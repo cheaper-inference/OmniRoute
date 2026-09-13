@@ -1,0 +1,4 @@
+# Python requirements for MarkItDown MCP integration
+# Install with: pip install -r requirements-markitdown.txt
+
+markitdown-mcp>=0.0.1a4
