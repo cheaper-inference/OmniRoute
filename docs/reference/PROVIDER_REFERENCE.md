@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.50
-lastUpdated: 2026-07-30
+lastUpdated: 2026-10-09
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-07-30
+> **Last generated:** 2026-10-09
 
-Total providers: **290**. See category breakdown below.
+Total providers: **293**. See category breakdown below.
 
 ## Categories
 
@@ -97,7 +97,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `zai-web` | `zw` | Z.ai Web (Free) | Web cookie | [link](https://chat.z.ai) | Paste the full Cookie header from chat.z.ai (must include the token=<JWT> cookie) | — |
 | `zenmux-free` | `zmf` | ZenMux Free (Web) | Web cookie | [link](https://zenmux.ai) | Login at zenmux.ai, then export all cookies using EditThisCookie or Cookie-Editor and paste the full Cookie header string here. Refresh every ~30 days. | — |
 
-## API Key Providers (paid / paid-with-free-credits) (195)
+## API Key Providers (paid / paid-with-free-credits) (198)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -130,6 +130,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `bytez` | `bytez` | Bytez | API key | [link](https://bytez.com) | $1 free credits, refreshes every 4 weeks |
 | `cerebras` | `cerebras` | Cerebras | API key | [link](https://inference.cerebras.ai) | Free Trial: 1M tokens/day, 30K TPM, 5 RPM — no credit card. |
 | `charm-hyper` | `charm-hyper` | Charm Hyper | API key | [link](https://hyper.charm.land) | 100 free monthly Hypercredits on signup |
+| `cheaperinference` | `cinf` | Cheaper Inference | API key | [link](https://cheaperinference.com/?utm_source=omniroute) | — |
 | `chenzk` | `chenzk` | Chenzk API | API key | [link](https://chenzk.top) | — |
 | `chutes` | `chutes` | Chutes.ai | API key, aggregator | [link](https://chutes.ai) | Bearer API key for the Chutes OpenAI-compatible gateway. |
 | `clarifai` | `clarifai` | Clarifai | API key, enterprise | [link](https://docs.clarifai.com) | Use your Clarifai PAT or app-specific API key. OmniRoute targets the OpenAI-compatible endpoint at https://api.clarifai.com/v2/ext/openai/v1 and authenticates with Authorization: Key <token>. |
@@ -177,11 +178,13 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `glm` | `glm` | GLM Coding | API key | [link](https://z.ai/subscribe) | — |
 | `glm-cn` | `glmcn` | GLM Coding (China) | API key | [link](https://open.bigmodel.cn) | — |
 | `glmt` | `glmt` | GLM Thinking | API key | [link](https://open.bigmodel.cn) | — |
+| `grokified` | `grokified` | Grokified | API key | [link](https://grokified.com) | $5 one-time credit on signup |
 | `groq` | `groq` | Groq | API key | [link](https://groq.com) | Free tier: 30 RPM / 14.4K RPD — no credit card |
 | `hackclub` | `hc` | Hackclub AI | API key, aggregator | [link](https://ai.hackclub.com) | Sign in with your Hack Club account at ai.hackclub.com. |
 | `haiper` | `hp` | Haiper | API key, video | [link](https://haiper.ai) | Get API key at haiper.ai/haiper-api |
 | `hcnsec` | `hcnsec` | Huancheng Public API | API key | [link](https://api.hcnsec.cn) | Get API key at api.hcnsec.cn |
 | `heroku` | `heroku` | Heroku AI | API key, enterprise | [link](https://www.heroku.com) | — |
+| `hetzner` | `hetzner` | Hetzner Inference API | API key | [link](https://experiments.hetzner.com/inference) | Free during Hetzner's experimental phase, no billing yet; no SLA |
 | `huggingface` | `hf` | HuggingFace | API key | [link](https://huggingface.co) | Free Inference API for thousands of models (Whisper, VITS, SDXL…) |
 | `hyperbolic` | `hyp` | Hyperbolic | API key | [link](https://hyperbolic.xyz) | $1-5 trial credits on signup for serverless inference |
 | `ideogram` | `ideo` | Ideogram | API key | [link](https://ideogram.ai) | Get API key at ideogram.ai/docs/api |

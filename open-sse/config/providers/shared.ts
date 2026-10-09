@@ -638,6 +638,8 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "deepseek-ai/DeepSeek-R1",
     "Qwen/Qwen2.5-72B-Instruct",
   ]),
+  hetzner: buildModels(["Qwen/Qwen3.6-35B-A3B-FP8"]),
+  grokified: buildModels(["grok-4.6", "grok-4.3", "grok-build-0.1"]),
   nanogpt: buildModels(["chatgpt-4o-latest", "claude-3.5-sonnet", "gpt-4o-mini"]),
   predibase: buildModels(["llama-3.3-70b"]),
   bytez: buildModels([

@@ -36,6 +36,8 @@ const CHAT_OPENAI_COMPAT_PROVIDER_IDS = [
   "maritalk",
   "xiaomi-mimo",
   "inference-net",
+  "hetzner",
+  "grokified",
   "nanogpt",
   "predibase",
   "bytez",

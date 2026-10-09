@@ -2368,6 +2368,29 @@
       "stream": "https://grok.com/rest/app-chat/conversations/new"
     }
   },
+  "grokified": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.grokified.com/v1/chat/completions",
+      "stream": "https://api.grokified.com/v1/chat/completions"
+    }
+  },
   "groq": {
     "format": "openai",
     "headers": {
@@ -2504,6 +2527,29 @@
     "url": {
       "nonStream": "https://us.inference.heroku.com/v1/chat/completions",
       "stream": "https://us.inference.heroku.com/v1/chat/completions"
+    }
+  },
+  "hetzner": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://inference.hetzner.com/api/v1/chat/completions",
+      "stream": "https://inference.hetzner.com/api/v1/chat/completions"
     }
   },
   "huggingchat": {
