@@ -323,6 +323,8 @@ export function getProviderBaseUrlHint(
       return t ? t("xiaomiMimoBaseUrlHint") : undefined;
     case "heroku":
       return t ? t("herokuBaseUrlHint") : undefined;
+    case "cerebrium":
+      return t ? t("cerebriumBaseUrlHint") : undefined;
     case "databricks":
       return t ? t("databricksBaseUrlHint") : undefined;
     case "snowflake":

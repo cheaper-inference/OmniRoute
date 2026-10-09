@@ -5488,6 +5488,7 @@
     "antigravityProjectIdPlaceholder": "我的 GCP 專案 ID",
     "grokWebCookiePlaceholder": "Grok Web Cookie",
     "herokuBaseUrlHint": "Heroku 部署的 Base URL。",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "隱藏郵箱",
     "imageProviders": "影像 Provider",
     "videoProviders": "影片生成",

@@ -5488,6 +5488,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "ملف تعريف ارتباط Grok",
     "herokuBaseUrlHint": "عنوان URL الأساسي لـ Heroku",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "إخفاء البريد الإلكتروني",
     "imageProviders": "مزودو الصور",
     "videoProviders": "مزودو الفيديو",

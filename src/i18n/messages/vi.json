@@ -5510,6 +5510,7 @@
     "antigravityProjectIdPlaceholder": "my-gcp-project-id",
     "grokWebCookiePlaceholder": "Gợi ý nhập Grok Web Cookie",
     "herokuBaseUrlHint": "Gợi ý Heroku Base URL",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ẩn email",
     "imageProviders": "Nhà cung cấp hình ảnh",
     "videoProviders": "Tạo video",

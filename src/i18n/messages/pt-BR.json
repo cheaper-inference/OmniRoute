@@ -5510,6 +5510,7 @@
     "antigravityProjectIdPlaceholder": "meu-gcp-project-id",
     "grokWebCookiePlaceholder": "Cole o valor do cookie sso do grok.com",
     "herokuBaseUrlHint": "Obrigatório: cole a URL base do Heroku Inference. O app adicionará /v1/chat/completions.",
+    "cerebriumBaseUrlHint": "Set this to your Cerebrium deployment's /run endpoint, for example https://api.cerebrium.ai/v4/p-xxxx/my-app/run.",
     "hideEmail": "Ocultar e-mail",
     "imageProviders": "Geração de Imagem",
     "videoProviders": "Geração de Vídeo",

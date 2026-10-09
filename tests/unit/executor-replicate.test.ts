@@ -337,3 +337,246 @@ test("Cerebrium without a Base URL fails fast with 400 and makes no upstream cal
   assert.equal(result.response.status, 400);
   assert.match((await result.response.json()).error.message, /Base URL/);
 });
+
+const encoder = new TextEncoder();
+
+function sseBody(events: string[], holdOpen = false) {
+  return new Response(
+    new ReadableStream({
+      start(controller) {
+        for (const event of events) controller.enqueue(encoder.encode(event));
+        if (!holdOpen) controller.close();
+      },
+    }),
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+}
+
+const streamingPrediction = {
+  status: "starting",
+  urls: {
+    get: "https://api.replicate.com/v1/predictions/live",
+    cancel: "https://api.replicate.com/v1/predictions/live/cancel",
+    stream: "https://stream.replicate.com/v1/streams/abc",
+  },
+};
+
+// Consumes the response while the fetch mock is still installed (streams are lazy).
+async function streamText(
+  handler: (url: string, init: RequestInit) => Response | Promise<Response>
+): Promise<string> {
+  const executor = new ReplicateExecutor();
+  return withFetch(handler, async () => {
+    const out = await executor.execute({
+      model: MODEL,
+      body: userBody,
+      stream: true,
+      credentials,
+    } as never);
+    return out.response.text();
+  });
+}
+
+test("Replicate relays the native SSE stream token by token and reports real usage", async () => {
+  const seen: Array<{ url: string; headers: Record<string, string> }> = [];
+
+  const text = await streamText((url, init) => {
+    seen.push({ url, headers: init.headers as Record<string, string> });
+    if (url === "https://stream.replicate.com/v1/streams/abc") {
+      return sseBody([
+        "event: output\ndata: Hel\n\n",
+        "event: output\ndata:  lo\n\n",
+        "event: done\ndata: {}\n\n",
+      ]);
+    }
+    if (url.endsWith("/predictions/live")) {
+      return jsonResponse({
+        status: "succeeded",
+        metrics: { input_token_count: 11, output_token_count: 2 },
+      });
+    }
+    return jsonResponse(streamingPrediction);
+  });
+
+  const deltas = [...text.matchAll(/"delta":\{"content":"([^"]*)"\}/g)].map((m) => m[1]);
+  assert.deepEqual(deltas, ["Hel", " lo"]);
+  assert.match(text, /"usage":\{"prompt_tokens":11,"completion_tokens":2,"total_tokens":13\}/);
+  assert.match(text, /"finish_reason":"stop"/);
+  assert.ok(text.trimEnd().endsWith("data: [DONE]"));
+
+  assert.equal(seen[0].headers.Prefer, undefined);
+  const streamCall = seen.find((c) => c.url.startsWith("https://stream.replicate.com"));
+  assert.ok(streamCall);
+  assert.equal(streamCall.headers.Authorization, undefined);
+});
+
+test("Replicate stream surfaces an upstream error event as a sanitized error frame", async () => {
+  const text = await streamText((url) =>
+    url.startsWith("https://stream.replicate.com")
+      ? sseBody(['event: error\ndata: {"detail":"boom at /srv/app/x.js"}\n\n'])
+      : jsonResponse(streamingPrediction)
+  );
+  assert.match(text, /Replicate prediction failed/);
+  assert.ok(!text.includes("/srv/app"));
+  assert.ok(text.trimEnd().endsWith("data: [DONE]"));
+});
+
+test("Replicate cancels the running prediction when the client drops the stream", async () => {
+  const executor = new ReplicateExecutor();
+  const posts: string[] = [];
+
+  const result = await withFetch(
+    (url, init) => {
+      if (init.method === "POST" && url.endsWith("/cancel")) posts.push(url);
+      if (url.startsWith("https://stream.replicate.com")) {
+        return sseBody(["event: output\ndata: partial\n\n"], true);
+      }
+      return jsonResponse(streamingPrediction);
+    },
+    async () => {
+      const out = await executor.execute({
+        model: MODEL,
+        body: userBody,
+        stream: true,
+        credentials,
+      } as never);
+      const reader = out.response.body!.getReader();
+      await reader.read();
+      await reader.cancel();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      return out;
+    }
+  );
+
+  assert.ok(result.response);
+  assert.deepEqual(posts, ["https://api.replicate.com/v1/predictions/live/cancel"]);
+});
+
+test("Replicate ignores a stream URL on an untrusted host and polls instead", async () => {
+  const executor = new FastReplicateExecutor();
+  const hosts = new Set<string>();
+
+  const result = await withFetch(
+    (url, init) => {
+      hosts.add(new URL(url).host);
+      if (init.method === "POST") {
+        return jsonResponse({
+          status: "starting",
+          urls: {
+            get: "https://api.replicate.com/v1/predictions/p1",
+            stream: "https://attacker.example/stream",
+          },
+        });
+      }
+      return jsonResponse({ status: "succeeded", output: ["ok"] });
+    },
+    () => executor.execute({ model: MODEL, body: userBody, stream: true, credentials } as never)
+  );
+
+  assert.ok(!hosts.has("attacker.example"));
+  assert.match(await result.response.text(), /"content":"ok"/);
+});
+
+test("Replicate reports Replicate's token metrics and length truncation", async () => {
+  const executor = new ReplicateExecutor();
+  const result = await withFetch(
+    () =>
+      jsonResponse({
+        status: "succeeded",
+        output: ["cut off"],
+        metrics: { input_token_count: 5, output_token_count: 16 },
+      }),
+    () =>
+      executor.execute({
+        model: MODEL,
+        body: { messages: userBody.messages, max_tokens: 16 },
+        stream: false,
+        credentials,
+      } as never)
+  );
+  const json = await result.response.json();
+  assert.deepEqual(json.usage, { prompt_tokens: 5, completion_tokens: 16, total_tokens: 21 });
+  assert.equal(json.choices[0].finish_reason, "length");
+});
+
+test("Replicate sends versioned models to /predictions with a version field", async () => {
+  const executor = new ReplicateExecutor();
+  const calls: Array<{ url: string; body: Record<string, unknown> }> = [];
+
+  await withFetch(
+    (url, init) => {
+      calls.push({ url, body: JSON.parse(String(init.body)) });
+      return jsonResponse({ status: "succeeded", output: ["v"] });
+    },
+    () =>
+      executor.execute({
+        model: "owner/custom-model:abc123def456",
+        body: userBody,
+        stream: false,
+        credentials,
+      } as never)
+  );
+
+  assert.equal(calls[0].url, "https://api.replicate.com/v1/predictions");
+  assert.equal(calls[0].body.version, "abc123def456");
+});
+
+test("Replicate rejects malformed model IDs before any upstream call", async () => {
+  const executor = new ReplicateExecutor();
+  let called = false;
+  const result = await withFetch(
+    () => {
+      called = true;
+      return jsonResponse({});
+    },
+    () =>
+      executor.execute({
+        model: "../../etc/passwd",
+        body: userBody,
+        stream: false,
+        credentials,
+      } as never)
+  );
+  assert.equal(called, false);
+  assert.equal(result.response.status, 400);
+});
+
+test("Replicate keeps tool results in the transcript and forwards the first image", async () => {
+  const executor = new ReplicateExecutor();
+  let sent: { input: Record<string, string> } = { input: {} };
+
+  await withFetch(
+    (url, init) => {
+      sent = JSON.parse(String(init.body));
+      return jsonResponse({ status: "succeeded", output: ["ok"] });
+    },
+    () =>
+      executor.execute({
+        model: MODEL,
+        body: {
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: "What is this?" },
+                { type: "image_url", image_url: { url: "https://example.com/a.png" } },
+              ],
+            },
+            {
+              role: "assistant",
+              content: "",
+              tool_calls: [{ function: { name: "lookup", arguments: '{"q":1}' } }],
+            },
+            { role: "tool", content: "result-42" },
+          ],
+        },
+        stream: false,
+        credentials,
+      } as never)
+  );
+
+  assert.equal(sent.input.image, "https://example.com/a.png");
+  assert.match(sent.input.prompt, /\[tool call lookup\(\{"q":1\}\)\]/);
+  assert.match(sent.input.prompt, /Tool result: result-42/);
+  assert.ok(sent.input.prompt.trimEnd().endsWith("Assistant:"));
+});
