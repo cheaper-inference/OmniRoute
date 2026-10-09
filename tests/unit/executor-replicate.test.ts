@@ -36,7 +36,11 @@ test("ReplicateExecutor is registered in the executor index", () => {
 
 test("ReplicateExecutor posts to the official-model predictions URL and wraps array output", async () => {
   const executor = new ReplicateExecutor();
-  const calls: Array<{ url: string; body: any; headers: Record<string, string> }> = [];
+  const calls: Array<{
+    url: string;
+    body: Record<string, unknown>;
+    headers: Record<string, string>;
+  }> = [];
 
   const result = await withFetch(
     (url, init) => {
