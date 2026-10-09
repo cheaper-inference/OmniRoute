@@ -298,14 +298,6 @@ export class DefaultExecutor extends BaseExecutor {
           : this.config.baseUrl;
       case "gemini":
         return `${this.config.baseUrl}/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
-      case "cerebrium": {
-        // Each Cerebrium deployment exposes its own endpoint ending in /run (already
-        // OpenAI-compatible), so the connection's Base URL is used verbatim.
-        const custom = credentials?.providerSpecificData?.baseUrl;
-        return typeof custom === "string" && custom.trim()
-          ? custom.trim().replace(/\/+$/, "")
-          : this.config.baseUrl;
-      }
       default: {
         // Honor a user-supplied custom base URL (providerSpecificData.baseUrl) for
         // OpenAI-format providers (e.g. the built-in "openai" provider pointed at a

@@ -8,7 +8,7 @@ export const cerebriumProvider: RegistryEntry = {
   id: "cerebrium",
   alias: "cerebrium",
   format: "openai",
-  executor: "default",
+  executor: "cerebrium",
   baseUrl: "https://api.cerebrium.ai/v4",
   authType: "apikey",
   authHeader: "bearer",

@@ -261,8 +261,8 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#EA2805",
     textIcon: "RP",
     website: "https://replicate.com",
-    hasFree: true,
-    freeNote: "Limited free runs on select models",
+    hasFree: false,
+    freeNote: "Pay per use; trial runs may be offered on select models (unverified)",
   },
   cerebrium: {
     id: "cerebrium",

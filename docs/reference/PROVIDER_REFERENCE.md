@@ -254,7 +254,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `qwen-cloud-token-plan` | `qct` | Qwen Cloud Token Plan | API key | [link](https://www.qwencloud.com/pricing/token-plan) | — |
 | `recraft` | `recraft` | Recraft | API key, image | [link](https://recraft.ai) | — |
 | `reka` | `reka` | Reka | API key | [link](https://docs.reka.ai/chat/overview) | Use your Reka API key. OmniRoute supports the OpenAI-compatible base URL https://api.reka.ai/v1 and sends both Authorization and X-Api-Key headers for compatibility. |
-| `replicate` | `replicate` | Replicate | API key, video | [link](https://replicate.com) | Limited free runs on select models |
+| `replicate` | `replicate` | Replicate | API key, video | [link](https://replicate.com) | Pay per use; trial runs may be offered on select models (unverified) |
 | `requesty` | `requesty` | Requesty | API key | [link](https://requesty.ai) | Free tier ~200 requests/day - multi-model routing gateway (300+ models) |
 | `routeway` | `routeway` | Routeway | API key | [link](https://routeway.ai) | Create a free API key at routeway.ai, then paste it here as a Bearer token. |
 | `runwayml` | `runway` | Runway | API key, video | [link](https://docs.dev.runwayml.com) | Use your Runway API key in Authorization: Bearer <key>. OmniRoute targets the current Runway API at https://api.dev.runwayml.com/v1 and sends the required X-Runway-Version header automatically. |

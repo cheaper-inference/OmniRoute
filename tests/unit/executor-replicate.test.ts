@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 
 import { getExecutor, hasSpecializedExecutor } from "../../open-sse/executors/index.ts";
 import { ReplicateExecutor } from "../../open-sse/executors/replicate.ts";
-import { DefaultExecutor } from "../../open-sse/executors/default.ts";
+import { CerebriumExecutor } from "../../open-sse/executors/cerebrium.ts";
+import { APIKEY_PROVIDERS } from "../../src/shared/constants/providers.ts";
 
 const MODEL = "meta/meta-llama-3-70b-instruct";
 const credentials = { apiKey: "r8_test" };
@@ -178,8 +179,132 @@ test("ReplicateExecutor rejects requests with no user message", async () => {
   assert.equal(result.response.status, 400);
 });
 
+class FastReplicateExecutor extends ReplicateExecutor {
+  protected pollIntervalMs = 1;
+  protected pollDeadlineMs = 30;
+}
+
+const userBody = { messages: [{ role: "user", content: "Hi" }] };
+
+test("Replicate never sends the API key to a polling URL on another origin", async () => {
+  const executor = new ReplicateExecutor();
+  const hosts: string[] = [];
+
+  const result = await withFetch(
+    (url) => {
+      hosts.push(new URL(url).host);
+      return jsonResponse({
+        status: "processing",
+        urls: { get: "https://attacker.example/steal" },
+      });
+    },
+    () => executor.execute({ model: MODEL, body: userBody, stream: false, credentials } as never)
+  );
+
+  assert.deepEqual(hosts, ["api.replicate.com"]);
+  assert.equal(result.response.status, 502);
+});
+
+test("Replicate cancels the prediction when the poll deadline passes", async () => {
+  const executor = new FastReplicateExecutor();
+  const seen: string[] = [];
+
+  const result = await withFetch(
+    (url, init) => {
+      seen.push(`${init.method} ${url}`);
+      if (init.method === "POST" && url.endsWith("/predictions")) {
+        return jsonResponse({
+          status: "processing",
+          urls: {
+            get: "https://api.replicate.com/v1/predictions/slow",
+            cancel: "https://api.replicate.com/v1/predictions/slow/cancel",
+          },
+        });
+      }
+      return jsonResponse({
+        status: "processing",
+        urls: { cancel: "https://api.replicate.com/v1/predictions/slow/cancel" },
+      });
+    },
+    () => executor.execute({ model: MODEL, body: userBody, stream: false, credentials } as never)
+  );
+
+  assert.equal(result.response.status, 504);
+  assert.ok(seen.includes("POST https://api.replicate.com/v1/predictions/slow/cancel"));
+});
+
+test("Replicate does not cancel through a foreign-origin cancel URL", async () => {
+  const executor = new FastReplicateExecutor();
+  const hosts = new Set<string>();
+
+  await withFetch(
+    (url, init) => {
+      hosts.add(new URL(url).host);
+      return jsonResponse({
+        status: "processing",
+        urls: {
+          get: "https://api.replicate.com/v1/predictions/slow",
+          cancel: "https://attacker.example/cancel",
+        },
+      });
+    },
+    () => executor.execute({ model: MODEL, body: userBody, stream: false, credentials } as never)
+  );
+
+  assert.deepEqual([...hosts], ["api.replicate.com"]);
+});
+
+test("Replicate keeps the upstream status and Retry-After when a poll is rate limited", async () => {
+  const executor = new FastReplicateExecutor();
+
+  const result = await withFetch(
+    (url, init) => {
+      if (init.method === "POST") {
+        return jsonResponse({
+          status: "processing",
+          urls: { get: "https://api.replicate.com/v1/predictions/abc" },
+        });
+      }
+      return new Response(JSON.stringify({ detail: "Too many requests" }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", "Retry-After": "7" },
+      });
+    },
+    () => executor.execute({ model: MODEL, body: userBody, stream: false, credentials } as never)
+  );
+
+  assert.equal(result.response.status, 429);
+  assert.equal(result.response.headers.get("Retry-After"), "7");
+});
+
+test("Replicate does not echo raw internal errors or long upstream detail", async () => {
+  const executor = new ReplicateExecutor();
+
+  const network = await withFetch(
+    () => {
+      throw new Error("connect ECONNREFUSED 10.0.0.5:443 at /srv/app/node_modules/x.js");
+    },
+    () => executor.execute({ model: MODEL, body: userBody, stream: false, credentials } as never)
+  );
+  assert.equal(network.response.status, 502);
+  const networkMessage = (await network.response.json()).error.message;
+  assert.ok(!networkMessage.includes("10.0.0.5"));
+  assert.ok(!networkMessage.includes("/srv/app"));
+
+  const verbose = await withFetch(
+    () => jsonResponse({ detail: "x".repeat(5000) }, 400),
+    () => executor.execute({ model: MODEL, body: userBody, stream: false, credentials } as never)
+  );
+  const verboseMessage = (await verbose.response.json()).error.message;
+  assert.ok(verboseMessage.length < 400);
+});
+
+test("Replicate is not advertised as a free provider", () => {
+  assert.equal(APIKEY_PROVIDERS.replicate.hasFree, false);
+});
+
 test("Cerebrium uses the connection Base URL verbatim (no /chat/completions suffix)", () => {
-  const executor = new DefaultExecutor("cerebrium");
+  const executor = new CerebriumExecutor();
   const url = "https://api.cerebrium.ai/v4/p-abc123/my-app/run";
   assert.equal(
     executor.buildUrl("meta-llama/Meta-Llama-3.1-8B-Instruct", false, 0, {
@@ -188,4 +313,27 @@ test("Cerebrium uses the connection Base URL verbatim (no /chat/completions suff
     } as never),
     url
   );
+});
+
+test("Cerebrium without a Base URL fails fast with 400 and makes no upstream call", async () => {
+  const executor = new CerebriumExecutor();
+  let called = false;
+
+  const result = await withFetch(
+    () => {
+      called = true;
+      return jsonResponse({});
+    },
+    () =>
+      executor.execute({
+        model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+        body: userBody,
+        stream: false,
+        credentials: { apiKey: "jwt" },
+      } as never)
+  );
+
+  assert.equal(called, false);
+  assert.equal(result.response.status, 400);
+  assert.match((await result.response.json()).error.message, /Base URL/);
 });

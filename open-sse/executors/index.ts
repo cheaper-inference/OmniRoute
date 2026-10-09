@@ -28,6 +28,7 @@ import { CommandCodeExecutor } from "./commandCode.ts";
 import { GitlabExecutor } from "./gitlab.ts";
 import { NlpCloudExecutor } from "./nlpcloud.ts";
 import { ReplicateExecutor } from "./replicate.ts";
+import { CerebriumExecutor } from "./cerebrium.ts";
 import { WindsurfExecutor } from "./windsurf.ts";
 import { ZedHostedExecutor } from "./zed-hosted.ts";
 import { DevinCliExecutor } from "./devin-cli.ts";
@@ -93,6 +94,7 @@ const executors = {
   "gitlab-duo": new GitlabExecutor("gitlab-duo"),
   nlpcloud: new NlpCloudExecutor(),
   replicate: new ReplicateExecutor(),
+  cerebrium: new CerebriumExecutor(),
   pollinations: new PollinationsExecutor(),
   pol: new PollinationsExecutor(), // Alias
   "cloudflare-ai": new CloudflareAIExecutor(),
@@ -258,6 +260,7 @@ export { CommandCodeExecutor } from "./commandCode.ts";
 export { GitlabExecutor } from "./gitlab.ts";
 export { NlpCloudExecutor } from "./nlpcloud.ts";
 export { ReplicateExecutor } from "./replicate.ts";
+export { CerebriumExecutor } from "./cerebrium.ts";
 export { WindsurfExecutor } from "./windsurf.ts";
 export { ZedHostedExecutor } from "./zed-hosted.ts";
 export { DevinCliExecutor } from "./devin-cli.ts";

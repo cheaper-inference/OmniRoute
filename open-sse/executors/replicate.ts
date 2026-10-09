@@ -7,7 +7,7 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
-import { buildErrorBody } from "../utils/error.ts";
+import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 
 type JsonRecord = Record<string, unknown>;
 type OpenAIMessage = {
@@ -125,11 +125,41 @@ function synthesizedStream(content: string, model: string): Response {
   return new Response(body, { status: 200, headers: { "Content-Type": "text/event-stream" } });
 }
 
-function errorResponse(status: number, message: string): Response {
+function errorResponse(status: number, message: string, retryAfter?: string | null): Response {
   return new Response(JSON.stringify(buildErrorBody(status, message)), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(retryAfter ? { "Retry-After": retryAfter } : {}),
+    },
   });
+}
+
+// Upstream HTTP failure that keeps its status (and Retry-After) so rate-limit and
+// auth handling downstream classify it correctly instead of seeing a flat 502.
+class ReplicateHttpError extends Error {
+  constructor(
+    readonly status: number,
+    readonly retryAfter: string | null,
+    message: string
+  ) {
+    super(message);
+  }
+}
+
+function describeUpstreamFailure(status: number, detail: unknown): string {
+  const safe = typeof detail === "string" ? sanitizeErrorMessage(detail.trim()).slice(0, 200) : "";
+  return `Replicate API failed with status ${status}${safe ? `: ${safe}` : ""}`;
+}
+
+// The Bearer token must only ever travel to the host the request itself was sent to.
+function sameOrigin(candidate: unknown, requestUrl: string): candidate is string {
+  if (typeof candidate !== "string") return false;
+  try {
+    return new URL(candidate).origin === new URL(requestUrl).origin;
+  } catch {
+    return false;
+  }
 }
 
 function outputToText(output: unknown): string {
@@ -155,6 +185,9 @@ function sleep(ms: number, signal?: AbortSignal | null): Promise<void> {
 }
 
 export class ReplicateExecutor extends BaseExecutor {
+  protected pollIntervalMs = POLL_INTERVAL_MS;
+  protected pollDeadlineMs = POLL_DEADLINE_MS;
+
   constructor() {
     super("replicate", PROVIDERS.replicate || { format: "openai" });
   }
@@ -207,24 +240,56 @@ export class ReplicateExecutor extends BaseExecutor {
 
   private async pollUntilDone(
     prediction: JsonRecord,
+    requestUrl: string,
     headers: Record<string, string>,
     signal?: AbortSignal | null
   ): Promise<JsonRecord> {
-    const pollUrl = asRecord(prediction.urls).get;
-    if (typeof pollUrl !== "string") return prediction;
+    if (TERMINAL_STATUSES.has(String(prediction.status))) return prediction;
+
+    const urls = asRecord(prediction.urls);
+    if (!sameOrigin(urls.get, requestUrl)) {
+      throw new ReplicateHttpError(502, null, "Replicate returned an unexpected polling URL");
+    }
 
     const pollHeaders = { ...headers };
     delete pollHeaders.Prefer;
-    const deadline = Date.now() + POLL_DEADLINE_MS;
+    const deadline = Date.now() + this.pollDeadlineMs;
     let current = prediction;
 
     while (!TERMINAL_STATUSES.has(String(current.status)) && Date.now() < deadline) {
-      await sleep(POLL_INTERVAL_MS, signal);
-      const res = await fetch(pollUrl, { method: "GET", headers: pollHeaders, signal });
-      if (!res.ok) throw new Error(`poll failed with status ${res.status}`);
+      await sleep(this.pollIntervalMs, signal);
+      const res = await fetch(urls.get, { method: "GET", headers: pollHeaders, signal });
+      if (!res.ok) {
+        const detail = asRecord(await res.json().catch(() => ({}))).detail;
+        throw new ReplicateHttpError(
+          res.status,
+          res.headers.get("Retry-After"),
+          describeUpstreamFailure(res.status, detail)
+        );
+      }
       current = asRecord(await res.json());
     }
+
+    if (!TERMINAL_STATUSES.has(String(current.status))) {
+      await this.cancelPrediction(current, requestUrl, pollHeaders);
+    }
     return current;
+  }
+
+  // Best effort: stop a prediction we are abandoning so it stops billing and a
+  // combo fallback does not duplicate the work.
+  private async cancelPrediction(
+    prediction: JsonRecord,
+    requestUrl: string,
+    headers: Record<string, string>
+  ): Promise<void> {
+    const cancelUrl = asRecord(prediction.urls).cancel;
+    if (!sameOrigin(cancelUrl, requestUrl)) return;
+    try {
+      await fetch(cancelUrl, { method: "POST", headers });
+    } catch {
+      // Nothing more to do; the caller still reports the timeout.
+    }
   }
 
   async execute({ model, body, stream, credentials, signal, upstreamExtraHeaders }: ExecuteInput) {
@@ -256,7 +321,8 @@ export class ReplicateExecutor extends BaseExecutor {
         return {
           response: errorResponse(
             res.status,
-            `Replicate API failed with status ${res.status}${typeof detail === "string" ? `: ${detail}` : ""}`
+            describeUpstreamFailure(res.status, detail),
+            res.headers.get("Retry-After")
           ),
           url,
           headers,
@@ -264,7 +330,7 @@ export class ReplicateExecutor extends BaseExecutor {
         };
       }
 
-      const prediction = await this.pollUntilDone(asRecord(await res.json()), headers, signal);
+      const prediction = await this.pollUntilDone(asRecord(await res.json()), url, headers, signal);
 
       if (prediction.status !== "succeeded") {
         const failed = prediction.status === "failed" || prediction.status === "canceled";
@@ -293,9 +359,12 @@ export class ReplicateExecutor extends BaseExecutor {
       };
     } catch (error) {
       if (signal?.aborted) throw error;
-      const message = error instanceof Error ? error.message : String(error || "Unknown error");
+      const response =
+        error instanceof ReplicateHttpError
+          ? errorResponse(error.status, error.message, error.retryAfter)
+          : errorResponse(502, "Replicate request failed");
       return {
-        response: errorResponse(502, `Replicate fetch error: ${message}`),
+        response,
         url,
         headers,
         transformedBody: payload,
