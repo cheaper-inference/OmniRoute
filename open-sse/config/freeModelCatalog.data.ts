@@ -259,6 +259,7 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "hyperbolic", modelId: "deepseek-ai/DeepSeek-V3", displayName: "DeepSeek V3", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "hyperbolic", tos: "ok" },
   { provider: "hyperbolic", modelId: "meta-llama/Llama-3.3-70B-Instruct", displayName: "Llama 3.3 70B", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "hyperbolic", tos: "ok" },
   { provider: "hyperbolic", modelId: "meta-llama/Llama-3.2-3B-Instruct", displayName: "Llama 3.2 3B", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "hyperbolic", tos: "ok" },
+  { provider: "hetzner", modelId: "Qwen/Qwen3.6-35B-A3B-FP8", displayName: "Qwen3.6 35B A3B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "hetzner", tos: "unknown" },
   { provider: "hyperbolic", modelId: "Qwen/Qwen2.5-72B-Instruct", displayName: "Qwen 2.5 72B", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "hyperbolic", tos: "ok" },
   { provider: "hyperbolic", modelId: "Qwen/Qwen2.5-Coder-32B-Instruct", displayName: "Qwen 2.5 Coder 32B", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "hyperbolic", tos: "ok" },
   { provider: "hyperbolic", modelId: "NousResearch/Hermes-3-Llama-3.1-70B", displayName: "Hermes 3 70B", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "hyperbolic", tos: "ok" },

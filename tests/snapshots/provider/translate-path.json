@@ -727,6 +727,29 @@
       "stream": "https://api.cerebras.ai/v1/chat/completions"
     }
   },
+  "cerebrium": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.cerebrium.ai/v4",
+      "stream": "https://api.cerebrium.ai/v4"
+    }
+  },
   "charm-hyper": {
     "format": "openai",
     "headers": {
@@ -4341,6 +4364,29 @@
     "url": {
       "nonStream": "https://api.reka.ai/v1/chat/completions",
       "stream": "https://api.reka.ai/v1/chat/completions"
+    }
+  },
+  "replicate": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.replicate.com/v1",
+      "stream": "https://api.replicate.com/v1"
     }
   },
   "requesty": {

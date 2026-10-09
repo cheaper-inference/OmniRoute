@@ -37,6 +37,7 @@ const CHAT_OPENAI_COMPAT_PROVIDER_IDS = [
   "xiaomi-mimo",
   "inference-net",
   "hetzner",
+  "cerebrium",
   "grokified",
   "nanogpt",
   "predibase",
