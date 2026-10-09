@@ -35,7 +35,7 @@ For full test matrix, see `CONTRIBUTING.md` → "Running Tests". For deep archit
 
 ## Project at a Glance
 
-**OmniRoute** — unified AI proxy/router. One endpoint, 290 LLM providers, auto-fallback.
+**OmniRoute** — unified AI proxy/router. One endpoint, 295 LLM providers, auto-fallback.
 
 | Layer         | Location                | Purpose                                                                                                                                                 |
 | ------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -469,7 +469,7 @@ own dedicated branch, and you MUST confirm the base branch with the operator bef
 
    **Never `ln -s` node_modules.** Turbopack rejects a symlink that resolves outside the
    project root, so `npm run dev` dies with a FATAL panic (`Symlink [project]/node_modules
-   is invalid, it points out of the filesystem root`) while typecheck, lint and the test
+is invalid, it points out of the filesystem root`) while typecheck, lint and the test
    runners all keep passing — the error names "filesystem root", not the worktree, so it
    reads like a Next/build bug and costs real time to trace (incident 2026-07-31, #9043).
 
