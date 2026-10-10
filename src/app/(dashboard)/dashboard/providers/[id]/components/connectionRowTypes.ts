@@ -37,6 +37,7 @@ export interface ConnectionRowProps {
   isOAuth: boolean;
   isClaude?: boolean;
   isCodex?: boolean;
+  isFactory?: boolean;
   codexGlobalServiceMode?: CodexGlobalServiceMode;
   isFirst: boolean;
   isLast: boolean;

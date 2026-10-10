@@ -1122,6 +1122,7 @@ async function handleChatCoreInner({
       comboStepId,
       comboExecutionKey,
       headers: clientRawRequest?.headers ?? null,
+      model: resolvedModel,
     })
   ) {
     trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
@@ -2604,10 +2605,17 @@ async function handleChatCoreInner({
     credentialRefreshPersistRan = false;
     const persistFn = onCredentialsRefreshed
       ? async (refreshResult: Record<string, unknown>) => {
-          credentialRefreshPersistRan = true;
-          Object.assign(targetCredentials, refreshResult);
-          Object.assign(credentials, refreshResult);
-          await onCredentialsRefreshed(refreshResult);
+          if (provider === "factory") {
+            await onCredentialsRefreshed(refreshResult);
+            credentialRefreshPersistRan = true;
+            Object.assign(targetCredentials, refreshResult);
+            Object.assign(credentials, refreshResult);
+          } else {
+            credentialRefreshPersistRan = true;
+            Object.assign(targetCredentials, refreshResult);
+            Object.assign(credentials, refreshResult);
+            await onCredentialsRefreshed(refreshResult);
+          }
         }
       : undefined;
 
@@ -2642,6 +2650,15 @@ async function handleChatCoreInner({
 
     if (newCredentials?.accessToken || newCredentials?.copilotToken) {
       log?.info?.("TOKEN", `${provider?.toUpperCase()} | refreshed`);
+      if (provider === "factory") {
+        const committedId = String(getCurrentConnectionId() || connectionId || "");
+        const committed = committedId ? await getProviderConnectionById(committedId) : null;
+        if (!committed?.accessToken || committed.provider !== "factory") return null;
+        if (committed.accessToken !== newCredentials.accessToken) return null;
+        Object.assign(targetCredentials, committed);
+        Object.assign(credentials, committed);
+        return committed;
+      }
       if (!credentialRefreshPersistRan) {
         Object.assign(targetCredentials, newCredentials);
         Object.assign(credentials, newCredentials);
@@ -2656,6 +2673,15 @@ async function handleChatCoreInner({
   };
 
   const handleCredentialsRefreshed = async (refreshed: Record<string, unknown>) => {
+    if (provider === "factory" && !credentialRefreshPersistRan) {
+      const committedId = String(getCurrentConnectionId() || connectionId || "");
+      const committed = committedId ? await getProviderConnectionById(committedId) : null;
+      if (committed?.provider !== "factory" || committed.accessToken !== refreshed.accessToken) {
+        throw new Error("Factory credential refresh was not committed");
+      }
+      Object.assign(credentials, committed);
+      return;
+    }
     Object.assign(credentials, refreshed);
     if (!credentialRefreshPersistRan && onCredentialsRefreshed) {
       credentialRefreshPersistRan = true;
@@ -2805,10 +2831,9 @@ async function handleChatCoreInner({
               provider,
               typeof onStreamFailure === "function"
             );
-            const isAntigravityQuotaFamily = shouldDeferAntigravityQuotaStateToCaller(
-              provider,
-              true
-            );
+            const isAntigravityQuotaFamily =
+              shouldDeferAntigravityQuotaStateToCaller(provider, true) ||
+              provider === "factory";
             let coreOwnedAntigravityLockout: {
               cooldownMs: number;
               failureCount: number;

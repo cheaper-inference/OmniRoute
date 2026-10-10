@@ -112,7 +112,7 @@ export default function ConnectionsListPanel({
   connections,
   providerId,
   isCcCompatible,
-  isOAuth,
+  isOAuth: _isOAuth,
   codexGlobalServiceMode,
   selectedIds,
   batchUpdating,
@@ -121,13 +121,13 @@ export default function ConnectionsListPanel({
   batchTesting,
   retestingId,
   refreshingId,
-  distributingProxies,
+  distributingProxies: _distributingProxies,
   healthFilter,
   page,
   accountSearch,
   PAGE_SIZE,
   connProxyMap,
-  proxyConfig,
+  proxyConfig: _proxyConfig,
   applyingCodexAuthId,
   exportingCodexAuthId,
   applyingClaudeAuthId,
@@ -387,6 +387,7 @@ export default function ConnectionsListPanel({
                 connection={conn}
                 isOAuth={conn.authType === "oauth"}
                 isClaude={providerId === "claude"}
+                isFactory={providerId === "factory"}
                 codexGlobalServiceMode={codexGlobalServiceMode}
                 isFirst={index === 0}
                 isLast={index === pageConnections.length - 1}
@@ -433,7 +434,9 @@ export default function ConnectionsListPanel({
                   )
                 }
                 onReauth={
-                  conn.authType === "oauth"
+                  conn.authType === "oauth" ||
+                  conn.provider === "factory" ||
+                  providerId === "factory"
                     ? () => gateConnectionFlow(() => onOpenOAuth(conn))
                     : undefined
                 }
@@ -594,6 +597,7 @@ export default function ConnectionsListPanel({
                     connection={conn}
                     isOAuth={conn.authType === "oauth"}
                     isClaude={providerId === "claude"}
+                    isFactory={providerId === "factory"}
                     codexGlobalServiceMode={codexGlobalServiceMode}
                     isFirst={gi === 0 && index === 0}
                     isLast={gi === visibleGroupKeys.length - 1 && index === groupConns.length - 1}
@@ -642,7 +646,9 @@ export default function ConnectionsListPanel({
                       )
                     }
                     onReauth={
-                      conn.authType === "oauth"
+                      conn.authType === "oauth" ||
+                      conn.provider === "factory" ||
+                      providerId === "factory"
                         ? () => gateConnectionFlow(() => onOpenOAuth(conn))
                         : undefined
                     }

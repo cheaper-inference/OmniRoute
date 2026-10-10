@@ -26,6 +26,7 @@ import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFilteri
 // openrouterQuotaFetcher.ts → this file, so importing quotaCache here closes an ESM init cycle
 // that deadlocks the esbuild MCP bundle (tests/unit/build/mcp-bundle-startup.test.ts).
 import { isQuotaHealthy } from "@/domain/quotaCacheState";
+import { factoryQuotaTierFor } from "../config/factory.ts";
 import {
   hasCodexPaidCredits,
   isCodexPaidCreditsEnabled,
@@ -38,6 +39,7 @@ import {
 import {
   isAntigravityQuotaProvider,
   selectAntigravityQuotaWindowNames,
+  selectFactoryQuotaWindowNames,
 } from "./antigravityQuotaFamily.ts";
 
 export interface PreflightQuotaResult {
@@ -246,7 +248,17 @@ function windowsForScope(
   windows: NonNullable<QuotaInfo["windows"]>,
   scope?: QuotaCutoffScope
 ): NonNullable<QuotaInfo["windows"]> {
-  if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider ?? null)) {
+  if (!scope?.requestedModel) return windows;
+  if (scope.provider === "factory") {
+    const selected = selectFactoryQuotaWindowNames(Object.keys(windows), scope.requestedModel);
+    if (selected.length === 0) return {};
+    const scoped: NonNullable<QuotaInfo["windows"]> = {};
+    for (const name of selected) {
+      if (windows[name]) scoped[name] = windows[name];
+    }
+    return scoped;
+  }
+  if (!isAntigravityQuotaProvider(scope.provider ?? null)) {
     return windows;
   }
   const selected = selectAntigravityQuotaWindowNames(Object.keys(windows), scope.requestedModel);
@@ -404,9 +416,19 @@ function windowedQuotaCutoffResult(
   if (!windows || Object.keys(windows).length === 0) return null;
 
   const scopedWindows = windowsForScope(windows, scope);
+  if (
+    scope?.provider === "factory" &&
+    scope.requestedModel &&
+    Object.keys(scopedWindows).length === 0
+  ) {
+    return { proceed: true, quotaPercent: quota.percentUsed };
+  }
   const cutoff = quotaWindowCutoffResult(scopedWindows, thresholds);
   if (cutoff) return cutoff;
   if (isAntigravityQuotaProvider(scope?.provider ?? null) && scope?.requestedModel) {
+    return { proceed: true, quotaPercent: quota.percentUsed };
+  }
+  if (scope?.provider === "factory" && scope.requestedModel) {
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
   if (quota.limitReached === true) return limitReachedResult(quota);
@@ -433,7 +455,9 @@ export function evaluateQuotaCutoff(
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
   // #14359 — same escape as the dispatch-time predicates: a recent success is not exhaustion.
-  if (scope?.connectionId && isQuotaHealthy(scope.connectionId)) {
+  const healthyScope =
+    scope?.provider === "factory" ? factoryQuotaTierFor(scope.requestedModel || "") : undefined;
+  if (scope?.connectionId && isQuotaHealthy(scope.connectionId, healthyScope)) {
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
 

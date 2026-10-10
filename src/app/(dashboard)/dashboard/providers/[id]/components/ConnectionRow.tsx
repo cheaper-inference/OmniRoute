@@ -9,6 +9,7 @@ import ConnectionTestButton from "@/shared/components/ConnectionTestButton";
 import { readCookieExpiresAt } from "@/shared/utils/webCookieExpiry";
 import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import ProviderIcon from "@/shared/components/ProviderIcon";
 import { Badge, Button, ReorderControl, Toggle } from "@/shared/components";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
@@ -89,6 +90,7 @@ export default function ConnectionRow({
   isOAuth,
   isClaude,
   isCodex,
+  isFactory,
   codexGlobalServiceMode,
   isCcCompatible,
   cliproxyapiEnabled,
@@ -402,6 +404,12 @@ export default function ConnectionRow({
                 title={connection.lastError}
               >
                 {connection.lastError}
+              </span>
+            )}
+            {isFactory && !isOAuth && onReauth && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                <ProviderIcon providerId="factory" size={16} type="color" />
+                {t("factoryReconnectWithOAuth")}
               </span>
             )}
             <span className="text-xs text-text-muted">#{connection.priority}</span>

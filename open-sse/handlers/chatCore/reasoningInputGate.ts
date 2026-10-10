@@ -24,6 +24,7 @@ export function isReasoningContinuationIncompatible({
   comboStepId,
   comboExecutionKey,
   headers,
+  model,
 }: {
   body: unknown;
   sourceFormat: string;
@@ -35,6 +36,7 @@ export function isReasoningContinuationIncompatible({
   comboStepId: string | null | undefined;
   comboExecutionKey: string | null | undefined;
   headers: Headers | Record<string, unknown> | null;
+  model?: string | null;
 }): boolean {
   const reasoningInputFormat =
     sourceFormat === FORMATS.OPENAI_RESPONSES
@@ -48,6 +50,7 @@ export function isReasoningContinuationIncompatible({
       reasoningInputFormat,
       {
         provider,
+        model,
         preserveEncryptedReasoning:
           credentials?.providerSpecificData?.preserveEncryptedReasoning === true,
         onIncompatibleReasoning: resolveIncompatibleReasoningAction({
