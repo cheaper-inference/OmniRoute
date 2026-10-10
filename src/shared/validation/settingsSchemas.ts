@@ -278,6 +278,11 @@ export const updateSettingsSchema = z.object({
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })
     .optional(),
+  factoryAutoPing: z
+    .object({
+      connections: z.record(z.string().max(100), z.boolean()).optional(),
+    })
+    .optional(),
   // #8848: opt-in per-connection Claude proactive warmup. `connections` maps a
   // provider_connections id -> enabled; default is an empty map (off for everyone)
   // until the operator flips a specific OAuth connection on from the settings UI.

@@ -63,6 +63,7 @@ import {
   getModelTargetFormat,
   PROVIDER_ID_TO_ALIAS,
 } from "@omniroute/open-sse/config/providerModels.ts";
+import { factoryQuotaTierFor } from "@omniroute/open-sse/config/factory.ts";
 import { getPassthroughProviders } from "@omniroute/open-sse/config/providerRegistry.ts";
 import * as log from "../utils/logger";
 import { checkAndRefreshToken } from "../services/tokenRefresh";
@@ -2260,7 +2261,10 @@ async function handleSingleModelChat(
 
       if (result.success) {
         clearModelLock(provider, credentials.connectionId, model);
-        markQuotaHealthy(credentials.connectionId);
+        markQuotaHealthy(
+          credentials.connectionId,
+          provider === "factory" ? factoryQuotaTierFor(model) : undefined
+        );
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
         if (
           !wasProviderProbe &&
