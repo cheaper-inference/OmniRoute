@@ -133,6 +133,7 @@ export const oauthExchangeSchema = z.object({
 export const oauthPollSchema = z.object({
   deviceCode: z.string().trim().min(1),
   codeVerifier: z.string().optional(),
+  connectionId: z.string().trim().min(1).max(100).optional(),
   extraData: z.unknown().optional(),
   // See oauthExchangeSchema: same email-less re-auth signal for device flows.
   connectionId: z.string().optional(),
