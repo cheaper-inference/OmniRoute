@@ -148,6 +148,15 @@ export function resolveFactoryModelContract(modelId: string): FactoryModelContra
     };
   }
 
+  if (id === "minimax-m3" || id.startsWith("minimax-m3-")) {
+    return {
+      targetFormat: "openai",
+      path: CHAT_PATH,
+      upstreamProvider: "fireworks",
+      quotaTier: "core",
+    };
+  }
+
   if (id.startsWith("minimax-")) {
     return {
       targetFormat: "claude",

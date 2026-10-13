@@ -16,14 +16,16 @@ const { resolveReasoningTransport } =
   await import("../../open-sse/services/reasoningInputPolicy.ts");
 const { resolvePublicCred } = await import("../../open-sse/utils/publicCreds.ts");
 
-test("Factory catalog projects 73 Droid models in source order", () => {
-  assert.equal(FACTORY_MODELS.length, 73);
+test("Factory catalog projects 75 Droid models in source order", () => {
+  assert.equal(FACTORY_MODELS.length, 75);
   assert.equal(FACTORY_MODELS[0]?.id, "claude-fable-5.1");
-  assert.equal(FACTORY_MODELS[17]?.id, "claude-haiku-4-5-20251001");
-  assert.equal(FACTORY_MODELS[43]?.id, "inkling");
-  assert.equal(FACTORY_MODELS[60]?.id, "minimax-m3");
-  assert.equal(FACTORY_MODELS[63]?.id, "nemotron-3-ultra");
-  assert.equal(FACTORY_MODELS[72]?.id, "garnet-07-15");
+  assert.equal(FACTORY_MODELS[17]?.id, "claude-haiku-5-5");
+  assert.equal(FACTORY_MODELS[18]?.id, "claude-haiku-4-5-20251001");
+  assert.equal(FACTORY_MODELS[44]?.id, "inkling");
+  assert.equal(FACTORY_MODELS[45]?.id, "mistral-large-4");
+  assert.equal(FACTORY_MODELS[62]?.id, "minimax-m3");
+  assert.equal(FACTORY_MODELS[65]?.id, "nemotron-3-ultra");
+  assert.equal(FACTORY_MODELS[74]?.id, "garnet-07-15");
 });
 
 test("Factory Chat models declare interleaved reasoning_content", () => {
@@ -33,16 +35,23 @@ test("Factory Chat models declare interleaved reasoning_content", () => {
   const haiku = FACTORY_MODELS.find((model) => model.id === "claude-haiku-4-5-20251001");
   assert.equal(haiku?.supportsReasoning, undefined);
   assert.equal(haiku?.interleavedField, undefined);
+  const haiku55 = FACTORY_MODELS.find((model) => model.id === "claude-haiku-5-5");
+  assert.equal(haiku55?.supportsReasoning, true);
+  assert.equal(haiku55?.targetFormat, "claude");
 });
 
-test("MiniMax M3 uses Messages, fireworks, and Core", () => {
+test("MiniMax M3 uses chat completions, fireworks, and Core", () => {
   const contract = resolveFactoryModelContract("minimax-m3");
   assert.deepEqual(contract, {
-    targetFormat: "claude",
-    path: "/api/llm/a/v1/messages",
+    targetFormat: "openai",
+    path: "/api/llm/o/v1/chat/completions",
     upstreamProvider: "fireworks",
     quotaTier: "core",
   });
+  const m3 = FACTORY_MODELS.find((model) => model.id === "minimax-m3");
+  assert.equal(m3?.targetFormat, "openai");
+  assert.equal(m3?.interleavedField, "reasoning_content");
+  assert.equal(m3?.supportsVision, true);
 });
 
 test("Factory routing table matches Droid family/upstream/tier", () => {
@@ -82,6 +91,18 @@ test("Factory routing table matches Droid family/upstream/tier", () => {
     upstreamProvider: "mistral",
     quotaTier: "core",
   });
+  assert.deepEqual(resolveFactoryModelContract("mistral-large-4"), {
+    targetFormat: "openai",
+    path: "/api/llm/o/v1/chat/completions",
+    upstreamProvider: "mistral",
+    quotaTier: "core",
+  });
+  assert.deepEqual(resolveFactoryModelContract("claude-haiku-5-5"), {
+    targetFormat: "claude",
+    path: "/api/llm/a/v1/messages",
+    upstreamProvider: "anthropic",
+    quotaTier: "standard",
+  });
   assert.equal(resolveFactoryModelContract("unknown-model"), null);
   assert.equal(resolveFactoryModelContract("openai/gpt-5.4-mini"), null);
 });
@@ -91,7 +112,7 @@ test("getModelTargetFormat uses the Factory resolver for dynamic IDs", () => {
   assert.equal(getModelTargetFormat("factory", "factory/gpt-5.4-mini"), "openai-responses");
   assert.equal(getModelTargetFormat("factory", "kimi-k2.6"), "openai");
   assert.equal(getModelTargetFormat("factory", "gemini-3-flash-preview"), "gemini");
-  assert.equal(getModelTargetFormat("factory", "minimax-m3"), "claude");
+  assert.equal(getModelTargetFormat("factory", "minimax-m3"), "openai");
   assert.equal(getModelTargetFormat("factory", "not-a-factory-model"), null);
 });
 
