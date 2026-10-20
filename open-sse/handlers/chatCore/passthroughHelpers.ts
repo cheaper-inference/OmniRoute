@@ -295,8 +295,20 @@ export function isAnthropicThinkingModifiedError({
     (typeof provider === "string" && provider.startsWith("anthropic-compatible-"));
   if (!isAnthropicTarget || status !== 400 || typeof message !== "string") return false;
 
-  return /[`'\"]?thinking[`'\"]?\s+or\s+[`'\"]?redacted_thinking[`'\"]?\s+blocks[\s\S]{0,80}?cannot be modified/i.test(
+  return /[`'\"]?thinking[`'\"]?\s+or\s+[`'\"]?redacted_thinking[`'\"]?\s+blocks\s+in\s+the\s+latest\s+assistant\s+message\s+cannot\s+be\s+modified/i.test(
     message
+  );
+}
+
+function hasNoSafeThinkingRecovery(content: unknown[]): boolean {
+  if (content.every(isThinkingBlock)) return true;
+  if (!hasBlock({ content }, "tool_use")) return false;
+  const first = content[0] as Record<string, unknown> | null;
+  if (!first || typeof first !== "object" || Object.keys(first).length !== 2) return false;
+  return (
+    first.type === "redacted_thinking" &&
+    first.data === DEFAULT_THINKING_CLAUDE_SIGNATURE &&
+    content.slice(1).every((block) => !isThinkingBlock(block))
   );
 }
 
@@ -331,12 +343,12 @@ export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
   if (!message || !Array.isArray(message.content) || !message.content.some(isThinkingBlock)) {
     return body;
   }
+  // Dropping every block would create an invalid empty assistant message.
+  // Keep the original failure when there is no safe content to retry.
+  if (hasNoSafeThinkingRecovery(message.content)) return body;
 
-  // message.content.some(isThinkingBlock) above guarantees at least one block
-  // is removed below, so the result is always a genuine change — no separate
-  // before/after comparison is needed (and a length comparison would be wrong
-  // here: swapping a thinking block for a same-size redacted_thinking
-  // placeholder leaves the count unchanged).
+  // The guards above exclude empty and already-normalized recovery bodies
+  // before downgrading stored blocks, which also forgets their cached entries.
   const downgraded = downgradeRestoredClaudeThinking(message.content);
   const base = (downgraded ?? message.content) as unknown[];
   let content = base.filter((block) => !isThinkingBlock(block));
@@ -346,10 +358,7 @@ export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
       !!block && typeof block === "object" && (block as { type?: unknown }).type === "tool_use"
   );
   if (hasToolUse) {
-    content = [
-      { type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE },
-      ...content,
-    ];
+    content = [{ type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE }, ...content];
   }
 
   const recoveredMessages = messages.slice();
