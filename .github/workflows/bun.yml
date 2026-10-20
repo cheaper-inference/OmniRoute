@@ -1,0 +1,55 @@
+name: Bun
+
+# Proves the Bun runtime path still works: the pinned Bun binary installs from the
+# lockfile and the `bun:sqlite` driver behind Dockerfile.bun passes its suite.
+# Bun is a best-effort runtime (AGENTS.md → Environment) — the Node suites stay the
+# support contract; this job keeps the Bun escape hatch from rotting silently.
+# Runs on a branch push to release/v* and on PRs targeting it. Tags and published
+# Releases fire no CI here: the `branches` filter drops refs/tags/*, and no `release:`
+# event is subscribed.
+on:
+  push:
+    branches:
+      - "release/v*"
+  pull_request:
+    branches:
+      - "release/v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bun-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bun-runtime:
+    name: Bun runtime (bun:sqlite)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+
+      # Installs the `bun` devDependency (the pinned binary) along with the rest of
+      # the tree — no setup-bun step, version comes from package.json + lockfile.
+      - uses: ./.github/actions/npm-ci-retry
+
+      - name: Verify Bun matches the pinned version
+        run: |
+          set -euo pipefail
+          expected=$(node -p "require('./package.json').devDependencies.bun")
+          actual=$(./node_modules/.bin/bun --version)
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::bun $actual != $expected pinned in package.json" >&2
+            exit 1
+          fi
+
+      - name: Bun tests (bun:sqlite driver)
+        run: npm run test:bun:db

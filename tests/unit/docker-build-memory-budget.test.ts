@@ -36,55 +36,79 @@ const HEADROOM_FRACTION = 0.75;
 // number — do not weaken the budget with another guess.
 const MEASURED_PROCESS_RSS_MB = 4500;
 
-const dockerfile = readFileSync(
-  fileURLToPath(new URL("../../Dockerfile", import.meta.url)),
-  "utf8"
-);
+const DOCKERFILES = ["Dockerfile", "Dockerfile.bun"].map((name) => ({
+  name,
+  text: readFileSync(
+    fileURLToPath(new URL(`../../${name}`, import.meta.url)),
+    "utf8"
+  ),
+}));
 
-function readArgDefault(name: string): number {
+function readArgDefault(dockerfile: string, name: string): number {
   const match = dockerfile.match(new RegExp(`^ARG ${name}=(\\d+)$`, "m"));
   assert.ok(match, `Dockerfile no longer declares ARG ${name}`);
   return Number(match![1]);
 }
 
 test("the Docker build's worker pool is derived from OMNIROUTE_BUILD_WORKERS", () => {
-  // assert.ok(boolean), not assert.match — a failing assert.match dumps the
-  // whole Dockerfile into the report.
-  assert.ok(
-    /^ENV CIRCLE_NODE_TOTAL=\$\{OMNIROUTE_BUILD_WORKERS\}$/m.test(dockerfile),
-    "CIRCLE_NODE_TOTAL must stay wired to the build arg so a big builder can raise it"
-  );
-  assert.ok(
-    /^ENV NODE_OPTIONS="--max-old-space-size=\$\{OMNIROUTE_BUILD_MEMORY_MB\}"$/m.test(dockerfile),
-    "the build heap ceiling must stay wired to OMNIROUTE_BUILD_MEMORY_MB"
-  );
+  for (const { name, text } of DOCKERFILES) {
+    // assert.ok(boolean), not assert.match — a failing assert.match dumps the
+    // whole Dockerfile into the report.
+    assert.ok(
+      /^ENV CIRCLE_NODE_TOTAL=\$\{OMNIROUTE_BUILD_WORKERS\}$/m.test(text),
+      `${name}: CIRCLE_NODE_TOTAL must stay wired to the build arg so a big builder can raise it`
+    );
+    assert.ok(
+      /^ENV NODE_OPTIONS="--max-old-space-size=\$\{OMNIROUTE_BUILD_MEMORY_MB\}"$/m.test(text),
+      `${name}: the build heap ceiling must stay wired to OMNIROUTE_BUILD_MEMORY_MB`
+    );
+  }
 });
 
 test("worker count × measured per-process RSS fits a 16 GB GitHub runner", () => {
-  const workerPool = readArgDefault("OMNIROUTE_BUILD_WORKERS");
+  for (const { name, text } of DOCKERFILES) {
+    const workerPool = readArgDefault(text, "OMNIROUTE_BUILD_WORKERS");
 
-  // Next derives `workers = CIRCLE_NODE_TOTAL - 1`.
-  const workers = workerPool - 1;
-  assert.ok(workers >= 1, `CIRCLE_NODE_TOTAL=${workerPool} leaves no build workers`);
+    // Next derives `workers = CIRCLE_NODE_TOTAL - 1`.
+    const workers = workerPool - 1;
+    assert.ok(workers >= 1, `${name}: CIRCLE_NODE_TOTAL=${workerPool} leaves no build workers`);
 
-  // Every process — the parent `next build` process AND each page-data
-  // worker — is budgeted at the measured per-process RSS floor (see the file
-  // banner comment). The V8 heap ceiling (OMNIROUTE_BUILD_MEMORY_MB) bounds
-  // JS allocations but not Turbopack's native/Rust memory, so it cannot stand
-  // in for the parent process's real RSS.
-  const processes = workers + 1;
-  const worstCaseMb = processes * MEASURED_PROCESS_RSS_MB;
-  const budgetMb = RUNNER_MEMORY_MB * HEADROOM_FRACTION;
-  assert.ok(
-    worstCaseMb <= budgetMb,
-    `${processes} processes (1 parent + ${workers} workers) × ${MEASURED_PROCESS_RSS_MB} MB ` +
-      `measured RSS = ${worstCaseMb} MB exceeds the ${budgetMb} MB budget on a ` +
-      `${RUNNER_MEMORY_MB} MB runner — the Docker publish step dies with "ResourceExhausted: ` +
-      `cannot allocate memory" during page-data collection`
-  );
+    // Every process — the parent `next build` process AND each page-data
+    // worker — is budgeted at the measured per-process RSS floor (see the file
+    // banner comment). The V8 heap ceiling (OMNIROUTE_BUILD_MEMORY_MB) bounds
+    // JS allocations but not Turbopack's native/Rust memory, so it cannot stand
+    // in for the parent process's real RSS. That ceiling is also inert under
+    // Bun (JavaScriptCore ignores --max-old-space-size), which is why the
+    // worker cap is the lever that has to stay.
+    const processes = workers + 1;
+    const worstCaseMb = processes * MEASURED_PROCESS_RSS_MB;
+    const budgetMb = RUNNER_MEMORY_MB * HEADROOM_FRACTION;
+    assert.ok(
+      worstCaseMb <= budgetMb,
+      `${name}: ${processes} processes (1 parent + ${workers} workers) × ${MEASURED_PROCESS_RSS_MB} MB ` +
+        `measured RSS = ${worstCaseMb} MB exceeds the ${budgetMb} MB budget on a ` +
+        `${RUNNER_MEMORY_MB} MB runner — the Docker publish step dies with "ResourceExhausted: ` +
+        `cannot allocate memory" during page-data collection`
+    );
+  }
 });
 
 test("the worker pool does not oversubscribe the runner's 4 vCPU", () => {
-  const workers = readArgDefault("OMNIROUTE_BUILD_WORKERS") - 1;
-  assert.ok(workers <= 4, `${workers} workers oversubscribe a 4 vCPU runner`);
+  for (const { name, text } of DOCKERFILES) {
+    const workers = readArgDefault(text, "OMNIROUTE_BUILD_WORKERS") - 1;
+    assert.ok(workers <= 4, `${name}: ${workers} workers oversubscribe a 4 vCPU runner`);
+  }
+});
+
+const releaseWorkflow = readFileSync(
+  fileURLToPath(new URL("../../.github/workflows/release.yml", import.meta.url)),
+  "utf8"
+);
+
+test("the GitHub Bun image build uses the measured low-memory settings", () => {
+  const bunJob = releaseWorkflow.split("  docker-bun:")[1]?.split("  promote-latest:")[0];
+  assert.ok(bunJob, "release workflow declares docker-bun job");
+  assert.match(bunJob, /OMNIROUTE_USE_TURBOPACK=0/);
+  assert.match(bunJob, /OMNIROUTE_BUILD_WORKERS=2/);
+  assert.match(bunJob, /OMNIROUTE_BUILD_MEMORY_MB=12288/);
 });
