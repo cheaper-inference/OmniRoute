@@ -1,0 +1,1 @@
+- **fix(providers):** ChatPlayground follows the current web API — vendor-prefixed azure model ids (`provider/modelName` from `/api/models`), per-endpoint payload contract, refreshed 2026-10-20 catalog, and CITATIONS line stripping for perplexity ([#17308](https://github.com/diegosouzapw/OmniRoute/pull/17308))

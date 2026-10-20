@@ -62,7 +62,24 @@ export function enqueueSseCompletion(
 }
 
 /**
+ * Vendor-prefixed upstream model id expected by the azure endpoint.
+ * The web client sends `${provider.toLowerCase()}/${modelName}` (e.g.
+ * "google/gemini-3.8-flash", "openai/gpt-6-luna") resolved from /api/models.
+ */
+export function resolveChatPlaygroundUpstreamModel(modelData: ChatPlaygroundModel): string {
+  const provider = (modelData.provider || "").trim().toLowerCase();
+  if (modelData.endpoint === "azure" && provider) {
+    return `${provider}/${modelData.modelName}`;
+  }
+  return modelData.modelName;
+}
+
+/**
  * Build the JSON request payload for ChatPlayground API.
+ * Field sets mirror what web.chatplayground.ai sends per endpoint:
+ *   - azure:     messages, model, chatId, isRegenerate, promptTemplate, fileUrl, botId, submissionId, noSave
+ *   - lmsys:     messages, model
+ *   - perplexity: messages, modelName
  */
 export function buildChatPlaygroundPayload(
   body: unknown,
@@ -71,41 +88,25 @@ export function buildChatPlaygroundPayload(
   const req = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
   const messages = Array.isArray(req.messages) ? req.messages : [];
 
-  const payload: Record<string, unknown> = {
+  if (modelData.endpoint === "perplexity") {
+    return { messages, modelName: modelData.modelName };
+  }
+
+  if (modelData.endpoint === "lmsys") {
+    return { messages, model: modelData.modelName };
+  }
+
+  return {
     messages,
-    botId: modelData.id,
-    chatId:
-      typeof req.chatId === "string" && req.chatId
-        ? req.chatId
-        : randomUUID().replace(/-/g, "").slice(0, 24),
-    stream: req.stream !== false,
-    temperature: typeof req.temperature === "number" ? req.temperature : 0.7,
+    model: resolveChatPlaygroundUpstreamModel(modelData),
+    chatId: typeof req.chatId === "string" ? req.chatId : "",
     isRegenerate: false,
     promptTemplate: null,
     fileUrl: null,
-    submissionId: randomUUID().replace(/-/g, ""),
+    botId: modelData.id,
+    submissionId: randomUUID(),
     noSave: true,
   };
-
-  if (modelData.endpoint === "perplexity") {
-    payload.modelName = modelData.modelName;
-  } else {
-    payload.model = modelData.modelName;
-  }
-
-  for (const key of [
-    "max_tokens",
-    "top_p",
-    "presence_penalty",
-    "frequency_penalty",
-    "stop",
-  ] as const) {
-    if (key in req && req[key] !== undefined && req[key] !== null) {
-      payload[key] = req[key];
-    }
-  }
-
-  return payload;
 }
 
 /**
@@ -129,6 +130,18 @@ export function toOpenAiCompletionEnvelope(model: string, content: string): Resp
     }),
     { headers: { "content-type": "application/json" } }
   );
+}
+
+/**
+ * Strip the `CITATIONS:[...]` metadata line the perplexity endpoint appends to its
+ * answer stream (the web client parses it for citation links instead of rendering it).
+ */
+export function stripCitationsLine(text: string): string {
+  if (!text) return "";
+  return text
+    .split("\n")
+    .filter((line) => !line.trimStart().startsWith("CITATIONS:"))
+    .join("\n");
 }
 
 /** Count characters in a Chat Completions message `content` (string or multipart). */
@@ -213,7 +226,7 @@ export function createPerplexityOpenAiResponse(
   rawText: string,
   isStreaming: boolean
 ): Response {
-  const content = stripChatId(rawText, true);
+  const content = stripChatId(stripCitationsLine(rawText), true);
   if (!isStreaming) return toOpenAiCompletionEnvelope(model, content);
 
   const streamId = randomUUID().slice(0, 12);

@@ -7,7 +7,9 @@ import {
   ChatPlaygroundExecutor,
   chatplaygroundExecutor,
   stripChatId,
+  stripCitationsLine,
   buildChatPlaygroundPayload,
+  resolveChatPlaygroundUpstreamModel,
 } from "../../open-sse/executors/chatplayground.ts";
 import {
   decodeJwtPayload,
@@ -171,8 +173,8 @@ test("ChatPlayground — auth resolution with cached & minted tokens", async () 
 
 test("ChatPlayground — model & endpoint resolution", () => {
   // Prefix stripping
-  assert.equal(stripChatPlaygroundPrefix("chatplayground/gpt-5.6-sol"), "gpt-5.6-sol");
-  assert.equal(stripChatPlaygroundPrefix("cpl/claude-sonnet-5"), "claude-sonnet-5");
+  assert.equal(stripChatPlaygroundPrefix("chatplayground/gpt-6.1-sol"), "gpt-6.1-sol");
+  assert.equal(stripChatPlaygroundPrefix("cpl/claude-sonnet-5-5"), "claude-sonnet-5-5");
   assert.equal(stripChatPlaygroundPrefix("cpl.kimi-k3"), "kimi-k3");
   assert.equal(stripChatPlaygroundPrefix("cp.perplexity-sonar-pro"), "perplexity-sonar-pro");
 
@@ -180,19 +182,19 @@ test("ChatPlayground — model & endpoint resolution", () => {
   assert.equal(resolveChatPlaygroundEndpoint({ endpoint: "azure" }), "azure");
   assert.equal(resolveChatPlaygroundEndpoint({ endpoint: "lmsys" }), "lmsys");
   assert.equal(resolveChatPlaygroundEndpoint({ endpoint: "perplexity" }), "perplexity");
-  assert.equal(resolveChatPlaygroundEndpoint("gpt-5.6-sol"), "azure");
-  assert.equal(resolveChatPlaygroundEndpoint("claude-sonnet-5"), "azure");
+  assert.equal(resolveChatPlaygroundEndpoint("gpt-6-luna"), "azure");
+  assert.equal(resolveChatPlaygroundEndpoint("claude-sonnet-5-5"), "azure");
   assert.equal(resolveChatPlaygroundEndpoint("kimi-k3"), "lmsys");
   assert.equal(resolveChatPlaygroundEndpoint("llama-4-scout"), "lmsys");
   assert.equal(resolveChatPlaygroundEndpoint("qwen3.8-max"), "lmsys");
-  assert.equal(resolveChatPlaygroundEndpoint("grok-4.5"), "lmsys");
+  assert.equal(resolveChatPlaygroundEndpoint("grok-4.7"), "lmsys");
   assert.equal(resolveChatPlaygroundEndpoint("perplexity-sonar-pro"), "perplexity");
   assert.equal(resolveChatPlaygroundEndpoint("sonar-pro"), "perplexity");
 
   // Model resolution
-  const m1 = resolveChatPlaygroundModel("cpl/gpt-5.6-sol");
+  const m1 = resolveChatPlaygroundModel("cpl/gpt-6.1-sol");
   assert.ok(m1);
-  assert.equal(m1.id, "gpt-5.6-sol");
+  assert.equal(m1.id, "gpt-6.1-sol");
   assert.equal(m1.endpoint, "azure");
 
   const m2 = resolveChatPlaygroundModel("kimi-k3");
@@ -205,6 +207,23 @@ test("ChatPlayground — model & endpoint resolution", () => {
   assert.equal(m3.endpoint, "perplexity");
   assert.equal(m3.modelName, "sonar-pro");
 
+  // Catalog reflects the live /api/models contract: latest bots, provider hints, and
+  // endpoint assignments that keyword heuristics would get wrong (kimi-k2.6 and
+  // grok-4.6 are served on azure, llama/qwen/glm use vendor-namespaced modelNames).
+  const m4 = resolveChatPlaygroundModel("kimi-k2.6");
+  assert.ok(m4);
+  assert.equal(m4.endpoint, "azure");
+  const m5 = resolveChatPlaygroundModel("grok-4.6");
+  assert.ok(m5);
+  assert.equal(m5.endpoint, "azure");
+  const m6 = resolveChatPlaygroundModel("llama-4-scout");
+  assert.ok(m6);
+  assert.equal(m6.modelName, "meta-llama/llama-4-scout-17b-16e-instruct");
+  const m7 = resolveChatPlaygroundModel("gemini-3.8-flash-l");
+  assert.ok(m7);
+  assert.equal(m7.provider, "google");
+  assert.equal(m7.modelName, "gemini-3.8-flash");
+
   // Model validation — returns null for unrecognized models (no synthesis fallback)
   assert.equal(resolveChatPlaygroundModel("non-existent-model"), null);
 });
@@ -215,22 +234,46 @@ test("ChatPlayground — payload construction & CHAT_ID stripping", () => {
   assert.equal(stripChatId("CHAT_ID:prefix_123 Hello world"), "Hello world");
   assert.equal(stripChatId("Hello CHAT_ID:mid_456 world"), "Hello  world");
 
-  // Payload formatting
-  const modelAzure = resolveChatPlaygroundModel("gpt-5.6-sol")!;
+  // CITATIONS line stripping (perplexity endpoint appends a metadata line)
+  assert.equal(stripCitationsLine('Answer text\nCITATIONS:[{"url":"https://a"}]'), "Answer text");
+  assert.equal(stripCitationsLine("no citations here"), "no citations here");
+
+  // Azure payload mirrors the web client: vendor-prefixed model, botId, noSave
+  const modelAzure = resolveChatPlaygroundModel("gpt-6.1-sol")!;
   const payloadAzure = buildChatPlaygroundPayload(
     {
       messages: [{ role: "user", content: "Hi" }],
-      temperature: 0.5,
-      max_tokens: 1024,
     },
     modelAzure
   );
-  assert.equal(payloadAzure.botId, "gpt-5.6-sol");
-  assert.equal(payloadAzure.model, "gpt-5.6-sol");
-  assert.equal(payloadAzure.temperature, 0.5);
-  assert.equal(payloadAzure.max_tokens, 1024);
+  assert.equal(payloadAzure.botId, "gpt-6.1-sol");
+  assert.equal(payloadAzure.model, "openai/gpt-6.1-sol");
   assert.equal(payloadAzure.noSave, true);
+  assert.equal(payloadAzure.chatId, "");
+  assert.equal(payloadAzure.isRegenerate, false);
+  assert.equal(payloadAzure.promptTemplate, null);
+  assert.equal(payloadAzure.fileUrl, null);
+  assert.match(String(payloadAzure.submissionId), /^[0-9a-f-]{36}$/);
+  // Sampling params the upstream ignores must not leak into the payload
+  assert.equal("temperature" in payloadAzure, false);
+  assert.equal("max_tokens" in payloadAzure, false);
+  assert.equal("stream" in payloadAzure, false);
 
+  // Vendor prefix follows the provider field case-insensitively
+  const gemini = resolveChatPlaygroundModel("gemini-3.8-flash-l")!;
+  assert.equal(resolveChatPlaygroundUpstreamModel(gemini), "google/gemini-3.8-flash");
+
+  // LMSYS payload: plain vendor-namespaced model, no azure-only fields
+  const modelLmsys = resolveChatPlaygroundModel("qwen3.8-max")!;
+  const payloadLmsys = buildChatPlaygroundPayload(
+    { messages: [{ role: "user", content: "Hi" }] },
+    modelLmsys
+  );
+  assert.equal(payloadLmsys.model, "qwen/qwen3.8-max");
+  assert.equal("botId" in payloadLmsys, false);
+  assert.equal("noSave" in payloadLmsys, false);
+
+  // Perplexity payload uses modelName, not model/botId
   const modelPplx = resolveChatPlaygroundModel("perplexity-sonar-pro")!;
   const payloadPplx = buildChatPlaygroundPayload(
     {
@@ -238,8 +281,9 @@ test("ChatPlayground — payload construction & CHAT_ID stripping", () => {
     },
     modelPplx
   );
-  assert.equal(payloadPplx.botId, "perplexity-sonar-pro");
   assert.equal(payloadPplx.modelName, "sonar-pro");
+  assert.equal("botId" in payloadPplx, false);
+  assert.equal("model" in payloadPplx, false);
 });
 
 test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", async () => {
@@ -261,7 +305,7 @@ test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", asy
 
   try {
     const result = await executor.execute({
-      model: "gpt-5.6-sol",
+      model: "gpt-6.1-sol",
       body: {
         messages: [{ role: "user", content: "Hello" }],
         stream: false,
@@ -300,7 +344,7 @@ test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", asy
 
   try {
     const streamResult = await executor.execute({
-      model: "gpt-5.6-sol",
+      model: "gpt-6.1-sol",
       body: {
         messages: [{ role: "user", content: "Hello" }],
         stream: true,
@@ -341,7 +385,7 @@ test("ChatPlaygroundExecutor — execution flow: non-streaming & streaming", asy
 
   try {
     const errResult = await executor.execute({
-      model: "gpt-5.6-sol",
+      model: "gpt-6.1-sol",
       body: { messages: [{ role: "user", content: "Hello" }] },
       credentials: { apiKey: mockJwt },
     });
@@ -466,7 +510,7 @@ test("ChatPlaygroundExecutor — 15,000 character limit per message validation",
   // 1. Single string message exceeding limit
   const oversizedMessage = "A".repeat(15_001);
   const errResult = await executor.execute({
-    model: "gpt-5.6-terra",
+    model: "gpt-6.1-sol",
     body: {
       messages: [{ role: "user", content: oversizedMessage }],
     },
@@ -482,7 +526,7 @@ test("ChatPlaygroundExecutor — 15,000 character limit per message validation",
 
   // 2. Multipart array message exceeding limit
   const errResultMultipart = await executor.execute({
-    model: "gpt-5.6-terra",
+    model: "gpt-6.1-sol",
     body: {
       messages: [
         {
@@ -557,7 +601,7 @@ test("ChatPlaygroundExecutor — streaming whitespace & token formatting preserv
 
   try {
     const streamResult = await executor.execute({
-      model: "gpt-5.6-sol",
+      model: "gpt-6.1-sol",
       body: {
         messages: [{ role: "user", content: "code" }],
         stream: true,
@@ -591,15 +635,20 @@ test("ChatPlaygroundExecutor — streaming whitespace & token formatting preserv
 
 test("ChatPlayground — discovery models parser", () => {
   const rawApiData = [
-    { botId: "gpt-5.6-sol", displayName: "GPT 5.6 Sol", modelName: "gpt-5.6-sol", group: "chat" },
+    {
+      botId: "gpt-6.1-sol",
+      displayName: "ChatGPT-6.1 Sol",
+      modelName: "gpt-6.1-sol",
+      group: "chat",
+    },
     { botId: "whisper-v3", displayName: "Whisper V3", group: "audio" },
-    { botId: "claude-sonnet-5", displayName: "Claude Sonnet 5", group: "chat" },
+    { botId: "claude-sonnet-5-5", displayName: "Claude Sonnet 5.5", group: "chat" },
   ];
 
   const parsed = parseChatPlaygroundDiscoveryModels(rawApiData);
   assert.equal(parsed.length, 2);
-  assert.equal(parsed[0].id, "gpt-5.6-sol");
-  assert.equal(parsed[0].name, "GPT 5.6 Sol");
+  assert.equal(parsed[0].id, "gpt-6.1-sol");
+  assert.equal(parsed[0].name, "ChatGPT-6.1 Sol");
   assert.equal(parsed[0].owned_by, "chatplayground");
-  assert.equal(parsed[1].id, "claude-sonnet-5");
+  assert.equal(parsed[1].id, "claude-sonnet-5-5");
 });
