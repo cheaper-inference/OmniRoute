@@ -202,6 +202,13 @@ const nextConfig = {
   // accept for image-bearing requests; tune via env if a deployment needs
   // more.
   experimental: {
+    // Next 16 defaults useTypeScriptCli to true: it shells out to
+    // `process.execPath <tsc> --showConfig` and JSON.parses the captured stdout (~700 KB
+    // for this tsconfig). Bun's child_process pipe capture truncates that output
+    // intermittently, so `bun run build` died with "Could not parse output from
+    // TypeScript's --showConfig". Node keeps the default; Bun uses the in-process
+    // compiler API path. Drop the conditional once Bun's pipe capture is reliable.
+    ...(process.versions.bun ? { useTypeScriptCli: false } : {}),
     // macOS development only: avoid the EBADF spawn failures of Next's TypeScript
     // CLI and static-path worker (see scripts/build/macosDevWorkaround.mjs).
     ...macosDevExperimentalOverrides(),
