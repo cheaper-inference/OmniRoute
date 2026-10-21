@@ -65,6 +65,23 @@ export function supportsDualAuthProvider(providerId: unknown): boolean {
 }
 
 /**
+ * No-auth providers that ALSO offer a device-code sign-in in the dashboard.
+ *
+ * MiniMax Code is the reference: the provider itself stores no credential
+ * (it reads the local MiniMax Code profile), but an operator can sign in
+ * to their MiniMax account from the dashboard and have the credential
+ * written into that profile. The dashboard row is the account; the
+ * credential lives in the provider's own profile.
+ */
+const NOAUTH_DEVICE_CODE_PROVIDER_IDS = new Set(["minimax-code"]);
+
+export function supportsDeviceCodeLogin(providerId: unknown): boolean {
+  return (
+    typeof providerId === "string" && NOAUTH_DEVICE_CODE_PROVIDER_IDS.has(providerId)
+  );
+}
+
+/**
  * Backend provider IDs that are managed from one dashboard provider family.
  *
  * Family members intentionally remain distinct in the registry and database:

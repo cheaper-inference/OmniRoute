@@ -16,13 +16,10 @@
 import { readFile, writeFile, rename, chmod } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+import { resolveMinimaxCodeAccountBase } from "../config/minimaxCode.ts";
 import { resolvePublicCred } from "../utils/publicCreds.ts";
 
 const GATEWAY_URL = "https://agent.minimax.io/mavis/api/v1/llm/v1/messages";
-const ACCOUNT_BASES: Record<string, string> = {
-  en: "https://account.minimax.io",
-  cn: "https://account.minimax.cn",
-};
 const DEFAULT_MAX_TOKENS = 8192;
 /**
  * Ceiling on the estimated input size of one MANAGED GATEWAY request.
@@ -580,7 +577,7 @@ export async function refreshAuthProfile(
 ): Promise<MinimaxAuthProfile> {
   const region =
     (options.region || process.env.MINIMAX_CODE_REGION || "en").trim().toLowerCase() || "en";
-  const base = ACCOUNT_BASES[region] || ACCOUNT_BASES.en;
+  const base = resolveMinimaxCodeAccountBase(region);
   const doFetch = options.fetchImpl || fetch;
   const form = new URLSearchParams({
     grant_type: "refresh_token",

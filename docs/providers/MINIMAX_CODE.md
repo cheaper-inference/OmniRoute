@@ -1,16 +1,18 @@
 ---
 title: "MiniMax Code Provider"
 version: 3.8.53
-lastUpdated: 2026-10-21
+lastUpdated: 2026-10-22
 ---
 
 # MiniMax Code Provider
 
 `minimax-code` (alias `mmcode`) routes OpenAI-compatible chat completions to
 MiniMax Code: the subscription product behind the MiniMax Code desktop app and
-the `mcode` CLI. It is a **no-auth** provider — OmniRoute stores no credential
-for it. It reads the credential from your own local MiniMax Code profile
+the `mcode` CLI. It is a **no-auth** provider — a run needs no credential in
+OmniRoute. It reads the credential from your own local MiniMax Code profile
 (`~/.minimax`) and gives the run the same models the profile is entitled to.
+You can also sign in to your MiniMax account from the provider page; the
+credential that comes back is written into that same local profile.
 
 ## Transports
 
@@ -41,6 +43,34 @@ run.
 
 Models: `MiniMax-M3.1-Flash` and `MiniMax-M3`. The provider accepts only
 these ids — a request for another model is rejected before it reaches MiniMax.
+
+## Signing in from the dashboard
+
+The provider page carries a sign-in action that runs the MiniMax account
+device-code flow — the same flow the CLI uses, so no extra tool is needed:
+
+1. **Dashboard → Providers → MiniMax Code → Add connection**. The panel asks the
+   account service for a device code and shows the verification URL and the
+   code to confirm there.
+2. Open the URL, sign in to your MiniMax account and confirm the code.
+3. The panel polls the account service. On success the credential is written
+   into your local MiniMax Code profile — the same file the CLI reads — and the
+   account appears in the panel as a connection.
+
+The provider stays a **no-auth** provider: it can be enabled without any
+connection, and the credential a run uses is the one in your local profile.
+The dashboard connection is the account entry — it can be re-authenticated
+from the panel, but it never routes a request.
+
+Two things worth knowing:
+
+- **The local profile has to exist.** A host that never ran `mcode login` has
+  no `~/.minimax/auth/prod/<region>/mcode-public/auth.json` to write into:
+  the dashboard account is created, but the credential cannot be placed in
+  the profile until that profile exists.
+- **The account host follows the region.** `MINIMAX_CODE_REGION=en` (the
+  default) talks to `account.minimax.io`, `cn` to `account.minimax.cn`. The
+  region also decides which profile the credential is written to.
 
 ## The credential is shared, and OmniRoute writes to it
 
