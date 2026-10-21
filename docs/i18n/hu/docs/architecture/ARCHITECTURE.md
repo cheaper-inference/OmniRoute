@@ -21,7 +21,7 @@ Fő képességek:
 - Strukturált kombinációs lépések (`provider + model + connection`), futásidejű rendezéssel a `compositeTiers` alapján
 - Fiókszintű tartalék útvonal (szolgáltatónként több fiók)
 - Kvóta-előellenőrzés és kvótatudatos P2C-fiókválasztás a fő csevegési útvonalon
-- OAuth- és API-kulcs-alapú szolgáltatói kapcsolatkezelés (27 OAuth-szolgáltatói modul)
+- OAuth- és API-kulcs-alapú szolgáltatói kapcsolatkezelés (28 OAuth-szolgáltatói modul)
 - Beágyazások generálása a `/v1/embeddings` végponton keresztül (18 szolgáltató)
 - Képgenerálás a `/v1/images/generations` végponton keresztül (10+ szolgáltató, 20+ modell)
 - Hangátírás a `/v1/audio/transcriptions` végponton keresztül (18 szolgáltató)
@@ -64,7 +64,7 @@ Fő képességek:
 - Promptinjektálás elleni köztesréteg
 - Prompttömörítési folyamat Caveman és RTK támogatással, halmozott folyamatokkal, tömörítési kombinációkkal, nyelvi csomagokkal és analitikával
 - ACP (Agent Communication Protocol) jegyzék
-- Moduláris OAuth-szolgáltatók (22 különálló modul a `src/lib/oauth/providers/` alatt)
+- Moduláris OAuth-szolgáltatók (28 különálló modul a `src/lib/oauth/providers/` alatt)
 - Eltávolítási/teljes eltávolítási szkriptek
 - OAuth-környezet javítására szolgáló művelet
 - WebSocket-híd OpenAI-kompatibilis WS-kliensekhez (`/v1/ws`)
@@ -319,10 +319,10 @@ A tartományi réteg moduljai:
 - Kiértékelés-futtató: `src/lib/evals/evalRunner.ts`
 - Tartományi állapot tartós tárolása: `src/lib/db/domainState.ts` — SQLite CRUD a visszaállási láncokhoz, keretekhez, költségelőzményekhez, kizárási állapothoz és megszakítókhoz
 
-OAuth-szolgáltatói modulok (27 különálló fájl a `src/lib/oauth/providers/` alatt):
+OAuth-szolgáltatói modulok (28 különálló fájl a `src/lib/oauth/providers/` alatt):
 
 - Nyilvántartási index: `src/lib/oauth/providers/index.ts`
-- Egyedi szolgáltatók: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Egyedi szolgáltatók: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Megosztott segédfüggvények: `codebuddyDeviceAuth.ts` (CodeBuddy CN/nemzetközi eszközfolyamat), `museCodeDeviceResponse.ts`
 - Vékony burkolómodul: `src/lib/oauth/providers.ts` — újraexportál az egyedi modulokból
 

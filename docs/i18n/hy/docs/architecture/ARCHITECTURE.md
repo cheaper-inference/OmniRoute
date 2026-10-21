@@ -21,7 +21,7 @@ OmniRoute-ը Next.js-ի հիման վրա կառուցված տեղային AI �
 - Կառուցվածքային համակցված քայլեր (`provider + model + connection`)՝ կատարման պահին `compositeTiers`-ով դասակարգմամբ
 - Հաշվի մակարդակով պահուստային անցում (մեկ մատակարարի համար մի քանի հաշիվ)
 - Քվոտայի նախնական ստուգում և քվոտան հաշվի առնող P2C հաշվի ընտրություն՝ զրույցի հիմնական ուղում
-- OAuth + API բանալիով մատակարարի կապերի կառավարում (27 OAuth մատակարարի մոդուլ)
+- OAuth + API բանալիով մատակարարի կապերի կառավարում (28 OAuth մատակարարի մոդուլ)
 - Ներդրվածքների ստեղծում `/v1/embeddings`-ի միջոցով (18 մատակարար)
 - Պատկերների ստեղծում `/v1/images/generations`-ի միջոցով (10+ մատակարար, 20+ մոդել)
 - Ձայնագրությունների վերծանում `/v1/audio/transcriptions`-ի միջոցով (18 մատակարար)
@@ -64,7 +64,7 @@ OmniRoute-ը Next.js-ի հիման վրա կառուցված տեղային AI �
 - Հուշման ներարկումից պաշտպանող միջնաշերտ
 - Հուշումների սեղմման հոսքաշար՝ Caveman, RTK, շերտավորված հոսքաշարերով, սեղմման համակցություններով, լեզվական փաթեթներով և վերլուծությամբ
 - ACP (Գործակալների հաղորդակցման արձանագրություն) գրանցամատյան
-- Մոդուլային OAuth մատակարարներ (22 առանձին մոդուլ `src/lib/oauth/providers/`-ի ներքո)
+- Մոդուլային OAuth մատակարարներ (28 առանձին մոդուլ `src/lib/oauth/providers/`-ի ներքո)
 - Ապատեղադրման/ամբողջական ապատեղադրման սկրիպտներ
 - OAuth միջավայրի վերականգնման գործողություն
 - WebSocket կամուրջ՝ OpenAI-ի հետ համատեղելի WS սպասառուների համար (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - Գնահատումների գործարկիչ՝ `src/lib/evals/evalRunner.ts`
 - Տիրույթի վիճակի պահպանում՝ `src/lib/db/domainState.ts` — SQLite CRUD՝ պահուստային անցման շղթաների, բյուջեների, ծախսերի պատմության, արգելափակման վիճակի և շղթայի անջատիչների համար
 
-OAuth մատակարարների մոդուլներ (27 առանձին ֆայլ `src/lib/oauth/providers/`-ի ներքո)․
+OAuth մատակարարների մոդուլներ (28 առանձին ֆայլ `src/lib/oauth/providers/`-ի ներքո)․
 
 - Գրանցամատյանի ինդեքս՝ `src/lib/oauth/providers/index.ts`
-- Առանձին մատակարարներ՝ `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Առանձին մատակարարներ՝ `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Համօգտագործվող օժանդակիչներ՝ `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl սարքային հոսք), `museCodeDeviceResponse.ts`
 - Թեթև փաթեթավորիչ՝ `src/lib/oauth/providers.ts` — վերաարտահանում է առանձին մոդուլներից
 

@@ -21,7 +21,7 @@ OmniRoute არის Next.js-ზე აგებული ლოკალუ�
 - სტრუქტურირებული კომბინაციის ნაბიჯები (`provider + model + connection`) შესრულებისას `compositeTiers`-ის მიხედვით დალაგებით
 - ანგარიშის დონეზე სარეზერვო გადართვა (თითოეულ პროვაიდერზე რამდენიმე ანგარიში)
 - კვოტის წინასწარი შემოწმება და კვოტის გათვალისწინებით P2C ანგარიშის შერჩევა ჩატის ძირითად ნაკადში
-- OAuth-ისა და API-გასაღების საფუძველზე პროვაიდერებთან კავშირების მართვა (27 OAuth პროვაიდერის მოდული)
+- OAuth-ისა და API-გასაღების საფუძველზე პროვაიდერებთან კავშირების მართვა (28 OAuth პროვაიდერის მოდული)
 - ემბედინგების გენერირება `/v1/embeddings`-ის მეშვეობით (18 პროვაიდერი)
 - სურათების გენერირება `/v1/images/generations`-ის მეშვეობით (10+ პროვაიდერი, 20+ მოდელი)
 - აუდიოს ტრანსკრიფცია `/v1/audio/transcriptions`-ის მეშვეობით (18 პროვაიდერი)
@@ -64,7 +64,7 @@ OmniRoute არის Next.js-ზე აგებული ლოკალუ�
 - მოთხოვნებში ინექციისგან დამცავი შუალედური პროგრამული უზრუნველყოფა
 - მოთხოვნების შეკუმშვის კონვეიერი Caveman-ის, RTK-ის, მრავალშრიანი კონვეიერების, შეკუმშვის კომბინაციების, ენობრივი პაკეტებისა და ანალიტიკის მხარდაჭერით
 - ACP (Agent Communication Protocol) რეესტრი
-- მოდულური OAuth პროვაიდერები (22 ცალკეული მოდული `src/lib/oauth/providers/`-ში)
+- მოდულური OAuth პროვაიდერები (28 ცალკეული მოდული `src/lib/oauth/providers/`-ში)
 - დეინსტალაციის/სრული დეინსტალაციის სკრიპტები
 - OAuth გარემოს აღდგენის მოქმედება
 - WebSocket ხიდი OpenAI-სთან თავსებადი WS კლიენტებისთვის (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - შეფასებების გამშვები: `src/lib/evals/evalRunner.ts`
 - დომენის მდგომარეობის მუდმივი შენახვა: `src/lib/db/domainState.ts` — SQLite CRUD სარეზერვო გადართვის ჯაჭვებისთვის, ბიუჯეტებისთვის, ღირებულების ისტორიისთვის, ბლოკირების მდგომარეობისა და ამომრთველებისთვის
 
-OAuth პროვაიდერის მოდულები (27 ცალკეული ფაილი `src/lib/oauth/providers/`-ში):
+OAuth პროვაიდერის მოდულები (28 ცალკეული ფაილი `src/lib/oauth/providers/`-ში):
 
 - რეესტრის ინდექსი: `src/lib/oauth/providers/index.ts`
-- ცალკეული პროვაიდერები: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- ცალკეული პროვაიდერები: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - საზიარო დამხმარეები: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl მოწყობილობის ნაკადი), `museCodeDeviceResponse.ts`
 - თხელი გარსი: `src/lib/oauth/providers.ts` — ცალკეული მოდულებიდან ხელახლა ახორციელებს ექსპორტს
 

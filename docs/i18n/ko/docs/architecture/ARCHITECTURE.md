@@ -21,7 +21,7 @@ OmniRoute는 Next.js를 기반으로 구축된 로컬 AI 라우팅 게이트웨�
 - 구조화된 콤보 단계(`provider + model + connection`) 및 `compositeTiers`에 따른 런타임 순서 지정
 - 계정 수준 폴백(공급자별 다중 계정)
 - 기본 채팅 경로에서 할당량 사전 확인 및 할당량을 고려한 P2C 계정 선택
-- OAuth + API 키 기반 공급자 연결 관리(OAuth 공급자 모듈 27개)
+- OAuth + API 키 기반 공급자 연결 관리(OAuth 공급자 모듈 28개)
 - `/v1/embeddings`를 통한 임베딩 생성(공급자 18개)
 - `/v1/images/generations`를 통한 이미지 생성(10개 이상의 공급자, 20개 이상의 모델)
 - `/v1/audio/transcriptions`를 통한 오디오 전사(공급자 18개)
@@ -64,7 +64,7 @@ OmniRoute는 Next.js를 기반으로 구축된 로컬 AI 라우팅 게이트웨�
 - 프롬프트 인젝션 방어 미들웨어
 - Caveman, RTK, 스택형 파이프라인, 압축 콤보, 언어 팩 및 분석을 지원하는 프롬프트 압축 파이프라인
 - ACP(Agent Communication Protocol) 레지스트리
-- 모듈식 OAuth 공급자(`src/lib/oauth/providers/` 아래의 개별 모듈 22개)
+- 모듈식 OAuth 공급자(`src/lib/oauth/providers/` 아래의 개별 모듈 28개)
 - 제거/완전 제거 스크립트
 - OAuth 환경 복구 작업
 - OpenAI 호환 WS 클라이언트를 위한 WebSocket 브리지(`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - 평가 실행기: `src/lib/evals/evalRunner.ts`
 - 도메인 상태 영속성: `src/lib/db/domainState.ts` — 폴백 체인, 예산, 비용 기록, 잠금 상태, 회로 차단기를 위한 SQLite CRUD
 
-OAuth 제공자 모듈(`src/lib/oauth/providers/` 아래의 개별 파일 27개):
+OAuth 제공자 모듈(`src/lib/oauth/providers/` 아래의 개별 파일 28개):
 
 - 레지스트리 인덱스: `src/lib/oauth/providers/index.ts`
-- 개별 제공자: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- 개별 제공자: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - 공유 헬퍼: `codebuddyDeviceAuth.ts`(CodeBuddy CN/국제 버전 기기 흐름), `museCodeDeviceResponse.ts`
 - 얇은 래퍼: `src/lib/oauth/providers.ts` — 개별 모듈에서 다시 내보냄
 

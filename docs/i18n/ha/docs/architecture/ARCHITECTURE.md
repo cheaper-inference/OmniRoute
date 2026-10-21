@@ -21,7 +21,7 @@ Manyan ƙwarewa:
 - Matakan combo masu tsari (`provider + model + connection`) tare da jeren lokacin aiki bisa `compositeTiers`
 - Fallback na matakin account (accounts da yawa ga kowane provider)
 - Binciken quota kafin aiwatarwa da zaɓin account na P2C mai la'akari da quota a babban hanyar chat
-- Gudanar da haɗin provider ta OAuth + API-key (OAuth provider modules 27)
+- Gudanar da haɗin provider ta OAuth + API-key (OAuth provider modules 28)
 - Samar da embeddings ta `/v1/embeddings` (providers 18)
 - Samar da hotuna ta `/v1/images/generations` (providers 10+, models 20+)
 - Sauya sauti zuwa rubutu ta `/v1/audio/transcriptions` (providers 18)
@@ -64,7 +64,7 @@ Manyan ƙwarewa:
 - Prompt injection guard middleware
 - Tsarin prompt compression tare da Caveman, RTK, stacked pipelines, compression combos, language packs, da analytics
 - Rajistar ACP (Agent Communication Protocol)
-- Modular OAuth providers (modules guda 22 a ƙarƙashin `src/lib/oauth/providers/`)
+- Modular OAuth providers (modules guda 28 a ƙarƙashin `src/lib/oauth/providers/`)
 - Scripts na uninstall/full-uninstall
 - Aikin gyaran OAuth environment
 - WebSocket bridge don OpenAI-compatible WS clients (`/v1/ws`)
@@ -319,10 +319,10 @@ Modulolin layin domain:
 - Mai gudanar da kimantawa: `src/lib/evals/evalRunner.ts`
 - Adana yanayin domain: `src/lib/db/domainState.ts` — ayyukan SQLite CRUD don jerin komawa ga madadi, kasafin kuɗi, tarihin kuɗi, yanayin kullewa, da masu katse da'ira
 
-Modulolin masu samar da OAuth (fayiloli guda 27 a ƙarƙashin `src/lib/oauth/providers/`):
+Modulolin masu samar da OAuth (fayiloli guda 28 a ƙarƙashin `src/lib/oauth/providers/`):
 
 - Fihirisar rijista: `src/lib/oauth/providers/index.ts`
-- Masu samarwa ɗai-ɗai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Masu samarwa ɗai-ɗai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Mataimaka na gama-gari: `codebuddyDeviceAuth.ts` (tafiyar tantance na'urar CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Ƙaramin wrapper: `src/lib/oauth/providers.ts` — yana sake fitarwa daga modulolin ɗai-ɗai
 

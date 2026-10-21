@@ -21,7 +21,7 @@ Keskeiset ominaisuudet:
 - Rakenteiset yhdistelmävaiheet (`provider + model + connection`) ja ajonaikainen järjestäminen `compositeTiers`-arvon perusteella
 - Tilitason varajärjestely (useita tilejä palveluntarjoajaa kohden)
 - Kiintiön ennakkotarkistus ja kiintiöt huomioiva P2C-tilinvalinta ensisijaisessa keskustelupolussa
-- OAuth- ja API-avaimiin perustuvien palveluntarjoajayhteyksien hallinta (27 OAuth-palveluntarjoajamoduulia)
+- OAuth- ja API-avaimiin perustuvien palveluntarjoajayhteyksien hallinta (28 OAuth-palveluntarjoajamoduulia)
 - Upotusten luonti `/v1/embeddings`-päätepisteen kautta (18 palveluntarjoajaa)
 - Kuvien luonti `/v1/images/generations`-päätepisteen kautta (yli 10 palveluntarjoajaa, yli 20 mallia)
 - Äänen litterointi `/v1/audio/transcriptions`-päätepisteen kautta (18 palveluntarjoajaa)
@@ -64,7 +64,7 @@ Keskeiset ominaisuudet:
 - Kehotesyötteiden manipulointia estävä väliohjelmisto
 - Kehotteiden pakkausputki, joka sisältää Cavemanin, RTK:n, pinotut putket, pakkausyhdistelmät, kielipaketit ja analytiikan
 - ACP (Agent Communication Protocol) -rekisteri
-- Modulaariset OAuth-palveluntarjoajat (22 erillistä moduulia hakemistossa `src/lib/oauth/providers/`)
+- Modulaariset OAuth-palveluntarjoajat (28 erillistä moduulia hakemistossa `src/lib/oauth/providers/`)
 - Asennuksen poisto- ja täydellisen asennuksen poiston komentosarjat
 - OAuth-ympäristön korjaustoiminto
 - WebSocket-silta OpenAI-yhteensopiville WS-asiakkaille (`/v1/ws`)
@@ -319,10 +319,10 @@ Toimialokerroksen moduulit:
 - Arviointien suorittaja: `src/lib/evals/evalRunner.ts`
 - Toimialan tilan pysyväistallennus: `src/lib/db/domainState.ts` — SQLite CRUD varajärjestelyketjuille, budjeteille, kustannushistorialle, lukitustilalle ja katkaisijoille
 
-OAuth-palveluntarjoajamoduulit (27 erillistä tiedostoa hakemistossa `src/lib/oauth/providers/`):
+OAuth-palveluntarjoajamoduulit (28 erillistä tiedostoa hakemistossa `src/lib/oauth/providers/`):
 
 - Rekisterin hakemistotiedosto: `src/lib/oauth/providers/index.ts`
-- Yksittäiset palveluntarjoajat: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Yksittäiset palveluntarjoajat: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Jaetut apumoduulit: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl -laiteprosessi), `museCodeDeviceResponse.ts`
 - Ohut kääremoduuli: `src/lib/oauth/providers.ts` — vie uudelleen yksittäisistä moduuleista
 

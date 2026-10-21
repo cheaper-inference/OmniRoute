@@ -21,7 +21,7 @@ OmniRoute คือเกตเวย์กำหนดเส้นทาง AI 
 - ขั้นตอนของชุดแบบมีโครงสร้าง (`provider + model + connection`) พร้อมการจัดลำดับขณะรันด้วย `compositeTiers`
 - การสำรองระดับบัญชี (หลายบัญชีต่อผู้ให้บริการ)
 - การตรวจสอบโควตาล่วงหน้าและการเลือกบัญชีแบบ P2C ที่คำนึงถึงโควตาในเส้นทางแชตหลัก
-- การจัดการการเชื่อมต่อผู้ให้บริการด้วย OAuth + คีย์ API (โมดูลผู้ให้บริการ OAuth 27 โมดูล)
+- การจัดการการเชื่อมต่อผู้ให้บริการด้วย OAuth + คีย์ API (โมดูลผู้ให้บริการ OAuth 28 โมดูล)
 - การสร้างเวกเตอร์ฝังผ่าน `/v1/embeddings` (ผู้ให้บริการ 18 ราย)
 - การสร้างรูปภาพผ่าน `/v1/images/generations` (ผู้ให้บริการมากกว่า 10 ราย, โมเดลมากกว่า 20 โมเดล)
 - การถอดเสียงผ่าน `/v1/audio/transcriptions` (ผู้ให้บริการ 18 ราย)
@@ -64,7 +64,7 @@ OmniRoute คือเกตเวย์กำหนดเส้นทาง AI 
 - มิดเดิลแวร์ป้องกันการแทรกพรอมต์
 - ไปป์ไลน์การบีบอัดพรอมต์พร้อม Caveman, RTK, ไปป์ไลน์แบบซ้อน ชุดการบีบอัด แพ็กภาษา และการวิเคราะห์
 - รีจิสทรี ACP (Agent Communication Protocol)
-- ผู้ให้บริการ OAuth แบบโมดูลาร์ (โมดูลแยก 22 โมดูลภายใต้ `src/lib/oauth/providers/`)
+- ผู้ให้บริการ OAuth แบบโมดูลาร์ (โมดูลแยก 28 โมดูลภายใต้ `src/lib/oauth/providers/`)
 - สคริปต์ถอนการติดตั้ง/ถอนการติดตั้งแบบสมบูรณ์
 - การดำเนินการซ่อมแซมสภาพแวดล้อม OAuth
 - บริดจ์ WebSocket สำหรับไคลเอนต์ WS ที่เข้ากันได้กับ OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - ตัวรันการประเมิน: `src/lib/evals/evalRunner.ts`
 - การจัดเก็บสถานะโดเมนถาวร: `src/lib/db/domainState.ts` — SQLite CRUD สำหรับเชนตัวสำรอง, งบประมาณ, ประวัติต้นทุน, สถานะการล็อกไม่ให้ใช้งาน และเซอร์กิตเบรกเกอร์
 
-โมดูลผู้ให้บริการ OAuth (ไฟล์แยกกัน 27 ไฟล์ภายใต้ `src/lib/oauth/providers/`):
+โมดูลผู้ให้บริการ OAuth (ไฟล์แยกกัน 28 ไฟล์ภายใต้ `src/lib/oauth/providers/`):
 
 - ดัชนีรีจิสทรี: `src/lib/oauth/providers/index.ts`
-- ผู้ให้บริการแต่ละราย: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- ผู้ให้บริการแต่ละราย: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - ตัวช่วยที่ใช้ร่วมกัน: `codebuddyDeviceAuth.ts` (โฟลว์อุปกรณ์ CodeBuddy CN/สากล), `museCodeDeviceResponse.ts`
 - แรปเปอร์แบบบาง: `src/lib/oauth/providers.ts` — ส่งออกซ้ำจากแต่ละโมดูล
 

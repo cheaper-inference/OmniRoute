@@ -21,7 +21,7 @@ Temel yetenekler:
 - `compositeTiers` tarafından çalışma zamanında sıralanan yapılandırılmış kombinasyon adımları (`provider + model + connection`)
 - Hesap düzeyinde yedekleme mekanizması (sağlayıcı başına birden fazla hesap)
 - Ana sohbet akışında kota ön kontrolü ve kotayı dikkate alan P2C hesap seçimi
-- OAuth + API anahtarı tabanlı sağlayıcı bağlantısı yönetimi (27 OAuth sağlayıcı modülü)
+- OAuth + API anahtarı tabanlı sağlayıcı bağlantısı yönetimi (28 OAuth sağlayıcı modülü)
 - `/v1/embeddings` üzerinden gömme oluşturma (18 sağlayıcı)
 - `/v1/images/generations` üzerinden görüntü oluşturma (10+ sağlayıcı, 20+ model)
 - `/v1/audio/transcriptions` üzerinden ses transkripsiyonu (18 sağlayıcı)
@@ -64,7 +64,7 @@ Temel yetenekler:
 - İstem enjeksiyonuna karşı koruma ara yazılımı
 - Caveman, RTK, yığınlanmış işlem hatları, sıkıştırma kombinasyonları, dil paketleri ve analiz özellikleri içeren istem sıkıştırma işlem hattı
 - ACP (Agent Communication Protocol) kayıt defteri
-- Modüler OAuth sağlayıcıları (`src/lib/oauth/providers/` altında 22 ayrı modül)
+- Modüler OAuth sağlayıcıları (`src/lib/oauth/providers/` altında 28 ayrı modül)
 - Kaldırma/tam kaldırma betikleri
 - OAuth ortamı onarma eylemi
 - OpenAI uyumlu WS istemcileri için WebSocket köprüsü (`/v1/ws`)
@@ -319,10 +319,10 @@ Etki alanı katmanı modülleri:
 - Değerlendirme çalıştırıcısı: `src/lib/evals/evalRunner.ts`
 - Etki alanı durumu kalıcılığı: `src/lib/db/domainState.ts` — geri dönüş zincirleri, bütçeler, maliyet geçmişi, kilitleme durumu ve devre kesiciler için SQLite CRUD işlemleri
 
-OAuth sağlayıcı modülleri (`src/lib/oauth/providers/` altında 27 ayrı dosya):
+OAuth sağlayıcı modülleri (`src/lib/oauth/providers/` altında 28 ayrı dosya):
 
 - Kayıt defteri dizini: `src/lib/oauth/providers/index.ts`
-- Ayrı sağlayıcılar: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Ayrı sağlayıcılar: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Paylaşılan yardımcılar: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl cihaz akışı), `museCodeDeviceResponse.ts`
 - İnce sarmalayıcı: `src/lib/oauth/providers.ts` — ayrı modüllerden yeniden dışa aktarır
 

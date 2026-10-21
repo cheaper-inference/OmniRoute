@@ -21,7 +21,7 @@ Các khả năng cốt lõi:
 - Các bước tổ hợp có cấu trúc (`provider + model + connection`) với thứ tự khi chạy dựa trên `compositeTiers`
 - Dự phòng ở cấp tài khoản (nhiều tài khoản cho mỗi nhà cung cấp)
 - Kiểm tra trước hạn ngạch và lựa chọn tài khoản P2C có xét hạn ngạch trong luồng trò chuyện chính
-- Quản lý kết nối nhà cung cấp bằng OAuth + khóa API (27 mô-đun nhà cung cấp OAuth)
+- Quản lý kết nối nhà cung cấp bằng OAuth + khóa API (28 mô-đun nhà cung cấp OAuth)
 - Tạo embedding qua `/v1/embeddings` (18 nhà cung cấp)
 - Tạo hình ảnh qua `/v1/images/generations` (hơn 10 nhà cung cấp, hơn 20 mô hình)
 - Chuyển âm thanh thành văn bản qua `/v1/audio/transcriptions` (18 nhà cung cấp)
@@ -64,7 +64,7 @@ Các khả năng cốt lõi:
 - Phần mềm trung gian bảo vệ chống chèn lời nhắc
 - Pipeline nén lời nhắc với Caveman, RTK, các pipeline xếp chồng, tổ hợp nén, gói ngôn ngữ và phân tích
 - Sổ đăng ký ACP (Agent Communication Protocol)
-- Các nhà cung cấp OAuth dạng mô-đun (22 mô-đun riêng lẻ trong `src/lib/oauth/providers/`)
+- Các nhà cung cấp OAuth dạng mô-đun (28 mô-đun riêng lẻ trong `src/lib/oauth/providers/`)
 - Script gỡ cài đặt/gỡ cài đặt hoàn toàn
 - Thao tác sửa chữa môi trường OAuth
 - Cầu nối WebSocket dành cho các máy khách WS tương thích với OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Các mô-đun tầng miền:
 - Trình chạy đánh giá: `src/lib/evals/evalRunner.ts`
 - Lưu trữ trạng thái miền: `src/lib/db/domainState.ts` — CRUD SQLite cho các chuỗi dự phòng, ngân sách, lịch sử chi phí, trạng thái khóa và bộ ngắt mạch
 
-Các mô-đun nhà cung cấp OAuth (27 tệp riêng lẻ trong `src/lib/oauth/providers/`):
+Các mô-đun nhà cung cấp OAuth (28 tệp riêng lẻ trong `src/lib/oauth/providers/`):
 
 - Chỉ mục registry: `src/lib/oauth/providers/index.ts`
-- Các nhà cung cấp riêng lẻ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Các nhà cung cấp riêng lẻ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Các trình trợ giúp dùng chung: `codebuddyDeviceAuth.ts` (luồng thiết bị CodeBuddy CN/quốc tế), `museCodeDeviceResponse.ts`
 - Lớp bao mỏng: `src/lib/oauth/providers.ts` — tái xuất từ các mô-đun riêng lẻ
 

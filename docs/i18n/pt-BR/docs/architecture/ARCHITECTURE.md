@@ -21,7 +21,7 @@ Principais recursos:
 - Etapas estruturadas de combinação (`provider + model + connection`) com ordenação em tempo de execução por `compositeTiers`
 - Fallback no nível da conta (várias contas por provedor)
 - Verificação prévia de cota e seleção de contas P2C sensível à cota no fluxo principal de chat
-- Gerenciamento de conexões de provedores via OAuth + chave de API (27 módulos de provedores OAuth)
+- Gerenciamento de conexões de provedores via OAuth + chave de API (28 módulos de provedores OAuth)
 - Geração de embeddings via `/v1/embeddings` (18 provedores)
 - Geração de imagens via `/v1/images/generations` (mais de 10 provedores, mais de 20 modelos)
 - Transcrição de áudio via `/v1/audio/transcriptions` (18 provedores)
@@ -64,7 +64,7 @@ Principais recursos:
 - Middleware de proteção contra injeção de prompt
 - Pipeline de compressão de prompts com Caveman, RTK, pipelines empilhados, combinações de compressão, pacotes de idiomas e análises
 - Registro ACP (Agent Communication Protocol)
-- Provedores OAuth modulares (22 módulos individuais em `src/lib/oauth/providers/`)
+- Provedores OAuth modulares (28 módulos individuais em `src/lib/oauth/providers/`)
 - Scripts de desinstalação/desinstalação completa
 - Ação de reparo do ambiente OAuth
 - Ponte WebSocket para clientes WS compatíveis com a OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Módulos da camada de domínio:
 - Executor de avaliações: `src/lib/evals/evalRunner.ts`
 - Persistência do estado do domínio: `src/lib/db/domainState.ts` — CRUD SQLite para cadeias de fallback, orçamentos, histórico de custos, estado de bloqueio e disjuntores
 
-Módulos de provedores OAuth (27 arquivos individuais em `src/lib/oauth/providers/`):
+Módulos de provedores OAuth (28 arquivos individuais em `src/lib/oauth/providers/`):
 
 - Índice do registro: `src/lib/oauth/providers/index.ts`
-- Provedores individuais: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Provedores individuais: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Utilitários compartilhados: `codebuddyDeviceAuth.ts` (fluxo de dispositivo do CodeBuddy CN/internacional), `museCodeDeviceResponse.ts`
 - Wrapper mínimo: `src/lib/oauth/providers.ts` — reexporta a partir dos módulos individuais
 

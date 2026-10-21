@@ -21,7 +21,7 @@ OmniRoute ହେଉଛି Next.js ଉପରେ ନିର୍ମିତ ଏକ ସ�
 - `compositeTiers` ଅନୁଯାୟୀ ରନ୍ଟାଇମ୍ କ୍ରମ ସହିତ ଗଠିତ କମ୍ବୋ ପଦକ୍ଷେପ (`provider + model + connection`)
 - ଆକାଉଣ୍ଟ-ସ୍ତରୀୟ ଫଲ୍ବ୍ୟାକ୍ (ପ୍ରତି ପ୍ରଦାତା ପାଇଁ ଏକାଧିକ ଆକାଉଣ୍ଟ)
 - ମୁଖ୍ୟ ଚାଟ୍ ପଥରେ କୋଟା ପ୍ରିଫ୍ଲାଇଟ୍ ଏବଂ କୋଟା-ସଚେତନ P2C ଆକାଉଣ୍ଟ ଚୟନ
-- OAuth + API-କି ପ୍ରଦାତା ସଂଯୋଗ ପରିଚାଳନା (27 OAuth ପ୍ରଦାତା ମଡ୍ୟୁଲ୍)
+- OAuth + API-କି ପ୍ରଦାତା ସଂଯୋଗ ପରିଚାଳନା (28 OAuth ପ୍ରଦାତା ମଡ୍ୟୁଲ୍)
 - `/v1/embeddings` ମାଧ୍ୟମରେ ଏମ୍ବେଡିଂ ସୃଷ୍ଟି (18 ପ୍ରଦାତା)
 - `/v1/images/generations` ମାଧ୍ୟମରେ ଚିତ୍ର ସୃଷ୍ଟି (10+ ପ୍ରଦାତା, 20+ ମଡେଲ୍)
 - `/v1/audio/transcriptions` ମାଧ୍ୟମରେ ଅଡିଓ ଟ୍ରାନ୍ସକ୍ରିପ୍ସନ୍ (18 ପ୍ରଦାତା)
@@ -64,7 +64,7 @@ OmniRoute ହେଉଛି Next.js ଉପରେ ନିର୍ମିତ ଏକ ସ�
 - ପ୍ରମ୍ପ୍ଟ ଇଞ୍ଜେକ୍ସନ୍ ଗାର୍ଡ ମିଡଲ୍ୱେର୍
 - Caveman, RTK, ଷ୍ଟାକ୍ଡ ପାଇପ୍ଲାଇନ୍, କମ୍ପ୍ରେସନ୍ କମ୍ବୋ, ଭାଷା ପ୍ୟାକ୍ ଏବଂ ଆନାଲିଟିକ୍ସ ସହିତ ପ୍ରମ୍ପ୍ଟ କମ୍ପ୍ରେସନ୍ ପାଇପ୍ଲାଇନ୍
 - ACP (Agent Communication Protocol) ରେଜିଷ୍ଟ୍ରି
-- ମଡ୍ୟୁଲାର୍ OAuth ପ୍ରଦାତା (`src/lib/oauth/providers/` ଅଧୀନରେ 22ଟି ବ୍ୟକ୍ତିଗତ ମଡ୍ୟୁଲ୍)
+- ମଡ୍ୟୁଲାର୍ OAuth ପ୍ରଦାତା (`src/lib/oauth/providers/` ଅଧୀନରେ 28ଟି ବ୍ୟକ୍ତିଗତ ମଡ୍ୟୁଲ୍)
 - ଅନ୍ଇନ୍ଷ୍ଟଲ୍/ସମ୍ପୂର୍ଣ୍ଣ-ଅନ୍ଇନ୍ଷ୍ଟଲ୍ ସ୍କ୍ରିପ୍ଟ
 - OAuth ପରିବେଶ ମରାମତି କାର୍ଯ୍ୟ
 - OpenAI-ସୁସଙ୍ଗତ WS କ୍ଲାଏଣ୍ଟ (`/v1/ws`) ପାଇଁ WebSocket ବ୍ରିଜ୍
@@ -319,10 +319,10 @@ flowchart LR
 - ମୂଲ୍ୟାୟନ ରନର୍: `src/lib/evals/evalRunner.ts`
 - ଡୋମେନ୍ ସ୍ଥିତି ସ୍ଥାୟୀକରଣ: `src/lib/db/domainState.ts` — ଫଲ୍ବ୍ୟାକ୍ ଶୃଙ୍ଖଳା, ବଜେଟ୍, ଖର୍ଚ୍ଚ ଇତିହାସ, ଲକ୍ଆଉଟ୍ ସ୍ଥିତି ଏବଂ ସର୍କିଟ୍ ବ୍ରେକର୍ଗୁଡ଼ିକ ପାଇଁ SQLite CRUD
 
-OAuth ପ୍ରଦାତା ମଡ୍ୟୁଲଗୁଡ଼ିକ (`src/lib/oauth/providers/` ଅଧୀନରେ 27ଟି ସ୍ୱତନ୍ତ୍ର ଫାଇଲ୍):
+OAuth ପ୍ରଦାତା ମଡ୍ୟୁଲଗୁଡ଼ିକ (`src/lib/oauth/providers/` ଅଧୀନରେ 28ଟି ସ୍ୱତନ୍ତ୍ର ଫାଇଲ୍):
 
 - ରେଜିଷ୍ଟ୍ରି ଇଣ୍ଡେକ୍ସ: `src/lib/oauth/providers/index.ts`
-- ସ୍ୱତନ୍ତ୍ର ପ୍ରଦାତାଗୁଡ଼ିକ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- ସ୍ୱତନ୍ତ୍ର ପ୍ରଦାତାଗୁଡ଼ିକ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - ଅଂଶୀଦାର ସହାୟକଗୁଡ଼ିକ: `codebuddyDeviceAuth.ts` (CodeBuddy CN/ଆନ୍ତର୍ଜାତୀୟ ଡିଭାଇସ୍ ପ୍ରବାହ), `museCodeDeviceResponse.ts`
 - ସରଳ ରାପର୍: `src/lib/oauth/providers.ts` — ସ୍ୱତନ୍ତ୍ର ମଡ୍ୟୁଲଗୁଡ଼ିକରୁ ପୁନଃ-ରପ୍ତାନି କରେ
 

@@ -21,7 +21,7 @@ OmniRoute הוא שער ניתוב מקומי לבינה מלאכותית ולו
 - שלבים מובנים בשילוב (`provider + model + connection`) עם סדר ריצה לפי `compositeTiers`
 - מעבר לגיבוי ברמת החשבון (מספר חשבונות לכל ספק)
 - בדיקה מקדימה של מכסות ובחירת חשבון P2C מודעת-מכסה בנתיב הצ'אט הראשי
-- ניהול חיבורים לספקים באמצעות OAuth ומפתחות API (27 מודולי ספקי OAuth)
+- ניהול חיבורים לספקים באמצעות OAuth ומפתחות API (28 מודולי ספקי OAuth)
 - יצירת הטמעות דרך `/v1/embeddings` ‏(18 ספקים)
 - יצירת תמונות דרך `/v1/images/generations` ‏(10+ ספקים, 20+ מודלים)
 - תמלול אודיו דרך `/v1/audio/transcriptions` ‏(18 ספקים)
@@ -64,7 +64,7 @@ OmniRoute הוא שער ניתוב מקומי לבינה מלאכותית ולו
 - תווכת הגנה מפני הזרקת הנחיות
 - צינור דחיסת הנחיות עם Caveman, RTK, צינורות מוערמים, שילובי דחיסה, חבילות שפה וניתוח נתונים
 - מרשם ACP ‏(Agent Communication Protocol)
-- ספקי OAuth מודולריים (22 מודולים נפרדים תחת `src/lib/oauth/providers/`)
+- ספקי OAuth מודולריים (28 מודולים נפרדים תחת `src/lib/oauth/providers/`)
 - סקריפטים להסרה ולהסרה מלאה
 - פעולת תיקון סביבת OAuth
 - גשר WebSocket עבור לקוחות WS תואמי OpenAI ‏(`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - מריץ הערכות: `src/lib/evals/evalRunner.ts`
 - שמירת מצב התחום: `src/lib/db/domainState.ts` — פעולות CRUD של SQLite עבור שרשראות גיבוי, תקציבים, היסטוריית עלויות, מצב נעילה ומפסקי זרם
 
-מודולי ספקי OAuth ‏(27 קבצים נפרדים תחת `src/lib/oauth/providers/`):
+מודולי ספקי OAuth ‏(28 קבצים נפרדים תחת `src/lib/oauth/providers/`):
 
 - אינדקס המרשם: `src/lib/oauth/providers/index.ts`
-- ספקים נפרדים: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- ספקים נפרדים: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - כלי עזר משותפים: `codebuddyDeviceAuth.ts` (תהליך מכשיר של CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - מעטפת דקה: `src/lib/oauth/providers.ts` — מייצאת מחדש מהמודולים הנפרדים
 

@@ -21,7 +21,7 @@ OmniRoute என்பது Next.js அடிப்படையில் உர
 - `compositeTiers` அடிப்படையிலான இயக்கநேர வரிசைப்படுத்தலுடன் கட்டமைக்கப்பட்ட தொகுப்புப் படிகள் (`provider + model + connection`)
 - கணக்கு-நிலை மாற்று வழித்தடம் (ஒவ்வொரு வழங்குநருக்கும் பல கணக்குகள்)
 - முதன்மை அரட்டைப் பாதையில் ஒதுக்கீட்டு முன்சரிபார்ப்பும் ஒதுக்கீட்டை உணரும் P2C கணக்குத் தேர்வும்
-- OAuth + API-key வழங்குநர் இணைப்பு மேலாண்மை (27 OAuth வழங்குநர் தொகுதிகள்)
+- OAuth + API-key வழங்குநர் இணைப்பு மேலாண்மை (28 OAuth வழங்குநர் தொகுதிகள்)
 - `/v1/embeddings` வழியாக உட்பொதிவு உருவாக்கம் (18 வழங்குநர்கள்)
 - `/v1/images/generations` வழியாகப் பட உருவாக்கம் (10+ வழங்குநர்கள், 20+ மாதிரிகள்)
 - `/v1/audio/transcriptions` வழியாக ஒலி எழுத்துப்பெயர்ப்பு (18 வழங்குநர்கள்)
@@ -64,7 +64,7 @@ OmniRoute என்பது Next.js அடிப்படையில் உர
 - Prompt injection guard middleware
 - Caveman, RTK, அடுக்கப்பட்ட pipeline-கள், சுருக்கத் தொகுப்புகள், மொழித் தொகுப்புகள் மற்றும் பகுப்பாய்வுகளைக் கொண்ட prompt சுருக்க pipeline
 - ACP (Agent Communication Protocol) பதிவகம்
-- தொகுதியாக்கப்பட்ட OAuth வழங்குநர்கள் (`src/lib/oauth/providers/` கீழ் 22 தனித்தனி தொகுதிகள்)
+- தொகுதியாக்கப்பட்ட OAuth வழங்குநர்கள் (`src/lib/oauth/providers/` கீழ் 28 தனித்தனி தொகுதிகள்)
 - நிறுவல் நீக்கம்/முழுமையான நிறுவல் நீக்க script-கள்
 - OAuth சூழல் பழுதுபார்ப்பு நடவடிக்கை
 - OpenAI-இணக்கமான WS client-களுக்கான WebSocket bridge (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - மதிப்பீட்டு இயக்கி: `src/lib/evals/evalRunner.ts`
 - டொமைன் நிலை நிலைநிறுத்தம்: `src/lib/db/domainState.ts` — மாற்றுவழிச் சங்கிலிகள், வரவுசெலவுத் திட்டங்கள், செலவு வரலாறு, பூட்டல் நிலை மற்றும் சர்க்யூட் பிரேக்கர்களுக்கான SQLite CRUD
 
-OAuth வழங்குநர் தொகுதிகள் (`src/lib/oauth/providers/`-இன் கீழ் 27 தனிப்பட்ட கோப்புகள்):
+OAuth வழங்குநர் தொகுதிகள் (`src/lib/oauth/providers/`-இன் கீழ் 28 தனிப்பட்ட கோப்புகள்):
 
 - பதிவகச் சுட்டி: `src/lib/oauth/providers/index.ts`
-- தனிப்பட்ட வழங்குநர்கள்: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- தனிப்பட்ட வழங்குநர்கள்: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - பகிரப்பட்ட உதவிச் செயலிகள்: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl சாதன ஓட்டம்), `museCodeDeviceResponse.ts`
 - மெல்லிய உறையாக்கி: `src/lib/oauth/providers.ts` — தனிப்பட்ட தொகுதிகளிலிருந்து மீள்-ஏற்றுமதி செய்கிறது
 

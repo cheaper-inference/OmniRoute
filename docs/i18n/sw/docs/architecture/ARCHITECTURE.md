@@ -21,7 +21,7 @@ Uwezo mkuu:
 - Hatua zilizopangiliwa za mchanganyiko (`provider + model + connection`) zenye upangaji wakati wa utekelezaji kwa kutumia `compositeTiers`
 - Fallback katika kiwango cha akaunti (akaunti nyingi kwa kila mtoa huduma)
 - Ukaguzi wa awali wa kikomo na uteuzi wa akaunti wa P2C unaozingatia kikomo katika njia kuu ya gumzo
-- Usimamizi wa miunganisho ya watoa huduma kupitia OAuth + ufunguo wa API (moduli 27 za watoa huduma wa OAuth)
+- Usimamizi wa miunganisho ya watoa huduma kupitia OAuth + ufunguo wa API (moduli 28 za watoa huduma wa OAuth)
 - Uzalishaji wa embedding kupitia `/v1/embeddings` (watoa huduma 18)
 - Uzalishaji wa picha kupitia `/v1/images/generations` (watoa huduma 10+, modeli 20+)
 - Unukuzi wa sauti kupitia `/v1/audio/transcriptions` (watoa huduma 18)
@@ -64,7 +64,7 @@ Uwezo mkuu:
 - Middleware ya ulinzi dhidi ya uingizaji hasidi wa vidokezo
 - Msururu wa kubana vidokezo wenye Caveman, RTK, misururu iliyopangwa kwa tabaka, michanganyiko ya ubanaji, vifurushi vya lugha na uchanganuzi
 - Sajili ya ACP (Agent Communication Protocol)
-- Watoa huduma wa OAuth wa kimoduli (moduli 22 mahususi chini ya `src/lib/oauth/providers/`)
+- Watoa huduma wa OAuth wa kimoduli (moduli 28 mahususi chini ya `src/lib/oauth/providers/`)
 - Hati za kuondoa/usafishaji kamili
 - Kitendo cha kurekebisha mazingira ya OAuth
 - Daraja la WebSocket kwa viteja vya WS vinavyoendana na OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Moduli za safu ya kikoa:
 - Kiendesha tathmini: `src/lib/evals/evalRunner.ts`
 - Udumishaji wa hali ya kikoa: `src/lib/db/domainState.ts` — SQLite CRUD kwa misururu ya kutumia mbadala, bajeti, historia ya gharama, hali ya kufungia na vivunja mzunguko
 
-Moduli za watoa huduma wa OAuth (faili 27 mahususi chini ya `src/lib/oauth/providers/`):
+Moduli za watoa huduma wa OAuth (faili 28 mahususi chini ya `src/lib/oauth/providers/`):
 
 - Fahirisi ya sajili: `src/lib/oauth/providers/index.ts`
-- Watoa huduma mahususi: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Watoa huduma mahususi: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Visaidizi vinavyoshirikiwa: `codebuddyDeviceAuth.ts` (mtiririko wa kifaa wa CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Kifungashio chepesi: `src/lib/oauth/providers.ts` — husafirisha upya kutoka kwenye moduli mahususi
 

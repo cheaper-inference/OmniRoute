@@ -21,7 +21,7 @@ Next.js അടിസ്ഥാനമാക്കി നിർമ്മിച്�
 - `compositeTiers` അനുസരിച്ചുള്ള റൺടൈം ക്രമീകരണത്തോടുകൂടിയ ഘടനാപരമായ കോംബോ ഘട്ടങ്ങൾ (`provider + model + connection`)
 - അക്കൗണ്ട്-തല ഫാൾബാക്ക് (ഓരോ പ്രൊവൈഡറിനും ഒന്നിലധികം അക്കൗണ്ടുകൾ)
 - പ്രധാന ചാറ്റ് പാതയിൽ ക്വോട്ട പ്രീഫ്ലൈറ്റും ക്വോട്ട പരിഗണിക്കുന്ന P2C അക്കൗണ്ട് തിരഞ്ഞെടുപ്പും
-- OAuth + API-key പ്രൊവൈഡർ കണക്ഷൻ മാനേജ്മെന്റ് (27 OAuth പ്രൊവൈഡർ മൊഡ്യൂളുകൾ)
+- OAuth + API-key പ്രൊവൈഡർ കണക്ഷൻ മാനേജ്മെന്റ് (28 OAuth പ്രൊവൈഡർ മൊഡ്യൂളുകൾ)
 - `/v1/embeddings` വഴിയുള്ള എംബെഡിംഗ് ജനറേഷൻ (18 പ്രൊവൈഡറുകൾ)
 - `/v1/images/generations` വഴിയുള്ള ഇമേജ് ജനറേഷൻ (10+ പ്രൊവൈഡറുകൾ, 20+ മോഡലുകൾ)
 - `/v1/audio/transcriptions` വഴിയുള്ള ഓഡിയോ ട്രാൻസ്ക്രിപ്ഷൻ (18 പ്രൊവൈഡറുകൾ)
@@ -64,7 +64,7 @@ Next.js അടിസ്ഥാനമാക്കി നിർമ്മിച്�
 - പ്രോംപ്റ്റ് ഇൻജക്ഷൻ ഗാർഡ് മിഡിൽവെയർ
 - Caveman, RTK, സ്റ്റാക്ക് ചെയ്ത പൈപ്പ്ലൈനുകൾ, കംപ്രഷൻ കോംബോകൾ, ലാംഗ്വേജ് പാക്കുകൾ, അനലിറ്റിക്സ് എന്നിവയുള്ള പ്രോംപ്റ്റ് കംപ്രഷൻ പൈപ്പ്ലൈൻ
 - ACP (Agent Communication Protocol) റെജിസ്ട്രി
-- മോഡുലാർ OAuth പ്രൊവൈഡറുകൾ (`src/lib/oauth/providers/`-ന് കീഴിലുള്ള 22 പ്രത്യേക മൊഡ്യൂളുകൾ)
+- മോഡുലാർ OAuth പ്രൊവൈഡറുകൾ (`src/lib/oauth/providers/`-ന് കീഴിലുള്ള 28 പ്രത്യേക മൊഡ്യൂളുകൾ)
 - അൺഇൻസ്റ്റാൾ/പൂർണ്ണ അൺഇൻസ്റ്റാൾ സ്ക്രിപ്റ്റുകൾ
 - OAuth എൻവയോൺമെന്റ് റിപ്പയർ പ്രവർത്തനം
 - OpenAI-അനുയോജ്യമായ WS ക്ലയന്റുകൾക്കായുള്ള WebSocket ബ്രിഡ്ജ് (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - ഇവാൽ റണ്ണർ: `src/lib/evals/evalRunner.ts`
 - ഡൊമെയ്ൻ സ്റ്റേറ്റ് പെർസിസ്റ്റൻസ്: `src/lib/db/domainState.ts` — ഫാൾബാക്ക് ചെയിനുകൾ, ബജറ്റുകൾ, ചെലവ് ചരിത്രം, ലോക്ക്ഔട്ട് സ്റ്റേറ്റ്, സർക്യൂട്ട് ബ്രേക്കറുകൾ എന്നിവയ്ക്കായുള്ള SQLite CRUD
 
-OAuth പ്രൊവൈഡർ മൊഡ്യൂളുകൾ (`src/lib/oauth/providers/` എന്നതിനു കീഴിലുള്ള 27 വ്യക്തിഗത ഫയലുകൾ):
+OAuth പ്രൊവൈഡർ മൊഡ്യൂളുകൾ (`src/lib/oauth/providers/` എന്നതിനു കീഴിലുള്ള 28 വ്യക്തിഗത ഫയലുകൾ):
 
 - രജിസ്ട്രി ഇൻഡക്സ്: `src/lib/oauth/providers/index.ts`
-- വ്യക്തിഗത പ്രൊവൈഡറുകൾ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- വ്യക്തിഗത പ്രൊവൈഡറുകൾ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - പങ്കിട്ട ഹെൽപ്പറുകൾ: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ഡിവൈസ് ഫ്ലോ), `museCodeDeviceResponse.ts`
 - തിൻ റാപ്പർ: `src/lib/oauth/providers.ts` — വ്യക്തിഗത മൊഡ്യൂളുകളിൽനിന്ന് വീണ്ടും എക്സ്പോർട്ട് ചെയ്യുന്നു
 

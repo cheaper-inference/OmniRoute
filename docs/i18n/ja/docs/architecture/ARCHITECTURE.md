@@ -21,7 +21,7 @@ OmniRoute は、Next.js 上に構築されたローカル AI ルーティング�
 - 構造化コンボステップ（`provider + model + connection`）と、`compositeTiers` による実行時の順序付け
 - アカウントレベルのフォールバック（プロバイダーごとに複数アカウント）
 - メインチャットパスにおける、クォータの事前確認およびクォータを考慮した P2C アカウント選択
-- OAuth および API キーによるプロバイダー接続管理（27 の OAuth プロバイダーモジュール）
+- OAuth および API キーによるプロバイダー接続管理（28 の OAuth プロバイダーモジュール）
 - `/v1/embeddings` による埋め込み生成（18 プロバイダー）
 - `/v1/images/generations` による画像生成（10 以上のプロバイダー、20 以上のモデル）
 - `/v1/audio/transcriptions` による音声文字起こし（18 プロバイダー）
@@ -64,7 +64,7 @@ OmniRoute は、Next.js 上に構築されたローカル AI ルーティング�
 - プロンプトインジェクション防止ミドルウェア
 - Caveman、RTK、スタック型パイプライン、圧縮コンボ、言語パック、分析機能を備えたプロンプト圧縮パイプライン
 - ACP（Agent Communication Protocol）レジストリ
-- モジュール式 OAuth プロバイダー（`src/lib/oauth/providers/` 配下の 22 個の個別モジュール）
+- モジュール式 OAuth プロバイダー（`src/lib/oauth/providers/` 配下の 28 個の個別モジュール）
 - アンインストール／完全アンインストールスクリプト
 - OAuth 環境修復アクション
 - OpenAI 互換 WS クライアント向け WebSocket ブリッジ（`/v1/ws`）
@@ -319,10 +319,10 @@ flowchart LR
 - 評価ランナー: `src/lib/evals/evalRunner.ts`
 - ドメイン状態の永続化: `src/lib/db/domainState.ts` — フォールバックチェーン、バジェット、コスト履歴、ロックアウト状態、サーキットブレーカーに対するSQLite CRUD
 
-OAuthプロバイダーモジュール（`src/lib/oauth/providers/`配下の個別ファイル27個）:
+OAuthプロバイダーモジュール（`src/lib/oauth/providers/`配下の個別ファイル28個）:
 
 - レジストリインデックス: `src/lib/oauth/providers/index.ts`
-- 個別プロバイダー: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- 個別プロバイダー: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - 共有ヘルパー: `codebuddyDeviceAuth.ts`（CodeBuddy CN/intlデバイスフロー）、`museCodeDeviceResponse.ts`
 - 薄いラッパー: `src/lib/oauth/providers.ts` — 個別モジュールから再エクスポート
 

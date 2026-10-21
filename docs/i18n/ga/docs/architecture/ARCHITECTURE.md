@@ -21,7 +21,7 @@ Príomhchumais:
 - Céimeanna struchtúrtha teaglama (`provider + model + connection`) le hordú ag am rite de réir `compositeTiers`
 - Cúltaca ar leibhéal cuntais (ilchuntais in aghaidh an tsoláthraí)
 - Réamhsheiceáil cuóta agus roghnú cuntais P2C atá feasach ar chuóta sa phríomhchonair chomhrá
-- Bainistíocht nasc soláthraithe OAuth + eochair API (27 modúl soláthraithe OAuth)
+- Bainistíocht nasc soláthraithe OAuth + eochair API (28 modúl soláthraithe OAuth)
 - Giniúint leabaithe trí `/v1/embeddings` (18 soláthraí)
 - Giniúint íomhánna trí `/v1/images/generations` (10+ soláthraí, 20+ samhail)
 - Tras-scríobh fuaime trí `/v1/audio/transcriptions` (18 soláthraí)
@@ -64,7 +64,7 @@ Príomhchumais:
 - Meánearra cosanta ar instealladh leid
 - Píblíne comhbhrúite leid le Caveman, RTK, píblínte cruachta, teaglamaí comhbhrúite, pacáistí teanga agus anailísíocht
 - Clárlann ACP (Agent Communication Protocol)
-- Soláthraithe modúlacha OAuth (22 modúl aonair faoi `src/lib/oauth/providers/`)
+- Soláthraithe modúlacha OAuth (28 modúl aonair faoi `src/lib/oauth/providers/`)
 - Scripteanna díshuiteála/díshuiteála iomláine
 - Gníomh deisiúcháin timpeallachta OAuth
 - Droichead WebSocket do chliaint WS atá comhoiriúnach le OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Modúil na sraithe fearainn:
 - Reathaí meastóireachta: `src/lib/evals/evalRunner.ts`
 - Marthanacht staid fearainn: `src/lib/db/domainState.ts` — CRUD SQLite le haghaidh slabhraí cúltaca, buiséad, stair chostais, staid frithdhúnadh agus scoradáin chiorcaid
 
-Modúil soláthraithe OAuth (27 comhad aonair faoi `src/lib/oauth/providers/`):
+Modúil soláthraithe OAuth (28 comhad aonair faoi `src/lib/oauth/providers/`):
 
 - Innéacs clárlainne: `src/lib/oauth/providers/index.ts`
-- Soláthraithe aonair: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Soláthraithe aonair: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Cúntóirí comhroinnte: `codebuddyDeviceAuth.ts` (sreabhadh gléis CodeBuddy CN/idirnáisiúnta), `museCodeDeviceResponse.ts`
 - Fillteán tanaí: `src/lib/oauth/providers.ts` — athonnmhairíonn sé ó mhodúil aonair
 

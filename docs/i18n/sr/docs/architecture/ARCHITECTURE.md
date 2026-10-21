@@ -21,7 +21,7 @@ OmniRoute је локални мрежни пролаз за усмеравањ�
 - Структурирани кораци комбинације (`provider + model + connection`) са редоследом током извршавања према `compositeTiers`
 - Резервни избор на нивоу налога (више налога по добављачу)
 - Претходна провера квоте и P2C избор налога који узима квоту у обзир у главној путањи за ћаскање
-- Управљање везама са добављачима путем OAuth-а и API кључева (27 OAuth модула добављача)
+- Управљање везама са добављачима путем OAuth-а и API кључева (28 OAuth модула добављача)
 - Генерисање угнежђивања путем `/v1/embeddings` (18 добављача)
 - Генерисање слика путем `/v1/images/generations` (10+ добављача, 20+ модела)
 - Транскрипција звука путем `/v1/audio/transcriptions` (18 добављача)
@@ -64,7 +64,7 @@ OmniRoute је локални мрежни пролаз за усмеравањ�
 - Посреднички слој за заштиту од убацивања злонамерних упита
 - Процес компресије упита са Caveman-ом, RTK-ом, наслаганим процесима, комбинацијама компресије, језичким пакетима и аналитиком
 - ACP (Agent Communication Protocol) регистар
-- Модуларни OAuth добављачи (22 појединачна модула у `src/lib/oauth/providers/`)
+- Модуларни OAuth добављачи (28 појединачна модула у `src/lib/oauth/providers/`)
 - Скрипте за деинсталацију/потпуну деинсталацију
 - Радња за поправку OAuth окружења
 - WebSocket мост за WS клијенте компатибилне са OpenAI-јем (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - Покретач евалуација: `src/lib/evals/evalRunner.ts`
 - Перзистенција стања домена: `src/lib/db/domainState.ts` — SQLite CRUD за ланце резервног избора, буџете, историју трошкова, стање блокирања и прекидаче струјног кола
 
-Модули OAuth провајдера (27 засебних датотека у `src/lib/oauth/providers/`):
+Модули OAuth провајдера (28 засебних датотека у `src/lib/oauth/providers/`):
 
 - Индекс регистра: `src/lib/oauth/providers/index.ts`
-- Појединачни провајдери: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Појединачни провајдери: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Дељене помоћне функције: `codebuddyDeviceAuth.ts` (ток уређајске ауторизације за CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Танак омотач: `src/lib/oauth/providers.ts` — поново извози из појединачних модула
 

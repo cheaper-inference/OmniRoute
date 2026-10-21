@@ -21,7 +21,7 @@ OmniRoute — это локальный шлюз маршрутизации ИИ
 - Структурированные шаги комбинаций (`provider + model + connection`) с упорядочиванием во время выполнения по `compositeTiers`
 - Резервное переключение на уровне учётных записей (несколько учётных записей для каждого провайдера)
 - Предварительная проверка квоты и учитывающий квоты выбор учётной записи методом P2C в основном потоке чата
-- Управление подключениями к провайдерам через OAuth и API-ключи (27 модулей OAuth-провайдеров)
+- Управление подключениями к провайдерам через OAuth и API-ключи (28 модулей OAuth-провайдеров)
 - Создание эмбеддингов через `/v1/embeddings` (18 провайдеров)
 - Генерация изображений через `/v1/images/generations` (более 10 провайдеров, более 20 моделей)
 - Транскрибирование аудио через `/v1/audio/transcriptions` (18 провайдеров)
@@ -64,7 +64,7 @@ OmniRoute — это локальный шлюз маршрутизации ИИ
 - Промежуточное ПО для защиты от инъекций промптов
 - Конвейер сжатия промптов с Caveman, RTK, составными конвейерами, комбинациями сжатия, языковыми пакетами и аналитикой
 - Реестр ACP (Agent Communication Protocol)
-- Модульные OAuth-провайдеры (22 отдельных модуля в `src/lib/oauth/providers/`)
+- Модульные OAuth-провайдеры (28 отдельных модуля в `src/lib/oauth/providers/`)
 - Скрипты удаления и полного удаления
 - Действие для восстановления среды OAuth
 - Мост WebSocket для совместимых с OpenAI WS-клиентов (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - Средство запуска оценок: `src/lib/evals/evalRunner.ts`
 - Сохранение состояния домена: `src/lib/db/domainState.ts` — CRUD-операции SQLite для цепочек переключения, бюджетов, истории стоимости, состояния блокировки и автоматических выключателей
 
-Модули OAuth-провайдеров (27 отдельных файлов в `src/lib/oauth/providers/`):
+Модули OAuth-провайдеров (28 отдельных файлов в `src/lib/oauth/providers/`):
 
 - Индекс реестра: `src/lib/oauth/providers/index.ts`
-- Отдельные провайдеры: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Отдельные провайдеры: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Общие вспомогательные модули: `codebuddyDeviceAuth.ts` (поток авторизации устройств CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Тонкая обёртка: `src/lib/oauth/providers.ts` — повторно экспортирует сущности из отдельных модулей
 

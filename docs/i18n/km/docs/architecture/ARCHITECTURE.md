@@ -21,7 +21,7 @@ OmniRoute គឺជា gateway សម្រាប់បញ្ជូនសំណ�
 - ជំហាន combo ដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយការរៀបលំដាប់នៅពេលដំណើរការដោយ `compositeTiers`
 - Fallback កម្រិត account (មាន account ច្រើនក្នុង provider នីមួយៗ)
 - ការត្រួតពិនិត្យ quota ជាមុន និងការជ្រើសរើស account តាម P2C ដែលគិតគូរពី quota ក្នុងផ្លូវ chat ចម្បង
-- ការគ្រប់គ្រងការតភ្ជាប់ provider តាម OAuth + API-key (27 OAuth provider modules)
+- ការគ្រប់គ្រងការតភ្ជាប់ provider តាម OAuth + API-key (28 OAuth provider modules)
 - ការបង្កើត embedding តាមរយៈ `/v1/embeddings` (18 providers)
 - ការបង្កើតរូបភាពតាមរយៈ `/v1/images/generations` (10+ providers, 20+ models)
 - ការចម្លងសំឡេងទៅជាអត្ថបទតាមរយៈ `/v1/audio/transcriptions` (18 providers)
@@ -64,7 +64,7 @@ OmniRoute គឺជា gateway សម្រាប់បញ្ជូនសំណ�
 - Prompt injection guard middleware
 - Prompt compression pipeline ជាមួយ Caveman, RTK, stacked pipelines, compression combos, language packs និង analytics
 - ACP (Agent Communication Protocol) registry
-- Modular OAuth providers (22 individual modules នៅក្រោម `src/lib/oauth/providers/`)
+- Modular OAuth providers (28 individual modules នៅក្រោម `src/lib/oauth/providers/`)
 - Scripts សម្រាប់ uninstall/full-uninstall
 - សកម្មភាពជួសជុល OAuth environment
 - WebSocket bridge សម្រាប់ OpenAI-compatible WS clients (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - កម្មវិធីដំណើរការវាយតម្លៃ៖ `src/lib/evals/evalRunner.ts`
 - ការរក្សាទុកស្ថានភាពដែន៖ `src/lib/db/domainState.ts` — ប្រតិបត្តិការ SQLite CRUD សម្រាប់ខ្សែសង្វាក់បម្រុងទុក, ថវិកា, ប្រវត្តិចំណាយ, ស្ថានភាពចាក់សោ និងឧបករណ៍ផ្តាច់សៀគ្វី
 
-ម៉ូឌុលអ្នកផ្តល់សេវា OAuth (ឯកសារដាច់ដោយឡែកចំនួន 27 ក្រោម `src/lib/oauth/providers/`)៖
+ម៉ូឌុលអ្នកផ្តល់សេវា OAuth (ឯកសារដាច់ដោយឡែកចំនួន 28 ក្រោម `src/lib/oauth/providers/`)៖
 
 - លិបិក្រមបញ្ជីចុះឈ្មោះ៖ `src/lib/oauth/providers/index.ts`
-- អ្នកផ្តល់សេវានីមួយៗ៖ `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- អ្នកផ្តល់សេវានីមួយៗ៖ `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - មុខងារជំនួយរួម៖ `codebuddyDeviceAuth.ts` (លំហូរឧបករណ៍ CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - ស្រោមរុំស្តើង៖ `src/lib/oauth/providers.ts` — នាំចេញឡើងវិញពីម៉ូឌុលនីមួយៗ
 

@@ -21,7 +21,7 @@ OmniRoute යනු Next.js මත ගොඩනගා ඇති දේශීය 
 - `compositeTiers` අනුව runtime අනුපිළිවෙළ සහිත ව්යුහගත combo පියවර (`provider + model + connection`)
 - ගිණුම් මට්ටමේ fallback (එක් සපයන්නෙකුට ගිණුම් කිහිපයක්)
 - ප්රධාන chat මාර්ගය තුළ quota පූර්ව පරීක්ෂාව සහ quota පිළිබඳ දැනුවත් P2C ගිණුම් තේරීම
-- OAuth + API-key සපයන්නන්ගේ සම්බන්ධතා කළමනාකරණය (OAuth සපයන්නන්ගේ මොඩියුල 27ක්)
+- OAuth + API-key සපයන්නන්ගේ සම්බන්ධතා කළමනාකරණය (OAuth සපයන්නන්ගේ මොඩියුල 28ක්)
 - `/v1/embeddings` හරහා embedding ජනනය (සපයන්නන් 18ක්)
 - `/v1/images/generations` හරහා රූප ජනනය (සපයන්නන් 10කට වැඩි, මාදිලි 20කට වැඩි)
 - `/v1/audio/transcriptions` හරහා ශ්රව්ය පිටපත්කරණය (සපයන්නන් 18ක්)
@@ -64,7 +64,7 @@ OmniRoute යනු Next.js මත ගොඩනගා ඇති දේශීය 
 - Prompt injection guard middleware
 - Caveman, RTK, stacked pipelines, compression combos, language packs සහ analytics සහිත prompt compression pipeline
 - ACP (Agent Communication Protocol) registry
-- Modular OAuth සපයන්නන් (`src/lib/oauth/providers/` යටතේ තනි මොඩියුල 22ක්)
+- Modular OAuth සපයන්නන් (`src/lib/oauth/providers/` යටතේ තනි මොඩියුල 28ක්)
 - Uninstall/full-uninstall scripts
 - OAuth පරිසර අලුත්වැඩියා ක්රියාව
 - OpenAI-අනුකූල WS clients සඳහා WebSocket bridge (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - ඇගයීම් ධාවකය: `src/lib/evals/evalRunner.ts`
 - වසම් තත්ත්ව ස්ථායීකරණය: `src/lib/db/domainState.ts` — පසුබැසීමේ දාම, අයවැය, පිරිවැය ඉතිහාසය, අගුලු දැමීමේ තත්ත්වය සහ පරිපථ බිඳින සඳහා SQLite CRUD
 
-OAuth සපයන්නාගේ මොඩියුල (`src/lib/oauth/providers/` යටතේ තනි ගොනු 27ක්):
+OAuth සපයන්නාගේ මොඩියුල (`src/lib/oauth/providers/` යටතේ තනි ගොනු 28ක්):
 
 - රෙජිස්ට්රි දර්ශකය: `src/lib/oauth/providers/index.ts`
-- තනි සපයන්නන්: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- තනි සපයන්නන්: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - හවුල් සහායක: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl උපාංග ප්රවාහය), `museCodeDeviceResponse.ts`
 - සැහැල්ලු ආවරණකය: `src/lib/oauth/providers.ts` — තනි මොඩියුලවලින් නැවත නිර්යාත කරයි
 

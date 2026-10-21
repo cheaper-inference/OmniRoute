@@ -21,7 +21,7 @@ Keupayaan teras:
 - Langkah kombo berstruktur (`provider + model + connection`) dengan penyusunan masa jalan mengikut `compositeTiers`
 - Sandaran peringkat akaun (berbilang akaun bagi setiap penyedia)
 - Prapemeriksaan kuota dan pemilihan akaun P2C yang peka terhadap kuota dalam laluan sembang utama
-- Pengurusan sambungan penyedia OAuth + kunci API (27 modul penyedia OAuth)
+- Pengurusan sambungan penyedia OAuth + kunci API (28 modul penyedia OAuth)
 - Penjanaan pembenaman melalui `/v1/embeddings` (18 penyedia)
 - Penjanaan imej melalui `/v1/images/generations` (10+ penyedia, 20+ model)
 - Transkripsi audio melalui `/v1/audio/transcriptions` (18 penyedia)
@@ -64,7 +64,7 @@ Keupayaan teras:
 - Perisian tengah perlindungan suntikan gesaan
 - Talian paip pemampatan gesaan dengan Caveman, RTK, talian paip bertindan, kombo pemampatan, pek bahasa dan analitik
 - Daftar ACP (Agent Communication Protocol)
-- Penyedia OAuth modular (22 modul individu di bawah `src/lib/oauth/providers/`)
+- Penyedia OAuth modular (28 modul individu di bawah `src/lib/oauth/providers/`)
 - Skrip nyahpasang/nyahpasang penuh
 - Tindakan pembaikan persekitaran OAuth
 - Jambatan WebSocket untuk klien WS yang serasi dengan OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Modul lapisan domain:
 - Pelaksana penilaian: `src/lib/evals/evalRunner.ts`
 - Pengekalan keadaan domain: `src/lib/db/domainState.ts` — CRUD SQLite untuk rantaian sandaran, belanjawan, sejarah kos, keadaan penguncian dan pemutus litar
 
-Modul penyedia OAuth (27 fail individu di bawah `src/lib/oauth/providers/`):
+Modul penyedia OAuth (28 fail individu di bawah `src/lib/oauth/providers/`):
 
 - Indeks daftar: `src/lib/oauth/providers/index.ts`
-- Penyedia individu: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Penyedia individu: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Pembantu dikongsi: `codebuddyDeviceAuth.ts` (aliran peranti CodeBuddy CN/antarabangsa), `museCodeDeviceResponse.ts`
 - Pembalut nipis: `src/lib/oauth/providers.ts` — mengeksport semula daripada modul individu
 

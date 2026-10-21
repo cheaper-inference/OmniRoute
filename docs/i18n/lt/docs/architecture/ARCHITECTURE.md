@@ -21,7 +21,7 @@ Pagrindinės galimybės:
 - Struktūrizuoti derinio veiksmai (`provider + model + connection`) su vykdymo metu nustatoma tvarka pagal `compositeTiers`
 - Atsarginis perjungimas paskyros lygmeniu (kelios paskyros vienam paslaugų teikėjui)
 - Išankstinis kvotų tikrinimas ir kvotas įvertinantis P2C paskyros parinkimas pagrindiniame pokalbių sraute
-- OAuth ir API raktais pagrįstas ryšių su paslaugų teikėjais valdymas (27 OAuth paslaugų teikėjų moduliai)
+- OAuth ir API raktais pagrįstas ryšių su paslaugų teikėjais valdymas (28 OAuth paslaugų teikėjų moduliai)
 - Įterpinių generavimas per `/v1/embeddings` (18 paslaugų teikėjų)
 - Vaizdų generavimas per `/v1/images/generations` (10+ paslaugų teikėjų, 20+ modelių)
 - Garso transkribavimas per `/v1/audio/transcriptions` (18 paslaugų teikėjų)
@@ -64,7 +64,7 @@ Pagrindinės galimybės:
 - Raginimų įterpimo atakų apsaugos tarpinė programinė įranga
 - Raginimų glaudinimo konvejeris su Caveman, RTK, sudėtiniais konvejeriais, glaudinimo deriniais, kalbų paketais ir analitika
 - ACP (Agent Communication Protocol) registras
-- Moduliniai OAuth paslaugų teikėjai (22 atskiri moduliai kataloge `src/lib/oauth/providers/`)
+- Moduliniai OAuth paslaugų teikėjai (28 atskiri moduliai kataloge `src/lib/oauth/providers/`)
 - Pašalinimo ir visiško pašalinimo scenarijai
 - OAuth aplinkos taisymo veiksmas
 - WebSocket tiltas, skirtas su „OpenAI“ suderinamiems WS klientams (`/v1/ws`)
@@ -319,10 +319,10 @@ Domeno sluoksnio moduliai:
 - Vertinimų vykdymo priemonė: `src/lib/evals/evalRunner.ts`
 - Domeno būsenos išlaikymas: `src/lib/db/domainState.ts` — SQLite CRUD operacijos, skirtos atsarginio parinkimo grandinėms, biudžetams, sąnaudų istorijai, blokavimo būsenai ir grandinės pertraukikliams
 
-OAuth teikėjų moduliai (27 atskiri failai kataloge `src/lib/oauth/providers/`):
+OAuth teikėjų moduliai (28 atskiri failai kataloge `src/lib/oauth/providers/`):
 
 - Registro rodyklė: `src/lib/oauth/providers/index.ts`
-- Atskiri teikėjai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Atskiri teikėjai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Bendrinamos pagalbinės priemonės: `codebuddyDeviceAuth.ts` („CodeBuddy“ CN / tarptautinis įrenginio srautas), `museCodeDeviceResponse.ts`
 - Plonas apvalkalas: `src/lib/oauth/providers.ts` — pakartotinai eksportuoja iš atskirų modulių
 

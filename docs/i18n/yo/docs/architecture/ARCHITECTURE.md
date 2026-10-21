@@ -21,7 +21,7 @@ OmniRoute jẹ́ ẹnu-ọ̀nà ìdarí AI abẹ́lẹ̀ àti pátákó ìdarí 
 - Àwọn ìgbésẹ̀ combo tó ní ètò (`provider + model + connection`) pẹ̀lú ìṣètò ní àkókò ìṣiṣẹ́ nípasẹ̀ `compositeTiers`
 - Ìyípadà sí àṣàyàn mìíràn ní ìpele àkọọ́lẹ̀ (ọ̀pọ̀ àkọọ́lẹ̀ fún olùpèsè kọ̀ọ̀kan)
 - Ìṣàyẹ̀wò quota ṣáájú àti yíyan àkọọ́lẹ̀ P2C tó mọ nípa quota nínú ipa-ọ̀nà ìfọ̀rọ̀wérọ̀ pàtàkì
-- Ìṣàkóso ìsopọ̀ olùpèsè OAuth + API-key (àwọn module olùpèsè OAuth 27)
+- Ìṣàkóso ìsopọ̀ olùpèsè OAuth + API-key (àwọn module olùpèsè OAuth 28)
 - Ṣíṣẹ̀dá embedding nípasẹ̀ `/v1/embeddings` (olùpèsè 18)
 - Ṣíṣẹ̀dá àwòrán nípasẹ̀ `/v1/images/generations` (olùpèsè 10+, model 20+)
 - Ìkọ̀wé ohùn sílẹ̀ nípasẹ̀ `/v1/audio/transcriptions` (olùpèsè 18)
@@ -64,7 +64,7 @@ OmniRoute jẹ́ ẹnu-ọ̀nà ìdarí AI abẹ́lẹ̀ àti pátákó ìdarí 
 - Middleware tó ń dáàbò bo lọ́wọ́ prompt injection
 - Pipeline ìfúnpọ̀ prompt pẹ̀lú Caveman, RTK, àwọn pipeline tí a tò léra, àwọn combo ìfúnpọ̀, package èdè, àti ìtúpalẹ̀
 - Registry ACP (Agent Communication Protocol)
-- Àwọn olùpèsè OAuth tó jẹ́ module (module kọ̀ọ̀kan 22 lábẹ́ `src/lib/oauth/providers/`)
+- Àwọn olùpèsè OAuth tó jẹ́ module (module kọ̀ọ̀kan 28 lábẹ́ `src/lib/oauth/providers/`)
 - Àwọn script uninstall/full-uninstall
 - Ìgbésẹ̀ àtúnṣe ayíká OAuth
 - Afárá WebSocket fún àwọn client WS tó bá OpenAI mu (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - Olùṣiṣẹ́ àyẹ̀wò: `src/lib/evals/evalRunner.ts`
 - Ìtọ́jú ipò àgbègbè iṣẹ́: `src/lib/db/domainState.ts` — SQLite CRUD fún àwọn ẹ̀wọ̀n ìyípadà sí omi-in, àwọn ìpín, ìtàn iye owó, ipò ìdènà, àti àwọn olùdádúró sákítì
 
-Àwọn módùlù olùpèsè OAuth (fáìlì kọ̀ọ̀kan 27 lábẹ́ `src/lib/oauth/providers/`):
+Àwọn módùlù olùpèsè OAuth (fáìlì kọ̀ọ̀kan 28 lábẹ́ `src/lib/oauth/providers/`):
 
 - Àtòjọ ìforúkọsílẹ̀: `src/lib/oauth/providers/index.ts`
-- Àwọn olùpèsè kọ̀ọ̀kan: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Àwọn olùpèsè kọ̀ọ̀kan: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Àwọn olùrànlọ́wọ́ tí a pín: `codebuddyDeviceAuth.ts` (ìṣàn ẹ̀rọ CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Àpò ìbora kékeré: `src/lib/oauth/providers.ts` — ń tún àwọn ohun tí a kó jáde láti inú àwọn módùlù kọ̀ọ̀kan kó jáde
 

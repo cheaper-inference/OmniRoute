@@ -21,7 +21,7 @@ OmniRoute یک درگاه مسیریابی محلی هوش مصنوعی و دا�
 - مراحل ترکیبی ساختاریافته (`provider + model + connection`) با ترتیبدهی زمان اجرا بر اساس `compositeTiers`
 - مسیر جایگزین در سطح حساب (چند حساب برای هر ارائهدهنده)
 - پیشبررسی سهمیه و انتخاب حساب P2C آگاه از سهمیه در مسیر اصلی چت
-- مدیریت اتصال ارائهدهندگان از طریق OAuth و کلید API (27 ماژول ارائهدهنده OAuth)
+- مدیریت اتصال ارائهدهندگان از طریق OAuth و کلید API (28 ماژول ارائهدهنده OAuth)
 - تولید تعبیهسازی از طریق `/v1/embeddings` (18 ارائهدهنده)
 - تولید تصویر از طریق `/v1/images/generations` (بیش از 10 ارائهدهنده، بیش از 20 مدل)
 - رونویسی صوت از طریق `/v1/audio/transcriptions` (18 ارائهدهنده)
@@ -64,7 +64,7 @@ OmniRoute یک درگاه مسیریابی محلی هوش مصنوعی و دا�
 - میانافزار محافظ در برابر تزریق پرامپت
 - خط لوله فشردهسازی پرامپت با Caveman، RTK، خطوط لوله پشتهای، ترکیبهای فشردهسازی، بستههای زبانی و تحلیلها
 - رجیستری ACP (Agent Communication Protocol)
-- ارائهدهندگان ماژولار OAuth (22 ماژول مجزا در `src/lib/oauth/providers/`)
+- ارائهدهندگان ماژولار OAuth (28 ماژول مجزا در `src/lib/oauth/providers/`)
 - اسکریپتهای حذف نصب/حذف نصب کامل
 - اقدام ترمیم محیط OAuth
 - پل WebSocket برای کلاینتهای WS سازگار با OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - اجراکنندهٔ ارزیابی: `src/lib/evals/evalRunner.ts`
 - ماندگارسازی وضعیت دامنه: `src/lib/db/domainState.ts` — عملیات CRUD در SQLite برای زنجیرههای جایگزینی، بودجهها، تاریخچهٔ هزینه، وضعیت قفلسازی و قطعکنندههای مدار
 
-ماژولهای ارائهدهندهٔ OAuth (27 فایل مجزا در `src/lib/oauth/providers/`):
+ماژولهای ارائهدهندهٔ OAuth (28 فایل مجزا در `src/lib/oauth/providers/`):
 
 - ایندکس رجیستری: `src/lib/oauth/providers/index.ts`
-- ارائهدهندگان مجزا: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
+- ارائهدهندگان مجزا: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `minimax-code.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
 - توابع کمکی مشترک: `codebuddyDeviceAuth.ts` (جریان دستگاه CodeBuddy CN/intl)، `museCodeDeviceResponse.ts`
 - پوششدهندهٔ سبک: `src/lib/oauth/providers.ts` — صادرات مجدد از ماژولهای مجزا
 

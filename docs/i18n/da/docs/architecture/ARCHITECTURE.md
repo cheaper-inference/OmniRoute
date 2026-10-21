@@ -21,7 +21,7 @@ Centrale funktioner:
 - Strukturerede kombinationstrin (`provider + model + connection`) med runtime-sortering efter `compositeTiers`
 - Fallback på kontoniveau (flere konti pr. udbyder)
 - Forhåndskontrol af kvoter og kvotebevidst P2C-kontovalg i det primære chatforløb
-- Administration af udbyderforbindelser via OAuth og API-nøgler (27 OAuth-udbydermoduler)
+- Administration af udbyderforbindelser via OAuth og API-nøgler (28 OAuth-udbydermoduler)
 - Generering af embeddings via `/v1/embeddings` (18 udbydere)
 - Billedgenerering via `/v1/images/generations` (10+ udbydere, 20+ modeller)
 - Lydtransskription via `/v1/audio/transcriptions` (18 udbydere)
@@ -64,7 +64,7 @@ Centrale funktioner:
 - Middleware til beskyttelse mod promptinjektion
 - Pipeline til promptkomprimering med Caveman, RTK, stablede pipelines, komprimeringskombinationer, sprogpakker og analyse
 - ACP-register (Agent Communication Protocol)
-- Modulære OAuth-udbydere (22 individuelle moduler under `src/lib/oauth/providers/`)
+- Modulære OAuth-udbydere (28 individuelle moduler under `src/lib/oauth/providers/`)
 - Scripts til afinstallation/fuldstændig afinstallation
 - Handling til reparation af OAuth-miljøet
 - WebSocket-bro til OpenAI-kompatible WS-klienter (`/v1/ws`)
@@ -319,10 +319,10 @@ Domænelagsmoduler:
 - Evalueringskørsel: `src/lib/evals/evalRunner.ts`
 - Lagring af domænetilstand: `src/lib/db/domainState.ts` — SQLite-CRUD til fallback-kæder, budgetter, omkostningshistorik, lockout-tilstand og kredsløbsafbrydere
 
-OAuth-udbydermoduler (27 individuelle filer under `src/lib/oauth/providers/`):
+OAuth-udbydermoduler (28 individuelle filer under `src/lib/oauth/providers/`):
 
 - Registerindeks: `src/lib/oauth/providers/index.ts`
-- Individuelle udbydere: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Individuelle udbydere: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Delte hjælpefunktioner: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl-enhedsflow), `museCodeDeviceResponse.ts`
 - Tynd wrapper: `src/lib/oauth/providers.ts` — reeksporterer fra individuelle moduler
 

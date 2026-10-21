@@ -21,7 +21,7 @@ OmniRoute ایک مقامی AI روٹنگ گیٹ وے اور ڈیش بورڈ ہ�
 - منظم کومبو مراحل (`provider + model + connection`) مع `compositeTiers` کے ذریعے رن ٹائم ترتیب
 - اکاؤنٹ کی سطح پر فال بیک (ہر فراہم کنندہ کے لیے متعدد اکاؤنٹس)
 - مرکزی چیٹ پاتھ میں کوٹہ پری فلائٹ اور کوٹہ سے آگاہ P2C اکاؤنٹ انتخاب
-- OAuth + API کلید کے ذریعے فراہم کنندہ کنکشن کا انتظام (27 OAuth فراہم کنندہ ماڈیولز)
+- OAuth + API کلید کے ذریعے فراہم کنندہ کنکشن کا انتظام (28 OAuth فراہم کنندہ ماڈیولز)
 - `/v1/embeddings` کے ذریعے ایمبیڈنگ جنریشن (18 فراہم کنندگان)
 - `/v1/images/generations` کے ذریعے تصویر جنریشن (10+ فراہم کنندگان، 20+ ماڈلز)
 - `/v1/audio/transcriptions` کے ذریعے آڈیو ٹرانسکرپشن (18 فراہم کنندگان)
@@ -64,7 +64,7 @@ OmniRoute ایک مقامی AI روٹنگ گیٹ وے اور ڈیش بورڈ ہ�
 - پرامپٹ انجیکشن گارڈ مڈل ویئر
 - Caveman، RTK، اسٹیکڈ پائپ لائنز، کمپریشن کومبوز، لینگویج پیکس، اور تجزیات کے ساتھ پرامپٹ کمپریشن پائپ لائن
 - ACP (Agent Communication Protocol) رجسٹری
-- ماڈیولر OAuth فراہم کنندگان (`src/lib/oauth/providers/` کے تحت 22 انفرادی ماڈیولز)
+- ماڈیولر OAuth فراہم کنندگان (`src/lib/oauth/providers/` کے تحت 28 انفرادی ماڈیولز)
 - اَن انسٹال/مکمل اَن انسٹال اسکرپٹس
 - OAuth ماحول کی مرمت کی کارروائی
 - OpenAI-مطابق WS کلائنٹس کے لیے WebSocket برج (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - ایویل رنر: `src/lib/evals/evalRunner.ts`
 - ڈومین اسٹیٹ پرسسٹنس: `src/lib/db/domainState.ts` — فال بیک چینز، بجٹس، لاگت کی تاریخ، لاک آؤٹ اسٹیٹ، اور سرکٹ بریکرز کے لیے SQLite CRUD
 
-OAuth پرووائیڈر ماڈیولز (`src/lib/oauth/providers/` کے تحت 27 انفرادی فائلیں):
+OAuth پرووائیڈر ماڈیولز (`src/lib/oauth/providers/` کے تحت 28 انفرادی فائلیں):
 
 - رجسٹری انڈیکس: `src/lib/oauth/providers/index.ts`
-- انفرادی پرووائیڈرز: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
+- انفرادی پرووائیڈرز: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `minimax-code.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
 - مشترکہ ہیلپرز: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ڈیوائس فلو)، `museCodeDeviceResponse.ts`
 - ہلکا ریپر: `src/lib/oauth/providers.ts` — انفرادی ماڈیولز سے دوبارہ ایکسپورٹ کرتا ہے
 

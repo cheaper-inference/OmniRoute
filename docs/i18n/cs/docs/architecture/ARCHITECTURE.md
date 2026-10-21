@@ -21,7 +21,7 @@ Klíčové funkce:
 - Strukturované kroky kombinací (`provider + model + connection`) s pořadím za běhu podle `compositeTiers`
 - Záložní mechanismus na úrovni účtů (více účtů pro jednoho poskytovatele)
 - Předběžná kontrola kvóty a výběr účtu P2C s ohledem na kvótu v hlavním toku chatu
-- Správa připojení k poskytovatelům prostřednictvím OAuth a klíčů API (27 modulů poskytovatelů OAuth)
+- Správa připojení k poskytovatelům prostřednictvím OAuth a klíčů API (28 modulů poskytovatelů OAuth)
 - Generování vektorových reprezentací prostřednictvím `/v1/embeddings` (18 poskytovatelů)
 - Generování obrázků prostřednictvím `/v1/images/generations` (více než 10 poskytovatelů, více než 20 modelů)
 - Přepis zvuku prostřednictvím `/v1/audio/transcriptions` (18 poskytovatelů)
@@ -64,7 +64,7 @@ Klíčové funkce:
 - Middleware pro ochranu před vložením škodlivých pokynů
 - Kanál komprese pokynů s Caveman, RTK, vrstvenými kanály, kombinacemi komprese, jazykovými balíčky a analytikou
 - Registr ACP (Agent Communication Protocol)
-- Modulární poskytovatelé OAuth (22 samostatných modulů v `src/lib/oauth/providers/`)
+- Modulární poskytovatelé OAuth (28 samostatných modulů v `src/lib/oauth/providers/`)
 - Skripty pro odinstalaci a úplnou odinstalaci
 - Akce pro opravu prostředí OAuth
 - Most WebSocket pro klienty WS kompatibilní s OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Moduly doménové vrstvy:
 - Spouštěč vyhodnocení: `src/lib/evals/evalRunner.ts`
 - Perzistence stavu domény: `src/lib/db/domainState.ts` — operace CRUD v SQLite pro řetězce záložních variant, rozpočty, historii nákladů, stav uzamčení a jističe
 
-Moduly poskytovatelů OAuth (27 samostatných souborů v `src/lib/oauth/providers/`):
+Moduly poskytovatelů OAuth (28 samostatných souborů v `src/lib/oauth/providers/`):
 
 - Index registru: `src/lib/oauth/providers/index.ts`
-- Jednotliví poskytovatelé: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Jednotliví poskytovatelé: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Sdílené pomocné moduly: `codebuddyDeviceAuth.ts` (tok zařízení CodeBuddy CN / mezinárodní verze), `museCodeDeviceResponse.ts`
 - Tenká obálka: `src/lib/oauth/providers.ts` — znovu exportuje obsah jednotlivých modulů
 

@@ -21,7 +21,7 @@ Ikike ndị bụ isi:
 - Nzọụkwụ ngwakọta ahaziri ahazi (`provider + model + connection`) nwere nhazi oge runtime site na `compositeTiers`
 - Fallback n'ogo akaụntụ (ọtụtụ akaụntụ maka onye na-eweta ọrụ ọ bụla)
 - Nlele quota tupu oge eruo na nhọrọ akaụntụ P2C nke na-eburu quota n'uche n'ụzọ chat bụ isi
-- Nchịkwa njikọ onye na-eweta ọrụ site na OAuth + API-key (modul onye na-eweta OAuth 27)
+- Nchịkwa njikọ onye na-eweta ọrụ site na OAuth + API-key (modul onye na-eweta OAuth 28)
 - Mmepụta embedding site na `/v1/embeddings` (ndị na-eweta ọrụ 18)
 - Mmepụta onyonyo site na `/v1/images/generations` (ndị na-eweta ọrụ 10+, model 20+)
 - Ntughari ọdịyo gaa na ederede site na `/v1/audio/transcriptions` (ndị na-eweta ọrụ 18)
@@ -64,7 +64,7 @@ Ikike ndị bụ isi:
 - Middleware nchebe megide prompt injection
 - Pipeline mkpakọ prompt nwere Caveman, RTK, pipeline ndị a kwakọtara ọnụ, combo mkpakọ, ngwugwu asụsụ, na analytics
 - Registry ACP (Agent Communication Protocol)
-- Ndị na-eweta OAuth modular (modul dị iche iche 22 n'okpuru `src/lib/oauth/providers/`)
+- Ndị na-eweta OAuth modular (modul dị iche iche 28 n'okpuru `src/lib/oauth/providers/`)
 - Script uninstall/full-uninstall
 - Action mmezi gburugburu OAuth
 - Àkwà mmiri WebSocket maka ndị ahịa WS dakọtara na OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Modul oyi akwa ngalaba:
 - Ihe na-agba ntule: `src/lib/evals/evalRunner.ts`
 - Nchekwa na-adịgide adịgide nke ọnọdụ ngalaba: `src/lib/db/domainState.ts` — SQLite CRUD maka agbụ ndabere, oke ego, akụkọ ihe mere eme nke ọnụ ahịa, ọnọdụ mkpọchi, na ihe nkwụsị sekit
 
-Modul ndị na-eweta OAuth (faịlụ 27 dị iche iche n'okpuru `src/lib/oauth/providers/`):
+Modul ndị na-eweta OAuth (faịlụ 28 dị iche iche n'okpuru `src/lib/oauth/providers/`):
 
 - Ndepụta ndebanye aha: `src/lib/oauth/providers/index.ts`
-- Ndị na-eweta ọrụ n'otu n'otu: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Ndị na-eweta ọrụ n'otu n'otu: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Ihe enyemaka a na-ekekọrịta: `codebuddyDeviceAuth.ts` (usoro ngwaọrụ CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Ihe mkpuchi dị mfe: `src/lib/oauth/providers.ts` — na-ebupụgharị site na modul ndị dị iche iche
 

@@ -21,7 +21,7 @@ OmniRoute ಎಂಬುದು Next.js ಆಧಾರಿತ ಸ್ಥಳೀಯ AI �
 - `compositeTiers` ಮೂಲಕ ರನ್ಟೈಮ್ ಕ್ರಮೀಕರಣದೊಂದಿಗೆ ರಚನಾತ್ಮಕ ಕಾಂಬೊ ಹಂತಗಳು (`provider + model + connection`)
 - ಖಾತೆ-ಮಟ್ಟದ ಪರ್ಯಾಯ ವ್ಯವಸ್ಥೆ (ಪ್ರತಿ ಪೂರೈಕೆದಾರರಿಗೆ ಬಹು ಖಾತೆಗಳು)
 - ಮುಖ್ಯ ಚಾಟ್ ಪಥದಲ್ಲಿ ಕೋಟಾ ಪೂರ್ವಪರಿಶೀಲನೆ ಮತ್ತು ಕೋಟಾ-ಅರಿವುಳ್ಳ P2C ಖಾತೆ ಆಯ್ಕೆ
-- OAuth + API-ಕೀ ಪೂರೈಕೆದಾರ ಸಂಪರ್ಕ ನಿರ್ವಹಣೆ (27 OAuth ಪೂರೈಕೆದಾರ ಮಾಡ್ಯೂಲ್ಗಳು)
+- OAuth + API-ಕೀ ಪೂರೈಕೆದಾರ ಸಂಪರ್ಕ ನಿರ್ವಹಣೆ (28 OAuth ಪೂರೈಕೆದಾರ ಮಾಡ್ಯೂಲ್ಗಳು)
 - `/v1/embeddings` ಮೂಲಕ ಎಂಬೆಡಿಂಗ್ ರಚನೆ (18 ಪೂರೈಕೆದಾರರು)
 - `/v1/images/generations` ಮೂಲಕ ಚಿತ್ರ ರಚನೆ (10+ ಪೂರೈಕೆದಾರರು, 20+ ಮಾದರಿಗಳು)
 - `/v1/audio/transcriptions` ಮೂಲಕ ಆಡಿಯೊ ಲಿಪ್ಯಂತರ (18 ಪೂರೈಕೆದಾರರು)
@@ -64,7 +64,7 @@ OmniRoute ಎಂಬುದು Next.js ಆಧಾರಿತ ಸ್ಥಳೀಯ AI �
 - ಪ್ರಾಂಪ್ಟ್ ಇಂಜೆಕ್ಷನ್ ಗಾರ್ಡ್ ಮಿಡಲ್ವೇರ್
 - Caveman, RTK, ಸ್ಟ್ಯಾಕ್ ಮಾಡಿದ ಪೈಪ್ಲೈನ್ಗಳು, ಸಂಕುಚನ ಕಾಂಬೊಗಳು, ಭಾಷಾ ಪ್ಯಾಕ್ಗಳು ಮತ್ತು ಅನಾಲಿಟಿಕ್ಸ್ನೊಂದಿಗೆ ಪ್ರಾಂಪ್ಟ್ ಸಂಕುಚನ ಪೈಪ್ಲೈನ್
 - ACP (Agent Communication Protocol) ರಿಜಿಸ್ಟ್ರಿ
-- ಮಾಡ್ಯುಲರ್ OAuth ಪೂರೈಕೆದಾರರು (`src/lib/oauth/providers/` ಅಡಿಯಲ್ಲಿ 22 ಪ್ರತ್ಯೇಕ ಮಾಡ್ಯೂಲ್ಗಳು)
+- ಮಾಡ್ಯುಲರ್ OAuth ಪೂರೈಕೆದಾರರು (`src/lib/oauth/providers/` ಅಡಿಯಲ್ಲಿ 28 ಪ್ರತ್ಯೇಕ ಮಾಡ್ಯೂಲ್ಗಳು)
 - ಅನ್ಇನ್ಸ್ಟಾಲ್/ಪೂರ್ಣ-ಅನ್ಇನ್ಸ್ಟಾಲ್ ಸ್ಕ್ರಿಪ್ಟ್ಗಳು
 - OAuth ಪರಿಸರ ದುರಸ್ತಿ ಕ್ರಿಯೆ
 - OpenAI-ಹೊಂದಾಣಿಕೆಯ WS ಕ್ಲೈಂಟ್ಗಳಿಗಾಗಿ WebSocket ಬ್ರಿಡ್ಜ್ (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - ಮೌಲ್ಯಮಾಪನ ರನ್ನರ್: `src/lib/evals/evalRunner.ts`
 - ಡೊಮೇನ್ ಸ್ಥಿತಿ ಶಾಶ್ವತ ಸಂಗ್ರಹಣೆ: `src/lib/db/domainState.ts` — ಫಾಲ್ಬ್ಯಾಕ್ ಸರಪಳಿಗಳು, ಬಜೆಟ್ಗಳು, ವೆಚ್ಚ ಇತಿಹಾಸ, ಲಾಕ್ಔಟ್ ಸ್ಥಿತಿ ಮತ್ತು ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ಗಳಿಗಾಗಿ SQLite CRUD
 
-OAuth ಪ್ರೊವೈಡರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`src/lib/oauth/providers/` ಅಡಿಯಲ್ಲಿ 27 ಪ್ರತ್ಯೇಕ ಫೈಲ್ಗಳು):
+OAuth ಪ್ರೊವೈಡರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`src/lib/oauth/providers/` ಅಡಿಯಲ್ಲಿ 28 ಪ್ರತ್ಯೇಕ ಫೈಲ್ಗಳು):
 
 - ರಿಜಿಸ್ಟ್ರಿ ಸೂಚ್ಯಂಕ: `src/lib/oauth/providers/index.ts`
-- ಪ್ರತ್ಯೇಕ ಪ್ರೊವೈಡರ್ಗಳು: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- ಪ್ರತ್ಯೇಕ ಪ್ರೊವೈಡರ್ಗಳು: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - ಹಂಚಿಕೆಯ ಸಹಾಯಕಗಳು: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ಸಾಧನ ಹರಿವು), `museCodeDeviceResponse.ts`
 - ತೆಳುವಾದ ರ್ಯಾಪರ್: `src/lib/oauth/providers.ts` — ಪ್ರತ್ಯೇಕ ಮಾಡ್ಯೂಲ್ಗಳಿಂದ ಮರು-ರಫ್ತು ಮಾಡುತ್ತದೆ
 

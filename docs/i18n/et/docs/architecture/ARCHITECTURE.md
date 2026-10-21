@@ -23,7 +23,7 @@ Põhifunktsioonid:
 - Struktureeritud kombinatsioonisammud (`provider + model + connection`) käitusaegse järjestamisega välja `compositeTiers` alusel
 - Kontotaseme varuvariandid (mitu kontot teenusepakkuja kohta)
 - Kvoodi eelkontroll ja kvooditeadlik P2C-konto valimine vestluse põhivoos
-- OAuthi ja API-võtmetega teenusepakkujaühenduste haldus (27 OAuthi teenusepakkujamoodulit)
+- OAuthi ja API-võtmetega teenusepakkujaühenduste haldus (28 OAuthi teenusepakkujamoodulit)
 - Manuste genereerimine lõpp-punkti `/v1/embeddings` kaudu (18 teenusepakkujat)
 - Piltide genereerimine lõpp-punkti `/v1/images/generations` kaudu (üle 10 teenusepakkuja, üle 20 mudeli)
 - Heli transkribeerimine lõpp-punkti `/v1/audio/transcriptions` kaudu (18 teenusepakkujat)
@@ -66,7 +66,7 @@ Põhifunktsioonid:
 - Viibasüstide vastane vahevarakiht
 - Viipade tihendamise konveier Cavemani, RTK, virnastatud konveierite, tihenduskombinatsioonide, keelepakettide ja analüütikaga
 - ACP (Agent Communication Protocol) register
-- Modulaarsed OAuthi teenusepakkujad (22 eraldi moodulit kataloogis `src/lib/oauth/providers/`)
+- Modulaarsed OAuthi teenusepakkujad (28 eraldi moodulit kataloogis `src/lib/oauth/providers/`)
 - Desinstallimise ja täieliku desinstallimise skriptid
 - OAuthi keskkonna parandamise toiming
 - WebSocketi sild OpenAI-ga ühilduvatele WS-klientidele (`/v1/ws`)
@@ -319,10 +319,10 @@ Domeenikihi moodulid:
 - Hindamiste käitaja: `src/lib/evals/evalRunner.ts`
 - Domeenioleku püsisalvestus: `src/lib/db/domainState.ts` — SQLite CRUD varuahelate, eelarvete, kuluajaloo, lukustusoleku ja kaitselülitite jaoks
 
-OAuth-pakkujate moodulid (27 eraldi faili kataloogis `src/lib/oauth/providers/`):
+OAuth-pakkujate moodulid (28 eraldi faili kataloogis `src/lib/oauth/providers/`):
 
 - Registri indeks: `src/lib/oauth/providers/index.ts`
-- Üksikud pakkujad: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Üksikud pakkujad: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Jagatud abifunktsioonid: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl seadmevoog), `museCodeDeviceResponse.ts`
 - Õhuke ümbris: `src/lib/oauth/providers.ts` — reekspordib üksikutest moodulitest
 

@@ -21,7 +21,7 @@ OmniRoute သည် Next.js ကို အခြေခံတည်ဆောက်
 - `compositeTiers` အလိုက် runtime အစီအစဉ်သတ်မှတ်မှုပါရှိသော ဖွဲ့စည်းပုံကျ combo အဆင့်များ (`provider + model + connection`)
 - Account အဆင့် fallback (provider တစ်ခုစီအတွက် account များစွာ)
 - ပင်မ chat လမ်းကြောင်းတွင် quota ကြိုတင်စစ်ဆေးခြင်းနှင့် quota ကို ထည့်သွင်းစဉ်းစားသော P2C account ရွေးချယ်ခြင်း
-- OAuth + API key provider connection စီမံခန့်ခွဲမှု (OAuth provider module 27 ခု)
+- OAuth + API key provider connection စီမံခန့်ခွဲမှု (OAuth provider module 28 ခု)
 - `/v1/embeddings` မှတစ်ဆင့် embedding ထုတ်လုပ်ခြင်း (provider 18 ခု)
 - `/v1/images/generations` မှတစ်ဆင့် image ထုတ်လုပ်ခြင်း (provider 10+ ခု၊ model 20+ ခု)
 - `/v1/audio/transcriptions` မှတစ်ဆင့် audio transcription ပြုလုပ်ခြင်း (provider 18 ခု)
@@ -64,7 +64,7 @@ OmniRoute သည် Next.js ကို အခြေခံတည်ဆောက်
 - Prompt injection guard middleware
 - Caveman၊ RTK၊ stacked pipeline များ၊ compression combo များ၊ language pack များနှင့် analytics တို့ပါရှိသော prompt compression pipeline
 - ACP (Agent Communication Protocol) registry
-- Modular OAuth provider များ (`src/lib/oauth/providers/` အောက်ရှိ သီးခြား module 22 ခု)
+- Modular OAuth provider များ (`src/lib/oauth/providers/` အောက်ရှိ သီးခြား module 28 ခု)
 - Uninstall/full-uninstall script များ
 - OAuth environment ပြုပြင်သည့် action
 - OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော WS client များအတွက် WebSocket bridge (`/v1/ws`)
@@ -319,10 +319,10 @@ Domain layer module များ:
 - Eval runner: `src/lib/evals/evalRunner.ts`
 - Domain state persistence: `src/lib/db/domainState.ts` — fallback chain များ၊ budget များ၊ cost history၊ lockout state နှင့် circuit breaker များအတွက် SQLite CRUD
 
-OAuth provider module များ (`src/lib/oauth/providers/` အောက်ရှိ သီးခြား file 27 ခု):
+OAuth provider module များ (`src/lib/oauth/providers/` အောက်ရှိ သီးခြား file 28 ခု):
 
 - Registry index: `src/lib/oauth/providers/index.ts`
-- Provider တစ်ခုချင်းစီ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Provider တစ်ခုချင်းစီ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - မျှဝေသုံးစွဲသော helper များ: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl device flow), `museCodeDeviceResponse.ts`
 - ပါးလွှာသော wrapper: `src/lib/oauth/providers.ts` — သီးခြား module များမှ ပြန်လည် export လုပ်သည်
 

@@ -21,7 +21,7 @@ OmniRoute በNext.js ላይ የተገነባ አካባቢያዊ የAI ማዘዋ�
 - በ`compositeTiers` መሠረት በአሂድ ጊዜ የሚደረደሩ የተዋቀሩ የጥምረት ደረጃዎች (`provider + model + connection`)
 - በመለያ ደረጃ የሚሠራ አማራጭ ውድቀት መቋቋሚያ (ለእያንዳንዱ አቅራቢ በርካታ መለያዎች)
 - በዋናው የውይይት ዱካ ውስጥ የኮታ ቅድመ-ምርመራ እና ኮታን ያገናዘበ የP2C መለያ ምርጫ
-- የOAuth + API-key አቅራቢ ግንኙነት አስተዳደር (27 የOAuth አቅራቢ ሞጁሎች)
+- የOAuth + API-key አቅራቢ ግንኙነት አስተዳደር (28 የOAuth አቅራቢ ሞጁሎች)
 - በ`/v1/embeddings` በኩል የማካተቻዎች ማመንጨት (18 አቅራቢዎች)
 - በ`/v1/images/generations` በኩል ምስል ማመንጨት (10+ አቅራቢዎች፣ 20+ ሞዴሎች)
 - በ`/v1/audio/transcriptions` በኩል የድምፅ ወደ ጽሑፍ ቅጂ (18 አቅራቢዎች)
@@ -64,7 +64,7 @@ OmniRoute በNext.js ላይ የተገነባ አካባቢያዊ የAI ማዘዋ�
 - የመጠየቂያ ማስገቢያ ጥቃት መከላከያ middleware
 - Caveman፣ RTK፣ ተደራራቢ የሂደት መስመሮች፣ የመጭመቂያ ጥምረቶች፣ የቋንቋ ጥቅሎች እና ትንታኔዎች ያሉት የመጠየቂያ መጭመቂያ ሂደት
 - የACP (Agent Communication Protocol) መዝገብ
-- ሞጁላዊ የOAuth አቅራቢዎች (በ`src/lib/oauth/providers/` ስር 22 የተናጠል ሞጁሎች)
+- ሞጁላዊ የOAuth አቅራቢዎች (በ`src/lib/oauth/providers/` ስር 28 የተናጠል ሞጁሎች)
 - የማራገፊያ/ሙሉ-ማራገፊያ ስክሪፕቶች
 - የOAuth አካባቢ ጥገና እርምጃ
 - ከOpenAI ጋር ለሚጣጣሙ WS ደንበኞች የWebSocket ድልድይ (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - የግምገማ አስኪያጅ፦ `src/lib/evals/evalRunner.ts`
 - የጎራ ሁኔታ ማቆያ፦ `src/lib/db/domainState.ts` — ለምትክ ሰንሰለቶች፣ በጀቶች፣ የወጪ ታሪክ፣ የመቆለፊያ ሁኔታ እና የወረዳ መቆራረጫዎች SQLite CRUD
 
-የOAuth አቅራቢ ሞጁሎች (በ`src/lib/oauth/providers/` ስር ያሉ 27 የተናጠል ፋይሎች)፦
+የOAuth አቅራቢ ሞጁሎች (በ`src/lib/oauth/providers/` ስር ያሉ 28 የተናጠል ፋይሎች)፦
 
 - የመዝገብ ማውጫ፦ `src/lib/oauth/providers/index.ts`
-- የተናጠል አቅራቢዎች፦ `agy.ts`፣ `antigravity.ts`፣ `claude.ts`፣ `cline.ts`፣ `codebuddy-cn.ts`፣ `codebuddy-intl.ts`፣ `codex.ts`፣ `cursor.ts`፣ `devin-desktop.ts`፣ `ghe-copilot.ts`፣ `github.ts`፣ `gitlab-duo.ts`፣ `grok-cli-oauth.ts`፣ `grok-cli.ts`፣ `kilocode.ts`፣ `kimi-coding.ts`፣ `kiro.ts`፣ `muse-code.ts`፣ `openference.ts`፣ `qoder.ts`፣ `trae.ts`፣ `workbuddy.ts`፣ `xai-oauth.ts`፣ `zed-hosted.ts`፣ `zed.ts`
+- የተናጠል አቅራቢዎች፦ `agy.ts`፣ `antigravity.ts`፣ `claude.ts`፣ `cline.ts`፣ `codebuddy-cn.ts`፣ `codebuddy-intl.ts`፣ `codex.ts`፣ `cursor.ts`፣ `devin-desktop.ts`፣ `ghe-copilot.ts`፣ `github.ts`፣ `gitlab-duo.ts`፣ `grok-cli-oauth.ts`፣ `grok-cli.ts`፣ `kilocode.ts`፣ `kimi-coding.ts`፣ `kiro.ts`፣ `minimax-code.ts`፣ `muse-code.ts`፣ `openference.ts`፣ `qoder.ts`፣ `trae.ts`፣ `workbuddy.ts`፣ `xai-oauth.ts`፣ `zed-hosted.ts`፣ `zed.ts`
 - የጋራ ረዳቶች፦ `codebuddyDeviceAuth.ts` (የCodeBuddy CN/intl መሣሪያ ፍሰት)፣ `museCodeDeviceResponse.ts`
 - ቀላል መጠቅለያ፦ `src/lib/oauth/providers.ts` — ከተናጠል ሞጁሎች ዳግም ወደ ውጪ ይልካል
 

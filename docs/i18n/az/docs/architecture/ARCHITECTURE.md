@@ -21,7 +21,7 @@ O, vahid OpenAI-uyğun son nöqtə (`/v1/*`) təqdim edir və tərcümə, ehtiya
 - `compositeTiers` əsasında icra zamanı sıralanan strukturlaşdırılmış kombinasiya addımları (`provider + model + connection`)
 - Hesab səviyyəsində ehtiyat keçid (hər provayder üçün birdən çox hesab)
 - Əsas çat axınında kvotanın ilkin yoxlanması və kvotanı nəzərə alan P2C hesab seçimi
-- OAuth + API açarı əsasında provayder bağlantılarının idarə edilməsi (27 OAuth provayder modulu)
+- OAuth + API açarı əsasında provayder bağlantılarının idarə edilməsi (28 OAuth provayder modulu)
 - `/v1/embeddings` vasitəsilə vektor təsvirlərinin yaradılması (18 provayder)
 - `/v1/images/generations` vasitəsilə təsvirlərin yaradılması (10-dan çox provayder, 20-dən çox model)
 - `/v1/audio/transcriptions` vasitəsilə audio transkripsiyası (18 provayder)
@@ -64,7 +64,7 @@ O, vahid OpenAI-uyğun son nöqtə (`/v1/*`) təqdim edir və tərcümə, ehtiya
 - Prompt inyeksiyasından qoruyan aralıq proqram
 - Caveman, RTK, yığılmış emal xətləri, sıxılma kombinasiyaları, dil paketləri və analitika ilə prompt sıxılma emal xətti
 - ACP (Agent Communication Protocol) reyestri
-- Modul tipli OAuth provayderləri (`src/lib/oauth/providers/` altında 22 ayrıca modul)
+- Modul tipli OAuth provayderləri (`src/lib/oauth/providers/` altında 28 ayrıca modul)
 - Silmə/tam silmə skriptləri
 - OAuth mühitinin bərpası əməliyyatı
 - OpenAI-uyğun WS müştəriləri üçün WebSocket körpüsü (`/v1/ws`)
@@ -319,10 +319,10 @@ Domen qatı modulları:
 - Qiymətləndirmə icraçısı: `src/lib/evals/evalRunner.ts`
 - Domen vəziyyətinin daimi saxlanması: `src/lib/db/domainState.ts` — ehtiyat keçid zəncirləri, büdcələr, xərc tarixçəsi, bloklama vəziyyəti və dövrə açarları üçün SQLite CRUD əməliyyatları
 
-OAuth provayder modulları (`src/lib/oauth/providers/` altında 27 ayrı fayl):
+OAuth provayder modulları (`src/lib/oauth/providers/` altında 28 ayrı fayl):
 
 - Reyestr indeksi: `src/lib/oauth/providers/index.ts`
-- Ayrı-ayrı provayderlər: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Ayrı-ayrı provayderlər: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Ortaq köməkçi modullar: `codebuddyDeviceAuth.ts` (CodeBuddy CN/beynəlxalq cihaz axını), `museCodeDeviceResponse.ts`
 - Nazik örtük: `src/lib/oauth/providers.ts` — ayrı-ayrı modullardan təkrar ixrac edir
 

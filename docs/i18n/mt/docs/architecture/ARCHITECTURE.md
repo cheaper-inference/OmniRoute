@@ -21,7 +21,7 @@ Kapaċitajiet ewlenin:
 - Passi strutturati tal-kombinazzjonijiet (`provider + model + connection`) b’ordni waqt l-eżekuzzjoni skont `compositeTiers`
 - Fallback fil-livell tal-kont (diversi kontijiet għal kull fornitur)
 - Verifika preliminari tal-kwota u għażla tal-kont P2C konxja mill-kwota fil-fluss ewlieni taċ-chat
-- Ġestjoni tal-konnessjonijiet mal-fornituri permezz ta’ OAuth + API key (27 modulu ta’ fornituri OAuth)
+- Ġestjoni tal-konnessjonijiet mal-fornituri permezz ta’ OAuth + API key (28 modulu ta’ fornituri OAuth)
 - Ġenerazzjoni ta’ embeddings permezz ta’ `/v1/embeddings` (18-il fornitur)
 - Ġenerazzjoni ta’ immaġnijiet permezz ta’ `/v1/images/generations` (10+ fornituri, 20+ mudell)
 - Traskrizzjoni tal-awdjo permezz ta’ `/v1/audio/transcriptions` (18-il fornitur)
@@ -64,7 +64,7 @@ Kapaċitajiet ewlenin:
 - Middleware ta’ protezzjoni kontra l-injezzjoni tal-prompt
 - Pipeline għall-kompressjoni tal-prompt b’Caveman, RTK, pipelines f’munzell, kombinazzjonijiet ta’ kompressjoni, pakketti lingwistiċi, u analitika
 - Reġistru ACP (Agent Communication Protocol)
-- Fornituri OAuth modulari (22 modulu individwali taħt `src/lib/oauth/providers/`)
+- Fornituri OAuth modulari (28 modulu individwali taħt `src/lib/oauth/providers/`)
 - Scripts għad-diżinstallazzjoni/diżinstallazzjoni sħiħa
 - Azzjoni għat-tiswija tal-ambjent OAuth
 - Bridge WebSocket għal klijenti WS kompatibbli ma’ OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Moduli tas-saff tad-dominju:
 - Eżekutur tal-evalwazzjonijiet: `src/lib/evals/evalRunner.ts`
 - Persistenza tal-istat tad-dominju: `src/lib/db/domainState.ts` — CRUD ta' SQLite għal ktajjen ta' riżerva, baġits, storja tal-ispejjeż, stat tal-imblukkar, u salvaviti
 
-Moduli tal-fornituri OAuth (27 fajl individwali taħt `src/lib/oauth/providers/`):
+Moduli tal-fornituri OAuth (28 fajl individwali taħt `src/lib/oauth/providers/`):
 
 - Indiċi tar-reġistru: `src/lib/oauth/providers/index.ts`
-- Fornituri individwali: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Fornituri individwali: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Għodod ta' għajnuna kondiviżi: `codebuddyDeviceAuth.ts` (fluss tal-apparat CodeBuddy CN/internazzjonali), `museCodeDeviceResponse.ts`
 - Wrapper irqiq: `src/lib/oauth/providers.ts` — jerġa' jesporta mill-moduli individwali
 

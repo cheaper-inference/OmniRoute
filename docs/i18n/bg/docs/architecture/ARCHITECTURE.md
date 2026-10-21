@@ -21,7 +21,7 @@ OmniRoute е локален шлюз за маршрутизиране на AI �
 - Структурирани стъпки на комбинациите (`provider + model + connection`) с подреждане по време на изпълнение чрез `compositeTiers`
 - Резервно превключване на ниво акаунт (множество акаунти за всеки доставчик)
 - Предварителна проверка на квотата и съобразен с квотата P2C избор на акаунт в основния път за чат
-- Управление на връзките с доставчици чрез OAuth + API ключове (27 OAuth модула за доставчици)
+- Управление на връзките с доставчици чрез OAuth + API ключове (28 OAuth модула за доставчици)
 - Генериране на вграждания чрез `/v1/embeddings` (18 доставчици)
 - Генериране на изображения чрез `/v1/images/generations` (10+ доставчици, 20+ модела)
 - Транскрибиране на аудио чрез `/v1/audio/transcriptions` (18 доставчици)
@@ -64,7 +64,7 @@ OmniRoute е локален шлюз за маршрутизиране на AI �
 - Междинен софтуер за защита от инжектиране на подкани
 - Конвейер за компресиране на подкани с Caveman, RTK, съставни конвейери, комбинации за компресиране, езикови пакети и анализи
 - ACP (Agent Communication Protocol) регистър
-- Модулни OAuth доставчици (22 отделни модула в `src/lib/oauth/providers/`)
+- Модулни OAuth доставчици (28 отделни модула в `src/lib/oauth/providers/`)
 - Скриптове за деинсталиране/пълно деинсталиране
 - Действие за поправка на OAuth средата
 - WebSocket мост за WS клиенти, съвместими с OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - Изпълнител на оценки: `src/lib/evals/evalRunner.ts`
 - Устойчиво съхранение на състоянието на домейна: `src/lib/db/domainState.ts` — SQLite CRUD за вериги от резервни варианти, бюджети, история на разходите, състояние на блокиране и прекъсвачи на вериги
 
-Модули за OAuth доставчици (27 отделни файла в `src/lib/oauth/providers/`):
+Модули за OAuth доставчици (28 отделни файла в `src/lib/oauth/providers/`):
 
 - Индекс на регистъра: `src/lib/oauth/providers/index.ts`
-- Отделни доставчици: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Отделни доставчици: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Споделени помощни модули: `codebuddyDeviceAuth.ts` (поток за удостоверяване на устройства за CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Тънка обвивка: `src/lib/oauth/providers.ts` — реекспортира от отделните модули
 

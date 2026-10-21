@@ -21,7 +21,7 @@ _Τελευταία ενημέρωση: 2026-06-28_
 - Δομημένα βήματα συνδυασμού (`provider + model + connection`) με σειρά εκτέλεσης βάσει `compositeTiers`
 - Εναλλακτική δρομολόγηση σε επίπεδο λογαριασμού (πολλαπλοί λογαριασμοί ανά πάροχο)
 - Προκαταρκτικός έλεγχος ορίου χρήσης και επιλογή λογαριασμού P2C με επίγνωση ορίου χρήσης στην κύρια ροή συνομιλίας
-- Διαχείριση συνδέσεων παρόχων μέσω OAuth + κλειδιού API (27 μονάδες παρόχων OAuth)
+- Διαχείριση συνδέσεων παρόχων μέσω OAuth + κλειδιού API (28 μονάδες παρόχων OAuth)
 - Δημιουργία ενσωματώσεων μέσω `/v1/embeddings` (18 πάροχοι)
 - Δημιουργία εικόνων μέσω `/v1/images/generations` (10+ πάροχοι, 20+ μοντέλα)
 - Μεταγραφή ήχου μέσω `/v1/audio/transcriptions` (18 πάροχοι)
@@ -64,7 +64,7 @@ _Τελευταία ενημέρωση: 2026-06-28_
 - Middleware προστασίας από εισαγωγή κακόβουλων προτροπών
 - Διοχέτευση συμπίεσης προτροπών με Caveman, RTK, στοιβαγμένες διοχετεύσεις, συνδυασμούς συμπίεσης, πακέτα γλωσσών και αναλυτικά στοιχεία
 - Μητρώο ACP (Agent Communication Protocol)
-- Αρθρωτοί πάροχοι OAuth (22 ανεξάρτητες μονάδες στο `src/lib/oauth/providers/`)
+- Αρθρωτοί πάροχοι OAuth (28 ανεξάρτητες μονάδες στο `src/lib/oauth/providers/`)
 - Σενάρια απεγκατάστασης/πλήρους απεγκατάστασης
 - Ενέργεια επιδιόρθωσης περιβάλλοντος OAuth
 - Γέφυρα WebSocket για πελάτες WS συμβατούς με OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - Εκτελεστής αξιολογήσεων: `src/lib/evals/evalRunner.ts`
 - Μόνιμη αποθήκευση κατάστασης τομέα: `src/lib/db/domainState.ts` — λειτουργίες CRUD SQLite για αλυσίδες εναλλακτικής χρήσης, προϋπολογισμούς, ιστορικό κόστους, κατάσταση αποκλεισμού και διακόπτες κυκλώματος
 
-Μονάδες παρόχων OAuth (27 μεμονωμένα αρχεία στον κατάλογο `src/lib/oauth/providers/`):
+Μονάδες παρόχων OAuth (28 μεμονωμένα αρχεία στον κατάλογο `src/lib/oauth/providers/`):
 
 - Ευρετήριο μητρώου: `src/lib/oauth/providers/index.ts`
-- Μεμονωμένοι πάροχοι: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Μεμονωμένοι πάροχοι: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Κοινόχρηστα βοηθητικά στοιχεία: `codebuddyDeviceAuth.ts` (ροή συσκευής CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Λεπτό περίβλημα: `src/lib/oauth/providers.ts` — επανεξάγει από τις μεμονωμένες μονάδες
 

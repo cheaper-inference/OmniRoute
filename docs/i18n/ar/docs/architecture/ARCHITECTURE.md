@@ -21,7 +21,7 @@ OmniRoute هي بوابة توجيه محلية للذكاء الاصطناعي 
 - خطوات مجموعات منظّمة (`provider + model + connection`) مع ترتيب وقت التشغيل بواسطة `compositeTiers`
 - تراجع على مستوى الحساب (حسابات متعددة لكل مزود)
 - فحص مسبق للحصة واختيار حساب P2C مع مراعاة الحصة ضمن مسار الدردشة الرئيسي
-- إدارة اتصالات المزودين عبر OAuth + مفتاح API ‏(27 وحدة مزود OAuth)
+- إدارة اتصالات المزودين عبر OAuth + مفتاح API ‏(28 وحدة مزود OAuth)
 - إنشاء التضمينات عبر `/v1/embeddings` ‏(18 مزودًا)
 - إنشاء الصور عبر `/v1/images/generations` ‏(أكثر من 10 مزودين، وأكثر من 20 نموذجًا)
 - تحويل الصوت إلى نص عبر `/v1/audio/transcriptions` ‏(18 مزودًا)
@@ -64,7 +64,7 @@ OmniRoute هي بوابة توجيه محلية للذكاء الاصطناعي 
 - برمجية وسيطة للحماية من حقن المطالبات
 - مسار معالجة لضغط المطالبات باستخدام Caveman وRTK ومسارات معالجة مكدّسة ومجموعات ضغط وحزم لغات وتحليلات
 - سجل ACP ‏(Agent Communication Protocol)
-- مزودو OAuth معياريون (22 وحدة منفردة ضمن `src/lib/oauth/providers/`)
+- مزودو OAuth معياريون (28 وحدة منفردة ضمن `src/lib/oauth/providers/`)
 - برامج نصية لإلغاء التثبيت/إلغاء التثبيت الكامل
 - إجراء لإصلاح بيئة OAuth
 - جسر WebSocket لعملاء WS المتوافقين مع OpenAI ‏(`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - مشغّل التقييمات: `src/lib/evals/evalRunner.ts`
 - استمرارية حالة النطاق: `src/lib/db/domainState.ts` — عمليات CRUD في SQLite لسلاسل الرجوع، والميزانيات، وسجلّ التكلفة، وحالة الحظر، وقواطع الدائرة
 
-وحدات مزوّدي OAuth ‏(27 ملفًا منفردًا ضمن `src/lib/oauth/providers/`):
+وحدات مزوّدي OAuth ‏(28 ملفًا منفردًا ضمن `src/lib/oauth/providers/`):
 
 - فهرس السجلّ: `src/lib/oauth/providers/index.ts`
-- المزوّدون الفرديون: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
+- المزوّدون الفرديون: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `minimax-code.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
 - الأدوات المساعدة المشتركة: `codebuddyDeviceAuth.ts` (تدفق جهاز CodeBuddy لـ CN/intl)، `museCodeDeviceResponse.ts`
 - غلاف خفيف: `src/lib/oauth/providers.ts` — يعيد التصدير من الوحدات الفردية
 

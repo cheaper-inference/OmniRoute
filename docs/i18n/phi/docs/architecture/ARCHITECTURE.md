@@ -21,7 +21,7 @@ Mga pangunahing kakayahan:
 - Mga structured combo step (`provider + model + connection`) na may runtime ordering ayon sa `compositeTiers`
 - Fallback sa antas ng account (maraming account sa bawat provider)
 - Quota preflight at quota-aware na pagpili ng P2C account sa pangunahing chat path
-- Pamamahala ng koneksyon sa provider gamit ang OAuth + API key (27 OAuth provider module)
+- Pamamahala ng koneksyon sa provider gamit ang OAuth + API key (28 OAuth provider module)
 - Pagbuo ng embedding sa pamamagitan ng `/v1/embeddings` (18 provider)
 - Pagbuo ng larawan sa pamamagitan ng `/v1/images/generations` (10+ provider, 20+ modelo)
 - Transkripsyon ng audio sa pamamagitan ng `/v1/audio/transcriptions` (18 provider)
@@ -64,7 +64,7 @@ Mga pangunahing kakayahan:
 - Middleware na panangga laban sa prompt injection
 - Pipeline ng prompt compression na may Caveman, RTK, mga stacked pipeline, compression combo, language pack, at analytics
 - Registry ng ACP (Agent Communication Protocol)
-- Mga modular na OAuth provider (22 indibidwal na module sa ilalim ng `src/lib/oauth/providers/`)
+- Mga modular na OAuth provider (28 indibidwal na module sa ilalim ng `src/lib/oauth/providers/`)
 - Mga script para sa uninstall/full-uninstall
 - Aksyon para sa pagkukumpuni ng OAuth environment
 - WebSocket bridge para sa mga WS client na compatible sa OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Mga module ng domain layer:
 - Runner ng eval: `src/lib/evals/evalRunner.ts`
 - Persistence ng state ng domain: `src/lib/db/domainState.ts` — SQLite CRUD para sa mga fallback chain, budget, history ng gastos, state ng lockout, at mga circuit breaker
 
-Mga module ng OAuth provider (27 indibidwal na file sa ilalim ng `src/lib/oauth/providers/`):
+Mga module ng OAuth provider (28 indibidwal na file sa ilalim ng `src/lib/oauth/providers/`):
 
 - Index ng registry: `src/lib/oauth/providers/index.ts`
-- Mga indibidwal na provider: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Mga indibidwal na provider: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Mga pinagsasaluhang helper: `codebuddyDeviceAuth.ts` (daloy ng device ng CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Manipis na wrapper: `src/lib/oauth/providers.ts` — muling nag-e-export mula sa mga indibidwal na module
 

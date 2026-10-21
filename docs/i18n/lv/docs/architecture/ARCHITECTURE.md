@@ -21,7 +21,7 @@ Galvenās iespējas:
 - Strukturēti kombināciju soļi (`provider + model + connection`) ar izpildlaika secību, ko nosaka `compositeTiers`
 - Konta līmeņa rezerves pārslēgšanās (vairāki konti katram pakalpojumu sniedzējam)
 - Kvotu sākotnējā pārbaude un kvotas ņemoša vērā P2C konta atlase galvenajā tērzēšanas ceļā
-- OAuth un API atslēgu pakalpojumu sniedzēju savienojumu pārvaldība (27 OAuth pakalpojumu sniedzēju moduļi)
+- OAuth un API atslēgu pakalpojumu sniedzēju savienojumu pārvaldība (28 OAuth pakalpojumu sniedzēju moduļi)
 - Iegultņu ģenerēšana, izmantojot `/v1/embeddings` (18 pakalpojumu sniedzēji)
 - Attēlu ģenerēšana, izmantojot `/v1/images/generations` (vairāk nekā 10 pakalpojumu sniedzēji, vairāk nekā 20 modeļi)
 - Audio transkribēšana, izmantojot `/v1/audio/transcriptions` (18 pakalpojumu sniedzēji)
@@ -64,7 +64,7 @@ Galvenās iespējas:
 - Uzvedņu injekcijas aizsardzības starpprogrammatūra
 - Uzvedņu saspiešanas konveijers ar Caveman, RTK, sakrautiem konveijeriem, saspiešanas kombinācijām, valodu pakotnēm un analītiku
 - ACP (Agent Communication Protocol) reģistrs
-- Modulāri OAuth pakalpojumu sniedzēji (22 atsevišķi moduļi mapē `src/lib/oauth/providers/`)
+- Modulāri OAuth pakalpojumu sniedzēji (28 atsevišķi moduļi mapē `src/lib/oauth/providers/`)
 - Atinstalēšanas/pilnīgas atinstalēšanas skripti
 - OAuth vides labošanas darbība
 - WebSocket tilts ar OpenAI saderīgiem WS klientiem (`/v1/ws`)
@@ -319,10 +319,10 @@ Domēna slāņa moduļi:
 - Novērtējumu izpildītājs: `src/lib/evals/evalRunner.ts`
 - Domēna stāvokļa pastāvīga glabāšana: `src/lib/db/domainState.ts` — SQLite CRUD atkāpšanās ķēdēm, budžetiem, izmaksu vēsturei, bloķēšanas stāvoklim un ķēdes pārtraucējiem
 
-OAuth pakalpojumu sniedzēju moduļi (27 atsevišķi faili direktorijā `src/lib/oauth/providers/`):
+OAuth pakalpojumu sniedzēju moduļi (28 atsevišķi faili direktorijā `src/lib/oauth/providers/`):
 
 - Reģistra indekss: `src/lib/oauth/providers/index.ts`
-- Atsevišķi pakalpojumu sniedzēji: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Atsevišķi pakalpojumu sniedzēji: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Koplietojamie palīgmoduļi: `codebuddyDeviceAuth.ts` (CodeBuddy CN/starptautiskā ierīces plūsma), `museCodeDeviceResponse.ts`
 - Vienkāršs ietinējs: `src/lib/oauth/providers.ts` — atkārtoti eksportē no atsevišķajiem moduļiem
 

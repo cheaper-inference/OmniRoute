@@ -21,7 +21,7 @@ Kernfunktionen:
 - Strukturierte Kombinationsschritte (`provider + model + connection`) mit Laufzeitsortierung nach `compositeTiers`
 - Fallback auf Kontoebene (mehrere Konten pro Anbieter)
 - Kontingentvorabprüfung und kontingentorientierte P2C-Kontoauswahl im Hauptpfad für Chats
-- Verwaltung von Anbieterverbindungen per OAuth und API-Schlüssel (27 OAuth-Anbietermodule)
+- Verwaltung von Anbieterverbindungen per OAuth und API-Schlüssel (28 OAuth-Anbietermodule)
 - Generierung von Embeddings über `/v1/embeddings` (18 Anbieter)
 - Bildgenerierung über `/v1/images/generations` (mehr als 10 Anbieter, mehr als 20 Modelle)
 - Audiotranskription über `/v1/audio/transcriptions` (18 Anbieter)
@@ -64,7 +64,7 @@ Kernfunktionen:
 - Middleware zum Schutz vor Prompt-Injection
 - Pipeline zur Prompt-Komprimierung mit Caveman, RTK, gestapelten Pipelines, Komprimierungskombinationen, Sprachpaketen und Analysen
 - ACP-Registry (Agent Communication Protocol)
-- Modulare OAuth-Anbieter (22 einzelne Module unter `src/lib/oauth/providers/`)
+- Modulare OAuth-Anbieter (28 einzelne Module unter `src/lib/oauth/providers/`)
 - Skripte zur Deinstallation und vollständigen Deinstallation
 - Aktion zur Reparatur der OAuth-Umgebung
 - WebSocket-Bridge für OpenAI-kompatible WS-Clients (`/v1/ws`)
@@ -319,10 +319,10 @@ Module der Domänenschicht:
 - Evaluierungsausführung: `src/lib/evals/evalRunner.ts`
 - Persistenz des Domänenzustands: `src/lib/db/domainState.ts` — SQLite-CRUD für Fallback-Ketten, Budgets, Kostenverlauf, Sperrzustand und Circuit Breaker
 
-OAuth-Provider-Module (27 einzelne Dateien unter `src/lib/oauth/providers/`):
+OAuth-Provider-Module (28 einzelne Dateien unter `src/lib/oauth/providers/`):
 
 - Registrierungsindex: `src/lib/oauth/providers/index.ts`
-- Einzelne Provider: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Einzelne Provider: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Gemeinsam genutzte Hilfsfunktionen: `codebuddyDeviceAuth.ts` (CodeBuddy-CN-/Intl-Geräteablauf), `museCodeDeviceResponse.ts`
 - Dünner Wrapper: `src/lib/oauth/providers.ts` — re-exportiert aus den einzelnen Modulen
 

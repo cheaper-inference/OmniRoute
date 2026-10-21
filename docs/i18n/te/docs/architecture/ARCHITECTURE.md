@@ -21,7 +21,7 @@ OmniRoute అనేది Next.jsపై నిర్మించబడిన స
 - `compositeTiers` ఆధారంగా రన్టైమ్ క్రమంతో నిర్మిత కాంబో దశలు (`provider + model + connection`)
 - ఖాతా-స్థాయి ఫాల్బ్యాక్ (ప్రతి ప్రొవైడర్కు బహుళ ఖాతాలు)
 - ప్రధాన చాట్ పాత్లో కోటా ముందస్తు తనిఖీ మరియు కోటా-అవగాహనతో కూడిన P2C ఖాతా ఎంపిక
-- OAuth + API-key ప్రొవైడర్ కనెక్షన్ నిర్వహణ (27 OAuth ప్రొవైడర్ మాడ్యూల్స్)
+- OAuth + API-key ప్రొవైడర్ కనెక్షన్ నిర్వహణ (28 OAuth ప్రొవైడర్ మాడ్యూల్స్)
 - `/v1/embeddings` ద్వారా ఎంబెడింగ్ జనరేషన్ (18 ప్రొవైడర్లు)
 - `/v1/images/generations` ద్వారా ఇమేజ్ జనరేషన్ (10+ ప్రొవైడర్లు, 20+ మోడళ్లు)
 - `/v1/audio/transcriptions` ద్వారా ఆడియో ట్రాన్స్క్రిప్షన్ (18 ప్రొవైడర్లు)
@@ -64,7 +64,7 @@ OmniRoute అనేది Next.jsపై నిర్మించబడిన స
 - ప్రాంప్ట్ ఇంజెక్షన్ గార్డ్ మిడిల్వేర్
 - Caveman, RTK, స్టాక్డ్ పైప్లైన్లు, కంప్రెషన్ కాంబోలు, లాంగ్వేజ్ ప్యాక్లు మరియు అనలిటిక్స్తో ప్రాంప్ట్ కంప్రెషన్ పైప్లైన్
 - ACP (Agent Communication Protocol) రిజిస్ట్రీ
-- మాడ్యులర్ OAuth ప్రొవైడర్లు (`src/lib/oauth/providers/` కింద 22 వ్యక్తిగత మాడ్యూల్స్)
+- మాడ్యులర్ OAuth ప్రొవైడర్లు (`src/lib/oauth/providers/` కింద 28 వ్యక్తిగత మాడ్యూల్స్)
 - అన్ఇన్స్టాల్/పూర్తి అన్ఇన్స్టాల్ స్క్రిప్ట్లు
 - OAuth ఎన్విరాన్మెంట్ మరమ్మతు చర్య
 - OpenAI-అనుకూల WS క్లయింట్ల కోసం WebSocket బ్రిడ్జ్ (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - మూల్యాంకన రన్నర్: `src/lib/evals/evalRunner.ts`
 - డొమైన్ స్థితి నిల్వ: `src/lib/db/domainState.ts` — ఫాల్బ్యాక్ చైన్లు, బడ్జెట్లు, ఖర్చు చరిత్ర, లాకౌట్ స్థితి, సర్క్యూట్ బ్రేకర్ల కోసం SQLite CRUD
 
-OAuth ప్రొవైడర్ మాడ్యూల్లు (`src/lib/oauth/providers/` కింద 27 వ్యక్తిగత ఫైల్లు):
+OAuth ప్రొవైడర్ మాడ్యూల్లు (`src/lib/oauth/providers/` కింద 28 వ్యక్తిగత ఫైల్లు):
 
 - రిజిస్ట్రీ ఇండెక్స్: `src/lib/oauth/providers/index.ts`
-- వ్యక్తిగత ప్రొవైడర్లు: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- వ్యక్తిగత ప్రొవైడర్లు: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - భాగస్వామ్య సహాయకాలు: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl పరికర ప్రవాహం), `museCodeDeviceResponse.ts`
 - తేలికపాటి ర్యాపర్: `src/lib/oauth/providers.ts` — వ్యక్తిగత మాడ్యూల్ల నుంచి తిరిగి ఎగుమతి చేస్తుంది
 

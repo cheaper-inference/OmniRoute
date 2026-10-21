@@ -21,7 +21,7 @@ OmniRoute হলো Next.js-এর ওপর নির্মিত একটি 
 - `compositeTiers` অনুযায়ী রানটাইম ক্রমসহ কাঠামোবদ্ধ কম্বো ধাপ (`provider + model + connection`)
 - অ্যাকাউন্ট-স্তরের ফলব্যাক (প্রতি প্রোভাইডারে একাধিক অ্যাকাউন্ট)
 - মূল চ্যাট পাথে কোটা প্রিফ্লাইট এবং কোটা-সচেতন P2C অ্যাকাউন্ট নির্বাচন
-- OAuth + API-key প্রোভাইডার সংযোগ ব্যবস্থাপনা (27টি OAuth প্রোভাইডার মডিউল)
+- OAuth + API-key প্রোভাইডার সংযোগ ব্যবস্থাপনা (28টি OAuth প্রোভাইডার মডিউল)
 - `/v1/embeddings`-এর মাধ্যমে এম্বেডিং তৈরি (18টি প্রোভাইডার)
 - `/v1/images/generations`-এর মাধ্যমে ছবি তৈরি (10+টি প্রোভাইডার, 20+টি মডেল)
 - `/v1/audio/transcriptions`-এর মাধ্যমে অডিও ট্রান্সক্রিপশন (18টি প্রোভাইডার)
@@ -64,7 +64,7 @@ OmniRoute হলো Next.js-এর ওপর নির্মিত একটি 
 - প্রম্পট ইনজেকশন গার্ড মিডলওয়্যার
 - Caveman, RTK, স্ট্যাকড পাইপলাইন, কম্প্রেশন কম্বো, ল্যাঙ্গুয়েজ প্যাক ও অ্যানালিটিক্সসহ প্রম্পট কম্প্রেশন পাইপলাইন
 - ACP (Agent Communication Protocol) রেজিস্ট্রি
-- মডিউলার OAuth প্রোভাইডার (`src/lib/oauth/providers/`-এর অধীনে 22টি স্বতন্ত্র মডিউল)
+- মডিউলার OAuth প্রোভাইডার (`src/lib/oauth/providers/`-এর অধীনে 28টি স্বতন্ত্র মডিউল)
 - আনইনস্টল/সম্পূর্ণ আনইনস্টল স্ক্রিপ্ট
 - OAuth এনভায়রনমেন্ট মেরামতের অ্যাকশন
 - OpenAI-সামঞ্জস্যপূর্ণ WS ক্লায়েন্টের জন্য WebSocket ব্রিজ (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - ইভ্যাল রানার: `src/lib/evals/evalRunner.ts`
 - ডোমেইন স্টেট পারসিস্টেন্স: `src/lib/db/domainState.ts` — ফলব্যাক চেইন, বাজেট, খরচের ইতিহাস, লকআউট স্টেট এবং সার্কিট ব্রেকারের জন্য SQLite CRUD
 
-OAuth প্রোভাইডার মডিউলসমূহ (`src/lib/oauth/providers/`-এর অধীনে 27টি স্বতন্ত্র ফাইল):
+OAuth প্রোভাইডার মডিউলসমূহ (`src/lib/oauth/providers/`-এর অধীনে 28টি স্বতন্ত্র ফাইল):
 
 - রেজিস্ট্রি ইনডেক্স: `src/lib/oauth/providers/index.ts`
-- স্বতন্ত্র প্রোভাইডারসমূহ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- স্বতন্ত্র প্রোভাইডারসমূহ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - শেয়ার করা সহায়কসমূহ: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ডিভাইস ফ্লো), `museCodeDeviceResponse.ts`
 - হালকা র্যাপার: `src/lib/oauth/providers.ts` — স্বতন্ত্র মডিউলগুলো থেকে পুনরায় এক্সপোর্ট করে
 

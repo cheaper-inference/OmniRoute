@@ -21,7 +21,7 @@ OmniRoute हे Next.js वर तयार केलेले स्थान�
 - `compositeTiers` नुसार रनटाइम क्रमासह संरचित कॉम्बो टप्पे (`provider + model + connection`)
 - खाते-स्तरीय फॉलबॅक (प्रत्येक प्रदात्यासाठी अनेक खाती)
 - मुख्य चॅट पथामध्ये कोटा पूर्वतपासणी आणि कोटा-जागरूक P2C खाते निवड
-- OAuth + API-की प्रदाता कनेक्शन व्यवस्थापन (27 OAuth प्रदाता मॉड्यूल्स)
+- OAuth + API-की प्रदाता कनेक्शन व्यवस्थापन (28 OAuth प्रदाता मॉड्यूल्स)
 - `/v1/embeddings` द्वारे एम्बेडिंग निर्मिती (18 प्रदाते)
 - `/v1/images/generations` द्वारे प्रतिमा निर्मिती (10+ प्रदाते, 20+ मॉडेल्स)
 - `/v1/audio/transcriptions` द्वारे ऑडिओ लिप्यंतरण (18 प्रदाते)
@@ -64,7 +64,7 @@ OmniRoute हे Next.js वर तयार केलेले स्थान�
 - प्रॉम्प्ट इंजेक्शन गार्ड मिडलवेअर
 - Caveman, RTK, स्टॅक्ड पाइपलाइन्स, कॉम्प्रेशन कॉम्बोज, भाषा पॅक्स आणि विश्लेषणासह प्रॉम्प्ट कॉम्प्रेशन पाइपलाइन
 - ACP (Agent Communication Protocol) रजिस्ट्री
-- मॉड्युलर OAuth प्रदाते (`src/lib/oauth/providers/` अंतर्गत 22 स्वतंत्र मॉड्यूल्स)
+- मॉड्युलर OAuth प्रदाते (`src/lib/oauth/providers/` अंतर्गत 28 स्वतंत्र मॉड्यूल्स)
 - अनइन्स्टॉल/पूर्ण-अनइन्स्टॉल स्क्रिप्ट्स
 - OAuth पर्यावरण दुरुस्ती कृती
 - OpenAI-सुसंगत WS क्लायंट्ससाठी WebSocket ब्रिज (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - मूल्यमापन रनर: `src/lib/evals/evalRunner.ts`
 - डोमेन स्थिती पर्सिस्टन्स: `src/lib/db/domainState.ts` — फॉलबॅक चेन्स, बजेट्स, खर्चाचा इतिहास, लॉकआउट स्थिती आणि सर्किट ब्रेकर्ससाठी SQLite CRUD
 
-OAuth प्रोव्हायडर मॉड्यूल्स (`src/lib/oauth/providers/` अंतर्गत 27 स्वतंत्र फाइल्स):
+OAuth प्रोव्हायडर मॉड्यूल्स (`src/lib/oauth/providers/` अंतर्गत 28 स्वतंत्र फाइल्स):
 
 - रजिस्ट्री इंडेक्स: `src/lib/oauth/providers/index.ts`
-- स्वतंत्र प्रोव्हायडर्स: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- स्वतंत्र प्रोव्हायडर्स: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - सामायिक हेल्पर्स: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl डिव्हाइस फ्लो), `museCodeDeviceResponse.ts`
 - थिन रॅपर: `src/lib/oauth/providers.ts` — स्वतंत्र मॉड्यूल्समधून पुन्हा एक्सपोर्ट करतो
 

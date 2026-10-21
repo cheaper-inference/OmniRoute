@@ -28,7 +28,7 @@ OmniRoute 是一個以 Next.js 建置的本機 AI 路由閘道與儀表板。
 - 結構化組合步驟（`provider + model + connection`），並依 `compositeTiers` 進行執行階段排序
 - 帳戶層級備援（每個提供者可有多個帳戶）
 - 主要聊天路徑中的配額預檢，以及具配額感知能力的 P2C 帳戶選擇
-- OAuth + API 金鑰提供者連線管理（27 個 OAuth 提供者模組）
+- OAuth + API 金鑰提供者連線管理（28 個 OAuth 提供者模組）
 - 透過 `/v1/embeddings` 產生嵌入向量（18 個提供者）
 - 透過 `/v1/images/generations` 產生影像（10+ 個提供者、20+ 個模型）
 - 透過 `/v1/audio/transcriptions` 進行音訊轉錄（18 個提供者）
@@ -71,7 +71,7 @@ OmniRoute 是一個以 Next.js 建置的本機 AI 路由閘道與儀表板。
 - 提示詞注入防護中介軟體
 - 提示詞壓縮管線，支援 Caveman、RTK、堆疊式管線、壓縮組合、語言套件及分析
 - ACP（Agent Communication Protocol）登錄檔
-- 模組化 OAuth 提供者（`src/lib/oauth/providers/` 下有 22 個獨立模組）
+- 模組化 OAuth 提供者（`src/lib/oauth/providers/` 下有 28 個獨立模組）
 - 解除安裝／完整解除安裝指令碼
 - OAuth 環境修復動作
 - 適用於 OpenAI 相容 WS 用戶端的 WebSocket 橋接器（`/v1/ws`）
@@ -325,10 +325,10 @@ flowchart LR
 - 評估執行器：`src/lib/evals/evalRunner.ts`
 - 領域狀態持久化：`src/lib/db/domainState.ts` — 對備援鏈、預算、成本歷程、鎖定狀態及斷路器執行 SQLite CRUD
 
-OAuth 提供者模組（`src/lib/oauth/providers/` 下的 27 個獨立檔案）：
+OAuth 提供者模組（`src/lib/oauth/providers/` 下的 28 個獨立檔案）：
 
 - 登錄表索引：`src/lib/oauth/providers/index.ts`
-- 個別提供者：`agy.ts`、`antigravity.ts`、`claude.ts`、`cline.ts`、`codebuddy-cn.ts`、`codebuddy-intl.ts`、`codex.ts`、`cursor.ts`、`devin-desktop.ts`、`ghe-copilot.ts`、`github.ts`、`gitlab-duo.ts`、`grok-cli-oauth.ts`、`grok-cli.ts`、`kilocode.ts`、`kimi-coding.ts`、`kiro.ts`、`muse-code.ts`、`openference.ts`、`qoder.ts`、`trae.ts`、`workbuddy.ts`、`xai-oauth.ts`、`zed-hosted.ts`、`zed.ts`
+- 個別提供者：`agy.ts`、`antigravity.ts`、`claude.ts`、`cline.ts`、`codebuddy-cn.ts`、`codebuddy-intl.ts`、`codex.ts`、`cursor.ts`、`devin-desktop.ts`、`ghe-copilot.ts`、`github.ts`、`gitlab-duo.ts`、`grok-cli-oauth.ts`、`grok-cli.ts`、`kilocode.ts`、`kimi-coding.ts`、`kiro.ts`、`minimax-code.ts`、`muse-code.ts`、`openference.ts`、`qoder.ts`、`trae.ts`、`workbuddy.ts`、`xai-oauth.ts`、`zed-hosted.ts`、`zed.ts`
 - 共用輔助工具：`codebuddyDeviceAuth.ts`（CodeBuddy CN／intl 裝置流程）、`museCodeDeviceResponse.ts`
 - 輕量包裝器：`src/lib/oauth/providers.ts` — 從個別模組重新匯出
 

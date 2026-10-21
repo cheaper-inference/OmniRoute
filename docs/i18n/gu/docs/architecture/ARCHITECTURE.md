@@ -21,7 +21,7 @@ OmniRoute એ Next.js પર બનાવાયેલ સ્થાનિક AI �
 - `compositeTiers` દ્વારા રનટાઇમ ક્રમનિર્ધારણ સાથે સંરચિત કોમ્બો સ્ટેપ્સ (`provider + model + connection`)
 - એકાઉન્ટ-સ્તરીય ફૉલબૅક (દરેક પ્રદાતા માટે બહુવિધ એકાઉન્ટ)
 - મુખ્ય ચેટ પાથમાં ક્વોટા પ્રીફ્લાઇટ અને ક્વોટા-જાગૃત P2C એકાઉન્ટ પસંદગી
-- OAuth + API-કી પ્રદાતા કનેક્શન વ્યવસ્થાપન (27 OAuth પ્રદાતા મોડ્યુલો)
+- OAuth + API-કી પ્રદાતા કનેક્શન વ્યવસ્થાપન (28 OAuth પ્રદાતા મોડ્યુલો)
 - `/v1/embeddings` દ્વારા એમ્બેડિંગ જનરેશન (18 પ્રદાતાઓ)
 - `/v1/images/generations` દ્વારા ઇમેજ જનરેશન (10+ પ્રદાતાઓ, 20+ મોડેલો)
 - `/v1/audio/transcriptions` દ્વારા ઑડિયો ટ્રાન્સક્રિપ્શન (18 પ્રદાતાઓ)
@@ -64,7 +64,7 @@ OmniRoute એ Next.js પર બનાવાયેલ સ્થાનિક AI �
 - પ્રોમ્પ્ટ ઇન્જેક્શન ગાર્ડ મિડલવેર
 - Caveman, RTK, સ્ટૅક્ડ પાઇપલાઇન્સ, કમ્પ્રેશન કોમ્બો, લેંગ્વેજ પૅક્સ અને ઍનાલિટિક્સ સાથે પ્રોમ્પ્ટ કમ્પ્રેશન પાઇપલાઇન
 - ACP (Agent Communication Protocol) રજિસ્ટ્રી
-- મોડ્યુલર OAuth પ્રદાતાઓ (`src/lib/oauth/providers/` હેઠળ 22 અલગ મોડ્યુલો)
+- મોડ્યુલર OAuth પ્રદાતાઓ (`src/lib/oauth/providers/` હેઠળ 28 અલગ મોડ્યુલો)
 - અનઇન્સ્ટૉલ/ફુલ-અનઇન્સ્ટૉલ સ્ક્રિપ્ટ્સ
 - OAuth એન્વાયરમેન્ટ રિપેર ઍક્શન
 - OpenAI-સુસંગત WS ક્લાયન્ટ્સ માટે WebSocket બ્રિજ (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - ઇવૅલ રનર: `src/lib/evals/evalRunner.ts`
 - ડોમેન સ્ટેટ પર્સિસ્ટન્સ: `src/lib/db/domainState.ts` — ફૉલબૅક ચેઇન્સ, બજેટ્સ, ખર્ચ ઇતિહાસ, લૉકઆઉટ સ્ટેટ અને સર્કિટ બ્રેકર્સ માટે SQLite CRUD
 
-OAuth પ્રોવાઇડર મોડ્યુલો (`src/lib/oauth/providers/` હેઠળ 27 અલગ ફાઇલો):
+OAuth પ્રોવાઇડર મોડ્યુલો (`src/lib/oauth/providers/` હેઠળ 28 અલગ ફાઇલો):
 
 - રજિસ્ટ્રી ઇન્ડેક્સ: `src/lib/oauth/providers/index.ts`
-- વ્યક્તિગત પ્રોવાઇડર્સ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- વ્યક્તિગત પ્રોવાઇડર્સ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - શેર કરેલા હેલ્પર્સ: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ડિવાઇસ ફ્લો), `museCodeDeviceResponse.ts`
 - પાતળું રૅપર: `src/lib/oauth/providers.ts` — વ્યક્તિગત મોડ્યુલોમાંથી ફરીથી એક્સપોર્ટ કરે છે
 

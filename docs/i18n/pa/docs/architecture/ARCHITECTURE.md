@@ -21,7 +21,7 @@ OmniRoute, Next.js ਉੱਤੇ ਬਣਿਆ ਇੱਕ ਸਥਾਨਕ AI ਰੂ
 - `compositeTiers` ਮੁਤਾਬਕ ਰਨਟਾਈਮ ਕ੍ਰਮਬੱਧਤਾ ਦੇ ਨਾਲ ਸੰਰਚਿਤ ਕੌਂਬੋ ਪੜਾਅ (`provider + model + connection`)
 - ਖਾਤਾ-ਪੱਧਰੀ ਫਾਲਬੈਕ (ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਲਈ ਕਈ ਖਾਤੇ)
 - ਮੁੱਖ ਚੈਟ ਪਾਥ ਵਿੱਚ ਕੋਟਾ ਪ੍ਰੀਫਲਾਈਟ ਅਤੇ ਕੋਟਾ-ਜਾਗਰੂਕ P2C ਖਾਤਾ ਚੋਣ
-- OAuth + API-ਕੀ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ ਪ੍ਰਬੰਧਨ (27 OAuth ਪ੍ਰਦਾਤਾ ਮੋਡੀਊਲ)
+- OAuth + API-ਕੀ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ ਪ੍ਰਬੰਧਨ (28 OAuth ਪ੍ਰਦਾਤਾ ਮੋਡੀਊਲ)
 - `/v1/embeddings` ਰਾਹੀਂ ਐਮਬੈਡਿੰਗ ਜਨਰੇਸ਼ਨ (18 ਪ੍ਰਦਾਤਾ)
 - `/v1/images/generations` ਰਾਹੀਂ ਚਿੱਤਰ ਜਨਰੇਸ਼ਨ (10+ ਪ੍ਰਦਾਤਾ, 20+ ਮਾਡਲ)
 - `/v1/audio/transcriptions` ਰਾਹੀਂ ਆਡੀਓ ਟ੍ਰਾਂਸਕ੍ਰਿਪਸ਼ਨ (18 ਪ੍ਰਦਾਤਾ)
@@ -64,7 +64,7 @@ OmniRoute, Next.js ਉੱਤੇ ਬਣਿਆ ਇੱਕ ਸਥਾਨਕ AI ਰੂ
 - ਪ੍ਰੌਂਪਟ ਇੰਜੈਕਸ਼ਨ ਗਾਰਡ ਮਿਡਲਵੇਅਰ
 - Caveman, RTK, ਸਟੈਕਡ ਪਾਈਪਲਾਈਨਾਂ, ਕੰਪ੍ਰੈਸ਼ਨ ਕੌਂਬੋਜ਼, ਭਾਸ਼ਾ ਪੈਕਾਂ ਅਤੇ ਐਨਾਲਿਟਿਕਸ ਦੇ ਨਾਲ ਪ੍ਰੌਂਪਟ ਕੰਪ੍ਰੈਸ਼ਨ ਪਾਈਪਲਾਈਨ
 - ACP (Agent Communication Protocol) ਰਜਿਸਟਰੀ
-- ਮੋਡੀਊਲਰ OAuth ਪ੍ਰਦਾਤਾ (`src/lib/oauth/providers/` ਅਧੀਨ 22 ਵਿਅਕਤੀਗਤ ਮੋਡੀਊਲ)
+- ਮੋਡੀਊਲਰ OAuth ਪ੍ਰਦਾਤਾ (`src/lib/oauth/providers/` ਅਧੀਨ 28 ਵਿਅਕਤੀਗਤ ਮੋਡੀਊਲ)
 - ਅਨਇੰਸਟਾਲ/ਪੂਰਨ-ਅਨਇੰਸਟਾਲ ਸਕ੍ਰਿਪਟਾਂ
 - OAuth ਵਾਤਾਵਰਣ ਮੁਰੰਮਤ ਕਾਰਵਾਈ
 - OpenAI-ਅਨੁਕੂਲ WS ਕਲਾਇੰਟਾਂ ਲਈ WebSocket ਬ੍ਰਿਜ (`/v1/ws`)
@@ -319,10 +319,10 @@ flowchart LR
 - ਮੁਲਾਂਕਣ ਰਨਰ: `src/lib/evals/evalRunner.ts`
 - ਡੋਮੇਨ ਸਥਿਤੀ ਪਰਸਿਸਟੈਂਸ: `src/lib/db/domainState.ts` — ਫਾਲਬੈਕ ਚੇਨਾਂ, ਬਜਟਾਂ, ਲਾਗਤ ਇਤਿਹਾਸ, ਲੌਕਆਉਟ ਸਥਿਤੀ ਅਤੇ ਸਰਕਿਟ ਬ੍ਰੇਕਰਾਂ ਲਈ SQLite CRUD
 
-OAuth ਪ੍ਰਦਾਤਾ ਮੋਡੀਊਲ (`src/lib/oauth/providers/` ਅਧੀਨ 27 ਵੱਖਰੀਆਂ ਫਾਈਲਾਂ):
+OAuth ਪ੍ਰਦਾਤਾ ਮੋਡੀਊਲ (`src/lib/oauth/providers/` ਅਧੀਨ 28 ਵੱਖਰੀਆਂ ਫਾਈਲਾਂ):
 
 - ਰਜਿਸਟਰੀ ਇੰਡੈਕਸ: `src/lib/oauth/providers/index.ts`
-- ਵੱਖਰੇ ਪ੍ਰਦਾਤਾ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- ਵੱਖਰੇ ਪ੍ਰਦਾਤਾ: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - ਸਾਂਝੇ ਹੈਲਪਰ: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ਡਿਵਾਈਸ ਪ੍ਰਵਾਹ), `museCodeDeviceResponse.ts`
 - ਪਤਲਾ ਰੈਪਰ: `src/lib/oauth/providers.ts` — ਵੱਖਰੇ ਮੋਡੀਊਲਾਂ ਤੋਂ ਮੁੜ ਐਕਸਪੋਰਟ ਕਰਦਾ ਹੈ
 

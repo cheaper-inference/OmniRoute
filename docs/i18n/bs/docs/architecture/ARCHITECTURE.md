@@ -21,7 +21,7 @@ Osnovne mogućnosti:
 - Strukturirani koraci kombinacije (`provider + model + connection`) s redoslijedom tokom izvođenja prema `compositeTiers`
 - Rezervno prebacivanje na nivou računa (više računa po pružaocu)
 - Prethodna provjera kvote i P2C odabir računa uzimajući u obzir kvotu u glavnom toku razgovora
-- Upravljanje vezama s pružaocima putem OAuth-a i API ključeva (27 OAuth modula pružalaca)
+- Upravljanje vezama s pružaocima putem OAuth-a i API ključeva (28 OAuth modula pružalaca)
 - Generisanje ugrađivanja putem `/v1/embeddings` (18 pružalaca)
 - Generisanje slika putem `/v1/images/generations` (10+ pružalaca, 20+ modela)
 - Transkripcija zvuka putem `/v1/audio/transcriptions` (18 pružalaca)
@@ -64,7 +64,7 @@ Osnovne mogućnosti:
 - Middleware za zaštitu od umetanja zlonamjernih upita
 - Cjevovod za kompresiju upita s Cavemanom, RTK-om, naslaganim cjevovodima, kombinacijama kompresije, jezičkim paketima i analitikom
 - ACP (Agent Communication Protocol) registar
-- Modularni OAuth pružaoci (22 pojedinačna modula pod `src/lib/oauth/providers/`)
+- Modularni OAuth pružaoci (28 pojedinačna modula pod `src/lib/oauth/providers/`)
 - Skripte za deinstalaciju/potpunu deinstalaciju
 - Radnja popravke OAuth okruženja
 - WebSocket most za WS klijente kompatibilne s OpenAI-em (`/v1/ws`)
@@ -319,10 +319,10 @@ Moduli domenskog sloja:
 - Pokretač evaluacija: `src/lib/evals/evalRunner.ts`
 - Trajno pohranjivanje stanja domene: `src/lib/db/domainState.ts` — SQLite CRUD za lance rezervnih opcija, budžete, historiju troškova, stanje blokiranja i prekidače strujnog kola
 
-Moduli OAuth pružalaca usluga (27 pojedinačnih datoteka u `src/lib/oauth/providers/`):
+Moduli OAuth pružalaca usluga (28 pojedinačnih datoteka u `src/lib/oauth/providers/`):
 
 - Indeks registra: `src/lib/oauth/providers/index.ts`
-- Pojedinačni pružaoci usluga: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Pojedinačni pružaoci usluga: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Dijeljeni pomoćni moduli: `codebuddyDeviceAuth.ts` (tok autentifikacije uređaja za CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
 - Tanki omotač: `src/lib/oauth/providers.ts` — ponovo izvozi iz pojedinačnih modula
 

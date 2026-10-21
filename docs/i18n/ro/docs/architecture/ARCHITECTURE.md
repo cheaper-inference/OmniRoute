@@ -21,7 +21,7 @@ Capabilități principale:
 - Pași structurați pentru combinații (`provider + model + connection`), cu ordonare la execuție prin `compositeTiers`
 - Mecanism de rezervă la nivel de cont (mai multe conturi per furnizor)
 - Verificare preliminară a cotei și selectarea contului prin P2C în funcție de cotă, în fluxul principal de chat
-- Gestionarea conexiunilor la furnizori prin OAuth + chei API (27 de module pentru furnizori OAuth)
+- Gestionarea conexiunilor la furnizori prin OAuth + chei API (28 de module pentru furnizori OAuth)
 - Generarea de încorporări prin `/v1/embeddings` (18 furnizori)
 - Generarea de imagini prin `/v1/images/generations` (peste 10 furnizori, peste 20 de modele)
 - Transcriere audio prin `/v1/audio/transcriptions` (18 furnizori)
@@ -64,7 +64,7 @@ Capabilități principale:
 - Middleware de protecție împotriva injectării de prompturi
 - Flux de compresie a prompturilor cu Caveman, RTK, fluxuri suprapuse, combinații de compresie, pachete lingvistice și analize
 - Registru ACP (Agent Communication Protocol)
-- Furnizori OAuth modulari (22 de module individuale în `src/lib/oauth/providers/`)
+- Furnizori OAuth modulari (28 de module individuale în `src/lib/oauth/providers/`)
 - Scripturi de dezinstalare/dezinstalare completă
 - Acțiune de reparare a mediului OAuth
 - Punte WebSocket pentru clienți WS compatibili cu OpenAI (`/v1/ws`)
@@ -319,10 +319,10 @@ Modulele stratului de domeniu:
 - Executorul de evaluări: `src/lib/evals/evalRunner.ts`
 - Persistența stării domeniului: `src/lib/db/domainState.ts` — operațiuni CRUD SQLite pentru lanțuri de rezervă, bugete, istoricul costurilor, starea blocărilor și întrerupătoare de circuit
 
-Modulele furnizorilor OAuth (27 de fișiere individuale în `src/lib/oauth/providers/`):
+Modulele furnizorilor OAuth (28 de fișiere individuale în `src/lib/oauth/providers/`):
 
 - Indexul registrului: `src/lib/oauth/providers/index.ts`
-- Furnizori individuali: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Furnizori individuali: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Funcții auxiliare partajate: `codebuddyDeviceAuth.ts` (fluxul pe dispozitiv CodeBuddy CN/internațional), `museCodeDeviceResponse.ts`
 - Înveliș minimal: `src/lib/oauth/providers.ts` — reexportă din modulele individuale
 
