@@ -28,6 +28,7 @@ import {
   resolveAuthFile,
   type GatewayStreamState,
 } from "./minimaxCodeGateway.ts";
+import { runMinimaxCodeAcpTurn } from "./minimaxCodeAcp.ts";
 
 /**
  * MiniMax Code provider.
@@ -117,6 +118,8 @@ export interface MinimaxCodeRunResult {
 }
 
 export interface MinimaxCodeExecutorOptions {
+  /** Profile directory of the shared agent (default: the code profile). */
+  agentDataDir?: string;
   /** Path to the `mcode` binary (default: `mcode` from PATH). */
   command?: string;
   /** Replaces the computed `mcode exec` arguments — used by tests. */
@@ -688,6 +691,45 @@ export class MinimaxCodeExecutor extends BaseExecutor {
   }
 
   /**
+   * Whether the local transport runs on the shared agent.
+   *
+   * The switch is a deployment setting, not a code constant: a host that
+   * wants a process per request keeps the one-shot CLI run.
+   */
+  private sharedAgentEnabled(): boolean {
+    const raw = String(process.env.MINIMAX_CODE_SHARED_AGENT ?? "")
+      .trim()
+      .toLowerCase();
+    return raw === "1" || raw === "true" || raw === "yes";
+  }
+
+  /** One turn on the shared agent. */
+  private async runSharedAgentTurn(
+    options: MinimaxCodeRunOptions,
+    model: string
+  ): Promise<MinimaxCodeRunResult> {
+    const text = await runMinimaxCodeAcpTurn({
+      command: options.command,
+      // The shared agent speaks the Agent Client Protocol; the one-shot
+      // arguments of the CLI path do not apply to it.
+      args: ["acp"],
+      cwd: options.cwd,
+      prompt: options.prompt,
+      model,
+      timeoutMs: options.timeoutMs,
+      signal: options.signal,
+      env: options.env,
+      dataDir: this.options.agentDataDir,
+      onDelta: options.onDelta,
+    });
+    return {
+      text,
+      usage: null,
+      state: { text, usage: null, status: "completed", error: null },
+    };
+  }
+
+  /**
    * One call against the managed gateway. A token that expired mid-flight is
    * refreshed through the account OAuth endpoint and the call is repeated once.
    */
@@ -877,7 +919,16 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     const body = asRecord(input.body);
     const messages = Array.isArray(body.messages) ? (body.messages as OpenAIMsg[]) : [];
     const prompt = buildMinimaxCodePrompt(messages);
-    const runner = this.options.runner ?? runMinimaxCodeExec;
+    // The local transport runs on one shared agent when the deployment asks
+    // for it: the runtime costs a few hundred megabytes and a few seconds of
+    // start-up, and that cost is paid once for the whole process instead of
+    // once per request.
+    const runner =
+      this.options.runner ??
+      (this.sharedAgentEnabled()
+        ? (runOptions: MinimaxCodeRunOptions) =>
+            this.runSharedAgentTurn(runOptions, resolution.model)
+        : runMinimaxCodeExec);
     const mode = this.resolveModeForRequest(body);
     const clientTools = Array.isArray(body.tools) ? body.tools : [];
     const wantsTools = clientTools.length > 0;
