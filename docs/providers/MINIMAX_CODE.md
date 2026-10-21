@@ -78,6 +78,32 @@ That has two practical consequences:
 `MINIMAX_CODE_GATEWAY_URL` overrides the endpoint if your account or a proxy
 uses another one.
 
+## One shared agent for every request
+
+The local transport can run on **one shared agent** instead of one agent per
+request. A MiniMax Code runtime costs a few hundred megabytes and a few
+seconds of start-up; with one agent per request every concurrent request paid
+that cost again, and each one added its own copy to the instance.
+
+With `MINIMAX_CODE_SHARED_AGENT=true` the local transport speaks the **Agent
+Client Protocol** (`mcode acp`) and keeps one agent per profile for the whole
+process:
+
+- only the **session** is per request, the process cost is paid once;
+- an idle agent is closed after `MINIMAX_CODE_SHARED_AGENT_IDLE_MS`, which
+  releases its memory;
+- an agent that dies is replaced instead of handed out again;
+- an aborted request cancels its turn in the agent.
+
+The switch is a **deployment setting**, not a code constant: a host that wants
+one process per request keeps the one-shot CLI run. The profile of the agent
+is `MINIMAX_CODE_SHARED_AGENT_DATA_DIR`; empty uses the profile of the
+credential.
+
+The shared agent changes the transport, never the protocol: like the one-shot
+CLI run it cannot answer a request that carries client tools — such a request
+belongs to the gateway transport.
+
 ## Host tools need an explicit opt-in
 
 A CLI run in the **`standard` context** gives the agent the host tools (shell,
