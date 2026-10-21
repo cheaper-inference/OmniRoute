@@ -25,6 +25,10 @@ import {
   resolveChatPlaygroundEndpoint,
   resolveChatPlaygroundModel,
   parseChatPlaygroundDiscoveryModels,
+  fetchChatPlaygroundModels,
+  clearChatPlaygroundCatalogCache,
+  expireChatPlaygroundCatalogForTest,
+  CHATPLAYGROUND_FALLBACK_MODELS,
 } from "../../open-sse/services/chatplaygroundModels.ts";
 import { getChatPlaygroundUsage } from "../../open-sse/services/usage/chatplayground.ts";
 
@@ -660,4 +664,122 @@ test("ChatPlayground — discovery models parser", () => {
   assert.equal(parsed[0].name, "ChatGPT-6.1 Sol");
   assert.equal(parsed[0].owned_by, "chatplayground");
   assert.equal(parsed[1].id, "claude-sonnet-5-5");
+});
+
+test("ChatPlayground — dynamic catalog: live fetch, parse, cache", async () => {
+  clearChatPlaygroundCatalogCache();
+  const originalFetch = globalThis.fetch;
+  let fetchCount = 0;
+  const liveCatalog = [
+    {
+      botId: "grok-4.7",
+      displayName: "Grok 4.7",
+      modelName: "grok-4.7",
+      provider: "xAI",
+      group: "chat",
+      endpoint: "azure",
+      active: true,
+      creditWeight: 2,
+      premiumOnly: false,
+      contextWindow: 256000,
+    },
+    {
+      botId: "qwen3.7-plus",
+      displayName: "Qwen 3.7 Plus",
+      modelName: "qwen/qwen3.7-plus",
+      provider: "Qwen",
+      group: "chat",
+      endpoint: "lmsys",
+      active: true,
+      creditWeight: 1,
+      premiumOnly: false,
+    },
+    { botId: "gpt-image-2.5-flare", displayName: "GPT Image 2.5 Flare", group: "image" },
+  ];
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    fetchCount += 1;
+    const urlStr = String(input);
+    if (urlStr.includes("/api/models")) {
+      return new Response(JSON.stringify(liveCatalog), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response("Not found", { status: 404 });
+  }) as typeof fetch;
+
+  try {
+    const models = await fetchChatPlaygroundModels();
+    assert.equal(fetchCount, 1);
+    // non-chat group dropped, live rows parsed into full routing rows
+    assert.equal(models.length, 2);
+    const grok = models.find((m) => m.id === "grok-4.7")!;
+    assert.equal(grok.endpoint, "azure");
+    assert.equal(grok.provider, "xAI");
+    assert.equal(grok.active, true);
+    assert.equal(grok.premiumOnly, false);
+    assert.equal(grok.creditWeight, 2);
+    assert.equal(grok.contextLength, 256000);
+    const qwen = models.find((m) => m.id === "qwen3.7-plus")!;
+    assert.equal(qwen.endpoint, "lmsys");
+    assert.equal(qwen.modelName, "qwen/qwen3.7-plus");
+
+    // cache: a second call within the TTL does not re-fetch
+    const again = await fetchChatPlaygroundModels();
+    assert.equal(fetchCount, 1);
+    assert.equal(again.length, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+    clearChatPlaygroundCatalogCache();
+  }
+});
+
+test("ChatPlayground — dynamic catalog: outage falls back to bundled catalog", async () => {
+  clearChatPlaygroundCatalogCache();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    throw new Error("network down");
+  }) as typeof fetch;
+
+  try {
+    const models = await fetchChatPlaygroundModels();
+    assert.equal(models, CHATPLAYGROUND_FALLBACK_MODELS);
+
+    // after a good fetch, a later outage keeps the last good live catalog
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      if (String(input).includes("/api/models")) {
+        return new Response(
+          JSON.stringify([
+            {
+              botId: "kimi-k2.6",
+              displayName: "Kimi K",
+              modelName: "kimi-k2.6",
+              provider: "kimi",
+              group: "chat",
+              endpoint: "azure",
+              active: true,
+            },
+          ]),
+          { status: 200, headers: { "content-type": "application/json" } }
+        );
+      }
+      return new Response("Not found", { status: 404 });
+    }) as typeof fetch;
+    const live = await fetchChatPlaygroundModels();
+    assert.equal(live.length, 1);
+    assert.equal(live[0].id, "kimi-k2.6");
+    assert.equal(live[0].endpoint, "azure");
+
+    // TTL expires and discovery is down again -> the last good live catalog is served
+    expireChatPlaygroundCatalogForTest();
+    globalThis.fetch = (async () => {
+      throw new Error("network down");
+    }) as typeof fetch;
+    const stale = await fetchChatPlaygroundModels();
+    assert.equal(stale.length, 1);
+    assert.equal(stale[0].id, "kimi-k2.6");
+  } finally {
+    globalThis.fetch = originalFetch;
+    clearChatPlaygroundCatalogCache();
+  }
 });

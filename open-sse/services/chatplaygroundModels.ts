@@ -520,6 +520,119 @@ function trimmedString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+/**
+ * Build a full ChatPlaygroundModel from one live /api/models item. Returns null
+ * for unusable rows (missing botId, non-chat group).
+ */
+function buildCatalogModel(item: unknown, seen: Set<string>): ChatPlaygroundModel | null {
+  if (!item || typeof item !== "object") return null;
+  const rec = item as Record<string, unknown>;
+  const botId = trimmedString(rec.botId);
+  if (!botId || seen.has(botId)) return null;
+  if (rec.group && rec.group !== "chat") return null;
+  seen.add(botId);
+  const modelName = trimmedString(rec.modelName) || botId;
+  const name = trimmedString(rec.displayName) || modelName;
+  const provider = trimmedString(rec.provider);
+  const endpointHint = trimmedString(rec.endpoint).toLowerCase();
+  const endpoint = resolveChatPlaygroundEndpoint({
+    endpoint: endpointHint || undefined,
+    provider: provider || undefined,
+    botId,
+  });
+  const active = rec.active === undefined ? true : rec.active === true;
+  return {
+    id: botId,
+    name,
+    modelName,
+    provider: provider || undefined,
+    endpoint,
+    active,
+    creditWeight: typeof rec.creditWeight === "number" ? rec.creditWeight : 1,
+    premiumOnly: rec.premiumOnly === true,
+    contextLength:
+      typeof rec.contextWindow === "number"
+        ? rec.contextWindow
+        : typeof rec.maxTokens === "number"
+          ? rec.maxTokens
+          : CHATPLAYGROUND_DEFAULT_CONTEXT,
+  };
+}
+
+/**
+ * Live catalog cache (10-minute TTL). The live GET /api/models is
+ * unauthenticated, so requests can build their routing row from the current
+ * roster without shipping a static model list; the offline fallback catalog
+ * covers discovery outages.
+ */
+const CATALOG_TTL_MS = 10 * 60_000;
+let catalogCache: { models: ChatPlaygroundModel[]; fetchedAt: number } | null = null;
+let catalogInflight: Promise<ChatPlaygroundModel[]> | null = null;
+
+/**
+ * Resolve the current live model catalog, with a 10-minute in-memory cache and
+ * a single in-flight guard. On any fetch/parse failure it falls back to the
+ * last good live catalog, or the offline fallback catalog if none was loaded.
+ * The returned array is a safe reference — callers must not mutate it.
+ */
+export async function fetchChatPlaygroundModels(): Promise<ChatPlaygroundModel[]> {
+  const now = Date.now();
+  if (catalogCache && now - catalogCache.fetchedAt < CATALOG_TTL_MS) {
+    return catalogCache.models;
+  }
+  if (catalogInflight) return catalogInflight;
+  catalogInflight = (async () => {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15_000);
+      let res: Response;
+      try {
+        res = await fetch(CHATPLAYGROUND_MODELS_URL, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Origin: CHATPLAYGROUND_WEB_ORIGIN,
+            Referer: `${CHATPLAYGROUND_WEB_ORIGIN}/`,
+          },
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
+      if (res.ok) {
+        const data: unknown = await res.json();
+        const seen = new Set<string>();
+        const models = extractRawModelList(data)
+          .map((item) => buildCatalogModel(item, seen))
+          .filter((m): m is ChatPlaygroundModel => m !== null);
+        if (models.length > 0) {
+          catalogCache = { models, fetchedAt: Date.now() };
+          return models;
+        }
+      }
+    } catch {
+      // discovery outage (network, timeout, malformed payload) — fall through
+    }
+    return catalogCache?.models ?? CHATPLAYGROUND_FALLBACK_MODELS;
+  })();
+  try {
+    return await catalogInflight;
+  } finally {
+    catalogInflight = null;
+  }
+}
+
+/** Drop the in-memory live catalog cache (testing / config changes). */
+export function clearChatPlaygroundCatalogCache(): void {
+  catalogCache = null;
+  catalogInflight = null;
+}
+
+/** Test hook: age the cached catalog past its TTL so the next call refetches. */
+export function expireChatPlaygroundCatalogForTest(): void {
+  if (catalogCache) catalogCache.fetchedAt = 0;
+}
+
 function parseDiscoveryItem(
   item: unknown,
   seen: Set<string>

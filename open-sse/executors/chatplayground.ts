@@ -19,6 +19,7 @@ import {
 import { resolveChatPlaygroundAuth } from "../services/chatplaygroundAuth.ts";
 import {
   CHATPLAYGROUND_API_BASE,
+  fetchChatPlaygroundModels,
   resolveChatPlaygroundModel,
   type ChatPlaygroundModel,
 } from "../services/chatplaygroundModels.ts";
@@ -72,6 +73,20 @@ export function resolveChatPlaygroundUpstreamModel(modelData: ChatPlaygroundMode
     return `${provider}/${modelData.modelName}`;
   }
   return modelData.modelName;
+}
+
+/**
+ * Resolve a request's model against the current live /api/models catalog
+ * (10-minute cached, offline fallback), falling back to the bundled catalog so
+ * a model the live roster no longer lists still routes rather than 400ing.
+ */
+async function resolveChatPlaygroundModelForRequest(
+  model: string
+): Promise<ChatPlaygroundModel | null> {
+  const live = await fetchChatPlaygroundModels();
+  const fromLive = resolveChatPlaygroundModel(model, live);
+  if (fromLive) return fromLive;
+  return resolveChatPlaygroundModel(model);
 }
 
 /**
@@ -290,7 +305,7 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
     const { model, body, stream, credentials, signal } = input;
     const chatUrl = `${CHATPLAYGROUND_API_BASE}/chat`;
 
-    const modelData = resolveChatPlaygroundModel(model);
+    const modelData = await resolveChatPlaygroundModelForRequest(model);
     if (!modelData) {
       return makeErrorResult(
         400,
