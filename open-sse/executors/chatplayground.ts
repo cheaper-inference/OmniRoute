@@ -77,9 +77,9 @@ export function resolveChatPlaygroundUpstreamModel(modelData: ChatPlaygroundMode
 /**
  * Build the JSON request payload for ChatPlayground API.
  * Field sets mirror what web.chatplayground.ai sends per endpoint:
- *   - azure:     messages, model, chatId, isRegenerate, promptTemplate, fileUrl, botId, submissionId, noSave
- *   - lmsys:     messages, model
- *   - perplexity: messages, modelName
+ *   - azure:      messages, model, chatId, isRegenerate, promptTemplate, fileUrl, botId, submissionId, noSave
+ *   - lmsys:      messages, model, botId (botId is required — the API 500s without it)
+ *   - perplexity: messages, modelName, botId (botId is required — the API 500s without it)
  */
 export function buildChatPlaygroundPayload(
   body: unknown,
@@ -89,11 +89,11 @@ export function buildChatPlaygroundPayload(
   const messages = Array.isArray(req.messages) ? req.messages : [];
 
   if (modelData.endpoint === "perplexity") {
-    return { messages, modelName: modelData.modelName };
+    return { messages, modelName: modelData.modelName, botId: modelData.id };
   }
 
   if (modelData.endpoint === "lmsys") {
-    return { messages, model: modelData.modelName };
+    return { messages, model: modelData.modelName, botId: modelData.id };
   }
 
   return {
@@ -133,15 +133,19 @@ export function toOpenAiCompletionEnvelope(model: string, content: string): Resp
 }
 
 /**
- * Strip the `CITATIONS:[...]` metadata line the perplexity endpoint appends to its
- * answer stream (the web client parses it for citation links instead of rendering it).
+ * Strip the `CITATIONS:[...]` metadata the perplexity endpoint appends to its
+ * answer stream (the web client parses it for citation links instead of
+ * rendering it). The marker can arrive on its own line OR inline right after
+ * the answer text (e.g. `…Canberra**.[1]CITATIONS:[…]`), so both forms are
+ * removed: whole `CITATIONS:` lines, and `CITATIONS:` runs to end of line.
  */
 export function stripCitationsLine(text: string): string {
   if (!text) return "";
   return text
     .split("\n")
     .filter((line) => !line.trimStart().startsWith("CITATIONS:"))
-    .join("\n");
+    .join("\n")
+    .replace(/CITATIONS:[^\n]*/g, "");
 }
 
 /** Count characters in a Chat Completions message `content` (string or multipart). */

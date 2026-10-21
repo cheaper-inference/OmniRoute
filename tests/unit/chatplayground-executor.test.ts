@@ -187,7 +187,7 @@ test("ChatPlayground — model & endpoint resolution", () => {
   assert.equal(resolveChatPlaygroundEndpoint("kimi-k3"), "lmsys");
   assert.equal(resolveChatPlaygroundEndpoint("llama-4-scout"), "lmsys");
   assert.equal(resolveChatPlaygroundEndpoint("qwen3.8-max"), "lmsys");
-  assert.equal(resolveChatPlaygroundEndpoint("grok-4.7"), "lmsys");
+  assert.equal(resolveChatPlaygroundEndpoint("grok-4.7"), "azure");
   assert.equal(resolveChatPlaygroundEndpoint("perplexity-sonar-pro"), "perplexity");
   assert.equal(resolveChatPlaygroundEndpoint("sonar-pro"), "perplexity");
 
@@ -207,14 +207,19 @@ test("ChatPlayground — model & endpoint resolution", () => {
   assert.equal(m3.endpoint, "perplexity");
   assert.equal(m3.modelName, "sonar-pro");
 
-  // Catalog reflects the live /api/models contract: latest bots, provider hints, and
-  // endpoint assignments that keyword heuristics would get wrong (kimi-k2.6 and
-  // grok-4.6 are served on azure, llama/qwen/glm use vendor-namespaced modelNames).
+  // Catalog reflects the live /api/models contract (2026-10-21): latest bots, provider hints,
+  // and endpoint assignments that keyword heuristics would get wrong (kimi-k2.6 is served on
+  // azure, llama/qwen/glm use vendor-namespaced modelNames, grok-4.7 moved to azure, and
+  // grok-4.6 was retired from the live roster).
   const m4 = resolveChatPlaygroundModel("kimi-k2.6");
   assert.ok(m4);
   assert.equal(m4.endpoint, "azure");
+  const m4b = resolveChatPlaygroundModel("grok-4.7");
+  assert.ok(m4b);
+  assert.equal(m4b.endpoint, "azure");
   const m5 = resolveChatPlaygroundModel("grok-4.6");
   assert.ok(m5);
+  assert.equal(m5.active, false);
   assert.equal(m5.endpoint, "azure");
   const m6 = resolveChatPlaygroundModel("llama-4-scout");
   assert.ok(m6);
@@ -234,9 +239,10 @@ test("ChatPlayground — payload construction & CHAT_ID stripping", () => {
   assert.equal(stripChatId("CHAT_ID:prefix_123 Hello world"), "Hello world");
   assert.equal(stripChatId("Hello CHAT_ID:mid_456 world"), "Hello  world");
 
-  // CITATIONS line stripping (perplexity endpoint appends a metadata line)
+  // CITATIONS stripping (perplexity endpoint appends metadata — on its own line or inline)
   assert.equal(stripCitationsLine('Answer text\nCITATIONS:[{"url":"https://a"}]'), "Answer text");
   assert.equal(stripCitationsLine("no citations here"), "no citations here");
+  assert.equal(stripCitationsLine("The capital is **Canberra**.[1]CITATIONS:[\"https://a\",\"https://b\"]"), "The capital is **Canberra**.[1]");
 
   // Azure payload mirrors the web client: vendor-prefixed model, botId, noSave
   const modelAzure = resolveChatPlaygroundModel("gpt-6.1-sol")!;
@@ -263,17 +269,20 @@ test("ChatPlayground — payload construction & CHAT_ID stripping", () => {
   const gemini = resolveChatPlaygroundModel("gemini-3.8-flash-l")!;
   assert.equal(resolveChatPlaygroundUpstreamModel(gemini), "google/gemini-3.8-flash");
 
-  // LMSYS payload: plain vendor-namespaced model, no azure-only fields
+  // LMSYS payload: plain vendor-namespaced model + botId (required — the API 500s without it),
+  // no azure-only fields
   const modelLmsys = resolveChatPlaygroundModel("qwen3.8-max")!;
   const payloadLmsys = buildChatPlaygroundPayload(
     { messages: [{ role: "user", content: "Hi" }] },
     modelLmsys
   );
   assert.equal(payloadLmsys.model, "qwen/qwen3.8-max");
-  assert.equal("botId" in payloadLmsys, false);
+  assert.equal(payloadLmsys.botId, "qwen3.8-max");
   assert.equal("noSave" in payloadLmsys, false);
+  assert.equal("chatId" in payloadLmsys, false);
 
-  // Perplexity payload uses modelName, not model/botId
+  // Perplexity payload uses modelName + botId (required — the API 500s without it),
+  // not the azure model field
   const modelPplx = resolveChatPlaygroundModel("perplexity-sonar-pro")!;
   const payloadPplx = buildChatPlaygroundPayload(
     {
@@ -282,7 +291,7 @@ test("ChatPlayground — payload construction & CHAT_ID stripping", () => {
     modelPplx
   );
   assert.equal(payloadPplx.modelName, "sonar-pro");
-  assert.equal("botId" in payloadPplx, false);
+  assert.equal(payloadPplx.botId, "perplexity-sonar-pro");
   assert.equal("model" in payloadPplx, false);
 });
 

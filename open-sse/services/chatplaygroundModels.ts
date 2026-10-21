@@ -168,14 +168,14 @@ export const CHATPLAYGROUND_FALLBACK_MODELS: ChatPlaygroundModel[] = [
     premiumOnly: false,
     contextLength: 128_000,
   },
-  // grok-4.6 is served through the Azure endpoint (unlike grok-4.7 on lmsys)
+  // grok-4.6 retired from the live catalog (2026-10-21); grok-4.7 is now served on azure
   {
     id: "grok-4.6",
     name: "Grok 4.6",
     modelName: "grok-4.6",
     provider: "xAI",
     endpoint: "azure",
-    active: true,
+    active: false,
     creditWeight: 2,
     premiumOnly: false,
     contextLength: 128_000,
@@ -336,15 +336,16 @@ export const CHATPLAYGROUND_FALLBACK_MODELS: ChatPlaygroundModel[] = [
     premiumOnly: false,
     contextLength: 128_000,
   },
+  // grok-4.7 moved from lmsys to azure in the live catalog (2026-10-21)
   {
     id: "grok-4.7",
     name: "Grok 4.7",
     modelName: "grok-4.7",
     provider: "xAI",
-    endpoint: "lmsys",
+    endpoint: "azure",
     active: true,
     creditWeight: 2,
-    premiumOnly: true,
+    premiumOnly: false,
     contextLength: 128_000,
   },
   {
@@ -444,7 +445,7 @@ const LMSYS_PROVIDERS = [
   "qwen",
   "deepseek",
 ];
-const LMSYS_KEYWORDS = ["llama", "qwen", "grok", "glm", "minimax", "command", "kimi"];
+const LMSYS_KEYWORDS = ["llama", "qwen", "glm", "minimax", "command", "kimi"];
 
 function readEndpointHints(
   modelInfo:
