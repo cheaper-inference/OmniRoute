@@ -403,6 +403,33 @@ export async function readAuthProfile(path: string): Promise<MinimaxAuthProfile 
  * If MiniMax extends that format, this writer has to follow it — OmniRoute is
  * a second writer of a credential store owned by another application.
  */
+/**
+ * Read the generation the CLI keeps in its own state file.
+ *
+ * The CLI bumps that counter on every refresh of its own, so it can be ahead
+ * of the generation stored in the credential record. Whoever writes the record
+ * has to respect the higher of the two: a generation that goes backwards makes
+ * the CLI treat the session as expired ("Sign in to MiniMax to use Agent
+ * features") even though the credential is fresh.
+ */
+export async function readStateGeneration(path: string): Promise<number | null> {
+  try {
+    const state = asRecord(JSON.parse(await readFile(join(dirname(path), "auth-state.json"), "utf8")));
+    return typeof state.generation === "number" ? state.generation : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The generation to store for a rotated credential: one above the highest
+ * generation any writer of this store has used.
+ */
+async function nextGeneration(path: string, current: number): Promise<number> {
+  const stateGeneration = await readStateGeneration(path);
+  return Math.max(current, stateGeneration ?? 0) + 1;
+}
+
 async function writeAuthState(path: string, profile: MinimaxAuthProfile): Promise<void> {
   const statePath = join(dirname(path), "auth-state.json");
   let state: JsonRecord;
@@ -413,7 +440,8 @@ async function writeAuthState(path: string, profile: MinimaxAuthProfile): Promis
     return;
   }
   if (typeof state.generation !== "number") return;
-  state.generation = profile.generation;
+  // Never move the CLI's own counter backwards.
+  state.generation = Math.max(state.generation, profile.generation);
   state.expiresAtMs = profile.expiresAtMs;
   state.status = "authenticated";
   const tmp = `${statePath}.tmp`;
@@ -427,19 +455,75 @@ async function writeAuthProfile(path: string, profile: MinimaxAuthProfile): Prom
   const doc = asRecord(JSON.parse(await readFile(path, "utf8")));
   const records = asRecord(doc.records);
   const keys = Object.keys(records);
-  if (!keys.length) return;
   // Write the credential back into the record it came from: the profile can
   // hold several accounts, and refreshing one of them must not touch another.
-  const key = profile.recordKey && keys.includes(profile.recordKey) ? profile.recordKey : keys[0];
+  const key =
+    profile.recordKey && keys.includes(profile.recordKey)
+      ? profile.recordKey
+      : keys[0] || profile.recordKey || "";
+  if (!key) return;
   const record = asRecord(records[key]);
   record.accessToken = profile.accessToken;
   if (profile.refreshToken) record.refreshToken = profile.refreshToken;
   record.expiresAtMs = profile.expiresAtMs;
   record.generation = profile.generation;
+  if (!record.clientId) record.clientId = profile.clientId;
+  if (!Array.isArray(record.scopes)) record.scopes = profile.scopes;
+  if (!record.audience) record.audience = profile.audience;
+  records[key] = record;
+  doc.records = records;
   const tmp = `${path}.tmp`;
   await writeFile(tmp, `${JSON.stringify(doc, null, 2)}\n`, { mode: 0o600 });
   await rename(tmp, path);
   await chmod(path, 0o600).catch(() => undefined);
+}
+
+export interface PersistCredentialOptions {
+  accessToken: string;
+  refreshToken?: string;
+  /** Absolute expiry of the access token in milliseconds since the epoch. */
+  expiresAtMs?: number;
+  clientId?: string;
+  scopes?: string[];
+  audience?: string;
+  path?: string;
+}
+
+/**
+ * Store a credential that was obtained outside the CLI — for example through
+ * the dashboard's device-code flow — in the MiniMax Code profile, so the CLI
+ * and the local agent pick it up on their next session.
+ *
+ * The profile belongs to the MiniMax Code application, so the write follows
+ * its rules: the record's generation is raised above every generation in use
+ * and the CLI's state file is marked as authenticated.
+ */
+export async function persistProfileCredential(
+  options: PersistCredentialOptions
+): Promise<MinimaxAuthProfile> {
+  const path = options.path || resolveAuthFile();
+  const doc = asRecord(JSON.parse(await readFile(path, "utf8")));
+  const records = asRecord(doc.records);
+  const keys = Object.keys(records);
+  const key = keys[0] || "com.minimax.mcode.oauth.prod.en\u0000local";
+  const record = asRecord(records[key]);
+  const generation = await nextGeneration(path, Number(record.generation ?? 0) || 0);
+  const profile: MinimaxAuthProfile = {
+    accessToken: options.accessToken,
+    refreshToken: options.refreshToken,
+    clientId: options.clientId || asString(record.clientId) || "mcode-public",
+    scopes:
+      options.scopes ??
+      (Array.isArray(record.scopes) ? record.scopes.map(asString) : ["agent.default"]),
+    audience: options.audience || asString(record.audience) || "agent-backend",
+    expiresAtMs: options.expiresAtMs ?? Date.now() + 3600 * 1000,
+    generation,
+    path,
+    recordKey: key,
+  };
+  await writeAuthProfile(path, profile);
+  await writeAuthState(path, profile).catch(() => undefined);
+  return profile;
 }
 
 export interface EnsureTokenOptions {
@@ -518,7 +602,7 @@ export async function refreshAuthProfile(
     accessToken,
     refreshToken: asString(data.refresh_token) || profile.refreshToken,
     expiresAtMs: Date.now() + (expiresIn > 0 ? expiresIn : 3600) * 1000,
-    generation: profile.generation + 1,
+    generation: await nextGeneration(profile.path, profile.generation),
   };
   try {
     await writeAuthProfile(profile.path, updated);
