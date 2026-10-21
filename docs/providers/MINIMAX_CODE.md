@@ -17,7 +17,7 @@ for it. It reads the credential from your own local MiniMax Code profile
 | Transport | What it does | When it is used |
 | --- | --- | --- |
 | `gateway` (default) | One call to the managed MiniMax subscription gateway. It speaks the native tool protocol, so a request that carries client tools comes back as OpenAI `tool_calls`. **No fallback**: a failing gateway answers with a `502` that names the transport. | Every request. |
-| `cli` | Runs the locally installed MiniMax Code CLI (`mcode exec --output-format stream-json`) in the lightweight conversation profile. | Opt-in (`MINIMAX_CODE_TRANSPORT=cli`). |
+| `cli` | Runs the locally installed MiniMax Code CLI (`mcode exec --output-format stream-json`) in the lightweight conversation profile — or on the shared agent below, when `MINIMAX_CODE_SHARED_AGENT` is on. | Opt-in (`MINIMAX_CODE_TRANSPORT=cli`). |
 | `auto` | Requests with client tools to the gateway, plain chat to the CLI. | Opt-in (`MINIMAX_CODE_TRANSPORT=auto`). |
 
 The gateway transport has **no fallback**: a request that cannot be answered
@@ -93,7 +93,8 @@ process:
 - an idle agent is closed after `MINIMAX_CODE_SHARED_AGENT_IDLE_MS`, which
   releases its memory;
 - an agent that dies is replaced instead of handed out again;
-- an aborted request cancels its turn in the agent.
+- an aborted request cancels its turn in the agent and ends at once — it does
+  not wait for the turn timeout.
 
 The switch is a **deployment setting**, not a code constant: a host that wants
 one process per request keeps the one-shot CLI run. The profile of the agent
@@ -103,6 +104,20 @@ credential.
 The shared agent changes the transport, never the protocol: like the one-shot
 CLI run it cannot answer a request that carries client tools — such a request
 belongs to the gateway transport.
+
+Three things the shared agent does differently from the one-shot CLI run, worth
+knowing before it is switched on:
+
+- **The one-shot CLI flags do not reach it.** `MINIMAX_CODE_PERMISSION`,
+  `MINIMAX_CODE_MODE` and `MINIMAX_CODE_MAX_STEPS` configure the one-shot run;
+  a shared agent session has its own permission model and runs as one turn.
+  The host-tools opt-in (`MINIMAX_CODE_ALLOW_HOST_TOOLS`) still applies.
+- **Usage is estimated.** The Agent Client Protocol carries no token counts, so
+  the answer reports estimated usage (`usage.estimated = true`) instead of the
+  real counts the one-shot run reports.
+- **Every turn opens a session.** The protocol has no `session/close`, so the
+  agent keeps the session state of the last turns until the idle timeout
+  closes it.
 
 ## Host tools need an explicit opt-in
 

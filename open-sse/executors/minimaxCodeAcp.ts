@@ -1,4 +1,5 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { mkdirSync } from "node:fs";
 
 /**
  * One shared MiniMax Code agent over the Agent Client Protocol.
@@ -56,6 +57,8 @@ interface PendingRequest {
   resolve: (value: unknown) => void;
   reject: (error: Error) => void;
   timer: ReturnType<typeof setTimeout>;
+  /** The session this request belongs to, when it has one. */
+  sessionId?: string;
 }
 
 interface SessionListener {
@@ -85,9 +88,11 @@ export class MinimaxCodeAcpClient {
   private child: ChildProcessWithoutNullStreams | null = null;
   private buffer = "";
   private readonly pending = new Map<string, PendingRequest>();
-  private readonly listeners = new Map<string, SessionListener>();
+  private readonly listeners = new Map<string, Set<SessionListener>>();
   private nextRequestId = 1;
   private closed = false;
+  /** The failure that killed the agent, when it died. */
+  private failure: Error | null = null;
 
   constructor(options: MinimaxCodeAcpOptions) {
     this.options = options;
@@ -102,15 +107,36 @@ export class MinimaxCodeAcpClient {
     if (this.child) return;
     const env = { ...process.env, ...(this.options.env ?? {}) };
     if (this.options.dataDir) env.MINIMAX_DATA_DIR = this.options.dataDir;
-    this.child = spawn(this.options.command, this.options.args ?? ["acp"], {
+    // The agent runs in a working directory it must be able to enter: a
+    // missing directory is a spawn error, and an unhandled spawn error would
+    // take the whole server down.
+    if (this.options.cwd) {
+      try {
+        mkdirSync(this.options.cwd, { recursive: true });
+      } catch {
+        // The spawn below reports the real error with the real path.
+      }
+    }
+    const child = spawn(this.options.command, this.options.args ?? ["acp"], {
       stdio: ["pipe", "pipe", "pipe"],
       cwd: this.options.cwd,
       env,
     });
-    this.child.stdout.on("data", (chunk: Buffer) => this.feed(chunk.toString("utf8")));
-    this.child.stderr.on("data", () => undefined);
-    this.child.on("exit", () => {
-      const error = new Error("MiniMax Code agent exited");
+    this.child = child;
+    child.stdout.on("data", (chunk: Buffer) => this.feed(chunk.toString("utf8")));
+    child.stderr.on("data", () => undefined);
+    // A spawn failure (a missing binary, a missing working directory) arrives
+    // as an asynchronous 'error' event. Without a listener it becomes an
+    // uncaught exception and kills the server, so it is turned into a failed
+    // request like every other agent error.
+    child.on("error", (error: Error) => {
+      this.fail(new Error(`MiniMax Code agent could not start: ${error.message}`));
+    });
+    // Writing to a dead pipe is an EPIPE error, not a reason to crash.
+    child.stdin.on("error", () => undefined);
+    child.on("exit", () => {
+      this.child = null;
+      const error = this.failure ?? new Error("MiniMax Code agent exited");
       this.failAll(error);
       this.options.onExit?.(error);
     });
@@ -149,26 +175,40 @@ export class MinimaxCodeAcpClient {
 
   /** Watch the answer of one session. */
   onSession(sessionId: string, listener: SessionListener): () => void {
-    this.listeners.set(sessionId, listener);
-    return () => this.listeners.delete(sessionId);
+    let group = this.listeners.get(sessionId);
+    if (!group) {
+      group = new Set<SessionListener>();
+      this.listeners.set(sessionId, group);
+    }
+    group.add(listener);
+    return () => {
+      const current = this.listeners.get(sessionId);
+      if (!current) return;
+      current.delete(listener);
+      if (current.size === 0) this.listeners.delete(sessionId);
+    };
   }
 
   /**
    * Send one prompt and wait for the turn to end.
    *
    * The answer arrives as `session/update` notifications, the result of the
-   * prompt request carries the stop reason.
+   * prompt request carries the stop reason. `onChunk` is called for every
+   * text chunk as it arrives, so a streaming client sees the turn as it is
+   * written instead of one delta at the end.
    */
   async prompt(
     sessionId: string,
     text: string,
-    timeoutMs: number = this.options.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS
+    timeoutMs: number = this.options.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+    onChunk?: (delta: string) => void
   ): Promise<MinimaxCodeAcpTurn> {
     let answer = "";
     let thinking = "";
     const stop = this.onSession(sessionId, {
       onText: (delta) => {
         answer += delta;
+        onChunk?.(delta);
       },
       onThinking: (delta) => {
         thinking += delta;
@@ -176,7 +216,12 @@ export class MinimaxCodeAcpClient {
     });
     try {
       const result = asRecord(
-        await this.request("session/prompt", { sessionId, prompt: [{ type: "text", text }] }, timeoutMs)
+        await this.request(
+          "session/prompt",
+          { sessionId, prompt: [{ type: "text", text }] },
+          timeoutMs,
+          sessionId
+        )
       );
       const stopReason = typeof result.stopReason === "string" ? result.stopReason : "end_turn";
       return { text: answer.trim(), thinking: thinking.trim(), stopReason };
@@ -185,26 +230,34 @@ export class MinimaxCodeAcpClient {
     }
   }
 
-  /** Cancel the turn of a session. */
+  /**
+   * Cancel the turn of a session.
+   *
+   * The agent is asked to stop, and the pending prompt of that session is
+   * settled locally: a cancelled request must not hold its model slot until
+   * the turn timeout.
+   */
   async cancel(sessionId: string): Promise<void> {
     await this.request("session/cancel", { sessionId }, 5_000).catch(() => undefined);
+    this.settleSession(sessionId, new Error("MiniMax Code request aborted"));
   }
 
   async close(): Promise<void> {
     if (this.closed) return;
     this.closed = true;
     this.failAll(new Error("MiniMax Code agent client closed"));
+    const child = this.child;
+    this.child = null;
     try {
-      this.child?.stdin.end();
+      child?.stdin.end();
     } catch {
       // The pipe may already be gone; the exit handler covers the rest.
     }
     try {
-      this.child?.kill("SIGTERM");
+      child?.kill("SIGTERM");
     } catch {
       // Best effort: the agent may have exited on its own.
     }
-    this.child = null;
   }
 
   private feed(chunk: string): void {
@@ -246,21 +299,26 @@ export class MinimaxCodeAcpClient {
     const update = asRecord(params.update);
     const sessionId = typeof params.sessionId === "string" ? params.sessionId : undefined;
     if (!sessionId) return;
-    const listener = this.listeners.get(sessionId);
-    if (!listener) return;
+    const group = this.listeners.get(sessionId);
+    if (!group || group.size === 0) return;
     const kind = update.sessionUpdate;
-    if (kind === "agent_message_chunk") {
-      const delta = contentText(update.content);
-      if (delta) listener.onText?.(delta);
-      return;
-    }
-    if (kind === "agent_thought_chunk") {
-      const delta = contentText(update.content);
-      if (delta) listener.onThinking?.(delta);
+    const delta = kind === "agent_thought_chunk" ? "" : contentText(update.content);
+    for (const listener of [...group]) {
+      if (kind === "agent_message_chunk") {
+        if (delta) listener.onText?.(delta);
+      } else if (kind === "agent_thought_chunk") {
+        const thought = contentText(update.content);
+        if (thought) listener.onThinking?.(thought);
+      }
     }
   }
 
-  private request(method: string, params: unknown, timeoutMs: number): Promise<unknown> {
+  private request(
+    method: string,
+    params: unknown,
+    timeoutMs: number,
+    sessionId?: string
+  ): Promise<unknown> {
     const id = `rpc-${this.nextRequestId++}`;
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
@@ -268,14 +326,37 @@ export class MinimaxCodeAcpClient {
         reject(new Error(`MiniMax Code agent request timed out: ${method}`));
       }, timeoutMs);
       timer.unref?.();
-      this.pending.set(id, { resolve, reject, timer });
-      this.send({ jsonrpc: "2.0", id, method, params });
+      this.pending.set(id, { resolve, reject, timer, sessionId });
+      try {
+        this.send({ jsonrpc: "2.0", id, method, params });
+      } catch (error) {
+        // The agent is gone: the request fails now instead of waiting for its
+        // timeout, and nothing is left pending.
+        this.pending.delete(id);
+        clearTimeout(timer);
+        reject(error instanceof Error ? error : new Error(String(error)));
+      }
     });
   }
 
   private send(message: JsonRecord): void {
     if (!this.child) throw new Error("MiniMax Code agent client is not started");
     this.child.stdin.write(`${JSON.stringify(message)}\n`);
+  }
+
+  /** Settle every pending request of one session. */
+  private settleSession(sessionId: string, error: Error): void {
+    for (const [id, pending] of [...this.pending]) {
+      if (pending.sessionId !== sessionId) continue;
+      this.pending.delete(id);
+      clearTimeout(pending.timer);
+      pending.reject(error);
+    }
+  }
+
+  private fail(error: Error): void {
+    this.failure = error;
+    this.failAll(error);
   }
 
   private failAll(error: Error): void {
@@ -337,48 +418,72 @@ export async function acquireSharedAgent(
   options: MinimaxCodeAcpServerOptions
 ): Promise<MinimaxCodeAcpClient> {
   const key = agentKey(options);
-  let entry = sharedAgents.get(key);
-  if (entry?.dead) {
-    sharedAgents.delete(key);
-    entry = undefined;
-  }
-  if (!entry) {
-    // The exit handler belongs to this client only: a late exit of an agent
-    // that was already replaced must not drop the agent that took its place.
-    let client: MinimaxCodeAcpClient;
-    client = new MinimaxCodeAcpClient({
-      command: options.command,
-      args: options.args,
-      cwd: options.cwd,
-      env: options.env,
-      dataDir: options.dataDir,
-      startupTimeoutMs: options.startupTimeoutMs,
-      requestTimeoutMs: options.requestTimeoutMs,
-      onExit: () => {
-        const current = sharedAgents.get(key);
-        if (current && current.client === client) {
-          current.dead = true;
-          sharedAgents.delete(key);
-        }
-      },
-    });
-    entry = { client, starting: null, users: 0, idleTimer: null, dead: false };
-    sharedAgents.set(key, entry);
-  }
-  if (!entry.starting) {
-    entry.starting = entry.client.start().catch((error) => {
-      entry!.dead = true;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    let entry = sharedAgents.get(key);
+    if (entry?.dead) {
       sharedAgents.delete(key);
-      throw error;
-    });
+      entry = undefined;
+    }
+    if (!entry) {
+      // The exit handler belongs to this client only: a late exit of an agent
+      // that was already replaced must not drop the agent that took its place.
+      let client: MinimaxCodeAcpClient;
+      client = new MinimaxCodeAcpClient({
+        command: options.command,
+        args: options.args,
+        cwd: options.cwd,
+        env: options.env,
+        dataDir: options.dataDir,
+        startupTimeoutMs: options.startupTimeoutMs,
+        requestTimeoutMs: options.requestTimeoutMs,
+        onExit: () => {
+          const current = sharedAgents.get(key);
+          if (current && current.client === client) {
+            current.dead = true;
+            // The idle timer belongs to the agent that is gone: it must not
+            // fire later and close the agent that replaced it.
+            if (current.idleTimer) {
+              clearTimeout(current.idleTimer);
+              current.idleTimer = null;
+            }
+            sharedAgents.delete(key);
+          }
+        },
+      });
+      entry = { client, starting: null, users: 0, idleTimer: null, dead: false };
+      sharedAgents.set(key, entry);
+    }
+    if (!entry.starting) {
+      entry.starting = entry.client.start().catch(async (error) => {
+        entry!.dead = true;
+        sharedAgents.delete(key);
+        // A failed start must not leave the agent process behind: the entry is
+        // gone from the registry, so nothing else would ever close it.
+        await entry!.client.close().catch(() => undefined);
+        throw error;
+      });
+    }
+    try {
+      await entry.starting;
+    } catch (error) {
+      if (attempt === 1) throw error;
+      continue;
+    }
+    if (!entry.client.running) {
+      // The agent died between the start and this call: drop it and start a
+      // fresh one instead of handing out a dead client.
+      sharedAgents.delete(key);
+      entry.dead = true;
+      continue;
+    }
+    entry.users += 1;
+    if (entry.idleTimer) {
+      clearTimeout(entry.idleTimer);
+      entry.idleTimer = null;
+    }
+    return entry.client;
   }
-  await entry.starting;
-  entry.users += 1;
-  if (entry.idleTimer) {
-    clearTimeout(entry.idleTimer);
-    entry.idleTimer = null;
-  }
-  return entry.client;
+  throw new Error("MiniMax Code shared agent could not be started");
 }
 
 /** Give the shared agent back; it is closed once it has been idle for a while. */
@@ -412,7 +517,7 @@ export async function closeAllSharedAgents(): Promise<void> {
   for (const key of [...sharedAgents.keys()]) await closeSharedAgent(key);
 }
 
-/** How many shared agents are alive — used by the run log and the tests. */
+/** How many shared agents are alive — used by the tests. */
 export function sharedAgentCount(): number {
   return sharedAgents.size;
 }
@@ -463,28 +568,36 @@ export async function runMinimaxCodeAcpTurn(options: MinimaxCodeAcpRunOptions): 
     requestTimeoutMs: options.timeoutMs,
   };
   const client = await acquireSharedAgent(serverOptions);
+  options.log?.debug?.(
+    "MINIMAX_CODE",
+    `shared agent acquired agents=${sharedAgentCount()} command=${options.command}`
+  );
   let sessionId: string | null = null;
+  let aborted = false;
+  // The listener is registered before the session exists: an abort that
+  // arrives while the session is being opened must not be lost.
+  const onAbort = () => {
+    aborted = true;
+    if (sessionId) void client.cancel(sessionId);
+  };
+  options.signal?.addEventListener("abort", onAbort, { once: true });
   try {
     const session = await client.newSession(options.cwd, options.model || undefined);
     sessionId = session.sessionId;
-    const turnPromise = client.prompt(sessionId, options.prompt, options.timeoutMs);
-    if (options.signal) {
-      const onAbort = () => {
-        if (sessionId) void client.cancel(sessionId);
-      };
-      options.signal.addEventListener("abort", onAbort, { once: true });
-      try {
-        const turn = await turnPromise;
-        if (turn.text) options.onDelta?.(turn.text);
-        return turn.text;
-      } finally {
-        options.signal.removeEventListener("abort", onAbort);
-      }
+    if (aborted) {
+      await client.cancel(sessionId).catch(() => undefined);
+      throw abortError();
     }
-    const turn = await turnPromise;
-    if (turn.text) options.onDelta?.(turn.text);
+    const turn = await client.prompt(sessionId, options.prompt, options.timeoutMs, (delta) =>
+      options.onDelta?.(delta)
+    );
+    if (turn.text && !options.onDelta) options.onDelta?.(turn.text);
     return turn.text;
+  } catch (error) {
+    if (aborted) throw abortError();
+    throw error;
   } finally {
+    options.signal?.removeEventListener("abort", onAbort);
     releaseSharedAgent(client, serverOptions);
   }
 }
