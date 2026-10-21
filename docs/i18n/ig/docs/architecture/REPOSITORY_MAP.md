@@ -239,7 +239,7 @@ src/
 
 | Modul                            | Ebumnuche                                                                            |
 | -------------------------------- | ------------------------------------------------------------------------------------ |
-| `constants/providers.ts`         | **Ndị na-eweta ọrụ 375** nwere nkwado Zod (isi mmalite nke eziokwu)                  |
+| `constants/providers.ts`         | **Ndị na-eweta ọrụ 376** nwere nkwado Zod (isi mmalite nke eziokwu)                  |
 | `constants/cliTools.ts`          | Ndebanye ngwaọrụ CLI mpụga                                                           |
 | `constants/routingStrategies.ts` | **Atụmatụ ntụgharị ụzọ 20** nwere ọkwa mkpa                                          |
 | `constants/publicApiRoutes.ts`   | Ụzọ ndị chọrọ nkwenye Bearer (kama nkwenye njikwa)                                   |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Njikọ CLI mpụga + CLI OmniRoute nke ime                                                             |
 | `I18N.md`                   | Nhazi ụlọ i18n, ịgbakwunye asụsụ, locale 67                                                         |
 | `UNINSTALL.md`              | Usoro iwepụ nrụnye kpamkpam                                                                         |
-| `PROVIDER_REFERENCE.md`     | Katalọgụ ndị na-eweta 375 **emepụtara na-akpaghị aka** (megharịa: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Katalọgụ ndị na-eweta 376 **emepụtara na-akpaghị aka** (megharịa: `npm run gen:provider-reference`) |
 
 ### Nkọwa miri emi nke usoro nta
 

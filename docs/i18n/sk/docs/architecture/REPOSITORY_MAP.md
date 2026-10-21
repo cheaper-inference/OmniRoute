@@ -239,7 +239,7 @@ src/
 
 | Modul                            | Účel                                                                                |
 | -------------------------------- | ----------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 poskytovateľov** s validáciou Zod (zdroj pravdy)                              |
+| `constants/providers.ts`         | **376 poskytovateľov** s validáciou Zod (zdroj pravdy)                              |
 | `constants/cliTools.ts`          | Register externých nástrojov CLI                                                    |
 | `constants/routingStrategies.ts` | **20 stratégií smerovania** s prioritami                                            |
 | `constants/publicApiRoutes.ts`   | Trasy, ktoré vyžadujú autentifikáciu Bearer (namiesto správcovskej)                 |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrácie externých CLI + interné CLI OmniRoute                                                    |
 | `I18N.md`                   | Architektúra i18n, pridanie jazyka, 67 lokalizácií                                                  |
 | `UNINSTALL.md`              | Kroky na čistú odinštaláciu                                                                         |
-| `PROVIDER_REFERENCE.md`     | **Automaticky generovaný** katalóg 375 poskytovateľov (obnovenie: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaticky generovaný** katalóg 376 poskytovateľov (obnovenie: `npm run gen:provider-reference`) |
 
 ### Podrobné prehľady subsystémov
 

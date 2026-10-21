@@ -239,7 +239,7 @@ src/
 
 | Modul                            | Tujuan                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 penyedia** dengan pengesahan Zod (sumber rujukan utama)               |
+| `constants/providers.ts`         | **376 penyedia** dengan pengesahan Zod (sumber rujukan utama)               |
 | `constants/cliTools.ts`          | Pendaftaran alat CLI luaran                                                 |
 | `constants/routingStrategies.ts` | **20 strategi penghalaan** dengan keutamaan                                 |
 | `constants/publicApiRoutes.ts`   | Laluan yang memerlukan pengesahan Bearer (berbanding pengesahan pengurusan) |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Penyepaduan CLI luaran + CLI OmniRoute dalaman                                                        |
 | `I18N.md`                   | Seni bina i18n, penambahan bahasa, 67 penempatan                                                      |
 | `UNINSTALL.md`              | Langkah nyahpasang bersih                                                                             |
-| `PROVIDER_REFERENCE.md`     | Katalog 375 penyedia yang **dijana secara automatik** (jana semula: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Katalog 376 penyedia yang **dijana secara automatik** (jana semula: `npm run gen:provider-reference`) |
 
 ### Perincian mendalam subsistem
 

@@ -239,7 +239,7 @@ src/
 
 | モジュール                       | 目的                                                                                 |
 | -------------------------------- | ------------------------------------------------------------------------------------ |
-| `constants/providers.ts`         | Zod 検証を備えた **375 プロバイダー**（信頼できる唯一の情報源）                      |
+| `constants/providers.ts`         | Zod 検証を備えた **376 プロバイダー**（信頼できる唯一の情報源）                      |
 | `constants/cliTools.ts`          | 外部 CLI ツールレジストリ                                                            |
 | `constants/routingStrategies.ts` | 優先順位を備えた **20 のルーティング戦略**                                           |
 | `constants/publicApiRoutes.ts`   | Bearer 認証（管理用認証ではなく）を必要とするルート                                  |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 外部CLI統合 + 内部OmniRoute CLI                                                   |
 | `I18N.md`                   | i18nアーキテクチャ、言語の追加方法、67ロケール                                    |
 | `UNINSTALL.md`              | クリーンアンインストール手順                                                      |
-| `PROVIDER_REFERENCE.md`     | 375プロバイダーの**自動生成**カタログ（再生成：`npm run gen:provider-reference`） |
+| `PROVIDER_REFERENCE.md`     | 376プロバイダーの**自動生成**カタログ（再生成：`npm run gen:provider-reference`） |
 
 ### サブシステムの詳細解説
 

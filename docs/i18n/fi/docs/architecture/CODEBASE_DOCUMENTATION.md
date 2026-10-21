@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Palveluntarjoajarekisterit, otsakeprofiilit, identiteetti, …
 ├── handlers/               Pyyntökäsittelijät (keskustelu, upotukset, ääni, kuva, …)
-├── executors/              156 palveluntarjoajan suoritinmoduulia (suoritinluokat + palveluntarjoajakohtaiset apurit)
+├── executors/              158 palveluntarjoajan suoritinmoduulia (suoritinluokat + palveluntarjoajakohtaiset apurit)
 ├── translator/             Muotomuunnokset (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions -suoratoistotransformaattori
 ├── services/               Yli 80 palvelumoduulia (yhdistelmät, varajärjestelyt, kiintiöt, identiteetti, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ylätason suoritinmoduulia (`*.ts`, pois lukien `base.ts`, `index.ts` ja testit — lukumäärän
+158 ylätason suoritinmoduulia (`*.ts`, pois lukien `base.ts`, `index.ts` ja testit — lukumäärän
 mittaa `npm run check:docs-counts`). Jokainen suoritinluokka laajentaa `BaseExecutor`-luokkaa (`base.ts`)
 joko suoraan tai `DefaultExecutor`-luokan tai muun suorittimen kautta; loput moduulit ovat palveluntarjoajakohtaisia
 apureita (työkaluskeemat, haku-/TTS-sovittimet ja erityispiirteiden käsittelijät). Suorittimiin kuuluvat:
@@ -489,7 +489,7 @@ apureita (työkaluskeemat, haku-/TTS-sovittimet ja erityispiirteiden käsittelij
 (jaettu identiteettiapuri) ja `index.ts` (rekisteri).
 
 > Huomautus: palveluntarjoajia, joita ei ole lueteltu tässä, palvelee `default.ts` yleisen
-> OpenAI-yhteensopivan suorittimen avulla. Täydellinen palveluntarjoajaluettelo (375 palveluntarjoajaa) sijaitsee
+> OpenAI-yhteensopivan suorittimen avulla. Täydellinen palveluntarjoajaluettelo (376 palveluntarjoajaa) sijaitsee
 > tiedostossa `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

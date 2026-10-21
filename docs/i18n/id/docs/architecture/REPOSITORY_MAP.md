@@ -239,7 +239,7 @@ src/
 
 | Modul                            | Tujuan                                                                            |
 | -------------------------------- | --------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 penyedia** dengan validasi Zod (sumber kebenaran)                           |
+| `constants/providers.ts`         | **376 penyedia** dengan validasi Zod (sumber kebenaran)                           |
 | `constants/cliTools.ts`          | Registri alat CLI eksternal                                                       |
 | `constants/routingStrategies.ts` | **20 strategi perutean** dengan prioritas                                         |
 | `constants/publicApiRoutes.ts`   | Rute yang memerlukan autentikasi Bearer (dibandingkan autentikasi manajemen)      |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrasi CLI eksternal + CLI OmniRoute Internal                                             |
 | `I18N.md`                   | Arsitektur i18n, penambahan bahasa, 67 locale                                                |
 | `UNINSTALL.md`              | Langkah-langkah penghapusan instalasi secara bersih                                          |
-| `PROVIDER_REFERENCE.md`     | Katalog 375 penyedia yang **dibuat otomatis** (buat ulang: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Katalog 376 penyedia yang **dibuat otomatis** (buat ulang: `npm run gen:provider-reference`) |
 
 ### Pembahasan mendalam subsistem
 

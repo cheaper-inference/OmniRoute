@@ -239,7 +239,7 @@ src/
 
 | Modúl                            | Cuspóir                                                                     |
 | -------------------------------- | --------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 soláthraí** le bailíochtú Zod (foinse na fírinne)                     |
+| `constants/providers.ts`         | **376 soláthraí** le bailíochtú Zod (foinse na fírinne)                     |
 | `constants/cliTools.ts`          | Clárlann uirlisí seachtracha CLI                                            |
 | `constants/routingStrategies.ts` | **20 straitéis ródúcháin** le tosaíochtaí                                   |
 | `constants/publicApiRoutes.ts`   | Bealaí a éilíonn fíordheimhniú Bearer (seachas fíordheimhniú bainistíochta) |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Comhtháthuithe CLI seachtracha + CLI inmheánach OmniRoute                                 |
 | `I18N.md`                   | Ailtireacht i18n, teanga a chur leis, 67 logchaighdeán                                    |
 | `UNINSTALL.md`              | Céimeanna díshuiteála glaine                                                              |
-| `PROVIDER_REFERENCE.md`     | Catalóg **uathghinte** de 375 sholáthraí (athghiniúint: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Catalóg **uathghinte** de 376 sholáthraí (athghiniúint: `npm run gen:provider-reference`) |
 
 ### Mionléargas ar fhochórais
 

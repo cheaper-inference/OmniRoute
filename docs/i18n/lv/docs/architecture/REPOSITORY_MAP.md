@@ -239,7 +239,7 @@ src/
 
 | Modulis                          | Mērķis                                                                                    |
 | -------------------------------- | ----------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 pakalpojumu sniedzēji** ar Zod validāciju (patiesības avots)                        |
+| `constants/providers.ts`         | **376 pakalpojumu sniedzēji** ar Zod validāciju (patiesības avots)                        |
 | `constants/cliTools.ts`          | Ārējo CLI rīku reģistrs                                                                   |
 | `constants/routingStrategies.ts` | **20 maršrutēšanas stratēģijas** ar prioritātēm                                           |
 | `constants/publicApiRoutes.ts`   | Maršruti, kuriem nepieciešama Bearer autentifikācija (nevis pārvaldības)                  |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ārējās CLI integrācijas un iekšējais OmniRoute CLI                                                                   |
 | `I18N.md`                   | i18n arhitektūra, valodas pievienošana, 67 lokalizācijas                                                             |
 | `UNINSTALL.md`              | Tīras atinstalēšanas darbības                                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 375 pakalpojumu sniedzēju katalogs (atkārtota ģenerēšana: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 376 pakalpojumu sniedzēju katalogs (atkārtota ģenerēšana: `npm run gen:provider-reference`) |
 
 ### Apakšsistēmu padziļināti apraksti
 

@@ -239,7 +239,7 @@ src/
 
 | Modul                            | Formål                                                                             |
 | -------------------------------- | ---------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 udbydere** med Zod-validering (autoritativ kilde)                            |
+| `constants/providers.ts`         | **376 udbydere** med Zod-validering (autoritativ kilde)                            |
 | `constants/cliTools.ts`          | Register over eksterne CLI-værktøjer                                               |
 | `constants/routingStrategies.ts` | **20 routingstrategier** med prioriteter                                           |
 | `constants/publicApiRoutes.ts`   | Ruter, der kræver Bearer-godkendelse (i modsætning til administrationsgodkendelse) |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI-integrationer + intern OmniRoute-CLI                                                   |
 | `I18N.md`                   | i18n-arkitektur, tilføjelse af et sprog, 67 lokaliteter                                             |
 | `UNINSTALL.md`              | Trin til ren afinstallation                                                                         |
-| `PROVIDER_REFERENCE.md`     | **Automatisk genereret** katalog over 375 udbydere (regenerering: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatisk genereret** katalog over 376 udbydere (regenerering: `npm run gen:provider-reference`) |
 
 ### Detaljerede beskrivelser af undersystemer
 

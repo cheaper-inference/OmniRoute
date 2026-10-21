@@ -445,7 +445,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provayder reyestrləri, başlıq profilləri, identiklik, …
 ├── handlers/               Sorğu emalçıları (söhbət, yerləşdirmələr, audio, şəkil, …)
-├── executors/              156 provayder icraçı modulu (icraçı sinifləri + hər provayder üçün köməkçilər)
+├── executors/              158 provayder icraçı modulu (icraçı sinifləri + hər provayder üçün köməkçilər)
 ├── translator/             Format çevrilməsi (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions axın transformatoru
 ├── services/               80+ xidmət modulu (kombinasiyalar, ehtiyat mexanizmi, kvotalar, identiklik, …)
@@ -475,7 +475,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 üst səviyyəli icraçı modulu (`*.ts`, `base.ts`, `index.ts` və testlər istisna olmaqla — sayı
+158 üst səviyyəli icraçı modulu (`*.ts`, `base.ts`, `index.ts` və testlər istisna olmaqla — sayı
 `npm run check:docs-counts` ölçür). Hər icraçı sinfi birbaşa və ya `DefaultExecutor`, yaxud başqa
 bir icraçı vasitəsilə `BaseExecutor` (`base.ts`) sinfini genişləndirir; qalan modullar hər provayder
 üçün köməkçilərdir (alət sxemləri, fetch/TTS adapterləri, özəllik emalçıları). İcraçılara daxildir:
@@ -487,7 +487,7 @@ bir icraçı vasitəsilə `BaseExecutor` (`base.ts`) sinfini genişləndirir; qa
 (paylaşılan identiklik köməkçisi) və `index.ts` (reyestr).
 
 > Qeyd: burada sadalanmayan provayderlərə ümumi OpenAI-uyğun icraçıdan istifadə edən
-> `default.ts` xidmət göstərir. Tam provayder kataloqu (375 provayder)
+> `default.ts` xidmət göstərir. Tam provayder kataloqu (376 provayder)
 > `src/shared/constants/providers.ts` daxilində yerləşir.
 
 ### 4.3 `open-sse/translator/`

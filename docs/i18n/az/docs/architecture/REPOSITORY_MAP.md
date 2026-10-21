@@ -239,7 +239,7 @@ src/
 
 | Modul                            | Təyinatı                                                                                 |
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | Zod doğrulaması ilə **375 provayder** (əsas həqiqət mənbəyi)                             |
+| `constants/providers.ts`         | Zod doğrulaması ilə **376 provayder** (əsas həqiqət mənbəyi)                             |
 | `constants/cliTools.ts`          | Xarici CLI alətləri reyestri                                                             |
 | `constants/routingStrategies.ts` | Prioritetlərlə **20 marşrutlaşdırma strategiyası**                                       |
 | `constants/publicApiRoutes.ts`   | Bearer (idarəetmə əvəzinə) autentifikasiyası tələb edən marşrutlar                       |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Xarici CLI inteqrasiyaları + daxili OmniRoute CLI                                                                 |
 | `I18N.md`                   | i18n arxitekturası, dil əlavə edilməsi, 67 lokalizasiya                                                           |
 | `UNINSTALL.md`              | Təmiz silmə addımları                                                                                             |
-| `PROVIDER_REFERENCE.md`     | 375 provayderdən ibarət **avtomatik yaradılan** kataloq (yenidən yaratmaq üçün: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 provayderdən ibarət **avtomatik yaradılan** kataloq (yenidən yaratmaq üçün: `npm run gen:provider-reference`) |
 
 ### Altsistemlər üzrə ətraflı təlimatlar
 

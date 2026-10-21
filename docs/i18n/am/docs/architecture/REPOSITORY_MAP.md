@@ -239,7 +239,7 @@ src/
 
 | ሞጁል                              | ዓላማ                                                             |
 | -------------------------------- | --------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 አቅራቢዎች** ከZod ማረጋገጫ ጋር (ዋናው የእውነት ምንጭ)                    |
+| `constants/providers.ts`         | **376 አቅራቢዎች** ከZod ማረጋገጫ ጋር (ዋናው የእውነት ምንጭ)                    |
 | `constants/cliTools.ts`          | የውጫዊ CLI መሣሪያዎች መዝገብ                                            |
 | `constants/routingStrategies.ts` | **20 የማዘዋወሪያ ስልቶች** ከቅድሚያዎች ጋር                                  |
 | `constants/publicApiRoutes.ts`   | Bearer (ከአስተዳደር ማረጋገጫ በተቃራኒ) ማረጋገጫን የሚጠይቁ መንገዶች                 |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ውጫዊ የCLI ውህደቶች + ውስጣዊ OmniRoute CLI                                               |
 | `I18N.md`                   | የi18n አርክቴክቸር፣ ቋንቋ ማከል፣ 67 አካባቢያዊ ቅንብሮች                                           |
 | `UNINSTALL.md`              | ሙሉ በሙሉ ለማራገፍ የሚያስፈልጉ ደረጃዎች                                                        |
-| `PROVIDER_REFERENCE.md`     | **በራስ-ሰር የመነጨ** የ375 አቅራቢዎች ካታሎግ (እንደገና ለማመንጨት፦ `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **በራስ-ሰር የመነጨ** የ376 አቅራቢዎች ካታሎግ (እንደገና ለማመንጨት፦ `npm run gen:provider-reference`) |
 
 ### የንዑስ ስርዓቶች ጥልቅ ዝርዝሮች
 

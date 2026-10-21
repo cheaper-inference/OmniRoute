@@ -444,7 +444,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               ඉල්ලීම් handlers (chat, embeddings, audio, image, …)
-├── executors/              Provider executor modules 156ක් (executor classes + එක් එක් provider සඳහා helpers)
+├── executors/              Provider executor modules 158ක් (executor classes + එක් එක් provider සඳහා helpers)
 ├── translator/             ආකෘති පරිවර්තනය (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions ප්රවාහ transformer
 ├── services/               සේවා modules 80කට වැඩි ගණනක් (combos, fallback, quotas, identity, …)
@@ -474,7 +474,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-ඉහළ මට්ටමේ executor modules 156ක් (`*.ts` වෙතින් `base.ts`, `index.ts` සහ tests අඩු කළ විට — මෙම ගණන
+ඉහළ මට්ටමේ executor modules 158ක් (`*.ts` වෙතින් `base.ts`, `index.ts` සහ tests අඩු කළ විට — මෙම ගණන
 `npm run check:docs-counts` මඟින් මනිනු ලැබේ). සෑම executor class එකක්ම `BaseExecutor` (`base.ts`) වෙතින්,
 සෘජුවම හෝ `DefaultExecutor` හෝ වෙනත් executor එකක් හරහා, විස්තාරණය වේ; ඉතිරි modules එක් එක් provider සඳහා වන
 helpers වේ (tool schemas, fetch/TTS adapters, quirk handlers). Executors අතර පහත ඒවා ඇතුළත් වේ:
@@ -486,7 +486,7 @@ helpers වේ (tool schemas, fetch/TTS adapters, quirk handlers). Executors අ
 (හවුල් identity helper) සහ `index.ts` (registry).
 
 > සටහන: මෙහි ලැයිස්තුගත කර නොමැති providers සඳහා generic
-> OpenAI-compatible executor එක භාවිත කරමින් `default.ts` මඟින් සේවය සපයයි. සම්පූර්ණ provider නාමාවලිය (providers 375ක්)
+> OpenAI-compatible executor එක භාවිත කරමින් `default.ts` මඟින් සේවය සපයයි. සම්පූර්ණ provider නාමාවලිය (providers 376ක්)
 > `src/shared/constants/providers.ts` තුළ ඇත.
 
 ### 4.3 `open-sse/translator/`

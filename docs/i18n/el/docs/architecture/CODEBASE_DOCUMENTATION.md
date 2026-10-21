@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Μητρώα παρόχων, προφίλ κεφαλίδων, ταυτότητα, …
 ├── handlers/               Χειριστές αιτημάτων (συνομιλία, embeddings, ήχος, εικόνα, …)
-├── executors/              156 μονάδες executor παρόχων (κλάσεις executor + βοηθητικά ανά πάροχο)
+├── executors/              158 μονάδες executor παρόχων (κλάσεις executor + βοηθητικά ανά πάροχο)
 ├── translator/             Μετατροπή μορφών (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer ροής Responses API ↔ Chat Completions
 ├── services/               80+ μονάδες υπηρεσιών (συνδυασμοί, fallback, ποσοστώσεις, ταυτότητα, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 μονάδες executor ανώτατου επιπέδου (`*.ts` χωρίς τα `base.ts`, `index.ts` και τις δοκιμές — αυτό το πλήθος μετρά η εντολή
+158 μονάδες executor ανώτατου επιπέδου (`*.ts` χωρίς τα `base.ts`, `index.ts` και τις δοκιμές — αυτό το πλήθος μετρά η εντολή
 `npm run check:docs-counts`). Κάθε κλάση executor επεκτείνει την `BaseExecutor` (`base.ts`),
 είτε απευθείας είτε μέσω της `DefaultExecutor` ή άλλου executor· οι υπόλοιπες μονάδες είναι βοηθητικά
 ανά πάροχο (σχήματα εργαλείων, προσαρμογείς fetch/TTS, χειριστές ιδιαιτεροτήτων). Οι executors περιλαμβάνουν:
@@ -488,7 +488,7 @@ open-sse/
 (κοινόχρηστο βοηθητικό ταυτότητας) και το `index.ts` (μητρώο).
 
 > Σημείωση: οι πάροχοι που δεν παρατίθενται εδώ εξυπηρετούνται από το `default.ts` μέσω του γενικού
-> executor που είναι συμβατός με το OpenAI. Ο πλήρης κατάλογος παρόχων (375 πάροχοι) βρίσκεται στο
+> executor που είναι συμβατός με το OpenAI. Ο πλήρης κατάλογος παρόχων (376 πάροχοι) βρίσκεται στο
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries၊ header profiles၊ identity၊ …
 ├── handlers/               Request handlers (chat၊ embeddings၊ audio၊ image၊ …)
-├── executors/              Provider executor modules 156 ခု (executor classes + provider တစ်ခုချင်းစီအတွက် helpers)
+├── executors/              Provider executor modules 158 ခု (executor classes + provider တစ်ခုချင်းစီအတွက် helpers)
 ├── translator/             Format ပြောင်းလဲခြင်း (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               Service modules 80+ ခု (combos၊ fallback၊ quotas၊ identity၊ …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-ထိပ်တန်းအဆင့် executor modules 156 ခု (`base.ts`၊ `index.ts` နှင့် tests မပါဝင်သည့် `*.ts` များ —
+ထိပ်တန်းအဆင့် executor modules 158 ခု (`base.ts`၊ `index.ts` နှင့် tests မပါဝင်သည့် `*.ts` များ —
 ဤအရေအတွက်ကို `npm run check:docs-counts` က တိုင်းတာသည်)။ Executor class တိုင်းသည် `BaseExecutor` (`base.ts`) ကို
 တိုက်ရိုက်ဖြစ်စေ၊ `DefaultExecutor` သို့မဟုတ် အခြား executor မှတစ်ဆင့်ဖြစ်စေ extends လုပ်သည်။ ကျန် modules များမှာ provider
 တစ်ခုချင်းစီအတွက် helpers (tool schemas၊ fetch/TTS adapters၊ ပုံမှန်မဟုတ်သော အပြုအမူများကို ကိုင်တွယ်သည့် handlers) ဖြစ်သည်။ Executors များတွင် အောက်ပါတို့ ပါဝင်သည်-
@@ -489,7 +489,7 @@ open-sse/
 (မျှဝေသုံးစွဲသည့် identity helper) နှင့် `index.ts` (registry) တို့ဖြစ်သည်။
 
 > မှတ်ချက်- ဤနေရာတွင် စာရင်းမဖော်ပြထားသော providers များကို generic
-> OpenAI-compatible executor သုံးသည့် `default.ts` က ဝန်ဆောင်မှုပေးသည်။ Provider catalog အပြည့်အစုံ (providers 375 ခု) သည်
+> OpenAI-compatible executor သုံးသည့် `default.ts` က ဝန်ဆောင်မှုပေးသည်။ Provider catalog အပြည့်အစုံ (providers 376 ခု) သည်
 > `src/shared/constants/providers.ts` တွင် ရှိသည်။
 
 ### 4.3 `open-sse/translator/`

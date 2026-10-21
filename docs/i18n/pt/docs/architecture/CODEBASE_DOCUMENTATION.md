@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registos de fornecedores, perfis de cabeçalhos, identidade, …
 ├── handlers/               Processadores de pedidos (conversação, embeddings, áudio, imagem, …)
-├── executors/              156 módulos executores de fornecedores (classes de executor + auxiliares por fornecedor)
+├── executors/              158 módulos executores de fornecedores (classes de executor + auxiliares por fornecedor)
 ├── translator/             Conversão de formatos (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformador de streams da Responses API ↔ Chat Completions
 ├── services/               Mais de 80 módulos de serviço (combinações, recurso, quotas, identidade, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 módulos executores de nível superior (`*.ts` menos `base.ts`, `index.ts` e testes — a contagem
+158 módulos executores de nível superior (`*.ts` menos `base.ts`, `index.ts` e testes — a contagem
 é medida por `npm run check:docs-counts`). Cada classe de executor estende `BaseExecutor` (`base.ts`),
 diretamente ou através de `DefaultExecutor` ou de outro executor; os restantes módulos são auxiliares
 por fornecedor (esquemas de ferramentas, adaptadores de obtenção/TTS, processadores de particularidades). Os executores incluem:
@@ -489,7 +489,7 @@ por fornecedor (esquemas de ferramentas, adaptadores de obtenção/TTS, processa
 (auxiliar de identidade partilhado) e `index.ts` (registo).
 
 > Nota: os fornecedores não indicados aqui são servidos por `default.ts`, utilizando o executor
-> genérico compatível com OpenAI. O catálogo completo de fornecedores (375 fornecedores) encontra-se em
+> genérico compatível com OpenAI. O catálogo completo de fornecedores (376 fornecedores) encontra-se em
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

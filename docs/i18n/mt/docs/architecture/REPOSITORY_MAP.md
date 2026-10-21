@@ -239,7 +239,7 @@ src/
 
 | Modulu                           | Għan                                                                        |
 | -------------------------------- | --------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 fornitur** b'validazzjoni Zod (is-sors awtorevoli)                    |
+| `constants/providers.ts`         | **376 fornitur** b'validazzjoni Zod (is-sors awtorevoli)                    |
 | `constants/cliTools.ts`          | Reġistru ta' għodod CLI esterni                                             |
 | `constants/routingStrategies.ts` | **20 strateġija ta' direzzjonar** bi prijoritajiet                          |
 | `constants/publicApiRoutes.ts`   | Rotot li jeħtieġu awtentikazzjoni Bearer (minflok ta' ġestjoni)             |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrazzjonijiet esterni tas-CLI + CLI intern ta’ OmniRoute                                                 |
 | `I18N.md`                   | Arkitettura tal-i18n, żieda ta’ lingwa, 67 lokalizzazzjoni                                                   |
 | `UNINSTALL.md`              | Passi għal diżinstallazzjoni nadifa                                                                          |
-| `PROVIDER_REFERENCE.md`     | Katalgu ta’ 375 fornitur **iġġenerat awtomatikament** (iġġenera mill-ġdid: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Katalgu ta’ 376 fornitur **iġġenerat awtomatikament** (iġġenera mill-ġdid: `npm run gen:provider-reference`) |
 
 ### Analiżijiet dettaljati tas-sottosistemi
 

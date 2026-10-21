@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registri pružatelja, profili zaglavlja, identitet, …
 ├── handlers/               Obrađivači zahtjeva (razgovor, ugradnje, zvuk, slika, …)
-├── executors/              156 modula izvršitelja pružatelja (klase izvršitelja + pomoćni moduli po pružatelju)
+├── executors/              158 modula izvršitelja pružatelja (klase izvršitelja + pomoćni moduli po pružatelju)
 ├── translator/             Pretvorba formata (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformator toka Responses API ↔ Chat Completions
 ├── services/               Više od 80 servisnih modula (kombinacije, pričuvni mehanizmi, kvote, identitet, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modula izvršitelja najviše razine (`*.ts` bez `base.ts`, `index.ts` i testova — taj broj
+158 modula izvršitelja najviše razine (`*.ts` bez `base.ts`, `index.ts` i testova — taj broj
 mjeri `npm run check:docs-counts`). Svaka klasa izvršitelja proširuje `BaseExecutor` (`base.ts`),
 izravno ili putem `DefaultExecutor` ili drugog izvršitelja; preostali moduli pomoćni su moduli
 po pružatelju (sheme alata, prilagodnici za dohvaćanje/TTS, obrađivači posebnosti). Izvršitelji uključuju:
@@ -489,7 +489,7 @@ po pružatelju (sheme alata, prilagodnici za dohvaćanje/TTS, obrađivači poseb
 (dijeljeni pomoćni modul za identitet) i `index.ts` (registar).
 
 > Napomena: pružatelje koji ovdje nisu navedeni opslužuje `default.ts` koristeći generički
-> izvršitelj kompatibilan s OpenAI-jem. Cjelovit katalog pružatelja (375 pružatelja) nalazi se u
+> izvršitelj kompatibilan s OpenAI-jem. Cjelovit katalog pružatelja (376 pružatelja) nalazi se u
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

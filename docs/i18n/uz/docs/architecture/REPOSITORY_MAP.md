@@ -239,7 +239,7 @@ src/
 
 | Modul                            | Maqsadi                                                                                                   |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | Zod validatsiyasiga ega **375 ta provayder** (asosiy haqiqat manbai)                                      |
+| `constants/providers.ts`         | Zod validatsiyasiga ega **376 ta provayder** (asosiy haqiqat manbai)                                      |
 | `constants/cliTools.ts`          | Tashqi CLI vositalari reyestri                                                                            |
 | `constants/routingStrategies.ts` | Ustuvorliklarga ega **20 ta marshrutlash strategiyasi**                                                   |
 | `constants/publicApiRoutes.ts`   | Bearer autentifikatsiyasini (boshqaruv autentifikatsiyasidan farqli ravishda) talab qiladigan marshrutlar |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Tashqi CLI integratsiyalari + ichki OmniRoute CLI                                                                 |
 | `I18N.md`                   | i18n arxitekturasi, til qoʻshish, 67 ta lokal                                                                     |
 | `UNINSTALL.md`              | Toza oʻchirish bosqichlari                                                                                        |
-| `PROVIDER_REFERENCE.md`     | 375 ta provayderdan iborat **avtomatik yaratiladigan** katalog (qayta yaratish: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 ta provayderdan iborat **avtomatik yaratiladigan** katalog (qayta yaratish: `npm run gen:provider-reference`) |
 
 ### Quyi tizimlar boʻyicha batafsil qoʻllanmalar
 

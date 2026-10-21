@@ -239,7 +239,7 @@ src/
 
 | मॉड्यूल                          | उद्देश्य                                                                     |
 | -------------------------------- | ---------------------------------------------------------------------------- |
-| `constants/providers.ts`         | Zod सत्यापन के साथ **375 प्रदाता** (सत्य का स्रोत)                           |
+| `constants/providers.ts`         | Zod सत्यापन के साथ **376 प्रदाता** (सत्य का स्रोत)                           |
 | `constants/cliTools.ts`          | बाहरी CLI टूल रजिस्ट्री                                                      |
 | `constants/routingStrategies.ts` | प्राथमिकताओं के साथ **20 रूटिंग रणनीतियाँ**                                  |
 | `constants/publicApiRoutes.ts`   | वे रूट जिन्हें Bearer (प्रबंधन के बजाय) प्रमाणीकरण की आवश्यकता होती है       |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाहरी CLI एकीकरण + आंतरिक OmniRoute CLI                                           |
 | `I18N.md`                   | i18n आर्किटेक्चर, भाषा जोड़ना, 67 लोकेल                                           |
 | `UNINSTALL.md`              | स्वच्छ अनइंस्टॉल चरण                                                              |
-| `PROVIDER_REFERENCE.md`     | 375 प्रदाताओं की **स्वतः-जनित** सूची (पुनर्जनन: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 प्रदाताओं की **स्वतः-जनित** सूची (पुनर्जनन: `npm run gen:provider-reference`) |
 
 ### उपप्रणालियों का गहन विवरण
 

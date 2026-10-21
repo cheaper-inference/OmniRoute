@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Teikėjų registrai, antraščių profiliai, tapatybė, …
 ├── handlers/               Užklausų apdorojimo moduliai (pokalbiai, įterpiniai, garsas, vaizdai, …)
-├── executors/              156 teikėjų vykdyklių modulių (vykdyklių klasės + kiekvieno teikėjo pagalbiniai moduliai)
+├── executors/              158 teikėjų vykdyklių modulių (vykdyklių klasės + kiekvieno teikėjo pagalbiniai moduliai)
 ├── translator/             Formatų konvertavimas (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions srauto transformatorius
 ├── services/               Daugiau nei 80 paslaugų modulių (deriniai, atsarginiai variantai, kvotos, tapatybė, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 aukščiausio lygio vykdyklių modulių (`*.ts`, išskyrus `base.ts`, `index.ts` ir testus — šį skaičių
+158 aukščiausio lygio vykdyklių modulių (`*.ts`, išskyrus `base.ts`, `index.ts` ir testus — šį skaičių
 nustato `npm run check:docs-counts`). Kiekviena vykdyklės klasė tiesiogiai arba per
 `DefaultExecutor` ar kitą vykdyklę išplečia `BaseExecutor` (`base.ts`); likę moduliai yra konkretiems
 teikėjams skirti pagalbiniai moduliai (įrankių schemos, užklausų / TTS adapteriai, ypatumų apdorojimo moduliai). Vykdyklės apima:
@@ -489,7 +489,7 @@ teikėjams skirti pagalbiniai moduliai (įrankių schemos, užklausų / TTS adap
 (bendrinamas tapatybės pagalbinis modulis) ir `index.ts` (registras).
 
 > Pastaba: čia nenurodytus teikėjus aptarnauja `default.ts`, naudodamas bendrąją
-> su OpenAI suderinamą vykdyklę. Visas teikėjų katalogas (375 teikėjai) yra
+> su OpenAI suderinamą vykdyklę. Visas teikėjų katalogas (376 teikėjai) yra
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

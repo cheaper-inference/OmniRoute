@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Leverandørregistre, headerprofiler, identitet, …
 ├── handlers/               Forespørselshåndterere (chat, embedding, lyd, bilde, …)
-├── executors/              156 eksekutørmoduler for leverandører (eksekutørklasser + leverandørspesifikke hjelpere)
+├── executors/              158 eksekutørmoduler for leverandører (eksekutørklasser + leverandørspesifikke hjelpere)
 ├── translator/             Formatkonvertering (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Strømtransformator for Responses API ↔ Chat Completions
 ├── services/               Mer enn 80 tjenestemoduler (kombinasjoner, reservevalg, kvoter, identitet, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 eksekutørmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` og tester — antallet måles av
+158 eksekutørmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` og tester — antallet måles av
 `npm run check:docs-counts`). Hver eksekutørklasse utvider `BaseExecutor` (`base.ts`),
 direkte eller gjennom `DefaultExecutor` eller en annen eksekutør. De gjenværende modulene er
 leverandørspesifikke hjelpere (verktøyskjemaer, hentings-/TTS-adaptere og håndterere for særegenheter).
@@ -489,7 +489,7 @@ Eksekutørene omfatter:
 (delt identitetshjelper) og `index.ts` (register).
 
 > Merk: Leverandører som ikke er oppført her, betjenes av `default.ts` ved hjelp av den generiske
-> OpenAI-kompatible eksekutøren. Den fullstendige leverandørkatalogen (375 leverandører) finnes i
+> OpenAI-kompatible eksekutøren. Den fullstendige leverandørkatalogen (376 leverandører) finnes i
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

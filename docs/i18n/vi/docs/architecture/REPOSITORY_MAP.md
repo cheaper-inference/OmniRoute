@@ -239,7 +239,7 @@ src/
 
 | Mô-đun                           | Mục đích                                                                    |
 | -------------------------------- | --------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 nhà cung cấp** với xác thực Zod (nguồn dữ liệu chuẩn)                 |
+| `constants/providers.ts`         | **376 nhà cung cấp** với xác thực Zod (nguồn dữ liệu chuẩn)                 |
 | `constants/cliTools.ts`          | Sổ đăng ký công cụ CLI bên ngoài                                            |
 | `constants/routingStrategies.ts` | **20 chiến lược định tuyến** với mức độ ưu tiên                             |
 | `constants/publicApiRoutes.ts`   | Các tuyến yêu cầu xác thực Bearer (thay vì xác thực quản lý)                |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Tích hợp CLI bên ngoài + CLI OmniRoute nội bộ                                                  |
 | `I18N.md`                   | Kiến trúc i18n, cách thêm ngôn ngữ, 67 locale                                                  |
 | `UNINSTALL.md`              | Các bước gỡ cài đặt sạch                                                                       |
-| `PROVIDER_REFERENCE.md`     | Danh mục **được tạo tự động** gồm 375 nhà cung cấp (tạo lại: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Danh mục **được tạo tự động** gồm 376 nhà cung cấp (tạo lại: `npm run gen:provider-reference`) |
 
 ### Chuyên sâu về hệ thống con
 

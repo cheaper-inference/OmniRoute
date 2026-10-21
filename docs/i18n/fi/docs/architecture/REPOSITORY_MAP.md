@@ -239,7 +239,7 @@ src/
 
 | Moduuli                          | Tarkoitus                                                                               |
 | -------------------------------- | --------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 palveluntarjoajaa** Zod-validoinnilla (ensisijainen tietolähde)                   |
+| `constants/providers.ts`         | **376 palveluntarjoajaa** Zod-validoinnilla (ensisijainen tietolähde)                   |
 | `constants/cliTools.ts`          | Ulkoisten CLI-työkalujen rekisteri                                                      |
 | `constants/routingStrategies.ts` | **20 reititysstrategiaa** prioriteetteineen                                             |
 | `constants/publicApiRoutes.ts`   | Reitit, jotka edellyttävät Bearer-todennusta (hallintatodennuksen sijaan)               |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ulkoiset komentorivi-integraatiot + sisäinen OmniRoute-komentorivityökalu                                  |
 | `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen, 67 aluekohtaista versiota                                           |
 | `UNINSTALL.md`              | Puhtaan asennuksen poiston vaiheet                                                                         |
-| `PROVIDER_REFERENCE.md`     | **Automaattisesti luotu** 375 palveluntarjoajan luettelo (luo uudelleen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaattisesti luotu** 376 palveluntarjoajan luettelo (luo uudelleen: `npm run gen:provider-reference`) |
 
 ### Alijärjestelmien syväkatsaukset
 

@@ -444,7 +444,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Mga registry ng provider, profile ng header, identity, …
 ├── handlers/               Mga handler ng request (chat, embedding, audio, image, …)
-├── executors/              156 module ng provider executor (mga executor class + helper para sa bawat provider)
+├── executors/              158 module ng provider executor (mga executor class + helper para sa bawat provider)
 ├── translator/             Pag-convert ng format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer ng stream ng Responses API ↔ Chat Completions
 ├── services/               80+ module ng serbisyo (mga combo, fallback, quota, identity, …)
@@ -474,7 +474,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 top-level na module ng executor (`*.ts` maliban sa `base.ts`, `index.ts`, at mga test — ang bilang na sinusukat ng
+158 top-level na module ng executor (`*.ts` maliban sa `base.ts`, `index.ts`, at mga test — ang bilang na sinusukat ng
 `npm run check:docs-counts`). Ang bawat executor class ay nag-e-extend sa `BaseExecutor` (`base.ts`),
 nang direkta o sa pamamagitan ng `DefaultExecutor` o ibang executor; ang mga natitirang module ay mga helper para sa bawat provider
 (mga schema ng tool, fetch/TTS adapter, handler ng kakaibang gawi). Kabilang sa mga executor ang:
@@ -486,7 +486,7 @@ nang direkta o sa pamamagitan ng `DefaultExecutor` o ibang executor; ang mga nat
 (nakabahaging helper ng identity) at `index.ts` (registry).
 
 > Tandaan: ang mga provider na hindi nakalista rito ay pinaglilingkuran ng `default.ts` gamit ang generic na
-> OpenAI-compatible executor. Ang buong catalog ng provider (375 provider) ay nasa
+> OpenAI-compatible executor. Ang buong catalog ng provider (376 provider) ay nasa
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

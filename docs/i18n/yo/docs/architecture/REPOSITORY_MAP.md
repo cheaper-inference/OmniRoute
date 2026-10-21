@@ -239,7 +239,7 @@ src/
 
 | Módùlù                           | Ìdí                                                                  |
 | -------------------------------- | -------------------------------------------------------------------- |
-| `constants/providers.ts`         | **Àwọn olùpèsè 375** pẹ̀lú ìfọwọ́sí Zod (orísun òtítọ́)                 |
+| `constants/providers.ts`         | **Àwọn olùpèsè 376** pẹ̀lú ìfọwọ́sí Zod (orísun òtítọ́)                 |
 | `constants/cliTools.ts`          | Ìforúkọsílẹ̀ irinṣẹ́ CLI ti ita                                        |
 | `constants/routingStrategies.ts` | **Àwọn ọ̀nà ìdarí 20** pẹ̀lú àwọn ipò àkọ́kọ́                            |
 | `constants/publicApiRoutes.ts`   | Àwọn ipa-ọ̀nà tí ó nílò ìfàṣẹsí Bearer (dípò ti ìṣàkóso)              |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Àwọn ìsopọ̀ CLI ti ita + CLI OmniRoute inú                                                    |
 | `I18N.md`                   | Faaji i18n, fífi èdè kan kún un, àwọn locale 67                                              |
 | `UNINSTALL.md`              | Àwọn ìgbésẹ̀ ìyọkúrò pátápátá                                                                 |
-| `PROVIDER_REFERENCE.md`     | Kátálọ́ọ̀gù àwọn olùpèsè 375 tí a **ṣẹ̀dá láìfọwọ́ṣe** (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Kátálọ́ọ̀gù àwọn olùpèsè 376 tí a **ṣẹ̀dá láìfọwọ́ṣe** (regen: `npm run gen:provider-reference`) |
 
 ### Ìtúpalẹ̀ jíjinlẹ̀ àwọn ẹ̀ka-ètò
 

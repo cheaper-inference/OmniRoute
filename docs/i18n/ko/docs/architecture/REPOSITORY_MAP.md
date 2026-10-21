@@ -239,7 +239,7 @@ src/
 
 | 모듈                             | 용도                                                               |
 | -------------------------------- | ------------------------------------------------------------------ |
-| `constants/providers.ts`         | Zod 검증이 적용된 **375개 제공자**(단일 진실 공급원)               |
+| `constants/providers.ts`         | Zod 검증이 적용된 **376개 제공자**(단일 진실 공급원)               |
 | `constants/cliTools.ts`          | 외부 CLI 도구 레지스트리                                           |
 | `constants/routingStrategies.ts` | 우선순위가 지정된 **20가지 라우팅 전략**                           |
 | `constants/publicApiRoutes.ts`   | 관리 인증이 아닌 Bearer 인증이 필요한 라우트                       |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                                |
 | `I18N.md`                   | i18n 아키텍처, 언어 추가 방법, 67개 로케일                                        |
 | `UNINSTALL.md`              | 완전한 제거 단계                                                                  |
-| `PROVIDER_REFERENCE.md`     | 375개 제공자의 **자동 생성된** 카탈로그(재생성: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376개 제공자의 **자동 생성된** 카탈로그(재생성: `npm run gen:provider-reference`) |
 
 ### 하위 시스템 상세 가이드
 

@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Providerregisters, headerprofielen, identiteit, …
 ├── handlers/               Aanvraaghandlers (chat, embeddings, audio, afbeeldingen, …)
-├── executors/              156 provider-executormodules (executorklassen + helpers per provider)
+├── executors/              158 provider-executormodules (executorklassen + helpers per provider)
 ├── translator/             Formaatconversie (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions-streamtransformer
 ├── services/               Meer dan 80 servicemodules (combinaties, fallback, quota's, identiteit, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 executormodules op het hoogste niveau (`*.ts` met uitzondering van `base.ts`, `index.ts` en tests — het aantal dat
+158 executormodules op het hoogste niveau (`*.ts` met uitzondering van `base.ts`, `index.ts` en tests — het aantal dat
 `npm run check:docs-counts` meet). Elke executorklasse breidt `BaseExecutor` (`base.ts`) uit,
 rechtstreeks of via `DefaultExecutor` of een andere executor; de overige modules zijn helpers per provider
 (toolschema's, fetch/TTS-adapters, handlers voor eigenaardigheden). Executors omvatten:
@@ -488,7 +488,7 @@ rechtstreeks of via `DefaultExecutor` of een andere executor; de overige modules
 (gedeelde identiteitshelper) en `index.ts` (register).
 
 > Opmerking: providers die hier niet worden vermeld, worden bediend door `default.ts` met behulp van de generieke
-> OpenAI-compatibele executor. De volledige providercatalogus (375 providers) bevindt zich in
+> OpenAI-compatibele executor. De volledige providercatalogus (376 providers) bevindt zich in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

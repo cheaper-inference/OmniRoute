@@ -239,7 +239,7 @@ src/
 
 | Módulo                           | Finalidade                                                                       |
 | -------------------------------- | -------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 provedores** com validação Zod (fonte da verdade)                          |
+| `constants/providers.ts`         | **376 provedores** com validação Zod (fonte da verdade)                          |
 | `constants/cliTools.ts`          | Registro de ferramentas CLI externas                                             |
 | `constants/routingStrategies.ts` | **20 estratégias de roteamento** com prioridades                                 |
 | `constants/publicApiRoutes.ts`   | Rotas que exigem autenticação Bearer (em vez de autenticação de gerenciamento)   |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrações externas de CLI + CLI interna do OmniRoute                                              |
 | `I18N.md`                   | Arquitetura de i18n, adição de idioma, 67 localidades                                               |
 | `UNINSTALL.md`              | Etapas para uma desinstalação completa                                                              |
-| `PROVIDER_REFERENCE.md`     | Catálogo de 375 provedores **gerado automaticamente** (regenerar: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Catálogo de 376 provedores **gerado automaticamente** (regenerar: `npm run gen:provider-reference`) |
 
 ### Análises detalhadas dos subsistemas
 

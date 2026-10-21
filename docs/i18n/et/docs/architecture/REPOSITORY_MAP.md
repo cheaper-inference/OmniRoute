@@ -239,7 +239,7 @@ src/
 
 | Moodul                           | Otstarve                                                                 |
 | -------------------------------- | ------------------------------------------------------------------------ |
-| `constants/providers.ts`         | **375 teenusepakkujat** koos Zodi valideerimisega (tõeallikas)           |
+| `constants/providers.ts`         | **376 teenusepakkujat** koos Zodi valideerimisega (tõeallikas)           |
 | `constants/cliTools.ts`          | Väliste CLI-tööriistade register                                         |
 | `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** koos prioriteetidega                      |
 | `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad Bearer-autentimist (haldusautentimise asemel)    |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Välised CLI-integratsioonid + sisemine OmniRoute CLI                                                            |
 | `I18N.md`                   | i18n-arhitektuur, keele lisamine, 67 lokaati                                                                    |
 | `UNINSTALL.md`              | Puhta desinstallimise juhised                                                                                   |
-| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 375 teenusepakkuja kataloog (taasgenereerimine: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 376 teenusepakkuja kataloog (taasgenereerimine: `npm run gen:provider-reference`) |
 
 ### Alamsüsteemide süvaülevaated
 

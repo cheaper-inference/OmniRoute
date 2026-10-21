@@ -454,7 +454,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Rejestry dostawców, profile nagłówków, tożsamość, …
 ├── handlers/               Procedury obsługi żądań (czat, osadzanie, audio, obrazy, …)
-├── executors/              156 modułów wykonawczych dostawców (klasy wykonawcze + narzędzia pomocnicze dla poszczególnych dostawców)
+├── executors/              158 modułów wykonawczych dostawców (klasy wykonawcze + narzędzia pomocnicze dla poszczególnych dostawców)
 ├── translator/             Konwersja formatów (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformator strumienia Responses API ↔ Chat Completions
 ├── services/               Ponad 80 modułów usług (kombinacje, mechanizm zapasowy, limity, tożsamość, …)
@@ -484,7 +484,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modułów wykonawczych najwyższego poziomu (`*.ts` z wyłączeniem `base.ts`, `index.ts` i testów — tę liczbę
+158 modułów wykonawczych najwyższego poziomu (`*.ts` z wyłączeniem `base.ts`, `index.ts` i testów — tę liczbę
 mierzy `npm run check:docs-counts`). Każda klasa wykonawcza rozszerza `BaseExecutor` (`base.ts`),
 bezpośrednio albo za pośrednictwem `DefaultExecutor` lub innego modułu wykonawczego; pozostałe moduły to
 narzędzia pomocnicze dla poszczególnych dostawców (schematy narzędzi, adaptery pobierania/TTS, procedury obsługi niestandardowych zachowań). Moduły wykonawcze obejmują:
@@ -496,7 +496,7 @@ narzędzia pomocnicze dla poszczególnych dostawców (schematy narzędzi, adapte
 (współdzielone narzędzie pomocnicze tożsamości) i `index.ts` (rejestr).
 
 > Uwaga: dostawcy niewymienieni tutaj są obsługiwani przez `default.ts` przy użyciu ogólnego
-> modułu wykonawczego zgodnego z OpenAI. Pełny katalog dostawców (375 dostawców) znajduje się w
+> modułu wykonawczego zgodnego z OpenAI. Pełny katalog dostawców (376 dostawców) znajduje się w
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

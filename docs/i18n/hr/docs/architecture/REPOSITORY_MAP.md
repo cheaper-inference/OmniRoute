@@ -239,7 +239,7 @@ src/
 
 | Modul                            | Svrha                                                                             |
 | -------------------------------- | --------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 pružatelja** sa Zod validacijom (izvor istine)                              |
+| `constants/providers.ts`         | **376 pružatelja** sa Zod validacijom (izvor istine)                              |
 | `constants/cliTools.ts`          | Registar vanjskih CLI alata                                                       |
 | `constants/routingStrategies.ts` | **20 strategija usmjeravanja** s prioritetima                                     |
 | `constants/publicApiRoutes.ts`   | Rute koje zahtijevaju Bearer autentifikaciju (nasuprot upravljačkoj)              |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Vanjske CLI integracije + interni OmniRoute CLI                                                         |
 | `I18N.md`                   | Arhitektura i18n-a, dodavanje jezika, 67 lokalizacija                                                   |
 | `UNINSTALL.md`              | Koraci za čistu deinstalaciju                                                                           |
-| `PROVIDER_REFERENCE.md`     | **Automatski generiran** katalog 375 pružatelja (ponovno generiranje: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatski generiran** katalog 376 pružatelja (ponovno generiranje: `npm run gen:provider-reference`) |
 
 ### Detaljni opisi podsustava
 

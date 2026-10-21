@@ -239,7 +239,7 @@ src/
 
 | Module                           | Manufa                                                                              |
 | -------------------------------- | ----------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **Masu samarwa 375** tare da ingantawar Zod (tushen gaskiya)                        |
+| `constants/providers.ts`         | **Masu samarwa 376** tare da ingantawar Zod (tushen gaskiya)                        |
 | `constants/cliTools.ts`          | Rajistar kayan aikin CLI na waje                                                    |
 | `constants/routingStrategies.ts` | **Dabarun zaɓin hanya 20** tare da fifiko                                           |
 | `constants/publicApiRoutes.ts`   | Hanyoyin da ke buƙatar tantancewar Bearer (maimakon ta gudanarwa)                   |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Haɗaɗɗun CLI na waje + CLI na cikin gida na OmniRoute                                               |
 | `I18N.md`                   | Tsarin gine-ginen i18n, ƙara harshe, locales 67                                                     |
 | `UNINSTALL.md`              | Matakan cire shigarwa gaba ɗaya                                                                     |
-| `PROVIDER_REFERENCE.md`     | Kasidar providers 375 da aka **samar ta atomatik** (sake samarwa: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Kasidar providers 376 da aka **samar ta atomatik** (sake samarwa: `npm run gen:provider-reference`) |
 
 ### Cikakken bayani kan ƙananan tsare-tsare
 

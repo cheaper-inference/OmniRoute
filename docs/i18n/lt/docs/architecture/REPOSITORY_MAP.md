@@ -239,7 +239,7 @@ src/
 
 | Modulis                          | Paskirtis                                                                      |
 | -------------------------------- | ------------------------------------------------------------------------------ |
-| `constants/providers.ts`         | **375 teikėjai** su Zod validacija (pagrindinis tiesos šaltinis)               |
+| `constants/providers.ts`         | **376 teikėjai** su Zod validacija (pagrindinis tiesos šaltinis)               |
 | `constants/cliTools.ts`          | Išorinių CLI įrankių registras                                                 |
 | `constants/routingStrategies.ts` | **20 maršruto parinkimo strategijų** su prioritetais                           |
 | `constants/publicApiRoutes.ts`   | Maršrutai, kuriems reikalingas Bearer autentifikavimas (o ne valdymo)          |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Išorinės CLI integracijos + vidinis OmniRoute CLI                                                          |
 | `I18N.md`                   | i18n architektūra, kalbos pridėjimas, 67 lokalės                                                           |
 | `UNINSTALL.md`              | Švaraus pašalinimo veiksmai                                                                                |
-| `PROVIDER_REFERENCE.md`     | **Automatiškai sugeneruotas** 375 teikėjų katalogas (generuoti iš naujo: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatiškai sugeneruotas** 376 teikėjų katalogas (generuoti iš naujo: `npm run gen:provider-reference`) |
 
 ### Išsamūs posistemių aprašymai
 

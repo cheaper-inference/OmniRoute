@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registre de furnizori, profiluri de anteturi, identitate, …
 ├── handlers/               Gestionare cereri (chat, încorporări, audio, imagini, …)
-├── executors/              156 de module de execuție pentru furnizori (clase de execuție + utilitare per furnizor)
+├── executors/              158 de module de execuție pentru furnizori (clase de execuție + utilitare per furnizor)
 ├── translator/             Conversia formatelor (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformator de flux Responses API ↔ Chat Completions
 ├── services/               Peste 80 de module de servicii (combinații, soluții de rezervă, cote, identitate, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 de module de execuție de nivel superior (`*.ts` fără `base.ts`, `index.ts` și teste — numărul
+158 de module de execuție de nivel superior (`*.ts` fără `base.ts`, `index.ts` și teste — numărul
 este măsurat de `npm run check:docs-counts`). Fiecare clasă de execuție extinde `BaseExecutor` (`base.ts`),
 direct sau prin `DefaultExecutor` ori printr-un alt executant; modulele rămase sunt utilitare specifice
 fiecărui furnizor (scheme pentru instrumente, adaptoare de preluare/TTS, gestionare a particularităților). Executanții includ:
@@ -489,7 +489,7 @@ fiecărui furnizor (scheme pentru instrumente, adaptoare de preluare/TTS, gestio
 (utilitar comun pentru identitate) și `index.ts` (registru).
 
 > Notă: furnizorii care nu sunt enumerați aici sunt deserviți de `default.ts` folosind executantul generic
-> compatibil cu OpenAI. Catalogul complet al furnizorilor (375 de furnizori) se află în
+> compatibil cu OpenAI. Catalogul complet al furnizorilor (376 de furnizori) se află în
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

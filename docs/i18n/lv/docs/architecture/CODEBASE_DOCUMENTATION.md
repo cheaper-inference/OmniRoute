@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Pakalpojumu sniedzēju reģistri, galveņu profili, identitāte, …
 ├── handlers/               Pieprasījumu apstrādātāji (tērzēšana, iegultnes, audio, attēli, …)
-├── executors/              156 pakalpojumu sniedzēju izpildītāju moduļi (izpildītāju klases + katra pakalpojumu sniedzēja palīgmoduļi)
+├── executors/              158 pakalpojumu sniedzēju izpildītāju moduļi (izpildītāju klases + katra pakalpojumu sniedzēja palīgmoduļi)
 ├── translator/             Formātu konvertēšana (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions straumes transformators
 ├── services/               Vairāk nekā 80 pakalpojumu moduļi (kombinācijas, atkāpšanās mehānismi, kvotas, identitāte, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 augstākā līmeņa izpildītāju moduļi (`*.ts`, neietverot `base.ts`, `index.ts` un testus — šo skaitu
+158 augstākā līmeņa izpildītāju moduļi (`*.ts`, neietverot `base.ts`, `index.ts` un testus — šo skaitu
 nosaka `npm run check:docs-counts`). Katra izpildītāja klase paplašina `BaseExecutor` (`base.ts`)
 tieši vai ar `DefaultExecutor` vai cita izpildītāja starpniecību; pārējie moduļi ir katram pakalpojumu sniedzējam
 paredzēti palīgmoduļi (rīku shēmas, fetch/TTS adapteri, īpatnību apstrādātāji). Izpildītāji ietver:
@@ -489,7 +489,7 @@ paredzēti palīgmoduļi (rīku shēmas, fetch/TTS adapteri, īpatnību apstrād
 (koplietots identitātes palīgmodulis) un `index.ts` (reģistrs).
 
 > Piezīme: pakalpojumu sniedzējus, kas šeit nav uzskaitīti, apkalpo `default.ts`, izmantojot vispārīgo
-> ar OpenAI saderīgo izpildītāju. Pilns pakalpojumu sniedzēju katalogs (375 pakalpojumu sniedzēji) atrodas
+> ar OpenAI saderīgo izpildītāju. Pilns pakalpojumu sniedzēju katalogs (376 pakalpojumu sniedzēji) atrodas
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

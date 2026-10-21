@@ -445,7 +445,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Clárlanna soláthraithe, próifílí ceanntásca, aitheantas, …
 ├── handlers/               Láimhseálaithe iarratas (comhrá, leabuithe, fuaim, íomhá, …)
-├── executors/              156 modúl seiceadóra soláthraí (aicmí seiceadóra + cúntóirí in aghaidh an tsoláthraí)
+├── executors/              158 modúl seiceadóra soláthraí (aicmí seiceadóra + cúntóirí in aghaidh an tsoláthraí)
 ├── translator/             Tiontú formáide (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            API Responses ↔ Claochladán srutha Chat Completions
 ├── services/               80+ modúl seirbhíse (teaglamaí, cúltaca, cuótaí, aitheantas, …)
@@ -475,7 +475,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modúl seiceadóra barrleibhéil (`*.ts` lúide `base.ts`, `index.ts` agus tástálacha — tomhaiseann
+158 modúl seiceadóra barrleibhéil (`*.ts` lúide `base.ts`, `index.ts` agus tástálacha — tomhaiseann
 `npm run check:docs-counts` an líon). Leathnaíonn gach aicme seiceadóra `BaseExecutor` (`base.ts`),
 go díreach nó trí `DefaultExecutor` nó seiceadóir eile; is cúntóirí in aghaidh an tsoláthraí iad
 na modúil eile (scéimeanna uirlisí, cuibheoirí aisghabhála/TTS, láimhseálaithe corr-iompair). Áirítear leis na seiceadóirí:
@@ -487,7 +487,7 @@ na modúil eile (scéimeanna uirlisí, cuibheoirí aisghabhála/TTS, láimhseál
 (cúntóir aitheantais comhroinnte) agus `index.ts` (clárlann).
 
 > Nóta: freastalaíonn `default.ts` ar sholáthraithe nach bhfuil liostaithe anseo agus úsáid á baint as an seiceadóir cineálach
-> atá comhoiriúnach le OpenAI. Tá catalóg iomlán na soláthraithe (375 soláthraí) le fáil in
+> atá comhoiriúnach le OpenAI. Tá catalóg iomlán na soláthraithe (376 soláthraí) le fáil in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

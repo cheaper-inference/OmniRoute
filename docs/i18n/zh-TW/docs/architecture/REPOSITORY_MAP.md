@@ -239,7 +239,7 @@ src/
 
 | 模組                             | 用途                                                           |
 | -------------------------------- | -------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 個提供者**，使用 Zod 驗證（單一事實來源）                |
+| `constants/providers.ts`         | **376 個提供者**，使用 Zod 驗證（單一事實來源）                |
 | `constants/cliTools.ts`          | 外部 CLI 工具登錄檔                                            |
 | `constants/routingStrategies.ts` | **20 種路由策略**及其優先順序                                  |
 | `constants/publicApiRoutes.ts`   | 需要 Bearer（而非管理）驗證的路由                              |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 外部 CLI 整合 + 內部 OmniRoute CLI                                           |
 | `I18N.md`                   | i18n 架構、新增語言、67 個語系                                               |
 | `UNINSTALL.md`              | 完整解除安裝步驟                                                             |
-| `PROVIDER_REFERENCE.md`     | 375 個提供者的**自動產生**目錄（重新產生：`npm run gen:provider-reference`） |
+| `PROVIDER_REFERENCE.md`     | 376 個提供者的**自動產生**目錄（重新產生：`npm run gen:provider-reference`） |
 
 ### 子系統深入解析
 

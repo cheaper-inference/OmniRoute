@@ -433,7 +433,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 提供者注册表、请求头配置、身份标识等
 ├── handlers/               请求处理器（聊天、嵌入、音频、图像等）
-├── executors/              156 个提供者执行器模块（执行器类 + 各提供者辅助模块）
+├── executors/              158 个提供者执行器模块（执行器类 + 各提供者辅助模块）
 ├── translator/             格式转换（OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro）
 ├── transformer/            Responses API ↔ Chat Completions 流转换器
 ├── services/               80+ 个服务模块（组合、回退、配额、身份标识等）
@@ -463,7 +463,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-包含 156 个顶层执行器模块（`*.ts`，不包括 `base.ts`、`index.ts` 和测试——此数量由
+包含 158 个顶层执行器模块（`*.ts`，不包括 `base.ts`、`index.ts` 和测试——此数量由
 `npm run check:docs-counts` 测量）。每个执行器类都直接继承 `BaseExecutor`（`base.ts`），
 或通过 `DefaultExecutor` 或其他执行器间接继承；其余模块是各提供者的辅助模块
 （工具模式、fetch/TTS 适配器、特殊行为处理器）。执行器包括：
@@ -475,7 +475,7 @@ open-sse/
 （共享身份标识辅助模块）和 `index.ts`（注册表）。
 
 > 注意：此处未列出的提供者由 `default.ts` 使用通用的 OpenAI 兼容执行器提供服务。
-> 完整的提供者目录（375 个提供者）位于
+> 完整的提供者目录（376 个提供者）位于
 > `src/shared/constants/providers.ts`。
 
 ### 4.3 `open-sse/translator/`

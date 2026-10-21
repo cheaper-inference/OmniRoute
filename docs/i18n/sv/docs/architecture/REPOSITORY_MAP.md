@@ -239,7 +239,7 @@ src/
 
 | Modul                            | Syfte                                                                          |
 | -------------------------------- | ------------------------------------------------------------------------------ |
-| `constants/providers.ts`         | **375 leverantörer** med Zod-validering (primär sanningskälla)                 |
+| `constants/providers.ts`         | **376 leverantörer** med Zod-validering (primär sanningskälla)                 |
 | `constants/cliTools.ts`          | Register över externa CLI-verktyg                                              |
 | `constants/routingStrategies.ts` | **20 routningsstrategier** med prioriteter                                     |
 | `constants/publicApiRoutes.ts`   | Rutter som kräver Bearer-autentisering (i stället för hanteringsautentisering) |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externa CLI-integrationer + intern OmniRoute-CLI                                                        |
 | `I18N.md`                   | i18n-arkitektur, tillägg av ett språk, 67 språkversioner                                                |
 | `UNINSTALL.md`              | Steg för ren avinstallation                                                                             |
-| `PROVIDER_REFERENCE.md`     | **Automatiskt genererad** katalog över 375 leverantörer (generera om: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatiskt genererad** katalog över 376 leverantörer (generera om: `npm run gen:provider-reference`) |
 
 ### Djupdykningar i delsystem
 

@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 فراہم کنندہ registries، header profiles، identity، …
 ├── handlers/               درخواست handlers (چیٹ، embeddings، آڈیو، تصویر، …)
-├── executors/              فراہم کنندگان کے 156 executor modules (executor classes + ہر فراہم کنندہ کے helpers)
+├── executors/              فراہم کنندگان کے 158 executor modules (executor classes + ہر فراہم کنندہ کے helpers)
 ├── translator/             فارمیٹ کی تبدیلی (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions اسٹریم transformer
 ├── services/               80+ service modules (combos، fallback، quotas، identity، …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 اعلیٰ سطحی executor modules (`*.ts` میں سے `base.ts`، `index.ts` اور tests کے علاوہ — یہ تعداد
+158 اعلیٰ سطحی executor modules (`*.ts` میں سے `base.ts`، `index.ts` اور tests کے علاوہ — یہ تعداد
 `npm run check:docs-counts` ناپتا ہے)۔ ہر executor class، براہ راست یا `DefaultExecutor` یا کسی دوسرے
 executor کے ذریعے، `BaseExecutor` (`base.ts`) کو extend کرتی ہے؛ باقی modules ہر فراہم کنندہ کے
 لیے مخصوص helpers ہیں (tool schemas، fetch/TTS adapters، quirk handlers)۔ Executors میں شامل ہیں:
@@ -489,7 +489,7 @@ executor کے ذریعے، `BaseExecutor` (`base.ts`) کو extend کرتی ہے�
 (مشترکہ identity helper) اور `index.ts` (registry)۔
 
 > نوٹ: یہاں درج نہ کیے گئے فراہم کنندگان کو `default.ts` عمومی
-> OpenAI-compatible executor استعمال کرتے ہوئے فراہم کرتا ہے۔ فراہم کنندگان کا مکمل کیٹلاگ (375 فراہم کنندگان)
+> OpenAI-compatible executor استعمال کرتے ہوئے فراہم کرتا ہے۔ فراہم کنندگان کا مکمل کیٹلاگ (376 فراہم کنندگان)
 > `src/shared/constants/providers.ts` میں موجود ہے۔
 
 ### 4.3 `open-sse/translator/`

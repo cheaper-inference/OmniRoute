@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registry nhà cung cấp, hồ sơ header, danh tính, …
 ├── handlers/               Trình xử lý yêu cầu (chat, embedding, âm thanh, hình ảnh, …)
-├── executors/              156 mô-đun executor nhà cung cấp (các lớp executor + helper cho từng nhà cung cấp)
+├── executors/              158 mô-đun executor nhà cung cấp (các lớp executor + helper cho từng nhà cung cấp)
 ├── translator/             Chuyển đổi định dạng (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer luồng Responses API ↔ Chat Completions
 ├── services/               Hơn 80 mô-đun dịch vụ (combo, dự phòng, hạn ngạch, danh tính, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 mô-đun executor cấp cao nhất (`*.ts` ngoại trừ `base.ts`, `index.ts` và các bài kiểm thử — số lượng
+158 mô-đun executor cấp cao nhất (`*.ts` ngoại trừ `base.ts`, `index.ts` và các bài kiểm thử — số lượng
 được đo bởi `npm run check:docs-counts`). Mọi lớp executor đều mở rộng `BaseExecutor` (`base.ts`),
 trực tiếp hoặc thông qua `DefaultExecutor` hay một executor khác; các mô-đun còn lại là những helper
 cho từng nhà cung cấp (schema công cụ, adapter fetch/TTS, trình xử lý các đặc thù). Các executor bao gồm:
@@ -489,7 +489,7 @@ cho từng nhà cung cấp (schema công cụ, adapter fetch/TTS, trình xử l�
 (helper danh tính dùng chung) và `index.ts` (registry).
 
 > Lưu ý: các nhà cung cấp không được liệt kê ở đây được phục vụ bởi `default.ts` thông qua
-> executor chung tương thích với OpenAI. Danh mục nhà cung cấp đầy đủ (375 nhà cung cấp) nằm trong
+> executor chung tương thích với OpenAI. Danh mục nhà cung cấp đầy đủ (376 nhà cung cấp) nằm trong
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

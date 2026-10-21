@@ -239,7 +239,7 @@ src/
 
 | Module                           | Layunin                                                                              |
 | -------------------------------- | ------------------------------------------------------------------------------------ |
-| `constants/providers.ts`         | **375 provider** na may Zod validation (pangunahing sanggunian)                      |
+| `constants/providers.ts`         | **376 provider** na may Zod validation (pangunahing sanggunian)                      |
 | `constants/cliTools.ts`          | Registry ng external na CLI tool                                                     |
 | `constants/routingStrategies.ts` | **20 diskarte sa routing** na may mga priyoridad                                     |
 | `constants/publicApiRoutes.ts`   | Mga route na nangangailangan ng Bearer auth (kumpara sa management auth)             |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Mga external na integrasyon ng CLI + Internal OmniRoute CLI                                         |
 | `I18N.md`                   | Arkitektura ng i18n, pagdaragdag ng wika, 67 locale                                                 |
 | `UNINSTALL.md`              | Mga hakbang para sa malinis na pag-uninstall                                                        |
-| `PROVIDER_REFERENCE.md`     | **Awtomatikong binuo** na katalogo ng 375 provider (muling buuin: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Awtomatikong binuo** na katalogo ng 376 provider (muling buuin: `npm run gen:provider-reference`) |
 
 ### Malalalim na pagtalakay sa mga subsystem
 

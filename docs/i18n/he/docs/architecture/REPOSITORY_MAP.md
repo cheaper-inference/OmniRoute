@@ -239,7 +239,7 @@ src/
 
 | מודול                            | מטרה                                                                       |
 | -------------------------------- | -------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **375 ספקים** עם אימות Zod (מקור האמת)                                     |
+| `constants/providers.ts`         | **376 ספקים** עם אימות Zod (מקור האמת)                                     |
 | `constants/cliTools.ts`          | מרשם כלי CLI חיצוניים                                                      |
 | `constants/routingStrategies.ts` | **20 אסטרטגיות ניתוב** עם סדרי עדיפויות                                    |
 | `constants/publicApiRoutes.ts`   | נתיבים שדורשים אימות Bearer (לעומת אימות ניהולי)                           |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | שילובים עם כלי CLI חיצוניים + כלי CLI פנימי של OmniRoute                             |
 | `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 הגדרות אזוריות                                        |
 | `UNINSTALL.md`              | שלבים להסרה נקייה                                                                    |
-| `PROVIDER_REFERENCE.md`     | קטלוג של 375 ספקים שנוצר **אוטומטית** (יצירה מחדש: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | קטלוג של 376 ספקים שנוצר **אוטומטית** (יצירה מחדש: `npm run gen:provider-reference`) |
 
 ### סקירות מעמיקות של תתי-מערכות
 

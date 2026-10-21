@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Leverantörsregister, rubrikprofiler, identitet, …
 ├── handlers/               Förfrågningshanterare (chatt, inbäddningar, ljud, bild, …)
-├── executors/              156 exekverarmoduler för leverantörer (exekverarklasser + hjälpfunktioner per leverantör)
+├── executors/              158 exekverarmoduler för leverantörer (exekverarklasser + hjälpfunktioner per leverantör)
 ├── translator/             Formatkonvertering (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Strömtransformator för Responses API ↔ Chat Completions
 ├── services/               Över 80 tjänstemoduler (kombinationer, reservlösningar, kvoter, identitet, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 exekverarmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` och tester — antalet
+158 exekverarmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` och tester — antalet
 mäts av `npm run check:docs-counts`). Varje exekverarklass utökar `BaseExecutor` (`base.ts`),
 direkt eller genom `DefaultExecutor` eller en annan exekverare; de återstående modulerna är
 hjälpfunktioner per leverantör (verktygsscheman, fetch/TTS-adaptrar, hanterare för särdrag). Exekverarna omfattar:
@@ -489,7 +489,7 @@ hjälpfunktioner per leverantör (verktygsscheman, fetch/TTS-adaptrar, hanterare
 (delad identitetshjälpfunktion) och `index.ts` (register).
 
 > Obs! Leverantörer som inte anges här hanteras av `default.ts` med den generiska
-> OpenAI-kompatibla exekveraren. Den fullständiga leverantörskatalogen (375 leverantörer) finns i
+> OpenAI-kompatibla exekveraren. Den fullständiga leverantörskatalogen (376 leverantörer) finns i
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

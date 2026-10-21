@@ -239,7 +239,7 @@ src/
 
 | Modül                            | Amaç                                                                                   |
 | -------------------------------- | -------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | Zod doğrulamalı **375 sağlayıcı** (tek doğruluk kaynağı)                               |
+| `constants/providers.ts`         | Zod doğrulamalı **376 sağlayıcı** (tek doğruluk kaynağı)                               |
 | `constants/cliTools.ts`          | Harici CLI aracı kayıt defteri                                                         |
 | `constants/routingStrategies.ts` | Önceliklere sahip **20 yönlendirme stratejisi**                                        |
 | `constants/publicApiRoutes.ts`   | Bearer kimlik doğrulaması (yönetim kimlik doğrulaması yerine) gerektiren rotalar       |
@@ -396,7 +396,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Harici CLI entegrasyonları + dahili OmniRoute CLI                                                               |
 | `I18N.md`                   | i18n mimarisi, dil ekleme, 67 yerel ayar                                                                        |
 | `UNINSTALL.md`              | Temiz kaldırma adımları                                                                                         |
-| `PROVIDER_REFERENCE.md`     | 375 sağlayıcıdan oluşan **otomatik oluşturulmuş** katalog (yeniden oluşturma: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 sağlayıcıdan oluşan **otomatik oluşturulmuş** katalog (yeniden oluşturma: `npm run gen:provider-reference`) |
 
 ### Alt sistemlere derinlemesine bakış
 
