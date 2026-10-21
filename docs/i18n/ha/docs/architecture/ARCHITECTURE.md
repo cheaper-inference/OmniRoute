@@ -15,7 +15,7 @@ Tana samar da endpoint guda ɗaya mai dacewa da OpenAI (`/v1/*`) sannan tana rar
 
 Manyan ƙwarewa:
 
-- API mai dacewa da OpenAI don CLI/kayan aiki (providers 376, executor modules 158)
+- API mai dacewa da OpenAI don CLI/kayan aiki (providers 376, executor modules 159)
 - Fassarar request/response tsakanin tsare-tsaren providers
 - Fallback na haɗin models (jerin models da yawa)
 - Matakan combo masu tsari (`provider + model + connection`) tare da jeren lokacin aiki bisa `compositeTiers`
