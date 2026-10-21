@@ -159,6 +159,7 @@ import { novitaProvider } from "./registry/novita/index.ts";
 import { regoloProvider } from "./registry/regolo/index.ts";
 import { devin_desktopProvider } from "./registry/devin-desktop/index.ts";
 import { zcodeProvider } from "./registry/zcode/index.ts";
+import { minimaxCodeProvider } from "./registry/minimax-code/index.ts";
 import { zed_hostedProvider } from "./registry/zed-hosted/index.ts";
 import { nanogptProvider } from "./registry/nanogpt/index.ts";
 import { nanProvider } from "./registry/nan/index.ts";
@@ -448,6 +449,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   regolo: regoloProvider,
   "devin-desktop": devin_desktopProvider,
   zcode: zcodeProvider,
+  "minimax-code": minimaxCodeProvider,
   "zed-hosted": zed_hostedProvider,
   nanogpt: nanogptProvider,
   nan: nanProvider,

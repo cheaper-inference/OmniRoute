@@ -1,0 +1,120 @@
+---
+title: "MiniMax Code Provider"
+version: 3.8.53
+lastUpdated: 2026-10-21
+---
+
+# MiniMax Code Provider
+
+`minimax-code` (alias `mmcode`) routes OpenAI-compatible chat completions to
+MiniMax Code: the subscription product behind the MiniMax Code desktop app and
+the `mcode` CLI. It is a **no-auth** provider — OmniRoute stores no credential
+for it. It reads the credential from your own local MiniMax Code profile
+(`~/.minimax`) and gives the run the same models the profile is entitled to.
+
+## Transports
+
+| Transport | What it does | When it is used |
+| --- | --- | --- |
+| `gateway` (default) | One call to the managed MiniMax subscription gateway. It speaks the native tool protocol, so a request that carries client tools comes back as OpenAI `tool_calls`. **No fallback**: a failing gateway answers with a `502` that names the transport. | Every request. |
+| `cli` | Runs the locally installed MiniMax Code CLI (`mcode exec --output-format stream-json`) in the lightweight conversation profile. | Opt-in (`MINIMAX_CODE_TRANSPORT=cli`). |
+| `auto` | Requests with client tools to the gateway, plain chat to the CLI. | Opt-in (`MINIMAX_CODE_TRANSPORT=auto`). |
+
+The gateway transport has **no fallback**: a request that cannot be answered
+by the gateway fails with a `502` that names the transport. The local CLI stays
+available as an explicit transport (`MINIMAX_CODE_TRANSPORT=cli`, or `auto` for
+a plain chat turn) — but it never answers a request that asked for the gateway,
+and it cannot honour the protocol of a request that carries client tools: the
+CLI has no way to hand a tool call back to the client, so answering with prose
+would make the client believe the turn is over without a single tool having
+run.
+
+## Setup
+
+1. Install the MiniMax Code CLI and sign in (`mcode login`), or use an
+   existing MiniMax Code session on the machine. The credential lives in
+   `~/.minimax/auth/prod/<region>/mcode-public/auth.json`.
+2. Add the provider in **Dashboard → Providers → Add Provider** and pick
+   **MiniMax Code**. No API key is asked for.
+3. Send a chat completion with the model `minimax-code/MiniMax-M3.1-Flash` or
+   `minimax-code/MiniMax-M3`.
+
+Models: `MiniMax-M3.1-Flash` and `MiniMax-M3`. The provider accepts only
+these ids — a request for another model is rejected before it reaches MiniMax.
+
+## The credential is shared, and OmniRoute writes to it
+
+OmniRoute **reads** the access and refresh token from your MiniMax Code
+profile and, when the account rotates the token, **writes the refreshed
+credential back** into that same profile, and keeps the CLI's session state
+file in sync. Two consequences worth knowing:
+
+- A request through this provider can re-authenticate your MiniMax Code
+  desktop session.
+- A second OmniRoute instance that shares `~/.minimax` will fight over the
+  token with the first one. Point `MINIMAX_CODE_PROFILE_DIR` at a separate
+  profile directory if you run more than one instance.
+
+When the profile holds several accounts, the provider uses the record with
+the newest generation — the one the CLI itself refreshes. Pin a specific
+record with `MINIMAX_CODE_AUTH_RECORD` (the record key inside `auth.json`).
+
+## The gateway endpoint
+
+The managed gateway URL is an **internal endpoint of the MiniMax Code app**,
+not a documented public API. OmniRoute identifies itself with the app's own
+user agent (`MiniMaxAgent`) and the refresh call with the CLI's user agent
+(`minimax-code-cli`), because that is what the endpoint expects.
+
+That has two practical consequences:
+
+- The endpoint can change without notice. When it does, the request fails with
+  a `502` that names the transport — it never changes meaning silently.
+  `MINIMAX_CODE_TRANSPORT=cli` (or `auto`) is the way to keep working against
+  the local CLI.
+- The whole gateway call is bounded: one attempt of 60 s, a backoff and one
+  retry. An unreachable gateway cannot hold a model slot for long.
+
+`MINIMAX_CODE_GATEWAY_URL` overrides the endpoint if your account or a proxy
+uses another one.
+
+## Host tools need an explicit opt-in
+
+A CLI run in the **`standard` context** gives the agent the host tools (shell,
+file, memory, web) — that context is what an agentic client asks for, and
+`MINIMAX_CODE_MODE=standard` pins it for every run. Either way the host tools
+are opt-in:
+
+```
+MINIMAX_CODE_ALLOW_HOST_TOOLS=true
+```
+
+Without it, a CLI run in the `standard` context is refused with a `400`. The
+managed gateway never needs the opt-in — it only relays tool calls to the
+client.
+
+A CLI run works in `~/.omniroute/minimax-code-workspace` (or
+`MINIMAX_CODE_CWD`), never in the server's own working directory, and the
+resolved path is written to the run log. The run log also names the CLI binary
+it used and the version that binary reported — pin the binary with
+`MINIMAX_CODE_BIN=/absolute/path/to/mcode` to keep the run independent of
+`PATH`.
+
+## Ownership and support
+
+This provider is maintained in the OmniRoute repository: the provider code,
+this page and the tests live there, and provider-specific defects belong in
+the repository's issue tracker. The gateway endpoint, the subscription and the
+credential itself belong to **MiniMax** — OmniRoute talks to an internal
+endpoint of the MiniMax Code app, so a change on MiniMax's side shows up here
+as a transport error, not as a provider defect. Anything that needs a MiniMax
+account (a subscription, a token, the app itself) is a MiniMax support
+question.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `MiniMax Code auth profile not found — run 'mcode login' first` | The profile is not where the provider looks. | `mcode login`, or set `MINIMAX_CODE_PROFILE_DIR` / `MINIMAX_CODE_AUTH_FILE`. A CN account needs `MINIMAX_CODE_REGION=cn`. |
+| `502` on a request | The gateway is unreachable, or the request carries client tools on the CLI transport, which cannot execute them. | Check the gateway URL and the run log; the message names the transport. `MINIMAX_CODE_TRANSPORT=cli` answers a plain chat turn through the local CLI. |
+| `400` on a CLI run in the `standard` context | The host tools are not allowed. | `MINIMAX_CODE_ALLOW_HOST_TOOLS=true`, or use the gateway transport. |
