@@ -59,6 +59,25 @@ When the profile holds several accounts, the provider uses the record with
 the newest generation — the one the CLI itself refreshes. Pin a specific
 record with `MINIMAX_CODE_AUTH_RECORD` (the record key inside `auth.json`).
 
+## The gateway has its own input ceiling
+
+The two transports do not have the same limits. The local MiniMax Code
+transport runs the models with their full context (1M for
+`MiniMax-M3.1-Flash`, 512k for `MiniMax-M3`), and no OmniRoute setting
+lowers it.
+
+The managed gateway transport has a ceiling of its own. A request above
+`MINIMAX_CODE_MAX_INPUT_TOKENS` (200000 by default) is refused locally
+with a 413, because the gateway answers such a request with
+`limit_exceeded` after minutes of work, and that failure locks the model
+out of every fallback combo it belongs to. The refusal is request-scoped:
+it says nothing about the health of the model, which is why it answers 413
+and not 400.
+
+Raise the ceiling only for a deployment whose gateway accepts more than
+the default. A request that is too large for the gateway transport does
+not become valid by raising the number.
+
 ## The gateway endpoint
 
 The managed gateway URL is an **internal endpoint of the MiniMax Code app**,

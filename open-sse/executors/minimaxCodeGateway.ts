@@ -25,16 +25,23 @@ const ACCOUNT_BASES: Record<string, string> = {
 };
 const DEFAULT_MAX_TOKENS = 8192;
 /**
- * Hard ceiling on the estimated input size of one gateway request.
+ * Ceiling on the estimated input size of one MANAGED GATEWAY request.
+ *
+ * This is the ceiling of the gateway transport, not of the model: the local
+ * MiniMax Code transport runs the same models with their full context
+ * (1M for MiniMax-M3.1-Flash, 512k for MiniMax-M3) and has no such guard.
  *
  * Incident 2026-10-21: a request with ~322k input tokens was accepted by the
  * managed gateway, ran for 236s and came back as `limit_exceeded`. That error
  * is what trips the in-memory model lockout in the combo fallback, which took
  * the MiniMax leg out of every combo for ~27 minutes. A request that large is
- * never useful here, so it is refused locally with a fast 400 instead of being
- * forwarded.
+ * never useful on this transport, so it is refused locally with a fast
+ * 413 instead of being forwarded.
+ *
+ * The value is an operator knob: a deployment whose gateway accepts more can
+ * raise it without a code change.
  */
-const MAX_INPUT_TOKENS = 200_000;
+const DEFAULT_MAX_INPUT_TOKENS = 200_000;
 /** Chars per token, deliberately pessimistic for CJK and code payloads. */
 const CHARS_PER_TOKEN = 3;
 /**
@@ -832,11 +839,26 @@ export function estimateGatewayInputTokens(payload: JsonRecord): number {
 }
 
 /**
+ * The input ceiling of the managed gateway transport.
+ *
+ * `MINIMAX_CODE_MAX_INPUT_TOKENS` overrides the default for a deployment
+ * whose gateway accepts more. A value that is not a positive number falls
+ * back to the default instead of disabling the guard.
+ */
+export function resolveGatewayInputLimit(): number {
+  const raw = Number(process.env.MINIMAX_CODE_MAX_INPUT_TOKENS);
+  if (Number.isFinite(raw) && raw > 0) return Math.floor(raw);
+  return DEFAULT_MAX_INPUT_TOKENS;
+}
+
+/**
  * A payload whose estimated input size is above the ceiling.
  *
- * Returned as a plain object so the caller can turn it into a 400 response
- * without going through the gateway at all.
+ * Returned as a plain object so the caller can turn it into a 413 response
+ * without going through the gateway at all. The refusal is request-scoped:
+ * it says nothing about the health of the model, so it must not be able to
+ * lock the model out of the fallbacks.
  */
 export function isGatewayPayloadOversized(payload: JsonRecord): boolean {
-  return estimateGatewayInputTokens(payload) > MAX_INPUT_TOKENS;
+  return estimateGatewayInputTokens(payload) > resolveGatewayInputLimit();
 }

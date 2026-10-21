@@ -78,3 +78,40 @@ test("the estimate stays under the ceiling for a realistic agent session", async
   const payload = buildGatewayPayload({ messages }, "MiniMax-M3.1-Flash");
   assert.equal(isGatewayPayloadOversized(payload), false);
 });
+
+test("the gateway input ceiling is an operator setting", async () => {
+  const { resolveGatewayInputLimit } = await loadGateway();
+  const previous = process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
+  try {
+    delete process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
+    assert.equal(resolveGatewayInputLimit(), 200_000);
+    // A deployment whose gateway accepts more can raise the ceiling.
+    process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "500000";
+    assert.equal(resolveGatewayInputLimit(), 500_000);
+    // A value that is not a positive number keeps the guard in place.
+    process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "0";
+    assert.equal(resolveGatewayInputLimit(), 200_000);
+    process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "not-a-number";
+    assert.equal(resolveGatewayInputLimit(), 200_000);
+  } finally {
+    if (previous === undefined) delete process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
+    else process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = previous;
+  }
+});
+
+test("a raised ceiling lets a bigger request through", async () => {
+  const { buildGatewayPayload, isGatewayPayloadOversized } = await loadGateway();
+  const previous = process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
+  try {
+    const huge = "x".repeat(900_000);
+    const payload = buildGatewayPayload(
+      { messages: [{ role: "user", content: huge }] },
+      "MiniMax-M3.1-Flash"
+    );
+    process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "1000000";
+    assert.equal(isGatewayPayloadOversized(payload), false);
+  } finally {
+    if (previous === undefined) delete process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
+    else process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = previous;
+  }
+});

@@ -26,6 +26,7 @@ import {
   readAuthProfile,
   refreshAuthProfile,
   resolveAuthFile,
+  resolveGatewayInputLimit,
   type GatewayStreamState,
 } from "./minimaxCodeGateway.ts";
 import { runMinimaxCodeAcpTurn } from "./minimaxCodeAcp.ts";
@@ -777,6 +778,20 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     }
   }
 
+  /**
+   * The refusal for a request that is too large for the managed gateway
+   * transport. It names the transport and the model context, so the message
+   * is not read as a limit of the model itself.
+   */
+  private oversizedGatewayMessage(tokens: number): string {
+    return (
+      `MiniMax Code request is too large for the managed gateway transport: ` +
+      `~${tokens} input tokens (limit ${resolveGatewayInputLimit()}). ` +
+      `Trim the conversation and retry. The local MiniMax Code transport runs ` +
+      `the same models with their full context.`
+    );
+  }
+
   /** One-shot call against the managed gateway: native tool calling, no agent. */
   private async executeGateway(
     input: ExecuteInput,
@@ -786,11 +801,13 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     const payload = buildGatewayPayload(body, model);
     if (isGatewayPayloadOversized(payload)) {
       const tokens = estimateGatewayInputTokens(payload);
-      const message =
-        `MiniMax Code request is too large: ~${tokens} input tokens ` +
-        `(limit 200000). Trim the conversation and retry.`;
+      const message = this.oversizedGatewayMessage(tokens);
       input.log?.warn?.("MINIMAX_CODE", message);
-      return errorResponse(400, message);
+      // 413, not 400: a request-scoped refusal says nothing about the health
+      // of the model. A 400 with a model scope is classified as a model
+      // failure and locks the model out of the fallbacks, which takes the leg
+      // down for every other session (incident 2026-10-21).
+      return errorResponse(413, message);
     }
     const response = await this.callManagedGateway(payload, false, input.signal, input.log);
     const result = parseGatewayResult(asRecord(await response.json()));
@@ -806,13 +823,11 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     const payload = buildGatewayPayload(body, model);
     if (isGatewayPayloadOversized(payload)) {
       const tokens = estimateGatewayInputTokens(payload);
-      const message =
-        `MiniMax Code request is too large: ~${tokens} input tokens ` +
-        `(limit 200000). Trim the conversation and retry.`;
+      const message = this.oversizedGatewayMessage(tokens);
       input.log?.warn?.("MINIMAX_CODE", message);
       // The failure happens before the stream is opened, so the request
       // answers with a real status — the same as the non-streaming path.
-      return errorResponse(400, message);
+      return errorResponse(413, message);
     }
     const response = await this.callManagedGateway(payload, true, input.signal, input.log);
     const upstream = response.body;

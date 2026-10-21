@@ -825,3 +825,28 @@ test("the host-tools gate is not skipped by a differently cased mode", async () 
   assert.equal(response.status, 400);
   assert.equal(ran, false);
 });
+
+test("an oversized gateway request is refused with 413, not 400", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "gateway",
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: { messages: [{ role: "user", content: "x".repeat(900_000) }] },
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // 413, not 400: a request-scoped refusal says nothing about the health of
+  // the model, and a 400 with a model scope locks the model out of the
+  // fallbacks — it takes the leg down for every other session.
+  assert.equal(response.status, 413);
+  const body = await response.json();
+  assert.match(JSON.stringify(body), /too large for the managed gateway transport/);
+});
