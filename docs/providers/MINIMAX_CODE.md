@@ -62,7 +62,7 @@ connection, and the credential a run uses is the one in your local profile.
 The dashboard connection is the account entry — it can be re-authenticated
 from the panel, but it never routes a request.
 
-Two things worth knowing:
+Three things worth knowing:
 
 - **The profile is created if it is missing.** A host that never ran
   `mcode login` has no `~/.minimax/auth/prod/<region>/mcode-public/auth.json`:

@@ -167,6 +167,17 @@ test("MiniMax Code runs a plain chat turn in the standard context when the host 
   assert.deepEqual(steps, [1]);
 });
 
+test("the CLI version probe reads the output of the command", async () => {
+  const { probeCliVersion } = await loadMinimaxCodeExecutor();
+  // The version the operator sees in the run log is the version of the
+  // binary that runs the turn. Reading the child process instead of its
+  // output logged the stream object as the version.
+  const version = await probeCliVersion(process.execPath);
+  assert.ok(version, "the version of the command has to be read");
+  assert.match(version, /^v\d+\.\d+\.\d+/);
+  assert.doesNotMatch(version, /object Object/);
+});
+
 test("the transport budgets stay under the per-target timeout of a combo", async () => {
   const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
   const previousGateway = process.env.MINIMAX_CODE_GATEWAY_TIMEOUT_MS;

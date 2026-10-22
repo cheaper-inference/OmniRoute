@@ -582,15 +582,25 @@ function sseChunk(
  */
 let cliVersionCache: string | null | undefined;
 
-async function probeCliVersion(command: string): Promise<string | null> {
+export async function probeCliVersion(command: string): Promise<string | null> {
   if (cliVersionCache !== undefined) return cliVersionCache;
   cliVersionCache = null;
   try {
-    const { stdout } = await execFile(command, ["--version"], {
-      timeout: 5_000,
-      encoding: "utf8",
+    // execFile is the callback API: awaited without a callback it hands back
+    // the child process, and its `stdout` is the readable stream of the
+    // child — not the output of the command.
+    const stdout = await new Promise<string>((resolve, reject) => {
+      execFile(
+        command,
+        ["--version"],
+        { timeout: 5_000, encoding: "utf8" },
+        (error, out) => {
+          if (error) reject(error);
+          else resolve(String(out));
+        }
+      );
     });
-    const line = String(stdout)
+    const line = stdout
       .split("\n")
       .map((entry) => entry.trim())
       .find((entry) => entry.length > 0);
