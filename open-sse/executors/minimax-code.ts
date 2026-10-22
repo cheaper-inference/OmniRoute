@@ -19,6 +19,8 @@ import {
   isGatewayPayloadOversized,
   callGateway,
   ensureAccessToken,
+  gatewayErrorInBody,
+  gatewayErrorStatus,
   gatewayResultToCompletion,
   GatewayAuthError,
   GatewayStatusError,
@@ -55,12 +57,48 @@ const MINIMAX_CODE_URL = "minimax-code://gateway";
  *
  * The status of the upstream answer decides what the runtime does with the
  * failure. A 4xx belongs to the request and keeps its own status; a failure
- * without a status is a transport failure and stays a 502.
+ * of the transport itself — the gateway could not be reached — is a 502, and
+ * everything else is ours and stays a 500. A 502 is in the model-lockout
+ * list, and it only belongs there for an outage of the gateway.
  */
 function gatewayFailureStatus(error: unknown): number {
   if (error instanceof GatewayStatusError) return error.status;
   if (error instanceof GatewayAuthError) return error.status;
-  return 502;
+  // The gateway could not be reached: that is an outage of the upstream, and
+  // a 502 keeps the model out of the combos while it lasts.
+  if (isTransportFailure(error)) return 502;
+  // Anything else is ours — a bug in the payload builder or in the parser.
+  // It says nothing about the health of the model, and a 502 would lock the
+  // model out of every combo of the instance for half an hour.
+  return 500;
+}
+
+/** A failure of the HTTP transport itself, not of our code. */
+function isTransportFailure(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /fetch failed|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|EAI_AGAIN|socket hang up|network|terminated/i.test(
+    message
+  );
+}
+
+/**
+ * The status a refusal of the local CLI transport has to be answered with.
+ *
+ * The CLI refuses a request for a reason that belongs to the request ("too
+ * large", "no such model") and for a reason that belongs to this host (the
+ * binary is missing, the agent died). None of them says anything about the
+ * health of the model, and a 502 is in the model-lockout list: one refusal
+ * would take the model out of every combo for half an hour.
+ */
+function cliFailureStatus(message: string): number {
+  if (isCliAuthFailure(message)) return 401;
+  if (/too large|too long|context length|exceeds the maximum|maximum context/i.test(message)) {
+    return 413;
+  }
+  if (/model .*(not found|not supported|unknown)|unknown model|invalid model/i.test(message)) {
+    return 400;
+  }
+  return 500;
 }
 
 /**
@@ -93,18 +131,30 @@ function isCliAuthFailure(message: string): boolean {
   return /authentication required/i.test(message) || /mcode login/i.test(message);
 }
 /**
- * Budget of one managed-gateway attempt.
+ * Budget of one managed-gateway call.
  *
- * The whole call (attempt, backoff, one retry) has to stay well under the
- * per-target timeout of the routing machinery: an unreachable gateway must
- * not hold a model slot for minutes and take the provider out of every
- * fallback combo.
+ * The whole call (the refresh, the attempt, the backoff and the retry) has to
+ * stay under the per-target timeout of the routing machinery (120 s): a
+ * target that runs longer is cut off with a synthetic 504, and a 504 is in
+ * the model-lockout list, so a slow gateway would take the model out of
+ * every fallback combo of the instance. The budget therefore has to be
+ * shorter than that timeout, and it covers every attempt of the call.
  */
-const DEFAULT_GATEWAY_TIMEOUT_MS = 60_000;
+const DEFAULT_GATEWAY_TIMEOUT_MS = 100_000;
 const MINIMAX_CODE_PROVIDER_ID = "minimax";
 const DEFAULT_MODEL = MINIMAX_CODE_MODELS[0]?.id || "MiniMax-M3.1-Flash";
 const MINIMAX_CODE_MODEL_ALLOWLIST = new Set(MINIMAX_CODE_MODELS.map((model) => model.id));
-const DEFAULT_TURN_TIMEOUT_MS = 180_000;
+/**
+ * Budget of one local CLI run.
+ *
+ * The budget has to stay under the per-target timeout of the routing
+ * machinery (120 s): a run that is cut off by that timer is answered with a
+ * synthetic 504, and a 504 is in the model-lockout list — the model would be
+ * taken out of every combo of the instance for minutes because one turn was
+ * slow. The provider answers first instead, with a status that says nothing
+ * about the health of the model.
+ */
+const DEFAULT_TURN_TIMEOUT_MS = 100_000;
 const DEFAULT_MAX_STEPS = 1;
 const DEFAULT_CONTEXT_MODE = "lightweight";
 const DEFAULT_PERMISSION_POLICY = "smart";
@@ -179,7 +229,9 @@ export interface MinimaxCodeExecutorOptions {
   /**
    * Transport used for a run.
    *   "gateway"— the managed gateway (the default). It has no fallback: a
-   *              failing gateway answers with a 502 that names the transport.
+   *              failing gateway answers with the status of the failure and
+   *              names the transport. A missing credential answers with a 401
+   *              — it is not an outage of the model.
    *   "auto"   — client tools go through the managed gateway (native function
    *              calling, the client executes the tools), plain chat stays on
    *              the local CLI in the fast lightweight profile.
@@ -609,10 +661,13 @@ export class MinimaxCodeExecutor extends BaseExecutor {
   }
 
   private resolveTimeoutMs(): number {
-    return (
+    const configured =
       this.options.timeoutMs ??
-      Number(process.env.MINIMAX_CODE_TURN_TIMEOUT_MS || DEFAULT_TURN_TIMEOUT_MS)
-    );
+      Number(process.env.MINIMAX_CODE_TURN_TIMEOUT_MS || DEFAULT_TURN_TIMEOUT_MS);
+    // A timeout of zero or a negative number would abort every run at once
+    // and answer 500, which no combo can fail over from.
+    if (!Number.isFinite(configured) || configured <= 0) return DEFAULT_TURN_TIMEOUT_MS;
+    return Math.floor(configured);
   }
 
   /**
@@ -642,10 +697,13 @@ export class MinimaxCodeExecutor extends BaseExecutor {
   }
 
   private resolveGatewayTimeoutMs(): number {
-    return (
+    const configured =
       this.options.gatewayTimeoutMs ??
-      Number(process.env.MINIMAX_CODE_GATEWAY_TIMEOUT_MS || DEFAULT_GATEWAY_TIMEOUT_MS)
-    );
+      Number(process.env.MINIMAX_CODE_GATEWAY_TIMEOUT_MS || DEFAULT_GATEWAY_TIMEOUT_MS);
+    // A timeout of zero or a negative number would abort every call at once
+    // and answer 502, which locks the model out of the fallbacks.
+    if (!Number.isFinite(configured) || configured <= 0) return DEFAULT_GATEWAY_TIMEOUT_MS;
+    return Math.floor(configured);
   }
 
   /**
@@ -784,15 +842,18 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     log?: ExecuteInput["log"]
   ): Promise<Response> {
     const path = this.options.authFile;
+    const timeoutMs = this.resolveGatewayTimeoutMs();
+    // The budget starts before the refresh: the refresh is a call to the
+    // account endpoint and has to share the bound of the whole call.
+    const startedAt = Date.now();
     const accessToken = await ensureAccessToken({
       path,
       // The injected transport has to reach the first refresh as well: a
       // refresh that escapes it would talk to the real account endpoint.
       fetchImpl: this.options.fetchImpl,
+      timeoutMs: Math.max(1_000, timeoutMs - (Date.now() - startedAt)),
       onRefresh: () => log?.info?.("MINIMAX_CODE", "managed gateway access token refreshed"),
     });
-    const timeoutMs = this.resolveGatewayTimeoutMs();
-    const startedAt = Date.now();
     const options = {
       payload,
       accessToken,
@@ -853,7 +914,18 @@ export class MinimaxCodeExecutor extends BaseExecutor {
       return errorResponse(413, message);
     }
     const response = await this.callManagedGateway(payload, false, input.signal, input.log);
-    const result = parseGatewayResult(asRecord(await response.json()));
+    const doc = asRecord(await response.json());
+    // A 200 answer can carry the refusal of the gateway in its body. Parsing
+    // it as a normal answer hands the client an empty completion and loses
+    // the refusal.
+    const bodyError = gatewayErrorInBody(doc);
+    if (bodyError) {
+      throw new GatewayStatusError(
+        gatewayErrorStatus(bodyError.type),
+        `MiniMax gateway error: ${bodyError.message}`
+      );
+    }
+    const result = parseGatewayResult(doc);
     return Response.json(gatewayResultToCompletion(model, result));
   }
 
@@ -1023,8 +1095,9 @@ export class MinimaxCodeExecutor extends BaseExecutor {
         // the failure. A 4xx is a property of the request and keeps its own
         // status: a refusal that arrives as a 502 is recorded as a model
         // outage, and the model lockout that follows takes the MiniMax leg
-        // out of every combo for minutes (incident 2026-10-21). A failure
-        // without a status is a transport failure and stays a 502.
+        // out of every combo for minutes (incident 2026-10-21). Only a
+        // failure of the transport itself is a 502; everything else is ours
+        // and stays a 500.
         const status = gatewayFailureStatus(error);
         const detail =
           status === 502
@@ -1106,7 +1179,7 @@ export class MinimaxCodeExecutor extends BaseExecutor {
                 error instanceof Error ? error.message : String(error)
               );
               input.log?.warn?.("MINIMAX_CODE", message);
-              const status = isCliAuthFailure(message) ? 401 : 502;
+              const status = cliFailureStatus(message);
               controller.enqueue(
                 encoder.encode(
                   `data: ${JSON.stringify(buildErrorBody(status, message))}\n\ndata: [DONE]\n\n`
@@ -1136,12 +1209,9 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     } catch (error) {
       const message = sanitizeErrorMessage(error instanceof Error ? error.message : String(error));
       input.log?.warn?.("MINIMAX_CODE", message);
-      // A missing or expired credential is not an outage of the model: a 502
-      // would lock the model out of the fallbacks for half an hour.
-      if (isCliAuthFailure(message)) {
-        return errorResponse(401, message);
-      }
-      return errorResponse(502, message);
+      // A refusal of the CLI is not an outage of the model: a 502 would
+      // lock the model out of the fallbacks for half an hour.
+      return errorResponse(cliFailureStatus(message), message);
     }
   }
 

@@ -497,10 +497,27 @@ export function releaseSharedAgent(
     if (entry.users > 0) return;
     const delay = idleTimeout(options);
     entry.idleTimer = setTimeout(() => {
-      void closeSharedAgent(key);
+      closeSharedAgentIfIdle(key, entry.client);
     }, delay);
     entry.idleTimer.unref?.();
   }
+}
+
+/**
+ * Close the shared agent of a key when it is the same client and nobody uses
+ * it.
+ *
+ * The idle timer belongs to the agent it was set for. A request that took the
+ * agent again in the meantime keeps it, and an agent that was replaced in the
+ * meantime is not touched — otherwise the timer of the old agent closes the
+ * agent that a fresh request is already talking to, and that request fails
+ * with a transport error.
+ */
+export function closeSharedAgentIfIdle(key: string, client: MinimaxCodeAcpClient): void {
+  const current = sharedAgents.get(key);
+  if (!current || current.client !== client) return;
+  if (current.users > 0) return;
+  void closeSharedAgent(key);
 }
 
 /** Close one shared agent (used by the idle timer and by the tests). */

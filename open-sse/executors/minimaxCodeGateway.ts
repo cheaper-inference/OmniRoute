@@ -61,6 +61,14 @@ const WIDE_CHARS_PER_TOKEN = 1;
  * the entire worst case.
  */
 const DEFAULT_TIMEOUT_MS = 60_000;
+/**
+ * Budget of one access-token refresh.
+ *
+ * The refresh is a call to the account endpoint of MiniMax, not to the
+ * gateway. It happens before the gateway call starts, so it needs a bound of
+ * its own: a hanging account endpoint must not hold the model slot.
+ */
+const DEFAULT_REFRESH_TIMEOUT_MS = 15_000;
 const DEFAULT_MAX_RETRIES = 1;
 const REFRESH_MARGIN_MS = 60_000;
 
@@ -77,6 +85,11 @@ export interface MinimaxAuthProfile {
   path: string;
   /** Key of the profile record this credential was read from. */
   recordKey?: string;
+  /**
+   * The credential replaced one that was in the profile before, and that one
+   * was kept as the fallback of this record.
+   */
+  replacedAccount?: boolean;
 }
 
 export interface GatewayToolCall {
@@ -299,6 +312,47 @@ export function parseGatewayResult(doc: JsonRecord): GatewayResult {
   };
 }
 
+/**
+ * An error the gateway put into an answer that came with a 200.
+ *
+ * The gateway answers a refusal with the Anthropic error shape
+ * (`{"type":"error","error":{"type":…,"message":…}}`), and the status of the
+ * answer does not always match the refusal: a body that carries an error can
+ * arrive with a 200. Parsing it as a normal answer hands the client an empty
+ * completion and loses the refusal.
+ */
+export function gatewayErrorInBody(doc: JsonRecord): { type: string; message: string } | null {
+  const raw = doc.error;
+  if (raw === undefined || raw === null) {
+    if (asString(doc.type) !== "error") return null;
+    return {
+      type: "error",
+      message: asString(doc.message) || "the gateway answered with an error",
+    };
+  }
+  if (typeof raw === "string") return { type: "error", message: raw };
+  const error = asRecord(raw);
+  return {
+    type: asString(error.type) || asString(doc.type) || "error",
+    message:
+      asString(error.message) || asString(doc.message) || "the gateway answered with an error",
+  };
+}
+
+/**
+ * The status an error that the gateway put into a 200 answer is answered with.
+ *
+ * A refusal of the request keeps the status of the refusal (400), a quota
+ * keeps 429, and everything else is a failure of the gateway that says
+ * nothing about the model: the answer is a 500, which leaves the model in
+ * place, while a 502 would take it out of every combo of the instance.
+ */
+export function gatewayErrorStatus(type: string): number {
+  if (/invalid_request|not_found_error|request_too_large|permission_error/i.test(type)) return 400;
+  if (/rate_limit|quota|overloaded/i.test(type)) return 429;
+  return 500;
+}
+
 /** Build the OpenAI chat completion body for a gateway result. */
 export function gatewayResultToCompletion(model: string, result: GatewayResult): JsonRecord {
   const toolCalls = result.toolCalls.map((call) => ({
@@ -509,14 +563,22 @@ async function writeAuthState(path: string, profile: MinimaxAuthProfile): Promis
 }
 
 /** Persist a refreshed token back into the MiniMax Code auth profile. */
-async function writeAuthProfile(path: string, profile: MinimaxAuthProfile): Promise<void> {
+async function writeAuthProfile(
+  path: string,
+  profile: MinimaxAuthProfile,
+  options: { keepPrevious?: boolean } = {}
+): Promise<boolean> {
   const doc = await readProfileDocument(path);
   const records = asRecord(doc.records);
   // Write the credential back into the record it came from: the profile can
   // hold several accounts, and refreshing one of them must not touch another.
   const key = profile.recordKey || Object.keys(records)[0] || "";
-  if (!key) return;
+  if (!key) return false;
   const record = asRecord(records[key]);
+  // A credential that came from outside the CLI may belong to another
+  // account: the one it replaces is kept, so a sign-in never destroys an
+  // account the operator cannot get back.
+  const kept = options.keepPrevious ? keepPreviousCredential(records, key, record) : false;
   record.accessToken = profile.accessToken;
   if (profile.refreshToken) record.refreshToken = profile.refreshToken;
   record.expiresAtMs = profile.expiresAtMs;
@@ -533,6 +595,7 @@ async function writeAuthProfile(path: string, profile: MinimaxAuthProfile): Prom
   await writeFile(tmp, `${JSON.stringify(doc, null, 2)}\n`, { mode: 0o600 });
   await rename(tmp, path);
   await chmod(path, 0o600).catch(() => undefined);
+  return kept;
 }
 
 export interface PersistCredentialOptions {
@@ -556,6 +619,16 @@ export interface PersistCredentialOptions {
  */
 const profileWriteLocks = new Map<string, Promise<unknown>>();
 
+/**
+ * One writer at a time per profile file, inside this process.
+ *
+ * The lock is in-process: the MiniMax Code CLI writes the same file on its
+ * own refresh, and that write is not serialized with ours. The write itself
+ * is atomic (a temporary file and a rename), so a concurrent write of the
+ * CLI never leaves a half-written profile behind — at worst the last writer
+ * wins, and the generation of the record tells the runtime which of the two
+ * credentials is the newer one.
+ */
 function withProfileWriteLock<T>(path: string, task: () => Promise<T>): Promise<T> {
   const previous = profileWriteLocks.get(path) ?? Promise.resolve();
   const result = previous.then(task, task);
@@ -589,6 +662,17 @@ async function readProfileDocument(path: string): Promise<JsonRecord> {
   if (!doc.records) doc.records = {};
   return doc;
 }
+
+/**
+ * The record that holds the credential a dashboard sign-in replaced.
+ *
+ * The account endpoint returns no account identity, so the dashboard cannot
+ * tell whether it signed in with the account the CLI holds. The credential it
+ * replaces is kept under this key instead of being destroyed: the runtime
+ * reads it as the fallback of the record it belongs to, and an operator can
+ * pin it with MINIMAX_CODE_AUTH_RECORD to go back to the previous account.
+ */
+const PREVIOUS_CREDENTIAL_SUFFIX = "\u0000previous";
 
 /**
  * The record the runtime reads.
@@ -629,6 +713,31 @@ function resolveTargetRecordKey(records: JsonRecord): string {
 }
 
 /**
+ * Keep the credential of a record that is about to be replaced.
+ *
+ * The copy keeps the generation of the credential it replaces, so it stays
+ * behind the record that replaces it: the runtime reads it only when the
+ * newer credential does not work.
+ */
+function keepPreviousCredential(
+  records: JsonRecord,
+  key: string,
+  record: JsonRecord
+): boolean {
+  const accessToken = asString(record.accessToken);
+  if (!accessToken) return false;
+  const backupKey = `${key}${PREVIOUS_CREDENTIAL_SUFFIX}`;
+  const backup = asRecord(records[backupKey]);
+  const backupGeneration = Number(backup.generation ?? 0) || 0;
+  const generation = Number(record.generation ?? 0) || 0;
+  // A backup of an older credential is not worth anything: the newer one is
+  // the one that was in use.
+  if (backupGeneration >= generation) return false;
+  records[backupKey] = { ...record };
+  return true;
+}
+
+/**
  * Store a credential that was obtained outside the CLI — for example through
  * the dashboard's device-code flow — in the MiniMax Code profile, so the CLI
  * and the local agent pick it up on their next session.
@@ -661,9 +770,12 @@ export async function persistProfileCredential(
       path,
       recordKey: key,
     };
-    await writeAuthProfile(path, profile);
+    // The credential comes from the dashboard, so the one it replaces is
+    // kept: the account endpoint returns no account identity, and a
+    // destroyed credential is an account the operator cannot go back to.
+    const replacedAccount = await writeAuthProfile(path, profile, { keepPrevious: true });
     await writeAuthState(path, profile).catch(() => undefined);
-    return profile;
+    return { ...profile, replacedAccount };
   });
 }
 
@@ -675,6 +787,15 @@ export interface EnsureTokenOptions {
   /** Refresh even when the current access token is still valid. */
   force?: boolean;
   onRefresh?: (profile: MinimaxAuthProfile) => void;
+  /**
+   * Budget of one refresh, in milliseconds.
+   *
+   * The refresh talks to the account endpoint, which is a different service
+   * from the gateway. Without a bound of its own it holds the model slot
+   * until the HTTP client gives up, and the bound of the gateway call does
+   * not cover it: the refresh happens before the call starts.
+   */
+  timeoutMs?: number;
 }
 /**
  * Return a usable access token, refreshing it through the account OAuth
@@ -684,7 +805,14 @@ export async function ensureAccessToken(options: EnsureTokenOptions = {}): Promi
   const path = options.path || resolveAuthFile();
   const profiles = await readAuthProfiles(path);
   if (!profiles.length) {
-    throw new Error("MiniMax Code auth profile not found — run `mcode login` first");
+    // No credential is not an outage of the model. A 502 is in the
+    // model-lockout list, so a host that is not signed in would take the
+    // model out of every combo of the instance for half an hour — for every
+    // session, not only for the one that needed the credential. The answer
+    // is 401: the operator has to sign in, the model itself is fine.
+    throw new GatewayAuthError(
+      "MiniMax Code auth profile not found — run `mcode login` first"
+    );
   }
   const now = options.now ?? Date.now();
   let lastError: unknown = null;
@@ -723,20 +851,61 @@ export async function refreshAuthProfile(
     scope: profile.scopes.join(" "),
     audience: profile.audience,
   });
-  const response = await doFetch(`${base}/oauth2/token`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-      "user-agent": "minimax-code-cli",
-    },
-    body: form.toString(),
-  });
+  const timeoutMs = Math.max(1_000, options.timeoutMs ?? DEFAULT_REFRESH_TIMEOUT_MS);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  timer.unref?.();
+  let response: Response;
+  try {
+    response = await doFetch(`${base}/oauth2/token`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+        "user-agent": "minimax-code-cli",
+      },
+      body: form.toString(),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    // The account endpoint did not answer. It is a different service from the
+    // gateway, and its failure says nothing about the model: the answer is a
+    // 500, which keeps the model out of the lockout list.
+    const aborted =
+      typeof error === "object" &&
+      error !== null &&
+      (error as { name?: string }).name === "AbortError";
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new GatewayStatusError(
+      500,
+      aborted
+        ? `MiniMax token refresh timed out after ${timeoutMs} ms`
+        : `MiniMax token refresh failed: ${detail.slice(0, 200)}`
+    );
+  } finally {
+    clearTimeout(timer);
+  }
   if (!response.ok) {
-    throw new Error(`MiniMax token refresh failed (${response.status})`);
+    const detail = (await response.text().catch(() => "")).slice(0, 200);
+    if (response.status >= 400 && response.status < 500) {
+      // The refresh token was consumed or revoked: the credential is dead
+      // and the operator has to sign in again. This is the same refusal the
+      // CLI transport answers with 401 — a 502 would lock the model out.
+      throw new GatewayAuthError(
+        `MiniMax token refresh rejected (${response.status})${detail ? `: ${detail}` : ""}`
+      );
+    }
+    // The account endpoint itself failed. The model is untouched, so the
+    // answer must not be a status of the lockout list.
+    throw new GatewayStatusError(
+      500,
+      `MiniMax token endpoint failed (${response.status})${detail ? `: ${detail}` : ""}`
+    );
   }
   const data = asRecord(await response.json());
   const accessToken = asString(data.access_token);
-  if (!accessToken) throw new Error("MiniMax token refresh returned no access token");
+  if (!accessToken) {
+    throw new GatewayStatusError(500, "MiniMax token refresh returned no access token");
+  }
   const expiresIn = Number(data.expires_in ?? 0);
   const updated: MinimaxAuthProfile = await withProfileWriteLock(profile.path, async () => {
     const rotated: MinimaxAuthProfile = {
@@ -808,6 +977,15 @@ export class GatewayStatusError extends Error {
   }
 }
 
+/** An abort raised by our own timeout rather than by the caller. */
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { name?: string }).name === "AbortError"
+  );
+}
+
 /** The statuses the gateway transport retries: a quota or an outage. */
 function isRetryableGatewayStatus(status: number): boolean {
   return status === 429 || status >= 500;
@@ -845,15 +1023,22 @@ export async function callGateway(options: GatewayCallOptions): Promise<Response
   );
   const baseMs = options.retryBaseMs ?? 1000;
   let lastError: unknown = null;
+  // The budget covers the whole call: the attempt, the backoff and the retry.
+  // A budget that each attempt gets on its own would let one call hold the
+  // model slot for twice the documented bound.
+  const deadline = Date.now() + timeoutMs;
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
     if (attempt > 0) {
       await sleep(Math.min(baseMs * 2 ** (attempt - 1), 30_000), options.signal);
     }
+    const attemptTimeoutMs = Math.max(1, Math.min(timeoutMs, deadline - Date.now()));
     const controller = new AbortController();
     // A ref'd timer: an unref'd abort timer never fires when the caller is
     // not a server, and the attempt is then abandoned without an answer.
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const timer = setTimeout(() => controller.abort(), attemptTimeoutMs);
     const onAbort = () => controller.abort();
     options.signal?.addEventListener("abort", onAbort, { once: true });
     try {
@@ -895,6 +1080,16 @@ export async function callGateway(options: GatewayCallOptions): Promise<Response
       if (error instanceof GatewayStatusError && !isRetryableGatewayStatus(error.status)) {
         throw error;
       }
+      // Our own timeout is not a verdict on the model: the gateway may be
+      // slow, or the request may be a large one. A 504 is in the lockout
+      // list, so a slow answer would take the model out of every combo for
+      // half an hour. The answer is a 500, which leaves the model in place.
+      if (isAbortError(error) && !options.signal?.aborted) {
+        throw new GatewayStatusError(
+          500,
+          `MiniMax gateway call timed out after ${attemptTimeoutMs} ms`
+        );
+      }
       lastError = error;
       if (attempt >= maxRetries) break;
     } finally {
@@ -921,6 +1116,16 @@ export interface GatewayStreamState {
 export function applyGatewayEvent(state: GatewayStreamState, event: JsonRecord): string {
   const type = asString(event.type);
 
+  if (type === "error") {
+    // The gateway refused inside the stream. Folding it into a normal
+    // completion would hand the client an answer that looks successful and
+    // carries no content at all.
+    const bodyError = gatewayErrorInBody(event);
+    throw new GatewayStatusError(
+      gatewayErrorStatus(bodyError?.type ?? "error"),
+      `MiniMax gateway error: ${bodyError?.message ?? "the gateway answered with an error"}`
+    );
+  }
   if (type === "message_start") {
     const message = asRecord(event.message);
     const usage = asRecord(message.usage);

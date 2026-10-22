@@ -41,6 +41,11 @@ interface MiniMaxCodeTokenResponse {
 export interface MiniMaxCodePostExchange {
   profileSynced: boolean;
   profileSyncError?: string;
+  /**
+   * The sign-in replaced the credential of the account that was in the
+   * profile before. The replaced credential is kept as the fallback.
+   */
+  profileReplacedAccount?: boolean;
 }
 
 function asRecord(value: unknown): JsonRecord {
@@ -194,7 +199,7 @@ export const minimaxCode = {
     }
     const refreshToken = asString(tokens.refresh_token);
     const expiresIn = asNumber(tokens.expires_in);
-    await persistProfileCredential({
+    const profile = await persistProfileCredential({
       accessToken,
       refreshToken: refreshToken || undefined,
       expiresAtMs: Date.now() + (expiresIn > 0 ? expiresIn : 3600) * 1000,
@@ -202,7 +207,11 @@ export const minimaxCode = {
       scopes: [MINIMAX_CODE_SCOPE],
       audience: MINIMAX_CODE_AUDIENCE,
     });
-    return { profileSynced: true };
+    // The credential of the account that was in the profile before is kept
+    // under a key of our own: the runtime falls back to it when the new
+    // credential does not work. A profile that was empty before the sign-in
+    // had nothing to keep, and replacedAccount says so.
+    return { profileSynced: true, profileReplacedAccount: profile.replacedAccount === true };
   },
 
   mapTokens: (tokens: MiniMaxCodeTokenResponse, extra?: MiniMaxCodePostExchange) => {
@@ -221,6 +230,9 @@ export const minimaxCode = {
         // Did the credential reach the local profile the CLI reads?
         profileSynced: extra?.profileSynced === true,
         profileSyncError: extra?.profileSyncError,
+        // The account that was in the profile before this sign-in was
+        // replaced; its credential is kept as the fallback.
+        profileReplacedAccount: extra?.profileReplacedAccount === true,
         lastRefresh: new Date().toISOString(),
       },
     };

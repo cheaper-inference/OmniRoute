@@ -515,7 +515,7 @@ test("a transient gateway error is retried with a backoff", async () => {
   const { callGateway } = await loadGateway();
   const { createServer } = await import("node:http");
   let calls = 0;
-  const server = createServer((req, res) => {
+  const server = createServer((_req, res) => {
     calls += 1;
     if (calls === 1) {
       res.writeHead(429, { "content-type": "application/json" });
@@ -923,8 +923,97 @@ test("the profile is created when the host has no MiniMax Code login yet", async
 
   assert.equal(profile.accessToken, "fresh-access-token");
   assert.ok(profile.recordKey.length > 0);
+  // There was no credential before, so nothing was replaced.
+  assert.equal(profile.replacedAccount, false);
   const auth = JSON.parse(await readFile(authFile, "utf8"));
   const records = Object.values(auth.records) as Record<string, unknown>[];
   assert.equal(records.length, 1);
   assert.equal(records[0].accessToken, "fresh-access-token");
+});
+
+test("a dashboard sign-in keeps the credential it replaced", async () => {
+  const { persistProfileCredential, readAuthProfiles } = await loadGateway();
+  const { mkdtemp, writeFile, readFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+
+  const dir = await mkdtemp(join(tmpdir(), "mmcode-previous-"));
+  const authFile = join(dir, "auth.json");
+  const recordKey = "com.minimax.mcode.oauth.prod.en\u0000cli-account";
+  await writeFile(
+    authFile,
+    JSON.stringify({
+      schemaVersion: 1,
+      records: {
+        [recordKey]: {
+          accessToken: "cli-access-token",
+          refreshToken: "cli-refresh-token",
+          clientId: "mcode-public",
+          scopes: ["agent.default"],
+          audience: "agent-backend",
+          expiresAtMs: Date.now() + 3_600_000,
+          generation: 12,
+        },
+      },
+    })
+  );
+
+  const profile = await persistProfileCredential({
+    path: authFile,
+    accessToken: "dashboard-access-token",
+    refreshToken: "dashboard-refresh-token",
+    expiresAtMs: Date.now() + 3_600_000,
+    clientId: "mcode-public",
+    scopes: ["agent.default"],
+    audience: "agent-backend",
+  });
+
+  // The sign-in replaced the credential that was in the profile.
+  assert.equal(profile.replacedAccount, true);
+
+  const doc = JSON.parse(await readFile(authFile, "utf8"));
+  const records = doc.records as Record<string, Record<string, unknown>>;
+  // The runtime reads the record the sign-in wrote into.
+  assert.equal(records[recordKey]?.accessToken, "dashboard-access-token");
+  // The credential that was there before is not destroyed: it is kept as the
+  // fallback of that record, so an account is never lost by a sign-in.
+  const previous = records[`${recordKey}\u0000previous`];
+  assert.ok(previous, "the replaced credential must be kept");
+  assert.equal(previous?.accessToken, "cli-access-token");
+  assert.equal(previous?.refreshToken, "cli-refresh-token");
+  // The kept credential is behind the new one: the runtime picks the newest.
+  const profiles = await readAuthProfiles(authFile);
+  assert.equal(profiles[0]?.accessToken, "dashboard-access-token");
+  assert.ok(
+    profiles.some((profile) => profile.accessToken === "cli-access-token"),
+    "the kept credential has to stay readable as a fallback"
+  );
+});
+
+test("an error that the gateway puts into a 200 answer is recognized", async () => {
+  const { gatewayErrorInBody, gatewayErrorStatus } = await loadGateway();
+
+  // The Anthropic error shape.
+  const refusal = gatewayErrorInBody({
+    type: "error",
+    error: { type: "invalid_request_error", message: "invalid params, mismatched type" },
+  });
+  assert.equal(refusal?.type, "invalid_request_error");
+  assert.equal(refusal?.message, "invalid params, mismatched type");
+
+  // A plain error string.
+  const plain = gatewayErrorInBody({ error: "limit_exceeded" });
+  assert.equal(plain?.message, "limit_exceeded");
+
+  // A normal answer carries no error.
+  assert.equal(
+    gatewayErrorInBody({ type: "message", content: [{ type: "text", text: "hi" }] }),
+    null
+  );
+
+  // The status of the refusal is kept, a quota keeps 429, and everything else
+  // is a failure of the gateway that says nothing about the model.
+  assert.equal(gatewayErrorStatus("invalid_request_error"), 400);
+  assert.equal(gatewayErrorStatus("rate_limit_error"), 429);
+  assert.equal(gatewayErrorStatus("api_error"), 500);
 });

@@ -18,12 +18,12 @@ credential that comes back is written into that same local profile.
 
 | Transport | What it does | When it is used |
 | --- | --- | --- |
-| `gateway` (default) | One call to the managed MiniMax subscription gateway. It speaks the native tool protocol, so a request that carries client tools comes back as OpenAI `tool_calls`. **No fallback**: a failing gateway answers with a `502` that names the transport. | Every request. |
+| `gateway` (default) | One call to the managed MiniMax subscription gateway. It speaks the native tool protocol, so a request that carries client tools comes back as OpenAI `tool_calls`. **No fallback**: a failing gateway answers with the status of the failure and names the transport — `502` when the gateway could not be reached, `401` when the credential is missing or dead, `500` when the failure is ours. | Every request. |
 | `cli` | Runs the locally installed MiniMax Code CLI (`mcode exec --output-format stream-json`) in the lightweight conversation profile — or on the shared agent below, when `MINIMAX_CODE_SHARED_AGENT` is on. | Opt-in (`MINIMAX_CODE_TRANSPORT=cli`). |
 | `auto` | Requests with client tools to the gateway, plain chat to the CLI. | Opt-in (`MINIMAX_CODE_TRANSPORT=auto`). |
 
 The gateway transport has **no fallback**: a request that cannot be answered
-by the gateway fails with a `502` that names the transport. The local CLI stays
+by the gateway fails with the status of the failure and names the transport. The local CLI stays
 available as an explicit transport (`MINIMAX_CODE_TRANSPORT=cli`, or `auto` for
 a plain chat turn) — but it never answers a request that asked for the gateway,
 and it cannot honour the protocol of a request that carries client tools: the
@@ -64,10 +64,16 @@ from the panel, but it never routes a request.
 
 Two things worth knowing:
 
-- **The local profile has to exist.** A host that never ran `mcode login` has
-  no `~/.minimax/auth/prod/<region>/mcode-public/auth.json` to write into:
-  the dashboard account is created, but the credential cannot be placed in
-  the profile until that profile exists.
+- **The profile is created if it is missing.** A host that never ran
+  `mcode login` has no `~/.minimax/auth/prod/<region>/mcode-public/auth.json`:
+  the provider creates the directory and writes the credential into it. The
+  CLI picks the file up on its next session.
+- **The credential that was there before is kept.** The account service returns
+  no account identity, so the panel cannot tell whether it signed in with the
+  account the CLI holds. The credential a sign-in replaces is therefore kept in
+  the profile as the fallback of that record — a sign-in never destroys an
+  account the operator cannot get back. Pin it with `MINIMAX_CODE_AUTH_RECORD`
+  to go back to the previous account.
 - **The account host follows the region.** `MINIMAX_CODE_REGION=en` (the
   default) talks to `account.minimax.io`, `cn` to `account.minimax.cn`. The
   region also decides which profile the credential is written to.
@@ -118,11 +124,17 @@ user agent (`MiniMaxAgent`) and the refresh call with the CLI's user agent
 That has two practical consequences:
 
 - The endpoint can change without notice. When it does, the request fails with
-  a `502` that names the transport — it never changes meaning silently.
+  the status of the failure and names the transport — it never changes
+  meaning silently.
   `MINIMAX_CODE_TRANSPORT=cli` (or `auto`) is the way to keep working against
   the local CLI.
-- The whole gateway call is bounded: one attempt of 60 s, a backoff and one
-  retry. An unreachable gateway cannot hold a model slot for long.
+- The whole gateway call is bounded: the token refresh, one attempt, a backoff
+  and one retry share one budget of 100 s
+  (`MINIMAX_CODE_GATEWAY_TIMEOUT_MS`). An unreachable gateway cannot hold a
+  model slot for long, and the provider answers with its own status before
+  the routing machinery cuts the request off — a cut-off is answered with a
+  synthetic `504`, and that one takes the model out of every combo of the
+  instance.
 
 `MINIMAX_CODE_GATEWAY_URL` overrides the endpoint if your account or a proxy
 uses another one.
@@ -206,5 +218,6 @@ question.
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `MiniMax Code auth profile not found — run 'mcode login' first` | The profile is not where the provider looks. | `mcode login`, or set `MINIMAX_CODE_PROFILE_DIR` / `MINIMAX_CODE_AUTH_FILE`. A CN account needs `MINIMAX_CODE_REGION=cn`. |
-| `502` on a request | The gateway is unreachable, or the request carries client tools on the CLI transport, which cannot execute them. | Check the gateway URL and the run log; the message names the transport. `MINIMAX_CODE_TRANSPORT=cli` answers a plain chat turn through the local CLI. |
+| `401` on a request | The credential is missing, expired, or the token refresh was refused. | `mcode login`, or sign in from the provider page. |
+| `502` on a request | The gateway could not be reached, or the request carries client tools on the CLI transport, which cannot execute them. | Check the gateway URL and the run log; the message names the transport. `MINIMAX_CODE_TRANSPORT=cli` answers a plain chat turn through the local CLI. |
 | `400` on a CLI run in the `standard` context | The host tools are not allowed. | `MINIMAX_CODE_ALLOW_HOST_TOOLS=true`, or use the gateway transport. |

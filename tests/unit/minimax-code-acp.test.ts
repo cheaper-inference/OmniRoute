@@ -7,6 +7,7 @@ import {
   acquireSharedAgent,
   closeAllSharedAgents,
   closeSharedAgent,
+  closeSharedAgentIfIdle,
   contentText,
   releaseSharedAgent,
   runMinimaxCodeAcpTurn,
@@ -310,4 +311,18 @@ test("the late exit of a replaced agent does not drop the new one", async () => 
     rmSync(file, { force: true });
     await closeAllSharedAgents();
   }
+});
+
+test("the idle timer does not close an agent that was taken again", async () => {
+  await closeAllSharedAgents();
+  const settings = { ...options("taken"), idleTimeoutMs: 50 };
+  const client = await acquireSharedAgent(settings);
+  const key = `${settings.command}|${settings.args.join(" ")}|${settings.cwd}|${settings.dataDir}`;
+  // The timer of a released agent may fire while the agent is in use again:
+  // it belongs to the agent it was set for and may not close a fresh user.
+  closeSharedAgentIfIdle(key, client);
+  await sleep(120);
+  assert.equal(sharedAgentCount(), 1, "an agent that is in use must stay");
+  releaseSharedAgent(client, settings);
+  await closeAllSharedAgents();
 });

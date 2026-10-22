@@ -204,7 +204,6 @@ export const MUSE_CODE_CONFIG = {
   mintUrl: "https://api.meta.ai/muse-code/key",
 };
 
-// Kimi Coding OAuth Configuration (Device Code Flow)
 // MiniMax Code OAuth Configuration (Device Code Flow, RFC 8628 + S256-PKCE).
 //
 // The account host follows the region of the local MiniMax Code profile — the
@@ -237,6 +236,7 @@ export const MINIMAX_CODE_CONFIG: MinimaxCodeOAuthConfig = {
   tokenUrl: `${MINIMAX_CODE_ACCOUNT_BASE}/oauth2/token`,
 };
 
+// Kimi Coding OAuth Configuration (Device Code Flow)
 export const KIMI_CODING_CONFIG = {
   clientId: resolvePublicCred("kimi_id", "KIMI_CODING_OAUTH_CLIENT_ID"),
   deviceCodeUrl: "https://auth.kimi.com/api/oauth/device_authorization",

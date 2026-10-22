@@ -167,6 +167,44 @@ test("MiniMax Code runs a plain chat turn in the standard context when the host 
   assert.deepEqual(steps, [1]);
 });
 
+test("the transport budgets stay under the per-target timeout of a combo", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const previousGateway = process.env.MINIMAX_CODE_GATEWAY_TIMEOUT_MS;
+  const previousTurn = process.env.MINIMAX_CODE_TURN_TIMEOUT_MS;
+  const executor = new MinimaxCodeExecutor();
+  const read = (name: "resolveGatewayTimeoutMs" | "resolveTimeoutMs"): number =>
+    (executor as unknown as Record<string, () => number>)[name].call(executor);
+  try {
+    delete process.env.MINIMAX_CODE_GATEWAY_TIMEOUT_MS;
+    delete process.env.MINIMAX_CODE_TURN_TIMEOUT_MS;
+
+    // The per-target timeout of the routing machinery is 120 s. A target that
+    // runs longer is cut off with a synthetic 504, and a 504 is in the
+    // model-lockout list: the model would be taken out of every combo of the
+    // instance for minutes because one call was slow. The provider has to
+    // answer first, with a status that says nothing about the model.
+    assert.ok(read("resolveGatewayTimeoutMs") < 120_000);
+    assert.ok(read("resolveTimeoutMs") < 120_000);
+
+    // A budget of zero or a negative number would abort every call at once.
+    process.env.MINIMAX_CODE_GATEWAY_TIMEOUT_MS = "0";
+    process.env.MINIMAX_CODE_TURN_TIMEOUT_MS = "-1";
+    assert.equal(read("resolveGatewayTimeoutMs"), 100_000);
+    assert.equal(read("resolveTimeoutMs"), 100_000);
+
+    // A budget that is set is the one that counts.
+    process.env.MINIMAX_CODE_GATEWAY_TIMEOUT_MS = "45000";
+    process.env.MINIMAX_CODE_TURN_TIMEOUT_MS = "45000";
+    assert.equal(read("resolveGatewayTimeoutMs"), 45_000);
+    assert.equal(read("resolveTimeoutMs"), 45_000);
+  } finally {
+    if (previousGateway === undefined) delete process.env.MINIMAX_CODE_GATEWAY_TIMEOUT_MS;
+    else process.env.MINIMAX_CODE_GATEWAY_TIMEOUT_MS = previousGateway;
+    if (previousTurn === undefined) delete process.env.MINIMAX_CODE_TURN_TIMEOUT_MS;
+    else process.env.MINIMAX_CODE_TURN_TIMEOUT_MS = previousTurn;
+  }
+});
+
 test("MiniMax Code routes client tools to the managed gateway and plain chat to the CLI", async () => {
   const { resolveMinimaxCodeTransport } = await loadMinimaxCodeExecutor();
   // Client tools live on the client machine: the model must call them through
@@ -184,7 +222,7 @@ test("MiniMax Code routes client tools to the managed gateway and plain chat to 
   assert.equal(resolveMinimaxCodeTransport("gateway", false), "gateway");
 });
 
-test("a failing gateway answers with a 502 that names the transport", async () => {
+test("a missing credential on the gateway transport answers with a 401", async () => {
   const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
   let ran = false;
   const executor = new MinimaxCodeExecutor({
@@ -212,11 +250,14 @@ test("a failing gateway answers with a 502 that names the transport", async () =
     credentials: {},
   });
   const response = "response" in result ? result.response : result;
-  // The gateway transport does not change the transport of a request behind
-  // the client's back: it fails with the transport named.
-  assert.equal(response.status, 502);
+  // A missing credential is not an outage of the model: a 502 is in the
+  // model-lockout list and would take the model out of every combo of the
+  // instance for half an hour. The answer is a 401.
+  assert.equal(response.status, 401);
   const body = await response.json();
-  assert.ok(String(body.error?.message ?? "").includes("managed gateway"));
+  assert.ok(String(body.error?.message ?? "").toLowerCase().includes("mcode login"));
+  // The gateway transport does not change the transport of a request behind
+  // the client's back: it fails instead of running the CLI.
   assert.equal(ran, false);
 });
 
@@ -664,7 +705,7 @@ test("MiniMax Code refreshes an expired token through the injected transport", a
 });
 
 
-test("a request with client tools fails when the gateway is unreachable", async () => {
+test("a request with client tools does not fall back to the CLI when the credential is missing", async () => {
   const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
   let ran = false;
   const executor = new MinimaxCodeExecutor({
@@ -704,10 +745,11 @@ test("a request with client tools fails when the gateway is unreachable", async 
   });
   const response = "response" in result ? result.response : result;
   // The CLI cannot hand a tool call back to the client, so the request has to
-  // fail with the transport named instead of answering with prose.
-  assert.equal(response.status, 502);
+  // fail instead of answering with prose — and a missing credential is a 401,
+  // not a 502 that would lock the model out of the fallbacks.
+  assert.equal(response.status, 401);
   const body = await response.json();
-  assert.ok(String(body.error?.message ?? "").includes("managed gateway"));
+  assert.ok(String(body.error?.message ?? "").toLowerCase().includes("mcode login"));
   assert.equal(body.choices, undefined);
   assert.equal(ran, false);
 });
@@ -1023,4 +1065,206 @@ test("a local CLI that is not signed in is answered with 401, not 502", async ()
   assert.equal(response.status, 401);
   const body = await response.json();
   assert.match(JSON.stringify(body), /Authentication required/);
+});
+
+async function writeAuthProfile(records: Record<string, unknown>): Promise<string> {
+  const { mkdtemp, writeFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const dir = await mkdtemp(join(tmpdir(), "mmcode-exec-"));
+  const authFile = join(dir, "auth.json");
+  await writeFile(authFile, JSON.stringify({ schemaVersion: 1, records }));
+  return authFile;
+}
+
+function liveRecord(accessToken: string) {
+  return {
+    accessToken,
+    refreshToken: "refresh-token",
+    clientId: "mcode-public",
+    scopes: ["agent.default"],
+    audience: "agent-backend",
+    expiresAtMs: Date.now() + 3_600_000,
+    generation: 7,
+  };
+}
+
+function expiredRecord() {
+  return {
+    accessToken: "expired-access-token",
+    refreshToken: "consumed-refresh-token",
+    clientId: "mcode-public",
+    scopes: ["agent.default"],
+    audience: "agent-backend",
+    expiresAtMs: Date.now() - 1_000,
+    generation: 9,
+  };
+}
+
+test("a 200 answer that carries an error is a refusal, not an empty answer", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const authFile = await writeAuthProfile({ live: liveRecord("access-token") });
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "gateway",
+    authFile,
+    // The gateway answers a refusal with the error shape — and the status of
+    // the answer does not always match the refusal.
+    fetchImpl: async () =>
+      new Response(
+        JSON.stringify({
+          type: "error",
+          error: { type: "invalid_request_error", message: "invalid params, mismatched type" },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      ),
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // The refusal belongs to the request, so it keeps the status of the
+  // refusal: a 400 that no combo reads as an outage of the model. An empty
+  // completion would have hidden the refusal completely.
+  assert.equal(response.status, 400);
+  const body = await response.json();
+  assert.match(String(body.error?.message || ""), /mismatched type/);
+});
+
+test("an unreachable gateway answers 502 — the upstream is down", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const authFile = await writeAuthProfile({ live: liveRecord("access-token") });
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "gateway",
+    authFile,
+    fetchImpl: async () => {
+      throw new Error("fetch failed");
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // The gateway itself could not be reached: that is an outage of the
+  // upstream, and a 502 keeps the model out of the combos while it lasts.
+  assert.equal(response.status, 502);
+});
+
+test("a dead refresh token answers 401 — the credential has to be renewed", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const authFile = await writeAuthProfile({ expired: expiredRecord() });
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "gateway",
+    authFile,
+    fetchImpl: async () =>
+      new Response(JSON.stringify({ error: "invalid_grant" }), {
+        status: 400,
+        headers: { "content-type": "application/json" },
+      }),
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // The refresh token was consumed. The credential is dead, the model is
+  // fine: a 401, never a 502 that would lock the model out of the combos.
+  assert.equal(response.status, 401);
+});
+
+test("an account endpoint that fails answers 500 — the model is not the cause", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const authFile = await writeAuthProfile({ expired: expiredRecord() });
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "gateway",
+    authFile,
+    fetchImpl: async () => {
+      throw new Error("fetch failed");
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // The credential service failed. That is not a property of the model, so
+  // the answer must not be a status of the model-lockout list.
+  assert.equal(response.status, 500);
+});
+
+test("a local CLI failure answers 500 and not 502", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "cli",
+    runner: async () => {
+      throw new Error("the agent process died");
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // The CLI died on this host. It says nothing about the model, and a 502
+  // would lock the model out of every combo of the instance.
+  assert.equal(response.status, 500);
+});
+
+test("an oversized CLI request answers 413", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "cli",
+    runner: async () => {
+      throw new Error("request too large: context length exceeded");
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // A refusal of the request is request-scoped: 413 is in no lockout list.
+  assert.equal(response.status, 413);
 });
