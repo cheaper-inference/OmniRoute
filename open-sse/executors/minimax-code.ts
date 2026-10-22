@@ -21,6 +21,7 @@ import {
   ensureAccessToken,
   gatewayErrorInBody,
   gatewayErrorStatus,
+  isContextWindowFailure,
   gatewayResultToCompletion,
   GatewayAuthError,
   GatewayStatusError,
@@ -62,7 +63,14 @@ const MINIMAX_CODE_URL = "minimax-code://gateway";
  * list, and it only belongs there for an outage of the gateway.
  */
 function gatewayFailureStatus(error: unknown): number {
-  if (error instanceof GatewayStatusError) return error.status;
+  if (error instanceof GatewayStatusError) {
+    // A request that does not fit the window of the model is a property of
+    // the request, not a failure of the model. The gateway answers it with a
+    // 400, and a 400 with a model scope locks the model out of the fallbacks
+    // (incident 2026-10-21) — it is answered with a 413 instead.
+    if (isContextWindowFailure(error.message)) return 413;
+    return error.status;
+  }
   if (error instanceof GatewayAuthError) return error.status;
   // The gateway could not be reached: that is an outage of the upstream, and
   // a 502 keeps the model out of the combos while it lasts.
@@ -927,10 +935,10 @@ export class MinimaxCodeExecutor extends BaseExecutor {
    * transport. It names the transport and the model context, so the message
    * is not read as a limit of the model itself.
    */
-  private oversizedGatewayMessage(tokens: number, model: string): string {
+  private oversizedGatewayMessage(tokens: number): string {
     return (
       `MiniMax Code request is too large for the managed gateway transport: ` +
-      `~${tokens} input tokens (limit ${resolveGatewayInputLimit(model)}). ` +
+      `~${tokens} input tokens (limit ${resolveGatewayInputLimit()}). ` +
       `Trim the conversation and retry.`
     );
   }
@@ -942,9 +950,9 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     body: JsonRecord
   ): Promise<ExecutorExecuteResult> {
     const payload = buildGatewayPayload(body, model);
-    if (isGatewayPayloadOversized(payload, model)) {
+    if (isGatewayPayloadOversized(payload)) {
       const tokens = estimateGatewayInputTokens(payload);
-      const message = this.oversizedGatewayMessage(tokens, model);
+      const message = this.oversizedGatewayMessage(tokens);
       input.log?.warn?.("MINIMAX_CODE", message);
       // 413, not 400: a request-scoped refusal says nothing about the health
       // of the model. A 400 with a model scope is classified as a model
@@ -960,7 +968,7 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     const bodyError = gatewayErrorInBody(doc);
     if (bodyError) {
       throw new GatewayStatusError(
-        gatewayErrorStatus(bodyError.type),
+        gatewayErrorStatus(bodyError.type, bodyError.message),
         `MiniMax gateway error: ${bodyError.message}`
       );
     }
@@ -975,9 +983,9 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     body: JsonRecord
   ): Promise<ExecutorExecuteResult> {
     const payload = buildGatewayPayload(body, model);
-    if (isGatewayPayloadOversized(payload, model)) {
+    if (isGatewayPayloadOversized(payload)) {
       const tokens = estimateGatewayInputTokens(payload);
-      const message = this.oversizedGatewayMessage(tokens, model);
+      const message = this.oversizedGatewayMessage(tokens);
       input.log?.warn?.("MINIMAX_CODE", message);
       // The failure happens before the stream is opened, so the request
       // answers with a real status — the same as the non-streaming path.

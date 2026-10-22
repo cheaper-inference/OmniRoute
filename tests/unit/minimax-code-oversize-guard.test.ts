@@ -6,52 +6,53 @@ async function loadGateway() {
 }
 
 /**
- * The ceiling of the managed gateway is the context window of the model: the
- * model catalog of the MiniMax Code product declares 512000 for MiniMax-M3 and
- * MiniMax-M3.1-Flash. The gateway answered a request of 439226 input tokens
- * with 200 in 54.7 s, so the guard must not refuse what the gateway answers.
+ * The ceiling of the managed gateway is the window of the gateway: 1000000.
+ * The model catalog of the MiniMax Code product declares 512000 for
+ * MiniMax-M3 and MiniMax-M3.1-Flash and offers 1000000 as a second window
+ * behind the `higher_usage` hint. The gateway answers inside the larger
+ * window — a request of 1024056 input tokens was answered with 200 in 42.8 s
+ * — so the guard must not refuse what the gateway answers.
  */
 test("an oversized request is refused before it reaches the gateway", async () => {
   const { buildGatewayPayload, isGatewayPayloadOversized } = await loadGateway();
-  const huge = "x".repeat(1_800_000);
+  const huge = "x".repeat(3_300_000);
   const payload = buildGatewayPayload(
     { messages: [{ role: "user", content: huge }] },
     "MiniMax-M3.1-Flash"
   );
-  assert.equal(isGatewayPayloadOversized(payload, "MiniMax-M3.1-Flash"), true);
+  assert.equal(isGatewayPayloadOversized(payload), true);
 });
 
 test("a request of the size the gateway answered is not refused", async () => {
   const { buildGatewayPayload, isGatewayPayloadOversized } = await loadGateway();
-  // 900000 characters are about 300000 estimated tokens; the gateway took a
-  // request of that size without a complaint.
+  // 2.9M characters are about 966k estimated tokens, just under the window
+  // of the gateway, which answered a request of 1024056 input tokens.
   const payload = buildGatewayPayload(
-    { messages: [{ role: "user", content: "x".repeat(900_000) }] },
+    { messages: [{ role: "user", content: "x".repeat(2_900_000) }] },
     "MiniMax-M3.1-Flash"
   );
-  assert.equal(isGatewayPayloadOversized(payload, "MiniMax-M3.1-Flash"), false);
+  assert.equal(isGatewayPayloadOversized(payload), false);
 });
 
-test("the ceiling is the context window of the model", async () => {
+test("the ceiling is the context window of the gateway", async () => {
   const { resolveGatewayInputLimit } = await loadGateway();
-  assert.equal(resolveGatewayInputLimit("MiniMax-M3"), 512_000);
-  assert.equal(resolveGatewayInputLimit("MiniMax-M3.1-Flash"), 512_000);
-  assert.equal(resolveGatewayInputLimit("a-model-the-catalog-does-not-name"), 512_000);
+  // The gateway answered a request of 1024056 input tokens with 200.
+  assert.equal(resolveGatewayInputLimit(), 1_000_000);
 });
 
-test("the larger window of the catalog can be selected", async () => {
+test("the narrower window of the catalog can be selected", async () => {
   const { buildGatewayPayload, resolveContextWindow, resolveGatewayInputLimit } =
     await loadGateway();
   const before = process.env.MINIMAX_CODE_CONTEXT_WINDOW;
   try {
-    process.env.MINIMAX_CODE_CONTEXT_WINDOW = "1000000";
-    assert.equal(resolveContextWindow("MiniMax-M3.1-Flash"), 1_000_000);
-    assert.equal(resolveGatewayInputLimit("MiniMax-M3.1-Flash"), 1_000_000);
+    process.env.MINIMAX_CODE_CONTEXT_WINDOW = "512000";
+    assert.equal(resolveContextWindow(), 512_000);
+    assert.equal(resolveGatewayInputLimit(), 512_000);
     const payload = buildGatewayPayload(
       { messages: [{ role: "user", content: "hi" }] },
       "MiniMax-M3.1-Flash"
     );
-    assert.equal(payload.context_window, 1_000_000);
+    assert.equal(payload.context_window, 512_000);
   } finally {
     if (before === undefined) delete process.env.MINIMAX_CODE_CONTEXT_WINDOW;
     else process.env.MINIMAX_CODE_CONTEXT_WINDOW = before;
@@ -63,7 +64,7 @@ test("a window the catalog does not offer is ignored", async () => {
   const before = process.env.MINIMAX_CODE_CONTEXT_WINDOW;
   try {
     process.env.MINIMAX_CODE_CONTEXT_WINDOW = "123456";
-    assert.equal(resolveContextWindow("MiniMax-M3.1-Flash"), 512_000);
+    assert.equal(resolveContextWindow(), 1_000_000);
   } finally {
     if (before === undefined) delete process.env.MINIMAX_CODE_CONTEXT_WINDOW;
     else process.env.MINIMAX_CODE_CONTEXT_WINDOW = before;
@@ -79,6 +80,22 @@ test("the default window is not sent as a field of the request", async () => {
   assert.equal(payload.context_window, undefined);
 });
 
+test("a refusal of the gateway for a request that does not fit is a 413", async () => {
+  const { gatewayErrorStatus, isContextWindowFailure } = await loadGateway();
+  // The gateway answers such a request with a 400 and
+  // `invalid params, context window exceeds limit (2013)`.
+  assert.equal(isContextWindowFailure("invalid params, context window exceeds limit (2013)"), true);
+  assert.equal(
+    gatewayErrorStatus(
+      "invalid_request_error",
+      "invalid params, context window exceeds limit (2013)"
+    ),
+    413
+  );
+  // A refusal that is not about the window keeps its own status.
+  assert.equal(gatewayErrorStatus("invalid_request_error", "model not found"), 400);
+});
+
 test("a normal request is not refused", async () => {
   const { buildGatewayPayload, isGatewayPayloadOversized } = await loadGateway();
   const payload = buildGatewayPayload(
@@ -91,7 +108,7 @@ test("a normal request is not refused", async () => {
     },
     "MiniMax-M3.1-Flash"
   );
-  assert.equal(isGatewayPayloadOversized(payload, "MiniMax-M3.1-Flash"), false);
+  assert.equal(isGatewayPayloadOversized(payload), false);
 });
 
 test("a request whose tool schemas are oversized is refused", async () => {
@@ -99,7 +116,7 @@ test("a request whose tool schemas are oversized is refused", async () => {
   // The tool catalog of an agentic client is the largest part of the request,
   // so the guard has to count it: the incident this guard was written for was
   // an oversized request whose bulk was tool schemas.
-  const tools = Array.from({ length: 120 }, (_, i) => ({
+  const tools = Array.from({ length: 200 }, (_, i) => ({
     type: "function",
     function: {
       name: `tool_${i}`,
@@ -111,7 +128,7 @@ test("a request whose tool schemas are oversized is refused", async () => {
     { messages: [{ role: "user", content: "hi" }], tools },
     "MiniMax-M3.1-Flash"
   );
-  assert.equal(isGatewayPayloadOversized(payload, "MiniMax-M3.1-Flash"), true);
+  assert.equal(isGatewayPayloadOversized(payload), true);
 });
 
 test("the token estimate grows with the prompt", async () => {
@@ -134,7 +151,7 @@ test("the estimate stays under the ceiling for a realistic agent session", async
     content: "a".repeat(4_000),
   }));
   const payload = buildGatewayPayload({ messages }, "MiniMax-M3.1-Flash");
-  assert.equal(isGatewayPayloadOversized(payload, "MiniMax-M3.1-Flash"), false);
+  assert.equal(isGatewayPayloadOversized(payload), false);
 });
 
 /**
@@ -150,40 +167,40 @@ test("the local transport refuses a request the gateway would answer", async () 
   assert.equal(isLocalRequestOversized("x".repeat(300_000)), false);
 });
 
-test("the gateway input ceiling is the window of the model", async () => {
+test("the gateway input ceiling is the window of the gateway", async () => {
   const { resolveGatewayInputLimit } = await loadGateway();
   const previous = process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
   try {
     delete process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
-    assert.equal(resolveGatewayInputLimit("MiniMax-M3.1-Flash"), 512_000);
+    assert.equal(resolveGatewayInputLimit(), 1_000_000);
     // The operator can lower the ceiling for a stricter deployment ...
     process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "300000";
-    assert.equal(resolveGatewayInputLimit("MiniMax-M3.1-Flash"), 300_000);
-    // ... but not raise it above the window of the model.
+    assert.equal(resolveGatewayInputLimit(), 300_000);
+    // ... but not raise it above the window of the gateway.
     process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "2000000";
-    assert.equal(resolveGatewayInputLimit("MiniMax-M3.1-Flash"), 512_000);
+    assert.equal(resolveGatewayInputLimit(), 1_000_000);
     // A value that is not a positive number keeps the guard in place.
     process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "0";
-    assert.equal(resolveGatewayInputLimit("MiniMax-M3.1-Flash"), 512_000);
+    assert.equal(resolveGatewayInputLimit(), 1_000_000);
     process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "not-a-number";
-    assert.equal(resolveGatewayInputLimit("MiniMax-M3.1-Flash"), 512_000);
+    assert.equal(resolveGatewayInputLimit(), 1_000_000);
   } finally {
     if (previous === undefined) delete process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
     else process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = previous;
   }
 });
 
-test("a ceiling above the window of the model does not raise it", async () => {
+test("a ceiling above the window of the gateway does not raise it", async () => {
   const { buildGatewayPayload, isGatewayPayloadOversized } = await loadGateway();
   const previous = process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
   try {
-    const huge = "x".repeat(1_800_000);
+    const huge = "x".repeat(3_300_000);
     const payload = buildGatewayPayload(
       { messages: [{ role: "user", content: huge }] },
       "MiniMax-M3.1-Flash"
     );
-    process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "1000000";
-    assert.equal(isGatewayPayloadOversized(payload, "MiniMax-M3.1-Flash"), true);
+    process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = "2000000";
+    assert.equal(isGatewayPayloadOversized(payload), true);
   } finally {
     if (previous === undefined) delete process.env.MINIMAX_CODE_MAX_INPUT_TOKENS;
     else process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = previous;
@@ -199,25 +216,25 @@ test("a ceiling above the window of the model does not raise it", async () => {
 test("the estimate does not under-count Russian text", async () => {
   const { buildGatewayPayload, isGatewayPayloadOversized, estimateGatewayInputTokens } =
     await loadGateway();
-  // ~1.2M characters of Cyrillic: around 600k tokens, above the window.
+  // ~2.4M characters of Cyrillic: around 1.2M tokens, above the window.
   const payload = buildGatewayPayload(
-    { messages: [{ role: "user", content: "ы".repeat(1_200_000) }] },
+    { messages: [{ role: "user", content: "ы".repeat(2_400_000) }] },
     "MiniMax-M3.1-Flash"
   );
-  assert.ok(estimateGatewayInputTokens(payload) > 512_000);
-  assert.equal(isGatewayPayloadOversized(payload, "MiniMax-M3.1-Flash"), true);
+  assert.ok(estimateGatewayInputTokens(payload) > 1_000_000);
+  assert.equal(isGatewayPayloadOversized(payload), true);
 });
 
 test("the estimate does not under-count Chinese text", async () => {
   const { buildGatewayPayload, isGatewayPayloadOversized, estimateGatewayInputTokens } =
     await loadGateway();
-  // CJK is close to one token per character.
+  // 1.2M characters of CJK: around 1.2M tokens, above the window.
   const payload = buildGatewayPayload(
-    { messages: [{ role: "user", content: "漢".repeat(600_000) }] },
+    { messages: [{ role: "user", content: "漢".repeat(1_200_000) }] },
     "MiniMax-M3.1-Flash"
   );
-  assert.ok(estimateGatewayInputTokens(payload) > 512_000);
-  assert.equal(isGatewayPayloadOversized(payload, "MiniMax-M3.1-Flash"), true);
+  assert.ok(estimateGatewayInputTokens(payload) > 1_000_000);
+  assert.equal(isGatewayPayloadOversized(payload), true);
 });
 
 test("a request-scoped refusal is not in the model lockout list", async () => {

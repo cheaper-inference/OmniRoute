@@ -22,28 +22,29 @@ import { resolvePublicCred } from "../utils/publicCreds.ts";
 const GATEWAY_URL = "https://agent.minimax.io/mavis/api/v1/llm/v1/messages";
 const DEFAULT_MAX_TOKENS = 8192;
 /**
- * The context window of the managed gateway, per model.
+ * The context window of the managed gateway.
  *
- * Source: the model catalog the MiniMax Code product ships — the desktop app
- * and the CLI carry the same one. MiniMax-M3 and MiniMax-M3.1-Flash declare
- * `limit.context = 512000` and offer `contextWindowOptions: [512000, 1000000]`;
- * the larger window is hinted as `higher_usage`, it costs more of the plan.
+ * The model catalog the MiniMax Code product ships declares 512000 for
+ * MiniMax-M3 and MiniMax-M3.1-Flash and offers 1000000 as a second window,
+ * behind the `higher_usage` hint — the larger window costs more of the plan.
+ * The gateway answers within the larger window: a request of 1024056 input
+ * tokens was answered with 200 in 42.8 s (MiniMax-M3.1-Flash) and one of
+ * 1024072 tokens with 200 in 34.5 s (MiniMax-M3) on 2026-10-23, while a
+ * request of ~2.05M tokens was refused with `context window exceeds limit
+ * (2013)` in 6.3 s.
  *
- * Measured against the live gateway on 2026-10-23: a request of 439226 input
- * tokens was answered with 200 in 54.7 s. The 200000 ceiling this file used
- * to carry came from a failure of the LOCAL transport and refused requests
- * that the gateway answers.
+ * The 200000 ceiling this file used to carry came from a failure of the LOCAL
+ * transport and refused requests the gateway answers.
  */
-const MODEL_CONTEXT_WINDOWS: Readonly<Record<string, number>> = {
-  "MiniMax-M3": 512_000,
-  "MiniMax-M3.1-Flash": 512_000,
-};
-
-/** The context window of a model the catalog does not name. */
-const DEFAULT_CONTEXT_WINDOW = 512_000;
-
-/** The larger window the catalog offers, behind the `higher_usage` hint. */
 export const MAX_CONTEXT_WINDOW = 1_000_000;
+
+/**
+ * The window the catalog declares as the default of the models.
+ *
+ * Asking for it narrows the request and the plan counts less of it, so it is
+ * the setting for a deployment whose plan charges by the window.
+ */
+export const CATALOG_DEFAULT_CONTEXT_WINDOW = 512_000;
 /**
  * Chars per token, per script.
  *
@@ -279,11 +280,11 @@ export function buildGatewayPayload(body: JsonRecord, model: string): JsonRecord
   const topP = Number(body.top_p);
   if (Number.isFinite(topP)) payload.top_p = topP;
 
-  const contextWindow = resolveContextWindow(model);
-  if (contextWindow !== (MODEL_CONTEXT_WINDOWS[model] ?? DEFAULT_CONTEXT_WINDOW)) {
-    // The catalog offers a second, larger window. The gateway takes it as a
-    // field of the request; without the field the model stays in the window
-    // the catalog declares as its default.
+  const contextWindow = resolveContextWindow();
+  if (contextWindow < MAX_CONTEXT_WINDOW) {
+    // The deployment asked for the narrower window of the catalog. The
+    // gateway takes it as a field of the request, and the plan counts less
+    // of the request in it.
     payload.context_window = contextWindow;
   }
 
@@ -360,7 +361,25 @@ export function gatewayErrorInBody(doc: JsonRecord): { type: string; message: st
  * nothing about the model: the answer is a 500, which leaves the model in
  * place, while a 502 would take it out of every combo of the instance.
  */
-export function gatewayErrorStatus(type: string): number {
+/**
+ * The vocabulary of a request that does not fit the window of the model.
+ *
+ * The gateway answers such a request with a 400 and `invalid params, context
+ * window exceeds limit (2013)` — fast, in seconds. A 400 with a model scope
+ * is classified as a model failure and locks the model out of the fallbacks,
+ * so the refusal is answered with a 413: it says nothing about the health of
+ * the model.
+ */
+const CONTEXT_WINDOW_ERROR =
+  /context window exceeds limit|prompt is too long|maximum context length|input is too long|context[_ ]length[_ ]exceeded|model_context_window_exceeded|too many tokens|token limit exceeded|exceeds the maximum allowed input length|exceeded model token limit/i;
+
+/** Whether a refusal of the gateway is a request that does not fit the window. */
+export function isContextWindowFailure(message: string): boolean {
+  return CONTEXT_WINDOW_ERROR.test(message);
+}
+
+export function gatewayErrorStatus(type: string, message?: string): number {
+  if (message && isContextWindowFailure(message)) return 413;
   if (/invalid_request|not_found_error|request_too_large|permission_error/i.test(type)) return 400;
   if (/rate_limit|quota|overloaded/i.test(type)) return 429;
   return 500;
@@ -1254,27 +1273,27 @@ export function estimateGatewayInputTokens(payload: JsonRecord): number {
 /**
  * The context window this deployment asks the gateway for.
  *
- * `MINIMAX_CODE_CONTEXT_WINDOW` selects the window the catalog offers:
- * 512000 (the default of the catalog) or 1000000 (the larger window, which
- * the catalog hints as `higher_usage`). A value that is not one of the two is
- * ignored, so a typo cannot ask for a window the model does not have.
+ * `MINIMAX_CODE_CONTEXT_WINDOW` narrows the request to the window the catalog
+ * declares as the default of the models (512000). Without it the gateway runs
+ * in the larger window it answers in anyway (1000000). A value that is
+ * neither of the two is ignored, so a typo cannot ask for a window the model
+ * does not have.
  */
-export function resolveContextWindow(model?: string): number {
+export function resolveContextWindow(): number {
   const raw = Number(process.env.MINIMAX_CODE_CONTEXT_WINDOW);
-  if (raw === MAX_CONTEXT_WINDOW) return MAX_CONTEXT_WINDOW;
-  if (raw === DEFAULT_CONTEXT_WINDOW) return DEFAULT_CONTEXT_WINDOW;
-  return MODEL_CONTEXT_WINDOWS[model ?? ""] ?? DEFAULT_CONTEXT_WINDOW;
+  if (raw === CATALOG_DEFAULT_CONTEXT_WINDOW) return CATALOG_DEFAULT_CONTEXT_WINDOW;
+  return MAX_CONTEXT_WINDOW;
 }
 
 /**
  * The input ceiling of the managed gateway transport.
  *
- * The ceiling is the context window of the model, and
+ * The ceiling is the context window of the gateway, and
  * `MINIMAX_CODE_MAX_INPUT_TOKENS` lowers it for a deployment that wants a
- * stricter refusal. It cannot raise it above the window of the model.
+ * stricter refusal. It cannot raise it above the window of the gateway.
  */
-export function resolveGatewayInputLimit(model?: string): number {
-  const window = resolveContextWindow(model);
+export function resolveGatewayInputLimit(): number {
+  const window = resolveContextWindow();
   const raw = Number(process.env.MINIMAX_CODE_MAX_INPUT_TOKENS);
   if (Number.isFinite(raw) && raw > 0) return Math.min(Math.floor(raw), window);
   return window;
@@ -1288,6 +1307,6 @@ export function resolveGatewayInputLimit(model?: string): number {
  * it says nothing about the health of the model, so it must not be able to
  * lock the model out of the fallbacks.
  */
-export function isGatewayPayloadOversized(payload: JsonRecord, model?: string): boolean {
-  return estimateGatewayInputTokens(payload) > resolveGatewayInputLimit(model);
+export function isGatewayPayloadOversized(payload: JsonRecord): boolean {
+  return estimateGatewayInputTokens(payload) > resolveGatewayInputLimit();
 }

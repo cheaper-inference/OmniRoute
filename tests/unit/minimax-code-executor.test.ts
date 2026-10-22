@@ -897,7 +897,7 @@ test("an oversized gateway request is refused with 413, not 400", async () => {
 
   const result = await executor.execute({
     model: "MiniMax-M3.1-Flash",
-    body: { messages: [{ role: "user", content: "x".repeat(1_800_000) }] },
+    body: { messages: [{ role: "user", content: "x".repeat(3_300_000) }] },
     stream: false,
     credentials: {},
   });
@@ -951,7 +951,7 @@ test("an upstream refusal is answered with its own status, not with 502", async 
       res.writeHead(400, { "content-type": "application/json" });
       res.end(
         JSON.stringify({
-          error: { type: "invalid_request_error", message: "input is too long" },
+          error: { type: "invalid_request_error", message: "model not found" },
         })
       );
     });
@@ -978,6 +978,84 @@ test("an upstream refusal is answered with its own status, not with 502", async 
     const body = await response.json();
     assert.equal(body.error?.type, "invalid_request_error");
     // A refusal is not retried: the same request gets the same answer.
+    assert.equal(calls, 1);
+  } finally {
+    if (previousUrl === undefined) delete process.env.MINIMAX_CODE_GATEWAY_URL;
+    else process.env.MINIMAX_CODE_GATEWAY_URL = previousUrl;
+    server.close();
+  }
+});
+
+/**
+ * The gateway refuses a request that does not fit the window of the model with
+ * a 400 and `invalid params, context window exceeds limit (2013)`. A 400 with
+ * a model scope is classified as a model failure and locks the model out of
+ * the fallbacks, so the refusal of the context window is answered with a 413:
+ * it says nothing about the health of the model.
+ */
+test("an upstream refusal of the context window is answered with 413", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const { mkdtemp, writeFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { createServer } = await import("node:http");
+
+  const dir = await mkdtemp(join(tmpdir(), "mmcode-auth-"));
+  const authFile = join(dir, "auth.json");
+  await writeFile(
+    authFile,
+    JSON.stringify({
+      schemaVersion: 1,
+      records: {
+        "com.minimax.mcode.oauth.prod.en": {
+          accessToken: "test-access-token",
+          refreshToken: "test-refresh-token",
+          clientId: "mcode-public",
+          scopes: ["agent.default"],
+          audience: "agent-backend",
+          expiresAtMs: Date.now() + 3_600_000,
+          generation: 1,
+        },
+      },
+    })
+  );
+
+  let calls = 0;
+  const server = createServer((req, res) => {
+    calls += 1;
+    req.on("data", () => undefined);
+    req.on("end", () => {
+      res.writeHead(400, { "content-type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: {
+            type: "invalid_request_error",
+            message: "invalid params, context window exceeds limit (2013)",
+          },
+        })
+      );
+    });
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", () => resolve()));
+  const address = server.address();
+  const port = typeof address === "object" && address ? address.port : 0;
+  const previousUrl = process.env.MINIMAX_CODE_GATEWAY_URL;
+  process.env.MINIMAX_CODE_GATEWAY_URL = `http://127.0.0.1:${port}/mavis/api/v1/llm/v1/messages`;
+
+  try {
+    const executor = new MinimaxCodeExecutor({ authFile, transport: "gateway" });
+    const result = await executor.execute({
+      model: "MiniMax-M3.1-Flash",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials: {},
+    });
+    const response = "response" in result ? result.response : result;
+    assert.equal(response.status, 413);
+    const body = await response.json();
+    assert.match(JSON.stringify(body), /context window exceeds limit/);
+    // A refusal of the request is not retried: the same request gets the same
+    // answer.
     assert.equal(calls, 1);
   } finally {
     if (previousUrl === undefined) delete process.env.MINIMAX_CODE_GATEWAY_URL;

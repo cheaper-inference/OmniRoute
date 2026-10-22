@@ -100,16 +100,20 @@ record with `MINIMAX_CODE_AUTH_RECORD` (the record key inside `auth.json`).
 The model catalog the MiniMax Code product ships declares a context window
 of 512000 tokens for `MiniMax-M3` and `MiniMax-M3.1-Flash`, and offers a
 second, larger window of 1000000 tokens that the catalog hints as
-`higher_usage` — it costs more of the plan. The managed gateway answers
-within that window: a request of 439226 input tokens was accepted and
-answered with 200 in 54.7 s (2026-10-23).
+`higher_usage` — it costs more of the plan. The managed gateway answers in
+the larger window: a request of 1024056 input tokens was answered with 200
+in 42.8 s, one of 1024072 tokens in 34.5 s, and a request of ~2.05M tokens
+was refused with `context window exceeds limit (2013)` in 6.3 s
+(2026-10-23).
 
 The managed gateway transport therefore refuses a request above the window
-of the model. `MINIMAX_CODE_MAX_INPUT_TOKENS` (512000 by default) is
+of the gateway. `MINIMAX_CODE_MAX_INPUT_TOKENS` (1000000 by default) is
 refused locally with a 413. The refusal is request-scoped: it says nothing
 about the health of the model, which is why it answers 413 and not 400 —
 a 400 with a model scope is classified as a model failure and locks the
-model out of every fallback combo it belongs to.
+model out of every fallback combo it belongs to. The refusal of the gateway
+itself (`context window exceeds limit`) is answered with a 413 for the same
+reason.
 
 The local CLI transport has a lower ceiling, 200000 estimated input tokens.
 The CLI adds its own agent scaffolding to the prompt, so a request of
@@ -117,10 +121,12 @@ The CLI adds its own agent scaffolding to the prompt, so a request of
 (incident 2026-10-21). That error trips the in-memory model lockout, so
 the local transport refuses such a request with a fast 413 instead.
 
-`MINIMAX_CODE_CONTEXT_WINDOW` selects the window the gateway is asked for
-(512000 or 1000000). `MINIMAX_CODE_MAX_INPUT_TOKENS` lowers the ceiling of
-the managed gateway below the window of the model; it cannot raise it
-above.
+`MINIMAX_CODE_CONTEXT_WINDOW` narrows the request to the window the
+catalog declares as the default of the models (512000) — the plan counts
+less of a request that runs in the narrower window. Without it the gateway
+runs in the larger window it answers in anyway. `MINIMAX_CODE_MAX_INPUT_TOKENS`
+lowers the ceiling of the managed gateway; it cannot raise it above the
+window.
 
 ## The gateway endpoint
 
