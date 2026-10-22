@@ -182,8 +182,10 @@ export const minimaxCode = {
    * The profile belongs to the MiniMax Code application, so the write follows
    * its rules (the helper raises the generation above every generation in
    * use). A profile that cannot be written — no MiniMax Code login on this
-   * host yet, a read-only home — must not fail the sign-in: the dashboard
-   * account is still created, and the reason is reported next to it.
+   * host yet, a read-only home — fails the sign-in: the credential of this
+   * provider lives in that profile and nowhere else, so a dashboard account
+   * without a profile entry would show a signed-in account that the runtime
+   * never uses.
    */
   postExchange: async (tokens: MiniMaxCodeTokenResponse): Promise<MiniMaxCodePostExchange> => {
     const accessToken = asString(tokens.access_token);
@@ -192,23 +194,15 @@ export const minimaxCode = {
     }
     const refreshToken = asString(tokens.refresh_token);
     const expiresIn = asNumber(tokens.expires_in);
-    try {
-      await persistProfileCredential({
-        accessToken,
-        refreshToken: refreshToken || undefined,
-        expiresAtMs: Date.now() + (expiresIn > 0 ? expiresIn : 3600) * 1000,
-        clientId: MINIMAX_CODE_CONFIG.clientId,
-        scopes: [MINIMAX_CODE_SCOPE],
-        audience: MINIMAX_CODE_AUDIENCE,
-      });
-      return { profileSynced: true };
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      console.warn(
-        `[minimax-code] the credential could not be written into the local MiniMax Code profile: ${reason}`
-      );
-      return { profileSynced: false, profileSyncError: reason };
-    }
+    await persistProfileCredential({
+      accessToken,
+      refreshToken: refreshToken || undefined,
+      expiresAtMs: Date.now() + (expiresIn > 0 ? expiresIn : 3600) * 1000,
+      clientId: MINIMAX_CODE_CONFIG.clientId,
+      scopes: [MINIMAX_CODE_SCOPE],
+      audience: MINIMAX_CODE_AUDIENCE,
+    });
+    return { profileSynced: true };
   },
 
   mapTokens: (tokens: MiniMaxCodeTokenResponse, extra?: MiniMaxCodePostExchange) => {

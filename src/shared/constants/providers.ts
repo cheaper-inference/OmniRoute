@@ -6,6 +6,7 @@ export type RiskNoticeVariant =
 import { NOAUTH_PROVIDERS } from "./providers/noauth";
 export { supportsNoAuthProviderProxy } from "./providers/noauth";
 import { OAUTH_PROVIDERS } from "./providers/oauth";
+import { NOAUTH_DEVICE_CODE_PROVIDER_IDS } from "./oauthDeviceCodeProviders";
 import { WEB_COOKIE_PROVIDERS, resolveWebProviderHost } from "./providers/web-cookie";
 export { resolveWebProviderHost };
 import { APIKEY_PROVIDERS } from "./providers/apikey";
@@ -72,9 +73,10 @@ export function supportsDualAuthProvider(providerId: unknown): boolean {
  * to their MiniMax account from the dashboard and have the credential
  * written into that profile. The dashboard row is the account; the
  * credential lives in the provider's own profile.
+ *
+ * The list lives with the other device-code providers so that the two cannot
+ * drift apart.
  */
-const NOAUTH_DEVICE_CODE_PROVIDER_IDS = new Set(["minimax-code"]);
-
 export function supportsDeviceCodeLogin(providerId: unknown): boolean {
   return (
     typeof providerId === "string" && NOAUTH_DEVICE_CODE_PROVIDER_IDS.has(providerId)

@@ -13,7 +13,7 @@
  * same way the CLI itself does it, and the rotated token is written back.
  */
 
-import { readFile, writeFile, rename, chmod } from "node:fs/promises";
+import { readFile, writeFile, rename, chmod, mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { resolveMinimaxCodeAccountBase } from "../config/minimaxCode.ts";
@@ -39,8 +39,18 @@ const DEFAULT_MAX_TOKENS = 8192;
  * raise it without a code change.
  */
 const DEFAULT_MAX_INPUT_TOKENS = 200_000;
-/** Chars per token, deliberately pessimistic for CJK and code payloads. */
-const CHARS_PER_TOKEN = 3;
+/**
+ * Chars per token, per script.
+ *
+ * Latin text and code run around three to four chars per token, Cyrillic
+ * around two, and CJK, Kana and Hangul are close to one token per character.
+ * A single ratio would have to be the worst case for every script, and a
+ * ratio that is too small lets the payload the gateway rejects through the
+ * guard — that is how the incident this guard was written for happened.
+ */
+const LATIN_CHARS_PER_TOKEN = 3;
+const CYRILLIC_CHARS_PER_TOKEN = 2;
+const WIDE_CHARS_PER_TOKEN = 1;
 /**
  * Per-attempt budget of one managed-gateway call.
  *
@@ -320,6 +330,22 @@ export function gatewayResultToCompletion(model: string, result: GatewayResult):
   };
 }
 
+/** The account region of the local profile. */
+function resolveRegion(): string {
+  return (process.env.MINIMAX_CODE_REGION || "en").trim().toLowerCase() || "en";
+}
+
+/**
+ * The record a profile without any account identity uses.
+ *
+ * The CLI keys its records by the account scope hash. A host that has no
+ * login yet has no such key, so the credential is stored under a local key of
+ * our own — the runtime finds it by generation, not by name.
+ */
+function defaultProfileRecordKey(): string {
+  return `com.minimax.mcode.oauth.prod.${resolveRegion()}\u0000local`;
+}
+
 /** Absolute path of the MiniMax Code auth profile. */
 export function resolveAuthFile(profileDir?: string): string {
   const override = process.env.MINIMAX_CODE_AUTH_FILE;
@@ -327,8 +353,7 @@ export function resolveAuthFile(profileDir?: string): string {
   const dir = profileDir || process.env.MINIMAX_CODE_PROFILE_DIR || join(homedir(), ".minimax");
   // The account region decides both where the profile lives and which account
   // endpoint refreshes the token: a CN account has no `en` profile.
-  const region = (process.env.MINIMAX_CODE_REGION || "en").trim().toLowerCase() || "en";
-  return join(dir, "auth", "prod", region, "mcode-public", "auth.json");
+  return join(dir, "auth", "prod", resolveRegion(), "mcode-public", "auth.json");
 }
 
 /** Endpoint of the managed subscription gateway. */
@@ -431,7 +456,31 @@ export async function readStateGeneration(path: string): Promise<number | null> 
  */
 async function nextGeneration(path: string, current: number): Promise<number> {
   const stateGeneration = await readStateGeneration(path);
-  return Math.max(current, stateGeneration ?? 0) + 1;
+  const recordGeneration = await readRecordGeneration(path);
+  return Math.max(current, stateGeneration ?? 0, recordGeneration ?? 0) + 1;
+}
+
+/**
+ * The highest generation any record of the profile carries.
+ *
+ * The CLI writes the same file on its own refresh, so the record in the file
+ * can be ahead of the generation a caller read a moment ago. Whoever writes
+ * the record has to raise the generation above that one too — a generation
+ * that goes backwards makes the CLI treat the session as expired.
+ */
+async function readRecordGeneration(path: string): Promise<number | null> {
+  try {
+    const doc = asRecord(JSON.parse(await readFile(path, "utf8")));
+    const records = asRecord(doc.records);
+    let highest = 0;
+    for (const raw of Object.values(records)) {
+      const generation = Number(asRecord(raw).generation ?? 0) || 0;
+      if (generation > highest) highest = generation;
+    }
+    return highest || null;
+  } catch {
+    return null;
+  }
 }
 
 async function writeAuthState(path: string, profile: MinimaxAuthProfile): Promise<void> {
@@ -456,15 +505,11 @@ async function writeAuthState(path: string, profile: MinimaxAuthProfile): Promis
 
 /** Persist a refreshed token back into the MiniMax Code auth profile. */
 async function writeAuthProfile(path: string, profile: MinimaxAuthProfile): Promise<void> {
-  const doc = asRecord(JSON.parse(await readFile(path, "utf8")));
+  const doc = await readProfileDocument(path);
   const records = asRecord(doc.records);
-  const keys = Object.keys(records);
   // Write the credential back into the record it came from: the profile can
   // hold several accounts, and refreshing one of them must not touch another.
-  const key =
-    profile.recordKey && keys.includes(profile.recordKey)
-      ? profile.recordKey
-      : keys[0] || profile.recordKey || "";
+  const key = profile.recordKey || Object.keys(records)[0] || "";
   if (!key) return;
   const record = asRecord(records[key]);
   record.accessToken = profile.accessToken;
@@ -476,6 +521,9 @@ async function writeAuthProfile(path: string, profile: MinimaxAuthProfile): Prom
   if (!record.audience) record.audience = profile.audience;
   records[key] = record;
   doc.records = records;
+  // The dashboard sign-in can be the first MiniMax Code login on a host, so
+  // the directory of the profile may not exist yet.
+  await mkdir(dirname(path), { recursive: true }).catch(() => undefined);
   const tmp = `${path}.tmp`;
   await writeFile(tmp, `${JSON.stringify(doc, null, 2)}\n`, { mode: 0o600 });
   await rename(tmp, path);
@@ -494,40 +542,124 @@ export interface PersistCredentialOptions {
 }
 
 /**
+ * One writer at a time per profile file.
+ *
+ * The generation of a record is read and written in two steps, and the CLI
+ * writes the same file on its own refresh. Two writers that read the same
+ * generation and write it back leave one generation for two credentials — and
+ * the CLI, which keeps its own counter, treats the older one as expired.
+ */
+const profileWriteLocks = new Map<string, Promise<unknown>>();
+
+function withProfileWriteLock<T>(path: string, task: () => Promise<T>): Promise<T> {
+  const previous = profileWriteLocks.get(path) ?? Promise.resolve();
+  const result = previous.then(task, task);
+  profileWriteLocks.set(
+    path,
+    result.then(
+      () => undefined,
+      () => undefined
+    )
+  );
+  return result;
+}
+
+/**
+ * The profile document, or an empty one when the host has no MiniMax Code
+ * login yet.
+ *
+ * A missing file is not an error: the dashboard sign-in is one of the ways to
+ * put the first credential on a host. A file that exists but cannot be parsed
+ * is an error — overwriting it would throw away a working profile.
+ */
+async function readProfileDocument(path: string): Promise<JsonRecord> {
+  let raw: string;
+  try {
+    raw = await readFile(path, "utf8");
+  } catch (error) {
+    if ((error as { code?: string } | null)?.code === "ENOENT") return { records: {} };
+    throw error;
+  }
+  const doc = asRecord(JSON.parse(raw));
+  if (!doc.records) doc.records = {};
+  return doc;
+}
+
+/**
+ * The record the runtime reads.
+ *
+ * The profile holds one record per account identity, and the runtime uses the
+ * newest generation (or the record an operator pinned). A credential written
+ * into any other record is a credential the runtime never sees: the dashboard
+ * would show a signed-in account while the agent keeps using the old one.
+ */
+function resolveTargetRecordKey(records: JsonRecord): string {
+  const explicit = (process.env.MINIMAX_CODE_AUTH_RECORD || "").trim();
+  if (explicit) {
+    if (!(explicit in records)) {
+      throw new Error(
+        `MINIMAX_CODE_AUTH_RECORD=${explicit} is not a record of the MiniMax Code profile`
+      );
+    }
+    return explicit;
+  }
+  const entries = Object.entries(records)
+    .map(([key, raw]) => {
+      const record = asRecord(raw);
+      return {
+        key,
+        generation: Number(record.generation ?? 0) || 0,
+        expiresAtMs: Number(record.expiresAtMs ?? 0) || 0,
+        hasAccessToken: asString(record.accessToken) !== "",
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.generation - a.generation ||
+        b.expiresAtMs - a.expiresAtMs ||
+        Number(b.hasAccessToken) - Number(a.hasAccessToken)
+    );
+  const usable = entries.find((entry) => entry.hasAccessToken);
+  return (usable ?? entries[0])?.key || defaultProfileRecordKey();
+}
+
+/**
  * Store a credential that was obtained outside the CLI — for example through
  * the dashboard's device-code flow — in the MiniMax Code profile, so the CLI
  * and the local agent pick it up on their next session.
  *
  * The profile belongs to the MiniMax Code application, so the write follows
- * its rules: the record's generation is raised above every generation in use
- * and the CLI's state file is marked as authenticated.
+ * its rules: the credential goes into the record the runtime reads, the
+ * record's generation is raised above every generation in use and the CLI's
+ * state file is marked as authenticated.
  */
 export async function persistProfileCredential(
   options: PersistCredentialOptions
 ): Promise<MinimaxAuthProfile> {
   const path = options.path || resolveAuthFile();
-  const doc = asRecord(JSON.parse(await readFile(path, "utf8")));
-  const records = asRecord(doc.records);
-  const keys = Object.keys(records);
-  const key = keys[0] || "com.minimax.mcode.oauth.prod.en\u0000local";
-  const record = asRecord(records[key]);
-  const generation = await nextGeneration(path, Number(record.generation ?? 0) || 0);
-  const profile: MinimaxAuthProfile = {
-    accessToken: options.accessToken,
-    refreshToken: options.refreshToken,
-    clientId: options.clientId || asString(record.clientId) || "mcode-public",
-    scopes:
-      options.scopes ??
-      (Array.isArray(record.scopes) ? record.scopes.map(asString) : ["agent.default"]),
-    audience: options.audience || asString(record.audience) || "agent-backend",
-    expiresAtMs: options.expiresAtMs ?? Date.now() + 3600 * 1000,
-    generation,
-    path,
-    recordKey: key,
-  };
-  await writeAuthProfile(path, profile);
-  await writeAuthState(path, profile).catch(() => undefined);
-  return profile;
+  return withProfileWriteLock(path, async () => {
+    const doc = await readProfileDocument(path);
+    const records = asRecord(doc.records);
+    const key = resolveTargetRecordKey(records);
+    const record = asRecord(records[key]);
+    const generation = await nextGeneration(path, Number(record.generation ?? 0) || 0);
+    const profile: MinimaxAuthProfile = {
+      accessToken: options.accessToken,
+      refreshToken: options.refreshToken,
+      clientId: options.clientId || asString(record.clientId) || "mcode-public",
+      scopes:
+        options.scopes ??
+        (Array.isArray(record.scopes) ? record.scopes.map(asString) : ["agent.default"]),
+      audience: options.audience || asString(record.audience) || "agent-backend",
+      expiresAtMs: options.expiresAtMs ?? Date.now() + 3600 * 1000,
+      generation,
+      path,
+      recordKey: key,
+    };
+    await writeAuthProfile(path, profile);
+    await writeAuthState(path, profile).catch(() => undefined);
+    return profile;
+  });
 }
 
 export interface EnsureTokenOptions {
@@ -601,23 +733,29 @@ export async function refreshAuthProfile(
   const accessToken = asString(data.access_token);
   if (!accessToken) throw new Error("MiniMax token refresh returned no access token");
   const expiresIn = Number(data.expires_in ?? 0);
-  const updated: MinimaxAuthProfile = {
-    ...profile,
-    accessToken,
-    refreshToken: asString(data.refresh_token) || profile.refreshToken,
-    expiresAtMs: Date.now() + (expiresIn > 0 ? expiresIn : 3600) * 1000,
-    generation: await nextGeneration(profile.path, profile.generation),
-  };
-  try {
-    await writeAuthProfile(profile.path, updated);
-  } catch {
-    // A read-only profile must not break the request: the fresh token still works.
-  }
-  try {
-    await writeAuthState(profile.path, updated);
-  } catch {
-    // The CLI would read a stale state file as an expired session.
-  }
+  const updated: MinimaxAuthProfile = await withProfileWriteLock(profile.path, async () => {
+    const rotated: MinimaxAuthProfile = {
+      ...profile,
+      accessToken,
+      refreshToken: asString(data.refresh_token) || profile.refreshToken,
+      expiresAtMs: Date.now() + (expiresIn > 0 ? expiresIn : 3600) * 1000,
+      // The generation is read inside the write lock: a dashboard sign-in
+      // that rotated the profile a moment ago has to be part of the number
+      // this write is compared against.
+      generation: await nextGeneration(profile.path, profile.generation),
+    };
+    try {
+      await writeAuthProfile(profile.path, rotated);
+    } catch {
+      // A read-only profile must not break the request: the fresh token still works.
+    }
+    try {
+      await writeAuthState(profile.path, rotated);
+    } catch {
+      // The CLI would read a stale state file as an expired session.
+    }
+    return rotated;
+  });
   options.onRefresh?.(updated);
   return updated;
 }
@@ -644,6 +782,30 @@ export class GatewayAuthError extends Error {
     super(message);
     this.name = "GatewayAuthError";
   }
+}
+
+/**
+ * The gateway answered with an HTTP status the caller has to see.
+ *
+ * The status of the upstream answer decides what the runtime does with the
+ * failure. A 4xx is a property of the request, a 5xx is a property of the
+ * gateway. Turning both into one opaque error loses that distinction: a
+ * request-scoped refusal that arrives as a 502 is recorded as a model outage
+ * and takes the model out of every combo for minutes.
+ */
+export class GatewayStatusError extends Error {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "GatewayStatusError";
+    this.status = status;
+  }
+}
+
+/** The statuses the gateway transport retries: a quota or an outage. */
+function isRetryableGatewayStatus(status: number): boolean {
+  return status === 429 || status >= 500;
 }
 
 function sleep(ms: number, signal?: AbortSignal | null): Promise<void> {
@@ -710,10 +872,11 @@ export async function callGateway(options: GatewayCallOptions): Promise<Response
       }
       if (!response.ok) {
         const detail = await response.text().catch(() => "");
-        const error = new Error(
+        const error = new GatewayStatusError(
+          response.status,
           `MiniMax gateway error ${response.status}${detail ? `: ${detail.slice(0, 300)}` : ""}`
         );
-        if (response.status === 429 || response.status >= 500) {
+        if (isRetryableGatewayStatus(response.status)) {
           lastError = error;
           continue;
         }
@@ -722,6 +885,11 @@ export async function callGateway(options: GatewayCallOptions): Promise<Response
       return response;
     } catch (error) {
       if (error instanceof GatewayAuthError) throw error;
+      // A 4xx that is not a quota is a property of the request: retrying it
+      // spends the same answer again.
+      if (error instanceof GatewayStatusError && !isRetryableGatewayStatus(error.status)) {
+        throw error;
+      }
       lastError = error;
       if (attempt >= maxRetries) break;
     } finally {
@@ -832,7 +1000,36 @@ export function estimateGatewayInputTokens(payload: JsonRecord): number {
     JSON.stringify(payload.messages ?? []) +
     JSON.stringify(payload.system ?? []) +
     JSON.stringify(payload.tools ?? []);
-  return Math.ceil(text.length / CHARS_PER_TOKEN);
+  // The token count depends on the script: CJK is close to one token per
+  // character, Cyrillic runs at about two chars per token. Counting
+  // everything as one third of a character under-estimates a Russian or
+  // Chinese payload by a factor of two to three — the estimate has to stay on
+  // the pessimistic side of the real count.
+  let wide = 0;
+  let cyrillic = 0;
+  for (const char of text) {
+    const code = char.codePointAt(0) ?? 0;
+    if (
+      (code >= 0x3000 && code <= 0x9fff) || // CJK, Hiragana, Katakana
+      (code >= 0xac00 && code <= 0xd7af) || // Hangul
+      (code >= 0xf900 && code <= 0xfaff) // CJK compatibility ideographs
+    ) {
+      wide += 1;
+      continue;
+    }
+    if (
+      (code >= 0x0400 && code <= 0x04ff) || // Cyrillic
+      (code >= 0x0500 && code <= 0x052f) // Cyrillic supplement
+    ) {
+      cyrillic += 1;
+    }
+  }
+  const latin = text.length - wide - cyrillic;
+  return (
+    Math.ceil(wide / WIDE_CHARS_PER_TOKEN) +
+    Math.ceil(cyrillic / CYRILLIC_CHARS_PER_TOKEN) +
+    Math.ceil(latin / LATIN_CHARS_PER_TOKEN)
+  );
 }
 
 /**

@@ -21,6 +21,7 @@ import {
   ensureAccessToken,
   gatewayResultToCompletion,
   GatewayAuthError,
+  GatewayStatusError,
   parseGatewayResult,
   parseGatewaySse,
   readAuthProfile,
@@ -49,6 +50,34 @@ import { runMinimaxCodeAcpTurn } from "./minimaxCodeAcp.ts";
  */
 
 const MINIMAX_CODE_URL = "minimax-code://gateway";
+/**
+ * The status a gateway failure has to be answered with.
+ *
+ * The status of the upstream answer decides what the runtime does with the
+ * failure. A 4xx belongs to the request and keeps its own status; a failure
+ * without a status is a transport failure and stays a 502.
+ */
+function gatewayFailureStatus(error: unknown): number {
+  if (error instanceof GatewayStatusError) return error.status;
+  if (error instanceof GatewayAuthError) return error.status;
+  return 502;
+}
+
+/**
+ * The error classification of a gateway failure.
+ *
+ * A request-scoped refusal is marked as one, so the fallback layer keeps it
+ * out of the model lockout: another account of the same model would fail the
+ * same way. Only the statuses that are a property of the request are marked
+ * — a 403 or a 429 stay what they are.
+ */
+function gatewayFailureClassification(
+  error: unknown
+): { type: string; code?: string } | undefined {
+  const status = gatewayFailureStatus(error);
+  if (status !== 400 && status !== 413 && status !== 422) return undefined;
+  return { type: "invalid_request_error" };
+}
 /**
  * Budget of one managed-gateway attempt.
  *
@@ -902,9 +931,12 @@ export class MinimaxCodeExecutor extends BaseExecutor {
               error instanceof Error ? error.message : String(error)
             );
             input.log?.warn?.("MINIMAX_CODE", message);
+            const status = gatewayFailureStatus(error);
             controller.enqueue(
               encoder.encode(
-                `data: ${JSON.stringify(buildErrorBody(502, message))}\n\ndata: [DONE]\n\n`
+                `data: ${JSON.stringify(
+                  buildErrorBody(status, message, undefined, gatewayFailureClassification(error))
+                )}\n\ndata: [DONE]\n\n`
               )
             );
           } finally {
@@ -973,17 +1005,21 @@ export class MinimaxCodeExecutor extends BaseExecutor {
         const message = sanitizeErrorMessage(
           error instanceof Error ? error.message : String(error)
         );
-        // The gateway transport does not change the transport of a request
-        // behind the client's back: the local CLI cannot honour the protocol
-        // of a request that carries client tools, and a plain chat turn
-        // answered by another transport would change what the request means.
-        // The request fails with the transport named instead; the local CLI
-        // stays available as an explicit transport.
-        const detail = `MiniMax managed gateway unavailable (${message})`;
+        // The status of the gateway answer decides what the runtime does with
+        // the failure. A 4xx is a property of the request and keeps its own
+        // status: a refusal that arrives as a 502 is recorded as a model
+        // outage, and the model lockout that follows takes the MiniMax leg
+        // out of every combo for minutes (incident 2026-10-21). A failure
+        // without a status is a transport failure and stays a 502.
+        const status = gatewayFailureStatus(error);
+        const detail =
+          status === 502
+            ? `MiniMax managed gateway unavailable (${message})`
+            : `MiniMax gateway rejected the request (${status}): ${message}`;
         input.log?.warn?.("MINIMAX_CODE", detail);
         // The failure happens before the stream is opened, so the request
         // answers with a real status instead of an error inside a 200 stream.
-        return errorResponse(502, detail);
+        return errorResponse(status, detail, gatewayFailureClassification(error));
       }
     }
 
@@ -997,7 +1033,10 @@ export class MinimaxCodeExecutor extends BaseExecutor {
         "MiniMax Code: the local CLI transport cannot execute client tools — " +
         "use the managed gateway transport for a request that carries tools.";
       input.log?.warn?.("MINIMAX_CODE", message);
-      return errorResponse(502, message);
+      // The refusal is a property of the request, not of the model: it is
+      // answered with a request-scoped status so it cannot lock the model
+      // out of the fallbacks.
+      return errorResponse(400, message, { type: "invalid_request_error" });
     }
 
     const cliPath = this.resolveCommandPath();

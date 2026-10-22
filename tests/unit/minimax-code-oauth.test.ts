@@ -221,15 +221,47 @@ test("postExchange writes the credential into the local MiniMax Code profile", a
   assert.ok(record.generation > 4, "the generation must rise above the one in use");
 });
 
-test("postExchange survives a profile that cannot be written", async () => {
+test("postExchange fails when the profile cannot be written", async () => {
+  // The credential of this provider lives in the local MiniMax Code profile
+  // and nowhere else: a dashboard account without a profile entry would show
+  // a signed-in account that the runtime never uses. The sign-in has to fail
+  // loudly instead of reporting a success that is not one.
+  const blocker = join(tmpdir(), `minimax-code-blocker-${process.pid}`);
+  await writeFile(blocker, "not a directory", { mode: 0o600 });
   const previousAuthFile = process.env.MINIMAX_CODE_AUTH_FILE;
-  process.env.MINIMAX_CODE_AUTH_FILE = join(tmpdir(), "minimax-code-missing-dir", "auth.json");
+  process.env.MINIMAX_CODE_AUTH_FILE = join(blocker, "auth.json");
   try {
-    const extra = await minimaxCode.postExchange({ access_token: "access-token" });
-    assert.equal(extra.profileSynced, false);
-    assert.ok(extra.profileSyncError);
+    await assert.rejects(
+      () => minimaxCode.postExchange({ access_token: "access-token" }),
+      /auth\.json/
+    );
   } finally {
     if (previousAuthFile === undefined) delete process.env.MINIMAX_CODE_AUTH_FILE;
     else process.env.MINIMAX_CODE_AUTH_FILE = previousAuthFile;
   }
+});
+
+test("postExchange creates the profile of a host without a MiniMax Code login", async () => {
+  // The dashboard sign-in can be the first MiniMax Code login on a host: the
+  // directory of the profile does not exist yet and the sign-in has to make
+  // it, otherwise the credential has nowhere to live.
+  const dir = await mkdtemp(join(tmpdir(), "minimax-code-fresh-"));
+  const profilePath = join(dir, "auth", "prod", "en", "mcode-public", "auth.json");
+  const previousAuthFile = process.env.MINIMAX_CODE_AUTH_FILE;
+  process.env.MINIMAX_CODE_AUTH_FILE = profilePath;
+  try {
+    const extra = await minimaxCode.postExchange({
+      access_token: "new-access",
+      refresh_token: "new-refresh",
+      expires_in: 3600,
+    });
+    assert.equal(extra.profileSynced, true);
+  } finally {
+    if (previousAuthFile === undefined) delete process.env.MINIMAX_CODE_AUTH_FILE;
+    else process.env.MINIMAX_CODE_AUTH_FILE = previousAuthFile;
+  }
+  const profile = JSON.parse(await readFile(profilePath, "utf8"));
+  const records = Object.values(profile.records) as Record<string, unknown>[];
+  assert.equal(records.length, 1);
+  assert.equal(records[0].accessToken, "new-access");
 });

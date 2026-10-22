@@ -115,3 +115,48 @@ test("a raised ceiling lets a bigger request through", async () => {
     else process.env.MINIMAX_CODE_MAX_INPUT_TOKENS = previous;
   }
 });
+
+/**
+ * The estimate has to stay on the pessimistic side of the real token count.
+ * A single chars-per-token ratio under-counts every script that packs more
+ * than one symbol per token — the payload the guard lets through is the
+ * payload the gateway rejects after minutes of work.
+ */
+test("the estimate does not under-count Russian text", async () => {
+  const { buildGatewayPayload, isGatewayPayloadOversized, estimateGatewayInputTokens } =
+    await loadGateway();
+  // ~500k characters of Cyrillic: around 250k tokens, well above the ceiling.
+  const payload = buildGatewayPayload(
+    { messages: [{ role: "user", content: "ы".repeat(500_000) }] },
+    "MiniMax-M3.1-Flash"
+  );
+  assert.ok(estimateGatewayInputTokens(payload) > 200_000);
+  assert.equal(isGatewayPayloadOversized(payload), true);
+});
+
+test("the estimate does not under-count Chinese text", async () => {
+  const { buildGatewayPayload, isGatewayPayloadOversized, estimateGatewayInputTokens } =
+    await loadGateway();
+  // CJK is close to one token per character.
+  const payload = buildGatewayPayload(
+    { messages: [{ role: "user", content: "漢".repeat(300_000) }] },
+    "MiniMax-M3.1-Flash"
+  );
+  assert.ok(estimateGatewayInputTokens(payload) > 200_000);
+  assert.equal(isGatewayPayloadOversized(payload), true);
+});
+
+test("a request-scoped refusal is not in the model lockout list", async () => {
+  const { DEFAULT_MODEL_LOCKOUT_SETTINGS } = await import(
+    "@/lib/resilience/modelLockoutSettings"
+  );
+  // The statuses of a refusal that belongs to the request. A 502 would be
+  // recorded as a model outage and lock the model out of the fallbacks — the
+  // incident of 2026-10-21 took the MiniMax leg down for ~27 minutes.
+  assert.equal(DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes.includes(400), false);
+  assert.equal(DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes.includes(413), false);
+  assert.equal(DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes.includes(422), false);
+  // The statuses of an outage stay in the list: the model really is down.
+  assert.equal(DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes.includes(502), true);
+  assert.equal(DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes.includes(503), true);
+});

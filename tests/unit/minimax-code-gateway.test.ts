@@ -682,3 +682,222 @@ test("a credential from the dashboard is stored in the CLI profile", async () =>
   assert.equal(state.generation, 13);
   assert.equal(state.expiresAtMs, expiresAtMs);
 });
+
+/**
+ * The profile holds one record per account identity, and the runtime reads
+ * the newest generation. A dashboard credential written into another record
+ * is a credential the runtime never sees: the panel shows a signed-in account
+ * while the agent keeps using the old one.
+ */
+test("a dashboard credential lands in the record the runtime reads", async () => {
+  const { persistProfileCredential } = await loadGateway();
+  const { mkdtemp, writeFile, readFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+
+  const dir = await mkdtemp(join(tmpdir(), "mmcode-auth-"));
+  const authFile = join(dir, "auth.json");
+  await writeFile(
+    authFile,
+    JSON.stringify({
+      schemaVersion: 1,
+      records: {
+        "account-old": {
+          accessToken: "old-access-token",
+          refreshToken: "old-refresh-token",
+          clientId: "mcode-public",
+          scopes: ["agent.default"],
+          audience: "agent-backend",
+          expiresAtMs: 1000,
+          generation: 2,
+        },
+        "account-live": {
+          accessToken: "live-access-token",
+          refreshToken: "live-refresh-token",
+          clientId: "mcode-public",
+          scopes: ["agent.default"],
+          audience: "agent-backend",
+          expiresAtMs: 1000,
+          generation: 9,
+        },
+      },
+    })
+  );
+
+  const profile = await persistProfileCredential({
+    accessToken: "fresh-access-token",
+    refreshToken: "fresh-refresh-token",
+    expiresAtMs: Date.now() + 3600 * 1000,
+    path: authFile,
+  });
+
+  assert.equal(profile.recordKey, "account-live");
+  const auth = JSON.parse(await readFile(authFile, "utf8"));
+  assert.equal(auth.records["account-live"].accessToken, "fresh-access-token");
+  assert.equal(auth.records["account-old"].accessToken, "old-access-token");
+});
+
+test("an operator can pin the record a dashboard credential is written into", async () => {
+  const { persistProfileCredential } = await loadGateway();
+  const { mkdtemp, writeFile, readFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+
+  const dir = await mkdtemp(join(tmpdir(), "mmcode-auth-"));
+  const authFile = join(dir, "auth.json");
+  await writeFile(
+    authFile,
+    JSON.stringify({
+      schemaVersion: 1,
+      records: {
+        "account-old": {
+          accessToken: "old-access-token",
+          clientId: "mcode-public",
+          scopes: ["agent.default"],
+          audience: "agent-backend",
+          expiresAtMs: 1000,
+          generation: 2,
+        },
+        "account-live": {
+          accessToken: "live-access-token",
+          clientId: "mcode-public",
+          scopes: ["agent.default"],
+          audience: "agent-backend",
+          expiresAtMs: 1000,
+          generation: 9,
+        },
+      },
+    })
+  );
+
+  const previous = process.env.MINIMAX_CODE_AUTH_RECORD;
+  process.env.MINIMAX_CODE_AUTH_RECORD = "account-old";
+  try {
+    const profile = await persistProfileCredential({
+      accessToken: "pinned-access-token",
+      expiresAtMs: Date.now() + 3600 * 1000,
+      path: authFile,
+    });
+    assert.equal(profile.recordKey, "account-old");
+    const auth = JSON.parse(await readFile(authFile, "utf8"));
+    assert.equal(auth.records["account-old"].accessToken, "pinned-access-token");
+    assert.equal(auth.records["account-live"].accessToken, "live-access-token");
+  } finally {
+    if (previous === undefined) delete process.env.MINIMAX_CODE_AUTH_RECORD;
+    else process.env.MINIMAX_CODE_AUTH_RECORD = previous;
+  }
+});
+
+test("a pin that names no record fails instead of writing somewhere else", async () => {
+  const { persistProfileCredential } = await loadGateway();
+  const { mkdtemp, writeFile, readFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+
+  const dir = await mkdtemp(join(tmpdir(), "mmcode-auth-"));
+  const authFile = join(dir, "auth.json");
+  await writeFile(
+    authFile,
+    JSON.stringify({
+      schemaVersion: 1,
+      records: {
+        "account-live": {
+          accessToken: "live-access-token",
+          clientId: "mcode-public",
+          scopes: ["agent.default"],
+          audience: "agent-backend",
+          expiresAtMs: 1000,
+          generation: 9,
+        },
+      },
+    })
+  );
+
+  const previous = process.env.MINIMAX_CODE_AUTH_RECORD;
+  process.env.MINIMAX_CODE_AUTH_RECORD = "account-missing";
+  try {
+    await assert.rejects(
+      () =>
+        persistProfileCredential({
+          accessToken: "fresh-access-token",
+          expiresAtMs: Date.now() + 3600 * 1000,
+          path: authFile,
+        }),
+      /account-missing/
+    );
+    const auth = JSON.parse(await readFile(authFile, "utf8"));
+    assert.equal(auth.records["account-live"].accessToken, "live-access-token");
+  } finally {
+    if (previous === undefined) delete process.env.MINIMAX_CODE_AUTH_RECORD;
+    else process.env.MINIMAX_CODE_AUTH_RECORD = previous;
+  }
+});
+
+test("two concurrent dashboard writes get different generations", async () => {
+  const { persistProfileCredential } = await loadGateway();
+  const { mkdtemp, writeFile, readFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+
+  const dir = await mkdtemp(join(tmpdir(), "mmcode-auth-"));
+  const authFile = join(dir, "auth.json");
+  await writeFile(
+    authFile,
+    JSON.stringify({
+      schemaVersion: 1,
+      records: {
+        "account-live": {
+          accessToken: "live-access-token",
+          clientId: "mcode-public",
+          scopes: ["agent.default"],
+          audience: "agent-backend",
+          expiresAtMs: 1000,
+          generation: 9,
+        },
+      },
+    })
+  );
+
+  const [first, second] = await Promise.all([
+    persistProfileCredential({
+      accessToken: "first-access-token",
+      expiresAtMs: Date.now() + 3600 * 1000,
+      path: authFile,
+    }),
+    persistProfileCredential({
+      accessToken: "second-access-token",
+      expiresAtMs: Date.now() + 3600 * 1000,
+      path: authFile,
+    }),
+  ]);
+
+  // The CLI keeps its own generation counter and treats the older credential
+  // as expired: two credentials must never share one generation.
+  assert.notEqual(first.generation, second.generation);
+  const auth = JSON.parse(await readFile(authFile, "utf8"));
+  assert.equal(auth.records["account-live"].generation, Math.max(first.generation, second.generation));
+});
+
+test("the profile is created when the host has no MiniMax Code login yet", async () => {
+  const { persistProfileCredential } = await loadGateway();
+  const { mkdtemp, readFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+
+  const dir = await mkdtemp(join(tmpdir(), "mmcode-auth-"));
+  const authFile = join(dir, "auth", "prod", "en", "mcode-public", "auth.json");
+
+  const profile = await persistProfileCredential({
+    accessToken: "fresh-access-token",
+    refreshToken: "fresh-refresh-token",
+    expiresAtMs: Date.now() + 3600 * 1000,
+    path: authFile,
+  });
+
+  assert.equal(profile.accessToken, "fresh-access-token");
+  assert.ok(profile.recordKey.length > 0);
+  const auth = JSON.parse(await readFile(authFile, "utf8"));
+  const records = Object.values(auth.records) as Record<string, unknown>[];
+  assert.equal(records.length, 1);
+  assert.equal(records[0].accessToken, "fresh-access-token");
+});

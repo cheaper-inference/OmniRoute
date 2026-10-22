@@ -20,3 +20,13 @@ export const DEVICE_CODE_PROVIDERS = new Set([
   // in the browser; the credential lands in the local MiniMax Code profile.
   "minimax-code",
 ]);
+
+/**
+ * No-auth providers that are on that list.
+ *
+ * A no-auth provider stores no credential of its own — it reads the profile
+ * of a local CLI — and can still offer a device-code sign-in in the dashboard.
+ * The sign-in writes the credential into that profile; the dashboard row is
+ * the account, the credential lives in the provider's own store.
+ */
+export const NOAUTH_DEVICE_CODE_PROVIDER_IDS = new Set(["minimax-code"]);
