@@ -22,10 +22,37 @@ test("gateway payload maps system, user and assistant turns", async () => {
   assert.deepEqual(payload.system, [{ type: "text", text: "You are a coding assistant." }]);
   assert.equal(payload.messages.length, 3);
   assert.equal(payload.messages[0].role, "user");
-  assert.equal(payload.messages[0].content, "What time is it?");
+  assert.deepEqual(payload.messages[0].content, [{ type: "text", text: "What time is it?" }]);
   assert.equal(payload.messages[1].role, "assistant");
-  assert.equal(payload.messages[2].content, "Thanks.");
+  assert.deepEqual(payload.messages[2].content, [{ type: "text", text: "Thanks." }]);
   assert.equal(payload.tools, undefined);
+});
+
+test("a user message with one image and no text keeps the array content form", async () => {
+  const { buildGatewayPayload } = await loadGateway();
+  const payload = buildGatewayPayload(
+    {
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: { url: "data:image/png;base64,iVBORw0KGgo=" },
+            },
+          ],
+        },
+      ],
+    },
+    "MiniMax-M3.1-Flash"
+  );
+  // The gateway reads a message content as a list of content blocks; a bare
+  // block object is answered with 400 "Mismatch type []*custom.ClaudeContent".
+  assert.ok(Array.isArray(payload.messages[0].content));
+  assert.equal(payload.messages[0].content[0].type, "image");
+  for (const message of payload.messages) {
+    assert.ok(Array.isArray(message.content));
+  }
 });
 
 test("gateway payload maps OpenAI tools to Anthropic input_schema", async () => {

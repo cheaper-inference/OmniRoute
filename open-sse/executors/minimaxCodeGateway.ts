@@ -217,7 +217,12 @@ export function buildGatewayPayload(body: JsonRecord, model: string): JsonRecord
     if (text) blocks.push({ type: "text", text });
     blocks.push(...images);
     if (!blocks.length) continue;
-    messages.push({ role: "user", content: blocks.length === 1 ? text || blocks[0] : blocks });
+    // The gateway reads the content of a message as a list of content blocks
+    // (`[]*custom.ClaudeContent`). A single block used to travel as a bare
+    // object when it carried no text — an image-only message — and the
+    // gateway answered 400 "Mismatch type []*custom.ClaudeContent with value
+    // object". Every message carries the array form.
+    messages.push({ role: "user", content: blocks });
   }
   flushToolResults();
 
