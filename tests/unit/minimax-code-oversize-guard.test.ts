@@ -160,3 +160,13 @@ test("a request-scoped refusal is not in the model lockout list", async () => {
   assert.equal(DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes.includes(502), true);
   assert.equal(DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes.includes(503), true);
 });
+
+test("a missing credential is not in the model lockout list", async () => {
+  const { DEFAULT_MODEL_LOCKOUT_SETTINGS } = await import(
+    "@/lib/resilience/modelLockoutSettings"
+  );
+  // The local CLI refuses a run when it is not signed in. That refusal is a
+  // property of the credential, not of the model: it must not lock the model
+  // out of the fallbacks.
+  assert.equal(DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes.includes(401), false);
+});

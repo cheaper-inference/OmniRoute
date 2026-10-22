@@ -78,6 +78,20 @@ function gatewayFailureClassification(
   if (status !== 400 && status !== 413 && status !== 422) return undefined;
   return { type: "invalid_request_error" };
 }
+
+/**
+ * The local CLI refuses the run when it is not signed in.
+ *
+ * That refusal says nothing about the health of the model, and it must not be
+ * answered with a 502: a 502 is in the model-lockout list, so a missing
+ * credential takes the model out of every combo for half an hour — for every
+ * session on the instance, not only for the one that needed the credential.
+ * The answer is 401: the credential is missing or expired, and the operator
+ * has to sign in again.
+ */
+function isCliAuthFailure(message: string): boolean {
+  return /authentication required/i.test(message) || /mcode login/i.test(message);
+}
 /**
  * Budget of one managed-gateway attempt.
  *
@@ -1092,9 +1106,10 @@ export class MinimaxCodeExecutor extends BaseExecutor {
                 error instanceof Error ? error.message : String(error)
               );
               input.log?.warn?.("MINIMAX_CODE", message);
+              const status = isCliAuthFailure(message) ? 401 : 502;
               controller.enqueue(
                 encoder.encode(
-                  `data: ${JSON.stringify(buildErrorBody(502, message))}\n\ndata: [DONE]\n\n`
+                  `data: ${JSON.stringify(buildErrorBody(status, message))}\n\ndata: [DONE]\n\n`
                 )
               );
             } finally {
@@ -1121,6 +1136,11 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     } catch (error) {
       const message = sanitizeErrorMessage(error instanceof Error ? error.message : String(error));
       input.log?.warn?.("MINIMAX_CODE", message);
+      // A missing or expired credential is not an outage of the model: a 502
+      // would lock the model out of the fallbacks for half an hour.
+      if (isCliAuthFailure(message)) {
+        return errorResponse(401, message);
+      }
       return errorResponse(502, message);
     }
   }

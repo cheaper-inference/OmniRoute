@@ -988,3 +988,39 @@ test("an upstream outage stays an outage", async () => {
     server.close();
   }
 });
+
+/**
+ * Incident 2026-10-21: the local CLI refused the run with "Authentication
+ * required". That refusal was answered with a 502, and a 502 is in the
+ * model-lockout list: the model was locked out of every combo for half an
+ * hour, for every session on the instance, and every new attempt extended
+ * the lockout. A missing credential is not an outage of the model.
+ */
+test("a local CLI that is not signed in is answered with 401, not 502", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "cli",
+    runner: async () => {
+      throw new Error(
+        "-32000: Authentication required: Run `mcode login` and try again."
+      );
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // 401, not 502: a 502 is recorded as a model outage and locks the model
+  // out of the fallbacks.
+  assert.equal(response.status, 401);
+  const body = await response.json();
+  assert.match(JSON.stringify(body), /Authentication required/);
+});
