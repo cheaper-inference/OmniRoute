@@ -266,7 +266,11 @@ test("a missing credential on the gateway transport answers with a 401", async (
   // instance for half an hour. The answer is a 401.
   assert.equal(response.status, 401);
   const body = await response.json();
-  assert.ok(String(body.error?.message ?? "").toLowerCase().includes("mcode login"));
+  assert.ok(
+    String(body.error?.message ?? "")
+      .toLowerCase()
+      .includes("mcode login")
+  );
   // The gateway transport does not change the transport of a request behind
   // the client's back: it fails instead of running the CLI.
   assert.equal(ran, false);
@@ -618,7 +622,6 @@ test("MiniMax Code streams native tool calls from the managed gateway", async ()
   }
 });
 
-
 test("MiniMax Code refreshes an expired token through the injected transport", async () => {
   const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
   const { mkdtemp, writeFile } = await import("node:fs/promises");
@@ -715,7 +718,6 @@ test("MiniMax Code refreshes an expired token through the injected transport", a
   }
 });
 
-
 test("a request with client tools does not fall back to the CLI when the credential is missing", async () => {
   const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
   let ran = false;
@@ -760,11 +762,14 @@ test("a request with client tools does not fall back to the CLI when the credent
   // not a 502 that would lock the model out of the fallbacks.
   assert.equal(response.status, 401);
   const body = await response.json();
-  assert.ok(String(body.error?.message ?? "").toLowerCase().includes("mcode login"));
+  assert.ok(
+    String(body.error?.message ?? "")
+      .toLowerCase()
+      .includes("mcode login")
+  );
   assert.equal(body.choices, undefined);
   assert.equal(ran, false);
 });
-
 
 test("a CLI run in the standard context is refused without the host-tools opt-in", async () => {
   const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
@@ -798,7 +803,6 @@ test("a CLI run in the standard context is refused without the host-tools opt-in
   assert.equal(response.status, 400);
   assert.equal(ran, false);
 });
-
 
 test("the CLI transport refuses a request that carries client tools", async () => {
   const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
@@ -893,7 +897,7 @@ test("an oversized gateway request is refused with 413, not 400", async () => {
 
   const result = await executor.execute({
     model: "MiniMax-M3.1-Flash",
-    body: { messages: [{ role: "user", content: "x".repeat(900_000) }] },
+    body: { messages: [{ role: "user", content: "x".repeat(1_800_000) }] },
     stream: false,
     credentials: {},
   });
@@ -1058,9 +1062,7 @@ test("a local CLI that is not signed in is answered with 401, not 502", async ()
     timeoutMs: 10_000,
     transport: "cli",
     runner: async () => {
-      throw new Error(
-        "-32000: Authentication required: Run `mcode login` and try again."
-      );
+      throw new Error("-32000: Authentication required: Run `mcode login` and try again.");
     },
   });
 

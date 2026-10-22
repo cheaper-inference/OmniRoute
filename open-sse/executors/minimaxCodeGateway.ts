@@ -22,23 +22,28 @@ import { resolvePublicCred } from "../utils/publicCreds.ts";
 const GATEWAY_URL = "https://agent.minimax.io/mavis/api/v1/llm/v1/messages";
 const DEFAULT_MAX_TOKENS = 8192;
 /**
- * Ceiling on the estimated input size of one MANAGED GATEWAY request.
+ * The context window of the managed gateway, per model.
  *
- * This is the ceiling of the gateway transport, not of the model: the local
- * MiniMax Code transport runs the same models with their full context
- * (1M for MiniMax-M3.1-Flash, 512k for MiniMax-M3) and has no such guard.
+ * Source: the model catalog the MiniMax Code product ships — the desktop app
+ * and the CLI carry the same one. MiniMax-M3 and MiniMax-M3.1-Flash declare
+ * `limit.context = 512000` and offer `contextWindowOptions: [512000, 1000000]`;
+ * the larger window is hinted as `higher_usage`, it costs more of the plan.
  *
- * Incident 2026-10-21: a request with ~322k input tokens was accepted by the
- * managed gateway, ran for 236s and came back as `limit_exceeded`. That error
- * is what trips the in-memory model lockout in the combo fallback, which took
- * the MiniMax leg out of every combo for ~27 minutes. A request that large is
- * never useful on this transport, so it is refused locally with a fast
- * 413 instead of being forwarded.
- *
- * The value is an operator knob: a deployment whose gateway accepts more can
- * raise it without a code change.
+ * Measured against the live gateway on 2026-10-23: a request of 439226 input
+ * tokens was answered with 200 in 54.7 s. The 200000 ceiling this file used
+ * to carry came from a failure of the LOCAL transport and refused requests
+ * that the gateway answers.
  */
-const DEFAULT_MAX_INPUT_TOKENS = 200_000;
+const MODEL_CONTEXT_WINDOWS: Readonly<Record<string, number>> = {
+  "MiniMax-M3": 512_000,
+  "MiniMax-M3.1-Flash": 512_000,
+};
+
+/** The context window of a model the catalog does not name. */
+const DEFAULT_CONTEXT_WINDOW = 512_000;
+
+/** The larger window the catalog offers, behind the `higher_usage` hint. */
+export const MAX_CONTEXT_WINDOW = 1_000_000;
 /**
  * Chars per token, per script.
  *
@@ -274,6 +279,14 @@ export function buildGatewayPayload(body: JsonRecord, model: string): JsonRecord
   const topP = Number(body.top_p);
   if (Number.isFinite(topP)) payload.top_p = topP;
 
+  const contextWindow = resolveContextWindow(model);
+  if (contextWindow !== (MODEL_CONTEXT_WINDOWS[model] ?? DEFAULT_CONTEXT_WINDOW)) {
+    // The catalog offers a second, larger window. The gateway takes it as a
+    // field of the request; without the field the model stays in the window
+    // the catalog declares as its default.
+    payload.context_window = contextWindow;
+  }
+
   return payload;
 }
 
@@ -502,7 +515,9 @@ export async function readAuthProfile(path: string): Promise<MinimaxAuthProfile 
  */
 export async function readStateGeneration(path: string): Promise<number | null> {
   try {
-    const state = asRecord(JSON.parse(await readFile(join(dirname(path), "auth-state.json"), "utf8")));
+    const state = asRecord(
+      JSON.parse(await readFile(join(dirname(path), "auth-state.json"), "utf8"))
+    );
     return typeof state.generation === "number" ? state.generation : null;
   } catch {
     return null;
@@ -719,11 +734,7 @@ function resolveTargetRecordKey(records: JsonRecord): string {
  * behind the record that replaces it: the runtime reads it only when the
  * newer credential does not work.
  */
-function keepPreviousCredential(
-  records: JsonRecord,
-  key: string,
-  record: JsonRecord
-): boolean {
+function keepPreviousCredential(records: JsonRecord, key: string, record: JsonRecord): boolean {
   const accessToken = asString(record.accessToken);
   if (!accessToken) return false;
   const backupKey = `${key}${PREVIOUS_CREDENTIAL_SUFFIX}`;
@@ -810,9 +821,7 @@ export async function ensureAccessToken(options: EnsureTokenOptions = {}): Promi
     // model out of every combo of the instance for half an hour — for every
     // session, not only for the one that needed the credential. The answer
     // is 401: the operator has to sign in, the model itself is fine.
-    throw new GatewayAuthError(
-      "MiniMax Code auth profile not found — run `mcode login` first"
-    );
+    throw new GatewayAuthError("MiniMax Code auth profile not found — run `mcode login` first");
   }
   const now = options.now ?? Date.now();
   let lastError: unknown = null;
@@ -1243,16 +1252,32 @@ export function estimateGatewayInputTokens(payload: JsonRecord): number {
 }
 
 /**
+ * The context window this deployment asks the gateway for.
+ *
+ * `MINIMAX_CODE_CONTEXT_WINDOW` selects the window the catalog offers:
+ * 512000 (the default of the catalog) or 1000000 (the larger window, which
+ * the catalog hints as `higher_usage`). A value that is not one of the two is
+ * ignored, so a typo cannot ask for a window the model does not have.
+ */
+export function resolveContextWindow(model?: string): number {
+  const raw = Number(process.env.MINIMAX_CODE_CONTEXT_WINDOW);
+  if (raw === MAX_CONTEXT_WINDOW) return MAX_CONTEXT_WINDOW;
+  if (raw === DEFAULT_CONTEXT_WINDOW) return DEFAULT_CONTEXT_WINDOW;
+  return MODEL_CONTEXT_WINDOWS[model ?? ""] ?? DEFAULT_CONTEXT_WINDOW;
+}
+
+/**
  * The input ceiling of the managed gateway transport.
  *
- * `MINIMAX_CODE_MAX_INPUT_TOKENS` overrides the default for a deployment
- * whose gateway accepts more. A value that is not a positive number falls
- * back to the default instead of disabling the guard.
+ * The ceiling is the context window of the model, and
+ * `MINIMAX_CODE_MAX_INPUT_TOKENS` lowers it for a deployment that wants a
+ * stricter refusal. It cannot raise it above the window of the model.
  */
-export function resolveGatewayInputLimit(): number {
+export function resolveGatewayInputLimit(model?: string): number {
+  const window = resolveContextWindow(model);
   const raw = Number(process.env.MINIMAX_CODE_MAX_INPUT_TOKENS);
-  if (Number.isFinite(raw) && raw > 0) return Math.floor(raw);
-  return DEFAULT_MAX_INPUT_TOKENS;
+  if (Number.isFinite(raw) && raw > 0) return Math.min(Math.floor(raw), window);
+  return window;
 }
 
 /**
@@ -1263,6 +1288,6 @@ export function resolveGatewayInputLimit(): number {
  * it says nothing about the health of the model, so it must not be able to
  * lock the model out of the fallbacks.
  */
-export function isGatewayPayloadOversized(payload: JsonRecord): boolean {
-  return estimateGatewayInputTokens(payload) > resolveGatewayInputLimit();
+export function isGatewayPayloadOversized(payload: JsonRecord, model?: string): boolean {
+  return estimateGatewayInputTokens(payload) > resolveGatewayInputLimit(model);
 }

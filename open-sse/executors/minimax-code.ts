@@ -82,6 +82,35 @@ function isTransportFailure(error: unknown): boolean {
 }
 
 /**
+ * Ceiling on the estimated input size of one LOCAL CLI request.
+ *
+ * The local transport has a lower ceiling than the managed gateway, and the
+ * reason is the agent, not the model: the CLI adds its own scaffolding (the
+ * system prompt and the host tools) on top of the prompt, so the request
+ * that reaches the model is larger than the one that was sent.
+ *
+ * Incident 2026-10-21: a request of ~322k input tokens ran on this transport
+ * for 236 s and came back as `limit_exceeded`. That error trips the in-memory
+ * model lockout, which took the MiniMax leg out of every combo for ~27
+ * minutes, so a request of that size is refused here with a fast 413.
+ */
+const LOCAL_TRANSPORT_MAX_INPUT_TOKENS = 200_000;
+
+/**
+ * Whether a prompt is too large for the local transport.
+ *
+ * The same estimate the gateway path uses, so both refusals name the same
+ * unit. The local transport sends the prompt as one string, so it is measured
+ * as a single message.
+ */
+export function isLocalRequestOversized(prompt: string): boolean {
+  const estimate = estimateGatewayInputTokens({
+    messages: [{ role: "user", content: prompt }],
+  });
+  return estimate > LOCAL_TRANSPORT_MAX_INPUT_TOKENS;
+}
+
+/**
  * The status a refusal of the local CLI transport has to be answered with.
  *
  * The CLI refuses a request for a reason that belongs to the request ("too
@@ -109,9 +138,7 @@ function cliFailureStatus(message: string): number {
  * same way. Only the statuses that are a property of the request are marked
  * — a 403 or a 429 stay what they are.
  */
-function gatewayFailureClassification(
-  error: unknown
-): { type: string; code?: string } | undefined {
+function gatewayFailureClassification(error: unknown): { type: string; code?: string } | undefined {
   const status = gatewayFailureStatus(error);
   if (status !== 400 && status !== 413 && status !== 422) return undefined;
   return { type: "invalid_request_error" };
@@ -590,15 +617,10 @@ export async function probeCliVersion(command: string): Promise<string | null> {
     // the child process, and its `stdout` is the readable stream of the
     // child — not the output of the command.
     const stdout = await new Promise<string>((resolve, reject) => {
-      execFile(
-        command,
-        ["--version"],
-        { timeout: 5_000, encoding: "utf8" },
-        (error, out) => {
-          if (error) reject(error);
-          else resolve(String(out));
-        }
-      );
+      execFile(command, ["--version"], { timeout: 5_000, encoding: "utf8" }, (error, out) => {
+        if (error) reject(error);
+        else resolve(String(out));
+      });
     });
     const line = stdout
       .split("\n")
@@ -761,7 +783,11 @@ export class MinimaxCodeExecutor extends BaseExecutor {
   /** Host tools are opt-in: they let a request reach the host machine. */
   private hostToolsAllowed(): boolean {
     const raw = this.options.allowHostTools ?? process.env.MINIMAX_CODE_ALLOW_HOST_TOOLS;
-    return String(raw ?? "").trim().toLowerCase() === "true";
+    return (
+      String(raw ?? "")
+        .trim()
+        .toLowerCase() === "true"
+    );
   }
 
   private resolveModeForRequest(body: JsonRecord): string {
@@ -888,7 +914,11 @@ export class MinimaxCodeExecutor extends BaseExecutor {
       // documented bound.
       const remaining = timeoutMs - (Date.now() - startedAt);
       if (remaining <= 0) throw error;
-      return await callGateway({ ...options, accessToken: refreshed.accessToken, timeoutMs: remaining });
+      return await callGateway({
+        ...options,
+        accessToken: refreshed.accessToken,
+        timeoutMs: remaining,
+      });
     }
   }
 
@@ -897,12 +927,11 @@ export class MinimaxCodeExecutor extends BaseExecutor {
    * transport. It names the transport and the model context, so the message
    * is not read as a limit of the model itself.
    */
-  private oversizedGatewayMessage(tokens: number): string {
+  private oversizedGatewayMessage(tokens: number, model: string): string {
     return (
       `MiniMax Code request is too large for the managed gateway transport: ` +
-      `~${tokens} input tokens (limit ${resolveGatewayInputLimit()}). ` +
-      `Trim the conversation and retry. The local MiniMax Code transport runs ` +
-      `the same models with their full context.`
+      `~${tokens} input tokens (limit ${resolveGatewayInputLimit(model)}). ` +
+      `Trim the conversation and retry.`
     );
   }
 
@@ -913,9 +942,9 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     body: JsonRecord
   ): Promise<ExecutorExecuteResult> {
     const payload = buildGatewayPayload(body, model);
-    if (isGatewayPayloadOversized(payload)) {
+    if (isGatewayPayloadOversized(payload, model)) {
       const tokens = estimateGatewayInputTokens(payload);
-      const message = this.oversizedGatewayMessage(tokens);
+      const message = this.oversizedGatewayMessage(tokens, model);
       input.log?.warn?.("MINIMAX_CODE", message);
       // 413, not 400: a request-scoped refusal says nothing about the health
       // of the model. A 400 with a model scope is classified as a model
@@ -946,9 +975,9 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     body: JsonRecord
   ): Promise<ExecutorExecuteResult> {
     const payload = buildGatewayPayload(body, model);
-    if (isGatewayPayloadOversized(payload)) {
+    if (isGatewayPayloadOversized(payload, model)) {
       const tokens = estimateGatewayInputTokens(payload);
-      const message = this.oversizedGatewayMessage(tokens);
+      const message = this.oversizedGatewayMessage(tokens, model);
       input.log?.warn?.("MINIMAX_CODE", message);
       // The failure happens before the stream is opened, so the request
       // answers with a real status — the same as the non-streaming path.
@@ -1098,6 +1127,19 @@ export class MinimaxCodeExecutor extends BaseExecutor {
         (transport === "cli" ? ` maxSteps=${maxSteps}` : "") +
         ` clientTools=${clientTools.length} cwd=${this.resolveCwd()}`
     );
+
+    if (transport === "cli" && isLocalRequestOversized(prompt)) {
+      // The local transport would run the request for minutes and answer
+      // `limit_exceeded`, which locks the model out of the fallbacks. A
+      // request-scoped refusal answers with a fast 413 instead.
+      const message =
+        `MiniMax Code request is too large for the local transport: ` +
+        `~${estimateGatewayInputTokens({ messages: [{ role: "user", content: prompt }] })} ` +
+        `input tokens (limit ${LOCAL_TRANSPORT_MAX_INPUT_TOKENS}). ` +
+        `Trim the conversation and retry.`;
+      input.log?.warn?.("MINIMAX_CODE", message);
+      return errorResponse(413, message);
+    }
 
     if (transport === "gateway") {
       try {
