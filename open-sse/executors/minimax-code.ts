@@ -1052,6 +1052,13 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     });
   }
 
+  /**
+   * Run one request through the MiniMax Code transport.
+   *
+   * @executorRecovery custom
+   * @executorRecoveryReason Owns its own dispatch: the request goes either to the managed MiniMax subscription gateway or to the local MiniMax Code CLI, and the answer of each is turned into an OpenAI answer here. None of the three recovery kinds of the base loop applies to this payload — it carries no reasoning enum, no field the base recovery knows how to repair, and no Gemini budget — and the refusals of the request keep their own status (413 above the ceiling of the gateway, 400 for a refusal of the gateway), so they are never read as an outage of the model.
+   * @executorRecoveryTest tests/unit/minimax-code-executor.test.ts
+   */
   async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
     const resolution = resolveMinimaxCodeModel(input.model);
     if (!resolution.ok) {
