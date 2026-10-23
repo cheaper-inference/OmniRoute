@@ -243,6 +243,39 @@ const NON_RETRYABLE_MODEL_LOCKOUT_REASONS = new Set(["not_found", "not_found_loc
 // this base. Real upstream Retry-After hints still win — they flow through
 // `exactCooldownMs` (usedUpstreamRetryHint), not this base. (#5222)
 const ANTIGRAVITY_FAMILY_INFERRED_BASE_COOLDOWN_MS = 30_000;
+const AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS = ["gemini-4*", "*argon*"] as const;
+
+export function applyArgon404ExclusionToPsd(
+  psd: Record<string, unknown>
+): { nextPsd: Record<string, unknown>; changed: boolean } {
+  const nextPsd: Record<string, unknown> = { ...psd };
+  let changed = false;
+
+  if (psd.hasArgon !== false) {
+    nextPsd.hasArgon = false;
+    changed = true;
+  }
+
+  const existing = Array.isArray(psd.excludedModels)
+    ? psd.excludedModels.filter((m): m is string => typeof m === "string")
+    : [];
+  const merged = [...existing];
+  let modelsAdded = false;
+
+  for (const pattern of AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS) {
+    if (!merged.includes(pattern)) {
+      merged.push(pattern);
+      modelsAdded = true;
+    }
+  }
+
+  if (modelsAdded) {
+    nextPsd.excludedModels = merged;
+    changed = true;
+  }
+
+  return { nextPsd, changed };
+}
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
@@ -3016,7 +3049,16 @@ export async function markAccountUnavailable(
         }
       );
       // Update last error for observability (without changing terminal status)
+      const isAntigravityArgon404 =
+        (provider === "antigravity" || provider === "agy") &&
+        status === 404 &&
+        /argon|gemini-4/i.test(model);
+      const argonPsdUpdate =
+        isAntigravityArgon404 && conn
+          ? applyArgon404ExclusionToPsd(connProviderSpecificData)
+          : null;
       updateProviderConnection(connectionId, {
+        ...(argonPsdUpdate?.changed ? { providerSpecificData: argonPsdUpdate.nextPsd } : {}),
         lastErrorType: reason,
         lastError: `Model ${model} ${reason}`,
         lastErrorAt: new Date().toISOString(),

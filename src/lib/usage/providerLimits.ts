@@ -710,7 +710,69 @@ async function syncClaudeExtraUsageStateIfNeeded(
   };
 }
 
-/** Persist Antigravity tier from live loadCodeAssist on quota refresh (not only OAuth). */
+const AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS = ["gemini-4*", "*argon*"] as const;
+
+export function applyAntigravityArgonEligibilityToPsd(
+  psd: Record<string, unknown>,
+  hasArgon: unknown
+): { nextPsd: Record<string, unknown>; changed: boolean } {
+  if (typeof hasArgon !== "boolean") {
+    return { nextPsd: { ...psd }, changed: false };
+  }
+
+  const nextPsd: Record<string, unknown> = { ...psd };
+  let changed = false;
+
+  if (hasArgon === false) {
+    if (psd.hasArgon !== false) {
+      nextPsd.hasArgon = false;
+      changed = true;
+    }
+
+    const existing = Array.isArray(psd.excludedModels)
+      ? psd.excludedModels.filter((m): m is string => typeof m === "string")
+      : [];
+    const merged = [...existing];
+    let modelsAdded = false;
+
+    for (const pattern of AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS) {
+      if (!merged.includes(pattern)) {
+        merged.push(pattern);
+        modelsAdded = true;
+      }
+    }
+
+    if (modelsAdded) {
+      nextPsd.excludedModels = merged;
+      changed = true;
+    }
+  } else {
+    if (psd.hasArgon !== true) {
+      nextPsd.hasArgon = true;
+      changed = true;
+    }
+
+    if (!psd.connectionTestModel) {
+      nextPsd.connectionTestModel = "gemini-4-argon";
+      changed = true;
+    }
+
+    if (Array.isArray(psd.excludedModels)) {
+      const autoSet = new Set<string>(AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS);
+      const filtered = psd.excludedModels.filter(
+        (m) => typeof m !== "string" || !autoSet.has(m)
+      );
+      if (filtered.length !== psd.excludedModels.length) {
+        nextPsd.excludedModels = filtered;
+        changed = true;
+      }
+    }
+  }
+
+  return { nextPsd, changed };
+}
+
+/** Persist Antigravity tier from live loadCodeAssist and Argon eligibility on quota refresh (not only OAuth). */
 async function syncAntigravitySubscriptionIfNeeded(
   connection: ProviderConnectionLike,
   usage: JsonRecord
@@ -718,39 +780,49 @@ async function syncAntigravitySubscriptionIfNeeded(
   if (connection.provider !== "antigravity" && connection.provider !== "agy") return connection;
 
   const subscriptionInfo = usage.subscriptionInfo;
-  if (!subscriptionInfo) return connection;
+  if (!subscriptionInfo && typeof usage.hasArgon !== "boolean") return connection;
 
   const psd = (connection.providerSpecificData || {}) as JsonRecord;
-  const nextPsd: JsonRecord = { ...psd };
+  let nextPsd: JsonRecord = { ...psd };
   let changed = false;
-
-  const tierId = extractCodeAssistOnboardTierId(subscriptionInfo);
-  if (tierId && tierId !== "legacy-tier" && psd.tier !== tierId) {
-    nextPsd.tier = tierId;
-    changed = true;
-  }
-
-  const subscriptionTier = extractCodeAssistSubscriptionTier(subscriptionInfo);
-  if (subscriptionTier && psd.subscriptionTier !== subscriptionTier) {
-    nextPsd.subscriptionTier = subscriptionTier;
-    changed = true;
-  }
-
-  const plan = typeof usage.plan === "string" ? usage.plan.trim() : "";
-  if (plan && psd.plan !== plan) {
-    nextPsd.plan = plan;
-    changed = true;
-  }
-
-  const discoveredProjectId = extractAntigravityProjectIdFromPayload(
-    subscriptionInfo as Record<string, unknown>
-  );
-  const storedProjectId = getStoredAntigravityProjectId(connection);
   let nextProjectId: string | undefined;
-  if (discoveredProjectId && !storedProjectId) {
-    nextPsd.projectId = discoveredProjectId;
-    nextProjectId = discoveredProjectId;
-    changed = true;
+
+  if (subscriptionInfo) {
+    const tierId = extractCodeAssistOnboardTierId(subscriptionInfo);
+    if (tierId && tierId !== "legacy-tier" && psd.tier !== tierId) {
+      nextPsd.tier = tierId;
+      changed = true;
+    }
+
+    const subscriptionTier = extractCodeAssistSubscriptionTier(subscriptionInfo);
+    if (subscriptionTier && psd.subscriptionTier !== subscriptionTier) {
+      nextPsd.subscriptionTier = subscriptionTier;
+      changed = true;
+    }
+
+    const plan = typeof usage.plan === "string" ? usage.plan.trim() : "";
+    if (plan && psd.plan !== plan) {
+      nextPsd.plan = plan;
+      changed = true;
+    }
+
+    const discoveredProjectId = extractAntigravityProjectIdFromPayload(
+      subscriptionInfo as Record<string, unknown>
+    );
+    const storedProjectId = getStoredAntigravityProjectId(connection);
+    if (discoveredProjectId && !storedProjectId) {
+      nextPsd.projectId = discoveredProjectId;
+      nextProjectId = discoveredProjectId;
+      changed = true;
+    }
+  }
+
+  if (typeof usage.hasArgon === "boolean") {
+    const argonResult = applyAntigravityArgonEligibilityToPsd(nextPsd, usage.hasArgon);
+    if (argonResult.changed) {
+      nextPsd = argonResult.nextPsd;
+      changed = true;
+    }
   }
 
   if (!changed) return connection;
