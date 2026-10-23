@@ -431,8 +431,12 @@ export function getUserDatabaseSettings(): UserDatabaseSettings {
   }
 
   mergeTopLevelSections(settings, mainSettings);
-  mergeDatabaseSettingsNamespace(settings, readNamespace(DATABASE_SETTINGS_NAMESPACE));
+  // Legacy flat keys land first so an explicit databaseSettings write always wins.
+  // The dashboard persists the logs section under the databaseSettings namespace;
+  // merging that afterwards keeps a stale `call_log_pipeline_enabled` row from
+  // silently overriding the value the operator just chose in the panel.
   mergeRuntimeLogSettings(settings, mainSettings);
+  mergeDatabaseSettingsNamespace(settings, readNamespace(DATABASE_SETTINGS_NAMESPACE));
   normalizeOptimizationSettings(settings);
   decryptCacheSecrets(settings.cache as unknown as Record<string, unknown>);
 

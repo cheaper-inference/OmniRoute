@@ -164,6 +164,39 @@ function applySessionAffinityLegacyFallback(settings: Record<string, unknown>): 
   }
 }
 
+/**
+ * The dashboard persists the logs section under the `databaseSettings` namespace
+ * (camelCase keys), while the request hot path reads
+ * `settings.call_log_pipeline_enabled` (snake_case) from the `settings`
+ * namespace. Without a bridge the panel toggle writes one row and the hot path
+ * reads another, so enabling detailed logging changes nothing (#16310 follow-up).
+ * Only an explicit new-namespace value wins; otherwise the flat key stands.
+ */
+function applyCallLogLoggingBridge(
+  db: { prepare(sql: string): { get(...args: unknown[]): unknown } },
+  settings: Record<string, unknown>
+): void {
+  const readExplicit = (keys: string[]): boolean | null => {
+    for (const key of keys) {
+      const row = db
+        .prepare("SELECT value FROM key_value WHERE namespace = 'databaseSettings' AND key = ?")
+        .get(key) as { value?: unknown } | undefined;
+      const raw = row?.value;
+      if (typeof raw !== "string") continue;
+      const normalized = raw.trim().toLowerCase();
+      if (normalized === "true" || normalized === "1") return true;
+      if (normalized === "false" || normalized === "0") return false;
+    }
+    return null;
+  };
+
+  const pipeline = readExplicit(["logs.callLogPipelineEnabled", "callLogPipelineEnabled"]);
+  if (pipeline !== null) settings.call_log_pipeline_enabled = pipeline;
+
+  const detailed = readExplicit(["logs.detailedLogsEnabled", "detailedLogsEnabled"]);
+  if (detailed !== null) settings.detailed_logs_enabled = detailed;
+}
+
 export async function getSettings() {
   const db = getDbInstance();
   const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = 'settings'").all();
@@ -343,6 +376,7 @@ export async function getSettings() {
     }
   }
   applySessionAffinityLegacyFallback(settings);
+  applyCallLogLoggingBridge(db, settings);
 
   // Auto-complete onboarding for pre-configured deployments (Docker/VM)
   // If INITIAL_PASSWORD is set via env, this is a headless deploy — skip the wizard
