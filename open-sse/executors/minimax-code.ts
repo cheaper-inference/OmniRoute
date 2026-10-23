@@ -11,7 +11,10 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { buildErrorBody, errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
-import { MINIMAX_CODE_MODELS } from "../config/providers/registry/minimax-code/index.ts";
+import {
+  MINIMAX_CODE_EFFORT_LEVELS_BY_MODEL,
+  MINIMAX_CODE_MODELS,
+} from "../config/providers/registry/minimax-code/index.ts";
 import {
   applyGatewayEvent,
   buildGatewayPayload,
@@ -30,6 +33,7 @@ import {
   readAuthProfile,
   refreshAuthProfile,
   resolveAuthFile,
+  resolveEffort,
   resolveGatewayInputLimit,
   type GatewayStreamState,
 } from "./minimaxCodeGateway.ts";
@@ -116,6 +120,22 @@ export function isLocalRequestOversized(prompt: string): boolean {
     messages: [{ role: "user", content: prompt }],
   });
   return estimate > LOCAL_TRANSPORT_MAX_INPUT_TOKENS;
+}
+
+/**
+ * The effort level one request runs with.
+ *
+ * The catalog declares effort levels for MiniMax-M3.1-Flash only, and the CLI
+ * refuses `--effort` for a model without them ("does not support reasoning
+ * effort selection"), so a level for such a model is dropped here instead of
+ * failing the run.
+ */
+export function resolveModelEffort(model: string, body: JsonRecord): string | undefined {
+  const effort = resolveEffort(body);
+  if (!effort) return undefined;
+  const levels = MINIMAX_CODE_EFFORT_LEVELS_BY_MODEL[model];
+  if (levels && !levels.includes(effort)) return undefined;
+  return effort;
 }
 
 /**
@@ -366,6 +386,7 @@ export function buildMinimaxCodeExecArgs(options: {
   permission?: string;
   timeoutMs?: number;
   mode?: string;
+  effort?: string;
   extraArgs?: string[];
 }): string[] {
   const args = [
@@ -385,6 +406,9 @@ export function buildMinimaxCodeExecArgs(options: {
     "--cwd",
     options.cwd,
   ];
+  // The CLI validates the level against the levels its own model catalog
+  // declares for the model and refuses a model that has none.
+  if (options.effort) args.push("--effort", options.effort);
   const maxSteps = options.maxSteps ?? DEFAULT_MAX_STEPS;
   if (Number.isFinite(maxSteps) && maxSteps > 0) args.push("--max-steps", String(maxSteps));
   const timeoutMs = options.timeoutMs ?? DEFAULT_TURN_TIMEOUT_MS;
@@ -809,7 +833,8 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     prompt: string,
     mode: string,
     maxSteps: number,
-    signal?: AbortSignal | null
+    signal?: AbortSignal | null,
+    effort?: string
   ): MinimaxCodeRunOptions {
     const cwd = this.resolveCwd();
     const args =
@@ -821,6 +846,7 @@ export class MinimaxCodeExecutor extends BaseExecutor {
         permission: this.resolvePermission(),
         timeoutMs: this.resolveTimeoutMs(),
         mode,
+        effort,
         extraArgs: this.options.extraArgs,
       });
     return {
@@ -852,7 +878,8 @@ export class MinimaxCodeExecutor extends BaseExecutor {
   /** One turn on the shared agent. */
   private async runSharedAgentTurn(
     options: MinimaxCodeRunOptions,
-    model: string
+    model: string,
+    effort?: string
   ): Promise<MinimaxCodeRunResult> {
     const text = await runMinimaxCodeAcpTurn({
       command: options.command,
@@ -862,6 +889,7 @@ export class MinimaxCodeExecutor extends BaseExecutor {
       cwd: options.cwd,
       prompt: options.prompt,
       model,
+      effort,
       timeoutMs: options.timeoutMs,
       signal: options.signal,
       env: options.env,
@@ -1114,9 +1142,10 @@ export class MinimaxCodeExecutor extends BaseExecutor {
       this.options.runner ??
       (this.sharedAgentEnabled()
         ? (runOptions: MinimaxCodeRunOptions) =>
-            this.runSharedAgentTurn(runOptions, resolution.model)
+            this.runSharedAgentTurn(runOptions, resolution.model, effort)
         : runMinimaxCodeExec);
     const mode = this.resolveModeForRequest(body);
+    const effort = resolveModelEffort(resolution.model, body);
     const clientTools = Array.isArray(body.tools) ? body.tools : [];
     const wantsTools = clientTools.length > 0;
     const transport = this.resolveTransport(wantsTools);
@@ -1131,6 +1160,8 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     input.log?.info?.(
       "MINIMAX_CODE",
       `run started model=${resolution.model} transport=${transport} mode=${mode}` +
+        // The level of the reasoning, when the request named one.
+        (effort ? ` effort=${effort}` : "") +
         // The step budget belongs to the CLI run; the gateway has no steps.
         (transport === "cli" ? ` maxSteps=${maxSteps}` : "") +
         ` clientTools=${clientTools.length} cwd=${this.resolveCwd()}`
@@ -1228,7 +1259,14 @@ export class MinimaxCodeExecutor extends BaseExecutor {
                 )
               );
               await runner({
-                ...this.buildRunOptions(resolution.model, prompt, mode, maxSteps, input.signal),
+                ...this.buildRunOptions(
+                  resolution.model,
+                  prompt,
+                  mode,
+                  maxSteps,
+                  input.signal,
+                  effort
+                ),
                 onDelta: (delta) => {
                   controller.enqueue(
                     encoder.encode(
@@ -1270,7 +1308,7 @@ export class MinimaxCodeExecutor extends BaseExecutor {
 
     try {
       const result = await runner(
-        this.buildRunOptions(resolution.model, prompt, mode, maxSteps, input.signal)
+        this.buildRunOptions(resolution.model, prompt, mode, maxSteps, input.signal, effort)
       );
       return completionResponse(resolution.model, prompt, result.text, result.usage);
     } catch (error) {

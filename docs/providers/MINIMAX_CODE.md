@@ -128,6 +128,32 @@ runs in the larger window it answers in anyway. `MINIMAX_CODE_MAX_INPUT_TOKENS`
 lowers the ceiling of the managed gateway; it cannot raise it above the
 window.
 
+## The effort level
+
+The MiniMax Code product lets a model reason at different levels. The model
+catalog it ships declares them for `MiniMax-M3.1-Flash`:
+`effortOptions = ['default', 'low', 'medium', 'high', 'xhigh', 'max']`, where
+`default` means "let the provider decide". The level changes how much the
+model reasons: on 2026-10-23 a request of `low` was answered with 3 output
+tokens and no thinking tokens, `medium` with 7 thinking tokens, `xhigh` and
+`max` with 15.
+
+A request names the level the way its client speaks: `reasoning_effort` (the
+OpenAI field), `output_config.effort` (the Anthropic field) or
+`reasoning.effort`. `MINIMAX_CODE_EFFORT` pins the level of a deployment, and
+the level of the request wins over it. `default` is never sent — the model
+then reasons the way it decides by itself — and a level the catalog does not
+offer is dropped instead of being forwarded.
+
+The level travels on every transport: the managed gateway takes it as the
+`effort` field of `output_config` of the request, the local CLI takes it as
+`--effort <level>`, and the shared agent takes it as the `thinkingEffort`
+option of the session.
+
+`MiniMax-M3` declares no levels in the catalog — its thinking is switchable
+instead — so a level asked for that model is dropped: the CLI refuses
+`--effort` for a model without levels.
+
 ## The gateway endpoint
 
 The managed gateway URL is an **internal endpoint of the MiniMax Code app**,

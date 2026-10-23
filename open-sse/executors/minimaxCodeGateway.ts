@@ -45,6 +45,21 @@ export const MAX_CONTEXT_WINDOW = 1_000_000;
  * the setting for a deployment whose plan charges by the window.
  */
 export const CATALOG_DEFAULT_CONTEXT_WINDOW = 512_000;
+
+/**
+ * The effort levels the MiniMax Code product offers.
+ *
+ * The model catalog the product ships declares them for MiniMax-M3.1-Flash:
+ * `thinking.effortOptions = ['default', 'low', 'medium', 'high', 'xhigh',
+ * 'max']` with `defaultEffort = 'default'`. The managed gateway takes the
+ * level as the `effort` field of `output_config` of the request — the field
+ * the Anthropic protocol carries — and the level changes how much the model
+ * reasons: on 2026-10-23 a request of 'low' was answered with 3 output
+ * tokens and no thinking tokens, 'medium' with 7 thinking tokens, 'xhigh' and
+ * 'max' with 15.
+ */
+export const MINIMAX_CODE_EFFORT_LEVELS = ["low", "medium", "high", "xhigh", "max"];
+
 /**
  * Chars per token, per script.
  *
@@ -286,6 +301,13 @@ export function buildGatewayPayload(body: JsonRecord, model: string): JsonRecord
     // gateway takes it as a field of the request, and the plan counts less
     // of the request in it.
     payload.context_window = contextWindow;
+  }
+
+  const effort = resolveEffort(body);
+  if (effort) {
+    // The gateway reads the level of the reasoning as the `effort` field of
+    // `output_config` — the field the Anthropic protocol carries.
+    payload.output_config = { ...asRecord(body.output_config), effort };
   }
 
   return payload;
@@ -1268,6 +1290,27 @@ export function estimateGatewayInputTokens(payload: JsonRecord): number {
     Math.ceil(cyrillic / CYRILLIC_CHARS_PER_TOKEN) +
     Math.ceil(latin / LATIN_CHARS_PER_TOKEN)
   );
+}
+
+/**
+ * The effort level one request asks for.
+ *
+ * A client names the level the Anthropic way (`output_config.effort`), the
+ * OpenAI way (`reasoning_effort`) or the nested way (`reasoning.effort`); a
+ * deployment pins a default with `MINIMAX_CODE_EFFORT`. 'default' means
+ * "let the provider decide" and is not sent at all, and a level the catalog
+ * does not offer is dropped instead of being forwarded as a field the
+ * gateway would answer with a surprise.
+ */
+export function resolveEffort(body: JsonRecord): string | undefined {
+  const raw =
+    asString(asRecord(body.output_config).effort) ||
+    asString(body.reasoning_effort) ||
+    asString(asRecord(body.reasoning).effort) ||
+    asString(process.env.MINIMAX_CODE_EFFORT);
+  const effort = raw.trim().toLowerCase();
+  if (!effort || effort === "default" || effort === "none" || effort === "off") return undefined;
+  return MINIMAX_CODE_EFFORT_LEVELS.includes(effort) ? effort : undefined;
 }
 
 /**

@@ -173,6 +173,20 @@ export class MinimaxCodeAcpClient {
     return { sessionId };
   }
 
+  /**
+   * Set one option of a session, e.g. the thinking effort.
+   *
+   * The agent answers with its list of options and the value it holds now, so
+   * the caller can read back what the agent took.
+   */
+  async setConfigOption(sessionId: string, configId: string, value: string): Promise<unknown> {
+    return this.request(
+      "session/set_config_option",
+      { sessionId, configId, value },
+      this.options.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS
+    );
+  }
+
   /** Watch the answer of one session. */
   onSession(sessionId: string, listener: SessionListener): () => void {
     let group = this.listeners.get(sessionId);
@@ -287,7 +301,9 @@ export class MinimaxCodeAcpClient {
       const error = asRecord(message.error);
       if (message.error) {
         pending.reject(
-          new Error(`${error.code ?? "agent-error"}: ${error.message ?? "MiniMax Code agent error"}`)
+          new Error(
+            `${error.code ?? "agent-error"}: ${error.message ?? "MiniMax Code agent error"}`
+          )
         );
       } else {
         pending.resolve(message.result);
@@ -405,7 +421,9 @@ function agentKey(options: MinimaxCodeAcpServerOptions): string {
 
 function idleTimeout(options: MinimaxCodeAcpServerOptions): number {
   const raw = Number(
-    process.env.MINIMAX_CODE_SHARED_AGENT_IDLE_MS ?? options.idleTimeoutMs ?? DEFAULT_IDLE_TIMEOUT_MS
+    process.env.MINIMAX_CODE_SHARED_AGENT_IDLE_MS ??
+      options.idleTimeoutMs ??
+      DEFAULT_IDLE_TIMEOUT_MS
   );
   return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_IDLE_TIMEOUT_MS;
 }
@@ -549,6 +567,8 @@ export interface MinimaxCodeAcpRunOptions {
   cwd: string;
   prompt: string;
   model: string;
+  /** The level of the reasoning of the session, when the request names one. */
+  effort?: string;
   timeoutMs: number;
   signal?: AbortSignal | null;
   env?: NodeJS.ProcessEnv;
@@ -601,6 +621,19 @@ export async function runMinimaxCodeAcpTurn(options: MinimaxCodeAcpRunOptions): 
   try {
     const session = await client.newSession(options.cwd, options.model || undefined);
     sessionId = session.sessionId;
+    if (options.effort) {
+      try {
+        // The agent refuses a level its model does not have. The turn then
+        // runs with the level of the model, which is better than failing it.
+        await client.setConfigOption(sessionId, "thinkingEffort", options.effort);
+      } catch (error) {
+        options.log?.warn?.(
+          "MINIMAX_CODE",
+          `the agent refused the thinking effort ${options.effort}: ` +
+            (error instanceof Error ? error.message : String(error))
+        );
+      }
+    }
     if (aborted) {
       await client.cancel(sessionId).catch(() => undefined);
       throw abortError();
