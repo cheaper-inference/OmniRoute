@@ -58,7 +58,6 @@ import { getInflight, incrementInflight } from "./quotaShareInflight.ts";
 import { preferAntigravityConnectionsWithStoredProject } from "../antigravityProjectPersist.ts";
 import { getQuotaFetchScope, quotaWindowNamesForScope } from "../antigravityQuotaFamily.ts";
 import { getCodexQuotaWindowFilterForModel } from "../../config/codexQuotaScopes.ts";
-import { toNumber } from "../../../src/shared/utils/numeric.ts";
 import {
   getQuotaSnapshotFetchedAt,
   getQuotaWeightedRemainingPercent,
@@ -656,6 +655,18 @@ type CachedQuotaRow = {
 };
 
 /**
+ * Local coercion for a cached remaining-percentage value. open-sse must not
+ * import from src/, so this mirrors src/shared/utils/numeric.ts `toNumber(v, NaN)`:
+ * numbers pass through, non-empty strings are parsed, anything else is NaN.
+ * Non-finite results are rejected by the caller's Number.isFinite guard.
+ */
+function coerceRemainingPercent(v: unknown): number {
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && v.trim().length > 0) return Number(v.trim());
+  return Number.NaN;
+}
+
+/**
  * Model-scoped quota view for one combo target. Mirrors the conversion in
  * buildConnectionQuotaWindowsView but (a) filters windows to the family the
  * requested model actually spends — the same scoping the health gate applies —
@@ -688,7 +699,7 @@ export function buildScopedExpiryQuotaView(
   for (const name of names) {
     const quota = quotas[name];
     if (quota?.fractionReported === false) continue; // unknown, not exhausted
-    const remainingPercent = toNumber(quota?.remainingPercentage, Number.NaN);
+    const remainingPercent = coerceRemainingPercent(quota?.remainingPercentage);
     if (!Number.isFinite(remainingPercent)) continue;
     windows[name.toLowerCase()] = {
       percentUsed: Math.min(1, Math.max(0, 1 - remainingPercent / 100)),
