@@ -8919,7 +8919,9 @@
         "financial": "Airgeadais",
         "brazilian": "Brasaíleach",
         "usa": "SAM",
-        "full": "Iomlán"
+        "full": "Iomlán",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Cineálacha ionsuite",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "Seoltaí IPv4",
         "ipv6_address": "Seoltaí IPv6",
         "aws_key": "Eochracha rochtana AWS",
-        "api_key_generic": "Eochracha API agus comharthaí"
+        "api_key_generic": "Eochracha API agus comharthaí",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Patrúin shaincheaptha",
       "customPatternsDesc": "Cuirtear [CUSTOM_REDACTED] in ionad na meaitseálacha. Suas le {max} patrún. Diúltaítear do phatrúin a bhfuil baol cúlrianaithe tubaistigh ag baint leo.",

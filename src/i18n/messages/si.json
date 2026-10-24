@@ -8919,7 +8919,9 @@
         "financial": "මූල්‍ය",
         "brazilian": "බ්‍රසීල",
         "usa": "ඇමරිකාව",
-        "full": "සම්පූර්ණ"
+        "full": "සම්පූර්ණ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "ගොඩනඟන ලද වර්ග",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 ලිපින",
         "ipv6_address": "IPv6 ලිපින",
         "aws_key": "AWS ප්‍රවේශ යතුරු",
-        "api_key_generic": "API යතුරු සහ ටෝකන"
+        "api_key_generic": "API යතුරු සහ ටෝකන",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "අභිරුචි රටා",
       "customPatternsDesc": "ගැළපීම් [CUSTOM_REDACTED] මගින් ප්‍රතිස්ථාපනය වේ. උපරිම රටා {max}. විනාශකාරී පසුගමන අවදානමක් ඇති රටා ප්‍රතික්ෂේප වේ.",

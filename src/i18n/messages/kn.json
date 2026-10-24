@@ -8919,7 +8919,9 @@
         "financial": "ಹಣಕಾಸು",
         "brazilian": "ಬ್ರೆಜಿಲಿಯನ್",
         "usa": "ಅಮೆರಿಕ",
-        "full": "ಪೂರ್ಣ"
+        "full": "ಪೂರ್ಣ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "ಅಂತರ್ನಿರ್ಮಿತ ಪ್ರಕಾರಗಳು",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 ವಿಳಾಸಗಳು",
         "ipv6_address": "IPv6 ವಿಳಾಸಗಳು",
         "aws_key": "AWS ಪ್ರವೇಶ ಕೀಗಳು",
-        "api_key_generic": "API ಕೀಗಳು ಮತ್ತು ಟೋಕನ್‌ಗಳು"
+        "api_key_generic": "API ಕೀಗಳು ಮತ್ತು ಟೋಕನ್‌ಗಳು",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "ಕಸ್ಟಮ್ ಮಾದರಿಗಳು",
       "customPatternsDesc": "ಹೊಂದಾಣಿಕೆಗಳನ್ನು [CUSTOM_REDACTED] ನಿಂದ ಬದಲಾಯಿಸಲಾಗುತ್ತದೆ. ಗರಿಷ್ಠ {max} ಮಾದರಿಗಳು. ವಿನಾಶಕಾರಿ ಬ್ಯಾಕ್‌ಟ್ರ್ಯಾಕಿಂಗ್ ಅಪಾಯವಿರುವ ಮಾದರಿಗಳನ್ನು ತಿರಸ್ಕರಿಸಲಾಗುತ್ತದೆ.",

@@ -8919,7 +8919,9 @@
         "financial": "مالی",
         "brazilian": "برزیلی",
         "usa": "آمریکا",
-        "full": "کامل"
+        "full": "کامل",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "انواع داخلی",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "نشانی‌های IPv4",
         "ipv6_address": "نشانی‌های IPv6",
         "aws_key": "کلیدهای دسترسی AWS",
-        "api_key_generic": "کلیدهای API و توکن‌ها"
+        "api_key_generic": "کلیدهای API و توکن‌ها",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "الگوهای سفارشی",
       "customPatternsDesc": "موارد منطبق با [CUSTOM_REDACTED] جایگزین می‌شوند. حداکثر {max} الگو. الگوهایی که خطر عقبگرد فاجعه‌بار دارند رد می‌شوند.",

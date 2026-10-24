@@ -8919,7 +8919,9 @@
         "financial": "مالي",
         "brazilian": "برازيلي",
         "usa": "الولايات المتحدة",
-        "full": "كامل"
+        "full": "كامل",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "الأنواع المضمّنة",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "عناوين IPv4",
         "ipv6_address": "عناوين IPv6",
         "aws_key": "مفاتيح وصول AWS",
-        "api_key_generic": "مفاتيح API والرموز المميزة"
+        "api_key_generic": "مفاتيح API والرموز المميزة",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "أنماط مخصصة",
       "customPatternsDesc": "تُستبدل المطابقات بـ [CUSTOM_REDACTED]. حتى {max} نمطًا. تُرفض الأنماط المعرّضة لخطر التراجع الكارثي.",

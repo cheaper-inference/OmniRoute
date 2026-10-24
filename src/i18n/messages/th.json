@@ -8919,7 +8919,9 @@
         "financial": "การเงิน",
         "brazilian": "บราซิล",
         "usa": "สหรัฐฯ",
-        "full": "ทั้งหมด"
+        "full": "ทั้งหมด",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "ประเภทในตัว",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "ที่อยู่ IPv4",
         "ipv6_address": "ที่อยู่ IPv6",
         "aws_key": "คีย์การเข้าถึง AWS",
-        "api_key_generic": "คีย์ API และโทเค็น"
+        "api_key_generic": "คีย์ API และโทเค็น",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "รูปแบบที่กำหนดเอง",
       "customPatternsDesc": "ส่วนที่ตรงกันจะถูกแทนที่ด้วย [CUSTOM_REDACTED] ได้สูงสุด {max} รูปแบบ รูปแบบที่เสี่ยงต่อการย้อนรอยแบบหายนะจะถูกปฏิเสธ",

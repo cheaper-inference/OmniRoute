@@ -8919,7 +8919,9 @@
         "financial": "वित्तीय",
         "brazilian": "ब्राज़ीलियाई",
         "usa": "अमेरिका",
-        "full": "पूर्ण"
+        "full": "पूर्ण",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "अंतर्निहित प्रकार",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 पते",
         "ipv6_address": "IPv6 पते",
         "aws_key": "AWS एक्सेस कुंजियाँ",
-        "api_key_generic": "API कुंजियाँ और टोकन"
+        "api_key_generic": "API कुंजियाँ और टोकन",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "कस्टम पैटर्न",
       "customPatternsDesc": "मिलान [CUSTOM_REDACTED] से बदल दिए जाते हैं। अधिकतम {max} पैटर्न। विनाशकारी बैकट्रैकिंग के जोखिम वाले पैटर्न अस्वीकार किए जाते हैं।",

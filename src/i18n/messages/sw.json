@@ -8919,7 +8919,9 @@
         "financial": "Kifedha",
         "brazilian": "Kibrazili",
         "usa": "Marekani",
-        "full": "Kamili"
+        "full": "Kamili",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Aina zilizojengwa ndani",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "Anwani za IPv4",
         "ipv6_address": "Anwani za IPv6",
         "aws_key": "Funguo za ufikiaji za AWS",
-        "api_key_generic": "Funguo za API na tokeni"
+        "api_key_generic": "Funguo za API na tokeni",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Ruwaza maalum",
       "customPatternsDesc": "Zinazolingana hubadilishwa na [CUSTOM_REDACTED]. Hadi ruwaza {max}. Ruwaza zenye hatari ya urudishaji nyuma wa maafa hukataliwa.",

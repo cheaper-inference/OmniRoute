@@ -8919,7 +8919,9 @@
         "financial": "আর্থিক",
         "brazilian": "ব্রাজিলীয়",
         "usa": "যুক্তরাষ্ট্র",
-        "full": "সম্পূর্ণ"
+        "full": "সম্পূর্ণ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "অন্তর্নির্মিত ধরন",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 ঠিকানা",
         "ipv6_address": "IPv6 ঠিকানা",
         "aws_key": "AWS অ্যাক্সেস কী",
-        "api_key_generic": "API কী ও টোকেন"
+        "api_key_generic": "API কী ও টোকেন",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "কাস্টম প্যাটার্ন",
       "customPatternsDesc": "মিলগুলো [CUSTOM_REDACTED] দিয়ে প্রতিস্থাপিত হয়। সর্বোচ্চ {max}টি প্যাটার্ন। বিপর্যয়কর ব্যাকট্র্যাকিংয়ের ঝুঁকিপূর্ণ প্যাটার্ন প্রত্যাখ্যান করা হয়।",

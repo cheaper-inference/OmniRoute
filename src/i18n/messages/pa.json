@@ -8919,7 +8919,9 @@
         "financial": "ਵਿੱਤੀ",
         "brazilian": "ਬ੍ਰਾਜ਼ੀਲੀ",
         "usa": "ਅਮਰੀਕਾ",
-        "full": "ਪੂਰਾ"
+        "full": "ਪੂਰਾ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "ਬਿਲਟ-ਇਨ ਕਿਸਮਾਂ",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 ਪਤੇ",
         "ipv6_address": "IPv6 ਪਤੇ",
         "aws_key": "AWS ਪਹੁੰਚ ਕੁੰਜੀਆਂ",
-        "api_key_generic": "API ਕੁੰਜੀਆਂ ਅਤੇ ਟੋਕਨ"
+        "api_key_generic": "API ਕੁੰਜੀਆਂ ਅਤੇ ਟੋਕਨ",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "ਕਸਟਮ ਪੈਟਰਨ",
       "customPatternsDesc": "ਮੇਲ [CUSTOM_REDACTED] ਨਾਲ ਬਦਲੇ ਜਾਂਦੇ ਹਨ। ਵੱਧ ਤੋਂ ਵੱਧ {max} ਪੈਟਰਨ। ਤਬਾਹਕੁਨ ਬੈਕਟ੍ਰੈਕਿੰਗ ਦੇ ਖ਼ਤਰੇ ਵਾਲੇ ਪੈਟਰਨ ਰੱਦ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।",

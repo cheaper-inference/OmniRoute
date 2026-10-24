@@ -8919,7 +8919,9 @@
         "financial": "Financijski",
         "brazilian": "Brazilski",
         "usa": "SAD",
-        "full": "Potpuni"
+        "full": "Potpuni",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Ugrađene vrste",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 adrese",
         "ipv6_address": "IPv6 adrese",
         "aws_key": "AWS pristupni ključevi",
-        "api_key_generic": "API ključevi i tokeni"
+        "api_key_generic": "API ključevi i tokeni",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Prilagođeni uzorci",
       "customPatternsDesc": "Podudaranja se zamjenjuju s [CUSTOM_REDACTED]. Najviše {max} uzoraka. Uzorci s rizikom katastrofalnog vraćanja se odbijaju.",

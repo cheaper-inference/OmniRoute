@@ -8919,7 +8919,9 @@
         "financial": "ፋይናንስ",
         "brazilian": "ብራዚላዊ",
         "usa": "አሜሪካ",
-        "full": "ሙሉ"
+        "full": "ሙሉ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "አብሮ የተሰሩ ዓይነቶች",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 አድራሻዎች",
         "ipv6_address": "IPv6 አድራሻዎች",
         "aws_key": "የAWS መዳረሻ ቁልፎች",
-        "api_key_generic": "የAPI ቁልፎች እና ቶከኖች"
+        "api_key_generic": "የAPI ቁልፎች እና ቶከኖች",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "ብጁ ቅጦች",
       "customPatternsDesc": "ተዛማጆች በ[CUSTOM_REDACTED] ይተካሉ። እስከ {max} ቅጦች። አስከፊ የኋሊት ፍለጋ አደጋ ያላቸው ቅጦች ውድቅ ይደረጋሉ።",

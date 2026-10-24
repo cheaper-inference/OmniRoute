@@ -8919,7 +8919,9 @@
         "financial": "Financieel",
         "brazilian": "Braziliaans",
         "usa": "VS",
-        "full": "Volledig"
+        "full": "Volledig",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Ingebouwde typen",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4-adressen",
         "ipv6_address": "IPv6-adressen",
         "aws_key": "AWS-toegangssleutels",
-        "api_key_generic": "API-sleutels en tokens"
+        "api_key_generic": "API-sleutels en tokens",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Aangepaste patronen",
       "customPatternsDesc": "Overeenkomsten worden vervangen door [CUSTOM_REDACTED]. Maximaal {max} patronen. Patronen met risico op catastrofale backtracking worden geweigerd.",

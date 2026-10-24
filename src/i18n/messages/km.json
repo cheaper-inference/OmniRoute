@@ -8919,7 +8919,9 @@
         "financial": "ហិរញ្ញវត្ថុ",
         "brazilian": "ប្រេស៊ីល",
         "usa": "សហរដ្ឋអាមេរិក",
-        "full": "ពេញលេញ"
+        "full": "ពេញលេញ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "ប្រភេទដែលមានស្រាប់",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "អាសយដ្ឋាន IPv4",
         "ipv6_address": "អាសយដ្ឋាន IPv6",
         "aws_key": "កូនសោចូលប្រើ AWS",
-        "api_key_generic": "កូនសោ API និងថូខឹន"
+        "api_key_generic": "កូនសោ API និងថូខឹន",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "លំនាំផ្ទាល់ខ្លួន",
       "customPatternsDesc": "ការផ្គូផ្គងត្រូវបានជំនួសដោយ [CUSTOM_REDACTED]។ រហូតដល់ {max} លំនាំ។ លំនាំដែលមានហានិភ័យនៃការត្រឡប់ក្រោយមហន្តរាយត្រូវបានបដិសេធ។",

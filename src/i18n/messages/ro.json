@@ -8919,7 +8919,9 @@
         "financial": "Financiar",
         "brazilian": "Brazilian",
         "usa": "SUA",
-        "full": "Complet"
+        "full": "Complet",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Tipuri încorporate",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "Adrese IPv4",
         "ipv6_address": "Adrese IPv6",
         "aws_key": "Chei de acces AWS",
-        "api_key_generic": "Chei API și tokenuri"
+        "api_key_generic": "Chei API și tokenuri",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Modele personalizate",
       "customPatternsDesc": "Potrivirile sunt înlocuite cu [CUSTOM_REDACTED]. Până la {max} modele. Modelele cu risc de backtracking catastrofal sunt refuzate.",

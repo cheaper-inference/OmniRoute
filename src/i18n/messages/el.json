@@ -8919,7 +8919,9 @@
         "financial": "Οικονομικό",
         "brazilian": "Βραζιλιάνικο",
         "usa": "ΗΠΑ",
-        "full": "Πλήρες"
+        "full": "Πλήρες",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Ενσωματωμένοι τύποι",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "Διευθύνσεις IPv4",
         "ipv6_address": "Διευθύνσεις IPv6",
         "aws_key": "Κλειδιά πρόσβασης AWS",
-        "api_key_generic": "Κλειδιά API και tokens"
+        "api_key_generic": "Κλειδιά API και tokens",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Προσαρμοσμένα μοτίβα",
       "customPatternsDesc": "Οι αντιστοιχίες αντικαθίστανται με [CUSTOM_REDACTED]. Έως {max} μοτίβα. Μοτίβα με κίνδυνο καταστροφικής οπισθοδρόμησης απορρίπτονται.",

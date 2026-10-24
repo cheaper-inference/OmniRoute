@@ -8919,7 +8919,9 @@
         "financial": "Pénzügyi",
         "brazilian": "Brazil",
         "usa": "USA",
-        "full": "Teljes"
+        "full": "Teljes",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Beépített típusok",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4-címek",
         "ipv6_address": "IPv6-címek",
         "aws_key": "AWS hozzáférési kulcsok",
-        "api_key_generic": "API-kulcsok és tokenek"
+        "api_key_generic": "API-kulcsok és tokenek",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Egyéni minták",
       "customPatternsDesc": "A találatokat a rendszer [CUSTOM_REDACTED] értékre cseréli. Legfeljebb {max} minta. A katasztrofális visszalépés kockázatával járó mintákat elutasítja.",

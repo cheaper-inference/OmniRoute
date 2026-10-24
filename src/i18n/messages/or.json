@@ -8919,7 +8919,9 @@
         "financial": "ଆର୍ଥିକ",
         "brazilian": "ବ୍ରାଜିଲୀୟ",
         "usa": "ଯୁକ୍ତରାଷ୍ଟ୍ର",
-        "full": "ସମ୍ପୂର୍ଣ୍ଣ"
+        "full": "ସମ୍ପୂର୍ଣ୍ଣ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "ଅନ୍ତର୍ନିର୍ମିତ ପ୍ରକାର",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 ଠିକଣା",
         "ipv6_address": "IPv6 ଠିକଣା",
         "aws_key": "AWS ପ୍ରବେଶ କି",
-        "api_key_generic": "API କି ଏବଂ ଟୋକେନ୍"
+        "api_key_generic": "API କି ଏବଂ ଟୋକେନ୍",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "କଷ୍ଟମ୍ ପ୍ୟାଟର୍ନ",
       "customPatternsDesc": "ମେଳଗୁଡ଼ିକ [CUSTOM_REDACTED] ଦ୍ୱାରା ବଦଳାଯାଏ। ସର୍ବାଧିକ {max}ଟି ପ୍ୟାଟର୍ନ। ବିପର୍ଯ୍ୟୟକାରୀ ବ୍ୟାକଟ୍ରାକିଂ ବିପଦ ଥିବା ପ୍ୟାଟର୍ନ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ।",

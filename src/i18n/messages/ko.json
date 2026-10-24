@@ -8919,7 +8919,9 @@
         "financial": "금융",
         "brazilian": "브라질",
         "usa": "미국",
-        "full": "전체"
+        "full": "전체",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "기본 제공 유형",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 주소",
         "ipv6_address": "IPv6 주소",
         "aws_key": "AWS 액세스 키",
-        "api_key_generic": "API 키 및 토큰"
+        "api_key_generic": "API 키 및 토큰",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "사용자 지정 패턴",
       "customPatternsDesc": "일치 항목은 [CUSTOM_REDACTED](으)로 바뀝니다. 최대 {max}개 패턴. 치명적인 백트래킹 위험이 있는 패턴은 거부됩니다.",

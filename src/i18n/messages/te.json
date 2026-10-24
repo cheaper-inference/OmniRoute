@@ -8919,7 +8919,9 @@
         "financial": "ఆర్థిక",
         "brazilian": "బ్రెజిలియన్",
         "usa": "అమెరికా",
-        "full": "పూర్తి"
+        "full": "పూర్తి",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "అంతర్నిర్మిత రకాలు",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 చిరునామాలు",
         "ipv6_address": "IPv6 చిరునామాలు",
         "aws_key": "AWS యాక్సెస్ కీలు",
-        "api_key_generic": "API కీలు మరియు టోకెన్‌లు"
+        "api_key_generic": "API కీలు మరియు టోకెన్‌లు",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "అనుకూల ప్యాటర్న్‌లు",
       "customPatternsDesc": "సరిపోలికలు [CUSTOM_REDACTED] తో భర్తీ చేయబడతాయి. గరిష్ఠంగా {max} ప్యాటర్న్‌లు. విపత్కర బ్యాక్‌ట్రాకింగ్ ప్రమాదం ఉన్న ప్యాటర్న్‌లు తిరస్కరించబడతాయి.",

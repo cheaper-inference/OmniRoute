@@ -8919,7 +8919,9 @@
         "financial": "आर्थिक",
         "brazilian": "ब्राझिलियन",
         "usa": "अमेरिका",
-        "full": "संपूर्ण"
+        "full": "संपूर्ण",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "अंगभूत प्रकार",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 पत्ते",
         "ipv6_address": "IPv6 पत्ते",
         "aws_key": "AWS प्रवेश की",
-        "api_key_generic": "API की आणि टोकन"
+        "api_key_generic": "API की आणि टोकन",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "सानुकूल पॅटर्न",
       "customPatternsDesc": "जुळण्या [CUSTOM_REDACTED] ने बदलल्या जातात. जास्तीत जास्त {max} पॅटर्न. विनाशकारी बॅकट्रॅकिंगचा धोका असलेले पॅटर्न नाकारले जातात.",

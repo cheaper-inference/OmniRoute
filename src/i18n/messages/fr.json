@@ -8919,7 +8919,9 @@
         "financial": "Financier",
         "brazilian": "Brésilien",
         "usa": "États-Unis",
-        "full": "Complet"
+        "full": "Complet",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Types intégrés",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "Adresses IPv4",
         "ipv6_address": "Adresses IPv6",
         "aws_key": "Clés d’accès AWS",
-        "api_key_generic": "Clés d’API et jetons"
+        "api_key_generic": "Clés d’API et jetons",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Motifs personnalisés",
       "customPatternsDesc": "Les correspondances sont remplacées par [CUSTOM_REDACTED]. Jusqu’à {max} motifs. Les motifs qui risquent un backtracking catastrophique sont refusés.",

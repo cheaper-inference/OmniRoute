@@ -8919,7 +8919,9 @@
         "financial": "Na kuɗi",
         "brazilian": "Na Brazil",
         "usa": "Amurka",
-        "full": "Cikakke"
+        "full": "Cikakke",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Nau'ikan da aka gina",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "Adiresoshin IPv4",
         "ipv6_address": "Adiresoshin IPv6",
         "aws_key": "Maɓallan shiga na AWS",
-        "api_key_generic": "Maɓallan API da alamomi"
+        "api_key_generic": "Maɓallan API da alamomi",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Tsare-tsaren al'ada",
       "customPatternsDesc": "Ana maye gurbin abubuwan da suka dace da [CUSTOM_REDACTED]. Har zuwa tsari {max}. Ana ƙin tsare-tsaren da ke da haɗarin koma-baya mai muni.",

@@ -8919,7 +8919,9 @@
         "financial": "નાણાકીય",
         "brazilian": "બ્રાઝિલિયન",
         "usa": "યુએસએ",
-        "full": "સંપૂર્ણ"
+        "full": "સંપૂર્ણ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "બિલ્ટ-ઇન પ્રકારો",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 સરનામાં",
         "ipv6_address": "IPv6 સરનામાં",
         "aws_key": "AWS ઍક્સેસ કી",
-        "api_key_generic": "API કી અને ટોકન"
+        "api_key_generic": "API કી અને ટોકન",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "કસ્ટમ પેટર્ન",
       "customPatternsDesc": "મેળ [CUSTOM_REDACTED] થી બદલાય છે. વધુમાં વધુ {max} પેટર્ન. વિનાશક બેકટ્રેકિંગના જોખમવાળા પેટર્ન નકારવામાં આવે છે.",

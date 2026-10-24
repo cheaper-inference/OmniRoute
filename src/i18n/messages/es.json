@@ -8919,7 +8919,9 @@
         "financial": "Financiera",
         "brazilian": "Brasileña",
         "usa": "EE. UU.",
-        "full": "Completa"
+        "full": "Completa",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Tipos integrados",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "Direcciones IPv4",
         "ipv6_address": "Direcciones IPv6",
         "aws_key": "Claves de acceso de AWS",
-        "api_key_generic": "Claves de API y tokens"
+        "api_key_generic": "Claves de API y tokens",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Patrones personalizados",
       "customPatternsDesc": "Las coincidencias se reemplazan por [CUSTOM_REDACTED]. Hasta {max} patrones. Se rechazan los patrones con riesgo de backtracking catastrófico.",

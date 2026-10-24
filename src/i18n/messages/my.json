@@ -8919,7 +8919,9 @@
         "financial": "ငွေကြေး",
         "brazilian": "ဘရာဇီး",
         "usa": "အမေရိကန်",
-        "full": "အပြည့်အစုံ"
+        "full": "အပြည့်အစုံ",
+        "gdpr": "GDPR (ဥရောပသမဂ္ဂ)",
+        "popia": "POPIA (တောင်အာဖရိက)"
       },
       "builtinTypes": "မူလပါဝင်သော အမျိုးအစားများ",
       "types": {
@@ -8933,7 +8935,19 @@
         "ip_address": "IPv4 လိပ်စာများ",
         "ipv6_address": "IPv6 လိပ်စာများ",
         "aws_key": "AWS ဝင်ရောက်ခွင့် ကီးများ",
-        "api_key_generic": "API ကီးများနှင့် တိုကင်များ"
+        "api_key_generic": "API ကီးများနှင့် တိုကင်များ",
+        "iban": "IBAN ဘဏ်အကောင့်နံပါတ်များ",
+        "eu_vat": "EU VAT နံပါတ်များ",
+        "es_dni_nie": "စပိန် DNI / NIE",
+        "it_codice_fiscale": "အီတလီ Codice Fiscale",
+        "pl_pesel": "ပိုလန် PESEL",
+        "nl_bsn": "ဒတ်ခ်ျ BSN",
+        "de_steuer_id": "ဂျာမန် Steuer-ID",
+        "se_personnummer": "ဆွီဒင် personnummer",
+        "za_id": "တောင်အာဖရိက မှတ်ပုံတင်နံပါတ်များ",
+        "za_phone": "တောင်အာဖရိက ဖုန်းနံပါတ်များ",
+        "za_vat": "တောင်အာဖရိက VAT နံပါတ်များ",
+        "za_tax_ref": "တောင်အာဖရိက အခွန်ကိုးကားနံပါတ်များ"
       },
       "customPatterns": "စိတ်ကြိုက် ပုံစံများ",
       "customPatternsDesc": "ကိုက်ညီမှုများကို [CUSTOM_REDACTED] ဖြင့် အစားထိုးသည်။ ပုံစံ {max} ခုအထိ။ ဆိုးရွားသော backtracking အန္တရာယ်ရှိသော ပုံစံများကို ငြင်းပယ်သည်။",
