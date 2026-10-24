@@ -83,7 +83,7 @@ for (const provider of ["antigravity", "agy"])
       );
       const capsule = document.querySelector(`[data-account="${connection.id}"]`)!;
       expect(capsule).toHaveAttribute("data-kind", "ok");
-      expect(capsule.querySelector("[data-partial]")).toHaveClass("bg-[#eab308]");
+      expect(capsule.querySelector("[data-partial]")).toHaveClass("bg-warning");
       fireEvent.mouseEnter(capsule);
       const tooltip = screen.getByRole("tooltip");
       expect(tooltip).toHaveTextContent(messages.usage.modelLockouts);

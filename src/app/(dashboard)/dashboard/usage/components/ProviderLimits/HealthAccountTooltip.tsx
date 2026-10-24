@@ -134,7 +134,8 @@ function TooltipCells({ account }: { account: DisplayAccount }) {
               className="h-full rounded-full"
               style={{
                 width: `${cell.percent}%`,
-                background: cell.percent > 0 ? "#22c55e" : DISPLAY_COLORS[account.kind],
+                background:
+                  cell.percent > 0 ? "var(--color-success)" : DISPLAY_COLORS[account.kind],
               }}
             />
           </div>

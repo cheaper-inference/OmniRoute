@@ -37,7 +37,7 @@ export function CapsuleWater({
         />
       )}
       {partial && kind === "ok" && (
-        <span data-partial className="absolute inset-x-0 top-0 h-[6px] bg-[#eab308]" />
+        <span data-partial className="absolute inset-x-0 top-0 h-[6px] bg-warning" />
       )}
     </>
   );

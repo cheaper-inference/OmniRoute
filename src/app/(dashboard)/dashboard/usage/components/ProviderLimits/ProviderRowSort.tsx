@@ -18,6 +18,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 export function ProviderSortContext({
   ids,
   labels,
@@ -111,17 +113,18 @@ export function SortableProviderRow({
       className={`min-w-0 border-b border-border/70 bg-surface px-[18px] py-[14px] last:border-b-0 ${isDragging ? "cursor-grabbing rounded-xl shadow-xl ring-1 ring-border" : ""}`}
     >
       <div className="mb-[10px] flex min-w-0 flex-wrap items-center gap-2">
-        <button
+        <Button
           ref={setActivatorNodeRef}
-          type="button"
+          variant="ghost"
+          size="icon-sm"
           {...attributes}
           {...listeners}
           data-drag-handle
           aria-label={t("healthDrag")}
-          className="-ml-[6px] shrink-0 touch-none cursor-grab rounded px-[3px] py-[2px] text-[15px] leading-none text-text-muted focus-visible:outline-2 focus-visible:outline-primary active:cursor-grabbing"
+          className="-ms-[6px] shrink-0 touch-none cursor-grab active:cursor-grabbing"
         >
-          ⠿
-        </button>
+          <Icon name="drag_indicator" size={15} />
+        </Button>
         {header}
       </div>
       {children}

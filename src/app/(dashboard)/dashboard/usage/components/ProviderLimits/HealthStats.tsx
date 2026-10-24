@@ -1,4 +1,5 @@
 "use client";
+import Button from "@/shared/components/Button";
 import {
   DISPLAY_COLORS,
   DISPLAY_LABELS,
@@ -24,13 +25,13 @@ export default function HealthStats({
       {(["all", ...DISPLAY_KINDS] as const).map((kind) => {
         const color = kind === "all" ? "var(--color-text-main)" : DISPLAY_COLORS[kind];
         return (
-          <button
+          <Button
             key={kind}
-            type="button"
+            variant="outline"
             data-stat={kind}
             aria-pressed={value === kind}
             onClick={() => onChange(kind)}
-            className="min-w-0 cursor-pointer rounded-lg border px-3 py-2.5 text-left"
+            className="block h-auto min-h-0 min-w-0 px-3 py-2.5 text-start font-normal"
             style={{
               borderColor: value === kind ? color : "var(--color-border)",
               background:
@@ -50,7 +51,7 @@ export default function HealthStats({
                 {t("healthIncluded", { count: counts.partial })}
               </div>
             )}
-          </button>
+          </Button>
         );
       })}
     </div>

@@ -109,6 +109,9 @@ it.each(["en", "zh-CN"])(
       '[data-subpool="claude_gpt"] [data-availability]'
     )!;
     expect(claude).toHaveAttribute("data-kind", "cd5");
+    expect(claude.style.getPropertyValue("--capsule-color")).toBe("var(--color-warning)");
+    expect(handle).toHaveClass("ci-button");
+    expect(handle.querySelector('[data-icon="drag_indicator"]')).not.toBeNull();
     expect(claude.querySelector("[data-partial]")).toBeNull();
     fireEvent.mouseEnter(claude);
     const tip = screen.getByRole("tooltip");
@@ -188,7 +191,11 @@ it.each(["en", "zh-CN"])(
     view.unmount();
     mount(locale);
     expect(rows()).toEqual(after);
-    fireEvent.click(document.querySelector<HTMLButtonElement>("[data-reset-order]")!);
+    const reset = screen.getByRole("button", {
+      name: locale === "en" ? en.usage.healthResetOrder : zh.usage.healthResetOrder,
+    });
+    expect(reset.querySelector('[data-icon="restart_alt"]')).not.toBeNull();
+    fireEvent.click(reset);
     expect(rows()).toEqual(before);
     expect(localStorage.getItem("omniroute:limits:providerOrder")).toBeNull();
   }

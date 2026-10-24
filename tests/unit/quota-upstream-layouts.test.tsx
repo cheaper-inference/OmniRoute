@@ -108,7 +108,7 @@ for (const locale of ["en", "zh-CN"]) {
       cards = Array.from(container.querySelectorAll<HTMLElement>('[style*="border-left:"]'));
       const visibleCard = cards.find((card) => card.textContent?.includes("b-model"))!;
       expect(visibleCard).toHaveTextContent("TTFT");
-      expect(visibleCard).toHaveStyle({ borderLeft: "3px solid #ef4444" });
+      expect(visibleCard.style.borderLeft).toBe("3px solid var(--color-error)");
       fireEvent.click(
         within(visibleCard).getByRole("button", { name: messages.usage.hideQuotaRow })
       );

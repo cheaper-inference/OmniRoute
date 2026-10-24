@@ -155,6 +155,52 @@ interface ProviderQuotaSectionProps extends Omit<Props, "connections"> {
   defaultOpen?: boolean;
 }
 
+function ProviderQuotaHeader({
+  group,
+  providerLabel,
+  activeCount,
+  count,
+  open,
+}: {
+  group: ReturnType<typeof buildHealthGroups>[number] | undefined;
+  providerLabel: string;
+  activeCount: number;
+  count: number;
+  open: boolean;
+}) {
+  const t = useTranslations("usage");
+  const groupColor = group
+    ? {
+        critical: "var(--color-error)",
+        alert: "var(--color-warning)",
+        ok: "var(--color-success)",
+        empty: "var(--color-text-muted)",
+        paused: "var(--color-text-muted)",
+      }[group.status]
+    : undefined;
+  return (
+    <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+      <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
+      <div className="min-w-0 flex-1">
+        <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
+          {group && (
+            <span
+              className="me-2 inline-block h-2 w-2 rounded-full"
+              style={{ background: groupColor }}
+              aria-hidden
+            />
+          )}
+          {providerLabel}
+        </h3>
+        <p className="text-[11px] text-text-muted tabular-nums">
+          {t("activeCount", { count: activeCount })} / {t("accountsCount", { count })}
+        </p>
+      </div>
+      {group && <HealthCounts accounts={group.accounts.map((a) => displayAccount(a))} />}
+    </summary>
+  );
+}
+
 function ProviderQuotaSection({
   provider,
   connections,
@@ -177,19 +223,9 @@ function ProviderQuotaSection({
   onShowQuota,
   accounts,
 }: ProviderQuotaSectionProps) {
-  const t = useTranslations("usage");
   const [open, setOpen] = useState(defaultOpen);
   const group =
     accounts && buildHealthGroups(connections.map((c) => accounts[c.id]).filter(Boolean))[0];
-  const groupColor = group
-    ? {
-        critical: "#ef4444",
-        alert: "#eab308",
-        ok: "#22c55e",
-        empty: "var(--color-text-muted)",
-        paused: "var(--color-text-muted)",
-      }[group.status]
-    : undefined;
   const activeCount = connections.filter((conn) => conn.isActive ?? true).length;
   const providerLabel = providerLabels[provider] || provider;
 
@@ -199,26 +235,13 @@ function ProviderQuotaSection({
       onToggle={(event) => setOpen((event.target as HTMLDetailsElement).open)}
       className="rounded-lg border border-border bg-surface overflow-hidden"
     >
-      <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
-        <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
-            {group && (
-              <span
-                className="mr-2 inline-block h-2 w-2 rounded-full"
-                style={{ background: groupColor }}
-                aria-hidden
-              />
-            )}
-            {providerLabel}
-          </h3>
-          <p className="text-[11px] text-text-muted tabular-nums">
-            {t("activeCount", { count: activeCount })} /{" "}
-            {t("accountsCount", { count: connections.length })}
-          </p>
-        </div>
-        {group && <HealthCounts accounts={group.accounts.map((a) => displayAccount(a))} />}
-      </summary>
+      <ProviderQuotaHeader
+        group={group}
+        providerLabel={providerLabel}
+        activeCount={activeCount}
+        count={connections.length}
+        open={open}
+      />
       <div className="px-3 pb-3">
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-3">
           {connections.map((conn) => (

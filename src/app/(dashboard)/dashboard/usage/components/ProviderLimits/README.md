@@ -87,6 +87,13 @@ select the usable budget. Allowance reasons can remove bypassed plan meters from
 the waterline while retaining independent Spark meters. None of these display
 calculations decide eligibility or capsule color.
 
+The presentation uses the Keak CI UI Kit Button adapter for stat tiles, layout
+choices, drag handles, legend toggles and order reset. Capsules alone remain
+native buttons to preserve their exact geometry and fill without the kit's
+padding/min-height. Available accounts use the semantic success token; five-hour
+cooldowns and partial caps use warning; weekly cooldowns and needs-action use
+error. Paused and unknown accounts retain the muted token in both themes.
+
 ## Provider order
 
 `useProviderOrder` uses one module-level store and `useSyncExternalStore`.

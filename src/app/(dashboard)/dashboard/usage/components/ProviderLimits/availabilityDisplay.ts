@@ -12,10 +12,10 @@ export interface DisplayAccount extends HealthAccount {
 }
 export const DISPLAY_KINDS: DisplayKind[] = ["ok", "cd5", "cdw", "act", "paused", "empty"];
 export const DISPLAY_COLORS: Record<DisplayKind, string> = {
-  ok: "#22c55e",
-  cd5: "#eab308",
-  cdw: "#ef4444",
-  act: "#ef4444",
+  ok: "var(--color-success)",
+  cd5: "var(--color-warning)",
+  cdw: "var(--color-error)",
+  act: "var(--color-error)",
   paused: "var(--color-text-muted)",
   empty: "var(--color-text-muted)",
 };

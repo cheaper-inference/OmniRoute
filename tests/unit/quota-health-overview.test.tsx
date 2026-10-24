@@ -118,7 +118,7 @@ it("keeps known-usable capsules green when the water level is unknown", () => {
   expect(unit).toHaveAttribute("data-availability", "ok");
   expect(unit).toHaveAttribute("data-kind", "ok");
   expect(unit).not.toHaveClass("border-dashed");
-  expect(unit.style.getPropertyValue("--capsule-color")).toBe("#22c55e");
+  expect(unit.style.getPropertyValue("--capsule-color")).toBe("var(--color-success)");
   expect(unit.querySelector("[data-fill]")).toBeNull();
   expect(document.querySelector("[data-group-counts]")).toHaveTextContent("1 / 1 available");
 });
@@ -139,6 +139,7 @@ it.each([1, 2, 40, 200])(
     for (const unit of units()) {
       expect(unit).toHaveAttribute("data-availability", "critical");
       expect(unit).toHaveAttribute("data-kind", "cdw");
+      expect(unit.style.getPropertyValue("--capsule-color")).toBe("var(--color-error)");
       expect(unit).toHaveClass("w-[9px]", "h-[32px]", "rounded-full", "overflow-hidden");
       expect(unit.parentElement).toHaveClass("flex", "flex-wrap", "gap-x-[4px]", "gap-y-[6px]");
       expect(unit.getAttribute("aria-label")).not.toContain("@example.test");
@@ -302,16 +303,16 @@ function LayoutHarness() {
 }
 it("defaults to localized overview and persists explicit legacy layouts across remounts", () => {
   const view = localized(<LayoutHarness />, "zh-CN");
-  expect(screen.getByText("健康总览")).toHaveAttribute("aria-pressed", "true");
-  fireEvent.click(screen.getByText("完整"));
+  expect(screen.getByRole("button", { name: "健康总览" })).toHaveAttribute("aria-pressed", "true");
+  fireEvent.click(screen.getByRole("button", { name: "完整" }));
   expect(localStorage.getItem("omniroute:limits:layoutMode")).toBe("full");
   view.unmount();
   const second = localized(<LayoutHarness />);
-  expect(screen.getByText("Full")).toHaveAttribute("aria-pressed", "true");
-  fireEvent.click(screen.getByText("Compact"));
+  expect(screen.getByRole("button", { name: "Full" })).toHaveAttribute("aria-pressed", "true");
+  fireEvent.click(screen.getByRole("button", { name: "Compact" }));
   second.unmount();
   localized(<LayoutHarness />);
-  expect(screen.getByText("Compact")).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: "Compact" })).toHaveAttribute("aria-pressed", "true");
 });
 it("still switches layouts when localStorage is unavailable", () => {
   vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
@@ -321,8 +322,8 @@ it("still switches layouts when localStorage is unavailable", () => {
     throw Error("blocked");
   });
   localized(<LayoutHarness />);
-  fireEvent.click(screen.getByText("Compact"));
-  expect(screen.getByText("Compact")).toHaveAttribute("aria-pressed", "true");
+  fireEvent.click(screen.getByRole("button", { name: "Compact" }));
+  expect(screen.getByRole("button", { name: "Compact" })).toHaveAttribute("aria-pressed", "true");
 });
 it.each([
   { compact: false, locale: "en" },

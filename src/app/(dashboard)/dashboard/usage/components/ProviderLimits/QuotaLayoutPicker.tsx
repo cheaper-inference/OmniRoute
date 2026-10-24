@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 import { resolveQuotaLayout, type QuotaLayout } from "./healthOverview";
 
 const STORAGE_KEY = "omniroute:limits:layoutMode";
@@ -48,15 +49,16 @@ export default function QuotaLayoutPicker({
       aria-label={t("providerLimits")}
     >
       {MODES.map((mode) => (
-        <button
+        <Button
           key={mode}
-          type="button"
+          variant={value === mode ? "secondary" : "ghost"}
+          size="sm"
           aria-pressed={value === mode}
           onClick={() => onChange(mode)}
-          className={`rounded-md px-2 py-1 text-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-primary ${value === mode ? "bg-surface text-text-main shadow-sm" : "text-text-muted hover:text-text-main"}`}
+          className="h-7 min-h-7 rounded-md px-2 text-xs"
         >
           {t(LABELS[mode])}
-        </button>
+        </Button>
       ))}
     </div>
   );

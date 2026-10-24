@@ -14,7 +14,7 @@ export function HealthCounts({ accounts }: { accounts: DisplayAccount[] }) {
   return (
     <div
       data-group-counts
-      className="ml-auto flex flex-wrap items-center gap-2 text-xs text-text-muted"
+      className="ms-auto flex flex-wrap items-center gap-2 text-xs text-text-muted"
     >
       {(["cd5", "cdw", "act", "partial", "paused", "empty"] as const)
         .filter((k) => counts[k] > 0)
@@ -26,13 +26,13 @@ export function HealthCounts({ accounts }: { accounts: DisplayAccount[] }) {
             <span
               aria-hidden
               className="h-1.5 w-1.5 rounded-full"
-              style={{ background: k === "partial" ? "#eab308" : DISPLAY_COLORS[k] }}
+              style={{ background: k === "partial" ? "var(--color-warning)" : DISPLAY_COLORS[k] }}
             />
             {k === "partial" ? t("healthRestricted") : all(DISPLAY_LABELS[k])}{" "}
             {format.number(counts[k])}
           </span>
         ))}
-      <span className="ml-[6px]">
+      <span className="ms-[6px]">
         {t("healthRatio", { available: counts.ok, active: counts.all - counts.paused })}
       </span>
     </div>
@@ -125,12 +125,16 @@ export function HealthBanner({ accounts }: { accounts: DisplayAccount[] }) {
   return (
     <div
       data-banner
-      className={`flex items-center gap-[10px] rounded-xl border px-[18px] py-[14px] ${green ? "border-green-500/35 bg-green-500/[0.07]" : "border-yellow-500/35 bg-yellow-500/[0.07]"}`}
+      className="flex items-center gap-[10px] rounded-xl border px-[18px] py-[14px]"
+      style={{
+        borderColor: `color-mix(in srgb, var(--color-${green ? "success" : "warning"}) 35%, transparent)`,
+        background: `color-mix(in srgb, var(--color-${green ? "success" : "warning"}) 7%, transparent)`,
+      }}
     >
       <span
         aria-hidden
         className="h-[14px] w-[14px] shrink-0 rounded-full"
-        style={{ background: green ? "#22c55e" : "#eab308" }}
+        style={{ background: green ? "var(--color-success)" : "var(--color-warning)" }}
       />
       <div className="min-w-0">
         <b className="text-[15px]">

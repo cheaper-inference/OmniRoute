@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import { useNow } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import {
   buildHealthAccount,
@@ -55,6 +57,7 @@ function OverviewCapsules({
         const expanded = selected === account.connection.id;
         const visualKind = account.kind;
         return (
+          // kit-exception: exact capsule geometry/fill; kit Button imposes padding and min-height.
           <button
             key={account.connection.id}
             type="button"
@@ -118,7 +121,7 @@ function OverviewGroupHeader({
         style={{
           background:
             worst?.partial && worst.kind === "ok"
-              ? "#eab308"
+              ? "var(--color-warning)"
               : DISPLAY_COLORS[worst?.kind || "empty"],
         }}
       />
@@ -148,7 +151,7 @@ function OverviewGroupContent({
           <div
             key={pool}
             data-subpool={pool}
-            className="mb-[10px] ml-5 min-w-0 border-l-2 border-border pl-3 last:mb-0"
+            className="mb-[10px] ms-5 min-w-0 border-s-2 border-border ps-3 last:mb-0"
           >
             <div className="mb-[7px] flex flex-wrap items-center gap-2 text-xs">
               <b>{poolLabel(pool)}</b>
@@ -265,19 +268,20 @@ function OverviewHeader({
           {t("healthRuntimeObserved", { time: relative(oldest("runtimeObservedAt")) })} ·{" "}
           {t("healthOldestQuota", { time: relative(oldest("quotaObservedAt")) })}
         </span>
-        <button
-          type="button"
-          className="ml-auto text-xs text-primary"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="ms-auto text-xs"
           aria-expanded={!legendHidden}
           aria-controls={`${id}-legend`}
           onClick={toggleLegend}
         >
           {t(legendHidden ? "healthLegendShow" : "healthLegendHide")}
-        </button>
+        </Button>
         {custom && (
-          <button type="button" data-reset-order className="text-xs text-primary" onClick={reset}>
-            ↺ {t("healthResetOrder")}
-          </button>
+          <Button variant="ghost" size="sm" data-reset-order className="text-xs" onClick={reset}>
+            <Icon name="restart_alt" size={14} /> {t("healthResetOrder")}
+          </Button>
         )}
       </div>
       <HealthLegend id={`${id}-legend`} hidden={legendHidden} />
@@ -285,7 +289,8 @@ function OverviewHeader({
         <p
           data-summary-warning
           role="note"
-          className="m-3 rounded border border-yellow-500/40 bg-yellow-500/10 p-2 text-xs text-text-main"
+          className="m-3 rounded border bg-warning-bg p-2 text-xs text-text-main"
+          style={{ borderColor: "color-mix(in srgb, var(--color-warning) 40%, transparent)" }}
         >
           {t("healthSummaryFailed")}
         </p>
