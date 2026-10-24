@@ -1716,7 +1716,8 @@ async function buildUnifiedModelsResponseCore(
       const customModelsMap = (await getAllCustomModels()) as Record<string, unknown>;
       for (const [providerId, rawProviderCustomModels] of Object.entries(customModelsMap)) {
         await maybeYieldCatalogBuild();
-        if (providerUsesCuratedModelsOnly(providerId)) continue;
+        // Curated providers publish no upstream catalog, but an operator-added id is a
+        // local decision: it must reach /v1/models or it is unusable for routing.
         // Skip Gemini — handled by syncedAvailableModels above
         if (providerId === "gemini") continue;
         if (providerId === "reka") continue;

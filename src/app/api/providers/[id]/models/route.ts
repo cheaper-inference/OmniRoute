@@ -223,7 +223,7 @@ export async function GET(
     // over discovered metadata for the same id.
     let customModelsForProvider: Array<Record<string, unknown> & { id: string; name?: string }> =
       [];
-    if (!excludeCustom && !usesCuratedModelsOnly) {
+    if (!excludeCustom) {
       try {
         const custom = await getCustomModels(provider);
         if (Array.isArray(custom)) {
