@@ -33,7 +33,6 @@ import {
   hashLeaseOwnerId,
   type ExclusiveConnectionLease,
 } from "@/lib/db/exclusiveConnectionLeases";
-import { getSettings } from "@/lib/db/settings";
 import {
   describePeakHourWindow,
   evaluatePeakHourProtection,
@@ -1107,7 +1106,7 @@ export async function getProviderCredentials(
 
     // Fetched early so the session-affinity-pin override (#5903) can consult
     // the TTL before forcedConnectionId narrows the connection pool.
-    const settings = await getSettings();
+    const settings = await getCachedSettings();
     const sessionAffinityTtlMs = resolveSessionAffinityTtlMs(provider, options, settings);
 
     // Fix #922: Check for aliases (nvidia/nvidia_nim) to ensure credentials are found

@@ -14,7 +14,9 @@ interface LimiterWedgeWatchdogDependencies {
   limiters: Map<string, Bottleneck>;
   limiterLastUsed: Map<string, number>;
   limiterEffectiveSettings: WeakMap<Bottleneck, Bottleneck.ConstructorOptions>;
-  preservedReplacementSettings: Map<string, Bottleneck.ConstructorOptions>;
+  // boundedMap in production (LRU-capped), plain Map in some tests — the
+  // watchdog only reads and writes entries.
+  preservedReplacementSettings: Pick<Map<string, Bottleneck.ConstructorOptions>, "get" | "set">;
   trackBackground: (promise: Promise<unknown>) => void;
   log: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;

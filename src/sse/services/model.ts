@@ -1,6 +1,7 @@
 // Re-export from open-sse with localDb integration
 import { getModelAliases, getCustomModels } from "@/lib/db/models";
-import { getComboByName, getComboById, getComboByNameInsensitive } from "@/lib/db/combos";
+import { getComboById, getComboByNameInsensitive } from "@/lib/db/combos";
+import { getCachedComboByName } from "@/lib/db/readCache";
 import { getCachedProviderNodes, getCachedSettings } from "@/lib/db/readCache";
 
 import { getSyncedAutoAliases } from "@/lib/providerModels/syncedAutoAliases.ts";
@@ -690,7 +691,7 @@ export async function getModelInfoOrRetirementResponse(modelId: string) {
  */
 export async function getCombo(modelStr) {
   // Try exact match first (supports combos actually named "combo/ANY")
-  let combo = await getComboByName(modelStr);
+  let combo = await getCachedComboByName(modelStr);
   if (combo && Array.isArray(combo.models) && combo.models.length > 0) {
     return combo;
   }
@@ -698,7 +699,7 @@ export async function getCombo(modelStr) {
   // Fallback: Strip combo/ prefix if present
   if (modelStr.startsWith("combo/")) {
     const nameToSearch = modelStr.substring(6);
-    combo = await getComboByName(nameToSearch);
+    combo = await getCachedComboByName(nameToSearch);
     if (combo && Array.isArray(combo.models) && combo.models.length > 0) {
       return combo;
     }
