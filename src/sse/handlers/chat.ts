@@ -2669,6 +2669,7 @@ async function handleSingleModelChat(
         !comboName &&
         !forceLiveComboTest &&
         shouldRetrySameAccountTransport({
+          provider,
           status: result.status,
           errorText: errorStr,
           errorCode: result.errorCode,

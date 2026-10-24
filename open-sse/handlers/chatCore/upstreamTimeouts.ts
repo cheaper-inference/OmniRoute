@@ -1,5 +1,6 @@
 import {
   EXECUTOR_CONTRACT_VIOLATION_CODE,
+  ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
   FETCH_TIMEOUT_MS,
   HTTP_STATUS,
 } from "../../config/constants.ts";
@@ -47,6 +48,12 @@ export function createUpstreamStartTimeoutError(
     `Upstream request did not return response headers after ${timeoutMs}ms (${provider}/${model})`
   );
   err.name = "TimeoutError";
+  // The outer response-start watchdog and Antigravity executor readiness
+  // watchdog describe the same confirmed pre-response failure. Preserve its
+  // private marker so the non-streaming leg can route away from this account.
+  if (provider === "antigravity") {
+    (err as Error & { code?: string }).code = ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
+  }
   return err;
 }
 

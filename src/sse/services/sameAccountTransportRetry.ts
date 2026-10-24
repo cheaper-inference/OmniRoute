@@ -81,6 +81,7 @@ export function sameAccountTransportRetryDelayMs(random: () => number = Math.ran
 }
 
 export function shouldRetrySameAccountTransport(options: {
+  provider?: string;
   status: unknown;
   errorText?: string | null;
   errorCode?: string | null;
@@ -91,6 +92,11 @@ export function shouldRetrySameAccountTransport(options: {
 }): boolean {
   if (options.hasForcedConnection) return false;
   if (options.hasEmittedOutput) return false;
+  // Antigravity 504 commonly means the upstream produced NO response headers
+  // for the entire readiness budget. Retrying the same account doubles that
+  // wait; select a different eligible account instead. Keep Codex's #9708
+  // transient 504 retry behavior unchanged.
+  if (options.provider === "antigravity" && Number(options.status) === 504) return false;
   if (options.attempt >= SAME_ACCOUNT_TRANSPORT_RETRY_MAX) return false;
   return isRetryablePreOutputTransportError(
     options.status,
