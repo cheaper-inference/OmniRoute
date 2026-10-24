@@ -344,6 +344,11 @@ export function isPrivateLanHost(hostHeader: string | null): boolean {
  *   PATH lookup (`which cloudflared`), which runs only for loopback/LAN callers:
  *   a remote caller gets the unprobed status (`probed: false`) with no spawn
  *   (GHSA-35fw-cv32-2373 class, GHSA-jmq6-8j86-8xqj call-site gate).
+ *   /api/services/{bifrost,cliproxy,dario,mux,openwa}/status — GET returns
+ *   sanitized lifecycle/version metadata only. Lifecycle mutations remain
+ *   LOCAL_ONLY through the parent /api/services/ prefix. 9router is excluded:
+ *   its status handler also supports `?reveal=key` and can return a plaintext
+ *   service credential when the confirmation header is present.
  */
 export const LOCAL_ONLY_API_GET_EXEMPTIONS: ReadonlySet<string> = new Set([
   "/api/system/version",
@@ -358,6 +363,11 @@ export const LOCAL_ONLY_API_GET_EXEMPTIONS: ReadonlySet<string> = new Set([
   // 403s the timeline MCP poll forever (#13941).
   "/api/mcp/audit",
   "/api/mcp/audit/stats",
+  "/api/services/bifrost/status",
+  "/api/services/cliproxy/status",
+  "/api/services/dario/status",
+  "/api/services/mux/status",
+  "/api/services/openwa/status",
 ]);
 
 /** Safe HTTP methods that can be exempted for read-only paths. */
