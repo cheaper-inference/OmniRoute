@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "Дійсні записи не знайдено. Перевірте формат і повторіть спробу.",
     "bulkImportSuccess": "Імпорт завершено: {created} створено, {updated} оновлено, {failed} не вдалося",
     "bulkImportErrorLine": "Рядок {line}: {reason}",
-    "bulkImportMaxExceeded": "Максимум 100 проксі-серверів на імпорт",
+    "bulkImportMaxExceeded": "Максимум {max} проксі-серверів на імпорт",
     "bulkImportPreview": "Попередній перегляд",
     "clearAssignment": "(чисте завдання)",
     "bulkProxyAssignment": "Масове призначення проксі",
