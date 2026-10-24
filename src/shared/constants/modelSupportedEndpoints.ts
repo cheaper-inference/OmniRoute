@@ -9,6 +9,9 @@ export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
   "audio-transcriptions",
   "music",
   "images-generations",
+  // System One typed-decision models (TypeSafe Jev, …) — POST /v1/systemone
+  // (alias POST /v1/decisions). Not chat-capable; see classifyModelSupportedEndpoints.
+  "decisions",
   // Persisted legacy values remain valid input and normalize on write/edit.
   "video",
   "audio",
@@ -36,13 +39,17 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
 }
 
 export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
-  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "music";
+  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "music" | "decisions";
   subtype?: "speech" | "transcription";
 } {
   // "chat" and "responses" are text-conversation endpoints; they carry no
   // modality type. Return before the media checks so a multimodal chat model
   // is not classified as image, audio, embedding, or rerank.
   if (endpoints.includes("chat") || endpoints.includes("responses")) return {};
+  // System One decisions are their own kind, not a chat-adjacent text format:
+  // the request is {state, questions} and the response is typed answers with
+  // calibrated probabilities (#13987).
+  if (endpoints.includes("decisions")) return { type: "decisions" };
   const primary = (
     [
       ["embeddings", "embedding"],
@@ -90,6 +97,8 @@ export function defaultEndpointsForProviderNodeApiType(
       return ["audio-transcriptions"];
     case "images-generations":
       return ["images"];
+    case "decisions":
+      return ["decisions"];
     default:
       return ["chat"];
   }
