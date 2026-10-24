@@ -20,7 +20,7 @@ import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 import { getSpeechProvider, parseSpeechModel } from "../config/audioRegistry.ts";
 import { buildAuthHeaders } from "../config/registryUtils.ts";
 import { kieExecutor } from "../executors/kie.ts";
-import { vertexGenerateSpeech } from "../executors/vertexMedia.ts";
+import { extractSpeechInstruction, vertexGenerateSpeech } from "../executors/vertexMedia.ts";
 import { handleGeminiTtsSpeech } from "../executors/geminiTts.ts";
 import { handleAwsPollySpeech } from "../executors/awsPollyTts.ts";
 import { GttsUpstreamError, normalizeGttsLang, synthesizeGtts } from "../executors/gtts.ts";
@@ -935,10 +935,15 @@ export async function handleAudioSpeech({
     }
 
     if (providerConfig.format === "vertex-gemini-tts") {
+      const instructions = extractSpeechInstruction(body);
       const { audio, contentType } = await vertexGenerateSpeech(credentials, {
         model: modelId,
         input: body.input,
         voice: body.voice,
+        instructions,
+        speed: typeof body.speed === "number" ? body.speed : undefined,
+        response_format:
+          typeof body.response_format === "string" ? body.response_format : undefined,
       });
       return new Response(audio, {
         status: 200,
@@ -946,10 +951,15 @@ export async function handleAudioSpeech({
       });
     }
     if (providerConfig.format === "gemini-tts") {
+      const instructions = extractSpeechInstruction(body);
       return handleGeminiTtsSpeech(credentials, {
         model: modelId,
         text: body.input,
         voice: body.voice,
+        instructions,
+        speed: typeof body.speed === "number" ? body.speed : undefined,
+        response_format:
+          typeof body.response_format === "string" ? body.response_format : undefined,
       });
     }
 
