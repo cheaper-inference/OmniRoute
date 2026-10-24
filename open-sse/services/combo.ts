@@ -20,7 +20,10 @@ import {
   resolveComboQueueDepth,
   isComboCooldownWaitEligible,
   resolveComboTargetTimeoutMsForCombo,
+  hasExplicitComboTargetTimeout,
 } from "./comboConfig.ts";
+import { getModelTimeoutMs } from "../config/providerModels.ts";
+import { getRegistryEntry } from "../config/providerRegistry.ts";
 
 import { getHiddenModelsByProvider } from "@/models";
 import { getHiddenChatModels } from "../../src/lib/hiddenChatModels";
@@ -663,6 +666,45 @@ export async function resolveTargetTimeoutMsForTarget(
 }
 
 /**
+ * The target's declared budget for the first-output gate, in the order the upstream timeout uses
+ * (getExecutorTimeoutMs): connection `providerSpecificData.timeoutMs` → registry per-model
+ * `timeoutMs` → registry provider-level `timeoutMs`. The runner only lets it lengthen the wait,
+ * and by at most DECLARED_FIRST_OUTPUT_WAIT_CAP_MS. Returns undefined when `targetTimeoutMs` is
+ * set explicitly in the resolved combo config (the combo's own config or the global
+ * comboDefaults; see hasExplicitComboTargetTimeout), since that budget stays authoritative, or
+ * when nothing is declared.
+ */
+export async function resolveDeclaredTargetBudgetMs(
+  config: Record<string, unknown> | null | undefined,
+  target?: SingleModelTarget,
+  log?: Pick<ComboLogger, "debug"> | null
+): Promise<number | undefined> {
+  if (hasExplicitComboTargetTimeout(config)) return undefined;
+  if (!target || !("provider" in target) || !target.provider) return undefined;
+  if (target.connectionId) {
+    try {
+      const connection = await getCachedProviderConnectionById(target.connectionId);
+      const connectionTimeoutMs = resolveConnectionTimeoutMs(connection?.providerSpecificData);
+      if (connectionTimeoutMs !== undefined) return connectionTimeoutMs;
+    } catch (err) {
+      log?.debug?.(
+        "COMBO",
+        `resolveDeclaredTargetBudgetMs connection lookup failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+  }
+  const modelId = parseModel(target.modelStr).model || target.modelStr;
+  const modelTimeoutMs = getModelTimeoutMs(target.provider, modelId);
+  if (typeof modelTimeoutMs === "number" && modelTimeoutMs > 0) return modelTimeoutMs;
+  const providerTimeoutMs = getRegistryEntry(target.provider)?.timeoutMs;
+  return typeof providerTimeoutMs === "number" && providerTimeoutMs > 0
+    ? providerTimeoutMs
+    : undefined;
+}
+
+/**
  * #10681 egress: every combo response carries the opaque trace id in an
  * `X-OmniRoute-Combo-Trace` header so a post-incident lookup of the ordered
  * per-target decisions is possible; the finalized summary is also emitted as
@@ -747,6 +789,7 @@ async function handleComboChatInner({
         target,
         log
       ),
+    resolveDeclaredTargetBudgetMs: (target) => resolveDeclaredTargetBudgetMs(config, target, log),
     log,
   });
 
