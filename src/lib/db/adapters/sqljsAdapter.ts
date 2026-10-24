@@ -319,7 +319,9 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
       try {
         db.run(`ROLLBACK TO "${sp}"`);
         db.run(`RELEASE "${sp}"`);
-      } catch {}
+      } catch (rollbackErr) {
+        console.debug?.("[DB] sql.js rollback to savepoint failed:", rollbackErr);
+      }
       throw err;
     }
   }
@@ -371,7 +373,9 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
     if (dirty)
       try {
         persist();
-      } catch {}
+      } catch (err) {
+        console.debug?.("[DB] sql.js periodic persist failed:", err);
+      }
   }, CHECKPOINT_INTERVAL_MS);
   (checkpointTimer as unknown as NodeJS.Timeout).unref?.();
 
@@ -379,7 +383,9 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
     if (dirty)
       try {
         persist();
-      } catch {}
+      } catch (err) {
+        console.debug?.("[DB] sql.js flush persist failed:", err);
+      }
   };
   process.on("beforeExit", flush);
   process.on("SIGINT", flush);
@@ -391,10 +397,14 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
     if (dirty)
       try {
         persist();
-      } catch {}
+      } catch (err) {
+        console.debug?.("[DB] sql.js close persist failed:", err);
+      }
     try {
       db.close();
-    } catch {}
+    } catch (err) {
+      console.debug?.("[DB] sql.js db close failed:", err);
+    }
     _isOpen = false;
     // Without this, a closed adapter's whole closure (raw sql.js Database +
     // buffers) stays pinned in memory forever by these 3 process-level
@@ -453,7 +463,9 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
       if (dirty)
         try {
           persist();
-        } catch {}
+        } catch (err) {
+          console.debug?.("[DB] sql.js checkpoint persist failed:", err);
+        }
     },
 
     close(): void {

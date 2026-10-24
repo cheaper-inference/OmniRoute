@@ -138,12 +138,16 @@ export async function handleValidatedRerankRequestBody(
         let allCombos: Awaited<ReturnType<typeof getCombos>> = [];
         try {
           allCombos = await getCombos();
-        } catch {}
+        } catch (err) {
+          console.debug?.("[API] /v1/rerank failed to get combos:", err);
+        }
 
         let settings = {};
         try {
           settings = getUserDatabaseSettings();
-        } catch {}
+        } catch (err) {
+          console.debug?.("[API] /v1/rerank failed to get user database settings:", err);
+        }
 
         return handleComboChat({
           body: body as any,

@@ -91,8 +91,8 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
               : [];
           })
         );
-      } catch {
-        // If DB unavailable, show all models
+      } catch (err) {
+        console.debug?.("[API] /api/models failed to resolve active providers, falling back to all:", err);
       }
     }
 
@@ -104,7 +104,9 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
     try {
       const settings = await getSettings();
       hidePaid = settings?.hidePaidModels === true;
-    } catch {}
+    } catch (err) {
+      console.debug?.("[API] /api/models failed to read hidePaidModels setting:", err);
+    }
 
     // Filter before capability resolution so unavailable/paid rows cannot trigger
     // needless capability work. One request-local snapshot supplies all persisted
