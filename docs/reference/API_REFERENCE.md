@@ -1334,6 +1334,16 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/settings/compression`           | GET/PUT       | Global compression config                                                                                                                                                                                                                                            |
 | `/api/settings/purge-request-history` | POST          | Clear request log rows and local call-log artifacts                                                                                                                                                                                                                  |
 
+**Per-provider account routing (`providerStrategies`).** `PATCH /api/settings` accepts
+`providerStrategies.<providerId>` with `fallbackStrategy`, `stickyRoundRobinLimit` (1-1000) and
+`planWeights` (validated in `src/shared/validation/settingsSchemas.ts`). `planWeights` is a map
+of plan label to capacity weight (`0.01`-`100`) used only by the `expiry-first` strategy: the
+account's urgency score is multiplied by the weight of its plan (matched case-insensitively
+against the connection's `plan` / `chatgptPlanType` / `workspacePlanType`, so `max` also matches
+"Claude Max"). It is opt-in: without an entry every plan weighs `1` and the ordering is exactly
+the weekly-deadline score, and there is no dashboard control for it yet. Example:
+`{"providerStrategies":{"agy":{"fallbackStrategy":"expiry-first","planWeights":{"ultra":4,"pro":2}}}}`.
+
 ### Context & Compression
 
 | Endpoint                               | Method         | Description                                                              |
