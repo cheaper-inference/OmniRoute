@@ -1,12 +1,8 @@
-type JsonRecord = Record<string, unknown>;
+import { asRecord, type JsonRecord } from "@/shared/utils/recordHelpers";
 
 const COMBO_TEST_MAX_TOKENS = 64;
 const STREAMING_MODEL_TEST_MAX_TOKENS = 64;
 const COMBO_TEST_PROMPT = "Reply with exactly: pong";
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function joinNonEmpty(parts: string[]) {
   return parts.filter(Boolean).join("\n").trim();

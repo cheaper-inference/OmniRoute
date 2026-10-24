@@ -157,32 +157,31 @@ export async function POST(request: Request) {
 
 ### QUAL-05 — asRecord/isRecord/toRecord consolidation
 
-**Problem:** 143 divergent `asRecord` definitions, 83 `isRecord`, 80 `toRecord`. Returns `null` in some executor families and `{}` in others. Copy-paste propagates variant errors invisibly.
+**Status:** Phase 1 completed (2026-10-24). Canonical module live; migration tier-by-tier.
 
-**Fix:**
+**Problem:** ~300 divergent local `asRecord` (144 files), `isRecord` (81), `toRecord` (81) definitions. Two semantic splits make blind replacement dangerous: null-fallback vs {}-fallback (48 vs 91 of asRecord copies), and array-exclusion vs array-inclusion (76 vs 5 of isRecord copies).
 
-```ts
-// src/shared/utils/recordHelpers.ts
-export function asRecord<T>(data: T | null | undefined): Partial<T> | null {
-  return data == null ? null : data;
-}
+**Inventory (measured, 2026-10-24):**
 
-export function isRecord(obj: unknown): obj is Record<string, unknown> {
-  return typeof obj === "object" && obj !== null && !Array.isArray(obj);
-}
+| Helper     | Copies    | Semantics split                                                                                                                                       |
+| ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `asRecord` | 144 files | 48 null-fallback, 91 {}-fallback (array-excluded), 3 {}-fallback array-included, 2 JSON-parsing specials                                              |
+| `isRecord` | 81 files  | 76 array-excluded, 5 array-included (tinycmsDomMocks, minimaxMusic, deepinfraHandler, blockedHistory — deliberate container semantics, never migrate) |
+| `toRecord` | 81 files  | 66 {}-fallback, 13 null-fallback, 2 other (1 misnamed function, 1 unrelated)                                                                          |
 
-export function toRecord<T>(data: T): Partial<T> {
-  return data ?? {};
-}
-```
+**Phase 1 (this commit):**
 
-**Migration strategy:**
+- `src/shared/utils/recordHelpers.ts` — canonical `asRecord` ({}-fallback, array-excluded default, `allowArrays` opt-in), `asRecordOrNull` (null-fallback), `isRecord` (array-excluded default, `allowArrays` opt-in). The null/{} split is preserved as two named helpers so callers can no longer confuse them.
+- First migration group (identical {}-fallback array-excluded bodies, verified byte-for-byte): `src/domain/tagRouter.ts`, `src/domain/connectionModelRules.ts`, `src/lib/cloudSync.ts`, `src/lib/a2a/skills/healthReport.ts` (also migrated its local `toNumber` to `@/shared/utils/numeric` per the #7879 lint rule), `src/lib/combos/testHealth.ts`.
+- `tests/unit/record-helpers-semantics.test.ts` — 8 semantics-preservation tests pinning fallback behavior, array handling, and reference pass-through.
 
-1. Export new helpers
-2. Grep all usages, categorize by behavior
-3. Replace gradually, run tests
+**Verification:** consumer suites 35/35 (cloud-sync, connection-model-rules, combo-health ×5), semantics tests 8/8, `typecheck:core` clean, ESLint clean on all touched files.
 
-**Timeline:** Day 8-10
+**Remaining phases (no timeline change — ongoing):**
+
+1. Migrate remaining ~139 {}-fallback asRecord + 66 toRecord copies (mechanical, same shape).
+2. Migrate 48 null-fallback asRecord + 13 null-fallback toRecord copies to `asRecordOrNull` (each callsite requires a null-branch audit).
+3. Migrate 76 array-excluded isRecord copies; leave the 5 array-inclusive local guards in place with a pointer comment.
 
 ---
 

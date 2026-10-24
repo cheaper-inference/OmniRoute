@@ -1,10 +1,6 @@
-type JsonRecord = Record<string, unknown>;
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 export type RoutingTagMatchMode = "any" | "all";
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function normalizeSingleRoutingTag(value: unknown): string | null {
   if (typeof value !== "string") return null;

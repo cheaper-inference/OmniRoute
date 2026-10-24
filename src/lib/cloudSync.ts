@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { isCloudEnabled } from "@/lib/db/settings";
 import { getProviderConnections, updateProviderConnection } from "@/lib/db/providers";
 import { buildConfigSyncEnvelope, toLegacyCloudSyncPayload } from "@/lib/sync/bundle";
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 const configuredCloudUrl = process.env.CLOUD_URL ?? process.env.NEXT_PUBLIC_CLOUD_URL;
 const CLOUD_URL =
@@ -22,15 +23,10 @@ const CLOUD_SYNC_SECRETS_ENABLED = process.env.OMNIROUTE_CLOUD_SYNC_SECRETS === 
 // below. Bringing the v3.9 enforce-by-default switch forward as an explicit
 // opt-out-safe flag: default OFF preserves v3.8.x back-compat for peers that
 // haven't rotated in a shared secret yet (an unsigned payload still passes).
+
 // Set to "true" to reject even an unsigned payload when no local secret is
 // configured — the default flips to enforced in v3.9.
 const CLOUD_SYNC_ENFORCE_SIGNATURE = process.env.OMNIROUTE_CLOUD_SYNC_ENFORCE_SIGNATURE === "true";
-
-type JsonRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
