@@ -1,0 +1,1 @@
+- Signal upstream read failures after streamed content as a sanitized transport error instead of a clean end of stream, preserving pre-first-byte error frames and client cancellation.

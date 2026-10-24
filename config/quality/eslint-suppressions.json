@@ -618,11 +618,6 @@
       "count": 1
     }
   },
-  "open-sse/utils/earlyStreamKeepalive.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "open-sse/utils/error.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 3
