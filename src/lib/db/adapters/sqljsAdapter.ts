@@ -456,6 +456,12 @@ export async function createSqlJsAdapter(filePath: string): Promise<SqliteAdapte
         } catch {}
     },
 
+    flush(): void {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = null;
+      if (dirty) persist();
+    },
+
     close(): void {
       gracefulClose();
     },

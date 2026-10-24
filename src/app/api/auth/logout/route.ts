@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
-import { getSettings, updateSettings } from "@/lib/db/settings";
+import { revokeDashboardSession } from "@/lib/db/dashboardSessions";
 import {
   DASHBOARD_SESSION_COOKIE,
-  REVOKED_SESSIONS_SETTING,
-  addRevokedSession,
-  verifyDashboardSessionToken,
+  readSignedDashboardSessionToken,
 } from "@/shared/utils/dashboardSessionToken";
 import { cookies } from "next/headers";
 
 export const logoutRouteInternals = {
   getCookieStore: cookies,
+  revokeSession: revokeDashboardSession,
 };
 
 export async function POST(request) {
@@ -20,21 +19,16 @@ export async function POST(request) {
   // Clearing the cookie only ends the session in this browser. A copy of the token would stay
   // valid for the rest of its 30 days, so the session id is also revoked on the server.
   try {
-    const payload = await verifyDashboardSessionToken(
-      cookieStore.get(DASHBOARD_SESSION_COOKIE)?.value
-    );
-    if (payload && typeof payload.jti === "string" && typeof payload.exp === "number") {
-      const settings = (await getSettings()) as Record<string, unknown>;
-      await updateSettings({
-        [REVOKED_SESSIONS_SETTING]: addRevokedSession(
-          settings[REVOKED_SESSIONS_SETTING],
-          { jti: payload.jti, exp: payload.exp },
-          Math.floor(Date.now() / 1000)
-        ),
-      });
+    const token = cookieStore.get(DASHBOARD_SESSION_COOKIE)?.value;
+    const payload = await readSignedDashboardSessionToken(token);
+    if (payload && token) {
+      logoutRouteInternals.revokeSession(payload, token);
     }
-  } catch (error) {
-    console.error("[auth] Failed to revoke the signed-out session:", error);
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "Sign-out could not be saved. Please retry." },
+      { status: 503 }
+    );
   }
 
   cookieStore.delete("auth_token");

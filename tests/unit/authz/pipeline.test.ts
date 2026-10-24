@@ -633,6 +633,8 @@ test("runAuthzPipeline refreshes dashboard JWTs near expiry", async () => {
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
   const expiringToken = await new SignJWT({ authenticated: true })
     .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setJti(crypto.randomUUID())
     .setExpirationTime("1h")
     .sign(secret);
 
