@@ -140,7 +140,7 @@ it.each([1, 2, 40, 200])(
       expect(unit).toHaveAttribute("data-availability", "critical");
       expect(unit).toHaveAttribute("data-kind", "cdw");
       expect(unit.style.getPropertyValue("--capsule-color")).toBe("var(--color-error)");
-      expect(unit).toHaveClass("w-[9px]", "h-[32px]", "rounded-full", "overflow-hidden");
+      expect(unit).toHaveClass("w-[9px]", "h-[32px]", "grow-0", "rounded-full", "overflow-hidden");
       expect(unit.parentElement).toHaveClass("flex", "flex-wrap", "gap-x-[4px]", "gap-y-[6px]");
       expect(unit.getAttribute("aria-label")).not.toContain("@example.test");
       expect(unit).not.toHaveAttribute("title");

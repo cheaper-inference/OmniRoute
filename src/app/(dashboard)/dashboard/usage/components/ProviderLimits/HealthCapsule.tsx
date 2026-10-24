@@ -17,7 +17,8 @@ export function capsuleStyle(kind: DisplayKind): CSSProperties {
         : `inset 0 0 0 ${kind === "act" ? 2 : 1}px ${kind === "act" ? color : "color-mix(in srgb, var(--capsule-color) 45%, transparent)"}`,
   } as CSSProperties;
 }
-export const CAPSULE_CLASS = "relative h-[32px] w-[9px] shrink-0 overflow-hidden rounded-full";
+export const CAPSULE_CLASS =
+  "relative h-[32px] w-[9px] grow-0 shrink-0 overflow-hidden rounded-full";
 export function CapsuleWater({
   kind,
   fill,
