@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Codex の有料クレジット",
     "codexPaidCreditsAvailable": "利用可能（残高は未報告）",
     "codexPaidCreditsUnavailable": "利用不可、または支出上限に達しました",
-    "codexPaidCreditsUnlimited": "無制限"
+    "codexPaidCreditsUnlimited": "無制限",
+    "claudeResetCreditDefaultTitle": "Claude 制限のリセット",
+    "confirmRedeemClaudeResetCredit": "引き換えると、対象となる Claude の利用制限が即座にリセットされ、このクレジットは完全に消費されます。",
+    "claudeResetCreditsModalTitle": "Claude リセットクレジット",
+    "claudeResetCreditsModalExplainer": "このアカウントで利用可能な Claude リセットクレジットおよび週次セッションリセット。"
   },
   "modals": {
     "waitingAuth": "承認を待っています",

@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Ресетовање Claude ограничења",
+    "confirmRedeemClaudeResetCredit": "Искоришћавање одмах ресетује одговарајућа Claude ограничења коришћења и трајно троши овај кредит.",
+    "claudeResetCreditsModalTitle": "Claude кредити за ресетовање",
+    "claudeResetCreditsModalExplainer": "Доступни Claude кредити за ресетовање и недељна ресетовања сесија за овај налог."
   },
   "modals": {
     "waitingAuth": "Чекање на овлашћење",

@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Нулиране на лимита на Claude",
+    "confirmRedeemClaudeResetCredit": "Активирането незабавно нулира отговарящите на условията лимити за използване на Claude и окончателно изразходва този кредит.",
+    "claudeResetCreditsModalTitle": "Кредити за нулиране на Claude",
+    "claudeResetCreditsModalExplainer": "Налични кредити за нулиране на Claude и седмични нулирания на сесиите за този акаунт."
   },
   "modals": {
     "waitingAuth": "Изчакване на разрешение",

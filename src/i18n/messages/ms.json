@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Tetapan semula had Claude",
+    "confirmRedeemClaudeResetCredit": "Penebusan akan menetapkan semula had penggunaan Claude yang layak dengan serta-merta dan menggunakan kredit ini secara kekal.",
+    "claudeResetCreditsModalTitle": "Kredit tetapan semula Claude",
+    "claudeResetCreditsModalExplainer": "Kredit tetapan semula Claude yang tersedia dan tetapan semula sesi mingguan untuk akaun ini."
   },
   "modals": {
     "waitingAuth": "Menunggu Keizinan",

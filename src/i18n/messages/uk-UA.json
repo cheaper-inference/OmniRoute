@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Платні кредити Codex",
     "codexPaidCreditsAvailable": "Доступно (баланс не повідомляється)",
     "codexPaidCreditsUnavailable": "Недоступно або досягнуто ліміт витрат",
-    "codexPaidCreditsUnlimited": "Без обмежень"
+    "codexPaidCreditsUnlimited": "Без обмежень",
+    "claudeResetCreditDefaultTitle": "Скидання лімітів Claude",
+    "confirmRedeemClaudeResetCredit": "Активація негайно скидає відповідні ліміти використання Claude та безповоротно витрачає цей кредит.",
+    "claudeResetCreditsModalTitle": "Кредити для скидання Claude",
+    "claudeResetCreditsModalExplainer": "Доступні кредити для скидання Claude та щотижневі скидання сесій для цього облікового запису."
   },
   "modals": {
     "waitingAuth": "Очікування авторизації",

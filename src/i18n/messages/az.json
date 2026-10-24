@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude limitinin sıfırlanması",
+    "confirmRedeemClaudeResetCredit": "İstifadə edilməsi uyğun Claude istifadə limitlərini dərhal sıfırlayır və bu krediti həmişəlik sərf edir.",
+    "claudeResetCreditsModalTitle": "Claude sıfırlama kreditləri",
+    "claudeResetCreditsModalExplainer": "Bu hesab üçün mövcud Claude sıfırlama kreditləri və həftəlik sessiya sıfırlamaları."
   },
   "modals": {
     "waitingAuth": "Avtorizasiya gözlənilir",

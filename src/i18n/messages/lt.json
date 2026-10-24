@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude limito atstatymas",
+    "confirmRedeemClaudeResetCredit": "Panaudojus iš karto atstatomi atitinkami Claude naudojimo limitai ir visam laikui sunaudojamas šis kreditas.",
+    "claudeResetCreditsModalTitle": "Claude atstatymo kreditai",
+    "claudeResetCreditsModalExplainer": "Šiai paskyrai pasiekiami Claude atstatymo kreditai ir savaitiniai seansų atstatymai."
   },
   "modals": {
     "waitingAuth": "Laukiama autorizacijos",

@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Codex 유료 크레딧",
     "codexPaidCreditsAvailable": "사용 가능(잔액 미보고)",
     "codexPaidCreditsUnavailable": "사용 불가 또는 지출 한도 도달",
-    "codexPaidCreditsUnlimited": "무제한"
+    "codexPaidCreditsUnlimited": "무제한",
+    "claudeResetCreditDefaultTitle": "Claude 한도 초기화",
+    "confirmRedeemClaudeResetCredit": "사용 시 대상 Claude 사용 한도가 즉시 초기화되며 이 크레딧은 영구적으로 소진됩니다.",
+    "claudeResetCreditsModalTitle": "Claude 초기화 크레딧",
+    "claudeResetCreditsModalExplainer": "이 계정에서 사용 가능한 Claude 초기화 크레딧 및 주간 세션 초기화입니다."
   },
   "modals": {
     "waitingAuth": "승인을 기다리는 중",

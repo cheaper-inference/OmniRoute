@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude limitu atiestatīšana",
+    "confirmRedeemClaudeResetCredit": "Izmantošana nekavējoties atiestata atbilstošos Claude lietojuma limitus un neatgriezeniski iztērē šo kredītu.",
+    "claudeResetCreditsModalTitle": "Claude atiestatīšanas kredīti",
+    "claudeResetCreditsModalExplainer": "Šim kontam pieejamie Claude atiestatīšanas kredīti un iknedēļas sesiju atiestatīšanas."
   },
   "modals": {
     "waitingAuth": "Tiek gaidīta autorizācija",

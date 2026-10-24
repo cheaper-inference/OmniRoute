@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude'i limiidi lähtestamine",
+    "confirmRedeemClaudeResetCredit": "Lunastamine lähtestab kohe kohaldatavad Claude'i kasutuslimiidid ja kulutab selle krediidi jäädavalt.",
+    "claudeResetCreditsModalTitle": "Claude'i lähtestuskrediidid",
+    "claudeResetCreditsModalExplainer": "Selle konto saadaolevad Claude'i lähtestuskrediidid ja iganädalased seansilähtestused."
   },
   "modals": {
     "waitingAuth": "Autoriseerimise ootel",

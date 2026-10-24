@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Crediti a pagamento Codex",
     "codexPaidCreditsAvailable": "Disponibili (saldo non riportato)",
     "codexPaidCreditsUnavailable": "Non disponibili o limite di spesa raggiunto",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Ripristino limite Claude",
+    "confirmRedeemClaudeResetCredit": "Il riscatto ripristina immediatamente i limiti di utilizzo di Claude idonei e consuma permanentemente questo credito.",
+    "claudeResetCreditsModalTitle": "Crediti di ripristino Claude",
+    "claudeResetCreditsModalExplainer": "Crediti di ripristino Claude disponibili e ripristini settimanali delle sessioni per questo account."
   },
   "modals": {
     "waitingAuth": "In attesa di autorizzazione",

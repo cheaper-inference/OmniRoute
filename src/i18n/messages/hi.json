@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "सशुल्क Codex क्रेडिट",
     "codexPaidCreditsAvailable": "उपलब्ध (शेष राशि की रिपोर्ट नहीं)",
     "codexPaidCreditsUnavailable": "अनुपलब्ध या खर्च सीमा पूरी हो गई",
-    "codexPaidCreditsUnlimited": "असीमित"
+    "codexPaidCreditsUnlimited": "असीमित",
+    "claudeResetCreditDefaultTitle": "Claude सीमा रीसेट",
+    "confirmRedeemClaudeResetCredit": "रिडीम करने पर पात्र Claude उपयोग सीमाएं तुरंत रीसेट हो जाती हैं और यह क्रेडिट स्थायी रूप से खर्च हो जाता है।",
+    "claudeResetCreditsModalTitle": "Claude रीसेट क्रेडिट",
+    "claudeResetCreditsModalExplainer": "इस खाते के लिए उपलब्ध Claude रीसेट क्रेडिट और साप्ताहिक सत्र रीसेट।"
   },
   "modals": {
     "waitingAuth": "प्राधिकरण की प्रतीक्षा की जा रही है",

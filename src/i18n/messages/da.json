@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Nulstilling af Claude-grænse",
+    "confirmRedeemClaudeResetCredit": "Indløsning nulstiller øjeblikkeligt de gældende Claude-brugsgrænser og forbruger denne kredit permanent.",
+    "claudeResetCreditsModalTitle": "Claude-nulstillingskreditter",
+    "claudeResetCreditsModalExplainer": "Tilgængelige Claude-nulstillingskreditter og ugentlige sessionsnulstillinger for denne konto."
   },
   "modals": {
     "waitingAuth": "Venter på autorisation",

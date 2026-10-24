@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Kostenpflichtige Codex-Credits",
     "codexPaidCreditsAvailable": "Verfügbar (Guthaben nicht gemeldet)",
     "codexPaidCreditsUnavailable": "Nicht verfügbar oder Ausgabenlimit erreicht",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude-Limit-Reset",
+    "confirmRedeemClaudeResetCredit": "Das Einlösen setzt die berechtigten Claude-Nutzungslimits sofort zurück und verbraucht dieses Guthaben dauerhaft.",
+    "claudeResetCreditsModalTitle": "Claude-Reset-Guthaben",
+    "claudeResetCreditsModalExplainer": "Verfügbares Claude-Reset-Guthaben und wöchentliche Sitzungs-Resets für dieses Konto."
   },
   "modals": {
     "waitingAuth": "Warten auf Autorisierung",

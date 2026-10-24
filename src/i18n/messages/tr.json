@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Ücretli Codex kredileri",
     "codexPaidCreditsAvailable": "Kullanılabilir (bakiye bildirilmedi)",
     "codexPaidCreditsUnavailable": "Kullanılamıyor veya harcama limitine ulaşıldı",
-    "codexPaidCreditsUnlimited": "Sınırsız"
+    "codexPaidCreditsUnlimited": "Sınırsız",
+    "claudeResetCreditDefaultTitle": "Claude limit sıfırlama",
+    "confirmRedeemClaudeResetCredit": "Kullanmak, uygun Claude kullanım limitlerini anında sıfırlar ve bu krediyi kalıcı olarak tüketir.",
+    "claudeResetCreditsModalTitle": "Claude sıfırlama kredileri",
+    "claudeResetCreditsModalExplainer": "Bu hesap için kullanılabilir Claude sıfırlama kredileri ve haftalık oturum sıfırlamaları."
   },
   "modals": {
     "waitingAuth": "Yetkilendirme bekleniyor",

@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "เครดิต Codex แบบชำระเงิน",
     "codexPaidCreditsAvailable": "พร้อมใช้งาน (ไม่รายงานยอดคงเหลือ)",
     "codexPaidCreditsUnavailable": "ไม่พร้อมใช้งานหรือถึงขีดจำกัดการใช้จ่ายแล้ว",
-    "codexPaidCreditsUnlimited": "ไม่จำกัด"
+    "codexPaidCreditsUnlimited": "ไม่จำกัด",
+    "claudeResetCreditDefaultTitle": "รีเซ็ตขีดจำกัด Claude",
+    "confirmRedeemClaudeResetCredit": "การแลกรับจะรีเซ็ตขีดจำกัดการใช้งาน Claude ที่เข้าเกณฑ์ทันที และจะใช้เครดิตนี้ไปอย่างถาวร",
+    "claudeResetCreditsModalTitle": "เครดิตรีเซ็ต Claude",
+    "claudeResetCreditsModalExplainer": "เครดิตรีเซ็ต Claude ที่มีอยู่และการรีเซ็ตเซสชันรายสัปดาห์สำหรับบัญชีนี้"
   },
   "modals": {
     "waitingAuth": "รอการอนุญาต",

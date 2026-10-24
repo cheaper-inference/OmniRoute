@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Płatne kredyty Codex",
     "codexPaidCreditsAvailable": "Dostępne (saldo nie jest raportowane)",
     "codexPaidCreditsUnavailable": "Niedostępne lub osiągnięto limit wydatków",
-    "codexPaidCreditsUnlimited": "Bez limitu"
+    "codexPaidCreditsUnlimited": "Bez limitu",
+    "claudeResetCreditDefaultTitle": "Reset limitu Claude",
+    "confirmRedeemClaudeResetCredit": "Wykorzystanie natychmiast resetuje kwalifikujące się limity użycia Claude i trwale zużywa ten kredyt.",
+    "claudeResetCreditsModalTitle": "Kredyty resetu Claude",
+    "claudeResetCreditsModalExplainer": "Dostępne kredyty resetu Claude i cotygodniowe resety sesji dla tego konta."
   },
   "modals": {
     "waitingAuth": "Oczekiwanie na autoryzację",

@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude મર્યાદા રીસેટ",
+    "confirmRedeemClaudeResetCredit": "રીડીમ કરવાથી પાત્ર Claude વપરાશ મર્યાદાઓ તરત જ રીસેટ થઈ જાય છે અને આ ક્રેડિટ કાયમી ધોરણે વપરાઈ જાય છે.",
+    "claudeResetCreditsModalTitle": "Claude રીસેટ ક્રેડિટ્સ",
+    "claudeResetCreditsModalExplainer": "આ એકાઉન્ટ માટે ઉપલબ્ધ Claude રીસેટ ક્રેડિટ્સ અને સાપ્તાહિક સત્ર રીસેટ્સ."
   },
   "modals": {
     "waitingAuth": "અધિકૃતતાની રાહ જોઈ રહ્યું છે",

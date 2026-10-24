@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude 限额重置",
+    "confirmRedeemClaudeResetCredit": "兑换将立即重置符合条件的 Claude 使用限额，并永久消耗此点数。",
+    "claudeResetCreditsModalTitle": "Claude 重置点数",
+    "claudeResetCreditsModalExplainer": "此账户可用的 Claude 重置点数和每周会话重置次数。"
   },
   "modals": {
     "waitingAuth": "等待授权",

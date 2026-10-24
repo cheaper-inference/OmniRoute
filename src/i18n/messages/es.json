@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Créditos de pago de Codex",
     "codexPaidCreditsAvailable": "Disponible (saldo no informado)",
     "codexPaidCreditsUnavailable": "No disponible o límite de gasto alcanzado",
-    "codexPaidCreditsUnlimited": "Ilimitado"
+    "codexPaidCreditsUnlimited": "Ilimitado",
+    "claudeResetCreditDefaultTitle": "Restablecimiento del límite de Claude",
+    "confirmRedeemClaudeResetCredit": "Canjear restablece de inmediato los límites de uso de Claude aplicables y consume este crédito de forma permanente.",
+    "claudeResetCreditsModalTitle": "Créditos de restablecimiento de Claude",
+    "claudeResetCreditsModalExplainer": "Créditos de restablecimiento de Claude disponibles y restablecimientos semanales de sesión para esta cuenta."
   },
   "modals": {
     "waitingAuth": "Esperando autorización",

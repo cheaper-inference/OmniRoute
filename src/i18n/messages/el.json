@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Επαναφορά ορίων Claude",
+    "confirmRedeemClaudeResetCredit": "Η εξαργύρωση επαναφέρει άμεσα τα επιλέξιμα όρια χρήσης Claude και καταναλώνει οριστικά αυτήν την πίστωση.",
+    "claudeResetCreditsModalTitle": "Πιστώσεις επαναφοράς Claude",
+    "claudeResetCreditsModalExplainer": "Διαθέσιμες πιστώσεις επαναφοράς Claude και εβδομαδιαίες επαναφορές συνεδριών για αυτόν τον λογαριασμό."
   },
   "modals": {
     "waitingAuth": "Αναμονή εξουσιοδότησης",

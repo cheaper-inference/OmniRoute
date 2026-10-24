@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Athshocrú teorann Claude",
+    "confirmRedeemClaudeResetCredit": "Athshocraíonn fuascailt láithreach na teorainneacha úsáide incháilithe Claude agus ídíonn sé an creidmheas seo go buan.",
+    "claudeResetCreditsModalTitle": "Creidmheasanna athshocraithe Claude",
+    "claudeResetCreditsModalExplainer": "Creidmheasanna athshocraithe Claude agus athshocruithe seisiúin sheachtainiúla atá ar fáil don chuntas seo."
   },
   "modals": {
     "waitingAuth": "Ag fanacht le húdarú",

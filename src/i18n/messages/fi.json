@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude-rajojen nollaus",
+    "confirmRedeemClaudeResetCredit": "Lunastaminen nollaa soveltuvat Claude-käyttörajat välittömästi ja kuluttaa tämän krediitin pysyvästi.",
+    "claudeResetCreditsModalTitle": "Claude-nollauskrediitit",
+    "claudeResetCreditsModalExplainer": "Käytettävissä olevat Claude-nollauskrediitit ja viikoittaiset istunnon nollaukset tälle tilille."
   },
   "modals": {
     "waitingAuth": "Odotetaan valtuutusta",

@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Mga bayad na kredito sa Codex",
     "codexPaidCreditsAvailable": "Magagamit (hindi iniulat ang balanse)",
     "codexPaidCreditsUnavailable": "Hindi magagamit o naabot na ang limitasyon sa paggastos",
-    "codexPaidCreditsUnlimited": "Walang limitasyon"
+    "codexPaidCreditsUnlimited": "Walang limitasyon",
+    "claudeResetCreditDefaultTitle": "Pag-reset ng limit ng Claude",
+    "confirmRedeemClaudeResetCredit": "Ang pag-redeem ay agad na nagre-reset ng mga kwalipikadong limitasyon sa paggamit ng Claude at permanenteng gagamitin ang credit na ito.",
+    "claudeResetCreditsModalTitle": "Mga credit sa pag-reset ng Claude",
+    "claudeResetCreditsModalExplainer": "Mga available na credit sa pag-reset ng Claude at lingguhang pag-reset ng session para sa account na ito."
   },
   "modals": {
     "waitingAuth": "Naghihintay ng Awtorisasyon",

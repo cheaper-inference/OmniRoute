@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Reset limitu Claude",
+    "confirmRedeemClaudeResetCredit": "Uplatnění okamžitě resetuje příslušné limity využití Claude a trvale spotřebuje tento kredit.",
+    "claudeResetCreditsModalTitle": "Kredity na reset Claude",
+    "claudeResetCreditsModalExplainer": "Dostupné kredity na reset Claude a týdenní resety relací pro tento účet."
   },
   "modals": {
     "waitingAuth": "Očekávám Autorizaci",

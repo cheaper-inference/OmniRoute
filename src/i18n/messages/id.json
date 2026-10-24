@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Kredit Codex berbayar",
     "codexPaidCreditsAvailable": "Tersedia (saldo tidak dilaporkan)",
     "codexPaidCreditsUnavailable": "Tidak tersedia atau batas pengeluaran tercapai",
-    "codexPaidCreditsUnlimited": "Tak terbatas"
+    "codexPaidCreditsUnlimited": "Tak terbatas",
+    "claudeResetCreditDefaultTitle": "Reset batas Claude",
+    "confirmRedeemClaudeResetCredit": "Menukarkan akan langsung mereset batas penggunaan Claude yang memenuhi syarat dan menghabiskan kredit ini secara permanen.",
+    "claudeResetCreditsModalTitle": "Kredit reset Claude",
+    "claudeResetCreditsModalExplainer": "Kredit reset Claude dan reset sesi mingguan yang tersedia untuk akun ini."
   },
   "modals": {
     "waitingAuth": "Menunggu Otorisasi",

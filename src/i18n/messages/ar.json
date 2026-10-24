@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "أرصدة Codex المدفوعة",
     "codexPaidCreditsAvailable": "متاح (الرصيد غير مُبلَّغ عنه)",
     "codexPaidCreditsUnavailable": "غير متاح أو تم بلوغ حد الإنفاق",
-    "codexPaidCreditsUnlimited": "غير محدود"
+    "codexPaidCreditsUnlimited": "غير محدود",
+    "claudeResetCreditDefaultTitle": "إعادة تعيين حد Claude",
+    "confirmRedeemClaudeResetCredit": "يؤدي الاسترداد إلى إعادة تعيين حدود استخدام Claude المؤهلة فورًا واستهلاك هذا الرصيد بشكل دائم.",
+    "claudeResetCreditsModalTitle": "أرصدة إعادة تعيين Claude",
+    "claudeResetCreditsModalExplainer": "أرصدة إعادة تعيين Claude المتاحة وعمليات إعادة تعيين الجلسات الأسبوعية لهذا الحساب."
   },
   "modals": {
     "waitingAuth": "في انتظار التصريح",

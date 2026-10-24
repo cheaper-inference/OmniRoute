@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Betaalde Codex-credits",
     "codexPaidCreditsAvailable": "Beschikbaar (saldo niet gemeld)",
     "codexPaidCreditsUnavailable": "Niet beschikbaar of bestedingslimiet bereikt",
-    "codexPaidCreditsUnlimited": "Onbeperkt"
+    "codexPaidCreditsUnlimited": "Onbeperkt",
+    "claudeResetCreditDefaultTitle": "Claude-limietreset",
+    "confirmRedeemClaudeResetCredit": "Inwisselen reset direct de in aanmerking komende Claude-gebruikslimieten en verbruikt dit tegoed definitief.",
+    "claudeResetCreditsModalTitle": "Claude-resetcredits",
+    "claudeResetCreditsModalExplainer": "Beschikbare Claude-resetcredits en wekelijkse sessieresets voor dit account."
   },
   "modals": {
     "waitingAuth": "Wachten op toestemming",

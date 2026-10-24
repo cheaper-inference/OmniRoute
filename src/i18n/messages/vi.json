@@ -10321,7 +10321,11 @@
     "codexPaidCreditsLabel": "Tín dụng trả phí Codex",
     "codexPaidCreditsAvailable": "Khả dụng (không báo cáo số dư)",
     "codexPaidCreditsUnavailable": "Không khả dụng hoặc đã đạt giới hạn chi tiêu",
-    "codexPaidCreditsUnlimited": "Không giới hạn"
+    "codexPaidCreditsUnlimited": "Không giới hạn",
+    "claudeResetCreditDefaultTitle": "Đặt lại giới hạn Claude",
+    "confirmRedeemClaudeResetCredit": "Việc quy đổi sẽ ngay lập tức đặt lại các giới hạn sử dụng Claude đủ điều kiện và tiêu hao vĩnh viễn khoản tín dụng này.",
+    "claudeResetCreditsModalTitle": "Tín dụng đặt lại Claude",
+    "claudeResetCreditsModalExplainer": "Tín dụng đặt lại Claude khả dụng và lượt đặt lại phiên hàng tuần cho tài khoản này."
   },
   "modals": {
     "waitingAuth": "Đang chờ ủy quyền",

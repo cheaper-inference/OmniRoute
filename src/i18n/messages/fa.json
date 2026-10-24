@@ -10291,7 +10291,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "بازنشانی محدودیت Claude",
+    "confirmRedeemClaudeResetCredit": "استفاده از این اعتبار، بلافاصله محدودیت‌های واجد شرایط استفاده از Claude را بازنشانی کرده و این اعتبار را به‌طور دائم مصرف می‌کند.",
+    "claudeResetCreditsModalTitle": "اعتبارهای بازنشانی Claude",
+    "claudeResetCreditsModalExplainer": "اعتبارهای در دسترس بازنشانی Claude و بازنشانی‌های هفتگی نشست برای این حساب کاربری."
   },
   "modals": {
     "waitingAuth": "در انتظار تأیید مجوز",

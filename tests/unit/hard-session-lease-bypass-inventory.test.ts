@@ -282,6 +282,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // catalog, the export selection and the import match set. Read-only state, no dispatch.
     "src/lib/transfer/providerTransfer.ts": 1,
     "src/lib/usage/callLogs.ts": 1,
+    // #14728: Claude sibling of codexResetCredits.ts, same shape —
+    // isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an ACTIVE
+    // exclusive lease defers list/redeem (409 exclusive_lease_active).
+    "src/lib/usage/claudeResetCredits.ts": 1,
     "src/lib/usage/codexResetCredits.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
@@ -345,6 +349,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "src/lib/providers/volcPlanAutoSyncBackfill.ts",
         "src/lib/providers/volcenginePlanBinding.ts",
         "src/lib/services/quotaAutoPing.ts",
+        "src/lib/usage/claudeResetCredits.ts",
         "src/lib/usage/codexResetCredits.ts",
         "src/lib/usage/glmResetCards.ts",
         "src/lib/usage/grokResetCredits.ts",
@@ -456,6 +461,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/lib/modelValidation/runner.ts",
     "src/lib/services/quotaAutoPing.ts",
     "src/lib/services/quotaAutoPingManual.ts",
+    "src/lib/usage/claudeResetCredits.ts",
     "src/lib/usage/codexResetCredits.ts",
     "src/lib/usage/glmResetCards.ts",
     "src/lib/usage/grokResetCredits.ts",
