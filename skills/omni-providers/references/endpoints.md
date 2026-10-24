@@ -28,6 +28,7 @@
 - [`DELETE /api/provider-nodes/{id}`](#delete-apiprovider-nodesid)
 - [`POST /api/provider-nodes/validate`](#post-apiprovider-nodesvalidate)
 - [`GET /api/provider-models`](#get-apiprovider-models)
+- [`POST /api/provider-models`](#post-apiprovider-models)
 - [`PUT /api/provider-models`](#put-apiprovider-models)
 - [`POST /api/provider-models/validate-and-add`](#post-apiprovider-modelsvalidate-and-add)
 - [`GET /api/providers/{id}/cc-alias`](#get-apiprovidersidcc-alias)
@@ -339,6 +340,19 @@ curl http://localhost:20128/api/provider-models \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
+### POST /api/provider-models
+
+Add a custom model
+
+Requires management authentication. On a compatible provider node the stored modelId is the bare upstream id: a leading copy of the node's prefix is stripped (and canonical providers' slashed ids pass through untouched). The response echoes the stored id.
+
+```bash
+curl -X POST http://localhost:20128/api/provider-models \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ### PUT /api/provider-models
 
 Update model metadata or per-model overrides
@@ -356,7 +370,7 @@ curl -X PUT http://localhost:20128/api/provider-models \
 
 Validate and add a custom chat model on one exact connection
 
-Always requires management authentication and explicit inference consent. Runs bounded generation, streamed synthetic tool-call and continuation proofs through the chat core; no real tool is executed. Configuration changes, alternate connections, retries and proxy executor fallback fail closed. Only after all proofs pass is a previously absent custom model inserted and read back atomically. Every response is Cache-Control no-store. Requests can incur upstream charges. The validation receipt is informational, not redeemable. Initial strict support is limited to native Base/Default execution for OpenAI and canonical OpenAI-compatible nodes using a single Bearer credential and an exact JSON model field. Specialized executors and other providers are unsupported; session pools, extra-key rotation, HTTP redirects and credential refresh are refused. Active runtime plugins also fail closed; plugin policies are not silently skipped.
+Always requires management authentication and explicit inference consent. Runs bounded generation, streamed synthetic tool-call and continuation proofs through the chat core; no real tool is executed. Configuration changes, alternate connections, retries and proxy executor fallback fail closed. Only after all proofs pass is a previously absent custom model inserted and read back atomically. Every response is Cache-Control no-store. Requests can incur upstream charges. The validation receipt is informational, not redeemable. Initial strict support is limited to native Base/Default execution for OpenAI and canonical OpenAI-compatible nodes using a single Bearer credential and an exact JSON model field. Specialized executors and other providers are unsupported; session pools, extra-key rotation, HTTP redirects and credential refresh are refused. Active runtime plugins also fail closed; plugin policies are not silently skipped. On a compatible provider node the inserted modelId is stored as the bare upstream id (a leading copy of the node's prefix is stripped).
 
 ```bash
 curl -X POST http://localhost:20128/api/provider-models/validate-and-add \
