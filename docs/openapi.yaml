@@ -2779,6 +2779,132 @@ paths:
         "401":
           description: Authentication required
 
+  /api/keys/import:
+    post:
+      tags: [API Keys]
+      summary: Import a caller-supplied API key without replacing existing keys
+      description: |
+        Uses the same management authentication as POST /api/keys: dashboard session,
+        local CLI credential, manage/admin-scoped API key, or an admin oma_ access token.
+        read/write oma_ tokens are insufficient. When login is disabled, inference-only
+        imports may be anonymous, but importing manage/admin scopes requires a real
+        management credential, including retries against an existing management-scoped key.
+
+        Accepts a 32–256 character ASCII key beginning with sk-, followed only by
+        A–Z, a–z, 0–9, underscore or hyphen. No machine-id or CRC validation is performed.
+        Whitespace is rejected, never trimmed. Configured environment API keys and the
+        internal self-loop credential cannot be imported because they bypass row policy.
+
+        An explicit existing id with the same key hash returns 200 and the existing
+        stored policy without mutation; requested name/policy changes are ignored.
+        An existing id with a different value, or the same value at another id, returns
+        409 without disclosing another id. Without id, a UUID is generated and duplicate
+        values return 409, not 200. New imports return 201. No rekey is performed.
+
+        Identity checks and the complete policy insert run in one synchronous SQLite
+        IMMEDIATE transaction. Uses create-key defaults and scope normalization (adds
+        self:usage and removes duplicates). Unknown fields, including isActive, are
+        ignored just as on create; change active state through the existing PATCH route.
+        No settings, providers, combos or session state is imported. This does not change
+        the operator-only import-json restore permissions. Cloud sync is best-effort and
+        asynchronous for new imports only. Secrets use enc:v1 encryption at rest when
+        storage encryption is configured; otherwise upstream plaintext storage applies.
+        Responses contain only id/name, a masked key and whitelisted stored policy fields,
+        never the full secret, hash, key prefix column or machine identifier.
+      security:
+        - ManagementSessionAuth: []
+        - BearerAuth: []
+        - {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, key]
+              description: |
+                Policy fields and refinements match createKeySchema. modelAccessMode all
+                requires empty/omitted allowedModels; lease:exclusive requires connections.
+                Without a mode, nonempty allowedModels implies restricted, otherwise all.
+                Omitted combos default to ["combo/*"]; explicit [] denies all combos.
+                Zero/null usage limits mean no cap for that period. Unknown fields ignored.
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                key:
+                  type: string
+                  minLength: 32
+                  maxLength: 256
+                  pattern: '^sk-[A-Za-z0-9_-]+$(?![\s\S])'
+                  writeOnly: true
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                modelAccessMode:
+                  type: string
+                  enum: [all, restricted]
+                allowedModels:
+                  type: array
+                  maxItems: 1000
+                  items: { type: string, minLength: 1 }
+                allowedCombos:
+                  type: array
+                  maxItems: 500
+                  items: { type: string, minLength: 1, maxLength: 200 }
+                allowedConnections:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items: { type: string, format: uuid }
+                scopes:
+                  type: array
+                  maxItems: 32
+                  items: { type: string, minLength: 1, maxLength: 64 }
+                noLog: { type: boolean, default: false }
+                allowUsageCommand: { type: boolean, default: false }
+                usageLimitEnabled: { type: boolean, default: false }
+                dailyUsageLimitUsd:
+                  type: [number, string, "null"]
+                  description: Nonnegative number or numeric string; zero/null clears the cap
+                weeklyUsageLimitUsd:
+                  type: [number, string, "null"]
+                  description: Nonnegative number or numeric string; zero/null clears the cap
+                chaosModeEnabled: { type: boolean, default: false }
+                expiresAt:
+                  type: [string, "null"]
+                  format: date-time
+      responses:
+        "200":
+          description: |
+            Idempotent retry, no mutation. Returns existing id, name, masked key and stored
+            policy (model/connection/combo access, scopes, active/banned/revoked/expiry state,
+            logging, rate/usage/session/IP limits, endpoints, proxy, stream/cache/compression,
+            auto-combo/catalog/forced-model and Codex service policy). Never returns key hash.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportedApiKey"
+        "201":
+          description: New fully configured key imported; same masked response fields as 200
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportedApiKey"
+        "400":
+          description: Malformed JSON or invalid key, UUID, name or create-policy fields/refinements
+        "401":
+          description: Missing required credential or invalid/expired oma_ access token
+        "403":
+          description: Invalid management API key or insufficient API-key/access-token scope
+        "409":
+          description: ID/value conflict, duplicate value or reserved credential; no other ID disclosed
+        "500":
+          description: Sanitized import/storage failure; transaction rolls back on insertion failure
+        "503":
+          description: Management authentication backend temporarily unavailable
+
   /api/keys/{id}:
     get:
       tags: [API Keys]
@@ -15163,6 +15289,52 @@ components:
             requestId: 0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
 
   schemas:
+    ImportedApiKey:
+      type: object
+      additionalProperties: false
+      required: [id, name, key, scopes, modelAccessMode, isActive]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        key: { type: string, description: Masked key only; never a usable bearer }
+        modelAccessMode: { type: string, enum: [all, restricted] }
+        allowedModels: { type: array, items: { type: string } }
+        blockedModels: { type: array, items: { type: string } }
+        allowedCombos: { type: array, items: { type: string } }
+        allowedConnections: { type: array, items: { type: string } }
+        allowedQuotas: { type: array, items: { type: string } }
+        scopes: { type: array, items: { type: string } }
+        noLog: { type: boolean }
+        autoResolve: { type: boolean }
+        isActive: { type: boolean }
+        isBanned: { type: boolean }
+        revokedAt: { type: [string, "null"] }
+        expiresAt: { type: [string, "null"] }
+        accessSchedule: { type: [object, "null"] }
+        maxRequestsPerDay: { type: [integer, "null"] }
+        maxRequestsPerMinute: { type: [integer, "null"] }
+        throttleDelayMs: { type: [integer, "null"] }
+        rateLimits: { type: [array, "null"], items: { type: object } }
+        maxSessions: { type: integer }
+        ipAllowlist:
+          description: Stored IP allowlist representation
+          type: [string, array, "null"]
+          items: { type: string }
+        proxyId: { type: [string, "null"] }
+        allowedEndpoints: { type: array, items: { type: string } }
+        streamDefaultMode: { type: string, enum: [legacy, json] }
+        cacheDefaultMode: { type: string, enum: [legacy, bypass] }
+        codexServiceMode: { type: string, enum: [inherit, default, priority, flex] }
+        disableNonPublicModels: { type: boolean }
+        allowUsageCommand: { type: boolean }
+        usageLimitEnabled: { type: boolean }
+        dailyUsageLimitUsd: { type: [number, "null"] }
+        weeklyUsageLimitUsd: { type: [number, "null"] }
+        chaosModeEnabled: { type: boolean }
+        compressionEnabled: { type: boolean }
+        allowAutoCombos: { type: boolean }
+        catalogScope: { type: string, enum: [all, combos, models] }
+        forcedModel: { type: [string, "null"] }
     ElevenLabsSoundGeneration:
       type: object
       additionalProperties: true

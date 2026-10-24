@@ -1,0 +1,1 @@
+- Add `POST /api/keys/import` to register caller-supplied API keys with create-key policies, atomic duplicate checks, non-mutating UUID retries, management authentication, and masked responses without restoring unrelated configuration ([#18010](https://github.com/cheaper-inference/OmniRoute/pull/18010)) — thanks @xiaoyaner0201.

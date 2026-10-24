@@ -29,6 +29,15 @@ function dashboardExample({ path, method }: Operation, baseUrl: string): string[
 }
 
 function bearerExample({ path, method }: Operation, baseUrl: string): string[] {
+  if (path === "/api/keys/import" && method === "POST") {
+    return [
+      ': "${IMPORTED_API_KEY:?Set the caller-supplied sk- key to import}"',
+      `curl -X POST ${baseUrl}${path} \\`,
+      '  -H "Authorization: Bearer <YOUR_TOKEN>" \\',
+      '  -H "Content-Type: application/json" \\',
+      '  -d "{\\"name\\":\\"Imported key\\",\\"key\\":\\"$IMPORTED_API_KEY\\"}"',
+    ];
+  }
   const curlMethod = method === "GET" ? "" : `-X ${method} `;
   const hasJsonBody = ["POST", "PUT", "PATCH"].includes(method);
   return [

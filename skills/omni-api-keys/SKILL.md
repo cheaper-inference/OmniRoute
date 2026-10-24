@@ -34,6 +34,47 @@ curl -X POST http://localhost:20128/api/keys \
   -d '{}'
 ```
 
+### POST /api/keys/import
+
+Import a caller-supplied API key without replacing existing keys
+
+Uses the same management authentication as POST /api/keys: dashboard session,
+local CLI credential, manage/admin-scoped API key, or an admin oma_ access token.
+read/write oma_ tokens are insufficient. When login is disabled, inference-only
+imports may be anonymous, but importing manage/admin scopes requires a real
+management credential, including retries against an existing management-scoped key.
+
+Accepts a 32–256 character ASCII key beginning with sk-, followed only by
+A–Z, a–z, 0–9, underscore or hyphen. No machine-id or CRC validation is performed.
+Whitespace is rejected, never trimmed. Configured environment API keys and the
+internal self-loop credential cannot be imported because they bypass row policy.
+
+An explicit existing id with the same key hash returns 200 and the existing
+stored policy without mutation; requested name/policy changes are ignored.
+An existing id with a different value, or the same value at another id, returns
+409 without disclosing another id. Without id, a UUID is generated and duplicate
+values return 409, not 200. New imports return 201. No rekey is performed.
+
+Identity checks and the complete policy insert run in one synchronous SQLite
+IMMEDIATE transaction. Uses create-key defaults and scope normalization (adds
+self:usage and removes duplicates). Unknown fields, including isActive, are
+ignored just as on create; change active state through the existing PATCH route.
+No settings, providers, combos or session state is imported. This does not change
+the operator-only import-json restore permissions. Cloud sync is best-effort and
+asynchronous for new imports only. Secrets use enc:v1 encryption at rest when
+storage encryption is configured; otherwise upstream plaintext storage applies.
+Responses contain only id/name, a masked key and whitelisted stored policy fields,
+never the full secret, hash, key prefix column or machine identifier.
+
+
+```bash
+: "${IMPORTED_API_KEY:?Set the caller-supplied sk- key to import}"
+curl -X POST http://localhost:20128/api/keys/import \
+  -H "Authorization: Bearer <YOUR_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d "{\"name\":\"Imported key\",\"key\":\"$IMPORTED_API_KEY\"}"
+```
+
 ### GET /api/keys/{id}
 
 Get API key
