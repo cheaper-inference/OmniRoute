@@ -4,6 +4,7 @@ import { getModelTargetFormat } from "../config/providerModels.ts";
 import { isResponsesEndpointPath } from "../utils/responsesEndpoint.ts";
 import { chatRequestToXaiResponses } from "@/lib/providers/xai/translators/openai-chat.ts";
 import { capXaiRequestHistory } from "../services/xaiMessageCap.ts";
+import { flattenNamespaceToolName } from "../translator/request/openai-responses/namespaceFlatten.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -33,6 +34,164 @@ const EFFORT_SUFFIXES = ["low", "medium", "high", "xhigh"] as const;
 
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
+
+/**
+ * Tool `type` values xAI's native `/v1/responses` deserializer accepts. Anything
+ * else makes xAI reject the WHOLE request with
+ * `422 tools[N].type: unknown variant ...` (e.g. Codex CLI's MCP `namespace` groups).
+ */
+const XAI_RESPONSES_TOOL_TYPES: ReadonlySet<string> = new Set([
+  "function",
+  "web_search",
+  "x_search",
+  "image_generation",
+  "collections_search",
+  "file_search",
+  "code_execution",
+  "code_interpreter",
+  "mcp",
+  "shell",
+  "tool_search",
+]);
+
+/** One Responses function tool `{type:"function", name, description?, parameters?, strict?}`. */
+function toXaiFunctionTool(value: unknown, nameOverride?: string): JsonRecord | null {
+  const tool = asRecord(value);
+  if (!tool) return null;
+  // Accept both the flat Responses shape and the nested Chat `{function:{...}}` shape.
+  const fn = asRecord(tool.function) ?? tool;
+  const rawName = typeof fn.name === "string" ? fn.name.trim() : "";
+  const name = nameOverride ?? rawName;
+  if (!name) return null;
+  const out: JsonRecord = { type: "function", name };
+  if (typeof fn.description === "string") out.description = fn.description;
+  if (fn.parameters !== undefined) out.parameters = fn.parameters;
+  if (typeof fn.strict === "boolean") out.strict = fn.strict;
+  return out;
+}
+
+/**
+ * Make a Responses `tools[]` array acceptable to xAI:
+ *   - `namespace` groups (Codex MCP servers) are flattened into plain function tools
+ *     with the `mcp__<server>__<tool>` qualified name (same scheme as the Chat path,
+ *     which Codex still resolves for MCP calls);
+ *   - nested Chat-shaped function tools are flattened;
+ *   - `custom` (freeform) tools become a single-string-arg function tool;
+ *   - any other type xAI does not know is dropped instead of failing the request.
+ */
+export function normalizeXaiResponsesTools(tools: unknown): unknown[] | undefined {
+  if (!Array.isArray(tools)) return undefined;
+  const out: unknown[] = [];
+  const seen = new Set<string>();
+  const pushFn = (tool: JsonRecord | null) => {
+    if (!tool) return;
+    const name = String(tool.name);
+    if (seen.has(name)) return;
+    seen.add(name);
+    out.push(tool);
+  };
+
+  for (const value of tools) {
+    const tool = asRecord(value);
+    if (!tool) continue;
+    const type = typeof tool.type === "string" ? tool.type : "function";
+
+    if (type === "namespace") {
+      const nsName = typeof tool.name === "string" ? tool.name : "";
+      for (const child of Array.isArray(tool.tools) ? tool.tools : []) {
+        const childRecord = asRecord(child);
+        if (!childRecord) continue;
+        const childFn = asRecord(childRecord.function) ?? childRecord;
+        const leaf = typeof childFn.name === "string" ? childFn.name.trim() : "";
+        if (!leaf) continue;
+        pushFn(toXaiFunctionTool(childRecord, flattenNamespaceToolName(nsName, leaf)));
+      }
+      continue;
+    }
+
+    if (type === "function") {
+      pushFn(toXaiFunctionTool(tool));
+      continue;
+    }
+
+    if (type === "custom") {
+      const name = typeof tool.name === "string" ? tool.name.trim() : "";
+      if (!name) continue;
+      pushFn({
+        type: "function",
+        name,
+        ...(typeof tool.description === "string" ? { description: tool.description } : {}),
+        parameters: {
+          type: "object",
+          properties: { input: { type: "string" } },
+          required: ["input"],
+        },
+      });
+      continue;
+    }
+
+    if (type === "web_search") {
+      out.push(toXaiWebSearchTool(tool));
+      continue;
+    }
+
+    if (XAI_RESPONSES_TOOL_TYPES.has(type)) out.push(tool);
+    // else: unsupported hosted tool type for xAI — drop it rather than 422 the request.
+  }
+
+  return out;
+}
+
+/**
+ * OpenAI/Codex `web_search` carries arguments xAI rejects with
+ * `400 Argument not supported: external_web_access`. Keep only what xAI understands.
+ */
+function toXaiWebSearchTool(tool: JsonRecord): JsonRecord {
+  const out: JsonRecord = { ...tool };
+  delete out.external_web_access;
+  delete out.search_context_size;
+  const filters = asRecord(out.filters);
+  if (filters) {
+    delete out.filters;
+    if (Array.isArray(filters.allowed_domains) && out.allowed_domains === undefined) {
+      out.allowed_domains = filters.allowed_domains;
+    }
+    if (Array.isArray(filters.blocked_domains) && out.excluded_domains === undefined) {
+      out.excluded_domains = filters.blocked_domains;
+    }
+  }
+  return out;
+}
+
+/**
+ * xAI accepts only Responses content part types (`input_text`, `output_text`,
+ * `input_image`, `input_file`, `refusal`); a Chat-style `text` / `image_url` part makes
+ * it 422 the whole request (`content[0]: unknown content type "text"`).
+ */
+export function normalizeXaiResponsesInput(input: unknown): unknown {
+  if (!Array.isArray(input)) return input;
+  return input.map((value) => {
+    const item = asRecord(value);
+    if (!item || !Array.isArray(item.content)) return value;
+    const textType = item.role === "assistant" ? "output_text" : "input_text";
+    let changed = false;
+    const content = item.content.map((partValue) => {
+      const part = asRecord(partValue);
+      if (!part) return partValue;
+      if (part.type === "text") {
+        changed = true;
+        return { ...part, type: textType };
+      }
+      if (part.type === "image_url") {
+        changed = true;
+        const image = asRecord(part.image_url);
+        return { type: "input_image", image_url: image ? image.url : part.image_url };
+      }
+      return partValue;
+    });
+    return changed ? { ...item, content } : value;
+  });
 }
 
 /**
@@ -156,6 +315,20 @@ export class XaiExecutor extends BaseExecutor {
           delete out.response_format;
         }
       }
+      // xAI rejects the whole request on any tool type it does not know (e.g. Codex's
+      // MCP `namespace` groups → 422 `tools[N].type: unknown variant namespace`).
+      if (Array.isArray(out.tools)) {
+        const tools = normalizeXaiResponsesTools(out.tools) ?? [];
+        if (tools.length > 0) out.tools = tools;
+        else delete out.tools;
+      }
+      // Codex side requests (titles, compaction) send `tool_choice` with no tools; xAI
+      // rejects that with 400 "A tool_choice was set on the request but no tools were specified".
+      if (!Array.isArray(out.tools) || out.tools.length === 0) {
+        delete out.tool_choice;
+        delete out.parallel_tool_calls;
+      }
+      if (Array.isArray(out.input)) out.input = normalizeXaiResponsesInput(out.input);
       // Keep model id from the routed request when the translator left it empty.
       if (out.model == null && model) out.model = model;
       // After chat→Responses expansion, `input` is what xAI counts toward 800.

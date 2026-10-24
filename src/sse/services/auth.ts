@@ -72,6 +72,7 @@ import {
 } from "@omniroute/open-sse/services/antigravityFamilyCooldown.ts";
 import { markQuotaPreflightAccountUnavailable } from "./quotaPreflightUnavailable.ts";
 import { buildNoAuthModelCooldown, pauseCooldownIfPaused } from "./noAuthModelCooldown.ts";
+import { isRequestShapeError } from "./requestShape.ts";
 import { getCreditsMode } from "@omniroute/open-sse/services/antigravityCredits.ts";
 import { preferAntigravityConnectionsWithStoredProject } from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
 import {
@@ -2582,6 +2583,18 @@ export async function markAccountUnavailable(
 
     const resourceBypass = getResource404Bypass(status, errorText, connectionId, log);
     if (resourceBypass) return resourceBypass;
+
+    // The upstream rejected the SHAPE of this request (schema / unsupported argument),
+    // not the account. Cooling the connection down would fail every other client routed
+    // to it (often the provider's only account) with this stale error. Let the caller
+    // fall back, but keep the connection available.
+    if (isRequestShapeError(status, errorText, provider)) {
+      log.info(
+        "AUTH",
+        `${connectionId.slice(0, 8)} request-shape ${status} — no cooldown: ${String(errorText).slice(0, 120)}`
+      );
+      return { shouldFallback: true, cooldownMs: 0 };
+    }
 
     // Read current connection to get backoffLevel
     const connectionsRaw = await getProviderConnections({ provider });
