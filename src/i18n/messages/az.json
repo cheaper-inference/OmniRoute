@@ -12686,7 +12686,8 @@
     "avgTtft": "Ortalama TTFT",
     "avgTotal": "Ortalama ümumi",
     "requestTelemetry": "Sorğu telemetriyası",
-    "requestTelemetryDescription": "7 mərhələli konveyer bölgüsü (son 5 dəqiqə)"
+    "requestTelemetryDescription": "7 mərhələli konveyer bölgüsü (son 5 dəqiqə)",
+    "windowSince": "{date} tarixindən"
   },
   "relay": {
     "title": "Serverless Relay proksiləri",

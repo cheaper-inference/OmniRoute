@@ -12686,7 +12686,8 @@
     "avgTtft": "Ort. TTFT",
     "avgTotal": "Ort. Toplam",
     "requestTelemetry": "İstek Telemetrisi",
-    "requestTelemetryDescription": "7 aşamalı işlem hattı dağılımı (son 5 dakika)"
+    "requestTelemetryDescription": "7 aşamalı işlem hattı dağılımı (son 5 dakika)",
+    "windowSince": "{date} tarihinden beri"
   },
   "relay": {
     "title": "Serverless Relay Proxy'leri",

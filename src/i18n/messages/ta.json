@@ -12686,7 +12686,8 @@
     "avgTtft": "சராசரி TTFT",
     "avgTotal": "சராசரி மொத்தம்",
     "requestTelemetry": "கோரிக்கை டெலிமெட்ரி",
-    "requestTelemetryDescription": "7-கட்ட பைப்லைன் விவரப்பிரிப்பு (கடைசி 5 நிமிடங்கள்)"
+    "requestTelemetryDescription": "7-கட்ட பைப்லைன் விவரப்பிரிப்பு (கடைசி 5 நிமிடங்கள்)",
+    "windowSince": "{date} முதல்"
   },
   "relay": {
     "title": "சர்வர்லெஸ் ரிலே ப்ராக்ஸிகள்",

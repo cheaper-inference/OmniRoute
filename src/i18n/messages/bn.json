@@ -12686,7 +12686,8 @@
     "avgTtft": "গড় TTFT",
     "avgTotal": "গড় মোট",
     "requestTelemetry": "অনুরোধ টেলিমেট্রি",
-    "requestTelemetryDescription": "৭-ধাপের পাইপলাইন ব্রেকডাউন (শেষ ৫ মিনিট)"
+    "requestTelemetryDescription": "৭-ধাপের পাইপলাইন ব্রেকডাউন (শেষ ৫ মিনিট)",
+    "windowSince": "{date} থেকে"
   },
   "relay": {
     "title": "সার্ভারলেস রিলে প্রক্সি",

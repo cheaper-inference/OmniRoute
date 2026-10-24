@@ -12686,7 +12686,8 @@
     "avgTtft": "TTFT ממוצע",
     "avgTotal": "סה\"כ ממוצע",
     "requestTelemetry": "טלמטריית בקשות",
-    "requestTelemetryDescription": "פילוח צינור עיבוד בן 7 שלבים (5 הדקות האחרונות)"
+    "requestTelemetryDescription": "פילוח צינור עיבוד בן 7 שלבים (5 הדקות האחרונות)",
+    "windowSince": "מאז {date}"
   },
   "relay": {
     "title": "פרוקסי Relay ללא שרת",

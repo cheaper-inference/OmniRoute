@@ -12686,7 +12686,8 @@
     "avgTtft": "සාමාන්ය TTFT",
     "avgTotal": "සාමාන්ය සමස්තය",
     "requestTelemetry": "ඉල්ලීම් ටෙලිමෙට්රිය",
-    "requestTelemetryDescription": "අදියර 7ක නල මාර්ග විශ්ලේෂණය (පසුගිය මිනිත්තු 5)"
+    "requestTelemetryDescription": "අදියර 7ක නල මාර්ග විශ්ලේෂණය (පසුගිය මිනිත්තු 5)",
+    "windowSince": "{date} සිට"
   },
   "relay": {
     "title": "සර්වර් රහිත රිලේ ප්රොක්සි",

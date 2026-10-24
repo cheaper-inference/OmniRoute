@@ -12686,7 +12686,8 @@
     "avgTtft": "Vidējais TTFT",
     "avgTotal": "Vidējais kopējais laiks",
     "requestTelemetry": "Pieprasījumu telemetrija",
-    "requestTelemetryDescription": "7 fāžu konveijera sadalījums (pēdējās 5 minūtes)"
+    "requestTelemetryDescription": "7 fāžu konveijera sadalījums (pēdējās 5 minūtes)",
+    "windowSince": "Kopš {date}"
   },
   "relay": {
     "title": "Bezserveru releju starpniekserveri",

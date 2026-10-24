@@ -12686,7 +12686,8 @@
     "avgTtft": "Среднее TTFT",
     "avgTotal": "Среднее общее",
     "requestTelemetry": "Телеметрия запросов",
-    "requestTelemetryDescription": "Детализация 7-фазного конвейера (за последние 5 минут)"
+    "requestTelemetryDescription": "Детализация 7-фазного конвейера (за последние 5 минут)",
+    "windowSince": "С {date}"
   },
   "relay": {
     "title": "Бессерверные прокси-ретрансляторы",

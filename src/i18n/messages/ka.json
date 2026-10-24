@@ -12686,7 +12686,8 @@
     "avgTtft": "საშ. TTFT",
     "avgTotal": "საშ. ჯამური დრო",
     "requestTelemetry": "მოთხოვნების ტელემეტრია",
-    "requestTelemetryDescription": "7-ფაზიანი პროცესის დეტალიზაცია (ბოლო 5 წუთი)"
+    "requestTelemetryDescription": "7-ფაზიანი პროცესის დეტალიზაცია (ბოლო 5 წუთი)",
+    "windowSince": "{date}-დან"
   },
   "relay": {
     "title": "უსერვერო რელე-პროქსიები",

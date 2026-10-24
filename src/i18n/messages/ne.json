@@ -12686,7 +12686,8 @@
     "avgTtft": "औसत TTFT",
     "avgTotal": "औसत कुल समय",
     "requestTelemetry": "अनुरोध टेलिमेट्री",
-    "requestTelemetryDescription": "७-चरणीय पाइपलाइनको विस्तृत विवरण (पछिल्ला ५ मिनेट)"
+    "requestTelemetryDescription": "७-चरणीय पाइपलाइनको विस्तृत विवरण (पछिल्ला ५ मिनेट)",
+    "windowSince": "{date} देखि"
   },
   "relay": {
     "title": "सर्भरलेस रिले प्रोक्सीहरू",

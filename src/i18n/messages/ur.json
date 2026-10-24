@@ -12686,7 +12686,8 @@
     "avgTtft": "اوسط TTFT",
     "avgTotal": "اوسط کل",
     "requestTelemetry": "درخواست ٹیلی میٹری",
-    "requestTelemetryDescription": "7-مرحلہ پائپ لائن کی تفصیلات (آخری 5 منٹ)"
+    "requestTelemetryDescription": "7-مرحلہ پائپ لائن کی تفصیلات (آخری 5 منٹ)",
+    "windowSince": "{date} سے"
   },
   "relay": {
     "title": "سرور لیس ریلے پراکسیز",

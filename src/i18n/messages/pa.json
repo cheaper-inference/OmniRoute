@@ -12686,7 +12686,8 @@
     "avgTtft": "ਔਸਤ TTFT",
     "avgTotal": "ਔਸਤ ਕੁੱਲ",
     "requestTelemetry": "ਬੇਨਤੀ ਟੈਲੀਮੈਟਰੀ",
-    "requestTelemetryDescription": "7-ਪੜਾਅ ਪਾਈਪਲਾਈਨ ਵੇਰਵਾ (ਪਿਛਲੇ 5 ਮਿੰਟ)"
+    "requestTelemetryDescription": "7-ਪੜਾਅ ਪਾਈਪਲਾਈਨ ਵੇਰਵਾ (ਪਿਛਲੇ 5 ਮਿੰਟ)",
+    "windowSince": "{date} ਤੋਂ"
   },
   "relay": {
     "title": "ਸਰਵਰਲੈੱਸ ਰੀਲੇ ਪ੍ਰਾਕਸੀ",

@@ -12686,7 +12686,8 @@
     "avgTtft": "Сер. TTFT",
     "avgTotal": "Сер. загальний час",
     "requestTelemetry": "Телеметрія запитів",
-    "requestTelemetryDescription": "Розподіл 7-фазного конвеєра (останні 5 хвилин)"
+    "requestTelemetryDescription": "Розподіл 7-фазного конвеєра (останні 5 хвилин)",
+    "windowSince": "Від {date}"
   },
   "relay": {
     "title": "Безсерверні Relay-проксі",

@@ -12686,7 +12686,8 @@
     "avgTtft": "Avg. TTFT",
     "avgTotal": "Avg. Gesamt",
     "requestTelemetry": "Anfragetelemetrie",
-    "requestTelemetryDescription": "Aufschlüsselung der 7-Phasen-Pipeline (letzte 5 Minuten)"
+    "requestTelemetryDescription": "Aufschlüsselung der 7-Phasen-Pipeline (letzte 5 Minuten)",
+    "windowSince": "Seit {date}"
   },
   "relay": {
     "title": "Serverless-Relay-Proxies",

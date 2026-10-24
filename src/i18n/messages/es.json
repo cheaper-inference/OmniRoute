@@ -12686,7 +12686,8 @@
     "avgTtft": "TTFT medio",
     "avgTotal": "Total medio",
     "requestTelemetry": "Telemetría de solicitudes",
-    "requestTelemetryDescription": "Desglose del proceso de 7 fases (últimos 5 minutos)"
+    "requestTelemetryDescription": "Desglose del proceso de 7 fases (últimos 5 minutos)",
+    "windowSince": "Desde {date}"
   },
   "relay": {
     "title": "Proxies de retransmisión sin servidor",

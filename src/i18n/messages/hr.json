@@ -12686,7 +12686,8 @@
     "avgTtft": "Prosj. TTFT",
     "avgTotal": "Prosj. ukupno vrijeme",
     "requestTelemetry": "Telemetrija zahtjeva",
-    "requestTelemetryDescription": "Raščlamba cjevovoda u 7 faza (posljednjih 5 minuta)"
+    "requestTelemetryDescription": "Raščlamba cjevovoda u 7 faza (posljednjih 5 minuta)",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Relejni proxyji bez poslužitelja",

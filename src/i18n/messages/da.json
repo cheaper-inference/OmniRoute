@@ -12686,7 +12686,8 @@
     "avgTtft": "Gns. TTFT",
     "avgTotal": "Gns. total",
     "requestTelemetry": "Anmodningstelemetri",
-    "requestTelemetryDescription": "7-faset pipeline-fordeling (sidste 5 minutter)"
+    "requestTelemetryDescription": "7-faset pipeline-fordeling (sidste 5 minutter)",
+    "windowSince": "Siden {date}"
   },
   "relay": {
     "title": "Serverless relay-proxies",

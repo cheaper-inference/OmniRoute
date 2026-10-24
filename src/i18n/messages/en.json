@@ -12756,7 +12756,8 @@
     "title": "Provider stats",
     "description": "Per-provider and per-model traffic, latency and success rates",
     "combo": "Combo",
-    "toggleModels": "Show models for {provider}"
+    "toggleModels": "Show models for {provider}",
+    "windowSince": "Since {date}"
   },
   "relay": {
     "title": "Serverless Relay Proxies",

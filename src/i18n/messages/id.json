@@ -12686,7 +12686,8 @@
     "avgTtft": "TTFT Rata-rata",
     "avgTotal": "Total Rata-rata",
     "requestTelemetry": "Telemetri Permintaan",
-    "requestTelemetryDescription": "Rincian pipeline 7 fase (5 menit terakhir)"
+    "requestTelemetryDescription": "Rincian pipeline 7 fase (5 menit terakhir)",
+    "windowSince": "Sejak {date}"
   },
   "relay": {
     "title": "Proksi Relai Serverless",

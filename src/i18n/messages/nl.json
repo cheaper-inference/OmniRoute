@@ -12686,7 +12686,8 @@
     "avgTtft": "Gem. TTFT",
     "avgTotal": "Gem. totaal",
     "requestTelemetry": "Verzoektelemetrie",
-    "requestTelemetryDescription": "Uitsplitsing van 7-fasenpipeline (laatste 5 minuten)"
+    "requestTelemetryDescription": "Uitsplitsing van 7-fasenpipeline (laatste 5 minuten)",
+    "windowSince": "Sinds {date}"
   },
   "relay": {
     "title": "Serverless relay-proxy's",

@@ -12686,7 +12686,8 @@
     "avgTtft": "औसत TTFT",
     "avgTotal": "औसत कुल",
     "requestTelemetry": "अनुरोध टेलीमेट्री",
-    "requestTelemetryDescription": "7-चरण पाइपलाइन ब्रेकडाउन (पिछले 5 मिनट)"
+    "requestTelemetryDescription": "7-चरण पाइपलाइन ब्रेकडाउन (पिछले 5 मिनट)",
+    "windowSince": "{date} से"
   },
   "relay": {
     "title": "सर्वरलेस रिले प्रॉक्सी",

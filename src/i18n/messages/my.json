@@ -12686,7 +12686,8 @@
     "avgTtft": "ပျမ်းမျှ TTFT",
     "avgTotal": "စုစုပေါင်း ပျမ်းမျှ",
     "requestTelemetry": "တောင်းဆိုမှု တယ်လီမက်ထရီ",
-    "requestTelemetryDescription": "အဆင့် ၇ ဆင့်ပါ ပိုက်လိုင်း ခွဲခြမ်းစိတ်ဖြာမှု (ပြီးခဲ့သည့် ၅ မိနစ်)"
+    "requestTelemetryDescription": "အဆင့် ၇ ဆင့်ပါ ပိုက်လိုင်း ခွဲခြမ်းစိတ်ဖြာမှု (ပြီးခဲ့သည့် ၅ မိနစ်)",
+    "windowSince": "{date} မှစ၍"
   },
   "relay": {
     "title": "ဆာဗာမဲ့ Relay ပရောက်စီများ",

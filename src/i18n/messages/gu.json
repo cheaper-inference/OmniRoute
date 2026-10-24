@@ -12686,7 +12686,8 @@
     "avgTtft": "સરેરાશ TTFT",
     "avgTotal": "સરેરાશ કુલ",
     "requestTelemetry": "વિનંતી ટેલિમેટ્રી",
-    "requestTelemetryDescription": "7-તબક્કાની પાઇપલાઇન વિભાજન (છેલ્લી 5 મિનિટ)"
+    "requestTelemetryDescription": "7-તબક્કાની પાઇપલાઇન વિભાજન (છેલ્લી 5 મિનિટ)",
+    "windowSince": "{date} થી"
   },
   "relay": {
     "title": "સર્વરલેસ રિલે પ્રોક્સીઝ",

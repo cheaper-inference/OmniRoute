@@ -12686,7 +12686,8 @@
     "avgTtft": "Vid. TTFT",
     "avgTotal": "Vid. bendra trukmė",
     "requestTelemetry": "Užklausų telemetrija",
-    "requestTelemetryDescription": "7 etapų proceso išklotinė (paskutinės 5 minutės)"
+    "requestTelemetryDescription": "7 etapų proceso išklotinė (paskutinės 5 minutės)",
+    "windowSince": "Nuo {date}"
   },
   "relay": {
     "title": "Be serverių veikiantys perdavimo tarpiniai serveriai",

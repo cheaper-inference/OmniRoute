@@ -12686,7 +12686,8 @@
     "avgTtft": "平均TTFT",
     "avgTotal": "平均合計",
     "requestTelemetry": "リクエストテレメトリ",
-    "requestTelemetryDescription": "7フェーズのパイプライン内訳（過去5分間）"
+    "requestTelemetryDescription": "7フェーズのパイプライン内訳（過去5分間）",
+    "windowSince": "{date}以降"
   },
   "relay": {
     "title": "サーバーレスリレープロキシ",

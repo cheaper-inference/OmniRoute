@@ -12756,7 +12756,8 @@
     "title": "Thống kê nhà cung cấp",
     "description": "Lưu lượng, độ trễ và tỷ lệ thành công theo nhà cung cấp và mô hình",
     "combo": "Combo",
-    "toggleModels": "Hiện các mô hình của {provider}"
+    "toggleModels": "Hiện các mô hình của {provider}",
+    "windowSince": "Kể từ {date}"
   },
   "relay": {
     "title": "Relay Proxy không máy chủ",

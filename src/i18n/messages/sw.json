@@ -12686,7 +12686,8 @@
     "avgTtft": "Wastani wa TTFT",
     "avgTotal": "Wastani wa Jumla",
     "requestTelemetry": "Telemetri ya Maombi",
-    "requestTelemetryDescription": "Mchanganuo wa mchakato wa awamu 7 (dakika 5 zilizopita)"
+    "requestTelemetryDescription": "Mchanganuo wa mchakato wa awamu 7 (dakika 5 zilizopita)",
+    "windowSince": "Tangu {date}"
   },
   "relay": {
     "title": "Proksi za Relay Zisizo na Seva",

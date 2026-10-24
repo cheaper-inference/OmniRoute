@@ -12686,7 +12686,8 @@
     "avgTtft": "Nkezi TTFT",
     "avgTotal": "Nkezi Ngụkọta",
     "requestTelemetry": "Telemetrị Arịrịọ",
-    "requestTelemetryDescription": "Nkọwa usoro nwere akụkụ 7 (n'ime nkeji 5 gara aga)"
+    "requestTelemetryDescription": "Nkọwa usoro nwere akụkụ 7 (n'ime nkeji 5 gara aga)",
+    "windowSince": "Kemgbe {date}"
   },
   "relay": {
     "title": "Proksi Relay Serverless",

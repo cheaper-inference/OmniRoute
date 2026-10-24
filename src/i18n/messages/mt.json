@@ -12686,7 +12686,8 @@
     "avgTtft": "TTFT Medju",
     "avgTotal": "Medja Totali",
     "requestTelemetry": "Telemetrija tat-Talbiet",
-    "requestTelemetryDescription": "Tqassim tal-pipeline f’7 fażijiet (l-aħħar 5 minuti)"
+    "requestTelemetryDescription": "Tqassim tal-pipeline f’7 fażijiet (l-aħħar 5 minuti)",
+    "windowSince": "Minn {date}"
   },
   "relay": {
     "title": "Proxies tar-Relay mingħajr server",

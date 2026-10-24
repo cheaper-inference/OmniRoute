@@ -12686,7 +12686,8 @@
     "avgTtft": "평균 TTFT",
     "avgTotal": "평균 총계",
     "requestTelemetry": "요청 텔레메트리",
-    "requestTelemetryDescription": "7단계 파이프라인 분석 (최근 5분)"
+    "requestTelemetryDescription": "7단계 파이프라인 분석 (최근 5분)",
+    "windowSince": "{date} 이후"
   },
   "relay": {
     "title": "서버리스 릴레이 프록시",

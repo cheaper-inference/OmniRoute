@@ -12686,7 +12686,8 @@
     "avgTtft": "Průměrné TTFT",
     "avgTotal": "Průměr celkem",
     "requestTelemetry": "Telemetrie požadavků",
-    "requestTelemetryDescription": "Rozdělení 7fázové pipeline (posledních 5 minut)"
+    "requestTelemetryDescription": "Rozdělení 7fázové pipeline (posledních 5 minut)",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Serverless relay proxy",

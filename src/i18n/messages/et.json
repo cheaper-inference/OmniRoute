@@ -12686,7 +12686,8 @@
     "avgTtft": "Keskmine TTFT",
     "avgTotal": "Keskmine koguaeg",
     "requestTelemetry": "Päringute telemeetria",
-    "requestTelemetryDescription": "7-etapilise töötluskonveieri jaotus (viimased 5 minutit)"
+    "requestTelemetryDescription": "7-etapilise töötluskonveieri jaotus (viimased 5 minutit)",
+    "windowSince": "Alates {date}"
   },
   "relay": {
     "title": "Serverivabad releeproksid",

@@ -12686,7 +12686,8 @@
     "avgTtft": "میانگین TTFT",
     "avgTotal": "میانگین کل",
     "requestTelemetry": "تله‌متری درخواست",
-    "requestTelemetryDescription": "تفکیک خط لوله ۷ مرحله‌ای (۵ دقیقه اخیر)"
+    "requestTelemetryDescription": "تفکیک خط لوله ۷ مرحله‌ای (۵ دقیقه اخیر)",
+    "windowSince": "از {date}"
   },
   "relay": {
     "title": "پروکسی‌های رله بدون سرور",

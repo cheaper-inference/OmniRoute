@@ -12686,7 +12686,8 @@
     "avgTtft": "ശരാശരി TTFT",
     "avgTotal": "ശരാശരി ആകെ സമയം",
     "requestTelemetry": "അഭ്യർത്ഥന ടെലിമെട്രി",
-    "requestTelemetryDescription": "7-ഘട്ട പൈപ്പ്ലൈൻ വിഭജനം (കഴിഞ്ഞ 5 മിനിറ്റ്)"
+    "requestTelemetryDescription": "7-ഘട്ട പൈപ്പ്ലൈൻ വിഭജനം (കഴിഞ്ഞ 5 മിനിറ്റ്)",
+    "windowSince": "{date} മുതൽ"
   },
   "relay": {
     "title": "സർവർലെസ് റിലേ പ്രോക്സികൾ",

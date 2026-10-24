@@ -12686,7 +12686,8 @@
     "avgTtft": "సగటు TTFT",
     "avgTotal": "సగటు మొత్తం",
     "requestTelemetry": "అభ్యర్థన టెలిమెట్రీ",
-    "requestTelemetryDescription": "7-దశల పైప్‌లైన్ విభజన (చివరి 5 నిమిషాలు)"
+    "requestTelemetryDescription": "7-దశల పైప్‌లైన్ విభజన (చివరి 5 నిమిషాలు)",
+    "windowSince": "{date} నుండి"
   },
   "relay": {
     "title": "సర్వర్‌లెస్ రిలే ప్రాక్సీలు",

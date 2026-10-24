@@ -12686,7 +12686,8 @@
     "avgTtft": "Keskim. TTFT",
     "avgTotal": "Keskim. yhteensä",
     "requestTelemetry": "Pyyntötelemetria",
-    "requestTelemetryDescription": "7-vaiheisen putken erittely (viimeiset 5 minuuttia)"
+    "requestTelemetryDescription": "7-vaiheisen putken erittely (viimeiset 5 minuuttia)",
+    "windowSince": "{date} lähtien"
   },
   "relay": {
     "title": "Serverless-välityspalvelimet",

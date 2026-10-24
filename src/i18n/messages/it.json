@@ -12686,7 +12686,8 @@
     "avgTtft": "TTFT medio",
     "avgTotal": "Totale medio",
     "requestTelemetry": "Telemetria delle richieste",
-    "requestTelemetryDescription": "Suddivisione della pipeline in 7 fasi (ultimi 5 minuti)"
+    "requestTelemetryDescription": "Suddivisione della pipeline in 7 fasi (ultimi 5 minuti)",
+    "windowSince": "Dal {date}"
   },
   "relay": {
     "title": "Proxy relay serverless",

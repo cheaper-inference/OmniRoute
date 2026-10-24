@@ -12686,7 +12686,8 @@
     "avgTtft": "Matsakaicin TTFT",
     "avgTotal": "Matsakaicin Jimilla",
     "requestTelemetry": "Telemetirin Buƙata",
-    "requestTelemetryDescription": "Rarrabuwar tsarin matakai 7 (minti 5 da suka gabata)"
+    "requestTelemetryDescription": "Rarrabuwar tsarin matakai 7 (minti 5 da suka gabata)",
+    "windowSince": "Tun {date}"
   },
   "relay": {
     "title": "Proxies na Relay Marasa Sabar",

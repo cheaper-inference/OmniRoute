@@ -12686,7 +12686,8 @@
     "avgTtft": "Átlagos TTFT",
     "avgTotal": "Átlagos összesített",
     "requestTelemetry": "Kérés-telemetria",
-    "requestTelemetryDescription": "7 fázisú folyamat lebontása (utolsó 5 perc)"
+    "requestTelemetryDescription": "7 fázisú folyamat lebontása (utolsó 5 perc)",
+    "windowSince": "{date} óta"
   },
   "relay": {
     "title": "Szerver nélküli közvetítő proxyk",

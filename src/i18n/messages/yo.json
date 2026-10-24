@@ -12686,7 +12686,8 @@
     "avgTtft": "TTFT Ní Ìpíndọ́gba",
     "avgTotal": "Àpapọ̀ Àkókò Ní Ìpíndọ́gba",
     "requestTelemetry": "Tẹlímẹ́tírì Ìbéèrè",
-    "requestTelemetryDescription": "Ìpín ọ̀nà ìṣiṣẹ́ onípele méje (ìṣẹ́jú márùn-ún tó kọjá)"
+    "requestTelemetryDescription": "Ìpín ọ̀nà ìṣiṣẹ́ onípele méje (ìṣẹ́jú márùn-ún tó kọjá)",
+    "windowSince": "Tió {date}"
   },
   "relay": {
     "title": "Àwọn Prọ́ọ̀sì Relay Aláìní Sẹ́fà",

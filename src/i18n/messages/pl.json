@@ -12686,7 +12686,8 @@
     "avgTtft": "Śr. TTFT",
     "avgTotal": "Śr. łącznie",
     "requestTelemetry": "Telemetria żądań",
-    "requestTelemetryDescription": "Podział 7-fazowego potoku (ostatnie 5 minut)"
+    "requestTelemetryDescription": "Podział 7-fazowego potoku (ostatnie 5 minut)",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Bezserwerowe proxy przekaźnikowe",

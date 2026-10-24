@@ -12686,7 +12686,8 @@
     "avgTtft": "Purata TTFT",
     "avgTotal": "Purata Jumlah",
     "requestTelemetry": "Telemetri Permintaan",
-    "requestTelemetryDescription": "Pecahan saluran paip 7 fasa (5 minit terakhir)"
+    "requestTelemetryDescription": "Pecahan saluran paip 7 fasa (5 minit terakhir)",
+    "windowSince": "Sejak {date}"
   },
   "relay": {
     "title": "Proksi Geganti Tanpa Pelayan",

@@ -12686,7 +12686,8 @@
     "avgTtft": "Meán TTFT",
     "avgTotal": "Meán Iomlán",
     "requestTelemetry": "Teilimeadracht Iarratais",
-    "requestTelemetryDescription": "Miondealú ar an bpíblíne 7 gcéim (na 5 nóiméad anuas)"
+    "requestTelemetryDescription": "Miondealú ar an bpíblíne 7 gcéim (na 5 nóiméad anuas)",
+    "windowSince": "Ó {date}"
   },
   "relay": {
     "title": "Seachfhreastalaithe Relé Gan Freastalaí",

@@ -12686,7 +12686,8 @@
     "avgTtft": "Genomsnittlig TTFT",
     "avgTotal": "Genomsnittlig total",
     "requestTelemetry": "Anropstelemetri",
-    "requestTelemetryDescription": "Uppdelning av 7-fas-pipeline (senaste 5 minuterna)"
+    "requestTelemetryDescription": "Uppdelning av 7-fas-pipeline (senaste 5 minuterna)",
+    "windowSince": "Sedan {date}"
   },
   "relay": {
     "title": "Serverlösa relay-proxies",

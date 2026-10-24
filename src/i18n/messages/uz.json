@@ -12686,7 +12686,8 @@
     "avgTtft": "O‘rtacha TTFT",
     "avgTotal": "O‘rtacha jami vaqt",
     "requestTelemetry": "So‘rov telemetriyasi",
-    "requestTelemetryDescription": "7 bosqichli konveyer tafsilotlari (oxirgi 5 daqiqa)"
+    "requestTelemetryDescription": "7 bosqichli konveyer tafsilotlari (oxirgi 5 daqiqa)",
+    "windowSince": "{date} dan beri"
   },
   "relay": {
     "title": "Serversiz rele proksilari",

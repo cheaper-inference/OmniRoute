@@ -12686,7 +12686,8 @@
     "avgTtft": "TTFT mediu",
     "avgTotal": "Total mediu",
     "requestTelemetry": "Telemetrie cereri",
-    "requestTelemetryDescription": "Defalcare pipeline în 7 faze (ultimele 5 minute)"
+    "requestTelemetryDescription": "Defalcare pipeline în 7 faze (ultimele 5 minute)",
+    "windowSince": "Din {date}"
   },
   "relay": {
     "title": "Proxy-uri relay serverless",

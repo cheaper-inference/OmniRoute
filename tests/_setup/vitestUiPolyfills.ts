@@ -22,6 +22,22 @@ if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
   };
 }
 
+// jsdom (unlike real browsers) does not implement `ResizeObserver`. The `TableScrollArea`
+// component of the UI kit (packages/ui-kit/src/table-scroll-area.tsx:83) creates one in a
+// `useEffect` on mount, so any test mounting it — directly or transitively, e.g. via
+// `ProviderStatsPage` — crashes with `ReferenceError: ResizeObserver is not defined` unless
+// this polyfill runs first. It is a no-op stub: jsdom does not lay out boxes, so none of the
+// callbacks need to fire for these tests.
+if (typeof window !== "undefined" && typeof window.ResizeObserver === "undefined") {
+  const ResizeObserverPolyfill = class ResizeObserver {
+    constructor(public callback: () => void) {}
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  };
+  (window as Record<string, unknown>).ResizeObserver = ResizeObserverPolyfill;
+}
+
 // #7935 wired `useTranslations`/`useLocale` (next-intl) into ~180 dashboard/shared
 // components (Button, Modal, Select, EmptyState, ProviderIcon, ...). Any UI test that
 // mounts a component depending on one of those — directly or transitively — without its

@@ -12686,7 +12686,8 @@
     "avgTtft": "Μέσος TTFT",
     "avgTotal": "Μέσος συνολικός χρόνος",
     "requestTelemetry": "Τηλεμετρία αιτημάτων",
-    "requestTelemetryDescription": "Ανάλυση του pipeline 7 φάσεων (τελευταία 5 λεπτά)"
+    "requestTelemetryDescription": "Ανάλυση του pipeline 7 φάσεων (τελευταία 5 λεπτά)",
+    "windowSince": "Από {date}"
   },
   "relay": {
     "title": "Serverless proxy αναμετάδοσης",

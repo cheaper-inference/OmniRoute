@@ -12686,7 +12686,8 @@
     "avgTtft": "TTFT เฉลี่ย",
     "avgTotal": "รวมเฉลี่ย",
     "requestTelemetry": "เทเลเมทรีของคำขอ",
-    "requestTelemetryDescription": "รายละเอียดไปป์ไลน์ 7 เฟส (5 นาทีล่าสุด)"
+    "requestTelemetryDescription": "รายละเอียดไปป์ไลน์ 7 เฟส (5 นาทีล่าสุด)",
+    "windowSince": "ตั้งแต่ {date}"
   },
   "relay": {
     "title": "พร็อกซี Serverless Relay",

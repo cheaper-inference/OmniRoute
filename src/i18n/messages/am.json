@@ -12686,7 +12686,8 @@
     "avgTtft": "አማካይ TTFT",
     "avgTotal": "አማካይ ጠቅላላ ጊዜ",
     "requestTelemetry": "የጥያቄ ቴሌሜትሪ",
-    "requestTelemetryDescription": "የባለ 7-ደረጃ ፓይፕላይን ክፍፍል (ባለፉት 5 ደቂቃዎች)"
+    "requestTelemetryDescription": "የባለ 7-ደረጃ ፓይፕላይን ክፍፍል (ባለፉት 5 ደቂቃዎች)",
+    "windowSince": "ከ{date} ወዲህ"
   },
   "relay": {
     "title": "ሰርቨር-አልባ ሪሌይ ፕሮክሲዎች",

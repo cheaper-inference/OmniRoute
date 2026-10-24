@@ -12686,7 +12686,8 @@
     "avgTtft": "Povp. TTFT",
     "avgTotal": "Povp. skupni čas",
     "requestTelemetry": "Telemetrija zahtev",
-    "requestTelemetryDescription": "Razčlenitev 7-faznega cevovoda (zadnjih 5 minut)"
+    "requestTelemetryDescription": "Razčlenitev 7-faznega cevovoda (zadnjih 5 minut)",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Brezstrežniški relejni posredniški strežniki",

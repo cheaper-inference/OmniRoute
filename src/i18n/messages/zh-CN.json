@@ -12686,7 +12686,8 @@
     "avgTtft": "平均 TTFT",
     "avgTotal": "平均总计",
     "requestTelemetry": "请求遥测",
-    "requestTelemetryDescription": "7 阶段流水线明细（最近 5 分钟）"
+    "requestTelemetryDescription": "7 阶段流水线明细（最近 5 分钟）",
+    "windowSince": "自 {date}"
   },
   "relay": {
     "title": "Serverless 中继代理",

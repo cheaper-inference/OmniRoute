@@ -12686,7 +12686,8 @@
     "avgTtft": "Karaniwang TTFT",
     "avgTotal": "Karaniwang Kabuuan",
     "requestTelemetry": "Telemetry ng Kahilingan",
-    "requestTelemetryDescription": "Breakdown ng 7-phase pipeline (huling 5 minuto)"
+    "requestTelemetryDescription": "Breakdown ng 7-phase pipeline (huling 5 minuto)",
+    "windowSince": "Mula {date}"
   },
   "relay": {
     "title": "Mga Serverless Relay Proxy",

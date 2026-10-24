@@ -12686,7 +12686,8 @@
     "avgTtft": "متوسط TTFT",
     "avgTotal": "المتوسط الإجمالي",
     "requestTelemetry": "بيانات تتبع الطلب",
-    "requestTelemetryDescription": "تفصيل مسار المعالجة المكون من 7 مراحل (آخر 5 دقائق)"
+    "requestTelemetryDescription": "تفصيل مسار المعالجة المكون من 7 مراحل (آخر 5 دقائق)",
+    "windowSince": "منذ {date}"
   },
   "relay": {
     "title": "وكلاء الترحيل بلا خادم",

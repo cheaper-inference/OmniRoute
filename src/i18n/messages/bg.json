@@ -12686,7 +12686,8 @@
     "avgTtft": "Средно TTFT",
     "avgTotal": "Средно общо",
     "requestTelemetry": "Телеметрия на заявките",
-    "requestTelemetryDescription": "Разбивка на 7-фазния конвейер (последните 5 минути)"
+    "requestTelemetryDescription": "Разбивка на 7-фазния конвейер (последните 5 минути)",
+    "windowSince": "От {date}"
   },
   "relay": {
     "title": "Serverless Relay проксита",

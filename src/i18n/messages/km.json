@@ -12686,7 +12686,8 @@
     "avgTtft": "TTFT មធ្យម",
     "avgTotal": "សរុបមធ្យម",
     "requestTelemetry": "ទិន្នន័យតាមដានសំណើ",
-    "requestTelemetryDescription": "ការបែងចែកលំហូរដំណើរការ 7 ដំណាក់កាល (5 នាទីចុងក្រោយ)"
+    "requestTelemetryDescription": "ការបែងចែកលំហូរដំណើរការ 7 ដំណាក់កាល (5 នាទីចុងក្រោយ)",
+    "windowSince": "តាំងពី {date}"
   },
   "relay": {
     "title": "ប្រូកស៊ី Relay បែប Serverless",

@@ -12686,7 +12686,8 @@
     "avgTtft": "ಸರಾಸರಿ TTFT",
     "avgTotal": "ಸರಾಸರಿ ಒಟ್ಟು",
     "requestTelemetry": "ವಿನಂತಿ ಟೆಲಿಮೆಟ್ರಿ",
-    "requestTelemetryDescription": "7-ಹಂತದ ಪೈಪ್ಲೈನ್ ವಿವರ (ಕಳೆದ 5 ನಿಮಿಷಗಳು)"
+    "requestTelemetryDescription": "7-ಹಂತದ ಪೈಪ್ಲೈನ್ ವಿವರ (ಕಳೆದ 5 ನಿಮಿಷಗಳು)",
+    "windowSince": "{date} ಇಂದ"
   },
   "relay": {
     "title": "ಸರ್ವರ್ಲೆಸ್ ರಿಲೇ ಪ್ರಾಕ್ಸಿಗಳು",

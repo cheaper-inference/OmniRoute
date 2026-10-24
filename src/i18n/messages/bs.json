@@ -12686,7 +12686,8 @@
     "avgTtft": "Prosječni TTFT",
     "avgTotal": "Prosječni ukupno",
     "requestTelemetry": "Telemetrija zahtjeva",
-    "requestTelemetryDescription": "Analiza pipeline-a u 7 faza (zadnjih 5 minuta)"
+    "requestTelemetryDescription": "Analiza pipeline-a u 7 faza (zadnjih 5 minuta)",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Serverless Relay Proxy-ji",

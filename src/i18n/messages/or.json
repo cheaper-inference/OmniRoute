@@ -12686,7 +12686,8 @@
     "avgTtft": "ହାରାହାରି TTFT",
     "avgTotal": "ହାରାହାରି ମୋଟ",
     "requestTelemetry": "ଅନୁରୋଧ ଟେଲିମେଟ୍ରି",
-    "requestTelemetryDescription": "୭-ପର୍ଯ୍ୟାୟ ପାଇପଲାଇନ୍ ବିଶ୍ଳେଷଣ (ଗତ ୫ ମିନିଟ୍)"
+    "requestTelemetryDescription": "୭-ପର୍ଯ୍ୟାୟ ପାଇପଲାଇନ୍ ବିଶ୍ଳେଷଣ (ଗତ ୫ ମିନିଟ୍)",
+    "windowSince": "{date} ଠାରୁ"
   },
   "relay": {
     "title": "ସର୍ଭରଲେସ୍ ରିଲେ ପ୍ରକ୍ସିଗୁଡ଼ିକ",

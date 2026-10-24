@@ -12686,7 +12686,8 @@
     "avgTtft": "Snitt TTFT",
     "avgTotal": "Snitt totalt",
     "requestTelemetry": "Forespørselstelemetri",
-    "requestTelemetryDescription": "7-fase pipeline-fordeling (siste 5 minutter)"
+    "requestTelemetryDescription": "7-fase pipeline-fordeling (siste 5 minutter)",
+    "windowSince": "Siden {date}"
   },
   "relay": {
     "title": "Serverløse relé-proxyer",

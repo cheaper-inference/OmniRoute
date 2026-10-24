@@ -12686,7 +12686,8 @@
     "avgTtft": "平均 TTFT",
     "avgTotal": "平均總計",
     "requestTelemetry": "請求遙測",
-    "requestTelemetryDescription": "7 階段管線細項（過去 5 分鐘）"
+    "requestTelemetryDescription": "7 階段管線細項（過去 5 分鐘）",
+    "windowSince": "自 {date}"
   },
   "relay": {
     "title": "無伺服器 Relay 代理",

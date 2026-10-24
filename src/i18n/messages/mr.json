@@ -12686,7 +12686,8 @@
     "avgTtft": "सरासरी TTFT",
     "avgTotal": "सरासरी एकूण",
     "requestTelemetry": "रिक्वेस्ट टेलिमेट्री",
-    "requestTelemetryDescription": "7-टप्प्यांचे पाइपलाइन विश्लेषण (शेवटची 5 मिनिटे)"
+    "requestTelemetryDescription": "7-टप्प्यांचे पाइपलाइन विश्लेषण (शेवटची 5 मिनिटे)",
+    "windowSince": "{date} पासून"
   },
   "relay": {
     "title": "सर्व्हरलेस रिले प्रॉक्सी",
