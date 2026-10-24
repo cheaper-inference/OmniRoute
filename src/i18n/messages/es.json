@@ -2979,7 +2979,7 @@
       "windsurf": "Úsalo cuando quieras un IDE centrado en IA con modelos de Codeium/Windsurf enrutados a través de OmniRoute.",
       "antigravity": "Úselo cuando el tráfico de Antigravity/Kiro debe interceptarse a través de MITM y enrutarse a OmniRoute.",
       "copilot": "Úselo cuando desee una experiencia de usuario estilo chat Copilot mientras aplica las claves de OmniRoute y las reglas de enrutamiento.",
-      "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
+      "amp": "Úsalo cuando quieras los flujos abreviados de Amp, pero sigas necesitando que se apliquen los alias y las reglas de enrutamiento de OmniRoute.",
       "hermes": "Úselo cuando necesite un asistente de IA nativo de terminal liviano para tareas rápidas.",
       "hermes-agent": "Utilizar cuando necesites el agente Hermes (de Nousresearch) con modelos predeterminados, de delegación, visión y auxiliares enrutados mediante OmniRoute.",
       "custom": "Úselo para implementaciones de herramientas personalizadas o configuraciones genéricas compatibles con OpenAI."
@@ -3479,7 +3479,7 @@
     "resetAware": "RR con reconocimiento de reinicio",
     "resetAwareDesc": "Equilibra la cuota restante con los restablecimientos semanales y de 5 h, y luego realiza todos contra todos puntuaciones similares",
     "quotaWeighted": "Ponderado por cuota",
-    "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "quotaWeightedDesc": "Omite las cuentas agotadas y elige entre las demás en proporción a la cuota restante, dividida entre la carga en curso. Las conversaciones existentes se mantienen fijadas.",
     "strictRandom": "Aleatorio estricto",
     "strictRandomDesc": "Baraja — utiliza cada modelo una vez antes de volver a barajar",
     "fusion": "Fusión",
@@ -3881,7 +3881,7 @@
     "wizardStep2Title": "Añade modelos",
     "wizardStep2Desc": "Selecciona modelos de IA y organiza su orden de prioridad de respaldo",
     "wizardStep3Title": "Elige una estrategia",
-    "wizardStep3Desc": "Pick how requests are distributed across your models - 13 strategies available",
+    "wizardStep3Desc": "Elige cómo se reparten las solicitudes entre tus modelos: 14 estrategias disponibles",
     "wizardStep4Title": "Revisa y guarda",
     "wizardStep4Desc": "Revisa tu configuración y activa el combo",
     "usageGuideInvokeTitle": "Cómo llamar a este combo",
@@ -7087,8 +7087,8 @@
     "showNgrokTunnel": "túnel ngrok",
     "showNgrokTunnelDesc": "Muestre los controles del túnel ngrok en la página Punto final.",
     "sidebarVisibility": "Ocultar elementos de la barra lateral",
-    "sidebarVisibilityDesc": "Hide any sidebar navigation entry to reduce visual clutter.",
-    "sidebarVisibilityHint": "Any sidebar section is hidden automatically when a...",
+    "sidebarVisibilityDesc": "Oculta cualquier entrada de navegación de la barra lateral para reducir el desorden visual sin desactivar ninguna función",
+    "sidebarVisibilityHint": "Una sección de la barra lateral se oculta automáticamente cuando todas sus entradas están ocultas",
     "sidebarSectionShow": "Mostrar todos los elementos de esta sección",
     "sidebarSectionHide": "Ocultar todos los elementos de esta sección",
     "presetAll": "Todo",
@@ -7407,7 +7407,7 @@
     "blockProviderTitle": "Bloquear {provider}",
     "unblockProviderTitle": "Desbloquear {provider}",
     "cliFingerprint": "Coincidencia de huella digital de CLI",
-    "cliFingerprintDesc": "Match native CLI binary signatures when proxying requests. Reorders headers and body fields to look identical to the official CLI tools. Your proxy IP is preserved.",
+    "cliFingerprintDesc": "Normaliza las cabeceras y los campos del cuerpo de las solicitudes para que coincidan con las firmas de las herramientas CLI oficiales. Se activa por proveedor.",
     "cliFingerprintEnabled": "{count} proveedor(es) con la huella digital de CLI activa",
     "enableFingerprintTitle": "Activar la huella digital para {provider}",
     "disableFingerprintTitle": "Desactivar la huella digital para {provider}",
@@ -7440,7 +7440,7 @@
     "resetAware": "RR con reconocimiento de reinicio",
     "resetAwareDesc": "Prefiere cuentas con cuota restante saludable y reinicios más cercanos",
     "quotaWeighted": "Ponderado por cuota",
-    "quotaWeightedDesc": "Skip exhausted accounts, then pick among the rest in proportion to reset-aware leftover.",
+    "quotaWeightedDesc": "Omite las cuentas agotadas y elige entre las demás en proporción a la cuota restante, dividida entre la carga en curso. Las conversaciones existentes se mantienen fijadas.",
     "strictRandom": "Aleatorio estricto",
     "strictRandomDesc": "Baraja las cuentas: usa cada cuenta una vez antes de volver a barajar",
     "stickyLimit": "Límite fijo",
@@ -8539,7 +8539,7 @@
     "resilienceMaxAttempts": "Intentos máximos",
     "resilienceMaxWaitPerAttempt": "Espera máxima por intento",
     "resilienceComboCooldownWaitTitle": "Quota-share combo cooldown wait",
-    "resilienceComboCooldownWaitDesc": "For quota-share combos only: wait out a short transient cooldown and re-dispatch instead of returning a 429 immediately. Never waits on quota_exhausted.",
+    "resilienceComboCooldownWaitDesc": "Para todas las estrategias de combo: espera a que pase un enfriamiento breve y transitorio y vuelve a enviar la solicitud en lugar de devolver un 429 de inmediato. Nunca espera si la cuota está agotada (quota_exhausted).",
     "resilienceComboCooldownWaitToggleDesc": "Quota-share combos only; never waits on quota_exhausted.",
     "resilienceComboCooldownMaxWaitMs": "Espera máxima por intento",
     "resilienceComboCooldownBudgetMs": "Tiempo total de espera",
@@ -9321,7 +9321,7 @@
   },
   "omniglyph": {
     "preview": "Vista previa",
-    "description": "Context-as-image compression. Renders the system prompt, tool documentation, and dense history as compact PNG pages that Claude Fable 5 reads instead of text. Image tokens are billed by dimensions rather than characters, so the converted block costs about 10× less. Direct Anthropic route only.",
+    "description": "Compresión del contexto como imagen. Convierte el prompt del sistema, la documentación de herramientas y el historial denso en páginas PNG compactas para la ruta medida de Claude Fable 5. El paquete publicado de OmniGlyph también incluye transformadores nativos para GPT 5.6, pero OmniRoute mantiene esas rutas cerradas ante fallos hasta que existan garantías de fidelidad del proveedor y comprobantes de lectura.",
     "economicsTitle": "La economía",
     "economics": {
       "fewerTokens": "menos tokens en el bloque convertido",
@@ -9346,12 +9346,12 @@
       "transport": {
         "label": "Transporte",
         "pass": "direct Anthropic",
-        "why": "Aggregators resample images and destroy legibility — only the direct route is authoritative."
+        "why": "Los agregadores pueden remuestrear las imágenes y destruir su legibilidad: solo una ruta directa al proveedor es fiable."
       },
       "format": {
         "label": "Formato",
         "pass": "native Claude",
-        "why": "The body must use Claude format and must never put a system role inside messages."
+        "why": "El cuerpo debe coincidir con el formato del proveedor: Claude Messages, OpenAI Chat Completions o el campo input[] nativo de la API Responses de OpenAI."
       },
       "profitable": {
         "label": "Rentable",
@@ -9360,7 +9360,7 @@
       }
     },
     "enableTitle": "Activar el motor",
-    "enableDescription": "Runs last in the stack (after RTK/Caveman cleans the text, OmniGlyph converts the remainder to images) and also runs standalone through <code>omniglyph</code> mode. This is a preview and remains off by default until end-to-end validation is complete.",
+    "enableDescription": "Se ejecuta en último lugar, después de que los motores de texto limpien la solicitud, usando el formato nativo del proveedor; las solicitudes a las API Chat y Responses de OpenAI se comprimen después de traducirlas, para conservar su estructura. También funciona por separado con el modo <code>omniglyph</code>. Es una versión preliminar y permanece desactivada por defecto hasta completar la validación de extremo a extremo.",
     "profileTitle": "Perfil de compresión",
     "profileDescription": "El perfil es un límite superior, no inferior: un perfil más estricto no puede flexibilizarse mediante una excepción por paso. Según las mediciones realizadas en este código base, con «seguro para código» o «equilibrado», una sesión que aún no ha acumulado historial no comprime nada, porque ambos elevan el umbral mínimo de caracteres y mantienen de forma nativa el prompt del sistema, los esquemas de herramientas y los resultados de las herramientas.",
     "profiles": {
@@ -9389,7 +9389,7 @@
   },
   "embeddedServices": {
     "title": "Servicios integrados",
-    "description": "Local engines managed on demand — CLIProxyAPI, 9Router, Mux, and Bifrost. Accessible on loopback only.",
+    "description": "Ayudantes opcionales que se ejecutan en tu equipo. La mayoría de usuarios puede empezar sin ellos: instala uno solo cuando una integración lo necesite.",
     "stateRunning": "En ejecución",
     "stateStopped": "Detenido",
     "stateStarting": "Iniciando",
@@ -9723,8 +9723,8 @@
     "eventSourcesLabel": "Fuentes de eventos:",
     "eventSourceTranslatorPage": "• Página de traductor (Chat Tester, Test Bench)",
     "eventSourceMainPipeline": "• Canalización de solicitudes principal (tráfico CLI/IDE/API)",
-    "liveMonitorDescriptionPrefix": "Shows translation events as API calls flow through OmniRoute. Events come from the in-memory buffer (resets on restart). uso",
-    "liveMonitorDescriptionSuffix": "o llamadas API externas para generar eventos.",
+    "liveMonitorDescriptionPrefix": "Muestra los eventos de traducción a medida que las llamadas a la API pasan por OmniRoute. Los eventos proceden del búfer en memoria (se vacía al reiniciar). Usa",
+    "liveMonitorDescriptionSuffix": ", o llamadas a API externas, para generar eventos.",
     "streamTransformer": "Transformador de corriente",
     "modeDescriptionStreamTransformer": "Ejecute transmisiones SSE de finalización de chat a través del transformador de Respuestas.",
     "streamTransformerTitle": "Transformador de flujo de respuestas",
@@ -11129,7 +11129,7 @@
   },
   "cache": {
     "title": "Gestión de caché",
-    "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
+    "description": "Supervisa la eficiencia de la caché de prompts del proveedor y la reutilización local de respuestas semánticas.",
     "refresh": "Actualizar",
     "clearAll": "Clear All",
     "memoryEntries": "Entradas en memoria",
