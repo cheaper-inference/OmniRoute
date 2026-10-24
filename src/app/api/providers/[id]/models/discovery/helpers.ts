@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { isSelfHostedChatProvider } from "@/shared/constants/providers";
 import { getStaticModelsForProvider, type LocalCatalogModel } from "@/lib/providers/staticModels";
 import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
@@ -8,11 +9,6 @@ import {
 } from "@/lib/providerModels/ollamaCapabilities";
 
 export type JsonRecord = Record<string, unknown>;
-
-export function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 export function toNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
@@ -140,3 +136,5 @@ export async function enrichOllamaLocalModels(
     }
   });
 }
+
+export { asRecord };

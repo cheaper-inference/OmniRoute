@@ -4,6 +4,7 @@
  * This module is an independent implementation based on the WHATWG event-stream
  * algorithm and the public OpenAI, Anthropic, and Gemini streaming schemas.
  */
+import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 
 export type ApiFormat = "anthropic" | "openai" | "gemini" | "unknown";
 
@@ -37,13 +38,6 @@ interface OpenAiChoiceState {
   message: JsonRecord;
   tools: Map<number, OpenAiToolState>;
 }
-
-function asRecord(value: unknown): JsonRecord | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as JsonRecord)
-    : null;
-}
-
 function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }

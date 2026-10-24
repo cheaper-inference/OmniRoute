@@ -16,6 +16,7 @@
  *  11. omniroute_sync_pricing      — Sync provider pricing from external source
  */
 
+import { isRecord, toRecord } from "../../utils/recordHelpers.ts";
 import { logToolCall } from "../audit.ts";
 import { readAnalyticsTotals, readProviderMetrics } from "../analyticsShape.ts";
 import { toSafeMcpErrorMessage } from "../errorMessage.ts";
@@ -44,13 +45,7 @@ interface ComboModel {
   inputCostPer1M: number;
 }
 
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
-function toRecord(value: unknown): JsonRecord {
-  return isRecord(value) ? value : {};
-}
 
 function toArrayOfRecords(value: unknown): JsonRecord[] {
   return Array.isArray(value) ? value.filter(isRecord) : [];

@@ -31,6 +31,7 @@
  * Dynamic dispatch is handled by quotaPreflight.ts + quotaMonitor.ts.
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import type { QuotaInfo } from "./quotaPreflight.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
@@ -70,11 +71,6 @@ if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 /**
  * Strip trailing `/v1` (or `/v1/`) from a baseUrl so that node URLs like

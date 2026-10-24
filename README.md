@@ -935,6 +935,8 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 Default stacked combo runs `RTK → Caveman`. When both act on the same tool/context payload, savings compound:
 
+> **Opt-in by default.** Compression ships disabled (`compression.enabled: false`, `defaultMode: "off"`) — the numbers below apply once you enable it (dashboard Compression panel, `x-omniroute-compression` per request, or a per-combo pipeline). `lite` is the always-on safe baseline.
+
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
 average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
@@ -1310,7 +1312,7 @@ Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Language</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> across <code>src/</code> and <code>open-sse/</code> (zero <code>any</code> in core since v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domain modules, 209 migrations</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domain modules, 211 migrations</td></tr>
   <tr><td nowrap><b>Memory</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings, typed decay</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — MCP tool I/O validation + API contracts</td></tr>
   <tr><td nowrap><b>Protocols</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1401,6 +1403,7 @@ Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n Guide</a></b></td><td>67-language support, translation workflow, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Release Checklist</a></b></td><td>Pre-release validation steps</td></tr>
   <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Coverage Plan</a></b></td><td>Test coverage strategy for 56,000+ static test declarations across 7,800+ tracked test files</td></tr>
+  <tr><td nowrap><b><a href="docs/audit/IMPROVEMENT-PLAN.md">Improvement Plan</a></b></td><td>Performance & reliability roadmap from comprehensive codebase audit</td></tr>
 </table>
 
 <br/>

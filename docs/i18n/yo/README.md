@@ -1310,23 +1310,23 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 
 <table>
   <tr><th align="left">Ìpele</th><th align="left">Ìmọ̀-ẹ̀rọ</th></tr>
-  <tr><td nowrap><b>Àkókò Ṣíṣe</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> káàkiri <code>src/</code> àti <code>open-sse/</code> (kò sí <code>any</code> rárá nínú ẹ̀yà-àkọ́kọ́ láti v2.0)</td></tr>
-  <tr><td nowrap><b>Ìlànà-iṣẹ́</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ìbùdó Dátà</b></td><td>better-sqlite3 (SQLite, ìkọsílẹ̀ WAL) + LowDB (JSON àtijọ́) — àwọn modulu ìkápá 147, àwọn migrations 209</td></tr>
-  <tr><td nowrap><b>Ìrántilẹ́</b></td><td>àwáàrí kíkún-ọ̀rọ̀ SQLite FTS5 + àwọn vector embeddings tí a dín kù sí int8, ìdínkù oní-ìru</td></tr>
-  <tr><td nowrap><b>Àwọn Àpẹẹrẹ</b></td><td>Zod 4 — ìjẹ̀rìsí I/O irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
-  <tr><td nowrap><b>Àwọn Ìlànà Ìbánisọ̀rọ̀</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Ṣíṣàn</b></td><td>Server-Sent Events (SSE) + afárá WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Ìfùnpọ̀</b></td><td>ìlà-iṣẹ́ ẹ́rọ mẹ́jìlá — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Ìfàṣẹsí àti Ààbò</b></td><td>OAuth 2.0 (PKCE) + JWT + Àwọn Kọ́kọ́rọ́ API + ìfàṣẹsí MCP oní-ìdíwọ́ · AES-256-GCM ní ìpamọ́ · DOMPurify</td></tr>
-  <tr><td nowrap><b>Ìfárápamọ́</b></td><td>wreq-js — ìfarada ìdámọ̀ọ́ TLS JA3 / JA4, proxy oní-ìpele mẹ́ta</td></tr>
-  <tr><td nowrap><b>Ìfaradà</b></td><td>Circuit breaker, exponential backoff, anti-thundering-herd, ìwòsàn-fúnrarẹ̀ auto-combo</td></tr>
-  <tr><td nowrap><b>Ìkọsílẹ̀</b></td><td>pino — àwọn àkọsílẹ̀ JSON oní-ìlànà pẹ̀lú àyíká ìbéèrè</td></tr>
-  <tr><td nowrap><b>Ìdánwò</b></td><td>Node.js test runner + Vitest — <b>àwọn ìkéde ìdánwò ìdúró 56,000+</b> káàkiri àwọn fáìlì ìdánwò tí wọ́n ń tọpinpin 7,800+ (unit, integration, E2E, ààbò, àyíká-ìbáṣepọ̀)</td></tr>
-  <tr><td nowrap><b>Àwọn Pẹpẹ</b></td><td>Kòǹpútà Tábìlì (Electron) · Android (Termux) · PWA (browser kankan)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ìtẹ̀jáde npm fúnrarẹ̀ + Docker Hub nígbà ìtúpalẹ̀</td></tr>
-  <tr><td nowrap><b>Àwọn Ìsopọ̀</b></td><td><a href="https://omniroute.online">Ìbùdó Ayélujára</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Àkókò ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> jákèjádò <code>src/</code> àti <code>open-sse/</code> (kò sí <code>any</code> rárá nínú ìpìlẹ̀ láti v2.0)</td></tr>
+  <tr><td nowrap><b>Àgbékalẹ̀</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìkọ àkọsílẹ̀ WAL) + LowDB (ogún JSON) — àwọn módù ìbùdó 147, àwọn ìṣíkiri 211</td></tr>
+  <tr><td nowrap><b>Ìrántí</b></td><td>Ọ̀rọ̀-kíkún SQLite FTS5 + àwọn àfihàn fekito tí a dín sí int8, ìdínkù onírúurú</td></tr>
+  <tr><td nowrap><b>Àwọn skímà</b></td><td>Zod 4 — ìfọwọ́sí I/O irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
+  <tr><td nowrap><b>Àwọn ìlànà</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
+  <tr><td nowrap><b>Ìṣànwọlé</b></td><td>Server-Sent Events (SSE) + afárá WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Ìfúnpọ̀</b></td><td>Òpó-ìṣiṣẹ́ ẹ́ńjìnnì 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Ìfàṣẹsí &amp; ààbò</b></td><td>OAuth 2.0 (PKCE) + JWT + àwọn kọ́kọ́rọ́ API + ìfàṣẹsí MCP tó ní ààlà · AES-256-GCM nígbà ìfipamọ́ · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ìfarapamọ́</b></td><td>wreq-js — fífarawé ìtẹ̀wọ́-ìka TLS JA3 / JA4, aṣojú alápele 3</td></tr>
+  <tr><td nowrap><b>Ìfaradà</b></td><td>Olùdáwọ́lé àyíká, ìfàsẹ́yìn tó ń pọ̀ lọ, ìdènà ọ̀pọ̀-ìbéèrè-lẹ́ẹ̀kan-náà, ìmúpadàbọ̀sípò ara-ẹni auto-combo</td></tr>
+  <tr><td nowrap><b>Ìkọ àkọsílẹ̀</b></td><td>pino — àwọn àkọsílẹ̀ JSON oníṣètò pẹ̀lú ọ̀rọ̀ àyíká ìbéèrè</td></tr>
+  <tr><td nowrap><b>Ìdánwò</b></td><td>Olùṣiṣẹ́ ìdánwò Node.js + Vitest — <b>àwọn ìkéde ìdánwò àìyípadà 56,000+</b> jákèjádò àwọn fáìlì ìdánwò tí a ń tọpinpin 7,800+ (ẹyọ̀, ìṣọ̀kan, E2E, ààbò, ètò àyíká)</td></tr>
+  <tr><td nowrap><b>Àwọn pẹpẹ</b></td><td>Kọ̀ǹpútà alágbèéká (Electron) · Android (Termux) · PWA (aṣàwákiri èyíkéyìí)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ìtẹ̀jáde npm aládàáṣiṣẹ́ + Docker Hub nígbà ìtújáde</td></tr>
+  <tr><td nowrap><b>Àwọn atọ́ka</b></td><td><a href="https://omniroute.online">Ojúlé wẹ́ẹ̀bù</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

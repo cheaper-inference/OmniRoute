@@ -25,7 +25,7 @@ import {
 import * as rot from "./rotationConfig.ts";
 import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
 import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
-import { getProviderCategory, isLocalProvider } from "../config/providerRegistry.ts";
+import { getProviderCategory } from "../config/providerRegistry.ts";
 import {
   DEFAULT_RESILIENCE_SETTINGS,
   resolveResilienceSettings,
@@ -498,11 +498,6 @@ export function isOAuthInvalidToken(errorText: string): boolean {
 }
 
 // ─── Resilience Profile Helper ──────────────────────────────────────────────
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function isCompatibleProvider(provider: string | null | undefined): boolean {
   return (
     typeof provider === "string" &&
@@ -2554,7 +2549,7 @@ export { isAccountSemaphoreFull } from "./accountSemaphore.ts";
  */
 export function getAccountHealth(
   account: AccountState | null | undefined,
-  model?: unknown
+  _model?: unknown
 ): number {
   if (!account) return 0;
   let score = 100;

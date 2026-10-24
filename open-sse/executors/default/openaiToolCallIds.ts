@@ -1,3 +1,4 @@
+import { isRecord } from "../../utils/recordHelpers.ts";
 import { createHash } from "node:crypto";
 
 /**
@@ -17,9 +18,6 @@ const OPENAI_TOOL_CALL_ID_PREFIX_LENGTH = 20;
 
 type JsonRecord = Record<string, unknown>;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 export function normalizeOpenAIToolCallId(id: string): string {
   if (id.length <= OPENAI_TOOL_CALL_ID_MAX_LENGTH) return id;

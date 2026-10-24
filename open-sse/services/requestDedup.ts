@@ -8,6 +8,7 @@
  * work across multiple process instances (no cross-instance dedup).
  */
 
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { createHash } from "node:crypto";
 
 const MAX_INFLIGHT = 1000;
@@ -32,11 +33,6 @@ export interface DedupResult<T> {
 
 const inflight = new Map<string, Promise<unknown>>();
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 /**
  * Extract the prompt-bearing content from a (possibly translated) request body.

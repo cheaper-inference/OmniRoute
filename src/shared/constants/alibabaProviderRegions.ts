@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 export const ALIBABA_PROVIDER_REGION_VALUES = ["global-sg", "china-beijing"] as const;
 
 export type AlibabaProviderRegion = (typeof ALIBABA_PROVIDER_REGION_VALUES)[number];
@@ -37,13 +38,6 @@ const REGIONAL_PROVIDER_IDS = new Set([
   "qwen-cloud",
   "qwen-cloud-token-plan",
 ]);
-
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 function canonicalProviderFamily(providerId: string): AlibabaProviderFamily | null {
   if (providerId === "alibaba-cn") return "alibaba";
   if (

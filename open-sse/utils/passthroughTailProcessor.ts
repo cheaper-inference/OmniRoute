@@ -1,3 +1,4 @@
+import { asRecord } from "./recordHelpers.ts";
 import { extractUsage } from "./usageTracking.ts";
 import { parseSSEDataPayload } from "./streamHelpers.ts";
 import {
@@ -51,9 +52,6 @@ export type PassthroughTailProcessorContext = {
   abortFailure: (failure: StreamFailurePayload, publicMessage: string) => void;
 };
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function getFunctionCallPendingKey(item: JsonRecord | null): string | null {
   if (!item) return null;

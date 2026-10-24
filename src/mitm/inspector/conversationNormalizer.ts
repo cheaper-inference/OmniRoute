@@ -5,6 +5,7 @@
  * Gemini payload shapes. It intentionally emits only the normalized block
  * types consumed by the inspector UI.
  */
+import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 
 import { mergeStream, parseSseStream } from "./sseMerger.ts";
 import type {
@@ -18,13 +19,6 @@ type JsonRecord = Record<string, unknown>;
 type NormalizedRole = NormalizedTurn["role"];
 
 const WRAPPER_KEYS = ["body", "payload", "data", "request", "requestBody", "response"];
-
-function asRecord(value: unknown): JsonRecord | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as JsonRecord)
-    : null;
-}
-
 function tryParseJson(value: unknown): unknown {
   if (typeof value !== "string") return value;
   const trimmed = value.trim();

@@ -6,6 +6,7 @@
  * usage provenance tells whether token counts were reported, estimated
  * locally, or absent. Nullable by design — unknown is never a claim.
  */
+import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 
 export type UsageProvenance = "reported" | "estimated" | "absent";
 
@@ -68,12 +69,6 @@ export function isNonTextRequest(requestType: unknown, path: unknown): boolean {
   if (typeof path === "string" && NON_TEXT_PATH_PATTERN.test(path)) return true;
   return false;
 }
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  return value as Record<string, unknown>;
-}
-
 function hasNonBlankText(value: unknown): boolean {
   return typeof value === "string" && value.trim().length > 0;
 }

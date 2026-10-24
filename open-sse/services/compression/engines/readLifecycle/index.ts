@@ -16,6 +16,7 @@
  * shape (assistant `tool_calls` + `role:"tool"` messages), linked by call id.
  */
 
+import { isRecord } from "../../../../utils/recordHelpers.ts";
 import { createCompressionStats } from "../../stats.ts";
 import type {
   CompressionEngine,
@@ -52,9 +53,6 @@ function classifyTool(name: unknown): "read" | "write" | null {
   return null;
 }
 
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return v !== null && typeof v === "object" && !Array.isArray(v);
-}
 
 /** Extract a file path from a tool input object across common field names. */
 function extractPath(input: unknown): string | null {

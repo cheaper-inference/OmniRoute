@@ -15,12 +15,14 @@ let memoMisses = 0;
 // the *current* hit rate during a traffic spike, not a diluted all-time
 // average. Bounded memory: RING_CAP * ~9 bytes ≈ 90 KB, fixed-size array.
 const RING_CAP = 10_000;
-const ring: Array<{ ts: number; hit: boolean } | undefined> = new Array(RING_CAP);
+const ringTs = new Float64Array(RING_CAP);
+const ringHit = new Uint8Array(RING_CAP);
 let ringHead = 0; // index of the NEXT write slot (wraps)
 let ringCount = 0; // entries written so far (clamped to RING_CAP)
 
 function recordLookup(hit: boolean): void {
-  ring[ringHead] = { ts: Date.now(), hit };
+  ringTs[ringHead] = Date.now();
+  ringHit[ringHead] = hit ? 1 : 0;
   ringHead = (ringHead + 1) % RING_CAP;
   if (ringCount < RING_CAP) ringCount++;
 }
@@ -34,10 +36,8 @@ function windowStats(windowMs: number): { hits: number; misses: number; hitRate:
   // an entry is older than the cutoff every earlier one is too — early break.
   for (let k = 0; k < ringCount; k++) {
     const idx = (ringHead - 1 - k + RING_CAP) % RING_CAP;
-    const e = ring[idx];
-    if (!e) break;
-    if (e.ts < cutoff) break;
-    if (e.hit) hits++;
+    if (ringTs[idx] < cutoff) break;
+    if (ringHit[idx] === 1) hits++;
     else misses++;
   }
   const total = hits + misses;
@@ -138,6 +138,20 @@ function boundedSet(key: string, value: CompressionResult): void {
   memoMap.set(key, value);
 }
 
+function cloneMessage(msg: unknown): unknown {
+  if (!msg || typeof msg !== "object") return msg;
+  return { ...(msg as Record<string, unknown>) };
+}
+
+function cloneBodyShallow(body: Record<string, unknown>): Record<string, unknown> {
+  if (!body || typeof body !== "object") return body;
+  const record: Record<string, unknown> = { ...body };
+  if ("messages" in record && Array.isArray(record.messages)) {
+    record.messages = record.messages.map(cloneMessage);
+  }
+  return record;
+}
+
 export function memoLookup(key: string): CompressionResult | null {
   lookupCountForTests++;
   const hit = memoMap.get(key);
@@ -148,21 +162,19 @@ export function memoLookup(key: string): CompressionResult | null {
   }
   memoHits++;
   recordLookup(true);
-  // Return a clone so downstream mutation cannot corrupt the cached value.
-  const cloned = structuredClone(hit);
-  if (cloned.stats) {
-    cloned.stats.memoHit = true;
-  }
-  return cloned;
+  return {
+    ...hit,
+    body: cloneBodyShallow(hit.body),
+    stats: hit.stats ? { ...hit.stats, memoHit: true } : null,
+  };
 }
 
 export function memoStore(key: string, result: CompressionResult): CompressionResult {
-  // Clone on STORE (memoLookup also clones on read) so the caller's live object — which
-  // an async engine may still hold a sub-ref to — cannot later corrupt the cached entry.
-  // Returns the stored clone so callers that need a fresh instance (the common
-  // `memoStore(key, result); return memoLookup(key)!` idiom) can avoid a redundant
-  // second multi-MB deep clone of the body on the way out.
-  const stored = structuredClone(result);
+  const stored: CompressionResult = {
+    ...result,
+    body: cloneBodyShallow(result.body),
+    stats: result.stats ? { ...result.stats } : null,
+  };
   boundedSet(key, stored);
   return stored;
 }
@@ -206,7 +218,8 @@ export function clearMemoStore(): void {
   lookupCountForTests = 0;
   memoHits = 0;
   memoMisses = 0;
-  for (let i = 0; i < RING_CAP; i++) ring[i] = undefined;
+  ringTs.fill(0);
+  ringHit.fill(0);
   ringHead = 0;
   ringCount = 0;
 }

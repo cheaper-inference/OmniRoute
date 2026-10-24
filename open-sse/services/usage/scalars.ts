@@ -8,10 +8,10 @@
  * per-provider fetcher leaves) import without a cycle. Behavior-preserving move.
  */
 
-type JsonRecord = Record<string, unknown>;
+import { toRecord as canonicalToRecord } from "../../utils/recordHelpers.ts";
 
-export function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+export function toRecord(value: unknown): Record<string, unknown> {
+  return canonicalToRecord(value);
 }
 
 export function toNumber(value: unknown, fallback = 0): number {

@@ -21,9 +21,40 @@
 
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
-import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
+import {
+  resolveClientApiKey,
+  type ResolvedClientApiKey,
+} from "@/sse/services/clientApiKeyResolver";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
+
+type CachedKeyResolution = {
+  sig: string;
+  result: Promise<ResolvedClientApiKey>;
+};
+
+const clientApiKeyResolutionCache = new WeakMap<object, CachedKeyResolution>();
+
+/**
+ * Resolve client API key with WeakMap request-level caching.
+ * Prevents duplicate SHA-256 and DB lookups when called multiple times on the same request.
+ */
+export function getCachedResolvedClientApiKey(request: Request): Promise<ResolvedClientApiKey> {
+  const reqObj = request as unknown as object;
+  const authHeader = request.headers?.get?.("authorization") ?? "";
+  const apiKeyHeader = request.headers?.get?.("x-api-key") ?? "";
+  const googHeader = request.headers?.get?.("x-goog-api-key") ?? "";
+  const sig = `${authHeader}|${apiKeyHeader}|${googHeader}`;
+
+  const cached = clientApiKeyResolutionCache.get(reqObj);
+  if (cached && cached.sig === sig) {
+    return cached.result;
+  }
+
+  const promise = resolveClientApiKey(request);
+  clientApiKeyResolutionCache.set(reqObj, { sig, result: promise });
+  return promise;
+}
 
 /**
  * Authenticate a client-API request at the route level.
@@ -35,7 +66,7 @@ import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
 export async function enforceClientApiRouteAuth(request: Request): Promise<Response | null> {
   // Any presented credential that validates is accepted — a stale Bearer next
   // to a valid x-api-key must not 401 here when `clientApiPolicy` admitted it.
-  const { apiKey: apiKeyRaw, valid } = await resolveClientApiKey(request);
+  const { apiKey: apiKeyRaw, valid } = await getCachedResolvedClientApiKey(request);
 
   if (valid) return null;
   if (apiKeyRaw) {

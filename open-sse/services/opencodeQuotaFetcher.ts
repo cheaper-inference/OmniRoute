@@ -9,6 +9,7 @@
  * parsing failures remain fail-open so quota checks never block on missing data.
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import {
   registerQuotaCacheInvalidator,
   registerQuotaFetcher,
@@ -91,11 +92,6 @@ if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 type ParsedUsageWindow = {
   percentUsed: number;

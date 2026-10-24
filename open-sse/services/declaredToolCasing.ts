@@ -28,13 +28,11 @@
  * when the request itself answers the question.
  */
 
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { restoreClaudeToolName } from "./claudeCodeToolRemapper.ts";
 
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function trimmedName(record: JsonRecord | null): string {
   return typeof record?.name === "string" ? record.name.trim() : "";

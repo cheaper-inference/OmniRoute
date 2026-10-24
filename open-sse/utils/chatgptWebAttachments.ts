@@ -1,3 +1,4 @@
+import { isRecord } from "./recordHelpers.ts";
 import { fetchRemoteMedia } from "@/shared/network/remoteImageFetch";
 
 // Re-exported for other engine media downloaders (DashScope TTS) so the engine keeps a
@@ -63,9 +64,6 @@ export class ChatGptWebAttachmentError extends Error {
   }
 }
 
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function optionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;

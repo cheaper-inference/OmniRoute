@@ -1,3 +1,4 @@
+import { toRecord } from "../utils/recordHelpers.ts";
 import { getCodexRequestDefaults } from "../../src/lib/providers/requestDefaults.ts";
 import { getProviderConnections } from "../../src/lib/db/providers.ts";
 import { providerLacksModelListing } from "../../src/lib/providers/modelListingCapability.ts";
@@ -40,9 +41,6 @@ type McpCatalogRequestSpec = {
   thinkingEffort?: string;
 };
 
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function toString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;

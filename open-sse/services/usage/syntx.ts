@@ -5,6 +5,7 @@
  *   GET https://api.syntx.ai/api/v1/user/subscription?ref=false  → tokens (wallet string)
  *   GET https://api.syntx.ai/api/v1/llm/limits                   → plan, window_6h/7d percent_left
  */
+import { asRecord } from "../../utils/recordHelpers.ts";
 import { SYNTX_API_BASE, looksLikeJwt, resolveSyntxToken, syntxAuthHeaders } from "../syntxAuth.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { parseResetTime, type UsageQuota } from "./quota.ts";
@@ -28,11 +29,6 @@ export type SyntxLimits = {
   window_7d?: SyntxLimitWindow;
 };
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 const SIX_HOURS_MS = 6 * 3600_000;
 const SEVEN_DAYS_MS = 7 * 24 * 3600_000;

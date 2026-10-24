@@ -8,6 +8,7 @@
  * substring matching (no regex / no ReDoS) and a bounded dot-path resolver (no eval).
  */
 
+import { isRecord } from "../../utils/recordHelpers.ts";
 export type JsonPathCondition = "exists" | "nonEmpty" | "equals" | "notEquals";
 
 export interface JsonPathPredicate {
@@ -167,11 +168,7 @@ export function extractContentText(json: unknown): string {
   return "";
 }
 
-type JsonRecord = Record<string, unknown>;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
 
 function validToolId(value: unknown): value is string {
   return typeof value === "string" && value.length <= 512 && /^[^\s\x00-\x1f\x7f]+$/.test(value);

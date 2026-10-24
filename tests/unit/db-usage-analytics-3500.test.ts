@@ -40,6 +40,7 @@ function insertUsageHistory(row: Record<string, unknown>) {
     connection_id: null,
     api_key_id: null,
     api_key_name: null,
+    provider_cost_usd: null,
     ...row,
     timestamp: row.timestamp ?? new Date().toISOString(),
   };
@@ -48,11 +49,11 @@ function insertUsageHistory(row: Record<string, unknown>) {
     `INSERT INTO usage_history (
       timestamp, provider, model,
       tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
-      service_tier, success, latency_ms, connection_id, api_key_id, api_key_name
+      service_tier, success, latency_ms, connection_id, api_key_id, api_key_name, provider_cost_usd
     ) VALUES (
       @timestamp, @provider, @model,
       @tokens_input, @tokens_output, @tokens_cache_read, @tokens_cache_creation, @tokens_reasoning,
-      @service_tier, @success, @latency_ms, @connection_id, @api_key_id, @api_key_name
+      @service_tier, @success, @latency_ms, @connection_id, @api_key_id, @api_key_name, @provider_cost_usd
     )`
   ).run(full);
 }
@@ -255,13 +256,21 @@ test("#3500 getDailyUsage — groups by date, ascending order", () => {
 });
 
 // ---------------------------------------------------------------------------
-// getDailyCostRows
+// deriveDailyCostRows
 // ---------------------------------------------------------------------------
 
-test("#3500 getDailyCostRows — groups by date+provider+model+serviceTier", () => {
+test("#3500 deriveDailyCostRows — groups by date+provider+model+serviceTier", () => {
   const rawCutoffDate = "2020-01-01";
   const ts = "2025-04-01T12:00:00.000Z";
 
+  insertUsageHistory({
+    timestamp: "2025-04-02T12:00:00.000Z",
+    provider: "anthropic",
+    model: "claude-3-5-sonnet",
+    tokens_input: 25,
+    tokens_output: 50,
+    service_tier: "priority",
+  });
   insertUsageHistory({
     timestamp: ts,
     provider: "anthropic",
@@ -287,14 +296,57 @@ test("#3500 getDailyCostRows — groups by date+provider+model+serviceTier", () 
     apiKeyParams: {},
   });
 
-  const rows = mod.getDailyCostRows(unifiedSource, unifiedParams);
+  const rows = mod.deriveDailyCostRows(mod.getModelUsageMatrixRows(unifiedSource, unifiedParams));
   const row = rows.find((r) => r.provider === "anthropic" && r.model === "claude-3-5-sonnet");
 
   assert.ok(row, "anthropic/claude row present");
   assert.equal(row!.date, "2025-04-01");
+  assert.equal(row!.model, "claude-3-5-sonnet");
   assert.equal(row!.serviceTier, "priority");
   assert.equal(row!.promptTokens, 150, "promptTokens aggregated");
   assert.equal(row!.completionTokens, 300, "completionTokens aggregated");
+});
+
+test("#3500 deriveDailyCostRows — keeps one row per day, matrix totals preserved", () => {
+  const { unifiedSource, unifiedParams } = mod.buildUnifiedSource({
+    sinceIso: "2025-04-01T00:00:00.000Z",
+    untilIso: "2025-04-02T23:59:59.000Z",
+    rawCutoffDate: "2020-01-01",
+    apiKeyWhere: "",
+    apiKeyParams: {},
+  });
+
+  const matrix = mod.getModelUsageMatrixRows(unifiedSource, unifiedParams);
+  const rows = mod.deriveDailyCostRows(matrix);
+  const april1 = rows.filter((r) => r.date === "2025-04-01");
+  const april2 = rows.filter((r) => r.date === "2025-04-02");
+
+  assert.equal(april1.length, 1, "one row for 2025-04-01");
+  assert.equal(april2.length, 1, "one row for 2025-04-02");
+  assert.equal(april1[0]!.promptTokens, 150, "april 1 keeps its own subtotal");
+  assert.equal(april2[0]!.promptTokens, 25, "april 2 keeps its own subtotal");
+  assert.equal(
+    rows.reduce((sum, r) => sum + r.promptTokens, 0),
+    matrix.reduce((sum, r) => sum + r.promptTokens, 0),
+    "per-day roll-up preserves the matrix total"
+  );
+});
+
+test("#3500 deriveModelUsageRows — collapses the date across days", () => {
+  const { unifiedSource, unifiedParams } = mod.buildUnifiedSource({
+    sinceIso: "2025-04-01T00:00:00.000Z",
+    untilIso: "2025-04-02T23:59:59.000Z",
+    rawCutoffDate: "2020-01-01",
+    apiKeyWhere: "",
+    apiKeyParams: {},
+  });
+
+  const rows = mod.deriveModelUsageRows(mod.getModelUsageMatrixRows(unifiedSource, unifiedParams));
+  const row = rows.find((r) => r.provider === "anthropic" && r.model === "claude-3-5-sonnet");
+
+  assert.ok(row, "single window-wide row for the model");
+  assert.equal(row!.date, null, "a multi-day roll-up carries no single date");
+  assert.equal(row!.promptTokens, 175, "tokens summed across both days");
 });
 
 // ---------------------------------------------------------------------------
@@ -315,10 +367,10 @@ test("#3500 getHeatmapRows — groups by date, respects conditions", () => {
 });
 
 // ---------------------------------------------------------------------------
-// getModelUsageRows
+// deriveModelUsageRows
 // ---------------------------------------------------------------------------
 
-test("#3500 getModelUsageRows — returns per-model aggregates", () => {
+test("#3500 deriveModelUsageRows — returns per-model aggregates", () => {
   const rawCutoffDate = "2020-01-01";
   const ts = "2025-06-01T10:00:00.000Z";
 
@@ -349,7 +401,7 @@ test("#3500 getModelUsageRows — returns per-model aggregates", () => {
     apiKeyParams: {},
   });
 
-  const rows = mod.getModelUsageRows(unifiedSource, unifiedParams);
+  const rows = mod.deriveModelUsageRows(mod.getModelUsageMatrixRows(unifiedSource, unifiedParams));
   const row = rows.find((r) => r.model === "gpt-5" && r.provider === "openai");
 
   assert.ok(row, "gpt-5/openai row present");
@@ -361,10 +413,10 @@ test("#3500 getModelUsageRows — returns per-model aggregates", () => {
 });
 
 // ---------------------------------------------------------------------------
-// getProviderCostRows
+// deriveProviderCostRows
 // ---------------------------------------------------------------------------
 
-test("#3500 getProviderCostRows — groups by provider+model+serviceTier", () => {
+test("#3500 deriveProviderCostRows — groups by provider+model+serviceTier", () => {
   const rawCutoffDate = "2020-01-01";
   const ts = "2025-07-01T12:00:00.000Z";
 
@@ -385,7 +437,9 @@ test("#3500 getProviderCostRows — groups by provider+model+serviceTier", () =>
     apiKeyParams: {},
   });
 
-  const rows = mod.getProviderCostRows(unifiedSource, unifiedParams);
+  const rows = mod.deriveProviderCostRows(
+    mod.getModelUsageMatrixRows(unifiedSource, unifiedParams)
+  );
   const row = rows.find((r) => r.provider === "gemini");
 
   assert.ok(row, "gemini row present");
@@ -393,10 +447,10 @@ test("#3500 getProviderCostRows — groups by provider+model+serviceTier", () =>
 });
 
 // ---------------------------------------------------------------------------
-// getProviderUsageRows
+// deriveProviderUsageRows
 // ---------------------------------------------------------------------------
 
-test("#3500 getProviderUsageRows — aggregates per provider", () => {
+test("#3500 deriveProviderUsageRows — aggregates per provider", () => {
   const rawCutoffDate = "2020-01-01";
   const ts = "2025-08-01T12:00:00.000Z";
 
@@ -425,7 +479,9 @@ test("#3500 getProviderUsageRows — aggregates per provider", () => {
     apiKeyParams: {},
   });
 
-  const rows = mod.getProviderUsageRows(unifiedSource, unifiedParams);
+  const rows = mod.deriveProviderUsageRows(
+    mod.getModelUsageMatrixRows(unifiedSource, unifiedParams)
+  );
   const row = rows.find((r) => r.provider === "mistral");
 
   assert.ok(row, "mistral row present");
@@ -485,10 +541,10 @@ test("#3500 getApiKeyMetadataRows — returns api key metadata with lastUsed", (
 });
 
 // ---------------------------------------------------------------------------
-// getServiceTierUsageRows
+// deriveServiceTierUsageRows
 // ---------------------------------------------------------------------------
 
-test("#3500 getServiceTierUsageRows — groups by serviceTier+provider+model", () => {
+test("#3500 deriveServiceTierUsageRows — groups by serviceTier+provider+model", () => {
   const rawCutoffDate = "2020-01-01";
   const ts = "2025-09-01T12:00:00.000Z";
 
@@ -525,7 +581,9 @@ test("#3500 getServiceTierUsageRows — groups by serviceTier+provider+model", (
     apiKeyParams: {},
   });
 
-  const rows = mod.getServiceTierUsageRows(unifiedSource, unifiedParams);
+  const rows = mod.deriveServiceTierUsageRows(
+    mod.getModelUsageMatrixRows(unifiedSource, unifiedParams)
+  );
 
   const flexRow = rows.find((r) => r.serviceTier === "flex" && r.model === "gpt-5");
   const stdRow = rows.find((r) => r.serviceTier === "standard" && r.model === "gpt-5");
@@ -697,4 +755,142 @@ test("#3500 buildUnifiedSource UNION — summary rows merged into getDailyUsage 
   assert.ok(june1, "2023-06-01 summary row is visible through UNION");
   // daily_usage_summary synthesizes a timestamp at noon; totalTokens = 500+750 = 1250
   assert.equal(june1!.totalTokens, 1250, "tokens from summary row: 500+750=1250");
+});
+
+// ---------------------------------------------------------------------------
+// Cost attribution — stored cost split and summary token pricing
+// ---------------------------------------------------------------------------
+
+function matrixFor(
+  provider: string,
+  model: string,
+  sinceIso: string,
+  untilIso: string,
+  rawCutoffDate: string
+) {
+  const { unifiedSource, unifiedParams } = mod.buildUnifiedSource({
+    sinceIso,
+    untilIso,
+    rawCutoffDate,
+    apiKeyWhere: "",
+    apiKeyParams: {},
+  });
+  return mod
+    .getModelUsageMatrixRows(unifiedSource, unifiedParams)
+    .filter((row) => row.provider === provider && row.model === model);
+}
+
+test("#3500 getModelUsageMatrixRows — splits aggregated and raw stored cost, both additive", () => {
+  const day = "2024-09-01";
+  insertUsageHistory({
+    timestamp: `${day}T10:00:00.000Z`,
+    provider: "splita",
+    model: "m1",
+    provider_cost_usd: 0.5,
+  });
+  insertUsageHistory({
+    timestamp: `${day}T11:00:00.000Z`,
+    provider: "splita",
+    model: "m1",
+    provider_cost_usd: 0.25,
+  });
+  insertDailyUsageSummary({
+    date: "2024-08-20",
+    provider: "splita",
+    model: "m1",
+    total_cost: 1.25,
+  });
+
+  const rows = matrixFor(
+    "splita",
+    "m1",
+    "2024-08-01T00:00:00.000Z",
+    "2024-09-30T00:00:00.000Z",
+    "2024-09-01"
+  );
+  const summaryRow = rows.find((row) => row.isAggregated > 0);
+  const rawRow = rows.reduce(
+    (acc, row) => (row.isAggregated > 0 ? acc : acc + row.storedCost),
+    0
+  );
+
+  assert.ok(summaryRow, "summary leg present");
+  assert.equal(summaryRow!.aggregatedStoredCost, 1.25, "aggregated leg carries total_cost");
+  assert.equal(summaryRow!.rawStoredCost, 0, "aggregated row contributes no raw stored cost");
+  assert.equal(summaryRow!.storedCost, 1.25, "storedCost stays the plain sum");
+  assert.equal(rawRow, 0.75, "usage_history rows keep their provider-reported cost");
+});
+
+test("#3500 deriveModelUsageRows — aggregated and raw stored cost survive the roll-up", () => {
+  const day = "2024-09-02";
+  insertUsageHistory({
+    timestamp: `${day}T10:00:00.000Z`,
+    provider: "splitb",
+    model: "m2",
+    provider_cost_usd: 1.0,
+  });
+  insertDailyUsageSummary({ date: "2024-08-21", provider: "splitb", model: "m2", total_cost: 2.5 });
+
+  const { unifiedSource, unifiedParams } = mod.buildUnifiedSource({
+    sinceIso: "2024-08-01T00:00:00.000Z",
+    untilIso: "2024-09-30T00:00:00.000Z",
+    rawCutoffDate: "2024-09-01",
+    apiKeyWhere: "",
+    apiKeyParams: {},
+  });
+  const matrix = mod.getModelUsageMatrixRows(unifiedSource, unifiedParams);
+  const collapsed = mod.deriveModelUsageRows(matrix).find((row) => row.model === "m2");
+
+  assert.ok(collapsed, "collapsed model row present");
+  assert.equal(collapsed!.aggregatedStoredCost, 2.5, "aggregated cost rolled up across days");
+  assert.equal(collapsed!.rawStoredCost, 1, "raw stored cost rolled up across days");
+  assert.equal(collapsed!.storedCost, 3.5, "storedCost equals the two legs combined");
+});
+
+test("#3500 summary cost columns — priced summaries keep their tokens out of the priceable sums", () => {
+  const { unifiedSource } = mod.buildUnifiedSource({
+    sinceIso: "2024-07-01T00:00:00.000Z",
+    untilIso: "2024-07-31T00:00:00.000Z",
+    rawCutoffDate: "2024-07-31",
+    apiKeyWhere: "",
+    apiKeyParams: {},
+  });
+
+  assert.ok(
+    unifiedSource.includes("CASE WHEN COALESCE(total_cost, 0.0) = 0.0 THEN total_input_tokens ELSE 0 END"),
+    "priced summary rows report zero priceable input tokens"
+  );
+  assert.ok(
+    unifiedSource.includes("CASE WHEN COALESCE(total_cost, 0.0) = 0.0 THEN total_output_tokens ELSE 0 END"),
+    "priced summary rows report zero priceable output tokens"
+  );
+});
+
+test("#3500 summary cost columns — zero-cost summaries still expose their token totals", () => {
+  const pastDate = "2023-11-01";
+  insertDailyUsageSummary({
+    date: pastDate,
+    provider: "legacyzero",
+    model: "gemini-1.0",
+    total_input_tokens: 400,
+    total_output_tokens: 600,
+    total_requests: 3,
+    total_cost: 0.0,
+  });
+
+  const { unifiedSource, unifiedParams } = mod.buildUnifiedSource({
+    sinceIso: `${pastDate}T00:00:00.000Z`,
+    untilIso: `${pastDate}T23:59:59.000Z`,
+    rawCutoffDate: "2023-11-02",
+    apiKeyWhere: "",
+    apiKeyParams: {},
+  });
+  const row = mod
+    .getModelUsageMatrixRows(unifiedSource, unifiedParams)
+    .find((candidate) => candidate.provider === "legacyzero");
+
+  assert.ok(row, "legacy zero-cost summary row present");
+  assert.equal(row!.storedCost, 0, "no stored cost to bill");
+  assert.equal(row!.costPromptTokens, 400, "input tokens stay priceable");
+  assert.equal(row!.costCompletionTokens, 600, "output tokens stay priceable");
 });

@@ -1,5 +1,6 @@
 // Pure Claude-web payload construction (types + transforms + default tools/style).
 // Extracted verbatim from claude-web.ts. No host state, no fetch/auth.
+import { isRecord } from "../../utils/recordHelpers.ts";
 import { extractClaudeWebAttachments } from "./attachments.ts";
 import { randomUUID } from "crypto";
 
@@ -85,9 +86,6 @@ export interface ClaudeWebStreamChunk {
 
 type ClaudeWebTool = ClaudeWebRequestPayload["tools"][number];
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
 
 function transformOpenAiTool(candidate: unknown): ClaudeWebTool | null {
   if (!isRecord(candidate) || candidate.type !== "function" || !isRecord(candidate.function)) {

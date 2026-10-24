@@ -1,3 +1,4 @@
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import { createHash } from "crypto";
 
 import { getProviderConnections, updateProviderConnection } from "@/lib/db/providers";
@@ -104,11 +105,6 @@ export interface ExecuteProviderAutopilotActionInput {
 
 const TERMINAL_STATUSES = new Set(["banned", "expired", "credits_exhausted"]);
 const OPEN_BREAKER_STATES = new Set(["OPEN", "HALF_OPEN"]);
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }

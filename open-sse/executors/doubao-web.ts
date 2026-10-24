@@ -7,6 +7,7 @@
  * Endpoint: POST https://www.dola.com/chat/completion
  * Auth: Session cookies from www.dola.com
  */
+import { asRecord } from "../utils/recordHelpers.ts";
 import { randomUUID } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { makeExecutorErrorResult as makeErrorResult, normalizeCookie } from "../utils/error.ts";
@@ -26,9 +27,6 @@ export interface DolaTextExtractionState {
   bufferedDeltas: string[];
 }
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function toString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";

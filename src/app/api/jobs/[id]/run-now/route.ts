@@ -10,7 +10,7 @@
  * one. Cancelling here does not cancel the job -- the handler keeps running.
  */
 import { NextResponse } from "next/server";
-
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 import { getJobRegistry } from "@/lib/jobRegistry";
 
@@ -18,7 +18,10 @@ export const dynamic = "force-dynamic";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 
-export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const registry = getJobRegistry();

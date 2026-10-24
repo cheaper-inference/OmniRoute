@@ -8,10 +8,11 @@
  * (no cycles). Logic unchanged; combo.ts imports them back for compatibility.
  */
 
+import { isRecord as canonicalIsRecord } from "../../utils/recordHelpers.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
+  return canonicalIsRecord(value);
 }
 
 export function dedupeTargetsByExecutionKey(targets: ResolvedComboTarget[]) {

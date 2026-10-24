@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 type CcCompatibleRequestDefaultsForm = {
   ccCompatibleContext1m: boolean;
   ccCompatibleRedactThinking: boolean;
@@ -9,13 +10,6 @@ const CC_COMPATIBLE_BOOLEAN_DEFAULTS = [
   ["redactThinking", "ccCompatibleRedactThinking"],
   ["summarizeThinking", "ccCompatibleSummarizeThinking"],
 ] as const;
-
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 export function getCcCompatibleRequestDefaults(
   formData: CcCompatibleRequestDefaultsForm
 ): Record<string, true> | undefined {

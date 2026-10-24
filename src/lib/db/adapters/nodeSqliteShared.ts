@@ -74,7 +74,9 @@ export function createNodeSqliteAdapterFromDatabase(
     if (stmt && "finalize" in stmt) {
       try {
         (stmt as NodeSqliteStatement & { finalize: () => void }).finalize();
-      } catch {}
+      } catch (err) {
+        console.debug?.("[DB] Statement finalization failed:", err);
+      }
     }
   }
 
@@ -117,7 +119,9 @@ export function createNodeSqliteAdapterFromDatabase(
       try {
         db.exec(`ROLLBACK TO "${sp}"`);
         db.exec(`RELEASE "${sp}"`);
-      } catch {}
+      } catch (rollbackErr) {
+        console.debug?.("[DB] Savepoint rollback/release failed:", rollbackErr);
+      }
       throw err;
     }
   }
@@ -136,7 +140,9 @@ export function createNodeSqliteAdapterFromDatabase(
     } catch (error) {
       try {
         db.exec("ROLLBACK");
-      } catch {} // The failed transaction may already have released its write lock.
+      } catch (rollbackErr) {
+        console.debug?.("[DB] Immediate transaction rollback failed:", rollbackErr);
+      }
       throw error;
     } finally {
       transactionDepth -= 1;
@@ -146,16 +152,22 @@ export function createNodeSqliteAdapterFromDatabase(
   function close() {
     try {
       onClose?.();
-    } catch {}
+    } catch (err) {
+      console.debug?.("[DB] onClose hook failed during close:", err);
+    }
     try {
       for (const entry of stmtCache.values()) {
         finalizeStatement(entry.stmt);
       }
       stmtCache.clear();
-    } catch {}
+    } catch (err) {
+      console.debug?.("[DB] Statement cache clear failed during close:", err);
+    }
     try {
       db.close();
-    } catch {}
+    } catch (err) {
+      console.debug?.("[DB] Database close failed:", err);
+    }
     _isOpen = false;
   }
 
@@ -221,13 +233,17 @@ export function createNodeSqliteAdapterFromDatabase(
 
       try {
         db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-      } catch {}
+      } catch (err) {
+        console.debug?.("[DB] WAL checkpoint failed before file copy backup:", err);
+      }
       await fs.promises.copyFile(filePath, destination);
     },
     checkpoint(mode = "TRUNCATE"): void {
       try {
         db.exec(`PRAGMA wal_checkpoint(${mode})`);
-      } catch {}
+      } catch (err) {
+        console.debug?.(`[DB] WAL checkpoint(${mode}) failed:`, err);
+      }
     },
     close,
     get raw() {

@@ -25,6 +25,7 @@
  * `isTerminalConnectionStatus`, `isCodexScopeUnavailable`, and the quota-policy
  * check wrapping `evaluateQuotaLimitPolicy` — are injected as callbacks.
  */
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 import { createHash } from "crypto";
 import {
@@ -46,13 +47,6 @@ import * as log from "../utils/logger";
 import { readHeaderValue } from "./headerReader.ts";
 
 export { readHeaderValue } from "./headerReader.ts";
-
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 /** Maximum accepted session-key input length. Longer identifiers are rejected before processing. */
 const SESSION_KEY_MAX_INPUT_LEN = 4096;
 

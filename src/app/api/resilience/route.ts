@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { NextResponse } from "next/server";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { getSettings, updateSettings } from "@/lib/db/settings";
@@ -15,11 +16,6 @@ import { resetAllCircuitBreakers } from "@/shared/utils/circuitBreaker";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
 type JsonRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function getErrorMessage(error: unknown, fallback: string): string {
   return sanitizeErrorMessage(error) || fallback;
 }

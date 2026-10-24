@@ -171,9 +171,9 @@ async function resolveAccountName(connectionId: string | null | undefined) {
   }
 
   try {
-    const { getProviderConnections } = await import("@/lib/db/providers");
-    const connections = await getProviderConnections();
-    const conn = connections.find((item) => item.id === connectionId);
+    // Dynamic import avoids circular dependency between callLogs and providers
+    const { getProviderConnectionById } = await import("@/lib/db/providers");
+    const conn = await getProviderConnectionById(connectionId);
     if (conn) {
       account = pickDisplayValue(
         [toStringOrNull(conn.name), toStringOrNull(conn.email)],

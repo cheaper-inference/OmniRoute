@@ -1,3 +1,4 @@
+import { toRecord } from "../utils/recordHelpers.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 
@@ -140,9 +141,6 @@ function readSSEEvents(rawSSE) {
   return events;
 }
 
-function toRecord(value) {
-  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
-}
 
 function toString(value, fallback = "") {
   return typeof value === "string" ? value : fallback;

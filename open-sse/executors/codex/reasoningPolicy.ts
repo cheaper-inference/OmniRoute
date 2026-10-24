@@ -1,3 +1,4 @@
+import { asRecord } from "../../utils/recordHelpers.ts";
 import {
   CODEX_EFFORT_ORDER as EFFORT_ORDER,
   getCodexAliasEffortCap,
@@ -6,9 +7,6 @@ import {
 } from "./reasoningSuffix.ts";
 
 type RecordValue = Record<string, unknown>;
-function asRecord(value: unknown): RecordValue {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as RecordValue) : {};
-}
 function effort(value: unknown): string | undefined {
   return typeof value === "string" ? value.trim().toLowerCase() || undefined : undefined;
 }

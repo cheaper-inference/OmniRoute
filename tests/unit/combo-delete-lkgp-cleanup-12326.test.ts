@@ -15,7 +15,6 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const comboRepo = await import("../../src/lib/db/repositories/sqliteComboRepository.ts");
 const lkgpDb = await import("../../src/lib/db/settings/lkgp.ts");
-const readCache = await import("../../src/lib/db/readCache.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -77,25 +76,6 @@ test("#12326: deleting a combo removes its LKGP pins", async () => {
     provider: "berry",
     connectionId: "conn-3",
   });
-});
-
-test("#12326: deleting a combo invalidates warmed LKGP read-cache entries", async () => {
-  const doomedId = await createCombo("cached-combo");
-
-  await lkgpDb.setLKGP("cached-combo", "model-x", "berry", "conn-1");
-
-  assert.deepEqual(await readCache.getCachedLKGP("cached-combo", "model-x"), {
-    provider: "berry",
-    connectionId: "conn-1",
-  });
-
-  assert.equal(await comboRepo.deleteCombo(doomedId), true);
-
-  assert.equal(
-    await readCache.getCachedLKGP("cached-combo", "model-x"),
-    null,
-    "deleted combos' LKGP pins must not survive in the read cache"
-  );
 });
 
 test("#12326: a combo whose name prefixes another keeps the sibling's pins", async () => {

@@ -11,6 +11,7 @@
  * Uses globalThis to share config across Turbopack module instances (#2470).
  */
 
+import { isRecord } from "../utils/recordHelpers.ts";
 const GLOBAL_KEY = "__omniroute_systemPrompt_config__";
 
 interface SystemPromptConfig {
@@ -20,9 +21,6 @@ interface SystemPromptConfig {
   prompt: string;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
 
 function isSystemMessage(value: unknown): value is Record<string, unknown> {
   return isRecord(value) && (value.role === "system" || value.role === "developer");

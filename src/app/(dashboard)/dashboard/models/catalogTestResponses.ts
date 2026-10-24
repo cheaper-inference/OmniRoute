@@ -1,3 +1,4 @@
+import { isRecord } from "@/shared/utils/recordHelpers";
 import {
   classifyError,
   getComboTestKey,
@@ -41,10 +42,6 @@ export interface ComboTestResponse {
 export type RequestTarget =
   | { targetType: "model"; providerId: string; modelId: string }
   | { targetType: "combo"; comboName: string };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function asNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;

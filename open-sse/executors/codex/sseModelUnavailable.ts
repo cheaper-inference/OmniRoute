@@ -14,6 +14,7 @@
  * happens to quote the phrase is never classified.
  */
 
+import { asRecordOrNull as asRecord } from "../../utils/recordHelpers.ts";
 export const CODEX_SSE_MODEL_UNAVAILABLE_PATTERNS = [
   "configured model is unavailable from the provider",
   "not offered on this account",
@@ -21,11 +22,6 @@ export const CODEX_SSE_MODEL_UNAVAILABLE_PATTERNS = [
 
 const ERROR_EVENT_TYPES = new Set(["error", "response.failed"]);
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function errorFrameMessage(frame: string): string | null {
   let eventName = "";

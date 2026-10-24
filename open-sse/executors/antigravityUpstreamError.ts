@@ -7,6 +7,7 @@
  * fixed allowlist of scalar envelope fields and classifications; arbitrary
  * text, nested details, identifiers, and request-derived values are discarded.
  */
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { isGeoBlockedError } from "../services/errorClassifier.ts";
 
@@ -63,10 +64,6 @@ export type AntigravityValidationDiagnostic = {
   schemaKeyword?: SchemaKeyword;
 };
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  return value as Record<string, unknown>;
-}
 
 function readFirst(record: Record<string, unknown>, keys: readonly string[]): unknown {
   for (const key of keys) {

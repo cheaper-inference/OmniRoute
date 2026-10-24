@@ -6,6 +6,7 @@
  * Replaces the stub `extractLlmMetadata` left in `kindDetector.ts` by F1.
  * Cost estimation uses the minimal pricing table in `pricing.ts` (R5-11).
  */
+import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 
 import { detectKind } from "./kindDetector.ts";
 import { estimateCost } from "./pricing.ts";
@@ -54,14 +55,6 @@ const API_KIND_MATCHERS: ApiKindMatch[] = [
   { pattern: /\/generateContent/i, apiKind: "generateContent" },
   { pattern: /\/(v1|v1beta)\/completions/i, apiKind: "completions" },
 ];
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value as Record<string, unknown>;
-  }
-  return null;
-}
-
 function safeParseJson(value: string | null | undefined): unknown {
   if (!value) return null;
   try {

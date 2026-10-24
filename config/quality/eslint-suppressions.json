@@ -294,9 +294,6 @@
     }
   },
   "open-sse/mcp-server/tools/pickFastestModel.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "no-restricted-syntax": {
       "count": 1
     }
@@ -314,11 +311,6 @@
   "open-sse/services/__tests__/tierResolver.test.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
-    }
-  },
-  "open-sse/services/accountFallback.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
     }
   },
   "open-sse/services/adobeFireflySession.ts": {
@@ -521,11 +513,6 @@
   "open-sse/services/tierConfig.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 3
-    }
-  },
-  "open-sse/services/tokenLimitCounter.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "open-sse/services/tokenRefresh.ts": {

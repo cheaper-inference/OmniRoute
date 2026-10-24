@@ -3,11 +3,9 @@
 // Split out of commandCode.ts to keep that file under the 1200-line file-size
 // gate; the logic is self-contained and only two symbols are needed by callers.
 
+import { isRecord } from "../../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function stringValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;

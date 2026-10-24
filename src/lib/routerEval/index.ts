@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 type JsonRecord = Record<string, unknown>;
 
 export type RouterObservation = {
@@ -107,11 +108,6 @@ export type RouterEvalArtifactMetadata = {
     corpus?: string;
   };
 };
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function asString(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim().length > 0 ? value : fallback;
 }

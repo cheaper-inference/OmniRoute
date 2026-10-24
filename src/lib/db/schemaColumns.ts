@@ -329,9 +329,27 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
     );
     db.exec("CREATE INDEX IF NOT EXISTS idx_cl_correlation_id ON call_logs(correlation_id)");
     db.exec("CREATE INDEX IF NOT EXISTS idx_cl_session_tag ON call_logs(session_tag)");
+    db.exec(
+      "CREATE INDEX IF NOT EXISTS idx_cl_conn_model_state_time ON call_logs(connection_id, model, detail_state, timestamp DESC) WHERE artifact_relpath IS NOT NULL"
+    );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.warn("[DB] Failed to verify call_logs schema:", message);
+  }
+}
+
+export function ensureCostLedgerColumns(db: SqliteDatabase) {
+  try {
+    const tableExists = db
+      .prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='request_cost_ledger'")
+      .get();
+    if (!tableExists) return;
+    db.exec(
+      "CREATE INDEX IF NOT EXISTS idx_rcl_request_id ON request_cost_ledger(request_id)"
+    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn("[DB] Failed to verify request_cost_ledger schema:", message);
   }
 }
 

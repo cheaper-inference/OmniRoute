@@ -9,6 +9,7 @@
  * positive evidence, not a successful auth probe or generic quota poll; terminal
  * accounts (banned / expired / deactivated / credits_exhausted) remain locked.
  */
+import { isRecord } from "@/shared/utils/recordHelpers";
 
 import { getProviderConnectionById } from "@/lib/db/providers";
 import { hasUsableQuota } from "@/lib/usage/providerLimits";
@@ -37,11 +38,6 @@ const QUOTA_ERROR_TYPES = new Set<string>([
   PROVIDER_ERROR_TYPES.RATE_LIMITED,
   PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED,
 ]);
-
-function isRecord(value: unknown): value is JsonRecord {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
 /** A refresh that failed (or returned no windows) is not evidence the quota came back. */
 function hasRefreshedQuotas(usage: unknown): usage is JsonRecord {
   if (!isRecord(usage) || usage.message) return false;

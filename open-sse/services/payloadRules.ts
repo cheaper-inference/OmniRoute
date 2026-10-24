@@ -1,3 +1,4 @@
+import { toRecord } from "../utils/recordHelpers.ts";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { wildcardMatch } from "./wildcardRouter.ts";
@@ -50,9 +51,6 @@ let lastFileCheckAt = 0;
 let fileLoadPromise: Promise<void> | null = null;
 let lastFileErrorSignature = "";
 
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function toArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];

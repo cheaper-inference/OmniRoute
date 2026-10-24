@@ -8,6 +8,7 @@
  * generic tool-call execution path (@/lib/skills/interception::handleToolCallExecution).
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import { FORMATS } from "../translator/formats.ts";
 
 export const OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME = "omniroute_web_fetch";
@@ -27,9 +28,6 @@ export interface WebFetchFallbackPlan {
   convertedToolCount: number;
 }
 
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function isBuiltInWebFetchTool(tool: unknown): tool is JsonRecord {
   const toolRecord = toRecord(tool);

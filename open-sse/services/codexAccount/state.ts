@@ -1,3 +1,4 @@
+import { asRecord } from "../../utils/recordHelpers.ts";
 import { getCodexModelScope, type CodexQuotaScope } from "../../config/codexQuotaScopes.ts";
 import type {
   CodexAccountConnection,
@@ -18,11 +19,6 @@ const CODEX_SCOPES: readonly CodexQuotaScope[] = ["codex", "spark"];
 
 type LegacyStateOwner = Pick<CodexAccountConnection, "providerSpecificData">;
 
-function asRecord(value: unknown): Readonly<Record<string, unknown>> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Readonly<Record<string, unknown>>)
-    : {};
-}
 
 function getLegacyCooldownMap(connection: LegacyStateOwner): Readonly<Record<string, unknown>> {
   return asRecord(connection.providerSpecificData.codexScopeRateLimitedUntil);

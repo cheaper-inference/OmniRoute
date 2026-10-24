@@ -1,4 +1,4 @@
-type JsonRecord = Record<string, unknown>;
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 type ClaudeExtraUsageConnectionState = {
   provider?: string | null;
@@ -30,11 +30,6 @@ const SESSION_RESET_WINDOW_KEYS = ["session (5h)", "session", "five_hour"];
 export const CLAUDE_EXTRA_USAGE_ERROR_SOURCE = "extra_usage";
 export const CLAUDE_EXTRA_USAGE_ERROR_MESSAGE =
   "Claude extra usage was detected and blocked by this connection policy.";
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 }

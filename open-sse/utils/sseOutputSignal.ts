@@ -9,6 +9,7 @@
  * The stream only calls this until the first match, so parsing a few early frames is cheap.
  */
 
+import { isRecord } from "./recordHelpers.ts";
 const RESPONSES_TOOL_ITEM_TYPES = new Set([
   "function_call",
   "custom_tool_call",
@@ -19,9 +20,6 @@ const RESPONSES_TOOL_ITEM_TYPES = new Set([
 
 const CLAUDE_TOOL_BLOCK_TYPES = new Set(["tool_use", "server_tool_use", "mcp_tool_use"]);
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function hasText(value: unknown): boolean {
   if (typeof value === "string") return value.length > 0;

@@ -12,13 +12,9 @@
  * wall-clock delta and effort VALUES only.
  */
 
+import { asRecordOrNull as asRecord } from "./recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as JsonRecord)
-    : null;
-}
 
 function isNonEmptyString(value: unknown): boolean {
   return typeof value === "string" && value.length > 0;

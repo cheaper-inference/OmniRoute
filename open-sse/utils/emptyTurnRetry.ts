@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "./recordHelpers.ts";
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { STREAM_READINESS_MAX_TIMEOUT_MS } from "../config/constants.ts";
@@ -474,11 +475,6 @@ type ProbeAccum = {
   toolCallsPresent: boolean;
 };
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return !!value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function firstChoiceOf(rec: Record<string, unknown>): Record<string, unknown> | null {
   if (!Array.isArray(rec.choices)) return null;

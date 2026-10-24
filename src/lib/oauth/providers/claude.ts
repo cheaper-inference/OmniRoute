@@ -1,3 +1,4 @@
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import crypto from "node:crypto";
 import { CLAUDE_CONFIG } from "../constants/oauth";
 import { getClaudeCodeVersion } from "@omniroute/open-sse/executors/claudeIdentity.ts";
@@ -40,13 +41,6 @@ async function fetchClaudeBootstrap(accessToken) {
     clearTimeout(timer);
   }
 }
-
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 function firstNonEmptyString(...values: unknown[]): string | undefined {
   for (const value of values) {
     if (typeof value !== "string") {

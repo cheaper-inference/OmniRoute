@@ -16,6 +16,7 @@
  * - [2026-07-25] [Composer] - Add probe-based free-tier model discovery for Alibaba connections
  */
 
+import { asRecord } from "../utils/recordHelpers.ts";
 import {
   getAlibabaBillingMode,
   getAlibabaFreeDrainedModels,
@@ -56,11 +57,6 @@ const ALIBABA_NATIVE_FREE_TIER_PREFIXES = [
   /^MiniMax-/i,
 ] as const;
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 function normalizeModelIdList(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];

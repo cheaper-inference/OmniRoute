@@ -391,12 +391,15 @@ function ImageResults({ data }: { data: any }) {
         const src = img.url || (img.b64_json ? `data:image/png;base64,${img.b64_json}` : null);
         if (!src) return null;
         return (
-          <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
+          <div
+            key={i}
+            className="relative group rounded-lg overflow-hidden border border-border aspect-square"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={src}
               alt={img.revised_prompt || t("generatedImageAlt", { index: i + 1 })}
-              className="w-full"
+              className="w-full h-full object-cover"
             />
             <a
               href={src}

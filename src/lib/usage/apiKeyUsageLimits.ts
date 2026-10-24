@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 import { getDbInstance } from "@/lib/db/core";
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import { getProviderQuotaWindowStartIso } from "@/lib/db/quotaResetEvents";
@@ -92,13 +93,6 @@ function toNumber(value: unknown): number {
   }
   return 0;
 }
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
 function normalizeLimitUsd(value: unknown): number | null {
   const numeric = toNumber(value);
   return numeric > 0 ? numeric : null;

@@ -1,6 +1,19 @@
 import { getDbInstance } from "../db/core";
 import { RESOLVED_ACCOUNT_SQL } from "./callLogs";
 
+const FILTER_OPTIONS_TTL_MS = 15_000;
+
+interface CacheEntry {
+  key: string;
+  expiresAt: number;
+  value: CallLogFilterOptions;
+}
+
+let filterOptionsCache = new WeakMap<object, CacheEntry>();
+
+export function resetCallLogFilterOptionsCache(): void {
+  filterOptionsCache = new WeakMap<object, CacheEntry>();
+}
 export type CallLogFilterOptions = {
   providers: string[];
   models: string[];
@@ -24,6 +37,18 @@ function distinctStrings(rows: { value: unknown }[]): string[] {
  */
 export async function getCallLogFilterOptions(): Promise<CallLogFilterOptions> {
   const db = getDbInstance();
+  const now = Date.now();
+
+  const watermark = db
+    .prepare("SELECT COALESCE(MAX(rowid), 0) AS maxId, COUNT(*) AS cnt FROM call_logs")
+    .get() as { maxId: number; cnt: number } | undefined;
+  const cacheKey = watermark ? `${watermark.maxId}:${watermark.cnt}` : "0:0";
+
+  const cached = filterOptionsCache.get(db as unknown as object);
+  if (cached && cached.key === cacheKey && cached.expiresAt > now) {
+    return cached.value;
+  }
+
   const providers = db.prepare("SELECT DISTINCT provider AS value FROM call_logs").all() as {
     value: unknown;
   }[];
@@ -48,10 +73,18 @@ export async function getCallLogFilterOptions(): Promise<CallLogFilterOptions> {
     )
     .all() as { id: string | null; name: string | null }[];
 
-  return {
+  const result: CallLogFilterOptions = {
     providers: distinctStrings(providers),
     models: distinctStrings(models),
     accounts: distinctStrings(accounts),
     apiKeys,
   };
+
+  filterOptionsCache.set(db as unknown as object, {
+    key: cacheKey,
+    expiresAt: now + FILTER_OPTIONS_TTL_MS,
+    value: result,
+  });
+
+  return result;
 }

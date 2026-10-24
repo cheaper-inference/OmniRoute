@@ -6,6 +6,7 @@
 // contract on the request side, and (b) parse the upstream `<tool>{...}</tool>` text
 // back into OpenAI `tool_calls` on the response side. (#2820)
 
+import { asRecordOrNull as toRecord } from "../utils/recordHelpers.ts";
 export interface OpenAIToolCall {
   id: string;
   type: "function";
@@ -94,11 +95,6 @@ export interface RequestedToolName {
   normalized: string;
 }
 
-function toRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 export function getRequestedToolNames(tools: unknown): RequestedToolName[] {
   if (!Array.isArray(tools)) return [];

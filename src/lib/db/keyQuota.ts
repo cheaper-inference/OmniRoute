@@ -11,6 +11,7 @@
  *
  * @module db/keyQuota
  */
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 import { getDbInstance } from "./core";
 import { aggregateLedgerThisMonth } from "./costLedger";
@@ -66,12 +67,6 @@ const DIMENSION_RPM = "key-quota:rpm";
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-type JsonRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 /** NULL or <=0 reads as unlimited → null. */
 function toLimitOrNull(value: unknown): number | null {

@@ -1,3 +1,4 @@
+import { isRecord } from "../../utils/recordHelpers.ts";
 import type { ExecutorExecuteResult } from "../base.ts";
 
 /**
@@ -7,11 +8,7 @@ import type { ExecutorExecuteResult } from "../base.ts";
  *  - empty legacy `delta.function_call` shells (no name, no arguments) → dropped
  */
 
-type JsonRecord = Record<string, unknown>;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function isEmptyField(value: unknown): boolean {
   return value === null || value === undefined || value === "";

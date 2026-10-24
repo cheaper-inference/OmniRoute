@@ -1,3 +1,4 @@
+import { asRecordOrNull as toRecord } from "../utils/recordHelpers.ts";
 import { isCodexCompactionWebReplay } from "../executors/codex/compactionReplay.ts";
 import { isValidResponsesItemId } from "./responsesItemId.ts";
 
@@ -24,9 +25,6 @@ const SERVER_ITEM_ID_PATTERN = /^(fc|msg|rs|resp)_/;
 const FUNCTION_NAME_VALID_RE = /^[a-zA-Z0-9_-]{1,128}$/;
 const FUNCTION_NAME_SANITIZE_RE = /[^a-zA-Z0-9_-]/g;
 
-function toRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function isResponsesMessageItem(record: JsonRecord): boolean {
   return record.type === "message" || (!record.type && typeof record.role === "string");

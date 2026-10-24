@@ -14,6 +14,7 @@
  */
 
 /** Content-part `type` values that carry media, across the supported wire formats. */
+import { isRecord } from "../../utils/recordHelpers.ts";
 const MEDIA_PART_TYPES = new Set([
   // Claude
   "image",
@@ -36,9 +37,6 @@ const NESTED_PART_KEYS = ["content", "output", "parts"] as const;
 
 const MAX_DEPTH = 4;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function nodeHasMedia(node: unknown, depth: number): boolean {
   if (!isRecord(node) || depth > MAX_DEPTH) return false;

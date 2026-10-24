@@ -1,3 +1,4 @@
+import { asRecord } from "../utils/recordHelpers.ts";
 import crypto from "crypto";
 import fs from "fs";
 import os from "os";
@@ -45,9 +46,6 @@ type QoderCliFailure = {
   retryAfterSeconds?: number;
 };
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function getString(value: unknown): string {
   return typeof value === "string" ? value : "";

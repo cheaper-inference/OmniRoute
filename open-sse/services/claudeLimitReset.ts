@@ -25,10 +25,10 @@
  * (already used this week, not in the experiment, …) does not re-query on every request.
  */
 
+import { asRecord } from "../utils/recordHelpers.ts";
 import { fetchClaudeBootstrap, getClaudeCodeVersion } from "../executors/claudeIdentity.ts";
 import { setBoundedEntry } from "./claudeLowPriority.ts";
 
-type JsonRecord = Record<string, unknown>;
 type FetchLike = typeof fetch;
 
 export const CLAUDE_LIMIT_RESET_PROGRAM = "juniper_tide";
@@ -74,9 +74,6 @@ export type ClaudeLimitResetClaim = {
   weeklyResetsAt: string | null;
 };
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function stringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim() !== "" ? value : null;

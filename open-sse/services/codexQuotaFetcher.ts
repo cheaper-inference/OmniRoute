@@ -16,6 +16,7 @@
  * Registration: call registerCodexQuotaFetcher() once at server startup.
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import {
   CODEX_SPARK_QUOTA_SESSION,
   CODEX_SPARK_QUOTA_WEEKLY,
@@ -293,11 +294,6 @@ function toNumber(value: unknown, fallback = 0): number {
   return fallback;
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 function parseWindowReset(window: Record<string, unknown>): string | null {
   const resetAt = toNumber(window["reset_at"] ?? window["resetAt"], 0);

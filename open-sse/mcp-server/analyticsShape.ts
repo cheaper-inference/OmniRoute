@@ -10,11 +10,9 @@
  * real shape.
  */
 
+import { asRecord } from "../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function asArray(value: unknown): JsonRecord[] {
   return Array.isArray(value)

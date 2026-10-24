@@ -1,3 +1,4 @@
+import { isRecord } from "@/shared/utils/recordHelpers";
 type JsonObject = Record<string, unknown>;
 
 const IMPLICIT_CONTEXT_KEYS = new Set([
@@ -72,11 +73,6 @@ export type VscodeContextSanitizerResult<T> = {
   changed: boolean;
   audit: VscodeContextSanitizerAudit;
 };
-
-function isRecord(value: unknown): value is JsonObject {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
 function normalizePath(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();

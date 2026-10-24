@@ -421,13 +421,15 @@ export function transferTokens(
 }
 
 export function getBalance(apiKeyId: string): number {
-  const received = db()
-    .prepare(`SELECT COALESCE(SUM(amount), 0) AS total FROM token_ledger WHERE to_api_key_id = ?`)
-    .get(apiKeyId) as { total: number };
-  const sent = db()
-    .prepare(`SELECT COALESCE(SUM(amount), 0) AS total FROM token_ledger WHERE from_api_key_id = ?`)
-    .get(apiKeyId) as { total: number };
-  return received.total - sent.total;
+  const row = db()
+    .prepare(
+      `SELECT
+         COALESCE((SELECT SUM(amount) FROM token_ledger WHERE to_api_key_id = ?), 0)
+         - COALESCE((SELECT SUM(amount) FROM token_ledger WHERE from_api_key_id = ?), 0)
+         AS balance`
+    )
+    .get(apiKeyId, apiKeyId) as { balance: number };
+  return row.balance;
 }
 
 export function getHistory(apiKeyId: string, limit: number): TokenLedgerEntry[] {

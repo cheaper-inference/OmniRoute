@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { getProviderConnections, updateProviderConnection } from "@/lib/db/providers";
 import { getSettings, updateSettings } from "@/lib/db/settings";
 import { getCodexRequestDefaults } from "./requestDefaults";
@@ -5,11 +6,6 @@ import { getCodexRequestDefaults } from "./requestDefaults";
 type JsonRecord = Record<string, unknown>;
 
 const MIGRATION_SETTING_KEY = "codexConnectionDefaultsMigrationV1";
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function parseLegacyCodexServiceTier(value: unknown): { enabled: boolean } {
   if (typeof value === "string") {
     try {

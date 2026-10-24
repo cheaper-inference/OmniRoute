@@ -21,6 +21,7 @@ import {
   extractSessionAffinityKey,
 } from "../services/auth";
 import { resolveClientApiKey } from "../services/clientApiKeyResolver";
+import { getCachedResolvedClientApiKey } from "@/shared/utils/clientApiRouteAuth";
 import {
   getRuntimeProviderProfile,
   clearModelLock,
@@ -66,7 +67,7 @@ import {
 import { getPassthroughProviders } from "@omniroute/open-sse/config/providerRegistry.ts";
 import * as log from "../utils/logger";
 import { checkAndRefreshToken } from "../services/tokenRefresh";
-import { createHookContext, runHooks, initPreRequestRegistry } from "@/lib/middleware/registry";
+import { createHookContext, runHooks, initPreRequestRegistry, getAllHooks } from "@/lib/middleware/registry";
 import { rejectPeerRequest } from "@/shared/resilience/peerRouting";
 import { isRuntimeProviderRetirementError } from "@/shared/constants/providerRetirement";
 import { isCommonChatGptWebRetirementError } from "@/shared/constants/chatgptWebRetirement";
@@ -447,6 +448,8 @@ async function handleChatImplementation(
   // Pipeline: Start request telemetry
   const reqId = correlationId || generateRequestId();
   const telemetry = new RequestTelemetry(reqId);
+  const url = new URL(request.url);
+  const requestPath = url.pathname;
 
   const backpressure = checkConnectionCapacity();
   if (backpressure.shouldReject) {
@@ -462,7 +465,7 @@ async function handleChatImplementation(
   } catch {
     log.warn("CHAT", "Invalid JSON body");
     return logHandlerRejection(errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid JSON body"), {
-      path: new URL(request.url).pathname,
+      path: requestPath,
       model: "-",
       requestBody: null,
       apiKeyId: null,
@@ -497,7 +500,7 @@ async function handleChatImplementation(
   if ("messages" in msgBody && !Array.isArray(msgBody.messages)) {
     log.warn("CHAT", "Rejecting request with non-array messages");
     return logHandlerRejection(errorResponse(HTTP_STATUS.BAD_REQUEST, "messages: Expected array"), {
-      path: new URL(request.url).pathname,
+      path: requestPath,
       model: typeof body?.model === "string" && body.model ? body.model : "-",
       requestBody: body ?? null,
       apiKeyId: null,
@@ -510,7 +513,7 @@ async function handleChatImplementation(
     return logHandlerRejection(
       errorResponse(HTTP_STATUS.BAD_REQUEST, "messages: at least one message is required"),
       {
-        path: new URL(request.url).pathname,
+        path: requestPath,
         model: typeof body?.model === "string" && body.model ? body.model : "-",
         requestBody: body ?? null,
         apiKeyId: null,
@@ -530,7 +533,7 @@ async function handleChatImplementation(
     return logHandlerRejection(
       errorResponse(HTTP_STATUS.BAD_REQUEST, "messages: Expected array of objects"),
       {
-        path: new URL(request.url).pathname,
+        path: requestPath,
         model: typeof body?.model === "string" && body.model ? body.model : "-",
         requestBody: body ?? null,
         apiKeyId: null,
@@ -544,7 +547,7 @@ async function handleChatImplementation(
     return logHandlerRejection(
       errorResponse(HTTP_STATUS.BAD_REQUEST, "messages: Expected array, received undefined"),
       {
-        path: new URL(request.url).pathname,
+        path: requestPath,
         model: typeof body?.model === "string" && body.model ? body.model : "-",
         requestBody: body ?? null,
         apiKeyId: null,
@@ -568,7 +571,7 @@ async function handleChatImplementation(
         `model: Expected string, received ${Array.isArray(rawModel) ? "array" : typeof rawModel}`
       ),
       {
-        path: new URL(request.url).pathname,
+        path: requestPath,
         model: "-",
         requestBody: body ?? null,
         apiKeyId: null,
@@ -637,9 +640,6 @@ async function handleChatImplementation(
     );
   }
 
-  // Log request endpoint and model
-  const url = new URL(request.url);
-
   // No-thinking gateway alias (Fase 8.1): `no-think/<provider>/<model>`
   // resolves back to the real model with reasoning suppressed in place, before any
   // model resolution / combo routing sees it. Claude/Messages path forces
@@ -703,7 +703,7 @@ async function handleChatImplementation(
   // masked prefix/last4. These debug lines get copied verbatim into bug reports
   // and support tickets, so any key fragment is sensitive.
   const authHeader = request.headers.get("Authorization");
-  const { apiKey } = await resolveClientApiKey(request);
+  const { apiKey } = await getCachedResolvedClientApiKey(request);
   if (authHeader && apiKey) {
     log.debug("AUTH", "API key provided");
   } else {
@@ -721,7 +721,7 @@ async function handleChatImplementation(
   if (!modelStr) {
     log.warn("CHAT", "Missing model");
     return logHandlerRejection(errorResponse(HTTP_STATUS.BAD_REQUEST, "Missing model"), {
-      path: new URL(request.url).pathname,
+      path: requestPath,
       model: "-",
       requestBody: body ?? null,
       apiKeyId: null,
@@ -750,7 +750,7 @@ async function handleChatImplementation(
         `Model '${modelStr}' is an image-generation model and cannot be used on /v1/chat/completions. Use POST /v1/images/generations instead.`
       ),
       {
-        path: new URL(request.url).pathname,
+        path: requestPath,
         model: modelStr,
         requestBody: body ?? null,
         apiKeyId: null,
@@ -765,7 +765,7 @@ async function handleChatImplementation(
   const endpointMismatch = await getRequestedModelEndpointMismatch(modelStr, "chat");
   if (endpointMismatch) {
     return logHandlerRejection(errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch), {
-      path: new URL(request.url).pathname,
+      path: requestPath,
       model: modelStr,
       requestBody: body ?? null,
       apiKeyId: null,
@@ -792,7 +792,7 @@ async function handleChatImplementation(
       `API key policy rejected: ${modelStr} (key=${policy.apiKeyInfo?.id || "unknown"})`
     );
     return logHandlerRejection(policy.rejection, {
-      path: new URL(request.url).pathname,
+      path: requestPath,
       model: modelStr,
       requestBody: body ?? null,
       apiKeyId: policy.apiKeyInfo?.id ?? null,
@@ -858,7 +858,7 @@ async function handleChatImplementation(
     // resume flag for the attempt store in handleChatCore (best-effort).
     if (!stored) {
       return previousResponseNotFoundRejection({
-        path: new URL(request.url).pathname,
+        path: requestPath,
         model: modelStr,
         requestBody: body ?? null,
         apiKeyId: apiKeyInfo?.id ?? null,
@@ -879,7 +879,7 @@ async function handleChatImplementation(
   const admissionRejection = await admissionContext.acquire(apiKeyInfo?.id, { signal }, body);
   if (admissionRejection) {
     void logAdmissionRejection(admissionRejection, {
-      path: new URL(request.url).pathname,
+      path: requestPath,
       model: typeof body?.model === "string" && body.model ? body.model : "-",
       requestBody: body ?? null,
       apiKeyId: apiKeyInfo?.id ?? null,
@@ -912,7 +912,7 @@ async function handleChatImplementation(
       body,
       headers: request.headers,
     }),
-    endpoint: new URL(request.url).pathname,
+    endpoint: requestPath,
     headers: request.headers,
     log,
     method: request.method,
@@ -931,7 +931,7 @@ async function handleChatImplementation(
         preCallGuardrails.message || "Request rejected: suspicious content detected"
       ),
       {
-        path: new URL(request.url).pathname,
+        path: requestPath,
         model: modelStr,
         requestBody: body ?? null,
         apiKeyId: apiKeyInfo?.id ?? null,
@@ -1010,40 +1010,43 @@ async function handleChatImplementation(
   // T09 — Pre-request Middleware Hooks
   // Execute user-defined hooks BEFORE task-aware routing and combo selection
   initPreRequestRegistry();
-  const hookContext = createHookContext({
-    body: body as Record<string, unknown>,
-    headers: Object.fromEntries(request?.headers?.entries() || []) as Record<
-      string,
-      string | string[] | undefined
-    >,
-    model: modelStr,
-    combo: undefined,
-    apiKeyInfo: apiKeyInfo ? { ...apiKeyInfo } : undefined,
-    log,
-  });
-
-  const { context: hookCtx, response: hookResponse } = await runHooks(hookContext);
-
-  // Apply hook mutations
-  body = hookCtx.body as any;
-  ({ body, modelStr } = RoutingModelOps.reconcileModelOverride({
-    body,
-    modelStr,
-    overrideModel: hookCtx.model,
-    logTag: "Hook model override",
-    log,
-  }));
-
-  // Short-circuit if a hook returned a direct response
-  if (hookResponse) {
-    return logHandlerRejection(errorResponse(hookResponse.status, hookResponse.body as any), {
-      path: new URL(request.url).pathname,
+  const registeredHooks = getAllHooks();
+  if (registeredHooks.length > 0) {
+    const hookContext = createHookContext({
+      body: body as Record<string, unknown>,
+      headers: Object.fromEntries(request?.headers?.entries() || []) as Record<
+        string,
+        string | string[] | undefined
+      >,
       model: modelStr,
-      requestBody: body ?? null,
-      apiKeyId: apiKeyInfo?.id ?? null,
-      apiKeyName: apiKeyInfo?.name ?? null,
-      correlationId: reqId,
+      combo: undefined,
+      apiKeyInfo: apiKeyInfo ? { ...apiKeyInfo } : undefined,
+      log,
     });
+
+    const { context: hookCtx, response: hookResponse } = await runHooks(hookContext);
+
+    // Apply hook mutations
+    body = hookCtx.body as any;
+    ({ body, modelStr } = RoutingModelOps.reconcileModelOverride({
+      body,
+      modelStr,
+      overrideModel: hookCtx.model,
+      logTag: "Hook model override",
+      log,
+    }));
+
+    // Short-circuit if a hook returned a direct response
+    if (hookResponse) {
+      return logHandlerRejection(errorResponse(hookResponse.status, hookResponse.body as any), {
+        path: requestPath,
+        model: modelStr,
+        requestBody: body ?? null,
+        apiKeyId: apiKeyInfo?.id ?? null,
+        apiKeyName: apiKeyInfo?.name ?? null,
+        correlationId: reqId,
+      });
+    }
   }
 
   // T05 — Task-Aware Smart Routing
@@ -1265,11 +1268,11 @@ async function handleChatImplementation(
       // deferral check can never drift from chatCore's own native-codex-passthrough
       // decision. See knownContextOverflow.ts::KnownContextOverflowOptions.
       sourceFormat,
-      endpointPath: new URL(request.url).pathname,
+      endpointPath: requestPath,
       requestHeaders: request.headers,
       clientManagedResponsesContext:
         sourceFormat === "openai-responses" &&
-        new URL(request.url).pathname.split("/").includes("responses") &&
+        requestPath.split("/").includes("responses") &&
         isVerifiedNativeCodexRequest(body, request.headers),
       handleSingleModel: (
         b: any,
@@ -1466,7 +1469,6 @@ async function handleChatImplementation(
     const providerPrefix = resolvedModelStr.split("/")[0];
     if (providerPrefix) {
       try {
-        const { getComboByName } = await import("@/lib/db/combos");
         const routingCombo = await getComboByName(providerPrefix);
         if (typeof routingCombo?.id === "string") {
           routingComboId = routingCombo.id;

@@ -5,13 +5,11 @@
  * into the standard `{ plan, quotas }` response.
  */
 
+import { asRecordOrNull as toRecord } from "../../utils/recordHelpers.ts";
 import { fetchContext7Quota, type Context7Quota } from "../context7QuotaFetcher.ts";
 import { createQuotaFromUsage } from "./quota.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
-function toRecord(v: unknown): Record<string, unknown> | null {
-  return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
-}
 
 function createContext7PlanQuota(q: Context7Quota) {
   return {

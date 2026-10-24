@@ -7,6 +7,7 @@
  * providerSpecificData.region; connections saved before the selector existed
  * have no region and keep the Singapore host they were created against.
  */
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 export const XIAOMI_TOKEN_PLAN_REGION_VALUES = ["cn", "sgp", "ams"] as const;
 
@@ -29,13 +30,6 @@ function stripTrailingSlashes(value: string): string {
   while (end > 0 && value.charCodeAt(end - 1) === SLASH_CHAR_CODE) end--;
   return end === value.length ? value : value.slice(0, end);
 }
-
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 export function isXiaomiTokenPlanProvider(providerId: string | null | undefined): boolean {
   return providerId === XIAOMI_TOKEN_PLAN_PROVIDER_ID;
 }

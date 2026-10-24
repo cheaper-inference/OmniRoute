@@ -12,6 +12,7 @@
  *
  * @module lib/semanticCache
  */
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 import crypto from "crypto";
 import { canonicalJson } from "./skills/stableJson";
@@ -19,12 +20,6 @@ import { LRUCache } from "./cacheLayer";
 import { getDbInstance } from "./db/core";
 import { toNumber } from "@/shared/utils/numeric";
 import { conversationSignatureFields } from "../../open-sse/utils/conversationSignatureFields";
-
-type JsonRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 /**
  * Current time in the same format `expires_at` and `created_at` are written in.

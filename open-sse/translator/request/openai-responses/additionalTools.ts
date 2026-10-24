@@ -1,10 +1,7 @@
+import { toRecord } from "../../../utils/recordHelpers.ts";
 import { flattenNamespaceToolName } from "./namespaceFlatten.ts";
 
-type JsonRecord = Record<string, unknown>;
 
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function toolName(value: unknown): string {
   const tool = toRecord(value);

@@ -12,14 +12,12 @@
  * transform that holds back the opening fence across chunk boundaries.
  */
 
+import { asRecordOrNull as asRecord } from "./recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
 const JSON_OUTPUT_TYPES = new Set(["json_schema", "json_object"]);
 const FENCE = "```";
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function isJsonFormatType(format: unknown): boolean {
   const type = asRecord(format)?.type;

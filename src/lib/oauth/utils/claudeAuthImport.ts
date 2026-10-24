@@ -1,3 +1,4 @@
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import crypto from "node:crypto";
 import {
   getProviderConnections,
@@ -8,11 +9,6 @@ import { getClaudeCodeUserAgent } from "@/shared/constants/claudeCodeClient";
 import { ClaudeAuthFileError } from "@/lib/oauth/utils/claudeAuthFile";
 
 type JsonRecord = Record<string, unknown>;
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();

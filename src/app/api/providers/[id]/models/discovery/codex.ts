@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import {
   CODEX_CLI_RS_ORIGINATOR,
   getCodexClientVersion,
@@ -57,11 +58,6 @@ type CodexGithubCatalogCache = {
 };
 
 let codexGithubCatalogCache: CodexGithubCatalogCache | null = null;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toNonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }

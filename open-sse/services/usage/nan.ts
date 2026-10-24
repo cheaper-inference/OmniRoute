@@ -16,6 +16,7 @@
  * provider leaf, mirroring usage/apmix.ts.
  */
 
+import { isRecord } from "../../utils/recordHelpers.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
@@ -32,9 +33,6 @@ export type NanUsageResult = {
   message?: string;
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function toQuota(row: unknown, seen: Record<string, UsageQuota>): [string, UsageQuota] | null {
   if (!isRecord(row)) return null;

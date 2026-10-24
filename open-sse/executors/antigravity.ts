@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import crypto, { randomUUID } from "crypto";
 import {
   BaseExecutor,
@@ -309,11 +310,6 @@ function applyAntigravityGenerationDefaults(
 // without spinning up the full executor.
 export const __test_applyAntigravityGenerationDefaults = applyAntigravityGenerationDefaults;
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 /**
  * Known competing-agent identity sentences that Antigravity's server-side

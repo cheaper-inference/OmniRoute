@@ -214,10 +214,50 @@ function isDeferredUnsupportedMigration(
   return isOptionalFts5Migration(migration) && !supportsFts5(db);
 }
 
+const defaultReaddirSync = fs.readdirSync;
+const defaultReadFileSync = fs.readFileSync;
+
+let cachedMigrationFiles: Array<{ version: string; name: string; path: string }> | null = null;
+let lastMigrationsDirMtime = 0;
+let lastExtraDirsEnv: string | undefined = undefined;
+const migrationSqlCache = new Map<string, string>();
+
+export function clearMigrationCache(): void {
+  cachedMigrationFiles = null;
+  lastMigrationsDirMtime = 0;
+  lastExtraDirsEnv = undefined;
+  migrationSqlCache.clear();
+}
+
+function readMigrationSql(filePath: string): string {
+  if (fs.readFileSync === defaultReadFileSync) {
+    const cached = migrationSqlCache.get(filePath);
+    if (cached !== undefined) return cached;
+    const sql = fs.readFileSync(filePath, "utf-8");
+    migrationSqlCache.set(filePath, sql);
+    return sql;
+  }
+  return fs.readFileSync(filePath, "utf-8");
+}
+
 /**
  * Get all migration files sorted by version number.
  */
 function getMigrationFiles(): Array<{ version: string; name: string; path: string }> {
+  const isDefaultFs = fs.readdirSync === defaultReaddirSync;
+  const currentExtraEnv = process.env.OMNIROUTE_EXTRA_MIGRATIONS_DIRS;
+
+  if (isDefaultFs && cachedMigrationFiles !== null) {
+    try {
+      const stat = fs.statSync(MIGRATIONS_DIR);
+      if (stat.mtimeMs === lastMigrationsDirMtime && currentExtraEnv === lastExtraDirsEnv) {
+        return cachedMigrationFiles;
+      }
+    } catch {
+      // Fall through to re-read
+    }
+  }
+
   // The extra directories are an independent set: a missing core directory must not
   // make them vanish silently.
   if (!fs.existsSync(MIGRATIONS_DIR)) return getExtraMigrationFiles();
@@ -275,7 +315,17 @@ function getMigrationFiles(): Array<{ version: string; name: string; path: strin
   // collide with a numeric slot, and every downstream consumer here — the applied
   // set, the gap reconciliation, the name-mismatch check — keys on the version
   // string and needs no further change. Empty and filesystem-free when unset.
-  return [...files, ...getExtraMigrationFiles()];
+  const result = [...files, ...getExtraMigrationFiles()];
+  if (isDefaultFs) {
+    try {
+      lastMigrationsDirMtime = fs.statSync(MIGRATIONS_DIR).mtimeMs;
+    } catch {
+      lastMigrationsDirMtime = 0;
+    }
+    lastExtraDirsEnv = currentExtraEnv;
+    cachedMigrationFiles = result;
+  }
+  return result;
 }
 
 function filterSupersededDuplicateMigrations(
@@ -765,7 +815,7 @@ function applyCompressionReceiptsMigration(db: SqliteAdapter): void {
 }
 
 function applyCompressionCombosMigration(db: SqliteAdapter, migrationPath: string): void {
-  const sql = fs.readFileSync(migrationPath, "utf-8");
+  const sql = readMigrationSql(migrationPath);
   db.exec(sql);
   ensureColumn(
     db,
@@ -1138,7 +1188,7 @@ export function runMigrations(
         if (migration.name === "remove_opencode_free_provider") {
           ensureOpencodeFreeRemovalColumns(db);
         }
-        const sql = fs.readFileSync(migration.path, "utf-8");
+        const sql = readMigrationSql(migration.path);
         genericSql = sql;
         db.exec(sql);
       }

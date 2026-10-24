@@ -12,15 +12,13 @@
  * scheme as the Chat translator, then restore the codex `{namespace, name}`
  * identity on the function calls Grok returns so Codex can dispatch them.
  */
+import { isRecord } from "../utils/recordHelpers.ts";
 import { flattenNamespaceToolName } from "../translator/request/openai-responses/namespaceFlatten.ts";
 import { applyFunctionCallIdentity } from "../translator/response/openai-responses/functionCallIdentity.ts";
 
 type JsonRecord = Record<string, unknown>;
 export type NamespaceToolIdentityMap = Map<string, { namespace: string; name: string }>;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function stringOrEmpty(value: unknown): string {
   return typeof value === "string" ? value : "";

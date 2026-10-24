@@ -1,3 +1,4 @@
+import { asRecordOrNull as toRecord } from "@/shared/utils/recordHelpers";
 import {
   sanitizeProviderBillingStatus,
   type ProviderBillingStatus,
@@ -45,11 +46,6 @@ function parseJson(raw: string): unknown {
     return null;
   }
 }
-
-function toRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
-
 function sanitizeCacheEntryForStorage(entry: ProviderLimitsCacheEntry): ProviderLimitsCacheEntry {
   const { billing: rawBilling, ...rest } = entry;
   const billing = sanitizeProviderBillingStatus(rawBilling);

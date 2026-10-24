@@ -10,6 +10,7 @@
  *
  * @module lib/db/tokenLimits
  */
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 import { randomUUID } from "crypto";
 import { getDbInstance } from "./core";
@@ -51,11 +52,6 @@ export interface TokenWindowState {
 type JsonRecord = Record<string, unknown>;
 
 let _schemaChecked = false;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toNumber(value: unknown, fallback = 0): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim().length > 0) {

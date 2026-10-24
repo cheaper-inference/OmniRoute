@@ -1,3 +1,4 @@
+import { isRecord } from "./recordHelpers.ts";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -72,9 +73,6 @@ export interface ChatGptWebExecutorAdapterDeps {
   now?: () => number;
 }
 
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function isFirstPartyHost(value: string): boolean {
   const host = value.toLowerCase().replace(/^\./, "");

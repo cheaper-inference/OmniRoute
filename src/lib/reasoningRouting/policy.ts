@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { getComboById } from "@/lib/db/combos";
 import {
   getReasoningRoutingRules,
@@ -56,11 +57,6 @@ export interface ReasoningRuleDecision {
   requiresReasoning: boolean;
   warnings: string[];
 }
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function effort(value: unknown): ReasoningEffort | null {
   if (typeof value !== "string") return null;
   const normalized = value.trim().toLowerCase();

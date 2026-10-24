@@ -1,3 +1,4 @@
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import { randomBytes } from "node:crypto";
 
 import {
@@ -160,11 +161,6 @@ export function isGlmResetCardProvider(provider: unknown): boolean {
     (GLM_RESET_CARD_PROVIDERS as readonly string[]).includes(provider)
   );
 }
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toPublicCard(card: GlmResetCard): PublicGlmResetCard {
   const { id, ...metadata } = card;
   return { ...metadata, selectionToken: id };

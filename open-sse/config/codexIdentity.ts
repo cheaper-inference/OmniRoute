@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { createHash, randomUUID } from "node:crypto";
 
 import { normalizeCodexSessionId } from "./codexClient.ts";
@@ -636,11 +637,6 @@ export function isCodexOriginatedHeaders(
   return getHeader("user-agent").startsWith("codex");
 }
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 /** Require the native Codex thread/turn binding; prompt text and cache keys are not authority. */
 export function hasNativeCodexTurnBinding(body: unknown): boolean {

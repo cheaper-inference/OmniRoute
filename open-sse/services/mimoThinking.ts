@@ -1,8 +1,6 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 /**
  * Normalize chain-of-thought control to Xiaomi MiMo's native request shape.

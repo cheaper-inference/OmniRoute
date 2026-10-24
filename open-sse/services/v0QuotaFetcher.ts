@@ -19,6 +19,7 @@
  * Registration: call registerV0QuotaFetcher() once at server startup.
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import {
   registerQuotaCacheInvalidator,
   registerQuotaFetcher,
@@ -65,11 +66,6 @@ if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 function toNumber(value: unknown, fallback = 0): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;

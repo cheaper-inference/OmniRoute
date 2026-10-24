@@ -1,3 +1,4 @@
+import { asRecord } from "./recordHelpers.ts";
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
@@ -233,6 +234,8 @@ type StreamOptions = {
    */
   requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
   pendingRequestId?: string | null;
+  rawByteLength?: number;
+  contentLength?: number;
 };
 
 type TranslateState = ReturnType<typeof initState> & {
@@ -276,9 +279,6 @@ type ToolCall = {
 
 type UsageTokenRecord = Record<string, number>;
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 // #7936 — restore `{namespace, name}` on Responses passthrough `function_call`
 // items when the request-side Responses→Chat flatten stamped the bare leaf on the
@@ -772,15 +772,32 @@ export function createSSEStream(options: StreamOptions = {}) {
     requestToolIdentityMap = null,
     streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
     pendingRequestId = null,
+    rawByteLength,
+    contentLength,
   } = options;
-  // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
   // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
   // tools can query performance.getEntriesByType("mark") filtered by name.
-  let bodySize = 0;
-  try {
-    bodySize = body ? Buffer.byteLength(JSON.stringify(body), "utf8") : 0;
-  } catch {
-    /* body may not be JSON-serialisable (e.g. FormData, Blob) — metric stays 0 */
+  const rawLength = rawByteLength ?? contentLength;
+  let bodySize = typeof rawLength === "number" && rawLength >= 0 ? rawLength : 0;
+  if (bodySize === 0 && body) {
+    if (
+      typeof body === "object" &&
+      body !== null &&
+      "_rawByteLength" in body &&
+      typeof body._rawByteLength === "number"
+    ) {
+      bodySize = body._rawByteLength;
+    } else if (typeof body === "string") {
+      bodySize = Buffer.byteLength(body, "utf8");
+    } else if (Buffer.isBuffer(body)) {
+      bodySize = body.length;
+    } else {
+      try {
+        bodySize = Buffer.byteLength(JSON.stringify(body), "utf8");
+      } catch {
+        /* body may not be JSON-serialisable (e.g. FormData, Blob) — metric stays 0 */
+      }
+    }
   }
   if (bodySize > 0) {
     // Cleared immediately: this is a fixed-name mark created on every stream, so
@@ -849,7 +866,14 @@ export function createSSEStream(options: StreamOptions = {}) {
   /** Passthrough: accumulate tool_calls deltas for call log responseBody */
   const passthroughToolCalls = new Map<string, ToolCall>();
   let passthroughToolCallSeq = 0;
-  const allowedToolNames = extractAllowedToolNames(body);
+  const hasTools = Boolean(
+    body &&
+      typeof body === "object" &&
+      "tools" in body &&
+      Array.isArray(body.tools) &&
+      body.tools.length > 0
+  );
+  const allowedToolNames = hasTools ? extractAllowedToolNames(body) : null;
   let skipPassthroughEvent = false;
   const thinkState = initThinkState(mode === STREAM_MODE.PASSTHROUGH, provider, model);
 

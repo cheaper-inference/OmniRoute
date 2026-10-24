@@ -3,11 +3,9 @@
  * Mirrors Antigravity-Manager src-tauri/src/modules/quota.rs fetch_project_id().
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function pickTierField(tier: unknown, field: "name" | "id"): string | null {
   const record = toRecord(tier);

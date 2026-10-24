@@ -8,13 +8,11 @@
 // match the emitted name's dotted suffixes against the DECLARED names only —
 // never against a guessed alias table, never fuzzily.
 
+import { asRecordOrNull as asRecord } from "../../../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
 const TOOL_NAME_PREFIX_SEPARATOR = ".";
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function addName(names: Set<string>, value: unknown) {
   if (typeof value !== "string") return;

@@ -9,6 +9,7 @@
  * extraction, decision parsing and a bounded per-(account, conversation) cache — so
  * the executor only wires the HTTP call.
  */
+import { asRecordOrNull as asRecord } from "../../utils/recordHelpers.ts";
 import { createHash } from "node:crypto";
 
 import { containsMediaKind } from "../../utils/mediaParts.ts";
@@ -32,9 +33,6 @@ export type CopilotAutoDecision = {
 
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 export function isCopilotAutoModel(model: unknown): boolean {
   return typeof model === "string" && model.trim().toLowerCase() === COPILOT_AUTO_MODEL_ID;

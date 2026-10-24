@@ -1,3 +1,4 @@
+import { isRecord } from "@/shared/utils/recordHelpers";
 import type { CatalogTestResult } from "./catalogTestStorage";
 import { getComboTestKey } from "./catalogTestStorage";
 
@@ -33,10 +34,6 @@ export interface ComboCatalogFilters {
 
 export type ComboSortField = "name" | "strategy" | "memberCount" | "status";
 export type ComboSortDirection = "asc" | "desc";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function toModelStep(step: Record<string, unknown>, model: string): ComboCatalogStep {
   return {

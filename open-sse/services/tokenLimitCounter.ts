@@ -17,10 +17,10 @@ import {
   resetWindowIfElapsed,
   getWindowUsage,
   incrementWindowTokens,
-  getTokenLimitsForRequest,
+  listTokenLimits,
   logTokenLimitReset,
   type TokenLimit,
-} from "@/lib/db/tokenLimits";
+} from "../../src/lib/db/tokenLimits.ts";
 
 interface CacheEntry {
   windowStart: string;
@@ -31,10 +31,40 @@ interface CacheEntry {
 
 /** key = `${limitId}` ; value tracks the *current* window only */
 const cache = new Map<string, CacheEntry>();
-
 /** Cache entries older than this are re-validated against the DB on read. */
 const CACHE_TTL_MS = 5_000;
 
+interface KeyLimitsEntry {
+  limits: TokenLimit[];
+  cachedAt: number;
+}
+const keyLimitsCache = new Map<string, KeyLimitsEntry>();
+const KEY_LIMITS_TTL_MS = 5_000;
+
+export function getCachedTokenLimitsForRequest(
+  apiKeyId: string,
+  provider = "",
+  model = ""
+): TokenLimit[] {
+  const now = Date.now();
+  const entry = keyLimitsCache.get(apiKeyId);
+  let allLimits: TokenLimit[];
+  if (entry && now - entry.cachedAt < KEY_LIMITS_TTL_MS) {
+    allLimits = entry.limits;
+  } else {
+    allLimits = listTokenLimits(apiKeyId);
+    keyLimitsCache.set(apiKeyId, { limits: allLimits, cachedAt: now });
+  }
+
+  if (allLimits.length === 0) return [];
+  return allLimits.filter(
+    (l) =>
+      l.enabled !== false &&
+      (l.scopeType === "global" ||
+        (l.scopeType === "model" && l.scopeValue === (model || "")) ||
+        (l.scopeType === "provider" && l.scopeValue === (provider || "")))
+  );
+}
 /**
  * Sum billable tokens recorded in usage_history for this limit's API key within
  * the active window, filtered by scope (model / provider / global). Used to seed
@@ -153,11 +183,13 @@ export function syncCache(limitId: string, windowStart: string, tokensUsed: numb
 /** Drop a single limit's cache entry (e.g. on limit delete/update). */
 export function invalidateLimit(limitId: string): void {
   cache.delete(limitId);
+  keyLimitsCache.clear();
 }
 
 /** Clear the whole cache (tests / config reload). */
 export function clearTokenLimitCache(): void {
   cache.clear();
+  keyLimitsCache.clear();
 }
 
 /**
@@ -196,19 +228,49 @@ export function checkTokenLimits(
   now = Date.now()
 ): TokenLimitBreach | null {
   if (!apiKeyId) return null;
-
-  const limits = getTokenLimitsForRequest(apiKeyId, provider, model);
+  const limits = getCachedTokenLimitsForRequest(apiKeyId, provider, model);
   if (!limits || limits.length === 0) return null;
 
   let worst: TokenLimitBreach | null = null;
+  const db = getDbInstance();
+
+  // DB-07: Batch counter lookup if multiple candidate limits exist
+  const counterMap = new Map<string, number>();
+  if (limits.length > 1) {
+    const items = limits.map((l) => ({
+      id: l.id,
+      windowStart: resetWindowIfElapsed(l, now).windowStart,
+    }));
+    const clauses = items.map(() => "(limit_id = ? AND window_start = ?)").join(" OR ");
+    const params: unknown[] = [];
+    for (const item of items) {
+      params.push(item.id, item.windowStart);
+    }
+    const rows = db
+      .prepare(`SELECT limit_id, tokens_used FROM api_key_token_counters WHERE ${clauses}`)
+      .all(...params) as Array<{ limit_id: string; tokens_used?: number }>;
+    for (const row of rows) {
+      if (row && typeof row.limit_id === "string") {
+        counterMap.set(row.limit_id, Number(row.tokens_used) || 0);
+      }
+    }
+  }
 
   for (const limit of limits) {
     if (limit.enabled === false) continue;
     const limitValue = limit.tokenLimit;
     if (!Number.isFinite(limitValue) || limitValue <= 0) continue;
 
-    // Authoritative read (bypass the in-memory accelerator).
-    const tokensUsed = getCurrentWindowUsage(limit, now, true);
+    let tokensUsed: number;
+    const preloaded = counterMap.get(limit.id);
+    if (preloaded !== undefined && preloaded > 0) {
+      tokensUsed = preloaded;
+      const { windowStart } = resetWindowIfElapsed(limit, now);
+      cache.set(limit.id, { windowStart, tokensUsed, syncedAt: now });
+    } else {
+      // Authoritative read (bypass the in-memory accelerator; seeds if 0).
+      tokensUsed = getCurrentWindowUsage(limit, now, true);
+    }
     if (tokensUsed < limitValue) continue; // within budget
 
     const { windowStart, nextResetAt } = resetWindowIfElapsed(limit, now);
@@ -268,7 +330,7 @@ export function recordTokenUsage(
   Promise.resolve()
     .then(() => {
       const now = Date.now();
-      const limits = getTokenLimitsForRequest(apiKeyId, provider || "", model || "");
+      const limits = getCachedTokenLimitsForRequest(apiKeyId, provider || "", model || "");
       if (!limits || limits.length === 0) return;
 
       const db = getDbInstance();
@@ -323,7 +385,7 @@ export function recordTokenUsage(
         for (const a of applied) {
           syncCache(a.limitId, a.windowStart, a.total);
         }
-      } catch (err) {
+      } catch {
         // better-sqlite3 auto-rolls-back on throw; verify we are not stuck mid-txn.
         if (db.inTransaction) {
           try {

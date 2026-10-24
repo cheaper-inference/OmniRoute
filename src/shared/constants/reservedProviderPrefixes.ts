@@ -19,7 +19,7 @@
 //     cause false-positive rejections.
 //   - Live REGISTRY entries remain case-sensitive. Retired ids use their retirement
 //     normalizer (trim + lowercase), so casing cannot revive a removed provider.
-import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { PROVIDER_METADATA } from "@omniroute/open-sse/config/providers/metadata";
 
 import {
   isMicrosoftDesignerWebRetiredProviderId,
@@ -36,9 +36,10 @@ let _reserved: Set<string> | null = null;
 function buildReservedProviderPrefixes(): Set<string> {
   if (_reserved) return _reserved;
   const reserved = new Set<string>();
-  for (const entry of Object.values(REGISTRY)) {
-    if (entry?.id) reserved.add(entry.id);
-    if (entry?.alias) reserved.add(entry.alias);
+  for (const id of Object.keys(PROVIDER_METADATA)) {
+    reserved.add(id);
+    const alias = PROVIDER_METADATA[id]?.alias;
+    if (alias) reserved.add(alias);
   }
   for (const providerId of RETIRED_MICROSOFT_DESIGNER_WEB_PROVIDER_IDS) {
     reserved.add(providerId);

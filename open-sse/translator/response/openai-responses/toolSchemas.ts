@@ -4,11 +4,9 @@
 // JSON Schema into response-side normalization (#6951 — stripEmptyOptionalToolArgs) so
 // it can be schema-aware instead of allowlist-only. No stream state, no host import.
 
+import { asRecordOrNull as asRecord } from "../../../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 export function extractToolSchemaMap(body: unknown): Map<string, JsonRecord> | null {
   const record = asRecord(body);

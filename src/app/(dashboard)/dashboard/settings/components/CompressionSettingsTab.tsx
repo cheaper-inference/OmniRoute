@@ -8,6 +8,7 @@ import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import Toggle from "@/shared/components/Toggle";
+import { isRecord } from "@/shared/utils/recordHelpers";
 import { useTranslations } from "next-intl";
 import CompressionTokenSaverCard, {
   type CompressionTokenSaverConfig,
@@ -100,9 +101,6 @@ interface RuleMetadata {
 type SettingsPatch<T> = {
   [K in keyof T]?: T[K] extends unknown[] ? T[K] : T[K] extends object ? SettingsPatch<T[K]> : T[K];
 };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 function withPatch<T>(base: T, patch: unknown): T {
   if (!isRecord(base) || !isRecord(patch)) return patch as T;

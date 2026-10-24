@@ -12,6 +12,7 @@
  * (`COMPRESSION_PREFIX_FREEZE_ENABLED`); when off the observer is never consulted (zero cost).
  */
 
+import { isRecord } from "../../utils/recordHelpers.ts";
 import crypto from "node:crypto";
 
 export interface PrefixFreezeConfig {
@@ -57,9 +58,6 @@ export function resolvePrefixFreezeConfig(
 
 // ─── prefix extraction ──────────────────────────────────────────────────────────
 
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return v !== null && typeof v === "object" && !Array.isArray(v);
-}
 
 /**
  * Pull plain text out of the system-prompt shapes: `string`, `Array<…>`, `{text}` (OpenAI/Claude

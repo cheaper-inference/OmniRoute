@@ -6,12 +6,12 @@
  * @exports CachingContext, CacheAwareStrategy, detectCachingContext, getCacheAwareStrategy
  */
 
+import { isRecord } from "../../utils/recordHelpers.ts";
 import {
   providerSupportsCaching,
   type ConnectionCacheOverride,
 } from "../../utils/cacheControlPolicy.ts";
 
-type JsonRecord = Record<string, unknown>;
 
 export interface CachingDetectionContext {
   provider?: string | null;
@@ -33,9 +33,6 @@ export interface CacheAwareStrategy {
   deterministicOnly: boolean;
 }
 
-function isRecord(value: unknown): value is JsonRecord {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
 
 function normalizeString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;

@@ -15,6 +15,7 @@
  *
  * Ref: #6636
  */
+import { asRecordOrNull as toRecord } from "@/shared/utils/recordHelpers";
 
 import { decodeJwtExp } from "@/lib/oauth/services/codexImport";
 
@@ -24,13 +25,6 @@ export type ParsedCodexSession = { accessToken: string; email?: string };
 export type ParseResult = { ok: true; session: ParsedCodexSession } | { ok: false; error: string };
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
-
-function toRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
 function toNonEmptyString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }

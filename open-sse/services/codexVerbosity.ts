@@ -15,13 +15,10 @@
  * Ref: OpenAI GPT-5 docs (text.verbosity), Azure Foundry reasoning guide.
  */
 
-type JsonRecord = Record<string, unknown>;
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 
 const VERBOSITY_LEVELS = new Set(["low", "medium", "high"]);
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function normalizeLevel(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;

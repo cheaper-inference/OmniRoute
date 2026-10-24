@@ -1,3 +1,4 @@
+import { asRecord } from "../utils/recordHelpers.ts";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
@@ -30,9 +31,6 @@ export interface ZcodeExecutorOptions {
   requestTimeoutMs?: number;
   turnTimeoutMs?: number;
   clientFactory?: () => ZcodeClientLike;
-}
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 /**
  * Native generateWorkspaceText selection payload. The native schema rejects
