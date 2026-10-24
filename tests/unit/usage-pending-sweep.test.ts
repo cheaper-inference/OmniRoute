@@ -11,6 +11,7 @@ const {
   finalizePendingRequestById,
   updatePendingRequestById,
   updatePendingRequest,
+  updatePendingRequestStreamChunks,
   clearPendingRequests,
 } = await import("../../src/lib/usage/usageHistory.ts");
 
@@ -133,7 +134,9 @@ test("UPDATE path measures payloads (regression: the ceiling must not no-op in p
   updatePendingRequest("m", "p", "c-b", { providerResponse: worstCaseObject });
   assert.equal(getPendingRetainedBytes(), afterBucket, "replacing a payload must not accumulate");
 
-  // Enough entries to exceed the ceiling, each fattened through the update path.
+  // After inserting enough fat entries, the byte ceiling should cap retained bytes.
+  // Insert entries until we're at or near the ceiling, then verify we can't exceed it
+  // by adding more payloads — the ceiling should reclaim or refuse.
   const CEILING = 256 * 1024 * 1024;
   const perEntry = afterById - afterInsertA;
   const extra = Math.ceil(CEILING / perEntry) + 50;
@@ -142,10 +145,12 @@ test("UPDATE path measures payloads (regression: the ceiling must not no-op in p
     assert.ok(nextId);
     updatePendingRequestById(nextId, { providerResponse: worstCaseObject });
   }
+  // After the burst, retained bytes should be close to but not exceed the ceiling.
   assert.ok(
-    getPendingRetainedBytes() > CEILING,
-    `the map should now exceed the ceiling (retained ${getPendingRetainedBytes()})`
+    getPendingRetainedBytes() <= CEILING * 1.01,
+    `the map should stay at or near the ceiling after a fat insert burst (retained ${getPendingRetainedBytes()})`
   );
+
   trackPendingRequest("m", "p", "c-trigger", true);
   assert.ok(
     getPendingRetainedBytes() <= CEILING,
@@ -156,11 +161,50 @@ test("UPDATE path measures payloads (regression: the ceiling must not no-op in p
   assert.equal(getPendingRetainedBytes(), 0, "clear resets retained bytes");
 });
 
+test("stream-chunks update path is measured and re-enforces the ceiling (regression)", () => {
+  clearPendingRequests();
+
+  // A bare entry retains almost nothing; chunks arrive later via the
+  // streaming path. Before the fix, growing chunks were neither measured nor
+  // enforced, so the byte ceiling silently stopped binding for streams.
+  const id = trackPendingRequest("m", "p", "c-stream", true);
+  assert.ok(id, "id tracked");
+  const afterInsert = getPendingRetainedBytes();
+
+  const bigChunk = "y".repeat(1200);
+  updatePendingRequestStreamChunks("m", "p", "c-stream", {
+    provider: [bigChunk],
+  });
+  const afterChunks = getPendingRetainedBytes();
+  assert.ok(
+    afterChunks > afterInsert,
+    `stream-chunks update must be measured (insert ${afterInsert} -> ${afterChunks})`
+  );
+
+  // Replacing with the same-size payload must not accumulate.
+  updatePendingRequestStreamChunks("m", "p", "c-stream", {
+    provider: [bigChunk],
+  });
+  assert.equal(getPendingRetainedBytes(), afterChunks, "replacing a payload must not accumulate");
+
+  // Clearing chunks must drop the retained bytes back down.
+  updatePendingRequestStreamChunks("m", "p", "c-stream", null);
+  assert.ok(
+    getPendingRetainedBytes() < afterChunks,
+    "clearing stream chunks must reclaim their bytes"
+  );
+
+  clearPendingRequests();
+  assert.equal(getPendingRetainedBytes(), 0, "clear resets retained bytes");
+});
+
 test("sweepStalePendingRequests marks over-age pending details and keeps counts", () => {
   clearPendingRequests();
 
   // One request that will age past the max age (still in flight), one fresh.
-  const staleId = trackPendingRequest("gpt-x", "openai", "conn-stale", true);
+  const staleId = trackPendingRequest("gpt-x", "openai", "conn-stale", true, {
+    providerResponse: { body: "x".repeat(20_000) },
+  });
   const freshId = trackPendingRequest("gpt-x", "openai", "conn-fresh", true);
 
   assert.ok(staleId && freshId, "both started requests should produce ids");
@@ -170,6 +214,15 @@ test("sweepStalePendingRequests marks over-age pending details and keeps counts"
   // Age the stale entry well beyond the max age.
   const stale = getPendingById().get(staleId);
   assert.ok(stale, "stale detail should exist");
+  stale.tokens = {
+    in: 12,
+    out: 34,
+    cacheRead: null,
+    cacheCreation: null,
+    reasoning: null,
+    compressed: null,
+  };
+  const retainedBeforeSweep = getPendingRetainedBytes();
   stale.startedAt = Date.now() - 2 * HOUR_MS;
 
   const removed = sweepStalePendingRequests(Date.now(), HOUR_MS);
@@ -179,6 +232,12 @@ test("sweepStalePendingRequests marks over-age pending details and keeps counts"
   const marked = getPendingById().get(staleId);
   assert.equal(marked?.stale, true, "over-age entry should be marked");
   assert.ok(typeof marked?.sweptAt === "number", "marked entry should carry a sweep timestamp");
+  assert.equal(marked?.providerResponse, undefined, "stale payloads should be pruned");
+  assert.deepEqual(marked?.tokens, stale.tokens, "lightweight token metadata should be preserved");
+  assert.ok(
+    getPendingRetainedBytes() < retainedBeforeSweep,
+    "pruning stale payloads must reduce retained-byte accounting"
+  );
   assert.ok(getPendingById().has(freshId), "fresh entry must survive");
   assert.equal(getPendingById().get(freshId)?.stale, undefined);
 

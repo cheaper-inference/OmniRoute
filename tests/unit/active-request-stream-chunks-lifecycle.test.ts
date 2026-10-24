@@ -536,6 +536,8 @@ test("createRequestLogger and trackPendingRequest with matching model propagate 
   logger.appendProviderChunk('data: {"chunk":"hello"}');
   logger.appendOpenAIChunk('data: {"choices":[{"delta":{"content":"hi"}}]}');
   logger.appendConvertedChunk('data: {"content":"world"}');
+  // Stream chunks reach the pending map in batches (64 KiB deltas); getPipelinePayloads() flushes.
+  logger.getPipelinePayloads();
 
   const detail = usageHistory.getPendingById().get(requestId);
   assert.ok(detail, "pending detail should exist");

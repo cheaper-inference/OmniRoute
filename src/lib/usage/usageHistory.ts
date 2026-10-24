@@ -360,8 +360,23 @@ export function sweepStalePendingRequests(
   for (const detail of pendingById.values()) {
     if (detail.stale) continue;
     if (now - detail.startedAt > maxAgeMs) {
-      detail.stale = true;
+      // Prune heavyweight payloads while preserving lightweight metadata
+      // needed for dashboard visibility: model, provider, correlationId, tokens,
+      // and the counters. The full request/response bodies are discarded so they
+      // no longer accumulate in RSS.
+      const before = pendingDetailBytes(detail);
+      detail.clientRequest = undefined;
+      detail.providerRequest = undefined;
+      detail.providerResponse = undefined;
+      detail.clientResponse = undefined;
+      detail.streamChunks = undefined;
+      detail.stage = undefined;
+      detail.stageUpdatedAt = undefined;
+      detail.error = undefined;
+      detail.errorCode = undefined;
+      totalPendingDetailBytes += pendingDetailBytes(detail) - before;
       detail.sweptAt = now;
+      detail.stale = true;
     }
   }
 
@@ -549,6 +564,7 @@ export function updatePendingRequest(
   const before = pendingDetailBytes(details[lastIdx]);
   Object.assign(details[lastIdx], normalizePendingMetadata(metadata));
   totalPendingDetailBytes += pendingDetailBytes(details[lastIdx]) - before;
+  enforcePendingByteCeiling();
 }
 
 export function updatePendingRequestById(id: string | null, metadata: PendingRequestMetadata) {
@@ -557,6 +573,7 @@ export function updatePendingRequestById(id: string | null, metadata: PendingReq
   const before = pendingDetailBytes(detail);
   Object.assign(detail, normalizePendingMetadata(metadata));
   totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+  enforcePendingByteCeiling();
   return true;
 }
 
@@ -690,6 +707,24 @@ export function finalizeMostRecentPendingRequest(
 
 export { getCompletedDetails } from "./completedRequestDetails";
 
+/** Store an owned snapshot so caller array mutations cannot bypass byte accounting. */
+export function updatePendingRequestStreamChunksById(
+  id: string,
+  streamChunks: PendingRequestDetail["streamChunks"]
+): boolean {
+  const entry = pendingById.get(id);
+  if (!entry) return false;
+  const before = pendingDetailBytes(entry);
+  entry.streamChunks = streamChunks
+    ? Object.fromEntries(
+        Object.entries(streamChunks).map(([key, chunks]) => [key, chunks?.slice()])
+      )
+    : streamChunks;
+  totalPendingDetailBytes += pendingDetailBytes(entry) - before;
+  enforcePendingByteCeiling();
+  return true;
+}
+
 export function updatePendingRequestStreamChunks(
   model: string,
   provider: string,
@@ -705,7 +740,7 @@ export function updatePendingRequestStreamChunks(
   if (!isSafeKey(modelKey)) return;
   const details = pendingRequests.details[connectionId]?.[modelKey];
   if (!details?.length) return;
-  details[0].streamChunks = streamChunks;
+  updatePendingRequestStreamChunksById(details[0].id, streamChunks);
 }
 
 /**
