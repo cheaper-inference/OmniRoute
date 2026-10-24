@@ -804,3 +804,64 @@ test("v1 assignments route resolves connection proxies and bulk assignment cover
   assert.equal(globalPayload.requested, 1);
   assert.equal(globalPayload.updated, 1);
 });
+
+const settingsAssignmentsRoute =
+  await import("../../src/app/api/settings/proxies/assignments/route.ts");
+
+test("both assignment write endpoints validate bodies before changing state", async () => {
+  for (const handler of [settingsAssignmentsRoute.PUT, proxyAssignmentsV1Route.PUT]) {
+    await resetStorage();
+    const invalid = await handler(
+      new Request("http://localhost/api/settings/proxies/assignments", {
+        method: "PUT",
+        body: JSON.stringify({ scope: "invalid" }),
+      })
+    );
+    assert.equal(invalid.status, 400);
+    const malformed = await handler(
+      new Request("http://localhost/api/settings/proxies/assignments", {
+        method: "PUT",
+        body: "{bad",
+      })
+    );
+    assert.equal(malformed.status, 400);
+  }
+});
+
+test("each assignment write endpoint reports its own failure message", async () => {
+  const cases = [
+    [
+      settingsAssignmentsRoute.PUT,
+      "http://localhost/api/settings/proxies/assignments",
+      "Failed to update assignment",
+    ],
+    [
+      proxyAssignmentsV1Route.PUT,
+      "http://localhost/api/v1/management/proxies/assignments",
+      "Failed to update proxy assignment",
+    ],
+  ] as const;
+  for (const [handler, url, expectedMessage] of cases) {
+    await resetStorage();
+    const db = core.getDbInstance();
+    const originalPrepare = db.prepare.bind(db);
+    // A thrown value without a message falls back to the per-route failure message.
+    db.prepare = (sql, ...args) => {
+      if (String(sql).includes("DELETE FROM proxy_assignments")) throw {};
+      return originalPrepare(sql, ...args);
+    };
+    try {
+      const response = await handler(
+        new Request(url, {
+          method: "PUT",
+          body: JSON.stringify({ scope: "global", proxyId: null }),
+        })
+      );
+      assert.equal(response.status, 500);
+      const payload = (await response.json()) as { error: { message: string } };
+      assert.equal(payload.error.message, expectedMessage);
+    } finally {
+      db.prepare = originalPrepare;
+    }
+  }
+});
