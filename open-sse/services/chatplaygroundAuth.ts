@@ -14,7 +14,7 @@ export const CLERK_MINT_PATH = "/v1/client/sessions/{sid}/tokens";
 export const CLERK_MINT_QUERY = "?__clerk_api_version=2025-11-10&_clerk_js_version=5.127.2";
 export const WEB_ORIGIN = "https://web.chatplayground.ai";
 export const DEFAULT_CLERK_UA =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36";
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36";
 
 export const CLERK_JWT_SKEW_SECONDS = 15;
 
@@ -227,7 +227,7 @@ function buildChatPlaygroundRequestHeaders(): Record<string, string> {
     DEFAULT_CLERK_UA;
   return {
     accept: "*/*",
-    "content-type": "text/plain;charset=UTF-8",
+    "content-type": "application/json",
     origin: WEB_ORIGIN,
     referer: `${WEB_ORIGIN}/`,
     "user-agent": userAgent,

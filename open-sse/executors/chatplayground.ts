@@ -19,6 +19,7 @@ import {
 import { resolveChatPlaygroundAuth } from "../services/chatplaygroundAuth.ts";
 import {
   CHATPLAYGROUND_API_BASE,
+  fetchChatPlaygroundModels,
   resolveChatPlaygroundModel,
   type ChatPlaygroundModel,
 } from "../services/chatplaygroundModels.ts";
@@ -62,7 +63,38 @@ export function enqueueSseCompletion(
 }
 
 /**
+ * Vendor-prefixed upstream model id expected by the azure endpoint.
+ * The web client sends `${provider.toLowerCase()}/${modelName}` (e.g.
+ * "google/gemini-3.8-flash", "openai/gpt-6-luna") resolved from /api/models.
+ */
+export function resolveChatPlaygroundUpstreamModel(modelData: ChatPlaygroundModel): string {
+  const provider = (modelData.provider || "").trim().toLowerCase();
+  if (modelData.endpoint === "azure" && provider) {
+    return `${provider}/${modelData.modelName}`;
+  }
+  return modelData.modelName;
+}
+
+/**
+ * Resolve a request's model against the current live /api/models catalog
+ * (10-minute cached, offline fallback), falling back to the bundled catalog so
+ * a model the live roster no longer lists still routes rather than 400ing.
+ */
+async function resolveChatPlaygroundModelForRequest(
+  model: string
+): Promise<ChatPlaygroundModel | null> {
+  const live = await fetchChatPlaygroundModels();
+  const fromLive = resolveChatPlaygroundModel(model, live);
+  if (fromLive) return fromLive;
+  return resolveChatPlaygroundModel(model);
+}
+
+/**
  * Build the JSON request payload for ChatPlayground API.
+ * Field sets mirror what web.chatplayground.ai sends per endpoint:
+ *   - azure:      messages, model, chatId, isRegenerate, promptTemplate, fileUrl, botId, submissionId, noSave
+ *   - lmsys:      messages, model, botId (botId is required — the API 500s without it)
+ *   - perplexity: messages, modelName, botId (botId is required — the API 500s without it)
  */
 export function buildChatPlaygroundPayload(
   body: unknown,
@@ -71,41 +103,25 @@ export function buildChatPlaygroundPayload(
   const req = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
   const messages = Array.isArray(req.messages) ? req.messages : [];
 
-  const payload: Record<string, unknown> = {
+  if (modelData.endpoint === "perplexity") {
+    return { messages, modelName: modelData.modelName, botId: modelData.id };
+  }
+
+  if (modelData.endpoint === "lmsys") {
+    return { messages, model: modelData.modelName, botId: modelData.id };
+  }
+
+  return {
     messages,
-    botId: modelData.id,
-    chatId:
-      typeof req.chatId === "string" && req.chatId
-        ? req.chatId
-        : randomUUID().replace(/-/g, "").slice(0, 24),
-    stream: req.stream !== false,
-    temperature: typeof req.temperature === "number" ? req.temperature : 0.7,
+    model: resolveChatPlaygroundUpstreamModel(modelData),
+    chatId: typeof req.chatId === "string" ? req.chatId : "",
     isRegenerate: false,
     promptTemplate: null,
     fileUrl: null,
-    submissionId: randomUUID().replace(/-/g, ""),
+    botId: modelData.id,
+    submissionId: randomUUID(),
     noSave: true,
   };
-
-  if (modelData.endpoint === "perplexity") {
-    payload.modelName = modelData.modelName;
-  } else {
-    payload.model = modelData.modelName;
-  }
-
-  for (const key of [
-    "max_tokens",
-    "top_p",
-    "presence_penalty",
-    "frequency_penalty",
-    "stop",
-  ] as const) {
-    if (key in req && req[key] !== undefined && req[key] !== null) {
-      payload[key] = req[key];
-    }
-  }
-
-  return payload;
 }
 
 /**
@@ -129,6 +145,22 @@ export function toOpenAiCompletionEnvelope(model: string, content: string): Resp
     }),
     { headers: { "content-type": "application/json" } }
   );
+}
+
+/**
+ * Strip the `CITATIONS:[...]` metadata the perplexity endpoint appends to its
+ * answer stream (the web client parses it for citation links instead of
+ * rendering it). The marker can arrive on its own line OR inline right after
+ * the answer text (e.g. `…Canberra**.[1]CITATIONS:[…]`), so both forms are
+ * removed: whole `CITATIONS:` lines, and `CITATIONS:` runs to end of line.
+ */
+export function stripCitationsLine(text: string): string {
+  if (!text) return "";
+  return text
+    .split("\n")
+    .filter((line) => !line.trimStart().startsWith("CITATIONS:"))
+    .join("\n")
+    .replace(/CITATIONS:[^\n]*/g, "");
 }
 
 /** Count characters in a Chat Completions message `content` (string or multipart). */
@@ -213,7 +245,7 @@ export function createPerplexityOpenAiResponse(
   rawText: string,
   isStreaming: boolean
 ): Response {
-  const content = stripChatId(rawText, true);
+  const content = stripChatId(stripCitationsLine(rawText), true);
   if (!isStreaming) return toOpenAiCompletionEnvelope(model, content);
 
   const streamId = randomUUID().slice(0, 12);
@@ -273,7 +305,7 @@ export class ChatPlaygroundExecutor extends BaseExecutor {
     const { model, body, stream, credentials, signal } = input;
     const chatUrl = `${CHATPLAYGROUND_API_BASE}/chat`;
 
-    const modelData = resolveChatPlaygroundModel(model);
+    const modelData = await resolveChatPlaygroundModelForRequest(model);
     if (!modelData) {
       return makeErrorResult(
         400,
