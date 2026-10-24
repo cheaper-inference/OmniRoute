@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 export type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
@@ -243,9 +244,6 @@ const NON_RETRYABLE_MODEL_LOCKOUT_REASONS = new Set(["not_found", "not_found_loc
 // this base. Real upstream Retry-After hints still win — they flow through
 // `exactCooldownMs` (usedUpstreamRetryHint), not this base. (#5222)
 const ANTIGRAVITY_FAMILY_INFERRED_BASE_COOLDOWN_MS = 30_000;
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 }

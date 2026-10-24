@@ -1,3 +1,4 @@
+import { isRecord } from "@/shared/utils/recordHelpers";
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import {
   buildApiKeyUsageLimitPercentText,
@@ -108,11 +109,6 @@ async function getDefaultUsageCommandQuotaPolicy(): Promise<UsageCommandQuotaPol
     providerWindowDefaults: resilience.quotaPreflight.providerWindowDefaults,
   };
 }
-
-function isRecord(value: unknown): value is JsonRecord {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
 function readHeader(request: Request, name: string): string | null {
   return request.headers.get(name) || request.headers.get(name.toLowerCase());
 }

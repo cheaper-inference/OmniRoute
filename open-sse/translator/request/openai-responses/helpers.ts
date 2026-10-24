@@ -1,6 +1,7 @@
 // Pure shared primitives for the OpenAI Responses <-> Chat Completions request
 // translators. Extracted verbatim from openai-responses.ts (no host imports).
 
+import { toRecord as canonicalToRecord } from "../../../utils/recordHelpers.ts";
 export type JsonRecord = Record<string, unknown>;
 export const RESPONSES_STORE_MARKER = "_omnirouteResponsesStore";
 export const COPILOT_REASONING_SUMMARY_MARKER = "_omnirouteCopilotReasoningSummary";
@@ -24,8 +25,8 @@ export function normalizeVerbosity(value: unknown): string | undefined {
   return VERBOSITY_LEVELS.has(level) ? level : undefined;
 }
 
-export function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+export function toRecord(value: unknown): Record<string, unknown> {
+  return canonicalToRecord(value);
 }
 
 // The Responses API rejects call_id values longer than 64 characters (9router#396).

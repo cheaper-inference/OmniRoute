@@ -1,8 +1,6 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 // ponytail: Kimi K3 (Moonshot) enforces a stricter tool-message contract than most
 // OpenAI-compatible APIs: every role:"tool" message must carry a `name` field matching

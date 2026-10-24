@@ -1,3 +1,4 @@
+import { isRecord } from "@/shared/utils/recordHelpers";
 import { DEFAULT_DATABASE_SETTINGS } from "@/types/databaseSettings";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 
@@ -110,11 +111,6 @@ const INCREMENTAL_VACUUM_BATCH_PAGES = 2000;
 let timer: ReturnType<typeof setTimeout> | null = null;
 let hydrated = false;
 let currentState: VacuumSchedulerState = { ...STATE_DEFAULTS };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
-
 function parseJsonSafe(raw: string | null): unknown {
   if (raw === null) return undefined;
   try {

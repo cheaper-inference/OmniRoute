@@ -17,14 +17,12 @@
  * the same progress as for a plain function call.
  */
 
+import { isRecord } from "../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
 /** Converted custom tools by customToolKey(), with the client's original definition. */
 export type GrokBuildCustomTools = Map<string, JsonRecord>;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function nonEmptyName(value: unknown): string | null {
   return typeof value === "string" && value.trim() !== "" ? value : null;

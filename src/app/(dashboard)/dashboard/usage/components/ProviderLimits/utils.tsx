@@ -1,3 +1,4 @@
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 export { parseQuotaData } from "./quotaParsing";
 import { hasFixedQuotaOrder, hasCanonicalWindowOrder, sortQuotasByWindow } from "./quotaParsing";
 
@@ -38,13 +39,6 @@ const QUOTA_LABEL_MAP: Record<string, string> = {
   gemini_weekly: "Gemini Weekly",
   claude_gpt_weekly: "Claude & GPT Weekly",
 };
-
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 function isClaudeOrganizationTypeLabel(value: string) {
   return /^default_claude(?:_ai)?$/i.test(value.trim());
 }

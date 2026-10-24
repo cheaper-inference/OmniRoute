@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { flattenOpenAIToolRootAnyOf } from "../services/toolSchemaSanitizer.ts";
 import { DefaultExecutor } from "./default.ts";
 import type { ProviderCredentials } from "./base.ts";
@@ -12,9 +13,6 @@ const FIXED_SAMPLING_PARAMS = [
   "n",
 ] as const;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function normalizeMaxCompletionTokens(body: JsonRecord, ceiling: number): void {
   if (body.max_completion_tokens === undefined && body.max_tokens !== undefined) {

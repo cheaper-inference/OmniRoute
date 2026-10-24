@@ -12,8 +12,9 @@
  * they must reach generativelanguage.googleapis.com as Content parts — do
  * not collapse the OpenAI `input` array to string[].
  */
+import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 
-import { isCanonicalEmbeddingItem, isPlainObject } from "./jinaNativeEmbeddingInput";
+import { isCanonicalEmbeddingItem } from "./jinaNativeEmbeddingInput";
 
 export type GeminiEmbeddingModality = "text" | "image" | "audio" | "video" | "document";
 
@@ -22,11 +23,6 @@ const GEMINI_EMBEDDING_2_IDS = new Set(["gemini-embedding-2", "gemini-embedding-
 export function isGeminiEmbedding2Family(modelId: string | null | undefined): boolean {
   return typeof modelId === "string" && GEMINI_EMBEDDING_2_IDS.has(modelId);
 }
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return isPlainObject(value) ? value : null;
-}
-
 function mimeFromInline(value: Record<string, unknown>): string | null {
   const snake = asRecord(value.inline_data);
   if (typeof snake?.mime_type === "string") return snake.mime_type;

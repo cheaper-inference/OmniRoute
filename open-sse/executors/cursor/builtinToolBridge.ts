@@ -1,3 +1,4 @@
+import { isRecord } from "../../utils/recordHelpers.ts";
 import {
   decodeProtobufValue,
   type ChatMessage,
@@ -166,9 +167,6 @@ export function selectCursorBridgeTools(
   return tools?.filter((tool) => tool.name === toolChoice.function.name);
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function hasOnlyKeys(value: Record<string, unknown>, allowed: Set<string>): boolean {
   return Object.keys(value).every((key) => allowed.has(key));

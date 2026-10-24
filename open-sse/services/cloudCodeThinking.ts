@@ -1,10 +1,8 @@
+import { isRecord } from "../utils/recordHelpers.ts";
 import { getModelSpec } from "../../src/shared/constants/modelSpecs.ts";
 
 const CLOUD_CODE_REASONING_UNSUPPORTED_PATTERNS = [/^claude-/i, /^gpt-oss-/i, /^tab_/i];
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 const PREFIX_TRIM_RE = /^(?:models\/|antigravity\/)+/i;
 

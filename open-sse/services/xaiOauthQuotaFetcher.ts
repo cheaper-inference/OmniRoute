@@ -23,6 +23,7 @@
  * (before registerGenericQuotaFetchers). Not a module-load side effect.
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import {
   fetchGrokBillingWithToken,
   grokBillingSnapshotToQuotaInfo,
@@ -62,11 +63,6 @@ if (typeof _cacheCleanup === "object" && _cacheCleanup && "unref" in _cacheClean
   (_cacheCleanup as { unref?: () => void }).unref?.();
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 /**
  * Resolve bearer token from Provider Limits (root accessToken) or executor

@@ -5,6 +5,7 @@
  * @changes
  * - [2026-07-24] [Composer] - Skip execute-mode units at concurrency cap before dispatch
  */
+import { isRecord } from "../../utils/recordHelpers.ts";
 import { errorResponse } from "../../utils/error.ts";
 import { buildContextBudgetResponse, readBudgetFailure } from "./budgetExhaustion.ts";
 import type { ComboDiagnostics } from "../../utils/error.ts";
@@ -41,9 +42,6 @@ export type RuntimeUnitExecutionResult = {
 
 type RuntimeUnitRunner = (options: HandleComboChatOptions) => Promise<Response>;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function getCombosList(allCombos: ComboCollectionLike): ComboLike[] {
   const combos = Array.isArray(allCombos) ? allCombos : allCombos?.combos || [];

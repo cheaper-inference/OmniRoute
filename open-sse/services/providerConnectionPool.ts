@@ -1,13 +1,9 @@
+import { asRecord } from "../utils/recordHelpers.ts";
 import { nodeTypeFromId } from "@/lib/db/providerNodeSelect";
 import { getCachedProviderConnections, getCachedProviderNodes } from "@/lib/db/readCache";
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { getProviderById, getProviderAlias, resolveProviderId } from "@/shared/constants/providers";
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 const PROVIDER_SEARCH_PAIRS: string[][] = [
   ["nvidia", "nvidia_nim"],

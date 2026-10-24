@@ -12,6 +12,7 @@
  * must never log it or echo it into a client-facing error body.
  */
 
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
 const GOOGLE_ACCOUNTS_HOST = "accounts.google.com";
@@ -19,9 +20,6 @@ const VERIFICATION_WORDING = /validation|verif|appeal/i;
 // Bounded quantifier keeps the scan linear on untrusted upstream text.
 const FREE_TEXT_URL = /https:\/\/accounts\.google\.com\/[^\s"'\\<>]{1,2048}/;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];

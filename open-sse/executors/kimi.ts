@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import {
   buildKimiCodeIdentityHeaders,
   getKimiCodeCliUserAgent,
@@ -22,9 +23,6 @@ type KimiThinkingPolicy = {
   defaultThinkingEffort?: string;
 };
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function resolveKimiProtocol(
   credentials: ProviderCredentials | null | undefined,

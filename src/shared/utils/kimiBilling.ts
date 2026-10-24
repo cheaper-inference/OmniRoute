@@ -5,6 +5,7 @@
  * Code quota windows and `boosterWallet`. Only the strictly whitelisted fields
  * below may cross the Provider Limits cache/UI boundary.
  */
+import { asRecordOrNull as toRecord } from "@/shared/utils/recordHelpers";
 
 export const KIMI_CODE_ADDITIONAL_CREDITS_URL =
   "https://www.kimi.com/membership/subscription?tab=quota&aff=omniroute";
@@ -49,12 +50,6 @@ type KimiBillingCardRow =
       target: "_blank";
       rel: "noreferrer noopener";
     };
-
-type JsonRecord = Record<string, unknown>;
-
-function toRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function minorUnits(value: unknown): number | undefined {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : undefined;

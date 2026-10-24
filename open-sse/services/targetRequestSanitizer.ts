@@ -7,6 +7,7 @@
  * that belong to the source model but are invalid for the actual target.
  */
 
+import { isRecord } from "../utils/recordHelpers.ts";
 import { stripUnsupportedParams } from "../translator/paramSupport.ts";
 import { sanitizeReasoningEffortForProvider } from "../executors/base/reasoningEffort.ts";
 
@@ -19,9 +20,6 @@ type LoggerLike =
   | null
   | undefined;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
 
 /** GPT-5 Chat/Responses models are the only family that owns `verbosity`. */
 export function targetSupportsVerbosity(model: string | null | undefined): boolean {

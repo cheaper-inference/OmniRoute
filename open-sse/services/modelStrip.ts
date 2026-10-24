@@ -1,10 +1,8 @@
+import { asRecord } from "../utils/recordHelpers.ts";
 import { PROVIDER_ID_TO_ALIAS, getModelStripTypes } from "../config/providerModels.ts";
 
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function shouldStripPart(part: JsonRecord, stripTypes: Set<string>): boolean {
   const type = typeof part.type === "string" ? part.type : "";

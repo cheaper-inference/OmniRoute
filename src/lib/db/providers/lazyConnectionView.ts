@@ -8,17 +8,13 @@
  * Extracted from sse/services/auth.ts for reuse across dashboard,
  * admin, and catalog callers during Phase 2/3 of the lazy-decrypt rollout.
  */
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 import { decryptQuiet } from "../encryption";
 import { mapProviderSpecificDataSecrets } from "./providerSpecificDataSecrets";
 import type { ConnectionRateLimitOverrides } from "./columns";
 
 type JsonRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 }

@@ -32,6 +32,7 @@
  * matches, which is what `interleavedField` on a registry model declares.
  */
 
+import { isRecord } from "./recordHelpers.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -47,9 +48,6 @@ function isBlank(value: unknown): boolean {
   return false;
 }
 
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function hasToolCalls(message: unknown): boolean {
   if (!isRecord(message)) return false;

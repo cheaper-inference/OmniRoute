@@ -5,6 +5,7 @@
  * @changes
  * - [2026-07-24] [Composer] - Aggregate usage_history in SQL instead of loading all rows into JS
  */
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 
 import { setImmediate as yieldToEventLoop } from "node:timers/promises";
 import { getCostSummary } from "@/domain/costRules";
@@ -124,11 +125,6 @@ export interface ProviderWindowCostBreakdown {
   estimatedFullQuotaUsd: number | null;
   rows: ProviderWindowCostBreakdownRow[];
 }
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toNumber(value: unknown, fallback = 0): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim().length > 0) {

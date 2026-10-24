@@ -9,6 +9,7 @@
  *
  * Chat/LLM generate stays in executors/syntx.ts and is not used here.
  */
+import { asRecord } from "../utils/recordHelpers.ts";
 import { randomBytes } from "node:crypto";
 import { SYNTX_API_BASE, looksLikeJwt, resolveSyntxToken, syntxAuthHeaders } from "./syntxAuth.ts";
 import {
@@ -30,9 +31,6 @@ const MEDIA_OBJECT_TYPES = new Set(["image", "video", "audio", "file"]);
 type JsonRecord = Record<string, unknown>;
 type FetchImpl = typeof fetch;
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value : "";

@@ -1,8 +1,6 @@
+import { asRecordOrNull as asRecord } from "../../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function remaining(value: JsonRecord | null): number | null {
   if (!value) return null;

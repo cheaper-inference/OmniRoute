@@ -21,6 +21,7 @@
  * Azure Foundry reasoning matrix, openai-python#2072.
  */
 
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { FORMATS } from "../translator/formats.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -31,9 +32,6 @@ const ACTIVE_EFFORT_SUFFIX = /-(low|medium|high|xhigh|minimal)$/i;
 // Suffix that encodes the explicit non-reasoning mode, e.g. `gpt-5.4-none`.
 const NONE_EFFORT_SUFFIX = /-none$/i;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 /**
  * True when the request carries an active reasoning effort (any level other than

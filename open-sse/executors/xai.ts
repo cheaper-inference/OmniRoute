@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { BaseExecutor, type ExecutorLog, type ProviderCredentials } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { getModelTargetFormat } from "../config/providerModels.ts";
@@ -31,9 +32,6 @@ const REASONING_DENIED = ["grok-build-0.1", "grok-4.20-0309-non-reasoning"];
 /** `-{level}` suffixes some clients append to a model id to select reasoning intensity. */
 const EFFORT_SUFFIXES = ["low", "medium", "high", "xhigh"] as const;
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 /**
  * xAI/Grok executor (port of decolua/9router#2147).

@@ -12,6 +12,7 @@
  * expose those as mediaCapabilities so the Media page does not stamp one
  * generic size list on every SYNTX model.
  */
+import { asRecord } from "../utils/recordHelpers.ts";
 import { SYNTX_API_BASE, syntxAuthHeaders } from "./syntxAuth.ts";
 
 export type SyntxMediaKind = "image" | "video" | "speech" | "music" | "upscale" | "transcription";
@@ -360,11 +361,6 @@ export function defaultAiNameForKind(kind: SyntxMediaKind): string {
   }
 }
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 export function parseSyntxAiServices(json: unknown): Map<string, string> {
   const rows = Array.isArray(json)

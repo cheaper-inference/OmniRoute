@@ -1,3 +1,4 @@
+import { isRecord } from "../utils/recordHelpers.ts";
 import { randomUUID } from "node:crypto";
 
 import { isVisionModelId } from "@/shared/constants/visionModels";
@@ -39,9 +40,6 @@ export const COMMAND_CODE_VERSION = process.env.COMMAND_CODE_VERSION?.trim() || 
 const MAX_COMMAND_CODE_TOKENS = 200_000;
 const encoder = new TextEncoder();
 
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function asRecordArray(value: unknown): JsonRecord[] {
   return Array.isArray(value) ? value.filter(isRecord) : [];

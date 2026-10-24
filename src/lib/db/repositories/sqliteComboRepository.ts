@@ -1,6 +1,7 @@
 /**
  * SQLite implementation of the combo repository contract.
  */
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 import { v4 as uuidv4 } from "uuid";
 import type {
@@ -16,11 +17,6 @@ import { clearRotationState } from "../proxies/rotation";
 import { bumpProxyRegistryGeneration } from "../proxies/registryGeneration";
 
 type JsonRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function getSerializedData(value: unknown): string | null {
   const row = asRecord(value);
   return typeof row.data === "string" ? row.data : null;

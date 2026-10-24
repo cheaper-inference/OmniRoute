@@ -9,13 +9,9 @@
  * truncation would have dropped it.
  */
 
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 const GROK_BUILD_HOSTED_TOOL_TYPES = new Set(["web_search", "x_search"]);
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function functionName(value: unknown): string {
   const record = asRecord(value);

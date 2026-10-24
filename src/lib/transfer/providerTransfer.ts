@@ -18,6 +18,7 @@
  * credentials are re-encrypted at rest with the destination key and the
  * existing dedup / dashboard-password guards still apply.
  */
+import { isRecord } from "@/shared/utils/recordHelpers";
 import { z } from "zod";
 import { backupDbFile } from "@/lib/db/backup";
 import {
@@ -192,11 +193,6 @@ const sealedPayloadSchema = z.object({
   providerConnections: z.array(sealedConnectionSchema).max(MAX_TRANSFER_CONNECTIONS),
   providerNodes: z.array(sealedNodeSchema).max(MAX_TRANSFER_CONNECTIONS),
 });
-
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
-
 function str(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }

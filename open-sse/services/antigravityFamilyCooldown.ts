@@ -2,6 +2,7 @@
  * Persist Antigravity/agy quota cooldowns per model family (gemini vs claude)
  * on the connection row, without cooling the whole account.
  */
+import { asRecord } from "../utils/recordHelpers.ts";
 import { lockModel } from "./accountFallback.ts";
 import {
   getAntigravityQuotaFamily,
@@ -12,11 +13,6 @@ type JsonRecord = Record<string, unknown>;
 
 const FAMILY_PSD_KEY = "antigravityFamilyRateLimitedUntil";
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as JsonRecord)
-    : {};
-}
 
 function parseUntilMs(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;

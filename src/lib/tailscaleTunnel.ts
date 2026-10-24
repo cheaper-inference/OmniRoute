@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { execFile, spawn } from "child_process";
 import fs from "fs";
 import fsPromises from "fs/promises";
@@ -122,11 +123,6 @@ export type TailscaleEnableResult =
       enableUrl: string | null;
       status: TailscaleTunnelStatus;
     };
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();

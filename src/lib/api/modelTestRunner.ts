@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { randomUUID } from "node:crypto";
 import { prepareConnectionModelTest } from "@/lib/providerModels/prepareConnectionModelTest";
 import { POST as postChatCompletion } from "@/app/api/v1/chat/completions/route";
@@ -51,13 +52,6 @@ export function shouldSkipWebSessionModelTest(providerId: unknown): boolean {
       providerId.trim().toLowerCase() !== CHATGPT_WEB_CLEAN_ROOM_PROVIDER_ID)
   );
 }
-
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 function getErrorMessage(error: unknown): string {
   return sanitizeErrorMessage(error) || "Unknown error";
 }

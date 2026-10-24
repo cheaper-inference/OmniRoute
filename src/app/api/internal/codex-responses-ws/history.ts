@@ -2,14 +2,11 @@ import { NextResponse } from "next/server";
 import { getApiKeyMetadata } from "@/lib/db/apiKeys";
 import { extractWsTokenFromRequest } from "@/lib/ws/handshake";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import { isRecord } from "@/shared/utils/recordHelpers";
 
 const CODEX_RESPONSES_WS_URL = "wss://chatgpt.com/backend-api/codex/responses";
 type JsonRecord = Record<string, unknown>;
 type ApiKeyMetadata = Awaited<ReturnType<typeof getApiKeyMetadata>>;
-
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;

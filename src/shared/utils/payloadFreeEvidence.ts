@@ -12,6 +12,7 @@
  *     anywhere else in `pricing` (per-request, per-image, per-second, audio, ...).
  *  4. A `free` tag, under the same no-positive-price condition.
  */
+import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -25,11 +26,6 @@ const NON_PRICE_KEYS = new Set([
   "prompt_tokens_threshold",
   "threshold",
 ]);
-
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
-
 function toPrice(value: unknown): number | null {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
   if (typeof value !== "string" || value.trim().length === 0) return null;

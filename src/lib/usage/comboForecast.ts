@@ -1,3 +1,4 @@
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import { getComboForecastUsageRows, type ComboForecastUsageRow } from "@/lib/db/comboForecast";
 import { getCombos, getComboById } from "@/lib/db/combos";
 import { getPricingForModel } from "@/lib/db/settings";
@@ -52,11 +53,6 @@ const HORIZON_MS: Record<ComboForecastHorizon, number> = {
   "7d": 7 * 24 * 60 * 60 * 1000,
   "30d": 30 * 24 * 60 * 60 * 1000,
 };
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function roundNumber(value: number, digits = 2): number {
   if (!Number.isFinite(value)) return 0;
   return Number(value.toFixed(digits));

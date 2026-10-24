@@ -7,6 +7,7 @@
  * Opt-in via `QODER_CLI_TRANSPORT=acp`; the process-wide qodercli gate still
  * bounds how many prompts run at once.
  */
+import { asRecord } from "../utils/recordHelpers.ts";
 import { spawn } from "child_process";
 import crypto from "crypto";
 import { resolveQoderCliInvocation } from "./qoderCliResolve";
@@ -49,9 +50,6 @@ export function isQoderAcpTransportEnabled(): boolean {
   );
 }
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 class AcpRpcError extends Error {
   constructor(

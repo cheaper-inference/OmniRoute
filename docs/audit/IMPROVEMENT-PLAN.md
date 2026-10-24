@@ -171,7 +171,7 @@ export async function POST(request: Request) {
 
 **Phase 1 (this commit):**
 
-- `src/shared/utils/recordHelpers.ts` — canonical `asRecord` ({}-fallback, array-excluded default, `allowArrays` opt-in), `asRecordOrNull` (null-fallback), `isRecord` (array-excluded default, `allowArrays` opt-in). The null/{} split is preserved as two named helpers so callers can no longer confuse them.
+- `src/shared/utils/recordHelpers.ts` (canonical for `src/` tree) and `open-sse/utils/recordHelpers.ts` (canonical for `open-sse/` tree) — canonical `asRecord` ({}-fallback, array-excluded default, `allowArrays` opt-in), `asRecordOrNull` (null-fallback), `isRecord` (array-excluded default, `allowArrays` opt-in) per cross-boundary isolation. The null/{} split is preserved as two named helpers so callers can no longer confuse them.
 - First migration group (identical {}-fallback array-excluded bodies, verified byte-for-byte): `src/domain/tagRouter.ts`, `src/domain/connectionModelRules.ts`, `src/lib/cloudSync.ts`, `src/lib/a2a/skills/healthReport.ts` (also migrated its local `toNumber` to `@/shared/utils/numeric` per the #7879 lint rule), `src/lib/combos/testHealth.ts`.
 - `tests/unit/record-helpers-semantics.test.ts` — 8 semantics-preservation tests pinning fallback behavior, array handling, and reference pass-through.
 

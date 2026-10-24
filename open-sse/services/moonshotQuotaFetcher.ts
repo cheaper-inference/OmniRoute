@@ -10,6 +10,7 @@
  * Cache: 60s in-memory. Registration: registerMoonshotQuotaFetcher() at startup.
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import { toNumber } from "@/shared/utils/numeric";
 import {
   registerQuotaCacheInvalidator,
@@ -60,11 +61,6 @@ if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 function parseMoonshotQuotaResponse(data: unknown, origin: string): MoonshotQuota | null {
   const obj = toRecord(data);

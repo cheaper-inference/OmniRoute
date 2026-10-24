@@ -8,6 +8,7 @@
  * Can be toggled per provider connection via dashboard.
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import { AsyncResource } from "node:async_hooks";
 import Bottleneck from "bottleneck";
 import { applyBottleneckDoExpirePatch, applyBottleneckHeartbeatPatch } from "./bottleneckPatch.ts";
@@ -77,11 +78,7 @@ interface LimiterUpdateSettings {
   reservoirRefreshInterval?: number | null;
 }
 
-type JsonRecord = Record<string, unknown>;
 
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 // Store limiters keyed by "provider:connectionId" (and optionally ":model")
 const limiters = new Map<string, Bottleneck>();

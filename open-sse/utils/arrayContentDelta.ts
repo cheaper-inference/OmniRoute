@@ -15,11 +15,9 @@
  * `content` (some Cloudflare Workers AI models stream digits as JSON numbers) becomes its string.
  */
 
+import { isRecord } from "./recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function partsText(value: unknown): string {
   if (typeof value === "string") return value;

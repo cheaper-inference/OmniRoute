@@ -73,6 +73,7 @@ export function useTrafficStream(
 
       ws.onmessage = (ev: MessageEvent) => {
         if (!mountedRef.current) return;
+        if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
         let event: WsEvent;
         try {
           event = JSON.parse(ev.data as string) as WsEvent;

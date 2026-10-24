@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { NextResponse } from "next/server";
 import { getAllModelLockouts } from "@omniroute/open-sse/services/accountFallback.ts";
 import { getCacheStats } from "@omniroute/open-sse/services/signatureCache.ts";
@@ -12,12 +13,6 @@ import { getAccountDisplayName } from "@/lib/display/names";
 
 import { toggleRateLimitSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
-
-type JsonRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 /**
  * GET /api/rate-limits — Consolidated rate-limit status

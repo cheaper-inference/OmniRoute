@@ -1,8 +1,8 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { v4 as uuidv4 } from "uuid";
 import { getDbInstance, rowToCamel } from "./core";
 import { backupDbFile } from "./backup";
 
-type JsonRecord = Record<string, unknown>;
 
 export interface SyncTokenRecord {
   id: string;
@@ -29,11 +29,6 @@ interface DbLike {
   prepare: <TRow = unknown>(sql: string) => StatementLike<TRow>;
   exec: (sql: string) => void;
 }
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toSyncTokenRecord(value: unknown): SyncTokenRecord | null {
   const record = asRecord(rowToCamel(value));
   if (typeof record.id !== "string" || typeof record.name !== "string") {

@@ -104,9 +104,7 @@ export async function cleanupCallLogs(): Promise<CleanupResult> {
  * Clean up old usage_history based on retention settings.
  */
 export async function cleanupUsageHistory(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
-
   const retentionDays = retention.usageHistory;
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
@@ -134,15 +132,73 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   }
 
   try {
-    const stmt = db.prepare("DELETE FROM usage_history WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffDateStr);
-    result.deleted = runResult.changes;
-
+    const deleted = await deleteFromTableBeforeInBatches(
+      { table: "usage_history", column: "timestamp", cutoff: "date" },
+      cutoffDateStr
+    );
+    result.deleted = deleted;
     console.log(
       `[Cleanup] Deleted ${result.deleted} usage_history older than ${retentionDays} days`
     );
   } catch (err: unknown) {
     console.error("[Cleanup] Error cleaning usage_history:", err);
+    result.errors++;
+  }
+
+  return result;
+}
+
+/**
+ * Clean up old request_cost_ledger based on retention settings.
+ * Uses retention.usageHistory (same retention window as usage_history).
+ */
+export async function cleanupCostLedger(): Promise<CleanupResult> {
+  const db = getDbInstance();
+  const retention = getRetentionSettings();
+  const retentionDays = retention.usageHistory;
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+  const cutoffISO = cutoffDate.toISOString();
+
+  const result: CleanupResult = { deleted: 0, errors: 0 };
+
+  try {
+    if (!tableExists("request_cost_ledger")) return result;
+
+    const stmt = db.prepare("DELETE FROM request_cost_ledger WHERE timestamp < ?");
+    const runResult = stmt.run(cutoffISO);
+    result.deleted = runResult.changes;
+
+    console.log(
+      `[Cleanup] Deleted ${result.deleted} request_cost_ledger older than ${retentionDays} days`
+    );
+  } catch (err: unknown) {
+    console.error("[Cleanup] Error cleaning request_cost_ledger:", err);
+    result.errors++;
+  }
+
+  return result;
+}
+
+/**
+ * Clean up expired sliding-window counter buckets in api_key_quota_counters.
+ */
+export async function cleanupApiKeyQuotaCounters(): Promise<CleanupResult> {
+  const db = getDbInstance();
+  const result: CleanupResult = { deleted: 0, errors: 0 };
+
+  try {
+    if (!tableExists("api_key_quota_counters")) return result;
+
+    // Sliding window counters have max window size of 1 month; anything older than 7 days is safe to prune
+    const cutoffMs = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const stmt = db.prepare("DELETE FROM api_key_quota_counters WHERE updated_at < ?");
+    const runResult = stmt.run(cutoffMs);
+    result.deleted = runResult.changes;
+
+    console.log(`[Cleanup] Deleted ${result.deleted} expired api_key_quota_counters`);
+  } catch (err: unknown) {
+    console.error("[Cleanup] Error cleaning api_key_quota_counters:", err);
     result.errors++;
   }
 
@@ -706,6 +762,8 @@ export async function runAutoCleanup(): Promise<{
     agenticConversations: await cleanupAgenticConversations(),
     oldBatches: await cleanupOldBatches(),
     expiredFiles: await cleanupExpiredFiles(),
+    costLedger: await cleanupCostLedger(),
+    apiKeyQuotaCounters: await cleanupApiKeyQuotaCounters(),
   };
 
   const totalDeleted = Object.values(results).reduce((sum, r) => sum + r.deleted, 0);

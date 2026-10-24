@@ -1,4 +1,4 @@
-type JsonRecord = Record<string, unknown>;
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 /**
  * Default models that support Anthropic Fast Mode (speed:"fast").
@@ -14,11 +14,6 @@ export const CLAUDE_FAST_MODE_DEFAULT_MODELS = [
   "claude-opus-4-7",
   "claude-opus-4-6",
 ] as const;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function asStringArray(value: unknown): string[] | null {
   if (!Array.isArray(value)) return null;
   const out: string[] = [];

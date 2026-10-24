@@ -7,6 +7,7 @@
  * - [2026-07-24] [Composer] - Add free-vs-paid billing mode and permanent free-tier model drain handling
  */
 
+import { asRecord } from "../utils/recordHelpers.ts";
 import { isModelLocked, lockModel } from "./accountFallback.ts";
 
 export type AlibabaBillingMode = "free" | "paid";
@@ -41,11 +42,6 @@ export {
   isAlibabaFreeTierAudioCapableModel,
 } from "./alibabaFreeTierQuotaFetcher.ts";
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 export function isAlibabaModelStudioProvider(provider: string | null | undefined): boolean {
   if (!provider) return false;

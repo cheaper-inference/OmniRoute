@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import {
   getMaxEffortWhenThinkingDisabled,
   isAdaptiveThinkingOnly,
@@ -6,9 +7,6 @@ import {
 type JsonRecord = Record<string, unknown>;
 const DIRECT_ANTHROPIC_API_PROVIDERS = new Set(["anthropic", "claude"]);
 
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 /**
  * Collapse manual extended thinking to adaptive for Claude models that no longer accept it.

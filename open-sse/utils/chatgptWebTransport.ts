@@ -1,3 +1,4 @@
+import { isRecord } from "./recordHelpers.ts";
 import { parseChatGptWebEncodedItem } from "./chatgptWebDeltaV1.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -22,9 +23,6 @@ export interface ChatGptWebTopicFrameResult {
   done: boolean;
 }
 
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function requireNonEmptyString(value: unknown, name: string): string {
   if (typeof value !== "string" || !value.trim()) {

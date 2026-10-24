@@ -11,6 +11,7 @@
  * expects its native format and normalization would lose format-specific metadata.
  */
 
+import { isRecord } from "./recordHelpers.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { hasAnyReasoningSignal } from "./reasoningFields.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
@@ -50,9 +51,6 @@ type SSEEventPrefixBuffer = {
   remember: (line: string) => void;
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 /**
  * Matches ANSI/VT100 terminal control sequences plus non-whitespace C0 control
@@ -139,16 +137,24 @@ function extractSseDataLine(line: string): string | null {
 
 export function createSSEDataLineNormalizer(): SSEDataLineNormalizer {
   let pendingEventLines: string[] = [];
+  let cachedParsed: SSEJsonPayload | null | undefined = undefined;
 
-  const getPendingDataLines = () =>
-    pendingEventLines
-      .map((line) => extractSseDataLine(line))
-      .filter((line): line is string => line !== null);
+  const getParsedPayload = (dataLines: string[]) => {
+    if (cachedParsed !== undefined) return cachedParsed;
+    if (dataLines.length === 0) {
+      cachedParsed = null;
+      return null;
+    }
+    cachedParsed = parseSSEDataLines(dataLines, { logWarning: false });
+    return cachedParsed;
+  };
 
   const hasSelfDescribingPendingDataPayload = () => {
-    const dataLines = getPendingDataLines();
-    const parsed =
-      dataLines.length > 0 ? parseSSEDataLines(dataLines, { logWarning: false }) : null;
+    if (pendingEventLines.length === 0) return false;
+    const dataLines = pendingEventLines
+      .map((line) => extractSseDataLine(line))
+      .filter((line): line is string => line !== null);
+    const parsed = getParsedPayload(dataLines);
     if (!parsed) return false;
     return (
       parsed.done === true ||
@@ -178,11 +184,34 @@ export function createSSEDataLineNormalizer(): SSEDataLineNormalizer {
 
     output.push(...passthroughLines);
     if (dataLines.length > 0) {
-      const parsed = parseSSEDataLines(dataLines, { logWarning: false });
-      if (parsed) {
-        output.push(parsed.done === true ? "data: [DONE]" : `data: ${JSON.stringify(parsed)}`);
+      if (dataLines.length === 1) {
+        const single = dataLines[0].trim();
+        if (single === "[DONE]") {
+          output.push("data: [DONE]");
+        } else if (single.startsWith("{") && single.endsWith("}")) {
+          const parsed = getParsedPayload(dataLines);
+          if (parsed && !parsed.done) {
+            output.push(`data: ${single}`);
+          } else if (parsed?.done) {
+            output.push("data: [DONE]");
+          } else {
+            output.push(...eventLines.filter((line) => extractSseDataLine(line) !== null));
+          }
+        } else {
+          const parsed = getParsedPayload(dataLines);
+          if (parsed) {
+            output.push(parsed.done === true ? "data: [DONE]" : `data: ${JSON.stringify(parsed)}`);
+          } else {
+            output.push(...eventLines.filter((line) => extractSseDataLine(line) !== null));
+          }
+        }
       } else {
-        output.push(...eventLines.filter((line) => extractSseDataLine(line) !== null));
+        const parsed = getParsedPayload(dataLines);
+        if (parsed) {
+          output.push(parsed.done === true ? "data: [DONE]" : `data: ${JSON.stringify(parsed)}`);
+        } else {
+          output.push(...eventLines.filter((line) => extractSseDataLine(line) !== null));
+        }
       }
     } else {
       output.push(...eventLines.filter((line) => extractSseDataLine(line) !== null));
@@ -190,6 +219,7 @@ export function createSSEDataLineNormalizer(): SSEDataLineNormalizer {
 
     output.push("");
     pendingEventLines = [];
+    cachedParsed = undefined;
   };
 
   return {
@@ -202,11 +232,17 @@ export function createSSEDataLineNormalizer(): SSEDataLineNormalizer {
         const normalizedLine = line.replace(CR_STRIP_RE, "");
         const trimmed = normalizedLine.trim();
 
-        if (trimmed && SSE_FIELD_RE.test(trimmed) && hasSelfDescribingPendingDataPayload()) {
+        if (
+          pendingEventLines.length > 0 &&
+          trimmed &&
+          SSE_FIELD_RE.test(trimmed) &&
+          hasSelfDescribingPendingDataPayload()
+        ) {
           flush(output);
         }
 
         pendingEventLines.push(normalizedLine);
+        cachedParsed = undefined;
         if (!trimmed) {
           flush(output);
         }

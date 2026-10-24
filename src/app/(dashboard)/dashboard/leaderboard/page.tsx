@@ -87,39 +87,83 @@ export default function LeaderboardPage() {
   );
 
   useEffect(() => {
+    let active = true;
+    let es: EventSource | null = null;
+    let reconnectTimer: number | null = null;
+
+    const connect = () => {
+      if (!active) return;
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      if (es) {
+        es.close();
+        es = null;
+      }
+      const instance = new EventSource(`/api/gamification/stream?scope=${scope}`);
+      es = instance;
+      eventSourceRef.current = instance;
+
+      instance.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "leaderboard" && data.scope === scope) {
+            setEntries((previous) => withKnownNames(previous, data.entries || []));
+          }
+        } catch {
+        }
+      };
+
+      instance.onerror = () => {
+        instance.close();
+        if (eventSourceRef.current === instance) {
+          eventSourceRef.current = null;
+        }
+        clearTimeout(reconnectTimer as number);
+        reconnectTimer = window.setTimeout(() => {
+          if (!active) return;
+          void fetchLeaderboard(scope);
+          connect();
+        }, 3000);
+      };
+    };
+
+    const handleVisibilityChange = () => {
+      if (typeof document === "undefined") return;
+      if (document.visibilityState === "hidden") {
+        clearTimeout(reconnectTimer as number);
+        reconnectTimer = null;
+        if (es) {
+          es.close();
+          es = null;
+        }
+        eventSourceRef.current = null;
+      } else if (document.visibilityState === "visible") {
+        void fetchLeaderboard(scope);
+        connect();
+      }
+    };
+
     const loadTimer = window.setTimeout(() => {
       void fetchLeaderboard(scope);
     }, 0);
 
-    // SSE real-time updates
-    const es = new EventSource(`/api/gamification/stream?scope=${scope}`);
-    eventSourceRef.current = es;
+    connect();
 
-    es.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "leaderboard" && data.scope === scope) {
-          setEntries((previous) => withKnownNames(previous, data.entries || []));
-        }
-      } catch {
-        // ignore parse errors from heartbeats
-      }
-    };
-
-    es.onerror = () => {
-      es.close();
-      // Reconnect after 3s with exponential backoff
-      setTimeout(() => {
-        if (eventSourceRef.current === es) {
-          fetchLeaderboard(scope);
-        }
-      }, 3000);
-    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
 
     return () => {
+      active = false;
       window.clearTimeout(loadTimer);
-      es.close();
+      clearTimeout(reconnectTimer as number);
+      if (es) {
+        es.close();
+        es = null;
+      }
       eventSourceRef.current = null;
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
     };
   }, [scope, fetchLeaderboard]);
 

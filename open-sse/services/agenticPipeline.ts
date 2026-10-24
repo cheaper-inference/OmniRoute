@@ -7,6 +7,7 @@
  * executor turn, so the planner remains in control of sequential workflows while the
  * executor may still emit multiple independent tool calls in parallel.
  */
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { errorResponse } from "../utils/error.ts";
 import type { ComboLogger, HandleSingleModel, ResolvedComboTarget } from "./combo/types.ts";
 import { extractPanelText, isToolBearingRequest } from "./fusion.ts";
@@ -45,11 +46,6 @@ function stepTarget(step: PipelineStep): ResolvedComboTarget | undefined {
   return "target" in step ? step.target : undefined;
 }
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function contentHasType(content: unknown, types: ReadonlySet<string>): boolean {
   if (!Array.isArray(content)) return false;

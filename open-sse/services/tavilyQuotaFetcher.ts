@@ -17,6 +17,7 @@
  * Cache: 60s in-memory TTL keyed by connectionId.
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import {
   registerQuotaCacheInvalidator,
   registerQuotaFetcher,
@@ -60,11 +61,6 @@ if (typeof _cacheCleanup === "object" && _cacheCleanup && "unref" in _cacheClean
   (_cacheCleanup as { unref?: () => void }).unref?.();
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 export function extractTavilyToken(connection?: Record<string, unknown>): string | null {
   if (typeof connection?.apiKey === "string" && connection.apiKey.trim()) {

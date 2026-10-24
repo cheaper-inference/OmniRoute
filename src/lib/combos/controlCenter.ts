@@ -1,3 +1,4 @@
+import { isRecord } from "@/shared/utils/recordHelpers";
 import { normalizeComboModels, type ComboStep } from "./steps";
 import { resolveProviderAlias } from "../../../open-sse/services/providerAlias.ts";
 
@@ -94,11 +95,6 @@ export interface ComboControlCenterSummary {
   healthState: ComboControlCenterHealthState;
   healthReasons: string[];
 }
-
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
-
 function toNumber(value: unknown, fallback = 0): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }

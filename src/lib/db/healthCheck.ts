@@ -1,3 +1,4 @@
+import { isRecord, asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import { normalizeComboStep } from "@/lib/combos/steps";
 import { getSyntheticApiKeyIds } from "@/shared/constants/apiKeyIdentities";
 
@@ -131,15 +132,6 @@ interface QuotaSnapshotRow {
   connection_id?: string | null;
   created_at?: string | null;
 }
-
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
-
-function toRecord(value: unknown): JsonRecord {
-  return isRecord(value) ? value : {};
-}
-
 function toTrimmedString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }

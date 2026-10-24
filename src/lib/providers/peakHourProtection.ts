@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 export const PEAK_HOUR_PROTECTION_MODES = ["block", "avoid"] as const;
 export const PEAK_HOUR_PROTECTION_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
@@ -29,16 +30,10 @@ export type ActivePeakHourProtection = {
 export type InactivePeakHourProtection = { active: false };
 export type PeakHourProtectionState = ActivePeakHourProtection | InactivePeakHourProtection;
 
-type JsonRecord = Record<string, unknown>;
 
 const DAY_BY_UTC_INDEX: PeakHourProtectionDay[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 const MINUTES_PER_DAY = 24 * 60;
 const MAX_WINDOWS = 16;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function parseUtcTimeMinutes(value: unknown): number | null {
   if (typeof value !== "string") return null;
   const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);

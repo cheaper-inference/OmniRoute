@@ -2,6 +2,7 @@
  * Pure, stateless helpers extracted from usageHistory.ts.
  * No DB access, no module-level state — safe to import anywhere.
  */
+import { asRecord } from "@/shared/utils/recordHelpers";
 
 // #7879: re-export the canonical helper so existing consumers of this module
 // keep importing `toNumber` from here unchanged.
@@ -11,11 +12,6 @@ import { resolveGenerationMs, resolveTpsOutputTokens } from "@/shared/utils/logT
 import { toNumber as toNumberValue } from "@/shared/utils/numeric";
 
 type JsonRecord = Record<string, unknown>;
-
-export function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 export function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 }
@@ -377,3 +373,5 @@ export function truncatePendingPreviewStrings(value: unknown): unknown {
     ])
   );
 }
+
+export { asRecord };

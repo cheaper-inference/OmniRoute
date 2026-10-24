@@ -1,3 +1,4 @@
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import { getProviderConnectionById } from "@/lib/db/providers";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
@@ -60,11 +61,6 @@ export class CodexResetCreditError extends Error {
     this.code = code;
   }
 }
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function normalizeOutcome(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const normalized = value

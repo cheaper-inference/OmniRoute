@@ -1,3 +1,4 @@
+import { isRecord } from "./recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
 export interface ChatGptWebEncodedEvent {
@@ -28,9 +29,6 @@ const UNSAFE_POINTER_SEGMENTS: ReadonlySet<string> = new Set([
   "prototype",
 ]);
 
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function cloneValue<T>(value: T): T {
   return structuredClone(value);

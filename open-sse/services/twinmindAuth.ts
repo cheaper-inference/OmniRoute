@@ -1,3 +1,4 @@
+import { asRecord as canonicalAsRecord } from "../utils/recordHelpers.ts";
 import { resolvePublicCred } from "../utils/publicCreds.ts";
 
 const FIREBASE_REFRESH_URL = "https://securetoken.googleapis.com/v1/token";
@@ -5,8 +6,8 @@ const ACCESS_TOKEN_REFRESH_LEAD_MS = 5 * 60 * 1000;
 
 type JsonRecord = Record<string, unknown>;
 
-export function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+export function asRecord(value: unknown): Record<string, unknown> {
+  return canonicalAsRecord(value);
 }
 
 export function toStringOrEmpty(value: unknown): string {

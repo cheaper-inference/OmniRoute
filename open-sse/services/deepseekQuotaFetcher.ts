@@ -22,6 +22,7 @@
  * Registration: call registerDeepseekQuotaFetcher() once at server startup.
  */
 
+import { toRecord } from "../utils/recordHelpers.ts";
 import {
   registerQuotaCacheInvalidator,
   registerQuotaFetcher,
@@ -89,11 +90,6 @@ function toNumber(value: unknown, fallback = 0): number {
   return fallback;
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 function toArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];

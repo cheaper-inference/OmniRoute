@@ -1,12 +1,9 @@
+import { isRecord } from "@/shared/utils/recordHelpers";
 type JsonRecord = Record<string, unknown>;
 
 export const QWEN_CODE_ENV_KEY = "OMNIROUTE_API_KEY";
 
 const LEGACY_ENV_KEYS = new Set(["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"]);
-
-const isRecord = (value: unknown): value is JsonRecord =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
 const cloneRecord = (value: unknown): JsonRecord => (isRecord(value) ? { ...value } : {});
 
 export const normalizeQwenCodeBaseUrl = (value: unknown): string => {

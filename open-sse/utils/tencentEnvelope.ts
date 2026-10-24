@@ -1,14 +1,10 @@
+import { asRecordOrNull as asRecord } from "./recordHelpers.ts";
 import { isProviderSafetyStopsEnabled } from "./providerSafety.ts";
 
 // Tencent / CodeBuddy wrap errors as {Response.Error}, {data.Response.Error},
 // or {code, msg}. Detect and unwrap; other shapes pass through as empty fields.
 // Callers must still route the message through sanitizeErrorMessage / buildErrorBody.
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function readNestedTencentError(record: Record<string, unknown> | null): {
   message: string | null;

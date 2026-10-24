@@ -1,3 +1,4 @@
+import { asRecordOrNull as toRecord } from "../utils/recordHelpers.ts";
 import {
   copyOpenAICompatibleReasoningFields,
   getReadableReasoningValue,
@@ -51,10 +52,6 @@ type ParseOptions = { parseTextualReasoningTags?: boolean };
 
 export const OMIT_STREAMING_CHUNK_MARKER = "__omniroute_omit_streaming_chunk";
 
-function toRecord(value: unknown): JsonRecord | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  return value as JsonRecord;
-}
 function toString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }

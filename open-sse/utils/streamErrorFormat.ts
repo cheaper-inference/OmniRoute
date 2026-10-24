@@ -1,3 +1,4 @@
+import { asRecord } from "./recordHelpers.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { isContentPolicyRefusal } from "./contentPolicyError.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
@@ -55,9 +56,6 @@ export function projectCompletedStreamError(
   }).error;
 }
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function copyFailureSnapshot(record: JsonRecord): Pick<StreamFailurePayload, "streamSnapshot"> {
   const snapshot = record.streamSnapshot;

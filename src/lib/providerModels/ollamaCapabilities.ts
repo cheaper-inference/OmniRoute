@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { z } from "zod";
 
 type JsonRecord = Record<string, unknown>;
@@ -15,11 +16,6 @@ const OLLAMA_CAPABILITY_TO_ENDPOINT: Readonly<Record<string, string>> = {
 };
 
 const MAX_CONCURRENT_SHOW_REQUESTS = 4;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 export function buildOllamaShowUrl(openAiBaseUrl: string): string {
   let base = openAiBaseUrl.trim();
   while (base.endsWith("/")) base = base.slice(0, -1);

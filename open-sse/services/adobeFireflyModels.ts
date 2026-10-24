@@ -5,6 +5,7 @@
  * when a request cannot perform authenticated discovery (for example /v1/models).
  */
 
+import { asRecord } from "../utils/recordHelpers.ts";
 import { ADOBE_FIREFLY_DISCOVERY_SNAPSHOT } from "./adobeFireflyModelSnapshot.ts";
 
 export type AdobeFireflyModality = "image" | "video" | "audio" | "unknown";
@@ -81,11 +82,6 @@ interface MergedObjectSchema {
   required: string[];
 }
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
 
 function asStringArray(value: unknown): string[] {
   return Array.isArray(value)

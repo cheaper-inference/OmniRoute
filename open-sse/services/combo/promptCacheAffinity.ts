@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "../../utils/recordHelpers.ts";
 import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 import {
   analyzePrefix,
@@ -30,11 +31,6 @@ export interface PromptCacheAffinityResult {
   fingerprint: string | null;
 }
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function normalizeMessageContent(value: unknown): string | unknown[] {
   if (typeof value === "string" || Array.isArray(value)) return value;

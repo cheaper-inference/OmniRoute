@@ -13,14 +13,12 @@
  * Returns "" when the text is not a parseable chat-completion object with at
  * least one choice — callers then fall back to the original (error) handling.
  */
+import { isRecord } from "./recordHelpers.ts";
 import { normalizeOpenAICompatibleFinishReasonString } from "./finishReason.ts";
 import { getUnsupportedReasoningValue } from "./reasoningFields.ts";
 
 type JsonRecord = Record<string, unknown>;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function nonEmptyString(value: unknown): string {
   return typeof value === "string" && value.length > 0 ? value : "";

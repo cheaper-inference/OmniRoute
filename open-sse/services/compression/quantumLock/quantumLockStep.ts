@@ -1,3 +1,4 @@
+import { isRecord } from "../../../utils/recordHelpers.ts";
 import { detectVolatileSpans } from "./quantumLock.ts";
 import {
   placeholderFor,
@@ -14,9 +15,6 @@ import {
  */
 const emptyStats = (): QuantumLockStats => ({ fragments: 0, categories: {} });
 
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return v !== null && typeof v === "object" && !Array.isArray(v);
-}
 
 /** v1 stabilizes string-content system messages only. Array/multimodal ⇒ no-op (follow-up). */
 function systemTextOf(msg: Record<string, unknown>): string {

@@ -9,6 +9,7 @@
  * flips the row back to active). Confirmed-BYOP accounts get disabled by
  * markAntigravityMissingCloudCodeProject() on the first dispatch instead.
  */
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 
 export type AntigravityDegradedProjectState = {
   /** Persist with this status instead of "active". */
@@ -32,13 +33,6 @@ const DISCOVERY_FAILED_WARNING =
   "Connected, but the Google Cloud Code projectId could not be discovered during login " +
   "(loadCodeAssist/onboardUser failed). The account is marked degraded; discovery retries " +
   "automatically on the first request.";
-
-function toRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 /** Cloud Code project id from either the mapped token top-level or providerSpecificData. */
 function extractAntigravityProjectId(
   tokenData: Record<string, unknown> | null | undefined

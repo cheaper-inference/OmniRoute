@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
 export interface ProviderRequestDefaults {
@@ -7,12 +8,6 @@ export interface ProviderRequestDefaults {
   thinkingType?: "enabled" | "adaptive";
 }
 
-function asRecord(value: unknown): JsonRecord | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return null;
-  }
-  return value as JsonRecord;
-}
 
 function toPositiveInteger(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isFinite(value)) return null;

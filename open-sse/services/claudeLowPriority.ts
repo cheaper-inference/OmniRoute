@@ -37,7 +37,7 @@
  * claim (`claudeLimitReset.ts`) is injected as a callback so this file stays unit-testable.
  */
 
-type JsonRecord = Record<string, unknown>;
+import { asRecord } from "../utils/recordHelpers.ts";
 
 export const CLAUDE_USAGE_LIMIT_HEADER = "anthropic-usage-limit";
 export const CLAUDE_USAGE_LIMIT_SLOW = "slow";
@@ -168,9 +168,6 @@ export function setBoundedEntry<K, V>(map: Map<K, V>, key: K, value: V, max: num
   map.set(key, value);
 }
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 /** Read the two per-connection opt-ins from `providerSpecificData` (both default off). */
 export function readClaudeUsageLimitConfig(providerSpecificData: unknown): ClaudeUsageLimitConfig {

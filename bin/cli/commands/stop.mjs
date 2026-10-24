@@ -8,7 +8,6 @@ import {
   sleep,
 } from "../utils/pid.mjs";
 import { t } from "../i18n.mjs";
-import { stopProcessGracefully } from "../../../src/shared/platform/windowsProcess.ts";
 
 const execFileAsync = promisify(execFile);
 
@@ -53,6 +52,9 @@ export async function runStopCommand(opts = {}, deps = {}) {
       // the server's own async graceful shutdown / WAL checkpoint. stopProcessGracefully
       // skips the immediate SIGTERM on win32 and just polls before escalating to SIGKILL.
       if (isPidRunning(pid)) {
+        const { stopProcessGracefully } = await import(
+          "../../../src/shared/platform/windowsProcess.ts"
+        );
         await stopProcessGracefully({ pid, timeoutMs: 5000, isPidRunning, sleep });
       }
 

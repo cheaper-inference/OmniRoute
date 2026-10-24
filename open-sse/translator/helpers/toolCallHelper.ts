@@ -1,3 +1,4 @@
+import { asRecordOrNull as toRecord } from "../../utils/recordHelpers.ts";
 import { createHash } from "node:crypto";
 import { coerceToolCallArguments } from "./toolArguments.ts";
 
@@ -36,9 +37,6 @@ interface ToolCallBody extends JsonRecord {
   messages?: ToolMessage[];
 }
 
-function toRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 function aliasOpenAIToolName(name: unknown, maxLength: number, aliases: ToolNameAliases): unknown {
   if (typeof name !== "string" || name.length === 0) return name;

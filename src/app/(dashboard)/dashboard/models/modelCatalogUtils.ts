@@ -1,3 +1,4 @@
+import { isRecord } from "@/shared/utils/recordHelpers";
 import { isFreeModel } from "@/shared/utils/freeModels";
 import type { CatalogTestResult } from "./catalogTestStorage";
 import { getModelTestKey } from "./catalogTestStorage";
@@ -41,10 +42,6 @@ export interface CatalogFilters {
 export interface CatalogFilterOptions {
   providerHealthMap?: Record<string, "healthy" | "degraded" | "down">;
   testResults?: Record<string, CatalogTestResult>;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function isString(value: unknown): value is string {

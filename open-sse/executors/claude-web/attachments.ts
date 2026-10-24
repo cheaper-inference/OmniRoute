@@ -7,6 +7,7 @@
  * yet, so only text-bearing parts are forwarded here.
  */
 
+import { isRecord } from "../../utils/recordHelpers.ts";
 export interface ClaudeWebAttachment {
   file_name: string;
   file_type: string;
@@ -16,9 +17,6 @@ export interface ClaudeWebAttachment {
 
 const DATA_URL_RE = /^data:([^;,]+)((?:;[^;,]+)*),(.*)$/s;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function isTextMime(mime: string): boolean {
   return (

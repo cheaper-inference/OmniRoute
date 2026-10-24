@@ -1,3 +1,4 @@
+import { isRecord } from "./recordHelpers.ts";
 import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "./emptyTurnPolicy.ts";
 import { normalizeStreamFailurePayload, type StreamFailurePayload } from "./streamErrorFormat.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
@@ -47,9 +48,6 @@ export type StreamReadinessResult =
       upstreamFailure?: true;
     };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function hasNonEmptyString(value: unknown): boolean {
   return typeof value === "string" && value.length > 0;

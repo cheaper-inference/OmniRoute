@@ -1,29 +1,14 @@
 /**
- * QUAL-05 — canonical record coercion helpers.
- *
- * The codebase carries ~300 private copies of these three helpers with three
- * divergent semantics that MUST stay distinguishable after consolidation:
- *
- *  - null-fallback (`asRecordOrNull`): returns null for non-records. Callers
- *    branch on the null to detect "field absent/malformed" — blind swapping
- *    with the {}-variant crashes on property access or silently fabricates
- *    empty objects.
- *  - {}-fallback (`asRecord`): returns {} for non-records. Callers index
- *    straight into the result. Preserves array-exclusion (the dominant
- *    variant, 91 of 94 copies) AND array-inclusion (4 copies) via the
- *    `allowArrays` flag — defaulting to the strict, array-excluding form.
- *  - boolean guard (`isRecord`): type predicate. Array-excluding by default;
- *    the 4 array-including copies (tinycmsDomMocks, minimaxMusic,
- *    deepinfraHandler, blockedHistory) keep local semantics deliberately —
- *    they treat JSON arrays as record-ish containers. Do NOT migrate them.
- *
- * Type aliases (`JsonRecord`) resolve to `Record<string, unknown>`; both
- * spellings appear across the codebase and are structurally identical.
+ * Record coercion preserves object identity; it does not validate fields.
+ * `asRecordOrNull` lets callers detect malformed data. `asRecord` supplies a
+ * fresh empty object instead, so callers can safely read missing properties.
+ * Substituting either fallback for the other changes caller behavior.
+ * Arrays are excluded unless explicitly allowed by the guard or coercion.
  */
 
 export type JsonRecord = Record<string, unknown>;
 
-/** Record guard. Arrays excluded by default (76 of 81 local copies). */
+/** Record guard. Arrays excluded unless explicitly allowed. */
 export function isRecord(
   value: unknown,
   options?: { allowArrays?: boolean }
@@ -39,11 +24,7 @@ export function asRecordOrNull(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-/**
- * Coerce to a record or {}. Arrays excluded unless `allowArrays` is set —
- * mirrors the 91-copy dominant local variant; the 4 array-inclusive callers
- * stay on their local helper.
- */
+/** Coerce to a record or a fresh empty object; arrays require opt-in. */
 export function asRecord(
   value: unknown,
   options?: { allowArrays?: boolean }

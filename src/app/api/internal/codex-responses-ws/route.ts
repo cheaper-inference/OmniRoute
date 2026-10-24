@@ -16,6 +16,7 @@ import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { checkAndRefreshToken } from "@/sse/services/tokenRefresh";
 import { resolveCodexWsModelInfo } from "./modelResolution";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isRecord } from "@/shared/utils/recordHelpers";
 import { formatMemoryContext } from "@/lib/memory/injection";
 import { retrieveMemories } from "@/lib/memory/retrieval";
 import {
@@ -113,10 +114,6 @@ const bridgePayloadSchema = z
     response: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
-
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;

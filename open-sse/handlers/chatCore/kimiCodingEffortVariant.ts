@@ -16,13 +16,9 @@
  * explicitly disabled `thinking` always wins over the suffix.
  */
 
+import { asRecordOrNull as asRecord } from "../../utils/recordHelpers.ts";
 import { splitKimiCodingEffortVariant } from "../../utils/kimiCodingEffortVariant.ts";
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function hasExplicitEffort(body: Record<string, unknown>): boolean {
   const thinking = asRecord(body.thinking);

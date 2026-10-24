@@ -1,3 +1,4 @@
+import { isRecord } from "@/shared/utils/recordHelpers";
 import { buildComboHealthAutopilotReport } from "@/lib/monitoring/comboHealthAutopilot";
 import { getCombos } from "@/lib/db/combos";
 import { getProviderConnections } from "@/lib/db/providers";
@@ -102,11 +103,6 @@ function roundNumber(value: number, digits = 4): number {
 function normalizeTaskType(taskType: string | undefined): string {
   return typeof taskType === "string" && taskType.trim().length > 0 ? taskType.trim() : "default";
 }
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
 /**
  * Resolves the auto-strategy config object a combo's weights should be read from,
  * honoring the same precedence the runtime auto-combo strategy uses: a dedicated

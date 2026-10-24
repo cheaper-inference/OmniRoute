@@ -1,3 +1,4 @@
+import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { bridgeToResponsesSSE, buildResponseJSON } from "../vendor/codex-chatgpt-web/bridge.ts";
 import { AsyncEventQueue } from "../vendor/codex-chatgpt-web/event-queue.ts";
 import type { AdapterEvent } from "../vendor/codex-chatgpt-web/types.ts";
@@ -120,9 +121,6 @@ const FREEFORM_INPUT_SCHEMA: Record<string, unknown> = {
   required: ["input"],
 };
 
-function asRecord(v: unknown): Record<string, unknown> | null {
-  return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
-}
 
 function appServerThreadId(result: { thread?: { id?: unknown }; threadId?: unknown }): string {
   // Codex returns thread.id; retain the legacy top-level threadId fallback.

@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { NextResponse } from "next/server";
 import {
   PROVIDER_METADATA,
@@ -6,13 +7,6 @@ import {
 import { getAllCustomModels, getAllSyncedAvailableModels } from "@/lib/db/models";
 import { getPricing } from "@/lib/db/settings";
 import { getProviderPrefixIndex } from "@/lib/providerNodePrefixes";
-
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 function asModelArray(value: unknown): Array<{ id?: string; name?: string }> {
   if (!Array.isArray(value)) return [];
   return value.filter((item) => item && typeof item === "object") as Array<{

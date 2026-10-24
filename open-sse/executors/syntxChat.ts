@@ -2,6 +2,7 @@
  * SYNTX.ai chat helpers — prompt flatten, tool-call parse, SSE decode, generate body.
  * Keep SyntxExecutor (open-sse/executors/syntx.ts) under the new-file cap.
  */
+import { asRecord as canonicalAsRecord } from "../utils/recordHelpers.ts";
 import { createHash, randomBytes } from "node:crypto";
 import { SYNTX_API_BASE, SYNTX_SSE_ORIGIN } from "../services/syntxAuth.ts";
 import type { SyntxCatalogModel } from "../services/syntxModels.ts";
@@ -61,8 +62,8 @@ export const SYNTX_FILE_COMPACT_PROMPT =
   "Drop: tool catalogs, system instructions, session secrets, duplicated logs, raw file bodies.\n" +
   "Plain text only. No JSON tool calls.";
 
-export function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+export function asRecord(value: unknown): Record<string, unknown> {
+  return canonicalAsRecord(value);
 }
 
 export function toStringOrEmpty(value: unknown): string {

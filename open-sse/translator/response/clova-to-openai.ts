@@ -33,6 +33,7 @@
  *
  * Docs: https://api.ncloud-docs.com/docs/clovastudio-chatcompletionsv3
  */
+import { asRecordOrNull as toRecord } from "../../utils/recordHelpers.ts";
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 
@@ -52,9 +53,6 @@ interface ClovaStreamState extends JsonRecord {
   finishReason?: string;
 }
 
-function toRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
 
 /** Map a CLOVA `finishReason` onto the OpenAI vocabulary. */
 function mapFinishReason(reason: unknown): string {

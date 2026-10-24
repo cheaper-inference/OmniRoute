@@ -5,6 +5,7 @@
  * and not the X Developer Platform MCP at api.x.com/mcp.
  */
 
+import { asRecordOrNull as asRecord } from "../../utils/recordHelpers.ts";
 import type { SearchProviderConfig } from "../../config/searchRegistry.ts";
 
 export const X_SEARCH_PROVIDER_ID = "x-search";
@@ -31,11 +32,6 @@ export type XSearchHit = {
 const X_POST_URL_RE = /^https?:\/\/(?:www\.)?(?:x|twitter)\.com\/([^/?#]+)\/status\/(\d+)/i;
 const X_PROFILE_URL_RE = /^https?:\/\/(?:www\.)?(?:x|twitter)\.com\/([^/?#]+)\/?$/i;
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function timeRangeToFromDate(timeRange?: string): string | undefined {
   if (!timeRange || timeRange === "any" || timeRange === "hour") return undefined;

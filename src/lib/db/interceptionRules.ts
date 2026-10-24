@@ -7,6 +7,7 @@
  * Resolution precedence (see resolveInterceptSearch): per-model rule > provider-level
  * rule > undefined (caller falls back to the existing native-bypass defaults).
  */
+import { isRecord } from "@/shared/utils/recordHelpers";
 
 import { getDbInstance } from "./core";
 
@@ -44,11 +45,6 @@ function invalidateCache(): void {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
 function toNormalizedString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }

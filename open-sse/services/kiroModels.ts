@@ -23,6 +23,7 @@
  * never breaks when the account is offline / unauthenticated / token-expired.
  */
 
+import { asRecord } from "../utils/recordHelpers.ts";
 import { createHash } from "node:crypto";
 
 import { v4 as uuidv4 } from "uuid";
@@ -35,7 +36,6 @@ import {
 import { resolveKiroRuntimeRegion } from "./kiroRegion.ts";
 import { supportsKiroAdaptiveThinking } from "../translator/request/openai-to-kiro/adaptiveThinking.ts";
 
-type RawRecord = Record<string, unknown>;
 
 const KIRO_RUNTIME_SDK_VERSION = "1.0.0";
 const KIRO_AGENT_OS = "windows";
@@ -46,9 +46,6 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const catalogCache = new Map<string, { expiresAt: number; models: KiroModel[] }>();
 
-function asRecord(value: unknown): RawRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as RawRecord) : {};
-}
 
 function toNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;

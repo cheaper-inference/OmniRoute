@@ -17,6 +17,7 @@
  * A safe fallback to the existing static catalog is preserved for
  * offline/unauthed/failed refresh so the import flow never breaks.
  */
+import { asRecord } from "../utils/recordHelpers.ts";
 import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
 import { isRetiredGitHubCopilotModelId } from "../config/providers/registry/github/retiredModels.ts";
 
@@ -66,9 +67,6 @@ export type GitHubCopilotModel = {
 
 type RawRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): RawRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as RawRecord) : {};
-}
 
 function toNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;

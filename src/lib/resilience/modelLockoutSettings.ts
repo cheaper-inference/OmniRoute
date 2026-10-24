@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 
 export interface ModelLockoutSettings {
@@ -17,12 +18,6 @@ export const DEFAULT_MODEL_LOCKOUT_SETTINGS: ModelLockoutSettings = {
   maxBackoffSteps: 10,
   useExponentialBackoff: true,
 };
-
-type JsonRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 
 function toInteger(
   value: unknown,

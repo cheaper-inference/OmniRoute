@@ -2,6 +2,7 @@
  * Fetch Cursor Available Models via HTTP (no cursor-agent binary required).
  * Uses Connect-RPC JSON against api2.cursor.sh AiService/AvailableModels.
  */
+import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 
 import { CURSOR_CONFIG } from "@/lib/oauth/constants/oauth";
 import { CursorService } from "@/lib/oauth/services/cursor";
@@ -21,13 +22,6 @@ export type FetchCursorAvailableModelsOptions = {
   fetchImpl?: typeof fetch;
   signal?: AbortSignal;
 };
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
 function pickModelId(entry: Record<string, unknown>): string | null {
   for (const key of ["name", "modelId", "model_id", "id", "slug"]) {
     const v = entry[key];

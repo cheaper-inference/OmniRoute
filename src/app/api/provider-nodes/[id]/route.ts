@@ -1,3 +1,4 @@
+import { asRecord } from "@/shared/utils/recordHelpers";
 import { NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import {
@@ -15,11 +16,6 @@ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { validateProviderNodeBaseUrl } from "../urlGuard";
 
 type JsonRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function sanitizeAnthropicBaseUrl(baseUrl: string) {
   return (baseUrl || "")
     .trim()

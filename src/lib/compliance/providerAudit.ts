@@ -1,3 +1,4 @@
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import {
   PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS,
   PROVIDER_SPECIFIC_SECRET_FIELDS,
@@ -27,11 +28,6 @@ const AUDIT_SENSITIVE_METADATA_FIELDS: ReadonlySet<string> = new Set<string>([
   ...PROVIDER_SPECIFIC_SECRET_FIELDS,
   ...PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS,
 ]);
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function truncateWarning(value: string) {
   const compact = value.replace(/\s+/g, " ").trim();
   return compact.length > MAX_WARNING_LENGTH

@@ -1,8 +1,6 @@
+import { isRecord } from "../../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
-function isRecord(value: unknown): value is JsonRecord {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function hasOpenAIChoices(value: unknown): value is JsonRecord & { choices: unknown[] } {
   return isRecord(value) && Array.isArray(value.choices);

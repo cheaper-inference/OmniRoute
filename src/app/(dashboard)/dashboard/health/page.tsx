@@ -137,19 +137,30 @@ function HealthSnapshot() {
   }, []);
 
   useEffect(() => {
-    const initialFetch = setTimeout(() => {
+    const fetchAll = () => {
       void fetchHealth();
       void fetchExtras();
       void fetchDbHealth();
-    }, 0);
+    };
+    const initialFetch = setTimeout(fetchAll, 0);
     const interval = setInterval(() => {
-      void fetchHealth();
-      void fetchExtras();
-      void fetchDbHealth();
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      fetchAll();
     }, 15000);
+    const handleVisibilityChange = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        fetchAll();
+      }
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
     return () => {
       clearTimeout(initialFetch);
       clearInterval(interval);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
     };
   }, [fetchHealth, fetchExtras, fetchDbHealth]);
 

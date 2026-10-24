@@ -8,6 +8,7 @@
  * frames (event name taken from `data.type`), and a final frame flushed at EOF without a
  * trailing blank line. On a failure event the upstream stream is cancelled, not drained.
  */
+import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 
 export type CodexPingOutcome = "completed" | "failed" | "incomplete";
 
@@ -21,11 +22,6 @@ type PingResponseLike = {
 const FRAME_SEPARATOR = /\r\n\r\n|\n\n|\r\r/;
 const FAILURE_EVENTS = new Set(["error", "response.failed", "response.incomplete"]);
 const FAILURE_STATUSES = new Set(["failed", "incomplete"]);
-
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
-}
-
 function parseFrame(block: string): { event: string | null; data: JsonRecord | null } {
   let event: string | null = null;
   const dataLines: string[] = [];

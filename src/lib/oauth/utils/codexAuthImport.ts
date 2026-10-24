@@ -1,3 +1,4 @@
+import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import {
   getProviderConnections,
   createProviderConnection,
@@ -7,11 +8,6 @@ import { CodexAuthFileError } from "@/lib/oauth/utils/codexAuthFile";
 import { pickCodexConnectionForUser } from "@/lib/oauth/utils/codexConnectionSelection";
 
 type JsonRecord = Record<string, unknown>;
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
 function toNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();

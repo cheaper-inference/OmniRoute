@@ -1,3 +1,4 @@
+import { isRecord } from "../../../utils/recordHelpers.ts";
 import { applyLiteCompression, isUsableLiteMaxToolLength } from "../lite.ts";
 import { cavemanCompress } from "../caveman.ts";
 import { compressAggressive } from "../aggressive.ts";
@@ -107,9 +108,6 @@ const ULTRA_SCHEMA: EngineConfigField[] = [
   },
 ];
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
 
 function validateBoolean(config: Record<string, unknown>, key: string, errors: string[]): void {
   if (config[key] !== undefined && typeof config[key] !== "boolean") {

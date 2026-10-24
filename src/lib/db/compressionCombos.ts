@@ -129,8 +129,11 @@ function upgradeLegacySeededDefaultCompressionCombo(): void {
   );
 }
 
+const tablesEnsuredDbs = new WeakSet<object>();
+
 function ensureCompressionComboTables(): void {
   const db = getDbInstance();
+  if (tablesEnsuredDbs.has(db)) return;
   db.exec(`
     CREATE TABLE IF NOT EXISTS compression_combos (
       id TEXT PRIMARY KEY,
@@ -178,6 +181,7 @@ function ensureCompressionComboTables(): void {
     1
   );
   upgradeLegacySeededDefaultCompressionCombo();
+  tablesEnsuredDbs.add(db);
 }
 
 function rowToCompressionCombo(row: unknown): CompressionCombo | null {
