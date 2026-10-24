@@ -179,9 +179,10 @@ test("test 14: claude live non-200 uses catalog fallback, not empty 502", () => 
   assert.ok(assembleIdx >= 0, "generic live must assemble provider-models headers");
   const tail = src.slice(assembleIdx);
   // Generic live 401/non-200: warning + cached/local catalog, not a 502 empty body.
+  // The fallback now carries the observed failure, so the call has arguments.
   assert.match(
     tail,
-    /if\s*\(\s*!response\.ok\s*\)[\s\S]{0,400}buildDiscoveryFallbackResponse\(\s*\)/
+    /if\s*\(\s*!response\.ok\s*\)[\s\S]{0,400}buildDiscoveryFallbackResponse\(\s*\{\s*failure:/
   );
   assert.doesNotMatch(tail, /if\s*\(\s*!response\.ok\s*\)[\s\S]{0,500}status:\s*502/);
 });

@@ -6,6 +6,7 @@ import {
   type CodexClientVersionFetch,
 } from "@omniroute/open-sse/config/codexClient.ts";
 import { readCodexReasoningMetadata } from "@/shared/reasoning/codexEfforts";
+import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
 import {
   classifyCodexDiscoveryModel,
   isCodexDiscoveryModelExcluded,
@@ -512,6 +513,10 @@ export function enrichCodexModelsFromGithubCatalog(
   return [...githubCatalogModels];
 }
 
+/**
+ * The live Codex catalog, or the reason it could not be read. The reason is a
+ * code or an HTTP status — never a message, a body or an URL.
+ */
 export async function fetchCodexDiscoveryModels({
   accessToken,
   providerSpecificData,
@@ -520,8 +525,8 @@ export async function fetchCodexDiscoveryModels({
   accessToken: string | null;
   providerSpecificData?: Record<string, unknown> | null;
   fetchImpl: CodexModelsFetch;
-}): Promise<CodexDiscoveryModel[] | null> {
-  if (!accessToken) return null;
+}): Promise<{ models: CodexDiscoveryModel[]; failure?: DiscoveryFailure }> {
+  if (!accessToken) return { models: [], failure: { code: "NO_CREDENTIAL" } };
 
   try {
     await refreshCodexClientVersion(fetchImpl);
@@ -543,15 +548,20 @@ export async function fetchCodexDiscoveryModels({
       headers,
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) return { models: [], failure: { status: response.status } };
 
     const models = normalizeCodexModelsResponse(await response.json());
-    return models.length > 0 ? models : null;
+    if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
+    return { models };
   } catch {
-    return null;
+    return { models: [], failure: {} };
   }
 }
 
+/**
+ * The public Codex catalog, or the reason it could not be read. The reason is a
+ * code or an HTTP status — never a message, a body or an URL.
+ */
 export async function fetchCodexGithubCatalogModels({
   fetchImpl,
   now = Date.now(),
@@ -560,9 +570,9 @@ export async function fetchCodexGithubCatalogModels({
   fetchImpl: CodexModelsFetch;
   now?: number;
   cacheTtlMs?: number;
-}): Promise<CodexDiscoveryModel[] | null> {
+}): Promise<{ models: CodexDiscoveryModel[]; failure?: DiscoveryFailure }> {
   const cachedModels = getFreshCodexGithubCatalogCache(now, cacheTtlMs);
-  if (cachedModels) return cachedModels;
+  if (cachedModels) return { models: cachedModels };
 
   try {
     const response = await fetchImpl(CODEX_GITHUB_MODELS_URL, {
@@ -571,16 +581,16 @@ export async function fetchCodexGithubCatalogModels({
     });
 
     const notModifiedModels = getNotModifiedCodexGithubCatalog(response, now, cacheTtlMs);
-    if (notModifiedModels) return notModifiedModels;
+    if (notModifiedModels) return { models: notModifiedModels };
 
-    if (!response.ok) return null;
+    if (!response.ok) return { models: [], failure: { status: response.status } };
 
     const models = normalizeCodexGithubCatalogResponse(await response.json());
-    if (models.length === 0) return null;
+    if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
 
     storeCodexGithubCatalogCache(models, response, now, cacheTtlMs);
-    return models;
+    return { models };
   } catch {
-    return codexGithubCatalogCache?.models || null;
+    return { models: codexGithubCatalogCache?.models || [], failure: {} };
   }
 }
