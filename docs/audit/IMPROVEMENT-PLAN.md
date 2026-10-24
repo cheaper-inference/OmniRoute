@@ -205,11 +205,23 @@ export function toRecord<T>(data: T): Partial<T> {
 
 ### FUNC-02/03/04 — Documentation alignment
 
-**Problem:** Three coexisting provider counts (375 catalog / 291 runtime REGISTRY / 294 executors). "110 MCP tools" measured as 45 manifest / 84 runtime.
+**Status:** Completed (2026-10-24). Measured; headline docs confirmed correct — no corrections required.
 
-**Fix:** Update docs with actual measurements and clarify what each number means.
+**Problem (as written):** Three coexisting provider counts (375 catalog / 291 runtime REGISTRY / 294 executors). "110 MCP tools" measured as 45 manifest / 84 runtime.
 
-**Timeline:** Day 12-13
+**Measured reconciliation (live, `countUniqueMcpTools` + registry introspection, 2026-10-24):**
+
+| Claim                   | Measured                                                                                                                                                                                                                | Verdict                                                                                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 375 providers (catalog) | `AI_PROVIDERS` = 375                                                                                                                                                                                                    | ✅ correct — dashboard/connect catalog                                                                                           |
+| 291 runtime REGISTRY    | `Object.keys(REGISTRY)` = 291                                                                                                                                                                                           | ✅ correct — runtime wire-format registry                                                                                        |
+| Executors               | **140 registered aliases** (`listExecutorAliases()` after barrel import; the `lazyExecutors` literal has exactly 140 entries)                                                                                           | ❌ "294" was wrong — no 294 anywhere                                                                                             |
+| "110 MCP tools"         | `countUniqueMcpTools({...12 collections})` = **110** (45 canonical + memory 3 + skills 4 + agentSkill 3 + githubSkill 3 + pool 6 + gamification 8 + plugin 8 + notion 6 + obsidian 22 + localCorpus 3 + compression 13) | ✅ correct — the earlier "45 manifest / 84 runtime" audit measurement under-counted because it missed the non-index tool modules |
+
+**Actions:**
+
+- The "294 executors" figure appears only in `docs/audit/AUDIT-2026-10-22.md` as a historical measurement note; corrected in this plan. User-facing docs (README, MCP-SERVER.md, ARCHITECTURE.md) claim 110 tools, which is verified correct and left untouched.
+- The audit's FUNC-02 correction ("45/84") is itself refuted by the live de-duplicated count: the headline "110 tools" in README and docs is the accurate number.
 
 ---
 
