@@ -759,40 +759,36 @@ test("codex.normalizeCodexModelsResponse drops entries without an id", () => {
   );
 });
 
-test("codex.fetchCodexDiscoveryModels returns null for missing token, auth failure, empty, or network error", async () => {
-  assert.equal(
-    await fetchCodexDiscoveryModels({
-      accessToken: null,
-      fetchImpl: async () => Response.json({ data: [{ id: "never-called" }] }),
-    }),
-    null
-  );
+test("codex.fetchCodexDiscoveryModels reports why it found no model: missing token, auth failure, empty, or network error", async () => {
+  const missingToken = await fetchCodexDiscoveryModels({
+    accessToken: null,
+    fetchImpl: async () => Response.json({ data: [{ id: "never-called" }] }),
+  });
+  assert.deepEqual(missingToken.models, []);
+  assert.deepEqual(missingToken.failure, { code: "NO_CREDENTIAL" });
 
-  assert.equal(
-    await fetchCodexDiscoveryModels({
-      accessToken: "tok",
-      fetchImpl: async () => new Response("unauthorized", { status: 401 }),
-    }),
-    null
-  );
+  const authFailure = await fetchCodexDiscoveryModels({
+    accessToken: "tok",
+    fetchImpl: async () => new Response("unauthorized", { status: 401 }),
+  });
+  assert.deepEqual(authFailure.models, []);
+  assert.deepEqual(authFailure.failure, { status: 401 });
 
-  assert.equal(
-    await fetchCodexDiscoveryModels({
-      accessToken: "tok",
-      fetchImpl: async () => Response.json({ data: [] }),
-    }),
-    null
-  );
+  const empty = await fetchCodexDiscoveryModels({
+    accessToken: "tok",
+    fetchImpl: async () => Response.json({ data: [] }),
+  });
+  assert.deepEqual(empty.models, []);
+  assert.deepEqual(empty.failure, { code: "EMPTY_CATALOG" });
 
-  assert.equal(
-    await fetchCodexDiscoveryModels({
-      accessToken: "tok",
-      fetchImpl: async () => {
-        throw new Error("network down");
-      },
-    }),
-    null
-  );
+  const networkError = await fetchCodexDiscoveryModels({
+    accessToken: "tok",
+    fetchImpl: async () => {
+      throw new Error("network down");
+    },
+  });
+  assert.deepEqual(networkError.models, []);
+  assert.deepEqual(networkError.failure, {});
 });
 
 test("codex.fetchCodexDiscoveryModels calls the Codex models endpoint with Codex bearer headers", async () => {
@@ -818,9 +814,10 @@ test("codex.fetchCodexDiscoveryModels calls the Codex models endpoint with Codex
   assert.equal(seenWorkspace, "account-123");
   assert.equal(seenOriginator, "codex_cli_rs");
   assert.deepEqual(
-    models?.map((m) => m.id),
+    models.models.map((m) => m.id),
     ["gpt-5.6"]
   );
+  assert.equal(models.failure, undefined);
 });
 
 test("codex.fetchCodexGithubCatalogModels fetches the OpenAI Codex repo catalog", async () => {
@@ -848,9 +845,10 @@ test("codex.fetchCodexGithubCatalogModels fetches the OpenAI Codex repo catalog"
   );
   assert.equal(seenUrl, CODEX_GITHUB_MODELS_URL);
   assert.deepEqual(
-    models?.map((model) => model.id),
+    models.models.map((model) => model.id),
     ["gpt-5.6-terra"]
   );
+  assert.equal(models.failure, undefined);
 });
 
 test("codex.fetchCodexGithubCatalogModels reuses cached catalog with ETags", async () => {
@@ -893,17 +891,20 @@ test("codex.fetchCodexGithubCatalogModels reuses cached catalog with ETags", asy
   });
 
   assert.deepEqual(
-    first?.map((model) => model.id),
+    first.models.map((model) => model.id),
     ["gpt-5.6-luna"]
   );
   assert.deepEqual(
-    second?.map((model) => model.id),
+    second.models.map((model) => model.id),
     ["gpt-5.6-luna"]
   );
   assert.deepEqual(
-    third?.map((model) => model.id),
+    third.models.map((model) => model.id),
     ["gpt-5.6-luna"]
   );
+  assert.equal(first.failure, undefined);
+  assert.equal(second.failure, undefined);
+  assert.equal(third.failure, undefined);
   assert.deepEqual(calls, [
     { url: CODEX_GITHUB_MODELS_URL, ifNoneMatch: undefined },
     { url: CODEX_GITHUB_MODELS_URL, ifNoneMatch: "catalog-v1" },
