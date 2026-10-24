@@ -151,6 +151,9 @@ it.each(["en", "zh-CN"])(
     const stat = (kind: string) =>
       document.querySelector<HTMLButtonElement>(`[data-stat="${kind}"]`)!;
     await waitFor(() => expect(document.querySelectorAll("[data-availability]")).toHaveLength(5));
+    const tiles = document.querySelectorAll("[data-stat]");
+    expect(tiles).toHaveLength(7);
+    for (const tile of tiles) expect(tile).toHaveClass("ci-button", "rounded-lg");
     const counters = () =>
       ["all", "ok", "cd5", "cdw", "act", "paused", "empty"].map((kind) => stat(kind).textContent);
     await waitFor(() => expect(stat("ok").querySelector(".text-2xl")).toHaveTextContent("2"));
