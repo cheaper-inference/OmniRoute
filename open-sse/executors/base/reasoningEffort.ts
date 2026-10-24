@@ -203,7 +203,7 @@ export function supportsMaxEffortForProvider(provider: string, model: string): b
     supportsClaudeMaxEffort(resolvedModelId);
   const isOpencodeGo = isOpencodeGoProvider(provider);
   const isOllamaCloud = isOllamaCloudProvider(provider);
-  const isMoonshotK3 = /^kimi-k3(?:$|-)/i.test(resolvedModelId);
+  const isMoonshotK3 = /^kimi-k3(?:$|[.-])/i.test(resolvedModelId);
   const isCommandCode = isCommandCodeProvider(provider);
   const isMaxTierModel =
     MAX_TIER_REASONING_MODEL_PATTERN.test(resolvedModelId) ||
@@ -255,6 +255,28 @@ function readEffortCarriers(b: Record<string, unknown>): EffortCarriers {
     hasOutputConfigEffort,
     effort,
   };
+}
+
+const K31_WIRE_EFFORTS = new Set(["low", "high", "max"]);
+
+/** K3.1 recovery must not turn an explicit invalid value into an accepted tier. */
+export function hasUnsupportedK31Effort(body: unknown): boolean {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return false;
+  const record = body as Record<string, unknown>;
+  const asRecord = (value: unknown): Record<string, unknown> | null =>
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : null;
+  return [
+    record.reasoning_effort,
+    asRecord(record.reasoning)?.effort,
+    asRecord(record.output_config)?.effort,
+    asRecord(record.thinking)?.effort,
+  ].some(
+    (value) =>
+      value !== undefined &&
+      (typeof value !== "string" || !K31_WIRE_EFFORTS.has(value.toLowerCase()))
+  );
 }
 
 /** Write a normalized effort value back to every carrier that was present. */
@@ -332,6 +354,23 @@ export function sanitizeReasoningEffortForProvider(
   if (c.effort === undefined) return body;
   const effortStr = typeof c.effort === "string" ? c.effort.toLowerCase() : "";
   const modelStr = model || "";
+
+  // K3.1 rejects off-thinking and unknown effort values, so preserve them for
+  // the upstream 400 instead of silently clamping to an accepted tier.
+  if (
+    (provider === "moonshot" ||
+      provider === "kimi" ||
+      provider === "kimi-coding" ||
+      provider === "kimi-coding-apikey") &&
+    /(?:^|\/)(?:kimi-)?k3\.1(?:$|-)/i.test(modelStr)
+  ) {
+    if (effortStr === "none" || effortStr === "off" || effortStr === "disabled") return body;
+    if (
+      !["low", "high", "max", "medium", "minimum", "light", "xhigh", "ultra"].includes(effortStr)
+    ) {
+      return body;
+    }
+  }
 
   // ── o1-preview: does not accept reasoning_effort parameter at all ─────────
   if (O1_PREVIEW_PATTERN.test(modelStr)) {

@@ -323,6 +323,22 @@ describe("additional auto-routing families (#13214)", () => {
         provider
       );
     }
+    for (const [providerId, model] of [
+      ["moonshot", "kimi-k3.1-pro"],
+      ["moonshot", "kimi-k3.1-pro-highspeed"],
+      ["kimi-coding", "k3.1-pro"],
+      ["kimi-coding", "k3.1-pro-highspeed"],
+      ["kimi-coding-apikey", "k3.1-pro"],
+      ["kimi-coding-apikey", "k3.1-pro-highspeed"],
+    ]) {
+      assert.ok(
+        combo.models.some(
+          (candidate) =>
+            candidate.providerId === providerId && candidate.model === `${providerId}/${model}`
+        ),
+        `${providerId}/${model}`
+      );
+    }
     assert.ok(combo.models.every((model) => model.providerId !== "openai"));
   });
 
@@ -344,13 +360,16 @@ describe("additional auto-routing families (#13214)", () => {
   it("includes Kimi k3 only on known Kimi backends, alongside prefix matches", () => {
     const filter = buildFamilyCandidateFilter("kimi");
     for (const provider of ["kimi-coding", "kimi-web", "kimi-coding-apikey"]) {
-      assert.equal(filter({ provider, model: "k3" }), true);
-      assert.equal(filter({ provider, model: `${provider}/k3` }), true);
+      for (const model of ["k3", "k3.1-pro", "k3.1-pro-highspeed"]) {
+        assert.equal(filter({ provider, model }), true);
+        assert.equal(filter({ provider, model: `${provider}/${model}` }), true);
+      }
       assert.equal(filter({ provider, model: "gpt-4o" }), false);
     }
     assert.equal(filter({ provider: "moonshot", model: "kimi-k3" }), true);
     assert.equal(filter({ provider: "custom", model: "kimi-k2.5" }), true);
     assert.equal(filter({ provider: "custom", model: "k3" }), false);
+    assert.equal(filter({ provider: "custom", model: "k3.1-pro" }), false);
     assert.equal(buildFamilyCandidateFilter("gpt")({ provider: "kimi-web", model: "k3" }), false);
     assert.equal(buildFamilyCandidateFilter("zai")({ provider: "glm", model: "glm-5.2" }), false);
   });

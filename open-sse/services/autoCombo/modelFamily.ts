@@ -110,7 +110,7 @@ interface FamilyPoolCandidate {
  * Build the candidate filter for `auto/<family>`. Provider-override families
  * (currently only `zai`) filter by connection provider id; every other family
  * filters by `detectModelFamily(model) === family`, with a provider-scoped
- * exception for Kimi backends exposing the bare `k3` model id.
+ * exception for Kimi backends exposing bare `k3` / `k3.1-*` model ids.
  */
 export function buildFamilyCandidateFilter(
   family: ModelFamily
@@ -121,13 +121,13 @@ export function buildFamilyCandidateFilter(
   }
   return (candidate) => {
     if (detectModelFamily(candidate.model) === family) return true;
-    // Coding OAuth/API-key and web share the bare k3 id. Do not classify an
+    // Coding OAuth/API-key and web share bare k3-family ids. Do not classify an
     // unrelated provider's k3 (or other models on these providers) as Kimi.
     const bareModel = candidate.model.slice(candidate.model.lastIndexOf("/") + 1);
     return (
       family === "kimi" &&
       ["kimi-coding", "kimi-coding-apikey", "kimi-web"].includes(candidate.provider) &&
-      bareModel.toLowerCase() === "k3"
+      /^k3(?:$|[.-])/.test(bareModel.toLowerCase())
     );
   };
 }

@@ -22,7 +22,14 @@ import {
 import { translateRequest } from "../../open-sse/translator/index.ts";
 import { getResolvedModelCapabilities } from "../../src/lib/modelCapabilities.ts";
 
-const EXPECTED_MODELS = ["kimi-k3", "kimi-k2.7-code", "kimi-k2.7-code-highspeed", "kimi-k2.6"];
+const EXPECTED_MODELS = [
+  "kimi-k3.1-pro",
+  "kimi-k3.1-pro-highspeed",
+  "kimi-k3",
+  "kimi-k2.7-code",
+  "kimi-k2.7-code-highspeed",
+  "kimi-k2.6",
+];
 
 function registryModelIds(provider: string): string[] {
   const entry = getRegistryEntry(provider);

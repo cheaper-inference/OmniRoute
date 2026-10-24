@@ -613,6 +613,18 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     aliases: ["claude-haiku-4.5"],
   },
 
+  // ── Kimi K3.1 Pro (Moonshot API / Kimi Coding — 1M context/output) ──
+  "kimi-k3.1-pro": {
+    maxOutputTokens: 1048576,
+    contextWindow: 1048576,
+    thinkingBudgetCap: 32768,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    supportsVideo: true,
+    aliases: ["k3.1-pro", "kimi-k3.1-pro-highspeed", "k3.1-pro-highspeed"],
+  },
+
   // ── Kimi K3 (Moonshot API — 1M context/output, native vision) ────
   // `k3` is the Kimi Coding / kimi-coding-apikey wire id (#8250).
   "kimi-k3": {

@@ -11,6 +11,7 @@ import {
   isAutoLearnGloballyEnabled,
 } from "@/lib/db/paramFilters";
 import { HTTP_STATUS } from "../../config/constants.ts";
+import { hasUnsupportedK31Effort } from "./reasoningEffort.ts";
 import {
   findOffendingField,
   detectRejectedMessageFields,
@@ -158,6 +159,19 @@ export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams):
     return response;
   }
   const record = body as Record<string, unknown>;
+  const model = params.model || "";
+  const thinking =
+    record.thinking && typeof record.thinking === "object" && !Array.isArray(record.thinking)
+      ? (record.thinking as Record<string, unknown>)
+      : null;
+  const explicitlyDisabled = record.enable_thinking === false || thinking?.type === "disabled";
+  if (
+    /(?:^|\/)(?:kimi-)?k3\.1(?:$|-)/i.test(model) &&
+    (explicitlyDisabled || hasUnsupportedK31Effort(record))
+  ) {
+    return response;
+  }
+
   const errText = await response
     .clone()
     .text()

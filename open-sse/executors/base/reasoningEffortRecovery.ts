@@ -17,6 +17,7 @@ import {
   recordLearnedReasoningEffort,
 } from "../../services/learnedReasoningEffortCaps.ts";
 import {
+  hasUnsupportedK31Effort,
   readBodyReasoningEffort,
   sanitizeReasoningEffortForProvider,
   writeBodyReasoningEffort,
@@ -81,6 +82,9 @@ export async function applyReasoningEffortRecovery(
     return notRecoverable;
   }
   if (!body || typeof body !== "object") {
+    return notRecoverable;
+  }
+  if (/(?:^|\/)(?:kimi-)?k3\.1(?:$|-)/i.test(model || "") && hasUnsupportedK31Effort(body)) {
     return notRecoverable;
   }
 

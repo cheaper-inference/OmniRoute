@@ -34,6 +34,8 @@ export interface AdaptiveEffortContext {
    * on a Claude/Gemini-targeted request would silently no-op or break the request.
    */
   targetFormat: string | undefined;
+  /** Resolved upstream model id, used to preserve K3.1's literal effort contract. */
+  model?: string | undefined;
 }
 
 /**
@@ -53,6 +55,9 @@ export function wireAdaptiveEffort<T extends Record<string, unknown>>(
   // not a wire value, so it must NOT count as an explicit client field (it
   // would otherwise short-circuit the guard below and ship "auto" upstream).
   const modelDefaultAuto = isAdaptiveEffort(body.reasoning_effort);
+  if (modelDefaultAuto && /(?:^|\/)(?:kimi-)?k3\.1(?:$|-)/i.test(ctx.model || "")) {
+    return body;
+  }
   if (!modelDefaultAuto && hasExplicitReasoningField(body)) return body;
   const headerEffort =
     ctx.headerEffort !== undefined

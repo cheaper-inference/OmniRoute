@@ -96,6 +96,48 @@ function normalizeK2Thinking(body: JsonRecord, preservedThinkingOnly: boolean): 
   }
 }
 
+const K31_EFFORT_ALIASES: Record<string, string> = {
+  ultra: "max",
+  xhigh: "max",
+  high: "high",
+  medium: "high",
+  low: "low",
+  minimum: "low",
+  light: "low",
+  max: "max",
+};
+
+function normalizeK31ReasoningEffort(body: JsonRecord): void {
+  const existingReasoning = asRecord(body.reasoning);
+  const existingThinking = asRecord(body.thinking);
+  const requested =
+    body.reasoning_effort !== undefined
+      ? body.reasoning_effort
+      : existingReasoning?.effort !== undefined
+        ? existingReasoning.effort
+        : existingThinking?.effort;
+  const explicitlyDisabled =
+    requested === undefined &&
+    (body.enable_thinking === false || existingThinking?.type === "disabled");
+  delete body.thinking;
+  delete body.enable_thinking;
+  delete body.reasoning;
+
+  if (explicitlyDisabled) {
+    body.reasoning_effort = "none";
+    return;
+  }
+  if (requested === undefined) {
+    body.reasoning_effort = "max";
+    return;
+  }
+  if (typeof requested !== "string") {
+    body.reasoning_effort = requested;
+    return;
+  }
+  body.reasoning_effort = K31_EFFORT_ALIASES[requested.toLowerCase()] ?? requested;
+}
+
 export function normalizeMoonshotRequest(model: string, body: unknown): unknown {
   const record = asRecord(body);
   if (!record) return body;
@@ -105,7 +147,8 @@ export function normalizeMoonshotRequest(model: string, body: unknown): unknown 
 
   const next: JsonRecord = { ...record };
   if (Array.isArray(next.tools)) next.tools = flattenOpenAIToolRootAnyOf(next.tools);
-  const isK3 = /^kimi-k3(?:$|-)/.test(normalizedModel);
+  const isK3 = /^kimi-k3(?:$|[.-])/.test(normalizedModel);
+  const isK31 = /^kimi-k3\.1(?:$|-)/.test(normalizedModel);
   const isK27 = /^kimi-k2\.7-code(?:$|-)/.test(normalizedModel);
   const isK26 = /^kimi-k2\.6(?:$|-)/.test(normalizedModel);
   const outputCeiling = isK3 ? 1048576 : 262144;
@@ -115,6 +158,11 @@ export function normalizeMoonshotRequest(model: string, body: unknown): unknown 
     stripFixedSamplingParams(next);
   } else {
     stripFixedTemperature(next);
+  }
+
+  if (isK31) {
+    normalizeK31ReasoningEffort(next);
+    return next;
   }
 
   if (isK3) {
