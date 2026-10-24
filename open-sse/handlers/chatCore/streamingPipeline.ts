@@ -24,6 +24,7 @@ import {
   createCredentialSseTransform as defaultCredentialSse,
   isCredentialTransformEnabled,
 } from "@/lib/streamingCredentialTransform";
+import { createDetokenizingStream, isReversibleVaultEnabled } from "@/lib/pii/tokenVault";
 import { isFeatureFlagEnabled as defaultFeatureFlag } from "@/shared/utils/featureFlags";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { SSE_HEARTBEAT_INTERVAL_MS } from "../../config/constants.ts";
@@ -51,6 +52,8 @@ export interface StreamingPipelineDeps {
   createSseHeartbeatTransform: typeof defaultHeartbeat;
   shapeForClientFormat: typeof defaultShape;
   createModelEchoTransform: typeof defaultModelEcho;
+  createDetokenizingStream?: typeof createDetokenizingStream;
+  isReversibleVaultEnabled?: typeof isReversibleVaultEnabled;
 }
 
 const DEFAULT_DEPS: StreamingPipelineDeps = {
@@ -63,6 +66,8 @@ const DEFAULT_DEPS: StreamingPipelineDeps = {
   createSseHeartbeatTransform: defaultHeartbeat,
   shapeForClientFormat: defaultShape,
   createModelEchoTransform: defaultModelEcho,
+  createDetokenizingStream: createDetokenizingStream,
+  isReversibleVaultEnabled: isReversibleVaultEnabled,
 };
 
 export function assembleStreamingPipeline(
@@ -138,6 +143,11 @@ export function assembleStreamingPipeline(
   // #1311: echo the requested alias/combo name in each streamed SSE chunk's model field.
   if (args.echoModel) {
     finalStream = finalStream.pipeThrough(deps.createModelEchoTransform(args.echoModel));
+  }
+  const checkVault = deps.isReversibleVaultEnabled ?? isReversibleVaultEnabled;
+  if (checkVault()) {
+    const makeDetokenizer = deps.createDetokenizingStream ?? createDetokenizingStream;
+    finalStream = finalStream.pipeThrough(makeDetokenizer());
   }
   performance.mark(PIPELINE_END);
   performance.measure(PIPELINE_MEASURE, PIPELINE_START, PIPELINE_END);

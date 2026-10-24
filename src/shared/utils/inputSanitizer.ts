@@ -10,6 +10,7 @@
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
+import { TokenVaultManager, isReversibleVaultEnabled } from "@/lib/pii/tokenVault";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
 
@@ -333,7 +334,14 @@ function processPII(text, redact = false, options = undefined) {
     if (matches && matches.length > 0) {
       detections.push({ type: rule.name, count: matches.length });
       if (redact) {
-        processed = processed.replace(rule.pattern, rule.replacement);
+        if (isReversibleVaultEnabled()) {
+          const vault = TokenVaultManager.getInstance();
+          processed = processed.replace(rule.pattern, (match: string) =>
+            vault.getOrCreateToken(rule.name, match)
+          );
+        } else {
+          processed = processed.replace(rule.pattern, rule.replacement);
+        }
       }
     }
   }
