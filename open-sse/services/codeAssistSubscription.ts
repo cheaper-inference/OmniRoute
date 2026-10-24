@@ -76,8 +76,5 @@ export function extractCodeAssistOnboardTierId(subscriptionInfo: unknown): strin
   const defaultId = defaultTier ? pickTierField(defaultTier, "id") : null;
   if (defaultId) return defaultId;
 
-  const currentId = pickTierField(subscription.currentTier, "id");
-  if (currentId) return currentId;
-
   return "legacy-tier";
 }

@@ -60,3 +60,14 @@ test("extractCodeAssistOnboardTierId skips currentTier when ineligible", () => {
 test("extractCodeAssistOnboardTierId falls back to legacy-tier", () => {
   assert.equal(extractCodeAssistOnboardTierId({}), "legacy-tier");
 });
+
+test("extractCodeAssistOnboardTierId returns legacy-tier when ineligible without an allowed default", () => {
+  assert.equal(
+    extractCodeAssistOnboardTierId({
+      currentTier: { id: "x" },
+      ineligibleTiers: ["y"],
+      allowedTiers: [],
+    }),
+    "legacy-tier"
+  );
+});
