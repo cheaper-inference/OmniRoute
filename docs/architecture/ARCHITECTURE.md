@@ -318,9 +318,9 @@ Domain layer modules:
 
 - Cost rules/budgets: `src/domain/costRules.ts`
 - Fallback policy: `src/domain/fallbackPolicy.ts`
-- Combo resolver: `src/domain/comboResolver.ts`
+- Reserved combo-resolution contract: `src/domain/comboResolver.ts`; live routing uses `open-sse/services/combo.ts`
 - Lockout policy: `src/domain/lockoutPolicy.ts`
-- Policy engine: `src/domain/policyEngine.ts` — centralized lockout → budget → fallback evaluation
+- Reserved policy-evaluation contract: `src/domain/policyEngine.ts`; the request path enforces API-key policy through `src/shared/utils/apiKeyPolicy.ts` and resolved-target authorization through `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Error codes catalog: `src/shared/constants/errorCodes.ts`
 - Request ID: `src/shared/utils/requestId.ts`
 - Fetch timeout: `src/shared/utils/fetchTimeout.ts`
@@ -368,7 +368,7 @@ relying on a static combo definition. It powers the `auto/*` model prefix family
 
 - Engine entry: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (auto-detection of `auto/` prefix)
+- Live combo entry: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), called by `src/sse/handlers/chat.ts`
 - Dashboard: `/dashboard/auto-combo`
 - Telemetry: `auto_combo_decisions` SQLite table
 
@@ -431,17 +431,27 @@ For ruleset authoring and threshold tuning, see
 
 ### D. Domain Layer
 
-The `src/domain/` namespace centralizes policy decisions so route handlers do not
-have to assemble lockout/budget/fallback logic themselves.
+The `src/domain/` namespace contains domain services and reserved evaluation contracts.
+It is not one mandatory policy entry point for every request.
 
-- Policy engine: `src/domain/policyEngine.ts` — single entry point for
-  pre-execution evaluation (lockout → budget → fallback ordering)
+The live chat path calls `enforceApiKeyPolicy()` from
+`src/shared/utils/apiKeyPolicy.ts`; authorization of resolved models and combo members
+is implemented in `src/sse/handlers/chat/resolvedModelPolicy.ts`. The self-hosted
+entry in `src/app/api/v1/chat/completions/route.ts` also enforces API-key policy before
+dispatch. Combo resolution runs through `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` and `src/lib/container.ts`
+remain tested contracts, not the wiring of that request path. The container registers
+the policy engine, but the inspected production request path does not resolve it.
+Changing those contracts alone does not change live chat policy or combo routing;
+connecting or removing them requires a separate design decision.
+
+- Reserved policy engine: `src/domain/policyEngine.ts` — lockout → budget → fallback evaluation
 - Cost rules: `src/domain/costRules.ts`
 - Fallback policy: `src/domain/fallbackPolicy.ts`
 - Lockout policy: `src/domain/lockoutPolicy.ts`
 - Tag-based routing: `src/domain/tagRouter.ts`
-- Combo resolver: `src/domain/comboResolver.ts` — resolves combo names, auto/\*
-  prefixes, and wildcard model targets to concrete execution plans
+- Reserved combo resolver: `src/domain/comboResolver.ts` — standalone selection contract; live combo routing is implemented in `open-sse/services/combo.ts`
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Model availability snapshots: `src/domain/modelAvailability.ts`
 - Provider expiration tracking: `src/domain/providerExpiration.ts`

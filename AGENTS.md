@@ -38,7 +38,7 @@ Running tests: see [Testing](#testing) below (run the most focused test for chan
 - Transformer — `open-sse/transformer/` (Responses API ↔ Chat Completions)
 - Services — `open-sse/services/` (combo routing, rate limits, caching, etc)
 - Database — `src/lib/db/` (SQLite domain modules, 209 migrations)
-- Domain/Policy — `src/domain/` (policy engine, cost rules, fallback logic)
+- Domain services — `src/domain/` (cost, quota, routing helpers and reserved contracts). Live API-key policy: `src/shared/utils/apiKeyPolicy.ts`; resolved-target authorization: `src/sse/handlers/chat/resolvedModelPolicy.ts`. The tested `policyEngine.ts` / `comboResolver.ts` / `src/lib/container.ts` trio does not wire the inspected chat request path.
 - MCP Server — `open-sse/mcp-server/` (110 tools: 45 canonical + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modules; 3 transports: stdio / SSE / Streamable HTTP; 33 scopes)
 - A2A Server — `src/lib/a2a/` (JSON-RPC 2.0 agent protocol)
 - Skills — `src/lib/skills/` (extensible skill framework); Memory — `src/lib/memory/` (persistent conversational memory)
