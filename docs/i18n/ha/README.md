@@ -1305,7 +1305,7 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
   <tr><td nowrap><b>Lokacin Aiki</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Harshe</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> a cikin <code>src/</code> da <code>open-sse/</code> (babu <code>any</code> a jigon tsarin tun daga v2.0)</td></tr>
   <tr><td nowrap><b>Tsarin Aiki</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma'ajin Bayanai</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON na dā) — modules 147 na yankuna, migrations 209</td></tr>
+  <tr><td nowrap><b>Ma'ajin Bayanai</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON na dā) — modules 147 na yankuna, migrations 210</td></tr>
   <tr><td nowrap><b>Ƙwaƙwalwa</b></td><td>SQLite FTS5 binciken cikakken rubutu + vector embeddings masu int8-quantized, decay mai nau'i</td></tr>
   <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — tantance I/O na kayan aikin MCP + kwangilolin API</td></tr>
   <tr><td nowrap><b>Ƙa'idodin Sadarwa</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
