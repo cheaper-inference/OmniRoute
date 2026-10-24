@@ -1,0 +1,1 @@
+- **refactor(db):** move Playground preset persistence behind a Promise-based domain repository with a SQLite implementation; routes use the async path, legacy synchronous helpers stay SQLite-only (related to #17952; [#17962](https://github.com/cheaper-inference/OmniRoute/pull/17962)).
