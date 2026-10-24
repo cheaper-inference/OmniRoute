@@ -1,0 +1,1 @@
+- **fix(translator):** `fixMissingToolResponses` scans all consecutive tool responses and inserts empty responses for any unanswered `tool_call_id` in a multi-call assistant turn or trailing assistant turn, preventing 400 errors from strict upstreams such as DeepSeek (#17946).

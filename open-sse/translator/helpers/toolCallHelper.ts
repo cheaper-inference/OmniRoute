@@ -301,7 +301,7 @@ export function hasToolResults(
   return false;
 }
 
-// Fix missing tool responses - insert empty tool_result if assistant has tool_use but next message has no tool_result.
+// Fix missing tool responses - insert empty tool_result if assistant has tool_use but next messages lack responses for all tool_calls.
 // Inserts in the same shape as the opening assistant message: OpenAI tool_calls → role:"tool";
 // Claude tool_use blocks → role:"user" with tool_result content blocks.
 export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
@@ -311,19 +311,40 @@ export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
 
   for (let i = 0; i < body.messages.length; i++) {
     const msg = body.messages[i];
-    const nextMsg = body.messages[i + 1];
-
     newMessages.push(msg);
 
     // Check if this is assistant with tool_calls/tool_use
     const toolCallIds = getToolCallIds(msg);
     if (toolCallIds.length === 0) continue;
 
-    // Check if next message has tool_result
-    if (nextMsg && !hasToolResults(nextMsg, toolCallIds)) {
+    // Collect all tool response IDs that immediately follow this assistant message
+    const respondedIds = new Set<string>();
+    let j = i + 1;
+    while (j < body.messages.length) {
+      const nextMsg = body.messages[j];
+      let isToolResponse = false;
+      if (nextMsg.role === "tool" && nextMsg.tool_call_id) {
+        respondedIds.add(String(nextMsg.tool_call_id));
+        isToolResponse = true;
+      } else if (nextMsg.role === "user" && Array.isArray(nextMsg.content)) {
+        for (const block of nextMsg.content as ToolContentBlock[]) {
+          if (block?.type === "tool_result" && block.tool_use_id) {
+            respondedIds.add(String(block.tool_use_id));
+            isToolResponse = true;
+          }
+        }
+      }
+      if (!isToolResponse) break;
+      newMessages.push(nextMsg);
+      j++;
+    }
+
+    // Insert empty tool responses for any tool calls that were not answered
+    const missingIds = toolCallIds.filter((id) => !respondedIds.has(id));
+    if (missingIds.length > 0) {
       const hasOpenAIToolCalls = Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
       if (hasOpenAIToolCalls) {
-        for (const id of toolCallIds) {
+        for (const id of missingIds) {
           newMessages.push({
             role: "tool",
             tool_call_id: id,
@@ -333,7 +354,7 @@ export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
       } else {
         newMessages.push({
           role: "user",
-          content: toolCallIds.map((id) => ({
+          content: missingIds.map((id) => ({
             type: "tool_result",
             tool_use_id: id,
             content: "",
@@ -341,6 +362,8 @@ export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
         });
       }
     }
+
+    i = j - 1;
   }
 
   body.messages = newMessages;
