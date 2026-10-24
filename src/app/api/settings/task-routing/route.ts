@@ -34,7 +34,9 @@ export async function GET(request: Request) {
  * PUT /api/settings/task-routing
  * Update the task-aware routing configuration.
  * Body: { enabled?: boolean, taskModelMap?: { coding?: "...", ... }, detectionEnabled?: boolean,
- *          patternOverrides?: { coding?: { patterns?: string[], userPatterns?: string[] }, ... } }
+ *          patternOverrides?: { coding?: { patterns?: string[], userPatterns?: string[] }, ... },
+ *          detectionAnchor?: "latest-user" | "first-user",
+ *          complexityRouting?: { enabled: boolean, minScore: 0-100, model: string } }
  */
 export async function PUT(request: Request) {
   const authError = await requireManagementAuth(request);
@@ -114,12 +116,18 @@ export async function POST(request: Request) {
     }
 
     if (actionRequest.action === "detect") {
-      const { detectTaskType } = await import("@omniroute/open-sse/services/taskAwareRouter.ts");
-      const taskType = detectTaskType(actionRequest.body || {});
+      const { detectTaskType, resolveComplexityEscalation } =
+        await import("@omniroute/open-sse/services/taskAwareRouter.ts");
+      const detectBody = actionRequest.body || {};
+      const taskType = detectTaskType(detectBody);
+      const escalation = resolveComplexityEscalation(taskType, detectBody);
       const config = getTaskRoutingConfig();
       return NextResponse.json({
         taskType,
-        preferredModel: config.taskModelMap[taskType] || "(no override)",
+        preferredModel: escalation?.model || config.taskModelMap[taskType] || "(no override)",
+        ...(escalation
+          ? { complexityScore: escalation.score, escalated: escalation.model !== null }
+          : {}),
       });
     }
 

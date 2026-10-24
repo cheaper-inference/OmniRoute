@@ -1056,9 +1056,10 @@ async function handleChatImplementation(
     if (tr.wasRouted) {
       resolvedModelStr = tr.model;
       body = { ...body, model: tr.model };
+      const escalation = tr.escalated ? ` (complexity ${tr.complexityScore} escalated)` : "";
       log.info(
         "T05",
-        `Task-Aware: detected="${tr.taskType}" → model override: ${modelStr} → ${tr.model}`
+        `Task-Aware: detected="${tr.taskType}"${escalation} → model override: ${modelStr} → ${tr.model}`
       );
     } else if (tr.taskType !== "chat") {
       log.debug("T05", `Task-Aware: detected="${tr.taskType}" (no override configured)`);
