@@ -48,6 +48,8 @@ import WebSessionCredentialGuide from "../WebSessionCredentialGuide";
 import HarImportButton from "../HarImportButton";
 import CcCompatibleRequestDefaultsFields from "./CcCompatibleRequestDefaultsFields";
 import { buildAddProviderSpecificData } from "./connectionProviderSpecificData";
+import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
+import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getCommandCodeAuthPhaseLabel } from "./commandCodeAuthPhase";
 import { createInitialAddApiKeyFormData } from "./addApiKeyInitialFormData";
 import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
@@ -267,6 +269,18 @@ export default function AddApiKeyModal({
         ? combineModalCredential(formData.apiKey, formData.tokenSecret)
         : formData.apiKey;
 
+  const validateRequestBody = (apiKey: string) =>
+    JSON.stringify(
+      buildProviderValidateRequestBody({
+        provider,
+        apiKey,
+        formData,
+        isAwsPolly,
+        showsRegion,
+        defaultRegion,
+        isChatGptWebCodex,
+      })
+    );
   const handleValidate = async () => {
     setValidating(true);
     setSaveError(null);
@@ -274,24 +288,7 @@ export default function AddApiKeyModal({
       const res = await fetch("/api/providers/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider,
-          apiKey: resolveCredentialInput(),
-          validationModelId: formData.validationModelId || undefined,
-          customUserAgent: formData.customUserAgent.trim() || undefined,
-          baseUrl: formData.baseUrl.trim() || undefined,
-          region: isAwsPolly
-            ? formData.region.trim() || "us-east-1"
-            : showsRegion
-              ? formData.region.trim() || defaultRegion
-              : undefined,
-          accessKeyId: isAwsPolly ? formData.awsAccessKeyId.trim() || undefined : undefined,
-          sessionToken: isAwsPolly ? formData.awsSessionToken.trim() || undefined : undefined,
-          cx: formData.cx.trim() || undefined,
-          runtimeKey: isChatGptWebCodex ? formData.runtimeKey.trim() || undefined : undefined,
-          tunnelId: isChatGptWebCodex ? formData.tunnelId.trim() || undefined : undefined,
-          connectorName: isChatGptWebCodex ? formData.connectorName.trim() || undefined : undefined,
-        }),
+        body: validateRequestBody(resolveCredentialInput()),
       });
       const data = await res.json();
       const ok = !!data.valid;
@@ -360,26 +357,7 @@ export default function AddApiKeyModal({
           const res = await fetch("/api/providers/validate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              provider,
-              apiKey: credentialInput,
-              validationModelId: formData.validationModelId || undefined,
-              customUserAgent: formData.customUserAgent.trim() || undefined,
-              baseUrl: formData.baseUrl.trim() || undefined,
-              region: isAwsPolly
-                ? formData.region.trim() || "us-east-1"
-                : showsRegion
-                  ? formData.region.trim() || defaultRegion
-                  : undefined,
-              accessKeyId: isAwsPolly ? formData.awsAccessKeyId.trim() || undefined : undefined,
-              sessionToken: isAwsPolly ? formData.awsSessionToken.trim() || undefined : undefined,
-              cx: formData.cx.trim() || undefined,
-              runtimeKey: isChatGptWebCodex ? formData.runtimeKey.trim() || undefined : undefined,
-              tunnelId: isChatGptWebCodex ? formData.tunnelId.trim() || undefined : undefined,
-              connectorName: isChatGptWebCodex
-                ? formData.connectorName.trim() || undefined
-                : undefined,
-            }),
+            body: validateRequestBody(credentialInput),
           });
           const data = await res.json();
           isValid = !!data.valid;
@@ -765,6 +743,11 @@ export default function AddApiKeyModal({
                 </div>
               </div>
             )}
+            <CommandCodeZdrToggle
+              provider={provider}
+              checked={formData.commandCodeZdrEnabled}
+              onChange={(checked) => setFormData({ ...formData, commandCodeZdrEnabled: checked })}
+            />
             <Input
               label={t("nameLabel")}
               value={formData.name}
