@@ -247,6 +247,8 @@ const eslintConfig = [
       "review/**",
       // Electron app
       "electron/**",
+      // Linux tray contrib: Python + QML; its QML JS (`.pragma library`) is not valid ESLint input
+      "contrib/omniroute-tray-linux/**",
       // Docs
       "docs/**",
       // Open-SSE compiled/bundled output
