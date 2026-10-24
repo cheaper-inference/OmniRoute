@@ -29,6 +29,7 @@ import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 import { isJsonObject } from "../utils/kieTask.ts";
 import { handleOpenRouterTranscription } from "./openrouterTranscription.ts";
 import { handleSyntxTranscription } from "./syntxAudio.ts";
+import { resolveTranscriptionFile, TranscriptionAudioUrlError } from "../utils/transcriptionRemoteAudio.ts";
 
 type TranscriptionCredentials = {
   apiKey?: string;
@@ -973,11 +974,10 @@ export async function handleAudioTranscription({
     return errorResponse(400, "Invalid model ID");
   }
 
-  const fileEntry = formData.get("file");
-  if (!(fileEntry instanceof Blob)) {
+  // Preserve file-only behavior; URL-only audio is resolved after credentials.
+  if (!(formData.get("file") instanceof Blob) && typeof formData.get("url") !== "string") {
     return errorResponse(400, "file is required");
   }
-  const file = fileEntry as Blob & { name?: unknown };
 
   // Use pre-resolved provider/model from route handler if available (supports dynamic provider_nodes).
   let providerConfig = resolvedProvider;
@@ -1000,6 +1000,18 @@ export async function handleAudioTranscription({
     providerConfig.authType === "none" ? null : credentials?.apiKey || credentials?.accessToken;
   if (providerConfig.authType !== "none" && !token) {
     return errorResponse(401, `No credentials for transcription provider: ${providerConfig.id}`);
+  }
+
+  // Fetch URL input into a local file. Never forward Telegram URLs/tokens
+  // or other caller-controlled URLs to the upstream STT provider.
+  let file: Blob & { name?: unknown };
+  try {
+    file = await resolveTranscriptionFile(formData);
+  } catch (error) {
+    if (error instanceof TranscriptionAudioUrlError) {
+      return errorResponse(error.status, error.message);
+    }
+    return errorResponse(502, "Audio URL could not be fetched");
   }
 
   // Route to provider-specific handler
