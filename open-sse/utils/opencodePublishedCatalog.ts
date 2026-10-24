@@ -11,12 +11,14 @@
  * flag resolver. No gate registered, or a gate that throws, reads as "off": the registry
  * decides exactly as before and no catalog request is ever made.
  *
- * When on, the map is filled from one coalesced in-memory read of
+ * When on, the maps are filled from one coalesced in-memory read of
  * `models.opencode.ai/api.json` (6 h TTL, 30 s floor between attempts, 5 s timeout, never
  * throws) and rewritten as a block on every successful read: one entry per published model,
  * no per-request growth, and a model the catalog moves to another SDK shows its new surface
- * on the next refresh. The first request after a cold start sees an empty map and keeps the
- * registry format while the read runs in the background.
+ * on the next refresh. The same read also records the base URL each catalog section
+ * publishes (`api`), so a key-based Zen/Go request follows the publisher's endpoint on the
+ * next refresh instead of waiting for a release. The first request after a cold start sees
+ * empty maps and keeps the registry values while the read runs in the background.
  */
 
 const CATALOG_URL = "https://models.opencode.ai/api.json";
@@ -27,11 +29,11 @@ export const OPENCODE_PUBLISHED_CATALOG_TTL_MS = 6 * 60 * 60 * 1000;
 const REFRESH_FLOOR_MS = 30_000;
 
 /**
- * Catalog sections read for the model surface, by provider id (= public alias for both).
- * The catalog's `opencode` section is OpenCode Zen; the keyless OpenCode Free provider
- * (`opencode` / `oc`) was removed in #16310, so no other id maps here.
+ * Catalog sections read for the model surface and the base URL, by provider id (= public
+ * alias for both). The catalog's `opencode` section is OpenCode Zen; the keyless OpenCode
+ * Free provider (`opencode` / `oc`) was removed in #16310, so no other id maps here.
  */
-const NPM_CATALOG_KEY_BY_PROVIDER: Record<string, string> = {
+const CATALOG_SECTION_BY_PROVIDER: Record<string, string> = {
   "opencode-zen": "opencode",
   "opencode-go": "opencode-go",
 };
@@ -42,10 +44,13 @@ type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
 /** Raw `provider.npm` by `${catalogKey} ${modelId}`; rewritten as a block per catalog read. */
 const npmByModel = new Map<string, string>();
+/** Validated `api` by catalog section key; rewritten as a block per catalog read. */
+const apiBySection = new Map<string, string>();
 let fetchedAt = 0;
 let lastAttemptAt = 0;
 let inFlight: Promise<void> | null = null;
 let testFetch: FetchLike | null = null;
+let catalogFetch: FetchLike | null = null;
 
 /**
  * The gate lives on `globalThis` so duplicated module instances (route bundles vs.
@@ -73,12 +78,22 @@ export function isPublishedCatalogRoutingEnabled(): boolean {
   }
 }
 
+/**
+ * Register (or clear, with `null`) the transport the catalog read goes through. Called once
+ * by `open-sse/executors/opencode.ts` with the proxy-aware `proxyFetch`, because this module
+ * cannot import it (it is reachable from the client bundle). Test runners keep using their
+ * own injected fetch, which wins over this registration.
+ */
+export function setPublishedCatalogFetch(fetchImpl: FetchLike | null): void {
+  catalogFetch = fetchImpl;
+}
+
 /** Raw `provider.npm` values by `${catalogKey} ${modelId}`, from one catalog read. */
 export function readPublishedNpmByModel(catalog: unknown): Map<string, string> {
   const map = new Map<string, string>();
   if (!catalog || typeof catalog !== "object") return map;
   const sections = catalog as Record<string, { models?: Record<string, unknown> } | undefined>;
-  for (const sectionKey of new Set(Object.values(NPM_CATALOG_KEY_BY_PROVIDER))) {
+  for (const sectionKey of new Set(Object.values(CATALOG_SECTION_BY_PROVIDER))) {
     const models = sections[sectionKey]?.models;
     if (!models || typeof models !== "object") continue;
     for (const [modelId, entry] of Object.entries(models)) {
@@ -93,6 +108,28 @@ export function readPublishedNpmByModel(catalog: unknown): Map<string, string> {
 export function replacePublishedCatalogNpm(next: Map<string, string>): void {
   npmByModel.clear();
   for (const [key, npm] of next) npmByModel.set(key, npm);
+}
+
+/**
+ * The base URL each catalog section publishes in `api`, from one catalog read. A value that
+ * fails `normalizePublishedApi` is dropped, so an unreachable or malformed endpoint never
+ * replaces the registry base.
+ */
+export function readPublishedApiBySection(catalog: unknown): Map<string, string> {
+  const map = new Map<string, string>();
+  if (!catalog || typeof catalog !== "object") return map;
+  const sections = catalog as Record<string, { api?: unknown } | undefined>;
+  for (const sectionKey of new Set(Object.values(CATALOG_SECTION_BY_PROVIDER))) {
+    const api = normalizePublishedApi(sections[sectionKey]?.api);
+    if (api) map.set(sectionKey, api);
+  }
+  return map;
+}
+
+/** Replace every entry with one catalog read's result. */
+export function replacePublishedApiBySection(next: Map<string, string>): void {
+  apiBySection.clear();
+  for (const [key, api] of next) apiBySection.set(key, api);
 }
 
 /**
@@ -111,13 +148,14 @@ function isFresh(): boolean {
 
 /**
  * Re-read the catalog (coalesced: concurrent callers share one fetch; never rejects).
- * A failed or empty read keeps the previous map.
+ * A failed or empty read keeps the previous maps.
  */
 export function refreshPublishedCatalog(): Promise<void> {
   if (inFlight) return inFlight;
-  if (!testFetch && underTestRunner()) return Promise.resolve();
+  const fetchImpl: FetchLike | null =
+    testFetch ?? catalogFetch ?? (underTestRunner() ? null : globalThis.fetch);
+  if (!fetchImpl) return Promise.resolve();
   lastAttemptAt = Date.now();
-  const fetchImpl: FetchLike = testFetch ?? globalThis.fetch;
   inFlight = (async () => {
     try {
       const response = await fetchImpl(CATALOG_URL, {
@@ -128,13 +166,15 @@ export function refreshPublishedCatalog(): Promise<void> {
         await response.body?.cancel().catch(() => {});
         return;
       }
-      const next = readPublishedNpmByModel(await response.json());
+      const catalog = await response.json();
+      const next = readPublishedNpmByModel(catalog);
       if (next.size > 0) {
         replacePublishedCatalogNpm(next);
+        replacePublishedApiBySection(readPublishedApiBySection(catalog));
         fetchedAt = Date.now();
       }
     } catch {
-      // Catalog unreachable or not JSON: the previous map (or the registry) stays in place.
+      // Catalog unreachable or not JSON: the previous maps (or the registry) stay in place.
     } finally {
       inFlight = null;
     }
@@ -169,6 +209,20 @@ export function getPublishedModelNpm(
 }
 
 /**
+ * Sync hot path: the base URL the catalog publishes for this key-based Zen/Go provider, or
+ * `undefined` when routing is off, the provider is outside Zen/Go, or the published value
+ * was missing or invalid. Same contract as `getPublishedModelNpm`: a stale or cold map
+ * starts one coalesced background read, and off starts no read at all.
+ */
+export function getPublishedBaseUrl(providerId: string | null | undefined): string | undefined {
+  const catalogKey = normalizeCatalogKey(providerId);
+  if (!catalogKey) return undefined;
+  if (!isPublishedCatalogRoutingEnabled()) return undefined;
+  requestRefreshIfStale();
+  return apiBySection.get(catalogKey);
+}
+
+/**
  * The target format a published SDK rides, or `null` when the catalog decides nothing.
  * Only the measured SDKs map: everything else falls back to the registry heuristics.
  */
@@ -179,22 +233,29 @@ export function surfaceTargetFormatForNpm(npm: string | null | undefined): strin
 }
 
 /**
- * Test seam. Seeds the surface map from a catalog-shaped object, without networking:
- * `catalog[section].models[modelId].provider.npm` (non-empty strings kept). A seeded map
- * counts as fresh, so no background read starts.
+ * Test seam. Seeds both maps from a catalog-shaped object, without networking:
+ * `catalog[section].models[modelId].provider.npm` (non-empty strings kept) and
+ * `catalog[section].api` (validated). A seeded map counts as fresh, so no background read
+ * starts.
  */
 export function configurePublishedCatalogForTests(
   catalog: unknown,
   options: { fetchImpl?: FetchLike } = {}
 ): void {
   replacePublishedCatalogNpm(readPublishedNpmByModel(catalog));
+  replacePublishedApiBySection(readPublishedApiBySection(catalog));
   fetchedAt = catalog ? Date.now() : 0;
   if (options.fetchImpl) testFetch = options.fetchImpl;
 }
 
-/** Test seam: drop the map, the timers' bookkeeping and any injected fetch. */
+/**
+ * Test seam: drop both maps, the timers' bookkeeping and any injected fetch. The
+ * production transport registered through `setPublishedCatalogFetch` is wiring, not state,
+ * so it survives (see the executor's registration).
+ */
 export function resetPublishedCatalogForTests(): void {
   npmByModel.clear();
+  apiBySection.clear();
   fetchedAt = 0;
   lastAttemptAt = 0;
   inFlight = null;
@@ -204,7 +265,29 @@ export function resetPublishedCatalogForTests(): void {
 /** Provider id (alias or raw id — identical for Zen and Go) → catalog section key. */
 function normalizeCatalogKey(providerId: string | null | undefined): string | undefined {
   if (typeof providerId !== "string" || !providerId) return undefined;
-  return NPM_CATALOG_KEY_BY_PROVIDER[providerId];
+  return CATALOG_SECTION_BY_PROVIDER[providerId];
+}
+
+/**
+ * The publisher's `api` value, or `undefined` when it must not replace the registry base.
+ * https only, the publisher's own host (exact match, so `opencode.ai.evil.test` never
+ * passes), no port, no credentials, no query or hash; the origin plus path, trailing slash
+ * removed.
+ */
+function normalizePublishedApi(value: unknown): string | undefined {
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  let url: URL;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    return undefined;
+  }
+  if (url.protocol !== "https:") return undefined;
+  if (url.hostname !== "opencode.ai") return undefined;
+  if (url.port !== "") return undefined;
+  if (url.username !== "" || url.password !== "") return undefined;
+  if (url.search !== "" || url.hash !== "") return undefined;
+  return `${url.origin}${url.pathname}`.replace(/\/$/, "");
 }
 
 function stripCatalogModelPrefix(modelId: string | null | undefined): string | undefined {
