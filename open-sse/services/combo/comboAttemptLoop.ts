@@ -462,6 +462,14 @@ export async function dispatchWithCooldownRetry(opts: {
         markLoopExpiredIfSafetyFired();
       }
 
+      // This set has finished dispatching. Release its timer before any terminal
+      // response, set-retry delay, or cooldown-aware re-dispatch.
+      if (loopSafetyTimer) {
+        clearTimeout(loopSafetyTimer);
+        loopSafetyTimer = null;
+        activeLoopSafetyTimer = null;
+      }
+
       // G1: if the safety timer won the race (request would otherwise hang), give
       // in-flight tasks a short drain window to land their per-model errors into
       // state.comboErrors so the 504 carries the same "tried: a (500)" summary the
@@ -498,12 +506,6 @@ export async function dispatchWithCooldownRetry(opts: {
       // Record its actual HTTP status, not an unconditional success.
       finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
       if (anySuccess) {
-        // G1: clear the safety timer on the happy path so a successful combo does
-        // not leave a 10-minute timer alive per request.
-        if (loopSafetyTimer) {
-          clearTimeout(loopSafetyTimer);
-          loopSafetyTimer = null;
-        }
         const response = await globalPromise;
         finishComboTrace(deps.traceInvocationId, { status: response.status });
         return response;
