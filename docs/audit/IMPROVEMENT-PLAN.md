@@ -270,22 +270,18 @@ Verified: `npm run typecheck:core` clean; ESLint clean on both files.
 
 ### PERF-09 — Provider metadata build-time JSON
 
-**Problem:** 288 provider modules evaluated eagerly. Lazy Proxy alone won't help—`Object.entries(REGISTRY)` at import forces every getter.
+**Status:** Completed (2026-10-24)
 
-**Fix:** Build-time script generates `config/providers/metadata.json`:
+**Problem:** 291 provider modules evaluated eagerly. Lazy Proxy alone won't help — `Object.entries(REGISTRY)` at import forces every getter.
 
-```json
-{
-  "count": 288,
-  "hasVision": ["gpt-4o", "claude-3"],
-  "needsApiKey": ["openai", "anthropic"],
-  ...
-}
-```
+**Fix (implemented):**
 
-**Consumers:** Import JSON instead of iterating `REGISTRY`.
+- `scripts/build/gen-provider-metadata.ts` — deterministic generator writing `open-sse/config/providers/metadata.json` from the live REGISTRY (sorted keys, `name || id` pre-resolved, claude-wire id list precomputed). Refuses to emit when a REGISTRY key disagrees with its `entry.id`.
+- `open-sse/config/providers/metadata.ts` — typed reader (`PROVIDER_METADATA`, `CLAUDE_WIRE_PROVIDERS`, alias/authType/format/models helpers).
+- Consumers rewired off the 291-module REGISTRY import: `src/lib/guardrails/visionBridgeHelpers.ts`, `src/shared/constants/reservedProviderPrefixes.ts`, `src/shared/utils/providerCredentialRequirement.ts`, `src/app/api/pricing/models/route.ts`.
+- Drift gate: `tests/unit/provider-metadata-sync.test.ts` regenerates in-memory and fails on any registry/metadata divergence, plus per-provider consumer-parity assertions.
 
-**Timeline:** Day 18-20
+Verified: 291 providers / 3,060 models parity vs REGISTRY (0 mismatches), reserved-prefix set unchanged (432), credential requirements unchanged (anthropic=required, aihorde=optional, 20 no-credential). `typecheck:core` clean, ESLint clean (one pre-existing unrelated error in visionBridgeHelpers).
 
 ---
 
