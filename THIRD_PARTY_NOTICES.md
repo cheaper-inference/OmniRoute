@@ -342,7 +342,7 @@ subject to owner guidelines. `minimax` remains HOLD under custom terms. `hugging
 because its matching file has no entry or license claim in the fixed registry.
 
 ### Trademark and affiliation disclaimer
-
+### End of The Notice
 All brand names, logos, and trademarks are the property of their respective owners. OmniRoute uses
 these assets nominatively to identify provider integrations. There is no affiliation, sponsorship,
 or endorsement by the respective owners. Copyright provenance and source license claims do not
