@@ -878,11 +878,6 @@
       "count": 1
     }
   },
-  "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/index.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/utils.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
