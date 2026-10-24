@@ -1,0 +1,1 @@
+- **fix(resilience):** Preserve account cooldown diagnostics when connection expansion empties a combo pool. Quota-aware strategies and connection-aware routing now return HTTP 503 with the earliest cooldown's `Retry-After` instead of a misleading missing-model error, while retaining connection restrictions and quota exclusions (#17878).

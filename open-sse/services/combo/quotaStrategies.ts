@@ -33,6 +33,7 @@ import { PRE_SCREEN_CONCURRENCY } from "../comboConfig.ts";
 import { getQuotaFetcher } from "../quotaPreflight.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
+import type { PreDispatchExclusion } from "./pinRecovery.ts";
 import { MAX_RR_COUNTERS, rrCounters } from "./rrState.ts";
 import type { ResolvedComboTarget, IsModelAvailable } from "./types.ts";
 import {
@@ -179,7 +180,7 @@ export async function expandTargetsByQuotaAwareConnections(
   comboName: string,
   log: { warn?: (...args: unknown[]) => void },
   apiKeyAllowedConnectionIds?: string[] | null,
-  opts?: { skipExhaustionFilter?: boolean }
+  opts?: { skipExhaustionFilter?: boolean; exclusions?: PreDispatchExclusion[] }
 ): Promise<{
   connectionById: Map<string, Record<string, unknown>>;
   expandedTargets: ResolvedComboTarget[];
@@ -235,6 +236,23 @@ export async function expandTargetsByQuotaAwareConnections(
         typeof connection.rateLimitedUntil === "string" &&
         isAccountUnavailable(connection.rateLimitedUntil)
       ) {
+        if (
+          opts?.exclusions &&
+          provider &&
+          !isQuotaExhaustedForRequest(
+            connectionId,
+            provider,
+            target.modelStr || null,
+            connection.providerSpecificData
+          )
+        ) {
+          opts.exclusions.push({
+            provider,
+            model: target.modelStr.slice(target.modelStr.indexOf("/") + 1),
+            reason: "connection_cooldown",
+            retryAfterMs: Date.parse(connection.rateLimitedUntil) - Date.now(),
+          });
+        }
         continue;
       }
       if (
@@ -515,7 +533,8 @@ export async function orderTargetsByResetAwareQuota(
   comboName: string,
   configSource: Record<string, unknown> | null | undefined,
   log: { warn?: (...args: unknown[]) => void },
-  apiKeyAllowedConnectionIds?: string[] | null
+  apiKeyAllowedConnectionIds?: string[] | null,
+  exclusions?: PreDispatchExclusion[]
 ) {
   if (targets.length === 0) return targets;
 
@@ -524,7 +543,8 @@ export async function orderTargetsByResetAwareQuota(
     targets,
     comboName,
     log,
-    apiKeyAllowedConnectionIds
+    apiKeyAllowedConnectionIds,
+    { exclusions }
   );
 
   const scoredTargets = await scoreQuotaAwareTargets({
@@ -553,7 +573,8 @@ export async function orderTargetsByResetWindow(
   comboName: string,
   configSource: Record<string, unknown> | null | undefined,
   log: { warn?: (...args: unknown[]) => void },
-  apiKeyAllowedConnectionIds?: string[] | null
+  apiKeyAllowedConnectionIds?: string[] | null,
+  exclusions?: PreDispatchExclusion[]
 ) {
   if (targets.length === 0) return targets;
 
@@ -562,7 +583,8 @@ export async function orderTargetsByResetWindow(
     targets,
     comboName,
     log,
-    apiKeyAllowedConnectionIds
+    apiKeyAllowedConnectionIds,
+    { exclusions }
   );
 
   // One `now` snapshot for the whole ranking: quota fetches run concurrently and
@@ -645,7 +667,8 @@ export async function orderTargetsByHeadroom(
   targets: ResolvedComboTarget[],
   comboName: string,
   log: { warn?: (...args: unknown[]) => void },
-  apiKeyAllowedConnectionIds?: string[] | null
+  apiKeyAllowedConnectionIds?: string[] | null,
+  exclusions?: PreDispatchExclusion[]
 ): Promise<ResolvedComboTarget[]> {
   if (targets.length <= 1) return targets;
 
@@ -654,7 +677,8 @@ export async function orderTargetsByHeadroom(
       targets,
       comboName,
       log,
-      apiKeyAllowedConnectionIds
+      apiKeyAllowedConnectionIds,
+      { exclusions }
     );
 
     if (expandedTargets.length <= 1) return expandedTargets;
@@ -774,7 +798,8 @@ export async function orderTargetsByQuotaWeighted(
   comboName: string,
   configSource: Record<string, unknown> | null | undefined,
   log: { warn?: (...args: unknown[]) => void },
-  apiKeyAllowedConnectionIds?: string[] | null
+  apiKeyAllowedConnectionIds?: string[] | null,
+  exclusions?: PreDispatchExclusion[]
 ): Promise<ResolvedComboTarget[]> {
   if (targets.length === 0) return targets;
 
@@ -784,7 +809,7 @@ export async function orderTargetsByQuotaWeighted(
     comboName,
     log,
     apiKeyAllowedConnectionIds,
-    { skipExhaustionFilter: true }
+    { skipExhaustionFilter: true, exclusions }
   );
 
   const liveTargets = expandedTargets.filter((target) => {

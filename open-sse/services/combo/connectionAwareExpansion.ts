@@ -17,6 +17,7 @@
  *
  */
 
+import type { PreDispatchExclusion } from "./pinRecovery.ts";
 import type { ResolvedComboTarget, ComboLogger } from "./types.ts";
 import { expandTargetsByQuotaAwareConnections } from "./quotaStrategies.ts";
 
@@ -65,6 +66,7 @@ export interface ExpandTargetsForAllStrategiesArgs {
   log: ComboLogger;
   /** API-key allowedConnections scope, intersected with the expansion. */
   apiKeyAllowedConnectionIds?: string[] | null;
+  exclusions?: PreDispatchExclusion[];
   /**
    * Test-only injection point replacing the underlying expander, used to
    * exercise the fail-open path deterministically (T10). Production callers
@@ -124,7 +126,7 @@ export async function expandTargetsForAllStrategies(
     const expander =
       args.__testExpander ??
       ((t: ResolvedComboTarget[], name: string, l: ComboLogger, allowed: string[] | null) =>
-        expandTargetsByQuotaAwareConnections(t, name, l, allowed));
+        expandTargetsByQuotaAwareConnections(t, name, l, allowed, { exclusions: args.exclusions }));
     const { expandedTargets } = await expander(
       targets,
       comboName,

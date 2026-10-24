@@ -42,6 +42,7 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
+      "tests/unit/combo/quota-expansion-cooldown-17878.test.ts",
       "tests/unit/provider-limits-recovery.test.ts",
       "tests/unit/veoaifree-optional-credentials.test.ts",
       "tests/unit/16380-opencode-401-model-scope.test.ts",
