@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Բոլոր մոդելներն արդեն ներմուծված են",
     "noNewModelsToImport": "Ներմուծման համար նոր մոդելներ չկան. բոլոր մոդելներն արդեն գրանցամատյանում կամ հատուկ մոդելների ցանկում են",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Մոդելի հայտնաբերումը ձախողվեց {time}",
     "skippingExistingModels": "Բաց է թողնվում առկա {count} մոդել",
     "autoSync": "Ավտոմատ համաժամացում",
     "autoSyncShort": "Համաժամացնել",

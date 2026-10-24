@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Kaikki mallit on jo tuotu",
     "noNewModelsToImport": "Ei uusia malleja tuotavaksi — kaikki mallit ovat jo rekisterissä tai mukautetulla mallilistalla",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Mallin etsintä epäonnistui {time}",
     "skippingExistingModels": "Ohitetaan {count} olemassa olevaa mallia",
     "autoSync": "Automaattinen synkronointi",
     "autoSyncShort": "Synkronointi",

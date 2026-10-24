@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Alle modeller er allerede importert",
     "noNewModelsToImport": "Ingen nye modeller å importere — alle modeller finnes allerede i registeret eller listen over egendefinerte modeller",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Modell oppdagelse mislyktes {time}",
     "skippingExistingModels": "Hopper over {count} eksisterende modeller",
     "autoSync": "Auto-synkronisering",
     "autoSyncShort": "Synkronisering",

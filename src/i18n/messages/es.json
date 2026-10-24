@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Todos los modelos ya están importados",
     "noNewModelsToImport": "No hay modelos nuevos para importar — todos los modelos ya están en el registro o en la lista de modelos personalizados",
     "localCatalogFallbackStatus": "No se pudo acceder a la lista de modelos del proveedor: se muestra el catálogo integrado",
+    "discoveryDegradedStatus": "Descubrimiento del modelo fallido {time}",
     "skippingExistingModels": "Omitiendo {count} modelos existentes",
     "autoSync": "Sincronización automática",
     "autoSyncShort": "Sincronizar",

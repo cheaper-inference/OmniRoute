@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "جميع النماذج مستوردة بالفعل",
     "noNewModelsToImport": "لا توجد نماذج جديدة لاستيرادها — جميعها موجودة في السجل أو قائمة النماذج المخصصة",
     "localCatalogFallbackStatus": "تعذّر الوصول إلى قائمة نماذج المزود — يتم عرض الكتالوج المضمّن",
+    "discoveryDegradedStatus": "فشل اكتشاف النموذج {time}",
     "skippingExistingModels": "تخطي {count} نموذج موجود",
     "autoSync": "المزامنة التلقائية",
     "autoSyncShort": "المزامنة",

@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Modeli zote tayari zimeingizwa",
     "noNewModelsToImport": "Hakuna modeli mpya za kuingiza — modeli zote tayari ziko kwenye sajili au orodha ya modeli maalum",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Kugundua mfano kumeshindwa {time}",
     "skippingExistingModels": "Inapuuza modeli {count} zilizopo",
     "autoSync": "Usawazishaji Otomatiki",
     "autoSyncShort": "Sawazisha",
