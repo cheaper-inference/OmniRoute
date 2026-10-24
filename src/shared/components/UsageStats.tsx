@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Card from "./Card";
+import CachedInputTokens from "./CachedInputTokens";
+import UsageOverview from "./UsageOverview";
 import Badge from "./Badge";
 import SegmentedControl from "./SegmentedControl";
 import Toggle from "./Toggle";
@@ -12,28 +14,6 @@ import { CardSkeleton } from "./Loading";
 import { fmtFull, fmtCost } from "@/shared/utils/formatting";
 import { SortableTableHead, type DataTableSortDirection } from "@omniroute/ui-kit/data-table-shell";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@omniroute/ui-kit/table";
-
-function MiniBarGraph({
-  data,
-  colorClass = "bg-primary",
-}: {
-  data: number[];
-  colorClass?: string;
-}) {
-  const max = Math.max(...data, 1);
-  return (
-    <div className="flex items-end gap-1 h-8 w-24">
-      {data.slice(-9).map((val, idx) => (
-        <div
-          key={`bar-${idx}-${val}`}
-          className={`flex-1 rounded-t-sm transition-all duration-500 ${colorClass}`}
-          style={{ height: `${Math.max((val / max) * 100, 5)}%` }}
-          title={String(val)}
-        />
-      ))}
-    </div>
-  );
-}
 
 export default function UsageStats() {
   const t = useTranslations("stats");
@@ -273,58 +253,7 @@ export default function UsageStats() {
         </Card>
       )}
 
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="px-4 py-3 flex flex-col gap-1">
-          <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1">
-              <span className="text-text-muted text-sm uppercase font-semibold">
-                {t("totalRequests")}
-              </span>
-              <span className="text-2xl font-bold">{fmt(stats.totalRequests)}</span>
-            </div>
-            <MiniBarGraph
-              data={(stats.last10Minutes || []).map((m) => m.requests)}
-              colorClass="bg-text-muted/30"
-            />
-          </div>
-        </Card>
-        <Card className="px-4 py-3 flex flex-col gap-1">
-          <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1">
-              <span className="text-text-muted text-sm uppercase font-semibold">
-                {t("totalInputTokens")}
-              </span>
-              <span className="text-2xl font-bold text-primary">
-                {fmt(stats.totalPromptTokens)}
-              </span>
-            </div>
-            <MiniBarGraph
-              data={(stats.last10Minutes || []).map((m) => m.promptTokens)}
-              colorClass="bg-primary/50"
-            />
-          </div>
-        </Card>
-        <Card className="px-4 py-2 flex flex-col gap-1">
-          <div className="flex justify-between items-start gap-4">
-            <div className="flex flex-col gap-1 flex-1">
-              <span className="text-text-muted text-sm uppercase font-semibold">
-                {t("outputTokens")}
-              </span>
-              <span className="text-2xl font-bold text-success">
-                {fmt(stats.totalCompletionTokens)}
-              </span>
-            </div>
-            <div className="w-px bg-border self-stretch mx-2" />
-            <div className="flex flex-col gap-1 flex-1">
-              <span className="text-text-muted text-sm uppercase font-semibold">
-                {t("totalCost")}
-              </span>
-              <span className="text-2xl font-bold text-warning">{fmtCost(stats.totalCost)}</span>
-            </div>
-          </div>
-        </Card>
-      </div>
+      <UsageOverview stats={stats} />
 
       {/* {t("usageByModel")} Table */}
       <Card className="overflow-hidden">
@@ -478,6 +407,10 @@ export default function UsageStats() {
                   <>
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmt(data.promptTokens)}
+                      <CachedInputTokens
+                        value={data.cachedInputTokens}
+                        complete={data.cachedInputTokensComplete}
+                      />
                     </TableCell>
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmt(data.completionTokens)}
@@ -684,6 +617,10 @@ export default function UsageStats() {
                   <>
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmt(data.promptTokens)}
+                      <CachedInputTokens
+                        value={data.cachedInputTokens}
+                        complete={data.cachedInputTokensComplete}
+                      />
                     </TableCell>
                     <TableCell className="px-6 py-3 text-right text-text-muted">
                       {fmt(data.completionTokens)}

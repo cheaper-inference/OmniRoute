@@ -11,6 +11,7 @@ import { SortableTableHead } from "@omniroute/ui-kit/data-table-shell";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Card from "../Card";
+import CachedInputTokens from "../CachedInputTokens";
 import { getSeriesColor } from "./chartColors";
 import { fmtCompact as fmt, fmtFull, fmtCost } from "@/shared/utils/formatting";
 import {
@@ -126,6 +127,12 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
                 }
               >
                 {displayMode === "exact" ? fmtFull(m.promptTokens) : fmt(m.promptTokens)}
+                {m.cachedInputTokens !== undefined && (
+                  <CachedInputTokens
+                    value={m.cachedInputTokens as number | null}
+                    complete={m.cachedInputTokensComplete as boolean}
+                  />
+                )}
               </TableCell>
               <TableCell
                 className="px-4 py-2.5 text-right font-mono text-success"

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef, useSyncExternalStore
 import { useLocale, useTranslations } from "next-intl";
 import Button from "./Button";
 import Card from "./Card";
+import CachedInputTokens from "./CachedInputTokens";
 import Icon from "./Icon";
 import { CardSkeleton } from "./Loading";
 import { fmtCompact as fmt, fmtFull, fmtCost } from "@/shared/utils/formatting";
@@ -354,6 +355,9 @@ export default function UsageAnalytics() {
             tokenDisplayMode === "exact" ? `~${fmt(s.promptTokens)}` : fmtFull(s.promptTokens)
           }
           color="text-primary"
+          subValue={
+            <CachedInputTokens value={s.cachedInputTokens} complete={s.cachedInputTokensComplete} />
+          }
         />
         <StatCard
           icon="output"
