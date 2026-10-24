@@ -1,5 +1,10 @@
 # ── Common base with runtime deps ──────────────────────────────────────────
-FROM node:26-trixie-slim AS base
+# Pinned to a patch release (Dependabot bumps it) instead of the floating `26-trixie-slim`
+# tag: the floating tag let v3.8.52 ship with node 26.12.0, whose bundled root store still
+# trusts the compromised eMudhra intermediates (https://emudhra.we-have-a-problem.com/).
+# 26.12.1 is the first 26.x that rejects them; tests/unit/build/docker-ca-baseline.test.mjs
+# keeps it from going below that.
+FROM node:26.12.1-trixie-slim AS base
 WORKDIR /app
 
 # Mirrors for builders whose network cannot reach the default sources
