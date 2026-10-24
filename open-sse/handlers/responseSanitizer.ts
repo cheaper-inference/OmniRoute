@@ -2,6 +2,7 @@ import {
   copyOpenAICompatibleReasoningFields,
   getReadableReasoningValue,
 } from "../utils/reasoningFields.ts";
+import { hasDotsToolCalls, parseDotsToolCalls, stripDotsToolCallBlocks } from "../utils/dotsToolCalls.ts";
 import { stripInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
 import { normalizeOpenAICompatibleFinishReason } from "../utils/finishReason.ts";
 import {
@@ -373,7 +374,7 @@ function sanitizeChoice(
 
 function sanitizeMessageContent(msgRecord: JsonRecord, options: ParseOptions = {}): JsonRecord {
   if (typeof msgRecord.content === "string") {
-    const strippedContent = stripInternalReasoningPlaceholder(
+    let strippedContent = stripInternalReasoningPlaceholder(
       stripInternalToolEnvelopeText(msgRecord.content)
     );
     const nativeReasoning = getReadableReasoningValue(msgRecord);
@@ -419,7 +420,26 @@ function sanitizeMessage(msg: unknown, options: ParseOptions = {}): unknown {
 
   Object.assign(sanitized, sanitizeMessageContent(msgRecord, options));
 
+  // Dots Studio tool-call markup in content (OpenAI leg)
+  if (typeof sanitized.content === "string" && hasDotsToolCalls(sanitized.content)) {
+    const dotsResult = parseDotsToolCalls(sanitized.content);
+    if (dotsResult.toolCalls.length > 0 && !msgRecord.tool_calls && !sanitized.tool_calls) {
+      sanitized.content = dotsResult.content || null;
+      sanitized.tool_calls = dotsResult.toolCalls;
+      sanitized.finish_reason = "tool_calls";
+    } else if (dotsResult.content !== sanitized.content) {
+      sanitized.content = dotsResult.content || null;
+    }
+  }
+
   copyOpenAICompatibleReasoningFields(msgRecord, sanitized);
+  // Scrub dots blocks from reasoning fields if present
+  if (typeof sanitized.reasoning_content === "string") {
+    sanitized.reasoning_content = stripDotsToolCallBlocks(sanitized.reasoning_content);
+  }
+  if (typeof (sanitized as any).reasoning === "string") {
+    (sanitized as any).reasoning = stripDotsToolCallBlocks((sanitized as any).reasoning);
+  }
   applyTextualToolCallSanitization(sanitized, msgRecord);
 
   if (msgRecord.tool_calls) {

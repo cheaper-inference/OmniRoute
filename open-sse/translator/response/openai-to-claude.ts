@@ -17,6 +17,7 @@ import { restoreDeclaredToolName } from "../../services/declaredToolCasing.ts";
 import { sanitizeToolId } from "../helpers/schemaCoercion.ts";
 import { splitMarkdownBoundary } from "../helpers/markdownBoundary.ts";
 import { hasDsmlToolCalls, parseDsmlToolCalls } from "../../utils/dsmlToolCalls.ts";
+import { hasDotsToolCalls, parseDotsToolCalls } from "../../utils/dotsToolCalls.ts";
 import {
   createDirectivePreambleStripper,
   createSystemPreambleStripper,
@@ -540,6 +541,7 @@ export function openaiToClaudeResponse(chunk, state) {
     state._pendingXmlToolCalls = [];
     state._dsmlHoldback = undefined;
     state._xmlInvokeBuffer = "";
+    state._dotsHoldback = undefined;
     state._markdownBuffer = "";
     state._markdownCodeSpanRun = 0;
     state._markdownTrailingBackslash = false;
@@ -718,18 +720,39 @@ export function openaiToClaudeResponse(chunk, state) {
         }));
       }
 
+      // Dots Studio <dots_function_call> markup
+      let dotsContent = dsmlContent;
+      const dotsPending = state._dotsHoldback;
+      if (dotsPending) {
+        dotsContent = dotsPending + dotsContent;
+        state._dotsHoldback = undefined;
+      }
+      let dotsToolCalls: { id: string; name: string; args: Record<string, string> }[] = [];
+      if (hasDotsToolCalls(dotsContent)) {
+        const dotsResult = parseDotsToolCalls(dotsContent, { tools: state.clientTools });
+        dotsContent = dotsResult.content;
+        if (dotsResult.holdback) {
+          state._dotsHoldback = dotsResult.holdback;
+        }
+        dotsToolCalls = dotsResult.toolCalls.map((tc) => ({
+          id: tc.id,
+          name: tc.function.name,
+          args: JSON.parse(tc.function.arguments) as Record<string, string>,
+        }));
+      }
+
       // Check for XML <invoke> blocks that some models emit instead of JSON tool_calls
       const { cleaned, toolCalls: xmlToolCalls } = extractXmlInvokeBlocks(
-        bufferedPrefix + dsmlContent,
+        bufferedPrefix + dotsContent,
         state
       );
 
-      // Accumulate extracted tool calls for emission at finish. DSML and XML
+      // Accumulate extracted tool calls for emission at finish. DSML, Dots, and XML
       // invoke tool calls share the same pending queue and finish emission.
-      if (xmlToolCalls.length > 0 || dsmlToolCalls.length > 0) {
+      if (xmlToolCalls.length > 0 || dsmlToolCalls.length > 0 || dotsToolCalls.length > 0) {
         // Close any ongoing text block before tool calls
         stopTextBlock(state, results);
-        state._pendingXmlToolCalls.push(...xmlToolCalls, ...dsmlToolCalls);
+        state._pendingXmlToolCalls.push(...xmlToolCalls, ...dsmlToolCalls, ...dotsToolCalls);
       }
 
       // Defer any trailing incomplete Markdown boundary token to the next chunk.
@@ -876,15 +899,17 @@ export function openaiToClaudeResponse(chunk, state) {
     // dropped the held text silently — for a single-chunk response whose block
     // never closes, that is the ENTIRE answer replaced by an empty message.
     // Release whatever is still held before the terminal blocks are emitted.
-    // The same goes for an unclosed <invoke>/<tool_call> tag and the DSML holdback:
+    // The same goes for an unclosed <invoke>/<tool_call> tag and the DSML/Dots holdback:
     // no further chunk can complete them, so they were prose and must reach the client.
     const flushedPreamble =
       (state._directiveStripper?.flush?.() ?? "") +
       (state._systemPreambleStripper?.flush?.() ?? "") +
       (state._xmlInvokeBuffer ?? "") +
-      (state._dsmlHoldback ?? "");
+      (state._dsmlHoldback ?? "") +
+      (state._dotsHoldback ?? "");
     state._xmlInvokeBuffer = "";
     state._dsmlHoldback = undefined;
+    state._dotsHoldback = undefined;
     if (flushedPreamble) {
       if (!state.textBlockStarted || state.textBlockClosed) {
         state.textBlockIndex = state.nextBlockIndex++;
