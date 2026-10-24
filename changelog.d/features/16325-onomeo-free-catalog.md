@@ -1,0 +1,1 @@
+- Provider: onomeo (19 free models: auto, DeepSeek V4/V4.1 Flash, GLM 5.2/5.3/4.5/4.6v/4.7 Flash, Gemini 3.1/3.5/3.6/3.7/3.8 Flash, GPT-OSS 20B, Muse Glimmer 30B, Codestral, Mistral 14B, HY4 Preview) — 30 calls per 5-hour window that refill automatically, no card required ([#16318](https://github.com/diegosouzapw/OmniRoute/issues/16318)).
