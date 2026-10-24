@@ -6630,7 +6630,8 @@
       "codex": "Συνδέστε το OpenAI Codex με την υπάρχουσα ροή OAuth.",
       "qwen": "Συνδέστε το Qwen Code με την υπάρχουσα ροή OAuth.",
       "github-models": "Δημιουργήστε ένα GitHub PAT με εμβέλεια 'models: read' στο github.com/settings/tokens",
-      "apmix": "Συνδέστε το Apmix με κλειδί API από το apmix.ai/dashboard — μία συνδρομή, πολλά μοντέλα."
+      "apmix": "Συνδέστε το Apmix με κλειδί API από το apmix.ai/dashboard — μία συνδρομή, πολλά μοντέλα.",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "Το {provider} δέχεται εγγενή αναγνωριστικά μοντέλων του παρόχου. Εισαγάγετε τα από το /models ή προσθέστε προσαρμοσμένα αναγνωριστικά για δρομολόγηση.",
     "bedrockModelsDescription": "Τα μοντέλα Amazon Bedrock ορίζονται ανά περιοχή AWS. Εισαγάγετε από το /models ή προσθέστε αναγνωριστικά μοντέλων Bedrock που είναι ενεργοποιημένα στην επιλεγμένη περιοχή.",
@@ -9479,7 +9480,11 @@
     "mappingInvalidJson": "Μη έγκυρο JSON.",
     "mappingMustBeObject": "Η αντιστοίχιση πρέπει να είναι αντικείμενο JSON, όχι πίνακας ή απλή τιμή.",
     "mappingValueMustBeString": "Η τιμή για το κλειδί «{key}» πρέπει να είναι συμβολοσειρά.",
-    "save": "Αποθήκευση"
+    "save": "Αποθήκευση",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). OmniRoute starts it on demand when the URL is a loopback address and nothing is listening yet; the CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

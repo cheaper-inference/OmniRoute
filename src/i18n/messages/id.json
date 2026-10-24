@@ -6630,7 +6630,8 @@
       "codex": "Hubungkan OpenAI Codex dengan alur OAuth yang ada.",
       "qwen": "Hubungkan Qwen Code dengan alur OAuth yang ada.",
       "github-models": "Buat GitHub PAT dengan cakupan 'models: read' di github.com/settings/tokens",
-      "apmix": "Hubungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model."
+      "apmix": "Hubungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model.",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} menerima ID model asli penyedia. Impor dari /models atau tambahkan ID khusus untuk perutean.",
     "bedrockModelsDescription": "Model Amazon Bedrock dicakup berdasarkan wilayah AWS. Impor dari /models atau tambahkan ID model Batuan Dasar yang diaktifkan di wilayah yang dipilih.",
@@ -9479,7 +9480,11 @@
     "mappingInvalidJson": "JSON tidak valid.",
     "mappingMustBeObject": "Pemetaan harus berupa objek JSON, bukan array atau nilai primitif.",
     "mappingValueMustBeString": "Nilai untuk kunci “{key}” harus berupa string.",
-    "save": "Simpan"
+    "save": "Simpan",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). OmniRoute starts it on demand when the URL is a loopback address and nothing is listening yet; the CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Mesin Caveman",

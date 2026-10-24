@@ -23,6 +23,7 @@ import {
 } from "@/lib/db/upstreamProxy";
 import { getProviderConnections } from "@/lib/db/providers";
 import { clearCliproxyapiUrlCache } from "@omniroute/open-sse/executors/cliproxyapi.ts";
+import { clearOpencodeServerSettingsCache } from "@omniroute/open-sse/services/opencodeServerSettings.ts";
 import {
   ensurePersistentManagementPasswordHash,
   getStoredManagementPassword,
@@ -477,6 +478,25 @@ export async function PATCH(request: Request) {
       }
       // Invalidate the executor's URL cache so it picks up the new URL immediately
       clearCliproxyapiUrlCache();
+    }
+
+    // Same for the opencode server: its executor caches the settings snapshot for
+    // 60s, so without this an operator edit (including clearing the URL back to
+    // the default) would not apply until the TTL expired. Only the URL is a
+    // setting; the CLI binary is env-only (see services/opencodeServerSettings.ts).
+    const ocsUrl = rawBody.opencode_server_url as string | undefined;
+    if (ocsUrl !== undefined && typeof ocsUrl === "string") {
+      if (ocsUrl.trim() !== "") {
+        const urlValidation = validateProxyUrl(ocsUrl.trim());
+        if (urlValidation.valid === false) {
+          emitSettingsFailureAudit(request, actor, "OPENCODE_SERVER_URL_INVALID", attemptedKeys);
+          return NextResponse.json(
+            { error: `Invalid opencode server URL: ${urlValidation.error}` },
+            { status: 400 }
+          );
+        }
+      }
+      clearOpencodeServerSettingsCache();
     }
 
     const cpaModelMapping = rawBody.cliproxyapi_model_mapping as Record<string, string> | undefined;

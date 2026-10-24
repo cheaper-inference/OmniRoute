@@ -75,6 +75,11 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   fb: () => import("./freebuff.ts").then((m) => new m.FreebuffExecutor()), // Alias
   "opencode-zen": () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-zen")),
   "opencode-go": () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-go")),
+  // Local headless server of the opencode CLI (`opencode serve`). Speaks
+  // session/parts, not the OpenAI wire format, so it needs its own executor;
+  // there is no OpenAI-compatible endpoint to point a generic node at.
+  "opencode-server": () =>
+    import("./opencodeServer.ts").then((m) => new m.OpencodeServerExecutor()),
   vertex: () => import("./vertex.ts").then((m) => new m.VertexExecutor()),
   "vertex-partner": () => import("./vertex.ts").then((m) => new m.VertexExecutor()),
   cliproxyapi: () => import("./cliproxyapi.ts").then((m) => new m.CliproxyapiExecutor()),

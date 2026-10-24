@@ -6630,7 +6630,8 @@
       "codex": "Pripojte OpenAI Codex pomocou existujúceho toku OAuth.",
       "qwen": "Pripojte Qwen Code pomocou existujúceho toku OAuth.",
       "github-models": "Vytvorte si GitHub PAT s rozsahom 'models: read' na adrese github.com/settings/tokens",
-      "apmix": "Pripojte Apmix pomocou API kľúča z apmix.ai/dashboard — jedno predplatné, mnoho modelov."
+      "apmix": "Pripojte Apmix pomocou API kľúča z apmix.ai/dashboard — jedno predplatné, mnoho modelov.",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} akceptuje ID modelu natívneho poskytovateľa. Importujte z /models alebo pridajte vlastné ID pre smerovanie.",
     "bedrockModelsDescription": "Modely Amazon Bedrock sú vymedzené podľa regiónu AWS. Importovať z /models alebo pridať ID modelu Bedrock povolené vo vybranom regióne.",
@@ -9479,7 +9480,11 @@
     "mappingInvalidJson": "Neplatný formát JSON.",
     "mappingMustBeObject": "Mapovanie musí byť objekt JSON, nie pole alebo primitívna hodnota.",
     "mappingValueMustBeString": "Hodnota pre kľúč „{key}“ musí byť reťazec.",
-    "save": "Uložiť"
+    "save": "Uložiť",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). OmniRoute starts it on demand when the URL is a loopback address and nothing is listening yet; the CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Mechanizmus Caveman",

@@ -6637,7 +6637,8 @@
       "codex": "පවතින OAuth ප්රවාහය සමඟ OpenAI Codex සම්බන්ධ කරන්න.",
       "qwen": "පවතින OAuth ප්රවාහය සමඟ Qwen Code සම්බන්ධ කරන්න.",
       "github-models": "github.com/settings/tokens හි 'models: read' scope එක සහිත GitHub PAT එකක් සාදන්න",
-      "apmix": "apmix.ai/dashboard වෙතින් API යතුරක් සමඟ Apmix සම්බන්ධ කරන්න — එක් දායකත්වයක්, බොහෝ ආකෘති."
+      "apmix": "apmix.ai/dashboard වෙතින් API යතුරක් සමඟ Apmix සම්බන්ධ කරන්න — එක් දායකත්වයක්, බොහෝ ආකෘති.",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} සපයන්නා provider-native model IDs පිළිගනී. /models වෙතින් ආයාත කරන්න හෝ මාර්ගගත කිරීම සඳහා අභිරුචි IDs එක් කරන්න.",
     "bedrockModelsDescription": "Amazon Bedrock models AWS කලාපය අනුව සීමා වේ. /models වෙතින් ආයාත කරන්න හෝ තෝරාගත් කලාපයේ සක්රීය කර ඇති Bedrock model IDs එක් කරන්න.",
@@ -9479,7 +9480,11 @@
     "mappingInvalidJson": "වලංගු නොවන JSON.",
     "mappingMustBeObject": "සිතියම්ගත කිරීම අරාවක් හෝ ප්රාථමික අගයක් නොව, JSON වස්තුවක් විය යුතුය.",
     "mappingValueMustBeString": "“{key}” යතුර සඳහා වන අගය පෙළක් විය යුතුය.",
-    "save": "සුරකින්න"
+    "save": "සුරකින්න",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). OmniRoute starts it on demand when the URL is a loopback address and nothing is listening yet; the CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman එන්ජිම",

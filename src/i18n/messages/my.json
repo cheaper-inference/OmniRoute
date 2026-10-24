@@ -6637,7 +6637,8 @@
       "codex": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် OpenAI Codex ကို ချိတ်ဆက်ပါ။",
       "qwen": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် Qwen Code ကို ချိတ်ဆက်ပါ။",
       "github-models": "github.com/settings/tokens တွင် 'models: read' scope ပါဝင်သည့် GitHub PAT တစ်ခု ဖန်တီးပါ",
-      "apmix": "apmix.ai/dashboard မှ API key ဖြင့် Apmix ကို ချိတ်ဆက်ပါ — စာရင်းသွင်းမှုတစ်ခု၊ မော်ဒယ်များစွာ။"
+      "apmix": "apmix.ai/dashboard မှ API key ဖြင့် Apmix ကို ချိတ်ဆက်ပါ — စာရင်းသွင်းမှုတစ်ခု၊ မော်ဒယ်များစွာ။",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} သည် provider-native model IDs များကို လက်ခံသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် routing အတွက် စိတ်ကြိုက် IDs များ ထည့်ပါ။",
     "bedrockModelsDescription": "Amazon Bedrock မော်ဒယ်များကို AWS region အလိုက် ကန့်သတ်ထားသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် ရွေးချယ်ထားသည့် region တွင် ဖွင့်ထားသော Bedrock model IDs များ ထည့်ပါ။",
@@ -9479,7 +9480,11 @@
     "mappingInvalidJson": "JSON မမှန်ကန်ပါ။",
     "mappingMustBeObject": "ချိတ်ဆက်သတ်မှတ်မှုသည် array သို့မဟုတ် primitive value မဟုတ်ဘဲ JSON object ဖြစ်ရမည်။",
     "mappingValueMustBeString": "“{key}” key အတွက် value သည် string ဖြစ်ရမည်။",
-    "save": "သိမ်းဆည်းရန်"
+    "save": "သိမ်းဆည်းရန်",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). OmniRoute starts it on demand when the URL is a loopback address and nothing is listening yet; the CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

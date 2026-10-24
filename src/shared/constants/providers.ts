@@ -252,6 +252,7 @@ export const SELF_HOSTED_CHAT_PROVIDER_IDS = new Set([
   "docker-model-runner",
   "xinference",
   "oobabooga",
+  "opencode-server",
 ]);
 
 export function isSelfHostedChatProvider(providerId: unknown): boolean {

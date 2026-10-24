@@ -6630,7 +6630,8 @@
       "codex": "বিদ্যমান OAuth ফ্লো-এর সাথে OpenAI Codex সংযুক্ত করুন।",
       "qwen": "বিদ্যমান OAuth ফ্লো-এর সাথে Qwen Code সংযুক্ত করুন।",
       "github-models": "github.com/settings/tokens-এ 'models: read' স্কোপ সহ একটি GitHub PAT তৈরি করুন",
-      "apmix": "apmix.ai/dashboard থেকে API কী দিয়ে Apmix সংযোগ করুন — একটি সাবস্ক্রিপশন, অনেক মডেল।"
+      "apmix": "apmix.ai/dashboard থেকে API কী দিয়ে Apmix সংযোগ করুন — একটি সাবস্ক্রিপশন, অনেক মডেল।",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} প্রদানকারী-নেটিভ মডেল আইডি গ্রহণ করে। /মডেল থেকে আমদানি করুন বা রাউটিং এর জন্য কাস্টম আইডি যোগ করুন।",
     "bedrockModelsDescription": "অ্যামাজন বেডরক মডেলগুলি AWS অঞ্চল দ্বারা স্কোপ করা হয়েছে৷ /মডেল থেকে আমদানি করুন বা নির্বাচিত অঞ্চলে সক্ষম বেডরক মডেল আইডি যোগ করুন।",
@@ -9479,7 +9480,11 @@
     "mappingInvalidJson": "অকার্যকর JSON।",
     "mappingMustBeObject": "ম্যাপিংটি অবশ্যই একটি JSON অবজেক্ট হতে হবে, কোনো অ্যারে বা প্রিমিটিভ মান নয়।",
     "mappingValueMustBeString": "“{key}” কী-এর মান অবশ্যই একটি স্ট্রিং হতে হবে।",
-    "save": "সংরক্ষণ করুন"
+    "save": "সংরক্ষণ করুন",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). OmniRoute starts it on demand when the URL is a loopback address and nothing is listening yet; the CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman Engine",

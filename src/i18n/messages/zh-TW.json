@@ -6630,7 +6630,8 @@
       "codex": "使用現有的 OAuth 流程連線 OpenAI Codex。",
       "qwen": "使用現有的 OAuth 流程連線 Qwen Code。",
       "github-models": "在 github.com/settings/tokens 建立具有 'models: read' 範圍的 GitHub PAT",
-      "apmix": "使用來自 apmix.ai/dashboard 的 API 金鑰連接 Apmix — 一份訂閱，多個模型。"
+      "apmix": "使用來自 apmix.ai/dashboard 的 API 金鑰連接 Apmix — 一份訂閱，多個模型。",
+      "opencode-server": "Route requests through the opencode CLI local server, which uses your opencode account and free models."
     },
     "passthroughModelsDescription": "{provider} 接受提供者本機模型 ID。從 /models 匯入或新增用於路由的自定義 ID。",
     "bedrockModelsDescription": "Amazon Bedrock 模型的範圍按 AWS 區域劃分。從 /models 匯入或新增在所選區域中啟用的基岩模型 ID。",
@@ -9479,7 +9480,11 @@
     "mappingInvalidJson": "無效的 JSON。",
     "mappingMustBeObject": "對應必須是 JSON 物件，而非陣列或基本型別值。",
     "mappingValueMustBeString": "金鑰「{key}」的值必須是字串。",
-    "save": "儲存"
+    "save": "儲存",
+    "opencodeServerConnection": "OpenCode CLI Server",
+    "opencodeServerConnectionDescription": "Address of the opencode CLI headless server (opencode serve). OmniRoute starts it on demand when the URL is a loopback address and nothing is listening yet; the CLI binary comes from OPENCODE_SERVER_BIN or the usual install locations. Leave empty for the default.",
+    "opencodeServerUrl": "Server URL",
+    "opencodeServerUrlHint": "Base address of the opencode server. Default http://127.0.0.1:4096."
   },
   "contextCaveman": {
     "title": "Caveman 引擎",
