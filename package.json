@@ -361,7 +361,7 @@
     "commander": "^15.0.0",
     "cron-parser": "^5.10.0",
     "csv-stringify": "^6.8.3",
-    "dompurify": "^3.4.14",
+    "dompurify": "^3.4.17",
     "express": "^5.2.1",
     "fetch-socks": "^1.3.3",
     "fflate": "^0.8.3",
@@ -542,7 +542,7 @@
     "fast-xml-parser": "^5.10.1",
     "sharp": "^0.35.5",
     "postcss": "^8.5.18",
-    "ip-address": "^10.7.2",
+    "ip-address": "^10.7.4",
     "axios": "^1.20.0",
     "qs": "^6.16.0",
     "uuid": "^14.0.2",
@@ -605,7 +605,7 @@
     },
     "nanoid": "^3.3.17",
     "monaco-editor": {
-      "dompurify": "^3.4.14"
+      "dompurify": "^3.4.17"
     },
     "csv-parse": "^7.0.2"
   }

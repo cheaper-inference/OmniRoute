@@ -1,0 +1,1 @@
+- **deps(security):** bump `dompurify` to `^3.4.17` (direct dependency and the `monaco-editor` override) and the `ip-address` override to `^10.7.4`, picking up the upstream fixes for DOMPurify's `SAFE_FOR_TEMPLATES`, `IN_PLACE` and SMIL `href` sanitization bypasses and for `ip-address`'s quadratic-time zone-identifier match. Lockfile-only change; no source changes.
