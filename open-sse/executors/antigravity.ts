@@ -623,10 +623,14 @@ export class AntigravityExecutor extends BaseExecutor {
 
   buildHeaders(credentials: AntigravityCredentials, _stream = true): Record<string, string> {
     const clientProfile = getAntigravityClientProfile(credentials);
-    const raw = {
+    const raw: Record<string, string> = {
       ...getAntigravityContentHeaders(clientProfile, credentials.accessToken),
-      Accept: "text/event-stream",
     };
+    // The native Go CLI requests SSE through `?alt=sse` alone and sends no Accept header;
+    // only the IDE/Electron profile advertises `text/event-stream`.
+    if (clientProfile !== "cli") {
+      raw.Accept = "text/event-stream";
+    }
     // Scrub proxy/fingerprint headers that reveal non-native traffic
     return scrubProxyAndFingerprintHeaders(raw);
   }

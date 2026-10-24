@@ -824,7 +824,7 @@ async function getAntigravitySubscriptionInfo(
     const response = await fetch(ANTIGRAVITY_CONFIG.loadProjectApiUrl, {
       method: "POST",
       headers: getAntigravityContentHeaders(profile, accessToken),
-      body: JSON.stringify({ metadata: getAntigravityLoadCodeAssistMetadata() }),
+      body: JSON.stringify({ metadata: getAntigravityLoadCodeAssistMetadata(profile) }),
     });
 
     if (!response.ok) return null;
