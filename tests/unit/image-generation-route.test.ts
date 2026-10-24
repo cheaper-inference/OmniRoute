@@ -220,11 +220,9 @@ test("v1 image models GET exposes image-only modalities for credential-backed im
 
 test("v1 image models GET exposes current Codex image models and hides inactive providers", async () => {
   await seedConnection("codex", { apiKey: "codex-key" });
-
   const response = await imageRoute.GET();
   const body = (await response.json()) as { data: Array<{ id: string }> };
   const ids = body.data.map((item) => item.id);
-
   assert.equal(response.status, 200);
   assert.deepEqual(
     ids.filter((id) => id.startsWith("codex/")),
@@ -232,6 +230,7 @@ test("v1 image models GET exposes current Codex image models and hides inactive 
       "codex/gpt-5.6-sol-image",
       "codex/gpt-5.6-terra-image",
       "codex/gpt-5.6-luna-image",
+      "codex/gpt-6.1-sol-image",
       "codex/gpt-image-2.5-flare",
       "codex/gpt-image-2.5-sunburst",
       "codex/gpt-image-2",
