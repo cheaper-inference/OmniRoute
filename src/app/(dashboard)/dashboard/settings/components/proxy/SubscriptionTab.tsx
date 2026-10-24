@@ -182,6 +182,24 @@ async function fetchSubscriptionsResult(
   }
 }
 
+/** Subscription creation/update payload from the edited form. Pure. */
+function buildSubscriptionPayload(form: FormState): Record<string, unknown> {
+  const payload: Record<string, unknown> = {
+    name: form.name.trim(),
+    url: form.url.trim(),
+    mode: form.mode,
+    ruleProviders: form.mode === "rule" ? form.ruleProviders : null,
+    localCoreEndpoint: form.localCoreEndpoint.trim() || null,
+    controlUrl: form.controlUrl.trim() || null,
+    coreConfigPath: form.coreConfigPath.trim() || null,
+    selectorMinGapSeconds: Number(form.selectorMinGapSeconds) || 60,
+    updateIntervalMinutes: Number(form.updateIntervalMinutes) || 60,
+    enabled: form.enabled,
+  };
+  if (form.controlSecret.length > 0) payload.controlSecret = form.controlSecret;
+  return payload;
+}
+
 type EarlyReasonLabelKey =
   | "proxySubscription.earlySkipsSinceRestart"
   | "proxySubscription.error.SELECTOR_EARLY_NO_CONTROL"
@@ -357,19 +375,15 @@ export default function SubscriptionTab() {
     if (Object.keys(nextFieldErrors).length > 0) return;
     setSaving(true);
     try {
-      const payload: Record<string, unknown> = {
-        name: form.name.trim(),
-        url: form.url.trim(),
-        mode: form.mode,
-        ruleProviders: form.mode === "rule" ? form.ruleProviders : null,
-        localCoreEndpoint: form.localCoreEndpoint.trim() || null,
-        controlUrl: form.controlUrl.trim() || null,
-        coreConfigPath: form.coreConfigPath.trim() || null,
-        selectorMinGapSeconds: Number(form.selectorMinGapSeconds) || 60,
-        updateIntervalMinutes: Number(form.updateIntervalMinutes) || 60,
-        enabled: form.enabled,
-      };
-      if (form.controlSecret.length > 0) payload.controlSecret = form.controlSecret;
+      if (!form.name.trim()) throw new Error(t("proxySubscription.nameRequired"));
+      // Mirror of requireNameUrl (server): a feedless subscription carries no
+      // URL and is accepted only with a control URL.
+      if (!form.url.trim() && !form.controlUrl.trim())
+        throw new Error(t("proxySubscription.urlRequired"));
+      if (form.mode === "rule" && form.ruleProviders.length === 0) {
+        throw new Error(t("proxySubscription.ruleModeProviderRequired"));
+      }
+      const payload = buildSubscriptionPayload(form);
       const res = editingId
         ? await fetch(`/api/v1/management/proxy-subscriptions/${editingId}`, {
             method: "PATCH",
@@ -529,6 +543,9 @@ export default function SubscriptionTab() {
                 placeholder={t("proxySubscription.urlPlaceholder")}
                 error={fieldErrors.url}
               />
+              <span className="text-xs text-text-muted">
+                {t("proxySubscription.urlFeedlessHint")}
+              </span>
             </div>
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
