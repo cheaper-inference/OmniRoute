@@ -103,26 +103,16 @@ Read the nearest `AGENTS.md` and the linked deep-dive before making a non-trivia
 
 ## File placement & repo-root hygiene
 
-- **Test files**: ALL unit tests, integration tests, ecosystem tests, or Vitest files MUST strictly be placed within the `tests/` directory (e.g., `tests/unit/`, `tests/integration/`). NEVER create test files in the project root (`/`).
-- **Scripts and utilities**: ALL maintenance, debugging, generation, or experimental scripts (`.cjs`, `.mjs`, `.js`, `.ts`) MUST be placed strictly inside one of the `scripts/` subfolders (`build/`, `dev/`, `check/`, `docs/`, `i18n/`, `ad-hoc/`, `quality/`, `release/`, `ci/`, `ops/`, `perf/`, `research/`, `sre/`, `vps/`, `homolog/`, `packs/`, `skills/`, `test/`, `cli/`, `compression/`, `compression-eval/`, `devin-bridge/`, `docker/`, `features/`, `router-eval/`). One-shot or experimental code goes under `scripts/ad-hoc/`. NEVER dump loose scripts in the project root (`/`) or the top-level `scripts/` folder.
+- **Test files**: Place all tests within `tests/` (`tests/unit/`, `tests/integration/`), never in project root
+- **Scripts**: Place all scripts (`.cjs`, `.mjs`, `.js`, `.ts`) inside `scripts/` subfolders — one-shot code goes under `scripts/ad-hoc/`
 
-**The project root MUST ONLY contain:**
+**Project root contains only:**
+- Config: `vitest.config.ts`, `next.config.mjs`, `eslint.config.mjs`, `tsconfig*.json`, `playwright.config.ts`, `prettier.config.mjs`, `postcss.config.mjs`, `sonar-project.properties`, `fly.toml`, `docker-compose*.yml`, `Dockerfile`
+- Dependencies: `package.json`, `package-lock.json`
+- Docs: `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `LICENSE`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `llm.txt`
+- CI/CD: `.gitignore`, `.dockerignore`, `.npmignore`, `.npmrc`, `.node-version`, `.nvmrc`, `.env.example`
 
-- Configuration files (`vitest.config.ts`, `next.config.mjs`, `eslint.config.mjs`, `tsconfig*.json`, `playwright.config.ts`, `prettier.config.mjs`, `postcss.config.mjs`, `sonar-project.properties`, `fly.toml`, `docker-compose*.yml`, `Dockerfile`)
-- Dependency files (`package.json`, `package-lock.json`)
-- Documentation files (`README.md`, `CHANGELOG.md`, `ROADMAP.md`, `LICENSE`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `llm.txt`)
-- CI/CD files and ignore definitions (`.gitignore`, `.dockerignore`, `.npmignore`, `.npmrc`, `.node-version`, `.nvmrc`, `.env.example`)
-
-When creating _any_ validation tests or one-off logic scripts, default to `scripts/ad-hoc/` or `tests/unit/` according to your goals. Do not pollute the `/` root context.
-
-- **Root `_*` paths are private and NEVER tracked** (`_tasks/`, `_references/`, `_mono_repo/`,
-  `_ideia/`, `_cache/` and any future `_<name>`): they live on disk only, are gitignored by the
-  anchored patterns `/_*/` + `/_*`, and some are full git repositories of their own (`_tasks` →
-  private remote `_tasks_omniroute`). Never `git add` anything inside them (a plain `add` is
-  already blocked by the ignore; never use `-f`), and never "clean them up" from the main repo —
-  untracking is done with `git rm --cached` so the disk content stays. The
-  `check:tracked-artifacts` gate (pre-commit + CI) fails on ANY tracked root path starting with
-  `_`, present or future. See Hard Rule #23 for the `_tasks` specifics.
+**Root `_*` paths are private and never tracked** (`_tasks/`, `_references/`, `_mono_repo/`, `_ideia/`, `_cache/`): gitignored by `/_*/` + `/_*`, some are separate git repos. `check:tracked-artifacts` gate blocks ANY tracked `_*` path. See Hard Rule #23.
 
 ---
 
@@ -130,11 +120,11 @@ When creating _any_ validation tests or one-off logic scripts, default to `scrip
 
 ### Code Style
 
-- **2 spaces**, semicolons, double quotes, 100 char width, es5 trailing commas (enforced by lint-staged via Prettier) — run Prettier on changed files
+- **2 spaces**, semicolons, double quotes, 100 char width, es5 trailing commas (Prettier via lint-staged)
 - **Imports**: external → internal (`@/`, `@omniroute/open-sse`) → relative
 - **Naming**: files=camelCase/kebab, components=PascalCase, constants=UPPER_SNAKE
-- **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = error everywhere; `no-explicit-any` = **error** in `open-sse/` and `tests/` (since #6218 — pre-existing violations are frozen in `config/quality/eslint-suppressions.json`, new ones must be fixed; `npm run lint` applies the suppressions and is what CI runs)
-- **TypeScript**: `strict: false`, target ES2022, module esnext, resolution bundler. Prefer explicit types.
+- **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = error; `no-explicit-any` = error in `open-sse/` and `tests/` (pre-existing frozen in `config/quality/eslint-suppressions.json`)
+- **TypeScript**: `strict: false`, target ES2022, module esnext, resolution bundler
 
 ### Database
 
@@ -212,7 +202,7 @@ For any non-trivial change, read the matching deep-dive first:
 - API reference + OpenAPI — `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` · Provider catalog (auto-generated) — `docs/reference/PROVIDER_REFERENCE.md`
 - Tunnels — `docs/ops/TUNNELS_GUIDE.md` · Release flow — `docs/ops/RELEASE_CHECKLIST.md` · Worktree protocol — `docs/ops/WORKTREE_ISOLATION.md` · Hard Rules detail — `docs/ops/HARD_RULES_DETAIL.md` · Build warnings + Bun troubleshooting — `docs/ops/BUILD_WARNINGS.md`
 - Electron desktop app — `docs/guides/ELECTRON_GUIDE.md` · VS Code Copilot Chat (OmniCopilot extension) — `docs/guides/VSCODE-COPILOT.md`
-- Embedded services — `docs/frameworks/EMBEDDED-SERVICES.md` · Quality gates (~90 scripts, allowlist policy) — `docs/architecture/QUALITY_GATES.md`
+- Embedded services — `docs/frameworks/EMBEDDED-SERVICES.md` · Quality gates (124 scripts, allowlist policy) — `docs/architecture/QUALITY_GATES.md`
 
 ---
 
@@ -353,7 +343,7 @@ This checkout is a fork of `diegosouzapw/OmniRoute`. Keep fork-only deployment a
 
 ## Quality Gates & Ratchets
 
-OmniRoute has **~90 quality-gate scripts** (`scripts/check/` + `scripts/quality/`) wired across **9 gate-running jobs** in `.github/workflows/ci.yml`, plus the `quality.yml` fast-gates job (PR→`release/**`) and 5 quality nightly workflows. Full inventory, per-job breakdown, and operational procedures: [`docs/architecture/QUALITY_GATES.md`](docs/architecture/QUALITY_GATES.md).
+OmniRoute has **124 quality-gate scripts** (`scripts/check/` + `scripts/quality/`) wired across **9 gate-running jobs** in `.github/workflows/ci.yml`, plus the `quality.yml` fast-gates job (PR→`release/**`) and 5 quality nightly workflows. Full inventory, per-job breakdown, and operational procedures: [`docs/architecture/QUALITY_GATES.md`](docs/architecture/QUALITY_GATES.md).
 
 **Quick reference:**
 
