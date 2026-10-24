@@ -1,0 +1,1 @@
+- **fix(sse):** stop duplicating streamed tool call arguments on credential transform flush — `flushOpenAiChoices` cloned `lastJson` which already contained emitted tool call fragments, causing `drainToolCalls` to re-emit the initial chunk before the tail ([#17300](https://github.com/diegosouzapw/OmniRoute/pull/17300)) — thanks @NabiBukhsh-AI

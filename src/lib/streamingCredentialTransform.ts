@@ -350,12 +350,7 @@ function drainToolCalls(
   choiceBuf: Record<FieldCategory, string>,
   toolEntries: Array<[string, Record<FieldCategory, string>]>
 ): void {
-  if (!choiceBuf.toolArgs && toolEntries.length === 0) {
-    delete delta.tool_calls;
-    return;
-  }
-  if (!delta.tool_calls) delta.tool_calls = [];
-  const toolCalls = delta.tool_calls as Array<Record<string, unknown>>;
+  const toolCalls: Array<Record<string, unknown>> = [];
   if (choiceBuf.toolArgs) {
     toolCalls.push({ index: 0, function: { arguments: choiceBuf.toolArgs } });
     choiceBuf.toolArgs = "";
@@ -365,6 +360,11 @@ function drainToolCalls(
     const toolIdx = parseInt(key.split("_")[1] || "0", 10);
     toolCalls.push({ index: toolIdx, function: { arguments: buf.toolArgs } });
     buf.toolArgs = "";
+  }
+  if (toolCalls.length > 0) {
+    delta.tool_calls = toolCalls;
+  } else {
+    delete delta.tool_calls;
   }
 }
 
@@ -376,6 +376,8 @@ function drainOneChoice(store: ChoiceBufferStore, choice: OpenAiChoice): void {
   const choiceBuf = store.get(`${choiceIdx}_0`);
   if (!choice.delta) choice.delta = {};
   const delta = choice.delta as Record<string, unknown>;
+  delete delta.role;
+  delete (choice as Record<string, unknown>).finish_reason;
   drainTextField(delta, "content", choiceBuf.content, () => {
     choiceBuf.content = "";
   });
@@ -386,6 +388,8 @@ function drainOneChoice(store: ChoiceBufferStore, choice: OpenAiChoice): void {
   if (choiceBuf.partialJson) {
     delta.partial_json = choiceBuf.partialJson;
     choiceBuf.partialJson = "";
+  } else {
+    delete delta.partial_json;
   }
 }
 

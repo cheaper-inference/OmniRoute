@@ -262,3 +262,192 @@ test("gate resolution honors the flag, the env fallback, and the opt-out", async
     else process.env.CREDENTIAL_REDACTION_ENABLED = original;
   }
 });
+
+test("streamed tool call arguments larger than window size are not duplicated (#17291)", async () => {
+  const toolArgs = JSON.stringify({ command: "echo " + "x".repeat(1500) });
+  const chunk1 =
+    "data: " +
+    JSON.stringify({
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [
+              {
+                index: 0,
+                id: "call_abc123",
+                type: "function",
+                function: { name: "terminal", arguments: toolArgs },
+              },
+            ],
+          },
+        },
+      ],
+    }) +
+    "\n\n";
+  const chunk2 = "data: [DONE]\n\n";
+
+  const output = await runTransform(createCredentialSseTransform({ windowSize: 512 }), [
+    chunk1,
+    chunk2,
+  ]);
+
+  const lines = output.split("\n").filter((l) => l.startsWith("data: ") && !l.includes("[DONE]"));
+  const receivedArgs: string[] = [];
+  for (const line of lines) {
+    const json = JSON.parse(line.slice(6));
+    const tc = json.choices?.[0]?.delta?.tool_calls;
+    if (tc) {
+      for (const t of tc) {
+        if (typeof t.function?.arguments === "string") {
+          receivedArgs.push(t.function.arguments);
+        }
+      }
+    }
+  }
+
+  const concatenated = receivedArgs.join("");
+  assert.equal(concatenated, toolArgs, "concatenated tool arguments must equal original arguments");
+  assert.doesNotThrow(() => JSON.parse(concatenated), "concatenated arguments must be valid JSON");
+});
+
+test("multi-chunk streamed tool call arguments with finish_reason are not duplicated (#17291)", async () => {
+  const part1 = '{"command":"set -u; ';
+  const part2 = "echo " + "y".repeat(1200) + '"}';
+  const expected = part1 + part2;
+
+  const chunk1 =
+    "data: " +
+    JSON.stringify({
+      choices: [
+        {
+          index: 0,
+          delta: {
+            role: "assistant",
+            tool_calls: [
+              {
+                index: 0,
+                id: "call_123",
+                type: "function",
+                function: { name: "terminal", arguments: part1 },
+              },
+            ],
+          },
+        },
+      ],
+    }) +
+    "\n\n";
+  const chunk2 =
+    "data: " +
+    JSON.stringify({
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [
+              {
+                index: 0,
+                function: { arguments: part2 },
+              },
+            ],
+          },
+        },
+      ],
+    }) +
+    "\n\n";
+  const chunk3 =
+    "data: " +
+    JSON.stringify({
+      choices: [
+        {
+          index: 0,
+          delta: {},
+          finish_reason: "tool_calls",
+        },
+      ],
+    }) +
+    "\n\n";
+  const chunk4 = "data: [DONE]\n\n";
+
+  const output = await runTransform(createCredentialSseTransform({ windowSize: 512 }), [
+    chunk1,
+    chunk2,
+    chunk3,
+    chunk4,
+  ]);
+
+  const lines = output.split("\n").filter((l) => l.startsWith("data: ") && !l.includes("[DONE]"));
+  const receivedArgs: string[] = [];
+  for (const line of lines) {
+    const json = JSON.parse(line.slice(6));
+    const tc = json.choices?.[0]?.delta?.tool_calls;
+    if (tc) {
+      for (const t of tc) {
+        if (typeof t.function?.arguments === "string") {
+          receivedArgs.push(t.function.arguments);
+        }
+      }
+    }
+  }
+
+  const concatenated = receivedArgs.join("");
+  assert.equal(concatenated, expected, "concatenated tool arguments must equal original arguments");
+  assert.doesNotThrow(() => JSON.parse(concatenated), "concatenated arguments must be valid JSON");
+});
+
+test("streamed tool call arguments carrying secrets are redacted without duplication (#17291)", async () => {
+  const secretPart = `echo ${OPENAI_KEY} && `;
+  const filler = "z".repeat(1200);
+  const toolArgs = JSON.stringify({ command: secretPart + filler });
+
+  const chunk1 =
+    "data: " +
+    JSON.stringify({
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [
+              {
+                index: 0,
+                function: { name: "terminal", arguments: toolArgs },
+              },
+            ],
+          },
+        },
+      ],
+    }) +
+    "\n\n";
+  const chunk2 = "data: [DONE]\n\n";
+
+  const output = await runTransform(createCredentialSseTransform({ windowSize: 512 }), [
+    chunk1,
+    chunk2,
+  ]);
+
+  assert.ok(!output.includes(OPENAI_KEY), "raw key must not leak in streamed tool call");
+  assert.match(output, /\[REDACTED:openai\]/);
+
+  const lines = output.split("\n").filter((l) => l.startsWith("data: ") && !l.includes("[DONE]"));
+  const receivedArgs: string[] = [];
+  for (const line of lines) {
+    const json = JSON.parse(line.slice(6));
+    const tc = json.choices?.[0]?.delta?.tool_calls;
+    if (tc) {
+      for (const t of tc) {
+        if (typeof t.function?.arguments === "string") {
+          receivedArgs.push(t.function.arguments);
+        }
+      }
+    }
+  }
+
+  const concatenated = receivedArgs.join("");
+  const expected = redactCredentials(toolArgs).text;
+  assert.equal(
+    concatenated,
+    expected,
+    "concatenated tool arguments must match expected redacted payload"
+  );
+  assert.doesNotThrow(() => JSON.parse(concatenated), "concatenated arguments must be valid JSON");
+});
