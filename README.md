@@ -935,6 +935,8 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 Default stacked combo runs `RTK → Caveman`. When both act on the same tool/context payload, savings compound:
 
+> **Opt-in by default.** Compression ships disabled (`compression.enabled: false`, `defaultMode: "off"`) — the numbers below apply once you enable it (dashboard Compression panel, `x-omniroute-compression` per request, or a per-combo pipeline). `lite` is the always-on safe baseline.
+
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
 average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
