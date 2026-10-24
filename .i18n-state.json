@@ -2018,7 +2018,7 @@
         },
         "lv": {
           "source_hash": "5e951fac774a53555138d1e7054a513e7f78045c8910aa86643031055e985191",
-          "target_hash": "749b7ed2d7db901f8cb19b92d6854dd7a15c8605d9acb5092d1044544a9b2156",
+          "target_hash": "f9551b7c965aa18297f23bca4d4f17338dba29cbac4b13c1f2fd3738cb4e601d",
           "section_hashes": [
             "b02037e2c3b4",
             "ef6f4fff831e",
@@ -2031,7 +2031,7 @@
             "ecfaa4a13490",
             "9c5e3db8efe2"
           ],
-          "updated_at": "2026-10-24T07:13:53.088Z"
+          "updated_at": "2026-10-24T07:34:53.179Z"
         },
         "sl": {
           "source_hash": "5e951fac774a53555138d1e7054a513e7f78045c8910aa86643031055e985191",
