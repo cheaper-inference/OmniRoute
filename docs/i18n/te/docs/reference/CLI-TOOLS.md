@@ -43,60 +43,69 @@ ACP Agents (రివర్స్ స్పాన్ ప్రవాహం):
 
 ---
 
-## `setup-*`తో స్వయంచాలకంగా కాన్ఫిగర్ చేయండి
+## `setup-*`తో స్వయంచాలకంగా కాన్ఫిగర్ చేయడం
 
-ప్రతి సాధనం యొక్క కాన్ఫిగ్ను మీరు చేతితో రాయాల్సిన అవసరం లేదు. మద్దతు ఉన్న ప్రతి CLI కోసం OmniRoute ఒక `setup-*`
-కమాండ్ను అందిస్తుంది. ఇది అమలవుతున్న OmniRoute (స్థానిక లేదా రిమోట్) నుండి **లైవ్** మోడల్ కేటలాగ్ను చదివి,
-మీ మెషీన్లో ఆ సాధనం యొక్క స్వంత కాన్ఫిగ్ను రాస్తుంది:
+ప్రతి సాధనం యొక్క కాన్ఫిగరేషన్ను మీరు చేతితో వ్రాయాల్సిన అవసరం లేదు. అమలవుతున్న
+OmniRoute (స్థానిక లేదా రిమోట్) నుండి **లైవ్** మోడల్ కేటలాగ్ను చదివి, మీ మెషీన్లో
+ఆ సాధనం యొక్క స్వంత కాన్ఫిగరేషన్ను వ్రాసే `setup-*` కమాండ్ను, మద్దతు ఉన్న ప్రతి CLI కోసం
+OmniRoute అందిస్తుంది:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-ప్రతి కమాండ్ `--remote <url> --api-key <key>` (రిమోట్ OmniRoute కోసం స్థానిక సాధనాన్ని కాన్ఫిగర్ చేయడం), `--dry-run` (రాయకుండా ప్రివ్యూ చేయడం), మరియు `--port`లను అంగీకరిస్తుంది. మోడల్ స్వయంచాలక ఆవిష్కరణ లేని సాధనాలు (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)
-`--model <id>`ను (అలాగే ఇంటరాక్టివ్ కాని రన్ల కోసం `--yes`ను) తీసుకుంటాయి. `$HOME` కింద రాయని ఏకైక
-రెసిపీ `setup-5dive`: ఇది ఫ్లీట్ హోస్ట్పై root యాజమాన్యంలోని ప్రామాణీకరణ ప్రొఫైల్ను
-రాయడం ద్వారా 5dive ఏజెంట్ ఫ్లీట్ను కాన్ఫిగర్ చేస్తుంది, కాబట్టి ఇది `sudo` ద్వారా మళ్లీ ఎగ్జిక్యూట్ అవుతుంది
-మరియు దీనికి స్వంత రిమోట్ మోడ్ లేదు. సరైన env ఇంజెక్ట్ చేసి, ఎలాంటి కాన్ఫిగ్నూ రాయకుండా CLIని ప్రారంభించడానికి,
-సాధారణ `omniroute run <target>` లాంచర్ను ఉపయోగించండి (claude, codex, aider, goose, opencode, qwen,
-gemini — టార్గెట్లు మరియు అలియాస్లు `bin/cli/cli-manifest.mjs` నుండి వస్తాయి); లెగసీ
-సాధన-నిర్దిష్ట లాంచర్లు `omniroute launch` (Claude Code) మరియు `omniroute launch-codex`
-(Codex) ఇప్పటికీ అందుబాటులో ఉన్నాయి. Gemini CLI కేవలం లాంచ్కు మాత్రమే: ఇది `omniroute run`
-టార్గెట్, కానీ దీనికి `setup-*`/`configure` రెసిపీ లేదు.
+ప్రతి కమాండ్ `--remote <url> --api-key <key>` (రిమోట్ OmniRouteకు అనుగుణంగా స్థానిక
+సాధనాన్ని కాన్ఫిగర్ చేయడం), `--dry-run` (వ్రాయకుండానే ప్రివ్యూ చూడడం), మరియు `--port`ను
+ఆమోదిస్తుంది. మోడల్ స్వయంచాలక గుర్తింపు లేని సాధనాలు (Cline, Kilo, Roo, Goose, Aider,
+Qwen, 5dive) `--model <id>`ను (మరియు ఇంటరాక్టివ్ కాని అమలుల కోసం `--yes`ను)
+తీసుకుంటాయి. `$HOME` కింద వ్రాయని ఏకైక రెసిపీ `setup-5dive`: ఇది ఫ్లీట్ హోస్ట్లో
+root యాజమాన్యంలోని auth ప్రొఫైల్ను వ్రాయడం ద్వారా 5dive ఏజెంట్ ఫ్లీట్ను కాన్ఫిగర్
+చేస్తుంది, కాబట్టి ఇది `sudo` ద్వారా మళ్లీ అమలవుతుంది మరియు దీనికి స్వంత రిమోట్ మోడ్
+లేదు. సరైన envను ఇంజెక్ట్ చేసి, ఎలాంటి కాన్ఫిగరేషన్నూ వ్రాయకుండా CLIని ప్రారంభించడానికి,
+సాధారణ `omniroute run <target>` లాంచర్ను ఉపయోగించండి (claude, codex, aider, goose,
+opencode, qwen, gemini — టార్గెట్లు మరియు అలియాస్లు `bin/cli/cli-manifest.mjs` నుండి
+వస్తాయి); పాత, ఒక్కో సాధనానికి ప్రత్యేకమైన `omniroute launch` (Claude Code) మరియు
+`omniroute launch-codex` (Codex) లాంచర్లు ఇప్పటికీ అందుబాటులో ఉన్నాయి. Gemini CLI
+ప్రారంభించడానికి మాత్రమే ఉద్దేశించబడింది: ఇది `omniroute run` టార్గెట్, కానీ దీనికి
+`setup-*`/`configure` రెసిపీ లేదు.
 
-> **పూర్తి సూచన:** ప్రతి కమాండ్ ఏమి రాస్తుంది, ప్రతి ఫ్లాగ్,
-> స్థానికం మరియు రిమోట్ మధ్య తేడా, అలాగే ఏ సాధనాలకు `/v1` సఫిక్స్ అవసరమో వివరించే ప్రధాన పట్టిక
-> **[CLI అనుసంధానాలు](../guides/CLI-INTEGRATIONS.md)**లో ఉంది.
+> **పూర్తి సూచిక:** ప్రతి కమాండ్ ఏమి వ్రాస్తుంది, ప్రతి ఫ్లాగ్, స్థానికం వర్సెస్ రిమోట్,
+> మరియు ఏ సాధనాలకు `/v1` సఫిక్స్ అవసరం వంటి వివరాలతో కూడిన ప్రధాన పట్టిక
+> **[CLI ఇంటిగ్రేషన్లు](../guides/CLI-INTEGRATIONS.md)**లో ఉంది.
 
-### వీటిని కంటైనర్ లోపల అమలు చేయడం
+### వీటిని కంటైనర్లో అమలు చేయడం
 
-OmniRoute కంటైనర్ లోపల అమలు చేసిన `setup-*` కమాండ్
-కంటైనర్ యొక్క స్వంత హోమ్లో రాస్తుంది. దాన్ని ఏ హోస్ట్ CLI చదవదు మరియు కంటైనర్తో పాటు అది అదృశ్యమవుతుంది.
-OmniRoute దీన్ని గుర్తించి, రాయకుండా సూచనలతో పాటు `2` కోడ్తో నిష్క్రమిస్తుంది.
-ముందుకు సాగడానికి మద్దతు ఉన్న రెండు మార్గాలు ఉన్నాయి — హోస్ట్లో CLIని ఇన్స్టాల్ చేసి,
-కంటైనర్కు `omniroute connect` చేయడం, లేదా కాన్ఫిగ్ డైరెక్టరీలను బైండ్-మౌంట్ చేసి
-`CLI_CONFIG_HOME`ను సెట్ చేయడం (compose `host` ప్రొఫైల్). ప్రతి `setup-*` కమాండ్తో పాటు
-`omniroute configure` మరియు `omniroute config set`, కంటైనర్ యొక్క స్వంత CLIలను కాన్ఫిగర్ చేయడమే మీరు
-వాస్తవంగా ఉద్దేశించినప్పుడు `--allow-container-write`ను అంగీకరిస్తాయి;
-సర్వర్ కోసం `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` కూడా అదే పని చేస్తుంది.
-[Docker గైడ్ → హోస్ట్ CLI సాధనాలను కాన్ఫిగర్ చేయడం](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) చూడండి.
+OmniRoute కంటైనర్లో అమలు చేసిన `setup-*` కమాండ్, కంటైనర్ యొక్క స్వంత homeలోకి
+వ్రాస్తుంది; దాన్ని హోస్ట్లోని ఏ CLI కూడా చదవదు మరియు కంటైనర్తో పాటు అది కూడా
+అదృశ్యమవుతుంది. OmniRoute దీన్ని గుర్తించి, వ్రాయడానికి బదులుగా సూచనలతో `2` కోడ్తో
+నిష్క్రమిస్తుంది. ముందుకు వెళ్లడానికి మద్దతు ఉన్న రెండు మార్గాలు ఉన్నాయి — హోస్ట్లో
+CLIని ఇన్స్టాల్ చేసి కంటైనర్కు `omniroute connect` చేయడం, లేదా కాన్ఫిగరేషన్ డైరెక్టరీలను
+bind-mount చేసి `CLI_CONFIG_HOME`ను సెట్ చేయడం (compose `host` ప్రొఫైల్). ప్రతి
+`setup-*` కమాండ్తో పాటు `omniroute configure` మరియు `omniroute config set` కూడా,
+మీరు నిజంగా కంటైనర్ యొక్క స్వంత CLIలను కాన్ఫిగర్ చేయాలనుకున్నప్పుడు
+`--allow-container-write`ను ఆమోదిస్తాయి; సర్వర్ కోసం
+`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` కూడా అదే పని చేస్తుంది. చూడండి:
+[Docker గైడ్ → హోస్ట్ CLI సాధనాలను కాన్ఫిగర్ చేయడం](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-డ్యాష్బోర్డ్ యొక్క **అప్లై ఎండ్పాయింట్** (`POST /api/cli-tools/apply`) కూడా
-అదే గార్డ్ను అమలు చేస్తుంది: కంటైనర్లో, హోస్ట్ నుండి బైండ్-మౌంట్ చేయని టార్గెట్కు రాయడానికి ప్రయత్నిస్తే,
-సురక్షిత దోష సందేశం, `containerEphemeralTarget: true`, అలాగే — హోస్ట్ రెసిపీ ఉన్న సాధనాల కోసం (claude, codex, opencode, cline,
-kilo, continue) — హోస్ట్లో బదులుగా అమలు చేయాల్సిన `hostSetupCommand` (ఉదా. `omniroute setup-opencode`)తో
-**`422`** ప్రతిస్పందన వస్తుంది; ఏదీ రాయబడదు. కంటైనర్ మోడ్లో `dryRun: true` పనిచేస్తూనే ఉంటుంది
-మరియు డిస్క్ను తాకకుండా సవరించిన ప్రివ్యూ + టార్గెట్ పాత్ను తిరిగి ఇస్తుంది. ప్రివ్యూ
-కంటెంట్ అనేది కాపీ చేయడానికి లేదా దిగుమతి చేసుకోవడానికి క్రెడెన్షియల్లను కలిగి ఉండే కాన్ఫిగరేషన్ కాదు. అసలు
-సాధనం/బేస్ URL/API కీ/మోడల్ ఇన్పుట్లతో హోస్ట్లో అప్లై చేయండి లేదా సూచించిన
-హోస్ట్-సైడ్ సెటప్ కమాండ్ను ఉపయోగించండి. ప్రివ్యూ హెడర్ మరియు అభ్యర్థన ఒప్పందం కోసం
-[CLI కాన్ఫిగరేషన్ భద్రత](../security/CLI-CONFIGURATION.md) చూడండి. ఈ ప్రవర్తన
-ఉద్దేశపూర్వకమైనది మరియు
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` ద్వారా రిగ్రెషన్ నుండి రక్షించబడుతుంది — గార్డ్ను తొలగించడం ద్వారా 422ను ఎప్పుడూ "పరిష్కరించవద్దు".
+డాష్బోర్డ్ యొక్క **అప్లై ఎండ్పాయింట్** (`POST /api/cli-tools/apply`) కూడా ఇదే
+రక్షణను అమలు చేస్తుంది: కంటైనర్లో, హోస్ట్ నుండి bind-mount చేయని టార్గెట్కు వ్రాయడానికి
+ప్రయత్నిస్తే, సురక్షితమైన లోప సందేశంతో మరియు `containerEphemeralTarget: true`తో
+**`422`** సమాధానం వస్తుంది; అలాగే హోస్ట్ రెసిపీ ఉన్న సాధనాల కోసం (claude, codex,
+opencode, cline, kilo, continue), బదులుగా హోస్ట్లో అమలు చేయడానికి ఒక
+`hostSetupCommand` (ఉదా. `omniroute setup-opencode`) కూడా అందుతుంది; ఏదీ వ్రాయబడదు.
+కంటైనర్ మోడ్లో `dryRun: true` పని చేస్తూనే ఉంటుంది మరియు డిస్క్ను తాకకుండా సున్నితమైన
+వివరాలు తొలగించిన ప్రివ్యూ + టార్గెట్ పాత్ను తిరిగి ఇస్తుంది. ప్రివ్యూ కంటెంట్ అనేది
+కాపీ చేయడానికి లేదా ఇంపోర్ట్ చేయడానికి ఉద్దేశించిన, ఆధారాలను కలిగి ఉన్న కాన్ఫిగరేషన్
+కాదు. అసలు సాధనం/base URL/API key/model ఇన్పుట్లతో హోస్ట్లో అప్లై చేయండి, లేదా
+సూచించిన హోస్ట్-సైడ్ సెటప్ కమాండ్ను ఉపయోగించండి. ప్రివ్యూ హెడర్ మరియు రిక్వెస్ట్
+కాంట్రాక్ట్ కోసం [CLI కాన్ఫిగరేషన్ భద్రత](../security/CLI-CONFIGURATION.md) చూడండి.
+ఈ ప్రవర్తన ఉద్దేశపూర్వకమైనది మరియు
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` ద్వారా రిగ్రెషన్ నుండి
+రక్షించబడుతుంది — ఈ రక్షణను తొలగించడం ద్వారా 422ను ఎప్పుడూ "పరిష్కరించవద్దు".
 
 ---
 
@@ -139,40 +148,41 @@ kilo, continue) — హోస్ట్లో బదులుగా అమలు 
 
 ---
 
-## 1. CLI కోడ్ కేటలాగ్ (26 సాధనాలు)
+## 1. CLI Code సాధనాల కేటలాగ్ (27 సాధనాలు)
 
-`/dashboard/cli-code`లో కనిపించే అన్ని సాధనాలు. `baseUrlSupport: none` ఉన్నవి అనుకూల బేస్ URLకు బదులుగా MITM లేదా మాన్యువల్ గైడ్ ద్వారా అనుసంధానించబడ్డాయి:
+`/dashboard/cli-code`లో కనిపించే అన్ని సాధనాలు. `baseUrlSupport: none` ఉన్నవి అనుకూల base URLకు బదులుగా MITM లేదా మాన్యువల్ గైడ్ ద్వారా అనుసంధానించబడ్డాయి:
 
-| id           | name                    | vendor                   | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------------ | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic                | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                   | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                     | none           | custom         | false        |
-| cline        | Cline                   | OSS (మునుపటి Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org                 | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)                | full           | guide          | false        |
-| continue     | Continue                | continue.dev             | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)        | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ              | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)           | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)        | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)             | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (మునుపటి SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI               | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS                | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere                | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)        | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)         | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                      | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)              | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba                  | full           | guide          | true         |
-| cursor       | Cursor                  | Anysphere                | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                   | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research            | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                   | none           | mitm           | false        |
-| custom       | Custom CLI              | —                        | full           | custom-builder | false        |
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"` ఉన్న సాధనాల డాష్బోర్డ్ కార్డ్లో "⚠ పాక్షిక బేస్ URL" బ్యాడ్జ్ కనిపిస్తుంది.
+`baseUrlSupport: "partial"` ఉన్న సాధనాల డ్యాష్బోర్డ్ కార్డ్లో "⚠ పాక్షిక Base URL" బ్యాడ్జ్ కనిపిస్తుంది.
 ---
 
 ## 2. CLI ఏజెంట్ల కేటలాగ్ (10 సాధనాలు)

@@ -697,6 +697,16 @@
       "name": "typecheck:noimplicit:core",
       "command": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
       "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:free-catalog-evidence",
+      "command": "node scripts/check/check-free-catalog-evidence.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:ui-kit-snapshot",
+      "command": "node scripts/check/check-ui-kit-snapshot.mjs",
+      "disposition": "separately-invoked"
     }
   ],
   "profiles": {

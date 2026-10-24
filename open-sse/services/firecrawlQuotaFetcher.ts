@@ -22,9 +22,14 @@
  * Cache: 60s in-memory TTL keyed by connectionId.
  */
 
-import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 import { isUrlHost } from "../utils/urlHost.ts";
 import { toNumberOrNull } from "@/shared/utils/numeric";
 
@@ -156,7 +161,7 @@ export async function fetchFirecrawlQuota(
   try {
     await throttleQuotaFetch();
 
-    const response = await fetch(CREDIT_USAGE_URL, {
+    const response = await fetchWithConnectionProxy(connectionId, CREDIT_USAGE_URL, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -164,6 +169,7 @@ export async function fetchFirecrawlQuota(
       },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
+    if (!response) return null;
 
     if (response.status === 401 || response.status === 403) {
       quotaCache.set(connectionId, { quota: null, fetchedAt: Date.now() });
@@ -189,5 +195,6 @@ export function invalidateFirecrawlQuotaCache(connectionId: string): void {
 
 export function registerFirecrawlQuotaFetcher(): void {
   registerQuotaFetcher("firecrawl", fetchFirecrawlQuota);
+  registerQuotaCacheInvalidator("firecrawl", invalidateFirecrawlQuotaCache);
   registerMonitorFetcher("firecrawl", fetchFirecrawlQuota);
 }

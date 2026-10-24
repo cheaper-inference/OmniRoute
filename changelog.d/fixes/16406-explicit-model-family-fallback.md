@@ -1,1 +1,0 @@
-- **fix(routing):** require explicit opt-in for internal fallback across model versions, preserve same-version effort recovery and report the dispatched model after fallback; keep API-key model restrictions effective (Refs #16406).

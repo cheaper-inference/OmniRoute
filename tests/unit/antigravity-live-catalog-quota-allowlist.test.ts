@@ -11,7 +11,8 @@ test("quota key allowed: static model IDs are always allowed", () => {
   assert.equal(isUsageQuotaKeyAllowed("antigravity", "claude-sonnet-4-6"), true);
   assert.equal(isUsageQuotaKeyAllowed("antigravity", "gemini-3.7-flash-high"), true);
   assert.equal(isUsageQuotaKeyAllowed("agy", "claude-sonnet-4-6"), true);
-  assert.equal(isUsageQuotaKeyAllowed("agy", "gemini-3.7-flash-medium"), true);
+  // #12608 retired the per-tier 3.7 ids from AGY (absent from the live roster); 3.8 is the live tier.
+  assert.equal(isUsageQuotaKeyAllowed("agy", "gemini-3.8-flash-medium"), true);
 });
 
 test("quota key allowed: future dynamic live catalog model IDs are allowed when in liveModelIds set", () => {

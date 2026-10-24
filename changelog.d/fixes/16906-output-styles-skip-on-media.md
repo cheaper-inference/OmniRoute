@@ -1,1 +1,0 @@
-- **fix(compression):** skip output-style prompts (less-code / caveman) on requests that carry images, audio or files, so they no longer degrade vision answers ([#16906](https://github.com/diegosouzapw/OmniRoute/pull/16906)) — thanks @raflyazf

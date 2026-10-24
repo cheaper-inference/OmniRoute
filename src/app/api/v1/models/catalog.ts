@@ -80,7 +80,10 @@ import {
 import type { ModelCapabilityEntry } from "@/lib/modelsDevSync";
 import { getModelSpec } from "@/shared/constants/modelSpecs";
 import { classifyModelSupportedEndpoints } from "@/shared/constants/modelSupportedEndpoints";
-import { getModelsCatalogPrefixMode } from "@/shared/utils/featureFlags";
+import {
+  getModelsCatalogPrefixMode,
+  isModelsDevEffortTiersEnabled,
+} from "@/shared/utils/featureFlags";
 import {
   isProviderNodePrefixReserved,
   selectCompatibleNodeForPrefix,
@@ -130,6 +133,7 @@ import {
   getComboTargetModelId as getComboTargetModelIdFromMaps,
 } from "./catalogProviderMaps";
 import { indexNodeApiTypes, nodeModelEndpoints, overlayEndpoints } from "./catalogNodeModality";
+import { createComboPricingTargetResolver } from "./catalogPricing";
 import {
   getModelCatalogAuthRejection,
   isCodexModelCatalogClient,
@@ -274,8 +278,8 @@ async function buildCatalogPayload(
   let cacheTTL = CATALOG_CACHE_TTL_MS_DEFAULT;
   try {
     // Only the persisted cache section is needed here. The full database-settings
-    // view also calculates dbstat, WAL, schema and integrity diagnostics, which are
-    // synchronous and can pin the event loop after an otherwise cooperative build.
+    // view also calculates dbstat, WAL and schema, which are synchronous and can
+    // pin the event loop after an otherwise cooperative build.
     const dbSettings = getUserDatabaseSettings();
     cacheTTL = dbSettings.cache?.modelCatalogCacheTtlMs ?? CATALOG_CACHE_TTL_MS_DEFAULT;
   } catch {
@@ -339,6 +343,7 @@ async function buildUnifiedModelsResponseCore(
       _qp === "alias" || _qp === "canonical" || _qp === "dual" ? _qp : getModelsCatalogPrefixMode();
     const includeAlias = prefixMode !== "canonical";
     const includeCanonical = prefixMode !== "alias";
+    const modelsDevEffortTiers = isModelsDevEffortTiersEnabled(); // #15944, default off
     const resolveCanonicalProviderId = (aliasOrProviderId: string, fallbackProviderId?: string) =>
       resolveCanonicalProviderIdFromMaps(aliasToProviderId, aliasOrProviderId, fallbackProviderId);
     const aliasMaps = { aliasToProviderId, providerIdToAlias };
@@ -646,7 +651,8 @@ async function buildUnifiedModelsResponseCore(
               eligibleConnectionIds,
               connectionCatalog || {},
               getRegistryModelThinkingEfforts(providerId, modelId),
-              getRegistryThinkingEfforts(providerId, modelId)
+              getRegistryThinkingEfforts(providerId, modelId),
+              modelsDevEffortTiers
             );
       if (
         connectionEfforts === undefined &&
@@ -741,7 +747,8 @@ async function buildUnifiedModelsResponseCore(
               canonical.capabilities.supportsThinking,
               getRegistryThinkingEfforts(providerId, modelId),
               true,
-              syncedReasoningEfforts
+              syncedReasoningEfforts,
+              modelsDevEffortTiers
             )
           : getThinkingCapabilityFields(
               providerId,
@@ -749,7 +756,8 @@ async function buildUnifiedModelsResponseCore(
               connectionEfforts.length > 0 ? true : canonical.capabilities.supportsThinking,
               connectionEfforts,
               true,
-              syncedReasoningEfforts
+              syncedReasoningEfforts,
+              modelsDevEffortTiers
             )
       );
 
@@ -830,6 +838,27 @@ async function buildUnifiedModelsResponseCore(
     const models = [];
     const timestamp = Math.floor(Date.now() / 1000);
     const listedIds = new Set<string>();
+    const postFilterContext = {
+      connections,
+      prefixMode,
+      aliasToProviderId,
+      hideNoThinkVariants: settings.hideNoThinkVariants === true,
+      blockedProviders: settings.blockedProviders,
+      // Per-entry `pricing`: a combo is priced as its first visible target.
+      pricing: {
+        providerNodeIdsByPrefix: providerNodeIdByPrefix,
+        resolveComboTarget: createComboPricingTargetResolver(
+          combos,
+          (combo) =>
+            resolveNestedComboTargets(
+              combo as Parameters<typeof resolveNestedComboTargets>[0],
+              combos as Parameters<typeof resolveNestedComboTargets>[1]
+            ) as ComboCatalogTarget[],
+          getComboTargetModelId,
+          (providerId, modelId) => isModelHiddenBulk(providerId, modelId)
+        ),
+      },
+    };
 
     // #8770 follow-up: a quota-exclusive key (allowedQuotas non-empty) only ever
     // receives the pool's `qtSd/*` combos — the key-permission step further down
@@ -854,12 +883,7 @@ async function buildUnifiedModelsResponseCore(
           timestamp,
           (c) => buildComboCatalogMetadata(c, combos)
         );
-        const quotaFinal = await applyCatalogPostFilters(request, quotaModels, {
-          connections,
-          prefixMode,
-          aliasToProviderId,
-          hideNoThinkVariants: settings.hideNoThinkVariants === true,
-        });
+        const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
         return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
           ...corsHeaders,
           ...diagnosticHeaders,
@@ -1130,7 +1154,8 @@ async function buildUnifiedModelsResponseCore(
           !hasDeclaredEffortTiers,
           // Memory only. Do not call getSyncedCapabilities() here — that opens
           // SQLite and runs migrations on a pure catalog read.
-          peekCachedReasoningEfforts(canonicalProviderId, model.id)
+          peekCachedReasoningEfforts(canonicalProviderId, model.id),
+          modelsDevEffortTiers
         );
         const thinkingCapabilities =
           Object.keys(thinkingFields).length > 0 ? { capabilities: thinkingFields } : {};
@@ -2055,12 +2080,7 @@ async function buildUnifiedModelsResponseCore(
       }
     }
     // ?configuredOnly — hide models that have no eligible DB connection.
-    finalModels = await applyCatalogPostFilters(request, finalModels, {
-      connections,
-      prefixMode,
-      aliasToProviderId,
-      hideNoThinkVariants: settings.hideNoThinkVariants === true,
-    });
+    finalModels = await applyCatalogPostFilters(request, finalModels, postFilterContext);
 
     const getDefaultContextFallback = (model: any): number | undefined => {
       if (typeof model.context_length === "number") return undefined;

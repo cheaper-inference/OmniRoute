@@ -29,23 +29,24 @@ Dacă descoperiți o vulnerabilitate de securitate în OmniRoute, raportați-o �
 | 3.7.x    | ✅ Securitate                                           |
 | < 3.7.0  | ❌ Fără suport                                          |
 
-## Perioada de suport LTS (v3.9.x)
+## Perioada de asistență LTS (v3.9.x)
 
-După 3.8.59, următoarea versiune este **3.9.0**, care deschide linia de suport pe termen lung în
-ramura `stable/v3` (consultați [`ROADMAP.md`](ROADMAP.md) → „Faza 3 — v3.9.0 LTS”).
+După 3.8.59, următoarea versiune este **3.9.0**, care deschide linia de asistență pe termen lung în ramura
+`stable/v3` (consultați [`ROADMAP.md`](ROADMAP.md) → „Faza 3 — v3.9.0 LTS”).
 
-- **Ce primește `stable/v3`:** remedieri de erori, corecții de securitate și actualizări pentru furnizori. Funcționalitățile
-  noi sunt livrate pe canalul v4; linia LTS prioritizează stabilitatea. `npm install omniroute`
+- **Ce primește `stable/v3`:** remedieri de erori, corecții de securitate și actualizări ale furnizorilor. Funcționalitățile
+  noi sunt direcționate către canalul v4; linia LTS prioritizează stabilitatea. `npm install omniroute`
   (eticheta de distribuție `latest`) rămâne pe v3 pe parcursul întregului ciclu v4.
-- **Durata perioadei:** `<T-GAP-3: decizia proprietarului este în așteptare — consultați ROADMAP.md>`. Durata
-  perioadei de după disponibilitatea generală a v4.0 (când `latest` trece la v4) **nu a fost încă stabilită**; această
-  secțiune este actualizată atunci când responsabilul de întreținere o anunță. Până atunci, nu presupuneți o dată de încheiere.
-- **Raportarea unei vulnerabilități în linia LTS:** același canal ca pentru orice altă versiune —
-  un [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privat,
+- **Durata perioadei:** `stable/v3` primește **remedieri de securitate și corecții pentru regresii critice timp de
+  12 luni după lansarea versiunii 3.9.0 sau până la 90 de zile după ce v4.0.0 este publicată ca `latest` —
+  oricare dintre aceste termene este mai îndepărtat**. Data de încheiere rezultată este consemnată în notele de lansare pentru 3.9.0 și în
+  [`ROADMAP.md`](ROADMAP.md) atunci când are loc lansarea.
+- **Raportarea unei vulnerabilități în linia LTS:** se utilizează același canal ca pentru orice altă versiune —
+  un [Aviz de securitate GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privat,
   niciodată o problemă publică. Menționați versiunea testată (de exemplu, `3.9.2`); remedierile ajung în
   `stable/v3` și sunt portate ulterior în v4.
-- **Nivelul de referință pentru securitate la separarea LTS:** starea măsurată a scanerului, protecția rutelor și
-  dovezile privind acreditările publice sunt înregistrate în
+- **Nivelul de referință pentru securitate la lansarea LTS:** starea măsurată a scanerului, mecanismul de protecție a rutelor și
+  dovezile privind credențialele publice sunt consemnate în
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

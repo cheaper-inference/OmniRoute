@@ -1,1 +1,0 @@
-- Preserve short scene events selected by experimental segment-aware video sampling through the final caption budget, and separate its corrected result-cache identity from the previous oversampled policy.

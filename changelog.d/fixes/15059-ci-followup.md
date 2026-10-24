@@ -1,1 +1,0 @@
-- **Auto-Combo ToS policy:** Separate settings state from rendering to keep the new control within the function-size limit, and use the canonical provider term in its Simplified Chinese text. Refs #15059.

@@ -1,1 +1,0 @@
-- **fix(resilience):** Gemini 429s that report a daily (`PerDay`) quota violation now lock the model until the daily reset (still bounded by the model-lockout cap) instead of re-trying the exhausted key every ~20s ([#16705](https://github.com/diegosouzapw/OmniRoute/pull/16705)) — thanks @scottchristian

@@ -56,6 +56,11 @@ const BUILT_IN_ALIASES: Record<string, string> = {
   // exempted by the provider-aware check in resolveModelAlias.
   "qwen3.8-max": "qwen3.8-max-preview",
 
+  // OpenCode Zen rotated its free DeepSeek snapshot on 2026-10-18: the upstream
+  // catalog now serves `deepseek-v4.1-flash-free` and rejects the old id with
+  // `400 Model is unavailable`. Clients pinned to the old id keep working.
+  "deepseek-v4-flash-free": "deepseek-v4.1-flash-free",
+
   // Mistral short aliases
   "mistral-large": "mistral-large-latest",
   "mistral-small": "mistral-small-latest",

@@ -59,31 +59,32 @@ Kombinasyonlar, sağlayıcı durumu ve zenginleştirme bilgileri (görünen adla
 
 ## Seçenekler
 
-| Anahtar                          | Varsayılan                                         | Notlar                                                                                                                   |
-| -------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `providerId`                     | `"omniroute"`                                      | Sağlayıcı kimliği, entegrasyon kimliği ve modellerin altında göründüğü önek                                              |
-| `baseURL`                        | gerekli                                            | Ağ geçidi kökü; yalnızca `http(s)`; `/v1` son eki gerektiğinde eklenir                                                   |
-| `apiKey`                         | bağlı kimlik bilgisi, ardından `OMNIROUTE_API_KEY` | `/v1/*` için sohbet anahtarı                                                                                             |
-| `managementReadToken`            | `apiKey` değerine geri döner                       | `/api/*` için anahtar — genellikle aynı anahtar **değildir**                                                             |
-| `displayName`                    | `"OmniRoute"`                                      | Seçicideki sağlayıcı adı                                                                                                 |
-| `timeoutMs`                      | `10000`                                            | Uç nokta başına getirme zaman aşımı (otomatik kombinasyonlar 5 sn kullanır)                                              |
-| `modelCacheTtlMs`                | `300000`                                           | Katalog önbelleği TTL'si; disk anlık görüntüsü soğuk başlatmaları hızlandırır                                            |
-| `timeouts`                       | `timeoutMs` değerine geri döner                    | Ms cinsinden uç nokta başına süre bütçeleri: `models`, `combos`, `autoCombos`, `enrichment`                              |
-| `enrichment`                     | `true`                                             | Adları, fiyatlandırmayı ve ücretsiz katman bütçelerini getir                                                             |
-| `providerTag`                    | `true`                                             | Görünen adın önüne, yönlendirme yapılan üst sağlayıcıyı ekle                                                             |
-| `usableOnly`                     | `false`                                            | Yalnızca ağ geçidinin tedarik edilmiş olarak bildirdiği sağlayıcıları tut                                                |
-| `showcasePerOwner`               | `10`                                               | Varsayılan görünümde sağlayıcı başına tutulan girdiler                                                                   |
-| `freshPerOwner`                  | `10`                                               | Varsayılan görünümün yeni dalında sağlayıcı başına tutulan yeni girdiler                                                 |
-| `freshWindowDays`                | `90`                                               | Yeni dal için gün cinsinden yenilik penceresi                                                                            |
-| `usageMemory`                    | `true`                                             | 30 günlük kullanım analizlerinde adı geçen, statik olarak elenmiş girdileri geri yükle (yönetim belirteci gerektirir)    |
-| `visibleModels` / `hiddenModels` | `[]`                                               | Tam veya son ek eşleşmeli izin listeleri; ret önceliklidir; `*` tüm kataloğu yayımlar (diğer filtreler yine uygulanır)   |
-| `geminiSanitization`             | `true`                                             | Gemini'ın araç şemalarında reddettiği JSON-Schema anahtar sözcüklerini kaldır (`$ref` araçları değiştirilmeden iletilir) |
-| `apiFormat.allowAnthropic`       | `false`                                            | İzin listesindeki kimlikleri Anthropic API bloğu üzerinden yönlendir                                                     |
-| `apiFormat.anthropicModels`      | `[]`                                               | Anthropic'e yönlendirilen tam model kimlikleri                                                                           |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                   | Günlük kaydı ayrıntı düzeyi                                                                                              |
+| Anahtar                          | Varsayılan                                         | Notlar                                                                                                                                      |
+| -------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                      | Sağlayıcı kimliği, entegrasyon kimliği ve modellerin altında göründüğü önek                                                                 |
+| `baseURL`                        | gerekli                                            | Ağ geçidi kökü, yalnızca `http(s)`; gerektiğinde `/v1` son eki eklenir                                                                      |
+| `apiKey`                         | bağlı kimlik bilgisi, ardından `OMNIROUTE_API_KEY` | `/v1/*` için sohbet anahtarı                                                                                                                |
+| `managementReadToken`            | `apiKey` değerine geri döner                       | `/api/*` için anahtar — genellikle aynı anahtar **değildir**                                                                                |
+| `displayName`                    | `"OmniRoute"`                                      | Seçicideki sağlayıcı adı                                                                                                                    |
+| `timeoutMs`                      | `10000`                                            | Uç nokta başına getirme zaman aşımı (otomatik kombinasyonlar 5 sn kullanır)                                                                 |
+| `modelCacheTtlMs`                | `300000`                                           | Katalog önbelleği TTL değeri; disk anlık görüntüsü soğuk başlatmaları hızlandırır                                                           |
+| `timeouts`                       | `timeoutMs` değerine geri döner                    | Milisaniye cinsinden uç nokta başına süre bütçeleri: `models`, `combos`, `autoCombos`, `enrichment`                                         |
+| `enrichment`                     | `true`                                             | Adları, fiyatlandırmayı ve ücretsiz katman bütçelerini getir                                                                                |
+| `providerTag`                    | `true`                                             | Görünen adın önüne, yönlendirme yapılan yukarı akış sağlayıcısını ekle                                                                      |
+| `usableOnly`                     | `false`                                            | Yalnızca ağ geçidinin kullanıma hazır olarak bildirdiği sağlayıcıları tut                                                                   |
+| `combosSource`                   | `"api"`                                            | `"models"`, `/api/combos` öğesini atlar ve `/v1/models` kombinasyon satırlarını yayımlar; üye düzeyi filtreler `"api"` değerini korur       |
+| `showcasePerOwner`               | `10`                                               | Varsayılan görünümde sağlayıcı başına tutulan girdiler                                                                                      |
+| `freshPerOwner`                  | `10`                                               | Varsayılan görünümde sağlayıcı başına tutulan yeni girdiler                                                                                 |
+| `freshWindowDays`                | `90`                                               | Yeni girdiler dalı için gün cinsinden güncellik aralığı                                                                                     |
+| `usageMemory`                    | `true`                                             | 30 günlük kullanım analizinde adı geçen, statik olarak çıkarılmış girdileri geri yükle (bir yönetim belirteci gerektirir)                   |
+| `visibleModels` / `hiddenModels` | `[]`                                               | Tam eşleşmeli veya sonek tabanlı izin listeleri; engelleme önceliklidir; `*` tam kataloğu yayımlar (diğer filtreler uygulanmaya devam eder) |
+| `geminiSanitization`             | `true`                                             | Gemini'ın araç şemalarında reddettiği JSON Şeması anahtar sözcüklerini kaldır (`$ref` araçları değiştirilmeden iletilir)                    |
+| `apiFormat.allowAnthropic`       | `false`                                            | İzin listesindeki kimlikleri Anthropic API bloğu üzerinden yönlendir                                                                        |
+| `apiFormat.anthropicModels`      | `[]`                                               | Anthropic'e yönlendirilen tam model kimlikleri                                                                                              |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                   | Günlükleyici ayrıntı düzeyi                                                                                                                 |
 
 Kullanım belleği varsayılan olarak açıktır. Yönetim belirteci olmadan etkisiz kalır
-(başlangıçta bir bildirim günlüğe kaydedilir) ve hiçbir şey geri yüklenmez.
+(bir başlangıç bildirimi günlüğe kaydedilir) ve hiçbir şey geri yüklenmez.
 
 ## Katalog nasıl güncel tutulur
 

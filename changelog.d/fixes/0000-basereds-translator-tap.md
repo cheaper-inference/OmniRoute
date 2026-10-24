@@ -1,1 +1,0 @@
-- **fix(release):** Drain base-red #15306 leftovers: align four unit tests with the intentional Gemini tool-result text folding (#16601) and single canonical `User-Agent` (#16445) contracts, and register 16 covering tests in `stryker.conf.json` `tap.testFiles` ([#15306](https://github.com/diegosouzapw/OmniRoute/issues/15306)).

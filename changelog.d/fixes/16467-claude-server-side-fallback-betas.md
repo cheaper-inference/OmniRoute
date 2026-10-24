@@ -1,1 +1,0 @@
-- **fix(claude):** the `server-side-fallback-2026-06-01` and `server-side-fallback-2026-07-01` betas that Claude Code sends with its `fallbacks` body parameter are now forwarded, so the request no longer fails with `400 fallbacks: Extra inputs are not permitted` ([#16467](https://github.com/diegosouzapw/OmniRoute/pull/16467)) — thanks @tiagolabsit

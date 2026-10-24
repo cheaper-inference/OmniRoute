@@ -17,6 +17,7 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const aggregateHistory = await import("../../src/lib/usage/aggregateHistory.ts");
 const analyticsRoute = await import("../../src/app/api/usage/analytics/route.ts");
+const analyticsCache = await import("../../src/lib/usage/analyticsResponseCache.ts");
 
 const clearPendingRequests = usageHistory.clearPendingRequests;
 const EXPECTED_TOTAL_COST = 0.020925;
@@ -27,6 +28,10 @@ async function resetStorage() {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   clearPendingRequests();
+  // The route caches any response that took >= 1 s to build, keyed only by the
+  // query string. On a loaded runner one slow build would serve the previous
+  // test's data to the next one, so every test starts from an empty cache.
+  analyticsCache.clearAnalyticsResponseCache();
 }
 
 async function seedAnalyticsData() {
@@ -660,6 +665,52 @@ test("GET /api/usage/analytics does not persist guessed API key attribution", as
   assert.equal(row.api_key_name, null);
 });
 
+test("GET /api/usage/analytics?view=apiKeys returns only lifetime totals per API key", async () => {
+  const usedKey = await apiKeysDb.createApiKey("Used Key", "machine1234567890");
+  const idleKey = await apiKeysDb.createApiKey("Idle Key", "machine1234567890");
+  const db = core.getDbInstance();
+  const now = Date.now();
+  const at = (msAgo: number) => new Date(now - msAgo).toISOString();
+  const insertUsage = db.prepare(
+    `INSERT INTO usage_history (provider, model, connection_id, api_key_id, api_key_name, tokens_input, tokens_output, success, latency_ms, timestamp)
+     VALUES (?, ?, 'c1', ?, ?, ?, ?, 1, 200, ?)`
+  );
+  insertUsage.run("openai", "gpt-4o", usedKey.id, "Used Key", 100, 50, at(86_400_000));
+  insertUsage.run("openai", "gpt-4o", usedKey.id, "Old Name", 200, 100, at(60_000));
+  insertUsage.run("anthropic", "claude-sonnet", usedKey.id, "Used Key", 300, 30, at(120_000));
+  // Rows recorded before per-key ids carry only the key name.
+  insertUsage.run("openai", "gpt-4o", null, "Idle Key", 1000, 1000, at(30_000));
+
+  const response = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all&view=apiKeys")
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(Object.keys(body), ["byApiKey"]);
+  const totalsById = new Map(body.byApiKey.map((entry) => [entry.apiKeyId, entry]));
+  const used = totalsById.get(usedKey.id);
+  assert.equal(used.apiKeyName, "Used Key");
+  assert.equal(used.requests, 3);
+  // gpt-4o: 300 in × $2.50 + 150 out × $10; claude-sonnet: 300 in × $3 + 30 out × $15 (per 1M).
+  assertClose(used.cost, 0.0036);
+  assert.equal(used.lastUsed, at(60_000));
+  assert.deepEqual(totalsById.get(idleKey.id), {
+    apiKeyId: idleKey.id,
+    apiKeyName: "Idle Key",
+    requests: 0,
+    cost: 0,
+    lastUsed: at(30_000),
+  });
+
+  const fullReport = await (
+    await analyticsRoute.GET(makeRequest("http://localhost/api/usage/analytics?range=all"))
+  ).json();
+  const fullEntry = fullReport.byApiKey.find((entry) => entry.apiKeyId === usedKey.id);
+  assert.equal(fullEntry.requests, used.requests);
+  assertClose(fullEntry.cost, used.cost);
+});
+
 test("GET /api/usage/analytics returns weeklyPattern for the costs dashboard", async () => {
   await seedAnalyticsData();
 
@@ -818,4 +869,152 @@ test("rollupUsageHistoryBeforeDate prices each request, not the day's summed tok
   // Retention must preserve the billed value. Archiving a day may not silently
   // discount it just because the day's requests were grouped before pricing.
   assertClose(archived.total_cost, expectedCost);
+});
+
+test("GET /api/usage/analytics uses per-row provider_cost_usd instead of re-pricing its tokens", async () => {
+  // A row carrying a provider-reported cost (credit-metered providers such as Kiro,
+  // xAI's exact cost) is billed by that cost on every breakdown; its tokens are
+  // display-only and must not be charged again through the pricing table.
+  await localDb.updatePricing({
+    kiro: { "gpt-5.6-luna": { input: 999, output: 999 } },
+  });
+  const apiKey = await apiKeysDb.createApiKey("Metered key", "test-machine");
+  const db = core.getDbInstance();
+  db.prepare(
+    `INSERT INTO usage_history (provider, model, connection_id, account_key, api_key_id, api_key_name,
+       tokens_input, tokens_output, provider_credits, provider_cost_usd, success, latency_ms, timestamp)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    "kiro",
+    "gpt-5.6-luna",
+    "metered-conn",
+    "metered-account",
+    apiKey.id,
+    apiKey.name,
+    100000,
+    50000,
+    0.5,
+    0.01,
+    1,
+    200,
+    new Date().toISOString()
+  );
+
+  const response = await analyticsRoute.GET(makeRequest("http://localhost/api/usage/analytics"));
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assertClose(body.summary.totalCost, 0.01);
+  const kiroProvider = body.byProvider.find((row: { provider: string }) =>
+    row.provider.toLowerCase().includes("kiro")
+  );
+  assert.ok(kiroProvider);
+  assertClose(kiroProvider.cost, 0.01);
+  assert.equal(body.byAccount.length, 1);
+  assertClose(body.byAccount[0].cost, 0.01);
+  assert.equal(body.byApiKey.length, 1);
+  assertClose(body.byApiKey[0].cost, 0.01);
+  const kiroModel = body.byModel.find((row: { provider: string }) =>
+    row.provider.toLowerCase().includes("kiro")
+  );
+  assert.ok(kiroModel);
+  assertClose(kiroModel.cost, 0.01);
+  assert.equal(kiroModel.promptTokens, 100000);
+  const dailyCostTotal = body.dailyTrend.reduce(
+    (sum: number, row: { cost: number }) => sum + row.cost,
+    0
+  );
+  assertClose(dailyCostTotal, 0.01);
+
+  // The API Manager's lightweight per-key totals view bills the same reported cost.
+  const totalsResponse = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?view=apiKeys")
+  );
+  const totals = await totalsResponse.json();
+  assert.equal(totalsResponse.status, 200);
+  const meteredKey = totals.byApiKey.find(
+    (row: { apiKeyId: string }) => row.apiKeyId === apiKey.id
+  );
+  assert.ok(meteredKey);
+  assert.equal(meteredKey.requests, 1);
+  assertClose(meteredKey.cost, 0.01);
+});
+
+test("GET /api/usage/analytics keeps measured and token-priced usage apart after rollup", async () => {
+  await localDb.updatePricing({
+    xai: { "grok-reported": { input: 1, output: 2 } },
+  });
+  const db = core.getDbInstance();
+  const timestamp = new Date(Date.now() - 400 * 86_400_000).toISOString();
+  const insert = db.prepare(
+    `INSERT INTO usage_history
+       (provider, model, tokens_input, tokens_output, provider_cost_usd, success, timestamp)
+     VALUES (?, ?, ?, ?, ?, 1, ?)`
+  );
+  // Same token shape, one with a reported cost and one without.
+  insert.run("xai", "grok-reported", 100000, 50000, 0.01, timestamp);
+  insert.run("xai", "grok-reported", 100000, 50000, null, timestamp);
+  insert.run("openai", "gpt-4o", 100000, 0, null, timestamp);
+
+  assert.equal((await aggregateHistory.rollupUsageHistoryBeforeDate("2100-01-01")).errors, 0);
+
+  const response = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all")
+  );
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  // xai: 0.01 reported + (100k × $1 + 50k × $2)/M = 0.21; openai: 100k × $2.5/M = 0.25.
+  assertClose(body.summary.totalCost, 0.46);
+  assertClose(
+    body.byProvider.find((row: { provider: string }) => row.provider.toLowerCase().includes("xai"))
+      .cost,
+    0.21
+  );
+  assertClose(
+    body.byProvider.find((row: { provider: string }) =>
+      row.provider.toLowerCase().includes("openai")
+    ).cost,
+    0.25
+  );
+  const grok = body.byModel.find((row: { model: string }) => row.model === "grok-reported");
+  assertClose(grok.cost, 0.21);
+  assert.equal(grok.promptTokens, 200000);
+  assertClose(
+    body.dailyTrend.reduce((sum: number, row: { cost: number }) => sum + row.cost, 0),
+    0.46
+  );
+});
+
+test("GET /api/usage/analytics bills a failed credit-metered request only by its measurement", async () => {
+  await localDb.updatePricing({ kiro: { "gpt-5.6-luna": { input: 999, output: 999 } } });
+  const apiKey = await apiKeysDb.createApiKey("Failed dashboard", "machine-failed-dash");
+
+  await usageHistory.saveRequestUsage({
+    provider: "kiro",
+    model: "gpt-5.6-luna",
+    apiKeyId: apiKey.id,
+    timestamp: new Date().toISOString(),
+    tokens: { prompt_tokens: 100000, completion_tokens: 0 },
+    success: false,
+    status: "502",
+  });
+  await usageHistory.saveRequestUsage({
+    provider: "kiro",
+    model: "gpt-5.6-luna",
+    apiKeyId: apiKey.id,
+    timestamp: new Date(Date.now() + 1000).toISOString(),
+    tokens: { prompt_tokens: 100000, completion_tokens: 0, cost_in_usd_ticks: 100000000 },
+    success: false,
+    status: "502",
+  });
+
+  const response = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all")
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assertClose(body.summary.totalCost, 0.01);
+  assert.equal(body.byApiKey.length, 1);
+  assertClose(body.byApiKey[0].cost, 0.01);
 });

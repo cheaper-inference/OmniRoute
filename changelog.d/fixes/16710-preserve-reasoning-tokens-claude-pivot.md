@@ -1,1 +1,0 @@
-- **fix(usage):** keep reasoning_tokens when OpenAI/Responses upstreams are translated to Claude format, and read nested output_tokens_details in usage accounting ([#16710](https://github.com/diegosouzapw/OmniRoute/pull/16710)) — thanks @raflyazf and @rifuki

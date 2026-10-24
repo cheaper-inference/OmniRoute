@@ -46,61 +46,62 @@ ACP Agents (fordított indítási folyamat):
 ## Automatikus konfigurálás a `setup-*` használatával
 
 Nem kell kézzel megírnia az egyes eszközök konfigurációját. Az OmniRoute minden támogatott CLI-hez biztosít egy `setup-*`
-parancsot, amely beolvassa az **élő** modellkatalógust egy futó
-OmniRoute-példányból (helyiből vagy távoliból), és kiírja az eszköz saját konfigurációját a gépére:
+parancsot, amely beolvassa az **aktuális** modellkatalógust egy futó
+OmniRoute-példányból (helyiből vagy távoliból), és létrehozza az eszköz saját konfigurációját a gépén:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Mindegyik elfogadja a `--remote <url> --api-key <key>` kapcsolókat (helyi eszköz konfigurálása egy
-távoli OmniRoute-példányhoz), a `--dry-run` kapcsolót (előnézet írás nélkül), valamint a `--port` kapcsolót. Az automatikus modellfelderítéssel
-nem rendelkező eszközök (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) a
-`--model <id>` kapcsolót fogadják el (nem interaktív futtatásokhoz pedig a `--yes` kapcsolót is). A `setup-5dive` az egyetlen
-recept, amely nem a `$HOME` alatt végez írást: egy 5dive-ügynökflottát konfigurál úgy, hogy
-rendszergazdai tulajdonú hitelesítési profilt ír a flottagazdagépre, ezért újraindítja önmagát a `sudo`
-használatával, és nem rendelkezik saját távoli móddal. Ha úgy szeretne elindítani egy CLI-t, hogy
-a megfelelő környezeti változók legyenek beállítva, és egyáltalán ne íródjon konfiguráció, használja az általános
+Mindegyik elfogadja a `--remote <url> --api-key <key>` kapcsolókat (egy helyi eszköz konfigurálása egy
+távoli OmniRoute használatára), a `--dry-run` kapcsolót (előnézet írás nélkül), valamint a `--port` kapcsolót. Azok az eszközök,
+amelyek nem támogatják a modellek automatikus felderítését (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), elfogadják
+a `--model <id>` kapcsolót (nem interaktív futtatáshoz pedig a `--yes` kapcsolót is). A `setup-5dive` az egyetlen olyan
+konfigurációs eljárás, amely nem a `$HOME` alatt végez írást: egy 5dive-ügynökflottát konfigurál úgy, hogy
+root tulajdonú hitelesítési profilt ír a flottagazdagépre, ezért újraindítja magát a `sudo`
+használatával, és nem rendelkezik saját távoli móddal. Ha egy CLI-t a megfelelő
+környezeti változókkal, de bármilyen konfiguráció kiírása nélkül szeretne elindítani, használja az általános
 `omniroute run <target>` indítót (claude, codex, aider, goose, opencode, qwen,
-gemini — a célok és álnevek a `bin/cli/cli-manifest.mjs` fájlból származnak); a régi,
+gemini — a célok és álnevek a `bin/cli/cli-manifest.mjs` fájlból származnak); a korábbi,
 eszközspecifikus `omniroute launch` (Claude Code) és `omniroute launch-codex`
 (Codex) indítók továbbra is elérhetők. A Gemini CLI csak indítható: az `omniroute run`
-egyik célja, de nem tartozik hozzá `setup-*`/`configure` recept.
+egyik célja, de nem rendelkezik `setup-*`/`configure` konfigurációs eljárással.
 
-> **Teljes referencia:** az összesítő táblázat — az egyes parancsok által kiírt tartalom, az összes kapcsoló,
-> a helyi és távoli használat, valamint hogy mely eszközök igényelnek `/v1` utótagot — a
+> **Teljes referencia:** a központi táblázat — amely bemutatja, hogy az egyes parancsok mit írnak, felsorolja az összes kapcsolót,
+> ismerteti a helyi és távoli használatot, valamint azt, hogy mely eszközök igénylik a `/v1` utótagot — a
 > **[CLI-integrációk](../guides/CLI-INTEGRATIONS.md)** oldalon található.
 
 ### Futtatás konténeren belül
 
 Az OmniRoute-konténeren belül végrehajtott `setup-*` parancs a
-konténer saját kezdőkönyvtárába ír, amelyet egyetlen gazdagépi CLI sem olvas, és amely a
-konténerrel együtt eltűnik. Az OmniRoute ezt észleli, és írás helyett
-utasításokat megjelenítve `2` kóddal kilép. Két támogatott továbblépési lehetőség van: telepítse a CLI-t a gazdagépre, és
-az `omniroute connect` használatával csatlakozzon a konténerhez, vagy csatolja be kötött csatolással a konfigurációs könyvtárakat, és állítsa be a
-`CLI_CONFIG_HOME` változót (a compose `host` profilja). Minden `setup-*` parancs, valamint az
+konténer saját könyvtárába ír, amelyet egyetlen gazdagépen futó CLI sem olvas, és amely a
+konténerrel együtt eltűnik. Az OmniRoute ezt felismeri, és írás helyett utasításokkal együtt a `2` kilépési kóddal
+leáll. Két támogatott továbblépési lehetőség van — telepítse a CLI-t a gazdagépre, és
+az `omniroute connect` segítségével csatlakoztassa a konténerhez, vagy csatolja be a konfigurációs könyvtárakat, és állítsa be a
+`CLI_CONFIG_HOME` változót (a compose `host` profilját). Minden `setup-*` parancs, továbbá az
 `omniroute configure` és az `omniroute config set` is elfogadja az
-`--allow-container-write` kapcsolót, ha valóban a konténer saját CLI-jeit szeretné
+`--allow-container-write` kapcsolót, ha valóban a konténer saját CLI-jeit kívánja
 konfigurálni; a kiszolgáló esetében az `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ugyanezt teszi.
-Lásd: [Docker-útmutató → Gazdagépi CLI-eszközök konfigurálása](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Lásd:
+[Docker-útmutató → A gazdagép CLI-eszközeinek konfigurálása](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
 Az irányítópult **alkalmazási végpontja** (`POST /api/cli-tools/apply`) ugyanezt a
-védelmet érvényesíti: konténerben az olyan írás, amelynek célja nincs kötött csatolással beillesztve a
-gazdagépről, **`422`** választ ad `containerEphemeralTarget: true` értékkel, biztonságos
-hibaszöveggel, valamint — a gazdagépi recepttel rendelkező eszközök esetében (claude, codex, opencode, cline,
+védelmet érvényesíti: konténerben a gazdagépről nem becsatolt célhelyre irányuló
+írási kérés **`422`** választ ad `containerEphemeralTarget: true` értékkel, biztonságos
+hibaüzenettel, valamint — a gazdagépi konfigurációs eljárással rendelkező eszközöknél (claude, codex, opencode, cline,
 kilo, continue) — egy `hostSetupCommand` értékkel (például `omniroute setup-opencode`), amelyet
-ehelyett a gazdagépen kell futtatni; semmi nem íródik ki. A `dryRun: true` konténeres
-módban is működik, és a lemez módosítása nélkül egy kitakart előnézetet és célútvonalat ad vissza. Az előnézeti
-tartalom nem másolható vagy importálható hitelesítő adatokat tartalmazó konfigurációként. Az eredeti
-eszköz-/alap-URL-/API-kulcs-/modellbemenetekkel alkalmazza a konfigurációt a gazdagépen, vagy használja a megadott
-gazdagépi beállítási parancsot. Az előnézeti fejlécről és a kérési szerződésről lásd:
-[CLI-konfiguráció biztonsága](../security/CLI-CONFIGURATION.md).
-Ez a működés szándékos, és regressziós védelemmel rendelkezik a
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` tesztben — soha ne „javítsa ki” a 422-es hibát
+ehelyett a gazdagépen kell futtatni; semmi sem kerül kiírásra. A `dryRun: true` konténermódban
+is működik, és bizalmas adatoktól megtisztított előnézetet, valamint célútvonalat ad vissza a lemez módosítása nélkül. Az előnézet
+tartalma nem másolható vagy importálható hitelesítő adatokat tartalmazó konfigurációként. Az alkalmazást
+az eredeti eszköz-, alap-URL-, API-kulcs- és modellbemenetekkel hajtsa végre a gazdagépen, vagy használja a megadott,
+gazdagépoldali konfigurációs parancsot. Az előnézeti fejlécről és a kérési szerződésről lásd a
+[CLI-konfiguráció biztonsága](../security/CLI-CONFIGURATION.md) című dokumentumot. Ez a viselkedés
+szándékos, és regresszió ellen a
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` teszt védi — soha ne „javítsa” a 422-es hibát
 a védelem eltávolításával.
 
 ---
@@ -144,38 +145,39 @@ csak az egyik felülethez adnak hozzá a többi nélkül, a tesztcsomag hibával
 
 ---
 
-## 1. A CLI Code katalógusa (26 eszköz)
+## 1. A CLI Code katalógusa (27 eszköz)
 
 A `/dashboard/cli-code` oldalon megjelenő összes eszköz. A `baseUrlSupport: none` értékkel rendelkezők egyéni alap-URL helyett MITM-en vagy kézi útmutatón keresztül vannak bekötve:
 
-| id           | név                     | gyártó                    | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic                 | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                    | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                      | none           | custom         | false        |
-| cline        | Cline                   | OSS (korábban Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org                  | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)                 | full           | guide          | false        |
-| continue     | Continue                | continue.dev              | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)         | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ               | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)            | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)         | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)              | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (korábban SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI                | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS                 | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere                 | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)         | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)          | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                       | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)               | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba                   | full           | guide          | true         |
-| cursor       | Cursor                  | Anysphere                 | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                    | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research             | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                    | none           | mitm           | false        |
-| custom       | Egyéni CLI              | —                         | full           | custom-builder | false        |
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Egyéni CLI              | —                   | full           | custom-builder | false        |
 
 A `baseUrlSupport: "partial"` értékkel rendelkező eszközök kártyáján a „⚠ Részleges alap-URL” jelvény jelenik meg.
 ---
@@ -184,18 +186,18 @@ A `baseUrlSupport: "partial"` értékkel rendelkező eszközök kártyáján a �
 
 A `/dashboard/cli-agents` oldalon megjelenő autonóm ügynökök:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| id           | név              | szolgáltató              | baseUrl-támogatás | acpSpawnable |
+| ------------ | ---------------- | ------------------------ | ----------------- | ------------ |
+| hermes-agent | Hermes Agent     | Nous Research            | full              | false        |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full              | true         |
+| goose        | Goose            | Block / Linux Foundation | full              | true         |
+| interpreter  | Open Interpreter | OSS                      | full              | true         |
+| warp         | Warp AI          | Warp Inc.                | partial           | true         |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full              | false        |
+| omp          | Oh My Pi         | OSS                      | full              | true         |
+| letta        | Letta CLI        | Letta                    | full              | false        |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full              | false        |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full              | false        |
 
 ---
 

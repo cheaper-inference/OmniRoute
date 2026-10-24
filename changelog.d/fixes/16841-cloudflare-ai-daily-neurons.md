@@ -1,1 +1,0 @@
-- **fix(usage):** show Cloudflare Workers AI daily neuron usage (GraphQL Analytics, vs the 10k/day free allocation) in Provider Limits ([#16841](https://github.com/diegosouzapw/OmniRoute/pull/16841)) — thanks @askidmobile

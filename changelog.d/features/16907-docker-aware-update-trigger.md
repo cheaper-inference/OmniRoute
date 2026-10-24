@@ -1,1 +1,0 @@
-- **feat(updater):** Docker-aware dashboard update — image containers show the host `docker compose pull` + recreate command, and `DOCKER_UPDATE_TRIGGER_FILE` enables one-click updates through a host-watched request file inside `DATA_DIR` (no Docker socket) ([#16907](https://github.com/diegosouzapw/OmniRoute/pull/16907)) — thanks @semihisikman

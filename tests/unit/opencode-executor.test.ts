@@ -85,11 +85,12 @@ describe("OpencodeExecutor", () => {
       assert.equal(fetchCalls[0].url, "https://opencode.ai/inference/v1/chat/completions");
     });
 
-    it("includes deepseek-v4-flash-free in opencode-zen PROVIDER_MODELS", () => {
+    it("includes deepseek-v4.1-flash-free in opencode-zen PROVIDER_MODELS", () => {
       const models = PROVIDER_MODELS["opencode-zen"];
-      const model = models?.find((m) => m.id === "deepseek-v4-flash-free");
-      assert.ok(model, "deepseek-v4-flash-free should be in opencode-zen model list");
-      assert.equal(model.name, "DeepSeek V4 Flash Free");
+      const model = models?.find((m) => m.id === "deepseek-v4.1-flash-free");
+      assert.ok(model, "deepseek-v4.1-flash-free should be in opencode-zen model list");
+      assert.equal(model.name, "DeepSeek V4.1 Flash Free");
+      assert.deepEqual(model.aliases, ["deepseek-v4-flash-free"]);
       assert.equal(model.supportsReasoning, true);
     });
 

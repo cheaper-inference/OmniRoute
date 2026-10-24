@@ -1,1 +1,0 @@
-- **fix(providers):** OpenCode zen free-tier sessions are minted with the client's descending Identifier encoding so `x-opencode-session` stays inside the accepted counter window instead of 403 FreeTierError ([#16598](https://github.com/diegosouzapw/OmniRoute/pull/16598)) — thanks @MRQC-st. Refs #16328.

@@ -13,107 +13,58 @@ OmniRoute တွင် API တောင်းဆိုမှုတိုင်�
 
 > ရင်းမြစ်: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## Auth မုဒ် နှစ်မျိုး
+## အတည်ပြုခြင်း ပုံစံ နှစ်မျိုး
 
-### 1. API Key (Bearer)
+### ၁. API Key (Bearer)
 
-OpenAI/Anthropic/Gemini နှင့် တွဲဖက်အသုံးပြုနိုင်သော client API များနှင့် key တွင် `manage` scope ရှိသည့်အခါ စီမံခန့်ခွဲမှု route အချို့အတွက် အသုံးပြုသည်။
+OpenAI/Anthropic/Gemini နှင့် တွဲဖက်သော client API များအတွက်၊ နှင့် key တွင် `manage` scope ပါဝင်သောအခါ management route အချို့အတွက် အသုံးပြုသည်။
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`src/sse/services/auth.ts` ရှိ `isValidApiKey()` / `extractApiKey()` ဖြင့် စစ်ဆေးအတည်ပြုပြီး `src/shared/utils/apiAuth.ts` မှတစ်ဆင့် ပြန်လည် export လုပ်ထားသည်။ Validator သည် `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env var များကို အမြဲတမ်းသုံးနိုင်သော passthrough key များအဖြစ်လည်း လက်ခံသည် (issue #1350)။
+`src/sse/services/auth.ts` ထဲရှိ `isValidApiKey()` / `extractApiKey()` ဖြင့် စစ်ဆေးပြီး `src/shared/utils/apiAuth.ts` မှတစ်ဆင့် ပြန်လည် export လုပ်သည်။ validator သည် `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` ပတ်ဝန်းကျင်ကိန်းရှင် (env var) များကိုလည်း persistent passthrough key များအဖြစ် လက်ခံသည် (issue #1350)။
 
-### 2. Dashboard Session (auth_token cookie)
+### ၂. Dashboard Session (auth_token cookie)
 
-Dashboard စာမျက်နှာများနှင့် admin လုပ်ဆောင်ချက်များအတွက် ဖြစ်သည်။
+Dashboard စာမျက်နှာများနှင့် admin လုပ်ဆောင်ချက်များအတွက် အသုံးပြုသည်။
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-JWT ကို အတည်ပြုနိုင်ပြီး **ထို့အပြင်** `authenticated: true` ပါရှိမှသာ cookie ကို session အဖြစ် သတ်မှတ်သည်
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)။ Cookie ကို အသုံးပြုသူတိုင်း (dashboard route guard (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live
-server, `/api/settings/require-login`, `/api/auth/status`) သည် ထို helper မှတစ်ဆင့် လုပ်ဆောင်သည်။
-`JWT_SECRET` ဖြင့် လက်မှတ်ရေးထိုးထားသော အခြား JWT များလည်း ရှိသည် — Cursor CLI passthrough သည် key ကိုင်ဆောင်သူများအတွက်
-`iss "omniroute" / aud "cursor-cli"` token များကို ထုတ်ပေးသည် — သို့သော် ၎င်းတို့သည် session များ လုံးဝမဟုတ်ပါ
-(#13298)။
+Cookie သည် JWT ကို အတည်ပြုနိုင်ပြီး **နှင့်** `authenticated: true` ပါဝင်မှသာ session ဖြစ်သည် (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)။ Cookie ကို သုံးသည့် အစိတ်အပိုင်းတိုင်း (dashboard route guard (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live server, `/api/settings/require-login`, `/api/auth/status`) သည် ထို helper ကို ဖြတ်သန်းသည်။ `JWT_SECRET` ဖြင့် လက်မှတ်ထိုးထားသော အခြား JWT များလည်း ရှိသည် — Cursor CLI passthrough သည် key ကိုင်ထားသူများအတွက် `iss "omniroute" / aud "cursor-cli"` token များကို ထုတ်ပေးပြီး ၎င်းတို့သည် ဘယ်တော့မှ session မဖြစ်ပါ (#13298)။
 
-`src/shared/utils/apiAuth.ts` ရှိ `isDashboardSessionAuthenticated()` ဖြင့် စစ်ဆေးအတည်ပြုသည်။ Pipeline သည် ရက် 30 သက်တမ်းအတွင်း ရက် 7 ထက်နည်းသာ ကျန်ရှိသောအခါ JWT ကို အလိုအလျောက် refresh လုပ်သည်။
+`src/shared/utils/apiAuth.ts` ထဲရှိ `isDashboardSessionAuthenticated()` က စစ်ဆေးသည်။ Pipeline သည် JWT ၏ ၃၀ ရက် သက်တမ်းအတွင်း ၇ ရက်အောက်သာ ကျန်သောအခါ JWT ကို အလိုအလျောက် refresh လုပ်သည်။
 
-Session တစ်ခုသည် ရက် 30 မပြည့်မီလည်း အဆုံးသတ်နိုင်သည်။ အကြောင်းမှာ token ထုတ်ပေးသည့် minter တိုင်းသည် `mintDashboardSessionToken` မှတစ်ဆင့် လုပ်ဆောင်သောကြောင့်ဖြစ်ပြီး (ထုတ်ပေးသည့်အချိန် `iat` နှင့် ID `jti` ပါရှိသည်) verifier သည် setting နှစ်ခုကို စစ်ဆေးသည်။ ပထမတစ်ခုမှာ password ပြောင်းသည့်အခါ သတ်မှတ်သော `sessionsValidAfter` ဖြစ်ပြီး ၎င်းကြောင့် ထိုအချိန်မတိုင်မီ ထုတ်ပေးထားသည့် session အားလုံးသည် အတည်ပြု၍မရတော့ပါ (password ပြောင်းခဲ့သည့် browser က cookie အသစ်ကို ရရှိသည်)။ ဒုတိယတစ်ခုမှာ `revokedDashboardSessions` ဖြစ်ပြီး `POST /api/auth/logout` က sign out လုပ်ထားသော session ၏ `jti` ကို ထိုနေရာသို့ ထည့်သည်။ Release အဟောင်းမှ ထုတ်ပေးထားသော session များတွင် မည်သည့် claim မျှ မပါရှိဘဲ ပထမဆုံး password ပြောင်းလဲသည့်အချိန်အထိ ဆက်လက်အကျုံးဝင်သည်။ Setting များကို ဖတ်၍မရပါက session ကို ယုံကြည်လက်ခံမည်မဟုတ်ပါ။
+Session သည် ၃၀ ရက် မပြည့်မီ ကုန်ဆုံးနိုင်သည်။ အကြောင်းမှာ token ထုတ်သူအားလုံးသည် `mintDashboardSessionToken` (issue time `iat` နှင့် id `jti` ပါဝင်သည်) ကို ဖြတ်သန်းရပြီး verifier က settings နှစ်ခုကို စစ်ဆေးသောကြောင့် ဖြစ်သည် — ပထမတစ်ခုမှာ `sessionsValidAfter` ဖြစ်ပြီး password ပြောင်းလဲမှုက ၎င်းကို သတ်မှတ်သည်။ ထိုအချိန်မတိုင်မီ ထုတ်ထားသော session အားလုံး အသက်ဝင်ခြင်း ရပ်သွားသည် (password ပြောင်းသော browser သည် cookie အသစ် ရရှိသည်)။ ဒုတိယမှာ `revokedDashboardSessions` ဖြစ်ပြီး `POST /api/auth/logout` က ထွက်ခွာသွားသော session ၏ `jti` ကို ထည့်သည်။ ဗားရှင်းဟောင်းမှ ထုတ်ထားသော session များတွင် ဤ claim နှစ်ခုလုံး မပါဝင်ဘဲ ပထမဆုံး password ပြောင်းသည်အထိ valid ဖြစ်နေဆဲ ဖြစ်သည်။ Settings ကို ဖတ်၍ မရပါက session ကို ယုံကြည်ခြင်း မပြုပါ။
 
-စီမံခန့်ခွဲမှု route အချို့သည် မုဒ် **တစ်မျိုးမျိုး** ကို လက်ခံသည်- cookie သို့မဟုတ် API key တွင် `manage` (သို့မဟုတ် `admin`) scope ရှိသောအခါ `Bearer <key>`။ ဤအချက်က v3.8 တွင် ထည့်သွင်းခဲ့သော "API call များမှတစ်ဆင့် ပြင်ဆင်သတ်မှတ်နိုင်သည့်" workflow ကို အသုံးပြုနိုင်စေသည်။
+Management route အချို့သည် **မုဒ်နှစ်ခုလုံး** ကို လက်ခံသည်: cookie သို့မဟုတ် API key တွင် `manage` (သို့မဟုတ် `admin`) scope ရှိသောအခါ `Bearer <key>`။ ဤအချက်ကြောင့် v3.8 တွင် ထည့်သွင်းခဲ့သည့် "API ခေါ်ဆိုမှုဖြင့် ပြင်ဆင်နိုင်သော" workflow ဖြစ်လာသည်။
 
-#### ရွေးချယ်အသုံးပြုနိုင်သော OIDC login gate (#6973)
+#### စနစ်ရွေးချယ်နိုင်သော OIDC login gate (#6973)
 
-Dashboard admin login သည် မူလ password login နှင့်အတူ **ရွေးချယ်ဖွင့်နိုင်သော** OIDC (OpenID Connect) flow ကိုလည်း ပံ့ပိုးသည် — password login ကို ဖယ်ရှားခြင်းမရှိဘဲ
-ထပ်မံဖြည့်စွက်ပေးခြင်းသာ ဖြစ်သည်-
+Dashboard admin login သည် မူလ password login နှင့်အတူ **ရွေးချယ်ခွင့်ရှိသော** OIDC (OpenID Connect) flow ကိုလည်း ထောက်ပံ့သည် — password login ကို ဘယ်တော့မှ ဖယ်ရှားခြင်း မရှိပါ၊ ထပ်ဖြည့်ခြင်းသာ ဖြစ်သည်:
 
-- `settings.oidcEnabled === true` ဖြစ်ပြီး **ထို့အပြင်** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` အားလုံးကို ပြင်ဆင်သတ်မှတ်ထားမှသာ ဖွင့်ထားသည် (Settings → Auth)။
-  ထိုသို့မဟုတ်ပါက `GET /api/auth/oidc/login` သည် `400` ကို ပြန်ပေးသည်။
-- `GET /api/auth/oidc/login` သည် issuer ၏
-  `/.well-known/openid-configuration` မှ `authorization_endpoint` ကို ရှာဖွေသည် (`<issuer>/authorize` ကို
-  အရန်အဖြစ် အသုံးပြုသည်)၊ ဝင်လာသော request မှ redirect URI ကို တည်ဆောက်သည်
-  (`x-forwarded-proto` ကို ထည့်သွင်းစဉ်းစားသည်)၊ ထို့နောက် `httpOnly` `oidc_state` cookie တွင်
-  သိမ်းဆည်းထားသော ကျပန်း `state` တစ်ခုဖြင့် IdP သို့ redirect လုပ်သည်။
-- `GET /api/auth/oidc/callback` သည် `state` ကို စစ်ဆေးအတည်ပြုကာ authorization
-  code ကို လဲလှယ်ပြီး issuer ၏ JWKS မှတစ်ဆင့် ID token ၏ လက်မှတ်ကို
-  (`jose` ၏ `createRemoteJWKSet`၊ JWKS URI တစ်ခုစီအလိုက် cache လုပ်ထားသည်) `issuer`/`audience`
-  စစ်ဆေးမှုများနှင့်အတူ အတည်ပြုသည်။ `oidcAllowedSubjects` allowlist သည် မဖြစ်မနေလိုအပ်သည်- ၎င်းသည်
-  token ၏ `sub` claim သို့မဟုတ် `email` claim နှင့် ကိုက်ညီမှုရှိမရှိ စစ်ဆေးသည် — `email_verified === true`
-  ဖြစ်မှသာ email claim ကို လက်ခံသောကြောင့် IdP ရှိ အတည်မပြုရသေးသော email သည်
-  gate ကို မည်သည့်အခါမျှ ဖြတ်ကျော်နိုင်မည်မဟုတ်ပါ — ထို့အပြင် entry မရှိပါက callback သည် login အားလုံးကို
-  ငြင်းပယ်သည် (`not_configured`)။
-- အောင်မြင်သောအခါ password login က ထုတ်ပေးသည့် **လုံးဝတူညီသော** ရက် 30 သက်တမ်းရှိ `auth_token` JWT ကို
-  ထုတ်ပေးသည် (`src/app/api/auth/login/route.ts`)။ ထို့ကြောင့် ကျန် dashboard
-  session pipeline (auto-refresh၊ cookie flag များ) သည် မပြောင်းလဲပါ —
-  OIDC သည် cookie ကို ထုတ်ပေးသည့်နည်းလမ်းကိုသာ အစားထိုးပြီး cookie က ပေးအပ်သည့် ခွင့်ပြုချက်များကို မပြောင်းလဲပါ။
-- `oidc*` setting အားလုံး (`oidcEnabled`, `oidcDisablePasswordLogin`,
-  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) သည် `SECURITY_IMPACTING_SETTINGS_KEYS`
-  (`src/shared/constants/securityImpactingSettings.ts`) ထဲတွင် ပါဝင်သည်။ Body တွင် စီမံခန့်ခွဲမှု
-  password ကို `currentPassword` အဖြစ် မထည့်ထားပါက `PATCH /api/settings` သည်
-  `400 PASSWORD_REQUIRED` ကို ပြန်ပေးသည် (မှားယွင်းပါက `401 PASSWORD_MISMATCH`)။
-  `oidcDisablePasswordLogin` သည် password _login_ (`POST /api/auth/login`) ကို ငြင်းပယ်သော်လည်း
-  သိမ်းဆည်းထားသော password hash ကို ဆက်လက်ထိန်းသိမ်းထားပြီး re-auth လုပ်ရာတွင်လည်း
-  `currentPassword` ကို ၎င်းနှင့် တိုက်ဆိုင်စစ်ဆေးဆဲဖြစ်သည်။
-- `POST /api/settings/import-json` သည် ထို re-auth ကို ကျော်သွားသောကြောင့် ရေးသားသိမ်းဆည်းခြင်းမပြုမီ
-  `IMPORT_STRIPPED_SETTINGS_KEYS` (တူညီသော file) အတွင်းရှိ key အားလုံးကို ဖယ်ရှားသည်- password နှင့်
-  `currentPassword`၊ `SECURITY_IMPACTING_SETTINGS_KEYS` entry အားလုံးနှင့်
-  dashboard session state (`sessionsValidAfter`, `revokedDashboardSessions`) တို့ဖြစ်သည်။
-  ထို့ကြောင့် backup အဟောင်းတစ်ခုကို import လုပ်ခြင်းသည် password ပြောင်းလဲမှု
-  သို့မဟုတ် sign-out လုပ်မှုကြောင့် အဆုံးသတ်ပြီးသော session ကို ပြန်လည်အသက်သွင်းနိုင်မည်မဟုတ်ပါ။
+- `settings.oidcEnabled === true` **နှင့်** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` အားလုံး configure လုပ်ထားမှသာ ဖွင့်ပေးသည် (Settings → Auth)။ မဟုတ်ပါက `GET /api/auth/oidc/login` က `400` ပြန်ပေးသည်။
+- `GET /api/auth/oidc/login` သည် issuer ၏ `/.well-known/openid-configuration` မှ `authorization_endpoint` ကို ရှာဖွေသည် (`<issuer>/authorize` သို့ fallback လုပ်သည်)၊ ဝင်လာသော request မှ redirect URI ကို တည်ဆောက်သည် (`x-forwarded-proto` ကို အသုံးပြု၍)၊ ထို့နောက် `httpOnly` `oidc_state` cookie တွင် သိမ်းထားသော random `state` ဖြင့် IdP သို့ redirect လုပ်သည်။
+- `GET /api/auth/oidc/callback` သည် `state` ကို စစ်ဆေးပြီး authorization code ကို လဲလှယ်သည်၊ ထို့နောက် ID token ၏ signature ကို issuer ၏ JWKS ဖြင့် အတည်ပြုသည် (`jose` ၏ `createRemoteJWKSet`၊ JWKS URI တစ်ခုစီအလိုက် cache လုပ်ထားသည်)၊ `issuer`/`audience` စစ်ဆေးမှုများ ပါဝင်သည်။ `oidcAllowedSubjects` allowlist သည် မဖြစ်မနေ လိုအပ်သည်: ၎င်းသည် token ၏ `sub` claim သို့မဟုတ် `email` claim နှင့် ကိုက်ညီသည် — `email` claim ကို `email_verified === true` ဖြစ်မှသာ လက်ခံသည်၊ ထို့ကြောင့် IdP တွင် အတည်မပြုရသေးသော email သည် gate ကို ဘယ်တော့မှ ဖြတ်မသွားနိုင်ပါ — entry မရှိပါက callback သည် login တိုင်းကို ပယ်ချသည် (`not_configured`)။
+- အောင်မြင်ပါက password login ထုတ်ပေးသည့် **အတူတူ** 30-day `auth_token` JWT ကို mint လုပ်သည် (`src/app/api/auth/login/route.ts`)။ ထို့ကြောင့် dashboard session pipeline ၏ အခြားအပိုင်းများ (auto-refresh၊ cookie flags) သည် မပြောင်းလဲပါ — OIDC သည် cookie ကို ဘယ်လို ထုတ်ပေးသလဲကိုသာ အစားထိုးသည်၊ ၎င်းပေးသော အခွင့်အရေးကို မပြောင်းပါ။
+- `oidc*` setting အားလုံး (`oidcEnabled`၊ `oidcDisablePasswordLogin`၊ `oidcIssuer`၊ `oidcClientId`၊ `oidcClientSecret`၊ `oidcAllowedSubjects`၊ `oidcRedirectPath`၊ `oidcScopes`) သည် `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`) တွင် ရှိသည်: `PATCH /api/settings` သည် request body တွင် management password ကို `currentPassword` အဖြစ် မပါဝင်ပါက `400 PASSWORD_REQUIRED` ပြန်ပေးသည် (မှားနေပါက `401 PASSWORD_MISMATCH`)။ `oidcDisablePasswordLogin` သည် password _login_ (`POST /api/auth/login`) ကို ပိတ်သော်လည်း သိမ်းထားသော password hash ကို ဖျက်ခြင်းမရှိပါ၊ ပြန်လည် authentication ကလည်း ၎င်းနှင့် `currentPassword` ကို ဆက်စစ်သည်။
+- `corsOrigins` နှင့် `bruteForceProtection` သည်လည်း `SECURITY_IMPACTING_SETTINGS_KEYS` တွင် ပါဝင်သည်: ၎င်းတို့ကို လျှော့ချလိုက်ခြင်းသည် login ကာကွယ်မှုများကို အားနည်းစေသောကြောင့် တူညီသော `currentPassword` ပြန်လည် authentication (Security tab က တောင်းသည်) လိုအပ်ပြီး JSON import တွင် ၎င်းတို့ကို ချန်လှပ်သည်။
+- Security-policy key အားလုံး — `SECURITY_IMPACTING_SETTINGS_KEYS` entry များ၊ `oidc*` key အားလုံးနှင့် dashboard session state — သည် `PATCH /api/settings` တွင် **operator-only** ဖြစ်သည်: manage-scoped API key သို့မဟုတ် `oma_` access token ကို `currentPassword` မှန်ပါစေ `403` ဖြင့် ပယ်ချပြီး ပယ်ချမှုကို `settings.update_failed` နှင့် `reason: OPERATOR_REQUIRED` ဖြင့် audit လုပ်သည် (`src/lib/api/operatorCredential.ts` ရှိ `requireOperatorCredential()`)။ ပုံမှန် setting များ (theme၊ display preference) သည် `manage` key သို့မဟုတ် `admin` access token အတွက် ဆက်ရေးနိုင်သည်။ `/api/settings` ၏ mutation တိုင်း (နှင့် `/api/settings/require-login`) သည် `admin` access-token scope လိုအပ်သည် (`src/server/authz/accessScopes.ts` ရှိ `ADMIN_MUTATION_EXACT_PATHS`၊ exact-path match); `GET` သည် `read` ဖြစ်ဆဲ ဖြစ်ပြီး `/api/settings/*` ၏ အခြား sub-route များ (proxies၊ combo defaults၊ model aliases၊ compression၊ purges…) သည် method-inferred `write` scope ကို ဆက်သုံးသည်။
+- `POST /api/settings/import-json` သည် ထို re-auth ကို ကျော်သည်၊ ထို့ကြောင့် ရေးသားခြင်းမပြုမီ `IMPORT_STRIPPED_SETTINGS_KEYS` (တူညီသော ဖိုင်) ရှိ key အားလုံးကို ဖယ်ရှားသည်: password နှင့် `currentPassword`၊ `SECURITY_IMPACTING_SETTINGS_KEYS` entry အားလုံး၊ နှင့် dashboard session state (`sessionsValidAfter`၊ `revokedDashboardSessions`)။ ထို့ကြောင့် ဟောင်းသော backup ကို import လုပ်ခြင်းက password ပြောင်းခြင်း သို့မဟုတ် sign-out ဖြင့် အဆုံးသတ်ခဲ့သော session ကို ပြန်လည်အသက်ဝင်စေနိုင်ခြင်း မရှိပါ။
 
-## Route Class များ
+## Route အမျိုးအစားများ
 
-`src/server/authz/types.ts` တွင် class သုံးခုကို သတ်မှတ်ထားသည်။ တိတိကျကျ အမျိုးအစားမခွဲခြားနိုင်သော route အားလုံးကို `MANAGEMENT` အဖြစ် သတ်မှတ်မည်။
+`src/server/authz/types.ts` သည် အမျိုးအစား သုံးမျိုးကို သတ်မှတ်သည်; အမျိုးအစား အတိအကျ သတ်မှတ်၍ မရသော route မှန်သမျှသည် `MANAGEMENT` သို့ ပြန်ကျသည်။
 
-| Class        | ဖော်ပြချက်                                                                                                                                                                    | လိုအပ်သော အထောက်အထားစိစစ်မှု                                                                    |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `PUBLIC`     | login၊ logout၊ status၊ init၊ health နှင့် onboarding bootstrap ကဲ့သို့ အန္တရာယ်ကင်းကြောင်း အတိအလင်း သတ်မှတ်ထားသော route များ။                                                 | မလိုအပ်ပါ                                                                                       |
-| `CLIENT_API` | Model ဝန်ဆောင်မှုပေးသည့် endpoint များ — `/api/v1/*`၊ `/api/v1beta/*` နှင့် alias များဖြစ်သော `/v1/*`၊ `/v1beta/*`၊ `/chat/completions`၊ `/responses`၊ `/models`၊ `/codex/*`။ | အမှန်တကယ် သက်ရောက်နေသော `REQUIRE_API_KEY` feature flag ကို ဖွင့်ထားသည့်အခါ Bearer key လိုအပ်သည် |
-| `MANAGEMENT` | Dashboard စာမျက်နှာများ၊ ဆက်တင်များ၊ provider များ၊ key များ၊ admin နှင့် ရောဂါရှာဖွေရေး endpoint များ။                                                                       | Dashboard session သို့မဟုတ် `manage` scope ပါသော Bearer လိုအပ်သည်                               |
+| အမျိုးအစား   | ဖော်ပြချက်                                                                                                                                                       | လိုအပ်သော auth                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `PUBLIC`     | ရှင်းရှင်းလင်းလင်း ဘေးကင်းသော route များ — login၊ logout၊ status၊ init၊ health၊ onboarding bootstrap။                                                            | မလို                                                                |
+| `CLIENT_API` | Model ဝန်ဆောင်မှု endpoint များ — `/api/v1/*`၊ `/api/v1beta/*`၊ နှင့် alias များ `/v1/*`၊ `/v1beta/*`၊ `/chat/completions`၊ `/responses`၊ `/models`၊ `/codex/*`။ | ထင်ရှားသော `REQUIRE_API_KEY` feature flag ဖွင့်ထားသောအခါ Bearer key |
+| `MANAGEMENT` | Dashboard စာမျက်နှာများ၊ settings၊ provider များ၊ key များ၊ admin နှင့် diagnostics endpoint များ။                                                               | Dashboard session သို့မဟုတ် `manage` scope ပါသော Bearer             |
 
-`MANAGEMENT` action အချို့ကို **operator သာ** လုပ်ဆောင်နိုင်သည်။ `manage` key တစ်ခုတည်းဖြင့် မလုံလောက်ပါ။ သိမ်းဆည်းထားသော
-credential များကို export လုပ်ခြင်း (`GET /api/settings/export-json`၊ `GET /api/db-backups/export`၊
-`GET /api/db-backups/exportAll`)၊ sync token ထုတ်ပေးခြင်း (`POST /api/sync/tokens`) နှင့်
-`admin` CLI access token ဖန်တီးခြင်း (`POST /api/cli/tokens`) တို့အတွက် dashboard session၊ local CLI
-subject သို့မဟုတ် login ပိတ်ထားခြင်း လိုအပ်သည်။ မည်သည့် scope ပါသော API key မဆိုနှင့် `oma_` access token များသည် `403` ကို ရရှိမည်။ စစ်ဆေးမှုကို
-`src/lib/api/operatorCredential.ts` ရှိ (`resolveOperatorCredential()` /
-`requireOperatorCredential()`) တွင် ပြုလုပ်သည်။
-
-A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
-credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), restoring a backup over the live data
-(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
-`POST /api/settings/import-json`), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
-lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
+`MANAGEMENT` လုပ်ဆောင်ချက် အချို့သည် **operator-only** ဖြစ်သည်: `manage` key သာလျှင် မလုံလောက်ပါ။ သိမ်းထားသော credential များကို ထုတ်ယူခြင်း (`GET /api/settings/export-json`၊ `GET /api/db-backups/export`၊ `GET /api/db-backups/exportAll`)၊ လက်ရှိ data အပေါ် backup ကို ပြန်ထည့်ခြင်း (`dryRun=true` အပါအဝင် `POST /api/db-backups/import`၊ id ဖြင့် `POST /api/db-backups` restore၊ `POST /api/settings/import-json`)၊ restore point များကို ဖျက်ခြင်း (`DELETE /api/db-backups` cleanup နှင့် `PATCH /api/db-backups` ကြောင့်ဆိုသော ၎င်းက ထိန်းသိမ်းထားသော retention သည် backup တိုင်းပြီးနောက် အလိုအလျောက် pruning ကို မောင်းနှင်သည်) တို့အတွက် dashboard session၊ local CLI subject သို့မဟုတ် login ပိတ်ထားခြင်း လိုအပ်သည်။ Sync token ထုတ်ခြင်း (`POST /api/sync/tokens`) နှင့် `admin` CLI access token ထုတ်ခြင်း (`POST /api/cli/tokens`) တို့သည် login မုဒ်အားလုံးတွင် dashboard session သို့မဟုတ် local CLI subject လိုအပ်သည်။ မည်သည့် scope ရှိ API key မဆို နှင့် `oma_` access token များသည် operator credential မဟုတ်ပါ: လိုအပ်သည့်အခါတိုင်း `403` ရရှိသည်။ စစ်ဆေးမှုသည် `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) တွင် ရှိသည်။ Login setting များ ပြောင်းခြင်းလည်း operator-only ဖြစ်သည်: `POST /api/settings/require-login` (management password သတ်မှတ်ခြင်း / `requireLogin` ပြောင်းခြင်း) သည် password ရှိပြီးနောက် ထို credential များကိုသာ လက်ခံသည် — ပထမဆုံး run ချိန် bootstrap window (password မရှိသေးချိန်) မပြောင်းလဲပါ — နှင့် dashboard session က password အစားထိုးရန် `currentPassword` ပို့ရမည် (မပါခြင်း သို့မဟုတ် မှားခြင်းဖြစ်ပါက `403`၊ `settings.update_failed` အဖြစ် audit လုပ်သည်)။ Local CLI နှင့် login ပိတ်ထားသော instance တို့သည် recovery လမ်းကြောင်းကို ထိန်းသိမ်းထားပြီး ထို့ကြောင့် `currentPassword` မပါဘဲ password သတ်မှတ်နိုင်သည်၊ အကြောင်းမှာ နှစ်ခုလုံးသည် data directory ပိုင်ဆိုင်သော host ဖြင့် ချိတ်ဆက်ထားသောကြောင့် ဖြစ်သည်။
 
 ## လုပ်ငန်းစဉ်
 
@@ -261,15 +212,15 @@ subset ဖြစ်ပြီး၊ ထို full catalog မဟုတ်ပါ�
 (`src/lib/accessTokens/scopes.ts`) ဖြင့် အဆင့်သတ်မှတ်သည်။ ဤအဆင့်သည် access-token
 credential အတွက်သာ သက်ဆိုင်သည်။ [Management Authentication](../guides/MANAGEMENT-AUTH.md) ကို ကြည့်ပါ။
 
-## Auth လိုအပ်မှု အဖွင့်/အပိတ်
+## Auth လိုအပ်ချက် ခလုတ်
 
-`src/shared/utils/apiAuth.ts` ရှိ `isAuthRequired()` သည် request တစ်ခုအတွက် **မည်သည့်** auth ကိုမဆို အတည်ပြုစစ်ဆေးမည်လားဆိုသည်ကို ဆုံးဖြတ်သည်-
+`src/shared/utils/apiAuth.ts` ရှိ `isAuthRequired()` သည် request တစ်ခုအတွက် **မည်သည့်** auth ကိုမဆို တည်ဆဲ လုပ်ရမလား ဆုံးဖြတ်သည်:
 
-- `settings.requireLogin === false` → auth ကို စနစ်တစ်ခုလုံးအတွက် ပိတ်ထားသည်။
-- Password သတ်မှတ်မထားဘဲ `INITIAL_PASSWORD` env var လည်း မရှိပါက → bootstrap mode သည် onboarding wizard နှင့် loopback request များကို ခွင့်ပြုသော်လည်း ကွန်ရက်ပေါ် ဖွင့်လှစ်ထားသော request များအတွက် credential များ လိုအပ်နေဆဲဖြစ်သည်။
-- DB error တစ်ခုခု ဖြစ်ပေါ်ပါက → ပုံမှန်အားဖြင့် လုံခြုံမှုရှိစေရန် ဝင်ရောက်ခွင့်ကို ပိတ်ထားသည် (secure-by-default)။
+- `settings.requireLogin === false` → auth ကို global အရ ပိတ်ထားသည်၊ ဒါပေမဲ့ always-protected tier ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) နှင့် ၎င်းလက်ခံသော credential ကို ထုတ်ပေးသည့် ခေါ်ဆိုမှုများကတော့ login ဖွင့်ထားစဉ်နှင့် တူညီသော credential လိုအပ်သည်: sync token ထုတ်ခြင်း၊ မည်သည့် scope ဖြင့်မဆို CLI access token ထုတ်ခြင်း၊ နှင့် `manage`/`admin` scope ပါသော API key ဖန်တီးခြင်း၊ ထို scope ကို key တစ်ခုသို့ ပေးခြင်း၊ သို့မဟုတ် ထို key ကို regenerate သို့မဟုတ် ပြခြင်း (`src/lib/api/requireManagementAuth.ts` ရှိ `requireCredentialForManagementScopedKey()`)။ Inference-only key များသည် ဖွင့်ထားဆဲ ဖြစ်သည်။
+- Password သတ်မှတ်မထားပြီး **နှင့်** `INITIAL_PASSWORD` env var မရှိပါက → bootstrap mode သည် onboarding wizard နှင့် loopback request များကို ခွင့်ပြုသော်လည်း ပြင်ပ network request များသည် credential လိုအပ်ဆဲ ဖြစ်သည်။
+- DB error မည်သည့်အချိန်မဆို → fail closed (ဘေးကင်းရေးကို မူလအဖြစ် ထားသည်)။
 
-Client API key စည်းကမ်းသတ်မှတ်ချက်သည် `process.env.REQUIRE_API_KEY` ကို တိုက်ရိုက်ဖတ်ခြင်းမဟုတ်ဘဲ `src/shared/utils/featureFlags.ts` ရှိ `isRequireApiKeyEnabled()` ကို အသုံးပြုသည်။ ဤအချက်သည် deploy လုပ်ထားသော instance များအတွက် အရေးကြီးသည်။ Dashboard → Feature Flags တွင် `REQUIRE_API_KEY` ကို အဖွင့်/အပိတ် ပြောင်းလဲခြင်းက DB override တစ်ခုကို သိမ်းဆည်းပြီး ဤ helper ကို အတူတကွ အသုံးပြုသော `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` နှင့် အခြား client-API auth စစ်ဆေးမှုများအပေါ် ချက်ချင်း သက်ရောက်သည်။ Feature flag store ကို ဖတ်၍မရပါက client API auth သည် ဝင်ရောက်ခွင့်ကို ပိတ်ထားပြီး key တစ်ခု လိုအပ်သည်။
+Client API key enforcement သည် `src/shared/utils/featureFlags.ts` ရှိ `isRequireApiKeyEnabled()` ကို အသုံးပြုသည်၊ တိုက်ရိုက် `process.env.REQUIRE_API_KEY` ကို ဖတ်ခြင်း မဟုတ်ပါ။ ၎င်းသည် deployed instance များအတွက် အရေးကြီးသည်: Dashboard → Feature Flags တွင် `REQUIRE_API_KEY` ကို ပြောင်းခြင်းက DB override ကို သိမ်းပြီး `/v1/*`၊ `/v1beta/*`၊ `/models`၊ `/responses`၊ `/chat/completions`၊ `/codex/*` နှင့် ဤ helper ကို မျှဝေသော အခြား client-API auth စစ်ဆေးမှုများကို ချက်ချင်း သက်ရောက်စေသည်။ Feature flag store ကို ဖတ်၍ မရပါက client API auth သည် fail closed ဖြစ်ပြီး key တစ်ခု လိုအပ်သည်။
 
 ## လိုက်ဖက်ညီမှုကို ချိုးဖောက်သော ပြောင်းလဲမှု — v3.8.0
 

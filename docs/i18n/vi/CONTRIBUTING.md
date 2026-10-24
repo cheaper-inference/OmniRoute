@@ -12,17 +12,17 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Điều kiện tiên quyết
 
-- **Node.js** `>=22.22.3 <23`, hoặc `>=24.0.0 <27` (khuyến nghị: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, hoặc `>=24.0.0 <27` (khuyến nghị: 24 LTS)
 - **npm** 10+
 
 > **Người dùng npm v11+ (Node 24+):** Sau khi chạy `npm install`, hãy xác minh rằng các mô-đun native đã được cài đặt:
-> `node -e "require('better-sqlite3')"`. Nếu lệnh thất bại với `MODULE_NOT_FOUND`,
+> `node -e "require('better-sqlite3')"`. Nếu lệnh thất bại với lỗi `MODULE_NOT_FOUND`,
 > hãy chạy `npm approve-scripts better-sqlite3 && npm install`. Xem
 > [Khắc phục sự cố](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Sao chép kho lưu trữ & Cài đặt
+### Sao chép & Cài đặt
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -41,7 +41,7 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Các biến chính dành cho phát triển:
+Các biến chính dành cho môi trường phát triển:
 
 | Biến                   | Giá trị mặc định khi phát triển | Mô tả                       |
 | ---------------------- | ------------------------------- | --------------------------- |
@@ -55,65 +55,65 @@ Các biến chính dành cho phát triển:
 
 Bảng điều khiển cung cấp các nút bật/tắt trên giao diện người dùng cho những tính năng cũng có thể được cấu hình thông qua biến môi trường:
 
-| Vị trí cài đặt     | Nút bật/tắt                 | Mô tả                                             |
-| ------------------ | --------------------------- | ------------------------------------------------- |
-| Cài đặt → Nâng cao | Chế độ gỡ lỗi               | Bật nhật ký yêu cầu gỡ lỗi (giao diện người dùng) |
-| Cài đặt → Chung    | Khả năng hiển thị thanh bên | Hiện/ẩn các phần của thanh bên                    |
+| Vị trí cài đặt     | Nút bật/tắt                 | Mô tả                                  |
+| ------------------ | --------------------------- | -------------------------------------- |
+| Cài đặt → Nâng cao | Chế độ gỡ lỗi               | Bật nhật ký yêu cầu gỡ lỗi (giao diện) |
+| Cài đặt → Chung    | Khả năng hiển thị thanh bên | Hiển thị/ẩn các phần của thanh bên     |
 
 Các cài đặt này được lưu trong cơ sở dữ liệu và duy trì qua các lần khởi động lại, đồng thời ghi đè các giá trị mặc định của biến môi trường khi được thiết lập.
 
 ### Chạy cục bộ
 
 ```bash
-# Chế độ phát triển (tải lại nóng)
+# Chế độ phát triển (tự động tải lại)
 npm run dev
 
-# Bản dựng sản xuất
-npm run build    # next build → .build/next/ sau đó assembleStandalone → dist/
+# Bản dựng production
+npm run build    # next build → .build/next/ rồi assembleStandalone → dist/
 npm run start
 
 # Biên dịch nhanh chỉ dành cho backend/API đối với các thay đổi của người đóng góp
 npm run build:contributor
 
-# Bản dựng phát hành (dựng lại từ đầu + dấu kiểm HEAD — bắt buộc để triển khai)
+# Bản dựng phát hành (dựng lại từ đầu + dấu kiểm tra HEAD — bắt buộc để triển khai)
 npm run build:release   # rm -rf .build dist && build + ghi dist/BUILD_SHA
 
 # Cấu hình cổng thường dùng
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bản dựng dành cho người đóng góp chỉ thực hiện xác thực biên dịch: nó không lắp ráp bản phân phối độc lập
-hoặc dựng các tài nguyên đóng gói native tùy chọn. Hãy sử dụng bản dựng sản xuất thông thường khi
+Bản dựng dành cho người đóng góp chỉ thực hiện xác thực biên dịch: nó không đóng gói bản phân phối độc lập
+hoặc dựng các tài nguyên đóng gói native tùy chọn. Hãy sử dụng bản dựng production thông thường khi
 bạn cần xác thực gói có thể phát hành.
 
 ### Bố cục đầu ra bản dựng
 
-| Thư mục   | Nội dung                                                                                | Được theo dõi |
-| --------- | --------------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Mã nguồn ứng dụng (TypeScript / TSX)                                                    | Có            |
-| `.build/` | Các tệp trung gian — đầu ra của `next build` (được git bỏ qua, `distDir = .build/next`) | Không         |
-| `dist/`   | Gói có thể phát hành — được lắp ráp bởi `assembleStandalone` (được git bỏ qua)          | Không         |
+| Thư mục   | Nội dung                                                                          | Được theo dõi |
+| --------- | --------------------------------------------------------------------------------- | ------------- |
+| `src/`    | Mã nguồn ứng dụng (TypeScript / TSX)                                              | Có            |
+| `.build/` | Tệp trung gian — đầu ra của `next build` (bị git bỏ qua, `distDir = .build/next`) | Không         |
+| `dist/`   | Gói có thể phát hành — được tạo bởi `assembleStandalone` (bị git bỏ qua)          | Không         |
 
 Quy trình dựng chỉ gồm một lượt:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (đầu ra Next.js)
-  └─ assembleStandalone()                 (sao chép bản độc lập + tệp tĩnh + công khai + tài nguyên native)
+  └─ assembleStandalone()                 (sao chép bản độc lập + tệp tĩnh + public + tài nguyên native)
        └─ đầu ra: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` còn dọn sạch cả hai thư mục trước tiên và ghi
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) làm dấu kiểm tính toàn vẹn khi triển khai.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) làm dấu kiểm tra tính toàn vẹn khi triển khai.
 
-`npm run build:contributor` sử dụng cấu hình dựng chỉ dành cho backend. Cấu hình này tạm thời thay thế
-các tệp giao diện người dùng của bảng điều khiển bằng tệp giả trong khi dựng, giữ nguyên các trình xử lý tuyến API và khôi phục các tệp gốc
-sau khi dựng. Hãy sử dụng `npm run build` cho các thay đổi ảnh hưởng đến giao diện người dùng của bảng điều khiển hoặc để
+`npm run build:contributor` sử dụng cấu hình dựng chỉ dành cho backend. Nó tạm thời thay thế
+các tệp giao diện bảng điều khiển bằng tệp giả trong khi dựng, giữ nguyên các trình xử lý tuyến API và khôi phục các tệp gốc
+sau khi dựng. Hãy sử dụng `npm run build` cho những thay đổi ảnh hưởng đến giao diện bảng điều khiển hoặc để
 xác thực đầy đủ bản phát hành; cấu hình dành cho người đóng góp không thay thế cho bản dựng phát hành.
 
-> **Lưu ý khi triển khai lên VPS:** thư mục image từ xa `/usr/lib/node_modules/omniroute/app/`
+> **Lưu ý khi triển khai VPS:** thư mục image từ xa `/usr/lib/node_modules/omniroute/app/`
 > không thay đổi. Các kỹ năng triển khai dùng rsync để đồng bộ nội dung của `dist/` vào thư mục đó.
-> Chỉ đường dẫn đầu ra bản dựng trong kho lưu trữ được thay đổi (`app/` → `dist/`).
+> Chỉ đường dẫn đầu ra bản dựng trong kho lưu trữ thay đổi (`app/` → `dist/`).
 
 Các URL mặc định:
 
@@ -292,7 +292,7 @@ Xem `open-sse/utils/stream.ts` và `open-sse/utils/streamHandler.ts` để biế
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
+├── app/                    # App Router của Next.js 16
 │   ├── (dashboard)/        # Các trang bảng điều khiển (23 phần)
 │   ├── api/                # Các tuyến API (51 thư mục)
 │   └── login/              # Các trang xác thực (.tsx)
@@ -307,19 +307,19 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── skills/             # Khung kỹ năng có thể mở rộng
 │   ├── usage/              # Theo dõi mức sử dụng và tính toán chi phí
 │   └── localDb.ts          # Chỉ là lớp tái xuất — tuyệt đối không thêm logic tại đây
-├── middleware/              # Middleware xử lý yêu cầu (promptInjectionGuard)
+├── middleware/              # Phần mềm trung gian xử lý yêu cầu (promptInjectionGuard)
 ├── mitm/                   # Proxy MITM (chứng chỉ, DNS, định tuyến đích)
 ├── shared/
 │   ├── components/         # Các thành phần React (.tsx)
-│   ├── constants/          # Định nghĩa nhà cung cấp (329), phạm vi MCP, 19 chiến lược định tuyến
-│   ├── utils/              # Bộ ngắt mạch, trình làm sạch, trình hỗ trợ xác thực
+│   ├── constants/          # Định nghĩa nhà cung cấp (329), phạm vi MCP, 20 chiến lược định tuyến
+│   ├── utils/              # Bộ ngắt mạch, trình làm sạch, trình trợ giúp xác thực
 │   └── validation/         # Các lược đồ Zod v4
 └── sse/                    # Quy trình proxy SSE
 
 open-sse/                   # Không gian làm việc @omniroute/open-sse
-├── executors/              # 150 mô-đun thực thi (các lớp thực thi + trình hỗ trợ cho từng nhà cung cấp)
-├── handlers/               # 11 trình xử lý yêu cầu (trò chuyện, phản hồi, embedding, hình ảnh, v.v.)
-├── mcp-server/             # Máy chủ MCP (110 công cụ riêng biệt, 3 phương thức truyền tải, 33 phạm vi)
+├── executors/              # 150 mô-đun thực thi (các lớp thực thi + trình trợ giúp cho từng nhà cung cấp)
+├── handlers/               # 11 trình xử lý yêu cầu (trò chuyện, phản hồi, nhúng, hình ảnh, v.v.)
+├── mcp-server/             # Máy chủ MCP (110 công cụ độc nhất, 3 phương thức truyền tải, 33 phạm vi)
 ├── services/               # 178 dịch vụ cấp cao nhất (combo, autoCombo, rateLimitManager, v.v.)
 ├── translator/             # Trình chuyển đổi định dạng (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Trình chuyển đổi Responses API
@@ -338,7 +338,7 @@ tests/
 docs/
 ├── adr/                     # Hồ sơ quyết định kiến trúc
 ├── architecture/            # Kiến trúc hệ thống và khả năng phục hồi
-├── comparison/              # So sánh OmniRoute với các giải pháp thay thế
+├── comparison/              # OmniRoute so với các giải pháp thay thế
 ├── compression/             # Hướng dẫn và quy tắc nén
 ├── dev/                     # Hướng dẫn phát triển
 ├── diagrams/                # Sơ đồ kiến trúc
@@ -347,10 +347,10 @@ docs/
 ├── i18n/                    # Các bản dịch README được quốc tế hóa
 ├── marketing/               # Tài liệu tiếp thị
 ├── ops/                     # Triển khai, proxy, độ bao phủ, bản phát hành
-├── providers/               # Tài liệu dành riêng cho từng nhà cung cấp
-├── reference/               # Tham chiếu API, biến môi trường, công cụ CLI, các gói miễn phí
+├── providers/               # Tài liệu dành riêng cho nhà cung cấp
+├── reference/               # Tài liệu tham khảo API, biến môi trường, công cụ CLI, gói miễn phí
 ├── releases/                # Ghi chú phát hành
-├── routing/                 # Công cụ auto-combo, phát lại quá trình suy luận
+├── routing/                 # Công cụ tổ hợp tự động, phát lại quá trình suy luận
 ├── screenshots/             # Ảnh chụp màn hình bảng điều khiển
 ├── security/                # Rào chắn bảo vệ, tuân thủ, chế độ ẩn, token
 └── specs/                   # Đặc tả thiết kế
@@ -413,9 +413,12 @@ Viết các kiểm thử đơn vị trong `tests/unit/`, tối thiểu bao gồm
 
 ---
 
-## Releasing
+## Phát hành
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Các bản phát hành được quản lý thông qua quy trình làm việc `/generate-release`. Khi một GitHub Release mới được tạo, package sẽ được **tự động xuất bản lên npm** thông qua GitHub Actions.
+
+Để triển khai lên VPS, hãy sử dụng `npm run build:release` (không dùng `npm run build`) — lệnh này thực hiện build lại từ đầu, tập hợp bundle vào `dist/` và ghi tệp đánh dấu `dist/BUILD_SHA`.
+Sau đó, hãy sử dụng các skill `/deploy-vps-*-cc` để đồng bộ `dist/` bằng rsync tới thư mục `app/` trên máy chủ từ xa.
 
 ---
 

@@ -13,30 +13,29 @@
 
 ## Kaj je to
 
-OmniRoute registrira 372 ponudnikov, vključno s 155 vnosi v katalogu, označenimi kot **brezplačni/brez preverjanja pristnosti**
-(brez preverjanja pristnosti,
-OAuth z brezplačno ravnjo ali ključ API z brezplačno ravnjo — glejte
-[vodnik po brezplačnih ravneh](../getting-started/FREE-TIERS-GUIDE.md) in celoten
-[imenik brezplačnih ravni](../reference/FREE_TIERS.md)). Vendar se brezplačni ponudniki
-močno razlikujejo po kakovosti modelov. Ponudnik brez preverjanja pristnosti, ki ponuja model na samem vrhu zmogljivosti, je veliko uporabnejši
-od ponudnika, ki ponuja majhen zastarel model.
+OmniRoute registrira 375 ponudnikov, vključno s 155 vnosi v katalogu, označenimi kot **brezplačno/brez-avtentikacije**
+(brez avtentikacije, OAuth z brezplačnim nivojem ali API ključ z brezplačnim nivojem — glejte
+[Vodnik po brezplačnih nivojih](../getting-started/FREE-TIERS-GUIDE.md) in celoten
+[imenik brezplačnih nivojev](../reference/FREE_TIERS.md)). Težava je v tem: brezplačni ponudniki se
+zelo razlikujejo v kakovosti modelov. Ponudnik brez avtentikacije, ki ponuja najsodobnejši model, je veliko bolj uporaben
+kot tisti, ki ponuja majhen zastarel model.
 
-**Razvrstitev brezplačnih ponudnikov** odgovarja na vprašanje »**kateri brezplačni ponudnik mi ponuja najboljši model?**« tako,
-da katalog vsakega brezplačnega ponudnika združi z **množično zbranimi ocenami kakovosti** z
-**lestvice Arena AI** (ELO na podlagi človeških preferenc, enaka zamisel kot pri areni klepetalnih robotov
-LMArena). Ponudniki so nato razvrščeni glede na zmogljivost njihovega **najboljšega brezplačnega modela**.
+**Razvrstitev brezplačnih ponudnikov** odgovori na vprašanje »**kateri brezplačni ponudnik mi ponuja najboljši model?**«
+tako, da združi katalog vsakega brezplačnega ponudnika z **množično zbranimi ocenami kakovosti** z
+**lestvice Arena AI** (ELO na podlagi človeških preferenc, ista ideja kot pri LMArena
+chatbot areni). Ponudniki so nato razvrščeni glede na moč njihovega **najboljšega brezplačnega modela**.
 
-Razvrstitev se izračuna iz treh resničnih virov:
+Razvrstitev se izračuna iz treh dejanskih virov:
 
-1. Seznami brezplačnih ponudnikov — `NOAUTH_PROVIDERS` ter vnosi `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS`, označeni z `hasFree`
+1. Seznami brezplačnih ponudnikov — `NOAUTH_PROVIDERS`, ter vnosi `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS`, označeni z zastavico `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Katalog modelov posameznega ponudnika iz registra ponudnikov
+2. Katalog modelov vsakega ponudnika iz registra ponudnikov
    (`open-sse/config/providerRegistry.ts`).
-3. Ocene primernosti za naloge, izpeljane iz ELO in shranjene v tabeli zbirke podatkov `model_intelligence` z
-   mehanizmom za sinhronizacijo Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Ocene primernosti za naloge, izpeljane iz ELO, ki jih pogon za sinhronizacijo Arena ELO
+   (`src/lib/arenaEloSync.ts`) shranjuje v tabelo zbirke podatkov `model_intelligence`.
 
-Logika združevanja je v `src/lib/freeProviderRankings.ts`.
+Logika združevanja se nahaja v `src/lib/freeProviderRankings.ts`.
 
 ---
 

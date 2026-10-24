@@ -7,7 +7,6 @@
  * @module shared/utils/apiAuth
  */
 
-import { cookies } from "next/headers";
 import { getOrCreateBootstrapToken, peekBootstrapToken } from "@/lib/auth/bootstrapToken";
 import { getSettings } from "@/lib/db/settings";
 import {
@@ -403,6 +402,10 @@ export async function isDashboardSessionAuthenticated(
 
   if (!token) {
     try {
+      // Lazy: `next/headers` only resolves inside the Next.js runtime. The MCP server
+      // bundle now reaches this module through keyConnectionScope → comboTargetKeyPolicy
+      // → apiKeyPolicy (#16499) and must stay importable on plain Node.
+      const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
       token = cookieStore.get(DASHBOARD_SESSION_COOKIE)?.value || null;
     } catch {

@@ -48,6 +48,7 @@ import { normalizeCodexVerbosity } from "../services/codexVerbosity.ts";
 import { getThinkingBudgetConfig, ThinkingMode } from "../services/thinkingBudget.ts";
 import { CORS_HEADERS } from "../utils/cors.ts";
 import { projectCodexPublicError } from "../utils/codexPublicError.ts";
+import { classifyProviderSafetyError } from "../utils/providerSafety.ts";
 import { errorResponse } from "../utils/error.ts";
 import {
   buildSyntheticResponsesFailureId,
@@ -465,10 +466,13 @@ function toCodexResponseFailedEvent(parsed: Record<string, unknown>): Record<str
     toStatusCode(response?.status) ??
     toStatusCode(upstreamError.status_code) ??
     toStatusCode(upstreamError.status);
+  const safety = classifyProviderSafetyError({ status: explicitStatus, code, type, message });
   const statusCode =
-    explicitStatus ?? (looksLikeQuotaOrRateLimit(code, type, message) ? 429 : null);
+    explicitStatus ??
+    safety?.status ??
+    (looksLikeQuotaOrRateLimit(code, type, message) ? 429 : null);
   const error: Record<string, unknown> = {
-    ...projectCodexPublicError({ status: statusCode, code, type }),
+    ...projectCodexPublicError({ status: statusCode, code, type, message }),
   };
 
   if (statusCode !== null) error.status_code = statusCode;

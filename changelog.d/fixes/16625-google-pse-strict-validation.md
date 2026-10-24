@@ -1,1 +1,0 @@
-- **fix(providers):** Google PSE validation now rejects an invalid API key or Search Engine ID (cx) (HTTP 400) instead of reporting it as valid; quota-exhausted 429 stays valid ([#16625](https://github.com/diegosouzapw/OmniRoute/pull/16625)) — thanks @Jordannst

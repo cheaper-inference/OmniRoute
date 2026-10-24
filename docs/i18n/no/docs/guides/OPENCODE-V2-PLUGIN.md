@@ -72,28 +72,29 @@ og oppgir endepunktet og hva som gikk tapt — slik at en redusert modellvelger 
 
 ## Alternativer
 
-| Nøkkel                           | Standardverdi                                        | Merknader                                                                                                                              |
-| -------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                        | Leverandør-ID, integrasjons-ID og prefikset modellene vises under                                                                      |
-| `baseURL`                        | påkrevd                                              | Rotadresse for gatewayen, kun `http(s)`; suffikset `/v1` legges til der det er nødvendig                                               |
-| `apiKey`                         | tilkoblet legitimasjon, deretter `OMNIROUTE_API_KEY` | Chatnøkkel for `/v1/*`                                                                                                                 |
-| `managementReadToken`            | bruker `apiKey` som reserve                          | Nøkkel for `/api/*` — vanligvis **ikke** den samme                                                                                     |
-| `displayName`                    | `"OmniRoute"`                                        | Leverandørnavn i velgeren                                                                                                              |
-| `timeoutMs`                      | `10000`                                              | Tidsavbrudd per endepunkt (automatiske kombinasjoner bruker 5 s)                                                                       |
-| `modelCacheTtlMs`                | `300000`                                             | TTL for katalogbufferen; et diskøyeblikksbilde varmer opp kaldstarter                                                                  |
-| `timeouts`                       | bruker `timeoutMs` som reserve                       | Tidsbudsjetter per endepunkt i ms: `models`, `combos`, `autoCombos`, `enrichment`                                                      |
-| `enrichment`                     | `true`                                               | Hent navn, priser og budsjetter for gratisnivået                                                                                       |
-| `providerTag`                    | `true`                                               | Sett leverandøren den ruter til, foran visningsnavnet                                                                                  |
-| `usableOnly`                     | `false`                                              | Behold bare leverandører som gatewayen rapporterer som klargjort                                                                       |
-| `showcasePerOwner`               | `10`                                                 | Oppføringer som beholdes per leverandør i standardvisningen                                                                            |
-| `freshPerOwner`                  | `10`                                                 | Nye oppføringer som beholdes per leverandør i standardvisningen                                                                        |
-| `freshWindowDays`                | `90`                                                 | Tidsvindu for hva som regnes som nytt, i dager                                                                                         |
-| `usageMemory`                    | `true`                                               | Gjenopprett statisk utelatte oppføringer navngitt av bruksanalyse for 30 dager (krever et administrasjonstoken)                        |
-| `visibleModels` / `hiddenModels` | `[]`                                                 | Tillatelseslister med eksakt treff eller suffikstreff; avvisning vinner; `*` publiserer hele katalogen (andre filtre gjelder fortsatt) |
-| `geminiSanitization`             | `true`                                               | Fjern JSON Schema-nøkkelordene Gemini avviser fra verktøyskjemaer (`$ref`-verktøy videresendes uendret)                                |
-| `apiFormat.allowAnthropic`       | `false`                                              | Rut tillatte ID-er gjennom Anthropic API-blokken                                                                                       |
-| `apiFormat.anthropicModels`      | `[]`                                                 | Fullstendige modell-ID-er som rutes til Anthropic                                                                                      |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                     | Loggerens detaljnivå                                                                                                                   |
+| Nøkkel                           | Standardverdi                                        | Merknader                                                                                                                               |
+| -------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                        | Leverandør-ID, integrasjons-ID og prefikset modellene vises under                                                                       |
+| `baseURL`                        | påkrevd                                              | Gateway-rot, kun `http(s)`; suffikset `/v1` legges til ved behov                                                                        |
+| `apiKey`                         | tilkoblet legitimasjon, deretter `OMNIROUTE_API_KEY` | Chatnøkkel for `/v1/*`                                                                                                                  |
+| `managementReadToken`            | bruker `apiKey` som reserve                          | Nøkkel for `/api/*` — vanligvis **ikke** den samme                                                                                      |
+| `displayName`                    | `"OmniRoute"`                                        | Leverandørnavn i velgeren                                                                                                               |
+| `timeoutMs`                      | `10000`                                              | Tidsavbrudd per endepunkt (automatiske kombinasjoner bruker 5 s)                                                                        |
+| `modelCacheTtlMs`                | `300000`                                             | TTL for katalogbufferen; et øyeblikksbilde på disken varmer opp kaldstarter                                                             |
+| `timeouts`                       | bruker `timeoutMs` som reserve                       | Tidsbudsjetter per endepunkt i ms: `models`, `combos`, `autoCombos`, `enrichment`                                                       |
+| `enrichment`                     | `true`                                               | Hent navn, priser og budsjetter for gratisnivået                                                                                        |
+| `providerTag`                    | `true`                                               | Sett navnet på oppstrømsleverandøren som det rutes til, foran visningsnavnet                                                            |
+| `usableOnly`                     | `false`                                              | Behold bare leverandører som gatewayen rapporterer som klargjort                                                                        |
+| `combosSource`                   | `"api"`                                              | `"models"` hopper over `/api/combos` og publiserer kombinasjonsradene fra `/v1/models`; filtre på medlemsnivå beholder `"api"`          |
+| `showcasePerOwner`               | `10`                                                 | Oppføringer i standardvisningen som beholdes per leverandør                                                                             |
+| `freshPerOwner`                  | `10`                                                 | Nye oppføringer i standardvisningen som beholdes per leverandør                                                                         |
+| `freshWindowDays`                | `90`                                                 | Tidsvindu i dager for den nye grenen                                                                                                    |
+| `usageMemory`                    | `true`                                               | Gjenopprett statisk utelatte oppføringer som er navngitt i bruksanalysen for de siste 30 dagene (krever et administrasjonstoken)        |
+| `visibleModels` / `hiddenModels` | `[]`                                                 | Tillatelseslister med eksakt treff eller suffikstreff; blokkering vinner; `*` publiserer hele katalogen (andre filtre gjelder fortsatt) |
+| `geminiSanitization`             | `true`                                               | Fjern JSON Schema-nøkkelordene som Gemini avviser, fra verktøyskjemaer (`$ref`-verktøy videresendes uendret)                            |
+| `apiFormat.allowAnthropic`       | `false`                                              | Rut tillatte ID-er gjennom Anthropic API-blokken                                                                                        |
+| `apiFormat.anthropicModels`      | `[]`                                                 | Fullstendige modell-ID-er som rutes til Anthropic                                                                                       |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                     | Detaljnivå for logging                                                                                                                  |
 
 Bruksminne er aktivert som standard. Uten et administrasjonstoken forblir det inaktivt
 (et oppstartsvarsel logges), og ingenting gjenopprettes.
@@ -106,7 +107,7 @@ oppdatert informasjon. Modeller og kombinasjoner publiseres så snart de ankomme
 og utvidelsesoverlegget flettes inn når de blir tilgjengelige, slik at ett tregt endepunkt ikke kan blokkere
 hele velgeren.
 
-Navnene inneholder det gatewayen vet: oppstrømsleverandøren som en modell rutes til, en `[Gratis]`-markør
+Navnene inneholder det gatewayen vet: oppstrømsleverandøren som en modell rutes til, en `[Free]`-markør
 og budsjettet som følger med — slik at to tilkoblinger som selger samme modell, fortsatt kan
 skilles fra hverandre. Slå av prefikset med `"providerTag": false`.
 

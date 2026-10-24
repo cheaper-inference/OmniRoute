@@ -1,1 +1,0 @@
-- **tests(translator):** Isolate the provider-scoped thinking-output regression from changing provider catalogs, while separately checking the real OpenCode Go output cap and operator-override precedence ([#10139](https://github.com/diegosouzapw/OmniRoute/issues/10139), [#15306](https://github.com/diegosouzapw/OmniRoute/issues/15306)).

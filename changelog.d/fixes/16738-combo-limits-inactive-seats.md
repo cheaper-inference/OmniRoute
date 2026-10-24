@@ -1,1 +1,0 @@
-- **fix(models):** combo context/output limits in `/v1/models` ignore seats whose provider has no active connection ([#16738](https://github.com/diegosouzapw/OmniRoute/pull/16738)) — thanks @amirsalaar

@@ -46,60 +46,62 @@ ACP Agents (বিপরীত চালুর প্রবাহ):
 ## `setup-*` দিয়ে স্বয়ংক্রিয়ভাবে কনফিগার করুন
 
 আপনাকে প্রতিটি টুলের কনফিগ হাতে লিখতে হবে না। OmniRoute প্রতিটি সমর্থিত CLI-এর জন্য একটি `setup-*`
-কমান্ড দেয়, যা চলমান OmniRoute (স্থানীয় বা রিমোট) থেকে **লাইভ** মডেল ক্যাটালগ পড়ে
-এবং আপনার মেশিনে টুলটির নিজস্ব কনফিগ লিখে:
+কমান্ড সরবরাহ করে, যা চলমান OmniRoute (স্থানীয় বা রিমোট) থেকে **লাইভ** মডেল ক্যাটালগ
+পড়ে এবং আপনার মেশিনে টুলটির নিজস্ব কনফিগ লেখে:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-প্রতিটি কমান্ড `--remote <url> --api-key <key>` (রিমোট OmniRoute-এর সঙ্গে একটি স্থানীয় টুল কনফিগার করা),
-`--dry-run` (কিছু না লিখে প্রিভিউ দেখা), এবং `--port` গ্রহণ করে। যেসব টুলে
-মডেল স্বয়ংক্রিয়ভাবে আবিষ্কারের সুবিধা নেই (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), সেগুলো
-`--model <id>` (এবং নন-ইন্টারঅ্যাক্টিভ রানের জন্য `--yes`) গ্রহণ করে। `setup-5dive` হলো একমাত্র
-রেসিপি, যা `$HOME`-এর অধীনে লেখে না: এটি ফ্লিট হোস্টে root-মালিকানাধীন একটি auth প্রোফাইল
+প্রতিটি কমান্ড `--remote <url> --api-key <key>` (একটি রিমোট OmniRoute-এর জন্য স্থানীয়
+টুল কনফিগার করা), `--dry-run` (কিছু না লিখে প্রিভিউ দেখা), এবং `--port` গ্রহণ করে। যেসব টুলে
+মডেল স্বয়ংক্রিয়ভাবে শনাক্ত করার সুবিধা নেই (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), সেগুলো
+`--model <id>` (এবং নন-ইন্টার্যাক্টিভ রানের জন্য `--yes`) গ্রহণ করে। `setup-5dive` হলো একমাত্র
+রেসিপি যা `$HOME`-এর অধীনে লেখে না: এটি ফ্লিট হোস্টে root-এর মালিকানাধীন একটি auth প্রোফাইল
 লিখে 5dive এজেন্ট ফ্লিট কনফিগার করে, তাই এটি `sudo`-এর মাধ্যমে নিজেকে পুনরায় চালায়
-এবং এর নিজস্ব কোনো রিমোট মোড নেই। সঠিক env ইনজেক্ট করে এবং কোনো কনফিগ না লিখেই
-একটি CLI চালু করতে জেনেরিক `omniroute run <target>` লঞ্চার ব্যবহার করুন (claude, codex,
-aider, goose, opencode, qwen, gemini — টার্গেট ও অ্যালিয়াসগুলো `bin/cli/cli-manifest.mjs`
-থেকে আসে); পুরোনো টুলভিত্তিক লঞ্চার `omniroute launch` (Claude Code) এবং
-`omniroute launch-codex` (Codex) এখনও উপলভ্য। Gemini CLI কেবল লঞ্চযোগ্য: এটি একটি
-`omniroute run` টার্গেট, তবে এর কোনো `setup-*`/`configure` রেসিপি নেই।
+এবং এর নিজস্ব কোনো রিমোট মোড নেই। সঠিক env ইনজেক্ট করে এবং কোনো কনফিগ না লিখেই একটি
+CLI চালু করতে, সাধারণ `omniroute run <target>` লঞ্চার ব্যবহার করুন (claude, codex, aider,
+goose, opencode, qwen, gemini — টার্গেট ও অ্যালিয়াসগুলো `bin/cli/cli-manifest.mjs` থেকে আসে);
+পুরোনো প্রতি-টুল লঞ্চার `omniroute launch` (Claude Code) এবং `omniroute launch-codex`
+(Codex) এখনও উপলভ্য। Gemini CLI কেবল লঞ্চ করা যায়: এটি একটি `omniroute run`
+টার্গেট, তবে এর কোনো `setup-*`/`configure` রেসিপি নেই।
 
-> **সম্পূর্ণ রেফারেন্স:** মূল টেবিলটি — প্রতিটি কমান্ড কী লেখে, প্রতিটি ফ্ল্যাগ,
-> স্থানীয় বনাম রিমোট, এবং কোন টুলে `/v1` সাফিক্স প্রয়োজন — পাওয়া যাবে
-> **[CLI ইন্টিগ্রেশনসমূহ](../guides/CLI-INTEGRATIONS.md)**-এ।
+> **সম্পূর্ণ রেফারেন্স:** মূল টেবিলটি — প্রতিটি কমান্ড কী লেখে, সব ফ্ল্যাগ,
+> স্থানীয় বনাম রিমোট, এবং কোন টুলগুলোর `/v1` সাফিক্স প্রয়োজন — রয়েছে
+> **[CLI ইন্টিগ্রেশন](../guides/CLI-INTEGRATIONS.md)**-এ।
 
 ### কনটেইনারের ভিতরে এগুলো চালানো
 
-OmniRoute কনটেইনারের ভিতরে চালানো একটি `setup-*` কমান্ড কনটেইনারটির
-নিজস্ব home-এ লেখে, যা হোস্টের কোনো CLI পড়ে না এবং কনটেইনারের সঙ্গে অদৃশ্য হয়ে যায়।
-OmniRoute এটি শনাক্ত করে এবং কিছু না লিখে নির্দেশনাসহ `2` কোডে প্রস্থান করে।
-এগিয়ে যাওয়ার দুটি সমর্থিত উপায় হলো — হোস্টে CLI ইনস্টল করে কনটেইনারের সঙ্গে
-`omniroute connect` করা, অথবা কনফিগ ডিরেক্টরিগুলো bind-mount করে
-`CLI_CONFIG_HOME` সেট করা (compose `host` প্রোফাইল)। প্রতিটি `setup-*` কমান্ডের পাশাপাশি
+OmniRoute কনটেইনারের ভিতরে চালানো একটি `setup-*` কমান্ড কনটেইনারের নিজস্ব home-এ
+লেখে, যা হোস্টের কোনো CLI পড়ে না এবং কনটেইনারের সঙ্গে অদৃশ্য হয়ে যায়।
+OmniRoute এটি শনাক্ত করে এবং কিছু লেখার পরিবর্তে নির্দেশনাসহ `2` কোডে প্রস্থান করে।
+এগিয়ে যাওয়ার দুটি সমর্থিত উপায় রয়েছে — হোস্টে CLI ইনস্টল করে কনটেইনারের সঙ্গে
+`omniroute connect` করা, অথবা কনফিগ ডিরেক্টরিগুলো bind-mount করে `CLI_CONFIG_HOME`
+সেট করা (compose-এর `host` প্রোফাইল)। প্রতিটি `setup-*` কমান্ডের পাশাপাশি
 `omniroute configure` এবং `omniroute config set`-ও `--allow-container-write`
 গ্রহণ করে, যখন আপনি সত্যিই কনটেইনারের নিজস্ব CLI-গুলো কনফিগার করতে চান;
-সার্ভারের জন্য `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` একই কাজ করে।
-দেখুন [Docker গাইড → হোস্ট CLI টুল কনফিগার করা](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)।
+সার্ভারের ক্ষেত্রে `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` একই কাজ করে।
+দেখুন
+[Docker গাইড → হোস্ট CLI টুল কনফিগার করা](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)।
 
-ড্যাশবোর্ডের **apply endpoint** (`POST /api/cli-tools/apply`) একই সুরক্ষা প্রয়োগ করে:
-কনটেইনারে, যে write-এর target হোস্ট থেকে bind-mounted নয়, তার উত্তরে
-**`422`**, `containerEphemeralTarget: true`, নিরাপদ ত্রুটি-বার্তা এবং — যেসব টুলের
-হোস্ট রেসিপি আছে (claude, codex, opencode, cline, kilo, continue) — হোস্টে চালানোর জন্য
-একটি `hostSetupCommand` (যেমন `omniroute setup-opencode`) ফেরত দেয়; কিছুই লেখা হয় না।
-কনটেইনার মোডে `dryRun: true` কাজ করতে থাকে এবং ডিস্ক স্পর্শ না করেই একটি সংবেদনশীল তথ্য
-আড়াল করা প্রিভিউ + টার্গেট পাথ ফেরত দেয়। প্রিভিউয়ের কনটেন্ট কপি বা ইমপোর্ট করার উপযোগী
-শংসাপত্র-সংবলিত কনফিগারেশন নয়। মূল টুল/base URL/API key/model ইনপুটগুলো ব্যবহার করে
-হোস্টে apply করুন, অথবা নির্দেশিত হোস্ট-সাইড setup কমান্ড ব্যবহার করুন।
-প্রিভিউ হেডার এবং রিকোয়েস্ট কনট্র্যাক্টের জন্য
+ড্যাশবোর্ডের **apply এন্ডপয়েন্ট** (`POST /api/cli-tools/apply`) একই সুরক্ষা প্রয়োগ
+করে: একটি কনটেইনারে, যে write-এর target হোস্ট থেকে bind-mounted নয়, সেটি
+**`422`** সহ `containerEphemeralTarget: true`, নিরাপদ ত্রুটি বার্তা এবং — যেসব
+টুলের হোস্ট রেসিপি রয়েছে (claude, codex, opencode, cline, kilo, continue) —
+হোস্টে চালানোর জন্য একটি `hostSetupCommand` (যেমন `omniroute setup-opencode`)
+ফেরত দেয়; কিছুই লেখা হয় না। কনটেইনার মোডে `dryRun: true` কাজ করতে থাকে এবং ডিস্ক
+স্পর্শ না করেই একটি সংবেদনশীল তথ্য অপসারিত প্রিভিউ + target path ফেরত দেয়। প্রিভিউয়ের
+কনটেন্ট কপি বা ইমপোর্ট করার মতো credential-বহনকারী কনফিগারেশন নয়। মূল
+tool/base URL/API key/model ইনপুট ব্যবহার করে হোস্টে apply করুন, অথবা নির্দেশিত
+হোস্ট-সাইড setup কমান্ড ব্যবহার করুন। প্রিভিউ হেডার এবং request contract-এর জন্য
 [CLI কনফিগারেশন নিরাপত্তা](../security/CLI-CONFIGURATION.md) দেখুন। এই আচরণটি
-ইচ্ছাকৃত এবং `tests/unit/api/cli-tools/apply-container-guard.test.ts` দ্বারা
-রিগ্রেশন থেকে সুরক্ষিত — guard সরিয়ে কখনোই 422 "ঠিক" করবেন না।
+ইচ্ছাকৃত এবং
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` দ্বারা regression থেকে সুরক্ষিত —
+guard সরিয়ে কখনোই একটি 422 "ঠিক" করবেন না।
 
 ---
 
@@ -142,11 +144,11 @@ OmniRoute এটি শনাক্ত করে এবং কিছু না �
 
 ---
 
-## 1. CLI Code-এর ক্যাটালগ (26টি টুল)
+## 1. CLI Code-এর ক্যাটালগ (27টি টুল)
 
-`/dashboard/cli-code`-এ প্রদর্শিত সব টুল। যেগুলোর `baseUrlSupport: none`, সেগুলো কাস্টম বেস URL-এর পরিবর্তে MITM বা একটি ম্যানুয়াল গাইডের মাধ্যমে সংযুক্ত:
+`/dashboard/cli-code`-এ প্রদর্শিত সব টুল। যেগুলোর `baseUrlSupport: none`, সেগুলো কাস্টম বেস URL-এর পরিবর্তে MITM অথবা একটি ম্যানুয়াল গাইডের মাধ্যমে সংযুক্ত করা হয়েছে:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| id           | নাম                     | বিক্রেতা            | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
 | claude       | Claude Code             | Anthropic           | full           | env            | true         |
 | codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
@@ -169,20 +171,21 @@ OmniRoute এটি শনাক্ত করে এবং কিছু না �
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
 | custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"`-সহ টুলগুলোর ড্যাশবোর্ড কার্ডে "⚠ আংশিক বেস URL" ব্যাজ দেখানো হয়।
+`baseUrlSupport: "partial"`-সহ টুলগুলোর ড্যাশবোর্ড কার্ডে "⚠ আংশিক বেস URL" ব্যাজটি দেখানো হয়।
 ---
 
-## 2. CLI এজেন্ট ক্যাটালগ (10টি টুল)
+## 2. CLI এজেন্ট ক্যাটালগ (১০টি টুল)
 
 `/dashboard/cli-agents`-এ প্রদর্শিত স্বয়ংক্রিয় এজেন্টসমূহ:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
+| id           | নাম              | সরবরাহকারী               | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |
 | hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
 | openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |

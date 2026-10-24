@@ -21,6 +21,7 @@ import { parseModel } from "../model.ts";
 import { supportsToolCalling } from "../modelCapabilities.ts";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import { parseAutoConfig } from "./autoConfig.ts";
+import { isComboEmptyPoolNoEligibleTargetsEnabled } from "./protectedPriorityStopStatus.ts";
 import { dedupeTargetsByExecutionKey } from "./comboData.ts";
 import { restoreIncomingOrder } from "./rungOrder.ts";
 import {
@@ -137,6 +138,31 @@ export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOpti
 }
 
 /**
+ * #14313 — an auto combo whose candidate pool is already EMPTY (every target skipped by
+ * cooldowns, lockouts or exhaustion before the tool pre-filter ran) used to fall into the
+ * tool pre-filter and answer 400 "No target in combo X supports tool calling", a
+ * capability_mismatch that describes a filter rejecting a populated pool. With the
+ * COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED flag on, the empty pool answers a truthful,
+ * retryable 503 `no_eligible_targets` instead. Off by default (client-visible status and
+ * body change); `null` keeps the legacy path.
+ */
+function emptyCandidatePoolResponse(poolSize: number, comboName: string): Response | null {
+  if (poolSize !== 0 || !isComboEmptyPoolNoEligibleTargetsEnabled()) return null;
+  return errorResponseWithComboDiagnostics(
+    503,
+    `No eligible targets in combo ${comboName}; the candidate pool is empty`,
+    {
+      poolSize: 0,
+      attempted: 0,
+      excluded: [],
+      attemptOrder: [],
+      terminalReason: "no_eligible_targets",
+    },
+    { code: "no_eligible_targets", type: "api_error" }
+  );
+}
+
+/**
  * Resolve target ordering for the `auto` combo strategy.
  *
  * Extracted verbatim from `handleComboChat`'s auto-strategy branch (now selected by the
@@ -172,6 +198,11 @@ export async function resolveAutoStrategyOrder(
       true;
 
   if (requestHasTools) {
+    // #14313 (opt-in, COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED): an empty pool is
+    // not a tool-calling mismatch. Off by default: the pool falls into the pre-filter
+    // below and answers the legacy 400 capability_mismatch exactly as before.
+    const emptyPoolResponse = emptyCandidatePoolResponse(eligibleTargets.length, combo.name);
+    if (emptyPoolResponse) return { earlyResponse: emptyPoolResponse };
     // Keep #5240 prompt-emulation providers (toolCalling:"emulated") even when
     // registry/capability rows honestly report toolCalling:false.
     const filtered = eligibleTargets.filter(

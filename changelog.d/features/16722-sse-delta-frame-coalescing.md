@@ -1,1 +1,0 @@
-- **feat(sse):** opt-in coalescing of Claude `content_block_delta` events (`SSE_COALESCE_*_MS`), SSE frame batching (`SSE_FRAME_COALESCE_MS`) and an interval-based stall watchdog (`SSE_STALL_WATCHDOG=interval`), all off by default ([#16722](https://github.com/diegosouzapw/OmniRoute/pull/16722)) — thanks @WYSTAF and @wallerjenifernk530-hash

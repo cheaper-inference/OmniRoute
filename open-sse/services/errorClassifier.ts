@@ -401,7 +401,9 @@ export function classifyProviderError(
 ): ProviderErrorType | null {
   const bodyStr = responseBodyToString(responseBody);
   const creditsExhausted = isCreditsExhausted(bodyStr);
-  const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase());
+  // Claude's native weekly 429 wording is provider-scoped; omitting provider
+  // silently classified the long-window quota as a short RPM rate limit.
+  const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase(), provider);
   const accountDeactivated = isAccountDeactivated(bodyStr);
   const oauthInvalid = isOAuthInvalidToken(bodyStr);
   const preserveQuota429 = shouldPreserveQuotaSignalsFor429(provider);

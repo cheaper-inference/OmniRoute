@@ -2,7 +2,10 @@ name: Quality Gates
 
 on:
   push:
-    branches: [main, "release/**"]
+    # release/** pushes are covered by the PR run of each change plus Release-Green on the
+    # merged combination (see ci.yml for the 2026-10-18 measurement); the per-push run here
+    # only ever queued hosted slots and was cancelled by the next merge.
+    branches: [main]
   pull_request:
     branches: [main, "release/**"]
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, edited]
@@ -49,6 +52,10 @@ jobs:
           node-version: ${{ env.CI_NODE_VERSION }}
       - name: Validate gate inventory
         run: npm run check:gate-manifest
+      - name: Validate recurring free catalog evidence
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: npm run check:free-catalog-evidence
       - id: classify
         env:
           EVENT_NAME: ${{ github.event_name }}

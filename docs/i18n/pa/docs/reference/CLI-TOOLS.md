@@ -46,7 +46,7 @@ ACP Agents (ਉਲਟਾ ਸਪੌਨ ਪ੍ਰਵਾਹ):
 ## `setup-*` ਨਾਲ ਸਵੈ-ਸੰਰਚਨਾ
 
 ਤੁਹਾਨੂੰ ਹਰ ਟੂਲ ਦੀ ਸੰਰਚਨਾ ਹੱਥੀਂ ਲਿਖਣ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ। OmniRoute ਹਰ ਸਮਰਥਿਤ CLI ਲਈ ਇੱਕ `setup-*`
-ਕਮਾਂਡ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ, ਜੋ ਚੱਲ ਰਹੇ OmniRoute (ਸਥਾਨਕ ਜਾਂ ਰਿਮੋਟ) ਤੋਂ **ਲਾਈਵ** ਮਾਡਲ ਕੈਟਾਲਾਗ
+ਕਮਾਂਡ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ, ਜੋ ਚੱਲ ਰਹੇ OmniRoute (ਲੋਕਲ ਜਾਂ ਰਿਮੋਟ) ਤੋਂ **ਲਾਈਵ** ਮਾਡਲ ਕੈਟਾਲਾਗ
 ਪੜ੍ਹਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੀ ਮਸ਼ੀਨ ਉੱਤੇ ਟੂਲ ਦੀ ਆਪਣੀ ਸੰਰਚਨਾ ਲਿਖਦੀ ਹੈ:
 
 ```bash
@@ -54,52 +54,54 @@ omniroute setup-codex        omniroute setup-claude       omniroute setup-openco
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-ਹਰ ਕਮਾਂਡ `--remote <url> --api-key <key>` (ਕਿਸੇ ਸਥਾਨਕ ਟੂਲ ਨੂੰ ਰਿਮੋਟ
-OmniRoute ਲਈ ਸੰਰਚਿਤ ਕਰੋ), `--dry-run` (ਲਿਖੇ ਬਿਨਾਂ ਝਲਕ), ਅਤੇ `--port` ਸਵੀਕਾਰਦੀ ਹੈ। ਮਾਡਲ
-ਸਵੈ-ਖੋਜ ਤੋਂ ਬਿਨਾਂ ਟੂਲ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)
-`--model <id>` (ਅਤੇ ਗੈਰ-ਇੰਟਰਐਕਟਿਵ ਰਨਾਂ ਲਈ `--yes`) ਲੈਂਦੇ ਹਨ। `setup-5dive` ਇੱਕੋ ਇੱਕ
-ਵਿਧੀ ਹੈ ਜੋ `$HOME` ਦੇ ਅਧੀਨ ਨਹੀਂ ਲਿਖਦੀ: ਇਹ ਫਲੀਟ ਹੋਸਟ ਉੱਤੇ ਰੂਟ ਦੀ ਮਲਕੀਅਤ ਵਾਲਾ ਪ੍ਰਮਾਣੀਕਰਨ
-ਪ੍ਰੋਫਾਈਲ ਲਿਖ ਕੇ 5dive ਏਜੰਟ ਫਲੀਟ ਨੂੰ ਸੰਰਚਿਤ ਕਰਦੀ ਹੈ, ਇਸ ਲਈ ਇਹ `sudo` ਰਾਹੀਂ ਆਪਣੇ ਆਪ ਨੂੰ ਮੁੜ ਚਲਾਉਂਦੀ ਹੈ
-ਅਤੇ ਇਸਦਾ ਆਪਣਾ ਕੋਈ ਰਿਮੋਟ ਮੋਡ ਨਹੀਂ ਹੈ। ਸਹੀ env ਇੰਜੈਕਟ ਕਰਕੇ ਅਤੇ ਕੋਈ ਵੀ ਸੰਰਚਨਾ ਲਿਖੇ ਬਿਨਾਂ
-CLI ਚਲਾਉਣ ਲਈ ਆਮ `omniroute run <target>` ਲਾਂਚਰ ਦੀ ਵਰਤੋਂ ਕਰੋ (claude, codex, aider, goose, opencode, qwen,
-gemini — ਟਾਰਗੇਟ ਅਤੇ ਉਪਨਾਮ `bin/cli/cli-manifest.mjs` ਤੋਂ ਆਉਂਦੇ ਹਨ); ਪੁਰਾਣੇ
+ਹਰੇਕ `--remote <url> --api-key <key>` (ਇੱਕ ਲੋਕਲ ਟੂਲ ਨੂੰ ਰਿਮੋਟ OmniRoute ਨਾਲ
+ਸੰਰਚਿਤ ਕਰਨ ਲਈ), `--dry-run` (ਲਿਖੇ ਬਿਨਾਂ ਪੂਰਵਦਰਸ਼ਨ ਲਈ), ਅਤੇ `--port` ਸਵੀਕਾਰ ਕਰਦੀ ਹੈ। ਮਾਡਲ
+ਸਵੈ-ਖੋਜ ਤੋਂ ਬਿਨਾਂ ਵਾਲੇ ਟੂਲ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)
+`--model <id>` (ਅਤੇ ਗੈਰ-ਇੰਟਰਐਕਟਿਵ ਰਨਾਂ ਲਈ `--yes`) ਲੈਂਦੇ ਹਨ। `setup-5dive` ਇਕਲੌਤੀ
+ਰੈਸਿਪੀ ਹੈ ਜੋ `$HOME` ਦੇ ਅਧੀਨ ਨਹੀਂ ਲਿਖਦੀ: ਇਹ ਫਲੀਟ ਹੋਸਟ ਉੱਤੇ root ਦੀ ਮਲਕੀਅਤ ਵਾਲੀ
+ਪ੍ਰਮਾਣੀਕਰਨ ਪ੍ਰੋਫਾਈਲ ਲਿਖ ਕੇ 5dive ਏਜੰਟ ਫਲੀਟ ਨੂੰ ਸੰਰਚਿਤ ਕਰਦੀ ਹੈ, ਇਸ ਲਈ ਇਹ `sudo`
+ਰਾਹੀਂ ਆਪਣੇ ਆਪ ਨੂੰ ਮੁੜ ਚਲਾਉਂਦੀ ਹੈ ਅਤੇ ਇਸਦਾ ਆਪਣਾ ਕੋਈ ਰਿਮੋਟ ਮੋਡ ਨਹੀਂ ਹੈ। ਸਹੀ env
+ਇੰਜੈਕਟ ਕਰਕੇ ਅਤੇ ਬਿਨਾਂ ਕੋਈ ਸੰਰਚਨਾ ਲਿਖੇ CLI ਚਲਾਉਣ ਲਈ, ਆਮ
+`omniroute run <target>` ਲਾਂਚਰ (claude, codex, aider, goose, opencode, qwen,
+gemini — ਟਾਰਗੇਟ ਅਤੇ ਉਪਨਾਮ `bin/cli/cli-manifest.mjs` ਤੋਂ ਆਉਂਦੇ ਹਨ) ਵਰਤੋ; ਪੁਰਾਣੇ
 ਹਰੇਕ-ਟੂਲ ਲਾਂਚਰ `omniroute launch` (Claude Code) ਅਤੇ `omniroute launch-codex`
 (Codex) ਅਜੇ ਵੀ ਉਪਲਬਧ ਹਨ। Gemini CLI ਸਿਰਫ਼ ਲਾਂਚ ਲਈ ਹੈ: ਇਹ ਇੱਕ `omniroute run`
-ਟਾਰਗੇਟ ਹੈ ਪਰ ਇਸਦੀ ਕੋਈ `setup-*`/`configure` ਵਿਧੀ ਨਹੀਂ ਹੈ।
+ਟਾਰਗੇਟ ਹੈ, ਪਰ ਇਸਦੀ ਕੋਈ `setup-*`/`configure` ਰੈਸਿਪੀ ਨਹੀਂ ਹੈ।
 
-> **ਪੂਰਾ ਹਵਾਲਾ:** ਮੁੱਖ ਸਾਰਣੀ — ਹਰ ਕਮਾਂਡ ਕੀ ਲਿਖਦੀ ਹੈ, ਹਰੇਕ ਫਲੈਗ,
-> ਸਥਾਨਕ ਬਨਾਮ ਰਿਮੋਟ, ਅਤੇ ਕਿਹੜੇ ਟੂਲਾਂ ਨੂੰ `/v1` ਪਿਛੇਤਰ ਚਾਹੀਦਾ ਹੈ — ਇੱਥੇ ਉਪਲਬਧ ਹੈ:
-> **[CLI ਏਕੀਕਰਨ](../guides/CLI-INTEGRATIONS.md)**।
+> **ਪੂਰਾ ਹਵਾਲਾ:** ਮੁੱਖ ਸਾਰਣੀ — ਹਰੇਕ ਕਮਾਂਡ ਕੀ ਲਿਖਦੀ ਹੈ, ਹਰ ਫਲੈਗ,
+> ਲੋਕਲ ਬਨਾਮ ਰਿਮੋਟ, ਅਤੇ ਕਿਹੜੇ ਟੂਲਾਂ ਨੂੰ `/v1` ਪਿਛੇਤਰ ਚਾਹੀਦਾ ਹੈ — ਇੱਥੇ ਉਪਲਬਧ ਹੈ:
+> **[CLI ਇੰਟੀਗ੍ਰੇਸ਼ਨ](../guides/CLI-INTEGRATIONS.md)**।
 
 ### ਇਨ੍ਹਾਂ ਨੂੰ ਕੰਟੇਨਰ ਦੇ ਅੰਦਰ ਚਲਾਉਣਾ
 
-OmniRoute ਕੰਟੇਨਰ ਦੇ ਅੰਦਰ ਚਲਾਈ ਗਈ `setup-*` ਕਮਾਂਡ ਕੰਟੇਨਰ ਦੇ
-ਆਪਣੇ ਹੋਮ ਵਿੱਚ ਲਿਖਦੀ ਹੈ, ਜਿਸਨੂੰ ਕੋਈ ਹੋਸਟ CLI ਨਹੀਂ ਪੜ੍ਹਦਾ ਅਤੇ ਜੋ ਕੰਟੇਨਰ ਦੇ ਨਾਲ
-ਗਾਇਬ ਹੋ ਜਾਂਦਾ ਹੈ। OmniRoute ਇਸਦਾ ਪਤਾ ਲਗਾਉਂਦਾ ਹੈ ਅਤੇ ਲਿਖਣ ਦੀ ਬਜਾਏ ਹਦਾਇਤਾਂ ਸਮੇਤ
-`2` ਕੋਡ ਨਾਲ ਬੰਦ ਹੋ ਜਾਂਦਾ ਹੈ। ਅੱਗੇ ਵਧਣ ਦੇ ਦੋ ਸਮਰਥਿਤ ਤਰੀਕੇ ਹਨ — ਹੋਸਟ ਉੱਤੇ CLI ਇੰਸਟਾਲ ਕਰੋ ਅਤੇ
-ਕੰਟੇਨਰ ਨਾਲ `omniroute connect` ਕਰੋ, ਜਾਂ ਸੰਰਚਨਾ ਡਾਇਰੈਕਟਰੀਆਂ ਨੂੰ ਬਾਈਂਡ-ਮਾਊਂਟ ਕਰੋ ਅਤੇ
-`CLI_CONFIG_HOME` (`host` ਕੰਪੋਜ਼ ਪ੍ਰੋਫਾਈਲ) ਸੈੱਟ ਕਰੋ। ਹਰ `setup-*` ਕਮਾਂਡ, ਨਾਲ ਹੀ
+OmniRoute ਕੰਟੇਨਰ ਦੇ ਅੰਦਰ ਚਲਾਈ ਗਈ `setup-*` ਕਮਾਂਡ ਕੰਟੇਨਰ ਦੇ ਆਪਣੇ ਹੋਮ ਵਿੱਚ ਲਿਖਦੀ ਹੈ,
+ਜਿਸਨੂੰ ਹੋਸਟ ਦਾ ਕੋਈ ਵੀ CLI ਨਹੀਂ ਪੜ੍ਹਦਾ ਅਤੇ ਜੋ ਕੰਟੇਨਰ ਦੇ ਨਾਲ ਹੀ ਗਾਇਬ ਹੋ ਜਾਂਦਾ ਹੈ।
+OmniRoute ਇਸਦਾ ਪਤਾ ਲਗਾਉਂਦਾ ਹੈ ਅਤੇ ਲਿਖਣ ਦੀ ਬਜਾਏ ਹਦਾਇਤਾਂ ਸਮੇਤ `2` ਕੋਡ ਨਾਲ ਬੰਦ ਹੋ ਜਾਂਦਾ ਹੈ।
+ਅੱਗੇ ਵਧਣ ਦੇ ਦੋ ਸਮਰਥਿਤ ਤਰੀਕੇ ਹਨ — CLI ਨੂੰ ਹੋਸਟ ਉੱਤੇ ਇੰਸਟਾਲ ਕਰੋ ਅਤੇ ਕੰਟੇਨਰ ਨਾਲ
+`omniroute connect` ਕਰੋ, ਜਾਂ ਸੰਰਚਨਾ ਡਾਇਰੈਕਟਰੀਆਂ ਨੂੰ bind-mount ਕਰੋ ਅਤੇ
+`CLI_CONFIG_HOME` (`host` compose ਪ੍ਰੋਫਾਈਲ) ਸੈੱਟ ਕਰੋ। ਹਰ `setup-*` ਕਮਾਂਡ, ਅਤੇ ਨਾਲ ਹੀ
 `omniroute configure` ਅਤੇ `omniroute config set`, `--allow-container-write`
-ਸਵੀਕਾਰਦੇ ਹਨ ਜਦੋਂ ਤੁਸੀਂ ਅਸਲ ਵਿੱਚ ਕੰਟੇਨਰ ਦੇ ਆਪਣੇ CLI ਸੰਰਚਿਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ਸਰਵਰ ਲਈ ਇਹੀ ਕੰਮ ਕਰਦਾ ਹੈ। ਵੇਖੋ:
-[Docker ਗਾਈਡ → ਹੋਸਟ CLI ਟੂਲਾਂ ਦੀ ਸੰਰਚਨਾ](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)।
+ਸਵੀਕਾਰ ਕਰਦੀ ਹੈ, ਜਦੋਂ ਤੁਸੀਂ ਅਸਲ ਵਿੱਚ ਕੰਟੇਨਰ ਦੇ ਆਪਣੇ CLIs ਨੂੰ ਸੰਰਚਿਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ;
+ਸਰਵਰ ਲਈ `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ਵੀ ਇਹੀ ਕੰਮ ਕਰਦਾ ਹੈ।
+ਵੇਖੋ [Docker ਗਾਈਡ → ਹੋਸਟ CLI ਟੂਲਾਂ ਨੂੰ ਸੰਰਚਿਤ ਕਰਨਾ](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)।
 
-ਡੈਸ਼ਬੋਰਡ ਦਾ **ਲਾਗੂ ਕਰਨ ਵਾਲਾ ਐਂਡਪੌਇੰਟ** (`POST /api/cli-tools/apply`) ਵੀ ਉਹੀ
-ਸੁਰੱਖਿਆ ਲਾਗੂ ਕਰਦਾ ਹੈ: ਕੰਟੇਨਰ ਵਿੱਚ, ਅਜਿਹੀ ਲਿਖਤ ਜਿਸਦਾ ਟਾਰਗੇਟ ਹੋਸਟ ਤੋਂ ਬਾਈਂਡ-ਮਾਊਂਟ ਨਹੀਂ ਹੈ,
-**`422`** ਨਾਲ ਜਵਾਬ ਦਿੰਦੀ ਹੈ, ਜਿਸ ਵਿੱਚ `containerEphemeralTarget: true`, ਸੁਰੱਖਿਅਤ ਗਲਤੀ
-ਟੈਕਸਟ ਅਤੇ — ਹੋਸਟ ਵਿਧੀ ਵਾਲੇ ਟੂਲਾਂ ਲਈ (claude, codex, opencode, cline,
-kilo, continue) — ਹੋਸਟ ਉੱਤੇ ਚਲਾਉਣ ਲਈ ਇੱਕ `hostSetupCommand` (ਉਦਾਹਰਨ ਵਜੋਂ `omniroute setup-opencode`)
-ਸ਼ਾਮਲ ਹੁੰਦੀ ਹੈ; ਕੁਝ ਵੀ ਨਹੀਂ ਲਿਖਿਆ ਜਾਂਦਾ। `dryRun: true` ਕੰਟੇਨਰ
-ਮੋਡ ਵਿੱਚ ਕੰਮ ਕਰਨਾ ਜਾਰੀ ਰੱਖਦਾ ਹੈ ਅਤੇ ਡਿਸਕ ਨੂੰ ਛੂਹੇ ਬਿਨਾਂ ਸੰਪਾਦਿਤ ਝਲਕ + ਟਾਰਗੇਟ ਪਾਥ ਵਾਪਸ ਕਰਦਾ ਹੈ। ਝਲਕ
-ਦੀ ਸਮੱਗਰੀ ਕਾਪੀ ਜਾਂ ਆਯਾਤ ਕਰਨ ਲਈ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਵਾਲੀ ਸੰਰਚਨਾ ਨਹੀਂ ਹੈ। ਮੂਲ
-ਟੂਲ/ਬੇਸ URL/API ਕੁੰਜੀ/ਮਾਡਲ ਇਨਪੁੱਟਾਂ ਨਾਲ ਹੋਸਟ ਉੱਤੇ ਲਾਗੂ ਕਰੋ, ਜਾਂ ਦਰਸਾਈ ਗਈ
-ਹੋਸਟ-ਪਾਸੇ ਦੀ ਸੈਟਅੱਪ ਕਮਾਂਡ ਵਰਤੋ। ਝਲਕ ਹੈਡਰ ਅਤੇ ਬੇਨਤੀ ਇਕਰਾਰਨਾਮੇ ਲਈ
-[CLI ਸੰਰਚਨਾ ਸੁਰੱਖਿਆ](../security/CLI-CONFIGURATION.md) ਵੇਖੋ। ਇਹ ਵਿਹਾਰ
-ਜਾਣਬੁੱਝ ਕੇ ਹੈ ਅਤੇ
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` ਦੁਆਰਾ ਰਿਗ੍ਰੈਸ਼ਨ ਤੋਂ ਸੁਰੱਖਿਅਤ ਹੈ — ਸੁਰੱਖਿਆ ਹਟਾ ਕੇ ਕਦੇ ਵੀ 422 ਨੂੰ "ਠੀਕ" ਨਾ ਕਰੋ।
+ਡੈਸ਼ਬੋਰਡ ਦਾ **apply endpoint** (`POST /api/cli-tools/apply`) ਵੀ ਇਹੀ ਸੁਰੱਖਿਆ ਲਾਗੂ ਕਰਦਾ ਹੈ:
+ਕੰਟੇਨਰ ਵਿੱਚ, ਅਜਿਹੀ ਲਿਖਤ ਜਿਸਦਾ ਟਾਰਗੇਟ ਹੋਸਟ ਤੋਂ bind-mount ਨਹੀਂ ਕੀਤਾ ਗਿਆ, ਸੁਰੱਖਿਅਤ
+ਗਲਤੀ ਟੈਕਸਟ ਅਤੇ `containerEphemeralTarget: true` ਦੇ ਨਾਲ **`422`** ਜਵਾਬ ਦਿੰਦੀ ਹੈ ਅਤੇ —
+ਉਨ੍ਹਾਂ ਟੂਲਾਂ ਲਈ ਜਿਨ੍ਹਾਂ ਦੀ ਹੋਸਟ ਰੈਸਿਪੀ ਹੈ (claude, codex, opencode, cline,
+kilo, continue) — ਹੋਸਟ ਉੱਤੇ ਚਲਾਉਣ ਲਈ ਇੱਕ `hostSetupCommand` (ਉਦਾਹਰਨ ਵਜੋਂ
+`omniroute setup-opencode`) ਵੀ ਦਿੰਦੀ ਹੈ; ਕੁਝ ਵੀ ਨਹੀਂ ਲਿਖਿਆ ਜਾਂਦਾ। ਕੰਟੇਨਰ ਮੋਡ ਵਿੱਚ
+`dryRun: true` ਕੰਮ ਕਰਦਾ ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਡਿਸਕ ਨੂੰ ਛੂਹੇ ਬਿਨਾਂ ਇੱਕ ਸੰਵੇਦਨਸ਼ੀਲ ਜਾਣਕਾਰੀ-ਰਹਿਤ
+ਪੂਰਵਦਰਸ਼ਨ + ਟਾਰਗੇਟ ਪਾਥ ਵਾਪਸ ਕਰਦਾ ਹੈ। ਪੂਰਵਦਰਸ਼ਨ ਸਮੱਗਰੀ ਕਾਪੀ ਜਾਂ ਇੰਪੋਰਟ ਕਰਨ ਲਈ
+ਪ੍ਰਮਾਣ-ਪੱਤਰਾਂ ਵਾਲੀ ਸੰਰਚਨਾ ਨਹੀਂ ਹੈ। ਮੂਲ ਟੂਲ/base URL/API key/model ਇਨਪੁੱਟਾਂ ਨਾਲ
+ਹੋਸਟ ਉੱਤੇ ਲਾਗੂ ਕਰੋ, ਜਾਂ ਦੱਸੀ ਗਈ ਹੋਸਟ-ਸਾਈਡ ਸੈੱਟਅੱਪ ਕਮਾਂਡ ਵਰਤੋ। ਪੂਰਵਦਰਸ਼ਨ ਹੈਡਰ ਅਤੇ
+ਬੇਨਤੀ ਸਮਝੌਤੇ ਲਈ [CLI ਸੰਰਚਨਾ ਸੁਰੱਖਿਆ](../security/CLI-CONFIGURATION.md) ਵੇਖੋ।
+ਇਹ ਵਿਹਾਰ ਜਾਣਬੁੱਝ ਕੇ ਹੈ ਅਤੇ
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` ਦੁਆਰਾ ਰਿਗ੍ਰੈਸ਼ਨ ਤੋਂ ਸੁਰੱਖਿਅਤ ਹੈ —
+ਗਾਰਡ ਨੂੰ ਹਟਾ ਕੇ ਕਦੇ ਵੀ 422 ਨੂੰ "ਠੀਕ" ਨਾ ਕਰੋ।
 
 ---
 
@@ -142,9 +144,9 @@ kilo, continue) — ਹੋਸਟ ਉੱਤੇ ਚਲਾਉਣ ਲਈ ਇੱਕ `
 
 ---
 
-## 1. CLI Code ਦਾ ਕੈਟਾਲਾਗ (26 ਟੂਲ)
+## 1. CLI Code ਦਾ ਕੈਟਾਲਾਗ (27 ਟੂਲ)
 
-ਉਹ ਸਾਰੇ ਟੂਲ ਜੋ `/dashboard/cli-code` ਵਿੱਚ ਦਿਖਾਈ ਦਿੰਦੇ ਹਨ। ਜਿਨ੍ਹਾਂ ਵਿੱਚ `baseUrlSupport: none` ਹੈ, ਉਹ ਕਸਟਮ ਬੇਸ URL ਦੀ ਬਜਾਏ MITM ਜਾਂ ਮੈਨੁਅਲ ਗਾਈਡ ਰਾਹੀਂ ਜੋੜੇ ਗਏ ਹਨ:
+ਉਹ ਸਾਰੇ ਟੂਲ ਜੋ `/dashboard/cli-code` ਵਿੱਚ ਦਿਖਾਈ ਦਿੰਦੇ ਹਨ। ਜਿਨ੍ਹਾਂ ਦਾ `baseUrlSupport: none` ਹੈ, ਉਹ ਕਸਟਮ ਬੇਸ URL ਦੀ ਬਜਾਏ MITM ਜਾਂ ਮੈਨੁਅਲ ਗਾਈਡ ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤੇ ਜਾਂਦੇ ਹਨ:
 
 | id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
@@ -169,20 +171,21 @@ kilo, continue) — ਹੋਸਟ ਉੱਤੇ ਚਲਾਉਣ ਲਈ ਇੱਕ `
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
 | custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"` ਵਾਲੇ ਟੂਲਾਂ ਦੇ ਡੈਸ਼ਬੋਰਡ ਕਾਰਡ ਉੱਤੇ "⚠ ਅੰਸ਼ਕ ਬੇਸ URL" ਬੈਜ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ।
+`baseUrlSupport: "partial"` ਵਾਲੇ ਟੂਲ ਡੈਸ਼ਬੋਰਡ ਕਾਰਡ ਵਿੱਚ "⚠ ਅੰਸ਼ਕ Base URL" ਬੈਜ ਦਿਖਾਉਂਦੇ ਹਨ।
 ---
 
-## 2. CLI ਏਜੰਟ ਕੈਟਾਲੌਗ (10 ਟੂਲ)
+## 2. CLI ਏਜੰਟ ਕੈਟਾਲਾਗ (10 ਟੂਲ)
 
-`/dashboard/cli-agents` ਵਿੱਚ ਦਿਖਾਈ ਦੇਣ ਵਾਲੇ ਖੁਦਮੁਖਤਿਆਰ ਏਜੰਟ:
+ਖੁਦਮੁਖਤਿਆਰ ਏਜੰਟ ਜੋ `/dashboard/cli-agents` ਵਿੱਚ ਦਿਖਾਈ ਦਿੰਦੇ ਹਨ:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
+| id           | ਨਾਮ              | ਵਿਕਰੇਤਾ                  | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |
 | hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
 | openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |

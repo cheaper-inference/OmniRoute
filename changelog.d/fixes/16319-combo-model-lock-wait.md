@@ -1,1 +1,0 @@
-- **fix(resilience):** a combo whose every target is skipped by a short transient model cooldown no longer answers a hint-less 503 `ALL_TARGETS_SKIPPED` in ~100ms (#16319). The zero-attempt path now waits the lock out (quota/auth/not-found locks excluded) and re-dispatches; when no wait is allowed it answers 429 with the earliest transient lock expiry instead.

@@ -16,16 +16,16 @@ AgentBridge este proxy-ul MITM (Man-in-the-Middle) al OmniRoute, care intercepte
 
 ### Ce este AgentBridge?
 
-Când un agent IDE (de exemplu, GitHub Copilot, Cursor, Claude Code) efectuează un apel API, acesta se conectează direct la furnizorul AI din amonte (OpenAI, Anthropic etc.). AgentBridge interceptează transparent conexiunea la nivel TLS — fără a necesita nicio modificare a configurației agentului — și rescrie cererea prin OmniRoute.
+Atunci când un agent IDE (de ex., GitHub Copilot, Cursor, Claude Code) efectuează un apel API, acesta se conectează direct la furnizorul AI upstream (OpenAI, Anthropic etc.). AgentBridge interceptează transparent acea conexiune la nivel TLS — fără a necesita vreo modificare a configurației agentului — și rescrie cererea prin OmniRoute.
 
-Aceasta înseamnă că puteți:
+Acest lucru înseamnă că poți:
 
-- **Redirecționa orice agent către orice furnizor**: Copilot comunică cu OpenAI? Redirecționați-l către Anthropic Claude, Gemini sau oricare dintre cei 372 de furnizori OmniRoute.
-- **Aplica mapări de modele**: `gemini-3-flash` → `claude-sonnet-4.7` în mod transparent la nivelul gestionarului.
-- **Observa întregul trafic al agenților**: fiecare cerere interceptată este publicată în [Inspectorul de trafic](./TRAFFIC_INSPECTOR.md).
-- **Aplica mecanismele de reziliență OmniRoute**: rutarea combinată, întrerupătoarele de circuit, mecanismele de rezervă și urmărirea costurilor funcționează și pentru traficul agenților IDE.
+- **Redirecționa orice agent către orice furnizor**: Copilot comunică cu OpenAI? Redirecționează-l către Anthropic Claude, Gemini sau oricare dintre cei 375 de furnizori ai OmniRoute.
+- **Aplica mapări de modele**: `gemini-3-flash` → `claude-sonnet-4.7` transparent, la nivelul handlerului.
+- **Observa tot traficul agenților**: fiecare cerere interceptată este publicată în [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
+- **Aplica reziliența OmniRoute**: rutarea combinată, întrerupătoarele de circuit, mecanismele de fallback și urmărirea costurilor funcționează și pentru traficul agenților IDE.
 
-### Poziționare în raport cu piața
+### Poziționare față de piață
 
 | Funcționalitate                    | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
 | ---------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
@@ -37,13 +37,13 @@ Aceasta înseamnă că puteți:
 | Zed Industries                     |    —    |    ✓     |        —        |             ✓             |
 | Claude Code                        |    —    |    —     |        ✓        |             ✓             |
 | Open Code                          |    —    |    —     |        ✓        |             ✓             |
-| Trae                               |    —    |    —     |        —        |     🔍 În investigare     |
-| Interfață tablou de bord           |    ✓    |    ✗     |        ✗        |             ✓             |
-| Inspector de trafic                |    ✗    |    ✗     |        ✓        |             ✓             |
+| Trae                               |    —    |    —     |        —        | 🔍 În curs de investigare |
+| Interfață de panou de control      |    ✓    |    ✗     |        ✗        |             ✓             |
+| Traffic Inspector                  |    ✗    |    ✗     |        ✓        |             ✓             |
 | Rutare OmniRoute                   |    ✗    |    ✗     |        ✗        |             ✓             |
 | Interfață pentru maparea modelelor |    ✗    |    ✗     |        ✗        |             ✓             |
 | Listă de ocolire                   |    ✗    |    ✗     |        ✓        |             ✓             |
-| Certificat CA din amonte           |    ✗    |    ✗     |        ✓        |             ✓             |
+| Certificat CA upstream             |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

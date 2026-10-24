@@ -1,10 +1,17 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Card, Button, CardSkeleton } from "@/shared/components";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import { CardSkeleton } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
@@ -408,100 +415,79 @@ function AccessBehaviourPanelPanelContent({ context }: { context: AccessFormCont
 function AccessHeader({ context }: { context: AccessFormContext }) {
   const { apiKey, t } = context;
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-xs text-text-muted">
-        <Link
-          href="/dashboard/api-manager"
-          className="hover:text-primary transition-colors inline-flex items-center gap-1"
-        >
-          <span aria-hidden="true" className="material-symbols-outlined text-[14px]">
-            arrow_back
-          </span>
-          {t("keyManagement")}
-        </Link>
-        <span>/</span>
-        <span className="font-mono text-text-main truncate max-w-[200px]">{apiKey.name}</span>
-        <span>/</span>
-        <span>{t("accessBreadcrumb")}</span>
-      </div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-main flex items-center gap-2">
-            <span aria-hidden="true" className="material-symbols-outlined text-[28px] text-primary">
-              key
-            </span>
-            {t("accessEditorTitle", { name: apiKey.name })}
-          </h1>
-          <p className="text-sm text-text-muted">{t("accessEditorDesc")}</p>
+    <PageHeader
+      compact
+      breadcrumbs={
+        <div className="flex items-center gap-2 text-xs text-text-muted">
+          <Link
+            href="/dashboard/api-manager"
+            className="hover:text-primary transition-colors inline-flex items-center gap-1"
+          >
+            <Icon name="arrow_back" size={14} />
+            {t("keyManagement")}
+          </Link>
+          <span>/</span>
+          <span className="font-mono text-text-main truncate max-w-[200px]">{apiKey.name}</span>
+          <span>/</span>
+          <span>{t("accessBreadcrumb")}</span>
         </div>
-      </div>
-    </div>
+      }
+      title={t("accessEditorTitle", { name: apiKey.name })}
+      description={t("accessEditorDesc")}
+    />
   );
 }
 
 function AccessTabBar({ context }: { context: AccessFormContext }) {
   const { form, t, tabListRef, activeTab, switchTab, handleTabKeyDown } = context;
   return (
-    <div className="border-b border-border">
-      <div
-        ref={tabListRef}
-        role="tablist"
-        aria-label={t("accessEditorTabsLabel")}
-        className="flex gap-1 overflow-x-auto scrollbar-none pb-px"
-      >
-        {TABS.map((tabDef, index) => {
-          const isSelected = activeTab === tabDef.id;
-          const errorCount = form.getTabErrorCount(tabDef.id);
+    <TabsList
+      ref={tabListRef}
+      aria-label={t("accessEditorTabsLabel")}
+      className="overflow-x-auto scrollbar-none"
+    >
+      {TABS.map((tabDef, index) => {
+        const isSelected = activeTab === tabDef.id;
+        const errorCount = form.getTabErrorCount(tabDef.id);
 
-          return (
-            <button
-              key={tabDef.id}
-              role="tab"
-              type="button"
-              id={`tab-${tabDef.id}`}
-              aria-controls={isSelected ? `panel-${tabDef.id}` : undefined}
-              aria-selected={isSelected}
-              tabIndex={isSelected ? 0 : -1}
-              onClick={() => switchTab(tabDef.id)}
-              onKeyDown={(e) => handleTabKeyDown(e, index)}
-              className={`relative inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-t-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                isSelected
-                  ? "text-primary border-b-2 border-primary bg-primary/5"
-                  : "text-text-muted hover:text-text-main hover:bg-surface/50 border-b-2 border-transparent"
-              }`}
-            >
-              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
-                {tabDef.icon}
-              </span>
-              <span>{t(tabDef.labelKey)}</span>
-              {/* The space keeps the label and the badge text apart in the accessible name;
+        return (
+          <TabsTrigger
+            key={tabDef.id}
+            value={tabDef.id}
+            id={`tab-${tabDef.id}`}
+            aria-controls={isSelected ? `panel-${tabDef.id}` : undefined}
+            onClick={() => switchTab(tabDef.id)}
+            onKeyDown={(e) => handleTabKeyDown(e, index)}
+            className="gap-2 whitespace-nowrap"
+          >
+            <Icon name={tabDef.icon} size={18} />
+            <span>{t(tabDef.labelKey)}</span>
+            {/* The space keeps the label and the badge text apart in the accessible name;
                     white space between flex items is not rendered. */}
-              {errorCount > 0 && " "}
-              {errorCount > 0 && (
-                <span
-                  className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-red-500 text-white"
-                  title={t("errorBadgeLabel", { count: errorCount })}
-                >
-                  <span aria-hidden="true">{errorCount}</span>
-                  <span className="sr-only">{t("errorBadgeLabel", { count: errorCount })}</span>
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+            {errorCount > 0 && " "}
+            {errorCount > 0 && (
+              <span
+                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-error text-bg"
+                title={t("errorBadgeLabel", { count: errorCount })}
+              >
+                <span aria-hidden="true">{errorCount}</span>
+                <span className="sr-only">{t("errorBadgeLabel", { count: errorCount })}</span>
+              </span>
+            )}
+          </TabsTrigger>
+        );
+      })}
+    </TabsList>
   );
 }
 
 function AccessPanel({ context }: { context: AccessFormContext }) {
   const { activeTab, isSubmitting } = context;
   return (
-    <div
-      role="tabpanel"
+    <TabsContent
+      value={activeTab}
       id={`panel-${activeTab}`}
       aria-labelledby={`tab-${activeTab}`}
-      tabIndex={0}
       className="focus:outline-none"
     >
       <Card className="p-6">
@@ -525,7 +511,7 @@ function AccessPanel({ context }: { context: AccessFormContext }) {
           {activeTab === "behaviour" && <AccessBehaviourPanelPanelContent context={context} />}
         </fieldset>
       </Card>
-    </div>
+    </TabsContent>
   );
 }
 
@@ -536,27 +522,20 @@ function AccessSaveBar({ context }: { context: AccessFormContext }) {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           {form.isDirty ? (
-            <span className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span className="flex items-center gap-1.5 text-xs font-medium text-warning">
+              <span className="w-2 h-2 rounded-full bg-warning animate-pulse" />
               {t("unsavedChanges")}
             </span>
           ) : (
             <span className="flex items-center gap-1.5 text-xs text-text-muted">
-              <span
-                aria-hidden="true"
-                className="material-symbols-outlined text-[16px] text-emerald-500"
-              >
-                check_circle
-              </span>
+              <Icon name="check_circle" size={16} className="text-success" />
               {ts("saved")}
             </span>
           )}
 
           {form.hasErrors && (
-            <span className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400 font-medium">
-              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">
-                error
-              </span>
+            <span className="flex items-center gap-1 text-xs text-error font-medium">
+              <Icon name="error" size={16} />
               {t("fixValidationErrors")}
             </span>
           )}
@@ -576,16 +555,10 @@ function AccessSaveBar({ context }: { context: AccessFormContext }) {
             type="button"
             onClick={handleSave}
             disabled={!form.isDirty || isSubmitting || form.hasErrors}
+            loading={isSubmitting}
             className="flex-1 sm:flex-none"
           >
-            {isSubmitting ? (
-              <span className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {ts("saving")}
-              </span>
-            ) : (
-              t("saveChanges")
-            )}
+            {isSubmitting ? <span>{ts("saving")}</span> : t("saveChanges")}
           </Button>
         </div>
       </div>
@@ -597,8 +570,15 @@ function ApiKeyAccessEditorForm(props: ApiKeyAccessEditorFormProps) {
   return (
     <div className="flex flex-col gap-6">
       <AccessHeader context={context} />
-      <AccessTabBar context={context} />
-      <AccessPanel context={context} />
+      <Tabs
+        variant="underline"
+        value={context.activeTab}
+        onValueChange={(next) => context.switchTab(next as typeof context.activeTab)}
+        className="flex flex-col gap-6"
+      >
+        <AccessTabBar context={context} />
+        <AccessPanel context={context} />
+      </Tabs>
       <AccessSaveBar context={context} />
     </div>
   );
@@ -841,22 +821,16 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
   if (notFound) {
     return (
       <Card className="flex flex-col items-center justify-center p-12 text-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
-          <span aria-hidden="true" className="material-symbols-outlined text-[24px]">
-            key_off
-          </span>
+        <div className="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center text-error">
+          <Icon name="key_off" size={24} />
         </div>
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-bold text-text-main">{t("keyNotFound")}</h2>
           <p className="text-sm text-text-muted">{t("keyNotFoundDesc")}</p>
         </div>
-        <Link href="/dashboard/api-manager">
-          <Button variant="outline">
-            <span aria-hidden="true" className="material-symbols-outlined text-[16px] mr-1.5">
-              arrow_back
-            </span>
-            {t("backToApiKeys")}
-          </Button>
+        <Link href="/dashboard/api-manager" className={buttonVariants({ variant: "outline" })}>
+          <Icon name="arrow_back" size={16} />
+          {t("backToApiKeys")}
         </Link>
       </Card>
     );
@@ -866,21 +840,15 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
   if (fetchError || !apiKey) {
     return (
       <Card className="flex flex-col items-center justify-center p-12 text-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
-          <span aria-hidden="true" className="material-symbols-outlined text-[24px]">
-            error
-          </span>
+        <div className="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center text-error">
+          <Icon name="error" size={24} />
         </div>
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-bold text-text-main">{fetchError || t("failedLoadKey")}</h2>
         </div>
-        <Link href="/dashboard/api-manager">
-          <Button variant="outline">
-            <span aria-hidden="true" className="material-symbols-outlined text-[16px] mr-1.5">
-              arrow_back
-            </span>
-            {t("backToApiKeys")}
-          </Button>
+        <Link href="/dashboard/api-manager" className={buttonVariants({ variant: "outline" })}>
+          <Icon name="arrow_back" size={16} />
+          {t("backToApiKeys")}
         </Link>
       </Card>
     );

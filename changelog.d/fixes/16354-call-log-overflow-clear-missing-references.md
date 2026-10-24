@@ -1,1 +1,0 @@
-- **fix(call-logs):** Hold the artifact ceiling even when files are already gone ([#16354](https://github.com/diegosouzapw/OmniRoute/pull/16354)) — thanks @maxmad64bis

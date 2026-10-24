@@ -16,16 +16,16 @@ AgentBridge är OmniRoutes MITM-proxy (Man-in-the-Middle) som avlyssnar HTTPS-tr
 
 ### Vad är AgentBridge?
 
-När en IDE-agent (t.ex. GitHub Copilot, Cursor eller Claude Code) gör ett API-anrop ansluter den direkt till AI-leverantören uppströms (OpenAI, Anthropic osv.). AgentBridge fångar transparent upp anslutningen på TLS-nivå – utan att kräva någon konfigurationsändring i agenten – och dirigerar om begäran via OmniRoute.
+När en IDE-agent (t.ex. GitHub Copilot, Cursor, Claude Code) gör ett API-anrop ansluter den direkt till AI-leverantören uppströms (OpenAI, Anthropic osv.). AgentBridge fångar upp anslutningen transparent på TLS-nivå — utan att någon ändring av agentens konfiguration krävs — och skriver om begäran via OmniRoute.
 
 Det innebär att du kan:
 
-- **Dirigera om valfri agent till valfri leverantör**: Kommunicerar Copilot med OpenAI? Omdirigera den till Anthropic Claude, Gemini eller någon av OmniRoutes 372 leverantörer.
+- **Dirigera om valfri agent till valfri leverantör**: Pratar Copilot med OpenAI? Omdirigera den till Anthropic Claude, Gemini eller någon av OmniRoutes 375 leverantörer.
 - **Tillämpa modellmappningar**: `gemini-3-flash` → `claude-sonnet-4.7` transparent på hanterarnivå.
-- **Övervaka all agenttrafik**: varje uppfångad begäran publiceras i [trafikinspektören](./TRAFFIC_INSPECTOR.md).
-- **Tillämpa OmniRoutes feltålighet**: kombinationsdirigering, kretsbrytare, reservlösningar och kostnadsspårning fungerar även för trafik från IDE-agenter.
+- **Observera all agenttrafik**: varje uppfångad begäran publiceras till [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
+- **Utnyttja OmniRoutes motståndskraft**: komboroutning, circuit breakers, fallback-mekanismer och kostnadsspårning fungerar även för IDE-agenttrafik.
 
-### Positionering jämfört med marknaden
+### Positionering mot marknaden
 
 | Funktion                | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
 | ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
@@ -37,12 +37,12 @@ Det innebär att du kan:
 | Zed Industries          |    —    |    ✓     |        —        |             ✓             |
 | Claude Code             |    —    |    —     |        ✓        |             ✓             |
 | Open Code               |    —    |    —     |        ✓        |             ✓             |
-| Trae                    |    —    |    —     |        —        |       🔍 Undersöks        |
-| Instrumentpanel         |    ✓    |    ✗     |        ✗        |             ✓             |
-| Trafikinspektör         |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute-dirigering    |    ✗    |    ✗     |        ✗        |             ✓             |
+| Trae                    |    —    |    —     |        —        |       🔍 Undersöker       |
+| Instrumentpanel (UI)    |    ✓    |    ✗     |        ✗        |             ✓             |
+| Traffic Inspector       |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute-routning      |    ✗    |    ✗     |        ✗        |             ✓             |
 | UI för modellmappning   |    ✗    |    ✗     |        ✗        |             ✓             |
-| Förbikopplingslista     |    ✗    |    ✗     |        ✓        |             ✓             |
+| Bypass-lista            |    ✗    |    ✗     |        ✓        |             ✓             |
 | CA-certifikat uppströms |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---

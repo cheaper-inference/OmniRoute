@@ -1,1 +1,0 @@
-- **fix(dashboard):** the Codex auth.json import dialog now accepts the top-level credential layout (`{ access_token, refresh_token, id_token, … }`) that `POST /api/oauth/codex/import` already imports, instead of rejecting it with "The file is not a valid Codex auth.json" ([#16821](https://github.com/diegosouzapw/OmniRoute/pull/16821))

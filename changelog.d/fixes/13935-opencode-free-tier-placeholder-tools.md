@@ -1,1 +1,0 @@
-- **fix(providers):** use genuine OpenCode CLI tool name (`read`) instead of `_noop` for free-tier placeholder to resolve 403 FreeTierError ([#13935](https://github.com/diegosouzapw/OmniRoute/issues/13935))

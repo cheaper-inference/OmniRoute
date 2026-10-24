@@ -31,10 +31,7 @@ import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { isModelAllowedForKey } from "@/lib/db/apiKeys";
 import { constrainConnectionsToQuota, resolveQuotaKeyScope } from "@/lib/quota/quotaKey";
 import { intersectAllowedConnectionIds } from "@/sse/handlers/chat/connectionConstraints";
-import {
-  comboTargetPassesKeyModelPolicy,
-  type ComboTargetKeyPolicyInfo,
-} from "@/sse/handlers/chat/comboTargetKeyPolicy";
+import type { ComboTargetKeyPolicyInfo } from "@/sse/handlers/chat/comboTargetKeyPolicy";
 import { hasApiKeyModelRestrictions } from "@/shared/utils/resolvedModelAccess";
 import * as log from "@/sse/utils/logger";
 
@@ -148,6 +145,11 @@ export function createComboTargetKeyGate(
   if (!apiKey || !apiKeyInfo || !hasApiKeyModelRestrictions(apiKeyInfo)) return undefined;
   return async (targetModelStr: string) => {
     try {
+      // Lazy for the same reason as modelFallbackAuthorization: comboTargetKeyPolicy imports
+      // apiKeyPolicy, and since #16499 this module is on the embeddings path that the MCP
+      // server bundle includes.
+      const { comboTargetPassesKeyModelPolicy } =
+        await import("@/sse/handlers/chat/comboTargetKeyPolicy");
       return await comboTargetPassesKeyModelPolicy({
         apiKey,
         apiKeyInfo,

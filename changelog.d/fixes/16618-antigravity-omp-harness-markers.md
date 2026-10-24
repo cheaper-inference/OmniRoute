@@ -1,1 +1,0 @@
-- **fix(antigravity):** normalize Oh My Pi harness markers in system instructions (Claude and Gemini branches) and drop the `used_claude*` telemetry keys to avoid false 429 quota errors ([#16618](https://github.com/diegosouzapw/OmniRoute/pull/16618)) — thanks @ersaasyhar

@@ -1,1 +1,0 @@
-- **fix(api):** preserve the Responses API message `phase` field in non-streaming output.

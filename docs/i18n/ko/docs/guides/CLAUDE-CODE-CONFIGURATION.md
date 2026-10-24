@@ -44,53 +44,65 @@ Claude Code는 **Anthropic Messages API**를 사용하며 환경 변수를 통�
 
 ---
 
-## 검색 별칭 — Claude가 아닌 모델을 `/model` 선택기에 표시
+## 검색 별칭 — `/model` 선택기에서 Claude가 아닌 모델 노출하기
 
-Claude Code의 게이트웨이 모델 검색은 ID가 `claude` 또는 `anthropic`으로 시작하는 모델만 나열합니다. 따라서 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`을 설정해도 기본 `/model` 선택기에는 일반적으로 OmniRoute의 Claude/Anthropic 모델**만** 표시됩니다. `kimi/kimi-k2.6` 또는 `glm/glm-5.2`는 정상적으로 라우팅되더라도 표시되지 않습니다.
+Claude Code의 게이트웨이 모델 검색은 `claude` 또는 `anthropic`으로 시작하는 id만 나열합니다. 따라서 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`이 설정된 상태에서 기본 `/model` 선택기에는 일반적으로 OmniRoute의 Claude/Anthropic 모델**만** 표시됩니다. `kimi/kimi-k2.6`이나 `glm/glm-5.2` 같은 모델은 라우팅이 정상적으로 이루어지더라도 절대 나타나지 않습니다.
 
-OmniRoute는 활성화된 모든 모델과 조합을 `claude/…` ID로 미러링할 수 있으므로, 해당 필터를 통과해 선택기에 표시됩니다.
+OmniRoute는 활성화된 모든 모델(및 콤보)을 `claude/…` id로 미러링하여 해당 필터를 통과하고 선택기에 표시되도록 할 수 있습니다:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<조합 "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Claude Code에서 이러한 항목 중 하나를 선택하면 OmniRoute는 라우팅하기 전에 `claude/` 래퍼를 제거해 실제 ID로 되돌립니다. 실제 Claude OAuth 공급자의 진짜 `claude/<real-claude-model>` ID는 항상 그대로 유지됩니다.
+Claude Code에서 이 중 하나를 선택하면, OmniRoute는 라우팅 전에 `claude/` 래퍼를 벗겨내어 실제 id로 복원합니다. 진짜 `claude/<real-claude-model>` id(실제 Claude OAuth 프로바이더)는 항상 그대로 유지됩니다.
 
-**이 기능은 기본적으로 꺼져 있으며**, 3단계 게이트로 제어됩니다. 가장 구체적인 설정이 우선하므로, Claude Code를 사용하지 않는 클라이언트에서는 일반 OmniRoute가 카탈로그를 중복 표시하지 않습니다.
+기본적으로는 기본 id만 미러링됩니다. 옵트인 기능 플래그인 `CATALOG_MIRROR_REFINEMENTS_ENABLED`를 켜면, 카탈로그에 이미 나열된 reasoning-effort 변형(예: `codex/gpt-6-sol-high`)도 다른 id와 마찬가지로 미러링되므로 Claude Code가 명시적인 effort 수준을 선택할 수 있습니다. 요청 경로가 실체화할 수 없는 내장 `auto/*` id는 미러링되지 않습니다. effort 변형이 아예 나열될지 여부는 여전히 `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS`에 의해 결정됩니다. 미러는 기본 카탈로그에 없는 변형을 절대 추가하지 않습니다.
 
-| 수준   | 위치                                                                  |
-| ------ | --------------------------------------------------------------------- |
-| 모델   | 공급자 상세 페이지 → 모델별 "Claude Code에 노출" 토글                 |
-| 공급자 | 공급자 상세 페이지 → 공급자 수준 토글(해당 공급자의 모든 모델에 적용) |
-| 전역   | 설정 → 기능 플래그 → `EXPOSE_CC_DISCOVERY_ALIASES`(기본적으로 꺼짐)   |
+**이 기능은 기본적으로 꺼져 있으며**, 3단계 게이트(가장 구체적인 설정이 우선함)로 제어됩니다. 따라서 일반적인 OmniRoute는 Claude Code를 사용하지 않는 클라이언트를 위해 카탈로그를 두 배로 늘리지 않습니다:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` 환경 변수는 전역 수준을 강제로 활성화하며 대시보드 재정의보다 우선합니다. 이 환경 변수가 적용되면 기능 플래그 화면에 "환경 변수를 통해 활성화됨"이라는 메모가 표시됩니다. 공급자별 및 모델별 토글을 사용해 적용 범위를 더 세부적으로 조정할 수 있습니다. 예를 들어 전역 설정을 끄고 Kimi 공급자만 켜면 Kimi 모델만 노출됩니다.
+| 수준       | 위치                                                                              |
+| ---------- | --------------------------------------------------------------------------------- |
+| 모델       | 프로바이더 상세 페이지 → 모델별 "Expose in Claude Code" 토글                      |
+| 프로바이더 | 프로바이더 상세 페이지 → 프로바이더 수준 토글(해당 프로바이더의 모든 모델에 적용) |
+| 전역       | 설정 → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES`(기본값 꺼짐)                 |
 
-> ⚠️ **Claude가 아닌 모델에서의 윈도 불일치.** Claude Code는 인식하지 못하는 모든 ID에 대해 200K 컨텍스트 윈도를 가정합니다(`/v1/models`에서 실제 윈도 크기를 읽을 수 없음). 더 큰 윈도를 가진 모델(예: Kimi K2의 256K)의 경우, 자동 압축이 너무 일찍 실행되지 않도록 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`를 모델의 실제 윈도보다 작은 값으로 설정하세요. 위에서 생성한 프로필에는 이미 모델별로 이 설정이 적용되어 있습니다.
+`EXPOSE_CC_DISCOVERY_ALIASES` 환경 변수는 전역 수준을 강제로 켜며 대시보드 재정의보다 우선합니다(이 경우 Feature Flags 화면에 "active via environment variable"(환경 변수를 통해 활성화됨)라는 안내가 표시됩니다). 프로바이더별 및 모델별 토글은 그 위에서 세부적으로 조정합니다. 예를 들어 전역 꺼짐 + Kimi 프로바이더 켜짐 상태에서는 Kimi의 모델만 노출됩니다.
+
+> ⚠️ **Claude가 아닌 모델의 컨텍스트 윈도우 불일치.** Claude Code는 인식하지 못하는 모든 id에 대해 200K 컨텍스트 윈도우를 가정합니다(`/v1/models`에서 실제 윈도우 값을 읽을 수 없기 때문입니다). 더 큰 윈도우를 가진 모델(예: Kimi K2의 256K)의 경우, `CLAUDE_CODE_AUTO_COMPACT_WINDOW`를 모델의 실제 윈도우보다 낮은 값으로 설정하여 자동 압축이 너무 일찍 실행되지 않도록 하세요. 위에서 생성된 프로필은 이미 모델별로 이를 처리합니다.
 
 ---
 
 ## 대시보드의 온보딩 블록
 
-Claude 도구 카드(**Dashboard → CLI Code**)는 검색 별칭 정보 버튼 옆에 이 인스턴스에 맞는 정확한 `settings.json` 조각을 복사 버튼과 함께 표시합니다.
+Claude 도구 카드(**대시보드 → CLI 코드**)는 검색 별칭 정보 버튼 옆에 이 인스턴스에 해당하는 정확한 `settings.json` 조각을 복사 버튼과 함께 표시합니다.
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<사용자 OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<사용자 OmniRoute API 키>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-기본 URL은 카드에서 확인된 URL이며(직접 입력한 사용자 지정 재정의 포함), 이미 정규화되어 있습니다. 즉, `/v1` 접미사와 후행 슬래시가 없습니다. **키는 절대 표시되지 않습니다**. 이 블록은 자리표시자를 제공하므로 스크린샷이나 붙여 넣은 코드 조각을 통해 키가 유출될 수 없습니다. 자리표시자를 자신의 키로 교체하세요.
+기본 URL은 카드에서 확인된 값(직접 입력한 사용자 지정 재정의 포함)이며, 이미 정규화되어 있습니다. 즉, `/v1` 접미사와 후행 슬래시가 없습니다. **키는 절대 표시되지 않습니다**. 이 블록은 자리표시자를 제공하므로 스크린샷이나 붙여 넣은 코드 조각을 통해 키가 유출되지 않습니다. 자리표시자를 실제 키로 바꾸세요.
 
-실제 컨텍스트 창이 200K가 아닌 모델의 경우 동일한 `env` 블록 아래에 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`를 추가하세요. Claude Code는 인식하지 못하는 모든 id의 컨텍스트 창을 200K로 가정하므로, 그렇지 않으면 자동 압축이 잘못된 시점에 실행됩니다(이전 섹션의 경고 참조). 코드 조각 빌더도 이 값을 허용하므로, 대상 모델의 컨텍스트 창을 아는 호출자는 이를 직접 출력할 수 있습니다.
+실제 컨텍스트 창이 200K가 아닌 모델의 경우 동일한 `env` 블록 아래에 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`를 추가하세요. Claude Code는 인식하지 못하는 모든 id에 대해 200K라고 가정하므로, 그렇지 않으면 자동 압축이 잘못된 시점에 실행됩니다(이전 섹션의 경고 참조). 코드 조각 빌더도 이 값을 허용하므로, 대상 모델의 창 크기를 아는 호출자는 이를 직접 출력할 수 있습니다.
 
-소스: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet`(`ClaudeGatewayOnboardingBlock`에서 렌더링되는 순수 빌더이며 단위 테스트 완료).
+출처: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet`(단위 테스트를 거친 순수 빌더), `ClaudeGatewayOnboardingBlock`에서 렌더링됩니다.
+
+### 계정 하나 고정하기(선택 사항)
+
+모든 Claude Code 요청을 하나의 특정 제공자 계정을 통해 전송하려면 동일한 `env` 블록에서 `ANTHROPIC_CUSTOM_HEADERS`를 통해 `x-omniroute-connection` 헤더를 추가하세요.
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+제공자 페이지의 연결 행에 있는 `xxxxxxxx…` 칩에서 id를 복사하세요. 고정은 단일 모델 id(`provider/model`)에만 적용되며, 콤보에는 적용되지 않습니다. 정확한 폴백 동작은 [요청별 계정 고정](../reference/API_REFERENCE.md#account-pinning-per-request)을 참조하세요.
 
 ---
 

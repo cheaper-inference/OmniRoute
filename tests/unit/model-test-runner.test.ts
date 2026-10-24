@@ -74,6 +74,7 @@ test("detectTestKind defaults to a plain chat test for ordinary models", () => {
     isRerank: false,
     isEmbedding: false,
     isAudioTranscription: false,
+    isAudioSpeech: false,
     isResponses: false,
     isNonChatGeneration: false,
   });
@@ -97,6 +98,7 @@ test("detectTestKind detects rerank by id and by metadata, and rerank wins over 
     isRerank: true,
     isEmbedding: false,
     isAudioTranscription: false,
+    isAudioSpeech: false,
     isResponses: false,
     isNonChatGeneration: false,
   });
@@ -120,6 +122,7 @@ test("detectTestKind detects audio transcription from metadata, and it wins over
     isRerank: false,
     isEmbedding: false,
     isAudioTranscription: true,
+    isAudioSpeech: false,
     isResponses: false,
     isNonChatGeneration: false,
   });
@@ -158,6 +161,7 @@ test("detectTestKind falls back to the provider node's configured apiType", () =
     isRerank: false,
     isEmbedding: false,
     isAudioTranscription: false,
+    isAudioSpeech: false,
     isResponses: false,
     isNonChatGeneration: false,
   });

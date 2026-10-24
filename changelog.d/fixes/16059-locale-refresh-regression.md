@@ -1,1 +1,0 @@
-- **Tests:** preserve the first-visit locale refresh ordering regression, checking that cookie, local storage, language and text direction are persisted before refreshing server content; isolate mock and React-root cleanup between cases (#16059).

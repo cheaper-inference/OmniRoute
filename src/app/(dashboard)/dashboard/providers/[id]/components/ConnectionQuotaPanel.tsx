@@ -1,5 +1,8 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+import { Button } from "@/shared/components";
+
 /**
  * ConnectionQuotaPanel — per-account usage/limits strip rendered under each
  * connection row on the provider detail page.
@@ -128,11 +131,11 @@ export default function ConnectionQuotaPanel({
   }, [cache, providerKey]);
 
   const messageRow = rows.length === 1 && rows[0].message ? rows[0] : null;
-  // Failed fetches keep the previous cache but leave `message` set; show it
-  // whenever there is nothing else to render (claude folds it into an error
-  // row, other providers keep it next to stale/empty quotas).
-  const messageText =
-    messageRow?.message ?? (rows.length === 0 && cache?.message ? cache.message : null);
+  // Failed fetches keep the previous cache but leave `message` set; surface it
+  // whenever it exists, not only when no rows parsed (claude folds it into an
+  // error row, others — e.g. xiaomi-mimo's self-tracked fallback — keep it
+  // beside real quota rows, where hiding it makes local counters look live).
+  const messageText = messageRow?.message ?? (cache?.message ? cache.message : null);
   const creditRows = rows.filter((r) => r.isCredits || r.isResetCredits);
   const windowRows = rows.filter(
     (r) => !r.isCredits && !r.isResetCredits && quotaWindowRank(r.name) !== null && !r.message
@@ -177,24 +180,24 @@ export default function ConnectionQuotaPanel({
   }
 
   const refreshControl = onRefresh ? (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="icon-sm"
       onClick={onRefresh}
       disabled={refreshing}
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-medium text-text-muted hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+      className="size-6 min-h-6 rounded text-text-muted"
       title={t("quotaRefresh")}
+      aria-label={t("quotaRefresh")}
     >
-      <span className={`material-symbols-outlined text-[13px] ${refreshing ? "animate-spin" : ""}`}>
-        refresh
-      </span>
-    </button>
+      <Icon name="refresh" size={13} className={refreshing ? "animate-spin" : undefined} />
+    </Button>
   ) : null;
 
   // No cached data at all — offer the first fetch inline instead of an empty strip.
   if (!cache) {
     return (
       <div className="mt-2 flex items-center gap-2 text-xs text-text-muted">
-        <span className="material-symbols-outlined text-[13px] opacity-60">data_usage</span>
+        <Icon name="data_usage" size={13} className="opacity-60" />
         <span>{t("quotaNoData")}</span>
         {refreshControl}
       </div>
@@ -205,7 +208,7 @@ export default function ConnectionQuotaPanel({
     <div className="mt-2">
       <div className="flex flex-wrap items-center gap-1.5 text-xs">
         {messageText ? (
-          <span className="text-amber-500" title={messageText}>
+          <span className="text-warning" title={messageText}>
             {messageText}
           </span>
         ) : (
@@ -246,7 +249,7 @@ export default function ConnectionQuotaPanel({
             className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-medium text-text-muted"
             style={{ background: "rgba(120,120,120,0.12)" }}
           >
-            <span className="material-symbols-outlined text-[13px]">toll</span>
+            <Icon name="toll" size={13} />
             {renderUsedText(row)}
           </span>
         ))}
@@ -279,17 +282,16 @@ export default function ConnectionQuotaPanel({
           <span className="text-[11px] text-text-muted/70">{updatedAgo}</span>
         ) : null}
         {hasDetails && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            icon={expanded ? "expand_less" : "expand_more"}
             aria-expanded={expanded}
             onClick={() => setExpanded((v) => !v)}
-            className="inline-flex items-center px-1 py-0.5 rounded text-[11px] font-medium text-text-muted hover:text-primary"
+            className="size-6 min-h-6 rounded text-text-muted"
             title={t("quotaDetails")}
-          >
-            <span className="material-symbols-outlined text-[14px]">
-              {expanded ? "expand_less" : "expand_more"}
-            </span>
-          </button>
+            aria-label={t("quotaDetails")}
+          />
         )}
       </div>
 
@@ -318,7 +320,7 @@ export default function ConnectionQuotaPanel({
                 {isCreditRow || remaining === null ? (
                   <span className="flex-1" />
                 ) : (
-                  <span className="h-1.5 flex-1 rounded-full overflow-hidden bg-black/[0.06] dark:bg-white/[0.06]">
+                  <span className="h-1.5 flex-1 rounded-full overflow-hidden bg-bg-subtle">
                     <span
                       className="block h-full rounded-full"
                       style={{

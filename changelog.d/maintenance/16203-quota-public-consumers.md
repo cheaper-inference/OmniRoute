@@ -1,1 +1,0 @@
-- Exercise quota consumers through the registered MCP RPC tools and exported A2A skill, including HTTP failure propagation and a disconnected-handler mutation control, without changing production handlers or weakening structural wiring checks.

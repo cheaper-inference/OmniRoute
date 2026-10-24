@@ -1,1 +1,0 @@
-- **fix(executors):** Normalize Grok Build's forced native web-search choice when search is the only offered tool, avoiding `ModelToolChoice` rejection while preserving mixed/custom tool choices ([#16447](https://github.com/diegosouzapw/OmniRoute/pull/16447)) — thanks @DavyMassoneto

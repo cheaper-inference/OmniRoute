@@ -20,19 +20,33 @@ test("superseded runs cancel only within the same workflow/ref", () => {
   assert.equal(workflow.concurrency["cancel-in-progress"], true);
 });
 
-test("runner isolation still blocks fork code from the self-hosted build slot", () => {
-  assert.match(
-    workflow.jobs.build["runs-on"],
-    /github\.event\.pull_request\.head\.repo\.full_name == github\.repository/
-  );
-  assert.match(workflow.jobs.build["runs-on"], /\["self-hosted","omni-build"\]/);
-  assert.match(workflow.jobs.build["runs-on"], /\|\| 'ubuntu-latest'/);
+test("no pull request or merge group Build reaches the self-hosted build slot", () => {
+  // 2026-10-18: with every own-origin PR routed to the ONE omni-build runner, 18 Turbopack
+  // Builds (29-58 min each) queued for up to 18 h and the release line's own push Build got
+  // the slot once in 40 jobs. PR and merge_group Builds now run hosted with webpack.
+  // The self-hosted path is a pure conjunction, so these four clauses are the whole gate:
+  // a pull_request (own-origin or fork) or merge_group event can never satisfy it.
+  const runsOn: string = workflow.jobs.build["runs-on"];
+  const runnerCondition = runsOn.split(" && fromJSON(")[0];
+  const clauses = runnerCondition
+    .replace(/^\$\{\{ \(/, "")
+    .replace(/\)$/, "")
+    .split(" && ");
+  assert.deepEqual(clauses, [
+    "vars.USE_VPS_RUNNER == 'true'",
+    "vars.USE_VPS_BUILD_RUNNER == 'true'",
+    "github.event_name != 'merge_group'",
+    "github.event_name != 'pull_request'",
+  ]);
+  assert.doesNotMatch(runnerCondition, /\|\|/, "no exception may re-admit a PR event");
+  assert.match(runsOn, /\["self-hosted","omni-build"\]/);
+  assert.match(runsOn, /\|\| 'ubuntu-latest' \}\}$/);
 });
 
 test("the Turbopack switch follows the self-hosted build slot; hosted stays on webpack", () => {
-  // The .113 build slot has 64 GB since 2026-10-16: the Turbopack build of this tree peaks at
-  // ~36 GB under a cgroup cap (49 GB uncapped) and finished in 23 min with three lint jobs
-  // alongside. Hosted runners (16 GB) cannot hold it and build with webpack (14 GB).
+  // The .113 build slot has 56 GB High since 2026-10-17: the Turbopack compile phase alone
+  // holds ~40 GB and the build peaked at 49 GB uncapped. Hosted runners (16 GB) cannot hold
+  // it and build with webpack (14 GB) — which is where every PR Build now runs.
   const step = workflow.jobs.build.steps.find(
     (item: { run?: string }) => item.run === "npm run build"
   );

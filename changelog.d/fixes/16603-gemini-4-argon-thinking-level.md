@@ -1,1 +1,0 @@
-- **fix(translator):** route `gemini-4-*` (including `vertex/gemini-4-argon`) through the `thinkingLevel` path instead of sending a numeric `thinkingBudget`, and support unnamespaced canonical spec lookup for provider-qualified model IDs ([#16603](https://github.com/diegosouzapw/OmniRoute/issues/16603))

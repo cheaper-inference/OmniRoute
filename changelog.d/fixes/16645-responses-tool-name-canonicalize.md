@@ -1,1 +1,0 @@
-- **fix(responses):** map provider-injected tool-call prefixes (`functions.exec`) back to the declared tool name instead of forwarding an undeclared name the Responses client rejects ([#16645](https://github.com/diegosouzapw/OmniRoute/pull/16645)) — thanks @vianhanif

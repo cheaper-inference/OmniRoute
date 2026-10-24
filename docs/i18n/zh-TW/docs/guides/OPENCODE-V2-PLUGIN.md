@@ -71,30 +71,31 @@
 
 ## 選項
 
-| 鍵                               | 預設值                                   | 說明                                                                                  |
-| -------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                            | 提供者 ID、整合 ID，以及模型顯示時使用的前綴                                          |
-| `baseURL`                        | 必填                                     | 閘道根 URL，僅支援 `http(s)`；系統會在需要時加上 `/v1` 後綴                           |
-| `apiKey`                         | 已連線的認證，然後是 `OMNIROUTE_API_KEY` | 用於 `/v1/*` 的聊天金鑰                                                               |
-| `managementReadToken`            | 回退至 `apiKey`                          | 用於 `/api/*` 的金鑰——通常與前者**不同**                                              |
-| `displayName`                    | `"OmniRoute"`                            | 選擇器中顯示的提供者名稱                                                              |
-| `timeoutMs`                      | `10000`                                  | 各端點的擷取逾時時間（自動組合使用 5 秒）                                             |
-| `modelCacheTtlMs`                | `300000`                                 | 目錄快取 TTL；磁碟快照可加速冷啟動                                                    |
-| `timeouts`                       | 回退至 `timeoutMs`                       | 各端點的時間預算（毫秒）：`models`、`combos`、`autoCombos`、`enrichment`              |
-| `enrichment`                     | `true`                                   | 擷取名稱、定價及免費方案額度                                                          |
-| `providerTag`                    | `true`                                   | 在顯示名稱前加上其路由目標的上游提供者                                                |
-| `usableOnly`                     | `false`                                  | 僅保留閘道回報為已佈建的提供者                                                        |
-| `showcasePerOwner`               | `10`                                     | 預設檢視中每個提供者保留的項目數                                                      |
-| `freshPerOwner`                  | `10`                                     | 預設檢視中每個提供者保留的近期項目數                                                  |
-| `freshWindowDays`                | `90`                                     | 近期分支的新鮮度時間範圍（天）                                                        |
-| `usageMemory`                    | `true`                                   | 還原由 30 天使用情況分析指名、但被靜態移除的項目（需要管理權杖）                      |
-| `visibleModels` / `hiddenModels` | `[]`                                     | 精確或後綴允許清單；拒絕規則優先；`*` 會發布完整目錄（其他篩選器仍會套用）            |
-| `geminiSanitization`             | `true`                                   | 從工具結構描述中移除 Gemini 不接受的 JSON-Schema 關鍵字（含 `$ref` 的工具會原樣轉送） |
-| `apiFormat.allowAnthropic`       | `false`                                  | 透過 Anthropic API 區塊路由允許清單中的 ID                                            |
-| `apiFormat.anthropicModels`      | `[]`                                     | 路由至 Anthropic 的完整模型 ID                                                        |
-| `logLevel` / `startupDebug`      | `warn` / `false`                         | 記錄器的詳細程度                                                                      |
+| 鍵                               | 預設值                                   | 說明                                                                                              |
+| -------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                            | 提供者 ID、整合 ID，以及模型顯示時使用的前綴                                                      |
+| `baseURL`                        | 必填                                     | 閘道根網址，僅支援 `http(s)`；會在需要時加上 `/v1` 後綴                                           |
+| `apiKey`                         | 已連線的認證，接著是 `OMNIROUTE_API_KEY` | 用於 `/v1/*` 的聊天金鑰                                                                           |
+| `managementReadToken`            | 後援使用 `apiKey`                        | 用於 `/api/*` 的金鑰——通常與前者**不同**                                                          |
+| `displayName`                    | `"OmniRoute"`                            | 選擇器中顯示的提供者名稱                                                                          |
+| `timeoutMs`                      | `10000`                                  | 各端點的擷取逾時時間（自動組合使用 5 秒）                                                         |
+| `modelCacheTtlMs`                | `300000`                                 | 目錄快取 TTL；磁碟快照可加速冷啟動                                                                |
+| `timeouts`                       | 後援使用 `timeoutMs`                     | 各端點的時間預算（毫秒）：`models`、`combos`、`autoCombos`、`enrichment`                          |
+| `enrichment`                     | `true`                                   | 擷取名稱、定價與免費方案額度                                                                      |
+| `providerTag`                    | `true`                                   | 在顯示名稱前加上其路由至的上游提供者                                                              |
+| `usableOnly`                     | `false`                                  | 僅保留閘道回報為已佈建的提供者                                                                    |
+| `combosSource`                   | `"api"`                                  | `"models"` 會略過 `/api/combos`，並發布 `/v1/models` 的組合資料列；成員層級的篩選器會保留 `"api"` |
+| `showcasePerOwner`               | `10`                                     | 預設檢視中每個提供者保留的精選項目數                                                              |
+| `freshPerOwner`                  | `10`                                     | 預設檢視中每個提供者保留的新項目數                                                                |
+| `freshWindowDays`                | `90`                                     | 新項目分支的新鮮度時間範圍（天）                                                                  |
+| `usageMemory`                    | `true`                                   | 根據 30 天使用情況分析，還原由靜態篩選移除的具名項目（需要管理權杖）                              |
+| `visibleModels` / `hiddenModels` | `[]`                                     | 精確或後綴比對的允許清單；拒絕規則優先；`*` 會發布完整目錄（其他篩選器仍會套用）                  |
+| `geminiSanitization`             | `true`                                   | 從工具結構描述中移除 Gemini 不接受的 JSON-Schema 關鍵字（使用 `$ref` 的工具會原樣轉送）           |
+| `apiFormat.allowAnthropic`       | `false`                                  | 透過 Anthropic API 區塊路由允許清單中的 ID                                                        |
+| `apiFormat.anthropicModels`      | `[]`                                     | 路由至 Anthropic 的完整模型 ID                                                                    |
+| `logLevel` / `startupDebug`      | `warn` / `false`                         | 記錄器詳細程度                                                                                    |
 
-使用情況記憶體預設為啟用。若沒有管理權杖，則會維持停用狀態
+使用記憶功能預設為開啟。若沒有管理權杖，該功能將維持停用狀態
 （啟動時會記錄一則通知），且不會還原任何項目。
 
 ## 目錄如何保持最新

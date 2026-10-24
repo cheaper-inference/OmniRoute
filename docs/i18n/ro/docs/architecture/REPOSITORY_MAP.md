@@ -110,25 +110,25 @@ OmniRoute/
 
 ---
 
-## `src/` — Aplicație Next.js
+## `src/` — aplicația Next.js
 
 ```
 src/
-├── app/                 # App Router (pagini + rute API + pagini de stare + pagină de prezentare)
-├── lib/                 # Biblioteci de bază / module de domeniu (80 de subdirectoare + ~70 de fișiere la nivel superior)
-├── domain/              # Logică pură de domeniu (motor de politici, mecanism de rezervă, cost, blocare, comboResolver, evaluare)
+├── app/                 # App Router (pagini + rute API + pagini de stare + pagina de prezentare)
+├── lib/                 # Biblioteci principale / module de domeniu (80 de subdirectoare + ~70 de fișiere la nivel superior)
+├── domain/              # Logică pură de domeniu (motor de politici, rezervă, cost, blocare, comboResolver, evaluare)
 ├── server/              # Module exclusiv pentru server (flux de autorizare, cors, middleware de autentificare) — nu pot fi importate din client
-├── shared/              # Partajate în siguranță între server și client (constante, tipuri, validare, contracte, utilitare)
-├── i18n/                # Configurație next-intl + JSON cu mesaje pentru fiecare localizare (42 de localizări)
+├── shared/              # Partajate între server și client acolo unde este sigur (constante, tipuri, validare, contracte, utilitare)
+├── i18n/                # Configurație next-intl + fișiere JSON cu mesaje pentru fiecare localizare (67 de localizări)
 ├── middleware/          # Middleware Next.js (îmbogățirea cererilor, detectarea localizării)
-├── mitm/                # Nucleul proxy-ului MITM: generare/instalare certificate, gestionare, ținte, inspector, măști, transmitere directă
+├── mitm/                # Nucleul proxy-ului MITM: generare/instalare certificate, gestionare, ținte, inspecție, măști, transmitere directă
 │   ├── handlers/        # 9 clase de gestionare pentru agenți IDE care extind MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Strat de capturare a traficului: buffer (inel în memorie), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+│   └── inspector/       # Strat de captare a traficului: buffer (inel în memorie), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
 ├── models/              # Cod de integrare pentru adaptoarele de modele (strat de compatibilitate vechi)
-├── scripts/             # Scripturi de mentenanță din arborele sursă (de ex., backfillAggregation)
+├── scripts/             # Scripturi de mentenanță incluse în arbore (de exemplu, backfillAggregation)
 ├── sse/                 # Gestionare/servicii SSE vechi (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Depozit vechi în memorie (în curs de înlocuire cu src/lib/db)
-├── types/               # Fișiere de tipuri TS partajate
+├── store/               # Magazin vechi în memorie (eliminat treptat în favoarea src/lib/db)
+├── types/               # Fișiere partajate cu tipuri TS
 ├── instrumentation.ts   # Hook de telemetrie Next.js (browser + edge)
 ├── instrumentation-node.ts  # Instrumentare exclusiv pentru Node
 └── proxy.ts             # Strat de compatibilitate pentru punctul de intrare al proxy-ului HTTP
@@ -138,80 +138,80 @@ src/
 
 | Cale                                                                         | Scop                                                                                                                                                                                                                                                                                                                         |
 | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | API public compatibil cu OpenAI (~25 de sub-rute: chat, completări, embeddings, fișiere, loturi, audio, imagini, videoclipuri, muzică, rerank, moderări, căutare, ws, agenți, conturi, furnizori etc.)                                                                                                                       |
+| `app/api/v1/`                                                                | API public compatibil cu OpenAI (~25 de sub-rute: chat, completări, embeddings, fișiere, loturi, audio, imagini, videoclipuri, muzică, rerank, moderare, căutare, ws, agenți, conturi, furnizori etc.)                                                                                                                       |
 | `app/api/v1beta/`                                                            | Endpointuri API în stil Gemini                                                                                                                                                                                                                                                                                               |
-| `app/api/playground/`                                                        | Rute Playground Studio: `improve-prompt/` (POST — reformulator de prompturi bazat pe LLM), `presets/` (GET pentru listare / POST pentru creare), `presets/[id]/` (GET / PUT / DELETE) — consultați `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                    |
-| `app/api/` (non-v1)                                                          | Rute de administrare/management (~60 de directoare: furnizori, combinații, setări, mcp, a2a, evaluări, memorie, abilități, webhookuri, conformitate, reziliență, monitorizare, tuneluri, instrumente CLI etc.)                                                                                                               |
-| `app/api/tools/agent-bridge/`                                                | API REST AgentBridge — 12 rute (controlul serverului, starea/DNS-ul/mapările agenților, ocolire, certificat, CA upstream). LOCAL_ONLY + SPAWN_CAPABLE. Consultați `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                       |
+| `app/api/playground/`                                                        | Rute Playground Studio: `improve-prompt/` (POST — reformulare a promptului cu LLM), `presets/` (GET pentru listare / POST pentru creare), `presets/[id]/` (GET / PUT / DELETE) — consultați `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                           |
+| `app/api/` (non-v1)                                                          | Rute de gestionare/administrare (~60 de directoare: furnizori, combinații, setări, mcp, a2a, evaluări, memorie, abilități, webhook-uri, conformitate, reziliență, monitorizare, tuneluri, instrumente CLI etc.)                                                                                                              |
+| `app/api/tools/agent-bridge/`                                                | API REST AgentBridge — 12 rute (controlul serverului, starea/DNS-ul/mapările agentului, ocolire, certificat, CA upstream). LOCAL_ONLY + SPAWN_CAPABLE. Consultați `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                       |
 | `app/api/tools/traffic-inspector/`                                           | API REST + WS Traffic Inspector — peste 16 rute (cereri, sesiuni, gazde, moduri de captură, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Consultați `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                   |
 | `app/a2a/`                                                                   | Punct de intrare A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                              |
-| `app/.well-known/agent.json/`                                                | Fișă de agent A2A (descoperire)                                                                                                                                                                                                                                                                                              |
-| `app/(dashboard)/dashboard/`                                                 | Pagini pentru interfața tabloului de bord (peste 50 de secțiuni, ~118 fișiere page.tsx: furnizori, combinații, setări, memorie, abilități, webhookuri, evaluări, audit, loturi, cache, costuri, stare de funcționare, sistem, activitate etc.)                                                                               |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Interfața Search Tools Studio (3 file: Căutare/Extragere/Comparare + SearchConceptCard + ProviderCatalog) — consultați `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                              |
+| `app/.well-known/agent.json/`                                                | Card de agent A2A (descoperire)                                                                                                                                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/`                                                 | Pagini UI ale panoului de control (peste 50 de secțiuni, ~118 fișiere page.tsx: furnizori, combinații, setări, memorie, abilități, webhook-uri, evaluări, audit, loturi, cache, costuri, stare, sistem, activitate etc.)                                                                                                     |
+| `app/(dashboard)/dashboard/search-tools/`                                    | UI Search Tools Studio (3 file: Căutare/Extragere/Comparare + SearchConceptCard + ProviderCatalog) — consultați `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                     |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (planul 21): `page.tsx` (structură cu 3 file), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Pagina AgentBridge din tabloul de bord — card pentru server, 9 carduri pentru agenți, asistent de configurare, maparea modelelor, listă de ocolire. i18n PT-BR + EN. Consultați `docs/frameworks/AGENTBRIDGE.md`.                                                                                                            |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Pagina Traffic Inspector din tabloul de bord — vizualizare divizată DevTools, 7 file de detalii, 4 comutatoare pentru modurile de captură, înregistrarea sesiunilor, colorizarea contextului. i18n PT-BR + EN. Consultați `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                            |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Pagina AgentBridge din panoul de control — card de server, 9 carduri de agent, expert de configurare, maparea modelelor, listă de ocolire. i18n PT-BR + EN. Consultați `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                     |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Pagina Traffic Inspector din panoul de control — vizualizare divizată DevTools, 7 file de detalii, 4 comutatoare pentru modurile de captură, înregistrator de sesiuni, colorizare contextuală. i18n PT-BR + EN. Consultați `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                           |
 | `app/(dashboard)/dashboard/activity/`                                        | Pagina fluxului de activitate (Grupul B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — consultați `docs/architecture/MONITORING_SECTIONS.md`                                                                                                    |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Pagina de partajare a cotelor (Grupul B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                        |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Pagina de configurare a planului furnizorului (Grupul B): `page.tsx` + `ProviderPlanConfigClient.tsx` — suprascrierea dimensiunilor cotei pentru fiecare conexiune                                                                                                                                                           |
-| `app/docs/`                                                                  | Vizualizator de documentație încorporat (redă `docs/*.md`)                                                                                                                                                                                                                                                                   |
-| `app/landing/`                                                               | Pagină de destinație pentru marketing                                                                                                                                                                                                                                                                                        |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Pagina de configurare a planului furnizorului (Grupul B): `page.tsx` + `ProviderPlanConfigClient.tsx` — dimensiunile cotelor pentru fiecare conexiune suprascriu valorile implicite                                                                                                                                          |
+| `app/docs/`                                                                  | Vizualizator de documentație încorporat (randează `docs/*.md`)                                                                                                                                                                                                                                                               |
+| `app/landing/`                                                               | Pagina de destinație pentru marketing                                                                                                                                                                                                                                                                                        |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Pagini legate de autentificare                                                                                                                                                                                                                                                                                               |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | Pagini de eroare HTTP                                                                                                                                                                                                                                                                                                        |
 | `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Pagini statice/de stare                                                                                                                                                                                                                                                                                                      |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Aspectul rădăcină, pagina principală, manifestul PWA, CSS global                                                                                                                                                                                                                                                             |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Aspect rădăcină, pagina principală, manifest PWA, CSS global                                                                                                                                                                                                                                                                 |
 | `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Limite de eroare                                                                                                                                                                                                                                                                                                             |
 
 ### `src/lib/` — Biblioteci de bază (~50 de module)
 
 | Modul                                    | Scop                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | Manager de sarcini pentru protocolul A2A, capabilități (5), streaming                                                                                                                                                                                                                                                                   |
+| `a2a/`                                   | Manager de sarcini pentru protocolul A2A, abilități (5), streaming                                                                                                                                                                                                                                                                      |
 | `acp/`                                   | Registru de agenți CLI (descoperire CLI locală — consultați `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                 |
 | `api/`                                   | Funcții auxiliare API partajate (`requireManagementAuth`, validare)                                                                                                                                                                                                                                                                     |
-| `auth/`                                  | Sesiune, hashing-ul parolelor, validarea tokenurilor                                                                                                                                                                                                                                                                                    |
+| `auth/`                                  | Sesiune, hashingul parolelor, validarea tokenurilor                                                                                                                                                                                                                                                                                     |
 | `batches/`                               | Handlere pentru API-ul OpenAI Batches                                                                                                                                                                                                                                                                                                   |
-| `catalog/`                               | Validare Zod pentru catalogul furnizorilor + rezolvarea capabilităților                                                                                                                                                                                                                                                                 |
+| `catalog/`                               | Validarea Zod a catalogului de furnizori + rezolvarea capabilităților                                                                                                                                                                                                                                                                   |
 | `cloudAgent/`                            | Agenți cloud (Codex Cloud, Devin, Jules) — consultați `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                                  |
-| `combos/`                                | Funcții auxiliare pentru rezolvarea combinațiilor + reordonare                                                                                                                                                                                                                                                                          |
+| `combos/`                                | Funcții auxiliare pentru rezolvarea și reordonarea combinațiilor                                                                                                                                                                                                                                                                        |
 | `audit/`                                 | Funcții auxiliare pentru fluxul de activitate: `highLevelActions.ts` (listă de permisiuni + `isHighLevelAction()`), `activityIcons.ts` (mapare acțiune → pictogramă/verb), `timeline.ts` (groupByDay/relativeTime) — consultați `docs/architecture/MONITORING_SECTIONS.md`                                                              |
 | `compliance/`                            | Jurnal de audit + auditarea furnizorilor — consultați `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                     |
 | `compression/`                           | Cod de integrare pentru motorul de compresie (motoarele se află în `open-sse/services/compression/`)                                                                                                                                                                                                                                    |
 | `config/`                                | Funcții auxiliare pentru configurarea la rulare                                                                                                                                                                                                                                                                                         |
-| `db/`                                    | Peste 120 de module DB de domeniu + 168 de migrări (pentru SQLite, accesul se face întotdeauna prin acestea)                                                                                                                                                                                                                            |
+| `db/`                                    | Peste 120 de module DB pentru domenii + 168 de migrări (pentru SQLite, accesați întotdeauna prin acestea)                                                                                                                                                                                                                               |
 | `quota/`                                 | Motor de partajare a cotelor: `dimensions.ts` (tipuri/Zod), `types.ts` (interfața QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — consultați `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | Client pentru catalogul de modele gratuite Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — consultați `docs/frameworks/RADAR.md`                                                                                                                                    |
 | `display/`                               | Funcții auxiliare pentru formatarea interfeței (cost, latență etc.)                                                                                                                                                                                                                                                                     |
-| `embeddings/`                            | Funcții auxiliare pentru serviciul de înglobări                                                                                                                                                                                                                                                                                         |
+| `embeddings/`                            | Funcții auxiliare pentru serviciul de embeddings                                                                                                                                                                                                                                                                                        |
 | `env/`                                   | Parsarea și validarea variabilelor de mediu                                                                                                                                                                                                                                                                                             |
 | `evals/`                                 | Cadru de evaluare (suite, executor, mediu de execuție) — consultați `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                          |
-| `guardrails/`                            | Mascare PII, protecție împotriva injectării de prompturi, punte pentru funcții vizuale — consultați `docs/security/GUARDRAILS.md`                                                                                                                                                                                                       |
+| `guardrails/`                            | Mascare PII, protecție împotriva injectării de prompturi, punte pentru procesarea imaginilor — consultați `docs/security/GUARDRAILS.md`                                                                                                                                                                                                 |
 | `jobs/`                                  | Sarcini în fundal (similare cron)                                                                                                                                                                                                                                                                                                       |
 | `memory/`                                | Memorie conversațională (RRF hibrid SQLite FTS5 + sqlite-vec și Qdrant de nivel 2) — consultați `docs/frameworks/MEMORY.md`                                                                                                                                                                                                             |
-| `memory/embedding/`                      | Strat de înglobări din surse multiple: `index.ts` (rezolvator), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (planul 21)                                                                                                                                                                              |
-| `memory/vectorStore.ts`                  | Wrapper sqlite-vec v0.1.9 — KNN prin forță brută + RRF hibrid (FTS5 + vector, k=60). Inițializare întârziată, funcționează în mod degradat atunci când sqlite-vec nu este disponibil. (planul 21)                                                                                                                                       |
-| `memory/reindex.ts`                      | `runReindexBatch()` — procesează în fundal memoriile cu `needs_reindex=1`; apelată de `POST /api/memory/reindex` și de mecanismul de completare întârziată. (planul 21)                                                                                                                                                                 |
-| `monitoring/`                            | Verificări de stare, emiterea metricilor                                                                                                                                                                                                                                                                                                |
+| `memory/embedding/`                      | Strat de embeddings cu surse multiple: `index.ts` (rezolvare), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (planul 21)                                                                                                                                                                               |
+| `memory/vectorStore.ts`                  | Wrapper sqlite-vec v0.1.9 — căutare KNN prin forță brută + RRF hibrid (FTS5 + vector, k=60). Inițializare leneșă, cu degradare controlată când sqlite-vec nu este disponibil. (planul 21)                                                                                                                                               |
+| `memory/reindex.ts`                      | `runReindexBatch()` — procesează în fundal memoriile cu `needs_reindex=1`; apelată de `POST /api/memory/reindex` și de calea de completare retroactivă leneșă. (planul 21)                                                                                                                                                              |
+| `monitoring/`                            | Verificări de sănătate, emiterea metricilor                                                                                                                                                                                                                                                                                             |
 | `oauth/`                                 | Fluxuri OAuth/de import pentru 22 de module de furnizori (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                    |
 | `plugins/`                               | Registru de pluginuri                                                                                                                                                                                                                                                                                                                   |
 | `promptCache/`                           | Puncte de întrerupere pentru memoria cache a prompturilor în stil Anthropic                                                                                                                                                                                                                                                             |
 | `skills/`                                | Cadru pentru abilități (încorporate + marketplace + SkillsSH) — consultați `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                  |
 | `playground/`                            | Utilitare partajate pentru Playground Studio: `codeExport.ts` (generator curl/Python/TS), `promptImprover.ts` (constructor de meta-prompturi), `streamMetrics.ts` (TTFT/TPS pur), `types.ts` (tabel de prețuri) — consultați `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                     |
-| `webhookDispatcher.ts`                   | Livrare de webhook-uri cu HMAC — consultați `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                               |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Manageri de tuneluri — consultați `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                           |
+| `webhookDispatcher.ts`                   | Livrare de webhook-uri HMAC — consultați `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                  |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Administratoare de tuneluri — consultați `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                    |
 | `cloudSync.ts`, `initCloudSync.ts`       | Sincronizare opțională a stării în cloud                                                                                                                                                                                                                                                                                                |
-| `localDb.ts`                             | Modul agregator de reexportare pentru modulele bazei de date (fără logică — doar reexportări)                                                                                                                                                                                                                                           |
+| `localDb.ts`                             | Modul central de reexportare pentru modulele bazei de date (fără logică — doar reexportări)                                                                                                                                                                                                                                             |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Memorarea în cache a cererilor + idempotență                                                                                                                                                                                                                                                                                            |
 | (încă ~30 de fișiere de nivel superior)  | Utilitare specializate (logEnv, modelsDevSync, piiSanitizer etc.)                                                                                                                                                                                                                                                                       |
 
-### `src/lib/db/` — Bază de date (137 de module + 193 de migrări)
+### `src/lib/db/` — Bază de date (147 de module + 208 migrări)
 
 | Subdirector               | Scop                                                                                                                                                                                     |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | Singleton `getDbInstance()` cu jurnalizare WAL                                                                                                                                           |
+| `db/core.ts`              | Instanță singleton `getDbInstance()` cu jurnalizare WAL                                                                                                                                  |
 | `db/migrations/`          | Fișiere SQL versionate (idempotente, tranzacționale). `073_memory_vec.sql` adaugă `memory_vec_meta` + coloana `needs_reindex` (planul 21).                                               |
 | `db/playgroundPresets.ts` | Modul CRUD pentru presetările Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)           |
-| `db/memoryVec.ts`         | Operațiuni CRUD pentru `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` etc. (planul 21)               |
+| `db/memoryVec.ts`         | Operații CRUD pentru `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` etc. (planul 21)                 |
 | `db/<domain>.ts`          | Câte un modul pentru fiecare domeniu: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache etc. |
 
 ### `src/domain/`
@@ -219,13 +219,13 @@ src/
 | Modul                  | Scop                                                          |
 | ---------------------- | ------------------------------------------------------------- |
 | `policy.ts`            | Motor de politici                                             |
-| `fallbackPolicy.ts`    | Arbore decizional de rezervă                                  |
+| `fallbackPolicy.ts`    | Arbore decizional pentru mecanismul de rezervă                |
 | `costRules.ts`         | Reguli de calculare a costurilor                              |
 | `lockoutPolicy.ts`     | Politică de blocare a modelelor/conexiunilor                  |
 | `tagRouter.ts`         | Rutare bazată pe etichete                                     |
 | `comboResolver.ts`     | Rezolvarea combinațiilor (utilizată de motorul de combinații) |
 | `modelAvailability.ts` | Verificarea disponibilității pentru fiecare model             |
-| `assessment/`          | Evaluarea modelelor (faza 1 din RFC-AUTO-ASSESSMENT)          |
+| `assessment/`          | Evaluarea modelelor (Faza 1 din RFC-AUTO-ASSESSMENT)          |
 
 ### `src/server/`
 
@@ -233,25 +233,25 @@ src/
 | -------- | ------------------------------------------------------------------------------------------------------- |
 | `authz/` | Flux de autorizare: `classify` → `policies` → `enforce` — consultați `docs/architecture/AUTHZ_GUIDE.md` |
 | `cors/`  | Configurare CORS                                                                                        |
-| `auth/`  | Middleware de sesiune                                                                                   |
+| `auth/`  | Middleware pentru sesiuni                                                                               |
 
 ### `src/shared/`
 
 | Modul                            | Scop                                                                                          |
 | -------------------------------- | --------------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **372 de furnizori** cu validare Zod (sursa adevărului)                                       |
+| `constants/providers.ts`         | **375 de furnizori** cu validare Zod (sursa de adevăr)                                        |
 | `constants/cliTools.ts`          | Registrul instrumentelor CLI externe                                                          |
-| `constants/routingStrategies.ts` | **19 strategii de rutare** cu priorități                                                      |
-| `constants/publicApiRoutes.ts`   | Rute care necesită autentificare Bearer (în locul celei de administrare)                      |
-| `constants/upstreamHeaders.ts`   | Lista antetelor interzise pentru solicitările upstream                                        |
-| `validation/schemas.ts`          | ~80 de scheme Zod (sursa unică a adevărului pentru contractele API)                           |
-| `validation/helpers.ts`          | Funcții auxiliare pentru validarea Zod (`validateBody` etc.)                                  |
+| `constants/routingStrategies.ts` | **20 de strategii de rutare** cu priorități                                                   |
+| `constants/publicApiRoutes.ts`   | Rute care necesită autentificare Bearer (în locul autentificării de administrare)             |
+| `constants/upstreamHeaders.ts`   | Lista antetelor interzise pentru cererile upstream                                            |
+| `validation/schemas.ts`          | ~80 de scheme Zod (sursa unică de adevăr pentru contractele API)                              |
+| `validation/helpers.ts`          | Funcții ajutătoare pentru validarea Zod (`validateBody` etc.)                                 |
 | `types/`                         | Tipuri TS partajate                                                                           |
 | `contracts/`                     | Contracte API publice (utilizate de `files:` în `package.json`)                               |
 | `utils/circuitBreaker.ts`        | Întrerupător de circuit pentru furnizori (consultați `docs/architecture/RESILIENCE_GUIDE.md`) |
 | `utils/apiAuth.ts`               | Validarea cheilor API, verificarea domeniilor de acces                                        |
-| `utils/fetchTimeout.ts`          | Wrappere pentru expirarea/anularea operațiunilor fetch upstream                               |
-| `utils/releaseNotes.ts`          | Parser pentru anunțurile v2/legacy închise, localizare și ignorare după ID                    |
+| `utils/fetchTimeout.ts`          | Wrappere pentru expirare/anulare destinate operațiilor fetch upstream                         |
+| `utils/releaseNotes.ts`          | Parser pentru anunțurile v2/vechi închise, localizare și respingere după ID                   |
 
 ---
 
@@ -381,74 +381,74 @@ open-sse/
 
 | Document                    | Scop                                                                                           |
 | --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Arhitectură generală, harta subsistemelor, suprafața panoului de control                       |
+| `ARCHITECTURE.md`           | Arhitectură de nivel înalt, harta subsistemelor, interfața panoului de control                 |
 | `CODEBASE_DOCUMENTATION.md` | Referință tehnică: directoare, module, convenții                                               |
-| `FEATURES.md`               | Matricea funcționalităților, cu evidențierea noutăților din v3.8                               |
+| `FEATURES.md`               | Matrice de funcționalități cu noutățile din v3.8                                               |
 | `USER_GUIDE.md`             | Manual pentru utilizatorul final (configurare, modele, combinații, CLI-uri, audio etc.)        |
-| `API_REFERENCE.md`          | Referință pentru endpoint-urile API, cu modelul de autentificare                               |
-| `openapi.yaml`              | Specificație OpenAPI 3.0 (121 de căi)                                                          |
-| `SETUP_GUIDE.md`            | Metode de instalare (npm, npx, Docker, Electron, Termux, sursă)                                |
+| `API_REFERENCE.md`          | Referință pentru endpointurile API, cu modelul de autentificare                                |
+| `openapi.yaml`              | Specificație OpenAPI 3.0 (121 de rute)                                                         |
+| `SETUP_GUIDE.md`            | Metode de instalare (npm, npx, Docker, Electron, Termux, cod sursă)                            |
 | `ENVIRONMENT.md`            | Toate variabilele de mediu (~800 documentate, ~3.050 de linii în `.env.example`)               |
 | `TROUBLESHOOTING.md`        | Erori frecvente + probleme cunoscute în v3.8.0                                                 |
 | `RELEASE_CHECKLIST.md`      | Flux complet de lansare (abilități, husky, commituri convenționale, implementare)              |
-| `COVERAGE_PLAN.md`          | Obiective de acoperire și starea actuală                                                       |
-| `FREE_TIERS.md`             | Furnizori selectați cu nivel gratuit (48+ gratuiți + 11 OAuth)                                 |
+| `COVERAGE_PLAN.md`          | Obiectivele de acoperire și starea actuală                                                     |
+| `FREE_TIERS.md`             | Furnizori selectați cu nivel gratuit (peste 48 gratuiți + 11 OAuth)                            |
 | `CLI-TOOLS.md`              | Integrări CLI externe + CLI-ul intern OmniRoute                                                |
-| `I18N.md`                   | Arhitectura i18n, adăugarea unei limbi, 42 de localizări                                       |
+| `I18N.md`                   | Arhitectură i18n, adăugarea unei limbi, 67 de localizări                                       |
 | `UNINSTALL.md`              | Pași pentru dezinstalarea completă                                                             |
-| `PROVIDER_REFERENCE.md`     | Catalog **generat automat** cu 372 de furnizori (regenerare: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Catalog **generat automat** cu 375 de furnizori (regenerare: `npm run gen:provider-reference`) |
 
-### Prezentări detaliate ale subsistemelor
+### Prezentări aprofundate ale subsistemelor
 
-| Document                                       | Scop                                                                                             |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `MCP-SERVER.md`                                | Server MCP: 110 instrumente, 3 mecanisme de transport, 33 de domenii de acces, endpoint-uri REST |
-| `A2A-SERVER.md`                                | A2A v0.3: JSON-RPC, 6 abilități, utilitare REST, fișa agentului                                  |
-| `AGENT_PROTOCOLS_GUIDE.md`                     | Ghid unificat: A2A comparativ cu ACP și agenții cloud                                            |
-| `CLOUD_AGENT.md`                               | Orchestrarea Codex Cloud / Devin / Jules                                                         |
-| `SKILLS.md`                                    | Cadru pentru abilități (încorporate + marketplace + SkillsSH + sandbox)                          |
-| `RADAR.md`                                     | Suprapunere peste catalogul Radar de modele gratuite (`RADAR_ENABLED`, dezactivată implicit)     |
-| `MEMORY.md`                                    | Sistem de memorie (SQLite FTS5 + Qdrant)                                                         |
-| `EVALS.md`                                     | Cadru de evaluare (suite, rulări, criterii)                                                      |
-| `GUARDRAILS.md`                                | Mascarea PII, injectarea de prompturi, punte pentru procesarea vizuală                           |
-| `COMPLIANCE.md`                                | Jurnal de audit, retenție, opțiune de renunțare noLog                                            |
-| `WEBHOOKS.md`                                  | Livrarea webhook-urilor semnate cu HMAC                                                          |
-| `REASONING_REPLAY.md`                          | Memorie hibridă/cache SQLite pentru `reasoning_content`                                          |
-| `AUTHZ_GUIDE.md`                               | Flux de autorizare (`classify` → `policies` → `enforce`)                                         |
-| `RESILIENCE_GUIDE.md`                          | Întrerupător de circuit + perioadă de așteptare + blocarea modelului                             |
-| `docs/security/STEALTH_GUIDE.md` (doar în git) | Amprentare TLS (JA3/JA4), Claude Code CCH, certificat MITM                                       |
-| `AUTO-COMBO.md`                                | Motorul Auto Combo (evaluare pe baza a 16 factori, 6 pachete de moduri, fabrică virtuală)        |
+| Document                                       | Scop                                                                                           |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                                | Server MCP: 110 instrumente, 3 transporturi, 33 de domenii, endpointuri REST                   |
+| `A2A-SERVER.md`                                | A2A v0.3: JSON-RPC, 6 abilități, utilitare REST, fișă de agent                                 |
+| `AGENT_PROTOCOLS_GUIDE.md`                     | Ghid unificat: A2A comparativ cu ACP și agenții cloud                                          |
+| `CLOUD_AGENT.md`                               | Orchestrare Codex Cloud / Devin / Jules                                                        |
+| `SKILLS.md`                                    | Cadru pentru abilități (încorporate + marketplace + SkillsSH + sandbox)                        |
+| `RADAR.md`                                     | Strat suprapus peste catalogul Radar de modele gratuite (`RADAR_ENABLED`, dezactivat implicit) |
+| `MEMORY.md`                                    | Sistem de memorie (SQLite FTS5 + Qdrant)                                                       |
+| `EVALS.md`                                     | Cadru de evaluare (suite, rulări, criterii)                                                    |
+| `GUARDRAILS.md`                                | Mascare PII, injectare de prompturi, punte pentru viziune                                      |
+| `COMPLIANCE.md`                                | Jurnal de audit, retenție, opțiune de excludere noLog                                          |
+| `WEBHOOKS.md`                                  | Livrare de webhookuri semnate cu HMAC                                                          |
+| `REASONING_REPLAY.md`                          | Cache hibrid memorie/SQLite pentru `reasoning_content`                                         |
+| `AUTHZ_GUIDE.md`                               | Flux de autorizare (`classify` → `policies` → `enforce`)                                       |
+| `RESILIENCE_GUIDE.md`                          | Întrerupător de circuit + perioadă de așteptare + blocarea modelului                           |
+| `docs/security/STEALTH_GUIDE.md` (doar în git) | Amprentare TLS (JA3/JA4), Claude Code CCH, certificat MITM                                     |
+| `AUTO-COMBO.md`                                | Motor Auto Combo (evaluare pe baza a 16 factori, 6 pachete de moduri, fabrică virtuală)        |
 
-### Comprimare
+### Compresie
 
-| Document                        | Scop                                                             |
-| ------------------------------- | ---------------------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Prezentare generală a modurilor de comprimare + foaie de parcurs |
-| `COMPRESSION_ENGINES.md`        | Motoarele Caveman + RTK, contractul registrului                  |
-| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON pentru pachetul de reguli Caveman                    |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Inventarul pachetelor de reguli pentru fiecare limbă             |
-| `RTK_COMPRESSION.md`            | Flux declarativ RTK (49 de filtre)                               |
+| Document                        | Scop                                                            |
+| ------------------------------- | --------------------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Prezentare generală a modurilor de compresie + foaie de parcurs |
+| `COMPRESSION_ENGINES.md`        | Motoarele Caveman + RTK, contractul registrului                 |
+| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON a pachetului de reguli Caveman                      |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventarul pachetelor de reguli pentru fiecare limbă            |
+| `RTK_COMPRESSION.md`            | Flux declarativ RTK (49 de filtre)                              |
 
 ### Implementare
 
-| Document                     | Scop                                                               |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | Build Docker, profiluri (base/cli/host/cliproxyapi), sidecar Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Implementare generică pe VM/VPS (Ubuntu/Debian + nginx + systemd)  |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Implementare pe Fly.io (momentan disponibil doar în chineză)       |
-| `TERMUX_GUIDE.md`            | Android fără interfață grafică prin Termux                         |
-| `PWA_GUIDE.md`               | Instalarea aplicației web progresive + service worker              |
-| `ELECTRON_GUIDE.md`          | Build aplicație desktop + semnare + distribuire                    |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                             |
-| `PROXY_GUIDE.md`             | Proxy de ieșire pe 4 niveluri + marketplace 1proxy                 |
+| Document                     | Scop                                                                             |
+| ---------------------------- | -------------------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Compilare Docker, profiluri (base/cli/host/cliproxyapi), serviciu auxiliar Redis |
+| `VM_DEPLOYMENT_GUIDE.md`     | Implementare generică pe VM/VPS (Ubuntu/Debian + nginx + systemd)                |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Implementare pe Fly.io (momentan disponibil doar în chineză)                     |
+| `TERMUX_GUIDE.md`            | Rulare fără interfață grafică pe Android prin Termux                             |
+| `PWA_GUIDE.md`               | Instalarea aplicației web progresive + service worker                            |
+| `ELECTRON_GUIDE.md`          | Compilarea aplicației desktop + semnare + distribuire                            |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                           |
+| `PROXY_GUIDE.md`             | Proxy de ieșire pe 4 niveluri + marketplace-ul 1proxy                            |
 
 ### Subdirectoare
 
-| Subdirector           | Scop                                                                                                                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Traduceri localizate ale documentației (41 de limbi)                                                                                                                                                                                       |
-| `docs/screenshots/`   | Resurse de imagine pentru ghiduri                                                                                                                                                                                                          |
-| `_tasks/superpowers/` | Planuri/specificații din superpowers (`writing-plans`/`brainstorming`) + cercetare — depozit izolat, cu versiuni gestionate separat, ignorat de git în arborele principal. Consultați CLAUDE.md → „Artefacte de planificare și cercetare”. |
+| Subdirector           | Scop                                                                                                                                                                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Traduceri localizate ale documentației (41 de limbi)                                                                                                                                                                            |
+| `docs/screenshots/`   | Resurse de imagine pentru ghiduri                                                                                                                                                                                               |
+| `_tasks/superpowers/` | Planuri/specificații din superpowers (`writing-plans`/`brainstorming`) + cercetare — depozit izolat, versionat separat și ignorat de Git în arborele principal. Consultați CLAUDE.md → „Artefacte de planificare și cercetare”. |
 
 ---
 

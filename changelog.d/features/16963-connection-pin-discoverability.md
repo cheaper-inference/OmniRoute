@@ -1,1 +1,0 @@
-- **feat(dashboard):** Copyable connection-ID chip on every provider connection row, plus docs for per-request account pinning with the `x-omniroute-connection` header (strict pin, single-model requests, Claude Code `ANTHROPIC_CUSTOM_HEADERS` example) ([#16963](https://github.com/diegosouzapw/OmniRoute/pull/16963)) — thanks @nhan14t1

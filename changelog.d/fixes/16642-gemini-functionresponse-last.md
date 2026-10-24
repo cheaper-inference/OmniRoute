@@ -1,1 +1,0 @@
-- sse: Gemini translators keep `functionResponse` parts last when merging a tool result with a following user turn, fixing the Gemini 4 400 "Requests ending with a model turn are not supported" (#16642)

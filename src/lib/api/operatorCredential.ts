@@ -14,6 +14,12 @@ export interface OperatorCredentialOptions {
    * an internal service actually calls (sync token issuance) should opt in.
    */
   allowInternalService?: boolean;
+  /**
+   * The action is a credential surface that stays authenticated even when login is disabled
+   * (the `ALWAYS_PROTECTED_API_PATHS` tier): an open instance no longer counts as the operator,
+   * so an API key presented on an open instance is still refused. Off by default.
+   */
+  alwaysRequireAuth?: boolean;
 }
 
 /**
@@ -36,7 +42,9 @@ export async function resolveOperatorCredential(
   request: Request,
   options: OperatorCredentialOptions = {}
 ): Promise<OperatorCredentialKind | null> {
-  if (!(await isAuthRequired(request, { ignorePublicRoute: true }))) return "open_instance";
+  if (!options.alwaysRequireAuth && !(await isAuthRequired(request, { ignorePublicRoute: true }))) {
+    return "open_instance";
+  }
   if (await isDashboardSessionAuthenticated(request)) return "dashboard_session";
   if (options.allowInternalService && isTrustedLoopbackInternalServiceRequest(request)) {
     return "internal_service";
@@ -73,13 +81,16 @@ export async function requireOperatorCredential(
   request: Request,
   options: OperatorCredentialOptions & { forbiddenMessage: string }
 ): Promise<OperatorAuthVerdict> {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, {
+    alwaysRequireAuth: options.alwaysRequireAuth,
+  });
   if (authError) return { ok: false, response: authError };
 
   let operator: OperatorCredentialKind | null;
   try {
     operator = await resolveOperatorCredential(request, {
       allowInternalService: options.allowInternalService,
+      alwaysRequireAuth: options.alwaysRequireAuth,
     });
   } catch {
     return {

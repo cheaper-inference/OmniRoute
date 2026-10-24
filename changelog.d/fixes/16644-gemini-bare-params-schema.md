@@ -1,1 +1,0 @@
-- sse: move bare property-map tool parameters under `properties` so Gemini no longer 400s with "Unknown name … Cannot find field" (#16644)

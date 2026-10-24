@@ -494,6 +494,35 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
     format: "syntx-video",
     models: toSyntxVideoModels(),
   },
+
+  // Added locally. OpenRouter publishes video on POST /api/v1/videos (the
+  // /videos/generations path is a 404). That endpoint is asynchronous: it
+  // answers 202 with a job id, so `format` selects the submit→poll preset
+  // rather than the synchronous openai-video handler, which returned 200
+  // with no video. Model ids are OpenRouter's own slugs, passed through.
+  openrouter: {
+    id: "openrouter",
+    baseUrl: "https://openrouter.ai/api/v1",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openrouter-video-job",
+    models: [
+      { id: "google/veo-3.1", name: "Veo 3.1" },
+      { id: "google/veo-3.1-fast", name: "Veo 3.1 Fast" },
+      { id: "google/veo-3.1-lite", name: "Veo 3.1 Lite" },
+      { id: "openai/sora-2-pro", name: "Sora 2 Pro" },
+      { id: "kwaivgi/kling-v3.0-pro", name: "Kling 3.0 Pro" },
+      { id: "kwaivgi/kling-v3.0-std", name: "Kling 3.0 Standard" },
+      { id: "bytedance/seedance-2.5", name: "Seedance 2.5" },
+      { id: "bytedance/seedance-2.0", name: "Seedance 2.0" },
+      { id: "minimax/hailuo-3-max", name: "Hailuo 3 Max" },
+      { id: "minimax/hailuo-3", name: "Hailuo 3" },
+      { id: "alibaba/wan-3.0", name: "Wan 3.0" },
+      { id: "alibaba/wan-3.0-prime", name: "Wan 3.0 Prime" },
+      { id: "x-ai/grok-imagine-video-1.5", name: "Grok Imagine Video 1.5" },
+      { id: "runway/gen-4.5", name: "Runway Gen-4.5" },
+    ],
+  },
 };
 
 /**

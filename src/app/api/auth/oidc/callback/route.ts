@@ -136,6 +136,9 @@ export async function GET(request: Request) {
     // use conventional endpoints
   }
 
+  // PKCE: the verifier is only sent when this browser started the flow with a challenge.
+  const codeVerifier = cookieStore.get("oidc_pkce_verifier")?.value;
+
   // Exchange code for tokens (form post)
   const tokenParams = new URLSearchParams({
     grant_type: "authorization_code",
@@ -144,6 +147,9 @@ export async function GET(request: Request) {
     client_id: clientId,
     client_secret: clientSecret,
   });
+  if (codeVerifier) {
+    tokenParams.set("code_verifier", codeVerifier);
+  }
 
   let tokenResp: Response;
   try {
@@ -199,6 +205,19 @@ export async function GET(request: Request) {
       audience: clientId,
     });
 
+    // The id_token must echo the nonce sent in the authorization URL. The
+    // browser-bound cookie is required: an id_token replayed without the nonce
+    // must not mint a session.
+    const expectedNonce = cookieStore.get("oidc_nonce")?.value;
+    const tokenNonce = (payload as Record<string, unknown>).nonce;
+    if (
+      !expectedNonce ||
+      typeof tokenNonce !== "string" ||
+      !timingSafeCompare(expectedNonce, tokenNonce)
+    ) {
+      return NextResponse.redirect(new URL("/login?oidc_error=id_token_invalid", originEarly));
+    }
+
     const sub = typeof payload.sub === "string" ? payload.sub : "";
     const emailVerified = (payload as Record<string, unknown>).email_verified === true;
     const email =
@@ -242,6 +261,20 @@ export async function GET(request: Request) {
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
+  });
+
+  // Single-use PKCE material: clear it once the session is minted.
+  store.set("oidc_pkce_verifier", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+  store.set("oidc_nonce", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
   });
 
   // Success — go to dashboard

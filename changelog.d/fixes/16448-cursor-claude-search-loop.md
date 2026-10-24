@@ -1,1 +1,0 @@
-- **fix(sse):** Preserve forced search tools through Claude-to-Cursor translation and replay the completed server-owned search loop as Anthropic SSE, so streaming clients receive the final answer ([#16448](https://github.com/diegosouzapw/OmniRoute/pull/16448)) — thanks @DavyMassoneto

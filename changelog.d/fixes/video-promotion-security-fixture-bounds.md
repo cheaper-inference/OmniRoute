@@ -1,1 +1,0 @@
-- Render the complete Video Bridge promotion security-fixture instruction on two lines so the adversarial text fits inside the frame; verify actual FFmpeg glyph widths before accepting the corpus.

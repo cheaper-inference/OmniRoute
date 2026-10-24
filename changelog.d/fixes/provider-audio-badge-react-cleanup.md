@@ -1,1 +1,0 @@
-- Unmount the provider audio-badge test's React roots and await teardown before removing the DOM, preventing scheduler work from accessing a disposed jsdom window during parallel UI tests.

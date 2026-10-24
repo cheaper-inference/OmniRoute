@@ -1,1 +1,0 @@
-- **fix(kiro):** route Kiro API-key connections to the Amazon Q regional endpoint and auto-detect the key's region at import ([#16497](https://github.com/diegosouzapw/OmniRoute/pull/16497)) — thanks @ryanngit

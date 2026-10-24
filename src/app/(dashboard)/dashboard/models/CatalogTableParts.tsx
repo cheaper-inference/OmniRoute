@@ -2,23 +2,19 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/shared/components";
+import { DataTableFooter } from "@omniroute/ui-kit/data-table-shell";
+import { TableCell, TableHead } from "@omniroute/ui-kit/table";
+import { Button, Checkbox } from "@/shared/components";
 
-// Cells and footer shared by the model and combo catalog tables; the markup matches what each
-// table rendered inline, so both keep the same DOM, labels and classes.
-
-const CHECKBOX_CLASS =
-  "rounded border-black/20 text-primary focus:ring-primary dark:border-white/20";
+// Cells and footer shared by the model and combo catalog tables (kit Table cells, Checkbox
+// adapter, kit DataTableFooter).
 
 /** A column heading without sorting. */
 export function PlainHeading({ children }: { children: ReactNode }) {
   return (
-    <th
-      scope="col"
-      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-muted"
-    >
+    <TableHead scope="col" className="px-4">
       {children}
-    </th>
+    </TableHead>
   );
 }
 
@@ -26,12 +22,9 @@ export function PlainHeading({ children }: { children: ReactNode }) {
 export function ActionsHeading() {
   const t = useTranslations("modelCatalog");
   return (
-    <th
-      scope="col"
-      className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-text-muted"
-    >
+    <TableHead scope="col" className="px-4 text-right">
       {t("actions")}
-    </th>
+    </TableHead>
   );
 }
 
@@ -48,18 +41,16 @@ export function SelectAllHeaderCell({
   label: string;
 }) {
   return (
-    <th scope="col" className="w-10 px-4 py-3">
-      <input
-        type="checkbox"
+    <TableHead scope="col" className="w-10 px-4">
+      {/* The adapter forwards `indeterminate` as the kit prop (not a ref callback: the kit
+          effect would overwrite a ref-set value). */}
+      <Checkbox
         checked={checked}
-        ref={(el) => {
-          if (el) el.indeterminate = indeterminate;
-        }}
+        indeterminate={indeterminate}
         onChange={onToggle}
         aria-label={label}
-        className={CHECKBOX_CLASS}
       />
-    </th>
+    </TableHead>
   );
 }
 
@@ -73,15 +64,9 @@ export function SelectRowCell({
   label: string;
 }) {
   return (
-    <td className="w-10 px-4 py-3">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={onToggle}
-        aria-label={label}
-        className={CHECKBOX_CLASS}
-      />
-    </td>
+    <TableCell className="w-10 px-4">
+      <Checkbox checked={checked} onChange={onToggle} aria-label={label} />
+    </TableCell>
   );
 }
 
@@ -101,19 +86,24 @@ export function CatalogTableFooter({
 }) {
   const t = useTranslations("modelCatalog");
   return (
-    <footer className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-text-muted" aria-live="polite">
-        {children}
-      </p>
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-text-muted">{t("page", { page, pageCount })}</span>
-        <Button variant="secondary" size="sm" disabled={page === 1} onClick={onPrevious}>
-          {t("previous")}
-        </Button>
-        <Button variant="secondary" size="sm" disabled={page >= pageCount} onClick={onNext}>
-          {t("next")}
-        </Button>
-      </div>
-    </footer>
+    <DataTableFooter
+      className="border-t border-border px-4 py-3"
+      metadata={
+        <p className="text-sm text-text-muted" aria-live="polite">
+          {children}
+        </p>
+      }
+      pagination={
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-text-muted">{t("page", { page, pageCount })}</span>
+          <Button variant="outline" size="sm" disabled={page === 1} onClick={onPrevious}>
+            {t("previous")}
+          </Button>
+          <Button variant="outline" size="sm" disabled={page >= pageCount} onClick={onNext}>
+            {t("next")}
+          </Button>
+        </div>
+      }
+    />
   );
 }

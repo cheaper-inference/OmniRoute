@@ -1,1 +1,0 @@
-- **fix(ci):** Require both admission gates in the release merge queue and run applicable CI lanes for verified same-repository Mergify candidates, while rejecting ordinary drafts, forged queue identities and missing or skipped required results.

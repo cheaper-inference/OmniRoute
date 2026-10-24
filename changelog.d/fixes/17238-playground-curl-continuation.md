@@ -1,0 +1,1 @@
+- **fix(dashboard):** Keep the endpoint URL in copied media-playground cURL commands. ([#17238](https://github.com/diegosouzapw/OmniRoute/pull/17238)) — thanks @pacocartones

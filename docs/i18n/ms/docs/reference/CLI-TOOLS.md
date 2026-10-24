@@ -45,63 +45,63 @@ ACP Agents (aliran permulaan terbalik):
 
 ## Konfigurasi automatik dengan `setup-*`
 
-Anda tidak perlu menulis konfigurasi setiap alat secara manual. OmniRoute menyediakan satu perintah `setup-*`
-bagi setiap CLI yang disokong, yang membaca katalog model **langsung** daripada
-OmniRoute yang sedang berjalan (setempat atau jauh) dan menulis konfigurasi alat tersebut pada mesin anda:
+Anda tidak perlu menulis konfigurasi setiap alat secara manual. OmniRoute menyediakan satu arahan `setup-*`
+bagi setiap CLI yang disokong, yang membaca katalog model **langsung** daripada OmniRoute yang sedang berjalan
+(setempat atau jauh) dan menulis konfigurasi alat tersebut pada mesin anda:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Setiap satunya menerima `--remote <url> --api-key <key>` (konfigurasikan alat setempat untuk menggunakan
+Setiap arahan menerima `--remote <url> --api-key <key>` (konfigurasikan alat setempat untuk menggunakan
 OmniRoute jauh), `--dry-run` (pratonton tanpa menulis), dan `--port`. Alat
 tanpa penemuan automatik model (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) menerima
-`--model <id>` (dan `--yes` untuk pelaksanaan tanpa interaksi). `setup-5dive` ialah satu-satunya
+`--model <id>` (dan `--yes` untuk pelaksanaan tidak interaktif). `setup-5dive` ialah satu-satunya
 resipi yang tidak menulis di bawah `$HOME`: ia mengkonfigurasi sekumpulan ejen 5dive dengan
-menulis profil pengesahan milik root pada hos kumpulan tersebut, lalu melaksanakan semula melalui `sudo`
+menulis profil pengesahan milik root pada hos kumpulan tersebut, jadi ia melaksanakan semula melalui `sudo`
 dan tidak mempunyai mod jauhnya sendiri. Untuk melancarkan CLI dengan
-persekitaran yang betul disuntik tanpa menulis sebarang konfigurasi, gunakan pelancar umum
+persekitaran yang betul disuntik dan tanpa menulis sebarang konfigurasi, gunakan pelancar generik
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — sasaran dan alias datang daripada `bin/cli/cli-manifest.mjs`); pelancar
-khusus alat legasi `omniroute launch` (Claude Code) dan `omniroute launch-codex`
-(Codex) kekal tersedia. Gemini CLI hanya boleh dilancarkan: ia ialah sasaran `omniroute run`
+gemini — sasaran dan alias berasal daripada `bin/cli/cli-manifest.mjs`); pelancar lama
+bagi setiap alat, `omniroute launch` (Claude Code) dan `omniroute launch-codex`
+(Codex), masih tersedia. Gemini CLI hanya boleh dilancarkan: ia merupakan sasaran `omniroute run`
 tetapi tidak mempunyai resipi `setup-*`/`configure`.
 
-> **Rujukan penuh:** jadual induk — perkara yang ditulis oleh setiap perintah, setiap tanda,
+> **Rujukan lengkap:** jadual induk — perkara yang ditulis oleh setiap arahan, setiap pilihan,
 > setempat berbanding jauh, dan alat yang memerlukan akhiran `/v1` — tersedia dalam
 > **[Integrasi CLI](../guides/CLI-INTEGRATIONS.md)**.
 
-### Menjalankan perintah ini di dalam bekas
+### Menjalankan arahan ini di dalam bekas
 
-Perintah `setup-*` yang dilaksanakan di dalam bekas OmniRoute akan menulis ke dalam
-direktori utama bekas itu sendiri, yang tidak dibaca oleh mana-mana CLI hos dan akan hilang bersama
-bekas tersebut. OmniRoute mengesan keadaan itu dan keluar dengan kod `2` berserta arahan dan bukannya
-menulis. Terdapat dua cara yang disokong untuk meneruskan — pasang CLI pada hos dan gunakan
-`omniroute connect` untuk menyambung ke bekas, atau lekapkan ikat direktori konfigurasi dan tetapkan
-`CLI_CONFIG_HOME` (profil compose `host`). Setiap perintah `setup-*`, serta
+Arahan `setup-*` yang dilaksanakan di dalam bekas OmniRoute menulis ke dalam direktori utama
+bekas itu sendiri, yang tidak dibaca oleh mana-mana CLI hos dan akan hilang bersama
+bekas tersebut. OmniRoute mengesan keadaan itu dan keluar dengan kod `2` berserta arahan, bukannya
+menulis. Terdapat dua cara yang disokong untuk meneruskan — pasang CLI pada hos dan
+gunakan `omniroute connect` untuk menyambung ke bekas, atau lekap-ikat direktori konfigurasi dan tetapkan
+`CLI_CONFIG_HOME` (profil compose `host`). Setiap arahan `setup-*`, termasuk
 `omniroute configure` dan `omniroute config set`, menerima
-`--allow-container-write` apabila anda sememangnya mahu mengkonfigurasi CLI milik bekas itu
-sendiri; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` melakukan perkara yang sama untuk
+`--allow-container-write` apabila anda sememangnya mahu mengkonfigurasi CLI milik bekas
+itu sendiri; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` melakukan perkara yang sama untuk
 pelayan. Lihat
 [Panduan Docker → Mengkonfigurasi alat CLI hos](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Titik akhir penggunaan** papan pemuka (`POST /api/cli-tools/apply`) menguatkuasakan
-perlindungan yang sama: dalam bekas, operasi tulis yang sasarannya tidak dilekapkan ikat daripada
-hos akan memberikan respons **`422`** dengan `containerEphemeralTarget: true`, teks ralat yang
-selamat dan — bagi alat yang mempunyai resipi hos (claude, codex, opencode, cline,
+**Titik akhir penerapan** papan pemuka (`POST /api/cli-tools/apply`) menguatkuasakan
+perlindungan yang sama: di dalam bekas, operasi tulis yang sasarannya tidak dilekap-ikat daripada
+hos akan memberikan respons **`422`** dengan `containerEphemeralTarget: true`, teks ralat
+yang selamat dan — untuk alat yang mempunyai resipi hos (claude, codex, opencode, cline,
 kilo, continue) — `hostSetupCommand` (cth. `omniroute setup-opencode`) untuk dijalankan
-pada hos; tiada apa-apa yang ditulis. `dryRun: true` terus berfungsi dalam mod bekas
-dan mengembalikan pratonton yang telah disunting + laluan sasaran tanpa menyentuh cakera. Kandungan
-pratonton bukan konfigurasi yang mengandungi kelayakan untuk disalin atau diimport. Gunakan konfigurasi
-dengan input alat/URL asas/kunci API/model yang asal pada hos, atau gunakan perintah persediaan
+pada hos sebagai gantinya; tiada apa-apa yang ditulis. `dryRun: true` terus berfungsi dalam mod
+bekas dan mengembalikan pratonton yang disunting + laluan sasaran tanpa menyentuh cakera. Kandungan
+pratonton bukan konfigurasi yang mengandungi bukti kelayakan untuk disalin atau diimport. Terapkan dengan
+input alat/URL asas/kunci API/model yang asal pada hos, atau gunakan arahan persediaan
 pada hos yang dinyatakan. Lihat [Keselamatan konfigurasi CLI](../security/CLI-CONFIGURATION.md)
 untuk pengepala pratonton dan kontrak permintaan. Tingkah laku ini
 disengajakan dan dilindungi daripada regresi oleh
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — jangan sekali-kali "betulkan" ralat 422
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — jangan sekali-kali "membaiki" ralat 422
 dengan membuang perlindungan tersebut.
 
 ---
@@ -145,40 +145,41 @@ satu permukaan tanpa yang lain akan menggagalkan suite dan bukannya menyimpang s
 
 ---
 
-## 1. Katalog CLI Code (26 alat)
+## 1. Katalog Kod CLI (27 alat)
 
 Semua alat yang dipaparkan dalam `/dashboard/cli-code`. Alat dengan `baseUrlSupport: none` disambungkan melalui MITM atau panduan manual dan bukannya URL asas tersuai:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| id           | nama                         | vendor                     | sokongan URL asas | jenis konfigurasi | boleh dicetuskan ACP |
+| ------------ | ---------------------------- | -------------------------- | ----------------- | ----------------- | -------------------- |
+| claude       | Claude Code                  | Anthropic                  | full              | env               | true                 |
+| codex        | OpenAI Codex CLI             | OpenAI                     | full              | custom            | true                 |
+| zcode        | ZCode (Pelan Pengekodan GLM) | Z.ai                       | none              | custom            | false                |
+| cline        | Cline                        | OSS (dahulunya Claude Dev) | full              | custom            | true                 |
+| kilo         | Kilo Code                    | Kilo-Org                   | full              | custom            | false                |
+| roo          | Roo Code                     | Roo (OSS)                  | full              | guide             | false                |
+| continue     | Continue                     | continue.dev               | full              | guide             | false                |
+| aider        | Aider                        | OSS (P. Gauthier)          | full              | guide             | true                 |
+| forge        | ForgeCode                    | Antinomy HQ                | full              | custom            | true                 |
+| jcode        | jcode                        | 1jehuang (OSS)             | full              | custom            | false                |
+| deepseek-tui | DeepSeek TUI                 | Hunter Bown (OSS)          | full              | custom            | false                |
+| codewhale    | CodeWhale                    | Hmbown (OSS)               | full              | custom            | false                |
+| opencode     | OpenCode                     | Anomaly (dahulunya SST)    | full              | guide             | true                 |
+| droid        | Factory Droid                | Factory AI                 | partial           | guide             | false                |
+| copilot      | GitHub Copilot CLI           | GitHub/MS                  | full              | custom            | false                |
+| cursor-cli   | Cursor CLI                   | Anysphere                  | partial           | guide             | true                 |
+| smelt        | Smelt                        | leonardcser (OSS)          | full              | custom            | false                |
+| pi           | Pi (pi-coding-agent)         | M. Zechner (OSS)           | full              | custom            | false                |
+| grok-build   | Grok Build                   | xAI                        | full              | custom            | false                |
+| crush        | Crush                        | OSS (Charm)                | full              | custom            | false                |
+| qwen         | Qwen Code                    | Alibaba                    | full              | guide             | true                 |
+| zed          | Zed                          | Zed Industries             | full              | guide             | false                |
+| cursor       | Cursor                       | Anysphere                  | none              | guide             | false                |
+| antigravity  | Antigravity                  | Google                     | none              | mitm              | false                |
+| hermes       | Hermes                       | Nous Research              | none              | guide             | false                |
+| kiro         | Kiro AI                      | Amazon                     | none              | mitm              | false                |
+| custom       | CLI Tersuai                  | —                          | full              | custom-builder    | false                |
 
-Alat dengan `baseUrlSupport: "partial"` memaparkan lencana "⚠ URL asas separa" pada kad papan pemuka.
+Alat dengan `baseUrlSupport: "partial"` memaparkan lencana "⚠ URL Asas Separa" pada kad papan pemuka.
 ---
 
 ## 2. Katalog Ejen CLI (10 alat)
@@ -187,16 +188,16 @@ Ejen autonomi yang dipaparkan dalam `/dashboard/cli-agents`:
 
 | id           | nama             | vendor                   | sokonganBaseUrl | bolehDimulakanAcp |
 | ------------ | ---------------- | ------------------------ | --------------- | ----------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | penuh           | false             |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | penuh           | true              |
-| goose        | Goose            | Block / Linux Foundation | penuh           | true              |
-| interpreter  | Open Interpreter | OSS                      | penuh           | true              |
-| warp         | Warp AI          | Warp Inc.                | separa          | true              |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | penuh           | false             |
-| omp          | Oh My Pi         | OSS                      | penuh           | true              |
-| letta        | Letta CLI        | Letta                    | penuh           | false             |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | penuh           | false             |
-| 5dive        | 5dive            | OSS (5dive-ai)           | penuh           | false             |
+| hermes-agent | Hermes Agent     | Nous Research            | full            | false             |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full            | true              |
+| goose        | Goose            | Block / Linux Foundation | full            | true              |
+| interpreter  | Open Interpreter | OSS                      | full            | true              |
+| warp         | Warp AI          | Warp Inc.                | partial         | true              |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full            | false             |
+| omp          | Oh My Pi         | OSS                      | full            | true              |
+| letta        | Letta CLI        | Letta                    | full            | false             |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false             |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full            | false             |
 
 ---
 

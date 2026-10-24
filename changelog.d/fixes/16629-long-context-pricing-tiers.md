@@ -1,1 +1,0 @@
-- **fix(usage):** Cost estimates now apply long-context pricing tiers (OpenAI >272K input tokens, xAI Grok 4.6 ≥200K) and use corrected GPT-5.4 and Claude Haiku 4.5 cache rates ([#16629](https://github.com/diegosouzapw/OmniRoute/pull/16629)) — thanks @Primexz

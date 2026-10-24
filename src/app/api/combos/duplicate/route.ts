@@ -12,6 +12,7 @@ import {
 import { AutoVariant } from "@omniroute/open-sse/services/autoCombo/autoPrefix";
 import { AutoComboSpec } from "@omniroute/open-sse/services/autoCombo/virtualFactory";
 import { MODEL_FAMILIES, ModelFamily } from "@omniroute/open-sse/services/autoCombo/modelFamily";
+import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
 // POST /api/combos/duplicate - Resolve an auto-combo into a static combo snapshot.
 // Takes an auto/* template name, resolves its candidate pool using the same logic as
@@ -160,15 +161,7 @@ export async function POST(request: Request) {
     return NextResponse.json(comboData, { status: 201 });
   } catch (error) {
     console.error("Error duplicating auto-combo:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to duplicate auto-combo",
-        details:
-          typeof error === "object" && error !== null && "message" in error
-            ? String(error.message)
-            : String(error),
-      },
-      { status: 500 }
-    );
+    const body = buildErrorBody(500, "Failed to duplicate auto-combo");
+    return NextResponse.json({ error: body.error.message }, { status: 500 });
   }
 }

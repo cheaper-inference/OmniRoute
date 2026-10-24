@@ -1,1 +1,0 @@
-- **fix(sse):** Gemini responses without `totalTokenCount` now report `total_tokens` as prompt + completion instead of 0 (non-streaming, SSE accumulator and streaming paths) ([#16702](https://github.com/diegosouzapw/OmniRoute/pull/16702)) — thanks @WYSTAF

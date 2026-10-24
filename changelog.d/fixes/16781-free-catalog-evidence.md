@@ -1,1 +1,0 @@
-- Correct free-model classification for Bytez paid 70B/72B tiers and unverified Nous Hermes-4 entries; retain Bytez Mistral-7B without an unsupported token allowance and refresh the documented catalog counts. Closes #16781.

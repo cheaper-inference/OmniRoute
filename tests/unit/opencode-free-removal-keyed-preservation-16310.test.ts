@@ -6,7 +6,7 @@ import { NOAUTH_PROVIDERS } from "../../src/shared/constants/providers/noauth.ts
 
 const zenModels = [
   "opencode/big-pickle",
-  "opencode/deepseek-v4-flash-free",
+  "opencode/deepseek-v4.1-flash-free",
   "opencode/nemotron-3-super-free",
   "opencode/mimo-v2.5-free",
   "opencode/north-mini-code-free",

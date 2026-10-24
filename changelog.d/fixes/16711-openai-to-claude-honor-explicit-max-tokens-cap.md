@@ -1,1 +1,0 @@
-- **fix(translator):** OpenAI→Claude now honors an explicit `max_tokens` / `max_completion_tokens` cap even when tools are present, so 1-token prompt-cache warm requests no longer generate 32k output tokens; small explicit caps (e.g. 4096) with tools are now hard limits ([#16711](https://github.com/diegosouzapw/OmniRoute/pull/16711)) — thanks @kvyb

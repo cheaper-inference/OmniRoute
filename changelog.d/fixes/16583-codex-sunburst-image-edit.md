@@ -1,1 +1,0 @@
-- **fix(providers):** Codex `gpt-image-2.5-sunburst` is registered as a Codex image model, so reference-image edits reach the dedicated Codex Images edits route instead of returning 400, and Sunburst appears in the image catalog next to Flare ([#16583](https://github.com/diegosouzapw/OmniRoute/issues/16583))

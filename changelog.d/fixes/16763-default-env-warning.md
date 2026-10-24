@@ -1,1 +1,0 @@
-- Avoid warning about volatile package configuration when the CLI only loads unchanged generated defaults. Continue warning for effective customized values and unknown keys without exposing their contents.

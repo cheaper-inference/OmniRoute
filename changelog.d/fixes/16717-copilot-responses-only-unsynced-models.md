@@ -1,1 +1,0 @@
-- **fix(copilot):** route not-yet-synced Responses-only GPT models (gpt-6-*, gpt-5.5+) to `/responses` instead of `/chat/completions` ([#16717](https://github.com/diegosouzapw/OmniRoute/pull/16717)) — thanks @amirsalaar

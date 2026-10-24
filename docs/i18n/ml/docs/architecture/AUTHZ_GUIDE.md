@@ -13,103 +13,58 @@
 
 > ഉറവിടം: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## രണ്ട് Auth മോഡുകൾ
+## രണ്ട് ഓതന്റിക്കേഷൻ മോഡുകൾ
 
 ### 1. API കീ (Bearer)
 
-OpenAI/Anthropic/Gemini-അനുയോജ്യമായ ക്ലയന്റ് API-കൾക്കും, കീയ്ക്ക് `manage` സ്കോപ്പ് ഉള്ളപ്പോൾ ചില മാനേജ്മെന്റ് റൂട്ടുകൾക്കുമായി ഉപയോഗിക്കുന്നു.
+OpenAI/Anthropic/Gemini-അനുയോജ്യമായ ക്ലയന്റ് APIകൾക്കും, കീക്ക് `manage` സ്കോപ്പ് ഉള്ളപ്പോൾ ചില മാനേജ്‌മെന്റ് റൂട്ടുകൾക്കും ഇത് ഉപയോഗിക്കുന്നു.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`src/sse/services/auth.ts`-ലെ `isValidApiKey()` / `extractApiKey()` ഉപയോഗിച്ച് സാധുത പരിശോധിക്കുകയും `src/shared/utils/apiAuth.ts` വഴി വീണ്ടും എക്സ്പോർട്ട് ചെയ്യുകയും ചെയ്യുന്നു. സ്ഥിരമായ passthrough കീകളായി `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env vars-ഉം വാലിഡേറ്റർ സ്വീകരിക്കുന്നു (issue #1350).
+`src/sse/services/auth.ts` ലെ `isValidApiKey()` / `extractApiKey()` വഴി ഇത് സാധൂകരിക്കുകയും `src/shared/utils/apiAuth.ts` വഴി വീണ്ടും എക്സ്പോർട്ട് ചെയ്യുകയും ചെയ്യുന്നു. `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` എൻവയോൺമെന്റ് വേരിയബിളുകളെ സ്ഥിരമായ പാസ്‌ത്രൂ കീകളായും ഈ വാലിഡേറ്റർ സ്വീകരിക്കുന്നു (issue #1350).
 
-### 2. ഡാഷ്ബോർഡ് സെഷൻ (auth_token cookie)
+### 2. ഡാഷ്‌ബോർഡ് സെഷൻ (auth_token കുക്കി)
 
-ഡാഷ്ബോർഡ് പേജുകൾക്കും അഡ്മിൻ പ്രവർത്തനങ്ങൾക്കും.
+ഡാഷ്‌ബോർഡ് പേജുകൾക്കും അഡ്മിൻ പ്രവർത്തനങ്ങൾക്കുമായി.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-JWT സാധുത പരിശോധിക്കപ്പെടുകയും **കൂടാതെ** അതിൽ `authenticated: true` ഉണ്ടായിരിക്കുകയും ചെയ്യുമ്പോൾ മാത്രമാണ് ഒരു cookie സെഷനാകുന്നത്
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). cookie ഉപയോഗിക്കുന്ന ഓരോ ഘടകവും (ഡാഷ്ബോർഡ് റൂട്ട് ഗാർഡ് (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live
-server, `/api/settings/require-login`, `/api/auth/status`) ആ helper വഴിയാണ് കടന്നുപോകുന്നത്.
-`JWT_SECRET` ഉപയോഗിച്ച് ഒപ്പിട്ട മറ്റ് JWT-കളും നിലവിലുണ്ട് — കീ ഉടമകൾക്കായി Cursor CLI passthrough
-`iss "omniroute" / aud "cursor-cli"` ടോക്കണുകൾ സൃഷ്ടിക്കുന്നു — അവ ഒരിക്കലും സെഷനുകളല്ല
-(#13298).
+JWT സാധൂകരിക്കപ്പെടുകയും **കൂടാതെ** `authenticated: true` ഉൾക്കൊള്ളുകയും ചെയ്യുമ്പോൾ മാത്രമേ ഒരു കുക്കി സെഷനാകൂ (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). കുക്കി ഉപയോഗിക്കുന്ന എല്ലാ ഘടകങ്ങളും — ഡാഷ്‌ബോർഡ് റൂട്ട് ഗാർഡ് (`isDashboardSessionAuthenticated()`), authz പൈപ്പ്‌ലൈൻ റിഫ്രഷ്, WebSocket ഹാൻഡ്‌ഷേക്ക്, ലൈവ് സെർവർ, `/api/settings/require-login`, `/api/auth/status` — ആ ഹെൽപ്പർ വഴിയാണ് പോകുന്നത്. `JWT_SECRET` ഉപയോഗിച്ച് ഒപ്പിട്ട മറ്റ് JWTകളും നിലവിലുണ്ട് — കീ ഉടമകൾക്കായി Cursor CLI passthrough `iss "omniroute" / aud "cursor-cli"` ടോക്കണുകൾ നൽകുന്നു — അവ ഒരിക്കലും സെഷനുകളല്ല (#13298).
 
-`src/shared/utils/apiAuth.ts`-ലെ `isDashboardSessionAuthenticated()` ഉപയോഗിച്ചാണ് സാധുത പരിശോധിക്കുന്നത്. JWT-യുടെ 30 ദിവസത്തെ കാലാവധിയിൽ 7 ദിവസത്തിൽ താഴെ മാത്രം ശേഷിക്കുമ്പോൾ pipeline അത് സ്വയമേവ പുതുക്കുന്നു.
+`src/shared/utils/apiAuth.ts` ലെ `isDashboardSessionAuthenticated()` വഴി ഇത് സാധൂകരിക്കപ്പെടുന്നു. JWT-ന്റെ 30 ദിവസത്തെ ആയുസ്സിൽ 7 ദിവസത്തിൽ കുറവ് ശേഷിക്കുമ്പോൾ പൈപ്പ്‌ലൈൻ അത് സ്വയമേവ റിഫ്രഷ് ചെയ്യുന്നു.
 
-ഒരു സെഷന്റെ 30 ദിവസം പൂർത്തിയാകുന്നതിന് മുമ്പും അത് അവസാനിക്കാം, കാരണം ഓരോ minter-ഉം `mintDashboardSessionToken` വഴിയാണ് കടന്നുപോകുന്നത് (issue time `iat`, id `jti` എന്നിവ സഹിതം), കൂടാതെ verifier രണ്ട് settings പരിശോധിക്കുന്നു: password മാറ്റുമ്പോൾ സജ്ജീകരിക്കപ്പെടുന്ന `sessionsValidAfter`, അതിനാൽ അതിനു മുമ്പ് സൃഷ്ടിച്ച എല്ലാ സെഷനുകളുടെയും സാധുതാ പരിശോധന പരാജയപ്പെടും (password മാറ്റിയ browser-ന് പുതിയ cookie ലഭിക്കും); കൂടാതെ `POST /api/auth/logout`, sign out ചെയ്ത സെഷന്റെ `jti` ചേർക്കുന്ന `revokedDashboardSessions`. പഴയ release ഉപയോഗിച്ച് സൃഷ്ടിച്ച സെഷനുകളിൽ ഈ claims രണ്ടും ഉണ്ടാകില്ല, ആദ്യത്തെ password മാറ്റം വരെ അവ സാധുവായി തുടരും. settings വായിക്കാൻ കഴിയുന്നില്ലെങ്കിൽ സെഷനെ വിശ്വസിക്കില്ല.
+30 ദിവസം തികയുന്നതിന് മുമ്പും ഒരു സെഷൻ അവസാനിക്കാം: എല്ലാ മിന്റർമാരും `mintDashboardSessionToken` വഴിയാണ് പോകുന്നത് (ഇഷ്യു ചെയ്ത സമയം `iat`, ഐഡി `jti`), കൂടാതെ വെരിഫയർ രണ്ട് ക്രമീകരണങ്ങൾ പരിശോധിക്കുന്നു: പാസ്‌വേഡ് മാറ്റം സജ്ജമാക്കുന്ന `sessionsValidAfter` (അതിനു മുമ്പ് ഇഷ്യു ചെയ്ത ഓരോ സെഷനും സാധുവല്ലാതാകുന്നു — പാസ്‌വേഡ് മാറ്റിയ ബ്രൗസറിന് പുതിയ കുക്കി ലഭിക്കും), കൂടാതെ `POST /api/auth/logout` സൈൻ-ഔട്ട് ചെയ്ത സെഷന്റെ `jti` ചേർക്കുന്ന `revokedDashboardSessions`. പഴയ റിലീസ് ഇഷ്യു ചെയ്ത സെഷനുകളിൽ ഈ ക്ലെയിമുകൾ ഉണ്ടാവില്ല, ആദ്യത്തെ പാസ്‌വേഡ് മാറ്റം വരെ അവ സാധുവായി തുടരും. ക്രമീകരണങ്ങൾ വായിക്കാനായില്ലെങ്കിൽ സെഷൻ വിശ്വസിക്കപ്പെടുന്നില്ല.
 
-ചില management routes **ഏതെങ്കിലും** മോഡ് സ്വീകരിക്കുന്നു: cookie അല്ലെങ്കിൽ API കീയ്ക്ക് `manage` (അഥവാ `admin`) സ്കോപ്പ് ഉള്ളപ്പോൾ `Bearer <key>`. v3.8-ൽ ചേർത്ത "API calls വഴി ക്രമീകരിക്കാവുന്ന" workflow സാധ്യമാക്കുന്നത് ഇതാണ്.
+ചില മാനേജ്‌മെന്റ് റൂട്ടുകൾ **ഏതെങ്കിലും** ഒരു മോഡ് സ്വീകരിക്കുന്നു: API കീക്ക് `manage` (അല്ലെങ്കിൽ `admin`) സ്കോപ്പ് ഉണ്ടെങ്കിൽ കുക്കി അല്ലെങ്കിൽ `Bearer <key>`. v3.8-ൽ ചേർത്ത "API കോളുകൾ വഴി കോൺഫിഗർ ചെയ്യാവുന്ന" വർക്ക്ഫ്ലോ ഇതാണ് സാധ്യമാക്കുന്നത്.
 
-#### ഐച്ഛിക OIDC login gate (#6973)
+#### ഓപ്ഷണൽ OIDC ലോഗിൻ ഗേറ്റ് (#6973)
 
-ഡാഷ്ബോർഡ് admin login, ഡിഫോൾട്ട് password login-നൊപ്പം ഒരു **opt-in** OIDC (OpenID Connect) flow-ഉം പിന്തുണയ്ക്കുന്നു — password login ഒരിക്കലും നീക്കംചെയ്യുന്നില്ല, അതിന് അനുബന്ധമായി മാത്രമാണ് ഇത് ചേർക്കുന്നത്:
+ഡാഷ്‌ബോർഡ് അഡ്മിൻ ലോഗിൻ, സ്ഥിരസ്ഥിതിയായ പാസ്‌വേഡ് ലോഗിനോടൊപ്പം **ഓപ്ഷണൽ** OIDC (OpenID Connect) ഫ്ലോയും പിന്തുണയ്ക്കുന്നു — പാസ്‌വേഡ് ലോഗിൻ ഒരിക്കലും നീക്കം ചെയ്യപ്പെടുന്നില്ല, അത് കൂടുതൽ പിന്തുണ നൽകുക മാത്രമേ ചെയ്യുന്നുള്ളൂ:
 
-- `settings.oidcEnabled === true` ആയിരിക്കുകയും **കൂടാതെ** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` എന്നിവയെല്ലാം ക്രമീകരിച്ചിരിക്കുകയും ചെയ്യാത്തിടത്തോളം ഇത് പ്രവർത്തനരഹിതമാണ് (Settings → Auth).
-  അല്ലാത്തപക്ഷം `GET /api/auth/oidc/login` `400` തിരികെ നൽകുന്നു.
-- `GET /api/auth/oidc/login`, issuer-ന്റെ
-  `/.well-known/openid-configuration`-ൽ നിന്ന് `authorization_endpoint` കണ്ടെത്തുന്നു
-  (`<issuer>/authorize` fallback ആയി ഉപയോഗിക്കുന്നു), ലഭിക്കുന്ന request-ൽ നിന്ന് redirect URI നിർമ്മിക്കുന്നു
-  (`x-forwarded-proto` കണക്കിലെടുക്കുന്നു), തുടർന്ന് `httpOnly` `oidc_state` cookie-യിൽ സൂക്ഷിച്ചിരിക്കുന്ന random `state` സഹിതം IdP-യിലേക്ക് redirect ചെയ്യുന്നു.
-- `GET /api/auth/oidc/callback`, `state` സാധൂകരിക്കുകയും authorization
-  code exchange ചെയ്യുകയും issuer-ന്റെ JWKS വഴി ID token-ന്റെ signature പരിശോധിക്കുകയും ചെയ്യുന്നു
-  (`jose`-ന്റെ `createRemoteJWKSet`, ഓരോ JWKS URI-യ്ക്കും cache ചെയ്യുന്നു), ഒപ്പം `issuer`/`audience`
-  checks നടത്തുന്നു. `oidcAllowedSubjects` allowlist നിർബന്ധമാണ്: ഇത്
-  token-ന്റെ `sub` claim-ുമായോ അതിന്റെ `email` claim-ുമായോ പൊരുത്തപ്പെടുത്തുന്നു — `email_verified === true` ആയിരിക്കുമ്പോൾ മാത്രമാണ് email claim അംഗീകരിക്കുന്നത്, അതിനാൽ IdP-യിലെ പരിശോധിച്ചുറപ്പിക്കാത്ത email-ന് ഒരിക്കലും
-  gate കടക്കാനാവില്ല — entries ഒന്നുമില്ലെങ്കിൽ callback എല്ലാ login-ുകളും നിരസിക്കുന്നു
-  (`not_configured`).
-- വിജയിച്ചാൽ, password login നൽകുന്ന **അതേ** 30 ദിവസത്തെ `auth_token` JWT തന്നെയാണ് ഇത് സൃഷ്ടിക്കുന്നത്
-  (`src/app/api/auth/login/route.ts`), അതിനാൽ ബാക്കിയുള്ള
-  dashboard session pipeline (auto-refresh, cookie flags) മാറ്റമില്ലാതെ തുടരുന്നു —
-  cookie എങ്ങനെ സൃഷ്ടിക്കപ്പെടുന്നു എന്നത് മാത്രമാണ് OIDC മാറ്റിസ്ഥാപിക്കുന്നത്, അത് നൽകുന്ന അനുമതികളെയല്ല.
-- എല്ലാ `oidc*` settings-ഉം (`oidcEnabled`, `oidcDisablePasswordLogin`,
-  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS`-ൽ ഉൾപ്പെടുന്നു
-  (`src/shared/constants/securityImpactingSettings.ts`): body-യിൽ management
-  password `currentPassword` ആയി ഉൾപ്പെടുത്തിയിട്ടില്ലെങ്കിൽ `PATCH /api/settings`
-  `400 PASSWORD_REQUIRED` മറുപടി നൽകുന്നു (അത് തെറ്റാണെങ്കിൽ `401 PASSWORD_MISMATCH`).
-  `oidcDisablePasswordLogin`, password _login_ (`POST /api/auth/login`) നിരസിക്കുന്നു,
-  എന്നാൽ സംഭരിച്ച password hash നിലനിർത്തുന്നു; re-auth ഇപ്പോഴും
-  `currentPassword` അതുമായി പരിശോധിക്കുന്നു.
-- `POST /api/settings/import-json` ആ re-auth ഒഴിവാക്കുന്നതിനാൽ, എഴുതുന്നതിന് മുമ്പ്
-  `IMPORT_STRIPPED_SETTINGS_KEYS`-ലെ (അതേ file) ഓരോ key-യും നീക്കംചെയ്യുന്നു: password,
-  `currentPassword`, എല്ലാ `SECURITY_IMPACTING_SETTINGS_KEYS` entries, കൂടാതെ
-  dashboard session state (`sessionsValidAfter`, `revokedDashboardSessions`).
-  അതിനാൽ പഴയ backup import ചെയ്യുന്നതിലൂടെ password മാറ്റമോ sign-out-ഓ ഇതിനകം അവസാനിപ്പിച്ച സെഷനെ വീണ്ടും സജീവമാക്കാനാവില്ല.
+- `settings.oidcEnabled === true` **കൂടാതെ** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` എല്ലാം കോൺഫിഗർ ചെയ്തിട്ടുണ്ടെങ്കിൽ മാത്രമേ ഇത് പ്രവർത്തിക്കൂ (Settings → Auth). അല്ലാത്തപക്ഷം `GET /api/auth/oidc/login` `400` നൽകുന്നു.
+- `GET /api/auth/oidc/login` issuer-ന്റെ `/.well-known/openid-configuration` ൽ നിന്ന് `authorization_endpoint` കണ്ടെത്തുന്നു (ഇല്ലെങ്കിൽ `<issuer>/authorize` ലേക്ക് തിരികെ വീഴുന്നു), വരുന്ന റിക്വസ്റ്റിൽ നിന്ന് redirect URI നിർമ്മിക്കുന്നു (`x-forwarded-proto` അറിയുന്നത്), `httpOnly` `oidc_state` കുക്കിയിൽ സൂക്ഷിച്ച ക്രമരഹിതമായ `state` സഹിതം IdP-യിലേക്ക് റീഡയറക്ട് ചെയ്യുന്നു.
+- `GET /api/auth/oidc/callback` `state` സാധൂകരിക്കുന്നു, ഓതറൈസേഷൻ കോഡ് കൈമാറുന്നു, issuer-ന്റെ JWKS വഴി ID ടോക്കണിന്റെ ഒപ്പ് പരിശോധിക്കുന്നു (`jose`-യുടെ `createRemoteJWKSet`, ഓരോ JWKS URI-ക്കും കാഷെ ചെയ്തത്), `issuer`/`audience` പരിശോധനകളോടെ. `oidcAllowedSubjects` അനുവദനപ്പട്ടിക നിർബന്ധമാണ്: ഇത് ടോക്കണിന്റെ `sub` ക്ലെയിമുമായോ `email` ക്ലെയിമുമായോ പൊരുത്തപ്പെടുന്നു — `email` ക്ലെയിം `email_verified === true` ആകുമ്പോൾ മാത്രമേ പരിഗണിക്കൂ, അതിനാൽ IdP-യിലെ സ്ഥിരീകരിക്കാത്ത ഇമെയിൽ ഒരിക്കലും ഗേറ്റ് കടക്കില്ല — എൻട്രികളൊന്നുമില്ലെങ്കിൽ കോൾബാക്ക് എല്ലാ ലോഗിനുകളും നിരസിക്കുന്നു (`not_configured`).
+- വിജയകരമായാൽ പാസ്‌വേഡ് ലോഗിൻ നൽകുന്ന **അതേ** 30 ദിവസത്തെ `auth_token` JWT ഇത് മിന്റ് ചെയ്യുന്നു (`src/app/api/auth/login/route.ts`), അതിനാൽ ബാക്കി ഡാഷ്‌ബോർഡ് സെഷൻ പൈപ്പ്‌ലൈൻ (സ്വയം-റിഫ്രഷ്, കുക്കി ഫ്ലാഗുകൾ) മാറ്റമില്ലാതെ തുടരുന്നു — OIDC മാറ്റുന്നത് കുക്കി എങ്ങനെ ലഭിക്കുന്നു എന്നത് മാത്രമാണ്, അത് നൽകുന്നതിനെയല്ല.
+- ഓരോ `oidc*` ക്രമീകരണവും (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS` ൽ ഉണ്ട് (`src/shared/constants/securityImpactingSettings.ts`): ബോഡിയിൽ മാനേജ്‌മെന്റ് പാസ്‌വേഡ് `currentPassword` ആയി ഇല്ലെങ്കിൽ `PATCH /api/settings` `400 PASSWORD_REQUIRED` നൽകുന്നു (തെറ്റാണെങ്കിൽ `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` പാസ്‌വേഡ് _ലോഗിൻ_ (`POST /api/auth/login`) നിരസിക്കുന്നു, പക്ഷേ സൂക്ഷിച്ച പാസ്‌വേഡ് ഹാഷ് നിലനിർത്തുന്നു, കൂടാതെ റീ-ഓതന്റിക്കേഷൻ ഇപ്പോഴും `currentPassword` അതിനെതിരെ പരിശോധിക്കുന്നു.
+- `corsOrigins`, `bruteForceProtection` എന്നിവയും `SECURITY_IMPACTING_SETTINGS_KEYS` ൽ ഉണ്ട്: ഇവ അയവുവരുത്തുന്നത് ലോഗിൻ പ്രതിരോധങ്ങളെ ദുർബലമാക്കുന്നു, അതിനാൽ ഇവയ്ക്കും അതേ `currentPassword` റീ-ഓതന്റിക്കേഷൻ വേണം (Security ടാബ് അത് ചോദിക്കുന്നു), കൂടാതെ JSON ഇമ്പോർട്ട് ഇവ ഒഴിവാക്കുന്നു.
+- ഓരോ സെക്യൂരിറ്റി-നയ കീയും — `SECURITY_IMPACTING_SETTINGS_KEYS` എൻട്രികൾ, ഓരോ `oidc*` കീയും, ഡാഷ്‌ബോർഡ് സെഷൻ നിലയും — `PATCH /api/settings` ൽ **ഓപ്പറേറ്റർ-മാത്രം** ആണ്: `manage` സ്കോപ്പുള്ള API കീയോ `oma_` ആക്സസ് ടോക്കണോ ശരിയായ `currentPassword` അയച്ചാലും `403` നൽകി നിരസിക്കപ്പെടുന്നു, ആ നിരസനം `reason: OPERATOR_REQUIRED` സഹിതം `settings.update_failed` ആയി ഓഡിറ്റ് ചെയ്യുന്നു (`src/lib/api/operatorCredential.ts` ലെ `requireOperatorCredential()`). സാധാരണ ക്രമീകരണങ്ങൾ (തീം, ഡിസ്പ്ലേ മുൻഗണനകൾ) `manage` കീക്കോ `admin` ആക്സസ് ടോക്കണിനോ എഴുതാവുന്നതായി തുടരുന്നു. `/api/settings` സ്വയമുള്ള എല്ലാ മാറ്റങ്ങൾക്കും (കൂടാതെ `/api/settings/require-login` നും) `admin` ആക്സസ്-ടോക്കൺ സ്കോപ്പും വേണം (`src/server/authz/accessScopes.ts` ലെ `ADMIN_MUTATION_EXACT_PATHS`, കൃത്യമായ പാത്ത് പൊരുത്തം); `GET` `read` ആയി തുടരുന്നു, മറ്റ് `/api/settings/*` ഉപ-റൂട്ടുകൾ (പ്രോക്സികൾ, combo ഡിഫോൾട്ടുകൾ, മോഡൽ അലിയാസുകൾ, കംപ്രഷൻ, പർജുകൾ…) രീതിയിൽ നിന്ന് ഊഹിക്കുന്ന `write` സ്കോപ്പ് നിലനിർത്തുന്നു.
+- `POST /api/settings/import-json` ആ റീ-ഓതന്റിക്കേഷൻ ഒഴിവാക്കുന്നു, അതിനാൽ എഴുതുന്നതിന് മുമ്പ് `IMPORT_STRIPPED_SETTINGS_KEYS` (അതേ ഫയൽ) ലെ എല്ലാ കീയും നീക്കം ചെയ്യുന്നു: പാസ്‌വേഡും `currentPassword`ഉം, ഓരോ `SECURITY_IMPACTING_SETTINGS_KEYS` എൻട്രിയും, ഡാഷ്‌ബോർഡ് സെഷൻ നിലയും (`sessionsValidAfter`, `revokedDashboardSessions`). പഴയ ബാക്കപ്പ് ഇമ്പോർട്ട് ചെയ്യുന്നത് പാസ്‌വേഡ് മാറ്റമോ സൈൻ-ഔട്ടോ അവസാനിപ്പിച്ച ഒരു സെഷനെ പുനരുജ്ജീവിപ്പിക്കില്ല.
 
 ## റൂട്ട് ക്ലാസുകൾ
 
-`src/server/authz/types.ts` മൂന്ന് ക്ലാസുകൾ നിർവചിക്കുന്നു; നിർണ്ണായകമായി വർഗ്ഗീകരിക്കാൻ കഴിയാത്ത ഏത് റൂട്ടും `MANAGEMENT`-ലേക്ക് മടങ്ങും.
+`src/server/authz/types.ts` മൂന്ന് ക്ലാസുകൾ നിർവചിക്കുന്നു; നിർണ്ണായകമായി വർഗ്ഗീകരിക്കാനാവാത്ത ഏതൊരു റൂട്ടും `MANAGEMENT` ലേക്ക് വീഴുന്നു.
 
-| ക്ലാസ്       | വിവരണം                                                                                                                                                                | ആവശ്യമായ ഓത്ത്                                                                              |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `PUBLIC`     | വ്യക്തമായി സുരക്ഷിതമായ റൂട്ടുകൾ — ലോഗിൻ, ലോഗൗട്ട്, സ്റ്റാറ്റസ്, ഇനീഷ്യലൈസേഷൻ, ഹെൽത്ത്, ഓൺബോർഡിംഗ് ബൂട്ട്സ്ട്രാപ്പ്.                                                   | ഒന്നുമില്ല                                                                                  |
-| `CLIENT_API` | മോഡൽ സേവനം നൽകുന്ന എൻഡ്പോയിന്റുകൾ — `/api/v1/*`, `/api/v1beta/*`, കൂടാതെ അപരനാമങ്ങളായ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | പ്രാബല്യത്തിലുള്ള `REQUIRE_API_KEY` ഫീച്ചർ ഫ്ലാഗ് പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുമ്പോൾ ബെയറർ കീ |
-| `MANAGEMENT` | ഡാഷ്ബോർഡ് പേജുകൾ, ക്രമീകരണങ്ങൾ, പ്രൊവൈഡറുകൾ, കീകൾ, അഡ്മിൻ, ഡയഗ്നോസ്റ്റിക്സ് എൻഡ്പോയിന്റുകൾ.                                                                           | ഡാഷ്ബോർഡ് സെഷൻ അല്ലെങ്കിൽ `manage` സ്കോപ്പുള്ള ബെയറർ                                        |
+| ക്ലാസ്       | വിവരണം                                                                                                                                                     | ഓതന്റിക്കേഷൻ ആവശ്യം                                                    |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `PUBLIC`     | വ്യക്തമായി സുരക്ഷിതമായ റൂട്ടുകൾ — ലോഗിൻ, ലോഗൗട്ട്, സ്റ്റാറ്റസ്, ഇനിഷ്യലൈസ്, ഹെൽത്ത്, ഓൺബോർഡിംഗ് ബൂട്ട്സ്ട്രാപ്പ്.                                          | ഒന്നുമില്ല                                                             |
+| `CLIENT_API` | മോഡൽ-സേവന എൻഡ്‌പോയിന്റുകൾ — `/api/v1/*`, `/api/v1beta/*`, കൂടാതെ അലിയാസുകൾ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | ഫലപ്രദമായ `REQUIRE_API_KEY` ഫീച്ചർ ഫ്ലാഗ് പ്രവർത്തനക്ഷമമായാൽ Bearer കീ |
+| `MANAGEMENT` | ഡാഷ്‌ബോർഡ് പേജുകൾ, ക്രമീകരണങ്ങൾ, ദാതാക്കൾ, കീകൾ, അഡ്മിൻ, ഡയഗ്നോസ്റ്റിക്സ് എൻഡ്‌പോയിന്റുകൾ.                                                                 | ഡാഷ്‌ബോർഡ് സെഷൻ അല്ലെങ്കിൽ `manage` സ്കോപ്പുള്ള Bearer                 |
 
-ചില `MANAGEMENT` പ്രവർത്തനങ്ങൾ **ഓപ്പറേറ്റർക്ക് മാത്രം** ഉള്ളവയാണ്: ഒരു `manage` കീ മാത്രം മതിയാകില്ല. സംഭരിച്ച
-ക്രെഡൻഷ്യലുകൾ എക്സ്പോർട്ട് ചെയ്യുന്നതിനും (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), ഒരു സിങ്ക് ടോക്കൺ നൽകുന്നതിനും (`POST /api/sync/tokens`), ഒരു
-`admin` CLI ആക്സസ് ടോക്കൺ സൃഷ്ടിക്കുന്നതിനും (`POST /api/cli/tokens`) ഒരു ഡാഷ്ബോർഡ് സെഷനോ, ലോക്കൽ CLI
-സബ്ജക്റ്റോ ആവശ്യമാണ്, അല്ലെങ്കിൽ ലോഗിൻ പ്രവർത്തനരഹിതമായിരിക്കണം; ഏത് സ്കോപ്പിലുമുള്ള API കീകൾക്കും `oma_` ആക്സസ് ടോക്കണുകൾക്കും `403` ലഭിക്കും. ഈ പരിശോധന
-`src/lib/api/operatorCredential.ts`-ലെ (`resolveOperatorCredential()` /
-`requireOperatorCredential()`) ഫംഗ്ഷനുകളിലാണ്.
-
-A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
-credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), restoring a backup over the live data
-(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
-`POST /api/settings/import-json`), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
-lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
+ചില `MANAGEMENT` പ്രവർത്തനങ്ങൾ **ഓപ്പറേറ്റർ-മാത്രം** ആണ്: `manage` കീ മതിയാകില്ല. സൂക്ഷിച്ച ക്രെഡൻഷ്യലുകൾ എക്സ്പോർട്ട് ചെയ്യൽ (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ലൈവ് ഡാറ്റയ്ക്ക് മുകളിൽ ബാക്കപ്പ് പുനഃസ്ഥാപിക്കൽ (`dryRun=true` ഉൾപ്പെടെ `POST /api/db-backups/import`, ID വഴി പുനഃസ്ഥാപിക്കുന്ന `POST /api/db-backups`, `POST /api/settings/import-json`), പുനഃസ്ഥാപന പോയിന്റുകൾ നശിപ്പിക്കൽ (`DELETE /api/db-backups` ക്ലീനപ്പ്, കൂടാതെ `PATCH /api/db-backups` കാരണം അത് സംരക്ഷിക്കുന്ന റിട്ടൻഷൻ ഓരോ ബാക്കപ്പിന് ശേഷവും ഓട്ടോമാറ്റിക് പ്രൂണിംഗിനെ നയിക്കുന്നു) എന്നിവയ്ക്കെല്ലാം ഡാഷ്‌ബോർഡ് സെഷൻ, പ്രാദേശിക CLI വിഷയം, അല്ലെങ്കിൽ ലോഗിൻ പ്രവർത്തനരഹിതമാകൽ എന്നിവ വേണം. സിങ്ക് ടോക്കൺ നൽകുന്നത് (`POST /api/sync/tokens`) കൂടാതെ `admin` CLI ആക്സസ് ടോക്കൺ നിർമ്മിക്കുന്നത് (`POST /api/cli/tokens`) ഓരോ ലോഗിൻ മോഡിലും ഡാഷ്‌ബോർഡ് സെഷനോ പ്രാദേശിക CLI വിഷയമോ ആവശ്യപ്പെടുന്നു. ഏത് സ്കോപ്പിലെയും API കീകളും `oma_` ആക്സസ് ടോക്കണുകളും ഓപ്പറേറ്റർ ക്രെഡൻഷ്യലുകളല്ല: ആവശ്യമായപ്പോഴെല്ലാം അവയ്ക്ക് `403` ലഭിക്കും. ഈ പരിശോധന `src/lib/api/operatorCredential.ts` ലാണ് (`resolveOperatorCredential()` / `requireOperatorCredential()`). ലോഗിൻ ക്രമീകരണങ്ങൾ മാറ്റുന്നതും ഓപ്പറേറ്റർ-മാത്രമാണ്: പാസ്‌വേഡ് നിലവിലുണ്ടായാൽ `POST /api/settings/require-login` (മാനേജ്‌മെന്റ് പാസ്‌വേഡ് സജ്ജമാക്കൽ / `requireLogin` ടോഗിൾ) ഈ ക്രെഡൻഷ്യലുകൾ മാത്രമേ സ്വീകരിക്കൂ — ആദ്യ റൺ ബൂട്ട്സ്ട്രാപ്പ് വിൻഡോ (പാസ്‌വേഡ് ഇതുവരെ ഇല്ലാത്തപ്പോൾ) മാറ്റമില്ലാതെ തുടരുന്നു — പാസ്‌വേഡ് മാറ്റിസ്ഥാപിക്കാൻ ഡാഷ്‌ബോർഡ് സെഷൻ `currentPassword` അയയ്ക്കണം (അത് ഇല്ലെങ്കിലോ തെറ്റാണെങ്കിലോ `403`, `settings.update_failed` ആയി ഓഡിറ്റ് ചെയ്യപ്പെടുന്നു). പ്രാദേശിക CLIയും ലോഗിൻ പ്രവർത്തനരഹിതമായ ഇൻസ്റ്റൻസും വീണ്ടെടുക്കൽ പാത നിലനിർത്തുന്നു, അതില്ലാതെയും പാസ്‌വേഡ് സജ്ജമാക്കാം, കാരണം രണ്ടും ഡാറ്റാ ഡയറക്ടറി ഉടമസ്ഥതയുള്ള ഹോസ്റ്റിനോട് ബന്ധിതമാണ്.
 
 ## പൈപ്പ്ലൈൻ
 
@@ -249,15 +204,15 @@ API കീകൾ ഒരു `scopes` അറേ വഹിക്കുന്നു 
 
 `oma_live_…` ടോക്കണുകളിലെ `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) അനുസരിച്ച് റാങ്ക് ചെയ്തിരിക്കുന്നു. ഈ റാങ്ക് ആക്സസ്-ടോക്കൺ ക്രെഡൻഷ്യലിന് മാത്രമേ ബാധകമാകൂ. [മാനേജ്മെൻ്റ് ഓതൻ്റിക്കേഷൻ](../guides/MANAGEMENT-AUTH.md) കാണുക.
 
-## ഓത്ത് ആവശ്യകതാ ടോഗിൾ
+## ഓതന്റിക്കേഷൻ ആവശ്യം ടോഗിൾ
 
-ഒരു അഭ്യർത്ഥനയ്ക്കായി **ഏതെങ്കിലും** ഓത്ത് നിർബന്ധമാക്കണമോ എന്ന് `src/shared/utils/apiAuth.ts`-ലെ `isAuthRequired()` തീരുമാനിക്കുന്നു:
+`src/shared/utils/apiAuth.ts` ലെ `isAuthRequired()` ഒരു റിക്വസ്റ്റിന് **ഏതെങ്കിലും** ഓതന്റിക്കേഷൻ ബാധകമാക്കണോ എന്ന് തീരുമാനിക്കുന്നു:
 
-- `settings.requireLogin === false` → ഓത്ത് ആഗോളമായി പ്രവർത്തനരഹിതമാക്കുന്നു.
-- പാസ്വേഡ് കോൺഫിഗർ ചെയ്തിട്ടില്ലാത്തതും `INITIAL_PASSWORD` എൻവ് വേരിയബിൾ ഇല്ലാത്തതുമായിരിക്കുമ്പോൾ → ബൂട്ട്സ്ട്രാപ്പ് മോഡ് ഓൺബോർഡിംഗ് വിസാർഡിനെയും ലൂപ്പ്ബാക്ക് അഭ്യർത്ഥനകളെയും അനുവദിക്കുന്നു, എന്നാൽ നെറ്റ്വർക്കിലേക്ക് തുറന്ന അഭ്യർത്ഥനകൾക്ക് തുടർന്നും ക്രെഡൻഷ്യലുകൾ ആവശ്യമാണ്.
-- ഏതെങ്കിലും DB പിശക് → ആക്സസ് നിഷേധിക്കുന്നു (സുരക്ഷാ-ഡിഫോൾട്ട്).
+- `settings.requireLogin === false` → ഓതന്റിക്കേഷൻ ആഗോളതലത്തിൽ പ്രവർത്തനരഹിതം, എന്നാൽ എപ്പോഴും സംരക്ഷിതമായ ശ്രേണി (കാണുക [റൂട്ട് ഗാർഡ് ടിയറുകൾ](../security/ROUTE_GUARD_TIERS.md)) ഒഴികെ, കൂടാതെ അത് സ്വീകരിക്കുന്ന ക്രെഡൻഷ്യൽ നൽകുന്ന കോളുകൾ ഒഴികെ — ലോഗിൻ ഓണായിരിക്കുമ്പോൾ ആവശ്യമുള്ള അതേ ക്രെഡൻഷ്യൽ ഇവയ്ക്ക് വേണം: സിങ്ക് ടോക്കണുകൾ നൽകൽ, ഏത് സ്കോപ്പിലും CLI ആക്സസ് ടോക്കണുകൾ നിർമ്മിക്കൽ, `manage`/`admin` സ്കോപ്പുള്ള API കീ സൃഷ്ടിക്കൽ, ആ സ്കോപ്പ് ഒരു കീക്ക് നൽകൽ, അല്ലെങ്കിൽ അത്തരം കീ പുനർസൃഷ്ടിക്കൽ അല്ലെങ്കിൽ വെളിപ്പെടുത്തൽ (`src/lib/api/requireManagementAuth.ts` ലെ `requireCredentialForManagementScopedKey()`). ഇൻഫറൻസ്-മാത്രം കീകൾ തുറന്നു തന്നെ നിൽക്കുന്നു.
+- പാസ്‌വേഡ് കോൺഫിഗർ ചെയ്തിട്ടില്ല **കൂടാതെ** `INITIAL_PASSWORD` എൻവയോൺമെന്റ് വേരിയബിളും ഇല്ല → ബൂട്ട്സ്ട്രാപ്പ് മോഡ് ഓൺബോർഡിംഗ് വിസാർഡും ലൂപ്പ്ബാക്ക് റിക്വസ്റ്റുകളും അനുവദിക്കുന്നു, എന്നാൽ തുറന്ന നെറ്റ്‌വർക്ക് റിക്വസ്റ്റുകൾക്ക് ഇപ്പോഴും ക്രെഡൻഷ്യലുകൾ വേണം.
+- ഏത് DB പിശകും → ഫെയിൽ-ക്ലോസ്ഡ് (സുരക്ഷിത-സ്ഥിരസ്ഥിതി).
 
-ക്ലയന്റ് API കീ നിർബന്ധമാക്കൽ നേരിട്ടുള്ള `process.env.REQUIRE_API_KEY` റീഡിനു പകരം `src/shared/utils/featureFlags.ts`-ലെ `isRequireApiKeyEnabled()` ഉപയോഗിക്കുന്നു. ഡിപ്ലോയ് ചെയ്ത ഇൻസ്റ്റൻസുകൾക്ക് ഇത് പ്രധാനമാണ്: Dashboard → Feature Flags-ൽ `REQUIRE_API_KEY` ടോഗിൾ ചെയ്യുന്നത് ഒരു DB ഓവർറൈഡ് സംഭരിക്കുകയും, ഈ ഹെൽപ്പർ പങ്കിടുന്ന `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` എന്നിവയെയും മറ്റ് ക്ലയന്റ്-API ഓത്ത് പരിശോധനകളെയും ഉടനടി ബാധിക്കുകയും ചെയ്യുന്നു. ഫീച്ചർ ഫ്ലാഗ് സ്റ്റോർ വായിക്കാൻ കഴിയുന്നില്ലെങ്കിൽ, ക്ലയന്റ് API ഓത്ത് ആക്സസ് നിഷേധിക്കുകയും ഒരു കീ ആവശ്യപ്പെടുകയും ചെയ്യുന്നു.
+ക്ലയന്റ് API കീ നടപ്പാക്കൽ `src/shared/utils/featureFlags.ts` ലെ `isRequireApiKeyEnabled()` ഉപയോഗിക്കുന്നു, നേരിട്ടുള്ള `process.env.REQUIRE_API_KEY` വായന അല്ല. വിന്യസിച്ച ഇൻസ്റ്റൻസുകൾക്ക് ഇത് പ്രധാനമാണ്: ഡാഷ്‌ബോർഡ് → ഫീച്ചർ ഫ്ലാഗുകളിൽ `REQUIRE_API_KEY` ടോഗിൾ ചെയ്താൽ ഒരു DB ഓവർറൈഡ് സംഭരിക്കപ്പെടുകയും `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` എന്നിവയെയും ഈ ഹെൽപ്പർ പങ്കിടുന്ന മറ്റ് ക്ലയന്റ്-API ഓതന്റിക്കേഷൻ പരിശോധനകളെയും ഉടനടി ബാധിക്കുകയും ചെയ്യുന്നു. ഫീച്ചർ ഫ്ലാഗ് സ്റ്റോർ വായിക്കാനായില്ലെങ്കിൽ ക്ലയന്റ് API ഓതന്റിക്കേഷൻ ഫെയിൽ-ക്ലോസ്ഡ് ആയി മാറുകയും കീ ആവശ്യപ്പെടുകയും ചെയ്യുന്നു.
 
 ## ബ്രേക്കിംഗ് മാറ്റം — v3.8.0
 

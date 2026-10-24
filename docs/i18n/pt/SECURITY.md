@@ -31,21 +31,22 @@ Se descobrir uma vulnerabilidade de segurança no OmniRoute, comunique-a de form
 
 ## Período de suporte LTS (v3.9.x)
 
-Após a 3.8.59, a versão seguinte é a **3.9.0**, que dá início à linha de suporte de longo prazo no
+Depois da 3.8.59, a versão seguinte é a **3.9.0**, que inicia a linha de suporte de longo prazo no
 ramo `stable/v3` (consulte [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
 
 - **O que `stable/v3` recebe:** correções de erros, patches de segurança e atualizações de fornecedores. As novas
-  funcionalidades seguem para o canal v4; a linha LTS dá prioridade à estabilidade. `npm install omniroute`
+  funcionalidades são destinadas ao canal v4; a estabilidade é a prioridade da linha LTS. `npm install omniroute`
   (a dist-tag `latest`) permanece na v3 durante todo o ciclo da v4.
-- **Duração do período:** `<T-GAP-3: decisão do proprietário pendente — consulte ROADMAP.md>`. A duração do
-  período após a disponibilização geral da v4.0 (quando `latest` passa para a v4) **ainda não foi decidida**; esta
-  secção será atualizada quando o responsável pela manutenção a anunciar. Até lá, não assuma uma data de fim.
-- **Comunicação de uma vulnerabilidade na linha LTS:** utilize o mesmo canal que para qualquer outra versão —
+- **Duração do período:** `stable/v3` recebe **correções de segurança e de regressões críticas durante
+  12 meses após o lançamento da 3.9.0, ou até 90 dias depois de a v4.0.0 ser publicada como `latest` —
+  consoante a data que ocorrer mais tarde**. A data de fim resultante é registada nas notas de lançamento da 3.9.0 e no
+  [`ROADMAP.md`](ROADMAP.md) quando o lançamento ocorrer.
+- **Comunicar uma vulnerabilidade na linha LTS:** utilize o mesmo canal que para qualquer outra versão —
   um [Aviso de Segurança do GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privado,
-  nunca uma issue pública. Indique a versão que testou (por exemplo, `3.9.2`); as correções são aplicadas em
-  `stable/v3` e transportadas para a v4.
-- **Referência de segurança na criação da LTS:** o estado medido pelo scanner e as provas relativas à proteção de rotas e
-  às credenciais públicas estão registados em
+  nunca uma ocorrência pública. Indique a versão que testou (por exemplo, `3.9.2`); as correções são aplicadas em
+  `stable/v3` e portadas para a v4.
+- **Referência de segurança no lançamento da LTS:** o estado medido pelo analisador, as proteções de rotas e
+  as provas relativas a credenciais públicas são registados em
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

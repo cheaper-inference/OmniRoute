@@ -1,1 +1,0 @@
-- fix(translator): coerce the pending Responses tool-call id to a string before queueing it, restoring the API route typecheck gate that #16539 broke (`openai-responses.ts` TS2345)

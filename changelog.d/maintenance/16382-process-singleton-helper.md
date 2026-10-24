@@ -1,1 +1,0 @@
-- **refactor(shared):** process-wide state shared through one helper instead of ten hand-written copies ([#16382](https://github.com/diegosouzapw/OmniRoute/pull/16382)) — thanks @maxmad64bis

@@ -1,1 +1,0 @@
-- **fix(context):** Layer-3 `purify_history` used to drop the lone user turn when it kept only the newest tool tail, so vLLM/Qwen rejected the request with HTTP 400 "No user query found in messages." The newest user message now survives purification ([#16613](https://github.com/diegosouzapw/OmniRoute/pull/16613)) — thanks @pompousman.

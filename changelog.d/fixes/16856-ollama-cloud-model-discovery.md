@@ -1,1 +1,0 @@
-- **fix(providers):** Restore Ollama Cloud live model discovery via the documented `/api/tags` endpoint and normalize tag names as routable model IDs ([#16856](https://github.com/diegosouzapw/OmniRoute/pull/16856)) — thanks @fabioKoruja00

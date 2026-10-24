@@ -72,8 +72,12 @@ function fixture(t: test.TestContext, { serverComesUp }: { serverComesUp: boolea
   fs.writeFileSync(env.GITHUB_ENV!, "");
   const scripts = {
     node: 'printf "%s\\n%s\\n%s\\n" "$DATA_DIR" "$DISABLE_SQLITE_AUTO_BACKUP" "$OMNIROUTE_PLUGINS_DIR" > "$FIXTURE/server-env"\necho "fake server log line"\nexec /bin/sleep 60',
-    curl: serverComesUp ? "exit 0" : "exit 7",
-    sleep: "/bin/sleep 0.01",
+    // Healthy only once the fake server has written its environment, like a real health
+    // check: the start step runs the server in the background, so a curl that always
+    // passed let the step return before the server wrote anything, and the test then
+    // read no file (ENOENT) or the previous boot's file (seen in #17100's CI).
+    curl: serverComesUp ? '[ -s "$FIXTURE/server-env" ] || exit 7' : "exit 7",
+    sleep: "/bin/sleep 0.05",
   };
   for (const [name, script] of Object.entries(scripts)) {
     fs.writeFileSync(path.join(bin, name), `#!/bin/sh\n${script}\n`, { mode: 0o755 });
@@ -184,6 +188,8 @@ test("k6-soak: prepares a fresh DATA_DIR under RUNNER_TEMP before npm ci and the
     );
     assert.equal(exported.OMNIROUTE_PLUGINS_DIR, path.join(dataDir, "plugins"));
 
+    // Each boot must be judged by its own server: drop the previous boot's file first.
+    fs.rmSync(path.join(f.dir, "server-env"), { force: true });
     const booted = f.run(start!, { ...exported, PORT: port });
     assert.equal(booted.status, 0, booted.stderr);
     const [seenDataDir, seenBackupFlag, seenPluginsDir] = fs

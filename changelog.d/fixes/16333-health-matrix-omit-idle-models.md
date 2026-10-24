@@ -1,1 +1,0 @@
-- **fix(health):** Shrink the provider health matrix payload by omitting idle models by default, with `includeIdleModels=true` to restore the full list ([#16333](https://github.com/diegosouzapw/OmniRoute/pull/16333)) — thanks @maxmad64bis

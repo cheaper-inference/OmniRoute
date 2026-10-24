@@ -1,1 +1,0 @@
-- Restrict Cloud Agent provider checks and lookups to registered IDs, rejecting inherited object properties while preserving the four agent singletons and their listing order.

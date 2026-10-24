@@ -1,1 +1,0 @@
-- **chore(skills):** regenerate the `omni-providers` and `omni-inference` endpoint reference files with the official agent-skills generator so `check:agent-skills-sync` is green again on `release/v3.8.52` (drift left behind by the call-site spawn gate wording of #16366 and the management-only auth notes).

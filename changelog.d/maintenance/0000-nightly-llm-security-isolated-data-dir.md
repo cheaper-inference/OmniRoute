@@ -1,1 +1,0 @@
-- **ci(llm-security):** the nightly promptfoo/garak eval servers now boot on a fresh `DATA_DIR` under `$RUNNER_TEMP` with auto-backups off, so the self-hosted runner's stale `~/.omniroute` database no longer trips the mass-migration guard and kills the security verdict (dead since 2026-08-27).

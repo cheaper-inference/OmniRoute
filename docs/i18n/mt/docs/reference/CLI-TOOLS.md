@@ -47,61 +47,61 @@ Aġenti ACP (fluss ta’ tnedija bil-maqlub):
 
 M’għandekx għalfejn tikteb il-konfigurazzjoni ta’ kull għodda manwalment. OmniRoute jipprovdi kmand `setup-*`
 għal kull CLI appoġġjat li jaqra l-katalgu **attiv** tal-mudelli minn istanza ta’
-OmniRoute li tkun qed taħdem (lokali jew remota) u jikteb il-konfigurazzjoni tal-għodda stess fuq il-magna tiegħek:
+OmniRoute li tkun qed taħdem (lokali jew remota) u jikteb il-konfigurazzjoni tal-għodda fuq il-magna tiegħek:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Kull wieħed jaċċetta `--remote <url> --api-key <key>` (ikkonfigura għodda lokali ma’
-OmniRoute remot), `--dry-run` (ara previżjoni mingħajr kitba), u `--port`. Għodod
+Kull wieħed jaċċetta `--remote <url> --api-key <key>` (biex tikkonfigura għodda lokali ma’
+OmniRoute remot), `--dry-run` (biex tara minn qabel mingħajr ma tikteb), u `--port`. Għodod
 mingħajr skoperta awtomatika tal-mudelli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) jieħdu
 `--model <id>` (u `--yes` għal eżekuzzjonijiet mhux interattivi). `setup-5dive` huwa l-unika
-riċetta li ma tiktebx taħt `$HOME`: tikkonfigura flotta ta’ aġenti 5dive billi
+riċetta li ma tiktebx taħt `$HOME`: din tikkonfigura flotta ta’ aġenti 5dive billi
 tikteb profil tal-awtentikazzjoni li huwa proprjetà ta’ root fuq il-host tal-flotta, għalhekk terġa’ teżegwixxi lilha nfisha permezz ta’ `sudo`
 u m’għandhiex modalità remota tagħha stess. Biex tniedi CLI bl-ambjent
-it-tajjeb injettat u mingħajr ma tinkiteb ebda konfigurazzjoni, uża l-lanċjatur ġeneriku
+korrett injettat u mingħajr ma tinkiteb ebda konfigurazzjoni, uża l-lanċjatur ġeneriku
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — it-targets u l-aliases jiġu minn `bin/cli/cli-manifest.mjs`); il-lanċjaturi preċedenti
-għal kull għodda `omniroute launch` (Claude Code) u `omniroute launch-codex`
-(Codex) għadhom disponibbli. Gemini CLI jista’ jitnieda biss: huwa target ta’ `omniroute run`
+gemini — il-miri u l-aliases jiġu minn `bin/cli/cli-manifest.mjs`); il-lanċjaturi
+preċedenti speċifiċi għall-għodda `omniroute launch` (Claude Code) u `omniroute launch-codex`
+(Codex) għadhom disponibbli. Gemini CLI jista’ jitnieda biss: huwa mira ta’ `omniroute run`
 iżda m’għandux riċetta `setup-*`/`configure`.
 
 > **Referenza sħiħa:** it-tabella ewlenija — x’jikteb kull kmand, kull flag,
-> lokali kontra remot, u liema għodod jeħtieġu s-suffiss `/v1` — tinsab f’
-> **[Integrazzjonijiet CLI](../guides/CLI-INTEGRATIONS.md)**.
+> lokali kontra remot, u liema għodod jeħtieġu suffiss `/v1` — tinsab f’
+> **[Integrazzjonijiet tas-CLI](../guides/CLI-INTEGRATIONS.md)**.
 
-### Eżekuzzjoni ta’ dawn ġewwa container
+### It-tħaddim ta’ dawn ġewwa container
 
 Kmand `setup-*` eżegwit ġewwa l-container ta’ OmniRoute jikteb fil-home
 tal-container stess, li ma jinqara minn ebda CLI tal-host u li jisparixxi mal-
-container. OmniRoute jidentifika dan u joħroġ b’`2` flimkien ma’ struzzjonijiet minflok
+container. OmniRoute jidentifika dan u joħroġ b’`2` flimkien ma’ istruzzjonijiet minflok
 ma jikteb. Hemm żewġ modi appoġġjati biex tkompli — installa s-CLI fuq il-host u
-uża `omniroute connect` biex tikkonnettja mal-container, jew immonta b’bind id-direttorji tal-konfigurazzjoni u ssettja
-`CLI_CONFIG_HOME` (il-profil `host` ta’ compose). Kull kmand `setup-*`, kif ukoll
+uża `omniroute connect` biex tikkonnettja mal-container, jew agħmel bind-mount tad-direttorji tal-konfigurazzjoni u ssettja
+`CLI_CONFIG_HOME` (il-profil `host` ta’ compose). Kull kmand `setup-*`, flimkien ma’
 `omniroute configure` u `omniroute config set`, jaċċetta
-`--allow-container-write` meta dak li tassew trid tagħmel huwa li tikkonfigura l-CLIs tal-container
+`--allow-container-write` meta dak li fil-fatt trid huwa li tikkonfigura s-CLIs tal-container
 stess; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` jagħmel l-istess għas-
 server. Ara
-[Gwida Docker → Konfigurazzjoni tal-għodod CLI tal-host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+[Gwida ta’ Docker → Il-konfigurazzjoni tal-għodod CLI tal-host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Il-**punt ta’ tmiem għall-applikazzjoni** tad-dashboard (`POST /api/cli-tools/apply`) jinforza l-
-istess protezzjoni: f’container, kitba li t-target tagħha mhuwiex immuntat b’bind mill-
-host twieġeb b’**`422`** b’`containerEphemeralTarget: true`, it-test sigur tal-iżball
-u — għall-għodod li għandhom riċetta għall-host (claude, codex, opencode, cline,
+L-**endpoint tal-applikazzjoni** tad-dashboard (`POST /api/cli-tools/apply`) jinforza l-
+istess protezzjoni: f’container, kitba li l-mira tagħha mhijiex bind-mounted mill-
+host twieġeb b’**`422`** flimkien ma’ `containerEphemeralTarget: true`, it-test sikur tal-
+iżball u — għall-għodod b’riċetta għall-host (claude, codex, opencode, cline,
 kilo, continue) — `hostSetupCommand` (eż. `omniroute setup-opencode`) biex jiġi eżegwit
-fuq il-host minflok; ma jinkiteb xejn. `dryRun: true` jibqa’ jaħdem fil-modalità
-container u jirritorna previżjoni b’informazzjoni sensittiva moħbija + il-passaġġ tat-target mingħajr ma jmiss id-diska. Il-kontenut
-tal-previżjoni mhuwiex konfigurazzjoni li tinkludi kredenzjali biex tiġi kkupjata jew importata. Applika
-bl-inputs oriġinali tal-għodda/URL bażi/ċavetta API/mudell fuq il-host, jew uża l-kmand indikat
-ta’ setup min-naħa tal-host. Ara [Sigurtà tal-konfigurazzjoni CLI](../security/CLI-CONFIGURATION.md)
+fuq il-host minflok; ma jinkiteb xejn. `dryRun: true` jibqa’ jaħdem fil-modalità tal-container
+u jirritorna previżjoni b’informazzjoni sensittiva moħbija flimkien mal-path tal-mira mingħajr ma jmiss id-diska. Il-kontenut tal-
+previżjoni mhuwiex konfigurazzjoni li fiha kredenzjali biex tiġi kkupjata jew importata. Applika
+bl-inputs oriġinali tal-għodda/URL bażi/API key/mudell fuq il-host, jew uża l-kmand indikat
+ta’ setup fuq il-host. Ara [Sigurtà tal-konfigurazzjoni tas-CLI](../security/CLI-CONFIGURATION.md)
 għall-header tal-previżjoni u l-kuntratt tat-talba. Din l-imġiba hija
 intenzjonata u protetta kontra rigressjonijiet minn
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — qatt “tirranġa” 422
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — qatt “issewwi” 422
 billi tneħħi l-protezzjoni.
 
 ---
@@ -145,7 +145,7 @@ wiċċ wieħed mingħajr l-oħrajn twassal biex is-sett tat-testijiet ifalli min
 
 ---
 
-## 1. Il-Katalgu ta' CLI Code (26 għodda)
+## 1. Il-Katalgu tal-Kodiċi CLI (27 għodda)
 
 L-għodod kollha li jidhru f’`/dashboard/cli-code`. Dawk b’`baseUrlSupport: none` huma kkonfigurati permezz ta’ MITM jew gwida manwali minflok URL bażi personalizzat:
 
@@ -172,31 +172,32 @@ L-għodod kollha li jidhru f’`/dashboard/cli-code`. Dawk b’`baseUrlSupport: 
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
 | custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-L-għodod b’`baseUrlSupport: "partial"` juru badge "⚠ URL Bażi parzjali" fil-kard tad-dashboard.
+L-għodod b’`baseUrlSupport: "partial"` juru badge "⚠ URL bażi parzjali" fil-kard tad-dashboard.
 ---
 
 ## 2. Katalgu tal-Aġenti CLI (10 għodod)
 
 Aġenti awtonomi li jidhru f’`/dashboard/cli-agents`:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| id           | isem             | fornitur                 | appoġġ għal baseUrl | jista’ jitħaddem b’ACP |
+| ------------ | ---------------- | ------------------------ | ------------------- | ---------------------- |
+| hermes-agent | Hermes Agent     | Nous Research            | full                | false                  |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full                | true                   |
+| goose        | Goose            | Block / Linux Foundation | full                | true                   |
+| interpreter  | Open Interpreter | OSS                      | full                | true                   |
+| warp         | Warp AI          | Warp Inc.                | partial             | true                   |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full                | false                  |
+| omp          | Oh My Pi         | OSS                      | full                | true                   |
+| letta        | Letta CLI        | Letta                    | full                | false                  |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full                | false                  |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full                | false                  |
 
 ---
 

@@ -436,7 +436,7 @@ Imegawanywa katika saraka ndogo zilizolenga majukumu mahususi:
 
 ## 4. `open-sse/` — Nafasi ya kazi ya injini ya utiririshaji
 
-Nafasi tofauti ya kazi ya npm iliyochapishwa kama `@omniroute/open-sse`. Inamiliki uchakataji wa maombi, vitekelezaji, vitafsiri, huduma, kibadilishaji, na seva ya MCP.
+Nafasi tofauti ya kazi ya npm iliyochapishwa kama `@omniroute/open-sse`. Inamiliki uchakataji wa maombi, vitekelezaji, vitafsiri, huduma, kigeuzi, na seva ya MCP.
 
 ```
 open-sse/
@@ -445,50 +445,55 @@ open-sse/
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 Sajili za watoa huduma, wasifu wa vichwa, utambulisho, …
-├── handlers/               Vishughulikiaji vya maombi (gumzo, upachikaji, sauti, picha, …)
-├── executors/              Moduli 150 za vitekelezaji vya watoa huduma (madarasa ya vitekelezaji + visaidizi vya kila mtoa huduma)
-├── translator/             Ubadilishaji wa miundo (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Kibadilishaji cha mtiririko cha Responses API ↔ Chat Completions
-├── services/               Zaidi ya moduli 80 za huduma (michanganyiko, mbadala, viwango, utambulisho, …)
+├── handlers/               Vishughulikiaji vya maombi (gumzo, embeddings, sauti, picha, …)
+├── executors/              Moduli 156 za vitekelezaji vya watoa huduma (madarasa ya vitekelezaji + visaidizi vya kila mtoa huduma)
+├── translator/             Ubadilishaji wa umbizo (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Kigeuzi cha mtiririko cha Responses API ↔ Chat Completions
+├── services/               Moduli 80+ za huduma (michanganyiko, mbadala, viwango, utambulisho, …)
 ├── utils/                  Visaidizi vya utiririshaji, kiteja cha TLS, AWS SigV4, uchotaji kupitia proksi, …
 └── mcp-server/             Seva ya MCP (njia 3 za usafirishaji, mawanda 33, zana 110)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Kishughulikiaji         | Madhumuni                                                                                             |
-| ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Mkondo mkuu wa gumzo (akiba, kikomo cha kasi, uelekezaji wa mchanganyiko, upelekaji kwa vitekelezaji) |
-| `responsesHandler.ts`   | Sehemu ya kuingilia ya OpenAI Responses API                                                           |
-| `embeddings.ts`         | Upachikaji                                                                                            |
-| `imageGeneration.ts`    | Uzalishaji wa picha                                                                                   |
-| `audioSpeech.ts`        | Maandishi-kuwa-matamshi                                                                               |
-| `audioTranscription.ts` | Matamshi-kuwa-maandishi                                                                               |
-| `videoGeneration.ts`    | Uzalishaji wa video                                                                                   |
-| `musicGeneration.ts`    | Uzalishaji wa muziki                                                                                  |
-| `rerank.ts`             | Upangaji upya                                                                                         |
-| `moderations.ts`        | Udhibiti wa maudhui                                                                                   |
-| `search.ts`             | Utafutaji wa wavuti                                                                                   |
-| `sseParser.ts`          | Kichanganuzi cha matukio ya SSE                                                                       |
-| `usageExtractor.ts`     | Hutoa idadi ya tokeni kutoka kwenye mitiririko ya chanzo                                              |
-| `responseSanitizer.ts`  | Huondoa uchafu maalum wa mtoa huduma                                                                  |
-| `responseTranslator.ts` | Kiunganishi kati ya jibu la mtoa huduma na safu ya utafsiri                                           |
+| Kishughulikiaji         | Kusudi                                                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Mchakato mkuu wa gumzo (akiba, kikomo cha kiwango, uelekezaji wa mchanganyiko, upelekaji kwa vitekelezaji) |
+| `responsesHandler.ts`   | Sehemu ya kuingilia ya OpenAI Responses API                                                                |
+| `embeddings.ts`         | Embeddings                                                                                                 |
+| `imageGeneration.ts`    | Uzalishaji wa picha                                                                                        |
+| `audioSpeech.ts`        | Maandishi-hadi-matamshi                                                                                    |
+| `audioTranscription.ts` | Matamshi-hadi-maandishi                                                                                    |
+| `videoGeneration.ts`    | Uzalishaji wa video                                                                                        |
+| `musicGeneration.ts`    | Uzalishaji wa muziki                                                                                       |
+| `rerank.ts`             | Upangaji upya                                                                                              |
+| `moderations.ts`        | Udhibiti                                                                                                   |
+| `search.ts`             | Utafutaji wa wavuti                                                                                        |
+| `sseParser.ts`          | Kichanganuzi cha matukio ya SSE                                                                            |
+| `usageExtractor.ts`     | Huchota idadi za tokeni kutoka kwenye mitiririko ya chanzo                                                 |
+| `responseSanitizer.ts`  | Huondoa kelele mahususi za mtoa huduma                                                                     |
+| `responseTranslator.ts` | Kiunganishi kati ya jibu la mtoa huduma na safu ya kitafsiri                                               |
 
 ### 4.2 `open-sse/executors/`
 
-Moduli 150 za kiwango cha juu za vitekelezaji (`*.ts` ukiondoa `base.ts`, `index.ts` na majaribio — idadi inayopimwa na `npm run check:docs-counts`). Kila darasa la kitekelezaji hurithi `BaseExecutor` (`base.ts`), moja kwa moja au kupitia `DefaultExecutor` au kitekelezaji kingine; moduli zilizobaki ni visaidizi vya kila mtoa huduma (skima za zana, adapta za uchotaji/TTS, vishughulikiaji vya tabia zisizo za kawaida). Vitekelezaji vinajumuisha:
+Moduli 156 za vitekelezaji vya kiwango cha juu (`*.ts` ukiondoa `base.ts`, `index.ts` na majaribio — idadi inayopimwa na
+`npm run check:docs-counts`). Kila darasa la kitekelezaji hupanua `BaseExecutor` (`base.ts`),
+moja kwa moja au kupitia `DefaultExecutor` au kitekelezaji kingine; moduli zilizosalia ni visaidizi vya kila mtoa huduma
+(skima za zana, adapta za uchotaji/TTS, vishughulikiaji vya hali zisizo za kawaida). Vitekelezaji vinajumuisha:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, pamoja na `claudeIdentity.ts`
-(kisaidizi cha pamoja cha utambulisho) na `index.ts` (sajili).
+(kisaidizi cha utambulisho kinachoshirikiwa) na `index.ts` (sajili).
 
-> Kumbuka: watoa huduma ambao hawajaorodheshwa hapa huhudumiwa na `default.ts` kwa kutumia kitekelezaji cha jumla kinachooana na OpenAI. Katalogi kamili ya watoa huduma (watoa huduma 372) inapatikana katika `src/shared/constants/providers.ts`.
+> Kumbuka: watoa huduma ambao hawajaorodheshwa hapa huhudumiwa na `default.ts` kwa kutumia kitekelezaji cha jumla
+> kinachooana na OpenAI. Katalogi kamili ya watoa huduma (watoa huduma 375) inapatikana katika
+> `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Utafsiri wa kitovu-na-miale (OpenAI ndiyo kitovu).
+Tafsiri ya kitovu-na-miale (OpenAI ndiyo kitovu).
 
 - **Vitafsiri 9 vya maombi** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -507,53 +512,54 @@ Utafsiri wa kitovu-na-miale (OpenAI ndiyo kitovu).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Kigeuzi kinachotegemea `TransformStream` cha Responses API ↔ Chat Completions (kinachotumiwa na njia ya kunasa yote ya `responses/`).
+- `responsesTransformer.ts` — kigeuzi kinachotegemea `TransformStream` cha Responses API ↔ Chat
+  Completions (kinachotumiwa na njia ya kukamata yote ya `responses/`).
 
 ### 4.5 `open-sse/services/`
 
 Vipengele muhimu (orodha kamili chini ya `open-sse/services/`):
 
-| Jambo                    | Faili                                                                                                                                                                                                                                                    |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Uelekezaji wa Combo      | `combo.ts` (mikakati 19), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
-| Injini ya Auto Combo     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Ustahimilivu             | `accountFallback.ts` (kipindi cha kusubiri + kufungiwa), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                           |
-| Viwango vya matumizi     | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Uakibishaji              | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Uelewa wa uelekezaji     | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Ushughulikiaji wa modeli | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Mfinyazo                 | `compression/` — uunganishaji kamili wa injini ya mfinyazo                                                                                                                                                                                               |
-| Tokeni + kipindi         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Ngazi / manifesti        | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / mtandao             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Mafungu                  | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Matumizi                 | `usage.ts`                                                                                                                                                                                                                                               |
+| Jambo                              | Faili                                                                                                                                                                                                                                                    |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Uelekezaji wa mchanganyiko         | `combo.ts` (mikakati 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
+| Injini ya Mchanganyiko Kiotomatiki | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Ustahimilivu                       | `accountFallback.ts` (muda wa kusubiri + kufungiwa), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                               |
+| Vikomo vya matumizi                | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Uhifadhi wa muda                   | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Akili ya uelekezaji                | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Ushughulikiaji wa modeli           | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Mfinyazo                           | `compression/` — uunganishaji kamili wa injini ya mfinyazo                                                                                                                                                                                               |
+| Tokeni + kipindi                   | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Kiwango / manifesti                | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / mtandao                       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Makundi                            | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Matumizi                           | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **Zana 110 za kipekee** zilizounganishwa katika `server.ts` (45 za kikanoni katika `schemas/tools.ts` +
-  moduli za kumbukumbu, ujuzi, ujuzi wa GitHub, mkusanyiko, uchezeshaji, programu-jalizi, Notion, Obsidian,
+- **Zana 110 za kipekee** zimeunganishwa katika `server.ts` (45 za msingi katika `schemas/tools.ts` +
+  moduli za kumbukumbu, ujuzi, ujuzi wa GitHub, pool, uchezeshaji, programu-jalizi, Notion, Obsidian,
   hazina ya ndani na mfinyazo — muungano umehesabiwa na `countUniqueMcpTools`).
 - **Njia 3 za usafirishaji**: stdio, HTTP Streamable, SSE.
-- **Mawanda 33** yanayotekelezwa wakati wa uendeshaji — orodha ya msingi katika `src/shared/constants/mcpScopes.ts`, seti kamili ni muungano wa mawanda yaliyotangazwa na kila moduli ya zana.
+- **Mawanda 33** yanatekelezwa wakati wa uendeshaji — orodha ya msingi ipo katika `src/shared/constants/mcpScopes.ts`, seti kamili ni muungano wa mawanda yaliyotangazwa na kila moduli ya zana.
 - Jedwali la ukaguzi: `mcp_tool_audit` (linajazwa na `audit.ts`).
 - Faili: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  pamoja na majaribio chini ya `__tests__/`.
-- Angalia [MCP-SERVER.md](../frameworks/MCP-SERVER.md) kwa katalogi kamili ya zana.
+  pamoja na majaribio yaliyo chini ya `__tests__/`.
+- Tazama [MCP-SERVER.md](../frameworks/MCP-SERVER.md) kwa katalogi kamili ya zana.
 
 ### 4.7 `open-sse/config/`
 
-Rejista za watoa huduma (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), rejista za modeli kwa kila umbizo (`audioRegistry.ts`,
+Rejesta za watoa huduma (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), rejesta za modeli kwa kila umbizo (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-vijenzi saidizi vya utambulisho (`codexIdentity.ts`, `codexInstructions.ts`,
+visaidizi vya utambulisho (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-vijenzi saidizi vya vitambulisho (`credentialLoader.ts`, `codexClient.ts`), na adapta za
-wingu (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+visaidizi vya vitambulisho vya kuingia (`credentialLoader.ts`, `codexClient.ts`), na adapta za wingu
+(`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
@@ -664,7 +670,11 @@ Imepangwa katika folda ndogo 6 kulingana na madhumuni.
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`.
+  `system-info.mjs`, pamoja na visaidizi vya kusimamia PR vya kusoma pekee
+  `ci-discriminate.sh` (hupanga saini za ukaguzi ulioshindwa wa PR katika makundi ya kwake / zilizorithiwa /
+  zisizojulikana kwa kuzilinganisha na PR ya marejeleo au suala la msingi lililoshindwa) na `audit-worktree.sh`
+  (faili chafu, maeneo yaliyolindwa, uthibitishaji ulioondolewa, idadi ya ukandamizaji, tsconfig za muda
+  zilizosalia, kichwa cha PR dhidi ya HEAD ya ndani — kabla ya PR ya mfanyakazi kukubaliwa).
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,

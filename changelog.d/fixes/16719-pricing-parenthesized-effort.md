@@ -1,1 +1,0 @@
-- **fix(pricing):** price parenthesized Codex effort ids (e.g. `gpt-6-luna(max)`) at the tier/base rate instead of $0 ([#16719](https://github.com/diegosouzapw/OmniRoute/pull/16719)) — thanks @raflyazf

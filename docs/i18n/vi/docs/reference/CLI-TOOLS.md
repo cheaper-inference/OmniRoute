@@ -43,66 +43,66 @@ ACP Agents (luồng khởi chạy ngược):
 
 ---
 
-## Tự động cấu hình bằng `setup-*`
+## Tự động cấu hình với `setup-*`
 
-Bạn không cần tự viết cấu hình cho từng công cụ. OmniRoute cung cấp một lệnh `setup-*`
+Bạn không cần phải viết thủ công cấu hình cho từng công cụ. OmniRoute cung cấp một lệnh `setup-*`
 cho mỗi CLI được hỗ trợ; lệnh này đọc danh mục mô hình **trực tiếp** từ một
-OmniRoute đang chạy (cục bộ hoặc từ xa) và ghi cấu hình riêng của công cụ trên máy của bạn:
+OmniRoute đang chạy (cục bộ hoặc từ xa) và ghi cấu hình riêng của công cụ đó trên máy của bạn:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Mỗi lệnh chấp nhận `--remote <url> --api-key <key>` (cấu hình một công cụ cục bộ để kết nối với
-OmniRoute từ xa), `--dry-run` (xem trước mà không ghi) và `--port`. Những công cụ
-không hỗ trợ tự động khám phá mô hình (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) nhận
-`--model <id>` (và `--yes` cho các lần chạy không tương tác). `setup-5dive` là công thức
-duy nhất không ghi bên dưới `$HOME`: lệnh này cấu hình một cụm tác nhân 5dive bằng cách
-ghi hồ sơ xác thực do root sở hữu trên máy chủ của cụm, vì vậy nó tự thực thi lại thông qua `sudo`
-và không có chế độ từ xa riêng. Để khởi chạy một CLI với các biến môi trường
-phù hợp được chèn vào mà hoàn toàn không ghi cấu hình, hãy dùng trình khởi chạy chung
+Mỗi lệnh đều chấp nhận `--remote <url> --api-key <key>` (cấu hình một công cụ cục bộ để kết nối với
+OmniRoute từ xa), `--dry-run` (xem trước mà không ghi) và `--port`. Các công cụ
+không hỗ trợ tự động phát hiện mô hình (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) nhận
+`--model <id>` (và `--yes` cho các lần chạy không tương tác). `setup-5dive` là công thức duy nhất
+không ghi vào `$HOME`: nó cấu hình một cụm tác nhân 5dive bằng cách
+ghi hồ sơ xác thực thuộc sở hữu của root trên máy chủ của cụm, vì vậy nó tự thực thi lại thông qua `sudo`
+và không có chế độ từ xa riêng. Để khởi chạy một CLI với
+các biến môi trường phù hợp được chèn vào mà hoàn toàn không ghi cấu hình, hãy dùng trình khởi chạy chung
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — các đích và bí danh lấy từ `bin/cli/cli-manifest.mjs`); các trình khởi chạy
-riêng cho từng công cụ cũ là `omniroute launch` (Claude Code) và `omniroute launch-codex`
-(Codex) vẫn tiếp tục khả dụng. Gemini CLI chỉ hỗ trợ khởi chạy: đây là một đích của `omniroute run`
+gemini — các đích và bí danh đến từ `bin/cli/cli-manifest.mjs`); các trình khởi chạy
+riêng cho từng công cụ kiểu cũ là `omniroute launch` (Claude Code) và `omniroute launch-codex`
+(Codex) vẫn khả dụng. Gemini CLI chỉ hỗ trợ khởi chạy: đây là một đích của `omniroute run`
 nhưng không có công thức `setup-*`/`configure`.
 
-> **Tài liệu tham khảo đầy đủ:** bảng tổng hợp — nội dung được từng lệnh ghi, mọi cờ,
-> chế độ cục bộ so với từ xa và những công cụ nào yêu cầu hậu tố `/v1` — có tại
+> **Tài liệu tham khảo đầy đủ:** bảng tổng hợp — mỗi lệnh ghi những gì, tất cả các cờ,
+> chế độ cục bộ so với từ xa và những công cụ nào yêu cầu hậu tố `/v1` — có trong
 > **[Tích hợp CLI](../guides/CLI-INTEGRATIONS.md)**.
 
 ### Chạy các lệnh này bên trong container
 
-Một lệnh `setup-*` được thực thi bên trong container OmniRoute sẽ ghi vào
-thư mục home riêng của container, nơi không CLI nào trên máy chủ đọc được và sẽ biến mất cùng
-container. OmniRoute phát hiện điều đó và thoát với mã `2`, kèm hướng dẫn thay vì
-ghi dữ liệu. Có hai cách được hỗ trợ để tiếp tục — cài đặt CLI trên máy chủ và dùng
-`omniroute connect` để kết nối với container, hoặc bind-mount các thư mục cấu hình và đặt
+Một lệnh `setup-*` được thực thi bên trong container OmniRoute sẽ ghi vào thư mục home
+riêng của container, nơi không CLI nào trên máy chủ đọc được và sẽ biến mất cùng với
+container. OmniRoute phát hiện điều đó và thoát với mã `2`, kèm theo hướng dẫn thay vì
+ghi dữ liệu. Có hai hướng xử lý được hỗ trợ — cài đặt CLI trên máy chủ và
+dùng `omniroute connect` để kết nối với container, hoặc bind-mount các thư mục cấu hình và đặt
 `CLI_CONFIG_HOME` (profile `host` của compose). Mọi lệnh `setup-*`, cùng với
 `omniroute configure` và `omniroute config set`, đều chấp nhận
 `--allow-container-write` khi điều bạn thực sự muốn là cấu hình các CLI riêng của container;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` thực hiện điều tương tự cho
+`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` cũng thực hiện điều tương tự cho
 máy chủ. Xem
 [Hướng dẫn Docker → Cấu hình các công cụ CLI trên máy chủ](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
 **Endpoint áp dụng** của bảng điều khiển (`POST /api/cli-tools/apply`) thực thi
-cùng biện pháp bảo vệ: trong container, một thao tác ghi có đích không được bind-mount từ
-máy chủ sẽ trả về **`422`** với `containerEphemeralTarget: true`, nội dung lỗi an toàn
+cùng một cơ chế bảo vệ: trong container, thao tác ghi có đích không được bind-mount từ
+máy chủ sẽ trả về **`422`** cùng với `containerEphemeralTarget: true`, nội dung lỗi an toàn
 và — đối với các công cụ có công thức dành cho máy chủ (claude, codex, opencode, cline,
 kilo, continue) — một `hostSetupCommand` (ví dụ: `omniroute setup-opencode`) để chạy
-trên máy chủ thay thế; không có gì được ghi. `dryRun: true` vẫn hoạt động ở chế độ
-container và trả về bản xem trước đã được che thông tin nhạy cảm cùng đường dẫn đích mà không tác động đến ổ đĩa. Nội dung
-xem trước không phải là cấu hình chứa thông tin xác thực để sao chép hoặc nhập. Hãy áp dụng bằng
-các giá trị đầu vào ban đầu về công cụ/URL cơ sở/khóa API/mô hình trên máy chủ, hoặc sử dụng
+trên máy chủ thay thế; không có gì được ghi. `dryRun: true` vẫn hoạt động trong chế độ container
+và trả về bản xem trước đã được che thông tin nhạy cảm cùng với đường dẫn đích mà không tác động đến ổ đĩa. Nội dung
+xem trước không phải là một cấu hình chứa thông tin xác thực để sao chép hoặc nhập. Hãy áp dụng với
+các đầu vào ban đầu về công cụ/URL cơ sở/API key/mô hình trên máy chủ, hoặc sử dụng
 lệnh thiết lập phía máy chủ được chỉ định. Xem [Bảo mật cấu hình CLI](../security/CLI-CONFIGURATION.md)
-để biết phần đầu xem trước và hợp đồng yêu cầu. Hành vi này là
-có chủ đích và được bảo vệ chống hồi quy bởi
+để biết tiêu đề xem trước và quy ước yêu cầu. Hành vi này là
+có chủ đích và được bảo vệ khỏi hồi quy bởi
 `tests/unit/api/cli-tools/apply-container-guard.test.ts` — tuyệt đối không “sửa” lỗi 422
-bằng cách loại bỏ biện pháp bảo vệ.
+bằng cách loại bỏ cơ chế bảo vệ.
 
 ---
 
@@ -145,40 +145,41 @@ một bề mặt mà không được thêm vào các bề mặt khác sẽ khi�
 
 ---
 
-## 1. Danh mục CLI Code (26 công cụ)
+## 1. Danh mục CLI Code (27 công cụ)
 
-Tất cả công cụ xuất hiện trong `/dashboard/cli-code`. Những công cụ có `baseUrlSupport: none` được kết nối qua MITM hoặc hướng dẫn thủ công thay vì URL cơ sở tùy chỉnh:
+Tất cả các công cụ xuất hiện trong `/dashboard/cli-code`. Những công cụ có `baseUrlSupport: none` được kết nối thông qua MITM hoặc hướng dẫn thủ công thay vì URL cơ sở tùy chỉnh:
 
-| id           | tên                     | nhà cung cấp                  | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ----------------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic                     | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                        | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                          | none           | custom         | false        |
-| cline        | Cline                   | OSS (trước đây là Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org                      | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)                     | full           | guide          | false        |
-| continue     | Continue                | continue.dev                  | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)             | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ                   | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)                | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)             | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)                  | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (trước đây là SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI                    | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS                     | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere                     | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)             | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)              | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                           | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)                   | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba                       | full           | guide          | true         |
-| cursor       | Cursor                  | Anysphere                     | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                        | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research                 | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                        | none           | mitm           | false        |
-| custom       | CLI tùy chỉnh           | —                             | full           | custom-builder | false        |
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-Các công cụ có `baseUrlSupport: "partial"` hiển thị huy hiệu "⚠ URL cơ sở một phần" trên thẻ trong bảng điều khiển.
+Các công cụ có `baseUrlSupport: "partial"` hiển thị huy hiệu "⚠ URL cơ sở được hỗ trợ một phần" trong thẻ trên bảng điều khiển.
 ---
 
 ## 2. Danh mục CLI Agent (10 công cụ)
@@ -187,16 +188,16 @@ Các agent tự trị xuất hiện trong `/dashboard/cli-agents`:
 
 | id           | tên              | nhà cung cấp             | hỗ trợ base URL | có thể khởi chạy qua ACP |
 | ------------ | ---------------- | ------------------------ | --------------- | ------------------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | đầy đủ          | false                    |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | đầy đủ          | true                     |
-| goose        | Goose            | Block / Linux Foundation | đầy đủ          | true                     |
-| interpreter  | Open Interpreter | OSS                      | đầy đủ          | true                     |
-| warp         | Warp AI          | Warp Inc.                | một phần        | true                     |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | đầy đủ          | false                    |
-| omp          | Oh My Pi         | OSS                      | đầy đủ          | true                     |
-| letta        | Letta CLI        | Letta                    | đầy đủ          | false                    |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | đầy đủ          | false                    |
-| 5dive        | 5dive            | OSS (5dive-ai)           | đầy đủ          | false                    |
+| hermes-agent | Hermes Agent     | Nous Research            | full            | false                    |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full            | true                     |
+| goose        | Goose            | Block / Linux Foundation | full            | true                     |
+| interpreter  | Open Interpreter | OSS                      | full            | true                     |
+| warp         | Warp AI          | Warp Inc.                | partial         | true                     |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full            | false                    |
+| omp          | Oh My Pi         | OSS                      | full            | true                     |
+| letta        | Letta CLI        | Letta                    | full            | false                    |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false                    |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full            | false                    |
 
 ---
 

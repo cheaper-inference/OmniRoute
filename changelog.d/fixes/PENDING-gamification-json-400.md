@@ -1,1 +1,0 @@
-- **fix(gamification):** `POST /api/gamification/rotate`, `POST /api/gamification/servers` and `POST /api/gamification/federation/score` called `request.json()` outside a `try`, so a body that is not valid JSON threw an unhandled `SyntaxError` instead of answering 400; they now answer 400 `Invalid JSON body`, as the other routes do.

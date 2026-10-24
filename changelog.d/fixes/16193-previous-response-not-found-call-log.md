@@ -1,1 +1,0 @@
-- **fix(sse):** record unknown previous response rejections in the request journal ([#16193](https://github.com/diegosouzapw/OmniRoute/pull/16193)) — thanks @maxmad64bis

@@ -8,11 +8,17 @@ const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-upstream-error-log-"
 process.env.DATA_DIR = dataDir;
 process.env.CHAT_LOG_MAX_BODY_KB = "1";
 const { ensureDbInitialized, resetDbInstance } = await import("../../src/lib/db/core.ts");
-const { getCallLogs, getCallLogById } = await import("../../src/lib/usage/callLogs.ts");
+const { getCallLogs, getCallLogById, waitForCallLogSaves } =
+  await import("../../src/lib/usage/callLogs.ts");
 const { persistAttemptLogs } = await import("../../open-sse/handlers/chatCore/attemptLogging.ts");
 type Args = Parameters<typeof persistAttemptLogs>[0];
 type Context = Parameters<typeof persistAttemptLogs>[1];
 let sequence = 0;
+// The detail artifact is written by a worker thread that starts cold on the first write (a source
+// checkout spawns it through tsx), which can take far longer than a fixed polling budget on a
+// loaded machine. persistAttemptLogs hands the row to saveCallLog synchronously, so wait for that
+// save itself; the bound only turns a hung save into a failure.
+const SAVE_SETTLE_TIMEOUT_MS = 60_000;
 
 before(ensureDbInitialized);
 after(() => {
@@ -38,15 +44,16 @@ async function logFailure(args: Partial<Args>, context: Partial<Context> = {}) {
     noLogEnabled: false,
     ...context,
   } as Context);
-  for (let attempt = 0; attempt < 200; attempt++) {
-    const rows = await getCallLogs({ correlationId: traceId, limit: 1 });
-    if (rows[0]?.id) {
-      const row = await getCallLogById(rows[0].id);
-      if (row) return row;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 20));
-  }
-  assert.fail("attempt did not reach durable call-log detail");
+  assert.equal(await waitForCallLogSaves(SAVE_SETTLE_TIMEOUT_MS), true, "call-log save hung");
+  const [logged] = await getCallLogs({ correlationId: traceId, limit: 1 });
+  assert.ok(logged?.id, "attempt did not reach the call log");
+  // #15608: a row that expects a detail artifact is inserted as detail_state = 'pending' before
+  // that write lands, and the save settles it ('ready', or 'missing' if it failed). No-log rows
+  // start as 'none'.
+  assert.notEqual(logged.detailState, "pending");
+  const row = await getCallLogById(logged.id);
+  assert.ok(row, "attempt did not reach durable call-log detail");
+  return row;
 }
 
 test("retains upstream JSON error diagnostics without detailed logging", async () => {

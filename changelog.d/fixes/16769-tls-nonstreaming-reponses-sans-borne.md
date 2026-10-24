@@ -1,1 +1,0 @@
-- **fix(tls):** cap non-streaming TLS responses at 10 MB instead of buffering without limit ([#16769](https://github.com/diegosouzapw/OmniRoute/pull/16769)) — thanks @maxmad64bis

@@ -256,10 +256,12 @@ the dashboard under **Settings → Access Tokens** (create, revoke, copy-once).
 
 A token can never be minted with more privilege than its creator holds. An
 `admin` token can only be created by the operator — the dashboard session, the
-local CLI on the server itself, `omniroute connect` with the password, or an
-instance with login disabled. Machine credentials (an `admin` access token,
-or an API key with the `manage`/`admin` scope) can mint `write` and `read`
-tokens only; asking them for `--scope admin` returns `403`.
+local CLI on the server itself, or `omniroute connect` with the password.
+Machine credentials (an `admin` access token, or an API key with the
+`manage`/`admin` scope) can mint `write` and `read` tokens only; asking them
+for `--scope admin` returns `403`. Disabling login does not open minting: an
+access token of any scope is a credential the always-authenticated routes
+accept, so an anonymous call gets `401` at any scope.
 
 ---
 

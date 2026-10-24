@@ -1,1 +1,0 @@
-- **feat(guardrails):** per-type PII selection, custom masking patterns (ReDoS-gated) and detection counters for the opt-in PII masking ([#16902](https://github.com/diegosouzapw/OmniRoute/pull/16902)) — thanks @lsilveirab39

@@ -1,1 +1,0 @@
-- **fix(dashboard):** the Utilization page now plots the tightest quota window of each bucket (one point per provider or connection) instead of an arbitrary window, so an exhausted weekly window is no longer hidden behind a half-full session window ([#16463](https://github.com/diegosouzapw/OmniRoute/pull/16463)) — thanks @tiagolabsit

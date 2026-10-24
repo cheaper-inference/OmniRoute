@@ -19,11 +19,13 @@ import {
 } from "../accountFallback.ts";
 import {
   errorResponse,
+  isContentPolicyRefusalComboStopEnabled,
   logRetryHintUnreadable,
   parseRetryAfterHeader,
   readProseRetryAfter,
 } from "../../utils/error.ts";
 import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
+import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { recordComboRequest, getComboMetrics } from "../comboMetrics.ts";
 import {
   expandComboSystemPromptIfPresent,
@@ -62,8 +64,6 @@ import {
   isProviderCircuitOpenResult,
   isComboRequestScopedFailure as isScopedFailure,
   shouldRecordModelLockoutForComboFailure,
-  isStreamReadinessFailureErrorBody,
-  isStreamEarlyEofErrorBody,
   isLocalKeyPolicyBreachErrorBody,
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
@@ -108,6 +108,13 @@ import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.t
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
+import {
+  handleEmptyContentRetry,
+  isEmptyContentResponse,
+  isEarlyEofResponse,
+  isReadinessFailure,
+} from "./emptyContentRetry.ts";
+import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
 
 export async function executeTargetAttempt(
   opts: ExecuteTargetAttemptOptions
@@ -136,6 +143,10 @@ export async function executeTargetAttempt(
     });
 
   const familyTried = new Set<string>();
+  // #16438 opt-in (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): an empty_content turn spends
+  // this loop's existing retry on a sibling connection with no lockout. Off = release path.
+  const emptyStreamSiblingRecovery = isEmptyStreamSiblingRecoveryEnabled();
+  let emptyTurnConnectionId: string | null = null;
   // Retry loop for transient errors
   for (let retry = 0; retry <= deps.maxRetries; retry++) {
     // Fix #1681: Bail out immediately if the client has disconnected
@@ -342,6 +353,7 @@ export async function executeTargetAttempt(
     }
     const result = await deps.handleSingleModelWithTimeout(attemptBody, modelStr, {
       ...targetForAttempt,
+      emptyTurnConnectionId,
       effectiveComboStrategy: deps.strategy,
       failoverBeforeRetry: deps.config.failoverBeforeRetry,
     });
@@ -408,7 +420,12 @@ export async function executeTargetAttempt(
         state.requestScopedFailureSeen ||= qualityFailure.requestScoped;
         if (qualityFailure.requestScoped)
           state.requestScopedRejectedModelKeys?.add(requestScopedReplayKey(modelStr));
-        if (provider && rawModel && !qualityFailure.requestScoped) {
+        if (
+          provider &&
+          rawModel &&
+          !qualityFailure.requestScoped &&
+          !(emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent)
+        ) {
           const mlSettings = resolveModelLockoutSettings(deps.settings);
           if (mlSettings.enabled && mlSettings.errorCodes.includes(qualityFailure.status)) {
             recordModelLockoutFailure(
@@ -435,7 +452,18 @@ export async function executeTargetAttempt(
           latencyMs: Date.now() - deps.startTime,
         });
         state.observeFailure(false, target.executionKey);
-        if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) continue;
+        if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) {
+          if (emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent) {
+            emptyTurnConnectionId = effectiveConnectionId || null;
+          }
+          continue;
+        }
+        // #15917 (opt-in): return a content-policy refusal instead of routing around it.
+        if (
+          isContentPolicyRefusal(quality.upstreamFailure) &&
+          isContentPolicyRefusalComboStopEnabled()
+        )
+          return qualityValidationFailure(quality);
         familyTried.add(modelStr);
         const familyNext = await getNextComboFamilyFallback({
           model: modelStr,
@@ -516,9 +544,14 @@ export async function executeTargetAttempt(
 
       // Reset cooldown on success
       if (provider && provider !== "unknown") {
-        recordProviderSuccess(provider, effectiveConnectionId || undefined, {
-          providerProbeSettled: isProviderProbeResponse(result),
-        });
+        recordProviderSuccess(
+          provider,
+          effectiveConnectionId || undefined,
+          {
+            providerProbeSettled: isProviderProbeResponse(result),
+          },
+          deps.log
+        );
       }
       if (
         getStrategyTraits(deps.strategy).stickyPin === "weighted" &&
@@ -761,13 +794,24 @@ export async function executeTargetAttempt(
       return null;
     }
 
-    const isStreamReadinessFailure =
-      (result.status === 502 || result.status === 504) &&
-      isStreamReadinessFailureErrorBody(errorBody);
-    // An early EOF is an upstream failure, not a readiness probe — the breaker must
-    // see it even though the transient-retry path below treats both codes alike.
-    const isStreamEarlyEof =
-      (result.status === 502 || result.status === 504) && isStreamEarlyEofErrorBody(errorBody);
+    if (emptyStreamSiblingRecovery && isEmptyContentResponse(result, errorBody)) {
+      const emptyContentRetry = handleEmptyContentRetry({
+        response: result,
+        errorText,
+        modelStr,
+        retry,
+        protectedPriorityTarget,
+        target,
+        state,
+        deps,
+      });
+      emptyTurnConnectionId = emptyContentRetry.connectionId;
+      if (emptyContentRetry.shouldRetry === true) continue;
+      return emptyContentRetry.result;
+    }
+
+    const isStreamReadinessFailure = isReadinessFailure(result, errorBody);
+    const isStreamEarlyEof = isEarlyEofResponse(result, errorBody);
 
     // FIX 5: a local per-API-key policy 429 (token limit, budget) must not cool shared accounts.
     const isTokenLimitBreach = result.status === 429 && isLocalKeyPolicyBreachErrorBody(errorBody);
@@ -843,6 +887,8 @@ export async function executeTargetAttempt(
     // let that case fall through, so only short-circuit when every remaining
     // target is the same model (the "retrying will fail identically" premise
     // only holds within a homogeneous same-model pool).
+    // #15917: with CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED on, a content-policy refusal
+    // stops the combo even with different models remaining.
     const remainderHomogeneous = remainderIsHomogeneous(state.orderedTargets, i, modelStr);
     const isInputBoundFailure = shouldAbortOnInputBoundFailure({
       structuredError,
@@ -851,7 +897,7 @@ export async function executeTargetAttempt(
     if (isInputBoundFailure) {
       deps.log.warn(
         "COMBO",
-        `Input-bound request failure from ${modelStr} — aborting combo (same input will fail identically on every account)`
+        `Input-bound request failure from ${modelStr} — stopping combo and returning the refusal`
       );
       recordComboRequest(deps.combo.name, modelStr, {
         success: false,

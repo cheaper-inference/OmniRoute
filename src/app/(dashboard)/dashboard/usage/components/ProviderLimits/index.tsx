@@ -15,7 +15,10 @@ import {
   compareQuotaConnections,
   quotaStatusLevel,
 } from "./utils";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import Card from "@/shared/components/Card";
+import Select from "@/shared/components/Select";
 import { CardSkeleton } from "@/shared/components/Loading";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import {
@@ -127,9 +130,9 @@ const getQuotaBarWidthClass = (pct: number) => {
 };
 
 const QUOTA_TONE_CLASSES = {
-  critical: "bg-red-500 text-red-500",
-  alert: "bg-yellow-500 text-yellow-500",
-  ok: "bg-green-500 text-green-500",
+  critical: "bg-error text-error",
+  alert: "bg-warning text-warning",
+  ok: "bg-success text-success",
 } as const;
 
 const getQuotaToneClasses = (pct: number) => QUOTA_TONE_CLASSES[quotaStatusLevel(pct)];
@@ -181,20 +184,34 @@ function matchesVisibleQuotaConnection(
   return true;
 }
 
-// Worst aggregate across a list of statuses — drives the group header dot.
-function aggregateWorst(statuses: StatusKey[]): "critical" | "alert" | "ok" | "empty" {
-  let worst: "ok" | "alert" | "empty" = "empty";
-  for (const s of statuses) {
-    if (s === "critical") return "critical";
-    if (s === "alert" && worst !== "alert") worst = "alert";
-    if (s === "ok" && worst === "empty") worst = "ok";
-  }
-  return worst;
-}
-
 interface ProviderLimitsProps {
   showFilters?: boolean;
   autoRefreshInterval?: number;
+}
+
+/** Toggle chip for the quota filters (purchase type / tier / env) on the kit Button. */
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Button
+      variant={active ? "secondary" : "outline"}
+      size="sm"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`h-7 min-h-7 gap-1.5 rounded-full px-2.5 text-xs ${
+        active ? "border-primary text-text-main" : "text-text-muted"
+      }`}
+    >
+      {children}
+    </Button>
+  );
 }
 
 export default function ProviderLimits({
@@ -813,7 +830,7 @@ export default function ProviderLimits({
     return (
       <Card padding="lg">
         <div className="text-center py-12">
-          <span className="material-symbols-outlined text-[64px] opacity-15">cloud_off</span>
+          <Icon name="cloud_off" size={64} className="opacity-15" />
           <h3 className="mt-4 text-lg font-semibold text-text-main">{t("noProviders")}</h3>
           <p className="mt-2 text-sm text-text-muted max-w-[400px] mx-auto">
             {t("connectProvidersForQuota")}
@@ -838,19 +855,21 @@ export default function ProviderLimits({
 
         <div className="flex items-center gap-2">
           <QuotaLayoutPicker value={layoutMode} onChange={selectLayout} />
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => void refreshAll()}
             disabled={refreshingAll}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-bg-subtle border border-border text-text-main text-[13px] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="gap-1.5 text-[13px]"
             title={
               autoRefreshIntervalMs > 0 ? tr("autoRefreshing", "Auto-refreshing") : t("refreshAll")
             }
           >
-            <span
-              className={`material-symbols-outlined text-[16px] ${refreshingAll ? "animate-spin" : ""}`}
-            >
-              {autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
-            </span>
+            <Icon
+              name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
+              size={16}
+              className={refreshingAll ? "animate-spin" : undefined}
+            />
             {refreshingAll
               ? tr("refreshing", "Refreshing")
               : autoRefreshIntervalMs > 0
@@ -861,7 +880,7 @@ export default function ProviderLimits({
                     )
                   )}`
                 : t("refreshAll")}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -887,21 +906,14 @@ export default function ProviderLimits({
               if (type.key !== "all" && count === 0) return null;
               const active = purchaseTypeFilter === type.key;
               return (
-                <button
+                <FilterChip
                   key={type.key}
+                  active={active}
                   onClick={() => handleSetPurchaseFilter(type.key)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer"
-                  style={{
-                    border: active
-                      ? "1px solid var(--color-primary, #E54D5E)"
-                      : "1px solid var(--color-border)",
-                    background: active ? "rgba(229,77,94,0.1)" : "transparent",
-                    color: active ? "var(--color-primary, #E54D5E)" : "var(--color-text-muted)",
-                  }}
                 >
                   <span>{tr(type.labelKey, type.fallback)}</span>
                   <span className="opacity-85">{count}</span>
-                </button>
+                </FilterChip>
               );
             })}
           </div>
@@ -915,21 +927,10 @@ export default function ProviderLimits({
               if (tier.key !== "all" && !tierCounts[tier.key]) return null;
               const active = tierFilter === tier.key;
               return (
-                <button
-                  key={tier.key}
-                  onClick={() => setTierFilter(tier.key)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer"
-                  style={{
-                    border: active
-                      ? "1px solid var(--color-primary, #E54D5E)"
-                      : "1px solid var(--color-border)",
-                    background: active ? "rgba(229,77,94,0.1)" : "transparent",
-                    color: active ? "var(--color-primary, #E54D5E)" : "var(--color-text-muted)",
-                  }}
-                >
+                <FilterChip key={tier.key} active={active} onClick={() => setTierFilter(tier.key)}>
                   <span>{tier.label || t(tier.labelKey!)}</span>
                   <span className="opacity-85">{tierCounts[tier.key] || 0}</span>
-                </button>
+                </FilterChip>
               );
             })}
           </div>
@@ -942,7 +943,9 @@ export default function ProviderLimits({
               <span className="text-[11px] uppercase tracking-wider text-text-muted font-semibold mr-1">
                 {tr("filterProviderLabel", "Provider")}
               </span>
-              <select
+              <Select
+                compact
+                className="w-auto"
                 value={
                   providerFilter === "all" || providerOptions.includes(providerFilter)
                     ? providerFilter
@@ -950,7 +953,6 @@ export default function ProviderLimits({
                 }
                 onChange={(event) => handleSetProviderFilter(event.target.value)}
                 aria-label={tr("filterProviderAriaLabel", "Filter quota providers")}
-                className="h-8 rounded-full border border-border bg-transparent px-3 text-xs font-semibold text-text-muted cursor-pointer"
               >
                 <option value="all">{tr("filterProviderAll", "All providers")}</option>
                 {providerOptions.map((provider) => (
@@ -958,7 +960,7 @@ export default function ProviderLimits({
                     {PROVIDER_LABEL[provider] || provider}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
 
@@ -973,21 +975,10 @@ export default function ProviderLimits({
                 const active = envFilter === tag;
                 const label = tag === "all" ? tr("filterEnvAll", "All") : tag;
                 return (
-                  <button
-                    key={tag}
-                    onClick={() => handleSetEnvFilter(tag)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer"
-                    style={{
-                      border: active
-                        ? "1px solid var(--color-primary, #E54D5E)"
-                        : "1px solid var(--color-border)",
-                      background: active ? "rgba(229,77,94,0.1)" : "transparent",
-                      color: active ? "var(--color-primary, #E54D5E)" : "var(--color-text-muted)",
-                    }}
-                  >
+                  <FilterChip key={tag} active={active} onClick={() => handleSetEnvFilter(tag)}>
                     <span>{label}</span>
                     <span className="opacity-85">{count}</span>
-                  </button>
+                  </FilterChip>
                 );
               })}
             </div>

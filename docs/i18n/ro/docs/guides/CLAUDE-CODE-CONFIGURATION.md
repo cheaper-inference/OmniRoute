@@ -48,15 +48,11 @@ să funcționeze direct), verifică starea serverului și execută `claude`.
 
 ---
 
-## Aliasuri de descoperire — afișați modelele non-Claude în selectorul `/model`
+## Aliasuri de descoperire — afișarea modelelor non-Claude în selectorul `/model`
 
-Descoperirea modelelor de gateway din Claude Code listează numai ID-urile care încep cu `claude`
-sau `anthropic`, astfel încât, atunci când este setat `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`,
-selectorul nativ `/model` afișează în mod normal **numai** modelele Claude/Anthropic din OmniRoute — un
-`kimi/kimi-k2.6` sau `glm/glm-5.2` nu apare niciodată, chiar dacă rutarea sa funcționează corect.
+Descoperirea modelelor prin gateway din Claude Code listează doar id-urile care încep cu `claude` sau `anthropic`, așa că, cu `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, selectorul nativ `/model` afișează în mod normal **doar** modelele Claude/Anthropic din OmniRoute — un `kimi/kimi-k2.6` sau un `glm/glm-5.2` nu apare niciodată, chiar dacă rutarea funcționează corect.
 
-OmniRoute poate oglindi orice model activat (și orice combinație) sub un ID `claude/…`, astfel încât acesta
-să treacă de filtrul respectiv și să apară în selector:
+OmniRoute poate oglindi orice model activat (și orice combo) sub un id `claude/…`, astfel încât acesta trece de filtrul respectiv și apare în selector:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,62 +60,65 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Când selectați unul dintre acestea în Claude Code, OmniRoute elimină prefixul `claude/`
-pentru a reveni la ID-ul real înainte de rutare — un ID autentic `claude/<real-claude-model>`
-(furnizorul OAuth Claude propriu-zis) este lăsat întotdeauna nemodificat.
+Când alegi unul dintre acestea în Claude Code, OmniRoute elimină prefixul `claude/` pentru a reveni la id-ul real înainte de rutare — un id autentic `claude/<real-claude-model>` (furnizorul real Claude OAuth) este întotdeauna lăsat neatins.
 
-**Această funcționalitate este dezactivată implicit** și controlată printr-o ierarhie cu trei niveluri
-(cel mai specific are prioritate), astfel încât o instanță OmniRoute obișnuită să nu își dubleze niciodată
-catalogul pentru clienții care nu utilizează Claude Code:
+În mod implicit, sunt oglindite doar id-urile de bază. Cu flag-ul de funcționalitate opțional `CATALOG_MIRROR_REFINEMENTS_ENABLED` activat, variantele de nivel de efort de raționament pe care catalogul le listează deja (de ex. `codex/gpt-6-sol-high`) sunt oglindite ca orice alt id, astfel încât Claude Code poate alege un nivel de efort explicit, iar id-urile integrate `auto/*` pe care calea de cerere nu le poate materializa nu sunt oglindite. Dacă variantele de efort sunt listate sau nu rămâne în continuare reglat de `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — oglindirea nu adaugă niciodată o variantă pe care catalogul de bază nu o are.
 
-| Nivel    | Unde                                                                                                  |
-| -------- | ----------------------------------------------------------------------------------------------------- |
-| Model    | Pagina de detalii a furnizorului → comutatorul per model „Expune în Claude Code”                      |
-| Furnizor | Pagina de detalii a furnizorului → comutatorul la nivel de furnizor (acoperă toate modelele acestuia) |
-| Global   | Setări → Indicatori de funcționalitate → `EXPOSE_CC_DISCOVERY_ALIASES` (dezactivat implicit)          |
+**Această funcție este dezactivată implicit** și este controlată de o poartă pe trei niveluri (cel mai specific câștigă), astfel încât un OmniRoute standard nu își dublează niciodată catalogul pentru clienții care nu folosesc Claude Code:
 
-Variabila de mediu `EXPOSE_CC_DISCOVERY_ALIASES` forțează activarea nivelului global
-și are prioritate față de suprascrierea din panoul de control (ecranul Indicatori de funcționalitate afișează
-o notă „activ prin variabila de mediu” atunci când este cazul). Comutatoarele pentru fiecare furnizor și
-fiecare model rafinează configurația de acolo — de ex., nivelul global dezactivat + furnizorul Kimi activat expune
-numai modelele Kimi.
+| Nivel    | Unde                                                                                            |
+| -------- | ----------------------------------------------------------------------------------------------- |
+| Model    | Pagina de detalii a furnizorului → comutator per model „Expune în Claude Code"                  |
+| Furnizor | Pagina de detalii a furnizorului → comutator la nivel de furnizor (acoperă toate modelele sale) |
+| Global   | Setări → Flag-uri de funcționalitate → `EXPOSE_CC_DISCOVERY_ALIASES` (dezactivat implicit)      |
 
-> ⚠️ **Nepotrivirea ferestrei pentru modelele non-Claude.** Claude Code presupune o fereastră de context
-> de 200K pentru orice ID pe care nu îl recunoaște (nu poate citi dimensiunea reală a ferestrei din
-> `/v1/models`). Pentru un model cu o fereastră mai mare (de ex. 256K pentru Kimi K2), setați
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` la o valoare mai mică decât fereastra reală a modelului, astfel încât
-> compactarea automată să nu se declanșeze prematur. Profilurile generate mai sus fac deja
-> acest lucru pentru fiecare model.
+Variabila de mediu `EXPOSE_CC_DISCOVERY_ALIASES` forțează activarea nivelului global și are prioritate față de suprascrierea din dashboard (ecranul Flag-uri de funcționalitate afișează în acest caz o notă „activ prin variabilă de mediu"). Comutatoarele per furnizor și per model rafinează de acolo — de ex. global dezactivat + furnizorul Kimi activat expune doar modelele Kimi.
+
+> ⚠️ **Nepotrivire a ferestrei de context la modelele non-Claude.** Claude Code presupune o fereastră de context de 200K pentru orice id pe care nu îl recunoaște (nu poate citi o fereastră reală din `/v1/models`). Pentru un model cu o fereastră mai mare (de ex. cea de 256K a lui Kimi K2), setează `CLAUDE_CODE_AUTO_COMPACT_WINDOW` la o valoare sub fereastra reală a modelului, astfel încât compactarea automată să nu se declanșeze prematur. Profilele generate mai sus fac deja acest lucru pentru fiecare model.
 
 ---
 
-## Blocul de inițiere de pe panoul de control
+## Bloc de integrare pe panoul de control
 
-Cardul instrumentului Claude (**Panou de control → Cod CLI**) afișează fragmentul exact din `settings.json`
+Cardul instrumentului Claude (**Panou de control → Cod CLI**) afișează fragmentul `settings.json` exact
 pentru această instanță, lângă butonul de informații despre aliasul de descoperire, împreună cu un buton de copiere:
 
 ```jsonc
 {
   "env": {
     "ANTHROPIC_BASE_URL": "http://<OmniRoute-ul dvs.>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<cheia API OmniRoute a dvs.>",
+    "ANTHROPIC_AUTH_TOKEN": "<cheia API OmniRoute>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-URL-ul de bază este cel determinat de card (inclusiv o suprascriere personalizată introdusă de dvs.), deja
-normalizat — fără sufixul `/v1` și fără bară oblică la final. **Cheia nu este afișată niciodată**: blocul conține un
-substituent, astfel încât o captură de ecran sau un fragment lipit nu poate divulga cheia. Înlocuiți-l cu cheia dvs.
+URL-ul de bază este cel determinat de card (inclusiv o suprascriere personalizată pe care ați introdus-o), deja
+normalizat — fără sufixul `/v1` și fără bară oblică la final. **Cheia nu este afișată niciodată**: blocul include un
+substitut, astfel încât o captură de ecran sau un fragment lipit să nu poată divulga cheia. Înlocuiți-l cu cheia dvs.
 
 Adăugați `CLAUDE_CODE_AUTO_COMPACT_WINDOW` în același bloc `env` pentru orice model a cărui
-fereastră reală de context nu este de 200K — Claude Code presupune 200K pentru fiecare ID pe care nu îl recunoaște, astfel încât
-compactarea automată este declanșată altfel la momentul greșit (consultați avertismentul din secțiunea anterioară).
-Generatorul de fragmente acceptă și această valoare, astfel încât un apelant care cunoaște dimensiunea ferestrei modelului țintă
+fereastră de context reală nu este de 200K — Claude Code presupune 200K pentru fiecare id pe care nu îl recunoaște, astfel încât
+compactarea automată este declanșată altfel într-un moment greșit (consultați avertismentul din secțiunea precedentă).
+Constructorul fragmentului acceptă și această valoare, astfel încât un apelant care cunoaște dimensiunea ferestrei modelului țintă
 o poate emite direct.
 
-Sursă: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (generator
+Sursă: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (constructor
 pur, testat unitar), afișat de `ClaudeGatewayOnboardingBlock`.
+
+### Fixați un cont (opțional)
+
+Pentru a trimite fiecare solicitare Claude Code printr-un anumit cont de furnizor, adăugați antetul
+`x-omniroute-connection` prin `ANTHROPIC_CUSTOM_HEADERS` în același bloc `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Copiați id-ul din cipul `xxxxxxxx…` de pe rândul conexiunii din pagina furnizorului. Fixarea se
+aplică numai id-urilor de model unic (`provider/model`), nu combinațiilor. Consultați
+[Fixarea contului pentru fiecare solicitare](../reference/API_REFERENCE.md#account-pinning-per-request) pentru
+comportamentul exact de rezervă.
 
 ---
 

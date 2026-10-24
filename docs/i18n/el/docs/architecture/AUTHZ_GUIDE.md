@@ -13,109 +13,101 @@
 
 > Πηγή: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## Δύο τρόποι ελέγχου ταυτότητας
+## Δύο τρόποι αυθεντικοποίησης
 
 ### 1. Κλειδί API (Bearer)
 
-Χρησιμοποιείται για τα API πελατών που είναι συμβατά με OpenAI/Anthropic/Gemini και για ορισμένες διαδρομές διαχείρισης, όταν το κλειδί διαθέτει το πεδίο εφαρμογής `manage`.
+Χρησιμοποιείται για τα client API συμβατά με OpenAI/Anthropic/Gemini και για μερικές διαδρομές διαχείρισης, όταν το κλειδί έχει το scope `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Επικυρώνεται από τις `isValidApiKey()` / `extractApiKey()` στο `src/sse/services/auth.ts` και επανεξάγεται μέσω του `src/shared/utils/apiAuth.ts`. Ο επικυρωτής αποδέχεται επίσης τις μεταβλητές περιβάλλοντος `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` ως μόνιμα κλειδιά passthrough (ζήτημα #1350).
+Επικυρώνεται από τις `isValidApiKey()` / `extractApiKey()` στο `src/sse/services/auth.ts` και επανεξάγεται μέσω του `src/shared/utils/apiAuth.ts`. Ο validator δέχεται επίσης τις μεταβλητές περιβάλλοντος `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` ως κλειδιά passthrough μόνιμης ισχύος (issue #1350).
 
-### 2. Συνεδρία πίνακα ελέγχου (cookie auth_token)
+### 2. Συνεδρία πίνακα ελέγχου (cookie `auth_token`)
 
-Για σελίδες του πίνακα ελέγχου και λειτουργίες διαχειριστή.
+Για τις σελίδες του πίνακα ελέγχου και τις λειτουργίες διαχειριστή.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Ένα cookie αποτελεί συνεδρία μόνο όταν το JWT επαληθεύεται **και** περιέχει `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Κάθε
-καταναλωτής του cookie (μηχανισμός προστασίας διαδρομών του πίνακα ελέγχου (`isDashboardSessionAuthenticated()`), ανανέωση της διοχέτευσης εξουσιοδότησης, χειραψία WebSocket, ενεργός
-διακομιστής, `/api/settings/require-login`, `/api/auth/status`) περνά από αυτόν τον βοηθό.
-Υπάρχουν και άλλα JWT υπογεγραμμένα με `JWT_SECRET` — το passthrough του Cursor CLI δημιουργεί
-διακριτικά `iss "omniroute" / aud "cursor-cli"` για κατόχους κλειδιών — και αυτά δεν αποτελούν ποτέ συνεδρίες
-(#13298).
+Ένα cookie αποτελεί συνεδρία μόνο όταν το JWT επαληθεύεται **και** φέρει `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Κάθε καταναλωτής του cookie (ο guard των διαδρομών του πίνακα ελέγχου (`isDashboardSessionAuthenticated()`), η ανανέωση της αλυσίδας authz, το WebSocket handshake, ο live server, το `/api/settings/require-login`, το `/api/auth/status`) περνά από αυτόν τον βοηθό.
+Υπάρχουν και άλλα JWT υπογεγραμμένα με `JWT_SECRET` — το passthrough του Cursor CLI εκδίδει tokens `iss "omniroute" / aud "cursor-cli"` για τους κατόχους κλειδιών — και δεν θεωρούνται ποτέ συνεδρίες (#13298).
 
-Επαληθεύεται από την `isDashboardSessionAuthenticated()` στο `src/shared/utils/apiAuth.ts`. Η διοχέτευση ανανεώνει αυτόματα το JWT όταν απομένουν λιγότερες από 7 ημέρες από τη διάρκεια ζωής του, η οποία είναι 30 ημέρες.
+Επαληθεύεται από την `isDashboardSessionAuthenticated()` στο `src/shared/utils/apiAuth.ts`. Η αλυσίδα ανανεώνει αυτόματα το JWT όταν του απομένουν λιγότερες από 7 ημέρες από τη διάρκειά του των 30 ημερών.
 
-Μια συνεδρία μπορεί επίσης να λήξει πριν συμπληρωθούν οι 30 ημέρες, επειδή κάθε δημιουργός χρησιμοποιεί τη `mintDashboardSessionToken` (χρόνος έκδοσης `iat` και αναγνωριστικό `jti`) και ο επαληθευτής ελέγχει δύο ρυθμίσεις: τη `sessionsValidAfter`, η οποία ορίζεται κατά την αλλαγή κωδικού πρόσβασης, ώστε κάθε συνεδρία που εκδόθηκε νωρίτερα να παύει να επαληθεύεται (το πρόγραμμα περιήγησης στο οποίο άλλαξε ο κωδικός πρόσβασης λαμβάνει νέο cookie), και τη `revokedDashboardSessions`, στην οποία το `POST /api/auth/logout` προσθέτει το `jti` της συνεδρίας από την οποία έγινε αποσύνδεση. Οι συνεδρίες που δημιουργήθηκαν από παλαιότερη έκδοση δεν περιέχουν καμία από αυτές τις δηλώσεις και παραμένουν έγκυρες έως την πρώτη αλλαγή κωδικού πρόσβασης. Αν δεν είναι δυνατή η ανάγνωση των ρυθμίσεων, η συνεδρία δεν θεωρείται αξιόπιστη.
+Μια συνεδρία μπορεί επίσης να λήξει πριν συμπληρωθούν οι 30 ημέρες της, επειδή κάθε εκδότης περνά από το `mintDashboardSessionToken` (έναν χρόνο έκδοσης `iat` και ένα αναγνωριστικό `jti`) και ο επαληθευτής ελέγχει δύο ρυθμίσεις: το `sessionsValidAfter`, που ορίζεται με την αλλαγή κωδικού ώστε κάθε συνεδρία που εκδόθηκε πριν από αυτήν να σταματά να επαληθεύεται (ο περιηγητής που άλλαξε τον κωδικό παίρνει νέο cookie), και το `revokedDashboardSessions`, στο οποίο το `POST /api/auth/logout` προσθέτει το `jti` της συνεδρίας που αποσυνδέθηκε. Οι συνεδρίες που εκδόθηκαν από παλαιότερη έκδοση δεν φέρουν κανένα από τα δύο πεδία και παραμένουν έγκυρες έως την πρώτη αλλαγή κωδικού. Αν δεν μπορούν να διαβαστούν οι ρυθμίσεις, η συνεδρία δεν εμπιστεύεται.
 
-Ορισμένες διαδρομές διαχείρισης αποδέχονται **οποιονδήποτε** από τους δύο τρόπους: cookie Ή `Bearer <key>` όταν το κλειδί API διαθέτει το πεδίο εφαρμογής `manage` (ή `admin`). Αυτό καθιστά δυνατή τη ροή εργασίας «διαμορφώσιμο μέσω κλήσεων API» που προστέθηκε στην v3.8.
+Ορισμένες διαδρομές διαχείρισης δέχονται **είτε** τον έναν τρόπο **είτε** τον άλλο: cookie Ή `Bearer <key>`, όταν το κλειδί API έχει το scope `manage` (ή `admin`). Αυτό επιτρέπει τη ροή εργασίας "ρυθμιζόμενο μέσω κλήσεων API" που προστέθηκε στην έκδοση v3.8.
 
 #### Προαιρετική πύλη σύνδεσης OIDC (#6973)
 
-Η σύνδεση διαχειριστή στον πίνακα ελέγχου υποστηρίζει επίσης μια **προαιρετικά ενεργοποιούμενη** ροή OIDC (OpenID Connect)
-παράλληλα με την προεπιλεγμένη σύνδεση μέσω κωδικού πρόσβασης — η σύνδεση μέσω κωδικού πρόσβασης δεν καταργείται ποτέ, απλώς
-συμπληρώνεται:
+Η σύνδεση διαχειριστή του πίνακα ελέγχου υποστηρίζει επίσης μια ροή OIDC (OpenID Connect) **προαιρετικής ενεργοποίησης**, παράλληλα με τη προεπιλεγμένη σύνδεση με κωδικό πρόσβασης. Η σύνδεση με κωδικό δεν καταργείται ποτέ, απλώς συμπληρώνεται:
 
-- Είναι απενεργοποιημένη, εκτός αν `settings.oidcEnabled === true` **και** τα `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` έχουν όλα διαμορφωθεί (Ρυθμίσεις → Έλεγχος ταυτότητας).
-  Διαφορετικά, το `GET /api/auth/oidc/login` επιστρέφει `400`.
-- Το `GET /api/auth/oidc/login` εντοπίζει το `authorization_endpoint` από το
-  `/.well-known/openid-configuration` του εκδότη (με εναλλακτική χρήση του
-  `<issuer>/authorize`), δημιουργεί το URI ανακατεύθυνσης από το εισερχόμενο αίτημα
-  (λαμβάνοντας υπόψη το `x-forwarded-proto`) και ανακατευθύνει στον IdP με μια τυχαία τιμή `state`
-  αποθηκευμένη σε ένα cookie `oidc_state` με χαρακτηριστικό `httpOnly`.
-- Το `GET /api/auth/oidc/callback` επικυρώνει το `state`, ανταλλάσσει τον κωδικό εξουσιοδότησης
-  και επαληθεύει την υπογραφή του διακριτικού ID μέσω του JWKS του εκδότη
-  (`createRemoteJWKSet` του `jose`, αποθηκευμένο στην κρυφή μνήμη ανά URI του JWKS), με ελέγχους `issuer`/`audience`.
-  Απαιτείται η λίστα επιτρεπόμενων `oidcAllowedSubjects`: αντιστοιχίζει τη δήλωση `sub`
-  του διακριτικού ή τη δήλωση `email` — η δήλωση email γίνεται δεκτή μόνο
-  όταν `email_verified === true`, επομένως ένα μη επαληθευμένο email στον IdP δεν μπορεί ποτέ
-  να περάσει την πύλη — και όταν δεν υπάρχουν καταχωρίσεις, η επιστροφή κλήσης απορρίπτει κάθε σύνδεση
-  (`not_configured`).
-- Σε περίπτωση επιτυχίας, δημιουργεί το **ίδιο ακριβώς** JWT `auth_token` διάρκειας 30 ημερών που εκδίδει η σύνδεση
-  μέσω κωδικού πρόσβασης (`src/app/api/auth/login/route.ts`), επομένως η υπόλοιπη
-  διοχέτευση συνεδρίας του πίνακα ελέγχου (αυτόματη ανανέωση, χαρακτηριστικά cookie) παραμένει αμετάβλητη —
-  το OIDC αντικαθιστά μόνο τον τρόπο δημιουργίας του cookie, όχι τα δικαιώματα που αυτό παρέχει.
-- Κάθε ρύθμιση `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
-  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) περιλαμβάνεται στο `SECURITY_IMPACTING_SETTINGS_KEYS`
-  (`src/shared/constants/securityImpactingSettings.ts`): το `PATCH /api/settings`
-  απαντά με `400 PASSWORD_REQUIRED`, εκτός αν το σώμα περιλαμβάνει τον κωδικό πρόσβασης διαχείρισης
-  ως `currentPassword` (`401 PASSWORD_MISMATCH` όταν είναι λανθασμένος).
-  Το `oidcDisablePasswordLogin` απορρίπτει τη _σύνδεση_ μέσω κωδικού πρόσβασης (`POST /api/auth/login`),
-  αλλά διατηρεί το αποθηκευμένο hash του κωδικού πρόσβασης, ενώ ο επανέλεγχος ταυτότητας εξακολουθεί να ελέγχει
-  το `currentPassword` σε σχέση με αυτό.
-- Το `POST /api/settings/import-json` παρακάμπτει αυτόν τον επανέλεγχο ταυτότητας, επομένως αφαιρεί κάθε κλειδί στο
-  `IMPORT_STRIPPED_SETTINGS_KEYS` (στο ίδιο αρχείο) πριν από την εγγραφή: τον κωδικό πρόσβασης και
-  το `currentPassword`, κάθε καταχώριση του `SECURITY_IMPACTING_SETTINGS_KEYS` και την
+- Είναι απενεργοποιημένη εκτός αν `settings.oidcEnabled === true` **και** τα `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` είναι όλα ρυθμισμένα (Settings → Auth).
+  Το `GET /api/auth/oidc/login` επιστρέφει `400` διαφορετικά.
+- Το `GET /api/auth/oidc/login` ανακαλύπτει το `authorization_endpoint` από το
+  `/.well-known/openid-configuration` του issuer (με εναλλακτική λύση το
+  `<issuer>/authorize`), κατασκευάζει το redirect URI από το εισερχόμενο αίτημα
+  (λαμβάνοντας υπόψη το `x-forwarded-proto`) και ανακατευθύνει στον IdP με ένα τυχαίο
+  `state` που αποθηκεύεται σε cookie `oidc_state` τύπου `httpOnly`.
+- Το `GET /api/auth/oidc/callback` ελέγχει το `state`, ανταλλάσσει τον κωδικό εξουσιοδότησης
+  και επαληθεύει την υπογραφή του ID token μέσω του JWKS του issuer (`createRemoteJWKSet`
+  του `jose`, με cache ανά URI JWKS) με ελέγχους `issuer`/`audience`. Η λίστα επιτρεπόμενων
+  θεμάτων `oidcAllowedSubjects` είναι υποχρεωτική: ταιριάζει με το claim `sub` του token ή
+  με το claim `email` του — το claim email γίνεται δεκτό μόνο όταν `email_verified === true`,
+  ώστε ένα μη επαληθευμένο email στον IdP να μην μπορεί ποτέ να περάσει την πύλη — και χωρίς
+  καταχωρίσεις, το callback απορρίπτει κάθε σύνδεση (`not_configured`).
+- Σε επιτυχία εκδίδει **ακριβώς το ίδιο** JWT `auth_token` 30 ημερών που εκδίδει και η σύνδεση
+  με κωδικό (`src/app/api/auth/login/route.ts`), ώστε το υπόλοιπο pipeline συνεδρίας του
+  πίνακα ελέγχου (αυτόματη ανανέωση, σημαίες cookie) να μένει αμετάβλητο — το OIDC αντικαθιστά
+  μόνο τον τρόπο έκδοσης του cookie, όχι αυτό που παρέχει.
+- Κάθε ρύθμιση `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`,
+  `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`)
+  βρίσκεται στο `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`):
+  το `PATCH /api/settings` απαντά `400 PASSWORD_REQUIRED` εκτός αν το σώμα φέρει τον κωδικό
+  διαχείρισης ως `currentPassword` (`401 PASSWORD_MISMATCH` όταν είναι λάθος).
+  Το `oidcDisablePasswordLogin` απαγορεύει τη _σύνδεση_ με κωδικό (`POST /api/auth/login`)
+  αλλά διατηρεί το αποθηκευμένο hash του κωδικού, και η επανα-πιστοποίηση εξακολουθεί να
+  ελέγχει το `currentPassword` έναντι αυτού.
+- Τα `corsOrigins` και `bruteForceProtection` ανήκουν επίσης στο
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: η χαλάρωση οποιουδήποτε από τα δύο αποδυναμώνει τις
+  άμυνες σύνδεσης, γι' αυτό απαιτούν την ίδια επανα-πιστοποίηση με `currentPassword` (η
+  καρτέλα Security την ζητά) και η εισαγωγή JSON τα αφαιρεί.
+- Κάθε κλειδί πολιτικής ασφαλείας — οι καταχωρίσεις του `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  κάθε κλειδί `oidc*` και η κατάσταση συνεδρίας του πίνακα ελέγχου — είναι **μόνο για τον
+  διαχειριστή** στο `PATCH /api/settings`: ένα κλειδί API με scope διαχείρισης ή ένα token
+  πρόσβασης `oma_` απορρίπτεται με `403` ακόμη και αν στέλνει σωστό `currentPassword`, και η
+  απόρριψη καταγράφεται ως `settings.update_failed` με `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` στο `src/lib/api/operatorCredential.ts`). Οι συνήθεις
+  ρυθμίσεις (θέμα, προτιμήσεις εμφάνισης) παραμένουν εγγράψιμες για κλειδί `manage` ή για
+  token πρόσβασης `admin`. Κάθε τροποποίηση του ίδιου του `/api/settings` (και του
+  `/api/settings/require-login`) απαιτεί επίσης το scope token πρόσβασης `admin`
+  (`ADMIN_MUTATION_EXACT_PATHS` στο `src/server/authz/accessScopes.ts`, αντιστοίχιση ακριβούς
+  διαδρομής)· το `GET` παραμένει `read`, ενώ οι υπόλοιπες υπο-διαδρομές `/api/settings/*`
+  (proxies, προεπιλογές combo, ψευδώνυμα μοντέλων, συμπίεση, καθαρισμοί…) διατηρούν το scope
+  `write` που προκύπτει από τη μέθοδο.
+- Το `POST /api/settings/import-json` παρακάμπτει αυτή την επανα-πιστοποίηση, οπότε αφαιρεί
+  κάθε κλειδί του `IMPORT_STRIPPED_SETTINGS_KEYS` (στο ίδιο αρχείο) πριν γράψει: τον κωδικό
+  και το `currentPassword`, κάθε καταχώριση του `SECURITY_IMPACTING_SETTINGS_KEYS` και την
   κατάσταση συνεδρίας του πίνακα ελέγχου (`sessionsValidAfter`, `revokedDashboardSessions`).
-  Επομένως, η εισαγωγή ενός παλαιότερου αντιγράφου ασφαλείας δεν μπορεί να επανενεργοποιήσει μια συνεδρία που έχει ήδη
-  τερματιστεί λόγω αλλαγής κωδικού πρόσβασης ή αποσύνδεσης.
+  Η εισαγωγή ενός παλαιότερου αντιγράφου ασφαλείας δεν μπορεί επομένως να αναστήσει συνεδρία
+  που τερμάτισε αλλαγή κωδικού ή αποσύνδεση.
 
 ## Κλάσεις διαδρομών
 
-Το `src/server/authz/types.ts` ορίζει τρεις κλάσεις· κάθε διαδρομή που δεν μπορεί να ταξινομηθεί με ντετερμινιστικό τρόπο κατατάσσεται από προεπιλογή στη `MANAGEMENT`.
+Το `src/server/authz/types.ts` ορίζει τρεις κλάσεις· κάθε διαδρομή που δεν μπορεί να ταξινομηθεί με βεβαιότητα επιστρέφει στην `MANAGEMENT`.
 
-| Κλάση        | Περιγραφή                                                                                                                                                                     | Απαιτούμενος έλεγχος ταυτότητας                                                         |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `PUBLIC`     | Ρητά ασφαλείς διαδρομές — σύνδεση, αποσύνδεση, κατάσταση, αρχικοποίηση, έλεγχος υγείας, αρχική ρύθμιση ένταξης.                                                               | Κανένας                                                                                 |
-| `CLIENT_API` | Τερματικά σημεία εξυπηρέτησης μοντέλων — `/api/v1/*`, `/api/v1beta/*`, καθώς και τα ψευδώνυμα `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Κλειδί Bearer όταν είναι ενεργοποιημένη η ισχύουσα σημαία δυνατότητας `REQUIRE_API_KEY` |
-| `MANAGEMENT` | Σελίδες πίνακα ελέγχου, ρυθμίσεις, πάροχοι, κλειδιά, καθώς και τερματικά σημεία διαχείρισης και διαγνωστικών.                                                                 | Συνεδρία πίνακα ελέγχου Ή Bearer με εμβέλεια `manage`                                   |
+| Κλάση        | Περιγραφή                                                                                                                                                              | Απαιτούμενη αυθεντικοποίηση                                            |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `PUBLIC`     | Ρητά ασφαλείς διαδρομές — σύνδεση, αποσύνδεση, κατάσταση, αρχικοποίηση, υγεία, bootstrap του onboarding.                                                               | Καμία                                                                  |
+| `CLIENT_API` | Endpoints εξυπηρέτησης μοντέλων — `/api/v1/*`, `/api/v1beta/*`, καθώς και τα ψευδώνυμα `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Κλειδί Bearer όταν είναι ενεργή η σημαία λειτουργίας `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Σελίδες πίνακα ελέγχου, ρυθμίσεις, providers, κλειδιά, endpoints διαχειριστή και διαγνωστικών.                                                                         | Συνεδρία πίνακα ελέγχου Ή Bearer με scope `manage`                     |
 
-Ορισμένες ενέργειες `MANAGEMENT` είναι **μόνο για χειριστές**: ένα κλειδί `manage` δεν αρκεί. Η εξαγωγή αποθηκευμένων
-διαπιστευτηρίων (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), η έκδοση ενός διακριτικού συγχρονισμού (`POST /api/sync/tokens`) και η δημιουργία ενός
-διακριτικού πρόσβασης CLI `admin` (`POST /api/cli/tokens`) απαιτούν συνεδρία πίνακα ελέγχου, το υποκείμενο του τοπικού CLI
-ή απενεργοποιημένη σύνδεση· τα κλειδιά API οποιασδήποτε εμβέλειας και τα διακριτικά πρόσβασης `oma_` λαμβάνουν `403`. Ο έλεγχος
-βρίσκεται στο `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
-
-A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
-credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), restoring a backup over the live data
-(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
-`POST /api/settings/import-json`), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
-lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
+Ορισμένες ενέργειες της `MANAGEMENT` είναι **μόνο για τον διαχειριστή**: ένα κλειδί `manage` δεν αρκεί. Η εξαγωγή αποθηκευμένων διαπιστευτηρίων (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), η επαναφορά αντιγράφου πάνω στα ζωντανά δεδομένα (`POST /api/db-backups/import`, συμπεριλαμβανομένου του `dryRun=true`, `POST /api/db-backups` επαναφορά με βάση το id, `POST /api/settings/import-json`), η καταστροφή σημείων επαναφοράς (`DELETE /api/db-backups` για καθαρισμό και `PATCH /api/db-backups`, επειδή η διατήρηση που αποθηκεύει οδηγεί την αυτόματη διαγραφή μετά από κάθε αντίγραφο) απαιτούν συνεδρία πίνακα ελέγχου, το τοπικό υποκείμενο CLI ή απενεργοποιημένη σύνδεση. Η έκδοση ενός token συγχρονισμού (`POST /api/sync/tokens`) και η δημιουργία token πρόσβασης CLI με `admin` (`POST /api/cli/tokens`) απαιτούν συνεδρία πίνακα ελέγχου ή το τοπικό υποκείμενο CLI σε κάθε λειτουργία σύνδεσης. Τα κλειδιά API όλων των scopes και τα tokens πρόσβασης `oma_` δεν είναι διαπιστευτήρια διαχειριστή: λαμβάνουν `403` όποτε απαιτείται ένα τέτοιο. Ο έλεγχος βρίσκεται στο `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Η αλλαγή των ρυθμίσεων σύνδεσης είναι επίσης μόνο για τον διαχειριστή: το `POST /api/settings/require-login` (ορισμός του κωδικού διαχείρισης / εναλλαγή του `requireLogin`) δέχεται μόνο αυτά τα διαπιστευτήρια αφού υπάρξει κωδικός — το παράθυρο της αρχικής ρύθμισης (όταν δεν υπάρχει ακόμη κωδικός) παραμένει ως έχει — και μια συνεδρία πίνακα ελέγχου πρέπει να στείλει `currentPassword` για να αντικαταστήσει τον κωδικό (`403` όταν λείπει ή είναι λάθος, με καταγραφή ως `settings.update_failed`). Το τοπικό CLI και μια εγκατάσταση με απενεργοποιημένη σύνδεση διατηρούν τη διαδρομή ανάκτησης και μπορούν να ορίσουν κωδικό χωρίς αυτόν, αφού και τα δύο είναι δεσμευμένα στον υπολογιστή που κατέχει τον κατάλογο δεδομένων.
 
 ## Ροή επεξεργασίας
 
@@ -267,15 +259,15 @@ export async function POST(request: Request) {
 (`src/lib/accessTokens/scopes.ts`). Αυτή η κατάταξη εφαρμόζεται μόνο στο διαπιστευτήριο διακριτικού πρόσβασης.
 Βλ. [Έλεγχος ταυτότητας διαχείρισης](../guides/MANAGEMENT-AUTH.md).
 
-## Εναλλαγή απαίτησης ελέγχου ταυτότητας
+## Εναλλαγή απαίτησης αυθεντικοποίησης
 
-Η `isAuthRequired()` στο `src/shared/utils/apiAuth.ts` αποφασίζει εάν επιβάλλεται **οποιοσδήποτε** έλεγχος ταυτότητας για ένα αίτημα:
+Η `isAuthRequired()` στο `src/shared/utils/apiAuth.ts` αποφασίζει αν επιβάλλεται **οποιαδήποτε** αυθεντικοποίηση σε ένα αίτημα:
 
-- `settings.requireLogin === false` → ο έλεγχος ταυτότητας είναι καθολικά απενεργοποιημένος.
-- Δεν έχει ρυθμιστεί κωδικός πρόσβασης **και** δεν υπάρχει μεταβλητή περιβάλλοντος `INITIAL_PASSWORD` → η λειτουργία αρχικής ρύθμισης επιτρέπει τον οδηγό εισαγωγής και τα αιτήματα loopback, αλλά τα αιτήματα από εκτεθειμένο δίκτυο εξακολουθούν να απαιτούν διαπιστευτήρια.
-- Οποιοδήποτε σφάλμα της βάσης δεδομένων → αποτυχία με αποκλεισμό πρόσβασης (ασφάλεια από προεπιλογή).
+- `settings.requireLogin === false` → η αυθεντικοποίηση είναι καθολικά απενεργοποιημένη, εκτός από το πάντα προστατευμένο επίπεδο (βλ. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) και τις κλήσεις που χορηγούν ένα διαπιστευτήριο που αυτή αποδέχεται. Αυτές απαιτούν το ίδιο διαπιστευτήριο όπως με ενεργή σύνδεση: έκδοση tokens συγχρονισμού, δημιουργία tokens πρόσβασης CLI σε οποιοδήποτε scope, και δημιουργία κλειδιού API με scope `manage`/`admin`, χορήγηση αυτού του scope σε κλειδί, ή αναδημιουργία ή αποκάλυψη τέτοιου κλειδιού (`requireCredentialForManagementScopedKey()` στο `src/lib/api/requireManagementAuth.ts`). Τα κλειδιά μόνο για inference παραμένουν ανοιχτά.
+- Δεν υπάρχει ρυθμισμένος κωδικός **και** δεν υπάρχει μεταβλητή περιβάλλοντος `INITIAL_PASSWORD` → η λειτουργία bootstrap επιτρέπει τον οδηγό onboarding και τα αιτήματα από το loopback, ενώ τα εκτεθειμένα αιτήματα δικτύου εξακολουθούν να χρειάζονται διαπιστευτήρια.
+- Κάθε σφάλμα βάσης δεδομένων → αποτυγχάνει κλειστά (secure-by-default).
 
-Η επιβολή κλειδιού API πελάτη χρησιμοποιεί την `isRequireApiKeyEnabled()` στο `src/shared/utils/featureFlags.ts` και όχι την απευθείας ανάγνωση του `process.env.REQUIRE_API_KEY`. Αυτό έχει σημασία για τις αναπτυγμένες παρουσίες: η εναλλαγή του `REQUIRE_API_KEY` στο Dashboard → Feature Flags αποθηκεύει μια παράκαμψη στη βάση δεδομένων και επηρεάζει αμέσως τα `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` και άλλους ελέγχους ταυτότητας του API πελάτη που χρησιμοποιούν από κοινού αυτό το βοηθητικό στοιχείο. Εάν δεν είναι δυνατή η ανάγνωση του χώρου αποθήκευσης σημαιών λειτουργιών, ο έλεγχος ταυτότητας του API πελάτη αποτυγχάνει με αποκλεισμό πρόσβασης και απαιτεί κλειδί.
+Η επιβολή του κλειδιού API πελάτη χρησιμοποιεί την `isRequireApiKeyEnabled()` στο `src/shared/utils/featureFlags.ts`, και όχι ανάγνωση απευθείας του `process.env.REQUIRE_API_KEY`. Αυτό έχει σημασία για τις αναπτύξεις: η αλλαγή του `REQUIRE_API_KEY` στο Dashboard → Feature Flags αποθηκεύει παράκαμψη στη βάση δεδομένων και επηρεάζει αμέσως τα `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` και άλλους ελέγχους αυθεντικοποίησης του client API που μοιράζονται αυτή τη βοηθητική συνάρτηση. Αν το κατάστημα των feature flags δεν μπορεί να διαβαστεί, η αυθεντικοποίηση του client API αποτυγχάνει κλειστά και απαιτεί κλειδί.
 
 ## Μη συμβατή αλλαγή — v3.8.0
 

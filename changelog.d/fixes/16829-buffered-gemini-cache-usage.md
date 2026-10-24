@@ -1,1 +1,0 @@
-- **fix(sse):** Buffered Antigravity/Gemini SSE responses now preserve upstream cache-read tokens as `prompt_tokens_details.cached_tokens` for non-streaming clients ([#16829](https://github.com/diegosouzapw/OmniRoute/pull/16829))

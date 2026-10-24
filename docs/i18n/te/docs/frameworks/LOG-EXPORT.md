@@ -16,82 +16,153 @@ Logs డ్యాష్బోర్డ్ ట్యాబ్ అభ్యర్�
 ## 1. ఇది ఎలా పనిచేస్తుంది
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (Logs ట్యాబ్ ఫీల్డ్ సమితి)
-      → గమ్యస్థాన client.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+server (configను decrypt చేసి validate చేయడం, cursorను reconcile చేయడం)
+  → IPC ప్రారంభం → వేరుచేయబడిన exportChild OS process
+    → read-only storage.sqlite → భాగస్వామ్య call-log query/mapping
+      → async artifact hydration → destination prepare()/send()
+        → batch IPC → server cursorను persist చేస్తుంది → ack IPC
+          → తదుపరి batch; done IPC → server విజయాన్ని నమోదు చేస్తుంది
 ```
 
-- **షెడ్యూల్** — ఒక `JobRegistry` cron జాబ్, `log_export`, డిఫాల్ట్గా `0 * * * *` (ప్రతి గంటకు,
+- **షెడ్యూల్** — ఒక `JobRegistry` cron job, `log_export`, డిఫాల్ట్గా `0 * * * *` (ప్రతి గంటకు,
   UTC). `src/lib/initCloudSync.ts`లో నమోదు చేయబడుతుంది; `OMNIROUTE_LOG_EXPORT_CRON`తో మార్చవచ్చు.
-  ప్రతి టిక్లో **ప్రారంభించబడిన** ప్రతి గమ్యస్థానం వరుసగా పూర్తిగా ప్రాసెస్ చేయబడుతుంది.
-- **కర్సర్** — SQLite యొక్క అంతర్నిర్మిత `call_logs.rowid`, ప్రతి గమ్యస్థానానికి
-  `log_export_destinations.cursor_row_id`లో నిల్వ చేయబడుతుంది. `timestamp`ను ఉద్దేశపూర్వకంగా కర్సర్గా ఉపయోగించరు: కాలర్లు
-  తమ స్వంత విలువను అందించవచ్చు; అందువల్ల, ఆలస్యంగా పూర్తయ్యే అభ్యర్థన దాని తర్వాత ప్రారంభమై త్వరగా పూర్తయిన అభ్యర్థన తర్వాత వ్రాయబడవచ్చు,
-  అప్పుడు టైమ్స్టాంప్ కర్సర్ దానిని దాటవేస్తుంది.
-- **బ్యాచింగ్** — ఒక్కో అభ్యర్థనకు `batch_size` వరుసలు (డిఫాల్ట్ 500), ఒక్కో రన్కు
-  `max_rows_per_run` వరుసలు (డిఫాల్ట్ 10000); తద్వారా పెద్ద బ్యాక్లాగ్ ఒకే రన్ను నిరోధించకుండా
-  అనేక టిక్లలో ప్రాసెస్ అవుతుంది.
-- **డెలివరీ** — `send()` పరిష్కరించబడిన తర్వాత మాత్రమే కర్సర్ ముందుకు కదులుతుంది. విఫలమైన బ్యాచ్
-  కర్సర్ను ఉన్నచోటే ఉంచుతుంది, కాబట్టి అవే వరుసలు తదుపరి రన్లో మళ్లీ ప్రయత్నించబడతాయి. దీని హామీ
-  కనీసం-ఒక్కసారైనా డెలివరీతో పాటు గమ్యస్థానం వైపు డీ-డూప్లికేషన్ మాత్రమే; నిజమైన సరిగ్గా-ఒక్కసారి డెలివరీ కాదు: BigQuery ప్రతి
-  వరుసకు కాల్-లాగ్ id ఆధారంగా కీ ఇస్తుంది, దాన్ని తన స్వంత డీడూప్ విండోలో సాధ్యమైనంత ఉత్తమంగా గౌరవిస్తుంది.
-- **ఓవర్ల్యాప్ గార్డ్** — cron టిక్ మరియు `POST .../run` ఒకేసారి అమలు కావచ్చు. ఇప్పటికే
-  ప్రాసెస్ అవుతున్న గమ్యస్థానం రెండుసార్లు ప్రాసెస్ చేయబడకుండా దాటవేయబడుతుంది (రన్ ఫలితంలో `skipped: true`),
-  కాబట్టి సమాంతర రన్ బ్యాచ్ను మళ్లీ పంపలేదు లేదా కర్సర్ను వెనక్కి వ్రాయలేదు.
-- **పర్జ్ రికవరీ** — `cursor_row_id` విలువ `MAX(rowid)` కంటే ఎక్కువగా ఉంటే (మొత్తం టేబుల్
-  పర్జ్ చేయబడి, rowidలు మళ్లీ మొదలైతే), రన్నర్ శాశ్వతంగా కొత్త రికార్డులను చూడలేని స్థితిలోకి వెళ్లకుండా కర్సర్ను 0కు రివైండ్ చేస్తుంది.
+  ప్రతి tick, **ప్రారంభించబడిన** ప్రతి destinationను వరుసగా drain చేస్తుంది.
+- **కర్సర్** — SQLite యొక్క implicit `call_logs.rowid`, ప్రతి destinationకు
+  `log_export_destinations.cursor_row_id`లో persist చేయబడుతుంది. `timestamp`ను ఉద్దేశపూర్వకంగా cursorగా ఉపయోగించరు:
+  callers తమ సొంత విలువను అందించవచ్చు, కాబట్టి ఆలస్యమైన request, దాని తర్వాత ప్రారంభమైన వేగవంతమైన request
+  అనంతరం వ్రాయబడవచ్చు; timestamp cursor దానిని దాటవేస్తుంది.
+- **బ్యాచింగ్** — ప్రతి requestకు `batch_size` rows (డిఫాల్ట్ 500), ప్రతి runకు
+  `max_rows_per_run` rows (డిఫాల్ట్ 10000); దీనివల్ల పెద్ద backlog ఒకే runను block చేయకుండా
+  అనేక ticksలో drain అవుతుంది.
+- **డెలివరీ** — `send()` resolve అయిన తర్వాత మాత్రమే cursor ముందుకు కదులుతుంది. విఫలమైన batch
+  cursorను ఉన్న చోటే ఉంచుతుంది, కాబట్టి తదుపరి runలో అవే rows మళ్లీ ప్రయత్నించబడతాయి. హామీ
+  true exactly-once కాదు; at-least-onceతో పాటు destination-side de-duplication: BigQuery ప్రతి
+  rowకు call-log id ఆధారంగా key ఇస్తుంది, దాని సొంత dedup windowలో best-effort ప్రాతిపదికన దాన్ని గౌరవిస్తుంది.
+- **ఓవర్ల్యాప్ గార్డ్** — cron tick మరియు `POST .../run` ఒకేసారి ప్రారంభం కావచ్చు. ఇప్పటికే
+  drain అవుతున్న destinationను రెండుసార్లు drain చేయకుండా దాటవేస్తుంది (run resultలో `skipped: true`);
+  అందువల్ల concurrent run ఒక batchను మళ్లీ పంపడం లేదా cursorను వెనక్కి వ్రాయడం చేయలేదు.
+- **పర్జ్ రికవరీ** — `cursor_row_id`, `MAX(rowid)` కంటే పైకి వెళ్లిపోతే (మొత్తం table
+  purge చేయబడి rowids మళ్లీ ప్రారంభమైతే), runner శాశ్వతంగా ఏమీ గుర్తించలేని స్థితిలో ఉండకుండా 0కు rewind అవుతుంది.
+
+### వేరుచేయబడిన runner మరియు పరిమితులు
+
+Nodeలో ప్రతి destination run ఒక ప్రత్యేకమైన, స్వల్పకాలిక OS child processను (`child_process`
+తో IPC, `worker_threads` కాదు) ప్రారంభిస్తుంది. Body reads, payload JSON parsing/serialization, destination
+`prepare()` మరియు destination network I/O అన్నీ server యొక్క event loopలో కాకుండా అందులోనే run అవుతాయి.
+IPC ద్వారా configuration మరియు చిన్న progress messages మాత్రమే వెళ్తాయి; export చేసిన records ఎప్పుడూ
+serverకు తిరిగి రావు. cron job మరియు Run now route ఒకే public result మరియు overlap guardను కొనసాగిస్తాయి.
+
+Child, server resolve చేసిన `DATA_DIR/storage.sqlite`ను `node:sqlite` ఉపయోగించి read-onlyగా తెరుస్తుంది;
+`busy_timeout=5000` మరియు `query_only=ON`తో. ఇది ఏ DB singletonను import చేయదు, అలాగే
+migrations, backups లేదా SQLite updates ఏవీ నిర్వహించదు. Missing/corrupt artifact bookkeeping (corrupt-artifact
+UPDATEతో సహా) dashboard detail pathలో మాత్రమే ఉంటుంది. రెండు paths ఒక pure detail resolverను
+పంచుకుంటాయి; export asynchronous filesystem reads మరియు అదే artifact → legacy inline → legacy disk → none
+resolution క్రమాన్ని ఉపయోగిస్తుంది. Child తన readerను తెరిచినప్పుడు run గరిష్ఠ insertion rowid యొక్క snapshotను
+తీసుకుంటుంది; తర్వాతి inserts తదుపరి run కోసం వేచి ఉంటాయి. ఇది insertion boundary మాత్రమే,
+దీర్ఘకాలిక SQLite transaction కాదు: network waits సమయంలో WAL writers మరియు checkpoints స్వేచ్ఛగా కొనసాగుతాయి.
+ఇప్పటికే ఉన్న rowsకు updates/deletions ఈ boundary వల్ల freeze కావు.
+
+అంగీకరించిన ప్రతి batch తర్వాత, child acknowledgement కోసం వేచి ఉంటుంది. Server మొదట
+`advanceLogExportCursor`తో cursorను persist చేసి, తర్వాత `ack` పంపుతుంది; దానికి ముందు తదుపరి batch ప్రారంభం కాదు.
+send failure, crash లేదా timeout, ఆ batchను ముందుకు జరపకుండా failureను నమోదు చేస్తుంది. గతంలో
+acknowledge చేసిన batches committedగానే ఉంటాయి; acknowledgement అందని ఒక్క batch మాత్రమే మళ్లీ పంపబడవచ్చు.
+`done` అందిన తర్వాత మరియు child cleanగా exit అయిన తర్వాత మాత్రమే success నమోదు అవుతుంది. Failures childను
+SIGTERMతో terminate చేస్తాయి, 500 ms తర్వాత SIGKILLకు escalation చేస్తాయి, అలాగే runner process closure కోసం వేచి ఉంటుంది.
+
+| Environment variable                          | డిఫాల్ట్ | ఉద్దేశ్యం                              |
+| --------------------------------------------- | -------- | -------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | ప్రతి destinationకు wall-clock పరిమితి |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Child V8 old-space పరిమితి, MBలో       |
+
+చెల్లని/ధనాత్మకం కాని/integer కాని విలువలకు defaults ఉపయోగించబడతాయి. Heap setting మొత్తం
+RSS పరిమితి కాదు; చాలా పెద్ద batches ఇప్పటికీ child memoryని పూర్తిగా వినియోగించి runను సురక్షితంగా విఫలం చేయవచ్చు.
+1024 MB default, bodies ప్రారంభించి ఉన్నప్పుడు 512 KiB artifactsతో కూడిన default 500-row batchకు,
+BigQuery యొక్క byte-chunked JSON serializationతో సహా, అదనపు స్థలాన్ని ఉంచుతుంది. ఇది
+10000-row bodies batchను సురక్షితంగా చేయదు. V8 heap exhaustion పరిష్కార సూచనతో కూడిన failureను నమోదు చేస్తుంది:
+batch sizeను తగ్గించండి లేదా `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`ను పెంచండి; cursor చివరిగా
+acknowledge చేసిన batch వద్దే ఉంటుంది. Historical inline/disk bodies ఆధునిక artifact cap పరిధిలోకి రావు.
+Operators RSSను విడిగా పరిగణనలోకి తీసుకోవాలి, ముఖ్యంగా memory-limited containersలో.
+
+Child resolve చేసిన `DATA_DIR`, `NODE_ENV`, explicit `TZ` (legacy filename
+local-time resolution), ఉన్నప్పుడు `ELECTRON_RUN_AS_NODE`, అలాగే కింది outbound inputsను మాత్రమే inherit చేస్తుంది:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (మరియు వాటి lowercase రూపాలు),
+`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
+Global Undici dispatcher, `NO_PROXY`తో సహా server యొక్క pure environment-proxy resolution మరియు local-host
+bypass rulesను పంచుకుంటుంది; ఇది `proxyFetch.ts`ను లేదా దాని DB/feature flagsను import చేయదు.
+Forward చేసిన output మరియు నమోదు చేసిన errorsలో proxy credentials redacted చేయబడతాయి. Destination credentials
+ఒక్క start IPC messageలో మాత్రమే ప్రయాణిస్తాయి, argv లేదా environmentలో ఎప్పుడూ కాదు; output/error forwardingకు
+prefix జోడించి sanitize చేస్తారు. ప్రతి cron runలో Node యొక్క SQLite warning పునరావృతం కాకుండా ఉండటానికి
+child exec argumentsలో `ExperimentalWarning` మాత్రమే disable చేయబడుతుంది; ఇతర warning types కనిపిస్తూనే ఉంటాయి.
+
+గమ్యస్థాన మాడ్యూల్లను Next.js/సర్వర్కు-మాత్రమే పరిమితమైన డిపెండెన్సీలు లేకుండా ఇంపోర్ట్ చేయగలగాలి. ఇప్పటికే ఉన్న
+BigQuery అమలు ఆ ఒప్పందాన్ని పాటిస్తోంది. యాక్సెస్-టోకెన్ క్యాష్లు చైల్డ్
+రన్ వరకు మాత్రమే ఉంటాయి, రన్ల మధ్య కొనసాగవు. Node మద్దతు ఉన్న రన్టైమ్ (`package.json` engines), అయితే READMEలోని Bun
+ఇన్స్టాలేషన్ విభాగం మరియు `Dockerfile.bun` కూడా `bun:sqlite` (`src/lib/db/core.ts` / అడాప్టర్లు) ఉపయోగించే ప్రొడక్షన్ అనుకూలత మార్గాన్ని
+ప్రచారం చేస్తాయి. అందువల్ల Bun కింద, ఎక్స్పోర్ట్లు మునుపటి
+ఇన్-ప్రాసెస్ మార్గాన్ని కొనసాగిస్తాయి మరియు ఒకసారి మాత్రమే హెచ్చరికను జారీ చేస్తాయి: చైల్డ్ హీప్/టైమ్అవుట్ ఐసోలేషన్ అందుబాటులో లేదు. ఈవెంట్-లూప్ మరియు OOM ఐసోలేషన్ కోసం
+Node ఉపయోగించండి; ఇక్కడ Bunను కేవలం డెవలప్మెంట్ కోసం మాత్రమే ఉద్దేశించినదిగా పరిగణించరు.
+
+`includeBodies` ప్రారంభించినప్పుడు, గంటకొకసారి పేలోడ్ బ్యాక్లాగ్ను పోగుచేయడానికి బదులుగా
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` వంటి నిమిష-స్థాయి షెడ్యూల్కు ప్రాధాన్యం ఇవ్వండి.
+బ్యాచ్ మరియు రో పరిమితులు ఇప్పటికీ ప్రతి రన్ను నియంత్రిస్తాయి. ప్రతి రన్లో ప్రతి గమ్యస్థానానికి ప్రాసెస్ స్టార్టప్ ఖర్చు ఉంటుంది;
+ఇది మొత్తం CPU వినియోగాన్ని తగ్గించడం కోసం కాకుండా, సర్వర్ ఈవెంట్-లూప్ ఐసోలేషన్ కోసం స్వల్ప స్టార్టప్ ఖర్చును అంగీకరిస్తుంది.
 
 ### పేలోడ్లు (ప్రాంప్ట్లు మరియు కంప్లీషన్లు)
 
-డిఫాల్ట్గా, ఎగుమతిలో Logs **జాబితా** చూపించే సారాంశ ఫీల్డ్లు మాత్రమే ఉంటాయి. **ప్రాంప్ట్లు మరియు ప్రతిస్పందనలను ఎగుమతి చేయండి** (`includeBodies`)ని ఆన్ చేస్తే, ప్రతి కాల్కు Logs **వివరాల**
-పేన్ చూపించే సమాచారాన్ని అదనంగా పంపుతుంది:
+డిఫాల్ట్గా, ఎక్స్పోర్ట్లో Logs **జాబితా** చూపించే సారాంశ ఫీల్డ్లు మాత్రమే ఉంటాయి. **ప్రాంప్ట్లు మరియు ప్రతిస్పందనలను ఎక్స్పోర్ట్ చేయండి** (`includeBodies`)ను
+ఆన్ చేస్తే, ప్రతి కాల్ కోసం Logs **వివరాల**
+పేన్ చూపించేవి కూడా అదనంగా పంపబడతాయి:
 
-| ఫీల్డ్                           | అందులో ఉండేది                                           |
-| -------------------------------- | ------------------------------------------------------- |
-| `request_body` / `response_body` | డ్యాష్బోర్డ్ రెండర్ చేసే విధంగా కాల్ పేలోడ్లు           |
-| `pipeline_route_decision`        | రౌటర్ ఎంచుకున్న టార్గెట్ మరియు మోడల్                    |
-| `pipeline_client_request`        | క్లయింట్ పంపినట్లుగానే ఉన్న ముడి అభ్యర్థన               |
-| `pipeline_openai_request`        | అంతర్గత OpenAI ఆకృతిలోకి అనువదించిన తర్వాతది            |
-| `pipeline_provider_request`      | ప్రొవైడర్ డయలెక్ట్లో వాస్తవంగా అప్స్ట్రీమ్కు పంపినది    |
-| `pipeline_provider_response`     | ముడి అప్స్ట్రీమ్ ప్రతిస్పందన                            |
-| `pipeline_client_response`       | కాలర్కు తిరిగి అందించబడినది                             |
-| `pipeline_error`                 | విఫలమైన కాల్కు పైప్లైన్-స్థాయి ఎర్రర్ వివరాలు           |
-| `bodies_truncated`               | పై ఫీల్డ్లలో ఏదైనా `maxBodyBytes` పరిమితిని చేరితే True |
+| ఫీల్డ్                           | అందులో ఉండేది                                            |
+| -------------------------------- | -------------------------------------------------------- |
+| `request_body` / `response_body` | డ్యాష్బోర్డ్ రెండర్ చేసిన విధంగా కాల్ పేలోడ్లు           |
+| `pipeline_route_decision`        | రౌటర్ ఎంచుకున్న టార్గెట్ మరియు మోడల్                     |
+| `pipeline_client_request`        | క్లయింట్ పంపినట్లుగానే ఉన్న ముడి రిక్వెస్ట్              |
+| `pipeline_openai_request`        | అంతర్గత OpenAI ఆకృతిలోకి అనువదించిన తర్వాతది             |
+| `pipeline_provider_request`      | ప్రొవైడర్ డైలెక్ట్లో వాస్తవంగా అప్స్ట్రీమ్కు పంపినది     |
+| `pipeline_provider_response`     | ముడి అప్స్ట్రీమ్ ప్రతిస్పందన                             |
+| `pipeline_client_response`       | కాలర్కు తిరిగి అందించినది                                |
+| `pipeline_error`                 | విఫలమైన కాల్కు సంబంధించిన పైప్లైన్-స్థాయి ఎర్రర్ వివరాలు |
+| `bodies_truncated`               | పైనున్న ఏదైనా ఫీల్డ్ `maxBodyBytes`ను చేరినప్పుడు True   |
 
-ఇది ప్రాంప్ట్ కంటెంట్ కాబట్టి, డిఫాల్ట్గా **ఆఫ్లో** ఉంటుంది మరియు ఉద్దేశపూర్వకంగా ప్రతి గమ్యస్థానానికి విడిగా ఎంచుకునే ఎంపికగా ఉంటుంది.
-పంపబడేది డ్యాష్బోర్డ్ చూపించేదే, ఎందుకంటే రెండూ `getCallLogById` ద్వారా చదువుతాయి: పేలోడ్లు
-వ్రాయబడేటప్పటికే PII-శానిటైజ్ చేయబడి, రహస్యాలు రిడాక్ట్ చేయబడతాయి; అలాగే
-`noLog` API కీతో చేసిన కాల్ ఎలాంటి పేలోడ్ను నిల్వ చేయదు, కాబట్టి ఎగుమతి చేయడానికి ఏమీ ఉండదు.
+ఇది ప్రాంప్ట్ కంటెంట్, కాబట్టి ఇది **డిఫాల్ట్గా ఆఫ్లో ఉంటుంది** మరియు ఉద్దేశపూర్వకంగా ప్రతి గమ్యస్థానానికి విడిగా ఎంచుకునే ఎంపిక.
+ఎక్స్పోర్ట్ మరియు `getCallLogById` ఒకే వివరాల
+రిజల్యూషన్ను పంచుకుంటాయి కాబట్టి, డ్యాష్బోర్డ్ చూపించేదే పంపబడుతుంది: పేలోడ్లు రాయబడే సమయానికే
+PII-శుద్ధి చేయబడి, సీక్రెట్లు తొలగించబడతాయి; అలాగే `noLog` API కీతో చేసిన కాల్
+ఏ పేలోడ్నూ నిల్వ చేయదు, కాబట్టి ఎక్స్పోర్ట్ చేయడానికి ఏమీ ఉండదు.
 
-పేలోడ్లు ఫైల్సిస్టమ్ ఆర్టిఫాక్ట్ నుండి ఒక్కో వరుసకు విడిగా చదవబడతాయి, కాబట్టి వాటిని అభ్యర్థించిన గమ్యస్థానాల కోసం మాత్రమే
-హైడ్రేషన్ అమలవుతుంది. ఆర్టిఫాక్ట్ కనిపించని లేదా పాడైన వరుస, బ్యాచ్ను విఫలం చేసి
-కర్సర్ను నిలిపివేయడానికి బదులుగా null పేలోడ్లతో తన సారాంశాన్ని ఎగుమతి చేస్తుంది.
+పేలోడ్లు ప్రతి రోకు ఫైల్సిస్టమ్ ఆర్టిఫాక్ట్ నుండి చదవబడతాయి, కాబట్టి వాటిని అభ్యర్థించిన గమ్యస్థానాల కోసం మాత్రమే
+హైడ్రేషన్ అమలవుతుంది. ఆర్టిఫాక్ట్ లేకపోయినా లేదా పాడైపోయినా, బ్యాచ్ విఫలమై కర్సర్ నిలిచిపోవడానికి బదులుగా
+null పేలోడ్లతో దాని సారాంశం ఎక్స్పోర్ట్ అవుతుంది.
 
-`maxBodyBytes` (డిఫాల్ట్ 262144) ప్రతి ఫీల్డ్కు పరిమితిని విధిస్తుంది. పొడవైన పేలోడ్లు తొలగించబడకుండా
-**ట్రంకేట్ చేయబడతాయి** — కత్తిరించబడిన ప్రాంప్ట్ కూడా "ఏమి అడిగారు" అనే ప్రశ్నకు సమాధానం ఇస్తుంది — మరియు ఆ వరుస
-`bodies_truncated`తో గుర్తించబడుతుంది. స్ట్రీమ్ చేయబడిన ఒక్కో-చంక్ డెల్టాలు ఎగుమతి చేయబడవు; సమీకరించిన ప్రతిస్పందన ఇప్పటికే
-`pipeline_provider_response` మరియు `pipeline_client_response`లో ఉంటుంది.
+`maxBodyBytes` (డిఫాల్ట్ 262144) ప్రతి ఫీల్డ్ను పరిమితం చేస్తుంది. పొడవైన పేలోడ్లు తొలగించబడటానికి బదులుగా
+**కుదించబడతాయి** — కత్తిరించిన ప్రాంప్ట్ కూడా "ఏమి అడిగారు" అనే ప్రశ్నకు సమాధానం ఇస్తుంది — మరియు ఆ రో
+`bodies_truncated`తో ఫ్లాగ్ చేయబడుతుంది. స్ట్రీమ్ చేసిన చంక్-వారీ డెల్టాలు ఎక్స్పోర్ట్ చేయబడవు; సమీకరించిన ప్రతిస్పందన
+ఇప్పటికే `pipeline_provider_response` మరియు `pipeline_client_response`లో ఉంటుంది.
 
 ---
 
 ## 2. ఫైళ్లు
 
-| భాగం                  | స్థానం                                       |
-| --------------------- | -------------------------------------------- |
-| గమ్యస్థాన కాంట్రాక్ట్ | `src/lib/logExport/types.ts`                 |
-| రిజిస్ట్రీ            | `src/lib/logExport/registry.ts`              |
-| సీక్రెట్ నిర్వహణ      | `src/lib/logExport/secrets.ts`               |
-| రన్నర్ (కర్సర్ లూప్)  | `src/lib/logExport/runner.ts`                |
-| API ప్రొజెక్షన్       | `src/lib/logExport/presenter.ts`             |
-| BigQuery గమ్యస్థానం   | `src/lib/logExport/destinations/bigquery.ts` |
-| Google SA ప్రామాణీకరణ | `src/lib/logExport/googleServiceAccount.ts`  |
-| కాల్-లాగ్ మూలం        | `src/lib/usage/callLogExportSource.ts`       |
-| స్థిర నిల్వ           | `src/lib/db/logExportDestinations.ts`        |
-| Cron జాబ్             | `src/lib/jobs/logExportJob.ts`               |
-| REST లేయర్            | `src/app/api/log-export/`                    |
-| డ్యాష్బోర్డ్ పేజీ     | `src/app/(dashboard)/dashboard/log-export/`  |
+| భాగం                        | స్థానం                                       |
+| --------------------------- | -------------------------------------------- |
+| గమ్యస్థాన కాంట్రాక్ట్       | `src/lib/logExport/types.ts`                 |
+| రిజిస్ట్రీ                  | `src/lib/logExport/registry.ts`              |
+| సీక్రెట్ నిర్వహణ            | `src/lib/logExport/secrets.ts`               |
+| రన్నర్ (పేరెంట్ IPC)        | `src/lib/logExport/runner.ts`                |
+| ప్రాసెస్ జీవితచక్రం         | `src/lib/logExport/childRunner.ts`           |
+| చైల్డ్ ఎంట్రీ               | `src/lib/logExport/exportChild.ts`           |
+| రీడ్-ఓన్లీ ఓపెనర్           | `src/lib/db/logExportReadOnly.ts`            |
+| భాగస్వామ్య క్వెరీ/మ్యాపింగ్ | `src/lib/usage/callLogExportQueries.ts`      |
+| వివరాల రిజాల్వర్            | `src/lib/usage/callLogDetailResolver.ts`     |
+| API ప్రొజెక్షన్             | `src/lib/logExport/presenter.ts`             |
+| BigQuery గమ్యస్థానం         | `src/lib/logExport/destinations/bigquery.ts` |
+| Google SA ప్రమాణీకరణ        | `src/lib/logExport/googleServiceAccount.ts`  |
+| కాల్-లాగ్ మూలం              | `src/lib/usage/callLogExportSource.ts`       |
+| స్థిర నిల్వ                 | `src/lib/db/logExportDestinations.ts`        |
+| Cron జాబ్                   | `src/lib/jobs/logExportJob.ts`               |
+| REST లేయర్                  | `src/app/api/log-export/`                    |
+| డ్యాష్బోర్డ్ పేజీ           | `src/app/(dashboard)/dashboard/log-export/`  |
 
 స్కీమా: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

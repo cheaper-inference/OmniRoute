@@ -130,6 +130,10 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // connection's model list matches what its key can reach. The registry seed
   // (41-model union of apmix.ai/models) stays as the offline fallback.
   "apmix",
+  // Demon Route has a key-scoped /v1/models endpoint. Without this classification,
+  // the dashboard only shows static seeds and cannot synchronize the live catalog
+  // of vendor-qualified open-weight model IDs (#16979).
+  "demonroute",
 ]);
 
 export function isNamedOpenAIStyleProvider(provider: string): boolean {

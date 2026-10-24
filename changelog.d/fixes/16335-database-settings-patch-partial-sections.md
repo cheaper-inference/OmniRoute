@@ -1,1 +1,0 @@
-- **fix(api):** Accept partial database settings sections with a 200 response ([#16335](https://github.com/diegosouzapw/OmniRoute/pull/16335)) — thanks @maxmad64bis

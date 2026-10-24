@@ -18,6 +18,7 @@
 import { getComboByName, getCombos } from "@/lib/db/combos";
 import { resolveComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import { getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
+import type { VideoMediaSink } from "@omniroute/open-sse/handlers/videoGeneration/job.ts";
 import { resolveVideoCredentialProvider } from "@omniroute/open-sse/handlers/videoGeneration/googleFlow.ts";
 import {
   getProviderCredentialsWithQuotaPreflight,
@@ -58,6 +59,8 @@ export async function executeVideoCombo(
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
     /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */
     keyScope?: ComboKeyScope;
+    /** #16372 — stores auth-gated job results; built by the route (owner + public origin). */
+    mediaSink?: VideoMediaSink;
   },
   startTime: number,
   log: typeof logger
@@ -237,6 +240,9 @@ export async function executeVideoCombo(
         body: { ...body, model: modelStr },
         credentials,
         log,
+        // Route-injected sink, so a job-preset result is servable exactly like the
+        // fal targets' public URLs (#16372).
+        mediaSink: auth.mediaSink,
         ...(isCustomModel && { resolvedProvider: targetProvider }),
       });
 

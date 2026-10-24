@@ -1,1 +1,0 @@
-- **dashboard:** declare the Add API Key bulk state before the open-reset effect so `react-hooks/immutability` no longer reports `setMode`/`setBulkText` accessed before declaration (#15306).

@@ -3,12 +3,15 @@
  *
  * Extracted verbatim from modelsDevSync.ts. Holds the models.dev data-model
  * types, the provider-id mapping table, and the raw→OmniRoute transform
- * functions. Zero imports, no DB access, no module state — pure functions and
- * static data. The host (modelsDevSync.ts) imports these for its sync
- * orchestration and re-exports the originally-public symbols.
+ * functions. No DB access, no module state — pure functions and static data; the
+ * only import is the shared reasoning-effort vocabulary. The host
+ * (modelsDevSync.ts) imports these for its sync orchestration and re-exports the
+ * originally-public symbols.
  *
  * @module lib/modelsDevSync/transform
  */
+
+import { REASONING_EFFORT_ORDER } from "@omniroute/open-sse/services/learnedReasoningEffortCaps";
 
 export type PricingEntry = {
   input: number;
@@ -236,8 +239,24 @@ function modelsDevEffortValues(options: ModelsDevReasoningOption[] | undefined):
   const values = options.flatMap((option) =>
     option?.type === "effort" && Array.isArray(option.values) ? option.values : []
   );
+  // Stored as published: the known-vocabulary filter runs where the tiers are read
+  // (knownReasoningEffortTiers), so MODELS_DEV_EFFORT_TIERS_ENABLED toggles losslessly.
   const efforts = values.filter((value) => typeof value === "string" && value.length > 0);
   return efforts.length > 0 ? [...new Set(efforts)] : null;
+}
+
+/**
+ * Keep only the tiers an executor accepts (`minimal` included, unknown names such as
+ * `turbo` dropped), preserving the published order. `null` when nothing known remains.
+ */
+export function knownReasoningEffortTiers(
+  efforts: readonly unknown[] | null | undefined
+): string[] | null {
+  if (!Array.isArray(efforts)) return null;
+  const known = efforts.filter(
+    (value): value is string => typeof value === "string" && REASONING_EFFORT_ORDER.includes(value)
+  );
+  return known.length > 0 ? [...new Set(known)] : null;
 }
 
 /**

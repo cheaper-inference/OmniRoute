@@ -1,1 +1,0 @@
-- **feat(api):** opt-in `capability` / `min_context` / `kind` / `q` discovery filters on `GET /v1/models` (output unchanged without them) and a new `POST /v1/models/query` deterministic model shortlist ([#16945](https://github.com/diegosouzapw/OmniRoute/pull/16945)) — thanks @vianhanif

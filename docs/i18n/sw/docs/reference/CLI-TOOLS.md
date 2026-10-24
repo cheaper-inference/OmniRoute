@@ -45,62 +45,62 @@ Mawakala wa ACP (mtiririko wa uanzishaji wa kinyume):
 
 ## Sanidi kiotomatiki kwa `setup-*`
 
-Si lazima uandike usanidi wa kila zana mwenyewe. OmniRoute huja na amri ya `setup-*`
-kwa kila CLI inayotumika, ambayo husoma katalogi ya modeli ya **moja kwa moja** kutoka kwa
-OmniRoute inayoendeshwa (ndani ya mashine au kwa mbali) na kuandika usanidi wa zana hiyo kwenye mashine yako:
+Huhitaji kuandika usanidi wa kila zana wewe mwenyewe. OmniRoute huja na amri ya `setup-*`
+kwa kila CLI inayotumika, ambayo husoma katalogi **inayotumika sasa** ya modeli kutoka
+OmniRoute inayoendeshwa (ya ndani au ya mbali) na kuandika usanidi wa zana hiyo kwenye mashine yako:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Kila moja hukubali `--remote <url> --api-key <key>` (sanidi zana ya ndani dhidi ya
-OmniRoute ya mbali), `--dry-run` (hakiki bila kuandika), na `--port`. Zana
+Kila moja hukubali `--remote <url> --api-key <key>` (kusandi zana ya ndani dhidi ya
+OmniRoute ya mbali), `--dry-run` (kuhakiki bila kuandika), na `--port`. Zana
 zisizo na ugunduzi wa modeli kiotomatiki (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) hutumia
 `--model <id>` (na `--yes` kwa utekelezaji usiohitaji mwingiliano). `setup-5dive` ndiyo
 utaratibu pekee ambao hauandiki chini ya `$HOME`: husanidi kundi la mawakala wa 5dive kwa
-kuandika wasifu wa uthibitishaji unaomilikiwa na root kwenye seva ya kundi hilo, kwa hiyo hujitekeleza upya kupitia `sudo`
-na haina hali yake yenyewe ya mbali. Ili kuanzisha CLI huku
-mazingira sahihi yakiingizwa bila kuandika usanidi wowote, tumia kizinduzi cha jumla
+kuandika wasifu wa uthibitishaji unaomilikiwa na root kwenye seva ya kundi, kwa hivyo hujitekeleza upya kupitia `sudo`
+na haina hali yake yenyewe ya mbali. Ili kuzindua CLI huku
+vigezo sahihi vya mazingira vikiingizwa na bila kuandika usanidi wowote, tumia kizinduzi cha jumla
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — shabaha na majina mbadala hutoka kwenye `bin/cli/cli-manifest.mjs`); vizinduzi vya zamani
+gemini — shabaha na lakabu hutoka `bin/cli/cli-manifest.mjs`); vizinduzi vya zamani
 vya kila zana `omniroute launch` (Claude Code) na `omniroute launch-codex`
-(Codex) bado vinapatikana. Gemini CLI ni ya kuanzisha pekee: ni shabaha ya `omniroute run`
+(Codex) bado vinapatikana. Gemini CLI ni ya kuzindua pekee: ni shabaha ya `omniroute run`
 lakini haina utaratibu wa `setup-*`/`configure`.
 
-> **Rejeleo kamili:** jedwali kuu — kile ambacho kila amri huandika, kila alama,
-> matumizi ya ndani dhidi ya mbali, na zana zipi zinahitaji kiambishi cha `/v1` — linapatikana katika
+> **Rejeleo kamili:** jedwali kuu — kile ambacho kila amri huandika, kila bendera,
+> hali ya ndani dhidi ya mbali, na zana zipi zinahitaji kiambishi cha `/v1` — linapatikana katika
 > **[Miunganisho ya CLI](../guides/CLI-INTEGRATIONS.md)**.
 
 ### Kuendesha hizi ndani ya kontena
 
 Amri ya `setup-*` inayotekelezwa ndani ya kontena la OmniRoute huandika kwenye
-saraka ya nyumbani ya kontena lenyewe, ambayo haisomwi na CLI yoyote ya host na ambayo hutoweka pamoja na
-kontena. OmniRoute hugundua hilo na hutoka kwa msimbo `2` ikiwa na maelekezo badala ya
-kuandika. Kuna njia mbili zinazotumika za kuendelea — sakinisha CLI kwenye host na
-utumie `omniroute connect` kuunganisha kwenye kontena, au bind-mount saraka za usanidi na uweke
+saraka ya nyumbani ya kontena lenyewe, ambayo haisomwi na CLI yoyote ya seva mwenyeji na ambayo hupotea pamoja na
+kontena. OmniRoute hutambua hilo na hutoka kwa msimbo `2` ikiwa na maagizo badala ya
+kuandika. Kuna njia mbili zinazotumika za kuendelea — sakinisha CLI kwenye seva mwenyeji na
+utumie `omniroute connect` kuunganisha kwenye kontena, au unganisha saraka za usanidi kwa bind-mount na uweke
 `CLI_CONFIG_HOME` (wasifu wa compose wa `host`). Kila amri ya `setup-*`, pamoja na
 `omniroute configure` na `omniroute config set`, hukubali
-`--allow-container-write` ikiwa ulichokusudia hasa ni kusanidi CLI za kontena
-lenyewe; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` hufanya vivyo hivyo kwa
-seva. Angalia
-[Mwongozo wa Docker → Kusanidi zana za CLI za host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+`--allow-container-write` ikiwa kusanidi CLI za kontena lenyewe ndicho
+ulichokusudia; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` hufanya vivyo hivyo kwa
+seva. Tazama
+[Mwongozo wa Docker → Kusanidi zana za CLI za seva mwenyeji](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
 **Endpoint ya utekelezaji** ya dashibodi (`POST /api/cli-tools/apply`) hutekeleza
-ulinzi huohuo: ndani ya kontena, jaribio la kuandika ambalo shabaha yake haijawekwa kama bind mount kutoka kwa
-host hujibu kwa **`422`** likiwa na `containerEphemeralTarget: true`, maandishi salama ya
-hitilafu na — kwa zana zilizo na utaratibu wa host (claude, codex, opencode, cline,
-kilo, continue) — `hostSetupCommand` (k.m. `omniroute setup-opencode`) ya kutekelezwa
-kwenye host badala yake; hakuna chochote kinachoandikwa. `dryRun: true` huendelea kufanya kazi katika hali ya
-kontena na hurudisha hakikisho lililofichwa taarifa nyeti + njia lengwa bila kugusa diski. Maudhui ya
-hakikisho si usanidi wenye taarifa tambulishi unaopaswa kunakiliwa au kuingizwa. Tekeleza kwa
-ingizo asili la zana/URL msingi/ufunguo wa API/modeli kwenye host, au tumia amri iliyoonyeshwa
-ya usanidi kwenye host. Angalia [Usalama wa usanidi wa CLI](../security/CLI-CONFIGURATION.md)
-kwa kichwa cha hakikisho na mkataba wa ombi. Tabia hii ni
-ya makusudi na inalindwa dhidi ya uharibifu wa utendaji na
+ulinzi huohuo: ndani ya kontena, jaribio la kuandika ambalo shabaha yake haijaunganishwa kwa bind-mount kutoka
+kwa seva mwenyeji hujibu kwa **`422`** ikiwa na `containerEphemeralTarget: true`, maandishi salama ya
+hitilafu na — kwa zana zenye utaratibu wa seva mwenyeji (claude, codex, opencode, cline,
+kilo, continue) — `hostSetupCommand` (kwa mfano `omniroute setup-opencode`) ya kutekelezwa
+kwenye seva mwenyeji badala yake; hakuna kinachoandikwa. `dryRun: true` huendelea kufanya kazi katika hali ya kontena
+na hurudisha hakikisho lililofichwa taarifa nyeti + njia ya shabaha bila kugusa diski. Maudhui ya
+hakikisho si usanidi wenye taarifa za uthibitishaji wa kunakili au kuingiza. Tekeleza kwa kutumia
+zana/URL msingi/ufunguo wa API/modeli za awali kwenye seva mwenyeji, au tumia amri iliyoonyeshwa
+ya usanidi kwenye seva mwenyeji. Tazama [Usalama wa usanidi wa CLI](../security/CLI-CONFIGURATION.md)
+kwa kichwa cha hakikisho na mkataba wa ombi. Tabia hii
+imekusudiwa na inalindwa dhidi ya hitilafu za kurudia na
 `tests/unit/api/cli-tools/apply-container-guard.test.ts` — kamwe “usirekebishe” 422
 kwa kuondoa ulinzi.
 
@@ -145,11 +145,11 @@ sehemu moja bila nyingine husababisha mkusanyiko wa majaribio kushindwa badala y
 
 ---
 
-## 1. Katalogi ya Msimbo wa CLI (zana 26)
+## 1. Katalogi ya Msimbo wa CLI (zana 27)
 
-Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zenye `baseUrlSupport: none` huunganishwa kupitia MITM au mwongozo wa hatua za mikono badala ya URL msingi maalum:
+Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zenye `baseUrlSupport: none` zimeunganishwa kupitia MITM au mwongozo wa usanidi wa mikono badala ya URL maalum ya msingi:
 
-| id           | jina                    | msambazaji          | baseUrlSupport | configType     | acpSpawnable |
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
 | claude       | Claude Code             | Anthropic           | full           | env            | true         |
 | codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
@@ -172,13 +172,14 @@ Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zenye `baseUrlSupport
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
 | custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-Zana zenye `baseUrlSupport: "partial"` huonyesha beji ya "⚠ URL msingi kwa kiasi" kwenye kadi ya dashibodi.
+Zana zenye `baseUrlSupport: "partial"` huonyesha beji ya "⚠ URL ya Msingi kiasi" kwenye kadi ya dashibodi.
 ---
 
 ## 2. Katalogi ya Mawakala wa CLI (zana 10)
@@ -187,16 +188,16 @@ Mawakala huru wanaoonekana katika `/dashboard/cli-agents`:
 
 | id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | kamili         | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | kamili         | true         |
-| goose        | Goose            | Block / Linux Foundation | kamili         | true         |
-| interpreter  | Open Interpreter | OSS                      | kamili         | true         |
-| warp         | Warp AI          | Warp Inc.                | sehemu         | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | kamili         | false        |
-| omp          | Oh My Pi         | OSS                      | kamili         | true         |
-| letta        | Letta CLI        | Letta                    | kamili         | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | kamili         | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | kamili         | false        |
+| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
+| goose        | Goose            | Block / Linux Foundation | full           | true         |
+| interpreter  | Open Interpreter | OSS                      | full           | true         |
+| warp         | Warp AI          | Warp Inc.                | partial        | true         |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
+| omp          | Oh My Pi         | OSS                      | full           | true         |
+| letta        | Letta CLI        | Letta                    | full           | false        |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
 
 ---
 

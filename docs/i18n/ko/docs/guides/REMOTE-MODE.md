@@ -213,60 +213,44 @@ xAI 또는 Grok CLI를 연결할 때는 `1455`를 `56121`/`56122`로 바꾸고, 
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ 비밀값을 단 한 번만 출력합니다 — 지금 복사하세요
-omniroute tokens list                 # 마스킹됨: ID, 이름, 범위, 접두사, 상태, 만료
+#   ↳ 시크릿은 한 번만 표시됩니다 — 지금 바로 복사하세요
+omniroute tokens list                 # 마스킹됨: id, name, scope, prefix, status, expiry
 omniroute tokens revoke <id|prefix>   # 즉시 폐기
-omniroute tokens scopes               # 세 가지 범위 설명
+omniroute tokens scopes               # 세 가지 스코프 설명
 ```
 
-`tokens` 명령에는 **admin** 자격 증명이 필요합니다. 대시보드의
-**Settings → Access Tokens**에서도 토큰을 관리할 수 있습니다(생성, 폐기, 한 번만 복사).
+`tokens` 명령에는 **admin** 자격 증명이 필요합니다. 대시보드의 **Settings → Access Tokens**에서도 토큰을 관리할 수 있습니다(생성, 폐기, 한 번만 복사).
 
-토큰은 생성자가 가진 권한보다 더 높은 권한으로 발급될 수 없습니다.
-`admin` 토큰은 운영자만 생성할 수 있습니다. 즉, 대시보드 세션, 서버 자체의
-로컬 CLI, 비밀번호를 사용하는 `omniroute connect` 또는 로그인이 비활성화된
-인스턴스를 통해서만 생성할 수 있습니다. 머신 자격 증명(`admin` 액세스 토큰
-또는 `manage`/`admin` 범위가 있는 API 키)은 `write` 및 `read` 토큰만
-발급할 수 있으며, `--scope admin`을 요청하면 `403`이 반환됩니다.
-
-토큰은 생성자가 가진 권한보다 더 큰 권한으로 발급될 수 없습니다. `admin` 토큰은 운영자만 생성할 수 있습니다. 대시보드 세션, 서버 자체의 로컬 CLI, 비밀번호를 사용하는 `omniroute connect` 또는 로그인이 비활성화된 인스턴스를 통해 생성합니다. 머신 인증 정보(`admin` 액세스 토큰 또는 `manage`/`admin` 범위의 API 키)로는 `write` 및 `read` 토큰만 생성할 수 있으며, 이를 사용해 `--scope admin`을 요청하면 `403`이 반환됩니다.
+토큰은 생성자가 가진 권한보다 더 많은 권한으로 발급될 수 없습니다. `admin` 토큰은 운영자만 만들 수 있습니다. 즉 대시보드 세션, 서버 자체에서 실행하는 로컬 CLI, 또는 비밀번호를 사용하는 `omniroute connect`를 통해서만 만들 수 있습니다. 머신 자격 증명(`admin` 액세스 토큰 또는 `manage`/`admin` 스코프 API 키)은 `write`와 `read` 토큰만 발급할 수 있습니다. 이들이 `--scope admin`을 요청하면 `403`이 반환됩니다. 로그인을 비활성화해도 토큰 발급이 열리지는 않습니다. 모든 스코프의 액세스 토큰은 항상 인증된 라우트가 받아들이는 자격 증명이므로, 익명 호출은 어떤 스코프에서든 `401`을 받습니다.
 
 ---
 
 ## 원격 카탈로그에서 코딩 CLI 구성하기
 
-`omniroute configure`는 **활성 서버의** 실시간 모델 카탈로그를 읽고
-**사용자의** 머신에 구성을 작성합니다.
+`omniroute configure`는 **활성 서버의** 실시간 모델 카탈로그를 읽고, **사용자의** 머신에 구성을 기록합니다.
 
 ```bash
 omniroute configure codex
-#   공급자: glm, kmc, ollamacloud, opencode-go, …
-#   공급자: glm
-#   모델 id: glm/glm-5.2
-#   ✔ ~/.codex/glm52.config.toml에 작성됨
+#   Providers: glm, kmc, ollamacloud, opencode-go, …   （프로바이더 목록）
+#   Provider: glm
+#   Model id: glm/glm-5.2
+#   ✔ ~/.codex/glm52.config.toml 기록 완료
 #   사용 방법:  codex --profile glm52
 
 # 비대화형
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# 자주 사용하는 모델을 대화형 선택기 상단에 유지
+# 자주 쓰는 모델을 대화형 선택기 맨 위에 유지
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-선택기는 로컬 `model-preferences.json` 파일에 모델 ID만 보관하며(URL이나 자격 증명은
-절대 저장하지 않음), 컨텍스트와 CLI 대상별로 범위가 지정됩니다. 즐겨찾기는 최근 선택
-항목보다 먼저 표시됩니다. 선택한 모델을 해당 컨텍스트/대상 목록에서 제거하려면
-`--unfavorite`을 사용하십시오.
+선택기는 로컬 `model-preferences.json` 파일에 모델 ID만 저장합니다(URL이나 자격 증명은 저장하지 않음). 이 목록은 컨텍스트와 CLI 대상별로 나뉩니다. 즐겨찾기는 최근 선택 항목보다 먼저 표시됩니다. 선택한 모델을 해당 컨텍스트/대상 목록에서 제거하려면 `--unfavorite`를 사용하세요.
 
-작성된 프로필은 환경 변수를 통해 추론 키를 참조합니다
-(`OMNIROUTE_API_KEY`). 비밀 값은 디스크에 절대 기록되지 않습니다. 일회성 기본 Codex
-설정(`[model_providers.omniroute]` 블록)은
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md)를 참조하십시오.
+생성된 프로필은 추론 키를 환경 변수(`OMNIROUTE_API_KEY`)로 참조하므로, 시크릿이 디스크에 기록되지 않습니다. 기본 Codex 설정(`[model_providers.omniroute]` 블록)은 [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md)를 참조하세요.
 
-### 원격 서버를 대상으로 CLI 실행하기(구성 기록 없음)
+### 원격에 대해 CLI 실행하기(구성 파일 기록 없음)
 
-`omniroute run <target>`도 활성 컨텍스트를 따릅니다. 원격 기본 URL과
-컨텍스트 자격 증명은 생성된 프로세스에만 주입됩니다.
+`omniroute run <target>`도 활성 컨텍스트를 따릅니다. 원격 기본 URL과 컨텍스트 자격 증명은 생성된 프로세스에만 주입됩니다.
 
 ```bash
 omniroute connect 192.168.0.15
@@ -274,51 +258,45 @@ omniroute run claude   --model openai/gpt-5.4          # Claude Code → 원격
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# 정확히 무엇이 생성될지 미리 보기(환경 변수 KEY 이름만 표시하며 값은 절대 표시하지 않음):
+# 실행될 내용을 정확히 미리 보기(환경 변수 키 이름만 표시, 값은 표시 안 함):
 omniroute run codex --dry-run --json
 ```
 
-대상: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(단일 소스: `bin/cli/cli-manifest.mjs`). Qwen과 Gemini는 종료 시 제거되는
-임시 격리 홈에서 실행되므로, 실행 과정에서 개인 도구 구성을 건드리거나 해당 구성에
-정보를 유출하지 않습니다.
+대상: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`(단일 소스: `bin/cli/cli-manifest.mjs`). Qwen과 Gemini는 종료 시 제거되는 임시 격리 홈에서 실행되므로, 실행이 개인 도구 구성을 건드리거나 그 안으로 새어 들어가는 일이 없습니다.
 
 ### CLI별 설정 명령
 
-지원되는 각 CLI에는 원격을 인식하는 설정 명령이 있습니다(모두 활성
-컨텍스트 또는 `--remote <url> --api-key <key>`를 따름).
+지원되는 각 CLI에는 원격을 인식하는 설정 명령이 있습니다(모두 활성 컨텍스트를 따르거나 `--remote <url> --api-key <key>`를 사용합니다).
 
-| CLI         | 명령어                     | 작성되는 항목                                                                                                                                               |
-| ----------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` 프로필(모델별)                                                                                                                |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json`(모델별)                                                                                                           |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — 카탈로그의 모든 모델이 포함된 `omniroute` OpenAI 호환 제공자(`opencode -m omniroute/<model>` 실행)                     |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json`(CLI 모드) + 붙여 넣을 VS Code 확장 설정 출력(OpenAI 호환, `/v1`이 **없는** 기본 URL)                             |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json`(CLI) + VS Code `kilocode.*` 설정 — OpenAI 호환, `/v1`이 **포함된** 기본 URL                                                 |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml`(VS Code/JetBrains + `cn` CLI) — `provider: openai`, `/v1`이 **포함된** `apiBase`, `${{ secrets.OMNIROUTE_API_KEY }}`를 통한 키    |
-| Cursor      | `omniroute setup-cursor`   | 앱 내 설정 단계 출력(설정 → 모델 → `/v1`이 **포함된** OpenAI 기본 URL 재정의 + 키 + 모델). Cursor 설정은 불투명한 SQLite 형식 — 채팅 패널 전용              |
-| Roo Code    | `omniroute setup-roo`      | Roo 가져오기 JSON(`~/.omniroute/roo-settings.json`) 작성 + `roo-cline.autoImportSettingsPath` 설정 + UI 단계 출력(OpenAI 호환, `/v1`이 **포함된** 기본 URL) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` 제공자, `/v1`이 **포함된** `base_url`, `$OMNIROUTE_API_KEY`를 통한 키                                        |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml`(`GOOSE_PROVIDER=openai` + `/v1`이 **없는** `OPENAI_HOST` + `GOOSE_MODEL`) + 환경 변수 설정 예시                               |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml`(`/v1`이 **없는** `openai-api-base` + `model: openai/<id>`) + 환경 변수 설정 예시(`aider --message --yes`)                               |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4의 `modelProviders.openai` 항목 + `~/.qwen/.env`의 `OMNIROUTE_API_KEY`                                                            |
+| CLI         | Command                    | 기록되는 내용                                                                                                                                                        |
+| ----------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` 프로필(모델별)                                                                                                                         |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json`(모델별)                                                                                                                    |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — 카탈로그의 모든 모델을 담은 `omniroute` OpenAI 호환 프로바이더(`opencode -m omniroute/<model>`로 실행)                          |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json`(CLI 모드) + 붙여넣을 VS Code 확장 설정 출력(OpenAI 호환, Base URL은 **`/v1` 없이**)                                       |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json`(CLI) + VS Code `kilocode.*` 설정 — OpenAI 호환, Base URL은 **`/v1` 포함**                                                            |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml`(VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase`는 **`/v1` 포함**, 키는 `${{ secrets.OMNIROUTE_API_KEY }}`로 지정             |
+| Cursor      | `omniroute setup-cursor`   | 앱 내 단계를 출력(Settings → Models → Override OpenAI Base URL에 **`/v1` 포함** URL + 키 + 모델 입력). Cursor 구성은 불투명한 SQLite이므로 채팅 패널만 해당          |
+| Roo Code    | `omniroute setup-roo`      | Roo 가져오기 JSON(`~/.omniroute/roo-settings.json`)을 기록하고 `roo-cline.autoImportSettingsPath`를 설정하며 UI 단계를 출력(OpenAI 호환, Base URL은 **`/v1` 포함**） |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` 프로바이더, `base_url`은 **`/v1` 포함**, 키는 `$OMNIROUTE_API_KEY`로 지정                                             |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url`은 **`/v1` 포함**, 키는 Zed가 `$OMNIROUTE_API_KEY`에서 읽음(기록되지 않음)   |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml`(`GOOSE_PROVIDER=openai` + `OPENAI_HOST`는 **`/v1` 없이** + `GOOSE_MODEL`) + 환경 레시피                                                |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml`(`openai-api-base`는 **`/v1` 없이** + `model: openai/<id>`) + 환경 레시피(`aider --message --yes`)                                                |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json`의 V4 `modelProviders.openai` 항목 + `~/.qwen/.env`의 `OMNIROUTE_API_KEY`                                                                     |
 
 ```bash
-# OpenCode(OpenAI 호환 제공자, 모든 카탈로그 모델, 원격 VPS)
+# OpenCode(OpenAI 호환 프로바이더, 카탈로그의 모든 모델, 원격 VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 omniroute setup-opencode --only glm,kimi        # 일치하는 모델만 유지
-opencode -m omniroute/glm/glm-5.2 "..."          # 먼저 OMNIROUTE_API_KEY 내보내기
+opencode -m omniroute/glm/glm-5.2 "..."          # 먼저 OMNIROUTE_API_KEY를 내보내기
 ```
 
-> OpenCode에는 더 풍부한 **플러그인** 통합도 있습니다: `omniroute setup opencode`
-> (이제 `--remote`를 통해 원격 환경도 지원)는 `@omniroute/opencode-plugin`을 설치합니다.
-> `setup-opencode`는 가벼운 OpenAI 호환 대안입니다. API 키는
-> `{env:OMNIROUTE_API_KEY}`를 통해 참조되며, 디스크에는 절대 기록되지 않습니다.
+---
+
+> OpenCode에는 더 풍부한 **플러그인** 통합도 있습니다. `omniroute setup opencode`(`--remote`로 원격을 인식)는 `@omniroute/opencode-plugin`을 설치합니다.
+> `setup-opencode`는 가벼운 OpenAI 호환 대안입니다. API 키는 `{env:OMNIROUTE_API_KEY}`로 참조되며, 디스크에 기록되지 않습니다.
 >
-> OpenCode v2에서는 대신 `@omniroute/opencode-plugin-v2`를 사용하세요. 카탈로그는 같지만
-> 로더 계약이 다릅니다. 통합이 연결되면 OpenCode 자체 자격 증명
-> 저장소에서 키를 읽으므로, 원격 게이트웨이는 `opencode.json`에
-> 키를 전혀 포함할 필요가 없습니다.
+> OpenCode v2에서는 대신 `@omniroute/opencode-plugin-v2`를 사용하세요. 카탈로그는 같지만 로더 계약이 다릅니다. 통합이 연결되어 있으면 OpenCode 자체 자격 증명 저장소에서 키를 읽으므로, 원격 게이트웨이의 경우 `opencode.json`에 키를 전혀 둘 필요가 없습니다.
 
 ---
 

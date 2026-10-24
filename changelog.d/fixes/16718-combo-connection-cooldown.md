@@ -1,1 +1,0 @@
-- Preserve a retryable response with `Retry-After` when a combo peer is temporarily unavailable at the credential gate and another target returns a payment failure (#16718). This also preserves retry hints for active pinned connections with persisted cooldowns, excluding terminal and inactive accounts.

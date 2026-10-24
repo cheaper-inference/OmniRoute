@@ -1,1 +1,0 @@
-- **fix(dashboard):** reset the Add API key modal between opens so a saved or cancelled credential no longer reappears in the next add ([#16628](https://github.com/diegosouzapw/OmniRoute/pull/16628)) — thanks @hamedniroomand, @semihisikman

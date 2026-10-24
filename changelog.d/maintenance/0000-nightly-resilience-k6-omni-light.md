@@ -1,1 +1,0 @@
-- **ci(resilience):** the nightly `k6-soak` job now runs on the self-hosted `omni-light` pool (the hosted 7 GB runner died in the backend-only build 8 nights out of 8), boots its server on a fresh `DATA_DIR` under `$RUNNER_TEMP` on its own port `21776` with auto-backups off, and fails when the server never comes up instead of soaking nothing (#16853).

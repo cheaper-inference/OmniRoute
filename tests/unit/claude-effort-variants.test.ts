@@ -204,6 +204,17 @@ test("CLAUDE_EFFORT_SUFFIX_RE stays in sync across claudeEffortVariants/noThinki
       1,
       `ccDiscoveryAliases must never mirror an effort-suffixed id (${suffix})`
     );
+    // Opt-in CATALOG_MIRROR_REFINEMENTS_ENABLED (`refined`) deliberately mirrors the
+    // listed effort variant; only the default contract above is the drift guard.
+    const refinedMirror = appendCcDiscoveryAliases(
+      [{ id: `cc/${BASE}${suffix}`, owned_by: "cc" }],
+      () => true,
+      { refined: true }
+    );
+    assert.deepEqual(
+      refinedMirror.map((m) => m.id),
+      [`cc/${BASE}${suffix}`, `claude/cc/${BASE}${suffix}`]
+    );
   }
 
   // Control: the identical base model WITHOUT a suffix must pass all three

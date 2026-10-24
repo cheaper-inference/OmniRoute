@@ -1,1 +1,0 @@
-- **CI:** add a narrowly scoped, owner-reviewed Relay integration queue that preserves original commits and requires both aggregate gates without enabling paid batching; prevent integration candidates from falling through to the ordinary squash queue and document activation/readback requirements.

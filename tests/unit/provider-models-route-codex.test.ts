@@ -90,7 +90,7 @@ test("hidden Codex models survive live sync and cached routing while picker filt
     providerSpecificData: { codexDiscoveryMode: "safe" },
   });
   globalThis.fetch = async (url) =>
-    String(url).includes("raw.githubusercontent.com")
+    new URL(String(url)).hostname === "raw.githubusercontent.com"
       ? Response.json({ models: [] })
       : Response.json({
           models: [

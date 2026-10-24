@@ -1,1 +1,0 @@
-- **fix(sse):** strip malformed regex `pattern` constraints from tool schemas before OpenRouter dispatch ([#16867](https://github.com/diegosouzapw/OmniRoute/pull/16867)) — thanks @nitsuah

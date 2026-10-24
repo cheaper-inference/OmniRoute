@@ -1,1 +1,0 @@
-- **fix(sse):** record partial token usage (provider-reported, or estimated from the streamed output and flagged as estimated) for streams the client aborts or that fail mid-answer, instead of zero; status 499/success semantics unchanged ([#16521](https://github.com/diegosouzapw/OmniRoute/pull/16521)) — thanks @brimob-sowax, @ntdat812, @ntdatt812

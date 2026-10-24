@@ -1,1 +1,0 @@
-- Preserve Arena ELO last-sync freshness across restarts by reading the persisted source timestamp in authenticated sync status.

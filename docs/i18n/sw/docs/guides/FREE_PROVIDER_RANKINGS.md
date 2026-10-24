@@ -13,30 +13,30 @@
 
 ## Ni Nini
 
-OmniRoute husajili watoa huduma 372, ikiwemo maingizo 155 ya katalogi yaliyowekwa alama **bila malipo/hayahitaji uthibitishaji**
-(hayahitaji uthibitishaji,
-OAuth ya kiwango cha bila malipo, au ufunguo wa API wa kiwango cha bila malipo — angalia
-[Mwongozo wa Viwango vya Bila Malipo](../getting-started/FREE-TIERS-GUIDE.md) na
-[Orodha kamili ya Viwango vya Bila Malipo](../reference/FREE_TIERS.md)). Changamoto ni kwamba: watoa huduma wa bila malipo hutofautiana
-sana katika ubora wa modeli. Mtoa huduma asiyehitaji uthibitishaji anayetumika kutoa modeli ya kisasa zaidi ana manufaa makubwa zaidi
+OmniRoute husajili watoa huduma 375, ikijumuisha viingilio 155 vya katalogi vilivyowekewa alama **bure/bila-uthibitishaji**
+(bila-uthibitishaji,
+OAuth ya kiwango cha bure, au ufunguo wa API wa kiwango cha bure — angalia
+[Mwongozo wa Viwango vya Bure](../getting-started/FREE-TIERS-GUIDE.md) na
+[Saraka kamili ya Viwango vya Bure](../reference/FREE_TIERS.md)). Shida ni kwamba: watoa huduma wa bure hutofautiana
+sana katika ubora wa modeli. Mtoa huduma wa bila-uthibitishaji anayetoa modeli ya kisasa ni muhimu zaidi
 kuliko yule anayetoa modeli ndogo ya zamani.
 
-**Viwango vya Watoa Huduma wa Bila Malipo** hujibu "**ni mtoa huduma gani wa bila malipo anayenipa modeli bora zaidi?**" kwa
-kuunganisha katalogi ya kila mtoa huduma wa bila malipo na **alama za ubora zinazokusanywa kutoka kwa umma** kutoka
-**jedwali la vinara la Arena AI** (ELO ya mapendeleo ya binadamu, wazo lilelile linalotumiwa katika ulingo wa
-chatbot wa LMArena). Kisha watoa huduma huorodheshwa kulingana na ubora wa **modeli yao bora zaidi ya bila malipo**.
+**Mpangilio wa Watoa Huduma wa Bure** hujibu swali "**ni mtoa huduma yupi wa bure ananipa modeli bora?**" kwa
+kuunganisha katalogi ya kila mtoa huduma wa bure na **alama za ubora zilizokusanywa kutoka kwa umma** kutoka kwa
+**jedwali la vinara la Arena AI** (ELO ya mapendeleo ya binadamu, wazo lile lile lililo nyuma ya uwanja wa
+chatbot wa LMArena). Watoa huduma kisha hupangiwa nafasi kulingana na nguvu ya **modeli yao bora ya bure**.
 
-Orodha hiyo hukokotolewa kutoka vyanzo vitatu halisi:
+Mpangilio huhesabiwa kutoka vyanzo vitatu halisi:
 
-1. Orodha za watoa huduma wa bila malipo — `NOAUTH_PROVIDERS`, pamoja na maingizo ya `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` yaliyowekwa alama `hasFree`
+1. Orodha za watoa huduma wa bure — `NOAUTH_PROVIDERS`, pamoja na viingilio vya `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` vilivyowekewa bendera `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Katalogi ya modeli za kila mtoa huduma kutoka kwenye sajili ya watoa huduma
+2. Katalogi ya modeli ya kila mtoa huduma kutoka kwa rejista ya watoa huduma
    (`open-sse/config/providerRegistry.ts`).
-3. Alama za ufaafu wa kazi zinazotokana na ELO zilizohifadhiwa katika jedwali la DB la `model_intelligence` na
-   injini ya ulandanishi ya Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Alama za ulinganifu wa kazi zilizotokana na ELO zilizohifadhiwa katika jedwali la DB la `model_intelligence`
+   na injini ya usawazishaji wa Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Mantiki ya uunganishaji ipo katika `src/lib/freeProviderRankings.ts`.
+Mantiki ya kuunganisha iko katika `src/lib/freeProviderRankings.ts`.
 
 ---
 

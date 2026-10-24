@@ -12,10 +12,10 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Forutsetninger
 
-- **Node.js** `>=22.22.3 <23`, eller `>=24.0.0 <27` (anbefalt: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (anbefalt: 24 LTS)
 - **npm** 10+
 
-> **Brukere av npm v11+ (Node 24+):** Etter `npm install`, kontroller at native moduler ble installert:
+> **Brukere av npm v11+ (Node 24+):** Etter `npm install` må du kontrollere at integrerte moduler ble installert:
 > `node -e "require('better-sqlite3')"`. Hvis kommandoen mislykkes med `MODULE_NOT_FOUND`,
 > kjør `npm approve-scripts better-sqlite3 && npm install`. Se
 > [Feilsøking](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -55,12 +55,12 @@ Viktige variabler for utvikling:
 
 Kontrollpanelet har brytere for funksjoner som også kan konfigureres via miljøvariabler:
 
-| Plassering av innstilling | Bryter                  | Beskrivelse                                     |
-| ------------------------- | ----------------------- | ----------------------------------------------- |
-| Innstillinger → Avansert  | Feilsøkingsmodus        | Aktiver logger for feilsøkingsforespørsler (UI) |
-| Innstillinger → Generelt  | Synlighet for sidepanel | Vis/skjul deler av sidepanelet                  |
+| Plassering av innstilling | Bryter                    | Beskrivelse                                     |
+| ------------------------- | ------------------------- | ----------------------------------------------- |
+| Innstillinger → Avansert  | Feilsøkingsmodus          | Aktiver feilsøkingslogger for forespørsler (UI) |
+| Innstillinger → Generelt  | Synlighet for sidepanelet | Vis/skjul deler av sidepanelet                  |
 
-Disse innstillingene lagres i databasen og beholdes etter omstarter. Når de er angitt, overstyrer de standardverdiene fra miljøvariablene.
+Disse innstillingene lagres i databasen og beholdes på tvers av omstarter. Når de er angitt, overstyrer de standardverdiene fra miljøvariablene.
 
 ### Lokal kjøring
 
@@ -72,48 +72,48 @@ npm run dev
 npm run build    # next build → .build/next/ og deretter assembleStandalone → dist/
 npm run start
 
-# Rask kompilering kun av bakenden/API-et for bidragsyterendringer
+# Rask kompilering kun for backend/API ved bidragsyterendringer
 npm run build:contributor
 
-# Utgivelsesbygg (ren ombygging + HEAD-sentinel — kreves for utrulling)
+# Utgivelsesbygg (ren ombygging + HEAD-kontrollmarkør — påkrevd for distribusjon)
 npm run build:release   # rm -rf .build dist && build + skriver dist/BUILD_SHA
 
 # Vanlig portkonfigurasjon
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bidragsyterbygget utfører kun kompileringsvalidering: Det setter ikke sammen den frittstående
-distribusjonen eller bygger valgfrie native pakkeressurser. Bruk det vanlige produksjonsbygget når
-du må validere den distribuerbare pakken.
+Bidragsyterbygget utfører kun validering ved kompilering: det setter ikke sammen den frittstående
+distribusjonen og bygger heller ikke valgfrie integrerte pakkeressurser. Bruk det vanlige produksjonsbygget når
+du må validere pakken som skal distribueres.
 
-### Utformingen av byggresultatet
+### Oppsett for byggutdata
 
-| Mappe     | Innhold                                                                            | Sporet |
-| --------- | ---------------------------------------------------------------------------------- | ------ |
-| `src/`    | Applikasjonens kildekode (TypeScript / TSX)                                        | Ja     |
-| `.build/` | Mellomresultater — resultat fra `next build` (gitignored, `distDir = .build/next`) | Nei    |
-| `dist/`   | Distribuerbar pakke — satt sammen av `assembleStandalone` (gitignored)             | Nei    |
+| Katalog   | Innhold                                                                         | Versjonsstyrt |
+| --------- | ------------------------------------------------------------------------------- | ------------- |
+| `src/`    | Kildekode for applikasjonen (TypeScript / TSX)                                  | Ja            |
+| `.build/` | Mellomprodukter — utdata fra `next build` (gitignored, `distDir = .build/next`) | Nei           |
+| `dist/`   | Distribuerbar pakke — satt sammen av `assembleStandalone` (gitignored)          | Nei           |
 
 Byggeprosessen består av én gjennomkjøring:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (resultat fra Next.js)
-  └─ assembleStandalone()                 (kopierer standalone + static + public + native ressurser)
-       └─ resultat: dist/                 (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (utdata fra Next.js)
+  └─ assembleStandalone()                 (kopierer frittstående + statiske + offentlige + integrerte ressurser)
+       └─ utdata: dist/                    (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` rydder i tillegg først begge mappene og skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en integritetssentinel for utrulling.
+`npm run build:release` tømmer i tillegg begge katalogene først og skriver
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en kontrollmarkør for distribusjonsintegritet.
 
-`npm run build:contributor` bruker byggeprofilen kun for bakenden. Den erstatter midlertidig
-UI-filene til kontrollpanelet med plassholdere under byggingen, beholder API-rutebehandlerne og gjenoppretter originalfilene
-etter byggingen. Bruk `npm run build` for endringer som påvirker kontrollpanelets brukergrensesnitt, eller for fullstendig
-utgivelsesvalidering. Bidragsyterprofilen er ikke en erstatning for utgivelsesbygget.
+`npm run build:contributor` bruker byggeprofilen som kun omfatter backend. Den erstatter midlertidig
+UI-filene for kontrollpanelet med plassholdere under byggingen, beholder API-rutebehandlerne og gjenoppretter originalfilene
+etter byggingen. Bruk `npm run build` for endringer som påvirker brukergrensesnittet i kontrollpanelet eller for fullstendig
+validering av utgivelsen. Bidragsyterprofilen er ikke en erstatning for utgivelsesbygget.
 
-> **Merknad om VPS-utrulling:** Den eksterne image-mappen `/usr/lib/node_modules/omniroute/app/`
-> er uendret. Utrullingsverktøyene synkroniserer innholdet i `dist/` til den med rsync.
-> Bare banen til byggresultatet i repositoriet er flyttet (`app/` → `dist/`).
+> **Merknad om VPS-distribusjon:** Den eksterne bildekatalogen `/usr/lib/node_modules/omniroute/app/`
+> er uendret. Distribusjonsfunksjonene bruker rsync til å overføre innholdet i `dist/` til den.
+> Bare banen til byggutdataene i repositoriet er endret (`app/` → `dist/`).
 
 Standard-URL-er:
 
@@ -293,14 +293,14 @@ Se `open-sse/utils/stream.ts` og `open-sse/utils/streamHandler.ts` for anvendte 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboardsider (23 seksjoner)
+│   ├── (dashboard)/        # Dashboard-sider (23 seksjoner)
 │   ├── api/                # API-ruter (51 kataloger)
 │   └── login/              # Autentiseringssider (.tsx)
 ├── domain/                 # Regelmotor (policyEngine, comboResolver, costRules osv.)
-├── lib/                    # Sentral forretningslogikk (.ts)
-│   ├── a2a/                # Agent-til-agent v0.3-protokollserver
-│   ├── acp/                # Register for Agent Communication Protocol
-│   ├── compliance/         # Regelmotor for samsvar
+├── lib/                    # Kjerneforretningslogikk (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3-protokollserver
+│   ├── acp/                # Agent Communication Protocol-register
+│   ├── compliance/         # Regelmotor for etterlevelse
 │   ├── db/                 # SQLite-domenemoduler + 130 migreringer
 │   ├── memory/             # Vedvarende samtaleminne
 │   ├── oauth/              # OAuth-leverandører, -tjenester og -verktøy
@@ -311,21 +311,21 @@ src/                        # TypeScript (.ts / .tsx)
 ├── mitm/                   # MITM-proxy (sertifikat, DNS, målruting)
 ├── shared/
 │   ├── components/         # React-komponenter (.tsx)
-│   ├── constants/          # Leverandørdefinisjoner (329), MCP-omfang, 19 rutingsstrategier
+│   ├── constants/          # Leverandørdefinisjoner (329), MCP-omfang, 20 rutingsstrategier
 │   ├── utils/              # Kretsbryter, rensing, autentiseringshjelpere
 │   └── validation/         # Zod v4-skjemaer
 └── sse/                    # SSE-proxypipeline
 
 open-sse/                   # @omniroute/open-sse-arbeidsområde
-├── executors/              # 150 kjøringsmoduler (kjøringsklasser + leverandørspesifikke hjelpere)
-├── handlers/               # 11 forespørselsbehandlere (chat, svar, innebygginger, bilder osv.)
+├── executors/              # 150 eksekveringsmoduler (eksekveringsklasser + hjelpere per leverandør)
+├── handlers/               # 11 forespørselsbehandlere (chat, responses, embeddings, images osv.)
 ├── mcp-server/             # MCP-server (110 unike verktøy, 3 transporter, 33 omfang)
 ├── services/               # 178 tjenester på toppnivå (combo, autoCombo, rateLimitManager osv.)
 ├── translator/             # Formatoversettere (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Transformer for Responses API
-└── utils/                  # 22 verktøymoduler (strøm, TLS, proxy, logging)
+└── utils/                  # 22 verktøymoduler (strømming, TLS, proxy, logging)
 
-electron/                   # Electron-skrivebordsapp (på tvers av plattformer)
+electron/                   # Electron-skrivebordsapp (plattformuavhengig)
 
 tests/
 ├── unit/                   # Node.js-testkjører (1 574 testfiler)
@@ -336,23 +336,23 @@ tests/
 └── load/                   # Belastningstester
 
 docs/
-├── adr/                     # Arkitekturbeslutningslogger
+├── adr/                     # Logger over arkitekturbeslutninger
 ├── architecture/            # Systemarkitektur og robusthet
 ├── comparison/              # OmniRoute kontra alternativer
-├── compression/             # Komprimeringsveiledninger og -regler
+├── compression/             # Veiledninger og regler for komprimering
 ├── dev/                     # Utviklingsveiledninger
 ├── diagrams/                # Arkitekturdiagrammer
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── frameworks/              # MCP, A2A, OpenCode, minne, ferdigheter
 ├── guides/                  # Brukerveiledning, Docker, oppsett, feilsøking
 ├── i18n/                    # Internasjonaliserte README-oversettelser
 ├── marketing/               # Markedsføringsmateriell
-├── ops/                     # Distribusjon, proxy, dekning, utgivelser
+├── ops/                     # Utrulling, proxy, dekning, utgivelser
 ├── providers/               # Leverandørspesifikk dokumentasjon
 ├── reference/               # API-referanse, miljøvariabler, CLI-verktøy, gratisnivåer
-├── releases/                # Utgivelsesmerknader
-├── routing/                 # Automatisk kombinasjonsmotor, repetisjon av resonnering
-├── screenshots/             # Skjermbilder av dashbordet
-├── security/                # Sikkerhetsmekanismer, samsvar, skjult modus, tokener
+├── releases/                # Versjonsmerknader
+├── routing/                 # Automatisk kombinasjonsmotor, avspilling av resonnering
+├── screenshots/             # Skjermbilder av dashboardet
+├── security/                # Sikkerhetsmekanismer, etterlevelse, stealth, tokener
 └── specs/                   # Designspesifikasjoner
 ```
 
@@ -413,9 +413,13 @@ Skriv enhetstester i `tests/unit/` som minst dekker:
 
 ---
 
-## Releasing
+## Publisering
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Publiseringer administreres via arbeidsflyten `/generate-release`. Når en ny GitHub-utgivelse opprettes, blir pakken **automatisk publisert til npm** via GitHub Actions.
+
+For distribusjon til VPS-er bruker du `npm run build:release` (ikke `npm run build`) — den utfører en ren
+ombygging, setter sammen pakken i `dist/` og skriver markørfilen `dist/BUILD_SHA`.
+Bruk deretter `/deploy-vps-*-cc`-ferdighetene, som synkroniserer `dist/` til den eksterne `app/`-katalogen med rsync.
 
 ---
 

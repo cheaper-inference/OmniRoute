@@ -1,1 +1,0 @@
-- **feat(providers):** Baseten opt-in thinking via `chat_template_args.enable_thinking`, per-model reasoning effort clamp and refreshed model seed ([#16879](https://github.com/diegosouzapw/OmniRoute/pull/16879)) — thanks @elidrissi-amine

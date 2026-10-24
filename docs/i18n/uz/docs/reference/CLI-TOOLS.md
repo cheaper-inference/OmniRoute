@@ -43,77 +43,29 @@ ACP Agents (teskari ishga tushirish oqimi):
 
 ---
 
-## `setup-*` yordamida avtomatik sozlash
+## `setup-*` bilan avtomatik sozlash
 
-Har bir vosita konfiguratsiyasini qoʻlda yozishingiz shart emas. OmniRoute har bir
-qoʻllab-quvvatlanadigan CLI uchun `setup-*` buyrugʻini taqdim etadi. U ishlayotgan
-OmniRoute’dan (mahalliy yoki masofaviy) **jonli** modellar katalogini oʻqiydi va
-vositaning oʻz konfiguratsiyasini kompyuteringizga yozadi:
+Har bir vosita konfiguratsiyasini qoʻlda yozishingiz shart emas. OmniRoute qoʻllab-quvvatlanadigan har bir CLI uchun ishlayotgan OmniRouteʼdan (mahalliy yoki masofaviy) **jonli** modellar katalogini oʻqiydigan va kompyuteringizda vositaning oʻz konfiguratsiyasini yozadigan `setup-*` buyrugʻini taqdim etadi:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Har biri `--remote <url> --api-key <key>` (mahalliy vositani masofaviy
-OmniRoute bilan ishlashga sozlash), `--dry-run` (yozmasdan oldindan koʻrish) va
-`--port` parametrlarini qabul qiladi. Modelni avtomatik aniqlash imkoniyati
-boʻlmagan vositalar (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)
-`--model <id>` parametrini (interaktiv boʻlmagan ishga tushirishlar uchun esa
-`--yes` parametrini ham) qabul qiladi. `setup-5dive` — `$HOME` ichiga yozmaydigan
-yagona retsept: u flot xostida root egaligidagi autentifikatsiya profilini yozish
-orqali 5dive agentlar flotini sozlaydi, shu sababli oʻzini `sudo` orqali qayta
-ishga tushiradi va oʻzining masofaviy rejimiga ega emas. CLI’ni tegishli muhit
-oʻzgaruvchilari kiritilgan holda, umuman konfiguratsiya yozmasdan ishga tushirish
-uchun umumiy `omniroute run <target>` ishga tushirgichidan foydalaning (claude,
-codex, aider, goose, opencode, qwen, gemini — maqsadlar va taxalluslar
-`bin/cli/cli-manifest.mjs` faylidan olinadi); har bir vosita uchun moʻljallangan
-eski `omniroute launch` (Claude Code) va `omniroute launch-codex` (Codex) ishga
-tushirgichlari ham mavjud. Gemini CLI faqat ishga tushirish uchun moʻljallangan:
-u `omniroute run` maqsadi hisoblanadi, ammo `setup-*`/`configure` retseptiga ega
-emas.
+Har biri `--remote <url> --api-key <key>` (mahalliy vositani masofaviy OmniRoute bilan ishlashga sozlash), `--dry-run` (yozmasdan oldindan koʻrish) va `--port` parametrlarini qabul qiladi. Modellarni avtomatik aniqlash imkoniyati boʻlmagan vositalar (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>` parametrini (interaktiv boʻlmagan ishga tushirishlar uchun esa `--yes` parametrini ham) qabul qiladi. `setup-5dive` — `$HOME` ichiga yozmaydigan yagona retsept: u flot xostida root egasiga tegishli autentifikatsiya profilini yozish orqali 5dive agentlar flotini sozlaydi, shuning uchun `sudo` orqali oʻzini qayta ishga tushiradi va oʻzining masofaviy rejimiga ega emas. Toʻgʻri muhit oʻzgaruvchilari kiritilgan holda va umuman hech qanday konfiguratsiya yozmasdan CLIʼni ishga tushirish uchun umumiy `omniroute run <target>` ishga tushirgichidan foydalaning (claude, codex, aider, goose, opencode, qwen, gemini — nishonlar va taxalluslar `bin/cli/cli-manifest.mjs` faylidan olinadi); har bir vosita uchun eski `omniroute launch` (Claude Code) va `omniroute launch-codex` (Codex) ishga tushirgichlari hamon mavjud. Gemini CLI faqat ishga tushirish uchun moʻljallangan: u `omniroute run` nishoni, ammo `setup-*`/`configure` retseptiga ega emas.
 
-> **Toʻliq maʼlumotnoma:** asosiy jadval — har bir buyruq nima yozishi, barcha
-> parametrlar, mahalliy va masofaviy rejimlar hamda qaysi vositalarga `/v1`
-> suffiksi kerakligi — **[CLI integratsiyalari](../guides/CLI-INTEGRATIONS.md)**
-> sahifasida keltirilgan.
+> **Toʻliq maʼlumotnoma:** asosiy jadval — har bir buyruq nimalarni yozishi, barcha parametrlar,
+> mahalliy va masofaviy rejimlar oʻrtasidagi farqlar hamda qaysi vositalar `/v1` suffiksini talab qilishi —
+> **[CLI integratsiyalari](../guides/CLI-INTEGRATIONS.md)** sahifasida joylashgan.
 
 ### Bularni konteyner ichida ishga tushirish
 
-OmniRoute konteyneri ichida bajarilgan `setup-*` buyrugʻi konteynerning oʻz uy
-katalogiga yozadi; xostdagi hech bir CLI uni oʻqimaydi va u konteyner bilan
-birga yoʻqoladi. OmniRoute buni aniqlaydi va yozish oʻrniga koʻrsatmalar bilan
-`2` chiqish kodini qaytaradi. Davom etishning qoʻllab-quvvatlanadigan ikkita
-usuli mavjud — CLI’ni xostga oʻrnating va konteynerga `omniroute connect` orqali
-ulanishni bajaring yoki konfiguratsiya kataloglarini bind-mount qiling va
-`CLI_CONFIG_HOME` qiymatini belgilang (compose’dagi `host` profili). Har bir
-`setup-*` buyrugʻi, shuningdek `omniroute configure` va
-`omniroute config set`, agar asl maqsadingiz konteynerning oʻz CLI’larini
-sozlash boʻlsa, `--allow-container-write` parametrini qabul qiladi;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` server uchun ayni vazifani
-bajaradi. [Docker qoʻllanmasi → Xostdagi CLI vositalarini sozlash](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-boʻlimiga qarang.
+OmniRoute konteyneri ichida bajarilgan `setup-*` buyrugʻi konteynerning oʻz uy katalogiga yozadi; bu katalogni xostdagi hech bir CLI oʻqimaydi va u konteyner bilan birga yoʻqoladi. OmniRoute buni aniqlaydi va yozish oʻrniga koʻrsatmalar bilan `2` kodi orqali chiqadi. Davom etishning qoʻllab-quvvatlanadigan ikki usuli mavjud — CLIʼni xostga oʻrnatib, konteynerga `omniroute connect` orqali ulanish yoki konfiguratsiya kataloglarini bind-mount qilib, `CLI_CONFIG_HOME` qiymatini belgilash (composeʼning `host` profili). Har bir `setup-*` buyrugʻi, shuningdek `omniroute configure` va `omniroute config set`, agar aynan konteynerning oʻz CLIʼlarini sozlamoqchi boʻlsangiz, `--allow-container-write` parametrini qabul qiladi; server uchun `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` xuddi shu vazifani bajaradi. [Docker qoʻllanmasi → Xost CLI vositalarini sozlash](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) boʻlimiga qarang.
 
-Boshqaruv panelining **qoʻllash endpointi** (`POST /api/cli-tools/apply`) xuddi
-shu himoya qoidasini qoʻllaydi: konteynerda, maqsadi xostdan bind-mount qilinmagan
-yozish soʻrovi **`422`** javobini `containerEphemeralTarget: true`, xavfsiz xato
-matni va — xost retseptiga ega vositalar (claude, codex, opencode, cline, kilo,
-continue) uchun — xostda bajariladigan `hostSetupCommand` (masalan,
-`omniroute setup-opencode`) bilan qaytaradi; hech narsa yozilmaydi.
-`dryRun: true` konteyner rejimida ham ishlashda davom etadi va diskka tegmasdan,
-maxfiy qismlari yashirilgan oldindan koʻrish natijasi hamda maqsad yoʻlini
-qaytaradi. Oldindan koʻrish tarkibi nusxalash yoki import qilish uchun
-moʻljallangan hisob maʼlumotlarini oʻz ichiga oluvchi konfiguratsiya emas.
-Asl vosita/asosiy URL/API kaliti/model kiritmalaridan foydalanib xostda qoʻllang
-yoki koʻrsatilgan xost tomonidagi sozlash buyrugʻidan foydalaning. Oldindan
-koʻrish sarlavhasi va soʻrov shartnomasi uchun
-[CLI konfiguratsiyasi xavfsizligi](../security/CLI-CONFIGURATION.md) sahifasiga
-qarang. Bu xatti-harakat ataylab joriy qilingan va regressiyadan
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` orqali himoyalangan —
-himoya qoidasini olib tashlash orqali 422 xatosini hech qachon «tuzatmang».
+Boshqaruv panelining **qoʻllash endpointi** (`POST /api/cli-tools/apply`) ham xuddi shu himoyani taʼminlaydi: konteyner ichida xostdan bind-mount qilinmagan nishonga yozish soʻrovi xavfsiz xato matni, `containerEphemeralTarget: true` va — xost retseptiga ega vositalar (claude, codex, opencode, cline, kilo, continue) uchun — xostda ishga tushiriladigan `hostSetupCommand` (masalan, `omniroute setup-opencode`) bilan **`422`** javobini qaytaradi; hech narsa yozilmaydi. `dryRun: true` konteyner rejimida ishlashda davom etadi va diskka tegmasdan maxfiy qismlari yashirilgan oldindan koʻrish natijasi hamda nishon yoʻlini qaytaradi. Oldindan koʻrish tarkibi nusxalash yoki import qilish uchun moʻljallangan, hisob maʼlumotlarini oʻz ichiga oluvchi konfiguratsiya emas. Dastlabki vosita/asosiy URL/API kaliti/model kirish maʼlumotlari bilan xostda qoʻllang yoki koʻrsatilgan xost tomondagi sozlash buyrugʻidan foydalaning. Oldindan koʻrish sarlavhasi va soʻrov shartnomasi uchun [CLI konfiguratsiyasi xavfsizligi](../security/CLI-CONFIGURATION.md) sahifasiga qarang. Bu xatti-harakat ataylab joriy qilingan va `tests/unit/api/cli-tools/apply-container-guard.test.ts` orqali regressiyadan himoyalangan — himoyani olib tashlash orqali 422 xatosini hech qachon «tuzatmang».
 
 ---
 
@@ -149,47 +101,48 @@ Kataloglangan vositalarning hammasini ham aniqlash, sozlash yoki ishga tushirish
 
 ---
 
-## 1. CLI Code katalogi (26 ta vosita)
+## 1. CLI Code katalogi (27 ta vosita)
 
-`/dashboard/cli-code` sahifasida ko‘rsatiladigan barcha vositalar. `baseUrlSupport: none` bo‘lganlari maxsus asosiy URL o‘rniga MITM yoki qo‘llanma orqali sozlanadi:
+`/dashboard/cli-code` sahifasida ko‘rsatiladigan barcha vositalar. `baseUrlSupport: none` qiymatiga ega vositalar maxsus asosiy URL o‘rniga MITM yoki qo‘llanma orqali sozlanadi:
 
-| id           | name                    | vendor                 | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ---------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic              | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                 | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                   | none           | custom         | false        |
-| cline        | Cline                   | OSS (sobiq Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org               | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)              | full           | guide          | false        |
-| continue     | Continue                | continue.dev           | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)      | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ            | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)         | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)      | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)           | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (sobiq SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI             | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS              | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere              | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)      | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)       | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
-| cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research          | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                 | none           | mitm           | false        |
-| custom       | Custom CLI              | —                      | full           | custom-builder | false        |
+| id           | nomi                    | yetkazib beruvchi   | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"` bo‘lgan vositalarning boshqaruv panelidagi kartasida «⚠ Asosiy URL qisman qo‘llab-quvvatlanadi» belgisi ko‘rsatiladi.
+`baseUrlSupport: "partial"` qiymatiga ega vositalarning boshqaruv panelidagi kartasida «⚠ Qisman Base URL» nishoni ko‘rsatiladi.
 ---
 
 ## 2. CLI agentlari katalogi (10 ta vosita)
 
-`/dashboard/cli-agents` sahifasida ko‘rsatiladigan avtonom agentlar:
+`/dashboard/cli-agents` sahifasida ko‘rinadigan avtonom agentlar:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
+| id           | nomi             | yetkazib beruvchi        | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |
 | hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
 | openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |

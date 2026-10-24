@@ -3,7 +3,7 @@ import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { mapNvidiaGlm52ReasoningParams } from "./base/reasoningEffort.ts";
 import { mapBasetenReasoningParams } from "./base/basetenReasoning.ts";
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../config/constants.ts";
-import { getAccessToken } from "../services/tokenRefresh.ts";
+import { getAccessToken, NO_REFRESH_NEEDED } from "../services/tokenRefresh.ts";
 
 import {
   buildClaudeCodeCompatibleHeaders,
@@ -68,6 +68,7 @@ import { resolveAlibabaProviderBaseUrl } from "@/shared/constants/alibabaProvide
 import { xiaomiAlternateUrl, xiaomiMimoChatUrl } from "./default/xiaomiTokenPlan.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
 import { applyRegistryBodyRepairs } from "../utils/strictChatHistory.ts";
+import { withWorkbuddyHeaders, sanitizeWorkbuddyBody } from "../utils/workbuddyGateway.ts";
 
 const NVIDIA_TOOL_CALL_ID_PATTERN = /^[A-Za-z0-9]{9}$/;
 const PERPLEXITY_AGENT_DEFAULT_MAX_OUTPUT_TOKENS = 4096;
@@ -711,6 +712,10 @@ export class DefaultExecutor extends BaseExecutor {
 
     normalizeAnthropicHeaderVariants(headers);
 
+    if (this.provider === "workbuddy") {
+      withWorkbuddyHeaders(headers, body);
+    }
+
     return headers;
   }
 
@@ -1058,6 +1063,10 @@ export class DefaultExecutor extends BaseExecutor {
 
     applyRegistryToolNameLengthAliases(this.provider, withDefaults);
 
+    if (this.provider === "workbuddy") {
+      withDefaults = sanitizeWorkbuddyBody(withDefaults);
+    }
+
     return applyRegistryBodyRepairs(this.provider, withDefaults);
   }
 
@@ -1119,7 +1128,7 @@ export class DefaultExecutor extends BaseExecutor {
         return null;
       }
     }
-    if (!credentials.refreshToken) return null;
+    if (!credentials.refreshToken) return NO_REFRESH_NEEDED;
     try {
       return await getAccessToken(this.provider, credentials, log);
     } catch (error) {

@@ -1,1 +1,0 @@
-- **fix(plugin):** plugin warnings now reach the host log, each refresh logs a stage summary, and the `freeOnly` warning counts unmatched free-tier lines ([#16785](https://github.com/diegosouzapw/OmniRoute/pull/16785)) — thanks @maxmad64bis

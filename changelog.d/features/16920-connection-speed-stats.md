@@ -1,1 +1,0 @@
-- **feat(dashboard):** per-connection decode speed (avg/last tok/s, TTFT, sample count per model) on quota cards ([#16920](https://github.com/diegosouzapw/OmniRoute/pull/16920)) — thanks @raflyazf

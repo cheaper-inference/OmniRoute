@@ -23,99 +23,48 @@ OpenAI/Anthropic/Gemini-ਅਨੁਕੂਲ ਕਲਾਇੰਟ APIs ਅਤੇ ਕ
 Authorization: Bearer <api-key>
 ```
 
-ਇਸਦੀ ਪੁਸ਼ਟੀ `src/sse/services/auth.ts` ਵਿੱਚ `isValidApiKey()` / `extractApiKey()` ਦੁਆਰਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ ਅਤੇ ਇਸਨੂੰ `src/shared/utils/apiAuth.ts` ਰਾਹੀਂ ਮੁੜ ਐਕਸਪੋਰਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਵੈਲੀਡੇਟਰ `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env vars ਨੂੰ ਸਥਾਈ ਪਾਸਥਰੂ ਕੁੰਜੀਆਂ ਵਜੋਂ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ (ਮੁੱਦਾ #1350)।
+`src/sse/services/auth.ts` ਵਿੱਚ `isValidApiKey()` / `extractApiKey()` ਰਾਹੀਂ ਤਸਦੀਕ ਹੁੰਦੀ ਹੈ ਅਤੇ `src/shared/utils/apiAuth.ts` ਰਾਹੀਂ ਮੁੜ-ਐਕਸਪੋਰਟ ਹੁੰਦੀ ਹੈ। ਵੈਲੀਡੇਟਰ `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲਾਂ ਨੂੰ ਵੀ ਸਥਾਈ ਪਾਸਥਰੂ ਕੁੰਜੀਆਂ ਵਜੋਂ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ (issue #1350)।
 
-### 2. ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ (auth_token ਕੂਕੀ)
+### 2. ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ (auth_token cookie)
 
-ਡੈਸ਼ਬੋਰਡ ਪੰਨਿਆਂ ਅਤੇ ਐਡਮਿਨ ਕਾਰਵਾਈਆਂ ਲਈ।
+ਡੈਸ਼ਬੋਰਡ ਪੰਨਿਆਂ ਅਤੇ ਐਡਮਿਨ ਓਪਰੇਸ਼ਨਾਂ ਲਈ।
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-ਕੋਈ ਕੂਕੀ ਕੇਵਲ ਉਦੋਂ ਹੀ ਸੈਸ਼ਨ ਹੁੰਦੀ ਹੈ ਜਦੋਂ JWT ਦੀ ਪੁਸ਼ਟੀ ਹੋਵੇ **ਅਤੇ** ਉਸ ਵਿੱਚ `authenticated: true`
-ਮੌਜੂਦ ਹੋਵੇ (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)। ਕੂਕੀ ਦਾ ਹਰ
-ਉਪਭੋਗਤਾ (ਡੈਸ਼ਬੋਰਡ ਰੂਟ ਗਾਰਡ (`isDashboardSessionAuthenticated()`), authz ਪਾਈਪਲਾਈਨ ਰਿਫ੍ਰੈਸ਼, WebSocket ਹੈਂਡਸ਼ੇਕ, ਲਾਈਵ
-ਸਰਵਰ, `/api/settings/require-login`, `/api/auth/status`) ਉਸ ਹੈਲਪਰ ਰਾਹੀਂ ਜਾਂਦਾ ਹੈ।
-`JWT_SECRET` ਨਾਲ ਸਾਈਨ ਕੀਤੇ ਹੋਰ JWTs ਵੀ ਮੌਜੂਦ ਹਨ — Cursor CLI ਪਾਸਥਰੂ ਕੁੰਜੀ ਧਾਰਕਾਂ ਲਈ
-`iss "omniroute" / aud "cursor-cli"` ਟੋਕਨ ਜਾਰੀ ਕਰਦਾ ਹੈ — ਅਤੇ ਉਹ ਕਦੇ ਵੀ ਸੈਸ਼ਨ ਨਹੀਂ ਹੁੰਦੇ
-(#13298)।
+ਕੂਕੀ ਤਾਂ ਹੀ ਸੈਸ਼ਨ ਮੰਨੀ ਜਾਂਦੀ ਹੈ ਜਦੋਂ JWT ਤਸਦੀਕ ਹੋਵੇ **ਅਤੇ** ਉਸ ਵਿੱਚ `authenticated: true` ਹੋਵੇ (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)। ਕੂਕੀ ਦਾ ਹਰ ਉਪਭੋਗੀ (ਡੈਸ਼ਬੋਰਡ ਰੂਟ ਗਾਰਡ (`isDashboardSessionAuthenticated()`), authz ਪਾਈਪਲਾਈਨ ਰਿਫ੍ਰੈਸ਼, WebSocket ਹੈਂਡਸ਼ੇਕ, ਲਾਈਵ ਸਰਵਰ, `/api/settings/require-login`, `/api/auth/status`) ਇਸੇ ਹੈਲਪਰ ਰਾਹੀਂ ਜਾਂਦਾ ਹੈ। `JWT_SECRET` ਨਾਲ ਸਾਈਨ ਕੀਤੇ ਹੋਰ JWT ਵੀ ਮੌਜੂਦ ਹਨ — Cursor CLI passthrough ਕੁੰਜੀ ਧਾਰਕਾਂ ਲਈ `iss "omniroute" / aud "cursor-cli"` ਟੋਕਨ ਬਣਾਉਂਦਾ ਹੈ — ਪਰ ਉਹ ਕਦੇ ਸੈਸ਼ਨ ਨਹੀਂ ਹੁੰਦੇ (#13298)।
 
-ਇਸਦੀ ਪੁਸ਼ਟੀ `src/shared/utils/apiAuth.ts` ਵਿੱਚ `isDashboardSessionAuthenticated()` ਦੁਆਰਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਜਦੋਂ JWT ਦੀ 30 ਦਿਨਾਂ ਦੀ ਮਿਆਦ ਵਿੱਚੋਂ 7 ਦਿਨਾਂ ਤੋਂ ਘੱਟ ਸਮਾਂ ਬਾਕੀ ਰਹਿ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਪਾਈਪਲਾਈਨ ਇਸਨੂੰ ਆਪਣੇ ਆਪ ਰਿਫ੍ਰੈਸ਼ ਕਰਦੀ ਹੈ।
+ਇਹ `src/shared/utils/apiAuth.ts` ਵਿੱਚ `isDashboardSessionAuthenticated()` ਰਾਹੀਂ ਤਸਦੀਕ ਹੁੰਦਾ ਹੈ। ਪਾਈਪਲਾਈਨ JWT ਨੂੰ ਆਪਣੇ 30-ਦਿਨਾਂ ਦੇ ਜੀਵਨ-ਕਾਲ ਵਿੱਚ 7 ਦਿਨਾਂ ਤੋਂ ਘੱਟ ਬਚਣ 'ਤੇ ਆਪਣੇ ਆਪ ਰਿਫ੍ਰੈਸ਼ ਕਰਦੀ ਹੈ।
 
-ਕੋਈ ਸੈਸ਼ਨ ਆਪਣੇ 30 ਦਿਨ ਪੂਰੇ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਵੀ ਖਤਮ ਹੋ ਸਕਦਾ ਹੈ, ਕਿਉਂਕਿ ਹਰ ਜਾਰੀਕਰਤਾ `mintDashboardSessionToken` ਰਾਹੀਂ ਜਾਂਦਾ ਹੈ (ਇੱਕ ਜਾਰੀਕਰਨ ਸਮਾਂ `iat` ਅਤੇ ਇੱਕ id `jti`) ਅਤੇ ਵੈਰੀਫਾਇਰ ਦੋ ਸੈਟਿੰਗਾਂ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ: `sessionsValidAfter`, ਜੋ ਪਾਸਵਰਡ ਬਦਲਣ ਵੇਲੇ ਸੈੱਟ ਹੁੰਦੀ ਹੈ ਤਾਂ ਜੋ ਉਸ ਤੋਂ ਪਹਿਲਾਂ ਜਾਰੀ ਕੀਤਾ ਹਰ ਸੈਸ਼ਨ ਵੈਰੀਫਾਈ ਹੋਣਾ ਬੰਦ ਕਰ ਦੇਵੇ (ਪਾਸਵਰਡ ਬਦਲਣ ਵਾਲੇ ਬ੍ਰਾਊਜ਼ਰ ਨੂੰ ਨਵੀਂ ਕੂਕੀ ਮਿਲਦੀ ਹੈ), ਅਤੇ `revokedDashboardSessions`, ਜਿਸ ਵਿੱਚ `POST /api/auth/logout` ਸਾਈਨ-ਆਉਟ ਕੀਤੇ ਸੈਸ਼ਨ ਦਾ `jti` ਜੋੜਦਾ ਹੈ। ਕਿਸੇ ਪੁਰਾਣੀ ਰਿਲੀਜ਼ ਦੁਆਰਾ ਜਾਰੀ ਕੀਤੇ ਸੈਸ਼ਨਾਂ ਵਿੱਚ ਇਨ੍ਹਾਂ ਵਿੱਚੋਂ ਕੋਈ ਵੀ ਕਲੇਮ ਨਹੀਂ ਹੁੰਦਾ ਅਤੇ ਉਹ ਪਹਿਲੀ ਵਾਰ ਪਾਸਵਰਡ ਬਦਲੇ ਜਾਣ ਤੱਕ ਵੈਧ ਰਹਿੰਦੇ ਹਨ। ਜੇ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹੀਆਂ ਨਹੀਂ ਜਾ ਸਕਦੀਆਂ, ਤਾਂ ਸੈਸ਼ਨ 'ਤੇ ਭਰੋਸਾ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ।
+ਸੈਸ਼ਨ 30 ਦਿਨ ਪੂਰੇ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਵੀ ਖ਼ਤਮ ਹੋ ਸਕਦਾ ਹੈ, ਕਿਉਂਕਿ ਹਰ ਟੋਕਨ ਬਣਾਉਣ ਵਾਲਾ `mintDashboardSessionToken` ਰਾਹੀਂ ਜਾਂਦਾ ਹੈ (ਜਾਰੀ ਹੋਣ ਦਾ ਸਮਾਂ `iat` ਅਤੇ ਇੱਕ id `jti`) ਅਤੇ ਵੈਰੀਫਾਇਰ ਦੋ ਸੈਟਿੰਗਾਂ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ: `sessionsValidAfter`, ਜੋ ਪਾਸਵਰਡ ਬਦਲਣ ਨਾਲ ਸੈੱਟ ਹੁੰਦੀ ਹੈ ਤਾਂ ਜੋ ਉਸ ਤੋਂ ਪਹਿਲਾਂ ਜਾਰੀ ਹੋਏ ਸਾਰੇ ਸੈਸ਼ਨ ਤਸਦੀਕ ਹੋਣੋਂ ਰੁਕ ਜਾਣ (ਪਾਸਵਰਡ ਬਦਲਣ ਵਾਲਾ ਬ੍ਰਾਊਜ਼ਰ ਨਵੀਂ ਕੂਕੀ ਲੈਂਦਾ ਹੈ), ਅਤੇ `revokedDashboardSessions`, ਜਿਸ ਵਿੱਚ `POST /api/auth/logout` ਸਾਈਨ-ਆਉਟ ਕੀਤੇ ਸੈਸ਼ਨ ਦਾ `jti` ਜੋੜਦਾ ਹੈ। ਪੁਰਾਣੇ ਰਿਲੀਜ਼ ਦੁਆਰਾ ਬਣਾਏ ਸੈਸ਼ਨਾਂ ਵਿੱਚ ਇਹ ਦੋਵੇਂ ਕਲੇਮ ਨਹੀਂ ਹੁੰਦੇ ਅਤੇ ਪਹਿਲੀ ਪਾਸਵਰਡ ਤਬਦੀਲੀ ਤੱਕ ਵੈਧ ਰਹਿੰਦੇ ਹਨ। ਜੇ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹੀਆਂ ਨਾ ਜਾ ਸਕਣ, ਤਾਂ ਸੈਸ਼ਨ ਭਰੋਸੇਯੋਗ ਨਹੀਂ ਮੰਨਿਆ ਜਾਂਦਾ।
 
-ਕੁਝ ਪ੍ਰਬੰਧਨ ਰੂਟ **ਦੋਵਾਂ ਵਿੱਚੋਂ ਕਿਸੇ ਇੱਕ** ਮੋਡ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ: ਕੂਕੀ ਜਾਂ `Bearer <key>`, ਜਦੋਂ API ਕੁੰਜੀ ਕੋਲ `manage` (ਜਾਂ `admin`) ਸਕੋਪ ਹੋਵੇ। ਇਸੇ ਨਾਲ v3.8 ਵਿੱਚ ਜੋੜਿਆ ਗਿਆ "API ਕਾਲਾਂ ਰਾਹੀਂ ਸੰਰਚਿਤ ਕਰਨ ਯੋਗ" ਵਰਕਫਲੋ ਸੰਭਵ ਹੁੰਦਾ ਹੈ।
+ਕੁਝ ਪ੍ਰਬੰਧਨ ਰੂਟ **ਕੋਈ ਵੀ ਇੱਕ** ਮੋਡ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ: ਕੂਕੀ ਜਾਂ `Bearer <key>`, ਜਦੋਂ API ਕੁੰਜੀ ਕੋਲ `manage` (ਜਾਂ `admin`) ਸਕੋਪ ਹੋਵੇ। ਇਹੀ 'API ਕਾਲਾਂ ਰਾਹੀਂ ਸੰਰਚਨਾਯੋਗ' ਵਰਕਫਲੋ ਨੂੰ ਸੰਭਵ ਬਣਾਉਂਦਾ ਹੈ, ਜੋ v3.8 ਵਿੱਚ ਜੋੜਿਆ ਗਿਆ ਸੀ।
 
 #### ਵਿਕਲਪਿਕ OIDC ਲੌਗਇਨ ਗੇਟ (#6973)
 
-ਡੈਸ਼ਬੋਰਡ ਐਡਮਿਨ ਲੌਗਇਨ ਡਿਫਾਲਟ ਪਾਸਵਰਡ ਲੌਗਇਨ ਦੇ ਨਾਲ ਇੱਕ **ਚੋਣਵਾਂ** OIDC (OpenID Connect) ਫਲੋ ਵੀ
-ਸਮਰਥਿਤ ਕਰਦਾ ਹੈ — ਪਾਸਵਰਡ ਲੌਗਇਨ ਕਦੇ ਹਟਾਇਆ ਨਹੀਂ ਜਾਂਦਾ, ਸਿਰਫ਼
-ਇਸਨੂੰ ਪੂਰਕ ਕੀਤਾ ਜਾਂਦਾ ਹੈ:
+ਡੈਸ਼ਬੋਰਡ ਐਡਮਿਨ ਲੌਗਇਨ ਡਿਫਾਲਟ ਪਾਸਵਰਡ ਲੌਗਇਨ ਦੇ ਨਾਲ **ਵਿਕਲਪਿਕ** OIDC (OpenID Connect) ਫਲੋ ਵੀ ਸਮਰਥਨ ਕਰਦਾ ਹੈ — ਪਾਸਵਰਡ ਲੌਗਇਨ ਕਦੇ ਹਟਾਇਆ ਨਹੀਂ ਜਾਂਦਾ, ਸਿਰਫ਼ ਉਸ ਦੇ ਨਾਲ ਵਾਧੂ ਵਿਕਲਪ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ:
 
-- ਇਹ ਉਦੋਂ ਤੱਕ ਅਸਮਰੱਥ ਰਹਿੰਦਾ ਹੈ ਜਦੋਂ ਤੱਕ `settings.oidcEnabled === true` **ਅਤੇ** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` ਸਾਰੇ ਸੰਰਚਿਤ ਨਾ ਹੋਣ (ਸੈਟਿੰਗਾਂ → ਪ੍ਰਮਾਣੀਕਰਨ)।
-  ਨਹੀਂ ਤਾਂ `GET /api/auth/oidc/login` `400` ਵਾਪਸ ਕਰਦਾ ਹੈ।
-- `GET /api/auth/oidc/login`, ਜਾਰੀਕਰਤਾ ਦੇ
-  `/.well-known/openid-configuration` ਤੋਂ `authorization_endpoint` ਲੱਭਦਾ ਹੈ (ਨਾ ਮਿਲਣ 'ਤੇ
-  `<issuer>/authorize` ਵਰਤਦਾ ਹੈ), ਆਉਣ ਵਾਲੀ ਬੇਨਤੀ ਤੋਂ ਰੀਡਾਇਰੈਕਟ URI ਬਣਾਉਂਦਾ ਹੈ
-  (`x-forwarded-proto` ਨੂੰ ਧਿਆਨ ਵਿੱਚ ਰੱਖਦੇ ਹੋਏ), ਅਤੇ ਇੱਕ ਬੇਤਰਤੀਬ `state` ਦੇ ਨਾਲ IdP ਵੱਲ ਰੀਡਾਇਰੈਕਟ ਕਰਦਾ ਹੈ,
-  ਜੋ ਇੱਕ `httpOnly` `oidc_state` ਕੂਕੀ ਵਿੱਚ ਸਟੋਰ ਹੁੰਦਾ ਹੈ।
-- `GET /api/auth/oidc/callback`, `state` ਦੀ ਪੁਸ਼ਟੀ ਕਰਦਾ ਹੈ, ਅਧਿਕਾਰਕਰਨ
-  ਕੋਡ ਦਾ ਵਟਾਂਦਰਾ ਕਰਦਾ ਹੈ, ਅਤੇ ਜਾਰੀਕਰਤਾ ਦੇ JWKS ਰਾਹੀਂ ID ਟੋਕਨ ਦੇ ਦਸਤਖਤ ਦੀ ਪੁਸ਼ਟੀ ਕਰਦਾ ਹੈ
-  (`jose` ਦਾ `createRemoteJWKSet`, ਹਰ JWKS URI ਲਈ ਕੈਸ਼ ਕੀਤਾ ਹੋਇਆ), ਨਾਲ ਹੀ `issuer`/`audience`
-  ਜਾਂਚਾਂ ਕਰਦਾ ਹੈ। `oidcAllowedSubjects` ਮਨਜ਼ੂਰਸ਼ੁਦਾ ਸੂਚੀ ਲਾਜ਼ਮੀ ਹੈ: ਇਹ
-  ਟੋਕਨ ਦੇ `sub` ਕਲੇਮ ਜਾਂ ਇਸਦੇ `email` ਕਲੇਮ ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਹੈ — email ਕਲੇਮ ਨੂੰ ਕੇਵਲ
-  ਉਦੋਂ ਹੀ ਮੰਨਿਆ ਜਾਂਦਾ ਹੈ ਜਦੋਂ `email_verified === true` ਹੋਵੇ, ਇਸ ਲਈ IdP 'ਤੇ ਕੋਈ ਅਪ੍ਰਮਾਣਿਤ email ਕਦੇ ਵੀ
-  ਗੇਟ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦੀ — ਅਤੇ ਕੋਈ ਐਂਟਰੀ ਨਾ ਹੋਣ 'ਤੇ callback ਹਰ ਲੌਗਇਨ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦਾ ਹੈ
-  (`not_configured`)।
-- ਸਫਲਤਾ 'ਤੇ ਇਹ **ਬਿਲਕੁਲ ਉਹੀ** 30-ਦਿਨਾਂ ਵਾਲਾ `auth_token` JWT ਜਾਰੀ ਕਰਦਾ ਹੈ ਜੋ ਪਾਸਵਰਡ
-  ਲੌਗਇਨ ਜਾਰੀ ਕਰਦਾ ਹੈ (`src/app/api/auth/login/route.ts`), ਇਸ ਲਈ ਬਾਕੀ
-  ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਪਾਈਪਲਾਈਨ (ਆਟੋ-ਰਿਫ੍ਰੈਸ਼, ਕੂਕੀ ਫਲੈਗ) ਵਿੱਚ ਕੋਈ ਤਬਦੀਲੀ ਨਹੀਂ ਹੁੰਦੀ —
-  OIDC ਸਿਰਫ਼ ਇਹ ਬਦਲਦਾ ਹੈ ਕਿ ਕੂਕੀ ਕਿਵੇਂ ਜਾਰੀ ਹੁੰਦੀ ਹੈ, ਇਹ ਨਹੀਂ ਕਿ ਉਹ ਕੀ ਅਧਿਕਾਰ ਦਿੰਦੀ ਹੈ।
-- ਹਰ `oidc*` ਸੈਟਿੰਗ (`oidcEnabled`, `oidcDisablePasswordLogin`,
-  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS`
-  (`src/shared/constants/securityImpactingSettings.ts`) ਵਿੱਚ ਹੈ: `PATCH /api/settings`
-  `400 PASSWORD_REQUIRED` ਨਾਲ ਜਵਾਬ ਦਿੰਦਾ ਹੈ, ਜਦੋਂ ਤੱਕ body ਵਿੱਚ ਪ੍ਰਬੰਧਨ
-  ਪਾਸਵਰਡ `currentPassword` ਵਜੋਂ ਨਾ ਹੋਵੇ (ਗਲਤ ਹੋਣ 'ਤੇ `401 PASSWORD_MISMATCH`)।
-  `oidcDisablePasswordLogin` ਪਾਸਵਰਡ _ਲੌਗਇਨ_ (`POST /api/auth/login`) ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦਾ ਹੈ,
-  ਪਰ ਸਟੋਰ ਕੀਤਾ ਪਾਸਵਰਡ ਹੈਸ਼ ਬਰਕਰਾਰ ਰੱਖਦਾ ਹੈ, ਅਤੇ ਮੁੜ-ਪ੍ਰਮਾਣੀਕਰਨ ਫਿਰ ਵੀ
-  ਇਸਦੇ ਮੁਕਾਬਲੇ `currentPassword` ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ।
-- `POST /api/settings/import-json` ਉਸ ਮੁੜ-ਪ੍ਰਮਾਣੀਕਰਨ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ, ਇਸ ਲਈ ਲਿਖਣ ਤੋਂ ਪਹਿਲਾਂ
-  `IMPORT_STRIPPED_SETTINGS_KEYS` (ਉਹੀ ਫਾਈਲ) ਵਿੱਚ ਮੌਜੂਦ ਹਰ ਕੁੰਜੀ ਹਟਾ ਦਿੰਦਾ ਹੈ: ਪਾਸਵਰਡ ਅਤੇ
-  `currentPassword`, ਹਰ `SECURITY_IMPACTING_SETTINGS_KEYS` ਐਂਟਰੀ, ਅਤੇ
-  ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਸਥਿਤੀ (`sessionsValidAfter`, `revokedDashboardSessions`)।
-  ਇਸ ਲਈ ਕਿਸੇ ਪੁਰਾਣੇ ਬੈਕਅੱਪ ਨੂੰ ਇੰਪੋਰਟ ਕਰਨ ਨਾਲ ਉਹ ਸੈਸ਼ਨ ਮੁੜ ਸਰਗਰਮ ਨਹੀਂ ਹੋ ਸਕਦਾ, ਜਿਸਨੂੰ ਪਾਸਵਰਡ
-  ਬਦਲਣ ਜਾਂ ਸਾਈਨ-ਆਉਟ ਕਰਨ ਨਾਲ ਪਹਿਲਾਂ ਹੀ ਖਤਮ ਕੀਤਾ ਜਾ ਚੁੱਕਾ ਹੋਵੇ।
+- `settings.oidcEnabled === true` **ਅਤੇ** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` ਸਭ ਸੰਰਚਿਤ ਹੋਣ ਤੱਕ ਬੰਦ ਰਹਿੰਦਾ ਹੈ (Settings → Auth)। ਇਸ ਤੋਂ ਬਿਨਾਂ `GET /api/auth/oidc/login` `400` ਵਾਪਸ ਕਰਦਾ ਹੈ।
+- `GET /api/auth/oidc/login` issuer ਦੇ `/.well-known/openid-configuration` ਤੋਂ `authorization_endpoint` ਲੱਭਦਾ ਹੈ (ਨਾ ਮਿਲਣ 'ਤੇ `<issuer>/authorize` ਵਰਤਦਾ ਹੈ), ਆਉਣ ਵਾਲੀ ਬੇਨਤੀ ਤੋਂ ਰੀਡਾਇਰੈਕਟ URI ਬਣਾਉਂਦਾ ਹੈ (`x-forwarded-proto` ਦਾ ਧਿਆਨ ਰੱਖਦਾ ਹੈ), ਅਤੇ `httpOnly` `oidc_state` ਕੂਕੀ ਵਿੱਚ ਰੱਖੇ ਬੇਤਰਤੀਬ `state` ਨਾਲ IdP ਵੱਲ ਰੀਡਾਇਰੈਕਟ ਕਰਦਾ ਹੈ।
+- `GET /api/auth/oidc/callback` `state` ਤਸਦੀਕ ਕਰਦਾ ਹੈ, authorization code ਦਾ ਬਦਲਾ ਕਰਦਾ ਹੈ, ਅਤੇ ID ਟੋਕਨ ਦੇ ਦਸਤਖ਼ਤ ਨੂੰ issuer ਦੇ JWKS ਰਾਹੀਂ (`jose` ਦਾ `createRemoteJWKSet`, ਹਰ JWKS URI ਲਈ ਕੈਸ਼ ਕੀਤਾ) `issuer`/`audience` ਜਾਂਚਾਂ ਨਾਲ ਤਸਦੀਕ ਕਰਦਾ ਹੈ। `oidcAllowedSubjects` ਸੂਚੀ ਲਾਜ਼ਮੀ ਹੈ: ਇਹ ਟੋਕਨ ਦੇ `sub` ਕਲੇਮ ਜਾਂ `email` ਕਲੇਮ ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਹੈ — `email` ਕਲੇਮ ਸਿਰਫ਼ ਉਦੋਂ ਮੰਨਿਆ ਜਾਂਦਾ ਹੈ ਜਦੋਂ `email_verified === true` ਹੋਵੇ, ਇਸ ਲਈ IdP 'ਤੇ ਅਪ੍ਰਮਾਣਿਤ ਈਮੇਲ ਕਦੇ ਗੇਟ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦੀ — ਅਤੇ ਬਿਨਾਂ ਕਿਸੇ ਐਂਟਰੀ ਦੇ ਕਾਲਬੈਕ ਹਰ ਲੌਗਇਨ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ (`not_configured`)।
+- ਸਫਲ ਹੋਣ 'ਤੇ ਇਹ ਪਾਸਵਰਡ ਲੌਗਇਨ ਵਾਲਾ **ਬਿਲਕੁਲ ਉਹੀ** 30-ਦਿਨਾਂ ਵਾਲਾ `auth_token` JWT ਬਣਾਉਂਦਾ ਹੈ (`src/app/api/auth/login/route.ts`), ਇਸ ਲਈ ਬਾਕੀ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਪਾਈਪਲਾਈਨ (ਆਟੋ-ਰਿਫ੍ਰੈਸ਼, ਕੂਕੀ ਫਲੈਗ) ਨਹੀਂ ਬਦਲਦੀ — OIDC ਸਿਰਫ਼ ਕੂਕੀ ਬਣਾਉਣ ਦਾ ਤਰੀਕਾ ਬਦਲਦਾ ਹੈ, ਜੋ ਉਹ ਦਿੰਦੀ ਹੈ ਉਹ ਨਹੀਂ।
+- ਹਰ `oidc*` ਸੈਟਿੰਗ (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS` ਵਿੱਚ ਹੈ (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` ਬਾਡੀ ਵਿੱਚ `currentPassword` ਵਜੋਂ ਪ੍ਰਬੰਧਨ ਪਾਸਵਰਡ ਨਾ ਹੋਣ 'ਤੇ `400 PASSWORD_REQUIRED` ਦਿੰਦਾ ਹੈ (ਗਲਤ ਹੋਣ 'ਤੇ `401 PASSWORD_MISMATCH`)। `oidcDisablePasswordLogin` ਪਾਸਵਰਡ _ਲੌਗਇਨ_ (`POST /api/auth/login`) ਨੂੰ ਰੋਕਦਾ ਹੈ ਪਰ ਸੰਗ੍ਰਹਿਤ ਪਾਸਵਰਡ ਹੈਸ਼ ਰੱਖਦਾ ਹੈ, ਅਤੇ ਮੁੜ-ਪ੍ਰਮਾਣੀਕਰਨ ਅਜੇ ਵੀ `currentPassword` ਨੂੰ ਉਸ ਦੇ ਵਿਰੁੱਧ ਜਾਂਚਦਾ ਹੈ।
+- `corsOrigins` ਅਤੇ `bruteForceProtection` ਵੀ `SECURITY_IMPACTING_SETTINGS_KEYS` ਵਿੱਚ ਹਨ: ਇਹਨਾਂ ਨੂੰ ਢਿੱਲਾ ਕਰਨ ਨਾਲ ਲੌਗਇਨ ਬਚਾਅ ਕਮਜ਼ੋਰ ਹੁੰਦੇ ਹਨ, ਇਸ ਲਈ ਇਹਨਾਂ ਨੂੰ ਵੀ ਉਹੀ `currentPassword` ਮੁੜ-ਪ੍ਰਮਾਣੀਕਰਨ ਲੱਗਦਾ ਹੈ (Security ਟੈਬ ਇਹ ਪੁੱਛਦੀ ਹੈ) ਅਤੇ JSON ਇੰਪੋਰਟ ਇਹਨਾਂ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ।
+- ਹਰ ਸੁਰੱਖਿਆ-ਨੀਤੀ ਕੁੰਜੀ — `SECURITY_IMPACTING_SETTINGS_KEYS` ਦੀਆਂ ਐਂਟਰੀਆਂ, ਹਰ `oidc*` ਕੁੰਜੀ ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਸਥਿਤੀ — `PATCH /api/settings` 'ਤੇ **ਸਿਰਫ਼ ਓਪਰੇਟਰ** ਲਈ ਹੈ: `manage` ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ ਜਾਂ `oma_` ਐਕਸੈੱਸ ਟੋਕਨ ਨੂੰ ਸਹੀ `currentPassword` ਭੇਜਣ ਦੇ ਬਾਵਜੂਦ `403` ਮਿਲਦਾ ਹੈ, ਅਤੇ ਇਹ ਇਨਕਾਰ `reason: OPERATOR_REQUIRED` ਨਾਲ `settings.update_failed` ਵਜੋਂ ਆਡਿਟ ਹੁੰਦਾ ਹੈ (`src/lib/api/operatorCredential.ts` ਵਿੱਚ `requireOperatorCredential()`)। ਆਮ ਸੈਟਿੰਗਾਂ (ਥੀਮ, ਡਿਸਪਲੇ ਪਸੰਦਾਂ) `manage` ਕੁੰਜੀ ਜਾਂ `admin` ਐਕਸੈੱਸ ਟੋਕਨ ਲਈ ਲਿਖਣਯੋਗ ਰਹਿੰਦੀਆਂ ਹਨ। `/api/settings` ਦੀ ਹਰ ਤਬਦੀਲੀ ਖੁਦ (ਅਤੇ `/api/settings/require-login` ਦੀ) ਨੂੰ ਵੀ `admin` ਐਕਸੈੱਸ-ਟੋਕਨ ਸਕੋਪ ਚਾਹੀਦਾ ਹੈ (`src/server/authz/accessScopes.ts` ਵਿੱਚ `ADMIN_MUTATION_EXACT_PATHS`, ਸਟੀਕ ਪਾਥ ਮੇਲ); `GET` `read` ਰਹਿੰਦਾ ਹੈ, ਅਤੇ `/api/settings/*` ਦੇ ਹੋਰ ਸਬ-ਰੂਟ (ਪ੍ਰਾਕਸੀ, ਕੰਬੋ ਡਿਫਾਲਟ, ਮਾਡਲ ਉਪਨਾਮ, ਕੰਪਰੈਸ਼ਨ, ਸਫਾਈ…) ਆਪਣੇ ਤਰੀਕੇ ਤੋਂ ਅਨੁਮਾਨਿਤ `write` ਸਕੋਪ ਰੱਖਦੇ ਹਨ।
+- `POST /api/settings/import-json` ਇਹ ਮੁੜ-ਪ੍ਰਮਾਣੀਕਰਨ ਛੱਡ ਦਿੰਦਾ ਹੈ, ਇਸ ਲਈ ਲਿਖਣ ਤੋਂ ਪਹਿਲਾਂ ਉਸੇ ਫਾਈਲ ਦੀਆਂ `IMPORT_STRIPPED_SETTINGS_KEYS` ਸਾਰੀਆਂ ਕੁੰਜੀਆਂ ਹਟਾ ਦਿੰਦਾ ਹੈ: ਪਾਸਵਰਡ ਅਤੇ `currentPassword`, ਹਰ `SECURITY_IMPACTING_SETTINGS_KEYS` ਐਂਟਰੀ, ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਸਥਿਤੀ (`sessionsValidAfter`, `revokedDashboardSessions`)। ਇਸ ਲਈ ਪੁਰਾਣਾ ਬੈਕਅੱਪ ਇੰਪੋਰਟ ਕਰਨ ਨਾਲ ਉਹ ਸੈਸ਼ਨ ਮੁੜ ਜ਼ਿੰਦਾ ਨਹੀਂ ਹੋ ਸਕਦਾ ਜੋ ਪਾਸਵਰਡ ਬਦਲਣ ਜਾਂ ਸਾਈਨ-ਆਉਟ ਨਾਲ ਖ਼ਤਮ ਹੋ ਚੁੱਕਾ ਸੀ।
 
 ## ਰੂਟ ਕਲਾਸਾਂ
 
-`src/server/authz/types.ts` ਤਿੰਨ ਕਲਾਸਾਂ ਪਰਿਭਾਸ਼ਿਤ ਕਰਦੀ ਹੈ; ਕੋਈ ਵੀ ਰੂਟ ਜਿਸਨੂੰ ਨਿਸ਼ਚਿਤ ਤੌਰ 'ਤੇ ਵਰਗੀਕ੍ਰਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ, ਡਿਫਾਲਟ ਰੂਪ ਵਿੱਚ `MANAGEMENT` ਵਿੱਚ ਚਲਾ ਜਾਂਦਾ ਹੈ।
+`src/server/authz/types.ts` ਤਿੰਨ ਕਲਾਸਾਂ ਪਰਿਭਾਸ਼ਿਤ ਕਰਦਾ ਹੈ; ਕੋਈ ਵੀ ਰੂਟ ਜਿਸਨੂੰ ਨਿਰਣਾਇਕ ਤੌਰ 'ਤੇ ਵਰਗੀਕ੍ਰਿਤ ਨਾ ਕੀਤਾ ਜਾ ਸਕੇ, `MANAGEMENT` 'ਤੇ ਡਿੱਗ ਜਾਂਦਾ ਹੈ।
 
-| ਕਲਾਸ         | ਵੇਰਵਾ                                                                                                                                               | ਪ੍ਰਮਾਣਿਕਤਾ ਲੋੜੀਂਦੀ ਹੈ                                               |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `PUBLIC`     | ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਸੁਰੱਖਿਅਤ ਰੂਟ — ਲੌਗਇਨ, ਲੌਗਆਉਟ, ਸਥਿਤੀ, ਸ਼ੁਰੂਆਤ, ਸਿਹਤ, ਆਨਬੋਰਡਿੰਗ ਬੂਟਸਟਰੈਪ।                                                               | ਕੋਈ ਨਹੀਂ                                                            |
-| `CLIENT_API` | ਮਾਡਲ-ਸੇਵਾ ਐਂਡਪੌਇੰਟ — `/api/v1/*`, `/api/v1beta/*`, ਅਤੇ ਨਾਲ ਹੀ ਉਪਨਾਮ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`। | ਜਦੋਂ ਪ੍ਰਭਾਵੀ `REQUIRE_API_KEY` ਫੀਚਰ ਫਲੈਗ ਸਮਰੱਥ ਹੋਵੇ ਤਾਂ ਬੇਅਰਰ ਕੁੰਜੀ |
-| `MANAGEMENT` | ਡੈਸ਼ਬੋਰਡ ਪੰਨੇ, ਸੈਟਿੰਗਾਂ, ਪ੍ਰਦਾਤਾ, ਕੁੰਜੀਆਂ, ਐਡਮਿਨ ਅਤੇ ਡਾਇਗਨੌਸਟਿਕਸ ਐਂਡਪੌਇੰਟ।                                                                          | ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਜਾਂ `manage` ਸਕੋਪ ਵਾਲਾ ਬੇਅਰਰ                         |
+| ਕਲਾਸ         | ਵੇਰਵਾ                                                                                                                                        | ਲੋੜੀਂਦਾ ਪ੍ਰਮਾਣੀਕਰਨ                                              |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `PUBLIC`     | ਸਪੱਸ਼ਟ ਤੌਰ 'ਤੇ ਸੁਰੱਖਿਅਤ ਰੂਟ — ਲੌਗਇਨ, ਲੌਗਆਉਟ, ਸਥਿਤੀ, ਸ਼ੁਰੂਆਤ, ਹੈਲਥ, ਔਨਬੋਰਡਿੰਗ ਬੂਟਸਟ੍ਰੈਪ।                                                      | ਕੋਈ ਨਹੀਂ                                                        |
+| `CLIENT_API` | ਮਾਡਲ-ਸੇਵਾ ਐਂਡਪੌਇੰਟ — `/api/v1/*`, `/api/v1beta/*`, ਅਤੇ ਉਪਨਾਮ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`। | Bearer ਕੁੰਜੀ ਜਦੋਂ ਪ੍ਰਭਾਵੀ `REQUIRE_API_KEY` ਫੀਚਰ ਫਲੈਗ ਚਾਲੂ ਹੋਵੇ |
+| `MANAGEMENT` | ਡੈਸ਼ਬੋਰਡ ਪੰਨੇ, ਸੈਟਿੰਗਾਂ, ਪ੍ਰਦਾਤਾ, ਕੁੰਜੀਆਂ, ਐਡਮਿਨ ਅਤੇ ਡਾਇਗਨੌਸਟਿਕ ਐਂਡਪੌਇੰਟ।                                                                    | ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਜਾਂ `manage` ਸਕੋਪ ਵਾਲਾ Bearer                    |
 
-ਕੁਝ `MANAGEMENT` ਕਾਰਵਾਈਆਂ **ਸਿਰਫ਼ ਆਪਰੇਟਰ ਲਈ** ਹਨ: ਇੱਕ `manage` ਕੁੰਜੀ ਕਾਫ਼ੀ ਨਹੀਂ ਹੈ। ਸਟੋਰ ਕੀਤੇ
-ਕ੍ਰੈਡੈਂਸ਼ਲਾਂ ਨੂੰ ਐਕਸਪੋਰਟ ਕਰਨ (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), ਸਿੰਕ ਟੋਕਨ ਜਾਰੀ ਕਰਨ (`POST /api/sync/tokens`) ਅਤੇ ਇੱਕ
-`admin` CLI ਐਕਸੈੱਸ ਟੋਕਨ ਬਣਾਉਣ (`POST /api/cli/tokens`) ਲਈ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਸਥਾਨਕ CLI
-ਸਬਜੈਕਟ, ਜਾਂ ਅਸਮਰੱਥ ਕੀਤਾ ਲੌਗਇਨ ਲੋੜੀਂਦਾ ਹੈ; ਕਿਸੇ ਵੀ ਸਕੋਪ ਦੀਆਂ API ਕੁੰਜੀਆਂ ਅਤੇ `oma_` ਐਕਸੈੱਸ ਟੋਕਨਾਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ। ਇਹ ਜਾਂਚ
-`src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`) ਵਿੱਚ ਮੌਜੂਦ ਹੈ।
-
-A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
-credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), restoring a backup over the live data
-(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
-`POST /api/settings/import-json`), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
-lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
+ਕੁਝ `MANAGEMENT` ਕਾਰਵਾਈਆਂ **ਸਿਰਫ਼ ਓਪਰੇਟਰ** ਲਈ ਹਨ: `manage` ਕੁੰਜੀ ਕਾਫ਼ੀ ਨਹੀਂ। ਸਟੋਰ ਕੀਤੇ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਐਕਸਪੋਰਟ ਕਰਨਾ (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ਲਾਈਵ ਡੇਟਾ ਉੱਤੇ ਬੈਕਅੱਪ ਰੀਸਟੋਰ ਕਰਨਾ (`dryRun=true` ਸਮੇਤ `POST /api/db-backups/import`, ਆਈਡੀ ਰਾਹੀਂ ਰੀਸਟੋਰ `POST /api/db-backups`, `POST /api/settings/import-json`), ਅਤੇ ਰੀਸਟੋਰ ਪੌਇੰਟ ਨਸ਼ਟ ਕਰਨਾ (`DELETE /api/db-backups` ਸਫਾਈ, ਅਤੇ `PATCH /api/db-backups` ਕਿਉਂਕਿ ਇਹ ਜੋ ਰੱਖ-ਰਖਾਵ ਸੰਭਾਲਦਾ ਹੈ ਉਹ ਹਰ ਬੈਕਅੱਪ ਤੋਂ ਬਾਅਦ ਆਟੋਮੈਟਿਕ ਛਾਂਟੀ ਚਲਾਉਂਦਾ ਹੈ) ਲਈ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਲੋਕਲ CLI ਸਬਜੈਕਟ, ਜਾਂ ਲੌਗਇਨ ਬੰਦ ਹੋਣਾ ਲੋੜੀਂਦਾ ਹੈ। ਸਿੰਕ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ (`POST /api/sync/tokens`) ਅਤੇ `admin` CLI ਐਕਸੈੱਸ ਟੋਕਨ ਬਣਾਉਣਾ (`POST /api/cli/tokens`) ਹਰ ਲੌਗਇਨ ਮੋਡ ਵਿੱਚ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਜਾਂ ਲੋਕਲ CLI ਸਬਜੈਕਟ ਮੰਗਦੇ ਹਨ। ਕਿਸੇ ਵੀ ਸਕੋਪ ਦੀਆਂ API ਕੁੰਜੀਆਂ ਅਤੇ `oma_` ਐਕਸੈੱਸ ਟੋਕਨ ਓਪਰੇਟਰ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਨਹੀਂ ਹਨ: ਜਦੋਂ ਵੀ ਇਹ ਲੋੜੀਂਦਾ ਹੋਵੇ, ਉਹਨਾਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ। ਇਹ ਜਾਂਚ `src/lib/api/operatorCredential.ts` ਵਿੱਚ ਹੈ (`resolveOperatorCredential()` / `requireOperatorCredential()`)। ਲੌਗਇਨ ਸੈਟਿੰਗਾਂ ਬਦਲਣਾ ਵੀ ਸਿਰਫ਼ ਓਪਰੇਟਰ ਲਈ ਹੈ: `POST /api/settings/require-login` (ਪ੍ਰਬੰਧਨ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰਨਾ / `requireLogin` ਟੌਗਲ ਕਰਨਾ) ਇੱਕ ਵਾਰ ਪਾਸਵਰਡ ਮੌਜੂਦ ਹੋਣ 'ਤੇ ਸਿਰਫ਼ ਉਹੀ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ — ਪਹਿਲੀ-ਵਾਰ ਬੂਟਸਟ੍ਰੈਪ ਵਿੰਡੋ (ਅਜੇ ਪਾਸਵਰਡ ਨਹੀਂ) ਨਹੀਂ ਬਦਲਦੀ — ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਨੂੰ ਪਾਸਵਰਡ ਬਦਲਣ ਲਈ `currentPassword` ਭੇਜਣਾ ਪੈਂਦਾ ਹੈ (ਗੈਰ-ਮੌਜੂਦ ਜਾਂ ਗਲਤ ਹੋਣ 'ਤੇ `403`, `settings.update_failed` ਵਜੋਂ ਆਡਿਟ ਹੁੰਦਾ ਹੈ)। ਲੋਕਲ CLI ਅਤੇ ਲੌਗਇਨ ਬੰਦ ਵਾਲਾ ਇੰਸਟੈਂਸ ਰਿਕਵਰੀ ਰਸਤਾ ਰੱਖਦੇ ਹਨ ਅਤੇ ਇਸ ਤੋਂ ਬਿਨਾਂ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰ ਸਕਦੇ ਹਨ, ਕਿਉਂਕਿ ਦੋਵੇਂ ਉਸ ਹੋਸਟ ਨਾਲ ਬੱਝੇ ਹਨ ਜੋ ਡੇਟਾ ਡਾਇਰੈਕਟਰੀ ਦਾ ਮਾਲਕ ਹੈ।
 
 ## ਪਾਈਪਲਾਈਨ
 
@@ -266,15 +215,15 @@ MCP ਪ੍ਰਮਾਣਿਕਤਾ ਜਾਣਕਾਰੀ, ਬੇਨਤੀ ਮੈ
 (`src/lib/accessTokens/scopes.ts`) ਦੁਆਰਾ ਦਰਜਾਬੰਦੀ ਕੀਤੀ ਗਈ। ਇਹ ਰੈਂਕ ਸਿਰਫ਼ ਐਕਸੈਸ-ਟੋਕਨ
 ਪ੍ਰਮਾਣ ਪੱਤਰ 'ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ। ਦੇਖੋ [ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣਿਕਤਾ](../guides/MANAGEMENT-AUTH.md)।
 
-## ਪ੍ਰਮਾਣੀਕਰਨ ਲੋੜੀਂਦਾ ਟੌਗਲ
+## ਔਥ ਲੋੜੀਂਦਾ ਟੌਗਲ
 
-`src/shared/utils/apiAuth.ts` ਵਿੱਚ `isAuthRequired()` ਇਹ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ ਕਿ ਕਿਸੇ ਬੇਨਤੀ ਲਈ **ਕੋਈ ਵੀ** ਪ੍ਰਮਾਣੀਕਰਨ ਲਾਗੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਜਾਂ ਨਹੀਂ:
+`src/shared/utils/apiAuth.ts` ਵਿੱਚ `isAuthRequired()` ਫੈਸਲਾ ਕਰਦਾ ਹੈ ਕਿ ਕਿਸੇ ਬੇਨਤੀ ਲਈ **ਕੋਈ ਵੀ** ਪ੍ਰਮਾਣੀਕਰਨ ਲਾਗੂ ਹੋਵੇਗਾ ਜਾਂ ਨਹੀਂ:
 
-- `settings.requireLogin === false` → ਪ੍ਰਮਾਣੀਕਰਨ ਗਲੋਬਲ ਤੌਰ 'ਤੇ ਅਯੋਗ ਹੈ।
-- ਕੋਈ ਪਾਸਵਰਡ ਸੰਰਚਿਤ ਨਹੀਂ ਹੈ **ਅਤੇ** ਕੋਈ `INITIAL_PASSWORD` ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ ਨਹੀਂ ਹੈ → ਬੂਟਸਟਰੈਪ ਮੋਡ ਆਨਬੋਰਡਿੰਗ ਵਿਜ਼ਾਰਡ ਅਤੇ ਲੂਪਬੈਕ ਬੇਨਤੀਆਂ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਪਰ ਨੈੱਟਵਰਕ 'ਤੇ ਉਪਲਬਧ ਬੇਨਤੀਆਂ ਲਈ ਫਿਰ ਵੀ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਲੋੜੀਂਦੇ ਹਨ।
-- ਕੋਈ ਵੀ DB ਗਲਤੀ → ਪਹੁੰਚ ਬੰਦ ਰੱਖਦਾ ਹੈ (ਮੂਲ ਰੂਪ ਵਿੱਚ ਸੁਰੱਖਿਅਤ)।
+- `settings.requireLogin === false` → ਪ੍ਰਮਾਣੀਕਰਨ ਵਿਸ਼ਵ-ਪੱਧਰ 'ਤੇ ਬੰਦ ਹੈ, ਸਿਵਾਏ ਹਮੇਸ਼ਾ-ਸੁਰੱਖਿਅਤ ਟੀਅਰ (ਵੇਖੋ [ਰੂਟ ਗਾਰਡ ਟੀਅਰ](../security/ROUTE_GUARD_TIERS.md)) ਅਤੇ ਉਹਨਾਂ ਕਾਲਾਂ ਦੇ ਜੋ ਉਹ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਦਿੰਦੀਆਂ ਹਨ ਜੋ ਇਹ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ — ਇਹਨਾਂ ਨੂੰ ਉਹੀ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਚਾਹੀਦਾ ਹੈ ਜਿਵੇਂ ਲੌਗਇਨ ਚਾਲੂ ਹੋਣ 'ਤੇ: ਸਿੰਕ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ, ਕਿਸੇ ਵੀ ਸਕੋਪ 'ਤੇ CLI ਐਕਸੈੱਸ ਟੋਕਨ ਬਣਾਉਣਾ, ਅਤੇ `manage`/`admin` ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ ਬਣਾਉਣਾ, ਉਸ ਸਕੋਪ ਨੂੰ ਕਿਸੇ ਕੁੰਜੀ ਨੂੰ ਦੇਣਾ, ਜਾਂ ਅਜਿਹੀ ਕੁੰਜੀ ਨੂੰ ਮੁੜ-ਬਣਾਉਣਾ ਜਾਂ ਦਿਖਾਉਣਾ (`src/lib/api/requireManagementAuth.ts` ਵਿੱਚ `requireCredentialForManagementScopedKey()`)। ਇਨਫਰੈਂਸ-ਸਿਰਫ਼ ਕੁੰਜੀਆਂ ਖੁੱਲ੍ਹੀਆਂ ਰਹਿੰਦੀਆਂ ਹਨ।
+- ਕੋਈ ਪਾਸਵਰਡ ਸੰਰਚਿਤ ਨਹੀਂ **ਅਤੇ** ਕੋਈ `INITIAL_PASSWORD` ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ ਨਹੀਂ → ਬੂਟਸਟ੍ਰੈਪ ਮੋਡ ਔਨਬੋਰਡਿੰਗ ਵਿਜ਼ਾਰਡ ਅਤੇ ਲੋਕਲ ਬੇਨਤੀਆਂ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦਾ ਹੈ, ਪਰ ਬਾਹਰੀ ਨੈੱਟਵਰਕ ਬੇਨਤੀਆਂ ਨੂੰ ਅਜੇ ਵੀ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਚਾਹੀਦੇ ਹਨ।
+- ਕੋਈ ਵੀ DB ਗਲਤੀ → ਬੰਦ ਹੋ ਕੇ ਫੇਲ੍ਹ ਹੁੰਦਾ ਹੈ (ਡਿਫਾਲਟ ਤੌਰ 'ਤੇ ਸੁਰੱਖਿਅਤ)।
 
-ਕਲਾਇੰਟ API ਕੁੰਜੀ ਲਾਗੂਕਰਨ `process.env.REQUIRE_API_KEY` ਨੂੰ ਸਿੱਧਾ ਪੜ੍ਹਨ ਦੀ ਬਜਾਏ `src/shared/utils/featureFlags.ts` ਵਿੱਚ `isRequireApiKeyEnabled()` ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ। ਇਹ ਡਿਪਲੌਇ ਕੀਤੀਆਂ ਇੰਸਟੈਂਸਾਂ ਲਈ ਮਹੱਤਵਪੂਰਨ ਹੈ: Dashboard → Feature Flags ਵਿੱਚ `REQUIRE_API_KEY` ਨੂੰ ਟੌਗਲ ਕਰਨ ਨਾਲ DB ਓਵਰਰਾਈਡ ਸਟੋਰ ਹੁੰਦਾ ਹੈ ਅਤੇ ਇਹ ਤੁਰੰਤ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, ਅਤੇ ਇਸ ਸਹਾਇਕ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਵਾਲੀਆਂ ਹੋਰ ਕਲਾਇੰਟ-API ਪ੍ਰਮਾਣੀਕਰਨ ਜਾਂਚਾਂ ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕਰਦਾ ਹੈ। ਜੇ ਫੀਚਰ ਫਲੈਗ ਸਟੋਰ ਨੂੰ ਪੜ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ, ਤਾਂ ਕਲਾਇੰਟ API ਪ੍ਰਮਾਣੀਕਰਨ ਪਹੁੰਚ ਬੰਦ ਰੱਖਦਾ ਹੈ ਅਤੇ ਕੁੰਜੀ ਦੀ ਮੰਗ ਕਰਦਾ ਹੈ।
+ਕਲਾਇੰਟ API ਕੁੰਜੀ ਲਾਗੂਕਰਨ `src/shared/utils/featureFlags.ts` ਵਿੱਚ `isRequireApiKeyEnabled()` ਵਰਤਦਾ ਹੈ, ਨਾ ਕਿ ਸਿੱਧਾ `process.env.REQUIRE_API_KEY` ਪੜ੍ਹਨਾ। ਇਹ ਤਾਇਨਾਤ ਇੰਸਟੈਂਸਾਂ ਲਈ ਮਾਇਨੇ ਰੱਖਦਾ ਹੈ: ਡੈਸ਼ਬੋਰਡ → Feature Flags ਵਿੱਚ `REQUIRE_API_KEY` ਬਦਲਣ ਨਾਲ DB ਓਵਰਰਾਈਡ ਸਟੋਰ ਹੁੰਦਾ ਹੈ ਅਤੇ ਤੁਰੰਤ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ਅਤੇ ਹੋਰ ਕਲਾਇੰਟ-API ਪ੍ਰਮਾਣੀਕਰਨ ਜਾਂਚਾਂ 'ਤੇ ਅਸਰ ਪਾਉਂਦਾ ਹੈ, ਜੋ ਇਸ ਹੈਲਪਰ ਨੂੰ ਸਾਂਝਾ ਕਰਦੀਆਂ ਹਨ। ਜੇ ਫੀਚਰ ਫਲੈਗ ਸਟੋਰ ਪੜ੍ਹਿਆ ਨਾ ਜਾ ਸਕੇ, ਤਾਂ ਕਲਾਇੰਟ API ਪ੍ਰਮਾਣੀਕਰਨ ਬੰਦ ਹੋ ਕੇ ਫੇਲ੍ਹ ਹੁੰਦਾ ਹੈ ਅਤੇ ਕੁੰਜੀ ਲਾਜ਼ਮੀ ਕਰਦਾ ਹੈ।
 
 ## ਅਸੰਗਤ ਤਬਦੀਲੀ — v3.8.0
 

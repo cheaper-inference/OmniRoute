@@ -36,7 +36,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const rawBody = await request.json();
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
     const validation = validateBody(skillsshInstallSchema, rawBody);
     if (isValidationFailure(validation)) {
       return NextResponse.json(validation.error, { status: 400 });

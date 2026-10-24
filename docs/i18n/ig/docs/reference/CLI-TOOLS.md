@@ -45,67 +45,67 @@ Ndị nnọchi anya ACP (usoro mbido ntụgharị azụ):
 
 ## Jiri `setup-*` hazie ya na-akpaghị aka
 
-Ịkwesịghị iji aka dee config nke ngwa ọ bụla. OmniRoute nwere iwu `setup-*`
-maka CLI ọ bụla a na-akwado, nke na-agụ katalọgụ model **dị ndụ** site na
-OmniRoute na-agba ọrụ (nke mpaghara ma ọ bụ nke dị anya), wee dee config nke
-ngwa ahụ n’onwe ya na kọmputa gị:
+Ị gaghị eji aka dee nhazi nke ngwaọrụ ọ bụla. OmniRoute na-eweta iwu `setup-*`
+maka CLI ọ bụla ọ na-akwado, nke na-agụ katalọgụ model **dị ugbu a** site na
+OmniRoute na-agba ọsọ (nke mpaghara ma ọ bụ nke dị anya), wee dee nhazi nke
+ngwaọrụ ahụ n'onwe ya na kọmputa gị:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Nke ọ bụla na-anabata `--remote <url> --api-key <key>` (iji hazie ngwa mpaghara
-ka ọ rụọ ọrụ megide OmniRoute dị anya), `--dry-run` (iji hụ ihe a ga-eme n’edeghị
-ihe ọ bụla), na `--port`. Ngwa ndị na-enweghị nchọpụta model na-akpaghị aka
-(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) na-eji `--model <id>` (yana `--yes`
-maka ịgba ọsọ na-enweghị mkparịta ụka). `setup-5dive` bụ naanị usoro nhazi
-na-adịghị ede ihe n’okpuru `$HOME`: ọ na-ahazi otu ìgwè ndị nnọchi anya 5dive
-site n’ide profaịlụ auth nke root nwe na host nke ìgwè ahụ, ya mere ọ na-eji
-`sudo` malitegharịa onwe ya ma ọ nweghị mode dị anya nke ya. Iji malite CLI
-ka etinyere env kwesịrị ekwesị n’edeghị config ọ bụla ma ọlị, jiri launcher
-izugbe `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — targets na aliases sitere na `bin/cli/cli-manifest.mjs`); launchers
-ochie akọwapụtara maka ngwa ọ bụla, `omniroute launch` (Claude Code) na
-`omniroute launch-codex` (Codex), ka dịkwa. Gemini CLI bụ naanị maka mmalite:
-ọ bụ target nke `omniroute run`, mana o nweghị usoro `setup-*`/`configure`.
+Nke ọ bụla na-anabata `--remote <url> --api-key <key>` (iji hazie ngwaọrụ mpaghara
+ka ọ rụọ ọrụ megide OmniRoute dị anya), `--dry-run` (iji hụ ihe ga-eme n'ebughị ụzọ
+dee ya), na `--port`. Ngwaọrụ ndị na-enweghị nchọpụta model na-akpaghị aka (Cline,
+Kilo, Roo, Goose, Aider, Qwen, 5dive) na-anabata `--model <id>` (yana `--yes` maka
+ọrụ ndị anaghị achọ mmekọrịta onye ọrụ). `setup-5dive` bụ naanị usoro nhazi nke
+na-adịghị ede n'okpuru `$HOME`: ọ na-ahazi ìgwè agent 5dive site n'ide profaịlụ
+njirimara nke root nwe n'elu host nke ìgwè ahụ, ya mere ọ na-eji `sudo` malite onwe
+ya ọzọ, ọ nweghịkwa ọnọdụ nke ya maka ọrụ dị anya. Iji malite CLI nke etinyere env
+kwesịrị ekwesị n'edeghị nhazi ọ bụla ma ọlị, jiri ihe mmalite izugbe
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
+gemini — target na aha nnọchi ha sitere na `bin/cli/cli-manifest.mjs`); ihe
+mmalite ochie pụrụ iche maka ngwaọrụ ọ bụla, `omniroute launch` (Claude Code) na
+`omniroute launch-codex` (Codex), ka dịkwa. Gemini CLI bụ naanị maka mmalite: ọ bụ
+target nke `omniroute run` mana o nweghị usoro `setup-*`/`configure`.
 
-> **Nrụtụaka zuru ezu:** tebụl ukwu ahụ — ihe iwu ọ bụla na-ede, flag ọ bụla,
-> nke mpaghara megide nke dị anya, na ngwa ndị chọrọ suffix `/v1` — dị na
-> **[Njikọ CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Nkọwa zuru ezu:** tebụl isi — ihe iwu ọ bụla na-ede, flag niile,
+> mpaghara megide nke dị anya, na ngwaọrụ ndị chọrọ mgbakwunye `/v1` — dị na
+> **[Njikọta CLI](../guides/CLI-INTEGRATIONS.md)**.
 
-### Ịgba ndị a n’ime container
+### Ịgba ndị a n'ime container
 
-Iwu `setup-*` e gburu n’ime container OmniRoute na-ede ihe n’ime home nke
-container ahụ n’onwe ya, nke CLI ọ bụla dị na host anaghị agụ ma nke na-apụ
-mgbe container ahụ kwụsịrị ịdị. OmniRoute na-achọpụta nke ahụ wee jiri `2`
-kwụsị, yana ntuziaka, kama ide ihe. E nwere ụzọ abụọ a na-akwado iji gaa n’ihu
-— wụnye CLI na host wee jiri `omniroute connect` jikọọ na container ahụ, ma ọ
-bụ jiri bind-mount tinye config dirs ma tọọ `CLI_CONFIG_HOME` (profaịlụ compose
-`host`). Iwu `setup-*` ọ bụla, tinyere `omniroute configure` na
-`omniroute config set`, na-anabata `--allow-container-write` mgbe ihe i bu
-n’obi n’ezie bụ ịhazi CLI nke container ahụ n’onwe ya;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` na-emekwa otu ihe ahụ maka sava.
-Lee
-[Ntuziaka Docker → Ịhazị ngwa CLI nke host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Iwu `setup-*` e mere n'ime container OmniRoute na-ede n'ime home nke container
+ahụ n'onwe ya, nke CLI ọ bụla dị na host anaghị agụ, nke ga-apụkwa mgbe container
+ahụ kwụsịrị ịdị. OmniRoute na-achọpụta nke ahụ ma jiri koodu `2` kwụsị, na-enye
+ntuziaka kama ide ihe. E nwere ụzọ abụọ akwadoro iji gaa n'ihu — wụnye CLI na
+host ma jiri `omniroute connect` jikọọ na container ahụ, ma ọ bụ jiri bind-mount
+tinye ndekọ nhazi ma tọọ `CLI_CONFIG_HOME` (profaịlụ compose `host`). Iwu
+`setup-*` ọ bụla, tinyere `omniroute configure` na `omniroute config set`, na-anabata
+`--allow-container-write` mgbe ihe ị chọrọ n'ezie bụ ịhazi CLI nke container ahụ
+n'onwe ya; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` na-emekwa otu ihe ahụ
+maka sava ahụ. Lee
+[Nduzi Docker → Ịhazi ngwaọrụ CLI nke host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Apply endpoint** nke dashboard (`POST /api/cli-tools/apply`) na-amanye otu
-nchedo ahụ: n’ime container, ide ihe nke target ya na-esiteghị na host site na
-bind-mount na-aza **`422`** yana `containerEphemeralTarget: true`, ederede njehie
-nchekwa na — maka ngwa ndị nwere usoro host (claude, codex, opencode, cline,
-kilo, continue) — `hostSetupCommand` (dịka `omniroute setup-opencode`) nke a
-ga-agba na host kama ime ya ebe ahụ; ọ dịghị ihe a na-ede. `dryRun: true` ka
-na-arụ ọrụ na mode container ma na-eweghachi nlele e kpuchiri ozi nzuzo + ụzọ
-target n’emetụghị disk aka. Ọdịnaya nlele abụghị nhazi nwere credential nke
-a ga-edepụta ma ọ bụ bubata. Tinye ya na host site n’iji tool/base URL/API key/model
-inputs mbụ, ma ọ bụ jiri iwu nhazi nke dị n’akụkụ host e gosiri. Lee
-[Nchekwa nhazi CLI](../security/CLI-CONFIGURATION.md) maka header nlele na nkwekọrịta
-arịrịọ. Omume a bụ nke e mere n’ebumnobi ma regression guard na-echekwa ya site na
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — emela mgbe ọ bụla ka
-ị “dozie” 422 site n’iwepụ guard ahụ.
+**Endpoint itinye n'ọrụ** nke dashboard (`POST /api/cli-tools/apply`) na-amanye
+otu ihe mgbochi ahụ: n'ime container, ọrụ ide ihe nke target ya na-esiteghị na
+host mee bind-mount na-aza **`422`** yana `containerEphemeralTarget: true`, ederede
+njehie dị nchebe na — maka ngwaọrụ ndị nwere usoro nhazi host (claude, codex,
+opencode, cline, kilo, continue) — `hostSetupCommand` (dịka
+`omniroute setup-opencode`) a ga-agba na host kama; a naghị ede ihe ọ bụla.
+`dryRun: true` ka na-arụ ọrụ n'ọnọdụ container ma na-eweghachi nlele e zoro
+ozi nzuzo ya + path target n'emetụghị diski aka. Ọdịnaya nlele abụghị nhazi nwere
+ozi nzere nke a ga-edegharị ma ọ bụ bubata. Tinye ya n'ọrụ na host site na iji
+ngwaọrụ mbụ/base URL/igodo API/model e nyere, ma ọ bụ jiri iwu nhazi nke host
+egosiri. Lee [Nchekwa nhazi CLI](../security/CLI-CONFIGURATION.md)
+maka header nlele na nkwekọrịta request. Omume a bụ nke e mere ụma ma ule
+nloghachi-mmejọ na-echekwa ya na
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — emela ka ị "dozie" 422
+site n'iwepụ ihe mgbochi ahụ.
 
 ---
 
@@ -148,9 +148,9 @@ otu mpaghara na-enweghị ndị ọzọ na-eme ka test suite daa kama ikwe ka nd
 
 ---
 
-## 1. Katalọgụ Koodu CLI (ngwaọrụ 26)
+## 1. Katalọgụ CLI Code (ngwaọrụ 27)
 
-Ngwaọrụ niile pụtara na `/dashboard/cli-code`. Ndị nwere `baseUrlSupport: none` na-eji MITM ma ọ bụ ntuziaka aka arụ ọrụ kama iji URL ntọala ahaziri iche:
+Ngwaọrụ niile pụtara na `/dashboard/cli-code`. A na-ejikọta ndị nwere `baseUrlSupport: none` site na MITM ma ọ bụ ntuziaka aka kama iji URL ntọala ahaziri iche:
 
 | id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
@@ -175,6 +175,7 @@ Ngwaọrụ niile pụtara na `/dashboard/cli-code`. Ndị nwere `baseUrlSupport
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
@@ -184,9 +185,9 @@ Ngwaọrụ niile pụtara na `/dashboard/cli-code`. Ndị nwere `baseUrlSupport
 Ngwaọrụ nwere `baseUrlSupport: "partial"` na-egosi baajị "⚠ URL ntọala ezughị ezu" na kaadị dashboard.
 ---
 
-## 2. Katalọgụ Ndị Agent CLI (ngwaọrụ 10)
+## 2. Katalọgụ Ndị Ọrụ CLI (ngwaọrụ 10)
 
-Ndị agent na-arụ ọrụ n'onwe ha nke na-apụta na `/dashboard/cli-agents`:
+Ndị ọrụ nọọrọ onwe ha na-apụta na `/dashboard/cli-agents`:
 
 | id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |

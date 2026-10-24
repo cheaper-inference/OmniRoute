@@ -1,1 +1,0 @@
-- **chore(quality):** raise every file-size ceiling by 20% so contributor fixes a few lines over a zero-slack freeze can land during the v3.8.52 drain. Coverage, complexity, and eslint budgets are unchanged.

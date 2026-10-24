@@ -1,1 +1,0 @@
-- **fix(models):** preserve upstream model namespaces when resolving static tool and context capabilities, so AI Horde models cannot inherit DeepSeek capabilities from a matching leaf name. Provider-qualified public spec lookups and the vision-only leaf fallback remain supported.

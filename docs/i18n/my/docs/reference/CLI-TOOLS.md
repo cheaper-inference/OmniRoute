@@ -43,63 +43,30 @@ ACP Agents (ပြောင်းပြန် စတင်ပေးသည့် 
 
 ---
 
-## `setup-*` ဖြင့် အလိုအလျောက် configure လုပ်ခြင်း
+## `setup-*` ဖြင့် အလိုအလျောက် စီစဉ်သတ်မှတ်ခြင်း
 
-ကိရိယာတစ်ခုချင်းစီ၏ config ကို ကိုယ်တိုင် ရေးရန် မလိုပါ။ OmniRoute တွင် ပံ့ပိုးထားသော CLI တစ်ခုစီအတွက် `setup-*`
-command တစ်ခု ပါရှိပြီး၊ ၎င်းသည် အလုပ်လုပ်နေသော OmniRoute (local သို့မဟုတ် remote) မှ **live** model catalog ကို
-ဖတ်ကာ သင့်စက်ပေါ်ရှိ ကိရိယာ၏ ကိုယ်ပိုင် config ကို ရေးပေးသည်-
+Tool တစ်ခုချင်းစီ၏ config ကို ကိုယ်တိုင်ရေးသားရန် မလိုအပ်ပါ။ OmniRoute တွင် ပံ့ပိုးထားသည့် CLI တစ်ခုချင်းစီအတွက် `setup-*` command တစ်ခုစီ ပါဝင်ပြီး၊ ၎င်းသည် လည်ပတ်နေသော OmniRoute (local သို့မဟုတ် remote) မှ **လက်ရှိအသုံးပြုနေသည့်** model catalog ကို ဖတ်ရှုပြီး သင့်စက်ပေါ်ရှိ သက်ဆိုင်ရာ tool ၏ ကိုယ်ပိုင် config ကို ရေးသားပေးသည်-
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-တစ်ခုချင်းစီသည် `--remote <url> --api-key <key>` (local ကိရိယာတစ်ခုကို remote OmniRoute နှင့် အလုပ်လုပ်ရန်
-configure လုပ်ခြင်း)၊ `--dry-run` (မရေးမီ အကြိုကြည့်ရှုခြင်း) နှင့် `--port` တို့ကို လက်ခံသည်။ Model
-auto-discovery မရှိသော ကိရိယာများ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) သည်
-`--model <id>` (နှင့် interactive မဟုတ်သော run များအတွက် `--yes`) ကို လက်ခံသည်။ `setup-5dive` သည်
-`$HOME` အောက်တွင် မရေးသော တစ်ခုတည်းသော recipe ဖြစ်သည်။ ၎င်းသည် fleet host ပေါ်တွင် root ပိုင်ဆိုင်သော auth profile
-တစ်ခုကို ရေးခြင်းဖြင့် 5dive agent fleet ကို configure လုပ်သောကြောင့် `sudo` မှတစ်ဆင့် ပြန်လည် execute လုပ်ပြီး
-၎င်းကိုယ်တိုင်အတွက် remote mode မရှိပါ။ မှန်ကန်သော env ကို ထည့်သွင်းပြီး config လုံးဝမရေးဘဲ CLI တစ်ခုကို
-စတင်ရန် ယေဘုယျ `omniroute run <target>` launcher (claude, codex, aider, goose, opencode, qwen,
-gemini — target များနှင့် alias များကို `bin/cli/cli-manifest.mjs` မှ ရယူသည်) ကို အသုံးပြုပါ။ Legacy
-ကိရိယာအလိုက် launcher များဖြစ်သော `omniroute launch` (Claude Code) နှင့် `omniroute launch-codex`
-(Codex) တို့ကိုလည်း ဆက်လက် အသုံးပြုနိုင်ပါသည်။ Gemini CLI သည် launch-only ဖြစ်သည်- ၎င်းသည် `omniroute run`
-target တစ်ခုဖြစ်သော်လည်း `setup-*`/`configure` recipe မရှိပါ။
+တစ်ခုချင်းစီသည် `--remote <url> --api-key <key>` (local tool တစ်ခုကို remote OmniRoute နှင့် အသုံးပြုရန် စီစဉ်သတ်မှတ်ခြင်း)၊ `--dry-run` (မရေးသားဘဲ အစမ်းကြည့်ရှုခြင်း) နှင့် `--port` တို့ကို လက်ခံသည်။ Model အလိုအလျောက်ရှာဖွေမှု မရှိသည့် tool များ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) သည် `--model <id>` (နှင့် အပြန်အလှန်တုံ့ပြန်မှုမရှိဘဲ လုပ်ဆောင်ရန် `--yes`) ကို လက်ခံသည်။ `setup-5dive` သည် `$HOME` အောက်တွင် မရေးသားသည့် တစ်ခုတည်းသော recipe ဖြစ်သည်။ ၎င်းသည် fleet host ပေါ်တွင် root ပိုင် auth profile တစ်ခုကို ရေးသားခြင်းဖြင့် 5dive agent fleet ကို စီစဉ်သတ်မှတ်သောကြောင့် `sudo` မှတစ်ဆင့် ပြန်လည် execute လုပ်ပြီး ၎င်းကိုယ်တိုင်အတွက် remote mode မရှိပါ။ မှန်ကန်သော env ကို ထည့်သွင်းပေးထားပြီး မည်သည့် config ကိုမျှ မရေးသားဘဲ CLI တစ်ခုကို စတင်ရန် ယေဘုယျ `omniroute run <target>` launcher (claude, codex, aider, goose, opencode, qwen, gemini — target များနှင့် alias များသည် `bin/cli/cli-manifest.mjs` မှ လာသည်) ကို အသုံးပြုပါ။ ယခင် tool အလိုက် launcher များဖြစ်သည့် `omniroute launch` (Claude Code) နှင့် `omniroute launch-codex` (Codex) တို့ကိုလည်း ဆက်လက်အသုံးပြုနိုင်သည်။ Gemini CLI ကို စတင်ရန်သာ အသုံးပြုနိုင်သည်။ ၎င်းသည် `omniroute run` target တစ်ခုဖြစ်သော်လည်း `setup-*`/`configure` recipe မရှိပါ။
 
-> **အပြည့်အစုံ ကိုးကားရန်:** command တစ်ခုစီက ရေးသည့်အရာ၊ flag အားလုံး၊
-> local နှင့် remote ကွာခြားချက်၊ မည်သည့်ကိရိယာများက `/v1` suffix လိုအပ်သည်တို့ ပါဝင်သော အဓိကဇယားကို
-> **[CLI ပေါင်းစည်းမှုများ](../guides/CLI-INTEGRATIONS.md)** တွင် ကြည့်နိုင်ပါသည်။
+> **အပြည့်အစုံ ကိုးကားချက်-** command တစ်ခုချင်းစီက ရေးသားသည့်အရာ၊ flag အားလုံး၊ local နှင့် remote ကွာခြားချက်၊ မည်သည့် tool များက `/v1` suffix လိုအပ်သည် စသည်တို့ပါဝင်သော ပင်မဇယားကို
+> **[CLI ပေါင်းစည်းမှုများ](../guides/CLI-INTEGRATIONS.md)** တွင် ကြည့်ရှုနိုင်သည်။
 
-### ဤ command များကို container အတွင်း run ခြင်း
+### Container တစ်ခုအတွင်း ၎င်းတို့ကို လုပ်ဆောင်ခြင်း
 
-OmniRoute container အတွင်း execute လုပ်သော `setup-*` command သည် container ၏ ကိုယ်ပိုင် home ထဲသို့
-ရေးမည်ဖြစ်ပြီး၊ မည်သည့် host CLI ကမျှ ထိုနေရာကို မဖတ်သည့်အပြင် container ပျောက်သွားသည့်အခါ ၎င်းလည်း
-ပျောက်သွားမည်ဖြစ်သည်။ OmniRoute က ယင်းအခြေအနေကို ရှာဖွေသိရှိပြီး ရေးသားမည့်အစား လမ်းညွှန်ချက်များနှင့်အတူ
-`2` ဖြင့် exit လုပ်သည်။ ပံ့ပိုးထားသော ဆက်လက်လုပ်ဆောင်နိုင်သည့် နည်းလမ်းနှစ်ခုမှာ—host ပေါ်တွင် CLI ကို
-install လုပ်ပြီး container သို့ `omniroute connect` လုပ်ခြင်း၊ သို့မဟုတ် config dir များကို bind-mount လုပ်ပြီး
-`CLI_CONFIG_HOME` (compose `host` profile) ကို သတ်မှတ်ခြင်းတို့ ဖြစ်သည်။ `setup-*` command တိုင်းအပြင်
-`omniroute configure` နှင့် `omniroute config set` တို့သည် container ၏ ကိုယ်ပိုင် CLI များကို configure
-လုပ်ရန် အမှန်တကယ် ရည်ရွယ်ထားသည့်အခါ `--allow-container-write` ကို လက်ခံသည်။ Server အတွက်
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` သည် အလားတူ လုပ်ဆောင်ပေးသည်။
-[Docker လမ်းညွှန် → Host CLI ကိရိယာများကို configure လုပ်ခြင်း](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) ကို ကြည့်ပါ။
+OmniRoute container အတွင်း လုပ်ဆောင်သော `setup-*` command သည် container ၏ ကိုယ်ပိုင် home ထဲသို့ ရေးသားသည်။ Host CLI မည်သည့်တစ်ခုကမျှ ထိုနေရာကို မဖတ်ရှုသည့်အပြင် container နှင့်အတူ ပျောက်ကွယ်သွားမည်ဖြစ်သည်။ OmniRoute သည် ယင်းအခြေအနေကို စစ်ဆေးသိရှိပြီး ရေးသားခြင်းမပြုဘဲ လမ်းညွှန်ချက်များနှင့်အတူ `2` ဖြင့် ထွက်သည်။ ပံ့ပိုးထားသည့် ရှေ့ဆက်လုပ်ဆောင်နိုင်သော နည်းလမ်းနှစ်ခုမှာ CLI ကို host ပေါ်တွင် install လုပ်ပြီး container သို့ `omniroute connect` လုပ်ခြင်း၊ သို့မဟုတ် config directory များကို bind-mount လုပ်ပြီး `CLI_CONFIG_HOME` (compose `host` profile) ကို သတ်မှတ်ခြင်းတို့ဖြစ်သည်။ Container ၏ ကိုယ်ပိုင် CLI များကို အမှန်တကယ် စီစဉ်သတ်မှတ်လိုခြင်းဖြစ်ပါက `setup-*` command တိုင်းအပြင် `omniroute configure` နှင့် `omniroute config set` တို့သည် `--allow-container-write` ကို လက်ခံသည်။ Server အတွက် `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ကလည်း အလားတူ လုပ်ဆောင်ပေးသည်။
+[Docker လမ်းညွှန် → Host CLI tool များကို စီစဉ်သတ်မှတ်ခြင်း](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) ကို ကြည့်ပါ။
 
-Dashboard ၏ **apply endpoint** (`POST /api/cli-tools/apply`) သည်လည်း တူညီသော guard ကို
-မဖြစ်မနေ သက်ရောက်စေသည်- container တစ်ခုအတွင်း host မှ bind-mount မလုပ်ထားသော target သို့ ရေးသားမှုတစ်ခုသည်
-**`422`** ကို `containerEphemeralTarget: true`၊ လုံခြုံသော error စာသားနှင့်—host recipe ရှိသည့်
-ကိရိယာများ (claude, codex, opencode, cline, kilo, continue) အတွက်—host ပေါ်တွင် run ရမည့်
-`hostSetupCommand` (ဥပမာ `omniroute setup-opencode`) တို့နှင့်အတူ ပြန်ပေးပြီး မည်သည့်အရာကိုမျှ မရေးပါ။
-`dryRun: true` သည် container mode တွင် ဆက်လက်အလုပ်လုပ်ပြီး disk ကို မထိဘဲ ဖုံးကွယ်ထားသော preview +
-target path ကို ပြန်ပေးသည်။ Preview အကြောင်းအရာသည် copy သို့မဟုတ် import လုပ်ရန် credential ပါဝင်သော
-configuration မဟုတ်ပါ။ မူလ tool/base URL/API key/model input များဖြင့် host ပေါ်တွင် apply လုပ်ပါ၊ သို့မဟုတ်
-ဖော်ပြထားသော host-side setup command ကို အသုံးပြုပါ။ Preview header နှင့် request contract အတွက်
-[CLI configuration လုံခြုံရေး](../security/CLI-CONFIGURATION.md) ကို ကြည့်ပါ။ ဤလုပ်ဆောင်ပုံသည်
-ရည်ရွယ်ချက်ရှိရှိ ပြုလုပ်ထားခြင်းဖြစ်ပြီး
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` ဖြင့် regression မဖြစ်စေရန် ကာကွယ်ထားသည်—guard ကို
-ဖယ်ရှားခြင်းဖြင့် 422 ကို မည်သည့်အခါမျှ "မပြင်ပါနှင့်"။
+Dashboard ၏ **apply endpoint** (`POST /api/cli-tools/apply`) သည်လည်း အလားတူ ကာကွယ်မှုကို အတည်ပြုအသုံးချသည်။ Container တစ်ခုအတွင်း ရေးသားမည့် target ကို host မှ bind-mount မလုပ်ထားပါက ဘေးကင်းသော error စာသား၊ `containerEphemeralTarget: true` တို့နှင့်အတူ **`422`** ကို တုံ့ပြန်သည်။ ထို့အပြင် host recipe ရှိသည့် tool များ (claude, codex, opencode, cline, kilo, continue) အတွက် host ပေါ်တွင် အစားထိုးလုပ်ဆောင်ရန် `hostSetupCommand` (ဥပမာ `omniroute setup-opencode`) ကို ပေးပြီး မည်သည့်အရာကိုမျှ မရေးသားပါ။ Container mode တွင် `dryRun: true` သည် ဆက်လက်အလုပ်လုပ်ပြီး disk ကို မထိတွေ့ဘဲ လျှို့ဝှက်အချက်အလက်များ ဖယ်ရှားထားသည့် အစမ်းကြည့်ရှုမှုနှင့် target path ကို ပြန်ပေးသည်။ အစမ်းကြည့်ရှုသည့် အကြောင်းအရာသည် ကူးယူရန် သို့မဟုတ် import လုပ်ရန်အတွက် အထောက်အထားများပါဝင်သော configuration မဟုတ်ပါ။ မူလ tool/base URL/API key/model input များဖြင့် host ပေါ်တွင် apply လုပ်ပါ၊ သို့မဟုတ် ဖော်ပြထားသော host-side setup command ကို အသုံးပြုပါ။ Preview header နှင့် request contract အတွက် [CLI configuration လုံခြုံရေး](../security/CLI-CONFIGURATION.md) ကို ကြည့်ပါ။ ဤအပြုအမူသည် ရည်ရွယ်ချက်ရှိရှိ သတ်မှတ်ထားပြီး
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` ဖြင့် regression မဖြစ်စေရန် ကာကွယ်ထားသည် — guard ကို ဖယ်ရှားခြင်းဖြင့် 422 ကို မည်သည့်အခါမျှ "ပြင်ဆင်" ရန် မကြိုးစားပါနှင့်။
 
 ---
 
@@ -142,40 +109,41 @@ catalog၊ UI catalog နှင့် consumer မျက်နှာပြင်
 
 ---
 
-## 1. CLI Code ၏ ကတ်တလောက် (ကိရိယာ 26 ခု)
+## 1. CLI Code ကိရိယာစာရင်း (ကိရိယာ 27 ခု)
 
-`/dashboard/cli-code` တွင် ပေါ်လာသည့် ကိရိယာအားလုံး။ `baseUrlSupport: none` ဖြစ်သည့် ကိရိယာများကို စိတ်ကြိုက် base URL အစား MITM သို့မဟုတ် ကိုယ်တိုင်လုပ်ဆောင်ရမည့် လမ်းညွှန်မှတစ်ဆင့် ချိတ်ဆက်ထားသည်-
+`/dashboard/cli-code` တွင် ပေါ်လာသော ကိရိယာအားလုံး။ `baseUrlSupport: none` ဖြစ်သော ကိရိယာများကို စိတ်ကြိုက် base URL အစား MITM သို့မဟုတ် လက်စွဲလမ်းညွှန်မှတစ်ဆင့် ချိတ်ဆက်ထားသည်-
 
-| id           | အမည်                    | ထုတ်လုပ်သူ            | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | --------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic             | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                  | none           | custom         | false        |
-| cline        | Cline                   | OSS (ယခင် Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org              | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)             | full           | guide          | false        |
-| continue     | Continue                | continue.dev          | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)     | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ           | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)        | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)     | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)          | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ယခင် SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI            | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS             | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere             | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)     | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)      | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                   | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)           | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba               | full           | guide          | true         |
-| cursor       | Cursor                  | Anysphere             | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research         | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                | none           | mitm           | false        |
-| custom       | စိတ်ကြိုက် CLI          | —                     | full           | custom-builder | false        |
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"` ဖြစ်သည့် ကိရိယာများ၏ dashboard ကတ်တွင် "⚠ Base URL တစ်စိတ်တစ်ပိုင်းသာ ပံ့ပိုးသည်" တံဆိပ်ကို ပြသထားသည်။
+`baseUrlSupport: "partial"` ဖြစ်သော ကိရိယာများ၏ dashboard ကတ်တွင် "⚠ တစ်စိတ်တစ်ပိုင်း Base URL" badge ကို ပြသသည်။
 ---
 
 ## 2. CLI Agent များစာရင်း (ကိရိယာ 10 ခု)
@@ -184,16 +152,16 @@ catalog၊ UI catalog နှင့် consumer မျက်နှာပြင်
 
 | id           | အမည်             | ထုတ်လုပ်သူ               | baseUrl ပံ့ပိုးမှု | ACP ဖြင့် စတင်နိုင်မှု |
 | ------------ | ---------------- | ------------------------ | ------------------ | ---------------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | အပြည့်အဝ           | မရပါ                   |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | အပြည့်အဝ           | ရပါ                    |
-| goose        | Goose            | Block / Linux Foundation | အပြည့်အဝ           | ရပါ                    |
-| interpreter  | Open Interpreter | OSS                      | အပြည့်အဝ           | ရပါ                    |
-| warp         | Warp AI          | Warp Inc.                | တစ်စိတ်တစ်ပိုင်း   | ရပါ                    |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | အပြည့်အဝ           | မရပါ                   |
-| omp          | Oh My Pi         | OSS                      | အပြည့်အဝ           | ရပါ                    |
-| letta        | Letta CLI        | Letta                    | အပြည့်အဝ           | မရပါ                   |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | အပြည့်အဝ           | မရပါ                   |
-| 5dive        | 5dive            | OSS (5dive-ai)           | အပြည့်အဝ           | မရပါ                   |
+| hermes-agent | Hermes Agent     | Nous Research            | full               | false                  |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full               | true                   |
+| goose        | Goose            | Block / Linux Foundation | full               | true                   |
+| interpreter  | Open Interpreter | OSS                      | full               | true                   |
+| warp         | Warp AI          | Warp Inc.                | partial            | true                   |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full               | false                  |
+| omp          | Oh My Pi         | OSS                      | full               | true                   |
+| letta        | Letta CLI        | Letta                    | full               | false                  |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                  |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                  |
 
 ---
 

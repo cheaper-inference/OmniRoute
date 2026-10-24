@@ -1,1 +1,0 @@
-- **fix(translator):** Gemini/Antigravity schemas keep literal unions typed (`0|1|2|null` → bounded integer, string unions keep every value) and reject runaway `$ref` expansion with a clean 400 that skips account cooldown ([#16729](https://github.com/diegosouzapw/OmniRoute/pull/16729)) — thanks @amirho1

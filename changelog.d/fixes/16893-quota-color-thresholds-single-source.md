@@ -1,1 +1,0 @@
-- **fix(dashboard):** single source for the provider-limit quota colour thresholds; drop the dead helpers that used a contradictory 70/30 policy ([#16893](https://github.com/diegosouzapw/OmniRoute/pull/16893)) — thanks @ntdatt812

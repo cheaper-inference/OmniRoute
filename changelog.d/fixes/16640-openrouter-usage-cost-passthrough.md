@@ -1,1 +1,0 @@
-- **fix(usage):** preserve OpenRouter's provider-reported `usage.cost` for OpenAI-format clients and use it as the exact cost in usage accounting ([#16640](https://github.com/diegosouzapw/OmniRoute/pull/16640)) — thanks @AlexanderMakarov

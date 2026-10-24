@@ -240,116 +240,96 @@ tilkoblingen vises som aktiv.
 
 ---
 
-## Administrere tokener
+## Administrere tokens
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ skriver ut hemmeligheten ÉN GANG – kopier den nå
-omniroute tokens list                 # maskert: ID, navn, omfang, prefiks, status, utløpstidspunkt
-omniroute tokens revoke <id|prefix>   # tilbakekall umiddelbart
-omniroute tokens scopes               # forklar de tre omfangene
+#   ↳ skriver ut hemmeligheten ÉN gang — kopier den nå
+omniroute tokens list                 # maskert: id, navn, scope, prefiks, status, utløp
+omniroute tokens revoke <id|prefix>   # trekk tilbake umiddelbart
+omniroute tokens scopes               # forklarer de tre scopene
 ```
 
-`tokens`-kommandoer krever administratorlegitimasjon (**admin**). Du kan også administrere tokener i
-kontrollpanelet under **Innstillinger → Tilgangstokener** (opprett, tilbakekall, kopier én gang).
+`tokens`-kommandoer krever en **admin**-legitimasjon. Du kan også administrere tokens i dashboardet under **Innstillinger → Tilgangstokens** (opprett, trekk tilbake, kopier én gang).
 
-Et token kan aldri utstedes med flere rettigheter enn oppretteren har. Et
-`admin`-token kan bare opprettes av operatøren – via kontrollpaneløkten, den
-lokale CLI-en på selve serveren, `omniroute connect` med passordet eller en
-instans der innlogging er deaktivert. Maskinlegitimasjon (et `admin`-tilgangstoken
-eller en API-nøkkel med omfanget `manage`/`admin`) kan bare utstede `write`- og
-`read`-tokener. Forespørsler om `--scope admin` returnerer `403`.
-
-Et token kan aldri opprettes med flere rettigheter enn oppretteren har. Bare operatøren kan opprette et `admin`-token: gjennom dashbordøkten, den lokale CLI-en på selve serveren, `omniroute connect` med passordet eller en instans med innlogging deaktivert. Maskinlegitimasjon (et `admin`-tilgangstoken eller en API-nøkkel med omfanget `manage`/`admin`) kan bare opprette `write`- og `read`-tokener; en forespørsel om `--scope admin` med disse returnerer `403`.
+Et token kan aldri utstedes med mer privilegium enn det opprettende er innehaver av. Et `admin`-token kan bare opprettes av operatøren: dashboard-økten, den lokale CLI-en på selve serveren, eller `omniroute connect` med passordet. Maskinlegitimasjoner (et `admin`-tilgangstoken, eller en API-nøkkel med scopet `manage`/`admin`) kan bare utstede `write`- og `read`-tokens. Hvis de ber om `--scope admin`, returneres `403`. Å deaktivere innlogging åpner ikke for utstedelse: et tilgangstoken med hvilket som helst scope er en legitimasjon de alltid autentiserte rutene godtar, så et anonymt kall får `401` på alle scopes.
 
 ---
 
-## Konfigurere en CLI for koding fra den eksterne katalogen
+## Konfigurere et kodeverktøy for CLI fra den eksterne katalogen
 
-`omniroute configure` leser den **aktive serverens** gjeldende modellkatalog og
-skriver en konfigurasjon på **din** maskin.
+`omniroute configure` leser den **aktive serverens** modellkatalog i sanntid og skriver en konfigurasjon på **din** maskin.
 
 ```bash
 omniroute configure codex
 #   Leverandører: glm, kmc, ollamacloud, opencode-go, …
 #   Leverandør: glm
-#   Modell-ID: glm/glm-5.2
+#   Modell-id: glm/glm-5.2
 #   ✔ Skrev ~/.codex/glm52.config.toml
 #   Bruk den:  codex --profile glm52
 
-# ikke-interaktiv
+# ikke-interaktivt
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# behold en ofte brukt modell øverst i den interaktive velgeren
+# hold en ofte brukt modell øverst i den interaktive velgeren
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Velgeren lagrer bare modell-ID-er (aldri URL-er eller legitimasjon) i den lokale
-filen `model-preferences.json`, avgrenset etter kontekst og CLI-mål. Favoritter
-vises før nylige valg; bruk `--unfavorite` for å fjerne en valgt modell fra
-listen for denne konteksten og dette målet.
+Velgeren lagrer bare modell-ID-er (aldri URL-er eller legitimasjoner) i den lokale filen `model-preferences.json`, avgrenset per kontekst og CLI-mål. Favoritter vises før nylige valg. Bruk `--unfavorite` for å fjerne en valgt modell fra listen for den konteksten og målet.
 
-Den skrevne profilen refererer til inferensnøkkelen via en miljøvariabel
-(`OMNIROUTE_API_KEY`) — hemmeligheten skrives aldri til disken. For
-engangskonfigureringen av Codex-basen (`[model_providers.omniroute]`-blokken), se
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Den skrevne profilen refererer til inferensnøkkelen via miljøvariabelen `OMNIROUTE_API_KEY`. Hemmeligheten skrives aldri til disk. For det engangsoppsettet av Codex-basen (blokken `[model_providers.omniroute]`), se [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Starte en CLI mot den eksterne serveren (ingen konfigurasjon skrives)
+### Starte et CLI mot eksternt (ingen konfigurasjon skrevet)
 
-`omniroute run <target>` respekterer også den aktive konteksten: den eksterne
-basis-URL-en og kontekstlegitimasjonen injiseres bare i den startede prosessen.
+`omniroute run <target>` respekterer også den aktive konteksten: base-URL-en til den eksterne serveren og kontekstens legitimasjon injiseres bare i den startede prosessen.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → ekstern server
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → eksternt
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Forhåndsvis nøyaktig hva som ville blitt startet (bare NAVN på miljøvariabler, aldri verdier):
+# Forhåndsvis nøyaktig hva som ville blitt startet (kun miljønavn, aldri verdier):
 omniroute run codex --dry-run --json
 ```
 
-Mål: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(én enkelt kilde: `bin/cli/cli-manifest.mjs`). Qwen og Gemini kjører med en
-midlertidig, isolert hjemmekatalog som fjernes ved avslutning, slik at oppstarten
-aldri berører — eller lekker inn i — din personlige verktøykonfigurasjon.
+Mål: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (eneste kilde: `bin/cli/cli-manifest.mjs`). Qwen og Gemini kjører med et midlertidig isolert hjem som fjernes ved avslutning, slik at oppstarten aldri berører eller lekker inn i din personlige verktøykonfigurasjon.
 
-### Oppsettkommandoer per CLI
+### Oppsettskommandoer per CLI
 
-Hver støttede CLI har en oppsettkommando som støtter eksterne servere (alle
-respekterer den aktive konteksten, eller `--remote <url> --api-key <key>`):
+Hvert støttede CLI har en eksternt bevisst oppsettskommando (alle respekterer den aktive konteksten, eller `--remote <url> --api-key <key>`):
 
-| CLI         | Kommando                   | Hva den skriver                                                                                                                                                                                   |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml`-profiler (per modell)                                                                                                                                               |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (per modell)                                                                                                                                            |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — den OpenAI-kompatible `omniroute`-leverandøren med alle katalogmodeller (kjør `opencode -m omniroute/<model>`)                                               |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI-modus) + skriver ut innstillingene for VS Code-utvidelsen som skal limes inn (OpenAI-kompatibel, basis-URL **uten** `/v1`)                        |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code-innstillinger for `kilocode.*` — OpenAI-kompatibel, basis-URL **med** `/v1`                                                                       |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **med** `/v1`, nøkkel via `${{ secrets.OMNIROUTE_API_KEY }}`                                             |
-| Cursor      | `omniroute setup-cursor`   | skriver ut trinnene i appen (Innstillinger → Modeller → Overstyr OpenAI-basis-URL **med** `/v1` + nøkkel + modell). Cursor-konfigurasjonen er ugjennomsiktig SQLite — bare chattepanelet          |
-| Roo Code    | `omniroute setup-roo`      | skriver en Roo-import-JSON (`~/.omniroute/roo-settings.json`) + angir `roo-cline.autoImportSettingsPath` + skriver ut trinnene i brukergrensesnittet (OpenAI-kompatibel, basis-URL **med** `/v1`) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat`-leverandør, `base_url` **med** `/v1`, nøkkel via `$OMNIROUTE_API_KEY`                                                                              |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **uten** `/v1` + `GOOSE_MODEL`) + oppskrift for miljøvariabler                                                             |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **uten** `/v1` + `model: openai/<id>`) + oppskrift for miljøvariabler (`aider --message --yes`)                                                            |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4-oppføring for `modelProviders.openai` + `OMNIROUTE_API_KEY` i `~/.qwen/.env`                                                                                           |
+| CLI         | Kommando                   | Hva den skriver                                                                                                                                                                                        |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml`-profiler (per modell)                                                                                                                                                    |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (per modell)                                                                                                                                                 |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: leverandøren `omniroute` med openai-kompatibelt API og alle katalogmodellene (kjør `opencode -m omniroute/<model>`)                                                |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI-modus) + skriver ut innstillingene for VS Code-utvidelsen å lime inn (OpenAI-kompatibel, Base URL **uten** `/v1`)                                      |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code-innstillinger `kilocode.*`: OpenAI-kompatibel, Base URL **med** `/v1`                                                                                  |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **med** `/v1`, nøkkel via `${{ secrets.OMNIROUTE_API_KEY }}`                                                   |
+| Cursor      | `omniroute setup-cursor`   | skriver ut stegene i appen (Settings → Models → Override OpenAI Base URL **med** `/v1` + nøkkel + modell). Cursors konfigurasjon er en ugjennomsiktig SQLite-database, så den gjelder bare chatpanelet |
+| Roo Code    | `omniroute setup-roo`      | skriver en Roo-importfil i JSON (`~/.omniroute/roo-settings.json`) + setter `roo-cline.autoImportSettingsPath` + skriver ut UI-stegene (OpenAI-kompatibel, Base URL **med** `/v1`)                     |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: leverandøren `openai-compat`, `base_url` **med** `/v1`, nøkkel via `$OMNIROUTE_API_KEY`                                                                                  |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **med** `/v1`, nøkkelen leses av Zed fra `$OMNIROUTE_API_KEY` (skrives aldri)                                  |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **uten** `/v1` + `GOOSE_MODEL`) + env-oppskrift                                                                                 |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **uten** `/v1` + `model: openai/<id>`) + env-oppskrift (`aider --message --yes`)                                                                                |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json`, V4-oppføringen `modelProviders.openai` + `OMNIROUTE_API_KEY` i `~/.qwen/.env`                                                                                                 |
 
 ```bash
-# OpenCode (OpenAI-kompatibel leverandør, alle katalogmodeller, ekstern VPS)
+# OpenCode (openai-kompatibel leverandør, alle katalogmodellene, ekstern VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # behold bare samsvarende modeller
+omniroute setup-opencode --only glm,kimi        # behold bare matchende modeller
 opencode -m omniroute/glm/glm-5.2 "..."          # eksporter OMNIROUTE_API_KEY først
 ```
 
-> OpenCode har også en mer omfattende **plugin**-integrasjon: `omniroute setup opencode`
-> (nå med støtte for eksterne verter via `--remote`) installerer `@omniroute/opencode-plugin`.
-> `setup-opencode` er det lettvektige OpenAI-kompatible alternativet. API-nøkkelen
-> refereres via `{env:OMNIROUTE_API_KEY}` — den skrives aldri til disk.
+> OpenCode har også en rikere **plugin**-integrasjon: `omniroute setup opencode`
+> (nå eksternt bevisst via `--remote`) installerer `@omniroute/opencode-plugin`.
+> `setup-opencode` er det lettvekts openai-kompatible alternativet. API-nøkkelen
+> refereres via `{env:OMNIROUTE_API_KEY}`, og den skrives aldri til disk.
 >
-> På OpenCode v2 bruker du `@omniroute/opencode-plugin-v2` i stedet: samme katalog,
-> en annen lasterkontrakt. Den leser nøkkelen fra OpenCodes eget lager for påloggingsinformasjon
-> når integrasjonen er koblet til, så en ekstern gateway trenger ingen nøkkel i
-> `opencode.json` i det hele tatt.
+> På OpenCode v2 bruker du i stedet `@omniroute/opencode-plugin-v2`: samme katalog,
+> men en annen lasterkontrakt. Den leser nøkkelen fra OpenCodes egen legitimasjonslagring
+> når integrasjonen er koblet til, så en ekstern gateway trenger ingen nøkkel i `opencode.json` i det hele tatt.
 
 ---
 

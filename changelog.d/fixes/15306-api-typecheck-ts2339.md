@@ -1,1 +1,0 @@
-- types: narrow `IntegerParam` / Copilot `/auto` failures with `ok === false` and type `Transformer.cancel` so api-typecheck stops regressing nine TS2339s (base-red #15306).

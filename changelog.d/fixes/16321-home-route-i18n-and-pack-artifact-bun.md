@@ -1,2 +1,0 @@
-- **fix(i18n):** mount the `/home` route's message provider so the home page and its sponsor banners stop rendering `MISSING_MESSAGE` in production builds ([#16321](https://github.com/diegosouzapw/OmniRoute/issues/16321)).
-- **fix(build):** `check:pack-artifact` runs npm through the bundled `npm-cli.js` instead of trusting `npm_execpath`, so `bun run` no longer dumps the Bun ELF binary into the validator's error output ([#16321](https://github.com/diegosouzapw/OmniRoute/issues/16321)).

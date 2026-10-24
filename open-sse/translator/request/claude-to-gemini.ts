@@ -4,12 +4,17 @@ import {
   DEFAULT_SAFETY_SETTINGS,
   buildGeminiThinkingConfig,
   cleanJSONSchemaForAntigravity,
+  geminiModelRejectsThinkingConfig,
 } from "../helpers/geminiHelper.ts";
 import { buildGeminiTools, sanitizeGeminiToolName } from "../helpers/geminiToolsSanitizer.ts";
 import {
   isGeminiTrailingModelTurnRejectingModel,
   stripTrailingGeminiModelTurns,
 } from "../helpers/geminiTrailingModelTurn.ts";
+import {
+  isClaudeServerWebSearchTool,
+  isSoleClaudeServerWebSearchTool,
+} from "../helpers/claudeServerWebSearch.ts";
 import {
   buildGeminiThoughtSignatureKey,
   resolveGeminiThoughtSignature,
@@ -23,6 +28,7 @@ import {
   buildHistoricalToolResultContext,
   mergeConsecutiveSameRoleContents,
   ensureHistoryDoesNotOpenWithFunctionCall,
+  sanitizeFunctionResponseData,
   type GeminiContent,
 } from "./openai-to-gemini/helpers.ts";
 
@@ -370,7 +376,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 functionResponse: {
                   ...(stripFunctionCallId ? {} : { id: toolUseId }),
                   name,
-                  response: { result: content },
+                  response: { result: sanitizeFunctionResponseData(content) },
                 },
               });
               afterLastToolResult = parts.length;
@@ -408,7 +414,19 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   }
 
   // ── Convert tools ──────────────────────────────────────────────
-  const geminiTools = buildGeminiTools(body.tools, {
+  // Claude Code's WebSearch sends Anthropic's dated web-search *server* tool as the
+  // request's sole tool. `buildGeminiTools` only recognizes the non-versioned
+  // `web_search` type, so normalize the dated form to the marker it maps to
+  // `{ googleSearch: {} }`. A mixed request (server tool next to custom tools) must
+  // NOT enable grounding — Antigravity 400s on a built-in tool mixed with
+  // functionDeclarations, and the custom tools have to survive — so there the server
+  // tool is dropped, matching the hub lane (claude-to-openai.ts).
+  const geminiToolsInput = Array.isArray(body.tools)
+    ? isSoleClaudeServerWebSearchTool(body.tools)
+      ? [{ type: "web_search" }]
+      : body.tools.filter((tool) => !isClaudeServerWebSearchTool(tool))
+    : body.tools;
+  const geminiTools = buildGeminiTools(geminiToolsInput, {
     toolNameMap,
   });
   if (geminiTools) {
@@ -417,7 +435,9 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
 
   // ── Thinking config ────────────────────────────────────────────
   // Priority: thinking.budget_tokens (Claude native) > output_config.effort (Claude Code).
-  if (model.startsWith("gemma-4")) {
+  // Models without thinking support (TTS, transcription, gemini-2.5-flash-image)
+  // 400 on ANY thinkingConfig, so they skip both paths below (#16928).
+  if (model.startsWith("gemma-4") || geminiModelRejectsThinkingConfig(model)) {
     // gemma-4 models returns - 400: Thinking budget is not supported for this model
   } else if (body.thinking?.type === "enabled" && typeof body.thinking.budget_tokens === "number") {
     // typeof check ensures only numeric budget_tokens triggers the thinking path;
@@ -487,7 +507,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   // Gemini strictly rejects requests containing consecutive messages with the same role
   // (400 INVALID_ARGUMENT: "Request contains consecutive messages with the same role").
   // Normalize adjacent same-role messages by concatenating their parts.
-  result.contents = mergeConsecutiveSameRoleContents(result.contents);
+  result.contents = mergeConsecutiveSameRoleContents(result.contents, model);
   mergeTrailingTextIntoFunctionResponses(result.contents);
   // Guard the one alternation violation the merge above cannot reach: history
   // that opens with a functionCall-bearing turn instead of a user turn.

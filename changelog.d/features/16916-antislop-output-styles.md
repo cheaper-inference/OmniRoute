@@ -1,1 +1,0 @@
-- **feat(compression):** opt-in `antislop-ui` and `antislop-copy` output styles that steer generated UI and copy away from generic AI defaults (purpose-tested visuals; no em dash, generic CTAs or invented facts; WCAG AA contrast, keyboard and mobile rules) ([#16916](https://github.com/diegosouzapw/OmniRoute/pull/16916)) — thanks @royhanmh

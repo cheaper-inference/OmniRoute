@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Para sa `smart-routing`, ang `metadata.combo` ay isang tahasang pag-override sa
+`metadata.model` para sa kahilingan sa gateway; ipinapadala ito bilang tunay na `model`,
+hindi bilang isang binabalewalang `x-combo` JSON field. Nalalapat pa rin ang karaniwang API-key at
+awtorisasyon ng gateway para sa bawat target. Tinatanggihan ang isang hindi wasto o walang-lamang combo.
+
+Inilalantad ng resulta ang `requested_combo` (layunin ng tumatawag), `dispatched_model`
+(ang aktuwal na kahilingan sa gateway), `response_model` (tugon ng gateway), at
+`confirmed_combo`. Ang huling field ay `null` maliban kung tahasang
+tinutukoy ng gateway ang isang combo. Iniuugnay lamang ng mga log ng desisyon ng A2A ang pagpapatupad sa isang
+nakumpirmang combo, habang pinananatili ang isang hindi nakumpirmang kahilingan bilang `requestedCombo`.
+
 **Tugon:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE Streaming
+### `message/stream` — Pag-stream gamit ang SSE
 
-Kapareho ito ng `message/send`, ngunit nagbabalik ng Server-Sent Events para sa real-time streaming.
+Kapareho ng `message/send` ngunit nagbabalik ng mga Server-Sent Event para sa real-time na pag-stream.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Mga SSE Event:**
+**Mga Event ng SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Suriin ang Status ng Gawain
+### `tasks/get` — Alamin ang Katayuan ng Gawain
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Mga Available na Skill
 
-Naglalantad ang OmniRoute ng 6 na A2A skill na nakakonekta sa `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Matatagpuan ang bawat module ng skill sa `src/lib/a2a/skills/`.
+Nag-eexpose ang OmniRoute ng 6 A2A skill na nakakabit sa `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ang bawat skill module ay matatagpuan sa `src/lib/a2a/skills/`.
 
-| Skill                     | ID                   | Paglalarawan                                                                                                                                                          | Mga Tag                       | Mga Halimbawa                                          |
-| :------------------------ | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :----------------------------------------------------- |
-| Matalinong Routing        | `smart-routing`      | Niruruta ang isang prompt sa pinakamainam na provider/combo gamit ang combo engine at scoring ng OmniRoute                                                            | routing, mga provider         | "Iruta ang prompt na ito sa pinakamahusay na model"    |
-| Pamamahala ng Quota       | `quota-management`   | Inuulat ang estado ng quota ng bawat provider at tumutulong sa mga caller na magpasya kung kailan mag-throttle/lumipat                                                | quota, mga provider           | "Suriin ang quota para sa anthropic"                   |
-| Pagtuklas ng Provider     | `provider-discovery` | Inililista ang mga naka-install na provider kasama ang kanilang mga capability, free-tier flag, at status ng OAuth                                                    | mga provider, pagtuklas       | "Anong mga provider ang available?"                    |
-| Pagsusuri ng Gastos       | `cost-analysis`      | Tinatantiya ang gastos ng isang request/conversation batay sa catalog at kamakailang paggamit                                                                         | gastos, paggamit              | "Tantiyahin ang gastos ng conversation na ito"         |
-| Ulat sa Kalagayan         | `health-report`      | Pinagsasama-sama ang circuit breaker, cooldown, at lockout state ng bawat provider                                                                                    | kalagayan, katatagan          | "Ipakita ang status ng kalagayan ng lahat ng provider" |
-| Ilista ang mga Capability | `list-capabilities`  | Ibinabalik ang buong catalog ng Agent Skills na may 45 entry (23 API + 21 CLI + 1 config) bilang markdown table na may mga raw SKILL.md URL para sa context injection | catalog, pagtuklas, mga skill | "Ilista ang lahat ng capability ng OmniRoute"          |
+| Skill              | ID                   | Paglalarawan                                                                                                                                                  | Tags                       | Mga Halimbawa                          |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------- |
+| Smart Routing      | `smart-routing`      | Nagre-route ng prompt sa pamamagitan ng optimal na provider/combo gamit ang combo engine + scoring ng OmniRoute                                               | routing, providers         | "Route this prompt via the best model" |
+| Quota Management   | `quota-management`   | Nag-uulat ng quota state ng bawat provider, tumutulong sa mga caller na magpasya kung kailan mag-throttle/mag-switch                                          | quota, providers           | "Check quota for anthropic"            |
+| Provider Discovery | `provider-discovery` | Nagli-lista ng mga naka-install na provider kasama ang mga capability, free-tier flag, at OAuth status                                                        | providers, discovery       | "What providers are available?"        |
+| Cost Analysis      | `cost-analysis`      | Nag-eestimate ng gastos ng isang request/kombensasyon batay sa catalog + kamakailang usage                                                                    | cost, usage                | "Estimate cost for this conversation"  |
+| Health Report      | `health-report`      | Nag-a-aggregate ng circuit breaker, cooldown, at lockout state ng bawat provider                                                                              | health, resilience         | "Show health status of all providers"  |
+| List Capabilities  | `list-capabilities`  | Nagbabalik ng buong 45-entry na Agent Skills catalog (23 API + 21 CLI + 1 config) bilang markdown table na may mga raw SKILL.md URL para sa context injection | catalog, discovery, skills | "List all OmniRoute capabilities"      |
 
-> Dapat panatilihing nakaayon ang Agent Card sa aktuwal na catalog na may 372 provider; ang bilang ng mga provider at metadata ng libre/walang-auth ay kinukuha mula sa runtime registry.
+> Ang Agent Card ay dapat panatilihing naka-align sa live na 375-provider catalog; ang mga bilang ng provider at free/no-auth metadata ay mula sa runtime registry.
 
-### Detalye ng Skill na `list-capabilities`
+### Detalye ng `list-capabilities` Skill
 
-Partikular na kapaki-pakinabang ang skill na `list-capabilities` para sa mga external agent na kailangang tuklasin kung ano ang inilalantad ng OmniRoute bago magpadala ng mga API call. Nagbabalik ito ng isang structured markdown table artifact:
+Ang `list-capabilities` skill ay partikular na kapaki-pakinabang para sa mga external agent na kailangang tuklasin kung ano ang ine-expose ng OmniRoute bago magpadala ng mga API call. Nagbabalik ito ng structured markdown table artifact:
 
 ```
-| ID | Pangalan | Kategorya | Larangan | Mga Endpoint/Command | Raw URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Auth at mga Session | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Kasama sa bawat row ang column na `rawUrl` upang agad na makuha ng mga agent ang buong SKILL.md. Sinasalamin ng field na `metadata.totalSkills` ang laki ng catalog (45 sa kasalukuyan). Implementasyon: `src/lib/a2a/skills/listCapabilities.ts`. Tingnan din ang [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Ang bawat row ay may kasamang `rawUrl` column para agad makuha ng mga agent ang buong SKILL.md. Ang `metadata.totalSkills` field ay sumasalamin sa laki ng catalog (45 sa ngayon). Implementasyon: `src/lib/a2a/skills/listCapabilities.ts`. Tingnan din ang [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

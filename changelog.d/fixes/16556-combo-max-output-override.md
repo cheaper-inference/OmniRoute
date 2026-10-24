@@ -1,1 +1,0 @@
-- **fix(catalog):** a combo's `max_output_tokens` now honours a member's `max_output_tokens` capability override, as the per-model entry already did ([#16556](https://github.com/diegosouzapw/OmniRoute/pull/16556)) — thanks @pacocartones

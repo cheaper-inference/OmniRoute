@@ -1,1 +1,0 @@
-- **fix(translator):** keep a client-sent `service_tier` through the Anthropic → OpenAI pivot for OpenAI, Azure OpenAI and Codex targets, so the billed tier and the served tier no longer diverge ([#16946](https://github.com/diegosouzapw/OmniRoute/pull/16946)) — thanks @raflyazf

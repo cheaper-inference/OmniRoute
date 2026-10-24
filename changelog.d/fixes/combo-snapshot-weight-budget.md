@@ -1,1 +1,0 @@
-- Keep duplicated auto-combo snapshot weights at a total of 100 for large or highly skewed candidate pools, preserving every candidate with a positive fractional weight when integer weights exceed the budget.

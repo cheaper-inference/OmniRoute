@@ -1,1 +1,0 @@
-- **test(authz):** align the manage-scope bypass deny-list guard with #16366: `/api/providers/{validate,import,bulk}` are remote-reachable by design (spawn gated at the call site) and stay refused in the bypass list — the guard now asserts exactly that instead of a stale LOCAL_ONLY expectation.

@@ -56,7 +56,7 @@ const P = await import("../../src/shared/constants/providers.ts");
 // Token Market (#13191) adds one apikey/gateways entry — measured 248 on the #13191 branch.
 // NaN.Builders adds one apikey/gateways entry — 250.
 // DaoXE adds one apikey/gateways entry — 251.
-const APIKEY_PROVIDER_COUNT = 251;
+const APIKEY_PROVIDER_COUNT = 252;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [

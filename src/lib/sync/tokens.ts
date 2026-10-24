@@ -64,10 +64,20 @@ export async function validateSyncToken(rawToken: string | null | undefined) {
 
   const record = await getSyncTokenByHash(hashSyncToken(token));
   if (!record || record.revokedAt) return null;
+  if (isIssuedWithoutCredential(record)) return null;
   if (isSyncTokenExpired(record)) return null;
   if (await isIssuedBeforePasswordChange(record)) return null;
   if (!(await isLinkedApiKeyLive(record))) return null;
   return record;
+}
+
+/**
+ * Earlier releases let an anonymous caller mint a sync token while login was disabled, recorded
+ * as `issuedBy: "open"`. Nothing vouches for whoever holds one, and turning login back on did not
+ * end it, so these tokens never open the bundle again. Issuance now always needs a credential.
+ */
+function isIssuedWithoutCredential(record: SyncTokenRecord) {
+  return record.issuedBy === "open";
 }
 
 function isSyncTokenExpired(record: SyncTokenRecord, now = Date.now()) {

@@ -777,6 +777,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-high": {
     maxOutputTokens: 131072,
@@ -784,6 +785,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-low": {
     maxOutputTokens: 131072,
@@ -791,6 +793,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-max": {
     maxOutputTokens: 131072,
@@ -798,6 +801,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-flash-high": {
     maxOutputTokens: 131072,

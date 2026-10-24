@@ -1,1 +1,0 @@
-- **fix(translator):** a non-streaming Responses upstream that ends `incomplete` on `max_output_tokens` or `content_filter` now reaches a Chat Completions client with `finish_reason` `length` or `content_filter` instead of a clean `stop`, as the streaming path already did (#15867).

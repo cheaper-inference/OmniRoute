@@ -16,6 +16,17 @@ import { syncToCloud } from "@/lib/cloudSync";
 import { setQuotaCache } from "@/domain/quotaCache";
 import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
 import { clearRecoveredProviderState } from "@/sse/services/auth";
+import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
+import {
+  clearModelLock,
+  getAllModelLockouts,
+} from "@omniroute/open-sse/services/accountFallback.ts";
+import { RateLimitReason } from "@omniroute/open-sse/config/constants.ts";
+import {
+  claudeQuotaMatchesModel,
+  isClaudeQuotaMetadata,
+  isExplicitClaudeQuota429Text,
+} from "@omniroute/open-sse/services/usage/claudeQuota.ts";
 import { getMachineId } from "@/shared/utils/machine";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
 import { mergeProviderLimitsCacheEntry, toProviderLimitsCacheEntry } from "./providerLimitsCache";
@@ -412,11 +423,11 @@ export function shouldClearErrorStateOnValidProbe(
 /**
  * May an active cooldown be released because the REAL quota windows recovered?
  *
- * Only the synthetic-cooldown case (#10534) qualifies: lastErrorType
- * "quota_exhausted" plus every governing window past its real reset with quota
- * left. A window that is still exhausted — or whose reset is unknown/unparseable
- * — keeps the connection locked, matching the kimi-coding partial-refresh
- * semantics.
+ * An ordinary quota poll may not overrule a real upstream 429 (#11277).
+ * There are only two narrow recovery paths: a synthetic cooldown whose real
+ * windows have elapsed (#10534), or a Claude weekly reset event positively
+ * observed AFTER that exact 429 with every reported quota window replenished
+ * (#17043). Unobserved/partial/stale windows preserve the original cooldown.
  */
 
 /**
@@ -443,24 +454,159 @@ export function shouldClearErrorStateOnValidProbe(
  * window elapses, the next probe clears the state normally.
  */
 
+/**
+ * A weekly reset event cannot release an unrelated Claude RPM or monthly-spend
+ * cooldown. Require weekly provenance from the persisted upstream error: either
+ * a named weekly window or Claude's native account-rate-limit quota wording.
+ */
+export function isClaudeWeeklyQuota429Signal(errorText: string | null | undefined): boolean {
+  if (!errorText) return false;
+  const lower = errorText.toLowerCase();
+  return (
+    lower.includes("weekly") ||
+    lower.includes("seven_day") ||
+    lower.includes("seven day") ||
+    lower.includes("7-day") ||
+    lower.includes("7d") ||
+    (lower.includes("would exceed your account's rate limit") &&
+      isExplicitClaudeQuota429Text(errorText))
+  );
+}
+
+/** A reset event must not make one full/unknown governing window disappear. */
+export function everyQuotaWindowReplenished(usage: JsonRecord): boolean {
+  if (usage.message || usage._stale || !isRecord(usage.quotas)) return false;
+  const windows = Object.values(usage.quotas);
+  return (
+    windows.length > 0 &&
+    windows.every((value) => {
+      if (!isRecord(value) || value.unlimited === true || value.fractionReported === false) {
+        return false;
+      }
+      const remaining =
+        typeof value.remainingPercentage === "number"
+          ? value.remainingPercentage
+          : typeof value.remaining === "number"
+            ? value.remaining
+            : null;
+      return remaining !== null && Number.isFinite(remaining) && remaining > 0;
+    })
+  );
+}
+
+/** A partial session-only poll is not proof of a recovered weekly allowance. */
+export function hasRecoveredClaudeWeeklyWindow(usage: JsonRecord): boolean {
+  if (!isRecord(usage.quotas)) return false;
+  return Object.entries(usage.quotas).some(([key, value]) => {
+    // Normalized Claude quotas put model-scoped buckets in modelQuotas.
+    // Reject similarly named rows here rather than treating a recovered
+    // Opus/Haiku weekly bucket as recovered account-wide capacity.
+    const normalized = key.trim().toLowerCase();
+    if (!["weekly", "weekly (7d)", "7d"].includes(normalized)) return false;
+    if (!isRecord(value) || value.fractionReported === false || value.unlimited === true) {
+      return false;
+    }
+    const remaining =
+      typeof value.remainingPercentage === "number"
+        ? value.remainingPercentage
+        : typeof value.remaining === "number"
+          ? value.remaining
+          : null;
+    return remaining !== null && Number.isFinite(remaining) && remaining > 0;
+  });
+}
+
+/**
+ * A recovered account-wide bucket does not prove that an existing model-specific
+ * quota lock has recovered. Clear it only when the fresh response supplies an
+ * explicit matching weekly model quota with positive, reported remaining capacity.
+ * Missing/empty/unknown model telemetry must fail closed (#17043).
+ */
+export function hasBlockingClaudeModelQuota(usage: JsonRecord, model: string): boolean {
+  if (!isRecord(usage.modelQuotas)) return true;
+  const matchingScopes = Object.values(usage.modelQuotas).filter((value) => {
+    if (!isRecord(value) || !isClaudeQuotaMetadata(value.claudeQuota)) return false;
+    return (
+      value.claudeQuota.kind === "weekly_scoped" &&
+      claudeQuotaMatchesModel(value.claudeQuota, model)
+    );
+  });
+  if (matchingScopes.length === 0) return true;
+  return matchingScopes.some((value) => {
+    if (!isRecord(value)) return true;
+    if (value.fractionReported === false || value.unlimited === true) return true;
+    const remaining =
+      typeof value.remainingPercentage === "number"
+        ? value.remainingPercentage
+        : typeof value.remaining === "number"
+          ? value.remaining
+          : null;
+    return remaining === null || !Number.isFinite(remaining) || remaining <= 0;
+  });
+}
+
+function canRecoverClaudeFromObservedReset(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): boolean {
+  return (
+    connection.provider === "claude" &&
+    (connection.lastErrorType === "quota_exhausted" ||
+      // Older 429 records used the generic RPM classifier for Claude's
+      // weekly-quota text. Only admit such a record with the full positive
+      // reset evidence and an explicit long-window signal.
+      connection.lastErrorType === "rate_limited") &&
+    isClaudeWeeklyQuota429Signal(connection.lastError) &&
+    connection.lastErrorSource !== "extra_usage" &&
+    Number(connection.errorCode) === 429 &&
+    hasObservedClaudeQuotaResetAfter(connection.id, connection.lastErrorAt) &&
+    everyQuotaWindowReplenished(usage) &&
+    hasRecoveredClaudeWeeklyWindow(usage)
+  );
+}
+
+function clearRecoveredClaudeQuotaModelLocks(connectionId: string, usage: JsonRecord): void {
+  const accountLocks = getAllModelLockouts().filter(
+    (lock) => lock.connectionId === connectionId && lock.provider === "claude"
+  );
+  // clearModelLock removes *all* lock keys for a model. Never let quota
+  // recovery erase an unrelated capacity/auth/not-found lock on that model.
+  const unrelatedModels = new Set(
+    accountLocks
+      .filter((lock) => lock.reason !== RateLimitReason.QUOTA_EXHAUSTED)
+      .map((lock) => lock.model)
+  );
+  for (const lock of accountLocks) {
+    if (lock.reason !== RateLimitReason.QUOTA_EXHAUSTED) continue;
+    if (unrelatedModels.has(lock.model)) continue;
+    if (hasBlockingClaudeModelQuota(usage, lock.model)) continue;
+    clearModelLock(lock.provider, lock.connectionId, lock.model);
+  }
+}
+
 export async function maybeClearRecoveredQuotaState(
   connection: ProviderConnectionLike,
   usage: JsonRecord
 ): Promise<ProviderConnectionLike> {
   if (!hasUsableQuota(usage)) return connection;
   if (isTerminalStatusForQuotaRecovery(connection.testStatus)) return connection;
+  let verifiedResetRecovery = false;
   if (hasActiveCooldown(connection)) {
     // A future rateLimitedUntil written from a real upstream signal is a hard
     // statement no poller may overrule (#11277) — executor-sourced rate limits
-    // and extra-usage policy blocks included. Only a SYNTHETIC cooldown (a
-    // quota_exhausted lock persisted without an upstream reset, e.g. the
-    // Claude-subscription poller's 1h lockout) yields to positive live-window
-    // evidence that the real quota has already replenished past its reset.
+    // and extra-usage policy blocks included. Two independently evidenced
+    // exceptions exist: an outlived synthetic cooldown and a recorded Claude
+    // weekly reset observed after the 429 with fresh, usable windows.
     const syntheticRecoveryOverride =
       connection.lastErrorType === "quota_exhausted" &&
       connection.lastErrorSource !== "extra_usage" &&
       syntheticCooldownOutlivedByRealWindows(usage);
-    if (!syntheticRecoveryOverride) return connection;
+    // #17043: unlike an ordinary quota poll, a persisted weekly reset event
+    // observed after the last 429 is independent positive evidence. It can
+    // release only a Claude quota-exhaustion lock with every live window open.
+    const observedResetOverride = canRecoverClaudeFromObservedReset(connection, usage);
+    if (!syntheticRecoveryOverride && !observedResetOverride) return connection;
+    verifiedResetRecovery = observedResetOverride;
   }
 
   const hasTransientState =
@@ -496,6 +642,12 @@ export async function maybeClearRecoveredQuotaState(
   } catch (dbError) {
     console.warn("[ProviderLimits] Failed to clear recovered quota state:", dbError);
     return connection;
+  }
+
+  if (cleared && verifiedResetRecovery) {
+    // Only quota-family locks belong to this reset. Preserve auth, capacity,
+    // missing-model, and generic RPM locks for their own recovery path.
+    clearRecoveredClaudeQuotaModelLocks(connection.id, usage);
   }
 
   if (!cleared) {

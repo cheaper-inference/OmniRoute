@@ -17,10 +17,10 @@ CI in koraki usklajevanja.
 
 ### Predpogoji
 
-- **Node.js** `>=22.22.3 <23` ali `>=24.0.0 <27` (priporočeno: 24 LTS)
+- **Node.js** `>=22.22.2 <23` ali `>=24.0.0 <27` (priporočeno: 24 LTS)
 - **npm** 10+
 
-> **Uporabniki npm v11+ (Node 24+):** Po ukazu `npm install` preverite, ali so bili izvorni moduli nameščeni:
+> **Uporabniki npm v11+ (Node 24+):** Po ukazu `npm install` preverite, ali so bili nativni moduli nameščeni:
 > `node -e "require('better-sqlite3')"`. Če ukaz ne uspe z napako `MODULE_NOT_FOUND`,
 > zaženite `npm approve-scripts better-sqlite3 && npm install`. Glejte
 > [Odpravljanje težav](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -35,10 +35,10 @@ cd OmniRoute
 npm install
 ```
 
-### Okoljske spremenljivke
+### Spremenljivke okolja
 
 ```bash
-# Ustvarite datoteko .env iz predloge
+# Ustvarite svojo datoteko .env iz predloge
 cp .env.example .env
 
 # Ustvarite zahtevane skrivnosti
@@ -48,24 +48,24 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Ključne spremenljivke za razvoj:
 
-| Spremenljivka          | Privzeta vrednost za razvoj | Opis                               |
-| ---------------------- | --------------------------- | ---------------------------------- |
-| `PORT`                 | `20128`                     | Vrata strežnika                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Osnovni URL za uporabniški vmesnik |
-| `JWT_SECRET`           | (ustvarite zgoraj)          | Skrivnost za podpisovanje JWT      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Geslo za prvo prijavo              |
-| `APP_LOG_LEVEL`        | `info`                      | Raven podrobnosti dnevnika         |
+| Spremenljivka          | Privzeta razvojna vrednost | Opis                               |
+| ---------------------- | -------------------------- | ---------------------------------- |
+| `PORT`                 | `20128`                    | Vrata strežnika                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Osnovni URL za uporabniški vmesnik |
+| `JWT_SECRET`           | (ustvarite zgoraj)         | Skrivnost za podpisovanje JWT      |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | Geslo za prvo prijavo              |
+| `APP_LOG_LEVEL`        | `info`                     | Raven podrobnosti dnevnika         |
 
 ### Nastavitve nadzorne plošče
 
-Nadzorna plošča ponuja preklopnike uporabniškega vmesnika za funkcije, ki jih je mogoče nastaviti tudi prek okoljskih spremenljivk:
+Nadzorna plošča zagotavlja stikala uporabniškega vmesnika za funkcije, ki jih je mogoče nastaviti tudi prek spremenljivk okolja:
 
-| Mesto nastavitve      | Preklopnik                  | Opis                                               |
+| Mesto nastavitve      | Stikalo                     | Opis                                               |
 | --------------------- | --------------------------- | -------------------------------------------------- |
 | Nastavitve → Napredno | Način za odpravljanje napak | Omogoči dnevnike zahtev za odpravljanje napak (UI) |
-| Nastavitve → Splošno  | Vidnost stranske vrstice    | Prikaže/skrije razdelke stranske vrstice           |
+| Nastavitve → Splošno  | Vidnost stranske vrstice    | Prikaži/skrij razdelke stranske vrstice            |
 
-Te nastavitve so shranjene v podatkovni zbirki in se ohranijo med ponovnimi zagoni, pri čemer po nastavitvi preglasijo privzete vrednosti okoljskih spremenljivk.
+Te nastavitve so shranjene v podatkovni zbirki in se ohranijo med ponovnimi zagoni, pri čemer po nastavitvi preglasijo privzete vrednosti spremenljivk okolja.
 
 ### Lokalni zagon
 
@@ -77,48 +77,48 @@ npm run dev
 npm run build    # next build → .build/next/, nato assembleStandalone → dist/
 npm run start
 
-# Hitro prevajanje samo zaledja/API-ja za spremembe sodelujočih
+# Hitra gradnja samo zaledja/API-ja za spremembe sodelujočih
 npm run build:contributor
 
-# Izdajna gradnja (čista ponovna gradnja + kontrolna oznaka HEAD — zahtevano za uvedbo)
-npm run build:release   # rm -rf .build dist, nato gradnja + zapis dist/BUILD_SHA
+# Izdajna gradnja (čista ponovna gradnja + kontrolna oznaka HEAD — zahtevano za uvajanje)
+npm run build:release   # rm -rf .build dist && gradnja + zapiše dist/BUILD_SHA
 
-# Običajna nastavitev vrat
+# Običajna konfiguracija vrat
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
 Gradnja za sodelujoče izvede samo preverjanje prevajanja: ne sestavi samostojne
-distribucije in ne zgradi izbirnih sredstev izvornega pakiranja. Običajno produkcijsko gradnjo uporabite, ko
-morate preveriti paket, pripravljen za distribucijo.
+distribucije in ne zgradi izbirnih nativnih sredstev za pakiranje. Običajno produkcijsko gradnjo
+uporabite, kadar morate preveriti paket, pripravljen za distribucijo.
 
-### Razporeditev izhodnih datotek gradnje
+### Razporeditev izhoda gradnje
 
-| Imenik    | Vsebina                                                                       | Sledeno |
-| --------- | ----------------------------------------------------------------------------- | ------- |
-| `src/`    | Izvorna koda aplikacije (TypeScript / TSX)                                    | Da      |
-| `.build/` | Vmesne datoteke — izhod `next build` (prezrt v Gitu, `distDir = .build/next`) | Ne      |
-| `dist/`   | Paket za distribucijo — sestavi ga `assembleStandalone` (prezrt v Gitu)       | Ne      |
+| Imenik    | Vsebina                                                                     | Sleden |
+| --------- | --------------------------------------------------------------------------- | ------ |
+| `src/`    | Izvorna koda aplikacije (TypeScript / TSX)                                  | Da     |
+| `.build/` | Vmesni rezultati — izhod `next build` (gitignored, `distDir = .build/next`) | Ne     |
+| `dist/`   | Paket za distribucijo — sestavi ga `assembleStandalone` (gitignored)        | Ne     |
 
-Gradbeni cevovod se izvede v enem prehodu:
+Cevovod gradnje se izvede v enem prehodu:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (izhod Next.js)
-  └─ assembleStandalone()                 (kopira standalone + static + public + izvorna sredstva)
+  └─ assembleStandalone()                 (kopira standalone + static + public + nativna sredstva)
        └─ izhod: dist/                    (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` poleg tega najprej počisti oba imenika in zapiše
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kot kontrolno oznako celovitosti uvedbe.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kot kontrolno oznako celovitosti uvajanja.
 
 `npm run build:contributor` uporablja profil gradnje samo za zaledje. Med gradnjo začasno nadomesti
-datoteke uporabniškega vmesnika nadzorne plošče z nadomestnimi datotekami, ohrani obdelovalnike poti API in po gradnji obnovi izvirne datoteke.
+datoteke uporabniškega vmesnika nadzorne plošče z nadomestnimi datotekami, ohrani obdelovalnike poti API-ja in po gradnji obnovi izvirne datoteke.
 Za spremembe, ki vplivajo na uporabniški vmesnik nadzorne plošče, ali za celovito preverjanje izdaje uporabite `npm run build`;
 profil za sodelujoče ni nadomestilo za izdajno gradnjo.
 
-> **Opomba za uvedbo na VPS:** oddaljeni imenik slike `/usr/lib/node_modules/omniroute/app/`
-> ostaja nespremenjen. Orodja za uvedbo z rsync sinhronizirajo vsebino imenika `dist/` vanj.
-> Spremenila se je le pot izhoda gradnje znotraj repozitorija (`app/` → `dist/`).
+> **Opomba za uvajanje na VPS:** oddaljeni imenik slike `/usr/lib/node_modules/omniroute/app/`
+> ostaja nespremenjen. Orodja za uvajanje z ukazom rsync vanj sinhronizirajo vsebino imenika `dist/`.
+> Spremenila se je samo pot izhoda gradnje znotraj repozitorija (`app/` → `dist/`).
 
 Privzeti URL-ji:
 
@@ -297,35 +297,35 @@ Za uporabljene primere glejte `open-sse/utils/stream.ts` in `open-sse/utils/stre
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
+├── app/                    # Usmerjevalnik aplikacije Next.js 16
 │   ├── (dashboard)/        # Strani nadzorne plošče (23 razdelkov)
-│   ├── api/                # Poti API (51 imenikov)
+│   ├── api/                # API-poti (51 imenikov)
 │   └── login/              # Strani za preverjanje pristnosti (.tsx)
 ├── domain/                 # Mehanizem pravilnikov (policyEngine, comboResolver, costRules itd.)
-├── lib/                    # Temeljna poslovna logika (.ts)
+├── lib/                    # Osrednja poslovna logika (.ts)
 │   ├── a2a/                # Strežnik protokola Agent-to-Agent v0.3
 │   ├── acp/                # Register protokola Agent Communication Protocol
 │   ├── compliance/         # Mehanizem pravilnikov skladnosti
 │   ├── db/                 # Domenski moduli SQLite + 130 migracij
-│   ├── memory/             # Trajni pogovorni pomnilnik
+│   ├── memory/             # Trajni pomnilnik pogovorov
 │   ├── oauth/              # Ponudniki, storitve in pripomočki OAuth
 │   ├── skills/             # Razširljivo ogrodje veščin
-│   ├── usage/              # Sledenje uporabi in izračun stroškov
+│   ├── usage/              # Spremljanje uporabe in izračun stroškov
 │   └── localDb.ts          # Samo plast za ponovni izvoz — sem nikoli ne dodajajte logike
-├── middleware/              # Vmesna programska oprema za zahteve (promptInjectionGuard)
+├── middleware/              # Vmesna programska oprema zahtev (promptInjectionGuard)
 ├── mitm/                   # Posredniški strežnik MITM (potrdilo, DNS, usmerjanje ciljev)
 ├── shared/
 │   ├── components/         # Komponente React (.tsx)
-│   ├── constants/          # Definicije ponudnikov (329), obsegi MCP, 19 strategij usmerjanja
+│   ├── constants/          # Definicije ponudnikov (329), obsegi MCP, 20 strategij usmerjanja
 │   ├── utils/              # Odklopnik, čistilnik in pomočniki za preverjanje pristnosti
 │   └── validation/         # Sheme Zod v4
 └── sse/                    # Posredniški cevovod SSE
 
 open-sse/                   # Delovni prostor @omniroute/open-sse
 ├── executors/              # 150 izvajalnih modulov (izvajalni razredi + pomočniki za posamezne ponudnike)
-├── handlers/               # 11 obdelovalnikov zahtev (klepet, odgovori, vdelave, slike itd.)
-├── mcp-server/             # Strežnik MCP (110 edinstvenih orodij, 3 transporti, 33 obsegov)
-├── services/               # 178 storitev najvišje ravni (combo, autoCombo, rateLimitManager itd.)
+├── handlers/               # 11 obdelovalnikov zahtev (klepet, odzivi, vdelave, slike itd.)
+├── mcp-server/             # Strežnik MCP (110 edinstvenih orodij, 3 prenosi, 33 obsegov)
+├── services/               # 178 vrhnjih storitev (combo, autoCombo, rateLimitManager itd.)
 ├── translator/             # Pretvorniki formatov (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Pretvornik API-ja Responses
 └── utils/                  # 22 pomožnih modulov (tok, TLS, posredniški strežnik, beleženje)
@@ -333,7 +333,7 @@ open-sse/                   # Delovni prostor @omniroute/open-sse
 electron/                   # Namizna aplikacija Electron (za več platform)
 
 tests/
-├── unit/                   # Izvajalnik testov Node.js (1,574 testnih datotek)
+├── unit/                   # Izvajalnik testov Node.js (1.574 testnih datotek)
 ├── integration/            # Integracijski testi
 ├── e2e/                    # Testi Playwright
 ├── security/               # Varnostni testi
@@ -342,22 +342,22 @@ tests/
 
 docs/
 ├── adr/                     # Zapisi arhitekturnih odločitev
-├── architecture/            # Sistemska arhitektura in odpornost
+├── architecture/            # Arhitektura in odpornost sistema
 ├── comparison/              # OmniRoute v primerjavi z alternativami
 ├── compression/             # Vodniki in pravila za stiskanje
 ├── dev/                     # Razvojni vodniki
 ├── diagrams/                # Arhitekturni diagrami
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── frameworks/              # MCP, A2A, OpenCode, pomnilnik, veščine
 ├── guides/                  # Uporabniški vodnik, Docker, nastavitev, odpravljanje težav
-├── i18n/                    # Internacionalizirani prevodi README
+├── i18n/                    # Internacionalizirani prevodi datoteke README
 ├── marketing/               # Trženjska gradiva
 ├── ops/                     # Uvajanje, posredniški strežnik, pokritost, izdaje
 ├── providers/               # Dokumentacija za posamezne ponudnike
 ├── reference/               # Referenca API-ja, okoljske spremenljivke, orodja CLI, brezplačne ravni
-├── releases/                # Opombe ob izdaji
+├── releases/                # Opombe ob izdajah
 ├── routing/                 # Mehanizem samodejnih kombinacij, ponovno predvajanje sklepanja
 ├── screenshots/             # Posnetki zaslona nadzorne plošče
-├── security/                # Zaščitni ukrepi, skladnost, prikritost, žetoni
+├── security/                # Varnostne omejitve, skladnost, prikritost, žetoni
 └── specs/                   # Specifikacije zasnove
 ```
 

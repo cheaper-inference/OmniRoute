@@ -1,1 +1,0 @@
-- **fix(pricing):** Antigravity and Antigravity CLI connections price every model they serve (Gemini 4 Argon, Gemini 3.8 Flash, Claude 5.5, Flash-Lite, and the existing Pro/Claude 4.6/GPT-OSS rows that were only under the legacy `ag` key), so a single call no longer fail-closes a per-key USD quota ([#16574](https://github.com/diegosouzapw/OmniRoute/pull/16574))

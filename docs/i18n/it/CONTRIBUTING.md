@@ -12,11 +12,11 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Prerequisiti
 
-- **Node.js** `>=22.22.3 <23` oppure `>=24.0.0 <27` (versione consigliata: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, oppure `>=24.0.0 <27` (consigliato: 24 LTS)
 - **npm** 10+
 
 > **Utenti di npm v11+ (Node 24+):** dopo `npm install`, verifica che i moduli nativi siano stati installati:
-> `node -e "require('better-sqlite3')"`. Se il comando non riesce con `MODULE_NOT_FOUND`,
+> `node -e "require('better-sqlite3')"`. Se il comando non riesce e restituisce `MODULE_NOT_FOUND`,
 > esegui `npm approve-scripts better-sqlite3 && npm install`. Consulta
 > [Risoluzione dei problemi](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -30,10 +30,10 @@ cd OmniRoute
 npm install
 ```
 
-### Variabili d'ambiente
+### Variabili di ambiente
 
 ```bash
-# Crea il file .env dal modello
+# Crea il tuo .env dal modello
 cp .env.example .env
 
 # Genera i segreti richiesti
@@ -43,24 +43,24 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Variabili principali per lo sviluppo:
 
-| Variabile              | Valore predefinito di sviluppo | Descrizione                  |
-| ---------------------- | ------------------------------ | ---------------------------- |
-| `PORT`                 | `20128`                        | Porta del server             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`       | URL di base per il frontend  |
-| `JWT_SECRET`           | (generato sopra)               | Segreto per la firma JWT     |
-| `INITIAL_PASSWORD`     | `CHANGEME`                     | Password del primo accesso   |
-| `APP_LOG_LEVEL`        | `info`                         | Livello di dettaglio dei log |
+| Variabile              | Valore predefinito di sviluppo | Descrizione                   |
+| ---------------------- | ------------------------------ | ----------------------------- |
+| `PORT`                 | `20128`                        | Porta del server              |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`       | URL di base per il frontend   |
+| `JWT_SECRET`           | (generato sopra)               | Segreto per la firma dei JWT  |
+| `INITIAL_PASSWORD`     | `CHANGEME`                     | Password per il primo accesso |
+| `APP_LOG_LEVEL`        | `info`                         | Livello di verbosità dei log  |
 
 ### Impostazioni della dashboard
 
-La dashboard fornisce opzioni dell'interfaccia utente per funzionalità che possono essere configurate anche tramite variabili d'ambiente:
+La dashboard fornisce opzioni nell'interfaccia per funzionalità che possono essere configurate anche tramite variabili di ambiente:
 
-| Posizione dell'impostazione | Opzione                         | Descrizione                                          |
-| --------------------------- | ------------------------------- | ---------------------------------------------------- |
-| Impostazioni → Avanzate     | Modalità di debug               | Abilita i log di debug delle richieste (interfaccia) |
-| Impostazioni → Generali     | Visibilità della barra laterale | Mostra/nasconde le sezioni della barra laterale      |
+| Posizione dell'impostazione | Opzione                         | Descrizione                                     |
+| --------------------------- | ------------------------------- | ----------------------------------------------- |
+| Impostazioni → Avanzate     | Modalità di debug               | Abilita i log di debug delle richieste (UI)     |
+| Impostazioni → Generali     | Visibilità della barra laterale | Mostra/nasconde le sezioni della barra laterale |
 
-Queste impostazioni vengono memorizzate nel database e persistono dopo i riavvii, sostituendo i valori predefiniti delle variabili d'ambiente quando vengono impostate.
+Queste impostazioni vengono archiviate nel database e persistono tra i riavvii, sovrascrivendo i valori predefiniti delle variabili di ambiente quando vengono configurate.
 
 ### Esecuzione in locale
 
@@ -69,51 +69,52 @@ Queste impostazioni vengono memorizzate nel database e persistono dopo i riavvii
 npm run dev
 
 # Build di produzione
-npm run build    # next build → .build/next/ quindi assembleStandalone → dist/
+npm run build    # next build → .build/next/, quindi assembleStandalone → dist/
 npm run start
 
-# Compilazione rapida del solo backend/API per le modifiche dei collaboratori
+# Compilazione rapida del solo backend/API per le modifiche dei contributori
 npm run build:contributor
 
-# Build di rilascio (ricompilazione pulita + sentinella HEAD — obbligatorio per il deploy)
+# Build di rilascio (ricompilazione pulita + sentinella HEAD — richiesta per il deployment)
 npm run build:release   # rm -rf .build dist && build + scrive dist/BUILD_SHA
 
 # Configurazione comune della porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-La build per i collaboratori esegue una convalida della sola compilazione: non assembla la
-distribuzione autonoma né genera le risorse native opzionali per la creazione dei pacchetti. Usa la normale build di produzione quando
-devi convalidare il pacchetto distribuibile.
+La build per i contributori esegue esclusivamente la convalida della compilazione: non assembla la
+distribuzione standalone né genera le risorse native opzionali per il packaging. Usa la normale build
+di produzione quando devi convalidare il bundle distribuibile.
 
-### Struttura dell'output di build
+### Struttura dell'output della build
 
 | Directory | Contenuto                                                                          | Tracciata |
 | --------- | ---------------------------------------------------------------------------------- | --------- |
 | `src/`    | Codice sorgente dell'applicazione (TypeScript / TSX)                               | Sì        |
-| `.build/` | File intermedi — output di `next build` (ignorato da Git, `distDir = .build/next`) | No        |
-| `dist/`   | Pacchetto distribuibile — assemblato da `assembleStandalone` (ignorato da Git)     | No        |
+| `.build/` | File intermedi — output di `next build` (ignorato da git, `distDir = .build/next`) | No        |
+| `dist/`   | Bundle distribuibile — assemblato da `assembleStandalone` (ignorato da git)        | No        |
 
 La pipeline di build viene eseguita in un singolo passaggio:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (output di Next.js)
-  └─ assembleStandalone()                 (copia i file standalone + statici + pubblici + le risorse native)
+  └─ assembleStandalone()                 (copia standalone + file statici + public + risorse native)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` pulisce inoltre prima entrambe le directory e scrive
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) come sentinella dell'integrità del deploy.
+`npm run build:release` pulisce inoltre entrambe le directory prima dell'esecuzione e scrive
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) come sentinella per l'integrità del deployment.
 
-`npm run build:contributor` utilizza il profilo di build per il solo backend. Durante la build sostituisce temporaneamente
-i file dell'interfaccia della dashboard con stub, mantiene i gestori delle route API e ripristina i file originali
-al termine della build. Usa `npm run build` per le modifiche che interessano l'interfaccia della dashboard o per la
-convalida completa del rilascio; il profilo per i collaboratori non sostituisce la build di rilascio.
+`npm run build:contributor` utilizza il profilo di build del solo backend. Durante la build sostituisce
+temporaneamente i file dell'interfaccia della dashboard con stub, mantiene i gestori delle route API e
+ripristina i file originali al termine della build. Usa `npm run build` per le modifiche che interessano
+l'interfaccia della dashboard o per una convalida completa del rilascio; il profilo per i contributori
+non sostituisce la build di rilascio.
 
-> **Nota sul deploy VPS:** la directory dell'immagine remota `/usr/lib/node_modules/omniroute/app/`
-> rimane invariata. Le procedure di deploy sincronizzano tramite rsync il contenuto di `dist/` al suo interno.
-> È cambiato solo il percorso dell'output di build all'interno del repository (`app/` → `dist/`).
+> **Nota sul deployment su VPS:** la directory dell'immagine remota `/usr/lib/node_modules/omniroute/app/`
+> rimane invariata. Le procedure di deployment sincronizzano tramite rsync il contenuto di `dist/` al suo interno.
+> È cambiato soltanto il percorso dell'output della build nel repository (`app/` → `dist/`).
 
 URL predefiniti:
 
@@ -312,13 +313,13 @@ src/                        # TypeScript (.ts / .tsx)
 ├── mitm/                   # Proxy MITM (certificati, DNS, instradamento delle destinazioni)
 ├── shared/
 │   ├── components/         # Componenti React (.tsx)
-│   ├── constants/          # Definizioni dei provider (329), ambiti MCP, 19 strategie di instradamento
+│   ├── constants/          # Definizioni dei provider (329), ambiti MCP, 20 strategie di instradamento
 │   ├── utils/              # Circuit breaker, sanitizzatore, helper di autenticazione
 │   └── validation/         # Schemi Zod v4
 └── sse/                    # Pipeline del proxy SSE
 
 open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # 150 moduli executor (classi executor + helper per provider)
+├── executors/              # 150 moduli executor (classi executor + helper specifici per provider)
 ├── handlers/               # 11 gestori delle richieste (chat, risposte, embedding, immagini, ecc.)
 ├── mcp-server/             # Server MCP (110 strumenti univoci, 3 trasporti, 33 ambiti)
 ├── services/               # 178 servizi di primo livello (combo, autoCombo, rateLimitManager, ecc.)
@@ -326,7 +327,7 @@ open-sse/                   # Workspace @omniroute/open-sse
 ├── transformer/            # Trasformatore dell'API Responses
 └── utils/                  # 22 moduli di utilità (stream, TLS, proxy, logging)
 
-electron/                   # App desktop Electron (multipiattaforma)
+electron/                   # Applicazione desktop Electron (multipiattaforma)
 
 tests/
 ├── unit/                   # Test runner di Node.js (1.574 file di test)
@@ -337,22 +338,22 @@ tests/
 └── load/                   # Test di carico
 
 docs/
-├── adr/                     # Record delle decisioni architetturali
+├── adr/                     # Registri delle decisioni architetturali
 ├── architecture/            # Architettura e resilienza del sistema
 ├── comparison/              # OmniRoute rispetto alle alternative
 ├── compression/             # Guide e regole per la compressione
-├── dev/                     # Guide per lo sviluppo
+├── dev/                     # Guide allo sviluppo
 ├── diagrams/                # Diagrammi dell'architettura
-├── frameworks/              # MCP, A2A, OpenCode, memoria, skill
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
 ├── guides/                  # Guida utente, Docker, configurazione, risoluzione dei problemi
 ├── i18n/                    # Traduzioni internazionalizzate del README
 ├── marketing/               # Materiali di marketing
-├── ops/                     # Distribuzione, proxy, copertura, release
+├── ops/                     # Distribuzione, proxy, copertura, rilasci
 ├── providers/               # Documentazione specifica dei provider
-├── reference/               # Riferimento API, variabili di ambiente, strumenti CLI, piani gratuiti
+├── reference/               # Riferimento API, variabili d'ambiente, strumenti CLI, piani gratuiti
 ├── releases/                # Note di rilascio
-├── routing/                 # Motore auto-combo, riproduzione del ragionamento
-├── screenshots/             # Screenshot della dashboard
+├── routing/                 # Motore di combinazione automatica, riproduzione del ragionamento
+├── screenshots/             # Schermate della dashboard
 ├── security/                # Protezioni, conformità, modalità invisibile, token
 └── specs/                   # Specifiche di progettazione
 ```
@@ -414,9 +415,13 @@ Scrivere test unitari in `tests/unit/` che coprano almeno:
 
 ---
 
-## Releasing
+## Rilascio
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+I rilasci vengono gestiti tramite il workflow `/generate-release`. Quando viene creata una nuova release su GitHub, il pacchetto viene **pubblicato automaticamente su npm** tramite GitHub Actions.
+
+Per i deployment su VPS, usa `npm run build:release` (non `npm run build`): esegue una
+ricompilazione pulita, assembla il bundle in `dist/` e scrive il file sentinella `dist/BUILD_SHA`.
+Quindi usa le skill `/deploy-vps-*-cc`, che sincronizzano `dist/` tramite rsync con la directory remota `app/`.
 
 ---
 

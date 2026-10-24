@@ -1,1 +1,0 @@
-- fix(dashboard): offer every canonical Codex Fast Tier model in the settings checklist while preserving saved selections and custom models (#16486).

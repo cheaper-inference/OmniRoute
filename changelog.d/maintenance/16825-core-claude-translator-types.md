@@ -1,1 +1,0 @@
-- **fix(types):** Restore the core TypeScript check for OpenAI-to-Claude translators and DSML match offsets without changing protocol output ([#16825](https://github.com/diegosouzapw/OmniRoute/pull/16825)) — thanks @jktan0504.

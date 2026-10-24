@@ -1,1 +1,0 @@
-- **fix(github):** strip unsupported `temperature` for Copilot GPT-5.4+ and GPT-6 models (gpt-5.5, gpt-5.6-*, gpt-6-astra), which otherwise returned HTTP 400 ([#16725](https://github.com/diegosouzapw/OmniRoute/pull/16725)) — thanks @m00nie

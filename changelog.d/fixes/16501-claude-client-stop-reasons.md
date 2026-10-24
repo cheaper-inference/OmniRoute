@@ -1,1 +1,0 @@
-- **fix(translator):** Claude clients now get `refusal` when an OpenAI-format upstream stops on `content_filter` or a Gemini upstream blocks on safety, recitation or a blocklist, instead of a clean `end_turn`; a truncated non-streaming completion now gets `max_tokens` instead of the raw `length`, as the streaming path already did.

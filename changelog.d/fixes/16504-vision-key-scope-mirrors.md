@@ -1,1 +1,0 @@
-- Translate the Vision Bridge API-key scope, authenticated self-loop enforcement, and no-permitted-model fallback into all 66 documentation locales, with content-bound translation state and regression coverage (#16504).

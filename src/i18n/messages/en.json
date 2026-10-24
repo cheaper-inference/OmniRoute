@@ -25,8 +25,10 @@
     "confirm": "Are you sure?",
     "refresh": "Refresh",
     "close": "Close",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Previous page",
     "nextPage": "Next page",
+    "pagination": "Pagination",
     "capsLockOn": "Caps Lock is on",
     "dismissNotification": "Dismiss notification",
     "toggleColumns": "Toggle columns",
@@ -182,6 +184,7 @@
     "combos": "Combos",
     "noModelsFound": "No models found",
     "clear": "Clear",
+    "clearFilters": "Clear filters",
     "done": "Done",
     "selectAll": "Select all",
     "unselectAll": "Unselect all",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Used by {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Preview",
     "batchFilePreviewTruncated": "Showing first {shown} lines ({total} total lines)",
-    "batchFileDownloadFull": "Download Full File"
+    "batchFileDownloadFull": "Download Full File",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Send tokens between API keys, share invite codes and connect community servers.",
+    "tokensServerUrlLabel": "Server URL"
   },
   "disabled": "Disabled",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Route budget-exhausted requests to the emergency free fallback provider/model.",
@@ -1017,6 +1023,15 @@
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Let the automatic cleanup sweep delete terminal (completed/failed/cancelled/expired) Batch API jobs older than OMNIROUTE_BATCH_RETENTION_DAYS, along with their per-line checkpoints, and clear the BLOB content of uploaded files past their own expires_at. Off by default: every existing install keeps this data exactly as before until an operator opts in. The operator-triggered DELETE /api/v1/batches/delete-completed route is unaffected either way -- it is a separate, unconditional public API contract.",
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "Fetch the live xAI model catalog for xai-oauth connections from https://api.x.ai/v1/models using the OAuth bearer token, instead of the frozen static seed. Off by default: xai-oauth keeps serving the static seed unchanged. On any resolution error, discovery falls back to the seed.",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "Run the startup database integrity/health check after the server starts accepting requests instead of blocking startup until it completes. Off by default: startup blocks on the check exactly like before this change, so a corrupt database is still caught before the first request is served.",
+  "featureFlagCatalogMirrorRefinementsEnabledDescription": "Refine the claude/ discovery and functional-gateway mirrors on /v1/models. Off by default: both mirror passes behave exactly as before. On: claude/ discovery mirrors also cover listed reasoning-effort variants (-low/-medium/-high/-xhigh), skip built-in auto/* ids the request path cannot materialize and skip an alias already listed; functional-gateway mirrors skip combos and OmniRoute-synthesized ids (claude/, no-think/), take the owner from owned_by, never use the owner as its own gateway, skip gateways disabled in blockedProviders and models outside a gateway's authoritative live catalog.",
+  "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "Let OpenCode Zen and OpenCode Go models without an explicit registry endpoint take their request surface (Responses for @ai-sdk/openai, Messages for @ai-sdk/anthropic) from the published models.opencode.ai catalog, read in the background every 6 h. Off by default: the endpoint comes from the registry heuristics exactly as before and the catalog is never fetched.",
+  "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Send the OpenCode v2 CLI client fingerprint on OpenCode Zen/Go requests: the opencode/latest/<2.x>/cli User-Agent and x-opencode-client cli, and on free-tier requests the v2 session headers, the v2 CLI read/shell tool schemas and no tool_choice \"none\". Off by default: every OpenCode request keeps the current identity, headers and body unchanged.",
+  "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "When an auto combo's candidate pool is already empty before the tool-calling pre-filter runs (every target skipped by cooldowns, lockouts or exhaustion), answer 503 no_eligible_targets instead of the legacy 400 \"No target supports tool calling\" capability_mismatch. Off by default: the empty pool keeps the legacy 400.",
+  "featureFlagModelEndpointCapabilityGateEnabledDescription": "Enforce trusted model endpoint tags (declared by the provider catalog, inferred from a specialty model id, or set by the operator): reject a request sent to an endpoint the model does not serve with HTTP 400 before dispatch on /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations and /v1/audio/*; hide models whose tagged endpoints have no OmniRoute adapter from /v1/models; and answer the dashboard model test with 422 for such models. Off by default: endpoint tags stay informational and requests are dispatched exactly as before.",
+  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "On plain anthropic-compatible relays, keep mid-conversation system turns inside the message list instead of moving them into the top-level system prompt, so the cached prompt prefix stays stable across turns. Applies only when the client itself sent the mid-conversation-system-2026-04-07 beta. Off by default: every system turn is moved into the system prompt exactly as before, because relays without that beta reject system turns in the message list.",
+  "featureFlagModelsDevEffortTiersEnabledDescription": "Use the reasoning effort tiers models.dev publishes when neither an operator override nor the provider registry declares any, keeping only known effort levels, and treat an empty declared tier list as \"no tiers\". Off by default: the model catalog and resolved effort tiers stay exactly as before.",
+  "featureFlagAutoRequestResolvedCapabilitiesDescription": "Let auto/* requests build the candidate pool with resolved model capabilities (vision, reasoning, thinking) and observed quality scores, read in one bulk pass. Off by default: request-time candidate weights stay exactly as before. On: those signals feed the snapshot weights, so candidate weights and selection can change.",
+  "featureFlagCredentialHealthRetestAutoDisabledDescription": "Let the credential health sweep retest connections the gateway switched off by itself (at most once every 6 hours each, 5 per sweep) and switch one back on when its retest passes. Off by default: such connections stay off until an operator acts. Operator-disabled and permanently banned connections are never retested.",
   "sidebar": {
     "home": "Home",
     "dashboard": "Dashboard",
@@ -1476,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 or @channelname",
       "chatIdHint": "The unique numerical identifier or public username of the chat/channel.",
       "tutorial": "How to configure Telegram webhook:"
-    }
+    },
+    "copy": "Copy",
+    "copied": "Copied!",
+    "expandDetails": "Show details",
+    "collapseDetails": "Hide details"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1588,7 +1607,8 @@
     "mcpMetricCalls24h": "Calls (24h)",
     "mcpMetricSuccessRate": "Success rate",
     "mcpMetricAvgDuration": "Avg duration",
-    "mcpMetricTopTool": "Top tool"
+    "mcpMetricTopTool": "Top tool",
+    "dismissError": "Dismiss error"
   },
   "themesPage": {
     "title": "Themes",
@@ -1604,6 +1624,8 @@
     "quickNavigation": "Quick nav",
     "quickNavigationTitle": "Quick navigation (⌘K / Ctrl+K)",
     "openQuickNavigation": "Open quick navigation",
+    "openMenu": "Open menu",
+    "products": "Keak products",
     "switchToLightMode": "Switch to light mode",
     "switchToDarkMode": "Switch to dark mode",
     "language": "Language",
@@ -2486,7 +2508,8 @@
     "onlySelectedConnections": "Only selected connections",
     "selectAtLeastOneConnection": "Select at least one connection or choose All connections.",
     "allConnectionsDesc": "This key can use any active connection.",
-    "restrictedToConnections": "Restricted to {count, plural, one {# connection} other {# connections}}."
+    "restrictedToConnections": "Restricted to {count, plural, one {# connection} other {# connections}}.",
+    "removeSelection": "Remove {name}"
   },
   "auditLog": {
     "title": "Audit Log",
@@ -2598,7 +2621,9 @@
     "imageToTextBridgeCta": "Configure the Image→Text bridge in Modality Bridge settings",
     "sttBridgeCta": "Configure the Speech→Text bridge in Modality Bridge settings",
     "existingConnection": "Existing connection",
-    "openrouterSttDescription": "OpenRouter speech-to-text models use your configured OpenRouter connection. No separate credential is required."
+    "openrouterSttDescription": "OpenRouter speech-to-text models use your configured OpenRouter connection. No separate credential is required.",
+    "modalityTabsAria": "Media type",
+    "serviceKindsAria": "Service type"
   },
   "search": {
     "searchQuery": "Search Query",
@@ -3269,7 +3294,8 @@
     "cliproxyapiUnknown": "Unknown",
     "cliproxyapiUpdate": "Update",
     "cliproxyapiUpdateAvailable": "Update available: v{current} → v{latest}",
-    "cliproxyapiVersion": "Version"
+    "cliproxyapiVersion": "Version",
+    "removeMapping": "Remove mapping"
   },
   "modelCatalog": {
     "title": "Models & Combos",
@@ -3550,6 +3576,7 @@
     "playgroundNoCombosYet": "No combos configured yet.",
     "playgroundCreateFirst": "Create one first",
     "weighted": "Weighted",
+    "weightPercent": "Weight (%)",
     "leastUsed": "Least-Used",
     "costOpt": "Cost-Opt",
     "strategyGuideTitle": "How to use this strategy",
@@ -3711,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# account} other {# accounts}}",
     "builderGlobalAdded": "Added",
     "builderGlobalAdd": "Add",
+    "clearSearch": "Clear search",
     "manualModel": "Manual model",
     "manualModelInvalid": "Enter a model as provider/model.",
     "manualModelUnknownProvider": "Unknown provider prefix.",
@@ -3964,6 +3992,10 @@
     "responseValidationMinLength": "Minimum content length (chars)",
     "responseValidationJsonPaths": "JSON-path checks",
     "responseValidationAddCheck": "+ Add check",
+    "responseValidationRemoveCheck": "Remove check",
+    "responseValidationPath": "JSON path",
+    "responseValidationCondition": "Condition",
+    "responseValidationValue": "Expected value",
     "agentFeaturesSystemMessageOverride": "Override system message",
     "agentFeaturesSystemMessagePlaceholder": "You are an expert assistant...",
     "agentFeaturesSystemMessageHint": "System message override for agents",
@@ -5279,7 +5311,8 @@
         "skipped": "already configured",
         "failed": "failed"
       }
-    }
+    },
+    "stepProgress": "Setup progress"
   },
   "providers": {
     "tosAvoidNoticeTitle": "This provider is excluded from auto by default",
@@ -5376,6 +5409,12 @@
     "reorderByAvailabilityTitle": "Reorder connections by availability",
     "reorderByAvailabilityError": "Failed to reorder connections by availability",
     "distributeProxies": "Distribute Proxies",
+    "clearAccountProxies": "Remove account proxies",
+    "clearAccountProxyAssignments": "Remove assignments",
+    "clearAccountProxiesConfirm": "Remove individual proxy assignments from all {count} accounts of this provider, including disabled accounts? Saved proxies and provider/global assignments are preserved. Accounts will inherit provider/global proxy settings again.",
+    "accountProxiesCleared": "Account proxy assignments removed.",
+    "clearAccountProxiesPartial": "Could not completely reset {count} account(s). The displayed assignments have been refreshed; you can retry.",
+    "clearAccountProxiesError": "Could not reset account proxies or refresh their status. Please reload and retry.",
     "distributing": "Distributing...",
     "selectedCount": "{count, plural, one {# selected} other {# selected}}",
     "accountsCount": "{count, plural, one {# account} other {# accounts}}",
@@ -5581,6 +5620,10 @@
     "autoSyncTooltip": "Automatically refresh model list every 6h by default (configurable via MODEL_SYNC_INTERVAL_HOURS)",
     "autoSyncEnabled": "Auto-sync enabled — models will refresh periodically",
     "autoSyncDisabled": "Auto-sync disabled",
+    "autoSyncLastSynced": "Synced {time}",
+    "autoSyncNeverSynced": "Never synced",
+    "autoSyncImmediateFailed": "Auto-sync enabled, but the immediate model refresh failed",
+    "autoSyncImmediatePartialFailure": "Auto-sync enabled, but some immediate model refreshes failed",
     "autoSyncToggleFailed": "Failed to toggle auto-sync",
     "autoSyncPartialFailure": "Auto-sync updated for some connections, but not all",
     "clearAllModels": "Clear All Models",
@@ -5778,6 +5821,7 @@
     "contextWindowOverridePlaceholder": "e.g. 131072",
     "contextWindowOverrideHint": "Manually set this model's real context window (tokens) when the provider misreports it. Wins over auto-detected/catalog values and prevents combo routing from dropping the model.",
     "contextWindowOverrideInvalid": "Context window override must be a positive whole number of tokens",
+    "maxOutputTokenOverrideInvalid": "Max output tokens override must be a positive whole number of tokens",
     "visionCapableLabel": "Vision capable",
     "visionCapableHint": "Manually flag this model as vision-capable when the provider's discovery metadata doesn't report an image input modality (common for self-hosted/local backends).",
     "compatParamFiltersLabel": "Param Filters",
@@ -6228,6 +6272,16 @@
     "supportedEndpointEmbeddings": "Embeddings",
     "supportedEndpointImages": "Images",
     "supportedEndpointsLabel": "Supported endpoints",
+    "endpointCapabilitiesEdit": "Edit model endpoints",
+    "endpointCapabilitiesReset": "Reset to discovered",
+    "endpointCapabilitiesDefaulted": "Assumed",
+    "endpointCapabilitiesDeclared": "Declared",
+    "endpointCapabilitiesInferred": "Inferred",
+    "endpointCapabilitiesOperator": "Manual",
+    "endpointCapabilitiesSave": "Save endpoints",
+    "endpointCapabilitiesSaveFailed": "Failed to update model endpoints",
+    "endpointCapabilitiesResetFailed": "Failed to reset model endpoints",
+    "endpointCapabilitiesNoAdapter": "No provider adapter for this endpoint",
     "tagGroupHint": "Tag Group Hint",
     "tagGroupLabel": "Tag Group Label",
     "tagGroupPlaceholder": "Tag Group Placeholder",
@@ -7129,6 +7183,8 @@
         "NEEDS_CORE_NOT_CONFIGURED": "This subscription has nodes that need a local proxy core (SS/VMess/Trojan/VLESS); they are not routed until you configure the local-core SOCKS5 endpoint.",
         "NO_USABLE_NODES": "Subscription yielded no usable nodes (http/https/socks5 or nodes with a local core endpoint).",
         "SELECTOR_SWITCH_FAILED": "The proxy-core control call failed; the previous route stays active. Check the control URL and secret, then refresh.",
+        "SELECTOR_EARLY_NO_CONTROL": "No control URL",
+        "SELECTOR_EARLY_UNMAPPED": "No matching subscription",
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "The generated core configuration could not replace the adopted file; the beside copy was kept instead.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
@@ -7160,6 +7216,7 @@
       "createSubscription": "Create Subscription",
       "loading": "Loading…",
       "noSubscriptions": "No subscriptions yet. Click \"Add Subscription\" to get started.",
+      "earlySkipsSinceRestart": "Selector skips since last restart",
       "statusOk": "OK",
       "statusError": "Error",
       "statusEmpty": "Empty",
@@ -7674,6 +7731,7 @@
     "configured": "configured",
     "none": "None",
     "modelOverrideValuePlaceholder": "Numeric value",
+    "modelOverrideKey": "Override key",
     "modelOverrideReasoningEffortsPlaceholder": "English comma-separated, e.g. low, medium, high",
     "addKeyValue": "Add key value",
     "noModelOverrides": "No overrides configured for this model.",
@@ -8150,6 +8208,9 @@
     "storageIntegrityCheck": "Integrity Check",
     "storageIntegrityOk": "✓ OK",
     "storageIntegrityError": "✗ Error",
+    "storageIntegrityLastCheck": "Last checked {date}",
+    "storageIntegrityRunCheck": "Run integrity check",
+    "storageIntegrityCheckFailed": "Integrity check failed",
     "storageUsageTokenBuffer": "Usage Token Buffer",
     "storageUsageTokenBufferDesc": "Extra tokens added to reported usage to account for system prompt overhead.",
     "storageUsageTokenBufferHint": "Set to 0 to report raw provider token counts. Default: 2000.",
@@ -8999,7 +9060,8 @@
     "tomlTestPassed": "Passed",
     "tomlTestFailed": "Failed",
     "tomlImportError": "Could not process the RTK TOML file.",
-    "tomlFileReadError": "Could not read the selected TOML file."
+    "tomlFileReadError": "Could not read the selected TOML file.",
+    "viewMode": "View mode"
   },
   "compressionEngineConfig": {
     "loading": "Loading…",
@@ -9221,7 +9283,8 @@
     "languagePacksList": "Language packs: {packs}",
     "dragToReorder": "Drag to reorder step",
     "engine": "Engine",
-    "intensity": "Intensity"
+    "intensity": "Intensity",
+    "compressionOverride": "Compression override"
   },
   "compressionStudio": {
     "noRun": "No compression run available.",
@@ -9281,7 +9344,8 @@
     "encoderWinner": "winner: {winner}",
     "encoder": "encoder",
     "bytes": "bytes",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Studio views"
   },
   "omniglyph": {
     "preview": "Preview",
@@ -9487,7 +9551,9 @@
     "tooltipMinLength": "Messages shorter than this are not compressed. Lower = more compression.",
     "tooltipMinSavings": "Only compress if it saves at least this many tokens.",
     "ultraSettings": "Ultra Settings",
-    "ultraSettingsDesc": "SLM-powered semantic compression"
+    "ultraSettingsDesc": "SLM-powered semantic compression",
+    "defaultLanguage": "Default language",
+    "viewMode": "View mode"
   },
   "translator": {
     "title": "Translator",
@@ -11092,7 +11158,8 @@
       "message": "Message",
       "error": "Error",
       "completion": "Completion"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Simple Chat",
@@ -11273,7 +11340,8 @@
     "minutesAgo": "{minutes}m ago",
     "hoursAgo": "{hours}h ago",
     "daysAgo": "{days}d ago",
-    "entries": "Entries"
+    "entries": "Entries",
+    "viewSwitcherAria": "Cache view"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11461,6 +11529,7 @@
     "tableHealth": "Health (24h)",
     "tableUsage": "Usage",
     "tableActions": "Actions",
+    "moreActions": "More actions",
     "test": "Test",
     "edit": "Edit",
     "delete": "Delete",
@@ -11823,7 +11892,8 @@
       "nextButton": "Next",
       "runButton": "Run",
       "promptPlaceholder": "Enter your message… (Enter to send, Shift+Enter for newline)"
-    }
+    },
+    "playgroundTabs": "Playground modes"
   },
   "miniPlayground": {
     "endpoint": "Endpoint",
@@ -11894,7 +11964,8 @@
     "assistant": "Assistant",
     "errorLabel": "Error",
     "requestFailed": "Request failed",
-    "stop": "Stop"
+    "stop": "Stop",
+    "messageInputAria": "Message"
   },
   "requestLogger": {
     "recording": "Recording",
@@ -12081,8 +12152,18 @@
       "resilienceRotations": "{count} account rotations",
       "resilienceRetried": "Retried empty turn",
       "resilienceContinued": "Resumed mid-stream",
-      "resilienceRecovered": "Recovered by a resilience action"
-    }
+      "resilienceRecovered": "Recovered by a resilience action",
+      "conversationContext": "Conversation Context",
+      "goToBottom": "Go to bottom",
+      "liveRefreshOn": "Live refresh: on",
+      "liveRefreshOff": "Live refresh: off",
+      "liveRefresh": "Live refresh",
+      "continuesFromParent": "continues from parent",
+      "continuesFrom": "Continues from {id}",
+      "viewConversation": "view conversation",
+      "openConversation": "Open conversation {id}"
+    },
+    "tableLabel": "Request logs"
   },
   "proxyLogger": {
     "filterAll": "All",
@@ -12127,7 +12208,9 @@
     "colServedBy": "Served by",
     "filterTraffic": "Traffic",
     "filterTests": "Tests",
-    "filterSource": "Source"
+    "filterSource": "Source",
+    "tableLabel": "Proxy logs",
+    "sortLogs": "Sort logs"
   },
   "endpointOptions": {
     "speech": "Speech",
@@ -12212,7 +12295,8 @@
     "statusExhausted": "EXHAUSTED",
     "statusAlerting": "ALERTING",
     "statusError": "ERROR",
-    "moreSuffix": "+{count} more"
+    "moreSuffix": "+{count} more",
+    "feedFilterLabel": "Filter events"
   },
   "quotaShare": {
     "weightPercent": "Weight %",
@@ -12379,7 +12463,10 @@
     "ungroupedTitle": "Ungrouped",
     "ungroupedHint": "These pools are not assigned to a known group. Edit a pool to move it into a real group.",
     "removeFailed": "Could not remove this pool.",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "allocationsHeading": "Allocations",
+    "wizardRemoveDimension": "Remove dimension",
+    "wizardRemoveKey": "Remove key"
   },
   "plugins": {
     "title": "Plugins",
@@ -12537,7 +12624,8 @@
       "settingsUpdateFailed": "Settings update failed",
       "serviceRevealApiKey": "{actor} revealed API key for {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Dismiss error"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12670,7 +12758,21 @@
       "goNow": "Go now",
       "message": "The MITM Proxy now lives under AgentBridge.",
       "title": "This page has moved"
-    }
+    },
+    "dnsOn": "DNS on",
+    "dnsOff": "DNS off",
+    "showServerSettings": "Show server settings",
+    "hideServerSettings": "Hide server settings",
+    "upstreamCaTesting": "Testing…",
+    "removeMapping": "Remove mapping",
+    "mappingSourcePlaceholder": "e.g., gemini-3.6-flash-medium, or * for all unmapped",
+    "mappingWildcardHint": "Use * as the source to route every model without an explicit mapping through OmniRoute to the selected target. Exact source matches always win over *.",
+    "wizardDetectingModels": "Detecting models from intercepted traffic...",
+    "wizardDetectedModels": "Found {count, plural, one {# model} other {# models}} in intercepted traffic. Select the ones you want to add:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# models}} selected. You'll map them to OmniRoute models in the next screen.",
+    "wizardAddModels": "Add {count, plural, one {# model} other {# models}}",
+    "wizardNoModelsDetected": "No models detected yet. Use {agent} to make a request, then run this wizard again to auto-detect models from traffic.",
+    "wizardNoModelsHint": "Or close this wizard and add mappings manually in the agent card."
   },
   "providerStats": {
     "unknownError": "Unknown error",
@@ -12700,7 +12802,11 @@
     "avgTtft": "Avg TTFT",
     "avgTotal": "Avg Total",
     "requestTelemetry": "Request Telemetry",
-    "requestTelemetryDescription": "7-phase pipeline breakdown (last 5 minutes)"
+    "requestTelemetryDescription": "7-phase pipeline breakdown (last 5 minutes)",
+    "title": "Provider stats",
+    "description": "Per-provider and per-model traffic, latency and success rates",
+    "combo": "Combo",
+    "toggleModels": "Show models for {provider}"
   },
   "relay": {
     "title": "Serverless Relay Proxies",
@@ -12861,7 +12967,18 @@
     "noRequestBody": "No request body.",
     "noResponseBody": "No response body.",
     "formatted": "Formatted",
-    "raw": "Raw"
+    "raw": "Raw",
+    "requestCount": "{count, plural, one {# request} other {# requests}}",
+    "expandList": "Expand list",
+    "collapseList": "Collapse list",
+    "snippetLanguage": "Snippet language",
+    "headersTable": "Headers",
+    "showSecrets": "Show secrets",
+    "maskSecrets": "Mask secrets",
+    "llmNotAvailable": "LLM metadata not available for this request.",
+    "llmStreamYes": "yes (SSE)",
+    "llmStreamNo": "no",
+    "llmTotalTokens": "Total: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13320,7 +13437,8 @@
     "colReliabilityHelp": "Share of calls this provider actually answered over the last 24 hours. A dash means it served too little traffic to state a rate.",
     "reliabilitySample": "{successes} of {requests} calls succeeded in the last {hours}h",
     "reliabilityTooFew": "Only {requests} calls in the last {hours}h — too few to state a rate",
-    "reliabilityNoTraffic": "No calls recorded in the last 24h"
+    "reliabilityNoTraffic": "No calls recorded in the last 24h",
+    "categoryFilter": "Task category"
   },
   "discovery": {
     "title": "Provider Discovery",
@@ -13345,7 +13463,11 @@
     "method": "Method",
     "auth": "Auth",
     "feasibility": "Feasibility",
-    "models": "Models"
+    "models": "Models",
+    "provider": "Provider",
+    "status": "Status",
+    "endpoint": "Endpoint",
+    "actions": "Actions"
   },
   "noAuthProvider": {
     "title": "No authentication required",
@@ -13394,7 +13516,8 @@
     "ownProxy": "Own proxy",
     "freeTierPause": "Model {model} paused (429), back at {time}",
     "freeTierPauseProvider": "Paused (429), back at {time}",
-    "freeTierPauseNote": "In-process pause on this instance"
+    "freeTierPauseNote": "In-process pause on this instance",
+    "proxyType": "Proxy type"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13567,7 +13690,10 @@
         "description": "A hidden achievement awaits...",
         "criteria": "Complete the hidden achievement to reveal this badge."
       }
-    }
+    },
+    "leaderboardTitle": "Leaderboard",
+    "leaderboardDescription": "Rankings and achievements across your API keys",
+    "badgeLocked": "Locked"
   },
   "featureFlags": {
     "title": "Feature Flags",
@@ -13808,6 +13934,7 @@
     "latency": "Latency",
     "quota": "Quota",
     "rangeWindow": "{range} window",
+    "timeRange": "Time range",
     "runtimeHealthBlend": "runtime/health blend",
     "averageResponseTime": "average response time",
     "worstQuota": "Worst quota",
@@ -14009,7 +14136,11 @@
     "learnMore": "Learn more",
     "changelogLoadFailed": "Could not load the changelog. Please try again later.",
     "retry": "Retry",
-    "viewFullHistory": "View full history on GitHub"
+    "viewFullHistory": "View full history on GitHub",
+    "title": "News & changelog",
+    "description": "Announcements from the OmniRoute team and the latest release notes",
+    "viewLabel": "View",
+    "loadingNews": "Loading announcements..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14411,7 +14542,8 @@
       "never": "-",
       "failureCount": "Failure Count",
       "retryAfterMs": "Retry After (ms)",
-      "lastFailureKind": "Last Failure Kind"
+      "lastFailureKind": "Last Failure Kind",
+      "lastClose": "Last Close"
     },
     "empty": {
       "title": "No connections",
@@ -14559,7 +14691,9 @@
       "circuitBreakerState": "Provider Circuit Breaker State",
       "lastUpdate": "Last update: {timestamp}",
       "uptimeMinutes": "{minutes}m",
-      "uptimeHoursMinutes": "{hours}h {minutes}m"
+      "uptimeHoursMinutes": "{hours}h {minutes}m",
+      "breakerClosed": "Closed",
+      "breakerNotClosed": "Open or half-open"
     },
     "statusPages": {
       "400": {
@@ -14634,6 +14768,9 @@
         "primaryAction": "Maintenance Details",
         "secondaryAction": "System Status"
       }
+    },
+    "miniapp": {
+      "askAnything": "Ask anything…"
     }
   },
   "kiroAuthModal": {
@@ -14730,7 +14867,10 @@
     "distributeProxies": {
       "distributing": "Distributing...",
       "complete": "Complete",
-      "defaultLabel": "Distribute Proxies"
+      "defaultLabel": "Distribute Proxies",
+      "confirmMessage": "Assign saved proxies to every account in this group? This replaces existing account assignments and enables proxy routing, including for disabled accounts.",
+      "confirmDistribute": "Distribute proxies",
+      "cancel": "Cancel"
     }
   },
   "providerTest": {
@@ -14821,7 +14961,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} visible / {total} total",
+    "modeLabel": "View mode",
+    "jumpToNow": "Jump to current time, NOW line resets to position {position}%",
+    "laneReuse": "Lane reuse",
+    "laneReuseLabel": "Lane reuse window (minutes)",
+    "laneReuseHint": "Requests sharing a conversation id stay on the same timeline row as long as the gap between them is under this many minutes.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Auto-refresh",
+    "autoRefreshLabel": "Auto-refresh interval (seconds)",
+    "autoRefreshHint": "How often the timeline re-fetches the request list from the server.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in"
   },
   "metadata": {
     "compressionTitle": "Compression",

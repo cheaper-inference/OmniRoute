@@ -1,1 +1,0 @@
-- Correct the context and output limits for twelve verified OpenCode Go models so imported models no longer fall back to a 200K context window. Preserve the narrower GPT-6 Luna and Space Bunny input limits, operator overrides, synced metadata, and documented request formats.

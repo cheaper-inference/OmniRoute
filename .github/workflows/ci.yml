@@ -2,7 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [main, "release/**"]
+    # Pushes to release/** no longer start this matrix (2026-10-18). Every change that
+    # reaches a release branch already ran it on its own PR, and the merged COMBINATION
+    # is validated by Release-Green (nightly-release-green.yml: --quick on every push to
+    # release/v*, full sweep 3×/day on its own runner slot). With ~10 merges/hour the push
+    # runs here were cancelled by the next push before finishing (24 of 24 in one day) while
+    # each held up to 30 of the account's 40 hosted job slots — the queue that made PR
+    # checks wait for hours. `main` keeps it: the release squash is the one push that
+    # lands code nobody validated as a PR into main.
+    branches: [main]
   pull_request:
     branches: [main, "release/**"]
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, edited]
@@ -60,6 +68,10 @@ jobs:
           node-version: ${{ env.CI_NODE_VERSION }}
       - name: Validate gate inventory
         run: npm run check:gate-manifest
+      - name: Validate recurring free catalog evidence
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: npm run check:free-catalog-evidence
 
       # Refuse a PR that targets its own head branch before spending anything on it. #8912 has
       # head == base == release/v3.8.50: no diff, can never merge, and it sits in the queue with
@@ -514,7 +526,27 @@ jobs:
       # Blocking since the 2026-09 docs re-sync: a core doc edited without `npm run i18n:run
       # --files=<doc>` (or `--adopt` for a mechanical edit) leaves 65 stale mirrors behind;
       # the run only retranslates the `## ` sections whose text changed, so it is cheap.
+      #
+      # PR-scoped since 2026-10-20: on a pull request the gate compares against the BASE
+      # checkout and fails only on drift this PR introduces. Drift the base already carried
+      # (release/v3.8.53 inherited 14 drifted sources while the translation backend was down)
+      # is printed as inherited — the branch's own push run and the nightly Release-Green keep
+      # the full strict verdict, so the debt stays visible without painting every PR red.
+      - name: Base checkout for the i18n drift baseline (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .i18n-base
+          persist-credentials: false
+      - name: i18n docs drift (PR — only drift introduced by this PR blocks)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          set -euo pipefail
+          node scripts/i18n/check-translation-drift.mjs --root .i18n-base --json --warn > /tmp/i18n-base-drift.json
+          node scripts/i18n/check-translation-drift.mjs --base-report /tmp/i18n-base-drift.json
       - name: i18n docs drift (sources changed since their translation)
+        if: ${{ github.event_name != 'pull_request' }}
         run: node scripts/i18n/check-translation-drift.mjs
 
   docs-lint:
@@ -723,17 +755,23 @@ jobs:
     name: Build
     # Dynamic runner: when the release captain flips the USE_VPS_RUNNER repo var to
     # 'true' (scripts/vps/release-runner-up.sh does it after the self-hosted VM is
-    # online), the heavy jobs run on the dedicated 32-core VPS runners (label
-    # omni-build) instead of queueing on the 20-concurrent-job hosted pool.
-    # Safety: fork PRs NEVER reach the self-hosted runner — the expression falls
-    # back to ubuntu-latest unless the PR head repo is this repository (push /
-    # dispatch events are own-origin by definition). Any failure path (VM down,
-    # var unset/false) also falls back to ubuntu-latest.
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)) && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
+    # online), push Builds (main only: release/** pushes stopped running this workflow
+    # in #17092) and workflow_dispatch Builds run on the .113 build slot (label
+    # omni-build) with the Turbopack bundler that npm-publish ships.
+    # Pull requests (own-origin and forks) and merge_group always build on the hosted
+    # pool with webpack (2026-10-18): the slot is ONE runner and a Turbopack Build holds
+    # it 29-58 min, so with every own-origin PR routed there 18 Builds queued for up to
+    # 18 h, and the release line's own push Build got the slot once in 40 jobs. Hosted,
+    # the same PR Build takes 8-12 min next to the PR's other jobs. Safety: no PR code
+    # reaches the self-hosted runner (push / dispatch events are own-origin by
+    # definition). Any failure path (VM down, var unset/false) also falls back to
+    # ubuntu-latest.
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request') && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
     needs: changes
     # Capacity is owned by the ONE omni-build runner slot (#12048), also used by
     # Docker amd64. Do not add another worker with that label on the same host
-    # without reviewing its memory budget (a next-build peaks at 14–16 GB RSS).
+    # without reviewing its memory budget (a Turbopack next-build holds ~40 GB in the
+    # compile phase alone and peaked at 49 GB uncapped; docs/ops/RUNNER_BOX.md).
     # A shared PR concurrency group is not a queue: GitHub's default one-pending
     # limit replaces unrelated waiting PRs even with cancel-in-progress: false.
     # Isolate candidate refs; the runner slot still serializes self-hosted builds.
@@ -769,9 +807,15 @@ jobs:
       # tests/unit/ci-build-bundler-webpack.test.ts and heavy-build-queue.test.ts.
       - run: npm run build
         env:
-          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)) && '1' || '0' }}
+          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request') && '1' || '0' }}
       - name: Verify colocated compression worker
         run: node --import tsx/esm --test tests/integration/compression-worker-standalone.int.test.ts
+        env:
+          RUN_STANDALONE_INT: "1"
+      - name: Verify colocated LLMLingua worker
+        # Starts the optional ONNX worker from the standalone artifact and asserts its
+        # dependency closure resolves inside standalone/node_modules (#12796).
+        run: node --import tsx/esm --test tests/integration/llmlingua-worker-standalone.int.test.ts
         env:
           RUN_STANDALONE_INT: "1"
       - name: Archive Next.js build for downstream jobs
@@ -1119,7 +1163,11 @@ jobs:
     # the budget on two consecutive main runs (33207760653, 33215115341); the job ended
     # `cancelled` and dragged the whole run's conclusion to `cancelled` although every
     # blocking job was green. The upload step now has its own ceiling; this is headroom.
-    timeout-minutes: 30
+    # 45, not 30 (2026-10-20): the budget was eaten by growth — on six PRs the job took
+    # 28–31 min (download 4 min, merge+report+gate 18 min, Codecov ≤5 min) and two of six
+    # died at exactly 30 min as job-timeout `cancelled` (jobs 118735970655, 118737111780),
+    # failing Quality Ratchet / PR Coverage Comment / Gate / CI until a re-run.
+    timeout-minutes: 45
     needs: test-unit
     if: ${{ !cancelled() && needs.test-unit.result == 'success' }}
     env:

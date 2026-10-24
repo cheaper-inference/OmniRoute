@@ -12,10 +12,10 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Pré-requisitos
 
-- **Node.js** `>=22.22.3 <23`, ou `>=24.0.0 <27` (recomendado: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, ou `>=24.0.0 <27` (recomendado: 24 LTS)
 - **npm** 10+
 
-> **Utilizadores do npm v11+ (Node 24+):** Após executar `npm install`, verifique se os módulos nativos foram instalados:
+> **Utilizadores do npm v11+ (Node 24+):** Após executar `npm install`, confirme que os módulos nativos foram instalados:
 > `node -e "require('better-sqlite3')"`. Se falhar com `MODULE_NOT_FOUND`,
 > execute `npm approve-scripts better-sqlite3 && npm install`. Consulte
 > [Resolução de problemas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -46,74 +46,74 @@ Principais variáveis para desenvolvimento:
 | Variável               | Predefinição de Desenvolvimento | Descrição                                  |
 | ---------------------- | ------------------------------- | ------------------------------------------ |
 | `PORT`                 | `20128`                         | Porta do servidor                          |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`        | URL base para o frontend                   |
-| `JWT_SECRET`           | (gerar acima)                   | Segredo de assinatura do JWT               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`        | URL base para a interface                  |
+| `JWT_SECRET`           | (gerado acima)                  | Segredo de assinatura JWT                  |
 | `INITIAL_PASSWORD`     | `CHANGEME`                      | Palavra-passe do primeiro início de sessão |
 | `APP_LOG_LEVEL`        | `info`                          | Nível de detalhe dos registos              |
 
 ### Definições do Painel
 
-O painel disponibiliza controlos na interface para funcionalidades que também podem ser configuradas através de variáveis de ambiente:
+O painel disponibiliza controlos da interface para funcionalidades que também podem ser configuradas através de variáveis de ambiente:
 
-| Localização da Definição | Controlo                      | Descrição                                           |
-| ------------------------ | ----------------------------- | --------------------------------------------------- |
-| Definições → Avançadas   | Modo de Depuração             | Ativar registos de pedidos de depuração (interface) |
-| Definições → Geral       | Visibilidade da Barra Lateral | Mostrar/ocultar secções da barra lateral            |
+| Localização da Definição | Controlo                      | Descrição                                    |
+| ------------------------ | ----------------------------- | -------------------------------------------- |
+| Definições → Avançadas   | Modo de Depuração             | Ativar registos de pedidos de depuração (IU) |
+| Definições → Geral       | Visibilidade da Barra Lateral | Mostrar/ocultar secções da barra lateral     |
 
-Estas definições são armazenadas na base de dados e mantêm-se após reinícios, substituindo as predefinições das variáveis de ambiente quando configuradas.
+Estas definições são armazenadas na base de dados e persistem entre reinícios, substituindo as predefinições das variáveis de ambiente quando configuradas.
 
-### Executar Localmente
+### Execução Local
 
 ```bash
 # Modo de desenvolvimento (recarregamento automático)
 npm run dev
 
 # Compilação de produção
-npm run build    # next build → .build/next/ e depois assembleStandalone → dist/
+npm run build    # next build → .build/next/ e, depois, assembleStandalone → dist/
 npm run start
 
-# Compilação rápida apenas do backend/API para alterações de contribuidores
+# Compilação rápida apenas do backend/API para alterações de colaboradores
 npm run build:contributor
 
-# Compilação de lançamento (recompilação limpa + sentinela HEAD — necessária para implementação)
-npm run build:release   # rm -rf .build dist && compilação + escreve dist/BUILD_SHA
+# Compilação de lançamento (recompilação limpa + sentinela HEAD — necessária para a implementação)
+npm run build:release   # rm -rf .build dist && compilação + grava dist/BUILD_SHA
 
-# Configuração habitual da porta
+# Configuração comum da porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-A compilação para contribuidores realiza uma validação apenas de compilação: não prepara a
+A compilação de colaborador efetua uma validação apenas de compilação: não monta a
 distribuição autónoma nem compila recursos opcionais de empacotamento nativo. Utilize a compilação de produção normal quando
-necessitar de validar o pacote distribuível.
+precisar de validar o pacote distribuível.
 
 ### Estrutura do Resultado da Compilação
 
-| Diretório | Conteúdo                                                                                       | Controlado |
-| --------- | ---------------------------------------------------------------------------------------------- | ---------- |
-| `src/`    | Código-fonte da aplicação (TypeScript / TSX)                                                   | Sim        |
-| `.build/` | Ficheiros intermédios — resultado de `next build` (ignorado pelo Git, `distDir = .build/next`) | Não        |
-| `dist/`   | Pacote distribuível — preparado por `assembleStandalone` (ignorado pelo Git)                   | Não        |
+| Diretório | Conteúdo                                                                                | Controlado |
+| --------- | --------------------------------------------------------------------------------------- | ---------- |
+| `src/`    | Código-fonte da aplicação (TypeScript / TSX)                                            | Sim        |
+| `.build/` | Intermediários — resultado de `next build` (ignorado pelo Git, `distDir = .build/next`) | Não        |
+| `dist/`   | Pacote distribuível — montado por `assembleStandalone` (ignorado pelo Git)              | Não        |
 
-O processo de compilação é executado numa única passagem:
+O pipeline de compilação consiste numa única passagem:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (resultado do Next.js)
-  └─ assembleStandalone()                 (copia os ficheiros autónomos + estáticos + públicos + recursos nativos)
+  └─ assembleStandalone()                 (copia o pacote autónomo + ficheiros estáticos + públicos + recursos nativos)
        └─ resultado: dist/                (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` também limpa primeiro ambos os diretórios e escreve
+`npm run build:release` também limpa primeiro ambos os diretórios e grava
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) como sentinela de integridade da implementação.
 
-`npm run build:contributor` utiliza o perfil de compilação apenas do backend. Substitui temporariamente
-os ficheiros da interface do painel por stubs durante a compilação, mantém os processadores de rotas da API e restaura os ficheiros originais
-após a compilação. Utilize `npm run build` para alterações que afetem a interface do painel ou para uma
-validação completa do lançamento; o perfil para contribuidores não substitui a compilação de lançamento.
+`npm run build:contributor` utiliza o perfil de compilação apenas do backend. Durante a compilação, substitui temporariamente
+os ficheiros da IU do painel por stubs, mantém os processadores de rotas da API e restaura os ficheiros originais
+após a compilação. Utilize `npm run build` para alterações que afetem a IU do painel ou para uma validação
+completa do lançamento; o perfil de colaborador não substitui a compilação de lançamento.
 
-> **Nota sobre implementação em VPS:** o diretório remoto da imagem `/usr/lib/node_modules/omniroute/app/`
-> permanece inalterado. As competências de implementação sincronizam o conteúdo de `dist/` para o mesmo através de rsync.
-> Apenas foi alterado o caminho do resultado da compilação dentro do repositório (`app/` → `dist/`).
+> **Nota sobre a implementação em VPS:** o diretório remoto da imagem `/usr/lib/node_modules/omniroute/app/`
+> permanece inalterado. As ferramentas de implementação sincronizam o conteúdo de `dist/` para esse diretório através de rsync.
+> Apenas o caminho do resultado da compilação no repositório foi alterado (`app/` → `dist/`).
 
 URLs predefinidos:
 
@@ -297,35 +297,35 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── api/                # Rotas da API (51 diretórios)
 │   └── login/              # Páginas de autenticação (.tsx)
 ├── domain/                 # Motor de políticas (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Lógica empresarial principal (.ts)
-│   ├── a2a/                # Servidor do protocolo Agent-to-Agent v0.3
+├── lib/                    # Lógica de negócio principal (.ts)
+│   ├── a2a/                # Servidor do protocolo Agente-a-Agente v0.3
 │   ├── acp/                # Registo do Agent Communication Protocol
 │   ├── compliance/         # Motor de políticas de conformidade
 │   ├── db/                 # Módulos de domínio SQLite + 130 migrações
-│   ├── memory/             # Memória conversacional persistente
+│   ├── memory/             # Memória de conversação persistente
 │   ├── oauth/              # Fornecedores, serviços e utilitários OAuth
 │   ├── skills/             # Framework extensível de competências
 │   ├── usage/              # Monitorização da utilização e cálculo de custos
 │   └── localDb.ts          # Apenas camada de reexportação — nunca adicionar lógica aqui
 ├── middleware/              # Middleware de pedidos (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (certificados, DNS, encaminhamento para destinos)
+├── mitm/                   # Proxy MITM (certificados, DNS, encaminhamento de destinos)
 ├── shared/
 │   ├── components/         # Componentes React (.tsx)
-│   ├── constants/          # Definições de fornecedores (329), âmbitos MCP, 19 estratégias de encaminhamento
+│   ├── constants/          # Definições de fornecedores (329), âmbitos MCP, 20 estratégias de encaminhamento
 │   ├── utils/              # Disjuntor, higienizador, auxiliares de autenticação
 │   └── validation/         # Esquemas Zod v4
-└── sse/                    # Pipeline de proxy SSE
+└── sse/                    # Pipeline do proxy SSE
 
 open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # 150 módulos executores (classes de execução + auxiliares por fornecedor)
-├── handlers/               # 11 processadores de pedidos (chat, respostas, embeddings, imagens, etc.)
+├── executors/              # 150 módulos de execução (classes de execução + auxiliares por fornecedor)
+├── handlers/               # 11 processadores de pedidos (conversação, respostas, embeddings, imagens, etc.)
 ├── mcp-server/             # Servidor MCP (110 ferramentas únicas, 3 transportes, 33 âmbitos)
 ├── services/               # 178 serviços de nível superior (combo, autoCombo, rateLimitManager, etc.)
 ├── translator/             # Tradutores de formatos (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformador da API Responses
+├── transformer/            # Transformador da Responses API
 └── utils/                  # 22 módulos utilitários (stream, TLS, proxy, registo)
 
-electron/                   # Aplicação Electron para ambiente de trabalho (multiplataforma)
+electron/                   # Aplicação Electron para computador (multiplataforma)
 
 tests/
 ├── unit/                   # Executor de testes do Node.js (1 574 ficheiros de teste)
@@ -348,12 +348,12 @@ docs/
 ├── marketing/               # Materiais de marketing
 ├── ops/                     # Implementação, proxy, cobertura, lançamentos
 ├── providers/               # Documentação específica dos fornecedores
-├── reference/               # Referência da API, variáveis de ambiente, ferramentas CLI, planos gratuitos
+├── reference/               # Referência da API, variáveis de ambiente, ferramentas CLI, escalões gratuitos
 ├── releases/                # Notas de lançamento
-├── routing/                 # Motor de combinação automática, repetição do raciocínio
+├── routing/                 # Motor de combinação automática, reprodução do raciocínio
 ├── screenshots/             # Capturas de ecrã do painel
-├── security/                # Mecanismos de proteção, conformidade, ocultação, tokens
-└── specs/                   # Especificações de conceção
+├── security/                # Salvaguardas, conformidade, dissimulação, tokens
+└── specs/                   # Especificações de design
 ```
 
 ---
@@ -413,9 +413,13 @@ Escreva testes unitários em `tests/unit/` que abranjam, no mínimo:
 
 ---
 
-## Releasing
+## Lançamentos
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Os lançamentos são geridos através do fluxo de trabalho `/generate-release`. Quando é criado um novo GitHub Release, o pacote é **publicado automaticamente no npm** através do GitHub Actions.
+
+Para implementações em VPS, utilize `npm run build:release` (e não `npm run build`) — este comando efetua uma
+recompilação limpa, reúne o bundle em `dist/` e escreve o ficheiro sentinela `dist/BUILD_SHA`.
+Em seguida, utilize as skills `/deploy-vps-*-cc`, que sincronizam `dist/` através de rsync com o diretório remoto `app/`.
 
 ---
 

@@ -1,1 +1,0 @@
-- Release-branch hygiene: add the Y-API entry (#15131) to the provider translate-path golden snapshot.

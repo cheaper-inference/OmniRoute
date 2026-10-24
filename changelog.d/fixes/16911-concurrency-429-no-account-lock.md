@@ -1,1 +1,0 @@
-- **fix(resilience):** concurrency-limit 429s ("too many concurrent requests") now fail over to the next connection with a short fixed cooldown instead of escalating a healthy connection's backoff ([#16911](https://github.com/diegosouzapw/OmniRoute/pull/16911)) — thanks @PIKACHUIM

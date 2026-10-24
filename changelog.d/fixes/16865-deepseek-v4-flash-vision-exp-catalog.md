@@ -1,1 +1,0 @@
-- **fix(providers):** register DeepSeek V4 Flash Vision (exp) on OpenCode Go and Command Code with explicit vision support ([#16865](https://github.com/diegosouzapw/OmniRoute/pull/16865)) — thanks @Spoon94

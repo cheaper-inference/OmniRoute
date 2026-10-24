@@ -1,1 +1,0 @@
-- **feat(image):** Muse Image 1.0 text-to-image and reference-image edits on the Muse Code (Meta) provider, reusing the muse-code API key or device-flow credential ([#16871](https://github.com/diegosouzapw/OmniRoute/pull/16871)) — thanks @dasepmoch

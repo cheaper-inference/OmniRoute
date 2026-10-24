@@ -5,8 +5,7 @@
 // limits collided on the same cache entry and the second was served the first's
 // response verbatim under `x-omniroute-cache: HIT`. Generation params are now
 // extracted by outputContractOf — so the legacy signature AND the Layer-1 direct
-// hash both fold them — while bodies carrying none keep the byte-identical legacy
-// key, preserving existing plain-chat cache entries.
+// hash both fold them. The current key schema versions all entries.
 import test from "node:test";
 import assert from "node:assert/strict";
 
@@ -55,7 +54,7 @@ test("Layer-1 direct hash folds generation params too (manager lookup/store path
   assert.notEqual(hash({ max_tokens: 1500 }), hash({}));
 });
 
-test("plain chat keeps the legacy signature — existing cache entries stay valid", () => {
+test("plain chat and transport-only variants share the current signature", () => {
   assert.equal(
     generateSignature("m", MESSAGES, 0, 1, "key"),
     sig({ stream: true, user: "u", model: "m", temperature: 0 })

@@ -13,30 +13,30 @@
 
 ## Kas tai yra
 
-„OmniRoute“ registruoja 372 paslaugų teikėjus, įskaitant 155 katalogo įrašus, pažymėtus kaip **nemokamus / nereikalaujančius autentifikavimo**
-(be autentifikavimo,
-nemokamo lygio OAuth arba nemokamo lygio API raktas — žr.
-[Nemokamų lygių vadovą](../getting-started/FREE-TIERS-GUIDE.md) ir visą
-[Nemokamų lygių katalogą](../reference/FREE_TIERS.md)). Tačiau yra viena išlyga: nemokamų paslaugų teikėjų
-modelių kokybė labai skiriasi. Be autentifikavimo pasiekiamas paslaugų teikėjas, siūlantis pažangiausią modelį, yra gerokai naudingesnis
-už teikėją, siūlantį nedidelį senesnį modelį.
+„OmniRoute“ registruoja 375 tiekėjus, įskaitant 155 katalogo įrašus, pažymėtus kaip **nemokami / be autentifikacijos**
+(be autentifikacijos,
+nemokamo lygmens OAuth arba nemokamo lygmens API raktas — žr.
+[Nemokamų lygmenų vadovą](../getting-started/FREE-TIERS-GUIDE.md) ir visą
+[Nemokamų lygmenų katalogą](../reference/FREE_TIERS.md)). Yra viena iškaba: nemokamų
+tiekėjų modelių kokybė labai skiriasi. Tiekėjas be autentifikacijos, siūlantis pažangiausią
+(„frontier“) modelį, yra daug naudingesnis nei tas, kuris siūlo mažą pasenusį modelį.
 
-**Nemokamų paslaugų teikėjų reitingai** atsako į klausimą „**kuris nemokamas paslaugų teikėjas siūlo geriausią modelį?**“,
-susiedami kiekvieno nemokamo paslaugų teikėjo katalogą su **bendruomenės surinktais kokybės įverčiais** iš
-**Arena AI lyderių lentelės** (žmonių pasirinkimais pagrįstas ELO — ta pati idėja, kuria paremta LMArena
-pokalbių robotų arena). Tada paslaugų teikėjai reitinguojami pagal jų **geriausio nemokamo modelio** pajėgumą.
+**Nemokamų tiekėjų reitingai** atsako į klausimą „**kuris nemokamas tiekėjas suteikia man geriausią modelį?**“,
+sujungdami kiekvieno nemokamo tiekėjo katalogą su **bendruomenės renkamais kokybės balais** iš
+**„Arena AI“ lyderių lentelės** (žmonių pageidavimų ELO — ta pati idėja, kaip ir „LMArena“
+pokalbių robotų arenos). Tiekėjai reitinguojami pagal jų **geriausio nemokamo modelio** stiprumą.
 
-Reitingas apskaičiuojamas naudojant tris tikrus šaltinius:
+Reitingas apskaičiuojamas iš trijų realių šaltinių:
 
-1. Nemokamų paslaugų teikėjų sąrašus — `NOAUTH_PROVIDERS` ir `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` įrašus, pažymėtus `hasFree`
+1. Nemokamų tiekėjų sąrašai — `NOAUTH_PROVIDERS`, taip pat `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` įrašai, pažymėti `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Kiekvieno paslaugų teikėjo modelių katalogą iš paslaugų teikėjų registro
+2. Kiekvieno tiekėjo modelių katalogas iš tiekėjų registro
    (`open-sse/config/providerRegistry.ts`).
-3. Iš ELO išvestus tinkamumo užduotims įverčius, kuriuos `model_intelligence` DB lentelėje saugo
-   Arena ELO sinchronizavimo variklis (`src/lib/arenaEloSync.ts`).
+3. Iš ELO išvesti užduoties tinkamumo balai, saugomi DB lentelėje `model_intelligence` — juos įrašo
+   „Arena ELO“ sinchronizavimo variklis (`src/lib/arenaEloSync.ts`).
 
-Susiejimo logika pateikta faile `src/lib/freeProviderRankings.ts`.
+Sujungimo logika yra faile `src/lib/freeProviderRankings.ts`.
 
 ---
 

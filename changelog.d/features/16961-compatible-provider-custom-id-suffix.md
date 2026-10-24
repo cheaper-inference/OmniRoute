@@ -1,1 +1,0 @@
-- **feat(providers):** optional custom ID suffix for OpenAI-/Anthropic-compatible provider nodes (`openai-compatible-<apiType>-<suffix>` / `anthropic-compatible-<suffix>`), with 409 on duplicate ids instead of a 500 ([#16961](https://github.com/diegosouzapw/OmniRoute/pull/16961)) — thanks @rafi-zadanly

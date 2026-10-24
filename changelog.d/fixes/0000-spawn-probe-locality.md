@@ -1,1 +1,0 @@
-- **fix(authz):** the Headroom, Tailscale and cloudflared status routes now run their host binary probes (`which`, `--version`, `tailscale status --json`) only for loopback/LAN callers. These routes stay reachable from a remote dashboard, which now gets the same response built from persisted state and flagged `probed: false`; local responses are unchanged.

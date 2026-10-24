@@ -176,11 +176,11 @@ test("v1 models catalog includes display names by default", async () => {
     new Request("http://localhost/api/v1/models")
   );
   const body = (await response.json()) as any;
-  const model = body.data.find((item) => item.id === "unc/Lorbus/Qwen3.6-27B-int4-AutoRound");
+  const model = body.data.find((item) => item.id === "unc/turboderp/Qwen3.8-27B-exl3");
 
   assert.equal(response.status, 200);
   assert.ok(model);
-  assert.equal(model.name, "Qwen3.6 27B int4 AutoRound (🆓 Free)");
+  assert.equal(model.name, "Qwen3.8 27B exl3 (🆓 Free)");
 });
 
 test("v1 models catalog omits display names when the feature flag is disabled", async () => {
@@ -191,12 +191,12 @@ test("v1 models catalog omits display names when the feature flag is disabled", 
       new Request("http://localhost/api/v1/models")
     );
     const body = (await response.json()) as any;
-    const model = body.data.find((item) => item.id === "unc/Lorbus/Qwen3.6-27B-int4-AutoRound");
+    const model = body.data.find((item) => item.id === "unc/turboderp/Qwen3.8-27B-exl3");
 
     assert.equal(response.status, 200);
     assert.ok(model);
     assert.equal("name" in model, false);
-    assert.equal(model.root, "Lorbus/Qwen3.6-27B-int4-AutoRound");
+    assert.equal(model.root, "turboderp/Qwen3.8-27B-exl3");
   } finally {
     featureFlagsDb.removeFeatureFlagOverride("MODEL_CATALOG_INCLUDE_NAMES");
   }

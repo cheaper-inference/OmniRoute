@@ -1,1 +1,0 @@
-- **fix(sse):** normalize tool-call IDs longer than 64 characters before sending to OpenAI, keeping assistant calls and tool results linked ([#16490](https://github.com/diegosouzapw/OmniRoute/pull/16490)) — thanks @mwpn

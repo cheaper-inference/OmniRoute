@@ -13,16 +13,16 @@ ar to līgumiem, mērķētiem testiem, CI pārklājumu un saskaņošanas darbīb
 
 ---
 
-## Izstrādes iestatīšana
+## Izstrādes vides iestatīšana
 
 ### Priekšnosacījumi
 
-- **Node.js** `>=22.22.3 <23` vai `>=24.0.0 <27` (ieteicams: 24 LTS)
+- **Node.js** `>=22.22.2 <23` vai `>=24.0.0 <27` (ieteicams: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ lietotājiem (Node 24+):** Pēc `npm install` pārbaudiet, vai vietējie moduļi ir instalēti:
-> `node -e "require('better-sqlite3')"`. Ja komanda neizdodas ar `MODULE_NOT_FOUND`,
-> palaidiet `npm approve-scripts better-sqlite3 && npm install`. Skatiet
+> **npm v11+ lietotājiem (Node 24+):** pēc `npm install` izpildes pārbaudiet, vai vietējie moduļi ir instalēti:
+> `node -e "require('better-sqlite3')"`. Ja komanda neizdodas ar kļūdu `MODULE_NOT_FOUND`,
+> izpildiet `npm approve-scripts better-sqlite3 && npm install`. Skatiet
 > [Problēmu novēršana](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
@@ -38,7 +38,7 @@ npm install
 ### Vides mainīgie
 
 ```bash
-# Izveidojiet .env failu no veidnes
+# Izveidojiet savu .env failu no veidnes
 cp .env.example .env
 
 # Ģenerējiet nepieciešamos noslēpumus
@@ -46,74 +46,79 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Galvenie izstrādes mainīgie:
+Galvenie izstrādes vides mainīgie:
 
-| Mainīgais              | Noklusējuma vērtība izstrādē | Apraksts                      |
-| ---------------------- | ---------------------------- | ----------------------------- |
-| `PORT`                 | `20128`                      | Servera ports                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Frontend pamata URL           |
-| `JWT_SECRET`           | (ģenerējiet iepriekš)        | JWT parakstīšanas noslēpums   |
-| `INITIAL_PASSWORD`     | `CHANGEME`                   | Pirmās pieteikšanās parole    |
-| `APP_LOG_LEVEL`        | `info`                       | Žurnāla detalizācijas līmenis |
+| Mainīgais              | Izstrādes noklusējuma vērtība | Apraksts                      |
+| ---------------------- | ----------------------------- | ----------------------------- |
+| `PORT`                 | `20128`                       | Servera ports                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`      | Priekšgala pamata URL         |
+| `JWT_SECRET`           | (ģenerējiet iepriekš)         | JWT parakstīšanas noslēpums   |
+| `INITIAL_PASSWORD`     | `CHANGEME`                    | Pirmās pieteikšanās parole    |
+| `APP_LOG_LEVEL`        | `info`                        | Žurnāla detalizācijas līmenis |
 
 ### Informācijas paneļa iestatījumi
 
-Informācijas panelī ir pieejami funkciju pārslēgi, kurus var konfigurēt arī, izmantojot vides mainīgos:
+Informācijas panelī ir pieejami funkciju UI pārslēgi, kuras var konfigurēt arī ar vides mainīgajiem:
 
 | Iestatījuma atrašanās vieta | Pārslēgs            | Apraksts                                         |
 | --------------------------- | ------------------- | ------------------------------------------------ |
-| Settings → Advanced         | Atkļūdošanas režīms | Iespējot atkļūdošanas pieprasījumu žurnālus (UI) |
-| Settings → General          | Sānjoslas redzamība | Rādīt/slēpt sānjoslas sadaļas                    |
+| Iestatījumi → Papildu       | Atkļūdošanas režīms | Iespējot atkļūdošanas pieprasījumu žurnālus (UI) |
+| Iestatījumi → Vispārīgi     | Sānjoslas redzamība | Rādīt/paslēpt sānjoslas sadaļas                  |
 
-Šie iestatījumi tiek glabāti datubāzē un saglabājas pēc atkārtotas palaišanas; ja tie ir iestatīti, tie aizstāj vides mainīgo noklusējuma vērtības.
+Šie iestatījumi tiek glabāti datubāzē un saglabājas pēc restartēšanas, aizstājot vides mainīgo noklusējuma vērtības, ja tie ir iestatīti.
 
-### Darbināšana lokāli
+### Lokāla palaišana
 
 ```bash
 # Izstrādes režīms (automātiska pārlāde)
 npm run dev
 
 # Produkcijas būvējums
-npm run build    # next build → .build/next/ un pēc tam assembleStandalone → dist/
+npm run build    # next build → .build/next/, pēc tam assembleStandalone → dist/
 npm run start
 
-# Ātra tikai backend/API kompilēšana izmaiņām, ko veic ieguldītāji
+# Ātra tikai aizmugursistēmas/API kompilēšana līdzdalībnieku izmaiņām
 npm run build:contributor
 
-# Izlaiduma būvējums (tīra pārbūve + HEAD marķieris — nepieciešams izvietošanai)
-npm run build:release   # rm -rf .build dist un build + ieraksta dist/BUILD_SHA
+# Laidiena būvējums (tīra pārbūve + HEAD kontrolmarķieris — nepieciešams izvietošanai)
+npm run build:release   # rm -rf .build dist && build + ieraksta dist/BUILD_SHA
 
-# Izplatīta porta konfigurācija
+# Bieži izmantota porta konfigurācija
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Ieguldītāja būvējums veic tikai kompilēšanas validāciju: tas neizveido patstāvīgo izplatīšanu un nebūvē neobligātos vietējās pakotnes līdzekļus. Izmantojiet parasto produkcijas būvējumu, ja nepieciešams validēt izplatāmo pakotni.
+Līdzdalībnieku būvējums veic tikai kompilēšanas validāciju: tas neizveido autonomo
+izplatījumu un nebūvē neobligātos vietējās pakotnes resursus. Izmantojiet parasto produkcijas būvējumu, kad
+nepieciešams validēt izplatāmo komplektu.
 
 ### Būvējuma izvades struktūra
 
-| Direktorija | Saturs                                                               | Tiek izsekota |
-| ----------- | -------------------------------------------------------------------- | ------------- |
-| `src/`      | Lietotnes pirmkods (TypeScript / TSX)                                | Jā            |
-| `.build/`   | Starpfaili — `next build` izvade (ignorēta, `distDir = .build/next`) | Nē            |
-| `dist/`     | Izplatāmā pakotne — to izveido `assembleStandalone` (ignorēta)       | Nē            |
+| Direktorijs | Saturs                                                                     | Izseko Git |
+| ----------- | -------------------------------------------------------------------------- | ---------- |
+| `src/`      | Lietotnes pirmkods (TypeScript / TSX)                                      | Jā         |
+| `.build/`   | Starprezultāti — `next build` izvade (Git ignorē, `distDir = .build/next`) | Nē         |
+| `dist/`     | Izplatāmais komplekts — izveido `assembleStandalone` (Git ignorē)          | Nē         |
 
-Būvēšanas konveijers darbojas vienā piegājienā:
+Būvēšanas konveijers tiek izpildīts vienā piegājienā:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js izvade)
-  └─ assembleStandalone()                 (kopē standalone + static + public + native assets)
+  └─ assembleStandalone()                 (kopē autonomo būvējumu + statiskos + publiskos + vietējos resursus)
        └─ izvade: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` papildus vispirms notīra abas direktorijas un ieraksta
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kā izvietošanas integritātes marķieri.
+`npm run build:release` vispirms papildus iztīra abus direktorijus un ieraksta
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kā izvietošanas integritātes kontrolmarķieri.
 
-`npm run build:contributor` izmanto tikai backend paredzēto būvējuma profilu. Būvēšanas laikā tas īslaicīgi aizstāj informācijas paneļa UI failus, saglabā API maršrutu apstrādātājus un pēc būvēšanas atjauno sākotnējos failus. Izmantojiet `npm run build`, lai pārbaudītu izmaiņas, kas ietekmē informācijas paneļa UI, vai veiktu pilnu izlaiduma validāciju; ieguldītāja profils neaizstāj izlaiduma būvējumu.
+`npm run build:contributor` izmanto tikai aizmugursistēmai paredzēto būvēšanas profilu. Būvēšanas laikā tas īslaicīgi aizstāj
+informācijas paneļa UI failus ar aizstājējiem, saglabā API maršrutu apstrādātājus un pēc būvēšanas atjauno sākotnējos failus.
+Izmantojiet `npm run build` izmaiņām, kas ietekmē informācijas paneļa UI, vai pilnai
+laidiena validācijai; līdzdalībnieku profils neaizstāj laidiena būvējumu.
 
-> **Piezīme par izvietošanu VPS:** attālā attēla direktorija `/usr/lib/node_modules/omniroute/app/`
-> netiek mainīta. Izvietošanas prasmes tajā sinhronizē `dist/` saturu, izmantojot rsync.
-> Mainījies ir tikai repozitorijā esošais būvējuma izvades ceļš (`app/` → `dist/`).
+> **Piezīme par izvietošanu VPS:** attālā attēla direktorijs `/usr/lib/node_modules/omniroute/app/`
+> nav mainīts. Izvietošanas rīki ar rsync sinhronizē `dist/` saturu uz šo direktoriju.
+> Mainījās tikai repozitorijā esošās būvējuma izvades ceļš (`app/` → `dist/`).
 
 Noklusējuma URL:
 
@@ -287,36 +292,36 @@ Skatiet `open-sse/utils/stream.ts` un `open-sse/utils/streamHandler.ts`, lai iep
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
+├── app/                    # Next.js 16 lietotņu maršrutētājs
 │   ├── (dashboard)/        # Informācijas paneļa lapas (23 sadaļas)
 │   ├── api/                # API maršruti (51 direktorijs)
 │   └── login/              # Autentifikācijas lapas (.tsx)
-├── domain/                 # Politiku dzinējs (policyEngine, comboResolver, costRules u.c.)
+├── domain/                 # Politiku dzinis (policyEngine, comboResolver, costRules u.c.)
 ├── lib/                    # Biznesa pamatloģika (.ts)
 │   ├── a2a/                # Agent-to-Agent v0.3 protokola serveris
 │   ├── acp/                # Agent Communication Protocol reģistrs
-│   ├── compliance/         # Atbilstības politiku dzinējs
-│   ├── db/                 # SQLite domēna moduļi + 130 migrācijas
+│   ├── compliance/         # Atbilstības politiku dzinis
+│   ├── db/                 # SQLite domēna moduļi un 130 migrācijas
 │   ├── memory/             # Pastāvīgā sarunu atmiņa
 │   ├── oauth/              # OAuth nodrošinātāji, pakalpojumi un utilītas
 │   ├── skills/             # Paplašināms prasmju ietvars
 │   ├── usage/              # Lietojuma uzskaite un izmaksu aprēķināšana
 │   └── localDb.ts          # Tikai atkārtota eksporta slānis — nekad nepievienojiet šeit loģiku
 ├── middleware/              # Pieprasījumu starpprogrammatūra (promptInjectionGuard)
-├── mitm/                   # MITM starpniekserveris (sertifikāts, DNS, mērķa maršrutēšana)
+├── mitm/                   # MITM starpniekserveris (sertifikāti, DNS, mērķu maršrutēšana)
 ├── shared/
 │   ├── components/         # React komponenti (.tsx)
-│   ├── constants/          # Nodrošinātāju definīcijas (329), MCP tvērumi, 19 maršrutēšanas stratēģijas
+│   ├── constants/          # Nodrošinātāju definīcijas (329), MCP tvērumi, 20 maršrutēšanas stratēģijas
 │   ├── utils/              # Ķēdes pārtraucējs, sanitizētājs, autentifikācijas palīgfunkcijas
 │   └── validation/         # Zod v4 shēmas
 └── sse/                    # SSE starpniekservera konveijers
 
 open-sse/                   # @omniroute/open-sse darbvieta
-├── executors/              # 150 izpildītāju moduļi (izpildītāju klases + katra nodrošinātāja palīgfunkcijas)
-├── handlers/               # 11 pieprasījumu apstrādātāji (tērzēšana, atbildes, iegulumi, attēli u.c.)
+├── executors/              # 150 izpildītāju moduļi (izpildītāju klases un katra nodrošinātāja palīgfunkcijas)
+├── handlers/               # 11 pieprasījumu apstrādātāji (tērzēšana, atbildes, iegultnes, attēli u.c.)
 ├── mcp-server/             # MCP serveris (110 unikāli rīki, 3 transporti, 33 tvērumi)
 ├── services/               # 178 augstākā līmeņa pakalpojumi (combo, autoCombo, rateLimitManager u.c.)
-├── translator/             # Formātu pārveidotāji (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── translator/             # Formātu tulkotāji (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API pārveidotājs
 └── utils/                  # 22 utilītu moduļi (straumēšana, TLS, starpniekserveris, žurnalēšana)
 
@@ -327,13 +332,13 @@ tests/
 ├── integration/            # Integrācijas testi
 ├── e2e/                    # Playwright testi
 ├── security/               # Drošības testi
-├── translator/             # Pārveidotājam specifiski testi
+├── translator/             # Tulkotājam specifiski testi
 └── load/                   # Slodzes testi
 
 docs/
 ├── adr/                     # Arhitektūras lēmumu ieraksti
 ├── architecture/            # Sistēmas arhitektūra un noturība
-├── comparison/              # OmniRoute salīdzinājumā ar alternatīvām
+├── comparison/              # OmniRoute salīdzinājums ar alternatīvām
 ├── compression/             # Saspiešanas rokasgrāmatas un noteikumi
 ├── dev/                     # Izstrādes rokasgrāmatas
 ├── diagrams/                # Arhitektūras diagrammas
@@ -345,9 +350,9 @@ docs/
 ├── providers/               # Nodrošinātājiem specifiska dokumentācija
 ├── reference/               # API uzziņas, vides mainīgie, CLI rīki, bezmaksas līmeņi
 ├── releases/                # Laidienu piezīmes
-├── routing/                 # Automātisko kombināciju dzinējs, spriešanas atkārtošana
+├── routing/                 # Automātisko kombināciju dzinis, spriešanas atkārtota atskaņošana
 ├── screenshots/             # Informācijas paneļa ekrānuzņēmumi
-├── security/                # Aizsargmehānismi, atbilstība, maskēšana, pilnvaras
+├── security/                # Aizsargmehānismi, atbilstība, maskēšana, marķieri
 └── specs/                   # Projektējuma specifikācijas
 ```
 

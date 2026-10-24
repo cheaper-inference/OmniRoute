@@ -1,1 +1,0 @@
-- **fix(kiro):** retry once with a corrective instruction when Kiro emits a malformed `tool_call` wrapper before any output, instead of failing the turn; gated by the `KIRO_TOOL_CALL_REPAIR_ENABLED` flag (on by default) ([#16495](https://github.com/diegosouzapw/OmniRoute/pull/16495)) — thanks @SemonCat

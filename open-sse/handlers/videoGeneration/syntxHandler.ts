@@ -5,6 +5,7 @@ import { saveCallLog } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import {
   SyntxMediaError,
+  decodeDataUrlBounded,
   fetchSyntxMediaBytes,
   firstMediaUrl,
   mapSyntxVideoRequestSettings,
@@ -23,17 +24,25 @@ function collectUrls(value: unknown): string[] {
   return [];
 }
 
-function decodeDataUrl(dataUrl: string): { bytes: Uint8Array; mime: string; name: string } | null {
-  const match = /^data:([^;,]+);base64,(.+)$/i.exec(dataUrl.trim());
-  if (!match) return null;
-  try {
-    const mime = match[1] || "image/png";
-    const bytes = Buffer.from(match[2], "base64");
-    const ext = mime.startsWith("video/") ? "mp4" : mime.includes("jpeg") ? "jpg" : "png";
-    return { bytes, mime, name: `frame.${ext}` };
-  } catch {
-    return null;
-  }
+async function resolveVideoDataUrlRef(
+  token: string,
+  ref: string,
+  fetchImpl: typeof fetch
+): Promise<string | null> {
+  const decoded = decodeDataUrlBounded(ref);
+  if (!decoded) return null;
+  const ext = decoded.mime.startsWith("video/")
+    ? "mp4"
+    : decoded.mime.includes("jpeg")
+      ? "jpg"
+      : "png";
+  return uploadSyntxMediaFile({
+    token,
+    bytes: decoded.bytes,
+    filename: `frame.${ext}`,
+    mimeType: decoded.mime,
+    fetchImpl,
+  });
 }
 
 async function uploadVideoRefs(
@@ -50,15 +59,7 @@ async function uploadVideoRefs(
   const fileUrls: string[] = [];
   for (const ref of rawFiles) {
     if (ref.startsWith("data:")) {
-      const decoded = decodeDataUrl(ref);
-      if (!decoded) continue;
-      const url = await uploadSyntxMediaFile({
-        token,
-        bytes: decoded.bytes,
-        filename: decoded.name,
-        mimeType: decoded.mime,
-        fetchImpl,
-      });
+      const url = await resolveVideoDataUrlRef(token, ref, fetchImpl);
       if (url) fileUrls.push(url);
     } else if (/^https?:\/\//i.test(ref)) {
       fileUrls.push(ref);
@@ -76,6 +77,7 @@ async function runSyntxVideoJob(options: {
   startTime: number;
   log?: { info?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void };
   fetchImpl: typeof fetch;
+  signal?: AbortSignal | null;
 }) {
   const fileUrls = await uploadVideoRefs(options.token, options.body, options.fetchImpl);
   const { aiName, modelType } = resolveSyntxMediaTarget(options.model, "video");
@@ -101,7 +103,11 @@ async function runSyntxVideoJob(options: {
   const wantsBase64 = String(options.body.response_format || "").toLowerCase() === "b64_json";
   const item = wantsBase64
     ? {
-        b64_json: (await fetchSyntxMediaBytes(url, options.fetchImpl)).bytes.toString("base64"),
+        b64_json: (
+          await fetchSyntxMediaBytes(url, options.fetchImpl, {
+            signal: options.signal,
+          })
+        ).bytes.toString("base64"),
         format: "mp4",
       }
     : { url, format: "mp4" };
@@ -124,6 +130,7 @@ export async function handleSyntxVideoGeneration({
   credentials,
   log,
   fetchImpl = fetch,
+  signal = null,
 }: {
   model: string;
   provider: string;
@@ -136,6 +143,7 @@ export async function handleSyntxVideoGeneration({
   };
   log?: { info?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void };
   fetchImpl?: typeof fetch;
+  signal?: AbortSignal | null;
 }) {
   const startTime = Date.now();
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
@@ -165,6 +173,7 @@ export async function handleSyntxVideoGeneration({
       startTime,
       log,
       fetchImpl,
+      signal,
     });
   } catch (error) {
     const status = error instanceof SyntxMediaError ? error.status : 502;

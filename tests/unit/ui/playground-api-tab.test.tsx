@@ -282,6 +282,60 @@ describe("ApiTab", () => {
     expect(responseEditor.value).toContain("Hello!");
   });
 
+  it("opts image requests into the bounded stream and renders the restored image", async () => {
+    let capturedHeaders: Record<string, string> | undefined;
+    const imageBody = JSON.stringify({
+      data: [{ url: "https://cdn.example.com/api-image.png" }],
+    });
+    const terminal = `: keepalive\n\nevent: playground.image.result\ndata: ${JSON.stringify({
+      status: 200,
+      body: imageBody,
+      headers: { "content-type": "application/json" },
+    })}\n\n`;
+    mockFetch.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (typeof url === "string" && url.includes("/v1/models")) {
+        return new Response(JSON.stringify({ data: [{ id: "openai/gpt-image-2" }] }), {
+          headers: { "content-type": "application/json" },
+        });
+      }
+      if (typeof url === "string" && url.includes("/api/providers/client")) {
+        return new Response(JSON.stringify({ connections: [] }), {
+          headers: { "content-type": "application/json" },
+        });
+      }
+      capturedHeaders = init?.headers as Record<string, string>;
+      return new Response(terminal, {
+        status: 200,
+        headers: { "content-type": "text/event-stream" },
+      });
+    });
+
+    const el = renderApiTab();
+    await waitFor(() => el.querySelectorAll("select").length >= 3);
+    const endpointSelect = el.querySelectorAll("select")[0] as HTMLSelectElement;
+    act(() => {
+      endpointSelect.value = "images";
+      endpointSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    const modelSelect = el.querySelectorAll("select")[2] as HTMLSelectElement;
+    await waitFor(() => modelSelect.options.length > 0);
+    act(() => {
+      modelSelect.value = "openai/gpt-image-2";
+      modelSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("send")
+    );
+
+    await act(async () => sendBtn?.click());
+    await waitFor(() => el.querySelector("img") !== null);
+
+    expect(capturedHeaders?.["X-OmniRoute-Playground-Stream"]).toBe("1");
+    expect((el.querySelector("img") as HTMLImageElement).src).toBe(
+      "https://cdn.example.com/api-image.png"
+    );
+  });
+
   it("keeps the image response preview after the shared renderer extraction", async () => {
     mockFetch.mockImplementation(async (url: string) => {
       if (typeof url === "string" && url.includes("/v1/models")) {

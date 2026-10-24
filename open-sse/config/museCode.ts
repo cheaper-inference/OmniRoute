@@ -7,6 +7,8 @@
  * api.meta.ai/muse-code/key. The Muse CLI User-Agent is required by Meta.
  */
 
+import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
+
 export const MUSE_CODE_USER_AGENT = "muse-code/1.0.2";
 /** Inference UA used by CLIProxyAPI's MetaExecutor (auth still uses muse-code/1.0.2). */
 export const MUSE_CODE_INFERENCE_USER_AGENT =
@@ -39,5 +41,5 @@ export function isMuseDcaToken(token: string | null | undefined): boolean {
 export function normalizeMuseBaseUrl(raw: string | null | undefined): string {
   const trimmed = typeof raw === "string" ? raw.trim() : "";
   if (!trimmed) return MUSE_CODE_API_BASE_URL;
-  return trimmed.replace(/\/+$/, "");
+  return stripTrailingSlashes(trimmed);
 }

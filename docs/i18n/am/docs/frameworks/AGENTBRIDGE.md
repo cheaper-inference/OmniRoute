@@ -16,18 +16,18 @@ AgentBridge የOmniRoute MITM (Man-in-the-Middle) ፕሮክሲ ሲሆን፣ ከI
 
 ### AgentBridge ምንድን ነው?
 
-የIDE ኤጀንት (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) የAPI ጥሪ ሲያደርግ፣ በቀጥታ ከዋናው የAI አቅራቢ (OpenAI፣ Anthropic፣ ወዘተ) ጋር ይገናኛል። AgentBridge ይህን ግንኙነት ምንም ዓይነት የኤጀንት ውቅር ለውጥ ሳያስፈልግ በTLS ደረጃ በማይታይ ሁኔታ ይጠልፈዋል፣ እና ጥያቄውን በOmniRoute በኩል እንደገና ይጽፈዋል።
+IDE ወኪል (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) API ጥሪ ሲያደርግ፣ በቀጥታ ከላይኛው (upstream) AI አቅራቢ (OpenAI፣ Anthropic፣ ወዘተ) ጋር ይገናኛል። AgentBridge ያንን ግንኙነት በTLS ደረጃ በግልጽ ሁኔታ ያግደዋል — ምንም የወኪል ማዋቀሪያ ለውጥ ሳይጠይቅ — እና ጥያቄውን በOmniRoute በኩል እንደገና ይጽፈዋል።
 
-ይህም የሚከተሉትን እንዲያደርጉ ያስችልዎታል፦
+ይህ ማለት የሚከተሉትን መሥራት ይችላሉ ማለት ነው፦
 
-- **ማንኛውንም ኤጀንት ወደ ማንኛውም አቅራቢ መልሶ ማዘዋወር**፦ Copilot ከOpenAI ጋር እየተገናኘ ነው? ወደ Anthropic Claude፣ Gemini ወይም ወደ ማንኛውም የOmniRoute 372 አቅራቢዎች ያዘዋውሩት።
-- **የሞዴል ማዛመጃዎችን መተግበር**፦ `gemini-3-flash` → `claude-sonnet-4.7` በአስተናጋጅ ደረጃ በማይታይ ሁኔታ።
-- **ሁሉንም የኤጀንት ትራፊክ መከታተል**፦ እያንዳንዱ የተጠለፈ ጥያቄ ወደ [የትራፊክ መርማሪ](./TRAFFIC_INSPECTOR.md) ይታተማል።
-- **የOmniRoute የጽናት ባህሪያትን መተግበር**፦ ጥምር ማዘዋወር፣ የወረዳ ሰባሪዎች፣ አማራጭ ዘዴዎች እና የወጪ ክትትል ለIDE ኤጀንት ትራፊክም ይሠራሉ።
+- **ማንኛውንም ወኪል ወደ ማንኛውም አቅራቢ እንደገና ማስመራት**፦ Copilot ከOpenAI ጋር እየተነጋገረ ነው? ወደ Anthropic Claude፣ Gemini፣ ወይም ከOmniRoute 375 አቅራቢዎች ወደ ማንኛውም ያዞሩት።
+- **የሞዴል ማስማቶችን መተግበር**፦ `gemini-3-flash` → `claude-sonnet-4.7` በግልጽ ሁኔታ በአስተናጋጅ (handler) ደረጃ።
+- **የወኪሎችን ሁሉ ትራፊክ መከታተል**፦ እያንዳንዱ የተያዘ ጥያቄ ወደ [Traffic Inspector](./TRAFFIC_INSPECTOR.md) ይታተማል።
+- **የOmniRoute መቋቋምን መተግበር**፦ የተጣመረ መከፋፈል (combo routing)፣ የወሰን መቋረጫዎች (circuit breakers)፣ አማራጭ መንገዶች (fallbacks)፣ እና የወጪ ክትትል ለIDE ወኪል ትራፊክም ይሠራሉ።
 
-### በገበያው ውስጥ ያለው አቀማመጥ
+### ከገበያ ጋር ያለው አቀማመጥ
 
-| ባህሪ               | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| ባህሪይ              | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
 | ----------------- | :-----: | :------: | :-------------: | :-----------------------: |
 | Antigravity       |    ✓    |    ✓     |        —        |             ✓             |
 | GitHub Copilot    |    ✓    |    ✓     |        —        |             ✓             |
@@ -39,11 +39,11 @@ AgentBridge የOmniRoute MITM (Man-in-the-Middle) ፕሮክሲ ሲሆን፣ ከI
 | Open Code         |    —    |    —     |        ✓        |             ✓             |
 | Trae              |    —    |    —     |        —        |        🔍 በምርመራ ላይ        |
 | የዳሽቦርድ UI         |    ✓    |    ✗     |        ✗        |             ✓             |
-| የትራፊክ መርማሪ        |    ✗    |    ✗     |        ✓        |             ✓             |
-| የOmniRoute ማዘዋወር  |    ✗    |    ✗     |        ✗        |             ✓             |
-| የሞዴል ማዛመጃ UI      |    ✗    |    ✗     |        ✗        |             ✓             |
+| Traffic Inspector |    ✗    |    ✗     |        ✓        |             ✓             |
+| የOmniRoute መከፋፈል  |    ✗    |    ✗     |        ✗        |             ✓             |
+| የሞዴል ማስማት UI      |    ✗    |    ✗     |        ✗        |             ✓             |
 | የማለፊያ ዝርዝር        |    ✗    |    ✗     |        ✓        |             ✓             |
-| የዋና ምንጭ CA ሰርተፊኬት |    ✗    |    ✗     |        ✓        |             ✓             |
+| የኋላኛ CA ምስክር ወረቀት |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

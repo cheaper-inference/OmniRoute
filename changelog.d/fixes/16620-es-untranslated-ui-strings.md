@@ -1,1 +1,0 @@
-- **fix(i18n):** 24 UI strings of the Spanish locale were still English (the quota-share time windows, the paid Codex credits row, the Codex cooldown label, the request timeline labels); they are now translated with the wording of the neighbouring Spanish keys ([#16620](https://github.com/diegosouzapw/OmniRoute/pull/16620)) — thanks @pacocartones.

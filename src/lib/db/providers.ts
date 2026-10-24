@@ -13,6 +13,8 @@ import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache"
 import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
 import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
+import { applyAutomaticDisableMarker } from "@/lib/providers/operatorDisable";
+import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
 import { ensureProviderSpecificDataSecretsEncrypted } from "./providers/migrations";
 import { bumpProxyConfigGeneration, getSettings } from "./settings";
 import {
@@ -962,7 +964,16 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
   ).run(_buildUpdateConnectionRowParams(id, data, now));
 }
 
-export async function updateProviderConnection(id: string, data: JsonRecord, opts?: UpdateOpts) {
+export type ProviderConnectionUpdateOpts = UpdateOpts & {
+  /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
+  permanentBan?: boolean;
+};
+
+export async function updateProviderConnection(
+  id: string,
+  data: JsonRecord,
+  opts?: ProviderConnectionUpdateOpts
+) {
   const db = getDbInstance() as unknown as DbLike;
   const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
   if (!existing) return null;
@@ -988,6 +999,21 @@ export async function updateProviderConnection(id: string, data: JsonRecord, opt
       existingCamel.providerSpecificData
     )
   );
+  // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
+  // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
+  // so that sweep never retests it, whenever the flag is turned on.
+  if (typeof data.isActive === "boolean") {
+    merged.providerSpecificData = applyAutomaticDisableMarker(
+      merged.providerSpecificData,
+      existingCamel.isActive,
+      data.isActive,
+      undefined,
+      {
+        stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
+        permanentBan: opts?.permanentBan === true,
+      }
+    );
+  }
   // Mirror the sanitization the create path applies — keep the returned
   // object in lockstep with what we persist.
   if ("quotaWindowThresholds" in merged) {
@@ -1121,6 +1147,9 @@ export async function touchConnectionSyncedModelsAt(id: string): Promise<void> {
     updatedAt: now,
     id,
   });
+  // New successful-sync timestamp must be visible without waiting for the
+  // connection row cache to expire.
+  invalidateDbCache("connections", id, { skipModelCatalog: true });
 }
 
 /**

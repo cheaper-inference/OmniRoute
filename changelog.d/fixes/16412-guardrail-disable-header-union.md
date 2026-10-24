@@ -1,1 +1,0 @@
-- Merge both guardrail disable headers with key, body, and metadata selections instead of dropping the legacy header; prompt-injection block mode remains mandatory (#16412, #16413).

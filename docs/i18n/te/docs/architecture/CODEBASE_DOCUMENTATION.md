@@ -436,7 +436,7 @@ server/
 ## 4. `open-sse/` — స్ట్రీమింగ్ ఇంజిన్ వర్క్స్పేస్
 
 `@omniroute/open-sse`గా ప్రచురించబడిన ప్రత్యేక npm వర్క్స్పేస్. అభ్యర్థన
-ప్రాసెసింగ్, ఎగ్జిక్యూటర్లు, ట్రాన్స్లేటర్లు, సర్వీసులు, ట్రాన్స్ఫార్మర్ మరియు MCP సర్వర్ను నిర్వహిస్తుంది.
+ప్రాసెసింగ్, ఎగ్జిక్యూటర్లు, ట్రాన్స్లేటర్లు, సేవలు, ట్రాన్స్ఫార్మర్ మరియు MCP సర్వర్ను నిర్వహిస్తుంది.
 
 ```
 open-sse/
@@ -444,13 +444,13 @@ open-sse/
 ├── package.json            వర్క్స్పేస్ మానిఫెస్ట్
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 ప్రొవైడర్ రిజిస్ట్రీలు, హెడర్ ప్రొఫైళ్లు, ఐడెంటిటీ, …
-├── handlers/               అభ్యర్థన హ్యాండ్లర్లు (చాట్, ఎంబెడ్డింగ్లు, ఆడియో, ఇమేజ్, …)
-├── executors/              150 ప్రొవైడర్ ఎగ్జిక్యూటర్ మాడ్యూళ్లు (ఎగ్జిక్యూటర్ క్లాసులు + ఒక్కో ప్రొవైడర్కు హెల్పర్లు)
+├── config/                 ప్రొవైడర్ రిజిస్ట్రీలు, హెడర్ ప్రొఫైల్లు, ఐడెంటిటీ, …
+├── handlers/               అభ్యర్థన హ్యాండ్లర్లు (చాట్, ఎంబెడ్డింగ్లు, ఆడియో, చిత్రం, …)
+├── executors/              156 ప్రొవైడర్ ఎగ్జిక్యూటర్ మాడ్యూళ్లు (ఎగ్జిక్యూటర్ క్లాస్లు + ప్రతి ప్రొవైడర్కు సహాయకాలు)
 ├── translator/             ఫార్మాట్ మార్పిడి (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions స్ట్రీమ్ ట్రాన్స్ఫార్మర్
-├── services/               80+ సర్వీస్ మాడ్యూళ్లు (కాంబోలు, ఫాల్బ్యాక్, కోటాలు, ఐడెంటిటీ, …)
-├── utils/                  స్ట్రీమింగ్ హెల్పర్లు, TLS క్లయింట్, AWS SigV4, ప్రాక్సీ ఫెచ్, …
+├── services/               80+ సేవా మాడ్యూళ్లు (కాంబోలు, ఫాల్బ్యాక్, కోటాలు, ఐడెంటిటీ, …)
+├── utils/                  స్ట్రీమింగ్ సహాయకాలు, TLS క్లయింట్, AWS SigV4, ప్రాక్సీ ఫెచ్, …
 └── mcp-server/             MCP సర్వర్ (3 ట్రాన్స్పోర్ట్లు, 33 స్కోప్లు, 110 టూల్స్)
 ```
 
@@ -459,36 +459,36 @@ open-sse/
 | హ్యాండ్లర్              | ఉద్దేశ్యం                                                                         |
 | ----------------------- | --------------------------------------------------------------------------------- |
 | `chatCore.ts`           | ప్రధాన చాట్ పైప్లైన్ (క్యాష్, రేట్ పరిమితి, కాంబో రూటింగ్, ఎగ్జిక్యూటర్ డిస్పాచ్) |
-| `responsesHandler.ts`   | OpenAI Responses API ఎంట్రీ పాయింట్                                               |
+| `responsesHandler.ts`   | OpenAI Responses API ప్రవేశ బిందువు                                               |
 | `embeddings.ts`         | ఎంబెడ్డింగ్లు                                                                     |
-| `imageGeneration.ts`    | ఇమేజ్ జనరేషన్                                                                     |
+| `imageGeneration.ts`    | చిత్ర ఉత్పత్తి                                                                    |
 | `audioSpeech.ts`        | టెక్స్ట్-టు-స్పీచ్                                                                |
 | `audioTranscription.ts` | స్పీచ్-టు-టెక్స్ట్                                                                |
-| `videoGeneration.ts`    | వీడియో జనరేషన్                                                                    |
-| `musicGeneration.ts`    | సంగీత జనరేషన్                                                                     |
-| `rerank.ts`             | రీర్యాంకింగ్                                                                      |
+| `videoGeneration.ts`    | వీడియో ఉత్పత్తి                                                                   |
+| `musicGeneration.ts`    | సంగీత ఉత్పత్తి                                                                    |
+| `rerank.ts`             | పునఃర్యాంకింగ్                                                                    |
 | `moderations.ts`        | మోడరేషన్                                                                          |
 | `search.ts`             | వెబ్ శోధన                                                                         |
 | `sseParser.ts`          | SSE ఈవెంట్ పార్సర్                                                                |
-| `usageExtractor.ts`     | అప్స్ట్రీమ్ స్ట్రీమ్ల నుంచి టోకెన్ గణనలను వెలికితీయడం                             |
-| `responseSanitizer.ts`  | ప్రొవైడర్-నిర్దిష్ట అనవసర అంశాలను తొలగించడం                                       |
-| `responseTranslator.ts` | ప్రొవైడర్ రెస్పాన్స్ మరియు ట్రాన్స్లేటర్ లేయర్ మధ్య అనుసంధానం                     |
+| `usageExtractor.ts`     | అప్స్ట్రీమ్ స్ట్రీమ్ల నుండి టోకెన్ గణనలను వెలికితీయడం                             |
+| `responseSanitizer.ts`  | ప్రొవైడర్-నిర్దిష్ట అనవసర సమాచారాన్ని తొలగించడం                                   |
+| `responseTranslator.ts` | ప్రొవైడర్ ప్రతిస్పందన మరియు ట్రాన్స్లేటర్ లేయర్ మధ్య అనుసంధానం                    |
 
 ### 4.2 `open-sse/executors/`
 
-150 టాప్-లెవల్ ఎగ్జిక్యూటర్ మాడ్యూళ్లు (`*.ts` నుంచి `base.ts`, `index.ts` మరియు పరీక్షలను మినహాయించి — ఈ సంఖ్యను
+156 టాప్-లెవల్ ఎగ్జిక్యూటర్ మాడ్యూళ్లు (`*.ts` నుండి `base.ts`, `index.ts` మరియు పరీక్షలను మినహాయించి — ఈ సంఖ్యను
 `npm run check:docs-counts` కొలుస్తుంది). ప్రతి ఎగ్జిక్యూటర్ క్లాస్ `BaseExecutor` (`base.ts`)ను,
-నేరుగా లేదా `DefaultExecutor` లేదా మరొక ఎగ్జిక్యూటర్ ద్వారా విస్తరిస్తుంది; మిగిలిన మాడ్యూళ్లు ఒక్కో ప్రొవైడర్కు
-హెల్పర్లు (టూల్ స్కీమాలు, ఫెచ్/TTS అడాప్టర్లు, ప్రత్యేక ప్రవర్తన హ్యాండ్లర్లు). ఎగ్జిక్యూటర్లలో ఇవి ఉన్నాయి:
+నేరుగా లేదా `DefaultExecutor` లేదా మరొక ఎగ్జిక్యూటర్ ద్వారా విస్తరిస్తుంది; మిగిలిన మాడ్యూళ్లు ప్రతి ప్రొవైడర్కు
+సంబంధించిన సహాయకాలు (టూల్ స్కీమాలు, ఫెచ్/TTS అడాప్టర్లు, ప్రత్యేక ప్రవర్తన హ్యాండ్లర్లు). ఎగ్జిక్యూటర్లలో ఇవి ఉన్నాయి:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, అలాగే `claudeIdentity.ts`
-(షేర్డ్ ఐడెంటిటీ హెల్పర్) మరియు `index.ts` (రిజిస్ట్రీ).
+(ఉమ్మడి ఐడెంటిటీ సహాయకం) మరియు `index.ts` (రిజిస్ట్రీ).
 
-> గమనిక: ఇక్కడ జాబితా చేయని ప్రొవైడర్లను సాధారణ
-> OpenAI-అనుకూల ఎగ్జిక్యూటర్ను ఉపయోగించి `default.ts` అందిస్తుంది. పూర్తి ప్రొవైడర్ కేటలాగ్ (372 ప్రొవైడర్లు)
+> గమనిక: ఇక్కడ జాబితా చేయని ప్రొవైడర్లకు సాధారణ
+> OpenAI-అనుకూల ఎగ్జిక్యూటర్ను ఉపయోగించే `default.ts` సేవలందిస్తుంది. పూర్తి ప్రొవైడర్ కేటలాగ్ (375 ప్రొవైడర్లు)
 > `src/shared/constants/providers.ts`లో ఉంది.
 
 ### 4.3 `open-sse/translator/`
@@ -499,15 +499,15 @@ open-sse/
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 రెస్పాన్స్ ట్రాన్స్లేటర్లు** (`translator/response/`):
+- **9 ప్రతిస్పందన ట్రాన్స్లేటర్లు** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`.
-- **9 హెల్పర్లు** (`translator/helpers/`):
+- **9 సహాయకాలు** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, అలాగే
-  హెల్పర్ పరీక్షలు.
-- **ఇమేజ్ హెల్పర్లు** (`translator/image/sizeMapper.ts`).
+  సహాయక పరీక్షలు.
+- **చిత్ర సహాయకాలు** (`translator/image/sizeMapper.ts`).
 - టాప్-లెవల్: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
@@ -519,29 +519,29 @@ open-sse/
 
 ముఖ్యాంశాలు (పూర్తి జాబితా `open-sse/services/` కింద ఉంది):
 
-| అంశం              | ఫైళ్లు                                                                                                                                                                                                                                                   |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| కాంబో రూటింగ్     | `combo.ts` (19 వ్యూహాలు), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
-| ఆటో కాంబో ఇంజిన్  | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| వైఫల్య నిరోధకత    | `accountFallback.ts` (కూల్డౌన్ + లాకౌట్), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                          |
-| కోటాలు            | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| క్యాషింగ్         | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| రూటింగ్ మేధస్సు   | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| మోడల్ నిర్వహణ     | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| కంప్రెషన్         | `compression/` — పూర్తి కంప్రెషన్ ఇంజిన్ వైరింగ్                                                                                                                                                                                                         |
-| టోకెన్ + సెషన్    | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| టైర్ / మానిఫెస్ట్ | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / నెట్వర్క్    | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| బ్యాచ్లు          | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| వినియోగం          | `usage.ts`                                                                                                                                                                                                                                               |
+| అంశం                                      | ఫైళ్లు                                                                                                                                                                                                                                                   |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| కాంబో రూటింగ్                             | `combo.ts` (20 వ్యూహాలు), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
+| ఆటో కాంబో ఇంజిన్                          | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| ప్రతికూల పరిస్థితులను తట్టుకునే సామర్థ్యం | `accountFallback.ts` (కూల్డౌన్ + లాక్అవుట్), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                       |
+| కోటాలు                                    | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| క్యాషింగ్                                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| రూటింగ్ మేధస్సు                           | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| మోడల్ నిర్వహణ                             | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| కుదింపు                                   | `compression/` — పూర్తి కుదింపు ఇంజిన్ వైరింగ్                                                                                                                                                                                                           |
+| టోకెన్ + సెషన్                            | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| టైర్ / మానిఫెస్ట్                         | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / నెట్వర్క్                            | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| బ్యాచ్లు                                  | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| వినియోగం                                  | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts`లో అనుసంధానించబడిన **110 ప్రత్యేక టూల్స్** (`schemas/tools.ts`లో 45 ప్రామాణిక టూల్స్ +
+- `server.ts`లో **110 ప్రత్యేక టూల్స్** అనుసంధానించబడ్డాయి (`schemas/tools.ts`లో 45 ప్రామాణిక టూల్స్ +
   మెమరీ, స్కిల్స్, GitHub-స్కిల్స్, పూల్, గేమిఫికేషన్, ప్లగిన్, Notion, Obsidian,
-  లోకల్-కార్పస్ మరియు కంప్రెషన్ మాడ్యూల్స్ — `countUniqueMcpTools` ద్వారా యూనియన్ లెక్కించబడింది).
+  లోకల్-కార్పస్ మరియు కుదింపు మాడ్యూల్స్ — `countUniqueMcpTools` ద్వారా యూనియన్ లెక్కించబడింది).
 - **3 ట్రాన్స్పోర్ట్లు**: stdio, HTTP Streamable, SSE.
-- రన్టైమ్లో అమలు చేయబడే **33 స్కోప్లు** — ప్రాథమిక జాబితా `src/shared/constants/mcpScopes.ts`లో ఉంది; పూర్తి సమితి ప్రతి టూల్ మాడ్యూల్ ప్రకటించిన స్కోప్ల యూనియన్.
+- రన్టైమ్లో **33 స్కోప్లు** అమలు చేయబడతాయి — ప్రాథమిక జాబితా `src/shared/constants/mcpScopes.ts`లో ఉంది; పూర్తి సమితి ప్రతి టూల్ మాడ్యూల్ ప్రకటించిన స్కోప్ల యూనియన్.
 - ఆడిట్ పట్టిక: `mcp_tool_audit` (`audit.ts` ద్వారా నింపబడుతుంది).
 - ఫైళ్లు: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
@@ -552,10 +552,10 @@ open-sse/
 ### 4.7 `open-sse/config/`
 
 ప్రొవైడర్ రిజిస్ట్రీలు (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), ప్రతి ఫార్మాట్కు మోడల్ రిజిస్ట్రీలు (`audioRegistry.ts`,
+`providerHeaderProfiles.ts`), ప్రతి ఫార్మాట్కు సంబంధించిన మోడల్ రిజిస్ట్రీలు (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-ఐడెంటిటీ సహాయకాలు (`codexIdentity.ts`, `codexInstructions.ts`,
+గుర్తింపు సహాయకాలు (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
 క్రెడెన్షియల్ సహాయకాలు (`credentialLoader.ts`, `codexClient.ts`), మరియు క్లౌడ్
@@ -658,7 +658,7 @@ bin/
 
 ## 8. `scripts/`
 
-ప్రయోజనం ఆధారంగా 6 ఉపఫోల్డర్లుగా వ్యవస్థీకరించబడింది.
+ప్రయోజనం ఆధారంగా 6 ఉపఫోల్డర్లుగా క్రమబద్ధీకరించబడింది.
 
 - **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
   `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
@@ -670,7 +670,11 @@ bin/
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`.
+  `system-info.mjs`, అలాగే చదవడానికి-మాత్రమే ఉద్దేశించిన PR పర్యవేక్షణ సహాయకాలు
+  `ci-discriminate.sh` (ఒక రెఫరెన్స్ PR లేదా base-red ఇష్యూతో పోల్చి, PRలో విఫలమైన తనిఖీల సిగ్నేచర్లను స్వంతం /
+  వారసత్వంగా వచ్చినవి / తెలియనివిగా వర్గీకరిస్తుంది) మరియు `audit-worktree.sh`
+  (డర్టీ ఫైళ్లు, రక్షిత ఉపరితలాలు, తొలగించబడిన అసర్ట్లు, సప్రెషన్ గణనలు, మిగిలిపోయిన
+  తాత్కాలిక tsconfigలు, PR head వర్సెస్ స్థానిక HEAD — ఒక వర్కర్ PR ఆమోదించబడే ముందు).
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,

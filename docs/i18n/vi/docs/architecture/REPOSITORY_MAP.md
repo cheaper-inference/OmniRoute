@@ -115,46 +115,46 @@ OmniRoute/
 ```
 src/
 ├── app/                 # App Router (các trang + tuyến API + trang trạng thái + trang đích)
-├── lib/                 # Các thư viện cốt lõi / mô-đun miền nghiệp vụ (80 thư mục con + khoảng 70 tệp cấp cao nhất)
-├── domain/              # Logic miền nghiệp vụ thuần túy (công cụ chính sách, phương án dự phòng, chi phí, khóa truy cập, comboResolver, đánh giá)
-├── server/              # Các mô-đun chỉ dành cho máy chủ (quy trình authz, cors, middleware xác thực) — không thể nhập từ máy khách
-├── shared/              # Được chia sẻ giữa máy chủ và máy khách khi an toàn (hằng số, kiểu, xác thực, hợp đồng, tiện ích)
-├── i18n/                # Cấu hình next-intl + JSON thông báo theo từng ngôn ngữ (42 ngôn ngữ)
-├── middleware/          # Middleware Next.js (bổ sung dữ liệu cho yêu cầu, phát hiện ngôn ngữ)
-├── mitm/                # Lõi proxy MITM: tạo/cài đặt chứng chỉ, trình xử lý, đích, trình kiểm tra, mặt nạ, chuyển tiếp trực tiếp
-│   ├── handlers/        # 9 lớp trình xử lý tác nhân IDE mở rộng MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+├── lib/                 # Thư viện cốt lõi / mô-đun miền nghiệp vụ (80 thư mục con + khoảng 70 tệp cấp cao nhất)
+├── domain/              # Logic miền nghiệp vụ thuần túy (công cụ chính sách, dự phòng, chi phí, khóa truy cập, comboResolver, đánh giá)
+├── server/              # Mô-đun chỉ dành cho máy chủ (quy trình authz, cors, phần mềm trung gian xác thực) — không thể nhập từ máy khách
+├── shared/              # Dùng chung an toàn giữa máy chủ và máy khách (hằng số, kiểu, xác thực dữ liệu, hợp đồng, tiện ích)
+├── i18n/                # Cấu hình next-intl + JSON thông điệp theo từng ngôn ngữ (67 ngôn ngữ)
+├── middleware/          # Phần mềm trung gian Next.js (bổ sung dữ liệu yêu cầu, phát hiện ngôn ngữ)
+├── mitm/                # Lõi proxy MITM: tạo/cài đặt chứng chỉ, trình xử lý, đích, trình kiểm tra, mặt nạ, truyền thẳng
+│   ├── handlers/        # 9 lớp xử lý tác nhân IDE mở rộng MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
 │   └── inspector/       # Lớp thu thập lưu lượng: bộ đệm (vòng trong bộ nhớ), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
 ├── models/              # Mã kết nối bộ điều hợp mô hình (lớp tương thích cũ)
-├── scripts/             # Các tập lệnh bảo trì trong cây mã nguồn (ví dụ: backfillAggregation)
-├── sse/                 # Các trình xử lý/dịch vụ SSE cũ (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Kho lưu trữ trong bộ nhớ cũ (đang được thay thế dần bằng src/lib/db)
+├── scripts/             # Tập lệnh bảo trì nội bộ (ví dụ: backfillAggregation)
+├── sse/                 # Trình xử lý/dịch vụ SSE cũ (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Kho lưu trữ trong bộ nhớ cũ (đang được thay thế bằng src/lib/db)
 ├── types/               # Các tệp kiểu TS dùng chung
 ├── instrumentation.ts   # Hook đo từ xa Next.js (trình duyệt + edge)
 ├── instrumentation-node.ts  # Đo lường chỉ dành cho Node
-└── proxy.ts             # Lớp tương thích điểm vào HTTP-proxy
+└── proxy.ts             # Shim điểm vào proxy HTTP
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
 | Đường dẫn                                                                    | Mục đích                                                                                                                                                                                                                                                                                                               |
 | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | API công khai tương thích với OpenAI (~25 tuyến con: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers, v.v.)                                                                                                                  |
+| `app/api/v1/`                                                                | API công khai tương thích với OpenAI (~25 tuyến con: trò chuyện, hoàn thành, nhúng, tệp, lô, âm thanh, hình ảnh, video, âm nhạc, xếp hạng lại, kiểm duyệt, tìm kiếm, ws, tác tử, tài khoản, nhà cung cấp, v.v.)                                                                                                        |
 | `app/api/v1beta/`                                                            | Các điểm cuối API theo phong cách Gemini                                                                                                                                                                                                                                                                               |
-| `app/api/playground/`                                                        | Các tuyến của Playground Studio: `improve-prompt/` (POST — trình viết lại prompt bằng LLM), `presets/` (GET danh sách / POST tạo mới), `presets/[id]/` (GET / PUT / DELETE) — xem `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                               |
-| `app/api/` (không thuộc v1)                                                  | Các tuyến quản lý/quản trị (~60 thư mục: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, v.v.)                                                                                                                                         |
-| `app/api/tools/agent-bridge/`                                                | API REST AgentBridge — 12 tuyến (điều khiển máy chủ, trạng thái/DNS/ánh xạ tác nhân, bỏ qua, chứng chỉ, CA thượng nguồn). LOCAL_ONLY + SPAWN_CAPABLE. Xem `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                         |
-| `app/api/tools/traffic-inspector/`                                           | API REST + WS của Traffic Inspector — hơn 16 tuyến (requests, sessions, hosts, capture-modes, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Xem `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                  |
-| `app/a2a/`                                                                   | Điểm vào A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                                |
-| `app/.well-known/agent.json/`                                                | Thẻ tác nhân A2A (khám phá)                                                                                                                                                                                                                                                                                            |
-| `app/(dashboard)/dashboard/`                                                 | Các trang giao diện bảng điều khiển (hơn 50 mục, ~118 tệp page.tsx: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity, v.v.)                                                                                                                          |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Giao diện Search Tools Studio (3 tab: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — xem `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                      |
+| `app/api/playground/`                                                        | Các tuyến Playground Studio: `improve-prompt/` (POST — trình viết lại lời nhắc bằng LLM), `presets/` (GET danh sách / POST tạo mới), `presets/[id]/` (GET / PUT / DELETE) — xem `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                 |
+| `app/api/` (không phải v1)                                                   | Các tuyến quản lý/quản trị (~60 thư mục: nhà cung cấp, tổ hợp, cài đặt, mcp, a2a, đánh giá, bộ nhớ, kỹ năng, webhook, tuân thủ, khả năng phục hồi, giám sát, đường hầm, công cụ CLI, v.v.)                                                                                                                             |
+| `app/api/tools/agent-bridge/`                                                | API REST AgentBridge — 12 tuyến (điều khiển máy chủ, trạng thái/DNS/ánh xạ tác tử, bỏ qua, chứng chỉ, CA ngược dòng). LOCAL_ONLY + SPAWN_CAPABLE. Xem `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                             |
+| `app/api/tools/traffic-inspector/`                                           | API REST + WS của Traffic Inspector — hơn 16 tuyến (yêu cầu, phiên, máy chủ, chế độ thu thập, xuất, ws). LOCAL_ONLY + SPAWN_CAPABLE. Xem `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                    |
+| `app/a2a/`                                                                   | Điểm truy cập A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                           |
+| `app/.well-known/agent.json/`                                                | Thẻ tác tử A2A (khám phá)                                                                                                                                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/`                                                 | Các trang giao diện bảng điều khiển (hơn 50 phần, ~118 tệp page.tsx: nhà cung cấp, tổ hợp, cài đặt, bộ nhớ, kỹ năng, webhook, đánh giá, kiểm toán, lô, bộ nhớ đệm, chi phí, tình trạng, hệ thống, hoạt động, v.v.)                                                                                                     |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Giao diện Search Tools Studio (3 tab: Tìm kiếm/Thu thập dữ liệu/So sánh + SearchConceptCard + ProviderCatalog) — xem `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                          |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (kế hoạch 21): `page.tsx` (khung 3 tab), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Trang bảng điều khiển AgentBridge — thẻ máy chủ, 9 thẻ tác nhân, trình hướng dẫn thiết lập, ánh xạ mô hình, danh sách bỏ qua. i18n PT-BR + EN. Xem `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                   |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Trang bảng điều khiển Traffic Inspector — bố cục chia đôi kiểu DevTools, 7 tab chi tiết, 4 nút chuyển đổi chế độ ghi nhận, trình ghi phiên, tô màu theo ngữ cảnh. i18n PT-BR + EN. Xem `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                         |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Trang bảng điều khiển AgentBridge — thẻ máy chủ, 9 thẻ tác tử, trình hướng dẫn thiết lập, ánh xạ mô hình, danh sách bỏ qua. i18n PT-BR + EN. Xem `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                     |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Trang bảng điều khiển Traffic Inspector — bố cục chia đôi kiểu DevTools, 7 tab chi tiết, 4 nút bật/tắt chế độ thu thập, trình ghi phiên, tô màu theo ngữ cảnh. i18n PT-BR + EN. Xem `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                            |
 | `app/(dashboard)/dashboard/activity/`                                        | Trang nguồn cấp dữ liệu hoạt động (Nhóm B): `page.tsx` (máy chủ) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — xem `docs/architecture/MONITORING_SECTIONS.md`                                                                                                  |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Trang chia sẻ hạn ngạch (Nhóm B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                          |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Trang cấu hình gói nhà cung cấp (Nhóm B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ghi đè kích thước hạn ngạch cho từng kết nối                                                                                                                                                                                   |
-| `app/docs/`                                                                  | Trình xem tài liệu được nhúng (hiển thị `docs/*.md`)                                                                                                                                                                                                                                                                   |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Trang cấu hình gói của nhà cung cấp (Nhóm B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ghi đè kích thước hạn ngạch theo từng kết nối                                                                                                                                                                              |
+| `app/docs/`                                                                  | Trình xem tài liệu nhúng (hiển thị `docs/*.md`)                                                                                                                                                                                                                                                                        |
 | `app/landing/`                                                               | Trang đích tiếp thị                                                                                                                                                                                                                                                                                                    |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Các trang liên quan đến xác thực                                                                                                                                                                                                                                                                                       |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | Các trang lỗi HTTP                                                                                                                                                                                                                                                                                                     |
@@ -166,66 +166,66 @@ src/
 
 | Mô-đun                                   | Mục đích                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | Trình quản lý tác vụ giao thức A2A, kỹ năng (5), truyền luồng                                                                                                                                                                                                                                                               |
+| `a2a/`                                   | Trình quản lý tác vụ giao thức A2A, các kỹ năng (5), truyền phát                                                                                                                                                                                                                                                            |
 | `acp/`                                   | Sổ đăng ký tác nhân CLI (khám phá CLI cục bộ — xem `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                              |
-| `api/`                                   | Các tiện ích API dùng chung (`requireManagementAuth`, xác thực dữ liệu)                                                                                                                                                                                                                                                     |
+| `api/`                                   | Các trình trợ giúp API dùng chung (`requireManagementAuth`, xác thực dữ liệu)                                                                                                                                                                                                                                               |
 | `auth/`                                  | Phiên, băm mật khẩu, xác thực token                                                                                                                                                                                                                                                                                         |
 | `batches/`                               | Các trình xử lý OpenAI Batches API                                                                                                                                                                                                                                                                                          |
 | `catalog/`                               | Xác thực Zod cho danh mục nhà cung cấp + phân giải khả năng                                                                                                                                                                                                                                                                 |
 | `cloudAgent/`                            | Tác nhân đám mây (Codex Cloud, Devin, Jules) — xem `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                         |
-| `combos/`                                | Các tiện ích phân giải combo + sắp xếp lại                                                                                                                                                                                                                                                                                  |
-| `audit/`                                 | Các tiện ích nguồn cấp dữ liệu hoạt động: `highLevelActions.ts` (danh sách cho phép + `isHighLevelAction()`), `activityIcons.ts` (ánh xạ hành động → biểu tượng/động từ), `timeline.ts` (groupByDay/relativeTime) — xem `docs/architecture/MONITORING_SECTIONS.md`                                                          |
+| `combos/`                                | Các trình trợ giúp phân giải + sắp xếp lại tổ hợp                                                                                                                                                                                                                                                                           |
+| `audit/`                                 | Các trình trợ giúp nguồn cấp dữ liệu hoạt động: `highLevelActions.ts` (danh sách cho phép + `isHighLevelAction()`), `activityIcons.ts` (ánh xạ hành động → biểu tượng/động từ), `timeline.ts` (groupByDay/relativeTime) — xem `docs/architecture/MONITORING_SECTIONS.md`                                                    |
 | `compliance/`                            | Nhật ký kiểm toán + kiểm toán nhà cung cấp — xem `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                              |
 | `compression/`                           | Lớp kết nối công cụ nén (các công cụ nằm trong `open-sse/services/compression/`)                                                                                                                                                                                                                                            |
-| `config/`                                | Các tiện ích cấu hình thời gian chạy                                                                                                                                                                                                                                                                                        |
+| `config/`                                | Các trình trợ giúp cấu hình thời gian chạy                                                                                                                                                                                                                                                                                  |
 | `db/`                                    | Hơn 120 mô-đun DB theo miền + 168 bản di chuyển (luôn truy cập SQLite thông qua đây)                                                                                                                                                                                                                                        |
 | `quota/`                                 | Công cụ chia sẻ hạn ngạch: `dimensions.ts` (kiểu/Zod), `types.ts` (giao diện QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — xem `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Ứng dụng khách danh mục mô hình miễn phí Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — xem `docs/frameworks/RADAR.md`                                                                                                                                 |
-| `display/`                               | Các hàm hỗ trợ định dạng UI (chi phí, độ trễ, v.v.)                                                                                                                                                                                                                                                                         |
-| `embeddings/`                            | Các hàm hỗ trợ dịch vụ embedding                                                                                                                                                                                                                                                                                            |
+| `radar/`                                 | Client danh mục mô hình miễn phí Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — xem `docs/frameworks/RADAR.md`                                                                                                                                         |
+| `display/`                               | Các tiện ích hỗ trợ định dạng giao diện người dùng (chi phí, độ trễ, v.v.)                                                                                                                                                                                                                                                  |
+| `embeddings/`                            | Các tiện ích hỗ trợ dịch vụ embedding                                                                                                                                                                                                                                                                                       |
 | `env/`                                   | Phân tích cú pháp + xác thực biến môi trường                                                                                                                                                                                                                                                                                |
 | `evals/`                                 | Framework đánh giá (bộ kiểm thử, trình chạy, môi trường thực thi) — xem `docs/frameworks/EVALS.md`                                                                                                                                                                                                                          |
 | `guardrails/`                            | Bộ che PII, chống tiêm prompt, cầu nối thị giác — xem `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                         |
 | `jobs/`                                  | Các tác vụ nền (tương tự cron)                                                                                                                                                                                                                                                                                              |
 | `memory/`                                | Bộ nhớ hội thoại (RRF lai SQLite FTS5 + sqlite-vec + Qdrant tầng 2) — xem `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                       |
 | `memory/embedding/`                      | Lớp embedding đa nguồn: `index.ts` (bộ phân giải), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (kế hoạch 21)                                                                                                                                                                             |
-| `memory/vectorStore.ts`                  | Lớp bọc sqlite-vec v0.1.9 — KNN vét cạn + RRF lai (FTS5 + vector, k=60). Khởi tạo lười, suy giảm chức năng một cách an toàn khi sqlite-vec không khả dụng. (kế hoạch 21)                                                                                                                                                    |
-| `memory/reindex.ts`                      | `runReindexBatch()` — xử lý các mục bộ nhớ có `needs_reindex=1` trong nền; được gọi bởi `POST /api/memory/reindex` và luồng tự động bổ sung dữ liệu khi cần. (kế hoạch 21)                                                                                                                                                  |
-| `monitoring/`                            | Kiểm tra tình trạng hoạt động, phát số liệu đo lường                                                                                                                                                                                                                                                                        |
-| `oauth/`                                 | Các luồng OAuth/nhập dữ liệu cho 22 mô-đun nhà cung cấp (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                         |
+| `memory/vectorStore.ts`                  | Trình bao bọc sqlite-vec v0.1.9 — KNN vét cạn + RRF lai (FTS5 + vector, k=60). Khởi tạo lười, suy giảm chức năng an toàn khi sqlite-vec không khả dụng. (kế hoạch 21)                                                                                                                                                       |
+| `memory/reindex.ts`                      | `runReindexBatch()` — xử lý trong nền các bộ nhớ có `needs_reindex=1`; được gọi bởi `POST /api/memory/reindex` và luồng điền bù lười. (kế hoạch 21)                                                                                                                                                                         |
+| `monitoring/`                            | Kiểm tra tình trạng, phát số liệu                                                                                                                                                                                                                                                                                           |
+| `oauth/`                                 | Các luồng OAuth/nhập cho 22 mô-đun nhà cung cấp (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                 |
 | `plugins/`                               | Sổ đăng ký plugin                                                                                                                                                                                                                                                                                                           |
-| `promptCache/`                           | Các điểm ngắt bộ nhớ đệm prompt theo phong cách Anthropic                                                                                                                                                                                                                                                                   |
+| `promptCache/`                           | Các điểm ngắt bộ nhớ đệm prompt theo kiểu Anthropic                                                                                                                                                                                                                                                                         |
 | `skills/`                                | Framework kỹ năng (tích hợp sẵn + marketplace + SkillsSH) — xem `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                 |
-| `playground/`                            | Các trình trợ giúp dùng chung của Playground Studio: `codeExport.ts` (trình tạo curl/Python/TS), `promptImprover.ts` (trình dựng meta-prompt), `streamMetrics.ts` (TTFT/TPS thuần túy), `types.ts` (bảng giá) — xem `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                  |
-| `webhookDispatcher.ts`                   | Phân phối webhook bằng HMAC — xem `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                             |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Các trình quản lý tunnel — xem `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                  |
-| `cloudSync.ts`, `initCloudSync.ts`       | Đồng bộ trạng thái với đám mây theo tùy chọn                                                                                                                                                                                                                                                                                |
-| `localDb.ts`                             | Barrel tái xuất cho các mô-đun db (không có logic — chỉ tái xuất)                                                                                                                                                                                                                                                           |
+| `playground/`                            | Các tiện ích dùng chung của Playground Studio: `codeExport.ts` (trình tạo curl/Python/TS), `promptImprover.ts` (trình tạo meta-prompt), `streamMetrics.ts` (TTFT/TPS thuần túy), `types.ts` (bảng giá) — xem `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                         |
+| `webhookDispatcher.ts`                   | Gửi webhook bằng HMAC — xem `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                   |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Trình quản lý đường hầm — xem `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                   |
+| `cloudSync.ts`, `initCloudSync.ts`       | Đồng bộ trạng thái lên đám mây theo tùy chọn                                                                                                                                                                                                                                                                                |
+| `localDb.ts`                             | Tệp barrel tái xuất cho các mô-đun cơ sở dữ liệu (không có logic — chỉ tái xuất)                                                                                                                                                                                                                                            |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Bộ nhớ đệm yêu cầu + tính lũy đẳng                                                                                                                                                                                                                                                                                          |
-| (khoảng 30 tệp cấp cao nhất khác)        | Các trình trợ giúp chuyên biệt (logEnv, modelsDevSync, piiSanitizer, v.v.)                                                                                                                                                                                                                                                  |
+| (~30 tệp cấp cao nhất khác)              | Các tiện ích chuyên biệt (logEnv, modelsDevSync, piiSanitizer, v.v.)                                                                                                                                                                                                                                                        |
 
-### `src/lib/db/` — Cơ sở dữ liệu (137 mô-đun + 193 bản di chuyển)
+### `src/lib/db/` — Cơ sở dữ liệu (147 mô-đun + 208 bản di chuyển)
 
-| Thư mục con               | Mục đích                                                                                                                                                                                    |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | Singleton `getDbInstance()` với ghi nhật ký WAL                                                                                                                                             |
-| `db/migrations/`          | Các tệp SQL có phiên bản (lũy đẳng, có tính giao dịch). `073_memory_vec.sql` thêm `memory_vec_meta` + cột `needs_reindex` (kế hoạch 21).                                                    |
-| `db/playgroundPresets.ts` | Mô-đun CRUD cho các cấu hình đặt trước của Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
-| `db/memoryVec.ts`         | CRUD cho `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, v.v. (kế hoạch 21)                             |
-| `db/<domain>.ts`          | Một mô-đun cho mỗi miền: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, v.v.                |
+| Thư mục con               | Mục đích                                                                                                                                                                                  |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | Singleton `getDbInstance()` với ghi nhật ký WAL                                                                                                                                           |
+| `db/migrations/`          | Các tệp SQL có phiên bản (lũy đẳng, có tính giao dịch). `073_memory_vec.sql` thêm `memory_vec_meta` + cột `needs_reindex` (kế hoạch 21).                                                  |
+| `db/playgroundPresets.ts` | Mô-đun CRUD cho các cấu hình đặt sẵn của Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
+| `db/memoryVec.ts`         | CRUD cho `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, v.v. (kế hoạch 21)                           |
+| `db/<domain>.ts`          | Một mô-đun cho mỗi miền: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, v.v.              |
 
 ### `src/domain/`
 
-| Mô-đun                 | Mục đích                                               |
-| ---------------------- | ------------------------------------------------------ |
-| `policy.ts`            | Công cụ chính sách                                     |
-| `fallbackPolicy.ts`    | Cây quyết định dự phòng                                |
-| `costRules.ts`         | Các quy tắc tính chi phí                               |
-| `lockoutPolicy.ts`     | Chính sách khóa mô hình/kết nối                        |
-| `tagRouter.ts`         | Định tuyến dựa trên thẻ                                |
-| `comboResolver.ts`     | Phân giải combo (được công cụ combo sử dụng)           |
-| `modelAvailability.ts` | Kiểm tra tính khả dụng theo từng mô hình               |
-| `assessment/`          | Đánh giá mô hình (Giai đoạn 1 của RFC-AUTO-ASSESSMENT) |
+| Mô-đun                 | Mục đích                                                |
+| ---------------------- | ------------------------------------------------------- |
+| `policy.ts`            | Công cụ chính sách                                      |
+| `fallbackPolicy.ts`    | Cây quyết định dự phòng                                 |
+| `costRules.ts`         | Các quy tắc tính toán chi phí                           |
+| `lockoutPolicy.ts`     | Chính sách khóa mô hình/kết nối                         |
+| `tagRouter.ts`         | Định tuyến dựa trên thẻ                                 |
+| `comboResolver.ts`     | Phân giải combo (được công cụ combo sử dụng)            |
+| `modelAvailability.ts` | Kiểm tra tính khả dụng theo từng mô hình                |
+| `assessment/`          | Đánh giá mô hình (Giai đoạn 1 của RFC-AUTO-ASSESSMENT ) |
 
 ### `src/server/`
 
@@ -237,21 +237,21 @@ src/
 
 ### `src/shared/`
 
-| Mô-đun                           | Mục đích                                                                |
-| -------------------------------- | ----------------------------------------------------------------------- |
-| `constants/providers.ts`         | **372 nhà cung cấp** với xác thực Zod (nguồn chân lý)                   |
-| `constants/cliTools.ts`          | Registry các công cụ CLI bên ngoài                                      |
-| `constants/routingStrategies.ts` | **19 chiến lược định tuyến** với mức độ ưu tiên                         |
-| `constants/publicApiRoutes.ts`   | Các tuyến yêu cầu xác thực Bearer (thay vì xác thực quản trị)           |
-| `constants/upstreamHeaders.ts`   | Danh sách chặn header cho các yêu cầu upstream                          |
-| `validation/schemas.ts`          | ~80 schema Zod (nguồn chân lý duy nhất cho các hợp đồng API)            |
-| `validation/helpers.ts`          | Các hàm hỗ trợ xác thực Zod (`validateBody`, v.v.)                      |
-| `types/`                         | Các kiểu TS dùng chung                                                  |
-| `contracts/`                     | Các hợp đồng API công khai (được `files:` trong `package.json` sử dụng) |
-| `utils/circuitBreaker.ts`        | Bộ ngắt mạch nhà cung cấp (xem `docs/architecture/RESILIENCE_GUIDE.md`) |
-| `utils/apiAuth.ts`               | Xác thực khóa API, kiểm tra phạm vi                                     |
-| `utils/fetchTimeout.ts`          | Các wrapper hết thời gian chờ/hủy cho thao tác fetch upstream           |
-| `utils/releaseNotes.ts`          | Trình phân tích thông báo v2/cũ đã đóng, bản địa hóa và loại bỏ theo ID |
+| Mô-đun                           | Mục đích                                                                    |
+| -------------------------------- | --------------------------------------------------------------------------- |
+| `constants/providers.ts`         | **375 nhà cung cấp** với xác thực Zod (nguồn dữ liệu chuẩn)                 |
+| `constants/cliTools.ts`          | Sổ đăng ký công cụ CLI bên ngoài                                            |
+| `constants/routingStrategies.ts` | **20 chiến lược định tuyến** với mức độ ưu tiên                             |
+| `constants/publicApiRoutes.ts`   | Các tuyến yêu cầu xác thực Bearer (thay vì xác thực quản lý)                |
+| `constants/upstreamHeaders.ts`   | Danh sách chặn tiêu đề cho các yêu cầu thượng nguồn                         |
+| `validation/schemas.ts`          | Khoảng 80 schema Zod (nguồn dữ liệu chuẩn duy nhất cho các hợp đồng API)    |
+| `validation/helpers.ts`          | Các hàm hỗ trợ xác thực Zod (`validateBody`, v.v.)                          |
+| `types/`                         | Các kiểu TS dùng chung                                                      |
+| `contracts/`                     | Các hợp đồng API công khai (được `files:` sử dụng trong `package.json`)     |
+| `utils/circuitBreaker.ts`        | Bộ ngắt mạch nhà cung cấp (xem `docs/architecture/RESILIENCE_GUIDE.md`)     |
+| `utils/apiAuth.ts`               | Xác thực khóa API, kiểm tra phạm vi                                         |
+| `utils/fetchTimeout.ts`          | Các trình bao bọc timeout/hủy bỏ cho fetch thượng nguồn                     |
+| `utils/releaseNotes.ts`          | Trình phân tích thông báo v2/legacy đã đóng, bản địa hóa và loại bỏ theo ID |
 
 ---
 
@@ -381,53 +381,53 @@ open-sse/
 
 | Tài liệu                    | Mục đích                                                                                       |
 | --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Kiến trúc cấp cao, sơ đồ các hệ thống con, bề mặt bảng điều khiển                              |
+| `ARCHITECTURE.md`           | Kiến trúc tổng quan, sơ đồ hệ thống con, giao diện bảng điều khiển                             |
 | `CODEBASE_DOCUMENTATION.md` | Tài liệu tham khảo kỹ thuật: thư mục, mô-đun, quy ước                                          |
 | `FEATURES.md`               | Ma trận tính năng với các điểm nổi bật của v3.8                                                |
-| `USER_GUIDE.md`             | Hướng dẫn sử dụng cho người dùng cuối (thiết lập, mô hình, tổ hợp, CLI, âm thanh, v.v.)        |
+| `USER_GUIDE.md`             | Hướng dẫn sử dụng dành cho người dùng cuối (thiết lập, mô hình, combo, CLI, âm thanh, v.v.)    |
 | `API_REFERENCE.md`          | Tài liệu tham khảo endpoint API cùng mô hình xác thực                                          |
 | `openapi.yaml`              | Đặc tả OpenAPI 3.0 (121 đường dẫn)                                                             |
 | `SETUP_GUIDE.md`            | Các phương thức cài đặt (npm, npx, Docker, Electron, Termux, mã nguồn)                         |
-| `ENVIRONMENT.md`            | Tất cả biến môi trường (~800 biến được lập tài liệu, tệp `.env.example` dài ~3.050 dòng)       |
+| `ENVIRONMENT.md`            | Tất cả biến môi trường (~800 biến được ghi tài liệu, `.env.example` dài ~3.050 dòng)           |
 | `TROUBLESHOOTING.md`        | Các lỗi thường gặp + sự cố đã biết của v3.8.0                                                  |
 | `RELEASE_CHECKLIST.md`      | Quy trình phát hành đầy đủ (kỹ năng, husky, conventional commits, triển khai)                  |
-| `COVERAGE_PLAN.md`          | Mục tiêu về độ bao phủ và trạng thái hiện tại                                                  |
-| `FREE_TIERS.md`             | Danh sách tuyển chọn các nhà cung cấp có gói miễn phí (48+ miễn phí + 11 OAuth)                |
+| `COVERAGE_PLAN.md`          | Mục tiêu độ bao phủ và trạng thái hiện tại                                                     |
+| `FREE_TIERS.md`             | Các nhà cung cấp gói miễn phí được tuyển chọn (hơn 48 miễn phí + 11 OAuth)                     |
 | `CLI-TOOLS.md`              | Tích hợp CLI bên ngoài + CLI OmniRoute nội bộ                                                  |
-| `I18N.md`                   | Kiến trúc i18n, cách thêm ngôn ngữ, 42 ngôn ngữ                                                |
+| `I18N.md`                   | Kiến trúc i18n, cách thêm ngôn ngữ, 67 locale                                                  |
 | `UNINSTALL.md`              | Các bước gỡ cài đặt sạch                                                                       |
-| `PROVIDER_REFERENCE.md`     | Danh mục **được tạo tự động** gồm 372 nhà cung cấp (tạo lại: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Danh mục **được tạo tự động** gồm 375 nhà cung cấp (tạo lại: `npm run gen:provider-reference`) |
 
-### Phân tích chuyên sâu các hệ thống con
+### Chuyên sâu về hệ thống con
 
-| Tài liệu                                   | Mục đích                                                                          |
-| ------------------------------------------ | --------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                            | Máy chủ MCP: 110 công cụ, 3 phương thức truyền tải, 33 phạm vi, các endpoint REST |
-| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 kỹ năng, trình trợ giúp REST, thẻ tác nhân                  |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | Hướng dẫn hợp nhất: A2A so với ACP so với Cloud Agents                            |
-| `CLOUD_AGENT.md`                           | Điều phối Codex Cloud / Devin / Jules                                             |
-| `SKILLS.md`                                | Khung kỹ năng (tích hợp sẵn + chợ ứng dụng + SkillsSH + hộp cát)                  |
-| `RADAR.md`                                 | Lớp phủ danh mục mô hình miễn phí Radar (`RADAR_ENABLED`, mặc định tắt)           |
-| `MEMORY.md`                                | Hệ thống bộ nhớ (SQLite FTS5 + Qdrant)                                            |
-| `EVALS.md`                                 | Khung đánh giá (bộ kiểm thử, lượt chạy, tiêu chí)                                 |
-| `GUARDRAILS.md`                            | Công cụ che PII, chống chèn prompt, cầu nối thị giác                              |
-| `COMPLIANCE.md`                            | Nhật ký kiểm toán, thời hạn lưu giữ, tùy chọn từ chối noLog                       |
-| `WEBHOOKS.md`                              | Phân phối webhook có chữ ký HMAC                                                  |
-| `REASONING_REPLAY.md`                      | Bộ nhớ lai/bộ nhớ đệm SQLite cho `reasoning_content`                              |
-| `AUTHZ_GUIDE.md`                           | Quy trình phân quyền (`classify` → `policies` → `enforce`)                        |
-| `RESILIENCE_GUIDE.md`                      | Bộ ngắt mạch + thời gian chờ + khóa mô hình                                       |
-| `docs/security/STEALTH_GUIDE.md` (chỉ git) | Lấy dấu vân tay TLS (JA3/JA4), Claude Code CCH, chứng chỉ MITM                    |
-| `AUTO-COMBO.md`                            | Công cụ Auto Combo (chấm điểm theo 16 yếu tố, 6 gói chế độ, nhà máy ảo)           |
+| Tài liệu                                           | Mục đích                                                                      |
+| -------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                                    | Máy chủ MCP: 110 công cụ, 3 phương thức truyền tải, 33 phạm vi, endpoint REST |
+| `A2A-SERVER.md`                                    | A2A v0.3: JSON-RPC, 6 kỹ năng, trình trợ giúp REST, thẻ tác nhân              |
+| `AGENT_PROTOCOLS_GUIDE.md`                         | Hướng dẫn hợp nhất: A2A so với ACP so với Cloud Agents                        |
+| `CLOUD_AGENT.md`                                   | Điều phối Codex Cloud / Devin / Jules                                         |
+| `SKILLS.md`                                        | Khung kỹ năng (tích hợp sẵn + marketplace + SkillsSH + sandbox)               |
+| `RADAR.md`                                         | Lớp phủ danh mục mô hình miễn phí Radar (`RADAR_ENABLED`, mặc định tắt)       |
+| `MEMORY.md`                                        | Hệ thống bộ nhớ (SQLite FTS5 + Qdrant)                                        |
+| `EVALS.md`                                         | Khung đánh giá (bộ kiểm thử, lượt chạy, tiêu chí)                             |
+| `GUARDRAILS.md`                                    | Bộ che PII, chống chèn prompt, cầu nối thị giác                               |
+| `COMPLIANCE.md`                                    | Nhật ký kiểm toán, lưu giữ, tùy chọn từ chối noLog                            |
+| `WEBHOOKS.md`                                      | Phân phối webhook được ký bằng HMAC                                           |
+| `REASONING_REPLAY.md`                              | Bộ nhớ lai/bộ nhớ đệm SQLite cho `reasoning_content`                          |
+| `AUTHZ_GUIDE.md`                                   | Quy trình cấp quyền (`classify` → `policies` → `enforce`)                     |
+| `RESILIENCE_GUIDE.md`                              | Bộ ngắt mạch + thời gian chờ + khóa mô hình                                   |
+| `docs/security/STEALTH_GUIDE.md` (chỉ có trên git) | Dấu vân tay TLS (JA3/JA4), Claude Code CCH, chứng chỉ MITM                    |
+| `AUTO-COMBO.md`                                    | Công cụ Auto Combo (chấm điểm 16 yếu tố, 6 gói chế độ, nhà máy ảo)            |
 
 ### Nén
 
-| Tài liệu                        | Mục đích                                     |
-| ------------------------------- | -------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Tổng quan các chế độ nén + lộ trình          |
-| `COMPRESSION_ENGINES.md`        | Các công cụ Caveman + RTK, giao ước registry |
-| `COMPRESSION_RULES_FORMAT.md`   | Lược đồ JSON của gói quy tắc Caveman         |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Danh mục gói quy tắc theo từng ngôn ngữ      |
-| `RTK_COMPRESSION.md`            | Quy trình khai báo RTK (49 bộ lọc)           |
+| Tài liệu                        | Mục đích                                 |
+| ------------------------------- | ---------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Tổng quan về các chế độ nén + lộ trình   |
+| `COMPRESSION_ENGINES.md`        | Công cụ Caveman + RTK, hợp đồng registry |
+| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON của gói quy tắc Caveman      |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Danh mục gói quy tắc theo từng ngôn ngữ  |
+| `RTK_COMPRESSION.md`            | Quy trình khai báo RTK (49 bộ lọc)       |
 
 ### Triển khai
 
@@ -436,21 +436,19 @@ open-sse/
 | `DOCKER_GUIDE.md`            | Bản dựng Docker, các profile (base/cli/host/cliproxyapi), Redis sidecar |
 | `VM_DEPLOYMENT_GUIDE.md`     | Triển khai VM/VPS thông thường (Ubuntu/Debian + nginx + systemd)        |
 | `FLY_IO_DEPLOYMENT_GUIDE.md` | Triển khai Fly.io (hiện chỉ có tiếng Trung)                             |
-| `TERMUX_GUIDE.md`            | Chạy không giao diện trên Android thông qua Termux                      |
+| `TERMUX_GUIDE.md`            | Chạy không giao diện trên Android qua Termux                            |
 | `PWA_GUIDE.md`               | Cài đặt Progressive Web App + service worker                            |
-| `ELECTRON_GUIDE.md`          | Dựng + ký + phân phối ứng dụng desktop                                  |
+| `ELECTRON_GUIDE.md`          | Xây dựng + ký + phân phối ứng dụng máy tính                             |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                  |
-| `PROXY_GUIDE.md`             | Proxy đầu ra 4 cấp + chợ 1proxy                                         |
+| `PROXY_GUIDE.md`             | Proxy đầu ra 4 cấp + sàn giao dịch 1proxy                               |
 
 ### Các thư mục con
 
-| Thư mục con           | Mục đích                                                                                                                                                                                                                          |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Các bản dịch tài liệu đã được bản địa hóa (41 ngôn ngữ)                                                                                                                                                                           |
-| `docs/screenshots/`   | Tài nguyên hình ảnh cho các hướng dẫn                                                                                                                                                                                             |
-| `_tasks/superpowers/` | Các kế hoạch/đặc tả từ superpowers (`writing-plans`/`brainstorming`) + nghiên cứu — kho lưu trữ riêng biệt, được quản lý phiên bản độc lập và bị cây chính bỏ qua qua gitignore. Xem CLAUDE.md → "Planning & Research Artifacts". |
-
----
+| Thư mục con           | Mục đích                                                                                                                                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Các bản dịch tài liệu đã bản địa hóa (41 ngôn ngữ)                                                                                                                                                               |
+| `docs/screenshots/`   | Tài nguyên hình ảnh dành cho các hướng dẫn                                                                                                                                                                       |
+| `_tasks/superpowers/` | Các kế hoạch/đặc tả từ superpowers (`writing-plans`/`brainstorming`) + nghiên cứu — repo biệt lập, được quản lý phiên bản riêng và bị cây chính bỏ qua bởi git. Xem CLAUDE.md → "Planning & Research Artifacts". |
 
 ## `tests/` — Các bộ kiểm thử
 

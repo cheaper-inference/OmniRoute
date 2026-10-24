@@ -228,7 +228,7 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Supports **19 routing strategies** (see `src/shared/constants/routingStrategies.ts`):
+Supports **20 routing strategies** (see `src/shared/constants/routingStrategies.ts`):
 
 | Strategy            | Behavior                                                                  |
 | ------------------- | ------------------------------------------------------------------------- |
@@ -244,11 +244,14 @@ Supports **19 routing strategies** (see `src/shared/constants/routingStrategies.
 | `reset-aware`       | Aware of provider reset windows                                           |
 | `reset-window`      | Reset window-based routing                                                |
 | `headroom`          | Most remaining quota headroom first                                       |
+| `quota-weighted`    | Skip exhausted accounts, then draw by leftover quota ÷ in-flight load     |
 | `strict-random`     | Truly uniform (no quality weighting)                                      |
 | `auto`              | Use 16-factor scoring (`autoCombo/`)                                      |
 | `lkgp`              | Last known good provider first                                            |
 | `context-optimized` | Best for long-context requests                                            |
+| `cache-optimized`   | Pin each reusable prompt prefix to the same account (prompt-cache hits)   |
 | `fusion`            | Fan out to a panel in parallel, then synthesize via a judge (`fusion.ts`) |
+| `pipeline`          | Chain steps — each target's output feeds the next one                     |
 
 ### base.ts (1170 LOC)
 
@@ -487,7 +490,7 @@ This handles:
 
 | File                          | Purpose                                           |
 | ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-model registry over the 374-provider catalog |
+| `providerRegistry.ts`         | Chat-model registry over the 375-provider catalog |
 | `providerModels.ts`           | Model aliases, format mapping                     |
 | `constants.ts`                | Timeouts, limits, status codes                    |
 | `defaultThinkingSignature.ts` | Default Claude thinking signature                 |

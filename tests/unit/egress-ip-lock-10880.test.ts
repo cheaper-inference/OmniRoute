@@ -217,6 +217,56 @@ test("three connections sharing one egress IP: ONE upstream call for the whole p
   assert.equal(c!.testStatus, "unavailable");
 });
 
+// #16797: opencode-zen is keyed, so it joins the egress family only behind the
+// default-off OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED flag. Flag off = the tip's behavior
+// (every Zen connection is tried and cooled on its own); flag on = one call per pool.
+async function rotateZenPool(): Promise<{ upstreamCalls: number; siblingCooled: boolean }> {
+  await resetStorage();
+  const connA = await seedConnection("opencode-zen");
+  const connB = await seedConnection("opencode-zen");
+  seedProxyLog(connA, SHARED_EGRESS_IP, "opencode-zen");
+  seedProxyLog(connB, SHARED_EGRESS_IP, "opencode-zen");
+  // RATE_LIMIT_TEXT_429 carries no quota text, so a lone connection keeps a short
+  // scaled cooldown and the sibling's state is decided only by the egress branch.
+  const first = await auth.markAccountUnavailable(
+    connA,
+    429,
+    '{"error":{"message":"rate limit reached"}}',
+    "opencode-zen",
+    "model-x",
+    null,
+    {}
+  );
+  assert.equal(first.shouldFallback, true);
+  const b = await providersDb.getProviderConnectionById(connB);
+  const siblingCooled =
+    !!b?.rateLimitedUntil && new Date(String(b.rateLimitedUntil)).getTime() > Date.now();
+  const { upstreamCalls } = await rotateWholePool(
+    [connB],
+    '{"error":{"message":"rate limit reached"}}',
+    "opencode-zen"
+  );
+  return { upstreamCalls: upstreamCalls + 1, siblingCooled };
+}
+
+test("#16797 flag off (default): an opencode-zen 429 leaves its egress siblings alone", async () => {
+  delete process.env.OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED;
+  const { upstreamCalls, siblingCooled } = await rotateZenPool();
+  assert.equal(siblingCooled, false, "zen sibling must not be pre-cooled by default");
+  assert.equal(upstreamCalls, 2, "each zen connection is still tried on its own");
+});
+
+test("#16797 flag on: an opencode-zen 429 cools the connections sharing its egress IP", async () => {
+  process.env.OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED = "true";
+  try {
+    const { upstreamCalls, siblingCooled } = await rotateZenPool();
+    assert.equal(siblingCooled, true, "zen sibling cooled before being tried");
+    assert.equal(upstreamCalls, 1, "exactly one upstream call for the zen pool");
+  } finally {
+    delete process.env.OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED;
+  }
+});
+
 test("counter-test: the SAME rotation burns N calls for a non-allowlisted provider", async () => {
   await resetStorage();
   const connA = await seedConnection("ollama-cloud");

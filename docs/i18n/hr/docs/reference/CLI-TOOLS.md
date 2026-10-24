@@ -43,66 +43,31 @@ ACP agenti (obrnuti tijek pokretanja):
 
 ---
 
-## Automatsko konfiguriranje pomoću `setup-*`
+## Automatska konfiguracija pomoću `setup-*`
 
-Ne morate ručno pisati konfiguraciju svakog alata. OmniRoute isporučuje naredbu `setup-*`
-za svaki podržani CLI, koja čita **aktualni** katalog modela iz pokrenutog
-OmniRoutea (lokalnog ili udaljenog) i zapisuje vlastitu konfiguraciju alata na vaše računalo:
+Ne morate ručno pisati konfiguraciju svakog alata. OmniRoute za svaki podržani CLI isporučuje naredbu `setup-*` koja čita **aktualni** katalog modela iz pokrenutog OmniRoutea (lokalnog ili udaljenog) i zapisuje vlastitu konfiguraciju alata na vašem računalu:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Svaka prihvaća `--remote <url> --api-key <key>` (konfiguriranje lokalnog alata za
-udaljeni OmniRoute), `--dry-run` (pregled bez zapisivanja) i `--port`. Alati
-bez automatskog otkrivanja modela (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) prihvaćaju
-`--model <id>` (i `--yes` za neinteraktivna izvođenja). `setup-5dive` jedini je
-postupak koji ne zapisuje unutar `$HOME`: konfigurira flotu 5dive agenata
-zapisivanjem autentikacijskog profila u vlasništvu korisnika root na glavnom računalu flote, stoga se ponovno izvršava putem `sudo`
-i nema vlastiti udaljeni način rada. Za pokretanje CLI-ja s
-ispravno umetnutim varijablama okruženja bez zapisivanja ikakve konfiguracije upotrijebite generički
-pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — ciljevi i pseudonimi dolaze iz `bin/cli/cli-manifest.mjs`); naslijeđeni
-pokretači za pojedinačne alate `omniroute launch` (Claude Code) i `omniroute launch-codex`
-(Codex) i dalje su dostupni. Gemini CLI može se samo pokretati: cilj je za `omniroute run`,
-ali nema postupak `setup-*`/`configure`.
+Svaka prihvaća `--remote <url> --api-key <key>` (konfiguriranje lokalnog alata za udaljeni OmniRoute), `--dry-run` (pretpregled bez zapisivanja) i `--port`. Alati bez automatskog otkrivanja modela (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) prihvaćaju `--model <id>` (i `--yes` za neinteraktivna pokretanja). `setup-5dive` jedini je postupak koji ne zapisuje unutar `$HOME`: konfigurira skup 5dive agenata zapisivanjem autentifikacijskog profila u vlasništvu korisnika root na glavnom računalu skupa, stoga se ponovno izvršava putem `sudo` i nema vlastiti udaljeni način rada. Za pokretanje CLI-ja s umetnutim odgovarajućim varijablama okruženja i bez ikakvog zapisivanja konfiguracije upotrijebite generički pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — ciljevi i aliasi dolaze iz `bin/cli/cli-manifest.mjs`); stari pokretači za pojedinačne alate `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex) i dalje su dostupni. Gemini CLI može se samo pokretati: cilj je naredbe `omniroute run`, ali nema postupak `setup-*`/`configure`.
 
 > **Potpuna referenca:** glavna tablica — što svaka naredba zapisuje, sve zastavice,
-> lokalni nasuprot udaljenom načinu rada te koji alati zahtijevaju sufiks `/v1` — nalazi se u
-> dokumentu **[CLI integracije](../guides/CLI-INTEGRATIONS.md)**.
+> lokalni naspram udaljenog načina rada i koji alati zahtijevaju sufiks `/v1` — nalazi se u
+> odjeljku **[CLI integracije](../guides/CLI-INTEGRATIONS.md)**.
 
 ### Pokretanje ovih naredbi unutar spremnika
 
-Naredba `setup-*` izvršena unutar OmniRoute spremnika zapisuje u
-vlastiti početni direktorij spremnika, koji nijedan CLI na glavnom računalu ne čita i koji nestaje zajedno sa
-spremnikom. OmniRoute to otkriva i završava s kodom `2`, uz prikaz uputa, umjesto
-zapisivanja. Postoje dva podržana rješenja — instalirajte CLI na glavno računalo i
-izvršite `omniroute connect` prema spremniku ili povežite konfiguracijske direktorije putem bind-mounta i postavite
-`CLI_CONFIG_HOME` (`host` profil za compose). Svaka naredba `setup-*`, kao i
-`omniroute configure` i `omniroute config set`, prihvaća
-`--allow-container-write` kada doista želite konfigurirati CLI alate samog spremnika;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` čini isto za
-poslužitelj. Pogledajte
-[Vodič za Docker → Konfiguriranje CLI alata glavnog računala](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Naredba `setup-*` izvršena unutar OmniRoute spremnika zapisuje u vlastiti početni direktorij spremnika, koji nijedan CLI glavnog računala ne čita i koji nestaje zajedno sa spremnikom. OmniRoute to otkriva i završava s kodom `2`, uz upute, umjesto da zapisuje. Postoje dva podržana načina za nastavak — instalirajte CLI na glavno računalo i povežite se sa spremnikom pomoću `omniroute connect` ili montirajte konfiguracijske direktorije vezanim montiranjem i postavite `CLI_CONFIG_HOME` (compose profil `host`). Svaka naredba `setup-*`, kao i `omniroute configure` i `omniroute config set`, prihvaća `--allow-container-write` kada doista želite konfigurirati CLI-jeve samog spremnika; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` čini isto za poslužitelj. Pogledajte
+[Docker vodič → Konfiguriranje CLI alata glavnog računala](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Krajnja točka za primjenu** na nadzornoj ploči (`POST /api/cli-tools/apply`) provodi
-istu zaštitu: u spremniku, zapisivanje čije odredište nije povezano s
-glavnog računala putem bind-mounta vraća odgovor **`422`** s `containerEphemeralTarget: true`, sigurnim tekstom
-pogreške i — za alate s postupkom za glavno računalo (claude, codex, opencode, cline,
-kilo, continue) — vrijednošću `hostSetupCommand` (npr. `omniroute setup-opencode`) koju treba pokrenuti
-na glavnom računalu; ništa se ne zapisuje. `dryRun: true` nastavlja raditi u načinu rada
-spremnika te vraća redigirani pregled i odredišnu putanju bez pristupanja disku. Sadržaj
-pregleda nije konfiguracija koja sadrži vjerodajnice i koju treba kopirati ili uvesti. Primijenite
-izvorne ulazne podatke za alat/osnovni URL/API ključ/model na glavnom računalu ili upotrijebite navedenu
-naredbu za postavljanje na glavnom računalu. Za zaglavlje pregleda i ugovor zahtjeva pogledajte
-[Sigurnost CLI konfiguracije](../security/CLI-CONFIGURATION.md).
-Takvo je ponašanje namjerno i zaštićeno od regresija testom
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nikada nemojte „popravljati” odgovor 422
-uklanjanjem zaštite.
+**Krajnja točka za primjenu** na nadzornoj ploči (`POST /api/cli-tools/apply`) provodi istu zaštitu: u spremniku, zahtjev za zapisivanje čije odredište nije vezano montirano s glavnog računala odgovara kodom **`422`** uz `containerEphemeralTarget: true`, siguran tekst pogreške i — za alate s postupkom za glavno računalo (claude, codex, opencode, cline, kilo, continue) — `hostSetupCommand` (npr. `omniroute setup-opencode`) koji treba pokrenuti na glavnom računalu; ništa se ne zapisuje. `dryRun: true` nastavlja raditi u načinu rada spremnika i vraća redigirani pretpregled + odredišnu putanju bez pristupanja disku. Sadržaj pretpregleda nije konfiguracija s vjerodajnicama namijenjena kopiranju ili uvozu. Primijenite konfiguraciju s izvornim unosima alata/osnovnog URL-a/API ključa/modela na glavnom računalu ili upotrijebite navedenu naredbu za postavljanje na glavnom računalu. Za zaglavlje pretpregleda i ugovor zahtjeva pogledajte [Sigurnost konfiguracije CLI-ja](../security/CLI-CONFIGURATION.md). To je ponašanje namjerno i zaštićeno od regresija testom
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nikada nemojte „popraviti” 422 uklanjanjem zaštite.
 
 ---
 
@@ -145,40 +110,41 @@ na jednu površinu bez ostalih uzrokuje pad skupa testova umjesto neprimjetnog o
 
 ---
 
-## 1. Katalog CLI koda (26 alata)
+## 1. Katalog CLI Codea (27 alata)
 
-Svi alati koji se pojavljuju na `/dashboard/cli-code`. Oni s vrijednošću `baseUrlSupport: none` povezani su putem MITM-a ili ručnih uputa umjesto prilagođenog osnovnog URL-a:
+Svi alati koji se pojavljuju u `/dashboard/cli-code`. Oni s postavkom `baseUrlSupport: none` povezani su putem MITM-a ili ručnih uputa umjesto prilagođenog osnovnog URL-a:
 
-| id           | naziv                   | dobavljač              | podrška za osnovni URL | vrsta konfiguracije | moguće pokretanje putem ACP-a |
-| ------------ | ----------------------- | ---------------------- | ---------------------- | ------------------- | ----------------------------- |
-| claude       | Claude Code             | Anthropic              | potpuna                | varijable okruženja | da                            |
-| codex        | OpenAI Codex CLI        | OpenAI                 | potpuna                | prilagođena         | da                            |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                   | nema                   | prilagođena         | ne                            |
-| cline        | Cline                   | OSS (bivši Claude Dev) | potpuna                | prilagođena         | da                            |
-| kilo         | Kilo Code               | Kilo-Org               | potpuna                | prilagođena         | ne                            |
-| roo          | Roo Code                | Roo (OSS)              | potpuna                | upute               | ne                            |
-| continue     | Continue                | continue.dev           | potpuna                | upute               | ne                            |
-| aider        | Aider                   | OSS (P. Gauthier)      | potpuna                | upute               | da                            |
-| forge        | ForgeCode               | Antinomy HQ            | potpuna                | prilagođena         | da                            |
-| jcode        | jcode                   | 1jehuang (OSS)         | potpuna                | prilagođena         | ne                            |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)      | potpuna                | prilagođena         | ne                            |
-| codewhale    | CodeWhale               | Hmbown (OSS)           | potpuna                | prilagođena         | ne                            |
-| opencode     | OpenCode                | Anomaly (bivši SST)    | potpuna                | upute               | da                            |
-| droid        | Factory Droid           | Factory AI             | djelomična             | upute               | ne                            |
-| copilot      | GitHub Copilot CLI      | GitHub/MS              | potpuna                | prilagođena         | ne                            |
-| cursor-cli   | Cursor CLI              | Anysphere              | djelomična             | upute               | da                            |
-| smelt        | Smelt                   | leonardcser (OSS)      | potpuna                | prilagođena         | ne                            |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)       | potpuna                | prilagođena         | ne                            |
-| grok-build   | Grok Build              | xAI                    | potpuna                | prilagođena         | ne                            |
-| crush        | Crush                   | OSS (Charm)            | potpuna                | prilagođena         | ne                            |
-| qwen         | Qwen Code               | Alibaba                | potpuna                | upute               | da                            |
-| cursor       | Cursor                  | Anysphere              | nema                   | upute               | ne                            |
-| antigravity  | Antigravity             | Google                 | nema                   | mitm                | ne                            |
-| hermes       | Hermes                  | Nous Research          | nema                   | upute               | ne                            |
-| kiro         | Kiro AI                 | Amazon                 | nema                   | mitm                | ne                            |
-| custom       | Prilagođeni CLI         | —                      | potpuna                | alat za prilagodbu  | ne                            |
+| id           | name                    | vendor                 | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ---------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic              | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI                 | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                   | none           | custom         | false        |
+| cline        | Cline                   | OSS (bivši Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org               | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)              | full           | guide          | false        |
+| continue     | Continue                | continue.dev           | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)      | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ            | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)         | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)      | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)           | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (bivši SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI             | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS              | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere              | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)      | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)       | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries         | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
+| antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research          | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon                 | none           | mitm           | false        |
+| custom       | Prilagođeni CLI         | —                      | full           | custom-builder | false        |
 
-Alati s vrijednošću `baseUrlSupport: "partial"` prikazuju značku „⚠ Djelomičan osnovni URL” na kartici nadzorne ploče.
+Alati s postavkom `baseUrlSupport: "partial"` na kartici nadzorne ploče prikazuju značku „⚠ Djelomični osnovni URL”.
 ---
 
 ## 2. Katalog CLI agenata (10 alata)
@@ -187,16 +153,16 @@ Autonomni agenti koji se prikazuju na `/dashboard/cli-agents`:
 
 | id           | naziv            | dobavljač                | podrška za baseUrl | moguće pokretanje putem ACP-a |
 | ------------ | ---------------- | ------------------------ | ------------------ | ----------------------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | potpuna            | false                         |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | potpuna            | true                          |
-| goose        | Goose            | Block / Linux Foundation | potpuna            | true                          |
-| interpreter  | Open Interpreter | OSS                      | potpuna            | true                          |
-| warp         | Warp AI          | Warp Inc.                | djelomična         | true                          |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | potpuna            | false                         |
-| omp          | Oh My Pi         | OSS                      | potpuna            | true                          |
-| letta        | Letta CLI        | Letta                    | potpuna            | false                         |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | potpuna            | false                         |
-| 5dive        | 5dive            | OSS (5dive-ai)           | potpuna            | false                         |
+| hermes-agent | Hermes Agent     | Nous Research            | full               | false                         |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full               | true                          |
+| goose        | Goose            | Block / Linux Foundation | full               | true                          |
+| interpreter  | Open Interpreter | OSS                      | full               | true                          |
+| warp         | Warp AI          | Warp Inc.                | partial            | true                          |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full               | false                         |
+| omp          | Oh My Pi         | OSS                      | full               | true                          |
+| letta        | Letta CLI        | Letta                    | full               | false                         |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                         |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                         |
 
 ---
 

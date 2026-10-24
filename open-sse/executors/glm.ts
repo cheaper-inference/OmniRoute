@@ -242,6 +242,7 @@ export function translateSseResponse(
     undefined,
     undefined,
     undefined,
+    null,
     GLM_STREAM_BUFFER_BYTES
   );
   const headers = cloneHeaders(response.headers);

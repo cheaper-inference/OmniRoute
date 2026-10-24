@@ -45,64 +45,64 @@ Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose /
 
 ## التهيئة التلقائية باستخدام `setup-*`
 
-لست مضطرًا إلى كتابة إعدادات كل أداة يدويًا. يتضمن OmniRoute أمر `setup-*`
-لكل أداة CLI مدعومة، يقرأ كتالوج النماذج **المباشر** من مثيل OmniRoute قيد التشغيل
-(محلي أو بعيد)، ثم يكتب إعدادات الأداة نفسها على جهازك:
+لا يتعين عليك كتابة إعدادات كل أداة يدويًا. يوفّر OmniRoute أمرًا من نوع `setup-*`
+لكل CLI مدعوم، يقرأ كتالوج النماذج **الفعلي** من نسخة OmniRoute قيد التشغيل
+(محلية أو بعيدة)، ثم يكتب إعدادات الأداة نفسها على جهازك:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-يقبل كل أمر `--remote <url> --api-key <key>` (لتهيئة أداة محلية لاستخدام
-OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--port`. تتطلب الأدوات
-التي لا تدعم الاكتشاف التلقائي للنماذج (Cline وKilo وRoo وGoose وAider وQwen و5dive)
-الخيار `--model <id>` (وكذلك `--yes` لعمليات التشغيل غير التفاعلية). وصفة
-`setup-5dive` هي الوحيدة التي لا تكتب ضمن `$HOME`: فهي تهيئ مجموعة وكلاء 5dive
-عن طريق كتابة ملف تعريف مصادقة مملوك للمستخدم الجذر على مضيف المجموعة، ولذلك تعيد
-تنفيذ نفسها عبر `sudo` ولا توفر وضعًا بعيدًا خاصًا بها. لتشغيل أداة CLI مع حقن
-متغيرات البيئة المناسبة ودون كتابة أي إعدادات على الإطلاق، استخدم مشغّل
-`omniroute run <target>` العام (claude وcodex وaider وgoose وopencode وqwen
+يقبل كل أمر `--remote <url> --api-key <key>` (لتهيئة أداة محلية للعمل مع
+OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--port`. أما الأدوات
+التي لا تدعم الاكتشاف التلقائي للنماذج (Cline وKilo وRoo وGoose وAider وQwen و5dive)، فتقبل
+`--model <id>` (وكذلك `--yes` للتشغيل غير التفاعلي). تُعد `setup-5dive` الوصفة
+الوحيدة التي لا تكتب ضمن `$HOME`: فهي تهيّئ مجموعة وكلاء 5dive عبر
+كتابة ملف تعريف مصادقة مملوك للمستخدم الجذر على مضيف المجموعة، ولذلك تعيد تنفيذ نفسها من خلال `sudo`
+ولا تملك وضعًا بعيدًا خاصًا بها. لتشغيل CLI مع
+حقن متغيرات البيئة الصحيحة ومن دون كتابة أي إعدادات على الإطلاق، استخدم مشغّل التشغيل العام
+`omniroute run <target>` (claude وcodex وaider وgoose وopencode وqwen
 وgemini — تأتي الأهداف والأسماء البديلة من `bin/cli/cli-manifest.mjs`)؛ وتظل
-المشغلات القديمة الخاصة بكل أداة، `omniroute launch` ‏(Claude Code) و`omniroute launch-codex`
-‏(Codex)، متاحة. لا يمكن استخدام Gemini CLI إلا عبر التشغيل: فهي هدف لـ`omniroute run`
-لكنها لا تملك وصفة `setup-*`/`configure`.
+مشغّلات التشغيل القديمة المخصصة لكل أداة، وهي `omniroute launch` ‏(Claude Code) و`omniroute launch-codex`
+‏(Codex)، متاحة. يدعم Gemini CLI التشغيل فقط: فهو هدف لـ `omniroute run`
+ولكن لا توجد له وصفة `setup-*`/`configure`.
 
-> **المرجع الكامل:** يوجد الجدول الرئيسي — الذي يوضح ما يكتبه كل أمر، وجميع الخيارات،
-> والفرق بين الوضع المحلي والبعيد، والأدوات التي تتطلب اللاحقة `/v1` — في
+> **المرجع الكامل:** يوجد الجدول الرئيسي — الذي يوضّح ما يكتبه كل أمر، وجميع العلامات،
+> والوضع المحلي مقابل البعيد، والأدوات التي تتطلب اللاحقة `/v1` — في
 > **[تكاملات CLI](../guides/CLI-INTEGRATIONS.md)**.
 
 ### تشغيل هذه الأوامر داخل حاوية
 
-يكتب أمر `setup-*` الذي يُنفّذ داخل حاوية OmniRoute في الدليل الرئيسي الخاص
-بالحاوية نفسها، وهو دليل لا تقرأه أي أداة CLI على المضيف ويختفي مع اختفاء
-الحاوية. يكتشف OmniRoute ذلك وينهي التنفيذ بالرمز `2` مع عرض الإرشادات بدلًا من
-الكتابة. توجد طريقتان مدعومتان للمتابعة — تثبيت أداة CLI على المضيف واستخدام
-`omniroute connect` للاتصال بالحاوية، أو ربط أدلة الإعدادات وتعيين
+عند تنفيذ أمر `setup-*` داخل حاوية OmniRoute، فإنه يكتب في الدليل الرئيسي
+الخاص بالحاوية، والذي لا تقرؤه أي أداة CLI على المضيف ويختفي مع
+الحاوية. يكتشف OmniRoute ذلك وينهي التنفيذ بالرمز `2` مع عرض إرشادات بدلًا من
+الكتابة. توجد طريقتان مدعومتان للمتابعة — تثبيت CLI على المضيف ثم استخدام
+`omniroute connect` للاتصال بالحاوية، أو ربط أدلة الإعدادات عبر bind mount وضبط
 `CLI_CONFIG_HOME` (ملف تعريف compose المسمى `host`). يقبل كل أمر `setup-*`، بالإضافة إلى
-`omniroute configure` و`omniroute config set`، الخيار
-`--allow-container-write` عندما يكون المقصود فعلًا هو تهيئة أدوات CLI الخاصة
-بالحاوية نفسها؛ ويحقق `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` النتيجة نفسها
-للخادم. راجع
+`omniroute configure` و`omniroute config set`،
+الخيار `--allow-container-write` عندما يكون المقصود فعليًا هو تهيئة أدوات CLI الخاصة بالحاوية؛
+ويؤدي `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` الوظيفة نفسها بالنسبة إلى
+الخادم. راجع
 [دليل Docker ← تهيئة أدوات CLI على المضيف](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
 تفرض **نقطة نهاية التطبيق** في لوحة المعلومات (`POST /api/cli-tools/apply`)
-الحماية نفسها: داخل الحاوية، تستجيب عملية الكتابة التي لا يكون هدفها مرتبطًا
-من المضيف بالرمز **`422`** مع `containerEphemeralTarget: true`، ونص الخطأ الآمن،
-وكذلك — للأدوات التي تملك وصفة للمضيف (claude وcodex وopencode وcline
+القيد نفسه: داخل حاوية، إذا لم يكن هدف الكتابة مرتبطًا من
+المضيف عبر bind mount، فستستجيب بالرمز **`422`** مع `containerEphemeralTarget: true`، ونص الخطأ
+الآمن، وكذلك — للأدوات التي لها وصفة خاصة بالمضيف (claude وcodex وopencode وcline
 وkilo وcontinue) — قيمة `hostSetupCommand` (مثل `omniroute setup-opencode`) لتشغيلها
-على المضيف بدلًا من ذلك؛ ولا تتم كتابة أي شيء. يظل `dryRun: true` يعمل في وضع
-الحاوية ويعيد معاينة منقحة + مسار الهدف دون لمس القرص. محتوى المعاينة ليس إعدادًا
-يحتوي على بيانات اعتماد يمكن نسخه أو استيراده. طبّق الإعدادات باستخدام مدخلات
-الأداة/عنوان URL الأساسي/مفتاح API/النموذج الأصلية على المضيف، أو استخدم أمر
+على المضيف بدلًا من ذلك؛ ولن تتم كتابة أي شيء. يظل `dryRun: true` يعمل في وضع
+الحاوية، ويعيد معاينة منقّحة ومسار الهدف من دون لمس القرص. محتوى المعاينة
+ليس إعدادًا يحتوي على بيانات اعتماد بغرض نسخه أو استيراده. نفّذ التطبيق باستخدام
+المدخلات الأصلية للأداة/عنوان URL الأساسي/مفتاح API/النموذج على المضيف، أو استخدم أمر
 الإعداد المشار إليه على جانب المضيف. راجع [أمان تهيئة CLI](../security/CLI-CONFIGURATION.md)
 للاطلاع على ترويسة المعاينة وعقد الطلب. هذا السلوك
-مقصود ومحمي من التراجع بواسطة
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — لا تحاول مطلقًا «إصلاح» الخطأ 422
-عن طريق إزالة آلية الحماية.
+مقصود ومحمي من الانحدارات بواسطة
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — لا «تصلح» الخطأ 422 أبدًا
+عن طريق إزالة القيد.
 
 ---
 
@@ -145,11 +145,11 @@ OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--
 
 ---
 
-## 1. دليل أدوات CLI Code ‏(26 أداة)
+## 1. كتالوج CLI Code ‏(27 أداة)
 
-جميع الأدوات التي تظهر في `/dashboard/cli-code`. الأدوات التي تحتوي على `baseUrlSupport: none` يجري توصيلها عبر MITM أو من خلال دليل يدوي بدلًا من عنوان URL أساسي مخصص:
+جميع الأدوات التي تظهر في `/dashboard/cli-code`. الأدوات التي تحمل `baseUrlSupport: none` تُربط عبر MITM أو دليل يدوي بدلًا من عنوان URL أساسي مخصص:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| المعرّف      | الاسم                   | المورّد             | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
 | claude       | Claude Code             | Anthropic           | full           | env            | true         |
 | codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
@@ -172,13 +172,14 @@ OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
 | custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-تعرض الأدوات التي تحتوي على `baseUrlSupport: "partial"` شارة "⚠ عنوان URL الأساسي جزئي" في بطاقة لوحة المعلومات.
+تُظهر الأدوات التي تحمل `baseUrlSupport: "partial"` شارة "⚠ عنوان URL الأساسي جزئي" في بطاقة لوحة المعلومات.
 ---
 
 ## 2. كتالوج وكلاء CLI (10 أدوات)
@@ -187,16 +188,16 @@ OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--
 
 | id           | الاسم            | المورّد                  | دعم baseUrl | قابل للتشغيل عبر ACP |
 | ------------ | ---------------- | ------------------------ | ----------- | -------------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | كامل        | false                |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | كامل        | true                 |
-| goose        | Goose            | Block / Linux Foundation | كامل        | true                 |
-| interpreter  | Open Interpreter | OSS                      | كامل        | true                 |
-| warp         | Warp AI          | Warp Inc.                | جزئي        | true                 |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | كامل        | false                |
-| omp          | Oh My Pi         | OSS                      | كامل        | true                 |
-| letta        | Letta CLI        | Letta                    | كامل        | false                |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | كامل        | false                |
-| 5dive        | 5dive            | OSS (5dive-ai)           | كامل        | false                |
+| hermes-agent | Hermes Agent     | Nous Research            | full        | false                |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full        | true                 |
+| goose        | Goose            | Block / Linux Foundation | full        | true                 |
+| interpreter  | Open Interpreter | OSS                      | full        | true                 |
+| warp         | Warp AI          | Warp Inc.                | partial     | true                 |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full        | false                |
+| omp          | Oh My Pi         | OSS                      | full        | true                 |
+| letta        | Letta CLI        | Letta                    | full        | false                |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full        | false                |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full        | false                |
 
 ---
 

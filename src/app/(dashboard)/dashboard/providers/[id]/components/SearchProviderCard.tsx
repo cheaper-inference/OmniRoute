@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 // Phase 1t.7 extraction — Issue #3501
 import { Card } from "@/shared/components";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
@@ -15,21 +17,21 @@ export default function SearchProviderCard({ providerId, t }: SearchProviderCard
       <h2 className="text-lg font-semibold mb-4">{t("searchProvider")}</h2>
       <p className="text-sm text-text-muted">{t("searchProviderDesc")}</p>
       {providerId === "perplexity-search" && (
-        <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <span className="material-symbols-outlined text-sm text-blue-400">link</span>
-          <p className="text-xs text-blue-300">{t("perplexitySearchSharedKeyInfo")}</p>
+        <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-info/10 border border-info/20">
+          <Icon name="link" size={14} className="text-info" />
+          <p className="text-xs text-info">{t("perplexitySearchSharedKeyInfo")}</p>
         </div>
       )}
       {providerId === "google-pse-search" && (
-        <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
-          <span className="material-symbols-outlined text-sm text-amber-300">tune</span>
-          <p className="text-xs text-amber-200">{t("googlePseInfo")}</p>
+        <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-warning/10 border border-warning/20">
+          <Icon name="tune" size={14} className="text-warning" />
+          <p className="text-xs text-warning">{t("googlePseInfo")}</p>
         </div>
       )}
       {providerId === "searxng-search" && (
-        <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-          <span className="material-symbols-outlined text-sm text-emerald-300">dns</span>
-          <p className="text-xs text-emerald-200">{t("searxngInfo")}</p>
+        <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-success/10 border border-success/20">
+          <Icon name="dns" size={14} className="text-success" />
+          <p className="text-xs text-success">{t("searxngInfo")}</p>
         </div>
       )}
     </Card>

@@ -59,31 +59,32 @@
 
 ## 选项
 
-| 键                               | 默认值                                   | 说明                                                                                    |
-| -------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                            | 提供者 ID、集成 ID，以及模型显示时使用的前缀                                            |
-| `baseURL`                        | 必填                                     | 网关根地址，仅支持 `http(s)`；会在需要时添加 `/v1` 后缀                                 |
-| `apiKey`                         | 已连接的凭据，其次为 `OMNIROUTE_API_KEY` | `/v1/*` 的聊天密钥                                                                      |
-| `managementReadToken`            | 回退到 `apiKey`                          | `/api/*` 的密钥——通常与前者**不同**                                                     |
-| `displayName`                    | `"OmniRoute"`                            | 选择器中显示的提供者名称                                                                |
-| `timeoutMs`                      | `10000`                                  | 每个端点的获取超时时间（自动组合使用 5 秒）                                             |
-| `modelCacheTtlMs`                | `300000`                                 | 目录缓存 TTL；磁盘快照可加速冷启动                                                      |
-| `timeouts`                       | 回退到 `timeoutMs`                       | 各端点的时间预算（毫秒）：`models`、`combos`、`autoCombos`、`enrichment`                |
-| `enrichment`                     | `true`                                   | 获取名称、定价和免费层级额度                                                            |
-| `providerTag`                    | `true`                                   | 在显示名称前添加其路由到的上游提供者                                                    |
-| `usableOnly`                     | `false`                                  | 仅保留网关报告为已配置的提供者                                                          |
-| `showcasePerOwner`               | `10`                                     | 默认视图中为每个提供者保留的条目数                                                      |
-| `freshPerOwner`                  | `10`                                     | 默认视图中为每个提供者保留的新条目数                                                    |
-| `freshWindowDays`                | `90`                                     | 新条目分支的新鲜度时间窗口（天）                                                        |
-| `usageMemory`                    | `true`                                   | 根据 30 天使用情况分析，恢复被静态过滤掉的指定条目（需要管理令牌）                      |
-| `visibleModels` / `hiddenModels` | `[]`                                     | 精确匹配或后缀匹配的允许列表；拒绝规则优先；`*` 发布完整目录（其他过滤条件仍然适用）    |
-| `geminiSanitization`             | `true`                                   | 从工具 schema 中移除 Gemini 不接受的 JSON-Schema 关键字（包含 `$ref` 的工具将原样转发） |
-| `apiFormat.allowAnthropic`       | `false`                                  | 通过 Anthropic API 块路由允许列表中的 ID                                                |
-| `apiFormat.anthropicModels`      | `[]`                                     | 路由到 Anthropic 的完整模型 ID                                                          |
-| `logLevel` / `startupDebug`      | `warn` / `false`                         | 日志记录器的详细程度                                                                    |
+| 键                               | 默认值                                   | 说明                                                                                       |
+| -------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `providerId`                     | `"omniroute"`                            | 提供者 ID、集成 ID，以及模型显示时使用的前缀                                               |
+| `baseURL`                        | 必填                                     | 网关根地址，仅支持 `http(s)`；会在需要时添加 `/v1` 后缀                                    |
+| `apiKey`                         | 已连接的凭据，然后是 `OMNIROUTE_API_KEY` | 用于 `/v1/*` 的聊天密钥                                                                    |
+| `managementReadToken`            | 回退到 `apiKey`                          | 用于 `/api/*` 的密钥——通常与前者**不同**                                                   |
+| `displayName`                    | `"OmniRoute"`                            | 选择器中显示的提供者名称                                                                   |
+| `timeoutMs`                      | `10000`                                  | 每个端点的请求超时时间（自动组合使用 5 秒）                                                |
+| `modelCacheTtlMs`                | `300000`                                 | 目录缓存 TTL；磁盘快照用于预热冷启动                                                       |
+| `timeouts`                       | 回退到 `timeoutMs`                       | 各端点的超时预算（毫秒）：`models`、`combos`、`autoCombos`、`enrichment`                   |
+| `enrichment`                     | `true`                                   | 获取名称、定价和免费层额度                                                                 |
+| `providerTag`                    | `true`                                   | 在显示名称前添加其路由到的上游提供者                                                       |
+| `usableOnly`                     | `false`                                  | 仅保留网关报告为已配置的提供者                                                             |
+| `combosSource`                   | `"api"`                                  | `"models"` 会跳过 `/api/combos` 并发布 `/v1/models` 中的组合行；成员级筛选器会保留 `"api"` |
+| `showcasePerOwner`               | `10`                                     | 默认视图中每个提供者保留的条目数                                                           |
+| `freshPerOwner`                  | `10`                                     | 默认视图中每个提供者保留的新条目数                                                         |
+| `freshWindowDays`                | `90`                                     | 新条目分支的新鲜度时间窗口（天）                                                           |
+| `usageMemory`                    | `true`                                   | 根据 30 天使用情况分析，恢复被静态移除的指定条目（需要管理令牌）                           |
+| `visibleModels` / `hiddenModels` | `[]`                                     | 精确或后缀匹配的允许列表；拒绝优先；`*` 会发布完整目录（其他筛选器仍然适用）               |
+| `geminiSanitization`             | `true`                                   | 从工具架构中移除 Gemini 不接受的 JSON-Schema 关键字（包含 `$ref` 的工具会原样转发）        |
+| `apiFormat.allowAnthropic`       | `false`                                  | 通过 Anthropic API 块路由允许列表中的 ID                                                   |
+| `apiFormat.anthropicModels`      | `[]`                                     | 路由到 Anthropic 的完整模型 ID                                                             |
+| `logLevel` / `startupDebug`      | `warn` / `false`                         | 日志记录器的详细程度                                                                       |
 
 使用情况记忆默认启用。如果没有管理令牌，它将保持不活动状态
-（启动时会记录一条通知），且不会恢复任何条目。
+（启动时会记录一条通知），且不会恢复任何内容。
 
 ## 目录如何保持最新
 

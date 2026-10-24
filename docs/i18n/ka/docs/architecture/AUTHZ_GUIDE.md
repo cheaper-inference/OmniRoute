@@ -13,109 +13,99 @@ OmniRoute-ს აქვს მარშრუტის ამომცნობ�
 
 > წყარო: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## ავთენტიფიკაციის ორი რეჟიმი
+## ორი ავთენტიფიკაციის რეჟიმი
 
 ### 1. API გასაღები (Bearer)
 
-გამოიყენება OpenAI/Anthropic/Gemini-თან თავსებადი კლიენტის API-ებისთვის და მართვის რამდენიმე მარშრუტისთვის, როდესაც გასაღებს `manage` წვდომის სფერო აქვს.
+გამოიყენება OpenAI/Anthropic/Gemini-თან თავსებადი client API-ებისთვის და რამდენიმე მართვის მარშრუტისთვის, როცა გასაღებს აქვს `manage` scope.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-ვალიდაცია ხორციელდება `isValidApiKey()` / `extractApiKey()` ფუნქციებით `src/sse/services/auth.ts`-ში და ხელახლა ექსპორტირდება `src/shared/utils/apiAuth.ts`-ის მეშვეობით. ვალიდატორი ასევე იღებს `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` გარემოს ცვლადებს, როგორც მუდმივ გამჭოლ გასაღებებს (საკითხი #1350).
+მოწმდება `src/sse/services/auth.ts`-ის `isValidApiKey()` / `extractApiKey()`-ით და ხელმეორედ ექსპორტდება `src/shared/utils/apiAuth.ts`-ის მეშვეობით. ვალიდატორი ასევე იღებს `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` გარემოს ცვლადებს, როგორც მუდმივ passthrough გასაღებებს (issue #1350).
 
-### 2. დაფის სესია (auth_token cookie)
+### 2. დაფის სესია (cookie `auth_token`)
 
-დაფის გვერდებისა და ადმინისტრაციული ოპერაციებისთვის.
+დაფის გვერდებისა და ადმინისტრატორის ოპერაციებისთვის.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Cookie სესიად ითვლება მხოლოდ მაშინ, როდესაც JWT წარმატებით გადის შემოწმებას **და** შეიცავს `authenticated: true`-ს
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Cookie-ს ყოველი
-მომხმარებელი (დაფის მარშრუტის დამცავი (`isDashboardSessionAuthenticated()`), ავტორიზაციის კონვეიერის განახლება, WebSocket-ის კავშირის დამყარება, პირდაპირი
-სერვერი, `/api/settings/require-login`, `/api/auth/status`) ამ დამხმარე ფუნქციას იყენებს.
-არსებობს `JWT_SECRET`-ით ხელმოწერილი სხვა JWT-ებიც — Cursor CLI-ის გამჭოლი რეჟიმი
-გასაღების მფლობელებისთვის ქმნის `iss "omniroute" / aud "cursor-cli"` ტოკენებს — და ისინი არასოდეს წარმოადგენენ სესიებს
-(#13298).
+cookie არის სესია მხოლოდ იმ შემთხვევაში, როცა JWT ვერიფიცირდება **და** შეიცავს `authenticated: true`-ს (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). cookie-ს ყოველი მომხმარებელი (დაფის მარშრუტის guard (`isDashboardSessionAuthenticated()`), authz pipeline-ის განახლება, WebSocket handshake, live server, `/api/settings/require-login`, `/api/auth/status`) ამ დამხმარე ფუნქციის გავლით მუშაობს.
+ასევე არსებობს სხვა JWT-ები, რომლებიც ხელმოწერილია `JWT_SECRET`-ით — Cursor CLI passthrough გასაღების მფლობელებისთვის ამზადებს `iss "omniroute" / aud "cursor-cli"` ტოკენებს — და ისინი არასდროს არიან სესიები (#13298).
 
-შემოწმება ხორციელდება `isDashboardSessionAuthenticated()`-ის მიერ `src/shared/utils/apiAuth.ts`-ში. კონვეიერი JWT-ს ავტომატურად განაახლებს, როდესაც მისი 30-დღიანი მოქმედების ვადის ამოწურვამდე 7 დღეზე ნაკლები რჩება.
+ვერიფიცირდება `src/shared/utils/apiAuth.ts`-ის `isDashboardSessionAuthenticated()`-ით. pipeline ავტომატურად ანახლებს JWT-ს, როცა მის 30-დღიან სიცოცხლეში 7 დღეზე ნაკლები დარჩა.
 
-სესია შეიძლება 30 დღის გასვლამდეც დასრულდეს, რადგან ყველა გამომცემი იყენებს `mintDashboardSessionToken`-ს (გაცემის დრო `iat` და იდენტიფიკატორი `jti`), ხოლო შემმოწმებელი ამოწმებს ორ პარამეტრს: `sessionsValidAfter`, რომელიც პაროლის შეცვლისას დგინდება, რათა მანამდე გაცემულმა ყველა სესიამ შემოწმება ვეღარ გაიაროს (ბრაუზერი, რომელშიც პაროლი შეიცვალა, ახალ cookie-ს იღებს), და `revokedDashboardSessions`, რომელშიც `POST /api/auth/logout` გასული სესიის `jti`-ს ამატებს. უფრო ძველი გამოშვებით შექმნილი სესიები არცერთ ამ claim-ს არ შეიცავს და ძალაში რჩება პაროლის პირველ შეცვლამდე. თუ პარამეტრების წაკითხვა შეუძლებელია, სესია სანდოდ არ მიიჩნევა.
+სესია შეიძლება 30 დღემდე დასრულდეს, რადგან ყველა გამცემი გადის `mintDashboardSessionToken`-ზე (გაცემის დრო `iat` და იდენტიფიკატორი `jti`), ხოლო ვერიფიკატორი ამოწმებს ორ პარამეტრს: `sessionsValidAfter`, რომელსაც პაროლის შეცვლა ადგენს, რათა მასამდე გაცემული ყველა სესია აღარ ვერიფიცირდეს (პაროლის შემცვლელი ბრაუზერი ახალ cookie-ს იღებს), და `revokedDashboardSessions`, რომელსაც `POST /api/auth/logout` უმატებს გასული სესიის `jti`-ს. ადრინდელი გამოშვებით გაცემულ სესიებს ეს მახასიათებლები არ აქვთ და პირველ პაროლის შეცვლამდე რჩებიან ვალიდურები. თუ პარამეტრების წაკითხვა შეუძლებელია, სესია არ ენდობა.
 
-მართვის ზოგიერთი მარშრუტი იღებს **ნებისმიერ** რეჟიმს: cookie-ს ან `Bearer <key>`-ს, როდესაც API გასაღებს `manage` (ან `admin`) წვდომის სფერო აქვს. სწორედ ეს უზრუნველყოფს v3.8-ში დამატებულ „API გამოძახებებით კონფიგურირებად“ სამუშაო პროცესს.
+ზოგიერთი მართვის მარშრუტი იღებს **ან** ერთ, **ან** მეორე რეჟიმს: cookie ან `Bearer <key>`, როცა API გასაღებს აქვს `manage` (ან `admin`) scope. სწორედ ეს უზრუნველყოფს v3.8-ში დამატებულ „API გამოძახებით კონფიგურირებად“ სამუშაო პროცესს.
 
-#### არჩევითი OIDC შესვლის ბარიერი (#6973)
+#### არასავალდებულო OIDC შესვლის კარიბჭე (#6973)
 
-დაფის ადმინისტრატორის შესვლა ასევე მხარს უჭერს **არჩევით** OIDC (OpenID Connect) პროცესს
-ნაგულისხმევ პაროლით შესვლასთან ერთად — პაროლით შესვლა არასოდეს იშლება, მას მხოლოდ
-დამატებითი ვარიანტი ემატება:
+დაფის ადმინისტრატორის შესვლა ასევე უჭერს მხარს **არასავალდებულო** OIDC (OpenID Connect) ნაკადს ნაგულისხმევი პაროლით შესვლის გვერდით — პაროლით შესვლა არასდროს იშლება, მხოლოდ ემატება:
 
 - გამორთულია, თუ `settings.oidcEnabled === true` **და** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` სრულად არ არის კონფიგურირებული (პარამეტრები → ავთენტიფიკაცია).
-  სხვა შემთხვევაში `GET /api/auth/oidc/login` აბრუნებს `400`-ს.
-- `GET /api/auth/oidc/login` გამომცემლის
-  `/.well-known/openid-configuration`-დან აღმოაჩენს `authorization_endpoint`-ს (სათადარიგოდ იყენებს
-  `<issuer>/authorize`-ს), გადამისამართების URI-ს შემომავალი მოთხოვნის საფუძველზე აგებს
-  (`x-forwarded-proto`-ს გათვალისწინებით) და IdP-ზე გადაამისამართებს შემთხვევითი `state`-ით,
-  რომელიც `httpOnly` `oidc_state` cookie-ში ინახება.
-- `GET /api/auth/oidc/callback` ამოწმებს `state`-ს, ცვლის ავტორიზაციის
-  კოდს და ამოწმებს ID ტოკენის ხელმოწერას გამომცემლის JWKS-ის მეშვეობით
-  (`jose`-ის `createRemoteJWKSet`, კეშირებული თითოეული JWKS URI-სთვის), `issuer`/`audience`
-  შემოწმებებით. `oidcAllowedSubjects` დაშვებული მნიშვნელობების სია სავალდებულოა: ის ემთხვევა
-  ტოკენის `sub` claim-ს ან მის `email` claim-ს — ელფოსტის claim მხედველობაში მიიღება მხოლოდ
-  მაშინ, როდესაც `email_verified === true`, ამიტომ IdP-ზე დაუდასტურებელი ელფოსტა ბარიერს ვერასოდეს
-  გაივლის — ხოლო ცარიელი სიის შემთხვევაში callback უარს ამბობს ყველა შესვლაზე
-  (`not_configured`).
-- წარმატების შემთხვევაში იქმნება **ზუსტად იგივე** 30-დღიანი `auth_token` JWT, რომელსაც პაროლით
-  შესვლა გასცემს (`src/app/api/auth/login/route.ts`), ამიტომ დაფის სესიის დანარჩენი
-  კონვეიერი (ავტომატური განახლება, cookie-ს ალმები) უცვლელი რჩება —
-  OIDC მხოლოდ cookie-ს შექმნის გზას ცვლის და არა მის მიერ მინიჭებულ უფლებებს.
-- ყველა `oidc*` პარამეტრი (`oidcEnabled`, `oidcDisablePasswordLogin`,
-  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) შედის `SECURITY_IMPACTING_SETTINGS_KEYS`-ში
-  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
-  პასუხობს `400 PASSWORD_REQUIRED`-ით, თუ მოთხოვნის სხეული მართვის
-  პაროლს `currentPassword`-ის სახით არ შეიცავს (`401 PASSWORD_MISMATCH`, როდესაც ის არასწორია).
-  `oidcDisablePasswordLogin` უარყოფს პაროლით _შესვლას_ (`POST /api/auth/login`),
-  თუმცა ინარჩუნებს შენახულ პაროლის ჰეშს, ხოლო ხელახალი ავთენტიფიკაცია კვლავ ამოწმებს
-  `currentPassword`-ს მასთან მიმართებით.
-- `POST /api/settings/import-json` ამ ხელახალ ავთენტიფიკაციას გამოტოვებს, ამიტომ ჩაწერამდე შლის
-  `IMPORT_STRIPPED_SETTINGS_KEYS`-ში შემავალ ყველა გასაღებს (იგივე ფაილი): პაროლსა და
-  `currentPassword`-ს, `SECURITY_IMPACTING_SETTINGS_KEYS`-ის ყველა ჩანაწერს და
-  დაფის სესიის მდგომარეობას (`sessionsValidAfter`, `revokedDashboardSessions`).
-  შესაბამისად, ძველი სარეზერვო ასლის იმპორტი ვერ აღადგენს სესიას, რომელიც პაროლის
-  შეცვლამ ან სისტემიდან გასვლამ უკვე დაასრულა.
+  `oidcClientId` / `oidcClientSecret` ყველა არაა კონფიგურირებული (Settings → Auth).
+  წინააღმდეგ შემთხვევაში `GET /api/auth/oidc/login` აბრუნებს `400`-ს.
+- `GET /api/auth/oidc/login` იპოვის `authorization_endpoint`-ს issuer-ის
+  `/.well-known/openid-configuration`-იდან (სარეზერვოდ `<issuer>/authorize`), შემომავალი
+  მოთხოვნიდან აშენებს redirect URI-ს (`x-forwarded-proto`-ს გათვალისწინებით) და
+  გადამისამართებს IdP-ზე შემთხვევითი `state`-ით, რომელიც ინახება `httpOnly` `oidc_state`
+  cookie-ში.
+- `GET /api/auth/oidc/callback` ამოწმებს `state`-ს, ცვლის ავტორიზაციის კოდს და ამოწმებს
+  ID token-ის ხელმოწერას issuer-ის JWKS-ით (`jose`-ის `createRemoteJWKSet`, ქეშირებული
+  თითო JWKS URI-ზე) `issuer`/`audience` შემოწმებებით. `oidcAllowedSubjects` დაშვებული
+  სიის მითითება სავალდებულოა: ის ემთხვევა token-ის `sub` მოთხოვნას ან მის `email`
+  მოთხოვნას — email მოთხოვნა მხოლოდ მაშინ მიიღება, როცა `email_verified === true`, ასე
+  რომ IdP-ზე დაუდასტურებელი email არასდროს გაივლის კარიბჭეს — და ჩანაწერების გარეშე
+  callback უარყოფს ყველა შესვლას (`not_configured`).
+- წარმატების შემთხვევაში ის გასცემს **ზუსტად იმავე** 30-დღიან `auth_token` JWT-ს, რომელსაც
+  პაროლით შესვლა (`src/app/api/auth/login/route.ts`), ასე რომ დაფის სესიის დანარჩენი
+  pipeline (ავტომატური განახლება, cookie-ის დროშები) უცვლელი რჩება — OIDC ცვლის მხოლოდ
+  cookie-ის გაცემის გზას, არა იმას, რასაც ის ანიჭებს.
+- ყველა `oidc*` პარამეტრი (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`,
+  `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`)
+  არის `SECURITY_IMPACTING_SETTINGS_KEYS`-ში (`src/shared/constants/securityImpactingSettings.ts`):
+  `PATCH /api/settings` პასუხობს `400 PASSWORD_REQUIRED`-ით, თუ სხეული არ შეიცავს მართვის
+  პაროლს როგორც `currentPassword`-ს (`401 PASSWORD_MISMATCH`, როცა ის არასწორია).
+  `oidcDisablePasswordLogin` კრძალავს პაროლით _შესვლას_ (`POST /api/auth/login`), მაგრამ
+  ინახავს შენახულ პაროლის hash-ს, ხოლო ხელახალი ავთენტიფიკაცია მაინც ამოწმებს
+  `currentPassword`-ს მის მიმართ.
+- `corsOrigins` და `bruteForceProtection` ასევე `SECURITY_IMPACTING_SETTINGS_KEYS`-ში არიან:
+  ორივეს შერბილება არღვევს შესვლის დაცვას, ამიტომ მათ იგივე ხელახალი ავთენტიფიკაცია
+  სჭირდებათ `currentPassword`-ით (Security ჩანართი ითხოვს მას), ხოლო JSON იმპორტი მათ
+  აშორებს.
+- უსაფრთხოების პოლიტიკის ყველა გასაღები — `SECURITY_IMPACTING_SETTINGS_KEYS`-ის ჩანაწერები,
+  ყველა `oidc*` გასაღები და დაფის სესიის მდგომარეობა — **მხოლოდ ოპერატორისთვისაა**
+  `PATCH /api/settings`-ზე: manage scope-ის API გასაღები ან `oma_` წვდომის token იღებს `403`-ს
+  მაშინაც კი, თუ სწორ `currentPassword`-ს აგზავნის, და უარყოფა აუდიტირდება როგორც
+  `settings.update_failed` `reason: OPERATOR_REQUIRED`-ით (`requireOperatorCredential()`
+  `src/lib/api/operatorCredential.ts`-ში). ჩვეულებრივი პარამეტრები (თემა, ჩვენების
+  უპირატესობები) რჩება ჩასაწერი `manage` გასაღებისთვის ან `admin` წვდომის token-ისთვის.
+  `/api/settings`-ის ყოველი ცვლილება (და `/api/settings/require-login`-ის) ასევე მოითხოვს
+  `admin` წვდომის token-ის scope-ს (`ADMIN_MUTATION_EXACT_PATHS` `src/server/authz/accessScopes.ts`-ში,
+  ზუსტი გზის დამთხვევა); `GET` რჩება `read`-ად, ხოლო `/api/settings/*` სხვა ქვემარშრუტები
+  (proxies, combo ნაგულისხმევები, მოდელების მეტსახელები, შეკუმშვა, გასუფთავებები…) ინარჩუნებენ
+  მეთოდიდან მიღებულ `write` scope-ს.
+- `POST /api/settings/import-json` ამ ხელახალ ავთენტიფიკაციას გვერდს უვლის, ამიტომ წერამდე
+  აშორებს `IMPORT_STRIPPED_SETTINGS_KEYS`-ის ყველა გასაღებს (იმავე ფაილში): პაროლსა და
+  `currentPassword`-ს, `SECURITY_IMPACTING_SETTINGS_KEYS`-ის ყველა ჩანაწერს და დაფის სესიის
+  მდგომარეობას (`sessionsValidAfter`, `revokedDashboardSessions`). ამიტომ ძველი სარეზერვო
+  ასლის იმპორტი ვერ აღადგენს სესიას, რომელიც პაროლის შეცვლამ ან გასვლამ დაასრულა.
 
 ## მარშრუტების კლასები
 
-`src/server/authz/types.ts` განსაზღვრავს სამ კლასს; ნებისმიერი მარშრუტი, რომლის დეტერმინისტულად კლასიფიცირება შეუძლებელია, ნაგულისხმევად `MANAGEMENT` კლასში ხვდება.
+`src/server/authz/types.ts` განსაზღვრავს სამ კლასს; ნებისმიერი მარშრუტი, რომლის დეტერმინისტულად კლასიფიცირებაც შეუძლებელია, უბრუნდება `MANAGEMENT`-ს.
 
-| კლასი        | აღწერა                                                                                                                                                                      | საჭირო ავტორიზაცია                                                           |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `PUBLIC`     | ცალსახად უსაფრთხო მარშრუტები — სისტემაში შესვლა, სისტემიდან გამოსვლა, სტატუსი, ინიციალიზაცია, მდგომარეობის შემოწმება, პირველადი კონფიგურაციის ჩატვირთვა.                    | არ არის საჭირო                                                               |
-| `CLIENT_API` | მოდელის მომსახურების საბოლოო წერტილები — `/api/v1/*`, `/api/v1beta/*`, აგრეთვე ფსევდონიმები `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer გასაღები, როდესაც ეფექტური `REQUIRE_API_KEY` ფუნქციური ალამი ჩართულია |
-| `MANAGEMENT` | მართვის პანელის გვერდები, პარამეტრები, პროვაიდერები, გასაღებები, ადმინისტრირებისა და დიაგნოსტიკის საბოლოო წერტილები.                                                        | მართვის პანელის სესია ან Bearer `manage` მოქმედების არით                     |
+| კლასი        | აღწერა                                                                                                                                                                | საჭირო ავთენტიფიკაცია                                           |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `PUBLIC`     | აშკარად უსაფრთხო მარშრუტები — შესვლა, გასვლა, სტატუსი, ინიციალიზაცია, ჯანმრთელობა, onboarding-ის bootstrap.                                                           | არცერთი                                                         |
+| `CLIENT_API` | მოდელების მომსახურების endpoint-ები — `/api/v1/*`, `/api/v1beta/*`, ასევე მეტსახელები `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer გასაღები, როცა ჩართულია `REQUIRE_API_KEY` feature flag-ი |
+| `MANAGEMENT` | დაფის გვერდები, პარამეტრები, providers, გასაღებები, ადმინისტრატორისა და დიაგნოსტიკის endpoint-ები.                                                                    | დაფის სესია ან Bearer `manage` scope-ით                         |
 
-`MANAGEMENT`-ის ზოგიერთი მოქმედება **მხოლოდ ოპერატორისთვისაა**: `manage` გასაღები საკმარისი არ არის. შენახული
-ავტორიზაციის მონაცემების ექსპორტს (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), სინქრონიზაციის ტოკენის გაცემას (`POST /api/sync/tokens`) და
-`admin` CLI წვდომის ტოკენის შექმნას (`POST /api/cli/tokens`) სჭირდება მართვის პანელის სესია, ლოკალური CLI
-სუბიექტი ან გამორთული შესვლა; ნებისმიერი მოქმედების არის მქონე API გასაღებები და `oma_` წვდომის ტოკენები იღებენ `403`-ს. შემოწმება
-განთავსებულია `src/lib/api/operatorCredential.ts`-ში (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
-
-A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
-credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), restoring a backup over the live data
-(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
-`POST /api/settings/import-json`), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
-lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
+`MANAGEMENT`-ის ზოგიერთი მოქმედება **მხოლოდ ოპერატორისთვისაა**: `manage` გასაღები არ არის საკმარისი. შენახული credential-ების ექსპორტი (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), სარეზერვო ასლის აღდგენა ცოცხალ მონაცემებზე (`POST /api/db-backups/import`, მათ შორის `dryRun=true`, `POST /api/db-backups` აღდგენა id-ით, `POST /api/settings/import-json`), აღდგენის წერტილების განადგურება (`DELETE /api/db-backups` გასუფთავება და `PATCH /api/db-backups`, რადგან მის მიერ შენახული შენარჩუნების პოლიტიკა მართავს ყოველი სარეზერვო ასლის შემდეგ ავტომატურ წაშლას) მოითხოვს დაფის სესიას, ლოკალურ CLI სუბიექტს ან გამორთულ შესვლას. სინქრონიზაციის token-ის გაცემა (`POST /api/sync/tokens`) და `admin` CLI წვდომის token-ის მოჭრა (`POST /api/cli/tokens`) მოითხოვს დაფის სესიას ან ლოკალურ CLI სუბიექტს შესვლის ყველა რეჟიმში. API გასაღებები ნებისმიერი scope-ით და `oma_` წვდომის token-ები არ არიან ოპერატორის credential-ები: როცა ისინი საჭიროა, იღებენ `403`-ს. შემოწმება მდებარეობს `src/lib/api/operatorCredential.ts`-ში (`resolveOperatorCredential()` / `requireOperatorCredential()`). შესვლის პარამეტრების შეცვლაც მხოლოდ ოპერატორისთვისაა: `POST /api/settings/require-login` (მართვის პაროლის დაყენება / `requireLogin`-ის გადართვა) პაროლის არსებობის შემდეგ იღებს მხოლოდ ამ credential-ებს — პირველი გაშვების bootstrap ფანჯარა (როცა პაროლი ჯერ არ არსებობს) უცვლელი რჩება — ხოლო დაფის სესიამ პაროლის შესაცვლელად უნდა გააგზავნოს `currentPassword` (`403`, როცა ის აკლია ან არასწორია, აუდიტირდება როგორც `settings.update_failed`). ლოკალური CLI და გამორთული შესვლის მქონე ინსტალაცია ინარჩუნებენ აღდგენის გზას და პაროლის დაყენებას შეუძლიათ მის გარეშეც, რადგან ორივე მიბმულია ჰოსტზე, რომელიც მონაცემთა დირექტორიას ფლობს.
 
 ## დამუშავების კონვეიერი
 
@@ -259,15 +249,15 @@ API გასაღებები შეიცავს `scopes` მასი�
 `read` / `write` / `admin` `oma_live_…` ტოკენებზე, რანჟირებული `scopeSatisfies`-ის მიხედვით
 (`src/lib/accessTokens/scopes.ts`). ეს რანგი ვრცელდება მხოლოდ წვდომის ტოკენის სერთიფიკატზე. იხილეთ [მართვის ავთენტიფიკაცია](../guides/MANAGEMENT-AUTH.md).
 
-## ავთენტიფიკაციის მოთხოვნის გადამრთველი
+## ავთენტიფიკაციის საჭიროების გადამრთველი
 
-`src/shared/utils/apiAuth.ts`-ში არსებული `isAuthRequired()` განსაზღვრავს, აღსრულდება თუ არა მოთხოვნისთვის **რაიმე** ავთენტიფიკაცია:
+`src/shared/utils/apiAuth.ts`-ის `isAuthRequired()` განსაზღვრავს, ვრცელდება თუ არა **რაიმე** ავთენტიფიკაცია მოთხოვნაზე:
 
-- `settings.requireLogin === false` → ავთენტიფიკაცია გლობალურად გამორთულია.
-- პაროლი არ არის კონფიგურირებული **და** არ არსებობს `INITIAL_PASSWORD` გარემოს ცვლადი → საწყისი კონფიგურაციის რეჟიმი უშვებს პირველადი დაყენების ოსტატსა და უკუმარყუჟის მოთხოვნებს, თუმცა ქსელში გარედან ხელმისაწვდომ მოთხოვნებს კვლავ სჭირდება ავტორიზაციის მონაცემები.
-- მონაცემთა ბაზის ნებისმიერი შეცდომა → წვდომა იკეტება (ნაგულისხმევად უსაფრთხო რეჟიმი).
+- `settings.requireLogin === false` → ავთენტიფიკაცია გლობალურად გამორთულია, გარდა ყოველთვის დაცული იარუსისა (იხ. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) და იმ გამოძახებებისა, რომლებიც გასცემენ credential-ს, რომელსაც ის იღებს. ეს მოითხოვს იმავე credential-ს, რაც შესვლის ჩართულობისას: სინქრონიზაციის token-ების გაცემა, CLI წვდომის token-ების მოჭრა ნებისმიერი scope-ით, და `manage`/`admin` scope-ის მქონე API გასაღების შექმნა, ამ scope-ის მინიჭება გასაღებისთვის, ან ასეთი გასაღების ხელახლა გენერირება ან გამჟღავნება (`requireCredentialForManagementScopedKey()`, `src/lib/api/requireManagementAuth.ts`). მხოლოდ inference გასაღებები რჩება ღია.
+- პაროლი არ არის კონფიგურირებული **და** არ არსებობს `INITIAL_PASSWORD` გარემოს ცვლადი → bootstrap რეჟიმი უშვებს onboarding wizard-სა და loopback მოთხოვნებს, მაგრამ ქსელიდან გახსნილ მოთხოვნებს კვლავ სჭირდებათ credential-ები.
+- ნებისმიერი DB შეცდომა → დახურულად ვერ ხერხდება (secure-by-default).
 
-კლიენტის API გასაღების მოთხოვნის აღსრულება იყენებს `src/shared/utils/featureFlags.ts`-ში არსებულ `isRequireApiKeyEnabled()`-ს და არა `process.env.REQUIRE_API_KEY`-ის პირდაპირ წაკითხვას. ეს მნიშვნელოვანია განთავსებული ინსტანციებისთვის: Dashboard → Feature Flags-ში `REQUIRE_API_KEY`-ის გადართვა მონაცემთა ბაზაში ინახავს გადაფარვას და დაუყოვნებლივ მოქმედებს `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` და კლიენტის API-ის ავთენტიფიკაციის სხვა შემოწმებებზე, რომლებიც ამ დამხმარე ფუნქციას იყენებს. თუ ფუნქციური ალმების საცავის წაკითხვა შეუძლებელია, კლიენტის API-ის ავთენტიფიკაცია იკეტება და გასაღებს მოითხოვს.
+კლიენტის API გასაღების აღსრულება იყენებს `src/shared/utils/featureFlags.ts`-ის `isRequireApiKeyEnabled()`-ს და არა `process.env.REQUIRE_API_KEY`-ის პირდაპირ წაკითხვას. ეს მნიშვნელოვანია განლაგებული ინსტანციებისთვის: Dashboard → Feature Flags-ში `REQUIRE_API_KEY`-ის შეცვლა ინახავს DB-ის გადაფარვას და მაშინვე მოქმედებს `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` და კლიენტის API-ის სხვა ავთენტიფიკაციის შემოწმებებზე, რომლებიც ამ დამხმარეს იზიარებენ. თუ feature flag-ების საცავი ვერ იკითხება, კლიენტის API-ის ავთენტიფიკაცია დახურულად ვერ ხერხდება და გასაღებს ითხოვს.
 
 ## შეუთავსებელი ცვლილება — v3.8.0
 

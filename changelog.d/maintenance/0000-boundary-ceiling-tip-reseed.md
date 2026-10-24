@@ -1,1 +1,0 @@
-- **chore(quality):** re-seed the `open-sse → src` boundary ceiling at the release tip (771 → 774): two merges landed between the seed measurement and #16874's merge, so the new ratchet was red on the base from its first run. The ceiling only goes down from here.

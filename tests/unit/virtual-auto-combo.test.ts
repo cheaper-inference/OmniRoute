@@ -13,6 +13,13 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const virtualFactory = await import("../../open-sse/services/autoCombo/virtualFactory.ts");
+const noAuthReadiness = await import("../../open-sse/services/autoCombo/noAuthReadiness.ts");
+
+// devin-cli-agentic is admitted to auto/* only once its app-layer readiness probe
+// (`devin auth status`, registered at boot) confirms the login — #15446, covered in
+// noauth-autocombo-allowlist.test.ts. Stub that probe as "logged in" here so this file
+// keeps asserting the full emulated-tool-calling membership, Devin included.
+noAuthReadiness.registerNoAuthReadiness("devin-cli-agentic", () => true);
 
 type VirtualComboResult = Awaited<ReturnType<typeof virtualFactory.createVirtualAutoCombo>>;
 

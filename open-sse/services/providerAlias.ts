@@ -31,6 +31,8 @@ ALIAS_TO_PROVIDER_ID["agy"] = "antigravity";
 // The canonical provider ID is "amazon-q". Register it so parseModel("aq/<model>")
 // resolves provider = "amazon-q" instead of falling through to the identity fallback.
 ALIAS_TO_PROVIDER_ID["aq"] = "amazon-q";
+// wbai/ is the user-visible prefix for WorkBuddy AI (Issue #16978).
+ALIAS_TO_PROVIDER_ID["wbai"] = "workbuddy";
 
 /**
  * Resolve provider alias to provider ID

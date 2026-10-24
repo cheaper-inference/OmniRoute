@@ -56,6 +56,11 @@ const mount = (locale = "en") =>
   );
 const autoSwitch = () => screen.getByRole("switch", { name: "Hide auto/*" });
 const noThinkSwitch = () => screen.getByRole("switch", { name: "Hide no-think/*" });
+// The switches stay disabled until the settings load (and while a save runs). Testing Library
+// gives waitFor 1 s by default; inside the full Vitest UI suite on a loaded 4-vCPU runner the
+// first load took longer (1,203 ms in #17130's CI) and the assertion timed out. Same
+// assertions, a realistic window.
+const SETTLED = { timeout: 5_000 };
 
 beforeEach(() => {
   stored = { hideAutoCombos: false, hideNoThinkVariants: false };
@@ -79,7 +84,7 @@ test("the routing settings page remains mounted", () => {
 
 test("both catalog visibility switches are reachable and use persisted defaults", async () => {
   mount();
-  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false));
+  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false), SETTLED);
   expect(autoSwitch().getAttribute("aria-checked")).toBe("false");
   expect(noThinkSwitch().getAttribute("aria-checked")).toBe("false");
 });
@@ -89,27 +94,30 @@ test.each([
   ["hideNoThinkVariants", "Hide no-think/*"],
 ] as const)("saves only %s and keeps it after a page reload", async (key, label) => {
   const view = mount();
-  await waitFor(() =>
-    expect(screen.getByRole("switch", { name: label })).toHaveProperty("disabled", false)
+  await waitFor(
+    () => expect(screen.getByRole("switch", { name: label })).toHaveProperty("disabled", false),
+    SETTLED
   );
   fireEvent.click(screen.getByRole("switch", { name: label }));
-  await waitFor(() => expect(stored[key]).toBe(true));
+  await waitFor(() => expect(stored[key]).toBe(true), SETTLED);
   const patch = fetchMock.mock.calls.find(([, options]) => options?.method === "PATCH");
   expect(patch?.[0]).toBe("/api/settings");
   expect(JSON.parse(String(patch?.[1]?.body))).toEqual({ [key]: true });
   view.unmount();
   mount();
-  await waitFor(() =>
-    expect(screen.getByRole("switch", { name: label }).getAttribute("aria-checked")).toBe("true")
+  await waitFor(
+    () =>
+      expect(screen.getByRole("switch", { name: label }).getAttribute("aria-checked")).toBe("true"),
+    SETTLED
   );
 });
 
 test("a rejected save retains the stored value and shows an error", async () => {
   mount();
-  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false));
+  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false), SETTLED);
   fetchMock.mockResolvedValueOnce(reply({ error: "rejected" }, 500));
   fireEvent.click(autoSwitch());
-  await screen.findByRole("alert");
+  await screen.findByRole("alert", {}, SETTLED);
   expect(autoSwitch().getAttribute("aria-checked")).toBe("false");
   expect(stored.hideAutoCombos).toBe(false);
   expect(autoSwitch()).toHaveProperty("disabled", false);
@@ -118,17 +126,17 @@ test("a rejected save retains the stored value and shows an error", async () => 
 test("a failed load cannot write guessed defaults and can be retried", async () => {
   fetchMock.mockResolvedValueOnce(reply({}, 500));
   mount();
-  await screen.findByRole("alert");
+  await screen.findByRole("alert", {}, SETTLED);
   expect(autoSwitch()).toHaveProperty("disabled", true);
   fireEvent.click(autoSwitch());
   expect(fetchMock.mock.calls.some(([, options]) => options?.method === "PATCH")).toBe(false);
   fireEvent.click(screen.getByRole("button", { name: "Retry" }));
-  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false));
+  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false), SETTLED);
 });
 
 test("both switches stay disabled while a save is pending", async () => {
   mount();
-  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false));
+  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false), SETTLED);
   let complete!: (response: Response) => void;
   fetchMock.mockImplementationOnce(
     () =>
@@ -142,14 +150,14 @@ test("both switches stay disabled while a save is pending", async () => {
   fireEvent.click(noThinkSwitch());
   expect(fetchMock.mock.calls.filter(([, options]) => options?.method === "PATCH")).toHaveLength(1);
   complete(reply({ hideAutoCombos: true, hideNoThinkVariants: false }));
-  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false));
+  await waitFor(() => expect(autoSwitch()).toHaveProperty("disabled", false), SETTLED);
   expect(autoSwitch().getAttribute("aria-checked")).toBe("true");
 });
 
 test("catalog labels and the visibility-only explanation use the selected locale", async () => {
   mount("pt-BR");
-  const auto = await screen.findByRole("switch", { name: `${ptBr.common.hide} auto/*` });
-  await waitFor(() => expect(auto).toHaveProperty("disabled", false));
+  const auto = await screen.findByRole("switch", { name: `${ptBr.common.hide} auto/*` }, SETTLED);
+  await waitFor(() => expect(auto).toHaveProperty("disabled", false), SETTLED);
   expect(screen.getByRole("switch", { name: `${ptBr.common.hide} no-think/*` })).toBeTruthy();
   expect(screen.getByText(ptBr.settings.catalogVisibilityHint)).toBeTruthy();
   expect(screen.queryByText(en.settings.catalogVisibilityHint)).toBeNull();

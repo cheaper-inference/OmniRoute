@@ -446,19 +446,19 @@ open-sse/
 ├── package.json            工作區資訊清單
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 提供者登錄、標頭設定檔、身分識別，……
-├── handlers/               請求處理常式（聊天、嵌入、音訊、影像，……）
-├── executors/              150 個提供者執行器模組（執行器類別 + 各提供者輔助工具）
+├── config/                 提供者登錄檔、標頭設定檔、身分識別，…
+├── handlers/               請求處理器（聊天、嵌入、音訊、影像，…）
+├── executors/              156 個提供者執行器模組（執行器類別 + 各提供者輔助工具）
 ├── translator/             格式轉換（OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro）
 ├── transformer/            Responses API ↔ Chat Completions 串流轉換器
-├── services/               80+ 個服務模組（組合、備援、配額、身分識別，……）
-├── utils/                  串流輔助工具、TLS 用戶端、AWS SigV4、代理擷取，……
-└── mcp-server/             MCP 伺服器（3 種傳輸方式、33 個範圍、110 項工具）
+├── services/               80+ 個服務模組（組合、備援、配額、身分識別，…）
+├── utils/                  串流輔助工具、TLS 用戶端、AWS SigV4、代理擷取，…
+└── mcp-server/             MCP 伺服器（3 種傳輸方式、33 個範圍、110 個工具）
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| 處理常式                | 用途                                                 |
+| 處理器                  | 用途                                                 |
 | ----------------------- | ---------------------------------------------------- |
 | `chatCore.ts`           | 主要聊天管線（快取、速率限制、組合路由、執行器分派） |
 | `responsesHandler.ts`   | OpenAI Responses API 進入點                          |
@@ -478,10 +478,10 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 個頂層執行器模組（`*.ts` 扣除 `base.ts`、`index.ts` 和測試——此數量由
+156 個頂層執行器模組（`*.ts`，不含 `base.ts`、`index.ts` 與測試——此數量由
 `npm run check:docs-counts` 測量）。每個執行器類別都直接或透過 `DefaultExecutor`
-或其他執行器繼承 `BaseExecutor`（`base.ts`）；其餘模組則是各提供者的輔助工具
-（工具結構描述、擷取/TTS 配接器、特殊行為處理常式）。執行器包括：
+或其他執行器擴充 `BaseExecutor`（`base.ts`）；其餘模組則是各提供者專用的
+輔助工具（工具結構描述、擷取/TTS 配接器、特殊行為處理器）。執行器包括：
 
 `antigravity`、`azure-openai`、`blackbox-web`、`cliproxyapi`、
 `chatgpt-web-codex`、`cloudflare-ai`、`codex`、`commandCode`、`cursor`、`default`、`devin-cli`、
@@ -489,13 +489,13 @@ open-sse/
 `pollinations`、`qoder`、`vertex`、`devin-desktop`，以及 `claudeIdentity.ts`
 （共用身分識別輔助工具）和 `index.ts`（登錄檔）。
 
-> 注意：此處未列出的提供者會由 `default.ts` 使用通用的
-> OpenAI 相容執行器提供服務。完整的提供者目錄（372 個提供者）位於
+> 注意：此處未列出的提供者由 `default.ts` 使用通用的
+> OpenAI 相容執行器提供服務。完整的提供者目錄（375 個提供者）位於
 > `src/shared/constants/providers.ts`。
 
 ### 4.3 `open-sse/translator/`
 
-中心輻射式轉譯（OpenAI 為中心）。
+中心輻射式轉譯架構（以 OpenAI 為中心）。
 
 - **9 個請求轉譯器**（`translator/request/`）：
   `antigravity-to-openai`、`claude-to-gemini`、`claude-to-openai`、
@@ -515,15 +515,15 @@ open-sse/
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — 基於 `TransformStream` 的 Responses API ↔ Chat
-  Completions 轉換器（由 `responses/` 路由的全捕捉處理使用）。
+  Completions 轉換器（由 `responses/` 路由的全攔截處理器使用）。
 
 ### 4.5 `open-sse/services/`
 
-重點項目（完整清單位於 `open-sse/services/` 下）：
+重點項目（完整清單位於 `open-sse/services/`）：
 
 | 關注項目         | 檔案                                                                                                                                                                                                                                                     |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo 路由       | `combo.ts`（19 種策略）、`comboConfig.ts`、`comboMetrics.ts`、`comboManifestMetrics.ts`、`comboAgentMiddleware.ts`                                                                                                                                       |
+| Combo 路由       | `combo.ts`（20 種策略）、`comboConfig.ts`、`comboMetrics.ts`、`comboManifestMetrics.ts`、`comboAgentMiddleware.ts`                                                                                                                                       |
 | Auto Combo 引擎  | `autoCombo/` — `engine.ts`、`scoring.ts`、`taskFitness.ts`、`virtualFactory.ts`、`modePacks.ts`、`autoPrefix.ts`、`persistence.ts`、`providerDiversity.ts`、`providerRegistryAccessor.ts`、`routerStrategy.ts`、`selfHealing.ts`、`index.ts`             |
 | 韌性機制         | `accountFallback.ts`（冷卻 + 鎖定）、`errorClassifier.ts`、`requestRejectedStreak.ts`、`emergencyFallback.ts`、`rateLimitManager.ts`、`rateLimitSemaphore.ts`、`accountSemaphore.ts`、`accountSelector.ts`                                               |
 | 配額             | `quotaMonitor.ts`、`quotaPreflight.ts`、`bailianQuotaFetcher.ts`、`codexQuotaFetcher.ts`、`deepseekQuotaFetcher.ts`、`openrouterQuotaFetcher.ts`、`openrouterFreeWindow.ts`、`llmgatewayQuotaFetcher.ts`、`crofUsageFetcher.ts`、`antigravityCredits.ts` |
@@ -539,16 +539,16 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 個不重複工具**接入於 `server.ts`（`schemas/tools.ts` 中有 45 個標準工具 +
+- **110 個獨特工具**於 `server.ts` 中接線（`schemas/tools.ts` 中有 45 個標準工具 +
   記憶、技能、GitHub 技能、集區、遊戲化、外掛程式、Notion、Obsidian、
-  本機語料庫與壓縮模組——由 `countUniqueMcpTools` 計算聯集）。
+  本機語料庫及壓縮模組 — 聯集由 `countUniqueMcpTools` 計算）。
 - **3 種傳輸方式**：stdio、HTTP Streamable、SSE。
-- 在執行階段強制執行 **33 個範圍**——基礎清單位於 `src/shared/constants/mcpScopes.ts`，完整集合是各工具模組所宣告範圍的聯集。
-- 稽核資料表：`mcp_tool_audit`（由 `audit.ts` 填入資料）。
+- 執行階段強制執行 **33 個範圍** — 基礎清單位於 `src/shared/constants/mcpScopes.ts`，完整集合為各工具模組所宣告範圍的聯集。
+- 稽核資料表：`mcp_tool_audit`（由 `audit.ts` 填入）。
 - 檔案：`server.ts`、`index.ts`、`httpTransport.ts`、`audit.ts`、`scopeEnforcement.ts`、
   `runtimeHeartbeat.ts`、`descriptionCompressor.ts`、`schemas/{tools, a2a, audit, index}.ts`、
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`，
-  以及位於 `__tests__/` 下的測試。
+  以及 `__tests__/` 下的測試。
 - 如需完整工具目錄，請參閱 [MCP-SERVER.md](../frameworks/MCP-SERVER.md)。
 
 ### 4.7 `open-sse/config/`
@@ -560,7 +560,7 @@ open-sse/
 身分識別輔助工具（`codexIdentity.ts`、`codexInstructions.ts`、
 `anthropicHeaders.ts`、`antigravityUpstream.ts`、`antigravityModelAliases.ts`、
 `cliFingerprints.ts`、`toolCloaking.ts`、`defaultThinkingSignature.ts`）、
-憑證輔助工具（`credentialLoader.ts`、`codexClient.ts`），以及雲端
+憑證輔助工具（`credentialLoader.ts`、`codexClient.ts`）及雲端
 配接器（`azureAi.ts`、`bedrock.ts`、`datarobot.ts`、`glmProvider.ts`、
 `maritalk.ts`、`oci.ts`、`petals.ts`、`runway.ts`、`sap.ts`、`watsonx.ts`、
 `ollamaModels.ts`、`errorConfig.ts`、`constants.ts`、`registryUtils.ts`）。
@@ -660,7 +660,7 @@ bin/
 
 ## 8. `scripts/`
 
-按用途分為 6 個子資料夾。
+依用途分為 6 個子資料夾。
 
 - **`scripts/build/`** — `build-next-isolated.mjs`、`prepublish.ts`、
   `prepare-electron-standalone.mjs`、`pack-artifact-policy.ts`、
@@ -672,7 +672,11 @@ bin/
   `v1-ws-bridge.mjs`、`smoke-electron-packaged.mjs`、
   `run-playwright-tests.mjs`、`run-ecosystem-tests.mjs`、
   `run-protocol-clients-tests.mjs`、`sync-env.mjs`、`healthcheck.mjs`、
-  `system-info.mjs`。
+  `system-info.mjs`，以及唯讀的 PR 監控輔助工具：
+  `ci-discriminate.sh`（根據參考 PR 或 base-red 議題，將 PR 中失敗檢查的特徵分類為自身／繼承／
+  未知）與 `audit-worktree.sh`
+  （在接受工作者的 PR 前，檢查髒檔案、受保護區域、遭移除的斷言、抑制計數、殘留的
+  臨時 tsconfig，以及 PR head 與本機 HEAD 的差異）。
 - **`scripts/check/`** — `check-cycles.mjs`、`check-docs-sync.mjs`、
   `check-docs-counts-sync.mjs`、`check-env-doc-sync.mjs`、
   `check-deprecated-versions.mjs`、`check-route-validation.mjs`、

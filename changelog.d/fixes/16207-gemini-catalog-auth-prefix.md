@@ -1,1 +1,0 @@
-- Stop advertising compatible-provider nodes on `GET /v1beta/models` when they do not uniquely own a non-reserved routable prefix (missing, reserved or losing-collision prefixes), so the Gemini catalog no longer lists models under a name that cannot be routed (#16207).

@@ -1,6 +1,10 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
+import {
+  isClaudeServerWebSearchTool,
+  isSoleClaudeServerWebSearchTool,
+} from "../helpers/claudeServerWebSearch.ts";
 import { chatStrictFrom } from "../helpers/toolStrict.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -40,16 +44,6 @@ function normalizeOpenAIReasoningEffort(effort: unknown): string | undefined {
   return normalized || undefined;
 }
 
-function isClaudeServerWebSearchTool(tool: unknown): tool is JsonRecord {
-  if (!tool || typeof tool !== "object" || Array.isArray(tool)) return false;
-  const record = tool as JsonRecord;
-  return (
-    record.name === "web_search" &&
-    typeof record.type === "string" &&
-    /^web_search_\d{8}$/.test(record.type)
-  );
-}
-
 function toStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -80,13 +74,26 @@ function hasClaudeServerWebSearchTool(tools: unknown): boolean {
   return Array.isArray(tools) && tools.some((tool) => isClaudeServerWebSearchTool(tool));
 }
 
-function shouldUseNativeResponsesWebSearch(credentials: unknown): boolean {
-  return (
-    credentials !== null &&
-    typeof credentials === "object" &&
-    !Array.isArray(credentials) &&
-    (credentials as JsonRecord)._targetFormat === FORMATS.OPENAI_RESPONSES
-  );
+// Target formats whose translator understands the native web-search marker
+// `{ type: "web_search" }` that convertClaudeServerWebSearchTool emits: OpenAI
+// Responses consumes it directly, and the Gemini/Antigravity lane maps it to
+// Google Search grounding (`{ googleSearch: {} }`) in
+// geminiToolsSanitizer.ts::toGeminiGoogleSearchTool. Every other target keeps
+// receiving the plain `web_search` function the server tool degrades to.
+const NATIVE_WEB_SEARCH_TARGET_FORMATS = new Set<string>([
+  FORMATS.OPENAI_RESPONSES,
+  FORMATS.GEMINI,
+  FORMATS.ANTIGRAVITY,
+]);
+
+function nativeWebSearchTargetFormat(credentials: unknown): string | null {
+  if (credentials === null || typeof credentials !== "object" || Array.isArray(credentials)) {
+    return null;
+  }
+  const targetFormat = (credentials as JsonRecord)._targetFormat;
+  return typeof targetFormat === "string" && NATIVE_WEB_SEARCH_TARGET_FORMATS.has(targetFormat)
+    ? targetFormat
+    : null;
 }
 
 // OpenAI service_tier values. Anthropic's "standard_only" has no OpenAI twin beyond
@@ -272,14 +279,30 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
     result.messages.push({ role: "user", content: "(continue)" });
   }
 
-  const useNativeResponsesWebSearch = shouldUseNativeResponsesWebSearch(credentials);
+  const nativeWebSearchTarget = nativeWebSearchTargetFormat(credentials);
+  const useResponsesWebSearch = nativeWebSearchTarget === FORMATS.OPENAI_RESPONSES;
+  // Gemini/Antigravity grounding is enabled only when the Claude server tool is the
+  // request's SOLE tool (the Claude Code WebSearch sub-request shape). An agent turn
+  // that merely declares the server tool alongside its own functions must keep those
+  // functions — grounding there would drop them (Antigravity 400s on a built-in tool
+  // mixed with functionDeclarations), so the mixed case drops the server tool instead
+  // and leaves the custom functions untouched, as it did before this lane existed.
+  const geminiGroundingTarget =
+    nativeWebSearchTarget === FORMATS.GEMINI || nativeWebSearchTarget === FORMATS.ANTIGRAVITY;
+  const useGeminiGrounding = geminiGroundingTarget && isSoleClaudeServerWebSearchTool(body.tools);
 
   // Tools
   if (body.tools && Array.isArray(body.tools)) {
     const normalizedTools = body.tools
       .map((tool) => {
-        if (useNativeResponsesWebSearch && isClaudeServerWebSearchTool(tool)) {
-          return convertClaudeServerWebSearchTool(tool);
+        if (isClaudeServerWebSearchTool(tool)) {
+          if (useResponsesWebSearch || useGeminiGrounding) {
+            return convertClaudeServerWebSearchTool(tool);
+          }
+          // Mixed Gemini/Antigravity request: drop the server tool rather than
+          // degrade it to a plain `web_search` functionDeclaration (which the
+          // Antigravity envelope then strips anyway) or enable grounding.
+          if (geminiGroundingTarget) return null;
         }
 
         if (!tool || typeof tool !== "object" || Array.isArray(tool)) return null;
@@ -310,7 +333,7 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   if (body.tool_choice) {
     result.tool_choice = convertToolChoice(
       body.tool_choice,
-      useNativeResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
+      useResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
     );
     // Claude carries the single-call restriction on tool_choice (9router#4171).
     if (body.tool_choice?.disable_parallel_tool_use === true) {

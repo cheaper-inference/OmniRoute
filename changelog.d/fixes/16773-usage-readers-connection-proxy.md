@@ -1,1 +1,0 @@
-- **fix(usage):** route usage readings through the assigned connection proxy ([#16773](https://github.com/diegosouzapw/OmniRoute/pull/16773)) — thanks @maxmad64bis

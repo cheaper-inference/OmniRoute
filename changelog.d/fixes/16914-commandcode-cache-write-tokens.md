@@ -1,1 +1,0 @@
-- **fix(usage):** report Command Code cache-write tokens (`inputTokenDetails.cacheWriteTokens`) as cache creation in usage and cost ([#16914](https://github.com/diegosouzapw/OmniRoute/pull/16914)) — thanks @Spoon94

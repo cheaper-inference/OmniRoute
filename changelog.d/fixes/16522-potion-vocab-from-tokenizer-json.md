@@ -1,1 +1,0 @@
-- **fix(memory):** the static memory embedder (`potion-base-8M`) reads its vocab from `tokenizer.json` instead of requesting a `vocab.json` that the model repo does not ship, so it can load from an empty cache dir ([#16522](https://github.com/diegosouzapw/OmniRoute/pull/16522), refs [#16444](https://github.com/diegosouzapw/OmniRoute/issues/16444))

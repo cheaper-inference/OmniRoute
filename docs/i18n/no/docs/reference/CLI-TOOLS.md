@@ -43,65 +43,33 @@ ACP-agenter (omvendt oppstartsflyt):
 
 ---
 
-## Automatisk konfigurering med `setup-*`
+## Automatisk konfigurasjon med `setup-*`
 
-Du trenger ikke å skrive konfigurasjonen for hvert verktøy manuelt. OmniRoute leverer en `setup-*`-kommando
-for hver støttede CLI som leser den **aktive** modellkatalogen fra en kjørende
-OmniRoute-instans (lokal eller ekstern) og skriver verktøyets egen konfigurasjon på maskinen din:
+Du trenger ikke å skrive konfigurasjonen for hvert verktøy manuelt. OmniRoute leveres med en `setup-*`-kommando for hvert støttet CLI-verktøy. Kommandoen leser den **aktive** modellkatalogen fra en kjørende OmniRoute-instans (lokal eller ekstern) og skriver verktøyets egen konfigurasjon på maskinen din:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Hver kommando godtar `--remote <url> --api-key <key>` (konfigurer et lokalt verktøy mot en
-ekstern OmniRoute-instans), `--dry-run` (forhåndsvisning uten å skrive) og `--port`. Verktøy
-uten automatisk modelloppdagelse (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) bruker
-`--model <id>` (og `--yes` for ikke-interaktive kjøringer). `setup-5dive` er den eneste
-oppskriften som ikke skriver under `$HOME`: den konfigurerer en flåte med 5dive-agenter ved å
-skrive en roteid autentiseringsprofil på flåteverten, så den starter seg selv på nytt gjennom `sudo`
-og har ingen egen ekstern modus. For å starte en CLI med de
-riktige miljøvariablene satt inn og uten å skrive noen konfigurasjon, bruker du den generiske
-starteren `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — mål og aliaser kommer fra `bin/cli/cli-manifest.mjs`); de eldre
-verktøyspesifikke starterne `omniroute launch` (Claude Code) og `omniroute launch-codex`
-(Codex) er fortsatt tilgjengelige. Gemini CLI kan bare startes: den er et mål for `omniroute run`,
-men har ingen `setup-*`-/`configure`-oppskrift.
+Alle godtar `--remote <url> --api-key <key>` (konfigurer et lokalt verktøy mot en ekstern OmniRoute-instans), `--dry-run` (forhåndsvis uten å skrive) og `--port`. Verktøy uten automatisk modelloppdagelse (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) bruker `--model <id>` (og `--yes` for ikke-interaktive kjøringer). `setup-5dive` er den eneste oppskriften som ikke skriver under `$HOME`: Den konfigurerer en flåte med 5dive-agenter ved å skrive en roteid autentiseringsprofil på flåteverten. Derfor starter den seg selv på nytt gjennom `sudo` og har ingen egen ekstern modus. Hvis du vil starte et CLI-verktøy med riktige miljøvariabler injisert uten å skrive noen konfigurasjon, bruker du den generiske oppstarteren `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — mål og aliaser kommer fra `bin/cli/cli-manifest.mjs`). De eldre verktøyspesifikke oppstarterne `omniroute launch` (Claude Code) og `omniroute launch-codex` (Codex) er fortsatt tilgjengelige. Gemini CLI kan bare startes: Det er et mål for `omniroute run`, men har ingen `setup-*`/`configure`-oppskrift.
 
 > **Fullstendig referanse:** Hovedtabellen — hva hver kommando skriver, alle flagg,
-> lokal kontra ekstern kjøring og hvilke verktøy som krever suffikset `/v1` — finnes i
+> lokalt kontra eksternt og hvilke verktøy som krever et `/v1`-suffiks — finnes i
 > **[CLI-integrasjoner](../guides/CLI-INTEGRATIONS.md)**.
 
-### Kjøring av disse inne i en container
+### Kjøre disse inne i en container
 
-En `setup-*`-kommando som kjøres inne i OmniRoute-containeren, skriver til
-containerens egen hjemmekatalog, som ingen CLI på verten leser, og som forsvinner sammen med
-containeren. OmniRoute oppdager dette og avslutter med kode `2` og instruksjoner i stedet for
-å skrive. Det finnes to støttede fremgangsmåter — installer CLI-en på verten og bruk
-`omniroute connect` for å koble til containeren, eller bind-monter konfigurasjonskatalogene og angi
-`CLI_CONFIG_HOME` (Compose-profilen `host`). Alle `setup-*`-kommandoer, samt
-`omniroute configure` og `omniroute config set`, godtar
-`--allow-container-write` når du faktisk har til hensikt å konfigurere containerens egne CLI-er;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` gjør det samme for serveren. Se
-[Docker-veiledning → Konfigurering av CLI-verktøy på verten](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+En `setup-*`-kommando som kjøres inne i OmniRoute-containeren, skriver til containerens egen hjemmekatalog. Ingen CLI-verktøy på verten leser denne katalogen, og den forsvinner sammen med containeren. OmniRoute oppdager dette og avslutter med `2` og instruksjoner i stedet for å skrive. Det finnes to støttede løsninger — installer CLI-verktøyet på verten og bruk `omniroute connect` mot containeren, eller bind-monter konfigurasjonskatalogene og angi `CLI_CONFIG_HOME` (`host`-profilen i Compose). Alle `setup-*`-kommandoer, i tillegg til `omniroute configure` og `omniroute config set`, godtar `--allow-container-write` når hensikten faktisk er å konfigurere containerens egne CLI-verktøy. `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` gjør det samme for serveren. Se
+[Docker-veiledning → Konfigurere CLI-verktøy på verten](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Dashboardets **endepunkt for bruk av konfigurasjon** (`POST /api/cli-tools/apply`) håndhever den
-samme sperren: I en container vil en skriveoperasjon der målet ikke er bind-montert fra
-verten, svare med **`422`**, `containerEphemeralTarget: true`, den trygge
-feilmeldingen og — for verktøyene som har en vertsoppskrift (claude, codex, opencode, cline,
-kilo, continue) — en `hostSetupCommand` (f.eks. `omniroute setup-opencode`) som skal kjøres
-på verten i stedet; ingenting skrives. `dryRun: true` fortsetter å fungere i containermodus
-og returnerer en maskert forhåndsvisning samt målbanen uten å endre disken. Innholdet i
-forhåndsvisningen er ikke en konfigurasjon med legitimasjon som kan kopieres eller importeres. Bruk
-de opprinnelige inndataene for verktøy/basis-URL/API-nøkkel/modell på verten, eller bruk den angitte
-oppsettskommandoen på vertssiden. Se [Sikkerhet for CLI-konfigurasjon](../security/CLI-CONFIGURATION.md)
-for forhåndsvisningsheaderen og forespørselskontrakten. Denne atferden er
-tilsiktet og beskyttet mot regresjoner av
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — aldri «fiks» en 422-feil
-ved å fjerne sperren.
+Kontrollpanelets **apply-endepunkt** (`POST /api/cli-tools/apply`) håndhever det samme vernet: I en container vil en skriveoperasjon med et mål som ikke er bind-montert fra verten, svare med **`422`**, `containerEphemeralTarget: true`, en trygg feilmelding og — for verktøyene som har en oppskrift for verten (claude, codex, opencode, cline, kilo, continue) — en `hostSetupCommand` (f.eks. `omniroute setup-opencode`) som skal kjøres på verten i stedet. Ingenting blir skrevet. `dryRun: true` fungerer fortsatt i containermodus og returnerer en maskert forhåndsvisning samt målbanen uten å berøre disken. Innholdet i forhåndsvisningen er ikke en konfigurasjon med legitimasjon som kan kopieres eller importeres. Bruk de opprinnelige inndataene for verktøy, basis-URL, API-nøkkel og modell på verten, eller bruk den angitte oppsettskommandoen på vertssiden. Se [Sikkerhet for CLI-konfigurasjon](../security/CLI-CONFIGURATION.md)
+for forhåndsvisningshodet og forespørselskontrakten. Denne virkemåten er tilsiktet og beskyttet mot regresjoner av
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — aldri «fiks» en 422
+ved å fjerne vernet.
 
 ---
 
@@ -144,11 +112,11 @@ ett grensesnitt uten de andre, gjør at testpakken feiler i stedet for at avvike
 
 ---
 
-## 1. CLI Codes katalog (26 verktøy)
+## 1. CLI Codes katalog (27 verktøy)
 
-Alle verktøy som vises i `/dashboard/cli-code`. De med `baseUrlSupport: none` kobles til via MITM eller en manuell veiledning i stedet for en egendefinert basis-URL:
+Alle verktøyene som vises i `/dashboard/cli-code`. De med `baseUrlSupport: none` kobles til via MITM eller en manuell veiledning i stedet for en egendefinert basis-URL:
 
-| id           | name                    | vendor                 | baseUrlSupport | configType     | acpSpawnable |
+| id           | navn                    | leverandør             | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ---------------------- | -------------- | -------------- | ------------ |
 | claude       | Claude Code             | Anthropic              | full           | env            | true         |
 | codex        | OpenAI Codex CLI        | OpenAI                 | full           | custom         | true         |
@@ -171,13 +139,14 @@ Alle verktøy som vises i `/dashboard/cli-code`. De med `baseUrlSupport: none` k
 | grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries         | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research          | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon                 | none           | mitm           | false        |
 | custom       | Egendefinert CLI        | —                      | full           | custom-builder | false        |
 
-Verktøy med `baseUrlSupport: "partial"` viser merket «⚠ Delvis støtte for basis-URL» på kortet i kontrollpanelet.
+Verktøy med `baseUrlSupport: "partial"` viser merket «⚠ Delvis basis-URL» i kortet på kontrollpanelet.
 ---
 
 ## 2. Katalog over CLI-agenter (10 verktøy)

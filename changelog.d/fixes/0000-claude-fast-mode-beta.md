@@ -1,1 +1,0 @@
-- Send `anthropic-beta: fast-mode-2026-02-01` when a Claude request body carries the top-level `speed` field, and keep the beta a client negotiated through the merge, so Claude Code's fast mode toggle no longer fails with a 400.

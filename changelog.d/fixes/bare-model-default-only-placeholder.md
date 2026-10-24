@@ -1,1 +1,0 @@
-- **fix(routing):** a connection's `defaultModel` (`resolveBareModelToConnectionDefault`, added in #4825) now only replaces a placeholder bare model (`auto` or empty); a concrete bare name such as `claude-haiku-4-5` is no longer silently swapped for another provider's default. `BARE_MODEL_DEFAULT_OVERRIDE_LEGACY=true` restores the old behaviour.

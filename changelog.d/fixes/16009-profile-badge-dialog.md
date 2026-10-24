@@ -1,1 +1,0 @@
-- **fix(profile):** expose the badge detail panel as a modal dialog ([#16009](https://github.com/diegosouzapw/OmniRoute/pull/16009)) — thanks @pacocartones

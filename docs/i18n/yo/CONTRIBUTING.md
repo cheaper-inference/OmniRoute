@@ -15,15 +15,15 @@ UI/UX, i18n, CLI, ibi ìpamọ́ dátà, àti ìkọ́/ìmúṣiṣẹ́ pọ̀ 
 
 ## Ìṣètò Ìdàgbàsókè
 
-### Àwọn Ohun Tí A Nílò Ṣáájú
+### Àwọn Ohun Tí A Nílò Tẹ́lẹ̀
 
-- **Node.js** `>=22.22.3 <23`, tàbí `>=24.0.0 <27` (àbá: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, tàbí `>=24.0.0 <27` (tí a dámọ̀ràn: 24 LTS)
 - **npm** 10+
 
-> **Àwọn olumulo npm v11+ (Node 24+):** Lẹ́yìn `npm install`, ṣàyẹ̀wò pé a ti fi àwọn native modules sílẹ̀:
-> `node -e "require('better-sqlite3')"`. Tí ó bá kùnà pẹ̀lú `MODULE_NOT_FOUND`,
+> **Àwọn olùlò npm v11+ (Node 24+):** Lẹ́yìn `npm install`, ṣàyẹ̀wò pé a ti fi àwọn módù abinibi sílẹ̀:
+> `node -e "require('better-sqlite3')"`. Tí ó bá kuna pẹ̀lú `MODULE_NOT_FOUND`,
 > ṣiṣẹ́ `npm approve-scripts better-sqlite3 && npm install`. Wo
-> [Ìtọ́jú Àwọn Ìṣòro](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> [Yíyanjú Ìṣòro](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
@@ -35,92 +35,94 @@ cd OmniRoute
 npm install
 ```
 
-### Àwọn Àyípadà Àyíká
+### Àwọn Oniyí Àyíká
 
 ```bash
-# Ṣẹ̀dá .env rẹ láti inú àdàkọ
+# Ṣẹ̀dá .env rẹ láti inú àdàkọ náà
 cp .env.example .env
 
-# Ṣẹ̀dá àwọn aṣírí tó pọndandan
+# Ṣẹ̀dá àwọn àṣírí tí a nílò
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Àwọn àyípadà pàtàkì fún ìdàgbàsókè:
+Àwọn oniyí pàtàkì fún ìdàgbàsókè:
 
-| Àyípadà                | Ìpìlẹ̀ Ìdàgbàsókè         | Àpèjúwe                |
-| ---------------------- | ------------------------ | ---------------------- |
-| `PORT`                 | `20128`                  | Pọ́ọ̀tù olupin           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL ìpìlẹ̀ fún frontend |
-| `JWT_SECRET`           | (ṣẹ̀dá lókè)              | Aṣírí ìfọwọ́sí JWT      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Ọ̀rọ̀ aṣínà ìwọlé àkọ́kọ́  |
-| `APP_LOG_LEVEL`        | `info`                   | Ìpele àlàyé àkọsílẹ̀    |
+| Oniyí                  | Àìyípadà Ìdàgbàsókè      | Àpèjúwe                       |
+| ---------------------- | ------------------------ | ----------------------------- |
+| `PORT`                 | `20128`                  | Pọ́ọ̀tù olupin                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL ìpìlẹ̀ fún apá iwájú       |
+| `JWT_SECRET`           | (ṣẹ̀dá rẹ̀ lókè)           | Àṣírí fún fífi ìbuwọ́lu sí JWT |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Ọ̀rọ̀ aṣínà ìwọlé àkọ́kọ́         |
+| `APP_LOG_LEVEL`        | `info`                   | Ìpele ìkúnrẹ́rẹ́ àkọsílẹ̀        |
 
-### Àwọn Ìṣètò Dásíbọ́ọ̀dù
+### Àwọn Ètò Pátákó Ìṣàkóso
 
-Dásíbọ́ọ̀dù náà pèsè àwọn bọ́tìnì yíyí UI fún àwọn ẹ̀ya tí a tún lè ṣètò nípasẹ̀ àwọn àyípadà àyíká:
+Pátákó ìṣàkóso náà pèsè àwọn bọ́tìnì UI fún àwọn àfikún tí a tún lè ṣètò nípasẹ̀ àwọn oniyí àyíká:
 
-| Ibi Ìṣètò           | Bọ́tìnì Yíyí        | Àpèjúwe                                |
-| ------------------- | ------------------ | -------------------------------------- |
-| Settings → Advanced | Ipo Ìṣàtúnṣe Àṣìṣe | Mú àwọn àkọsílẹ̀ ìbéèrè àṣìṣe ṣiṣẹ́ (UI) |
-| Settings → General  | Ìfarahàn Sidebar   | Fi àwọn abala sidebar hàn/pamọ́         |
+| Ibi Ètò                | Bọ́tìnì          | Àpèjúwe                                      |
+| ---------------------- | --------------- | -------------------------------------------- |
+| Àwọn Ètò → Onítẹ̀síwájú | Ipò Àyẹ̀wò Àṣìṣe | Mu àwọn àkọsílẹ̀ ìbéèrè àyẹ̀wò àṣìṣe ṣiṣẹ́ (UI) |
+| Àwọn Ètò → Gbogbogbò   | Híhàn Pẹpẹ Ẹ̀gbẹ́ | Fi àwọn abala pẹpẹ ẹ̀gbẹ́ hàn/pamọ́             |
 
-A tọ́jú àwọn ìṣètò wọ̀nyí sínú ibi ìpamọ́ dátà, wọ́n sì máa ń dúró lẹ́yìn àwọn ìtunbẹ̀rẹ̀, nípa fífi àwọn iye ìpìlẹ̀ àyípadà àyíká sí ẹ̀gbẹ́ nígbà tí a bá ṣètò wọn.
+A máa ń tọ́jú àwọn ètò wọ̀nyí sínú ibi ìpamọ́ dátà, wọ́n sì máa ń dúró lẹ́yìn ìbẹ̀rẹ̀ tuntun, nípa ṣíṣe àyípò àwọn iye àìyípadà oniyí àyíká nígbà tí a bá ṣètò wọn.
 
-### Ṣíṣiṣẹ́ Ní Ẹ̀rọ Àdúgbò
+### Ṣíṣiṣẹ́ Lórí Ẹ̀rọ Agbègbè
 
 ```bash
-# Ipo ìdàgbàsókè (àtúnrù aládàáṣiṣẹ́)
+# Ipò ìdàgbàsókè (àtúnrù aládàáṣe)
 npm run dev
 
-# Ìkọ́ fún ìmújáde
+# Ìkọ́lé iṣelọpọ
 npm run build    # next build → .build/next/ lẹ́yìn náà assembleStandalone → dist/
 npm run start
 
-# Ìkójọ backend/API-nìkan tó yára fún àwọn àyípadà olùkópa
+# Ìṣàkójọ apá ẹ̀yìn/API-nìkan tó yára fún àwọn àyípadà olùkópa
 npm run build:contributor
 
-# Ìkọ́ ìtúsílẹ̀ (àtúnkọ́ mímọ́ + àmì ìṣọ́ HEAD — ó pọndandan fún ìmúṣiṣẹ́)
-npm run build:release   # rm -rf .build dist && build + kọ dist/BUILD_SHA
+# Ìkọ́lé ìtújáde (àtúnkọ́lé mímọ́ + àmì HEAD — ó pọndandan fún ìfìṣiṣẹ́)
+npm run build:release   # rm -rf .build dist && kọ́lé + kọ dist/BUILD_SHA
 
-# Ìṣètò pọ́ọ̀tù tó wọ́pọ̀
+# Ìṣètò pọ́ọ̀tù tí ó wọ́pọ̀
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Ìkọ́ olùkópa ń ṣe ìfọwọ́sí ìkójọ-nìkan: kì í kó ìpínkiri standalone jọ tàbí kọ́ àwọn ohun ìṣàkójọpọ̀ native àṣàyàn. Lo ìkọ́ ìmújáde déédéé nígbà tí ẹ bá nílò láti fọwọ́sí àkójọpọ̀ tí a lè pín kiri.
+Ìkọ́lé olùkópa ń ṣe ìfàṣẹsí ìṣàkójọ-nìkan: kì í ṣe àkójọpọ̀ ìpínkiri adádúró
+tàbí kọ́ àwọn ohun èlò àkójọpọ̀ abinibi àṣàyàn. Lo ìkọ́lé iṣelọpọ déédéé nígbà tí
+o bá nílò láti fìdí ìdìpọ̀ tí a lè fi ránṣẹ́ múlẹ̀.
 
-### Ètò Àbájáde Ìkọ́
+### Ìṣètò Àbájáde Ìkọ́lé
 
-| Àpò-ìtọ́sọ́nà | Àkóónú                                                                          | Títọpinpin |
-| ----------- | ------------------------------------------------------------------------------- | ---------- |
-| `src/`      | Orísun ìṣàfilọ́lẹ̀ (TypeScript / TSX)                                             | Bẹ́ẹ̀ni      |
-| `.build/`   | Àwọn àbájáde àárín — àbájáde `next build` (gitignored, `distDir = .build/next`) | Rárá       |
-| `dist/`     | Àkójọpọ̀ tí a lè pín — èyí tí `assembleStandalone` kó jọ (gitignored)            | Rárá       |
+| Àkójọ     | Àwọn Àkóónú                                                                   | Tí a ń Tọ̀lé |
+| --------- | ----------------------------------------------------------------------------- | ----------- |
+| `src/`    | Kóòdù orísun ohun èlò (TypeScript / TSX)                                      | Bẹ́ẹ̀ni       |
+| `.build/` | Àwọn fáìlì àárín — àbájáde `next build` (gitignored, `distDir = .build/next`) | Rárá        |
+| `dist/`   | Ìdìpọ̀ tí a lè fi ránṣẹ́ — tí `assembleStandalone` kó jọ (gitignored)           | Rárá        |
 
-Ìlànà ìkọ́ náà jẹ́ ìgbésẹ̀ ẹyọ kan:
+Ìlànà ìkọ́lé náà jẹ́ ìgbésẹ̀ ẹyọ kan:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Àbájáde Next.js)
-  └─ assembleStandalone()                 (ń da standalone + static + public + àwọn ohun èlò native kọ)
+  └─ next build → .build/next/standalone  (àbájáde Next.js)
+  └─ assembleStandalone()                 (ń ṣe ẹ̀dà adádúró + static + public + àwọn ohun èlò abinibi)
        └─ àbájáde: dist/                  (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` tún kọ́kọ́ nu àwọn àpò-ìtọ́sọ́nà méjèèjì, ó sì kọ
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) gẹ́gẹ́ bí àmì ìṣọ́ ìdúróṣinṣin ìmúṣiṣẹ́.
+`npm run build:release` tún máa ń fọ àwọn àkójọ méjèèjì mọ́ ní àkọ́kọ́, ó sì kọ
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) gẹ́gẹ́ bí àmì ìdúróṣinṣin ìfìṣiṣẹ́.
 
-`npm run build:contributor` ń lo àkóónú ìkọ́ backend-nìkan. Ó máa ń fi àwọn fáìlì UI dásíbọ́ọ̀dù
-arọ́pò fún ìgbà díẹ̀ nígbà ìkọ́, ó pa àwọn olùdarí ọ̀nà API mọ́, ó sì dá àwọn fáìlì ojúlówó padà
-lẹ́yìn ìkọ́ náà. Lo `npm run build` fún àwọn àyípadà tó kan UI dásíbọ́ọ̀dù tàbí fún
-ìfọwọ́sí ìtúsílẹ̀ ní kíkún; àkóónú olùkópa kì í ṣe arọ́pò fún ìkọ́ ìtúsílẹ̀.
+`npm run build:contributor` ń lo prófáìlì ìkọ́lé apá ẹ̀yìn-nìkan. Ó máa ń fi àwọn
+fáìlì UI pátákó ìṣàkóso àfidípò fún ìgbà díẹ̀ nígbà ìkọ́lé, ó pa àwọn olùṣàkóso ipa ọ̀nà API mọ́, ó sì
+dá àwọn fáìlì àtilẹ̀bá padà lẹ́yìn ìkọ́lé. Lo `npm run build` fún àwọn àyípadà tí ó kan UI pátákó
+ìṣàkóso tàbí fún ìfàṣẹsí ìtújáde kíkún; prófáìlì olùkópa kì í ṣe àropò fún ìkọ́lé ìtújáde.
 
-> **Àkíyèsí ìmúṣiṣẹ́ VPS:** àpò-ìtọ́sọ́nà àwòrán jíjìn `/usr/lib/node_modules/omniroute/app/`
-> kò yí padà. Àwọn ọgbọ́n ìmúṣiṣẹ́ ń lo rsync láti da àkóónú `dist/` sínú rẹ̀.
-> Ọ̀nà àbájáde ìkọ́ inú ibi ìpamọ́ kóòdù nìkan ló yí padà (`app/` → `dist/`).
+> **Àkíyèsí ìfìṣiṣẹ́ VPS:** àkójọ àwòrán jíjìn `/usr/lib/node_modules/omniroute/app/`
+> kò yí padà. Àwọn ọgbọ́n ìfìṣiṣẹ́ máa ń lo rsync láti da àwọn àkóónú `dist/` sínú rẹ̀.
+> Ọ̀nà àbájáde ìkọ́lé inú ibi ìpamọ́ kóòdù nìkan ni ó yí padà (`app/` → `dist/`).
 
-Àwọn URL ìpìlẹ̀:
+Àwọn URL àìyípadà:
 
-- **Dásíbọ́ọ̀dù**: `http://localhost:20128/dashboard`
+- **Pátákó Ìṣàkóso**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -291,47 +293,47 @@ Wo `open-sse/utils/stream.ts` àti `open-sse/utils/streamHandler.ts` fún àwọ
 
 ---
 
-## Ìṣètò Iṣẹ́-Àkànṣe
+## Ètò Àgbékalẹ̀ Iṣẹ́-Àkànṣe
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Àwọn ojú-ìwé dashboard (abala 23)
-│   ├── api/                # Àwọn ipa-ọ̀nà API (àpò-ọ̀nà 51)
-│   └── login/              # Àwọn ojú-ìwé ìfàṣẹsí (.tsx)
-├── domain/                 # Ẹ́ńjìnnì ìlànà (policyEngine, comboResolver, costRules, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
-├── lib/                    # Lọ́jììkì pàtàkì fún iṣẹ́-ajé (.ts)
+│   ├── (dashboard)/        # Àwọn ojúewé pánẹ́ẹ̀lì ìṣàkóso (abala 23)
+│   ├── api/                # Àwọn ipa-ọ̀nà API (àkójọpọ̀ fáìlì 51)
+│   └── login/              # Àwọn ojúewé ìfàṣẹsí (.tsx)
+├── domain/                 # Ẹ́ńjìnnì ìlànà (policyEngine, comboResolver, costRules, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.)
+├── lib/                    # Kókó ọgbọ́n iṣẹ́ ajé (.ts)
 │   ├── a2a/                # Sẹ́fà ìlànà Agent-to-Agent v0.3
 │   ├── acp/                # Ìforúkọsílẹ̀ Agent Communication Protocol
 │   ├── compliance/         # Ẹ́ńjìnnì ìlànà ìbámu
-│   ├── db/                 # Àwọn módùùlù domain SQLite + ìṣíkiri 130
-│   ├── memory/             # Ìrántí ìjíròrò tó máa ń wà pẹ́
-│   ├── oauth/              # Àwọn olupèsè, iṣẹ́, àti irinṣẹ́ OAuth
-│   ├── skills/             # Ìlànà iṣẹ́ ọgbọ́n tí a lè fẹ̀ sí i
+│   ├── db/                 # Àwọn módùùlù SQLite domain + ìṣíkiri 130
+│   ├── memory/             # Ìrántí ìjíròrò tí ó dúró
+│   ├── oauth/              # Àwọn olùpèsè, iṣẹ́, àti irinṣẹ́ OAuth
+│   ├── skills/             # Ìlànà iṣẹ́ ọgbọ́n tí a lè mú gbòòrò sí i
 │   ├── usage/              # Ìtọ́pinpin lílò àti ìṣírò iye owó
-│   └── localDb.ts          # Ìpele àtún-gbéjáde nìkan — má ṣe fi lọ́jììkì kún un níbí
+│   └── localDb.ts          # Ìpele àtún-gbéjáde nìkan — má ṣe fi ọgbọ́n iṣẹ́ kún un níbí láé
 ├── middleware/              # Middleware ìbéèrè (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (cert, DNS, ìdarí ibi-àfojúsùn)
+├── mitm/                   # Aṣojú MITM (ìwé-ẹ̀rí, DNS, afisona ibi-àfojúsùn)
 ├── shared/
-│   ├── components/         # Àwọn kọ́ńpónẹ́ǹtì React (.tsx)
-│   ├── constants/          # Àwọn ìtumọ̀ olupèsè (329), àwọn scope MCP, ọ̀nà ìdarí 19
-│   ├── utils/              # Olùdáwọ́lé circuit, sanitizer, àwọn olùrànlọ́wọ́ ìfàṣẹsí
-│   └── validation/         # Àwọn schema Zod v4
-└── sse/                    # Pipeline proxy SSE
+│   ├── components/         # Àwọn èròjà React (.tsx)
+│   ├── constants/          # Àwọn ìtumọ̀ olùpèsè (329), àwọn ààlà MCP, ọgbọ́n afisona 20
+│   ├── utils/              # Olùdáwọ́lé àyíká, olùsọ̀dọ̀tí, àwọn olùrànlọ́wọ́ ìfàṣẹsí
+│   └── validation/         # Àwọn àwòrán Zod v4
+└── sse/                    # Ọ̀nà ìṣiṣẹ́ aṣojú SSE
 
-open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # Módùùlù executor 150 (àwọn class executor + àwọn olùrànlọ́wọ́ fún olupèsè kọ̀ọ̀kan)
-├── handlers/               # Olùṣàkóso ìbéèrè 11 (chat, responses, embeddings, images, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
-├── mcp-server/             # Sẹ́fà MCP (irinṣẹ́ aláìlẹ́gbẹ́ 110, ọ̀nà gbigbe 3, scope 33)
-├── services/               # Iṣẹ́ ipele-òkè 178 (combo, autoCombo, rateLimitManager, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
-├── translator/             # Àwọn olùtumọ̀ fọ́ọ̀mù (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+open-sse/                   # Àyè iṣẹ́ @omniroute/open-sse
+├── executors/              # Módùùlù olùmúṣẹ 150 (àwọn kíláàsì olùmúṣẹ + àwọn olùrànlọ́wọ́ olùpèsè kọ̀ọ̀kan)
+├── handlers/               # Olùṣàkóso ìbéèrè 11 (ìfọ̀rọ̀wérọ̀, àwọn ìdáhùn, embeddings, àwọn àwòrán, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.)
+├── mcp-server/             # Sẹ́fà MCP (irinṣẹ́ aláìlẹ́gbẹ́ 110, ọ̀nà ìgbékalẹ̀ 3, ààlà 33)
+├── services/               # Iṣẹ́ ipele-òkè 178 (combo, autoCombo, rateLimitManager, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.)
+├── translator/             # Àwọn olùtumọ̀ ìrísí (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Olùyípadà Responses API
-└── utils/                  # Módùùlù irinṣẹ́ 22 (stream, TLS, proxy, logging)
+└── utils/                  # Módùùlù irinṣẹ́ 22 (ìṣàn, TLS, aṣojú, àkọsílẹ̀)
 
-electron/                   # Ìṣàfilọ́lẹ̀ desktop Electron (fún ọ̀pọ̀ platform)
+electron/                   # Ìṣàfilọ́lẹ̀ kọ̀ǹpútà Electron (fún oríṣiríṣi pẹpẹ)
 
 tests/
-├── unit/                   # Ẹ̀rọ ìdánwò Node.js (fáìlì ìdánwò 1,574)
+├── unit/                   # Olùṣiṣẹ́ ìdánwò Node.js (fáìlì ìdánwò 1,574)
 ├── integration/            # Àwọn ìdánwò ìṣọ̀kan
 ├── e2e/                    # Àwọn ìdánwò Playwright
 ├── security/               # Àwọn ìdánwò ààbò
@@ -339,23 +341,23 @@ tests/
 └── load/                   # Àwọn ìdánwò ẹrù
 
 docs/
-├── adr/                     # Àwọn Àkọsílẹ̀ Ìpinnu Ìmọ̀-ẹ̀rọ
-├── architecture/            # Ìmọ̀-ẹ̀rọ ètò àti agbára ìfaradà
+├── adr/                     # Àwọn Àkọsílẹ̀ Ìpinnu Àwòrán Ẹ̀rọ
+├── architecture/            # Àwòrán ẹ̀rọ ètò àti ìfaradà
 ├── comparison/              # OmniRoute ní ìfiwéra pẹ̀lú àwọn àṣàyàn mìíràn
 ├── compression/             # Àwọn ìtọ́sọ́nà àti òfin ìfúnpọ̀
 ├── dev/                     # Àwọn ìtọ́sọ́nà ìdàgbàsókè
-├── diagrams/                # Àwọn àwòrán atọ́ka ìmọ̀-ẹ̀rọ
+├── diagrams/                # Àwọn àwòrán àgbékalẹ̀ ẹ̀rọ
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
 ├── guides/                  # Ìtọ́sọ́nà onílò, Docker, ìṣètò, ìyanjú ìṣòro
-├── i18n/                    # Àwọn ìtumọ̀ README sí onírúurú èdè
-├── marketing/               # Àwọn ohun èlò ìtajà
-├── ops/                     # Ìmúlọ, proxy, coverage, àwọn ìtújáde
-├── providers/               # Àwọn ìwé àkọsílẹ̀ pàtó fún olupèsè
-├── reference/               # Ìtọ́kasí API, env vars, irinṣẹ́ CLI, àwọn ipele ọ̀fẹ́
+├── i18n/                    # Àwọn ìtumọ̀ README sí oríṣiríṣi èdè
+├── marketing/               # Àwọn ohun èlò ìpolówó ọjà
+├── ops/                     # Ìgbékalẹ̀, aṣojú, ìborí ìdánwò, àwọn ìtújáde
+├── providers/               # Àwọn ìwé ìtọ́sọ́nà pàtó fún olùpèsè
+├── reference/               # Ìtọ́kasí API, àwọn oníyípadà àyíká, irinṣẹ́ CLI, àwọn ipele ọ̀fẹ́
 ├── releases/                # Àwọn àkọsílẹ̀ ìtújáde
-├── routing/                 # Ẹ́ńjìnnì auto-combo, àtúnṣe ìrònú
-├── screenshots/             # Àwọn àwòrán ojú-iboju dashboard
-├── security/                # Àwọn òfin ààbò, ìbámu, ìfarapamọ́, àwọn token
+├── routing/                 # Ẹ́ńjìnnì auto-combo, àtúnṣeré ìronú
+├── screenshots/             # Àwọn àwòrán ojú-iboju pánẹ́ẹ̀lì ìṣàkóso
+├── security/                # Àwọn odi-ààbò, ìbámu, ìfarapamọ́, àwọn token
 └── specs/                   # Àwọn àlàyé ìṣètò
 ```
 

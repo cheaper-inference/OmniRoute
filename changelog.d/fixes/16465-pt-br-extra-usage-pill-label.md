@@ -1,1 +1,0 @@
-- **fix(i18n):** the pt-BR Claude connection pill no longer reads "Bloquear Extra ON" when extra usage is allowed; the label now names the state ("Uso extra") like the other locales ([#16465](https://github.com/diegosouzapw/OmniRoute/pull/16465)) — thanks @tiagolabsit

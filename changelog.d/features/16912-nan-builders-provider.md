@@ -1,1 +1,0 @@
-- **feat(providers):** add NaN.Builders API-key provider (`nan`) — chat with live model discovery, embeddings, STT/TTS (Kokoro default voice), image generation, rerank and per-model token quota usage ([#16912](https://github.com/diegosouzapw/OmniRoute/pull/16912)) — thanks @tasarren

@@ -43,65 +43,66 @@ ACP Agents (αντίστροφη ροή εκκίνησης):
 
 ---
 
-## Αυτόματη διαμόρφωση με `setup-*`
+## Αυτόματη ρύθμιση με `setup-*`
 
-Δεν χρειάζεται να γράψετε χειροκίνητα τη διαμόρφωση κάθε εργαλείου. Το OmniRoute παρέχει μία εντολή `setup-*`
-ανά υποστηριζόμενο CLI, η οποία διαβάζει τον **ενεργό** κατάλογο μοντέλων από ένα OmniRoute που εκτελείται
-(τοπικά ή απομακρυσμένα) και γράφει τη διαμόρφωση του ίδιου του εργαλείου στον υπολογιστή σας:
+Δεν χρειάζεται να γράψετε χειροκίνητα τη ρύθμιση κάθε εργαλείου. Το OmniRoute παρέχει μία εντολή `setup-*`
+ανά υποστηριζόμενο CLI, η οποία διαβάζει τον **ενεργό** κατάλογο μοντέλων από μια εκτελούμενη
+εγκατάσταση OmniRoute (τοπική ή απομακρυσμένη) και γράφει τη ρύθμιση του ίδιου του εργαλείου στον υπολογιστή σας:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Καθεμία δέχεται `--remote <url> --api-key <key>` (διαμόρφωση ενός τοπικού εργαλείου για χρήση ενός
-απομακρυσμένου OmniRoute), `--dry-run` (προεπισκόπηση χωρίς εγγραφή) και `--port`. Τα εργαλεία
-χωρίς αυτόματο εντοπισμό μοντέλων (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) δέχονται
-`--model <id>` (και `--yes` για μη διαδραστικές εκτελέσεις). Το `setup-5dive` είναι η μοναδική
-συνταγή που δεν γράφει κάτω από το `$HOME`: διαμορφώνει έναν στόλο από 5dive agents
-γράφοντας ένα προφίλ ελέγχου ταυτότητας που ανήκει στον χρήστη root στον κεντρικό υπολογιστή του στόλου, επομένως επανεκτελείται μέσω `sudo`
+Καθεμία δέχεται `--remote <url> --api-key <key>` (ρύθμιση ενός τοπικού εργαλείου για χρήση με ένα
+απομακρυσμένο OmniRoute), `--dry-run` (προεπισκόπηση χωρίς εγγραφή) και `--port`. Τα εργαλεία
+χωρίς αυτόματη ανακάλυψη μοντέλων (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) δέχονται
+`--model <id>` (και `--yes` για μη διαδραστικές εκτελέσεις). Το `setup-5dive` είναι η μόνη
+διαδικασία που δεν γράφει κάτω από το `$HOME`: ρυθμίζει έναν στόλο πρακτόρων 5dive
+γράφοντας ένα προφίλ ελέγχου ταυτότητας που ανήκει στον root στον κεντρικό υπολογιστή του στόλου, επομένως επανεκτελείται μέσω `sudo`
 και δεν διαθέτει δική του απομακρυσμένη λειτουργία. Για να εκκινήσετε ένα CLI με τις
-σωστές μεταβλητές περιβάλλοντος και χωρίς να γραφτεί καμία διαμόρφωση, χρησιμοποιήστε το γενικό πρόγραμμα εκκίνησης
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
+σωστές μεταβλητές περιβάλλοντος και χωρίς να γραφτεί καμία ρύθμιση, χρησιμοποιήστε το γενικό
+πρόγραμμα εκκίνησης `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
 gemini — οι στόχοι και τα ψευδώνυμα προέρχονται από το `bin/cli/cli-manifest.mjs`)· τα παλαιότερα
 προγράμματα εκκίνησης ανά εργαλείο `omniroute launch` (Claude Code) και `omniroute launch-codex`
-(Codex) παραμένουν διαθέσιμα. Το Gemini CLI υποστηρίζει μόνο εκκίνηση: αποτελεί στόχο του `omniroute run`,
-αλλά δεν διαθέτει συνταγή `setup-*`/`configure`.
+(Codex) παραμένουν διαθέσιμα. Το Gemini CLI υποστηρίζει μόνο εκκίνηση: είναι στόχος του `omniroute run`,
+αλλά δεν διαθέτει διαδικασία `setup-*`/`configure`.
 
-> **Πλήρης αναφορά:** ο κύριος πίνακας — τι γράφει κάθε εντολή, όλες οι σημαίες,
-> τοπική έναντι απομακρυσμένης λειτουργίας και ποια εργαλεία απαιτούν επίθημα `/v1` — βρίσκεται στις
+> **Πλήρης αναφορά:** ο κεντρικός πίνακας — τι γράφει κάθε εντολή, όλες οι σημαίες,
+> τοπική έναντι απομακρυσμένης λειτουργίας και ποια εργαλεία απαιτούν κατάληξη `/v1` — βρίσκεται στις
 > **[Ενσωματώσεις CLI](../guides/CLI-INTEGRATIONS.md)**.
 
 ### Εκτέλεση αυτών μέσα σε container
 
 Μια εντολή `setup-*` που εκτελείται μέσα στο container του OmniRoute γράφει στον
-προσωπικό κατάλογο του ίδιου του container, τον οποίο δεν διαβάζει κανένα CLI του host και ο οποίος εξαφανίζεται μαζί με το
-container. Το OmniRoute το εντοπίζει αυτό και τερματίζει με κωδικό `2` και οδηγίες, αντί να
-πραγματοποιήσει εγγραφή. Υπάρχουν δύο υποστηριζόμενοι τρόποι συνέχισης — εγκαταστήστε το CLI στον host και
-χρησιμοποιήστε `omniroute connect` για σύνδεση στο container ή προσαρτήστε με bind mount τους καταλόγους διαμόρφωσης και ορίστε
-το `CLI_CONFIG_HOME` (το προφίλ `host` του compose). Κάθε εντολή `setup-*`, καθώς και οι
+προσωπικό κατάλογο του ίδιου του container, τον οποίο δεν διαβάζει κανένα CLI του κεντρικού υπολογιστή και ο οποίος εξαφανίζεται μαζί με το
+container. Το OmniRoute το ανιχνεύει και τερματίζεται με κωδικό `2`, παρέχοντας οδηγίες αντί να
+γράψει. Υπάρχουν δύο υποστηριζόμενοι τρόποι συνέχισης — εγκαταστήστε το CLI στον κεντρικό υπολογιστή και
+χρησιμοποιήστε `omniroute connect` για σύνδεση στο container ή προσαρτήστε με bind mount τους καταλόγους ρυθμίσεων και ορίστε
+το `CLI_CONFIG_HOME` (το προφίλ compose `host`). Κάθε εντολή `setup-*`, καθώς και οι
 `omniroute configure` και `omniroute config set`, δέχεται
-`--allow-container-write` όταν αυτό που πραγματικά θέλετε είναι να διαμορφώσετε τα CLI του ίδιου του container·
-το `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` κάνει το ίδιο για τον διακομιστή. Δείτε τον
-[Οδηγό Docker → Διαμόρφωση εργαλείων CLI του host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+`--allow-container-write` όταν πράγματι σκοπεύετε να ρυθμίσετε τα CLI του ίδιου του container·
+το `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` κάνει το ίδιο για τον
+διακομιστή. Δείτε τον
+[Οδηγό Docker → Ρύθμιση εργαλείων CLI του κεντρικού υπολογιστή](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Το **endpoint εφαρμογής** του πίνακα ελέγχου (`POST /api/cli-tools/apply`) επιβάλλει τον
-ίδιο περιορισμό: μέσα σε container, μια εγγραφή της οποίας ο στόχος δεν έχει προσαρτηθεί από τον
-host μέσω bind mount απαντά με **`422`**, με `containerEphemeralTarget: true`, το ασφαλές κείμενο
-σφάλματος και — για τα εργαλεία που διαθέτουν συνταγή host (claude, codex, opencode, cline,
-kilo, continue) — μια `hostSetupCommand` (π.χ. `omniroute setup-opencode`) που πρέπει να εκτελεστεί
-στον host· δεν γράφεται τίποτα. Το `dryRun: true` συνεχίζει να λειτουργεί σε λειτουργία container
-και επιστρέφει μια προεπισκόπηση με αποσιωπημένα ευαίσθητα δεδομένα μαζί με τη διαδρομή προορισμού, χωρίς να αγγίζει τον δίσκο. Το περιεχόμενο της
-προεπισκόπησης δεν αποτελεί διαμόρφωση που περιέχει διαπιστευτήρια και μπορεί να αντιγραφεί ή να εισαχθεί. Εφαρμόστε τη διαμόρφωση
-με τις αρχικές εισόδους εργαλείου/βασικού URL/κλειδιού API/μοντέλου στον host ή χρησιμοποιήστε την υποδεικνυόμενη
-εντολή διαμόρφωσης στην πλευρά του host. Δείτε την ενότητα [Ασφάλεια διαμόρφωσης CLI](../security/CLI-CONFIGURATION.md)
+Το **τελικό σημείο εφαρμογής** του πίνακα ελέγχου (`POST /api/cli-tools/apply`) επιβάλλει την
+ίδια προστασία: μέσα σε container, μια εγγραφή της οποίας ο προορισμός δεν έχει προσαρτηθεί μέσω bind mount από τον
+κεντρικό υπολογιστή απαντά με **`422`**, με `containerEphemeralTarget: true`, το ασφαλές μήνυμα
+σφάλματος και — για τα εργαλεία που διαθέτουν διαδικασία στον κεντρικό υπολογιστή (claude, codex, opencode, cline,
+kilo, continue) — μια `hostSetupCommand` (π.χ. `omniroute setup-opencode`) προς εκτέλεση
+στον κεντρικό υπολογιστή· δεν γράφεται τίποτα. Το `dryRun: true` εξακολουθεί να λειτουργεί σε λειτουργία
+container και επιστρέφει μια προεπισκόπηση με απόκρυψη ευαίσθητων δεδομένων + τη διαδρομή προορισμού, χωρίς να τροποποιεί τον δίσκο. Το περιεχόμενο της
+προεπισκόπησης δεν αποτελεί ρύθμιση που περιέχει διαπιστευτήρια για αντιγραφή ή εισαγωγή. Εφαρμόστε τη ρύθμιση
+με τις αρχικές εισόδους εργαλείου/βασικού URL/κλειδιού API/μοντέλου στον κεντρικό υπολογιστή ή χρησιμοποιήστε την υποδεικνυόμενη
+εντολή ρύθμισης στον κεντρικό υπολογιστή. Δείτε την [Ασφάλεια ρύθμισης CLI](../security/CLI-CONFIGURATION.md)
 για την κεφαλίδα προεπισκόπησης και τη σύμβαση αιτήματος. Αυτή η συμπεριφορά είναι
 σκόπιμη και προστατεύεται από παλινδρομήσεις μέσω του
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — ποτέ μην «διορθώσετε» ένα 422
-αφαιρώντας τον περιορισμό.
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — μην «διορθώσετε» ποτέ ένα 422
+αφαιρώντας την προστασία.
 
 ---
 
@@ -144,11 +145,11 @@ runtime, ο κατάλογος UI και κάθε επιφάνεια καταν�
 
 ---
 
-## 1. Κατάλογος του CLI Code (26 εργαλεία)
+## 1. Κατάλογος του CLI Code (27 εργαλεία)
 
-Όλα τα εργαλεία που εμφανίζονται στο `/dashboard/cli-code`. Όσα έχουν `baseUrlSupport: none` δρομολογούνται μέσω MITM ή μέσω ενός μη αυτόματου οδηγού αντί για ένα προσαρμοσμένο βασικό URL:
+Όλα τα εργαλεία που εμφανίζονται στο `/dashboard/cli-code`. Όσα έχουν `baseUrlSupport: none` συνδέονται μέσω MITM ή μέσω μη αυτόματου οδηγού, αντί για προσαρμοσμένο βασικό URL:
 
-| id           | όνομα                   | προμηθευτής            | baseUrlSupport | configType     | acpSpawnable |
+| id           | name                    | vendor                 | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ---------------------- | -------------- | -------------- | ------------ |
 | claude       | Claude Code             | Anthropic              | full           | env            | true         |
 | codex        | OpenAI Codex CLI        | OpenAI                 | full           | custom         | true         |
@@ -171,31 +172,32 @@ runtime, ο κατάλογος UI και κάθε επιφάνεια καταν�
 | grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries         | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research          | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon                 | none           | mitm           | false        |
-| custom       | Προσαρμοσμένο CLI       | —                      | full           | custom-builder | false        |
+| custom       | Custom CLI              | —                      | full           | custom-builder | false        |
 
-Τα εργαλεία με `baseUrlSupport: "partial"` εμφανίζουν ένα σήμα "⚠ Μερική υποστήριξη βασικού URL" στην κάρτα του πίνακα ελέγχου.
+Τα εργαλεία με `baseUrlSupport: "partial"` εμφανίζουν ένα σήμα "⚠ Μερικό βασικό URL" στην κάρτα του πίνακα ελέγχου.
 ---
 
-## 2. Κατάλογος CLI Agents (10 εργαλεία)
+## 2. Κατάλογος πρακτόρων CLI (10 εργαλεία)
 
-Αυτόνομοι agents που εμφανίζονται στο `/dashboard/cli-agents`:
+Αυτόνομοι πράκτορες που εμφανίζονται στο `/dashboard/cli-agents`:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| id           | όνομα            | προμηθευτής              | υποστήριξη baseUrl | δυνατότητα εκκίνησης μέσω ACP |
+| ------------ | ---------------- | ------------------------ | ------------------ | ----------------------------- |
+| hermes-agent | Hermes Agent     | Nous Research            | full               | false                         |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full               | true                          |
+| goose        | Goose            | Block / Linux Foundation | full               | true                          |
+| interpreter  | Open Interpreter | OSS                      | full               | true                          |
+| warp         | Warp AI          | Warp Inc.                | partial            | true                          |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full               | false                         |
+| omp          | Oh My Pi         | OSS                      | full               | true                          |
+| letta        | Letta CLI        | Letta                    | full               | false                         |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                         |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                         |
 
 ---
 

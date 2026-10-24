@@ -1,1 +1,0 @@
-- **fix(codex):** fall back to the next combo model when Codex streams "model unavailable / not offered on this account" in a 200 SSE — surfaced as a model-scoped 400 (combo advances, model locked on that connection) instead of a failed 200 turn ([#16700](https://github.com/diegosouzapw/OmniRoute/pull/16700)) — thanks @mrnim94

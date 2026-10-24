@@ -1,1 +1,0 @@
-- **fix(mcp):** dynamic skill tools now run as the authenticated key principal instead of the client-chosen session id ([#16760](https://github.com/diegosouzapw/OmniRoute/pull/16760)) — thanks @maxmad64bis

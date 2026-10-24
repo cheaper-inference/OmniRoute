@@ -1,1 +1,0 @@
-- **fix(db):** keep the SQLite credential store, its WAL sidecars and every DB backup owner-only (0600 files, 0700 backup dirs), repairing world-readable files from older installs ([#16840](https://github.com/diegosouzapw/OmniRoute/pull/16840)) — thanks @elvis460

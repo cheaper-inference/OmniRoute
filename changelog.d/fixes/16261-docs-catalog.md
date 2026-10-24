@@ -1,1 +1,0 @@
-- fix(docs): compile the getting-started, provider and comparison guides linked from the documentation index, use canonical featured-link slugs, and preserve required page titles and sensitive-page exclusions. Adapted from PrinceThummar011’s PR #16338. (#16261)

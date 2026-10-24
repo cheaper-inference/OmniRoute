@@ -13,30 +13,30 @@
 
 ## Što je to
 
-OmniRoute registrira 372 pružatelja, uključujući 155 kataloških unosa označenih kao **besplatni/bez autentifikacije**
-(bez autentifikacije,
-OAuth s besplatnom razinom ili API ključ s besplatnom razinom — pogledajte
-[Vodič za besplatne razine](../getting-started/FREE-TIERS-GUIDE.md) i potpuni
-[Direktorij besplatnih razina](../reference/FREE_TIERS.md)). Kvaka je u tome što se besplatni pružatelji
-uvelike razlikuju po kvaliteti modela. Pružatelj bez autentifikacije koji poslužuje model najnovije generacije mnogo je korisniji
-od onoga koji poslužuje mali zastarjeli model.
+OmniRoute registrira 375 pružatelja, uključujući 155 zapisa u katalogu označenih kao **besplatno/bez autentifikacije**
+(bez autentifikacije, OAuth s besplatnim slojem ili API ključ s besplatnim slojem — pogledajte
+[Vodič za besplatne slojeve](../getting-started/FREE-TIERS-GUIDE.md) i cjeloviti
+[direktorij besplatnih slojeva](../reference/FREE_TIERS.md)). Kvaka: besplatni se pružatelji
+jako razlikuju u kvaliteti modela. Pružatelj bez autentifikacije koji nudi vodeći model
+daleko je korisniji od onoga koji nudi mali zastarjeli model.
 
-**Rangiranje besplatnih pružatelja** odgovara na pitanje „**koji mi besplatni pružatelj daje najbolji model?**” tako što
-povezuje katalog svakog besplatnog pružatelja s **ocjenama kvalitete prikupljenima od zajednice** s
-**ljestvice Arena AI** (ELO temeljen na ljudskim preferencijama, isti koncept na kojem se temelji LMArena
-arena chatbotova). Pružatelji se zatim rangiraju prema kvaliteti svojeg **najboljeg besplatnog modela**.
+**Rang ljestvica besplatnih pružatelja** odgovara na pitanje "**koji mi besplatni pružatelj daje najbolji model?**"
+spajanjem kataloga svakog besplatnog pružatelja s **ocjenama kvalitete prikupljenima od zajednice** s
+**Arena AI ljestvice** (ELO temeljen na ljudskim preferencijama, ista ideja koja stoji iza
+LMArena arene chatbotova). Pružatelji se zatim rangiraju prema snazi svog **najboljeg besplatnog modela**.
 
-Rangiranje se izračunava iz triju stvarnih izvora:
+Rangiranje se izračunava iz tri stvarna izvora:
 
-1. Popisi besplatnih pružatelja — `NOAUTH_PROVIDERS`, zajedno s unosima `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` označenima s `hasFree`
+1. Popisi besplatnih pružatelja — `NOAUTH_PROVIDERS`, te zapisi `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` označeni s `hasFree`
    (`src/shared/constants/providers.ts`).
 2. Katalog modela svakog pružatelja iz registra pružatelja
    (`open-sse/config/providerRegistry.ts`).
-3. Rezultati prikladnosti za zadatke izvedeni iz ELO-a, koje mehanizam za sinkronizaciju Arena ELO pohranjuje u DB tablicu `model_intelligence`
+3. Ocjene prikladnosti za zadatke izvedene iz ELO-a, pohranjene u tablici baze podataka
+   `model_intelligence` pomoću mehanizma za sinkronizaciju Arena ELO-a
    (`src/lib/arenaEloSync.ts`).
 
-Logika povezivanja nalazi se u `src/lib/freeProviderRankings.ts`.
+Logika spajanja nalazi se u `src/lib/freeProviderRankings.ts`.
 
 ---
 

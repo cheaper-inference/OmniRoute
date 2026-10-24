@@ -1,1 +1,0 @@
-- **fix(plugin):** `freeOnly` now publishes the free-tier models actually served (alias and canonical keys share the provider free status and budget), keeps single-use credits and retired models visible only without the preset, and labels uncapped budgets `(uncapped)` instead of an empty suffix ([#16775](https://github.com/diegosouzapw/OmniRoute/pull/16775)) — thanks @maxmad64bis

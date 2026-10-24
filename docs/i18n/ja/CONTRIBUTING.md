@@ -12,7 +12,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### 前提条件
 
-- **Node.js** `>=22.22.3 <23`、または `>=24.0.0 <27`（推奨: 24 LTS）
+- **Node.js** `>=22.22.2 <23`、または `>=24.0.0 <27`（推奨: 24 LTS）
 - **npm** 10+
 
 > **npm v11+ ユーザー（Node 24+）:** `npm install` の実行後、ネイティブモジュールがインストールされていることを確認してください:
@@ -43,7 +43,7 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 開発用の主要な変数:
 
-| 変数                   | 開発環境のデフォルト     | 説明                       |
+| 変数                   | 開発環境のデフォルト値   | 説明                       |
 | ---------------------- | ------------------------ | -------------------------- |
 | `PORT`                 | `20128`                  | サーバーポート             |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | フロントエンドのベース URL |
@@ -53,12 +53,12 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 ### ダッシュボード設定
 
-ダッシュボードには、環境変数でも設定可能な機能を切り替えるための UI トグルがあります:
+ダッシュボードには、環境変数からも設定できる機能の UI トグルが用意されています:
 
-| 設定場所    | トグル           | 説明                                 |
-| ----------- | ---------------- | ------------------------------------ |
-| 設定 → 詳細 | デバッグモード   | デバッグリクエストログを有効化（UI） |
-| 設定 → 一般 | サイドバーの表示 | サイドバーのセクションを表示/非表示  |
+| 設定場所        | トグル               | 説明                                   |
+| --------------- | -------------------- | -------------------------------------- |
+| 設定 → 詳細設定 | デバッグモード       | デバッグ用リクエストログを有効化（UI） |
+| 設定 → 一般     | サイドバーの表示設定 | サイドバーのセクションを表示／非表示   |
 
 これらの設定はデータベースに保存され、再起動後も維持されます。設定されている場合は、環境変数のデフォルト値より優先されます。
 
@@ -72,47 +72,47 @@ npm run dev
 npm run build    # next build → .build/next/、その後 assembleStandalone → dist/
 npm run start
 
-# コントリビューターによる変更向けの高速なバックエンド/API 専用コンパイル
+# コントリビューターによる変更向けの高速なバックエンド／API 専用コンパイル
 npm run build:contributor
 
-# リリースビルド（クリーン再ビルド + HEAD センチネル — デプロイに必須）
+# リリースビルド（クリーンビルド + HEAD センチネル — デプロイに必須）
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA を書き込み
 
 # 一般的なポート設定
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-コントリビュータービルドでは、コンパイルのみの検証を行います。スタンドアロン
-ディストリビューションの構成や、オプションのネイティブパッケージングアセットのビルドは行いません。配布可能なバンドルを
-検証する必要がある場合は、通常の本番ビルドを使用してください。
+コントリビュータービルドでは、コンパイルのみの検証を実行します。スタンドアロン
+ディストリビューションの組み立てや、オプションのネイティブパッケージングアセットのビルドは行いません。配布可能な
+バンドルを検証する必要がある場合は、通常の本番ビルドを使用してください。
 
 ### ビルド出力の構成
 
 | ディレクトリ | 内容                                                                        | 追跡対象 |
 | ------------ | --------------------------------------------------------------------------- | -------- |
-| `src/`       | アプリケーションソース（TypeScript / TSX）                                  | はい     |
-| `.build/`    | 中間生成物 — `next build` の出力（gitignore 対象、`distDir = .build/next`） | いいえ   |
-| `dist/`      | 配布可能なバンドル — `assembleStandalone` によって構成（gitignore 対象）    | いいえ   |
+| `src/`       | アプリケーションのソース（TypeScript / TSX）                                | はい     |
+| `.build/`    | 中間生成物 — `next build` の出力（Git 管理対象外、`distDir = .build/next`） | いいえ   |
+| `dist/`      | 配布可能なバンドル — `assembleStandalone` により組み立て（Git 管理対象外）  | いいえ   |
 
 ビルドパイプラインは単一パスです:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  （Next.js の出力）
-  └─ assembleStandalone()                 （standalone + static + public + ネイティブアセットをコピー）
-       └─ 出力: dist/                     （server.js、.next/static/、public/、node_modules/）
+  └─ assembleStandalone()                 （スタンドアロン + static + public + ネイティブアセットをコピー）
+       └─ 出力: dist/                      （server.js、.next/static/、public/、node_modules/）
 ```
 
 `npm run build:release` はさらに、最初に両方のディレクトリをクリーンアップし、
-デプロイ整合性センチネルとして `dist/BUILD_SHA`（= `git rev-parse --short HEAD`）を書き込みます。
+デプロイの整合性を確認するセンチネルとして `dist/BUILD_SHA`（= `git rev-parse --short HEAD`）を書き込みます。
 
-`npm run build:contributor` はバックエンド専用のビルドプロファイルを使用します。ビルド中は一時的に
-ダッシュボード UI ファイルをスタブ化し、API ルートハンドラーを維持したまま、ビルド後に元のファイルを
-復元します。ダッシュボード UI に影響する変更や完全なリリース検証には `npm run build` を使用してください。
-コントリビュータープロファイルはリリースビルドの代替にはなりません。
+`npm run build:contributor` は、バックエンド専用のビルドプロファイルを使用します。ビルド中は一時的に
+ダッシュボード UI ファイルをスタブ化し、API ルートハンドラーを維持したうえで、ビルド後に元のファイルを
+復元します。ダッシュボード UI に影響する変更や、完全なリリース検証には `npm run build` を使用してください。
+コントリビュータープロファイルは、リリースビルドの代替ではありません。
 
-> **VPS デプロイに関する注意:** リモートイメージディレクトリ `/usr/lib/node_modules/omniroute/app/`
-> に変更はありません。デプロイスキルは `dist/` の内容をそこへ rsync します。
+> **VPS デプロイに関する注記:** リモートイメージのディレクトリ `/usr/lib/node_modules/omniroute/app/`
+> に変更はありません。デプロイスキルは、`dist/` の内容をこのディレクトリへ rsync します。
 > 変更されたのは、リポジトリ内のビルド出力パスのみです（`app/` → `dist/`）。
 
 デフォルト URL:
@@ -304,13 +304,13 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── memory/             # 永続的な会話メモリ
 │   ├── oauth/              # OAuthプロバイダー、サービス、ユーティリティ
 │   ├── skills/             # 拡張可能なスキルフレームワーク
-│   ├── usage/              # 使用量追跡とコスト計算
-│   └── localDb.ts          # 再エクスポート層のみ — ここにはロジックを追加しないこと
+│   ├── usage/              # 使用量の追跡とコスト計算
+│   └── localDb.ts          # 再エクスポート専用レイヤー — ここにはロジックを追加しないこと
 ├── middleware/              # リクエストミドルウェア（promptInjectionGuard）
 ├── mitm/                   # MITMプロキシ（証明書、DNS、ターゲットルーティング）
 ├── shared/
 │   ├── components/         # Reactコンポーネント（.tsx）
-│   ├── constants/          # プロバイダー定義（329）、MCPスコープ、19種類のルーティング戦略
+│   ├── constants/          # プロバイダー定義（329件）、MCPスコープ、20種類のルーティング戦略
 │   ├── utils/              # サーキットブレーカー、サニタイザー、認証ヘルパー
 │   └── validation/         # Zod v4スキーマ
 └── sse/                    # SSEプロキシパイプライン
@@ -318,7 +318,7 @@ src/                        # TypeScript (.ts / .tsx)
 open-sse/                   # @omniroute/open-sseワークスペース
 ├── executors/              # 150個のエグゼキューターモジュール（エグゼキュータークラス + プロバイダー別ヘルパー）
 ├── handlers/               # 11個のリクエストハンドラー（チャット、レスポンス、埋め込み、画像など）
-├── mcp-server/             # MCPサーバー（110個の固有ツール、3種類のトランスポート、33個のスコープ）
+├── mcp-server/             # MCPサーバー（110種類のツール、3種類のトランスポート、33スコープ）
 ├── services/               # 178個のトップレベルサービス（combo、autoCombo、rateLimitManagerなど）
 ├── translator/             # フォーマットトランスレーター（OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama）
 ├── transformer/            # Responses APIトランスフォーマー
@@ -335,9 +335,9 @@ tests/
 └── load/                   # 負荷テスト
 
 docs/
-├── adr/                     # アーキテクチャ意思決定記録
+├── adr/                     # アーキテクチャ決定記録
 ├── architecture/            # システムアーキテクチャとレジリエンス
-├── comparison/              # OmniRouteと代替手段の比較
+├── comparison/              # OmniRouteと代替製品の比較
 ├── compression/             # 圧縮ガイドとルール
 ├── dev/                     # 開発ガイド
 ├── diagrams/                # アーキテクチャ図
@@ -412,9 +412,13 @@ OAuth 認証情報を `src/lib/oauth/constants/oauth.ts` に、サービスを `
 
 ---
 
-## Releasing
+## リリース
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+リリースは `/generate-release` ワークフローで管理されます。新しい GitHub Release が作成されると、GitHub Actions によってパッケージが **自動的に npm に公開されます**。
+
+VPS へのデプロイには、`npm run build` ではなく `npm run build:release` を使用してください。これにより、クリーンな
+再ビルドが実行され、バンドルが `dist/` にまとめられ、`dist/BUILD_SHA` センチネルが書き込まれます。
+その後、`dist/` をリモートの `app/` ディレクトリに rsync する `/deploy-vps-*-cc` スキルを使用してください。
 
 ---
 

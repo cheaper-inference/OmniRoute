@@ -110,8 +110,11 @@ import {
   isOpencodeRateLimited429EarlyStopEnabled,
   isOpencodeParkAndResumeEnabled,
   isOpencodePoolReselectEnabled,
+  isOpencodePublishedCatalogRoutingEnabled,
+  isOpencodeV2ClientFingerprintEnabled,
 } from "@/shared/utils/featureFlags";
-import { isEgressBucketedLockScope } from "../config/providerErrorRules.ts";
+import { setPublishedCatalogRoutingGate } from "../utils/opencodePublishedCatalog.ts";
+import { rotatesEgressOnQuotaRefusal } from "../config/providerErrorRules.ts";
 import {
   BURST_PARK_THRESHOLD,
   parkWaitMs,
@@ -188,6 +191,12 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
   }
   return null;
 }
+
+// #16798: the published-catalog surface lookup in providerModels.ts is client-reachable and
+// cannot import the server flag resolver; this executor (always loaded with the chat
+// pipeline) hands it the OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED reader. Unregistered
+// (client bundle) reads as off.
+setPublishedCatalogRoutingGate(isOpencodePublishedCatalogRoutingEnabled);
 
 /**
  * Resolves the registry `targetFormat` for a model, aliasing `provider` first.
@@ -274,6 +283,7 @@ export class OpencodeExecutor extends BaseExecutor {
       clientSession: this._clientSession,
       borrowed: attempt?.borrowed,
       clientToolNames: attempt?.clientToolNames ?? [],
+      v2Fingerprint: isOpencodeV2ClientFingerprintEnabled(),
     };
   }
 
@@ -596,8 +606,10 @@ export class OpencodeExecutor extends BaseExecutor {
       const poolReselectOn = isOpencodePoolReselectEnabled();
       // Resolver published by the chat layer when the ambient egress came from
       // a live connection pool (undefined otherwise). Read once per request.
+      // The provider test is the quota-refusal scope, so an operator widening it
+      // (OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS=all) reaches the free zen ids too.
       const poolReselect =
-        poolReselectOn && isEgressBucketedLockScope(this.provider) && hasAmbientProxyContext()
+        poolReselectOn && rotatesEgressOnQuotaRefusal(this.provider) && hasAmbientProxyContext()
           ? (currentRequestContext()?.reselectPoolMember ?? null)
           : null;
       // Key of the ambient pool member this request egressed through (null when
@@ -1331,6 +1343,14 @@ export class OpencodeExecutor extends BaseExecutor {
       ? this.resolveEffectiveKey(credentials) || credentials.accessToken
       : undefined;
 
+    // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
+    // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and
+    // rebuilding the JSON body from the event stream — the path chatCore already takes for
+    // any buffered event-stream response. Announcing the stream here keeps that buffering an
+    // expected outcome rather than a warning.
+    const gatedScope =
+      Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
+
     if (key) {
       if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
         headers["x-api-key"] = key;
@@ -1342,14 +1362,6 @@ export class OpencodeExecutor extends BaseExecutor {
     if (this._requestFormat === "claude") {
       headers["anthropic-version"] = "2023-06-01";
     }
-
-    // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
-    // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and
-    // rebuilding the JSON body from the event stream — the path chatCore already takes for
-    // any buffered event-stream response. Announcing the stream here keeps that buffering an
-    // expected outcome rather than a warning.
-    const gatedScope =
-      Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
     if (stream || gatedScope) {
       headers["Accept"] = "text/event-stream";
     }
@@ -1359,9 +1371,12 @@ export class OpencodeExecutor extends BaseExecutor {
     // OPENCODE_SYNTHESIZE_CLI_HEADERS=false. Client-supplied headers always win;
     // User-Agent is replaced with the CLI UA unless the client already sends one that
     // looks like the OpenCode CLI. Default values match 9router's proven defaults.
+    // #16571: the OpenCode v2 client fingerprint is opt-in (default off: identity unchanged).
+    const v2Fingerprint = isOpencodeV2ClientFingerprintEnabled();
     const cliDefaults = resolveOpencodeCliDefaults(
       this.config?.id || this.provider || "opencode",
-      gatedScope
+      gatedScope,
+      v2Fingerprint
     );
 
     this._clientSession = clientSuppliedOpencodeSession(clientHeaders, body);
@@ -1372,6 +1387,7 @@ export class OpencodeExecutor extends BaseExecutor {
         keepAgentUserAgent: this._surface() === "go" && !gatedScope, // #15311
         sessionBody: projectOpencodeSessionBody(body),
         reencodeSession: gatedScope,
+        v2Fingerprint,
       });
     }
 
@@ -1391,7 +1407,7 @@ export class OpencodeExecutor extends BaseExecutor {
    */
   private applyDeepSeekJsonSchemaFallback<T>(model: string, body: T): T {
     if (
-      model !== "deepseek-v4-flash-free" ||
+      (model !== "deepseek-v4-flash-free" && model !== "deepseek-v4.1-flash-free") ||
       (this.provider !== "opencode" && this.provider !== "opencode-zen")
     ) {
       return body;
@@ -1472,7 +1488,8 @@ export class OpencodeExecutor extends BaseExecutor {
       this.provider,
       model,
       this._clientSession,
-      body
+      body,
+      isOpencodeV2ClientFingerprintEnabled()
     );
     modifiedBody = prepared.body;
     // OpenCode's upstream 400s a request when a single enum property carries

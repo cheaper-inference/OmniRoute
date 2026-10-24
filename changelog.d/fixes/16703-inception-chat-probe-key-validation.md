@@ -1,1 +1,0 @@
-- **fix(providers):** Inception Labs keys are now validated with a 1-token chat probe. Its `/v1/models` is public and returns 200 for any key, so the setup dialog and connection Test used to accept any string. `mercury-2.5` is also added to the model seed. ([#16703](https://github.com/diegosouzapw/OmniRoute/pull/16703)) — thanks @defyma

@@ -13,6 +13,7 @@
 
 import { getModelContextLimit } from "../../src/lib/modelCapabilities";
 import { parseModel } from "./model.ts";
+import { resolveProviderModelAlias } from "./modelCanonicalization.ts";
 import {
   CONTEXT_OVERFLOW_REGEX,
   containsModelUnavailableMessage,
@@ -318,6 +319,7 @@ function isFamilyFallbackCandidateEligible(
 ): boolean {
   const parsedCandidate = parseModel(candidate);
   const candidateModel = parsedCandidate.model || candidate;
+  const wireModel = resolveProviderModelAlias(provider, candidateModel);
   // A public prefix can select a different runtime identity than its catalog id
   // (agy/ routes to antigravity). Bare wire ids retain the explicit provider hint.
   const visibilityProvider = parsedCandidate.providerAlias
@@ -325,7 +327,8 @@ function isFamilyFallbackCandidateEligible(
     : provider;
   return (
     isVisible(candidate, visibilityProvider) &&
-    !isModelLocked(provider, connectionId, candidateModel)
+    !isModelLocked(provider, connectionId, candidateModel) &&
+    !isModelLocked(provider, connectionId, wireModel)
   );
 }
 

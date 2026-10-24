@@ -20,8 +20,10 @@ import {
   getProviderErrorRuleMatch,
   resolveRuleMatchBody,
   honorsRuleLockScope,
+  setProviderErrorRuleFlagReader,
 } from "../config/providerErrorRules.ts";
 import * as rot from "./rotationConfig.ts";
+import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
 import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
 import { getProviderCategory, isLocalProvider } from "../config/providerRegistry.ts";
 import {
@@ -116,8 +118,16 @@ import { isCreditsExhaustedWithSharedWallet } from "./accountFallback/sharedWall
 import { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 import { isMistralAmbiguous401 } from "./accountFallback/mistralAmbiguousAuth.ts";
-import { isMistralAmbiguous401SoftLockoutEnabled } from "@/shared/utils/featureFlags";
+import {
+  isFeatureFlagEnabled,
+  isMistralAmbiguous401SoftLockoutEnabled,
+} from "@/shared/utils/featureFlags";
 import { boundedMap } from "@/lib/quota/boundedMap";
+// #16797: providerErrorRules.ts stays free of src/ imports; its opt-in flags
+// (OpenCode Zen egress-IP lock, full-text rule bodies) read the flag store through
+// this injected reader. Not registered = flags off (release default).
+setProviderErrorRuleFlagReader(isFeatureFlagEnabled);
+
 export type ProviderProfile = {
   baseCooldownMs: number;
   useUpstreamRetryHints: boolean;
@@ -1279,7 +1289,8 @@ export function recordProviderFailure(
 export function recordProviderSuccess(
   provider: string | null | undefined,
   connectionId?: string | null,
-  opts?: { providerProbeSettled?: boolean }
+  opts?: { providerProbeSettled?: boolean },
+  log?: { info?: (...args: unknown[]) => void }
 ): void {
   if (!provider || provider === "unknown") return;
   provider = resolveProviderId(provider);
@@ -1309,6 +1320,15 @@ export function recordProviderSuccess(
     }
   }
   breaker._onSuccess();
+  // Only a connection-scoped breaker can close here: OPEN (either scope) and a provider-level
+  // HALF_OPEN return early above. A provider-level breaker closes inside its own execute()
+  // probe or the chat handler's success settle, and its close is still recorded in the
+  // breaker's transitionHistory, which the resilience views read.
+  if (breakerState === "HALF_OPEN" && breaker.getStatus().state === "CLOSED") {
+    log?.info?.(
+      `[ProviderSuccess] ${provider}/${connectionId}: connection circuit breaker closed (HALF_OPEN -> CLOSED)`
+    );
+  }
 }
 
 /**
@@ -1712,6 +1732,16 @@ export function checkFallbackError(
       shouldFallback: false,
       cooldownMs: 0,
       reason: EXECUTOR_CONTRACT_VIOLATION_CODE,
+      skipProviderBreaker: true,
+    };
+  }
+  // A policy refusal belongs to this input, even when relayed with a 403/5xx.
+  // Preserve the refusal; rotating accounts or cooling them down cannot repair it.
+  if (isContentPolicyRefusal(structuredError)) {
+    return {
+      shouldFallback: false,
+      cooldownMs: 0,
+      reason: "content_policy_refusal",
       skipProviderBreaker: true,
     };
   }

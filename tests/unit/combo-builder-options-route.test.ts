@@ -216,7 +216,7 @@ test("combo builder options route includes no-auth provider (uncloseai) even wit
   assert.ok(noAuth.models.length > 0, "uncloseai should expose its built-in models");
   // Spot-check a known built-in model from providerRegistry.ts
   assert.ok(
-    noAuth.models.some((m: any) => m.id === "Lorbus/Qwen3.6-27B-int4-AutoRound"),
+    noAuth.models.some((m: any) => m.id === "turboderp/Qwen3.8-27B-exl3"),
     "the built-in model should be among uncloseai models"
   );
   // #2901: no-auth providers route under their alias ("unc/"), not their id.

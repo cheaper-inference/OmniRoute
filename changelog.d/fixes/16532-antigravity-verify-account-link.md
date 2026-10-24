@@ -1,1 +1,0 @@
-- **fix(providers):** surface the Antigravity "verify your account" link as a Verify button on the connection row, cleared after the next success ([#16532](https://github.com/diegosouzapw/OmniRoute/pull/16532)) — thanks @sasazemzulin058-debug

@@ -1,1 +1,0 @@
-- **fix(build):** Windows local builds no longer die at `next build` with `Failed to load native binding` under Next 16.3.8 — the SWC binding cache is pinned outside the temp-home sandbox ([#16605](https://github.com/diegosouzapw/OmniRoute/pull/16605))

@@ -1,1 +1,0 @@
-- **fix(sse):** Guard against uncaught upstream `BodyTimeoutError` responses without an error code, preventing avoidable server restarts ([#16819](https://github.com/diegosouzapw/OmniRoute/pull/16819)) — thanks @fabioKoruja00

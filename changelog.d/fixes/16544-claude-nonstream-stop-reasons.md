@@ -1,1 +1,0 @@
-- **fix(translator):** a non-streaming Claude response now maps `refusal`, `model_context_window_exceeded`, `stop_sequence` and `pause_turn` the same way the streaming path does, so a Gemini client sees a refusal as `SAFETY` and a context-window stop as `MAX_TOKENS` instead of a clean `STOP`.

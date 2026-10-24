@@ -1,1 +1,0 @@
-- Add dashboard controls for hiding auto and no-thinking catalog entries, with saved settings applied to model discovery without changing routing permissions (#13562).

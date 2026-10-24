@@ -1,7 +1,11 @@
 import { createHash, randomBytes, randomUUID } from "crypto";
-import { setUserAgentHeader } from "../executors/base.ts";
+import { setUserAgentHeader } from "../executors/base/headers.ts";
 import { generateSessionId } from "../services/sessionManager.ts";
-import { getCachedOpencodeCliVersion, refreshOpencodeCliVersion } from "./opencodeCliVersion.ts";
+import {
+  getCachedOpencodeCliVersion,
+  OPENCODE_CLI_V2_VERSION_FALLBACK,
+  refreshOpencodeCliVersion,
+} from "./opencodeCliVersion.ts";
 import {
   resolveOpencodeSessionIdentity,
   type OpencodeSessionBody,
@@ -13,6 +17,14 @@ import {
  * Overridable through the existing OPENCODE_USER_AGENT (or <PROVIDER>_USER_AGENT) knob.
  */
 export const DEFAULT_OPENCODE_USER_AGENT = "opencode/1.18.31";
+
+/**
+ * Opt-in OpenCode v2 client fingerprint (`OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED`, off by
+ * default; #16571, ported from 9router): the v2 CLI identifies as
+ * `opencode/<channel>/<version>/<client>` with a 2.x version and `x-opencode-client: cli`.
+ * With the flag off every surface keeps the identity above, byte for byte.
+ */
+export const DEFAULT_OPENCODE_V2_USER_AGENT = `opencode/latest/${OPENCODE_CLI_V2_VERSION_FALLBACK}/cli`;
 
 /** Canonical OpenCode session id shape: `ses_` + 12 hex + 14 base62. */
 export const OPENCODE_SESSION_PATTERN = /^ses_[0-9a-f]{12}[0-9A-Za-z]{14}$/;
@@ -47,15 +59,36 @@ export function isValidOpencodeSessionValue(
 
 const MINIMUM_USER_AGENT_MINOR = 17;
 const USER_AGENT_VERSION_RE = /opencode\/(?:[a-z]+\/)?v?(\d+)\.(\d+)/i;
+// v2 fingerprint only: `opencode/<channel>/<x.y.z>/<client>` or a bare `opencode/<x.y>`.
+const V2_USER_AGENT_VERSION_RE = /opencode\/(?:[a-z0-9-]+\/)?v?(\d+)\.(\d+)/i;
+const V2_MINIMUM_USER_AGENT_MAJOR = 2;
 
-/** Whether a User-Agent already satisfies the upstream contract, so it must be kept. */
-export function satisfiesOpencodeUserAgentContract(userAgent: string | null | undefined): boolean {
+/**
+ * Whether a User-Agent already satisfies the upstream contract, so it must be kept.
+ * `v2Fingerprint` (opt-in, #16571) raises the bar to a 2.x client: a 1.x UA is then
+ * replaced by the synthesized v2 identity instead of being kept.
+ */
+export function satisfiesOpencodeUserAgentContract(
+  userAgent: string | null | undefined,
+  v2Fingerprint = false
+): boolean {
+  if (v2Fingerprint) {
+    const v2Match = String(userAgent || "").match(V2_USER_AGENT_VERSION_RE);
+    return !!v2Match && Number.parseInt(v2Match[1], 10) >= V2_MINIMUM_USER_AGENT_MAJOR;
+  }
   const match = String(userAgent || "").match(USER_AGENT_VERSION_RE);
   if (!match) return false;
   const major = Number.parseInt(match[1], 10);
   const minor = Number.parseInt(match[2], 10);
   if (!Number.isFinite(major) || !Number.isFinite(minor)) return false;
   return major > 1 || (major === 1 && minor >= MINIMUM_USER_AGENT_MINOR);
+}
+
+/** The CLI version the v2 identity carries: the live one when it is 2.x, else the v2 pin. */
+function v2CliVersion(): string {
+  const live = getCachedOpencodeCliVersion();
+  const major = Number.parseInt(live.split(".")[0] ?? "", 10);
+  return major >= V2_MINIMUM_USER_AGENT_MAJOR ? live : OPENCODE_CLI_V2_VERSION_FALLBACK;
 }
 
 // SDK and HTTP-library defaults: never an agent's own identity, so they are always
@@ -92,10 +125,15 @@ export function clientSuppliedOpencodeSession(
  * contract, which `opencode-go` and paid models rely on), while on a gated request one
  * that does not satisfy the version rule is replaced — an operator still carrying the
  * previous unversioned default would otherwise be refused.
+ *
+ * `v2Fingerprint` (opt-in `OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED`, #16571) switches the
+ * synthesized identity to the OpenCode v2 CLI shape (`opencode/latest/<2.x>/cli`, client
+ * `cli`) and applies the 2.x rule to a configured UA on a gated request. Off: unchanged.
  */
 export function resolveOpencodeCliDefaults(
   providerId: string,
-  gated: boolean
+  gated: boolean,
+  v2Fingerprint = false
 ): { userAgent: string; client: string; project: string } | undefined {
   if (/^(0|false|no|off)$/i.test(process.env.OPENCODE_SYNTHESIZE_CLI_HEADERS?.trim() ?? "")) {
     return undefined;
@@ -109,12 +147,15 @@ export function resolveOpencodeCliDefaults(
   if (!process.env.NODE_TEST_CONTEXT && !process.env.VITEST && process.env.NODE_ENV !== "test") {
     void refreshOpencodeCliVersion();
   }
+  const synthesizedUA = v2Fingerprint
+    ? `opencode/latest/${v2CliVersion()}/cli`
+    : `opencode/${getCachedOpencodeCliVersion()}`;
   return {
     userAgent:
-      configuredUA && (!gated || satisfiesOpencodeUserAgentContract(configuredUA))
+      configuredUA && (!gated || satisfiesOpencodeUserAgentContract(configuredUA, v2Fingerprint))
         ? configuredUA
-        : `opencode/${getCachedOpencodeCliVersion()}`,
-    client: process.env.OPENCODE_CLIENT?.trim() || "desktop",
+        : synthesizedUA,
+    client: process.env.OPENCODE_CLIENT?.trim() || (v2Fingerprint ? "cli" : "desktop"),
     project: process.env.OPENCODE_PROJECT?.trim() || "global",
   };
 }
@@ -161,7 +202,7 @@ function canonicalId(prefix: "ses_" | "msg_", seed?: string): string {
         (BigInt(bytes[4]) >> 4n)) &
       OPENCODE_SESSION_TS_MAX;
     // OpenCode's own math, counter pinned to 1: ~(ts << 12 | 1) over 48 bits.
-    const value = (~((ts36 << 12n) | OPENCODE_SESSION_COUNTER)) & OPENCODE_SESSION_MASK_48;
+    const value = ~((ts36 << 12n) | OPENCODE_SESSION_COUNTER) & OPENCODE_SESSION_MASK_48;
     return `${prefix}${value.toString(16).padStart(12, "0")}${base62From(bytes.subarray(6), 14)}`;
   }
   return `${prefix}${bytes.subarray(0, 6).toString("hex")}${base62From(bytes.subarray(6), 14)}`;
@@ -261,6 +302,12 @@ function findHeader(headers: Record<string, string>, name: string): string | und
  *   upstream began enforcing this on 2026-10-13; a shape-valid but foreign-encoded id
  *   (raw hash, ascending id, out-of-window counter) is 403 FreeTierError. Off for the
  *   ungated surfaces (opencode-go), which keep the client's session unchanged (#15311).
+ * @param options.v2Fingerprint - Opt-in OpenCode v2 client fingerprint
+ *   (`OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED`, #16571). A client UA is kept only when it is
+ *   a 2.x OpenCode client, and on a gated free-tier request (`reencodeSession`) the v1-only
+ *   `x-opencode-request` is dropped and the session is mirrored onto
+ *   `x-opencode-session-id` / `x-session-affinity` / `x-session-id`, as the v2 CLI sends it.
+ *   Off: unchanged.
  */
 export function forwardOpencodeClientHeaders(
   headers: Record<string, string>,
@@ -272,6 +319,7 @@ export function forwardOpencodeClientHeaders(
     sessionBody?: OpencodeSessionBody;
     forwardUserAgent?: boolean;
     reencodeSession?: boolean;
+    v2Fingerprint?: boolean;
   }
 ): void {
   // 1. Forward User-Agent (opt-out for generic providers, #15632)
@@ -313,7 +361,8 @@ export function forwardOpencodeClientHeaders(
       options.cliDefaults,
       options.sessionBody,
       options.keepAgentUserAgent === true,
-      options.reencodeSession === true
+      options.reencodeSession === true,
+      options.v2Fingerprint === true
     );
   }
 }
@@ -349,8 +398,12 @@ function applySessionFallback(
  * `keepAgentUserAgent` (OpenCode Go, #15311) an agent's own UA is kept too, because Go asks
  * third-party agents to identify themselves — but never a generic SDK / HTTP-library UA.
  */
-function keepsClientUserAgent(userAgent: string | undefined, keepAgentUserAgent: boolean) {
-  if (satisfiesOpencodeUserAgentContract(userAgent)) return true;
+function keepsClientUserAgent(
+  userAgent: string | undefined,
+  keepAgentUserAgent: boolean,
+  v2Fingerprint = false
+) {
+  if (satisfiesOpencodeUserAgentContract(userAgent, v2Fingerprint)) return true;
   return keepAgentUserAgent && !isGenericClientUserAgent(userAgent);
 }
 
@@ -359,9 +412,11 @@ function applyCliDefaults(
   cliDefaults: { userAgent: string; client: string; project: string },
   sessionBody?: OpencodeSessionBody,
   keepAgentUserAgent = false,
-  reencodeSession = false
+  reencodeSession = false,
+  v2Fingerprint = false
 ): void {
-  if (!keepsClientUserAgent(headers["User-Agent"] || headers["user-agent"], keepAgentUserAgent)) {
+  const clientUA = headers["User-Agent"] || headers["user-agent"];
+  if (!keepsClientUserAgent(clientUA, keepAgentUserAgent, v2Fingerprint)) {
     setUserAgentHeader(headers, cliDefaults.userAgent);
   }
   headers["x-opencode-client"] ||= cliDefaults.client;
@@ -387,9 +442,24 @@ function applyCliDefaults(
     : clientSessionId && OPENCODE_SESSION_PATTERN.test(clientSessionId)
       ? clientSessionId
       : undefined;
-  headers["x-opencode-session"] = clientSessionId
+  const session = clientSessionId
     ? (canonicalClientSession ?? canonicalId("ses_", clientSessionId))
     : canonicalId("ses_", generateSessionId(sessionBody ?? null) ?? undefined);
+  headers["x-opencode-session"] = session;
+  if (v2Fingerprint && reencodeSession) applyV2FreeTierSessionHeaders(headers, session);
+}
+
+/**
+ * v2 fingerprint on a gated free-tier request (#16571): the v2 CLI sends no
+ * `x-opencode-request` (a v1-only header) and carries its session on three more headers.
+ */
+function applyV2FreeTierSessionHeaders(headers: Record<string, string>, session: string): void {
+  for (const key of Object.keys(headers)) {
+    if (key.toLowerCase() === "x-opencode-request") delete headers[key];
+  }
+  headers["x-opencode-session-id"] = session;
+  headers["x-session-affinity"] = session;
+  headers["x-session-id"] = session;
 }
 
 /**

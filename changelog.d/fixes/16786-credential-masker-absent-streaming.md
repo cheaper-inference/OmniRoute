@@ -1,1 +1,0 @@
-- **fix(streaming):** mask credentials in streaming responses under the same opt-in ([#16786](https://github.com/diegosouzapw/OmniRoute/pull/16786)) — thanks @maxmad64bis

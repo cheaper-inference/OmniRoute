@@ -13,9 +13,10 @@ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
  * require an `admin` credential (a read/write token gets 403 before here).
  *
  * Minting never hands out more privilege than the caller holds: an `admin` token is
- * operator-only (dashboard session, local CLI, or login disabled). Machine credentials —
- * manage/admin-scoped API keys and `oma_` access tokens — top out at `write`, so a key
- * given to automation cannot turn itself into an admin token that outlives it.
+ * operator-only (dashboard session or local CLI). Machine credentials — manage/admin-scoped
+ * API keys and `oma_` access tokens — top out at `write`, so a key given to automation cannot
+ * turn itself into an admin token that outlives it. Every token passes the always-protected
+ * tier, so minting stays authenticated with login disabled, too.
  */
 
 /** Highest scope a non-operator (API key / `oma_` token) caller may mint. */
@@ -34,7 +35,7 @@ const createSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   let rawBody: unknown;
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
   if (!scopeSatisfies(MACHINE_CREDENTIAL_MINT_CEILING, requestedScope)) {
     let operator: Awaited<ReturnType<typeof resolveOperatorCredential>>;
     try {
-      operator = await resolveOperatorCredential(request);
+      operator = await resolveOperatorCredential(request, { alwaysRequireAuth: true });
     } catch {
       return createErrorResponse({
         status: 503,

@@ -13,108 +13,58 @@ OmniRoute ప్రతి API అభ్యర్థనను నియంత్�
 
 > మూలం: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## రెండు Auth మోడ్లు
+## రెండు ప్రమాణీకరణ మోడ్‌లు
 
-### 1. API కీ (Bearer)
+### 1. API Key (Bearer)
 
-OpenAI/Anthropic/Gemini-అనుకూల క్లయింట్ APIల కోసం, అలాగే కీకి `manage` స్కోప్ ఉన్నప్పుడు కొన్ని నిర్వహణ రూట్ల కోసం ఉపయోగించబడుతుంది.
+OpenAI/Anthropic/Gemini-కు అనుకూలమైన క్లయింట్ APIల కోసం, అలాగే కీకు `manage` scope ఉన్నప్పుడు కొన్ని మేనేజ్‌మెంట్ routes కోసం ఇది ఉపయోగించబడుతుంది.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`src/sse/services/auth.ts`లోని `isValidApiKey()` / `extractApiKey()` ద్వారా ధృవీకరించబడుతుంది మరియు `src/shared/utils/apiAuth.ts` ద్వారా తిరిగి ఎగుమతి చేయబడుతుంది. ధృవీకరణ సాధనం `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` పర్యావరణ వేరియబుల్లను శాశ్వత పాస్త్రూ కీలుగా కూడా అంగీకరిస్తుంది (issue #1350).
+`src/sse/services/auth.ts`లోని `isValidApiKey()` / `extractApiKey()` ద్వారా ధృవీకరించబడుతుంది, మరియు `src/shared/utils/apiAuth.ts` ద్వారా మళ్లీ export చేయబడుతుంది. `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` environment variablesను కూడా validator శాశ్వత passthrough keysగా అంగీకరిస్తుంది (issue #1350).
 
-### 2. డ్యాష్బోర్డ్ సెషన్ (auth_token కుకీ)
+### 2. డ్యాష్‌బోర్డ్ సెషన్ (auth_token cookie)
 
-డ్యాష్బోర్డ్ పేజీలు మరియు అడ్మిన్ కార్యకలాపాల కోసం.
+డ్యాష్‌బోర్డ్ పేజీలు మరియు అడ్మిన్ కార్యకలాపాల కోసం.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-JWT ధృవీకరించబడి **మరియు** `authenticated: true` కలిగి ఉన్నప్పుడు మాత్రమే కుకీ ఒక సెషన్ అవుతుంది
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). కుకీని
-ఉపయోగించే ప్రతి భాగం (డ్యాష్బోర్డ్ రూట్ గార్డ్ (`isDashboardSessionAuthenticated()`), authz పైప్లైన్ రిఫ్రెష్, WebSocket హ్యాండ్షేక్, లైవ్
-సర్వర్, `/api/settings/require-login`, `/api/auth/status`) ఆ హెల్పర్ ద్వారానే వెళుతుంది.
-`JWT_SECRET`తో సంతకం చేయబడిన ఇతర JWTలు కూడా ఉన్నాయి — Cursor CLI పాస్త్రూ, కీ హోల్డర్ల కోసం
-`iss "omniroute" / aud "cursor-cli"` టోకెన్లను జారీ చేస్తుంది — అవి ఎప్పటికీ సెషన్లు కావు
-(#13298).
+JWT ధృవీకరించబడి **మరియు** `authenticated: true` కలిగి ఉన్నప్పుడు మాత్రమే cookie ఒక సెషన్‌గా ఉంటుంది (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Cookieను ఉపయోగించే ప్రతిదీ (డ్యాష్‌బోర్డ్ route guard (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live server, `/api/settings/require-login`, `/api/auth/status`) ఆ helper ద్వారానే వెళ్తుంది. `JWT_SECRET`తో సంతకం చేసిన ఇతర JWTలు కూడా ఉన్నాయి — Cursor CLI passthrough కీ హోల్డర్ల కోసం `iss "omniroute" / aud "cursor-cli"` టోకెన్‌లను జారీ చేస్తుంది — అవి ఎప్పుడూ సెషన్‌లు కావు (#13298).
 
-`src/shared/utils/apiAuth.ts`లోని `isDashboardSessionAuthenticated()` ద్వారా ధృవీకరించబడుతుంది. JWT యొక్క 30-రోజుల జీవితకాలంలో 7 రోజుల కంటే తక్కువ మిగిలి ఉన్నప్పుడు పైప్లైన్ దానిని స్వయంచాలకంగా రిఫ్రెష్ చేస్తుంది.
+`src/shared/utils/apiAuth.ts`లోని `isDashboardSessionAuthenticated()` ద్వారా ధృవీకరించబడుతుంది. JWT తన 30 రోజుల జీవితకాలంలో 7 రోజుల కంటే తక్కువ మిగిలి ఉన్నప్పుడు pipeline దాన్ని స్వయంచాలకంగా రిఫ్రెష్ చేస్తుంది.
 
-ప్రతి జారీ ప్రక్రియ `mintDashboardSessionToken` ద్వారా జరుగుతుంది (జారీ సమయం `iat` మరియు ఒక ID `jti`తో), అలాగే ధృవీకరణ సాధనం రెండు సెట్టింగ్లను తనిఖీ చేస్తుంది కాబట్టి, సెషన్ దాని 30 రోజులు పూర్తికాకముందే కూడా ముగియవచ్చు: `sessionsValidAfter`, పాస్వర్డ్ మార్పు జరిగినప్పుడు సెట్ చేయబడుతుంది, తద్వారా దానికి ముందు జారీ చేసిన ప్రతి సెషన్ ధృవీకరణ ఆగిపోతుంది (పాస్వర్డ్ను మార్చిన బ్రౌజర్కు కొత్త కుకీ లభిస్తుంది); మరియు `revokedDashboardSessions`, దీనికి `POST /api/auth/logout` సైన్-అవుట్ చేసిన సెషన్ యొక్క `jti`ని జోడిస్తుంది. పాత విడుదల ద్వారా జారీ చేయబడిన సెషన్లలో ఈ రెండు క్లెయిమ్లూ ఉండవు మరియు మొదటి పాస్వర్డ్ మార్పు వరకు అవి చెల్లుబాటులో ఉంటాయి. సెట్టింగ్లను చదవలేకపోతే, సెషన్ విశ్వసించబడదు.
+30 రోజులు పూర్తికాకముందే సెషన్ ముగియవచ్చు: ప్రతి minter `mintDashboardSessionToken` ద్వారానే వెళ్తుంది (జారీ సమయం `iat` మరియు ID `jti`తో), మరియు verifier రెండు సెట్టింగ్‌లను తనిఖీ చేస్తుంది: `sessionsValidAfter` — పాస్‌వర్డ్ మార్పు ద్వారా సెట్ అవుతుంది, కాబట్టి దానికి ముందు జారీ అయిన ప్రతి సెషన్ ధృవీకరణలో విఫలమవుతుంది (పాస్‌వర్డ్ మార్చిన బ్రౌజర్‌కు తాజా cookie లభిస్తుంది); మరియు `revokedDashboardSessions` — `POST /api/auth/logout` సైన్-అవుట్ అయిన సెషన్ యొక్క `jti`ని దీనికి జోడిస్తుంది. పాత రిలీజ్ జారీ చేసిన సెషన్‌లకు ఈ రెండు క్లెయిమ్‌లూ ఉండవు; మొదటి పాస్‌వర్డ్ మార్పు వరకు అవి చెల్లుబాటులోనే ఉంటాయి. సెట్టింగ్‌లను చదవలేకపోతే, సెషన్ నమ్మబడదు.
 
-కొన్ని నిర్వహణ రూట్లు **ఏదో ఒక** మోడ్ను అంగీకరిస్తాయి: కుకీ లేదా API కీకి `manage` (లేదా `admin`) స్కోప్ ఉన్నప్పుడు `Bearer <key>`. v3.8లో జోడించిన "API కాల్ల ద్వారా కాన్ఫిగర్ చేయగల" వర్క్ఫ్లోను సాధ్యం చేసేది ఇదే.
+కొన్ని మేనేజ్‌మెంట్ routes **ఏదో ఒక** మోడ్‌ను అంగీకరిస్తాయి: API కీకు `manage` (లేదా `admin`) scope ఉన్నప్పుడు cookie లేదా `Bearer <key>`. v3.8లో జోడించిన "API కాల్స్ ద్వారా కాన్ఫిగర్ చేయగల" వర్క్‌ఫ్లోను ఇది సాధ్యం చేస్తుంది.
 
 #### ఐచ్ఛిక OIDC లాగిన్ గేట్ (#6973)
 
-డ్యాష్బోర్డ్ అడ్మిన్ లాగిన్, డిఫాల్ట్ పాస్వర్డ్ లాగిన్తో పాటు **ఎంపిక చేసుకుంటే మాత్రమే సక్రియమయ్యే** OIDC (OpenID Connect) ఫ్లోకు కూడా మద్దతు ఇస్తుంది — పాస్వర్డ్ లాగిన్ ఎప్పటికీ తొలగించబడదు, కేవలం
-దానికి అదనంగా ఇది అందించబడుతుంది:
+డ్యాష్‌బోర్డ్ అడ్మిన్ లాగిన్ డిఫాల్ట్ పాస్‌వర్డ్ లాగిన్‌తో పాటు **ఐచ్ఛిక** OIDC (OpenID Connect) ఫ్లోకు కూడా మద్దతు ఇస్తుంది — పాస్‌వర్డ్ లాగిన్ ఎప్పుడూ తీసివేయబడదు, కేవలం అదనంగా మాత్రమే:
 
-- `settings.oidcEnabled === true` **మరియు** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` అన్నీ కాన్ఫిగర్ చేయబడి ఉంటే తప్ప ఇది నిలిపివేయబడి ఉంటుంది (Settings → Auth).
-  లేకపోతే `GET /api/auth/oidc/login` `400`ను తిరిగి ఇస్తుంది.
-- `GET /api/auth/oidc/login`, జారీదారు యొక్క
-  `/.well-known/openid-configuration` నుండి `authorization_endpoint`ను కనుగొంటుంది (`<issuer>/authorize`ను
-  ప్రత్యామ్నాయంగా ఉపయోగిస్తుంది), ఇన్కమింగ్ అభ్యర్థన నుండి రీడైరెక్ట్ URIని నిర్మిస్తుంది
-  (`x-forwarded-proto`ను పరిగణనలోకి తీసుకుంటుంది), మరియు యాదృచ్ఛిక `state`ను
-  `httpOnly` `oidc_state` కుకీలో నిల్వ చేసి IdPకి రీడైరెక్ట్ చేస్తుంది.
-- `GET /api/auth/oidc/callback`, `state`ను ధృవీకరిస్తుంది, ఆథరైజేషన్
-  కోడ్ను మార్పిడి చేస్తుంది, మరియు జారీదారు యొక్క JWKS ద్వారా ID టోకెన్ సంతకాన్ని
-  (`jose` యొక్క `createRemoteJWKSet`, ప్రతి JWKS URIకి క్యాష్ చేయబడుతుంది) `issuer`/`audience`
-  తనిఖీలతో ధృవీకరిస్తుంది. `oidcAllowedSubjects` అనుమతి జాబితా తప్పనిసరి: ఇది
-  టోకెన్ యొక్క `sub` క్లెయిమ్ లేదా దాని `email` క్లెయిమ్తో సరిపోల్చుతుంది — `email_verified === true` అయినప్పుడు మాత్రమే
-  ఇమెయిల్ క్లెయిమ్ పరిగణించబడుతుంది, కాబట్టి IdP వద్ద ధృవీకరించని ఇమెయిల్ ఎప్పటికీ
-  గేట్ను దాటలేదు — మరియు ఎటువంటి ఎంట్రీలు లేకపోతే కాల్బ్యాక్ ప్రతి లాగిన్ను
-  (`not_configured`) తిరస్కరిస్తుంది.
-- విజయవంతమైతే, పాస్వర్డ్ లాగిన్ జారీ చేసే **సరిగ్గా అదే** 30-రోజుల `auth_token` JWTని
-  (`src/app/api/auth/login/route.ts`) ఇది జారీ చేస్తుంది, కాబట్టి మిగిలిన
-  డ్యాష్బోర్డ్ సెషన్ పైప్లైన్ (ఆటో-రిఫ్రెష్, కుకీ ఫ్లాగ్లు) మారదు —
-  OIDC కేవలం కుకీ ఎలా జారీ చేయబడుతుందో మాత్రమే భర్తీ చేస్తుంది, అది ఇచ్చే అనుమతులను కాదు.
-- ప్రతి `oidc*` సెట్టింగ్ (`oidcEnabled`, `oidcDisablePasswordLogin`,
-  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS`లో
-  (`src/shared/constants/securityImpactingSettings.ts`) ఉంటుంది: బాడీలో నిర్వహణ
-  పాస్వర్డ్ను `currentPassword`గా కలిగి ఉంటే తప్ప `PATCH /api/settings`
-  `400 PASSWORD_REQUIRED`తో ప్రతిస్పందిస్తుంది (అది తప్పుగా ఉన్నప్పుడు `401 PASSWORD_MISMATCH`).
-  `oidcDisablePasswordLogin`, పాస్వర్డ్ _లాగిన్ను_ (`POST /api/auth/login`)
-  తిరస్కరిస్తుంది, కానీ నిల్వ చేసిన పాస్వర్డ్ హ్యాష్ను ఉంచుతుంది, అలాగే మళ్లీ ప్రామాణీకరించేటప్పుడు
-  `currentPassword`ను దానితో పోల్చి తనిఖీ చేస్తుంది.
-- `POST /api/settings/import-json` ఆ మళ్లీ-ప్రామాణీకరణను దాటవేస్తుంది, కాబట్టి వ్రాయడానికి ముందు
-  `IMPORT_STRIPPED_SETTINGS_KEYS`లోని (అదే ఫైల్) ప్రతి కీని తొలగిస్తుంది: పాస్వర్డ్ మరియు
-  `currentPassword`, ప్రతి `SECURITY_IMPACTING_SETTINGS_KEYS` ఎంట్రీ, అలాగే
-  డ్యాష్బోర్డ్ సెషన్ స్థితి (`sessionsValidAfter`, `revokedDashboardSessions`).
-  అందువల్ల పాత బ్యాకప్ను దిగుమతి చేయడం ద్వారా, పాస్వర్డ్ మార్పు
-  లేదా సైన్-అవుట్ ఇప్పటికే ముగించిన సెషన్ను తిరిగి సక్రియం చేయడం సాధ్యం కాదు.
+- `settings.oidcEnabled === true` **మరియు** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` అన్నీ కాన్ఫిగర్ చేయబడి ఉంటేనే ఇది పనిచేస్తుంది (Settings → Auth). లేకపోతే `GET /api/auth/oidc/login` `400` ఇస్తుంది.
+- `GET /api/auth/oidc/login` issuer యొక్క `/.well-known/openid-configuration` నుండి `authorization_endpoint`ను కనుగొంటుంది (దొరకకపోతే `<issuer>/authorize`కు వెనక్కి వెళ్తుంది), వచ్చిన request నుండి redirect URIని నిర్మిస్తుంది (`x-forwarded-proto`ను గౌరవిస్తుంది), మరియు `httpOnly` `oidc_state` cookieలో నిల్వ చేసిన యాదృచ్ఛిక `state`తో IdPకి మళ్లిస్తుంది.
+- `GET /api/auth/oidc/callback` `state`ను ధృవీకరిస్తుంది, authorization codeను మార్పిడి చేస్తుంది, మరియు `issuer`/`audience` తనిఖీలతో issuer యొక్క JWKS ద్వారా ID token సంతకాన్ని ధృవీకరిస్తుంది (`jose` యొక్క `createRemoteJWKSet`, ప్రతి JWKS URIకి విడిగా cache చేయబడుతుంది). `oidcAllowedSubjects` allowlist తప్పనిసరి: అది token యొక్క `sub` claim లేదా `email` claimతో సరిపోతుంది. `email` claim `email_verified === true` అయినప్పుడు మాత్రమే గౌరవించబడుతుంది — కాబట్టి IdPలో ధృవీకరించని email ఎప్పుడూ gateను దాటలేదు. ఎంట్రీలు లేకపోతే callback ప్రతి లాగిన్‌ను తిరస్కరిస్తుంది (`not_configured`).
+- విజయవంతమైతే, పాస్‌వర్డ్ లాగిన్ జారీ చేసే **అదే** 30 రోజుల `auth_token` JWTని ఇది జారీ చేస్తుంది (`src/app/api/auth/login/route.ts`). కాబట్టి dashboard session pipeline యొక్క మిగతా భాగాలు (ఆటో-రిఫ్రెష్, cookie flags) మారవు — OIDC మారుస్తున్నది cookie ఎలా పుడుతుందో మాత్రమే; అది ఇచ్చే అధికారాన్ని కాదు.
+- `oidc*` settings అన్నీ (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`)లో ఉన్నాయి: `currentPassword` గా మేనేజ్‌మెంట్ పాస్‌వర్డ్‌ను body లో పంపకపోతే `PATCH /api/settings` `400 PASSWORD_REQUIRED` ఇస్తుంది (తప్పు అయితే `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` పాస్‌వర్డ్ _login_ (`POST /api/auth/login`)ను నిరాకరిస్తుంది, కానీ నిల్వ చేసిన password hashను ఉంచుతుంది; మళ్లీ ధృవీకరణ ఇప్పటికీ దానికి వ్యతిరేకంగా `currentPassword`ను తనిఖీ చేస్తుంది.
+- `corsOrigins` మరియు `bruteForceProtection` కూడా `SECURITY_IMPACTING_SETTINGS_KEYS`లో ఉన్నాయి: వీటిని సడలిస్తే login రక్షణలు బలహీనపడతాయి, కాబట్టి వీటికీ అదే `currentPassword` మళ్లీ-ధృవీకరణ అవసరం (Security tab దాన్ని అడుగుతుంది), మరియు JSON import వీటిని వదిలేస్తుంది.
+- ప్రతి security-policy key — `SECURITY_IMPACTING_SETTINGS_KEYS` ఎంట్రీలు, ప్రతి `oidc*` key, మరియు dashboard session స్థితి — `PATCH /api/settings`పై **operator-only**: manage-scoped API key లేదా `oma_` access token సరైన `currentPassword` పంపినా `403`తో తిరస్కరించబడతాయి, మరియు ఆ తిరస్కారం `settings.update_failed` with `reason: OPERATOR_REQUIRED` గా ఆడిట్ చేయబడుతుంది (`src/lib/api/operatorCredential.ts`లోని `requireOperatorCredential()`). సాధారణ settings (theme, display preferences) `manage` key లేదా `admin` access token కు ఇంకా వ్రాయదగినవిగానే ఉంటాయి. `/api/settings` లో ప్రతి మార్పుకు (మరియు `/api/settings/require-login`కు) `admin` access-token scope అవసరం (`src/server/authz/accessScopes.ts`లోని `ADMIN_MUTATION_EXACT_PATHS`, exact-path match); `GET` `read` గానే ఉంటుంది, మరియు ఇతర `/api/settings/*` sub-routes (proxies, combo defaults, model aliases, compression, purges…) method నుండి ఊహించిన `write` scopeను కొనసాగిస్తాయి.
+- `POST /api/settings/import-json` ఆ మళ్లీ-ధృవీకరణను దాటవేస్తుంది, కాబట్టి వ్రాయడానికి ముందు అదే file లోని `IMPORT_STRIPPED_SETTINGS_KEYS`లోని ప్రతి keyను తొలగిస్తుంది: పాస్‌వర్డ్ మరియు `currentPassword`, ప్రతి `SECURITY_IMPACTING_SETTINGS_KEYS` ఎంట్రీ, మరియు dashboard session స్థితి (`sessionsValidAfter`, `revokedDashboardSessions`). కాబట్టి పాత backup ను import చేయడం, పాస్‌వర్డ్ మార్పు లేదా sign-out ఇప్పటికే ముగించిన session ను తిరిగి బ్రతికించలేదు.
 
 ## రూట్ తరగతులు
 
-`src/server/authz/types.ts` మూడు తరగతులను నిర్వచిస్తుంది; నిర్దిష్టంగా వర్గీకరించలేని ఏ రూట్ అయినా `MANAGEMENT`కు ఫాల్బ్యాక్ అవుతుంది.
+`src/server/authz/types.ts` మూడు తరగతులను నిర్వచిస్తుంది; నిర్ణయాత్మకంగా వర్గీకరించలేని ఏ route అయినా `MANAGEMENT`కు తిరిగి వెళ్తుంది.
 
-| తరగతి        | వివరణ                                                                                                                                                         | అవసరమైన ప్రామాణీకరణ                                                      |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `PUBLIC`     | స్పష్టంగా సురక్షితమైన రూట్లు — లాగిన్, లాగౌట్, స్థితి, ప్రారంభీకరణ, ఆరోగ్య తనిఖీ, ఆన్బోర్డింగ్ బూట్స్ట్రాప్.                                                  | ఏదీ లేదు                                                                 |
-| `CLIENT_API` | మోడల్ను అందించే ఎండ్పాయింట్లు — `/api/v1/*`, `/api/v1beta/*`, అలాగే అలియాస్లు `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | అమలులో ఉన్న `REQUIRE_API_KEY` ఫీచర్ ఫ్లాగ్ ప్రారంభించబడినప్పుడు బేరర్ కీ |
-| `MANAGEMENT` | డాష్బోర్డ్ పేజీలు, సెట్టింగ్లు, ప్రొవైడర్లు, కీలు, అడ్మిన్ మరియు డయాగ్నస్టిక్స్ ఎండ్పాయింట్లు.                                                                | డాష్బోర్డ్ సెషన్ లేదా `manage` స్కోప్తో బేరర్                            |
+| Class        | Description                                                                                                                                           | Auth required                                                            |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `PUBLIC`     | స్పష్టంగా సురక్షితమైన routes — login, logout, status, init, health, onboarding bootstrap.                                                             | ఏదీ అవసరం లేదు                                                           |
+| `CLIENT_API` | Model-serving endpoints — `/api/v1/*`, `/api/v1beta/*`, మరియు aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | `REQUIRE_API_KEY` feature flag ప్రభావవంతంగా ఆన్‌లో ఉన్నప్పుడు Bearer key |
+| `MANAGEMENT` | Dashboard పేజీలు, settings, providers, keys, admin మరియు diagnostics endpoints.                                                                       | Dashboard session లేదా `manage` scope ఉన్న Bearer                        |
 
-కొన్ని `MANAGEMENT` చర్యలు **ఆపరేటర్కు మాత్రమే** పరిమితం: `manage` కీ సరిపోదు. నిల్వ చేసిన
-క్రెడెన్షియల్లను ఎగుమతి చేయడం (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), సింక్ టోకెన్ను జారీ చేయడం (`POST /api/sync/tokens`) మరియు
-`admin` CLI యాక్సెస్ టోకెన్ను సృష్టించడం (`POST /api/cli/tokens`) కోసం డాష్బోర్డ్ సెషన్, స్థానిక CLI
-సబ్జెక్ట్ లేదా లాగిన్ నిలిపివేయబడి ఉండటం అవసరం; ఏ స్కోప్కు చెందిన API కీలు మరియు `oma_` యాక్సెస్ టోకెన్లకైనా `403` లభిస్తుంది. ఈ తనిఖీ
-`src/lib/api/operatorCredential.ts`లో (`resolveOperatorCredential()` /
-`requireOperatorCredential()`) ఉంటుంది.
-
-A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
-credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), restoring a backup over the live data
-(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
-`POST /api/settings/import-json`), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
-lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
+కొన్ని `MANAGEMENT` చర్యలు **operator-only**: `manage` key సరిపోదు. నిల్వ చేసిన credentials ఎగుమతి (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), live data పై backup ను పునరుద్ధరించడం (`dryRun=true` తో సహా `POST /api/db-backups/import`, id ద్వారా `POST /api/db-backups` restore, `POST /api/settings/import-json`), restore points ను నాశనం చేయడం (`DELETE /api/db-backups` cleanup, మరియు `PATCH /api/db-backups` ఎందుకంటే అది నిల్వ చేసే retention ప్రతి backup తర్వాత స్వయంచాలక తొలగింపును నడుపుతుంది) వంటి వాటికి dashboard session, స్థానిక CLI subject, లేదా login నిలిపివేయబడి ఉండటం అవసరం. Sync token జారీ (`POST /api/sync/tokens`) మరియు `admin` CLI access token తయారు చేయడం (`POST /api/cli/tokens`) ప్రతి login mode లో dashboard session లేదా స్థానిక CLI subject అవసరం. ఏ scope అయినా API keys మరియు `oma_` access tokens operator credentials కావు: అవసరమైనప్పుడెల్లా వాటికి `403` వస్తుంది. ఈ తనిఖీ `src/lib/api/operatorCredential.ts`లో ఉంది (`resolveOperatorCredential()` / `requireOperatorCredential()`). Login settings మార్చడం కూడా operator-only: పాస్‌వర్డ్ ఇప్పటికే ఉంటే `POST /api/settings/require-login` (మేనేజ్‌మెంట్ పాస్‌వర్డ్ సెట్ చేయడం / `requireLogin` టోగుల్ చేయడం) ఆ credentials నే అంగీకరిస్తుంది — పాస్‌వర్డ్ లేని మొదటి-రన్ bootstrap విండో మారదు — మరియు పాస్‌వర్డ్‌ను మార్చడానికి dashboard session `currentPassword` పంపాలి (అది లేకపోయినా లేదా తప్పుగా ఉన్నా `403`, `settings.update_failed` గా ఆడిట్ చేయబడుతుంది). స్థానిక CLI మరియు login నిలిపివేయబడిన instance రికవరీ మార్గాన్ని ఉంచుతాయి; అవి data directory ను కలిగి ఉన్న host కు బంధించబడి ఉన్నాయి కాబట్టి, అది లేకుండానే పాస్‌వర్డ్ సెట్ చేయవచ్చు.
 
 ## పైప్లైన్
 
@@ -265,15 +215,15 @@ API కీలు `scopes` శ్రేణిని కలిగి ఉంటా�
 (`src/lib/accessTokens/scopes.ts`) ద్వారా ర్యాంక్ చేయబడతాయి. ఈ ర్యాంక్
 యాక్సెస్-టోకెన్ క్రెడెన్షియల్కు మాత్రమే వర్తిస్తుంది. [మేనేజ్మెంట్ ప్రామాణీకరణ](../guides/MANAGEMENT-AUTH.md) చూడండి.
 
-## ప్రమాణీకరణ అవసరం టాగుల్
+## Auth Required టోగుల్
 
-`src/shared/utils/apiAuth.ts`లోని `isAuthRequired()`, ఒక అభ్యర్థన కోసం **ఏదైనా** ప్రమాణీకరణ అమలు చేయాలా వద్దా అని నిర్ణయిస్తుంది:
+`src/shared/utils/apiAuth.ts`లోని `isAuthRequired()` ఒక request కు **ఏదైనా** auth అమలు చేయాలా వద్దా అని నిర్ణయిస్తుంది:
 
-- `settings.requireLogin === false` → ప్రమాణీకరణ ప్రపంచవ్యాప్తంగా నిలిపివేయబడుతుంది.
-- పాస్వర్డ్ కాన్ఫిగర్ చేయబడకపోవడం **మరియు** `INITIAL_PASSWORD` env var లేకపోవడం → బూట్స్ట్రాప్ మోడ్ ఆన్బోర్డింగ్ విజార్డ్ మరియు లూప్బ్యాక్ అభ్యర్థనలను అనుమతిస్తుంది, కానీ నెట్వర్క్కు బహిర్గతమైన అభ్యర్థనలకు ఇప్పటికీ క్రెడెన్షియల్స్ అవసరం.
-- ఏదైనా DB ఎర్రర్ → యాక్సెస్ను నిరాకరిస్తుంది (డిఫాల్ట్గా సురక్షితం).
+- `settings.requireLogin === false` → auth ప్రపంచవ్యాప్తంగా నిలిపివేయబడుతుంది, కానీ ఎల్లప్పుడూ-రక్షిత శ్రేణి ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) మినహా, మరియు అంగీకరించే credential ను జారీ చేసే calls మినహా — login ఆన్‌లో ఉన్నప్పుడు అవసరమయ్యే అదే credential కావాలి: sync tokens జారీ చేయడం, ఏ scope లోనైనా CLI access tokens తయారు చేయడం, మరియు `manage`/`admin` scope ఉన్న API key ను సృష్టించడం, ఒక key కు ఆ scope ఇవ్వడం, లేదా అలాంటి key ను రీజెనరేట్ చేయడం లేదా బహిర్గతం చేయడం (`src/lib/api/requireManagementAuth.ts`లోని `requireCredentialForManagementScopedKey()`). Inference-only keys తెరిచే ఉంటాయి.
+- పాస్‌వర్డ్ కాన్ఫిగర్ కాలేదు **మరియు** `INITIAL_PASSWORD` env var లేదు → bootstrap mode onboarding wizard ను మరియు loopback requests ను అనుమతిస్తుంది, కానీ బహిర్గతమైన network requests కు ఇంకా credentials అవసరం.
+- ఏదైనా DB error → fail closed (secure-by-default).
 
-క్లయింట్ API కీ అమలు, నేరుగా `process.env.REQUIRE_API_KEY`ను చదవకుండా, `src/shared/utils/featureFlags.ts`లోని `isRequireApiKeyEnabled()`ను ఉపయోగిస్తుంది. డిప్లాయ్ చేసిన ఇన్స్టాన్స్లకు ఇది ముఖ్యమైనది: Dashboard → Feature Flagsలో `REQUIRE_API_KEY`ను టాగుల్ చేయడం DB ఓవర్రైడ్ను నిల్వ చేస్తుంది మరియు ఈ సహాయకాన్ని పంచుకునే `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` మరియు ఇతర క్లయింట్-API ప్రమాణీకరణ తనిఖీలపై వెంటనే ప్రభావం చూపుతుంది. ఫీచర్ ఫ్లాగ్ స్టోర్ను చదవలేకపోతే, క్లయింట్ API ప్రమాణీకరణ యాక్సెస్ను నిరాకరించి కీని తప్పనిసరి చేస్తుంది.
+Client API key అమలు, నేరుగా `process.env.REQUIRE_API_KEY`ని చదవకుండా, `src/shared/utils/featureFlags.ts`లోని `isRequireApiKeyEnabled()`ను ఉపయోగిస్తుంది. ఇది deployed instances కు ముఖ్యం: Dashboard → Feature Flags లో `REQUIRE_API_KEY`ను టోగుల్ చేస్తే DB override నిల్వ అవుతుంది మరియు `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, ఈ helper ను పంచుకునే ఇతర client-API auth తనిఖీలు వెంటనే ప్రభావితమవుతాయి. Feature flag store చదవలేకపోతే, client API auth fail closed అవుతుంది మరియు key ను కోరుతుంది.
 
 ## బ్రేకింగ్ మార్పు — v3.8.0
 

@@ -52,7 +52,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   const { id } = await params;
-  const rawBody = await request.json();
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const validation = validateBody(relayTokenPatchSchema, rawBody);
   if (isValidationFailure(validation)) {
     return NextResponse.json({ error: validation.error }, { status: 400 });

@@ -14,18 +14,18 @@ AgentBridge は、IDE AI エージェントからの HTTPS トラフィックを
 
 ## §1 概要
 
-### AgentBridge とは？
+### AgentBridge とは?
 
-IDE エージェント（GitHub Copilot、Cursor、Claude Code など）が API を呼び出す際、通常は上流の AI プロバイダー（OpenAI、Anthropic など）へ直接接続します。AgentBridge は、エージェントの設定を一切変更することなく、TLS レベルでその接続を透過的にインターセプトし、OmniRoute を経由するようにリクエストを書き換えます。
+IDE エージェント(GitHub Copilot、Cursor、Claude Code など)が API コールを行うと、アップストリームの AI プロバイダー(OpenAI、Anthropic など)に直接接続します。AgentBridge は、エージェント側の設定変更を一切必要とせず、TLS レベルでその接続を透過的にインターセプトし、OmniRoute を経由してリクエストを書き換えます。
 
-これにより、以下が可能になります。
+これにより、次のことが可能になります。
 
-- **任意のエージェントを任意のプロバイダーへ再ルーティング**: Copilot が OpenAI と通信している場合でも、Anthropic Claude、Gemini、または OmniRoute が対応する 372 のプロバイダーのいずれかへリダイレクトできます。
-- **モデルマッピングの適用**: ハンドラーレベルで `gemini-3-flash` → `claude-sonnet-4.7` のようなマッピングを透過的に適用できます。
-- **すべてのエージェントトラフィックを監視**: インターセプトされたすべてのリクエストは、[トラフィックインスペクター](./TRAFFIC_INSPECTOR.md)に送信されます。
-- **OmniRoute の耐障害性機能を適用**: コンボルーティング、サーキットブレーカー、フォールバック、コスト追跡を IDE エージェントのトラフィックにも適用できます。
+- **任意のエージェントを任意のプロバイダーへ振り替え**: Copilot が OpenAI と通信している? Anthropic Claude、Gemini、あるいは OmniRoute の 375 のプロバイダーのいずれかにリダイレクトできます。
+- **モデルマッピングの適用**: `gemini-3-flash` → `claude-sonnet-4.7` をハンドラーレベルで透過的に変換します。
+- **すべてのエージェントトラフィックを可視化**: インターセプトされたすべてのリクエストは [Traffic Inspector](./TRAFFIC_INSPECTOR.md) に公開されます。
+- **OmniRoute のレジリエンスを適用**: コンボルーティング、サーキットブレーカー、フォールバック、コスト追跡が IDE エージェントのトラフィックにもそのまま機能します。
 
-### 市場における位置付け
+### 市場におけるポジショニング
 
 | 機能                       | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
 | -------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
@@ -39,11 +39,11 @@ IDE エージェント（GitHub Copilot、Cursor、Claude Code など）が API 
 | Open Code                  |    —    |    —     |        ✓        |             ✓             |
 | Trae                       |    —    |    —     |        —        |         🔍 調査中         |
 | ダッシュボード UI          |    ✓    |    ✗     |        ✗        |             ✓             |
-| トラフィックインスペクター |    ✗    |    ✗     |        ✓        |             ✓             |
+| Traffic Inspector          |    ✗    |    ✗     |        ✓        |             ✓             |
 | OmniRoute ルーティング     |    ✗    |    ✗     |        ✗        |             ✓             |
 | モデルマッピング UI        |    ✗    |    ✗     |        ✗        |             ✓             |
 | バイパスリスト             |    ✗    |    ✗     |        ✓        |             ✓             |
-| 上流 CA 証明書             |    ✗    |    ✗     |        ✓        |             ✓             |
+| アップストリーム CA 証明書 |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

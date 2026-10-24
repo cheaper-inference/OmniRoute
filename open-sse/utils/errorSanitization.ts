@@ -4,6 +4,7 @@ import {
   stripRecognizedErrorStackTail,
 } from "./errorPathRedaction.ts";
 import { CREDENTIAL_PATTERNS } from "./credentialPatterns.ts";
+import { isPublicProviderSafetyCode } from "./providerSafety.ts";
 
 // Length cap protects against pathological inputs even before tokenization.
 const MAX_ERROR_LEN = 4096;
@@ -822,7 +823,8 @@ function projectUpstreamErrorIdentifier(key: UpstreamClassificationKey, value: u
   if (
     /^[1-5]\d{2}$/.test(value) ||
     /^HTTP_[1-5]\d{2}$/i.test(value) ||
-    SAFE_UPSTREAM_ERROR_IDENTIFIERS.has(value.toLowerCase())
+    SAFE_UPSTREAM_ERROR_IDENTIFIERS.has(value.toLowerCase()) ||
+    isPublicProviderSafetyCode(value)
   ) {
     return value;
   }

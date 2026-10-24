@@ -48,7 +48,6 @@ import { sanitizeErrorMessage, sanitizeUpstreamDetails } from "../utils/error.ts
 import { stringifyImageErrorForLog } from "./imageErrorLog.ts";
 
 import { handleSDWebUIImageGeneration } from "./imageGeneration/providers/sdWebUI.ts";
-import { buildImageEndpointSuccess, type ImageEndpointResult } from "./imageGeneration/result.ts";
 import { handleHyperbolicImageGeneration } from "./imageGeneration/providers/hyperbolic.ts";
 import { handleHuggingFaceImageGeneration } from "./imageGeneration/providers/huggingface.ts";
 import { handleComfyUIImageGeneration } from "./imageGeneration/providers/comfyUI.ts";
@@ -73,6 +72,7 @@ import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihord
 import * as codexImages from "./imageGeneration/providers/codexImages.ts";
 import { handleZenmuxImageGeneration } from "./imageGeneration/providers/zenmux.ts";
 import { handleMuseImageGeneration } from "./imageGeneration/providers/museImage.ts";
+import { handleGeminiAiImageGeneration } from "./imageGeneration/providers/geminiAiStudio.ts";
 import { handleBlackForestLabsImageGeneration } from "./imageGeneration/providers/blackForestLabs.ts";
 import {
   fanOutSingleImageCalls,
@@ -84,6 +84,7 @@ import {
   applyPollinationsAnonymousFallback,
   reportPollinationsAnonOutcome,
 } from "./imageGeneration/pollinationsAnonAuth.ts";
+import { fetchImageEndpoint } from "./imageGeneration/openAiImageFetch.ts";
 
 // Re-export so /v1/images/edits can dispatch Firefly reference-image edits.
 export { handleAdobeFireflyImageGeneration };
@@ -405,6 +406,9 @@ export async function handleImageGeneration({
   signal = null,
   clientHeaders = null,
   peerLocality = null,
+  // #16260 — IMAGE_GENERATION_LONG_JOBS, injected by the routes (the flag lives in src/):
+  // `{ resolveTimeoutMs }` for the OpenAI-compatible path. Null keeps the default behavior.
+  longJobs = null,
 }) {
   // Retirement guards: the retired-provider sets hold bare provider ids only, so testing
   // the `<provider>/` prefix (or the whole model when it carries no slash) covers both the
@@ -506,6 +510,8 @@ export async function handleImageGeneration({
       body,
       credentials,
       log,
+      signal,
+      longJobs,
     });
   }
 
@@ -576,6 +582,26 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "gemini-image") {
     return handleGeminiImageGeneration({ model, providerConfig, body, credentials, log });
+  }
+
+  if (providerConfig.format === "gemini-ai-image") {
+    return handleGeminiAiImageGeneration({
+      model,
+      providerConfig,
+      body,
+      credentials,
+      aspectRatio: normalizeImageAspectRatio(body.aspect_ratio, body.size),
+      signal,
+      log,
+      deps: {
+        saveCallLog,
+        saveErrorResult: saveImageErrorResult,
+        sanitizeProviderError: sanitizeImageProviderError,
+        fetchWithTimeout,
+        isTimeoutError: (err) => err instanceof FetchTimeoutError,
+        timeoutMs: getConfiguredTimeout(),
+      },
+    });
   }
 
   if (providerConfig.format === "imagen3") {
@@ -723,7 +749,15 @@ export async function handleImageGeneration({
   }
 
   if (providerConfig.format === "syntx-image") {
-    return handleSyntxImageGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleSyntxImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "nanobanana") {
@@ -870,7 +904,16 @@ export async function handleImageGeneration({
     });
   }
 
-  return handleOpenAIImageGeneration({ model, provider, providerConfig, body, credentials, log });
+  return handleOpenAIImageGeneration({
+    model,
+    provider,
+    providerConfig,
+    body,
+    credentials,
+    log,
+    signal,
+    longJobs,
+  });
 }
 
 function normalizeKieImageResult(recordData: unknown): string[] {
@@ -1317,6 +1360,8 @@ async function handleOpenAIImageGeneration({
   body,
   credentials,
   log,
+  signal,
+  longJobs,
 }) {
   const startTime = Date.now();
 
@@ -1396,6 +1441,11 @@ async function handleOpenAIImageGeneration({
   }
 
   const requestBody = JSON.stringify(upstreamBody);
+  // #16260 — the deadline always covers the body read (existing budget). The per-connection
+  // timeout and caller cancellation (499) only apply with IMAGE_GENERATION_LONG_JOBS on.
+  const fetchOptions = longJobs
+    ? { signal, timeoutMs: longJobs.resolveTimeoutMs(credentials?.providerSpecificData) }
+    : { timeoutMs: getConfiguredTimeout() };
 
   // Try primary URL
   let result = await fetchImageEndpoint(
@@ -1403,7 +1453,8 @@ async function handleOpenAIImageGeneration({
     headers,
     requestBody,
     provider,
-    log
+    log,
+    fetchOptions
   );
 
   // Fallback for providers with fallbackUrl (e.g., Nebius)
@@ -1420,7 +1471,8 @@ async function handleOpenAIImageGeneration({
       headers,
       requestBody,
       provider,
-      log
+      log,
+      fetchOptions
     );
   }
 
@@ -1544,7 +1596,8 @@ export async function handleOpenAIImageEdit({
     headers,
     multipartBody as unknown as BodyInit,
     provider,
-    log
+    log,
+    { timeoutMs: getConfiguredTimeout() }
   );
 
   saveCallLog({
@@ -1645,7 +1698,8 @@ export async function handleOpenRouterImageEdit({
     headers,
     JSON.stringify(upstreamBody),
     provider,
-    log
+    log,
+    { timeoutMs: getConfiguredTimeout() }
   );
 
   saveCallLog({
@@ -2787,98 +2841,6 @@ export function saveImageErrorResult({
     error,
     ...(retryable !== undefined ? { retryable } : {}),
   };
-}
-
-/**
- * Fetch a single image endpoint and normalize response
- */
-async function fetchImageEndpoint(url, headers, body, provider, log): Promise<ImageEndpointResult> {
-  try {
-    let response;
-    try {
-      response = await fetchWithTimeout(url, {
-        method: "POST",
-        headers,
-        body,
-        timeoutMs: getConfiguredTimeout(),
-      });
-    } catch (err: unknown) {
-      const isAbortError =
-        typeof err === "object" &&
-        err !== null &&
-        "name" in err &&
-        (err as { name?: unknown }).name === "AbortError";
-      if (err instanceof FetchTimeoutError || isAbortError) {
-        const message = err instanceof Error ? err.message : String(err);
-        if (log) {
-          log.error("IMAGE", `${provider} fetch error: ${message}`);
-        }
-        return {
-          success: false,
-          status: 504,
-          error: `Image provider error: ${sanitizeErrorMessage(message || err)}`,
-        };
-      }
-      throw err;
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      if (log) {
-        log.error("IMAGE", `${provider} error ${response.status}: ${errorText.slice(0, 200)}`);
-      }
-      return {
-        success: false,
-        status: response.status,
-        error: errorText,
-      };
-    }
-
-    const data = await response.json();
-
-    // Normalize response to OpenAI format
-    const items = Array.isArray(data?.data) ? data.data : [];
-
-    // Some providers return HTTP 2xx with an empty or malformed image
-    // payload (empty data array, missing/blank b64_json and url). Treating that
-    // as success makes image-combo strategies stop on the first leg and hand an
-    // image-less 200 to the client. Require at least one usable image item and
-    // surface an empty 2xx as a retryable 502 so combos fall back to the next
-    // priority leg.
-    const hasUsableImage = items.some(
-      (item: unknown) =>
-        isJsonObject(item) &&
-        ((typeof item.b64_json === "string" && item.b64_json.length > 0) ||
-          (typeof item.url === "string" && item.url.length > 0))
-    );
-    if (!hasUsableImage) {
-      if (log) {
-        log.warn(
-          "IMAGE",
-          `${provider} returned 200 without a usable image payload; treating as retryable 502`
-        );
-      }
-      return {
-        success: false,
-        status: HTTP_STATUS.BAD_GATEWAY,
-        error: sanitizeErrorMessage(
-          "Image provider returned a success status without an image payload"
-        ),
-      };
-    }
-
-    return buildImageEndpointSuccess(data, items);
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (log) {
-      log.error("IMAGE", `${provider} fetch error: ${message}`);
-    }
-    return {
-      success: false,
-      status: 502,
-      error: `Image provider error: ${sanitizeErrorMessage(message || err)}`,
-    };
-  }
 }
 
 /**

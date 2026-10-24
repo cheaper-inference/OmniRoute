@@ -1,1 +1,0 @@
-- **feat(providers):** add DaoXE OpenAI-compatible gateway (`daoxe`) with live `/v1/models` discovery and passthrough models ([#16889](https://github.com/diegosouzapw/OmniRoute/pull/16889)) — thanks @seven7763

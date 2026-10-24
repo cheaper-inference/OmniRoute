@@ -1,1 +1,0 @@
-- Synchronize the generated CLI key-policy skill with the existing model-access flags and guard its registry parity with a regression test.

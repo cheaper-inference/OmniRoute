@@ -1,1 +1,0 @@
-- **fix(responses):** a non-streaming `/v1/responses` client served by a Chat Completions upstream now gets `status: "incomplete"` with `incomplete_details` when the upstream stops on `length` or `content_filter`, instead of `completed`, as the streaming path already did (#14806).

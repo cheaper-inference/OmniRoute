@@ -45,60 +45,45 @@ ACP 代理程式（反向產生流程）：
 
 ## 使用 `setup-*` 自動設定
 
-您不必手動編寫每個工具的設定。OmniRoute 針對每個受支援的 CLI 提供一個 `setup-*`
-命令，該命令會從正在執行的 OmniRoute（本機或遠端）讀取**即時**模型目錄，
-並將該工具自己的設定寫入您的機器：
+您不必手動編寫每個工具的設定。OmniRoute 針對每個支援的 CLI 提供一個 `setup-*`
+命令，此命令會從執行中的 OmniRoute（本機或遠端）讀取**即時**模型目錄，並將該工具本身的設定寫入您的機器：
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-每個命令都接受 `--remote <url> --api-key <key>`（將本機工具設定為使用遠端
-OmniRoute）、`--dry-run`（僅預覽而不寫入）及 `--port`。不支援模型自動探索的工具
-（Cline、Kilo、Roo、Goose、Aider、Qwen、5dive）接受 `--model <id>`（非互動式執行
-另可使用 `--yes`）。`setup-5dive` 是唯一不會寫入 `$HOME` 下方的設定方案：
-它會在機群主機上寫入由 root 擁有的驗證設定檔，以設定 5dive 代理程式機群，
-因此會透過 `sudo` 重新執行，且本身不提供遠端模式。若要啟動 CLI 並注入正確的
-環境變數，且完全不寫入任何設定，請使用通用的 `omniroute run <target>` 啟動器
-（claude、codex、aider、goose、opencode、qwen、gemini——目標與別名來自
-`bin/cli/cli-manifest.mjs`）；舊版的個別工具啟動器 `omniroute launch`
-（Claude Code）與 `omniroute launch-codex`（Codex）仍然可用。Gemini CLI
-僅支援啟動：它是 `omniroute run` 的目標，但沒有 `setup-*`/`configure`
-設定方案。
+每個命令都接受 `--remote <url> --api-key <key>`（設定本機工具以連線至遠端
+OmniRoute）、`--dry-run`（只預覽而不寫入）及 `--port`。不支援自動探索模型的工具（Cline、Kilo、Roo、Goose、Aider、Qwen、5dive）接受
+`--model <id>`（非互動式執行時也可使用 `--yes`）。`setup-5dive` 是唯一不會在
+`$HOME` 下寫入內容的設定流程：它會在機群主機上寫入由 root 擁有的驗證設定檔，以設定 5dive 代理程式機群，因此會透過 `sudo`
+重新執行，而且本身不支援遠端模式。若要啟動 CLI、注入正確的環境變數且完全不寫入任何設定，請使用通用的
+`omniroute run <target>` 啟動器（claude、codex、aider、goose、opencode、qwen、
+gemini——目標及別名來自 `bin/cli/cli-manifest.mjs`）；舊版的各工具專用啟動器 `omniroute launch`（Claude Code）及 `omniroute launch-codex`
+（Codex）仍可使用。Gemini CLI 僅支援啟動：它是 `omniroute run`
+的目標，但沒有 `setup-*`/`configure` 設定流程。
 
-> **完整參考資料：**主表——包含每個命令會寫入的內容、所有旗標、
-> 本機與遠端的差異，以及哪些工具需要 `/v1` 後綴——位於
+> **完整參考資料：**主表——包括每個命令會寫入哪些內容、所有旗標、
+> 本機與遠端模式的差異，以及哪些工具需要 `/v1` 後綴——位於
 > **[CLI 整合](../guides/CLI-INTEGRATIONS.md)**。
 
 ### 在容器內執行這些命令
 
-在 OmniRoute 容器內執行的 `setup-*` 命令會寫入容器自己的家目錄，
-主機上的 CLI 不會讀取該目錄，而且該目錄會隨容器消失。OmniRoute 會偵測
-此情況，並以狀態碼 `2` 結束且顯示操作說明，而不會寫入。有兩種受支援的
-處理方式——在主機上安裝 CLI，並使用 `omniroute connect` 連線至容器；
-或繫結掛載設定目錄並設定 `CLI_CONFIG_HOME`（compose `host` 設定檔）。
-若您確實是要設定容器本身的 CLI，所有 `setup-*` 命令以及
-`omniroute configure` 和 `omniroute config set` 都接受
-`--allow-container-write`；伺服器也可使用
+在 OmniRoute 容器內執行的 `setup-*` 命令會寫入容器本身的家目錄，而主機上的 CLI 不會讀取該目錄，且該目錄會隨容器消失。
+OmniRoute 會偵測這種情況並以結束碼 `2` 結束，同時提供操作說明，而不會進行寫入。後續有兩種受支援的做法——在主機上安裝 CLI，並使用
+`omniroute connect` 連線至容器；或繫結掛載設定目錄並設定
+`CLI_CONFIG_HOME`（compose 的 `host` 設定檔）。每個 `setup-*` 命令，以及
+`omniroute configure` 和 `omniroute config set`，都接受
+`--allow-container-write`；若您實際上就是要設定容器本身的 CLI，便可使用此旗標；伺服器則可使用
 `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` 達到相同效果。請參閱
 [Docker 指南 → 設定主機 CLI 工具](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)。
 
-儀表板的**套用端點**（`POST /api/cli-tools/apply`）會執行相同的防護：
-在容器中，如果寫入目標不是從主機繫結掛載，則會回應 **`422`**，並包含
-`containerEphemeralTarget: true`、安全的錯誤文字，以及——對於具有主機設定方案
-的工具（claude、codex、opencode、cline、kilo、continue）——可改在主機上執行的
-`hostSetupCommand`（例如 `omniroute setup-opencode`）；不會寫入任何內容。
-`dryRun: true` 在容器模式下仍可正常運作，並會傳回已遮蔽敏感資訊的預覽與
-目標路徑，而不會存取磁碟。預覽內容並不是可供複製或匯入、且包含憑證的設定。
-請在主機上使用原始的工具／基礎 URL／API 金鑰／模型輸入進行套用，或使用指定的
-主機端設定命令。請參閱 [CLI 設定安全性](../security/CLI-CONFIGURATION.md)，
-以瞭解預覽標頭與請求契約。此行為是刻意設計的，並由
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` 進行迴歸防護——
-絕不要透過移除防護來「修正」422。
+儀表板的**套用端點**（`POST /api/cli-tools/apply`）會執行相同的防護措施：在容器中，如果寫入目標不是從主機繫結掛載，則會回應 **`422`**，並包含 `containerEphemeralTarget: true`、安全的錯誤文字，以及——對於具有主機設定流程的工具（claude、codex、opencode、cline、
+kilo、continue）——一個可改在主機上執行的 `hostSetupCommand`（例如 `omniroute setup-opencode`）；不會寫入任何內容。`dryRun: true` 在容器模式下仍可正常運作，並會回傳經遮蔽的預覽內容與目標路徑，而不會修改磁碟。預覽內容並不是可供複製或匯入的憑證設定。請在主機上使用原始的工具／基礎 URL／API 金鑰／模型輸入來套用設定，或使用所指示的主機端設定命令。關於預覽標頭及請求合約，請參閱 [CLI 設定安全性](../security/CLI-CONFIGURATION.md)。此行為是刻意設計的，並由
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` 進行迴歸防護——絕不可為了「修正」422 而移除此防護。
 
 ---
 
@@ -141,58 +126,59 @@ OmniRoute）、`--dry-run`（僅預覽而不寫入）及 `--port`。不支援模
 
 ---
 
-## 1. CLI Code 的目錄（26 個工具）
+## 1. CLI Code 的目錄（27 項工具）
 
-所有出現在 `/dashboard/cli-code` 中的工具。`baseUrlSupport: none` 的工具會透過 MITM 或手動指南連接，而非使用自訂基礎 URL：
+所有顯示於 `/dashboard/cli-code` 的工具。`baseUrlSupport: none` 的工具會透過 MITM 或手動指南連接，而不是使用自訂基礎 URL：
 
-| id           | 名稱                     | 提供者                          | 基礎 URL 支援 | 設定類型   | 可由 ACP 啟動 |
-| ------------ | ------------------------ | ------------------------------- | ------------- | ---------- | ------------- |
-| claude       | Claude Code              | Anthropic                       | 完整          | 環境變數   | 是            |
-| codex        | OpenAI Codex CLI         | OpenAI                          | 完整          | 自訂       | 是            |
-| zcode        | ZCode（GLM Coding Plan） | Z.ai                            | 無            | 自訂       | 否            |
-| cline        | Cline                    | 開放原始碼（前身為 Claude Dev） | 完整          | 自訂       | 是            |
-| kilo         | Kilo Code                | Kilo-Org                        | 完整          | 自訂       | 否            |
-| roo          | Roo Code                 | Roo（開放原始碼）               | 完整          | 指南       | 否            |
-| continue     | Continue                 | continue.dev                    | 完整          | 指南       | 否            |
-| aider        | Aider                    | 開放原始碼（P. Gauthier）       | 完整          | 指南       | 是            |
-| forge        | ForgeCode                | Antinomy HQ                     | 完整          | 自訂       | 是            |
-| jcode        | jcode                    | 1jehuang（開放原始碼）          | 完整          | 自訂       | 否            |
-| deepseek-tui | DeepSeek TUI             | Hunter Bown（開放原始碼）       | 完整          | 自訂       | 否            |
-| codewhale    | CodeWhale                | Hmbown（開放原始碼）            | 完整          | 自訂       | 否            |
-| opencode     | OpenCode                 | Anomaly（前身為 SST）           | 完整          | 指南       | 是            |
-| droid        | Factory Droid            | Factory AI                      | 部分          | 指南       | 否            |
-| copilot      | GitHub Copilot CLI       | GitHub/MS                       | 完整          | 自訂       | 否            |
-| cursor-cli   | Cursor CLI               | Anysphere                       | 部分          | 指南       | 是            |
-| smelt        | Smelt                    | leonardcser（開放原始碼）       | 完整          | 自訂       | 否            |
-| pi           | Pi（pi-coding-agent）    | M. Zechner（開放原始碼）        | 完整          | 自訂       | 否            |
-| grok-build   | Grok Build               | xAI                             | 完整          | 自訂       | 否            |
-| crush        | Crush                    | 開放原始碼（Charm）             | 完整          | 自訂       | 否            |
-| qwen         | Qwen Code                | Alibaba                         | 完整          | 指南       | 是            |
-| cursor       | Cursor                   | Anysphere                       | 無            | 指南       | 否            |
-| antigravity  | Antigravity              | Google                          | 無            | MITM       | 否            |
-| hermes       | Hermes                   | Nous Research                   | 無            | 指南       | 否            |
-| kiro         | Kiro AI                  | Amazon                          | 無            | MITM       | 否            |
-| custom       | 自訂 CLI                 | —                               | 完整          | 自訂建構器 | 否            |
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"` 的工具會在儀表板卡片上顯示「⚠ 部分支援基礎 URL」徽章。
+`baseUrlSupport: "partial"` 的工具會在儀表板卡片中顯示「⚠ 部分支援基礎 URL」徽章。
 ---
 
-## 2. CLI 代理目錄（10 個工具）
+## 2. CLI 代理程式目錄（10 項工具）
 
-出現在 `/dashboard/cli-agents` 中的自主代理：
+顯示於 `/dashboard/cli-agents` 中的自主代理程式：
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| id           | 名稱             | 提供者                   | 基礎 URL 支援 | 可由 ACP 產生 |
+| ------------ | ---------------- | ------------------------ | ------------- | ------------- |
+| hermes-agent | Hermes Agent     | Nous Research            | full          | false         |
+| openclaw     | OpenClaw         | OSS（P. Steinberger）    | full          | true          |
+| goose        | Goose            | Block / Linux Foundation | full          | true          |
+| interpreter  | Open Interpreter | OSS                      | full          | true          |
+| warp         | Warp AI          | Warp Inc.                | partial       | true          |
+| agent-deck   | Agent Deck       | asheshgoplani（OSS）     | full          | false         |
+| omp          | Oh My Pi         | OSS                      | full          | true          |
+| letta        | Letta CLI        | Letta                    | full          | false         |
+| prime-agent  | Prime Agent      | Prime Intellect（OSS）   | full          | false         |
+| 5dive        | 5dive            | OSS（5dive-ai）          | full          | false         |
 
 ---
 

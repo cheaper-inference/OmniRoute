@@ -293,6 +293,18 @@ test("invalid or weakened policy shape is rejected", () => {
   assert.notEqual(run(needsFor("ci"), context, "absent").verdict, "PASS");
 });
 
+// A self-hosted runner must never execute fork code. A runs-on expression satisfies that either by
+// admitting a pull request only from this repository, or by keeping every pull_request off the
+// self-hosted branch altogether — a pure conjunction (no `||`) that includes the exclusion, so no
+// other clause can re-admit the event (ci.yml `Build`, 2026-10-18).
+function keepsForkCodeOffSelfHosted(runsOn) {
+  if (runsOn.includes("github.event.pull_request.head.repo.full_name == github.repository")) {
+    return true;
+  }
+  const gate = runsOn.split(" && fromJSON(")[0];
+  return gate.includes("github.event_name != 'pull_request'") && !gate.includes("||");
+}
+
 for (const profile of ["ci", "quality"]) {
   test(`${profile}: workflow jobs and dependencies match the versioned admission policy`, () => {
     const workflow = loadYaml(
@@ -310,16 +322,19 @@ for (const profile of ["ci", "quality"]) {
     assert.equal(verdict.name, policy.profiles[profile].checkName);
     assert.equal(verdict.if, "${{ always() }}");
     assert.deepEqual(workflow.on.pull_request.branches, ["main", "release/**"]);
-    assert.deepEqual(workflow.on.push.branches, ["main", "release/**"]);
+    // Push runs only for main since 2026-10-18: each change already ran the matrix on its
+    // PR and Release-Green validates the merged combination on release/** (the per-push
+    // runs there were cancelled by the next merge, 24 of 24 in a day, while holding up to
+    // 30 hosted slots). See tests/unit/build/push-storm-diet.test.ts.
+    assert.deepEqual(workflow.on.push.branches, ["main"]);
     assert.ok(workflow.on.merge_group.types.includes("checks_requested"));
-    for (const job of Object.values(workflow.jobs)) {
+    for (const [id, job] of Object.entries(workflow.jobs)) {
       assert.ok(!String(job.if).includes("'hotfix'"), "a label cannot waive candidate evidence");
       if (String(job["runs-on"]).includes("self-hosted")) {
         assert.ok(job["runs-on"].includes("github.event_name != 'merge_group'"));
         assert.ok(
-          job["runs-on"].includes(
-            "github.event.pull_request.head.repo.full_name == github.repository"
-          )
+          keepsForkCodeOffSelfHosted(job["runs-on"]),
+          `${profile}:${id} must never run fork pull-request code on a self-hosted runner`
         );
       }
     }

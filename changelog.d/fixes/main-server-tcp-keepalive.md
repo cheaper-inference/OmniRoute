@@ -1,1 +1,0 @@
-- fix(server): enable TCP keepalive on main server connections to detect half-open sockets and avoid hanging streaming responses during silent network drops.

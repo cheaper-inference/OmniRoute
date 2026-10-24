@@ -1,1 +1,0 @@
-- **ci:** `Lock released branch` and `OpenSSF Scorecard` now run at most once per ref (`concurrency` with `cancel-in-progress`), so the ~10 pushes/hour on the active release branch no longer queue 20 hosted runs each against the account's concurrent-job limit.

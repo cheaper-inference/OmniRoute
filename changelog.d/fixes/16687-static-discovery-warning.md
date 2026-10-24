@@ -1,1 +1,0 @@
-- Correct the model-refresh warning for providers that intentionally use a local catalog: explain that discovery is not configured instead of reporting an unavailable upstream API.

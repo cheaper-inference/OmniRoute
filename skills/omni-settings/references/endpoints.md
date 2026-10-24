@@ -55,6 +55,7 @@
 - [`GET /api/settings/database`](#get-apisettingsdatabase)
 - [`PUT /api/settings/database`](#put-apisettingsdatabase)
 - [`PATCH /api/settings/database`](#patch-apisettingsdatabase)
+- [`POST /api/settings/database/integrity-check`](#post-apisettingsdatabaseintegrity-check)
 - [`POST /api/settings/database/refresh-stats`](#post-apisettingsdatabaserefresh-stats)
 - [`GET /api/settings/database/vacuum`](#get-apisettingsdatabasevacuum)
 - [`POST /api/settings/database/vacuum`](#post-apisettingsdatabasevacuum)
@@ -711,6 +712,19 @@ PATCH settings › database
 
 ```bash
 curl -X PATCH http://localhost:20128/api/settings/database \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/database/integrity-check
+
+POST settings › database › integrity check
+
+Runs SQLite `PRAGMA quick_check` on demand and stores the result. Reading the storage settings (GET /api/settings/database) only returns the last stored result and never runs the scan.
+
+```bash
+curl -X POST http://localhost:20128/api/settings/database/integrity-check \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'

@@ -1,1 +1,0 @@
-- Report whether connection restrictions come from an API key, quota scope, combo pin, or routing allowlist, and log distinct reasons when synthetic no-auth fallback is unavailable without changing credential selection or access rules.

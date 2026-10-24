@@ -1,1 +1,0 @@
-- **fix(providers):** align `xiaomi-mimo-token-plan` discovery-class metadata — declaring `modelsUrl` moves `getDiscoveryClass` from `static-only` to `openai-compat` and exposes the URL on the registry entry. Live `/v1/models` refresh already ships via #15308 ([#16686](https://github.com/diegosouzapw/OmniRoute/pull/16686))

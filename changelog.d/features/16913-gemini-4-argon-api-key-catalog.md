@@ -1,1 +1,0 @@
-- **feat(models):** list Gemini 4 Argon on the Gemini API (API-key) provider and give it a default pricing row (intro paid tier $2 / $10 / $0.10 cached per 1M), so API-key usage is no longer billed at $0 ([#16913](https://github.com/diegosouzapw/OmniRoute/pull/16913)) — thanks @WYSTAF

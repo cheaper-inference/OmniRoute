@@ -13,109 +13,58 @@ OmniRoutessa on reittitietoinen valtuutusputki, joka valvoo jokaista API-pyyntö
 
 > Lähde: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## Kaksi todennustapaa
+## Kaksi todennustilaa
 
 ### 1. API-avain (Bearer)
 
-Käytetään OpenAI-/Anthropic-/Gemini-yhteensopivissa asiakasrajapinnoissa ja muutamilla hallintareiteillä, kun avaimella on `manage`-käyttöoikeus.
+Käytetään OpenAI/Anthropic/Gemini-yhteensopivissa asiakasrajapinnoissa ja joissakin hallintareiteissä, kun avaimella on `manage`-laajuus.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Validoinnin suorittavat `isValidApiKey()` / `extractApiKey()` tiedostossa `src/sse/services/auth.ts`, ja ne viedään uudelleen tiedoston `src/shared/utils/apiAuth.ts` kautta. Validoija hyväksyy myös ympäristömuuttujat `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` pysyvinä läpivientiavaimina (ongelma #1350).
+Tarkistaa `isValidApiKey()` / `extractApiKey()` tiedostossa `src/sse/services/auth.ts`, ja se viedään uudelleen tiedoston `src/shared/utils/apiAuth.ts` kautta. Validaattori hyväksyy myös ympäristömuuttujat `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` pysyvinä läpikulkuavaimina (issue #1350).
 
-### 2. Hallintapaneelin istunto (auth_token-eväste)
+### 2. Dashboard-istunto (auth_token-evästeen)
 
-Hallintapaneelin sivuille ja ylläpitotoimintoihin.
+Dashboard-sivuille ja ylläpitotoimintoihin.
 
 ```
-Cookie: auth_token=<JWT allekirjoitettuna JWT_SECRET-arvolla>
+Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Eväste on istunto vain, kun JWT:n vahvistus onnistuu **ja** se sisältää arvon `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Jokainen
-evästeen käyttäjä (hallintapaneelin reittisuojaus (`isDashboardSessionAuthenticated()`), valtuutusputken päivitys, WebSocket-kättely, live-
-palvelin, `/api/settings/require-login`, `/api/auth/status`) käyttää kyseistä apufunktiota.
-Muitakin `JWT_SECRET`-arvolla allekirjoitettuja JWT-tunnisteita on olemassa — Cursor CLI:n läpivienti luo
-avaimen haltijoille tunnisteita, joissa on `iss "omniroute" / aud "cursor-cli"` — eikä niitä koskaan käsitellä istuntoina
-(#13298).
+Eväste on istunto vain, jos JWT vahvistetaan **ja** siinä on `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Jokainen evästeen käyttäjä (dashboardin reittivartija (`isDashboardSessionAuthenticated()`), todennuspipelinen uusiminen, WebSocket-kättely, live-palvelin, `/api/settings/require-login`, `/api/auth/status`) kulkee tämän apufunktion kautta. Muitakin `JWT_SECRET`-avaimella allekirjoitettuja JWT-tunnuksia on olemassa. Cursor CLI -läpikulku myöntää avainten haltijoille tunnuksia, joissa on `iss "omniroute" / aud "cursor-cli"`, mutta ne eivät koskaan ole istuntoja (#13298).
 
-Vahvistuksen suorittaa `isDashboardSessionAuthenticated()` tiedostossa `src/shared/utils/apiAuth.ts`. Putki päivittää JWT:n automaattisesti, kun sen 30 päivän voimassaoloajasta on jäljellä alle 7 päivää.
+Vahvistaa `isDashboardSessionAuthenticated()` tiedostossa `src/shared/utils/apiAuth.ts`. Pipeline uusii JWT:n automaattisesti, kun sen 30 päivän elinajasta on jäljellä alle 7 päivää.
 
-Istunto voi päättyä myös ennen 30 päivän määräajan täyttymistä, koska jokainen tunnisteen luoja käyttää `mintDashboardSessionToken`-funktiota (myöntämisaika `iat` ja tunniste `jti`) ja vahvistin tarkistaa kaksi asetusta: `sessionsValidAfter`, joka asetetaan salasanan vaihdon yhteydessä siten, että kaikki sitä ennen myönnetyt istunnot lakkaavat läpäisemästä vahvistusta (salasanan vaihtanut selain saa uuden evästeen), sekä `revokedDashboardSessions`, johon `POST /api/auth/logout` lisää uloskirjatun istunnon `jti`-arvon. Vanhemmalla julkaisulla luodut istunnot eivät sisällä kumpaakaan väitettä ja pysyvät voimassa ensimmäiseen salasanan vaihtoon asti. Jos asetuksia ei voida lukea, istuntoon ei luoteta.
+Istunto voi päättyä ennen 30 päivän kulumista, koska jokainen myöntäjä kulkee `mintDashboardSessionToken`-funktion kautta (myöntöaika `iat` ja tunniste `jti`) ja vahvistaja tarkistaa kaksi asetusta: `sessionsValidAfter`, jonka salasanan vaihto asettaa, jolloin kaikki ennen sitä myönnetyt istunnot lakkaavat vahvistumasta (salasanan vaihtanut selain saa uuden evästeen), ja `revokedDashboardSessions`, johon `POST /api/auth/logout` lisää kirjautuneen ulos istunnon `jti`:n. Vanhemman julkaisun myöntämissä istunnoissa ei ole kumpaakaan väittämää, ja ne pysyvät voimassa ensimmäiseen salasanan vaihtoon asti. Jos asetuksia ei voi lukea, istuntoon ei luoteta.
 
-Jotkin hallintareitit hyväksyvät **kumman tahansa** tavan: evästeen TAI `Bearer <key>` -arvon, kun API-avaimella on `manage`- (tai `admin`-) käyttöoikeus. Tämä mahdollistaa versiossa v3.8 lisätyn ”määritettävissä API-kutsuilla” -työnkulun.
+Jotkin hallintareitit hyväksyvät **kummankin** tilan: evästeen TAI `Bearer <key>`, kun API-avaimella on `manage`- (tai `admin`-) laajuus. Tämä mahdollistaa v3.8:ssa lisätyn ”määritettävissä API-kutsuilla” -työnkulun.
 
 #### Valinnainen OIDC-kirjautumisportti (#6973)
 
-Hallintapaneelin ylläpitäjäkirjautuminen tukee myös **valinnaisesti käyttöön otettavaa** OIDC (OpenID Connect) -kulkua
-oletusarvoisen salasanakirjautumisen rinnalla — salasanakirjautumista ei koskaan poisteta, vaan sitä ainoastaan
-täydennetään:
+Dashboardin ylläpitäjän kirjautuminen tukee myös **valinnaista** OIDC-kulkua (OpenID Connect) oletussalasanakirjautumisen rinnalla. Salasanakirjautumista ei koskaan poisteta, vaan sitä vain täydennetään:
 
-- Poissa käytöstä, ellei `settings.oidcEnabled === true` **ja** kaikkia arvoja `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` ole määritetty (Asetukset → Todennus).
-  `GET /api/auth/oidc/login` palauttaa muussa tapauksessa arvon `400`.
-- `GET /api/auth/oidc/login` selvittää `authorization_endpoint`-arvon myöntäjän
-  `/.well-known/openid-configuration`-osoitteesta (varavaihtoehtona
-  `<issuer>/authorize`), muodostaa uudelleenohjaus-URI:n saapuvasta pyynnöstä
-  (`x-forwarded-proto` huomioiden) ja ohjaa IdP-palveluun satunnaisen `state`-arvon kanssa,
-  joka on tallennettu `httpOnly`-tyyppiseen `oidc_state`-evästeeseen.
-- `GET /api/auth/oidc/callback` validoi `state`-arvon, vaihtaa valtuutuskoodin
-  ja vahvistaa ID-tunnisteen allekirjoituksen myöntäjän JWKS:n avulla
-  (`jose`-paketin `createRemoteJWKSet`, välimuistissa JWKS-URI-kohtaisesti) käyttäen `issuer`-/`audience`-
-  tarkistuksia. `oidcAllowedSubjects`-sallittujen luettelo vaaditaan: se vertaa tunnisteen
-  `sub`-väitettä tai sen `email`-väitettä — sähköpostiväite hyväksytään vain,
-  kun `email_verified === true`, joten IdP:n vahvistamaton sähköpostiosoite ei voi koskaan
-  läpäistä porttia — ja jos merkintöjä ei ole, paluukutsu hylkää kaikki kirjautumiset
-  (`not_configured`).
-- Onnistuessaan se luo **täsmälleen saman** 30 päivän `auth_token`-JWT:n, jonka salasana-
-  kirjautuminen myöntää (`src/app/api/auth/login/route.ts`), joten hallintapaneelin
-  istuntoputken muu toiminta (automaattinen päivitys, evästeen asetukset) säilyy muuttumattomana —
-  OIDC korvaa vain evästeen luontitavan, ei sen myöntämiä oikeuksia.
-- Jokainen `oidc*`-asetus (`oidcEnabled`, `oidcDisablePasswordLogin`,
-  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) kuuluu `SECURITY_IMPACTING_SETTINGS_KEYS`-
-  luetteloon (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
-  vastaa `400 PASSWORD_REQUIRED`, ellei pyynnön runko sisällä hallinta-
-  salasanaa `currentPassword`-arvona (`401 PASSWORD_MISMATCH`, kun se on väärä).
-  `oidcDisablePasswordLogin` estää salasana_kirjautumisen_ (`POST /api/auth/login`)
-  mutta säilyttää tallennetun salasanatiivisteen, ja uudelleentodennus tarkistaa edelleen
-  `currentPassword`-arvon sitä vasten.
-- `POST /api/settings/import-json` ohittaa tämän uudelleentodennuksen, joten se poistaa jokaisen
-  `IMPORT_STRIPPED_SETTINGS_KEYS`-luettelon avaimen (sama tiedosto) ennen kirjoittamista: salasanan ja
-  `currentPassword`-arvon, jokaisen `SECURITY_IMPACTING_SETTINGS_KEYS`-merkinnän sekä
-  hallintapaneelin istuntotilan (`sessionsValidAfter`, `revokedDashboardSessions`).
-  Vanhemman varmuuskopion tuonti ei siten voi palauttaa istuntoa, jonka salasanan
-  vaihto tai uloskirjautuminen on jo päättänyt.
+- Pois käytöstä, ellei `settings.oidcEnabled === true` **ja** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` ole kaikki määritetty (Asetukset → Todennus). `GET /api/auth/oidc/login` palauttaa muuten `400`.
+- `GET /api/auth/oidc/login` selvittää `authorization_endpoint`-päätepisteen issuerin `/.well-known/openid-configuration`-osoitteesta (palautuu osoitteeseen `<issuer>/authorize`), rakentaa uudelleenohjaus-URI:n saapuvasta pyynnöstä (`x-forwarded-proto` huomioiden) ja ohjaa IdP:lle satunnaisella `state`-arvolla, joka tallennetaan `httpOnly`-evästeeseen `oidc_state`.
+- `GET /api/auth/oidc/callback` vahvistaa `state`-arvon, vaihtaa authorization coden ja vahvistaa ID-tokenin allekirjoituksen issuerin JWKS-avaimista (`jose`:n `createRemoteJWKSet`, välimuistissa JWKS-URI:n mukaan) tarkistaen `issuer`/`audience`. Sallittujen tilaajien lista `oidcAllowedSubjects` vaaditaan: se vastaa tokenin `sub`-väittämää tai `email`-väittämää. Sähköpostiväittämä hyväksytään vain, kun `email_verified === true`, joten vahvistamaton sähköposti IdP:ssä ei voi koskaan päästä porttien läpi. Ilman merkintöjä callback hylkää jokaisen kirjautumisen (`not_configured`).
+- Onnistuessaan se myöntää **täsmälleen saman** 30 päivän `auth_token`-JWT:n kuin salasanakirjautuminen (`src/app/api/auth/login/route.ts`), joten dashboardin muu istuntopipeline (automaattinen uusiminen, evästeen liput) ei muutu. OIDC korvaa vain sen, miten eväste myönnetään, ei sitä, mitä se antaa.
+- Jokainen `oidc*`-asetus (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) on tiedostossa `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` vastaa `400 PASSWORD_REQUIRED`, ellei pyynnön runko sisällä hallintasalasanaa kentässä `currentPassword` (`401 PASSWORD_MISMATCH`, kun se on väärin). `oidcDisablePasswordLogin` kieltää salasanakirjautumisen (`POST /api/auth/login`) mutta säilyttää tallennetun salasanatiivisteen, ja uudelleentodennus tarkistaa edelleen `currentPassword`-kentän sitä vastaan.
+- Myös `corsOrigins` ja `bruteForceProtection` ovat tiedostossa `SECURITY_IMPACTING_SETTINGS_KEYS`: niiden löysentäminen heikentää kirjautumisen suojauksia, joten ne vaativat saman uudelleentodennuksen `currentPassword`-kentällä (Turvallisuus-välilehti pyytää sen), ja JSON-tuonti pudottaa ne.
+- Jokainen turvallisuuskäytännön avain (`SECURITY_IMPACTING_SETTINGS_KEYS`-merkinnät, jokainen `oidc*`-avain ja dashboardin istuntotila) on **vain operaattorille** `PATCH /api/settings`-rajapinnassa: `manage`-laajuuden API-avain tai `oma_`-käyttötunnus hylätään `403`-virheellä, vaikka se lähettäisi oikean `currentPassword`-kentän, ja hylkäys kirjataan tilaan `settings.update_failed` syyllä `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` tiedostossa `src/lib/api/operatorCredential.ts`). Tavalliset asetukset (teema, näyttöasetukset) pysyvät kirjoitettavina `manage`-avaimella tai `admin`-käyttötunnuksella. Jokainen `/api/settings`-muutos itse (ja `/api/settings/require-login`) vaatii myös käyttötunnuksen `admin`-laajuuden (`ADMIN_MUTATION_EXACT_PATHS` tiedostossa `src/server/authz/accessScopes.ts`, tarkka polkuvastaavuus). `GET` pysyy `read`-laajuudessa, ja muut `/api/settings/*`-alireitit (välityspalvelimet, combo-oletukset, mallialiakset, pakkaus, tyhjennykset …) säilyttävät metodista päätellyn `write`-laajuuden.
+- `POST /api/settings/import-json` ohittaa tuon uudelleentodennuksen, joten se pudottaa jokaisen avaimen tiedostosta `IMPORT_STRIPPED_SETTINGS_KEYS` ennen kirjoittamista: salasanan ja `currentPassword`-kentän, jokaisen `SECURITY_IMPACTING_SETTINGS_KEYS`-merkinnän ja dashboardin istuntotilan (`sessionsValidAfter`, `revokedDashboardSessions`). Vanhemman varmuuskopion tuonti ei siis voi herättää henkiin istuntoa, jonka salasanan vaihto tai uloskirjautuminen on jo päättänyt.
 
 ## Reittiluokat
 
-`src/server/authz/types.ts` määrittelee kolme luokkaa; kaikki reitit, joita ei voida luokitella yksiselitteisesti, kuuluvat oletusarvoisesti luokkaan `MANAGEMENT`.
+`src/server/authz/types.ts` määrittelee kolme luokkaa. Jokainen reitti, jota ei voi luokitella deterministisesti, palautuu oletuksena luokkaan `MANAGEMENT`.
 
-| Luokka       | Kuvaus                                                                                                                                                      | Vaadittu todennus                                                               |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `PUBLIC`     | Nimenomaisesti turvalliset reitit — sisäänkirjautuminen, uloskirjautuminen, tila, alustus, kuntotarkistus ja käyttöönoton käynnistys.                       | Ei mitään                                                                       |
-| `CLIENT_API` | Mallia palvelevat päätepisteet — `/api/v1/*`, `/api/v1beta/*` sekä aliakset `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-avain, kun efektiivinen `REQUIRE_API_KEY`-ominaisuuslippu on käytössä    |
-| `MANAGEMENT` | Hallintapaneelin sivut, asetukset, palveluntarjoajat, avaimet sekä ylläpito- ja diagnostiikkapäätepisteet.                                                  | Hallintapaneeli-istunto TAI Bearer-tunniste, jolla on `manage`-käyttöoikeusalue |
+| Luokka       | Kuvaus                                                                                                                                                 | Todennus vaaditaan                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `PUBLIC`     | Nimenomaisesti turvalliset reitit: kirjautuminen, uloskirjautuminen, tila, alustus, terveystarkistus ja onboarding-bootstrap.                          | Ei mitään                                                         |
+| `CLIENT_API` | Mallipalvelun päätepisteet: `/api/v1/*`, `/api/v1beta/*` sekä aliakset `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-avain, kun `REQUIRE_API_KEY`-ominaisuusliput ovat käytössä |
+| `MANAGEMENT` | Dashboard-sivut, asetukset, palveluntarjoajat, avaimet, ylläpito- ja diagnostiikkapäätepisteet.                                                        | Dashboard-istunto TAI Bearer, jolla on `manage`-laajuus           |
 
-Muutamat `MANAGEMENT`-toiminnot on rajattu **vain operaattoreille**: `manage`-avain ei riitä. Tallennettujen
-tunnistetietojen vienti (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), synkronointitunnisteen myöntäminen (`POST /api/sync/tokens`) ja
-`admin`-CLI-käyttötunnisteen luominen (`POST /api/cli/tokens`) edellyttävät hallintapaneeli-istuntoa, paikallista CLI-
-subjektia tai sitä, että sisäänkirjautuminen on poistettu käytöstä; minkä tahansa käyttöoikeusalueen API-avaimet ja `oma_`-käyttötunnisteet saavat vastaukseksi `403`. Tarkistus
-sijaitsee tiedostossa `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
-
-A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
-credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), restoring a backup over the live data
-(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
-`POST /api/settings/import-json`), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
-lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
+Osa `MANAGEMENT`-toiminnoista on **vain operaattorille**: `manage`-avain ei riitä. Tallennettujen tunnistetietojen vieminen (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), varmuuskopion palauttaminen nykyisen datan päälle (`POST /api/db-backups/import` mukaan lukien `dryRun=true`, `POST /api/db-backups` palautus tunnuksella, `POST /api/settings/import-json`) ja palautuspisteiden tuhoaminen (`DELETE /api/db-backups` siivous sekä `PATCH /api/db-backups`, koska tallennettu säilytysaika ohjaa jokaisen varmuuskopioinnin jälkeisen automaattisen siivouksen) vaativat dashboard-istunnon, paikallisen CLI-identiteetin tai sen, että kirjautuminen on poistettu käytöstä. Synkronointitunnuksen myöntäminen (`POST /api/sync/tokens`) ja `admin`-laajuuden CLI-käyttötunnuksen luominen (`POST /api/cli/tokens`) vaativat dashboard-istunnon tai paikallisen CLI-identiteetin kaikissa kirjautumistiloissa. API-avaimet millä tahansa laajuudella ja `oma_`-käyttötunnukset eivät ole operaattorin tunnistetietoja: ne saavat `403`-virheen aina, kun sellainen vaaditaan. Tarkistus on tiedostossa `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Kirjautumisasetusten muuttaminen on myös vain operaattorille: `POST /api/settings/require-login` (aseta hallintasalasana / vaihda `requireLogin`) hyväksyy nämä tunnistetiedot vain, kun salasana on jo olemassa. Ensimmäisen käynnistyksen bootstrap-ikkuna (ei vielä salasanaa) on ennallaan, ja dashboard-istunnon on lähetettävä `currentPassword`, jotta salasana voidaan korvata (`403`, kun se puuttuu tai on väärä, kirjattu tilaan `settings.update_failed`). Paikallinen CLI ja instanssi, jossa kirjautuminen on pois käytöstä, säilyttävät palautusreitin ja saavat asettaa salasanan ilman sitä, koska molemmat on sidottu isäntään, joka omistaa datahakemiston.
 
 ## Putki
 
@@ -268,15 +217,15 @@ Se pysyy poissa käytöstä, ellei `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Tämä järjestys koskee vain käyttöoikeustunnuksen
 tunnistetietoja. Katso [Hallinnan todennus](../guides/MANAGEMENT-AUTH.md).
 
-## Todennusvaatimuksen valitsin
+## Todennuksen pakollisuuden kytkin
 
-Tiedoston `src/shared/utils/apiAuth.ts` funktio `isAuthRequired()` määrittää, valvotaanko pyynnölle **mitään** todennusta:
+`isAuthRequired()` tiedostossa `src/shared/utils/apiAuth.ts` ratkaisee, pakotetaanko pyynnölle **mitään** todennusta:
 
-- `settings.requireLogin === false` → todennus on poistettu käytöstä maailmanlaajuisesti.
-- Salasanaa ei ole määritetty **eikä** `INITIAL_PASSWORD`-ympäristömuuttujaa ole asetettu → alustustila sallii käyttöönottotoiminnon ja loopback-pyynnöt, mutta verkon kautta tulevat pyynnöt edellyttävät silti tunnistetietoja.
-- Mikä tahansa tietokantavirhe → pääsy estetään (oletusarvoisesti turvallinen toimintatapa).
+- `settings.requireLogin === false` → todennus on kytketty globaalisti pois päältä, lukuun ottamatta aina suojattua tasoa (ks. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ja kutsuja, jotka antavat ulos tunnistetiedon, jonka se hyväksyy. Nämä vaativat saman tunnistetiedon kuin kirjautumisen ollessa päällä: synkronointitunnusten myöntäminen, CLI-käyttötunnusten myöntäminen millä tahansa laajuudella sekä `manage`/`admin`-laajuuden API-avaimen luominen, tuon laajuuden myöntäminen avaimelle tai sellaisen avaimen uudelleengenerointi tai näyttäminen (`requireCredentialForManagementScopedKey()` tiedostossa `src/lib/api/requireManagementAuth.ts`). Pelkkiä päättelyavaimia varten jäävät avoimiksi.
+- Salasanaa ei ole määritetty **eikä** `INITIAL_PASSWORD`-ympäristömuuttujaa ole → bootstrap-tila sallii käyttöönottotoimet ja loopback-pyynnöt, mutta verkkoon avatut pyynnöt vaativat edelleen tunnistetiedot.
+- Mikä tahansa tietokantavirhe → estää pääsyn (oletusarvoisesti turvallinen).
 
-Asiakkaan API-avaimen vaatimuksen valvonta käyttää tiedoston `src/shared/utils/featureFlags.ts` funktiota `isRequireApiKeyEnabled()`, eikä lue suoraan arvoa `process.env.REQUIRE_API_KEY`. Tämä on tärkeää käyttöönotetuissa instansseissa: asetuksen `REQUIRE_API_KEY` muuttaminen kohdassa Dashboard → Feature Flags tallentaa tietokantaan ohitusarvon ja vaikuttaa välittömästi reitteihin `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` sekä muihin tätä apufunktiota käyttäviin asiakas-API:n todennustarkistuksiin. Jos ominaisuuslippujen tallennustilaa ei voida lukea, asiakas-API:n todennus estää pääsyn ja vaatii avaimen.
+Asiakas-API:n avainten pakottaminen käyttää `isRequireApiKeyEnabled()`-funktiota tiedostossa `src/shared/utils/featureFlags.ts`, ei suoraan `process.env.REQUIRE_API_KEY`-lukua. Tällä on merkitystä käyttöönotetuille instansseille: `REQUIRE_API_KEY`-arvon vaihtaminen kohdassa Dashboard → Feature Flags tallentaa tietokantaan ohituksen ja vaikuttaa välittömästi reitteihin `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ja muihin asiakas-API:n todennustarkistuksiin, jotka jakavat tämän apufunktion. Jos feature flag -varastoa ei voi lukea, asiakas-API:n todennus estää pääsyn ja vaatii avaimen.
 
 ## Rikkova muutos — v3.8.0
 

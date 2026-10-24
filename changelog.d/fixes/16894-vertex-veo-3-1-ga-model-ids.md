@@ -1,1 +1,0 @@
-- **fix(video):** list the Vertex Veo 3.1 / 3.1 Fast GA model ids (`veo-3.1-generate-001`, `veo-3.1-fast-generate-001`) in the video catalog ([#16894](https://github.com/diegosouzapw/OmniRoute/pull/16894)) — thanks @coozgan

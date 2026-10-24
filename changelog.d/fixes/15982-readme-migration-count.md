@@ -1,1 +1,0 @@
-- Keep translated README migration counts synchronized with the SQL migration files and check all configured README mirrors in the documentation gate.

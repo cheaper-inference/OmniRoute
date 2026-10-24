@@ -15,19 +15,19 @@ coverage, र reconciliation चरणहरूसँग नक्साङ्�
 
 ## विकास सेटअप
 
-### पूर्वावश्यकताहरू
+### पूर्वापेक्षाहरू
 
-- **Node.js** `>=22.22.3 <23`, वा `>=24.0.0 <27` (सिफारिस गरिएको: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, वा `>=24.0.0 <27` (सिफारिस गरिएको: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ प्रयोगकर्ताहरू (Node 24+):** `npm install` पछि, native modules स्थापना भएका छन् कि छैनन् भनी पुष्टि गर्नुहोस्:
+> **npm v11+ प्रयोगकर्ताहरू (Node 24+):** `npm install` पछि, नेटिभ मोड्युलहरू स्थापना भएका छन् भनी प्रमाणित गर्नुहोस्:
 > `node -e "require('better-sqlite3')"`. यदि यो `MODULE_NOT_FOUND` सहित असफल भयो भने,
 > `npm approve-scripts better-sqlite3 && npm install` चलाउनुहोस्। हेर्नुहोस्
 > [समस्या निवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
 
 - **Git**
 
-### Clone र स्थापना
+### क्लोन र स्थापना
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,94 +35,94 @@ cd OmniRoute
 npm install
 ```
 
-### Environment Variables
+### वातावरण चरहरू
 
 ```bash
 # टेम्प्लेटबाट आफ्नो .env सिर्जना गर्नुहोस्
 cp .env.example .env
 
-# आवश्यक secrets उत्पन्न गर्नुहोस्
+# आवश्यक गोप्य मानहरू उत्पन्न गर्नुहोस्
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-विकासका लागि मुख्य variables:
+विकासका लागि मुख्य चरहरू:
 
-| Variable               | विकासको पूर्वनिर्धारित मान | विवरण                     |
-| ---------------------- | -------------------------- | ------------------------- |
-| `PORT`                 | `20128`                    | Server port               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Frontend का लागि base URL |
-| `JWT_SECRET`           | (माथि उत्पन्न गर्नुहोस्)   | JWT signing secret        |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | पहिलो login password      |
-| `APP_LOG_LEVEL`        | `info`                     | Log verbosity level       |
+| चर                     | विकासको पूर्वनिर्धारित मान | विवरण                   |
+| ---------------------- | -------------------------- | ----------------------- |
+| `PORT`                 | `20128`                    | सर्भर पोर्ट             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | फ्रन्टएन्डको आधार URL   |
+| `JWT_SECRET`           | (माथि उत्पन्न गर्नुहोस्)   | JWT हस्ताक्षर गोप्य मान |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | पहिलो लगइनको पासवर्ड    |
+| `APP_LOG_LEVEL`        | `info`                     | लगको विस्तृतताको स्तर   |
 
-### Dashboard Settings
+### ड्यासबोर्ड सेटिङहरू
 
-Dashboard ले environment variables मार्फत पनि configure गर्न सकिने features का लागि UI toggles उपलब्ध गराउँछ:
+ड्यासबोर्डले वातावरण चरहरूमार्फत पनि कन्फिगर गर्न सकिने सुविधाहरूका लागि UI टगलहरू प्रदान गर्छ:
 
-| Setting को स्थान    | Toggle             | विवरण                                    |
-| ------------------- | ------------------ | ---------------------------------------- |
-| Settings → Advanced | Debug Mode         | Debug request logs सक्षम गर्नुहोस् (UI)  |
-| Settings → General  | Sidebar Visibility | Sidebar sections देखाउनुहोस्/लुकाउनुहोस् |
+| सेटिङको स्थान      | टगल               | विवरण                                   |
+| ------------------ | ----------------- | --------------------------------------- |
+| सेटिङहरू → उन्नत   | डिबग मोड          | डिबग अनुरोध लगहरू सक्षम गर्नुहोस् (UI)  |
+| सेटिङहरू → सामान्य | साइडबारको दृश्यता | साइडबार खण्डहरू देखाउनुहोस्/लुकाउनुहोस् |
 
-यी settings database मा भण्डारण हुन्छन् र restart पछि पनि कायम रहन्छन्, साथै set गरिएका बेला env var का पूर्वनिर्धारित मानहरूलाई override गर्छन्।
+यी सेटिङहरू डेटाबेसमा भण्डारण हुन्छन् र पुनः सुरु गरेपछि पनि कायम रहन्छन्। सेट गरिएका बेला तिनले वातावरण चरका पूर्वनिर्धारित मानहरूलाई अधिलेखन गर्छन्।
 
 ### स्थानीय रूपमा चलाउने
 
 ```bash
-# विकास mode (hot reload)
+# विकास मोड (हट रिलोड)
 npm run dev
 
-# Production build
+# उत्पादन बिल्ड
 npm run build    # next build → .build/next/ त्यसपछि assembleStandalone → dist/
 npm run start
 
-# योगदानकर्ताका परिवर्तनहरूका लागि छिटो backend/API-मात्र compile
+# योगदानकर्ताका परिवर्तनहरूका लागि द्रुत ब्याकएन्ड/API-मात्र कम्पाइल
 npm run build:contributor
 
-# Release build (सफा rebuild + HEAD sentinel — deploy का लागि आवश्यक)
+# रिलिज बिल्ड (सफा पुनःबिल्ड + HEAD सेन्टिनेल — डिप्लोयका लागि आवश्यक)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA लेख्छ
 
-# सामान्य port configuration
+# सामान्य पोर्ट कन्फिगरेसन
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Contributor build ले compile-मात्र validation गर्छ: यसले standalone
-distribution assemble गर्दैन वा वैकल्पिक native packaging assets build गर्दैन। पठाउन मिल्ने bundle validate गर्नुपर्ने बेला
-नियमित production build प्रयोग गर्नुहोस्।
+योगदानकर्ता बिल्डले कम्पाइल-मात्र प्रमाणीकरण गर्छ: यसले standalone
+वितरण तयार गर्दैन वा वैकल्पिक नेटिभ प्याकेजिङ एसेटहरू बिल्ड गर्दैन। वितरण गर्न मिल्ने बन्डल प्रमाणित गर्न
+आवश्यक हुँदा नियमित उत्पादन बिल्ड प्रयोग गर्नुहोस्।
 
-### Build Output को संरचना
+### बिल्ड आउटपुटको संरचना
 
-| Directory | सामग्री                                                                        | Track गरिएको |
-| --------- | ------------------------------------------------------------------------------ | ------------ |
-| `src/`    | Application source (TypeScript / TSX)                                          | हो           |
-| `.build/` | मध्यवर्ती फाइलहरू — `next build` output (gitignored, `distDir = .build/next`)  | होइन         |
-| `dist/`   | पठाउन मिल्ने bundle — `assembleStandalone` द्वारा assemble गरिएको (gitignored) | होइन         |
+| डाइरेक्टरी | सामग्री                                                                             | ट्र्याक गरिएको |
+| ---------- | ----------------------------------------------------------------------------------- | -------------- |
+| `src/`     | एप्लिकेसन स्रोत (TypeScript / TSX)                                                  | हो             |
+| `.build/`  | मध्यवर्ती फाइलहरू — `next build` आउटपुट (gitignore गरिएको, `distDir = .build/next`) | होइन           |
+| `dist/`    | वितरणयोग्य बन्डल — `assembleStandalone` द्वारा तयार गरिएको (gitignore गरिएको)       | होइन           |
 
-Build pipeline एकल pass हो:
+बिल्ड पाइपलाइन एकल पासमा चल्छ:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js output)
-  └─ assembleStandalone()                 (standalone + static + public + native assets प्रतिलिपि गर्छ)
-       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js आउटपुट)
+  └─ assembleStandalone()                 (standalone + static + public + नेटिभ एसेटहरू प्रतिलिपि गर्छ)
+       └─ आउटपुट: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ले थप रूपमा पहिले दुवै directories सफा गर्छ र deploy integrity sentinel का रूपमा
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लेख्छ।
+`npm run build:release` ले थप रूपमा पहिले दुवै डाइरेक्टरी सफा गर्छ र
+डिप्लोयको अखण्डता सेन्टिनेलका रूपमा `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लेख्छ।
 
-`npm run build:contributor` ले backend-मात्र build profile प्रयोग गर्छ। यसले build गर्दा अस्थायी रूपमा
-dashboard UI files लाई stubs ले प्रतिस्थापन गर्छ, API route handlers कायम राख्छ, र build पछि मूल files
-पुनर्स्थापित गर्छ। Dashboard UI लाई असर गर्ने परिवर्तनहरू वा पूर्ण
-release validation का लागि `npm run build` प्रयोग गर्नुहोस्; contributor profile release build को विकल्प होइन।
+`npm run build:contributor` ले ब्याकएन्ड-मात्र बिल्ड प्रोफाइल प्रयोग गर्छ। यसले बिल्ड गर्दा अस्थायी रूपमा
+ड्यासबोर्ड UI फाइलहरूलाई स्टब गर्छ, API रुट ह्यान्डलरहरू कायम राख्छ, र बिल्डपछि मूल फाइलहरू
+पुनर्स्थापित गर्छ। ड्यासबोर्ड UI लाई असर गर्ने परिवर्तनहरू वा पूर्ण रिलिज प्रमाणीकरणका लागि `npm run build`
+प्रयोग गर्नुहोस्; योगदानकर्ता प्रोफाइल रिलिज बिल्डको प्रतिस्थापन होइन।
 
-> **VPS deploy सम्बन्धी टिप्पणी:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> अपरिवर्तित छ। Deploy skills ले `dist/` का सामग्रीहरू यसमा rsync गर्छन्।
-> Repository भित्रको build output path मात्र परिवर्तन भएको हो (`app/` → `dist/`)।
+> **VPS डिप्लोय टिप्पणी:** रिमोट इमेज डाइरेक्टरी `/usr/lib/node_modules/omniroute/app/`
+> अपरिवर्तित छ। डिप्लोय स्किलहरूले `dist/` का सामग्रीहरू यसमा rsync गर्छन्।
+> रिपोजिटरीभित्रको बिल्ड आउटपुट पथ मात्र सारिएको हो (`app/` → `dist/`)।
 
-पूर्वनिर्धारित URLs:
+पूर्वनिर्धारित URL हरू:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **ड्यासबोर्ड**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -294,7 +294,7 @@ PR खोल्नुअघि, तपाईंले परिवर्तन �
 
 ---
 
-## परियोजनाको संरचना
+## परियोजना संरचना
 
 ```
 src/                        # TypeScript (.ts / .tsx)
@@ -317,14 +317,14 @@ src/                        # TypeScript (.ts / .tsx)
 ├── mitm/                   # MITM प्रोक्सी (प्रमाणपत्र, DNS, लक्ष्य रुटिङ)
 ├── shared/
 │   ├── components/         # React कम्पोनेन्टहरू (.tsx)
-│   ├── constants/          # प्रदायक परिभाषाहरू (329), MCP स्कोपहरू, 19 रुटिङ रणनीति
+│   ├── constants/          # प्रदायक परिभाषाहरू (329), MCP स्कोपहरू, 20 रुटिङ रणनीतिहरू
 │   ├── utils/              # सर्किट ब्रेकर, स्यानिटाइजर, प्रमाणीकरण सहायकहरू
 │   └── validation/         # Zod v4 स्किमाहरू
 └── sse/                    # SSE प्रोक्सी पाइपलाइन
 
-open-sse/                   # @omniroute/open-sse वर्कस्पेस
-├── executors/              # 150 कार्यान्वयनकर्ता मोड्युलहरू (कार्यान्वयनकर्ता क्लासहरू + प्रत्येक प्रदायकका सहायकहरू)
-├── handlers/               # 11 अनुरोध ह्यान्डलरहरू (च्याट, प्रतिक्रियाहरू, एम्बेडिङहरू, तस्बिरहरू, आदि)
+open-sse/                   # @omniroute/open-sse कार्यक्षेत्र
+├── executors/              # 150 एक्जिक्युटर मोड्युलहरू (एक्जिक्युटर क्लासहरू + प्रत्येक प्रदायकका सहायकहरू)
+├── handlers/               # 11 अनुरोध ह्यान्डलरहरू (च्याट, प्रतिक्रियाहरू, एम्बेडिङहरू, छविहरू, आदि)
 ├── mcp-server/             # MCP सर्भर (110 विशिष्ट उपकरण, 3 ट्रान्सपोर्ट, 33 स्कोप)
 ├── services/               # 178 शीर्ष-स्तरीय सेवाहरू (combo, autoCombo, rateLimitManager, आदि)
 ├── translator/             # ढाँचा अनुवादकहरू (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
@@ -343,20 +343,20 @@ tests/
 
 docs/
 ├── adr/                     # वास्तुकला निर्णय अभिलेखहरू
-├── architecture/            # प्रणाली वास्तुकला र लचिलोपन
-├── comparison/              # OmniRoute र विकल्पहरूबीच तुलना
+├── architecture/            # प्रणाली वास्तुकला र उत्थानशीलता
+├── comparison/              # OmniRoute र विकल्पहरूबीचको तुलना
 ├── compression/             # कम्प्रेसन मार्गदर्शिका र नियमहरू
 ├── dev/                     # विकास मार्गदर्शिकाहरू
 ├── diagrams/                # वास्तुकला रेखाचित्रहरू
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # प्रयोगकर्ता मार्गदर्शिका, Docker, सेटअप, समस्या समाधान
+├── guides/                  # प्रयोगकर्ता मार्गदर्शिका, Docker, सेटअप, समस्या निवारण
 ├── i18n/                    # अन्तर्राष्ट्रियकृत README अनुवादहरू
 ├── marketing/               # मार्केटिङ सामग्रीहरू
-├── ops/                     # डिप्लोयमेन्ट, प्रोक्सी, कभरेज, रिलिजहरू
-├── providers/               # प्रदायक-विशिष्ट कागजातहरू
+├── ops/                     # परिनियोजन, प्रोक्सी, कभरेज, रिलिजहरू
+├── providers/               # प्रदायक-विशिष्ट दस्तावेजहरू
 ├── reference/               # API सन्दर्भ, वातावरण चरहरू, CLI उपकरणहरू, निःशुल्क तहहरू
 ├── releases/                # रिलिज टिप्पणीहरू
-├── routing/                 # स्वचालित-कम्बो इन्जिन, तर्क पुनःप्रदर्शन
+├── routing/                 # स्वतः-कम्बो इन्जिन, रिजनिङ रिप्ले
 ├── screenshots/             # ड्यासबोर्ड स्क्रिनसटहरू
 ├── security/                # सुरक्षा सीमाहरू, अनुपालन, गोपनीयता, टोकनहरू
 └── specs/                   # डिजाइन विनिर्देशहरू

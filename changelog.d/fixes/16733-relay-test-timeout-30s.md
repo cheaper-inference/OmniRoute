@@ -1,1 +1,0 @@
-- **fix(proxy):** relay proxy test waits up to 30s so free-plan Vercel / Deno / Cloudflare relays are not reported dead during a cold start ([#16733](https://github.com/diegosouzapw/OmniRoute/pull/16733)) — thanks @erikyao0125

@@ -1,1 +1,0 @@
-- **fix(i18n):** propagate the pre-dispatch model-cooldown recovery contract from #16360 / #16319 to all published resilience-guide mirrors, including bounded waits, transient retry hints and the non-retryable lock exclusions (thanks @skygunner).

@@ -1,1 +1,0 @@
-- **fix(opencode):** Park requests with every egress set aside for quota until the earliest release instead of returning 429 ([#16389](https://github.com/diegosouzapw/OmniRoute/pull/16389)) — thanks @maxmad64bis

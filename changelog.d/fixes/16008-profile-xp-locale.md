@@ -1,1 +1,0 @@
-- **fix(profile):** format XP numbers with the UI locale ([#16008](https://github.com/diegosouzapw/OmniRoute/pull/16008)) — thanks @pacocartones

@@ -100,9 +100,11 @@ describe("hot-path bounded caches", { concurrency: false }, () => {
       process.env.MODEL_ALIAS_COMPAT_ENABLED = "false";
       const disabled = parseModel(model);
       assert.notDeepEqual(enabled, disabled);
-      assert.equal(enabled.model, "claude-opus-4-5-20251101");
-      assert.equal(enabled.provider, null);
-      assert.equal(enabled.isAlias, true);
+      // #16811: the provider-qualified alias keeps `anthropic` and resolves to the dashed
+      // wire ID; only the bare `claude-opus-4.5` still maps to the dated snapshot.
+      assert.equal(enabled.model, "claude-opus-4-5");
+      assert.equal(enabled.provider, "anthropic");
+      assert.equal(enabled.isAlias, false);
       assert.equal(disabled.provider, "anthropic");
       assert.equal(disabled.model, "claude-opus-4.5");
       assert.equal(disabled.isAlias, false);

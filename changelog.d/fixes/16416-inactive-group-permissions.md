@@ -1,1 +1,0 @@
-- fix(auth): keep inactive API-key groups restrictive, retain their denies, and accept grants only from active groups (#16416).

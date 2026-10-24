@@ -242,116 +242,92 @@ xAI ಅಥವಾ Grok CLI ಅನ್ನು ಸಂಪರ್ಕಿಸುವಾಗ `
 
 ---
 
-## ಟೋಕನ್ಗಳ ನಿರ್ವಹಣೆ
+## ಟೋಕನ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸುವುದು
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ ರಹಸ್ಯವನ್ನು ಒಮ್ಮೆ ಮಾತ್ರ ಮುದ್ರಿಸುತ್ತದೆ — ಈಗಲೇ ಅದನ್ನು ನಕಲಿಸಿ
-omniroute tokens list                 # ಮರೆಮಾಡಲಾಗಿದೆ: id, ಹೆಸರು, ವ್ಯಾಪ್ತಿ, ಪೂರ್ವಪ್ರತ್ಯಯ, ಸ್ಥಿತಿ, ಅವಧಿ ಮುಕ್ತಾಯ
-omniroute tokens revoke <id|prefix>   # ತಕ್ಷಣವೇ ಹಿಂಪಡೆಯಿರಿ
-omniroute tokens scopes               # ಮೂರು ವ್ಯಾಪ್ತಿಗಳನ್ನು ವಿವರಿಸಿ
+#   ↳ ರಹಸ್ಯವನ್ನು ಒಮ್ಮೆ ಮಾತ್ರ ಮುದ್ರಿಸುತ್ತದೆ — ಈಗಲೇ ನಕಲಿಸಿ
+omniroute tokens list                 # ಮರೆಮಾಡಿದ: id, name, scope, prefix, status, expiry
+omniroute tokens revoke <id|prefix>   # ತಕ್ಷಣ ರದ್ದುಗೊಳಿಸಿ
+omniroute tokens scopes               # ಮೂರು ಸ್ಕೋಪ್‌ಗಳನ್ನು ವಿವರಿಸಿ
 ```
 
-`tokens` ಕಮಾಂಡ್ಗಳಿಗೆ **admin** ರುಜುವಾತು ಅಗತ್ಯವಿದೆ. ನೀವು ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಲ್ಲಿ
-**Settings → Access Tokens** ಅಡಿಯಲ್ಲಿಯೂ ಟೋಕನ್ಗಳನ್ನು ನಿರ್ವಹಿಸಬಹುದು (ರಚಿಸುವುದು, ಹಿಂಪಡೆಯುವುದು, ಒಮ್ಮೆ ಮಾತ್ರ ನಕಲಿಸುವುದು).
+`tokens` ಆದೇಶಗಳಿಗೆ **admin** ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಬೇಕು. ನೀವು ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ **Settings → Access Tokens** ಅಡಿಯಲ್ಲಿ ಟೋಕನ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಬಹುದು (ರಚಿಸುವುದು, ರದ್ದುಗೊಳಿಸುವುದು, ಒಮ್ಮೆ-ನಕಲಿಸುವುದು).
 
-ಟೋಕನ್ ಅನ್ನು ಅದರ ರಚನೆಕಾರರು ಹೊಂದಿರುವುದಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಸವಲತ್ತಿನೊಂದಿಗೆ ಎಂದಿಗೂ ರಚಿಸಲಾಗುವುದಿಲ್ಲ.
-`admin` ಟೋಕನ್ ಅನ್ನು ಆಪರೇಟರ್ ಮಾತ್ರ ರಚಿಸಬಹುದು — ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸೆಷನ್, ಸರ್ವರ್ನಲ್ಲಿಯೇ
-ಇರುವ ಸ್ಥಳೀಯ CLI, ಪಾಸ್ವರ್ಡ್ನೊಂದಿಗೆ `omniroute connect`, ಅಥವಾ ಲಾಗಿನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾದ
-ಇನ್ಸ್ಟನ್ಸ್ ಮೂಲಕ. ಯಂತ್ರದ ರುಜುವಾತುಗಳು (`admin` ಪ್ರವೇಶ ಟೋಕನ್,
-ಅಥವಾ `manage`/`admin` ವ್ಯಾಪ್ತಿಯ API ಕೀ) `write` ಮತ್ತು `read`
-ಟೋಕನ್ಗಳನ್ನು ಮಾತ್ರ ರಚಿಸಬಲ್ಲವು; ಅವುಗಳ ಮೂಲಕ `--scope admin` ಅನ್ನು ವಿನಂತಿಸಿದರೆ `403` ಮರಳುತ್ತದೆ.
-
-ಟೋಕನ್ ಅನ್ನು ಅದರ ಸೃಷ್ಟಿಕರ್ತನಿಗಿಂತ ಹೆಚ್ಚಿನ ಅಧಿಕಾರಗಳೊಂದಿಗೆ ಎಂದಿಗೂ ರಚಿಸಲಾಗುವುದಿಲ್ಲ. `admin` ಟೋಕನ್ ಅನ್ನು ಆಪರೇಟರ್ ಮಾತ್ರ ರಚಿಸಬಹುದು: ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಸೆಷನ್ ಮೂಲಕ, ಸರ್ವರ್‌ನಲ್ಲೇ ಇರುವ ಸ್ಥಳೀಯ CLI ಮೂಲಕ, ಪಾಸ್‌ವರ್ಡ್‌ನೊಂದಿಗೆ `omniroute connect` ಮೂಲಕ ಅಥವಾ ಲಾಗಿನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದ ಇನ್‌ಸ್ಟನ್ಸ್‌ನಲ್ಲಿ. ಯಂತ್ರದ ದೃಢೀಕರಣ ವಿವರಗಳು (`admin` ಪ್ರವೇಶ ಟೋಕನ್ ಅಥವಾ `manage`/`admin` ವ್ಯಾಪ್ತಿಯ API ಕೀ) `write` ಮತ್ತು `read` ಟೋಕನ್‌ಗಳನ್ನು ಮಾತ್ರ ರಚಿಸಬಹುದು; ಅವುಗಳೊಂದಿಗೆ `--scope admin` ಕೇಳಿದರೆ `403` ಮರಳುತ್ತದೆ.
+ಯಾವುದೇ ಟೋಕನ್ ಅದರ ರಚನೆಕಾರ ಹೊಂದಿರುವುದಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಅಧಿಕಾರದೊಂದಿಗೆ ಎಂದಿಗೂ ರಚಿಸಲಾಗುವುದಿಲ್ಲ. `admin` ಟೋಕನ್ ಅನ್ನು ಆಪರೇಟರ್ ಮಾತ್ರ ರಚಿಸಬಹುದು — ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಸೆಷನ್, ಸರ್ವರ್‌ನಲ್ಲೇ ಇರುವ ಸ್ಥಳೀಯ CLI, ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್‌ನೊಂದಿಗೆ `omniroute connect`. ಯಂತ್ರ ಕ್ರೆಡೆನ್ಶಿಯಲ್‌ಗಳು (`admin` ಪ್ರವೇಶ ಟೋಕನ್, ಅಥವಾ `manage`/`admin` ಸ್ಕೋಪ್‌ನ API ಕೀ) ಕೇವಲ `write` ಮತ್ತು `read` ಟೋಕನ್‌ಗಳನ್ನು ರಚಿಸಬಹುದು; ಅವುಗಳಿಗೆ `--scope admin` ಕೇಳಿದರೆ `403` ಸಿಗುತ್ತದೆ. ಲಾಗಿನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುವುದರಿಂದ ಟೋಕನ್ ರಚನೆ ತೆರೆದುಕೊಳ್ಳುವುದಿಲ್ಲ: ಯಾವುದೇ ಸ್ಕೋಪ್‌ನ ಪ್ರವೇಶ ಟೋಕನ್ ಎಂದರೆ ಯಾವಾಗಲೂ-ದೃಢೀಕೃತ ರೂಟ್‌ಗಳು ಸ್ವೀಕರಿಸುವ ಕ್ರೆಡೆನ್ಶಿಯಲ್, ಆದ್ದರಿಂದ ಅನಾಮಧೇಯ ಕರೆಗೆ ಯಾವುದೇ ಸ್ಕೋಪ್‌ನಲ್ಲೂ `401` ಸಿಗುತ್ತದೆ.
 
 ---
 
-## ರಿಮೋಟ್ ಕ್ಯಾಟಲಾಗ್ನಿಂದ ಕೋಡಿಂಗ್ CLI ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡುವುದು
+## ದೂರಸ್ಥ ಕ್ಯಾಟಲಾಗ್‌ನಿಂದ ಕೋಡಿಂಗ್ CLI ಕಾನ್ಫಿಗರ್ ಮಾಡುವುದು
 
-`omniroute configure` **ಸಕ್ರಿಯ ಸರ್ವರ್ನ** ಲೈವ್ ಮಾಡೆಲ್ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಓದುತ್ತದೆ ಮತ್ತು
-**ನಿಮ್ಮ** ಯಂತ್ರದಲ್ಲಿ ಕಾನ್ಫಿಗ್ ಅನ್ನು ಬರೆಯುತ್ತದೆ.
+`omniroute configure` ಸಕ್ರಿಯ **ಸರ್ವರ್‌ನ** ನೇರ ಮಾದರಿ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಓದಿ **ನಿಮ್ಮ** ಯಂತ್ರದಲ್ಲಿ ಕಾನ್ಫಿಗ್ ಬರೆಯುತ್ತದೆ.
 
 ```bash
 omniroute configure codex
-#   ಪೂರೈಕೆದಾರರು: glm, kmc, ollamacloud, opencode-go, …
-#   ಪೂರೈಕೆದಾರ: glm
-#   ಮಾಡೆಲ್ id: glm/glm-5.2
-#   ✔ ~/.codex/glm52.config.toml ಅನ್ನು ಬರೆಯಲಾಗಿದೆ
-#   ಇದನ್ನು ಬಳಸಿ:  codex --profile glm52
+#   Providers: glm, kmc, ollamacloud, opencode-go, …
+#   Provider: glm
+#   Model id: glm/glm-5.2
+#   ✔ ~/.codex/glm52.config.toml ಬರೆಯಲಾಗಿದೆ
+#   ಬಳಸಿ:  codex --profile glm52
 
-# ಸಂವಾದಾತ್ಮಕವಲ್ಲದ
+# ಇಂಟರಾಕ್ಟಿವ್ ಅಲ್ಲದ ರೂಪ
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# ಪದೇಪದೇ ಬಳಸುವ ಮಾಡೆಲ್ ಅನ್ನು ಸಂವಾದಾತ್ಮಕ ಆಯ್ಕೆಪಟ್ಟಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಇರಿಸಿ
+# ಹೆಚ್ಚು ಬಳಸುವ ಮಾದರಿಯನ್ನು ಇಂಟರಾಕ್ಟಿವ್ ಆಯ್ಕೆಗಾರನ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಇರಿಸಿ
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-ಆಯ್ಕೆಪಟ್ಟಿಯು ಸ್ಥಳೀಯ `model-preferences.json` ಫೈಲ್ನಲ್ಲಿ, ಸಂದರ್ಭ ಮತ್ತು CLI ಗುರಿಗೆ ಸೀಮಿತವಾಗಿ,
-ಮಾಡೆಲ್ ID ಗಳನ್ನು ಮಾತ್ರ ಇರಿಸುತ್ತದೆ (URL ಗಳು ಅಥವಾ ರುಜುವಾತುಗಳನ್ನು ಎಂದಿಗೂ ಅಲ್ಲ).
-ಇತ್ತೀಚಿನ ಆಯ್ಕೆಗಳಿಗಿಂತ ಮೊದಲು ಮೆಚ್ಚಿನವುಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತದೆ; ಆ ಸಂದರ್ಭ/ಗುರಿ ಪಟ್ಟಿಯಿಂದ ಆಯ್ಕೆಮಾಡಿದ ಮಾಡೆಲ್ ಅನ್ನು
-ತೆಗೆದುಹಾಕಲು `--unfavorite` ಬಳಸಿ.
+ಆಯ್ಕೆಗಾರ ಕೇವಲ ಮಾದರಿ ID ಗಳನ್ನು ಮಾತ್ರ (URL ಗಳು ಅಥವಾ ಕ್ರೆಡೆನ್ಶಿಯಲ್‌ಗಳನ್ನು ಎಂದಿಗೂ ಅಲ್ಲ) ಸಂದರ್ಭ ಮತ್ತು CLI ಗುರಿಯ ಪ್ರಕಾರ ವಿಂಗಡಿಸಲಾದ ಸ್ಥಳೀಯ `model-preferences.json` ಫೈಲ್‌ನಲ್ಲಿ ಇಡುತ್ತದೆ. ಮೆಚ್ಚಿನವುಗಳನ್ನು ಇತ್ತೀಚಿನ ಆಯ್ಕೆಗಳ ಮೊದಲು ತೋರಿಸಲಾಗುತ್ತದೆ; ಆಯ್ಕೆಮಾಡಿದ ಮಾದರಿಯನ್ನು ಆ ಸಂದರ್ಭ/ಗುರಿ ಪಟ್ಟಿಯಿಂದ ತೆಗೆದುಹಾಕಲು `--unfavorite` ಬಳಸಿ.
 
-ಬರೆಯಲಾದ ಪ್ರೊಫೈಲ್ env var ಮೂಲಕ ಇನ್ಫರೆನ್ಸ್ ಕೀಲಿಯನ್ನು ಉಲ್ಲೇಖಿಸುತ್ತದೆ
-(`OMNIROUTE_API_KEY`) — ರಹಸ್ಯವನ್ನು ಎಂದಿಗೂ ಡಿಸ್ಕ್ಗೆ ಬರೆಯಲಾಗುವುದಿಲ್ಲ. ಒಂದು-ಬಾರಿಯ
-ಮೂಲ Codex ಸೆಟಪ್ಗಾಗಿ (`[model_providers.omniroute]` ಬ್ಲಾಕ್), ನೋಡಿ
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+ಬರೆಯಲಾದ ಪ್ರೊಫೈಲ್ ಇನ್‌ಫರೆನ್ಸ್ ಕೀಯನ್ನು ಎನ್ವಿರಾನ್ಮೆಂಟ್ ವೇರಿಯಬಲ್ (`OMNIROUTE_API_KEY`) ಮೂಲಕ ಉಲ್ಲೇಖಿಸುತ್ತದೆ — ರಹಸ್ಯವನ್ನು ಡಿಸ್ಕ್‌ಗೆ ಎಂದಿಗೂ ಬರೆಯಲಾಗುವುದಿಲ್ಲ. Codex ನ ಮೂಲ ಒಮ್ಮೆ-ಮಾತ್ರದ ಸೆಟಪ್ (`[model_providers.omniroute]` ಬ್ಲಾಕ್) ಗಾಗಿ [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md) ನೋಡಿ.
 
-### ರಿಮೋಟ್ಗೆ ವಿರುದ್ಧವಾಗಿ CLI ಅನ್ನು ಪ್ರಾರಂಭಿಸುವುದು (ಯಾವುದೇ ಕಾನ್ಫಿಗ್ ಬರೆಯಲಾಗುವುದಿಲ್ಲ)
+### ದೂರಸ್ಥದ ವಿರುದ್ಧ CLI ಚಲಾಯಿಸುವುದು (ಕಾನ್ಫಿಗ್ ಬರೆಯದೆ)
 
-`omniroute run <target>` ಸಕ್ರಿಯ ಸಂದರ್ಭವನ್ನೂ ಗೌರವಿಸುತ್ತದೆ: ರಿಮೋಟ್ ಮೂಲ URL
-ಮತ್ತು ಸಂದರ್ಭದ ರುಜುವಾತನ್ನು ಪ್ರಾರಂಭಿಸಲಾದ ಪ್ರಕ್ರಿಯೆಗೆ ಮಾತ್ರ ಸೇರಿಸಲಾಗುತ್ತದೆ.
+`omniroute run <target>` ಕೂಡ ಸಕ್ರಿಯ ಸಂದರ್ಭವನ್ನು ಗೌರವಿಸುತ್ತದೆ: ದೂರಸ್ಥ ಬೇಸ್ URL ಮತ್ತು ಸಂದರ್ಭ ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಕೇವಲ ಉತ್ಪತ್ತಿಯಾದ ಪ್ರಕ್ರಿಯೆಗೆ ಮಾತ್ರ ಇಂಜೆಕ್ಟ್ ಆಗುತ್ತದೆ.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → ರಿಮೋಟ್
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → ದೂರಸ್ಥ
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# ನಿಖರವಾಗಿ ಏನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತದೆ ಎಂಬುದನ್ನು ಪೂರ್ವವೀಕ್ಷಿಸಿ (env KEY ಹೆಸರುಗಳು ಮಾತ್ರ, ಮೌಲ್ಯಗಳು ಎಂದಿಗೂ ಅಲ್ಲ):
+# ನಿಖರವಾಗಿ ಏನು ಉತ್ಪತ್ತಿಯಾಗುತ್ತದೆ ಎಂಬುದರ ಮುನ್ನೋಟ (ಎನ್ವಿರಾನ್ಮೆಂಟ್ ಕೀ ಹೆಸರುಗಳು ಮಾತ್ರ, ಮೌಲ್ಯಗಳಲ್ಲ):
 omniroute run codex --dry-run --json
 ```
 
-ಗುರಿಗಳು: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(ಏಕೈಕ ಮೂಲ: `bin/cli/cli-manifest.mjs`). Qwen ಮತ್ತು Gemini ನಿರ್ಗಮನದ ವೇಳೆ ತೆಗೆದುಹಾಕಲಾಗುವ
-ತಾತ್ಕಾಲಿಕ ಪ್ರತ್ಯೇಕಿತ ಹೋಮ್ನೊಂದಿಗೆ ಚಾಲನೆಯಾಗುತ್ತವೆ, ಆದ್ದರಿಂದ ಪ್ರಾರಂಭವು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಪರಿಕರ
-ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ಎಂದಿಗೂ ಸ್ಪರ್ಶಿಸುವುದಿಲ್ಲ — ಅಥವಾ ಅದಕ್ಕೆ ಸೋರಿಕೆಯಾಗುವುದಿಲ್ಲ.
+ಗುರಿಗಳು: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (ಏಕೈಕ ಮೂಲ: `bin/cli/cli-manifest.mjs`). Qwen ಮತ್ತು Gemini ನಿರ್ಗಮನದಲ್ಲಿ ತೆಗೆದುಹಾಕಲಾಗುವ ತಾತ್ಕಾಲಿಕ ಪ್ರತ್ಯೇಕ ಹೋಮ್‌ನಲ್ಲಿ ಚಲಿಸುತ್ತವೆ, ಆದ್ದರಿಂದ ಚಾಲನೆಯು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಟೂಲ್ ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ಎಂದಿಗೂ ಮುಟ್ಟುವುದಿಲ್ಲ — ಅಥವಾ ಅದಕ್ಕೆ ಸೋರಿಕೆಯಾಗುವುದಿಲ್ಲ.
 
-### ಪ್ರತಿ-CLI ಸೆಟಪ್ ಆಜ್ಞೆಗಳು
+### ಪ್ರತಿ CLI ಗಾಗಿ ಸೆಟಪ್ ಆದೇಶಗಳು
 
-ಬೆಂಬಲಿತ ಪ್ರತಿ CLI ಗೂ ರಿಮೋಟ್-ಅರಿವಿನ ಸೆಟಪ್ ಆಜ್ಞೆ ಇದೆ (ಎಲ್ಲವೂ ಸಕ್ರಿಯ
-ಸಂದರ್ಭವನ್ನು ಅಥವಾ `--remote <url> --api-key <key>` ಅನ್ನು ಗೌರವಿಸುತ್ತವೆ):
+ಪ್ರತಿಯೊಂದು ಬೆಂಬಲಿತ CLI ದೂರಸ್ಥ-ಅರಿವಿನ ಸೆಟಪ್ ಆದೇಶವನ್ನು ಹೊಂದಿದೆ (ಎಲ್ಲವೂ ಸಕ್ರಿಯ ಸಂದರ್ಭವನ್ನು ಗೌರವಿಸುತ್ತವೆ, ಅಥವಾ `--remote <url> --api-key <key>`):
 
-| CLI         | ಕಮಾಂಡ್                     | ಇದು ಬರೆಯುವುದು                                                                                                                                                                                       |
-| ----------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` ಪ್ರೊಫೈಲ್ಗಳು (ಪ್ರತಿ ಮಾದರಿಗೆ)                                                                                                                                           |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (ಪ್ರತಿ ಮಾದರಿಗೆ)                                                                                                                                           |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — ಕ್ಯಾಟಲಾಗ್ನ ಪ್ರತಿಯೊಂದು ಮಾದರಿಯನ್ನೂ ಹೊಂದಿರುವ `omniroute` OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪ್ರೊವೈಡರ್ (`opencode -m omniroute/<model>` ಚಲಾಯಿಸಿ)                                    |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI ಮೋಡ್) + ಅಂಟಿಸಲು VS Code ವಿಸ್ತರಣೆಯ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ (OpenAI-ಹೊಂದಾಣಿಕೆ, `/v1` **ಇಲ್ಲದ** ಮೂಲ URL)                                         |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` ಸೆಟ್ಟಿಂಗ್ಗಳು — OpenAI-ಹೊಂದಾಣಿಕೆ, `/v1` **ಒಳಗೊಂಡ** ಮೂಲ URL                                                                              |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `/v1` **ಒಳಗೊಂಡ** `apiBase`, `${{ secrets.OMNIROUTE_API_KEY }}` ಮೂಲಕ ಕೀ                                               |
-| Cursor      | `omniroute setup-cursor`   | ಆ್ಯಪ್ನೊಳಗಿನ ಹಂತಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ (ಸೆಟ್ಟಿಂಗ್ಗಳು → ಮಾದರಿಗಳು → `/v1` **ಒಳಗೊಂಡಂತೆ** OpenAI ಮೂಲ URL ಅನ್ನು ಅತಿಕ್ರಮಿಸಿ + ಕೀ + ಮಾದರಿ). Cursor ಸಂರಚನೆಯು ಅಪಾರದರ್ಶಕ SQLite ಆಗಿದೆ — ಚಾಟ್ ಪ್ಯಾನೆಲ್ ಮಾತ್ರ      |
-| Roo Code    | `omniroute setup-roo`      | Roo ಆಮದು JSON (`~/.omniroute/roo-settings.json`) ಅನ್ನು ಬರೆಯುತ್ತದೆ + `roo-cline.autoImportSettingsPath` ಅನ್ನು ಹೊಂದಿಸುತ್ತದೆ + UI ಹಂತಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ (OpenAI-ಹೊಂದಾಣಿಕೆ, `/v1` **ಒಳಗೊಂಡ** ಮೂಲ URL) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` ಪ್ರೊವೈಡರ್, `/v1` **ಒಳಗೊಂಡ** `base_url`, `$OMNIROUTE_API_KEY` ಮೂಲಕ ಕೀ                                                                                 |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `/v1` **ಇಲ್ಲದ** `OPENAI_HOST` + `GOOSE_MODEL`) + ಪರಿಸರ ಸಂರಚನಾ ವಿಧಾನ                                                                        |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`/v1` **ಇಲ್ಲದ** `openai-api-base` + `model: openai/<id>`) + ಪರಿಸರ ಸಂರಚನಾ ವಿಧಾನ (`aider --message --yes`)                                                                       |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` ನಮೂದು + `~/.qwen/.env` ನಲ್ಲಿ `OMNIROUTE_API_KEY`                                                                                                 |
+| CLI         | ಆದೇಶ                       | ಅದು ಬರೆಯುವುದು                                                                                                                                                                          |
+| ----------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` ಪ್ರೊಫೈಲ್‌ಗಳು (ಪ್ರತಿ ಮಾದರಿಗೆ)                                                                                                                             |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (ಪ್ರತಿ ಮಾದರಿಗೆ)                                                                                                                              |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — `omniroute` openai-ಹೊಂದಾಣಿಕೆಯ ಪೂರೈಕೆದಾರ, ಪ್ರತಿ ಕ್ಯಾಟಲಾಗ್ ಮಾದರಿ ಸಹಿತ (`opencode -m omniroute/<model>` ಚಲಾಯಿಸಿ)                                     |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI ಮೋಡ್) + ಅಂಟಿಸಲು VS Code ವಿಸ್ತರಣೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ (OpenAI-ಹೊಂದಾಣಿಕೆ, Base URL **`/v1` ಇಲ್ಲದೆ**)                          |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` ಸೆಟ್ಟಿಂಗ್‌ಗಳು — OpenAI-ಹೊಂದಾಣಿಕೆ, Base URL **`/v1` ಸಹಿತ**                                                                 |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **`/v1` ಸಹಿತ**, ಕೀ `${{ secrets.OMNIROUTE_API_KEY }}` ಮೂಲಕ                                    |
+| Cursor      | `omniroute setup-cursor`   | ಆ್ಯಪ್‌ನಲ್ಲಿನ ಹಂತಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ (Settings → Models → Override OpenAI Base URL **`/v1` ಸಹಿತ** + ಕೀ + ಮಾದರಿ). Cursor ಕಾನ್ಫಿಗ್ ಅಪಾರದರ್ಶಕ SQLite — ಚಾಟ್ ಪ್ಯಾನೆಲ್ ಮಾತ್ರ                |
+| Roo Code    | `omniroute setup-roo`      | Roo ಆಮದು JSON (`~/.omniroute/roo-settings.json`) ಬರೆಯುತ್ತದೆ + `roo-cline.autoImportSettingsPath` ಹೊಂದಿಸುತ್ತದೆ + UI ಹಂತಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ (OpenAI-ಹೊಂದಾಣಿಕೆ, Base URL **`/v1` ಸಹಿತ**) |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` ಪೂರೈಕೆದಾರ, `base_url` **`/v1` ಸಹಿತ**, ಕೀ `$OMNIROUTE_API_KEY` ಮೂಲಕ                                                                      |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **`/v1` ಸಹಿತ**, ಕೀಯನ್ನು Zed `$OMNIROUTE_API_KEY` ನಿಂದ ಓದುತ್ತದೆ (ಎಂದಿಗೂ ಬರೆಯಲಾಗುವುದಿಲ್ಲ)       |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **`/v1` ಇಲ್ಲದೆ** + `GOOSE_MODEL`) + ಎನ್ವಿರಾನ್ಮೆಂಟ್ ರೆಸಿಪಿ                                                       |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **`/v1` ಇಲ್ಲದೆ** + `model: openai/<id>`) + ಎನ್ವಿರಾನ್ಮೆಂಟ್ ರೆಸಿಪಿ (`aider --message --yes`)                                                      |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` ನಮೂದು + `~/.qwen/.env` ನಲ್ಲಿ `OMNIROUTE_API_KEY`                                                                                    |
 
 ```bash
-# OpenCode (OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪ್ರೊವೈಡರ್, ಎಲ್ಲಾ ಕ್ಯಾಟಲಾಗ್ ಮಾದರಿಗಳು, ದೂರಸ್ಥ VPS)
+# OpenCode (openai-ಹೊಂದಾಣಿಕೆಯ ಪೂರೈಕೆದಾರ, ಎಲ್ಲಾ ಕ್ಯಾಟಲಾಗ್ ಮಾದರಿಗಳು, ದೂರಸ್ಥ VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # ಹೊಂದಿಕೆಯಾಗುವ ಮಾದರಿಗಳನ್ನು ಮಾತ್ರ ಉಳಿಸಿ
-opencode -m omniroute/glm/glm-5.2 "..."          # ಮೊದಲು OMNIROUTE_API_KEY ಅನ್ನು ರಫ್ತು ಮಾಡಿ
+omniroute setup-opencode --only glm,kimi        # ಹೊಂದಾಣಿಕೆಯ ಮಾದರಿಗಳನ್ನು ಮಾತ್ರ ಇರಿಸಿ
+opencode -m omniroute/glm/glm-5.2 "..."          # ಮೊದಲು OMNIROUTE_API_KEY ರಫ್ತು ಮಾಡಿ
 ```
 
-> OpenCode ಹೆಚ್ಚು ವೈಶಿಷ್ಟ್ಯಪೂರ್ಣವಾದ **ಪ್ಲಗಿನ್** ಏಕೀಕರಣವನ್ನೂ ಹೊಂದಿದೆ: `omniroute setup opencode`
-> (ಈಗ `--remote` ಮೂಲಕ ದೂರಸ್ಥ ವ್ಯವಸ್ಥೆಯ ಅರಿವು ಹೊಂದಿದೆ) `@omniroute/opencode-plugin` ಅನ್ನು ಸ್ಥಾಪಿಸುತ್ತದೆ.
-> `setup-opencode` ಹಗುರವಾದ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪರ್ಯಾಯವಾಗಿದೆ. API ಕೀಯನ್ನು
-> `{env:OMNIROUTE_API_KEY}` ಮೂಲಕ ಉಲ್ಲೇಖಿಸಲಾಗುತ್ತದೆ — ಅದನ್ನು ಎಂದಿಗೂ ಡಿಸ್ಕ್ಗೆ ಬರೆಯಲಾಗುವುದಿಲ್ಲ.
+> OpenCode ಗೆ ಶ್ರೀಮಂತ **ಪ್ಲಗಿನ್** ಇಂಟಿಗ್ರೇಶನ್ ಕೂಡ ಇದೆ: `omniroute setup opencode` (ಈಗ `--remote` ಮೂಲಕ ದೂರಸ್ಥ-ಅರಿವಿನದು) `@omniroute/opencode-plugin` ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡುತ್ತದೆ.
+> `setup-opencode` ಹಗುರವಾದ openai-ಹೊಂದಾಣಿಕೆಯ ಪರ್ಯಾಯ. API ಕೀಯನ್ನು `{env:OMNIROUTE_API_KEY}` ಮೂಲಕ ಉಲ್ಲೇಖಿಸಲಾಗುತ್ತದೆ — ಡಿಸ್ಕ್‌ಗೆ ಎಂದಿಗೂ ಬರೆಯಲಾಗುವುದಿಲ್ಲ.
 >
-> OpenCode v2 ನಲ್ಲಿ, ಬದಲಿಗೆ `@omniroute/opencode-plugin-v2` ಬಳಸಿ: ಅದೇ ಕ್ಯಾಟಲಾಗ್,
-> ವಿಭಿನ್ನ ಲೋಡರ್ ಒಪ್ಪಂದ. ಏಕೀಕರಣವನ್ನು ಸಂಪರ್ಕಿಸಿದಾಗ, ಅದು OpenCode ನ ಸ್ವಂತ ರುಜುವಾತು
-> ಸಂಗ್ರಹದಿಂದ ಕೀಯನ್ನು ಓದುತ್ತದೆ; ಆದ್ದರಿಂದ ದೂರಸ್ಥ ಗೇಟ್ವೇಗೆ `opencode.json` ನಲ್ಲಿ
-> ಯಾವುದೇ ಕೀ ಅಗತ್ಯವಿಲ್ಲ.
+> OpenCode v2 ನಲ್ಲಿ ಬದಲಿಗೆ `@omniroute/opencode-plugin-v2` ಬಳಸಿ: ಅದೇ ಕ್ಯಾಟಲಾಗ್, ಬೇರೆ ಲೋಡರ್ ಒಪ್ಪಂದ. ಇಂಟಿಗ್ರೇಶನ್ ಸಂಪರ್ಕಗೊಂಡಾಗ ಅದು ಕೀಯನ್ನು OpenCode ನ ಸ್ವಂತ ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಸ್ಟೋರ್‌ನಿಂದ ಓದುತ್ತದೆ, ಆದ್ದರಿಂದ ದೂರಸ್ಥ ಗೇಟ್‌ವೇಗೆ `opencode.json` ನಲ್ಲಿ ಯಾವುದೇ ಕೀ ಬೇಕಿಲ್ಲ.
 
 ---
 

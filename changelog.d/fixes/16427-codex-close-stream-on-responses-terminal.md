@@ -1,1 +1,0 @@
-- **fix(codex):** close client-facing stream immediately upon forwarding authoritative Responses terminal events on HTTP transport and cover all terminal types on WebSocket transport, preventing streaming hangs after tool calls ([#16427](https://github.com/diegosouzapw/OmniRoute/pull/16427))

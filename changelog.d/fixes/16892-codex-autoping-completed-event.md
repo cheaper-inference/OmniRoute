@@ -1,1 +1,0 @@
-- **fix(codex):** quota auto-ping only counts a ping as sent after a completed Responses event; failed, incomplete or unfinished 200 streams now enter the failure cooldown ([#16892](https://github.com/diegosouzapw/OmniRoute/pull/16892)) — thanks @anndev-69

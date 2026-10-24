@@ -1,1 +1,0 @@
-- **fix(memory):** with `PII_RESPONSE_SANITIZATION` on, memory now extracts facts from the sanitized response text instead of the raw model output, on both streaming and non-streaming paths ([#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401)) — thanks @yourspraveen

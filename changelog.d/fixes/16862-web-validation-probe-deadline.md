@@ -1,1 +1,0 @@
-- **fix(providers):** kimi-web and deepseek-web connection tests now time out after 15s instead of hanging on a stalled upstream ([#16862](https://github.com/diegosouzapw/OmniRoute/pull/16862)) — thanks @ntdat812

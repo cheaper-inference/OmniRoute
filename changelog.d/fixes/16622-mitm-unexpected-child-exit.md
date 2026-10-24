@@ -1,1 +1,0 @@
-- **fix(mitm):** revert the hosts entries, or flag Repair, when the AgentBridge/MITM child process exits unexpectedly after a successful start ([#16622](https://github.com/diegosouzapw/OmniRoute/pull/16622)) — thanks @khanghack222

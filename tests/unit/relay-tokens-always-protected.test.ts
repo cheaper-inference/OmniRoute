@@ -4,7 +4,8 @@
 // runs with login disabled (open instance):
 //   - no credential → 401, whatever `requireLogin` says;
 //   - a signed-in dashboard session → allowed, as before;
-//   - a manage-scoped API key → allowed, as before.
+//   - a manage-scoped API key → may list, edit and revoke (minting is operator-only, see
+//     relay-tokens-mint-operator.test.ts).
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -188,14 +189,10 @@ for (const requireLogin of [false, true]) {
     }
   });
 
-  test(`${mode}: a manage-scoped API key keeps working`, async () => {
+  test(`${mode}: a manage-scoped API key still lists, edits and revokes`, async () => {
     await updateSettings({ requireLogin });
     try {
-      const minted = await collection.POST(
-        withManageKey(COLLECTION_URL, "POST", { name: `key-mint-${mode}` })
-      );
-      assert.equal(minted.status, 200);
-      const { id } = await minted.json();
+      const id = seedToken(`key-managed-${mode}`);
 
       assert.equal((await collection.GET(withManageKey(COLLECTION_URL))).status, 200);
       assert.equal(

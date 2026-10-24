@@ -69,6 +69,18 @@ describe("workbuddy registry entry", () => {
     assert.equal(entry.strictChatHistory, true);
     assert.equal(entry.forceStream, true);
     assert.deepEqual(entry.bodyStringReplacements, [
+      // #17046 (#16978): the gateway-compliance rewrites run first, so the long Codex sentence
+      // is rewritten whole before the generic "Codex CLI" / "OpenAI" pairs below touch it.
+      ["x-anthropic-billing-header:", ""],
+      [
+        "You are Claude Code, Anthropic's official CLI for Claude",
+        "You are Claude Code, Anthropic's CLI for Claude",
+      ],
+      ["Main branch (you will usually use this for PRs)", "Main branch (usually the base for PRs)"],
+      [
+        "Codex CLI is an open source project led by OpenAI.",
+        "The Codex CLI is an open source project led by OpenAI.",
+      ],
       ["Codex CLI", "the assistant"],
       ["codex_cli_rs", "assistant"],
       ["OpenAI", "the provider"],

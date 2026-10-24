@@ -1,1 +1,0 @@
-- **release(lts-cut):** the 3.9.0 cut dry-run/rehearsal gains a blocking `source-full-history` precondition — a shallow clone cannot push `stable/v3` (the receiving side rejects the pack at the first grafted parent), so the script now refuses to run the cut from one and says how to unshallow.

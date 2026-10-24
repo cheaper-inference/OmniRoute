@@ -1,1 +1,0 @@
-- **fix(usage):** Claude OAuth quota polling keeps the last known quota on 429, honors Retry-After and coalesces concurrent polls ([#16480](https://github.com/diegosouzapw/OmniRoute/pull/16480)) — thanks @ryanngit

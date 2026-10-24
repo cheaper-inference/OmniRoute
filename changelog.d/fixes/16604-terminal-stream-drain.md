@@ -1,1 +1,0 @@
-- fix(streaming): drain upstream finalization within the disconnect grace period when clients close after a terminal event, preserving usage and call-log completion (#16604).

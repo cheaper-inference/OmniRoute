@@ -31,21 +31,22 @@ Jekk tiskopri vulnerabbiltà tas-sigurtà f’OmniRoute, jekk jogħġbok irrappo
 
 ## Perjodu ta’ appoġġ LTS (v3.9.x)
 
-Wara 3.8.59 il-verżjoni li jmiss hija **3.9.0**, li tiftaħ il-linja ta’ appoġġ fit-tul fuq il-fergħa
+Wara 3.8.59, il-verżjoni li jmiss hija **3.9.0**, li tiftaħ il-linja ta’ appoġġ fit-tul fil-fergħa
 `stable/v3` (ara [`ROADMAP.md`](ROADMAP.md) → "Fażi 3 — v3.9.0 LTS").
 
-- **X’jirċievi `stable/v3`:** soluzzjonijiet għal bugs, garżi tas-sigurtà u aġġornamenti tal-fornituri. Karatteristiċi
+- **X’jirċievi `stable/v3`:** tiswijiet ta’ bugs, garżi tas-sigurtà u aġġornamenti tal-fornituri. Karatteristiċi
   ġodda jmorru fil-kanal v4; il-linja LTS tagħti prijorità lill-istabbiltà. `npm install omniroute`
   (id-dist-tag `latest`) jibqa’ fuq v3 matul iċ-ċiklu kollu ta’ v4.
-- **Tul tal-perjodu:** `<T-GAP-3: deċiżjoni tas-sid għadha pendenti — ara ROADMAP.md>`. It-tul
-  tal-perjodu wara v4.0 GA (meta `latest` jaqleb għal v4) **għadu ma ġiex deċiż**; din
-  it-taqsima tiġi aġġornata meta l-manutenzjonist iħabbru. Sa dakinhar, tassumix data tat-tmiem.
-- **Rappurtar ta’ vulnerabbiltà fil-linja LTS:** l-istess kanal bħal għal kull verżjoni oħra —
+- **Tul tal-perjodu:** `stable/v3` jirċievi **tiswijiet tas-sigurtà u tiswijiet għal regressjonijiet kritiċi għal
+  12-il xahar wara r-rilaxx ta’ 3.9.0, jew sa 90 jum wara li v4.0.0 jiġi ppubblikat bħala `latest` —
+  skont liema minnhom ikun l-aktar tard**. Id-data tat-tmiem li tirriżulta tiġi rreġistrata fin-noti tar-rilaxx ta’ 3.9.0 u
+  f’[`ROADMAP.md`](ROADMAP.md) meta jsir ir-rilaxx.
+- **Kif tirrapporta vulnerabbiltà fil-linja LTS:** uża l-istess kanal bħal għal kwalunkwe verżjoni oħra —
   [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privat,
-  u qatt kwistjoni pubblika. Għid liema verżjoni ttestjajt (pereżempju `3.9.2`); is-soluzzjonijiet jiddaħħlu f’
-  `stable/v3` u jiġu portati ’l quddiem għal v4.
-- **Linja bażi tas-sigurtà fil-punt tat-tnedija tal-LTS:** l-istat imkejjel tal-iskaner, il-provi tal-protezzjoni
-  tar-rotot u tal-kredenzjali pubbliċi huma rreġistrati f’
+  u qatt issue pubblika. Speċifika liema verżjoni ttestjajt (pereżempju `3.9.2`); it-tiswijiet jiddaħħlu f’
+  `stable/v3` u jiġu trasferiti ’l quddiem għal v4.
+- **Linja bażi tas-sigurtà fil-mument tar-rilaxx LTS:** l-istat imkejjel tal-iskanner, il-garanziji tal-protezzjoni tar-rotot u
+  l-provi tal-kredenzjali pubbliċi jiġu rreġistrati f’
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

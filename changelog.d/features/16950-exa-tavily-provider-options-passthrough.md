@@ -1,1 +1,0 @@
-- **feat(search):** forward allow-listed, Zod-validated Exa and Tavily request fields via `provider_options.exa` / `provider_options.tavily`, map `time_range` to both, add the Tavily `finance` topic and keep their extra result fields in `provider_raw` ([#16950](https://github.com/diegosouzapw/OmniRoute/pull/16950)) — thanks @asuan-dev

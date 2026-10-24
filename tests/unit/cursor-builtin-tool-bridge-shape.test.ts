@@ -114,6 +114,39 @@ test("shape-fallback: custom-named grep tool matches by query property", () => {
   assert.equal(bridged.arguments.include, "*.ts");
 });
 
+test("shape-fallback: a length-constrained query property still matches", () => {
+  const customGrep: OpenAITool = {
+    type: "function",
+    function: {
+      name: "search_symbol",
+      description: "Search symbols in repo",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string", minLength: 1 },
+          dir: { type: "string" },
+        },
+        required: ["query"],
+        additionalProperties: false,
+      },
+    },
+  };
+  const event: ExecServerEvent = {
+    kind: "exec_grep",
+    execMsgId: "msg-1",
+    execId: "exec-1",
+    pattern: "handleChat",
+    path: "src/",
+    glob: "",
+    outputMode: "content",
+  };
+  const bridged = bridgeCursorBuiltinTool(event, defs([customGrep]));
+  assert.ok(bridged);
+  assert.equal(bridged.toolName, "search_symbol");
+  assert.equal(bridged.arguments.query, "handleChat");
+  assert.equal(bridged.arguments.dir, "src/");
+});
+
 test("shape-fallback: custom-named ls tool matches by path property", () => {
   const customLs: OpenAITool = {
     type: "function",

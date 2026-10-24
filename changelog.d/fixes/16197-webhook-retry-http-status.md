@@ -1,1 +1,0 @@
-- Fix custom webhook delivery results and delivery history to retain the final HTTP status when 5xx retries are exhausted. Terminal network failures continue to use status 0. Fixes #16197.

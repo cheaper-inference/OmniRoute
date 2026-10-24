@@ -13,7 +13,7 @@ coverage, and reconciliation steps.
 
 ### Prerequisites
 
-- **Node.js** `>=22.22.3 <23`, or `>=24.0.0 <27` (recommended: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, or `>=24.0.0 <27` (recommended: 24 LTS)
 - **npm** 10+
 
 > **npm v11+ users (Node 24+):** After `npm install`, verify native modules were installed:
@@ -312,7 +312,7 @@ src/                        # TypeScript (.ts / .tsx)
 ├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
 │   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, 19 routing strategies
+│   ├── constants/          # Provider definitions (329), MCP scopes, 20 routing strategies
 │   ├── utils/              # Circuit breaker, sanitizer, auth helpers
 │   └── validation/         # Zod v4 schemas
 └── sse/                    # SSE proxy pipeline

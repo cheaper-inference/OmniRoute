@@ -115,7 +115,9 @@ describe("ConnectionRow Codex account pool", () => {
     const row = container.firstElementChild as HTMLElement;
     expect(row.classList.contains("flex-col")).toBe(true);
     expect(row.classList.contains("items-stretch")).toBe(true);
-    expect(row.children[1].classList.contains("flex-wrap")).toBe(true);
+    // #15532: the actions live in a full-width wrapper; the wrapping flex bar is its child.
+    const actionBar = row.children[1].firstElementChild as HTMLElement;
+    expect(actionBar.classList.contains("flex-wrap")).toBe(true);
 
     act(() => {
       (container.querySelector("button[title='edit']") as HTMLButtonElement).click();

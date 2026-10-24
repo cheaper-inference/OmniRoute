@@ -1,1 +1,0 @@
-- **fix(dashboard):** connection reorder (▲/▼ on tied priorities and "Reorder by availability") now writes valid 1-based priorities and reports failures instead of silently saving the wrong order ([#16684](https://github.com/diegosouzapw/OmniRoute/pull/16684)) — thanks @StevanusPangau

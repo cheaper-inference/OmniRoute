@@ -4,15 +4,19 @@ import {
   isAbortFinishReason,
   normalizeOpenAICompatibleFinishReason,
 } from "../../utils/finishReason.ts";
-import { restoreClaudeToolName } from "../../services/claudeCodeToolRemapper.ts";
+import { restoreDeclaredToolName } from "../../services/declaredToolCasing.ts";
 import {
   buildGeminiThoughtSignatureKey,
   storeGeminiThoughtSignature,
 } from "../../services/geminiThoughtSignatureStore.ts";
 import { splitMarkdownBoundary } from "../helpers/markdownBoundary.ts";
+import {
+  buildClaudeWebSearchBlockEvents,
+  toClaudeWebSearchResults,
+} from "../helpers/claudeServerWebSearch.ts";
 
-function normalizeToolName(name: string, toolNameMap?: Map<string, string> | null): string {
-  return restoreClaudeToolName(name, toolNameMap);
+function normalizeToolName(name: string, toolNameMap: unknown, clientTools: unknown): string {
+  return restoreDeclaredToolName(name, toolNameMap, clientTools);
 }
 
 function extractXmlInvokeBlocks(
@@ -182,6 +186,59 @@ function flushMarkdownBuffer(state, results) {
 }
 
 /**
+ * Extract the web hits out of Gemini Google Search grounding metadata. Gemini
+ * exposes them as `groundingChunks[].web` (snake_case `grounding_chunks` on some
+ * upstreams); normalization into Anthropic `web_search_result` entries is shared
+ * with the other response translators (helpers/claudeServerWebSearch.ts).
+ */
+function collectGroundingWebItems(grounding) {
+  const chunks = grounding.groundingChunks || grounding.grounding_chunks;
+  if (!Array.isArray(chunks)) return [];
+  return chunks.map((chunk) => ({ url: chunk?.web?.uri, title: chunk?.web?.title }));
+}
+
+/**
+ * Emit the Anthropic server-tool blocks for Gemini Google Search grounding.
+ *
+ * Claude Code's built-in WebSearch reads its results from a paired
+ * `server_tool_use` (name "web_search") + `web_search_tool_result` block, so a
+ * Gemini/Antigravity response carrying `groundingMetadata` must surface that pair
+ * or the CLI reports zero results. Emitted at most once per message
+ * (`state.groundingProcessed`).
+ *
+ * Gemini attaches groundingMetadata to the final chunk, after the answer text has
+ * already streamed, so any open text/thinking block is flushed and closed first
+ * and the search pair takes the next indices.
+ */
+function emitGroundingWebSearch(candidate, state, results) {
+  if (state.groundingProcessed) return;
+  const grounding = candidate.groundingMetadata || candidate.grounding_metadata;
+  if (!grounding || typeof grounding !== "object") return;
+  const webResults = toClaudeWebSearchResults(collectGroundingWebItems(grounding));
+  if (webResults.length === 0) return;
+
+  // Close the open text/thinking block first so the search pair gets fresh indices.
+  flushMarkdownBuffer(state, results);
+  if (state.openTextBlockIdx !== null) {
+    results.push({ type: "content_block_stop", index: state.openTextBlockIdx });
+    state.openTextBlockIdx = null;
+  }
+
+  const queries = grounding.webSearchQueries || grounding.web_search_queries;
+  const query = Array.isArray(queries) && typeof queries[0] === "string" ? queries[0] : "";
+
+  const { events, nextIndex } = buildClaudeWebSearchBlockEvents({
+    query,
+    results: webResults,
+    startIndex: state.contentBlockIndex,
+  });
+  results.push(...events);
+  state.contentBlockIndex = nextIndex;
+
+  state.groundingProcessed = true;
+}
+
+/**
  * Direct Gemini → Claude response translator.
  * Converts Gemini streaming chunks directly to Claude Messages API
  * streaming events, skipping the OpenAI hub intermediate step.
@@ -289,7 +346,8 @@ export function geminiToClaudeResponse(chunk, state) {
         const rawToolName = fc.name;
         const restoredToolName = normalizeToolName(
           typeof rawToolName === "string" ? rawToolName : "",
-          state.toolNameMap instanceof Map ? state.toolNameMap : null
+          state.toolNameMap,
+          state.clientTools
         );
         const idx = state.contentBlockIndex++;
         const toolId = fc.id || `toolu_${Date.now()}_${idx}`;
@@ -352,9 +410,10 @@ export function geminiToClaudeResponse(chunk, state) {
           }
           for (const tc of textToolCalls) {
             const idx = state.contentBlockIndex++;
-            const restoredToolName = restoreClaudeToolName(
+            const restoredToolName = restoreDeclaredToolName(
               tc.name,
-              state.toolNameMap instanceof Map ? state.toolNameMap : null
+              state.toolNameMap,
+              state.clientTools
             );
             const signatureForToolCall =
               (typeof hasThoughtSig === "string" && hasThoughtSig.length > 0
@@ -443,6 +502,12 @@ export function geminiToClaudeResponse(chunk, state) {
       }
     }
   }
+
+  // ── Google Search grounding → server_tool_use + web_search_tool_result ──
+  // Gemini attaches groundingMetadata to the last chunk (after the answer text
+  // has streamed) and sometimes to an earlier chunk; emit the pair once, before
+  // the finish block so the search blocks precede message_delta/message_stop.
+  emitGroundingWebSearch(candidate, state, results);
 
   // ── Usage metadata ─────────────────────────────────────────────
   const usageMeta = response.usageMetadata || chunk.usageMetadata;

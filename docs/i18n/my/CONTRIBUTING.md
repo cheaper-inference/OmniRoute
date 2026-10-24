@@ -13,15 +13,15 @@ UI/UX၊ i18n၊ CLI၊ database နှင့် build/deploy ပြောင်
 
 ---
 
-## ဖွံ့ဖြိုးတိုးတက်ရေး ပတ်ဝန်းကျင်ပြင်ဆင်ခြင်း
+## ဖွံ့ဖြိုးတိုးတက်ရေး စနစ်ပြင်ဆင်ခြင်း
 
 ### ကြိုတင်လိုအပ်ချက်များ
 
-- **Node.js** `>=22.22.3 <23` သို့မဟုတ် `>=24.0.0 <27` (အကြံပြုချက်- 24 LTS)
+- **Node.js** `>=22.22.2 <23` သို့မဟုတ် `>=24.0.0 <27` (အကြံပြုချက်: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ အသုံးပြုသူများ (Node 24+):** `npm install` ပြုလုပ်ပြီးနောက် native module များ ထည့်သွင်းပြီးဖြစ်ကြောင်း စစ်ဆေးပါ-
-> `node -e "require('better-sqlite3')"`။ `MODULE_NOT_FOUND` ဖြင့် မအောင်မြင်ပါက
+> **npm v11+ အသုံးပြုသူများ (Node 24+):** `npm install` ပြုလုပ်ပြီးနောက် native module များ ထည့်သွင်းထားကြောင်း အတည်ပြုပါ:
+> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` ဖြင့် မအောင်မြင်ပါက
 > `npm approve-scripts better-sqlite3 && npm install` ကို လုပ်ဆောင်ပါ။ အသေးစိတ်ကို
 > [ပြဿနာဖြေရှင်းခြင်း](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) တွင် ကြည့်ပါ။
 
@@ -38,7 +38,7 @@ npm install
 ### ပတ်ဝန်းကျင် Variable များ
 
 ```bash
-# template မှ သင်၏ .env ကို ဖန်တီးပါ
+# နမူနာဖိုင်မှ သင့် .env ကို ဖန်တီးပါ
 cp .env.example .env
 
 # လိုအပ်သော secret များကို ထုတ်လုပ်ပါ
@@ -46,26 +46,26 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ဖွံ့ဖြိုးတိုးတက်ရေးအတွက် အဓိက variable များ-
+ဖွံ့ဖြိုးတိုးတက်ရေးအတွက် အဓိက variable များ:
 
-| Variable               | ဖွံ့ဖြိုးတိုးတက်ရေး မူလတန်ဖိုး | ဖော်ပြချက်                |
-| ---------------------- | ------------------------------ | ------------------------- |
-| `PORT`                 | `20128`                        | Server port               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`       | Frontend အတွက် အခြေခံ URL |
-| `JWT_SECRET`           | (အထက်တွင် ထုတ်လုပ်ပါ)          | JWT လက်မှတ်ထိုး secret    |
-| `INITIAL_PASSWORD`     | `CHANGEME`                     | ပထမဆုံး login password    |
-| `APP_LOG_LEVEL`        | `info`                         | Log အသေးစိတ်အဆင့်         |
+| Variable               | ဖွံ့ဖြိုးတိုးတက်ရေး ပုံသေတန်ဖိုး | ဖော်ပြချက်                   |
+| ---------------------- | -------------------------------- | ---------------------------- |
+| `PORT`                 | `20128`                          | ဆာဗာ port                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | frontend အတွက် အခြေခံ URL    |
+| `JWT_SECRET`           | (အထက်ပါအတိုင်း ထုတ်လုပ်ပါ)       | JWT လက်မှတ်ရေးထိုးမှု secret |
+| `INITIAL_PASSWORD`     | `CHANGEME`                       | ပထမဆုံး login စကားဝှက်       |
+| `APP_LOG_LEVEL`        | `info`                           | Log အသေးစိတ်အဆင့်            |
 
 ### Dashboard ဆက်တင်များ
 
-Dashboard တွင် ပတ်ဝန်းကျင် variable များမှတစ်ဆင့်လည်း သတ်မှတ်နိုင်သော feature များအတွက် UI toggle များ ပါဝင်သည်-
+Dashboard တွင် ပတ်ဝန်းကျင် variable များမှတစ်ဆင့်လည်း စီစဉ်သတ်မှတ်နိုင်သည့် လုပ်ဆောင်ချက်များအတွက် UI toggle များ ပါရှိသည်:
 
 | ဆက်တင်တည်နေရာ       | Toggle             | ဖော်ပြချက်                              |
 | ------------------- | ------------------ | --------------------------------------- |
 | Settings → Advanced | Debug Mode         | Debug request log များကို ဖွင့်ရန် (UI) |
 | Settings → General  | Sidebar Visibility | Sidebar အပိုင်းများကို ပြရန်/ဖျောက်ရန်  |
 
-ဤဆက်တင်များကို database တွင် သိမ်းဆည်းထားပြီး restart ပြုလုပ်ပြီးနောက်တွင်လည်း ဆက်လက်တည်ရှိကာ သတ်မှတ်ထားပါက env var မူလတန်ဖိုးများကို အစားထိုးအသုံးပြုသည်။
+ဤဆက်တင်များကို database တွင် သိမ်းဆည်းထားပြီး restart ပြုလုပ်ပြီးနောက်တွင်လည်း ဆက်လက်တည်ရှိသည်။ ဆက်တင်တန်ဖိုး သတ်မှတ်ထားပါက env var ပုံသေတန်ဖိုးများကို အစားထိုးအသုံးပြုသည်။
 
 ### Local တွင် လုပ်ဆောင်ခြင်း
 
@@ -74,32 +74,32 @@ Dashboard တွင် ပတ်ဝန်းကျင် variable များ�
 npm run dev
 
 # Production build
-npm run build    # next build → .build/next/ ထို့နောက် assembleStandalone → dist/
+npm run build    # next build → .build/next/၊ ထို့နောက် assembleStandalone → dist/
 npm run start
 
-# ပါဝင်ကူညီသူ၏ ပြောင်းလဲမှုများအတွက် လျင်မြန်သော backend/API-only compile
+# Contributor ပြောင်းလဲမှုများအတွက် လျင်မြန်သော backend/API သီးသန့် compile
 npm run build:contributor
 
-# Release build (ရှင်းလင်း၍ ပြန်လည် build လုပ်ခြင်း + HEAD sentinel — deploy အတွက် လိုအပ်သည်)
+# Release build (အစမှ ပြန်လည် build လုပ်ခြင်း + HEAD sentinel — deploy အတွက် မဖြစ်မနေလိုအပ်သည်)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ကို ရေးသားသည်
 
-# အသုံးများသော port သတ်မှတ်ချက်
+# အသုံးများသော port ဖွဲ့စည်းသတ်မှတ်မှု
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Contributor build သည် compile-only စစ်ဆေးမှုကို လုပ်ဆောင်သည်- standalone
-ဖြန့်ချိမှုကို စုစည်းခြင်း သို့မဟုတ် ရွေးချယ်နိုင်သော native packaging asset များကို build လုပ်ခြင်း မပြုပါ။ ဖြန့်ချိနိုင်သော bundle ကို
-စစ်ဆေးရန် လိုအပ်သည့်အခါ ပုံမှန် production build ကို အသုံးပြုပါ။
+Contributor build သည် compile သီးသန့် စစ်ဆေးအတည်ပြုမှုကို လုပ်ဆောင်သည်။ ၎င်းသည် standalone
+ဖြန့်ချိမှုကို စုစည်းခြင်း သို့မဟုတ် ရွေးချယ်နိုင်သော native packaging asset များကို build လုပ်ခြင်း မပြုပါ။ ဖြန့်ချိနိုင်သည့်
+bundle ကို စစ်ဆေးအတည်ပြုရန် လိုအပ်သည့်အခါ ပုံမှန် production build ကို အသုံးပြုပါ။
 
 ### Build Output ဖွဲ့စည်းပုံ
 
-| Directory | ပါဝင်သောအရာများ                                                                | ခြေရာခံထားမှု |
-| --------- | ------------------------------------------------------------------------------ | ------------- |
-| `src/`    | Application source (TypeScript / TSX)                                          | ဟုတ်သည်       |
-| `.build/` | ကြားခံဖိုင်များ — `next build` output (gitignored၊ `distDir = .build/next`)    | မဟုတ်ပါ       |
-| `dist/`   | ဖြန့်ချိနိုင်သော bundle — `assembleStandalone` ဖြင့် စုစည်းထားသည် (gitignored) | မဟုတ်ပါ       |
+| Directory | ပါဝင်သည့်အရာများ                                                                         | ခြေရာခံထားမှု |
+| --------- | ---------------------------------------------------------------------------------------- | ------------- |
+| `src/`    | Application source (TypeScript / TSX)                                                    | ရှိသည်        |
+| `.build/` | ကြားခံဖိုင်များ — `next build` output (gitignore လုပ်ထားသည်၊ `distDir = .build/next`)    | မရှိပါ        |
+| `dist/`   | ဖြန့်ချိနိုင်သော bundle — `assembleStandalone` ဖြင့် စုစည်းထားသည် (gitignore လုပ်ထားသည်) | မရှိပါ        |
 
-Build pipeline သည် တစ်ကြိမ်တည်းဖြင့် လုပ်ဆောင်သည်-
+Build pipeline သည် တစ်ကြိမ်တည်းဖြင့် လုပ်ဆောင်သည်:
 
 ```
 npm run build
@@ -108,19 +108,19 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` သည် ထို့အပြင် directory နှစ်ခုလုံးကို ဦးစွာရှင်းလင်းပြီး
-deploy အပြည့်အစုံမှန်ကန်ကြောင်း စစ်ဆေးသည့် sentinel အဖြစ် `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ကို ရေးသားသည်။
+`npm run build:release` သည် directory နှစ်ခုစလုံးကို ဦးစွာ ရှင်းလင်းပြီး deploy ပြည့်စုံမှန်ကန်မှု စစ်ဆေးရေး sentinel အဖြစ်
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ကို ထပ်မံရေးသားသည်။
 
-`npm run build:contributor` သည် backend-only build profile ကို အသုံးပြုသည်။ Build လုပ်နေစဉ်
-dashboard UI ဖိုင်များကို ယာယီ stub လုပ်ပြီး API route handler များကို ဆက်လက်ထားရှိကာ build ပြီးနောက် မူရင်းဖိုင်များကို
-ပြန်လည်ထားရှိသည်။ Dashboard UI ကို သက်ရောက်သော ပြောင်းလဲမှုများ သို့မဟုတ် release အပြည့်အစုံ
-စစ်ဆေးမှုအတွက် `npm run build` ကို အသုံးပြုပါ။ Contributor profile သည် release build ကို အစားထိုးခြင်းမဟုတ်ပါ။
+`npm run build:contributor` သည် backend သီးသန့် build profile ကို အသုံးပြုသည်။ Build လုပ်နေစဉ်
+dashboard UI ဖိုင်များကို ယာယီ stub ပြုလုပ်ပြီး API route handler များကို ဆက်လက်ထားရှိကာ build ပြီးနောက် မူရင်းဖိုင်များကို
+ပြန်လည်ထားရှိသည်။ Dashboard UI ကို သက်ရောက်စေသော ပြောင်းလဲမှုများ သို့မဟုတ် release အပြည့်အစုံ
+စစ်ဆေးအတည်ပြုမှုအတွက် `npm run build` ကို အသုံးပြုပါ။ Contributor profile သည် release build ကို အစားထိုး၍ မရပါ။
 
-> **VPS deploy မှတ်ချက်:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> သည် မပြောင်းလဲပါ။ Deploy skill များသည် `dist/` ၏ အကြောင်းအရာများကို ၎င်းထဲသို့ rsync လုပ်သည်။
-> Repository အတွင်းရှိ build output path သာ ပြောင်းသွားသည် (`app/` → `dist/`)။
+> **VPS deploy မှတ်ချက်:** Remote image directory `/usr/lib/node_modules/omniroute/app/`
+> သည် ပြောင်းလဲခြင်းမရှိပါ။ Deploy skill များသည် `dist/` ၏ အကြောင်းအရာများကို ၎င်းထဲသို့ rsync လုပ်သည်။
+> Repository အတွင်းရှိ build output path သာ ပြောင်းလဲသွားသည် (`app/` → `dist/`)။
 
-မူလ URL များ-
+ပုံသေ URL များ:
 
 - **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -299,67 +299,67 @@ production build တို့သည် CI ၏ တာဝန်ဖြစ်သည�
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ဒက်ရှ်ဘုတ် စာမျက်နှာများ (ကဏ္ဍ 23 ခု)
+│   ├── (dashboard)/        # Dashboard စာမျက်နှာများ (ကဏ္ဍ 23 ခု)
 │   ├── api/                # API လမ်းကြောင်းများ (လမ်းညွှန် 51 ခု)
-│   └── login/              # စစ်မှန်ကြောင်းအတည်ပြုခြင်း စာမျက်နှာများ (.tsx)
-├── domain/                 # မူဝါဒ အင်ဂျင် (policyEngine, comboResolver, costRules စသည်)
-├── lib/                    # ပင်မ လုပ်ငန်းဆိုင်ရာ လော့ဂျစ် (.ts)
+│   └── login/              # အထောက်အထားစိစစ်ခြင်း စာမျက်နှာများ (.tsx)
+├── domain/                 # မူဝါဒအင်ဂျင် (policyEngine, comboResolver, costRules စသည်)
+├── lib/                    # အဓိက စီးပွားရေးဆိုင်ရာ လုပ်ဆောင်ချက်များ (.ts)
 │   ├── a2a/                # Agent-to-Agent v0.3 ပရိုတိုကော ဆာဗာ
-│   ├── acp/                # Agent Communication Protocol မှတ်ပုံတင်စာရင်း
+│   ├── acp/                # Agent Communication Protocol မှတ်ပုံတင်စနစ်
 │   ├── compliance/         # စည်းမျဉ်းလိုက်နာမှု မူဝါဒအင်ဂျင်
-│   ├── db/                 # SQLite ဒိုမိန်းမော်ဂျူးများ + ရွှေ့ပြောင်းမှု 130 ခု
-│   ├── memory/             # အမြဲတမ်းသိမ်းဆည်းထားသော စကားဝိုင်းမှတ်ဉာဏ်
+│   ├── db/                 # SQLite ဒိုမိန်းမော်ဂျူးများ + migration 130 ခု
+│   ├── memory/             # ရေရှည်သိမ်းဆည်းထားသော စကားဝိုင်းမှတ်ဉာဏ်
 │   ├── oauth/              # OAuth ပံ့ပိုးသူများ၊ ဝန်ဆောင်မှုများနှင့် အသုံးဝင်ကိရိယာများ
-│   ├── skills/             # တိုးချဲ့နိုင်သော စွမ်းရည်ဘောင်
+│   ├── skills/             # တိုးချဲ့နိုင်သော skill မူဘောင်
 │   ├── usage/              # အသုံးပြုမှု ခြေရာခံခြင်းနှင့် ကုန်ကျစရိတ် တွက်ချက်ခြင်း
-│   └── localDb.ts          # ပြန်လည်တင်ပို့သည့် အလွှာသာ — ဤနေရာတွင် လော့ဂျစ်ကို မည်သည့်အခါမျှ မထည့်ပါနှင့်
-├── middleware/              # တောင်းဆိုမှု ကြားခံဆော့ဖ်ဝဲ (promptInjectionGuard)
-├── mitm/                   # MITM ပရောက်စီ (လက်မှတ်၊ DNS၊ ပစ်မှတ်လမ်းကြောင်းသတ်မှတ်ခြင်း)
+│   └── localDb.ts          # ပြန်လည် export လုပ်သည့် အလွှာသာဖြစ်သည် — ဤနေရာတွင် logic ကို မည်သည့်အခါမျှ မထည့်ပါနှင့်
+├── middleware/              # တောင်းဆိုမှု middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (လက်မှတ်၊ DNS၊ ပစ်မှတ်လမ်းကြောင်းသတ်မှတ်ခြင်း)
 ├── shared/
-│   ├── components/         # React ကွန်ပိုနင့်များ (.tsx)
-│   ├── constants/          # ပံ့ပိုးသူ သတ်မှတ်ချက်များ (329)၊ MCP နယ်ပယ်များ၊ လမ်းကြောင်းရွေးချယ်မှု မဟာဗျူဟာ 19 ခု
-│   ├── utils/              # ဆားကစ်ဖြတ်တောက်ကိရိယာ၊ သန့်စင်ကိရိယာ၊ စစ်မှန်ကြောင်းအတည်ပြုမှု အထောက်အကူပြုကိရိယာများ
-│   └── validation/         # Zod v4 စကီးမားများ
-└── sse/                    # SSE ပရောက်စီ လုပ်ငန်းစဉ်အစဉ်
+│   ├── components/         # React component များ (.tsx)
+│   ├── constants/          # ပံ့ပိုးသူ သတ်မှတ်ချက်များ (329)၊ MCP scope များ၊ လမ်းကြောင်းရွေးချယ်မှု မဟာဗျူဟာ 20 ခု
+│   ├── utils/              # Circuit breaker၊ sanitizer၊ အထောက်အထားစိစစ်ရေး အထောက်အကူပြုကိရိယာများ
+│   └── validation/         # Zod v4 schema များ
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse အလုပ်နေရာ
-├── executors/              # အကောင်အထည်ဖော် မော်ဂျူး 150 ခု (အကောင်အထည်ဖော် ကလတ်စ်များ + ပံ့ပိုးသူတစ်ခုချင်းစီအတွက် အထောက်အကူပြုကိရိယာများ)
-├── handlers/               # တောင်းဆိုမှု ကိုင်တွယ်သူ 11 ခု (ချတ်၊ တုံ့ပြန်ချက်များ၊ မြှုပ်သွင်းချက်များ၊ ပုံများ စသည်)
-├── mcp-server/             # MCP ဆာဗာ (ထူးခြားသော ကိရိယာ 110 ခု၊ ပို့ဆောင်ရေးနည်းလမ်း 3 ခု၊ နယ်ပယ် 33 ခု)
-├── services/               # အပေါ်ဆုံးအဆင့် ဝန်ဆောင်မှု 178 ခု (combo, autoCombo, rateLimitManager စသည်)
-├── translator/             # ဖော်မတ် ဘာသာပြန်ကိရိယာများ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API အသွင်ပြောင်းကိရိယာ
-└── utils/                  # အသုံးဝင် မော်ဂျူး 22 ခု (စီးကြောင်း၊ TLS၊ ပရောက်စီ၊ မှတ်တမ်းတင်ခြင်း)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # executor မော်ဂျူး 150 ခု (executor class များ + ပံ့ပိုးသူတစ်ခုချင်းစီအလိုက် အထောက်အကူပြုကိရိယာများ)
+├── handlers/               # တောင်းဆိုမှု handler 11 ခု (chat၊ responses၊ embeddings၊ images စသည်)
+├── mcp-server/             # MCP ဆာဗာ (ထူးခြားသော tool 110 ခု၊ transport 3 ခု၊ scope 33 ခု)
+├── services/               # ထိပ်တန်းအဆင့် service 178 ခု (combo, autoCombo, rateLimitManager စသည်)
+├── translator/             # ဖော်မတ်ပြောင်းလဲပေးသည့် translator များ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # အသုံးဝင်ကိရိယာ မော်ဂျူး 22 ခု (stream၊ TLS၊ proxy၊ logging)
 
-electron/                   # Electron ဒက်စ်တော့အက်ပ် (ပလက်ဖောင်းစုံ)
+electron/                   # Electron desktop app (ပလက်ဖောင်းမျိုးစုံသုံးနိုင်သော)
 
 tests/
-├── unit/                   # Node.js စမ်းသပ်မှု လုပ်ဆောင်ကိရိယာ (စမ်းသပ်မှုဖိုင် 1,574 ခု)
+├── unit/                   # Node.js test runner (test ဖိုင် 1,574 ခု)
 ├── integration/            # ပေါင်းစည်းမှု စမ်းသပ်ချက်များ
 ├── e2e/                    # Playwright စမ်းသပ်ချက်များ
 ├── security/               # လုံခြုံရေး စမ်းသပ်ချက်များ
-├── translator/             # ဘာသာပြန်ကိရိယာအတွက် သီးသန့် စမ်းသပ်ချက်များ
+├── translator/             # Translator သီးသန့် စမ်းသပ်ချက်များ
 └── load/                   # ဝန်အား စမ်းသပ်ချက်များ
 
 docs/
 ├── adr/                     # ဗိသုကာဆိုင်ရာ ဆုံးဖြတ်ချက် မှတ်တမ်းများ
-├── architecture/            # စနစ်ဗိသုကာနှင့် ခံနိုင်ရည်
-├── comparison/              # OmniRoute နှင့် အခြားရွေးချယ်စရာများ နှိုင်းယှဉ်ချက်
-├── compression/             # ချုံ့ခြင်း လမ်းညွှန်များနှင့် စည်းမျဉ်းများ
+├── architecture/            # စနစ်ဗိသုကာနှင့် ခံနိုင်ရည်ရှိမှု
+├── comparison/              # OmniRoute နှင့် အခြားရွေးချယ်စရာများကို နှိုင်းယှဉ်ခြင်း
+├── compression/             # ချုံ့ခြင်းဆိုင်ရာ လမ်းညွှန်များနှင့် စည်းမျဉ်းများ
 ├── dev/                     # ဖွံ့ဖြိုးတိုးတက်ရေး လမ်းညွှန်များ
-├── diagrams/                # ဗိသုကာ ပုံကြမ်းများ
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # အသုံးပြုသူလမ်းညွှန်၊ Docker၊ ပြင်ဆင်တပ်ဆင်မှု၊ ပြဿနာဖြေရှင်းခြင်း
-├── i18n/                    # နိုင်ငံတကာဘာသာစကားသုံး README ဘာသာပြန်များ
-├── marketing/               # စျေးကွက်မြှင့်တင်ရေး ပစ္စည်းများ
-├── ops/                     # ဖြန့်ကျက်ခြင်း၊ ပရောက်စီ၊ လွှမ်းခြုံမှု၊ ထုတ်ဝေမှုများ
-├── providers/               # ပံ့ပိုးသူအလိုက် စာရွက်စာတမ်းများ
-├── reference/               # API ကိုးကားချက်၊ ပတ်ဝန်းကျင် ကိန်းရှင်များ၊ CLI ကိရိယာများ၊ အခမဲ့အဆင့်များ
-├── releases/                # ထုတ်ဝေမှု မှတ်စုများ
-├── routing/                 # အလိုအလျောက် ပေါင်းစပ်အင်ဂျင်၊ ကျိုးကြောင်းဆင်ခြင်မှု ပြန်လည်လုပ်ဆောင်ခြင်း
-├── screenshots/             # ဒက်ရှ်ဘုတ် မျက်နှာပြင်ပုံများ
-├── security/                # အကာအကွယ်စည်းမျဉ်းများ၊ စည်းမျဉ်းလိုက်နာမှု၊ ကိုယ်ပျောက်စနစ်၊ တိုကင်များ
-└── specs/                   # ဒီဇိုင်း သတ်မှတ်ချက်များ
+├── diagrams/                # ဗိသုကာပုံကြမ်းများ
+├── frameworks/              # MCP၊ A2A၊ OpenCode၊ Memory၊ Skills
+├── guides/                  # အသုံးပြုသူလမ်းညွှန်၊ Docker၊ စနစ်ထည့်သွင်းမှု၊ ပြဿနာဖြေရှင်းခြင်း
+├── i18n/                    # ဘာသာစကားအမျိုးမျိုးဖြင့် ပြန်ဆိုထားသော README များ
+├── marketing/               # စျေးကွက်ရှာဖွေရေး အကြောင်းအရာများ
+├── ops/                     # ဖြန့်ကျက်တပ်ဆင်မှု၊ proxy၊ coverage၊ release များ
+├── providers/               # ပံ့ပိုးသူအလိုက် သီးသန့်စာတမ်းများ
+├── reference/               # API ရည်ညွှန်းချက်၊ env var များ၊ CLI tool များ၊ အခမဲ့အဆင့်များ
+├── releases/                # Release မှတ်စုများ
+├── routing/                 # Auto-combo အင်ဂျင်၊ reasoning replay
+├── screenshots/             # Dashboard screenshot များ
+├── security/                # Guardrail များ၊ စည်းမျဉ်းလိုက်နာမှု၊ မမြင်သာမှု၊ token များ
+└── specs/                   # ဒီဇိုင်းသတ်မှတ်ချက်များ
 ```
 
 ---

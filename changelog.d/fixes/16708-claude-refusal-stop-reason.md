@@ -1,1 +1,0 @@
-- **fix(translator):** content-filtered turns reach Claude clients as stop_reason "refusal" (stream and non-stream, including Gemini SAFETY/RECITATION/BLOCKLIST/PROHIBITED_CONTENT), and non-stream "length" maps to "max_tokens" ([#16708](https://github.com/diegosouzapw/OmniRoute/pull/16708)) — thanks @huohua-dev

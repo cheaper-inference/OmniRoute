@@ -3,7 +3,7 @@ import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { after, before, beforeEach, test } from "node:test";
+import { after, before, beforeEach, test, type TestContext } from "node:test";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-catalog-"));
 process.env.DATA_DIR = dataDir;
@@ -237,18 +237,24 @@ test("A5 explicit catalog auth opt-out preserves anonymous access", async () => 
   assert.ok(result.body.models?.length);
 });
 
-async function makeKeyless() {
+async function makeKeyless(t: TestContext) {
   for (const entry of await keys.getApiKeys()) await keys.deleteApiKey(entry.id);
   // Seed an already-completed installation through the real bootstrap rule.
   // updateSettings({ setupComplete: true }) would instead start onboarding's
   // unrelated background Codex resync against a dashboard server.
-  const previousPassword = process.env.INITIAL_PASSWORD;
+  const ambientPassword = process.env.INITIAL_PASSWORD;
+  t.after(() => {
+    if (ambientPassword === undefined) delete process.env.INITIAL_PASSWORD;
+    else process.env.INITIAL_PASSWORD = ambientPassword;
+  });
   try {
     process.env.INITIAL_PASSWORD = "synthetic-bootstrap-only";
     await settings.getSettings();
   } finally {
-    if (previousPassword === undefined) delete process.env.INITIAL_PASSWORD;
-    else process.env.INITIAL_PASSWORD = previousPassword;
+    // A keyless install has no env bootstrap password either: catalogRequest.ts treats any
+    // INITIAL_PASSWORD as configured auth. The CI integration job exports one, so restoring
+    // it here made this scenario non-keyless there; keep it cleared until the test ends.
+    delete process.env.INITIAL_PASSWORD;
   }
   await settings.updateSettings({ password: null });
   const stored = await settings.getSettings();
@@ -258,16 +264,16 @@ async function makeKeyless() {
   assert.equal(process.env.INITIAL_PASSWORD, undefined);
 }
 
-test("A6 keyless completed setup permits a trusted loopback socket", async () => {
-  await makeKeyless();
+test("A6 keyless completed setup permits a trusted loopback socket", async (t) => {
+  await makeKeyless(t);
   exposeSocketPeer = true;
   const result = await getCatalog();
   assert.equal(result.status, 200);
   assert.ok(result.body.models?.length);
 });
 
-test("A6 keyless remote context rejects forged loopback URL and headers", async () => {
-  await makeKeyless();
+test("A6 keyless remote context rejects forged loopback URL and headers", async (t) => {
+  await makeKeyless(t);
   requestOrigin = "http://127.0.0.1";
   const result = await getCatalog({
     host: "localhost",

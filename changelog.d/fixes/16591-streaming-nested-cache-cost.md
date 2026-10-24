@@ -1,1 +1,0 @@
-- **fix(usage):** apply cached-input pricing to translated streaming usage in the spend ledger and shared-quota USD recorder, preserving nested cache-write and reasoning details ([#16591](https://github.com/diegosouzapw/OmniRoute/pull/16591)) — fixes [#16590](https://github.com/diegosouzapw/OmniRoute/issues/16590)

@@ -1,2 +1,0 @@
-- Version the batch-merge workflow alongside the shared quality contracts and detect missing or drifted installations. Combined focused validation remains diagnostic; each actual landing follows current-candidate admission and contributor-credit rules without administrative or blanket rebaseline exceptions.
-- Include the referenced protected-instruction and contributor-credit rules in the drift contract. Keep per-PR instruction approval and contributor ownership explicit, without automatic closure or direct protected-branch fallback exceptions.

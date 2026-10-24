@@ -11,6 +11,11 @@
 import { BaseGuardrail, type GuardrailContext, type GuardrailResult } from "./base";
 import { getSettings as defaultGetSettings } from "@/lib/db/settings";
 import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
+import { getProviderNodePrefixSync } from "@/lib/db/providers/nodePrefix";
+import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
+import { getExactCustomModelVisionOverride } from "@/lib/db/models/customVisionOverride";
+import { getModelCompatVisionOverride } from "@/lib/db/models/compat";
+import { getSyncedAvailableModelVision } from "@/lib/db/models/syncedAvailableModelVision";
 import {
   extractImageParts,
   callVisionModel as defaultCallVisionModel,
@@ -52,6 +57,41 @@ function evaluateModelStepCapability(s: Record<string, unknown>): "vision" | "no
       : typeof s.provider === "string"
         ? s.provider
         : null;
+  // A public prefix, an internal node ID and a raw vendor/model path can all
+  // refer to one configured compatible provider. A generic capability lookup
+  // is NOT sufficient proof for such a node: its fallback may find the same
+  // model name in a completely different provider's customModels rows.
+  const internalProvider = provider && isCompatibleProviderConnectionId(provider) ? provider : null;
+  if (internalProvider) {
+    const slash = targetModel.indexOf("/");
+    const prefix = slash > 0 ? targetModel.slice(0, slash) : null;
+    const ownPrefix = getProviderNodePrefixSync(internalProvider);
+    const hasOwnPrefix = Boolean(
+      prefix &&
+      (prefix === internalProvider ||
+        (ownPrefix && prefix.toLowerCase() === ownPrefix.toLowerCase()))
+    );
+    const candidates = hasOwnPrefix ? [targetModel.slice(slash + 1), targetModel] : [targetModel];
+
+    // Preserve source precedence: an explicit false from this node must win
+    // before positive discoveries and must not be overridden by a foreign
+    // public-model verdict. Slash-shaped upstream IDs stay unmodified.
+    for (const id of candidates) {
+      const custom = getExactCustomModelVisionOverride(internalProvider, id);
+      if (custom !== null) return custom ? "vision" : "non-vision";
+    }
+    for (const id of candidates) {
+      const compat = getModelCompatVisionOverride(internalProvider, [id]);
+      if (compat !== null) return compat ? "vision" : "non-vision";
+    }
+    for (const id of candidates) {
+      if (getSyncedAvailableModelVision(internalProvider, id) === true) return "vision";
+    }
+    // No exact source owned by this node confirmed vision support. Do not
+    // treat an unrelated provider's row or a name heuristic as a pass.
+    return "non-vision";
+  }
+
   const caps = getResolvedModelCapabilities({ provider, model: targetModel });
   return caps.supportsVision === true ? "vision" : "non-vision";
 }
@@ -267,6 +307,8 @@ export interface VisionBridgeDependencies {
   ) => Promise<string>;
   /** Override combo-target vision check — return true to force processing, false to skip. */
   checkModelHasComboMapping?: (model: string) => Promise<boolean>;
+  /** Test/embedder seam: preserve the full combo verdict, including non-combo. */
+  resolveComboVisionDecision?: (model: string) => Promise<ComboVisionBridgeDecision>;
   /**
    * Whether a model string has a usable active credential (true/false).
    * Return `null` when indeterminate (no DB / error) so callers can fail-open.
@@ -327,6 +369,8 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
       requestedModelVision = capabilities?.supportsVision ?? null;
       comboVisionBridgeDecision = forceVisionBridge
         ? "process"
+        : this.deps.resolveComboVisionDecision
+          ? await this.deps.resolveComboVisionDecision(model)
         : this.deps.checkModelHasComboMapping
           ? (await this.deps.checkModelHasComboMapping(model))
             ? "process"
@@ -384,9 +428,9 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
       return { block: false };
     }
 
-    // 8. Check for images. Description mode can only replace top-level parts,
-    // while reroute mode preserves the entire body and therefore also supports
-    // images nested inside Responses function_call_output items.
+    // 8. Detect replaceable images in both top-level content and nested Claude
+    // tool_result parts. Responses function_call_output needs its separate
+    // detector for reroute mode (the output array is not message.content).
     const imageParts = extractImageParts(messages as Parameters<typeof extractImageParts>[0]);
     const nestedToolImageCount = countNestedToolOutputImages(messages as unknown[]);
     const detectedImageCount = imageParts.length + nestedToolImageCount;
@@ -602,6 +646,17 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
         { hasUsableCredentials: scopedCheckCreds }
       );
       if (!scopedModel) {
+        // A known text-only model must not receive the original image when the
+        // API-key scope forbids all available captioning routes. An explicit
+        // local rejection is safer than a guaranteed opaque upstream 400 and
+        // does not spend a provider's credit outside the caller's key policy.
+        if (!isAuto && (requestedModelVision === false || forceVisionBridge)) {
+          return {
+            block: true,
+            message: "No permitted vision model can describe images for this text-only target",
+            meta: { reason: "no_permitted_vision_model", requestedModel: model },
+          };
+        }
         context.log?.warn?.(
           "VISION_BRIDGE",
           `No vision model is permitted for this API key; passing ${detectedImageCount} image(s) through unchanged`
@@ -702,12 +757,28 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
     // outright (capability_mismatch), so stub text is strictly better than
     // preserving bytes no combo target can consume.
     const allNull = descriptions.every((d) => d === null);
+    // #17069: a confirmed text-only direct target cannot accept raw images even
+    // when only ONE description fails, or the history contains more images than
+    // maxImages. Keep the original fail-open rule for UNKNOWN/vision-capable
+    // targets: they may still be able to consume the unmodified image bytes.
+    const confirmedTextOnlyDirectTarget =
+      !isAuto &&
+      (requestedModelVision === false || forceVisionBridge) &&
+      comboVisionBridgeDecision !== "skip";
+    const noVisionCombo = comboVisionBridgeDecision === "no-vision";
     if (
-      allNull &&
-      (comboVisionBridgeDecision === "process" || comboVisionBridgeDecision === "no-vision")
+      confirmedTextOnlyDirectTarget ||
+      noVisionCombo ||
+      (allNull && comboVisionBridgeDecision === "process")
     ) {
-      for (let i = 0; i < descriptions.length; i++) {
-        descriptions[i] = `[Image ${i + 1}]: (unavailable — no vision-capable provider connected)`;
+      const totalImagesToReplace =
+        confirmedTextOnlyDirectTarget || noVisionCombo
+          ? imageParts.length
+          : descriptions.length;
+      for (let i = 0; i < totalImagesToReplace; i++) {
+        if (descriptions[i] == null) {
+          descriptions[i] = `[Image ${i + 1}]: (unavailable — no vision-capable provider connected)`;
+        }
       }
     }
 

@@ -1,4 +1,7 @@
 import { handleVideoGeneration } from "@omniroute/open-sse/handlers/videoGeneration.ts";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
+import { runWithCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
+import { createRequestMediaSink } from "@/app/api/v1/_helpers/mediaSink";
 import { resolveVideoCredentialProvider } from "@omniroute/open-sse/handlers/videoGeneration/googleFlow.ts";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import {
@@ -74,7 +77,28 @@ async function postHandler(request, context) {
   // the key's connection scope, the same scope chat applies.
   const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
   if (scope.rejection) return scope.rejection;
+  // Respect API key scope before rejecting incompatible model endpoints.
+  const endpointMismatch = await getRequestedModelEndpointMismatch(body.model, "videos");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
   const { allowedConnections } = scope;
+
+  // #16372 — where auth-gated job results (OpenRouter video) are stored and served from.
+  const mediaSink = await createRequestMediaSink(request, policy.apiKeyInfo);
+
+  // Bind API-key identity for every call log and usage row this request emits.
+  // Without it every video row lands with api_key_id NULL, which mis-buckets per-key
+  // usage into "unknown" and makes the row unmatchable against recorded per-key costs.
+  // Handlers fan out into provider helpers that write their own logs, so request-scoped
+  // storage is what keeps attribution attached without threading identity through every
+  // handler.
+  const withApiKeyContext = <TResult>(callback: () => TResult): TResult =>
+    runWithCallLogApiKeyContext(
+      {
+        apiKeyId: policy.apiKeyInfo?.id ?? null,
+        apiKeyName: policy.apiKeyInfo?.name ?? null,
+      },
+      callback
+    );
 
   // Detect a combo name and divert to full video combo execution, mirroring
   // the images route. Checks before the provider lookup — and before the
@@ -87,19 +111,22 @@ async function postHandler(request, context) {
     const combo = await getComboByName(body.model);
     if (combo) {
       const { executeVideoCombo } = await import("@omniroute/open-sse/services/videoCombo");
-      return executeVideoCombo(
-        body.model,
-        body,
-        {
-          request,
-          policy,
-          keyScope: {
-            allowedConnections,
-            isTargetAllowed: createComboTargetKeyGate(policy, body.model),
+      return withApiKeyContext(() =>
+        executeVideoCombo(
+          body.model,
+          body,
+          {
+            request,
+            policy,
+            mediaSink,
+            keyScope: {
+              allowedConnections,
+              isTargetAllowed: createComboTargetKeyGate(policy, body.model),
+            },
           },
-        },
-        startTime,
-        log
+          startTime,
+          log
+        )
       );
     }
   }
@@ -170,12 +197,18 @@ async function postHandler(request, context) {
     credentials = local.credentials;
   }
 
-  const result: MediaGenerationResultLike = await handleVideoGeneration({
-    body,
-    credentials,
-    log,
-    ...(isCustomModel && { resolvedProvider: provider }),
-  });
+  const result: MediaGenerationResultLike = await withApiKeyContext(() =>
+    handleVideoGeneration({
+      body,
+      credentials,
+      log,
+      // #16372 — auth-gated job results are stored under this caller's owner and served
+      // from the caller-facing origin (configured public URL / trusted proxy / Host).
+      mediaSink,
+      ...(isCustomModel && { resolvedProvider: provider }),
+      signal: request.signal,
+    })
+  );
 
   if (isMediaGenerationFailure(result)) {
     return failedMediaGenerationResponse(result, "Video generation provider error");
@@ -189,6 +222,7 @@ async function postHandler(request, context) {
     model: body.model,
     startTime,
     duration: body.duration,
+    apiKeyId: policy.apiKeyInfo?.id,
   });
 }
 

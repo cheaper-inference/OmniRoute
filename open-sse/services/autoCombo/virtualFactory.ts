@@ -1,4 +1,4 @@
-import { EMULATED_TOOL_CALLING_NOAUTH_PROVIDERS } from "./emulatedNoAuthAllowlist";
+import { getAutoRoutableEmulatedNoAuthProviders } from "./emulatedNoAuthAllowlist";
 import { AutoComboConfig } from "./engine";
 import { MODE_PACKS } from "./modePacks";
 import { DEFAULT_WEIGHTS, reliabilityFactor, ScoringWeights } from "./scoring";
@@ -55,6 +55,7 @@ import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
 import { resolveProviderAlias } from "../model.ts";
 import { filterExcludedCandidates } from "./candidateOverrides";
 import { getExcludedConnectionIds } from "@/lib/db/autoCandidateOverrides";
+import { isNoAuthProviderReadyForAutoRouting } from "./noAuthReadiness";
 import {
   filterResilienceBlockedCandidates,
   buildConnectionResilienceMap,
@@ -347,12 +348,18 @@ function hasUsableConnectionCredential(conn: VirtualFactoryConn): boolean {
 
 const SYNTHETIC_NOAUTH_CONNECTION_ID = RESILIENCE_NOAUTH_CONNECTION_ID;
 
+// No-auth providers must opt into prompt-emulated tool calling before entering
+// reliability-curated auto/* pools. Local CLI providers additionally need a
+// successful readiness probe before they are admitted; direct provider/model
+// routing remains unaffected.
 function isChatAutoComboNoAuthProvider(
   providerDef: NoAuthProviderDefinition,
   bypassAllowlist: boolean
 ): boolean {
   if (providerDef.noAuth !== true) return false;
-  if (!bypassAllowlist && !EMULATED_TOOL_CALLING_NOAUTH_PROVIDERS.has(providerDef.id)) return false;
+  if (!bypassAllowlist && !getAutoRoutableEmulatedNoAuthProviders().has(providerDef.id))
+    return false;
+  if (!bypassAllowlist && !isNoAuthProviderReadyForAutoRouting(providerDef.id)) return false;
   if (!Array.isArray(providerDef.serviceKinds) || providerDef.serviceKinds.length === 0)
     return true;
   return providerDef.serviceKinds.includes("llm");
@@ -1225,9 +1232,13 @@ export async function createVirtualAutoCombo(
   spec?: AutoComboSpec,
   apiKeyId?: string,
   autoChannel?: string,
-  traceInvocationId?: string
+  traceInvocationId?: string,
+  includeResolvedCapabilities?: boolean
 ): Promise<VirtualAutoCombo> {
-  const prepared = await prepareVirtualAutoComboInputs({ traceInvocationId });
+  const prepared = await prepareVirtualAutoComboInputs({
+    includeResolvedCapabilities,
+    traceInvocationId,
+  });
   return createVirtualAutoComboFromPrepared(
     prepared,
     variant,

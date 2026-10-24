@@ -39,7 +39,9 @@ function stubFetch(feed: () => Response): { calls: RecordedCall[]; feedCalls: st
     return new Response(
       JSON.stringify({
         models: {
-          "gemini-3.7-flash-high": {
+          // #12608: per-tier 3.7 ids left the live roster and are hidden from Provider Limits;
+          // the live 3.8 tier is what fetchAvailableModels returns now.
+          "gemini-3.8-flash-high": {
             quotaInfo: { remainingFraction: 0.5, resetTime: "2026-12-01T00:00:00Z" },
           },
         },
@@ -124,6 +126,6 @@ test("unreachable release feed falls back to the 2.5.5 floor and still fetches u
   }
   assert.ok(result && "quotas" in result, "usage result should carry quotas");
   if (result && "quotas" in result) {
-    assert.ok(result.quotas["gemini-3.7-flash-high"], "quota bucket should be parsed");
+    assert.ok(result.quotas["gemini-3.8-flash-high"], "quota bucket should be parsed");
   }
 });

@@ -1,1 +1,0 @@
-- **test(providers):** Keep the Gemini Web validation fixture aligned with the signed-in session-token requirement while retaining signed-out rejection coverage ([#16170](https://github.com/diegosouzapw/OmniRoute/pull/16170)).

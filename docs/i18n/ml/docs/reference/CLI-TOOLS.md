@@ -45,75 +45,73 @@ ACP Agents (വിപരീത സ്പോൺ പ്രവാഹം):
 
 ## `setup-*` ഉപയോഗിച്ച് സ്വയമേവ കോൺഫിഗർ ചെയ്യുക
 
-ഓരോ ടൂളിന്റെയും കോൺഫിഗറേഷൻ കൈകൊണ്ട് എഴുതേണ്ടതില്ല. പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുന്ന
+ഓരോ ടൂളിന്റെയും കോൺഫിഗറേഷൻ നിങ്ങൾ കൈകൊണ്ട് എഴുതേണ്ടതില്ല. പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുന്ന
 OmniRoute-ൽനിന്ന് (ലോക്കൽ അല്ലെങ്കിൽ റിമോട്ട്) **തത്സമയ** മോഡൽ കാറ്റലോഗ് വായിച്ച്,
-നിങ്ങളുടെ മെഷീനിൽ ടൂളിന്റെ സ്വന്തം കോൺഫിഗറേഷൻ എഴുതുന്ന ഒരു `setup-*`
-കമാൻഡ് പിന്തുണയ്ക്കുന്ന ഓരോ CLI-ക്കും OmniRoute നൽകുന്നു:
+നിങ്ങളുടെ മെഷീനിൽ ടൂളിന്റെ സ്വന്തം കോൺഫിഗറേഷൻ എഴുതുന്ന ഒരു `setup-*` കമാൻഡ്,
+പിന്തുണയ്ക്കുന്ന ഓരോ CLI-യ്ക്കും OmniRoute നൽകുന്നു:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-ഓരോന്നും `--remote <url> --api-key <key>` (ഒരു റിമോട്ട് OmniRoute-നായി ലോക്കൽ
-ടൂൾ കോൺഫിഗർ ചെയ്യുക), `--dry-run` (എഴുതാതെ പ്രിവ്യൂ ചെയ്യുക), `--port` എന്നിവ
-സ്വീകരിക്കുന്നു. മോഡൽ സ്വയം കണ്ടെത്തൽ ഇല്ലാത്ത ടൂളുകൾക്ക് (Cline, Kilo, Roo,
-Goose, Aider, Qwen, 5dive) `--model <id>` ആവശ്യമാണ് (ഇന്ററാക്ടീവ് അല്ലാത്ത
-റണ്ണുകൾക്ക് `--yes`-ഉം). `$HOME`-ന് കീഴിൽ എഴുതാത്ത ഒരേയൊരു റെസിപ്പിയാണ്
-`setup-5dive`: ഫ്ലീറ്റ് ഹോസ്റ്റിൽ root ഉടമസ്ഥതയിലുള്ള ഒരു ഓത്ത് പ്രൊഫൈൽ എഴുതി
-ഇത് ഒരു 5dive ഏജന്റ് ഫ്ലീറ്റ് കോൺഫിഗർ ചെയ്യുന്നതിനാൽ, `sudo` വഴി സ്വയം വീണ്ടും
-എക്സിക്യൂട്ട് ചെയ്യുകയും സ്വന്തമായി റിമോട്ട് മോഡ് ഇല്ലാതിരിക്കുകയും ചെയ്യുന്നു.
-ശരിയായ എൻവയോൺമെന്റ് ഇൻജക്ട് ചെയ്ത്, ഒരു കോൺഫിഗറേഷനും എഴുതാതെ ഒരു CLI
-ആരംഭിക്കാൻ പൊതുവായ `omniroute run <target>` ലോഞ്ചർ ഉപയോഗിക്കുക (claude, codex,
-aider, goose, opencode, qwen, gemini — ടാർഗറ്റുകളും അപരനാമങ്ങളും
-`bin/cli/cli-manifest.mjs`-ൽ നിന്നാണ് ലഭിക്കുന്നത്); ഓരോ ടൂളിനുമുള്ള പഴയ
-ലോഞ്ചറുകളായ `omniroute launch` (Claude Code), `omniroute launch-codex`
-(Codex) എന്നിവ തുടർന്നും ലഭ്യമാണ്. Gemini CLI ലോഞ്ച് ചെയ്യാൻ മാത്രമുള്ളതാണ്:
-അത് ഒരു `omniroute run` ടാർഗറ്റാണ്, എന്നാൽ അതിന് `setup-*`/`configure`
-റെസിപ്പിയില്ല.
+ഓരോന്നും `--remote <url> --api-key <key>` (ഒരു റിമോട്ട് OmniRoute-ന് എതിരായി ഒരു
+ലോക്കൽ ടൂൾ കോൺഫിഗർ ചെയ്യാൻ), `--dry-run` (എഴുതാതെ പ്രിവ്യൂ ചെയ്യാൻ), `--port`
+എന്നിവ സ്വീകരിക്കുന്നു. മോഡൽ സ്വയമേവ കണ്ടെത്താനുള്ള സൗകര്യമില്ലാത്ത ടൂളുകൾ
+(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>` സ്വീകരിക്കുന്നു
+(കൂടാതെ ഇന്ററാക്ടീവ് അല്ലാത്ത റണ്ണുകൾക്കായി `--yes`). `$HOME`-ന് കീഴിൽ എഴുതാത്ത
+ഒരേയൊരു റെസിപ്പിയാണ് `setup-5dive`: ഫ്ലീറ്റ് ഹോസ്റ്റിൽ root ഉടമസ്ഥതയിലുള്ള ഒരു
+ഓത്ത് പ്രൊഫൈൽ എഴുതിക്കൊണ്ട് ഇത് 5dive ഏജന്റ് ഫ്ലീറ്റിനെ കോൺഫിഗർ ചെയ്യുന്നു;
+അതിനാൽ ഇത് `sudo` വഴി വീണ്ടും എക്സിക്യൂട്ട് ചെയ്യുകയും സ്വന്തമായി റിമോട്ട് മോഡ്
+ഇല്ലാതിരിക്കുകയും ചെയ്യുന്നു. ശരിയായ env ഇൻജക്റ്റ് ചെയ്തുകൊണ്ടും യാതൊരു
+കോൺഫിഗറേഷനും എഴുതാതെയും ഒരു CLI ലോഞ്ച് ചെയ്യാൻ, പൊതുവായ
+`omniroute run <target>` ലോഞ്ചർ ഉപയോഗിക്കുക (claude, codex, aider, goose,
+opencode, qwen, gemini — ടാർഗറ്റുകളും അപരനാമങ്ങളും
+`bin/cli/cli-manifest.mjs`-ൽനിന്നാണ് വരുന്നത്); ഓരോ ടൂളിനുമുള്ള പഴയ ലോഞ്ചറുകളായ
+`omniroute launch` (Claude Code), `omniroute launch-codex` (Codex) എന്നിവ
+തുടർന്നും ലഭ്യമാണ്. Gemini CLI ലോഞ്ച് ചെയ്യാൻ മാത്രമുള്ളതാണ്: അത് ഒരു
+`omniroute run` ടാർഗറ്റാണ്, എന്നാൽ അതിന് `setup-*`/`configure` റെസിപ്പി ഇല്ല.
 
 > **പൂർണ്ണ റഫറൻസ്:** ഓരോ കമാൻഡും എന്താണ് എഴുതുന്നത്, എല്ലാ ഫ്ലാഗുകളും,
-> ലോക്കൽ-റിമോട്ട് വ്യത്യാസവും, ഏതൊക്കെ ടൂളുകൾക്ക് `/v1` സഫിക്സ് വേണമെന്നതും
-> ഉൾപ്പെടുന്ന പ്രധാന പട്ടിക **[CLI സംയോജനങ്ങൾ](../guides/CLI-INTEGRATIONS.md)** എന്നതിലുണ്ട്.
+> ലോക്കൽ-റിമോട്ട് വ്യത്യാസങ്ങളും, ഏതൊക്കെ ടൂളുകൾക്ക് `/v1` സഫിക്സ് വേണമെന്നതും
+> ഉൾക്കൊള്ളുന്ന പ്രധാന പട്ടിക
+> **[CLI ഇന്റഗ്രേഷനുകൾ](../guides/CLI-INTEGRATIONS.md)** എന്നതിലുണ്ട്.
 
 ### ഇവ ഒരു കണ്ടെയ്നറിനുള്ളിൽ പ്രവർത്തിപ്പിക്കൽ
 
-OmniRoute കണ്ടെയ്നറിനുള്ളിൽ എക്സിക്യൂട്ട് ചെയ്യുന്ന ഒരു `setup-*` കമാൻഡ്
-കണ്ടെയ്നറിന്റെ സ്വന്തം ഹോമിലാണ് എഴുതുന്നത്; ഹോസ്റ്റിലെ ഒരു CLI-യും അത്
-വായിക്കില്ല, കണ്ടെയ്നറിനൊപ്പം അത് അപ്രത്യക്ഷമാകുകയും ചെയ്യും. OmniRoute അത്
-തിരിച്ചറിഞ്ഞ് എഴുതുന്നതിനുപകരം നിർദ്ദേശങ്ങളോടുകൂടി `2` എക്സിറ്റ് കോഡ് നൽകി
-പുറത്തുകടക്കുന്നു. മുന്നോട്ട് പോകാൻ പിന്തുണയ്ക്കുന്ന രണ്ട് മാർഗങ്ങളുണ്ട് —
-ഹോസ്റ്റിൽ CLI ഇൻസ്റ്റാൾ ചെയ്ത് കണ്ടെയ്നറിലേക്ക് `omniroute connect` ചെയ്യുക,
-അല്ലെങ്കിൽ കോൺഫിഗറേഷൻ ഡയറക്ടറികൾ ബൈൻഡ്-മൗണ്ട് ചെയ്ത് `CLI_CONFIG_HOME`
-സജ്ജീകരിക്കുക (compose `host` പ്രൊഫൈൽ). കണ്ടെയ്നറിന്റെ സ്വന്തം CLI-കൾ
-കോൺഫിഗർ ചെയ്യുകയാണ് നിങ്ങൾ യഥാർഥത്തിൽ ഉദ്ദേശിച്ചതെങ്കിൽ, എല്ലാ `setup-*`
-കമാൻഡുകളും `omniroute configure`, `omniroute config set` എന്നിവയും
-`--allow-container-write` സ്വീകരിക്കുന്നു; സെർവറിനായി
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ഇതേ കാര്യം ചെയ്യുന്നു.
+OmniRoute കണ്ടെയ്നറിനുള്ളിൽ എക്സിക്യൂട്ട് ചെയ്യുന്ന ഒരു `setup-*` കമാൻഡ്,
+കണ്ടെയ്നറിന്റെ സ്വന്തം ഹോമിലാണ് എഴുതുന്നത്; ഒരു ഹോസ്റ്റ് CLI-യും അത് വായിക്കില്ല,
+കൂടാതെ കണ്ടെയ്നറിനൊപ്പം അത് അപ്രത്യക്ഷമാവുകയും ചെയ്യും. OmniRoute ഇത്
+കണ്ടെത്തുകയും എഴുതുന്നതിനുപകരം നിർദ്ദേശങ്ങളോടെ `2` എന്ന കോഡിൽ എക്സിറ്റ് ചെയ്യുകയും
+ചെയ്യുന്നു. മുന്നോട്ടുപോകാൻ പിന്തുണയ്ക്കുന്ന രണ്ട് മാർഗങ്ങളുണ്ട് — ഹോസ്റ്റിൽ CLI
+ഇൻസ്റ്റാൾ ചെയ്ത് കണ്ടെയ്നറിലേക്ക് `omniroute connect` ചെയ്യുക, അല്ലെങ്കിൽ കോൺഫിഗ്
+ഡയറക്ടറികൾ ബൈൻഡ്-മൗണ്ട് ചെയ്ത് `CLI_CONFIG_HOME` സജ്ജമാക്കുക (compose `host`
+പ്രൊഫൈൽ). കണ്ടെയ്നറിന്റെ സ്വന്തം CLI-കളെയാണ് നിങ്ങൾ യഥാർഥത്തിൽ കോൺഫിഗർ ചെയ്യാൻ
+ഉദ്ദേശിച്ചതെങ്കിൽ, എല്ലാ `setup-*` കമാൻഡുകളും കൂടാതെ `omniroute configure`,
+`omniroute config set` എന്നിവയും `--allow-container-write` സ്വീകരിക്കുന്നു;
+സെർവറിനായി `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ഇതേ കാര്യം ചെയ്യുന്നു.
 [Docker ഗൈഡ് → ഹോസ്റ്റ് CLI ടൂളുകൾ കോൺഫിഗർ ചെയ്യൽ](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 കാണുക.
 
-ഡാഷ്ബോർഡിന്റെ **അപ്ലൈ എൻഡ്പോയിന്റ്** (`POST /api/cli-tools/apply`) ഇതേ
-ഗാർഡ് നിർബന്ധമാക്കുന്നു: ഒരു കണ്ടെയ്നറിൽ, ഹോസ്റ്റിൽനിന്ന് ബൈൻഡ്-മൗണ്ട്
-ചെയ്തിട്ടില്ലാത്ത ടാർഗറ്റിലേക്കുള്ള റൈറ്റ് **`422`** എന്ന മറുപടിയോടൊപ്പം
-`containerEphemeralTarget: true`, സുരക്ഷിതമായ പിശക് വാചകം, കൂടാതെ ഹോസ്റ്റ്
-റെസിപ്പിയുള്ള ടൂളുകൾക്കായി (claude, codex, opencode, cline, kilo, continue)
-ഹോസ്റ്റിൽ പകരം പ്രവർത്തിപ്പിക്കാനുള്ള ഒരു `hostSetupCommand` (ഉദാ.
-`omniroute setup-opencode`) എന്നിവ നൽകുന്നു; ഒന്നും എഴുതപ്പെടുന്നില്ല.
-കണ്ടെയ്നർ മോഡിലും `dryRun: true` പ്രവർത്തിക്കുന്നത് തുടരുകയും, ഡിസ്കിൽ
-മാറ്റം വരുത്താതെ രഹസ്യവിവരങ്ങൾ മറച്ച ഒരു പ്രിവ്യൂവും ടാർഗറ്റ് പാത്തും
-നൽകുകയും ചെയ്യുന്നു. പ്രിവ്യൂ ഉള്ളടക്കം പകർത്താനോ ഇംപോർട്ട് ചെയ്യാനോ ഉള്ള,
-ക്രെഡൻഷ്യലുകൾ ഉൾക്കൊള്ളുന്ന കോൺഫിഗറേഷനല്ല. യഥാർഥ ടൂൾ/ബേസ് URL/API
-കീ/മോഡൽ ഇൻപുട്ടുകൾ ഉപയോഗിച്ച് ഹോസ്റ്റിൽ അപ്ലൈ ചെയ്യുക, അല്ലെങ്കിൽ
-സൂചിപ്പിച്ച ഹോസ്റ്റ്-സൈഡ് സെറ്റപ്പ് കമാൻഡ് ഉപയോഗിക്കുക. പ്രിവ്യൂ ഹെഡറിനും
-റിക്വസ്റ്റ് കോൺട്രാക്ടിനുമായി [CLI കോൺഫിഗറേഷൻ സുരക്ഷ](../security/CLI-CONFIGURATION.md)
-കാണുക. ഈ പെരുമാറ്റം മനഃപൂർവമുള്ളതും
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` മുഖേന റിഗ്രഷനുകളിൽനിന്ന്
-സംരക്ഷിക്കപ്പെട്ടതുമാണ് — ഗാർഡ് നീക്കം ചെയ്തുകൊണ്ട് ഒരു 422 ഒരിക്കലും
-"ശരിയാക്കരുത്".
+ഡാഷ്ബോർഡിന്റെ **അപ്ലൈ എൻഡ്പോയിന്റ്** (`POST /api/cli-tools/apply`) ഇതേ ഗാർഡ്
+നടപ്പാക്കുന്നു: ഒരു കണ്ടെയ്നറിൽ, ഹോസ്റ്റിൽനിന്ന് ബൈൻഡ്-മൗണ്ട് ചെയ്തിട്ടില്ലാത്ത
+ടാർഗറ്റിലേക്കുള്ള ഒരു റൈറ്റ്, **`422`**, `containerEphemeralTarget: true`,
+സുരക്ഷിതമായ പിശക് വാചകം എന്നിവ ഉപയോഗിച്ച് മറുപടി നൽകുന്നു; കൂടാതെ ഹോസ്റ്റ് റെസിപ്പി
+ഉള്ള ടൂളുകൾക്കായി (claude, codex, opencode, cline, kilo, continue), പകരം ഹോസ്റ്റിൽ
+പ്രവർത്തിപ്പിക്കാനുള്ള ഒരു `hostSetupCommand`-ഉം (ഉദാ. `omniroute setup-opencode`)
+നൽകുന്നു; ഒന്നും എഴുതപ്പെടുന്നില്ല. കണ്ടെയ്നർ മോഡിൽ `dryRun: true` തുടർന്നും
+പ്രവർത്തിക്കുകയും ഡിസ്കിൽ മാറ്റം വരുത്താതെ റീഡാക്ട് ചെയ്ത പ്രിവ്യൂ + ടാർഗറ്റ് പാത
+തിരികെ നൽകുകയും ചെയ്യുന്നു. പ്രിവ്യൂ ഉള്ളടക്കം പകർത്താനോ ഇംപോർട്ട് ചെയ്യാനോ ഉള്ള,
+ക്രെഡൻഷ്യലുകൾ ഉൾക്കൊള്ളുന്ന കോൺഫിഗറേഷൻ അല്ല. യഥാർഥ ടൂൾ/base URL/API key/model
+ഇൻപുട്ടുകൾ ഉപയോഗിച്ച് ഹോസ്റ്റിൽ അപ്ലൈ ചെയ്യുക, അല്ലെങ്കിൽ സൂചിപ്പിച്ചിരിക്കുന്ന
+ഹോസ്റ്റ്-സൈഡ് സെറ്റപ്പ് കമാൻഡ് ഉപയോഗിക്കുക. പ്രിവ്യൂ ഹെഡറിനും റിക്വസ്റ്റ്
+കോൺട്രാക്ടിനുമായി [CLI കോൺഫിഗറേഷൻ സുരക്ഷ](../security/CLI-CONFIGURATION.md)
+കാണുക. ഈ സ്വഭാവം മനഃപൂർവമുള്ളതും
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` മുഖേന റിഗ്രഷനിൽനിന്ന്
+സംരക്ഷിക്കപ്പെട്ടതുമാണ് — ഗാർഡ് നീക്കംചെയ്തുകൊണ്ട് ഒരിക്കലും 422 "ശരിയാക്കരുത്".
 
 ---
 
@@ -149,47 +147,48 @@ CLI കമാൻഡ് സർഫേസുകൾക്കുള്ള ആധി�
 
 ---
 
-## 1. CLI Code-ന്റെ കാറ്റലോഗ് (26 ടൂളുകൾ)
+## 1. CLI കോഡിന്റെ കാറ്റലോഗ് (27 ടൂളുകൾ)
 
-`/dashboard/cli-code`-ൽ ദൃശ്യമാകുന്ന എല്ലാ ടൂളുകളും. `baseUrlSupport: none` ഉള്ളവ ഒരു ഇഷ്ടാനുസൃത അടിസ്ഥാന URL-ന് പകരം MITM അല്ലെങ്കിൽ മാനുവൽ ഗൈഡ് വഴിയാണ് ബന്ധിപ്പിച്ചിരിക്കുന്നത്:
+`/dashboard/cli-code`-ൽ ദൃശ്യമാകുന്ന എല്ലാ ടൂളുകളും. `baseUrlSupport: none` ഉള്ളവ ഒരു ഇഷ്ടാനുസൃത base URL-ന് പകരം MITM വഴിയോ മാനുവൽ ഗൈഡ് വഴിയോ ബന്ധിപ്പിച്ചിരിക്കുന്നു:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| id           | name                    | vendor                 | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ---------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic              | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI                 | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                   | none           | custom         | false        |
+| cline        | Cline                   | OSS (മുൻപ് Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org               | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)              | full           | guide          | false        |
+| continue     | Continue                | continue.dev           | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)      | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ            | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)         | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)      | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)           | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (മുൻപ് SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI             | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS              | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere              | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)      | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)       | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries         | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
+| antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research          | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon                 | none           | mitm           | false        |
+| custom       | Custom CLI              | —                      | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"` ഉള്ള ടൂളുകളുടെ ഡാഷ്ബോർഡ് കാർഡിൽ "⚠ ഭാഗിക Base URL" എന്ന ബാഡ്ജ് പ്രദർശിപ്പിക്കുന്നു.
+`baseUrlSupport: "partial"` ഉള്ള ടൂളുകളുടെ ഡാഷ്ബോർഡ് കാർഡിൽ "⚠ ഭാഗിക Base URL" എന്ന ബാഡ്ജ് ദൃശ്യമാകും.
 ---
 
 ## 2. CLI ഏജന്റുകളുടെ കാറ്റലോഗ് (10 ടൂളുകൾ)
 
-`/dashboard/cli-agents`-ൽ ദൃശ്യമാകുന്ന സ്വയംപ്രവർത്തക ഏജന്റുകൾ:
+`/dashboard/cli-agents`-ൽ ദൃശ്യമാകുന്ന സ്വയംഭരണ ഏജന്റുകൾ:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
+| id           | പേര്             | വെൻഡർ                    | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |
 | hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
 | openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |

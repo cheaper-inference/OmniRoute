@@ -43,61 +43,64 @@ ACP ଏଜେଣ୍ଟ୍ଗୁଡ଼ିକ (ବିପରୀତ ଆରମ୍ଭ 
 
 ---
 
-## `setup-*` ସହ ସ୍ୱୟଂଚାଳିତ ବିନ୍ୟାସ
+## `setup-*` ସହିତ ସ୍ୱୟଂଚାଳିତ ଭାବେ କନଫିଗର୍ କରନ୍ତୁ
 
-ଆପଣଙ୍କୁ ପ୍ରତ୍ୟେକ ଟୁଲ୍ର ବିନ୍ୟାସ ହାତରେ ଲେଖିବାକୁ ପଡ଼େ ନାହିଁ। OmniRoute ପ୍ରତ୍ୟେକ ସମର୍ଥିତ CLI ପାଇଁ ଏକ `setup-*`
-କମାଣ୍ଡ ପ୍ରଦାନ କରେ, ଯାହା ଚାଲୁଥିବା ଏକ OmniRoute (ସ୍ଥାନୀୟ କିମ୍ବା ରିମୋଟ୍) ଠାରୁ **ଲାଇଭ୍** ମଡେଲ୍ କ୍ୟାଟାଲଗ୍ ପଢ଼େ
-ଏବଂ ଆପଣଙ୍କ ମେସିନ୍ରେ ଟୁଲ୍ର ନିଜସ୍ୱ ବିନ୍ୟାସ ଲେଖେ:
+ଆପଣଙ୍କୁ ପ୍ରତ୍ୟେକ ଟୁଲ୍ର କନଫିଗ୍ ହାତରେ ଲେଖିବାକୁ ପଡ଼ିବ ନାହିଁ। OmniRoute ପ୍ରତ୍ୟେକ ସମର୍ଥିତ CLI ପାଇଁ ଏକ `setup-*`
+କମାଣ୍ଡ ପ୍ରଦାନ କରେ, ଯାହା ଚାଲୁଥିବା OmniRoute (ସ୍ଥାନୀୟ କିମ୍ବା ରିମୋଟ୍)ରୁ **ଲାଇଭ୍** ମଡେଲ୍ କ୍ୟାଟାଲଗ୍ ପଢ଼େ
+ଏବଂ ଆପଣଙ୍କ ମେସିନ୍ରେ ଟୁଲ୍ର ନିଜସ୍ୱ କନଫିଗ୍ ଲେଖେ:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-ପ୍ରତ୍ୟେକଟି `--remote <url> --api-key <key>` (ଏକ ରିମୋଟ୍ OmniRoute ସହ ଏକ ସ୍ଥାନୀୟ ଟୁଲ୍ ବିନ୍ୟାସ କରନ୍ତୁ), `--dry-run` (ଲେଖିବା ବିନା ପୂର୍ବାବଲୋକନ), ଏବଂ `--port` ଗ୍ରହଣ କରେ। ମଡେଲ୍ ସ୍ୱୟଂ-ଆବିଷ୍କାର ନଥିବା ଟୁଲ୍ଗୁଡ଼ିକ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)
-`--model <id>` (ଏବଂ ଅଣ-ଇଣ୍ଟରାକ୍ଟିଭ୍ ରନ୍ଗୁଡ଼ିକ ପାଇଁ `--yes`) ଗ୍ରହଣ କରନ୍ତି। `setup-5dive` ହେଉଛି ଏକମାତ୍ର
-ରେସିପି ଯାହା `$HOME` ଅଧୀନରେ ଲେଖେ ନାହିଁ: ଏହା ଫ୍ଲିଟ୍ ହୋଷ୍ଟରେ ଏକ root-ମାଲିକାନାର ଅଥ୍ ପ୍ରୋଫାଇଲ୍ ଲେଖି
-ଏକ 5dive ଏଜେଣ୍ଟ୍ ଫ୍ଲିଟ୍ ବିନ୍ୟାସ କରେ, ତେଣୁ ଏହା `sudo` ମାଧ୍ୟମରେ ନିଜକୁ ପୁନଃନିଷ୍ପାଦନ କରେ
-ଏବଂ ଏହାର ନିଜସ୍ୱ କୌଣସି ରିମୋଟ୍ ମୋଡ୍ ନାହିଁ। ସଠିକ୍ env ଇଞ୍ଜେକ୍ଟ କରି ଏବଂ କୌଣସି ବିନ୍ୟାସ ନଲେଖି ଏକ CLI ଆରମ୍ଭ କରିବାକୁ,
-ସାଧାରଣ `omniroute run <target>` ଲଞ୍ଚର୍ ବ୍ୟବହାର କରନ୍ତୁ (claude, codex, aider, goose, opencode, qwen,
-gemini — ଟାର୍ଗେଟ୍ ଏବଂ ଉପନାମଗୁଡ଼ିକ `bin/cli/cli-manifest.mjs` ରୁ ଆସେ); ପୁରୁଣା
-ପ୍ରତି-ଟୁଲ୍ ଲଞ୍ଚର୍ଗୁଡ଼ିକ `omniroute launch` (Claude Code) ଏବଂ `omniroute launch-codex`
-(Codex) ଏବେ ମଧ୍ୟ ଉପଲବ୍ଧ। Gemini CLI କେବଳ ଲଞ୍ଚ ପାଇଁ: ଏହା ଏକ `omniroute run`
+ପ୍ରତ୍ୟେକ କମାଣ୍ଡ `--remote <url> --api-key <key>` (ଏକ ରିମୋଟ୍ OmniRoute ବିପକ୍ଷରେ ସ୍ଥାନୀୟ ଟୁଲ୍କୁ
+କନଫିଗର୍ କରିବା), `--dry-run` (କିଛି ନ ଲେଖି ପୂର୍ବାବଲୋକନ କରିବା), ଏବଂ `--port` ଗ୍ରହଣ କରେ। ମଡେଲ୍
+ସ୍ୱୟଂ-ଆବିଷ୍କାର ସୁବିଧା ନଥିବା ଟୁଲ୍ଗୁଡ଼ିକ (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)
+`--model <id>` (ଏବଂ ଅଣ-ଇଣ୍ଟରାକ୍ଟିଭ୍ ରନ୍ ପାଇଁ `--yes`) ଗ୍ରହଣ କରେ। `setup-5dive` ହେଉଛି ଏକମାତ୍ର
+ରେସିପି, ଯାହା `$HOME` ଅଧୀନରେ ଲେଖେ ନାହିଁ: ଏହା ଫ୍ଲିଟ୍ ହୋଷ୍ଟରେ root-ମାଲିକାନାର ଏକ ଅଥ୍ ପ୍ରୋଫାଇଲ୍
+ଲେଖି 5dive ଏଜେଣ୍ଟ ଫ୍ଲିଟ୍କୁ କନଫିଗର୍ କରେ, ତେଣୁ ଏହା `sudo` ମାଧ୍ୟମରେ ନିଜକୁ ପୁନଃ-ନିଷ୍ପାଦନ କରେ
+ଏବଂ ଏହାର ନିଜସ୍ୱ କୌଣସି ରିମୋଟ୍ ମୋଡ୍ ନାହିଁ। ଉପଯୁକ୍ତ env ଇଞ୍ଜେକ୍ଟ କରି ଏବଂ ଆଦୌ କୌଣସି କନଫିଗ୍ ନ ଲେଖି ଏକ CLI
+ଚାଲୁ କରିବାକୁ, ସାଧାରଣ `omniroute run <target>` ଲଞ୍ଚର୍ ବ୍ୟବହାର କରନ୍ତୁ (claude, codex, aider, goose, opencode, qwen,
+gemini — ଟାର୍ଗେଟ୍ ଏବଂ ଉପନାମଗୁଡ଼ିକ `bin/cli/cli-manifest.mjs`ରୁ ଆସେ); ପୁରୁଣା
+ପ୍ରତି-ଟୁଲ୍ ଲଞ୍ଚର୍ `omniroute launch` (Claude Code) ଏବଂ `omniroute launch-codex`
+(Codex) ଏବେ ମଧ୍ୟ ଉପଲବ୍ଧ ଅଛି। Gemini CLI କେବଳ ଲଞ୍ଚ ପାଇଁ: ଏହା ଏକ `omniroute run`
 ଟାର୍ଗେଟ୍, କିନ୍ତୁ ଏହାର କୌଣସି `setup-*`/`configure` ରେସିପି ନାହିଁ।
 
 > **ସମ୍ପୂର୍ଣ୍ଣ ସନ୍ଦର୍ଭ:** ମୁଖ୍ୟ ସାରଣୀ — ପ୍ରତ୍ୟେକ କମାଣ୍ଡ କ’ଣ ଲେଖେ, ପ୍ରତ୍ୟେକ ଫ୍ଲାଗ୍,
-> ସ୍ଥାନୀୟ ବନାମ ରିମୋଟ୍, ଏବଂ କେଉଁ ଟୁଲ୍ଗୁଡ଼ିକୁ `/v1` ସଫିକ୍ସ ଆବଶ୍ୟକ — ଏଠାରେ ଉପଲବ୍ଧ:
-> **[CLI ଏକୀକରଣ](../guides/CLI-INTEGRATIONS.md)**।
+> ସ୍ଥାନୀୟ ବନାମ ରିମୋଟ୍, ଏବଂ କେଉଁ ଟୁଲ୍କୁ `/v1` ସଫିକ୍ସ ଆବଶ୍ୟକ — ଏଠାରେ ଉପଲବ୍ଧ:
+> **[CLI ଇଣ୍ଟିଗ୍ରେସନ୍ଗୁଡ଼ିକ](../guides/CLI-INTEGRATIONS.md)**।
 
-### ଏଗୁଡ଼ିକୁ କଣ୍ଟେନର୍ ଭିତରେ ଚଲାଇବା
+### ଏଗୁଡ଼ିକୁ ଏକ କଣ୍ଟେନର୍ ଭିତରେ ଚଲାଇବା
 
-OmniRoute କଣ୍ଟେନର୍ ଭିତରେ ନିଷ୍ପାଦିତ ଏକ `setup-*` କମାଣ୍ଡ
-କଣ୍ଟେନର୍ର ନିଜସ୍ୱ ହୋମ୍ରେ ଲେଖେ, ଯାହାକୁ କୌଣସି ହୋଷ୍ଟ CLI ପଢ଼େ ନାହିଁ ଏବଂ ଯାହା
-କଣ୍ଟେନର୍ ସହିତ ଅଦୃଶ୍ୟ ହୋଇଯାଏ। OmniRoute ଏହା ଚିହ୍ନଟ କରେ ଏବଂ ଲେଖିବା ପରିବର୍ତ୍ତେ
-ନିର୍ଦ୍ଦେଶାବଳୀ ସହ `2` କୋଡ୍ରେ ବାହାରିଯାଏ। ଆଗକୁ ବଢ଼ିବାର ଦୁଇଟି ସମର୍ଥିତ ଉପାୟ — ହୋଷ୍ଟରେ CLI ଇନ୍ଷ୍ଟଲ୍ କରି
-କଣ୍ଟେନର୍ ସହ `omniroute connect` କରନ୍ତୁ, କିମ୍ବା ବିନ୍ୟାସ ଡିରେକ୍ଟୋରିଗୁଡ଼ିକୁ bind-mount କରି
-`CLI_CONFIG_HOME` (compose `host` ପ୍ରୋଫାଇଲ୍) ସେଟ୍ କରନ୍ତୁ। ପ୍ରତ୍ୟେକ `setup-*` କମାଣ୍ଡ, ସହିତ
-`omniroute configure` ଏବଂ `omniroute config set`, ଯଦି କଣ୍ଟେନର୍ର ନିଜସ୍ୱ CLI-ଗୁଡ଼ିକୁ ବିନ୍ୟାସ କରିବା ହିଁ
-ଆପଣଙ୍କର ବାସ୍ତବ ଉଦ୍ଦେଶ୍ୟ, ତେବେ `--allow-container-write` ଗ୍ରହଣ କରେ;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ସର୍ଭର୍ ପାଇଁ ସମାନ କାମ କରେ। ଦେଖନ୍ତୁ
-[Docker ଗାଇଡ୍ → ହୋଷ୍ଟ CLI ଟୁଲ୍ଗୁଡ଼ିକର ବିନ୍ୟାସ](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)।
+OmniRoute କଣ୍ଟେନର୍ ଭିତରେ ନିଷ୍ପାଦିତ ଏକ `setup-*` କମାଣ୍ଡ କଣ୍ଟେନର୍ର ନିଜସ୍ୱ homeରେ ଲେଖେ,
+ଯାହାକୁ କୌଣସି ହୋଷ୍ଟ CLI ପଢ଼େ ନାହିଁ ଏବଂ ଯାହା କଣ୍ଟେନର୍ ସହିତ ଅଦୃଶ୍ୟ ହୋଇଯାଏ।
+OmniRoute ଏହା ଚିହ୍ନଟ କରେ ଏବଂ କିଛି ଲେଖିବା ପରିବର୍ତ୍ତେ ନିର୍ଦ୍ଦେଶନା ସହିତ `2` କୋଡ୍ରେ ପ୍ରସ୍ଥାନ କରେ।
+ଆଗକୁ ବଢ଼ିବାର ଦୁଇଟି ସମର୍ଥିତ ଉପାୟ ଅଛି — ହୋଷ୍ଟରେ CLI ଇନ୍ଷ୍ଟଲ୍ କରି କଣ୍ଟେନର୍କୁ
+`omniroute connect` କରନ୍ତୁ, କିମ୍ବା କନଫିଗ୍ ଡିରେକ୍ଟୋରୀଗୁଡ଼ିକୁ bind-mount କରି
+`CLI_CONFIG_HOME` (compose `host` ପ୍ରୋଫାଇଲ୍) ସେଟ୍ କରନ୍ତୁ। ପ୍ରତ୍ୟେକ `setup-*` କମାଣ୍ଡ ସହିତ
+`omniroute configure` ଏବଂ `omniroute config set` ମଧ୍ୟ
+`--allow-container-write` ଗ୍ରହଣ କରେ, ଯେତେବେଳେ କଣ୍ଟେନର୍ର ନିଜସ୍ୱ CLIଗୁଡ଼ିକୁ କନଫିଗର୍ କରିବା ହିଁ ଆପଣଙ୍କର
+ପ୍ରକୃତ ଉଦ୍ଦେଶ୍ୟ; ସର୍ଭର୍ ପାଇଁ `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ମଧ୍ୟ ସମାନ କାମ କରେ।
+[Docker ଗାଇଡ୍ → ହୋଷ୍ଟ CLI ଟୁଲ୍ଗୁଡ଼ିକୁ କନଫିଗର୍ କରିବା](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) ଦେଖନ୍ତୁ।
 
-ଡ୍ୟାଶବୋର୍ଡର **ପ୍ରୟୋଗ ଏଣ୍ଡପଏଣ୍ଟ** (`POST /api/cli-tools/apply`)
-ସମାନ ସୁରକ୍ଷା ନିୟମ ଲାଗୁ କରେ: ଏକ କଣ୍ଟେନର୍ରେ, ଯେଉଁ ଲେଖନର ଟାର୍ଗେଟ୍ ହୋଷ୍ଟରୁ bind-mounted ହୋଇନାହିଁ,
-ତାହା **`422`** ସହ `containerEphemeralTarget: true`, ସୁରକ୍ଷିତ ତ୍ରୁଟି ପାଠ୍ୟ ଏବଂ — ହୋଷ୍ଟ ରେସିପି ଥିବା
-ଟୁଲ୍ଗୁଡ଼ିକ ପାଇଁ (claude, codex, opencode, cline, kilo, continue) — ତାହା ପରିବର୍ତ୍ତେ ହୋଷ୍ଟରେ ଚଲାଇବାକୁ
-ଏକ `hostSetupCommand` (ଉଦା. `omniroute setup-opencode`) ଫେରାଏ; କିଛି ମଧ୍ୟ ଲେଖାଯାଏ ନାହିଁ।
-`dryRun: true` କଣ୍ଟେନର୍ ମୋଡ୍ରେ ମଧ୍ୟ କାମ କରିଚାଲେ ଏବଂ ଡିସ୍କକୁ ସ୍ପର୍ଶ ନକରି ଏକ ସମ୍ବେଦନଶୀଳ ତଥ୍ୟ-ଲୁକ୍କାୟିତ
-ପୂର୍ବାବଲୋକନ + ଟାର୍ଗେଟ୍ ପଥ ଫେରାଏ। ପୂର୍ବାବଲୋକନ ବିଷୟବସ୍ତୁ କପି କିମ୍ବା ଆମଦାନୀ କରିବା ପାଇଁ
-ପ୍ରମାଣପତ୍ର-ବହନକାରୀ ବିନ୍ୟାସ ନୁହେଁ। ହୋଷ୍ଟରେ ମୂଳ ଟୁଲ୍/ମୂଳ URL/API କୀ/ମଡେଲ୍ ଇନ୍ପୁଟ୍ଗୁଡ଼ିକ ସହ ପ୍ରୟୋଗ କରନ୍ତୁ,
-କିମ୍ବା ସୂଚିତ ହୋଷ୍ଟ-ପାର୍ଶ୍ୱ setup କମାଣ୍ଡ ବ୍ୟବହାର କରନ୍ତୁ। ପୂର୍ବାବଲୋକନ ହେଡର୍ ଏବଂ ଅନୁରୋଧ ଚୁକ୍ତି ପାଇଁ
-[CLI ବିନ୍ୟାସ ସୁରକ୍ଷା](../security/CLI-CONFIGURATION.md) ଦେଖନ୍ତୁ। ଏହି ଆଚରଣ
+ଡ୍ୟାସ୍ବୋର୍ଡର **ପ୍ରୟୋଗ ଏଣ୍ଡପଏଣ୍ଟ** (`POST /api/cli-tools/apply`) ସମାନ
+ସୁରକ୍ଷା ନିୟମ ଲାଗୁ କରେ: ଏକ କଣ୍ଟେନର୍ରେ, ଯେଉଁ ରାଇଟ୍ର ଟାର୍ଗେଟ୍ ହୋଷ୍ଟରୁ bind-mount ହୋଇନାହିଁ,
+ତାହା **`422`** ସହିତ `containerEphemeralTarget: true`, ସୁରକ୍ଷିତ ତ୍ରୁଟି
+ପାଠ୍ୟ ଏବଂ — ହୋଷ୍ଟ ରେସିପି ଥିବା ଟୁଲ୍ଗୁଡ଼ିକ ପାଇଁ (claude, codex, opencode, cline,
+kilo, continue) — ହୋଷ୍ଟରେ ଚଲାଇବା ପାଇଁ ଏକ `hostSetupCommand` (ଉଦାହରଣ ସ୍ୱରୂପ `omniroute setup-opencode`)
+ଫେରାଏ; କିଛି ମଧ୍ୟ ଲେଖାଯାଏ ନାହିଁ। କଣ୍ଟେନର୍ ମୋଡ୍ରେ `dryRun: true` କାମ କରିବା ଜାରି ରଖେ
+ଏବଂ ଡିସ୍କକୁ ସ୍ପର୍ଶ ନ କରି ଏକ ସଂଶୋଧିତ ପୂର୍ବାବଲୋକନ + ଟାର୍ଗେଟ୍ ପଥ ଫେରାଏ। ପୂର୍ବାବଲୋକନ
+ବିଷୟବସ୍ତୁ କପି କିମ୍ବା ଇମ୍ପୋର୍ଟ କରିବାଯୋଗ୍ୟ କ୍ରେଡେନ୍ସିଆଲ୍-ଧାରଣକାରୀ କନଫିଗରେସନ୍ ନୁହେଁ। ମୂଳ
+ଟୁଲ୍/base URL/API key/model ଇନ୍ପୁଟ୍ଗୁଡ଼ିକ ସହିତ ହୋଷ୍ଟରେ ପ୍ରୟୋଗ କରନ୍ତୁ, କିମ୍ବା ସୂଚିତ
+ହୋଷ୍ଟ-ସାଇଡ୍ ସେଟଅପ୍ କମାଣ୍ଡ ବ୍ୟବହାର କରନ୍ତୁ। ପୂର୍ବାବଲୋକନ ହେଡର୍ ଏବଂ ଅନୁରୋଧ ଚୁକ୍ତି ପାଇଁ
+[CLI କନଫିଗରେସନ୍ ସୁରକ୍ଷା](../security/CLI-CONFIGURATION.md) ଦେଖନ୍ତୁ। ଏହି ଆଚରଣ
 ଉଦ୍ଦେଶ୍ୟମୂଳକ ଏବଂ
 `tests/unit/api/cli-tools/apply-container-guard.test.ts` ଦ୍ୱାରା ରିଗ୍ରେସନ୍ରୁ ସୁରକ୍ଷିତ — ସୁରକ୍ଷା ନିୟମ ହଟାଇ
-କେବେବି 422କୁ "ଠିକ୍" କରନ୍ତୁ ନାହିଁ।
+କେବେ ମଧ୍ୟ ଏକ 422କୁ "ଠିକ୍" କରନ୍ତୁ ନାହିଁ।
 
 ---
 
@@ -140,11 +143,11 @@ CLI କମାଣ୍ଡ ସର୍ଫେସ୍ଗୁଡ଼ିକ ପାଇଁ `bin
 
 ---
 
-## 1. CLI Codeର କ୍ୟାଟାଲଗ୍ (26ଟି ଟୁଲ୍)
+## 1. CLI Codeର କ୍ୟାଟାଲଗ୍ (27ଟି ଟୁଲ୍)
 
-`/dashboard/cli-code`ରେ ଦେଖାଯାଉଥିବା ସମସ୍ତ ଟୁଲ୍। `baseUrlSupport: none` ଥିବା ଟୁଲ୍ଗୁଡ଼ିକୁ କଷ୍ଟମ୍ ବେସ୍ URL ପରିବର୍ତ୍ତେ MITM କିମ୍ବା ଏକ ମାନୁଆଲ୍ ଗାଇଡ୍ ମାଧ୍ୟମରେ ସଂଯୋଗ କରାଯାଇଛି:
+`/dashboard/cli-code`ରେ ଦେଖାଯାଉଥିବା ସମସ୍ତ ଟୁଲ୍। `baseUrlSupport: none` ଥିବା ଟୁଲ୍ଗୁଡ଼ିକ ଏକ କଷ୍ଟମ୍ ବେସ୍ URL ପରିବର୍ତ୍ତେ MITM କିମ୍ବା ଏକ ମାନୁଆଲ୍ ଗାଇଡ୍ ମାଧ୍ୟମରେ ସଂଯୋଜିତ ହୋଇଛି:
 
-| id           | name                    | vendor                   | baseUrlSupport | configType     | acpSpawnable |
+| id           | ନାମ                     | ବିକ୍ରେତା                 | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ------------------------ | -------------- | -------------- | ------------ |
 | claude       | Claude Code             | Anthropic                | full           | env            | true         |
 | codex        | OpenAI Codex CLI        | OpenAI                   | full           | custom         | true         |
@@ -167,13 +170,14 @@ CLI କମାଣ୍ଡ ସର୍ଫେସ୍ଗୁଡ଼ିକ ପାଇଁ `bin
 | grok-build   | Grok Build              | xAI                      | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)              | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                  | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries           | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere                | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                   | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research            | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon                   | none           | mitm           | false        |
 | custom       | Custom CLI              | —                        | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"` ଥିବା ଟୁଲ୍ଗୁଡ଼ିକର ଡ୍ୟାସ୍ବୋର୍ଡ କାର୍ଡରେ "⚠ ଆଂଶିକ ବେସ୍ URL" ବ୍ୟାଜ୍ ଦେଖାଯାଏ।
+`baseUrlSupport: "partial"` ଥିବା ଟୁଲ୍ଗୁଡ଼ିକର ଡ୍ୟାସ୍ବୋର୍ଡ କାର୍ଡରେ "⚠ ଆଂଶିକ Base URL" ବ୍ୟାଜ୍ ଦେଖାଯାଏ।
 ---
 
 ## 2. CLI ଏଜେଣ୍ଟ କ୍ୟାଟାଲଗ୍ (10ଟି ଟୁଲ୍)
@@ -182,16 +186,16 @@ CLI କମାଣ୍ଡ ସର୍ଫେସ୍ଗୁଡ଼ିକ ପାଇଁ `bin
 
 | id           | ନାମ              | ବିକ୍ରେତା                 | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | ପୂର୍ଣ୍ଣ        | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | ପୂର୍ଣ୍ଣ        | true         |
-| goose        | Goose            | Block / Linux Foundation | ପୂର୍ଣ୍ଣ        | true         |
-| interpreter  | Open Interpreter | OSS                      | ପୂର୍ଣ୍ଣ        | true         |
-| warp         | Warp AI          | Warp Inc.                | ଆଂଶିକ          | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | ପୂର୍ଣ୍ଣ        | false        |
-| omp          | Oh My Pi         | OSS                      | ପୂର୍ଣ୍ଣ        | true         |
-| letta        | Letta CLI        | Letta                    | ପୂର୍ଣ୍ଣ        | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | ପୂର୍ଣ୍ଣ        | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | ପୂର୍ଣ୍ଣ        | false        |
+| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
+| goose        | Goose            | Block / Linux Foundation | full           | true         |
+| interpreter  | Open Interpreter | OSS                      | full           | true         |
+| warp         | Warp AI          | Warp Inc.                | partial        | true         |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
+| omp          | Oh My Pi         | OSS                      | full           | true         |
+| letta        | Letta CLI        | Letta                    | full           | false        |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
 
 ---
 

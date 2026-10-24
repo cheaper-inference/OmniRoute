@@ -1,1 +1,0 @@
-- **fix(resilience):** Scope ModelScope's `invalid_model` 401/403 denials to the rejected model, preserving healthy sibling routes and combo failover ([#16859](https://github.com/diegosouzapw/OmniRoute/pull/16859)) — thanks @fabioKoruja00

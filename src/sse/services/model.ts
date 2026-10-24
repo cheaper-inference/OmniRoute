@@ -80,7 +80,7 @@ function buildWildcardAliasMap(settings: Record<string, unknown>): Record<string
  * are folded in last: they are keyed by pattern string (containing `*`/`?`), which
  * cannot collide with a real model id, so ordering never affects exact-alias lookups.
  */
-async function getCombinedModelAliases(): Promise<Record<string, unknown>> {
+export async function getCombinedModelAliases(): Promise<Record<string, unknown>> {
   const [dbAliases, settings, autoAliases] = await Promise.all([
     getModelAliases().catch(() => ({})),
     getCachedSettings().catch(() => ({}) as Record<string, unknown>),
@@ -207,12 +207,16 @@ function findRegistryModel(providerId: string, modelId: string): any {
  * `modelId` with `effort: null` when nothing matches or the provider already owns its
  * own suffix mechanism.
  */
-function resolveSyncedModelIdAndEffort(
+export function resolveSyncedModelIdAndEffort(
   providerId: string,
   modelId: string,
   syncedModels: unknown
 ): { modelId: string; effort: string | null } {
-  if (providerId === "codex" && findRegistryModel(providerId, modelId)) {
+  if (
+    providerId === "codex" &&
+    findRegistryModel(providerId, modelId) &&
+    findSyncedModelMeta(syncedModels, modelId)
+  ) {
     return { modelId, effort: null };
   }
   if (isSyncedEffortSkippedProvider(providerId) || !Array.isArray(syncedModels)) {

@@ -1,1 +1,0 @@
-- **feat(settings):** selective transfer of provider accounts (and the custom provider nodes they use) between installations — passphrase-sealed file, import preview and per-item add/skip/replace that never deletes anything ([#16877](https://github.com/diegosouzapw/OmniRoute/pull/16877)) — thanks @minthanthtoo

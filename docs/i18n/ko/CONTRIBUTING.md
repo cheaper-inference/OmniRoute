@@ -12,11 +12,11 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### 사전 요구 사항
 
-- **Node.js** `>=22.22.3 <23` 또는 `>=24.0.0 <27`(권장: 24 LTS)
+- **Node.js** `>=22.22.2 <23` 또는 `>=24.0.0 <27`(권장: 24 LTS)
 - **npm** 10+
 
 > **npm v11+ 사용자(Node 24+):** `npm install` 실행 후 네이티브 모듈이 설치되었는지 확인하세요:
-> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` 오류가 발생하면
+> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` 오류와 함께 실패하면
 > `npm approve-scripts better-sqlite3 && npm install`을 실행하세요. 자세한 내용은
 > [문제 해결](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)을 참조하세요.
 
@@ -33,21 +33,21 @@ npm install
 ### 환경 변수
 
 ```bash
-# 템플릿에서 .env 생성
+# 템플릿을 사용하여 .env 생성
 cp .env.example .env
 
-# 필수 시크릿 생성
+# 필수 비밀 값 생성
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-개발을 위한 주요 변수:
+개발에 필요한 주요 변수:
 
 | 변수                   | 개발 기본값              | 설명                 |
 | ---------------------- | ------------------------ | -------------------- |
 | `PORT`                 | `20128`                  | 서버 포트            |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 프런트엔드 기본 URL  |
-| `JWT_SECRET`           | (위에서 생성)            | JWT 서명 시크릿      |
+| `JWT_SECRET`           | (위에서 생성)            | JWT 서명 비밀 값     |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | 최초 로그인 비밀번호 |
 | `APP_LOG_LEVEL`        | `info`                   | 로그 상세 수준       |
 
@@ -60,7 +60,7 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 | 설정 → 고급 | 디버그 모드        | 디버그 요청 로그 활성화(UI) |
 | 설정 → 일반 | 사이드바 표시 여부 | 사이드바 섹션 표시/숨기기   |
 
-이 설정은 데이터베이스에 저장되며 재시작 후에도 유지됩니다. 설정된 경우 환경 변수 기본값보다 우선합니다.
+이러한 설정은 데이터베이스에 저장되어 재시작 후에도 유지되며, 설정된 경우 환경 변수 기본값보다 우선합니다.
 
 ### 로컬에서 실행
 
@@ -75,45 +75,43 @@ npm run start
 # 기여자 변경 사항을 위한 빠른 백엔드/API 전용 컴파일
 npm run build:contributor
 
-# 릴리스 빌드(클린 재빌드 + HEAD 센티널 — 배포에 필수)
+# 릴리스 빌드(클린 빌드 + HEAD 센티널 — 배포 시 필수)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA 기록
 
 # 일반적인 포트 구성
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-기여자 빌드는 컴파일 전용 검증을 수행합니다. 독립 실행형 배포판을 구성하거나 선택적
-네이티브 패키징 자산을 빌드하지 않습니다. 배포 가능한 번들을 검증해야 하는 경우에는
-일반 프로덕션 빌드를 사용하세요.
+기여자 빌드는 컴파일 전용 검증을 수행합니다. 독립 실행형 배포판을 조립하거나 선택적 네이티브 패키징 에셋을 빌드하지 않습니다. 배포 가능한 번들을 검증해야 할 때는 일반 프로덕션 빌드를 사용하세요.
 
 ### 빌드 출력 구조
 
-| 디렉터리  | 내용                                                                  | 추적 여부 |
-| --------- | --------------------------------------------------------------------- | --------- |
-| `src/`    | 애플리케이션 소스(TypeScript / TSX)                                   | 예        |
-| `.build/` | 중간 산출물 — `next build` 출력(gitignore됨, `distDir = .build/next`) | 아니요    |
-| `dist/`   | 배포 가능한 번들 — `assembleStandalone`로 구성됨(gitignore됨)         | 아니요    |
+| 디렉터리  | 내용                                                                     | 추적 여부 |
+| --------- | ------------------------------------------------------------------------ | --------- |
+| `src/`    | 애플리케이션 소스(TypeScript / TSX)                                      | 예        |
+| `.build/` | 중간 산출물 — `next build` 출력(gitignore 적용, `distDir = .build/next`) | 아니요    |
+| `dist/`   | 배포 가능한 번들 — `assembleStandalone`로 조립(gitignore 적용)           | 아니요    |
 
-빌드 파이프라인은 단일 패스로 진행됩니다:
+빌드 파이프라인은 단일 패스로 실행됩니다:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js 출력)
-  └─ assembleStandalone()                 (독립 실행형 파일 + 정적 파일 + public + 네이티브 자산 복사)
+  └─ assembleStandalone()                 (독립 실행형 파일 + 정적 파일 + public + 네이티브 에셋 복사)
        └─ 출력: dist/                     (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release`는 먼저 두 디렉터리를 모두 정리하고, 배포 무결성 센티널로
-`dist/BUILD_SHA`(= `git rev-parse --short HEAD`)를 추가로 기록합니다.
+`npm run build:release`는 먼저 두 디렉터리를 모두 정리하고 배포 무결성 센티널로
+`dist/BUILD_SHA`(= `git rev-parse --short HEAD`)도 기록합니다.
 
 `npm run build:contributor`는 백엔드 전용 빌드 프로필을 사용합니다. 빌드하는 동안
-대시보드 UI 파일을 임시 스텁으로 대체하고 API 라우트 핸들러는 유지하며 빌드 후 원본 파일을
+대시보드 UI 파일을 임시 스텁으로 대체하고 API 경로 핸들러는 유지하며 빌드 후 원본 파일을
 복원합니다. 대시보드 UI에 영향을 주는 변경 사항이나 전체 릴리스 검증에는 `npm run build`를
 사용하세요. 기여자 프로필은 릴리스 빌드를 대체하지 않습니다.
 
 > **VPS 배포 참고:** 원격 이미지 디렉터리 `/usr/lib/node_modules/omniroute/app/`는
-> 변경되지 않았습니다. 배포 스킬은 `dist/`의 내용을 이 디렉터리로 rsync합니다.
-> 저장소 내부의 빌드 출력 경로만 이동했습니다(`app/` → `dist/`).
+> 변경되지 않습니다. 배포 스킬은 `dist/`의 내용을 이 디렉터리로 rsync합니다.
+> 저장소 내 빌드 출력 경로만 변경되었습니다(`app/` → `dist/`).
 
 기본 URL:
 
@@ -297,12 +295,12 @@ src/                        # TypeScript (.ts / .tsx)
 │   └── login/              # 인증 페이지(.tsx)
 ├── domain/                 # 정책 엔진(policyEngine, comboResolver, costRules 등)
 ├── lib/                    # 핵심 비즈니스 로직(.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 프로토콜 서버
+│   ├── a2a/                # 에이전트 간 v0.3 프로토콜 서버
 │   ├── acp/                # Agent Communication Protocol 레지스트리
 │   ├── compliance/         # 컴플라이언스 정책 엔진
 │   ├── db/                 # SQLite 도메인 모듈 + 마이그레이션 130개
 │   ├── memory/             # 영구 대화 메모리
-│   ├── oauth/              # OAuth 공급자, 서비스 및 유틸리티
+│   ├── oauth/              # OAuth 제공자, 서비스 및 유틸리티
 │   ├── skills/             # 확장 가능한 스킬 프레임워크
 │   ├── usage/              # 사용량 추적 및 비용 계산
 │   └── localDb.ts          # 재내보내기 계층 전용 — 여기에 로직을 추가하지 마세요
@@ -310,13 +308,13 @@ src/                        # TypeScript (.ts / .tsx)
 ├── mitm/                   # MITM 프록시(인증서, DNS, 대상 라우팅)
 ├── shared/
 │   ├── components/         # React 컴포넌트(.tsx)
-│   ├── constants/          # 공급자 정의(329개), MCP 범위, 라우팅 전략 19개
+│   ├── constants/          # 제공자 정의(329개), MCP 범위, 라우팅 전략 20개
 │   ├── utils/              # 서킷 브레이커, 새니타이저, 인증 헬퍼
 │   └── validation/         # Zod v4 스키마
 └── sse/                    # SSE 프록시 파이프라인
 
 open-sse/                   # @omniroute/open-sse 워크스페이스
-├── executors/              # 실행기 모듈 150개(실행기 클래스 + 공급자별 헬퍼)
+├── executors/              # 실행기 모듈 150개(실행기 클래스 + 제공자별 헬퍼)
 ├── handlers/               # 요청 핸들러 11개(채팅, 응답, 임베딩, 이미지 등)
 ├── mcp-server/             # MCP 서버(고유 도구 110개, 전송 방식 3개, 범위 33개)
 ├── services/               # 최상위 서비스 178개(combo, autoCombo, rateLimitManager 등)
@@ -346,13 +344,13 @@ docs/
 ├── i18n/                    # 국제화된 README 번역
 ├── marketing/               # 마케팅 자료
 ├── ops/                     # 배포, 프록시, 커버리지, 릴리스
-├── providers/               # 공급자별 문서
-├── reference/               # API 참조, 환경 변수, CLI 도구, 무료 티어
+├── providers/               # 제공자별 문서
+├── reference/               # API 레퍼런스, 환경 변수, CLI 도구, 무료 티어
 ├── releases/                # 릴리스 노트
-├── routing/                 # 자동 조합 엔진, 추론 재현
+├── routing/                 # 자동 콤보 엔진, 추론 재생
 ├── screenshots/             # 대시보드 스크린샷
 ├── security/                # 가드레일, 컴플라이언스, 스텔스, 토큰
-└── specs/                   # 설계 사양
+└── specs/                   # 설계 명세
 ```
 
 ---
@@ -412,9 +410,13 @@ handler/executor 내부에서 클라이언트에 전달되는 오류 메시지�
 
 ---
 
-## Releasing
+## 릴리스
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+릴리스는 `/generate-release` 워크플로를 통해 관리됩니다. 새 GitHub 릴리스가 생성되면 GitHub Actions를 통해 패키지가 **자동으로 npm에 게시됩니다**.
+
+VPS 배포에는 `npm run build`가 아닌 `npm run build:release`를 사용하세요. 이 명령은 클린
+재빌드를 수행하고, 번들을 `dist/`에 구성하며, `dist/BUILD_SHA` 센티널 파일을 작성합니다.
+그런 다음 `dist/`를 원격 `app/` 디렉터리에 rsync하는 `/deploy-vps-*-cc` 스킬을 사용하세요.
 
 ---
 

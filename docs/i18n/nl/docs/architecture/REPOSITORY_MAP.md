@@ -110,28 +110,28 @@ OmniRoute/
 
 ---
 
-## `src/` — Next.js-toepassing
+## `src/` — Next.js-applicatie
 
 ```
 src/
 ├── app/                 # App Router (pagina's + API-routes + statuspagina's + landingspagina)
 ├── lib/                 # Kernbibliotheken / domeinmodules (80 submappen + ~70 bestanden op het hoogste niveau)
-├── domain/              # Zuivere domeinlogica (beleidsengine, terugval, kosten, uitsluiting, comboResolver, beoordeling)
-├── server/              # Modules uitsluitend voor de server (autorisatiepijplijn, CORS, authenticatiemiddleware) — kunnen niet vanuit de client worden geïmporteerd
-├── shared/              # Waar veilig gedeeld tussen server en client (constanten, typen, validatie, contracten, hulpprogramma's)
-├── i18n/                # next-intl-configuratie + JSON-berichten per landinstelling (42 landinstellingen)
+├── domain/              # Zuivere domeinlogica (beleidsengine, terugvalmechanisme, kosten, uitsluiting, comboResolver, beoordeling)
+├── server/              # Alleen-servermodules (autorisatiepijplijn, cors, authenticatiemiddleware) — kunnen niet vanuit de client worden geïmporteerd
+├── shared/              # Veilig gedeeld tussen server en client (constanten, typen, validatie, contracten, hulpprogramma's)
+├── i18n/                # next-intl-configuratie + JSON-berichten per landinstelling (67 landinstellingen)
 ├── middleware/          # Next.js-middleware (verrijking van verzoeken, detectie van landinstellingen)
-├── mitm/                # Kern van MITM-proxy: certificaten genereren/installeren, handlers, doelen, inspectie, maskers, doorvoer
+├── mitm/                # Kern van MITM-proxy: certificaten genereren/installeren, handlers, doelen, inspector, maskers, passthrough
 │   ├── handlers/        # 9 handlerklassen voor IDE-agents die MitmHandlerBase uitbreiden (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
 │   └── inspector/       # Laag voor verkeersregistratie: buffer (ringbuffer in het geheugen), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
 ├── models/              # Koppellaag voor modeladapters (verouderde compatibiliteitslaag)
-├── scripts/             # Onderhoudsscripts in de broncodeboom (bijv. backfillAggregation)
+├── scripts/             # Onderhoudsscripts binnen de broncode (bijv. backfillAggregation)
 ├── sse/                 # Verouderde SSE-handlers/-services (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Verouderde opslag in het geheugen (wordt geleidelijk vervangen door src/lib/db)
+├── store/               # Verouderde opslag in het geheugen (wordt uitgefaseerd ten gunste van src/lib/db)
 ├── types/               # Gedeelde TS-typebestanden
-├── instrumentation.ts   # Next.js-hook voor telemetrie (browser + edge)
+├── instrumentation.ts   # Next.js-telemetriehook (browser + edge)
 ├── instrumentation-node.ts  # Instrumentatie uitsluitend voor Node
-└── proxy.ts             # Toegangspunt-compatibiliteitslaag voor HTTP-proxy
+└── proxy.ts             # Toegangsshim voor HTTP-proxy
 ```
 
 ### `src/app/` — App Router (Next.js 16)
@@ -140,21 +140,21 @@ src/
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/api/v1/`                                                                | Openbare OpenAI-compatibele API (~25 subroutes: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers, enz.)                                                                                                                                |
 | `app/api/v1beta/`                                                            | API-eindpunten in Gemini-stijl                                                                                                                                                                                                                                                                                                  |
-| `app/api/playground/`                                                        | Routes voor Playground Studio: `improve-prompt/` (POST — herschrijft LLM-prompts), `presets/` (GET-lijst / POST om aan te maken), `presets/[id]/` (GET / PUT / DELETE) — zie `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                             |
+| `app/api/playground/`                                                        | Playground Studio-routes: `improve-prompt/` (POST — LLM-prompt herschrijven), `presets/` (GET-lijst / POST-aanmaken), `presets/[id]/` (GET / PUT / DELETE) — zie `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                         |
 | `app/api/` (niet-v1)                                                         | Beheer-/adminroutes (~60 mappen: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, enz.)                                                                                                                                                          |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 routes (serverbeheer, agentstatus/DNS/toewijzingen, bypass, certificaat, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Zie `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                           |
 | `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ routes (requests, sessions, hosts, capture-modes, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Zie `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                                 |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0-toegangspunt (`POST /a2a`)                                                                                                                                                                                                                                                                                     |
-| `app/.well-known/agent.json/`                                                | A2A Agent Card (detectie)                                                                                                                                                                                                                                                                                                       |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0-ingangspunt (`POST /a2a`)                                                                                                                                                                                                                                                                                      |
+| `app/.well-known/agent.json/`                                                | A2A-agentkaart (detectie)                                                                                                                                                                                                                                                                                                       |
 | `app/(dashboard)/dashboard/`                                                 | Dashboard-UI-pagina's (50+ secties, ~118 page.tsx-bestanden: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity, enz.)                                                                                                                                          |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio-UI (3 tabbladen: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — zie `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                                |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (omhulsel met 3 tabbladen), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge-dashboardpagina — serverkaart, 9 agentkaarten, installatiewizard, modeltoewijzing, bypasslijst. i18n PT-BR + EN. Zie `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                              |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector-dashboardpagina — DevTools-splitsing, 7 detailtabbladen, 4 schakelaars voor opnamemodi, sessierecorder, contextkleuring. i18n PT-BR + EN. Zie `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                         |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge-dashboardpagina — serverkaart, 9 agentkaarten, configuratiewizard, modeltoewijzing, bypasslijst. i18n PT-BR + EN. Zie `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                             |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector-dashboardpagina — DevTools-splitsing, 7 detailtabbladen, 4 schakelaars voor vastlegmodi, sessierecorder, contextkleuring. i18n PT-BR + EN. Zie `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                        |
 | `app/(dashboard)/dashboard/activity/`                                        | Activiteitenfeedpagina (Groep B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — zie `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                      |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Pagina voor quotadeling (Groep B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                  |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Configuratiepagina voor providerabonnementen (Groep B): `page.tsx` + `ProviderPlanConfigClient.tsx` — overschrijving van quotadimensies per verbinding                                                                                                                                                                          |
-| `app/docs/`                                                                  | Ingesloten documentatieviewer (rendert `docs/*.md`)                                                                                                                                                                                                                                                                             |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Pagina voor het delen van quota (Groep B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                          |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Configuratiepagina voor providerplannen (Groep B): `page.tsx` + `ProviderPlanConfigClient.tsx` — overschrijving van quotadimensies per verbinding                                                                                                                                                                               |
+| `app/docs/`                                                                  | Ingebouwde documentatieviewer (rendert `docs/*.md`)                                                                                                                                                                                                                                                                             |
 | `app/landing/`                                                               | Marketinglandingspagina                                                                                                                                                                                                                                                                                                         |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Authenticatiegerelateerde pagina's                                                                                                                                                                                                                                                                                              |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP-foutpagina's                                                                                                                                                                                                                                                                                                               |
@@ -164,68 +164,68 @@ src/
 
 ### `src/lib/` — Kernbibliotheken (~50 modules)
 
-| Module                                         | Doel                                                                                                                                                                                                                                                                                                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `a2a/`                                         | Taakbeheer voor het A2A-protocol, vaardigheden (5), streaming                                                                                                                                                                                                                                                                        |
-| `acp/`                                         | Register voor CLI-agents (lokale CLI-detectie — zie `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                      |
-| `api/`                                         | Gedeelde API-hulpfuncties (`requireManagementAuth`, validatie)                                                                                                                                                                                                                                                                       |
-| `auth/`                                        | Sessies, wachtwoordhashing, tokenvalidatie                                                                                                                                                                                                                                                                                           |
-| `batches/`                                     | Handlers voor de OpenAI Batches API                                                                                                                                                                                                                                                                                                  |
-| `catalog/`                                     | Zod-validatie van de providercatalogus + bepaling van mogelijkheden                                                                                                                                                                                                                                                                  |
-| `cloudAgent/`                                  | Cloudagents (Codex Cloud, Devin, Jules) — zie `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                                       |
-| `combos/`                                      | Hulpfuncties voor het bepalen en herordenen van combo's                                                                                                                                                                                                                                                                              |
-| `audit/`                                       | Hulpfuncties voor de activiteitenfeed: `highLevelActions.ts` (toelatingslijst + `isHighLevelAction()`), `activityIcons.ts` (toewijzing van actie → pictogram/werkwoord), `timeline.ts` (groupByDay/relativeTime) — zie `docs/architecture/MONITORING_SECTIONS.md`                                                                    |
-| `compliance/`                                  | Auditlogboek + provideraudit — zie `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                                     |
-| `compression/`                                 | Koppellaag voor de compressie-engine (engines bevinden zich in `open-sse/services/compression/`)                                                                                                                                                                                                                                     |
-| `config/`                                      | Hulpfuncties voor runtimeconfiguratie                                                                                                                                                                                                                                                                                                |
-| `db/`                                          | Meer dan 120 domeinspecifieke databasemodules + 168 migraties (gebruik hiervoor altijd deze module bij SQLite)                                                                                                                                                                                                                       |
-| `quota/`                                       | Engine voor het delen van quota: `dimensions.ts` (typen/Zod), `types.ts` (`QuotaStore`-interface), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — zie `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                       | Client voor de catalogus met gratis Radar-modellen: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — zie `docs/frameworks/RADAR.md`                                                                                                                                      |
-| `display/`                                     | Helpers voor UI-opmaak (kosten, latentie, enz.)                                                                                                                                                                                                                                                                                      |
-| `embeddings/`                                  | Helpers voor de embeddings-service                                                                                                                                                                                                                                                                                                   |
-| `env/`                                         | Parseren en valideren van omgevingsvariabelen                                                                                                                                                                                                                                                                                        |
-| `evals/`                                       | Evaluatieframework (suites, runner, runtime) — zie `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                        |
-| `guardrails/`                                  | PII-maskering, promptinjectie, vision-bridge — zie `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                     |
-| `jobs/`                                        | Achtergrondtaken (cron-achtig)                                                                                                                                                                                                                                                                                                       |
-| `memory/`                                      | Conversatiegeheugen (SQLite FTS5 + hybride RRF met sqlite-vec + Qdrant-niveau 2) — zie `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                   |
-| `memory/embedding/`                            | Embeddinglaag met meerdere bronnen: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                                  |
-| `memory/vectorStore.ts`                        | Wrapper voor sqlite-vec v0.1.9 — brute-force-KNN + hybride RRF (FTS5 + vector, k=60). Luie initialisatie, blijft beperkt functioneren wanneer sqlite-vec niet beschikbaar is. (plan 21)                                                                                                                                              |
-| `memory/reindex.ts`                            | `runReindexBatch()` — verwerkt op de achtergrond geheugens met `needs_reindex=1`; aangeroepen door `POST /api/memory/reindex` en het pad voor luie backfill. (plan 21)                                                                                                                                                               |
-| `monitoring/`                                  | Gezondheidscontroles, uitsturen van metrische gegevens                                                                                                                                                                                                                                                                               |
-| `oauth/`                                       | OAuth-/importstromen voor 22 providermodules (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                             |
-| `plugins/`                                     | Pluginregister                                                                                                                                                                                                                                                                                                                       |
-| `promptCache/`                                 | Onderbrekingspunten voor promptcaching in Anthropic-stijl                                                                                                                                                                                                                                                                            |
-| `skills/`                                      | Skills-framework (ingebouwd + marketplace + SkillsSH) — zie `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                              |
-| `playground/`                                  | Gedeelde helpers voor Playground Studio: `codeExport.ts` (curl/Python/TS-generator), `promptImprover.ts` (meta-promptbouwer), `streamMetrics.ts` (pure TTFT/TPS), `types.ts` (prijstabel) — zie `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                               |
-| `webhookDispatcher.ts`                         | HMAC-webhookbezorging — zie `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                            |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`       | Tunnelbeheerders — zie `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                                   |
-| `cloudSync.ts`, `initCloudSync.ts`             | Optionele cloudsynchronisatie van status                                                                                                                                                                                                                                                                                             |
-| `localDb.ts`                                   | Herexportbestand voor databasemodules (geen logica — alleen herexports)                                                                                                                                                                                                                                                              |
-| `cacheLayer.ts`, `idempotencyLayer.ts`         | Caching van verzoeken + idempotentie                                                                                                                                                                                                                                                                                                 |
-| (nog circa 30 bestanden op het hoogste niveau) | Gespecialiseerde helpers (logEnv, modelsDevSync, piiSanitizer, enz.)                                                                                                                                                                                                                                                                 |
+| Module                                   | Doel                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | Taakbeheer voor het A2A-protocol, vaardigheden (5), streaming                                                                                                                                                                                                                                                                      |
+| `acp/`                                   | CLI-agentregister (lokale CLI-detectie — zie `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                           |
+| `api/`                                   | Gedeelde API-hulpfuncties (`requireManagementAuth`, validatie)                                                                                                                                                                                                                                                                     |
+| `auth/`                                  | Sessies, wachtwoordhashing, tokenvalidatie                                                                                                                                                                                                                                                                                         |
+| `batches/`                               | Handlers voor de OpenAI Batches API                                                                                                                                                                                                                                                                                                |
+| `catalog/`                               | Zod-validatie van de providercatalogus + oplossing van capaciteiten                                                                                                                                                                                                                                                                |
+| `cloudAgent/`                            | Cloudagents (Codex Cloud, Devin, Jules) — zie `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                                     |
+| `combos/`                                | Combinatieoplossing + hulpfuncties voor herordening                                                                                                                                                                                                                                                                                |
+| `audit/`                                 | Hulpfuncties voor de activiteitenfeed: `highLevelActions.ts` (toelatingslijst + `isHighLevelAction()`), `activityIcons.ts` (actie → pictogram/werkwoord-toewijzing), `timeline.ts` (groupByDay/relativeTime) — zie `docs/architecture/MONITORING_SECTIONS.md`                                                                      |
+| `compliance/`                            | Auditlogboek + provideraudit — zie `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                                   |
+| `compression/`                           | Koppellaag voor de compressie-engine (engines bevinden zich in `open-sse/services/compression/`)                                                                                                                                                                                                                                   |
+| `config/`                                | Hulpfuncties voor runtimeconfiguratie                                                                                                                                                                                                                                                                                              |
+| `db/`                                    | Meer dan 120 domeinspecifieke DB-modules + 168 migraties (gebruik voor SQLite altijd deze modules)                                                                                                                                                                                                                                 |
+| `quota/`                                 | Engine voor het delen van quota: `dimensions.ts` (typen/Zod), `types.ts` (QuotaStore-interface), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — zie `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Client voor de Radar-catalogus met gratis modellen: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — zie `docs/frameworks/RADAR.md`                                                                                                                                    |
+| `display/`                               | Helpers voor UI-opmaak (kosten, latentie, enz.)                                                                                                                                                                                                                                                                                    |
+| `embeddings/`                            | Helpers voor de embeddings-service                                                                                                                                                                                                                                                                                                 |
+| `env/`                                   | Parseren en valideren van omgevingsvariabelen                                                                                                                                                                                                                                                                                      |
+| `evals/`                                 | Evaluatieframework (suites, runner, runtime) — zie `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                      |
+| `guardrails/`                            | PII-maskering, promptinjectie, vision-bridge — zie `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                   |
+| `jobs/`                                  | Achtergrondtaken (cron-achtig)                                                                                                                                                                                                                                                                                                     |
+| `memory/`                                | Gespreksgeheugen (SQLite FTS5 + hybride RRF met sqlite-vec + Qdrant-laag 2) — zie `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                      |
+| `memory/embedding/`                      | Embeddinglaag met meerdere bronnen: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                                |
+| `memory/vectorStore.ts`                  | Wrapper voor sqlite-vec v0.1.9 — KNN-brute-force + hybride RRF (FTS5 + vector, k=60). Luie initialisatie, degradeert gecontroleerd wanneer sqlite-vec niet beschikbaar is. (plan 21)                                                                                                                                               |
+| `memory/reindex.ts`                      | `runReindexBatch()` — verwerkt op de achtergrond geheugens met `needs_reindex=1`; aangeroepen door `POST /api/memory/reindex` en het pad voor luie backfill. (plan 21)                                                                                                                                                             |
+| `monitoring/`                            | Gezondheidscontroles, uitsturen van metriekgegevens                                                                                                                                                                                                                                                                                |
+| `oauth/`                                 | OAuth-/importstromen voor 22 providermodules (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                           |
+| `plugins/`                               | Pluginregister                                                                                                                                                                                                                                                                                                                     |
+| `promptCache/`                           | Cachebreekpunten voor prompts in Anthropic-stijl                                                                                                                                                                                                                                                                                   |
+| `skills/`                                | Skills-framework (ingebouwd + marketplace + SkillsSH) — zie `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                            |
+| `playground/`                            | Gedeelde helpers voor Playground Studio: `codeExport.ts` (curl/Python/TS-generator), `promptImprover.ts` (meta-promptbouwer), `streamMetrics.ts` (pure TTFT/TPS), `types.ts` (prijstabel) — zie `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                             |
+| `webhookDispatcher.ts`                   | HMAC-webhookbezorging — zie `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                          |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnelbeheerders — zie `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                                 |
+| `cloudSync.ts`, `initCloudSync.ts`       | Optionele cloudsynchronisatie van status                                                                                                                                                                                                                                                                                           |
+| `localDb.ts`                             | Herexportbestand voor databasemodules (geen logica — alleen herexports)                                                                                                                                                                                                                                                            |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | Aanvraagcaching + idempotentie                                                                                                                                                                                                                                                                                                     |
+| (nog circa 30 bestanden op hoofdniveau)  | Gespecialiseerde helpers (logEnv, modelsDevSync, piiSanitizer, enz.)                                                                                                                                                                                                                                                               |
 
-### `src/lib/db/` — Database (137 modules + 193 migraties)
+### `src/lib/db/` — Database (147 modules + 208 migraties)
 
-| Submap                    | Doel                                                                                                                                                                       |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()`-singleton met WAL-journaling                                                                                                                             |
-| `db/migrations/`          | SQL-bestanden met versiebeheer (idempotent, transactioneel). `073_memory_vec.sql` voegt `memory_vec_meta` + de kolom `needs_reindex` toe (plan 21).                        |
-| `db/playgroundPresets.ts` | CRUD-module voor Playground Studio-presets (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)  |
-| `db/memoryVec.ts`         | CRUD voor `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, enz. (plan 21)               |
-| `db/<domain>.ts`          | Eén module per domein: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, enz. |
+| Submap                    | Doel                                                                                                                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | `getDbInstance()`-singleton met WAL-journaling                                                                                                                                |
+| `db/migrations/`          | SQL-bestanden met versiebeheer (idempotent, transactioneel). `073_memory_vec.sql` voegt `memory_vec_meta` + de kolom `needs_reindex` toe (plan 21).                           |
+| `db/playgroundPresets.ts` | CRUD-module voor presets van Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
+| `db/memoryVec.ts`         | CRUD voor `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, enz. (plan 21)                  |
+| `db/<domain>.ts`          | Eén module per domein: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, enz.    |
 
 ### `src/domain/`
 
-| Module                 | Doel                                              |
-| ---------------------- | ------------------------------------------------- |
-| `policy.ts`            | Beleidsengine                                     |
-| `fallbackPolicy.ts`    | Beslissingsboom voor terugvalscenario's           |
-| `costRules.ts`         | Regels voor kostenberekening                      |
-| `lockoutPolicy.ts`     | Uitsluitingsbeleid voor modellen/verbindingen     |
-| `tagRouter.ts`         | Routering op basis van tags                       |
-| `comboResolver.ts`     | Comboresolutie (gebruikt door de combo-engine)    |
-| `modelAvailability.ts` | Beschikbaarheidscontrole per model                |
-| `assessment/`          | Modelbeoordeling (fase 1 van RFC-AUTO-ASSESSMENT) |
+| Module                 | Doel                                               |
+| ---------------------- | -------------------------------------------------- |
+| `policy.ts`            | Beleidsengine                                      |
+| `fallbackPolicy.ts`    | Beslissingsboom voor terugvalopties                |
+| `costRules.ts`         | Regels voor kostenberekening                       |
+| `lockoutPolicy.ts`     | Uitsluitingsbeleid voor modellen/verbindingen      |
+| `tagRouter.ts`         | Taggebaseerde routering                            |
+| `comboResolver.ts`     | Combo-resolutie (gebruikt door de combo-engine)    |
+| `modelAvailability.ts` | Beschikbaarheidscontrole per model                 |
+| `assessment/`          | Modelbeoordeling (fase 1 van RFC-AUTO-ASSESSMENT ) |
 
 ### `src/server/`
 
@@ -237,21 +237,21 @@ src/
 
 ### `src/shared/`
 
-| Module                           | Doel                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **372 providers** met Zod-validatie (enige bron van waarheid)                   |
-| `constants/cliTools.ts`          | Register voor externe CLI-tools                                                 |
-| `constants/routingStrategies.ts` | **19 routeringsstrategieën** met prioriteiten                                   |
-| `constants/publicApiRoutes.ts`   | Routes die Bearer-authenticatie vereisen (i.p.v. beheer-authenticatie)          |
-| `constants/upstreamHeaders.ts`   | Blokkeerlijst voor headers van upstreamverzoeken                                |
-| `validation/schemas.ts`          | ~80 Zod-schema's (enige bron van waarheid voor API-contracten)                  |
-| `validation/helpers.ts`          | Helpers voor Zod-validatie (`validateBody`, enz.)                               |
-| `types/`                         | Gedeelde TS-typen                                                               |
-| `contracts/`                     | Openbare API-contracten (gebruikt door `files:` in `package.json`)              |
-| `utils/circuitBreaker.ts`        | Circuitonderbreker voor providers (zie `docs/architecture/RESILIENCE_GUIDE.md`) |
-| `utils/apiAuth.ts`               | API-sleutelvalidatie en bereikcontrole                                          |
-| `utils/fetchTimeout.ts`          | Time-out-/afbreekwrappers voor upstream-fetches                                 |
-| `utils/releaseNotes.ts`          | Parser voor gesloten v2-/legacy-aankondigingen, lokalisatie en negeren op ID    |
+| Module                           | Doel                                                                         |
+| -------------------------------- | ---------------------------------------------------------------------------- |
+| `constants/providers.ts`         | **375 providers** met Zod-validatie (leidende bron)                          |
+| `constants/cliTools.ts`          | Register van externe CLI-tools                                               |
+| `constants/routingStrategies.ts` | **20 routeringsstrategieën** met prioriteiten                                |
+| `constants/publicApiRoutes.ts`   | Routes die Bearer-authenticatie vereisen (in plaats van beheer)              |
+| `constants/upstreamHeaders.ts`   | Blokkeerlijst voor headers van upstreamverzoeken                             |
+| `validation/schemas.ts`          | ~80 Zod-schema's (enige leidende bron voor API-contracten)                   |
+| `validation/helpers.ts`          | Helpers voor Zod-validatie (`validateBody`, enz.)                            |
+| `types/`                         | Gedeelde TS-typen                                                            |
+| `contracts/`                     | Openbare API-contracten (gebruikt door `files:` in `package.json`)           |
+| `utils/circuitBreaker.ts`        | Circuitbreaker voor providers (zie `docs/architecture/RESILIENCE_GUIDE.md`)  |
+| `utils/apiAuth.ts`               | Validatie van API-sleutels en controle van scopes                            |
+| `utils/fetchTimeout.ts`          | Timeout-/abort-wrappers voor upstream-fetches                                |
+| `utils/releaseNotes.ts`          | Parser voor gesloten v2-/legacy-aankondigingen, lokalisatie en negeren op ID |
 
 ---
 
@@ -379,45 +379,45 @@ open-sse/
 
 ### Handleidingen op hoofdniveau
 
-| Document                    | Doel                                                                                                     |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Architectuur op hoofdlijnen, overzicht van subsystemen, dashboardoppervlak                               |
-| `CODEBASE_DOCUMENTATION.md` | Technische referentie: mappen, modules, conventies                                                       |
-| `FEATURES.md`               | Functiematrix met hoogtepunten van v3.8                                                                  |
-| `USER_GUIDE.md`             | Handleiding voor eindgebruikers (configuratie, modellen, combo's, CLI's, audio, enz.)                    |
-| `API_REFERENCE.md`          | Referentie voor API-eindpunten met authenticatiemodel                                                    |
-| `openapi.yaml`              | OpenAPI 3.0-specificatie (121 paden)                                                                     |
-| `SETUP_GUIDE.md`            | Installatiemethoden (npm, npx, Docker, Electron, Termux, broncode)                                       |
-| `ENVIRONMENT.md`            | Alle omgevingsvariabelen (~800 gedocumenteerd, ~3.050 regels in `.env.example`)                          |
-| `TROUBLESHOOTING.md`        | Veelvoorkomende fouten + bekende problemen in v3.8.0                                                     |
-| `RELEASE_CHECKLIST.md`      | Volledige releaseprocedure (skills, husky, conventionele commits, implementatie)                         |
-| `COVERAGE_PLAN.md`          | Dekkingsdoelen en huidige status                                                                         |
-| `FREE_TIERS.md`             | Samengestelde lijst met providers met een gratis abonnement (48+ gratis + 11 OAuth)                      |
-| `CLI-TOOLS.md`              | Externe CLI-integraties + interne OmniRoute-CLI                                                          |
-| `I18N.md`                   | i18n-architectuur, een taal toevoegen, 42 locales                                                        |
-| `UNINSTALL.md`              | Stappen voor een volledige verwijdering                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerde** catalogus van 372 providers (regenereren: `npm run gen:provider-reference`) |
+| Document                    | Doel                                                                                                           |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Architectuur op hoofdlijnen, overzicht van subsystemen, dashboardinterface                                     |
+| `CODEBASE_DOCUMENTATION.md` | Technische referentie: mappen, modules, conventies                                                             |
+| `FEATURES.md`               | Functiematrix met hoogtepunten van v3.8                                                                        |
+| `USER_GUIDE.md`             | Gebruikershandleiding (configuratie, modellen, combo's, CLI's, audio enz.)                                     |
+| `API_REFERENCE.md`          | Referentie voor API-endpoints met authenticatiemodel                                                           |
+| `openapi.yaml`              | OpenAPI 3.0-specificatie (121 paden)                                                                           |
+| `SETUP_GUIDE.md`            | Installatiemethoden (npm, npx, Docker, Electron, Termux, broncode)                                             |
+| `ENVIRONMENT.md`            | Alle omgevingsvariabelen (~800 gedocumenteerd, `.env.example` van ~3.050 regels)                               |
+| `TROUBLESHOOTING.md`        | Veelvoorkomende fouten + bekende problemen in v3.8.0                                                           |
+| `RELEASE_CHECKLIST.md`      | Volledige releaseprocedure (skills, husky, conventionele commits, implementatie)                               |
+| `COVERAGE_PLAN.md`          | Dekkingsdoelen en huidige status                                                                               |
+| `FREE_TIERS.md`             | Samengestelde lijst met providers met een gratis niveau (48+ gratis + 11 OAuth)                                |
+| `CLI-TOOLS.md`              | Externe CLI-integraties + interne OmniRoute-CLI                                                                |
+| `I18N.md`                   | i18n-architectuur, een taal toevoegen, 67 landinstellingen                                                     |
+| `UNINSTALL.md`              | Stappen voor een volledige verwijdering                                                                        |
+| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerde** catalogus van 375 providers (opnieuw genereren: `npm run gen:provider-reference`) |
 
-### Diepgaande documentatie van subsystemen
+### Diepgaande informatie over subsystemen
 
-| Document                                      | Doel                                                                                   |
-| --------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP-server: 110 tools, 3 transportmethoden, 33 scopes, REST-eindpunten                 |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 skills, REST-helpers, agentkaart                                 |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Gecombineerde handleiding: A2A versus ACP versus Cloud Agents                          |
-| `CLOUD_AGENT.md`                              | Orkestratie van Codex Cloud / Devin / Jules                                            |
-| `SKILLS.md`                                   | Skills-framework (ingebouwd + marketplace + SkillsSH + sandbox)                        |
-| `RADAR.md`                                    | Radar-catalogusoverlay voor gratis modellen (`RADAR_ENABLED`, standaard uitgeschakeld) |
-| `MEMORY.md`                                   | Geheugensysteem (SQLite FTS5 + Qdrant)                                                 |
-| `EVALS.md`                                    | Evaluatieframework (suites, uitvoeringen, rubrieken)                                   |
-| `GUARDRAILS.md`                               | PII-maskering, promptinjectie, vision bridge                                           |
-| `COMPLIANCE.md`                               | Auditlogboek, bewaartermijn, noLog-opt-out                                             |
-| `WEBHOOKS.md`                                 | Levering van met HMAC ondertekende webhooks                                            |
-| `REASONING_REPLAY.md`                         | Hybride geheugen-/SQLite-cache voor `reasoning_content`                                |
-| `AUTHZ_GUIDE.md`                              | Autorisatiepipeline (`classify` → `policies` → `enforce`)                              |
-| `RESILIENCE_GUIDE.md`                         | Stroomonderbreker + afkoelperiode + modelvergrendeling                                 |
-| `docs/security/STEALTH_GUIDE.md` (alleen git) | TLS-fingerprinting (JA3/JA4), Claude Code CCH, MITM-certificaat                        |
-| `AUTO-COMBO.md`                               | Auto Combo-engine (scoring met 16 factoren, 6 moduspakketten, virtuele fabriek)        |
+| Document                                      | Doel                                                                                           |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                               | MCP-server: 110 tools, 3 transportmethoden, 33 scopes, REST-endpoints                          |
+| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 skills, REST-hulpfuncties, agentkaart                                    |
+| `AGENT_PROTOCOLS_GUIDE.md`                    | Geïntegreerde handleiding: A2A versus ACP versus Cloud Agents                                  |
+| `CLOUD_AGENT.md`                              | Orkestratie van Codex Cloud / Devin / Jules                                                    |
+| `SKILLS.md`                                   | Skills-framework (ingebouwd + marketplace + SkillsSH + sandbox)                                |
+| `RADAR.md`                                    | Radar-overlay voor de catalogus met gratis modellen (`RADAR_ENABLED`, standaard uitgeschakeld) |
+| `MEMORY.md`                                   | Geheugensysteem (SQLite FTS5 + Qdrant)                                                         |
+| `EVALS.md`                                    | Evaluatieframework (suites, uitvoeringen, rubrics)                                             |
+| `GUARDRAILS.md`                               | PII-maskeerfunctie, promptinjectie, vision bridge                                              |
+| `COMPLIANCE.md`                               | Auditlogboek, bewaarbeleid, noLog-opt-out                                                      |
+| `WEBHOOKS.md`                                 | Met HMAC ondertekende webhookbezorging                                                         |
+| `REASONING_REPLAY.md`                         | Hybride geheugen-/SQLite-cache voor `reasoning_content`                                        |
+| `AUTHZ_GUIDE.md`                              | Autorisatiepijplijn (`classify` → `policies` → `enforce`)                                      |
+| `RESILIENCE_GUIDE.md`                         | Circuit breaker + afkoelperiode + modelvergrendeling                                           |
+| `docs/security/STEALTH_GUIDE.md` (alleen git) | TLS-fingerprinting (JA3/JA4), Claude Code CCH, MITM-certificaat                                |
+| `AUTO-COMBO.md`                               | Auto Combo-engine (scoring met 16 factoren, 6 moduspakketten, virtuele fabriek)                |
 
 ### Compressie
 
@@ -427,7 +427,7 @@ open-sse/
 | `COMPRESSION_ENGINES.md`        | Caveman- en RTK-engines, registercontract |
 | `COMPRESSION_RULES_FORMAT.md`   | JSON-schema voor Caveman-regelpakketten   |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Inventaris van regelpakketten per taal    |
-| `RTK_COMPRESSION.md`            | Declaratieve RTK-pipeline (49 filters)    |
+| `RTK_COMPRESSION.md`            | Declaratieve RTK-pijplijn (49 filters)    |
 
 ### Implementatie
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Submap                | Doel                                                                                                                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Gelokaliseerde documentatievertalingen (41 landinstellingen)                                                                                                                                                                          |
+| `docs/i18n/`          | Gelokaliseerde documentatievertalingen (41 locales)                                                                                                                                                                                   |
 | `docs/screenshots/`   | Afbeeldingsbestanden voor handleidingen                                                                                                                                                                                               |
 | `_tasks/superpowers/` | Plannen/specificaties van superpowers (`writing-plans`/`brainstorming`) + onderzoek — geïsoleerde repository met afzonderlijk versiebeheer, genegeerd door Git in de hoofdstructuur. Zie CLAUDE.md → "Planning & Research Artifacts". |
 

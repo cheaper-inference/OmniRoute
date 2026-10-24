@@ -1,1 +1,0 @@
-- Build: documented the expected production-build warnings in `docs/ops/BUILD_WARNINGS.md`, stopped the login route from logging `[SECURITY] FATAL: JWT_SECRET is not set` during `next build`, and widened the Fumadocs MDX build-cache warning filter to cover the `dist/eval-*.js` bundle ([#16320](https://github.com/diegosouzapw/OmniRoute/issues/16320)).

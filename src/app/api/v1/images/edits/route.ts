@@ -47,6 +47,8 @@ import {
   resolveImageModelPrefix,
   extractImageEditInputFromJson,
   validateCodexImageEditReferences,
+  MAX_CODEX_IMAGE_EDIT_REFERENCES,
+  MAX_CODEX_GPT_IMAGE_EDIT_REFERENCES,
 } from "@/lib/images/imageRouteModel";
 import { isMicrosoftDesignerWebProviderRetiredError } from "@/shared/constants/designerWebRetirement";
 import { resolveProxyForConnection } from "@/lib/db/settings";
@@ -116,6 +118,17 @@ interface EditInput {
 }
 
 const MAX_NON_CODEX_IMAGE_EDIT_REFERENCES = 1;
+
+/** Keep the legacy hosted-tool bound while matching the documented GPT Image edit cap. */
+function validateCodexReferencesForModel(
+  images: Array<{ bytes: Buffer; mime: string }>,
+  model: string
+): string | null {
+  const maxReferences = /^gpt-image-/i.test(model.trim())
+    ? MAX_CODEX_GPT_IMAGE_EDIT_REFERENCES
+    : MAX_CODEX_IMAGE_EDIT_REFERENCES;
+  return validateCodexImageEditReferences(images, maxReferences);
+}
 
 async function readMultipartImage(formData: FormData): Promise<EditInput> {
   const promptRaw = formData.get("prompt");
@@ -213,6 +226,36 @@ function editAccounting(
   return { ...base, endpoint: "/v1/images/edits", provider, model, credentials, comboStrategy };
 }
 
+async function syntxEditPreflight(
+  provider: string,
+  allowedConnections: string[] | null,
+  resolvedModel: string
+): Promise<{ credentials: unknown } | Response> {
+  const credentials = await getProviderCredentialsWithQuotaPreflight(
+    provider,
+    null,
+    allowedConnections,
+    resolvedModel
+  );
+  if (!credentials) {
+    return errorResponse(HTTP_STATUS.UNAUTHORIZED, `No credentials for provider: ${provider}`);
+  }
+  const rateLimit = credentials as {
+    allRateLimited?: boolean;
+    retryAfter?: string | number | Date | null;
+    retryAfterHuman?: string;
+  };
+  if (rateLimit.allRateLimited) {
+    return unavailableResponse(
+      HTTP_STATUS.RATE_LIMITED,
+      `[${provider}] All accounts rate limited`,
+      rateLimit.retryAfter,
+      rateLimit.retryAfterHuman
+    );
+  }
+  return { credentials };
+}
+
 async function handleSyntxEditRequest(params: {
   parsed: ReturnType<typeof parseImageModel>;
   providerConfig: NonNullable<ReturnType<typeof getImageProvider>>;
@@ -224,6 +267,7 @@ async function handleSyntxEditRequest(params: {
   images: Array<{ bytes: Buffer; mime: string }>;
   imageBytes: Buffer | null;
   imageMime: string | null;
+  signal: AbortSignal | null;
 }): Promise<Response> {
   const {
     parsed,
@@ -236,33 +280,12 @@ async function handleSyntxEditRequest(params: {
     images,
     imageBytes,
     imageMime,
+    signal,
   } = params;
 
-  const credentials = await getProviderCredentialsWithQuotaPreflight(
-    parsed.provider,
-    null,
-    allowedConnections,
-    resolvedModel
-  );
-  if (!credentials) {
-    return errorResponse(
-      HTTP_STATUS.UNAUTHORIZED,
-      `No credentials for provider: ${parsed.provider}`
-    );
-  }
-  const rateLimit = credentials as {
-    allRateLimited?: boolean;
-    retryAfter?: string | number | Date | null;
-    retryAfterHuman?: string;
-  };
-  if (rateLimit.allRateLimited) {
-    return unavailableResponse(
-      HTTP_STATUS.RATE_LIMITED,
-      `[${parsed.provider}] All accounts rate limited`,
-      rateLimit.retryAfter,
-      rateLimit.retryAfterHuman
-    );
-  }
+  const preflight = await syntxEditPreflight(parsed.provider, allowedConnections, resolvedModel);
+  if (preflight instanceof Response) return preflight;
+  const credentials = preflight.credentials;
 
   const dataUrls = buildAdobeFireflyEditDataUrls(images, imageBytes, imageMime);
   if (dataUrls.length === 0) {
@@ -284,6 +307,7 @@ async function handleSyntxEditRequest(params: {
     },
     credentials: credentials as Parameters<typeof handleSyntxImageGeneration>[0]["credentials"],
     log,
+    signal,
   });
 
   if ((result as { success?: boolean }).success) {
@@ -375,7 +399,7 @@ async function dispatchImageEditTarget(
         error: `Unsupported Codex image edit model: ${modelStr}`,
       };
     }
-    const imageValidationError = validateCodexImageEditReferences(images);
+    const imageValidationError = validateCodexReferencesForModel(images, parsed.model);
     if (imageValidationError) {
       return { success: false, status: HTTP_STATUS.BAD_REQUEST, error: imageValidationError };
     }
@@ -488,6 +512,7 @@ async function dispatchImageEditTarget(
       },
       credentials: credentials as never,
       log,
+      signal: request.signal,
     })) as ImageComboDispatchResult;
   }
 
@@ -765,7 +790,7 @@ async function postHandler(request: Request, _context?: unknown) {
         `Unsupported Codex image edit model: ${resolvedModel}`
       );
     }
-    const imageValidationError = validateCodexImageEditReferences(images);
+    const imageValidationError = validateCodexReferencesForModel(images, parsed.model);
     if (imageValidationError) {
       return errorResponse(HTTP_STATUS.BAD_REQUEST, imageValidationError);
     }
@@ -930,6 +955,7 @@ async function postHandler(request: Request, _context?: unknown) {
       images,
       imageBytes,
       imageMime,
+      signal: request.signal,
     });
   }
 

@@ -1,1 +1,0 @@
-- **fix(dashboard):** the provider test playground conversation is now persisted in `localStorage` per provider and API key, so it survives switching between the Test and Logs tabs and reopening the slide-over (#15097). Messages are reloaded when the selected key changes, validated on read, written only after a turn completes, and storage errors no longer break the panel.

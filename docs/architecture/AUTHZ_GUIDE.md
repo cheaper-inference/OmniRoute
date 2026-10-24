@@ -124,9 +124,11 @@ credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
 (`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
 `POST /api/settings/import-json`), destroying restore points (`DELETE /api/db-backups` cleanup,
 and `PATCH /api/db-backups` because the retention it persists drives the automatic pruning after
-every backup), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
+every backup) require a dashboard session, the local CLI subject, or login disabled. Issuing a
+sync token (`POST /api/sync/tokens`) and minting an `admin` CLI access token
+(`POST /api/cli/tokens`) require a dashboard session or the local CLI subject in every login mode.
+API keys of any scope and `oma_` access tokens are not operator credentials: they get `403`
+whenever one is required. The check
 lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
 `requireOperatorCredential()`). Changing the login settings is operator-only too:
 `POST /api/settings/require-login` (set the management password / toggle `requireLogin`) accepts
@@ -292,7 +294,13 @@ credential only. See [Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
 `isAuthRequired()` in `src/shared/utils/apiAuth.ts` decides whether **any** auth is enforced for a request:
 
-- `settings.requireLogin === false` → auth is globally disabled.
+- `settings.requireLogin === false` → auth is globally disabled, except for the always-protected
+  tier (see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) and the calls that hand out a
+  credential it accepts, which need the same credential as with login on: issuing sync tokens,
+  minting CLI access tokens at any scope, and creating an API key with the `manage`/`admin` scope,
+  granting that scope to a key, or regenerating or revealing such a key
+  (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`).
+  Inference-only keys stay open.
 - No password configured **and** no `INITIAL_PASSWORD` env var → bootstrap mode allows the onboarding wizard and loopback requests, but exposed network requests still need credentials.
 - Any DB error → fails closed (secure-by-default).
 

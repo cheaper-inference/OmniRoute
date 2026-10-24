@@ -12,11 +12,11 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Cerințe preliminare
 
-- **Node.js** `>=22.22.3 <23` sau `>=24.0.0 <27` (recomandat: 24 LTS)
+- **Node.js** `>=22.22.2 <23` sau `>=24.0.0 <27` (recomandat: 24 LTS)
 - **npm** 10+
 
-> **Utilizatori npm v11+ (Node 24+):** După `npm install`, verificați dacă modulele native au fost instalate:
-> `node -e "require('better-sqlite3')"`. Dacă aceasta eșuează cu `MODULE_NOT_FOUND`,
+> **Utilizatorii npm v11+ (Node 24+):** După `npm install`, verificați dacă modulele native au fost instalate:
+> `node -e "require('better-sqlite3')"`. Dacă eșuează cu `MODULE_NOT_FOUND`,
 > rulați `npm approve-scripts better-sqlite3 && npm install`. Consultați
 > [Depanare](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -46,7 +46,7 @@ Variabile principale pentru dezvoltare:
 | Variabilă              | Valoare implicită pentru dezvoltare | Descriere                          |
 | ---------------------- | ----------------------------------- | ---------------------------------- |
 | `PORT`                 | `20128`                             | Portul serverului                  |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`            | URL-ul de bază pentru frontend     |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`            | URL de bază pentru interfața web   |
 | `JWT_SECRET`           | (generați mai sus)                  | Secret pentru semnarea JWT         |
 | `INITIAL_PASSWORD`     | `CHANGEME`                          | Parola pentru prima autentificare  |
 | `APP_LOG_LEVEL`        | `info`                              | Nivelul de detaliere al jurnalelor |
@@ -55,64 +55,64 @@ Variabile principale pentru dezvoltare:
 
 Panoul de control oferă comutatoare în interfața cu utilizatorul pentru funcționalități care pot fi configurate și prin intermediul variabilelor de mediu:
 
-| Locația setării   | Comutator                    | Descriere                                                     |
-| ----------------- | ---------------------------- | ------------------------------------------------------------- |
-| Setări → Avansate | Mod de depanare              | Activează jurnalele de depanare pentru solicitări (interfață) |
-| Setări → Generale | Vizibilitatea barei laterale | Afișează/ascunde secțiunile barei laterale                    |
+| Locația setării   | Comutator                    | Descriere                                             |
+| ----------------- | ---------------------------- | ----------------------------------------------------- |
+| Setări → Avansate | Mod de depanare              | Activează jurnalele cererilor de depanare (interfață) |
+| Setări → Generale | Vizibilitatea barei laterale | Afișează/ascunde secțiunile barei laterale            |
 
-Aceste setări sunt stocate în baza de date și persistă între reporniri, suprascriind valorile implicite ale variabilelor de mediu atunci când sunt definite.
+Aceste setări sunt stocate în baza de date și persistă după reporniri, suprascriind valorile implicite ale variabilelor de mediu atunci când sunt configurate.
 
-### Rulare locală
+### Rularea locală
 
 ```bash
-# Mod de dezvoltare (reîncărcare automată)
+# Modul de dezvoltare (reîncărcare automată)
 npm run dev
 
 # Compilare pentru producție
 npm run build    # next build → .build/next/, apoi assembleStandalone → dist/
 npm run start
 
-# Compilare rapidă doar pentru backend/API, destinată modificărilor contribuitorilor
+# Compilare rapidă doar pentru backend/API, pentru modificările contribuitorilor
 npm run build:contributor
 
-# Compilare pentru lansare (recompilare curată + santinelă HEAD — obligatorie pentru implementare)
-npm run build:release   # rm -rf .build dist && compilare + scrie dist/BUILD_SHA
+# Compilare pentru lansare (recompilare curată + santinelă HEAD — necesară pentru implementare)
+npm run build:release   # rm -rf .build dist, apoi compilare + scrierea dist/BUILD_SHA
 
-# Configurare uzuală a portului
+# Configurație uzuală a portului
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Compilarea pentru contribuitori efectuează doar validarea compilării: nu asamblează distribuția autonomă
-și nu compilează resursele native opționale pentru împachetare. Utilizați compilarea obișnuită pentru producție atunci când
-trebuie să validați pachetul care poate fi livrat.
+Compilarea pentru contribuitori efectuează doar validarea prin compilare: aceasta nu asamblează
+distribuția autonomă și nici nu compilează resursele native opționale pentru împachetare. Folosiți compilarea obișnuită pentru producție atunci când
+trebuie să validați pachetul distribuibil.
 
-### Structura rezultatului compilării
+### Structura rezultatelor compilării
 
 | Director  | Conținut                                                                                 | Urmărit |
 | --------- | ---------------------------------------------------------------------------------------- | ------- |
 | `src/`    | Codul sursă al aplicației (TypeScript / TSX)                                             | Da      |
 | `.build/` | Fișiere intermediare — rezultatul `next build` (ignorat de git, `distDir = .build/next`) | Nu      |
-| `dist/`   | Pachet livrabil — asamblat de `assembleStandalone` (ignorat de git)                      | Nu      |
+| `dist/`   | Pachet distribuibil — asamblat de `assembleStandalone` (ignorat de git)                  | Nu      |
 
-Fluxul de compilare se desfășoară într-o singură trecere:
+Fluxul de compilare constă dintr-o singură trecere:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (rezultatul Next.js)
-  └─ assembleStandalone()                 (copiază componentele autonome + fișierele statice + fișierele publice + resursele native)
+  └─ assembleStandalone()                 (copiază resursele autonome + statice + publice + native)
        └─ rezultat: dist/                 (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` curăță mai întâi ambele directoare și scrie suplimentar
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ca santinelă pentru integritatea implementării.
+În plus, `npm run build:release` curăță mai întâi ambele directoare și scrie
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ca fișier-santinelă pentru integritatea implementării.
 
-`npm run build:contributor` utilizează profilul de compilare doar pentru backend. Acesta înlocuiește temporar cu substituenți
+`npm run build:contributor` utilizează profilul de compilare exclusiv pentru backend. Acesta înlocuiește temporar cu substituenți
 fișierele interfeței panoului de control în timpul compilării, păstrează gestionarii rutelor API și restaurează fișierele originale
-după compilare. Utilizați `npm run build` pentru modificările care afectează interfața panoului de control sau pentru validarea
-completă a versiunii; profilul pentru contribuitori nu înlocuiește compilarea pentru lansare.
+după compilare. Folosiți `npm run build` pentru modificările care afectează interfața panoului de control sau pentru validarea completă
+a lansării; profilul pentru contribuitori nu înlocuiește compilarea pentru lansare.
 
 > **Notă privind implementarea pe VPS:** directorul imaginii de la distanță `/usr/lib/node_modules/omniroute/app/`
-> rămâne neschimbat. Instrumentele de implementare sincronizează prin rsync conținutul din `dist/` în acesta.
+> rămâne neschimbat. Automatizările de implementare sincronizează prin rsync conținutul directorului `dist/` în acesta.
 > S-a schimbat doar calea rezultatului compilării din depozit (`app/` → `dist/`).
 
 URL-uri implicite:
@@ -293,11 +293,11 @@ Consultați `open-sse/utils/stream.ts` și `open-sse/utils/streamHandler.ts` pen
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Pagini ale panoului de control (23 de secțiuni)
+│   ├── (dashboard)/        # Pagini ale tabloului de bord (23 de secțiuni)
 │   ├── api/                # Rute API (51 de directoare)
 │   └── login/              # Pagini de autentificare (.tsx)
 ├── domain/                 # Motor de politici (policyEngine, comboResolver, costRules etc.)
-├── lib/                    # Logică de business principală (.ts)
+├── lib/                    # Logica principală de business (.ts)
 │   ├── a2a/                # Server pentru protocolul Agent-to-Agent v0.3
 │   ├── acp/                # Registru pentru Agent Communication Protocol
 │   ├── compliance/         # Motor de politici de conformitate
@@ -308,35 +308,35 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── usage/              # Urmărirea utilizării și calcularea costurilor
 │   └── localDb.ts          # Doar strat de reexportare — nu adăugați niciodată logică aici
 ├── middleware/              # Middleware pentru cereri (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (certificat, DNS, rutarea destinației)
+├── mitm/                   # Proxy MITM (certificate, DNS, rutarea destinației)
 ├── shared/
 │   ├── components/         # Componente React (.tsx)
-│   ├── constants/          # Definiții ale furnizorilor (329), domenii MCP, 19 strategii de rutare
-│   ├── utils/              # Întrerupător de circuit, curățare, funcții auxiliare de autentificare
+│   ├── constants/          # Definiții ale furnizorilor (329), domenii MCP, 20 de strategii de rutare
+│   ├── utils/              # Întrerupător de circuit, instrument de igienizare, funcții auxiliare pentru autentificare
 │   └── validation/         # Scheme Zod v4
-└── sse/                    # Flux proxy SSE
+└── sse/                    # Flux de procesare proxy SSE
 
 open-sse/                   # Spațiu de lucru @omniroute/open-sse
 ├── executors/              # 150 de module de execuție (clase de execuție + funcții auxiliare pentru fiecare furnizor)
-├── handlers/               # 11 gestionare de cereri (conversații, răspunsuri, embeddings, imagini etc.)
+├── handlers/               # 11 gestionare de cereri (chat, răspunsuri, încorporări, imagini etc.)
 ├── mcp-server/             # Server MCP (110 instrumente unice, 3 transporturi, 33 de domenii)
 ├── services/               # 178 de servicii de nivel superior (combo, autoCombo, rateLimitManager etc.)
-├── translator/             # Convertoare de format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformator pentru API-ul Responses
+├── translator/             # Traductoare de formate (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Transformator pentru Responses API
 └── utils/                  # 22 de module utilitare (flux, TLS, proxy, jurnalizare)
 
 electron/                   # Aplicație desktop Electron (multiplatformă)
 
 tests/
-├── unit/                   # Rulare de teste Node.js (1.574 de fișiere de testare)
+├── unit/                   # Executor de teste Node.js (1.574 de fișiere de testare)
 ├── integration/            # Teste de integrare
 ├── e2e/                    # Teste Playwright
 ├── security/               # Teste de securitate
-├── translator/             # Teste specifice convertoarelor
+├── translator/             # Teste specifice traductorului
 └── load/                   # Teste de încărcare
 
 docs/
-├── adr/                     # Înregistrări ale deciziilor arhitecturale
+├── adr/                     # Înregistrări ale deciziilor de arhitectură
 ├── architecture/            # Arhitectura și reziliența sistemului
 ├── comparison/              # OmniRoute comparativ cu alternativele
 ├── compression/             # Ghiduri și reguli de compresie
@@ -350,9 +350,9 @@ docs/
 ├── providers/               # Documentație specifică furnizorilor
 ├── reference/               # Referință API, variabile de mediu, instrumente CLI, niveluri gratuite
 ├── releases/                # Note de versiune
-├── routing/                 # Motor de combinare automată, reluarea raționamentului
-├── screenshots/             # Capturi de ecran ale panoului de control
-├── security/                # Măsuri de protecție, conformitate, operare discretă, tokenuri
+├── routing/                 # Motor auto-combo, redarea raționamentului
+├── screenshots/             # Capturi de ecran ale tabloului de bord
+├── security/                # Măsuri de protecție, conformitate, mod invizibil, tokenuri
 └── specs/                   # Specificații de proiectare
 ```
 
@@ -413,9 +413,13 @@ Scrieți teste unitare în `tests/unit/` care să acopere cel puțin:
 
 ---
 
-## Releasing
+## Publicarea versiunilor
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Versiunile sunt gestionate prin fluxul de lucru `/generate-release`. Când este creată o nouă versiune GitHub, pachetul este **publicat automat pe npm** prin GitHub Actions.
+
+Pentru implementările pe VPS, utilizați `npm run build:release` (nu `npm run build`) — acesta efectuează o
+recompilare de la zero, asamblează pachetul în `dist/` și scrie fișierul santinelă `dist/BUILD_SHA`.
+Apoi utilizați abilitățile `/deploy-vps-*-cc`, care sincronizează prin rsync directorul `dist/` cu directorul `app/` de la distanță.
 
 ---
 

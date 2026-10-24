@@ -1,1 +1,0 @@
-- Preserve the active application log during legacy-log archival when its configured path is directly inside `DATA_DIR/logs` or nested more deeply; unrelated legacy siblings are still archived and removed.

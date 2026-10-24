@@ -31,21 +31,22 @@ Jei aptikote „OmniRoute“ saugumo pažeidžiamumą, praneškite apie jį atsa
 
 ## LTS palaikymo laikotarpis (v3.9.x)
 
-Po 3.8.59 kita versija yra **3.9.0**, kuri atveria ilgalaikio palaikymo šaką
-`stable/v3` šakoje (žr. [`ROADMAP.md`](ROADMAP.md) → „Phase 3 — v3.9.0 LTS“).
+Po 3.8.59 kita versija yra **3.9.0**; ja atšakoje `stable/v3` pradedama ilgalaikio
+palaikymo linija (žr. [`ROADMAP.md`](ROADMAP.md) → „3 etapas — v3.9.0 LTS“).
 
-- **Ką gauna `stable/v3`:** klaidų pataisas, saugumo pataisas ir teikėjų atnaujinimus. Naujos
-  funkcijos pateikiamos v4 kanale; LTS šakoje pirmenybė teikiama stabilumui. `npm install omniroute`
-  (`latest` platinimo žyma) lieka v3 versijoje per visą v4 ciklą.
-- **Laikotarpio trukmė:** `<T-GAP-3: laukiama savininko sprendimo — žr. ROADMAP.md>`. Laikotarpio
-  trukmė po v4.0 bendrojo prieinamumo (kai `latest` persijungs į v4) **dar nenustatyta**; ši
-  skiltis bus atnaujinta prižiūrėtojui apie tai paskelbus. Iki tol nelaikykite, kad yra nustatyta pabaigos data.
-- **Pranešimas apie pažeidžiamumą LTS šakoje:** naudokite tą patį kanalą kaip ir bet kuriai kitai versijai —
-  privatų [„GitHub“ saugumo įspėjimą](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  niekada ne viešą problemą. Nurodykite, kurią versiją išbandėte (pavyzdžiui, `3.9.2`); pataisos įtraukiamos į
+- **Ką gauna `stable/v3`:** klaidų taisymus, saugos pataisas ir paslaugų teikėjų atnaujinimus. Naujos
+  funkcijos įtraukiamos į v4 kanalą; LTS linijoje pirmenybė teikiama stabilumui. `npm install omniroute`
+  (`latest` dist-tag) išlieka v3 versijoje per visą v4 ciklą.
+- **Laikotarpio trukmė:** `stable/v3` gauna **saugos pataisas ir kritinių regresijų taisymus
+  12 mėnesių po 3.9.0 išleidimo arba iki 90 dienų po to, kai v4.0.0 paskelbiama kaip `latest` —
+  atsižvelgiant į tai, kuri data yra vėlesnė**. Galutinė pabaigos data įrašoma 3.9.0 laidos pastabose ir
+  [`ROADMAP.md`](ROADMAP.md), kai ši versija išleidžiama.
+- **Pranešimas apie LTS linijos pažeidžiamumą:** naudojamas tas pats kanalas kaip ir bet kuriai kitai versijai —
+  privatus [GitHub saugos pranešimas](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  niekada ne viešas problemos įrašas. Nurodykite, kurią versiją išbandėte (pavyzdžiui, `3.9.2`); pataisos įtraukiamos į
   `stable/v3` ir perkeliamos į v4.
-- **Saugumo atskaitos taškas LTS atskyrimo metu:** išmatuota skaitytuvo būsena, maršrutų apsaugos ir
-  viešųjų prisijungimo duomenų patvirtinimai yra užfiksuoti
+- **Saugos atskaitos taškas LTS išleidimo metu:** užfiksuota skaitytuvo būsena, maršrutų apsaugos ir
+  viešųjų prisijungimo duomenų patikros įrodymai pateikiami faile
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

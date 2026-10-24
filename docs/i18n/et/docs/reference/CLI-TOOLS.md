@@ -43,30 +43,29 @@ ACP-agendid (vastupidine käivitusvoog):
 
 ---
 
-## Automaatne seadistamine käsuga `setup-*`
+## Automaatne seadistamine käskudega `setup-*`
 
-Te ei pea iga tööriista konfiguratsiooni käsitsi kirjutama. OmniRoute sisaldab iga toetatud CLI jaoks käsku `setup-*`, mis loeb töötavast OmniRoute'ist (kohalikust või kaugserveris asuvast) **reaalajas** mudelikataloogi ja kirjutab teie masinasse tööriista enda konfiguratsiooni:
+Iga tööriista konfiguratsiooni ei pea käsitsi kirjutama. OmniRoute sisaldab iga toetatud CLI jaoks käsku `setup-*`, mis loeb töötava OmniRoute’i (kohaliku või kaug-) **reaalajas** mudelikataloogi ja kirjutab teie masinasse tööriista enda konfiguratsiooni:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Igaüks neist aktsepteerib suvandeid `--remote <url> --api-key <key>` (kohaliku tööriista seadistamiseks kaugserveris asuva OmniRoute'i jaoks), `--dry-run` (eelvaade ilma kirjutamata) ja `--port`. Mudelite automaattuvastuseta tööriistad (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) kasutavad suvandit `--model <id>` (ning mitteinteraktiivsete käivituste korral suvandit `--yes`). `setup-5dive` on ainus retsept, mis ei kirjuta kataloogi `$HOME` alla: see seadistab 5dive'i agendipargi, kirjutades pargi hosti juurkasutajale kuuluva autentimisprofiili, mistõttu käivitab see end käsu `sudo` kaudu uuesti ega sisalda omaette kaugrežiimi. CLI käivitamiseks õigesti sisestatud keskkonnamuutujatega ja ilma konfiguratsiooni kirjutamata kasutage üldist käivitajat `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — sihtmärgid ja aliased pärinevad failist `bin/cli/cli-manifest.mjs`); pärandtööriistapõhised käivitajad `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) on endiselt saadaval. Gemini CLI on ainult käivitatav: see on käsu `omniroute run` sihtmärk, kuid selle jaoks puudub `setup-*`/`configure` retsept.
+Kõik käsud aktsepteerivad suvandeid `--remote <url> --api-key <key>` (kohaliku tööriista seadistamiseks kaug-OmniRoute’iga), `--dry-run` (eelvaade ilma kirjutamiseta) ja `--port`. Mudelite automaatse tuvastamiseta tööriistad (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) võtavad suvandi `--model <id>` (ja mitteinteraktiivsete käivituste jaoks `--yes`). `setup-5dive` on ainus retsept, mis ei kirjuta asukohta `$HOME`: see seadistab 5dive’i agentide parve, kirjutades parve hosti juurkasutajale kuuluva autentimisprofiili, mistõttu käivitab see end uuesti käsu `sudo` kaudu ja sellel puudub oma kaugrežiim. CLI käivitamiseks õigesti sisestatud keskkonnamuutujatega ja ilma konfiguratsiooni kirjutamata kasutage üldist käivitajat `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — sihtmärgid ja aliased pärinevad failist `bin/cli/cli-manifest.mjs`); pärandkäivitajad `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) on endiselt saadaval. Gemini CLI-d saab ainult käivitada: see on käsu `omniroute run` sihtmärk, kuid sellel puudub `setup-*`/`configure`-retsept.
 
-> **Täielik viide:** põhitabel — mida iga käsk kirjutab, kõik lipud,
-> kohalik ja kaugkasutus ning millised tööriistad vajavad järelliidet `/v1` — asub dokumendis
-> **[CLI-integratsioonid](../guides/CLI-INTEGRATIONS.md)**.
+> **Täielik viide:** põhitabel — mida iga käsk kirjutab, kõik lipud, kohalik ja kaugrežiim ning millised tööriistad vajavad järelliidet `/v1` — asub jaotises
+> **[CLI integratsioonid](../guides/CLI-INTEGRATIONS.md)**.
 
-### Nende käivitamine konteineris
+### Nende käskude käitamine konteineris
 
-OmniRoute'i konteineris käivitatud käsk `setup-*` kirjutab konteineri enda kodukataloogi, mida ükski hosti CLI ei loe ja mis kaob koos konteineriga. OmniRoute tuvastab selle ning lõpetab kirjutamise asemel koodiga `2` ja kuvab juhised. Edasi liikumiseks on kaks toetatud võimalust — installige CLI hosti ja kasutage konteineriga ühenduse loomiseks käsku `omniroute connect` või ühendage konfiguratsioonikataloogid bind-mount'iga ja määrake `CLI_CONFIG_HOME` (compose'i profiil `host`). Iga käsk `setup-*`, samuti `omniroute configure` ja `omniroute config set`, aktsepteerib suvandit `--allow-container-write`, kui kavatsesitegi seadistada konteineri enda CLI-sid; serveri puhul teeb sama `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`. Vaadake jaotist
+OmniRoute’i konteineris käivitatud käsk `setup-*` kirjutab konteineri enda kodukataloogi, mida ükski hosti CLI ei loe ja mis kaob koos konteineriga. OmniRoute tuvastab selle ning lõpetab kirjutamise asemel koodiga `2` ja kuvab juhised. Edasi liikumiseks on kaks toetatud viisi — installige CLI hosti ja looge konteineriga ühendus käsu `omniroute connect` abil või haakige konfiguratsioonikataloogid bind-mount-meetodil ja määrake `CLI_CONFIG_HOME` (compose’i profiil `host`). Iga käsk `setup-*`, samuti `omniroute configure` ja `omniroute config set`, aktsepteerib suvandit `--allow-container-write`, kui tegelikult soovitegi seadistada konteineri enda CLI-sid; serveri puhul teeb sama `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`. Vaadake
 [Dockeri juhend → Hosti CLI-tööriistade seadistamine](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Töölaua **rakendamise otspunkt** (`POST /api/cli-tools/apply`) rakendab sama kaitset: konteineris vastatakse kirjutamiskatsele, mille sihtmärk pole hostist bind-mount'iga ühendatud, koodiga **`422`** ning tagastatakse `containerEphemeralTarget: true`, turvaline veatekst ja — hosti retsepti omavate tööriistade puhul (claude, codex, opencode, cline, kilo, continue) — hostis käivitatav `hostSetupCommand` (nt `omniroute setup-opencode`); midagi ei kirjutata. `dryRun: true` töötab konteinerirežiimis edasi ning tagastab redigeeritud eelvaate ja sihtkoha tee ilma ketast muutmata. Eelvaate sisu ei ole identimisteavet sisaldav konfiguratsioon, mida saaks kopeerida või importida. Rakendage algsed tööriista, baas-URL-i, API-võtme ja mudeli sisendid hostis või kasutage näidatud hostipoolset seadistuskäsku. Eelvaate päise ja päringulepingu kohta vaadake dokumenti [CLI-konfiguratsiooni turvalisus](../security/CLI-CONFIGURATION.md). Selline käitumine on tahtlik ning regressioonide eest kaitstud testiga `tests/unit/api/cli-tools/apply-container-guard.test.ts` — ärge kunagi „parandage” vastust 422 kaitse eemaldamisega.
+Töölaua **rakendamise lõpp-punkt** (`POST /api/cli-tools/apply`) jõustab sama kaitse: konteineris vastab hostist bind-mount-meetodil haakimata sihtkohta kirjutamise katse koodiga **`422`**, sisaldades väärtust `containerEphemeralTarget: true`, turvalist veateksti ning — hostiretseptiga tööriistade puhul (claude, codex, opencode, cline, kilo, continue) — väljal `hostSetupCommand` hostis käivitatavat käsku (nt `omniroute setup-opencode`); midagi ei kirjutata. `dryRun: true` töötab ka konteinerirežiimis ning tagastab redigeeritud eelvaate ja sihttee ilma ketast muutmata. Eelvaate sisu ei ole mandaate sisaldav konfiguratsioon, mida saaks kopeerida või importida. Rakendage algsete tööriista, baas-URL-i, API-võtme ja mudeli sisenditega hostis või kasutage näidatud hostipoolset seadistuskäsku. Eelvaate päise ja päringulepingu kohta vaadake dokumenti [CLI konfiguratsiooni turvalisus](../security/CLI-CONFIGURATION.md). Selline käitumine on tahtlik ja regressioonide eest kaitstud testiga `tests/unit/api/cli-tools/apply-container-guard.test.ts` — ärge kunagi „parandage” vastust 422 kaitse eemaldamisega.
 
 ---
 
@@ -107,11 +106,11 @@ ning lipu `--model` sidumise. Kõrvalekallete kontroll
 kasutajaliidese kataloog ja kõik tarbijaliidesed püsivad sünkroonis — ühele
 liidesele ilma teisteta lisatud siht põhjustab testikomplekti nurjumise, mitte märkamatu kõrvalekalde.
 
-## 1. CLI Code'i kataloog (26 tööriista)
+## 1. CLI Code'i kataloog (27 tööriista)
 
-Kõik tööriistad, mis kuvatakse lehel `/dashboard/cli-code`. Need, millel on `baseUrlSupport: none`, on kohandatud baas-URL-i asemel ühendatud MITM-i või käsitsi seadistamise juhendi kaudu:
+Kõik tööriistad, mis kuvatakse jaotises `/dashboard/cli-code`. Tööriistad, millel on `baseUrlSupport: none`, ühendatakse kohandatud baas-URL-i asemel MITM-i või käsitsi seadistamise juhendi kaudu:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| id           | nimi                    | tarnija             | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
 | claude       | Claude Code             | Anthropic           | full           | env            | true         |
 | codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
@@ -134,18 +133,19 @@ Kõik tööriistad, mis kuvatakse lehel `/dashboard/cli-code`. Need, millel on `
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
 | custom       | Kohandatud CLI          | —                   | full           | custom-builder | false        |
 
-Tööriistade puhul, millel on `baseUrlSupport: "partial"`, kuvatakse töölaua kaardil märk „⚠ Osaline baas-URL“.
+Tööriistade puhul, millel on `baseUrlSupport: "partial"`, kuvatakse töölaua kaardil märk „⚠ Osaline baas-URL”.
 ---
 
 ## 2. CLI-agentide kataloog (10 tööriista)
 
-Autonoomsed agendid, mis kuvatakse lehel `/dashboard/cli-agents`:
+Autonoomsed agendid, mis kuvatakse asukohas `/dashboard/cli-agents`:
 
 | id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |

@@ -236,39 +236,30 @@ aiki.
 
 ---
 
-## Sarrafa token
+## Sarrafa tokens
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ yana nuna sirrin sau ƊAYA TAK — kwafe shi yanzu
-omniroute tokens list                 # an ɓoye wasu sassa: id, suna, izini, prefix, matsayi, ranar ƙarewa
+#   ↳ tana nuna sirrin SAU ÐAYA — kwafa shi yanzu
+omniroute tokens list                 # an ɓoye: id, name, scope, prefix, status, expiry
 omniroute tokens revoke <id|prefix>   # soke nan take
-omniroute tokens scopes               # bayyana nau'ikan izini guda uku
+omniroute tokens scopes               # bayyana iyakoki uku
 ```
 
-Umarnin `tokens` suna buƙatar shaidar **admin**. Hakanan za ka iya sarrafa token a
-dashboard ƙarƙashin **Settings → Access Tokens** (ƙirƙira, sokewa, kwafewa sau ɗaya tak).
+Umarnin `tokens` suna buƙatar takardar shaidar **admin**. Hakanan zaka iya sarrafa tokens a dashboard ƙarƙashin **Settings → Access Tokens** (ƙirƙira, soke, kwafa-sau-ɗaya).
 
-Ba za a taɓa iya ƙirƙirar token mai izini fiye da wanda mahaliccinsa yake da shi ba. Mai
-gudanarwa ne kaɗai zai iya ƙirƙirar token na `admin` — ta zaman dashboard, CLI na
-gida a kan uwar garken kanta, `omniroute connect` tare da kalmar sirri, ko kuma
-instance da aka kashe shiga cikinsa. Shaidun na'ura (access token na `admin`,
-ko API key mai izinin `manage`/`admin`) za su iya ƙirƙirar token na `write` da `read`
-kawai; neman su ƙirƙiri `--scope admin` yana mayar da `403`.
-
-Ba za a taɓa ƙirƙirar token da izini fiye da na wanda ya ƙirƙire shi ba. Mai gudanarwa kaɗai zai iya ƙirƙirar token na `admin`: ta zaman dashboard, CLI na cikin uwar garken da kanta, `omniroute connect` da kalmar sirri, ko a wata instance da aka kashe shiga cikinta. Bayanan shaidar na'ura (token na samun dama na `admin` ko maɓallin API mai iyakar `manage`/`admin`) za su iya ƙirƙirar token na `write` da `read` kawai; neman `--scope admin` da su yana mayar da `403`.
+Ba a taɓa iya ƙirƙirar token da ƙarin iko fiye da yadda mahaliccinsa yake da shi ba. Token na `admin` mai aiki ne kawai zai iya ƙirƙira shi: zaman dashboard, CLI na gida akan server ɗin kanta, ko `omniroute connect` tare da kalmar sirri. Takardun shaidar injina (access token na `admin`, ko maɓallin API mai iyakar `manage`/`admin`) suna iya ƙirƙirar tokens na `write` da `read` kawai. Idan suka nemi `--scope admin`, suna dawo da `403`. Kashe shiga ba ya buɗe ƙirƙira: access token na kowane iyaka takardar shaida ce da hanyoyin da ke buƙatar tabbaci koyaushe ke karɓa, don haka kiran da ba a san shi ba yana samun `401` a kowane iyaka.
 
 ---
 
-## Saita CLI na coding daga catalog na nesa
+## Saita CLI na coding daga katalogin nesa
 
-`omniroute configure` yana karanta catalog na model kai tsaye na **uwar garken da ke aiki** kuma ya rubuta
-config a kan na'urarka.
+`omniroute configure` yana karanta katalogin model na **uwar garken da ke aiki** kai tsaye kuma yana rubuta config a kan injinka **naka**.
 
 ```bash
 omniroute configure codex
-#   Masu samarwa: glm, kmc, ollamacloud, opencode-go, …
-#   Mai samarwa: glm
+#   Masu bayarwa: glm, kmc, ollamacloud, opencode-go, …
+#   Provider: glm
 #   Model id: glm/glm-5.2
 #   ✔ An rubuta ~/.codex/glm52.config.toml
 #   Yi amfani da shi:  codex --profile glm52
@@ -276,76 +267,61 @@ omniroute configure codex
 # ba tare da hulɗa ba
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# ajiye model da ake yawan amfani da shi a saman interactive picker
+# ajiye model da ake amfani da shi akai-akai a saman zaɓin hulɗa
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Picker yana adana model IDs kawai (ba ya taɓa adana URLs ko credentials) a cikin fayil na gida
-`model-preferences.json`, wanda aka keɓance bisa context da abin da CLI ke nufi. Ana
-nuna favorites kafin zaɓuɓɓukan baya-bayan nan; yi amfani da `--unfavorite` don cire model da aka zaɓa
-daga jerin context/target ɗin.
+Mai zaɓen yana ajiye model IDs kawai (ba URLs ko takardun shaida ba) a cikin fayil ɗin gida `model-preferences.json`, an raba shi ta mahallin da manufar CLI. Ana nuna waɗanda aka fi so kafin zaɓukan kwanan nan; yi amfani da `--unfavorite` don cire model da aka zaɓa daga jerin mahallin/manufar.
 
-Profile ɗin da aka rubuta yana nuni ga inference key ta env var
-(`OMNIROUTE_API_KEY`) — ba a taɓa rubuta secret ɗin zuwa disk ba. Don saitin Codex na asali na sau ɗaya
-(block ɗin `[model_providers.omniroute]`), duba
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Profile ɗin da aka rubuta yana nuni zuwa maɓallin inference ta env var (`OMNIROUTE_API_KEY`). Ba a taɓa rubuta sirrin a kan disk ba. Don saitin Codex na asali na lokaci ɗaya (toshe `[model_providers.omniroute]`), duba [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Ƙaddamar da CLI don yin aiki da na'urar nesa (ba a rubuta config)
+### Ƙaddamar da CLI a kan nesa (ba tare da rubuta config ba)
 
-`omniroute run <target>` shi ma yana bin active context: ana shigar da base URL na nesa
-da credential na context cikin process ɗin da aka ƙaddamar kawai.
+`omniroute run <target>` shi ma yana mutunta mahallin da ke aiki: ana allurar base URL na nesa da takardun shaidar mahallin cikin tsarin da aka ƙaddamar kawai.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → na'urar nesa
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → remote
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Duba daidai abin da za a ƙaddamar (SUNAYEN env KEY kawai, ba ƙimomi ba):
+# Duba daidai abin da za a ƙaddamar (sunayen env KEY kawai, ba ƙima ba):
 omniroute run codex --dry-run --json
 ```
 
-Targets: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(tushe guda ɗaya: `bin/cli/cli-manifest.mjs`). Qwen da Gemini suna aiki da
-home na wucin gadi da aka keɓe wanda ake cirewa bayan fita, saboda haka ƙaddamarwar ba za ta taɓa —
-ko fitar da bayanai zuwa — saitunan kayan aikinka na kashin kai ba.
+Manufofi: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (tushe ɗaya: `bin/cli/cli-manifest.mjs`). Qwen da Gemini suna gudana a cikin gida na wucin gadi keɓe wanda ake cirewa a fita, saboda haka ƙaddamarwa ba ta taɓa taɓa, ko zubewa cikin, saitin kayan aikin ka na sirri ba.
 
-### Umarnin saitawa na kowane CLI
+### Umarnin saiti ga kowane CLI
 
-Kowane CLI da ake tallafawa yana da umarnin saitawa da ya san yanayin nesa (duk suna bin active
-context, ko `--remote <url> --api-key <key>`):
+Kowane CLI da ake goyon baya yana da umarnin saiti mai sanin nesa (duk suna mutunta mahallin da ke aiki, ko `--remote <url> --api-key <key>`):
 
-| CLI         | Umarni                     | Abin da yake rubutawa                                                                                                                                                                            |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Codex       | `omniroute setup-codex`    | Fayilolin bayanin martaba na `~/.codex/<name>.config.toml` (ga kowane samfuri)                                                                                                                   |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (ga kowane samfuri)                                                                                                                                    |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — mai samar da `omniroute` mai dacewa da openai tare da kowane samfurin kundin bayanai (gudanar da `opencode -m omniroute/<model>`)                           |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (yanayin CLI) + yana buga saitunan tsawaitawar VS Code don liƙawa (mai dacewa da OpenAI, Base URL **ba tare da** `/v1` ba)                            |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + saitunan VS Code na `kilocode.*` — mai dacewa da OpenAI, Base URL **tare da** `/v1`                                                                      |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **tare da** `/v1`, maɓalli ta `${{ secrets.OMNIROUTE_API_KEY }}`                                        |
-| Cursor      | `omniroute setup-cursor`   | yana buga matakan cikin manhaja (Settings → Models → Override OpenAI Base URL **tare da** `/v1` + maɓalli + samfuri). Tsarin Cursor ɓoyayyen SQLite ne — sashen hira kawai                       |
-| Roo Code    | `omniroute setup-roo`      | yana rubuta JSON na shigarwa na Roo (`~/.omniroute/roo-settings.json`) + yana saita `roo-cline.autoImportSettingsPath` + yana buga matakan UI (mai dacewa da OpenAI, Base URL **tare da** `/v1`) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — mai samar da `openai-compat`, `base_url` **tare da** `/v1`, maɓalli ta `$OMNIROUTE_API_KEY`                                                                       |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **ba tare da** `/v1` ba + `GOOSE_MODEL`) + tsarin umarnin env                                                             |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **ba tare da** `/v1` ba + `model: openai/<id>`) + tsarin umarnin env (`aider --message --yes`)                                                            |
-| Qwen Code   | `omniroute setup-qwen`     | Shigarwar V4 ta `modelProviders.openai` a cikin `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` a cikin `~/.qwen/.env`                                                                             |
+| CLI         | Umarni                     | Abin da yake rubutawa                                                                                                                                                                             |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | bayanan martaba `~/.codex/<name>.config.toml` (ga kowane model)                                                                                                                                   |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (ga kowane model)                                                                                                                                       |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: mai bayarwa `omniroute` mai jituwa da openai tare da kowane model na katalogi (gudanar da `opencode -m omniroute/<model>`)                                    |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (yanayin CLI) + yana buga saitunan kari na VS Code don liƙawa (mai jituwa da OpenAI, Base URL **ba tare da** `/v1` ba)                                 |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + saitunan VS Code `kilocode.*`: mai jituwa da OpenAI, Base URL **tare da** `/v1`                                                                           |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **tare da** `/v1`, maɓalli ta `${{ secrets.OMNIROUTE_API_KEY }}`                                          |
+| Cursor      | `omniroute setup-cursor`   | yana buga matakai a cikin app (Settings → Models → Override OpenAI Base URL **tare da** `/v1` + maɓalli + model). Config ɗin Cursor SQLite ce da ba a iya karantawa ba, don haka chat panel kawai |
+| Roo Code    | `omniroute setup-roo`      | yana rubuta JSON na shigo da Roo (`~/.omniroute/roo-settings.json`) + yana saita `roo-cline.autoImportSettingsPath` + yana buga matakan UI (mai jituwa da OpenAI, Base URL **tare da** `/v1`)     |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: mai bayarwa `openai-compat`, `base_url` **tare da** `/v1`, maɓalli ta `$OMNIROUTE_API_KEY`                                                                          |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **tare da** `/v1`, Zed yana karanta maɓalli daga `$OMNIROUTE_API_KEY` (ba a taɓa rubuta shi ba)           |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **ba tare da** `/v1` + `GOOSE_MODEL`) + env recipe                                                                         |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **ba tare da** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                                                        |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` shigarwar V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` a `~/.qwen/.env`                                                                                               |
 
 ```bash
-# OpenCode (mai samarwa mai dacewa da openai, duk samfuran kundin bayanai, VPS na nesa)
+# OpenCode (mai bayarwa mai jituwa da openai, dukkan models na katalogi, VPS na nesa)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # ajiye samfuran da suka dace kawai
-opencode -m omniroute/glm/glm-5.2 "..."          # fara fitar da OMNIROUTE_API_KEY
+omniroute setup-opencode --only glm,kimi        # ajiye models masu dacewa kawai
+opencode -m omniroute/glm/glm-5.2 "..."          # fitar da OMNIROUTE_API_KEY da farko
 ```
 
-> OpenCode kuma yana da haɗin **plugin** mai ƙarin fasali: `omniroute setup opencode`
-> (yanzu yana aiki da na'ura mai nesa ta `--remote`) yana girka `@omniroute/opencode-plugin`.
-> `setup-opencode` shi ne madadin mai sauƙi wanda ya dace da openai. Ana ambaton maɓallin API
-> ta `{env:OMNIROUTE_API_KEY}` — ba a taɓa rubuta shi a faifai ba.
+> OpenCode kuma yana da haɗin **plugin** mai wadata: `omniroute setup opencode` (yanzu yana sane da nesa ta `--remote`) yana shigar da `@omniroute/opencode-plugin`.
+> `setup-opencode` madadin sauƙi ne mai jituwa da openai. Ana nuni zuwa maɓallin API ta `{env:OMNIROUTE_API_KEY}`, ba a taɓa rubuta shi a kan disk ba.
 >
-> A OpenCode v2, yi amfani da `@omniroute/opencode-plugin-v2` a maimakonsa: kundin bayanai iri ɗaya,
-> amma ƙa'idar loader ta bambanta. Yana karanta maɓallin daga ma'ajiyar bayanan shaidar OpenCode
-> lokacin da aka haɗa haɗin, don haka gateway na nesa ba ya buƙatar maɓalli ko kaɗan a cikin
-> `opencode.json`.
+> A OpenCode v2, yi amfani da `@omniroute/opencode-plugin-v2` maimakon haka: katalogi iri ɗaya, yarjejeniyar loader daban. Yana karanta maɓalli daga ma'ajiyar takardun shaida ta OpenCode da kanta idan an haɗa haɗin, don haka gateway na nesa ba ya buƙatar maɓalli a cikin `opencode.json` kwata-kwata.
 
 ---
 

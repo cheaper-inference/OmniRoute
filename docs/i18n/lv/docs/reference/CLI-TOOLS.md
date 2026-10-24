@@ -45,70 +45,63 @@ ACP aģenti (apgrieztā palaišanas plūsma):
 
 ## Automātiska konfigurēšana ar `setup-*`
 
-Katra rīka konfigurācija nav jāraksta manuāli. OmniRoute nodrošina `setup-*`
-komandu katram atbalstītajam CLI, kura nolasa **aktuālo** modeļu katalogu no
-darbojošās OmniRoute instances (lokālas vai attālas) un ieraksta attiecīgā rīka
-konfigurāciju jūsu datorā:
+Katra rīka konfigurācija nav jāraksta manuāli. OmniRoute katrai atbalstītajai CLI nodrošina `setup-*`
+komandu, kas nolasa **aktuālo** modeļu katalogu no darbojošās
+OmniRoute instances (lokālas vai attālas) un ieraksta attiecīgā rīka konfigurāciju jūsu datorā:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Katra komanda pieņem `--remote <url> --api-key <key>` (lokāla rīka konfigurēšanai
-darbam ar attālu OmniRoute), `--dry-run` (priekšskatījumam bez ierakstīšanas) un
-`--port`. Rīkiem bez automātiskas modeļa noteikšanas (Cline, Kilo, Roo, Goose,
-Aider, Qwen, 5dive) jānorāda `--model <id>` (un `--yes` neinteraktīvai izpildei).
-`setup-5dive` ir vienīgā recepte, kas neveic ierakstīšanu zem `$HOME`: tā
-konfigurē 5dive aģentu kopu, kopas resursdatorā ierakstot root piederošu
-autentifikācijas profilu, tādēļ tā atkārtoti izpilda sevi ar `sudo` un tai nav
-sava attālā režīma. Lai palaistu CLI ar ievadītiem pareizajiem vides mainīgajiem,
-vispār neierakstot konfigurāciju, izmantojiet vispārīgo
+Katra komanda pieņem `--remote <url> --api-key <key>` (lokāla rīka konfigurēšanai darbam ar
+attālu OmniRoute), `--dry-run` (priekšskatīšanai bez ierakstīšanas) un `--port`. Rīkiem
+bez automātiskas modeļu atklāšanas (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) ir nepieciešams
+`--model <id>` (un `--yes` neinteraktīvai izpildei). `setup-5dive` ir vienīgā
+recepte, kas neveic ierakstīšanu zem `$HOME`: tā konfigurē 5dive aģentu kopu,
+kopas resursdatorā ierakstot `root` lietotājam piederošu autentifikācijas profilu, tāpēc tā atkārtoti izpilda sevi ar `sudo`
+un tai nav sava attālā režīma. Lai palaistu CLI ar
+ievadītiem pareizajiem vides mainīgajiem, vispār neierakstot konfigurāciju, izmantojiet vispārīgo
 `omniroute run <target>` palaidēju (claude, codex, aider, goose, opencode, qwen,
-gemini — mērķi un aizstājvārdi tiek iegūti no `bin/cli/cli-manifest.mjs`);
-joprojām ir pieejami novecojušie katram rīkam paredzētie palaidēji
-`omniroute launch` (Claude Code) un `omniroute launch-codex` (Codex). Gemini CLI
-ir paredzēts tikai palaišanai: tas ir `omniroute run` mērķis, taču tam nav
-`setup-*`/`configure` receptes.
+gemini — mērķi un aizstājvārdi tiek iegūti no `bin/cli/cli-manifest.mjs`); joprojām ir pieejami arī mantotie
+atsevišķo rīku palaidēji `omniroute launch` (Claude Code) un `omniroute launch-codex`
+(Codex). Gemini CLI ir paredzēta tikai palaišanai: tā ir `omniroute run`
+mērķis, taču tai nav `setup-*`/`configure` receptes.
 
 > **Pilna atsauce:** galvenā tabula — ko katra komanda ieraksta, visi karodziņi,
-> lokāla un attāla izmantošana, kā arī tas, kuriem rīkiem nepieciešams `/v1`
-> sufikss — ir pieejama sadaļā
+> lokālais un attālais režīms, kā arī tas, kuriem rīkiem nepieciešams `/v1` sufikss — ir pieejama sadaļā
 > **[CLI integrācijas](../guides/CLI-INTEGRATIONS.md)**.
 
-### To izpilde konteinerā
+### Šo komandu izpilde konteinerā
 
-Konteinerā OmniRoute izpildīta `setup-*` komanda raksta paša konteinera mājas
-direktorijā, kuru neviens resursdatora CLI nelasa un kura pazūd kopā ar
-konteineru. OmniRoute to nosaka un tā vietā, lai veiktu ierakstīšanu, beidz darbu
-ar kodu `2` un parāda norādījumus. Ir divi atbalstīti risinājumi — instalējiet
-CLI resursdatorā un izmantojiet `omniroute connect`, lai savienotos ar
-konteineru, vai piesaistiet konfigurācijas direktorijus un iestatiet
+Konteinerā OmniRoute izpildīta `setup-*` komanda veic ierakstīšanu paša
+konteinera mājas direktorijā, kuru neviena resursdatora CLI nelasa un kura pazūd kopā ar
+konteineru. OmniRoute to nosaka un tā vietā, lai veiktu ierakstīšanu, beidz darbu ar kodu `2` un parāda norādījumus.
+Ir divi atbalstīti risinājumi — instalēt CLI resursdatorā un
+izmantot `omniroute connect`, lai izveidotu savienojumu ar konteineru, vai piesaistīt konfigurācijas direktorijus un iestatīt
 `CLI_CONFIG_HOME` (compose profils `host`). Katra `setup-*` komanda, kā arī
 `omniroute configure` un `omniroute config set`, pieņem
 `--allow-container-write`, ja patiesībā vēlaties konfigurēt paša konteinera CLI;
 `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` nodrošina to pašu serverim. Skatiet
-[Docker rokasgrāmata → Resursdatora CLI rīku konfigurēšana](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+[Docker rokasgrāmatu → Resursdatora CLI rīku konfigurēšana](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
 Informācijas paneļa **lietošanas galapunkts** (`POST /api/cli-tools/apply`) piemēro
-to pašu aizsardzību: konteinerā ierakstīšanas pieprasījums, kura mērķis nav
-piesaistīts no resursdatora, atbild ar **`422`**, `containerEphemeralTarget: true`,
-drošu kļūdas tekstu un — rīkiem, kuriem ir resursdatora recepte (claude, codex,
-opencode, cline, kilo, continue) — `hostSetupCommand` (piem.,
-`omniroute setup-opencode`), kas tā vietā jāizpilda resursdatorā; nekas netiek
-ierakstīts. `dryRun: true` turpina darboties konteinera režīmā un, nepiekļūstot
-diskam, atgriež aizklātu priekšskatījumu un mērķa ceļu. Priekšskatījuma saturs
-nav akreditācijas datus saturoša konfigurācija, ko kopēt vai importēt.
-Resursdatorā lietojiet sākotnējos rīka, pamata URL, API atslēgas un modeļa ievades
-datus vai izmantojiet norādīto resursdatora puses iestatīšanas komandu. Informāciju
-par priekšskatījuma galveni un pieprasījuma līgumu skatiet sadaļā
-[CLI konfigurācijas drošība](../security/CLI-CONFIGURATION.md). Šāda darbība ir
+to pašu aizsardzību: konteinerā ierakstīšanas pieprasījums, kura mērķis nav no
+resursdatora piesaistīts sējums, atbild ar **`422`**, `containerEphemeralTarget: true`, drošu kļūdas
+tekstu un — rīkiem, kuriem ir resursdatora recepte (claude, codex, opencode, cline,
+kilo, continue), — `hostSetupCommand` (piem., `omniroute setup-opencode`), kas tā vietā jāizpilda
+resursdatorā; nekas netiek ierakstīts. `dryRun: true` turpina darboties konteinera
+režīmā un, nepiekļūstot diskam, atgriež rediģētu priekšskatījumu un mērķa ceļu. Priekšskatījuma
+saturs nav akreditācijas datus ietveroša konfigurācija, ko var kopēt vai importēt. Lietojiet
+sākotnējos rīka/bāzes URL/API atslēgas/modeļa ievades datus resursdatorā vai izmantojiet norādīto
+resursdatora iestatīšanas komandu. Informāciju par priekšskatījuma galveni un pieprasījuma līgumu skatiet sadaļā [CLI konfigurācijas drošība](../security/CLI-CONFIGURATION.md).
+Šāda darbība ir
 apzināta, un pret regresijām to aizsargā
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nekad „nelabojiet” 422
-kļūdu, noņemot šo aizsardzību.
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nekad „nelabojiet” kļūdu 422,
+noņemot šo aizsardzību.
 
 ---
 
@@ -151,9 +144,9 @@ vienai saskarnei, bet ne pārējām, testu komplekts neizdodas, nevis ļauj neat
 
 ---
 
-## 1. CLI Code katalogs (26 rīki)
+## 1. CLI Code katalogs (27 rīki)
 
-Visi rīki, kas tiek rādīti sadaļā `/dashboard/cli-code`. Rīki ar `baseUrlSupport: none` tiek savienoti, izmantojot MITM vai manuālu ceļvedi, nevis pielāgotu bāzes URL:
+Visi rīki, kas redzami sadaļā `/dashboard/cli-code`. Rīki ar `baseUrlSupport: none` tiek savienoti, izmantojot MITM vai manuālu pamācību, nevis pielāgotu bāzes URL:
 
 | id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
@@ -178,20 +171,21 @@ Visi rīki, kas tiek rādīti sadaļā `/dashboard/cli-code`. Rīki ar `baseUrlS
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| custom       | Pielāgots CLI           | —                   | full           | custom-builder | false        |
 
-Rīkiem ar `baseUrlSupport: "partial"` informācijas paneļa kartītē tiek rādīta emblēma "⚠ Daļējs bāzes URL".
+Rīkiem ar `baseUrlSupport: "partial"` informācijas paneļa kartītē tiek rādīta emblēma „⚠ Daļējs bāzes URL atbalsts”.
 ---
 
 ## 2. CLI aģentu katalogs (10 rīki)
 
-Autonomie aģenti, kas tiek rādīti lapā `/dashboard/cli-agents`:
+Autonomie aģenti, kas tiek rādīti sadaļā `/dashboard/cli-agents`:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
+| id           | nosaukums        | piegādātājs              | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |
 | hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
 | openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |

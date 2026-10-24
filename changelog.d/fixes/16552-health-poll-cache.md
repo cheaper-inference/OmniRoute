@@ -1,1 +1,0 @@
-- fix(monitoring): reuse bounded call-log statistics snapshots across health matrix polls and cache light database diagnoses separately from full integrity scans, preserving live connection state and reset/repair invalidation. (#16552)

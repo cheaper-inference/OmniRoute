@@ -17,15 +17,15 @@ OmniRoute має конвеєр авторизації, що враховує м
 
 ### 1. Ключ API (Bearer)
 
-Використовується для клієнтських API, сумісних з OpenAI/Anthropic/Gemini, а також для кількох маршрутів керування, коли ключ має область дії `manage`.
+Використовується для клієнтських API, сумісних з OpenAI/Anthropic/Gemini, та для деяких маршрутів керування, коли ключ має область доступу `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Перевіряється за допомогою `isValidApiKey()` / `extractApiKey()` у `src/sse/services/auth.ts` і повторно експортується через `src/shared/utils/apiAuth.ts`. Валідатор також приймає змінні середовища `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` як постійні ключі наскрізної передачі (завдання #1350).
+Перевіряється функціями `isValidApiKey()` / `extractApiKey()` у `src/sse/services/auth.ts` і реекспортується через `src/shared/utils/apiAuth.ts`. Валідатор також приймає змінні середовища `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` як постійні наскрізні ключі (issue #1350).
 
-### 2. Сеанс панелі керування (файл cookie auth_token)
+### 2. Сеанс панелі керування (cookie auth_token)
 
 Для сторінок панелі керування та адміністративних операцій.
 
@@ -33,88 +33,93 @@ Authorization: Bearer <api-key>
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Файл cookie є сеансом лише тоді, коли JWT успішно перевірено **і** він містить `authenticated: true`
+Cookie є сеансом лише тоді, коли JWT перевіряється **і** містить `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Кожен
-споживач цього файлу cookie (захисний механізм маршруту панелі керування (`isDashboardSessionAuthenticated()`), оновлення конвеєра авторизації, встановлення з’єднання WebSocket, сервер обміну даними в реальному часі, `/api/settings/require-login`, `/api/auth/status`) використовує цей допоміжний метод.
-Існують й інші JWT, підписані за допомогою `JWT_SECRET`: механізм наскрізної передачі Cursor CLI створює
-для власників ключів токени з `iss "omniroute" / aud "cursor-cli"`, які ніколи не є сеансами
+споживач cookie (захист маршрутів панелі (`isDashboardSessionAuthenticated()`), оновлення в конвеєрі authz, рукостискання WebSocket, live
+server, `/api/settings/require-login`, `/api/auth/status`) проходить через цей помічник.
+Існують і інші JWT, підписані `JWT_SECRET`: наскрізний проброс Cursor CLI видає
+токени `iss "omniroute" / aud "cursor-cli"` для власників ключів, і вони ніколи не є сеансами
 (#13298).
 
-Перевіряється за допомогою `isDashboardSessionAuthenticated()` у `src/shared/utils/apiAuth.ts`. Конвеєр автоматично оновлює JWT, коли до завершення його 30-денного строку дії залишається менш ніж 7 днів.
+Перевіряється функцією `isDashboardSessionAuthenticated()` у `src/shared/utils/apiAuth.ts`. Конвеєр автоматично оновлює JWT, коли до завершення його 30-денного строку дії залишається менше 7 днів.
 
-Сеанс також може завершитися до закінчення 30 днів, оскільки кожен засіб створення токенів використовує `mintDashboardSessionToken` (час створення `iat` та ідентифікатор `jti`), а засіб перевірки перевіряє два налаштування: `sessionsValidAfter`, яке встановлюється під час зміни пароля, через що всі видані до цього сеанси перестають проходити перевірку (браузер, у якому змінено пароль, отримує новий файл cookie), і `revokedDashboardSessions`, до якого `POST /api/auth/logout` додає `jti` сеансу, з якого виконано вихід. Сеанси, створені старішим випуском, не містять жодної з цих заяв і залишаються дійсними до першої зміни пароля. Якщо налаштування неможливо прочитати, сеанс не вважається надійним.
+Сеанс може завершитися й раніше 30 днів, оскільки кожен емітент проходить через `mintDashboardSessionToken` (час видачі `iat` та ідентифікатор `jti`), а верифікатор перевіряє два параметри: `sessionsValidAfter`, який задається під час зміни пароля, тож усі сеанси, видані до неї, перестають проходити перевірку (браузер, що змінив пароль, отримує новий cookie), і `revokedDashboardSessions`, до якого `POST /api/auth/logout` додає `jti` завершеного сеансу. Сеанси, випущені старішим релізом, не містять жодного з цих полів і лишаються дійсними до першої зміни пароля. Якщо налаштування неможливо прочитати, сеанс не вважається довіреним.
 
-Деякі маршрути керування приймають **будь-який** із режимів: файл cookie АБО `Bearer <key>`, якщо ключ API має область дії `manage` (або `admin`). Саме це забезпечує робочий процес «налаштування за допомогою викликів API», доданий у v3.8.
+Деякі маршрути керування приймають **будь-який** із двох режимів: cookie АБО `Bearer <key>`, якщо ключ API має область доступу `manage` (або `admin`). Саме це забезпечує сценарій «налаштування через виклики API», доданий у v3.8.
 
-#### Необов’язковий шлюз входу OIDC (#6973)
+#### Необов'язковий шлюз входу OIDC (#6973)
 
-Адміністративний вхід до панелі керування також підтримує **необов’язковий** потік OIDC (OpenID Connect)
-разом зі стандартним входом за паролем — вхід за паролем ніколи не вилучається, а лише
-доповнюється:
+Вхід адміністратора до панелі також підтримує **необов'язковий** потік OIDC (OpenID Connect)
+поряд зі стандартним входом за паролем. Вхід за паролем ніколи не видаляється, а лише доповнюється:
 
-- Вимкнено, якщо `settings.oidcEnabled !== true` **або** не налаштовано хоча б одне з
-  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` (Налаштування → Автентифікація).
-  Інакше `GET /api/auth/oidc/login` повертає `400`.
-- `GET /api/auth/oidc/login` знаходить `authorization_endpoint` із
-  `/.well-known/openid-configuration` постачальника
-  (із резервним переходом до `<issuer>/authorize`), формує URI переспрямування з вхідного запиту
-  (з урахуванням `x-forwarded-proto`) і переспрямовує до IdP із випадковим значенням `state`,
-  збереженим у файлі cookie `oidc_state` з атрибутом `httpOnly`.
-- `GET /api/auth/oidc/callback` перевіряє `state`, обмінює код авторизації
-  та перевіряє підпис токена ID за допомогою JWKS постачальника
-  (`createRemoteJWKSet` із `jose`, кешований для кожного URI JWKS) із перевірками
-  `issuer`/`audience`. Список дозволених значень `oidcAllowedSubjects` є обов’язковим: він зіставляється із
-  заявою `sub` токена або його заявою `email` — заява електронної пошти враховується лише
-  тоді, коли `email_verified === true`, тому непідтверджена адреса електронної пошти в IdP ніколи не зможе
-  пройти перевірку — а за відсутності записів зворотний виклик відхиляє кожну спробу входу
-  (`not_configured`).
-- У разі успіху створюється **точно такий самий** 30-денний JWT `auth_token`, який видає вхід
-  за паролем (`src/app/api/auth/login/route.ts`), тому решта
-  конвеєра сеансу панелі керування (автоматичне оновлення, атрибути файлу cookie) залишається незмінною —
-  OIDC замінює лише спосіб створення файлу cookie, а не надані ним права.
-- Кожне налаштування `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
-  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) входить до `SECURITY_IMPACTING_SETTINGS_KEYS`
-  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
-  відповідає `400 PASSWORD_REQUIRED`, якщо тіло не містить пароль керування як
-  `currentPassword` (`401 PASSWORD_MISMATCH`, якщо він неправильний).
-  `oidcDisablePasswordLogin` забороняє _вхід_ за паролем (`POST /api/auth/login`),
-  але зберігає хеш пароля, а повторна автентифікація й надалі перевіряє
-  `currentPassword` відносно нього.
-- `POST /api/settings/import-json` пропускає цю повторну автентифікацію, тому перед записом видаляє кожен ключ із
-  `IMPORT_STRIPPED_SETTINGS_KEYS` (той самий файл): пароль і
-  `currentPassword`, кожен запис `SECURITY_IMPACTING_SETTINGS_KEYS`, а також
-  стан сеансу панелі керування (`sessionsValidAfter`, `revokedDashboardSessions`).
-  Тому імпортування старішої резервної копії не може відновити сеанс, який уже завершила
-  зміна пароля або вихід із системи.
+- Вимкнено, якщо не задано `settings.oidcEnabled === true` **і** не заповнено всі параметри `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` (Налаштування → Auth). `GET /api/auth/oidc/login` повертає `400` в інших випадках.
+- `GET /api/auth/oidc/login` отримує `authorization_endpoint` з `/.well-known/openid-configuration` емітента
+  (якщо його немає, використовується `<issuer>/authorize`), формує redirect URI за вхідним запитом
+  (з урахуванням `x-forwarded-proto`) і перенаправляє до IdP з випадковим `state`, збереженим у cookie `oidc_state`
+  з прапорцем `httpOnly`.
+- `GET /api/auth/oidc/callback` перевіряє `state`, обмінює код авторизації та перевіряє підпис ID-токена
+  через JWKS емітента (`jose`'s `createRemoteJWKSet`, кешується для кожного URI JWKS) з перевірками `issuer`
+  та `audience`. Список `oidcAllowedSubjects` є обов'язковим: він зіставляється з claim `sub` токена або з claim
+  `email`. Claim email враховується лише при `email_verified === true`, тож неперевірена електронна пошта в IdP
+  ніколи не пройде шлюз. За порожнього списку callback відхиляє будь-який вхід (`not_configured`).
+- Після успіху видається **той самий** 30-денний JWT `auth_token`, що й при вході за паролем
+  (`src/app/api/auth/login/route.ts`), тож решта конвеєра сеансу панелі (автооновлення, прапорці cookie)
+  не змінюється. OIDC замінює лише спосіб видачі cookie, але не те, що він надає.
+- Кожен параметр `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`,
+  `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) входить до
+  `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  відповідає `400 PASSWORD_REQUIRED`, якщо в тілі запиту немає пароля керування в полі `currentPassword`
+  (за неправильного пароля відповідь `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` забороняє вхід за паролем
+  (`POST /api/auth/login`), але зберігає хеш пароля, а повторна автентифікація все одно перевіряє
+  `currentPassword` проти нього.
+- `corsOrigins` та `bruteForceProtection` теж входять до `SECURITY_IMPACTING_SETTINGS_KEYS`: послаблення будь-якого
+  з них знижує захист входу, тому для них потрібна та сама повторна автентифікація через `currentPassword`
+  (вкладка Security її запитує), а при імпорті JSON ці ключі відкидаються.
+- Кожен ключ політики безпеки (записи `SECURITY_IMPACTING_SETTINGS_KEYS`, усі ключі `oidc*` та стан
+  сеансу панелі) доступний **лише оператору** в `PATCH /api/settings`. Ключ API з областю `manage` або
+  токен доступу `oma_` отримують `403`, навіть якщо надіслали правильний `currentPassword`. Відмова фіксується
+  в аудиті як `settings.update_failed` з `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` у
+  `src/lib/api/operatorCredential.ts`). Звичайні налаштування (тема, параметри відображення) лишаються доступними
+  для запису ключу `manage` або токену доступу `admin`. Будь-яка зміна самого `/api/settings` (і
+  `/api/settings/require-login`) також вимагає області доступу токена `admin` (`ADMIN_MUTATION_EXACT_PATHS`
+  у `src/server/authz/accessScopes.ts`, точний збіг шляху). `GET` лишається з `read`, а решта підмаршрутів
+  `/api/settings/*` (проксі, параметри комбо, псевдоніми моделей, стиснення, очищення…) зберігають
+  область `write`, що виводиться з методу.
+- `POST /api/settings/import-json` пропускає цю повторну автентифікацію, тож перед записом він відкидає
+  усі ключі з `IMPORT_STRIPPED_SETTINGS_KEYS` (той самий файл): пароль і `currentPassword`, кожен запис
+  `SECURITY_IMPACTING_SETTINGS_KEYS` та стан сеансу панелі (`sessionsValidAfter`,
+  `revokedDashboardSessions`). Тому імпорт старішої резервної копії не може воскресити сеанс,
+  який уже завершили зміна пароля або вихід із системи.
 
 ## Класи маршрутів
 
-`src/server/authz/types.ts` визначає три класи; будь-який маршрут, який неможливо однозначно класифікувати, за замовчуванням належить до `MANAGEMENT`.
+`src/server/authz/types.ts` визначає три класи. Будь-який маршрут, який неможливо детерміновано класифікувати, за замовчуванням відноситься до `MANAGEMENT`.
 
-| Клас         | Опис                                                                                                                                                                    | Необхідна автентифікація                                                    |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `PUBLIC`     | Явно безпечні маршрути — вхід, вихід, статус, ініціалізація, перевірка працездатності, початкове налаштування.                                                          | Не потрібна                                                                 |
-| `CLIENT_API` | Кінцеві точки обслуговування моделей — `/api/v1/*`, `/api/v1beta/*`, а також псевдоніми `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-ключ, коли активовано ефективний прапорець функції `REQUIRE_API_KEY` |
-| `MANAGEMENT` | Сторінки панелі керування, налаштування, провайдери, ключі, адміністративні та діагностичні кінцеві точки.                                                              | Сесія панелі керування АБО Bearer зі сферою дії `manage`                    |
+| Клас         | Опис                                                                                                                                                               | Потрібна автентифікація                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `PUBLIC`     | Явно безпечні маршрути: вхід, вихід, статус, ініціалізація, перевірка стану, початкове налаштування під час онбордингу.                                            | Не потрібна                                                            |
+| `CLIENT_API` | Ендпоінти обслуговування моделей: `/api/v1/*`, `/api/v1beta/*`, а також псевдоніми `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Ключ Bearer, коли увімкнено чинний прапорець функції `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Сторінки панелі керування, налаштування, провайдери, ключі, ендпоінти адміністрування та діагностики.                                                              | Сеанс панелі АБО Bearer з областю `manage`                             |
 
-Деякі дії `MANAGEMENT` доступні **лише оператору**: ключа `manage` недостатньо. Експорт збережених
-облікових даних (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), видача токена синхронізації (`POST /api/sync/tokens`) і створення
-токена доступу CLI `admin` (`POST /api/cli/tokens`) потребують сесії панелі керування, локального
-суб’єкта CLI або вимкненого входу; ключі API з будь-якою сферою дії та токени доступу `oma_`
-отримують `403`. Перевірка міститься в `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
-
-A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
-credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), restoring a backup over the live data
-(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
-`POST /api/settings/import-json`), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
-lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
+Деякі дії `MANAGEMENT` доступні **лише оператору**: ключа з областю `manage` для них недостатньо.
+Експорт збережених облікових даних (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), відновлення резервної копії поверх поточних даних
+(`POST /api/db-backups/import`, включно з `dryRun=true`, `POST /api/db-backups` з відновленням за id,
+`POST /api/settings/import-json`), а також видалення точок відновлення (очищення через `DELETE /api/db-backups`
+і `PATCH /api/db-backups`, оскільки збережене цим методом сховище керує автоматичним очищенням
+після кожного резервного копіювання) вимагають сеансу панелі, локального суб'єкта CLI або вимкненого входу.
+Видача токена синхронізації (`POST /api/sync/tokens`) і створення CLI-токена доступу з областю `admin`
+(`POST /api/cli/tokens`) вимагають сеансу панелі або локального суб'єкта CLI в усіх режимах входу.
+Ключі API будь-якої області та токени доступу `oma_` не є операторськими обліковими даними: якщо потрібні
+права оператора, вони отримують `403`. Перевірка виконується в `src/lib/api/operatorCredential.ts`
+(`resolveOperatorCredential()` / `requireOperatorCredential()`). Зміна налаштувань входу також доступна
+лише оператору: `POST /api/settings/require-login` (задати пароль керування або перемкнути `requireLogin`)
+приймає лише ці облікові дані, коли пароль уже існує. Вікно початкового налаштування (пароля ще немає)
+не змінюється. Сеанс панелі для заміни пароля має передати `currentPassword` (`403`, якщо його немає
+або він невірний; фіксується в аудиті як `settings.update_failed`). Локальний CLI та екземпляр з вимкненим
+входом зберігають шлях відновлення і можуть задати пароль без нього, оскільки обидва прив'язані до хоста,
+якому належить каталог даних.
 
 ## Конвеєр
 
@@ -266,15 +271,27 @@ export async function POST(request: Request) {
 (`src/lib/accessTokens/scopes.ts`). Цей ранг застосовується лише до облікових даних токена доступу.
 Див. [Автентифікація управління](../guides/MANAGEMENT-AUTH.md).
 
-## Перемикач обов’язкової автентифікації
+## Перемикач обов'язкової автентифікації
 
-`isAuthRequired()` у `src/shared/utils/apiAuth.ts` визначає, чи застосовується **будь-яка** автентифікація для запиту:
+`isAuthRequired()` у `src/shared/utils/apiAuth.ts` визначає, чи застосовується **будь-яка** автентифікація до запиту:
 
-- `settings.requireLogin === false` → автентифікацію глобально вимкнено.
-- Якщо пароль не налаштовано **і** змінну середовища `INITIAL_PASSWORD` не задано → режим початкового налаштування дозволяє роботу майстра адаптації та запити зі зворотного інтерфейсу, але для запитів із зовнішньої мережі все одно потрібні облікові дані.
-- Будь-яка помилка БД → доступ блокується (безпека за замовчуванням).
+- `settings.requireLogin === false` → автентифікація вимкнена глобально, окрім завжди захищеного рівня
+  (див. [Рівні захисту маршрутів](../security/ROUTE_GUARD_TIERS.md)) та викликів, які видають облікові дані,
+  що їх приймає система. Для них потрібні ті самі облікові дані, що й за увімкненого входу: видача токенів
+  синхронізації, видача CLI-токенів доступу з будь-якою областю, а також створення ключа API з областю
+  `manage`/`admin`, надання такої області ключу, перевипуск або показ такого ключа
+  (`requireCredentialForManagementScopedKey()` у `src/lib/api/requireManagementAuth.ts`). Ключі лише
+  для інференсу лишаються відкритими.
+- Пароль не задано **і** немає змінної середовища `INITIAL_PASSWORD` → режим початкового налаштування дозволяє
+  майстер онбордингу та запити з loopback, але запити із зовнішньої мережі, як і раніше, потребують облікових даних.
+- Будь-яка помилка БД → відмова (безпечне за замовчуванням поводження, fail closed).
 
-Для перевірки ключів клієнтського API використовується `isRequireApiKeyEnabled()` із `src/shared/utils/featureFlags.ts`, а не безпосереднє читання `process.env.REQUIRE_API_KEY`. Це важливо для розгорнутих екземплярів: перемикання `REQUIRE_API_KEY` у Dashboard → Feature Flags зберігає перевизначення в БД і негайно впливає на `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` та інші перевірки автентифікації клієнтського API, які використовують цей допоміжний засіб. Якщо сховище прапорців функцій неможливо прочитати, автентифікація клієнтського API блокує доступ за замовчуванням і вимагає ключ.
+Перевірка клієнтських ключів API використовує `isRequireApiKeyEnabled()` у `src/shared/utils/featureFlags.ts`,
+а не пряме читання `process.env.REQUIRE_API_KEY`. Це важливо для розгорнутих екземплярів: перемикання
+`REQUIRE_API_KEY` у Dashboard → Feature Flags зберігає перевизначення в БД і одразу впливає на `/v1/*`,
+`/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` та інші перевірки клієнтського API,
+які використовують цей помічник. Якщо сховище прапорців функцій не читається, автентифікація клієнтського API
+відмовляє і вимагає ключ.
 
 ## Несумісна зміна — v3.8.0
 

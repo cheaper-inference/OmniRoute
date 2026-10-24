@@ -1,1 +1,0 @@
-- **fix(i18n):** propagate the four CLI environment-variable contracts from #16441 and the in-memory quality tracker cold-start note from #16408 to every published documentation locale, preserving the original translations and verified source provenance (thanks @pacocartones and @maxmad64bis).

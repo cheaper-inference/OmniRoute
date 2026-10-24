@@ -17,105 +17,91 @@ OmniRoute possui um pipeline de autorização ciente de rotas que controla cada 
 
 ### 1. Chave de API (Bearer)
 
-Usado para as APIs de cliente compatíveis com OpenAI/Anthropic/Gemini e algumas rotas de gerenciamento quando a chave tem o escopo `manage`.
+Usada nas APIs de cliente compatíveis com OpenAI, Anthropic e Gemini e em algumas rotas de gerenciamento quando a chave tem o escopo `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Validado por `isValidApiKey()` / `extractApiKey()` em `src/sse/services/auth.ts` e reexportado por meio de `src/shared/utils/apiAuth.ts`. O validador também aceita as variáveis de ambiente `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` como chaves persistentes de passthrough (problema #1350).
+Validada por `isValidApiKey()` / `extractApiKey()` em `src/sse/services/auth.ts` e reexportada por `src/shared/utils/apiAuth.ts`. O validador também aceita as variáveis de ambiente `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` como chaves de passagem persistentes (issue #1350).
 
-### 2. Sessão do dashboard (cookie auth_token)
+### 2. Sessão do painel (cookie auth_token)
 
-Para páginas do dashboard e operações administrativas.
+Para as páginas do painel e as operações administrativas.
 
 ```
-Cookie: auth_token=<JWT assinado com JWT_SECRET>
+Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
 Um cookie só é uma sessão quando o JWT é verificado **e** contém `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Todo
-consumidor do cookie (proteção de rota do dashboard (`isDashboardSessionAuthenticated()`), atualização do pipeline de autorização, handshake de WebSocket, servidor
-ao vivo, `/api/settings/require-login`, `/api/auth/status`) passa por esse helper.
-Existem outros JWTs assinados com `JWT_SECRET` — o passthrough da CLI do Cursor emite
-tokens `iss "omniroute" / aud "cursor-cli"` para detentores de chaves — e eles nunca são sessões
-(#13298).
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Todo consumidor do cookie (o guarda de rotas do painel (`isDashboardSessionAuthenticated()`), a renovação no pipeline de autorização, o handshake de WebSocket, o servidor ao vivo, `/api/settings/require-login`, `/api/auth/status`) passa por esse helper. Existem outros JWTs assinados com `JWT_SECRET`, como os tokens `iss "omniroute" / aud "cursor-cli"` emitidos pelo passthrough do Cursor CLI para quem possui chaves, mas eles nunca são sessões (#13298).
 
-Verificado por `isDashboardSessionAuthenticated()` em `src/shared/utils/apiAuth.ts`. O pipeline atualiza automaticamente o JWT quando restam menos de 7 dias de sua validade de 30 dias.
+Verificado por `isDashboardSessionAuthenticated()` em `src/shared/utils/apiAuth.ts`. O pipeline renova automaticamente o JWT quando restam menos de 7 dias dos seus 30 dias de validade.
 
-Uma sessão também pode terminar antes de completar seus 30 dias, pois todo emissor passa por `mintDashboardSessionToken` (um horário de emissão `iat` e um ID `jti`) e o verificador confere duas configurações: `sessionsValidAfter`, definida por uma alteração de senha para que todas as sessões emitidas antes dela deixem de ser verificadas (o navegador que alterou a senha recebe um novo cookie), e `revokedDashboardSessions`, à qual `POST /api/auth/logout` adiciona o `jti` da sessão encerrada. Sessões emitidas por uma versão anterior não contêm nenhuma dessas claims e permanecem válidas até a primeira alteração de senha. Se não for possível ler as configurações, a sessão não será considerada confiável.
+Uma sessão também pode terminar antes dos 30 dias: todo emissor passa por `mintDashboardSessionToken` (com a data de emissão `iat` e o identificador `jti`), e o verificador checa duas configurações: `sessionsValidAfter`, definida por uma troca de senha, para que toda sessão emitida antes deixe de ser válida (o navegador que trocou a senha recebe um cookie novo), e `revokedDashboardSessions`, à qual `POST /api/auth/logout` adiciona o `jti` da sessão encerrada. As sessões emitidas por uma versão anterior não têm nenhuma dessas claims e continuam válidas até a primeira troca de senha. Se as configurações não puderem ser lidas, a sessão não é considerada confiável.
 
-Algumas rotas de gerenciamento aceitam **qualquer um** dos modos: cookie OU `Bearer <key>` quando a chave de API tem o escopo `manage` (ou `admin`). Isso é o que possibilita o fluxo de trabalho "configurável por meio de chamadas de API" adicionado na v3.8.
+Algumas rotas de gerenciamento aceitam **qualquer um** dos dois modos: cookie OU `Bearer <key>` quando a chave de API tem o escopo `manage` (ou `admin`). É isso que possibilita o fluxo "configurável por chamadas de API", adicionado na v3.8.
 
-#### Proteção opcional de login via OIDC (#6973)
+#### Login OIDC opcional (#6973)
 
-O login de administrador do dashboard também é compatível com um fluxo OIDC (OpenID Connect) **opcional**
-em conjunto com o login por senha padrão — o login por senha nunca é removido, apenas
-complementado:
+O login administrativo do painel também oferece um fluxo OIDC (OpenID Connect) **opcional**, além do login padrão por senha. O login por senha nunca é removido, apenas complementado:
 
-- Desabilitado a menos que `settings.oidcEnabled === true` **e** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` estejam todos configurados (Configurações → Autenticação).
-  Caso contrário, `GET /api/auth/oidc/login` retorna `400`.
+- Desabilitado, a menos que `settings.oidcEnabled === true` **e** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` estejam todos configurados (Configurações → Auth).
+  `GET /api/auth/oidc/login` retorna `400` caso contrário.
 - `GET /api/auth/oidc/login` descobre o `authorization_endpoint` a partir de
-  `/.well-known/openid-configuration` do emissor (com fallback para
-  `<issuer>/authorize`), cria o URI de redirecionamento a partir da solicitação recebida
-  (considerando `x-forwarded-proto`) e redireciona para o IdP com um `state` aleatório
-  armazenado em um cookie `oidc_state` `httpOnly`.
-- `GET /api/auth/oidc/callback` valida o `state`, troca o código de autorização
-  e verifica a assinatura do token de ID por meio do JWKS do emissor
-  (`createRemoteJWKSet` do `jose`, armazenado em cache por URI do JWKS), com verificações de `issuer`/`audience`.
-  A lista de permissões `oidcAllowedSubjects` é obrigatória: ela corresponde à
-  claim `sub` ou à claim `email` do token — a claim de e-mail só é considerada
-  quando `email_verified === true`, portanto um e-mail não verificado no IdP nunca pode
-  passar pela proteção — e, sem nenhuma entrada, o callback recusa todos os logins
-  (`not_configured`).
-- Em caso de sucesso, ele emite **exatamente o mesmo** JWT `auth_token` de 30 dias que o login
-  por senha emite (`src/app/api/auth/login/route.ts`), portanto o restante do
-  pipeline de sessão do dashboard (atualização automática, flags do cookie) permanece inalterado —
-  o OIDC apenas substitui a forma como o cookie é emitido, não o que ele concede.
-- Toda configuração `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
-  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) está em `SECURITY_IMPACTING_SETTINGS_KEYS`
-  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
-  responde com `400 PASSWORD_REQUIRED`, a menos que o corpo contenha a senha de gerenciamento
-  como `currentPassword` (`401 PASSWORD_MISMATCH` quando ela está incorreta).
-  `oidcDisablePasswordLogin` recusa o _login_ por senha (`POST /api/auth/login`),
-  mas mantém o hash da senha armazenado, e a reautenticação ainda verifica
-  `currentPassword` em relação a ele.
-- `POST /api/settings/import-json` ignora essa reautenticação, portanto descarta todas as chaves em
-  `IMPORT_STRIPPED_SETTINGS_KEYS` (mesmo arquivo) antes de gravar: a senha e
-  `currentPassword`, todas as entradas de `SECURITY_IMPACTING_SETTINGS_KEYS` e o
-  estado da sessão do dashboard (`sessionsValidAfter`, `revokedDashboardSessions`).
-  Portanto, importar um backup mais antigo não pode reativar uma sessão que uma alteração
-  de senha ou um logout já encerrou.
+  `/.well-known/openid-configuration` do emissor (como alternativa, `<issuer>/authorize`),
+  monta a URI de redirecionamento a partir da requisição recebida (considerando
+  `x-forwarded-proto`) e redireciona para o IdP com um `state` aleatório armazenado em um cookie
+  `oidc_state` com `httpOnly`.
+- `GET /api/auth/oidc/callback` valida o `state`, troca o código de autorização e verifica a
+  assinatura do ID token pelo JWKS do emissor (`createRemoteJWKSet` do `jose`, em cache por URI
+  de JWKS), com checagens de `issuer`/`audience`. A lista de permissões `oidcAllowedSubjects` é
+  obrigatória: ela confere com a claim `sub` do token ou com a claim `email`. A claim de email só é
+  considerada quando `email_verified === true`, então um email não verificado no IdP nunca passa
+  pelo filtro. Sem entradas, o callback recusa todo login (`not_configured`).
+- Em caso de sucesso, ele emite **exatamente o mesmo** JWT `auth_token` de 30 dias que o login por
+  senha emite (`src/app/api/auth/login/route.ts`), então o restante do pipeline de sessão do painel
+  (renovação automática, flags do cookie) não muda. O OIDC substitui apenas a forma como o cookie é
+  obtido, não aquilo que ele concede.
+- Todas as configurações `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`,
+  `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`)
+  estão em `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`):
+  `PATCH /api/settings` responde `400 PASSWORD_REQUIRED`, a menos que o corpo traga a senha de
+  gerenciamento como `currentPassword` (`401 PASSWORD_MISMATCH` se estiver errada).
+  `oidcDisablePasswordLogin` recusa o _login_ por senha (`POST /api/auth/login`), mas mantém o hash
+  da senha armazenado, e a reautenticação continua verificando `currentPassword` contra ele.
+- `corsOrigins` e `bruteForceProtection` também estão em `SECURITY_IMPACTING_SETTINGS_KEYS`:
+  afrouxar qualquer um dos dois enfraquece as defesas de login, então exigem a mesma reautenticação
+  com `currentPassword` (a aba de Segurança pede) e a importação JSON os descarta.
+- Toda chave de política de segurança (as entradas de `SECURITY_IMPACTING_SETTINGS_KEYS`, toda chave
+  `oidc*` e o estado da sessão do painel) é **somente para operador** em `PATCH /api/settings`: uma
+  chave de API com escopo `manage` ou um token de acesso `oma_` recebe `403`, mesmo enviando o
+  `currentPassword` correto, e a recusa é auditada como `settings.update_failed` com
+  `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` em `src/lib/api/operatorCredential.ts`).
+  As configurações comuns (tema, preferências de exibição) continuam graváveis com uma chave `manage`
+  ou com um token de acesso `admin`. Além disso, qualquer alteração em `/api/settings` em si (e em
+  `/api/settings/require-login`) exige o escopo de token de acesso `admin`
+  (`ADMIN_MUTATION_EXACT_PATHS` em `src/server/authz/accessScopes.ts`, com correspondência exata do
+  caminho). `GET` continua `read`, e as demais subrotas `/api/settings/*` (proxies, padrões de combos,
+  aliases de modelos, compressão, limpezas…) mantêm o escopo `write` inferido pelo método.
+- `POST /api/settings/import-json` dispensa essa reautenticação, então remove, antes de gravar,
+  cada chave de `IMPORT_STRIPPED_SETTINGS_KEYS` (no mesmo arquivo): a senha e `currentPassword`,
+  cada entrada de `SECURITY_IMPACTING_SETTINGS_KEYS` e o estado da sessão do painel
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Importar um backup antigo, portanto, não
+  consegue reviver uma sessão que uma troca de senha ou um logout já tinham encerrado.
 
-## Classes de rotas
+## Classes de rota
 
-`src/server/authz/types.ts` define três classes; qualquer rota que não possa ser classificada de forma determinística recorre a `MANAGEMENT`.
+`src/server/authz/types.ts` define três classes; qualquer rota que não possa ser classificada de forma determinística cai para `MANAGEMENT`.
 
-| Classe       | Descrição                                                                                                                                                                 | Autenticação necessária                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `PUBLIC`     | Rotas explicitamente seguras — login, logout, status, init, integridade, inicialização de onboarding.                                                                     | Nenhuma                                                                         |
-| `CLIENT_API` | Endpoints de disponibilização de modelos — `/api/v1/*`, `/api/v1beta/*`, além dos aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Chave Bearer quando a feature flag efetiva `REQUIRE_API_KEY` estiver habilitada |
-| `MANAGEMENT` | Páginas do painel, configurações, provedores, chaves e endpoints administrativos e de diagnóstico.                                                                        | Sessão do painel OU Bearer com escopo `manage`                                  |
+| Classe       | Descrição                                                                                                                                                           | Autenticação necessária                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `PUBLIC`     | Rotas explicitamente seguras: login, logout, status, inicialização, health check e bootstrap do onboarding.                                                         | Nenhuma                                                                      |
+| `CLIENT_API` | Endpoints de atendimento de modelos: `/api/v1/*`, `/api/v1beta/*`, além dos aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Chave Bearer quando a feature flag `REQUIRE_API_KEY` efetiva está habilitada |
+| `MANAGEMENT` | Páginas do painel, configurações, provedores, chaves, endpoints administrativos e de diagnóstico.                                                                   | Sessão do painel OU Bearer com escopo `manage`                               |
 
-Algumas ações de `MANAGEMENT` são **exclusivas do operador**: uma chave `manage` não é suficiente. A exportação de credenciais
-armazenadas (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), a emissão de um token de sincronização (`POST /api/sync/tokens`) e a criação de um
-token de acesso `admin` para a CLI (`POST /api/cli/tokens`) exigem uma sessão do painel, o sujeito da CLI local
-ou que o login esteja desabilitado; chaves de API de qualquer escopo e tokens de acesso `oma_` recebem `403`. A verificação
-fica em `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
-
-A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
-credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), restoring a backup over the live data
-(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
-`POST /api/settings/import-json`), issuing a sync token (`POST /api/sync/tokens`) and minting an
-`admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session, the local CLI
-subject, or login disabled; API keys of any scope and `oma_` access tokens get `403`. The check
-lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`).
+Algumas ações de `MANAGEMENT` são **somente para operador**: uma chave `manage` não basta. Exportar credenciais armazenadas (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), restaurar um backup sobre os dados ativos (`POST /api/db-backups/import`, incluindo `dryRun=true`, `POST /api/db-backups` com restauração por id, `POST /api/settings/import-json`) e apagar pontos de restauração (a limpeza por `DELETE /api/db-backups` e `PATCH /api/db-backups`, porque a retenção que ele persiste controla a remoção automática após cada backup) exigem uma sessão do painel, a identidade da CLI local ou o login desabilitado. Emitir um token de sincronização (`POST /api/sync/tokens`) e criar um token de acesso de CLI com escopo `admin` (`POST /api/cli/tokens`) exigem, em qualquer modo de login, uma sessão do painel ou a identidade da CLI local. Chaves de API de qualquer escopo e tokens de acesso `oma_` não são credenciais de operador: recebem `403` sempre que uma delas for exigida. A verificação fica em `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Alterar as configurações de login também é restrito ao operador: `POST /api/settings/require-login` (definir a senha de gerenciamento / ativar ou desativar `requireLogin`) aceita apenas essas credenciais assim que existe uma senha. A janela de bootstrap da primeira execução (sem senha ainda) continua igual, e uma sessão do painel precisa enviar `currentPassword` para substituir a senha (`403` se estiver ausente ou errada, auditado como `settings.update_failed`). A CLI local e uma instância com login desabilitado mantêm o caminho de recuperação e podem definir uma senha sem essa etapa, pois ambos estão vinculados ao host que possui o diretório de dados.
 
 ## Pipeline
 
@@ -266,15 +252,15 @@ resolve os escopos a partir das informações de autenticação do MCP, metadado
 (`src/lib/accessTokens/scopes.ts`). Essa classificação se aplica apenas à credencial do token de acesso.
 Veja [Autenticação de Gerenciamento](../guides/MANAGEMENT-AUTH.md).
 
-## Alternância da exigência de autenticação
+## Alternância de autenticação obrigatória
 
-`isAuthRequired()` em `src/shared/utils/apiAuth.ts` decide se **alguma** autenticação será exigida para uma requisição:
+`isAuthRequired()` em `src/shared/utils/apiAuth.ts` decide se **qualquer** autenticação é exigida em uma requisição:
 
-- `settings.requireLogin === false` → a autenticação é desabilitada globalmente.
-- Nenhuma senha configurada **e** nenhuma variável de ambiente `INITIAL_PASSWORD` → o modo de inicialização permite o assistente de integração e as requisições de loopback, mas as requisições de rede expostas ainda exigem credenciais.
-- Qualquer erro de banco de dados → falha de forma fechada (seguro por padrão).
+- `settings.requireLogin === false` → a autenticação fica desativada globalmente, exceto para o nível sempre protegido (veja [Níveis do Route Guard](../security/ROUTE_GUARD_TIERS.md)) e para as chamadas que entregam uma credencial que ele aceita. Essas exigem a mesma credencial de quando o login está ativo: emitir tokens de sincronização, criar tokens de acesso de CLI em qualquer escopo, criar uma chave de API com escopo `manage`/`admin`, conceder esse escopo a uma chave ou regenerar/revelar uma chave assim (`requireCredentialForManagementScopedKey()` em `src/lib/api/requireManagementAuth.ts`). Chaves apenas de inferência continuam abertas.
+- Nenhuma senha configurada **e** nenhuma variável de ambiente `INITIAL_PASSWORD` → o modo bootstrap permite o assistente de onboarding e as requisições de loopback, mas requisições de rede expostas continuam exigindo credenciais.
+- Qualquer erro de banco de dados → falha fechada (seguro por padrão).
 
-A exigência de chave de API do cliente usa `isRequireApiKeyEnabled()` em `src/shared/utils/featureFlags.ts`, em vez de uma leitura direta de `process.env.REQUIRE_API_KEY`. Isso é importante para instâncias implantadas: alternar `REQUIRE_API_KEY` em Dashboard → Feature Flags armazena uma substituição no banco de dados e afeta imediatamente `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` e outras verificações de autenticação da API do cliente que compartilham esse helper. Se o armazenamento de feature flags não puder ser lido, a autenticação da API do cliente falha de forma fechada e exige uma chave.
+A aplicação das chaves de API de cliente usa `isRequireApiKeyEnabled()` em `src/shared/utils/featureFlags.ts`, e não uma leitura direta de `process.env.REQUIRE_API_KEY`. Isso importa para instâncias implantadas: alterar `REQUIRE_API_KEY` em Dashboard → Feature Flags grava um override no banco e afeta imediatamente `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` e as demais verificações de autenticação da API de cliente que compartilham esse helper. Se o armazenamento das feature flags não puder ser lido, a autenticação da API de cliente falha de forma fechada e exige uma chave.
 
 ## Alteração incompatível — v3.8.0
 

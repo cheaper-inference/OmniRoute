@@ -70,6 +70,7 @@ export const PROVIDER_ENDPOINTS = {
   kenari: "https://kenari.id/v1/chat/completions",
   chenzk: "https://chenzk.top/v1/chat/completions",
   tokenmarket: "https://api.tokensmarket.ai/v1/chat/completions",
+  demonroute: "https://api.demonroute.com/v1/chat/completions",
   daoxe: "https://api.daoxe.com/v1/chat/completions",
   openai: "https://api.openai.com/v1/chat/completions",
   anthropic: "https://api.anthropic.com/v1/messages",

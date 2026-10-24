@@ -1,1 +1,0 @@
-- **fix(dashboard):** the console log stops dragging the reader back to the newest line while they read older entries; it follows the tail only while scrolled to the bottom ([#16891](https://github.com/diegosouzapw/OmniRoute/pull/16891)) — thanks @ntdatt812

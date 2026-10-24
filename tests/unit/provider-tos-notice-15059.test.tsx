@@ -102,7 +102,7 @@ describe("#15059 provider connection notice", () => {
     fs.rmSync(dataDir, { recursive: true, force: true });
   });
 
-  it.each(["agy", "antigravity", "kiro", "amazon-q", "opencode"])(
+  it.each(["agy", "antigravity", "kiro", "amazon-q"])(
     "shows the curated avoid policy for %s",
     async (providerId) => {
       await render(<Notice providerId={providerId} />);

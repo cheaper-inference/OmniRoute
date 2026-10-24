@@ -74,28 +74,29 @@ naming the endpoint and what was lost — so a degraded picker is never a myster
 
 ## Options
 
-| Key                              | Default                                        | Notes                                                                                                  |
-| -------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `providerId`                     | `"omniroute"`                                  | Provider id, integration id, and the prefix models appear under                                        |
-| `baseURL`                        | required                                       | Gateway root, `http(s)` only; the `/v1` suffix is added where needed                                   |
-| `apiKey`                         | connected credential, then `OMNIROUTE_API_KEY` | Chat key for `/v1/*`                                                                                   |
-| `managementReadToken`            | falls back to `apiKey`                         | Key for `/api/*` — usually **not** the same one                                                        |
-| `displayName`                    | `"OmniRoute"`                                  | Provider name in the picker                                                                            |
-| `timeoutMs`                      | `10000`                                        | Per-endpoint fetch timeout (auto-combos use 5s)                                                        |
-| `modelCacheTtlMs`                | `300000`                                       | Catalog cache TTL; a disk snapshot warms cold starts                                                   |
-| `timeouts`                       | falls back to `timeoutMs`                      | Per-endpoint budgets in ms: `models`, `combos`, `autoCombos`, `enrichment`                             |
-| `enrichment`                     | `true`                                         | Fetch names, pricing and free-tier budgets                                                             |
-| `providerTag`                    | `true`                                         | Prefix a display name with the upstream provider it routes to                                          |
-| `usableOnly`                     | `false`                                        | Keep only providers the gateway reports as provisioned                                                 |
-| `showcasePerOwner`               | `10`                                           | Default-view entries kept per provider                                                                 |
-| `freshPerOwner`                  | `10`                                           | Default-view fresh entries kept per provider                                                           |
-| `freshWindowDays`                | `90`                                           | Freshness window in days for the fresh branch                                                          |
-| `usageMemory`                    | `true`                                         | Restore statically dropped entries named by 30-day usage analytics (needs a management token)          |
-| `visibleModels` / `hiddenModels` | `[]`                                           | Exact-or-suffix allowlists; deny wins; `*` publishes the full catalog (other filters still apply)      |
-| `geminiSanitization`             | `true`                                         | Strip the JSON-Schema keywords Gemini rejects from tool schemas (`$ref` tools are forwarded untouched) |
-| `apiFormat.allowAnthropic`       | `false`                                        | Route allowlisted ids through the Anthropic API block                                                  |
-| `apiFormat.anthropicModels`      | `[]`                                           | Full model ids routed to Anthropic                                                                     |
-| `logLevel` / `startupDebug`      | `warn` / `false`                               | Logger verbosity                                                                                       |
+| Key                              | Default                                        | Notes                                                                                                       |
+| -------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                  | Provider id, integration id, and the prefix models appear under                                             |
+| `baseURL`                        | required                                       | Gateway root, `http(s)` only; the `/v1` suffix is added where needed                                        |
+| `apiKey`                         | connected credential, then `OMNIROUTE_API_KEY` | Chat key for `/v1/*`                                                                                        |
+| `managementReadToken`            | falls back to `apiKey`                         | Key for `/api/*` — usually **not** the same one                                                             |
+| `displayName`                    | `"OmniRoute"`                                  | Provider name in the picker                                                                                 |
+| `timeoutMs`                      | `10000`                                        | Per-endpoint fetch timeout (auto-combos use 5s)                                                             |
+| `modelCacheTtlMs`                | `300000`                                       | Catalog cache TTL; a disk snapshot warms cold starts                                                        |
+| `timeouts`                       | falls back to `timeoutMs`                      | Per-endpoint budgets in ms: `models`, `combos`, `autoCombos`, `enrichment`                                  |
+| `enrichment`                     | `true`                                         | Fetch names, pricing and free-tier budgets                                                                  |
+| `providerTag`                    | `true`                                         | Prefix a display name with the upstream provider it routes to                                               |
+| `usableOnly`                     | `false`                                        | Keep only providers the gateway reports as provisioned                                                      |
+| `combosSource`                   | `"api"`                                        | `"models"` skips `/api/combos` and publishes the `/v1/models` combo rows; member-level filters keep `"api"` |
+| `showcasePerOwner`               | `10`                                           | Default-view entries kept per provider                                                                      |
+| `freshPerOwner`                  | `10`                                           | Default-view fresh entries kept per provider                                                                |
+| `freshWindowDays`                | `90`                                           | Freshness window in days for the fresh branch                                                               |
+| `usageMemory`                    | `true`                                         | Restore statically dropped entries named by 30-day usage analytics (needs a management token)               |
+| `visibleModels` / `hiddenModels` | `[]`                                           | Exact-or-suffix allowlists; deny wins; `*` publishes the full catalog (other filters still apply)           |
+| `geminiSanitization`             | `true`                                         | Strip the JSON-Schema keywords Gemini rejects from tool schemas (`$ref` tools are forwarded untouched)      |
+| `apiFormat.allowAnthropic`       | `false`                                        | Route allowlisted ids through the Anthropic API block                                                       |
+| `apiFormat.anthropicModels`      | `[]`                                           | Full model ids routed to Anthropic                                                                          |
+| `logLevel` / `startupDebug`      | `warn` / `false`                               | Logger verbosity                                                                                            |
 
 Usage memory is on by default. Without a management token it stays inert
 (a startup notice is logged) and nothing is restored.

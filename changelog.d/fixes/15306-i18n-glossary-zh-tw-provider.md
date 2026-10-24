@@ -1,1 +1,0 @@
-- **i18n:** use the canonical zh-TW glossary term 提供者 (not 供應商) on the four ToS-avoid auto-combo strings so `check-glossary-consistency` passes (#15306).

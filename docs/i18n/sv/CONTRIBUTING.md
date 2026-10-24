@@ -12,11 +12,11 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Förutsättningar
 
-- **Node.js** `>=22.22.3 <23` eller `>=24.0.0 <27` (rekommenderat: 24 LTS)
+- **Node.js** `>=22.22.2 <23` eller `>=24.0.0 <27` (rekommenderat: 24 LTS)
 - **npm** 10+
 
-> **Användare av npm v11+ (Node 24+):** Efter `npm install`, verifiera att de inbyggda modulerna installerades:
-> `node -e "require('better-sqlite3')"`. Om det misslyckas med `MODULE_NOT_FOUND`,
+> **För användare av npm v11+ (Node 24+):** Efter `npm install`, verifiera att de systemspecifika modulerna har installerats:
+> `node -e "require('better-sqlite3')"`. Om kommandot misslyckas med `MODULE_NOT_FOUND`,
 > kör `npm approve-scripts better-sqlite3 && npm install`. Se
 > [Felsökning](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -43,24 +43,24 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Viktiga variabler för utveckling:
 
-| Variabel               | Standardvärde för utveckling | Beskrivning                    |
-| ---------------------- | ---------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                      | Serverport                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Bas-URL för klientdelen        |
-| `JWT_SECRET`           | (generera ovan)              | Hemlighet för JWT-signering    |
-| `INITIAL_PASSWORD`     | `CHANGEME`                   | Lösenord för första inloggning |
-| `APP_LOG_LEVEL`        | `info`                       | Detaljnivå för loggning        |
+| Variabel               | Standardvärde för utveckling | Beskrivning                      |
+| ---------------------- | ---------------------------- | -------------------------------- |
+| `PORT`                 | `20128`                      | Serverport                       |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Bas-URL för frontend             |
+| `JWT_SECRET`           | (generera ovan)              | Hemlighet för JWT-signering      |
+| `INITIAL_PASSWORD`     | `CHANGEME`                   | Lösenord vid första inloggningen |
+| `APP_LOG_LEVEL`        | `info`                       | Detaljnivå för loggning          |
 
-### Inställningar för kontrollpanelen
+### Inställningar i kontrollpanelen
 
-Kontrollpanelen innehåller gränssnittsväxlar för funktioner som även kan konfigureras via miljövariabler:
+Kontrollpanelen innehåller reglage för funktioner som även kan konfigureras via miljövariabler:
 
-| Inställningens plats      | Växel                 | Beskrivning                                               |
-| ------------------------- | --------------------- | --------------------------------------------------------- |
-| Inställningar → Avancerat | Felsökningsläge       | Aktivera felsökningsloggar för förfrågningar (gränssnitt) |
-| Inställningar → Allmänt   | Sidofältets synlighet | Visa/dölj avsnitt i sidofältet                            |
+| Inställningens plats      | Reglage               | Beskrivning                               |
+| ------------------------- | --------------------- | ----------------------------------------- |
+| Inställningar → Avancerat | Felsökningsläge       | Aktivera felsökningsloggar för anrop (UI) |
+| Inställningar → Allmänt   | Sidofältets synlighet | Visa/dölj avsnitt i sidofältet            |
 
-Dessa inställningar lagras i databasen och kvarstår mellan omstarter. När de har angetts åsidosätter de miljövariablernas standardvärden.
+Dessa inställningar lagras i databasen och finns kvar efter omstarter. När de har angetts åsidosätter de miljövariablernas standardvärden.
 
 ### Köra lokalt
 
@@ -72,48 +72,48 @@ npm run dev
 npm run build    # next build → .build/next/ och därefter assembleStandalone → dist/
 npm run start
 
-# Snabb kompilering enbart av serverdelen/API:t för bidragsgivarändringar
+# Snabb kompilering enbart av backend/API för bidragsgivares ändringar
 npm run build:contributor
 
 # Versionsbygge (ren ombyggnad + HEAD-kontrollmarkör — krävs för driftsättning)
-npm run build:release   # rm -rf .build dist && bygge + skriver dist/BUILD_SHA
+npm run build:release   # rm -rf .build dist && bygger + skriver dist/BUILD_SHA
 
 # Vanlig portkonfiguration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bidragsgivarbygget utför endast kompileringsvalidering: det sammanställer inte den fristående
-distributionen och bygger inte valfria inbyggda paketeringsresurser. Använd det vanliga produktionsbygget när
-du behöver validera det leveransbara paketet.
+Bygget för bidragsgivare utför endast kompileringsvalidering: det skapar inte den fristående
+distributionen och bygger inte heller valfria systemspecifika paketeringsresurser. Använd det vanliga produktionsbygget när
+du behöver validera det leveransklara paketet.
 
-### Byggutdatans struktur
+### Katalogstruktur för byggutdata
 
 | Katalog   | Innehåll                                                                              | Versionshanterad |
 | --------- | ------------------------------------------------------------------------------------- | ---------------- |
 | `src/`    | Applikationens källkod (TypeScript / TSX)                                             | Ja               |
 | `.build/` | Mellanresultat — utdata från `next build` (ignoreras av Git, `distDir = .build/next`) | Nej              |
-| `dist/`   | Leveransbart paket — sammanställt av `assembleStandalone` (ignoreras av Git)          | Nej              |
+| `dist/`   | Leveransklart paket — sammanställt av `assembleStandalone` (ignoreras av Git)         | Nej              |
 
-Byggprocessen körs i ett enda pass:
+Byggprocessen utförs i ett enda steg:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-utdata)
-  └─ assembleStandalone()                 (kopierar fristående utdata + statiska filer + publika filer + inbyggda resurser)
-       └─ utdata: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (utdata från Next.js)
+  └─ assembleStandalone()                 (kopierar fristående paket + statiska filer + offentliga filer + systemspecifika resurser)
+       └─ utdata: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` rensar dessutom båda katalogerna först och skriver
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en kontrollmarkör för driftsättningens integritet.
 
-`npm run build:contributor` använder byggprofilen enbart för serverdelen. Den ersätter tillfälligt
-kontrollpanelens gränssnittsfiler med stubbar under bygget, behåller API-rutthanterarna och återställer originalfilerna
-efter bygget. Använd `npm run build` för ändringar som påverkar kontrollpanelens gränssnitt eller för fullständig
-versionsvalidering. Bidragsgivarprofilen ersätter inte versionsbygget.
+`npm run build:contributor` använder byggprofilen enbart för backend. Den ersätter tillfälligt
+kontrollpanelens UI-filer med stubbar under bygget, behåller API-rutthanterarna och återställer originalfilerna
+efter bygget. Använd `npm run build` för ändringar som påverkar kontrollpanelens UI eller för fullständig
+versionsvalidering; bidragsgivarprofilen ersätter inte versionsbygget.
 
-> **Anmärkning om VPS-driftsättning:** fjärrkatalogen för avbildningen `/usr/lib/node_modules/omniroute/app/`
-> är oförändrad. Driftsättningsfärdigheterna synkroniserar innehållet i `dist/` till den med rsync.
-> Endast sökvägen till byggutdata i lagringsplatsen har flyttats (`app/` → `dist/`).
+> **Anmärkning om driftsättning på VPS:** fjärrbildens katalog `/usr/lib/node_modules/omniroute/app/`
+> är oförändrad. Driftsättningsverktygen använder rsync för att synkronisera innehållet i `dist/` till den.
+> Endast sökvägen för byggutdata i kodförrådet har ändrats (`app/` → `dist/`).
 
 Standard-URL:er:
 
@@ -304,21 +304,21 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── db/                 # SQLite-domänmoduler + 130 migreringar
 │   ├── memory/             # Beständigt konversationsminne
 │   ├── oauth/              # OAuth-leverantörer, tjänster och verktyg
-│   ├── skills/             # Utökningsbart ramverk för färdigheter
+│   ├── skills/             # Utbyggbart färdighetsramverk
 │   ├── usage/              # Användningsspårning och kostnadsberäkning
-│   └── localDb.ts          # Endast återexportlager — lägg aldrig till logik här
-├── middleware/              # Middleware för förfrågningar (promptInjectionGuard)
+│   └── localDb.ts          # Endast lager för återexport — lägg aldrig till logik här
+├── middleware/              # Middleware för begäranden (promptInjectionGuard)
 ├── mitm/                   # MITM-proxy (certifikat, DNS, målroutning)
 ├── shared/
 │   ├── components/         # React-komponenter (.tsx)
-│   ├── constants/          # Leverantörsdefinitioner (329), MCP-omfattningar, 19 routningsstrategier
+│   ├── constants/          # Leverantörsdefinitioner (329), MCP-omfattningar, 20 routningsstrategier
 │   ├── utils/              # Kretsbrytare, sanerare, autentiseringshjälpare
 │   └── validation/         # Zod v4-scheman
 └── sse/                    # SSE-proxypipeline
 
 open-sse/                   # @omniroute/open-sse-arbetsyta
-├── executors/              # 150 exekveringsmoduler (exekveringsklasser + hjälpare per leverantör)
-├── handlers/               # 11 förfrågningshanterare (chatt, svar, inbäddningar, bilder osv.)
+├── executors/              # 150 exekveringsmoduler (exekveringsklasser + leverantörsspecifika hjälpare)
+├── handlers/               # 11 begärandehanterare (chatt, svar, inbäddningar, bilder osv.)
 ├── mcp-server/             # MCP-server (110 unika verktyg, 3 transporter, 33 omfattningar)
 ├── services/               # 178 tjänster på toppnivå (combo, autoCombo, rateLimitManager osv.)
 ├── translator/             # Formatöversättare (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
@@ -352,7 +352,7 @@ docs/
 ├── releases/                # Versionsinformation
 ├── routing/                 # Automatisk kombinationsmotor, återuppspelning av resonemang
 ├── screenshots/             # Skärmbilder av kontrollpanelen
-├── security/                # Skyddsräcken, regelefterlevnad, smygläge, tokens
+├── security/                # Skyddsräcken, regelefterlevnad, smygläge, token
 └── specs/                   # Designspecifikationer
 ```
 
@@ -413,9 +413,12 @@ Skriv enhetstester i `tests/unit/` som minst omfattar:
 
 ---
 
-## Releasing
+## Lansering
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Lanseringar hanteras via arbetsflödet `/generate-release`. När en ny GitHub Release skapas publiceras paketet **automatiskt till npm** via GitHub Actions.
+
+För distributioner till VPS använder du `npm run build:release` (inte `npm run build`) – det utför en ren ombyggnad, sammanställer paketet i `dist/` och skriver sentinel-filen `dist/BUILD_SHA`.
+Använd sedan färdigheterna `/deploy-vps-*-cc`, som synkroniserar `dist/` med fjärrkatalogen `app/` via rsync.
 
 ---
 

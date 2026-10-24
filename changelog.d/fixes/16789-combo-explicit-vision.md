@@ -1,1 +1,0 @@
-- Preserve explicit vision capabilities for named combo members without registry or synced metadata, keeping the advertised vision and derived modalities available for confirmed vision combos while leaving unknown members conservative.

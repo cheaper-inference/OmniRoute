@@ -1,1 +1,0 @@
-- Keep Anthropic 404 errors naming the requested model scoped to that model, preserving sibling models on the same connection.

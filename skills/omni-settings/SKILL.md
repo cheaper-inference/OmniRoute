@@ -65,6 +65,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`GET /api/settings/database`](references/endpoints.md#get-apisettingsdatabase)
 - [`PUT /api/settings/database`](references/endpoints.md#put-apisettingsdatabase)
 - [`PATCH /api/settings/database`](references/endpoints.md#patch-apisettingsdatabase)
+- [`POST /api/settings/database/integrity-check`](references/endpoints.md#post-apisettingsdatabaseintegrity-check)
 - [`POST /api/settings/database/refresh-stats`](references/endpoints.md#post-apisettingsdatabaserefresh-stats)
 - [`GET /api/settings/database/vacuum`](references/endpoints.md#get-apisettingsdatabasevacuum)
 - [`POST /api/settings/database/vacuum`](references/endpoints.md#post-apisettingsdatabasevacuum)

@@ -29,23 +29,24 @@ Kung makatuklas ka ng kahinaan sa seguridad ng OmniRoute, mangyaring iulat ito n
 | 3.7.x   | ✅ Seguridad                                            |
 | < 3.7.0 | ❌ Hindi sinusuportahan                                 |
 
-## Panahon ng suporta sa LTS (v3.9.x)
+## Panahon ng suporta ng LTS (v3.9.x)
 
-Pagkatapos ng 3.8.59, ang susunod na bersyon ay **3.9.0**, na magbubukas sa long-term support line sa
-`stable/v3` branch (tingnan ang [`ROADMAP.md`](ROADMAP.md) → "Phase 3 — v3.9.0 LTS").
+Pagkatapos ng 3.8.59, ang susunod na bersyon ay **3.9.0**, na nagbubukas sa linya ng pangmatagalang suporta sa
+branch na `stable/v3` (tingnan ang [`ROADMAP.md`](ROADMAP.md) → "Yugto 3 — v3.9.0 LTS").
 
-- **Mga natatanggap ng `stable/v3`:** mga pag-aayos ng bug, mga security patch, at mga update sa provider. Ang mga bagong
-  feature ay mapupunta sa v4 channel; inuuna ng LTS line ang katatagan. Ang `npm install omniroute`
-  (ang `latest` dist-tag) ay mananatili sa v3 sa buong v4 cycle.
-- **Tagal ng panahon:** `<T-GAP-3: hinihintay ang desisyon ng may-ari — tingnan ang ROADMAP.md>`. Ang tagal ng
-  panahong kasunod ng v4.0 GA (kapag lumipat ang `latest` sa v4) ay **hindi pa napagpapasyahan**; ia-update ang
-  seksyong ito kapag inanunsyo ito ng maintainer. Hanggang sa panahong iyon, huwag magpalagay ng petsa ng pagtatapos.
-- **Pag-uulat ng kahinaan sa LTS line:** gamitin ang parehong channel tulad ng sa iba pang bersyon —
+- **Ano ang natatanggap ng `stable/v3`:** mga pag-aayos ng bug, mga patch sa seguridad, at mga update sa provider. Ang mga bagong
+  feature ay mapupunta sa channel na v4; inuuna ng linya ng LTS ang katatagan. Ang `npm install omniroute`
+  (ang dist-tag na `latest`) ay mananatili sa v3 sa buong cycle ng v4.
+- **Tagal ng panahon:** makakatanggap ang `stable/v3` ng **mga pag-aayos sa seguridad at kritikal na regression sa loob ng
+  12 buwan pagkatapos ilabas ang 3.9.0, o hanggang 90 araw matapos ilathala ang v4.0.0 bilang `latest` —
+  alinman ang mas huli**. Itatala ang magiging petsa ng pagtatapos sa mga tala sa paglabas ng 3.9.0 at sa
+  [`ROADMAP.md`](ROADMAP.md) kapag naganap ang paglabas.
+- **Pag-uulat ng kahinaan sa linya ng LTS:** gamitin ang parehong channel gaya ng para sa anumang ibang bersyon —
   isang pribadong [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  at hindi kailanman pampublikong issue. Sabihin kung aling bersyon ang sinubukan mo (halimbawa, `3.9.2`); ilalagay ang mga pag-aayos sa
-  `stable/v3` at ipo-forward-port ang mga ito sa v4.
-- **Security baseline sa LTS cut:** nakatala ang nasukat na kalagayan ng scanner, route-guard, at
-  mga patunay ng pampublikong credential sa
+  at hindi kailanman isang pampublikong issue. Sabihin kung aling bersyon ang sinubukan mo (halimbawa, `3.9.2`); ang mga pag-aayos ay ilalapat sa
+  `stable/v3` at ipa-forward-port sa v4.
+- **Baseline ng seguridad sa paglabas ng LTS:** itinatala ang nasukat na estado ng scanner, route-guard, at
+  mga patunay ng pampublikong kredensyal sa
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

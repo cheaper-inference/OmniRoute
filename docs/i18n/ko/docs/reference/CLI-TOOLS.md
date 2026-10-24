@@ -45,64 +45,62 @@ ACP Agents(역방향 실행 흐름):
 
 ## `setup-*`을 사용한 자동 구성
 
-각 도구의 구성을 직접 작성할 필요가 없습니다. OmniRoute는 지원되는 각 CLI별로 `setup-*`
+각 도구의 구성을 직접 작성할 필요가 없습니다. OmniRoute는 지원되는 각 CLI에 대해 `setup-*`
 명령을 제공합니다. 이 명령은 실행 중인 OmniRoute(로컬 또는 원격)에서 **실시간** 모델 카탈로그를
-읽고 사용자의 머신에 해당 도구 자체의 구성을 작성합니다:
+읽고 해당 도구의 자체 구성을 사용자의 머신에 작성합니다.
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
 각 명령은 `--remote <url> --api-key <key>`(로컬 도구가 원격 OmniRoute를 사용하도록 구성),
 `--dry-run`(작성하지 않고 미리 보기), `--port`를 지원합니다. 모델 자동 검색을 지원하지 않는
-도구(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)는 `--model <id>`를 사용하며,
-비대화형 실행에는 `--yes`도 사용합니다. `setup-5dive`는 `$HOME` 아래에 작성하지 않는
-유일한 구성 절차입니다. 이 명령은 플릿 호스트에 root 소유의 인증 프로필을 작성하여
-5dive 에이전트 플릿을 구성하므로 `sudo`를 통해 자체적으로 다시 실행되며, 자체 원격 모드는
-제공하지 않습니다. 올바른 환경 변수를 주입하고 구성을 전혀 작성하지 않은 채 CLI를
-실행하려면 범용 `omniroute run <target>` 실행기를 사용하세요(claude, codex, aider, goose,
-opencode, qwen, gemini — 대상과 별칭은 `bin/cli/cli-manifest.mjs`에서 가져옴). 레거시
-도구별 실행기인 `omniroute launch`(Claude Code)와 `omniroute launch-codex`
-(Codex)도 계속 사용할 수 있습니다. Gemini CLI는 실행 전용입니다. 즉, `omniroute run`
-대상이지만 `setup-*`/`configure` 구성 절차는 없습니다.
+도구(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)는 `--model <id>`를 사용하며, 비대화형
+실행에는 `--yes`도 사용합니다. `setup-5dive`는 `$HOME` 아래에 작성하지 않는 유일한
+구성 방식입니다. 이 명령은 플릿 호스트에 root 소유의 인증 프로필을 작성하여 5dive 에이전트
+플릿을 구성하므로 `sudo`를 통해 자신을 다시 실행하며, 자체적인 원격 모드는 없습니다. 올바른
+환경 변수를 주입한 상태로 구성을 전혀 작성하지 않고 CLI를 실행하려면 범용
+`omniroute run <target>` 실행기를 사용하세요(claude, codex, aider, goose, opencode, qwen,
+gemini — 대상과 별칭은 `bin/cli/cli-manifest.mjs`에서 가져옴). 기존의 도구별 실행기인
+`omniroute launch`(Claude Code)와 `omniroute launch-codex`(Codex)도 계속 사용할 수
+있습니다. Gemini CLI는 실행 전용입니다. 즉, `omniroute run` 대상이지만
+`setup-*`/`configure` 구성 방식은 없습니다.
 
-> **전체 참조:** 각 명령이 작성하는 내용, 모든 플래그, 로컬과 원격의 차이, 그리고 어떤 도구에
-> `/v1` 접미사가 필요한지를 보여주는 전체 표는
-> **[CLI 통합](../guides/CLI-INTEGRATIONS.md)**에서 확인할 수 있습니다.
+> **전체 참고 자료:** 각 명령이 작성하는 항목, 모든 플래그, 로컬과 원격의 차이, 그리고
+> 어떤 도구에 `/v1` 접미사가 필요한지를 정리한 마스터 표는
+> **[CLI 통합](../guides/CLI-INTEGRATIONS.md)**에 있습니다.
 
 ### 컨테이너 내부에서 실행하기
 
 OmniRoute 컨테이너 내부에서 실행한 `setup-*` 명령은 컨테이너 자체의 홈 디렉터리에
-작성합니다. 이 위치는 호스트 CLI에서 읽을 수 없으며 컨테이너와 함께 사라집니다.
-OmniRoute는 이를 감지하고 파일을 작성하는 대신 안내와 함께 종료 코드 `2`로
-종료합니다. 지원되는 해결 방법은 두 가지입니다. 호스트에 CLI를 설치하고
-`omniroute connect`를 사용하여 컨테이너에 연결하거나, 구성 디렉터리를 바인드
-마운트하고 `CLI_CONFIG_HOME`을 설정하세요(compose `host` 프로필). 모든 `setup-*`
-명령과 `omniroute configure` 및 `omniroute config set`은 실제로 컨테이너 자체의
-CLI를 구성하려는 경우 사용할 수 있도록 `--allow-container-write`를 지원합니다.
-서버에서는 `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`로 동일한 작업을 수행할 수
-있습니다. 자세한 내용은
-[Docker 가이드 → 호스트 CLI 도구 구성](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)을 참조하세요.
+작성합니다. 호스트의 CLI는 이를 읽지 않으며, 해당 내용은 컨테이너와 함께 사라집니다.
+OmniRoute는 이를 감지하고 작성하는 대신 안내와 함께 종료 코드 `2`로 종료합니다. 지원되는
+해결 방법은 두 가지입니다. 호스트에 CLI를 설치하고 `omniroute connect`로 컨테이너에
+연결하거나, 구성 디렉터리를 바인드 마운트하고 `CLI_CONFIG_HOME`(compose의 `host`
+프로필)을 설정하세요. 모든 `setup-*` 명령과 `omniroute configure` 및
+`omniroute config set`은 실제로 컨테이너 자체의 CLI를 구성하려는 경우 사용할 수 있도록
+`--allow-container-write`를 지원합니다. 서버에서는
+`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`가 동일한 기능을 수행합니다. 자세한
+내용은 [Docker 가이드 → 호스트 CLI 도구 구성](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)을
+참조하세요.
 
-대시보드의 **적용 엔드포인트**(`POST /api/cli-tools/apply`)에도 동일한 보호 장치가
-적용됩니다. 컨테이너에서 대상이 호스트로부터 바인드 마운트되지 않은 쓰기 요청을
-보내면 **`422`**와 함께 `containerEphemeralTarget: true`, 안전한 오류 텍스트,
-그리고 호스트 구성 절차가 있는 도구(claude, codex, opencode, cline, kilo,
-continue)의 경우 호스트에서 대신 실행할 `hostSetupCommand`(예:
-`omniroute setup-opencode`)가 반환되며, 아무것도 작성되지 않습니다.
-`dryRun: true`는 컨테이너 모드에서도 계속 작동하며 디스크를 변경하지 않고
-민감 정보가 제거된 미리 보기와 대상 경로를 반환합니다. 미리 보기 콘텐츠는
-복사하거나 가져올 수 있는 자격 증명 포함 구성이 아닙니다. 원래의
-도구/기본 URL/API 키/모델 입력을 사용하여 호스트에서 적용하거나, 안내된 호스트 측
-설정 명령을 사용하세요. 미리 보기 헤더와 요청 계약은
-[CLI 구성 보안](../security/CLI-CONFIGURATION.md)을 참조하세요. 이 동작은
-의도된 것이며
-`tests/unit/api/cli-tools/apply-container-guard.test.ts`를 통해 회귀 방지가 적용됩니다.
-보호 장치를 제거하여 422를 "수정"하지 마세요.
+대시보드의 **적용 엔드포인트**(`POST /api/cli-tools/apply`)도 동일한 보호 장치를
+적용합니다. 컨테이너에서 대상이 호스트로부터 바인드 마운트되지 않은 쓰기 요청에는 안전한
+오류 메시지 및 `containerEphemeralTarget: true`와 함께 **`422`**로 응답하며,
+호스트 구성 방식이 있는 도구(claude, codex, opencode, cline, kilo, continue)의 경우
+호스트에서 대신 실행할 `hostSetupCommand`(예: `omniroute setup-opencode`)도
+제공합니다. 아무것도 작성되지 않습니다. `dryRun: true`는 컨테이너 모드에서도 계속
+작동하며, 디스크를 건드리지 않고 민감 정보가 제거된 미리 보기와 대상 경로를 반환합니다.
+미리 보기 콘텐츠는 복사하거나 가져올 수 있는 자격 증명 포함 구성이 아닙니다. 원래의
+도구/기본 URL/API 키/모델 입력값으로 호스트에서 적용하거나, 안내된 호스트 측 설정 명령을
+사용하세요. 미리 보기 헤더와 요청 계약에 대해서는
+[CLI 구성 보안](../security/CLI-CONFIGURATION.md)을 참조하세요. 이 동작은 의도된 것이며
+`tests/unit/api/cli-tools/apply-container-guard.test.ts`로 회귀 방지 테스트가
+적용됩니다. 보호 장치를 제거하여 422 오류를 절대로 "수정"하지 마세요.
 
 ---
 
@@ -138,7 +136,7 @@ continue)의 경우 호스트에서 대신 실행할 `hostSetupCommand`(예:
 
 ---
 
-## 1. CLI Code 카탈로그(도구 26개)
+## 1. CLI Code 카탈로그(도구 27개)
 
 `/dashboard/cli-code`에 표시되는 모든 도구입니다. `baseUrlSupport: none`인 도구는 사용자 지정 기본 URL 대신 MITM 또는 수동 가이드를 통해 연결됩니다.
 
@@ -165,13 +163,14 @@ continue)의 경우 호스트에서 대신 실행할 `hostSetupCommand`(예:
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
 | custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"`인 도구의 대시보드 카드에는 "⚠ 부분적 기본 URL" 배지가 표시됩니다.
+`baseUrlSupport: "partial"`인 도구의 대시보드 카드에는 "⚠ 부분적 Base URL" 배지가 표시됩니다.
 ---
 
 ## 2. CLI 에이전트 카탈로그(도구 10개)

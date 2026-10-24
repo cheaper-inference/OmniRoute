@@ -291,6 +291,10 @@ export function getCodexClientSessionId(
   return (
     normalizeCodexSessionId(readNamedHeader(headers, "session-id")) ||
     normalizeCodexSessionId(readNamedHeader(headers, "session_id")) ||
+    // Client session aliases are inbound lineage, not native Codex passthrough headers.
+    normalizeCodexSessionId(readNamedHeader(headers, "x-opencode-session-id")) ||
+    normalizeCodexSessionId(readNamedHeader(headers, "x-session-affinity")) ||
+    normalizeCodexSessionId(readNamedHeader(headers, "x-session-id")) ||
     null
   );
 }
@@ -435,15 +439,17 @@ export function resolveCodexFingerprintIdentity(input: {
 }
 
 /**
- * True when the inbound request already carries a Codex client identity header.
- * A genuine Codex client always presents at least one; generic OpenAI-compatible
- * clients do not. Used to gate session-scoped identity convergence so OmniRoute
- * never fabricates a session envelope a real client would not produce.
+ * True when the inbound request carries a native Codex identity header or a
+ * valid client session alias. Used to gate session-scoped identity convergence
+ * so OmniRoute never fabricates a session envelope for a client with no identity.
  */
 export function hasCodexIdentityHeaders(
   headers?: Headers | Record<string, unknown> | null
 ): boolean {
-  return CODEX_IDENTITY_HEADER_NAMES.some((name) => readNamedHeader(headers, name) !== "");
+  return (
+    getCodexClientSessionId(headers) !== null ||
+    CODEX_IDENTITY_HEADER_NAMES.some((name) => readNamedHeader(headers, name) !== "")
+  );
 }
 
 /**

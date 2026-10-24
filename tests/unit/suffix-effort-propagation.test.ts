@@ -251,6 +251,8 @@ for (const failure of ["empty"]) {
       };
       const response = await handleChat(
         buildRequest({
+          // #16810: a cross-version family hop (4.6 → 4.5) only runs when the caller opts in.
+          headers: { "x-omniroute-allow-cross-version-fallback": "true" },
           body: {
             model: `${provider}/${model}${mode === "suffix" ? "-high" : ""}`,
             stream: false,

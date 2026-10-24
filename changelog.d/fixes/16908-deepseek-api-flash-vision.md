@@ -1,1 +1,0 @@
-- **fix(providers):** DeepSeek API Flash models (`deepseek-flash`, `deepseek-v4-flash`) now advertise vision support, so image requests are no longer filtered away from them ([#16908](https://github.com/diegosouzapw/OmniRoute/pull/16908)) — thanks @GimingRao

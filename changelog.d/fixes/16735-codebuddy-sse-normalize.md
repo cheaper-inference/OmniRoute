@@ -1,1 +1,0 @@
-- **fix(codebuddy):** normalize empty `finish_reason` / `function_call` shells in CodeBuddy SSE and drop empty `tools: []` ([#16735](https://github.com/diegosouzapw/OmniRoute/pull/16735)) — thanks @asuan-dev

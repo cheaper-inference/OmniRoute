@@ -1,1 +1,0 @@
-- **fix(i18n):** document the opt-in CodeBuddy system-prompt length cap, default identity-only replacement, and replacement-reason logging in all 66 environment-reference translations. Extend the mirror contract tests to prevent missing variable rows and stale source/target hashes (follow-up to #16510; thanks @ntdatt812 and @Azzt17).

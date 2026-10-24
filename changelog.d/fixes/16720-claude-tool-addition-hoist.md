@@ -1,1 +1,0 @@
-- **fix(translator):** expose Claude Code deferred MCP tools (`tool_addition`) to non-Anthropic providers instead of a 400 or a silently dropped tool ([#16720](https://github.com/diegosouzapw/OmniRoute/pull/16720)) — thanks @semihisikman

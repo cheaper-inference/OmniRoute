@@ -1,1 +1,0 @@
-- **feat(api-keys):** Pin an API key to one model or combo with the new `forcedModel` permission: every chat request made with the key is routed there even when the client hard-codes or omits the model, while the key's model, combo and budget limits still apply. ([#16921](https://github.com/diegosouzapw/OmniRoute/pull/16921)) — thanks @sandypratama2030-gif

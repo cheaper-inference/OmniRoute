@@ -9,7 +9,7 @@ import { normalizePeakHourProtection } from "@/lib/providers/peakHourProtection"
 import { normalizeDetectedReasoningControl } from "@/shared/reasoning/reasoningControl";
 import {
   PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS,
-  PROVIDER_SPECIFIC_SECRET_FIELDS,
+  providerSpecificSecretKeysIn,
 } from "@/lib/db/providers/providerSpecificDataSecrets";
 import { maskStoredApiKey } from "@/shared/utils/apiKeyMask";
 
@@ -394,7 +394,7 @@ export function sanitizeProviderSpecificDataForResponse(
   if (Object.keys(record).length === 0) return undefined;
 
   const sanitized: JsonRecord = { ...record };
-  for (const key of PROVIDER_SPECIFIC_SECRET_FIELDS) {
+  for (const key of providerSpecificSecretKeysIn(record)) {
     if (!MASKED_LIST_FIELD_SET.has(key)) delete sanitized[key];
   }
   for (const key of PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS) {

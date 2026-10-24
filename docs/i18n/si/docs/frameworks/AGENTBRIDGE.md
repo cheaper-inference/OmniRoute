@@ -16,34 +16,34 @@ AgentBridge යනු IDE AI නියෝජිතයන්ගෙන් පැ�
 
 ### AgentBridge යනු කුමක්ද?
 
-IDE agent එකක් (උදා., GitHub Copilot, Cursor, Claude Code) API ඇමතුමක් සිදු කරන විට, එය upstream AI provider වෙත (OpenAI, Anthropic, ආදිය) සෘජුවම සම්බන්ධ වේ. AgentBridge විසින් කිසිදු agent වින්යාස වෙනසක් අවශ්ය නොකර — TLS මට්ටමේදී — එම සම්බන්ධතාව විනිවිද පෙනෙන අයුරින් අන්තර්ග්රහණය කර, ඉල්ලීම OmniRoute හරහා නැවත ලියයි.
+IDE නියෝජිතයෙකු (උදා., GitHub Copilot, Cursor, Claude Code) API ඇමතුමක් කරන විට, එය සෘජුවම ඉහළ ධාරා AI සැපයුම්කරු (OpenAI, Anthropic ආදී) වෙත සම්බන්ධ වේ. AgentBridge එම සම්බන්ධතාවය TLS මට්ටමින් විනිවිද පරිදි අන්තර්ග්රහණය කර ගනියි — නියෝජිත වින්යාසයේ කිසිදු වෙනසක් අවශ්ය නොවේ — සහ ඉල්ලීම OmniRoute හරහා නැවත ලියයි.
 
-මෙයින් ඔබට පහත දෑ කළ හැකිය:
+මෙයින් අදහස් වන්නේ ඔබට මෙසේ කළ හැකි බවයි:
 
-- **ඕනෑම agent එකක් ඕනෑම provider එකක් වෙත නැවත යොමු කිරීම**: Copilot OpenAI සමඟ සන්නිවේදනය කරනවාද? එය Anthropic Claude, Gemini, හෝ OmniRoute හි providers 372න් ඕනෑම එකක් වෙත හරවා යවන්න.
-- **model mappings යෙදීම**: handler මට්ටමේදී විනිවිද පෙනෙන අයුරින් `gemini-3-flash` → `claude-sonnet-4.7`.
-- **සියලුම agent traffic නිරීක්ෂණය කිරීම**: අන්තර්ග්රහණය කළ සෑම ඉල්ලීමක්ම [Traffic Inspector](./TRAFFIC_INSPECTOR.md) වෙත ප්රකාශයට පත් කෙරේ.
-- **OmniRoute ප්රත්යස්ථතාව යෙදීම**: combo routing, circuit breakers, fallbacks, සහ cost tracking IDE agent traffic සඳහාද ක්රියා කරයි.
+- **ඕනෑම නියෝජිතයෙකු ඕනෑම සැපයුම්කරුවෙකු වෙත නැවත යොමු කරන්න**: Copilot OpenAI වෙත කතා කරයිද? එය Anthropic Claude, Gemini, හෝ OmniRoute හි සැපයුම්කරුවන් 375න් ඕනෑම එකකට යළි යොමු කරන්න.
+- **ආකෘති සිතියම්ගත කිරීම් යොදන්න**: `gemini-3-flash` → `claude-sonnet-4.7` ලෙස handler මට්ටමින් විනිවිද පරිදි.
+- **සියලුම නියෝජිත ගමනාගමනය නිරීක්ෂණය කරන්න**: අන්තර්ග්රහණය කරගත් සෑම ඉල්ලීමක්ම [Traffic Inspector](./TRAFFIC_INSPECTOR.md) වෙත ප්රකාශයට පත් කෙරේ.
+- **OmniRoute ප්රත්යාස්ථතාව යොදන්න**: කොම්බෝ රවුටිං, සර්කියුට් බ්රේකර්, ෆෝල්බැක් සහ පිරිවැය ලුහුබැඳීම IDE නියෝජිත ගමනාගමනය සඳහාත් ක්රියාත්මක වේ.
 
-### වෙළඳපොළට සාපේක්ෂ ස්ථානගත කිරීම
+### වෙළඳපොළ සමඟ සැසඳීම
 
-| විශේෂාංගය         | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity       |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot    |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)        |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex      |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE        |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries    |    —    |    ✓     |        —        |             ✓             |
-| Claude Code       |    —    |    —     |        ✓        |             ✓             |
-| Open Code         |    —    |    —     |        ✓        |             ✓             |
-| Trae              |    —    |    —     |        —        |  🔍 විමර්ශනය කරමින් පවතී  |
-| Dashboard UI      |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute routing |    ✗    |    ✗     |        ✗        |             ✓             |
-| Model mapping UI  |    ✗    |    ✗     |        ✗        |             ✓             |
-| Bypass list       |    ✗    |    ✗     |        ✓        |             ✓             |
-| Upstream CA cert  |    ✗    |    ✗     |        ✓        |             ✓             |
+| විශේෂාංගය                 | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| ------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity               |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot            |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)                |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex              |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE                |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries            |    —    |    ✓     |        —        |             ✓             |
+| Claude Code               |    —    |    —     |        ✓        |             ✓             |
+| Open Code                 |    —    |    —     |        ✓        |             ✓             |
+| Trae                      |    —    |    —     |        —        |    🔍 විමර්ශනය වෙමින්     |
+| උපකරණ පුවරු UI            |    ✓    |    ✗     |        ✗        |             ✓             |
+| Traffic Inspector         |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute රවුටිං          |    ✗    |    ✗     |        ✗        |             ✓             |
+| ආකෘති සිතියම්ගත කිරීමේ UI |    ✗    |    ✗     |        ✗        |             ✓             |
+| මඟහැරීමේ ලැයිස්තුව        |    ✗    |    ✗     |        ✓        |             ✓             |
+| ඉහළ ධාරා CA සහතිකය        |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

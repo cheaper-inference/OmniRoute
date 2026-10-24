@@ -110,24 +110,24 @@ OmniRoute/
 
 ---
 
-## `src/` — Ìṣàfilọ́lẹ̀ Next.js
+## `src/` — Ohun èlò Next.js
 
 ```
 src/
-├── app/                 # App Router (àwọn ojú-ewé + àwọn ipa-ọ̀nà API + àwọn ojú-ewé ipò + ojú-ewé ìbẹ̀rẹ̀)
-├── lib/                 # Àwọn ilé-ìkàwé pàtàkì / àwọn módùùlù àgbègbè iṣẹ́ (àwọn subdir 80 + nǹkan bí fáìlì ipele-ókè 70)
-├── domain/              # Lọ́jììkì àgbègbè iṣẹ́ mímọ́ (ẹ́ńjìnnì ìlànà, fallback, iye owó, lockout, comboResolver, assessment)
-├── server/              # Àwọn módùùlù ti server nìkan (authz pipeline, cors, auth middleware) — a kò lè import wọn láti client
-├── shared/              # Ohun tí server àti client ń pín níbi tí ó bá láìléwu (àwọn constant, type, validation, contract, util)
-├── i18n/                # Àtòpọ̀ next-intl + JSON ìfiranṣẹ́ fún locale kọ̀ọ̀kan (àwọn locale 42)
-├── middleware/          # Middleware Next.js (ìmúdára request, ìṣàwárí locale)
-├── mitm/                # Kókó proxy MITM: ṣíṣẹ̀dá/fífi cert sori ẹrọ, àwọn handler, target, inspector, mask, passthrough
-│   ├── handlers/        # Àwọn class handler IDE-agent 9 tí wọ́n fa MitmHandlerBase gùn (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Ìpele ìgbàkọjá traffic: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Àsopọ̀ adapter model (legacy shim)
-├── scripts/             # Àwọn script ìtọ́jú inú igi (fún àpẹẹrẹ, backfillAggregation)
-├── sse/                 # Àwọn handler/iṣẹ́ SSE legacy (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Store in-memory legacy (tí a ń yọ kúrò díẹ̀díẹ̀ fún src/lib/db)
+├── app/                 # App Router (àwọn ojú-ìwé + àwọn ipa-ọ̀nà API + àwọn ojú-ìwé ipò + ojú-ìwé ìbẹ̀rẹ̀)
+├── lib/                 # Àwọn ibi-ìkówèésí pàtàkì / àwọn módùùlù àgbègbè iṣẹ́ (àwọn àkójọpọ̀-ọ̀nà abẹ́ 80 + nǹkan bí fáìlì ipele-òkè 70)
+├── domain/              # Lọ́gíìkì àgbègbè iṣẹ́ mímọ́ (ẹ́ńjìnnì ìlànà, fallback, iye owó, lockout, comboResolver, assessment)
+├── server/              # Àwọn módùùlù fún server nìkan (authz pipeline, cors, auth middleware) — kò ṣeé import láti client
+├── shared/              # Ohun tí server àti client ń pín níbi tí ó bá láàbò (àwọn constant, types, validation, contracts, utils)
+├── i18n/                # Àtòpọ̀ next-intl + JSON ìfiránṣẹ́ fún locale kọ̀ọ̀kan (àwọn locale 67)
+├── middleware/          # Next.js middleware (ìmúdára request, ìṣàwárí locale)
+├── mitm/                # Ohun ìpìlẹ̀ proxy MITM: ṣíṣẹ̀dá/fífì cert sílẹ̀, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # Àwọn class handler aṣojú IDE 9 tí ń fa MitmHandlerBase gùn sí i (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Ìpele gbígba traffic: buffer (ring inú memory), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Àsopọ̀ adapter model (shim àtijọ́)
+├── scripts/             # Àwọn script ìtọju inú igi (fún àpẹẹrẹ, backfillAggregation)
+├── sse/                 # Àwọn handler/iṣẹ́ SSE àtijọ́ (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Ibi ìpamọ́ inú memory àtijọ́ (tí a ń mú kúrò díẹ̀díẹ̀ fún src/lib/db)
 ├── types/               # Àwọn fáìlì type TS tí a pín
 ├── instrumentation.ts   # Hook telemetry Next.js (browser + edge)
 ├── instrumentation-node.ts  # Instrumentation fún Node nìkan
@@ -136,122 +136,122 @@ src/
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Path                                                                         | Ìdí                                                                                                                                                                                                                                                                                                                       |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | API OpenAI-compat fún gbogbo ènìyàn (~25 ipa-ọ̀nà abẹ́: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                                                                                          |
-| `app/api/v1beta/`                                                            | Àwọn endpoint API aláṣà Gemini                                                                                                                                                                                                                                                                                            |
-| `app/api/playground/`                                                        | Àwọn ipa-ọ̀nà Playground Studio: `improve-prompt/` (POST — atúntò prompt LLM), `presets/` (GET àkójọ / POST ṣẹ̀dá), `presets/[id]/` (GET / PUT / DELETE) — wo `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                        |
-| `app/api/` (non-v1)                                                          | Àwọn ipa-ọ̀nà ìṣàkóso/alábòójútó (~60 àpò-ọ̀nà: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                                                                                                             |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — ipa-ọ̀nà 12 (ìṣàkóso server, ipò agent/DNS/mappings, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Wo `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                                |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — ipa-ọ̀nà 16+ (requests, sessions, hosts, capture-modes, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Wo `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                           |
-| `app/a2a/`                                                                   | Ojú-ọ̀nà àbáwọlé A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                            |
-| `app/.well-known/agent.json/`                                                | Káàdì Agent A2A (ìṣàwárí)                                                                                                                                                                                                                                                                                                 |
-| `app/(dashboard)/dashboard/`                                                 | Àwọn ojú-ewé UI dashboard (abala 50+, fáìlì page.tsx ~118: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                                                                                                            |
-| `app/(dashboard)/dashboard/search-tools/`                                    | UI Search Tools Studio (taabu 3: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — wo `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                               |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (ètò 21): `page.tsx` (ikarahun taabu mẹ́ta), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Ojú-ewé dashboard AgentBridge — káàdì server, káàdì agent 9, olùrànlọ́wọ́ ìṣètò, ìbáramu model, àkójọ bypass. i18n PT-BR + EN. Wo `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                         |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Ojú-ewé dashboard Traffic Inspector — ìpín DevTools, taabu àlàyé 7, tógù ipo àgbàsílẹ̀ 4, olùgbàsílẹ̀ session, fífi àwọ̀ hàn gẹ́gẹ́ bí àyíká ọ̀rọ̀. i18n PT-BR + EN. Wo `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                  |
-| `app/(dashboard)/dashboard/activity/`                                        | Ojú-ìwé ìṣàn ìgbòkègbodò (Ẹgbẹ́ B): `page.tsx` (olùpèsè) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — wo `docs/architecture/MONITORING_SECTIONS.md`                                                                                                               |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Ojú-ìwé Pínpín Ìpín (Ẹgbẹ́ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Ojú-ìwé àtòpọ̀ ètò olupèsè (Ẹgbẹ́ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — àwọn ìwọ̀n ìpín fún ìkọjá-àṣẹ ìsopọ̀ kọ̀ọ̀kan                                                                                                                                                                                               |
-| `app/docs/`                                                                  | Olùwo àkọsílẹ̀ tí a fi sínú rẹ̀ (ń ṣe àfihàn `docs/*.md`)                                                                                                                                                                                                                                                                   |
-| `app/landing/`                                                               | Ojú-ìwé ìbalẹ̀ ìpolówó                                                                                                                                                                                                                                                                                                     |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Àwọn ojú-ìwé tó ní í ṣe pẹ̀lú ìfàṣẹsí                                                                                                                                                                                                                                                                                      |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | Àwọn ojú-ìwé àṣìṣe HTTP                                                                                                                                                                                                                                                                                                   |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Àwọn ojú-ìwé àìyípadà/ipò                                                                                                                                                                                                                                                                                                 |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Ìṣètò gbòǹgbò, ojúlé, àkọsílẹ̀ PWA, CSS àgbáyé                                                                                                                                                                                                                                                                             |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Àwọn ààlà àṣìṣe                                                                                                                                                                                                                                                                                                           |
+| Path                                                                         | Ète                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | API OpenAI-compat gbogbogbò (~25 ipa-ọna abẹ́: ìjíròrò, àwọn ìparí, àwọn embedding, àwọn fáìlì, àwọn batch, ohun, àwọn àwòrán, àwọn fídíò, orin, àtúntò-ìpele, àyẹ̀wò àkóónú, ìṣàwárí, ws, àwọn aṣojú, àwọn àkọọ́lẹ̀, àwọn olùpèsè, abbl.)                                                                                 |
+| `app/api/v1beta/`                                                            | Àwọn endpoint API tó dà bí Gemini                                                                                                                                                                                                                                                                                      |
+| `app/api/playground/`                                                        | Àwọn ipa-ọna Playground Studio: `improve-prompt/` (POST — olùtún ìtọ́ni LLM kọ), `presets/` (GET àkójọ / POST ṣẹ̀dá), `presets/[id]/` (GET / PUT / DELETE) — wo `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                   |
+| `app/api/` (tí kì í ṣe v1)                                                   | Àwọn ipa-ọna ìṣàkóso/alábòójútó (~60 àpò-ọ̀nà: àwọn olùpèsè, àwọn àkójọpọ̀, àwọn ààtò, mcp, a2a, àwọn àyẹ̀wò, ìrántí, àwọn ọgbọ́n, àwọn webhook, ìbámu-òfin, ìfaradà, àbójútó, àwọn tunnel, àwọn irinṣẹ́ cli, abbl.)                                                                                                        |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — ipa-ọna 12 (ìṣàkóso server, ipò aṣojú/DNS/ìbámu, ìforíkọjá, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Wo `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                             |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — ipa-ọna 16+ (àwọn ìbéèrè, àwọn session, àwọn host, àwọn capture-mode, gbígbé jáde, ws). LOCAL_ONLY + SPAWN_CAPABLE. Wo `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                    |
+| `app/a2a/`                                                                   | Aaye ìwọlé A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                              |
+| `app/.well-known/agent.json/`                                                | Káàdì Aṣojú A2A (ìṣàwárí)                                                                                                                                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/`                                                 | Àwọn ojú-ìwé UI dashboard (ẹ̀ka 50+, fáìlì page.tsx ~118: àwọn olùpèsè, àwọn àkójọpọ̀, àwọn ààtò, ìrántí, àwọn ọgbọ́n, àwọn webhook, àwọn àyẹ̀wò, àyẹ̀wò-ìṣe, batch, cache, àwọn ìnáwó, ìlera, ètò, ìgbòkègbodò, abbl.)                                                                                                     |
+| `app/(dashboard)/dashboard/search-tools/`                                    | UI Search Tools Studio (taabu 3: Ìṣàwárí/Ìkórè/Ìfiwéra + SearchConceptCard + ProviderCatalog) — wo `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                            |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (ètò 21): `page.tsx` (ìkarahun taabu 3), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Ojú-ìwé dashboard AgentBridge — káàdì server, káàdì aṣojú 9, olùrànlọ́wọ́ ìṣètò, ìbámu model, àkójọ ìforíkọjá. i18n PT-BR + EN. Wo `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                     |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Ojú-ìwé dashboard Traffic Inspector — ìpín DevTools, taabu àlàyé 7, àyípadà ipo ìgbasilẹ 4, olùgbasilẹ session, fífi àwọ̀ sí àyíká-ọ̀rọ̀. i18n PT-BR + EN. Wo `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                     |
+| `app/(dashboard)/dashboard/activity/`                                        | Ojú-ìwé àkójọ ìṣe (Ẹgbẹ́ B): `page.tsx` (apèsè) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — wo `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                     |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Ojú-ìwé Pípín Ìwọ̀n-ìlò (Ẹgbẹ́ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                           |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Ojú-ìwé ìṣètò ètò olupèsè (Ẹgbẹ́ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — àtúnkọ àwọn ìwọ̀n ìpín fún àsopọ̀ kọ̀ọ̀kan                                                                                                                                                                                               |
+| `app/docs/`                                                                  | Olùwo àkọsílẹ̀ tí a fi sínú ètò (ń ṣe àfihàn `docs/*.md`)                                                                                                                                                                                                                                                               |
+| `app/landing/`                                                               | Ojú-ìwé ìbẹ̀rẹ̀ fún ìpolówó                                                                                                                                                                                                                                                                                              |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Àwọn ojú-ìwé tó jọmọ ìfàṣẹsí                                                                                                                                                                                                                                                                                           |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | Àwọn ojú-ìwé àṣìṣe HTTP                                                                                                                                                                                                                                                                                                |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Àwọn ojú-ìwé àìyípadà/ipò                                                                                                                                                                                                                                                                                              |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Ìṣètò gbòǹgbò, ojúlé, àkójọ PWA, CSS àgbáyé                                                                                                                                                                                                                                                                            |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Àwọn ààlà àṣìṣe                                                                                                                                                                                                                                                                                                        |
 
-### `src/lib/` — Àwọn ilé-ìkàwé pàtàkì (~50 àwọn módù)
+### `src/lib/` — Àwọn ilé-ìkàwé pàtàkì (~50 módùlù)
 
-| Module                                   | Ète                                                                                                                                                                                                                                                                                                                   |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | Olùṣàkóso iṣẹ́ ìlànà A2A, àwọn ọgbọ́n (5), ìṣànwọ́wọ́                                                                                                                                                                                                                                                                     |
-| `acp/`                                   | Ìforúkọsílẹ̀ Aṣojú CLI (àwárí CLI agbègbè — wo `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                             |
-| `api/`                                   | Àwọn olùrànlọ́wọ́ API tí a pín (`requireManagementAuth`, ìfọwọ́sí)                                                                                                                                                                                                                                                       |
-| `auth/`                                  | Ìjókòó, fífi ọ̀rọ̀ aṣínà ṣe hash, ìfọwọ́sí token                                                                                                                                                                                                                                                                         |
-| `batches/`                               | Àwọn olùmú Batches API OpenAI                                                                                                                                                                                                                                                                                         |
-| `catalog/`                               | Ìfọwọ́sí Zod fún àkójọ olùpèsè + ìyanjú agbára                                                                                                                                                                                                                                                                         |
-| `cloudAgent/`                            | Àwọn Aṣojú Cloud (Codex Cloud, Devin, Jules) — wo `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                    |
-| `combos/`                                | Ìyanjú Combo + àwọn olùrànlọ́wọ́ àtúntò tẹ̀lé-tẹ̀lé                                                                                                                                                                                                                                                                       |
-| `audit/`                                 | Àwọn olùrànlọ́wọ́ ìṣàn ìgbòkègbodò: `highLevelActions.ts` (àkójọ ohun tí a yọ̀ǹda + `isHighLevelAction()`), `activityIcons.ts` (ìṣe → àwòrán kékeré/àwòrán ọ̀rọ̀-ìṣe), `timeline.ts` (groupByDay/relativeTime) — wo `docs/architecture/MONITORING_SECTIONS.md`                                                             |
-| `compliance/`                            | Àkọsílẹ̀ àyẹ̀wò + àyẹ̀wò olùpèsè — wo `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                      |
-| `compression/`                           | Ohun àsopọ̀ ẹ́ńjìnnì ìfúnpọ̀ (àwọn ẹ́ńjìnnì wà nínú `open-sse/services/compression/`)                                                                                                                                                                                                                                     |
-| `config/`                                | Àwọn olùrànlọ́wọ́ àtòpọ̀ àkókò ìṣiṣẹ́                                                                                                                                                                                                                                                                                     |
-| `db/`                                    | Àwọn module DB àgbègbè 120+ + àwọn migration 168 (máa gba ibí yìí kọjá nígbà gbogbo fún SQLite)                                                                                                                                                                                                                       |
-| `quota/`                                 | Ẹ́ńjìnnì Pípín Ìwọ̀n: `dimensions.ts` (àwọn irú/Zod), `types.ts` (ojú-òpó QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — wo `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Kíláyẹ̀ẹ́tì àkójọ awoṣe ọ̀fẹ́ Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — wo `docs/frameworks/RADAR.md`                                                                                                                                           |
-| `display/`                               | Àwọn olùrànlọ́wọ́ fún ṣíṣe àgbékalẹ̀ UI (ìnáwó, ìdádúró, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                                                                                                                                                                                                                                 |
-| `embeddings/`                            | Àwọn olùrànlọ́wọ́ iṣẹ́ embeddings                                                                                                                                                                                                                                                                                        |
-| `env/`                                   | Ṣíṣàlàyé + ìfọwọ́sí àwọn onírúurú Env                                                                                                                                                                                                                                                                                  |
-| `evals/`                                 | Fírémù eval (àwọn suite, olùṣiṣẹ́, àkókò ìṣiṣẹ́) — wo `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                        |
-| `guardrails/`                            | Olùbòjú-boju PII, ìkọlù prompt injection, afárá ìran — wo `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                               |
-| `jobs/`                                  | Àwọn iṣẹ́ abẹ́lẹ̀ (bíi cron)                                                                                                                                                                                                                                                                                             |
-| `memory/`                                | Ìrántí ìjíròrò (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant ìpele 2) — wo `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                |
-| `memory/embedding/`                      | Ìpele embedding orísun-púpọ̀: `index.ts` (olùyanjú), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ètò 21)                                                                                                                                                                           |
-| `memory/vectorStore.ts`                  | Apò-ọ̀nà sqlite-vec v0.1.9 — KNN brute-force + hybrid RRF (FTS5 + vector, k=60). Ó ń bẹ̀rẹ̀ nígbà tí a bá nílò rẹ̀, ó sì ń dín iṣẹ́ rẹ̀ kù lọ́nà tó bójú mu nígbà tí sqlite-vec kò bá sí. (ètò 21)                                                                                                                           |
-| `memory/reindex.ts`                      | `runReindexBatch()` — ń ṣiṣẹ́ lórí àwọn ìrántí tó ní `needs_reindex=1` ní abẹ́lẹ̀; `POST /api/memory/reindex` àti ipa ọ̀nà lazy-backfill ló ń pè é. (ètò 21)                                                                                                                                                              |
-| `monitoring/`                            | Àwọn àyẹ̀wò ìlera, ìmújáde àwọn òṣùwọ̀n                                                                                                                                                                                                                                                                                 |
-| `oauth/`                                 | Àwọn ìṣàn OAuth/gbígbéwọlé fún àwọn módùlù olùpèsè 22 (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                     |
-| `plugins/`                               | Ìforúkọsílẹ̀ plugin                                                                                                                                                                                                                                                                                                    |
-| `promptCache/`                           | Àwọn ibi ìdádúró cache prompt ara Anthropic                                                                                                                                                                                                                                                                           |
-| `skills/`                                | Fírémù Skills (tí a fi sínú rẹ̀ + ọjà + SkillsSH) — wo `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                     |
-| `playground/`                            | Àwọn olùrànlọ́wọ́ pínpín fún Playground Studio: `codeExport.ts` (olùṣẹ̀dá curl/Python/TS), `promptImprover.ts` (olùkọ́ meta-prompt), `streamMetrics.ts` (TTFT/TPS mímọ́), `types.ts` (tábìlì ìdíyelé) — wo `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                          |
-| `webhookDispatcher.ts`                   | Ìfijiṣẹ́ webhook HMAC — wo `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                               |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Àwọn olùṣàkóso tunnel — wo `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                |
-| `cloudSync.ts`, `initCloudSync.ts`       | Ìṣiṣẹ́pọ̀ àṣàyàn ti state pẹ̀lú cloud                                                                                                                                                                                                                                                                                    |
-| `localDb.ts`                             | Fáìlì àkójọpọ̀ ìtúndàjáde fún àwọn module db (kò ní logic — ìtúndàjáde nìkan)                                                                                                                                                                                                                                          |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Ìfipamọ́ request sínú cache + idempotency                                                                                                                                                                                                                                                                              |
-| (~30 more top-level files)               | Àwọn olùrànlọ́wọ́ amọ̀jùmọ̀ (logEnv, modelsDevSync, piiSanitizer, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                                                                                                                                                                                                                         |
+| Módùlù                                   | Ète                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | Olùṣàkóso iṣẹ́ ìlànà A2A, àwọn ọgbọ́n (5), ìṣànwọ́                                                                                                                                                                                                                                                                   |
+| `acp/`                                   | Ìforúkọsílẹ̀ Aṣojú CLI (àwárí CLI agbègbè — wo `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                         |
+| `api/`                                   | Àwọn olùrànlọ́wọ́ API tí a pín (`requireManagementAuth`, ìfọwọ́sí)                                                                                                                                                                                                                                                   |
+| `auth/`                                  | Ìjókòó, hashing ọ̀rọ̀ aṣínà, ìfọwọ́sí token                                                                                                                                                                                                                                                                          |
+| `batches/`                               | Àwọn olùmúlò OpenAI Batches API                                                                                                                                                                                                                                                                                   |
+| `catalog/`                               | Ìfọwọ́sí Zod fún àkójọ olùpèsè + ìyànjú agbára                                                                                                                                                                                                                                                                     |
+| `cloudAgent/`                            | Àwọn Aṣojú Àwọsánmà (Codex Cloud, Devin, Jules) — wo `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                             |
+| `combos/`                                | Ìyànjú combo + àwọn olùrànlọ́wọ́ àtúntò                                                                                                                                                                                                                                                                             |
+| `audit/`                                 | Àwọn olùrànlọ́wọ́ ìṣàn ìgbòkègbodò: `highLevelActions.ts` (àkójọ ìyọ̀ǹda + `isHighLevelAction()`), `activityIcons.ts` (ìṣe → àwòrán/ọ̀rọ̀-ìṣe), `timeline.ts` (groupByDay/relativeTime) — wo `docs/architecture/MONITORING_SECTIONS.md`                                                                                |
+| `compliance/`                            | Àkọsílẹ̀ àyẹ̀wò + àyẹ̀wò olùpèsè — wo `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                  |
+| `compression/`                           | Ohun àsopọ̀ ẹ̀rọ ìfúnpọ̀ (àwọn ẹ̀rọ wà nínú `open-sse/services/compression/`)                                                                                                                                                                                                                                         |
+| `config/`                                | Àwọn olùrànlọ́wọ́ àtòpọ̀ ní àkókò ìṣiṣẹ́                                                                                                                                                                                                                                                                              |
+| `db/`                                    | Àwọn módùlù DB ẹ̀ka iṣẹ́ tó ju 120 lọ + àwọn ìṣíkiri 168 (máa gba ibí yìí kọjá ní gbogbo ìgbà fún SQLite)                                                                                                                                                                                                           |
+| `quota/`                                 | Ẹ̀rọ Pípín Ìpín: `dimensions.ts` (àwọn irú/Zod), `types.ts` (ojú-ọ̀nà QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — wo `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Oníbàárà àkójọ awoṣe ọ̀fẹ́ Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — wo `docs/frameworks/RADAR.md`                                                                                                                                        |
+| `display/`                               | Àwọn olùrànlọ́wọ́ fún ṣíṣe àgbékalẹ̀ UI (ìnáwó, ìdádúró, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                                                                                                                                                                                                                             |
+| `embeddings/`                            | Àwọn olùrànlọ́wọ́ iṣẹ́ embeddings                                                                                                                                                                                                                                                                                    |
+| `env/`                                   | Ìtúpalẹ̀ + ìfọwọ́sí àwọn àyípadà env                                                                                                                                                                                                                                                                                |
+| `evals/`                                 | Ètò eval (àwọn suite, runner, runtime) — wo `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                            |
+| `guardrails/`                            | Ìbòjú PII, ìkọlù abẹrẹ prompt, afárá vision — wo `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                    |
+| `jobs/`                                  | Àwọn iṣẹ́ abẹ́lẹ̀ (bíi cron)                                                                                                                                                                                                                                                                                         |
+| `memory/`                                | Ìrántí ìjíròrò (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant ìpele 2) — wo `docs/frameworks/MEMORY.md`                                                                                                                                                                                                            |
+| `memory/embedding/`                      | Ìpele embedding olórísun-púpọ̀: `index.ts` (olùyànjú), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ètò 21)                                                                                                                                                                     |
+| `memory/vectorStore.ts`                  | Apò sqlite-vec v0.1.9 — KNN brute-force + hybrid RRF (FTS5 + vector, k=60). Ó bẹ̀rẹ̀ nígbà tí a bá nílò rẹ̀, ó sì ń dín agbára rẹ̀ kù láìfa ìṣòro nígbà tí sqlite-vec kò bá sí. (ètò 21)                                                                                                                              |
+| `memory/reindex.ts`                      | `runReindexBatch()` — ń ṣiṣẹ́ lórí àwọn ìrántí tí ó ní `needs_reindex=1` ní abẹ́lẹ̀; `POST /api/memory/reindex` àti ọ̀nà lazy-backfill ni wọ́n ń pè é. (ètò 21)                                                                                                                                                        |
+| `monitoring/`                            | Àyẹ̀wò ìlera, ìtújáde àwọn metrics                                                                                                                                                                                                                                                                                 |
+| `oauth/`                                 | Àwọn ìṣàn OAuth/ìgbéwọlé fún àwọn module provider 22 (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                  |
+| `plugins/`                               | Ìforúkọsílẹ̀ plugin                                                                                                                                                                                                                                                                                                |
+| `promptCache/`                           | Àwọn ibi ìdádúró cache prompt ara Anthropic                                                                                                                                                                                                                                                                       |
+| `skills/`                                | Ètò skills (tí a ti kọ sínú rẹ̀ + marketplace + SkillsSH) — wo `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                         |
+| `playground/`                            | Àwọn olùrànlọ́wọ́ pínpín fún Playground Studio: `codeExport.ts` (olùṣẹ̀dá curl/Python/TS), `promptImprover.ts` (olùkọ́ meta-prompt), `streamMetrics.ts` (TTFT/TPS mímọ́), `types.ts` (tábìlì ìdíyelé) — wo `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                      |
+| `webhookDispatcher.ts`                   | Ìfiránṣẹ́ webhook HMAC — wo `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                          |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Àwọn olùṣàkóso tunnel — wo `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                            |
+| `cloudSync.ts`, `initCloudSync.ts`       | Ìbáradọ́gba state pẹ̀lú cloud tí ó jẹ́ àṣàyàn                                                                                                                                                                                                                                                                        |
+| `localDb.ts`                             | Barrel àtúnṣàgbéjáde fún àwọn module db (kò sí logic — àtúnṣàgbéjáde nìkan)                                                                                                                                                                                                                                       |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | Caching request + idempotency                                                                                                                                                                                                                                                                                     |
+| (~30 more top-level files)               | Àwọn olùrànlọ́wọ́ àkànṣe (logEnv, modelsDevSync, piiSanitizer, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                                                                                                                                                                                                                      |
 
-### `src/lib/db/` — Database (àwọn module 137 + àwọn migration 193)
+### `src/lib/db/` — Database (147 modules + 208 migrations)
 
-| Subdir                    | Ète                                                                                                                                                                                          |
+| Subdir                    | Ìdí                                                                                                                                                                                          |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | singleton `getDbInstance()` pẹ̀lú ìforúkọsílẹ̀ WAL                                                                                                                                             |
-| `db/migrations/`          | Àwọn fáìlì SQL tó ní version (idempotent, transactional). `073_memory_vec.sql` ṣàfikún `memory_vec_meta` + column `needs_reindex` (ètò 21).                                                  |
+| `db/core.ts`              | Singleton `getDbInstance()` pẹ̀lú WAL journaling                                                                                                                                              |
+| `db/migrations/`          | Àwọn fáìlì SQL tí a pín sí version (idempotent, transactional). `073_memory_vec.sql` ṣàfikún `memory_vec_meta` + column `needs_reindex` (ètò 21).                                            |
 | `db/playgroundPresets.ts` | Module CRUD fún àwọn preset Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                 |
 | `db/memoryVec.ts`         | CRUD fún `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ. (ètò 21)                        |
 | `db/<domain>.ts`          | Module kan fún domain kọ̀ọ̀kan: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ. |
 
 ### `src/domain/`
 
-| Module                 | Ète                                             |
+| Module                 | Ìdí                                             |
 | ---------------------- | ----------------------------------------------- |
-| `policy.ts`            | Ẹ́ńjìnnì policy                                  |
+| `policy.ts`            | Ẹ̀rọ policy                                      |
 | `fallbackPolicy.ts`    | Igi ìpinnu fallback                             |
-| `costRules.ts`         | Àwọn òfin ìṣirò iye owó                         |
-| `lockoutPolicy.ts`     | Policy ìdènà model/connection                   |
-| `tagRouter.ts`         | Ìdarí ipa tó dá lórí tag                        |
-| `comboResolver.ts`     | Ìyànjú combo (èyí tí ẹ́ńjìnnì combo ń lò)        |
-| `modelAvailability.ts` | Àyẹ̀wò wíwà fún model kọ̀ọ̀kan                     |
+| `costRules.ts`         | Àwọn òfin ìṣírò iye owó                         |
+| `lockoutPolicy.ts`     | Policy lockout model/connection                 |
+| `tagRouter.ts`         | Routing tó dá lórí tag                          |
+| `comboResolver.ts`     | Ìyanjú combo (tí ẹ̀rọ combo ń lò)                |
+| `modelAvailability.ts` | Àyẹ̀wò availability fún model kọ̀ọ̀kan             |
 | `assessment/`          | Ìṣàyẹ̀wò model (Ìpele 1 ti RFC-AUTO-ASSESSMENT ) |
 
 ### `src/server/`
 
-| Module   | Ète                                                                                                |
-| -------- | -------------------------------------------------------------------------------------------------- |
-| `authz/` | Òpópónà authorization: `classify` → `policies` → `enforce` — wo `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | Ìṣètò CORS                                                                                         |
-| `auth/`  | Middleware session                                                                                 |
+| Module   | Ìdí                                                                                                 |
+| -------- | --------------------------------------------------------------------------------------------------- |
+| `authz/` | Pipeline authorization: `classify` → `policies` → `enforce` — wo `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | Ìṣètò CORS                                                                                          |
+| `auth/`  | Middleware session                                                                                  |
 
 ### `src/shared/`
 
-| Módù                             | Ìdí                                                                  |
+| Módùlù                           | Ìdí                                                                  |
 | -------------------------------- | -------------------------------------------------------------------- |
-| `constants/providers.ts`         | **Àwọn olùpèsè 372** pẹ̀lú ìfọwọ́sí Zod (orisun òtítọ́)                 |
-| `constants/cliTools.ts`          | Ìforúkọsílẹ̀ irinṣẹ́ CLI ìta                                           |
-| `constants/routingStrategies.ts` | **Àwọn ọgbọ́n ìdarí ipa-ọ̀nà 19** pẹ̀lú àwọn ààyò                       |
-| `constants/publicApiRoutes.ts`   | Àwọn ipa-ọ̀nà tó nílò ìfàṣẹsí Bearer (dípò ti ìṣàkóso)                |
-| `constants/upstreamHeaders.ts`   | Àtòkọ àwọn àkọlé tí a kọ̀ fún àwọn ìbéèrè upstream                    |
-| `validation/schemas.ts`          | ~80 àwòrán Zod (orisun òtítọ́ kan ṣoṣo fún àwọn àdéhùn API)           |
+| `constants/providers.ts`         | **Àwọn olùpèsè 375** pẹ̀lú ìfọwọ́sí Zod (orísun òtítọ́)                 |
+| `constants/cliTools.ts`          | Ìforúkọsílẹ̀ irinṣẹ́ CLI ti ita                                        |
+| `constants/routingStrategies.ts` | **Àwọn ọ̀nà ìdarí 20** pẹ̀lú àwọn ipò àkọ́kọ́                            |
+| `constants/publicApiRoutes.ts`   | Àwọn ipa-ọ̀nà tí ó nílò ìfàṣẹsí Bearer (dípò ti ìṣàkóso)              |
+| `constants/upstreamHeaders.ts`   | Àtòjọ ìdènà àkọlé fún àwọn ìbéèrè upstream                           |
+| `validation/schemas.ts`          | ~80 àwòrán Zod (orísun òtítọ́ kan ṣoṣo fún àwọn àdéhùn API)           |
 | `validation/helpers.ts`          | Àwọn olùrànlọ́wọ́ ìfọwọ́sí Zod (`validateBody`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)         |
-| `types/`                         | Àwọn irú TS tí a pín lò pọ̀                                           |
-| `contracts/`                     | Àwọn àdéhùn API gbogbogbò (tí `files:` nínú `package.json` ń lò)     |
-| `utils/circuitBreaker.ts`        | Olùdádúró àyíká olùpèsè (wo `docs/architecture/RESILIENCE_GUIDE.md`) |
-| `utils/apiAuth.ts`               | Ìfọwọ́sí kọ́kọ́rọ́ API, ṣíṣe àyẹ̀wò ààlà                                  |
-| `utils/fetchTimeout.ts`          | Àwọn ìdìpọ̀ timeout/abort fún upstream fetch                          |
-| `utils/releaseNotes.ts`          | Olùtúpalẹ̀ ìkéde v2/legacy tí a ti pa, ìṣàdábọ̀ àti yíyọ ID kúrò       |
+| `types/`                         | Àwọn irú TS tí a pín lò                                              |
+| `contracts/`                     | Àwọn àdéhùn API gbangba (tí `files:` inú `package.json` ń lò)        |
+| `utils/circuitBreaker.ts`        | Olùdásí àyíká olùpèsè (wo `docs/architecture/RESILIENCE_GUIDE.md`)   |
+| `utils/apiAuth.ts`               | Ìfọwọ́sí kọ́kọ́rọ́ API, àyẹ̀wò ààlà                                       |
+| `utils/fetchTimeout.ts`          | Àwọn ohun ìdìpọ̀ timeout/abort fún upstream fetch                     |
+| `utils/releaseNotes.ts`          | Olùtúpalẹ̀ ìkéde v2/legacy tí a ti pa, ìṣàmúlò agbègbè àti ìyọkúrò ID |
 
 ---
 
@@ -375,80 +375,80 @@ open-sse/
 
 ---
 
-## `docs/` — Ìwé Àkọsílẹ̀ Gbangba (fáìlì gbòǹgbò 7 + àwọn abẹ́-àkójọpọ̀ fáìlì 17)
+## `docs/` — Ìwé Ìtọ́nisọ́nà Fún Gbogbo Ènìyàn (fáìlì gbòǹgbò 7 + àwọn àpò-ọmọ 17)
 
-### Àwọn ìtọ́sọ́nà ìpele-òkè
+### Àwọn ìtọ́sọ́nà ipele-òkè
 
-| Ìwé                         | Ète                                                                                         |
-| --------------------------- | ------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Àwòrán gbogbogbò ti àkànṣe, máàpù àwọn abẹ́-ètò, ojú-ìṣàkóso dashboard                       |
-| `CODEBASE_DOCUMENTATION.md` | Ìtọ́kasí ìmọ̀-ẹ̀rọ: àwọn àkójọpọ̀ fáìlì, àwọn module, àwọn àṣà                                  |
-| `FEATURES.md`               | Àtòjọ àwọn ẹ̀yà pẹ̀lú àwọn ohun pàtàkì inú v3.8                                               |
-| `USER_GUIDE.md`             | Ìwé ìtọ́sọ́nà olùlò (ìṣètò, àwọn model, àwọn combo, àwọn CLI, ohun, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)           |
-| `API_REFERENCE.md`          | Ìtọ́kasí endpoint API pẹ̀lú àwòṣe ìfàṣẹsí                                                     |
-| `openapi.yaml`              | Àlàyé OpenAPI 3.0 (ọ̀nà 121)                                                                 |
-| `SETUP_GUIDE.md`            | Àwọn ọ̀nà ìṣàgbékalẹ̀ (npm, npx, Docker, Electron, Termux, source)                            |
-| `ENVIRONMENT.md`            | Gbogbo àwọn env vars (~800 tí a ṣàkọsílẹ̀, ~3,050 ìlà `.env.example`)                        |
-| `TROUBLESHOOTING.md`        | Àwọn àṣìṣe tí ó wọ́pọ̀ + àwọn ìṣòro v3.8.0 tí a mọ̀                                            |
-| `RELEASE_CHECKLIST.md`      | Gbogbo ìṣàn ìtújáde (skills, husky, conventional commits, deploy)                           |
-| `COVERAGE_PLAN.md`          | Àwọn àfojúsùn coverage àti ipò lọ́wọ́lọ́wọ́                                                     |
-| `FREE_TIERS.md`             | Àwọn olupèsè ipele-ọ̀fẹ́ tí a ti fara balẹ̀ yàn (48+ ọ̀fẹ́ + 11 OAuth)                           |
-| `CLI-TOOLS.md`              | Àwọn ìṣọ̀kan CLI ìta + OmniRoute CLI inú                                                     |
-| `I18N.md`                   | Àkànṣe i18n, bí a ṣe ń ṣàfikún èdè, àwọn locale 42                                          |
-| `UNINSTALL.md`              | Àwọn ìgbésẹ̀ ìyọkúrò tó mọ́ tónítóní                                                          |
-| `PROVIDER_REFERENCE.md`     | Àkójọ àwọn olupèsè 372 tí a **ṣẹ̀dá láìfọwọ́ṣe** (tún ṣẹ̀dá: `npm run gen:provider-reference`) |
+| Ìwé                         | Ète                                                                                          |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Àwòrán àpapọ̀ faaji, máàpù àwọn ẹ̀ka-ètò, ojú-iṣẹ́ dashboard                                    |
+| `CODEBASE_DOCUMENTATION.md` | Ìtọ́kasí ìmọ̀ ẹ̀rọ: àwọn àpò, àwọn module, àwọn àṣà                                             |
+| `FEATURES.md`               | Àtẹ ìfiwéra àwọn ẹ̀ya pẹ̀lú àwọn àmì pàtàkì v3.8                                               |
+| `USER_GUIDE.md`             | Ìwé ìtọ́sọ́nà olùlò ìkẹyìn (ìṣètò, àwọn model, àwọn combo, àwọn CLI, ohùn, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)     |
+| `API_REFERENCE.md`          | Ìtọ́kasí àwọn endpoint API pẹ̀lú model ìfàṣẹsí                                                 |
+| `openapi.yaml`              | Àlàyé OpenAPI 3.0 (ọ̀nà 121)                                                                  |
+| `SETUP_GUIDE.md`            | Àwọn ọ̀nà ìfisórí ẹrọ (npm, npx, Docker, Electron, Termux, source)                            |
+| `ENVIRONMENT.md`            | Gbogbo àwọn env vars (~800 tí a ṣàkọsílẹ̀, ~3,050 ìlà `.env.example`)                         |
+| `TROUBLESHOOTING.md`        | Àwọn àṣìṣe tó wọ́pọ̀ + àwọn ìṣòro v3.8.0 tí a mọ̀                                               |
+| `RELEASE_CHECKLIST.md`      | Ìṣàn ìtújáde kíkún (skills, husky, conventional commits, deploy)                             |
+| `COVERAGE_PLAN.md`          | Àwọn àfojúsùn coverage àti ipò lọ́wọ́lọ́wọ́                                                      |
+| `FREE_TIERS.md`             | Àwọn olùpèsè ipele-ọ̀fẹ́ tí a ti fara balẹ̀ yàn (48+ ọ̀fẹ́ + 11 OAuth)                            |
+| `CLI-TOOLS.md`              | Àwọn ìsopọ̀ CLI ti ita + CLI OmniRoute inú                                                    |
+| `I18N.md`                   | Faaji i18n, fífi èdè kan kún un, àwọn locale 67                                              |
+| `UNINSTALL.md`              | Àwọn ìgbésẹ̀ ìyọkúrò pátápátá                                                                 |
+| `PROVIDER_REFERENCE.md`     | Kátálọ́ọ̀gù àwọn olùpèsè 375 tí a **ṣẹ̀dá láìfọwọ́ṣe** (regen: `npm run gen:provider-reference`) |
 
-### Àlàyé jíjinlẹ̀ àwọn abẹ́-ètò
+### Ìtúpalẹ̀ jíjinlẹ̀ àwọn ẹ̀ka-ètò
 
-| Ìwé                                          | Ète                                                                            |
-| -------------------------------------------- | ------------------------------------------------------------------------------ |
-| `MCP-SERVER.md`                              | Server MCP: irinṣẹ́ 110, ọ̀nà ìgbékalẹ̀ 3, scope 33, àwọn endpoint REST           |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, skills 6, àwọn olùrànlọ́wọ́ REST, káàdì agent                |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Ìtọ́sọ́nà àpapọ̀: A2A vs ACP vs Cloud Agents                                      |
-| `CLOUD_AGENT.md`                             | Ìṣètò àti ìdarí Codex Cloud / Devin / Jules                                    |
-| `SKILLS.md`                                  | Ètò skills (tí a kọ sínú rẹ̀ + marketplace + SkillsSH + sandbox)                |
-| `RADAR.md`                                   | Ìpele-àfikún àkójọ model ọ̀fẹ́ Radar (`RADAR_ENABLED`, ó wà ní pípà ní àìyípadà) |
-| `MEMORY.md`                                  | Ètò ìrántí (SQLite FTS5 + Qdrant)                                              |
-| `EVALS.md`                                   | Ètò eval (àwọn suite, àwọn run, àwọn rubric)                                   |
-| `GUARDRAILS.md`                              | Ìbòmọ́lẹ̀ PII, ìkọlù prompt injection, afárá ìran                                |
-| `COMPLIANCE.md`                              | Àkọsílẹ̀ àyẹ̀wò, ìpamọ́, yíyọ ara ẹni kúrò ní noLog                               |
-| `WEBHOOKS.md`                                | Fífiranṣẹ́ webhook tí HMAC fọwọ́ sí                                              |
-| `REASONING_REPLAY.md`                        | Cache àdàlù ìrántí/SQLite fún `reasoning_content`                              |
-| `AUTHZ_GUIDE.md`                             | Ìṣàn ìfúnni-láṣẹ (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + model lockout                                     |
-| `docs/security/STEALTH_GUIDE.md` (git nìkan) | Ìdánimọ̀ fingerprint TLS (JA3/JA4), Claude Code CCH, ẹ̀rí MITM                   |
-| `AUTO-COMBO.md`                              | Ẹ́ńjìnnì Auto Combo (ìṣírò ohun-ìwọ̀n 16, àkójọpọ̀ mode 6, ilé-iṣẹ́ afòjú)         |
+| Ìwé                                          | Ète                                                                     |
+| -------------------------------------------- | ----------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | Server MCP: irinṣẹ́ 110, transport 3, scope 33, àwọn endpoint REST       |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, skill 6, àwọn olùrànlọ́wọ́ REST, káàdì agent          |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Ìtọ́sọ́nà àpapọ̀: A2A vs ACP vs Cloud Agents                               |
+| `CLOUD_AGENT.md`                             | Ìṣètò àti ìṣàkóso Codex Cloud / Devin / Jules                           |
+| `SKILLS.md`                                  | Framework skills (tí a kọ sínú rẹ̀ + marketplace + SkillsSH + sandbox)   |
+| `RADAR.md`                                   | Ìpele àfikún kátálọ́ọ̀gù model ọ̀fẹ́ Radar (`RADAR_ENABLED`, pípa ní àkọ́kọ́) |
+| `MEMORY.md`                                  | Ètò ìrántí (SQLite FTS5 + Qdrant)                                       |
+| `EVALS.md`                                   | Framework àyẹ̀wò (suites, runs, rubrics)                                 |
+| `GUARDRAILS.md`                              | Olùbojú PII, ìkọlù prompt injection, afárá vision                       |
+| `COMPLIANCE.md`                              | Àkọsílẹ̀ àyẹ̀wò, ìmúpamọ́, yíyọ ara ẹni kúrò pẹ̀lú noLog                    |
+| `WEBHOOKS.md`                                | Ìfiránṣẹ́ webhook tí a fi HMAC fọwọ́ sí                                   |
+| `REASONING_REPLAY.md`                        | Memory àkópọ̀/cache SQLite fún `reasoning_content`                       |
+| `AUTHZ_GUIDE.md`                             | Ìlànà ìfúnni-láṣẹ (`classify` → `policies` → `enforce`)                 |
+| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + model lockout                              |
+| `docs/security/STEALTH_GUIDE.md` (git nìkan) | Ṣíṣe ìdánimọ̀ ìka ọwọ́ TLS (JA3/JA4), Claude Code CCH, MITM cert          |
+| `AUTO-COMBO.md`                              | Engine Auto Combo (ìṣírò kókó 16, àkójọpọ̀ mode 6, ilé-iṣẹ́ àfojúrí)      |
 
 ### Ìfúnpọ̀
 
-| Ìwé                             | Ète                                         |
-| ------------------------------- | ------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Àkótán àwọn mode ìfúnpọ̀ + àwòrán-ọ̀nà        |
-| `COMPRESSION_ENGINES.md`        | Àwọn ẹ́ńjìnnì Caveman + RTK, àdéhùn registry |
-| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON fún àkójọpọ̀ òfin Caveman        |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Àkójọ àwọn àkójọpọ̀ òfin fún èdè kọ̀ọ̀kan      |
-| `RTK_COMPRESSION.md`            | Ìṣàn iṣẹ́ RTK alásọyé (àlẹ̀mọ́ 49)             |
+| Ìwé                             | Ète                                        |
+| ------------------------------- | ------------------------------------------ |
+| `COMPRESSION_GUIDE.md`          | Àkíyèsí àpapọ̀ àwọn mode ìfúnpọ̀ + roadmap   |
+| `COMPRESSION_ENGINES.md`        | Àwọn engine Caveman + RTK, àdéhùn registry |
+| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON fún àkójọpọ̀ òfin Caveman       |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Àkójọ àkójọpọ̀ òfin fún èdè kọ̀ọ̀kan          |
+| `RTK_COMPRESSION.md`            | Pipeline ìkéde RTK (filter 49)             |
 
-### Ìmúṣiṣẹ́ sí ayé gidi
+### Ìmúlọ níbi iṣẹ́
 
-| Dókítà                       | Ète                                                                  |
-| ---------------------------- | -------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Ìkọ́ Docker, àwọn prófáìlì (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Ìmúṣiṣẹ́ lórí VM/VPS gbogbogbòò (Ubuntu/Debian + nginx + systemd)     |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Ìmúṣiṣẹ́ lórí Fly.io (ó wà ní èdè Ṣáínà nìkan lọ́wọ́lọ́wọ́)               |
-| `TERMUX_GUIDE.md`            | Android aláìní ìṣàfihàn nípasẹ̀ Termux                                |
-| `PWA_GUIDE.md`               | Fífi Progressive Web App sori ẹrọ + service worker                   |
-| `ELECTRON_GUIDE.md`          | Ìkọ́ ètò ìṣàmúlò desktop + fífi ìbuwọ́lu sí i + pípín rẹ̀               |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                               |
-| `PROXY_GUIDE.md`             | Proxy àjáde onípele mẹ́rin + ọjà 1proxy                               |
+| Ìwé                          | Ìdí                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Ìkọ́lé Docker, àwọn prófáìlì (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Ìmúṣiṣẹ́ lórí VM/VPS gbogbogbòò (Ubuntu/Debian + nginx + systemd)       |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Ìmúṣiṣẹ́ lórí Fly.io (ní èdè Ṣáínà nìkan lọ́wọ́lọ́wọ́)                      |
+| `TERMUX_GUIDE.md`            | Android aláìní ìṣàfihàn nípasẹ̀ Termux                                  |
+| `PWA_GUIDE.md`               | Fífì Progressive Web App sílẹ̀ + service worker                         |
+| `ELECTRON_GUIDE.md`          | Ìkọ́lé app orí kọ̀ǹpútà + fífi ìfọwọ́sí sí i + pípínkiri rẹ̀               |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
+| `PROXY_GUIDE.md`             | Proxy àbájáde onípele mẹ́rin + ọjà 1proxy                               |
 
-### Àwọn ìtọ́sọ́nà abẹ́
+### Àwọn àpò-ìwé abẹ́nú
 
-| Ìtọ́sọ́nà abẹ́           | Ète                                                                                                                                                                                                                   |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Àwọn ìtumọ̀ dókítà sí àwọn èdè agbègbè (èdè 41)                                                                                                                                                                        |
-| `docs/screenshots/`   | Àwọn ohun-èlò àwòrán fún àwọn ìtọ́sọ́nà                                                                                                                                                                                 |
-| `_tasks/superpowers/` | Àwọn ètò/àlàyé pàtó láti inú superpowers (`writing-plans`/`brainstorming`) + ìwádìí — repo tí a yà sọ́tọ̀, tí a ń ṣàkóso ẹ̀dà rẹ̀ lọ́tọ̀, tí igi àkọ́kọ́ sì fi sínú gitignore. Wo CLAUDE.md → "Àwọn Ohun Èlò Ìṣètò & Ìwádìí". |
+| Àpò-ìwé abẹ́nú         | Ìdí                                                                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | Àwọn ìtumọ̀ ìwé sí àwọn èdè agbègbè (agbègbè èdè 41)                                                                                                                                                                      |
+| `docs/screenshots/`   | Àwọn ohun-èlò àwòrán fún àwọn ìtọ́sọ́nà                                                                                                                                                                                    |
+| `_tasks/superpowers/` | Àwọn ètò/àwọn àlàyé pàtó láti inú superpowers (`writing-plans`/`brainstorming`) + ìwádìí — repo tí a yà sọ́tọ̀, tí ó ní ìṣàkóso ẹ̀yà tirẹ̀, tí igi àkọ́kọ́ sì fi sínú gitignore. Wo CLAUDE.md → "Àwọn Àṣàwárí Ètò àti Ìwádìí". |
 
 ---
 

@@ -9,7 +9,7 @@ import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardizatio
 import { isObsoleteKiroModelAlias } from "@omniroute/open-sse/services/kiroModels.ts";
 import { filterSelectableModels } from "@omniroute/open-sse/services/modelLifecycle.ts";
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
-import { hasPayloadFreeEvidence } from "@/shared/utils/payloadFreeEvidence";
+import { hasPayloadFreeEvidence, hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -605,6 +605,23 @@ export function normalizeDiscoveredModels(
             ? ["images"]
             : undefined;
 
+    // #16929 provenance. Only a parser that genuinely reads the upstream's own
+    // capability declaration (e.g. Gemini supportedGenerationMethods) stamps
+    // "declared" explicitly on the record. A bare supportedEndpoints array is NOT
+    // proof of declaration: OpenAI/OpenRouter/Ollama/codex/compatible parsers fill it
+    // from heuristics or fixed defaults, so it stays unmarked (= defaulted, never
+    // gating). Id/type modality inference applies only when no array was supplied.
+    // "defaulted" is left off the row so chat rows keep the tip's exact shape.
+    const endpointCapabilitySource: SyncedAvailableModel["endpointCapabilitySource"] =
+      record.endpointCapabilitySource === "operator" ||
+      record.endpointCapabilitySource === "declared" ||
+      record.endpointCapabilitySource === "inferred"
+        ? record.endpointCapabilitySource
+        : !Array.isArray(record.supportedEndpoints) &&
+            (modality.isEmbedding || modality.isRerank || modality.isImage)
+          ? "inferred"
+          : undefined;
+
     const apiFormat =
       toNonEmptyString(record.apiFormat) ||
       (modality.isEmbedding
@@ -666,7 +683,8 @@ export function normalizeDiscoveredModels(
     const supportsVision = detectVisionInput(record);
     // Persist only evidence present in this discovery payload. Static catalog
     // membership is intentionally not evidence about this connection's economics.
-    const isFree = hasPayloadFreeEvidence({ ...record, id });
+    const explicitlyPaid = providerId === "siliconflow" && hasPayloadPaidEvidence(record);
+    const isFree = !explicitlyPaid && hasPayloadFreeEvidence({ ...record, id });
 
     deduped.set(id, {
       id,
@@ -689,6 +707,7 @@ export function normalizeDiscoveredModels(
         ? { upstreamProtocol: toNonEmptyString(record.upstreamProtocol)! }
         : {}),
       ...(supportedEndpoints && supportedEndpoints.length > 0 ? { supportedEndpoints } : {}),
+      ...(endpointCapabilitySource ? { endpointCapabilitySource } : {}),
       ...(supportedThinkingEfforts !== undefined ? { supportedThinkingEfforts } : {}),
       ...(defaultThinkingEffort !== undefined ? { defaultThinkingEffort } : {}),
       ...(typeof inputTokenLimit === "number" ? { inputTokenLimit } : {}),
@@ -709,7 +728,9 @@ export function normalizeDiscoveredModels(
       ...(record.alwaysThinking === true ? { alwaysThinking: true } : {}),
       ...(typeof record.supportsTools === "boolean" ? { supportsTools: record.supportsTools } : {}),
       ...(typeof record.supportsVideo === "boolean" ? { supportsVideo: record.supportsVideo } : {}),
-      ...(isFree ? { isFree: true } : {}),
+      // Keep a paid verdict through the cache round trip: dropping false would
+      // let a :free suffix or a prior optimistic flag grant access again.
+      ...(explicitlyPaid ? { isFree: false } : isFree ? { isFree: true } : {}),
       ...(supportsVision ? { supportsVision: true } : {}),
       ...(typeof modality.dimensions === "number" && modality.dimensions > 0
         ? { dimensions: modality.dimensions }

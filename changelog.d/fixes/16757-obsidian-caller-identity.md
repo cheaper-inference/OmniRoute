@@ -1,1 +1,0 @@
-- **Fixed**: Non-sync Obsidian MCP tools reject callers without a resolved API-key identity before accessing vault credentials; authenticated global fallback and sync-token behavior remain supported. (#16757)

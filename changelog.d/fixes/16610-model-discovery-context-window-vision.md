@@ -1,1 +1,0 @@
-- **fix(modelDiscovery):** upstream OpenAI-compatible `/models` rows that advertise snake_case `context_window`, `max_context_window_tokens`, `context_window_tokens`, or a boolean `vision` flag now map onto `inputTokenLimit` / `supportsVision` ([#16610](https://github.com/diegosouzapw/OmniRoute/pull/16610)) — thanks @cmbergamo.

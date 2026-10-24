@@ -1,4 +1,5 @@
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import {
   getProviderCredentialsWithQuotaPreflight,
@@ -48,6 +49,7 @@ import {
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
+import { recordModalCallCost } from "@/domain/costRules";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
@@ -59,6 +61,10 @@ import {
   CHATGPT_WEB_RETIRED_ERROR_CODE,
   isCommonChatGptWebRetirementError,
 } from "@/shared/constants/chatgptWebRetirement";
+import { PLAYGROUND_IMAGE_STREAM_HEADER } from "@/shared/utils/playgroundImageStream";
+import { createPlaygroundImageStreamResponse } from "@/lib/playground/imageGenerationStream";
+import { getImageLongJobOptions } from "@/lib/images/imageGenerationLongJobs";
+import { isImageGenerationLongJobsEnabled } from "@/shared/utils/featureFlags";
 
 export const dynamic = "force-dynamic";
 
@@ -161,6 +167,9 @@ async function postHandler(request, context) {
   // target) stays inside the key's connection scope, the same scope chat applies.
   const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
   if (scope.rejection) return scope.rejection;
+  // Respect the authenticated API key's credential scope before checking model capabilities.
+  const endpointMismatch = await getRequestedModelEndpointMismatch(body.model, "images");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
   const { allowedConnections } = scope;
 
   const modelPrefix = body.model.includes("/")
@@ -391,6 +400,8 @@ async function postHandler(request, context) {
               log,
               ...(isCustomModel && { resolvedProvider: provider }),
               signal: request.signal,
+              // #16260 — IMAGE_GENERATION_LONG_JOBS (default off): null keeps the default path.
+              longJobs: getImageLongJobOptions(),
               clientHeaders: publicBaseUrlHeaders(request.headers),
               // Trusted "loopback"|"lan"|"remote" verdict stamped by the authz
               // pipeline from the real TCP peer (never the spoofable Host
@@ -424,6 +435,7 @@ async function postHandler(request, context) {
     // requested `n` must not be charged for the missing ones (#16398 follow-up).
     const n = (result as { data?: { data?: unknown[] } }).data?.data?.length || 1;
     const costUsd = await calculateModalCost("image", provider, body.model, { n });
+    recordModalCallCost(policy.apiKeyInfo?.id, { provider, model: body.model, costUsd });
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
       provider,
@@ -451,4 +463,16 @@ async function postHandler(request, context) {
   return errorResponse((result as any).status, message);
 }
 
-export const POST = withInjectionGuard(postHandler);
+const guardedPost = withInjectionGuard(postHandler);
+
+export function POST(request: Request, context?: unknown) {
+  // #16260 — the Playground SSE keepalive wrapper is honoured only with
+  // IMAGE_GENERATION_LONG_JOBS on; off, the header is ignored and the JSON response is unchanged.
+  if (
+    request.headers.get(PLAYGROUND_IMAGE_STREAM_HEADER) === "1" &&
+    isImageGenerationLongJobsEnabled()
+  ) {
+    return createPlaygroundImageStreamResponse(request, context, guardedPost);
+  }
+  return guardedPost(request, context);
+}

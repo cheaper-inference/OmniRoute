@@ -1,1 +1,0 @@
-- **fix(providers):** Correct OpenCode Go context and output limits for both DeepSeek Flash aliases and MiniMax M2.5, replacing stale imported placeholders with upstream-verified limits while honoring manual overrides; cover all confirmed Go model windows with regression tests ([#16860](https://github.com/diegosouzapw/OmniRoute/pull/16860)) — thanks @fabioKoruja00

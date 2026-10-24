@@ -48,6 +48,11 @@ const pluginOptionsSchema = z
     hiddenModels: z.array(z.string()).optional(),
     providersAllow: z.array(z.string()).optional(),
     usableOnly: z.boolean().default(false),
+    // Combo source: "api" (default) folds /api/combos over each combo's
+    // members, so a combo publishes only when every member passes the
+    // filters. "models" skips that request and publishes the combo rows
+    // /v1/models serves; any member-level filter keeps the "api" source.
+    combosSource: z.enum(["api", "models"]).default("api"),
     freeOnly: z.boolean().default(false),
     toolsOnly: z.boolean().default(false),
     visionOnly: z.boolean().default(false),
@@ -163,6 +168,7 @@ export function toResolvedOptions(parsed: PluginOptions): ResolvedOptions {
     hiddenModels: parsed.hiddenModels,
     providersAllow: parsed.providersAllow,
     usableOnly: parsed.usableOnly,
+    combosSource: parsed.combosSource,
     freeOnly: parsed.freeOnly,
     toolsOnly: parsed.toolsOnly,
     visionOnly: parsed.visionOnly,

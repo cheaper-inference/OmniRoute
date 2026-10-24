@@ -1,1 +1,0 @@
-- **fix(translator):** honor the terminal `response.done` status on Responses→Chat streams — failed/cancelled now surface as upstream errors (combo fallback fires), incomplete keeps its `length`/`content_filter` finish reason, and its usage is extracted ([#16909](https://github.com/diegosouzapw/OmniRoute/pull/16909)) — thanks @amirsalaar

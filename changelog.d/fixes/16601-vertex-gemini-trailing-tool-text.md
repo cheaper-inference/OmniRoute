@@ -1,1 +1,0 @@
-- **fix(providers):** Preserve Claude text following tool results in Gemini function responses, avoiding mixed turns rejected by Vertex Gemini Flash ([#16443](https://github.com/diegosouzapw/OmniRoute/issues/16443) — thanks @christianjgilman).

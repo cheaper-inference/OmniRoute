@@ -1,1 +1,0 @@
-- **fix(opencode):** alias over-length tool names (>64 chars) for OpenCode Zen/Go and restore them in responses ([#16531](https://github.com/diegosouzapw/OmniRoute/pull/16531)) — thanks @MakdumIbrohim

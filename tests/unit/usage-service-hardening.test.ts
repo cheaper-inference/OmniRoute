@@ -1426,7 +1426,12 @@ test("usage service opencode happy path returns plan and three quota windows", a
       { status: 200, headers: { "content-type": "application/json" } }
     );
 
+  // #16344: quota reads go through fetchWithConnectionProxy, which refuses to fetch for a
+  // connection without an id (it cannot resolve the assigned proxy, so it reports an unknown
+  // reading instead of egressing directly). Every production caller passes a stored
+  // connection; give this one an id like they do.
   const result: any = await usageService.getUsageForProvider({
+    id: "opencode-happy-conn",
     provider: "opencode-zen",
     apiKey: "oc-happy-key",
   });

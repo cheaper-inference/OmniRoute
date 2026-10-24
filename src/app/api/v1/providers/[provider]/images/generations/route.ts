@@ -18,6 +18,7 @@ import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import { runImageRequestWithAccounting } from "@/lib/usage/imageRequestAccounting";
 import { executeImageWithCredentialFallback } from "@/sse/services/imageCredentialRetry";
 import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
+import { getImageLongJobOptions } from "@/lib/images/imageGenerationLongJobs";
 
 /**
  * Handle CORS preflight
@@ -107,6 +108,8 @@ export async function POST(request, { params }) {
   const unusable = unusableCredentialsResponse(rawProvider, credentials);
   if (unusable) return unusable;
 
+  // #16260 — IMAGE_GENERATION_LONG_JOBS (default off): caller cancellation + connection timeout.
+  const longJobs = getImageLongJobOptions();
   const execution = await executeImageWithCredentialFallback({
     provider: rawProvider,
     requestedModel,
@@ -122,7 +125,13 @@ export async function POST(request, { params }) {
           credentials: attemptCredentials,
           startTime,
         },
-        () => handleImageGeneration({ body, credentials: attemptCredentials, log })
+        () =>
+          handleImageGeneration({
+            body,
+            credentials: attemptCredentials,
+            log,
+            ...(longJobs ? { signal: request.signal, longJobs } : {}),
+          })
       ),
   });
   credentials = execution.credentials;

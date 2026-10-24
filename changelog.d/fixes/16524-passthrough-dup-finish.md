@@ -1,1 +1,0 @@
-- **fix(sse):** drop duplicate finish chunks in passthrough streams and fail over on empty completions carrying an upstream `native_finish_reason` error ([#16524](https://github.com/diegosouzapw/OmniRoute/pull/16524)) — thanks @askidmobile
