@@ -14,6 +14,7 @@ import {
   formatBufferedVerdictLog,
   judgeBufferedTurn,
   readBoundedResponseOutcome,
+  resolveEmptyTurnReplayPath,
   FLUSH_EMPTY_RETRY_MAX_BYTES,
   pickEmptyTurnRetryCredentials,
   type RetryRouting,
@@ -74,6 +75,17 @@ export interface EmptyTurnRetryResult {
 export async function runEmptyTurnRetryLoop(
   deps: EmptyTurnRetryDeps
 ): Promise<EmptyTurnRetryResult> {
+  // The replay path decides the rule and the early stop of the bounded read.
+  // A same-format pair the probe cannot read (claude, gemini, ...) keeps the
+  // current behavior: no bounded read, no replay.
+  const replayPath = resolveEmptyTurnReplayPath(deps.targetFormat, deps.clientResponseFormat);
+  if (replayPath === "unsupported") {
+    return {
+      providerResponse: deps.providerResponse,
+      finalBody: deps.finalBody,
+      adopted: false,
+    };
+  }
   const maxRetries = deps.maxRetries ?? STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX;
   const note = deps.noteOutcome ?? noteBufferedVerdictOutcome;
   // Named `getProviderCredentials` so the hard-session-lease inventory still sees this call site.
@@ -86,7 +98,8 @@ export async function runEmptyTurnRetryLoop(
     const read = await readBoundedResponseOutcome(
       providerResponse,
       FLUSH_EMPTY_RETRY_MAX_BYTES,
-      deps.timeoutMs
+      deps.timeoutMs,
+      { replayPath }
     );
     const verdict: Verdict =
       read.kind === "text" && !deps.isAborted() && hasTrustedEmptyTurn(providerResponse)

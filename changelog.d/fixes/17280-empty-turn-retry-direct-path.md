@@ -1,0 +1,1 @@
+- **fix(sse):** an empty upstream turn on the direct streaming path is now replayed through the normal credential path instead of being returned as an empty 200 ([#17280](https://github.com/diegosouzapw/OmniRoute/pull/17280)) — thanks @maxmad64bis

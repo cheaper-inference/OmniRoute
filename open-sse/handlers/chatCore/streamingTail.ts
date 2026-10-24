@@ -24,6 +24,10 @@ import {
 import { FORMATS } from "../../translator/formats.ts";
 import { needsTranslation } from "../../translator/index.ts";
 import { runEmptyTurnRetryLoop } from "./emptyTurnRetryLoop.ts";
+import {
+  resolveEmptyTurnReplayPath,
+  type EmptyTurnReplayPath,
+} from "../../utils/emptyTurnRetry.ts";
 import { buildErrorBody } from "../../utils/error.ts";
 import {
   createPassthroughStreamWithLogger,
@@ -264,13 +268,15 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // cooldown and no forced exclusion: the round-robin picker may rotate
   // fingerprint slots opportunistically, a single slot simply replays the same
   // account. Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
-  // back to the current behavior. Translate-path streams only (mirror of the
-  // empty-stream guard); flag off = byte-for-byte unchanged. Bounded reader
-  // (abandon past the cap, never a full `text()` read); the original
-  // reconstructed response is piped, only the bounded copy is classified.
-  // Known TTFT cost when armed: a small valid turn under the cap is fully
-  // buffered before the first client byte (flag off by default, so the
-  // streaming path is untouched unless opted in).
+  // back to the current behavior. The arm covers the translated path and the
+  // direct path (upstream and client speaking the same chat-completions
+  // format): the only same-format pair whose turn shape the bounded probe
+  // reads exactly. Every other same-format pair keeps the current behavior.
+  // Flag off = byte-for-byte unchanged. Bounded reader (abandon past the cap,
+  // never a full `text()` read); the original reconstructed response is piped,
+  // only the bounded copy is classified. Known TTFT cost when armed: a small
+  // valid turn under the cap is fully buffered before the first client byte
+  // (flag off by default, so the streaming path is untouched unless opted in).
   if (stream && providerResponse.ok && providerResponse.body) {
     let flushEmptyRetryArmed = false;
     try {
@@ -278,10 +284,11 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     } catch {
       flushEmptyRetryArmed = false;
     }
-    const isTranslatePath =
-      targetFormat === FORMATS.OPENAI_RESPONSES ||
-      needsTranslation(targetFormat, clientResponseFormat);
-    if (flushEmptyRetryArmed && isTranslatePath) {
+    const emptyTurnReplayPath: EmptyTurnReplayPath = resolveEmptyTurnReplayPath(
+      targetFormat,
+      clientResponseFormat
+    );
+    if (flushEmptyRetryArmed && emptyTurnReplayPath !== "unsupported") {
       const retried = await runEmptyTurnRetryLoop({
         providerResponse,
         credentials,
