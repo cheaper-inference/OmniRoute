@@ -308,12 +308,10 @@ export function buildGeminiTools(
 
   const result: GeminiTool[] = [];
 
-  if (googleSearchTool) {
-    return [googleSearchTool];
-  }
-
   if (functionDeclarations.length > 0) {
     result.push({ functionDeclarations });
+  } else if (googleSearchTool) {
+    result.push(googleSearchTool);
   }
 
   return result.length > 0 ? result : undefined;

@@ -4802,7 +4802,7 @@
   },
   "tests/unit/translator-openai-to-gemini.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 65
+      "count": 63
     }
   },
   "tests/unit/translator-openai-to-kiro.test.ts": {
