@@ -4153,6 +4153,90 @@ paths:
         "200":
           description: Connection usage data
 
+  /api/v0/management/auth-files:
+    get:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible OAuth account list
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/auth-files`).
+        Lists the Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider,
+        email, disabled, id_token }] }`. Never includes tokens. Requires a dashboard session or
+        a `manage`-scoped API key, even when login is disabled.
+      x-always-protected: true
+      responses:
+        "200":
+          description: "`{ files }`"
+        "401":
+          description: Authentication required
+        "403":
+          description: API key lacks the `manage` scope
+
+  /api/v0/management/api-call:
+    post:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible upstream usage call
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/api-call`). Sends
+        one allowlisted request (Claude `GET /api/oauth/usage`; Codex `GET /backend-api/wham/usage`,
+        `GET /backend-api/wham/rate-limit-reset-credits`, `POST .../consume`) with the
+        connection's OAuth token injected server-side, and returns the raw upstream
+        `{ status_code, body }`. Any other method, URL or provider is refused with 403.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [auth_index, method, url]
+              properties:
+                auth_index:
+                  type: string
+                method:
+                  type: string
+                  enum: [GET, POST]
+                url:
+                  type: string
+                header:
+                  type: object
+                  additionalProperties:
+                    type: string
+                data:
+                  type: string
+                  description: JSON-encoded request body (POST only)
+      responses:
+        "200":
+          description: "`{ status_code, body }`"
+        "403":
+          description: Request not allowlisted, or API key lacks the `manage` scope
+        "404":
+          description: Unknown auth_index
+
+  /api/v0/management/reset-quota:
+    post:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible cooldown reset
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/reset-quota`).
+        Lifts the connection cooldown and model lockouts of one Claude or Codex OAuth account
+        (and the Codex per-scope cooldowns). Terminal states are left alone.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [auth_index]
+              properties:
+                auth_index:
+                  type: string
+      responses:
+        "200":
+          description: "`{ ok, auth_index, cleared, lockouts_cleared, skipped_terminal }`"
+        "404":
+          description: Unknown auth_index
+
   /api/usage/history:
     get:
       tags: [Usage]

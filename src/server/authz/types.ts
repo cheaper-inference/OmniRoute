@@ -35,6 +35,7 @@ export type ClassificationReason =
   | "client_api_alias"
   | "client_api_codex_alias"
   | "client_api_double_prefix"
+  | "cliproxy_management_alias"
   | "management_api"
   | "root_redirect"
   | "fallback_management";

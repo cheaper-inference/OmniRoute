@@ -28,6 +28,14 @@ function normalizePathname(rawPath: string): { path: string; reason?: Classifica
     return { path: "/api/v1/responses", reason: "client_api_codex_alias" };
   }
 
+  // CLIProxyAPI management compatibility: next.config.mjs rewrites /v0/management/* to
+  // /api/v0/management/*. Normalize here so the policy (and the ALWAYS_PROTECTED entry in
+  // routeGuard.ts) sees the same path for both spellings. Still MANAGEMENT, never client API.
+  if (lower === "/v0/management" || lower.startsWith("/v0/management/")) {
+    const tail = path.slice("/v0/management".length) || "";
+    return { path: "/api/v0/management" + tail, reason: "cliproxy_management_alias" };
+  }
+
   if (lower === "/v1/v1" || lower.startsWith("/v1/v1/")) {
     const tail = path.slice("/v1/v1".length) || "";
     return { path: "/api/v1" + tail, reason: "client_api_double_prefix" };
@@ -104,6 +112,14 @@ export function classifyRoute(rawPath: string, method: string = "GET"): RouteCla
     return {
       routeClass: "CLIENT_API",
       reason: aliasReason ?? "client_api_v1",
+      normalizedPath,
+    };
+  }
+
+  if (aliasReason === "cliproxy_management_alias") {
+    return {
+      routeClass: "MANAGEMENT",
+      reason: aliasReason,
       normalizedPath,
     };
   }
