@@ -1579,9 +1579,9 @@ A heartfelt thank-you to the people who fund OmniRoute out of their own pocket �
       <sub>💛 Active one-time sponsor</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/somesh-ghaturle">
-        <img src="https://github.com/somesh-ghaturle.png?size=140" width="72" style="border-radius:50%" alt="Somesh Ghaturle"/><br/>
-        <b>Somesh Ghaturle</b>
+      <a href="https://github.com/Fawadullah15">
+        <img src="https://github.com/Fawadullah15.png?size=140" width="72" style="border-radius:50%" alt="Somesh Ghaturle"/><br/>
+        <b>Fawad Imraj</b>
       </a><br/>
       <sub>💛 Active one-time sponsor</sub>
     </td>
