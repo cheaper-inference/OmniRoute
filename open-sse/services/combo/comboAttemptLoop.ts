@@ -344,6 +344,29 @@ export async function dispatchWithCooldownRetry(opts: {
         getStrategyTraits(deps.strategy).honorsFallbackOnlyTargets &&
         state.orderedTargets.some((target) => target.fallbackOnlyOnQuotaExhaustion === true);
 
+      const hedgingEnabled =
+        zeroLatencyOptimizationsEnabled &&
+        deps.config.hedging &&
+        bodySmallEnoughToHedge &&
+        !hasProtectedPriorityTarget;
+      // Keep original target indices: gates and abort controllers key by index.
+      const dispatchIndices = state.orderedTargets.map((_, index) => index);
+      if (hedgingEnabled) {
+        const groups = new Map<string, number[]>();
+        for (const index of dispatchIndices) {
+          const key = state.orderedTargets[index].modelStr;
+          const group = groups.get(key) ?? [];
+          group.push(index);
+          groups.set(key, group);
+        }
+        dispatchIndices.length = 0;
+        for (let account = 0; account < state.orderedTargets.length; account++) {
+          for (const group of groups.values()) {
+            if (account < group.length) dispatchIndices.push(group[account]);
+          }
+        }
+      }
+
       const executeTarget = async (i: number): Promise<ExecuteTargetResult> => {
         const gate = await extra.evaluateGates({ index: i, state, deps });
         if (gate.kind === "skip") return gate.result;
@@ -357,7 +380,7 @@ export async function dispatchWithCooldownRetry(opts: {
         });
       };
 
-      for (let i = 0; i < state.orderedTargets.length; i++) {
+      for (const [dispatchPosition, i] of dispatchIndices.entries()) {
         if (anySuccess || state.comboExpired || comboRequestMalformed) break;
         // Another connection of the SAME model rejects the request identically:
         // a request-scoped refusal is not fixable by another account.
@@ -388,6 +411,9 @@ export async function dispatchWithCooldownRetry(opts: {
                 // Fatal error, abort combo
                 anySuccess = true;
                 globalResolve!(res.response);
+                for (const [idx, ac] of state.abortControllers.entries()) {
+                  if (idx !== i) ac.abort();
+                }
               }
             }
           } finally {
@@ -401,10 +427,17 @@ export async function dispatchWithCooldownRetry(opts: {
           // executeTarget's error handling) and no other task succeeds, the post-loop
           // `Promise.race([globalPromise, ...])` would hang forever. Resolve with a
           // 502 so the request terminates with an actionable error.
-          if (!anySuccess && globalResolve) {
-            anySuccess = true;
-            globalResolve(errorResponse(502, `Combo target ${i} failed with an unexpected error`));
-          }
+          // A thrown branch is still a branch failure, not proof that every
+          // other provider failed. Post-loop aggregation settles all-failure.
+          state.lastStatus = 502;
+          state.lastError = "Combo target failed with an unexpected error";
+          state.comboErrors.push({
+            model: state.orderedTargets[i].modelStr,
+            status: 502,
+            error: state.lastError,
+            kind: "provider",
+          });
+          state.recordedAttempts++;
         });
 
         runningTasks.add(task);
@@ -415,7 +448,7 @@ export async function dispatchWithCooldownRetry(opts: {
           deps.config.hedging &&
           bodySmallEnoughToHedge &&
           !hasProtectedPriorityTarget &&
-          i + 1 < state.orderedTargets.length
+          dispatchPosition + 1 < dispatchIndices.length
         ) {
           const hedgeDelay = resolveDelayMs(deps.config.hedgeDelayMs, 500);
           const timeoutPromise = new Promise<void>((r) => {
@@ -442,7 +475,12 @@ export async function dispatchWithCooldownRetry(opts: {
           );
         }
 
-        if (!anySuccess && !state.comboExpired && hasIdenticalModelErrorStreak(state.comboErrors)) {
+        if (
+          !hedgingEnabled &&
+          !anySuccess &&
+          !state.comboExpired &&
+          hasIdenticalModelErrorStreak(state.comboErrors)
+        ) {
           comboRequestMalformed = true;
           const last = state.comboErrors[state.comboErrors.length - 1];
           deps.log.warn(
