@@ -11,6 +11,7 @@
  * `temperature` are forwarded upstream.
  */
 
+import { audioErrorResponse } from "../utils/audioResponse.ts";
 import {
   getTranslationProvider,
   parseTranslationModel,
@@ -130,6 +131,6 @@ export async function handleAudioTranslation({
     });
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
-    return errorResponse(500, `Translation request failed: ${error.message}`);
+    return audioErrorResponse(500, `Translation request failed: ${error.message}`);
   }
 }
