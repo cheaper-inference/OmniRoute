@@ -3936,6 +3936,7 @@
     "builderComboRefStep": "Lisää yhdistelmäviite",
     "builderPinnedAccount": "Kiinnitetty tili",
     "builderLegacyEntry": "Vanha merkintä",
+    "builderStaleModel": "Ei live-katalogissa",
     "reviewName": "Nimi",
     "reviewStrategy": "Strategia",
     "reviewSteps": "Vaiheet",
