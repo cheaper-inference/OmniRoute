@@ -14,6 +14,10 @@
   ],
   "properties": {
     "schema_version": { "type": "integer", "const": 1 },
+    "releaseAcceptance": {
+      "const": false,
+      "description": "A supplied-plan verdict is not a full release or promotion certificate."
+    },
     "identity": { "$ref": "#/$defs/identity" },
     "required_gates": {
       "type": "array",
@@ -30,10 +34,7 @@
     },
     "verdict": { "enum": ["VERIFIED", "FAILED", "UNVERIFIED"] },
     "artifact": {
-      "anyOf": [
-        { "type": "null" },
-        { "$ref": "#/$defs/artifact" }
-      ]
+      "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/artifact" }]
     }
   },
   "allOf": [
@@ -157,10 +158,7 @@
         "status": { "enum": ["PASS", "FAIL", "INFRA_ERROR", "SKIPPED"] },
         "reason": { "type": "string", "minLength": 1 },
         "cause": {
-          "anyOf": [
-            { "type": "null" },
-            { "$ref": "#/$defs/gateInstanceKey" }
-          ]
+          "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/gateInstanceKey" }]
         },
         "exit_code": { "type": ["integer", "null"] },
         "duration_ms": { "type": "integer", "minimum": 0 },
