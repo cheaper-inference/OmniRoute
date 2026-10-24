@@ -12,77 +12,77 @@ _Posljednje ažurirano: 2026-06-28_
 
 ## Izvršni sažetak
 
-OmniRoute je lokalni pristupnik za usmjeravanje AI prometa i nadzorna ploča izgrađena na Next.js-u.
-Pruža jednu krajnju točku kompatibilnu s OpenAI-jem (`/v1/*`) i usmjerava promet između više pružatelja uz prevođenje, pričuvno prebacivanje, osvježavanje tokena i praćenje upotrebe.
+OmniRoute je lokalni AI usmjerivački gateway i nadzorna ploča izgrađeni na Next.js-u.
+Pruža jedinstvenu OpenAI-kompatibilnu krajnju točku (`/v1/*`) i usmjerava promet kroz više upstream pružatelja s prijevodom, fallbackom, osvježavanjem tokena i praćenjem korištenja.
 
-Ključne mogućnosti:
+Osnovne mogućnosti:
 
-- API sučelje kompatibilno s OpenAI-jem za CLI/alate (375 pružatelja, 156 izvršna modula)
-- Prevođenje zahtjeva/odgovora između formata pružatelja
-- Pričuvno prebacivanje kombinacije modela (slijed više modela)
-- Strukturirani koraci kombinacije (`provider + model + connection`) s redoslijedom tijekom izvođenja prema `compositeTiers`
-- Pričuvno prebacivanje na razini računa (više računa po pružatelju)
-- Prethodna provjera kvote i odabir računa metodom P2C koji uzima u obzir kvotu u glavnom toku razgovora
-- Upravljanje vezama s pružateljima putem OAutha i API ključeva (27 modula OAuth pružatelja)
-- Generiranje ugradnji putem `/v1/embeddings` (18 pružatelja)
+- OpenAI-kompatibilno API sučelje za CLI/alate (375 pružatelja, 156 izvršnih modula)
+- Prijevod zahtjeva/odgovora između formata pružatelja
+- Fallback kombinacije modela (sekvenca više modela)
+- Strukturirani koraci kombinacije (`provider + model + connection`) s runtime uređivanjem redoslijeda prema `compositeTiers`
+- Fallback na razini računa (više računa po pružatelju)
+- Preflight provjera kvote i odabir P2C računa svjestan kvote na glavnom putu chata
+- Upravljanje OAuth + API-ključ vezama pružatelja (27 OAuth modula pružatelja)
+- Generiranje embeddinga putem `/v1/embeddings` (18 pružatelja)
 - Generiranje slika putem `/v1/images/generations` (10+ pružatelja, 20+ modela)
 - Transkripcija zvuka putem `/v1/audio/transcriptions` (18 pružatelja)
 - Pretvaranje teksta u govor putem `/v1/audio/speech` (24 ugrađena pružatelja)
-- Generiranje videozapisa putem `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generiranje videa putem `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Generiranje glazbe putem `/v1/music/generations` (ComfyUI)
-- Pretraživanje weba putem `/v1/search` (20 pružatelja)
-- Moderiranje putem `/v1/moderations`
+- Pretraga weba putem `/v1/search` (20 pružatelja)
+- Moderacije putem `/v1/moderations`
 - Ponovno rangiranje putem `/v1/rerank`
-- Raščlanjivanje oznaka za razmišljanje (``) za modele zaključivanja
+- Parsiranje think oznake (`<think>...</think>`) za modele zaključivanja
 - Sanitizacija odgovora radi stroge kompatibilnosti s OpenAI SDK-om
 - Normalizacija uloga (developer→system, system→user) radi kompatibilnosti među pružateljima
 - Pretvorba strukturiranog izlaza (json_schema → Gemini responseSchema)
-- Lokalna pohrana pružatelja, ključeva, pseudonima, kombinacija, postavki i cijena (122 DB modula)
-- Praćenje upotrebe/troškova i zapisivanje zahtjeva
-- Neobavezna sinkronizacija u oblaku za sinkronizaciju stanja između više uređaja
-- Popis dopuštenih/blokiranih IP adresa za kontrolu pristupa API-ju
-- Upravljanje proračunom za razmišljanje (prosljeđivanje/automatski/prilagođeni/prilagodljivi način)
-- Umetanje globalnog sistemskog upita
-- Praćenje sesija i izrada otisaka
-- Poboljšano ograničavanje brzine po računu s profilima specifičnima za pružatelja
-- Obrazac prekidača strujnog kruga za otpornost pružatelja
-- Zaštita od lavinskih zahtjeva zaključavanjem mutexom
-- Predmemorija za dedupliciranje zahtjeva na temelju potpisa
-- Sloj domene: pravila troškova, pravila pričuvnog prebacivanja, pravila zaključavanja
-- Context Relay: sažeci primopredaje sesije radi kontinuiteta pri izmjeni računa
-- Trajna pohrana stanja domene (SQLite predmemorija s izravnim zapisivanjem za pričuvna prebacivanja, proračune, zaključavanja i prekidače strujnog kruga)
-- Mehanizam pravila za centraliziranu procjenu zahtjeva (zaključavanje → proračun → pričuvno prebacivanje)
+- Lokalna trajna pohrana za pružatelje, ključeve, aliase, kombinacije, postavke, cjenike (122 DB modula)
+- Praćenje korištenja/troškova i bilježenje zahtjeva
+- Opcionalna sinkronizacija u oblaku za sinkronizaciju više uređaja/stanja
+- IP popisi dopuštenih/blokiranih za kontrolu pristupa API-ju
+- Upravljanje budžetom razmišljanja (passthrough/auto/custom/adaptive)
+- Globalno ubrizgavanje sistemskog upita
+- Praćenje sesija i fingerprinting
+- Poboljšano ograničavanje brzine (rate limiting) po računu s profilima specifičnim za pružatelje
+- Circuit breaker obrazac za otpornost pružatelja
+- Zaštita od thundering herda uz zaključavanje mutexom
+- Predmemorija za deduplikaciju zahtjeva temeljena na potpisu
+- Domenski sloj: pravila troškova, fallback politika, lockout politika
+- Context Relay: sažeci predaje sesije za kontinuitet rotacije računa
+- Trajna pohrana domenskog stanja (SQLite write-through predmemorija za fallbackove, budžete, lockoutove, circuit breakere)
+- Mehanizam pravila za središnju procjenu zahtjeva (lockout → budget → fallback)
 - Telemetrija zahtjeva s agregacijom latencije p50/p95/p99
-- Telemetrija ciljeva kombinacije i povijesno stanje ciljeva kombinacije putem `combo_execution_key` / `combo_step_id`
-- Korelacijski ID (X-Request-Id) za praćenje od početka do kraja
-- Evidentiranje revizijskih zapisa usklađenosti s mogućnošću isključivanja po API ključu
-- Okvir za evaluaciju radi osiguranja kvalitete LLM-a
-- Nadzorna ploča stanja s prikazom statusa prekidača strujnog kruga pružatelja u stvarnom vremenu
-- MCP poslužitelj (110 alata) s 3 prijenosa (stdio/SSE/Streamable HTTP)
+- Telemetrija ciljeva kombinacija i povijesno zdravlje ciljeva kombinacija putem `combo_execution_key` / `combo_step_id`
+- Korelacijski ID (X-Request-Id) za end-to-end praćenje
+- Bilježenje revizije usklađenosti s opt-outom po API ključu
+- Eval okvir za osiguranje kvalitete LLM-ova
+- Nadzorna ploča zdravlja sa statusom circuit breakera pružatelja u stvarnom vremenu
+- MCP poslužitelj (110 alata) s 3 transporta (stdio/SSE/Streamable HTTP)
 - A2A poslužitelj (JSON-RPC 2.0 + SSE) s vještinama i životnim ciklusom zadataka
-- Sustav memorije (izdvajanje, umetanje, dohvaćanje, sažimanje)
-- Sustav vještina (registar, izvršitelj, izolirano okruženje, ugrađene vještine)
-- MITM proxy s upravljanjem certifikatima i DNS-om
-- Posrednički sloj za zaštitu od ubacivanja upita
-- Cjevovod za kompresiju upita s Cavemanom, RTK-om, naslaganim cjevovodima, kombinacijama kompresije, jezičnim paketima i analitikom
-- Registar ACP-a (Agent Communication Protocol)
-- Modularni OAuth pružatelji (22 pojedinačna modula u `src/lib/oauth/providers/`)
+- Sustav memorije (ekstrakcija, ubrizgavanje, dohvat, sažimanje)
+- Sustav vještina (registar, izvršitelj, sandbox, ugrađene vještine)
+- MITM proxy s upravljanjem certifikatima i rukovanjem DNS-om
+- Middleware zaštite od ubrizgavanja upita
+- Pipeline kompresije upita s Caveman, RTK, složenim pipelineovima, kombinacijama kompresije, jezičnim paketima i analitikom
+- ACP (Agent Communication Protocol) registar
+- Modularni OAuth pružatelji (22 pojedina modula pod `src/lib/oauth/providers/`)
 - Skripte za deinstalaciju/potpunu deinstalaciju
-- Radnja popravka OAuth okruženja
-- WebSocket most za WS klijente kompatibilne s OpenAI-jem (`/v1/ws`)
-- Upravljanje tokenima za sinkronizaciju (izdavanje/opoziv, preuzimanje konfiguracijskog paketa s verzijama na temelju ETag-a)
-- GLM Thinking (`glmt`) kao punopravna unaprijed postavljena konfiguracija pružatelja
-- Hibridno brojanje tokena (`/messages/count_tokens` na strani pružatelja uz procjenu kao pričuvnu mogućnost)
-- Automatsko početno popunjavanje pseudonima modela (30+ normalizacija dijalekata između proxyja pri pokretanju)
-- Sigurno odlazno dohvaćanje sa zaštitom od SSRF-a, blokiranjem privatnih URL-ova i podesivim ponovnim pokušajima
-- Ponovni pokušaji razgovora koji uzimaju u obzir razdoblje čekanja, uz podesive `requestRetry` i `maxRetryIntervalSec`
-- Provjera valjanosti okruženja izvođenja pomoću Zoda pri pokretanju
-- Revizija usklađenosti v2 sa straničenjem, događajima CRUD operacija pružatelja i zapisivanjem provjere blokirane SSRF-om
+- Akcija popravka OAuth okruženja
+- WebSocket most za OpenAI-kompatibilne WS klijente (`/v1/ws`)
+- Upravljanje tokenima sinkronizacije (izdavanje/opoziv, preuzimanje paketa konfiguracije verzioniranog ETagom)
+- GLM Thinking (`glmt`) prvoklasni preset pružatelja
+- Hibridno brojanje tokena (`/messages/count_tokens` na strani pružatelja s fallback procjenom)
+- Automatsko inicijalno punjenje aliasa modela (30+ normalizacija dijalekata između proxyja pri pokretanju)
+- Siguran odlazni fetch sa SSRF zaštitom, blokiranjem privatnih URL-ova i podesivim ponovnim pokušajima
+- Ponovni pokušaji chata svjesni cooldowna s podesivim `requestRetry` i `maxRetryIntervalSec`
+- Validacija runtime okruženja pomoću Zoda pri pokretanju
+- Revizija usklađenosti v2 s paginacijom, CRUD događajima pružatelja i bilježenjem SSRF-blokiranih validacija
 
 Primarni model izvođenja:
 
-- Rute Next.js aplikacije u `src/app/api/*` implementiraju API-je nadzorne ploče i API-je za kompatibilnost
-- Zajednička jezgra za SSE/usmjeravanje u `src/sse/*` + `open-sse/*` upravlja izvršavanjem pružatelja, prevođenjem, strujanjem, pričuvnim prebacivanjem i upotrebom
+- Next.js app rute pod `src/app/api/*` implementiraju i API-je nadzorne ploče i kompatibilnosne API-je
+- Zajednička SSE/usmjerivačka jezgra u `src/sse/*` + `open-sse/*` rukuje izvršavanjem pružatelja, prijevodom, streamingom, fallbackom i korištenjem
 
 ## Referentni dijagrami
 
@@ -116,43 +116,51 @@ ostali su povezani iz svojih vodiča specifičnih za domenu.
 - SLA/upravljačka razina providera izvan lokalnog procesa
 - Vanjski CLI binarni programi (Claude CLI, Codex CLI, itd.)
 
-## Trenutna površina nadzorne ploče
+## Sučelje nadzorne ploče (trenutno)
 
 Glavne stranice pod `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — brzi početak + pregled providera
-- `/dashboard/endpoint` — proxy krajnjih točaka + MCP + A2A + kartice API krajnjih točaka
-- `/dashboard/providers` — veze i vjerodajnice providera
-- `/dashboard/combos` — combo strategije, predlošci, izgradnik po korakima, pravila usmjeravanja modela, ručno perzistirano redoslijeđivanje
-- `/dashboard/auto-combo` — Auto Combo Engine: bodovne težine, paketi modova, virtualni presetovi tvornice, telemetrija
+- `/dashboard` — brzi početak + pregled pružatelja
+- `/dashboard/endpoint` — proxy krajnjih točaka + kartice MCP + A2A + API krajnjih točaka
+- `/dashboard/providers` — veze s pružateljima i vjerodajnice
+- `/dashboard/combos` — strategije kombinacija, predlošci, graditelj temeljen na koracima, pravila usmjeravanja modela, ručno trajno spremljeni poredak
+- `/dashboard/auto-combo` — Auto Combo Engine: težine bodovanja, paketi načina rada, virtualne tvorničke pretpostavke, telemetrija
 - `/dashboard/costs` — agregacija troškova i vidljivost cijena
-- `/dashboard/analytics` — analitika korištenja, evaluacije, zdravlje combo ciljeva
-- `/dashboard/limits` — kontrole kvota/stope
-- `/dashboard/cli-tools` — uvod u CLI, otkrivanje runtimea, generiranje konfiguracije
+- `/dashboard/analytics` — analitika korištenja, evaluacije, zdravlje ciljnih kombinacija
+- `/dashboard/limits` — kontrole kvota/brzine
+- `/dashboard/cli-tools` — CLI onboarding, detekcija runtime okruženja, generiranje konfiguracije
 - `/dashboard/agents` — otkriveni ACP agenti + registracija prilagođenih agenata
-- `/dashboard/cloud-agents` — zadaci agenata smještenih u cloudu (Codex Cloud, Devin, Jules) i životni ciklus zadataka
-- `/dashboard/skills` — A2A registar vještina, izvršavanje u sandboxu, katalog ugrađenih vještina
-- `/dashboard/memory` — inspekcija i dohvat trajne konverzacijske memorije
-- `/dashboard/webhooks` — pretplate na odlazne webhookove, rotacija tajni, statistika ponovnih pokušaja
-- `/dashboard/batch` — slanje batch poslova i praćenje napretka
-- `/dashboard/cache` — statistika read-through i reasoning cachea, kontrole izbacivanja
-- `/dashboard/playground` — interaktivni chat playground protiv bilo kojeg konfiguriranog combo/modela
-- `/dashboard/changelog` — preglednik changeloga unutar aplikacije (prikazuje `CHANGELOG.md`)
-- `/dashboard/system` — dijagnostika runtimea, informacije o verziji, površina za validaciju okoline
-- `/dashboard/onboarding` — čarobnjak za prvo postavljanje kod nove instalacije
+- `/dashboard/cloud-agents` — zadaci agenata u oblaku (Codex Cloud, Devin, Jules) i životni ciklus zadataka
+- `/dashboard/skills` — A2A registar vještina, izvođenje u sandbox okruženju, ugrađeni katalog vještina
+- `/dashboard/memory` — pregled i dohvat trajne konverzacijske memorije
+- `/dashboard/webhooks` — odlazne pretplate na webhookove, rotacija tajni, statistike ponovnih pokušaja
+- `/dashboard/batch` — slanje grupnih zadataka i praćenje napretka
+- `/dashboard/cache` — statistike read-through i reasoning predmemorije, kontrole izbacivanja
+- `/dashboard/playground` — interaktivni chat playground za bilo koju konfiguriranu kombinaciju/model
+- `/dashboard/changelog` — preglednik dnevnika promjena unutar aplikacije (prikazuje `CHANGELOG.md`)
+- `/dashboard/system` — dijagnostika runtime okruženja, informacije o verziji, površina za validaciju okruženja
+- `/dashboard/onboarding` — čarobnjak za postavljanje pri prvom pokretanju novih instalacija
 - `/dashboard/media` — playground za slike/video/glazbu
-- `/dashboard/search-tools` — testiranje providera pretraživanja i povijest
-- `/dashboard/health` — vrijeme rada, circuit breakeri, ograničenja stope, sesije praćene kvotama
-- `/dashboard/logs` — zapisi zahtjeva/proxy/audit/konzole
-- `/dashboard/settings` — kartice sistemskih postavki (općenito, usmjeravanje, zadane vrijednosti combo, itd.)
-- `/dashboard/context/caveman` — pravila Caveman kompresije, jezični paketi, pregled i izlazni mod
-- `/dashboard/context/rtk` — filtri RTK izlaza naredbi, pregled i sigurnosne postavke runtimea
-- `/dashboard/context/combos` — imenovani pipelinei kompresije dodijeljeni routing combovima
-- `/dashboard/translator` — inspekcija prevoditelja i pregled pretvorbe formata zahtjeva
-- `/dashboard/audit` — preglednik audit zapisa usklađenosti s paginacijom i strukturiranim metapodacima
+- `/dashboard/search-tools` — testiranje pružatelja pretraživanja i povijest
+- `/dashboard/health` — vrijeme rada, prekidači krugova, ograničenja brzine, sesije nadzirane kvotama
+- `/dashboard/logs` — logovi zahtjeva/proxyja/revizije/konzole
+- `/dashboard/settings` — kartice sistemskih postavki (općenito, usmjeravanje, zadane postavke kombinacija itd.)
+- `/dashboard/context/caveman` — pravila Caveman kompresije, jezični paketi, pretpregled i način izlaza
+- `/dashboard/context/rtk` — RTK filtri izlaza naredbi, pretpregled i sigurnosne postavke runtime okruženja
+- `/dashboard/context/combos` — imenovani cjevovodi kompresije dodijeljeni kombinacijama usmjeravanja
+- `/dashboard/translator` — pregled prevoditelja i pretpregled konverzije formata zahtjeva
+- `/dashboard/audit` — preglednik revizijskih logova usklađenosti s paginacijom i strukturiranim metapodacima
 - `/dashboard/usage` — preglednik korištenja po zahtjevu vezan uz `usage_history`
-- `/dashboard/compression` — analitika kompresije, statistika i dodjela pipelinea
+- `/dashboard/compression` — analitika kompresije, statistike i dodjela cjevovoda
 - `/dashboard/api-manager` — životni ciklus API ključeva i dozvole modela
+
+UI sloj: svaka se stranica prikazuje unutar jedne zajedničke ljuske — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (kitov
+`SidebarProvider`/`SidebarInset`, OmniRouteov `Sidebar.tsx` i `Header.tsx`). Stranice uvoze svoje
+sastavne blokove iz `@/shared/components` (adapteri nad ugrađenim Keak CI UI Kitom u
+`packages/ui-kit`) ili iz podputova komponenti kita (`@omniroute/ui-kit/table`, `…/page-header`), a
+ikone putem `<Icon>` (`ICON_MAP` → Lucide). Tema (prema zadanim postavkama `system`, svijetla/tamna)
+i tokeni dolaze iz kita putem mosta u `src/app/globals.css`. Pojedinosti: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Kontekst sustava visoke razine
 

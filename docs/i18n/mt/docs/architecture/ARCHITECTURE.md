@@ -10,77 +10,77 @@ _Aġġornat l-aħħar: 2026-06-28_
 
 ## Sommarju Eżekuttiv
 
-OmniRoute huwa gateway lokali għar-routing tal-AI u dashboard mibni fuq Next.js.
-Jipprovdi endpoint wieħed kompatibbli ma’ OpenAI (`/v1/*`) u jidderieġi t-traffiku bejn diversi fornituri upstream bi traduzzjoni, fallback, tiġdid tat-token, u traċċar tal-użu.
+OmniRoute huwa gateway lokali għar-rottar tal-AI u dashboard mibni fuq Next.js.
+Jipprovdi endpoint wieħed kompatibbli ma' OpenAI (`/v1/*`) u jirrotta t-traffiku bejn diversi fornituri upstream b'traduzzjoni, fallback, aġġornament tat-token, u traċċar tal-użu.
 
 Kapaċitajiet ewlenin:
 
-- Wiċċ API kompatibbli ma’ OpenAI għal CLI/għodod (375 fornitur, 156 modulu ta’ eżekuzzjoni)
-- Traduzzjoni tat-talbiet/tweġibiet bejn il-formati tal-fornituri
-- Fallback ta’ kombinazzjonijiet ta’ mudelli (sekwenza b’diversi mudelli)
-- Passi strutturati tal-kombinazzjonijiet (`provider + model + connection`) b’ordni waqt l-eżekuzzjoni skont `compositeTiers`
+- Wiċċ API kompatibbli ma' OpenAI għal CLI/għodod (375 fornitur, 156 modulu eżekuttur)
+- Traduzzjoni ta' talbiet/risposti bejn il-formati tal-fornituri
+- Fallback ta' combo ta' mudelli (sekwenza ta' diversi mudelli)
+- Passi strutturati tal-combo (`provider + model + connection`) b'ordni runtime skont `compositeTiers`
 - Fallback fil-livell tal-kont (diversi kontijiet għal kull fornitur)
-- Verifika preliminari tal-kwota u għażla tal-kont P2C konxja mill-kwota fil-fluss ewlieni taċ-chat
-- Ġestjoni tal-konnessjonijiet mal-fornituri permezz ta’ OAuth + API key (27 modulu ta’ fornituri OAuth)
-- Ġenerazzjoni ta’ embeddings permezz ta’ `/v1/embeddings` (18-il fornitur)
-- Ġenerazzjoni ta’ immaġnijiet permezz ta’ `/v1/images/generations` (10+ fornituri, 20+ mudell)
-- Traskrizzjoni tal-awdjo permezz ta’ `/v1/audio/transcriptions` (18-il fornitur)
-- Konverżjoni minn test għal diskors permezz ta’ `/v1/audio/speech` (24 fornitur integrat)
-- Ġenerazzjoni ta’ vidjows permezz ta’ `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Ġenerazzjoni ta’ mużika permezz ta’ `/v1/music/generations` (ComfyUI)
-- Tiftix fuq il-web permezz ta’ `/v1/search` (20 fornitur)
-- Moderazzjonijiet permezz ta’ `/v1/moderations`
-- Klassifikazzjoni mill-ġdid permezz ta’ `/v1/rerank`
-- Analiżi tat-tikketti tal-ħsieb (``) għal mudelli ta’ raġunament
-- Sanitizzazzjoni tat-tweġibiet għal kompatibbiltà stretta mal-OpenAI SDK
-- Normalizzazzjoni tar-rwoli (developer→system, system→user) għal kompatibbiltà bejn il-fornituri
-- Konverżjoni ta’ output strutturat (json_schema → Gemini responseSchema)
-- Persistenza lokali għall-fornituri, keys, aliases, kombinazzjonijiet, settings, u prezzijiet (122 modulu DB)
-- Traċċar tal-użu/tal-ispejjeż u reġistrazzjoni tat-talbiet
-- Sinkronizzazzjoni fakultattiva mal-cloud għal sinkronizzazzjoni bejn diversi apparati/tal-istat
-- Allowlist/blocklist tal-IP għall-kontroll tal-aċċess għall-API
-- Ġestjoni tal-baġit tal-ħsieb (passthrough/awtomatiku/personalizzat/adattiv)
-- Injezzjoni globali tal-prompt tas-sistema
-- Traċċar tas-sessjonijiet u teħid tal-marki tas-swaba’
-- Limitazzjoni mtejba tar-rata għal kull kont bi profili speċifiċi għall-fornitur
-- Mudell ta’ circuit breaker għar-reżiljenza tal-fornituri
-- Protezzjoni kontra t-thundering herd permezz ta’ mutex locking
-- Cache għad-deduplikazzjoni tat-talbiet ibbażat fuq il-firma
-- Saff tad-domain: regoli tal-ispejjeż, politika tal-fallback, politika tal-lockout
-- Context Relay: sommarji tat-trasferiment tas-sessjoni għall-kontinwità waqt ir-rotazzjoni tal-kontijiet
-- Persistenza tal-istat tad-domain (cache write-through ta’ SQLite għall-fallbacks, baġits, lockouts, u circuit breakers)
-- Magna tal-politiki għall-evalwazzjoni ċentralizzata tat-talbiet (lockout → baġit → fallback)
-- Telemetrija tat-talbiet b’aggregazzjoni tal-latenza p50/p95/p99
-- Telemetrija tal-miri tal-kombinazzjonijiet u saħħa storika tal-miri tal-kombinazzjonijiet permezz ta’ `combo_execution_key` / `combo_step_id`
-- ID ta’ korrelazzjoni (X-Request-Id) għat-traċċar minn tarf sa tarf
-- Reġistrazzjoni tal-awditjar tal-konformità b’opt-out għal kull API key
-- Qafas ta’ evalwazzjoni għall-assigurazzjoni tal-kwalità tal-LLM
-- Dashboard tas-saħħa bi status f’ħin reali tas-circuit breakers tal-fornituri
-- MCP Server (110 għodda) bi 3 trasporti (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) b’ħiliet u ċiklu tal-ħajja tal-kompiti
-- Sistema tal-memorja (estrazzjoni, injezzjoni, irkupru, ġbir fil-qosor)
-- Sistema tal-ħiliet (reġistru, eżekutur, sandbox, ħiliet integrati)
-- Proxy MITM b’ġestjoni taċ-ċertifikati u trattament tad-DNS
-- Middleware ta’ protezzjoni kontra l-injezzjoni tal-prompt
-- Pipeline għall-kompressjoni tal-prompt b’Caveman, RTK, pipelines f’munzell, kombinazzjonijiet ta’ kompressjoni, pakketti lingwistiċi, u analitika
+- Preflight tal-kwota u għażla ta' kont P2C konxja tal-kwota fil-mogħdija prinċipali taċ-ċhat
+- Ġestjoni tal-konnessjonijiet tal-fornituri b'OAuth + API-key (27 modulu ta' fornitur OAuth)
+- Ġenerazzjoni ta' embeddings permezz ta' `/v1/embeddings` (18 fornitur)
+- Ġenerazzjoni ta' immaġini permezz ta' `/v1/images/generations` (10+ fornituri, 20+ mudell)
+- Traskrizzjoni tal-awdjo permezz ta' `/v1/audio/transcriptions` (18 fornitur)
+- Test-għal-diskors permezz ta' `/v1/audio/speech` (24 fornitur inkorporat)
+- Ġenerazzjoni ta' vidjo permezz ta' `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Ġenerazzjoni ta' mużika permezz ta' `/v1/music/generations` (ComfyUI)
+- Tfittxija fuq il-web permezz ta' `/v1/search` (20 fornitur)
+- Moderazzjoni permezz ta' `/v1/moderations`
+- Reranking permezz ta' `/v1/rerank`
+- Parsing tat-tag think (`<think>...</think>`) għal mudelli ta' raġunament
+- Sanitizzazzjoni tar-risposti għal kompatibilità stretta mal-SDK ta' OpenAI
+- Normalizzazzjoni tar-rwoli (developer→system, system→user) għal kompatibilità bejn il-fornituri
+- Konverżjoni ta' output strutturat (json_schema → Gemini responseSchema)
+- Persistenza lokali għall-fornituri, iċ-ċwievet, l-aliases, il-combos, is-settings, u l-prezzijiet (122 modulu DB)
+- Traċċar tal-użu/ispiża u logging tat-talbiet
+- Sinkronizzazzjoni cloud fakultattiva għal sinkronizzazzjoni ta' multi-apparat/istat
+- Allowlist/blocklist ta' IP għall-kontroll tal-aċċess API
+- Ġestjoni tal-baġit tat-thinking (passthrough/auto/custom/adaptive)
+- Injezzjoni globali ta' system prompt
+- Traċċar tas-sessjonijiet u fingerprinting
+- Rate limiting mtejba skont il-kont b'profili speċifiċi għall-fornitur
+- Pattern circuit breaker għar-reżiljenza tal-fornituri
+- Protezzjoni anti-thundering herd b'mutex locking
+- Cache ta' deduplikazzjoni tat-talbiet ibbażata fuq il-firma
+- Saff tad-dominju: regoli tal-ispejjeż, politika ta' fallback, politika ta' lockout
+- Context Relay: sommarji ta' handoff tas-sessjoni għall-kontinwità tar-rotazzjoni tal-kontijiet
+- Persistenza tal-istat tad-dominju (cache SQLite write-through għal fallbacks, baġits, lockouts, u circuit breakers)
+- Magna ta' politika għal evalwazzjoni ċentralizzata tat-talbiet (lockout → baġit → fallback)
+- Telemetrija tat-talbiet b'aggregazzjoni tal-latenza p50/p95/p99
+- Telemetrija tal-miri tal-combo u saħħa storika tal-miri tal-combo permezz ta' `combo_execution_key` / `combo_step_id`
+- Correlation ID (X-Request-Id) għal traċċar end-to-end
+- Logging ta' awditjar tal-konformità b'opt-out għal kull API key
+- Qafas eval għall-assigurazzjoni tal-kwalità tal-LLM
+- Dashboard tas-saħħa b'istat real-time tal-circuit breakers tal-fornituri
+- MCP Server (110 għodda) b'3 trasporti (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) b'skills u ċiklu tal-ħajja tal-kompiti
+- Sistema ta' memorja (estrazzjoni, injezzjoni, irkupru, u tqassir)
+- Sistema ta' skills (reġistru, eżekuttur, sandbox, u skills inkorporati)
+- Proxy MITM b'ġestjoni taċ-ċertifikati u trattament tad-DNS
+- Middleware ta' protezzjoni kontra l-injezzjoni ta' prompts
+- Pipeline ta' kompressjoni ta' prompts b'Caveman, RTK, pipelines stacked, combos ta' kompressjoni, pakketti ta' lingwi, u analytics
 - Reġistru ACP (Agent Communication Protocol)
 - Fornituri OAuth modulari (22 modulu individwali taħt `src/lib/oauth/providers/`)
-- Scripts għad-diżinstallazzjoni/diżinstallazzjoni sħiħa
-- Azzjoni għat-tiswija tal-ambjent OAuth
-- Bridge WebSocket għal klijenti WS kompatibbli ma’ OpenAI (`/v1/ws`)
-- Ġestjoni tat-tokens tas-sinkronizzazzjoni (ħruġ/revoka, tniżżil tal-pakkett tal-konfigurazzjoni bil-verżjonijiet ETag)
-- Preset ta’ fornitur tal-ewwel klassi għal GLM Thinking (`glmt`)
-- Għadd ibridu tat-tokens (`/messages/count_tokens` min-naħa tal-fornitur b’fallback għall-istima)
-- Auto-seeding tal-aliases tal-mudelli (30+ normalizzazzjoni ta’ djaletti bejn proxies waqt l-istartjar)
-- Fetch sigur ’il barra bi protezzjoni SSRF, imblukkar ta’ URLs privati, u tentattivi mill-ġdid konfigurabbli
-- Tentattivi mill-ġdid taċ-chat konxji mill-cooldown b’`requestRetry` u `maxRetryIntervalSec` konfigurabbli
-- Validazzjoni tal-ambjent waqt l-eżekuzzjoni permezz ta’ Zod waqt l-istartjar
-- Awditjar tal-konformità v2 b’paġinazzjoni, avvenimenti CRUD tal-fornituri, u reġistrazzjoni tal-validazzjoni mblukkata mill-SSRF
+- Skripts uninstall/full-uninstall
+- Azzjoni ta' tiswija tal-ambjent OAuth
+- Pont WebSocket għal klijenti WS kompatibbli ma' OpenAI (`/v1/ws`)
+- Ġestjoni ta' sync tokens (ħruġ/revoka, download ta' bundle ta' konfigurazzjoni b'verżjonijiet ETag)
+- Preset ta' fornitur first-class għal GLM Thinking (`glmt`)
+- Għadd ibridu ta' tokens (`/messages/count_tokens` fin-naħa tal-fornitur b'fallback ta' stima)
+- Auto-seeding ta' aliases tal-mudelli (30+ normalizzazzjoni ta' djaletti cross-proxy fl-istartjar)
+- Fetch outbound sikur b'gwardja SSRF, imblukkar ta' URLs privati, u retry konfigurabbli
+- Retries taċ-ċhat konxji tal-cooldown b'`requestRetry` u `maxRetryIntervalSec` konfigurabbli
+- Validazzjoni tal-ambjent runtime b'Zod fl-istartjar
+- Compliance audit v2 b'paġinazzjoni, avvenimenti CRUD tal-fornituri, u logging ta' validazzjonijiet mblukkati mill-SSRF
 
-Mudell ewlieni waqt l-eżekuzzjoni:
+Mudell primarju tar-runtime:
 
-- Ir-routes tal-app Next.js taħt `src/app/api/*` jimplimentaw kemm l-APIs tad-dashboard kif ukoll l-APIs tal-kompatibbiltà
-- Core kondiviż ta’ SSE/routing f’`src/sse/*` + `open-sse/*` jittratta l-eżekuzzjoni tal-fornitur, it-traduzzjoni, l-istreaming, il-fallback, u l-użu
+- Ir-routes tal-app Next.js taħt `src/app/api/*` jimplimentaw kemm l-APIs tad-dashboard kif ukoll l-APIs ta' kompatibilità
+- Core SSE/rottar kondiviż f'`src/sse/*` + `open-sse/*` jimmaniġġa l-eżekuzzjoni tal-fornituri, it-traduzzjoni, l-istreaming, il-fallback, u l-użu
 
 ## Diqaġni tal-Referenza
 
@@ -114,43 +114,52 @@ l-oħrajn huma marbuta mill-gwidi speċifiċi tad-doma tagħhom.
 - SLA/kontroll tal-fornitur barra mill-proċess lokali
 - Binaries tal-CLI esterni (Claude CLI, Codex CLI, eċċ.)
 
-## Superfiċja tal-Dashboard (Attwali)
+## Wiċċ tad-Dashboard (Kurrenti)
 
-Paġni ewlenin taħt `src/app/(dashboard)/dashboard/`:
+Paġni prinċipali taħt `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — bidu malajr + ġabra tal-fornitur
-- `/dashboard/endpoint` — proxy tal-endpoint + MCP + A2A + tabs tal-endpoint API
-- `/dashboard/providers` — konnessjonijiet tal-fornitur u kredenzjali
-- `/dashboard/combos` — strateġiji tal-combo, templates, bini bbażat fuq passi, regoli tar-rutting tal-mudell, ordinarja maħżuna manwalment
-- `/dashboard/auto-combo` — Magna tal-Auto Combo: piżijiet tal-punteġġ, pakketti tal-modalità, presets tal-fabbrika virtwali, telemetrija
-- `/dashboard/costs` — aggregazzjoni tal-ispejċ u viżibbiltà tal-prezzijiet
-- `/dashboard/analytics` — analitika tal-użu, evalwazzjonijiet, saħħa tal-mira tal-combo
-- `/dashboard/limits` — kontrolli tal-kwota/rata
-- `/dashboard/cli-tools` — onboarding tal-CLI, identifikazzjoni tal-runtime, ġenerazzjoni tal-konfigurazzjoni
-- `/dashboard/agents` — aġenti ACP identifikati + reġistrazzjoni ta' aġenti custom
-- `/dashboard/cloud-agents` — xogħlijiet tal-aġenti ospitati fil-cloud (Codex Cloud, Devin, Jules) u l-ċiklu tal-ħajja tax-xogħol
-- `/dashboard/skills` — reġistru tal-ħiliet A2A, twettiq tas-sandbox, katalgu tal-ħiliet integrati
-- `/dashboard/memory` — spezzjoni u retrieves tal-memorja konversazzjonali reżistenti
-- `/dashboard/webhooks` — abbonamenti tal-webhook outbound, rotazzjoni tal-isigri, statistika tal-ħdid mill-ġdid
-- `/dashboard/batch` — sottomissjoni tal-impjiegi tal-batch u progress
-- `/dashboard/cache` — statistika tal-cache read-through u r-raġunar, kontrolli tal-evikament
-- `/dashboard/playground` — playground interattiv tal-chat kontra kwalunkwe combo/mudell konfigurat
-- `/dashboard/changelog` — viżitur tal-changelog fl-app (jirrend `CHANGELOG.md`)
-- `/dashboard/system` — dijanjostika tal-runtime, informazzjoni tal-verżjoni, superfiċja tal-validazzjoni tal-ambjent
-- `/dashboard/onboarding` — wizzard tal-installazzjoni għal installazzjonijiet ġodda
-- `/dashboard/media` — playground tal-vidjow/mużika/immaġini
-- `/dashboard/search-tools` — testjar tal-fornitur tat-tiftix u storja
-- `/dashboard/health` — uptime, circuit breakers, limiti tal-rata, sessions immonitorjati bil-kwota
-- `/dashboard/logs` — logs tal-ħtiġijiet/proxy/awditjar/konsoll
-- `/dashboard/settings` — tabs tal-impostazzjonijiet tas-sistema (ġenerali, rutting, defaults tal-combo, eċċ.)
-- `/dashboard/context/caveman` — regoli tal-kompressjoni tal-Caveman, pakketti tal-lingwa, preview, u modalità ta' output
-- `/dashboard/context/rtk` — filtri RTK tal-kmand-output, preview, u impostazzjonijiet tas-sigurtà tal-runtime
-- `/dashboard/context/combos` — xbieki ta' kompressjoni b'isem assenjati għal combo tal-rutting
-- `/dashboard/translator` — spezzjoni tal-isifier u preview tal-konverżjoni tal-format tal-ħtiġijiet
-- `/dashboard/audit` — browser tal-log tal-awditjar tal-konformità bil-paġinazzjoni u metadata strutturata
-- `/dashboard/usage` — browser tal-użu għal kull ħtiġijiet marbut ma' `usage_history`
-- `/dashboard/compression` — analitika tal-kompressjoni, statistika, u assenjazzjoni tal-pipeline
-- `/dashboard/api-manager` — ċiklu tal-ħajja tal-kw-API u permessi tal-mudell
+- `/dashboard` — bidu rapidu + ħarsa ġenerali tal-fornituri
+- `/dashboard/endpoint` — endpoint proxy + MCP + A2A + tabs tal-endpoint API
+- `/dashboard/providers` — konnessjonijiet u kredenzjali tal-fornituri
+- `/dashboard/combos` — strateġiji tal-combo, templates, builder ibbażat fuq passi, regoli tar-routing tal-mudelli, trottib manwali persistit
+- `/dashboard/auto-combo` — Auto Combo Engine: piżijiet tal-iskorjar, pakketti tal-modi, presets virtwali tal-fabbrika, telemetrija
+- `/dashboard/costs` — aggregazzjoni tal-ispejjeż u viżibilità tal-prezzijiet
+- `/dashboard/analytics` — analitika tal-użu, evalwazzjonijiet, saħħa tal-miri tal-combo
+- `/dashboard/limits` — kontrolli tal-kwoti/rati
+- `/dashboard/cli-tools` — onboarding tal-CLI, sejbien tar-runtime, ġenerazzjoni tal-konfigurazzjoni
+- `/dashboard/agents` — aġenti ACP misjuba + reġistrazzjoni ta' aġenti personalizzati
+- `/dashboard/cloud-agents` — kompiti ta' aġenti ospitati fuq il-cloud (Codex Cloud, Devin, Jules) u ċ-ċiklu tal-ħajja tal-kompiti
+- `/dashboard/skills` — reġistru tal-ħiliet A2A, eżekuzzjoni f'sandbox, katalgu ta' ħiliet inkorporati
+- `/dashboard/memory` — spezzjoni u irkupru ta' memorja konversazzjonali persistenti
+- `/dashboard/webhooks` — abbonamenti ta' webhooks li joħorġu, rotazzjoni tas-sigrieti, statistiki tat-tentattivi mill-ġdid
+- `/dashboard/batch` — sottomissjoni u progress ta' xogħlijiet batch
+- `/dashboard/cache` — statistiki tal-cache read-through u tar-raġunament, kontrolli ta' evikzzjoni
+- `/dashboard/playground` — playground ta' chat interattiv kontra kwalunkwe combo/mudell ikkonfigurat
+- `/dashboard/changelog` — werri tal-changelog fl-app (jirrendi `CHANGELOG.md`)
+- `/dashboard/system` — djanjostika tar-runtime, informazzjoni tal-verżjoni, wiċċ ta' validazzjoni tal-ambjent
+- `/dashboard/onboarding` — wizard tal-setup tal-ewwel tħaddim għal installazzjonijiet ġodda
+- `/dashboard/media` — playground ta' immaġni/vidjo/mużika
+- `/dashboard/search-tools` — ittestjar u storja tal-fornituri tat-tfittxija
+- `/dashboard/health` — uptime, circuit breakers, rate limits, sessjonijiet sorveljati skont il-kwota
+- `/dashboard/logs` — logs tar-rikjesti/proxy/awditjar/konsoll
+- `/dashboard/settings` — tabs tas-settings tas-sistema (ġenerali, routing, defaults tal-combo, eċċ.)
+- `/dashboard/context/caveman` — regoli tal-kompressjoni Caveman, pakketti lingwistiċi, preċedu, u mod tal-output
+- `/dashboard/context/rtk` — filtri tal-output tal-kmandi RTK, preċedu, u settings tas-sigurtà tar-runtime
+- `/dashboard/context/combos` — pipelines ta' kompressjoni bin-nom assenjati lil combos tar-routing
+- `/dashboard/translator` — spezzjoni tat-traduttur u preċedu tal-konverżjoni tal-format tar-rikjesti
+- `/dashboard/audit` — browser tal-log tal-awditjar ta' konformità b'paġġnazzjoni u metadata strutturata
+- `/dashboard/usage` — browser tal-użu għal kull rikjesta marbut ma' `usage_history`
+- `/dashboard/compression` — analitika, statistiki, u assenjazzjoni tal-pipelines tal-kompressjoni
+- `/dashboard/api-manager` — ċiklu tal-ħajja tal-ċwievet API u permessi tal-mudelli
+
+Saff tal-UI: kull paġna tirrendi ġo shell wieħed — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (tal-kit
+`SidebarProvider`/`SidebarInset`, `Sidebar.tsx` u `Header.tsx` ta' OmniRoute). Il-paġni jimportaw
+il-blokki tal-bini tagħhom minn `@/shared/components` (adattaturi fuq il-Keak CI UI Kit vendored f'
+`packages/ui-kit`) jew minn subpaths tal-komponenti tal-kit (`@omniroute/ui-kit/table`,
+`…/page-header`), u l-ikoni permezz ta' `<Icon>` (`ICON_MAP` → Lucide). It-tema (`system` bħala
+default, ċar/skur) u t-tokens jiġu mill-kit permezz tal-pont f'`src/app/globals.css`. Dettalji:
+`docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Kontest tal-Isistema fil-Livell Għoli
 

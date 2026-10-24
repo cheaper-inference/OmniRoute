@@ -10,77 +10,77 @@ _Päivitetty viimeksi: 2026-06-28_
 
 ## Tiivistelmä
 
-OmniRoute on Next.js:n päälle rakennettu paikallinen tekoälyliikenteen reititysyhdyskäytävä ja hallintapaneeli.
-Se tarjoaa yhden OpenAI-yhteensopivan päätepisteen (`/v1/*`) ja reitittää liikenteen useille ulkoisille palveluntarjoajille tukien muunnoksia, varajärjestelyjä, tunnisteiden uusimista ja käytön seurantaa.
+OmniRoute on paikallinen tekoälyn reititysyhdyskäytävä ja hallintapaneeli, joka on rakennettu Next.js:llä.
+Se tarjoaa yhden OpenAI-yhteensopivan päätepisteen (`/v1/*`) ja reitittää liikenteen useiden ylävirran palveluntarjoajien välillä käännöksellä, varatoiminnolla, tunnusten uusimisella ja käytön seurannalla.
 
 Keskeiset ominaisuudet:
 
-- OpenAI-yhteensopiva API-pinta komentorivityökaluille ja muille työkaluille (375 palveluntarjoajaa, 156 suoritusmoduulia)
-- Pyyntöjen ja vastausten muuntaminen palveluntarjoajien eri muotojen välillä
-- Malliyhdistelmien varajärjestely (usean mallin sarja)
-- Rakenteiset yhdistelmävaiheet (`provider + model + connection`) ja ajonaikainen järjestäminen `compositeTiers`-arvon perusteella
-- Tilitason varajärjestely (useita tilejä palveluntarjoajaa kohden)
-- Kiintiön ennakkotarkistus ja kiintiöt huomioiva P2C-tilinvalinta ensisijaisessa keskustelupolussa
-- OAuth- ja API-avaimiin perustuvien palveluntarjoajayhteyksien hallinta (27 OAuth-palveluntarjoajamoduulia)
-- Upotusten luonti `/v1/embeddings`-päätepisteen kautta (18 palveluntarjoajaa)
-- Kuvien luonti `/v1/images/generations`-päätepisteen kautta (yli 10 palveluntarjoajaa, yli 20 mallia)
-- Äänen litterointi `/v1/audio/transcriptions`-päätepisteen kautta (18 palveluntarjoajaa)
-- Tekstistä puheeksi -muunnos `/v1/audio/speech`-päätepisteen kautta (24 sisäänrakennettua palveluntarjoajaa)
-- Videoiden luonti `/v1/videos/generations`-päätepisteen kautta (ComfyUI + SD WebUI)
-- Musiikin luonti `/v1/music/generations`-päätepisteen kautta (ComfyUI)
+- OpenAI-yhteensopiva API-pinta CLI-/työkaluille (375 palveluntarjoajaa, 156 suoritusmoduulia)
+- Pyyntöjen ja vastausten käännös palveluntarjoajien formaattien välillä
+- Mallikombinaatioiden varatoiminto (usean mallin jono)
+- Rakenteiset kombinaatiovaiheet (`provider + model + connection`) `compositeTiers`-arvon mukaisella ajonaikaisella järjestyksellä
+- Tilitason varatoiminto (useita tilejä palveluntarjoajaa kohden)
+- Kiintiön esitarkistus ja kiintiötietoinen P2C-tilinvalinta pääkeskustelupolulla
+- OAuth- ja API-avainpohjaisten palveluntarjoajayhteyksien hallinta (27 OAuth-palveluntarjoajamoduulia)
+- Upotusten generointi `/v1/embeddings`-päätepisteen kautta (18 palveluntarjoajaa)
+- Kuvien generointi `/v1/images/generations`-päätepisteen kautta (10+ palveluntarjoajaa, 20+ mallia)
+- Äänen transkriptio `/v1/audio/transcriptions`-päätepisteen kautta (18 palveluntarjoajaa)
+- Tekstistä puheeksi `/v1/audio/speech`-päätepisteen kautta (24 sisäänrakennettua palveluntarjoajaa)
+- Videoiden generointi `/v1/videos/generations`-päätepisteen kautta (ComfyUI + SD WebUI)
+- Musiikin generointi `/v1/music/generations`-päätepisteen kautta (ComfyUI)
 - Verkkohaku `/v1/search`-päätepisteen kautta (20 palveluntarjoajaa)
-- Sisällön moderointi `/v1/moderations`-päätepisteen kautta
-- Uudelleenjärjestely `/v1/rerank`-päätepisteen kautta
-- Think-tunnisteiden jäsennys (``) päättelymalleille
-- Vastausten puhdistus tiukan OpenAI SDK -yhteensopivuuden varmistamiseksi
-- Roolien normalisointi (developer→system, system→user) eri palveluntarjoajien välisen yhteensopivuuden takaamiseksi
-- Rakenteisen tulosteen muuntaminen (json_schema → Gemini responseSchema)
-- Paikallinen pysyväistallennus palveluntarjoajille, avaimille, aliaksille, yhdistelmille, asetuksille ja hinnoittelulle (122 tietokantamoduulia)
+- Moderointi `/v1/moderations`-päätepisteen kautta
+- Uudelleenjärjestys `/v1/rerank`-päätepisteen kautta
+- Think-tagien jäsennys (`<think>...</think>`) päättelymalleille
+- Vastausten puhdistus tiukkaa OpenAI SDK -yhteensopivuutta varten
+- Roolien normalisointi (developer→system, system→user) palveluntarjoajien välistä yhteensopivuutta varten
+- Rakenteisen tulosteen muunnos (json_schema → Gemini responseSchema)
+- Paikallinen pysyväistallennus palveluntarjoajille, avaimille, aliaksille, kombinaatioille, asetuksille ja hinnoittelulle (122 tietokantamoduulia)
 - Käytön ja kustannusten seuranta sekä pyyntöjen lokitus
-- Valinnainen pilvisynkronointi useiden laitteiden ja tilojen synkronointia varten
-- IP-osoitteiden sallittujen ja estettyjen osoitteiden luettelot API-käytön hallintaan
-- Ajattelubudjetin hallinta (läpivienti/automaattinen/mukautettu/adaptiivinen)
-- Globaalin järjestelmäkehotteen lisääminen
-- Istuntojen seuranta ja sormenjälkien muodostaminen
+- Valinnainen pilvisynkronointi useiden laitteiden ja tilan synkronointia varten
+- IP-sallittujen lista ja estolista API:n käyttöoikeuksien hallintaan
+- Päättelybudjetin hallinta (passthrough/auto/custom/adaptive)
+- Globaalin järjestelmäkehotteen injektointi
+- Istuntojen seuranta ja sormenjälkitys
 - Tilikohtainen tehostettu nopeusrajoitus palveluntarjoajakohtaisilla profiileilla
-- Katkaisijamalli palveluntarjoajien häiriönsietokyvyn parantamiseksi
-- Äkillisen samanaikaisen kuormituspiikin esto mutex-lukituksella
-- Allekirjoitukseen perustuva pyyntöjen kaksoiskappaleiden poistovälimuisti
-- Toimialuekerros: kustannussäännöt, varajärjestelykäytäntö ja lukituskäytäntö
-- Context Relay: istunnon siirtoyhteenvedot jatkuvuuden säilyttämiseksi tiliä vaihdettaessa
-- Toimialueen tilan pysyväistallennus (SQLite-läpikirjoitusvälimuisti varajärjestelyille, budjeteille, lukituksille ja katkaisijoille)
-- Käytäntömoottori pyyntöjen keskitettyyn arviointiin (lukitus → budjetti → varajärjestely)
-- Pyyntötelemetria p50-/p95-/p99-viiveiden koostamiseen
-- Yhdistelmäkohteiden telemetria ja yhdistelmäkohteiden historiallinen kunto `combo_execution_key`- / `combo_step_id`-arvojen avulla
-- Korrelaatiotunnus (X-Request-Id) kokonaisvaltaiseen jäljitykseen
-- Vaatimustenmukaisuuden tarkastuslokitus, jonka voi poistaa käytöstä API-avainkohtaisesti
-- Arviointikehys LLM-laadunvarmistukseen
-- Kuntopaneeli palveluntarjoajien katkaisijoiden reaaliaikaisilla tilatiedoilla
-- MCP-palvelin (110 työkalua), jossa on 3 siirtotapaa (stdio/SSE/Streamable HTTP)
-- A2A-palvelin (JSON-RPC 2.0 + SSE), jossa on taitoja ja tehtävien elinkaaren hallinta
-- Muistijärjestelmä (poiminta, lisääminen, haku, tiivistäminen)
+- Katkaisijakuvio palveluntarjoajien vikasietoisuuden parantamiseksi
+- Thundering herd -ilmiön estävä suojaus mutex-lukituksella
+- Allekirjoitukseen perustuva pyyntöjen deduplikaatiovälimuisti
+- Toimialuekerros: kustannussäännöt, varatoimintokäytäntö, lukitsemiskäytäntö
+- Context Relay: istunnon luovutusyhteenvedot tilien kierron jatkuvuuteen
+- Toimialueen tilan pysyvyys (SQLite write-through -välimuisti varatoiminnoille, budjeteille, lukituksille ja katkaisijoille)
+- Käytäntömoottori keskitettyyn pyyntöjen arviointiin (lukitus → budjetti → varatoiminto)
+- Pyyntötelemetria p50/p95/p99-viiveiden aggregoinnilla
+- Kombinaatiokohteiden telemetria ja historiallinen kombinaatiokohteiden kunto `combo_execution_key` / `combo_step_id` -tunnisteiden kautta
+- Korrelaatiotunniste (X-Request-Id) päästä päähän -jäljitykseen
+- Vaatimustenmukaisuuden auditointilokitus API-avainkohtaisella opt-out-vaihtoehdolla
+- Evaluointikehys LLM:n laadunvarmistukseen
+- Kunnon hallintapaneeli reaaliaikaisella palveluntarjoajien katkaisijoiden tilalla
+- MCP-palvelin (110 työkalua) 3 siirtotavalla (stdio/SSE/Streamable HTTP)
+- A2A-palvelin (JSON-RPC 2.0 + SSE) taidoilla ja tehtävien elinkaarella
+- Muistijärjestelmä (poiminta, injektointi, haku, tiivistäminen)
 - Taitojärjestelmä (rekisteri, suorittaja, hiekkalaatikko, sisäänrakennetut taidot)
 - MITM-välityspalvelin varmenteiden hallinnalla ja DNS-käsittelyllä
-- Kehotesyötteiden manipulointia estävä väliohjelmisto
-- Kehotteiden pakkausputki, joka sisältää Cavemanin, RTK:n, pinotut putket, pakkausyhdistelmät, kielipaketit ja analytiikan
+- Kehoteinjektion torjuntaväliohjelmisto
+- Kehotteiden pakkausputki Cavemanilla, RTK:lla, pinotuilla putkilla, pakkauskomboilla, kielipaketeilla ja analytiikalla
 - ACP (Agent Communication Protocol) -rekisteri
-- Modulaariset OAuth-palveluntarjoajat (22 erillistä moduulia hakemistossa `src/lib/oauth/providers/`)
-- Asennuksen poisto- ja täydellisen asennuksen poiston komentosarjat
+- Modulaariset OAuth-palveluntarjoajat (22 erillistä moduulia hakemiston `src/lib/oauth/providers/` alla)
+- Uninstall/full-uninstall-skriptit
 - OAuth-ympäristön korjaustoiminto
 - WebSocket-silta OpenAI-yhteensopiville WS-asiakkaille (`/v1/ws`)
-- Synkronointitunnisteiden hallinta (myöntäminen/kumoaminen, ETag-versioidun määrityspaketin lataus)
-- GLM Thinking (`glmt`) ensisijaisena palveluntarjoajaesiasetuksena
-- Hybridimuotoinen tunnisteiden laskenta (palveluntarjoajan `/messages/count_tokens` ja arviointi varamenetelmänä)
-- Mallialiasten automaattinen alustaminen (yli 30 välityspalvelinten välisten murre-erojen normalisointia käynnistyksen yhteydessä)
-- Turvallinen lähtevä tietojen haku SSRF-suojauksella, yksityisten URL-osoitteiden estolla ja määritettävillä uudelleenyrityksillä
-- Jäähdytysajan huomioivat keskustelupyyntöjen uudelleenyritykset määritettävillä `requestRetry`- ja `maxRetryIntervalSec`-arvoilla
-- Ajonaikaisen ympäristön validointi Zodilla käynnistyksen yhteydessä
-- Vaatimustenmukaisuuden tarkastus v2 sivutuksella, palveluntarjoajien CRUD-tapahtumilla ja SSRF-estojen validointilokituksella
+- Synkronointitunnusten hallinta (myöntäminen/peruuttaminen, ETag-versionoidun konfiguraatiopaketin lataus)
+- GLM Thinking (`glmt`) ensiluokkaisena palveluntarjoajan esiasetuksena
+- Hybridi token -laskenta (palveluntarjoajan puolella `/messages/count_tokens` arviointivaratoiminnolla)
+- Mallialiasten automaattinen alustus (30+ proxynvälistä murrenormalisointia käynnistyksessä)
+- Turvallinen lähtevä haku SSRF-suojauksella, yksityisten URL-osoitteiden estolla ja määritettävällä uudelleenyrityksellä
+- Jäähdytysaikatietoiset keskustelun uudelleenyritykset määritettävillä `requestRetry`- ja `maxRetryIntervalSec`-asetuksilla
+- Ajonaikaisen ympäristön validointi Zodilla käynnistyksessä
+- Vaatimustenmukaisuuden auditointi v2 sivutuksella, palveluntarjoajien CRUD-tapahtumilla ja SSRF-estettyjen validointien lokituksella
 
 Ensisijainen ajonaikainen malli:
 
-- Next.js-sovellusreitit hakemistossa `src/app/api/*` toteuttavat sekä hallintapaneelin API:t että yhteensopivuus-API:t
-- Jaettu SSE- ja reititysydin hakemistoissa `src/sse/*` + `open-sse/*` käsittelee palveluntarjoajien suorituksen, muunnokset, suoratoiston, varajärjestelyt ja käytön seurannan
+- Next.js-sovellusreitit hakemiston `src/app/api/*` alla toteuttavat sekä hallintapaneelin API:t että yhteensopivuus-API:t
+- Jaettu SSE-/reititysydin hakemistoissa `src/sse/*` + `open-sse/*` hoitaa palveluntarjoajien suorituksen, käännöksen, suoratoiston, varatoiminnon ja käytön seurannan
 
 ## Viitekaaviot
 
@@ -114,43 +114,51 @@ muihin on linkit niiden aihekohtaisissa oppaissa.
 - Paikallisen prosessin ulkopuolinen palveluntarjoajan SLA-/hallintataso
 - Itse ulkoiset CLI-binäärit (Claude CLI, Codex CLI jne.)
 
-## Hallintapaneelin näkymät (nykyiset)
+## Dashboard-pinta (nykyinen)
 
-Pääsivut hakemistossa `src/app/(dashboard)/dashboard/`:
+Pääsivut kansiossa `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — pika-aloitus ja palveluntarjoajien yleiskatsaus
-- `/dashboard/endpoint` — päätepistevälityspalvelin sekä MCP-, A2A- ja API-päätepistevälilehdet
-- `/dashboard/providers` — palveluntarjoajien yhteydet ja tunnistetiedot
-- `/dashboard/combos` — yhdistelmästrategiat, mallit, vaihekohtainen rakennustyökalu, mallien reitityssäännöt ja manuaalisesti tallennettu järjestys
-- `/dashboard/auto-combo` — Auto Combo Engine: pisteytyspainot, tilapaketit, virtuaalisten tehtaiden esiasetukset ja telemetria
-- `/dashboard/costs` — kustannusten koonti ja hinnoittelun näkyvyys
-- `/dashboard/analytics` — käyttöanalytiikka, arvioinnit ja yhdistelmäkohteiden kunto
-- `/dashboard/limits` — kiintiö- ja nopeusrajoitukset
-- `/dashboard/cli-tools` — CLI-käyttöönotto, suoritusympäristön tunnistus ja määritysten luonti
-- `/dashboard/agents` — tunnistetut ACP-agentit ja mukautettujen agenttien rekisteröinti
-- `/dashboard/cloud-agents` — pilvipalvelussa isännöidyt agenttitehtävät (Codex Cloud, Devin, Jules) ja tehtävien elinkaari
-- `/dashboard/skills` — A2A-taitorekisteri, hiekkalaatikkosuoritus ja sisäänrakennettujen taitojen luettelo
+- `/dashboard` — pika-aloitus + palveluntarjoajien yleiskatsaus
+- `/dashboard/endpoint` — endpoint-välityspalvelin + MCP + A2A + API-endpoint-välilehdet
+- `/dashboard/providers` — palveluntarjoajayhteydet ja tunnistetiedot
+- `/dashboard/combos` — combo-strategiat, mallipohjat, vaihepohjainen rakentaja, mallien reitityssäännöt, manuaalinen pysyvä järjestys
+- `/dashboard/auto-combo` — Auto Combo Engine: pisteytyspainot, tilapaketit, virtuaaliset tehdasasetukset, telemetria
+- `/dashboard/costs` — kustannusten kooste ja hinnoittelun näkyvyys
+- `/dashboard/analytics` — käyttöanalytiikka, arvioinnit, combo-kohteiden kunto
+- `/dashboard/limits` — kiintiö-/nopeusrajoitukset
+- `/dashboard/cli-tools` — CLI-käyttöönotto, ajonaikaisen ympäristön tunnistus, konfiguraation generointi
+- `/dashboard/agents` — havaitut ACP-agentit + mukautettujen agenttien rekisteröinti
+- `/dashboard/cloud-agents` — pilvessä isännöidyt agenttitehtävät (Codex Cloud, Devin, Jules) ja tehtävien elinkaari
+- `/dashboard/skills` — A2A-taitorekisteri, hiekkalaatikkosuoritus, sisäänrakennettu taitoluettelo
 - `/dashboard/memory` — pysyvän keskustelumuistin tarkastelu ja haku
-- `/dashboard/webhooks` — lähtevien webhook-kutsujen tilaukset, salaisuuksien kierrätys ja uudelleenyritystilastot
-- `/dashboard/batch` — eräajojen lähetys ja edistyminen
-- `/dashboard/cache` — läpilukevan välimuistin ja päättelyvälimuistin tilastot sekä poistamistoiminnot
-- `/dashboard/playground` — vuorovaikutteinen keskustelukokeiluympäristö mille tahansa määritetylle yhdistelmälle tai mallille
-- `/dashboard/changelog` — sovelluksen sisäinen muutoslokin katseluohjelma (hahmontaa tiedoston `CHANGELOG.md`)
-- `/dashboard/system` — suoritusympäristön diagnostiikka, versiotiedot ja ympäristön validointinäkymä
-- `/dashboard/onboarding` — ensimmäisen käyttökerran ohjattu määritys uusille asennuksille
-- `/dashboard/media` — kuvien, videoiden ja musiikin kokeiluympäristö
+- `/dashboard/webhooks` — lähtevät webhook-tilaukset, salaisuuksien kierto, uudelleenyritystilastot
+- `/dashboard/batch` — erätöiden lähetys ja edistyminen
+- `/dashboard/cache` — läpiluku- ja päättelyvälimuistin tilastot, poistojen hallinta
+- `/dashboard/playground` — interaktiivinen keskustelualue mitä tahansa määritettyä combo/mallia vasten
+- `/dashboard/changelog` — sovelluksen sisäinen muutoslokin katselin (renderöi `CHANGELOG.md`)
+- `/dashboard/system` — ajonaikaiset diagnostiikat, versiotiedot, ympäristön validointipinta
+- `/dashboard/onboarding` — ensikäynnistyksen asetusvelho uusille asennuksille
+- `/dashboard/media` — kuva-/video-/musiikkileikkikenttä
 - `/dashboard/search-tools` — hakupalveluntarjoajien testaus ja historia
-- `/dashboard/health` — käytettävyysaika, virtapiirin katkaisijat, nopeusrajoitukset ja kiintiövalvotut istunnot
-- `/dashboard/logs` — pyyntö-, välityspalvelin-, tarkastus- ja konsolilokit
-- `/dashboard/settings` — järjestelmäasetusten välilehdet (yleiset, reititys, yhdistelmien oletukset jne.)
-- `/dashboard/context/caveman` — Caveman-pakkaussäännöt, kielipaketit, esikatselu ja tulostila
-- `/dashboard/context/rtk` — RTK-komentotulosteiden suodattimet, esikatselu ja suoritusympäristön turvallisuusasetukset
-- `/dashboard/context/combos` — reititysyhdistelmille määritetyt nimetyt pakkausputket
-- `/dashboard/translator` — muuntimen tarkastelu ja pyyntömuodon muunnoksen esikatselu
-- `/dashboard/audit` — vaatimustenmukaisuuden tarkastuslokin selain, jossa on sivutus ja jäsennellyt metatiedot
-- `/dashboard/usage` — `usage_history`-tietoihin yhdistetty pyyntökohtainen käyttötietoselain
-- `/dashboard/compression` — pakkauksen analytiikka, tilastot ja putkien määritys
-- `/dashboard/api-manager` — API-avainten elinkaaren ja mallien käyttöoikeuksien hallinta
+- `/dashboard/health` — käytettävyys, katkaisijat, nopeusrajoitukset, kiintiövalvotut istunnot
+- `/dashboard/logs` — pyyntö-/välityspalvelin-/auditointi-/konsolilokit
+- `/dashboard/settings` — järjestelmäasetusten välilehdet (yleiset, reititys, combo-oletukset jne.)
+- `/dashboard/context/caveman` — Caveman-pakkaussäännöt, kielipaketit, esikatselu ja tulostetila
+- `/dashboard/context/rtk` — RTK-komentotulosten suodattimet, esikatselu ja ajonaikaiset turva-asetukset
+- `/dashboard/context/combos` — nimetyt pakkausputket, jotka on liitetty reitityscomboihin
+- `/dashboard/translator` — kääntäjän tarkastelu ja pyyntömuodon muunnoksen esikatselu
+- `/dashboard/audit` — vaatimustenmukaisuuden auditointilokin selain sivutuksella ja rakenteisilla metatiedoilla
+- `/dashboard/usage` — pyyntökohtainen käytön selain sidoksissa kohteeseen `usage_history`
+- `/dashboard/compression` — pakkausanalytiikka, tilastot ja putken liittäminen
+- `/dashboard/api-manager` — API-avainten elinkaari ja mallikäyttöoikeudet
+
+UI-kerros: jokainen sivu renderöityy yhden kuoren sisällä — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (kitin
+`SidebarProvider`/`SidebarInset`, OmniRouten `Sidebar.tsx` ja `Header.tsx`). Sivut tuovat
+rakennuspalikkansa kohteesta `@/shared/components` (sovitukset mukana toimitetun Keak CI UI Kitin
+päälle kansiossa `packages/ui-kit`) tai kit-komponenttien alipoluista (`@omniroute/ui-kit/table`, `…/page-header`), ja
+ikonit `<Icon>`-komponentin kautta (`ICON_MAP` → Lucide). Teema (`system` oletuksena, vaalea/tumma) ja tokenit tulevat
+kitistä sillan kautta tiedostossa `src/app/globals.css`. Yksityiskohdat: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Järjestelmän yleiskuva
 

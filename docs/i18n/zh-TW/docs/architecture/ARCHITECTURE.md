@@ -17,77 +17,77 @@ _最後更新：2026-06-28_
 
 ## 執行摘要
 
-OmniRoute 是一個以 Next.js 建置的本機 AI 路由閘道與儀表板。
-它提供單一的 OpenAI 相容端點（`/v1/*`），並透過格式轉換、備援、權杖重新整理及用量追蹤，將流量路由至多個上游提供者。
+OmniRoute 是一個建構於 Next.js 之上的本機 AI 路由閘道與儀表板。
+它提供單一 OpenAI 相容端點（`/v1/*`），並在多個上游提供者之間路由流量，具備格式轉換、容錯移轉、權杖刷新與用量追蹤功能。
 
-核心功能：
+核心能力：
 
-- 為 CLI／工具提供 OpenAI 相容的 API 介面（375 個提供者、156 個執行器模組）
-- 在不同提供者格式之間轉換請求／回應
-- 模型組合備援（多模型序列）
-- 結構化組合步驟（`provider + model + connection`），並依 `compositeTiers` 進行執行階段排序
-- 帳戶層級備援（每個提供者可有多個帳戶）
-- 主要聊天路徑中的配額預檢，以及具配額感知能力的 P2C 帳戶選擇
+- 供 CLI/工具使用的 OpenAI 相容 API 介面（375 個提供者、156 個執行器模組）
+- 跨提供者格式的請求/回應轉換
+- 模型組合容錯移轉（多模型序列）
+- 結構化組合步驟（`provider + model + connection`），在執行期依據 `compositeTiers` 排序
+- 帳號層級容錯移轉（每個提供者支援多帳號）
+- 主聊天路徑中的配額預檢與配額感知的 P2C 帳號選擇
 - OAuth + API 金鑰提供者連線管理（27 個 OAuth 提供者模組）
-- 透過 `/v1/embeddings` 產生嵌入向量（18 個提供者）
-- 透過 `/v1/images/generations` 產生影像（10+ 個提供者、20+ 個模型）
+- 透過 `/v1/embeddings` 生成嵌入（18 個提供者）
+- 透過 `/v1/images/generations` 生成圖像（10+ 個提供者、20+ 個模型）
 - 透過 `/v1/audio/transcriptions` 進行音訊轉錄（18 個提供者）
-- 透過 `/v1/audio/speech` 將文字轉換為語音（24 個內建提供者）
-- 透過 `/v1/videos/generations` 產生影片（ComfyUI + SD WebUI）
-- 透過 `/v1/music/generations` 產生音樂（ComfyUI）
-- 透過 `/v1/search` 進行網頁搜尋（20 個提供者）
+- 透過 `/v1/audio/speech` 進行文字轉語音（24 個內建提供者）
+- 透過 `/v1/videos/generations` 生成影片（ComfyUI + SD WebUI）
+- 透過 `/v1/music/generations` 生成音樂（ComfyUI）
+- 透過 `/v1/search` 進行網路搜尋（20 個提供者）
 - 透過 `/v1/moderations` 進行內容審核
 - 透過 `/v1/rerank` 進行重新排序
-- 為推理模型解析思考標籤（``）
-- 為嚴格的 OpenAI SDK 相容性進行回應清理
-- 為跨提供者相容性進行角色正規化（developer→system、system→user）
+- 思考標籤解析（`<think>...</think>`），適用於推理模型
+- 回應淨化，以嚴格相容 OpenAI SDK
+- 角色正規化（developer→system、system→user），以達成跨提供者相容性
 - 結構化輸出轉換（json_schema → Gemini responseSchema）
-- 對提供者、金鑰、別名、組合、設定及定價進行本機持久化（122 個資料庫模組）
-- 用量／成本追蹤與請求記錄
-- 用於多裝置／狀態同步的選用雲端同步
-- 用於 API 存取控制的 IP 允許清單／封鎖清單
-- 思考預算管理（直通／自動／自訂／自適應）
-- 全域系統提示詞注入
-- 工作階段追蹤與指紋辨識
-- 每個帳戶具備提供者專用設定檔的增強型速率限制
-- 提升提供者韌性的斷路器模式
-- 使用互斥鎖定提供防止驚群效應的保護
-- 以簽章為基礎的請求去重快取
-- 領域層：成本規則、備援政策、鎖定政策
-- Context Relay：用於維持帳戶輪替連續性的工作階段交接摘要
-- 領域狀態持久化（針對備援、預算、鎖定及斷路器的 SQLite 直寫式快取）
-- 用於集中式請求評估的政策引擎（鎖定 → 預算 → 備援）
-- 具備 p50／p95／p99 延遲彙總的請求遙測
-- 透過 `combo_execution_key`／`combo_step_id` 提供組合目標遙測與歷史組合目標健康狀態
+- 提供者、金鑰、別名、組合、設定、定價的本機持久化（122 個 DB 模組）
+- 用量/成本追蹤與請求日誌記錄
+- 可選的雲端同步，用於多裝置/狀態同步
+- IP 允許清單/封鎖清單，用於 API 存取控制
+- 思考預算管理（passthrough/auto/custom/adaptive）
+- 全域系統提示注入
+- 工作階段追蹤與指紋識別
+- 依帳號的增強型速率限制，含提供者專屬設定檔
+- 提升提供者韌性的熔斷器模式
+- 以防驚群保護搭配互斥鎖定
+- 基於簽章的請求去重快取
+- 領域層：成本規則、容錯移轉政策、鎖定政策
+- Context Relay：用於帳號輪替連續性的工作階段交接摘要
+- 領域狀態持久化（針對容錯移轉、預算、鎖定、熔斷器的 SQLite 寫穿快取）
+- 集中式請求評估的政策引擎（鎖定 → 預算 → 容錯移轉）
+- 請求遙測，含 p50/p95/p99 延遲彙總
+- 透過 `combo_execution_key` / `combo_step_id` 的組合目標遙測與歷史組合目標健康狀態
 - 用於端對端追蹤的關聯 ID（X-Request-Id）
-- 可按 API 金鑰選擇退出的合規稽核記錄
+- 合規稽核日誌記錄，可依 API 金鑰選擇退出
 - 用於 LLM 品質保證的評估框架
-- 顯示即時提供者斷路器狀態的健康狀態儀表板
-- MCP Server（110 項工具），支援 3 種傳輸方式（stdio／SSE／Streamable HTTP）
-- A2A Server（JSON-RPC 2.0 + SSE），具備技能與任務生命週期
+- 健康儀表板，含即時提供者熔斷器狀態
+- MCP 伺服器（110 個工具），支援 3 種傳輸方式（stdio/SSE/Streamable HTTP）
+- A2A 伺服器（JSON-RPC 2.0 + SSE），含技能與任務生命週期
 - 記憶系統（擷取、注入、檢索、摘要）
-- 技能系統（登錄檔、執行器、沙箱、內建技能）
-- 具備憑證管理與 DNS 處理功能的 MITM Proxy
-- 提示詞注入防護中介軟體
-- 提示詞壓縮管線，支援 Caveman、RTK、堆疊式管線、壓縮組合、語言套件及分析
-- ACP（Agent Communication Protocol）登錄檔
-- 模組化 OAuth 提供者（`src/lib/oauth/providers/` 下有 22 個獨立模組）
-- 解除安裝／完整解除安裝指令碼
+- 技能系統（註冊表、執行器、沙箱、內建技能）
+- MITM 代理，含憑證管理與 DNS 處理
+- 提示注入防護中介軟體
+- 提示壓縮管線，含 Caveman、RTK、堆疊管線、壓縮組合、語言包與分析
+- ACP（Agent Communication Protocol）註冊表
+- 模組化 OAuth 提供者（`src/lib/oauth/providers/` 下的 22 個獨立模組）
+- 解除安裝/完整解除安裝腳本
 - OAuth 環境修復動作
-- 適用於 OpenAI 相容 WS 用戶端的 WebSocket 橋接器（`/v1/ws`）
-- 同步權杖管理（核發／撤銷、下載以 ETag 進行版本控制的設定套件）
-- GLM Thinking（`glmt`）一級提供者預設
-- 混合式權杖計數（提供者端 `/messages/count_tokens`，並以估算作為備援）
-- 模型別名自動植入（啟動時進行 30+ 項跨代理方言正規化）
-- 具備 SSRF 防護、私人 URL 封鎖及可設定重試機制的安全對外擷取
-- 可感知冷卻時間的聊天重試，並提供可設定的 `requestRetry` 與 `maxRetryIntervalSec`
-- 啟動時使用 Zod 進行執行階段環境驗證
-- 合規稽核 v2，支援分頁、提供者 CRUD 事件及遭 SSRF 封鎖的驗證記錄
+- 供 OpenAI 相容 WS 用戶端使用的 WebSocket 橋接（`/v1/ws`）
+- 同步權杖管理（簽發/撤銷，ETag 版本化設定套件下載）
+- GLM Thinking（`glmt`）一等公民提供者預設
+- 混合權杖計數（提供者端 `/messages/count_tokens`，含估算容錯移轉）
+- 模型別名自動播種（啟動時 30+ 項跨代理方言正規化）
+- 安全的出站擷取，含 SSRF 防護、私有 URL 封鎖與可設定的重試
+- 冷卻感知的聊天重試，含可設定的 `requestRetry` 與 `maxRetryIntervalSec`
+- 啟動時使用 Zod 進行執行期環境驗證
+- 合規稽核 v2，含分頁、提供者 CRUD 事件與 SSRF 封鎖驗證日誌記錄
 
-主要執行階段模型：
+主要執行期模型：
 
 - `src/app/api/*` 下的 Next.js 應用程式路由同時實作儀表板 API 與相容性 API
-- `src/sse/*` + `open-sse/*` 中的共用 SSE／路由核心負責處理提供者執行、格式轉換、串流、備援及用量
+- `src/sse/*` + `open-sse/*` 中的共享 SSE/路由核心負責提供者執行、轉換、串流、容錯移轉與用量
 
 ## 參考圖表
 
@@ -121,43 +121,51 @@ v3.8.0 平台的標準版本控制 Mermaid 原始檔位於
 - 本地程序外的提供者 SLA/控制平面
 - 外部 CLI 二進位檔案本身（Claude CLI、Codex CLI 等）
 
-## 儀表板表面（目前版本）
+## 儀表板介面（目前）
 
 `src/app/(dashboard)/dashboard/` 下的主要頁面：
 
-- `/dashboard` — 快速入門 + 提供者概覽
+- `/dashboard` — 快速開始 + 提供者總覽
 - `/dashboard/endpoint` — 端點代理 + MCP + A2A + API 端點分頁
 - `/dashboard/providers` — 提供者連線與憑證
-- `/dashboard/combos` — 組合策略、範本、逐步建置器、模型路由規則、手動持久化排序
-- `/dashboard/auto-combo` — 自動組合引擎：評分權重、模式套件、虛擬工廠預設、遙測
-- `/dashboard/costs` — 成本彙總與定價檢視
-- `/dashboard/analytics` — 用量分析、評估、組合目標健康狀態
+- `/dashboard/combos` — 組合策略、範本、步驟式建構器、模型路由規則、手動持久化排序
+- `/dashboard/auto-combo` — Auto Combo Engine：評分權重、模式包、虛擬工廠預設值、遙測
+- `/dashboard/costs` — 成本彙總與定價可視性
+- `/dashboard/analytics` — 使用量分析、評估、組合目標健康狀態
 - `/dashboard/limits` — 配額/速率控制
-- `/dashboard/cli-tools` — CLI 入門、執行環境偵測、設定產生
-- `/dashboard/agents` — 偵測到的 ACP 代理 + 自訂代理註冊
-- `/dashboard/cloud-agents` — 雲端託管代理任務（Codex Cloud、Devin、Jules）與任務生命週期
+- `/dashboard/cli-tools` — CLI 導入、執行環境偵測、設定產生
+- `/dashboard/agents` — 偵測到的 ACP 代理程式 + 自訂代理程式註冊
+- `/dashboard/cloud-agents` — 雲端託管代理程式任務（Codex Cloud、Devin、Jules）與任務生命週期
 - `/dashboard/skills` — A2A 技能註冊表、沙箱執行、內建技能目錄
-- `/dashboard/memory` — 持久對話記憶體檢視與檢索
-- `/dashboard/webhooks` — 外送 Webhook 訂閱、金鑰輪換、重試統計
-- `/dashboard/batch` — 批次任務提交與進度
-- `/dashboard/cache` — 讀取快取與推理快取統計、清除控制
-- `/dashboard/playground` — 針對任何已設定組合/模型的互動式聊天測試區
-- `/dashboard/changelog` — 應用內更新日誌檢視器（渲染 `CHANGELOG.md`）
-- `/dashboard/system` — 執行時期診斷、版本資訊、環境驗證表面
+- `/dashboard/memory` — 持久對話記憶的檢查與檢索
+- `/dashboard/webhooks` — 外送 webhook 訂閱、密鑰輪換、重試統計
+- `/dashboard/batch` — 批次工作提交與進度
+- `/dashboard/cache` — 讀穿式與推理快取統計、逐出控制
+- `/dashboard/playground` — 針對任何已設定組合/模型的互動式聊天遊樂場
+- `/dashboard/changelog` — 應用程式內更新日誌檢視器（渲染 `CHANGELOG.md`）
+- `/dashboard/system` — 執行環境診斷、版本資訊、環境驗證介面
 - `/dashboard/onboarding` — 新安裝的首次執行設定精靈
-- `/dashboard/media` — 圖片/影片/音樂測試區
+- `/dashboard/media` — 圖片/影片/音樂遊樂場
 - `/dashboard/search-tools` — 搜尋提供者測試與歷史記錄
-- `/dashboard/health` — 運行時間、斷路器、速率限制、配額監控工作階段
-- `/dashboard/logs` — 請求/代理/稽核/主控台記錄
-- `/dashboard/settings` — 系統設定分頁（一般、路由、組合預設等）
-- `/dashboard/context/caveman` — Caveman 壓縮規則、語言套件、預覽與輸出模式
-- `/dashboard/context/rtk` — RTK 命令輸出過濾器、預覽與執行時期安全設定
+- `/dashboard/health` — 運作時間、斷路器、速率限制、配額監控工作階段
+- `/dashboard/logs` — 請求/代理/稽核/主控台日誌
+- `/dashboard/settings` — 系統設定分頁（一般、路由、組合預設值等）
+- `/dashboard/context/caveman` — Caveman 壓縮規則、語言包、預覽與輸出模式
+- `/dashboard/context/rtk` — RTK 指令輸出篩選器、預覽與執行環境安全設定
 - `/dashboard/context/combos` — 指派給路由組合的命名壓縮管線
-- `/dashboard/translator` — 轉換器檢視與請求格式轉換預覽
-- `/dashboard/audit` — 合規稽核記錄瀏覽器，含分頁與結構化中繼資料
-- `/dashboard/usage` — 與 `usage_history` 關聯的每次請求用量瀏覽器
-- `/dashboard/compression` — 壓縮分析、統計資料與管線指派
+- `/dashboard/translator` — 翻譯器檢查與請求格式轉換預覽
+- `/dashboard/audit` — 具備分頁與結構化元資料的合規稽核日誌瀏覽器
+- `/dashboard/usage` — 綁定 `usage_history` 的逐請求使用量瀏覽器
+- `/dashboard/compression` — 壓縮分析、統計與管線指派
 - `/dashboard/api-manager` — API 金鑰生命週期與模型權限
+
+UI 層：每個頁面都在同一個外殼內渲染 — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx`（套件的
+`SidebarProvider`/`SidebarInset`、OmniRoute 的 `Sidebar.tsx` 與 `Header.tsx`）。頁面從
+`@/shared/components`（`packages/ui-kit` 中隨附的 Keak CI UI Kit 的轉接器）或套件元件子路徑
+（`@omniroute/ui-kit/table`、`…/page-header`）匯入其建構區塊，並透過 `<Icon>`
+（`ICON_MAP` → Lucide）取得圖示。主題（預設為 `system`，淺色/深色）與設計權杖（tokens）
+透過 `src/app/globals.css` 中的橋接從套件取得。詳細資訊：`docs/architecture/DESIGN_SYSTEM.md`。
 
 ## 高層級系統上下文
 

@@ -8,79 +8,79 @@
 
 _Oxirgi yangilanish: 2026-06-28_
 
-## Qisqacha sharh
+## Qisqacha mazmun
 
-OmniRoute — Next.js asosida yaratilgan mahalliy AI marshrutlash shlyuzi va boshqaruv paneli.
-U yagona OpenAI-mos keluvchi soʻnggi nuqtani (`/v1/*`) taqdim etadi hamda tarjima, zaxira variantiga oʻtish, tokenni yangilash va foydalanishni kuzatish imkoniyatlari bilan trafikni bir nechta yuqori oqim provayderlari boʻylab marshrutlaydi.
+OmniRoute — Next.js asosida qurilgan mahalliy AI marshrutlash shlyuzi va boshqaruv paneli.
+U yagona OpenAI-mos endpoint (`/v1/*`) taqdim etadi va traflikni tarjima, fallback, token yangilash hamda foydalanishni kuzatish bilan bir nechta yuqori oqim (upstream) provayderlari orasida yo'naltiradi.
 
 Asosiy imkoniyatlar:
 
-- CLI/vositalar uchun OpenAI-mos keluvchi API interfeysi (375 ta provayder, 156 ta ijrochi modul)
-- Provayder formatlari oʻrtasida soʻrov/javob tarjimasi
-- Modellar kombinatsiyasi boʻyicha zaxira variantiga oʻtish (koʻp modelli ketma-ketlik)
-- `compositeTiers` asosida bajarilish vaqtida tartiblanadigan tuzilmali kombinatsiya bosqichlari (`provider + model + connection`)
-- Hisob darajasida zaxira variantiga oʻtish (har bir provayder uchun bir nechta hisob)
-- Asosiy chat yoʻlida kvotani oldindan tekshirish va kvotani hisobga oluvchi P2C hisob tanlovi
-- OAuth + API kaliti orqali provayder ulanishlarini boshqarish (27 ta OAuth provayder moduli)
-- `/v1/embeddings` orqali embedding yaratish (18 ta provayder)
-- `/v1/images/generations` orqali tasvir yaratish (10+ ta provayder, 20+ ta model)
-- `/v1/audio/transcriptions` orqali audio transkripsiyasi (18 ta provayder)
-- `/v1/audio/speech` orqali matndan nutq yaratish (24 ta ichki provayder)
-- `/v1/videos/generations` orqali video yaratish (ComfyUI + SD WebUI)
-- `/v1/music/generations` orqali musiqa yaratish (ComfyUI)
-- `/v1/search` orqali veb-qidiruv (20 ta provayder)
+- CLI/vositalar uchun OpenAI-mos API yuzasi (375 provayder, 156 ijrochi modul)
+- Provayder formatlari orasida so'rov/javob tarjimasi
+- Model kombo fallback (ko'p modelli ketma-ketlik)
+- `compositeTiers` bo'yicha ish vaqtida tartibga solish bilan strukturaviy kombo qadamlari (`provider + model + connection`)
+- Hisob darajasidagi fallback (har bir provayder uchun ko'p hisob)
+- Asosiy chat yo'lida kvotani oldindan tekshirish va kvotaga sezgir P2C hisob tanlash
+- OAuth + API-kalit provayder ulanishlarini boshqarish (27 OAuth provayder moduli)
+- `/v1/embeddings` orqali embedding generatsiyasi (18 provayder)
+- `/v1/images/generations` orqali rasm generatsiyasi (10+ provayder, 20+ model)
+- `/v1/audio/transcriptions` orqali audio transkripsiya (18 provayder)
+- `/v1/audio/speech` orqali matndan nutqga (24 ta o'rnatilgan provayder)
+- `/v1/videos/generations` orqali video generatsiyasi (ComfyUI + SD WebUI)
+- `/v1/music/generations` orqali musiqa generatsiyasi (ComfyUI)
+- `/v1/search` orqali veb-qidiruv (20 provayder)
 - `/v1/moderations` orqali moderatsiya
-- `/v1/rerank` orqali qayta saralash
-- Mantiqiy tahlil modellari uchun think teglarini tahlil qilish (``)
-- Qatʼiy OpenAI SDK mosligi uchun javoblarni sanitizatsiya qilish
-- Provayderlararo moslik uchun rollarni meʼyorlashtirish (developer→system, system→user)
-- Tuzilmali chiqishni oʻzgartirish (json_schema → Gemini responseSchema)
-- Provayderlar, kalitlar, taxalluslar, kombinatsiyalar, sozlamalar va narxlarni mahalliy saqlash (122 ta DB moduli)
-- Foydalanish/xarajatlarni kuzatish va soʻrovlarni jurnalga yozish
-- Bir nechta qurilma/holatni sinxronlashtirish uchun ixtiyoriy bulutli sinxronlash
-- API kirishini boshqarish uchun IP ruxsat etilganlar/bloklanganlar roʻyxati
-- Fikrlash budjetini boshqarish (oʻzgartirmasdan uzatish/avtomatik/maxsus/moslashuvchan)
+- `/v1/rerank` orqali qayta reytinglash
+- Fikrlaydigan modellar uchun think teg tahlili (`<think>...</think>`)
+- Qat'iy OpenAI SDK mosligi uchun javob sanitizatsiyasi
+- Provayderlararo moslik uchun rollarni normallashtirish (developer→system, system→user)
+- Strukturaviy chiqish konvertatsiyasi (json_schema → Gemini responseSchema)
+- Provayderlar, kalitlar, taxalluslar, kombolar, sozlamalar, narxlash uchun mahalliy saqlash (122 DB moduli)
+- Foydalanish/xarajat kuzatuvi va so'rov jurnallash
+- Ko'p qurilmali/holat sinxronizatsiyasi uchun ixtiyoriy bulutli sinxronizatsiya
+- API kirishini boshqarish uchun IP ruxsat ro'yxati/blok ro'yxati
+- Fikrlash byudjetini boshqarish (passthrough/auto/custom/adaptive)
 - Global tizim promptini kiritish
-- Seanslarni kuzatish va raqamli iz yaratish
-- Provayderga xos profillar bilan har bir hisob uchun kengaytirilgan tezlik cheklovi
-- Provayderlar barqarorligi uchun avtomatik uzgich andozasi
-- Mutex qulflash orqali bir vaqtda haddan tashqari koʻp soʻrov yuborilishidan himoya
-- Imzoga asoslangan soʻrovlarni takroriy bajarishdan saqlovchi kesh
-- Domen qatlami: xarajat qoidalari, zaxira variantiga oʻtish siyosati, bloklash siyosati
-- Context Relay: hisoblar almashtirilganda uzluksizlikni taʼminlash uchun seansni topshirish xulosalari
-- Domen holatini saqlash (zaxira variantlari, budjetlar, bloklashlar va avtomatik uzgichlar uchun SQLite orqali bevosita yoziluvchi kesh)
-- Soʻrovlarni markazlashtirilgan baholash uchun siyosat mexanizmi (bloklash → budjet → zaxira variantiga oʻtish)
-- p50/p95/p99 kechikish agregatsiyasiga ega soʻrov telemetriyasi
-- `combo_execution_key` / `combo_step_id` orqali kombinatsiya nishoni telemetriyasi va kombinatsiya nishonining tarixiy holati
-- Boshidan oxirigacha kuzatish uchun korrelyatsiya IDsi (X-Request-Id)
-- Har bir API kaliti uchun oʻchirib qoʻyish imkoniyatiga ega muvofiqlik auditi jurnali
-- LLM sifatini taʼminlash uchun baholash tizimi
-- Provayder avtomatik uzgichlarining real vaqt holatiga ega salomatlik boshqaruv paneli
-- 3 ta transportga (stdio/SSE/Streamable HTTP) ega MCP Server (110 ta vosita)
-- Koʻnikmalar va vazifalarning hayot sikliga ega A2A Server (JSON-RPC 2.0 + SSE)
-- Xotira tizimi (ajratib olish, kiritish, qidirib topish, umumlashtirish)
-- Koʻnikmalar tizimi (reestr, ijrochi, izolyatsiyalangan muhit, ichki koʻnikmalar)
-- Sertifikatlarni boshqarish va DNS bilan ishlash imkoniyatiga ega MITM proksi
-- Prompt kiritish hujumlaridan himoya qiluvchi oraliq dastur
-- Caveman, RTK, qatlamlangan konveyerlar, siqish kombinatsiyalari, til paketlari va tahlilga ega promptlarni siqish konveyeri
-- ACP (Agent Communication Protocol) reestri
-- Modulli OAuth provayderlari (`src/lib/oauth/providers/` ostidagi 22 ta alohida modul)
-- Oʻchirish/toʻliq oʻchirish skriptlari
-- OAuth muhitini tiklash amali
-- OpenAI-mos keluvchi WS mijozlari uchun WebSocket koʻprigi (`/v1/ws`)
-- Sinxronlash tokenlarini boshqarish (chiqarish/bekor qilish, ETag orqali versiyalangan konfiguratsiya toʻplamini yuklab olish)
-- Birinchi darajali GLM Thinking (`glmt`) provayder tayyor sozlamasi
-- Gibrid tokenlarni hisoblash (zaxira sifatida taxminiy hisoblash bilan provayder tomonidagi `/messages/count_tokens`)
-- Model taxalluslarini avtomatik boshlangʻich toʻldirish (ishga tushishda 30+ ta proksilararo dialekt meʼyorlashtirishi)
-- SSRF himoyasi, xususiy URL manzillarini bloklash va sozlanadigan qayta urinishga ega xavfsiz tashqi soʻrov
-- Sozlanadigan `requestRetry` va `maxRetryIntervalSec` bilan sovish davrini hisobga oluvchi chat qayta urinishlari
-- Ishga tushishda Zod yordamida bajarilish muhiti parametrlarini tekshirish
-- Sahifalash, provayder CRUD hodisalari va SSRF tomonidan bloklangan tekshiruvlarni jurnalga yozishga ega muvofiqlik auditi v2
+- Sessiyani kuzatish va fingerprinting
+- Provayderga xos profillar bilan har bir hisob uchun kengaytirilgan tezlik cheklash
+- Provayder chidamliligi uchun circuit breaker naqshi
+- Mutex qulflash bilan thundering herd'ga qarshi himoya
+- Imzoga asoslangan so'rov deduplikatsiya keshi
+- Domen qatlami: xarajat qoidalari, fallback siyosati, qulflash (lockout) siyosati
+- Context Relay: hisob rotatsiyasi uzluksizligi uchun sessiya topshirish xulosalari
+- Domen holatini saqlash (fallbacklar, byudjetlar, qulflashlar, circuit breakerlar uchun SQLite write-through kesh)
+- Markazlashtirilgan so'rov baholash uchun siyosat dvigateli (lockout → budget → fallback)
+- p50/p95/p99 kechikish agregatsiyasi bilan so'rov telemetriyasi
+- `combo_execution_key` / `combo_step_id` orqali kombo maqsad telemetriyasi va tarixiy kombo maqsad salomatligi
+- Uchdan-uchgacha kuzatish uchun korrelyatsiya ID (X-Request-Id)
+- Har bir API kaliti uchun opt-out bilan muvofiqlik audit jurnallash
+- LLM sifatini ta'minlash uchun eval freymvork
+- Real vaqt provayder circuit breaker holati bilan salomatlik paneli
+- 3 transport (stdio/SSE/Streamable HTTP) bilan MCP Server (110 vosita)
+- Ko'nikmalar va vazifa hayotiy tsikli bilan A2A Server (JSON-RPC 2.0 + SSE)
+- Xotira tizimi (ajratib olish, kiritish, qidirish, umumlashtirish)
+- Ko'nikmalar tizimi (reyestr, ijrochi, sandbox, o'rnatilgan ko'nikmalar)
+- Sertifikat boshqaruvi va DNS ishlov berish bilan MITM proksi
+- Prompt injection himoya middleware
+- Caveman, RTK, qatlamli pipelinelar, siqish kombolari, til paketlari va analitika bilan prompt siqish pipeline'i
+- ACP (Agent Communication Protocol) reyestri
+- Modulli OAuth provayderlari (`src/lib/oauth/providers/` ostida 22 ta alohida modul)
+- O'chirish/to'liq o'chirish skriptlari
+- OAuth muhitini tiklash harakati
+- OpenAI-mos WS mijozlari uchun WebSocket ko'prigi (`/v1/ws`)
+- Sinxronizatsiya tokenini boshqarish (berish/bekor qilish, ETag-versiyali konfiguratsiya to'plamini yuklab olish)
+- GLM Thinking (`glmt`) birinchi darajali provayder preset
+- Gibrid token hisoblash (baholash fallback bilan provayder tomonidagi `/messages/count_tokens`)
+- Model taxalluslarini avtomatik ekish (ishga tushirishda 30+ cross-proxy dialekt normallashtirishlari)
+- SSRF himoyasi, shaxsiy URL blokirovkasi va sozlanadigan qayta urinish bilan xavfsiz tashqi fetch
+- Sozlanadigan `requestRetry` va `maxRetryIntervalSec` bilan cooldown'ga sezgir chat qayta urinishlari
+- Ishga tushirishda Zod bilan ish vaqti muhitini tekshirish
+- Sahifalash, provayder CRUD hodisalari va SSRF-bloklangan tekshirish jurnallash bilan muvofiqlik auditi v2
 
-Asosiy bajarilish modeli:
+Asosiy ish vaqti modeli:
 
-- `src/app/api/*` ostidagi Next.js ilova marshrutlari boshqaruv paneli APIlarini ham, moslik APIlarini ham amalga oshiradi
-- `src/sse/*` + `open-sse/*` ichidagi umumiy SSE/marshrutlash yadrosi provayderni ishga tushirish, tarjima, oqimli uzatish, zaxira variantiga oʻtish va foydalanishni boshqaradi
+- `src/app/api/*` ostidagi Next.js app marshrutlari boshqaruv paneli API'lari va moslik API'larini ikkalasini ham amalga oshiradi
+- `src/sse/*` + `open-sse/*` dagi umumiy SSE/marshrutlash yadrosi provayder ijrosi, tarjima, oqim (streaming), fallback va foydalanishni boshqaradi
 
 ## Maʼlumotnoma diagrammalari
 
@@ -114,43 +114,52 @@ qolganlariga tegishli soha qoʻllanmalaridan havolalar berilgan.
 - Mahalliy jarayondan tashqaridagi provayder SLA/boshqaruv tekisligi
 - Tashqi CLI bajariluvchi fayllarining oʻzi (Claude CLI, Codex CLI va boshqalar)
 
-## Boshqaruv paneli yuzasi (joriy)
+## Dashboard yuzasi (joriy)
 
 `src/app/(dashboard)/dashboard/` ostidagi asosiy sahifalar:
 
-- `/dashboard` — tezkor boshlash + provayderlar sharhi
-- `/dashboard/endpoint` — soʻnggi nuqta proksisi + MCP + A2A + API soʻnggi nuqtasi varaqlari
-- `/dashboard/providers` — provayder ulanishlari va hisob maʼlumotlari
-- `/dashboard/combos` — kombinatsiya strategiyalari, shablonlar, qadamlarga asoslangan tuzuvchi, modelni yoʻnaltirish qoidalari, qoʻlda belgilangan doimiy tartib
-- `/dashboard/auto-combo` — Avtomatik kombinatsiya mexanizmi: baholash vaznlari, rejim toʻplamlari, virtual fabrika andozalari, telemetriya
-- `/dashboard/costs` — xarajatlarni jamlash va narxlar koʻrinishi
-- `/dashboard/analytics` — foydalanish tahlili, baholashlar, kombinatsiya maqsadlari holati
+- `/dashboard` — tez boshlash + provayderlarning umumiy ko'rinishi
+- `/dashboard/endpoint` — endpoint proksi + MCP + A2A + API endpoint yorliqlari
+- `/dashboard/providers` — provayder ulanishlari va hisob ma'lumotlari
+- `/dashboard/combos` — kombo strategiyalari, shablonlar, qadamlarga asoslangan konstruktor, model marshrutlash qoidalari, qo'lda saqlanadigan tartiblash
+- `/dashboard/auto-combo` — Auto Combo Engine: baholash vaznlari, rejim to'plamlari, virtual zavod oldindan sozlamalari, telemetriya
+- `/dashboard/costs` — xarajatlarni jamlash va narxlar ko'rinishi
+- `/dashboard/analytics` — foydalanish tahlili, baholashlar, kombo maqsadlari holati
 - `/dashboard/limits` — kvota/tezlik boshqaruvlari
-- `/dashboard/cli-tools` — CLI bilan ish boshlash, ish muhitini aniqlash, konfiguratsiya yaratish
-- `/dashboard/agents` — aniqlangan ACP agentlari + maxsus agentni roʻyxatdan oʻtkazish
-- `/dashboard/cloud-agents` — bulutda joylashtirilgan agent vazifalari (Codex Cloud, Devin, Jules) va vazifaning hayotiy sikli
-- `/dashboard/skills` — A2A koʻnikmalar reyestri, sinov muhitida bajarish, ichki koʻnikmalar katalogi
-- `/dashboard/memory` — doimiy suhbat xotirasini tekshirish va olish
-- `/dashboard/webhooks` — chiquvchi webhook obunalari, maxfiy kalitni almashtirish, qayta urinish statistikasi
-- `/dashboard/batch` — paketli vazifani yuborish va bajarilish jarayoni
-- `/dashboard/cache` — oʻqish orqali va mulohaza yuritish keshi statistikasi, chiqarib tashlash boshqaruvlari
-- `/dashboard/playground` — sozlangan istalgan kombinatsiya/model bilan interaktiv suhbat sinov maydoni
-- `/dashboard/changelog` — ilova ichidagi oʻzgarishlar jurnali koʻruvchisi (`CHANGELOG.md` faylini namoyish qiladi)
-- `/dashboard/system` — ish muhiti diagnostikasi, versiya maʼlumotlari, muhitni tekshirish interfeysi
-- `/dashboard/onboarding` — yangi oʻrnatishlar uchun birinchi ishga tushirishni sozlash ustasi
-- `/dashboard/media` — tasvir/video/musiqa sinov maydoni
-- `/dashboard/search-tools` — qidiruv provayderlarini sinash va tarix
-- `/dashboard/health` — uzluksiz ishlash vaqti, zanjir uzgichlar, tezlik cheklovlari, kvotasi kuzatiladigan seanslar
-- `/dashboard/logs` — soʻrov/proksi/audit/konsol jurnallari
-- `/dashboard/settings` — tizim sozlamalari varaqlari (umumiy, yoʻnaltirish, standart kombinatsiyalar va boshqalar)
-- `/dashboard/context/caveman` — Caveman siqish qoidalari, til paketlari, oldindan koʻrish va chiqish rejimi
-- `/dashboard/context/rtk` — RTK buyruq chiqishi filtrlari, oldindan koʻrish va ish muhiti xavfsizligi sozlamalari
-- `/dashboard/context/combos` — yoʻnaltirish kombinatsiyalariga tayinlangan nomli siqish konveyerlari
-- `/dashboard/translator` — tarjimonni tekshirish va soʻrov formatini oʻzgartirishni oldindan koʻrish
-- `/dashboard/audit` — sahifalash va tuzilmaviy metamaʼlumotlarga ega muvofiqlik auditi jurnali brauzeri
-- `/dashboard/usage` — `usage_history` bilan bogʻlangan har bir soʻrov boʻyicha foydalanish brauzeri
-- `/dashboard/compression` — siqish tahlili, statistika va konveyerlarni tayinlash
-- `/dashboard/api-manager` — API kalitining hayotiy sikli va model ruxsatlari
+- `/dashboard/cli-tools` — CLI bilan tanishtirish, ishga tushirish muhitini aniqlash, konfiguratsiya yaratish
+- `/dashboard/agents` — aniqlangan ACP agentlari + maxsus agentlarni ro'yxatdan o'tkazish
+- `/dashboard/cloud-agents` — bulutda joylashtirilgan agent vazifalari (Codex Cloud, Devin, Jules) va vazifa hayotiy tsikli
+- `/dashboard/skills` — A2A ko'nikmalar reestri, sandbox bajarish, o'rnatilgan ko'nikmalar katalogi
+- `/dashboard/memory` — doimiy suhbat xotirasini tekshirish va qidirish
+- `/dashboard/webhooks` — chiquvchi webhook obunalari, maxfiy kalitlarni almashtirish, qayta urinishlar statistikasi
+- `/dashboard/batch` — paketli vazifalarni yuborish va jarayon
+- `/dashboard/cache` — read-through va reasoning kesh statistikasi, tozalash boshqaruvlari
+- `/dashboard/playground` — har qanday sozlangan kombo/model bilan interaktiv chat maydoni
+- `/dashboard/changelog` — ilova ichidagi o'zgarishlar jurnalini ko'rish vositasi (`CHANGELOG.md` ni ko'rsatadi)
+- `/dashboard/system` — ishga tushirish diagnostikasi, versiya ma'lumotlari, muhitni tekshirish yuzasi
+- `/dashboard/onboarding` — yangi o'rnatishlar uchun birinchi ishga tushirish sozlash ustasi
+- `/dashboard/media` — rasm/video/musiqa maydoni
+- `/dashboard/search-tools` — qidiruv provayderini sinash va tarixi
+- `/dashboard/health` — ish vaqti, circuit breakerlar, tezlik cheklovlari, kvota bo'yicha kuzatiladigan seanslar
+- `/dashboard/logs` — so'rov/proksi/audit/konsol jurnallari
+- `/dashboard/settings` — tizim sozlamalari yorliqlari (umumiy, marshrutlash, kombo standartlari va boshqalar)
+- `/dashboard/context/caveman` — Caveman siqish qoidalari, til to'plamlari, oldindan ko'rish va chiqish rejimi
+- `/dashboard/context/rtk` — RTK buyruq-chiqish filtrlari, oldindan ko'rish va ishga tushirish xavfsizlik sozlamalari
+- `/dashboard/context/combos` — marshrutlash kombolariga tayinlangan nomlangan siqish quvur liniyalari
+- `/dashboard/translator` — tarjimonni tekshirish va so'rov formatini konvertatsiya qilishni oldindan ko'rish
+- `/dashboard/audit` — sahifalash va tuzilgan metama'lumotlar bilan muvofiqlik audit jurnali brauzeri
+- `/dashboard/usage` — `usage_history` ga bog'langan har bir so'rov bo'yicha foydalanish brauzeri
+- `/dashboard/compression` — siqish tahlili, statistikasi va quvur liniyasini tayinlash
+- `/dashboard/api-manager` — API kaliti hayotiy tsikli va model ruxsatlari
+
+UI qatlami: har bir sahifa bitta qobiq ichida ko'rsatiladi — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (kitning
+`SidebarProvider`/`SidebarInset`, OmniRoute'ning `Sidebar.tsx` va `Header.tsx`). Sahifalar o'z
+tarkibiy bloklarini `@/shared/components` dan (`packages/ui-kit` dagi vendored Keak CI UI Kit
+ustidagi adapterlar) yoki kit komponentlari yo'llaridan (`@omniroute/ui-kit/table`, `…/page-header`),
+belgilarni esa `<Icon>` orqali (`ICON_MAP` → Lucide) import qiladi. Mavzu (standart bo'yicha
+`system`, light/dark) va tokenlar `src/app/globals.css` dagi ko'prik orqali kitdan keladi.
+Tafsilotlar: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Yuqori Darajadagi Tizim Konteksti
 

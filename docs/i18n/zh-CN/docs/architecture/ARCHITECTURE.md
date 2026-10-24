@@ -20,76 +20,76 @@ _最后更新：2026-06-28_
 ## 执行摘要
 
 OmniRoute 是一个基于 Next.js 构建的本地 AI 路由网关和仪表板。
-它提供单一的 OpenAI 兼容端点（`/v1/*`），并通过格式转换、故障转移、令牌刷新和用量跟踪，将流量路由到多个上游提供者。
+它提供单一的 OpenAI 兼容端点（`/v1/*`），并在多个上游提供者之间路由流量，同时具备格式转换、回退、令牌刷新和使用量跟踪能力。
 
-核心能力：
+核心功能：
 
-- 为 CLI/工具提供 OpenAI 兼容的 API 接口（375 个提供者、156 个执行器模块）
-- 在不同提供者格式之间进行请求/响应转换
-- 模型组合故障转移（多模型序列）
-- 结构化组合步骤（`provider + model + connection`），并在运行时按 `compositeTiers` 排序
-- 账户级故障转移（每个提供者支持多个账户）
-- 在主聊天路径中执行配额预检和具备配额感知能力的 P2C 账户选择
+- 面向 CLI/工具的 OpenAI 兼容 API 接口（375 个提供者，156 个执行器模块）
+- 跨提供者格式的请求/响应转换
+- 模型组合回退（多模型序列）
+- 结构化组合步骤（`provider + model + connection`），运行时按 `compositeTiers` 排序
+- 账户级回退（每个提供者支持多账户）
+- 主聊天路径中的配额预检和配额感知的 P2C 账户选择
 - OAuth + API 密钥提供者连接管理（27 个 OAuth 提供者模块）
-- 通过 `/v1/embeddings` 生成嵌入（18 个提供者）
-- 通过 `/v1/images/generations` 生成图像（10+ 个提供者、20+ 个模型）
-- 通过 `/v1/audio/transcriptions` 转录音频（18 个提供者）
-- 通过 `/v1/audio/speech` 将文本转换为语音（24 个内置提供者）
+- 通过 `/v1/embeddings` 生成嵌入向量（18 个提供者）
+- 通过 `/v1/images/generations` 生成图像（10+ 个提供者，20+ 个模型）
+- 通过 `/v1/audio/transcriptions` 进行音频转录（18 个提供者）
+- 通过 `/v1/audio/speech` 进行文本转语音（24 个内置提供者）
 - 通过 `/v1/videos/generations` 生成视频（ComfyUI + SD WebUI）
 - 通过 `/v1/music/generations` 生成音乐（ComfyUI）
-- 通过 `/v1/search` 进行 Web 搜索（20 个提供者）
+- 通过 `/v1/search` 进行网络搜索（20 个提供者）
 - 通过 `/v1/moderations` 进行内容审核
 - 通过 `/v1/rerank` 进行重排序
-- 为推理模型解析思考标签（``）
-- 清理响应，以严格兼容 OpenAI SDK
-- 角色规范化（developer→system、system→user），以实现跨提供者兼容
+- 面向推理模型的思考标签解析（`<think>...</think>`）
+- 针对严格 OpenAI SDK 兼容性的响应净化
+- 针对跨提供者兼容性的角色规范化（developer→system，system→user）
 - 结构化输出转换（json_schema → Gemini responseSchema）
-- 本地持久化提供者、密钥、别名、组合、设置和定价（122 个数据库模块）
-- 用量/成本跟踪和请求日志记录
-- 可选的云端同步，用于多设备/状态同步
+- 提供者、密钥、别名、组合、设置、定价的本地持久化（122 个数据库模块）
+- 使用量/成本跟踪和请求日志记录
+- 可选的云同步，用于多设备/状态同步
 - 用于 API 访问控制的 IP 允许列表/阻止列表
-- 思考预算管理（透传/自动/自定义/自适应）
+- 思考预算管理（passthrough/auto/custom/adaptive）
 - 全局系统提示词注入
 - 会话跟踪和指纹识别
-- 基于提供者特定配置文件的账户级增强速率限制
-- 用于提高提供者韧性的断路器模式
-- 通过互斥锁防止惊群效应
+- 基于提供者特定配置文件的按账户增强速率限制
+- 用于提供者弹性的熔断器模式
+- 基于互斥锁的防惊群保护
 - 基于签名的请求去重缓存
-- 领域层：成本规则、故障转移策略、锁定策略
-- 上下文中继：用于在账户轮换时保持连续性的会话交接摘要
-- 领域状态持久化（针对故障转移、预算、锁定和断路器的 SQLite 直写式缓存）
-- 用于集中式请求评估的策略引擎（锁定 → 预算 → 故障转移）
-- 请求遥测，支持 p50/p95/p99 延迟聚合
-- 通过 `combo_execution_key` / `combo_step_id` 实现组合目标遥测和组合目标历史健康状态跟踪
+- 领域层：成本规则、回退策略、锁定策略
+- Context Relay：用于账户轮换连续性的会话交接摘要
+- 领域状态持久化（用于回退、预算、锁定、熔断器的 SQLite 写穿缓存）
+- 用于集中式请求评估的策略引擎（锁定 → 预算 → 回退）
+- 具有 p50/p95/p99 延迟聚合的请求遥测
+- 通过 `combo_execution_key` / `combo_step_id` 实现组合目标遥测和历史组合目标健康状况
 - 用于端到端追踪的关联 ID（X-Request-Id）
-- 合规审计日志记录，支持按 API 密钥选择退出
+- 支持按 API 密钥选择退出的合规审计日志
 - 用于 LLM 质量保证的评估框架
-- 提供实时提供者断路器状态的健康仪表板
+- 具有实时提供者熔断器状态的健康仪表板
 - MCP 服务器（110 个工具），支持 3 种传输方式（stdio/SSE/Streamable HTTP）
 - A2A 服务器（JSON-RPC 2.0 + SSE），支持技能和任务生命周期
 - 记忆系统（提取、注入、检索、摘要）
 - 技能系统（注册表、执行器、沙箱、内置技能）
-- 具备证书管理和 DNS 处理能力的 MITM 代理
+- 具有证书管理和 DNS 处理能力的 MITM 代理
 - 提示词注入防护中间件
-- 提示词压缩管线，支持 Caveman、RTK、堆叠式管线、压缩组合、语言包和分析
-- ACP（Agent Communication Protocol）注册表
+- 提示词压缩管道，包含 Caveman、RTK、堆叠管道、压缩组合、语言包和分析功能
+- ACP（代理通信协议）注册表
 - 模块化 OAuth 提供者（`src/lib/oauth/providers/` 下的 22 个独立模块）
-- 卸载/完整卸载脚本
+- 卸载/完全卸载脚本
 - OAuth 环境修复操作
-- 面向 OpenAI 兼容 WS 客户端的 WebSocket 桥接器（`/v1/ws`）
-- 同步令牌管理（签发/撤销、下载带 ETag 版本控制的配置包）
-- GLM Thinking（`glmt`）一等提供者预设
-- 混合令牌计数（提供者侧 `/messages/count_tokens`，并在不可用时回退到估算）
-- 模型别名自动播种（启动时执行 30+ 种跨代理方言规范化）
-- 具有 SSRF 防护、私有 URL 阻止和可配置重试机制的安全出站请求
-- 感知冷却时间的聊天重试，支持配置 `requestRetry` 和 `maxRetryIntervalSec`
-- 启动时使用 Zod 验证运行时环境
-- 合规审计 v2，支持分页、提供者 CRUD 事件和 SSRF 阻止验证日志记录
+- 面向 OpenAI 兼容 WS 客户端的 WebSocket 桥接（`/v1/ws`）
+- 同步令牌管理（签发/撤销，ETag 版本化的配置包下载）
+- GLM Thinking（`glmt`）一等公民提供者预设
+- 混合令牌计数（提供者端 `/messages/count_tokens`，带估算回退）
+- 模型别名自动播种（启动时进行 30+ 项跨代理方言规范化）
+- 具有 SSRF 防护、私有 URL 阻止和可配置重试的安全出站请求
+- 具有可配置 `requestRetry` 和 `maxRetryIntervalSec` 的冷却感知聊天重试
+- 启动时使用 Zod 进行运行时环境验证
+- 合规审计 v2，支持分页、提供者 CRUD 事件和 SSRF 阻止验证日志
 
 主要运行时模型：
 
-- `src/app/api/*` 下的 Next.js 应用路由同时实现仪表板 API 和兼容性 API
-- `src/sse/*` + `open-sse/*` 中的共享 SSE/路由核心负责提供者执行、格式转换、流式传输、故障转移和用量处理
+- `src/app/api/*` 下的 Next.js 应用路由同时实现仪表板 API 和兼容 API
+- `src/sse/*` + `open-sse/*` 中的共享 SSE/路由核心负责提供者执行、格式转换、流式传输、回退和使用量统计
 
 ## 参考架构图
 
@@ -123,43 +123,51 @@ v3.8.0 平台的权威版本控制 Mermaid 源文件位于
 - 本地进程之外的服务商 SLA/控制面
 - 外部 CLI 二进制程序本身（Claude Code、Codex CLI 等）
 
-## 控制台界面（当前）
+## Dashboard 界面（当前）
 
 `src/app/(dashboard)/dashboard/` 下的主要页面：
 
-- `/dashboard` — 快速开始 + 服务商概览
+- `/dashboard` — 快速开始 + 提供者概览
 - `/dashboard/endpoint` — 端点代理 + MCP + A2A + API 端点标签页
-- `/dashboard/providers` — 服务商连接和凭据
-- `/dashboard/combos` — Combo 策略、模板、基于步骤的构建器、模型路由规则、手动持久化排序
+- `/dashboard/providers` — 提供者连接与凭据
+- `/dashboard/combos` — 组合策略、模板、基于步骤的构建器、模型路由规则、手动持久化排序
 - `/dashboard/auto-combo` — Auto Combo 引擎：评分权重、模式包、虚拟工厂预设、遥测
-- `/dashboard/costs` — 成本聚合和定价可视化
-- `/dashboard/analytics` — 用量分析、评估、Combo 目标健康状态
+- `/dashboard/costs` — 成本聚合与定价可见性
+- `/dashboard/analytics` — 使用情况分析、评估、组合目标健康状况
 - `/dashboard/limits` — 配额/速率控制
-- `/dashboard/cli-tools` — CLI 接入引导、运行时检测、配置生成
-- `/dashboard/agents` — 已检测的 ACP 代理 + 自定义代理注册
-- `/dashboard/cloud-agents` — 云端托管代理任务（Codex Cloud、Devin、Jules）和任务生命周期
+- `/dashboard/cli-tools` — CLI 入门引导、运行时检测、配置生成
+- `/dashboard/agents` — 检测到的 ACP 代理 + 自定义代理注册
+- `/dashboard/cloud-agents` — 云端托管的代理任务（Codex Cloud、Devin、Jules）及任务生命周期
 - `/dashboard/skills` — A2A 技能注册表、沙箱执行、内置技能目录
-- `/dashboard/memory` — 持久化会话记忆查看和检索
-- `/dashboard/webhooks` — 出站 Webhook 订阅、密钥轮换、重试统计
-- `/dashboard/batch` — 批量任务提交和进度
-- `/dashboard/cache` — 读穿式缓存和推理缓存统计、淘汰控制
-- `/dashboard/playground` — 针对任意配置 Combo/模型的交互式对话演练
+- `/dashboard/memory` — 持久化对话记忆的检查与检索
+- `/dashboard/webhooks` — 出站 webhook 订阅、密钥轮换、重试统计
+- `/dashboard/batch` — 批量任务提交与进度
+- `/dashboard/cache` — 透读缓存与推理缓存统计、驱逐控制
+- `/dashboard/playground` — 针对任意已配置组合/模型的交互式聊天试验场
 - `/dashboard/changelog` — 应用内更新日志查看器（渲染 `CHANGELOG.md`）
-- `/dashboard/system` — 运行时诊断、版本信息、环境校验界面
-- `/dashboard/onboarding` — 新装首次运行设置向导
-- `/dashboard/media` — 图片/视频/音乐演练
-- `/dashboard/search-tools` — 搜索服务商测试和历史
+- `/dashboard/system` — 运行时诊断、版本信息、环境验证界面
+- `/dashboard/onboarding` — 新安装的首次运行设置向导
+- `/dashboard/media` — 图像/视频/音乐试验场
+- `/dashboard/search-tools` — 搜索提供者测试与历史记录
 - `/dashboard/health` — 运行时间、熔断器、速率限制、配额监控会话
 - `/dashboard/logs` — 请求/代理/审计/控制台日志
-- `/dashboard/settings` — 系统设置标签页（常规、路由、Combo 默认值等）
+- `/dashboard/settings` — 系统设置标签页（常规、路由、组合默认值等）
 - `/dashboard/context/caveman` — Caveman 压缩规则、语言包、预览和输出模式
 - `/dashboard/context/rtk` — RTK 命令输出过滤器、预览和运行时安全设置
-- `/dashboard/context/combos` — 分配给路由 Combo 的命名压缩管线
-- `/dashboard/translator` — 翻译器查看和请求格式转换预览
-- `/dashboard/audit` — 合规审计日志浏览器，含分页和结构化元数据
-- `/dashboard/usage` — 关联 `usage_history` 的每请求用量浏览器
-- `/dashboard/compression` — 压缩分析、统计和管线分配
-- `/dashboard/api-manager` — API Key 生命周期和模型权限
+- `/dashboard/context/combos` — 分配给路由组合的命名压缩流水线
+- `/dashboard/translator` — 转换器检查与请求格式转换预览
+- `/dashboard/audit` — 带分页和结构化元数据的合规审计日志浏览器
+- `/dashboard/usage` — 绑定到 `usage_history` 的逐请求使用情况浏览器
+- `/dashboard/compression` — 压缩分析、统计信息和流水线分配
+- `/dashboard/api-manager` — API 密钥生命周期与模型权限
+
+UI 层：每个页面都渲染在同一个外壳（shell）中——`src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx`（即套件中的
+`SidebarProvider`/`SidebarInset`，以及 OmniRoute 的 `Sidebar.tsx` 和 `Header.tsx`）。页面从
+`@/shared/components`（对 `packages/ui-kit` 中内置 Keak CI UI Kit 的适配器）或套件组件子路径
+（`@omniroute/ui-kit/table`、`…/page-header`）导入其构建块，图标则通过 `<Icon>`
+（`ICON_MAP` → Lucide）引入。主题（默认为 `system`，可选明/暗）和设计令牌通过
+`src/app/globals.css` 中的桥接层来自套件。详见：`docs/architecture/DESIGN_SYSTEM.md`。
 
 ## 高层系统上下文
 

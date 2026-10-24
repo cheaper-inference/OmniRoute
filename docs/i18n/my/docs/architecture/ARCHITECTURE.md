@@ -8,79 +8,78 @@
 
 _နောက်ဆုံးအပ်ဒိတ်လုပ်ထားသည့်ရက်: 2026-06-28_
 
-## အနှစ်ချုပ်
+## အမှုဆောင်အဆင့် အကျဉ်းချုပ်
 
-OmniRoute သည် Next.js ကို အခြေခံတည်ဆောက်ထားသော local AI routing gateway နှင့် dashboard တစ်ခုဖြစ်သည်။
-၎င်းသည် OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော endpoint (`/v1/*`) တစ်ခုတည်းကို ပံ့ပိုးပေးပြီး translation၊ fallback၊ token refresh နှင့် usage tracking တို့ဖြင့် upstream provider များစွာအကြား traffic ကို လမ်းကြောင်းခွဲပေးသည်။
+OmniRoute သည် Next.js အပေါ် တည်ဆောက်ထားသော local AI routing gateway နှင့် dashboard တစ်ခုဖြစ်သည်။ ၎င်းသည် OpenAI-compatible endpoint တစ်ခု (`/v1/*`) ကို ပေးဆောင်ပြီး translation၊ fallback၊ token refresh နှင့် usage tracking တို့ဖြင့် upstream provider အများအပြားသို့ traffic ကို လမ်းကြောင်းခွဲပေးသည်။
 
-အဓိကလုပ်ဆောင်နိုင်စွမ်းများ-
+အဓိက စွမ်းရည်များ:
 
-- CLI/tool များအတွက် OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော API မျက်နှာပြင် (provider 375 ခု၊ executor module 156 ခု)
-- Provider format များအကြား request/response ဘာသာပြန်ပြောင်းလဲခြင်း
-- Model combo fallback (model များစွာကို အစဉ်လိုက်အသုံးပြုခြင်း)
-- `compositeTiers` အလိုက် runtime အစီအစဉ်သတ်မှတ်မှုပါရှိသော ဖွဲ့စည်းပုံကျ combo အဆင့်များ (`provider + model + connection`)
-- Account အဆင့် fallback (provider တစ်ခုစီအတွက် account များစွာ)
-- ပင်မ chat လမ်းကြောင်းတွင် quota ကြိုတင်စစ်ဆေးခြင်းနှင့် quota ကို ထည့်သွင်းစဉ်းစားသော P2C account ရွေးချယ်ခြင်း
-- OAuth + API key provider connection စီမံခန့်ခွဲမှု (OAuth provider module 27 ခု)
-- `/v1/embeddings` မှတစ်ဆင့် embedding ထုတ်လုပ်ခြင်း (provider 18 ခု)
-- `/v1/images/generations` မှတစ်ဆင့် image ထုတ်လုပ်ခြင်း (provider 10+ ခု၊ model 20+ ခု)
-- `/v1/audio/transcriptions` မှတစ်ဆင့် audio transcription ပြုလုပ်ခြင်း (provider 18 ခု)
-- `/v1/audio/speech` မှတစ်ဆင့် စာသားမှအသံသို့ ပြောင်းလဲခြင်း (ထည့်သွင်းပေးထားသော provider 24 ခု)
-- `/v1/videos/generations` မှတစ်ဆင့် video ထုတ်လုပ်ခြင်း (ComfyUI + SD WebUI)
-- `/v1/music/generations` မှတစ်ဆင့် တေးဂီတထုတ်လုပ်ခြင်း (ComfyUI)
-- `/v1/search` မှတစ်ဆင့် web ရှာဖွေခြင်း (provider 20 ခု)
-- `/v1/moderations` မှတစ်ဆင့် အကြောင်းအရာစိစစ်ထိန်းချုပ်ခြင်း
-- `/v1/rerank` မှတစ်ဆင့် အဆင့်ပြန်လည်စီခြင်း
-- Reasoning model များအတွက် think tag ခွဲခြမ်းစိတ်ဖြာခြင်း (``)
-- တင်းကျပ်သော OpenAI SDK တွဲဖက်အသုံးပြုနိုင်မှုအတွက် response သန့်စင်ခြင်း
-- Provider များအကြား တွဲဖက်အသုံးပြုနိုင်မှုအတွက် role ပုံမှန်ပြုလုပ်ခြင်း (developer→system၊ system→user)
-- ဖွဲ့စည်းပုံကျ output ပြောင်းလဲခြင်း (json_schema → Gemini responseSchema)
-- Provider များ၊ key များ၊ alias များ၊ combo များ၊ setting များနှင့် pricing များအတွက် local persistence (DB module 122 ခု)
-- အသုံးပြုမှု/ကုန်ကျစရိတ် ခြေရာခံခြင်းနှင့် request မှတ်တမ်းတင်ခြင်း
-- စက်များစွာအကြား/state ချိန်ညှိမှုအတွက် စိတ်ကြိုက်ရွေးချယ်နိုင်သော cloud sync
-- API ဝင်ရောက်အသုံးပြုခွင့်ထိန်းချုပ်ရန် IP allowlist/blocklist
+- CLI/tools များအတွက် OpenAI-compatible API မျက်နှာပြင် (provider 375 ခု၊ executor module 156 ခု)
+- Provider format များအကြား request/response translation
+- Model combo fallback (multi-model အစီအစဉ်)
+- `compositeTiers` ဖြင့် runtime အစဉ်လိုက်စီပေးသည့် structured combo အဆင့်များ (`provider + model + connection`)
+- Account အဆင့် fallback (provider တစ်ခုလျှင် account အများ)
+- ပင်မ chat လမ်းကြောင်းတွင် quota preflight နှင့် quota-aware P2C account ရွေးချယ်မှု
+- OAuth + API-key provider ချိတ်ဆက်မှု စီမံခန့်ခွဲမှု (OAuth provider module 27 ခု)
+- `/v1/embeddings` မှတစ်ဆင့် embedding ထုတ်လုပ်မှု (provider 18 ခု)
+- `/v1/images/generations` မှတစ်ဆင့် ပုံရိပ် ထုတ်လုပ်မှု (provider 10 ခုကျော်၊ model 20 ခုကျော်)
+- `/v1/audio/transcriptions` မှတစ်ဆင့် audio transcription (provider 18 ခု)
+- `/v1/audio/speech` မှတစ်ဆင့် text-to-speech (built-in provider 24 ခု)
+- `/v1/videos/generations` မှတစ်ဆင့် ဗီဒီယို ထုတ်လုပ်မှု (ComfyUI + SD WebUI)
+- `/v1/music/generations` မှတစ်ဆင့် ဂီတ ထုတ်လုပ်မှု (ComfyUI)
+- `/v1/search` မှတစ်ဆင့် ဝက်ဘ် ရှာဖွေမှု (provider 20 ခု)
+- `/v1/moderations` မှတစ်ဆင့် moderations
+- `/v1/rerank` မှတစ်ဆင့် reranking
+- Reasoning model များအတွက် think tag parsing (`<think>...</think>`)
+- တင်းကြပ်သော OpenAI SDK compatibility အတွက် response sanitization
+- Cross-provider compatibility အတွက် role normalization (developer→system, system→user)
+- Structured output ပြောင်းလဲမှု (json_schema → Gemini responseSchema)
+- Provider များ၊ key များ၊ alias များ၊ combo များ၊ setting များ၊ ဈေးနှုန်းများအတွက် local persistence (DB module 122 ခု)
+- Usage/cost ခြေရာခံမှုနှင့် request logging
+- Multi-device/state sync အတွက် optional cloud sync
+- API access control အတွက် IP allowlist/blocklist
 - Thinking budget စီမံခန့်ခွဲမှု (passthrough/auto/custom/adaptive)
-- Global system prompt ထည့်သွင်းခြင်း
-- Session ခြေရာခံခြင်းနှင့် fingerprinting
-- Provider အလိုက် profile များပါရှိသော account တစ်ခုချင်းစီအတွက် အဆင့်မြှင့်ထားသည့် rate limiting
-- Provider ခံနိုင်ရည်ကောင်းမွန်စေရန် circuit breaker pattern
+- Global system prompt injection
+- Session ခြေရာခံမှုနှင့် fingerprinting
+- Provider-specific profile များဖြင့် account တစ်ခုချင်းစီ enhanced rate limiting
+- Provider resilience အတွက် circuit breaker pattern
 - Mutex locking ဖြင့် anti-thundering herd ကာကွယ်မှု
-- Signature အခြေပြု ထပ်တူ request ဖယ်ရှားသည့် cache
-- Domain layer- ကုန်ကျစရိတ်စည်းမျဉ်းများ၊ fallback policy၊ lockout policy
-- Context Relay- account rotation အဆက်မပြတ်စေရန် session လွှဲပြောင်းမှုအနှစ်ချုပ်များ
-- Domain state persistence (fallback၊ budget၊ lockout နှင့် circuit breaker များအတွက် SQLite write-through cache)
-- ဗဟိုချုပ်ကိုင်ထားသော request အကဲဖြတ်မှုအတွက် policy engine (lockout → budget → fallback)
-- p50/p95/p99 latency စုစည်းတွက်ချက်မှုပါရှိသော request telemetry
-- `combo_execution_key` / `combo_step_id` မှတစ်ဆင့် combo target telemetry နှင့် သမိုင်းဝင် combo target ကျန်းမာရေးအခြေအနေ
-- အစမှအဆုံး tracing ပြုလုပ်ရန် Correlation ID (X-Request-Id)
-- API key တစ်ခုချင်းစီအလိုက် opt-out ပြုလုပ်နိုင်သော compliance audit logging
-- LLM အရည်အသွေးအာမခံမှုအတွက် eval framework
-- Provider circuit breaker အခြေအနေကို အချိန်နှင့်တစ်ပြေးညီ ပြသသည့် health dashboard
-- Transport 3 မျိုး (stdio/SSE/Streamable HTTP) ပါရှိသော MCP Server (tool 110 ခု)
-- Skill များနှင့် task lifecycle ပါရှိသော A2A Server (JSON-RPC 2.0 + SSE)
-- Memory system (ထုတ်ယူခြင်း၊ ထည့်သွင်းခြင်း၊ ပြန်လည်ရယူခြင်း၊ အနှစ်ချုပ်ခြင်း)
-- Skills system (registry၊ executor၊ sandbox၊ ထည့်သွင်းပေးထားသော skill များ)
-- Certificate စီမံခန့်ခွဲမှုနှင့် DNS ကိုင်တွယ်မှုပါရှိသော MITM proxy
+- Signature-based request deduplication cache
+- Domain layer: cost စည်းမျဉ်းများ၊ fallback မူဝါဒ၊ lockout မူဝါဒ
+- Context Relay: account rotation ဆက်လက်လည်ပတ်မှုအတွက် session handoff အကျဉ်းချုပ်များ
+- Domain state persistence (fallback များ၊ budget များ၊ lockout များ၊ circuit breaker များအတွက် SQLite write-through cache)
+- ဗဟိုပြု request အကဲဖြတ်မှုအတွက် policy engine (lockout → budget → fallback)
+- p50/p95/p99 latency aggregation ဖြင့် request telemetry
+- `combo_execution_key` / `combo_step_id` မှတစ်ဆင့် combo target telemetry နှင့် historical combo target health
+- End-to-end tracing အတွက် Correlation ID (X-Request-Id)
+- API key တစ်ခုချင်းစီ opt-out ရှိသော compliance audit logging
+- LLM အရည်အသွေး သေချာစေမှုအတွက် eval framework
+- Real-time provider circuit breaker status ပါသော health dashboard
+- Transport 3 ခု (stdio/SSE/Streamable HTTP) ပါသော MCP Server (tool 110 ခု)
+- Skill များနှင့် task lifecycle ပါသော A2A Server (JSON-RPC 2.0 + SSE)
+- Memory system (extraction၊ injection၊ retrieval၊ summarization)
+- Skills system (registry၊ executor၊ sandbox၊ built-in skills)
+- Certificate စီမံခန့်ခွဲမှုနှင့် DNS handling ပါသော MITM proxy
 - Prompt injection guard middleware
-- Caveman၊ RTK၊ stacked pipeline များ၊ compression combo များ၊ language pack များနှင့် analytics တို့ပါရှိသော prompt compression pipeline
+- Caveman၊ RTK၊ stacked pipeline များ၊ compression combo များ၊ language pack များနှင့် analytics ပါသော prompt compression pipeline
 - ACP (Agent Communication Protocol) registry
-- Modular OAuth provider များ (`src/lib/oauth/providers/` အောက်ရှိ သီးခြား module 22 ခု)
+- Modular OAuth provider များ (`src/lib/oauth/providers/` အောက်ရှိ သီးသန့် module 22 ခု)
 - Uninstall/full-uninstall script များ
-- OAuth environment ပြုပြင်သည့် action
-- OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော WS client များအတွက် WebSocket bridge (`/v1/ws`)
-- Sync token စီမံခန့်ခွဲမှု (ထုတ်ပေးခြင်း/ပြန်လည်ရုပ်သိမ်းခြင်း၊ ETag-versioned config bundle download)
-- ပထမတန်းစား provider preset အဖြစ် GLM Thinking (`glmt`)
-- ပေါင်းစပ် token ရေတွက်ခြင်း (ခန့်မှန်းခြေ fallback ပါရှိသော provider-side `/messages/count_tokens`)
-- Model alias အလိုအလျောက် seed ထည့်ခြင်း (စတင်ချိန်တွင် cross-proxy dialect normalization 30+ ခု)
-- SSRF guard၊ private URL ပိတ်ဆို့မှုနှင့် ပြင်ဆင်သတ်မှတ်နိုင်သော retry ပါရှိသည့် လုံခြုံသော outbound fetch
-- ပြင်ဆင်သတ်မှတ်နိုင်သော `requestRetry` နှင့် `maxRetryIntervalSec` ပါရှိသည့် cooldown ကို ထည့်သွင်းစဉ်းစားသော chat retry များ
-- စတင်ချိန်တွင် Zod ဖြင့် runtime environment စစ်ဆေးအတည်ပြုခြင်း
-- Pagination၊ provider CRUD event များနှင့် SSRF ပိတ်ဆို့ခံရမှု validation logging ပါရှိသော compliance audit v2
+- OAuth ပတ်ဝန်းကျင် ပြုပြင်မှု action
+- OpenAI-compatible WS client များအတွက် WebSocket bridge (`/v1/ws`)
+- Sync token စီမံခန့်ခွဲမှု (issue/revoke၊ ETag-versioned config bundle download)
+- GLM Thinking (`glmt`) first-class provider preset
+- Hybrid token ရေတွက်မှု (estimation fallback ပါသော provider-side `/messages/count_tokens`)
+- Model alias auto-seeding (startup တွင် cross-proxy dialect normalization 30 ခုကျော်)
+- SSRF guard၊ private URL ပိတ်ဆီးမှုနှင့် configurable retry ပါသော ဘေးကင်းသော outbound fetch
+- Configurable `requestRetry` နှင့် `maxRetryIntervalSec` ဖြင့် cooldown-aware chat retry များ
+- Startup တွင် Zod ဖြင့် runtime environment validation
+- Pagination၊ provider CRUD event များနှင့် SSRF-blocked validation logging ပါသော compliance audit v2
 
-အဓိက runtime model-
+အဓိက runtime model:
 
-- `src/app/api/*` အောက်ရှိ Next.js app route များက dashboard API များနှင့် compatibility API များကို အကောင်အထည်ဖော်ပေးသည်
-- `src/sse/*` + `open-sse/*` ရှိ မျှဝေအသုံးပြုသော SSE/routing core က provider execution၊ translation၊ streaming၊ fallback နှင့် အသုံးပြုမှုတို့ကို ကိုင်တွယ်သည်
+- `src/app/api/*` အောက်ရှိ Next.js app route များသည် dashboard API များနှင့် compatibility API များ နှစ်ခုလုံးကို အကောင်အထည်ဖော်သည်
+- `src/sse/*` + `open-sse/*` ရှိ shared SSE/routing core က provider execution၊ translation၊ streaming၊ fallback နှင့် usage ကို ကိုင်တွယ်သည်
 
 ## ကိုးကားပုံကြမ်းများ
 
@@ -116,41 +115,49 @@ v3.8.0 ပလက်ဖောင်းအတွက် စံသတ်မှတ်
 
 ## Dashboard မျက်နှာပြင် (လက်ရှိ)
 
-`src/app/(dashboard)/dashboard/` အောက်ရှိ အဓိကစာမျက်နှာများ:
+`src/app/(dashboard)/dashboard/` အောက်ရှိ ပင်မစာမျက်နှာများ:
 
-- `/dashboard` — အမြန်စတင်ခြင်း + provider အနှစ်ချုပ်
-- `/dashboard/endpoint` — endpoint proxy + MCP + A2A + API endpoint တက်ဘ်များ
+- `/dashboard` — အမြန်စတင်ခြင်း + provider ခြုံငုံသုံးသပ်ချက်
+- `/dashboard/endpoint` — endpoint proxy + MCP + A2A + API endpoint တဘ်များ
 - `/dashboard/providers` — provider ချိတ်ဆက်မှုများနှင့် အထောက်အထားများ
-- `/dashboard/combos` — combo နည်းဗျူဟာများ၊ template များ၊ အဆင့်အလိုက် builder၊ model routing စည်းမျဉ်းများနှင့် ကိုယ်တိုင်သတ်မှတ်၍ အမြဲတမ်းသိမ်းဆည်းထားသော အစီအစဉ်
-- `/dashboard/auto-combo` — Auto Combo Engine: အမှတ်ပေး အလေးချိန်များ၊ mode pack များ၊ virtual factory ကြိုတင်သတ်မှတ်ချက်များနှင့် telemetry
-- `/dashboard/costs` — ကုန်ကျစရိတ် စုစည်းခြင်းနှင့် ဈေးနှုန်းမြင်သာမှု
-- `/dashboard/analytics` — အသုံးပြုမှု ခွဲခြမ်းစိတ်ဖြာချက်များ၊ အကဲဖြတ်မှုများနှင့် combo ပစ်မှတ် အခြေအနေ
+- `/dashboard/combos` — combo မဟာဗျူဟာများ၊ ပုံစံများ၊ အဆင့်အခြေခံ builder၊ model routing စည်းမျဉ်းများ၊ ကိုယ်ပိုင်သိမ်းဆည်းထားသော အစီအစဉ်
+- `/dashboard/auto-combo` — Auto Combo Engine: အမှတ်ပေးအလေးချိန်များ၊ mode pack များ၊ virtual factory preset များ၊ telemetry
+- `/dashboard/costs` — ကုန်ကျစရိတ်စုစည်းမှုနှင့် စျေးနှုန်းမြင်သာမှု
+- `/dashboard/analytics` — အသုံးပြုမှုခွဲတမ်း၊ အကဲဖြတ်ချက်များ၊ combo ပစ်မှတ်ကျန်းမာရေးအခြေအနေ
 - `/dashboard/limits` — quota/rate ထိန်းချုပ်မှုများ
-- `/dashboard/cli-tools` — CLI စတင်အသုံးပြုမှု၊ runtime ရှာဖွေသတ်မှတ်မှုနှင့် config ထုတ်လုပ်မှု
-- `/dashboard/agents` — ရှာဖွေတွေ့ရှိထားသော ACP agent များ + စိတ်ကြိုက် agent မှတ်ပုံတင်ခြင်း
-- `/dashboard/cloud-agents` — cloud ပေါ်တွင် လက်ခံထားသော agent လုပ်ငန်းများ (Codex Cloud၊ Devin၊ Jules) နှင့် လုပ်ငန်းသက်တမ်းစက်ဝန်း
-- `/dashboard/skills` — A2A skill registry၊ sandbox လုပ်ဆောင်မှုနှင့် ထည့်သွင်းပေးထားသော skill catalog
-- `/dashboard/memory` — အမြဲတမ်းသိမ်းဆည်းထားသော စကားဝိုင်းမှတ်ဉာဏ်ကို စစ်ဆေးခြင်းနှင့် ပြန်လည်ရယူခြင်း
-- `/dashboard/webhooks` — အပြင်သို့ပို့သည့် webhook စာရင်းသွင်းမှုများ၊ secret လှည့်လည်ပြောင်းလဲခြင်းနှင့် ပြန်လည်ကြိုးစားမှု ကိန်းဂဏန်းများ
+- `/dashboard/cli-tools` — CLI onboarding၊ runtime ရှာဖွေတွေ့ရှိမှု၊ config ထုတ်လုပ်ခြင်း
+- `/dashboard/agents` — ရှာဖွေတွေ့ရှိထားသော ACP agent များ + custom agent မှတ်ပုံတင်ခြင်း
+- `/dashboard/cloud-agents` — cloud-hosted agent task များ (Codex Cloud, Devin, Jules) နှင့် task lifecycle
+- `/dashboard/skills` — A2A skill registry၊ sandbox execution၊ built-in skill catalog
+- `/dashboard/memory` — ရှည်လျားစွာသိမ်းဆည်းထားသော စကားပြောမှတ်ဉာဏ် စစ်ဆေးခြင်းနှင့် ပြန်လည်ရယူခြင်း
+- `/dashboard/webhooks` — outbound webhook subscription များ၊ secret လှည့်ပတ်ခြင်း၊ retry စာရင်းအင်းများ
 - `/dashboard/batch` — batch job တင်သွင်းခြင်းနှင့် တိုးတက်မှု
-- `/dashboard/cache` — read-through နှင့် reasoning cache ကိန်းဂဏန်းများ၊ ဖယ်ရှားမှု ထိန်းချုပ်ချက်များ
-- `/dashboard/playground` — စီစဉ်သတ်မှတ်ထားသော မည်သည့် combo/model နှင့်မဆို အပြန်အလှန်အသုံးပြုနိုင်သည့် chat playground
-- `/dashboard/changelog` — အက်ပ်အတွင်း changelog ကြည့်ရှုကိရိယာ (`CHANGELOG.md` ကို ပုံဖော်ပြသသည်)
-- `/dashboard/system` — runtime စစ်ဆေးမှုများ၊ ဗားရှင်းအချက်အလက်နှင့် ပတ်ဝန်းကျင် အတည်ပြုမျက်နှာပြင်
-- `/dashboard/onboarding` — အသစ်ထည့်သွင်းမှုများအတွက် ပထမဆုံးအသုံးပြုချိန် စီစဉ်သတ်မှတ်မှု wizard
-- `/dashboard/media` — ရုပ်ပုံ/ဗီဒီယို/တေးဂီတ playground
-- `/dashboard/search-tools` — ရှာဖွေရေး provider စမ်းသပ်မှုနှင့် မှတ်တမ်း
-- `/dashboard/health` — uptime၊ circuit breaker များ၊ rate limit များနှင့် quota စောင့်ကြည့်ထားသော session များ
-- `/dashboard/logs` — တောင်းဆိုမှု/proxy/audit/console မှတ်တမ်းများ
-- `/dashboard/settings` — စနစ်ဆက်တင် တက်ဘ်များ (အထွေထွေ၊ routing၊ combo မူလသတ်မှတ်ချက်များ စသည်)
-- `/dashboard/context/caveman` — Caveman ချုံ့ခြင်းစည်းမျဉ်းများ၊ ဘာသာစကား pack များ၊ အစမ်းကြည့်ရှုမှုနှင့် output mode
-- `/dashboard/context/rtk` — RTK command-output filter များ၊ အစမ်းကြည့်ရှုမှုနှင့် runtime ဘေးကင်းရေး ဆက်တင်များ
-- `/dashboard/context/combos` — routing combo များသို့ သတ်မှတ်ပေးထားသော အမည်ပါ compression pipeline များ
-- `/dashboard/translator` — translator စစ်ဆေးမှုနှင့် တောင်းဆိုမှုပုံစံ ပြောင်းလဲမှု အစမ်းကြည့်ရှုချက်
-- `/dashboard/audit` — စာမျက်နှာခွဲခြင်းနှင့် ဖွဲ့စည်းပုံကျ metadata ပါဝင်သည့် လိုက်နာမှု audit log browser
-- `/dashboard/usage` — `usage_history` နှင့် ချိတ်ဆက်ထားသော တောင်းဆိုမှုတစ်ခုချင်းစီအလိုက် အသုံးပြုမှု browser
-- `/dashboard/compression` — compression ခွဲခြမ်းစိတ်ဖြာချက်များ၊ ကိန်းဂဏန်းများနှင့် pipeline သတ်မှတ်ပေးမှု
-- `/dashboard/api-manager` — API key သက်တမ်းစက်ဝန်းနှင့် model ခွင့်ပြုချက်များ
+- `/dashboard/cache` — read-through နှင့် reasoning cache စာရင်းအင်းများ၊ eviction ထိန်းချုပ်မှုများ
+- `/dashboard/playground` — ပြင်ဆင်သတ်မှတ်ထားသော combo/model မည်သည့်အရာနှင့်မဆို အပြန်အလှန်ဆက်သွယ်နိုင်သော chat playground
+- `/dashboard/changelog` — app အတွင်းရှိ changelog ကြည့်ရှုသူ (`CHANGELOG.md` ကို ပြသသည်)
+- `/dashboard/system` — runtime ရှာဖွေရွေးချယ်မှုများ၊ ဗားရှင်းအချက်အလက်၊ ပတ်ဝန်းကျင်အတည်ပြုခြင်းမျက်နှာပြင်
+- `/dashboard/onboarding` — အသစ်တပ်ဆင်မှုများအတွက် ပထမဆုံးအသုံးပြုခြင်း setup wizard
+- `/dashboard/media` — ပုံ/ဗီဒီယို/ဂီတ playground
+- `/dashboard/search-tools` — ရှာဖွေရေး provider စမ်းသပ်ခြင်းနှင့် မှတ်တမ်း
+- `/dashboard/health` — uptime၊ circuit breaker များ၊ rate limit များ၊ quota စောင့်ကြည့်ခံ session များ
+- `/dashboard/logs` — request/proxy/audit/console log များ
+- `/dashboard/settings` — စနစ်ဆက်တင် တဘ်များ (ယေဘုယျ၊ routing၊ combo မူရင်းတန်ဖိုးများ စသဖြင့်)
+- `/dashboard/context/caveman` — Caveman compression စည်းမျဉ်းများ၊ ဘာသာစကားပက်ခ်များ၊ အကြိုကြည့်ရှုခြင်း၊ နှင့် output mode
+- `/dashboard/context/rtk` — RTK command-output filter များ၊ အကြိုကြည့်ရှုခြင်း၊ နှင့် runtime လုံခြုံရေးဆက်တင်များ
+- `/dashboard/context/combos` — routing combo များသို့ သတ်မှတ်ထားသော အမည်ပေးထားသော compression pipeline များ
+- `/dashboard/translator` — translator စစ်ဆေးခြင်းနှင့် request format ပြောင်းလဲခြင်း အကြိုကြည့်ရှုခြင်း
+- `/dashboard/audit` — pagination နှင့် structured metadata ပါရှိသော compliance audit log browser
+- `/dashboard/usage` — `usage_history` နှင့် ချိတ်ဆက်ထားသော request တစ်ခုချင်းစီ အသုံးပြုမှု browser
+- `/dashboard/compression` — compression ခွဲတမ်း၊ စာရင်းအင်းများ၊ နှင့် pipeline သတ်မှတ်ခြင်း
+- `/dashboard/api-manager` — API key lifecycle နှင့် model ခွင့်ပြုချက်များ
+
+UI အလွှာ: စာမျက်နှာတိုင်းသည် shell တစ်ခုတည်းအတွင်းတွင် ပြသသည် — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (kit ၏
+`SidebarProvider`/`SidebarInset`, OmniRoute ၏ `Sidebar.tsx` နှင့် `Header.tsx`)။ စာမျက်နှာများသည် ၎င်းတို့၏
+အခြေခံအစိတ်အပိုင်းများကို `@/shared/components` မှ (`packages/ui-kit` အတွင်းရှိ vendored Keak CI UI Kit
+အပေါ်တွင် adapter များ) သို့မဟုတ် kit component subpath များ (`@omniroute/ui-kit/table`, `…/page-header`) မှ import လုပ်ပြီး၊
+icon များကို `<Icon>` (`ICON_MAP` → Lucide) မှတစ်ဆင့် ရယူသည်။ Theme (မူရင်းအားဖြင့် `system`၊ light/dark) နှင့် token များကို
+`src/app/globals.css` အတွင်းရှိ bridge မှတစ်ဆင့် kit မှ ရရှိသည်။ အသေးစိတ်: `docs/architecture/DESIGN_SYSTEM.md`။
 
 ## အဆင့်မြင့် စနစ်ဆိုင်ရာ အကြောင်းအရာ
 

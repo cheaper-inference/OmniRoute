@@ -10,77 +10,77 @@ _Terakhir diperbarui: 2026-06-28_
 
 ## Ringkasan Eksekutif
 
-OmniRoute adalah gateway perutean AI lokal dan dasbor yang dibangun dengan Next.js.
-OmniRoute menyediakan satu endpoint yang kompatibel dengan OpenAI (`/v1/*`) dan merutekan lalu lintas ke beberapa penyedia upstream dengan penerjemahan, fallback, penyegaran token, dan pelacakan penggunaan.
+OmniRoute adalah gateway perutean AI lokal dan dasbor yang dibangun di atas Next.js.
+Ia menyediakan satu endpoint yang kompatibel dengan OpenAI (`/v1/*`) dan merutekan lalu lintas ke berbagai penyedia upstream dengan translasi, fallback, refresh token, dan pelacakan penggunaan.
 
-Kemampuan utama:
+Kemampuan inti:
 
-- Permukaan API yang kompatibel dengan OpenAI untuk CLI/alat (375 penyedia, 156 modul eksekutor)
-- Penerjemahan permintaan/respons di berbagai format penyedia
-- Fallback kombinasi model (urutan multi-model)
-- Langkah kombinasi terstruktur (`provider + model + connection`) dengan pengurutan runtime berdasarkan `compositeTiers`
+- Permukaan API kompatibel OpenAI untuk CLI/perkakas (375 penyedia, 156 modul eksekutor)
+- Translasi permintaan/respons lintas format penyedia
+- Fallback kombo model (urutan multi-model)
+- Langkah kombo terstruktur (`provider + model + connection`) dengan pengurutan runtime berdasarkan `compositeTiers`
 - Fallback tingkat akun (multi-akun per penyedia)
-- Pemeriksaan awal kuota dan pemilihan akun P2C berbasis kuota di jalur chat utama
-- Pengelolaan koneksi penyedia melalui OAuth + kunci API (27 modul penyedia OAuth)
+- Preflight kuota dan pemilihan akun P2C yang memperhitungkan kuota di jalur chat utama
+- Manajemen koneksi penyedia OAuth + API key (27 modul penyedia OAuth)
 - Pembuatan embedding melalui `/v1/embeddings` (18 penyedia)
 - Pembuatan gambar melalui `/v1/images/generations` (10+ penyedia, 20+ model)
 - Transkripsi audio melalui `/v1/audio/transcriptions` (18 penyedia)
-- Teks-ke-ucapan melalui `/v1/audio/speech` (24 penyedia bawaan)
+- Text-to-speech melalui `/v1/audio/speech` (24 penyedia bawaan)
 - Pembuatan video melalui `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Pembuatan musik melalui `/v1/music/generations` (ComfyUI)
 - Pencarian web melalui `/v1/search` (20 penyedia)
 - Moderasi melalui `/v1/moderations`
-- Pemeringkatan ulang melalui `/v1/rerank`
-- Penguraian tag think (``) untuk model penalaran
+- Reranking melalui `/v1/rerank`
+- Parsing tag think (`<think>...</think>`) untuk model reasoning
 - Sanitasi respons untuk kompatibilitas ketat dengan OpenAI SDK
 - Normalisasi peran (developer→system, system→user) untuk kompatibilitas lintas penyedia
-- Konversi keluaran terstruktur (json_schema → Gemini responseSchema)
-- Persistensi lokal untuk penyedia, kunci, alias, kombinasi, pengaturan, dan harga (122 modul DB)
+- Konversi output terstruktur (json_schema → Gemini responseSchema)
+- Persistensi lokal untuk penyedia, kunci, alias, kombo, pengaturan, harga (122 modul DB)
 - Pelacakan penggunaan/biaya dan pencatatan permintaan
 - Sinkronisasi cloud opsional untuk sinkronisasi multi-perangkat/status
-- Daftar izin/daftar blokir IP untuk kontrol akses API
-- Pengelolaan anggaran thinking (passthrough/otomatis/kustom/adaptif)
-- Injeksi prompt sistem global
-- Pelacakan sesi dan pembuatan sidik jari
-- Pembatasan laju yang ditingkatkan per akun dengan profil khusus penyedia
+- Allowlist/blocklist IP untuk kontrol akses API
+- Manajemen anggaran thinking (passthrough/auto/custom/adaptive)
+- Injeksi system prompt global
+- Pelacakan sesi dan fingerprinting
+- Pembatasan laju per akun yang ditingkatkan dengan profil spesifik penyedia
 - Pola circuit breaker untuk ketahanan penyedia
 - Perlindungan anti-thundering herd dengan penguncian mutex
 - Cache deduplikasi permintaan berbasis tanda tangan
-- Lapisan domain: aturan biaya, kebijakan fallback, kebijakan penguncian
+- Lapisan domain: aturan biaya, kebijakan fallback, kebijakan lockout
 - Context Relay: ringkasan serah terima sesi untuk kontinuitas rotasi akun
-- Persistensi status domain (cache write-through SQLite untuk fallback, anggaran, penguncian, dan circuit breaker)
-- Mesin kebijakan untuk evaluasi permintaan terpusat (penguncian → anggaran → fallback)
+- Persistensi status domain (cache write-through SQLite untuk fallback, anggaran, lockout, circuit breaker)
+- Mesin kebijakan untuk evaluasi permintaan terpusat (lockout → anggaran → fallback)
 - Telemetri permintaan dengan agregasi latensi p50/p95/p99
-- Telemetri target kombinasi dan riwayat kesehatan target kombinasi melalui `combo_execution_key` / `combo_step_id`
-- ID korelasi (X-Request-Id) untuk penelusuran menyeluruh
-- Pencatatan audit kepatuhan dengan opsi penolakan per kunci API
-- Kerangka kerja evaluasi untuk jaminan kualitas LLM
-- Dasbor kesehatan dengan status circuit breaker penyedia secara waktu nyata
-- MCP Server (110 alat) dengan 3 transportasi (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) dengan keterampilan dan siklus hidup tugas
+- Telemetri target kombo dan kesehatan historis target kombo melalui `combo_execution_key` / `combo_step_id`
+- Correlation ID (X-Request-Id) untuk pelacakan end-to-end
+- Pencatatan audit kepatuhan dengan opt-out per API key
+- Kerangka eval untuk jaminan kualitas LLM
+- Dasbor kesehatan dengan status circuit breaker penyedia secara real-time
+- MCP Server (110 perkakas) dengan 3 transport (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) dengan skill dan siklus hidup tugas
 - Sistem memori (ekstraksi, injeksi, pengambilan, peringkasan)
-- Sistem keterampilan (registri, eksekutor, sandbox, keterampilan bawaan)
-- Proksi MITM dengan pengelolaan sertifikat dan penanganan DNS
-- Middleware pelindung dari injeksi prompt
-- Pipeline kompresi prompt dengan Caveman, RTK, pipeline bertumpuk, kombinasi kompresi, paket bahasa, dan analitik
+- Sistem skill (registri, eksekutor, sandbox, skill bawaan)
+- Proksi MITM dengan manajemen sertifikat dan penanganan DNS
+- Middleware pelindung injeksi prompt
+- Pipeline kompresi prompt dengan Caveman, RTK, pipeline bertumpuk, kombo kompresi, paket bahasa, dan analitik
 - Registri ACP (Agent Communication Protocol)
 - Penyedia OAuth modular (22 modul individual di bawah `src/lib/oauth/providers/`)
-- Skrip penghapusan/penghapusan penuh
-- Tindakan perbaikan lingkungan OAuth
-- Bridge WebSocket untuk klien WS yang kompatibel dengan OpenAI (`/v1/ws`)
-- Pengelolaan token sinkronisasi (penerbitan/pencabutan, pengunduhan bundel konfigurasi berversi ETag)
-- GLM Thinking (`glmt`) sebagai preset penyedia kelas utama
+- Skrip uninstall/full-uninstall
+- Aksi perbaikan environment OAuth
+- Jembatan WebSocket untuk klien WS kompatibel OpenAI (`/v1/ws`)
+- Manajemen token sinkronisasi (penerbitan/pencabutan, unduhan bundel konfigurasi berversi ETag)
+- Preset penyedia first-class GLM Thinking (`glmt`)
 - Penghitungan token hibrida (`/messages/count_tokens` di sisi penyedia dengan fallback estimasi)
-- Penyemaian otomatis alias model (30+ normalisasi dialek lintas-proksi saat startup)
-- Pengambilan outbound yang aman dengan pelindung SSRF, pemblokiran URL privat, dan percobaan ulang yang dapat dikonfigurasi
-- Percobaan ulang chat yang memperhitungkan cooldown dengan `requestRetry` dan `maxRetryIntervalSec` yang dapat dikonfigurasi
-- Validasi lingkungan runtime dengan Zod saat startup
-- Audit kepatuhan v2 dengan paginasi, peristiwa CRUD penyedia, dan pencatatan validasi yang diblokir SSRF
+- Auto-seeding alias model (30+ normalisasi dialek lintas proxy saat startup)
+- Fetch keluar yang aman dengan pelindung SSRF, pemblokiran URL privat, dan retry yang dapat dikonfigurasi
+- Retry chat yang memperhitungkan cooldown dengan `requestRetry` dan `maxRetryIntervalSec` yang dapat dikonfigurasi
+- Validasi environment runtime dengan Zod saat startup
+- Audit kepatuhan v2 dengan paginasi, event CRUD penyedia, dan pencatatan validasi yang diblokir SSRF
 
 Model runtime utama:
 
-- Rute aplikasi Next.js di bawah `src/app/api/*` mengimplementasikan API dasbor dan API kompatibilitas
-- Inti SSE/perutean bersama di `src/sse/*` + `open-sse/*` menangani eksekusi penyedia, penerjemahan, streaming, fallback, dan penggunaan
+- App route Next.js di bawah `src/app/api/*` mengimplementasikan API dasbor sekaligus API kompatibilitas
+- Inti SSE/perutean bersama di `src/sse/*` + `open-sse/*` menangani eksekusi penyedia, translasi, streaming, fallback, dan penggunaan
 
 ## Diagram Referensi
 
@@ -114,43 +114,51 @@ sisanya ditautkan dari panduan khusus domain masing-masing.
 - SLA/control plane penyedia di luar proses lokal
 - Biner CLI eksternal itu sendiri (Claude CLI, Codex CLI, dll.)
 
-## Permukaan Dasbor (Saat Ini)
+## Antarmuka Dashboard (Saat Ini)
 
 Halaman utama di bawah `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — mulai cepat + ikhtisar penyedia
-- `/dashboard/endpoint` — proksi endpoint + tab MCP + A2A + endpoint API
-- `/dashboard/providers` — koneksi dan kredensial penyedia
-- `/dashboard/combos` — strategi combo, templat, builder berbasis langkah, aturan perutean model, pengurutan manual yang dipersistenkan
+- `/dashboard` — mulai cepat + ikhtisar provider
+- `/dashboard/endpoint` — tab endpoint proxy + MCP + A2A + endpoint API
+- `/dashboard/providers` — koneksi provider dan kredensial
+- `/dashboard/combos` — strategi combo, templat, builder berbasis langkah, aturan routing model, pengurutan manual yang tersimpan
 - `/dashboard/auto-combo` — Auto Combo Engine: bobot penilaian, paket mode, preset pabrik virtual, telemetri
 - `/dashboard/costs` — agregasi biaya dan visibilitas harga
 - `/dashboard/analytics` — analitik penggunaan, evaluasi, kesehatan target combo
 - `/dashboard/limits` — kontrol kuota/laju
 - `/dashboard/cli-tools` — onboarding CLI, deteksi runtime, pembuatan konfigurasi
-- `/dashboard/agents` — agen ACP yang terdeteksi + pendaftaran agen khusus
-- `/dashboard/cloud-agents` — tugas agen yang di-host di cloud (Codex Cloud, Devin, Jules) dan siklus hidup tugas
+- `/dashboard/agents` — agen ACP yang terdeteksi + pendaftaran agen kustom
+- `/dashboard/cloud-agents` — tugas agen yang dihosting di cloud (Codex Cloud, Devin, Jules) dan siklus hidup tugas
 - `/dashboard/skills` — registri skill A2A, eksekusi sandbox, katalog skill bawaan
-- `/dashboard/memory` — pemeriksaan dan pengambilan memori percakapan persisten
+- `/dashboard/memory` — inspeksi dan pengambilan memori percakapan persisten
 - `/dashboard/webhooks` — langganan webhook keluar, rotasi secret, statistik percobaan ulang
-- `/dashboard/batch` — pengiriman pekerjaan batch dan progres
-- `/dashboard/cache` — statistik cache read-through dan penalaran, kontrol eviksi
+- `/dashboard/batch` — pengiriman batch job dan progresnya
+- `/dashboard/cache` — statistik cache read-through dan reasoning, kontrol eviksi
 - `/dashboard/playground` — playground chat interaktif terhadap combo/model apa pun yang dikonfigurasi
 - `/dashboard/changelog` — penampil changelog dalam aplikasi (merender `CHANGELOG.md`)
-- `/dashboard/system` — diagnostik runtime, info versi, permukaan validasi lingkungan
-- `/dashboard/onboarding` — wizard penyiapan penggunaan pertama untuk instalasi baru
+- `/dashboard/system` — diagnostik runtime, info versi, antarmuka validasi lingkungan
+- `/dashboard/onboarding` — wizard pengaturan pertama kali untuk instalasi baru
 - `/dashboard/media` — playground gambar/video/musik
-- `/dashboard/search-tools` — pengujian dan riwayat penyedia pencarian
-- `/dashboard/health` — waktu aktif, circuit breaker, batas laju, sesi yang dipantau kuotanya
-- `/dashboard/logs` — log permintaan/proksi/audit/konsol
-- `/dashboard/settings` — tab pengaturan sistem (umum, perutean, default combo, dll.)
-- `/dashboard/context/caveman` — aturan kompresi Caveman, paket bahasa, pratinjau, dan mode keluaran
-- `/dashboard/context/rtk` — filter keluaran perintah RTK, pratinjau, dan pengaturan keamanan runtime
-- `/dashboard/context/combos` — pipeline kompresi bernama yang ditetapkan ke combo perutean
-- `/dashboard/translator` — pemeriksaan penerjemah dan pratinjau konversi format permintaan
-- `/dashboard/audit` — penjelajah log audit kepatuhan dengan paginasi dan metadata terstruktur
-- `/dashboard/usage` — penjelajah penggunaan per permintaan yang terkait dengan `usage_history`
+- `/dashboard/search-tools` — pengujian provider pencarian dan riwayatnya
+- `/dashboard/health` — uptime, circuit breaker, rate limit, sesi yang dipantau kuotanya
+- `/dashboard/logs` — log request/proxy/audit/konsol
+- `/dashboard/settings` — tab pengaturan sistem (umum, routing, default combo, dll.)
+- `/dashboard/context/caveman` — aturan kompresi Caveman, paket bahasa, pratinjau, dan mode output
+- `/dashboard/context/rtk` — filter output perintah RTK, pratinjau, dan pengaturan keamanan runtime
+- `/dashboard/context/combos` — pipeline kompresi bernama yang ditetapkan ke combo routing
+- `/dashboard/translator` — inspeksi translator dan pratinjau konversi format request
+- `/dashboard/audit` — penelusur log audit kepatuhan dengan paginasi dan metadata terstruktur
+- `/dashboard/usage` — penelusur penggunaan per-request yang terikat pada `usage_history`
 - `/dashboard/compression` — analitik kompresi, statistik, dan penetapan pipeline
-- `/dashboard/api-manager` — siklus hidup kunci API dan izin model
+- `/dashboard/api-manager` — siklus hidup API key dan izin model
+
+Lapisan UI: setiap halaman dirender di dalam satu shell — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset`
+milik kit, serta `Sidebar.tsx` dan `Header.tsx` milik OmniRoute). Halaman mengimpor komponen
+penyusunnya dari `@/shared/components` (adapter di atas Keak CI UI Kit yang di-vendor di
+`packages/ui-kit`) atau dari subpath komponen kit (`@omniroute/ui-kit/table`, `…/page-header`), dan
+ikon melalui `<Icon>` (`ICON_MAP` → Lucide). Tema (`system` secara default, light/dark) dan token
+berasal dari kit melalui jembatan di `src/app/globals.css`. Detail: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Konteks Sistem Tingkat Tinggi
 
