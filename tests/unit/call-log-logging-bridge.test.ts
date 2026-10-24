@@ -14,9 +14,11 @@ const databaseSettingsDb = await import("../../src/lib/db/databaseSettings.ts");
 
 function put(namespace: string, key: string, value: string) {
   const db = core.getDbInstance();
-  db.prepare(
-    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)"
-  ).run(namespace, key, value);
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+    namespace,
+    key,
+    value
+  );
 }
 
 async function resetStorage() {
@@ -68,8 +70,10 @@ test("an explicit false in the new namespace wins over a stale true", async () =
 });
 
 test("the flat key survives when the new namespace never set it", async () => {
-  // Migration 213 seeds the new namespace, so "never set" means the row is absent.
-  core.getDbInstance()
+  // "Never set" means the row is absent (migration 213 removes the seeded rows);
+  // delete them here so the test does not depend on migration order.
+  core
+    .getDbInstance()
     .prepare(
       "DELETE FROM key_value WHERE namespace = 'databaseSettings' AND key IN ('logs.callLogPipelineEnabled', 'callLogPipelineEnabled')"
     )
@@ -97,12 +101,21 @@ test("a bridge on one key leaves the other key alone", async () => {
   assert.equal(settings.detailed_logs_enabled, true);
 });
 
-test("detailed logs follow the same bridge", async () => {
-  put("databaseSettings", "logs.detailedLogsEnabled", "true");
-  put("settings", "detailed_logs_enabled", "false");
+test("the legacy flat alias in the new namespace is bridged too", async () => {
+  put("databaseSettings", "callLogPipelineEnabled", "true");
+  put("settings", "call_log_pipeline_enabled", "false");
 
   const settings = await settingsDb.getSettings();
-  assert.equal(settings.detailed_logs_enabled, true);
+  assert.equal(settings.call_log_pipeline_enabled, true);
+});
+
+test("the nested logs key wins over the legacy flat alias", async () => {
+  put("databaseSettings", "callLogPipelineEnabled", "true");
+  put("databaseSettings", "logs.callLogPipelineEnabled", "false");
+  put("settings", "call_log_pipeline_enabled", "true");
+
+  const settings = await settingsDb.getSettings();
+  assert.equal(settings.call_log_pipeline_enabled, false);
 });
 
 // A flattened legacy row must not override the namespace the panel writes to.

@@ -144,6 +144,21 @@ function readNamespace(namespace: string): Record<string, unknown> {
   return values;
 }
 
+/**
+ * The call-log pipeline toggle as the dashboard saved it under the
+ * `databaseSettings` namespace, or null when it was never saved there. The
+ * nested `logs.*` key wins over the legacy flat alias, as in
+ * mergeDatabaseSettingsNamespace.
+ */
+export function readSavedCallLogPipelineEnabled(): boolean | null {
+  const values = readNamespace(DATABASE_SETTINGS_NAMESPACE);
+  for (const key of ["logs.callLogPipelineEnabled", "callLogPipelineEnabled"]) {
+    const enabled = toBooleanSetting(values[key]);
+    if (enabled !== null) return enabled;
+  }
+  return null;
+}
+
 function mergeSectionObject(
   target: UserDatabaseSettings,
   section: DatabaseSettingsSection,
