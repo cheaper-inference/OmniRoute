@@ -27,6 +27,7 @@ import { restoreDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { extractReplayableResponsesReasoningText } from "../services/reasoningInputPolicy.ts";
 import { sanitizeToolId } from "../translator/helpers/schemaCoercion.ts";
 import { stripEmptyOptionalToolArgs } from "../translator/response/openai-responses/pureHelpers.ts";
+import { geminiExtraUsageCounts } from "../translator/response/geminiUsageMetadata.ts";
 import {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
@@ -1034,6 +1035,7 @@ function convertOpenAINonStreamingToGeminiFamily(openaiResponse: JsonRecord): Js
         promptTokenCount: promptTokens,
         candidatesTokenCount: completionTokens,
         totalTokenCount: toNumber(usageSrc.total_tokens, promptTokens + completionTokens),
+        ...geminiExtraUsageCounts(usageSrc),
       },
       modelVersion: toString(openaiResponse.model, "unknown"),
       responseId: toString(openaiResponse.id, `resp_${Date.now()}`),
