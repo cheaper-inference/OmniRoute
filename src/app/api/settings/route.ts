@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/settings";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { updateSettingsSchema } from "@/shared/validation/settingsSchemas";
+import { oidcAdmissionClaimSchema } from "@/shared/utils/oidcAdmissionClaim";
 import {
   DASHBOARD_SESSION_STATE_SETTINGS_KEYS,
   SECURITY_IMPACTING_SETTINGS_KEYS,
@@ -321,21 +322,45 @@ export async function PATCH(request: Request) {
       }) as typeof body.modelLockout;
     }
 
-    if (body.oidcEnabled !== undefined || body.oidcAllowedSubjects !== undefined) {
+    if (
+      body.oidcEnabled !== undefined ||
+      body.oidcAllowedSubjects !== undefined ||
+      body.oidcAdmissionClaim !== undefined
+    ) {
       const current = await getSettings();
       const enabled = body.oidcEnabled ?? current.oidcEnabled === true;
       const subjects = Array.isArray(body.oidcAllowedSubjects)
         ? (body.oidcAllowedSubjects as unknown[])
         : ((current.oidcAllowedSubjects as unknown[] | undefined) ?? []);
       const hasAtLeastOne = subjects.some((s) => typeof s === "string" && s.trim().length > 0);
-      if (enabled && !hasAtLeastOne) {
+      const admissionClaim =
+        body.oidcAdmissionClaim === undefined
+          ? current.oidcAdmissionClaim
+          : body.oidcAdmissionClaim;
+      if (
+        enabled &&
+        admissionClaim != null &&
+        !oidcAdmissionClaimSchema.safeParse(admissionClaim).success
+      ) {
+        emitSettingsFailureAudit(request, actor, "OIDC_ADMISSION_CLAIM_INVALID", attemptedKeys);
+        return NextResponse.json(
+          {
+            error: {
+              code: "OIDC_ADMISSION_CLAIM_INVALID",
+              message: "Invalid OIDC admission claim policy",
+            },
+          },
+          { status: 400 }
+        );
+      }
+      if (enabled && !hasAtLeastOne && !admissionClaim) {
         emitSettingsFailureAudit(request, actor, "OIDC_ALLOWED_SUBJECTS_REQUIRED", attemptedKeys);
         return NextResponse.json(
           {
             error: {
               code: "OIDC_ALLOWED_SUBJECTS_REQUIRED",
               message:
-                "oidcAllowedSubjects must contain at least one subject or email when oidcEnabled is true",
+                "OIDC requires at least one allowed subject/email or an admission claim policy",
             },
           },
           { status: 400 }

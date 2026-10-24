@@ -182,6 +182,7 @@ export async function getSettings() {
     oidcScopes: ["openid", "profile", "email"],
     oidcRedirectPath: "/api/auth/oidc/callback",
     oidcAllowedSubjects: [], // optional sub or email whitelist
+    oidcAdmissionClaim: null, // optional ID-token role/group admission policy
     mcpEnabled: false,
     a2aEnabled: false,
     hiddenSidebarItems: [],
