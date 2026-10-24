@@ -38,6 +38,15 @@ export const listModelsCatalogOutput = z.object({
       })
     )
     .optional(),
+  degradedProviders: z
+    .array(
+      z.object({
+        provider: z.string(),
+        connectionId: z.string().optional(),
+        cause: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export const listModelsCatalogTool: McpToolDefinition<

@@ -20,6 +20,13 @@
 import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
 import { isRetiredGitHubCopilotModelId } from "../config/providers/registry/github/retiredModels.ts";
 
+/**
+ * Why the live catalog was not used: a code of the closed vocabulary, or an
+ * HTTP status. Never a message, a body or an URL — the reason is published to
+ * the operator, so it must not carry what the upstream sent.
+ */
+type DiscoveryFailure = { status?: number; code?: string };
+
 export const GITHUB_COPILOT_MODELS_URL = "https://api.githubcopilot.com/models";
 
 // Static fallback catalog. Used ONLY when live discovery is unavailable
@@ -204,10 +211,13 @@ export type GitHubCopilotModelsResult = {
   models: GitHubCopilotModel[];
   /** "api" = live discovery; "fallback" = static catalog (offline/unauthed/error). */
   source: "api" | "fallback";
+  /** Why the live catalog was not used — a code or an HTTP status, never a message. */
+  failure?: DiscoveryFailure;
 };
 
 function toFallbackResult(
-  fallbackModels: Array<{ id: string; name?: string }> | undefined
+  fallbackModels: Array<{ id: string; name?: string }> | undefined,
+  failure?: DiscoveryFailure
 ): GitHubCopilotModelsResult {
   const models = (fallbackModels || [])
     .map((model) => {
@@ -217,12 +227,15 @@ function toFallbackResult(
       return { id, name: toNonEmptyString(model.name) || id, owned_by: "github" };
     })
     .filter((model): model is GitHubCopilotModel => Boolean(model));
-  return { models, source: "fallback" };
+  return { models, source: "fallback", ...(failure ? { failure } : {}) };
 }
 
 /**
  * Discover the Copilot model catalog live, falling back to the static catalog
  * when no token is available or the upstream request fails.
+ *
+ * The reason of the fallback is reported next to the catalog: without it the
+ * static catalog silently passes for the account's own catalog.
  */
 export async function fetchGitHubCopilotModels(
   options: FetchGitHubCopilotModelsOptions
@@ -230,7 +243,7 @@ export async function fetchGitHubCopilotModels(
   const { token, fetchImpl = fetch, fallbackModels } = options;
 
   if (!toNonEmptyString(token)) {
-    return toFallbackResult(fallbackModels);
+    return toFallbackResult(fallbackModels, { code: "NO_CREDENTIAL" });
   }
 
   try {
@@ -243,18 +256,18 @@ export async function fetchGitHubCopilotModels(
     });
 
     if (!response.ok) {
-      return toFallbackResult(fallbackModels);
+      return toFallbackResult(fallbackModels, { status: response.status });
     }
 
     const data = await response.json();
     const models = parseGitHubCopilotModels(data);
     if (models.length === 0) {
-      return toFallbackResult(fallbackModels);
+      return toFallbackResult(fallbackModels, { code: "EMPTY_CATALOG" });
     }
     return { models, source: "api" };
   } catch {
     // Network/parse failure — never break the import flow.
-    return toFallbackResult(fallbackModels);
+    return toFallbackResult(fallbackModels, {});
   }
 }
 
@@ -329,13 +342,15 @@ export type FetchGheCopilotModelsOptions = {
  * Discover the GHE Copilot model catalog live from `<apiUrl>/models`.
  * Returns an empty list (no fallback catalog) when discovery is unavailable —
  * GHE model IDs are enterprise-specific, so a static fallback would be wrong.
+ * The reason of the empty list is reported next to it.
  */
 export async function fetchGheCopilotModels(
   options: FetchGheCopilotModelsOptions
-): Promise<GitHubCopilotModel[]> {
+): Promise<{ models: GitHubCopilotModel[]; failure?: DiscoveryFailure }> {
   const { apiUrl, token, fetchImpl = fetch } = options;
   const base = toNonEmptyString(apiUrl);
-  if (!base || !toNonEmptyString(token)) return [];
+  if (!base) return { models: [], failure: { code: "NO_ENDPOINT" } };
+  if (!toNonEmptyString(token)) return { models: [], failure: { code: "NO_CREDENTIAL" } };
 
   try {
     const response = await fetchImpl(`${base.replace(/\/+$/, "")}/models`, {
@@ -346,10 +361,12 @@ export async function fetchGheCopilotModels(
       },
     });
 
-    if (!response.ok) return [];
+    if (!response.ok) return { models: [], failure: { status: response.status } };
     const data = await response.json();
-    return parseGheCopilotModels(data);
+    const models = parseGheCopilotModels(data);
+    if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
+    return { models };
   } catch {
-    return [];
+    return { models: [], failure: {} };
   }
 }

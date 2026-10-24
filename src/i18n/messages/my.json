@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "မော်ဒယ်အားလုံးကို ထည့်သွင်းပြီးဖြစ်သည်",
     "noNewModelsToImport": "ထည့်သွင်းရန် မော်ဒယ်အသစ်မရှိပါ — မော်ဒယ်အားလုံးသည် မှတ်ပုံတင်စာရင်း သို့မဟုတ် စိတ်ကြိုက်မော်ဒယ်စာရင်းတွင် ရှိပြီးဖြစ်သည်",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "မော်ဒယ်ရှာဖွေတွေ့ရှိမှု မအောင်မြင် {time}",
     "skippingExistingModels": "ရှိပြီးသား မော်ဒယ် {count} ခုကို ကျော်နေသည်",
     "autoSync": "အလိုအလျောက် စင့်ခ်လုပ်ခြင်း",
     "autoSyncShort": "စင့်ခ်လုပ်မည်",

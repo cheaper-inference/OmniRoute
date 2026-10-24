@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "ಎಲ್ಲಾ ಮಾದರಿಗಳನ್ನು ಈಗಾಗಲೇ ಆಮದು ಮಾಡಲಾಗಿದೆ",
     "noNewModelsToImport": "ಆಮದು ಮಾಡಲು ಯಾವುದೇ ಹೊಸ ಮಾದರಿಗಳಿಲ್ಲ — ಎಲ್ಲಾ ಮಾದರಿಗಳು ಈಗಾಗಲೇ ನೋಂದಾವಣೆಯಲ್ಲಿ ಅಥವಾ ಕಸ್ಟಮ್ ಮಾದರಿಗಳ ಪಟ್ಟಿಯಲ್ಲಿವೆ",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "ಮಾಡೆಲ್ ಡಿಸ್ಕವರಿ ವಿಫಲವಾಗಿದೆ {time}",
     "skippingExistingModels": "ಈಗಾಗಲೇ ಇರುವ {count} ಮಾದರಿಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತಿದೆ",
     "autoSync": "ಸ್ವಯಂ-ಸಿಂಕ್",
     "autoSyncShort": "ಸಿಂಕ್",

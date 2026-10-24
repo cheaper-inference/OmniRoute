@@ -7,10 +7,13 @@ import {
 } from "@omniroute/open-sse/services/twinmindModels.ts";
 import { ensureTwinmindAccessToken } from "@omniroute/open-sse/services/twinmindAuth.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { toDiscoveryFailure, type DiscoveryFailure } from "@/shared/discovery/degradedCause";
 
 interface DiscoveryWarnings {
   cacheWarning?: string;
   localWarning?: string;
+  /** Why the discovery failed — a code or an HTTP status, never a message. */
+  failure?: DiscoveryFailure;
 }
 
 interface TwinmindDiscoveryRouteOptions {
@@ -88,6 +91,7 @@ export async function maybeHandleTwinmindModelDiscovery(
       {
         cacheWarning: "No Twinmind token configured — using cached catalog",
         localWarning: "No Twinmind token configured — using local catalog",
+        failure: { code: "NO_CREDENTIAL" },
       },
       "No Twinmind Bearer or refresh token — using seed model list"
     );
@@ -115,6 +119,7 @@ export async function maybeHandleTwinmindModelDiscovery(
       {
         cacheWarning: "Twinmind model discovery failed — using cached catalog",
         localWarning: "Twinmind model discovery failed — using seed catalog",
+        failure: toDiscoveryFailure(error),
       },
       "API unavailable — using seed Twinmind model list"
     );

@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Alle modellen zijn al geïmporteerd",
     "noNewModelsToImport": "Geen nieuwe modellen om te importeren — alle modellen staan al in het register of de lijst met aangepaste modellen",
     "localCatalogFallbackStatus": "De modellijst van de provider is niet bereikbaar — de ingebouwde catalogus wordt getoond",
+    "discoveryDegradedStatus": "Modeldetectie mislukt {time}",
     "skippingExistingModels": "{count} bestaande modellen overgeslagen",
     "autoSync": "Automatische synchronisatie",
     "autoSyncShort": "Synchroniseren",

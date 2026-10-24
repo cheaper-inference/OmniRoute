@@ -583,9 +583,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const modelSource = toNonEmptyString(modelsData.source)?.toLowerCase() || "unknown";
     const modelWarning = toNonEmptyString(modelsData.warning);
+    // The reason of the failed discovery travels with the refusal: the operator
+    // sees WHY the catalog could not be synced, not only that it was not.
+    const modelCause = toNonEmptyString(modelsData.error);
     if (isDegradedDiscovery(modelsData)) {
       const responseError =
-        modelWarning || "Remote model discovery failed; catalog fallback not synced";
+        modelCause || modelWarning || "Remote model discovery failed; catalog fallback not synced";
       await saveCallLog({
         method: "GET",
         path: `/api/providers/${id}/models`,
