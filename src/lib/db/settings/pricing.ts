@@ -14,6 +14,18 @@ type PricingByProvider = Record<string, PricingModels>;
 export type PricingSource = "default" | "litellm" | "modelsDev" | "user";
 export type PricingSourceMap = Record<string, Record<string, PricingSource>>;
 
+// Provider and model identifiers are data, not JavaScript property names.
+// Define own enumerable fields rather than invoking the "__proto__" setter
+// or accidentally treating "constructor"/"toString" as inherited prices.
+function setOwnKey<T>(record: Record<string, T>, key: string, value: T): void {
+  Object.defineProperty(record, key, {
+    value,
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+}
+
 async function touchPricing(): Promise<void> {
   invalidateDbCache("pricing");
   invalidateUserPricingMemo();
@@ -39,7 +51,7 @@ function readPricingNamespace(
     if (!key || rawValue === null) continue;
 
     try {
-      pricing[key] = toRecord(JSON.parse(rawValue)) as PricingModels;
+      setOwnKey(pricing, key, toRecord(JSON.parse(rawValue)) as PricingModels);
     } catch {
       // Corrupted data — skip silently, fallback to lower layers
     }
@@ -53,15 +65,17 @@ function mergePricingLayers(layers: PricingByProvider[]): PricingByProvider {
 
   for (const layer of layers) {
     for (const [provider, models] of Object.entries(layer)) {
-      if (!mergedPricing[provider]) {
-        mergedPricing[provider] = { ...models };
+      if (!Object.hasOwn(mergedPricing, provider)) {
+        setOwnKey(mergedPricing, provider, { ...models });
         continue;
       }
 
       for (const [model, pricing] of Object.entries(models)) {
-        mergedPricing[provider][model] = mergedPricing[provider][model]
-          ? { ...(mergedPricing[provider][model] || {}), ...toRecord(pricing) }
-          : pricing;
+        const previous = Object.hasOwn(mergedPricing[provider], model)
+          ? mergedPricing[provider][model]
+          : null;
+        setOwnKey(mergedPricing[provider], model,
+          previous ? { ...previous, ...toRecord(pricing) } : pricing);
       }
     }
   }
@@ -84,18 +98,15 @@ function buildPricingSourceMap(layers: {
   ]);
 
   for (const [provider, models] of Object.entries(mergedPricing)) {
-    sourceMap[provider] = {};
+    setOwnKey(sourceMap, provider, {});
 
     for (const model of Object.keys(models)) {
-      if (layers.user[provider]?.[model]) {
-        sourceMap[provider][model] = "user";
-      } else if (layers.modelsDev[provider]?.[model]) {
-        sourceMap[provider][model] = "modelsDev";
-      } else if (layers.litellm[provider]?.[model]) {
-        sourceMap[provider][model] = "litellm";
-      } else {
-        sourceMap[provider][model] = "default";
-      }
+      const hasPrice = (layer: PricingByProvider) =>
+        Object.hasOwn(layer, provider) && Object.hasOwn(layer[provider], model);
+      const source: PricingSource = hasPrice(layers.user) ? "user" :
+        hasPrice(layers.modelsDev) ? "modelsDev" :
+        hasPrice(layers.litellm) ? "litellm" : "default";
+      setOwnKey(sourceMap[provider], model, source);
     }
   }
 
@@ -218,12 +229,13 @@ export async function updatePricing(pricingData: PricingByProvider) {
     const key = typeof record.key === "string" ? record.key : null;
     const rawValue = typeof record.value === "string" ? record.value : null;
     if (!key || rawValue === null) continue;
-    existing[key] = toRecord(JSON.parse(rawValue)) as PricingModels;
+    setOwnKey(existing, key, toRecord(JSON.parse(rawValue)) as PricingModels);
   }
 
   const tx = db.transaction(() => {
     for (const [provider, models] of Object.entries(pricingData)) {
-      insert.run(provider, JSON.stringify({ ...(existing[provider] || {}), ...models }));
+      const previous = Object.hasOwn(existing, provider) ? existing[provider] : {};
+      insert.run(provider, JSON.stringify({ ...previous, ...models }));
     }
   });
   tx();
@@ -236,7 +248,7 @@ export async function updatePricing(pricingData: PricingByProvider) {
     const key = typeof record.key === "string" ? record.key : null;
     const rawValue = typeof record.value === "string" ? record.value : null;
     if (!key || rawValue === null) continue;
-    updated[key] = toRecord(JSON.parse(rawValue)) as PricingModels;
+    setOwnKey(updated, key, toRecord(JSON.parse(rawValue)) as PricingModels);
   }
   return updated;
 }
@@ -275,7 +287,7 @@ export async function resetPricing(provider: string, model?: string) {
     const key = typeof record.key === "string" ? record.key : null;
     const rawValue = typeof record.value === "string" ? record.value : null;
     if (!key || rawValue === null) continue;
-    result[key] = JSON.parse(rawValue);
+    setOwnKey(result, key, JSON.parse(rawValue));
   }
   return result;
 }

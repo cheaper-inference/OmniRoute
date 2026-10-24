@@ -42,6 +42,7 @@ import {
   isUsableCombo,
   isUsableRawModelId,
   lookupEnrichment,
+  reconcileHistoricalEnrichment,
   mapComboToModelV2,
   mapRawModelToModelV2,
   usableProviderAliasSet,
@@ -824,7 +825,14 @@ export async function collectCatalog(
   const visibleFilter = catalogAll ? undefined : compileModelListFilter(opts.visibleModels);
   const hiddenFilter = compileModelListFilter(opts.hiddenModels);
 
-  const enrichment = await resolveEnrichmentOverlay(opts, fetchers, log);
+  // Reconcile cached and freshly fetched historical pricing against the
+  // CURRENT served IDs before any name/cost/free-tier lookup. This also
+  // invalidates obsolete compatible prefixes when an offline disk snapshot
+  // spans an operator prefix rename (#17348).
+  const enrichment = reconcileHistoricalEnrichment(
+    await resolveEnrichmentOverlay(opts, fetchers, log),
+    rawModels
+  );
   const canonicalToAlias = buildCanonicalToAliasMap(enrichment);
   const canonicalDedup = canonicalDedupSet(rawModels, canonicalToAlias);
   // `freeOnly` reads the overlay: an empty overlay (no management token,
