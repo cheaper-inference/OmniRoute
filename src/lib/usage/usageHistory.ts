@@ -19,6 +19,7 @@ import {
   buildLatencyStatsEntry,
   createLatencyBucket,
   mapUsageHistoryRow,
+  normalizeServiceTier,
   resolvePositiveOption,
   toNumber,
   toStringOrNull,
@@ -33,8 +34,14 @@ import {
   storeCompletedDetail,
   getCompletedDetails,
 } from "./completedRequestDetails";
+import * as sessions from "./usageHistory/agentSessionUsage";
 import { shouldPersistToDisk } from "./migrations";
-import { attemptWrite, isWriteLockError, scheduleWriteRetry } from "./usageWriteRetry";
+import {
+  attemptWrite,
+  isWriteLockError,
+  scheduleWriteRetry,
+  type UsageWriteOptions,
+} from "./usageWriteRetry";
 import { getCallLogApiKeyContext } from "./callLogApiKeyContext";
 
 export type PendingRequestMetadata = {
@@ -831,6 +838,8 @@ export interface UsageEntry {
   endpoint?: string | null;
   /** Opaque CLIProxyAPI auth_index. Never a label, path, token, or email. */
   cpaAuthIndex?: string | null;
+  /** Coding-agent session and project of the request; attributes the row to an agent session. */
+  agentContext?: sessions.AgentContext | null;
 }
 
 /**
@@ -868,14 +877,26 @@ export async function saveRequestUsage(entry: UsageEntry, options: SaveRequestUs
     apiKeyName: entry.apiKeyName || apiKeyContext?.apiKeyName || null,
   };
 
+  // Agent-session counters are priced before the write (pricing is async) and replayed
+  // unchanged by the deferred retry; requests without an agent identity skip the await.
+  let writeOptions: UsageWriteOptions = options;
   try {
-    attemptWrite(frozenEntry, options);
+    if (frozenEntry.agentContext) {
+      const serviceTier = normalizeServiceTier(entry.serviceTier ?? entry.service_tier);
+      const agentSession = await sessions.buildAgentSessionUsage(
+        frozenEntry,
+        frozenEntry.timestamp,
+        serviceTier
+      );
+      writeOptions = { ...options, agentSession };
+    }
+    attemptWrite(frozenEntry, writeOptions);
   } catch (error) {
     if (!isWriteLockError(error)) {
       console.error("Failed to save usage stats:", error);
       return;
     }
-    scheduleWriteRetry(frozenEntry, options);
+    scheduleWriteRetry(frozenEntry, writeOptions);
   }
 }
 
