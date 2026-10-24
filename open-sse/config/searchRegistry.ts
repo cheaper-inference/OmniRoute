@@ -45,14 +45,27 @@ export interface SearchProviderConfig {
    */
   allowClientBaseUrlOverride?: boolean;
   /**
-   * Per-call price by request mode (the `mode` field of the built request body),
-   * for providers whose price depends on it. Unlisted modes use `costPerQuery`.
+   * Per-call price by request mode (the `costModeField` field of the built request
+   * body), for providers whose price depends on it. Unlisted modes use `costPerQuery`.
    * See computeSearchCostUsd() in open-sse/handlers/search/reportedCost.ts.
    */
   costByMode?: Record<string, number>;
+  /** Request-body field that holds the mode priced by `costByMode` (default `"mode"`). */
+  costModeField?: string;
   /** Results included in the per-call price; each one above it adds `extraResultCost`. */
   includedResults?: number;
   extraResultCost?: number;
+  /**
+   * Bill `costPerQuery` (or the mode price) once per started block of this many
+   * returned results, with at least one block per call (Firecrawl: 2 credits per
+   * 10 results, rounded up).
+   */
+  resultBlockSize?: number;
+  /**
+   * Per returned result, added when the request body sets `contents.<key>` to a
+   * truthy value (e.g. Exa bills `contents.summary` per summarized result).
+   */
+  contentsCostPerResult?: Record<string, number>;
 }
 
 export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
@@ -112,6 +125,14 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "x-api-key",
     costPerQuery: 0.007,
+    // Exa 3.0: `type: "lite"` is $4/1k requests vs $7/1k for the default `auto`.
+    // The legacy `instant` type is billed like lite; `fast` like auto (live costDollars).
+    costByMode: { lite: 0.004, instant: 0.004 },
+    costModeField: "type",
+    // Both include 10 results; each extra one and each summary is $0.001 (live costDollars).
+    includedResults: 10,
+    extraResultCost: 0.001,
+    contentsCostPerResult: { summary: 0.001 },
     freeMonthlyQuota: 1000,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,
@@ -165,6 +186,9 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "bearer",
     costPerQuery: 0.002,
+    // 2 credits per 10 results, rounded up (https://docs.firecrawl.dev/billing);
+    // $0.002 is those 2 credits at $0.001 each.
+    resultBlockSize: 10,
     freeMonthlyQuota: 1000,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,

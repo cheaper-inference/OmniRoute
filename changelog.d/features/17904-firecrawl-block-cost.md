@@ -1,0 +1,1 @@
+- **feat(search):** Firecrawl search is recorded per started block of 10 results ($0.002 each), so 11 or more results are no longer under-recorded ([#17904](https://github.com/diegosouzapw/OmniRoute/pull/17904)) — thanks @yourspraveen
