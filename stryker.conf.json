@@ -98,6 +98,7 @@
       "tests/unit/opencode-free-tier-combo-diagnostics.test.ts",
       "tests/unit/combo-protected-stop-diagnostics.test.ts",
       "tests/unit/model-validation-runner.test.ts",
+      "tests/unit/models-health-cooldown-route.test.ts",
       "tests/unit/model-concurrency-gate.test.ts",
       "tests/unit/bare-403-neutral.test.ts",
       "tests/unit/codex-gpt61-sol.test.ts",
