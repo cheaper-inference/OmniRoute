@@ -141,6 +141,10 @@ import {
   fetchCodexGithubCatalogModels,
 } from "./discovery/codex";
 import { createCodexDiscoveryFetch, createCodexCatalogReconciler } from "./discovery/codexRoute";
+import {
+  getCodexClientVersion,
+  getCodexClientVersionSource,
+} from "@omniroute/open-sse/config/codexClient.ts";
 import { fetchClaudeDiscoveryModels } from "./discovery/claude";
 import { applyConnectionCustomHeaders } from "./discovery/connectionCustomHeaders";
 import { maybeHandleConolOrSyntxModelDiscovery } from "./webSessionDiscovery";
@@ -2109,13 +2113,26 @@ export async function GET(
             : liveModels;
         const catalog = reconcileCodexCatalog(enrichedLiveModels);
         await persistDiscoveredModels(provider, connectionId, catalog.activeModels);
+        const clientVersionSource = getCodexClientVersionSource();
         return buildResponse({
           provider,
           connectionId,
           models: catalog.activeModels,
           source: "api",
           warning: catalog.warning,
-          discovery: { mode: codexDiscoveryMode },
+          discovery: {
+            mode: codexDiscoveryMode,
+            clientVersion: {
+              version: getCodexClientVersion(),
+              source: clientVersionSource,
+              ...(clientVersionSource === "fallback"
+                ? {
+                    degraded:
+                      "the last version refresh failed, so models gated behind a newer client may be missing",
+                  }
+                : {}),
+            },
+          },
           ...(includeCandidates ? { candidateModels: catalog.candidateModels } : {}),
         });
       }
