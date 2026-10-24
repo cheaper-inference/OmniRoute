@@ -78,13 +78,13 @@ export default function ImageResultsInline({ images }: { images: PlaygroundImage
         {safeImages.map((image, index) => (
           <div
             key={index}
-            className="relative group rounded-lg overflow-hidden border border-border"
+            className="relative group rounded-lg overflow-hidden border border-border aspect-square"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={image.src}
               alt={image.revisedPrompt || t("generatedImage", { index: index + 1 })}
-              className="w-full"
+              className="w-full h-full object-cover"
             />
             <a
               href={image.src}

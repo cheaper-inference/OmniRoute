@@ -345,12 +345,15 @@ export async function POST(request) {
         let allCombos: Awaited<ReturnType<typeof getCombos>> = [];
         try {
           allCombos = await getCombos();
-        } catch {}
+        } catch (err) {
+          console.debug?.("[API] /v1/audio/transcriptions failed to get combos:", err);
+        }
         let settings = {};
         try {
           settings = getUserDatabaseSettings();
-        } catch {}
-
+        } catch (err) {
+          console.debug?.("[API] /v1/audio/transcriptions failed to get user database settings:", err);
+        }
         return handleComboChat({
           body: { model: modelStr } as any,
           combo: combo as any,

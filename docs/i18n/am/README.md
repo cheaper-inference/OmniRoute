@@ -1302,12 +1302,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
 
 <table>
   <tr><th align="left">ንብርብር</th><th align="left">ቴክኖሎጂ</th></tr>
-  <tr><td nowrap><b>ራንታይም</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ቋንቋ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> በ<code>src/</code> እና <code>open-sse/</code> ላይ (ከ v2.0 ጀምሮ በኮር ውስጥ ምንም <code>any</code> የለም)</td></tr>
-  <tr><td nowrap><b>ፍሬምወርክ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ዳታቤዝ</b></td><td>better-sqlite3 (SQLite፣ WAL ጆርናሊንግ) + LowDB (JSON ነባር) — 147 የጎራ ሞጁሎች፣ 209 ማይግሬሽኖች</td></tr>
-  <tr><td nowrap><b>ማህደረ ትውስታ</b></td><td>SQLite FTS5 ሙሉ-ጽሑፍ + በ int8 የተቀነሱ የቬክተር ኢምቤዲንግዎች፣ ዓይነት-የተሰየመ መቀነስ</td></tr>
-  <tr><td nowrap><b>ስኪማዎች</b></td><td>Zod 4 — የ MCP መሣሪያ I/O ማረጋገጫ + የ API ውሎች</td></tr>
+  <tr><td nowrap><b>የማስኬጃ አካባቢ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>ቋንቋ</b></td><td>TypeScript 6.0 — በ<code>src/</code> እና <code>open-sse/</code> ውስጥ <b>100% TypeScript</b> (ከv2.0 ጀምሮ በዋናው ኮድ ውስጥ ምንም <code>any</code> የለም)</td></tr>
+  <tr><td nowrap><b>ማዕቀፍ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>የውሂብ ጎታ</b></td><td>better-sqlite3 (SQLite፣ WAL መዝገብ አያያዝ) + LowDB (የቆየ JSON) — 147 የጎራ ሞጁሎች፣ 211 ፍልሰቶች</td></tr>
+  <tr><td nowrap><b>ማህደረ ትውስታ</b></td><td>SQLite FTS5 ሙሉ-ጽሑፍ + int8-quantized የቬክተር ውክልናዎች፣ ዓይነት-የተወሰነ መቀነስ</td></tr>
+  <tr><td nowrap><b>መርሐግብሮች</b></td><td>Zod 4 — የMCP መሣሪያ I/O ማረጋገጫ + የAPI ውሎች</td></tr>
   <tr><td nowrap><b>ፕሮቶኮሎች</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>ስትሪሚንግ</b></td><td>ከሰርቨር የተላኩ ክስተቶች (SSE) + WebSocket ድልድይ (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>ግፊት</b></td><td>12-ሞተር ፓይፕላይን — RTK፣ Caveman፣ LLMLingua-2 (MobileBERT ONNX)፣ GCF፣ OmniGlyph</td></tr>

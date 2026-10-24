@@ -57,8 +57,8 @@ const RAW_COST_COLUMNS = `
  */
 const SUMMARY_COST_COLUMNS = `
           COALESCE(total_cost, 0.0) as stored_cost,
-          total_input_tokens as cost_tokens_input,
-          total_output_tokens as cost_tokens_output,
+          CASE WHEN COALESCE(total_cost, 0.0) = 0.0 THEN total_input_tokens ELSE 0 END as cost_tokens_input,
+          CASE WHEN COALESCE(total_cost, 0.0) = 0.0 THEN total_output_tokens ELSE 0 END as cost_tokens_output,
           0 as cost_tokens_cache_read,
           0 as cost_tokens_cache_creation,
           0 as cost_tokens_reasoning`;

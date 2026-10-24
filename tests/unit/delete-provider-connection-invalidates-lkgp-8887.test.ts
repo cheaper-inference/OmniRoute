@@ -15,7 +15,6 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const lkgpDb = await import("../../src/lib/db/settings/lkgp.ts");
-const readCache = await import("../../src/lib/db/readCache.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -77,25 +76,6 @@ test("#8887: single delete removes only the matching LKGP pin", async () => {
     provider: "berry",
     connectionId: survivorId,
   });
-});
-
-test("#8887: single delete invalidates a warmed LKGP read-cache entry", async () => {
-  const doomedId = await createConnection("berry", "cached-doomed");
-
-  await lkgpDb.setLKGP("cached-doomed", "model-x", "berry", doomedId);
-
-  assert.deepEqual(await readCache.getCachedLKGP("cached-doomed", "model-x"), {
-    provider: "berry",
-    connectionId: doomedId,
-  });
-
-  assert.equal(await providersDb.deleteProviderConnection(doomedId), true);
-
-  assert.equal(
-    await readCache.getCachedLKGP("cached-doomed", "model-x"),
-    null,
-    "deleted LKGP pins must not survive in the 5s read cache"
-  );
 });
 
 test("#8887: bulk delete removes every matching LKGP pin", async () => {

@@ -109,7 +109,9 @@ export async function POST(request: Request) {
   try {
     const settings = await getSettings();
     hidePaid = settings?.hidePaidModels === true;
-  } catch {}
+  } catch (err) {
+    console.debug?.("[API] /api/models/test-all failed to read hidePaidModels setting:", err);
+  }
 
   log.info(
     "MODEL_TEST_ALL",

@@ -1310,13 +1310,13 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
 </div>
 
 <table>
-  <tr><th align="left">Ciseal</th><th align="left">Teicneolaíocht</th></tr>
-  <tr><td nowrap><b>Am Rite</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> ar fud <code>src/</code> agus <code>open-sse/</code> (nialas <code>any</code> sa chroí ó v2.0)</td></tr>
-  <tr><td nowrap><b>Creatlach</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bunachar Sonraí</b></td><td>better-sqlite3 (SQLite, taifeadadh WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 209 imirce</td></tr>
-  <tr><td nowrap><b>Cuimhne</b></td><td>SQLite FTS5 lánthéacs + leabuithe veicteora cainníochtaithe int8, meath típáilte</td></tr>
-  <tr><td nowrap><b>Scéimeanna</b></td><td>Zod 4 — bailíochtú I/O uirlise MCP + conarthaí API</td></tr>
+  <tr><th align="left">Sraith</th><th align="left">Teicneolaíocht</th></tr>
+  <tr><td nowrap><b>Timpeallacht rite</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> ar fud <code>src/</code> agus <code>open-sse/</code> (gan aon <code>any</code> sa chroíchóras ó v2.0 i leith)</td></tr>
+  <tr><td nowrap><b>Creat</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, iriseoireacht WAL) + LowDB (oidhreacht JSON) — 147 modúl fearainn, 211 n-aistriú</td></tr>
+  <tr><td nowrap><b>Cuimhne</b></td><td>Téacs iomlán SQLite FTS5 + leabuithe veicteora cainníochtaithe go int8, meath clóscríofa</td></tr>
+  <tr><td nowrap><b>Scéimeanna</b></td><td>Zod 4 — bailíochtú ionchuir/aschuir uirlisí MCP + conarthaí API</td></tr>
   <tr><td nowrap><b>Prótacail</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Sruthú</b></td><td>Server-Sent Events (SSE) + droichead WebSocket (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Comhbhrú</b></td><td>Píblíne 12-inneall — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>

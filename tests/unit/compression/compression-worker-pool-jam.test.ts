@@ -599,6 +599,53 @@ describe("compression fail-open observability", () => {
   });
 });
 
+describe("CompressionWorkerPool queue cap (PERF-03)", () => {
+  it("rejects new jobs once the queue reaches MAX_QUEUE_SIZE instead of growing unbounded", async () => {
+    const previous = process.env.OMNI_COMPRESSION_MAX_QUEUE_SIZE;
+    process.env.OMNI_COMPRESSION_MAX_QUEUE_SIZE = "3";
+    const worker = fakeWorker();
+    const pool = new CompressionWorkerPool({ size: 1, workerFactory: () => worker });
+    try {
+      const active = pool.run({ ...body, model: "active" }, "stacked");
+      const queued = [
+        pool.run({ ...body, model: "queued-1" }, "stacked"),
+        pool.run({ ...body, model: "queued-2" }, "stacked"),
+        pool.run({ ...body, model: "queued-3" }, "stacked"),
+      ];
+      await assert.rejects(
+        withTimeout(pool.run({ ...body, model: "overflow" }, "stacked"), 2000, "overflow job never rejected"),
+        /Compression queue full/
+      );
+      const firstWireJob = worker.messages[0] as { id: number };
+      worker.emit("message", {
+        type: "result",
+        id: firstWireJob.id,
+        result: { body: { ...body, model: "active-result" }, compressed: true, stats: null },
+      });
+      assert.equal((await active).compressed, true);
+      for (let i = 0; i < 3; i++) {
+        const wireJob = worker.messages[i + 1] as { id: number };
+        assert.ok(wireJob, `queued job ${i + 1} must reach the worker once capacity frees up`);
+        worker.emit("message", {
+          type: "result",
+          id: wireJob.id,
+          result: { body: { ...body, model: `queued-${i + 1}-result` }, compressed: true, stats: null },
+        });
+      }
+      const results = await Promise.all(queued);
+      assert.deepEqual(
+        results.map((r) => r.body.model),
+        ["queued-1-result", "queued-2-result", "queued-3-result"],
+        "all three jobs within the cap must have been queued and dispatched, not rejected"
+      );
+    } finally {
+      if (previous === undefined) delete process.env.OMNI_COMPRESSION_MAX_QUEUE_SIZE;
+      else process.env.OMNI_COMPRESSION_MAX_QUEUE_SIZE = previous;
+      await pool.close();
+    }
+  });
+});
+
 describe("llmlingua worker spawn specifier", () => {
   it("passes a URL object (not a file:// string) to Worker — ERR_WORKER_PATH on Node >= 21", () => {
     const specifier = llmlinguaWorkerSpecifier("/app/onnxWorker.js");

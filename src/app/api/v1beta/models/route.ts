@@ -96,10 +96,13 @@ export async function GET(request: Request) {
     let settingsForAuth: Record<string, any> = {};
     try {
       settingsForAuth = await getSettings();
-    } catch {}
+    } catch (err) {
+      console.debug?.("[API] /v1beta/models failed to read settings for auth:", err);
+    }
     const authRejection = await getModelCatalogAuthRejection(request, settingsForAuth, {});
     if (authRejection) return authRejection;
-  } catch {
+  } catch (err) {
+    console.debug?.("[API] /v1beta/models auth check failure, falling through to builder:", err);
     // Fall through to the builder on auth-check failure; parity with /v1/models.
   }
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { createProviderNode, getProviderNodes } from "@/models";
 import { getProviderNodesCount, isProviderNodeIdConflictError } from "@/lib/db/providers/nodes";
 import { createErrorResponse } from "@/lib/api/errorResponse";
@@ -114,8 +115,11 @@ export async function GET(request?: Request) {
 }
 
 // POST /api/provider-nodes - Create provider node
-export async function POST(request) {
-  let rawBody;
+export async function POST(request: Request) {
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
+
+  let rawBody: unknown;
   try {
     rawBody = await request.json();
   } catch {

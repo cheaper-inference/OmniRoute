@@ -45,7 +45,10 @@ describe("usageAnalytics/sources — buildUnifiedSource", () => {
     // Regression: unified source must surface a `requests` column in both legs
     // so COUNT(*)→SUM(requests) counts actual requests, not row count.
     assert.ok(unifiedSource.includes("1 as requests"), "raw leg must surface requests column");
-    assert.ok(unifiedSource.includes("total_requests as requests"), "aggregated leg must surface total_requests as requests");
+    assert.ok(
+      unifiedSource.includes("total_requests as requests"),
+      "aggregated leg must surface total_requests as requests"
+    );
   });
 
   it("drops the aggregated leg when an api-key filter is active (raw-only)", () => {
@@ -62,7 +65,10 @@ describe("usageAnalytics/sources — buildUnifiedSource", () => {
       "aggregated leg must be absent once an api-key filter scopes the query to raw rows"
     );
     // Regression: raw-only fallback must also surface the requests column.
-    assert.ok(unifiedSource.includes("1 as requests"), "raw-only fallback must surface requests column");
+    assert.ok(
+      unifiedSource.includes("1 as requests"),
+      "raw-only fallback must surface requests column"
+    );
     assert.equal(unifiedParams.rawCutoff, undefined);
     assert.equal(unifiedParams.since, "2024-06-01T00:00:00.000Z");
     assert.equal(unifiedParams.apiKey0, "k1");
@@ -87,22 +93,23 @@ describe("usageAnalytics/sources — buildUnifiedSource", () => {
 const host = await import("../../src/lib/db/usageAnalytics.ts");
 
 describe("usageAnalytics.ts public API surface", () => {
-  // the 22 runtime functions (the 17 row/param interfaces are type-only and
-  // erased at runtime, so they are asserted via typecheck, not here)
+  // the runtime functions (the row/param interfaces are type-only and erased at
+  // runtime, so they are asserted via typecheck, not here)
   const expectedFns = [
     "buildUnifiedSource", // re-exported from sources
     "buildPresetUnifiedSource", // re-exported from sources
     "getUsageSummary",
     "getDailyUsage",
-    "getDailyCostRows",
+    "getModelUsageMatrixRows",
+    "deriveDailyCostRows",
     "getHeatmapRows",
-    "getModelUsageRows",
-    "getProviderCostRows",
-    "getProviderUsageRows",
+    "deriveModelUsageRows",
+    "deriveProviderCostRows",
+    "deriveProviderUsageRows",
     "getAccountCostRows",
     "getAccountUsageRows",
     "getApiKeyUsageRows",
-    "getServiceTierUsageRows",
+    "deriveServiceTierUsageRows",
     "getApiKeyMetadataRows",
     "getWeeklyPatternRows",
     "getPresetCostModelRows",
@@ -130,25 +137,28 @@ describe("usageAnalytics.ts public API surface", () => {
 // are counted correctly instead of as 1-per-row.
 
 describe("usageAnalytics queries use SUM(requests) not COUNT(*)", () => {
-  const queriesUsingCount = [
-    "getUsageSummary",
-    "getDailyUsage",
-    "getModelUsageRows",
-    "getProviderUsageRows",
-    "getServiceTierUsageRows",
-  ];
+  const queriesUsingCount = ["getUsageSummary", "getDailyUsage", "getModelUsageMatrixRows"];
 
   for (const fn of queriesUsingCount) {
     it(`${fn} uses SUM(requests) not COUNT(*)`, () => {
       const src = host[fn].toString();
-      assert.ok(src.includes("SUM(requests)"), `${fn} must use SUM(requests) for correct aggregated row counting`);
-      assert.ok(!src.match(/COUNT\(\*\)/), `${fn} must not use COUNT(*) which undercounts aggregated rows`);
+      assert.ok(
+        src.includes("SUM(requests)"),
+        `${fn} must use SUM(requests) for correct aggregated row counting`
+      );
+      assert.ok(
+        !src.match(/COUNT\(\*\)/),
+        `${fn} must not use COUNT(*) which undercounts aggregated rows`
+      );
     });
   }
 
   it("getWeeklyPatternRows inner subquery uses SUM(requests)", () => {
     const src = host.getWeeklyPatternRows.toString();
-    assert.ok(src.includes("SUM(requests)"), "getWeeklyPatternRows inner subquery must use SUM(requests)");
+    assert.ok(
+      src.includes("SUM(requests)"),
+      "getWeeklyPatternRows inner subquery must use SUM(requests)"
+    );
   });
 
   it("getUsageSummary uses SUM(CASE WHEN success=1 THEN requests ELSE 0 END) for successfulRequests", () => {
@@ -159,8 +169,8 @@ describe("usageAnalytics queries use SUM(requests) not COUNT(*)", () => {
     );
   });
 
-  it("getModelUsageRows uses SUM(CASE WHEN success=1 THEN requests ELSE 0 END) for successfulRequests", () => {
-    const src = host.getModelUsageRows.toString();
+  it("getModelUsageMatrixRows uses SUM(CASE WHEN success=1 THEN requests ELSE 0 END) for successfulRequests", () => {
+    const src = host.getModelUsageMatrixRows.toString();
     assert.ok(
       src.includes("SUM(CASE WHEN success = 1 THEN requests ELSE 0 END)"),
       "successfulRequests must weight by requests, not count 1-per-row"

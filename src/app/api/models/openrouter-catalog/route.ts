@@ -27,7 +27,9 @@ export async function GET(req: NextRequest) {
   try {
     const settings = await getSettings();
     hidePaid = settings?.hidePaidModels === true;
-  } catch {}
+  } catch (err) {
+    console.debug?.("[API] /api/models/openrouter-catalog failed to read hidePaidModels setting:", err);
+  }
   const applyFilter = <T extends { id?: string }>(data: T[]): T[] =>
     hidePaid
       ? data.filter((m) => isFreeForProvider("openrouter", m as { id: string; pricing?: unknown }))

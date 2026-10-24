@@ -8,7 +8,10 @@ import { getRuntimePorts } from "@/lib/runtime/ports";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatBodyAdmission";
 import { getBestVisionModel, getFallbackModels, recordLatency } from "./visionBridgeRouter";
 import { combineCredentialChecks } from "./visionBridgeKeyScope";
-import { REGISTRY } from "@omniroute/open-sse/config/providers";
+// PERF-09: provider metadata now comes from the generated metadata.json
+// (see open-sse/config/providers/metadata.ts) instead of the 291-module
+// REGISTRY import, which forced every provider module to evaluate at load.
+import { CLAUDE_WIRE_PROVIDERS } from "@omniroute/open-sse/config/providers/metadata";
 import { fetch as undiciFetch } from "undici";
 /**
  * Provider to environment variable mapping for API key resolution.
@@ -24,12 +27,6 @@ const PROVIDER_API_KEY_MAP: Record<string, string> = {
 // (MiniMax, Z.AI, …) do NOT — they reject remote URLs (MiniMax: 403 code
 // 2013). The vision bridge must deliver images as base64 for these targets,
 // both in the describe self-loop and in the rerouted payload.
-const CLAUDE_WIRE_PROVIDERS = new Set<string>(
-  Object.entries(REGISTRY)
-    .filter(([, entry]) => entry.format === "claude")
-    .map(([id]) => id.toLowerCase())
-);
-
 /**
  * True when `provider/model` targets a Claude-Messages wire format backend
  * that cannot ingest remote image URLs and needs base64 instead.

@@ -349,3 +349,38 @@ test("memory health endpoint requires management authentication", () => {
   assert.ok(content.includes("const authError = await requireManagementAuth(request);"));
   assert.ok(content.includes("if (authError) return authError;"));
 });
+
+test("provider-nodes mutating endpoints require management authentication", () => {
+  const routePath = "src/app/api/provider-nodes/route.ts";
+  const content = fs.readFileSync(routePath, "utf8");
+  assert.ok(content.includes('from "@/lib/api/requireManagementAuth"'));
+  assert.ok(content.includes("const authError = await requireManagementAuth(request);"));
+
+  const idRoutePath = "src/app/api/provider-nodes/[id]/route.ts";
+  const idContent = fs.readFileSync(idRoutePath, "utf8");
+  assert.ok(idContent.includes('from "@/lib/api/requireManagementAuth"'));
+  const putStart = idContent.indexOf("export async function PUT(");
+  const deleteStart = idContent.indexOf("export async function DELETE(");
+  assert.ok(putStart >= 0 && deleteStart >= 0);
+  const putBody = idContent.slice(putStart, deleteStart);
+  const deleteBody = idContent.slice(deleteStart);
+  assert.ok(putBody.includes("const authError = await requireManagementAuth(request);"));
+  assert.ok(deleteBody.includes("const authError = await requireManagementAuth(request);"));
+});
+
+test("jobs mutating endpoints require management authentication", () => {
+  const jobRoutes = [
+    "src/app/api/jobs/[id]/disable/route.ts",
+    "src/app/api/jobs/[id]/enable/route.ts",
+    "src/app/api/jobs/[id]/run-now/route.ts",
+  ];
+  for (const routePath of jobRoutes) {
+    const content = fs.readFileSync(routePath, "utf8");
+    assert.ok(content.includes('from "@/lib/api/requireManagementAuth"'), routePath);
+    assert.ok(
+      content.includes("const authError = await requireManagementAuth(request);"),
+      routePath
+    );
+    assert.ok(content.includes("if (authError) return authError;"), routePath);
+  }
+});

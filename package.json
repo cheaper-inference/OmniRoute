@@ -99,6 +99,7 @@
     "dev:candidate": "node scripts/dev/candidate.mjs",
     "prebuild:docs": "node scripts/docs/gen-openapi-module.mjs",
     "gen:provider-reference": "bun scripts/docs/gen-provider-reference.ts",
+    "gen:provider-metadata": "bun scripts/build/gen-provider-metadata.ts",
     "gen:i18n-routes": "node scripts/i18n/generate-route-namespaces.mjs",
     "bench:compression": "bun scripts/compression/benchmark.ts",
     "bench:heap-body": "node --expose-gc --import tsx/esm scripts/perf/request-body-heap.ts",

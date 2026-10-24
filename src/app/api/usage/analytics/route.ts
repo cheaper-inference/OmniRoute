@@ -10,17 +10,18 @@ import {
   buildPresetUnifiedSource,
   getUsageSummary,
   getDailyUsage,
-  getDailyCostRows,
+  getModelUsageMatrixRows,
   getHeatmapRows,
-  getModelUsageRows,
-  getProviderCostRows,
-  getProviderUsageRows,
+  deriveDailyCostRows,
+  deriveModelUsageRows,
+  deriveProviderCostRows,
+  deriveProviderUsageRows,
+  deriveServiceTierUsageRows,
   getAccountCostRows,
   getAccountUsageRows,
   getApiKeyUsageRows,
   getApiKeyTotalsRows,
   type ApiKeyTotalsRow,
-  getServiceTierUsageRows,
   getApiKeyMetadataRows,
   getWeeklyPatternRows,
   getPresetCostModelRows,
@@ -376,20 +377,15 @@ function computeUsageRowCost(
   const serviceTier = normalizeServiceTier(row.serviceTier ?? row.service_tier);
   const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
   const storedCost = toNumber(row.storedCost ?? row.stored_cost);
+  const aggregateOnlyCost = isAggregated
+    ? toNumber(row.aggregatedStoredCost ?? row.storedCost ?? 0)
+    : 0;
+  const rawStoredCost = isAggregated
+    ? toNumber(row.rawStoredCost ?? 0)
+    : storedCost;
 
   // Billed-cost views show flat-rate providers as $0, whatever was stored.
   if (flatRateAsZero && isFlatRateProvider(provider)) return 0;
-  if (isAggregated) {
-    // New rollups preserve the exact API-equivalent value calculated before
-    // cache/reasoning token dimensions are discarded. Legacy zero-cost rows
-    // fall through to the best available input/output-token estimate.
-    if (storedCost > 0) return storedCost;
-  }
-
-  // Raw rows: `storedCost` is the provider-reported exact cost of the rows that
-  // carry one, and the `cost*Tokens` sums exclude those rows' tokens, so a
-  // request with a reported cost is never priced a second time from its tokens.
-  const rawStoredCost = isAggregated ? 0 : storedCost;
   const pricing = resolveModelPricing(
     pricingByProvider,
     providerAliasMap,
@@ -399,9 +395,10 @@ function computeUsageRowCost(
     serviceTier,
     pricingContext
   );
-  if (!pricing) return rawStoredCost;
+  if (!pricing) return aggregateOnlyCost + rawStoredCost;
 
   return (
+    aggregateOnlyCost +
     rawStoredCost +
     computeCostFromPricing(
       pricing,
@@ -632,7 +629,8 @@ async function computeAnalyticsResponse(
     const summaryRow = getUsageSummary(unifiedSource, unifiedParams) as Record<string, unknown>;
 
     const dailyRows = getDailyUsage(unifiedSource, unifiedParams) as UsageRows;
-    const dailyCostRows = getDailyCostRows(unifiedSource, unifiedParams) as UsageRows;
+    const matrixRows = getModelUsageMatrixRows(unifiedSource, unifiedParams);
+    const dailyCostRows = deriveDailyCostRows(matrixRows) as UsageRows;
 
     const heatmapStart = new Date();
     heatmapStart.setUTCDate(heatmapStart.getUTCDate() - 364);
@@ -656,11 +654,11 @@ async function computeAnalyticsResponse(
 
     const heatmapRows = getHeatmapRows(heatmapConditions, heatmapParams) as UsageRows;
 
-    const modelRows = getModelUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const modelRows = deriveModelUsageRows(matrixRows) as UsageRows;
 
-    const providerCostRows = getProviderCostRows(unifiedSource, unifiedParams) as UsageRows;
+    const providerCostRows = deriveProviderCostRows(matrixRows) as UsageRows;
 
-    const providerRows = getProviderUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const providerRows = deriveProviderUsageRows(matrixRows) as UsageRows;
 
     const accountCostWhereClause = whereClause
       .replace(/timestamp/g, "usage_history.timestamp")
@@ -671,7 +669,7 @@ async function computeAnalyticsResponse(
 
     const apiKeyRows = getApiKeyUsageRows(apiKeyWhereClause, params) as UsageRows;
 
-    const serviceTierRows = getServiceTierUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const serviceTierRows = deriveServiceTierUsageRows(matrixRows) as UsageRows;
 
     const apiKeyMetadataRows = getApiKeyMetadataRows(apiKeyWhereClause, params) as UsageRows;
 
