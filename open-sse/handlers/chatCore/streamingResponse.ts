@@ -860,6 +860,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         ? { attempted: false, succeeded: false, execution: null, error: null, recoveryBody: null }
         : await recoverAnthropicThinkingSignature({
             provider,
+            model: currentModel,
             statusCode,
             message,
             body: translatedBody,

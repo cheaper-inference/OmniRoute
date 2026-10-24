@@ -9,7 +9,6 @@ import {
   applyKimiCodingThinking,
   createDefaultClaudeCacheControl,
 } from "../helpers/claudeHelper.ts";
-import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
 import { restoreClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
 import {
   getDefaultThinkingBudget,
@@ -647,7 +646,8 @@ function getContentBlocksFromMessage(
     // A nested `cache_control` is invalid inside `tool_result.content`; hoist it
     // onto the tool_result block. Also accept a marker already hoisted onto the
     // tool MESSAGE by filterToOpenAIFormat (openai-compat passthrough path).
-    const { content: hoistedContent, cacheControl } = hoistNestedToolResultCacheControl(toolContent);
+    const { content: hoistedContent, cacheControl } =
+      hoistNestedToolResultCacheControl(toolContent);
     const toolResultCacheControl =
       msg.cache_control !== undefined ? msg.cache_control : cacheControl;
     blocks.push({
@@ -756,10 +756,9 @@ function getContentBlocksFromMessage(
           if (part.type === "redacted_thinking" && part.data === "") {
             continue; // drop — same: empty data from non-Anthropic provider
           }
-          blocks.push({
-            ...part,
-            signature: part.signature || DEFAULT_THINKING_CLAUDE_SIGNATURE,
-          });
+          // Never fabricate a signature: the DEFAULT blob is a real encrypted thought from an
+          // unrelated session and Claude decrypts it as its own reasoning.
+          blocks.push({ ...part });
         } else if (part.type === "tool_use") {
           // Tool name already has prefix from tool declarations, keep as-is
           // CRITICAL: Skip tool_use blocks with empty name (causes Claude 400 error)
@@ -848,17 +847,10 @@ function getContentBlocksFromMessage(
     }
     if (isKimiCoding && typeof msg.reasoning_content === "string" && !hasThinkingBlock) {
       blocks.unshift({ type: "thinking", thinking: msg.reasoning_content });
-    } else if (
-      msg.reasoning_content &&
-      thinkingEnabledForRequest &&
-      hasToolUseBlock &&
-      !hasThinkingBlock
-    ) {
-      blocks.unshift({
-        type: "redacted_thinking",
-        data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-      });
     }
+    // A store miss injects nothing: adaptive thinking has no precursor requirement, and
+    // prepareClaudeRequest disables manual thinking when the final tool turn has no
+    // genuine block.
   }
 
   return blocks;

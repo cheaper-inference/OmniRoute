@@ -270,7 +270,7 @@ test("Responses client: end-to-end claude→responses stream then responses→cl
   assert.equal(toolUse?.id, "toolu_02RESP");
 });
 
-test("different model: nothing is restored (falls back to the #5312 placeholder)", () => {
+test("different model: nothing is restored and nothing is injected", () => {
   streamClaudeToChat(claudeToolTurnEvents());
 
   const turn = assistantTurn(translateChatTurn(chatHistory(), { model: "claude-opus-4-5" }));
@@ -278,10 +278,12 @@ test("different model: nothing is restored (falls back to the #5312 placeholder)
     turn.content.some((block) => block.type === "thinking"),
     false
   );
-  assert.deepEqual(stripCacheControl(turn.content[0]), {
-    type: "redacted_thinking",
-    data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-  });
+  assert.equal(turn.content[0].type, "tool_use");
+  assert.equal(
+    JSON.stringify(turn).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE),
+    false,
+    "the foreign placeholder blob is never injected"
+  );
 });
 
 test("dated response model vs undated request alias still binds to the same model", () => {
@@ -398,12 +400,9 @@ test("signature recovery downgrades a server-restored block in the active cycle 
   };
   assert.notEqual(recovered, body, "recovery produces a new body");
   const turn = assistantTurn(recovered);
-  assert.deepEqual(stripCacheControl(turn.content[0]), {
-    type: "redacted_thinking",
-    data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-  });
+  assert.equal(turn.content[0].type, "tool_use", "no placeholder is substituted");
   assert.equal(
-    turn.content.some((block) => block.type === "thinking"),
+    turn.content.some((block) => block.type === "thinking" || block.type === "redacted_thinking"),
     false
   );
   assert.equal(

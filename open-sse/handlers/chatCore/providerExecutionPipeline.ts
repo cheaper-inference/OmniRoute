@@ -515,6 +515,7 @@ export async function runProviderExecutionPipeline(
       // The caller receives it only for the explicit signature-validation 400.
       const signatureFailure = isAnthropicThinkingSignatureError({
         provider: target.provider,
+        model: wire.currentModel,
         status,
         message: signatureMessage,
       });
@@ -529,6 +530,7 @@ export async function runProviderExecutionPipeline(
       try {
         signatureRecovery = await recoverAnthropicThinkingSignature({
           provider: target.provider,
+          model: wire.currentModel,
           statusCode: status,
           message: signatureMessage,
           body: wire.body,

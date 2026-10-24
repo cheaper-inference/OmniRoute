@@ -2,6 +2,11 @@ import { FORMATS } from "../../translator/formats.ts";
 import { isVerifiedNativeCodexRequest } from "../../config/codexIdentity.ts";
 import { isClaudeCodeCompatibleProvider } from "../../services/claudeCodeCompatible.ts";
 import { downgradeRestoredClaudeThinking } from "../../services/claudeThinkingStore.ts";
+import {
+  disableManualThinkingWithoutFinalBlock,
+  type ClaudeRequestBody,
+} from "../../translator/helpers/claudeHelper.ts";
+import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { isResponsesEndpointPath } from "../../utils/responsesEndpoint.ts";
 import { mergeClientAnthropicBeta } from "../../config/anthropicHeaders.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
@@ -160,7 +165,7 @@ export function shouldUseNativeOpenAICompatibleResponsesPassthrough({
  */
 export function redactPassthroughThinkingSignatures(
   messages: unknown,
-  _signature: string
+  _signature?: string
 ): unknown {
   // Signed blocks stay verbatim; only blocks Anthropic never issued are dropped (#12917).
   return dropUnsignedPassthroughThinkingBlocks(messages);
@@ -227,6 +232,7 @@ export function dropUnsignedPassthroughThinkingBlocks(messages: unknown): unknow
 
 type ThinkingSignatureError = {
   provider?: string | null;
+  model?: string | null;
   status?: number | null;
   message?: string | null;
 };
@@ -254,12 +260,19 @@ function hasBlock(message: MessageLike | null | undefined, type: string): boolea
  */
 export function isAnthropicThinkingSignatureError({
   provider,
+  model,
   status,
   message,
 }: ThinkingSignatureError): boolean {
+  // Same upstream set that prepareClaudeRequest treats as signature-validating: Anthropic
+  // itself, Vertex Claude, and any registry model whose targetFormat is "claude" (GitHub
+  // Copilot claude-*, opencode-go claude-target models, ...).
   const isAnthropicTarget =
     provider === "claude" ||
-    (typeof provider === "string" && provider.startsWith("anthropic-compatible-"));
+    provider === "vertex" ||
+    provider === "vertex-partner" ||
+    (typeof provider === "string" && provider.startsWith("anthropic-compatible-")) ||
+    (!!provider && !!model && getModelTargetFormat(provider, model) === "claude");
   if (!isAnthropicTarget || status !== 400 || typeof message !== "string") return false;
 
   return /invalid\s+[`'\"]?signature[`'\"]?\s+in\s+[`'\"]?thinking[`'\"]?\s+block/i.test(message);
@@ -334,7 +347,9 @@ export function stripHistoricalThinkingForSignatureRecovery<T>(body: T): T {
   });
 
   if (!changed) return body;
-  return { ...record, messages: recoveredMessages } as T;
+  const recovered = { ...record, messages: recoveredMessages } as ClaudeRequestBody;
+  disableManualThinkingWithoutFinalBlock(recovered);
+  return recovered as T;
 }
 
 type SignatureRecoveryExecution<T> = {
@@ -346,6 +361,7 @@ type SignatureRecoveryExecution<T> = {
 /** Execute the normal body once, then perform at most one exact-error recovery. */
 export async function executeWithAnthropicThinkingSignatureRecovery<T>(args: {
   provider?: string | null;
+  model?: string | null;
   body: unknown;
   execute: (body: unknown) => Promise<T>;
   getError: (
@@ -361,6 +377,7 @@ export async function executeWithAnthropicThinkingSignatureRecovery<T>(args: {
     !failure ||
     !isAnthropicThinkingSignatureError({
       provider: args.provider,
+      model: args.model,
       status: failure.status,
       message: failure.message,
     })
