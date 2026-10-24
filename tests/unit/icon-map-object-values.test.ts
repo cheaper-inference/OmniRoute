@@ -62,10 +62,14 @@ export function iconSlotExpressions(src: string): string[] {
   const hops: string[] = [];
   for (const m of src.matchAll(/\b(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*([^;\n]+)/g)) {
     const [, name, expr] = m;
-    if (slots.some((s) => new RegExp(`\\b${name.replace(/\$/g, "\\$")}\\b`).test(s)))
-      hops.push(expr);
+    if (slots.some((s) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(s))) hops.push(expr);
   }
   return [...slots, ...hops];
+}
+
+/** Escapes every RegExp metacharacter so an identifier is matched literally. */
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /** `const NAME… = { key: "value", … }` objects whose NAME is read by an icon slot. */
@@ -74,7 +78,7 @@ export function iconLookupValues(src: string): Array<{ object: string; value: st
   const found: Array<{ object: string; value: string }> = [];
   for (const m of src.matchAll(/\bconst\s+([A-Za-z_$][\w$]*)\s*(?::[^=]+)?=\s*\{/g)) {
     const name = m[1];
-    if (!slots.some((s) => new RegExp(`\\b${name.replace(/\$/g, "\\$")}\\b`).test(s))) continue;
+    if (!slots.some((s) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(s))) continue;
     const body = braceBody(src, (m.index ?? 0) + m[0].length - 1);
     if (body == null) continue;
     const flat = !/\{/.test(body);
