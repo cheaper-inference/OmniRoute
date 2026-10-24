@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
 import {
+  buildChatGptWebIntegrityResolutionSource,
   collectChatGptWebFirstPartyAssetCandidates,
   executeChatGptWebFirstPartyTurn,
   extractChatGptWebFirstPartyAssetReferences,
@@ -250,5 +251,121 @@ describe("ChatGPT Web first-party request execution", () => {
     } finally {
       restoreBridge();
     }
+  });
+});
+
+describe("ChatGPT Web integrity module resolution", () => {
+  const names = { resolveIntegrityModule: "lXE", resolveIntegrity: "f" };
+
+  interface ResolutionBindings {
+    resolveIntegrity(proof: unknown): Promise<unknown>;
+    loadIntegrityModule(): Promise<Record<string, unknown>>;
+  }
+
+  let chunkImporterCount = 0;
+
+  // The generated snippet runs inside the bridge module, so the test evaluates it as a real
+  // ES module with the same two bindings the bridge provides: `names` and `importChunk`.
+  async function runResolution(
+    source: string,
+    importChunk: (url: string) => Promise<Record<string, unknown>>
+  ): Promise<ResolutionBindings> {
+    chunkImporterCount += 1;
+    const importerKey = `__chatGptTestImportChunk${chunkImporterCount}`;
+    const root = globalThis as typeof globalThis & Record<string, unknown>;
+    root[importerKey] = importChunk;
+    const code = [
+      `const names = ${JSON.stringify(names)};`,
+      `const importChunk = url => globalThis[${JSON.stringify(importerKey)}](url);`,
+      source,
+      `export { resolveIntegrity, loadIntegrityModule };`,
+    ].join("\n");
+    const url = `data:text/javascript;base64,${Buffer.from(code).toString("base64")}`;
+    return (await import(url)) as ResolutionBindings;
+  }
+
+  test("requires the module through the page runtime instead of stubbing its dependencies", async () => {
+    const resolveIntegrityHandler = async (proof: unknown) => ({ proof });
+    const imported: string[] = [];
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/plain-chunk.js",
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+    ]);
+
+    // No minified dependency id is pinned anymore: the previous shim hardcoded the uuid
+    // helper id ("TI"), which chatgpt.com has since renamed, failing every turn.
+    assert.doesNotMatch(source, /crypto\.randomUUID/);
+    // Top-level await would settle after the installer's `script.onload` check rejects.
+    assert.doesNotMatch(source, /^\s*await /);
+
+    const bindings = await runResolution(source, async (url) => {
+      imported.push(url);
+      if (url.endsWith("runtime-chunk.js")) {
+        return {
+          __webpack_require__: (id: string) =>
+            id === "lXE" ? { f: resolveIntegrityHandler } : { f: () => "wrong module" },
+        };
+      }
+      return { __webpack_modules__: { lXE: () => ({ f: () => "stubbed" }) } };
+    });
+
+    assert.deepEqual(await bindings.resolveIntegrity("proof"), { proof: "proof" });
+    assert.deepEqual(imported, [
+      "https://chatgpt.com/cdn/assets/plain-chunk.js",
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+    ]);
+  });
+
+  test("skips chunks that fail to import and keeps looking for the runtime", async () => {
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/broken.js",
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+    ]);
+
+    const bindings = await runResolution(source, async (url) => {
+      if (url.endsWith("broken.js")) throw new Error("chunk failed to evaluate");
+      return { __webpack_require__: () => ({ f: () => "headers" }) };
+    });
+
+    assert.equal(await bindings.resolveIntegrity("proof"), "headers");
+  });
+
+  test("names the module id when no loaded chunk exposes the page runtime", async () => {
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/plain-chunk.js",
+    ]);
+    const bindings = await runResolution(source, async () => ({ __webpack_modules__: {} }));
+
+    await assert.rejects(
+      bindings.resolveIntegrity("proof"),
+      /integrity module lXE is not registered in the page runtime \(1 chunks loaded\)/
+    );
+  });
+
+  test("rejects a resolved module that does not export the resolver", async () => {
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+    ]);
+    const bindings = await runResolution(source, async () => ({
+      __webpack_require__: () => ({ a: () => "other" }),
+    }));
+
+    await assert.rejects(bindings.resolveIntegrity("proof"), /integrity resolver is unavailable/);
+  });
+
+  test("drops non-first-party and duplicate chunk URLs", () => {
+    const source = buildChatGptWebIntegrityResolutionSource([
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+      "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+      "https://evil.example/cdn/assets/runtime-chunk.js",
+      "https://chatgpt.com/cdn/assets/not-a-chunk.css",
+    ]);
+
+    assert.equal(
+      source.match(/"https:\/\/chatgpt\.com\/cdn\/assets\/runtime-chunk\.js"/g)?.length,
+      1
+    );
+    assert.doesNotMatch(source, /evil\.example/);
+    assert.doesNotMatch(source, /not-a-chunk\.css/);
   });
 });

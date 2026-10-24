@@ -408,33 +408,79 @@ async function discoverFirstPartyModule(page: Page): Promise<FirstPartyModuleRes
   });
 }
 
+/** Keep only first-party chunk URLs, deduplicated and in page order. */
+function integrityCandidateChunkUrls(candidateAssetUrls: readonly string[]): string[] {
+  const accepted: string[] = [];
+  for (const candidate of candidateAssetUrls) {
+    try {
+      const url = requireChatGptAssetUrl(candidate);
+      if (!accepted.includes(url)) accepted.push(url);
+    } catch {
+      continue;
+    }
+  }
+  return accepted;
+}
+
+/**
+ * Resolve ChatGPT's Sentinel integrity module through the page's own Rspack runtime.
+ *
+ * The integrity factory is a webpack-style `(module, exports, require)` function whose
+ * `require` resolves minified module ids. Those ids are assigned per deployment: the uuid
+ * helper this factory calls already moved from `TI` to `DD`, and the module moved to a
+ * different chunk with it. Hand-instantiating the factory against a pinned id map
+ * therefore breaks on any chatgpt.com rebuild that reshuffles the module graph.
+ *
+ * The runtime chunk instead exports `__webpack_require__` with every loaded chunk's modules
+ * registered, so requiring the module through it executes ChatGPT's own code with ChatGPT's
+ * own ids — no id is pinned here and the factory's dependencies are never stubbed.
+ *
+ * Resolution stays lazy on purpose: the bridge module must not use top-level await, because
+ * the installer's `script.onload` check runs before a module script's pending top-level
+ * await settles and would reject a bridge that is in fact initializing.
+ *
+ * Expects `names` (the discovered contract) and `importChunk(url)` in scope.
+ */
+export function buildChatGptWebIntegrityResolutionSource(
+  candidateAssetUrls: readonly string[]
+): string {
+  const chunkUrlsLiteral = JSON.stringify(integrityCandidateChunkUrls(candidateAssetUrls));
+  return [
+    `const integrityChunkUrls = ${chunkUrlsLiteral};`,
+    `const loadIntegrityModule = async () => {`,
+    `for (const url of integrityChunkUrls) {`,
+    `let namespace;`,
+    `try { namespace = await importChunk(url); } catch { continue; }`,
+    `const runtimeRequire = namespace?.__webpack_require__;`,
+    `if (typeof runtimeRequire !== "function") continue;`,
+    `let integrityModule;`,
+    `try { integrityModule = runtimeRequire(names.resolveIntegrityModule); } catch { integrityModule = undefined; }`,
+    `if (integrityModule) return integrityModule;`,
+    `}`,
+    `throw new Error("ChatGPT integrity module " + names.resolveIntegrityModule + " is not registered in the page runtime (" + integrityChunkUrls.length + " chunks loaded)");`,
+    `};`,
+    `const resolveIntegrity = async proof => {`,
+    `const integrityModule = await loadIntegrityModule();`,
+    `const handler = integrityModule[names.resolveIntegrity];`,
+    `if (typeof handler !== "function") throw new Error("ChatGPT integrity resolver is unavailable");`,
+    `return handler(proof);`,
+    `};`,
+  ].join("");
+}
+
 function buildBridgeModuleSource(
   assetUrl: string,
-  contract: ChatGptWebFirstPartyModuleContract
+  contract: ChatGptWebFirstPartyModuleContract,
+  candidateAssetUrls: readonly string[] = []
 ): string {
   const urlLiteral = JSON.stringify(requireChatGptAssetUrl(assetUrl));
   const contractLiteral = JSON.stringify(contract);
   const keyLiteral = JSON.stringify(FIRST_PARTY_BRIDGE_KEY);
   if (contract.resolveIntegrity && contract.resolveIntegrityModule) {
     return [
-      `import * as upstream from ${urlLiteral};`,
       `const names = ${contractLiteral};`,
-      `const modules = upstream.__webpack_modules__;`,
-      `const factory = modules?.[names.resolveIntegrityModule];`,
-      `if (typeof factory !== "function") throw new Error("ChatGPT integrity module factory is unavailable");`,
-      `const exports = {};`,
-      `const requireShim = id => {`,
-      `if (id === "TI") return { a: () => crypto.randomUUID() };`,
-      `throw new Error("Unsupported ChatGPT integrity dependency: " + id);`,
-      `};`,
-      `requireShim.d = (target, definitions) => {`,
-      `for (const [name, getter] of Object.entries(definitions)) {`,
-      `Object.defineProperty(target, name, { enumerable: true, get: getter });`,
-      `}`,
-      `};`,
-      `factory({}, exports, requireShim);`,
-      `const resolveIntegrity = exports[names.resolveIntegrity];`,
-      `if (typeof resolveIntegrity !== "function") throw new Error("ChatGPT integrity resolver is unavailable");`,
+      `const importChunk = url => import(url);`,
+      buildChatGptWebIntegrityResolutionSource(candidateAssetUrls),
       `const sessionPromise = fetch("/api/auth/session", { credentials: "include" }).then(async response => {`,
       `if (!response.ok) throw new Error("ChatGPT browser session is unavailable");`,
       `return response.json();`,
@@ -554,7 +600,13 @@ async function ensureFirstPartyBridge(page: Page): Promise<void> {
   if (ready) return;
 
   const { assetUrl, contract } = await discoverFirstPartyModule(page);
-  const moduleSource = buildBridgeModuleSource(assetUrl, contract);
+  // The integrity module is required through the page's own runtime, so whichever chunk
+  // exposes `__webpack_require__` has to travel with the bridge source.
+  const candidateAssetUrls =
+    contract.resolveIntegrity && contract.resolveIntegrityModule
+      ? await collectPageAssetCandidates(page)
+      : [];
+  const moduleSource = buildBridgeModuleSource(assetUrl, contract, candidateAssetUrls);
   const collected = collectBridgeFailureSignals(page, assetUrl);
   try {
     await page.evaluate(
