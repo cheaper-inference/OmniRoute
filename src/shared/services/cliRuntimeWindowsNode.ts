@@ -1,4 +1,5 @@
 import fsSync from "fs";
+import os from "os";
 import path from "path";
 
 /**
@@ -17,13 +18,16 @@ type ValidateEnvPath = (value: string | undefined, allowedParents: string[]) => 
 const winPath = path.win32;
 const PROGRAM_FILES_PARENTS = ["C:\\Program Files", "C:\\Program Files (x86)"];
 
+// #17157: os.platform() is read at runtime; a bare process.platform can be folded by the bundler.
+const isWindows = (): boolean => os.platform() === "win32";
+
 /**
  * Directories where `npm install -g` drops `.cmd` shims on a stock Windows Node
  * MSI (`%ProgramFiles%\nodejs`, plus the x86 twin). Already trusted for
  * containment, but historically never enumerated as known install paths.
  */
 export const getWindowsSystemNodeBinDirs = (validateEnvPath: ValidateEnvPath): string[] => {
-  if (process.platform !== "win32") return [];
+  if (!isWindows()) return [];
 
   const roots = [
     validateEnvPath(process.env.ProgramFiles, PROGRAM_FILES_PARENTS),

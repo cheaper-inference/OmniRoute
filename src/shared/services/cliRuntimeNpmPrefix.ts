@@ -1,3 +1,4 @@
+import os from "os";
 import path from "path";
 import { execFileSync } from "child_process";
 
@@ -14,7 +15,8 @@ const NPM_PREFIX_RETRY_MS = 30_000;
 let _npmGlobalPrefix: string | undefined;
 let _npmGlobalPrefixFailAt = 0;
 
-const isWindows = (): boolean => process.platform === "win32";
+// #17157: os.platform() is read at runtime; a bare process.platform can be folded by the bundler.
+const isWindows = (): boolean => os.platform() === "win32";
 
 /** Test-only: clear prefix success/failure state between cases. */
 export const __resetNpmGlobalPrefixCacheForTests = (): void => {
