@@ -316,15 +316,14 @@ function hasNoSafeThinkingRecovery(content: unknown[]): boolean {
  * Build a one-shot recovery body after Anthropic rejected the thinking block
  * of the LATEST assistant message as modified (see
  * {@link isAnthropicThinkingModifiedError}). Only that one message is
- * touched: a block this store restored is swapped back to the #5312
- * `redacted_thinking` placeholder and forgotten (the same recovery
- * {@link stripHistoricalThinkingForSignatureRecovery} uses); any other
+ * touched: a block this store restored is dropped (forgotten); any other
  * thinking block left in that message — never restored by this store, so
  * either sent by the client or produced by a filtered/truncated upstream
  * turn OmniRoute could not capture faithfully — is dropped outright, since
  * it cannot be resent regardless of how it became unreplayable. A `tool_use`
- * left in the same message keeps a `redacted_thinking` placeholder ahead of
- * it so the turn's structural shape stays valid. Earlier turns and any
+ * left in the same message stays without a precursor thinking block: that is
+ * a valid Anthropic request shape (#17324/#17344 — re-injecting the
+ * fabricated placeholder re-triggers the same 400). Earlier turns and any
  * trailing tool-result messages are untouched. Returns the original body
  * reference when there is nothing safe to recover.
  */
@@ -351,15 +350,13 @@ export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
   // before downgrading stored blocks, which also forgets their cached entries.
   const downgraded = downgradeRestoredClaudeThinking(message.content);
   const base = (downgraded ?? message.content) as unknown[];
-  let content = base.filter((block) => !isThinkingBlock(block));
-
-  const hasToolUse = content.some(
-    (block) =>
-      !!block && typeof block === "object" && (block as { type?: unknown }).type === "tool_use"
-  );
-  if (hasToolUse) {
-    content = [{ type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE }, ...content];
-  }
+  // #17324/#17344: a tool_use turn left with NO thinking block at all is a valid
+  // Anthropic request shape (verified live: assistant[tool_use] + thinking:adaptive →
+  // 200). Re-injecting the fabricated DEFAULT_THINKING_CLAUDE_SIGNATURE blob here
+  // re-creates the exact "latest assistant message cannot be modified" 400 this
+  // recovery exists to escape (the blob never matches what Anthropic actually signed
+  // for those tool_use ids while their cache is warm). Omit the placeholder.
+  const content = base.filter((block) => !isThinkingBlock(block));
 
   const recoveredMessages = messages.slice();
   recoveredMessages[index] = { ...message, content: content as typeof message.content };

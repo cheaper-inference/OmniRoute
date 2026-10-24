@@ -22,8 +22,6 @@
  *   replayable (non-empty signature / data); a partial set would reorder the turn.
  */
 
-import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../config/defaultThinkingSignature.ts";
-
 export type ClaudeSignedThinkingBlock =
   | { type: "thinking"; thinking: string; signature: string }
   | { type: "redacted_thinking"; data: string };
@@ -233,9 +231,10 @@ function forgetEntriesHolding(blocks: unknown[]) {
 /**
  * Signature-recovery fallback: Anthropic rejected a thinking signature. The
  * active tool-use cycle is otherwise preserved verbatim by the recovery, so any
- * block this store restored there is swapped for the pre-restore #5312
- * `redacted_thinking` placeholder and forgotten, so later turns do not replay it
- * again. Returns null when the content holds no server-restored block.
+ * block this store restored there is dropped (forgotten) so later turns do not
+ * replay it again; the remaining turn keeps its valid shape without a fabricated
+ * placeholder (#17324/#17344). Returns null when the content holds no server-restored
+ * block.
  */
 export function downgradeRestoredClaudeThinking(content: unknown): unknown[] | null {
   if (!Array.isArray(content) || entries.size === 0) return null;
@@ -243,18 +242,11 @@ export function downgradeRestoredClaudeThinking(content: unknown): unknown[] | n
   if (restored.length === 0) return null;
 
   forgetEntriesHolding(restored);
-  const kept = content.filter((block) => !restored.includes(block));
-  const hasThinking = kept.some((block) => {
-    const type = (block as Record<string, unknown> | null)?.type;
-    return type === "thinking" || type === "redacted_thinking";
-  });
-  const hasToolUse = kept.some(
-    (block) => (block as Record<string, unknown> | null)?.type === "tool_use"
-  );
-  if (!hasThinking && hasToolUse) {
-    kept.unshift({ type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE });
-  }
-  return kept;
+  // Removed thinking blocks leave the tool_use turn without a precursor — a valid
+  // Anthropic request shape (#17324/#17344: no fabricated placeholder is re-injected;
+  // it never matches what Anthropic signed for those tool_use ids and re-triggers
+  // the "latest assistant message cannot be modified" 400 while their cache is warm).
+  return content.filter((block) => !restored.includes(block));
 }
 
 /**

@@ -6,12 +6,10 @@ const {
   isAnthropicThinkingModifiedError,
   stripLatestAssistantThinkingForModifiedRecovery,
 } = await import("@omniroute/open-sse/handlers/chatCore/passthroughHelpers.ts");
-const { recoverAnthropicThinkingSignature } = await import(
-  "@omniroute/open-sse/handlers/chatCore/thinkingSignatureRecovery.ts"
-);
-const { storeClaudeThinkingBlocks, clearClaudeThinkingStore } = await import(
-  "@omniroute/open-sse/services/claudeThinkingStore.ts"
-);
+const { recoverAnthropicThinkingSignature } =
+  await import("@omniroute/open-sse/handlers/chatCore/thinkingSignatureRecovery.ts");
+const { storeClaudeThinkingBlocks, clearClaudeThinkingStore } =
+  await import("@omniroute/open-sse/services/claudeThinkingStore.ts");
 
 const CANNOT_BE_MODIFIED_MESSAGE =
   "messages.5.content.23: `thinking` or `redacted_thinking` blocks in the latest " +
@@ -103,35 +101,35 @@ test("Anthropic thinking-modified recovery contract", async (t) => {
     }
   );
 
-  await t.test(
-    "keeps a structurally valid placeholder ahead of tool_use in the latest message",
-    () => {
-      const body = {
-        messages: [
-          { role: "user", content: [{ type: "text", text: "go" }] },
-          {
-            role: "assistant",
-            content: [
-              { type: "thinking", thinking: "cut off", signature: "STALE" },
-              { type: "tool_use", id: "toolu_1", name: "Bash", input: {} },
-            ],
-          },
-        ],
-      };
+  await t.test("leaves tool_use in the latest message without a fabricated placeholder", () => {
+    const body = {
+      messages: [
+        { role: "user", content: [{ type: "text", text: "go" }] },
+        {
+          role: "assistant",
+          content: [
+            { type: "thinking", thinking: "cut off", signature: "STALE" },
+            { type: "tool_use", id: "toolu_1", name: "Bash", input: {} },
+          ],
+        },
+      ],
+    };
 
-      const recovered = stripLatestAssistantThinkingForModifiedRecovery(body);
-      assert.notEqual(recovered, body);
-      const types = recovered.messages[1].content.map((block: { type: string }) => block.type);
-      assert.deepEqual(types, ["redacted_thinking", "tool_use"]);
-      assert.deepEqual(
-        recovered.messages[1].content[1],
-        body.messages[1].content[1],
-        "the tool_use block itself is untouched"
-      );
-    }
-  );
+    const recovered = stripLatestAssistantThinkingForModifiedRecovery(body);
+    assert.notEqual(recovered, body);
+    const types = recovered.messages[1].content.map((block: { type: string }) => block.type);
+    // #17324/#17344: a tool_use turn with NO thinking precursor is a valid
+    // Anthropic request shape (verified live with thinking:adaptive → 200);
+    // re-injecting the fabricated placeholder re-triggers the same 400.
+    assert.deepEqual(types, ["tool_use"]);
+    assert.deepEqual(
+      recovered.messages[1].content[0],
+      body.messages[1].content[1],
+      "the tool_use block itself is untouched"
+    );
+  });
 
-  await t.test("a store-restored block in the latest message is downgraded, not just dropped", () => {
+  await t.test("a store-restored block in the latest message is dropped and forgotten", () => {
     clearClaudeThinkingStore();
     const stored = storeClaudeThinkingBlocks({
       toolUseIds: ["toolu_restored"],
@@ -158,7 +156,7 @@ test("Anthropic thinking-modified recovery contract", async (t) => {
     assert.notEqual(recovered, body);
     assert.deepEqual(
       recovered.messages[1].content.map((block: { type: string }) => block.type),
-      ["redacted_thinking", "tool_use"]
+      ["tool_use"]
     );
     clearClaudeThinkingStore();
   });

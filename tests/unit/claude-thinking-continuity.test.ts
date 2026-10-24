@@ -388,7 +388,7 @@ test("expired entries are not restored", () => {
   }
 });
 
-test("signature recovery downgrades a server-restored block in the active cycle and forgets it", () => {
+test("signature recovery drops a server-restored block in the active cycle and forgets it", () => {
   streamClaudeToChat(claudeToolTurnEvents());
   const body = translateChatTurn(chatHistory());
   assert.equal(assistantTurn(body).content[0].type, "thinking");
@@ -398,13 +398,22 @@ test("signature recovery downgrades a server-restored block in the active cycle 
   };
   assert.notEqual(recovered, body, "recovery produces a new body");
   const turn = assistantTurn(recovered);
-  assert.deepEqual(stripCacheControl(turn.content[0]), {
-    type: "redacted_thinking",
-    data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-  });
+  // #17324/#17344: the restored block is dropped outright — no fabricated
+  // placeholder is re-injected (it re-triggers the same "cannot be modified"
+  // 400). A tool_use turn without a thinking precursor is a valid request shape.
+  assert.deepEqual(
+    stripCacheControl(turn.content[0]),
+    { type: "tool_use", id: "toolu_01ABC", name: "proxy_read_file", input: { path: "a.ts" } },
+    "recovered turn keeps the tool_use and nothing fabricated before it"
+  );
   assert.equal(
     turn.content.some((block) => block.type === "thinking"),
     false
+  );
+  assert.equal(
+    turn.content.some((block) => block.type === "redacted_thinking"),
+    false,
+    "no fabricated redacted_thinking placeholder after recovery"
   );
   assert.equal(
     store.restoreClaudeThinkingBlocks({

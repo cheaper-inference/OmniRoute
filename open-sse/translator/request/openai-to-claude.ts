@@ -364,7 +364,8 @@ export function openaiToClaudeRequest(
           model,
           disabled: credentials?._videoTranscriptSensitive === true,
         },
-        pendingToolUseIds
+        pendingToolUseIds,
+        result.thinking && typeof result.thinking.type === "string" ? result.thinking.type : undefined
       );
       if (newRole === "assistant") {
         pendingToolUseIds = blocks.filter((b) => b.type === "tool_use").map((b) => String(b.id));
@@ -601,8 +602,14 @@ function getContentBlocksFromMessage(
   disableToolPrefix = false,
   thinkingEnabledForRequest = false,
   isKimiCoding = false,
-  thinkingBinding: { provider?: unknown; model?: unknown; disabled?: boolean } = {},
-  pendingToolUseIds: string[] = []
+  thinkingBinding: {
+    provider?: unknown;
+    model?: unknown;
+    disabled?: boolean;
+    connectionId?: unknown;
+  } = {},
+  pendingToolUseIds: string[] = [],
+  thinkingTypeForRequest: string | undefined = undefined
 ) {
   const blocks: ClaudeContentBlock[] = [];
 
@@ -810,10 +817,21 @@ function getContentBlocksFromMessage(
       hasToolUseBlock &&
       !hasThinkingBlock
     ) {
-      blocks.unshift({
-        type: "redacted_thinking",
-        data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-      });
+      // #17324/#17344: only inject the #5312 `redacted_thinking` placeholder when the
+      // outbound request uses MANUAL extended thinking (`type:"enabled"`, budget_tokens)
+      // — the mode #5312 was VPS-validated on. For ADAPTIVE thinking (Opus 4.7+/Sonnet-5/
+      // Opus 5.x, reached via `reasoning_effort`), Anthropic accepts a tool_use turn with
+      // NO thinking block at all (verified live: assistant[tool_use] + thinking:adaptive
+      // → 200), while injecting the fabricated DEFAULT_THINKING_CLAUDE_SIGNATURE blob
+      // breaks prompt-cache block-equality for tool_use ids whose genuine signed blocks
+      // are still warm in Anthropic's cache → 400 "latest assistant message cannot be
+      // modified" (#17324).
+      if (thinkingTypeForRequest === "enabled") {
+        blocks.unshift({
+          type: "redacted_thinking",
+          data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
+        });
+      }
     }
   }
 

@@ -36,12 +36,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { openaiToClaudeRequest } = await import(
-  "../../open-sse/translator/request/openai-to-claude.ts"
-);
-const { DEFAULT_THINKING_CLAUDE_SIGNATURE } = await import(
-  "../../open-sse/config/defaultThinkingSignature.ts"
-);
+const { openaiToClaudeRequest } =
+  await import("../../open-sse/translator/request/openai-to-claude.ts");
+const { DEFAULT_THINKING_CLAUDE_SIGNATURE } =
+  await import("../../open-sse/config/defaultThinkingSignature.ts");
 
 test("#5945: reasoning_content on a plain-text assistant turn (no tool_use, thinking not requested) yields NO redacted_thinking/thinking block", () => {
   const result = openaiToClaudeRequest(
@@ -154,6 +152,75 @@ test("#5312: reasoning_content + tool_use + thinking ENABLED still gets a signat
     assistant.content.some((b) => b.type === "tool_use"),
     "tool_use block must still be present"
   );
+});
+
+test("#17324: reasoning_content + tool_use + ADAPTIVE thinking (reasoning_effort on an adaptive-only model) emits NO fabricated redacted_thinking", () => {
+  const result = openaiToClaudeRequest(
+    "claude-opus-5-5",
+    {
+      reasoning_effort: "high",
+      messages: [
+        { role: "user", content: "hello" },
+        {
+          role: "assistant",
+          reasoning_content: "thinking about it",
+          tool_calls: [
+            {
+              id: "call_1",
+              type: "function",
+              function: { name: "get_weather", arguments: "{}" },
+            },
+          ],
+        },
+      ],
+    },
+    false
+  );
+
+  const assistant = result.messages.find((m) => m.role === "assistant");
+  assert.ok(assistant, "expected assistant message");
+  // Adaptive thinking must not fabricate a placeholder at all: the fabricated
+  // blob breaks prompt-cache block-equality for tool_use ids whose genuine
+  // signed blocks are still warm in Anthropic's cache → the #17324
+  // "latest assistant message cannot be modified" 400 (verified live: the same
+  // body 400s inside the cache window with the blob, 200s without it).
+  assert.deepEqual(
+    assistant.content.map((b) => b.type),
+    ["tool_use"],
+    "adaptive thinking: no thinking/redacted_thinking block may be fabricated"
+  );
+});
+
+test("#17324: reasoning_content + tool_use + MANUAL thinking (type:enabled, budget_tokens) KEEPS the #5312 placeholder", () => {
+  const result = openaiToClaudeRequest(
+    "claude-sonnet-4-5",
+    {
+      reasoning_effort: "high",
+      messages: [
+        { role: "user", content: "hello" },
+        {
+          role: "assistant",
+          reasoning_content: "thinking about it",
+          tool_calls: [
+            {
+              id: "call_1",
+              type: "function",
+              function: { name: "get_weather", arguments: "{}" },
+            },
+          ],
+        },
+      ],
+    },
+    false
+  );
+
+  const assistant = result.messages.find((m) => m.role === "assistant");
+  assert.ok(assistant, "expected assistant message");
+  // claude-sonnet-4-5 is a manual-budget model: reasoning_effort maps to
+  // thinking:{type:"enabled", budget_tokens}. The #5312 placeholder was
+  // VPS-validated on this shape and stays.
+  assert.equal(assistant.content[0].type, "redacted_thinking");
+  assert.equal(assistant.content[0].data, DEFAULT_THINKING_CLAUDE_SIGNATURE);
 });
 
 test("#5312 RC-D: a REAL thinking signature is preserved verbatim", () => {
