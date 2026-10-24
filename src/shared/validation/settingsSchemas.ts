@@ -349,6 +349,12 @@ export const updateSettingsSchema = z.object({
   disableSessionStickiness: z.boolean().optional(),
   // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
   connectionAwareExpansion: z.boolean().optional(),
+  /**
+   * Keep combo targets whose known output ceiling sits below the request's
+   * max_tokens instead of dropping them. The combo resolver already honours this
+   * key; without it in the schema the only way to set it was per combo.
+   */
+  outputLimitAdvisory: z.boolean().optional(),
   /** Keep eligible combo targets close to the provider-side prompt cache. */
   promptCacheAffinityEnabled: z.boolean().optional(),
   /**
