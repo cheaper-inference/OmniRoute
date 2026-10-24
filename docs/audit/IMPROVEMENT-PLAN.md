@@ -152,6 +152,7 @@ export async function POST(request: Request) {
 - `node --test tests/unit/models-*.test.ts` passed 48/48 tests.
 - `node --test tests/unit/provider-stats-formatters.test.ts` passed 2/2 tests.
 - `npm run typecheck:core` passed with zero errors.
+
 ---
 
 ### QUAL-05 — asRecord/isRecord/toRecord consolidation
@@ -239,19 +240,16 @@ open-sse/services/sorting/poolOrdering.ts
 
 ### PERF-07 — Cache key canonicalization
 
-**Problem:** Same logical filter, different key order → cache miss.
+**Status:** Completed (2026-10-24)
 
-**Fix:**
+**Problem:** Same logical filter with different key order produces different cache keys, causing unnecessary cache misses.
 
-```diff
-src/lib/db/readCache.ts
-const cacheKey = filter && Object.keys(filter).length > 0
--  ? JSON.stringify(filter)
-+  ? JSON.stringify(Object.keys(filter).sort().reduce((obj, key) => { obj[key] = filter[key]; return obj; }, {}))
-   : "all";
-```
+**Implementation:**
 
-**Timeline:** Day 16-17
+- Added `canonicalizeFilterKey(filter?: Record<string, unknown>): string` in `src/lib/db/readCache.ts`.
+- Recursively sorts object keys and handles nested structures, arrays, null/undefined, and empty objects (canonicalized to `"all"`).
+- Applied to all filter-backed read caches: `getCachedProviderConnections`, `getCachedRawProviderConnections`, and `getCachedProviderNodes`.
+- Added comprehensive unit tests in `tests/unit/db-read-cache.test.ts` covering deterministic key generation, nested sorting, and cross-order cache hit verification.
 
 ---
 

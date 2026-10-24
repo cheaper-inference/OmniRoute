@@ -288,3 +288,102 @@ test("getCachedProviderNodes caches results and invalidates on nodes write", asy
   assert.equal(matchingFresh.length, 1);
   assert.equal(matchingFresh[0].name, "Direct Insert Node");
 });
+
+test("PERF-07: canonicalizeFilterKey produces deterministic cache keys regardless of property order", async () => {
+  const { canonicalizeFilterKey } = await import("../../src/lib/db/readCache.ts");
+
+  assert.equal(canonicalizeFilterKey(), "all");
+  assert.equal(canonicalizeFilterKey(undefined), "all");
+  assert.equal(canonicalizeFilterKey({}), "all");
+
+  const key1 = canonicalizeFilterKey({ provider: "openai", status: "active" });
+  const key2 = canonicalizeFilterKey({ status: "active", provider: "openai" });
+  assert.equal(key1, key2);
+  assert.equal(key1, JSON.stringify({ provider: "openai", status: "active" }));
+
+  const nested1 = canonicalizeFilterKey({ outer: { z: 1, a: 2 }, b: 3 });
+  const nested2 = canonicalizeFilterKey({ b: 3, outer: { a: 2, z: 1 } });
+  assert.equal(nested1, nested2);
+  assert.equal(nested1, JSON.stringify({ b: 3, outer: { a: 2, z: 1 } }));
+});
+
+test("PERF-07: getCachedProviderConnections shares cache between different key orderings of identical filters", async () => {
+  const readCache = await import("../../src/lib/db/readCache.ts");
+  const db = core.getDbInstance();
+  const now = new Date().toISOString();
+
+  await providersDb.createProviderConnection({
+    provider: "anthropic",
+    authType: "apikey",
+    name: "Anthropic-1",
+    apiKey: "sk-ant-1",
+  });
+  const read1 = await readCache.getCachedProviderConnections({
+    provider: "anthropic",
+    name: "Anthropic-1",
+  });
+  assert.equal(read1.length, 1);
+
+  db.prepare(
+    `INSERT INTO provider_connections (id, provider, auth_type, name, is_active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  ).run("ant-direct-insert", "anthropic", "apikey", "Anthropic-1", 1, now, now);
+
+  const read2 = await readCache.getCachedProviderConnections({
+    name: "Anthropic-1",
+    provider: "anthropic",
+  });
+  assert.equal(read2.length, 1, "Should hit cache due to canonicalized filter key");
+
+  readCache.invalidateDbCache("connections");
+  const freshRead = await readCache.getCachedProviderConnections({
+    name: "Anthropic-1",
+    provider: "anthropic",
+  });
+  assert.equal(freshRead.length, 2);
+});
+
+test("PERF-07: getCachedRawProviderConnections and getCachedProviderNodes share cache across key orders", async () => {
+  const readCache = await import("../../src/lib/db/readCache.ts");
+  const nodesDb = await import("../../src/lib/db/providers/nodes.ts");
+  const db = core.getDbInstance();
+  const now = new Date().toISOString();
+
+  await nodesDb.createProviderNode({
+    id: "canonical-node-1",
+    type: "openai-compatible",
+    name: "Custom Node",
+    baseUrl: "https://custom.example.com",
+    createdAt: now,
+    updatedAt: now,
+  });
+  const nodes1 = await readCache.getCachedProviderNodes({
+    type: "openai-compatible",
+    name: "Custom Node",
+  });
+  assert.equal(nodes1.length, 1);
+
+  db.prepare(
+    "INSERT INTO provider_nodes (id, type, name, base_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
+  ).run(
+    "canonical-node-direct",
+    "openai-compatible",
+    "Custom Node",
+    "https://direct.example.com",
+    now,
+    now
+  );
+
+  const nodes2 = await readCache.getCachedProviderNodes({
+    name: "Custom Node",
+    type: "openai-compatible",
+  });
+  assert.equal(nodes2.length, 1, "Should hit cache for reversed key ordering");
+
+  readCache.invalidateDbCache("nodes");
+  const freshNodes = await readCache.getCachedProviderNodes({
+    name: "Custom Node",
+    type: "openai-compatible",
+  });
+  assert.equal(freshNodes.length, 2);
+});
