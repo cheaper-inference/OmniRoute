@@ -589,23 +589,15 @@ export class DefaultExecutor extends BaseExecutor {
         headers["x-api-key"] = effectiveKey || credentials.accessToken;
         break;
       case "clinepass": // dual-auth (OAuth or BYOK) — see applyClineAuthHeaders()
+      case "cline":
         // buildClinepassHeaders() (called below via isClinepass=true) is the single
         // source of truth for the OAuth-vs-BYOK decision, keyed off
         // credentials.accessToken — do not re-decide it here off credentials.authType,
         // which can diverge from the real credential shape (#11828 review).
-        if (credentials?.accessToken) {
-          console.debug("[Auth] Using OAuth token for Cline/Kilo Code request.");
-        } else {
-          console.debug("[Auth] Using direct API key for Cline/Kilo Code request.");
-        }
+        // OAuth token vs BYOK API key handled inside applyClineAuthHeaders
+        // (keyed off credentials.accessToken); no duplicate decision needed here.
         applyClineAuthHeaders(headers, credentials, effectiveKey, clientHeaders, true);
         break;
-      case "cline": {
-        // OAuth: `workos:`-prefixed bearer + Cline client headers. BYOK API key: plain Bearer.
-        const byok = credentials?.authType === "apikey" || credentials?.authType === "api_key";
-        applyClineAuthHeaders(headers, credentials, effectiveKey, clientHeaders, byok);
-        break;
-      }
       default:
         if (this.usesClaudeCodeProtocol(credentials)) {
           const ccRequestDefaults = getClaudeCodeCompatibleRequestDefaults(
