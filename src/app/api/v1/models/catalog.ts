@@ -843,6 +843,7 @@ async function buildUnifiedModelsResponseCore(
       prefixMode,
       aliasToProviderId,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
+      allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
       blockedProviders: settings.blockedProviders,
       // Per-entry `pricing`: a combo is priced as its first visible target.
       pricing: {

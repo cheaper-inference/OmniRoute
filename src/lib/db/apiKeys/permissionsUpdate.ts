@@ -35,6 +35,7 @@ export interface ApiKeyPermissionsUpdate {
   chaosModeEnabled?: boolean;
   compressionEnabled?: boolean;
   allowAutoCombos?: boolean;
+  allowCcDiscoveryAliases?: boolean;
   catalogScope?: "all" | "combos" | "models";
   forcedModel?: string | null;
 }
@@ -80,6 +81,7 @@ export function normalizeApiKeyPermissionsUpdate(
     chaosModeEnabled: update.chaosModeEnabled,
     compressionEnabled: update.compressionEnabled,
     allowAutoCombos: update.allowAutoCombos,
+    allowCcDiscoveryAliases: update.allowCcDiscoveryAliases,
     catalogScope: update.catalogScope,
     forcedModel: update.forcedModel,
   };

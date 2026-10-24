@@ -118,6 +118,7 @@ export interface ApiKeyAccessData {
   streamDefaultMode?: StreamDefaultMode | null;
   compressionEnabled?: boolean | null;
   allowAutoCombos?: boolean | null;
+  allowCcDiscoveryAliases?: boolean | null;
   catalogScope?: CatalogScope | null;
   forcedModel?: string | null;
   disableNonPublicModels?: boolean | null;
@@ -165,6 +166,7 @@ export interface ApiKeyAccessFormState {
   streamDefaultMode: StreamDefaultMode;
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
+  allowCcDiscoveryAliases: boolean;
   catalogScope: CatalogScope;
   /** Per-key enforced routing target; "" = not pinned. */
   forcedModel: string;
@@ -298,6 +300,7 @@ type BehaviourStateField =
   | "streamDefaultMode"
   | "compressionEnabled"
   | "allowAutoCombos"
+  | "allowCcDiscoveryAliases"
   | "catalogScope"
   | "forcedModel"
   | "disableNonPublicModels"
@@ -314,6 +317,7 @@ function initialBehaviourState(
     streamDefaultMode: apiKey?.streamDefaultMode === "json" ? "json" : "legacy",
     compressionEnabled: apiKey?.compressionEnabled !== false,
     allowAutoCombos: apiKey?.allowAutoCombos !== false,
+    allowCcDiscoveryAliases: apiKey?.allowCcDiscoveryAliases !== false,
     catalogScope: apiKey?.catalogScope ?? "all",
     forcedModel: apiKey?.forcedModel ?? "",
     disableNonPublicModels: apiKey?.disableNonPublicModels === true,
@@ -457,6 +461,7 @@ export function buildApiKeyAccessPayload(
     streamDefaultMode: formState.streamDefaultMode,
     compressionEnabled: formState.compressionEnabled,
     allowAutoCombos: formState.allowAutoCombos,
+    allowCcDiscoveryAliases: formState.allowCcDiscoveryAliases,
     catalogScope: formState.catalogScope,
     disableNonPublicModels: formState.disableNonPublicModels,
     allowUsageCommand: formState.allowUsageCommand,
@@ -759,6 +764,13 @@ function useComboAndConnectionSetters(setFormState: FormStateSetter) {
     [setFormState]
   );
 
+  const setAllowCcDiscoveryAliases = useCallback(
+    (allowCcDiscoveryAliases: boolean) => {
+      setFormState((prev) => ({ ...prev, allowCcDiscoveryAliases }));
+    },
+    [setFormState]
+  );
+
   const setAllowAllConnections = useCallback(
     (allowAllConnections: boolean) => {
       setFormState((prev) => ({
@@ -786,6 +798,7 @@ function useComboAndConnectionSetters(setFormState: FormStateSetter) {
     setSelectedCombos,
     toggleCombo,
     setAllowAutoCombos,
+    setAllowCcDiscoveryAliases,
     setAllowAllConnections,
     setSelectedConnections,
   };

@@ -90,6 +90,7 @@ export async function PATCH(request, { params }) {
       streamDefaultMode,
       compressionEnabled,
       allowAutoCombos,
+      allowCcDiscoveryAliases,
       catalogScope,
       forcedModel,
       cacheDefaultMode,
@@ -131,6 +132,8 @@ export async function PATCH(request, { params }) {
     if (compressionEnabled !== undefined) payload.compressionEnabled = compressionEnabled;
     if (codexServiceMode !== undefined) payload.codexServiceMode = codexServiceMode;
     if (allowAutoCombos !== undefined) payload.allowAutoCombos = allowAutoCombos;
+    if (allowCcDiscoveryAliases !== undefined)
+      payload.allowCcDiscoveryAliases = allowCcDiscoveryAliases;
     if (catalogScope !== undefined) payload.catalogScope = catalogScope;
     if (forcedModel !== undefined) payload.forcedModel = forcedModel;
     if (cacheDefaultMode !== undefined) payload.cacheDefaultMode = cacheDefaultMode;
@@ -171,6 +174,7 @@ export async function PATCH(request, { params }) {
       ...(allowedEndpoints !== undefined && { allowedEndpoints }),
       ...(streamDefaultMode !== undefined && { streamDefaultMode }),
       ...(compressionEnabled !== undefined && { compressionEnabled }),
+      ...(allowCcDiscoveryAliases !== undefined && { allowCcDiscoveryAliases }),
       ...(cacheDefaultMode !== undefined && { cacheDefaultMode }),
       ...(codexServiceMode !== undefined && { codexServiceMode }),
       ...(forcedModel !== undefined && { forcedModel }),

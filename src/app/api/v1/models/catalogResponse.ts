@@ -146,6 +146,7 @@ export async function applyCatalogPostFilters(
     authorizeSyntheticModel?: CatalogVariantAuthorizer;
     /** Combo targets and node prefixes for the per-entry `pricing` object. */
     pricing?: CatalogPricingContext;
+    allowCcDiscoveryAliases?: boolean;
   }
 ): Promise<Array<Record<string, any>>> {
   const yieldTurn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
@@ -219,19 +220,26 @@ export async function applyCatalogPostFilters(
   // CATALOG_MIRROR_REFINEMENTS_ENABLED (default off): resolved once per build. Off keeps
   // both mirror passes exactly as before; on mirrors claude/ effort variants, drops
   // mirrors that cannot resolve, and checks gateways against what they will receive.
-  const mirrorRefinements = isCatalogMirrorRefinementsEnabled();
-  const ccAliasGlobal = isCcAliasGlobalEnabled();
-  const ccAliasSettings = getCcAliasSettingsBulk();
-  if (ccAliasGlobal || ccAliasSettings.providers.size > 0 || ccAliasSettings.models.size > 0) {
-    finalModels = appendCcDiscoveryAliases(
-      finalModels,
-      buildCcAliasPredicate({
-        global: ccAliasGlobal,
-        providers: ccAliasSettings.providers,
-        models: ccAliasSettings.models,
-      }),
-      { refined: mirrorRefinements, isResolvableAutoId: isResolvableBuiltinAutoId }
-    );
+  // hardcoded type allowlist. The per-key flag is an outer listing gate and defaults
+  // on for backward compatibility. This pass receives the already-authorized rows,
+  // so enabling aliases can never introduce a model/combo the key could not see.
+  if (ctx.allowCcDiscoveryAliases !== false) {
+    const ccAliasGlobal = isCcAliasGlobalEnabled();
+    const ccAliasSettings = getCcAliasSettingsBulk();
+    if (ccAliasGlobal || ccAliasSettings.providers.size > 0 || ccAliasSettings.models.size > 0) {
+      finalModels = appendCcDiscoveryAliases(
+        finalModels,
+        buildCcAliasPredicate({
+          global: ccAliasGlobal,
+          providers: ccAliasSettings.providers,
+          models: ccAliasSettings.models,
+        }),
+        {
+          refined: isCatalogMirrorRefinementsEnabled(),
+          isResolvableAutoId: isResolvableBuiltinAutoId,
+        }
+      );
+    }
   }
 
   // Advertise `<gateway-alias>/<id>` functional-gateway mirrors so discovery
