@@ -1,0 +1,1 @@
+- **fix(api):** `/v1/audio/translations` no longer echoes opaque upstream error bodies (HTML pages, plaintext stack traces, credential-bearing text) and its error responses now carry CORS — it joins the speech/transcription handlers on the shared sanitized upstream-error helper (#17843)
