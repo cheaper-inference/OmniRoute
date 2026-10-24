@@ -439,6 +439,30 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     includedResults: 10,
     extraResultCost: 0.001,
   },
+
+  // Keenable (https://keenable.ai): keyless by default through /v1/search/public
+  // (per-IP rate limits). A configured key moves the call to /v1/search and only
+  // lifts those limits. authType "none" keeps the keyless path reachable, as with
+  // context7; the builder attaches a configured key itself and only ever sends it
+  // to this fixed host (no base URL override, redirects refused). The same key
+  // also serves POST /v1/web/fetch (open-sse/executors/keenable-fetch.ts).
+  // fallbackOnly: a cost-0 provider never displaces a configured paid one.
+  "keenable-search": {
+    id: "keenable-search",
+    name: "Keenable Search",
+    baseUrl: "https://api.keenable.ai/v1/search",
+    method: "POST",
+    authType: "none",
+    authHeader: "none",
+    costPerQuery: 0,
+    freeMonthlyQuota: 0, // rate-limited per IP, not metered monthly; limits live in the catalog authHint
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 50,
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+    fallbackOnly: true,
+  },
 };
 
 /**
@@ -491,6 +515,7 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   anysearch: "anysearch-search",
   anysearch_search: "anysearch-search",
   parallel: "parallel-search",
+  keenable: "keenable-search",
 };
 
 export function resolveSearchProviderId(providerId: string): string {

@@ -611,8 +611,8 @@ export const v1SearchSchema = z.preprocess(
       // exa-search, tavily-search, firecrawl, google-pse-search, linkup-search, ollama-search,
       // searchapi-search, youcom-search, searxng-search, zai-search, jina-search, jina-ai,
       // jina, duckduckgo-free, x-search, x_search, xquik-search, xquik, anysearch-search,
-      // anysearch, parallel-search, parallel (plus short aliases resolved by
-      // SEARCH_PROVIDER_ALIASES).
+      // anysearch, parallel-search, parallel, keenable-search, keenable (plus short aliases
+      // resolved by SEARCH_PROVIDER_ALIASES).
       provider: z.string().min(1).optional(),
       max_results: z.coerce.number().int().min(1).max(100).default(5),
       search_type: z.enum(["web", "news", "x", "finance"]).default("web"),
@@ -727,6 +727,7 @@ export const v1WebFetchSchema = z.object({
       "nimble-search",
       "anysearch-search",
       "parallel-search",
+      "keenable-search",
     ])
     .optional(),
   format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),

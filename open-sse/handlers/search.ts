@@ -11,6 +11,7 @@ import { randomUUID } from "crypto";
  *   and xquik-search (direct X API search — explicit or credentialed fallback)
  *   and anysearch-search (free public web search — fallback-only)
  *   and parallel-search (Parallel Search API — web only)
+ *   and keenable-search (Keenable: keyless by default, optional key; fallback-only)
  *
  * Request format:
  * {
@@ -38,6 +39,7 @@ import * as xSearch from "./search/xSearch.ts";
 import * as xquikSearch from "./search/xquikSearch.ts";
 import * as anysearchSearch from "./search/anysearchSearch.ts";
 import * as parallelSearch from "./search/parallelSearch.ts";
+import * as keenableSearch from "./search/keenableSearch.ts";
 import { freeWebSearch } from "../services/freeWebSearch.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
@@ -776,6 +778,7 @@ const requestBuilders: Record<string, SearchRequestBuilder> = {
   "xquik-search": xquikSearch.buildXquikSearchRequest,
   "anysearch-search": anysearchSearch.buildAnysearchSearchRequest,
   "parallel-search": parallelSearch.buildParallelSearchRequest,
+  "keenable-search": keenableSearch.buildKeenableSearchRequest,
 };
 
 function buildRequest(
@@ -1407,6 +1410,7 @@ const responseNormalizers: Record<string, SearchResponseNormalizer> = {
   "xquik-search": (data) => xquikSearch.normalizeXquikSearchResponse(data, makeResult),
   "anysearch-search": (data) => anysearchSearch.normalizeAnysearchSearchResponse(data, makeResult),
   "parallel-search": (data) => parallelSearch.normalizeParallelSearchResponse(data, makeResult),
+  "keenable-search": (data) => keenableSearch.normalizeKeenableSearchResponse(data, makeResult),
 };
 
 function normalizeResponse(
