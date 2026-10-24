@@ -326,6 +326,27 @@ export function computeVerdict(results) {
   return { releaseGreen: hardFailures.length === 0, hardFailures, drift };
 }
 
+/** Missing scanner evidence is execution failure, never measured ratchet drift. */
+function evaluateWorkflowRun({ code, out }) {
+  const states = [...String(out).matchAll(/^workflowAuditState=([^\r\n]*)\r?$/gm)];
+  const policyCounts = ["provenanceRunnerFindings", "scheduledGuardFindings"].map((name) => {
+    const matches = [...String(out).matchAll(new RegExp(`^${name}=(\\d+)\\r?$`, "gm"))];
+    return matches.length === 1 ? Number(matches[0][1]) : null;
+  });
+  const measured =
+    states.length === 1 &&
+    states[0][1] === "MEASURED" &&
+    [0, 1].includes(code) &&
+    policyCounts.every((count) => Number.isSafeInteger(count) && count >= 0);
+  const policyFailure = policyCounts.some((count) => count > 0);
+  return {
+    kind: measured && !policyFailure ? "drift" : "hard",
+    ok: measured && !policyFailure && code === 0,
+    evidenceState: measured ? "MEASURED" : "INCOMPLETE",
+    detail: measured && !policyFailure && code === 0 ? "within baseline" : firstFailureLine(out),
+  };
+}
+
 // ─── --full-ci: reproduce the EXACT ci.yml gate set (P0, v3.8.46 post-mortem) ──
 //
 // WHY: the curated HARD/DRIFT lists above are a hand-maintained SUBSET. The v3.8.46
@@ -757,9 +778,8 @@ async function main() {
     });
   };
 
-  // A ratchet command (check:complexity, check:dead-code, …) exits 1 ONLY on a
-  // measured regression and self-skips (exit 0) when its tooling is absent — so a
-  // non-zero exit here is drift to rebaseline at release, never a contributor block.
+  // Ratchet findings remain drift. Workflow auditing additionally requires explicit
+  // measurement evidence: its exit 1 can also mean missing/broken scanner tooling.
   // ALL checks run regardless of earlier failures (the report is collected, not
   // fail-fast) so one pass surfaces every red instead of revealing them in layers.
   const driftCmd = async (id, label, cmd, cmdArgs, okDetail = "within baseline", opts) => {
@@ -769,9 +789,13 @@ async function main() {
     record({
       id,
       label,
-      kind: "drift",
-      ok: code === 0,
-      detail: code === 0 ? okDetail : firstFailureLine(out),
+      ...(id === "workflow-lint"
+        ? evaluateWorkflowRun({ code, out })
+        : {
+            kind: "drift",
+            ok: code === 0,
+            detail: code === 0 ? okDetail : firstFailureLine(out),
+          }),
     });
   };
 
@@ -1120,9 +1144,13 @@ async function main() {
         // Respect the curated classification when the curated pass already ran an equivalent
         // gate under a different id — otherwise the same ratchet is reported as a HARD failure
         // here AND as drift above, in one self-contradicting verdict.
-        kind: fullCiKindFor(g.id, results),
-        ok: code === 0,
-        detail: code === 0 ? "pass" : firstFailureLine(out),
+        ...(g.id === "check:workflows"
+          ? evaluateWorkflowRun({ code, out })
+          : {
+              kind: fullCiKindFor(g.id, results),
+              ok: code === 0,
+              detail: code === 0 ? "pass" : firstFailureLine(out),
+            }),
       });
     }
   }
@@ -1167,7 +1195,13 @@ async function main() {
           releaseGreen,
           hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
           drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          checks: results.map((r) => ({ id: r.id, kind: r.kind, ok: r.ok, detail: r.detail })),
+          checks: results.map((r) => ({
+            id: r.id,
+            kind: r.kind,
+            ok: r.ok,
+            detail: r.detail,
+            ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
+          })),
           commandReceipts,
         },
         null,
