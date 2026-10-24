@@ -16,6 +16,28 @@ const proxyHealthV1Route = await import("../../src/app/api/v1/management/proxies
 const proxyBulkAssignV1Route =
   await import("../../src/app/api/v1/management/proxies/bulk-assign/route.ts");
 const proxyLogger = await import("../../src/lib/proxyLogger.ts");
+const settingsBulkAssignRoute =
+  await import("../../src/app/api/settings/proxies/bulk-assign/route.ts");
+
+test("settings and v1 bulk assignment retain matching validation and auth responses", async () => {
+  await resetStorage();
+  for (const [handler, url] of [
+    [settingsBulkAssignRoute.PUT, "http://localhost/api/settings/proxies/bulk-assign"],
+    [proxyBulkAssignV1Route.PUT, "http://localhost/api/v1/management/proxies/bulk-assign"],
+  ] as const) {
+    await resetStorage();
+    const malformed = await handler(new Request(url, { method: "PUT", body: "{bad" }));
+    assert.equal(malformed.status, 400);
+    const invalid = await handler(
+      new Request(url, { method: "PUT", body: JSON.stringify({ scope: "invalid" }) })
+    );
+    assert.equal(invalid.status, 400);
+    await withEnv("INITIAL_PASSWORD", "test-password", async () => {
+      const unauthorized = await handler(new Request(url, { method: "PUT", body: "{bad" }));
+      assert.equal(unauthorized.status, 401, "auth must run before JSON validation");
+    });
+  }
+});
 
 async function withEnv(name, value, fn) {
   const previous = process.env[name];
