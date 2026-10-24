@@ -215,26 +215,17 @@ export function toRecord<T>(data: T): Partial<T> {
 
 ### PERF-06 — Pool ordering hash comparison
 
-**Problem:** `JSON.stringify(filter)` per request compares objects character-by-character. With C=10k+ connections, M=model count, this is O(C·M) stringify work.
+**Status:** Closed — stale finding (2026-10-24). No code change.
 
-**Fix:**
+**Problem (as written):** `JSON.stringify(filter)` per request compares objects character-by-character in `open-sse/services/sorting/poolOrdering.ts`, O(C·M) stringify work.
 
-```diff
-open-sse/services/sorting/poolOrdering.ts
-+ const cache = new Map<string, number>();
-+
-+ function computeOrderHash(connections: Connection[]): number {
-+   const hash = JSON.stringify(connections.map(c => c.id).sort());
-+   return Number(hash) % Number.MAX_SAFE_INTEGER;
-+ }
-+
-+ // Compare hashes instead of full objects
-+ if (cache.has(currentHash) && cache.get(currentHash) === lastHash) {
-+   return lastOrder; // Reuse cached result
-+ }
-```
+**Investigation result:** The cited file has never existed. Verified:
 
-**Timeline:** Day 14-16
+- `git log --all --oneline -- '*poolOrdering*'` → empty across every branch.
+- No `open-sse/services/sorting/` directory in HEAD or the `upstream/release/v3.8.53` tree.
+- `open-sse/services/providerConnectionPool.ts` (131 lines) contains no `JSON.stringify` and no `.sort()`; ordering-sensitive connection selection lives in the auth filter pass, which is already covered by the readCache canonicalization shipped in PERF-07.
+
+The finding predates the audit-branch rebase onto upstream `release/v3.8.53` and referenced a tree layout that no longer exists. Re-implementing it would mean inventing a cache for a comparison that no longer happens.
 
 ---
 
