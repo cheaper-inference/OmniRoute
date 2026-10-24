@@ -106,45 +106,27 @@ export async function POST(request: Request) {
 
 ## Week 2: Dashboard Performance + Failure Visibility
 
-### PERF-02 — Dashboard aggregate expression indexes
+### PERF-02 — Dashboard aggregate expression indexes [COMPLETED]
 
-**Problem:** 14 dashboard panels use `GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier`. SQLite cannot use existing indexes on raw columns for expression-based grouping. Measured: full scan + temp B-tree sort per panel per page load.
+**Problem:** 14 dashboard panels use `GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), service_tier` or endpoint aggregations. SQLite cannot use standard column indexes for expression-based grouping, forcing full table scans and temporary B-trees (`USE TEMP B-TREE FOR GROUP BY`).
 
-**Two approaches:**
+**Implementation:**
 
-#### Approach A: Expression indexes (simpler, immediate)
-
-```sql
--- Migration: 214_dashboard_aggregate_indexes.sql
-CREATE INDEX IF NOT EXISTS idx_uh_date_provider_model_tier
-ON usage_history(DATE(timestamp), LOWER(provider), LOWER(model), serviceTier);
-
-CREATE INDEX IF NOT EXISTS idx_uh_lower_timestamp
-ON usage_history(strftime('%Y-%m-%d', timestamp));
-```
-
-**Pros:** Direct fix, one migration, immediate effect  
-**Cons:** Index bloat (~200MB for 10M rows), query planner must choose wisely
-
-#### Approach B: Pre-aggregate from daily_usage_summary (elegant, complex)
-
-```sql
--- Existing view/table: daily_usage_summary already has DATE(provider), DATE(model), serviceTier
--- Derive panels from this pre-aggregated source instead of re-scanning usage_history
-```
-
-**Pros:** Zero additional index storage, consistent with existing pattern  
-**Cons:** Complex refactoring, requires testing every panel derivation
-
-**Recommendation:** Approach A (expression indexes). Simpler to implement, measure, and rollback if needed.
+- Added migration `src/lib/db/migrations/214_dashboard_aggregate_indexes.sql` creating targeted covering/grouping expression indexes:
+  1. `idx_uh_date`: `ON usage_history(DATE(timestamp))` for single-day heatmap and daily volume queries.
+  2. `idx_uh_date_provider_model_tier`: `ON usage_history(DATE(timestamp), LOWER(provider), LOWER(model), service_tier)` for model matrix rollups and multi-factor breakdown.
+  3. `idx_uh_endpoint_provider_model`: `ON usage_history(endpoint, LOWER(COALESCE(provider, 'unknown')), LOWER(COALESCE(model, 'unknown')))` for endpoint route breakdowns.
+- Added automated unit tests `tests/unit/migration-214-dashboard-aggregate-indexes.test.ts` exercising index existence, query plan verification (`USE TEMP B-TREE FOR GROUP BY` eliminated), and calculation parity across all roll-ups.
+- Bumped migration counts to 211 across `README.md`, `AGENTS.md`, `llm.txt`, and 66 `docs/i18n/*/README.md` and `docs/i18n/*/llm.txt` mirrors.
 
 **Verification:**
 
-- Run `EXPLAIN QUERY PLAN` on each panel query before and after
-- Expect `SCAN` → `SEARCH USING INDEX` for all 14 queries
-- Load test: compare dashboard load time with/without indexes
-
-**Timeline:** Day 5-7
+- `tests/unit/migration-214-dashboard-aggregate-indexes.test.ts` passed 5/5 tests.
+- `tests/unit/db-usage-analytics-3500.test.ts` passed 28/28 tests.
+- `node scripts/check/check-migration-numbering.mjs` passed (211 migrations, 3 gaps, 0 duplicates).
+- `node scripts/check/check-docs-sync.mjs` passed (66 locales consistent).
+- `node scripts/check/check-docs-counts-sync.mjs` passed (0 STRICT drifts).
+- `npm run typecheck:core` passed with zero errors.
 
 ---
 

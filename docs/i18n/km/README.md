@@ -1305,7 +1305,7 @@ process ដូចគ្នានៅលើ port តែមួយ ដូច្ន�
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ភាសា</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> នៅទូទាំង <code>src/</code> និង <code>open-sse/</code> (គ្មាន <code>any</code> នៅក្នុងស្នូលតាំងពី v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, ការកត់ត្រាបែប WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែន 147, ការធ្វើចំណាកស្រុក 210</td></tr>
+  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, ការកត់ត្រាបែប WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែន 147, ការធ្វើចំណាកស្រុក 211</td></tr>
   <tr><td nowrap><b>អង្គចងចាំ</b></td><td>ការស្វែងរកអត្ថបទពេញលេញ SQLite FTS5 + វ៉ិចទ័រ embeddings ដែលបាន quantize ជា int8, decay មានប្រភេទ</td></tr>
   <tr><td nowrap><b>Schema</b></td><td>Zod 4 — ការផ្ទៀងផ្ទាត់ I/O របស់ឧបករណ៍ MCP + កិច្ចសន្យា API</td></tr>
   <tr><td nowrap><b>ពិធីការ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
