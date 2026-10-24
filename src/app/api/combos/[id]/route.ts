@@ -5,6 +5,7 @@ import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
 import { validateCompositeTiersConfig } from "@/lib/combos/compositeTiers";
 import { normalizeComboModels } from "@/lib/combos/steps";
+import { buildComboConnectionLabels } from "@/lib/combos/controlCenterAccountLabels";
 import { validateComboDAG, clampComboDepth } from "@omniroute/open-sse/services/combo.ts";
 import { resolveCanonicalProviderModel } from "@omniroute/open-sse/services/model.ts";
 import { updateComboSchema } from "@/shared/validation/schemas";
@@ -47,7 +48,12 @@ export async function GET(request, { params }) {
       return comboErrorResponse("COMBO_007", 404, { id }, request);
     }
 
-    return NextResponse.json(combo);
+    // #17393: the control center renders the account each target is pinned to.
+    // The browser cannot read the connection table, so resolve the current
+    // account display names here and ship them next to the combo row.
+    const connectionLabels = buildComboConnectionLabels(combo);
+
+    return NextResponse.json({ ...combo, connectionLabels });
   } catch (error) {
     console.log("Error fetching combo:", error);
     return comboErrorResponse("INTERNAL_001", 500, undefined, request);
