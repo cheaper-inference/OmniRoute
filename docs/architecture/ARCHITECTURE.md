@@ -17,13 +17,13 @@ It provides a single OpenAI-compatible endpoint (`/v1/*`) and routes traffic acr
 
 Core capabilities:
 
-- OpenAI-compatible API surface for CLI/tools (375 providers, 156 executor modules)
+- OpenAI-compatible API surface for CLI/tools (376 providers, 159 executor modules)
 - Request/response translation across provider formats
 - Model combo fallback (multi-model sequence)
 - Structured combo steps (`provider + model + connection`) with runtime ordering by `compositeTiers`
 - Account-level fallback (multi-account per provider)
 - Quota preflight and quota-aware P2C account selection in the main chat path
-- OAuth + API-key provider connection management (27 OAuth provider modules)
+- OAuth + API-key provider connection management (28 OAuth provider modules)
 - Embedding generation via `/v1/embeddings` (18 providers)
 - Image generation via `/v1/images/generations` (10+ providers, 20+ models)
 - Audio transcription via `/v1/audio/transcriptions` (18 providers)
@@ -66,7 +66,7 @@ Core capabilities:
 - Prompt injection guard middleware
 - Prompt compression pipeline with Caveman, RTK, stacked pipelines, compression combos, language packs, and analytics
 - ACP (Agent Communication Protocol) registry
-- Modular OAuth providers (22 individual modules under `src/lib/oauth/providers/`)
+- Modular OAuth providers (28 individual modules under `src/lib/oauth/providers/`)
 - Uninstall/full-uninstall scripts
 - OAuth environment repair action
 - WebSocket bridge for OpenAI-compatible WS clients (`/v1/ws`)
@@ -329,10 +329,10 @@ Domain layer modules:
 - Eval runner: `src/lib/evals/evalRunner.ts`
 - Domain state persistence: `src/lib/db/domainState.ts` — SQLite CRUD for fallback chains, budgets, cost history, lockout state, circuit breakers
 
-OAuth provider modules (27 individual files under `src/lib/oauth/providers/`):
+OAuth provider modules (28 individual files under `src/lib/oauth/providers/`):
 
 - Registry index: `src/lib/oauth/providers/index.ts`
-- Individual providers: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Individual providers: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `minimax-code.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
 - Shared helpers: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl device flow), `museCodeDeviceResponse.ts`
 - Thin wrapper: `src/lib/oauth/providers.ts` — re-exports from individual modules
 

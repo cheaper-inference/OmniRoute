@@ -1,7 +1,7 @@
 {
   "sources": {
     "AGENTS.md": {
-      "source_hash": "60c36ac5e41427183bd2762e9bae9474786c732840a5368e62b8699e95570a9e",
+      "source_hash": "82654264cc13d974e0606c60aad36e62858175fecb23b542c9c522364eb99bc6",
       "locales": {
         "bs": {
           "source_hash": "60c36ac5e41427183bd2762e9bae9474786c732840a5368e62b8699e95570a9e",
@@ -2694,7 +2694,7 @@
       }
     },
     "README.md": {
-      "source_hash": "5d6c12457add7280df2210d669781cbd62fb59a0aca30d5543e214e292769f95",
+      "source_hash": "f24788d9b40211cf54401ea536f973837ad891187f9bb4e176251ce3482fa086",
       "locales": {
         "ar": {
           "source_hash": "5d6c12457add7280df2210d669781cbd62fb59a0aca30d5543e214e292769f95",
@@ -9207,7 +9207,7 @@
       }
     },
     "docs/architecture/ARCHITECTURE.md": {
-      "source_hash": "f7704f3ee62f83c64fd44b7ab8689e97e7c3f2998c0ea84efd5308cf2e392b4a",
+      "source_hash": "501f0b56cb3182b85182aac7da5033ba8e646eb4ba93d7010041dc7b3bc2edff",
       "locales": {
         "ar": {
           "source_hash": "f7704f3ee62f83c64fd44b7ab8689e97e7c3f2998c0ea84efd5308cf2e392b4a",
@@ -13573,7 +13573,7 @@
       }
     },
     "docs/architecture/CODEBASE_DOCUMENTATION.md": {
-      "source_hash": "160ea7188dd5cbc726815717d7cf61d1a10f58bf19b5c3e4914054e428d4995a",
+      "source_hash": "6dca66a2a38de514c6f12464208b3c6c74cff4e49e6a8574f03dca0193f41b08",
       "locales": {
         "ar": {
           "source_hash": "160ea7188dd5cbc726815717d7cf61d1a10f58bf19b5c3e4914054e428d4995a",
@@ -16893,7 +16893,7 @@
       }
     },
     "docs/architecture/REPOSITORY_MAP.md": {
-      "source_hash": "3b1b62ca7b129c68b86ea05bab0bb6ae0d60642709fff170f533e3bf946d4d95",
+      "source_hash": "e7e658cb522ebbc195a514db505d696ca835325ba16db4dfcfbad2d2f093861d",
       "locales": {
         "pl": {
           "source_hash": "3b1b62ca7b129c68b86ea05bab0bb6ae0d60642709fff170f533e3bf946d4d95",
@@ -21411,7 +21411,7 @@
       }
     },
     "docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md": {
-      "source_hash": "56d04e38af511cff4866649f66a769efb73f29e447fd34e1379ad2fb4e9a8ca8",
+      "source_hash": "48f23a7e16ef02292ba14bbfdb3d4748ca49c2cbaa861ad5b9d68c62d855b84e",
       "locales": {
         "pl": {
           "source_hash": "56d04e38af511cff4866649f66a769efb73f29e447fd34e1379ad2fb4e9a8ca8",
@@ -25543,7 +25543,7 @@
       }
     },
     "docs/frameworks/A2A-SERVER.md": {
-      "source_hash": "21dcaefff52bb3fa27d2dc9c0ed475a62321dca4f9a188942b507e4e339606db",
+      "source_hash": "c6dc580b454f6a98482fd4593d6bf6b2c37f4c0692a1bc80167db8debd95aa9c",
       "locales": {
         "ar": {
           "source_hash": "21dcaefff52bb3fa27d2dc9c0ed475a62321dca4f9a188942b507e4e339606db",
@@ -27472,7 +27472,7 @@
       }
     },
     "docs/frameworks/AGENTBRIDGE.md": {
-      "source_hash": "b99a192b660d7ab4fc971666b53d2ef6956835479550dd409a3250a5a2033290",
+      "source_hash": "f004d43517cb51c65d54a41ab62ee2bd570d04567c499136a583bb6182ea0475",
       "locales": {
         "pl": {
           "source_hash": "b99a192b660d7ab4fc971666b53d2ef6956835479550dd409a3250a5a2033290",
@@ -37965,7 +37965,7 @@
       }
     },
     "docs/frameworks/OPEN_SSE_ARCHITECTURE.md": {
-      "source_hash": "ce67c813ec418167e49f18a92bc84dbbb39b215212a623d22191b1114712f0ca",
+      "source_hash": "458ef6dd894983bc4b023006863b7b1fa87fcb33a07a77046d11903b70a0a7eb",
       "locales": {
         "pl": {
           "source_hash": "ce67c813ec418167e49f18a92bc84dbbb39b215212a623d22191b1114712f0ca",
@@ -56042,7 +56042,7 @@
       }
     },
     "docs/guides/FREE_PROVIDER_RANKINGS.md": {
-      "source_hash": "56bfe9cf43a0c8f41f41b10bea431ee14d1a4c9c4cb1f67a0e523705d8377a19",
+      "source_hash": "ac8c90d7a5a46aa130d9d56846c88af13b6d0480db63ef5ba9db0f5782ad9b21",
       "locales": {
         "pl": {
           "source_hash": "56bfe9cf43a0c8f41f41b10bea431ee14d1a4c9c4cb1f67a0e523705d8377a19",
@@ -86297,7 +86297,7 @@
       }
     },
     "docs/reference/ENVIRONMENT.md": {
-      "source_hash": "9449f680918596f6f0a4efc0ee2f70b18cfeb6552f8ab9f4763c7b30540c5e0f",
+      "source_hash": "767829110c346bf67a125422044ca1fb20801945f50d9914ddc0b1560650db3a",
       "locales": {
         "ar": {
           "source_hash": "9449f680918596f6f0a4efc0ee2f70b18cfeb6552f8ab9f4763c7b30540c5e0f",
@@ -92064,7 +92064,7 @@
       }
     },
     "docs/reference/PROVIDER_REFERENCE.md": {
-      "source_hash": "0e74cb2fee34efeee63afc56a646d87747730701d0e5ee7ab6700b72ec594761",
+      "source_hash": "9cbe921c15d63c794e71a021bb7c7ac552e59736c2a99d694dbe18c4b6ea1592",
       "locales": {
         "cs": {
           "source_hash": "0e74cb2fee34efeee63afc56a646d87747730701d0e5ee7ab6700b72ec594761",
@@ -106662,7 +106662,7 @@
       "locales": {}
     },
     "docs/getting-started/SELF_HOST_GUIDE.md": {
-      "source_hash": "28aff6607573128598b854acb0add3380e0484ac746cd80e71ae4727d59a2e5e",
+      "source_hash": "166f3b3db31d32fe94eadfc28eeda1d108e6cc33971ba8a0ac669c13fb4f1c24",
       "locales": {}
     },
     "docs/guides/CLI-COMPANION.md": {

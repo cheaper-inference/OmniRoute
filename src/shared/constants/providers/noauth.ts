@@ -116,6 +116,25 @@ export const NOAUTH_PROVIDERS = {
       text: "ZCode runs locally through its native app-server. OmniRoute never receives or stores the Z.ai credential.",
     },
   },
+  "minimax-code": {
+    id: "minimax-code",
+    alias: "mmcode",
+    name: "MiniMax Code",
+    icon: "terminal",
+    color: "#F97316",
+    textIcon: "MC",
+    website: "https://www.minimax.io",
+    noAuth: true,
+    hasFree: false,
+    serviceKinds: ["llm"],
+    isLocalCli: true,
+    toolCalling: "native",
+    authHint:
+      "No API key stored by OmniRoute. The provider reads the local MiniMax Code profile to authenticate a run. You can also sign in to your MiniMax account from this page (device code) \u2014 the credential is written into that same local profile.",
+    notice: {
+      text: "MiniMax Code talks to the managed MiniMax subscription gateway. The locally installed MiniMax Code CLI is available as an explicit transport. The credential lives in your local MiniMax Code profile: OmniRoute reads it to authenticate a run, writes a rotated credential back to it, and the dashboard sign-in writes the account credential into it too. The dashboard connection is the account entry \u2014 the credential a run uses is the one in your local profile.",
+    },
+  },
   "codex-app-server": {
     id: "codex-app-server",
     alias: "cxa",

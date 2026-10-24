@@ -6,6 +6,7 @@ export type RiskNoticeVariant =
 import { NOAUTH_PROVIDERS } from "./providers/noauth";
 export { supportsNoAuthProviderProxy } from "./providers/noauth";
 import { OAUTH_PROVIDERS } from "./providers/oauth";
+import { NOAUTH_DEVICE_CODE_PROVIDER_IDS } from "./oauthDeviceCodeProviders";
 import { WEB_COOKIE_PROVIDERS, resolveWebProviderHost } from "./providers/web-cookie";
 export { resolveWebProviderHost };
 import { APIKEY_PROVIDERS } from "./providers/apikey";
@@ -62,6 +63,24 @@ const DUAL_AUTH_PROVIDER_IDS = new Set([
 
 export function supportsDualAuthProvider(providerId: unknown): boolean {
   return typeof providerId === "string" && DUAL_AUTH_PROVIDER_IDS.has(providerId);
+}
+
+/**
+ * No-auth providers that ALSO offer a device-code sign-in in the dashboard.
+ *
+ * MiniMax Code is the reference: the provider itself stores no credential
+ * (it reads the local MiniMax Code profile), but an operator can sign in
+ * to their MiniMax account from the dashboard and have the credential
+ * written into that profile. The dashboard row is the account; the
+ * credential lives in the provider's own profile.
+ *
+ * The list lives with the other device-code providers so that the two cannot
+ * drift apart.
+ */
+export function supportsDeviceCodeLogin(providerId: unknown): boolean {
+  return (
+    typeof providerId === "string" && NOAUTH_DEVICE_CODE_PROVIDER_IDS.has(providerId)
+  );
 }
 
 /**

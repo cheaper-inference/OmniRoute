@@ -20,6 +20,11 @@ import {
   GROK_BUILD_OAUTH_SCOPES,
   GROK_BUILD_TOKEN_URL,
 } from "@omniroute/open-sse/config/grokBuild.ts";
+import {
+  MINIMAX_CODE_AUDIENCE,
+  MINIMAX_CODE_SCOPE,
+  resolveMinimaxCodeAccountBase,
+} from "@omniroute/open-sse/config/minimaxCode.ts";
 import { resolvePublicCred } from "@omniroute/open-sse/utils/publicCreds.ts";
 import { CURSOR_AGENT_CLI_VERSION } from "@omniroute/open-sse/utils/cursorAgentCliVersionPin.ts";
 import { buildGitLabOAuthEndpoints, GITLAB_DUO_DEFAULT_BASE_URL } from "../gitlab";
@@ -197,6 +202,38 @@ export const MUSE_CODE_CONFIG = {
   deviceCodeUrl: "https://auth.meta.com/oidc/device/authorization/",
   tokenUrl: "https://auth.meta.com/oidc/device/token/",
   mintUrl: "https://api.meta.ai/muse-code/key",
+};
+
+// MiniMax Code OAuth Configuration (Device Code Flow, RFC 8628 + S256-PKCE).
+//
+// The account host follows the region of the local MiniMax Code profile — the
+// same region the CLI and the gateway use — so a credential the dashboard
+// writes is refreshed by the host the CLI talks to.
+//
+// The public client id comes from resolvePublicCred() (never a literal): it is
+// the client the MiniMax Code CLI itself registers with.
+const MINIMAX_CODE_ACCOUNT_BASE = resolveMinimaxCodeAccountBase(
+  process.env.MINIMAX_CODE_REGION
+);
+
+export interface MinimaxCodeOAuthConfig {
+  clientId: string;
+  scope: string;
+  audience: string;
+  accountBase: string;
+  deviceCodeUrl: string;
+  tokenUrl: string;
+  /** Test seam: the account call uses the global fetch when this is unset. */
+  fetchImpl?: typeof fetch;
+}
+
+export const MINIMAX_CODE_CONFIG: MinimaxCodeOAuthConfig = {
+  clientId: resolvePublicCred("minimax_id"),
+  scope: MINIMAX_CODE_SCOPE,
+  audience: MINIMAX_CODE_AUDIENCE,
+  accountBase: MINIMAX_CODE_ACCOUNT_BASE,
+  deviceCodeUrl: `${MINIMAX_CODE_ACCOUNT_BASE}/oauth2/device/code`,
+  tokenUrl: `${MINIMAX_CODE_ACCOUNT_BASE}/oauth2/token`,
 };
 
 // Kimi Coding OAuth Configuration (Device Code Flow)
@@ -546,4 +583,5 @@ export const PROVIDERS = {
   ZED: "zed",
   ZED_HOSTED: "zed-hosted",
   MUSE_CODE: "muse-code",
+  MINIMAX_CODE: "minimax-code",
 };

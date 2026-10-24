@@ -265,6 +265,15 @@ const G09_BASELINE =
  */
 export const KNOWN_TRANSITIVE_SPAWN_SINKS: Record<string, string> = {
   "open-sse/executors/auggie.ts": `${G09_BASELINE} (child_process)`,
+  // The MiniMax Code executor spawns the locally installed `mcode` CLI (the
+  // one-shot run) and the shared agent spawns `mcode acp`: the same shape as
+  // the CLI-backed providers around it. The executor barrel reaches both from
+  // the chat routes, and those routes cannot be path-classified as local-only
+  // without locking the public chat API.
+  "open-sse/executors/minimax-code.ts":
+    "The MiniMax Code executor spawns the locally installed `mcode` CLI, like the CLI-backed providers around it: the executor barrel reaches it from the chat routes, and those cannot be path-classified as local-only without locking the public chat API.",
+  "open-sse/executors/minimaxCodeAcp.ts":
+    "The shared MiniMax Code agent spawns the same locally installed `mcode acp` CLI; it is reached from the same executor as the one-shot run.",
   "open-sse/executors/chatgpt-web-codex/tunnelClient.ts": `${G09_BASELINE} (child_process)`,
   "open-sse/executors/devin-cli-agentic.ts": `${G09_BASELINE} (child_process)`,
   "open-sse/executors/devin-cli.ts": `${G09_BASELINE} (child_process)`,
