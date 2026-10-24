@@ -79,7 +79,12 @@ import {
 } from "@/lib/combos/builderDraft";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import AutoComboCatalog from "./AutoComboCatalog";
-import { AutoComboTruncatedNote, getI18nOrFallback } from "./comboPageHelpers";
+import {
+  AutoComboTruncatedNote,
+  getComboStepKindLabel,
+  getI18nOrFallback,
+} from "./comboPageHelpers";
+import ComboStepTestButton from "./ComboStepTestButton";
 import KimiComboPresetCard from "./KimiComboPresetCard";
 import { KIMI_CODING_PRESET, hasKimiCodingPreset } from "./kimiComboPreset";
 import BuilderIntelligentStep from "./BuilderIntelligentStep";
@@ -3854,27 +3859,7 @@ function ComboFormModal({
                           {formatModelDisplay(entry)}
                         </div>
                         <div className="text-[10px] text-text-muted truncate">
-                          {entry.kind === "combo-ref"
-                            ? getI18nOrFallback(t, "builderComboRefStep", "Nested combo reference")
-                            : entry.kind === "provider-wildcard"
-                              ? getI18nOrFallback(
-                                  t,
-                                  "builderProviderWildcard",
-                                  "All matching provider models"
-                                )
-                              : entry.connectionId
-                                ? getI18nOrFallback(t, "builderPinnedAccount", "Pinned account")
-                                : entry.providerId
-                                  ? getI18nOrFallback(
-                                      t,
-                                      "builderDynamicAccountShort",
-                                      "Dynamic account"
-                                    )
-                                  : getI18nOrFallback(
-                                      t,
-                                      "builderLegacyEntry",
-                                      "Legacy model entry"
-                                    )}
+                          {getComboStepKindLabel(t, entry)}
                         </div>
                       </div>
 
@@ -3932,6 +3917,8 @@ function ComboFormModal({
                           <Icon name="arrow_downward" size={12} />
                         </Button>
                       </div>
+
+                      <ComboStepTestButton entry={entry} />
 
                       {/* Remove */}
                       <Button
@@ -4938,31 +4925,7 @@ function ComboFormModal({
                               {formatModelDisplay(entry)}
                             </p>
                             <p className="text-[10px] text-text-muted mt-0.5">
-                              {entry.kind === "combo-ref"
-                                ? getI18nOrFallback(
-                                    t,
-                                    "builderComboRefStep",
-                                    "Nested combo reference"
-                                  )
-                                : entry.kind === "provider-wildcard"
-                                  ? getI18nOrFallback(
-                                      t,
-                                      "builderProviderWildcard",
-                                      "All matching provider models"
-                                    )
-                                  : entry.connectionId
-                                    ? getI18nOrFallback(t, "builderPinnedAccount", "Pinned account")
-                                    : entry.providerId
-                                      ? getI18nOrFallback(
-                                          t,
-                                          "builderDynamicAccountShort",
-                                          "Dynamic account"
-                                        )
-                                      : getI18nOrFallback(
-                                          t,
-                                          "builderLegacyEntry",
-                                          "Legacy model entry"
-                                        )}
+                              {getComboStepKindLabel(t, entry)}
                               {strategy === "weighted" && entry.weight > 0
                                 ? ` · ${entry.weight}%`
                                 : ""}
