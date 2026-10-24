@@ -3954,7 +3954,7 @@
         "title": "Pirmiausia baigianti galioti kvota",
         "description": "Reitinguoja paskyras pagal išnaudojimo spaudimą: didelė likusi kvota, artima atkūrimo terminui, eina pirmiausia.",
         "tip1": "Reikalinga teikėjo kvotos telemetrija; paskyros be jos išlaiko nurodytą prioriteto tvarką.",
-        "tip2": "Beveik vienodi įverčiai keičiasi vienodų įverčių intervale, todėl giminingos paskyros vis tiek dalijasi apkrova.",
+        "tip2": "Beveik vienodi įverčiai keičiasi vienodų įverčių intervale, todėl panašios paskyros vis tiek dalijasi apkrova.",
         "tip3": "Apribokite reitingavimą tuo kvotos rinkiniu, pagal kurį kiekvienas modelis iš tikrųjų apmokestinamas."
       },
       "strict-random": {

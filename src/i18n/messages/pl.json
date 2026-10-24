@@ -3732,7 +3732,7 @@
       "expiry-first": {
         "when": "Gdy kierujesz ruch przez konta, których limity resetują się według różnych harmonogramów, i chcesz zużyć limit, który w przeciwnym razie wygasłby niewykorzystany.",
         "avoid": "Gdy dla większości kont brakuje telemetrii limitów lub potrzebujesz stabilnej kolejności, która ignoruje moment resetu.",
-        "example": "Preferowanie konta z 80% pozostałego limitu, które resetuje się za 39 minut, nad kontem z 48% pozostałego limitu, które resetuje się za 9 godzin — limit bliski wygaśnięcia zostaje zużyty, zanim przepadnie."
+        "example": "Preferuj konto z 80% pozostałego limitu, które resetuje się za 39 minut, zamiast konta z 48% pozostałego limitu, które resetuje się za 9 godzin — limit bliski wygaśnięcia zostaje zużyty, zanim przepadnie."
       },
       "strict-random": {
         "when": "Używaj, gdy chcesz uzyskać idealnie równomierne rozłożenie — każdy model jest używany raz przed powtórzeniem.",

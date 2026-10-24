@@ -3952,7 +3952,7 @@
       },
       "expiry-first": {
         "title": "Önce süresi dolan kota",
-        "description": "Hesapları değerlendirme baskısına göre sıralar: sıfırlama süresine yakın, kalan kotası yüksek hesap önce gelir.",
+        "description": "Hesapları kullanım aciliyetine göre sıralar: sıfırlama süresine yakın, kalan kotası yüksek hesap önce gelir.",
         "tip1": "Sağlayıcı kota telemetrisi gerektirir; telemetrisi olmayan hesaplar listelenen öncelik sırasını korur.",
         "tip2": "Neredeyse eşit puanlar eşitlik bandı içinde dönüşümlü kullanılır, böylece benzer hesaplar yükü paylaşmaya devam eder.",
         "tip3": "Sıralamayı her modelin fiilen faturalandırıldığı kota kovasıyla sınırlayın."
