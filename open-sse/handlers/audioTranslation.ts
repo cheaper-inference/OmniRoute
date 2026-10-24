@@ -19,28 +19,12 @@ import {
 import { buildAuthHeaders } from "../config/registryUtils.ts";
 import { buildMultipartBody } from "./audioTranscription.ts";
 import { errorResponse } from "../utils/error.ts";
+import { upstreamErrorResponse } from "../utils/audioResponse.ts";
 
 type TranslationCredentials = {
   apiKey?: string;
   accessToken?: string;
 };
-
-/**
- * Extract a readable error message from an upstream provider's error body.
- */
-function extractUpstreamErrorMessage(errText: string, status: number): string {
-  try {
-    const parsed = JSON.parse(errText);
-    const raw =
-      parsed?.error?.message ||
-      (typeof parsed?.error === "string" ? parsed.error : null) ||
-      parsed?.message ||
-      null;
-    return raw ? String(raw) : errText || `Upstream error (${status})`;
-  } catch {
-    return errText || `Upstream error (${status})`;
-  }
-}
 
 /**
  * Handle audio translation request
@@ -118,7 +102,7 @@ export async function handleAudioTranslation({
 
     if (!res.ok) {
       const errText = await res.text();
-      return errorResponse(res.status, extractUpstreamErrorMessage(errText, res.status));
+      return upstreamErrorResponse(res, errText);
     }
 
     const data = await res.text();
