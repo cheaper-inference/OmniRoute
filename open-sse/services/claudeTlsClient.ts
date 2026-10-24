@@ -8,13 +8,12 @@
  * preserves the original public export surface.
  */
 
+import { newestChromeProfile } from "../utils/browserProfiles.ts";
 import {
   createTlsClientModule,
   type TlsFetchOptions,
   type TlsFetchResult,
 } from "./tlsClientBase.ts";
-
-export const CLAUDE_TLS_BROWSER_MAJOR_VERSION = "146";
 
 const DEFAULT_TIMEOUT_MS =
   Number.parseInt(process.env.OMNIROUTE_CLAUDE_TLS_TIMEOUT_MS || "", 10) || 60_000;
@@ -23,7 +22,7 @@ const HARD_TIMEOUT_GRACE_MS =
 
 export const tlsClientModule = createTlsClientModule({
   providerName: "Claude",
-  tlsProfile: `chrome_${CLAUDE_TLS_BROWSER_MAJOR_VERSION}`,
+  tlsProfile: newestChromeProfile,
   emulationOs: "linux",
   domain: "https://claude.ai",
   streamEofPolicy: "include",

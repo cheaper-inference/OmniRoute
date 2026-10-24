@@ -13,13 +13,14 @@ import {
   type TlsFetchOptions,
   type TlsFetchResult,
 } from "./tlsClientBase.ts";
+import { newestChromeProfile } from "../utils/browserProfiles.ts";
 
 const DEFAULT_TIMEOUT_MS = 60_000;
 const HARD_TIMEOUT_GRACE_MS = 10_000;
 
 export const tlsClientModule = createTlsClientModule({
   providerName: "LMArena",
-  tlsProfile: "chrome_146",
+  tlsProfile: newestChromeProfile,
   emulationOs: "windows",
   domain: "https://lmarena.ai",
   // LMArena's proxy resolution domain is hardcoded to arena.ai, not the config domain.
