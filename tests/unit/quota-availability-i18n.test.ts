@@ -9,6 +9,63 @@ const catalogs = Object.fromEntries(
     .filter((file) => file.endsWith(".json"))
     .map((file) => [file.slice(0, -5), JSON.parse(readFileSync(new URL(file, root), "utf8"))])
 );
+// usage keys added between 1591cd55e0c2b4195cb41ea9e1967d3eb8f56d5e and
+// f03850e1ee56e8eab5efc43a9f7db08928835bb3. Global completeness is an upstream gate.
+const ownedKeys = [
+  "healthAccountHint",
+  "healthAction",
+  "healthAvailable",
+  "healthAwaitingSync",
+  "healthBannerAvailable",
+  "healthBannerUnavailable",
+  "healthCd5",
+  "healthCdw",
+  "healthCooldown",
+  "healthCutoffAtRequest",
+  "healthDetailsHint",
+  "healthDrag",
+  "healthDragPosition",
+  "healthExtraUsageBypass",
+  "healthFastest",
+  "healthFilteringBypass",
+  "healthFiveHour",
+  "healthIncluded",
+  "healthLegendAction",
+  "healthLegendCooldown",
+  "healthLegendHide",
+  "healthLegendOk",
+  "healthLegendPartial",
+  "healthLegendShow",
+  "healthNoRuntime",
+  "healthOldestQuota",
+  "healthOtherPool",
+  "healthOverall",
+  "healthOverview",
+  "healthPaidCreditsBypass",
+  "healthPeakHourProtection",
+  "healthPool",
+  "healthPreviousFailure",
+  "healthPreviousSnapshot",
+  "healthPurchasedBalanceBypass",
+  "healthQuotaError",
+  "healthQuotaExhausted",
+  "healthQuotaObserved",
+  "healthRatio",
+  "healthRecentSuccessBypass",
+  "healthRecovery",
+  "healthRecoveryUnknown",
+  "healthResetOrder",
+  "healthRestricted",
+  "healthRuntimeObserved",
+  "healthSummaryFailed",
+  "healthTitle",
+  "healthUnavailable",
+  "healthVerdictUnavailable",
+  "healthWait",
+  "healthWaited",
+  "layoutCompact",
+  "layoutFull",
+];
 const keys = [
   "healthAction",
   "healthTitle",
@@ -106,24 +163,15 @@ for (const locale of ["de", "fr", "ru", "ar", "pl"]) {
 }
 
 const obsolete = ["healthObservationUnavailable", "statCritical", "statAlert", "statHealthy"];
-function flatten(node: Record<string, unknown>, prefix = ""): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(node).flatMap(([key, value]) => {
-      const path = prefix ? `${prefix}.${key}` : key;
-      return value && typeof value === "object"
-        ? Object.entries(flatten(value as Record<string, unknown>, path))
-        : [[path, value as string]];
-    })
-  );
-}
-test("all 67 catalogs have identical key sets, no placeholders, and no obsolete availability keys", () => {
+test("all 67 catalogs have every availability-owned key, no owned placeholders, and no obsolete availability keys", () => {
   assert.equal(Object.keys(catalogs).length, 67);
-  const expected = Object.keys(flatten(catalogs.en)).sort();
   for (const [locale, catalog] of Object.entries(catalogs)) {
-    const messages = flatten(catalog);
-    assert.deepEqual(Object.keys(messages).sort(), expected, locale);
-    for (const [key, value] of Object.entries(messages))
-      assert.ok(!value.includes("__MISSING__"), `${locale}.${key}`);
+    for (const key of ownedKeys) {
+      const value = catalog.usage[key];
+      assert.equal(typeof value, "string", `${locale}.usage.${key}`);
+      assert.ok(value.trim().length > 0, `${locale}.usage.${key}`);
+      assert.ok(!value.includes("__MISSING__"), `${locale}.usage.${key}`);
+    }
     for (const key of obsolete)
       assert.equal(catalog.usage[key], undefined, `${locale}.${key} is obsolete`);
   }
