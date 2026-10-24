@@ -1,0 +1,1 @@
+- **feat(providers):** Added EmpirioLabs AI (`empiriolabs`) as an OpenAI-compatible API-key provider (`https://api.empiriolabs.ai/v1`), with live model discovery limited to chat models and API key checks against the authenticated `/v1/account/usage` endpoint.

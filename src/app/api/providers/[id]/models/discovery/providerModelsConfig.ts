@@ -108,6 +108,40 @@ export function parsePerplexitySonarModels(data: any): any[] {
     (model: any) => typeof model?.id === "string" && /^sonar(-|$)/.test(model.id)
   );
 }
+
+// EmpirioLabs AI's public /v1/models also lists image, video, speech and embedding
+// models. Each entry names the routes it serves in `supported_endpoints`, so keep
+// only the chat completions models and carry the catalog's context window, output
+// limit and image input, which the synced catalog would otherwise lack.
+const EMPIRIOLABS_CHAT_ENDPOINT = "POST /v1/chat/completions";
+
+export function parseEmpirioLabsChatModels(data: any): any[] {
+  const models = Array.isArray(data?.data) ? data.data : [];
+  return models
+    .filter(
+      (model: any) =>
+        typeof model?.id === "string" &&
+        model.id.length > 0 &&
+        Array.isArray(model.supported_endpoints) &&
+        model.supported_endpoints.includes(EMPIRIOLABS_CHAT_ENDPOINT)
+    )
+    .map((model: any) => ({
+      id: model.id,
+      name:
+        typeof model.display_name === "string" && model.display_name
+          ? model.display_name
+          : model.id,
+      ...(typeof model.context_window === "number" && model.context_window > 0
+        ? { contextLength: model.context_window }
+        : {}),
+      ...(typeof model.max_output_tokens === "number" && model.max_output_tokens > 0
+        ? { outputTokenLimit: model.max_output_tokens }
+        : {}),
+      ...(Array.isArray(model.input_modalities) && model.input_modalities.includes("image")
+        ? { supportsVision: true }
+        : {}),
+    }));
+}
 export type ProviderModelsHeaderContext = {
   id?: string;
   authType?: string;
@@ -754,6 +788,14 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     authHeader: "Authorization",
     authPrefix: "Bearer ",
     parseResponse: (data) => data.data || data.models || [],
+  },
+  empiriolabs: {
+    url: "https://api.empiriolabs.ai/v1/models",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    parseResponse: parseEmpirioLabsChatModels,
   },
   openference: {
     url: "https://api.openference.com/v1/models",

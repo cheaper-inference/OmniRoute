@@ -2199,6 +2199,29 @@
       "stream": "https://api.electronhub.ai/v1/chat/completions"
     }
   },
+  "empiriolabs": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.empiriolabs.ai/v1/chat/completions",
+      "stream": "https://api.empiriolabs.ai/v1/chat/completions"
+    }
+  },
   "eurouter": {
     "format": "openai",
     "headers": {

@@ -56,7 +56,8 @@ const P = await import("../../src/shared/constants/providers.ts");
 // Token Market (#13191) adds one apikey/gateways entry — measured 248 on the #13191 branch.
 // NaN.Builders adds one apikey/gateways entry — 250.
 // DaoXE adds one apikey/gateways entry — 251.
-const APIKEY_PROVIDER_COUNT = 252;
+// EmpirioLabs AI adds one apikey entry in its own extract, apikey/empiriolabs.ts: 253.
+const APIKEY_PROVIDER_COUNT = 253;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
@@ -91,6 +92,7 @@ test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into $
   const families: [string, string][] = [
     ["gateways", "APIKEY_PROVIDERS_GATEWAYS"],
     ["beatapi", "APIKEY_PROVIDERS_BEATAPI"],
+    ["empiriolabs", "APIKEY_PROVIDERS_EMPIRIOLABS"],
     ["frontier-labs", "APIKEY_PROVIDERS_FRONTIER"],
     ["inference-hosts", "APIKEY_PROVIDERS_INFERENCE"],
     ["enterprise-cloud", "APIKEY_PROVIDERS_ENTERPRISE"],
