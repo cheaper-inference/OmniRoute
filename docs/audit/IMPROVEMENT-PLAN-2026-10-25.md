@@ -227,10 +227,17 @@ npx c8 --include="open-sse/utils/recordHelpers.ts" \
        --include="src/lib/usage/callLogFilterOptions.ts" \
        --include="src/lib/db/compressionCombos.ts" \
        --include="src/lib/db/migrationRunner.ts" \
-       --reporter=text-summary node --import tsx/esm \
+       --reporter=text-summary \
+       --check-coverage --statements 60 --lines 60 --functions 60 --branches 60 \
+       node --import tsx/esm \
        --import ./open-sse/utils/setupPolyfill.ts \
        --import ./tests/_setup/isolateDataDir.ts \
        --test --test-force-exit \
+       tests/unit/compression/result-memo.test.ts \
+       tests/unit/streamHelpers.test.ts \
+       tests/unit/service-token-limit-counter.test.ts \
+       tests/unit/call-logs-filter-options.test.ts \
+       tests/unit/compression/compression-combos-db.test.ts \
        tests/unit/perf-hotpath-2026-10-25.test.ts \
        tests/unit/perf-db-2026-10-25.test.ts \
        tests/unit/perf-frontend-2026-10-25.test.ts \
@@ -240,20 +247,20 @@ npx c8 --include="open-sse/utils/recordHelpers.ts" \
 ```
 Results:
 ```
-1..35
-# tests 35
-# suites 0
-# pass 35
+1..55
+# tests 119
+# suites 14
+# pass 119
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
 
 =============================== Coverage summary ===============================
-Statements   : 67.47% ( 2160/3201 )
-Branches     : 54.86% ( 203/370 )
-Functions    : 65.25% ( 77/118 )
-Lines        : 67.47% ( 2160/3201 )
+Statements   : 76.6% ( 2452/3201 )
+Branches     : 68.73% ( 354/515 )
+Functions    : 82.2% ( 97/118 )
+Lines        : 76.6% ( 2452/3201 )
 ================================================================================
 ```
 
