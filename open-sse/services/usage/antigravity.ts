@@ -45,10 +45,9 @@ import {
 import { toRecord, toNumber, getFieldValue } from "./scalars.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
 import {
-  fetchAndParseAntigravityQuotaSummary,
-  type AntigravityQuotaGroup,
+  fetchAntigravityUserQuotaSummaryCached,
+  parseAntigravityWeeklyQuotas,
 } from "./antigravityWeeklyQuota.ts";
-import { getAntigravityQuotaFamily } from "../antigravityQuotaFamily.ts";
 
 type JsonRecord = Record<string, unknown>;
 type SubscriptionCacheEntry = {
@@ -622,11 +621,32 @@ export async function getAntigravityUsage(
       );
     }
 
-    const [data, userQuotaData, quotaSummary] = await Promise.all([
+    const [data, userQuotaData, summaryData] = await Promise.all([
       fetchAntigravityAvailableModelsCached(accessToken, projectId, clientProfile, options),
       fetchAntigravityUserQuotaCached(accessToken, projectId, clientProfile, options),
-      fetchAndParseAntigravityQuotaSummary(accessToken, projectId, clientProfile, options),
+      fetchAntigravityUserQuotaSummaryCached(accessToken, projectId, clientProfile, options),
     ]);
+    const weeklyQuotas = parseAntigravityWeeklyQuotas(summaryData);
+
+    const summaryGroups =
+      summaryData && typeof summaryData === "object"
+        ? Array.isArray(toRecord(summaryData).groups)
+          ? (toRecord(summaryData).groups as unknown[])
+          : Array.isArray(toRecord(toRecord(summaryData).quotaSummary).groups)
+            ? (toRecord(toRecord(summaryData).quotaSummary).groups as unknown[])
+            : null
+        : null;
+
+    const hasArgon: boolean | undefined =
+      summaryData === null || !Array.isArray(summaryGroups) || summaryGroups.length === 0
+        ? undefined
+        : Boolean(
+            weeklyQuotas.gemini_4_argon_weekly ||
+              weeklyQuotas.argon_weekly ||
+              summaryGroups.some((g) =>
+                /argon|gemini[\s_-]*4/i.test(String(toRecord(g).displayName || ""))
+              )
+          );
     const dataObj = toRecord(data);
     if (dataObj.__antigravityForbidden === true) {
       return { message: "Antigravity access forbidden. Check subscription." };
@@ -745,23 +765,11 @@ export async function getAntigravityUsage(
       };
     }
 
-    const quotaGroups: AntigravityQuotaGroup[] = quotaSummary.groups.map((group) => ({
-      ...group,
-      models: liveModelIds.filter((modelId) => {
-        const family = getAntigravityQuotaFamily(modelId);
-        return (
-          (group.id === "gemini" && family === "gemini") ||
-          (group.id === "claude_gpt" && family === "claude")
-        );
-      }),
-    }));
-
     return {
       plan: getAntigravityPlanLabel(subscriptionInfo, providerSpecificData),
-      quotaGroups,
       quotas: {
         ...quotas,
-        ...quotaSummary.quotas,
+        ...weeklyQuotas,
         ...(creditBalance !== null && {
           credits: {
             used: 0,
@@ -773,6 +781,7 @@ export async function getAntigravityUsage(
         }),
       },
       subscriptionInfo,
+      ...(typeof hasArgon === "boolean" ? { hasArgon } : {}),
     };
   } catch (error) {
     return {

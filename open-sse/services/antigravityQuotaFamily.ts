@@ -1,6 +1,6 @@
 const ANTIGRAVITY_PROVIDER_ID = "antigravity";
 
-export type AntigravityQuotaFamily = "gemini" | "claude" | "other";
+export type AntigravityQuotaFamily = "gemini" | "claude" | "argon" | "other";
 
 function normalizeModelId(model: string | null | undefined): string {
   return String(model || "")
@@ -22,6 +22,14 @@ export function getAntigravityQuotaFamily(
   const slashIndex = normalized.indexOf("/");
   const bare = slashIndex >= 0 ? normalized.slice(slashIndex + 1) : normalized;
 
+  if (
+    bare === "argon_weekly" ||
+    bare === "gemini_4_argon_weekly" ||
+    bare.includes("argon") ||
+    bare.startsWith("gemini-4")
+  ) {
+    return "argon";
+  }
   if (bare.startsWith("gemini-") || bare.includes("/gemini-") || bare.includes("gemini")) {
     return "gemini";
   }
@@ -73,7 +81,9 @@ export function quotaWindowNamesForScope(
 ): string[] {
   if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider)) return names;
   const scoped = selectAntigravityQuotaWindowNames(names, scope.requestedModel);
-  return scoped.length > 0 ? scoped : names;
+  if (scoped.length > 0) return scoped;
+  if (getAntigravityQuotaFamily(scope.requestedModel) === "argon") return [];
+  return names;
 }
 
 /**
@@ -138,7 +148,9 @@ export function selectAntigravityQuotaWindowNames(
       ? ["gemini_session", "gemini_weekly"]
       : requestedFamily === "claude"
         ? ["claude_gpt_session", "claude_gpt_weekly"]
-        : [];
+        : requestedFamily === "argon"
+          ? ["gemini_4_argon_weekly", "argon_weekly"]
+          : [];
 
   let exactWindows = quotaNames.filter((windowName) => {
     const bare = windowName.replace(/^(antigravity|agy)\//, "");
@@ -164,6 +176,7 @@ export function selectAntigravityQuotaWindowNames(
   const aggregateWindows = familyAggregates.filter((key) => quotaNames.includes(key));
   const scoped = [...exactWindows, ...aggregateWindows];
   if (scoped.length > 0) return scoped;
+  if (requestedFamily === "argon") return [];
 
   return quotaNames.filter(
     (windowName) => getAntigravityQuotaFamily(windowName) === requestedFamily
