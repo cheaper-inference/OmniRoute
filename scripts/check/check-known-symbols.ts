@@ -34,7 +34,7 @@
 //
 //   (5) A2A SKILLS — chaves de A2A_SKILL_HANDLERS (src/lib/a2a/taskExecution.ts) DEVEM
 //       bater bidirecionalmente com skills[].id expostos no Agent Card
-//       (src/app/.well-known/agent.json/route.ts). Divergência em qualquer direção = fail.
+//       (src/lib/a2a/agentCardMetadata.ts). Divergência em qualquer direção = fail.
 //
 //   (6) CLOUD AGENTS — entradas de AGENTS em src/lib/cloudAgent/registry.ts DEVEM bater
 //       bidirecionalmente com os arquivos de classe em src/lib/cloudAgent/agents/
@@ -640,7 +640,7 @@ async function main(): Promise<void> {
 
   // Parse the Agent Card route statically (the skills array is a literal in the source).
   const agentCardSource = readFileSync(
-    resolvePath(REPO_ROOT, "src/app/.well-known/agent.json/route.ts"),
+    resolvePath(REPO_ROOT, "src/lib/a2a/agentCardMetadata.ts"),
     "utf8"
   );
   // Extract skill IDs: `id: "..."` lines inside the skills array.
@@ -661,7 +661,7 @@ async function main(): Promise<void> {
     failures.push(
       `[a2a-skills] ${inHandlersNotCard.length} skill(s) em A2A_SKILL_HANDLERS mas ausente(s) do Agent Card (agentes não conseguem descobrir):\n` +
         inHandlersNotCard.map((s) => `    ✗ ${s}`).join("\n") +
-        `\n    → adicione o skill em src/app/.well-known/agent.json/route.ts (skills array).`
+        `\n    → adicione o skill em src/lib/a2a/agentCardMetadata.ts (skills array).`
     );
   }
   if (inCardNotHandlers.length) {

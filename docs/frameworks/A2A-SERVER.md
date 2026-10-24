@@ -217,7 +217,7 @@ The JSON-RPC endpoint `/a2a` is the canonical A2A entry point. The REST endpoint
    };
    ```
 
-3. **Expose in Agent Card:** in `src/app/.well-known/agent.json/route.ts`, append to the `skills` array:
+3. **Expose in Agent Card:** in `src/lib/a2a/agentCardMetadata.ts` (shared by `/.well-known/agent.json` and `/.well-known/agent-card.json`), append to the `skills` array:
 
    ```json
    {
