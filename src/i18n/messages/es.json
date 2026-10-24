@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Ahora",
       "coreConfigPath": "Archivo de configuración del núcleo",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Ruta absoluta a un .json (extensión en minúsculas). Vacío = sin generación. Cada sincronización escribe '<ruta>'.generated junto al archivo adoptado, nunca dentro de él.",
+      "coreConfigPathDesc": "Ruta absoluta a un .json/.yaml/.yml (extensión en minúsculas). Vacío = sin generación. Cada sincronización escribe '<ruta>'.generated junto al archivo adoptado, nunca dentro de él.",
       "lastSwitchKind": "Motivo del cambio",
       "switchKind": {
         "ip_quota_429": "quota",

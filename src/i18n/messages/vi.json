@@ -7279,7 +7279,7 @@
       "nextSwitchNow": "Ngay bây giờ",
       "coreConfigPath": "Tệp cấu hình lõi",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Đường dẫn tuyệt đối đến tệp .json (phần mở rộng viết thường). Để trống = không tạo. Mỗi lần đồng bộ ghi '<path>'.generated bên cạnh tệp đã áp dụng, không bao giờ ghi vào chính tệp đó.",
+      "coreConfigPathDesc": "Đường dẫn tuyệt đối đến tệp .json/.yaml/.yml (phần mở rộng viết thường). Để trống = không tạo. Mỗi lần đồng bộ ghi '<path>'.generated bên cạnh tệp đã áp dụng, không bao giờ ghi vào chính tệp đó.",
       "lastSwitchKind": "Lý do chuyển",
       "switchKind": {
         "ip_quota_429": "hạn mức",

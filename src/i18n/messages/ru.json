@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Сейчас",
       "coreConfigPath": "Файл конфигурации ядра",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Абсолютный путь к .json (расширение в нижнем регистре). Пусто = не создавать. Каждая синхронизация записывает '<path>'.generated рядом с принятым файлом, но не в него.",
+      "coreConfigPathDesc": "Абсолютный путь к .json/.yaml/.yml (расширение в нижнем регистре). Пусто = не создавать. Каждая синхронизация записывает '<path>'.generated рядом с принятым файлом, но не в него.",
       "lastSwitchKind": "Причина переключения",
       "switchKind": {
         "ip_quota_429": "квота",

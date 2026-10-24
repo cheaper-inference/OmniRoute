@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "الآن",
       "coreConfigPath": "ملف إعدادات النواة",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "مسار .json مطلق (امتداد بأحرف صغيرة). فارغ = بلا إنشاء. تكتب كل مزامنة '<path>'.generated بجوار الملف المعتمد وليس داخله أبدًا.",
+      "coreConfigPathDesc": "مسار .json/.yaml/.yml مطلق (امتداد بأحرف صغيرة). فارغ = بلا إنشاء. تكتب كل مزامنة '<path>'.generated بجوار الملف المعتمد وليس داخله أبدًا.",
       "lastSwitchKind": "سبب التبديل",
       "switchKind": {
         "ip_quota_429": "الحصة",

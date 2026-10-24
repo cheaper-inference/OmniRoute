@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Teraz",
       "coreConfigPath": "Plik konfiguracji rdzenia",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Bezwzględna ścieżka do pliku .json (rozszerzenie małymi literami). Puste = bez generowania. Każda synchronizacja zapisuje '<path>'.generated obok przyjętego pliku, nigdy do niego.",
+      "coreConfigPathDesc": "Bezwzględna ścieżka do pliku .json/.yaml/.yml (rozszerzenie małymi literami). Puste = bez generowania. Każda synchronizacja zapisuje '<path>'.generated obok przyjętego pliku, nigdy do niego.",
       "lastSwitchKind": "Powód przełączenia",
       "switchKind": {
         "ip_quota_429": "limit",

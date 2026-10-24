@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "지금",
       "coreConfigPath": "코어 구성 파일",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "소문자 확장자의 .json 절대 경로입니다. 비워 두면 생성하지 않습니다. 동기화할 때마다 적용된 파일 옆에 '<path>'.generated를 쓰며, 적용된 파일에는 쓰지 않습니다.",
+      "coreConfigPathDesc": "소문자 확장자의 .json/.yaml/.yml 절대 경로입니다. 비워 두면 생성하지 않습니다. 동기화할 때마다 적용된 파일 옆에 '<path>'.generated를 쓰며, 적용된 파일에는 쓰지 않습니다.",
       "lastSwitchKind": "전환 사유",
       "switchKind": {
         "ip_quota_429": "할당량",

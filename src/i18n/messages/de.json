@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Jetzt",
       "coreConfigPath": "Core-Konfigurationsdatei",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absoluter Pfad zu einer .json-Datei (Erweiterung in Kleinbuchstaben). Leer = keine Generierung. Jede Synchronisierung schreibt '<Pfad>'.generated neben die übernommene Datei, niemals in sie hinein.",
+      "coreConfigPathDesc": "Absoluter Pfad zu einer .json/.yaml/.yml-Datei (Erweiterung in Kleinbuchstaben). Leer = keine Generierung. Jede Synchronisierung schreibt '<Pfad>'.generated neben die übernommene Datei, niemals in sie hinein.",
       "lastSwitchKind": "Wechselgrund",
       "switchKind": {
         "ip_quota_429": "quota",

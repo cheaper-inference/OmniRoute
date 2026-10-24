@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Nu",
       "coreConfigPath": "Core-configuratiebestand",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absoluut .json-pad (extensie in kleine letters). Leeg = niet genereren. Elke synchronisatie schrijft '<path>'.generated naast het overgenomen bestand, nooit erin.",
+      "coreConfigPathDesc": "Absoluut .json/.yaml/.yml-pad (extensie in kleine letters). Leeg = niet genereren. Elke synchronisatie schrijft '<path>'.generated naast het overgenomen bestand, nooit erin.",
       "lastSwitchKind": "Reden van wisseling",
       "switchKind": {
         "ip_quota_429": "quotum",

@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Зараз",
       "coreConfigPath": "Файл конфігурації ядра",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Абсолютний шлях до .json (розширення малими літерами). Порожньо = не створювати. Кожна синхронізація записує '<path>'.generated поруч із прийнятим файлом, але не в нього.",
+      "coreConfigPathDesc": "Абсолютний шлях до .json/.yaml/.yml (розширення малими літерами). Порожньо = не створювати. Кожна синхронізація записує '<path>'.generated поруч із прийнятим файлом, але не в нього.",
       "lastSwitchKind": "Причина перемикання",
       "switchKind": {
         "ip_quota_429": "квота",

@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Şimdi",
       "coreConfigPath": "Çekirdek yapılandırma dosyası",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Mutlak .json yolu (küçük harfli uzantı). Boş = oluşturma. Her eşitleme, uygulanan dosyanın yanına '<path>'.generated yazar, dosyanın kendisine asla yazmaz.",
+      "coreConfigPathDesc": "Mutlak .json/.yaml/.yml yolu (küçük harfli uzantı). Boş = oluşturma. Her eşitleme, uygulanan dosyanın yanına '<path>'.generated yazar, dosyanın kendisine asla yazmaz.",
       "lastSwitchKind": "Geçiş nedeni",
       "switchKind": {
         "ip_quota_429": "kota",

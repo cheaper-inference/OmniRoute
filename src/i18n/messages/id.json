@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Sekarang",
       "coreConfigPath": "Berkas konfigurasi inti",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Jalur absolut .json (ekstensi huruf kecil). Kosong = tidak dibuat. Setiap sinkronisasi menulis '<path>'.generated di samping file yang diadopsi, tidak pernah ke dalamnya.",
+      "coreConfigPathDesc": "Jalur absolut .json/.yaml/.yml (ekstensi huruf kecil). Kosong = tidak dibuat. Setiap sinkronisasi menulis '<path>'.generated di samping file yang diadopsi, tidak pernah ke dalamnya.",
       "lastSwitchKind": "Alasan peralihan",
       "switchKind": {
         "ip_quota_429": "kuota",

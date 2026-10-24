@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "ตอนนี้",
       "coreConfigPath": "ไฟล์การกำหนดค่าคอร์",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "เส้นทาง .json แบบสัมบูรณ์ (นามสกุลตัวพิมพ์เล็ก) ว่าง = ไม่สร้าง การซิงก์แต่ละครั้งจะเขียน '<path>'.generated ไว้ข้างไฟล์ที่นำมาใช้ และไม่เขียนลงในไฟล์นั้นเอง",
+      "coreConfigPathDesc": "เส้นทาง .json/.yaml/.yml แบบสัมบูรณ์ (นามสกุลตัวพิมพ์เล็ก) ว่าง = ไม่สร้าง การซิงก์แต่ละครั้งจะเขียน '<path>'.generated ไว้ข้างไฟล์ที่นำมาใช้ และไม่เขียนลงในไฟล์นั้นเอง",
       "lastSwitchKind": "เหตุผลของการสลับ",
       "switchKind": {
         "ip_quota_429": "โควตา",

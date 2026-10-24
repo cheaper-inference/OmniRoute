@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "現在",
       "coreConfigPath": "核心設定檔",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "絕對 .json 路徑（副檔名小寫）。留空 = 不產生。每次同步會在已採用的檔案旁寫入 '<path>'.generated，絕不寫入該檔案本身。",
+      "coreConfigPathDesc": "絕對 .json/.yaml/.yml 路徑（副檔名小寫）。留空 = 不產生。每次同步會在已採用的檔案旁寫入 '<path>'.generated，絕不寫入該檔案本身。",
       "lastSwitchKind": "切換原因",
       "switchKind": {
         "ip_quota_429": "配額",

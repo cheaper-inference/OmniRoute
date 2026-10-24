@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "अभी",
       "coreConfigPath": "कोर कॉन्फ़िगरेशन फ़ाइल",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "निरपेक्ष .json पथ (छोटे अक्षरों में एक्सटेंशन)। खाली = न बनाएँ। हर सिंक अपनाई गई फ़ाइल के बगल में '<path>'.generated लिखता है, उस फ़ाइल में कभी नहीं।",
+      "coreConfigPathDesc": "निरपेक्ष .json/.yaml/.yml पथ (छोटे अक्षरों में एक्सटेंशन)। खाली = न बनाएँ। हर सिंक अपनाई गई फ़ाइल के बगल में '<path>'.generated लिखता है, उस फ़ाइल में कभी नहीं।",
       "lastSwitchKind": "स्विच का कारण",
       "switchKind": {
         "ip_quota_429": "कोटा",

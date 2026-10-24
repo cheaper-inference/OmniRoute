@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "今すぐ",
       "coreConfigPath": "コア設定ファイル",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "拡張子が小文字の .json の絶対パス。空欄 = 生成しない。同期のたびに、採用済みファイルの隣に '<path>'.generated を書き込み、採用済みファイル自体には書き込みません。",
+      "coreConfigPathDesc": "拡張子が小文字の .json/.yaml/.yml の絶対パス。空欄 = 生成しない。同期のたびに、採用済みファイルの隣に '<path>'.generated を書き込み、採用済みファイル自体には書き込みません。",
       "lastSwitchKind": "切り替えの理由",
       "switchKind": {
         "ip_quota_429": "クォータ",
