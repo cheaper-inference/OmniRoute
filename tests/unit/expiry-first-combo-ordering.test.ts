@@ -24,7 +24,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const dbCore = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
-const { setQuotaCache } = await import("../../src/domain/quotaCache.ts");
+const { setQuotaCache, getQuotaCache } = await import("../../src/domain/quotaCache.ts");
 const { orderTargetsByExpiryFirst, orderTargetsByResetAwareQuota, buildScopedExpiryQuotaView } =
   await import("../../open-sse/services/combo/quotaStrategies.ts");
 const { resolveExpiryFirstConfig, scoreExpiryFirstQuota } =
@@ -874,4 +874,60 @@ test("dispatch: promptCacheAffinityEnabled false leaves the expiry-first order u
     settings: { promptCacheAffinityEnabled: false },
   });
   assert.equal(calls[0], aId, "with affinity disabled the strategy order stands");
+});
+
+// case 26: coerceRemainingPercent. setQuotaCache normalizes numbers, so these
+// cases write the raw value into the cached row directly, as a row restored
+// from an older or external source could carry it.
+describe("expiry-first: remainingPercentage coercion", () => {
+  async function seedRawWeekly(label: string, raw: unknown, resetInMs = HOUR) {
+    const id = await createConnection("codex", label);
+    setQuotaCache(id, "codex", {
+      weekly: { remainingPercentage: 50, resetAt: isoFromNow(resetInMs) },
+    });
+    const entry = getQuotaCache(id);
+    assert.ok(entry?.quotas.weekly, "seeded weekly window must exist");
+    (entry.quotas.weekly as { remainingPercentage: unknown }).remainingPercentage = raw;
+    return id;
+  }
+
+  function weeklyPercentUsed(view: Record<string, unknown> | null) {
+    assert.ok(view, "expected a quota view");
+    const windows = (view as { windows: Record<string, { percentUsed: number }> }).windows;
+    return windows.weekly.percentUsed;
+  }
+
+  it("case 26a: a numeric string is parsed, with surrounding spaces trimmed", async () => {
+    const aId = await seedRawWeekly("c26a-a", "40");
+    assert.ok(
+      Math.abs(weeklyPercentUsed(buildScopedExpiryQuotaView(aId, "codex", "gpt-5")) - 0.6) < 1e-9
+    );
+    const bId = await seedRawWeekly("c26a-b", " 40 ");
+    assert.ok(
+      Math.abs(weeklyPercentUsed(buildScopedExpiryQuotaView(bId, "codex", "gpt-5")) - 0.6) < 1e-9
+    );
+  });
+
+  it("case 26b: an empty or blank string is skipped, not read as 0% left", async () => {
+    for (const [i, raw] of ["", "   "].entries()) {
+      const id = await seedRawWeekly(`c26b-${i}`, raw);
+      assert.equal(
+        buildScopedExpiryQuotaView(id, "codex", "gpt-5"),
+        null,
+        `raw ${JSON.stringify(raw)}`
+      );
+    }
+  });
+
+  it("case 26c: undefined is skipped, not read as exhausted", async () => {
+    const id = await seedRawWeekly("c26c", undefined);
+    assert.equal(buildScopedExpiryQuotaView(id, "codex", "gpt-5"), null);
+  });
+
+  it("case 26d: NaN and a non-numeric string are skipped", async () => {
+    for (const [i, raw] of [Number.NaN, "abc", Number.POSITIVE_INFINITY].entries()) {
+      const id = await seedRawWeekly(`c26d-${i}`, raw);
+      assert.equal(buildScopedExpiryQuotaView(id, "codex", "gpt-5"), null, `raw ${String(raw)}`);
+    }
+  });
 });
