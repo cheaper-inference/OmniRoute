@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "eż. 131072",
     "contextWindowOverrideHint": "Issettja manwalment it-tieqa tal-kuntest reali ta’ dan il-mudell (tokens) meta l-fornitur jirrapportaha ħażin. Dan jieħu preċedenza fuq il-valuri identifikati awtomatikament jew dawk tal-katalgu u jipprevjeni lir-routing ikkombinat milli jeskludi l-mudell.",
     "contextWindowOverrideInvalid": "Il-valur alternattiv għat-tieqa tal-kuntest irid ikun numru sħiħ pożittiv ta’ tokens",
+    "maxOutputTokenOverrideInvalid": "Il-valur alternattiv għan-numru massimu ta’ tokens tal-output irid ikun numru sħiħ pożittiv ta’ tokens",
     "visionCapableLabel": "Jappoġġja l-viżjoni",
     "visionCapableHint": "Immarka manwalment dan il-mudell bħala wieħed li jappoġġja l-viżjoni meta l-metadata tal-iskoperta tal-fornitur ma tindikax modalità ta’ input tal-immaġnijiet (komuni għal backends self-hosted/lokali).",
     "compatParamFiltersLabel": "Filtri tal-Parametri",

@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "hal. 131072",
     "contextWindowOverrideHint": "Manwal na itakda ang totoong context window (mga token) ng modelong ito kapag mali ang ulat ng provider. Mas nangingibabaw ito kaysa sa mga auto-detected/catalog na halaga at pinipigilan ang combo routing na alisin ang modelo.",
     "contextWindowOverrideInvalid": "Ang override sa context window ay dapat na isang positibong buong numero ng mga token",
+    "maxOutputTokenOverrideInvalid": "Ang override sa max output token ay dapat na isang positibong buong numero ng mga token",
     "visionCapableLabel": "May kakayahang vision",
     "visionCapableHint": "Manwal na markahan ang modelong ito bilang may kakayahang vision kapag hindi iniulat ng discovery metadata ng provider ang isang image input modality (karaniwan para sa mga self-hosted/lokal na backend).",
     "compatParamFiltersLabel": "Mga Param Filter",

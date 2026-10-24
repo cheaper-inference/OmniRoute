@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Teenusepakkujate registrid, päiseprofiilid, identiteet, …
 ├── handlers/               Päringutöötlejad (vestlus, manused, heli, pildid, …)
-├── executors/              150 teenusepakkuja täiturimoodulit (täituriklassid + teenusepakkuja-põhised abifunktsioonid)
+├── executors/              156 teenusepakkuja täiturimoodulit (täituriklassid + teenusepakkuja-põhised abifunktsioonid)
 ├── translator/             Vormingute teisendamine (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions voo teisendaja
 ├── services/               Üle 80 teenusemooduli (kombinatsioonid, varuvariandid, kvoodid, identiteet, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 tipptaseme täiturimoodulit (`*.ts`, välja arvatud `base.ts`, `index.ts` ja testid — seda arvu
+156 tipptaseme täiturimoodulit (`*.ts`, välja arvatud `base.ts`, `index.ts` ja testid — seda arvu
 mõõdab `npm run check:docs-counts`). Iga täituriklass laiendab klassi `BaseExecutor` (`base.ts`)
 kas otse või klassi `DefaultExecutor` või mõne muu täituri kaudu; ülejäänud moodulid on
 teenusepakkuja-põhised abimoodulid (tööriistaskeemid, fetch/TTS-adapterid, eripärade töötlejad).

@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Szolgáltatói nyilvántartások, fejlécprofilok, identitás, …
 ├── handlers/               Kéréskezelők (csevegés, beágyazások, hang, kép, …)
-├── executors/              150 szolgáltatói végrehajtómodul (végrehajtóosztályok + szolgáltatónkénti segédmodulok)
+├── executors/              156 szolgáltatói végrehajtómodul (végrehajtóosztályok + szolgáltatónkénti segédmodulok)
 ├── translator/             Formátumkonverzió (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions adatfolyam-transzformátor
 ├── services/               Több mint 80 szolgáltatásmodul (kombinációk, tartalékmechanizmusok, kvóták, identitás, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 felső szintű végrehajtómodul (`*.ts`, a `base.ts`, az `index.ts` és a tesztek nélkül — ezt a számot
+156 felső szintű végrehajtómodul (`*.ts`, a `base.ts`, az `index.ts` és a tesztek nélkül — ezt a számot
 az `npm run check:docs-counts` méri). Minden végrehajtóosztály a `BaseExecutor` (`base.ts`) osztályt
 terjeszti ki közvetlenül, vagy a `DefaultExecutor`, illetve egy másik végrehajtó közvetítésével; a fennmaradó modulok szolgáltatónkénti
 segédmodulok (eszközsémák, lekérési/TTS-adapterek, sajátosságkezelők). A végrehajtók közé tartoznak:

@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "de ex. 131072",
     "contextWindowOverrideHint": "Setați manual fereastra de context reală a acestui model (tokeni) atunci când furnizorul o raportează greșit. Are prioritate față de valorile detectate automat/din catalog și previne eliminarea modelului de către rutarea combo.",
     "contextWindowOverrideInvalid": "Suprascrierea ferestrei de context trebuie să fie un număr întreg pozitiv de tokeni",
+    "maxOutputTokenOverrideInvalid": "Suprascrierea numărului maxim de tokeni de ieșire trebuie să fie un număr întreg pozitiv de tokeni",
     "visionCapableLabel": "Capabil de procesare vizuală",
     "visionCapableHint": "Marcați manual acest model ca fiind capabil de procesare vizuală atunci când metadatele de descoperire ale furnizorului nu raportează o modalitate de introducere a imaginilor (frecvent pentru backend-urile auto-găzduite/locale).",
     "compatParamFiltersLabel": "Filtre parametri",

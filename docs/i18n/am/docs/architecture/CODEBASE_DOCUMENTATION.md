@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 የአቅራቢ መዝገቦች፣ የራስጌ መገለጫዎች፣ ማንነት፣ …
 ├── handlers/               የጥያቄ ተቆጣጣሪዎች (ውይይት፣ embeddings፣ ድምፅ፣ ምስል፣ …)
-├── executors/              150 የአቅራቢ አስፈጻሚ ሞጁሎች (የአስፈጻሚ ክፍሎች + የእያንዳንዱ አቅራቢ አጋዥ ክፍሎች)
+├── executors/              156 የአቅራቢ አስፈጻሚ ሞጁሎች (የአስፈጻሚ ክፍሎች + የእያንዳንዱ አቅራቢ አጋዥ ክፍሎች)
 ├── translator/             የቅርጸት ልወጣ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions የዥረት ቀያሪ
 ├── services/               80+ የአገልግሎት ሞጁሎች (ጥምረቶች፣ ተተኪ፣ ኮታዎች፣ ማንነት፣ …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 ከፍተኛ ደረጃ የአስፈጻሚ ሞጁሎች (`*.ts`፣ `base.ts`፣ `index.ts` እና ሙከራዎችን ሳይጨምር — ብዛቱን
+156 ከፍተኛ ደረጃ የአስፈጻሚ ሞጁሎች (`*.ts`፣ `base.ts`፣ `index.ts` እና ሙከራዎችን ሳይጨምር — ብዛቱን
 `npm run check:docs-counts` ይለካል)። እያንዳንዱ የአስፈጻሚ ክፍል `BaseExecutor` (`base.ts`)ን፣
 በቀጥታ ወይም በ`DefaultExecutor` ወይም በሌላ አስፈጻሚ በኩል ይወርሳል፤ የቀሩት ሞጁሎች ለእያንዳንዱ አቅራቢ
 የተዘጋጁ አጋዥ ክፍሎች ናቸው (የመሣሪያ ንድፎች፣ fetch/TTS አስማሚዎች፣ ያልተለመዱ ባህሪያት ተቆጣጣሪዎች)። አስፈጻሚዎቹ የሚከተሉትን ያካትታሉ፦

@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "k.m. 131072",
     "contextWindowOverrideHint": "Weka kwa mikono dirisha halisi la muktadha la mfano huu (tokens) wakati mtoa huduma anaporipoti vibaya. Inachukua nafasi ya thamani zilizogunduliwa kiotomatiki/katalogi na kuzuia uelekezaji wa combo usidondoshe mfano huo.",
     "contextWindowOverrideInvalid": "Ubatilishaji wa dirisha la muktadha lazima uwe nambari chanya kamili ya tokens",
+    "maxOutputTokenOverrideInvalid": "Ubatilishaji wa idadi ya juu ya tokeni za kutoa lazima uwe nambari chanya kamili ya tokens",
     "visionCapableLabel": "Uwezo wa kuona",
     "visionCapableHint": "Weka alama kwa mikono mfano huu kama una uwezo wa kuona wakati metadata ya ugunduzi ya mtoa huduma hairipoti mtindo wa uingizaji wa picha (kawaida kwa seva za ndani/zilizojiandaa wenyewe).",
     "compatParamFiltersLabel": "Vichujio vya Vigezo",

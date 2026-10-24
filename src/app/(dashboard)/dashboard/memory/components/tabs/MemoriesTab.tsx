@@ -2,7 +2,18 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Icon from "@/shared/components/Icon";
 import { Card, Badge, Button, Input, Select, Modal } from "@/shared/components";
+import EmptyState from "@/shared/components/EmptyState";
+import InfoTooltip from "@/shared/components/InfoTooltip";
 import EditMemoryModal from "../EditMemoryModal";
 
 interface Memory {
@@ -294,8 +305,12 @@ export default function MemoriesTab() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500" />
+      <div
+        role="status"
+        aria-label={t("loading")}
+        className="flex items-center justify-center h-32"
+      >
+        <Icon name="progress_activity" size={32} className="animate-spin text-primary" />
       </div>
     );
   }
@@ -307,7 +322,7 @@ export default function MemoriesTab() {
         <div className="flex items-center gap-2">
           {health !== null && (
             <span
-              className={`inline-block w-3 h-3 rounded-full ${health.working ? "bg-green-500" : "bg-red-500"}`}
+              className={`inline-block w-3 h-3 rounded-full ${health.working ? "bg-success" : "bg-error"}`}
               title={
                 health.working
                   ? t("pipelineOk", { latencyMs: health.latencyMs })
@@ -317,7 +332,7 @@ export default function MemoriesTab() {
           )}
           {health === null && !checkingHealth && (
             <span
-              className="inline-block w-3 h-3 rounded-full bg-gray-400"
+              className="inline-block w-3 h-3 rounded-full bg-surface-2"
               title={t("healthUnknown")}
             />
           )}
@@ -326,6 +341,7 @@ export default function MemoriesTab() {
           </Button>
         </div>
         <div className="flex gap-2 flex-wrap">
+          {/* kit-exception: Native file picker for Import (driven by the Import button; adapters have none). */}
           <input
             type="file"
             ref={fileInputRef}
@@ -354,7 +370,7 @@ export default function MemoriesTab() {
       </div>
 
       {importStatus && (
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/60 text-xs text-text-muted">
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/60 text-xs text-text-muted">
           {importStatus}
         </div>
       )}
@@ -365,12 +381,7 @@ export default function MemoriesTab() {
           <div className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs text-text-muted">{t("totalEntries")}</span>
-              <span
-                className="material-symbols-outlined text-[14px] text-text-muted cursor-help"
-                title={t("tooltip.totalEntries")}
-              >
-                info
-              </span>
+              <InfoTooltip text={t("tooltip.totalEntries")} />
             </div>
             <div className="text-2xl font-bold">{stats.totalEntries}</div>
           </div>
@@ -379,12 +390,7 @@ export default function MemoriesTab() {
           <div className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs text-text-muted">{t("tokensUsed")}</span>
-              <span
-                className="material-symbols-outlined text-[14px] text-text-muted cursor-help"
-                title={t("tooltip.tokensUsed")}
-              >
-                info
-              </span>
+              <InfoTooltip text={t("tooltip.tokensUsed")} />
             </div>
             <div className="text-2xl font-bold">{(stats.tokensUsed ?? 0).toLocaleString()}</div>
           </div>
@@ -394,12 +400,7 @@ export default function MemoriesTab() {
             <div className="p-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs text-text-muted">{t("hitRate")}</span>
-                <span
-                  className="material-symbols-outlined text-[14px] text-text-muted cursor-help"
-                  title={t("tooltip.hitRate")}
-                >
-                  info
-                </span>
+                <InfoTooltip text={t("tooltip.hitRate")} />
               </div>
               <div className="text-2xl font-bold">{((stats.hitRate ?? 0) * 100).toFixed(1)}%</div>
             </div>
@@ -410,20 +411,23 @@ export default function MemoriesTab() {
       {/* Memories table */}
       <Card>
         <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-semibold">{t("memories")}</h2>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <Input
+                icon="search"
                 placeholder={t("search")}
+                aria-label={t("search")}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setPage(1);
                 }}
-                className="w-64"
+                className="sm:w-64"
               />
               <Select
                 value={filterType}
+                aria-label={t("type")}
                 onChange={(e) => {
                   setFilterType(e.target.value);
                   setPage(1);
@@ -439,78 +443,73 @@ export default function MemoriesTab() {
           </div>
 
           {memories.length === 0 ? (
-            <div
-              data-testid="memories-empty-state"
-              className="flex flex-col items-center justify-center py-12 text-center"
-            >
-              <span className="material-symbols-outlined text-[40px] text-text-muted mb-3">
-                psychology
-              </span>
-              <p className="text-sm font-medium text-text-main mb-1">{t("emptyState.title")}</p>
-              <p className="text-xs text-text-muted max-w-xs">{t("emptyState.description")}</p>
-              <Button className="mt-4" size="sm" onClick={() => setAddDialogOpen(true)}>
-                {t("addMemory")}
-              </Button>
+            <div data-testid="memories-empty-state">
+              <EmptyState
+                icon="psychology"
+                title={t("emptyState.title")}
+                description={t("emptyState.description")}
+                actionLabel={t("addMemory")}
+                onAction={() => setAddDialogOpen(true)}
+              />
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2 px-4">{t("type")}</th>
-                      <th className="text-left py-2 px-4">{t("key")}</th>
-                      <th className="text-left py-2 px-4">{t("content")}</th>
-                      <th className="text-left py-2 px-4">{t("created")}</th>
-                      <th className="text-left py-2 px-4">{t("actions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {memories.map((memory) => (
-                      <tr key={memory.id} className="border-b hover:bg-surface/30">
-                        <td className="py-2 px-4">
-                          <Badge
-                            variant={getTypeColor(memory.type)}
-                            title={t(
-                              TYPE_TOOLTIPS[memory.type]?.replace("memory.", "") ?? memory.type
-                            )}
+              <Table aria-label={t("memories")} scrollbarLabel={t("memories")}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("type")}</TableHead>
+                    <TableHead>{t("key")}</TableHead>
+                    <TableHead>{t("content")}</TableHead>
+                    <TableHead>{t("created")}</TableHead>
+                    <TableHead>{t("actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {memories.map((memory) => (
+                    <TableRow key={memory.id}>
+                      <TableCell>
+                        <Badge
+                          variant={getTypeColor(memory.type)}
+                          title={t(
+                            TYPE_TOOLTIPS[memory.type]?.replace("memory.", "") ?? memory.type
+                          )}
+                        >
+                          {t(memory.type)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">{memory.key}</TableCell>
+                      <TableCell className="max-w-md truncate text-text-muted">
+                        {memory.content}
+                      </TableCell>
+                      <TableCell className="text-xs text-text-muted">
+                        {new Date(memory.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            data-testid={`edit-memory-${memory.id}`}
+                            onClick={() => openEdit(memory)}
+                            title={t("editMemory")}
+                            aria-label={t("editMemory")}
                           >
-                            {t(memory.type)}
-                          </Badge>
-                        </td>
-                        <td className="py-2 px-4 font-medium">{memory.key}</td>
-                        <td className="py-2 px-4 max-w-md truncate text-text-muted">
-                          {memory.content}
-                        </td>
-                        <td className="py-2 px-4 text-xs text-text-muted">
-                          {new Date(memory.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="py-2 px-4">
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              data-testid={`edit-memory-${memory.id}`}
-                              onClick={() => openEdit(memory)}
-                              title={t("editMemory")}
-                            >
-                              <span className="material-symbols-outlined text-[16px]">edit</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              data-testid={`delete-memory-${memory.id}`}
-                              onClick={() => setDeleteConfirmId(memory.id)}
-                            >
-                              {t("delete")}
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                            <Icon name="edit" size={16} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            data-testid={`delete-memory-${memory.id}`}
+                            onClick={() => setDeleteConfirmId(memory.id)}
+                          >
+                            {t("delete")}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-text-muted">
@@ -565,39 +564,31 @@ export default function MemoriesTab() {
         }
       >
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">{t("type")}</label>
-            <Select
-              value={newMemory.type}
-              onChange={(e) =>
-                setNewMemory({ ...newMemory, type: e.target.value as Memory["type"] })
-              }
-              className="w-full"
-            >
-              <option value="factual">{t("factual")}</option>
-              <option value="episodic">{t("episodic")}</option>
-              <option value="procedural">{t("procedural")}</option>
-              <option value="semantic">{t("semantic")}</option>
-            </Select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">{t("key")}</label>
-            <Input
-              value={newMemory.key}
-              onChange={(e) => setNewMemory({ ...newMemory, key: e.target.value })}
-              placeholder={t("keyPlaceholder")}
-              className="w-full"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">{t("content")}</label>
-            <Input
-              value={newMemory.content}
-              onChange={(e) => setNewMemory({ ...newMemory, content: e.target.value })}
-              placeholder={t("contentPlaceholder")}
-              className="w-full"
-            />
-          </div>
+          <Select
+            label={t("type")}
+            value={newMemory.type}
+            onChange={(e) => setNewMemory({ ...newMemory, type: e.target.value as Memory["type"] })}
+            className="w-full"
+          >
+            <option value="factual">{t("factual")}</option>
+            <option value="episodic">{t("episodic")}</option>
+            <option value="procedural">{t("procedural")}</option>
+            <option value="semantic">{t("semantic")}</option>
+          </Select>
+          <Input
+            label={t("key")}
+            value={newMemory.key}
+            onChange={(e) => setNewMemory({ ...newMemory, key: e.target.value })}
+            placeholder={t("keyPlaceholder")}
+            className="w-full"
+          />
+          <Input
+            label={t("content")}
+            value={newMemory.content}
+            onChange={(e) => setNewMemory({ ...newMemory, content: e.target.value })}
+            placeholder={t("contentPlaceholder")}
+            className="w-full"
+          />
         </div>
       </Modal>
 
@@ -663,7 +654,7 @@ export default function MemoriesTab() {
                 {summarizeCandidates.map((key, i) => (
                   <li
                     key={i}
-                    className="text-xs font-mono text-text-main truncate px-2 py-1 bg-surface/30 rounded"
+                    className="text-xs font-mono text-text-main truncate px-2 py-1 bg-bg-subtle rounded"
                   >
                     {key}
                   </li>

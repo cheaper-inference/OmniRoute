@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "ဥပမာ 131072",
     "contextWindowOverrideHint": "ပံ့ပိုးသူက မှားယွင်းဖော်ပြသည့်အခါ ဤမော်ဒယ်၏ အမှန်တကယ် context window (တိုကင်များ) ကို ကိုယ်တိုင် သတ်မှတ်ပါ။ ၎င်းသည် အလိုအလျောက် ရှာဖွေသတ်မှတ်ထားသော တန်ဖိုးများနှင့် catalog တန်ဖိုးများထက် ဦးစားပေးမည်ဖြစ်ပြီး combo routing က မော်ဒယ်ကို ဖယ်ရှားခြင်းမှ တားဆီးပေးသည်။",
     "contextWindowOverrideInvalid": "Context window အစားထိုးသတ်မှတ်ချက်သည် သုညထက်ကြီးသော ကိန်းပြည့်တိုကင်အရေအတွက် ဖြစ်ရမည်",
+    "maxOutputTokenOverrideInvalid": "အများဆုံး ထုတ်ပေး Token အစားထိုးသတ်မှတ်ချက်သည် သုညထက်ကြီးသော ကိန်းပြည့်တိုကင်အရေအတွက် ဖြစ်ရမည်",
     "visionCapableLabel": "Vision အသုံးပြုနိုင်သည်",
     "visionCapableHint": "ပံ့ပိုးသူ၏ ရှာဖွေတွေ့ရှိမှု metadata တွင် ရုပ်ပုံထည့်သွင်းမှု modality ကို မဖော်ပြထားသည့်အခါ ဤမော်ဒယ်ကို vision အသုံးပြုနိုင်သည်ဟု ကိုယ်တိုင် အမှတ်အသားပြုပါ (ကိုယ်တိုင် host လုပ်ထားသော/local backend များတွင် အဖြစ်များသည်)။",
     "compatParamFiltersLabel": "Parameter စစ်ထုတ်မှုများ",

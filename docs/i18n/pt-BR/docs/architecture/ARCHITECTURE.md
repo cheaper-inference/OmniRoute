@@ -15,7 +15,7 @@ Ele fornece um único endpoint compatível com a OpenAI (`/v1/*`) e roteia o tr�
 
 Principais recursos:
 
-- Superfície de API compatível com a OpenAI para CLIs/ferramentas (375 provedores, 154 módulos executores)
+- Superfície de API compatível com a OpenAI para CLIs/ferramentas (375 provedores, 156 módulos executores)
 - Tradução de solicitações/respostas entre formatos de provedores
 - Fallback de combinações de modelos (sequência de vários modelos)
 - Etapas estruturadas de combinação (`provider + model + connection`) com ordenação em tempo de execução por `compositeTiers`

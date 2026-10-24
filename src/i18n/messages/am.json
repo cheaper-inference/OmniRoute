@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "ለምሳሌ 131072",
     "contextWindowOverrideHint": "አቅራቢው የተሳሳተ መረጃ ሲያቀርብ፣ የዚህን ሞዴል ትክክለኛ የአውድ መስኮት (ቶከኖች) በእጅ ያዘጋጁ። ይህ በራስ-ሰር ከተገኙ/ከካታሎግ እሴቶች ይቀድማል፣ እንዲሁም የጥምር ማዘዋወር ሞዴሉን እንዳያስወግድ ይከላከላል።",
     "contextWindowOverrideInvalid": "የአውድ መስኮት መሻሪያው አዎንታዊ ሙሉ የቶከኖች ቁጥር መሆን አለበት",
+    "maxOutputTokenOverrideInvalid": "ከፍተኛው የውጤት ቶከኖች መሻሪያ አዎንታዊ ሙሉ የቶከኖች ቁጥር መሆን አለበት",
     "visionCapableLabel": "የምስል ችሎታ ያለው",
     "visionCapableHint": "የአቅራቢው የግኝት ዲበ ውሂብ የምስል ግቤት ሞዳሊቲን በማይገልጽበት ጊዜ፣ ይህን ሞዴል የምስል ችሎታ እንዳለው በእጅ ምልክት ያድርጉበት (በራስ ለሚስተናገዱ/አካባቢያዊ ባክኤንዶች የተለመደ)።",
     "compatParamFiltersLabel": "የመለኪያ ማጣሪያዎች",

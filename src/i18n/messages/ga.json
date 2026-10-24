@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "m.sh. 131072",
     "contextWindowOverrideHint": "Socraigh fíorfhuinneog chomhthéacs na samhla seo de láimh (comharthaí) nuair a thuairiscíonn an soláthraí go mícheart í. Tugtar tús áite di ar luachanna uathbhraite nó ar luachanna catalóige agus cuireann sí cosc ar ródú comhcheangailte an tsamhail a fhágáil ar lár.",
     "contextWindowOverrideInvalid": "Ní mór do shárú fhuinneog an chomhthéacs a bheith ina líon iomlán deimhneach comharthaí",
+    "maxOutputTokenOverrideInvalid": "Ní mór do shárú uasmhéid na dtóicíní aschuir a bheith ina líon iomlán deimhneach comharthaí",
     "visionCapableLabel": "In ann fís a phróiseáil",
     "visionCapableHint": "Marcáil an tsamhail seo de láimh mar shamhail atá in ann fís a phróiseáil nuair nach léirítear módúlacht ionchuir íomhá i meiteashonraí fionnachtana an tsoláthraí (rud atá coitianta i gcás cúléadan féinóstáilte nó áitiúil).",
     "compatParamFiltersLabel": "Scagairí Paraiméadar",

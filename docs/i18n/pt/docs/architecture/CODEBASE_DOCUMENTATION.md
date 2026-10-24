@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registos de fornecedores, perfis de cabeçalhos, identidade, …
 ├── handlers/               Processadores de pedidos (conversação, embeddings, áudio, imagem, …)
-├── executors/              150 módulos executores de fornecedores (classes de executor + auxiliares por fornecedor)
+├── executors/              156 módulos executores de fornecedores (classes de executor + auxiliares por fornecedor)
 ├── translator/             Conversão de formatos (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformador de streams da Responses API ↔ Chat Completions
 ├── services/               Mais de 80 módulos de serviço (combinações, recurso, quotas, identidade, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 módulos executores de nível superior (`*.ts` menos `base.ts`, `index.ts` e testes — a contagem
+156 módulos executores de nível superior (`*.ts` menos `base.ts`, `index.ts` e testes — a contagem
 é medida por `npm run check:docs-counts`). Cada classe de executor estende `BaseExecutor` (`base.ts`),
 diretamente ou através de `DefaultExecutor` ou de outro executor; os restantes módulos são auxiliares
 por fornecedor (esquemas de ferramentas, adaptadores de obtenção/TTS, processadores de particularidades). Os executores incluem:

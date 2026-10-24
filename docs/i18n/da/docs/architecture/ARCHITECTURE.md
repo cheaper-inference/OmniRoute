@@ -15,7 +15,7 @@ Den leverer et enkelt OpenAI-kompatibelt endpoint (`/v1/*`) og router trafik på
 
 Centrale funktioner:
 
-- OpenAI-kompatibel API-grænseflade til CLI/værktøjer (375 udbydere, 154 eksekveringsmoduler)
+- OpenAI-kompatibel API-grænseflade til CLI/værktøjer (375 udbydere, 156 eksekveringsmoduler)
 - Oversættelse af forespørgsler og svar på tværs af udbyderformater
 - Fallback med modelkombinationer (sekvens med flere modeller)
 - Strukturerede kombinationstrin (`provider + model + connection`) med runtime-sortering efter `compositeTiers`

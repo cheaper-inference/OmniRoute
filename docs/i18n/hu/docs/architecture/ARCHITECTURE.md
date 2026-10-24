@@ -15,7 +15,7 @@ Egyetlen, OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és fordítással,
 
 Fő képességek:
 
-- OpenAI-kompatibilis API-felület CLI-khez/eszközökhöz (375 szolgáltató, 154 végrehajtómodul)
+- OpenAI-kompatibilis API-felület CLI-khez/eszközökhöz (375 szolgáltató, 156 végrehajtómodul)
 - Kérések és válaszok fordítása a szolgáltatói formátumok között
 - Modellkombinációs tartalék útvonal (többmodelles sorozat)
 - Strukturált kombinációs lépések (`provider + model + connection`), futásidejű rendezéssel a `compositeTiers` alapján

@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "f.à. 131072",
     "contextWindowOverrideHint": "Ṣètò fèrèsé àyíká-ọ̀rọ̀ gidi ti módẹ́lì yìí (àwọn token) pẹ̀lú ọwọ́ nígbà tí olupèsè bá jabo rẹ̀ lọ́nà tí kò tọ́. Èyí yóò borí àwọn iye tí a ṣàwárí láìfọwọ́yí/tó wà nínú àkójọ, yóò sì dènà combo routing láti yọ módẹ́lì náà kúrò.",
     "contextWindowOverrideInvalid": "Ìṣètò àfikún fèrèsé àyíká-ọ̀rọ̀ gbọ́dọ̀ jẹ́ nọ́mbà odidi rere ti àwọn token",
+    "maxOutputTokenOverrideInvalid": "Ìṣètò àfikún iye tó pọ̀ jù ti àwọn token àbájáde gbọ́dọ̀ jẹ́ nọ́mbà odidi rere ti àwọn token",
     "visionCapableLabel": "Ó lè ṣiṣẹ́ pẹ̀lú ìran àwòrán",
     "visionCapableHint": "Fi ọwọ́ samì sí módẹ́lì yìí pé ó lè ṣiṣẹ́ pẹ̀lú ìran àwòrán nígbà tí dátà-àfikún àwárí olupèsè kò bá jabo irú ìgbéwọlé àwòrán (èyí wọ́pọ̀ fún àwọn backend tí a gbàlejò fúnra ẹni/tó wà lórí ẹ̀rọ agbègbè).",
     "compatParamFiltersLabel": "Àwọn Àlẹ̀ Párámítà",

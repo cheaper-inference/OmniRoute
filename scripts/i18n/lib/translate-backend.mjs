@@ -41,22 +41,78 @@ export function requireEnv(name) {
   return v.trim();
 }
 
+/**
+ * Pure over an env map. The primary model plus the optional fallback chain from
+ * `OMNIROUTE_TRANSLATION_FALLBACK_MODELS` (comma-separated, in order; blanks and repeats of the
+ * primary dropped). A wave used to stop dead when the one configured route hit its weekly quota
+ * (Codex 429 until ~2026-10-24, release/v3.8.53 stuck with 14 drifted sources); with a chain,
+ * each request moves to the next model when the current one fails for good.
+ */
+export function resolveModelChain(env = process.env) {
+  const model = (env.OMNIROUTE_TRANSLATION_MODEL ?? "").trim();
+  const seen = new Set([model]);
+  const fallbackModels = String(env.OMNIROUTE_TRANSLATION_FALLBACK_MODELS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s && !seen.has(s) && seen.add(s));
+  return { model, fallbackModels, models: [model, ...fallbackModels].filter(Boolean) };
+}
+
+/**
+ * Pure. Whether a failed request deserves the next model of the chain. Quota, auth, missing
+ * model, upstream errors, timeouts and network failures do; a request the backend rejected as
+ * malformed (400/413/422) would fail identically everywhere and is thrown as-is.
+ */
+export function isFallbackWorthy(err) {
+  const m = /upstream (\d{3})/.exec(String(err?.message ?? err));
+  if (!m) return true;
+  return !["400", "413", "422"].includes(m[1]);
+}
+
 export function backendConfig() {
   const apiUrl = requireEnv("OMNIROUTE_TRANSLATION_API_URL").replace(/\/$/, "");
   const apiKey = requireEnv("OMNIROUTE_TRANSLATION_API_KEY");
   const model = requireEnv("OMNIROUTE_TRANSLATION_MODEL");
+  const { fallbackModels } = resolveModelChain();
   const timeoutMs = Number(process.env.OMNIROUTE_TRANSLATION_TIMEOUT_MS || 60000);
   const reasoningEffort = process.env.OMNIROUTE_TRANSLATION_REASONING_EFFORT?.trim();
   return {
     apiUrl,
     apiKey,
     model,
+    fallbackModels,
     timeoutMs,
     ...(reasoningEffort ? { reasoningEffort } : {}),
   };
 }
 
-export async function callChat(
+/**
+ * One request through the model chain: the configured model first, then each fallback in
+ * order whenever the previous one failed for a reason the next model could fix
+ * (`isFallbackWorthy`). Every model keeps `callChatOnce`'s own single retry on transient
+ * failures, so a chain of two models makes at most four attempts per request.
+ */
+export async function callChat(messages, backend, retry = 0) {
+  const chain = [backend.model, ...(backend.fallbackModels ?? [])].filter(Boolean);
+  let lastErr;
+  for (let i = 0; i < chain.length; i++) {
+    try {
+      const content = await callChatOnce(messages, { ...backend, model: chain[i] }, retry);
+      if (i > 0) console.warn(`[i18n-fallback] success index=${i}`);
+      return content;
+    } catch (err) {
+      lastErr = err;
+      if (i < chain.length - 1 && isFallbackWorthy(err)) {
+        console.warn(`[i18n-fallback] attempt index=${i + 1}`);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastErr ?? new Error("no translation model configured");
+}
+
+export async function callChatOnce(
   messages,
   { apiUrl, apiKey, model, timeoutMs, reasoningEffort },
   retry = 0
@@ -86,7 +142,11 @@ export async function callChat(
         const wait = 1500 + retry * 1500;
         logWarn(`upstream ${res.status} — retrying after ${wait}ms`);
         await new Promise((r) => setTimeout(r, wait));
-        return callChat(messages, { apiUrl, apiKey, model, timeoutMs, reasoningEffort }, retry + 1);
+        return callChatOnce(
+          messages,
+          { apiUrl, apiKey, model, timeoutMs, reasoningEffort },
+          retry + 1
+        );
       }
       throw new Error(`upstream ${res.status}: ${text.slice(0, 200)}`);
     }
@@ -100,7 +160,11 @@ export async function callChat(
     if (err?.name === "AbortError") {
       if (retry < 1) {
         logWarn(`timeout after ${timeoutMs}ms — retrying`);
-        return callChat(messages, { apiUrl, apiKey, model, timeoutMs, reasoningEffort }, retry + 1);
+        return callChatOnce(
+          messages,
+          { apiUrl, apiKey, model, timeoutMs, reasoningEffort },
+          retry + 1
+        );
       }
       throw new Error(`timeout after ${timeoutMs}ms`);
     }
@@ -111,7 +175,11 @@ export async function callChat(
     ) {
       logWarn(`network error: ${err.message} — retrying`);
       await new Promise((r) => setTimeout(r, 1500));
-      return callChat(messages, { apiUrl, apiKey, model, timeoutMs, reasoningEffort }, retry + 1);
+      return callChatOnce(
+        messages,
+        { apiUrl, apiKey, model, timeoutMs, reasoningEffort },
+        retry + 1
+      );
     }
     throw err;
   } finally {

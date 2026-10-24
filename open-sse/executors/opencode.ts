@@ -114,7 +114,7 @@ import {
   isOpencodeV2ClientFingerprintEnabled,
 } from "@/shared/utils/featureFlags";
 import { setPublishedCatalogRoutingGate } from "../utils/opencodePublishedCatalog.ts";
-import { isEgressBucketedLockScope } from "../config/providerErrorRules.ts";
+import { rotatesEgressOnQuotaRefusal } from "../config/providerErrorRules.ts";
 import {
   BURST_PARK_THRESHOLD,
   parkWaitMs,
@@ -606,8 +606,10 @@ export class OpencodeExecutor extends BaseExecutor {
       const poolReselectOn = isOpencodePoolReselectEnabled();
       // Resolver published by the chat layer when the ambient egress came from
       // a live connection pool (undefined otherwise). Read once per request.
+      // The provider test is the quota-refusal scope, so an operator widening it
+      // (OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS=all) reaches the free zen ids too.
       const poolReselect =
-        poolReselectOn && isEgressBucketedLockScope(this.provider) && hasAmbientProxyContext()
+        poolReselectOn && rotatesEgressOnQuotaRefusal(this.provider) && hasAmbientProxyContext()
           ? (currentRequestContext()?.reselectPoolMember ?? null)
           : null;
       // Key of the ambient pool member this request egressed through (null when

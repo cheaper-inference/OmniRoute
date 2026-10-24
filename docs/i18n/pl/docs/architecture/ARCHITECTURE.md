@@ -22,7 +22,7 @@ Udostępnia pojedynczy punkt końcowy zgodny z OpenAI (`/v1/*`) i kieruje ruch d
 
 Kluczowe możliwości:
 
-- Interfejs API zgodny z OpenAI dla narzędzi CLI i innych narzędzi (375 dostawców, 154 moduły wykonawcze)
+- Interfejs API zgodny z OpenAI dla narzędzi CLI i innych narzędzi (375 dostawców, 156 moduły wykonawcze)
 - Translacja żądań i odpowiedzi między formatami dostawców
 - Awaryjne przełączanie kombinacji modeli (sekwencja wielu modeli)
 - Ustrukturyzowane kroki kombinacji (`provider + model + connection`) z porządkowaniem w czasie wykonywania według `compositeTiers`

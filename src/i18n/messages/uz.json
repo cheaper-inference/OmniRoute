@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "masalan, 131072",
     "contextWindowOverrideHint": "Provayder noto‘g‘ri ma’lumot berganda ushbu modelning haqiqiy kontekst oynasini (tokenlarda) qo‘lda belgilang. Bu qiymat avtomatik aniqlangan yoki katalogdagi qiymatlardan ustun turadi va kombinatsiyalangan marshrutlashda modelning chiqarib tashlanishiga yo‘l qo‘ymaydi.",
     "contextWindowOverrideInvalid": "Kontekst oynasi uchun qo‘lda belgilangan qiymat tokenlarning musbat butun soni bo‘lishi kerak",
+    "maxOutputTokenOverrideInvalid": "Maksimal chiqish tokenlari uchun qo‘lda belgilangan qiymat tokenlarning musbat butun soni bo‘lishi kerak",
     "visionCapableLabel": "Tasvirlarni qo‘llab-quvvatlaydi",
     "visionCapableHint": "Provayderning aniqlash metama’lumotlarida tasvir kiritish modalligi ko‘rsatilmagan bo‘lsa, ushbu modelni tasvirlarni qo‘llab-quvvatlaydigan model sifatida qo‘lda belgilang (bu o‘z serverida joylashtirilgan yoki lokal backendlar uchun keng tarqalgan).",
     "compatParamFiltersLabel": "Parametr filtrlari",

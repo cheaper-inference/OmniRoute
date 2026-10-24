@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "dịka ọmụmaatụ 131072",
     "contextWindowOverrideHint": "Jiri aka tọọ ezigbo windo context nke ụdị a (token) mgbe onye na-eweta ya kọọrọ ya n'ụzọ na-ezighi ezi. Nke a na-emeri ụkpụrụ achọpụtara na-akpaghị aka/nke katalọgụ ma gbochie ntụgharị ngwakọta iwepụ ụdị a.",
     "contextWindowOverrideInvalid": "Ntọala nnọchi windo context ga-abụrịrị ọnụọgụ token zuru ezu dị mma",
+    "maxOutputTokenOverrideInvalid": "Ntọala nnọchi token mmepụta kachasị elu ga-abụrịrị ọnụọgụ token zuru ezu dị mma",
     "visionCapableLabel": "Nwere ikike ịhụ ihe onyonyo",
     "visionCapableHint": "Jiri aka kaa ụdị a dị ka nke nwere ikike ịhụ ihe onyonyo mgbe metadata nchọpụta nke onye na-eweta ya anaghị egosi ụdị ntinye onyonyo (nke a na-ahụkarị na backend ndị a na-akwado n'onwe ha/ndị mpaghara).",
     "compatParamFiltersLabel": "Nzacha Paramita",

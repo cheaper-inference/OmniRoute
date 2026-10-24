@@ -173,14 +173,14 @@ export function ProviderCascadeNode({ data }: NodeProps) {
       {/* Body: model + latency */}
       <div className="px-2.5 py-1.5 flex flex-col gap-0.5">
         <span
-          className="text-[10px] text-muted font-mono truncate"
+          className="text-[10px] text-text-muted font-mono truncate"
           title={model as string}
           data-testid="model-name"
         >
           {model as string}
         </span>
         {latencyMs != null && (
-          <span className="text-[10px] text-muted">{(latencyMs as number).toFixed(0)}ms</span>
+          <span className="text-[10px] text-text-muted">{(latencyMs as number).toFixed(0)}ms</span>
         )}
       </div>
 

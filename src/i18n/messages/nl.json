@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "bijv. 131072",
     "contextWindowOverrideHint": "Stel handmatig het werkelijke contextvenster (tokens) van dit model in wanneer de provider dit onjuist rapporteert. Dit heeft voorrang op automatisch gedetecteerde/cataloguswaarden en voorkomt dat combo-routering het model laat vallen.",
     "contextWindowOverrideInvalid": "Overschrijving van het contextvenster moet een positief geheel getal aan tokens zijn",
+    "maxOutputTokenOverrideInvalid": "Overschrijving van de maximale uitvoertokens moet een positief geheel getal aan tokens zijn",
     "visionCapableLabel": "Geschikt voor vision",
     "visionCapableHint": "Markeer dit model handmatig als geschikt voor vision wanneer de ontdekkingsmetadata van de provider geen invoermodaliteit voor afbeeldingen rapporteert (gebruikelijk voor zelf-gehoste/lokale backends).",
     "compatParamFiltersLabel": "Parameterfilters",

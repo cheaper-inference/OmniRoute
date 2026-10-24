@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "pvz., 131072",
     "contextWindowOverrideHint": "Rankiniu būdu nustatykite tikrąjį šio modelio konteksto langą (žetonais), kai paslaugų teikėjas jį nurodo neteisingai. Ši reikšmė turi viršenybę prieš automatiškai aptiktas arba katalogo reikšmes ir neleidžia kombinuotajam maršrutų parinkimui atmesti modelio.",
     "contextWindowOverrideInvalid": "Konteksto lango reikšmė turi būti teigiamas sveikasis žetonų skaičius",
+    "maxOutputTokenOverrideInvalid": "Maksimalaus išvesties žetonų skaičiaus reikšmė turi būti teigiamas sveikasis žetonų skaičius",
     "visionCapableLabel": "Palaiko vaizdus",
     "visionCapableHint": "Rankiniu būdu pažymėkite šį modelį kaip palaikantį vaizdus, kai paslaugų teikėjo aptikimo metaduomenyse nenurodoma vaizdo įvesties modalija (tai įprasta savarankiškai talpinamoms arba vietinėms sistemoms).",
     "compatParamFiltersLabel": "Parametrų filtrai",

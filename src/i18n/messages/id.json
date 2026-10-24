@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "mis. 131072",
     "contextWindowOverrideHint": "Atur secara manual jendela konteks riil model ini (token) ketika penyedia salah melaporkannya. Mengalahkan nilai yang terdeteksi otomatis/katalog dan mencegah perutean kombo menjatuhkan model.",
     "contextWindowOverrideInvalid": "Penggantian jendela konteks harus berupa bilangan bulat positif token",
+    "maxOutputTokenOverrideInvalid": "Penggantian token output maksimum harus berupa bilangan bulat positif token",
     "visionCapableLabel": "Mendukung visi",
     "visionCapableHint": "Tandai model ini secara manual sebagai mendukung visi ketika metadata penemuan penyedia tidak melaporkan modalitas input gambar (umum untuk backend yang di-host sendiri/lokal).",
     "compatParamFiltersLabel": "Filter Parameter",

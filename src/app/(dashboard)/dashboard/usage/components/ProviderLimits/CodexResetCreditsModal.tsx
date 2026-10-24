@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
@@ -139,9 +140,9 @@ function ResetCreditConfirmation({
 }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+      <div className="rounded-lg border border-warning/30 bg-warning/10 p-4">
         <div className="flex items-start gap-3">
-          <span className="material-symbols-outlined text-amber-500">warning</span>
+          <Icon name="warning" className="text-warning" />
           <div>
             <p className="font-semibold text-text-main">
               {tr("confirmRedeemResetCreditTitle", "Redeem this reset credit?")}
@@ -326,7 +327,7 @@ function CreditSummary({
         <p className="mt-1 text-xs leading-relaxed text-text-muted">{credit.description}</p>
       )}
       <div className="mt-2 flex items-center gap-1.5 text-xs text-text-muted">
-        <span className="material-symbols-outlined text-[15px]">schedule</span>
+        <Icon name="schedule" size={15} />
         {expiry ? (
           <span>
             {tr("resetCreditExpiresAt", `Expires ${expiry}`, { date: expiry })}

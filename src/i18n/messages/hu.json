@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "pl. 131072",
     "contextWindowOverrideHint": "Állítsa be manuálisan a modell valós kontextusablakát (tokenekben), ha a szolgáltató hibásan jelenti azt. Elsőbbséget élvez az automatikusan észlelt/katalógusértékekkel szemben, és megakadályozza, hogy a kombinált útvonalválasztás eldobja a modellt.",
     "contextWindowOverrideInvalid": "A kontextusablak felülírásának pozitív egész számnak kell lennie tokenekben kifejezve",
+    "maxOutputTokenOverrideInvalid": "A maximális kimeneti tokenek felülírásának pozitív egész számnak kell lennie tokenekben kifejezve",
     "visionCapableLabel": "Látásra képes",
     "visionCapableHint": "Jelölje meg manuálisan ezt a modellt látásra képesként, ha a szolgáltató felderítési metaadatai nem jelentenek képbeviteli modalitást (gyakori a saját gazdagépű/helyi háttérprogramoknál).",
     "compatParamFiltersLabel": "Paraméterszűrők",

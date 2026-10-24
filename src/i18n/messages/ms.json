@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "cth. 131072",
     "contextWindowOverrideHint": "Tetapkan tetingkap konteks sebenar model ini (token) secara manual apabila penyedia salah melaporkannya. Mengatasi nilai yang dikesan secara automatik/katalog dan menghalang penghalaan kombo daripada menggugurkan model.",
     "contextWindowOverrideInvalid": "Pintasan tetingkap konteks mestilah nombor bulat positif bagi token",
+    "maxOutputTokenOverrideInvalid": "Pintasan token output maksimum mestilah nombor bulat positif bagi token",
     "visionCapableLabel": "Berkeupayaan visi",
     "visionCapableHint": "Tandakan model ini secara manual sebagai berkeupayaan visi apabila metadata penemuan penyedia tidak melaporkan modaliti input imej (biasa untuk bahagian belakang yang dihoskan sendiri/tempatan).",
     "compatParamFiltersLabel": "Penapis Parameter",

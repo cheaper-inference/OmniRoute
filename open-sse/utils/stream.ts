@@ -64,6 +64,7 @@ import { createReasoningStreamObserver } from "./responsesReasoningObservation.t
 import { recordToolLatency } from "../services/toolLatencyTracker.ts";
 import { extractToolSchemaMap } from "../translator/response/openai-responses/toolSchemas.ts";
 import { collectDeclaredToolNames } from "../translator/response/openai-responses/declaredToolName.ts";
+import { findDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { appendToolCallNameDelta } from "./toolCallName.ts";
 import {
   generateSessionId,
@@ -214,6 +215,8 @@ type StreamOptions = {
   provider?: string | null;
   reqLogger?: StreamLogger | null;
   toolNameMap?: unknown;
+  /** The CLIENT request's `tools[]`, the authority on tool-name casing for Anthropic-format clients. */
+  clientTools?: unknown;
   model?: string | null;
   connectionId?: string | null;
   apiKeyInfo?: unknown;
@@ -251,6 +254,8 @@ type TranslateState = ReturnType<typeof initState> & {
   toolSchemas?: Map<string, Record<string, unknown>> | null;
   /** Every tool name the request declared (with or without a schema). */
   declaredToolNames?: Set<string> | null;
+  /** The CLIENT request's `tools[]` — the authority on tool-name casing for Anthropic-format clients. */
+  clientTools?: unknown;
   customToolNames?: ReadonlySet<string>;
   requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
   upstreamError?: {
@@ -712,34 +717,6 @@ export function restoreClaudePassthroughToolUseName(
   return true;
 }
 
-/**
- * Exact- then case-insensitive lookup of `name` inside the request's tools[]
- * (Anthropic `name` or OpenAI `function.name`). Returns the DECLARED spelling,
- * or null when no declared tool matches (server tools, undeclared names).
- */
-function findDeclaredToolName(requestTools: unknown, name: string): string | null {
-  if (!Array.isArray(requestTools)) return null;
-  const lower = name.toLowerCase();
-  let caseInsensitive: string | null = null;
-  for (const tool of requestTools) {
-    if (!tool || typeof tool !== "object" || Array.isArray(tool)) continue;
-    const item = tool as JsonRecord;
-    const directName = typeof item.name === "string" ? item.name.trim() : "";
-    const fn =
-      item.function && typeof item.function === "object" && !Array.isArray(item.function)
-        ? (item.function as JsonRecord)
-        : null;
-    const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
-    const declared = functionName || directName;
-    if (!declared) continue;
-    if (declared === name) return declared;
-    if (caseInsensitive === null && declared.toLowerCase() === lower) {
-      caseInsensitive = declared;
-    }
-  }
-  return caseInsensitive;
-}
-
 // Note: TextDecoder/TextEncoder are created per-stream inside createSSEStream()
 // to avoid shared state issues with concurrent streams (TextDecoder with {stream:true}
 // maintains internal buffering state between decode() calls).
@@ -783,6 +760,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     provider = null,
     reqLogger = null,
     toolNameMap = null,
+    clientTools = null,
     model = null,
     connectionId = null,
     apiKeyInfo = null,
@@ -889,6 +867,7 @@ export function createSSEStream(options: StreamOptions = {}) {
           accumulatedReasoning: "",
           toolSchemas: extractToolSchemaMap(body),
           declaredToolNames: collectDeclaredToolNames(body),
+          clientTools,
           customToolNames,
           requestToolIdentityMap,
         }
@@ -1947,7 +1926,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   const restoredToolName = restoreClaudePassthroughToolUseName(
                     parsed,
                     toolNameMap,
-                    body
+                    clientTools ?? (body as JsonRecord | null)?.tools
                   );
                   // Track content length and accumulate from Claude format
                   if (parsed.delta?.text) {
@@ -3365,6 +3344,7 @@ export function createSSETransformStreamWithLogger(
   requestedThinking: boolean | undefined = undefined,
   customToolNames: ReadonlySet<string> = new Set(),
   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
+  clientTools: unknown = null,
   streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES
 ) {
   return createSSEStream({
@@ -3386,6 +3366,7 @@ export function createSSETransformStreamWithLogger(
     customToolNames,
     requestToolIdentityMap,
     streamBufferBytes,
+    clientTools,
   });
 }
 
@@ -3400,7 +3381,8 @@ export function createPassthroughStreamWithLogger(
   apiKeyInfo: unknown = null,
   onFailure: ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null = null,
   clientResponseFormat: string | null = null,
-  requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null
+  requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
+  clientTools: unknown = null
 ) {
   return createSSEStream({
     mode: STREAM_MODE.PASSTHROUGH,
@@ -3415,6 +3397,7 @@ export function createPassthroughStreamWithLogger(
     onFailure,
     clientResponseFormat,
     requestToolIdentityMap,
+    clientTools,
   });
 }
 

@@ -15,7 +15,7 @@ Disponibiliza um único endpoint compatível com OpenAI (`/v1/*`) e encaminha o 
 
 Capacidades principais:
 
-- Interface de API compatível com OpenAI para CLI/ferramentas (375 fornecedores, 154 módulos de execução)
+- Interface de API compatível com OpenAI para CLI/ferramentas (375 fornecedores, 156 módulos de execução)
 - Tradução de pedidos/respostas entre formatos de fornecedores
 - Recurso alternativo através de combinação de modelos (sequência de vários modelos)
 - Passos estruturados de combinação (`provider + model + connection`), com ordenação em tempo de execução por `compositeTiers`

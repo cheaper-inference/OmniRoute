@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "ad es. 131072",
     "contextWindowOverrideHint": "Imposta manualmente la finestra di contesto reale di questo modello (in token) quando il provider la segnala in modo errato. Prevale sui valori rilevati automaticamente o da catalogo ed evita che il routing combinato escluda il modello.",
     "contextWindowOverrideInvalid": "La forzatura della finestra di contesto deve essere un numero intero positivo di token",
+    "maxOutputTokenOverrideInvalid": "La forzatura del massimo di token di output deve essere un numero intero positivo di token",
     "visionCapableLabel": "Supporta visione",
     "visionCapableHint": "Contrassegna manualmente questo modello come compatibile con la visione quando i metadati di rilevamento del provider non segnalano una modalità di input immagine (comune per backend locali o self-hosted).",
     "compatParamFiltersLabel": "Filtri parametri",

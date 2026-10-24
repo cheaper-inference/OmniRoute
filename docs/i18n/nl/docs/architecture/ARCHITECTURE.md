@@ -15,7 +15,7 @@ Het biedt één OpenAI-compatibel endpoint (`/v1/*`) en routeert verkeer naar me
 
 Kernfunctionaliteiten:
 
-- OpenAI-compatibel API-oppervlak voor CLI/tools (375 providers, 154 uitvoeringsmodules)
+- OpenAI-compatibel API-oppervlak voor CLI/tools (375 providers, 156 uitvoeringsmodules)
 - Vertaling van requests/responses tussen providerindelingen
 - Fallback voor modelcombinaties (reeks van meerdere modellen)
 - Gestructureerde combinatiestappen (`provider + model + connection`) met runtimevolgorde op basis van `compositeTiers`

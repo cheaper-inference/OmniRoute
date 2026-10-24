@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "örn. 131072",
     "contextWindowOverrideHint": "Sağlayıcı yanlış bildirdiğinde bu modelin gerçek bağlam penceresini (token) manuel olarak ayarlayın. Otomatik algılanan/katalog değerlerinin üzerine yazar ve kombo yönlendirmenin modeli devre dışı bırakmasını önler.",
     "contextWindowOverrideInvalid": "Bağlam penceresi geçersiz kılma değeri pozitif bir tam sayı (token) olmalıdır",
+    "maxOutputTokenOverrideInvalid": "Maksimum çıkış token geçersiz kılma değeri pozitif bir tam sayı (token) olmalıdır",
     "visionCapableLabel": "Görsel destekli",
     "visionCapableHint": "Sağlayıcının keşif meta verileri bir görsel girdi modalitesi bildirmediğinde (kendi kendine barındırılan/yerel arka uçlar için yaygındır) bu modeli manuel olarak görsel destekli olarak işaretleyin.",
     "compatParamFiltersLabel": "Parametre Filtreleri",

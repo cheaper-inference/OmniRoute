@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "napr. 131072",
     "contextWindowOverrideHint": "Manuálne nastavte skutočné kontextové okno tohto modelu (v tokenoch), ak ho poskytovateľ nesprávne uvádza. Má prednosť pred automaticky zistenými/katalógovými hodnotami a zabraňuje vyradeniu modelu pri kombinovanom smerovaní.",
     "contextWindowOverrideInvalid": "Prepísanie kontextového okna musí byť kladné celé číslo tokenov",
+    "maxOutputTokenOverrideInvalid": "Prepísanie maximálneho výstupu tokenov musí byť kladné celé číslo tokenov",
     "visionCapableLabel": "Podpora spracovania obrazu",
     "visionCapableHint": "Manuálne označte tento model ako schopný spracovávať obraz, ak metaúdaje zisťovania poskytovateľa neuvádzajú modalitu vstupu obrázkov (bežné pri lokálnych/self-hosted backendoch).",
     "compatParamFiltersLabel": "Filtre parametrov",

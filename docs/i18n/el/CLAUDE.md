@@ -9,17 +9,18 @@
 μαθήματα PII). Διαβάστε το ολόκληρο· μην ξαναπροσθέτετε κανόνες έργου εδώ. Τα παρακάτω ισχύουν ΜΟΝΟ
 για το Claude Code — επιχειρησιακές βελτιώσεις κανόνων που ορίζονται ήδη στο `AGENTS.md`.
 
-## Απομόνωση Worktree — Ειδικά για Claude Code
+## Απομόνωση worktree — Ιδιαιτερότητες του Claude Code
 
-Το πλήρες υποχρεωτικό πρωτόκολλο worktree (επιβεβαίωση βασικού κλάδου, κανονική διαδρομή `.claude/worktrees/`,
-`cp -al` node_modules, κανόνες αποσυναρμολόγησης) βρίσκεται στο `AGENTS.md` → Git Workflow → "Worktree
-isolation". Σημεία ειδικά για το Claude Code:
+Το πλήρες υποχρεωτικό πρωτόκολλο worktree (επιβεβαίωση του κλάδου βάσης, κανονική διαδρομή
+`.claude/worktrees/`, `cp -al` για τα node_modules, κανόνες teardown) βρίσκεται στο
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (συνοπτικά στο `AGENTS.md` →
+Ροή εργασίας Git → "Απομόνωση worktree"). Σημεία ειδικά για το Claude Code:
 
-- Επιβεβαιώστε τον βασικό κλάδο με τον χειριστή μέσω `AskUserQuestion` (Σκληρός Κανόνας #19) εκτός εάν
-  σας το έχουν ήδη πει.
-- Προτιμήστε το εγγενές εργαλείο `EnterWorktree` — δημιουργεί ήδη worktrees κάτω από
+- Επιβεβαιώστε τον κλάδο βάσης με τον χειριστή μέσω `AskUserQuestion` (Αυστηρός Κανόνας #19), εκτός αν
+  σας το έχει ήδη αναφέρει.
+- Προτιμήστε το εγγενές εργαλείο `EnterWorktree` — δημιουργεί ήδη worktrees κάτω από το
   `.claude/worktrees/` (η κανονική διαδρομή). Δημιουργήστε το worktree με την τεκμηριωμένη εντολή `git
-worktree add`, στη συνέχεια καλέστε το `EnterWorktree` με τη `path` του.
+worktree add` και έπειτα καλέστε το `EnterWorktree` με το `path` του.
 
 ## Ασφάλεια μεταξύ συνεδριών — Ειδικά για Claude Code
 

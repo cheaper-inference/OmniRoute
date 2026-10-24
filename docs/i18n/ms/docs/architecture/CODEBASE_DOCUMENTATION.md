@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Daftar penyedia, profil pengepala, identiti, …
 ├── handlers/               Pengendali permintaan (sembang, pembenaman, audio, imej, …)
-├── executors/              150 modul pelaksana penyedia (kelas pelaksana + pembantu setiap penyedia)
+├── executors/              156 modul pelaksana penyedia (kelas pelaksana + pembantu setiap penyedia)
 ├── translator/             Penukaran format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Pengubah strim Responses API ↔ Chat Completions
 ├── services/               80+ modul perkhidmatan (gabungan, sandaran, kuota, identiti, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 modul pelaksana peringkat atas (`*.ts` tidak termasuk `base.ts`, `index.ts` dan ujian — bilangan ini
+156 modul pelaksana peringkat atas (`*.ts` tidak termasuk `base.ts`, `index.ts` dan ujian — bilangan ini
 diukur oleh `npm run check:docs-counts`). Setiap kelas pelaksana melanjutkan `BaseExecutor` (`base.ts`),
 secara langsung atau melalui `DefaultExecutor` atau pelaksana lain; modul selebihnya ialah pembantu
 setiap penyedia (skema alat, penyesuai pengambilan/TTS, pengendali kekhususan). Pelaksana termasuk:

@@ -137,7 +137,6 @@ const PROPERTY_ANNOTATION_KEYS = [
 ] as const;
 const SCALAR_PROPERTY_KEYS = new Set(["type", ...PROPERTY_ANNOTATION_KEYS]);
 const ARRAY_PROPERTY_KEYS = new Set(["type", "items", ...PROPERTY_ANNOTATION_KEYS]);
-const TODO_SCALAR_PROPERTY_KEYS = new Set(["type", "enum", ...PROPERTY_ANNOTATION_KEYS]);
 const NUMBER_BOUND_KEYS = ["minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum"] as const;
 const INTEGER_PROPERTY_KEYS = new Set(["type", ...NUMBER_BOUND_KEYS, ...PROPERTY_ANNOTATION_KEYS]);
 
@@ -235,9 +234,28 @@ function propertySupports(value: unknown, expected: SupportedPropertyType): bool
   return hasOnlyKeys(value, SCALAR_PROPERTY_KEYS) && value.type === expected;
 }
 
+const STRING_LENGTH_KEYS = ["minLength", "maxLength"] as const;
+const STRING_PROPERTY_KEYS = new Set([
+  "type",
+  "enum",
+  ...STRING_LENGTH_KEYS,
+  ...PROPERTY_ANNOTATION_KEYS,
+]);
+
 function propertyAcceptsString(value: unknown, actual: string): boolean {
-  if (!isRecord(value) || !hasOnlyKeys(value, TODO_SCALAR_PROPERTY_KEYS)) return false;
+  if (!isRecord(value) || !hasOnlyKeys(value, STRING_PROPERTY_KEYS)) return false;
   if (value.type !== "string") return false;
+  // Length bounds are validated against the literal the bridge is about to
+  // send. A real MCP grep tool constrains `pattern` (`minLength: 1` is the
+  // common shape); requiring a bare `{ type: "string" }` discarded it and every
+  // Cursor Grep ended in the fail-closed rejection.
+  for (const key of STRING_LENGTH_KEYS) {
+    const bound = value[key];
+    if (bound === undefined) continue;
+    if (!Number.isSafeInteger(bound) || (bound as number) < 0) return false;
+    if (key === "minLength" && actual.length < (bound as number)) return false;
+    if (key === "maxLength" && actual.length > (bound as number)) return false;
+  }
   if (value.enum === undefined) return true;
   return (
     Array.isArray(value.enum) &&
@@ -254,16 +272,33 @@ function namedTools(tools: McpToolDefinition[], names: string[]): McpToolDefinit
   return out;
 }
 
+/**
+ * Pick the property to carry a value. For `string` the literal must also be
+ * accepted by the property (enum membership, minLength/maxLength) — callers pass
+ * what they are about to send, so a constrained string property is no longer
+ * rejected just for declaring a bound.
+ */
 function selectProperty(
   schema: JsonSchema,
   properties: Record<string, unknown>,
   names: string[],
-  expected: SupportedPropertyType
+  expected: SupportedPropertyType,
+  actual?: string | number
 ): string | undefined {
   const required = new Set(requiredKeys(schema));
+  const accepts = (name: string): boolean => {
+    const property = properties[name];
+    if (expected !== "string" || actual === undefined) return propertySupports(property, expected);
+    return (
+      (propertySupports(property, "string") ||
+        (isRecord(property) &&
+          property.type === "string" &&
+          hasOnlyKeys(property, STRING_PROPERTY_KEYS))) &&
+      propertyAcceptsString(property, String(actual))
+    );
+  };
   return (
-    names.find((name) => required.has(name) && propertySupports(properties[name], expected)) ??
-    names.find((name) => propertySupports(properties[name], expected))
+    names.find((name) => required.has(name) && accepts(name)) ?? names.find((name) => accepts(name))
   );
 }
 
@@ -428,11 +463,23 @@ function grepBridge(
       const schema = schemaFor(tool);
       if (!schema) continue;
       const properties = schemaProperties(schema);
-      const patternKey = selectProperty(schema, properties, ["pattern", "glob"], "string");
+      const patternKey = selectProperty(
+        schema,
+        properties,
+        ["pattern", "glob"],
+        "string",
+        event.glob
+      );
       if (!patternKey) continue;
 
       const args: Record<string, unknown> = { [patternKey]: event.glob };
-      const pathKey = selectProperty(schema, properties, ["path", "dir", "directory"], "string");
+      const pathKey = selectProperty(
+        schema,
+        properties,
+        ["path", "dir", "directory"],
+        "string",
+        event.path
+      );
       if (pathKey && event.path) args[pathKey] = event.path;
       if (hasAllRequired(schema, args)) return { toolName: tool.name, arguments: args };
     }
@@ -442,17 +489,30 @@ function grepBridge(
     const schema = schemaFor(tool);
     if (!schema) continue;
     const properties = schemaProperties(schema);
-    const patternKey = selectProperty(schema, properties, ["pattern", "query", "regex"], "string");
+    const patternKey = selectProperty(
+      schema,
+      properties,
+      ["pattern", "query", "regex"],
+      "string",
+      event.pattern
+    );
     if (!patternKey) continue;
 
     const args: Record<string, unknown> = { [patternKey]: event.pattern };
-    const pathKey = selectProperty(schema, properties, ["path", "dir", "directory"], "string");
+    const pathKey = selectProperty(
+      schema,
+      properties,
+      ["path", "dir", "directory"],
+      "string",
+      event.path
+    );
     if (pathKey && event.path) args[pathKey] = event.path;
     const globKey = selectProperty(
       schema,
       properties,
       ["include", "glob", "filePattern"],
-      "string"
+      "string",
+      event.glob
     );
     if (globKey && event.glob) args[globKey] = event.glob;
     if (hasAllRequired(schema, args)) return { toolName: tool.name, arguments: args };
@@ -879,20 +939,50 @@ function singleToolGrepBridge(
     // An empty pattern with a glob is a file-search (ls) request. Only bridge
     // to tools that express directory/ls semantics, not content-grep tools.
     if (!LS_TOOL_NAMES.includes(tool.name.toLowerCase())) return null;
-    const patternKey = selectProperty(schema, properties, ["pattern", "glob"], "string");
+    const patternKey = selectProperty(
+      schema,
+      properties,
+      ["pattern", "glob"],
+      "string",
+      event.glob
+    );
     if (!patternKey) return null;
     const args: Record<string, unknown> = { [patternKey]: event.glob };
-    const pathKey = selectProperty(schema, properties, ["path", "dir", "directory"], "string");
+    const pathKey = selectProperty(
+      schema,
+      properties,
+      ["path", "dir", "directory"],
+      "string",
+      event.path
+    );
     if (pathKey && event.path) args[pathKey] = event.path;
     if (hasAllRequired(schema, args)) return { toolName: tool.name, arguments: args };
     return null;
   }
-  const patternKey = selectProperty(schema, properties, ["pattern", "query", "regex"], "string");
+  const patternKey = selectProperty(
+    schema,
+    properties,
+    ["pattern", "query", "regex"],
+    "string",
+    event.pattern
+  );
   if (!patternKey) return null;
   const args: Record<string, unknown> = { [patternKey]: event.pattern };
-  const pathKey = selectProperty(schema, properties, ["path", "dir", "directory"], "string");
+  const pathKey = selectProperty(
+    schema,
+    properties,
+    ["path", "dir", "directory"],
+    "string",
+    event.path
+  );
   if (pathKey && event.path) args[pathKey] = event.path;
-  const globKey = selectProperty(schema, properties, ["include", "glob", "filePattern"], "string");
+  const globKey = selectProperty(
+    schema,
+    properties,
+    ["include", "glob", "filePattern"],
+    "string",
+    event.glob
+  );
   if (globKey && event.glob) args[globKey] = event.glob;
   if (hasAllRequired(schema, args)) return { toolName: tool.name, arguments: args };
   return null;

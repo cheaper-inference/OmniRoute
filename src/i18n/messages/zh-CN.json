@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "例如 131072",
     "contextWindowOverrideHint": "当提供者误报时，手动设置此模型的实际上下文窗口（token）。此设置优先于自动检测/目录值，并防止组合路由丢弃该模型。",
     "contextWindowOverrideInvalid": "上下文窗口覆盖值必须是正整数 token 数",
+    "maxOutputTokenOverrideInvalid": "最大输出 token 覆盖值必须是正整数 token 数",
     "visionCapableLabel": "支持视觉",
     "visionCapableHint": "当提供者的发现元数据未报告图像输入模态时（常见于自托管/本地后端），手动将此模型标记为支持视觉。",
     "compatParamFiltersLabel": "参数过滤器",

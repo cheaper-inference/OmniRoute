@@ -15,7 +15,7 @@ Proporciona un único endpoint compatible con OpenAI (`/v1/*`) y enruta el tráf
 
 Capacidades principales:
 
-- Superficie de API compatible con OpenAI para CLI/herramientas (375 proveedores, 154 módulos ejecutores)
+- Superficie de API compatible con OpenAI para CLI/herramientas (375 proveedores, 156 módulos ejecutores)
 - Traducción de solicitudes/respuestas entre formatos de proveedores
 - Conmutación por error mediante combinaciones de modelos (secuencia de varios modelos)
 - Pasos de combinación estructurados (`provider + model + connection`) con ordenación en tiempo de ejecución mediante `compositeTiers`

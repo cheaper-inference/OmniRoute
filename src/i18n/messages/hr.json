@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "npr. 131072",
     "contextWindowOverrideHint": "Ručno postavite stvarni kontekstni prozor ovog modela (u tokenima) kada ga pružatelj pogrešno prijavljuje. Ima prednost nad automatski otkrivenim/kataloškim vrijednostima i sprječava kombinirano usmjeravanje da odbaci model.",
     "contextWindowOverrideInvalid": "Vrijednost nadjačavanja kontekstnog prozora mora biti pozitivan cijeli broj tokena",
+    "maxOutputTokenOverrideInvalid": "Vrijednost nadjačavanja maksimalnog broja izlaznih tokena mora biti pozitivan cijeli broj tokena",
     "visionCapableLabel": "Podržava slike",
     "visionCapableHint": "Ručno označite da ovaj model podržava slike kada metapodaci koje pružatelj daje pri otkrivanju ne navode mogućnost slikovnog unosa (što je uobičajeno za samostalno hostirana/lokalna pozadinska rješenja).",
     "compatParamFiltersLabel": "Filtri parametara",

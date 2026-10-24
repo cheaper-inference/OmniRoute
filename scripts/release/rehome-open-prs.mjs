@@ -33,7 +33,7 @@
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-const REPO = "diegosouzapw/OmniRoute";
+const REPO = "cheaper-inference/OmniRoute";
 
 function gh(args, { allowFail = false } = {}) {
   try {
@@ -53,7 +53,8 @@ export function classify(pr, currentBase, nextBase) {
   if (pr.baseRefName !== currentBase) {
     return { action: "skip", reason: `base is ${pr.baseRefName}, not the frozen branch` };
   }
-  if (pr.isDraft) return { action: "retarget", reason: "draft — retarget anyway, it still needs a home" };
+  if (pr.isDraft)
+    return { action: "retarget", reason: "draft — retarget anyway, it still needs a home" };
   return { action: "retarget", reason: "open PR on the frozen branch" };
 }
 
@@ -83,12 +84,24 @@ function main(argv) {
   // --limit 300: `gh pr list` returns 30 by default. Without this the loop
   // silently re-homes a third of the queue and exits 0.
   const raw = gh([
-    "pr", "list", "--repo", REPO, "--state", "open", "--limit", "300",
-    "--base", currentBase, "--json", "number,title,isDraft,baseRefName",
+    "pr",
+    "list",
+    "--repo",
+    REPO,
+    "--state",
+    "open",
+    "--limit",
+    "300",
+    "--base",
+    currentBase,
+    "--json",
+    "number,title,isDraft,baseRefName",
   ]);
   const prs = JSON.parse(raw);
 
-  console.log(`${prs.length} open PR(s) on ${currentBase} → ${nextBase}${dryRun ? "  [DRY RUN]" : ""}\n`);
+  console.log(
+    `${prs.length} open PR(s) on ${currentBase} → ${nextBase}${dryRun ? "  [DRY RUN]" : ""}\n`
+  );
 
   const failed = [];
   let moved = 0;
@@ -111,7 +124,17 @@ function main(argv) {
 
     // The read-back is the whole point: `gh pr edit --base` exits 0 on failure.
     const actual = gh(
-      ["pr", "view", String(pr.number), "--repo", REPO, "--json", "baseRefName", "--jq", ".baseRefName"],
+      [
+        "pr",
+        "view",
+        String(pr.number),
+        "--repo",
+        REPO,
+        "--json",
+        "baseRefName",
+        "--jq",
+        ".baseRefName",
+      ],
       { allowFail: true }
     );
 
@@ -121,13 +144,20 @@ function main(argv) {
       continue;
     }
 
-    gh([
-      "pr", "comment", String(pr.number), "--repo", REPO,
-      "--body",
-      `Re-homed to \`${nextBase}\`: v${current} entered its release freeze, so the branch now belongs ` +
-        `to the release captain and development continues on the next cycle. Nothing is wrong with this ` +
-        `PR — it just needed a live base. No action needed from you; CI will re-run against the new base.`,
-    ], { allowFail: true });
+    gh(
+      [
+        "pr",
+        "comment",
+        String(pr.number),
+        "--repo",
+        REPO,
+        "--body",
+        `Re-homed to \`${nextBase}\`: v${current} entered its release freeze, so the branch now belongs ` +
+          `to the release captain and development continues on the next cycle. Nothing is wrong with this ` +
+          `PR — it just needed a live base. No action needed from you; CI will re-run against the new base.`,
+      ],
+      { allowFail: true }
+    );
 
     console.log(`  ✔  #${pr.number} → ${nextBase}`);
     moved++;

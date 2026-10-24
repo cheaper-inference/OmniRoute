@@ -25,6 +25,7 @@ import {
   isProviderModelUnsupported400,
   cooldownUntilMs,
 } from "../accountFallback.ts";
+import { isModelNotFound404 } from "../accountFallback/perModelFailureScope.ts";
 import { isRequestScoped400 } from "../accountFallback/requestScoped400.ts";
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
@@ -298,6 +299,12 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   // connection health signal and must never feed lockout/cooldown/disable.
   resource_pressure: true,
   heap_pressure: true,
+  // #17132: Quota Share absolute-cap block — OUR OWN per-API-key policy decision,
+  // emitted by the chatCore quota-share pre-hook. The shared connection is healthy
+  // and keeps serving the other pool keys, so this code must never feed
+  // markAccountUnavailable, the provider breaker, or the #1731/#1731v2 combo
+  // skip-marking — in a combo it only skips this one target.
+  quota_share_blocked: true,
 };
 
 /** Request/model-specific failures must not poison provider-wide resilience state. */
@@ -471,7 +478,11 @@ export function shouldSkipConnDisable(
     // #14815: translation fails locally on the client's body — no account is at fault.
     result.errorCode === TRANSLATION_FAILURE_CODE ||
     (is401 && hasExtraKeys) ||
-    isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) ||
+    // Cursor's typed model-unavailable 404 is not a malformed request. Reuse
+    // the same model attribution predicate as failure persistence; ordinary
+    // invalid_request_error (including 400) remains request-scoped.
+    (isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) &&
+      !(provider === "cursor" && isModelNotFound404(result.status, errorText))) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
     isReqScoped400
   );

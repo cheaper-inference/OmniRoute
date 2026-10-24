@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "例如 131072",
     "contextWindowOverrideHint": "當提供者回報不正確時，手動設定此模型的實際上下文視窗（token）。此設定優先於自動偵測/目錄值，並可防止組合路由丟棄該模型。",
     "contextWindowOverrideInvalid": "上下文視窗覆寫值必須為正整數 token 數",
+    "maxOutputTokenOverrideInvalid": "最大輸出 token 覆寫值必須為正整數 token 數",
     "visionCapableLabel": "支援視覺",
     "visionCapableHint": "當提供者的探索中繼資料未回報圖片輸入模式時（常見於自託管/本地後端），手動將此模型標記為具備視覺能力。",
     "compatParamFiltersLabel": "參數過濾器",

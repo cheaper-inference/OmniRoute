@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "z. B. 131072",
     "contextWindowOverrideHint": "Legen Sie das tatsächliche Kontextfenster (Tokens) dieses Modells manuell fest, wenn der Anbieter es falsch meldet. Hat Vorrang vor automatisch erkannten/Katalog-Werten und verhindert, dass das Combo-Routing das Modell verwirft.",
     "contextWindowOverrideInvalid": "Die Kontextfenster-Überschreibung muss eine positive ganze Zahl von Tokens sein",
+    "maxOutputTokenOverrideInvalid": "Die Überschreibung der maximalen Ausgabetoken muss eine positive ganze Zahl von Tokens sein",
     "visionCapableLabel": "Vision-fähig",
     "visionCapableHint": "Markieren Sie dieses Modell manuell als vision-fähig, wenn die Discovery-Metadaten des Anbieters keine Bildeingabe-Modalität melden (häufig bei selbst gehosteten/lokalen Backends).",
     "compatParamFiltersLabel": "Parameterfilter",

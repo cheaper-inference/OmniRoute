@@ -43,11 +43,11 @@ aadressile `POST /a2a` annavad HTTP 503 koos JSON-RPC veakoodiga `-32000`.
 
 ---
 
-## JSON-RPC 2.0 Meetodid
+## JSON-RPC 2.0 meetodid
 
-### `message/send` — Sünkroonne Täitmine
+### `message/send` — sünkroonne täitmine
 
-Saadab sõnumi oskusele ja ootab täielikku vastust.
+Saadab oskusele sõnumi ja ootab täielikku vastust.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-u puhul alistab `metadata.combo` lüüsipäringus sõnaselgelt
+`metadata.model`-i; see saadetakse tegeliku `model`-ina, mitte eiratava
+`x-combo` JSON-väljana. Lüüsis kehtivad endiselt tavapärased API-võtme ja
+sihtkohapõhised autoriseerimisreeglid. Sobimatu või tühi kombinatsioon lükatakse tagasi.
+
+Tulemus sisaldab välju `requested_combo` (kutsuja kavatsus), `dispatched_model`
+(tegelik lüüsipäring), `response_model` (lüüsi vastus) ja
+`confirmed_combo`. Viimane väli on `null`, välja arvatud juhul, kui lüüs
+tuvastab kombinatsiooni sõnaselgelt. A2A otsustuslogid omistavad täitmise ainult
+kinnitatud kombinatsioonile, säilitades kinnitamata päringu väljana `requestedCombo`.
+
 **Vastus:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE Voog
+### `message/stream` — SSE voogedastus
 
-Sarnane `message/send`-iga, aga tagastab Server-Sent Events reaalajas voogu jaoks.
+Sama mis `message/send`, kuid tagastab reaalajas voogedastuseks Server-Sent Events sündmused.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE Sündmused:**
+**SSE sündmused:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Küsi Ülesande Olekut
+### `tasks/get` — ülesande oleku pärimine
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Tühista Ülesanne
+### `tasks/cancel` — ülesande tühistamine
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Saadaolevad oskused
 
-OmniRoute pakub 6 A2A oskust, mis on ühendatud failis `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuse moodul asub kataloogis `src/lib/a2a/skills/`.
+OmniRoute pakub 6 A2A-oskust, mis on seotud kohas `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuse moodul asub kataloogis `src/lib/a2a/skills/`.
 
-| Oskus                       | ID                   | Kirjeldus                                                                                                                                                      | Sildid                         | Näited                                   |
-| :-------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :--------------------------------------- |
-| Nutikas marsruutimine       | `smart-routing`      | Marsruudib viiba optimaalse teenusepakkuja või kombinatsiooni kaudu, kasutades OmniRoute'i kombinatsioonimootorit ja hindamist                                 | marsruutimine, teenusepakkujad | "Marsruudi see viip parima mudeli kaudu" |
-| Kvoodihaldus                | `quota-management`   | Esitab iga teenusepakkuja kvoodi oleku ja aitab kutsujatel otsustada, millal päringuid piirata või teenusepakkujat vahetada                                    | kvoot, teenusepakkujad         | "Kontrolli anthropic kvooti"             |
-| Teenusepakkujate avastamine | `provider-discovery` | Loetleb installitud teenusepakkujad koos võimekuste, tasuta taseme tähiste ja OAuthi olekuga                                                                   | teenusepakkujad, avastamine    | "Millised teenusepakkujad on saadaval?"  |
-| Kulude analüüs              | `cost-analysis`      | Hindab päringu või vestluse maksumust kataloogi ja hiljutise kasutuse põhjal                                                                                   | kulu, kasutus                  | "Hinda selle vestluse maksumust"         |
-| Tervisearuanne              | `health-report`      | Koondab iga teenusepakkuja kaitselüliti, ooteaja ja lukustuse oleku                                                                                            | seisund, töökindlus            | "Kuva kõigi teenusepakkujate seisund"    |
-| Võimekuste loend            | `list-capabilities`  | Tagastab täieliku 45 kirjega Agent Skillsi kataloogi (23 API + 21 CLI + 1 konfiguratsioon) markdown-tabelina koos SKILL.md toor-URL-idega konteksti lisamiseks | kataloog, avastamine, oskused  | "Loetle kõik OmniRoute'i võimekused"     |
+| Oskus              | ID                   | Kirjeldus                                                                                                                                                  | Sildid                     | Näited                                     |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :----------------------------------------- |
+| Smart Routing      | `smart-routing`      | Marsruudib prompti optimaalse pakkuya/kombo kaudu, kasutades OmniRoute'i kombo-mootorit ja skoorimist                                                      | routing, providers         | "Marsruudi see prompt parima mudeli kaudu" |
+| Quota Management   | `quota-management`   | Annab ülevaate pakkujapõhisest kvoodiseisundist ja aitab kutsujal otsustada, millal piirata või vahetada                                                   | quota, providers           | "Kontrolli anthropic'i kvooti"             |
+| Provider Discovery | `provider-discovery` | Loetleb installitud pakkujad koos võimekuste, tasuta taseme lippude ja OAuth-i olekuga                                                                     | providers, discovery       | "Millised pakkujad on saadaval?"           |
+| Cost Analysis      | `cost-analysis`      | Hindab päringu/vestluse maksumust kataloogi ja hiljutise kasutuse põhjal                                                                                   | cost, usage                | "Hinda selle vestluse maksumust"           |
+| Health Report      | `health-report`      | Koondab pakkujapõhiselt circuit-breakeri, cooldowni ja lockouti oleku                                                                                      | health, resilience         | "Näita kõigi pakkujate terviseolekut"      |
+| List Capabilities  | `list-capabilities`  | Tagastab täieliku 45-kirjelise Agent Skillsi kataloogi (23 API + 21 CLI + 1 config) markdown-tabelina koos toorete SKILL.md URL-idega konteksti lisamiseks | catalog, discovery, skills | "Loetle kõik OmniRoute'i võimekused"       |
 
-> Agent Cardi tuleks hoida kooskõlas aktiivse 374 teenusepakkuja kataloogiga; teenusepakkujate arv ning tasuta/autentimiseta kasutamise metaandmed pärinevad käitusaegsest registrist.
+> Agent Card tuleks hoida kooskõlas reaalajas 375 pakkujaga kataloogiga; pakkujate arv ning tasuta/autentimisvabad metaandmed pärinevad käitusaja registrist.
 
-### Oskuse `list-capabilities` üksikasjad
+### `list-capabilities` oskuse üksikasjad
 
-Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enne API-kutsete saatmist avastama, mida OmniRoute pakub. See tagastab struktureeritud markdown-tabeli artefakti:
+Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enne API-kõnede tegemist selgitama, mida OmniRoute pakub. See tagastab struktureeritud markdown-tabeli artefaktina:
 
 ```
-| ID | Nimi | Kategooria | Valdkond | Lõpp-punktid/käsud | Toor-URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentimine ja seansid | api | autentimine | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Iga rida sisaldab veergu `rawUrl`, et agendid saaksid kohe täieliku SKILL.md-faili hankida. Väli `metadata.totalSkills` kajastab kataloogi suurust (praegu 45). Teostus: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka dokumenti [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Iga rida sisaldab veergu `rawUrl`, et agendid saaksid kohe hankida kogu SKILL.md sisu. Väli `metadata.totalSkills` peegeldab kataloogi suurust (täna 45). Implementatsioon: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -274,7 +278,7 @@ resp = requests.post("http://localhost:20128/a2a", json={
     "method": "message/send",
     "params": {
         "skill": "smart-routing",
-        "messages": [{"role": "user", "content": "Tere"}]
+        "messages": [{"role": "user", "content": "Hello"}]
     }
 }, headers={"Authorization": "Bearer YOUR_KEY"})
 
@@ -298,7 +302,7 @@ const resp = await fetch("http://localhost:20128/a2a", {
     method: "message/send",
     params: {
       skill: "smart-routing",
-      messages: [{ role: "user", content: "Tere" }],
+      messages: [{ role: "user", content: "Hello" }],
     },
   }),
 });

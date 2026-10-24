@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "esim. 131072",
     "contextWindowOverrideHint": "Aseta manuaalisesti tämän mallin todellinen konteksti-ikkuna (tokenit), jos tarjoaja ilmoittaa sen väärin. Ohittaa automaattisesti havaitut/luettelon arvot ja estää yhdistelmäreititystä pudottamasta mallia.",
     "contextWindowOverrideInvalid": "Konteksti-ikkunan ohituksen on oltava positiivinen kokonaisluku tokeneita",
+    "maxOutputTokenOverrideInvalid": "Enimmäistulostustokenien ohituksen on oltava positiivinen kokonaisluku tokeneita",
     "visionCapableLabel": "Kuvantunnistuskykyinen",
     "visionCapableHint": "Merkitse tämä malli manuaalisesti kuvantunnistuskykyiseksi, kun tarjoajan hakumetatiedot eivät ilmoita kuvasyötettä (yleistä itseisännöidyissä/paikallisissa taustajärjestelmissä).",
     "compatParamFiltersLabel": "Parametrisuodattimet",

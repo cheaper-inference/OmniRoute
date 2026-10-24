@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "npr. 131072",
     "contextWindowOverrideHint": "Ročno nastavite dejansko kontekstno okno tega modela (v žetonih), kadar ga ponudnik napačno sporoči. Ta nastavitev ima prednost pred samodejno zaznanimi vrednostmi in vrednostmi iz kataloga ter preprečuje, da bi kombinirano usmerjanje izločilo model.",
     "contextWindowOverrideInvalid": "Ročna nastavitev kontekstnega okna mora biti pozitivno celo število žetonov",
+    "maxOutputTokenOverrideInvalid": "Ročna nastavitev največjega števila izhodnih žetonov mora biti pozitivno celo število žetonov",
     "visionCapableLabel": "Podpira slikovni vnos",
     "visionCapableHint": "Ročno označite ta model kot model, ki podpira slikovni vnos, kadar metapodatki ponudnika o razpoložljivih modelih ne navajajo načina slikovnega vnosa (pogosto pri lastno gostovanih/lokalnih zalednih sistemih).",
     "compatParamFiltersLabel": "Filtri parametrov",

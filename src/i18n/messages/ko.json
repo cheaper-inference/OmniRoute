@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "예: 131072",
     "contextWindowOverrideHint": "제공자가 모델의 실제 컨텍스트 창(토큰)을 잘못 보고할 때 수동으로 설정합니다. 자동 감지/카탈로그 값보다 우선 적용되며 콤보 라우팅에서 모델이 누락되는 것을 방지합니다.",
     "contextWindowOverrideInvalid": "컨텍스트 창 재정의 값은 양의 정수 토큰 수여야 합니다",
+    "maxOutputTokenOverrideInvalid": "최대 출력 토큰 재정의 값은 양의 정수 토큰 수여야 합니다",
     "visionCapableLabel": "비전 지원",
     "visionCapableHint": "제공자의 탐색 메타데이터가 이미지 입력 모달리티를 보고하지 않을 때(자체 호스팅/로컬 백엔드에서 흔함) 이 모델을 비전 지원 모델로 수동 표시합니다.",
     "compatParamFiltersLabel": "매개변수 필터",

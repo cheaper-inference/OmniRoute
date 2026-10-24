@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "p. ej., 131072",
     "contextWindowOverrideHint": "Establece manualmente la ventana de contexto real de este modelo (en tokens) cuando el proveedor la indica de forma incorrecta. Tiene prioridad sobre los valores detectados automáticamente o del catálogo, y evita que el enrutamiento combinado descarte el modelo.",
     "contextWindowOverrideInvalid": "La sobrescritura de la ventana de contexto debe ser un número entero positivo de tokens",
+    "maxOutputTokenOverrideInvalid": "La sobrescritura del máximo de tokens de salida debe ser un número entero positivo de tokens",
     "visionCapableLabel": "Compatible con visión",
     "visionCapableHint": "Marca manualmente este modelo como compatible con visión cuando los metadatos de detección del proveedor no indican una modalidad de entrada de imágenes (algo habitual en backends locales o autoalojados).",
     "compatParamFiltersLabel": "Filtros de parámetros",

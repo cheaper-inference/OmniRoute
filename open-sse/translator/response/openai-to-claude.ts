@@ -1,14 +1,19 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../request/openai-to-claude.ts";
-import { hasToolCallShim, applyToolCallShimToBuffer } from "../helpers/toolCallShim.ts";
+import {
+  hasToolCallShim,
+  applyToolCallShimToBuffer,
+  findToolCallSchema,
+} from "../helpers/toolCallShim.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
 import { openAIFinishReasonToClaudeStopReason } from "../../utils/finishReason.ts";
 import {
   isInternalReasoningPlaceholder,
   stripInternalReasoningPlaceholder,
 } from "../../utils/reasoningPlaceholder.ts";
-import { REVERSE_MAP, restoreClaudeToolName } from "../../services/claudeCodeToolRemapper.ts";
+import { REVERSE_MAP } from "../../services/claudeCodeToolRemapper.ts";
+import { restoreDeclaredToolName } from "../../services/declaredToolCasing.ts";
 import { sanitizeToolId } from "../helpers/schemaCoercion.ts";
 import { splitMarkdownBoundary } from "../helpers/markdownBoundary.ts";
 import { hasDsmlToolCalls, parseDsmlToolCalls } from "../../utils/dsmlToolCalls.ts";
@@ -782,7 +787,7 @@ export function openaiToClaudeResponse(chunk, state) {
       const incomingName = (() => {
         let n = tc.function?.name || "";
         if (n.startsWith(CLAUDE_OAUTH_TOOL_PREFIX)) n = n.slice(CLAUDE_OAUTH_TOOL_PREFIX.length);
-        return restoreClaudeToolName(n, state.toolNameMap);
+        return restoreDeclaredToolName(n, state.toolNameMap, state.clientTools);
       })();
       const idx = resolveToolCallKey(state, tc, incomingName);
 
@@ -935,7 +940,11 @@ export function openaiToClaudeResponse(chunk, state) {
       // fully patched JSON before closing the block. A refusal must not release
       // the buffered arguments: the block is closed empty instead.
       if (toolInfo.shimmed && choice.finish_reason !== "content_filter") {
-        const patched = applyToolCallShimToBuffer(toolInfo.name, toolInfo.argBuffer || "");
+        const patched = applyToolCallShimToBuffer(
+          toolInfo.name,
+          toolInfo.argBuffer || "",
+          findToolCallSchema(toolInfo.name, state.toolSchemas)
+        );
         results.push({
           type: "content_block_delta",
           index: toolInfo.blockIndex,
@@ -960,10 +969,7 @@ export function openaiToClaudeResponse(chunk, state) {
         content_block: {
           type: "tool_use",
           id: tc.id,
-          name: restoreClaudeToolName(
-            tc.name,
-            state.toolNameMap instanceof Map ? state.toolNameMap : null
-          ),
+          name: restoreDeclaredToolName(tc.name, state.toolNameMap, state.clientTools),
           input: tc.args,
         },
       });

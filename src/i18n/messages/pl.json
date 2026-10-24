@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "np. 131072",
     "contextWindowOverrideHint": "Ręcznie ustaw rzeczywiste okno kontekstu tego model (tokens), gdy provider podaje błędne informacje. Wygrywa z automatycznie wykrytymi/katalogowymi wartościami i zapobiega odrzuceniu model przez routing combo.",
     "contextWindowOverrideInvalid": "Nadpisanie okna kontekstu musi być dodatnią liczbą całkowitą tokens",
+    "maxOutputTokenOverrideInvalid": "Nadpisanie maksymalnej liczby wyjściowych tokens musi być dodatnią liczbą całkowitą tokens",
     "visionCapableLabel": "Obsługa Vision",
     "visionCapableHint": "Ręcznie oznacz ten model jako obsługujący Vision, gdy metadane wykrywania provider nie zgłaszają modalności wejściowej obrazu (częste w przypadku self-hosted/lokalnych backendów).",
     "compatParamFiltersLabel": "Filtry parametrów",

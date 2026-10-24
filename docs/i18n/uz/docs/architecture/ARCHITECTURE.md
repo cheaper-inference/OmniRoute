@@ -15,7 +15,7 @@ U yagona OpenAI-mos keluvchi soʻnggi nuqtani (`/v1/*`) taqdim etadi hamda tarji
 
 Asosiy imkoniyatlar:
 
-- CLI/vositalar uchun OpenAI-mos keluvchi API interfeysi (375 ta provayder, 154 ta ijrochi modul)
+- CLI/vositalar uchun OpenAI-mos keluvchi API interfeysi (375 ta provayder, 156 ta ijrochi modul)
 - Provayder formatlari oʻrtasida soʻrov/javob tarjimasi
 - Modellar kombinatsiyasi boʻyicha zaxira variantiga oʻtish (koʻp modelli ketma-ketlik)
 - `compositeTiers` asosida bajarilish vaqtida tartiblanadigan tuzilmali kombinatsiya bosqichlari (`provider + model + connection`)

@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "ឧ. 131072",
     "contextWindowOverrideHint": "កំណត់ទំហំ context window ពិតប្រាកដរបស់ម៉ូដែលនេះដោយដៃ (ជាចំនួន token) នៅពេល provider រាយការណ៍មិនត្រឹមត្រូវ។ ការកំណត់នេះមានអាទិភាពលើតម្លៃដែលរកឃើញដោយស្វ័យប្រវត្តិ/តម្លៃក្នុងកាតាឡុក ហើយការពារ combo routing មិនឱ្យដកម៉ូដែលនេះចេញ។",
     "contextWindowOverrideInvalid": "តម្លៃជំនួស context window ត្រូវតែជាចំនួន token វិជ្ជមាន និងជាចំនួនគត់",
+    "maxOutputTokenOverrideInvalid": "តម្លៃជំនួស token បញ្ចេញអតិបរមា ត្រូវតែជាចំនួន token វិជ្ជមាន និងជាចំនួនគត់",
     "visionCapableLabel": "គាំទ្ររូបភាព",
     "visionCapableHint": "សម្គាល់ម៉ូដែលនេះដោយដៃថាគាំទ្ររូបភាព នៅពេល metadata សម្រាប់ការរកឃើញរបស់ provider មិនរាយការណ៍អំពី modality នៃការបញ្ចូលរូបភាព (ជាទូទៅកើតឡើងជាមួយ backend ដែល host ដោយខ្លួនឯង/ក្នុងម៉ាស៊ីន)។",
     "compatParamFiltersLabel": "តម្រងប៉ារ៉ាម៉ែត្រ",

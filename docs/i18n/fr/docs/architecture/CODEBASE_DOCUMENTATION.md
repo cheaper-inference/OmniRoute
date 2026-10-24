@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registres de fournisseurs, profils d’en-têtes, identité, …
 ├── handlers/               Gestionnaires de requêtes (chat, embeddings, audio, image, …)
-├── executors/              150 modules d’exécution de fournisseurs (classes d’exécution + utilitaires propres à chaque fournisseur)
+├── executors/              156 modules d’exécution de fournisseurs (classes d’exécution + utilitaires propres à chaque fournisseur)
 ├── translator/             Conversion de formats (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformateur de flux Responses API ↔ Chat Completions
 ├── services/               Plus de 80 modules de service (combinaisons, repli, quotas, identité, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 modules d’exécution de premier niveau (`*.ts` moins `base.ts`, `index.ts` et les tests — nombre
+156 modules d’exécution de premier niveau (`*.ts` moins `base.ts`, `index.ts` et les tests — nombre
 mesuré par `npm run check:docs-counts`). Chaque classe d’exécution étend `BaseExecutor` (`base.ts`),
 directement ou par l’intermédiaire de `DefaultExecutor` ou d’un autre exécuteur ; les modules restants sont des
 utilitaires propres aux fournisseurs (schémas d’outils, adaptateurs de récupération/TTS, gestionnaires de particularités). Les exécuteurs comprennent :

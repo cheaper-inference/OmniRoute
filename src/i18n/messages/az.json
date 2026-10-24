@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "məs. 131072",
     "contextWindowOverrideHint": "Provayder səhv bildirdikdə bu modelin real kontekst pəncərəsini (tokenlər) əl ilə təyin edin. Avtomatik aşkarlanan/kataloq dəyərlərindən üstün tutulur və kombo marşrutlaşdırmanın modeli kənarlaşdırmasının qarşısını alır.",
     "contextWindowOverrideInvalid": "Kontekst pəncərəsinin yenidən təyini müsbət tam sayda token olmalıdır",
+    "maxOutputTokenOverrideInvalid": "Maksimum çıxış tokenlərinin yenidən təyini müsbət tam sayda token olmalıdır",
     "visionCapableLabel": "Görüntü qabiliyyətli",
     "visionCapableHint": "Provayderin aşkarlama metaməlumatları şəkil daxiletmə modallığını bildirmədikdə (öz serverində yerləşdirilən/lokal backend-lər üçün xarakterikdir) bu modeli əl ilə görüntü qabiliyyətli kimi qeyd edin.",
     "compatParamFiltersLabel": "Parametr Filtrləri",

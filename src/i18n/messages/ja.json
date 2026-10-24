@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "例: 131072",
     "contextWindowOverrideHint": "プロバイダーが誤ったコンテキストウィンドウを報告する場合に、このモデルの実際のコンテキストウィンドウ（トークン数）を手動で設定します。自動検出またはカタログの値よりも優先され、コンボルーティングによるモデルのドロップを防ぎます。",
     "contextWindowOverrideInvalid": "コンテキストウィンドウの上書き値は、正の整数のトークン数である必要があります",
+    "maxOutputTokenOverrideInvalid": "最大出力トークン数の上書き値は、正の整数のトークン数である必要があります",
     "visionCapableLabel": "ビジョン対応",
     "visionCapableHint": "プロバイダーの検出メタデータが画像入力モダリティを報告しない場合（セルフホストやローカルのバックエンドで一般的）、このモデルを手動でビジョン対応としてマークします。",
     "compatParamFiltersLabel": "パラメータフィルター",

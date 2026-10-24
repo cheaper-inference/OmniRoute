@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Rijistocin masu samarwa, bayanan martabar kanun bayanai, shaida, …
 ├── handlers/               Masu sarrafa buƙatu (taɗi, embeddings, sauti, hoto, …)
-├── executors/              Modulan masu aiwatarwa na masu samarwa guda 150 (azuzuwan masu aiwatarwa + mataimaka na kowane mai samarwa)
+├── executors/              Modulan masu aiwatarwa na masu samarwa guda 156 (azuzuwan masu aiwatarwa + mataimaka na kowane mai samarwa)
 ├── translator/             Sauya tsari (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Mai sauya yawo na Chat Completions
 ├── services/               Modulan ayyuka sama da 80 (haɗe-haɗe, madadin, ƙa'idojin amfani, shaida, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-Modulan masu aiwatarwa na matakin sama guda 150 (`*.ts` ban da `base.ts`, `index.ts` da gwaje-gwaje — wannan ne adadin da
+Modulan masu aiwatarwa na matakin sama guda 156 (`*.ts` ban da `base.ts`, `index.ts` da gwaje-gwaje — wannan ne adadin da
 `npm run check:docs-counts` ke aunawa). Kowane ajin mai aiwatarwa yana faɗaɗa `BaseExecutor` (`base.ts`),
 kai tsaye ko ta hanyar `DefaultExecutor` ko wani mai aiwatarwa; sauran modulan kuwa mataimaka ne na kowane mai samarwa
 (tsare-tsaren kayan aiki, adaftocin fetch/TTS, masu sarrafa halaye na musamman). Masu aiwatarwa sun haɗa da:

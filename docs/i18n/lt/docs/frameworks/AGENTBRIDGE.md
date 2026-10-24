@@ -14,36 +14,36 @@ AgentBridge yra „OmniRoute“ MITM („Man-in-the-Middle“, tarpininko) tarpi
 
 ## §1 Apžvalga
 
-### Kas yra „AgentBridge“?
+### Kas yra AgentBridge?
 
-Kai IDE agentas (pvz., „GitHub Copilot“, „Cursor“, „Claude Code“) atlieka API iškvietimą, jis tiesiogiai prisijungia prie pirminio DI paslaugų teikėjo („OpenAI“, „Anthropic“ ir kt.). „AgentBridge“ skaidriai perima šį ryšį TLS lygmeniu — nereikalaujant keisti jokios agento konfigūracijos — ir perrašo užklausą, nukreipdamas ją per „OmniRoute“.
+Kai IDE agentas (pvz., GitHub Copilot, Cursor, Claude Code) atlieka API užklausą, jis jungiasi tiesiogiai prie pirminio AI teikėjo (OpenAI, Anthropic ir kt.). AgentBridge skaidriai perima šį ryšį TLS lygmenyje — nereikalaujant jokių agento konfigūracijos pakeitimų — ir perrašo užklausą per OmniRoute.
 
-Tai suteikia galimybę:
+Tai reiškia, kad galite:
 
-- **Peradresuoti bet kurį agentą į bet kurį paslaugų teikėją**: „Copilot“ komunikuoja su „OpenAI“? Nukreipkite jį į „Anthropic Claude“, „Gemini“ ar bet kurį iš 374 „OmniRoute“ paslaugų teikėjų.
-- **Taikyti modelių susiejimus**: `gemini-3-flash` → `claude-sonnet-4.7` skaidriai apdorojimo modulio lygmeniu.
-- **Stebėti visą agentų srautą**: kiekviena perimta užklausa publikuojama [srauto inspektoriuje](./TRAFFIC_INSPECTOR.md).
-- **Taikyti „OmniRoute“ atsparumo mechanizmus**: kombinuotas maršrutizavimas, grandinės pertraukikliai, atsarginiai maršrutai ir sąnaudų stebėjimas taip pat veikia IDE agentų srautui.
+- **Peradresuoti bet kurį agentą bet kuriam teikėjui**: Copilot bendrauja su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini ar bet kurį iš 375 OmniRoute teikėjų.
+- **Taikyti modelių susiejimus**: `gemini-3-flash` → `claude-sonnet-4.7` skaidriai apdorotojo (handler) lygmenyje.
+- **Stebėti visą agentų srautą**: kiekviena perimta užklausa publikuojama [Srauto inspektoriuje](./TRAFFIC_INSPECTOR.md).
+- **Pasinaudoti OmniRoute atsparumu**: kombinuotas maršrutizavimas, grandinės pertraukikliai, atsarginiai variantai ir sąnaudų stebėjimas veikia ir IDE agentų srautui.
 
 ### Pozicionavimas rinkos atžvilgiu
 
-| Funkcija                          | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| --------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                       |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                    |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                        |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                      |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                        |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                    |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                       |    —    |    —     |        ✓        |             ✓             |
-| Open Code                         |    —    |    —     |        ✓        |             ✓             |
-| Trae                              |    —    |    —     |        —        |        🔍 Tiriama         |
-| Valdymo skydelio sąsaja           |    ✓    |    ✗     |        ✗        |             ✓             |
-| Srauto inspektorius               |    ✗    |    ✗     |        ✓        |             ✓             |
-| „OmniRoute“ maršrutizavimas       |    ✗    |    ✗     |        ✗        |             ✓             |
-| Modelių susiejimo sąsaja          |    ✗    |    ✗     |        ✗        |             ✓             |
-| Apėjimo sąrašas                   |    ✗    |    ✗     |        ✓        |             ✓             |
-| Pirminio serverio CA sertifikatas |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkcija                   | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| -------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity                |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot             |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)                 |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex               |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE                 |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries             |    —    |    ✓     |        —        |             ✓             |
+| Claude Code                |    —    |    —     |        ✓        |             ✓             |
+| Open Code                  |    —    |    —     |        ✓        |             ✓             |
+| Trae                       |    —    |    —     |        —        |        🔍 Tiriama         |
+| Informacijos suvestinės UI |    ✓    |    ✗     |        ✗        |             ✓             |
+| Srauto inspektorius        |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute maršrutizavimas  |    ✗    |    ✗     |        ✗        |             ✓             |
+| Modelių susiejimo UI       |    ✗    |    ✗     |        ✗        |             ✓             |
+| Aplenkimo sąrašas          |    ✗    |    ✗     |        ✓        |             ✓             |
+| Pirminio CA sertifikatas   |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

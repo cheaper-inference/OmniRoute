@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "misali 131072",
     "contextWindowOverrideHint": "Saita a hannu ainihin iyakar tagar mahallin bayanai na wannan samfurin (tokens) idan mai samarwa ya bayar da bayanin da ba daidai ba. Wannan saitin yana fifita ƙimomin da aka gano ta atomatik/na kundin bayanai, kuma yana hana tsarin haɗa hanyoyi cire samfurin.",
     "contextWindowOverrideInvalid": "Dole ne sauyin iyakar tagar mahallin bayanai ya zama tabbataccen cikakken adadin tokens",
+    "maxOutputTokenOverrideInvalid": "Dole ne sauyin matsakaicin tokens na fitarwa ya zama tabbataccen cikakken adadin tokens",
     "visionCapableLabel": "Yana iya sarrafa hotuna",
     "visionCapableHint": "Yi wa wannan samfurin alama da hannu cewa yana iya sarrafa hotuna idan bayanan ganowa na mai samarwa ba su nuna cewa yana karɓar shigarwar hoto ba (abin da ya zama ruwan dare ga tsarin baya da ake ɗaukar nauyinsa da kai/na gida).",
     "compatParamFiltersLabel": "Matatun Sigogi",

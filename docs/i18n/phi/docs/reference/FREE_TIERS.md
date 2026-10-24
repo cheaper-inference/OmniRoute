@@ -44,17 +44,17 @@ Pinakamalalaking **dokumentadong** contributor: `mistral` 1.00B, `nara` 210M, `l
 
 ---
 
-## Pag-refresh noong 2026-06-17 — ano ang nagbago mula 2026-06-05
+## Pag-refresh noong 2026-06-17 — ano ang nagbago mula noong 2026-06-05
 
-Isang web-research pass ng 50 agent (mga opisyal na dokumento + balita sa nakalipas na 7 araw, sinuring mabuti sa paraang adversarial) ang nag-refresh sa buong catalog. Mga tampok:
+Isang web-research pass na ginawa ng 50 agent (opisyal na dokumentasyon + balita sa nakaraang 7 araw, sinuring mabuti laban sa mga salungat na impormasyon) ang nag-refresh sa buong catalog. Mga tampok:
 
-- **Inalis / walang free tier (2026):** `chutes` (natapos ang free tier noong 2026-03), `phind` (nagsara ang kumpanya noong 2026-01), `kluster` (itinigil noong 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (binawi ang libreng MiMo noong 2026-05-24, natapos ang Nemotron promo noong 2026-06 — muling na-verify noong 2026-06-18), `aimlapi` (pansamantalang itinigil ang free tier — muling na-verify noong 2026-06-18), `yi` (itinigil ang Yi-Light, pay-as-you-go na — muling na-verify noong 2026-06-18), `featherless-ai` (walang kasalukuyang free tier), `chipotle` ("Pepper AI" ng Chipotle — nagbabalik na ngayon ng 404 sa bawat route, kabilang ang root, ang reverse-engineered na `amelia.chipotle.com` Amelia chat widget na kinakausap ng provider; na-decommission/inilipat ang backend, nakumpirma noong 2026-09-15 — ganap na inalis sa catalog, #13131/#4037). Nananatiling nakalista ang `iflytek` / `sparkdesk` ngunit may paalala tungkol sa ToS (libre ang Spark Lite; nililimitahan ng ToS ang paggamit bilang proxy/relay).
-- **Gemini** — itinigil ang `2.0 Flash` / `2.0 Flash-Lite` noong 2026-06-01 at umalis ang `2.5 Pro` sa free tier (2026-04); ang free tier ay para na lamang sa **Flash family** (2.5/3/3.1/3.5 Flash + Gemma). **Pinagsasama-sama** na ngayon ng catalog ang Flash family (dating napalaki ang bilang dahil hiwalay na binibilang ang bawat variant: 462M → 60M).
-- **Mga itinamang numero:** `cloudflare-ai` 122M → **30M** (aktuwal na 10k Neurons/araw), muling inuri ang `doubao` bilang isang minsanang signup credit (hindi umuulit), `llm7` 4M → **150M** (nakadokumentong 5M token/araw), itinigil ang mga "-Free" endpoint ng `together` → inalis din ang $25 signup credit (nangangailangan ng minimum na $5 na pagbili, walang libreng trial), natapos ang Preview ng `longcat` + itinigil ang mga Flash model → **LongCat-2.0** na lamang, muling inuri bilang minsanang **10M**-token signup credit (nangangailangan ng KYC, hindi umuulit).
-- **Mga bagong libreng provider na natuklasan:** ⭐ **Kilo Code** (`kilo-gateway` — umiikot na hanay ng "Auto Free": NVIDIA Nemotron 3 family, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 na umiikot na libreng coding model), ⭐ **Z.AI / Zhipu** (`glm-cn` — permanenteng libre ang GLM-4-Flash / 4.5-Flash / 4.7-Flash + 20M signup bonus), at `arcee-ai` Trinity Large Preview.
-- **Mga bagong tapat na tier** (tingnan ang Methodology): isang kategoryang _permanently-free-but-uncapped_ (tunay na umuulit na access, walang limitasyon sa token na mabibilang) at isang _deposit-unlock boost_ (OpenRouter $10 → +24M/buwan), na parehong ipinapakita nang **magkahiwalay** upang hindi kailanman mapalaki ang pangunahing bilang.
+- **Inalis / walang libreng tier (2026):** `chutes` (natapos ang libreng tier noong 2026-03), `phind` (nagsara ang kumpanya noong 2026-01), `kluster` (itinigil noong 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (binawi ang libreng MiMo noong 2026-05-24, natapos ang promosyon ng Nemotron noong 2026-06 — muling sinuri noong 2026-06-18), `aimlapi` (pansamantalang itinigil ang libreng tier — muling sinuri noong 2026-06-18), `yi` (itinigil ang Yi-Light, pay-as-you-go na — muling sinuri noong 2026-06-18), `featherless-ai` (walang kasalukuyang libreng tier), `chipotle` ("Pepper AI" ng Chipotle — ang reverse-engineered na Amelia chat widget sa `amelia.chipotle.com` na kinakausap ng provider ay nagbabalik na ngayon ng 404 sa bawat route, kabilang ang root; itinigil/inilipat ang backend, kinumpirma noong 2026-09-15 — ganap na inalis sa catalog, #13131/#4037). Nananatiling nakalista ang `iflytek` / `sparkdesk` ngunit may paalala tungkol sa ToS (libre ang Spark Lite; nililimitahan ng ToS ang paggamit bilang proxy/relay).
+- **Gemini** — itinigil ang `2.0 Flash` / `2.0 Flash-Lite` noong 2026-06-01 at inalis ang `2.5 Pro` sa libreng tier (2026-04); ang libreng tier ay para na lang sa **pamilya ng Flash** (2.5/3/3.1/3.5 Flash + Gemma). **Pinagsasama-sama** na ngayon ng catalog ang pamilya ng Flash (dati itong napalaki dahil hiwalay na binibilang ang bawat variant: 462M → 60M).
+- **Mga itinamang bilang:** `cloudflare-ai` 122M → **30M** (aktuwal na 10k Neuron/araw), muling inuri ang `doubao` bilang isang beses na signup credit (hindi nauulit), `llm7` 4M → **150M** (nakadokumentong 5M token/araw), itinigil ang mga endpoint na "-Free" ng `together` → inalis din ang $25 na signup credit (nangangailangan ng minimum na $5 na pagbili, walang libreng trial), natapos ang Preview ng `longcat` + itinigil ang mga modelong Flash → **LongCat-2.0** na lang, muling inuri bilang isang beses na signup credit na **10M** token (nangangailangan ng KYC, hindi nauulit).
+- **Mga bagong libreng provider na natuklasan:** ⭐ **Kilo Code** (`kilo-gateway` — umiikot na hanay ng "Auto Free": pamilya ng NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 umiikot na libreng coding model, ni-refresh noong 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — permanenteng libre ang GLM-4-Flash / 4.5-Flash / 4.7-Flash + 20M na signup bonus), at Trinity Large Preview ng `arcee-ai`.
+- **Mga bagong tapat na tier** (tingnan ang Metodolohiya): isang kategoryang _permanenteng libre ngunit walang itinakdang limitasyon_ (tunay na nauulit na access, walang token cap na mabibilang) at isang _boost na nabubuksan sa pamamagitan ng deposito_ (OpenRouter $10 → +24M/buwan), na parehong ipinapakita nang **magkahiwalay** upang hindi kailanman mapalaki ang pangunahing bilang.
 
-> Ang detalyadong talahanayan para sa bawat provider sa ibaba ay ang **snapshot noong 2026-06-05**; pinapalitan ito ng mga pagbabago sa itaas. Ang live at canonical na source ay ang per-model catalog na `open-sse/config/freeModelCatalog.ts`.
+> Ang detalyadong talahanayan para sa bawat provider sa ibaba ay ang **snapshot noong 2026-06-05**; pinapalitan ito ng mga pagbabago sa itaas. Ang live at kanonikal na source ay ang per-model catalog na `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -238,75 +238,75 @@ Karamihan sa mga bilang ng "libreng token kada buwan" sa larangang ito ay mga ka
 
 ---
 
-## Libreng tier kada provider (sinuri ang Bytez/Nous noong 2026-10-15; muling in-audit ang mga row noong 2026-09-02; ang iba noong 2026-06-17)
+## Libreng tier bawat provider (sinuri ang Bytez/Nous noong 2026-10-15; muling na-audit ang mga row noong 2026-09-02; ang iba ay noong 2026-06-17)
 
-> Muling nabuo mula sa katalogo kada modelo (`open-sse/config/freeModelCatalog.ts`), at inalis ang mga duplicate ayon sa pool. Inayos batay sa umuulit at tuloy-tuloy na dami ng token/buwan. `uncapped*` = permanenteng libre ngunit walang inilathalang limitasyon sa token (nililimitahan ayon sa rate/concurrency) — tunay na access, **hindi** isinasama sa pangunahing kabuuan. `—` = credit-only / keyless / hindi masusukat sa token.
+> Muling binuo mula sa catalog ng bawat modelo (`open-sse/config/freeModelCatalog.ts`), na inalisan ng mga duplicate ayon sa pool. Inayos batay sa umuulit na tuloy-tuloy na tokens/buwan. `uncapped*` = permanenteng libre ngunit walang inilathalang limitasyon sa token (limitado ayon sa rate/concurrency) — tunay na access, **hindi** isinama sa kabuuang bilang sa headline. `—` = credit lamang / walang key / hindi masusukat sa dami ng token.
 
-| Provider         | Uri ng libre               | Tuloy-tuloy na token/buwan | Kredito sa unang buwan | Mga Tuntunin | Mga modelo |
-| ---------------- | -------------------------- | -------------------------- | ---------------------- | ------------ | ---------- |
-| `mistral`        | paulit-ulit                | ~1.00B                     | —                      | mag-ingat    | 5          |
-| `nara`           | paulit-ulit                | ~210M                      | —                      | mag-ingat    | 8          |
-| `llm7`           | paulit-ulit                | ~150M                      | —                      | mag-ingat    | 4          |
-| `xkiro`          | paulit-ulit                | ~150M                      | —                      | mag-ingat    | 39         |
-| `longcat`        | isang beses                | —                          | 10M                    | mag-ingat    | 1          |
-| `cerebras`       | isang beses                | —                          | $5 na kredito          | mag-ingat    | 2          |
-| `cloudflare-ai`  | paulit-ulit                | ~30M                       | —                      | mag-ingat    | 9          |
-| `groq`           | paulit-ulit                | ~30M                       | —                      | mag-ingat    | 5          |
-| `api-airforce`   | paulit-ulit                | ~24M                       | —                      | mag-ingat    | 7          |
-| `bluesminds`     | paulit-ulit                | ~7M                        | —                      | malabo       | 22         |
-| `sambanova`      | paulit-ulit                | ~6M                        | —                      | mag-ingat    | 5          |
-| `arcee-ai`       | paulit-ulit                | ~5M                        | —                      | mag-ingat    | 1          |
-| `bazaarlink`     | paulit-ulit                | ~4M                        | —                      | mag-ingat    | 32         |
-| `openrouter`     | paulit-ulit                | ~1M                        | —                      | mag-ingat    | 1          |
-| `cohere`         | paulit-ulit                | ~800K                      | —                      | mag-ingat    | 6          |
-| `huggingchat`    | paulit-ulit                | ~500K                      | —                      | mag-ingat    | 4          |
-| `morph`          | paulit-ulit                | ~400K                      | —                      | ayos         | 2          |
-| `huggingface`    | paulit-ulit                | ~200K                      | —                      | mag-ingat    | 6          |
-| `kiro`           | paulit-ulit                | ~25K                       | —                      | iwasan       | 12         |
-| `glm-cn`         | walang limit               | walang limit\*             | ~20M                   | ayos         | 4          |
-| `baidu`          | walang limit               | walang limit\*             | —                      | mag-ingat    | 1          |
-| `gemini`         | walang limit               | walang limit\*             | —                      | mag-ingat    | 4          |
-| `kilo-gateway`   | walang limit               | walang limit\*             | —                      | mag-ingat    | 7          |
-| `ollama-cloud`   | walang limit               | walang limit\*             | —                      | malabo       | 8          |
-| `opencode-zen`   | walang limit               | walang limit\*             | —                      | mag-ingat    | 6          |
-| `tencent`        | walang limit               | walang limit\*             | —                      | mag-ingat    | 1          |
-| `vertex`         | kredito sa pagpaparehistro | —                          | ~300M                  | mag-ingat    | 10         |
-| `agentrouter`    | kredito sa pagpaparehistro | —                          | ~200M                  | mag-ingat    | 4          |
-| `predibase`      | kredito sa pagpaparehistro | —                          | ~25M                   | mag-ingat    | 1          |
-| `doubao`         | kredito sa pagpaparehistro | —                          | ~15M                   | malabo       | 1          |
-| `ai21`           | kredito sa pagpaparehistro | —                          | ~10M                   | iwasan       | 2          |
-| `deepseek`       | kredito sa pagpaparehistro | —                          | ~5M                    | ayos         | 2          |
-| `hyperbolic`     | kredito sa pagpaparehistro | —                          | ~5M                    | ayos         | 8          |
-| `nscale`         | kredito sa pagpaparehistro | —                          | ~5M                    | mag-ingat    | 6          |
-| `bytez`          | kredito (paulit-ulit)      | —                          | hindi alam             | malabo       | 1          |
-| `deepinfra`      | kredito sa pagpaparehistro | —                          | ~1M                    | mag-ingat    | 22         |
-| `fireworks`      | kredito sa pagpaparehistro | —                          | ~1M                    | iwasan       | 10         |
-| `nebius`         | kredito sa pagpaparehistro | —                          | ~1M                    | mag-ingat    | 1          |
-| `qoder`          | kredito sa pagpaparehistro | —                          | ~1M                    | mag-ingat    | 14         |
-| `scaleway`       | kredito sa pagpaparehistro | —                          | ~1M                    | ayos         | 6          |
-| `novita`         | kredito sa pagpaparehistro | —                          | ~500K                  | mag-ingat    | 1          |
-| `agy`            | walang susi                | —                          | —                      | iwasan       | 16         |
-| `baichuan`       | walang susi                | —                          | —                      | malabo       | 1          |
-| `blackbox`       | walang susi                | —                          | —                      | iwasan       | 6          |
-| `coze`           | walang susi                | —                          | —                      | iwasan       | 1          |
-| `duckduckgo-web` | walang susi                | —                          | —                      | iwasan       | 6          |
-| `freemodel-dev`  | walang susi                | —                          | —                      | hindi alam   | 4          |
-| `friendliai`     | walang susi                | —                          | —                      | iwasan       | 2          |
-| `iflytek`        | walang susi                | —                          | —                      | iwasan       | 1          |
-| `inference-net`  | walang susi                | —                          | —                      | mag-ingat    | 3          |
-| `liquid`         | walang susi                | —                          | —                      | hindi alam   | 1          |
-| `monsterapi`     | walang susi                | —                          | —                      | malabo       | 1          |
-| `muse-spark-web` | walang susi                | —                          | —                      | iwasan       | 3          |
-| `nlpcloud`       | walang susi                | —                          | —                      | iwasan       | 1          |
-| `nvidia`         | walang susi                | —                          | —                      | mag-ingat    | 13         |
-| `pollinations`   | walang susi                | —                          | —                      | mag-ingat    | 31         |
-| `publicai`       | walang susi                | —                          | —                      | mag-ingat    | 3          |
-| `reka`           | walang susi                | —                          | —                      | mag-ingat    | 2          |
-| `sensenova`      | walang susi                | —                          | —                      | mag-ingat    | 1          |
-| `sparkdesk`      | walang key                 | —                          | —                      | mag-ingat    | 1          |
-| `stepfun`        | walang key                 | —                          | —                      | ayos         | 1          |
-| `t3-web`         | walang key                 | —                          | —                      | iwasan       | 23         |
-| `uncloseai`      | walang key                 | —                          | —                      | mag-ingat    | 3          |
+| Tagapagbigay     | Uri ng libre           | Tuloy-tuloy na token/buwan | Kredito sa unang buwan | Mga Tuntunin | Mga modelo |
+| ---------------- | ---------------------- | -------------------------- | ---------------------- | ------------ | ---------- |
+| `mistral`        | paulit-ulit            | ~1.00B                     | —                      | mag-ingat    | 5          |
+| `nara`           | paulit-ulit            | ~210M                      | —                      | mag-ingat    | 8          |
+| `llm7`           | paulit-ulit            | ~150M                      | —                      | mag-ingat    | 4          |
+| `xkiro`          | paulit-ulit            | ~150M                      | —                      | mag-ingat    | 39         |
+| `longcat`        | minsanan               | —                          | 10M                    | mag-ingat    | 1          |
+| `cerebras`       | minsanan               | —                          | $5 na kredito          | mag-ingat    | 2          |
+| `cloudflare-ai`  | paulit-ulit            | ~30M                       | —                      | mag-ingat    | 9          |
+| `groq`           | paulit-ulit            | ~30M                       | —                      | mag-ingat    | 5          |
+| `api-airforce`   | paulit-ulit            | ~24M                       | —                      | mag-ingat    | 7          |
+| `bluesminds`     | paulit-ulit            | ~7M                        | —                      | malabo       | 22         |
+| `sambanova`      | paulit-ulit            | ~6M                        | —                      | mag-ingat    | 5          |
+| `arcee-ai`       | paulit-ulit            | ~5M                        | —                      | mag-ingat    | 1          |
+| `bazaarlink`     | paulit-ulit            | ~4M                        | —                      | mag-ingat    | 32         |
+| `openrouter`     | paulit-ulit            | ~1M                        | —                      | mag-ingat    | 1          |
+| `cohere`         | paulit-ulit            | ~800K                      | —                      | mag-ingat    | 6          |
+| `huggingchat`    | paulit-ulit            | ~500K                      | —                      | mag-ingat    | 4          |
+| `morph`          | paulit-ulit            | ~400K                      | —                      | ayos         | 2          |
+| `huggingface`    | paulit-ulit            | ~200K                      | —                      | mag-ingat    | 6          |
+| `kiro`           | paulit-ulit            | ~25K                       | —                      | iwasan       | 12         |
+| `glm-cn`         | walang limitasyon      | walang limitasyon\*        | ~20M                   | ayos         | 4          |
+| `baidu`          | walang limitasyon      | walang limitasyon\*        | —                      | mag-ingat    | 1          |
+| `gemini`         | walang limitasyon      | walang limitasyon\*        | —                      | mag-ingat    | 4          |
+| `kilo-gateway`   | walang limitasyon      | walang limitasyon\*        | —                      | mag-ingat    | 7          |
+| `ollama-cloud`   | walang limitasyon      | walang limitasyon\*        | —                      | malabo       | 8          |
+| `opencode-zen`   | walang limitasyon      | walang limitasyon\*        | —                      | mag-ingat    | 10         |
+| `tencent`        | walang limitasyon      | walang limitasyon\*        | —                      | mag-ingat    | 1          |
+| `vertex`         | kredito sa pag-sign up | —                          | ~300M                  | mag-ingat    | 10         |
+| `agentrouter`    | kredito sa pag-sign up | —                          | ~200M                  | mag-ingat    | 4          |
+| `predibase`      | kredito sa pag-sign up | —                          | ~25M                   | mag-ingat    | 1          |
+| `doubao`         | kredito sa pag-sign up | —                          | ~15M                   | malabo       | 1          |
+| `ai21`           | kredito sa pag-sign up | —                          | ~10M                   | iwasan       | 2          |
+| `deepseek`       | kredito sa pag-sign up | —                          | ~5M                    | ayos         | 2          |
+| `hyperbolic`     | kredito sa pag-sign up | —                          | ~5M                    | ayos         | 8          |
+| `nscale`         | kredito sa pag-sign up | —                          | ~5M                    | mag-ingat    | 6          |
+| `bytez`          | kredito (paulit-ulit)  | —                          | hindi alam             | malabo       | 1          |
+| `deepinfra`      | kredito sa pag-sign up | —                          | ~1M                    | mag-ingat    | 22         |
+| `fireworks`      | kredito sa pag-sign up | —                          | ~1M                    | iwasan       | 10         |
+| `nebius`         | kredito sa pag-sign up | —                          | ~1M                    | mag-ingat    | 1          |
+| `qoder`          | kredito sa pag-sign up | —                          | ~1M                    | mag-ingat    | 14         |
+| `scaleway`       | kredito sa pag-sign up | —                          | ~1M                    | ayos         | 6          |
+| `novita`         | kredito sa pag-sign up | —                          | ~500K                  | mag-ingat    | 1          |
+| `agy`            | walang key             | —                          | —                      | iwasan       | 16         |
+| `baichuan`       | walang key             | —                          | —                      | malabo       | 1          |
+| `blackbox`       | walang key             | —                          | —                      | iwasan       | 6          |
+| `coze`           | walang key             | —                          | —                      | iwasan       | 1          |
+| `duckduckgo-web` | walang key             | —                          | —                      | iwasan       | 6          |
+| `freemodel-dev`  | walang key             | —                          | —                      | hindi alam   | 4          |
+| `friendliai`     | walang key             | —                          | —                      | iwasan       | 2          |
+| `iflytek`        | walang key             | —                          | —                      | iwasan       | 1          |
+| `inference-net`  | walang key             | —                          | —                      | mag-ingat    | 3          |
+| `liquid`         | walang key             | —                          | —                      | hindi alam   | 1          |
+| `monsterapi`     | walang key             | —                          | —                      | malabo       | 1          |
+| `muse-spark-web` | walang key             | —                          | —                      | iwasan       | 3          |
+| `nlpcloud`       | walang key             | —                          | —                      | iwasan       | 1          |
+| `nvidia`         | walang key             | —                          | —                      | mag-ingat    | 13         |
+| `pollinations`   | walang key             | —                          | —                      | mag-ingat    | 31         |
+| `publicai`       | walang key             | —                          | —                      | mag-ingat    | 3          |
+| `reka`           | walang key             | —                          | —                      | mag-ingat    | 2          |
+| `sensenova`      | walang key             | —                          | —                      | mag-ingat    | 1          |
+| `sparkdesk`      | walang key             | —                          | —                      | mag-ingat    | 1          |
+| `stepfun`        | walang key             | —                          | —                      | ayos         | 1          |
+| `t3-web`         | walang key             | —                          | —                      | iwasan       | 23         |
+| `uncloseai`      | walang key             | —                          | —                      | mag-ingat    | 3          |
 
 ---
 

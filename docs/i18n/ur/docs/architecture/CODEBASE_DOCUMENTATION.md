@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 فراہم کنندہ registries، header profiles، identity، …
 ├── handlers/               درخواست handlers (چیٹ، embeddings، آڈیو، تصویر، …)
-├── executors/              فراہم کنندگان کے 150 executor modules (executor classes + ہر فراہم کنندہ کے helpers)
+├── executors/              فراہم کنندگان کے 156 executor modules (executor classes + ہر فراہم کنندہ کے helpers)
 ├── translator/             فارمیٹ کی تبدیلی (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions اسٹریم transformer
 ├── services/               80+ service modules (combos، fallback، quotas، identity، …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 اعلیٰ سطحی executor modules (`*.ts` میں سے `base.ts`، `index.ts` اور tests کے علاوہ — یہ تعداد
+156 اعلیٰ سطحی executor modules (`*.ts` میں سے `base.ts`، `index.ts` اور tests کے علاوہ — یہ تعداد
 `npm run check:docs-counts` ناپتا ہے)۔ ہر executor class، براہ راست یا `DefaultExecutor` یا کسی دوسرے
 executor کے ذریعے، `BaseExecutor` (`base.ts`) کو extend کرتی ہے؛ باقی modules ہر فراہم کنندہ کے
 لیے مخصوص helpers ہیں (tool schemas، fetch/TTS adapters، quirk handlers)۔ Executors میں شامل ہیں:

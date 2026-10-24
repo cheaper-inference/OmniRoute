@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "nt 131072",
     "contextWindowOverrideHint": "Määra käsitsi selle mudeli tegelik kontekstiaken (tokenites), kui teenusepakkuja esitab selle kohta valeinfo. See on automaatselt tuvastatud ja kataloogi väärtuste suhtes ülimuslik ning takistab kombineeritud marsruutimisel mudeli väljajätmist.",
     "contextWindowOverrideInvalid": "Kontekstiakna alistus peab olema positiivne täisarvuline tokenite arv",
+    "maxOutputTokenOverrideInvalid": "Väljundtokenite maksimaalse arvu alistus peab olema positiivne täisarvuline tokenite arv",
     "visionCapableLabel": "Pildivõimekusega",
     "visionCapableHint": "Märgi see mudel käsitsi pildivõimekusega mudeliks, kui teenusepakkuja tuvastusmetaandmed ei kajasta pildisisendi modaalsust (levinud isehostitud või kohalike taustsüsteemide puhul).",
     "compatParamFiltersLabel": "Parameetrifiltrid",

@@ -15,7 +15,7 @@ OmniRoute គឺជា gateway សម្រាប់បញ្ជូនសំណ�
 
 សមត្ថភាពស្នូល៖
 
-- ផ្ទៃ API ដែលឆបគ្នាជាមួយ OpenAI សម្រាប់ CLI/tools (375 providers, 154 executor modules)
+- ផ្ទៃ API ដែលឆបគ្នាជាមួយ OpenAI សម្រាប់ CLI/tools (375 providers, 156 executor modules)
 - ការបម្លែង request/response រវាងទម្រង់របស់ provider ផ្សេងៗ
 - Model combo fallback (លំដាប់ multi-model)
 - ជំហាន combo ដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយការរៀបលំដាប់នៅពេលដំណើរការដោយ `compositeTiers`

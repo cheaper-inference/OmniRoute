@@ -15,7 +15,7 @@ Ia menyediakan satu titik akhir yang serasi dengan OpenAI (`/v1/*`) dan menghala
 
 Keupayaan teras:
 
-- Permukaan API yang serasi dengan OpenAI untuk CLI/alat (375 penyedia, 154 modul pelaksana)
+- Permukaan API yang serasi dengan OpenAI untuk CLI/alat (375 penyedia, 156 modul pelaksana)
 - Penterjemahan permintaan/respons merentasi format penyedia
 - Sandaran kombo model (jujukan berbilang model)
 - Langkah kombo berstruktur (`provider + model + connection`) dengan penyusunan masa jalan mengikut `compositeTiers`

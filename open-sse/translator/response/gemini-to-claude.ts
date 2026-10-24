@@ -4,7 +4,7 @@ import {
   isAbortFinishReason,
   normalizeOpenAICompatibleFinishReason,
 } from "../../utils/finishReason.ts";
-import { restoreClaudeToolName } from "../../services/claudeCodeToolRemapper.ts";
+import { restoreDeclaredToolName } from "../../services/declaredToolCasing.ts";
 import {
   buildGeminiThoughtSignatureKey,
   storeGeminiThoughtSignature,
@@ -15,8 +15,8 @@ import {
   toClaudeWebSearchResults,
 } from "../helpers/claudeServerWebSearch.ts";
 
-function normalizeToolName(name: string, toolNameMap?: Map<string, string> | null): string {
-  return restoreClaudeToolName(name, toolNameMap);
+function normalizeToolName(name: string, toolNameMap: unknown, clientTools: unknown): string {
+  return restoreDeclaredToolName(name, toolNameMap, clientTools);
 }
 
 function extractXmlInvokeBlocks(
@@ -346,7 +346,8 @@ export function geminiToClaudeResponse(chunk, state) {
         const rawToolName = fc.name;
         const restoredToolName = normalizeToolName(
           typeof rawToolName === "string" ? rawToolName : "",
-          state.toolNameMap instanceof Map ? state.toolNameMap : null
+          state.toolNameMap,
+          state.clientTools
         );
         const idx = state.contentBlockIndex++;
         const toolId = fc.id || `toolu_${Date.now()}_${idx}`;
@@ -409,9 +410,10 @@ export function geminiToClaudeResponse(chunk, state) {
           }
           for (const tc of textToolCalls) {
             const idx = state.contentBlockIndex++;
-            const restoredToolName = restoreClaudeToolName(
+            const restoredToolName = restoreDeclaredToolName(
               tc.name,
-              state.toolNameMap instanceof Map ? state.toolNameMap : null
+              state.toolNameMap,
+              state.clientTools
             );
             const signatureForToolCall =
               (typeof hasThoughtSig === "string" && hasThoughtSig.length > 0

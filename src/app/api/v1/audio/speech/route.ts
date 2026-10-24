@@ -25,6 +25,7 @@ import {
 } from "@/app/api/v1/_shared/rateLimit";
 import { attachOmniRouteMetaToResponse } from "@/domain/omnirouteResponseMeta";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
+import { recordModalCallCost } from "@/domain/costRules";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { saveCallLog } from "@/lib/usageDb";
 
@@ -152,6 +153,7 @@ async function postHandler(request, context) {
     const costUsd = await calculateModalCost("audio", provider, resolvedModel || body.model, {
       characters,
     });
+    recordModalCallCost(apiKeyId, { provider, model: resolvedModel || body.model, costUsd });
     response = attachOmniRouteMetaToResponse(response, {
       provider,
       model: resolvedModel || body.model,

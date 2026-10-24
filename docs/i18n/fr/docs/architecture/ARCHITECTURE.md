@@ -15,7 +15,7 @@ Il fournit un point de terminaison unique compatible avec OpenAI (`/v1/*`) et ac
 
 Fonctionnalités principales :
 
-- Surface d’API compatible avec OpenAI pour les CLI/outils (375 fournisseurs, 154 modules d’exécution)
+- Surface d’API compatible avec OpenAI pour les CLI/outils (375 fournisseurs, 156 modules d’exécution)
 - Traduction des requêtes/réponses entre les formats des fournisseurs
 - Repli par combinaison de modèles (séquence multimodèle)
 - Étapes de combinaison structurées (`provider + model + connection`) avec ordonnancement à l’exécution selon `compositeTiers`

@@ -445,7 +445,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 プロバイダーレジストリ、ヘッダープロファイル、ID など
 ├── handlers/               リクエストハンドラー（チャット、埋め込み、音声、画像など）
-├── executors/              150 個のプロバイダーエグゼキューターモジュール（エグゼキュータークラス + プロバイダーごとのヘルパー）
+├── executors/              156 個のプロバイダーエグゼキューターモジュール（エグゼキュータークラス + プロバイダーごとのヘルパー）
 ├── translator/             形式変換（OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro）
 ├── transformer/            Responses API ↔ Chat Completions ストリームトランスフォーマー
 ├── services/               80 以上のサービスモジュール（コンボ、フォールバック、クォータ、ID など）
@@ -475,7 +475,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-トップレベルのエグゼキューターモジュールは 150 個です（`*.ts` から `base.ts`、`index.ts`、およびテストを除外した数であり、`npm run check:docs-counts` で計測されます）。各エグゼキュータークラスは、直接、または `DefaultExecutor` や別のエグゼキューターを介して `BaseExecutor`（`base.ts`）を継承します。残りのモジュールは、プロバイダーごとのヘルパー（ツールスキーマ、フェッチ/TTS アダプター、特殊挙動のハンドラー）です。エグゼキューターには以下が含まれます。
+トップレベルのエグゼキューターモジュールは 156 個です（`*.ts` から `base.ts`、`index.ts`、およびテストを除外した数であり、`npm run check:docs-counts` で計測されます）。各エグゼキュータークラスは、直接、または `DefaultExecutor` や別のエグゼキューターを介して `BaseExecutor`（`base.ts`）を継承します。残りのモジュールは、プロバイダーごとのヘルパー（ツールスキーマ、フェッチ/TTS アダプター、特殊挙動のハンドラー）です。エグゼキューターには以下が含まれます。
 
 `antigravity`、`azure-openai`、`blackbox-web`、`cliproxyapi`、
 `chatgpt-web-codex`、`cloudflare-ai`、`codex`、`commandCode`、`cursor`、`default`、`devin-cli`、

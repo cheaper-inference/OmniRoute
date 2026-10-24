@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "t.ex. 131072",
     "contextWindowOverrideHint": "Ställ in denna modells verkliga kontextfönster (tokens) manuellt när leverantören rapporterar fel. Går före automatiskt identifierade värden/katalogvärden och förhindrar att kombinationsdirigering tappar modellen.",
     "contextWindowOverrideInvalid": "Åsidosättning av kontextfönster måste vara ett positivt heltal tokens",
+    "maxOutputTokenOverrideInvalid": "Åsidosättning av maximalt antal utdatatoken måste vara ett positivt heltal tokens",
     "visionCapableLabel": "Vision-kapabel",
     "visionCapableHint": "Flagga denna modell manuellt som vision-kapabel när leverantörens identifieringsmetadata inte rapporterar modalitet för bildinmatning (vanligt för självhostade/lokala backends).",
     "compatParamFiltersLabel": "Parameterfilter",

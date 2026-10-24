@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "npr. 131072",
     "contextWindowOverrideHint": "Ručno postavite stvarni prozor konteksta (tokeni) ovog modela kada provajder pogrešno prijavi. Ima prednost nad auto-detektovanim/kataloškim vrijednostima i sprečava da combo rutiranje izbaci model.",
     "contextWindowOverrideInvalid": "Prepisivanje prozora konteksta mora biti pozitivan cijeli broj tokena",
+    "maxOutputTokenOverrideInvalid": "Prepisivanje maksimalnih izlaznih tokena mora biti pozitivan cijeli broj tokena",
     "visionCapableLabel": "Podržava viziju",
     "visionCapableHint": "Ručno označite ovaj model kao onaj koji podržava viziju kada metapodaci provajdera ne prijave modalitet slika kao ulaz (uobičajeno za self-hosted/lokalne backend-e).",
     "compatParamFiltersLabel": "Filteri parametara",

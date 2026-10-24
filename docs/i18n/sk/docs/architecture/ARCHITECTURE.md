@@ -15,7 +15,7 @@ Poskytuje jednotný koncový bod kompatibilný s OpenAI (`/v1/*`) a smeruje prev
 
 Kľúčové funkcie:
 
-- API rozhranie kompatibilné s OpenAI pre CLI/nástroje (375 poskytovateľov, 154 vykonávacích modulov)
+- API rozhranie kompatibilné s OpenAI pre CLI/nástroje (375 poskytovateľov, 156 vykonávacích modulov)
 - Preklad požiadaviek/odpovedí medzi formátmi poskytovateľov
 - Záložné prepínanie kombinácií modelov (sekvencia viacerých modelov)
 - Štruktúrované kroky kombinácie (`provider + model + connection`) s poradím za behu podľa `compositeTiers`

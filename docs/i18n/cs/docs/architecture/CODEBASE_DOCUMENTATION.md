@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registry poskytovatelů, profily hlaviček, identita, …
 ├── handlers/               Obslužné rutiny požadavků (chat, embeddingy, zvuk, obrázky, …)
-├── executors/              150 modulů exekutorů poskytovatelů (třídy exekutorů + pomocné funkce pro jednotlivé poskytovatele)
+├── executors/              156 modulů exekutorů poskytovatelů (třídy exekutorů + pomocné funkce pro jednotlivé poskytovatele)
 ├── translator/             Převod formátů (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformátor streamu Responses API ↔ Chat Completions
 ├── services/               Více než 80 modulů služeb (kombinace, záložní postupy, kvóty, identita, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 modulů exekutorů nejvyšší úrovně (`*.ts` bez `base.ts`, `index.ts` a testů — tento počet
+156 modulů exekutorů nejvyšší úrovně (`*.ts` bez `base.ts`, `index.ts` a testů — tento počet
 měří `npm run check:docs-counts`). Každá třída exekutoru rozšiřuje `BaseExecutor` (`base.ts`),
 buď přímo, nebo prostřednictvím `DefaultExecutor` či jiného exekutoru; zbývající moduly jsou
 pomocné moduly pro jednotlivé poskytovatele (schémata nástrojů, adaptéry fetch/TTS, obsluha specifických odlišností). Mezi exekutory patří:

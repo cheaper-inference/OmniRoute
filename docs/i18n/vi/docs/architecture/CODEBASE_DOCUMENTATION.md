@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registry nhà cung cấp, hồ sơ header, danh tính, …
 ├── handlers/               Trình xử lý yêu cầu (chat, embedding, âm thanh, hình ảnh, …)
-├── executors/              150 mô-đun executor nhà cung cấp (các lớp executor + helper cho từng nhà cung cấp)
+├── executors/              156 mô-đun executor nhà cung cấp (các lớp executor + helper cho từng nhà cung cấp)
 ├── translator/             Chuyển đổi định dạng (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer luồng Responses API ↔ Chat Completions
 ├── services/               Hơn 80 mô-đun dịch vụ (combo, dự phòng, hạn ngạch, danh tính, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 mô-đun executor cấp cao nhất (`*.ts` ngoại trừ `base.ts`, `index.ts` và các bài kiểm thử — số lượng
+156 mô-đun executor cấp cao nhất (`*.ts` ngoại trừ `base.ts`, `index.ts` và các bài kiểm thử — số lượng
 được đo bởi `npm run check:docs-counts`). Mọi lớp executor đều mở rộng `BaseExecutor` (`base.ts`),
 trực tiếp hoặc thông qua `DefaultExecutor` hay một executor khác; các mô-đun còn lại là những helper
 cho từng nhà cung cấp (schema công cụ, adapter fetch/TTS, trình xử lý các đặc thù). Các executor bao gồm:

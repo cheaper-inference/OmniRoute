@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "par ex. 131072",
     "contextWindowOverrideHint": "Définissez manuellement la fenêtre de contexte réelle de ce modèle (jetons) lorsque le fournisseur la signale de manière erronée. L'emporte sur les valeurs détectées automatiquement/du catalogue et empêche le routage combiné d'abandonner le modèle.",
     "contextWindowOverrideInvalid": "La surcharge de la fenêtre de contexte doit être un nombre entier positif de jetons",
+    "maxOutputTokenOverrideInvalid": "La surcharge du nombre maximal de jetons de sortie doit être un nombre entier positif de jetons",
     "visionCapableLabel": "Compatible vision",
     "visionCapableHint": "Marquez manuellement ce modèle comme compatible vision lorsque les métadonnées de découverte du fournisseur ne signalent pas de modalité d'entrée d'image (courant pour les backends auto-hébergés/locaux).",
     "compatParamFiltersLabel": "Filtres de paramètres",

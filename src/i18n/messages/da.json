@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "f.eks. 131072",
     "contextWindowOverrideHint": "Indstil manuelt denne models reelle kontekstvindue (tokens), når udbyderen rapporterer det forkert. Går forud for automatisk registrerede/katalogværdier og forhindrer, at kombinationsdirigering fjerner modellen.",
     "contextWindowOverrideInvalid": "Tilsidesættelse af kontekstvindue skal være et positivt helt tal af tokens",
+    "maxOutputTokenOverrideInvalid": "Tilsidesættelse af maks output tokens skal være et positivt helt tal af tokens",
     "visionCapableLabel": "Vision-kompatibel",
     "visionCapableHint": "Marker manuelt denne model som vision-kompatibel, når udbyderens registreringsmetadata ikke rapporterer en billedinputmodalitet (almindeligt for selvhostede/lokale backends).",
     "compatParamFiltersLabel": "Parameterfiltre",

@@ -62,7 +62,10 @@ import {
 } from "./comboPredicates.ts";
 import { collectCircuitOpenExclusions, evaluateExecuteTargetGates } from "./executeTargetGates.ts";
 import { executeTargetAttempt } from "./executeTargetAttempt.ts";
+import type { ResolvedComboTarget } from "./types.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
+import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
+import { isProviderInCooldown } from "../providerCooldownTracker.ts";
 import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
 import { resolveSkippedConnectionCooldownTerminal } from "./skippedConnectionCooldown.ts";
@@ -200,6 +203,12 @@ export type DispatchWithCooldownRetryExtra = {
   comboCooldownBudgetLeftMs: { current: number };
   evaluateGates: typeof evaluateExecuteTargetGates;
   executeAttempt: typeof executeTargetAttempt;
+  /**
+   * #6238 last-resort tier: the targets the compat pre-filter rejected. Probed
+   * only when no compat-kept target was ever dispatched — the same guard the
+   * round-robin path applies before its terminal error.
+   */
+  compatRejectedTargets: ResolvedComboTarget[];
 };
 
 export async function dispatchWithCooldownRetry(opts: {
@@ -625,6 +634,41 @@ export async function dispatchWithCooldownRetry(opts: {
       finishComboTrace(deps.traceInvocationId, { status: 503 });
       if (!state.lastStatus) {
         if (state.recordedAttempts === 0) {
+          // #6238: every compat-kept target was skipped as unavailable and NONE
+          // was ever attempted (recordedAttempts === 0). Before crystallizing
+          // 503, probe the targets the compat pre-filter rejected — a
+          // compat-rejected-but-healthy provider is a valid last-resort
+          // fallback tier, not a permanently dropped target. Mirrors the
+          // round-robin guard; a null result keeps the existing error path.
+          if (extra.compatRejectedTargets.length > 0) {
+            const compatFallbackResult = await attemptCompatRejectedFallback(
+              extra.compatRejectedTargets,
+              deps.body,
+              {
+                handleSingleModel: deps.handleSingleModelWithTimeout,
+                isModelAvailable: deps.isModelAvailable,
+                isProviderInCooldown: (target) =>
+                  deps.resilienceSettings.providerCooldown.enabled &&
+                  Boolean(target.provider && target.provider !== "unknown") &&
+                  isProviderInCooldown(
+                    target.provider as string,
+                    target.connectionId as string | undefined,
+                    deps.resilienceSettings
+                  ),
+                log: deps.log,
+                strategy: deps.strategy,
+              }
+            );
+            if (compatFallbackResult) {
+              recordComboRequest(deps.combo.name, null, {
+                success: true,
+                latencyMs: Date.now() - deps.startTime,
+                fallbackCount: state.fallbackCount,
+                strategy: deps.strategy,
+              });
+              return compatFallbackResult;
+            }
+          }
           notifyWebhookEvent("request.failed", {
             combo: deps.combo.name,
             reason: "ALL_TARGETS_SKIPPED",

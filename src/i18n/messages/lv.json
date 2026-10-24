@@ -5797,6 +5797,7 @@
     "contextWindowOverridePlaceholder": "piem., 131072",
     "contextWindowOverrideHint": "Manuāli iestatīt šī modeļa faktisko konteksta logu (tokenos), ja nodrošinātājs to norāda nepareizi. Šai vērtībai ir prioritāte pār automātiski noteiktajām un katalogā esošajām vērtībām, un tā novērš modeļa izslēgšanu no kombinētās maršrutēšanas.",
     "contextWindowOverrideInvalid": "Konteksta loga pārrakstīšanas vērtībai jābūt pozitīvam veselam tokenu skaitam",
+    "maxOutputTokenOverrideInvalid": "Maksimālā izvades tokenu skaita pārrakstīšanas vērtībai jābūt pozitīvam veselam tokenu skaitam",
     "visionCapableLabel": "Atbalsta attēlus",
     "visionCapableHint": "Manuāli atzīmēt, ka šis modelis atbalsta attēlus, ja nodrošinātāja atklāšanas metadatos nav norādīta attēlu ievades modalitāte (tas bieži sastopams pašmitinātās/lokālās aizmugursistēmās).",
     "compatParamFiltersLabel": "Parametru filtri",

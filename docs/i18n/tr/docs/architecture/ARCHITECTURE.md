@@ -15,7 +15,7 @@ Tek bir OpenAI uyumlu uç nokta (`/v1/*`) sağlar ve trafiği çeviri, yedek dev
 
 Temel yetenekler:
 
-- CLI/araçlar için OpenAI uyumlu API yüzeyi (375 sağlayıcı, 154 yürütücü modül)
+- CLI/araçlar için OpenAI uyumlu API yüzeyi (375 sağlayıcı, 156 yürütücü modül)
 - Sağlayıcı biçimleri arasında istek/yanıt çevirisi
 - Model kombinasyonu yedekleme mekanizması (çok modelli sıra)
 - `compositeTiers` tarafından çalışma zamanında sıralanan yapılandırılmış kombinasyon adımları (`provider + model + connection`)

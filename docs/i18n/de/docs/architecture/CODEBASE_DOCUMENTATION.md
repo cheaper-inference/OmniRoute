@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider-Registrys, Header-Profile, Identität, …
 ├── handlers/               Anfrage-Handler (Chat, Embeddings, Audio, Bilder, …)
-├── executors/              150 Provider-Executor-Module (Executor-Klassen + providerspezifische Hilfsfunktionen)
+├── executors/              156 Provider-Executor-Module (Executor-Klassen + providerspezifische Hilfsfunktionen)
 ├── translator/             Formatkonvertierung (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions-Stream-Transformer
 ├── services/               Mehr als 80 Service-Module (Kombinationen, Fallback, Kontingente, Identität, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 Executor-Module auf oberster Ebene (`*.ts` abzüglich `base.ts`, `index.ts` und Tests — die Anzahl wird von `npm run check:docs-counts` ermittelt). Jede Executor-Klasse erweitert `BaseExecutor` (`base.ts`), direkt oder über `DefaultExecutor` beziehungsweise einen anderen Executor; die übrigen Module sind providerspezifische Hilfsfunktionen (Tool-Schemas, Fetch-/TTS-Adapter, Handler für Besonderheiten). Zu den Executors gehören:
+156 Executor-Module auf oberster Ebene (`*.ts` abzüglich `base.ts`, `index.ts` und Tests — die Anzahl wird von `npm run check:docs-counts` ermittelt). Jede Executor-Klasse erweitert `BaseExecutor` (`base.ts`), direkt oder über `DefaultExecutor` beziehungsweise einen anderen Executor; die übrigen Module sind providerspezifische Hilfsfunktionen (Tool-Schemas, Fetch-/TTS-Adapter, Handler für Besonderheiten). Zu den Executors gehören:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,

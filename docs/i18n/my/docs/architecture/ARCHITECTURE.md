@@ -15,7 +15,7 @@ OmniRoute သည် Next.js ကို အခြေခံတည်ဆောက်
 
 အဓိကလုပ်ဆောင်နိုင်စွမ်းများ-
 
-- CLI/tool များအတွက် OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော API မျက်နှာပြင် (provider 375 ခု၊ executor module 154 ခု)
+- CLI/tool များအတွက် OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော API မျက်နှာပြင် (provider 375 ခု၊ executor module 156 ခု)
 - Provider format များအကြား request/response ဘာသာပြန်ပြောင်းလဲခြင်း
 - Model combo fallback (model များစွာကို အစဉ်လိုက်အသုံးပြုခြင်း)
 - `compositeTiers` အလိုက် runtime အစီအစဉ်သတ်မှတ်မှုပါရှိသော ဖွဲ့စည်းပုံကျ combo အဆင့်များ (`provider + model + connection`)

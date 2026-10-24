@@ -4,7 +4,7 @@
  * deps, and the values the barrel reads afterwards leave through carry.
  */
 
-import { meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
+import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { readCpaAuthIndex } from "../chatCore/failureUsage.ts";
 
 import { createRoutingEvent, emitRoutingEvent } from "../../services/routing/index.ts";
@@ -89,7 +89,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     buildCacheUsageLogMeta,
     buildCostCtx,
     buildErrorBody,
-    calculateCost,
+    calculateCostDetailed,
     calibrationEstimatedInputTokens,
     claudePromptCacheLogMeta: _claudePromptCacheLogMeta,
     clientRawRequest,
@@ -782,9 +782,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? translatedResponse.usage
         : null;
     const costUsage = normalizeUsage(responseUsage);
-    const estimatedCost = costUsage
-      ? await calculateCost(provider, model, costUsage, { serviceTier: effectiveServiceTier })
-      : 0;
+    const costResult = costUsage
+      ? await calculateCostDetailed(provider, model, costUsage, {
+          serviceTier: effectiveServiceTier,
+        })
+      : null;
+    const estimatedCost = costResult?.costUsd ?? 0;
+    // A metered model with no price must not pass the dollar budget as $0.
+    const unpricedBudgetCost = isUnpricedMeteredCost(provider, costResult);
     const chatCostCtx = buildCostCtx(provider, model, usage, effectiveServiceTier, traceId);
 
     if (postCallGuardrails.blocked) {
@@ -810,7 +815,8 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         apiKeyInfo,
         meteredBudgetCost(provider, estimatedCost),
         chatCostCtx,
-        false
+        false,
+        unpricedBudgetCost
       );
       log?.warn?.(
         "GUARDRAIL",
@@ -986,7 +992,13 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       claudeCacheUsageMeta: cacheUsageLogMeta,
       cacheSource: "upstream",
     });
-    recordChatCallCost(apiKeyInfo, meteredBudgetCost(provider, estimatedCost), chatCostCtx, true);
+    recordChatCallCost(
+      apiKeyInfo,
+      meteredBudgetCost(provider, estimatedCost),
+      chatCostCtx,
+      true,
+      unpricedBudgetCost
+    );
 
     // === Quota Share POST-hook (B/F7) — fire-and-forget, fail-open ===
     await scheduleQuotaShareConsumption({
