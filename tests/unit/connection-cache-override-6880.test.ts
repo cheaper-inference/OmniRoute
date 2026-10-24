@@ -22,7 +22,10 @@ import { normalizeProviderSpecificData } from "../../src/lib/providers/requestDe
 // no way to opt in. This adds a per-connection `cache` capability override consulted
 // first by the policy functions, defaulting to today's hardcoded-set behavior.
 
-function collectIssues(): { ctx: z.RefinementCtx; issues: Array<{ path: (string | number)[]; message: string }> } {
+function collectIssues(): {
+  ctx: z.RefinementCtx;
+  issues: Array<{ path: (string | number)[]; message: string }>;
+} {
   const issues: Array<{ path: (string | number)[]; message: string }> = [];
   const ctx = {
     addIssue: (issue: { path?: (string | number)[]; message: string }) => {
@@ -78,14 +81,19 @@ describe("#6880 providerSupportsCaching override", () => {
   });
 
   test("explicit opt-out overrides the hardcoded set", () => {
-    assert.equal(providerSupportsCaching("claude", undefined, { supportsPromptCaching: false }), false);
+    assert.equal(
+      providerSupportsCaching("claude", undefined, { supportsPromptCaching: false }),
+      false
+    );
   });
 });
 
 describe("#6880 providerHonorsOpenAIFormatCacheControl override", () => {
   test("openai-format override enables passthrough for a non-hardcoded provider", () => {
     assert.equal(
-      providerHonorsOpenAIFormatCacheControl("grok-custom", { cacheControlPassthrough: "openai-format" }),
+      providerHonorsOpenAIFormatCacheControl("grok-custom", {
+        cacheControlPassthrough: "openai-format",
+      }),
       true
     );
   });

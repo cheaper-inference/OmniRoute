@@ -12,6 +12,19 @@ import type { ConnectionCacheOverride } from "../../utils/cacheControlPolicy.ts"
 
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
 
+export const COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE_FLAG =
+  "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE";
+
+/** Default-off flag read at the decision point; any resolution error keeps the old behavior. */
+async function automaticPrefixEstimateEnabled(): Promise<boolean> {
+  try {
+    const { isFeatureFlagEnabled } = await import("@/shared/utils/featureFlags");
+    return isFeatureFlagEnabled(COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE_FLAG);
+  } catch {
+    return false;
+  }
+}
+
 export function recordCompressionCacheStats(args: {
   compressionInputBody: unknown;
   provider: string | null | undefined;
@@ -41,7 +54,13 @@ export function recordCompressionCacheStats(args: {
         model: args.effectiveModel ?? "",
         compressionMode: args.mode,
         cacheControlPresent: cacheContext.hasCacheControl,
-        estimatedCacheHit: cacheContext.hasCacheControl && cacheContext.isCachingProvider,
+        // Default: a hit is estimated only for an explicit cache_control marker sent to a
+        // caching provider. With COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE on, automatic-prefix
+        // providers (OpenAI, Codex, Azure) also count on every request: that is a cache-ELIGIBILITY
+        // estimate, not an observed hit, so their reported hit rate trends toward 100%.
+        estimatedCacheHit:
+          (cacheContext.hasCacheControl && cacheContext.isCachingProvider) ||
+          (cacheContext.usesAutomaticPrefixCaching && (await automaticPrefixEstimateEnabled())),
         tokensSavedCompression,
         tokensSavedCaching: 0,
         netSavings: tokensSavedCompression,

@@ -8,6 +8,7 @@
 
 import {
   providerSupportsCaching,
+  providerUsesAutomaticPrefixCaching,
   type ConnectionCacheOverride,
 } from "../../utils/cacheControlPolicy.ts";
 
@@ -25,6 +26,9 @@ export interface CachingContext {
   provider: string | null;
   targetFormat: string | null;
   isCachingProvider: boolean;
+  /** True when the provider caches a prefix without cache_control markers (OpenAI, Codex, Azure).
+   * It describes cache ELIGIBILITY only; it says nothing about an observed cache hit. */
+  usesAutomaticPrefixCaching: boolean;
 }
 
 export interface CacheAwareStrategy {
@@ -98,7 +102,15 @@ export function detectCachingContext(
     hasCacheControl: hasCacheControl(body),
     provider,
     targetFormat,
-    isCachingProvider: providerSupportsCaching(provider, targetFormat, context.connectionCacheOverride),
+    isCachingProvider: providerSupportsCaching(
+      provider,
+      targetFormat,
+      context.connectionCacheOverride
+    ),
+    usesAutomaticPrefixCaching: providerUsesAutomaticPrefixCaching(
+      provider,
+      context.connectionCacheOverride
+    ),
   };
 }
 
