@@ -3838,6 +3838,15 @@ paths:
                 url:
                   type: string
                   minLength: 1
+                mirrorUrls:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                  description: >-
+                    Optional extra feed URLs fetched next to `url`. Entries
+                    are trimmed and deduplicated, the primary URL is dropped
+                    and the first 5 are kept.
                 mode:
                   type: string
                   enum: [global, rule]
@@ -3926,6 +3935,15 @@ paths:
                   type: string
                 url:
                   type: string
+                mirrorUrls:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                  description: >-
+                    Replaces the extra feed URLs (trimmed, deduplicated,
+                    primary dropped, first 5 kept). A redacted mirror sent
+                    back as returned keeps its stored credentials.
                 mode:
                   type: string
                   enum: [global, rule]
@@ -16635,6 +16653,16 @@ components:
             are allowed by default (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`);
             cloud-metadata / link-local endpoints (169.254.0.0/16) are always
             blocked.
+        mirrorUrls:
+          type: array
+          nullable: true
+          maxItems: 5
+          items:
+            type: string
+          description: >-
+            Extra feed URLs, redacted like `url`. Each feed is fetched
+            on its own; a partial failure keeps the unavailable feeds'
+            last nodes.
         enabled:
           type: boolean
         mode:
