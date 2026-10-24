@@ -255,17 +255,16 @@ open-sse/services/sorting/poolOrdering.ts
 
 ### PERF-08 — Image CLS fix
 
+**Status:** Completed (2026-10-24)
+
 **Problem:** `<img className="w-full" />` causes layout shift as images load.
 
-**Fix:** Add aspect ratios:
+**Fix (implemented):** Aspect-ratio container reserves layout space before the image decodes, eliminating the shift:
 
-```jsx
-<div className="aspect-square">
-  <img className="w-full h-full object-cover" src={dataURI} alt="" />
-</div>
-```
+- `src/app/(dashboard)/dashboard/playground/components/ImageResultsInline.tsx` — grid cell wrapper now `aspect-square` with `w-full h-full object-cover` on the `<img>`.
+- `src/app/(dashboard)/dashboard/cache/media/MediaPageClient.tsx` (`ImageResults`) — same pattern applied.
 
-**Timeline:** Day 17-18
+Verified: `npm run typecheck:core` clean; ESLint clean on both files.
 
 ---
 
