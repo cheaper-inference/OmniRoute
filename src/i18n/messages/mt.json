@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Stat tas-sors",
     "noResponse": "Ebda risposta",
     "egressIp": "IP Egress",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Intestaturi wara",
     "firstChunkAfter": "L-ewwel biċċa wara",
     "servedBy": "Servut minn",

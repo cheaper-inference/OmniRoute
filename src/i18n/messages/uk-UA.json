@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Статус верхнього потоку",
     "noResponse": "Немає відповіді",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Заголовки після",
     "firstChunkAfter": "Перший фрагмент після",
     "servedBy": "Обслуговується",

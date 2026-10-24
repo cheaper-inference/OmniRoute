@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Stato a monte",
     "noResponse": "Nessuna risposta",
     "egressIp": "IP in uscita",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Intestazioni dopo",
     "firstChunkAfter": "Primo blocco dopo",
     "servedBy": "Servito da",

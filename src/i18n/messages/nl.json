@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Stroomopwaartse status",
     "noResponse": "Geen reactie",
     "egressIp": "Uittrede IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Headers na",
     "firstChunkAfter": "Eerste chunk na",
     "servedBy": "Gediend door",

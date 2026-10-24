@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Uppströmsstatus",
     "noResponse": "Ingen respons",
     "egressIp": "Utgående IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Rubriker efter",
     "firstChunkAfter": "Första del efter",
     "servedBy": "Serverad av",

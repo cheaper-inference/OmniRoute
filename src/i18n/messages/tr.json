@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Yukarı Akış Durumu",
     "noResponse": "Yanıt Yok",
     "egressIp": "Çıkış IP'si",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Başlıklar sonrası",
     "firstChunkAfter": "İlk parça sonrası",
     "servedBy": "Tarafından Sunuldu",

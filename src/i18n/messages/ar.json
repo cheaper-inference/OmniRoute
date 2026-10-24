@@ -14778,6 +14778,7 @@
     "upstreamStatus": "حالة التيار العلوي",
     "noResponse": "لا توجد استجابة",
     "egressIp": "عنوان IP الصادر",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "الرؤوس بعد",
     "firstChunkAfter": "الكتلة الأولى بعد",
     "servedBy": "مقدم بواسطة",

@@ -14778,6 +14778,7 @@
     "upstreamStatus": "ಅಪಸ್ಟ್ರೀಮ್ ಸ್ಥಿತಿ",
     "noResponse": "ಯಾವುದೇ ಪ್ರತಿಸ್ಪಂದನೆ ಇಲ್ಲ",
     "egressIp": "ಊರ್ಜಿತ ಐಪಿ",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "ಶೀರ್ಷಿಕೆಗಳು ನಂತರ",
     "firstChunkAfter": "ಮೊದಲ ತುಂಡು ನಂತರ",
     "servedBy": "ಸೇವಿತ بواسطة",

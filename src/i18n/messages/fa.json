@@ -14778,6 +14778,7 @@
     "upstreamStatus": "وضعیت بالا دستی",
     "noResponse": "هیچ پاسخی",
     "egressIp": "IP خروجی",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "سرفصل‌ها پس از",
     "firstChunkAfter": "اولین بخش پس از",
     "servedBy": "توسط ارائه شده",

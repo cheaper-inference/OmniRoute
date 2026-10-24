@@ -14778,6 +14778,7 @@
     "upstreamStatus": "סטטוס מעלה",
     "noResponse": "אין תגובה",
     "egressIp": "כתובת IP יוצאת",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "כותרות אחרי",
     "firstChunkAfter": "החלק הראשון אחרי",
     "servedBy": "מוגש על ידי",

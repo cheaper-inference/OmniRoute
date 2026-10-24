@@ -1,0 +1,1 @@
+- **fix(egress):** record the observed egress address of each address family ([#17326](https://github.com/diegosouzapw/OmniRoute/pull/17326)) — thanks @maxmad64bis (with thanks to @adevwithpurpose for the dual-target proposal in #9694)

@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Oqim holati",
     "noResponse": "Javob yo'q",
     "egressIp": "Chiqish IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Sarlavhalar keyin",
     "firstChunkAfter": "Birinchi bo'lak keyin",
     "servedBy": "Ta'minlovchi",

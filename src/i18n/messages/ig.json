@@ -14778,6 +14778,7 @@
     "upstreamStatus": "N'elu ọnọdụ",
     "noResponse": "Enweghị nzaghachi",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Isi mgbe",
     "firstChunkAfter": "Akụkụ mbụ mgbe",
     "servedBy": "Nyeere site na",

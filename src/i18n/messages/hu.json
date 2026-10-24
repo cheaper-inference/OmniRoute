@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Felfelé állapot",
     "noResponse": "Nincs válasz",
     "egressIp": "Kimeneti IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Fejlécek után",
     "firstChunkAfter": "Első darab után",
     "servedBy": "Szolgáltatva általa",

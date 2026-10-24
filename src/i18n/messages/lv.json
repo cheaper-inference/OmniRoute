@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Augšupe status",
     "noResponse": "Nav atbildes",
     "egressIp": "Izvades IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Virsraksti pēc",
     "firstChunkAfter": "Pirmais gabals pēc",
     "servedBy": "Piegādā",

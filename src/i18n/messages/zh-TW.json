@@ -14778,6 +14778,7 @@
     "upstreamStatus": "上游狀態",
     "noResponse": "無回應",
     "egressIp": "出口 IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "標頭之後",
     "firstChunkAfter": "第一個區塊之後",
     "servedBy": "由...提供",

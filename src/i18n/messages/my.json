@@ -14778,6 +14778,7 @@
     "upstreamStatus": "အထက်စီးအခြေအနေ",
     "noResponse": "တုံ့ပြန်မှုမရှိပါ",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "အခေါင်းစဉ်များ အပြီး",
     "firstChunkAfter": "ပထမ အပိုင်း အပြီး",
     "servedBy": "ဆောင်ရွက်သူ",

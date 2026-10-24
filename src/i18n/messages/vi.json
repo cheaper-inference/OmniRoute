@@ -14878,6 +14878,7 @@
     "upstreamStatus": "Trạng thái nguồn",
     "noResponse": "Không có phản hồi",
     "egressIp": "IP ra",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Tiêu đề sau",
     "firstChunkAfter": "Đoạn đầu tiên sau",
     "servedBy": "Được phục vụ bởi",

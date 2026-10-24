@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Stádas uachtarach",
     "noResponse": "Níl freagra",
     "egressIp": "IP Egress",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Ceanntásca i ndiaidh",
     "firstChunkAfter": "An chéad slabhra i ndiaidh",
     "servedBy": "Freastalaithe ag",

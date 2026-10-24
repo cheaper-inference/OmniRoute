@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Katayuan ng Upstream",
     "noResponse": "Walang tugon",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Mga header pagkatapos",
     "firstChunkAfter": "Unang chunk pagkatapos",
     "servedBy": "Ipinagkaloob ng",

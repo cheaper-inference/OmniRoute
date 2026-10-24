@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Status hulu",
     "noResponse": "Tiada respons",
     "egressIp": "IP Egress",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Header selepas",
     "firstChunkAfter": "Keping pertama selepas",
     "servedBy": "Dihidangkan oleh",

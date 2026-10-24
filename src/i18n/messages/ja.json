@@ -14778,6 +14778,7 @@
     "upstreamStatus": "アップストリームステータス",
     "noResponse": "応答なし",
     "egressIp": "イーグレスIP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "ヘッダーの後",
     "firstChunkAfter": "最初のチャンクの後",
     "servedBy": "提供元",

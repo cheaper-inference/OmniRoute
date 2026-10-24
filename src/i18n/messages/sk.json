@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Stav nadriadeného",
     "noResponse": "Žiadna odpoveď",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Hlavičky po",
     "firstChunkAfter": "Prvý úsek po",
     "servedBy": "Poskytované",

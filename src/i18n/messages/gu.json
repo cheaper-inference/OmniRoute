@@ -14778,6 +14778,7 @@
     "upstreamStatus": "અપસ્ટ્રીમ સ્થિતિ",
     "noResponse": "કોઈ પ્રતિસાદ નથી",
     "egressIp": "ઇગ્રેસ આઈપી",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "હેડર્સ પછી",
     "firstChunkAfter": "પ્રથમ ચંક પછી",
     "servedBy": "દ્વારા સેવા આપવામાં આવી",

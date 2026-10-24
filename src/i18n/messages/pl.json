@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Status źródła",
     "noResponse": "Brak odpowiedzi",
     "egressIp": "Adres IP wyjściowy",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Nagłówki po",
     "firstChunkAfter": "Pierwszy fragment po",
     "servedBy": "Obsługiwane przez",

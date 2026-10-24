@@ -14778,6 +14778,7 @@
     "upstreamStatus": "ከላይ የሚገኝ ሁኔታ",
     "noResponse": "አንድ እንደማይመልስ",
     "egressIp": "ወጣት አይፒ",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "አርከቶች በኋላ",
     "firstChunkAfter": "የመጀመሪያ ቁርጽ በኋ�",
     "servedBy": "የተሰጠ በ",

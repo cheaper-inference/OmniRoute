@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Stare ascendentă",
     "noResponse": "Fără răspuns",
     "egressIp": "IP de ieșire",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Antete după",
     "firstChunkAfter": "Primul fragment după",
     "servedBy": "Servit de",

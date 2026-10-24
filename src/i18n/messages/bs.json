@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Status upravljačkog",
     "noResponse": "Nema odgovora",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Zaglavlja nakon",
     "firstChunkAfter": "Prvi dio nakon",
     "servedBy": "Posluženo od",

@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Վերին հոսքի կարգավիճակ",
     "noResponse": "Պատասխան չկա",
     "egressIp": "Ելքային IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Վերնագրերը հետո",
     "firstChunkAfter": "Առաջին հատվածը հետո",
     "servedBy": "Մատակարարող",

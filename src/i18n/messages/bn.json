@@ -14778,6 +14778,7 @@
     "upstreamStatus": "আপস্ট্রিম স্থিতি",
     "noResponse": "কোনো প্রতিক্রিয়া নেই",
     "egressIp": "এগ্রেস আইপি",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "হেডারস পরে",
     "firstChunkAfter": "প্রথম চাঙ্ক পরে",
     "servedBy": "দ্বারা পরিবেশন করা হয়েছে",

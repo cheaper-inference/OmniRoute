@@ -14778,6 +14778,7 @@
     "upstreamStatus": "ਉਪਰਲੀ ਧਾਰਾ ਦੀ ਸਥਿਤੀ",
     "noResponse": "ਕੋਈ ਜਵਾਬ ਨਹੀਂ",
     "egressIp": "ਇਗਰੈਸ IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "ਹੈਡਰਜ਼ ਬਾਅਦ",
     "firstChunkAfter": "ਪਹਿਲਾ ਚੰਕ ਬਾਅਦ",
     "servedBy": "ਦੁਆਰਾ ਸੇਵਾ ਕੀਤੀ ਗਈ",

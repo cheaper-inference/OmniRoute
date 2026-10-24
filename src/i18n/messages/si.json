@@ -14778,6 +14778,7 @@
     "upstreamStatus": "උඩුගත තත්වය",
     "noResponse": "ප්‍රතිචාරයක් නැත",
     "egressIp": "ඉවත් වීමේ IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "ශීර්ෂක පසු",
     "firstChunkAfter": "පළමු කොටස පසු",
     "servedBy": "සැපයුම්කරු",

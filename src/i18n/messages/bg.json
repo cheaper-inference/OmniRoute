@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Статус на входящия",
     "noResponse": "Няма отговор",
     "egressIp": "Изходящ IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Заглавки след",
     "firstChunkAfter": "Първи блок след",
     "servedBy": "Обслужвано от",

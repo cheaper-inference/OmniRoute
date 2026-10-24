@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Hali ya mwelekeo",
     "noResponse": "Hakuna jibu",
     "egressIp": "IP ya Kutoka",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Vichwa baada",
     "firstChunkAfter": "Kipande cha kwanza baada",
     "servedBy": "Inatolewa na",

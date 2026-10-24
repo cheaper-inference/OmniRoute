@@ -14778,6 +14778,7 @@
     "upstreamStatus": "업스트림 상태",
     "noResponse": "응답 없음",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "헤더 이후",
     "firstChunkAfter": "첫 번째 청크 이후",
     "servedBy": "제공자",

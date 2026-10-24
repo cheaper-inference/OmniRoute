@@ -14778,6 +14778,7 @@
     "upstreamStatus": "Κατάσταση ανάντη",
     "noResponse": "Καμία απάντηση",
     "egressIp": "Διεύθυνση IP εξόδου",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Κεφαλίδες μετά",
     "firstChunkAfter": "Πρώτο τμήμα μετά",
     "servedBy": "Παρέχεται από",
