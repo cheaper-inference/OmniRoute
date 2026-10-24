@@ -1,0 +1,1 @@
+- **fix(docker):** add a Docker-client-free CLI target, keep the existing Docker-enabled target backward compatible, run pinned CLI lifecycle scripts under npm 11, and remove Next.js trace manifests from standalone artifacts.
