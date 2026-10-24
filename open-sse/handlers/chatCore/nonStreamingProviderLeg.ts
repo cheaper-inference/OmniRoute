@@ -309,6 +309,7 @@ function finishOk(
     // thinking block; the non-streaming converter used to never receive it.
     requestedThinking: hasActiveClaudeThinking(input.sourceBody ?? {}),
     phase: input.phase === "initial" ? "final" : "intermediate",
+    connectionId: params.connectionId,
   });
   const receipt = buildReceipt(input, {
     httpStatus: 200,

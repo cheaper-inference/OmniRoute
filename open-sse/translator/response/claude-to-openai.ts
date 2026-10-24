@@ -55,6 +55,7 @@ function flushThinkingContinuity(state) {
     blocks: [...blocks.entries()].sort(([left], [right]) => left - right).map(([, b]) => b),
     provider: state.provider,
     model: state.model,
+    connectionId: state.connectionId,
   });
 }
 

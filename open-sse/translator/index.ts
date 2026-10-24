@@ -619,6 +619,10 @@ export function translateRequest(
                           options.signatureNamespace,
                           model
                         ),
+                        // Raw connection id (chatCore threads the serving connection as
+                        // signatureNamespace): openai-to-claude binds the Claude signed-
+                        // thinking restore on it (#17324 — signatures are org-scoped).
+                        _connectionId: options.signatureNamespace,
                       }
                     : {}),
                   ...(hasPreCompression ? { _preCompressionBody: options.preCompressionBody } : {}),

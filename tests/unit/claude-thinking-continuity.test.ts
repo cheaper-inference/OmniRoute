@@ -109,11 +109,12 @@ function claudeToolTurnEvents({
   return events;
 }
 
-function streamClaudeToChat(events: Block[], provider = "claude") {
+function streamClaudeToChat(events: Block[], provider = "claude", connectionId?: string) {
   const state: Record<string, unknown> = {
     ...(initState(FORMATS.OPENAI) as Record<string, unknown>),
     provider,
     toolNameMap: new Map(),
+    ...(connectionId !== undefined ? { connectionId } : {}),
   };
   const chunks: unknown[] = [];
   for (const event of events) {
@@ -144,7 +145,17 @@ function chatHistory(toolUseId = "toolu_01ABC"): Block[] {
 
 function translateChatTurn(
   messages: Block[],
-  { model = MODEL, provider = "claude", reasoningEffort = "high" as string | null } = {}
+  {
+    model = MODEL,
+    provider = "claude",
+    reasoningEffort = "high" as string | null,
+    connectionId,
+  }: {
+    model?: string;
+    provider?: string;
+    reasoningEffort?: string | null;
+    connectionId?: string;
+  } = {}
 ) {
   return openaiToClaudeRequest(
     model,
@@ -159,7 +170,7 @@ function translateChatTurn(
       ],
     },
     true,
-    { _provider: provider }
+    { _provider: provider, ...(connectionId ? { _connectionId: connectionId } : {}) }
   ) as { messages: ClaudeMessage[] };
 }
 
@@ -208,6 +219,55 @@ test("Chat client: interleaved thinking + redacted_thinking keep their exact ord
     { type: "redacted_thinking", data: "REDACTED_OPAQUE_DATA" },
   ]);
   assert.equal(turn.content[2].type, "tool_use");
+});
+
+test("#17324: a thinking block stored on one connection is NOT restored on another connection", () => {
+  // Same provider + model, two OAuth orgs behind one combo (the production
+  // failure: turns produced by org A replayed on org B → 400 "latest assistant
+  // message cannot be modified"). The stream state carries connectionId "A".
+  // claude-opus-5-5: adaptive-only — a restore miss means NO block at all.
+  const ADAPTIVE_MODEL = "claude-opus-5-5";
+  streamClaudeToChat(claudeToolTurnEvents({ model: ADAPTIVE_MODEL }), "claude", "conn-org-a");
+
+  // Replay bound to connection "B": restore must miss → no thinking block at all.
+  const foreignTurn = assistantTurn(
+    translateChatTurn(chatHistory(), {
+      model: ADAPTIVE_MODEL,
+      connectionId: "conn-org-b",
+    })
+  );
+  assert.equal(
+    foreignTurn.content.some(
+      (block) => block.type === "thinking" || block.type === "redacted_thinking"
+    ),
+    false,
+    "no cross-connection restore and no fabricated placeholder on adaptive"
+  );
+
+  // Same connection "A": restore still hits.
+  const ownTurn = assistantTurn(
+    translateChatTurn(chatHistory(), {
+      model: ADAPTIVE_MODEL,
+      connectionId: "conn-org-a",
+    })
+  );
+  assert.deepEqual(stripCacheControl(ownTurn.content[0]), {
+    type: "thinking",
+    thinking: THINKING_TEXT,
+    signature: SIGNATURE,
+  });
+});
+
+test("#17324: entries stored without connection info restore only when the replay is unbound too", () => {
+  // Legacy/unknown provenance (no connectionId threaded): the entry stores "".
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", undefined);
+
+  const turn = assistantTurn(translateChatTurn(chatHistory(), { connectionId: "conn-org-a" }));
+  assert.equal(
+    turn.content.some((block) => block.type === "thinking"),
+    false,
+    "unbound entry is not restored on a bound replay"
+  );
 });
 
 test("the stream output itself is unchanged (no signature leaks to the client)", () => {

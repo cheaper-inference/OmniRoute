@@ -363,6 +363,8 @@ export function openaiToClaudeRequest(
           provider: routedProvider,
           model,
           disabled: credentials?._videoTranscriptSensitive === true,
+          connectionId:
+            typeof credentials?._connectionId === "string" ? credentials._connectionId : undefined,
         },
         pendingToolUseIds,
         result.thinking && typeof result.thinking.type === "string" ? result.thinking.type : undefined
@@ -789,9 +791,9 @@ function getContentBlocksFromMessage(
     // Signed-thinking continuity: the client (OpenAI Chat / Responses) never held the
     // signed blocks Claude produced for this tool turn, but claude-to-openai stored them
     // keyed by the tool_use ids. Restore them verbatim before the owning tool_use —
-    // only for the same provider + model, only when this request has thinking on and
-    // the client sent no thinking block of its own, never for a video-derived request.
-    // A miss keeps the #5312 placeholder.
+    // only for the same provider + model + connection, only when this request has
+    // thinking on and the client sent no thinking block of its own, never for a
+    // video-derived request. A miss keeps the #5312 placeholder.
     if (
       !isKimiCoding &&
       !thinkingBinding.disabled &&
@@ -803,6 +805,7 @@ function getContentBlocksFromMessage(
         toolUseIds: blocks.filter((b) => b.type === "tool_use").map((b) => b.id),
         provider: thinkingBinding.provider,
         model: thinkingBinding.model,
+        connectionId: thinkingBinding.connectionId,
       });
       if (restored) {
         blocks.unshift(...restored);
