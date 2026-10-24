@@ -200,6 +200,14 @@ const nextConfig = {
   // accept for image-bearing requests; tune via env if a deployment needs
   // more.
   experimental: {
+    // Next's TypeScript CLI subprocess can fail with EBADF during macOS dev
+    // startup. TypeScript 6 provides the API Next uses to read the same config
+    // in-process; leave the default unchanged for production and other platforms.
+    // Next's development static-path worker can hit the same spawn failure.
+    // Use its experimental thread worker on macOS development only.
+    ...(process.platform === "darwin" && process.env.NODE_ENV === "development"
+      ? { useTypeScriptCli: false, workerThreads: true }
+      : {}),
     serverActions: {
       bodySizeLimit: process.env.OMNIROUTE_SERVER_ACTIONS_BODY_LIMIT || "50mb",
     },
