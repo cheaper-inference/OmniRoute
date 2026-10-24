@@ -66,6 +66,8 @@ import {
   noteFreeTierOutcome,
   prepareFreeTierRequest,
   rebuildJsonFromForcedStream,
+  resolveFreeTierCredential,
+  resolveGatedCredential,
   surfaceFromBaseUrl,
 } from "./opencodeFreeTierContract.ts";
 import {
@@ -1337,19 +1339,18 @@ export class OpencodeExecutor extends BaseExecutor {
     body?: unknown
   ) {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    // #8467: honor Extra API Keys rotation via BaseExecutor.resolveEffectiveKey.
-    // Fall back to accessToken only when no apiKey/extras resolve to a key.
-    const key = credentials
-      ? this.resolveEffectiveKey(credentials) || credentials.accessToken
-      : undefined;
 
-    // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
-    // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and
-    // rebuilding the JSON body from the event stream — the path chatCore already takes for
-    // any buffered event-stream response. Announcing the stream here keeps that buffering an
-    // expected outcome rather than a warning.
+    // A gated request rides buildUrl() to the anonymous /inference lane, which since
+    // 2026-10-21 answers 403 "Model access is disabled" to a real API key while serving
+    // `Bearer public` — the credential flips with the lane; see opencodeFreeTierContract.ts.
     const gatedScope =
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
+    const freeTier = gatedScope ? resolveFreeTierCredential() : null;
+    // #8467: honor Extra API Keys rotation via BaseExecutor.resolveEffectiveKey.
+    // Fall back to accessToken only when no apiKey/extras resolve to a key.
+    const key = resolveGatedCredential(freeTier, () =>
+      credentials ? this.resolveEffectiveKey(credentials) || credentials.accessToken : undefined
+    );
 
     if (key) {
       if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
@@ -1362,6 +1363,11 @@ export class OpencodeExecutor extends BaseExecutor {
     if (this._requestFormat === "claude") {
       headers["anthropic-version"] = "2023-06-01";
     }
+    // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
+    // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and
+    // rebuilding the JSON body from the event stream — the path chatCore already takes for
+    // any buffered event-stream response. Announcing the stream here keeps that buffering an
+    // expected outcome rather than a warning.
     if (stream || gatedScope) {
       headers["Accept"] = "text/event-stream";
     }
