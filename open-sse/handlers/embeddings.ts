@@ -138,6 +138,18 @@ function flattenSingleRowEmbedding(item: unknown): void {
   }
 }
 
+/**
+ * Restore an `index` the upstream left out. Google's OpenAI-compatible endpoint omits the
+ * field when it is 0 (proto3 default), and OpenAI SDK consumers sort the batch by it.
+ */
+function fillMissingEmbeddingIndex(item: unknown, position: number): void {
+  if (!item || typeof item !== "object" || !("embedding" in item)) return;
+  const record = item as { index?: unknown };
+  if (typeof record.index !== "number" || !Number.isFinite(record.index)) {
+    record.index = position;
+  }
+}
+
 function failure(status: number, error: string, headers?: Headers): EmbeddingFailure {
   return { success: false, status, error, ...(headers ? { headers } : {}) };
 }
@@ -602,7 +614,10 @@ function normalizeEmbeddingData(
   const data = (normalizer ? normalizer(rawData) : rawData) as ParsedEmbeddingResponse;
   runtime.reqLogger.logProviderResponse(response.status, "", response.headers, data);
   const responseItems = data.data || data;
-  if (Array.isArray(responseItems)) responseItems.forEach(flattenSingleRowEmbedding);
+  if (Array.isArray(responseItems)) {
+    responseItems.forEach(flattenSingleRowEmbedding);
+    responseItems.forEach(fillMissingEmbeddingIndex);
+  }
   return {
     data,
     normalizedResponse: {
