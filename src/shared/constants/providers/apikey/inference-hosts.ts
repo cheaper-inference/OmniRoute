@@ -203,6 +203,19 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     textIcon: "LA",
     website: "https://lambda.ai",
   },
+  runcrate: {
+    id: "runcrate",
+    serviceKinds: ["llm"],
+    alias: "runcrate",
+    name: "Runcrate",
+    icon: "terminal",
+    color: "#1A2B79",
+    textIcon: "RC",
+    website:
+      "https://www.runcrate.ai/inference/free?utm_source=omniroute&utm_medium=directory&utm_campaign=gpu_pricing",
+    hasFree: true,
+    freeNote: "Open models are free with your GitHub account",
+  },
   sambanova: {
     id: "sambanova",
     serviceKinds: ["llm"],

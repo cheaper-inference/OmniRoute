@@ -10,6 +10,7 @@ const CHAT_OPENAI_COMPAT_PROVIDER_IDS = [
   "vercel-ai-gateway",
   "qianfan",
   "lambda-ai",
+  "runcrate",
   "sambanova",
   "nscale",
   "ovhcloud",

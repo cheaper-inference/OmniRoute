@@ -185,6 +185,7 @@ const KNOWN_SVGS = new Set([
   "replicate",
   "requesty",
   "roocode",
+  "runcrate",
   "runway",
   "sambanova",
   "searchapi",
