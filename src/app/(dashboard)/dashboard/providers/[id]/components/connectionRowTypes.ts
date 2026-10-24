@@ -1,8 +1,10 @@
+import type { PrefixShadowedDiagnostic } from "@/shared/utils/providerConnectionStatus";
 import type { CodexGlobalServiceMode } from "@/lib/providers/codexFastTier";
 import type { CodexAccountPoolProjection } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import type { ProviderQuotaCacheEntry } from "../hooks/useProviderQuota";
 
 export interface ConnectionRowConnection {
+  prefixShadowed?: PrefixShadowedDiagnostic | null;
   id?: string;
   provider?: string;
   name?: string;

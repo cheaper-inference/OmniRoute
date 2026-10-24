@@ -7,12 +7,9 @@
  * `401 "No active credentials for provider: openference"` while the dashboard
  * shows the node's three connections as healthy.
  *
- * The precedence itself is deliberate (a node with prefix "cf" must not hijack
- * cloudflare-ai) and is NOT changed here. What must change is the runtime
- * diagnostic: when the provider that ran out of credentials is a built-in whose
- * id/alias collides with a configured compatible-node prefix, the error has to
- * say that the prefix resolved to the built-in and name the shadowed node, so the
- * operator does not have to diff a changelog to find out why routing broke.
+ * #17278 updates precedence for persisted legacy nodes: a live builtin only
+ * wins while it has an active configured connection. Retired identities still
+ * fail closed, and diagnostics remain useful when the builtin owns the prefix.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -64,26 +61,30 @@ test.after(async () => {
   await harness.cleanup();
 });
 
-test("of/GLM-5.2 keeps resolving to the built-in openference provider (precedence unchanged)", async () => {
+test("of/GLM-5.2 resolves to the existing node when openference has no active connection", async () => {
   await seedShadowedNode();
 
   const info = (await getModelInfo("of/GLM-5.2")) as { provider?: string; model?: string };
 
-  assert.equal(info.provider, "openference");
+  assert.equal(info.provider, SHADOWED_NODE_ID);
   assert.equal(info.model, "GLM-5.2");
 });
 
-test("handleChat names the shadowed custom node when the built-in prefix has no credentials (#11943)", async () => {
+test("the credential-failure diagnostic still names a node shadowed by an active builtin", async () => {
   await seedShadowedNode();
-
-  const response = await handleChat(
-    buildRequest({
-      body: {
-        model: "of/GLM-5.2",
-        stream: false,
-        messages: [{ role: "user", content: "Hello" }],
-      },
-    })
+  await seedConnection("openference", { apiKey: "synthetic-openference-active-test-key" });
+  assert.equal((await getModelInfo("of/GLM-5.2")).provider, "openference");
+  const shadowed = await findShadowedCompatibleNode("openference");
+  const response = handleNoCredentials(
+    null,
+    null,
+    "openference",
+    "GLM-5.2",
+    null,
+    null,
+    undefined,
+    false,
+    shadowed
   );
   const json = (await response.json()) as ErrorBody;
   const message = json.error?.message ?? "";

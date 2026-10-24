@@ -1,3 +1,4 @@
+import { projectProviderPrefixCollisions } from "@/lib/providers/providerPrefixCollision";
 import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
 import { NextResponse } from "next/server";
 import { getSettings } from "@/lib/db/settings";
@@ -146,7 +147,7 @@ export async function GET(request: Request) {
 
     // Hide or mask sensitive fields
     const requestQueueSettings = resolveResilienceSettings(await getSettings()).requestQueue;
-    const safeConnections = connections.map((c) => {
+    const safeConnections = (await projectProviderPrefixCollisions(connections)).map((c) => {
       const providerSpecificData = c.providerSpecificData
         ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData, { revealKeys })
         : undefined;

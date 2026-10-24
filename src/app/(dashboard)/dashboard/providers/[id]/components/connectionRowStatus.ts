@@ -76,6 +76,16 @@ export function getStatusPresentation(
     };
   }
 
+  if (connection.prefixShadowed?.code === "prefix_shadowed") {
+    return {
+      statusVariant: "warning",
+      statusLabel: t("statusRuntimeIssue"),
+      errorType: "prefix_shadowed",
+      errorBadge: null,
+      errorTextClass: "text-yellow-600 dark:text-yellow-400",
+    };
+  }
+
   if (effectiveStatus === "active" || effectiveStatus === "success") {
     return {
       statusVariant: "success",

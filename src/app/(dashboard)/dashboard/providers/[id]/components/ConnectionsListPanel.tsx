@@ -239,7 +239,7 @@ export default function ConnectionsListPanel({
 
   const isHealthy = (c: ConnectionRowConnection): boolean => {
     const s = c.testStatus;
-    return c.isActive !== false && (!s || s === "active" || s === "success");
+    return c.isActive !== false && !c.prefixShadowed && (!s || s === "active" || s === "success");
   };
   const STATUS_FILTER_OPTIONS = [
     { value: "all", label: t("filterAll", "All") },
