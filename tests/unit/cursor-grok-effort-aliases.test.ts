@@ -7,7 +7,7 @@ import { resolveRequestedModel } from "../../open-sse/utils/cursorAgentProtobuf.
 const base = [
   { id: "grok-4.7", name: "Grok 4.7", source: "imported" as const, inputTokenLimit: 200_000 },
 ];
-const tiers = ["low", "medium", "high", "xhigh", "max"];
+const tiers = ["low", "medium", "high", "xhigh"];
 
 test("a live Grok 4.7 base exposes selectable verified effort aliases", () => {
   const catalog = enrichCursorCatalog("cursor", base);

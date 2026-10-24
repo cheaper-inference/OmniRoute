@@ -1,6 +1,6 @@
 import type { RegistryEntry, RegistryModel } from "../../shared.ts";
 import { CURSOR_REGISTRY_VERSION, getCursorRegistryHeaders } from "../../shared.ts";
-import { CURSOR_GROK_47_MODELS } from "./grok47.ts";
+import { CURSOR_GROK_47_MODELS, GROK_47_EFFORTS } from "./grok47.ts";
 
 const CLAUDE_FABLE_5_1_CAPABILITIES = {
   maxOutputTokens: 128_000,
@@ -50,6 +50,15 @@ export const cursorProvider: RegistryEntry = {
     { id: "auto-cost", name: "Auto (cost)" },
     { id: "auto-balance", name: "Auto (balance)" },
     { id: "auto-intelligence", name: "Auto (intelligence)" },
+    {
+      id: "grok-4.7",
+      name: "Grok 4.7",
+      contextLength: 256_000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: [...GROK_47_EFFORTS],
+      supportsVision: true,
+      toolCalling: true,
+    },
     ...CURSOR_GROK_47_MODELS,
     { id: "cursor-grok-4.6-xhigh-fast", name: "Cursor Grok 4.6 Xhigh Fast" },
     { id: "cursor-grok-4.6-xhigh", name: "Cursor Grok 4.6 Xhigh" },
