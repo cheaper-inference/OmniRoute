@@ -27,10 +27,15 @@ import { shouldUseLiveAlibabaFreeModelDiscovery } from "@omniroute/open-sse/serv
 import { isDashscopeTextModelId } from "@omniroute/open-sse/services/dashscopeTextModels.ts";
 import { extractZaiToken } from "@omniroute/open-sse/services/zaiWebCredentials.ts";
 import { buildOpencodeBackgroundHeaders } from "@omniroute/open-sse/utils/opencodeHeaders.ts";
+import { CODEBUDDY_CN_USER_AGENT } from "@omniroute/open-sse/config/providerHeaderProfiles.ts";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { applyConnectionCustomHeaders } from "./connectionCustomHeaders";
 import { buildChatPlaygroundModelsDiscoveryEntry } from "@omniroute/open-sse/services/chatplaygroundModels.ts";
-import { normalizeOpenAiLikeModelsResponse, normalizeWorkbuddyModelsResponse } from "./normalizers";
+import {
+  normalizeCodeBuddyCnModelsResponse,
+  normalizeOpenAiLikeModelsResponse,
+  normalizeWorkbuddyModelsResponse,
+} from "./normalizers";
 
 const QWEN_CLOUD_TEXT_MODEL_IDS = new Set(QWEN_CLOUD_TEXT_MODELS.map((model) => model.id));
 const ALIBABA_MODEL_STUDIO_MODEL_IDS = new Set(
@@ -952,6 +957,25 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
   },
   chatplayground: buildChatPlaygroundModelsDiscoveryEntry(),
   cpl: buildChatPlaygroundModelsDiscoveryEntry(),
+  // CodeBuddy CN's official CLI reads this authenticated product catalog. Keep
+  // the registry snapshot as offline fallback and replace it with the account's
+  // live chat roster after a successful discovery sync.
+  "codebuddy-cn": {
+    url: "https://copilot.tencent.com/v3/config",
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": CODEBUDDY_CN_USER_AGENT,
+      "X-Product": "SaaS",
+      "X-IDE-Type": "CLI",
+      "X-IDE-Name": "CLI",
+      "x-requested-with": "XMLHttpRequest",
+      "x-codebuddy-request": "1",
+    },
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    parseResponse: (data) => normalizeCodeBuddyCnModelsResponse(data),
+  },
   // WorkBuddy serves no OpenAI-shaped /models endpoint (/v1/models and
   // /v2/models both 404) and its bundled catalog is known to be stale, so the
   // roster is read from the authenticated config the official CLI itself uses.
