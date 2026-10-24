@@ -1,0 +1,1 @@
+- **fix(api):** Return a sanitized JSON 400 with a `POST /v1/search` hint when a search-only provider is used for chat completions; retain correlation IDs, preserve the error in streams that have already started and release request admission capacity. Fixes #17858 ([#17953](https://github.com/cheaper-inference/OmniRoute/pull/17953)) — thanks @manjughosa and @MumuTW.
