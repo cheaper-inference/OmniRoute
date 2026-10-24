@@ -60,6 +60,9 @@ interface OpenAIUsage {
   prompt_tokens?: number;
   completion_tokens?: number;
   total_tokens?: number;
+  prompt_tokens_details?: {
+    cached_tokens?: number;
+  };
   completion_tokens_details?: {
     reasoning_tokens?: number;
   };
@@ -109,6 +112,31 @@ interface GeminiUsageMetadata {
   candidatesTokenCount: number;
   totalTokenCount: number;
   thoughtsTokenCount?: number;
+  cachedContentTokenCount?: number;
+}
+
+/**
+ * Map an OpenAI usage object onto Gemini `usageMetadata`. Shared by the
+ * streaming and non-streaming converters so both report the same detail
+ * counters (#17841): `completion_tokens_details.reasoning_tokens` →
+ * `thoughtsTokenCount`, `prompt_tokens_details.cached_tokens` →
+ * `cachedContentTokenCount` — matching the antigravity converter.
+ */
+function mapOpenAIUsageToGemini(u: OpenAIUsage): GeminiUsageMetadata {
+  const usageMetadata: GeminiUsageMetadata = {
+    promptTokenCount: u.prompt_tokens || 0,
+    candidatesTokenCount: u.completion_tokens || 0,
+    totalTokenCount: u.total_tokens || 0,
+  };
+  const reasoningTokens = u.completion_tokens_details?.reasoning_tokens;
+  if (reasoningTokens) {
+    usageMetadata.thoughtsTokenCount = reasoningTokens;
+  }
+  const cachedTokens = u.prompt_tokens_details?.cached_tokens;
+  if (cachedTokens) {
+    usageMetadata.cachedContentTokenCount = cachedTokens;
+  }
+  return usageMetadata;
 }
 
 interface GeminiStreamChunk {
@@ -131,7 +159,23 @@ export function openAIChunkToGeminiChunk(
   state?: GeminiToolCallState
 ): GeminiStreamChunk | null {
   const choice = parsed.choices?.[0];
-  if (!choice) return null;
+  if (!choice) {
+    // #17841: the default executor forces `stream_options.include_usage: true`,
+    // so a real OpenAI upstream sends usage in a trailing `choices: []` chunk
+    // after the finish chunk (stream.ts forwards that chunk on purpose,
+    // #12151). `@google/genai` clients never saw it — the only chunk carrying
+    // usage was dropped here. Emit it as a Gemini chunk carrying just
+    // `usageMetadata`. When usage already rode the finish chunk this repeats
+    // the same values; the SDK keeps the last chunk's usage, never sums.
+    if (parsed.usage) {
+      return {
+        candidates: [],
+        usageMetadata: mapOpenAIUsageToGemini(parsed.usage),
+        modelVersion: parsed.model || fallbackModel,
+      };
+    }
+    return null;
+  }
 
   const delta: OpenAIChoiceDelta = choice.delta || {};
 
@@ -191,17 +235,7 @@ export function openAIChunkToGeminiChunk(
 
   // Attach usage + modelVersion on the final chunk (when finish_reason is set).
   if (choice.finish_reason && parsed.usage) {
-    const u = parsed.usage;
-    const usageMetadata: GeminiUsageMetadata = {
-      promptTokenCount: u.prompt_tokens || 0,
-      candidatesTokenCount: u.completion_tokens || 0,
-      totalTokenCount: u.total_tokens || 0,
-    };
-    const reasoningTokens = u.completion_tokens_details?.reasoning_tokens;
-    if (reasoningTokens) {
-      usageMetadata.thoughtsTokenCount = reasoningTokens;
-    }
-    out.usageMetadata = usageMetadata;
+    out.usageMetadata = mapOpenAIUsageToGemini(parsed.usage);
     out.modelVersion = parsed.model || fallbackModel;
   }
 
@@ -411,17 +445,7 @@ export async function convertOpenAIResponseToGemini(
   };
 
   if (body.usage) {
-    const u = body.usage;
-    const usageMetadata: GeminiUsageMetadata = {
-      promptTokenCount: u.prompt_tokens || 0,
-      candidatesTokenCount: u.completion_tokens || 0,
-      totalTokenCount: u.total_tokens || 0,
-    };
-    const reasoningTokens = u.completion_tokens_details?.reasoning_tokens;
-    if (reasoningTokens) {
-      usageMetadata.thoughtsTokenCount = reasoningTokens;
-    }
-    geminiResponse.usageMetadata = usageMetadata;
+    geminiResponse.usageMetadata = mapOpenAIUsageToGemini(body.usage);
   }
 
   return Response.json(geminiResponse, {

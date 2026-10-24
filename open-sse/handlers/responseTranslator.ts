@@ -1021,6 +1021,21 @@ function convertOpenAINonStreamingToGeminiFamily(openaiResponse: JsonRecord): Js
   const promptTokens = toNumber(usageSrc.prompt_tokens, 0);
   const completionTokens = toNumber(usageSrc.completion_tokens, 0);
 
+  // #17841: surface the same detail counters as the streaming path and the
+  // antigravity converter — cached prompt tokens and reasoning tokens.
+  const usageMetadata: JsonRecord = {
+    promptTokenCount: promptTokens,
+    candidatesTokenCount: completionTokens,
+    totalTokenCount: toNumber(usageSrc.total_tokens, promptTokens + completionTokens),
+  };
+  const cachedTokens = toNumber(toRecord(usageSrc.prompt_tokens_details).cached_tokens, 0);
+  if (cachedTokens > 0) usageMetadata.cachedContentTokenCount = cachedTokens;
+  const reasoningTokens = toNumber(
+    toRecord(usageSrc.completion_tokens_details).reasoning_tokens,
+    0
+  );
+  if (reasoningTokens > 0) usageMetadata.thoughtsTokenCount = reasoningTokens;
+
   const geminiResponse: JsonRecord = {
     response: {
       candidates: [
@@ -1030,11 +1045,7 @@ function convertOpenAINonStreamingToGeminiFamily(openaiResponse: JsonRecord): Js
           index: 0,
         },
       ],
-      usageMetadata: {
-        promptTokenCount: promptTokens,
-        candidatesTokenCount: completionTokens,
-        totalTokenCount: toNumber(usageSrc.total_tokens, promptTokens + completionTokens),
-      },
+      usageMetadata,
       modelVersion: toString(openaiResponse.model, "unknown"),
       responseId: toString(openaiResponse.id, `resp_${Date.now()}`),
     },

@@ -1,0 +1,1 @@
+- **fix(api):** `/v1beta` streaming now relays the OpenAI trailing usage-only chunk as a Gemini `usageMetadata` chunk (so `@google/genai` clients get final usage), and every `/v1beta` path reports `cachedContentTokenCount` and `thoughtsTokenCount` from the OpenAI token-details, matching the antigravity converter (#17841)
