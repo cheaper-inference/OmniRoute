@@ -647,6 +647,37 @@ detection above).
 
 ## 11. OAuth Provider Credentials
 
+### Passive Codex token refresh
+
+`OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS` set to `codex` makes this instance a consumer
+of synchronized Codex credentials, not a refresh-token rotation owner. The empty
+or unset default preserves normal refresh behaviour. Comma-separated values are
+trimmed and case-insensitive; `cx` is an alias for `codex`. Unsupported providers
+fail startup validation. Other providers are unchanged.
+
+At existing refresh points, the instance bypasses the connection read cache and
+adopts only a different, unexpired access token. Tokens rejected upstream during
+the request cannot qualify again after synchronization rolls back: the request
+credentials hold at most four SHA-256 fingerprints, discarded with that request.
+Only token fields are adopted, so request-local provider metadata survives. No
+adopted credentials are persisted. If no replacement exists, `refresh_disabled`
+is non-terminal and does not count toward the token-refresh circuit breaker.
+Real upstream 401/403 responses retain normal failure accounting, exponential
+cooldown and client errors; account-deactivation signals still lock permanently.
+
+Manual dashboard/API refresh returns `409` with code `refresh_disabled` and an
+instruction to refresh on the active instance and synchronize. Implicit refreshes
+(chat, usage, health checks and import validation) do not surface that error; on-demand
+usage 401 recovery retries once with an adopted synchronized token.
+Codex auth imports store the supplied tokens without a refresh-token exchange;
+new OAuth logins are unchanged. No pre-dispatch synchronization is added outside
+the existing proactive refresh path.
+
+Keep exactly one rotation owner and arrange token synchronization separately,
+before access tokens expire (default proactive lead: five minutes). This option
+is not a distributed lock, database replication or a shared SQLite deployment.
+Source: `open-sse/services/tokenRefresh/passiveCodex.ts`.
+
 Built-in credentials for **localhost development**. For remote deployments, register your own at each provider's developer console.
 
 | Variable                                    | Provider                | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |

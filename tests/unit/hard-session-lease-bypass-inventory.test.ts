@@ -157,6 +157,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // getCachedProviderConnections() read cache (its getProviderConnections site is the one
     // already inventoried under src/lib/db/readCache.ts). Read-only state lookup, no dispatch, 1->0.
     "open-sse/services/tokenRefresh.ts": 1,
+    // Read-only adoption for the already-selected connection; it never selects an account.
+    "open-sse/services/tokenRefresh/passiveCodex.ts": 1,
     // #15138: per-account test message config/send — reads the row for its stored test model
     // and active flag; dispatch goes through runSingleModelTest, which refuses managed-lease
     // connections itself (class C).

@@ -11,7 +11,7 @@ import { projectProviderValidationResultForPublicResponse } from "@/lib/provider
 import { getCliRuntimeStatus } from "@/shared/services/cliRuntime";
 import { buildQoderCliNotFoundHint } from "@omniroute/open-sse/services/qoderCliResolve.ts";
 // Use the shared open-sse token refresh with built-in dedup/race-condition cache
-import { getAccessToken } from "@omniroute/open-sse/services/tokenRefresh.ts";
+import { getAccessToken, isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import { shouldHideLogs } from "@/lib/tokenHealthCheck";
@@ -230,7 +230,7 @@ async function refreshOAuthToken(connection: any) {
       }
       await updateProviderConnection(connection.id, update);
     });
-    return result; // { accessToken, expiresIn, refreshToken } or null
+    return isPassiveCodex(provider) && !result?.accessToken ? null : result; // { accessToken, expiresIn, refreshToken } or null
   } catch (err) {
     console.error(
       `Error refreshing ${provider} token:`,

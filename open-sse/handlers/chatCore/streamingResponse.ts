@@ -1,4 +1,5 @@
 import { projectFailureUsageErrorCode } from "./failureUsage.ts";
+import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 
 export { extractSystemRoleMessages, relocateDirectiveOnlyMessages } from "./claudeSystemRole.ts";
 
@@ -33,12 +34,7 @@ import { FORMATS } from "../../translator/formats.ts";
 
 import { COLORS } from "../../utils/stream.ts";
 
-import {
-  refreshWithRetry,
-  isUnrecoverableRefreshError,
-  runWithOnPersist,
-  runWithCasGuard,
-} from "../../services/tokenRefresh.ts";
+import * as tokens from "../../services/tokenRefresh.ts";
 
 import { runWithCapture } from "../../utils/providerRequestLogging.ts";
 
@@ -615,6 +611,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     !(await shouldIsolateProbeFailures()) &&
     !(await shouldSkipCredentialRefresh(provider, providerResponse))
   ) {
+    if (isPassiveCodex(provider)) recordRejectedToken(credentials);
     // Fix A: wrap refreshCredentials in runWithOnPersist so the persist callback
     // executes INSIDE the per-connection mutex held by getAccessToken. This makes
     // [network refresh + DB write + outer-state mutation] one atomic step and
@@ -655,11 +652,12 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         }
       : null;
 
-    const newCredentials = (await refreshWithRetry(
+    const newCredentials = (await tokens.refreshWithRetry(
       () =>
-        runWithCasGuard(
+        tokens.runWithCasGuard(
           casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
-          () => runWithOnPersist(persistFn, () => executor.refreshCredentials(credentials, log))
+          () =>
+            tokens.runWithOnPersist(persistFn, () => executor.refreshCredentials(credentials, log))
         ),
       3,
       log,
@@ -684,7 +682,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       // mutation already happened atomically inside the mutex.
       if (!persistFnRan) {
         Object.assign(credentials, newCredentials);
-        if (onCredentialsRefreshed) {
+        if (onCredentialsRefreshed && !isPassiveCodex(provider)) {
           await onCredentialsRefreshed(newCredentials);
         }
       }
@@ -720,7 +718,9 @@ export async function runStreamingResponse(deps: StreamingDeps) {
               upstreamExtraHeaders: buildUpstreamHeadersForExecute(retryModelId),
               clientHeaders: getExecutorClientHeaders(),
               clientResponseFormat,
-              onCredentialsRefreshed,
+              onCredentialsRefreshed: isPassiveCodex(provider)
+                ? handleCredentialsRefreshed
+                : onCredentialsRefreshed,
               skipUpstreamRetry: isCombo,
               contextEditing: { enabled: contextEditingEnabled },
               correlationId,
@@ -774,7 +774,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       }
     } else {
       log?.warn?.("TOKEN", `${provider?.toUpperCase()} | refresh failed`);
-      if (isUnrecoverableRefreshError(newCredentials) && onCredentialsRefreshed) {
+      if (tokens.isUnrecoverableRefreshError(newCredentials) && onCredentialsRefreshed) {
         // Front 3 (reuse-race tolerance): before deactivating, re-read the DB.
         // If a sibling/concurrent refresh already rotated this connection's
         // refresh_token (common for Codex/OpenAI under one shared Auth0 client),

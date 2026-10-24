@@ -11,6 +11,8 @@
 // importers (open-sse/index.ts, executors, src/sse/services/tokenRefresh.ts,
 // tests) keep a stable surface.
 import { AsyncLocalStorage } from "node:async_hooks";
+export { isPassiveCodex } from "./tokenRefresh/passiveCodex.ts";
+import { isPassiveCodex, resolvePassiveCodex } from "./tokenRefresh/passiveCodex.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
@@ -245,10 +247,15 @@ export function getActiveOnPersist(): RefreshPersistFn | undefined {
 // ./tokenRefresh/shared.ts (imported above, re-exported below) — used both by
 // the generic orchestrator below and by every per-provider refresh module.
 
+export function refreshAccessToken(provider, token, creds, log, proxy: unknown = null) {
+  if (isPassiveCodex(provider)) return resolvePassiveCodex(creds);
+  return refreshActiveAccessToken(provider, token, creds, log, proxy);
+}
+
 /**
  * Refresh OAuth access token using refresh token
  */
-export async function refreshAccessToken(
+async function refreshActiveAccessToken(
   provider,
   refreshToken,
   credentials,
@@ -553,6 +560,7 @@ export async function getAccessToken(
   proxyConfig: unknown = null,
   onPersist?: RefreshPersistFn
 ) {
+  if (isPassiveCodex(provider)) return resolvePassiveCodex(credentials);
   if (!credentials || !credentials.refreshToken || typeof credentials.refreshToken !== "string") {
     log?.warn?.("TOKEN_REFRESH", `No valid refresh token available for provider: ${provider}`);
     return null;

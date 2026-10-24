@@ -1,4 +1,5 @@
 import { z } from "zod";
+import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 
 import { validateSecrets } from "@/shared/utils/secretsValidator";
 
@@ -99,6 +100,8 @@ export function validateWebRuntimeEnv(
   const schemaValidation = webRuntimeEnvSchema.safeParse(env);
   const errors = [...secretValidation.errors];
   const warnings = [...secretValidation.warnings];
+  const passiveError = passive.passiveProvidersError(env[passive.PASSIVE_REFRESH_ENV]);
+  if (passiveError) errors.push({ name: passive.PASSIVE_REFRESH_ENV, issue: passiveError });
 
   if (!schemaValidation.success) {
     errors.push(...getSchemaIssues(schemaValidation.error));

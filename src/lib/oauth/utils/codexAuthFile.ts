@@ -9,6 +9,7 @@ import {
   updateProviderCredentials,
 } from "@/sse/services/tokenRefresh";
 import { isUnrecoverableRefreshError } from "@omniroute/open-sse/services/tokenRefresh.ts";
+import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -215,6 +216,7 @@ async function resolveFreshCodexConnection(connectionId: string): Promise<CodexC
   if (!shouldRefreshCodexConnection(connection)) {
     return connection;
   }
+  if (passive.isPassiveCodex("codex")) return passive.adoptPassiveCodex(connection);
 
   const refreshToken = toNonEmptyString(connection.refreshToken);
   if (!refreshToken) {
