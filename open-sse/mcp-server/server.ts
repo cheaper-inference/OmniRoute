@@ -65,6 +65,7 @@ import {
   handleOneproxyStats,
 } from "./tools/advancedTools.ts";
 import { handlePickFastestModel } from "./tools/pickFastestModel.ts";
+import { registerPerplexityResearchTool } from "./tools/perplexityResearch.ts";
 // #15159 M-01 — "file = register + wrap. handle* -> tools/canonical/*.ts".
 // These twelve handlers used to be defined inline below `withScopeEnforcement`,
 // which made this file a 784-line registration-and-implementation mix. They are
@@ -577,6 +578,8 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
       handleWebSearch(buildWebSearchInputSchema(resolveBlockedProviders()).parse(args))
     )
   );
+
+  registerPerplexityResearchTool(server, withScopeEnforcement);
 
   server.registerTool(
     "omniroute_x_search",

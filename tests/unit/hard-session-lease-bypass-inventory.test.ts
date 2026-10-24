@@ -144,6 +144,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // just used so clearAccountError() can wipe a stale lastError/testStatus — a
     // post-dispatch state read, not connection selection, so it stays class C.
     "open-sse/handlers/search/searchProxy.ts": 1,
+    // The deep research tool reads one connection by id to take its cookie and
+    // check its cooldown. The caller names the connection; this is not selection.
+    "open-sse/mcp-server/tools/perplexityResearch.ts": 1,
     // v3.8.50 back-merge additions (f95b03d7): combo routing infra and the
     // volcengine-plan binding/auto-sync services query connections the same
     // way as their classified siblings.

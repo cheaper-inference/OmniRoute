@@ -1,0 +1,5 @@
+data: {"status":"PENDING","final_sse_message":false,"blocks":[{"intended_usage":"plan","plan_block":{"goals":[{"description":"read sources"}]}}]}
+
+data: {"status":"PENDING","final_sse_message":false,"blocks":[{"intended_usage":"ask_text","markdown_block":{"chunks":["The final report body."]}}]}
+
+data: {"status":"COMPLETED","final_sse_message":true,"artifact_entries":[{"assets":[{"asset_type":"RESEARCH_REPORT","research_report":{"final":true,"source_content":"The final report body.","citations":[{"name":"Source A","url":"https://example.test/a","snippet":"first"},{"name":null,"url":"https://example.test/b","snippet":"second"}]}}]}]}
