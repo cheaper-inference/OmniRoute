@@ -217,7 +217,7 @@ const pendingById = pendingState.pendingById;
 const pendingIdByCorrelation = pendingState.pendingIdByCorrelation;
 
 const DEFAULT_MAX_PENDING_REQUEST_AGE_MS = 60 * 60 * 1000;
-const MAX_PENDING_DETAILS = 5000;
+const DEFAULT_MAX_PENDING_DETAILS = 5000;
 const PENDING_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 const MAX_PENDING_DETAIL_BYTES = 256 * 1024 * 1024;
 
@@ -272,6 +272,14 @@ function pendingDetailBytes(detail: PendingRequestDetail): number {
   return bytes;
 }
 
+function removePendingCorrelationFor(detail: PendingRequestDetail): void {
+  if (!detail.correlationId) return;
+  const correlationEntry = pendingIdByCorrelation.get(detail.correlationId);
+  if (correlationEntry?.id === detail.id) {
+    pendingIdByCorrelation.delete(detail.correlationId);
+  }
+}
+
 /**
  * Hard byte ceiling on the pending map. Runs after every insert so a burst of
  * large-context requests cannot push the process past the 85% heap guard before
@@ -289,6 +297,7 @@ function enforcePendingByteCeiling(): void {
     const modelKey = detail.provider ? `${detail.model} (${detail.provider})` : detail.model;
     pendingById.delete(detail.id);
     totalPendingDetailBytes -= pendingDetailBytes(detail);
+    removePendingCorrelationFor(detail);
     if (detail.connectionId && isSafeKey(modelKey)) {
       const bucket = pendingRequests.details[detail.connectionId]?.[modelKey];
       if (bucket) {
@@ -314,6 +323,21 @@ export function getMaxPendingRequestAgeMs(
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_PENDING_REQUEST_AGE_MS;
 }
 
+export function getMaxPendingDetails(
+  rawValue: string | undefined = process.env.MAX_PENDING_DETAILS
+): number {
+  const parsed = Number(rawValue);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_PENDING_DETAILS;
+}
+
+function enforcePendingCorrelationLimit(maxEntries = getMaxPendingDetails()): void {
+  while (pendingIdByCorrelation.size > maxEntries) {
+    const oldest = pendingIdByCorrelation.keys().next();
+    if (oldest.done) return;
+    pendingIdByCorrelation.delete(oldest.value);
+  }
+}
+
 function ensurePendingSweepTimer(): void {
   if (_pendingSweepTimer || typeof setInterval !== "function") return;
   _pendingSweepTimer = setInterval(() => {
@@ -329,10 +353,8 @@ function ensurePendingSweepTimer(): void {
 
 /**
  * Marks over-age pending-request details so a stuck request stays visible on the
- * dashboard, and enforces a hard size cap. Marked entries keep their map, detail
- * bucket and counters; only the cap path removes entries (marked first, oldest
- * first), mirroring the normal removal path so the dashboard's pending counts
- * self-heal. Exported for deterministic testing.
+ * dashboard for one sweep interval, then removes the payload-free detail and
+ * enforces a hard size cap. Exported for deterministic testing.
  * @returns number of entries removed.
  */
 export function sweepStalePendingRequests(
@@ -354,21 +376,43 @@ export function sweepStalePendingRequests(
       cleanupPendingDetails(detail.connectionId, modelKey);
       decrementPendingCounters(modelKey, detail.connectionId);
     }
+    removePendingCorrelationFor(detail);
     removed++;
   };
 
   for (const detail of pendingById.values()) {
-    if (detail.stale) continue;
+    if (detail.stale) {
+      if (typeof detail.sweptAt === "number" && now - detail.sweptAt >= PENDING_SWEEP_INTERVAL_MS) {
+        remove(detail);
+      }
+      continue;
+    }
     if (now - detail.startedAt > maxAgeMs) {
-      detail.stale = true;
+      // Prune heavyweight payloads while preserving lightweight metadata
+      // needed for dashboard visibility: model, provider, correlationId, tokens,
+      // and the counters. The full request/response bodies are discarded so they
+      // no longer accumulate in RSS.
+      const before = pendingDetailBytes(detail);
+      detail.clientRequest = undefined;
+      detail.providerRequest = undefined;
+      detail.providerResponse = undefined;
+      detail.clientResponse = undefined;
+      detail.streamChunks = undefined;
+      detail.stage = undefined;
+      detail.stageUpdatedAt = undefined;
+      detail.error = undefined;
+      detail.errorCode = undefined;
+      totalPendingDetailBytes += pendingDetailBytes(detail) - before;
       detail.sweptAt = now;
+      detail.stale = true;
     }
   }
 
   // Hard backstop: if entries are still piling up faster than they age out, drop the oldest
   // beyond the cap.
-  if (pendingById.size > MAX_PENDING_DETAILS) {
-    const overflow = pendingById.size - MAX_PENDING_DETAILS;
+  const maxPendingDetails = getMaxPendingDetails();
+  if (pendingById.size > maxPendingDetails) {
+    const overflow = pendingById.size - maxPendingDetails;
     const oldest = [...pendingById.values()]
       .sort((a, b) => {
         if (Boolean(a.stale) !== Boolean(b.stale)) return a.stale ? -1 : 1;
@@ -384,13 +428,7 @@ export function sweepStalePendingRequests(
   for (const [correlationId, entry] of pendingIdByCorrelation) {
     if (now - entry.touchedAt > maxAgeMs) pendingIdByCorrelation.delete(correlationId);
   }
-  if (pendingIdByCorrelation.size > MAX_PENDING_DETAILS) {
-    const overflow = pendingIdByCorrelation.size - MAX_PENDING_DETAILS;
-    const oldest = [...pendingIdByCorrelation.entries()]
-      .sort((a, b) => a[1].touchedAt - b[1].touchedAt)
-      .slice(0, overflow);
-    for (const [correlationId] of oldest) pendingIdByCorrelation.delete(correlationId);
-  }
+  enforcePendingCorrelationLimit(maxPendingDetails);
 
   return removed;
 }
@@ -496,11 +534,13 @@ export function trackPendingRequest(
       pendingById.set(newDetail.id, newDetail);
       totalPendingDetailBytes += pendingDetailBytes(newDetail);
       enforcePendingByteCeiling();
-      if (normalizedMetadata.correlationId) {
+      if (normalizedMetadata.correlationId && pendingById.get(newDetail.id) === newDetail) {
+        pendingIdByCorrelation.delete(normalizedMetadata.correlationId);
         pendingIdByCorrelation.set(normalizedMetadata.correlationId, {
           id: newDetail.id,
           touchedAt: now,
         });
+        enforcePendingCorrelationLimit();
       }
       return newDetail.id;
     } else if (!started && nextCount >= 0) {
@@ -549,6 +589,7 @@ export function updatePendingRequest(
   const before = pendingDetailBytes(details[lastIdx]);
   Object.assign(details[lastIdx], normalizePendingMetadata(metadata));
   totalPendingDetailBytes += pendingDetailBytes(details[lastIdx]) - before;
+  enforcePendingByteCeiling();
 }
 
 export function updatePendingRequestById(id: string | null, metadata: PendingRequestMetadata) {
@@ -557,6 +598,7 @@ export function updatePendingRequestById(id: string | null, metadata: PendingReq
   const before = pendingDetailBytes(detail);
   Object.assign(detail, normalizePendingMetadata(metadata));
   totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+  enforcePendingByteCeiling();
   return true;
 }
 
@@ -690,6 +732,24 @@ export function finalizeMostRecentPendingRequest(
 
 export { getCompletedDetails } from "./completedRequestDetails";
 
+/** Store an owned snapshot so caller array mutations cannot bypass byte accounting. */
+export function updatePendingRequestStreamChunksById(
+  id: string,
+  streamChunks: PendingRequestDetail["streamChunks"]
+): boolean {
+  const entry = pendingById.get(id);
+  if (!entry) return false;
+  const before = pendingDetailBytes(entry);
+  entry.streamChunks = streamChunks
+    ? Object.fromEntries(
+        Object.entries(streamChunks).map(([key, chunks]) => [key, chunks?.slice()])
+      )
+    : streamChunks;
+  totalPendingDetailBytes += pendingDetailBytes(entry) - before;
+  enforcePendingByteCeiling();
+  return true;
+}
+
 export function updatePendingRequestStreamChunks(
   model: string,
   provider: string,
@@ -705,7 +765,7 @@ export function updatePendingRequestStreamChunks(
   if (!isSafeKey(modelKey)) return;
   const details = pendingRequests.details[connectionId]?.[modelKey];
   if (!details?.length) return;
-  details[0].streamChunks = streamChunks;
+  updatePendingRequestStreamChunksById(details[0].id, streamChunks);
 }
 
 /**
