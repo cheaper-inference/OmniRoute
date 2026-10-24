@@ -730,6 +730,31 @@ error that names a built-in provider or its credentials, check whether the node'
 reserved: nodes saved before this rule existed are still stored, but their prefix routes to
 the built-in provider. Edit the node and give it a new prefix.
 
+#### Per-connection gateway options
+
+These keys go in a connection's `providerSpecificData` (for example via
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (integer, 1–1024) — for OpenAI chat-format compatible connections whose
+  gateway rejects long tool names. Longer names are sent as short aliases and restored in the
+  response.
+- `quotaEndpoint` — the gateway's quota/credits endpoint, read for the dashboard quota strip and
+  quota-aware routing. Works on both OpenAI- and Anthropic-compatible connections; the full shape
+  is documented in `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Chaining OmniRoute Peers
 
 Another OmniRoute gateway can be added as a **Custom OpenAI-compatible** provider. Use the
