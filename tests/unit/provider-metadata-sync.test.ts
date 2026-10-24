@@ -42,6 +42,7 @@ function regenerate() {
     if (entry.authType) meta.authType = entry.authType;
     if (entry.format) meta.format = entry.format;
     if (entry.anonymousApiKey) meta.anonymousApiKey = true;
+    if (entry.reasoningTransport) meta.reasoningTransport = entry.reasoningTransport;
     const models = entry.models as Array<{ id: string; name?: string }> | undefined;
     if (models && models.length > 0) {
       meta.models = models.map((m) => ({ id: m.id, name: m.name || m.id }));

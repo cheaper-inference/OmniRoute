@@ -33,6 +33,7 @@ type MetaEntry = {
   authType?: string;
   format?: string;
   anonymousApiKey?: boolean;
+  reasoningTransport?: string;
   models?: { id: string; name: string }[];
 };
 
@@ -52,6 +53,7 @@ for (const [id, entry] of Object.entries(REGISTRY)) {
   if (entry.authType) meta.authType = entry.authType;
   if (entry.format) meta.format = entry.format;
   if (entry.anonymousApiKey) meta.anonymousApiKey = true;
+  if (entry.reasoningTransport) meta.reasoningTransport = entry.reasoningTransport;
   if (entry.models && entry.models.length > 0) {
     // Route consumer renders `m.name || m.id`; bake that resolution in here so
     // the JSON carries the final display name.

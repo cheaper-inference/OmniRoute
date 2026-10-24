@@ -1645,6 +1645,7 @@
     "chatgpt-web": {
       "authType": "apikey",
       "format": "openai",
+      "reasoningTransport": "opaque",
       "models": [
         {
           "id": "gpt-5-6",
@@ -1684,6 +1685,7 @@
       "alias": "cgpt-codex",
       "authType": "apikey",
       "format": "openai-responses",
+      "reasoningTransport": "opaque",
       "models": [
         {
           "id": "luna",
@@ -2472,6 +2474,7 @@
       "alias": "cx",
       "authType": "oauth",
       "format": "openai-responses",
+      "reasoningTransport": "opaque",
       "models": [
         {
           "id": "gpt-6-astra",
@@ -2687,6 +2690,7 @@
       "alias": "cxa",
       "authType": "none",
       "format": "openai-responses",
+      "reasoningTransport": "opaque",
       "models": [
         {
           "id": "gpt-6-astra",
@@ -7905,6 +7909,7 @@
       "alias": "gc",
       "authType": "oauth",
       "format": "openai",
+      "reasoningTransport": "opaque",
       "models": [
         {
           "id": "grok-4.7",
@@ -9357,6 +9362,7 @@
       "alias": "mc",
       "authType": "apikey",
       "format": "openai",
+      "reasoningTransport": "opaque",
       "models": [
         {
           "id": "muse-spark-1.3",
@@ -10040,6 +10046,7 @@
     "openai": {
       "authType": "apikey",
       "format": "openai",
+      "reasoningTransport": "opaque",
       "models": [
         {
           "id": "gpt-6.1-sol",
@@ -13479,6 +13486,7 @@
     "xai": {
       "authType": "apikey",
       "format": "openai",
+      "reasoningTransport": "opaque",
       "models": [
         {
           "id": "grok-4.6",
@@ -13510,6 +13518,7 @@
       "alias": "xao",
       "authType": "oauth",
       "format": "openai",
+      "reasoningTransport": "opaque",
       "models": [
         {
           "id": "grok-4.5",

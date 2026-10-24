@@ -14,6 +14,8 @@
  * metadata.
  */
 import metadataJson from "./metadata.json";
+// Type-only: narrows reasoningTransport to the wire union; erased at compile.
+import type { ReasoningTransport } from "../providerRegistry.ts";
 
 export interface ProviderMetaModel {
   id: string;
@@ -25,6 +27,7 @@ export interface ProviderMeta {
   authType?: string;
   format?: string;
   anonymousApiKey?: boolean;
+  reasoningTransport?: ReasoningTransport;
   models?: ProviderMetaModel[];
 }
 

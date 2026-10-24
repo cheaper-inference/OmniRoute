@@ -1,15 +1,21 @@
-import { REGISTRY } from "../config/providerRegistry.ts";
+// PERF-09: provider metadata comes from the generated metadata.json instead of
+// the 291-module REGISTRY import, which forced every provider module to
+// evaluate at module load of this hot-path policy file.
+import { PROVIDER_METADATA, type ProviderMeta } from "../config/providers/metadata.ts";
+// Type-only: ReasoningTransport is the public type contract of this module.
+// Importing it from providerRegistry.ts pulls no runtime code (erased at compile).
 import type { ReasoningTransport } from "../config/providerRegistry.ts";
 import { isValidResponsesItemId } from "./responsesItemId.ts";
 
 type JsonRecord = Record<string, unknown>;
 
 const REASONING_TRANSPORTS = new Map<string, ReasoningTransport>();
-for (const [id, entry] of Object.entries(REGISTRY)) {
-  if (!entry.reasoningTransport) continue;
-  REASONING_TRANSPORTS.set(id.toLowerCase(), entry.reasoningTransport);
-  if (entry.alias) {
-    REASONING_TRANSPORTS.set(entry.alias.toLowerCase(), entry.reasoningTransport);
+for (const [id, meta] of Object.entries(PROVIDER_METADATA)) {
+  const transport = (meta as ProviderMeta).reasoningTransport;
+  if (!transport) continue;
+  REASONING_TRANSPORTS.set(id.toLowerCase(), transport);
+  if (meta.alias) {
+    REASONING_TRANSPORTS.set(meta.alias.toLowerCase(), transport);
   }
 }
 
