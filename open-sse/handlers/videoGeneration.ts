@@ -11,6 +11,7 @@ import { getVideoProvider, parseVideoModel } from "../config/videoRegistry.ts";
 import { kieExecutor } from "../executors/kie.ts";
 import { vertexGenerateVideo } from "../executors/vertexMedia.ts";
 import { handleGoogleFlowVideoGeneration } from "./videoGeneration/googleFlowHandler.ts";
+import { handleGoogleFlowWebVideoGeneration } from "./videoGeneration/googleflowWebHandler.ts";
 import { handleDeepinfraVideoGeneration } from "./videoGeneration/deepinfraHandler.ts";
 import { handleLeonardoVideoGeneration } from "./videoGeneration/leonardoHandler.ts";
 import { handleDashscopeVideoGeneration } from "./videoGeneration/dashscopeHandler.ts";
@@ -297,6 +298,10 @@ export async function handleVideoGeneration({
 
   if (providerConfig.format === "google-flow") {
     return handleGoogleFlowVideoGeneration({ model, providerConfig, body, credentials, log });
+  }
+
+  if (providerConfig.format === "googleflow-web" || provider === "googleflow-web") {
+    return handleGoogleFlowWebVideoGeneration({ model, providerConfig, body, credentials, log });
   }
 
   if (providerConfig.format === "comfyui") {

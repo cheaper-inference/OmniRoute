@@ -62,6 +62,10 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   // Adobe Firefly web (cookie/JWT as apikey) — GET firefly.adobe.io/v1/credits/balance
   "adobe-firefly",
   "firefly",
+  // Google Flow web (Veo Credits via nzlxg RPC)
+  "googleflow-web",
+  "googleflow",
+  "gflow",
   "hyperagent",
   "ha",
   // xAI OAuth (Grok) weekly quota (id + public alias, same pattern as ha/agy)

@@ -49,6 +49,7 @@ import { getKiroUsage, buildKiroUsageResult, discoverKiroProfileArn } from "./us
 // Re-exported para os testes kiro-* (importam de services/usage).
 export { buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 import { getAdobeFireflyUsage } from "./usage/adobeFirefly.ts";
+import { getGoogleFlowUsage } from "./usage/googleflow.ts";
 import { getOpenrouterUsage } from "./usage/openrouter.ts";
 import { getOpenAiCompatibleUsage } from "./usage/openaiCompatible.ts";
 import { getLlmgatewayUsage } from "./usage/llmgateway.ts";
@@ -254,6 +255,11 @@ export async function getUsageForProvider(
     case "firefly":
       // Cookie or IMS JWT in apiKey/accessToken → GET firefly.adobe.io/v1/credits/balance
       return await getAdobeFireflyUsage(apiKey, accessToken, providerSpecificData);
+    case "googleflow-web":
+    case "googleflow":
+    case "gflow":
+    case "flow":
+      return await getGoogleFlowUsage(apiKey || accessToken, providerSpecificData);
     case "hyperagent":
     case "ha":
       return await getHyperAgentUsage(apiKey || accessToken, providerSpecificData);

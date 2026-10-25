@@ -65,6 +65,20 @@ export const WEB_COOKIE_PROVIDERS = {
     // #7286 Level 2: tools[] is prompt-emulated via webTools.ts (parseToolCallsFromText).
     toolCalling: "emulated",
   },
+  "googleflow-web": {
+    id: "googleflow-web",
+    serviceKinds: ["video", "image"],
+    alias: "gflow",
+    name: "Google Flow (Veo & Imagen)",
+    icon: "movie_filter",
+    color: "#EA4335",
+    textIcon: "GFlow",
+    website: "https://flow.google.com",
+    authHint:
+      "Paste your Google cookies (__Secure-1PSID, __Secure-1PSIDTS) or browser JSON export from flow.google.com",
+    subscriptionRisk: true,
+    riskNoticeVariant: "webCookie",
+  },
   "perplexity-web": {
     id: "perplexity-web",
     serviceKinds: ["llm"],

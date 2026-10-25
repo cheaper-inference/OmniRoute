@@ -158,6 +158,21 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
       "OAuth bearer. Generate video via labs.google/flow directly for now.",
   },
 
+  "googleflow-web": {
+    id: "googleflow-web",
+    alias: "gflow",
+    baseUrl: "https://flow.google.com",
+    authType: "cookie",
+    authHeader: "cookie",
+    format: "googleflow-web",
+    models: [
+      { id: "veo-3.1-quality", name: "Veo 3.1 - Quality" },
+      { id: "veo-3.1-fast", name: "Veo 3.1 - Fast" },
+      { id: "veo-3.1-lite", name: "Veo 3.1 - Lite" },
+      { id: "omni-1.1-flash", name: "Omni 1.1 Flash" },
+    ],
+  },
+
   kie: {
     id: "kie",
     baseUrl: "https://api.kie.ai",

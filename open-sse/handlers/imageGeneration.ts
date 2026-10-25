@@ -74,6 +74,7 @@ import { handleZenmuxImageGeneration } from "./imageGeneration/providers/zenmux.
 import { handleMuseImageGeneration } from "./imageGeneration/providers/museImage.ts";
 import { handleGeminiAiImageGeneration } from "./imageGeneration/providers/geminiAiStudio.ts";
 import { handleBlackForestLabsImageGeneration } from "./imageGeneration/providers/blackForestLabs.ts";
+import { handleGoogleFlowWebImageGeneration } from "./imageGeneration/providers/googleflowWeb.ts";
 import {
   fanOutSingleImageCalls,
   IMAGE_FANOUT_MAX_N,
@@ -776,6 +777,17 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "sdwebui") {
     return handleSDWebUIImageGeneration({ model, provider, providerConfig, body, log });
+  }
+
+  if (providerConfig.format === "googleflow-web" || provider === "googleflow-web") {
+    return handleGoogleFlowWebImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+    });
   }
 
   if (providerConfig.format === "comfyui") {

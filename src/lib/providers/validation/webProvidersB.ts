@@ -319,6 +319,63 @@ export async function validateGeminiWebProvider({ apiKey, providerSpecificData =
   }
 }
 
+// ── Google Flow Web cookie validator ──
+export async function validateGoogleFlowWebProvider({ apiKey, providerSpecificData = {} }: any) {
+  try {
+    const raw = String(apiKey || "").trim();
+    if (!raw) {
+      return { valid: false, error: "Paste your Google cookies (__Secure-1PSID) from flow.google.com" };
+    }
+
+    const cookieHeader = normalizeGeminiValidationCookie(raw);
+    if (!cookieHeader) {
+      return {
+        valid: false,
+        error: "No __Secure-1PSID cookie found — paste it from flow.google.com DevTools → Cookies",
+      };
+    }
+
+    const response = await validationRead("https://flow.google.com/", {
+      headers: applyCustomUserAgent(
+        {
+          Accept: "text/html,application/xhtml+xml",
+          Cookie: cookieHeader,
+          Origin: "https://flow.google.com",
+          Referer: "https://flow.google.com/",
+        },
+        providerSpecificData
+      ),
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        valid: false,
+        error: "Invalid or expired Google Flow cookie — sign in to flow.google.com and re-copy cookies",
+      };
+    }
+
+    return { valid: true, error: null };
+  } catch (error: any) {
+    if (
+      error instanceof SafeOutboundFetchError &&
+      error.code === "REDIRECT_BLOCKED" &&
+      !isSecurityBlockError(error)
+    ) {
+      const location = error.location ?? "";
+      if (/accounts\.google\.com\/.*ServiceLogin/i.test(location)) {
+        return {
+          valid: false,
+          error: "Session expired — sign in to flow.google.com and re-copy cookies",
+        };
+      }
+      if (/flow\.google\.com|accounts\.google\.com/i.test(location)) {
+        return { valid: true, error: null };
+      }
+    }
+    return toValidationErrorResult(error);
+  }
+}
+
 // ── Copilot Web token validator ──
 export async function validateCopilotWebProvider({ apiKey, providerSpecificData = {} }: any) {
   try {
