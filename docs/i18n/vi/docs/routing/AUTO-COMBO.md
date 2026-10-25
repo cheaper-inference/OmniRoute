@@ -328,20 +328,25 @@ Công cụ combo của OmniRoute hỗ trợ **20 chiến lược định tuyến
 Để xoay vòng nghiêm ngặt, hãy dùng `round-robin`; trọng số bằng nhau với `weighted` chỉ mang lại sự cân bằng theo thống kê — không phải
 nghiêm ngặt.
 
-### Chế độ pipeline tác tử
+### Chế độ pipeline tác nhân (Agentic pipeline)
 
-Một combo `pipeline` có ít nhất hai mô hình có thể chọn sử dụng định tuyến bộ lập kế hoạch/bộ thực thi bằng
-`config.agenticOrchestration.enabled`. Mục tiêu đầu tiên đảm nhiệm việc lập kế hoạch và câu trả lời cuối cùng;
-mục tiêu thứ hai phát ra các lệnh gọi công cụ nguyên bản của máy khách. OmniRoute phát hiện các lượt tiếp nối
-chứa kết quả công cụ từ giao thức yêu cầu, hỏi bộ lập kế hoạch xem có cần thêm một vòng công cụ hay không
-và tự động chọn bộ thực thi hoặc bộ lập kế hoạch làm bước cuối cùng hướng tới máy khách.
+Một combo `pipeline` với ít nhất hai mô hình có thể chọn tham gia định tuyến lập kế hoạch/thực thi (planner/executor) với `config.agenticOrchestration.enabled`. Mục tiêu đầu tiên chịu trách nhiệm lập kế hoạch và các câu trả lời cuối cùng; mục tiêu thứ hai phát ra các lệnh gọi công cụ gốc của client. OmniRoute phát hiện các phần tiếp nối của kết quả công cụ từ giao thức yêu cầu, hỏi trình lập kế hoạch xem có cần thêm một vòng công cụ nữa không, và tự động chọn trình thực thi hoặc trình lập kế hoạch làm bước cuối cùng hướng tới client.
 
-Các mô hình bổ sung sau mục tiêu thứ hai được sắp xếp làm phương án dự phòng cho bộ thực thi. Một phản hồi
-HTTP thất bại hoặc ngoại lệ truyền tải sẽ chuyển sang bộ thực thi tiếp theo, giữ nguyên
-quyết định của bộ lập kế hoạch và các công cụ nguyên bản nhưng sử dụng prompt bước riêng và
-kết nối đã phân giải của bộ thực thi đó. Phản hồi thành công đầu tiên được trả về không thay đổi, bao gồm cả
-luồng SSE; không thể thử lại tại đây nếu lỗi xảy ra sau khi luồng thành công đã bắt đầu.
-Nếu tất cả bộ thực thi đều thất bại, lỗi cuối cùng sẽ được trả về. Việc máy khách hủy yêu cầu sẽ dừng điều phối.
+Tùy chọn `config.agenticOrchestration.contextCompaction` áp dụng một ngân sách payload riêng biệt trước mỗi lần gửi trình lập kế hoạch hoặc trình thực thi. Kích hoạt nó một cách rõ ràng:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Đây là các ngân sách ký tự JSON được tuần tự hóa do người vận hành chọn, không phải cửa sổ ngữ cảnh token hay các giới hạn thượng nguồn được đảm bảo. Các ID mô hình chính xác sẽ ghi đè lên mặc định. Trên ngưỡng này, việc nén sẽ loại bỏ các định nghĩa công cụ trùng lặp, cắt bớt bằng chứng công cụ quá khổ bằng một bản tóm tắt (digest), và loại bỏ các nhóm lịch sử hoàn chỉnh cũ để đạt được tỷ lệ mục tiêu. Nó giữ lại các hướng dẫn hệ thống/nhà phát triển, yêu cầu mới nhất của người dùng, vòng công cụ cuối cùng bao gồm các lệnh gọi/kết quả song song, và hướng dẫn định tuyến hàng đầu của Gemini. Các hướng dẫn cấp cao nhất và cài đặt công cụ được bảo toàn. Một dấu hiệu lược bỏ ghi lại lịch sử đã bị xóa; đây là việc cắt tỉa có tính xác định, không phải là tóm tắt ngữ nghĩa. Nếu ngữ cảnh được ghim vẫn vượt quá ngân sách, yêu cầu sẽ trả về 413 trước khi liên hệ với mô hình. Khi tắt tính năng nén hoặc dưới ngưỡng, yêu cầu sẽ được chuyển qua mà không thay đổi.
+
+Các mô hình bổ sung sau mục tiêu thứ hai là các bản sao lưu trình thực thi theo thứ tự. Một phản hồi HTTP thất bại hoặc ngoại lệ truyền tải sẽ chuyển sang trình thực thi tiếp theo, mang theo cùng quyết định của trình lập kế hoạch và các công cụ gốc nhưng với lời nhắc bước (step prompt) và kết nối đã giải quyết của riêng trình thực thi đó. Phản hồi thành công đầu tiên được trả về mà không thay đổi, bao gồm cả SSE streaming; các lỗi sau khi luồng thành công bắt đầu không thể được thử lại ở đây. Nếu tất cả các trình thực thi đều thất bại, lỗi cuối cùng sẽ được trả về. Các lệnh hủy từ client sẽ dừng việc gửi.
 
 ```json
 {
@@ -353,11 +358,7 @@ Nếu tất cả bộ thực thi đều thất bại, lỗi cuối cùng sẽ đ
 }
 ```
 
-Bộ thực thi có thể phát ra nhiều lệnh gọi độc lập trong một phản hồi. Các lệnh gọi phụ thuộc được
-xử lý trong những lượt kết quả công cụ tiếp theo của máy khách, với bộ lập kế hoạch xem xét từng kết quả.
-`maxToolRounds` mặc định là `8` và chấp nhận `1`–`32`; khi đạt đến giới hạn, bộ lập kế hoạch phải
-tạo ra câu trả lời cuối cùng tốt nhất hiện có. Các quyết định nội bộ của bộ lập kế hoạch được lưu vào bộ đệm, trong khi
-phản hồi đã chọn để gửi tới máy khách vẫn giữ nguyên tùy chọn truyền luồng ban đầu.
+Trình thực thi có thể phát ra nhiều lệnh gọi độc lập trong một phản hồi. Các lệnh gọi phụ thuộc được xử lý trong các lượt kết quả công cụ của client sau đó, với việc trình lập kế hoạch xem xét mọi kết quả. `maxToolRounds` mặc định là `8` và chấp nhận giá trị từ `1`–`32`; khi đạt đến giới hạn, trình lập kế hoạch phải đưa ra câu trả lời cuối cùng tốt nhất hiện có. Các quyết định nội bộ của trình lập kế hoạch được đệm, trong khi phản hồi hướng tới client được chọn sẽ bảo toàn tùy chọn streaming ban đầu.
 
 ### Lô cố định `round-robin` và mở rộng tài khoản
 

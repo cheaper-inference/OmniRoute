@@ -328,21 +328,25 @@ Enjin kombo OmniRoute menyokong **20 strategi penghalaan** (diisytiharkan dalam 
 Untuk penggiliran ketat, gunakan `round-robin`; pemberat yang sama pada `weighted` menghasilkan keseimbangan statistik — bukan
 ketat.
 
-### Mod saluran paip agen
+### Mod pipeline ejen
 
-Kombo `pipeline` dengan sekurang-kurangnya dua model boleh menggunakan penghalaan perancang/pelaksana melalui
-`config.agenticOrchestration.enabled`. Sasaran pertama mengendalikan perancangan dan jawapan akhir;
-sasaran kedua menghasilkan panggilan alat natif klien. OmniRoute mengesan sambungan
-hasil alat daripada protokol permintaan, bertanya kepada perancang sama ada pusingan alat lain
-diperlukan, dan secara dinamik menjadikan sama ada pelaksana atau perancang sebagai langkah akhir
-yang berhadapan dengan klien.
+Kombo `pipeline` dengan sekurang-kurangnya dua model boleh memilih untuk menggunakan penghalaan perancang/pelaksana dengan `config.agenticOrchestration.enabled`. Sasaran pertama menguruskan perancangan dan jawapan akhir; sasaran kedua mengeluarkan panggilan alat asli klien. OmniRoute mengesan penyambungan hasil alat daripada protokol permintaan, bertanya kepada perancang sama ada pusingan alat lain diperlukan, dan secara dinamik menjadikan sama ada pelaksana atau perancang sebagai langkah akhir yang menghadap klien.
 
-Model tambahan selepas sasaran kedua disusun sebagai pelaksana sandaran. Respons
-HTTP yang gagal atau pengecualian pengangkutan akan beralih kepada pelaksana seterusnya, dengan membawa
-keputusan perancang dan alat natif yang sama tetapi menggunakan gesaan langkah dan
-sambungan terhurai milik pelaksana tersebut. Respons pertama yang berjaya dikembalikan tanpa perubahan, termasuk
-penstriman SSE; kegagalan selepas strim yang berjaya bermula tidak boleh dicuba semula di sini.
-Jika semua pelaksana gagal, kegagalan terakhir dikembalikan. Pembatalan oleh klien menghentikan penghantaran.
+`config.agenticOrchestration.contextCompaction` pilihan menggunakan belanjawan muatan berasingan sebelum setiap penghantaran perancang atau pelaksana. Dayakannya secara eksplisit:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Ini adalah belanjawan aksara JSON bersiri yang dipilih oleh pengendali, bukan tetingkap konteks token atau had hulu yang dijamin. ID model yang tepat mengatasi lalai. Di atas ambang, pemadatan mengalih keluar definisi alat yang serupa, memangkas bukti alat yang terlalu besar dengan ringkasan, dan mengalih keluar kumpulan sejarah lengkap yang lama ke arah nisbah sasaran. Ia mengekalkan arahan sistem/pembangun, permintaan pengguna terkini, pusingan alat terakhir termasuk panggilan/hasil selari, dan arahan penghalaan utama Gemini. Arahan peringkat atas dan tetapan alat dikekalkan. Penanda peninggalan merekodkan sejarah yang dialih keluar; ini adalah pemangkasan deterministik, bukan ringkasan semantik. Jika konteks yang disemat masih melebihi belanjawan, permintaan mengembalikan 413 sebelum menghubungi model. Dengan pemadatan dilumpuhkan atau di bawah ambang, permintaan dilalui tanpa perubahan.
+
+Model tambahan selepas sasaran kedua adalah sandaran pelaksana yang dipesan. Respons HTTP yang gagal atau pengecualian pengangkutan beralih ke pelaksana seterusnya, membawa keputusan perancang dan alat asli yang sama tetapi dengan gesaan langkah dan sambungan yang diselesaikan oleh pelaksana tersebut. Respons berjaya yang pertama dikembalikan tanpa perubahan, termasuk penstriman SSE; kegagalan selepas penstriman berjaya bermula tidak boleh dicuba semula di sini. Jika semua pelaksana gagal, kegagalan terakhir dikembalikan. Pembatalan klien menghentikan penghantaran.
 
 ```json
 {
@@ -354,11 +358,7 @@ Jika semua pelaksana gagal, kegagalan terakhir dikembalikan. Pembatalan oleh kli
 }
 ```
 
-Pelaksana boleh menghasilkan berbilang panggilan bebas dalam satu respons. Panggilan bersandar
-dikendalikan dalam giliran hasil alat klien yang berikutnya, dengan perancang menyemak setiap hasil.
-`maxToolRounds` ditetapkan secara lalai kepada `8` dan menerima `1`–`32`; apabila had dicapai, perancang mesti
-menghasilkan jawapan akhir terbaik yang tersedia. Keputusan dalaman perancang dibufer, manakala
-respons berhadapan dengan klien yang dipilih mengekalkan pilihan penstriman asal.
+Pelaksana mungkin mengeluarkan berbilang panggilan bebas dalam satu respons. Panggilan bersandar dikendalikan dalam pusingan hasil-alat klien kemudian, dengan perancang menyemak setiap hasil. `maxToolRounds` lalai kepada `8` dan menerima `1`–`32`; setelah dicapai, perancang mesti menghasilkan jawapan akhir terbaik yang tersedia. Keputusan perancang dalaman ditimbal, manakala respons menghadap klien yang dipilih mengekalkan keutamaan penstriman asal.
 
 ### Kelompok lekat `round-robin` dan pengembangan akaun
 

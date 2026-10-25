@@ -328,11 +328,25 @@ Le moteur de combos d’OmniRoute prend en charge **20 stratégies de routage** 
 
 Pour une rotation stricte, utilisez `round-robin` ; des poids égaux avec `weighted` assurent un équilibrage statistique — et non strict.
 
-### Mode de pipeline agentique
+### Mode pipeline agentique
 
-Un combo `pipeline` comportant au moins deux modèles peut activer le routage planificateur/exécuteur avec `config.agenticOrchestration.enabled`. La première cible prend en charge la planification et les réponses finales ; la deuxième cible émet des appels d’outils au format natif du client. OmniRoute détecte les continuations de résultats d’outils à partir du protocole de requête, demande au planificateur si un autre cycle d’outils est nécessaire et choisit dynamiquement l’exécuteur ou le planificateur comme étape finale présentée au client.
+Une combinaison `pipeline` avec au moins deux modèles peut opter pour un routage planificateur/exécuteur avec `config.agenticOrchestration.enabled`. La première cible gère la planification et les réponses finales ; la seconde cible émet des appels d'outils natifs au client. OmniRoute détecte les continuations de résultats d'outils à partir du protocole de requête, demande au planificateur si un autre cycle d'outils est nécessaire, et fait dynamiquement de l'exécuteur ou du planificateur l'étape finale face au client.
 
-Les modèles supplémentaires après la deuxième cible sont des exécuteurs de secours ordonnés. Une réponse HTTP en échec ou une exception de transport entraîne le passage à l’exécuteur suivant, en conservant la même décision du planificateur et les mêmes outils natifs, mais avec l’invite d’étape et la connexion résolue propres à cet exécuteur. La première réponse réussie est renvoyée sans modification, y compris en streaming SSE ; les échecs survenant après le début d’un flux réussi ne peuvent pas faire l’objet d’une nouvelle tentative ici. Si tous les exécuteurs échouent, le dernier échec est renvoyé. Les abandons côté client interrompent la répartition.
+L'option `config.agenticOrchestration.contextCompaction` applique un budget de charge utile distinct avant chaque répartition vers le planificateur ou l'exécuteur. Activez-la explicitement :
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Il s'agit de budgets de caractères JSON sérialisés sélectionnés par l'opérateur, et non de fenêtres de contexte de jetons ou de limites amont garanties. Les ID de modèles exacts remplacent la valeur par défaut. Au-dessus du seuil, la compaction supprime les définitions d'outils identiques, tronque les preuves d'outils trop volumineuses avec un résumé (digest), et supprime les anciens groupes d'historique complets pour atteindre le ratio cible. Elle conserve les instructions système/développeur, la dernière requête utilisateur, le dernier cycle d'outils incluant les appels/résultats parallèles, et l'instruction de routage principale de Gemini. Les instructions de haut niveau et les paramètres des outils sont préservés. Un marqueur d'omission enregistre l'historique supprimé ; il s'agit d'un découpage déterministe, et non d'un résumé sémantique. Si le contexte épinglé dépasse toujours le budget, la requête renvoie 413 avant de contacter le modèle. Avec la compaction désactivée ou en dessous du seuil, la requête passe sans modification.
+
+Les modèles supplémentaires après la seconde cible sont des sauvegardes d'exécuteur ordonnées. Une réponse HTTP échouée ou une exception de transport fait avancer vers l'exécuteur suivant, en conservant la même décision du planificateur et les mêmes outils natifs, mais avec le prompt d'étape et la connexion résolue propres à cet exécuteur. La première réponse réussie est renvoyée sans modification, y compris le streaming SSE ; les échecs après le début d'un flux réussi ne peuvent pas être relancés ici. Si tous les exécuteurs échouent, le dernier échec est renvoyé. Les abandons du client arrêtent la répartition.
 
 ```json
 {
@@ -344,7 +358,7 @@ Les modèles supplémentaires après la deuxième cible sont des exécuteurs de 
 }
 ```
 
-L’exécuteur peut émettre plusieurs appels indépendants dans une même réponse. Les appels dépendants sont traités lors de tours ultérieurs de résultats d’outils côté client, le planificateur examinant chaque résultat. `maxToolRounds` vaut `8` par défaut et accepte les valeurs de `1` à `32` ; une fois cette limite atteinte, le planificateur doit produire la meilleure réponse finale disponible. Les décisions internes du planificateur sont mises en mémoire tampon, tandis que la réponse sélectionnée et présentée au client conserve la préférence de streaming d’origine.
+L'exécuteur peut émettre plusieurs appels indépendants dans une seule réponse. Les appels dépendants sont gérés lors des tours de résultats d'outils ultérieurs du client, le planificateur examinant chaque résultat. `maxToolRounds` est défini par défaut sur `8` et accepte des valeurs de `1` à `32` ; une fois atteint, le planificateur doit produire la meilleure réponse finale disponible. Les décisions internes du planificateur sont mises en mémoire tampon, tandis que la réponse sélectionnée face au client préserve la préférence de streaming d'origine.
 
 ### Traitement par lots persistant de `round-robin` et expansion des comptes
 

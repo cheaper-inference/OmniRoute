@@ -333,24 +333,25 @@ OmniRoute'ning kombinatsiya mexanizmi **20 ta marshrutlash strategiyasini** qoʻ
 Qatʼiy rotatsiya uchun `round-robin`dan foydalaning; `weighted`da teng vaznlar qatʼiy
 emas, statistik muvozanatni taʼminlaydi.
 
-### Agentik konveyer rejimi
+### Agentli konveyer (pipeline) rejimi
 
-Kamida ikkita modelga ega `pipeline` kombinatsiyasi
-`config.agenticOrchestration.enabled` orqali rejalashtiruvchi/bajaruvchi marshrutlashini
-yoqishi mumkin. Birinchi maqsad rejalashtirish va yakuniy javoblar uchun javob beradi;
-ikkinchi maqsad mijozga xos vosita chaqiruvlarini chiqaradi. OmniRoute soʻrov
-protokolidan vosita natijasi davomlarini aniqlaydi, rejalashtiruvchidan yana bir vosita
-bosqichi kerak yoki kerak emasligini soʻraydi va mijozga koʻrinadigan yakuniy bosqich
-sifatida bajaruvchi yoki rejalashtiruvchini dinamik tarzda tanlaydi.
+Kamida ikkita modelga ega `pipeline` kombinatsiyasi `config.agenticOrchestration.enabled` yordamida rejalashtiruvchi/bajaruvchi (planner/executor) marshrutizatsiyasini tanlashi mumkin. Birinchi maqsad rejalashtirish va yakuniy javoblar uchun javobgar; ikkinchi maqsad esa mijozga xos vosita chaqiruvlarini (tool calls) amalga oshiradi. OmniRoute soʻrov protokolidan vosita natijalarining davomini aniqlaydi, rejalashtiruvchidan yana bir vosita bosqichi kerakligini soʻraydi va dinamik ravishda bajaruvchi yoki rejalashtiruvchini mijozga koʻrinadigan yakuniy bosqichga aylantiradi.
 
-Ikkinchi maqsaddan keyingi qoʻshimcha modellar tartiblangan zaxira bajaruvchilardir.
-Muvaffaqiyatsiz HTTP javobi yoki transport istisnosi keyingi bajaruvchiga oʻtadi va
-ayni rejalashtiruvchi qarori hamda mahalliy vositalarni saqlab qoladi, biroq oʻsha
-bajaruvchining oʻz bosqich koʻrsatmasi va aniqlangan ulanishidan foydalanadi. Birinchi
-muvaffaqiyatli javob oʻzgartirilmasdan qaytariladi, jumladan SSE oqimi ham; muvaffaqiyatli
-oqim boshlangandan keyingi xatoliklarni bu yerda qayta urinish orqali bajarib boʻlmaydi.
-Agar barcha bajaruvchilar muvaffaqiyatsiz boʻlsa, oxirgi xatolik qaytariladi. Mijoz
-tomonidan bekor qilish joʻnatishni toʻxtatadi.
+Ixtiyoriy `config.agenticOrchestration.contextCompaction` har bir rejalashtiruvchi yoki bajaruvchi joʻnatilishidan oldin alohida foydali yuk (payload) byudjetini qoʻllaydi. Uni aniq yoqing:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Bular operator tomonidan tanlangan serializatsiya qilingan JSON belgi byudjetlari boʻlib, token kontekst oynalari yoki kafolatlangan yuqori oqim limitlari emas. Aniq model ID'lari standart qiymatni bekor qiladi. Chegaradan oshib ketganda, siqish (compaction) bir xil vosita taʼriflarini olib tashlaydi, haddan tashqari katta vosita dalillarini dayjest bilan qisqartiradi va maqsadli nisbatga erishish uchun eski toʻliq tarix guruhlarini oʻchiradi. U tizim/dasturchi koʻrsatmalarini, oxirgi foydalanuvchi soʻrovini, parallel chaqiruvlar/natijalarni oʻz ichiga olgan oxirgi vosita bosqichini va Gemini'ning yetakchi marshrutlash koʻrsatmasini saqlab qoladi. Yuqori darajadagi koʻrsatmalar va vosita sozlamalari saqlanadi. Oʻtkazib yuborish belgisi oʻchirilgan tarixni qayd etadi; bu semantik xulosa emas, balki deterministik qisqartirishdir. Agar biriktirilgan kontekst hali ham byudjetdan oshib ketsa, soʻrov model bilan bogʻlanishdan oldin 413 xatosini qaytaradi. Siqish oʻchirilgan boʻlsa yoki chegara qiymatidan past boʻlsa, soʻrov oʻzgarishsiz oʻtadi.
+
+Ikkinchi maqsaddan keyingi qoʻshimcha modellar tartiblangan bajaruvchi zaxiralari hisoblanadi. Muvaffaqiyatsiz HTTP javobi yoki transport istisnosi keyingi bajaruvchiga oʻtadi, u bir xil rejalashtiruvchi qarori va mahalliy vositalarni olib oʻtadi, lekin oʻsha bajaruvchining oʻz qadam soʻrovi va hal qilingan ulanishidan foydalanadi. Birinchi muvaffaqiyatli javob, shu jumladan SSE striming ham oʻzgarishsiz qaytariladi; muvaffaqiyatli oqim boshlanganidan keyingi nosozliklarni bu yerda qayta urinib boʻlmaydi. Agar barcha bajaruvchilar muvaffaqiyatsizlikka uchrasa, oxirgi xatolik qaytariladi. Mijoz tomonidan bekor qilish joʻnatishni toʻxtatadi.
 
 ```json
 {
@@ -362,12 +363,7 @@ tomonidan bekor qilish joʻnatishni toʻxtatadi.
 }
 ```
 
-Bajaruvchi bitta javobda bir nechta mustaqil chaqiruv chiqarishi mumkin. Bogʻliq chaqiruvlar
-mijozning keyingi vosita natijasi bosqichlarida qayta ishlanadi va rejalashtiruvchi har bir
-natijani koʻrib chiqadi. `maxToolRounds`ning standart qiymati `8` boʻlib, `1`–`32`
-oraligʻidagi qiymatlarni qabul qiladi; chegaraga yetilgach, rejalashtiruvchi mavjud eng
-yaxshi yakuniy javobni yaratishi kerak. Rejalashtiruvchining ichki qarorlari buferlanadi,
-mijozga koʻrinadigan tanlangan javob esa asl oqim uzatish afzalligini saqlab qoladi.
+Bajaruvchi bitta javobda bir nechta mustaqil chaqiruvlarni amalga oshirishi mumkin. Bogʻliq chaqiruvlar keyingi mijoz vositasi natijalari bosqichlarida hal qilinadi, bunda rejalashtiruvchi har bir natijani koʻrib chiqadi. `maxToolRounds` standart qiymati `8` ga teng va `1`–`32` oraligʻini qabul qiladi; bu chegaraga yetganda, rejalashtiruvchi mavjud boʻlgan eng yaxshi yakuniy javobni taqdim etishi shart. Ichki rejalashtiruvchi qarorlari buferlanadi, tanlangan mijozga yoʻnaltirilgan javob esa asl striming afzalligini saqlab qoladi.
 
 ### `round-robin`ning biriktirilgan toʻplami va hisoblarni kengaytirish
 

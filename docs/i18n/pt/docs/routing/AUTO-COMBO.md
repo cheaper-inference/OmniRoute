@@ -330,11 +330,25 @@ O motor de combinações do OmniRoute suporta **20 estratégias de encaminhament
 
 Para uma rotação estrita, utilize `round-robin`; ponderações iguais em `weighted` proporcionam um equilíbrio estatístico — não estrito.
 
-### Modo de pipeline agêntico
+### Modo de pipeline agente
 
-Um combo `pipeline` com pelo menos dois modelos pode ativar o encaminhamento entre planeador e executor através de `config.agenticOrchestration.enabled`. O primeiro destino é responsável pelo planeamento e pelas respostas finais; o segundo destino emite chamadas de ferramentas nativas do cliente. O OmniRoute deteta continuações de resultados de ferramentas a partir do protocolo do pedido, pergunta ao planeador se é necessária outra ronda de ferramentas e, dinamicamente, define o executor ou o planeador como o passo final apresentado ao cliente.
+Uma combinação `pipeline` com pelo menos dois modelos pode optar pelo encaminhamento planeador/executor com `config.agenticOrchestration.enabled`. O primeiro destino é responsável pelo planeamento e pelas respostas finais; o segundo destino emite chamadas de ferramentas nativas do cliente. O OmniRoute deteta continuações de resultados de ferramentas a partir do protocolo de pedido, pergunta ao planeador se é necessária outra ronda de ferramentas e torna dinamicamente o executor ou o planeador o passo final voltado para o cliente.
 
-Os modelos adicionais após o segundo destino são cópias de segurança ordenadas do executor. Uma resposta HTTP com falha ou uma exceção de transporte faz avançar para o executor seguinte, mantendo a mesma decisão do planeador e as mesmas ferramentas nativas, mas utilizando o próprio prompt de passo e a ligação resolvida desse executor. A primeira resposta bem-sucedida é devolvida sem alterações, incluindo streaming SSE; as falhas após o início de um stream bem-sucedido não podem ser repetidas aqui. Se todos os executores falharem, é devolvida a última falha. Os cancelamentos do cliente interrompem o encaminhamento.
+A opção `config.agenticOrchestration.contextCompaction` aplica um orçamento de payload separado antes de cada despacho do planeador ou executor. Ative-a explicitamente:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Estes são orçamentos de caracteres JSON serializados selecionados pelo operador, não janelas de contexto de tokens ou limites a montante garantidos. IDs de modelo exatos substituem o padrão. Acima do limiar, a compactação remove definições de ferramentas idênticas, corta evidências de ferramentas demasiado grandes com um digest e remove grupos de histórico completos antigos em direção ao rácio alvo. Retém as instruções do sistema/programador, o pedido de utilizador mais recente, a última ronda de ferramentas, incluindo chamadas/resultados paralelos, e a instrução de encaminhamento principal do Gemini. As instruções de nível superior e as definições de ferramentas são preservadas. Um marcador de omissão regista o histórico removido; trata-se de um corte determinístico, não de um resumo semântico. Se o contexto afixado ainda exceder o orçamento, o pedido devolve 413 antes de contactar o modelo. Com a compactação desativada ou abaixo do limiar, o pedido passa inalterado.
+
+Modelos adicionais após o segundo destino são backups de executor ordenados. Uma resposta HTTP falhada ou uma exceção de transporte avança para o próximo executor, transportando a mesma decisão do planeador e ferramentas nativas, mas o prompt de passo e a ligação resolvida desse executor. A primeira resposta bem-sucedida é devolvida inalterada, incluindo o streaming SSE; falhas após o início de um stream bem-sucedido não podem ser tentadas novamente aqui. Se todos os executores falharem, a última falha é devolvida. As interrupções do cliente param o despacho.
 
 ```json
 {
@@ -346,7 +360,7 @@ Os modelos adicionais após o segundo destino são cópias de segurança ordenad
 }
 ```
 
-O executor pode emitir várias chamadas independentes numa única resposta. As chamadas dependentes são processadas em turnos posteriores de resultados de ferramentas do cliente, com o planeador a rever cada resultado. `maxToolRounds` tem o valor predefinido `8` e aceita `1`–`32`; uma vez atingido o limite, o planeador tem de produzir a melhor resposta final disponível. As decisões internas do planeador são colocadas em memória intermédia, enquanto a resposta selecionada e apresentada ao cliente preserva a preferência de streaming original.
+O executor pode emitir múltiplas chamadas independentes numa única resposta. As chamadas dependentes são processadas em turnos de resultados de ferramentas do cliente posteriores, com o planeador a rever cada resultado. `maxToolRounds` tem o valor predefinido de `8` e aceita `1`–`32`; uma vez atingido, o planeador deve produzir a melhor resposta final disponível. As decisões internas do planeador são armazenadas em buffer, enquanto a resposta selecionada voltada para o cliente preserva a preferência de streaming original.
 
 ### Lote persistente e expansão de contas de `round-robin`
 

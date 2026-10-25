@@ -329,21 +329,25 @@ El motor de combos de OmniRoute admite **20 estrategias de enrutamiento** (decla
 Para una rotación estricta, usa `round-robin`; asignar pesos iguales en `weighted` proporciona un equilibrio estadístico, no
 estricto.
 
-### Modo de canalización agéntica
+### Modo de pipeline agente
 
-Un combo `pipeline` con al menos dos modelos puede habilitar el enrutamiento planificador/ejecutor mediante
-`config.agenticOrchestration.enabled`. El primer destino se encarga de la planificación y de las respuestas finales;
-el segundo destino emite llamadas a herramientas nativas del cliente. OmniRoute detecta las continuaciones
-de resultados de herramientas a partir del protocolo de la solicitud, pregunta al planificador si se necesita otra ronda de herramientas
-y establece dinámicamente al ejecutor o al planificador como
-paso final orientado al cliente.
+Una combinación de `pipeline` con al menos dos modelos puede optar por el enrutamiento de planificador/ejecutor con `config.agenticOrchestration.enabled`. El primer objetivo se encarga de la planificación y las respuestas finales; el segundo objetivo emite llamadas a herramientas nativas del cliente. OmniRoute detecta las continuaciones de resultados de herramientas desde el protocolo de solicitud, pregunta al planificador si se necesita otra ronda de herramientas y convierte dinámicamente al ejecutor o al planificador en el paso final orientado al cliente.
 
-Los modelos adicionales posteriores al segundo destino se ordenan como ejecutores de respaldo. Una respuesta
-HTTP fallida o una excepción de transporte hace que se pase al siguiente ejecutor, manteniendo la
-misma decisión del planificador y las herramientas nativas, pero utilizando el prompt de paso y la
-conexión resuelta propios de ese ejecutor. La primera respuesta correcta se devuelve sin cambios, incluido
-el streaming SSE; los fallos posteriores al inicio de un streaming correcto no se pueden reintentar aquí.
-Si todos los ejecutores fallan, se devuelve el último fallo. Las cancelaciones del cliente detienen el envío.
+La opción `config.agenticOrchestration.contextCompaction` aplica un presupuesto de carga útil separado antes de cada despacho del planificador o ejecutor. Habilítela explícitamente:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Estos son presupuestos de caracteres JSON serializados seleccionados por el operador, no ventanas de contexto de tokens ni límites ascendentes garantizados. Los ID de modelo exactos anulan el valor predeterminado. Por encima del umbral, la compactación elimina definiciones de herramientas idénticas, recorta la evidencia de herramientas de gran tamaño con un resumen y elimina grupos de historial completos antiguos hacia la relación objetivo. Conserva las instrucciones del sistema/desarrollador, la última solicitud del usuario, la última ronda de herramientas, incluidas las llamadas/resultados paralelos, y la instrucción de enrutamiento principal de Gemini. Se conservan las instrucciones de nivel superior y la configuración de las herramientas. Un marcador de omisión registra el historial eliminado; esto es un recorte determinista, no un resumen semántico. Si el contexto anclado aún excede el presupuesto, la solicitud devuelve 413 antes de contactar al modelo. Con la compactación deshabilitada o por debajo del umbral, la solicitud pasa sin cambios.
+
+Los modelos adicionales después del segundo objetivo son respaldos de ejecutor ordenados. Una respuesta HTTP fallida o una excepción de transporte avanza al siguiente ejecutor, llevando la misma decisión del planificador y herramientas nativas, pero con el propio prompt de paso y la conexión resuelta de ese ejecutor. La primera respuesta exitosa se devuelve sin cambios, incluido el streaming SSE; las fallas después de que comienza un stream exitoso no se pueden reintentar aquí. Si todos los ejecutores fallan, se devuelve la última falla. Las interrupciones del cliente detienen el despacho.
 
 ```json
 {
@@ -355,11 +359,7 @@ Si todos los ejecutores fallan, se devuelve el último fallo. Las cancelaciones 
 }
 ```
 
-El ejecutor puede emitir varias llamadas independientes en una sola respuesta. Las llamadas dependientes se
-gestionan en turnos posteriores de resultados de herramientas del cliente, y el planificador revisa cada resultado.
-El valor predeterminado de `maxToolRounds` es `8` y acepta valores de `1` a `32`; una vez alcanzado, el planificador debe
-producir la mejor respuesta final disponible. Las decisiones internas del planificador se almacenan en búfer, mientras que
-la respuesta seleccionada orientada al cliente conserva la preferencia original de streaming.
+El ejecutor puede emitir múltiples llamadas independientes en una sola respuesta. Las llamadas dependientes se manejan en turnos posteriores de resultados de herramientas del cliente, con el planificador revisando cada resultado. `maxToolRounds` tiene un valor predeterminado de `8` y acepta de `1` a `32`; una vez alcanzado, el planificador debe producir la mejor respuesta final disponible. Las decisiones internas del planificador se almacenan en búfer, mientras que la respuesta seleccionada orientada al cliente conserva la preferencia de streaming original.
 
 ### Lotes persistentes de `round-robin` y expansión de cuentas
 

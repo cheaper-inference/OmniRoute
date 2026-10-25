@@ -326,21 +326,25 @@ Motorul de combinații OmniRoute acceptă **20 de strategii de rutare** (declara
 Pentru rotație strictă, utilizați `round-robin`; ponderile egale pentru `weighted` oferă un echilibru statistic — nu
 strict.
 
-### Modul de pipeline agentic
+### Modul pipeline agentic
 
-O combinație `pipeline` cu cel puțin două modele poate activa rutarea planificator/executor prin
-`config.agenticOrchestration.enabled`. Prima țintă gestionează planificarea și răspunsurile finale;
-a doua țintă emite apeluri de instrumente native pentru client. OmniRoute detectează continuările
-cu rezultate ale instrumentelor din protocolul cererii, întreabă planificatorul dacă este necesară
-încă o rundă de instrumente și stabilește dinamic dacă executorul sau planificatorul reprezintă
-etapa finală transmisă clientului.
+O combinație `pipeline` cu cel puțin două modele poate opta pentru rutarea planificator/executor cu `config.agenticOrchestration.enabled`. Prima țintă se ocupă de planificare și răspunsurile finale; a doua țintă emite apeluri de instrumente native clientului. OmniRoute detectează continuările rezultatelor instrumentelor din protocolul de cerere, întreabă planificatorul dacă este necesară o altă rundă de instrumente și face dinamic fie executorul, fie planificatorul pasul final orientat către client.
 
-Modelele suplimentare de după a doua țintă sunt copii de rezervă ordonate ale executorului. Un răspuns
-HTTP eșuat sau o excepție de transport determină trecerea la următorul executor, păstrând aceeași
-decizie a planificatorului și aceleași instrumente native, dar utilizând propriul prompt de etapă și
-propria conexiune rezolvată ale executorului respectiv. Primul răspuns reușit este returnat nemodificat, inclusiv
-streamingul SSE; eșecurile survenite după începerea unui flux reușit nu pot fi reîncercate aici.
-Dacă toți executorii eșuează, este returnat ultimul eșec. Anulările efectuate de client opresc distribuirea.
+Opțiunea `config.agenticOrchestration.contextCompaction` aplică un buget de sarcină utilă separat înainte de fiecare expediere a planificatorului sau executorului. Activați-o explicit:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Acestea sunt bugete de caractere JSON serializate selectate de operator, nu ferestre de context de token-uri sau limite upstream garantate. ID-urile exacte ale modelelor suprascriu valoarea implicită. Peste prag, compactarea elimină definițiile identice ale instrumentelor, scurtează dovezile instrumentelor supradimensionate cu un rezumat (digest) și elimină grupurile de istoric complet vechi către raportul țintă. Aceasta păstrează instrucțiunile de sistem/dezvoltator, cea mai recentă cerere a utilizatorului, ultima rundă de instrumente incluzând apeluri/rezultate paralele și instrucțiunea de rutare principală a Gemini. Instrucțiunile de nivel superior și setările instrumentelor sunt păstrate. Un marcator de omisiune înregistrează istoricul eliminat; aceasta este o tăiere deterministă, nu un rezumat semantic. Dacă contextul fixat depășește în continuare bugetul, cererea returnează 413 înainte de a contacta modelul. Cu compactarea dezactivată sau sub prag, cererea trece neschimbată.
+
+Modelele suplimentare de după a doua țintă sunt backup-uri de executor ordonate. Un răspuns HTTP eșuat sau o excepție de transport avansează la următorul executor, purtând aceeași decizie a planificatorului și instrumente native, dar propriul prompt de pas și conexiunea rezolvată a acelui executor. Primul răspuns reușit este returnat neschimbat, incluzând streaming-ul SSE; eșecurile după începerea unui stream reușit nu pot fi reîncercate aici. Dacă toți executorii eșuează, este returnat ultimul eșec. Întreruperile clientului opresc expedierea.
 
 ```json
 {
@@ -352,11 +356,7 @@ Dacă toți executorii eșuează, este returnat ultimul eșec. Anulările efectu
 }
 ```
 
-Executorul poate emite mai multe apeluri independente într-un singur răspuns. Apelurile dependente sunt
-gestionate în interacțiunile ulterioare ale clientului cu rezultate ale instrumentelor, planificatorul examinând fiecare rezultat.
-`maxToolRounds` are valoarea implicită `8` și acceptă `1`–`32`; odată ce limita este atinsă, planificatorul trebuie
-să producă cel mai bun răspuns final disponibil. Deciziile interne ale planificatorului sunt păstrate într-un buffer, iar
-răspunsul selectat pentru client păstrează preferința inițială de streaming.
+Executorul poate emite mai multe apeluri independente într-un singur răspuns. Apelurile dependente sunt gestionate în turele ulterioare de rezultate ale instrumentelor clientului, planificatorul revizuind fiecare rezultat. `maxToolRounds` are valoarea implicită `8` și acceptă `1`–`32`; odată atinsă, planificatorul trebuie să producă cel mai bun răspuns final disponibil. Deciziile interne ale planificatorului sunt stocate în buffer, în timp ce răspunsul selectat orientat către client păstrează preferința originală de streaming.
 
 ### Loturi persistente `round-robin` și extinderea conturilor
 

@@ -331,21 +331,25 @@ nustatytos reikšmės perduodamos esamoms variklio `config.modePack` / `config.b
 Griežtai rotacijai naudokite `round-robin`; vienodi `weighted` svoriai suteikia statistinį, o ne
 griežtą balansą.
 
-### Agentinio konvejerio režimas
+### Agentinio konvejerio (pipeline) režimas
 
-`pipeline` derinys, turintis bent du modelius, gali įjungti planuotojo / vykdytojo maršruto parinkimą
-naudojant `config.agenticOrchestration.enabled`. Pirmasis tikslas atsakingas už planavimą ir galutinius atsakymus;
-antrasis tikslas generuoja kliento vietinio formato įrankių iškvietimus. „OmniRoute“ pagal užklausos protokolą aptinka
-tęsinius su įrankių rezultatais, klausia planuotojo, ar reikia dar vieno įrankių vykdymo ciklo,
-ir dinamiškai parenka vykdytoją arba planuotoją kaip galutinį klientui skirtą
-etapą.
+`pipeline` derinys su bent dviem modeliais gali pasirinkti planuotojo/vykdytojo maršrutizavimą naudojant `config.agenticOrchestration.enabled`. Pirmasis tikslas atsako už planavimą ir galutinius atsakymus; antrasis tikslas išduoda kliento pusės įrankių iškvietimus. OmniRoute aptinka įrankių rezultatų tęsinius iš užklausos protokolo, klausia planuotojo, ar reikalingas dar vienas įrankių raundas, ir dinamiškai nustato, ar vykdytojas, ar planuotojas bus galutinis kliento pusės žingsnis.
 
-Po antrojo tikslo nurodyti papildomi modeliai yra iš eilės naudojami kaip atsarginiai vykdytojai. Gavus nesėkmingą
-HTTP atsakymą arba įvykus transporto išimčiai pereinama prie kito vykdytojo, išlaikant
-tą patį planuotojo sprendimą bei vietinius įrankius, tačiau naudojant to vykdytojo etapo instrukciją ir
-nustatytą ryšį. Pirmasis sėkmingas atsakymas grąžinamas nepakeistas, įskaitant
-SSE srautinį perdavimą; prasidėjus sėkmingam srautui, vėlesnių trikčių čia pakartotinai apdoroti negalima.
-Jei visi vykdytojai patiria triktį, grąžinama paskutinė triktis. Klientui nutraukus užklausą, siuntimas sustabdomas.
+Pasirenkamas `config.agenticOrchestration.contextCompaction` taiko atskirą naudingosios apkrovos biudžetą prieš kiekvieną planuotojo ar vykdytojo išsiuntimą. Įgalinkite jį aiškiai:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Tai yra operatoriaus pasirinkti serializuoti JSON simbolių biudžetai, o ne žetonų (token) konteksto langai ar garantuoti aukštesnio lygio limitai. Tikslūs modelių ID perrašo numatytuosius. Viršijus slenkstį, glaudinimas (compaction) pašalina identiškus įrankių apibrėžimus, apkarpo per didelius įrankių įrodymus su santrauka (digest) ir pašalina senas užbaigtas istorijos grupes, siekiant tikslinio santykio. Jis išsaugo sistemos/kūrėjo instrukcijas, naujausią vartotojo užklausą, paskutinį įrankių raundą, įskaitant lygiagrečius iškvietimus/rezultatus, ir Gemini pirminę maršrutizavimo instrukciją. Aukščiausio lygio instrukcijos ir įrankių nustatymai yra išsaugomi. Praleidimo žymeklis įrašo pašalintą istoriją; tai yra deterministinis apkarpymas, o ne semantinė santrauka. Jei prisegtas kontekstas vis tiek viršija biudžetą, užklausa grąžina 413 klaidą prieš susisiekiant su modeliu. Kai glaudinimas išjungtas arba neviršijamas slenkstis, užklausa praeina nepakeista.
+
+Papildomi modeliai po antrojo tikslo yra surikiuoti vykdytojų atsarginiai variantai. Nepavykęs HTTP atsakymas arba transportavimo išimtis perkelia užklausą į kitą vykdytoją, perduodant tą patį planuotojo sprendimą ir vietinius įrankius, bet naudojant to vykdytojo žingsnio užklausą ir išspręstą ryšį. Pirmasis sėkmingas atsakymas grąžinamas nepakeistas, įskaitant SSE srautinį perdavimą; klaidų po sėkmingo srauto pradžios čia pakartoti negalima. Jei visi vykdytojai nepavyksta, grąžinama paskutinė klaida. Kliento nutraukimai sustabdo išsiuntimą.
 
 ```json
 {
@@ -357,11 +361,7 @@ Jei visi vykdytojai patiria triktį, grąžinama paskutinė triktis. Klientui nu
 }
 ```
 
-Vykdytojas viename atsakyme gali pateikti kelis nepriklausomus iškvietimus. Priklausomi iškvietimai
-apdorojami vėlesniuose kliento įrankių rezultatų cikluose, planuotojui peržiūrint kiekvieną rezultatą.
-Numatytoji `maxToolRounds` reikšmė yra `8`, o priimamas intervalas — `1`–`32`; pasiekus šią ribą, planuotojas turi
-pateikti geriausią įmanomą galutinį atsakymą. Vidiniai planuotojo sprendimai kaupiami buferyje, o
-pasirinktame klientui skirtame atsakyme išlaikoma pradinė srautinio perdavimo nuostata.
+Vykdytojas gali išduoti kelis nepriklausomus iškvietimus viename atsakyme. Priklausomi iškvietimai tvarkomi vėlesniuose kliento įrankių rezultatų etapuose, planuotojui peržiūrint kiekvieną rezultatą. `maxToolRounds` numatytoji reikšmė yra `8` ir priima `1`–`32`; pasiekus šią ribą, planuotojas privalo pateikti geriausią įmanomą galutinį atsakymą. Vidiniai planuotojo sprendimai yra buferizuojami, o pasirinktas kliento pusės atsakymas išsaugo pradinę srautinio perdavimo nuostatą.
 
 ### `round-robin` susietas paketinis apdorojimas ir paskyrų išplėtimas
 

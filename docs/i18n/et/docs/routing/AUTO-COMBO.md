@@ -309,20 +309,25 @@ OmniRoute'i kombinatsioonimootor toetab **20 marsruutimisstrateegiat** (deklaree
 Range rotatsiooni jaoks kasutage `round-robin`; võrdsed kaalud strateegia `weighted` puhul annavad statistilise, mitte
 range tasakaalu.
 
-### Agendipõhise konveieri režiim
+### Agentne pipeline-režiim
 
-Vähemalt kahe mudeliga `pipeline`-kombinatsioon võib kasutada plaanija/täitja marsruutimist valikuga
-`config.agenticOrchestration.enabled`. Esimene sihtmudel vastutab plaanimise ja lõppvastuste eest;
-teine sihtmudel väljastab kliendinatiivseid tööriistakutseid. OmniRoute tuvastab päringu protokolli
-põhjal tööriistatulemuste jätkupäringud, küsib plaanijalt, kas vaja on veel üht tööriistavooru,
-ning valib dünaamiliselt kliendile suunatud viimaseks etapiks kas täitja või plaanija.
+`pipeline`-kombinatsioon, millel on vähemalt kaks mudelit, saab valida planeerija/täitja marsruutimise (planner/executor routing), kasutades `config.agenticOrchestration.enabled`. Esimene sihtmärk vastutab planeerimise ja lõplike vastuste eest; teine sihtmärk väljastab kliendipoolseid tööriistakutseid. OmniRoute tuvastab päringuprotokollist tööriista tulemuste jätkud, küsib planeerijalt, kas on vaja veel ühte tööriistaringi, ja määrab dünaamiliselt kas täitja või planeerija kliendile suunatud lõppsammuks.
 
-Teisele sihtmudelile järgnevad lisamudelid on järjestatud täitja varuvariandid. Nurjunud
-HTTP-vastus või transpordierand viib järgmise täitja juurde, säilitades
-sama plaanija otsuse ja natiivsed tööriistad, kuid kasutades selle täitja enda etapi viipa ning
-lahendatud ühendust. Esimene edukas vastus tagastatakse muutmata kujul, sealhulgas
-SSE-voogedastus; pärast eduka voo käivitumist tekkinud tõrgete korral ei saa siin uuesti proovida.
-Kui kõik täitjad nurjuvad, tagastatakse viimane tõrge. Kliendipoolsed katkestused peatavad edastamise.
+Valikuline `config.agenticOrchestration.contextCompaction` rakendab eraldi kasuliku koormuse eelarvet enne iga planeerija või täitja väljastamist. Lubage see selgesõnaliselt:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Need on operaatori valitud serialiseeritud JSON-i märgimahud (character budgets), mitte žetoonide kontekstiaknad või garanteeritud ülesvoolu piirangud. Täpsed mudeli ID-d kirjutavad vaikeseaded üle. Üle läve eemaldab tihendamine (compaction) identsed tööriistade definitsioonid, kärbib liiga suuri tööriistade tõendusmaterjale kokkuvõttega (digest) ja eemaldab vanad täielikud ajaloo grupid sihtsuhte saavutamiseks. See säilitab süsteemi/arendaja juhised, viimase kasutaja päringu, viimase tööriistaringi, sealhulgas paralleelsed kutsed/tulemused, ja Gemini juhtiva marsruutimisjuhise. Ülaltaseme juhised ja tööriistade seaded säilitatakse. Väljajätmise marker salvestab eemaldatud ajaloo; see on deterministlik kärpimine, mitte semantiline kokkuvõte. Kui kinnitatud kontekst ületab endiselt eelarvet, tagastab päring 413 enne mudeliga ühenduse võtmist. Kui tihendamine on keelatud või jääb alla läve, läbib päring süsteemi muutmata kujul.
+
+Täiendavad mudelid pärast teist sihtmärki on järjestatud täitja varukoopiad. Ebaõnnestunud HTTP-vastus või transpordierand liigub edasi järgmise täitja juurde, kandes sama planeerija otsust ja natiivseid tööriistu, kuid kasutades selle täitja enda sammu viipa (step prompt) ja lahendatud ühendust. Esimene edukas vastus tagastatakse muutmata kujul, sealhulgas SSE-voogedastus; pärast eduka voo algust tekkinud tõrkeid ei saa siin uuesti proovida. Kui kõik täitjad ebaõnnestuvad, tagastatakse viimane tõrge. Kliendi katkestused peatavad väljastamise.
 
 ```json
 {
@@ -334,11 +339,7 @@ Kui kõik täitjad nurjuvad, tagastatakse viimane tõrge. Kliendipoolsed katkest
 }
 ```
 
-Täitja võib ühes vastuses väljastada mitu sõltumatut kutset. Sõltuvaid kutseid
-käsitletakse kliendi hilisemates tööriistatulemuste voorudes ning plaanija vaatab iga tulemuse üle.
-`maxToolRounds` vaikeväärtus on `8` ja lubatud vahemik on `1`–`32`; piirmäära saavutamisel peab plaanija
-koostama parima saadaoleva lõppvastuse. Plaanija sisemised otsused puhverdatakse, samal ajal kui
-valitud kliendile suunatud vastus säilitab algse voogedastuseelistuse.
+Täitja võib ühes vastuses väljastada mitu sõltumatut kutset. Sõltuvad kutsed käsitletakse hilisemates kliendi tööriista-tulemuse voorudes, kusjuures planeerija vaatab iga tulemuse üle. `maxToolRounds` vaikeväärtus on `8` ja see aktsepteerib väärtusi `1`–`32`; kui see on saavutatud, peab planeerija koostama parima võimaliku lõpliku vastuse. Sisemised planeerija otsused puhverdatakse, samas kui valitud kliendile suunatud vastus säilitab algse voogedastuse eelistuse.
 
 ### `round-robin`-strateegia püsipaketid ja kontode laiendamine
 

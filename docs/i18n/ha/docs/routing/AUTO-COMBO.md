@@ -325,20 +325,25 @@ Injin haɗa-hadar OmniRoute yana goyon bayan **dabarun turowa guda 20** (waɗand
 Don juyawa mai tsauri yi amfani da `round-robin`; nauyi iri ɗaya a kan `weighted` yana ba da daidaito na ƙididdiga — ba
 mai tsauri ba.
 
-### Yanayin bututun wakili
+### Yanayin "pipeline" na wakilci (Agentic)
 
-Haɗin `pipeline` mai aƙalla samfura biyu zai iya kunna rabawar mai tsarawa/mai aiwatarwa ta hanyar
-`config.agenticOrchestration.enabled`. Manufa ta farko ce ke da alhakin tsarawa da amsoshin ƙarshe;
-manufa ta biyu tana fitar da kiran kayan aiki na asalin abokin ciniki. OmniRoute yana gano ci gaban
-sakamakon kayan aiki daga ƙa'idar buƙatar, yana tambayar mai tsarawa ko ana buƙatar wani zagayen kayan aiki,
-sannan a sauƙaƙe yana sanya ko dai mai aiwatarwa ko mai tsarawa ya zama matakin ƙarshe da abokin ciniki zai gani.
+Haɗin `pipeline` tare da aƙalla samfura guda biyu na iya zaɓar hanyar "planner/executor" tare da `config.agenticOrchestration.enabled`. Manufa ta farko tana kula da tsarawa da amsoshi na ƙarshe; manufa ta biyu tana fitar da kiran kayan aiki na asali na abokin ciniki. OmniRoute yana gano ci gaban sakamakon kayan aiki daga yarjejeniyar buƙata, yana tambayar mai tsarawa (planner) ko ana buƙatar wani zagaye na kayan aiki, kuma yana sanya ko dai mai aiwatarwa (executor) ko mai tsarawa ya zama matakin ƙarshe na abokin ciniki.
 
-Ƙarin samfuran da ke bayan manufa ta biyu ana jera su a matsayin madadin masu aiwatarwa. Amsar
-HTTP da ta gaza ko keɓantacciyar matsalar sufuri tana matsawa zuwa mai aiwatarwa na gaba, tare da
-ɗaukar shawarar mai tsarawa iri ɗaya da kayan aiki na asali, amma da umarnin matakin wannan mai aiwatarwar da
-haɗin da aka warware. Ana dawo da amsa ta farko da ta yi nasara ba tare da canji ba, ciki har da
-watsawar SSE; gazawar da ta faru bayan fara watsa bayanan da ya yi nasara ba za a iya sake gwadawa a nan ba.
-Idan duk masu aiwatarwa sun gaza, ana dawo da gazawa ta ƙarshe. Katsewar abokin ciniki yana dakatar da aikawa.
+Zaɓin `config.agenticOrchestration.contextCompaction` yana amfani da kasafin kuɗi na bayanai daban kafin kowane aikawa na mai tsarawa ko mai aiwatarwa. Kunna shi a fili:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Waɗannan su ne kasafin haruffa na JSON da aka tsara waɗanda ma'aikacin ya zaɓa, ba taga mahallin alama ko iyakokin da aka tabbatar na sama ba. ID na samfurin daidai suna maye gurbin tsoho. Sama da ƙofar, "compaction" yana cire ma'anar kayan aiki iri ɗaya, yana rage shaidar kayan aiki da suka wuce kima tare da taƙaitawa, kuma yana cire tsoffin ƙungiyoyin tarihi cikakke zuwa ga ma'aunin manufa. Yana riƙe umarnin tsarin/mai haɓakawa, buƙatar mai amfani ta baya-bayan nan, zagaye na kayan aiki na ƙarshe gami da kiran/sakamakon layi ɗaya, da umarnin karkatarwa na Gemini. Umarnin matakin sama da saitunan kayan aiki ana kiyaye su. Alamar tsallakewa tana rubuta tarihin da aka cire; wannan yankan ƙayyadadden abu ne, ba taƙaitaccen ma'ana ba. Idan mahallin da aka ƙulla har yanzu ya wuce kasafin kuɗi, buƙatar tana dawo da 413 kafin tuntuɓar samfurin. Tare da "compaction" a kashe ko ƙasa da ƙofar, buƙatar tana wucewa ba tare da canji ba.
+
+Ƙarin samfura bayan manufa ta biyu su ne madadin masu aiwatarwa da aka tsara. Amsar HTTP da ta gaza ko keɓancewar sufuri tana ci gaba zuwa mai aiwatarwa na gaba, tana ɗauke da shawarar mai tsarawa iri ɗaya da kayan aiki na asali amma tare da saurin matakin mai aiwatarwa da haɗin da aka warware. Amsar farko da ta yi nasara ana dawo da ita ba tare da canji ba, gami da SSE streaming; gazawar bayan kwararar nasara ta fara ba za a iya sake gwada ta a nan ba. Idan duk masu aiwatarwa sun gaza, ana dawo da gazawar ƙarshe. Katsewar abokin ciniki yana dakatar da aikawa.
 
 ```json
 {
@@ -350,11 +355,7 @@ Idan duk masu aiwatarwa sun gaza, ana dawo da gazawa ta ƙarshe. Katsewar abokin
 }
 ```
 
-Mai aiwatarwa na iya fitar da kiraye-kiraye masu zaman kansu da yawa a cikin amsa ɗaya. Kiraye-kirayen da suka dogara da juna
-ana sarrafa su a zagayen sakamakon kayan aiki na abokin ciniki na gaba, inda mai tsarawa yake duba kowane sakamako.
-`maxToolRounds` yana amfani da `8` a matsayin tsoho kuma yana karɓar `1`–`32`; da zarar an kai iyakar, dole ne mai tsarawa
-ya samar da mafi kyawun amsar ƙarshe da ake da ita. Ana ajiyar shawarwarin mai tsarawa na ciki, yayin da
-amsar da aka zaɓa don abokin ciniki take kiyaye zaɓin watsawa na asali.
+Mai aiwatarwa na iya fitar da kiran masu zaman kansu da yawa a cikin amsa ɗaya. Kiran da suka dogara ana sarrafa su a cikin juyowar sakamakon kayan aiki na abokin ciniki na gaba, tare da mai tsarawa yana nazarin kowane sakamako. `maxToolRounds` tsoho ne `8` kuma yana karɓar `1`–`32`; da zarar an kai, mai tsarawa dole ne ya samar da mafi kyawun amsar ƙarshe da ake da ita. Shawarar mai tsarawa ta ciki ana ajiye su (buffered), yayin da amsar da aka zaɓa ta abokin ciniki tana kiyaye zaɓin kwararar asali.
 
 ### Rukunin manne na `round-robin` da faɗaɗa asusu
 

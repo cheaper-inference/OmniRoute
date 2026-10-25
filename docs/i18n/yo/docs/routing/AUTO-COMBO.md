@@ -328,21 +328,25 @@ curl -sS http://localhost:20128/v1/chat/completions \
 Fún yíyí tó muna, lo `round-robin`; fífún `weighted` ní àwọn ìwọ̀n tó dọ́gba ń fúnni ní ìwọ̀ntúnwọ̀nsì oníṣirò — kì í ṣe
 èyí tó muna.
 
-### Ìpo pipeline aláṣojú
+### Ìpò pípáìpù (pipeline) ti àṣojú (agentic)
 
-Àkójọpọ̀ `pipeline` kan tó ní ó kéré tán àwọn model méjì lè yan ìdarí planner/executor pẹ̀lú
-`config.agenticOrchestration.enabled`. Target àkọ́kọ́ ló ń ṣètò ètò àti àwọn ìdáhùn ìkẹyìn;
-target kejì ló ń mú àwọn tool call abinibi client jáde. OmniRoute máa ń ṣàwárí àwọn ìtẹ̀síwájú
-tool-result láti inú protocol request, ó máa ń béèrè lọ́wọ́ planner bóyá tool round míì
-ṣì ṣe pàtàkì, ó sì máa ń yan executor tàbí planner ní ìmúdàgba gẹ́gẹ́ bí ìgbésẹ̀ ìkẹyìn
-tí client máa rí.
+Àkójọ `pipeline` tó ní ó kéré tán àwọn àwòṣe méjì lè yan láti wọ inú ìdarí (routing) ètò/aláṣẹ (planner/executor) pẹ̀lú `config.agenticOrchestration.enabled`. Àfojúsùn àkọ́kọ́ ni ó ń ṣàkóso ètò àti àwọn ìdáhùn ìkẹyìn; àfojúsùn kejì ni ó ń gbé àwọn ìpè irinṣẹ́ (tool calls) tó wà nínú oníbàárà jáde. OmniRoute máa ń wá àwọn ìtẹ̀síwájú ìyọrísí irinṣẹ́ (tool-result continuations) láti inú ìlànà ìbéèrè, ó máa ń bi ètò náà bóyá ìyípadà irinṣẹ́ mìíràn pọn dandan, ó sì máa ń sọ ètò tàbí aláṣẹ di ìgbésẹ̀ ìkẹyìn tó kọjú sí oníbàárà ní ọ̀nà tó yára yí padà.
 
-Àwọn model àfikún lẹ́yìn target kejì ni a tò sí executor backups. HTTP response tó kuna
-tàbí transport exception máa ń mú kí a lọ sí executor tó kàn, pẹ̀lú planner decision
-kan náà àti native tools kan náà, ṣùgbọ́n pẹ̀lú step prompt ti executor náà fúnra rẹ̀ àti
-resolved connection rẹ̀. Response àkọ́kọ́ tó ṣàṣeyọrí ni a máa dá padà láìyípadà, pẹ̀lú
-SSE streaming; àwọn ìkùnà lẹ́yìn tí stream tó ṣàṣeyọrí bá ti bẹ̀rẹ̀ kò ṣeé gbìyànjú lẹ́ẹ̀kan sí i níbí.
-Tí gbogbo executors bá kuna, ìkùnà tó kẹ́yìn ni a máa dá padà. Client aborts máa dá dispatch dúró.
+`config.agenticOrchestration.contextCompaction` tó jẹ́ àṣàyàn máa ń lo ìṣúná ìwọ̀n (payload budget) ọ̀tọ̀ọ̀tọ̀ ṣáájú ìránṣẹ́ ètò tàbí aláṣẹ kọ̀ọ̀kan. Mú un ṣiṣẹ́ ní gbangba:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Àwọn wọ̀nyí jẹ́ ìṣúná ìwọ̀n lẹ́tà JSON tí ó tẹ̀ léra tí oníṣẹ́ náà yàn, kì í ṣe àwọn fèrèsé àyíká ọ̀rọ̀ (token context windows) tàbí àwọn ààlà òkè tí ó dájú. Àwọn ID àwòṣe tó péye máa ń borí àìyẹsẹ̀ (default). Ní àkọjá ààlà náà, ìkójọpọ̀ (compaction) máa ń yọ àwọn ìtumọ̀ irinṣẹ́ tó jọra, ó máa ń gé ẹ̀rí irinṣẹ́ tó tóbi jù pẹ̀lú àkópọ̀ (digest), ó sì máa ń yọ àwọn ẹgbẹ́ ìtàn tó ti parí kúrò láti dé ìwọ̀n àfojúsùn náà. Ó máa ń pa àwọn ìtọ́ni ètò/oníṣẹ́ mọ́, ìbéèrè oníbàárà tó kẹ́yìn, ìyípadà irinṣẹ́ tó kẹ́yìn pẹ̀lú àwọn ìpè/ìyọrísí tó jọ ṣẹlẹ̀, àti ìtọ́ni ìdarí Gemini tó ṣáájú. Àwọn ìtọ́ni tó wà lókè àti àwọn ètò irinṣẹ́ ni a óò pa mọ́. Àmì ìyọkúrò (omission marker) máa ń gba ìtàn tí a yọ kúrò sílẹ̀; èyí jẹ́ gígé tó dájú, kì í ṣe àkópọ̀ ìtumọ̀. Bí àyíká ọ̀rọ̀ tí a kàn mọ́lẹ̀ bá ṣì kọjá ìṣúná náà, ìbéèrè náà máa ń padà pẹ̀lú 413 ṣáájú kí ó tó kan àwòṣe náà. Pẹ̀lú ìkójọpọ̀ tí a ti mú kúrò tàbí tí ó wà ní ìsàlẹ̀ ààlà náà, ìbéèrè náà kọjá lọ láìyí padà.
+
+Àwọn àwòṣe àfikún lẹ́yìn àfojúsùn kejì ni àwọn aláṣẹ àfẹ́yìn-tì (executor backups) tí a tò lẹ́sẹẹsẹ. Ìdáhùn HTTP tí ó kùnà tàbí àìṣedédé ìrìn-àjò (transport exception) máa ń tẹ̀ síwájú sí aláṣẹ tó kàn, ó ń gbé ìpinnu ètò kan náà àti àwọn irinṣẹ́ abínibí ṣùgbọ́n pẹ̀lú ìtọ́ni ìgbésẹ̀ ti aláṣẹ yẹn àti ìsopọ̀ tí a yanjú. Ìdáhùn àṣeyọrí àkọ́kọ́ ni a óò padà pẹ̀lú láìyí padà, pẹ̀lú SSE streaming; àwọn ìkùnà lẹ́yìn tí ìṣàn (stream) àṣeyọrí bá bẹ̀rẹ̀ kò lè tún wáyé níhìn-ín. Bí gbogbo àwọn aláṣẹ bá kùnà, ìkùnà tó kẹ́yìn ni a óò padà pẹ̀lú. Àwọn ìfagilé oníbàárà (client aborts) máa ń dá ìránṣẹ́ dúró.
 
 ```json
 {
@@ -354,11 +358,7 @@ Tí gbogbo executors bá kuna, ìkùnà tó kẹ́yìn ni a máa dá padà. Clie
 }
 ```
 
-Executor lè mú ọ̀pọ̀ independent calls jáde nínú response kan. Àwọn dependent calls ni a
-máa bójú tó ní àwọn client tool-result turns tó tẹ̀ lé e, nígbà tí planner yóò ṣe àyẹ̀wò gbogbo result.
-Ìye àìròtẹ́lẹ̀ ti `maxToolRounds` jẹ́ `8`, ó sì gba `1`–`32`; nígbà tí a bá dé iye náà, planner gbọ́dọ̀
-mú ìdáhùn ìkẹyìn tó dára jù lọ tó wà jáde. A máa ń fi àwọn internal planner decisions pamọ́ sínú buffer, nígbà tí
-client-facing response tí a yàn máa ń pa streaming preference àkọ́kọ́ mọ́.
+Aláṣẹ náà lè gbé ọ̀pọ̀lọpọ̀ ìpè tó dá dúró jáde nínú ìdáhùn kan. Àwọn ìpè tó sinmi lórí ara wọn ni a máa ń ṣàtúnṣe nínú àwọn ìyípadà ìyọrísí irinṣẹ́ oníbàárà tó kàn, pẹ̀lú ètò náà tó ń ṣàyẹ̀wò gbogbo ìyọrísí. `maxToolRounds` máa ń wà ní `8` gẹ́gẹ́ bí àìyẹsẹ̀, ó sì gba `1`–`32`; nígbà tí ó bá dé ibẹ̀, ètò náà gbọ́dọ̀ gbé ìdáhùn ìkẹyìn tó dára jù lọ jáde. Àwọn ìpinnu ètò inú ni a máa ń kó jọ (buffered), nígbà tí ìdáhùn tó kọjú sí oníbàárà tí a yàn máa ń pa ààyò ìṣàn (streaming preference) àtìbẹ̀rẹ̀pẹ̀pẹ̀ mọ́.
 
 ### `round-robin` sticky batch àti account expansion
 

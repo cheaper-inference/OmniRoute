@@ -334,21 +334,25 @@ OmniRoute-un kombinasiya mühərriki **20 marşrutlaşdırma strategiyasını** 
 
 Sərt rotasiya üçün `round-robin` istifadə edin; `weighted` strategiyasında bərabər çəkilər statistik — sərt deyil — balans təmin edir.
 
-### Agent əsaslı pipeline rejimi
+### Agentic pipeline rejimi
 
-Ən azı iki modeli olan `pipeline` kombinasiyası
-`config.agenticOrchestration.enabled` vasitəsilə planlaşdırıcı/işə salıcı marşrutlaşdırmasını aktivləşdirə bilər. Birinci hədəf planlaşdırmaya və yekun cavablara cavabdehdir;
-ikinci hədəf isə müştərinin doğma formatında alət çağırışları yaradır. OmniRoute sorğu protokolundan alət nəticələrinin
-davamlarını aşkarlayır, planlaşdırıcıdan başqa bir alət raundunun lazım olub-olmadığını
-soruşur və dinamik şəkildə ya işə salıcını, ya da planlaşdırıcını müştəriyə təqdim olunan yekun
-mərhələyə çevirir.
+Ən azı iki modelə malik `pipeline` kombinasiyası `config.agenticOrchestration.enabled` vasitəsilə planlaşdırıcı/icraçı marşrutlaşdırmasını seçə bilər. Birinci hədəf planlaşdırma və yekun cavabları öz üzərinə götürür; ikinci hədəf isə müştəri-yerli alət çağırışlarını həyata keçirir. OmniRoute sorğu protokolundan alət-nəticə davamlarını aşkar edir, planlaşdırıcıdan başqa bir alət dövrünün lazım olub-olmadığını soruşur və dinamik olaraq icraçını və ya planlaşdırıcını müştəriyə yönəlmiş yekun addım edir.
 
-İkinci hədəfdən sonrakı əlavə modellər ardıcıllıqla işə salıcının ehtiyat variantlarıdır. Uğursuz
-HTTP cavabı və ya nəqliyyat istisnası növbəti işə salıcıya keçir və bu zaman
-eyni planlaşdırıcı qərarı və doğma alətlər saxlanılır, lakin həmin işə salıcının öz mərhələ sorğusu və
-müəyyən edilmiş bağlantısı istifadə olunur. İlk uğurlu cavab dəyişdirilmədən, o cümlədən
-SSE axını ilə birlikdə qaytarılır; uğurlu axın başladıqdan sonrakı xətaları burada təkrar sınamaq
-mümkün deyil. Bütün işə salıcılar uğursuz olarsa, son xəta qaytarılır. Müştərinin ləğvetmə sorğuları göndərişi dayandırır.
+İsteğe bağlı `config.agenticOrchestration.contextCompaction` hər planlaşdırıcı və ya icraçı göndərişindən əvvəl ayrıca bir yük büdcəsi tətbiq edir. Onu açıq şəkildə aktivləşdirin:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Bunlar operator tərəfindən seçilmiş seriyalaşdırılmış JSON simvol büdcələridir, token kontekst pəncərələri və ya zəmanətli yuxarı axın limitləri deyil. Dəqiq model ID-ləri defolt dəyəri üstələyir. Eşikdən yuxarı olduqda, sıxılma (compaction) eyni alət təriflərini silir, həddindən artıq böyük alət sübutlarını daycest (digest) ilə kəsir və hədəf nisbətinə doğru köhnə tam tarixçə qruplarını silir. O, sistem/tərtibatçı təlimatlarını, ən son istifadəçi sorğusunu, paralel çağırışlar/nəticələr daxil olmaqla son alət dövrünü və Gemini-nin əsas marşrutlaşdırma təlimatını saxlayır. Yuxarı səviyyəli təlimatlar və alət parametrləri qorunur. Buraxılma işarəsi silinmiş tarixçəni qeyd edir; bu, semantik xülasə deyil, deterministik kəsmədir. Əgər sabitlənmiş kontekst hələ də büdcəni aşırsa, sorğu modelə çatmazdan əvvəl 413 qaytarır. Sıxılma deaktiv edildikdə və ya eşikdən aşağı olduqda, sorğu dəyişdirilmədən keçir.
+
+İkinci hədəfdən sonrakı əlavə modellər sıralanmış icraçı ehtiyat nüsxələridir. Uğursuz HTTP cavabı və ya nəqliyyat istisnası növbəti icraçıya keçir, eyni planlaşdırıcı qərarını və yerli alətləri daşıyır, lakin həmin icraçının öz addım sorğusu və həll edilmiş bağlantısı ilə. İlk uğurlu cavab, SSE axını daxil olmaqla, dəyişdirilmədən qaytarılır; uğurlu axın başladıqdan sonra baş verən uğursuzluqlar burada yenidən cəhd edilə bilməz. Əgər bütün icraçılar uğursuz olarsa, son uğursuzluq qaytarılır. Müştəri ləğvləri göndərişi dayandırır.
 
 ```json
 {
@@ -360,11 +364,7 @@ mümkün deyil. Bütün işə salıcılar uğursuz olarsa, son xəta qaytarılı
 }
 ```
 
-İşə salıcı bir cavabda bir neçə müstəqil çağırış yarada bilər. Asılı çağırışlar
-müştərinin sonrakı alət nəticəsi addımlarında işlənir və planlaşdırıcı hər nəticəni nəzərdən keçirir.
-`maxToolRounds` üçün standart dəyər `8`-dir və `1`–`32` qəbul edir; həddə çatdıqda planlaşdırıcı
-mövcud olan ən yaxşı yekun cavabı hazırlamalıdır. Daxili planlaşdırıcı qərarları buferlənir, seçilmiş
-müştəriyə təqdim olunan cavab isə ilkin axın seçimini qoruyur.
+İcraçı bir cavabda bir neçə müstəqil çağırış edə bilər. Asılı çağırışlar sonrakı müştəri alət-nəticə növbələrində idarə olunur və planlaşdırıcı hər nəticəni nəzərdən keçirir. `maxToolRounds` defolt olaraq `8`-dir və `1`–`32` aralığını qəbul edir; bu həddə çatdıqda, planlaşdırıcı mövcud olan ən yaxşı yekun cavabı verməlidir. Daxili planlaşdırıcı qərarları buferlənir, seçilmiş müştəri-yönümlü cavab isə orijinal axın seçimini qoruyur.
 
 ### `round-robin` yapışqan paketi və hesab genişləndirilməsi
 

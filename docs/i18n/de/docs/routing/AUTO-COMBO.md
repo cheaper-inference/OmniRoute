@@ -319,19 +319,23 @@ Verwenden Sie für eine strikte Rotation `round-robin`; gleiche Gewichtungen bei
 
 ### Agentischer Pipeline-Modus
 
-Eine `pipeline`-Kombination mit mindestens zwei Modellen kann über
-`config.agenticOrchestration.enabled` das Planner/Executor-Routing aktivieren. Das erste Ziel übernimmt die Planung und die endgültigen Antworten;
-das zweite Ziel erzeugt clientnative Tool-Aufrufe. OmniRoute erkennt Fortsetzungen mit Tool-Ergebnissen
-anhand des Anfrageprotokolls, fragt den Planner, ob eine weitere Tool-Runde erforderlich ist,
-und legt dynamisch entweder den Executor oder den Planner als letzten, clientseitig sichtbaren
-Schritt fest.
+Eine `pipeline`-Kombination mit mindestens zwei Modellen kann sich mit `config.agenticOrchestration.enabled` für das Planner/Executor-Routing entscheiden. Das erste Ziel übernimmt die Planung und die endgültigen Antworten; das zweite Ziel gibt client-native Tool-Aufrufe aus. OmniRoute erkennt Fortsetzungen von Tool-Ergebnissen aus dem Anforderungsprotokoll, fragt den Planner, ob eine weitere Tool-Runde erforderlich ist, und macht dynamisch entweder den Executor oder den Planner zum clientseitigen Abschlussschritt.
 
-Zusätzliche Modelle nach dem zweiten Ziel dienen in ihrer angegebenen Reihenfolge als Executor-Backups. Bei einer fehlgeschlagenen
-HTTP-Antwort oder einer Transportausnahme wird zum nächsten Executor gewechselt. Dabei werden
-dieselbe Planner-Entscheidung und dieselben nativen Tools übernommen, jedoch mit dem eigenen Schritt-Prompt und
-der aufgelösten Verbindung dieses Executors. Die erste erfolgreiche Antwort wird unverändert zurückgegeben, einschließlich
-SSE-Streaming; Fehler, die nach dem Beginn eines erfolgreichen Streams auftreten, können hier nicht erneut versucht werden.
-Wenn alle Executors fehlschlagen, wird der letzte Fehler zurückgegeben. Abbrüche durch den Client stoppen die Weiterleitung.
+Die optionale `config.agenticOrchestration.contextCompaction` wendet vor jedem Planner- oder Executor-Dispatch ein separates Payload-Budget an. Aktivieren Sie es explizit:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Dies sind serialisierte JSON-Zeichenbudgets, die vom Operator ausgewählt werden, keine Token-Kontextfenster oder garantierten Upstream-Limits. Genaue Modell-IDs überschreiben den Standardwert. Oberhalb des Schwellenwerts entfernt die Komprimierung identische Tool-Definitionen, kürzt zu große Tool-Nachweise mit einem Digest und entfernt alte vollständige Historien-Gruppen in Richtung des Zielverhältnisses. Sie behält System-/Entwickleranweisungen, die letzte Benutzeranfrage, die letzte Tool-Runde einschließlich paralleler Aufrufe/Ergebnisse und die führende Routing-Anweisung von Gemini bei. Anweisungen auf oberster Ebene und Tool-Einstellungen bleiben erhalten. Eine Auslassungsmarkierung protokolliert die entfernte Historie; dies ist ein deterministisches Kürzen, keine semantische Zusammenfassung. Wenn der angeheftete Kontext das Budget immer noch überschreitet, gibt die Anfrage 413 zurück, bevor das Modell kontaktiert wird. Wenn die Komprimierung deaktiviert ist oder unter dem Schwellenwert liegt, wird die Anfrage unverändert durchgereicht.
+
+Zusätzliche Modelle nach dem zweiten Ziel sind geordnete Executor-Backups. Eine fehlgeschlagene HTTP-Antwort oder eine Transportausnahme führt zum nächsten Executor, wobei dieselbe Planner-Entscheidung und dieselben nativen Tools beibehalten werden, jedoch der eigene Step-Prompt und die aufgelöste Verbindung dieses Executors verwendet werden. Die erste erfolgreiche Antwort wird unverändert zurückgegeben, einschließlich SSE-Streaming; Fehler nach Beginn eines erfolgreichen Streams können hier nicht wiederholt werden. Wenn alle Executors fehlschlagen, wird der letzte Fehler zurückgegeben. Client-Abbrüche stoppen den Dispatch.
 
 ```json
 {
@@ -343,11 +347,7 @@ Wenn alle Executors fehlschlagen, wird der letzte Fehler zurückgegeben. Abbrüc
 }
 ```
 
-Der Executor kann in einer Antwort mehrere unabhängige Aufrufe erzeugen. Abhängige Aufrufe werden
-in späteren Client-Runden mit Tool-Ergebnissen verarbeitet, wobei der Planner jedes Ergebnis überprüft.
-`maxToolRounds` hat standardmäßig den Wert `8` und akzeptiert `1`–`32`; sobald dieser Wert erreicht ist, muss der Planner
-die bestmögliche endgültige Antwort erzeugen. Interne Planner-Entscheidungen werden gepuffert, während
-die ausgewählte clientseitig sichtbare Antwort die ursprüngliche Streaming-Präferenz beibehält.
+Der Executor kann mehrere unabhängige Aufrufe in einer Antwort ausgeben. Abhängige Aufrufe werden in späteren Client-Tool-Ergebnis-Turns behandelt, wobei der Planner jedes Ergebnis überprüft. `maxToolRounds` ist standardmäßig auf `8` eingestellt und akzeptiert `1`–`32`; sobald dieser Wert erreicht ist, muss der Planner die bestmögliche endgültige Antwort liefern. Interne Planner-Entscheidungen werden gepuffert, während die ausgewählte clientseitige Antwort die ursprüngliche Streaming-Präferenz beibehält.
 
 ### Sticky-Batch und Kontoerweiterung bei `round-robin`
 

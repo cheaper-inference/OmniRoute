@@ -303,16 +303,25 @@ OmniRoute ၏ combo engine သည် **လမ်းကြောင်းရွ�
 
 တင်းကျပ်သော အလှည့်ကျအသုံးပြုမှုအတွက် `round-robin` ကို အသုံးပြုပါ။ `weighted` တွင် အလေးချိန်များ တူညီစွာ သတ်မှတ်ခြင်းသည် စာရင်းအင်းအရ ဟန်ချက်ညီမှုကိုသာ ပေးပြီး တင်းကျပ်သော ဟန်ချက်ညီမှုကို မပေးပါ။
 
-### အေးဂျင့်အခြေပြု pipeline မုဒ်
+### Agentic pipeline mode
 
-မော်ဒယ် အနည်းဆုံးနှစ်ခုပါဝင်သော `pipeline` ပေါင်းစပ်မှုတစ်ခုသည်
-`config.agenticOrchestration.enabled` ဖြင့် planner/executor လမ်းကြောင်းခွဲခြင်းကို ရွေးချယ်ဖွင့်နိုင်သည်။ ပထမ target သည် အစီအစဉ်ရေးဆွဲခြင်းနှင့် နောက်ဆုံးအဖြေများကို တာဝန်ယူပြီး၊
-ဒုတိယ target သည် client ၏ မူရင်းပုံစံ tool call များကို ထုတ်ပေးသည်။ OmniRoute သည် request protocol မှ tool-result ဆက်လက်လုပ်ဆောင်မှုများကို ရှာဖွေသိရှိပြီး၊ နောက်ထပ် tool အလှည့်တစ်ခု လိုအပ်ခြင်းရှိမရှိ planner ကို မေးမြန်းကာ executor သို့မဟုတ် planner ကို client ထံ ပြသမည့် နောက်ဆုံးအဆင့်အဖြစ် အခြေအနေအလိုက် သတ်မှတ်ပေးသည်။
+မော်ဒယ်အနည်းဆုံး နှစ်ခုပါဝင်သော `pipeline` combo တစ်ခုသည် `config.agenticOrchestration.enabled` ကို အသုံးပြု၍ planner/executor routing သို့ ရွေးချယ်ဝင်ရောက်နိုင်သည်။ ပထမဆုံး target သည် စီမံကိန်းရေးဆွဲခြင်းနှင့် နောက်ဆုံးအဖြေများကို တာဝန်ယူသည်။ ဒုတိယ target သည် client-native tool calls များကို ထုတ်ပေးသည်။ OmniRoute သည် request protocol မှ tool-result continuations များကို ထောက်လှမ်းပြီး နောက်ထပ် tool round တစ်ခု လိုအပ်မလို planner ကို မေးမြန်းကာ executor သို့မဟုတ် planner ကို client-facing နောက်ဆုံးအဆင့်အဖြစ် တက်ကြွစွာ သတ်မှတ်ပေးသည်။
 
-ဒုတိယ target နောက်တွင် ထည့်ထားသော မော်ဒယ်များသည် အစဉ်လိုက် executor အရန်များဖြစ်သည်။ မအောင်မြင်သော
-HTTP response သို့မဟုတ် သယ်ယူပို့ဆောင်ရေးဆိုင်ရာ exception တစ်ခု ဖြစ်ပေါ်ပါက၊ တူညီသော planner ဆုံးဖြတ်ချက်နှင့် မူရင်း tools များကို ဆက်လက်သယ်ဆောင်သော်လည်း ထို executor ၏ ကိုယ်ပိုင်အဆင့် prompt နှင့် ဖြေရှင်းသတ်မှတ်ထားသော connection ကို အသုံးပြု၍ နောက် executor သို့ ရွှေ့သည်။ ပထမဆုံး အောင်မြင်သော response ကို
-SSE streaming အပါအဝင် မပြောင်းလဲဘဲ ပြန်ပေးသည်။ အောင်မြင်သော stream စတင်ပြီးနောက် ဖြစ်ပေါ်သည့် မအောင်မြင်မှုများကို ဤနေရာတွင် ထပ်မံကြိုးစား၍ မရပါ။
-executor အားလုံး မအောင်မြင်ပါက နောက်ဆုံး မအောင်မြင်မှုကို ပြန်ပေးသည်။ Client မှ ပယ်ဖျက်လိုက်ပါက dispatch လုပ်ခြင်း ရပ်တန့်သည်။
+ရွေးချယ်နိုင်သော `config.agenticOrchestration.contextCompaction` သည် planner သို့မဟုတ် executor တစ်ခုချင်းစီကို မပို့ဆောင်မီ သီးခြား payload budget တစ်ခုကို အသုံးပြုသည်။ ၎င်းကို အောက်ပါအတိုင်း အတိအလင်း ဖွင့်ပေးပါ-
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+ဤသည်တို့မှာ operator မှ ရွေးချယ်ထားသော serialized JSON character budgets များဖြစ်ပြီး token context windows သို့မဟုတ် အာမခံချက်ရှိသော upstream limits များ မဟုတ်ပါ။ တိကျသော model ID များသည် default ကို ကျော်လွန်၍ အလုပ်လုပ်သည်။ သတ်မှတ်ချက် (threshold) ထက်ကျော်လွန်ပါက compaction သည် တူညီသော tool definitions များကို ဖယ်ရှားခြင်း၊ အရွယ်အစားကြီးမားသော tool evidence များကို digest ဖြင့် ဖြတ်တောက်ခြင်းနှင့် target ratio သို့ ရောက်ရှိစေရန်အတွက် အဟောင်းဆုံး history group များကို ဖယ်ရှားခြင်းတို့ကို လုပ်ဆောင်သည်။ ၎င်းသည် system/developer instructions များ၊ နောက်ဆုံးရ user request၊ parallel calls/results များအပါအဝင် နောက်ဆုံး tool round နှင့် Gemini ၏ ဦးဆောင် routing instruction တို့ကို ထိန်းသိမ်းထားသည်။ ထိပ်တန်းအဆင့် instructions များနှင့် tool settings များကို ထိန်းသိမ်းထားသည်။ Omission marker တစ်ခုသည် ဖယ်ရှားလိုက်သော history ကို မှတ်တမ်းတင်သည်။ ဤသည်မှာ semantic summary မဟုတ်ဘဲ deterministic trimming ဖြစ်သည်။ အကယ်၍ pinned context သည် budget ထက် ကျော်လွန်နေသေးပါက၊ request သည် မော်ဒယ်ကို မဆက်သွယ်မီ 413 ကို ပြန်ပေးသည်။ Compaction ကို ပိတ်ထားလျှင် သို့မဟုတ် သတ်မှတ်ချက်အောက်တွင် ရှိနေပါက request သည် မပြောင်းလဲဘဲ ဆက်လက်လုပ်ဆောင်သည်။
+
+ဒုတိယ target ပြီးနောက်ရှိ အပိုမော်ဒယ်များသည် executor backups များအဖြစ် စီစဉ်ထားသည်။ HTTP response ပျက်ကွက်ခြင်း သို့မဟုတ် transport exception ဖြစ်ပေါ်ပါက နောက်ထပ် executor သို့ ပြောင်းရွှေ့သွားမည်ဖြစ်ပြီး၊ တူညီသော planner ဆုံးဖြတ်ချက်နှင့် native tools များကို သယ်ဆောင်သွားသော်လည်း ထို executor ၏ ကိုယ်ပိုင် step prompt နှင့် resolved connection ကို အသုံးပြုသည်။ ပထမဆုံး အောင်မြင်သော response ကို SSE streaming အပါအဝင် မပြောင်းလဲဘဲ ပြန်ပေးသည်။ အောင်မြင်သော stream စတင်ပြီးနောက် ဖြစ်ပေါ်သော ပျက်ကွက်မှုများကို ဤနေရာတွင် ပြန်လည်ကြိုးစား၍ မရပါ။ အကယ်၍ executor အားလုံး ပျက်ကွက်ပါက နောက်ဆုံးဖြစ်ပေါ်သော ပျက်ကွက်မှုကို ပြန်ပေးသည်။ Client မှ ရပ်တန့်လိုက်ပါက dispatch ကို ရပ်တန့်သည်။
 
 ```json
 {
@@ -324,8 +333,7 @@ executor အားလုံး မအောင်မြင်ပါက နော
 }
 ```
 
-executor သည် response တစ်ခုတည်းတွင် သီးခြားလွတ်လပ်သော call များစွာကို ထုတ်ပေးနိုင်သည်။ အချင်းချင်း မှီခိုသော call များကို နောက်ပိုင်း client tool-result အလှည့်များတွင် ကိုင်တွယ်ပြီး planner က result တစ်ခုချင်းစီကို ပြန်လည်သုံးသပ်သည်။
-`maxToolRounds` ၏ မူလတန်ဖိုးသည် `8` ဖြစ်ပြီး `1`–`32` ကို လက်ခံသည်။ သတ်မှတ်ထားသော အရေအတွက်သို့ ရောက်သည်နှင့် planner သည် လက်ရှိရရှိနိုင်သော အကောင်းဆုံး နောက်ဆုံးအဖြေကို ထုတ်ပေးရမည်။ အတွင်းပိုင်း planner ဆုံးဖြတ်ချက်များကို buffer လုပ်ထားပြီး၊ ရွေးချယ်ထားသော client ထံ ပြသမည့် response သည် မူလ streaming ဦးစားပေးသတ်မှတ်ချက်ကို ဆက်လက်ထိန်းသိမ်းထားသည်။
+Executor သည် response တစ်ခုတည်းတွင် လွတ်လပ်သော call များစွာကို ထုတ်ပေးနိုင်သည်။ မှီခိုနေသော call များကို နောက်ပိုင်း client tool-result အလှည့်များတွင် ကိုင်တွယ်ပြီး planner က ရလဒ်တိုင်းကို ပြန်လည်စစ်ဆေးသည်။ `maxToolRounds` သည် default အားဖြင့် `8` ဖြစ်ပြီး `1`–`32` အထိ လက်ခံသည်။ ၎င်းသို့ ရောက်ရှိပါက planner သည် ရရှိနိုင်သော အကောင်းဆုံး နောက်ဆုံးအဖြေကို ထုတ်ပေးရမည်။ Internal planner ဆုံးဖြတ်ချက်များကို buffer လုပ်ထားပြီး၊ ရွေးချယ်ထားသော client-facing response သည် မူလ streaming preference ကို ထိန်းသိမ်းထားသည်။
 
 ### `round-robin` ၏ sticky batch နှင့် account ချဲ့ထွင်မှု
 

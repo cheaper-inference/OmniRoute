@@ -328,21 +328,25 @@ OmniRoute механизам за комбиновање подржава **20 �
 За строгу ротацију користите `round-robin`; једнаке тежине уз `weighted` дају статистичку — не и
 строгу — уравнотеженост.
 
-### Режим агентског проточног процеса
+### Režim agentnog pajplajna
 
-Комбинација `pipeline` са најмање два модела може да омогући усмеравање између планера и извршиоца помоћу
-`config.agenticOrchestration.enabled`. Прво одредиште је задужено за планирање и коначне одговоре;
-друго одредиште емитује позиве алата у изворном формату клијента. OmniRoute открива наставке
-са резултатима алата на основу протокола захтева, пита планер да ли је потребан још један круг алата
-и динамички одређује да ли ће извршилац или планер бити завршни
-корак окренут ка клијенту.
+`pipeline` kombinacija sa najmanje dva modela može da se opredeli za rutiranje planera/izvršioca pomoću `config.agenticOrchestration.enabled`. Prvi cilj je zadužen za planiranje i konačne odgovore; drugi cilj emituje pozive alata izvornih za klijenta. OmniRoute detektuje nastavke rezultata alata iz protokola zahteva, pita planera da li je potreban još jedan krug alata i dinamički čini ili izvršioca ili planera konačnim korakom okrenutim ka klijentu.
 
-Додатни модели после другог одредишта представљају уређене резервне извршиоце. Неуспешан
-HTTP одговор или транспортни изузетак доводи до преласка на следећег извршиоца, уз задржавање
-исте одлуке планера и изворних алата, али са сопственим упитом за корак тог извршиоца и
-разрешеном везом. Први успешан одговор враћа се непромењен, укључујући
-SSE стримовање; неуспеси након почетка успешног стрима овде се не могу поново покушати.
-Ако сви извршиоци не успеју, враћа се последњи неуспех. Клијентски прекиди заустављају отпремање.
+Opcioni `config.agenticOrchestration.contextCompaction` primenjuje poseban budžet korisnog tereta (payload) pre svakog slanja planera ili izvršioca. Omogućite ga eksplicitno:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Ovo su serijalizovani budžeti znakova u JSON formatu koje bira operater, a ne prozori konteksta tokena ili garantovana ograničenja uzvodno. Tačni ID-ovi modela nadjačavaju podrazumevanu vrednost. Iznad praga, kompakcija uklanja identične definicije alata, skraćuje prevelike dokaze alata pomoću sažetka (digest) i uklanja stare kompletne grupe istorije ka ciljnom odnosu. Zadržava sistemska/programerska uputstva, najnoviji zahtev korisnika, poslednji krug alata uključujući paralelne pozive/rezultate i vodeće instrukcije rutiranja Gemini-ja. Instrukcije najvišeg nivoa i podešavanja alata su sačuvani. Oznaka izostavljanja beleži uklonjenu istoriju; ovo je determinističko skraćivanje, a ne semantički sažetak. Ako fiksirani kontekst i dalje premašuje budžet, zahtev vraća 413 pre kontaktiranja modela. Sa onemogućenom kompakcijom ili ispod praga, zahtev prolazi nepromenjen.
+
+Dodatni modeli nakon drugog cilja su poređane rezervne kopije izvršioca. Neuspešan HTTP odgovor ili transportni izuzetak prelazi na sledećeg izvršioca, noseći istu odluku planera i izvorne alate, ali sopstveni prompt koraka tog izvršioca i razrešenu konekciju. Prvi uspešan odgovor se vraća nepromenjen, uključujući SSE striming; neuspesi nakon početka uspešnog strima se ovde ne mogu ponovo pokušati. Ako svi izvršioci ne uspeju, vraća se poslednji neuspeh. Prekidi od strane klijenta zaustavljaju slanje.
 
 ```json
 {
@@ -354,11 +358,7 @@ SSE стримовање; неуспеси након почетка успеш�
 }
 ```
 
-Извршилац може да емитује више независних позива у једном одговору. Зависни позиви се
-обрађују у каснијим клијентским корацима са резултатима алата, при чему планер прегледа сваки резултат.
-Подразумевана вредност за `maxToolRounds` је `8`, а прихвата вредности `1`–`32`; када се ограничење достигне, планер мора
-да произведе најбољи доступан коначни одговор. Интерне одлуке планера се баферују, док
-изабрани одговор окренут ка клијенту задржава првобитно подешавање стримовања.
+Izvršilac može emitovati više nezavisnih poziva u jednom odgovoru. Zavisni pozivi se obrađuju u kasnijim krugovima rezultata alata klijenta, pri čemu planer pregleda svaki rezultat. `maxToolRounds` je podrazumevano `8` i prihvata `1`–`32`; kada se dostigne, planer mora da proizvede najbolji dostupni konačni odgovor. Interne odluke planera se baferuju, dok izabrani odgovor okrenut ka klijentu čuva originalnu preferenciju strimovanja.
 
 ### Лепљиве серије и проширење налога за `round-robin`
 

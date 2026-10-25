@@ -328,20 +328,25 @@ Kombinačný mechanizmus OmniRoute podporuje **20 stratégií smerovania** (dekl
 Na striktnú rotáciu použite `round-robin`; rovnaké váhy pri stratégii `weighted` poskytujú štatistické — nie
 striktné — vyváženie.
 
-### Režim agentického pipeline
+### Režim agentnej pipeline
 
-Kombinácia `pipeline` s najmenej dvoma modelmi môže pomocou
-`config.agenticOrchestration.enabled` aktivovať smerovanie plánovač/vykonávateľ. Prvý cieľ zabezpečuje plánovanie a konečné odpovede;
-druhý cieľ generuje volania nástrojov v natívnom formáte klienta. OmniRoute rozpoznáva pokračovania
-s výsledkami nástrojov z protokolu požiadavky, zisťuje u plánovača, či je potrebné ďalšie kolo použitia nástrojov,
-a dynamicky určuje vykonávateľa alebo plánovača ako posledný krok komunikujúci s klientom.
+Kombinácia `pipeline` s aspoň dvoma modelmi sa môže rozhodnúť pre smerovanie plánovač/vykonávateľ (planner/executor) pomocou `config.agenticOrchestration.enabled`. Prvý cieľ má na starosti plánovanie a konečné odpovede; druhý cieľ emituje volania nástrojov natívne pre klienta. OmniRoute deteguje pokračovania výsledkov nástrojov z protokolu požiadaviek, pýta sa plánovača, či je potrebné ďalšie kolo nástrojov, a dynamicky určuje, či bude koncovým krokom pre klienta vykonávateľ alebo plánovač.
 
-Ďalšie modely za druhým cieľom slúžia ako zoradené záložné vykonávatele. Neúspešná
-odpoveď HTTP alebo výnimka prenosu spôsobí prechod na ďalšieho vykonávateľa, pričom sa zachová
-rovnaké rozhodnutie plánovača a natívne nástroje, ale použije sa vlastná výzva pre daný krok
-a vyriešené pripojenie príslušného vykonávateľa. Prvá úspešná odpoveď sa vráti nezmenená vrátane
-streamovania SSE; zlyhania po začatí úspešného streamu tu nemožno zopakovať.
-Ak zlyhajú všetci vykonávatelia, vráti sa posledné zlyhanie. Zrušenie zo strany klienta zastaví odosielanie.
+Voliteľné `config.agenticOrchestration.contextCompaction` aplikuje samostatný rozpočet pre payload pred každým odoslaním plánovača alebo vykonávateľa. Povoľte ho explicitne:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Ide o serializované rozpočty znakov JSON vybrané operátorom, nie o okná kontextu tokenov alebo garantované limity upstreamu. Presné ID modelov prepisujú predvolené nastavenie. Nad touto prahovou hodnotou komprimácia odstráni identické definície nástrojov, oreže nadrozmerné dôkazy nástrojov pomocou digestu a odstráni staré kompletné skupiny histórie smerom k cieľovému pomeru. Ponecháva systémové/vývojárske inštrukcie, najnovšiu požiadavku používateľa, posledné kolo nástrojov vrátane paralelných volaní/výsledkov a úvodnú smerovaciu inštrukciu Gemini. Inštrukcie najvyššej úrovne a nastavenia nástrojov sú zachované. Značka vynechania zaznamenáva odstránenú históriu; ide o deterministické orezávanie, nie o sémantické zhrnutie. Ak pripnutý kontext stále prekračuje rozpočet, požiadavka vráti 413 ešte pred kontaktovaním modelu. Ak je komprimácia vypnutá alebo pod prahovou hodnotou, požiadavka prechádza nezmenená.
+
+Ďalšie modely za druhým cieľom sú zoradené zálohy vykonávateľa. Zlyhaná HTTP odpoveď alebo výnimka prenosu posunie proces na ďalšieho vykonávateľa, pričom prenáša rovnaké rozhodnutie plánovača a natívne nástroje, ale s vlastným promptom kroku a vyriešeným pripojením daného vykonávateľa. Prvá úspešná odpoveď sa vráti nezmenená, vrátane SSE streamovania; zlyhania po začatí úspešného streamu tu nie je možné opakovať. Ak všetci vykonávatelia zlyhajú, vráti sa posledná chyba. Prerušenia zo strany klienta zastavia odosielanie.
 
 ```json
 {
@@ -353,11 +358,7 @@ Ak zlyhajú všetci vykonávatelia, vráti sa posledné zlyhanie. Zrušenie zo s
 }
 ```
 
-Vykonávateľ môže v jednej odpovedi vygenerovať viacero nezávislých volaní. Závislé volania sa
-spracujú v neskorších kolách klienta s výsledkami nástrojov, pričom plánovač skontroluje každý výsledok.
-Predvolená hodnota `maxToolRounds` je `8` a akceptovaný rozsah je `1`–`32`; po dosiahnutí limitu musí plánovač
-vytvoriť najlepšiu dostupnú konečnú odpoveď. Interné rozhodnutia plánovača sa ukladajú do vyrovnávacej pamäte, zatiaľ čo
-vybraná odpoveď určená klientovi zachováva pôvodné nastavenie streamovania.
+Vykonávateľ môže v jednej odpovedi emitovať viacero nezávislých volaní. Závislé volania sú spracované v neskorších kolách výsledkov nástrojov klienta, pričom plánovač kontroluje každý výsledok. `maxToolRounds` má predvolenú hodnotu `8` a akceptuje `1`–`32`; po dosiahnutí tohto limitu musí plánovač vyprodukovať najlepšiu dostupnú konečnú odpoveď. Interné rozhodnutia plánovača sú bufferované, zatiaľ čo vybraná odpoveď smerujúca ku klientovi zachováva pôvodnú preferenciu streamovania.
 
 ### Dávkové a účtové rozšírenie stratégie `round-robin`
 

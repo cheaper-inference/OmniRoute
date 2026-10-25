@@ -329,21 +329,25 @@ OmniRoutes kombinationsmotor stöder **20 routningsstrategier** (deklarerade i `
 För strikt rotation använder du `round-robin`; lika vikter med `weighted` ger statistisk — inte
 strikt — balans.
 
-### Agentiskt pipeline-läge
+### Agentiskt pipelineläge
 
-En `pipeline`-kombination med minst två modeller kan aktivera dirigering mellan planerare och exekverare med
-`config.agenticOrchestration.enabled`. Det första målet ansvarar för planering och slutsvar;
-det andra målet genererar klientanpassade verktygsanrop. OmniRoute identifierar fortsättningar
-med verktygsresultat från begäransprotokollet, frågar planeraren om ytterligare en verktygsomgång
-behövs och gör dynamiskt antingen exekveraren eller planeraren till det sista klientvända
-steget.
+En `pipeline`-kombination med minst två modeller kan välja att använda planner/executor-routing med `config.agenticOrchestration.enabled`. Det första målet ansvarar för planering och slutgiltiga svar; det andra målet avger klient-inbyggda verktygsanrop. OmniRoute detekterar fortsättningar av verktygsresultat från begäransprotokollet, frågar planeraren om ytterligare en verktygsrunda behövs, och gör dynamiskt antingen exekveraren eller planeraren till det klientvända slutsteget.
 
-Ytterligare modeller efter det andra målet ordnas som reservexekverare. Ett misslyckat
-HTTP-svar eller transportundantag leder vidare till nästa exekverare, med samma
-planerarbeslut och inbyggda verktyg men med den exekverarens egen stegprompt och
-matchade anslutning. Det första lyckade svaret returneras oförändrat, inklusive
-SSE-strömning; fel efter att en lyckad ström har startat kan inte provas igen här.
-Om alla exekverare misslyckas returneras det senaste felet. Avbrott från klienten stoppar vidarebefordran.
+Valfri `config.agenticOrchestration.contextCompaction` tillämpar en separat nyttolastbudget före varje planner- eller executor-utskick. Aktivera den explicit:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Dessa är serialiserade JSON-teckenbudgetar valda av operatören, inte token-kontextfönster eller garanterade uppströmsgränser. Exakta modell-ID:n åsidosätter standardvärdet. Över tröskelvärdet tar komprimeringen bort identiska verktygsdefinitioner, trimmar överdimensionerade verktygsbevis med ett sammandrag, och tar bort gamla kompletta historikgrupper mot målförhållandet. Den behåller system-/utvecklarinstruktioner, den senaste användarbegäran, den sista verktygsrundan inklusive parallella anrop/resultat, och Geminis ledande routinginstruktion. Instruktioner på toppnivå och verktygsinställningar bevaras. En utelämningsmarkör registrerar borttagen historik; detta är deterministisk trimning, inte en semantisk sammanfattning. Om den fixerade kontexten fortfarande överskrider budgeten returnerar begäran 413 innan modellen kontaktas. Med komprimering inaktiverad eller under tröskelvärdet passerar begäran igenom oförändrad.
+
+Ytterligare modeller efter det andra målet är ordnade executor-backuper. Ett misslyckat HTTP-svar eller transportundantag går vidare till nästa executor, med samma planeringsbeslut och inbyggda verktyg men med den executorns egna steg-prompt och lösta anslutning. Det första lyckade svaret returneras oförändrat, inklusive SSE-streaming; fel efter att en lyckad ström har startat kan inte göras om här. Om alla executors misslyckas returneras det sista felet. Klientavbrott stoppar utskicket.
 
 ```json
 {
@@ -355,11 +359,7 @@ Om alla exekverare misslyckas returneras det senaste felet. Avbrott från klient
 }
 ```
 
-Exekveraren kan generera flera oberoende anrop i ett och samma svar. Beroende anrop
-hanteras i senare klientomgångar med verktygsresultat, där planeraren granskar varje resultat.
-`maxToolRounds` har standardvärdet `8` och accepterar `1`–`32`; när gränsen har nåtts måste
-planeraren generera bästa tillgängliga slutsvar. Interna planerarbeslut buffras, medan
-det valda klientvända svaret bevarar den ursprungliga strömningsinställningen.
+Executorn kan avge flera oberoende anrop i ett svar. Beroende anrop hanteras i senare klient-verktygsresultat-turer, där planeraren granskar varje resultat. `maxToolRounds` har standardvärdet `8` och accepterar `1`–`32`; när detta nås måste planeraren producera det bästa tillgängliga slutgiltiga svaret. Interna planeringsbeslut buffras, medan det valda klientvända svaret bevarar den ursprungliga streaming-preferensen.
 
 ### Trög batchning och kontoutökning med `round-robin`
 

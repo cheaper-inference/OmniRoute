@@ -329,21 +329,25 @@ Mesin kombo OmniRoute mendukung **20 strategi perutean** (dideklarasikan dalam `
 Untuk rotasi ketat, gunakan `round-robin`; bobot yang sama pada `weighted` menghasilkan keseimbangan statistik — bukan
 ketat.
 
-### Mode pipeline agentik
+### Mode pipeline agen
 
-Kombinasi `pipeline` dengan setidaknya dua model dapat mengaktifkan perutean perencana/eksekutor melalui
-`config.agenticOrchestration.enabled`. Target pertama menangani perencanaan dan jawaban akhir;
-target kedua menghasilkan pemanggilan alat native klien. OmniRoute mendeteksi kelanjutan hasil alat
-dari protokol permintaan, menanyakan kepada perencana apakah putaran alat lain
-diperlukan, lalu secara dinamis menjadikan eksekutor atau perencana sebagai langkah akhir
-yang ditampilkan kepada klien.
+Kombo `pipeline` dengan setidaknya dua model dapat memilih perutean perencana/eksekutor dengan `config.agenticOrchestration.enabled`. Target pertama memiliki perencanaan dan jawaban akhir; target kedua mengeluarkan panggilan alat asli klien. OmniRoute mendeteksi kelanjutan hasil alat dari protokol permintaan, menanyakan kepada perencana apakah putaran alat lain diperlukan, dan secara dinamis menjadikan eksekutor atau perencana sebagai langkah akhir yang menghadap klien.
 
-Model tambahan setelah target kedua diurutkan sebagai cadangan eksekutor. Respons
-HTTP yang gagal atau pengecualian transportasi akan beralih ke eksekutor berikutnya, dengan membawa
-keputusan perencana dan alat native yang sama, tetapi menggunakan prompt langkah milik eksekutor tersebut dan
-koneksi yang telah di-resolve. Respons pertama yang berhasil dikembalikan tanpa perubahan, termasuk
-streaming SSE; kegagalan setelah stream yang berhasil dimulai tidak dapat dicoba ulang di sini.
-Jika semua eksekutor gagal, kegagalan terakhir akan dikembalikan. Pembatalan oleh klien menghentikan pengiriman.
+`config.agenticOrchestration.contextCompaction` opsional menerapkan anggaran payload terpisah sebelum setiap pengiriman perencana atau eksekutor. Aktifkan secara eksplisit:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Ini adalah anggaran karakter JSON berseri yang dipilih oleh operator, bukan jendela konteks token atau batas hulu yang dijamin. ID model yang tepat menggantikan default. Di atas ambang batas, pemadatan menghapus definisi alat yang identik, memangkas bukti alat yang terlalu besar dengan ringkasan, dan menghapus grup riwayat lengkap yang lama menuju rasio target. Ini mempertahankan instruksi sistem/pengembang, permintaan pengguna terbaru, putaran alat terakhir termasuk panggilan/hasil paralel, dan instruksi perutean utama Gemini. Instruksi tingkat atas dan pengaturan alat dipertahankan. Penanda penghilangan mencatat riwayat yang dihapus; ini adalah pemangkasan deterministik, bukan ringkasan semantik. Jika konteks yang disematkan masih melebihi anggaran, permintaan mengembalikan 413 sebelum menghubungi model. Dengan pemadatan dinonaktifkan atau di bawah ambang batas, permintaan diteruskan tanpa perubahan.
+
+Model tambahan setelah target kedua adalah cadangan eksekutor yang diurutkan. Respons HTTP atau pengecualian transport yang gagal akan berlanjut ke eksekutor berikutnya, membawa keputusan perencana dan alat asli yang sama tetapi dengan prompt langkah dan koneksi yang diselesaikan milik eksekutor tersebut. Respons sukses pertama dikembalikan tanpa perubahan, termasuk streaming SSE; kegagalan setelah streaming sukses dimulai tidak dapat dicoba ulang di sini. Jika semua eksekutor gagal, kegagalan terakhir dikembalikan. Pembatalan klien menghentikan pengiriman.
 
 ```json
 {
@@ -355,11 +359,7 @@ Jika semua eksekutor gagal, kegagalan terakhir akan dikembalikan. Pembatalan ole
 }
 ```
 
-Eksekutor dapat menghasilkan beberapa pemanggilan independen dalam satu respons. Pemanggilan yang saling bergantung
-ditangani pada giliran hasil alat klien berikutnya, dengan perencana meninjau setiap hasil.
-`maxToolRounds` memiliki nilai default `8` dan menerima `1`–`32`; setelah batas tercapai, perencana harus
-menghasilkan jawaban akhir terbaik yang tersedia. Keputusan internal perencana disimpan dalam buffer, sementara
-respons terpilih yang ditampilkan kepada klien mempertahankan preferensi streaming asli.
+Eksekutor dapat mengeluarkan beberapa panggilan independen dalam satu respons. Panggilan dependen ditangani dalam giliran hasil alat klien berikutnya, dengan perencana meninjau setiap hasil. `maxToolRounds` defaultnya adalah `8` dan menerima `1`–`32`; setelah tercapai, perencana harus menghasilkan jawaban akhir terbaik yang tersedia. Keputusan perencana internal di-buffer, sementara respons yang menghadap klien yang dipilih mempertahankan preferensi streaming asli.
 
 ### Batch sticky `round-robin` dan perluasan akun
 

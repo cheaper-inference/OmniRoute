@@ -308,9 +308,23 @@ Per una rotazione rigorosa usa `round-robin`; pesi uguali con `weighted` produco
 
 ### Modalità pipeline agentica
 
-Una combinazione `pipeline` con almeno due modelli può abilitare il routing pianificatore/esecutore tramite `config.agenticOrchestration.enabled`. Il primo target gestisce la pianificazione e le risposte finali; il secondo target emette chiamate agli strumenti native del client. OmniRoute rileva dal protocollo della richiesta le continuazioni con i risultati degli strumenti, chiede al pianificatore se sia necessario un altro ciclo di utilizzo degli strumenti e sceglie dinamicamente l'esecutore o il pianificatore come passaggio finale rivolto al client.
+Una combo `pipeline` con almeno due modelli può optare per il routing planner/executor con `config.agenticOrchestration.enabled`. Il primo target gestisce la pianificazione e le risposte finali; il secondo target emette chiamate a strumenti native del client. OmniRoute rileva le continuazioni dei risultati degli strumenti dal protocollo di richiesta, chiede al planner se è necessario un altro round di strumenti e rende dinamicamente l'executor o il planner il passaggio finale rivolto al client.
 
-Gli eventuali modelli aggiuntivi dopo il secondo target vengono ordinati come esecutori di riserva. Una risposta HTTP non riuscita o un'eccezione di trasporto fa passare all'esecutore successivo, mantenendo la stessa decisione del pianificatore e gli strumenti nativi, ma usando il prompt specifico del passaggio e la connessione risolta di quell'esecutore. La prima risposta riuscita viene restituita senza modifiche, incluso lo streaming SSE; gli errori che si verificano dopo l'avvio di uno stream riuscito non possono essere riprovati qui. Se tutti gli esecutori falliscono, viene restituito l'ultimo errore. Le interruzioni da parte del client arrestano l'invio.
+L'opzione `config.agenticOrchestration.contextCompaction` applica un budget di payload separato prima di ogni invio al planner o all'executor. Abilitarla esplicitamente:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Questi sono budget di caratteri JSON serializzati selezionati dall'operatore, non finestre di contesto dei token o limiti upstream garantiti. Gli ID modello esatti sovrascrivono il valore predefinito. Al di sopra della soglia, la compattazione rimuove le definizioni di strumenti identiche, riduce le prove degli strumenti sovradimensionate con un digest e rimuove i vecchi gruppi di cronologia completi verso il rapporto target. Mantiene le istruzioni di sistema/sviluppatore, l'ultima richiesta dell'utente, l'ultimo round di strumenti inclusi chiamate/risultati paralleli e l'istruzione di routing iniziale di Gemini. Le istruzioni di primo livello e le impostazioni degli strumenti vengono preservate. Un marcatore di omissione registra la cronologia rimossa; si tratta di un troncamento deterministico, non di un riepilogo semantico. Se il contesto bloccato supera ancora il budget, la richiesta restituisce 413 prima di contattare il modello. Con la compattazione disabilitata o al di sotto della soglia, la richiesta passa invariata.
+
+I modelli aggiuntivi dopo il secondo target sono backup dell'executor ordinati. Una risposta HTTP fallita o un'eccezione di trasporto avanza al successivo executor, mantenendo la stessa decisione del planner e gli strumenti nativi, ma con il prompt di passaggio e la connessione risolta di quell'executor. La prima risposta riuscita viene restituita invariata, incluso lo streaming SSE; i fallimenti dopo l'avvio di uno stream riuscito non possono essere riprovati qui. Se tutti gli executor falliscono, viene restituito l'ultimo errore. Le interruzioni del client arrestano l'invio.
 
 ```json
 {
@@ -322,7 +336,7 @@ Gli eventuali modelli aggiuntivi dopo il secondo target vengono ordinati come es
 }
 ```
 
-L'esecutore può emettere più chiamate indipendenti in un'unica risposta. Le chiamate dipendenti vengono gestite nei successivi turni del client contenenti i risultati degli strumenti, con il pianificatore che esamina ogni risultato. Il valore predefinito di `maxToolRounds` è `8` e sono accettati valori da `1` a `32`; una volta raggiunto il limite, il pianificatore deve produrre la migliore risposta finale disponibile. Le decisioni interne del pianificatore vengono memorizzate nel buffer, mentre la risposta selezionata rivolta al client mantiene la preferenza di streaming originale.
+L'executor può emettere più chiamate indipendenti in una singola risposta. Le chiamate dipendenti vengono gestite nei turni successivi di risultato dello strumento del client, con il planner che revisiona ogni risultato. `maxToolRounds` ha come valore predefinito `8` e accetta valori da `1` a `32`; una volta raggiunto, il planner deve produrre la migliore risposta finale disponibile. Le decisioni interne del planner vengono bufferizzate, mentre la risposta selezionata rivolta al client preserva la preferenza di streaming originale.
 
 ### Batch persistente `round-robin` ed espansione degli account
 

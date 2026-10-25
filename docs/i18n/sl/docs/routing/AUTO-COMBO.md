@@ -325,20 +325,25 @@ Mehanizem kombinacij OmniRoute podpira **20 strategij usmerjanja** (deklariranih
 
 Za strogo rotacijo uporabite `round-robin`; enake uteži pri `weighted` zagotavljajo statistično — ne pa strogo — uravnoteženost.
 
-### Način agentskega cevovoda
+### Način agentnega cevovoda
 
-Kombinacija `pipeline` z vsaj dvema modeloma lahko vključi usmerjanje načrtovalca/izvajalca z možnostjo
-`config.agenticOrchestration.enabled`. Prvi cilj je odgovoren za načrtovanje in končne odgovore;
-drugi cilj oddaja klice orodij v izvorni obliki odjemalca. OmniRoute zazna nadaljevanja z rezultati
-orodij iz protokola zahteve, vpraša načrtovalca, ali je potreben še en krog uporabe orodij,
-in dinamično določi bodisi izvajalca bodisi načrtovalca kot zadnji korak, prikazan odjemalcu.
+Kombinacija `pipeline` z vsaj dvema modeloma se lahko odloči za usmerjanje načrtovalec/izvajalec (planner/executor) s `config.agenticOrchestration.enabled`. Prvi cilj upravlja načrtovanje in končne odgovore; drugi cilj oddaja orodne klice, izvorne za odjemalca. OmniRoute zazna nadaljevanja rezultatov orodij iz protokola zahteve, vpraša načrtovalca, ali je potreben še en krog orodij, in dinamično določi, ali bo izvajalec ali načrtovalec končni korak za odjemalca.
 
-Dodatni modeli za drugim ciljem so razvrščeni kot rezervni izvajalci. Neuspešen
-odziv HTTP ali izjema pri prenosu povzroči prehod na naslednjega izvajalca, pri čemer se
-ohranijo ista odločitev načrtovalca in izvorna orodja, uporabijo pa se lasten poziv za korak
-tega izvajalca in razrešena povezava. Prvi uspešen odziv je vrnjen nespremenjen, vključno
-s pretakanjem SSE; napak po začetku uspešnega pretakanja tukaj ni mogoče znova poskusiti.
-Če odpovejo vsi izvajalci, je vrnjena zadnja napaka. Prekinitve odjemalca ustavijo razpošiljanje.
+Izbirni `config.agenticOrchestration.contextCompaction` uporabi ločen proračun za payload pred vsakim pošiljanjem načrtovalca ali izvajalca. Omogočite ga eksplicitno:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+To so proračuni znakov v serializiranem JSON, ki jih izbere operater, ne pa okna konteksta žetonov ali zajamčene zgornje meje. Točni ID-ji modelov preglasijo privzeto vrednost. Nad pragom zgoščevanje (compaction) odstrani identične definicije orodij, obreže prevelike dokaze orodij s povzetkom (digest) in odstrani stare skupine celotne zgodovine proti ciljnemu razmerju. Ohrani sistemska/razvijalska navodila, zadnjo uporabniško zahtevo, zadnji krog orodij, vključno z vzporednimi klici/rezultati, in vodilno usmerjevalno navodilo Gemini. Navodila na najvišji ravni in nastavitve orodij so ohranjeni. Oznaka opustitve zabeleži odstranjeno zgodovino; to je deterministično obrezovanje, ne semantični povzetek. Če pripeti kontekst še vedno presega proračun, zahteva vrne 413 pred stikom z modelom. Če je zgoščevanje onemogočeno ali pod pragom, zahteva preide nespremenjena.
+
+Dodatni modeli za drugim ciljem so urejene varnostne kopije izvajalca. Neuspešen odziv HTTP ali transportna izjema napreduje do naslednjega izvajalca, pri čemer nosi isto odločitev načrtovalca in izvorna orodja, vendar lasten poziv koraka (step prompt) in razrešeno povezavo tega izvajalca. Prvi uspešen odziv se vrne nespremenjen, vključno s pretakanjem SSE; napak po začetku uspešnega pretakanja tukaj ni mogoče ponovno poskusiti. Če vsi izvajalci odpovejo, se vrne zadnja napaka. Prekinitve s strani odjemalca ustavijo pošiljanje.
 
 ```json
 {
@@ -350,11 +355,7 @@ s pretakanjem SSE; napak po začetku uspešnega pretakanja tukaj ni mogoče znov
 }
 ```
 
-Izvajalec lahko v enem odzivu odda več neodvisnih klicev. Odvisni klici so
-obravnavani v poznejših odjemalčevih korakih z rezultati orodij, načrtovalec pa pregleda vsak rezultat.
-`maxToolRounds` ima privzeto vrednost `8` in sprejema vrednosti `1`–`32`; ko je meja dosežena, mora
-načrtovalec pripraviti najboljši razpoložljivi končni odgovor. Notranje odločitve načrtovalca se medpomnijo,
-izbrani odziv, prikazan odjemalcu, pa ohrani prvotno nastavitev pretakanja.
+Izvajalec lahko v enem odzivu odda več neodvisnih klicev. Odvisni klici se obravnavajo v poznejših obratih rezultatov orodij odjemalca, pri čemer načrtovalec pregleda vsak rezultat. `maxToolRounds` je privzeto `8` in sprejema `1`–`32`; ko je dosežen, mora načrtovalec pripraviti najboljši možni končni odgovor. Notranje odločitve načrtovalca so medpomnjene, medtem ko izbrani odziv, obrnjen proti odjemalcu, ohranja prvotno nastavitev pretakanja.
 
 ### Lepljivi paketi `round-robin` in razširitev računov
 

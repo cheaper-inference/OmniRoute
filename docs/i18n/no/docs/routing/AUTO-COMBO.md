@@ -329,22 +329,25 @@ OmniRoutes kombinasjonsmotor støtter **20 rutingstrategier** (deklarert i `src/
 For streng rotasjon bruker du `round-robin`; like vekter med `weighted` gir statistisk — ikke
 streng — balansering.
 
-### Agentbasert pipeline-modus
+### Agentisk pipeline-modus
 
-En `pipeline`-kombinasjon med minst to modeller kan aktivere planlegger-/utfører-ruting med
-`config.agenticOrchestration.enabled`. Det første målet håndterer planlegging og endelige svar;
-det andre målet genererer verktøykall i klientens opprinnelige format. OmniRoute oppdager
-fortsettelser med verktøyresultater fra forespørselsprotokollen, spør planleggeren om det kreves
-en ny verktøyrunde, og gjør dynamisk enten utføreren eller planleggeren til det siste
-klientvendte trinnet.
+En `pipeline`-kombinasjon med minst to modeller kan velge å bruke planlegger/utfører-ruting med `config.agenticOrchestration.enabled`. Det første målet står for planlegging og endelige svar; det andre målet sender ut klient-native verktøykall. OmniRoute oppdager fortsettelser av verktøyresultater fra forespørsels-protokollen, spør planleggeren om en ny verktøyrunde er nødvendig, og gjør dynamisk enten utføreren eller planleggeren til det klientvendte siste steget.
 
-Ytterligere modeller etter det andre målet er ordnede reserveutførere. Et mislykket
-HTTP-svar eller et transportunntak går videre til neste utfører og tar med seg den
-samme planleggerbeslutningen og de opprinnelige verktøyene, men bruker utførerens egen
-trinninstruksjon og løste tilkobling. Det første vellykkede svaret returneres uendret,
-inkludert SSE-strømming; feil etter at en vellykket strøm har startet, kan ikke forsøkes
-på nytt her. Hvis alle utførere mislykkes, returneres den siste feilen. Avbrudd fra
-klienten stopper utsendingen.
+Valgfri `config.agenticOrchestration.contextCompaction` bruker et separat nyttelastbudsjett før hver utsending til planlegger eller utfører. Aktiver det eksplisitt:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Dette er serialiserte JSON-tegnbudsjetter valgt av operatøren, ikke token-kontekstvinduer eller garanterte oppstrømsbegrensninger. Eksakte modell-ID-er overstyrer standardverdien. Over terskelen fjerner komprimering identiske verktøydefinisjoner, trimmer for store verktøybevis med et sammendrag, og fjerner gamle komplette historikkgrupper mot målforholdet. Den beholder system-/utviklerinstruksjoner, den nyeste brukerforespørselen, den siste verktøyrunden inkludert parallelle kall/resultater, og Geminis ledende rutinginstruksjon. Instruksjoner på toppnivå og verktøyinnstillinger bevares. En utelatelsesmarkør registrerer fjernet historikk; dette er deterministisk trimming, ikke et semantisk sammendrag. Hvis den låste konteksten fortsatt overskrider budsjettet, returnerer forespørselen 413 før den kontakter modellen. Med komprimering deaktivert eller under terskelen går forespørselen gjennom uendret.
+
+Ytterligere modeller etter det andre målet er ordnede utfører-reserver. Et mislykket HTTP-svar eller transportunntak går videre til neste utfører, med samme planleggerbeslutning og native verktøy, men med den utførerens egen steg-prompt og løste tilkobling. Det første vellykkede svaret returneres uendret, inkludert SSE-strømming; feil etter at en vellykket strøm har startet kan ikke prøves på nytt her. Hvis alle utførere feiler, returneres den siste feilen. Klientavbrudd stopper utsendingen.
 
 ```json
 {
@@ -356,11 +359,7 @@ klienten stopper utsendingen.
 }
 ```
 
-Utføreren kan generere flere uavhengige kall i ett svar. Avhengige kall håndteres i
-senere klientrunder med verktøyresultater, der planleggeren gjennomgår hvert resultat.
-`maxToolRounds` er som standard `8` og godtar `1`–`32`; når grensen er nådd, må planleggeren
-produsere det best mulige endelige svaret. Interne planleggerbeslutninger mellomlagres, mens
-det valgte klientvendte svaret beholder den opprinnelige strømmepreferansen.
+Utføreren kan sende ut flere uavhengige kall i ett svar. Avhengige kall håndteres i senere klient-verktøyresultat-runder, der planleggeren gjennomgår hvert resultat. `maxToolRounds` har standardverdi `8` og aksepterer `1`–`32`; når denne er nådd, må planleggeren produsere det beste tilgjengelige endelige svaret. Interne planleggerbeslutninger bufres, mens det valgte klientvendte svaret bevarer den opprinnelige strømmepreferansen.
 
 ### `round-robin`-gruppering og kontoutvidelse med fastholding
 

@@ -308,11 +308,25 @@ OmniRoute kombināciju dzinējs atbalsta **20 maršrutēšanas stratēģijas** (
 
 Stingrai rotācijai izmantojiet `round-robin`; vienādi svari ar `weighted` nodrošina statistisku, nevis stingru līdzsvaru.
 
-### Aģentiskā konveijera režīms
+### Aģentu konveijera (pipeline) režīms
 
-`pipeline` kombinācija ar vismaz diviem modeļiem var iespējot plānotāja/izpildītāja maršrutēšanu, izmantojot `config.agenticOrchestration.enabled`. Pirmais mērķis veic plānošanu un sagatavo galīgās atbildes; otrais mērķis ģenerē klienta protokolam atbilstošus rīku izsaukumus. OmniRoute nosaka rīku rezultātu turpinājumus pēc pieprasījuma protokola, vaicā plānotājam, vai nepieciešama vēl viena rīku izpildes kārta, un dinamiski izvēlas izpildītāju vai plānotāju par klientam paredzēto pēdējo posmu.
+`pipeline` kombinācija ar vismaz diviem modeļiem var izvēlēties plānotāja/izpildītāja maršrutēšanu, izmantojot `config.agenticOrchestration.enabled`. Pirmais mērķis veic plānošanu un sniedz galīgās atbildes; otrais mērķis izsauc klienta vietējos rīkus (tool calls). OmniRoute nosaka rīka rezultātu turpinājumus no pieprasījuma protokola, jautā plānotājam, vai ir nepieciešams vēl viens rīka izsaukuma cikls, un dinamiski padara vai nu izpildītāju, vai plānotāju par klientam redzamo pēdējo soli.
 
-Papildu modeļi pēc otrā mērķa tiek sakārtoti kā izpildītāja rezerves varianti. Neveiksmīgas HTTP atbildes vai transporta izņēmuma gadījumā tiek izmantots nākamais izpildītājs, saglabājot to pašu plānotāja lēmumu un sākotnējos rīkus, taču izmantojot šī izpildītāja posma uzvedni un atrisināto savienojumu. Pirmā veiksmīgā atbilde tiek atgriezta bez izmaiņām, tostarp saglabājot SSE straumēšanu; kļūmes pēc veiksmīgas straumes sākšanas šeit nevar mēģināt apstrādāt atkārtoti. Ja visi izpildītāji cieš neveiksmi, tiek atgriezta pēdējā kļūme. Klienta atcelšana aptur nosūtīšanu.
+Izvēles `config.agenticOrchestration.contextCompaction` piemēro atsevišķu datu apjoma (payload) budžetu pirms katras plānotāja vai izpildītāja nosūtīšanas. Iespējojiet to nepārprotami:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Šie ir operatora izvēlēti serializēti JSON rakstzīmju budžeti, nevis marķieru (token) konteksta logi vai garantēti augšupējie limiti. Precīzi modeļu ID ignorē noklusējuma iestatījumus. Virs sliekšņa kompaktēšana noņem identiskus rīku definējumus, apgriež pārāk lielus rīku pierādījumus ar kopsavilkumu (digest) un noņem vecas pilnīgas vēstures grupas, lai sasniegtu mērķa attiecību. Tā saglabā sistēmas/izstrādātāja instrukcijas, jaunāko lietotāja pieprasījumu, pēdējo rīku ciklu, ieskaitot paralēlos izsaukumus/rezultātus, un Gemini vadošo maršrutēšanas instrukciju. Augstākā līmeņa instrukcijas un rīku iestatījumi tiek saglabāti. Izlaišanas marķieris reģistrē noņemto vēsturi; šī ir deterministiska apgriešana, nevis semantisks kopsavilkums. Ja piespraustais (pinned) konteksts joprojām pārsniedz budžetu, pieprasījums atgriež 413 pirms sazināšanās ar modeli. Ja kompaktēšana ir atspējota vai ja tas ir zem sliekšņa, pieprasījums tiek izlaists cauri nemainīts.
+
+Papildu modeļi pēc otrā mērķa ir sakārtoti izpildītāja dublējumi. Neveiksmīga HTTP atbilde vai transporta izņēmums pāriet uz nākamo izpildītāju, pārnesot to pašu plānotāja lēmumu un vietējos rīkus, bet izmantojot šī izpildītāja paša soļa uzvedni (prompt) un atrisināto savienojumu. Pirmā veiksmīgā atbilde tiek atgriezta nemainīta, ieskaitot SSE straumēšanu; kļūdas pēc veiksmīgas straumes sākuma šeit nevar tikt mēģinātas atkārtoti. Ja visi izpildītāji neizdodas, tiek atgriezta pēdējā kļūda. Klienta pārtraukumi aptur nosūtīšanu.
 
 ```json
 {
@@ -324,7 +338,7 @@ Papildu modeļi pēc otrā mērķa tiek sakārtoti kā izpildītāja rezerves va
 }
 ```
 
-Izpildītājs vienā atbildē var ģenerēt vairākus neatkarīgus izsaukumus. Atkarīgie izsaukumi tiek apstrādāti turpmākajos klienta rīku rezultātu soļos, plānotājam pārskatot katru rezultātu. `maxToolRounds` noklusējuma vērtība ir `8`, un tas pieņem vērtības no `1` līdz `32`; sasniedzot šo ierobežojumu, plānotājam jāizveido labākā pieejamā galīgā atbilde. Plānotāja iekšējie lēmumi tiek buferēti, savukārt atlasītajā klientam paredzētajā atbildē tiek saglabāta sākotnējā straumēšanas preference.
+Izpildītājs vienā atbildē var izsūtīt vairākus neatkarīgus izsaukumus. Atkarīgie izsaukumi tiek apstrādāti vēlākos klienta rīka rezultātu pagriezienos, plānotājam pārskatot katru rezultātu. `maxToolRounds` noklusējuma vērtība ir `8`, un tas pieņem vērtības no `1` līdz `32`; kad šis limits ir sasniegts, plānotājam ir jāsniedz labākā pieejamā galīgā atbilde. Iekšējie plānotāja lēmumi tiek buferēti, savukārt izvēlētā klientam redzamā atbilde saglabā sākotnējo straumēšanas preferenci.
 
 ### `round-robin` piesaistītā pakešu apstrāde un kontu izvēršana
 

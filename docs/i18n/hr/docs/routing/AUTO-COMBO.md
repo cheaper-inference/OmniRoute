@@ -331,20 +331,25 @@ OmniRouteov kombinirani mehanizam podržava **20 strategija usmjeravanja** (dekl
 Za strogu rotaciju koristite `round-robin`; jednaki ponderi uz `weighted` daju statističku — ne
 strogu — ravnotežu.
 
-### Način rada agentnog cjevovoda
+### Način rada agentic pipeline
 
-Kombinacija `pipeline` s najmanje dva modela može uključiti usmjeravanje planera/izvršitelja putem
-`config.agenticOrchestration.enabled`. Prvi cilj zadužen je za planiranje i konačne odgovore;
-drugi cilj generira pozive alata u izvornom formatu klijenta. OmniRoute otkriva nastavke
-s rezultatima alata iz protokola zahtjeva, pita planer je li potreban još jedan krug alata
-te dinamički određuje hoće li završni korak okrenut klijentu izvršiti izvršitelj ili planer.
+`pipeline` kombinacija s najmanje dva modela može se odlučiti za usmjeravanje planera/izvršitelja (planner/executor) pomoću `config.agenticOrchestration.enabled`. Prvi cilj (target) upravlja planiranjem i konačnim odgovorima; drugi cilj emitira pozive alata izvornih za klijenta (client-native tool calls). OmniRoute detektira nastavke rezultata alata iz protokola zahtjeva, pita planer je li potreban još jedan krug alata i dinamički čini ili izvršitelja ili planer konačnim korakom okrenutim prema klijentu.
 
-Dodatni modeli nakon drugog cilja predstavljaju redom poredane pričuvne izvršitelje. Neuspješan
-HTTP odgovor ili iznimka pri prijenosu prebacuje obradu na sljedećeg izvršitelja, uz zadržavanje
-iste odluke planera i izvornih alata, ali uz korištenje vlastitog upita za korak tog izvršitelja i
-razriješene veze. Prvi uspješan odgovor vraća se neizmijenjen, uključujući
-SSE strujanje; neuspjesi nakon početka uspješnog strujanja ovdje se ne mogu ponovno pokušati.
-Ako svi izvršitelji ne uspiju, vraća se posljednja pogreška. Klijentski prekidi zaustavljaju slanje.
+Opcionalni `config.agenticOrchestration.contextCompaction` primjenjuje zaseban proračun korisnog tereta (payload budget) prije svakog slanja planera ili izvršitelja. Omogućite ga eksplicitno:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Ovo su serijalizirani JSON proračuni znakova koje je odabrao operater, a ne prozori konteksta tokena ili zajamčena uzvodna ograničenja. Točni ID-ovi modela nadjačavaju zadane postavke. Iznad praga, sažimanje (compaction) uklanja identične definicije alata, skraćuje prevelike dokaze alata sažetkom (digest) i uklanja stare potpune grupe povijesti prema ciljanom omjeru. Zadržava upute sustava/programera, najnoviji korisnički zahtjev, posljednji krug alata uključujući paralelne pozive/rezultate i Gemini-jevu vodeću uputu za usmjeravanje. Upute na najvišoj razini i postavke alata su sačuvane. Oznaka izostavljanja bilježi uklonjenu povijest; ovo je determinističko skraćivanje, a ne semantički sažetak. Ako prikvačeni kontekst i dalje premašuje proračun, zahtjev vraća 413 prije kontaktiranja modela. S onemogućenim sažimanjem ili ispod praga, zahtjev prolazi nepromijenjen.
+
+Dodatni modeli nakon drugog cilja su poredane sigurnosne kopije izvršitelja. Neuspjeli HTTP odgovor ili iznimka prijenosa prelazi na sljedećeg izvršitelja, noseći istu odluku planera i izvorne alate, ali vlastiti upit koraka (step prompt) i razriješenu vezu tog izvršitelja. Prvi uspješan odgovor vraća se nepromijenjen, uključujući SSE streaming; neuspjesi nakon početka uspješnog streama ne mogu se ovdje ponovno pokušati. Ako svi izvršitelji ne uspiju, vraća se posljednji neuspjeh. Prekidi klijenta zaustavljaju slanje.
 
 ```json
 {
@@ -356,11 +361,7 @@ Ako svi izvršitelji ne uspiju, vraća se posljednja pogreška. Klijentski preki
 }
 ```
 
-Izvršitelj može generirati više neovisnih poziva u jednom odgovoru. Ovisni pozivi
-obrađuju se u kasnijim klijentskim krugovima s rezultatima alata, pri čemu planer pregledava svaki rezultat.
-Zadana vrijednost za `maxToolRounds` jest `8`, a prihvaćene su vrijednosti `1`–`32`; nakon dosezanja te vrijednosti planer mora
-generirati najbolji dostupan konačni odgovor. Interne odluke planera pohranjuju se u međuspremnik, dok
-odabrani odgovor okrenut klijentu zadržava izvornu postavku strujanja.
+Izvršitelj može emitirati više neovisnih poziva u jednom odgovoru. Ovisni pozivi obrađuju se u kasnijim krugovima rezultata alata klijenta, pri čemu planer pregledava svaki rezultat. `maxToolRounds` je zadano na `8` i prihvaća `1`–`32`; nakon što se dosegne, planer mora proizvesti najbolji dostupni konačni odgovor. Interne odluke planera su međuspremljene (buffered), dok odabrani odgovor okrenut prema klijentu zadržava izvornu preferenciju streaminga.
 
 ### Ljepljiva serija i proširenje računa za `round-robin`
 

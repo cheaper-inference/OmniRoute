@@ -329,11 +329,25 @@ A `weighted` **kérésenkénti arányos véletlenszerű sorsolást** végez
 
 Szigorú rotációhoz használja a `round-robin` stratégiát; a `weighted` stratégia azonos súlyokkal statisztikai — nem pedig szigorú — kiegyensúlyozást biztosít.
 
-### Ügynökalapú pipeline mód
+### Agentic pipeline mód
 
-Egy legalább két modellt tartalmazó `pipeline` kombináció a `config.agenticOrchestration.enabled` beállítással használhat tervező/végrehajtó alapú útválasztást. Az első cél felel a tervezésért és a végső válaszokért; a második cél a kliens natív eszközhívásait bocsátja ki. Az OmniRoute a kérés protokollja alapján észleli az eszközeredményeket folytató kéréseket, megkérdezi a tervezőt, hogy szükség van-e újabb eszközkörre, majd dinamikusan vagy a végrehajtót, vagy a tervezőt teszi meg a kliens számára látható utolsó lépésnek.
+A legalább két modellt tartalmazó `pipeline` kombinációk választhatják a tervező/végrehajtó (planner/executor) útválasztást a `config.agenticOrchestration.enabled` beállítással. Az első célpont felelős a tervezésért és a végső válaszokért; a második célpont kliensoldali natív eszközhívásokat bocsát ki. Az OmniRoute észleli az eszközeredmény-folytatásokat a kérés protokolljából, megkérdezi a tervezőt, hogy szükség van-e újabb eszközhasználati körre, és dinamikusan teszi a végrehajtót vagy a tervezőt az ügyfél felé néző végső lépéssé.
 
-A második cél utáni további modellek sorrendbe állított tartalék végrehajtóként szolgálnak. Sikertelen HTTP-válasz vagy átviteli kivétel esetén a rendszer a következő végrehajtóra lép, megtartva ugyanazt a tervezői döntést és ugyanazokat a natív eszközöket, de az adott végrehajtó saját lépéspromptját és feloldott kapcsolatát használva. Az első sikeres választ változtatás nélkül adja vissza, beleértve az SSE-streamelést is; a sikeres stream elindulása után bekövetkező hibák itt nem próbálhatók újra. Ha minden végrehajtó sikertelen, az utolsó hiba kerül visszaadásra. A kliens általi megszakítás leállítja a továbbítást.
+Az opcionális `config.agenticOrchestration.contextCompaction` külön hasznos teher (payload) keretet alkalmaz minden tervező vagy végrehajtó feladatkiosztás előtt. Engedélyezze kifejezetten:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Ezek az operátor által kiválasztott szerializált JSON karakterkeretek, nem token kontextusablakok vagy garantált upstream korlátok. A pontos modellazonosítók felülbírálják az alapértelmezettet. A küszöbérték felett a tömörítés eltávolítja az azonos eszközdefiníciókat, kivonattal (digest) rövidíti a túlméretezett eszközbizonyítékokat, és eltávolítja a régi teljes előzménycsoportokat a cél arány elérése érdekében. Megőrzi a rendszer/fejlesztői utasításokat, a legutóbbi felhasználói kérést, az utolsó eszközhasználati kört a párhuzamos hívásokkal/eredményekkel együtt, valamint a Gemini vezető útválasztási utasítását. A legfelső szintű utasítások és az eszközbeállítások megmaradnak. Egy kihagyásjelző rögzíti az eltávolított előzményeket; ez determinisztikus rövidítés, nem szemantikai összefoglaló. Ha a rögzített kontextus továbbra is meghaladja a keretet, a kérés 413-as hibát ad vissza, mielőtt kapcsolatba lépne a modellel. Kikapcsolt tömörítés vagy a küszöbérték alatti érték esetén a kérés változatlanul halad tovább.
+
+A második célpont utáni további modellek sorrendbe állított végrehajtó tartalékok. Egy sikertelen HTTP-válasz vagy szállítási kivétel a következő végrehajtóra léptet tovább, ugyanazt a tervezői döntést és natív eszközöket továbbítva, de az adott végrehajtó saját lépés-promptjával és feloldott kapcsolatával. Az első sikeres válasz változatlanul kerül visszaadásra, beleértve az SSE streamelést is; a sikeres stream megkezdése utáni hibák itt nem próbálhatók újra. Ha az összes végrehajtó sikertelen, az utolsó hiba kerül visszaadásra. A kliensoldali megszakítások leállítják a feladatkiosztást.
 
 ```json
 {
@@ -345,7 +359,7 @@ A második cél utáni további modellek sorrendbe állított tartalék végreha
 }
 ```
 
-A végrehajtó egyetlen válaszban több, egymástól független hívást is kibocsáthat. A függő hívások kezelése a kliens későbbi eszközeredmény-köreiben történik, miközben a tervező minden eredményt felülvizsgál. A `maxToolRounds` alapértelmezett értéke `8`, és `1`–`32` közötti értékeket fogad el; a határ elérésekor a tervezőnek az elérhető legjobb végső választ kell előállítania. A belső tervezői döntések pufferelve vannak, míg a kliens számára kiválasztott válasz megőrzi az eredeti streamelési beállítást.
+A végrehajtó több független hívást is kibocsáthat egy válaszon belül. A függő hívások kezelése későbbi kliens eszközeredmény-körökben történik, ahol a tervező minden eredményt felülvizsgál. A `maxToolRounds` alapértelmezett értéke `8`, és `1`–`32` közötti értéket fogad el; az elérésekor a tervezőnek elő kell állítania a rendelkezésre álló legjobb végső választ. A belső tervezői döntések pufferelve vannak, míg a kiválasztott, kliens felé irányuló válasz megőrzi az eredeti streamelési preferenciát.
 
 ### A `round-robin` rögzített kötegelése és a fiókok kibővítése
 

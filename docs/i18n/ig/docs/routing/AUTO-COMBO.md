@@ -327,20 +327,25 @@ Injin ngwakọta OmniRoute na-akwado **usoro ntụgharị ụzọ 20** (akọwap
 Maka ntụgharị siri ike, jiri `round-robin`; ịdị arọ hà nhata na `weighted` na-enye nguzozi nke ọnụ ọgụgụ — ọ bụghị
 nke siri ike.
 
-### Ọnọdụ pipeline nke agentic
+### Ụdị pipeline nke onye nnọchi anya
 
-Ngwakọta `pipeline` nwere opekata mpe model abụọ nwere ike ịhọrọ iji nhazi ụzọ planner/executor site na
-`config.agenticOrchestration.enabled`. Target nke mbụ na-ahụ maka ime atụmatụ na azịza ikpeazụ;
-target nke abụọ na-ewepụta oku tool nke kwekọrọ na client. OmniRoute na-achọpụta njikọ na-aga n'ihu nke tool-result
-site na protocol nke arịrịọ ahụ, jụọ planner ma achọrọ okirikiri tool ọzọ,
-ma mee ka executor ma ọ bụ planner bụrụ nzọụkwụ ikpeazụ client ga-ahụ n'ụzọ na-agbanwe agbanwe.
+Ngwakọta `pipeline` nwere opekata mpe ụdị abụọ nwere ike ịhọrọ ịbanye na ntụgharị onye na-eme atụmatụ/onye na-eme ihe (planner/executor) na `config.agenticOrchestration.enabled`. Ihe mgbaru ọsọ mbụ na-ahụ maka atụmatụ na azịza ikpeazụ; ihe mgbaru ọsọ nke abụọ na-ewepụta oku ngwaọrụ nke onye ahịa (client-native). OmniRoute na-achọpụta nsonaazụ ngwaọrụ na-aga n'ihu site na usoro arịrịọ, na-ajụ onye na-eme atụmatụ (planner) ma ọ bụrụ na ọ dị mkpa ọzọ maka ngwaọrụ, ma na-eme ka onye na-eme ihe (executor) ma ọ bụ onye na-eme atụmatụ (planner) bụrụ usoro ikpeazụ nke onye ahịa na-ahụ.
 
-Model ndị ọzọ dị mgbe target nke abụọ gasịrị bụ executor ndabere ahaziri n'usoro. Nzaghachi
-HTTP dara ada ma ọ bụ transport exception na-eme ka usoro ahụ gaa na executor na-esote, na-eburu
-otu mkpebi planner ahụ na native tools mana jiri step prompt nke executor ahụ n'onwe ya na
-njikọ edoziri. A na-eweghachi nzaghachi izizi gara nke ọma n'enweghị mgbanwe, gụnyere
-SSE streaming; enweghị ike ịnwale ọdịda ọzọ ebe a ma ọ bụrụ na stream gara nke ọma amalitela.
-Ọ bụrụ na executor niile adaa, a na-eweghachi ọdịda ikpeazụ. Nkwụsị sitere n'aka client na-akwụsị dispatch.
+Nhọrọ `config.agenticOrchestration.contextCompaction` na-etinye mmefu ego payload dị iche tupu onye na-eme atụmatụ ma ọ bụ onye na-eme ihe ọ bụla ezipụ. Mee ka ọ rụọ ọrụ n'ụzọ doro anya:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Ndị a bụ mmefu ego agwa JSON a haziri ahazi nke onye ọrụ họọrọ, ọ bụghị windo gburugburu token ma ọ bụ oke elu nke ekwere nkwa. ID ụdị kpọmkwem na-emeri ndabara. N'elu ọnụ ụzọ ámá ahụ, compaction na-ewepụ nkọwa ngwaọrụ ndị yiri ya, na-egbutu ihe akaebe ngwaọrụ buru ibu na digest, ma na-ewepụ otu akụkọ ihe mere eme ochie zuru ezu gaa na oke ebumnuche. Ọ na-edobe ntuziaka sistemụ/onye mmepe, arịrịọ onye ọrụ kachasị ọhụrụ, gburugburu ngwaọrụ ikpeazụ gụnyere oku/nsonaazụ yiri ya, na ntuziaka ntụgharị na-eduga nke Gemini. A na-echekwa ntuziaka ọkwa kachasị elu na ntọala ngwaọrụ. Ihe nrịbama mwepu na-edekọ akụkọ ihe mere eme ewepụrụ; nke a bụ igbutu ihe doro anya, ọ bụghị nchịkọta semantiki. Ọ bụrụ na gburugburu ebe obibi a kọwara (pinned context) ka gafere mmefu ego, arịrịọ ahụ na-eweghachi 413 tupu ịkpọtụrụ ụdị ahụ. Site na compaction nwere nkwarụ ma ọ bụ n'okpuru ọnụ ụzọ ámá, arịrịọ ahụ na-agafe n'agbanweghị.
+
+Ụdị ndị ọzọ mgbe ihe mgbaru ọsọ nke abụọ gasịrị bụ nkwado onye na-eme ihe (executor backups). Nzaghachi HTTP dara ada ma ọ bụ mwepu njem na-aga n'ihu na onye na-eme ihe na-esote, na-ebu otu mkpebi onye na-eme atụmatụ na ngwaọrụ ala, mana nzọụkwụ onye na-eme ihe ahụ na njikọ edozi. A na-eweghachi nzaghachi mbụ na-aga nke ọma n'agbanweghị, gụnyere SSE streaming; ọdịda mgbe iyi na-aga nke ọma malitere enweghị ike ịmegharị ebe a. Ọ bụrụ na ndị niile na-eme ihe (executors) daa, a na-eweghachi ọdịda ikpeazụ. Ịkwụsị onye ahịa na-akwụsị izipu.
 
 ```json
 {
@@ -352,11 +357,7 @@ SSE streaming; enweghị ike ịnwale ọdịda ọzọ ebe a ma ọ bụrụ na
 }
 ```
 
-Executor nwere ike iwepụta ọtụtụ oku nọọrọ onwe ha n'otu nzaghachi. A na-ahazi oku ndị
-dabere n'ibe ha na ntụgharị tool-result nke client ndị na-esote, ebe planner na-enyocha nsonaazụ ọ bụla.
-`maxToolRounds` nwere ndabara `8` ma na-anabata `1`–`32`; ozugbo e ruru ya, planner ga-
-ewepụta azịza ikpeazụ kacha mma dị. A na-echekwa mkpebi ime planner na buffer, ebe
-nzaghachi ahọpụtara nke client ga-ahụ na-edobe mmasị streaming mbụ.
+Onye na-eme ihe (executor) nwere ike iwepụta ọtụtụ oku nọọrọ onwe ha n'otu nzaghachi. A na-ejikwa oku ndị dabere na ya na ntụgharị nsonaazụ ngwaọrụ onye ahịa mgbe e mesịrị, na onye na-eme atụmatụ na-enyocha nsonaazụ ọ bụla. `maxToolRounds` na-adabara na `8` ma na-anabata `1`–`32`; ozugbo erutere, onye na-eme atụmatụ ga-ewepụta azịza ikpeazụ kacha mma dị. A na-echekwa mkpebi onye na-eme atụmatụ n'ime, ebe nzaghachi onye ahịa ahọpụtara na-echekwa mmasị iyi mbụ.
 
 ### Batch nke `round-robin` na-anọgide otu ebe na mgbasawanye akaụntụ
 
