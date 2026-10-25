@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "ఇప్పుడు",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "చెల్లుబాటు అయ్యే నమోదులు ఏవీ కనుగొనబడలేదు. ఆకృతిని తనిఖీ చేసి, మళ్లీ ప్రయత్నించండి.",
     "bulkImportSuccess": "దిగుమతి పూర్తయింది: {created} సృష్టించబడింది, {updated} నవీకరించబడింది, {failed} విఫలమైంది",
     "bulkImportErrorLine": "లైన్ {line}: {reason}",
-    "bulkImportMaxExceeded": "దిగుమతికి గరిష్టంగా 100 ప్రాక్సీలు",
+    "bulkImportMaxExceeded": "దిగుమతికి గరిష్టంగా {max} ప్రాక్సీలు",
     "bulkImportPreview": "ప్రివ్యూ",
     "clearAssignment": "(స్పష్టమైన కేటాయింపు)",
     "bulkProxyAssignment": "బల్క్ ప్రాక్సీ అసైన్‌మెంట్",

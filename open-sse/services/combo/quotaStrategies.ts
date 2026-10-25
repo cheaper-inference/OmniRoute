@@ -26,6 +26,7 @@
 
 import {
   getRuntimeProviderProfile,
+  cooldownUntilMs,
   isAccountUnavailable,
   type ProviderProfile,
 } from "../accountFallback.ts";
@@ -34,6 +35,8 @@ import { getQuotaFetcher } from "../quotaPreflight.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { MAX_RR_COUNTERS, rrCounters } from "./rrState.ts";
+import type { PreDispatchExclusion } from "./pinRecovery.ts";
+import { parseModel } from "../model.ts";
 import type { ResolvedComboTarget, IsModelAvailable } from "./types.ts";
 import {
   resolveResetAwareConfig,
@@ -171,8 +174,9 @@ function getTargetConnectionIds(
 /**
  * Exported for the connection-aware expansion pipeline stage
  * (connectionAwareExpansion.ts) so quota-aware combo strategies can share the
- * A-group per-connection expander without duplicating its logic. The
- * function body is unchanged; only the visibility is widened.
+ * A-group per-connection expander without duplicating its logic.
+ * Exclusions stay request-scoped so callers can distinguish a cooling pool
+ * from a missing model without admitting a cooling account.
  */
 export async function expandTargetsByQuotaAwareConnections(
   targets: ResolvedComboTarget[],
@@ -183,11 +187,13 @@ export async function expandTargetsByQuotaAwareConnections(
 ): Promise<{
   connectionById: Map<string, Record<string, unknown>>;
   expandedTargets: ResolvedComboTarget[];
+  exclusions: PreDispatchExclusion[];
 }> {
   const connectionCache = new Map<string, Array<Record<string, unknown>>>();
   const connectionLoadPromises = new Map<string, Promise<Array<Record<string, unknown>>>>();
   const connectionById = new Map<string, Record<string, unknown>>();
   const expandedTargets: ResolvedComboTarget[] = [];
+  const exclusions: PreDispatchExclusion[] = [];
 
   const targetsWithConnections = await Promise.all(
     targets.map(async (target) => ({
@@ -230,15 +236,7 @@ export async function expandTargetsByQuotaAwareConnections(
       const provider = getResetAwareProvider(target);
       const connection = connectionById.get(connectionId);
       if (provider && getQuotaFetcher(provider) && !poolIds.has(connectionId)) continue;
-      if (
-        connection &&
-        typeof connection.rateLimitedUntil === "string" &&
-        isAccountUnavailable(connection.rateLimitedUntil)
-      ) {
-        continue;
-      }
-      if (
-        !opts?.skipExhaustionFilter &&
+      const quotaExhausted = Boolean(
         provider &&
         isQuotaExhaustedForRequest(
           connectionId,
@@ -246,7 +244,36 @@ export async function expandTargetsByQuotaAwareConnections(
           target.modelStr || null,
           connection?.providerSpecificData
         )
+      );
+      if (
+        connection &&
+        typeof connection.rateLimitedUntil === "string" &&
+        isAccountUnavailable(connection.rateLimitedUntil)
       ) {
+        const status = String(connection.testStatus || "")
+          .trim()
+          .toLowerCase();
+        // Terminal or exhausted accounts do not recover merely because this
+        // timer expires. ACL and pool membership were already checked above.
+        if (!quotaExhausted && !["banned", "expired", "credits_exhausted"].includes(status)) {
+          exclusions.push({
+            provider: target.provider,
+            model: parseModel(target.modelStr).model || target.modelStr,
+            reason: "connection_cooldown",
+            // Use the same ISO/numeric-epoch normalization as the cooldown gate,
+            // and bound persisted timestamps like parsed upstream retry hints.
+            retryAfterMs: Math.max(
+              1,
+              Math.min(
+                cooldownUntilMs(connection.rateLimitedUntil) - Date.now(),
+                24 * 60 * 60 * 1000
+              )
+            ),
+          });
+        }
+        continue;
+      }
+      if (!opts?.skipExhaustionFilter && quotaExhausted) {
         continue;
       }
       expandedTargets.push({
@@ -260,7 +287,7 @@ export async function expandTargetsByQuotaAwareConnections(
     }
   }
 
-  return { connectionById, expandedTargets };
+  return { connectionById, expandedTargets, exclusions };
 }
 
 async function scoreQuotaAwareTargets<TScore extends object>({
@@ -515,17 +542,23 @@ export async function orderTargetsByResetAwareQuota(
   comboName: string,
   configSource: Record<string, unknown> | null | undefined,
   log: { warn?: (...args: unknown[]) => void },
-  apiKeyAllowedConnectionIds?: string[] | null
+  apiKeyAllowedConnectionIds?: string[] | null,
+  exclusions?: PreDispatchExclusion[]
 ) {
   if (targets.length === 0) return targets;
 
   const config = resolveResetAwareConfig(configSource);
-  const { connectionById, expandedTargets } = await expandTargetsByQuotaAwareConnections(
+  const {
+    connectionById,
+    expandedTargets,
+    exclusions: expansionExclusions,
+  } = await expandTargetsByQuotaAwareConnections(
     targets,
     comboName,
     log,
     apiKeyAllowedConnectionIds
   );
+  exclusions?.push(...expansionExclusions);
 
   const scoredTargets = await scoreQuotaAwareTargets({
     comboName,
@@ -553,17 +586,23 @@ export async function orderTargetsByResetWindow(
   comboName: string,
   configSource: Record<string, unknown> | null | undefined,
   log: { warn?: (...args: unknown[]) => void },
-  apiKeyAllowedConnectionIds?: string[] | null
+  apiKeyAllowedConnectionIds?: string[] | null,
+  exclusions?: PreDispatchExclusion[]
 ) {
   if (targets.length === 0) return targets;
 
   const config = resolveResetWindowConfig(configSource);
-  const { connectionById, expandedTargets } = await expandTargetsByQuotaAwareConnections(
+  const {
+    connectionById,
+    expandedTargets,
+    exclusions: expansionExclusions,
+  } = await expandTargetsByQuotaAwareConnections(
     targets,
     comboName,
     log,
     apiKeyAllowedConnectionIds
   );
+  exclusions?.push(...expansionExclusions);
 
   // One `now` snapshot for the whole ranking: quota fetches run concurrently and
   // can take seconds, so re-reading the clock per target would compare remaining
@@ -645,17 +684,23 @@ export async function orderTargetsByHeadroom(
   targets: ResolvedComboTarget[],
   comboName: string,
   log: { warn?: (...args: unknown[]) => void },
-  apiKeyAllowedConnectionIds?: string[] | null
+  apiKeyAllowedConnectionIds?: string[] | null,
+  exclusions?: PreDispatchExclusion[]
 ): Promise<ResolvedComboTarget[]> {
   if (targets.length <= 1) return targets;
 
   try {
-    const { expandedTargets, connectionById } = await expandTargetsByQuotaAwareConnections(
+    const {
+      expandedTargets,
+      connectionById,
+      exclusions: expansionExclusions,
+    } = await expandTargetsByQuotaAwareConnections(
       targets,
       comboName,
       log,
       apiKeyAllowedConnectionIds
     );
+    exclusions?.push(...expansionExclusions);
 
     if (expandedTargets.length <= 1) return expandedTargets;
 
@@ -774,18 +819,24 @@ export async function orderTargetsByQuotaWeighted(
   comboName: string,
   configSource: Record<string, unknown> | null | undefined,
   log: { warn?: (...args: unknown[]) => void },
-  apiKeyAllowedConnectionIds?: string[] | null
+  apiKeyAllowedConnectionIds?: string[] | null,
+  exclusions?: PreDispatchExclusion[]
 ): Promise<ResolvedComboTarget[]> {
   if (targets.length === 0) return targets;
 
   const config = resolveResetAwareConfig(configSource);
-  const { connectionById, expandedTargets } = await expandTargetsByQuotaAwareConnections(
+  const {
+    connectionById,
+    expandedTargets,
+    exclusions: expansionExclusions,
+  } = await expandTargetsByQuotaAwareConnections(
     targets,
     comboName,
     log,
     apiKeyAllowedConnectionIds,
     { skipExhaustionFilter: true }
   );
+  exclusions?.push(...expansionExclusions);
 
   const liveTargets = expandedTargets.filter((target) => {
     const state = getCircuitBreaker(target.provider).getStatus().state;

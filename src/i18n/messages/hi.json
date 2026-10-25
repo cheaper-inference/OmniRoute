@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "अभी",
       "coreConfigPath": "कोर कॉन्फ़िगरेशन फ़ाइल",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "निरपेक्ष .json पथ (छोटे अक्षरों में एक्सटेंशन)। खाली = न बनाएँ। हर सिंक अपनाई गई फ़ाइल के बगल में '<path>'.generated लिखता है, उस फ़ाइल में कभी नहीं।",
+      "coreConfigPathDesc": "निरपेक्ष .json/.yaml/.yml पथ (छोटे अक्षरों में एक्सटेंशन)। खाली = न बनाएँ। हर सिंक अपनाई गई फ़ाइल के बगल में '<path>'.generated लिखता है, उस फ़ाइल में कभी नहीं।",
       "lastSwitchKind": "स्विच का कारण",
       "switchKind": {
         "ip_quota_429": "कोटा",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "कोई वैध प्रविष्टियाँ नहीं मिलीं. प्रारूप की जाँच करें और पुनः प्रयास करें।",
     "bulkImportSuccess": "आयात पूर्ण: {created} बनाया गया, {updated} अपडेट किया गया, {failed} विफल रहा",
     "bulkImportErrorLine": "लाइन {line}: {reason}",
-    "bulkImportMaxExceeded": "प्रति आयात अधिकतम 100 प्रॉक्सी",
+    "bulkImportMaxExceeded": "प्रति आयात अधिकतम {max} प्रॉक्सी",
     "bulkImportPreview": "पूर्वावलोकन",
     "clearAssignment": "(स्पष्ट असाइनमेंट)",
     "bulkProxyAssignment": "थोक प्रॉक्सी असाइनमेंट",

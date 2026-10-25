@@ -47,7 +47,7 @@ rapporterer `GET /api/a2a/status` `status: "disabled"` og `online: false`; JSON-
 
 ### `message/send` — Synkron udførelse
 
-Sender en besked til en færdighed og venter på det fuldstændige svar.
+Sender en meddelelse til en skill og venter på det fuldstændige svar.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+For `smart-routing` er `metadata.combo` en eksplicit tilsidesættelse af
+`metadata.model` for gateway-anmodningen. Den sendes som den faktiske `model`,
+ikke som et ignoreret `x-combo`-JSON-felt. Gatewayens normale API-nøgle og
+godkendelse pr. destination gælder stadig. En ugyldig eller tom combo afvises.
+
+Resultatet indeholder `requested_combo` (kalderens hensigt), `dispatched_model`
+(den faktiske gateway-anmodning), `response_model` (gateway-svaret) og
+`confirmed_combo`. Det sidste felt er `null`, medmindre gatewayen udtrykkeligt
+identificerer en combo. A2A-beslutningslogfiler tilskriver kun udførelsen til en
+bekræftet combo og bevarer en ubekræftet anmodning som `requestedCombo`.
+
 **Svar:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Forespørg om opgavestatus
+### `tasks/get` — Forespørg på opgavestatus
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

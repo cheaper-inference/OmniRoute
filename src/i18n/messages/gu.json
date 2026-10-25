@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "હમણાં",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "કોઈ માન્ય એન્ટ્રીઓ મળી નથી. ફોર્મેટ તપાસો અને ફરી પ્રયાસ કરો.",
     "bulkImportSuccess": "આયાત પૂર્ણ: {created} બનાવ્યું, {updated} અપડેટ થયું, {failed} નિષ્ફળ થયું",
     "bulkImportErrorLine": "રેખા {line}: {reason}",
-    "bulkImportMaxExceeded": "આયાત દીઠ મહત્તમ 100 પ્રોક્સી",
+    "bulkImportMaxExceeded": "આયાત દીઠ મહત્તમ {max} પ્રોક્સી",
     "bulkImportPreview": "પૂર્વાવલોકન",
     "clearAssignment": "(સ્પષ્ટ સોંપણી)",
     "bulkProxyAssignment": "બલ્ક પ્રોક્સી અસાઇનમેન્ટ",

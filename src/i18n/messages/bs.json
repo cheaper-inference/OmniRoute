@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Sada",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "Nisu pronađeni validni unosi. Provjerite format i pokušajte ponovo.",
     "bulkImportSuccess": "Uvoz završen: {created} kreirano, {updated} ažurirano, {failed} neuspjelo",
     "bulkImportErrorLine": "Linija {line}: {reason}",
-    "bulkImportMaxExceeded": "Maksimalno 100 proxy-ja po uvozu",
+    "bulkImportMaxExceeded": "Maksimalno {max} proxy-ja po uvozu",
     "bulkImportPreview": "Pregled",
     "clearAssignment": "(obriši dodjelu)",
     "bulkProxyAssignment": "Masovna dodjela proxy-ja",

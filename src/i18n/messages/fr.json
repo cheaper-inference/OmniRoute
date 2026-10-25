@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Maintenant",
       "coreConfigPath": "Fichier de configuration du cœur",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Chemin absolu d’un .json (extension en minuscules). Vide = pas de génération. Chaque synchronisation écrit '<chemin>'.generated à côté du fichier adopté, jamais dedans.",
+      "coreConfigPathDesc": "Chemin absolu d’un .json/.yaml/.yml (extension en minuscules). Vide = pas de génération. Chaque synchronisation écrit '<chemin>'.generated à côté du fichier adopté, jamais dedans.",
       "lastSwitchKind": "Motif du changement",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "Aucune entrée valide trouvée. Vérifiez le format et réessayez.",
     "bulkImportSuccess": "Importation terminée : {created} créé, {updated} mis à jour, {failed} a échoué",
     "bulkImportErrorLine": "Ligne {line} : {reason}",
-    "bulkImportMaxExceeded": "Maximum 100 proxys par importation",
+    "bulkImportMaxExceeded": "Maximum {max} proxys par importation",
     "bulkImportPreview": "Aperçu",
     "clearAssignment": "(affectation claire)",
     "bulkProxyAssignment": "Attribution de proxy en masse",

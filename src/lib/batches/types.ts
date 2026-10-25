@@ -24,7 +24,8 @@ export interface WizardCsvMapping {
 export interface WizardInput {
   kind: WizardInputKind;
   fileName: string | null;
-  rawContent: string | null; // utf-8 text (read via FileReader)
+  rawContent: string | null; // JSONL input or converted CSV; null until mapped
+  csvContent?: string; // original CSV; rawContent holds converted JSONL
   originalFile?: File; // JSONL upload source; rawContent may be a preview sample
   csvMapping?: WizardCsvMapping; // only when kind === "csv"
 }

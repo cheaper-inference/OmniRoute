@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Button, Card, ConfirmModal } from "@/shared/components";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Button, Card, ConfirmModal, EmptyState, Skeleton } from "@/shared/components";
 import CatalogBulkActionBar from "./CatalogBulkActionBar";
 import {
   BULK_CONFIRM_COMBO_THRESHOLD,
@@ -614,21 +615,22 @@ function CatalogHeader({ context }: { context: CatalogPageContext }) {
     context;
   return (
     <>
-      <header className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold text-text-main">{t("title")}</h1>
-            <p className="mt-1 max-w-3xl text-sm text-text-muted">{t("subtitle")}</p>
-          </div>
-          <Button
-            variant="secondary"
-            icon="refresh"
-            loading={modelsLoading || combosLoading}
-            onClick={refreshAll}
-          >
-            {t("refresh")}
-          </Button>
-        </div>
+      <div className="flex flex-col gap-2">
+        <PageHeader
+          compact
+          title={t("title")}
+          description={t("subtitle")}
+          actions={
+            <Button
+              variant="secondary"
+              icon="refresh"
+              loading={modelsLoading || combosLoading}
+              onClick={refreshAll}
+            >
+              {t("refresh")}
+            </Button>
+          }
+        />
 
         <CatalogTabs
           activeTab={activeTab}
@@ -639,7 +641,7 @@ function CatalogHeader({ context }: { context: CatalogPageContext }) {
             combos: `${t("combosTab")} (${combos.length})`,
           }}
         />
-      </header>
+      </div>
     </>
   );
 }
@@ -733,12 +735,12 @@ function CatalogModelsContent({ context }: { context: CatalogPageContext }) {
   return (
     <>
       {modelsLoading && models.length === 0 ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex min-h-64 items-center justify-center p-8 text-sm text-text-muted"
-        >
-          {t("loading")}
+        <div role="status" aria-live="polite" className="flex min-h-64 flex-col gap-2 p-4">
+          {/* Skeleton rows (CSS only): the kit TableLoadingState brand loader animates on timers. */}
+          <span className="ci-sr-only">{t("loading")}</span>
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-9 w-full" />
+          ))}
         </div>
       ) : modelsError && models.length === 0 ? (
         <div
@@ -752,19 +754,13 @@ function CatalogModelsContent({ context }: { context: CatalogPageContext }) {
           </Button>
         </div>
       ) : visibleModels.length === 0 ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-2 p-8 text-center">
-          <span className="material-symbols-outlined text-3xl text-text-muted" aria-hidden="true">
-            search_off
-          </span>
-          <p className="font-medium text-text-main">
-            {models.length === 0 ? t("noModelsAvailable") : t("noModelsMatch")}
-          </p>
-          {models.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearModelFilters}>
-              {t("clearFilters")}
-            </Button>
-          )}
-        </div>
+        <EmptyState
+          className="min-h-64"
+          icon="search_off"
+          title={models.length === 0 ? t("noModelsAvailable") : t("noModelsMatch")}
+          actionLabel={models.length > 0 ? t("clearFilters") : ""}
+          onAction={models.length > 0 ? clearModelFilters : null}
+        />
       ) : (
         <CatalogModelsResults context={context} />
       )}
@@ -921,12 +917,12 @@ function CatalogCombosContent({ context }: { context: CatalogPageContext }) {
   return (
     <>
       {combosLoading && combos.length === 0 ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex min-h-64 items-center justify-center p-8 text-sm text-text-muted"
-        >
-          {t("loading")}
+        <div role="status" aria-live="polite" className="flex min-h-64 flex-col gap-2 p-4">
+          {/* Skeleton rows (CSS only): the kit TableLoadingState brand loader animates on timers. */}
+          <span className="ci-sr-only">{t("loading")}</span>
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-9 w-full" />
+          ))}
         </div>
       ) : combosError && combos.length === 0 ? (
         <div
@@ -940,19 +936,13 @@ function CatalogCombosContent({ context }: { context: CatalogPageContext }) {
           </Button>
         </div>
       ) : visibleCombos.length === 0 ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-2 p-8 text-center">
-          <span className="material-symbols-outlined text-3xl text-text-muted" aria-hidden="true">
-            search_off
-          </span>
-          <p className="font-medium text-text-main">
-            {combos.length === 0 ? t("noCombosAvailable") : t("noCombosMatch")}
-          </p>
-          {combos.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearComboFilters}>
-              {t("clearFilters")}
-            </Button>
-          )}
-        </div>
+        <EmptyState
+          className="min-h-64"
+          icon="search_off"
+          title={combos.length === 0 ? t("noCombosAvailable") : t("noCombosMatch")}
+          actionLabel={combos.length > 0 ? t("clearFilters") : ""}
+          onAction={combos.length > 0 ? clearComboFilters : null}
+        />
       ) : (
         <CatalogCombosResults context={context} />
       )}

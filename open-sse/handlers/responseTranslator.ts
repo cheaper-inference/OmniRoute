@@ -1,3 +1,7 @@
+import {
+  applyToolCallShimToBuffer,
+  findToolCallSchema,
+} from "../translator/helpers/toolCallShim.ts";
 import { FORMATS } from "../translator/formats.ts";
 import {
   buildGeminiThoughtSignatureKey,
@@ -726,6 +730,7 @@ export function translateNonStreamingResponse(
       toRecord(intermediateOpenAI),
       toolNameMap ?? null,
       requestedThinking,
+      toolSchemas,
       clientTools
     );
   }
@@ -785,6 +790,20 @@ function parseToolCallArguments(rawArguments: unknown): Record<string, unknown> 
 }
 
 /**
+ * Parse a tool call's arguments into `tool_use.input`. Malformed arguments fail typed
+ * (#17198) before any shim runs; Read then keeps the client-declared path spelling (#17294).
+ */
+function parseToolUseInput(
+  name: string,
+  rawArguments: unknown,
+  schema: ReturnType<typeof findToolCallSchema>
+): Record<string, unknown> {
+  const parsed = parseToolCallArguments(rawArguments);
+  if (name.toLowerCase() !== "read" || !schema) return parsed;
+  return JSON.parse(applyToolCallShimToBuffer(name, JSON.stringify(parsed), schema));
+}
+
+/**
  * Helper to convert an OpenAI chat.completion JSON object to Claude format for non-streaming.
  *
  * `toolNameMap` carries request-side aliases; when it does not resolve a name,
@@ -799,6 +818,7 @@ function convertOpenAINonStreamingToClaude(
   openaiResponse: JsonRecord,
   toolNameMap?: Map<string, string> | null,
   requestedThinking?: boolean,
+  toolSchemas?: Map<string, JsonRecord> | null,
   clientTools?: unknown
 ): JsonRecord {
   const choices = openaiResponse.choices as unknown[] | undefined;
@@ -875,11 +895,13 @@ function convertOpenAINonStreamingToClaude(
       const fn = toRecord(toolObj.function);
       // An id-less call gets a random id; a timestamp collides across calls.
       const rawId = toString(toolObj.id) || undefined;
+      const name = restoreDeclaredToolName(toString(fn.name), toolNameMap ?? null, clientTools);
+      const schema = findToolCallSchema(name, toolSchemas);
       content.push({
         type: "tool_use",
         id: sanitizeToolId(rawId),
-        name: restoreDeclaredToolName(toString(fn.name), toolNameMap ?? null, clientTools),
-        input: parseToolCallArguments(fn.arguments),
+        name,
+        input: parseToolUseInput(name, fn.arguments, schema),
       });
     }
   }

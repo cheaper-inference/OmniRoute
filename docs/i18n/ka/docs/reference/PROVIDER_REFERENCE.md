@@ -4,11 +4,11 @@
 
 ---
 
-> **ავტომატურად გენერირებულია** `src/shared/constants/providers.ts`-დან — არ დაარედაქტიროთ ხელით.
-> ხელახალი გენერაციისთვის: `npm run gen:provider-reference`
-> **ბოლო გენერაცია:** 2026-10-18
+> **ავტომატურად გენერირებულია** `src/shared/constants/providers.ts`-დან — ხელით ნუ შეცვლით.
+> ხელახლა გენერირებისთვის გამოიყენეთ: `npm run gen:provider-reference`
+> **ბოლო გენერაცია:** 2026-10-20
 
-პროვაიდერების საერთო რაოდენობა: **375**. იხილეთ კატეგორიების დაყოფა ქვემოთ.
+პროვაიდერების საერთო რაოდენობა: **375**. კატეგორიების მიხედვით დაყოფა იხილეთ ქვემოთ.
 
 ## კატეგორიები
 
@@ -457,11 +457,11 @@
 | ------ | ---------- | --------------------------------- | ------- | -------- | ---------- |
 | `auto` | `auto`     | ავტომატური (კონფიგურაციის გარეშე) | სისტემა | —        | —          |
 
-## სიმართლის წყაროები
+## ჭეშმარიტი ინფორმაციის წყაროები
 
 - კატალოგი: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- რეესტრი (თითოეული მოდელის დეტალები): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- შემსრულებლები: [`open-sse/executors/`](../../open-sse/executors/) (154 იმპლემენტაცია)
+- რეესტრი (დეტალები თითოეული მოდელისთვის): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- შემსრულებლები: [`open-sse/executors/`](../../open-sse/executors/) (156 იმპლემენტაცია)
 - ტრანსლატორები: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## აგრეთვე იხილეთ

@@ -47,7 +47,7 @@ A2A იმართება **Endpoints → A2A** გადამრთვე�
 
 ### `message/send` — სინქრონული შესრულება
 
-აგზავნის შეტყობინებას უნართან და ელოდება სრულ პასუხს.
+უნარს უგზავნის შეტყობინებას და სრულ პასუხს ელოდება.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-ისთვის `metadata.combo` კარიბჭის მოთხოვნაში აშკარად ანაცვლებს
+`metadata.model`-ს; ის იგზავნება როგორც რეალური `model` და არა როგორც
+იგნორირებული `x-combo` JSON ველი. კარიბჭის სტანდარტული API გასაღებისა და
+თითოეული სამიზნის ავტორიზაციის წესები კვლავ მოქმედებს. არასწორი ან ცარიელი კომბინაცია უარყოფილია.
+
+შედეგი შეიცავს `requested_combo`-ს (გამომძახებლის განზრახვა), `dispatched_model`-ს
+(კარიბჭის რეალური მოთხოვნა), `response_model`-ს (კარიბჭის პასუხი) და
+`confirmed_combo`-ს. ბოლო ველის მნიშვნელობა არის `null`, თუ კარიბჭე კომბინაციას აშკარად
+არ განსაზღვრავს. A2A გადაწყვეტილებების ჟურნალები შესრულებას მხოლოდ
+დადასტურებულ კომბინაციას მიაკუთვნებს, ხოლო დაუდასტურებელ მოთხოვნას `requestedCombo`-ს სახით ინახავს.
+
 **პასუხი:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE ნაკადური გადაცემა
 
-იგივეა, რაც `message/send`, მაგრამ რეალურ დროში ნაკადური გადაცემისთვის აბრუნებს სერვერის მიერ გამოგზავნილ მოვლენებს.
+იგივეა, რაც `message/send`, მაგრამ რეალურ დროში ნაკადური გადაცემისთვის Server-Sent Events-ს აბრუნებს.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — ამოცანის სტატუსის მოთხოვნა
+### `tasks/get` — დავალების სტატუსის მოთხოვნა
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — ამოცანის გაუქმება
+### `tasks/cancel` — დავალების გაუქმება
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

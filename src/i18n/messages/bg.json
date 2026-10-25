@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Сега",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "Няма намерени валидни записи. Проверете формата и опитайте отново.",
     "bulkImportSuccess": "Импортирането завърши: {created} създаден, {updated} актуализиран, {failed} неуспешен",
     "bulkImportErrorLine": "Ред {line}: {reason}",
-    "bulkImportMaxExceeded": "Максимум 100 проксита на импортиране",
+    "bulkImportMaxExceeded": "Максимум {max} проксита на импортиране",
     "bulkImportPreview": "Преглед",
     "clearAssignment": "(чисто задание)",
     "bulkProxyAssignment": "Групово присвояване на прокси",

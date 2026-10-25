@@ -99,9 +99,7 @@ export function useTrafficStream(
             setRequests((prev) => [event.data, ...prev].slice(0, 1000));
           }
         } else if (event.type === "update") {
-          setRequests((prev) =>
-            prev.map((r) => (r.id === event.data.id ? event.data : r))
-          );
+          setRequests((prev) => prev.map((r) => (r.id === event.data.id ? event.data : r)));
         } else if (event.type === "clear") {
           setRequests([]);
         }
@@ -111,10 +109,7 @@ export function useTrafficStream(
         if (!mountedRef.current) return;
         setConnected(false);
         const delay = Math.min(backoffRef.current, MAX_BACKOFF_MS);
-        backoffRef.current = Math.min(
-          backoffRef.current * BACKOFF_MULTIPLIER,
-          MAX_BACKOFF_MS
-        );
+        backoffRef.current = Math.min(backoffRef.current * BACKOFF_MULTIPLIER, MAX_BACKOFF_MS);
         reconnectTimerRef.current = setTimeout(() => {
           // Use ref so we always call the current connect version
           connectRef.current();

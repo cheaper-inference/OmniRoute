@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` uchun `metadata.combo` shlyuz soʻrovidagi
+`metadata.model` qiymatini aniq almashtiradi; u eʼtiborsiz qoldiriladigan `x-combo` JSON maydoni sifatida emas, balki haqiqiy `model` sifatida yuboriladi.
+Shlyuzning odatiy API kaliti va har bir maqsad uchun avtorizatsiyasi hamon qoʻllaniladi. Notoʻgʻri yoki boʻsh kombinatsiya rad etiladi.
+
+Natija `requested_combo` (chaqiruvchining maqsadi), `dispatched_model`
+(shlyuzga yuborilgan haqiqiy soʻrov), `response_model` (shlyuz javobi) va
+`confirmed_combo` qiymatlarini taqdim etadi. Agar shlyuz kombinatsiyani aniq
+koʻrsatmasa, oxirgi maydon `null` boʻladi. A2A qaror jurnallari bajarilishni faqat
+tasdiqlangan kombinatsiyaga bogʻlaydi, tasdiqlanmagan soʻrov esa `requestedCombo` sifatida saqlanadi.
+
 **Javob:**
 
 ```json
@@ -76,28 +86,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE oqimi
+### `message/stream` — SSE orqali oqimli uzatish
 
 `message/send` bilan bir xil, ammo real vaqt rejimida oqimli uzatish uchun Server-Sent Events hodisalarini qaytaradi.
 

@@ -44,9 +44,9 @@ A2Aને **Endpoints → A2A** ટૉગલ દ્વારા નિયંત�
 
 ## JSON-RPC 2.0 પદ્ધતિઓ
 
-### `message/send` — સિંક્રોનસ એક્ઝિક્યુશન
+### `message/send` — સમકાલીન અમલીકરણ
 
-કોઈ કૌશલ્યને સંદેશ મોકલે છે અને સંપૂર્ણ પ્રતિસાદની રાહ જુએ છે.
+કોઈ સ્કિલને સંદેશ મોકલે છે અને સંપૂર્ણ પ્રતિસાદની રાહ જુએ છે.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -64,6 +64,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` માટે, ગેટવે વિનંતીમાં `metadata.combo` એ
+`metadata.model`નું સ્પષ્ટ ઓવરરાઇડ છે; તેને અવગણવામાં આવતા `x-combo` JSON ફીલ્ડ તરીકે નહીં,
+પરંતુ વાસ્તવિક `model` તરીકે મોકલવામાં આવે છે. ગેટવેની સામાન્ય API-કી અને
+દરેક ટાર્ગેટ માટેની અધિકૃતતા હજુ પણ લાગુ પડે છે. અમાન્ય અથવા ખાલી કોમ્બો નકારવામાં આવે છે.
+
+પરિણામ `requested_combo` (કૉલરનો આશય), `dispatched_model`
+(વાસ્તવિક ગેટવે વિનંતી), `response_model` (ગેટવે પ્રતિસાદ) અને
+`confirmed_combo` દર્શાવે છે. ગેટવે સ્પષ્ટપણે કોઈ કોમ્બોને ઓળખાવે નહીં ત્યાં સુધી છેલ્લું ફીલ્ડ `null`
+રહે છે. A2A નિર્ણય લૉગ્સ અમલીકરણને માત્ર પુષ્ટિ થયેલા
+કોમ્બો સાથે સાંકળે છે અને અપુષ્ટ વિનંતીને `requestedCombo` તરીકે જાળવી રાખે છે.
+
 **પ્રતિસાદ:**
 
 ```json
@@ -75,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -125,7 +129,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — ટાસ્કની સ્થિતિ પૂછો
+### `tasks/get` — ટાસ્કની સ્થિતિ જાણો
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -261,7 +265,7 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
 
 ---
 
-## ઇન્ટિગ્રેશન ઉદાહરણો
+## એકીકરણનાં ઉદાહરણો
 
 ### Python (requests)
 
