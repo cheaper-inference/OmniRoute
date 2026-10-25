@@ -1,13 +1,22 @@
 const DEFAULT_SLICE_MS = 6;
+let defaultSliceMs = DEFAULT_SLICE_MS;
+
+/**
+ * Test seam: pin the default slice so yield counts are deterministic. `0` yields on every
+ * check (work-proportional); `Infinity` never yields on time (only `ensureYielded` does).
+ * `null` restores the production default.
+ */
+export function __setCooperativeYieldSliceMsForTest(sliceMs: number | null): void {
+  defaultSliceMs = sliceMs ?? DEFAULT_SLICE_MS;
+}
 
 export interface CooperativeYieldBudget {
-  readonly hasYielded: boolean;
   yieldIfDue(): Promise<void> | null;
   ensureYielded(): Promise<void>;
 }
 
 /** Time-budgeted event-loop fairness without fixed per-item scheduler overhead. */
-export function createCooperativeYieldBudget(sliceMs = DEFAULT_SLICE_MS): CooperativeYieldBudget {
+export function createCooperativeYieldBudget(sliceMs = defaultSliceMs): CooperativeYieldBudget {
   let deadline = performance.now() + sliceMs;
   let yielded = false;
 
@@ -21,9 +30,6 @@ export function createCooperativeYieldBudget(sliceMs = DEFAULT_SLICE_MS): Cooper
     );
 
   return {
-    get hasYielded() {
-      return yielded;
-    },
     yieldIfDue() {
       return performance.now() >= deadline ? yieldTurn() : null;
     },

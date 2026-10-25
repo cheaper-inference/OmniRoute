@@ -126,7 +126,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/services/quotaAutoPing.ts": 1,
   },
   connection: {
-    "open-sse/handlers/autoComboCandidates.ts": 1,
+    // The read-only auto-candidate inspector no longer re-resolves connections one by one
+    // (getProviderConnectionById, 1->0): it reads one narrow, credential-free state projection
+    // (id, rate_limited_until, test_status) through getRawProviderConnections for the whole
+    // request. Transparency only, no credential selection and no dispatch.
     // Two of the three connection re-resolution sites moved into the streaming
     // leg with the decomposition (same sites, new home).
     "open-sse/handlers/chatCore.ts": 1,
@@ -332,7 +335,6 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
     Object.keys(EXPECTED.connection).map((file) => [
       file,
       [
-        "open-sse/handlers/autoComboCandidates.ts",
         "open-sse/handlers/chatCore.ts",
         "open-sse/handlers/chatCore/streamingResponse.ts",
         "open-sse/services/alibabaFreeTier.ts",
