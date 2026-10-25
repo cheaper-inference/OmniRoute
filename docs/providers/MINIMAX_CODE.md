@@ -16,20 +16,28 @@ credential that comes back is written into that same local profile.
 
 ## Transports
 
-| Transport           | What it does                                                                                                                                                                                                                                                                                                                                                                                       | When it is used                         |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `gateway` (default) | One call to the managed MiniMax subscription gateway. It speaks the native tool protocol, so a request that carries client tools comes back as OpenAI `tool_calls`. **No fallback**: a failing gateway answers with the status of the failure and names the transport — `502` when the gateway could not be reached, `401` when the credential is missing or dead, `500` when the failure is ours. | Every request.                          |
-| `cli`               | Runs the locally installed MiniMax Code CLI (`mcode exec --output-format stream-json`) in the lightweight conversation profile — or on the shared agent below, when `MINIMAX_CODE_SHARED_AGENT` is on.                                                                                                                                                                                             | Opt-in (`MINIMAX_CODE_TRANSPORT=cli`).  |
-| `auto`              | Requests with client tools to the gateway, plain chat to the CLI.                                                                                                                                                                                                                                                                                                                                  | Opt-in (`MINIMAX_CODE_TRANSPORT=auto`). |
+| Transport           | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                     | When it is used                         |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
+| `gateway` (default) | One call to the managed MiniMax subscription gateway. It speaks the native tool protocol, so a request that carries client tools comes back as OpenAI `tool_calls`. **Fallback**: a gateway that cannot be reached is answered by the locally installed CLI; a gateway that refuses the request keeps its own status — `401` when the credential is missing or dead, `500` when the failure is ours, `503` when the model itself is unavailable. | Every request.                          |
+| `cli`               | Runs the locally installed MiniMax Code CLI (`mcode exec --output-format stream-json`) in the lightweight conversation profile — or on the shared agent below, when `MINIMAX_CODE_SHARED_AGENT` is on.                                                                                                                                                                                                                                           | Opt-in (`MINIMAX_CODE_TRANSPORT=cli`).  |
+| `auto`              | An alias of `gateway`.                                                                                                                                                                                                                                                                                                                                                                                                                           | Opt-in (`MINIMAX_CODE_TRANSPORT=auto`). |
 
-The gateway transport has **no fallback**: a request that cannot be answered
-by the gateway fails with the status of the failure and names the transport. The local CLI stays
-available as an explicit transport (`MINIMAX_CODE_TRANSPORT=cli`, or `auto` for
-a plain chat turn) — but it never answers a request that asked for the gateway,
-and it cannot honour the protocol of a request that carries client tools: the
-CLI has no way to hand a tool call back to the client, so answering with prose
-would make the client believe the turn is over without a single tool having
-run.
+The managed gateway is the transport of **every** request — the one that carries
+client tools and the plain chat alike. The local CLI is the **fallback** of the
+gateway: it answers the request when the gateway service cannot be reached at
+all, and it reads the credential of your own MiniMax Code profile, so the
+request is answered while the gateway is down.
+
+The fallback is deliberately narrow. A gateway that _answers_ keeps its answer:
+a request it refuses (`400`), a credential it rejects (`401`) and a model it
+reports as unavailable (`503`) are not retried on the local CLI, because the
+CLI would reach the same model with the same request.
+
+The local CLI has one limit the gateway does not have: it cannot execute client
+tools. It has no way to hand a tool call back to the client, and answering with
+prose would make the client believe the turn is over without a single tool
+having run. A request that carries client tools is therefore refused with a
+`400` when the gateway is unreachable — the gateway has to answer it.
 
 ## Setup
 
@@ -174,9 +182,9 @@ That has two practical consequences:
 
 - The endpoint can change without notice. When it does, the request fails with
   the status of the failure and names the transport — it never changes
-  meaning silently.
-  `MINIMAX_CODE_TRANSPORT=cli` (or `auto`) is the way to keep working against
-  the local CLI.
+  meaning silently. A gateway that cannot be reached at all is answered by
+  the local CLI, and `MINIMAX_CODE_TRANSPORT=cli` pins every request to the
+  local CLI.
 - The whole gateway call is bounded: the token refresh, one attempt, a backoff
   and one retry share one budget of 100 s
   (`MINIMAX_CODE_GATEWAY_TIMEOUT_MS`). An unreachable gateway cannot hold a
@@ -264,9 +272,9 @@ question.
 
 ## Troubleshooting
 
-| Symptom                                                         | Cause                                                                                                                  | Fix                                                                                                                                                   |
-| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MiniMax Code auth profile not found — run 'mcode login' first` | The profile is not where the provider looks.                                                                           | `mcode login`, or set `MINIMAX_CODE_PROFILE_DIR` / `MINIMAX_CODE_AUTH_FILE`. A CN account needs `MINIMAX_CODE_REGION=cn`.                             |
-| `401` on a request                                              | The credential is missing, expired, or the token refresh was refused.                                                  | `mcode login`, or sign in from the provider page.                                                                                                     |
-| `502` on a request                                              | The gateway could not be reached, or the request carries client tools on the CLI transport, which cannot execute them. | Check the gateway URL and the run log; the message names the transport. `MINIMAX_CODE_TRANSPORT=cli` answers a plain chat turn through the local CLI. |
-| `400` on a CLI run in the `standard` context                    | The host tools are not allowed.                                                                                        | `MINIMAX_CODE_ALLOW_HOST_TOOLS=true`, or use the gateway transport.                                                                                   |
+| Symptom                                                         | Cause                                                                                                                  | Fix                                                                                                                                                                                 |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MiniMax Code auth profile not found — run 'mcode login' first` | The profile is not where the provider looks.                                                                           | `mcode login`, or set `MINIMAX_CODE_PROFILE_DIR` / `MINIMAX_CODE_AUTH_FILE`. A CN account needs `MINIMAX_CODE_REGION=cn`.                                                           |
+| `401` on a request                                              | The credential is missing, expired, or the token refresh was refused.                                                  | `mcode login`, or sign in from the provider page.                                                                                                                                   |
+| `502` on a request                                              | The gateway could not be reached, or the request carries client tools on the CLI transport, which cannot execute them. | Check the gateway URL and the run log; the message names the transport. An unreachable gateway is answered by the local CLI; a request that carries client tools needs the gateway. |
+| `400` on a CLI run in the `standard` context                    | The host tools are not allowed.                                                                                        | `MINIMAX_CODE_ALLOW_HOST_TOOLS=true`, or use the gateway transport.                                                                                                                 |

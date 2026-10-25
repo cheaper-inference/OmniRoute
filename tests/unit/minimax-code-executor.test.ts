@@ -216,21 +216,17 @@ test("the transport budgets stay under the per-target timeout of a combo", async
   }
 });
 
-test("MiniMax Code routes client tools to the managed gateway and plain chat to the CLI", async () => {
+test("the managed gateway is the transport of every request", async () => {
   const { resolveMinimaxCodeTransport } = await loadMinimaxCodeExecutor();
-  // Client tools live on the client machine: the model must call them through
-  // the native tool protocol, so the run goes to the managed gateway.
-  assert.equal(resolveMinimaxCodeTransport("auto", true), "gateway");
-  // Plain chat has nothing to execute and stays on the fast local CLI.
-  assert.equal(resolveMinimaxCodeTransport("auto", false), "cli");
-  // An explicit choice always wins.
-  assert.equal(resolveMinimaxCodeTransport("cli", true), "cli");
-  assert.equal(resolveMinimaxCodeTransport("gateway", false), "gateway");
-  // The default is the managed gateway for every request: it speaks the
-  // native tool protocol and answers in seconds. The local CLI is the
-  // fallback for a gateway that is unreachable or rejects the token.
-  assert.equal(resolveMinimaxCodeTransport("gateway", true), "gateway");
-  assert.equal(resolveMinimaxCodeTransport("gateway", false), "gateway");
+  // The gateway speaks the native tool protocol, it needs no CLI installed on
+  // the server and it answers in seconds, so it takes every request — the
+  // one that carries client tools and the plain chat alike.
+  assert.equal(resolveMinimaxCodeTransport("gateway"), "gateway");
+  // `auto` is an alias of the default now.
+  assert.equal(resolveMinimaxCodeTransport("auto"), "gateway");
+  // The local CLI stays an explicit opt-out for a deployment that asks for
+  // it; it is the fallback of the gateway otherwise.
+  assert.equal(resolveMinimaxCodeTransport("cli"), "cli");
 });
 
 test("a missing credential on the gateway transport answers with a 401", async () => {
@@ -273,6 +269,107 @@ test("a missing credential on the gateway transport answers with a 401", async (
   );
   // The gateway transport does not change the transport of a request behind
   // the client's back: it fails instead of running the CLI.
+  assert.equal(ran, false);
+});
+
+/** An auth profile with a token that is not expired. */
+async function writeUsableAuthProfile(): Promise<string> {
+  return writeAuthProfile({ live: liveRecord("access-token") });
+}
+
+test("an unreachable managed gateway refuses a request that carries client tools", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const authFile = await writeUsableAuthProfile();
+  let ran = false;
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "gateway",
+    authFile,
+    // The gateway service cannot be reached at all.
+    fetchImpl: async () => {
+      throw new Error("fetch failed");
+    },
+    runner: async () => {
+      ran = true;
+      return {
+        text: "fallback answer",
+        usage: null,
+        state: { text: "fallback answer", usage: null, status: "succeeded", error: null },
+      };
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: {
+      messages: [{ role: "user", content: "What time is it in Moscow?" }],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "get_time",
+            description: "Current time in a city",
+            parameters: { type: "object", properties: { city: { type: "string" } } },
+          },
+        },
+      ],
+    },
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // The local CLI cannot execute client tools: it has no way to hand a tool
+  // call back to the client. The refusal is a property of the request, so it
+  // keeps the model out of the lockout.
+  assert.equal(response.status, 400);
+  const body = await response.json();
+  assert.equal(body.error?.type, "invalid_request_error");
+  assert.match(String(body.error?.message ?? ""), /cannot execute client tools/i);
+  // The CLI did not run: it could not have answered the request anyway.
+  assert.equal(ran, false);
+});
+
+test("a managed gateway that rejects the request does not fall back to the local CLI", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const authFile = await writeUsableAuthProfile();
+  let ran = false;
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "gateway",
+    authFile,
+    // The gateway refused the request itself.
+    fetchImpl: async () =>
+      new Response(JSON.stringify({ error: { type: "invalid_request_error", message: "bad" } }), {
+        status: 400,
+        headers: { "content-type": "application/json" },
+      }),
+    runner: async () => {
+      ran = true;
+      return {
+        text: "fallback answer",
+        usage: null,
+        state: { text: "fallback answer", usage: null, status: "succeeded", error: null },
+      };
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // The gateway refused the request. The local CLI would not change that
+  // answer — it is the same request — so the refusal keeps its own status.
+  assert.equal(response.status, 400);
+  // The CLI did not run behind the client's back.
   assert.equal(ran, false);
 });
 
@@ -1228,9 +1325,10 @@ test("a 200 answer that carries an error is a refusal, not an empty answer", asy
   assert.match(String(body.error?.message || ""), /mismatched type/);
 });
 
-test("an unreachable gateway answers 502 — the upstream is down", async () => {
+test("an unreachable gateway falls back to the local CLI", async () => {
   const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
   const authFile = await writeAuthProfile({ live: liveRecord("access-token") });
+  let ran = false;
   const executor = new MinimaxCodeExecutor({
     command: process.execPath,
     args: [fixture],
@@ -1241,6 +1339,14 @@ test("an unreachable gateway answers 502 — the upstream is down", async () => 
     fetchImpl: async () => {
       throw new Error("fetch failed");
     },
+    runner: async () => {
+      ran = true;
+      return {
+        text: "fallback answer",
+        usage: null,
+        state: { text: "fallback answer", usage: null, status: "succeeded", error: null },
+      };
+    },
   });
 
   const result = await executor.execute({
@@ -1250,9 +1356,13 @@ test("an unreachable gateway answers 502 — the upstream is down", async () => 
     credentials: {},
   });
   const response = "response" in result ? result.response : result;
-  // The gateway itself could not be reached: that is an outage of the
-  // upstream, and a 502 keeps the model out of the combos while it lasts.
-  assert.equal(response.status, 502);
+  // The gateway service could not be reached at all. The local CLI is the
+  // fallback of the gateway, and it answers the request from the credential
+  // of the user's own MiniMax Code profile.
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.choices?.[0]?.message?.content, "fallback answer");
+  assert.equal(ran, true);
 });
 
 test("a dead refresh token answers 401 — the credential has to be renewed", async () => {

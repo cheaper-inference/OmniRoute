@@ -94,6 +94,26 @@ function isTransportFailure(error: unknown): boolean {
 }
 
 /**
+ * Whether the gateway could not be reached at all.
+ *
+ * The local CLI is the fallback of the managed gateway, and it is a fallback
+ * for an outage of the gateway service only: a gateway that answers with a
+ * status refused or rejected the request, and the local CLI would not change
+ * that answer — the credential of the CLI is the credential of the user, but
+ * the request is the same request. A 5xx of the gateway says the model
+ * itself is unavailable, and the local CLI talks to the same model.
+ *
+ * A failure of the transport is the other case: the gateway service could
+ * not be reached, and the local CLI is a different path to the model that
+ * answers the request while the gateway is down.
+ */
+function isGatewayUnreachable(error: unknown): boolean {
+  if (error instanceof GatewayStatusError) return false;
+  if (error instanceof GatewayAuthError) return false;
+  return isTransportFailure(error);
+}
+
+/**
  * Ceiling on the estimated input size of one LOCAL CLI request.
  *
  * The local transport has a lower ceiling than the managed gateway, and the
@@ -509,20 +529,19 @@ export function buildMinimaxCodeExecArgs(options: {
 /**
  * Pick the transport for one request.
  *
- * A request that carries client `tools` comes from an agentic client
- * (OpenCode, Codex, ...). Those tools live on the client machine and the
- * model has to call them, so the run goes to the managed gateway: it speaks
- * the native tool protocol and returns the calls to the client.
+ * The managed gateway is the transport of every request: it speaks the native
+ * tool protocol, it needs no CLI installed on the server and it answers in
+ * seconds. The local CLI is not a second transport any more — it is the
+ * fallback of the gateway, for a gateway that cannot be reached.
  *
- * A plain chat request has nothing to execute, so it stays on the local CLI
- * in the lightweight profile — no tools, small prompt, half the latency.
+ * `cli` stays an explicit opt-out for a deployment that wants every request
+ * to run on the locally installed CLI. `auto` is an alias of the default.
  */
 export function resolveMinimaxCodeTransport(
-  configured: "auto" | "gateway" | "cli",
-  hasTools: boolean
+  configured: "auto" | "gateway" | "cli"
 ): "gateway" | "cli" {
-  if (configured !== "auto") return configured;
-  return hasTools ? "gateway" : "cli";
+  if (configured === "cli") return "cli";
+  return "gateway";
 }
 
 export function createExecState(): MinimaxCodeExecState {
@@ -863,7 +882,8 @@ export class MinimaxCodeExecutor extends BaseExecutor {
    *
    * The default is the managed gateway: it is the transport that speaks the
    * native tool protocol, and it needs no CLI installed on the server. The
-   * local CLI stays an explicit transport.
+   * local CLI is the fallback of the gateway, and it stays available as an
+   * explicit transport for a deployment that asks for it.
    */
   private configuredTransport(): "auto" | "gateway" | "cli" {
     const raw = this.options.transport || process.env.MINIMAX_CODE_TRANSPORT || "gateway";
@@ -878,17 +898,17 @@ export class MinimaxCodeExecutor extends BaseExecutor {
   /**
    * Pick the transport for one request.
    *
-   * The default transport is the managed gateway for every request, and it
-   * does not fall back to another transport: a request that cannot be
-   * answered by the transport it asked for fails with that transport named.
-   * In the opt-in `auto` mode a request that carries client `tools` goes to
-   * the gateway — those tools live on the client machine and the model has
-   * to call them, so the gateway has to speak the native tool protocol —
-   * while a plain chat request stays on the local CLI in the lightweight
-   * profile: no tools, small prompt, half the latency.
+   * The managed gateway is the transport of every request — a request that
+   * carries client `tools` and a plain chat request alike. The tools live on
+   * the client machine and the model has to call them, so the gateway has to
+   * speak the native tool protocol; and a plain chat request is faster on the
+   * gateway than on the local CLI.
+   *
+   * The local CLI is the fallback of the gateway, not a transport of its own:
+   * it runs the request when the gateway cannot be reached.
    */
-  private resolveTransport(hasTools: boolean): "gateway" | "cli" {
-    return resolveMinimaxCodeTransport(this.configuredTransport(), hasTools);
+  private resolveTransport(): "gateway" | "cli" {
+    return resolveMinimaxCodeTransport(this.configuredTransport());
   }
 
   /**
@@ -1236,7 +1256,7 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     const effort = resolveModelEffort(resolution.model, body);
     const clientTools = Array.isArray(body.tools) ? body.tools : [];
     const wantsTools = clientTools.length > 0;
-    const transport = this.resolveTransport(wantsTools);
+    const transport = this.resolveTransport();
     const maxSteps = this.resolveMaxSteps();
     if (this.unknownTransport) {
       input.log?.warn?.(
@@ -1255,7 +1275,54 @@ export class MinimaxCodeExecutor extends BaseExecutor {
         ` clientTools=${clientTools.length} cwd=${this.resolveCwd()}`
     );
 
-    if (transport === "cli") {
+    // The local CLI runs the request when the transport is the local CLI, and
+    // when the managed gateway could not be reached: the CLI is the fallback
+    // of the gateway, not a transport of its own.
+    let localTransport = transport === "cli";
+
+    if (transport === "gateway") {
+      try {
+        return input.stream
+          ? await this.executeGatewayStream(input, resolution.model, body)
+          : await this.executeGateway(input, resolution.model, body);
+      } catch (error) {
+        const message = sanitizeErrorMessage(
+          error instanceof Error ? error.message : String(error)
+        );
+        if (isGatewayUnreachable(error)) {
+          // The gateway could not be reached at all. The local CLI is the
+          // fallback of the gateway for that case: it reads the credential of
+          // the user's own MiniMax Code profile, so the request is answered
+          // while the gateway is down. A request that carries client tools is
+          // not answered by it: the CLI has no way to hand a tool call back
+          // to the client, and it is refused below with a request-scoped 400.
+          input.log?.warn?.(
+            "MINIMAX_CODE",
+            `gateway transport failed, falling back to the local CLI: ${message}`
+          );
+          localTransport = true;
+        } else {
+          // The status of the gateway answer decides what the runtime does with
+          // the failure. A 4xx is a property of the request and keeps its own
+          // status: a refusal that arrives as a 502 is recorded as a model
+          // outage, and the model lockout that follows takes the MiniMax leg
+          // out of every combo for minutes (incident 2026-10-21). Only a
+          // failure of the transport itself is a 502; everything else is ours
+          // and stays a 500.
+          const status = gatewayFailureStatus(error);
+          const detail =
+            status === 502
+              ? `MiniMax managed gateway unavailable (${message})`
+              : `MiniMax gateway rejected the request (${status}): ${message}`;
+          input.log?.warn?.("MINIMAX_CODE", detail);
+          // The failure happens before the stream is opened, so the request
+          // answers with a real status instead of an error inside a 200 stream.
+          return errorResponse(status, detail, gatewayFailureClassification(error));
+        }
+      }
+    }
+
+    if (localTransport) {
       // The local transport would run the request for minutes and answer
       // `limit_exceeded`, which locks the model out of the fallbacks. A
       // request-scoped refusal answers with a fast 413 instead.
@@ -1286,43 +1353,19 @@ export class MinimaxCodeExecutor extends BaseExecutor {
       }
     }
 
-    if (transport === "gateway") {
-      try {
-        return input.stream
-          ? await this.executeGatewayStream(input, resolution.model, body)
-          : await this.executeGateway(input, resolution.model, body);
-      } catch (error) {
-        const message = sanitizeErrorMessage(
-          error instanceof Error ? error.message : String(error)
-        );
-        // The status of the gateway answer decides what the runtime does with
-        // the failure. A 4xx is a property of the request and keeps its own
-        // status: a refusal that arrives as a 502 is recorded as a model
-        // outage, and the model lockout that follows takes the MiniMax leg
-        // out of every combo for minutes (incident 2026-10-21). Only a
-        // failure of the transport itself is a 502; everything else is ours
-        // and stays a 500.
-        const status = gatewayFailureStatus(error);
-        const detail =
-          status === 502
-            ? `MiniMax managed gateway unavailable (${message})`
-            : `MiniMax gateway rejected the request (${status}): ${message}`;
-        input.log?.warn?.("MINIMAX_CODE", detail);
-        // The failure happens before the stream is opened, so the request
-        // answers with a real status instead of an error inside a 200 stream.
-        return errorResponse(status, detail, gatewayFailureClassification(error));
-      }
-    }
-
-    if (transport === "cli" && wantsTools) {
+    if (localTransport && wantsTools) {
       // The local CLI cannot execute client tools: it has no way to hand a
       // tool call back to the client, and answering with prose would make the
       // client believe the turn is over without a single tool having run.
       // The host-tools opt-in is about the agent's own tools, not about the
       // caller's protocol, so it does not unlock this path.
       const message =
-        "MiniMax Code: the local CLI transport cannot execute client tools — " +
-        "use the managed gateway transport for a request that carries tools.";
+        transport === "cli"
+          ? "MiniMax Code: the local CLI transport cannot execute client tools — " +
+            "use the managed gateway transport for a request that carries tools."
+          : "MiniMax Code: the managed gateway could not be reached and the local CLI " +
+            "transport cannot execute client tools — the request carries tools and the CLI " +
+            "has no way to hand a tool call back to the client.";
       input.log?.warn?.("MINIMAX_CODE", message);
       // The refusal is a property of the request, not of the model: it is
       // answered with a request-scoped status so it cannot lock the model
