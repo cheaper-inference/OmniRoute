@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { extractResponsesId } from "../../open-sse/handlers/chatCore/attemptLogging.ts";
 import { FORMATS } from "../../open-sse/translator/formats.ts";
@@ -15,6 +18,15 @@ import {
 } from "../../open-sse/utils/streamFailureFinalization.ts";
 import { buildStreamFailureSnapshot } from "../../open-sse/utils/streamFailureSnapshot.ts";
 import { createStructuredSSECollector } from "../../open-sse/utils/streamPayloadCollector.ts";
+
+// The end-to-end terminal-preservation test below drives the full SSE transform,
+// which persists usage through the usage DB. Isolate it in a throwaway DATA_DIR so
+// the probe never touches the operator's real store, and release the DB handle in
+// `after` so the native runner does not hang on an open SQLite connection.
+const terminalTestDataDir = mkdtempSync(join(tmpdir(), "omniroute-stream-terminal-"));
+process.env.DATA_DIR = terminalTestDataDir;
+const dbCore = await import("../../src/lib/db/core.ts");
+const { createSSEStream } = await import("../../open-sse/utils/stream.ts");
 
 const FAILURE_MESSAGE = "Upstream terminated mid-stream";
 const RESPONSES_FORMAT = FORMATS.OPENAI_RESPONSES;
@@ -335,4 +347,85 @@ test("collector that throws while counting still yields a zero-count snapshot", 
   });
   assert.equal(snapshot.providerEventCount, 0);
   assert.ok(!("providerSummary" in snapshot));
+});
+
+test.after(() => {
+  dbCore.resetDbInstance();
+  if (existsSync(terminalTestDataDir)) {
+    rmSync(terminalTestDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+const terminalTextEncoder = new TextEncoder();
+
+async function drainReadSide(readable: ReadableStream<Uint8Array>): Promise<{
+  output: string;
+  errored: boolean;
+}> {
+  const reader = readable.getReader();
+  const decoder = new TextDecoder();
+  const parts: string[] = [];
+  let errored = false;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      parts.push(decoder.decode(value, { stream: true }));
+    }
+  } catch {
+    errored = true;
+  } finally {
+    reader.releaseLock();
+  }
+  return { output: parts.join(""), errored };
+}
+
+test("passthrough failure after content keeps the queued terminal for a slow reader", async () => {
+  const transform = createSSEStream({
+    mode: "passthrough",
+    sourceFormat: FORMATS.OPENAI,
+    provider: "test",
+    model: "test-model",
+    body: { messages: [{ role: "user", content: "hi" }] },
+    // Mark the failure handled so the aborter does not also clear the pending
+    // request; the terminal-preservation decision stays in production code.
+    onFailure: () => true,
+  });
+  const { readable, writable } = transform;
+  const writer = writable.getWriter();
+
+  const contentFrame = `data: ${JSON.stringify({
+    id: "chatcmpl-terminal",
+    object: "chat.completion.chunk",
+    created: 1,
+    model: "test-model",
+    choices: [{ delta: { content: "Hello" }, index: 0 }],
+  })}\n\n`;
+  const failureFrame = `data: ${JSON.stringify({
+    error: {
+      message: "Upstream cut the stream after partial content",
+      code: "stream_terminated",
+    },
+  })}\n\n`;
+
+  // A slow reader: nothing is read while the upstream content and the failure
+  // frame are enqueued; the whole transform (including flush) runs to completion
+  // before the first read.
+  await writer.write(terminalTextEncoder.encode(contentFrame));
+  await writer.write(terminalTextEncoder.encode(failureFrame));
+  await writer.close();
+
+  const { output, errored } = await drainReadSide(readable);
+
+  assert.equal(errored, false, "a slow reader must not be cut off by a rejected readable side");
+  assert.ok(output.includes("Hello"), "content queued before the failure must survive");
+  assert.ok(
+    output.includes("Upstream cut the stream after partial content"),
+    "the queued failure terminal must be consumed by the slow reader"
+  );
+  assert.equal(
+    output.split("Upstream cut the stream after partial content").length - 1,
+    1,
+    "the queued failure terminal must be delivered exactly once, never duplicated"
+  );
 });

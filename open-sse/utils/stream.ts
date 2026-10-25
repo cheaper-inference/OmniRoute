@@ -1363,6 +1363,12 @@ export function createSSEStream(options: StreamOptions = {}) {
     model,
   });
 
+  // Keep queued chunks only once client-visible content was forwarded. A
+  // pre-content failure must still reject the stream, while a post-content
+  // failure leaves its queued terminal for slow readers instead of truncating.
+  const shouldPreserveQueuedChunks = (): boolean =>
+    totalContentLength > 0 || passthroughHasToolCalls || forwardedValuableChunk;
+
   const emitTranslatedFailureAndAbort = (
     controller: TransformStreamDefaultController<Uint8Array>,
     payload: unknown
@@ -1378,6 +1384,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     doneSent = true;
     abortStreamFailure(controller, failure.internalFailure, failure.publicMessage, {
       notifyComplete: true,
+      preserveQueuedChunks: shouldPreserveQueuedChunks(),
     });
     return true;
   };
@@ -2206,7 +2213,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                   if (isFinishChunk) {
                     if (passthroughSawFinishReason) continue;
                     if (nativeFailure && !totalContentLength && !passthroughHasToolCalls)
-                      return abortStreamFailure(controller, nativeFailure, nativeFailure.message);
+                      return abortStreamFailure(controller, nativeFailure, nativeFailure.message, {
+                        preserveQueuedChunks: shouldPreserveQueuedChunks(),
+                      });
                     passthroughSawFinishReason = true;
                   }
 
@@ -2294,7 +2303,8 @@ export function createSSEStream(options: StreamOptions = {}) {
               abortStreamFailure(
                 controller,
                 failurePayload,
-                publicFailureMessage || "Upstream failure"
+                publicFailureMessage || "Upstream failure",
+                { preserveQueuedChunks: shouldPreserveQueuedChunks() }
               );
               return;
             }
@@ -2626,7 +2636,9 @@ export function createSSEStream(options: StreamOptions = {}) {
               restoreOpenAIToolNames: (parsed: JsonRecord) =>
                 restoreOpenAIToolNames(parsed, toolNameMap),
               abortFailure: (failure: StreamFailurePayload, publicMessage: string) =>
-                abortStreamFailure(controller, failure, publicMessage),
+                abortStreamFailure(controller, failure, publicMessage, {
+                  preserveQueuedChunks: shouldPreserveQueuedChunks(),
+                }),
             };
 
             for (const line of normalizedTailLines) {
@@ -2709,7 +2721,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                 abortStreamFailure(
                   controller,
                   bufferedProjectedFailure.internalFailure,
-                  bufferedProjectedFailure.publicMessage
+                  bufferedProjectedFailure.publicMessage,
+                  { preserveQueuedChunks: shouldPreserveQueuedChunks() }
                 );
                 return;
               }
@@ -3084,7 +3097,10 @@ export function createSSEStream(options: StreamOptions = {}) {
             const errorBody = buildErrorBody(err.status, err.message);
             const publicErrorMessage = errorBody.error.message;
             err.streamSnapshot ??= buildStreamFailureSnapshot(providerPayloadCollector);
-            abortStreamFailure(controller, err, publicErrorMessage, { notifyComplete: true });
+            abortStreamFailure(controller, err, publicErrorMessage, {
+              notifyComplete: true,
+              preserveQueuedChunks: shouldPreserveQueuedChunks(),
+            });
             return;
           }
 
