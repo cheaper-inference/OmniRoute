@@ -547,6 +547,39 @@ function buildAutopilotCombo(
   };
 }
 
+/** Ids and names of the combos that are not explicitly disabled (`isActive !== false`). */
+function collectActiveComboKeys(
+  combos: ComboRecord[] | undefined
+): { ids: Set<string>; names: Set<string> } | null {
+  if (!combos) return null;
+  const ids = new Set<string>();
+  const names = new Set<string>();
+  for (const combo of combos) {
+    if ((combo as JsonRecord).isActive === false) continue;
+    if (typeof combo.id === "string") ids.add(combo.id);
+    if (typeof combo.name === "string") names.add(combo.name);
+  }
+  return { ids, names };
+}
+
+function summarizeAutopilotCombos(combos: ComboAutopilotCombo[]) {
+  const countState = (state: ComboAutopilotCombo["state"]) =>
+    combos.filter((combo) => combo.state === state).length;
+  const issueCount = combos.reduce((sum, combo) => sum + combo.issues.length, 0);
+  const suggestionCount = combos.reduce(
+    (sum, combo) =>
+      sum + combo.issues.reduce((issueSum, issue) => issueSum + issue.actions.length, 0),
+    0
+  );
+  return {
+    downCount: countState("down"),
+    degradedCount: countState("degraded"),
+    healthyCount: countState("healthy"),
+    issueCount,
+    suggestionCount,
+  };
+}
+
 export async function buildComboHealthAutopilotReport(
   options: ComboHealthAutopilotOptions
 ): Promise<ComboAutopilotReport> {
@@ -582,29 +615,14 @@ export async function buildComboHealthAutopilotReport(
   const forecastsByComboId = new Map(forecast.combos.map((entry) => [entry.comboId, entry]));
   const providerIssues = buildProviderIssueIndex(providerHealth);
   const quotaMonitorConnectionsByProvider = buildQuotaMonitorConnectionIndex(providerHealth);
-  const activeComboIds = combosSnapshot
-    ? new Set(
-        combosSnapshot.flatMap((combo) =>
-          (combo as JsonRecord).isActive !== false && typeof combo.id === "string" ? [combo.id] : []
-        )
-      )
-    : null;
-  const activeComboNames = combosSnapshot
-    ? new Set(
-        combosSnapshot.flatMap((combo) =>
-          (combo as JsonRecord).isActive !== false && typeof combo.name === "string"
-            ? [combo.name]
-            : []
-        )
-      )
-    : null;
+  const activeComboKeys = collectActiveComboKeys(combosSnapshot);
 
   const allCombos = health.combos
     .filter(
       (combo) =>
-        !activeComboIds ||
-        activeComboIds.has(combo.comboId) ||
-        activeComboNames?.has(combo.comboName)
+        !activeComboKeys ||
+        activeComboKeys.ids.has(combo.comboId) ||
+        activeComboKeys.names.has(combo.comboName)
     )
     .map((combo) =>
       buildAutopilotCombo(
@@ -618,29 +636,21 @@ export async function buildComboHealthAutopilotReport(
   const combos = includeHealthy
     ? allCombos
     : allCombos.filter((combo) => combo.state !== "healthy");
-  const downCount = allCombos.filter((combo) => combo.state === "down").length;
-  const degradedCount = allCombos.filter((combo) => combo.state === "degraded").length;
-  const healthyCount = allCombos.filter((combo) => combo.state === "healthy").length;
-  const issueCount = allCombos.reduce((sum, combo) => sum + combo.issues.length, 0);
-  const suggestionCount = allCombos.reduce(
-    (sum, combo) =>
-      sum + combo.issues.reduce((issueSum, issue) => issueSum + issue.actions.length, 0),
-    0
-  );
+  const counts = summarizeAutopilotCombos(allCombos);
 
   return {
-    status: downCount > 0 ? "critical" : degradedCount > 0 ? "warning" : "healthy",
+    status: counts.downCount > 0 ? "critical" : counts.degradedCount > 0 ? "warning" : "healthy",
     checkedAt,
     timeRange: options.range,
     horizon: options.horizon,
     summary: {
       comboCount: allCombos.length,
-      healthyCount,
-      degradedCount,
-      downCount,
-      issueCount,
-      suggestionCount,
-      actionableCount: suggestionCount,
+      healthyCount: counts.healthyCount,
+      degradedCount: counts.degradedCount,
+      downCount: counts.downCount,
+      issueCount: counts.issueCount,
+      suggestionCount: counts.suggestionCount,
+      actionableCount: counts.suggestionCount,
     },
     combos,
   };

@@ -283,6 +283,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/transfer/providerTransfer.ts": 1,
     "src/lib/usage/callLogs.ts": 1,
     "src/lib/usage/codexResetCredits.ts": 1,
+    // #17974: the combo health report reads the active connections once to decide which
+    // targets still have an eligible, model-advertising account — a read-only monitoring
+    // lookup behind the health endpoint, never connection selection or dispatch (class C).
+    "src/lib/usage/comboHealth.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
     // v3.8.51 #12805 (c042a5188): grok-cli sibling of codexResetCredits.ts, same

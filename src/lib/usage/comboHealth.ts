@@ -15,6 +15,7 @@ import { isModelAdvertisedByConnection } from "@/domain/connectionModelRules";
 import { isSelfHostedChatProvider } from "@/shared/constants/providers";
 import { getComboMetrics } from "@omniroute/open-sse/services/comboMetrics.ts";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo.ts";
+import type { ComboInput, ComboLike } from "@omniroute/open-sse/services/combo/types.ts";
 import type {
   ComboRecord,
   ComboHealthMetrics,
@@ -521,6 +522,67 @@ async function resolveEligibleConnectionIds(
   }
 }
 
+type TargetQuotaView = {
+  quotaRemainingPct: number | null;
+  quotaIsExhausted: boolean | null;
+  quotaTrend: "improving" | "stable" | "declining" | null;
+  quotaScope: "connection" | "provider" | "none";
+};
+
+/** Quota for the pinned connection when it has snapshots, else the provider-wide rollup. */
+function resolveTargetQuota(target: ResolvedComboTargetView, since: string): TargetQuotaView {
+  if (target.connectionId) {
+    const connectionHealth = buildConnectionHealth(
+      target.provider,
+      target.connectionId,
+      getQuotaSnapshots({
+        provider: target.provider,
+        connectionId: target.connectionId,
+        since,
+      })
+    );
+    if (connectionHealth) {
+      return {
+        quotaRemainingPct: connectionHealth.remainingPct,
+        quotaIsExhausted: connectionHealth.isExhausted,
+        quotaTrend: connectionHealth.trend,
+        quotaScope: "connection",
+      };
+    }
+  }
+
+  const providerSnapshots = getQuotaSnapshots({ provider: target.provider, since });
+  if (providerSnapshots.length > 0) {
+    const providerHealth = buildProviderHealth(target.provider, providerSnapshots);
+    return {
+      quotaRemainingPct: providerHealth.remainingPct,
+      quotaIsExhausted: providerHealth.isExhausted,
+      quotaTrend: providerHealth.trend,
+      quotaScope: "provider",
+    };
+  }
+  return { quotaRemainingPct: null, quotaIsExhausted: null, quotaTrend: null, quotaScope: "none" };
+}
+
+function pickHistoricalTargetMetric(
+  target: ResolvedComboTargetView,
+  historicalMetrics: HistoricalTargetMetrics
+): HistoricalTargetMetricView | null {
+  if (target.connectionId) {
+    const concreteExecutionKey = `${target.stepId}@${target.connectionId}`;
+    return (
+      historicalMetrics.byExecutionKey.get(concreteExecutionKey) ??
+      historicalMetrics.byExecutionKey.get(target.executionKey) ??
+      null
+    );
+  }
+  return (
+    historicalMetrics.byStepId.get(target.stepId) ??
+    historicalMetrics.byExecutionKey.get(target.executionKey) ??
+    null
+  );
+}
+
 async function buildTargetHealth(
   comboName: string,
   targets: ResolvedComboTargetView[],
@@ -534,56 +596,13 @@ async function buildTargetHealth(
 
   return Promise.all(
     targets.map(async (target) => {
-      const concreteExecutionKey = target.connectionId
-        ? `${target.stepId}@${target.connectionId}`
-        : target.executionKey;
-      const historicalMetric = target.connectionId
-        ? (historicalMetrics.byExecutionKey.get(concreteExecutionKey) ??
-          historicalMetrics.byExecutionKey.get(target.executionKey) ??
-          null)
-        : (historicalMetrics.byStepId.get(target.stepId) ??
-          historicalMetrics.byExecutionKey.get(target.executionKey) ??
-          null);
+      const historicalMetric = pickHistoricalTargetMetric(target, historicalMetrics);
       const runtimeMetric =
         historicalMetric === null
           ? ((comboMetrics?.byTarget?.[target.executionKey] ||
               comboMetrics?.byTarget?.[target.stepId] ||
               null) as RuntimeTargetMetricView | null)
           : null;
-
-      let quotaRemainingPct: number | null = null;
-      let quotaIsExhausted: boolean | null = null;
-      let quotaTrend: "improving" | "stable" | "declining" | null = null;
-      let quotaScope: "connection" | "provider" | "none" = "none";
-
-      if (target.connectionId) {
-        const connectionHealth = buildConnectionHealth(
-          target.provider,
-          target.connectionId,
-          getQuotaSnapshots({
-            provider: target.provider,
-            connectionId: target.connectionId,
-            since,
-          })
-        );
-        if (connectionHealth) {
-          quotaRemainingPct = connectionHealth.remainingPct;
-          quotaIsExhausted = connectionHealth.isExhausted;
-          quotaTrend = connectionHealth.trend;
-          quotaScope = "connection";
-        }
-      }
-
-      if (quotaScope === "none") {
-        const providerSnapshots = getQuotaSnapshots({ provider: target.provider, since });
-        const providerHealth = buildProviderHealth(target.provider, providerSnapshots);
-        if (providerSnapshots.length > 0) {
-          quotaRemainingPct = providerHealth.remainingPct;
-          quotaIsExhausted = providerHealth.isExhausted;
-          quotaTrend = providerHealth.trend;
-          quotaScope = "provider";
-        }
-      }
 
       return {
         executionKey: target.executionKey,
@@ -597,10 +616,7 @@ async function buildTargetHealth(
         avgLatencyMs: toSafeNumber(historicalMetric?.avgLatencyMs ?? runtimeMetric?.avgLatencyMs),
         lastStatus: historicalMetric?.lastStatus ?? runtimeMetric?.lastStatus ?? null,
         lastUsedAt: historicalMetric?.lastUsedAt ?? runtimeMetric?.lastUsedAt ?? null,
-        quotaRemainingPct,
-        quotaIsExhausted,
-        quotaTrend,
-        quotaScope,
+        ...resolveTargetQuota(target, since),
         eligibleConnectionIds: await resolveEligibleConnectionIds(
           target,
           activeConnectionsByProvider?.get(target.provider) ??
@@ -611,6 +627,17 @@ async function buildTargetHealth(
       };
     })
   );
+}
+
+/** ComboRecord is a loose DB row; the resolver only reads fields it validates itself. */
+function resolveComboTargetViews(
+  combo: ComboRecord,
+  allCombos: ComboRecord[]
+): ResolvedComboTargetView[] {
+  return resolveNestedComboTargets(
+    combo as unknown as ComboLike,
+    allCombos as unknown as ComboInput[]
+  ) as ResolvedComboTargetView[];
 }
 
 async function buildComboHealth(
@@ -625,7 +652,7 @@ async function buildComboHealth(
   const comboName = typeof combo.name === "string" ? combo.name : "";
   if (!comboId || !comboName) return null;
 
-  const targets = resolveNestedComboTargets(combo, allCombos) as ResolvedComboTargetView[];
+  const targets = resolveComboTargetViews(combo, allCombos);
   const models = targets.map((target) => target.modelStr);
   const providers = Array.from(new Set(targets.map((target) => target.provider)));
 
@@ -689,7 +716,7 @@ export async function buildComboHealthResponse(opts: {
 
   const targetProviders = new Set<string>();
   for (const combo of combos) {
-    for (const target of resolveNestedComboTargets(combo, allCombos) as ResolvedComboTargetView[]) {
+    for (const target of resolveComboTargetViews(combo, allCombos)) {
       if (isSelfHostedChatProvider(target.provider)) targetProviders.add(target.provider);
     }
   }
