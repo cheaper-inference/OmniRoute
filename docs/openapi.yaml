@@ -6763,7 +6763,7 @@ paths:
         "302":
           description: >-
             Redirect to `/dashboard` on success, or to
-            `/login?oidc_error={missing_code|invalid_state|not_configured|token_exchange|token_response|no_id_token|subject_not_allowed|id_token_invalid|server_misconfigured}`
+            `/login?oidc_error={missing_code|invalid_state|not_configured|token_exchange|token_response|no_id_token|subject_not_allowed|role_not_allowed|id_token_invalid|server_misconfigured}`
             on failure.
 
   /api/init:
