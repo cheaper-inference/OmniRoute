@@ -153,6 +153,8 @@ function extractReplayItems(body: unknown): unknown[] | null {
     return {
       ...message,
       type: "message",
+      // Codex drops system-role history; developer preserves these instructions.
+      role: message.role === "system" ? "developer" : message.role,
       content:
         typeof message.content === "string"
           ? [

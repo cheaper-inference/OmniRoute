@@ -608,6 +608,38 @@ test("CodexAppServerExecutor: a harness tool result is replayed into the next th
   assert.match(second.sseText, /Hello/);
 });
 
+test("CodexAppServerExecutor: system instructions survive native tool-history replay", async () => {
+  const content = [{ type: "input_text", text: "Follow SYSTEM_MARKER when answering." }];
+  const call = {
+    type: "function_call",
+    name: "get_weather",
+    call_id: "call_system",
+    arguments: "{}",
+  };
+  const result = { type: "function_call_output", call_id: "call_system", output: "18C" };
+  for (const system of [
+    { type: "message", role: "system", content },
+    { role: "system", content: "Follow SYSTEM_MARKER when answering." },
+  ]) {
+    const { sent } = await runStreamingTurn({
+      input: [system, { role: "developer", content: "Keep developer instructions." }, call, result],
+    });
+    const replay = sent.find((frame) => frame.method === "thread/inject_items");
+    assert.ok(replay);
+    assert.deepEqual((replay.params as Record<string, unknown>).items, [
+      { type: "message", role: "developer", content },
+      {
+        type: "message",
+        role: "developer",
+        content: [{ type: "input_text", text: "Keep developer instructions." }],
+      },
+      call,
+      result,
+    ]);
+    assert.equal(system.role, "system", "normalization must not mutate the caller's history");
+  }
+});
+
 for (const type of ["custom_tool_call_output", "tool_search_output"]) {
   test(`CodexAppServerExecutor: preserves structured ${type} history`, async () => {
     const call =
