@@ -1,1 +1,1 @@
-- **fix(sse):** Preserve harness tool calls, results and system instructions across Codex app-server requests by replaying structured history. ([#18105](https://github.com/cheaper-inference/OmniRoute/pull/18105)) — thanks @xc0derx
+- **fix(sse):** Preserve harness tool calls, results and system instructions across Codex app-server requests by replaying structured history; update the bundled Codex CLI and matching client identity to 0.164.0. ([#18105](https://github.com/cheaper-inference/OmniRoute/pull/18105)) — thanks @xc0derx
