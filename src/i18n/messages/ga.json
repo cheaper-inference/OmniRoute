@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Anois",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "Níor aimsíodh aon iontráil bailí. Seiceáil an fhormáid agus déan iarracht eile.",
     "bulkImportSuccess": "Iompórtáil críochnaithe: cruthaíodh {created}, nuashonraíodh {updated}, theip ar {failed}",
     "bulkImportErrorLine": "Líne {line}: {reason}",
-    "bulkImportMaxExceeded": "Uasmhéid de 100 seachfhreastalaí in aghaidh na hiompórtála",
+    "bulkImportMaxExceeded": "Uasmhéid {max} seachfhreastalai in aon iompórtáil amháin",
     "bulkImportPreview": "Réamhamharc",
     "clearAssignment": "(glan an sannadh)",
     "bulkProxyAssignment": "Sannadh Seachfhreastalaithe ar an Mórchóir",

@@ -2298,15 +2298,15 @@ export async function getProviderCredentialsWithQuotaPreflight(
     // Returns the minimum-remaining cutoff for a window — matches the
     // dashboard's quota bars so the number the user types in the modal
     // means the same thing as the percentage rendered on the bar.
+    const lookupWindowNames = (windowName: string): string[] =>
+      provider === "codex"
+        ? uniqueWindows(
+            [windowName, toCodexBaseQuotaWindowName(windowName)].filter(Boolean) as string[]
+          )
+        : [windowName];
     const resolveMinRemainingPercent = (windowName: string | null): number => {
       if (windowName !== null) {
-        const lookupWindowNames =
-          provider === "codex"
-            ? uniqueWindows(
-                [windowName, toCodexBaseQuotaWindowName(windowName)].filter(Boolean) as string[]
-              )
-            : [windowName];
-        for (const lookupWindowName of lookupWindowNames) {
+        for (const lookupWindowName of lookupWindowNames(windowName)) {
           const override = perConnectionWindowOverrides[lookupWindowName];
           if (typeof override === "number") return override;
           const providerDefault = providerWindowMap[lookupWindowName];
@@ -2330,6 +2330,19 @@ export async function getProviderCredentialsWithQuotaPreflight(
         {
           resolveMinRemainingPercent,
           resolveWarnRemainingPercent: () => warnThresholdPercent,
+          isConfiguredCutoff: (windowName) => {
+            if (windowName !== null) {
+              for (const name of lookupWindowNames(windowName)) {
+                if (
+                  Object.hasOwn(perConnectionWindowOverrides, name) ||
+                  Object.hasOwn(providerWindowMap, name)
+                ) {
+                  return true;
+                }
+              }
+            }
+            return globalCutoffEnabled || globalDefaultIsRestrictive || legacyForceEnable;
+          },
         }
       );
     } catch (error) {

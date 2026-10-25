@@ -4,11 +4,11 @@
 
 ---
 
-> **स्वतः-जनरेट किया गया** `src/shared/constants/providers.ts` से — मैन्युअल रूप से संपादित न करें।
-> पुनः जनरेट करने के लिए: `npm run gen:provider-reference`
-> **अंतिम बार जनरेट किया गया:** 2026-10-18
+> `src/shared/constants/providers.ts` से **स्वतः जनरेट किया गया** — इसे मैन्युअल रूप से संपादित न करें।
+> इसके साथ पुनः जनरेट करें: `npm run gen:provider-reference`
+> **अंतिम बार जनरेट किया गया:** 2026-10-20
 
-कुल प्रदाता: **375**। नीचे श्रेणी-वार विवरण देखें।
+कुल प्रोवाइडर: **375**। नीचे श्रेणीवार विवरण देखें।
 
 ## श्रेणियाँ
 
@@ -461,8 +461,8 @@
 
 - कैटलॉग: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - रजिस्ट्री (प्रति-मॉडल विवरण): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- एक्ज़िक्यूटर्स: [`open-sse/executors/`](../../open-sse/executors/) (154 कार्यान्वयन)
-- ट्रांसलेटर्स: [`open-sse/translator/`](../../open-sse/translator/)
+- निष्पादक: [`open-sse/executors/`](../../open-sse/executors/) (156 कार्यान्वयन)
+- अनुवादक: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## यह भी देखें
 

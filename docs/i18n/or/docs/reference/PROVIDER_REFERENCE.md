@@ -4,11 +4,11 @@
 
 ---
 
-> **ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଉତ୍ପନ୍ନ** `src/shared/constants/providers.ts` ରୁ — ହାତରେ ସମ୍ପାଦନ କରନ୍ତୁ ନାହିଁ।
-> ପୁନଃ ଉତ୍ପନ୍ନ କରନ୍ତୁ: `npm run gen:provider-reference`
-> **ଶେଷଥର ଉତ୍ପନ୍ନ ହୋଇଥିଲା:** 2026-10-18
+> `src/shared/constants/providers.ts`ରୁ **ସ୍ୱୟଂଚାଳିତ ଭାବେ ସୃଷ୍ଟି** — ହାତରେ ସମ୍ପାଦନା କରନ୍ତୁ ନାହିଁ।
+> ଏହା ସହିତ ପୁନଃ ସୃଷ୍ଟି କରନ୍ତୁ: `npm run gen:provider-reference`
+> **ଶେଷ ଥର ସୃଷ୍ଟି:** 2026-10-20
 
-ମୋଟ ପ୍ରୋଭାଇଡର: **375**। ବର୍ଗ ଅନୁସାରେ ବିଭାଜନ ତଳେ ଦେଖନ୍ତୁ।
+ମୋଟ ପ୍ରଦାନକାରୀ: **375**। ନିମ୍ନରେ ବର୍ଗଭିତ୍ତିକ ବିବରଣୀ ଦେଖନ୍ତୁ।
 
 ## ଶ୍ରେଣୀଗୁଡ଼ିକ
 
@@ -459,9 +459,9 @@
 
 ## ସତ୍ୟର ଉତ୍ସଗୁଡ଼ିକ
 
-- କାଟାଲଗ୍: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- ରେଜିଷ୍ଟ୍ରି (ପ୍ରତି-ମଡେଲ୍ ବିବରଣୀ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ଏକ୍ସିକ୍ୟୁଟର୍ଗୁଡ଼ିକ: [`open-sse/executors/`](../../open-sse/executors/) (154 କାର୍ଯ୍ୟାନ୍ୱୟନ)
+- କ୍ୟାଟାଲଗ୍: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- ରେଜିଷ୍ଟ୍ରି (ପ୍ରତି ମଡେଲ୍ର ବିବରଣୀ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- ଏକ୍ସିକ୍ୟୁଟର୍ଗୁଡ଼ିକ: [`open-sse/executors/`](../../open-sse/executors/) (156ଟି ଇମ୍ପ୍ଲିମେଣ୍ଟେସନ୍)
 - ଟ୍ରାନ୍ସଲେଟର୍ଗୁଡ଼ିକ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ଏହା ମଧ୍ୟ ଦେଖନ୍ତୁ

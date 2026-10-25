@@ -17,6 +17,7 @@
  *
  */
 
+import type { PreDispatchExclusion } from "./pinRecovery.ts";
 import type { ResolvedComboTarget, ComboLogger } from "./types.ts";
 import { expandTargetsByQuotaAwareConnections } from "./quotaStrategies.ts";
 
@@ -65,6 +66,8 @@ export interface ExpandTargetsForAllStrategiesArgs {
   log: ComboLogger;
   /** API-key allowedConnections scope, intersected with the expansion. */
   apiKeyAllowedConnectionIds?: string[] | null;
+  /** Request-scoped exclusions used only when expansion empties the pool. */
+  exclusions?: PreDispatchExclusion[];
   /**
    * Test-only injection point replacing the underlying expander, used to
    * exercise the fail-open path deterministically (T10). Production callers
@@ -75,7 +78,7 @@ export interface ExpandTargetsForAllStrategiesArgs {
     comboName: string,
     log: ComboLogger,
     apiKeyAllowedConnectionIds: string[] | null
-  ) => Promise<{ expandedTargets: ResolvedComboTarget[] }>;
+  ) => Promise<{ expandedTargets: ResolvedComboTarget[]; exclusions?: PreDispatchExclusion[] }>;
 }
 
 /**
@@ -125,7 +128,7 @@ export async function expandTargetsForAllStrategies(
       args.__testExpander ??
       ((t: ResolvedComboTarget[], name: string, l: ComboLogger, allowed: string[] | null) =>
         expandTargetsByQuotaAwareConnections(t, name, l, allowed));
-    const { expandedTargets } = await expander(
+    const { expandedTargets, exclusions } = await expander(
       targets,
       comboName,
       log,
@@ -144,6 +147,7 @@ export async function expandTargetsForAllStrategies(
       counts.set(key, seen + 1);
       capped.push(target);
     }
+    args.exclusions?.push(...(exclusions ?? []));
     return capped;
   } catch (error) {
     // Fail-open (spec section 3.1): expansion is a best-effort pre-filter, never a

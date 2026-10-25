@@ -351,7 +351,7 @@ Content-Type: application/json
 
 Az elérhető szolgáltatók közé tartozik az OpenAI (GPT Image 2), az xAI (Grok Image), a Together AI (FLUX), a Fireworks AI, a Nebius (FLUX), a Hyperbolic, a NanoBanana, az **OpenRouter**, a **ZenMux**, az SD WebUI (helyi) és a ComfyUI (helyi).
 
-Az `n` darab képet ad vissza a `data[]` tömbben. Azon szolgáltatók esetében, amelyek upstream API-ja hívásonként egy képet ad vissza
+Az `n` paraméter `n` darab képet ad vissza a `data[]` tömbben. Azon szolgáltatók esetében, amelyek upstream API-ja hívásonként egy képet ad vissza
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
 NVIDIA NIM, Cloudflare Workers AI), `n` külön upstream hívás történik, amelyek közül legfeljebb 4 lehet folyamatban egyszerre. A
 rögzített `seed` értékét a rendszer a hívás indexével növeli (`seed`, `seed + 1`, …), így a képek különböznek, de
@@ -612,6 +612,82 @@ GET /api/v1/provider-plugin-manifest
 Visszaadja a Bifrost, a CLIProxyAPI és a jövőbeli sidecar útválasztók által használt, JSON-biztos szolgáltatói bővítménymanifesztet. A válasz a TypeScript szolgáltatói regiszterből jön létre, és szándékosan nem tartalmaz OAuth-kliens-titkokat, futásidejű környezetfeloldást, végrehajtó függvényeket, kérésfejléceket és fiókadatokat.
 
 Ezt a végpontot akkor használja, ha egy sidecar folyamaton kívül fut, és nem tudja közvetlenül importálni az `open-sse/config/providerPluginManifestRegistry.ts` fájlt.
+
+---
+
+## ElevenLabs hanggenerálás
+
+Hozzon létre egy `elevenlabs` szolgáltatói kapcsolatot az OmniRoute-ban az ElevenLabs API-kulcsával.
+Az ügyfelek az **OmniRoute**-kulcsukkal hitelesítenek (`Authorization: Bearer $OMNIROUTE_API_KEY`);
+a gateway a tárolt szolgáltatói kulcsot `xi-api-key` fejlécként adja át. Soha ne küldjön ElevenLabs-kulcsot
+gateway bearer tokenként.
+
+| Metódus | Útvonal                     | Válasz                                   | API-kulcs végpont-kategória |
+| ------- | --------------------------- | ---------------------------------------- | --------------------------- |
+| POST    | `/v1/sound-generation`      | Natív hangbájtok                         | `elevenlabs`                |
+| POST    | `/v1/music`                 | Natív hangbájtok                         | `music`                     |
+| POST    | `/v1/music/stream`          | Streamelt hangbájtok                     | `music`                     |
+| POST    | `/v1/music/detailed`        | Natív multipart hang és kompozíciós terv | `music`                     |
+| POST    | `/v1/music/detailed/stream` | Natív SSE-metaadatok és hangdarabok      | `music`                     |
+| POST    | `/v1/music/plan`            | JSON kompozíciós terv                    | `music`                     |
+
+Ezek a végpontok kiegészítik a meglévő `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}` és `/v1/speech-to-text` útvonalakat. A natív JSON-mezők
+és lekérdezési paraméterek, például az `output_format` és az `enable_logging`, megmaradnak.
+A `/v1/music/detailed` válaszai megtartják a multipart határolóikat; multipartként dolgozza fel őket.
+A `/v1/music/detailed/stream` `text/event-stream` választ ad kompozíciós metaadatokkal és
+base64 hangdarabokkal SSE-eseményekben. Mind a hat útvonal támogatja a CORS preflightot.
+
+```bash
+export OMNIROUTE_BASE_URL="http://localhost:20128"
+export OMNIROUTE_API_KEY="your-omniroute-api-key"
+
+# A short sound effect. Duration: 0.5 to 30 seconds.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/sound-generation?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"A single soft bell chime","duration_seconds":1,"model_id":"eleven_text_to_sound_v2"}' \
+  --output effect.mp3
+
+# Music duration is expressed in milliseconds: 3000 to 600000.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Gentle instrumental piano","music_length_ms":10000,"force_instrumental":true,"model_id":"music_v1"}' \
+  --output music.mp3
+```
+
+A fokozatos hangkézbesítéshez használja a `/v1/music/stream` végpontot ugyanazzal a JSON-törzzsel. A kompozíció
+pontosan egyet fogad el a `prompt` és a `composition_plan` közül; a `/v1/music/plan` megköveteli a `prompt` mezőt,
+és opcionálisan elfogadja a `source_composition_plan` mezőt. A natív sémák megőrzik a további
+szolgáltatói mezőket, így a kompozíciós terv verziói és a finomhangolási beállítások eljutnak az ElevenLabshez.
+
+Az egységes `/v1/music/generations` végpont az `elevenlabs/music_v1`,
+`elevenlabs/music_v2` és `elevenlabs/music_v2_5` modelleket is elfogadja. Aktív ElevenLabs-kapcsolat esetén
+ezeket a modelleket a zenei katalógus is megjeleníti. Ez a végpont a következőt adja vissza:
+`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. A `duration` mezője
+másodpercben értendő, és a `music_length_ms` mezőre képeződik le; egy kifejezetten megadott `music_length_ms` elsőbbséget élvez.
+Az `instrumental` a `force_instrumental` mezőre képeződik le, a natív mező elsőbbségével.
+Streameléshez a natív streamelő végpontokat, kizárólag kompozíciós tervre épülő kérésekhez
+pedig a natív kompozíciós végpontot használja.
+
+```bash
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
+```
+
+A végpont-, modell-, költségkeret- és kapcsolati korlátozások még az upstream hívás előtt érvényesülnek. A natív
+útvonalak változatlanul adják vissza az upstream állapotkódokat és hibatörzseket, beleértve a `402` kódot a
+csomagkorlátozásnál és a `429` kódot a kvótakorlátnál. A `character-cost`, `song-id`, `request-id` és `retry-after`
+fejlécek megmaradnak, ha jelen vannak. Az ingyenes kreditegyenleg nem garantál hozzáférést minden
+zenei modellhez, kimeneti formátumhoz vagy API-funkcióhoz: az ElevenLabs kérésenként dönt a jogosultságról.
+Az egységes végpont megőrzi a hibaállapot-kódokat az OmniRoute normalizált hibaburkolatában.
+
+Upstream szerződések: [hangeffektusok](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+[zenei kompozíció](https://elevenlabs.io/docs/api-reference/music/compose) és
+[streamelt zenei részletek](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
 
 ---
 

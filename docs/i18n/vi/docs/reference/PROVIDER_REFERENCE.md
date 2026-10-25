@@ -6,9 +6,9 @@
 
 > **Được tạo tự động** từ `src/shared/constants/providers.ts` — không chỉnh sửa thủ công.
 > Tạo lại bằng: `npm run gen:provider-reference`
-> **Lần tạo gần nhất:** 2026-10-18
+> **Lần tạo gần nhất:** 2026-10-20
 
-Tổng số nhà cung cấp: **375**. Xem phân tích theo danh mục bên dưới.
+Tổng số nhà cung cấp: **375**. Xem phân loại theo danh mục bên dưới.
 
 ## Danh mục
 
@@ -457,12 +457,12 @@ Sử dụng bảng điều khiển tại `/dashboard/providers` để bật, c�
 | ------ | ------- | ---------------------------- | -------- | --------- | ------- |
 | `auto` | `auto`  | Tự động (Không cần cấu hình) | Hệ thống | —         | —       |
 
-## Nguồn chân lý (Sources of truth)
+## Nguồn dữ liệu chuẩn
 
-- Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Registry (chi tiết theo từng model): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (154 triển khai)
-- Translators: [`open-sse/translator/`](../../open-sse/translator/)
+- Danh mục: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- Registry (chi tiết theo từng mô hình): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Trình thực thi: [`open-sse/executors/`](../../open-sse/executors/) (156 bản triển khai)
+- Trình chuyển đổi: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Xem thêm
 

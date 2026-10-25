@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Nu",
       "coreConfigPath": "Core-configuratiebestand",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absoluut .json-pad (extensie in kleine letters). Leeg = niet genereren. Elke synchronisatie schrijft '<path>'.generated naast het overgenomen bestand, nooit erin.",
+      "coreConfigPathDesc": "Absoluut .json/.yaml/.yml-pad (extensie in kleine letters). Leeg = niet genereren. Elke synchronisatie schrijft '<path>'.generated naast het overgenomen bestand, nooit erin.",
       "lastSwitchKind": "Reden van wisseling",
       "switchKind": {
         "ip_quota_429": "quotum",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "Geen geldige vermeldingen gevonden. Controleer het formaat en probeer het opnieuw.",
     "bulkImportSuccess": "Import voltooid: {created} gemaakt, {updated} bijgewerkt, {failed} mislukt",
     "bulkImportErrorLine": "Regel {line}: {reason}",
-    "bulkImportMaxExceeded": "Maximaal 100 proxy's per import",
+    "bulkImportMaxExceeded": "Maximaal {max} proxy's per import",
     "bulkImportPreview": "Voorbeeld",
     "clearAssignment": "(duidelijke opdracht)",
     "bulkProxyAssignment": "Bulkproxytoewijzing",

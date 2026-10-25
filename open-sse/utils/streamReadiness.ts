@@ -227,6 +227,7 @@ const LEGIT_EMPTY_TERMINAL_REASONS = new Set([
   "content_filter",
   "max_tokens",
   "tool_use",
+  "refusal",
 ]);
 
 // #16438 content probe only (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): Claude terminals
@@ -234,7 +235,6 @@ const LEGIT_EMPTY_TERMINAL_REASONS = new Set([
 // into a retryable empty_content failure. The default watcher keeps the set above.
 const CONTENT_PROBE_LEGIT_EMPTY_TERMINAL_REASONS: ReadonlySet<string> = new Set([
   ...LEGIT_EMPTY_TERMINAL_REASONS,
-  "refusal",
   "pause_turn",
   "model_context_window_exceeded",
 ]);

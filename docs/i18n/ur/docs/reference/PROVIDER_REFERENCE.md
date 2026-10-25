@@ -4,11 +4,11 @@
 
 ---
 
-> **خودکار طور پر تیار کردہ** — `src/shared/constants/providers.ts` سے — دستی طور پر ترمیم نہ کریں۔
+> **خودکار طور پر تیار کردہ** از `src/shared/constants/providers.ts` — دستی طور پر ترمیم نہ کریں۔
 > دوبارہ تیار کرنے کے لیے: `npm run gen:provider-reference`
-> **آخری بار تیار شدہ:** 2026-10-18
+> **آخری بار تیار کیا گیا:** 2026-10-20
 
-کل فراہم کنندگان: **375**۔ زمرہ وار تفصیل نیچے دیکھیں۔
+کل فراہم کنندگان: **375**۔ ذیل میں زمرہ وار تفصیل دیکھیں۔
 
 ## زمرے
 
@@ -457,12 +457,12 @@
 | ------ | ------ | ---------------- | ---- | -------- | ---- |
 | `auto` | `auto` | Auto (بلا تشکیل) | سسٹم | —        | —    |
 
-## حقیقت کے ذرائع
+## مستند ماخذ
 
-- کیٹالاگ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- رجسٹری (فی ماڈل تفصیلات): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ایگزیکیوٹرز: [`open-sse/executors/`](../../open-sse/executors/) (154 نفاذات)
-- ٹرانسلیٹرز: [`open-sse/translator/`](../../open-sse/translator/)
+- کیٹلاگ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- رجسٹری (ہر ماڈل کی تفصیلات): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- ایگزیکیوٹرز: [`open-sse/executors/`](../../open-sse/executors/) (156 امپلیمینٹیشنز)
+- مترجمین: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## مزید دیکھیے
 

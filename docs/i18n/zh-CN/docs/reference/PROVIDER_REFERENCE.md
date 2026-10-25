@@ -4,9 +4,9 @@
 
 ---
 
-> **自动生成** 自 `src/shared/constants/providers.ts` — 请勿手动编辑。
-> 重新生成请运行：`npm run gen:provider-reference`
-> **最后生成时间：** 2026-10-18
+> **自动生成**自 `src/shared/constants/providers.ts` — 请勿手动编辑。
+> 使用以下命令重新生成：`npm run gen:provider-reference`
+> **最后生成时间：** 2026-10-20
 
 提供者总数：**375**。请参阅下方的分类明细。
 
@@ -459,10 +459,10 @@
 
 ## 事实来源
 
-- 目录（Catalog）：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- 注册表（各模型详细信息）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- 执行器（Executors）：[`open-sse/executors/`](../../open-sse/executors/)（154 个实现）
-- 转换器（Translators）：[`open-sse/translator/`](../../open-sse/translator/)
+- 目录：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- 注册表（各模型的详细信息）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- 执行器：[`open-sse/executors/`](../../open-sse/executors/)（156 个实现）
+- 转换器：[`open-sse/translator/`](../../open-sse/translator/)
 
 ## 另请参阅
 

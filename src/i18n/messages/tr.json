@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Şimdi",
       "coreConfigPath": "Çekirdek yapılandırma dosyası",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Mutlak .json yolu (küçük harfli uzantı). Boş = oluşturma. Her eşitleme, uygulanan dosyanın yanına '<path>'.generated yazar, dosyanın kendisine asla yazmaz.",
+      "coreConfigPathDesc": "Mutlak .json/.yaml/.yml yolu (küçük harfli uzantı). Boş = oluşturma. Her eşitleme, uygulanan dosyanın yanına '<path>'.generated yazar, dosyanın kendisine asla yazmaz.",
       "lastSwitchKind": "Geçiş nedeni",
       "switchKind": {
         "ip_quota_429": "kota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "Geçerli giriş bulunamadı. Formatı kontrol edip tekrar deneyin.",
     "bulkImportSuccess": "İçe aktarma tamamlandı: {created} oluşturuldu, {updated} güncellendi, {failed} başarısız oldu",
     "bulkImportErrorLine": "Satır {line}: {reason}",
-    "bulkImportMaxExceeded": "İçe aktarma başına maksimum 100 proxy",
+    "bulkImportMaxExceeded": "İçe aktarma başına maksimum {max} proxy",
     "bulkImportPreview": "Önizleme",
     "clearAssignment": "(açık atama)",
     "bulkProxyAssignment": "Toplu Vekalet Ataması",
