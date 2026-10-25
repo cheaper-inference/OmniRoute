@@ -428,8 +428,8 @@ export class CodexAppServerExecutor extends BaseExecutor {
 
         if (replayItems) {
           await client.request("thread/inject_items", { threadId, items: replayItems });
-          if (terminated) return;
         }
+        if (terminated) return;
         const turnInput: CodexTextUserInput[] = replayItems
           ? []
           : [{ type: "text", text: promptText, text_elements: [] }];
