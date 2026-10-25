@@ -136,7 +136,8 @@ export function createSseTextTransform(
     isSnapshot?: boolean
   ) => string,
   onFlush?: (lastJson: any, isJsonStream?: boolean, lastContentJson?: any) => any,
-  onCancel?: () => void
+  onCancel?: () => void,
+  opts?: { processToolArgs?: boolean }
 ): TransformStream {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder("utf-8");
@@ -244,7 +245,11 @@ export function createSseTextTransform(
                   continue;
                 }
                 if (field === "toolArgs" || field === "partialJson") {
-                  obj[key] = val;
+                  if (opts?.processToolArgs === true) {
+                    obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot);
+                  } else {
+                    obj[key] = val;
+                  }
                   matched = true;
                   continue;
                 }

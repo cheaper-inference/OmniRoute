@@ -46,30 +46,7 @@ function matchesCcrRetrieveToolName(name: string | undefined): boolean {
 /** Leading marker that identifies the injected instruction (also the idempotency sentinel). */
 export const CCR_PROTOCOL_MARKER_SENTINEL = "[CCR protocol]";
 
-export const CCR_PROTOCOL_INSTRUCTION = [
-  `${CCR_PROTOCOL_MARKER_SENTINEL} HARD EXECUTION RULE: This conversation uses content-compression-retrieve (CCR).`,
-  "Each real marker has a section number and a short Preview. A preview and hash are only lookup",
-  "labels; neither contains the archived text or counts as retrieved evidence. If the current task",
-  "needs old context, compare the task with the previews and select the single most relevant marker",
-  "—never choose by position or fetch every section by default. Make an actual call to",
-  `\`${CCR_RETRIEVE_TOOL_NAME}\` with that marker's exact hash before explaining, summarizing, or answering.`,
-  "Merely repeating a marker or proposing a tool call is not retrieval; wait for the tool result.",
-  "Do not answer from a preview. After the",
-  "tool returns, inspect the result and base the answer on the returned archived content. If the",
-  "result is not found, contains only metadata/a preview, or lacks the requested fact, do not treat",
-  "it as a successful retrieval; try the next most relevant marker if one exists. If no returned",
-  "block contains the fact, say retrieval did not recover it rather than guessing.",
-  "For exact names, numbers, or phrases, verify the requested value in the returned content before",
-  "answering; do not rely on memory or inference.",
-  "Do not deliberate in text or ask permission. Retrieve ONE marker per tool call; retrieve another",
-  "only when the first result does not contain the needed evidence. If the task does not need old",
-  "context or no preview is relevant, do not retrieve. This is an execution step, not a request to",
-  "discuss CCR. The `<24hex>` text in the marker format `[CCR retrieve hash=<24hex> chars=N]` is a",
-  "placeholder, not a real hash. The full original text (N characters) was stored and replaced by",
-  "the marker. Copy all 24 lowercase hexadecimal characters verbatim; a changed or partial hash",
-  "fails retrieval. A marker like `[dedup:ref sha=...]` is different: its content appeared earlier",
-  `in this conversation, so look back for it and do NOT call ${CCR_RETRIEVE_TOOL_NAME}.`,
-].join(" ");
+export const CCR_PROTOCOL_INSTRUCTION = `${CCR_PROTOCOL_MARKER_SENTINEL} This conversation uses content-compression-retrieve (CCR). When you see a marker like \`[CCR retrieve hash=<24hex> chars=N]\` in a message, it means the full original text (N characters) was stored and replaced with this marker to save space — call the \`${CCR_RETRIEVE_TOOL_NAME}\` tool with that hash to get the original text back verbatim. Copy the hash EXACTLY as written — all 24 hexadecimal characters, never truncated, abbreviated, or reformatted — a single wrong character will make the retrieval fail. If you instead see a marker like \`[dedup:ref sha=...]\`, it means that content already appeared earlier in this conversation — look back in the message history for it; do NOT call ${CCR_RETRIEVE_TOOL_NAME} for a dedup reference.`;
 
 type ToolLike = {
   type?: unknown;

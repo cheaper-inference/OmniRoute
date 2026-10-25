@@ -1,6 +1,7 @@
 import { createHmac, randomBytes } from "crypto";
 import { isOwnListenerSelfHop, SELF_HOP_HEADER } from "@omniroute/open-sse/utils/selfHop.ts";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
+import { getProcessStore, sharedSymbol } from "@/shared/utils/processSingleton";
 
 const ADMISSION_BYPASS_VALUE = "internal";
 const FINGERPRINT_KEY = "omniroute-admission-fingerprint-v1";
@@ -27,12 +28,11 @@ export function resolveSessionId(request: Request): string {
 // visionBridgeHelpers) and the verifiers (isInternalAdmissionBypass, API-key
 // validation) read this same value. It lives on globalThis because the proxy (Next
 // middleware bundle) and the route handlers load separate copies of this module.
-const SELF_LOOP_SECRET_KEY = Symbol.for("omniroute.selfLoopSecret");
+const SELF_LOOP_SECRET_KEY = sharedSymbol("selfLoopSecret");
 const selfLoopStore = globalThis as unknown as Record<symbol, string | undefined>;
 
 function getGeneratedSelfLoopSecret(): string {
-  selfLoopStore[SELF_LOOP_SECRET_KEY] ??= randomBytes(32).toString("hex");
-  return selfLoopStore[SELF_LOOP_SECRET_KEY];
+  return getProcessStore("selfLoopSecret", () => randomBytes(32).toString("hex"));
 }
 
 /** The generated self-loop secret, or null when none was created yet. Never creates it. */

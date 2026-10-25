@@ -204,14 +204,19 @@ function loadEnvFile() {
 
   // The package directory is replaced by the next `npm i -g`, so a .env kept
   // there is silently lost. Say so once, and only when that file actually
-  // supplied something.
+  // supplied an effective value that is not a regenerated template default.
   const durableEnvPath = join(process.env.DATA_DIR || getDefaultDataDir(), ".env");
-  const suppliedKeys = [...keyOrigin.values()].some((origin) => origin === join(ROOT, ".env"));
+  const suppliedValues = new Map(
+    [...keyOrigin]
+      .filter(([, origin]) => origin === join(ROOT, ".env"))
+      .map(([key]) => [key, process.env[key]])
+  );
   const volatileWarning = describeVolatileEnvWarning({
     envPath: join(ROOT, ".env"),
     packageRoot: ROOT,
     durableEnvPath,
-    suppliedKeys,
+    suppliedKeys: suppliedValues.size > 0,
+    suppliedValues,
   });
   if (volatileWarning && loadedEnvPaths.includes(join(ROOT, ".env"))) {
     console.warn(`  \x1b[33m⚠ ${volatileWarning}\x1b[0m`);
@@ -231,7 +236,7 @@ loadEnvFile();
 
 // Generate STORAGE_ENCRYPTION_KEY if not set (persisted to DATA_DIR or getDefaultDataDir()/.env)
 // This ensures the key survives across upgrades and is not regenerated on each install.
-// See: https://github.com/diegosouzapw/OmniRoute/issues/1622
+// See: https://github.com/cheaper-inference/OmniRoute/issues/1622
 //
 // Only provision for commands that actually touch encrypted storage. Purely
 // informational invocations (`--version`, `--help`, `help`) must not create a

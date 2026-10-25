@@ -1,4 +1,6 @@
 import { handleRerank } from "@omniroute/open-sse/handlers/rerank.ts";
+import { recordModalCallCost } from "@/domain/costRules";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import {
   getProviderCredentialsWithQuotaPreflight,
   clearRecoveredProviderState,
@@ -8,6 +10,12 @@ import { parseRerankModel, getRerankProvider } from "@omniroute/open-sse/config/
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  createComboTargetKeyGate,
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import { v1RerankSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { loadRerankProviderNodes } from "@/app/api/v1/_shared/rerankProviderNodes";
@@ -68,6 +76,13 @@ async function postHandler(request, context) {
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, body.model);
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection (direct and per combo target) stays inside
+  // the key's connection scope, the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  // Respect the authenticated API key's credential scope before checking model capabilities.
+  const endpointMismatch = await getRequestedModelEndpointMismatch(body.model, "rerank");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
 
   return handleValidatedRerankRequestBody(
     {
@@ -80,6 +95,8 @@ async function postHandler(request, context) {
     {
       apiKeyId: policy.apiKeyInfo?.id || null,
       apiKeyName: policy.apiKeyInfo?.name || null,
+      allowedConnections: scope.allowedConnections,
+      isComboTargetAllowed: createComboTargetKeyGate(policy, body.model),
     }
   );
 }
@@ -95,6 +112,10 @@ type ValidatedRerankBody = {
 type RerankRequestMeta = {
   apiKeyId?: string | null;
   apiKeyName?: string | null;
+  /** GHSA-3w2r: the caller key's connection scope (null/undefined = unscoped). */
+  allowedConnections?: string[] | null;
+  /** GHSA-3w2r: combo per-target model gate for the caller key (undefined = none). */
+  isComboTargetAllowed?: (targetModelStr: string) => Promise<boolean>;
 };
 
 /**
@@ -132,7 +153,7 @@ export async function handleValidatedRerankRequestBody(
               { ...reqBody, model: targetModelStr } as ValidatedRerankBody,
               meta
             ),
-          isModelAvailable: undefined,
+          isModelAvailable: meta.isComboTargetAllowed,
           log,
           settings,
           allCombos: allCombos as any,
@@ -179,7 +200,7 @@ export async function handleValidatedRerankRequestBody(
     const credentials = await getProviderCredentialsWithQuotaPreflight(
       effectiveProviderId,
       null,
-      null,
+      meta.allowedConnections ?? null,
       resolvedModelId
     );
     if (!credentials) {
@@ -187,6 +208,9 @@ export async function handleValidatedRerankRequestBody(
         HTTP_STATUS.BAD_REQUEST,
         `No credentials for provider: ${effectiveProviderId}`
       );
+    }
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      return keyScopeBlockedResponse(effectiveProviderId, credentials);
     }
     if (isAllRateLimitedCredentials(credentials)) {
       return rateLimitedProviderResponse(effectiveProviderId, credentials);
@@ -237,6 +261,7 @@ export async function handleValidatedRerankRequestBody(
       connectionId: (credentials as { connectionId?: string } | null)?.connectionId || null,
       apiKeyId: meta.apiKeyId || null,
       apiKeyName: meta.apiKeyName || null,
+      onPricedCall: (call) => recordModalCallCost(meta.apiKeyId, call),
     });
     if (response?.ok) {
       await clearRecoveredProviderState(credentials);
@@ -252,12 +277,19 @@ export async function handleValidatedRerankRequestBody(
     const localProvider = localProviders.find((p) => p.id === prefix);
 
     if (localProvider) {
-      const credentials = await getProviderCredentialsWithQuotaPreflight(localProvider.providerId);
+      const credentials = await getProviderCredentialsWithQuotaPreflight(
+        localProvider.providerId,
+        null,
+        meta.allowedConnections ?? null
+      );
       if (!credentials) {
         return errorResponse(
           HTTP_STATUS.BAD_REQUEST,
           `No credentials for local provider: ${prefix}`
         );
+      }
+      if (isKeyScopeBlockedCredentials(credentials)) {
+        return keyScopeBlockedResponse(prefix, credentials);
       }
       if (isAllRateLimitedCredentials(credentials)) {
         return rateLimitedProviderResponse(prefix, credentials);

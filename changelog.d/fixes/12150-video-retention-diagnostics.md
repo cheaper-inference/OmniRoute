@@ -1,1 +1,0 @@
-- **fix(video):** Keep transcript redaction shadows out of diagnostic logs and redact video transcript fields in pre-dispatch rejection snapshots while preserving live request and response payloads (#12150, #12430).

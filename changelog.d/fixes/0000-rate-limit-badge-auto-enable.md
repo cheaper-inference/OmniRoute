@@ -1,1 +1,0 @@
-- **dashboard:** the connection rate-limit badge now shows "Protected" when the auto-enable safety net (`autoEnableApiKeyProviders` / `RATE_LIMIT_AUTO_ENABLE`) already covers an active API-key connection, matching what the limiter actually does (#15790)

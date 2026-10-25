@@ -224,11 +224,11 @@ test("xp: level titles and tiers at every boundary", () => {
   );
 });
 
-test("characterization: xp currently maps non-finite totals to level 1 and leaks NaN/-Infinity", () => {
+test("xp: non-finite totals consistently start from level 1 with 282 XP remaining", () => {
   assert.equal(xp.calculateLevel(Number.NaN), 1);
   assert.equal(xp.calculateLevel(Number.POSITIVE_INFINITY), 1);
-  assert.ok(Number.isNaN(xp.xpToNextLevel(Number.NaN)));
-  assert.equal(xp.xpToNextLevel(Number.POSITIVE_INFINITY), Number.NEGATIVE_INFINITY);
+  assert.equal(xp.xpToNextLevel(Number.NaN), 282);
+  assert.equal(xp.xpToNextLevel(Number.POSITIVE_INFINITY), 282);
 });
 
 // ─── (b) Contracts — award pipeline (deterministic fixture) ──────────────────
@@ -341,14 +341,14 @@ test("emitGamificationEvent: empty apiKeyId is a silent no-op", async () => {
   assert.equal((await leaderboard.getTopN("global")).length, before);
 });
 
-test("characterization: emitGamificationEvent(unknown action) currently writes a 0-score leaderboard row", async () => {
+test("emitGamificationEvent: unknown action leaves the leaderboard unchanged", async () => {
   await events.emitGamificationEvent({
     apiKeyId: "fx-unknown",
     action: "not-an-action" as "request",
   });
   assert.equal(gamificationDb.getXp("fx-unknown"), null);
   const row = (await leaderboard.getTopN("global")).find((r) => r.apiKeyId === "fx-unknown");
-  assert.equal(row?.score, 0);
+  assert.equal(row, undefined);
 });
 
 test("validateScoreChange: >1000 XP/min is rejected with a reason; small awards allowed", async () => {
@@ -381,12 +381,12 @@ test("transferTokens: validation errors and insufficient balance", async () => {
   assert.deepEqual(await sharing.getHistory("a"), []);
 });
 
-test("characterization: transferTokens(NaN) currently passes validation and surfaces the raw SQLite error", async () => {
+test("transferTokens: NaN is rejected before reaching the SQLite ledger", async () => {
   const result = await sharing.transferTokens("a", "b", Number.NaN, undefined, "idem-nan");
   assert.deepEqual(result, {
     success: false,
-    idempotencyKey: "idem-nan",
-    error: "NOT NULL constraint failed: token_ledger.amount",
+    idempotencyKey: "",
+    error: "Amount must be positive",
   });
 });
 
@@ -447,9 +447,8 @@ test("servers: connect → list (no key hash exposed) → disconnect", async () 
   await servers.disconnectServer(conn.id);
 });
 
-test("characterization: evaluateBadges currently rejects with SyntaxError when any definition has malformed criteria", async () => {
-  // The outer loop skips a malformed definition, but the `hidden` (secret-badge) branch
-  // re-parses EVERY definition without a guard, so one bad row aborts the whole evaluation.
+test("badges: malformed criteria do not abort valid awards or hidden prerequisite evaluation", async () => {
+  // The malformed definition remains stored but is ignored consistently in both paths.
   core
     .getDbInstance()
     .prepare(
@@ -457,5 +456,9 @@ test("characterization: evaluateBadges currently rejects with SyntaxError when a
        VALUES ('char-broken', 'Broken', '', 'x', 'usage', 'common', 'not json', 0)`
     )
     .run();
-  await assert.rejects(badges.evaluateBadges("fx-fresh", "request"), SyntaxError);
+  gamificationDb.addXp("fx-criteria-recovery", "request", 1);
+  const unlocked = await badges.evaluateBadges("fx-criteria-recovery", "request");
+  assert.ok(unlocked.includes("first-token"));
+  assert.equal(gamificationDb.hasBadge("fx-criteria-recovery", "first-token"), true);
+  assert.equal(gamificationDb.hasBadge("fx-criteria-recovery", "char-broken"), false);
 });

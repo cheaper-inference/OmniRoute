@@ -13,6 +13,13 @@ import { buildClineHeaders } from "@/shared/utils/clineAuth";
 import { usesCcWireImage } from "./ccWireImageBuiltins.ts";
 
 const OPENAI_COMPATIBLE_PREFIX = "openai-compatible-";
+const OPENAI_COMPATIBLE_ID_TYPES = [
+  "responses",
+  "embeddings",
+  "audio-transcriptions",
+  "audio-speech",
+  "images-generations",
+] as const;
 const OPENAI_COMPATIBLE_DEFAULTS = {
   baseUrl: "https://api.openai.com/v1",
 };
@@ -61,12 +68,14 @@ export function getOpenAICompatibleType(
   ) {
     return configuredType;
   }
-  if (provider.includes("responses")) return "responses";
-  if (provider.includes("embeddings")) return "embeddings";
-  if (provider.includes("audio-transcriptions")) return "audio-transcriptions";
-  if (provider.includes("audio-speech")) return "audio-speech";
-  if (provider.includes("images-generations")) return "images-generations";
-  return "chat";
+  // Legacy fallback: the type is the fixed segment right after the prefix
+  // (`openai-compatible-<type>-<suffix>`, or the bare `openai-compatible-<type>`).
+  // Anchored so an operator-chosen suffix (e.g. `-chat-my-responses`) never flips it.
+  const marker = provider.slice(OPENAI_COMPATIBLE_PREFIX.length);
+  const legacyType = OPENAI_COMPATIBLE_ID_TYPES.find(
+    (type) => marker === type || marker.startsWith(`${type}-`)
+  );
+  return legacyType || "chat";
 }
 
 function buildOpenAICompatibleUrl(baseUrl, apiType) {

@@ -131,7 +131,7 @@
   },
   "open-sse/executors/kiro.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 3
+      "count": 2
     }
   },
   "open-sse/executors/kiro/eventstream.ts": {
@@ -191,7 +191,7 @@
   },
   "open-sse/handlers/imageGeneration.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 5
+      "count": 4
     }
   },
   "open-sse/handlers/musicGeneration.ts": {
@@ -291,11 +291,6 @@
   "open-sse/mcp-server/tools/githubSkillTools.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
-    }
-  },
-  "open-sse/mcp-server/tools/obsidianTools.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
     }
   },
   "open-sse/mcp-server/tools/pickFastestModel.ts": {
@@ -568,11 +563,6 @@
       "count": 1
     }
   },
-  "open-sse/services/videoCombo.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "open-sse/transformer/responsesTransformer.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 3
@@ -638,11 +628,6 @@
       "count": 3
     }
   },
-  "open-sse/utils/ollamaTransform.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "open-sse/utils/setupPolyfill.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 5
@@ -650,7 +635,7 @@
   },
   "open-sse/utils/stream.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 2
+      "count": 1
     }
   },
   "open-sse/utils/streamHelpers.ts": {
@@ -658,19 +643,9 @@
       "count": 1
     }
   },
-  "open-sse/utils/usageTracking.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/app/(dashboard)/dashboard/HomePageClient.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 2
-    }
-  },
-  "src/app/(dashboard)/dashboard/a2a/page.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 6
     }
   },
   "src/app/(dashboard)/dashboard/analytics/CompressionAnalyticsTab.tsx": {
@@ -743,11 +718,6 @@
       "count": 1
     }
   },
-  "src/app/(dashboard)/dashboard/mcp/page.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "src/app/(dashboard)/dashboard/playground/components/tabs/CompareTab.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -810,7 +780,7 @@
   },
   "src/app/(dashboard)/dashboard/providers/page.tsx": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 4
+      "count": 2
     }
   },
   "src/app/(dashboard)/dashboard/providers/utils/buildCurl.ts": {
@@ -875,7 +845,7 @@
   },
   "src/app/(dashboard)/dashboard/settings/components/ProxyRegistryManager.tsx": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 3
+      "count": 2
     }
   },
   "src/app/(dashboard)/dashboard/settings/components/ResponsesStatePolicyTab.tsx": {
@@ -891,11 +861,6 @@
   "src/app/(dashboard)/dashboard/tools/agent-bridge/components/AgentList.tsx": {
     "no-restricted-syntax": {
       "count": 3
-    }
-  },
-  "src/app/(dashboard)/dashboard/tools/traffic-inspector/components/RequestStreamingList.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "src/app/(dashboard)/dashboard/tools/traffic-inspector/components/TopBarControls.tsx": {
@@ -1028,11 +993,6 @@
       "count": 1
     }
   },
-  "src/app/api/relay/tokens/[id]/route.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "src/app/api/search/stats/route.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -1109,9 +1069,6 @@
     }
   },
   "src/app/api/v1/messages/count_tokens/route.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    },
     "no-restricted-imports": {
       "count": 1
     }
@@ -1574,11 +1531,6 @@
       "count": 1
     }
   },
-  "src/lib/usage/costCalculator.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
   "src/lib/usage/fetcher.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 7
@@ -1634,17 +1586,12 @@
   },
   "src/mitm/manager.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 3
+      "count": 2
     }
   },
   "src/server/ws/liveServer.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 5
-    }
-  },
-  "src/shared/components/DegradationBadge.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "src/shared/components/KiroAuthModal.tsx": {
@@ -1654,11 +1601,6 @@
   },
   "src/shared/components/LanguageSelector.tsx": {
     "@next/next/no-img-element": {
-      "count": 1
-    }
-  },
-  "src/shared/components/NotificationToast.tsx": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -1675,14 +1617,6 @@
   "src/shared/components/RequestTimeline.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
-    }
-  },
-  "src/shared/components/Sidebar.tsx": {
-    "@next/next/no-img-element": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
     }
   },
   "src/shared/components/analytics/rechartsUsageCharts.tsx": {
@@ -2543,11 +2477,6 @@
       "count": 10
     }
   },
-  "tests/unit/chat-cooldown-aware-retry.test.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 10
-    }
-  },
   "tests/unit/chat-rate-limit-body-lock.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 2
@@ -2899,7 +2828,7 @@
   },
   "tests/unit/cli-sync-commands.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 21
+      "count": 11
     },
     "@typescript-eslint/no-unused-vars": {
       "count": 2
@@ -3015,16 +2944,6 @@
   "tests/unit/combo-context-relay.test.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
-    }
-  },
-  "tests/unit/combo-fingerprint-expansion.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "tests/unit/combo-health-route.test.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 3
     }
   },
   "tests/unit/combo-pipeline.test.ts": {
@@ -4008,11 +3927,6 @@
   },
   "tests/unit/opencode-executor.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 1
-    }
-  },
-  "tests/unit/opencode-premium-keyless-gate-8681.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },

@@ -1,7 +1,7 @@
 {
   "name": "omniroute",
-  "version": "3.8.52",
-  "description": "Unified AI router with 372 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
+  "version": "3.8.53",
+  "description": "Unified AI router with 375 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
   "type": "module",
   "bin": {
     "omniroute": "bin/omniroute.mjs",
@@ -47,6 +47,7 @@
     "config/release/wreq-js-rust-license-inventory.json",
     "config/release/wreq-js-rust-notices.md",
     "scripts/build/build-next-isolated.mjs",
+    "scripts/i18n/generate-global-error-messages.mjs",
     "scripts/build/runtime-env.mjs",
     "scripts/packs/optionalPackManifest.mjs",
     "scripts/packs/optionalPackInstaller.mjs",
@@ -65,7 +66,8 @@
   ],
   "workspaces": [
     "open-sse",
-    "packages/browser-pool"
+    "packages/browser-pool",
+    "packages/ui-kit"
   ],
   "engines": {
     "node": ">=22.22.2 <23 || >=24.0.0 <27"
@@ -89,7 +91,7 @@
   "author": "diegosouzapw",
   "repository": {
     "type": "git",
-    "url": "https://github.com/diegosouzapw/OmniRoute"
+    "url": "https://github.com/cheaper-inference/OmniRoute"
   },
   "homepage": "https://omniroute.online",
   "scripts": {
@@ -101,6 +103,7 @@
     "bench:compression": "bun scripts/compression/benchmark.ts",
     "bench:heap-body": "node --expose-gc --import tsx/esm scripts/perf/request-body-heap.ts",
     "bench:routing-events": "node --import tsx/esm scripts/perf/routing-events-bench.ts",
+    "bench:egress-quota-rotation": "node --import tsx/esm scripts/perf/egress-quota-rotation-bench.ts",
     "bench:highwatermark": "node --import tsx/esm scripts/perf/benchmark-highwatermark.ts",
     "perf:lts-baseline": "node scripts/perf/lts-baseline.mjs",
     "eval:compression": "node --import tsx scripts/compression-eval/index.ts",
@@ -150,6 +153,8 @@
     "test:fixes": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/fixes-p1.test.ts",
     "test:security": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/security-fase01.test.ts",
     "test:property": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --test --test-force-exit tests/unit/correctness/*.property.test.ts",
+    "check:boundary": "node scripts/quality/measure-boundary.mjs",
+    "check:boundary:ratchet": "node scripts/quality/measure-boundary.mjs --ratchet",
     "check:cycles": "node scripts/check/check-cycles.mjs",
     "check:cycles:ratchet": "node scripts/check/check-cycles.mjs --ratchet",
     "vendor:chatgpt-web:status": "node scripts/dev/vendor-chatgpt-web.mjs status",
@@ -311,7 +316,10 @@
     "i18n:check-new-keys": "node scripts/i18n/check-new-key-coverage.mjs",
     "i18n:translate-new-keys": "bash scripts/i18n/translate-new-keys.sh",
     "i18n:check-keys": "node scripts/i18n/check-key-completeness.mjs",
-    "i18n:check-keys:cli": "node scripts/i18n/check-key-completeness.mjs --catalog=cli"
+    "i18n:check-keys:cli": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",
+    "check:free-catalog-evidence": "node scripts/check/check-free-catalog-evidence.mjs",
+    "check:ui-kit-snapshot": "node scripts/check/check-ui-kit-snapshot.mjs",
+    "gen:icon-map": "node scripts/dev/gen-icon-map.mjs"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "1.4.0",
@@ -319,10 +327,19 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/instrument-serif": "5.3.0",
+    "@fontsource/inter": "5.3.0",
     "@lobehub/icons": "^5.16.0",
     "@modelcontextprotocol/sdk": "^1.31.0",
     "@monaco-editor/react": "^4.7.0",
     "@ngrok/ngrok": "^1.7.0",
+    "@radix-ui/react-dialog": "1.1.23",
+    "@radix-ui/react-dropdown-menu": "2.1.24",
+    "@radix-ui/react-popover": "1.1.23",
+    "@radix-ui/react-select": "2.3.7",
+    "@radix-ui/react-slot": "1.3.3",
+    "@radix-ui/react-tooltip": "1.2.16",
     "@swc/helpers": "0.5.23",
     "@toon-format/toon": "^4.1.1",
     "@types/mdx": "^2.0.13",
@@ -357,13 +374,12 @@
     "ink-text-input": "^6.0.0",
     "ioredis": "^5.10.1",
     "jose": "^6.2.10",
-    "js-yaml": "^5.4.1",
+    "js-yaml": "^5.4.2",
     "jsonc-parser": "^3.3.1",
     "lowdb": "^7.0.1",
     "lucide-react": "^1.33.0",
     "marked": "^18.0.11",
     "marked-terminal": "^7.3.0",
-    "material-symbols": "^0.47.0",
     "mermaid": "^11.17.2",
     "monaco-editor": "^0.56.0",
     "next": "16.3.8",
@@ -380,6 +396,7 @@
     "playwright": "1.62.1",
     "playwright-core": "1.62.1",
     "react": "19.2.8",
+    "react-day-picker": "10.0.1",
     "react-dom": "19.2.8",
     "react-is": "^19.2.6",
     "react-markdown": "^10.1.0",
@@ -469,13 +486,13 @@
     "opencode-ai": "1.18.34",
     "playwright-ctrf-json-reporter": "^0.1.0",
     "prettier": "^3.9.6",
-    "promptfoo": "^0.123.0",
+    "promptfoo": "0.123.0",
     "size-limit": "^14.1.0",
     "tailwindcss": "^4.3.0",
     "type-coverage": "^2.30.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
-    "vite": "^8.0.16",
+    "vite": "^8.3.3",
     "vitest": "^5.0.0",
     "wait-on": "^9.1.0",
     "wtfnode": "^0.10.1"
@@ -530,10 +547,10 @@
     "qs": "^6.16.0",
     "uuid": "^14.0.2",
     "form-data": "^4.0.6",
-    "vite": "^8.0.16",
+    "vite": "^8.3.3",
     "protobufjs": "^7.6.5",
     "@babel/core": "^7.29.6",
-    "hono": "^4.13.7",
+    "hono": "^4.13.13",
     "@hono/node-server": "^2.0.5",
     "fast-uri": "^3.1.7",
     "body-parser": "^2.3.0",
@@ -575,7 +592,7 @@
       }
     },
     "@apidevtools/json-schema-ref-parser": {
-      "js-yaml": "^4.3.1"
+      "js-yaml": "^5.4.2"
     },
     "@eslint/eslintrc": {
       "js-yaml": "^4.3.1"

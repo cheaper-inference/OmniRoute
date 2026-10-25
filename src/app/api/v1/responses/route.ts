@@ -6,6 +6,7 @@ import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { resolveResponsesApiModel } from "@/app/api/internal/codex-responses-ws/modelResolution";
 import { getModelInfo, getComboForModel } from "@/sse/services/model";
 import { generateRequestId } from "@/shared/utils/requestId";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import { resolveIncomingCorrelationId } from "@/shared/utils/correlationPreserve.ts";
 import {
   admitChatRequest,
@@ -101,6 +102,12 @@ export async function withCodexPreferredModel(
  * Handled by the unified chat handler (openai-responses format auto-detected).
  */
 async function postHandler(request: any) {
+  // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
+  // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
+  // handler enforces authentication independently.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
+
   // Keep the framework Request untouched until the route has parsed enough state
   // to know this is a streaming response. Deadline lifecycle belongs to that branch.
   const sessionId = resolveSessionId(request);

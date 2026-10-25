@@ -209,6 +209,10 @@ The Auto-Combo Engine dynamically selects the best provider/model for each reque
 | `quality`             | 0.03           | Feedback-driven output-quality signal from the routing-event quality tracker; candidates without observations receive a neutral 0.5                                                            |
 | `reliability`         | 0.00           | Observed success share, `1 - failureRate`, from 24h of usage history behind a ten-sample floor (real-time metrics otherwise); candidates with no observations read as 1.0. Disabled by default |
 
+The in-memory `quality` tracker (`open-sse/services/routing/quality.ts`) is empty
+after a cold restart, so every candidate scores a neutral `0.5` until the
+first observations land.
+
 > **Unreadable quota (#15347).** When a provider has a quota fetcher but it returns nothing
 > readable (failed fetch, missing credentials, message-only usage, or a malformed snapshot with no
 > parseable `windows` and no finite `percentUsed`, including `percentUsed: null`), the candidate

@@ -516,6 +516,24 @@ export async function registerNodejs(): Promise<void> {
   // of the generic "next-server" standalone server name.
   process.title = renameProcessTitle(process.title);
 
+  // Record event-loop stalls (silent multi-minute freezes otherwise leave no
+  // trace): a 1s monotonic timer logs one line at resume past the threshold
+  // with memory + in-flight counts, and the counter/maximum surface on the
+  // monitoring health payload. Threshold via
+  // OMNIROUTE_EVENT_LOOP_STALL_THRESHOLD_MS (default 5000, 0 disables).
+  // Same process as scripts/dev/standalone-server-ws.mjs (it imports
+  // ./server.js, which runs this instrumentation hook), so this covers that
+  // entry point without touching the .mjs. Dynamic import: no new static edge
+  // in the boot graph (requestDedup never imports healthzLag — 0d proof).
+  try {
+    const { startEventLoopStallRecorder } = await import("@/lib/healthzLag");
+    const { getInflightCount } = await import("@omniroute/open-sse/services/requestDedup.ts");
+    startEventLoopStallRecorder({ sampler: () => getInflightCount() });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn("[STARTUP] Event loop stall recorder failed to start (non-fatal):", msg);
+  }
+
   // #13695: the inference API and `/v1/models` follow DIFFERENT auth settings,
   // so `GET /v1/models` answering 401 does not mean inference is protected.
   // #12568 added this warning for the API bridge and live-WS servers, but not
@@ -540,6 +558,12 @@ export async function registerNodejs(): Promise<void> {
   // Register quota fetchers early so combo routing can use real quota-aware
   // scoring for generic providers in the App Router production runtime.
   await registerQuotaFetchers();
+
+  // Readiness probes that keep local-CLI no-auth providers (devin-cli-agentic) out of
+  // the auto/* pools until confirmed (#15446). Unregistered probes fail closed.
+  const { registerNoAuthAutoRoutingReadiness } =
+    await import("@/lib/providers/noAuthAutoRoutingReadiness");
+  registerNoAuthAutoRoutingReadiness();
 
   // Guarantee the SQLite singleton — including a sql.js WASM pre-init when
   // both synchronous drivers (better-sqlite3, node:sqlite) are unavailable —
@@ -573,7 +597,7 @@ export async function registerNodejs(): Promise<void> {
   // that cause every connection to be skipped by getProviderCredentials(), making
   // all subsequent requests time out at Bottleneck's maxWaitMs (120 s default).
   // Terminal states (banned / expired / credits_exhausted) are intentionally kept.
-  // See: https://github.com/diegosouzapw/OmniRoute/issues/3625 (Part A)
+  // See: https://github.com/cheaper-inference/OmniRoute/issues/3625 (Part A)
   try {
     const { clearStaleCrashCooldowns } = await import("@/lib/db/providers");
     const { cleared } = clearStaleCrashCooldowns();
@@ -647,6 +671,9 @@ export async function registerNodejs(): Promise<void> {
     const { startQuotaAutoPing } = await import("@/lib/services/quotaAutoPing");
     startQuotaAutoPing();
     console.log("[STARTUP] Quota auto-ping scheduler started (opt-in, no-op until enabled)");
+    const { startCodexWakeups } = await import("@/lib/services/codexWakeups");
+    startCodexWakeups();
+    console.log("[STARTUP] Codex wakeup scheduler started (no-op until a task is created)");
     // Optional: cloud/model sync is skipped in headless mode (src/lib/system/headless.ts).
     if (!skipInHeadless("cloud-sync")) {
       const cloudSyncInitialized = await ensureCloudSyncInitialized();

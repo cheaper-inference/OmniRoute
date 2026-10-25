@@ -22,3 +22,10 @@ export function isComboModelVisible(
   }
   return !isHidden(providerId || parsed.provider || parsed.providerAlias, rawModel);
 }
+
+/** Share one hidden-model snapshot across all candidates of a recovery decision. */
+export function createComboModelVisibility(
+  hiddenModelsByProvider: HiddenModelsByProvider = getHiddenModelsByProvider()
+): (model: string, provider: string) => boolean {
+  return (model, provider) => isComboModelVisible(model, provider, hiddenModelsByProvider);
+}

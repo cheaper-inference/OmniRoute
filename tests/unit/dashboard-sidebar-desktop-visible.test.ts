@@ -10,55 +10,32 @@ function readSrc(path: string): string {
   return readFileSync(join(ROOT, path), "utf8");
 }
 
-// Regression guard: the desktop dashboard sidebar must stay visible on desktop.
-// The old `hidden ... lg:flex` Tailwind cascade is fragile — class ordering /
-// specificity can collapse the `lg:flex` and leave the sidebar permanently
-// hidden. The fix moves visibility into an explicit `.dashboard-sidebar-desktop`
-// class backed by a 1024px media query in globals.css.
+// Regression guard: the desktop dashboard sidebar must stay visible on desktop. The old
+// `hidden ... lg:flex` Tailwind cascade was fragile (class ordering / specificity could collapse
+// the `lg:flex` and hide the sidebar for good). The legacy shell answered with an explicit
+// `.dashboard-sidebar-desktop` class; since KEA-7886 F4 the only shell is the kit one, which
+// mounts the sidebar through SidebarProvider/SidebarInset and never uses that cascade.
 
-test("DashboardLayout desktop sidebar uses the explicit visibility class, not the hidden/lg:flex cascade", () => {
-  const source = readSrc("src/shared/components/layouts/DashboardLayout.tsx");
-
-  // The desktop sidebar wrapper must reference the dedicated class.
-  assert.match(
-    source,
-    /className="dashboard-sidebar-desktop"/,
-    "Desktop sidebar wrapper must use the dashboard-sidebar-desktop class"
-  );
-
-  // The fragile Tailwind cascade must be gone.
-  assert.doesNotMatch(
-    source,
-    /className="hidden[^"]*lg:flex"/,
-    "Desktop sidebar wrapper must not rely on the hidden/lg:flex Tailwind cascade"
-  );
+test("the kit shell mounts the sidebar through SidebarProvider/SidebarInset (no hidden/lg:flex cascade)", () => {
+  const shell = readSrc("src/shared/components/layouts/DashboardShell.tsx");
+  assert.match(shell, /<SidebarProvider/);
+  assert.match(shell, /<SidebarInset\s+id="main-content"/);
+  assert.doesNotMatch(shell, /className="hidden[^"]*lg:flex"/);
 });
 
-test("globals.css defines dashboard-sidebar-desktop hidden by default and flex at >=1024px", () => {
-  const css = readSrc("src/app/globals.css");
-
-  // Class exists.
-  assert.match(
-    css,
-    /\.dashboard-sidebar-desktop\s*\{/,
-    "globals.css must define .dashboard-sidebar-desktop"
-  );
-
-  // Hidden by default (mobile-first), then shown via a 1024px desktop media query.
-  const classIndex = css.indexOf(".dashboard-sidebar-desktop");
-  const desktopRule =
-    /@media\s*\(min-width:\s*1024px\)\s*\{[^}]*\.dashboard-sidebar-desktop\s*\{[^}]*display:\s*flex/;
-  assert.match(
-    css.slice(classIndex - 200),
-    desktopRule,
-    "globals.css must show .dashboard-sidebar-desktop with display:flex at min-width:1024px"
-  );
-
-  // Default state hides it (display:none) so mobile is unaffected.
-  const baseRule = /\.dashboard-sidebar-desktop\s*\{[^}]*display:\s*none/;
-  assert.match(
-    css,
-    baseRule,
-    "globals.css must hide .dashboard-sidebar-desktop by default (display:none)"
-  );
+test("the kit shell and the Sidebar import the kit sidebar subpath, not the 73-file barrel", () => {
+  // The barrel pulls every kit module (Radix, charts…) into each importer; the first Sidebar
+  // render in vitest went from ~43 s (barrel) to a few seconds (subpath) in trilha E's measure.
+  for (const file of [
+    "src/shared/components/Sidebar.tsx",
+    "src/shared/components/layouts/DashboardShell.tsx",
+  ]) {
+    const source = readSrc(file);
+    assert.doesNotMatch(source, /from "@omniroute\/ui-kit"/, `${file} imports the kit barrel`);
+    assert.match(
+      source,
+      /from "@omniroute\/ui-kit\/sidebar"/,
+      `${file} imports the sidebar subpath`
+    );
+  }
 });

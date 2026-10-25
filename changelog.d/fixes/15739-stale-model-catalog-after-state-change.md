@@ -1,1 +1,0 @@
-- **fix(models):** After catalog state changes, a timed-out `/v1/models` rebuild no longer returns the previous model list as a successful response.

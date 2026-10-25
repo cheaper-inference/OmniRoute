@@ -1,1 +1,0 @@
-- fix(providers): Keep Codex app-server turns open during retryable errors and settle disconnected turns without hanging or starting work on a closed socket (#16029).

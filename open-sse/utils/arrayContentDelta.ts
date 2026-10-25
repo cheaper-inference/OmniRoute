@@ -11,7 +11,8 @@
  * which strict Responses clients reject ("malformed response.output_text.delta delta").
  *
  * These helpers fold such a delta back into the OpenAI shape in place: text parts
- * become the `content` string, thinking parts are appended to `reasoning_content`.
+ * become the `content` string, thinking parts are appended to `reasoning_content`. A numeric
+ * `content` (some Cloudflare Workers AI models stream digits as JSON numbers) becomes its string.
  */
 
 type JsonRecord = Record<string, unknown>;
@@ -30,6 +31,14 @@ function partsText(value: unknown): string {
 
 /** Normalize one `delta` object. Returns true when it was changed. */
 export function normalizeArrayContentDelta(delta: JsonRecord): boolean {
+  // Cloudflare Workers AI sometimes streams a digit as a JSON number (`"content": 7`). Keep it as
+  // the text it stands for: a non-string content is not counted as text further down the
+  // pipeline, so the digit would be dropped (OmniRoute#16554).
+  if (typeof delta.content === "number") {
+    if (!Number.isFinite(delta.content)) return false;
+    delta.content = String(delta.content);
+    return true;
+  }
   if (!Array.isArray(delta.content)) return false;
 
   let text = "";

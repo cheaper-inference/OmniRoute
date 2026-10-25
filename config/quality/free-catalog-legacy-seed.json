@@ -1,0 +1,377 @@
+{
+  "schemaVersion": 1,
+  "trackingIssue": 17028,
+  "capturedFrom": "40523566e611838978835adbb6b84cda99602504",
+  "entries": [
+    {
+      "provider": "agnes-cn",
+      "modelId": "agnes-2.0-flash",
+      "catalogHash": "f7cb930fb1092a0cfc4656de7060fe23adc86f0964b8d44ad04ad4caf7373c90"
+    },
+    {
+      "provider": "agnes-cn",
+      "modelId": "agnes-2.5-flash",
+      "catalogHash": "f7cb930fb1092a0cfc4656de7060fe23adc86f0964b8d44ad04ad4caf7373c90"
+    },
+    {
+      "provider": "agnes-cn",
+      "modelId": "agnes-3.0-flash",
+      "catalogHash": "f7cb930fb1092a0cfc4656de7060fe23adc86f0964b8d44ad04ad4caf7373c90"
+    },
+    {
+      "provider": "agnes",
+      "modelId": "agnes-2.0-flash",
+      "catalogHash": "f7236e80dc036dbecffe99cc7e23273e14a1987be41301c5728778918ff94113"
+    },
+    {
+      "provider": "agnes",
+      "modelId": "agnes-2.5-flash",
+      "catalogHash": "f7236e80dc036dbecffe99cc7e23273e14a1987be41301c5728778918ff94113"
+    },
+    {
+      "provider": "agnes",
+      "modelId": "agnes-3.0-flash",
+      "catalogHash": "f7236e80dc036dbecffe99cc7e23273e14a1987be41301c5728778918ff94113"
+    },
+    {
+      "provider": "ainative",
+      "modelId": "deepseek-r1",
+      "catalogHash": "af8ab1e8b55c5d14e9ef0ac8bef6ae03e340853651f118fee371e419a3c49605"
+    },
+    {
+      "provider": "ainative",
+      "modelId": "gemini-flash",
+      "catalogHash": "af8ab1e8b55c5d14e9ef0ac8bef6ae03e340853651f118fee371e419a3c49605"
+    },
+    {
+      "provider": "ainative",
+      "modelId": "llama-4-maverick",
+      "catalogHash": "af8ab1e8b55c5d14e9ef0ac8bef6ae03e340853651f118fee371e419a3c49605"
+    },
+    {
+      "provider": "ainative",
+      "modelId": "llama3.1-8b-cerebras",
+      "catalogHash": "af8ab1e8b55c5d14e9ef0ac8bef6ae03e340853651f118fee371e419a3c49605"
+    },
+    {
+      "provider": "ainative",
+      "modelId": "nous-coder",
+      "catalogHash": "af8ab1e8b55c5d14e9ef0ac8bef6ae03e340853651f118fee371e419a3c49605"
+    },
+    {
+      "provider": "ainative",
+      "modelId": "qwen3-14b",
+      "catalogHash": "af8ab1e8b55c5d14e9ef0ac8bef6ae03e340853651f118fee371e419a3c49605"
+    },
+    {
+      "provider": "ainative",
+      "modelId": "qwen3-235b-cerebras",
+      "catalogHash": "af8ab1e8b55c5d14e9ef0ac8bef6ae03e340853651f118fee371e419a3c49605"
+    },
+    {
+      "provider": "ainative",
+      "modelId": "qwen3-32b",
+      "catalogHash": "af8ab1e8b55c5d14e9ef0ac8bef6ae03e340853651f118fee371e419a3c49605"
+    },
+    {
+      "provider": "ainative",
+      "modelId": "qwen3-8b",
+      "catalogHash": "af8ab1e8b55c5d14e9ef0ac8bef6ae03e340853651f118fee371e419a3c49605"
+    },
+    {
+      "provider": "aion",
+      "modelId": "aion-labs/aion-2.0",
+      "catalogHash": "b22a627d1a23327171749dd9bb4e023d6c616dc8a8773488d415b8b18f8a6f67"
+    },
+    {
+      "provider": "aion",
+      "modelId": "aion-labs/aion-2.5",
+      "catalogHash": "b22a627d1a23327171749dd9bb4e023d6c616dc8a8773488d415b8b18f8a6f67"
+    },
+    {
+      "provider": "aion",
+      "modelId": "aion-labs/aion-3.0",
+      "catalogHash": "b22a627d1a23327171749dd9bb4e023d6c616dc8a8773488d415b8b18f8a6f67"
+    },
+    {
+      "provider": "aion",
+      "modelId": "aion-labs/aion-3.0-mini",
+      "catalogHash": "b22a627d1a23327171749dd9bb4e023d6c616dc8a8773488d415b8b18f8a6f67"
+    },
+    {
+      "provider": "aion",
+      "modelId": "aion-labs/aion-rp-llama-3.1-8b",
+      "catalogHash": "b22a627d1a23327171749dd9bb4e023d6c616dc8a8773488d415b8b18f8a6f67"
+    },
+    {
+      "provider": "baidu",
+      "modelId": "ernie-4.0-8k",
+      "catalogHash": "8c4310655f8d2e307e298ef914854a3227062d71944efa9a567da03d6ff018de"
+    },
+    {
+      "provider": "gemini",
+      "modelId": "gemini-2.5-flash",
+      "catalogHash": "1cd3a64608f7dda0fe18bf0eac2cc63a9d3c0b7054284e040f293f4f9c1a7750"
+    },
+    {
+      "provider": "gemini",
+      "modelId": "gemini-2.5-flash-lite",
+      "catalogHash": "1cd3a64608f7dda0fe18bf0eac2cc63a9d3c0b7054284e040f293f4f9c1a7750"
+    },
+    {
+      "provider": "gemini",
+      "modelId": "gemini-3-flash-preview",
+      "catalogHash": "1cd3a64608f7dda0fe18bf0eac2cc63a9d3c0b7054284e040f293f4f9c1a7750"
+    },
+    {
+      "provider": "gemini",
+      "modelId": "gemini-3.1-flash-lite",
+      "catalogHash": "1cd3a64608f7dda0fe18bf0eac2cc63a9d3c0b7054284e040f293f4f9c1a7750"
+    },
+    {
+      "provider": "glm-cn",
+      "modelId": "glm-4-flash",
+      "catalogHash": "c234f5fc2562aae4cd897acf65423ffd0a179364f8d7054b6d01505823e88156"
+    },
+    {
+      "provider": "glm-cn",
+      "modelId": "glm-4.5-flash",
+      "catalogHash": "c234f5fc2562aae4cd897acf65423ffd0a179364f8d7054b6d01505823e88156"
+    },
+    {
+      "provider": "glm-cn",
+      "modelId": "glm-4.7-flash",
+      "catalogHash": "c234f5fc2562aae4cd897acf65423ffd0a179364f8d7054b6d01505823e88156"
+    },
+    {
+      "provider": "glm",
+      "modelId": "glm-4.5-flash",
+      "catalogHash": "c234f5fc2562aae4cd897acf65423ffd0a179364f8d7054b6d01505823e88156"
+    },
+    {
+      "provider": "glm",
+      "modelId": "glm-4.7-flash",
+      "catalogHash": "c234f5fc2562aae4cd897acf65423ffd0a179364f8d7054b6d01505823e88156"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "cohere/north-mini-code:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "kilo-auto/free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "kwaipilot/kat-coder-pro-v2.5:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "nvidia/nemotron-3-super-120b-a12b:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "nvidia/nemotron-3.5-content-safety:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "openrouter/auto-beta",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "openrouter/free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "poolside/laguna-m.1:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "poolside/laguna-xs-2.1:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "stepfun/step-3.7-flash:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "kilo-gateway",
+      "modelId": "tencent/hy3:free",
+      "catalogHash": "03d22d26dbf19ecdc470298c4603d103c8b1307bd45e239613e7e86028b9e8a9"
+    },
+    {
+      "provider": "ollama-cloud",
+      "modelId": "deepseek-v4-flash",
+      "catalogHash": "cc9700ad57590b6c1b817c0f6e41343649220862b37df3f45f91359af1811ed2"
+    },
+    {
+      "provider": "ollama-cloud",
+      "modelId": "deepseek-v4-pro",
+      "catalogHash": "cc9700ad57590b6c1b817c0f6e41343649220862b37df3f45f91359af1811ed2"
+    },
+    {
+      "provider": "ollama-cloud",
+      "modelId": "gemma4:31b",
+      "catalogHash": "cc9700ad57590b6c1b817c0f6e41343649220862b37df3f45f91359af1811ed2"
+    },
+    {
+      "provider": "ollama-cloud",
+      "modelId": "glm-5.1",
+      "catalogHash": "cc9700ad57590b6c1b817c0f6e41343649220862b37df3f45f91359af1811ed2"
+    },
+    {
+      "provider": "ollama-cloud",
+      "modelId": "kimi-k2.6",
+      "catalogHash": "cc9700ad57590b6c1b817c0f6e41343649220862b37df3f45f91359af1811ed2"
+    },
+    {
+      "provider": "ollama-cloud",
+      "modelId": "minimax-m2.7",
+      "catalogHash": "cc9700ad57590b6c1b817c0f6e41343649220862b37df3f45f91359af1811ed2"
+    },
+    {
+      "provider": "ollama-cloud",
+      "modelId": "nemotron-3-super",
+      "catalogHash": "cc9700ad57590b6c1b817c0f6e41343649220862b37df3f45f91359af1811ed2"
+    },
+    {
+      "provider": "ollama-cloud",
+      "modelId": "qwen3.5:397b",
+      "catalogHash": "cc9700ad57590b6c1b817c0f6e41343649220862b37df3f45f91359af1811ed2"
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/big-pickle",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea"
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/deepseek-v4.1-flash-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea"
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/mimo-v2.5-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea"
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/nemotron-3-super-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea"
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/nemotron-3-ultra-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea"
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/north-mini-code-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea"
+    },
+    {
+      "provider": "requesty",
+      "modelId": "mistral/leanstral-1-5",
+      "catalogHash": "e1f6c24d3c4bd94259b3fecf61d4a3ff081d1608090484085137bc2d65b547e3"
+    },
+    {
+      "provider": "requesty",
+      "modelId": "nvidia/nemotron-3-nano-30b-a3b",
+      "catalogHash": "e1f6c24d3c4bd94259b3fecf61d4a3ff081d1608090484085137bc2d65b547e3"
+    },
+    {
+      "provider": "requesty",
+      "modelId": "openai/gpt-oss-120b",
+      "catalogHash": "e1f6c24d3c4bd94259b3fecf61d4a3ff081d1608090484085137bc2d65b547e3"
+    },
+    {
+      "provider": "routeway",
+      "modelId": "laguna-m.1:free",
+      "catalogHash": "d4613f5fcbac96791ed0f5586a607fe9703409f0666d44fc96ad2f1f55735209"
+    },
+    {
+      "provider": "routeway",
+      "modelId": "laguna-xs.2:free",
+      "catalogHash": "d4613f5fcbac96791ed0f5586a607fe9703409f0666d44fc96ad2f1f55735209"
+    },
+    {
+      "provider": "routeway",
+      "modelId": "llama-3.2-3b-instruct:free",
+      "catalogHash": "d4613f5fcbac96791ed0f5586a607fe9703409f0666d44fc96ad2f1f55735209"
+    },
+    {
+      "provider": "routeway",
+      "modelId": "llama-3.3-70b-instruct:free",
+      "catalogHash": "d4613f5fcbac96791ed0f5586a607fe9703409f0666d44fc96ad2f1f55735209"
+    },
+    {
+      "provider": "routeway",
+      "modelId": "nemotron-3-nano-30b-a3b:free",
+      "catalogHash": "d4613f5fcbac96791ed0f5586a607fe9703409f0666d44fc96ad2f1f55735209"
+    },
+    {
+      "provider": "routeway",
+      "modelId": "nemotron-nano-9b-v2:free",
+      "catalogHash": "d4613f5fcbac96791ed0f5586a607fe9703409f0666d44fc96ad2f1f55735209"
+    },
+    {
+      "provider": "routeway",
+      "modelId": "step-3.5-flash:free",
+      "catalogHash": "d4613f5fcbac96791ed0f5586a607fe9703409f0666d44fc96ad2f1f55735209"
+    },
+    {
+      "provider": "routeway",
+      "modelId": "step-3.7-flash:free",
+      "catalogHash": "d4613f5fcbac96791ed0f5586a607fe9703409f0666d44fc96ad2f1f55735209"
+    },
+    {
+      "provider": "sealion",
+      "modelId": "aisingapore/Gemma-SEA-LION-v4-27B-IT",
+      "catalogHash": "51b4a02075f1e544e05bced7240b7ed0d5ab78c36707038174e4ae4121cec50d"
+    },
+    {
+      "provider": "sealion",
+      "modelId": "aisingapore/Llama-SEA-LION-v3-70B-IT",
+      "catalogHash": "51b4a02075f1e544e05bced7240b7ed0d5ab78c36707038174e4ae4121cec50d"
+    },
+    {
+      "provider": "sealion",
+      "modelId": "aisingapore/Llama-SEA-LION-v3.5-70B-R",
+      "catalogHash": "51b4a02075f1e544e05bced7240b7ed0d5ab78c36707038174e4ae4121cec50d"
+    },
+    {
+      "provider": "sealion",
+      "modelId": "aisingapore/Qwen-SEA-LION-v4-32B-IT",
+      "catalogHash": "51b4a02075f1e544e05bced7240b7ed0d5ab78c36707038174e4ae4121cec50d"
+    },
+    {
+      "provider": "sealion",
+      "modelId": "aisingapore/Qwen-SEA-LION-v4.5-27B-IT",
+      "catalogHash": "51b4a02075f1e544e05bced7240b7ed0d5ab78c36707038174e4ae4121cec50d"
+    },
+    {
+      "provider": "tencent",
+      "modelId": "hunyuan-pro",
+      "catalogHash": "724ec5745f9fea838c6c4ba551bb9c02742c728f7d86664f00fe15ceb1ccc04d"
+    }
+  ]
+}

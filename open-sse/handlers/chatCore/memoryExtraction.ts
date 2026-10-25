@@ -1,3 +1,4 @@
+import { sanitizePII } from "@/lib/piiSanitizer";
 import { capMemoryExtractionText, MEMORY_EXTRACTION_TEXT_LIMIT } from "./logTruncation.ts";
 
 export function extractMemoryTextFromResponse(
@@ -218,7 +219,11 @@ export function runMemoryExtractionGate(input: {
     extractFacts(requestMemoryText, memoryOwnerId, pipelineSessionId);
   }
 
-  const responseMemoryText = extractMemoryTextFromResponse(responseBody ?? null);
+  // Both callers pass the response from before PII response sanitization (non-streaming:
+  // ahead of the post-call guardrails; streaming: upstream of the PII SSE transform), so
+  // apply the same sanitizer here. It is a no-op while PII_RESPONSE_SANITIZATION is off,
+  // and it works on the extracted text so the caller's response object stays untouched.
+  const responseMemoryText = sanitizePII(extractMemoryTextFromResponse(responseBody ?? null)).text;
   if (responseMemoryText) {
     extractFacts(responseMemoryText, memoryOwnerId, pipelineSessionId);
   }

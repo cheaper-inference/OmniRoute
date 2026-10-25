@@ -429,6 +429,7 @@ test("setRequestWireState receives updated body on fallback", async () => {
   const wireStates: Array<{ translatedBody: Record<string, unknown>; effectiveModel: string }> = [];
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -582,6 +583,7 @@ test("empty content initial with fallback enabled -> retries with next model", a
   let executorCallCount = 0;
   const executedModels: string[] = [];
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -743,6 +745,7 @@ test("upstream error type is preserved in ChatCoreErrorResult", async () => {
 test("connection mismatch before fallback -> 409, no fallback executor call", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -774,6 +777,7 @@ test("connection mismatch before fallback -> 409, no fallback executor call", as
 test("connection mismatch after fallback -> 409, fallback result discarded", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -855,6 +859,7 @@ test("dynamic connection: ID changes between initial and retry -> 409 on retry p
 test("model-unavailable fallback returns real parsed response, usage, headers, winning connection/model", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -900,6 +905,7 @@ test("model-unavailable fallback returns real parsed response, usage, headers, w
 test("empty content fallback returns real parsed response, usage, headers", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -939,6 +945,7 @@ test("setRequestWireState is called before initial, retry, and fallback executor
   const wireStates: string[] = [];
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -1024,6 +1031,7 @@ test("empty-content fallback with invalid SSE body is 502, not 200 empty", async
   const sseBody = 'data: {"error":{"message":"Devin CLI not found"}}\n\n';
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",

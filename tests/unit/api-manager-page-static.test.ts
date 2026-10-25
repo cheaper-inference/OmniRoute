@@ -89,9 +89,10 @@ test("general tab uses i18n for management access description", () => {
 
 test("API manager page renders purpose-first header", () => {
   const source = readApiManagerPage();
+  // KEA-7886: the header is the kit PageHeader (title/description/actions) + the request flow.
   const headerBlock = source.slice(
-    source.indexOf('<h1 className="text-3xl'),
-    source.indexOf("{/* Filter Bar", source.indexOf('<h1 className="text-3xl'))
+    source.indexOf("<PageHeader"),
+    source.indexOf("{/* Filter Bar", source.indexOf("<PageHeader"))
   );
 
   assert.match(headerBlock, /\{t\("keyManagement"\)\}/);
@@ -105,6 +106,15 @@ test("API manager page renders purpose-first header", () => {
   assert.doesNotMatch(headerBlock, />\s*OmniRoute\s*</);
   assert.match(headerBlock, /setShowAddModal\(true\)/);
   assert.match(headerBlock, /\{t\("createKey"\)\}/);
+});
+
+test("API manager loads per-key usage from the lightweight totals view", () => {
+  const source = readApiManagerPage();
+
+  // The full analytics report blocks the server for seconds on large usage histories.
+  assert.match(source, /fetch\("\/api\/usage\/analytics\?range=all&view=apiKeys"\)/);
+  assert.doesNotMatch(source, /\/api\/usage\/analytics\?range=all"/);
+  assert.doesNotMatch(source, /\/api\/usage\/call-logs/);
 });
 
 test("general tab converts API key expiration ISO timestamps to local datetime input values", () => {
@@ -122,20 +132,20 @@ test("general tab converts API key expiration ISO timestamps to local datetime i
   assert.doesNotMatch(expirationBlock, /expiresAt\.slice\(0, 16\)/);
 });
 
-test("access editor switch buttons declare button type", () => {
+test("access editor switches never submit the form (kit Switch via the Toggle adapter)", () => {
+  // KEA-7886: the switches are the Toggle adapter (kit Switch = input[type=checkbox][role=switch]),
+  // which cannot submit a form; a hand-rolled <button role="switch"> must not come back.
   const source = readGeneralTab();
   const visibilityStart = source.indexOf("{/* Self-service Visibility */}");
   const visibilityEnd = source.indexOf("{/* Allowed Endpoints Section */}", visibilityStart);
   const selfServiceBlock = source.slice(visibilityStart, visibilityEnd);
-  const switchButtonCount = (selfServiceBlock.match(/role="switch"/g) ?? []).length;
-  const typedSwitchButtonCount = (
-    selfServiceBlock.match(/<button\s+type="button"\s+role="switch"/g) ?? []
-  ).length;
+  const toggleCount = (selfServiceBlock.match(/<Toggle\b/g) ?? []).length;
+  const rawSwitchCount = (selfServiceBlock.match(/role="switch"/g) ?? []).length;
 
   // Self-service Visibility block in GeneralTab has 2 inline switches: own-usage visibility
   // and shared-account quota visibility.
-  assert.equal(switchButtonCount, 2);
-  assert.equal(typedSwitchButtonCount, 2);
+  assert.equal(toggleCount, 2);
+  assert.equal(rawSwitchCount, 0);
 
   // The extracted toggle components keep the same invariant.
   for (const rel of [
@@ -144,11 +154,10 @@ test("access editor switch buttons declare button type", () => {
     "src/app/(dashboard)/dashboard/api-manager/components/ApiKeyCompressionToggle.tsx",
   ]) {
     const componentSource = fs.readFileSync(path.join(repoRoot, rel), "utf8");
-    const compSwitches = (componentSource.match(/role="switch"/g) ?? []).length;
-    const compTyped = (componentSource.match(/<button\s+type="button"\s+role="switch"/g) ?? [])
-      .length;
+    const compSwitches = (componentSource.match(/<Toggle\b/g) ?? []).length;
+    const compRaw = (componentSource.match(/role="switch"/g) ?? []).length;
     assert.ok(compSwitches >= 1, `${rel} must render a switch`);
-    assert.equal(compTyped, compSwitches, `${rel}: every switch declares type="button"`);
+    assert.equal(compRaw, 0, `${rel}: every switch is the non-submitting kit Switch`);
   }
 });
 
@@ -207,7 +216,8 @@ test("behaviour tab persists the per-key prompt-compression switch", () => {
   assert.match(component, /useTranslations\("settings"\)/);
   assert.match(component, /tSettings\("compressionTitle"\)/);
   assert.match(component, /tSettings\("compressionDesc"\)/);
-  assert.match(component, /aria-checked=\{enabled\}/);
+  assert.match(component, /[^-]checked=\{enabled\}/);
+  assert.doesNotMatch(component, /aria-checked=\{enabled\}/);
 });
 
 test("access editor exposes Claude Code default wildcard model", () => {

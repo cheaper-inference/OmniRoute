@@ -4,7 +4,7 @@
 
 ---
 
-> **En bref** : Installez → Connectez un fournisseur gratuit → Faites pointer votre IDE vers OmniRoute. C’est tout.
+> **En bref** : Installez → Connectez un fournisseur éligible → Faites pointer votre IDE vers OmniRoute. Terminé.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute démarre à l’adresse `http://localhost:20128`. Le tableau de bord s
 
 ---
 
-## Étape 3 : Connecter un fournisseur gratuit
+## Étape 3 : connecter un fournisseur éligible
 
-Vous pouvez utiliser OmniRoute **sans rien payer** en connectant un fournisseur gratuit.
+Choisissez un fournisseur dont les conditions d’utilisation et le quota correspondent à vos besoins. Dans **Tableau de bord → Fournisseurs**, connectez votre propre compte ou votre clé API, puis testez la connexion. L’accès gratuit et la disponibilité sans clé ne sont pas garantis.
 
-### Option A : Kiro (Claude gratuit — aucune carte bancaire)
-
-1. Ouvrez le tableau de bord à l’adresse `http://localhost:20128`
-2. Accédez à **Fournisseurs** → **Ajouter un fournisseur**
-3. Sélectionnez **Kiro AI**
-4. Cliquez sur **Connecter** (aucune clé API nécessaire !)
-5. C’est fait ! Vous disposez désormais d’un accès gratuit aux modèles Claude.
-
-### Option B : OpenCode Free (aucune authentification)
-
-1. Ouvrez le tableau de bord à l’adresse `http://localhost:20128`
-2. Accédez à **Fournisseurs** → **Ajouter un fournisseur**
-3. Sélectionnez **OpenCode Free**
-4. Cliquez sur **Connecter** (aucune clé API nécessaire !)
-5. C’est fait ! Vous disposez désormais d’un accès gratuit à plusieurs modèles.
-
-### Option C : Pollinations (aucune clé nécessaire)
-
-1. Ouvrez le tableau de bord à l’adresse `http://localhost:20128`
-2. Accédez à **Fournisseurs** → **Ajouter un fournisseur**
-3. Sélectionnez **Pollinations**
-4. Cliquez sur **Connecter** (aucune clé API nécessaire !)
-5. C’est fait ! Vous disposez désormais d’un accès gratuit à GPT-5, Claude, Gemini et bien d’autres modèles.
+`auto` exclut par défaut les fournisseurs marqués `tos: avoid`, notamment Kiro. La connexion d’un compte ne modifie pas cette politique. L’activation dans **Tableau de bord → Combos** s’applique à toutes les combinaisons automatiques. Consultez le [Guide des offres gratuites](./FREE-TIERS-GUIDE.md) avant de choisir un fournisseur.
 
 ---
 
@@ -154,32 +132,32 @@ Vous pouvez consulter les détails de la requête en cliquant sur [Surveillance/
 
 - **[Guide Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Laissez OmniRoute choisir la meilleure IA pour vous
 - **[Guide des fournisseurs](./PROVIDERS-GUIDE.md)** — Connectez davantage de fournisseurs (gratuits et payants)
-- **[Guide des offres gratuites](./FREE-TIERS-GUIDE.md)** — Accédez gratuitement à l’IA sans carte bancaire
+- **[Guide des offres gratuites](./FREE-TIERS-GUIDE.md)** — Consultez les conditions des fournisseurs et les limites des offres gratuites
 - **[Dépannage](../guides/TROUBLESHOOTING.md)** — Résolvez les problèmes courants
 
 ---
 
 ## Questions fréquentes
 
-### « Ai-je besoin d’une clé API ? »
+### « Ai-je besoin d'une clé API ? »
 
-**Non !** Vous pouvez utiliser des fournisseurs gratuits (Kiro, OpenCode Free, Pollinations) sans aucune clé API. Il vous suffit de les connecter depuis le tableau de bord.
+La clé API OmniRoute authentifie vos outils. Les identifiants en amont dépendent du fournisseur : certains nécessitent une clé API ou une connexion à un compte. L'accès gratuit n'est pas garanti.
 
-### « Qu’est-ce que `auto` ? »
+### « Qu'est-ce que `auto` ? »
 
-`auto` demande à OmniRoute de sélectionner automatiquement le meilleur fournisseur pour chaque requête. Il prend en compte la vitesse, le coût, la qualité et la disponibilité. Consultez le [Guide Auto-Combo](./AUTO-COMBO-GUIDE.md) pour plus de détails.
+`auto` indique à OmniRoute de sélectionner automatiquement le meilleur fournisseur pour chaque requête. Il prend en compte la vitesse, le coût, la qualité et la disponibilité. Consultez le [guide Auto-Combo](./AUTO-COMBO-GUIDE.md) pour plus de détails.
 
 ### « Combien cela coûte-t-il ? »
 
-OmniRoute est **gratuit et open source**. Vous ne payez que les fournisseurs que vous utilisez. De nombreux fournisseurs proposent des offres gratuites — consultez le [Guide des offres gratuites](./FREE-TIERS-GUIDE.md).
+OmniRoute est **gratuit et open source**. Vous ne payez que les fournisseurs que vous utilisez. De nombreux fournisseurs proposent des offres gratuites — consultez le [guide des offres gratuites](./FREE-TIERS-GUIDE.md).
 
-### « Puis-je l’utiliser avec Claude Code / Cursor / Copilot ? »
+### « Puis-je l'utiliser avec Claude Code / Cursor / Copilot ? »
 
-**Oui !** OmniRoute fonctionne avec tous les outils qui prennent en charge le format OpenAI. Il suffit de définir l’URL de base sur `http://localhost:20128/v1`. Consultez le [Guide des outils CLI](../reference/CLI-TOOLS.md) pour obtenir des instructions de configuration spécifiques.
+**Oui !** OmniRoute fonctionne avec tout outil prenant en charge le format OpenAI. Définissez simplement l'URL de base sur `http://localhost:20128/v1`. Consultez le [guide des outils CLI](../reference/CLI-TOOLS.md) pour obtenir des instructions de configuration spécifiques.
 
 ### « Que se passe-t-il si un fournisseur devient indisponible ? »
 
-OmniRoute ignore automatiquement les fournisseurs défaillants et essaie le suivant. Vous n’avez rien à faire. Consultez le [Guide Auto-Combo](./AUTO-COMBO-GUIDE.md) pour plus de détails.
+OmniRoute ignore automatiquement les fournisseurs défaillants et essaie le suivant. Vous n'avez rien à faire. Consultez le [guide Auto-Combo](./AUTO-COMBO-GUIDE.md) pour plus de détails.
 
 ---
 

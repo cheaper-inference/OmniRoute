@@ -46,7 +46,8 @@ test("provider onboarding renders provider logos instead of treating catalog ids
 test("shared empty states render Material Symbol ids as icons", () => {
   const source = readSource("src/shared/components/EmptyState.tsx");
   assert.match(source, /usesMaterialSymbol/);
-  assert.match(source, /className="material-symbols-outlined"/);
+  // KEA-7886: Material ids render through the shared <Icon> (Lucide, Material fallback).
+  assert.match(source, /<Icon name=\{icon\}/);
 });
 
 test("compression engine pages localize API-driven labels and normalize icon ids", () => {
@@ -55,14 +56,6 @@ test("compression engine pages localize API-driven labels and normalize icon ids
   assert.match(source, /brain: "psychology"/);
   assert.equal(source.includes(">Last 7 days<"), false);
   assert.equal(source.includes("Turn this layer on/off"), false);
-});
-
-test("English compression messages cover the GrevCaching engine", () => {
-  const messages = JSON.parse(readSource("src/i18n/messages/en.json"));
-  const engine = messages.settings.compressionEngine["append-preserving-ccr"];
-
-  assert.equal(engine.label, "GrevCaching");
-  assert.equal(engine.description, "Archives older conversation while keeping the recent tail direct.");
 });
 
 test("budget management does not expose deferred English-only states", () => {

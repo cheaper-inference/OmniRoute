@@ -30,15 +30,15 @@
 
 ```
 open-sse/
-├── index.ts              # Openbaar toegangspunt
+├── index.ts              # Openbaar ingangspunt
 ├── types.d.ts            # Openbare type-exports
 ├── package.json          # @omniroute/open-sse
 ├── config/               # Providerconfiguraties, constanten, registers
-├── executors/            # HTTP-executors per provider (67 + base.ts/index.ts)
-├── handlers/             # Verzoekhandlers (chatCore, responses, enz.)
+├── executors/            # HTTP-executors per provider (150 modules + base.ts/index.ts)
+├── handlers/             # Aanvraaghandlers (chatCore, responses, enz.)
 ├── lib/                  # Interne hulpprogramma's
 ├── mcp-server/           # Model Context Protocol-server
-├── services/             # Ongeveer 298 servicemodules
+├── services/             # ~298 servicemodules
 ├── transformer/          # Formaattransformator voor de Responses API
 ├── translator/           # Formaatvertaling (OpenAI ↔ Claude ↔ Gemini)
 └── utils/                # Gedeelde hulpprogramma's (logging, fouten, streams, enz.)
@@ -47,9 +47,9 @@ open-sse/
 ### Aantallen modules
 
 | Map | Bestanden | Doel |
-| `executors/` | 167 | HTTP-executors per provider (geünificeerd via de DefaultExecutor-factory) |
-| `handlers/` | 157 | Toegangspunten voor verzoeken (chatCore, responses, embeddings) |
-| `services/` | ~536 | Routering, caching, snelheidsbeperking, vernieuwing, enz. |
+| `executors/` | 167 | HTTP-executors per provider (samengebracht via de DefaultExecutor-factory) |
+| `handlers/` | 157 | Ingangspunten voor aanvragen (chatCore, responses, embeddings) |
+| `services/` | ~536 | Routering, caching, snelheidsbeperking, verversing, enz. |
 | `translator/` | 56 | Formaatconversie (OpenAI ↔ Claude ↔ Gemini) |
 | `mcp-server/` | 44 | MCP-tools en -transporten |
 | `utils/` | ~108 | Overkoepelende hulpprogramma's (logging, fouten, streams) |
@@ -165,20 +165,20 @@ Aanroeplogbestanden (indien ingeschakeld) worden weggeschreven naar `${DATA_DIR}
 
 ---
 
-## Diepgaande analyse van belangrijke bestanden
+## Sleutelbestanden in detail
 
 ### chatCore.ts (5977 regels)
 
-De **hoofdhandler voor verzoeken**. Ondanks de omvang heeft deze een duidelijke structuur:
+De **belangrijkste request-handler**. Ondanks de omvang heeft het een duidelijke structuur:
 
 ```ts
 // Pseudostructuur van chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Authenticatie + CORS
+  // 1. Auth + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Validatie van de body
+  // 2. Body-validatie
   const body = await parseRequestBody(request);
 
   // 3. Formaatdetectie + vertaling
@@ -188,7 +188,7 @@ export async function handleChat(request: NextRequest) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Comboroutering
+  // 4. Combo-routering
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,7 +196,7 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Doorgaan naar het volgende doel
+      // Ga door naar het volgende target
     }
   }
 
@@ -205,11 +205,11 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-Hoewel het één gigantische functie is, is deze ingedeeld in **secties met commentaar** die overeenkomen met de pijplijn van 5 fasen.
+Hoewel het één grote functie is, is die georganiseerd in **secties voorzien van commentaar** die overeenkomen met de pipeline van 5 fasen.
 
-### combo.ts (4456 regels code)
+### combo.ts (4456 LOC)
 
-De **routeringsengine** die een combo omzet in geordende doelen.
+De **routing-engine** die een combo omzet in een geordende lijst van targets.
 
 ```ts
 // services/combo.ts
@@ -219,53 +219,56 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
     try {
       return await handleSingleModel(target, body);
     } catch (err) {
-      log.warn("doel mislukt, volgende wordt geprobeerd", { target, err });
+      log.warn("target failed, trying next", { target, err });
     }
   }
-  throw new ComboExhaustedError("Alle doelen zijn mislukt");
+  throw new ComboExhaustedError("All targets failed");
 }
 ```
 
-Ondersteunt **19 routeringsstrategieën** (zie `src/shared/constants/routingStrategies.ts`):
+Ondersteunt **20 routeringsstrategieën** (zie `src/shared/constants/routingStrategies.ts`):
 
-| Strategie           | Gedrag                                                                                               |
-| ------------------- | ---------------------------------------------------------------------------------------------------- |
-| `priority`          | Geordende lijst met het eerste doel voorop                                                           |
-| `weighted`          | Probabilistisch op basis van het gewicht per doel                                                    |
-| `round-robin`       | Doorloop de doelen op volgorde                                                                       |
-| `context-relay`     | Geef context door tussen doelen                                                                      |
-| `fill-first`        | Vul het quotum voordat naar het volgende doel wordt gegaan                                           |
-| `p2c`               | Power of two choices                                                                                 |
-| `random`            | Uniform willekeurig                                                                                  |
-| `least-used`        | Kies het doel met het laagste recente gebruik                                                        |
-| `cost-optimized`    | Goedkoopste gezonde doel eerst                                                                       |
-| `reset-aware`       | Houdt rekening met resetvensters van providers                                                       |
-| `reset-window`      | Routering op basis van resetvensters                                                                 |
-| `headroom`          | Doel met de meeste resterende quotumruimte eerst                                                     |
-| `strict-random`     | Werkelijk uniform (geen kwaliteitsweging)                                                            |
-| `auto`              | Gebruik scoring met 16 factoren (`autoCombo/`)                                                       |
-| `lkgp`              | Laatst bekende goed werkende provider eerst                                                          |
-| `context-optimized` | Meest geschikt voor verzoeken met een lange context                                                  |
-| `fusion`            | Stuur parallel naar een panel en laat daarna een beoordelaar het resultaat samenvoegen (`fusion.ts`) |
+| Strategie           | Gedrag                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| `priority`          | Geordende lijst, eerste target eerst                                                 |
+| `weighted`          | Probabilistisch op basis van gewicht per target                                      |
+| `round-robin`       | Targets op volgorde afwisselen                                                       |
+| `context-relay`     | Context doorgeven tussen targets                                                     |
+| `fill-first`        | Quota vullen voordat naar de volgende wordt gegaan                                   |
+| `p2c`               | Power of two choices                                                                 |
+| `random`            | Uniform willekeurig                                                                  |
+| `least-used`        | Kies degene met de minste recente gebruiken                                          |
+| `cost-optimized`    | Goedkoopste gezonde target eerst                                                     |
+| `reset-aware`       | Houdt rekening met reset-vensters van providers                                      |
+| `reset-window`      | Routering op basis van reset-vensters                                                |
+| `headroom`          | Meeste resterende quota-ruimte eerst                                                 |
+| `quota-weighted`    | Sla uitgeputte accounts over, daarna trekking op resterend quota ÷ lopende belasting |
+| `strict-random`     | Echt uniform (geen kwaliteitsweging)                                                 |
+| `auto`              | Gebruik scoring op 16 factoren (`autoCombo/`)                                        |
+| `lkgp`              | Laatst bekende goede provider eerst                                                  |
+| `context-optimized` | Beste voor verzoeken met lange context                                               |
+| `cache-optimized`   | Pin elke herbruikbare prompt-prefix aan hetzelfde account (prompt-cache-hits)        |
+| `fusion`            | Stuur parallel uit naar een panel en synthetiseer daarna via een judge (`fusion.ts`) |
+| `pipeline`          | Keten stappen aan elkaar — de output van elk target voedt de volgende                |
 
-### base.ts (1170 regels code)
+### base.ts (1170 LOC)
 
-De **abstracte executor** die door alle 107 executors wordt uitgebreid. Deze bevat:
+De **abstracte executor** die elke executor-klasse uitbreidt (direct of via `DefaultExecutor` en andere subklassen). Het bevat:
 
-- `buildUrl()` — standaardconstructie van URL's (subklassen overschrijven dit voor aangepaste constructie)
-- `buildHeaders()` — standaardheaders (authenticatie, content-type)
-- `transformRequest()` — standaard ongewijzigde doorgifte
-- `execute()` — de belangrijkste HTTP-lus met nieuwe pogingen, back-off en circuitbreaker
+- `buildUrl()` — standaard-URL-constructie (subklassen overschrijven dit voor maatwerk)
+- `buildHeaders()` — standaard-headers (auth, content-type)
+- `transformRequest()` — standaard pass-through
+- `execute()` — de hoofd-HTTP-loop met retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Verwerkt alle OpenAI-/Anthropic-compatibele providers
-  // Providers registreren configuraties (URL, authenticatie, headers), maar delen de executorlogica
+  // Handelt alle OpenAI/Anthropic-compatibele providers af
+  // Providers registreren configuraties (URL, auth, headers) maar delen de executor-logica
 }
 ```
 
-Providerspecifiek gedrag (authenticatieheaders, basis-URL, versieheaders) wordt geconfigureerd via het providerregister, niet via afzonderlijke executorklassen.
+Providerspecifiek gedrag (auth-headers, basis-URL, versie-headers) wordt geconfigureerd via het provider-register, niet via aparte executor-klassen.
 
 ````
 
@@ -273,68 +276,68 @@ Providerspecifiek gedrag (authenticatieheaders, basis-URL, versieheaders) wordt 
 
 ## Services (117 modules)
 
-Services zijn **gerichte modules met één specifiek doel** die door handlers worden samengesteld. De hoofdcategorieën:
+Services zijn **gerichte modules met één enkel doel** die handlers samenstellen. De grote categorieën:
 
 ### Routering & Combo
 
-- `combo.ts` — toegangspunt voor via combo gerouteerde requests
-- `services/autoCombo/` — scoring op basis van 16 factoren, 8 automatische routeringsstrategieën
-- `wildcardRouter.ts` — koppelt wildcardroutes (`gpt-*`)
-- `modelFamilyFallback.ts` — T5-fallback binnen dezelfde familie
+- `combo.ts` — instappunt voor combo-gerouteerde verzoeken
+- `services/autoCombo/` — scoring op 16 factoren, 8 automatische routeringsstrategieën
+- `wildcardRouter.ts` — matcht wildcard-routes (`gpt-*`)
+- `modelFamilyFallback.ts` — T5-fallback binnen dezelfde modelfamilie
 
-### Snelheidsbeperking & Quota
+### Ratelimiting & quota
 
-- `rateLimitManager.ts` — tokenbucket per sleutel+provider
-- `usage.ts` — registratie van gebruik
+- `rateLimitManager.ts` — token bucket per sleutel+provider
+- `usage.ts` — gebruiksregistratie
 - `quotaCache.ts` — in-memory quotasnapshots
 
-### Account & Token
+### Account & token
 
-- `tokenRefresh.ts` — OAuth-vernieuwing bij 401
-- `accountFallback.ts` — overschakelen naar een alternatief account
-- `sessionManager.ts` — sessiestatus voor meerdere beurten
+- `tokenRefresh.ts` — OAuth-refresh bij een 401
+- `accountFallback.ts` — schakelt over naar een alternatief account
+- `sessionManager.ts` — sessiestatus over meerdere beurten
 
 ### Intelligentie
 
-- `intentClassifier.ts` — classificeert de intentie van requests
+- `intentClassifier.ts` — classificeert de intentie van een verzoek
 - `taskAwareRouter.ts` — routeert op taaktype
-- `thinkingBudget.ts` — wijst denktokens toe
+- `thinkingBudget.ts` — wijst thinking-tokens toe
 - `contextManager.ts` — injecteert routeringscontext
 
 ### Veerkracht
 
-- `resilience.ts` — orkestratie van nieuwe pogingen, back-off en circuitbreakers
+- `resilience.ts` — orkestratie van retry, backoff en breaker
 - `emergencyFallback.ts` — fallback als laatste redmiddel
-- `modelDeprecation.ts` — routeert automatisch naar opvolgende modellen
+- `modelDeprecation.ts` — routeert automatisch naar opvolgermodellen
 
 ### Status
 
-- `signatureCache.ts` — deduplicatie op basis van requestsignatuur
-- `volumeDetector.ts` — afschakeling bij hoge belasting
-- `contextHandoff.ts` — serialisatie van sessies
+- `signatureCache.ts` — deduplicatie op verzoeksignatuur
+- `volumeDetector.ts` — load shedding
+- `contextHandoff.ts` — sessieserialisatie
 
 ### Compressie
 
 - `compression/` (submap) — volledige compressiepijplijn
-- 39 bestanden voor engines, regelpakketten en adapters
+- 39 bestanden met engines, regelpakketten en adapters
 
-### Vaardigheden
+### Skills
 
-- (beschreven in [SKILLS.md](./SKILLS.md))
+- (behandeld in [SKILLS.md](./SKILLS.md))
 
 ### Geheugen
 
-- (beschreven in [MEMORY.md](./MEMORY.md))
+- (behandeld in [MEMORY.md](./MEMORY.md))
 
 ---
 
-## Executors (75+ bestanden)
+## Executors (150 modules)
 
-Eén bestand per provider. Ze breiden allemaal `BaseExecutor` uit en overschrijven alleen wat afwijkt.
+Meestal één bestand per provider. De executor-klassen erven allemaal af van `BaseExecutor` en overschrijven wat afwijkt; de andere modules zijn helpers per provider (toolschema's, fetch/TTS-adapters, quirk-handlers).
 
-### Algemene patronen
+### Veelvoorkomende patronen
 
-Providers worden opgezocht via `getExecutor(providerId)`, dat de geconfigureerde executor retourneert. OpenAI/Anthropic-compatibele providers gebruiken `DefaultExecutor` (`executors/default.ts`). Providerspecifiek gedrag (basis-URL, authenticatieheaders, API-versie) wordt geconfigureerd in `open-sse/config/providers/`, terwijl transformaties van requestbodies worden afgehandeld in `open-sse/translator/`.
+Providers worden opgelost via `getExecutor(providerId)`, die de geconfigureerde executor teruggeeft. OpenAI/Anthropic-compatibele providers gebruiken `DefaultExecutor` (`executors/default.ts`). Providerspecifiek gedrag (basis-URL, auth-headers, API-versie) wordt geconfigureerd in `open-sse/config/providers/`, terwijl transformaties van de request body worden afgehandeld in `open-sse/translator/`.
 
 **Aangepaste URL** wordt ingesteld via de providerconfiguratie:
 
@@ -346,9 +349,9 @@ export default {
 }
 ````
 
-**Aangepaste authenticatie** wordt afgehandeld via de authenticatieconfiguratie van het providerregister (API-sleutel, OAuth, headerprofielen).
+**Aangepaste authenticatie** wordt afgehandeld via de auth-configuratie van de providerregistry (API-sleutel, OAuth, headerprofielen).
 
-Transformaties van **aangepaste requestbodies** (bijvoorbeeld wanneer Anthropic `system` van `messages` scheidt) worden per provider geregistreerd in `open-sse/translator/`.
+**Transformaties van de aangepaste request body** (bijv. Anthropic dat `system` scheidt van `messages`) worden per provider geregistreerd in `open-sse/translator/`.
 
 ````
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-De resolutie verloopt via `ExecutorRegistry` (`executors/registry.ts`): elke gespecialiseerde executor wordt gedeclareerd in de ingebouwde tabel van `executors/index.ts` en bij het laden van de module geregistreerd via `registerExecutor(alias, instance)`; `getExecutor()` raadpleegt het register en valt terug op een gememoiseerde `DefaultExecutor` voor elke provider zonder gespecialiseerde invoer. De volledige koppeling van alias → executor wordt vastgelegd door de golden test `tests/unit/executor-map-golden.test.ts`.
+Het resolutieproces verloopt via de `ExecutorRegistry` (`executors/registry.ts`): elke gespecialiseerde executor wordt gedeclareerd in de ingebouwde tabel van `executors/index.ts` en geregistreerd via `registerExecutor(alias, instance)` bij het laden van de module; `getExecutor()` raadpleegt de registry en valt terug op een gememoizeerde `DefaultExecutor` voor elke provider zonder gespecialiseerde vermelding. De volledige alias → executor-mapping wordt gekarakteriseerd door de golden test `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -483,15 +486,15 @@ Deze verwerkt:
 
 `open-sse/config/` bevat de configuratielaag:
 
-| Bestand                       | Doel                                                          |
-| ----------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`         | Register voor chatmodellen uit de catalogus met 352 providers |
-| `providerModels.ts`           | Modelaliassen, indelingstoewijzing                            |
-| `constants.ts`                | Time-outs, limieten, statuscodes                              |
-| `defaultThinkingSignature.ts` | Standaarddenksignatuur van Claude                             |
-| `modelStrip.ts` (in services) | Veldverwijdering per provider                                 |
+| Bestand                       | Doel                                             |
+| ----------------------------- | ------------------------------------------------ |
+| `providerRegistry.ts`         | Chatmodel-register over de 375-providercatalogus |
+| `providerModels.ts`           | Modelaliassen, formaatmapping                    |
+| `constants.ts`                | Time-outs, limieten, statuscodes                 |
+| `defaultThinkingSignature.ts` | Standaard Claude thinking-signatuur              |
+| `modelStrip.ts` (in services) | Veldstripping per provider                       |
 
-### Schema van het providerregister
+### Providerregister-schema
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Zod-validatie tijdens het laden van de module waarborgt dat alle providerconfiguraties geldig zijn.
+Zod-validatie bij het laden van de module zorgt ervoor dat alle providerconfiguraties geldig zijn.
 
 ---
 

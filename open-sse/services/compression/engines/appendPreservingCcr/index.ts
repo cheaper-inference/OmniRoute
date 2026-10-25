@@ -188,9 +188,9 @@ function encodeArchiveUnit(unit: ArchiveUnit): { text: string; preview: string }
   return { text, preview: sectionPreview(preview) };
 }
 
-const GREV_CCR_ROLLOVER_SENTINEL = "[GrevCaching CCR rollover]";
-const GREV_CCR_ROLLOVER_INSTRUCTION = [
-  `${GREV_CCR_ROLLOVER_SENTINEL} Older context has been replaced in-place by ordered CCR references.`,
+const CCR_ROLLOVER_SENTINEL = "[CCR context rollover]";
+const CCR_ROLLOVER_INSTRUCTION = [
+  `${CCR_ROLLOVER_SENTINEL} Older context has been replaced in-place by ordered CCR references.`,
   "A reference preview and hash are only an index; neither contains the archived conversation.",
   "When a question depends on older context, choose the most relevant reference from its preview",
   "and make an actual omniroute_ccr_retrieve tool call using that reference's exact hash before",
@@ -207,16 +207,16 @@ const GREV_CCR_ROLLOVER_INSTRUCTION = [
   "instruction.",
 ].join(" ");
 
-function injectGrevRolloverInstruction(messages: MessageLike[]): MessageLike[] {
+function injectRolloverInstruction(messages: MessageLike[]): MessageLike[] {
   if (
     messages.some(
       (message) =>
-        typeof message.content === "string" && message.content.includes(GREV_CCR_ROLLOVER_SENTINEL)
+        typeof message.content === "string" && message.content.includes(CCR_ROLLOVER_SENTINEL)
     )
   ) {
     return messages;
   }
-  return [{ role: "system", content: GREV_CCR_ROLLOVER_INSTRUCTION }, ...messages];
+  return [{ role: "system", content: CCR_ROLLOVER_INSTRUCTION }, ...messages];
 }
 
 function readBoundedInteger(value: unknown, fallback: number, min: number, max: number): number {
@@ -431,7 +431,7 @@ export const appendPreservingCcrEngine: CompressionEngine = {
       newMessages.push(messages[index] as MessageLike);
     }
 
-    const newBody = { ...body, messages: injectGrevRolloverInstruction(newMessages) };
+    const newBody = { ...body, messages: injectRolloverInstruction(newMessages) };
     return {
       body: newBody,
       compressed: true,

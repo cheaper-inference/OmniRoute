@@ -86,6 +86,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`POST /api/v1/images/edits`](references/endpoints.md#post-apiv1imagesedits)
 - [`GET /api/v1/images/upscale`](references/endpoints.md#get-apiv1imagesupscale)
 - [`POST /api/v1/images/upscale`](references/endpoints.md#post-apiv1imagesupscale)
+- [`GET /api/v1/media/{id}`](references/endpoints.md#get-apiv1mediaid)
 - [`POST /api/v1/issues/report`](references/endpoints.md#post-apiv1issuesreport)
 - [`GET /api/v1/management/proxies`](references/endpoints.md#get-apiv1managementproxies)
 - [`POST /api/v1/management/proxies`](references/endpoints.md#post-apiv1managementproxies)

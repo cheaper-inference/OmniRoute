@@ -1,6 +1,11 @@
-import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 
 /**
  * Jina's wallet-balance endpoint only accepts the key as the `api_key` QUERY
@@ -124,13 +129,14 @@ export async function fetchJinaQuota(
     await throttleQuotaFetch();
     // Credential-bearing URL (see module header) — keep it local, never log it.
     const url = `${JINA_BALANCE_URL}?api_key=${encodeURIComponent(token)}`;
-    const response = await fetch(url, {
+    const response = await fetchWithConnectionProxy(connectionId, url, {
       method: "GET",
       headers: {
         Accept: "application/json",
       },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
+    if (!response) return null;
 
     if (!response.ok) {
       quotaCache.set(connectionId, { quota: null, fetchedAt: Date.now() });
@@ -155,6 +161,7 @@ export function registerJinaQuotaFetcher(): void {
       alias,
       fetchJinaQuota as (id: string, conn?: Record<string, unknown>) => Promise<QuotaInfo | null>
     );
+    registerQuotaCacheInvalidator(alias, invalidateJinaQuotaCache);
     registerMonitorFetcher(
       alias,
       fetchJinaQuota as (id: string, conn?: Record<string, unknown>) => Promise<QuotaInfo | null>

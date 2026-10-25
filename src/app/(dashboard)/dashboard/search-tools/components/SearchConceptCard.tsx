@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
 
 type ConceptKey = "search" | "scrape" | "compare" | "rerank" | "auto";
 
@@ -23,11 +24,26 @@ interface ConceptItem {
 }
 
 const CONCEPTS: ConceptItem[] = [
-  { icon: "🔍", key: "search", titleKey: "searchConceptTitle", descKey: "searchConceptDesc" },
-  { icon: "📄", key: "scrape", titleKey: "scrapeConceptTitle", descKey: "scrapeConceptDesc" },
-  { icon: "⚖", key: "compare", titleKey: "compareConceptTitle", descKey: "compareConceptDesc" },
-  { icon: "↕", key: "rerank", titleKey: "rerankConceptTitle", descKey: "rerankConceptDesc" },
-  { icon: "⚡", key: "auto", titleKey: "autoConceptTitle", descKey: "autoConceptDesc" },
+  { icon: "search", key: "search", titleKey: "searchConceptTitle", descKey: "searchConceptDesc" },
+  {
+    icon: "description",
+    key: "scrape",
+    titleKey: "scrapeConceptTitle",
+    descKey: "scrapeConceptDesc",
+  },
+  {
+    icon: "balance",
+    key: "compare",
+    titleKey: "compareConceptTitle",
+    descKey: "compareConceptDesc",
+  },
+  {
+    icon: "swap_vert",
+    key: "rerank",
+    titleKey: "rerankConceptTitle",
+    descKey: "rerankConceptDesc",
+  },
+  { icon: "bolt", key: "auto", titleKey: "autoConceptTitle", descKey: "autoConceptDesc" },
 ];
 
 interface SearchConceptCardProps {
@@ -45,8 +61,11 @@ export default function SearchConceptCard({ defaultCollapsed = false }: SearchCo
       data-testid="search-concept-card"
     >
       {/* Header */}
+      {/* kit-exception: Full-width disclosure header (label + chevron across the card): the kit Button is a
+          centred single-line pill, so the header stays a native <button> on kit tokens. */}
       <button
-        className="flex justify-between items-center w-full px-4 py-2.5 bg-bg-alt border-b border-border hover:bg-bg-alt/80 transition-colors"
+        type="button"
+        className="flex justify-between items-center w-full px-4 py-2.5 bg-bg-alt border-b border-border hover:bg-bg-subtle transition-colors"
         onClick={() => setCollapsed((c) => !c)}
         aria-expanded={!collapsed}
         aria-controls="concept-card-content"
@@ -73,9 +92,7 @@ export default function SearchConceptCard({ defaultCollapsed = false }: SearchCo
               className="flex gap-3 p-3 bg-bg-alt rounded-lg border border-border"
               data-testid={`concept-item-${c.key}`}
             >
-              <span className="text-lg shrink-0" aria-hidden="true">
-                {c.icon}
-              </span>
+              <Icon name={c.icon} size={20} className="text-primary" />
               <div>
                 <div className="text-xs font-semibold text-text-main mb-0.5">{t(c.titleKey)}</div>
                 <div className="text-[11px] text-text-muted leading-relaxed">{t(c.descKey)}</div>

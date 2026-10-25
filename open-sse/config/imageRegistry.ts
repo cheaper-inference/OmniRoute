@@ -7,6 +7,7 @@
 
 import { resolveRegisteredFeatureFlag } from "@/shared/utils/featureFlagResolverBridge.ts";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+import { getModelsByProviderId } from "./providerModels.ts";
 import {
   type ImageModelEntry,
   type ImageProviderConfig,
@@ -239,6 +240,17 @@ export function getImageModelEntry(modelStr) {
     imageRequired: modelConfig.imageRequired,
     description: modelConfig.description || undefined,
   };
+}
+
+/**
+ * Image-registry model whose provider/model pair the chat catalog does not also list, so
+ * /v1/chat/completions cannot serve it (#6457). Dual-purpose models (e.g. Codex GPT-5.5)
+ * are in both and stay chat-capable.
+ */
+export function isImageOnlyModel(modelStr: string): boolean {
+  const entry = getImageModelEntry(modelStr);
+  if (!entry) return false;
+  return !getModelsByProviderId(entry.provider).some((model) => model.id === entry.model);
 }
 
 /** Image input is mandatory only for edit-only models (`["image"]`, no `"text"`). Dual-modality models also accept pure t2i. */

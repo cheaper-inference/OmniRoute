@@ -16,10 +16,16 @@ import {
   clearRecoveredProviderState,
 } from "@/sse/services/auth";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
+import {
+  isKeyScopeBlockedCredentials,
+  scopeComboTargetsForKey,
+  type ComboKeyScope,
+} from "@omniroute/open-sse/services/comboKeyScope.ts";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
+import { runImageRequestWithAccounting } from "@/lib/usage/imageRequestAccounting";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
@@ -130,6 +136,14 @@ export async function runImageComboTargets<T extends ImageComboTarget>(
       continue;
     }
 
+    // GHSA-3w2r: every connection of this provider is outside the caller key's
+    // scope — the sentinel carries no secret and must never be dispatched.
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      lastError = { status: 403, error: `[${provider}] No connection allowed for this API key` };
+      fallbackCount += 1;
+      continue;
+    }
+
     if (isRateLimited(credentials)) {
       lastError = {
         status: 429,
@@ -170,6 +184,48 @@ export async function runImageComboTargets<T extends ImageComboTarget>(
 }
 
 /**
+ * Steps 1–2 of {@link executeImageCombo}: the combo's images-capable targets the
+ * caller key may use, with the key's connection scope — or the error response.
+ */
+async function resolveImageComboTargets(comboName: string, keyScope: ComboKeyScope | undefined) {
+  const combo = await getComboByName(comboName);
+  if (!combo) {
+    // Model name is not a combo; the caller should handle this as a direct model
+    return { response: errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`) };
+  }
+
+  const allCombos = await getCombos();
+  const targets = resolveComboTargets(combo as never, allCombos as never);
+  if (!targets || targets.length === 0) {
+    return {
+      response: errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `Combo "${comboName}" has no usable targets`
+      ),
+    };
+  }
+
+  // Images-capable targets, then those the caller key's model policy admits.
+  const capableTargets = targets.filter((t) => {
+    if (!t.modelStr) return false;
+    const entry = getImageModelEntry(t.modelStr);
+    return entry !== null;
+  });
+  const scoped = await scopeComboTargetsForKey(capableTargets, keyScope, comboName);
+  if (scoped.rejection) return { response: scoped.rejection };
+
+  if (scoped.targets.length === 0) {
+    return {
+      response: errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `No images-capable targets in combo "${comboName}"`
+      ),
+    };
+  }
+  return { targets: scoped.targets, allowedConnections: scoped.allowedConnections };
+}
+
+/**
  * Execute a full combo strategy for an image generation request.
  *
  * 1. Resolve combo targets via resolveComboTargets.
@@ -184,36 +240,16 @@ export async function executeImageCombo(
   auth: {
     request: Request;
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
+    /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */
+    keyScope?: ComboKeyScope;
   },
   startTime: number,
   log: typeof logger
 ): Promise<Response> {
-  // 1. Resolve combo targets
-  const combo = await getComboByName(comboName);
-  if (!combo) {
-    // Model name is not a combo; the caller should handle this as a direct model
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
-  }
-
-  const allCombos = await getCombos();
-  const targets = resolveComboTargets(combo as never, allCombos as never);
-  if (!targets || targets.length === 0) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
-  }
-
-  // 2. Filter to images-capable targets
-  const imageTargets = targets.filter((t) => {
-    if (!t.modelStr) return false;
-    const entry = getImageModelEntry(t.modelStr);
-    return entry !== null;
-  });
-
-  if (imageTargets.length === 0) {
-    return errorResponse(
-      HTTP_STATUS.BAD_REQUEST,
-      `No images-capable targets in combo "${comboName}"`
-    );
-  }
+  // 1–2. Resolve combo targets, filtered to images-capable ones the key may use
+  const resolved = await resolveImageComboTargets(comboName, auth.keyScope);
+  if ("response" in resolved) return resolved.response;
+  const { targets: imageTargets, allowedConnections } = resolved;
 
   // 3. Iterate targets in priority order (first healthy target wins).
   //    The skip / terminal classification lives in the shared runImageComboTargets
@@ -221,14 +257,27 @@ export async function executeImageCombo(
   //    /v1/images/edits can reuse the exact same iteration semantics (#12547).
   const run = await runImageComboTargets(imageTargets, {
     resolveProvider: (target) => parseImageModel(target.modelStr),
-    resolveCredentials: (provider) => getProviderCredentialsWithQuotaPreflight(provider),
-    dispatch: async ({ target, credentials }) =>
-      (await handleImageGeneration({
-        body: { ...body, model: target.modelStr },
-        credentials,
-        log,
-        signal: auth.request?.signal || null,
-      })) as ImageGenerationResult,
+    resolveCredentials: (provider) =>
+      getProviderCredentialsWithQuotaPreflight(provider, null, allowedConnections),
+    dispatch: async ({ target, provider, model, credentials }) =>
+      (await runImageRequestWithAccounting(
+        {
+          endpoint: "/v1/images/generations",
+          provider,
+          model,
+          apiKeyInfo: auth.policy?.apiKeyInfo,
+          credentials,
+          startTime,
+          comboStrategy: "priority",
+        },
+        () =>
+          handleImageGeneration({
+            body: { ...body, model: target.modelStr },
+            credentials,
+            log,
+            signal: auth.request?.signal || null,
+          })
+      )) as ImageGenerationResult,
     onSuccess: async (credentials) => {
       await clearRecoveredProviderState(credentials as never);
     },

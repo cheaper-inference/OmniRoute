@@ -45,6 +45,7 @@ import {
   shouldForceScopeEnforcement,
   type McpToolExtraLike,
 } from "./scopeEnforcement.ts";
+import { resolveMcpToolOwnerId } from "./mcpCallerIdentity.ts";
 import {
   handleSimulateRoute,
   handleSetBudgetGuard,
@@ -986,8 +987,7 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
         withScopeEnforcement(
           toolName,
           async (args, extra) => {
-            const scopeContext = resolveCallerScopeContext(extra, Array.from(MCP_ALLOWED_SCOPES));
-            const apiKeyId = scopeContext.callerId || "mcp";
+            const apiKeyId = (await resolveMcpToolOwnerId(extra)) ?? "mcp";
             try {
               const execution = await skillExecutor.execute(
                 skill.name,

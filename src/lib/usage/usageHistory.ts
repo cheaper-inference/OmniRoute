@@ -8,19 +8,17 @@
  */
 
 import { getDbInstance } from "../db/core";
-import { resolveProviderId } from "@/shared/constants/providers";
 import { normalizePayloadForLog, protectPayloadForLog } from "../logPayloads";
-import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import {
-  resolveOrphanedUsageAccountIdentity,
-  resolveUsageAccountIdentity,
-} from "./accountIdentity";
+  redactUrlQuerySecrets,
+  sanitizeErrorMessage,
+} from "@omniroute/open-sse/utils/errorSanitization.ts";
 import {
   accumulateLatencySample,
   asRecord,
   buildLatencyStatsEntry,
   createLatencyBucket,
-  normalizeServiceTier,
+  mapUsageHistoryRow,
   resolvePositiveOption,
   toNumber,
   toStringOrNull,
@@ -36,14 +34,8 @@ import {
   getCompletedDetails,
 } from "./completedRequestDetails";
 import { shouldPersistToDisk } from "./migrations";
-import { emitUsageRecorded } from "./usageEvents";
-import {
-  getLoggedInputTokens,
-  getLoggedOutputTokens,
-  getPromptCacheCreationTokens,
-  getPromptCacheReadTokens,
-  getReasoningTokens,
-} from "./tokenAccounting";
+import { attemptWrite, isWriteLockError, scheduleWriteRetry } from "./usageWriteRetry";
+import { getCallLogApiKeyContext } from "./callLogApiKeyContext";
 
 export type PendingRequestMetadata = {
   clientEndpoint?: string | null;
@@ -121,7 +113,9 @@ function normalizePendingMetadata(metadata?: PendingRequestMetadata): PendingReq
     normalized.clientEndpoint = toStringOrNull(metadata.clientEndpoint) || null;
   }
   if (metadata.providerUrl !== undefined) {
-    normalized.providerUrl = toStringOrNull(metadata.providerUrl) || null;
+    // Live pending detail is served to the dashboard: never retain `?key=`-style credentials.
+    const providerUrl = toStringOrNull(metadata.providerUrl);
+    normalized.providerUrl = providerUrl ? redactUrlQuerySecrets(providerUrl) : null;
   }
   if (metadata.stage !== undefined) {
     normalized.stage = toStringOrNull(metadata.stage) || null;
@@ -785,32 +779,7 @@ export async function getUsageDb(sinceIso?: string | null, limit?: number, curso
     rows = db.prepare(`SELECT * FROM usage_history ORDER BY timestamp ASC LIMIT ?`).all(maxRows);
   }
 
-  const history = rows.map((row) => {
-    const r = asRecord(row);
-    return {
-      provider: toStringOrNull(r.provider),
-      model: toStringOrNull(r.model),
-      connectionId: toStringOrNull(r.connection_id),
-      apiKeyId: toStringOrNull(r.api_key_id),
-      apiKeyName: toStringOrNull(r.api_key_name),
-      serviceTier: normalizeServiceTier(r.service_tier),
-      tokens: {
-        input: toNumber(r.tokens_input),
-        output: toNumber(r.tokens_output),
-        cacheRead: toNumber(r.tokens_cache_read),
-        cacheCreation: toNumber(r.tokens_cache_creation),
-        reasoning: toNumber(r.tokens_reasoning),
-      },
-      status: toStringOrNull(r.status),
-      success: toNumber(r.success) === 1,
-      latencyMs: toNumber(r.latency_ms),
-      timeToFirstTokenMs: toNumber(r.ttft_ms),
-      errorCode: toStringOrNull(r.error_code),
-      timestamp: toStringOrNull(r.timestamp),
-      cpaAuthIndex: toStringOrNull(r.cpa_auth_index),
-      cpaAccountLabel: null as string | null,
-    };
-  });
+  const history = rows.map(mapUsageHistoryRow);
   await attachCpaAccountLabels(history);
 
   // Provide next cursor if we hit the limit (more rows exist)
@@ -865,125 +834,48 @@ export interface UsageEntry {
 }
 
 /**
+ * Controls the legacy natural-key guard for one usage write.
+ *
+ * Normal callers keep the default so repeated callbacks for one request remain
+ * one row. A writer that already owns a distinct physical-attempt boundary may
+ * explicitly disable that guard without changing the row, cache, event, or
+ * account-attribution paths below.
+ */
+export interface SaveRequestUsageOptions {
+  deduplicate?: boolean;
+}
+
+/**
  * Save request usage entry to SQLite.
  */
-export async function saveRequestUsage(entry: UsageEntry) {
+export async function saveRequestUsage(entry: UsageEntry, options: SaveRequestUsageOptions = {}) {
   if (!shouldPersistToDisk) return;
 
+  // Freeze the timestamp on the first attempt so the deferred retry replays
+  // the same value and the dedup guard keys both attempts identically.
+  // Fall back to the request-scoped api-key context, exactly as saveCallLogOperation
+  // does. The context exists so callers need not thread identity through every
+  // handler, but this writer only ever read `entry.apiKeyId` — so media paths, which
+  // set the context once in the route, stored an unattributed usage row while their
+  // call-log row came out attributed. Attribution matters here more than in call_logs:
+  // this table is what the per-key usage aggregation reads. Resolved before the write
+  // so a deferred retry (outside the request's async context) keeps the attribution.
+  const apiKeyContext = getCallLogApiKeyContext();
+  const frozenEntry = {
+    ...entry,
+    timestamp: entry.timestamp || new Date().toISOString(),
+    apiKeyId: entry.apiKeyId || apiKeyContext?.apiKeyId || null,
+    apiKeyName: entry.apiKeyName || apiKeyContext?.apiKeyName || null,
+  };
+
   try {
-    const db = getDbInstance();
-    const timestamp = entry.timestamp || new Date().toISOString();
-    const serviceTier = normalizeServiceTier(entry.serviceTier ?? entry.service_tier);
-
-    const tokensInput = getLoggedInputTokens(entry.tokens);
-    const tokensOutput = getLoggedOutputTokens(entry.tokens);
-    const connection = entry.connectionId
-      ? (db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(entry.connectionId) as
-          Record<string, unknown> | undefined)
-      : undefined;
-    const accountIdentity = connection
-      ? resolveUsageAccountIdentity(connection)
-      : resolveOrphanedUsageAccountIdentity(entry.provider, entry.connectionId);
-
-    // Dedup guard: skip INSERT when an identical row already exists in the same
-    // second. This prevents double-counting when onRequestSuccess fires more
-    // than once (e.g. combo routing calling the callback from both the
-    // streaming and non-streaming paths for the same underlying request).
-    // Keyed on the natural identity of a request: timestamp + provider + model
-    // + connectionId + apiKeyId + token counts. If only the endpoint is missing
-    // on the existing row, fill it in rather than inserting a duplicate.
-    let inserted = false;
-
-    db.transaction(() => {
-      const existing = db
-        .prepare(
-          `SELECT id, endpoint, cpa_auth_index FROM usage_history
-           WHERE timestamp = ?
-             AND COALESCE(provider, '')     = COALESCE(?, '')
-             AND COALESCE(model, '')        = COALESCE(?, '')
-             AND COALESCE(connection_id, '') = COALESCE(?, '')
-             AND COALESCE(api_key_id, '')   = COALESCE(?, '')
-             AND tokens_input  = ?
-             AND tokens_output = ?
-           ORDER BY id DESC LIMIT 1`
-        )
-        .get(
-          timestamp,
-          entry.provider ? resolveProviderId(entry.provider) : null,
-          entry.model || null,
-          entry.connectionId || null,
-          entry.apiKeyId || null,
-          tokensInput,
-          tokensOutput
-        ) as { id: number; endpoint: string | null; cpa_auth_index: string | null } | undefined;
-
-      if (existing) {
-        // Back-fill endpoint if the original row missed it.
-        if (!existing.endpoint && entry.endpoint) {
-          db.prepare(`UPDATE usage_history SET endpoint = ? WHERE id = ?`).run(
-            entry.endpoint,
-            existing.id
-          );
-        }
-        // A later completed attempt can carry the trace the first write missed.
-        if (!existing.cpa_auth_index && entry.cpaAuthIndex) {
-          db.prepare(`UPDATE usage_history SET cpa_auth_index = ? WHERE id = ?`).run(
-            entry.cpaAuthIndex,
-            existing.id
-          );
-        }
-        return; // duplicate — do not insert
-      }
-
-      db.prepare(
-        `
-        INSERT INTO usage_history (provider, model, connection_id, account_key, account_label,
-          account_label_priority, api_key_id, api_key_name, tokens_input, tokens_output,
-          tokens_cache_read, tokens_cache_creation, tokens_reasoning, service_tier, status, success,
-          latency_ms, ttft_ms, error_code, combo_strategy, endpoint, cpa_auth_index, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `
-      ).run(
-        entry.provider ? resolveProviderId(entry.provider) : null,
-        entry.model || null,
-        entry.connectionId || null,
-        accountIdentity.accountKey,
-        accountIdentity.accountLabel,
-        accountIdentity.accountLabelPriority,
-        entry.apiKeyId || null,
-        entry.apiKeyName || null,
-        tokensInput,
-        tokensOutput,
-        getPromptCacheReadTokens(entry.tokens),
-        getPromptCacheCreationTokens(entry.tokens),
-        getReasoningTokens(entry.tokens),
-        serviceTier,
-        entry.status || null,
-        entry.success === false ? 0 : 1,
-        Number.isFinite(Number(entry.latencyMs)) ? Number(entry.latencyMs) : 0,
-        Number.isFinite(Number(entry.timeToFirstTokenMs))
-          ? Number(entry.timeToFirstTokenMs)
-          : Number.isFinite(Number(entry.latencyMs))
-            ? Number(entry.latencyMs)
-            : 0,
-        entry.errorCode || null,
-        entry.comboStrategy || entry.combo_strategy || null,
-        entry.endpoint || null,
-        entry.cpaAuthIndex || null,
-        timestamp
-      );
-
-      inserted = true;
-    })();
-
-    // Decoupled via the event bus so usageHistory never imports providerLimits
-    // (which would pull the executors/translator graph into the type-check surface).
-    // Only emit when a row was actually inserted — not on dedup no-ops.
-    if (inserted) {
-      emitUsageRecorded(entry.provider, entry.connectionId);
-    }
+    attemptWrite(frozenEntry, options);
   } catch (error) {
-    console.error("Failed to save usage stats:", error);
+    if (!isWriteLockError(error)) {
+      console.error("Failed to save usage stats:", error);
+      return;
+    }
+    scheduleWriteRetry(frozenEntry, options);
   }
 }
 
@@ -1028,32 +920,7 @@ export async function getUsageHistory(filter: UsageHistoryFilter = {}) {
   sql += " ORDER BY timestamp ASC";
 
   const rows = db.prepare(sql).all(params);
-  const history = rows.map((row) => {
-    const r = asRecord(row);
-    return {
-      provider: toStringOrNull(r.provider),
-      model: toStringOrNull(r.model),
-      connectionId: toStringOrNull(r.connection_id),
-      apiKeyId: toStringOrNull(r.api_key_id),
-      apiKeyName: toStringOrNull(r.api_key_name),
-      serviceTier: normalizeServiceTier(r.service_tier),
-      tokens: {
-        input: toNumber(r.tokens_input),
-        output: toNumber(r.tokens_output),
-        cacheRead: toNumber(r.tokens_cache_read),
-        cacheCreation: toNumber(r.tokens_cache_creation),
-        reasoning: toNumber(r.tokens_reasoning),
-      },
-      status: toStringOrNull(r.status),
-      success: toNumber(r.success) === 1,
-      latencyMs: toNumber(r.latency_ms),
-      timeToFirstTokenMs: toNumber(r.ttft_ms),
-      errorCode: toStringOrNull(r.error_code),
-      timestamp: toStringOrNull(r.timestamp),
-      cpaAuthIndex: toStringOrNull(r.cpa_auth_index),
-      cpaAccountLabel: null as string | null,
-    };
-  });
+  const history = rows.map(mapUsageHistoryRow);
   await attachCpaAccountLabels(history);
   return history;
 }

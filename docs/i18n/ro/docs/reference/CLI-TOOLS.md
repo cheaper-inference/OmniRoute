@@ -8,184 +8,233 @@ Ultima actualizare: 2026-08-23
 
 OmniRoute se integrează cu trei categorii de instrumente CLI, distribuite în trei pagini dedicate ale panoului de control:
 
-| Pagină         | Rută                    | Concept                                                                                      | Număr                |
-| -------------- | ----------------------- | -------------------------------------------------------------------------------------------- | -------------------- |
-| **Coduri CLI** | `/dashboard/cli-code`   | Instrumente de programare direcționate către OmniRoute (Client → CLI → OmniRoute → Furnizor) | 26                   |
-| **Agenți CLI** | `/dashboard/cli-agents` | Agenți autonomi direcționați către OmniRoute (același flux, domeniu mai larg)                | 10                   |
-| **Agenți ACP** | `/dashboard/acp-agents` | Instrumente CLI pe care OmniRoute le lansează ca backend prin stdio/ACP (flux invers)        | consultați registrul |
+| Pagină         | Rută                    | Concept                                                                                      | Număr          |
+| -------------- | ----------------------- | -------------------------------------------------------------------------------------------- | -------------- |
+| **CLI Code's** | `/dashboard/cli-code`   | Instrumente de programare direcționate către OmniRoute (Client → CLI → OmniRoute → Furnizor) | 26             |
+| **CLI Agents** | `/dashboard/cli-agents` | Agenți autonomi direcționați către OmniRoute (același flux, domeniu mai larg)                | 10             |
+| **ACP Agents** | `/dashboard/acp-agents` | CLI-uri lansate de OmniRoute ca backend prin stdio/ACP (flux invers)                         | vezi registrul |
 
 Rutele vechi redirecționează prin 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
-## Cum Funcționează
+## Cum funcționează
 
 ```
 CLI Code's / CLI Agents (flux de consum):
 Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose / ...
            │
-           ▼  (toate indică către OmniRoute)
+           ▼  (toate indică spre OmniRoute)
     http://YOUR_SERVER:20128/v1
            │
-           ▼  (OmniRoute direcționează către providerul corect)
+           ▼  (OmniRoute direcționează către furnizorul potrivit)
     Anthropic / OpenAI / Gemini / DeepSeek / Groq / Mistral / ...
 
-ACP Agents (flux de generare invers):
-    Cerere client → OmniRoute → generează CLI prin stdio/ACP → răspuns
+ACP Agents (flux invers de lansare):
+    Solicitare client → OmniRoute → lansează CLI-ul prin stdio/ACP → răspuns
 ```
 
 **Beneficii:**
 
-- O cheie API pentru a gestiona toate instrumentele
-- Urmărirea costurilor pe toate CLI-urile din tablou
+- O singură cheie API pentru gestionarea tuturor instrumentelor
+- Urmărirea costurilor pentru toate CLI-urile în panoul de control
 - Schimbarea modelului fără a reconfigura fiecare instrument
-- Funcționează local și pe servere remote (VPS, Docker, Akamai, Cloudflare Tunnel)
+- Funcționează local și pe servere la distanță (VPS, Docker, Akamai, Cloudflare Tunnel)
 
 ---
 
-## Auto-configurare cu `setup-*`
+## Configurare automată cu `setup-*`
 
-Nu trebuie să scrieți manual configurația fiecărui instrument. OmniRoute include o comandă `setup-*` pentru fiecare CLI acceptat, care citește catalogul de modele **live** dintr-un OmniRoute în execuție (local sau la distanță) și scrie propria configurație a instrumentului pe mașina dumneavoastră:
+Nu trebuie să scrieți manual configurația fiecărui instrument. OmniRoute oferă câte o comandă `setup-*`
+pentru fiecare CLI acceptat, care citește catalogul **activ** de modele dintr-o instanță
+OmniRoute aflată în execuție (locală sau la distanță) și scrie configurația instrumentului pe sistemul dvs.:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Fiecare acceptă `--remote <url> --api-key <key>` (configurează un instrument local față de un OmniRoute la distanță), `--dry-run` (previzualizare fără scriere) și `--port`. Instrumentele fără auto-descoperire a modelului (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) acceptă `--model <id>` (și `--yes` pentru rulări non-interactive). `setup-5dive` este singura rețetă care nu scrie sub `$HOME`: configurează o flotă de agenți 5dive scriind un profil de autentificare deținut de root pe gazda flotei, deci se re-execută prin `sudo` și nu are propriul mod la distanță. Pentru a lansa un CLI cu mediul corect injectat și fără nicio configurație scrisă, utilizați lansatorul generic `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — țintele și aliasurile provin din `bin/cli/cli-manifest.mjs`); lansatoarele vechi per-instrument `omniroute launch` (Claude Code) și `omniroute launch-codex` (Codex) rămân disponibile. Gemini CLI este doar pentru lansare: este o țintă `omniroute run`, dar nu are o rețetă `setup-*`/`configure`.
+Fiecare acceptă `--remote <url> --api-key <key>` (configurează un instrument local pentru o
+instanță OmniRoute la distanță), `--dry-run` (previzualizare fără scriere) și `--port`. Instrumentele
+fără detectare automată a modelelor (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) acceptă
+`--model <id>` (și `--yes` pentru execuții neinteractive). `setup-5dive` este singura
+procedură care nu scrie sub `$HOME`: aceasta configurează o flotă de agenți 5dive prin
+scrierea unui profil de autentificare deținut de root pe gazda flotei, astfel că se execută din nou prin `sudo`
+și nu are un mod propriu pentru acces la distanță. Pentru a lansa un CLI cu
+variabilele de mediu corecte injectate și fără a scrie nicio configurație, utilizați lansatorul generic
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
+gemini — țintele și aliasurile provin din `bin/cli/cli-manifest.mjs`); lansatoarele
+vechi, specifice fiecărui instrument, `omniroute launch` (Claude Code) și `omniroute launch-codex`
+(Codex), rămân disponibile. Gemini CLI poate fi doar lansat: este o țintă `omniroute run`,
+dar nu are nicio procedură `setup-*`/`configure`.
 
-> **Referință completă:** tabelul principal — ce scrie fiecare comandă, fiecare flag, local vs. la distanță și ce instrumente necesită un sufix `/v1` — se găsește în
+> **Referință completă:** tabelul principal — ce scrie fiecare comandă, toate opțiunile,
+> modurile local și la distanță și instrumentele care necesită sufixul `/v1` — se află în
 > **[Integrări CLI](../guides/CLI-INTEGRATIONS.md)**.
 
-### Rularea acestora într-un container
+### Executarea acestora într-un container
 
-O comandă `setup-*` executată în interiorul containerului OmniRoute scrie în propriul director home al containerului, pe care niciun CLI gazdă nu-l citește și care dispare odată cu containerul. OmniRoute detectează acest lucru și iese cu codul `2` cu instrucțiuni, în loc să scrie. Două modalități de a continua — instalați CLI-ul pe gazdă și `omniroute connect` la container, sau montați directorul de configurare și setați `CLI_CONFIG_HOME` (profilul `host` din compose). Fiecare comandă `setup-*`, plus `omniroute configure` și `omniroute config set`, acceptă `--allow-container-write` atunci când configurarea propriilor CLI-uri ale containerului este ceea ce ați intenționat de fapt; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` face același lucru pentru server. Consultați
-[Ghid Docker → Configurarea instrumentelor CLI gazdă](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+O comandă `setup-*` executată în containerul OmniRoute scrie în directorul personal
+al containerului, pe care niciun CLI de pe gazdă nu îl citește și care dispare odată cu
+containerul. OmniRoute detectează această situație și încheie execuția cu codul `2`, afișând instrucțiuni în loc
+să scrie. Există două soluții acceptate — instalați CLI-ul pe gazdă și utilizați
+`omniroute connect` pentru conectarea la container sau montați prin bind directoarele de configurare și setați
+`CLI_CONFIG_HOME` (profilul compose `host`). Fiecare comandă `setup-*`, precum și
+`omniroute configure` și `omniroute config set`, acceptă
+`--allow-container-write` atunci când intenția este într-adevăr să configurați CLI-urile proprii
+ale containerului; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` are același efect pentru
+server. Consultați
+[Ghidul Docker → Configurarea instrumentelor CLI de pe gazdă](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Endpoint-ul de aplicare** al tabloului de bord (`POST /api/cli-tools/apply`) impune aceeași protecție: într-un container, o scriere a cărei țintă nu este montată de pe gazdă răspunde cu **`422`** cu `containerEphemeralTarget: true`, textul de eroare sigur și — pentru instrumentele cu o rețetă gazdă (claude, codex, opencode, cline, kilo, continue) — o `hostSetupCommand` (de ex. `omniroute setup-opencode`) de rulat pe gazdă; nimic nu este scris. `dryRun: true` continuă să funcționeze în modul container și returnează o previzualizare redactată + calea țintă fără a atinge discul. Conținutul previzualizării nu este o configurație purtătoare de credențiale de copiat sau importat. Aplicați cu instrumentul original/URL-ul de bază/cheia API/intrările modelului pe gazdă, sau utilizați comanda de configurare indicată pe partea gazdă. Consultați [Securitatea configurației CLI](../security/CLI-CONFIGURATION.md) pentru antetul previzualizării și contractul cererii. Acest comportament este intenționat și protejat împotriva regresiei de
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nu "reparați" niciodată un 422 prin eliminarea protecției.
+**Endpointul de aplicare** al panoului de control (`POST /api/cli-tools/apply`) impune
+aceeași protecție: într-un container, o scriere a cărei țintă nu este montată prin bind de pe
+gazdă returnează **`422`** cu `containerEphemeralTarget: true`, textul sigur al erorii
+și — pentru instrumentele care au o procedură pentru gazdă (claude, codex, opencode, cline,
+kilo, continue) — un `hostSetupCommand` (de exemplu, `omniroute setup-opencode`) care trebuie executat
+în schimb pe gazdă; nu se scrie nimic. `dryRun: true` continuă să funcționeze în modul container
+și returnează o previzualizare cu datele sensibile mascate + calea țintă, fără a modifica discul. Conținutul
+previzualizării nu este o configurație care conține credențiale și care să poată fi copiată sau importată. Aplicați
+pe gazdă folosind valorile inițiale pentru instrument/adresa URL de bază/cheia API/model sau utilizați comanda indicată
+de configurare pe gazdă. Consultați [Securitatea configurării CLI](../security/CLI-CONFIGURATION.md)
+pentru antetul previzualizării și contractul cererii. Acest comportament este
+intenționat și protejat împotriva regresiilor prin
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nu „remediați” niciodată o eroare 422
+prin eliminarea protecției.
 
 ---
 
-## Sursa de Adevăr
+## Sursa de referință
 
-Catalogul unificat se află în `src/shared/constants/cliTools.ts` ca `CLI_TOOLS: Record<string, CliCatalogEntry>`.
+Catalogul unificat se află în `src/shared/constants/cliTools.ts` sub forma `CLI_TOOLS: Record<string, CliCatalogEntry>`.
 
-Fiecare intrare are aceste câmpuri (definite în `src/shared/schemas/cliCatalog.ts`):
+Fiecare intrare are următoarele câmpuri (definite în `src/shared/schemas/cliCatalog.ts`):
 
-| Câmp                                            | Tip                                                          | Descriere                                                             |
-| ----------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `category`                                      | `"code" \| "agent"`                                          | Pe ce pagină apare instrumentul                                       |
-| `vendor`                                        | `string`                                                     | Originea instrumentului ("Anthropic", "OSS (P. Gauthier)")            |
-| `acpSpawnable`                                  | `boolean`                                                    | De asemenea, utilizabil ca Agent ACP (badge afișat)                   |
-| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | Nivel de suport pentru endpoint personalizat. `"none"` = backlog MITM |
-| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Mecanism de configurare                                               |
-| `id`, `name`, `color`, `description`, `docsUrl` | standard                                                     | Câmpuri de afișare de bază                                            |
+| Câmp                                            | Tip                                                          | Descriere                                                                               |
+| ----------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `category`                                      | `"code" \| "agent"`                                          | Pagina pe care apare instrumentul                                                       |
+| `vendor`                                        | `string`                                                     | Originea instrumentului ("Anthropic", "OSS (P. Gauthier)")                              |
+| `acpSpawnable`                                  | `boolean`                                                    | Poate fi utilizat și ca agent ACP (se afișează o insignă)                               |
+| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | Nivelul de suport pentru endpoint-uri personalizate. `"none"` = lista de așteptare MITM |
+| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Mecanismul de configurare                                                               |
+| `id`, `name`, `color`, `description`, `docsUrl` | standard                                                     | Câmpurile principale de afișare                                                         |
 
-Intrările cu `baseUrlSupport: "none"` **nu sunt afișate** pe paginile tabloului de bord — ele sunt înregistrate în backlog-ul MITM pentru planul 11 (vezi `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
+Intrările cu `baseUrlSupport: "none"` **nu sunt afișate** în paginile tabloului de bord — acestea sunt înregistrate în lista de așteptare MITM pentru planul 11 (consultați `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
 
-### Niveluri de capacitate (catalogate × detectabile × configurabile × lansabile)
+### Niveluri de capabilități (catalogat × detectabil × configurabil × lansabil)
 
-Nu fiecare instrument catalogat este detectabil, configurabil sau lansabil. Fiecare nivel are o sursă declarativă, iar un test de derapaj le menține aliniate:
+Nu fiecare instrument catalogat este detectabil, configurabil sau lansabil. Fiecare nivel are o singură
+sursă declarativă, iar un test de divergență le menține aliniate:
 
-| Nivel            | Semnificație                                                                            | Declarație în                                                       |
-| ---------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| **Catalogat**    | Apare în catalogul tabloului de bord (nume, furnizor, documentație, tip de configurare) | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                    |
-| **Detectabil**   | Detectarea binarului/configurației, verificări de sănătate, căi de configurare          | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` catalog de rulare) |
-| **Configurabil** | Suportat de `omniroute configure <cli>` (rețetă de configurare existentă)               | `bin/cli/cli-manifest.mjs` (`configure: true`)                      |
-| **Lansabil**     | Suportat de `omniroute run <target>` (injectare env/args definită)                      | `bin/cli/cli-manifest.mjs` (`run: true`)                            |
+| Nivel            | Semnificație                                                                                       | Declarat în                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Catalogat**    | Apare în catalogul tabloului de bord (nume, furnizor, documentație, tip de configurare)            | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                        |
+| **Detectabil**   | Detectarea binarului/configurației, verificări de stare, căi de configurare                        | `src/shared/services/cliRuntime.ts` (catalogul de execuție `CLI_TOOLS`) |
+| **Configurabil** | Acceptat de `omniroute configure <cli>` (există o procedură de configurare)                        | `bin/cli/cli-manifest.mjs` (`configure: true`)                          |
+| **Lansabil**     | Acceptat de `omniroute run <target>` (injectarea variabilelor de mediu/argumentelor este definită) | `bin/cli/cli-manifest.mjs` (`run: true`)                                |
 
-`bin/cli/cli-manifest.mjs` este manifestul executabil canonic pentru comenzile CLI: `run`, `configure` și generatoarele de completare a shell-ului își derivă toate listele de ținte, rezolvarea aliasurilor (de exemplu `kilocode`/`kilo-code`/`kilo_cli` → `kilo`) și conectarea flag-ului `--model` din acesta. Gardianul de derapaj `tests/unit/cli/cli-manifest-drift.test.ts` afirmă că manifestul, catalogul de rulare, catalogul UI și fiecare suprafață de consumator rămân sincronizate — o țintă adăugată pe o suprafață fără celelalte va face ca suitei să eșueze în loc să derapeze în tăcere.
+`bin/cli/cli-manifest.mjs` este manifestul executabil canonic pentru suprafețele de comandă
+CLI: `run`, `configure` și generatoarele de completare pentru shell își derivă din acesta
+listele de ținte, rezolvarea aliasurilor (de exemplu, `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
+și asocierea opțiunii `--model`. Mecanismul de protecție împotriva divergenței
+`tests/unit/cli/cli-manifest-drift.test.ts` verifică faptul că manifestul, catalogul de
+execuție, catalogul UI și fiecare suprafață consumatoare rămân sincronizate — o țintă
+adăugată pe o suprafață fără a fi adăugată și pe celelalte determină eșecul suitei, în
+loc să permită apariția silențioasă a divergențelor.
 
-## 1. Catalogul Codului CLI (26 unelte)
-
-Toate uneltele care apar în `/dashboard/cli-code`. Cele cu `baseUrlSupport: none` sunt conectate prin MITM sau un ghid manual în loc de un URL de bază personalizat:
-
-| id           | nume                       | furnizor            | suportBaseUrl | tipConfig                | acpSpawnable |
-| ------------ | -------------------------- | ------------------- | ------------- | ------------------------ | ------------ |
-| claude       | Claude Code                | Anthropic           | complet       | env                      | true         |
-| codex        | OpenAI Codex CLI           | OpenAI              | complet       | personalizat             | true         |
-| zcode        | ZCode (Plan de Codare GLM) | Z.ai                | niciun        | personalizat             | false        |
-| cline        | Cline                      | OSS (ex-Claude Dev) | complet       | personalizat             | true         |
-| kilo         | Kilo Code                  | Kilo-Org            | complet       | personalizat             | false        |
-| roo          | Roo Code                   | Roo (OSS)           | complet       | ghid                     | false        |
-| continue     | Continue                   | continue.dev        | complet       | ghid                     | false        |
-| aider        | Aider                      | OSS (P. Gauthier)   | complet       | ghid                     | true         |
-| forge        | ForgeCode                  | Antinomy HQ         | complet       | personalizat             | true         |
-| jcode        | jcode                      | 1jehuang (OSS)      | complet       | personalizat             | false        |
-| deepseek-tui | DeepSeek TUI               | Hunter Bown (OSS)   | complet       | personalizat             | false        |
-| codewhale    | CodeWhale                  | Hmbown (OSS)        | complet       | personalizat             | false        |
-| opencode     | OpenCode                   | Anomaly (ex-SST)    | complet       | ghid                     | true         |
-| droid        | Factory Droid              | Factory AI          | parțial       | ghid                     | false        |
-| copilot      | GitHub Copilot CLI         | GitHub/MS           | complet       | personalizat             | false        |
-| cursor-cli   | Cursor CLI                 | Anysphere           | parțial       | ghid                     | true         |
-| smelt        | Smelt                      | leonardcser (OSS)   | complet       | personalizat             | false        |
-| pi           | Pi (pi-coding-agent)       | M. Zechner (OSS)    | complet       | personalizat             | false        |
-| grok-build   | Grok Build                 | xAI                 | complet       | personalizat             | false        |
-| crush        | Crush                      | OSS (Charm)         | complet       | personalizat             | false        |
-| qwen         | Qwen Code                  | Alibaba             | complet       | ghid                     | true         |
-| cursor       | Cursor                     | Anysphere           | niciun        | ghid                     | false        |
-| antigravity  | Antigravity                | Google              | niciun        | mitm                     | false        |
-| hermes       | Hermes                     | Nous Research       | niciun        | ghid                     | false        |
-| kiro         | Kiro AI                    | Amazon              | niciun        | mitm                     | false        |
-| custom       | Custom CLI                 | —                   | complet       | constructor-personalizat | false        |
-
-Uneltele cu `baseUrlSupport: "partial"` afișează un badge "⚠ URL de bază parțial" în cardul de pe tabloul de bord.
 ---
 
-## 2. Catalogul Agenților CLI (8 unelte)
+## 1. Catalogul CLI Code (27 de instrumente)
+
+Toate instrumentele care apar în `/dashboard/cli-code`. Cele cu `baseUrlSupport: none` sunt conectate prin MITM sau printr-un ghid manual, în locul unui URL de bază personalizat:
+
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+
+Instrumentele cu `baseUrlSupport: "partial"` afișează insigna „⚠ URL de bază parțial” pe cardul din panoul de control.
+---
+
+## 2. Catalogul agenților CLI (10 instrumente)
 
 Agenți autonomi care apar în `/dashboard/cli-agents`:
 
-| id           | nume             | furnizor                 | suportBaseUrl | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | ------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | complet       | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | complet       | true         |
-| goose        | Goose            | Block / Linux Foundation | complet       | true         |
-| interpreter  | Open Interpreter | OSS                      | complet       | true         |
-| warp         | Warp AI          | Warp Inc.                | parțial       | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | complet       | false        |
-| omp          | Oh My Pi         | OSS                      | complet       | true         |
-| letta        | Letta CLI        | Letta                    | complet       | false        |
+| id           | nume             | furnizor                 | suport baseUrl | poate fi lansat prin ACP |
+| ------------ | ---------------- | ------------------------ | -------------- | ------------------------ |
+| hermes-agent | Hermes Agent     | Nous Research            | full           | false                    |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true                     |
+| goose        | Goose            | Block / Linux Foundation | full           | true                     |
+| interpreter  | Open Interpreter | OSS                      | full           | true                     |
+| warp         | Warp AI          | Warp Inc.                | partial        | true                     |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false                    |
+| omp          | Oh My Pi         | OSS                      | full           | true                     |
+| letta        | Letta CLI        | Letta                    | full           | false                    |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false                    |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false                    |
 
 ---
 
 ## 3. Agenți ACP (/dashboard/acp-agents)
 
-Această pagină (renumită din `/dashboard/agents`) arată CLI-urile pe care OmniRoute le poate **spawn** ca motoare de execuție backend prin protocolul stdio/ACP. Catalogul este întreținut separat în `src/lib/acp/registry.ts` și **nu** este același cu `CLI_TOOLS`.
+Această pagină (redenumită din `/dashboard/agents`) afișează aplicațiile CLI pe care OmniRoute le poate **lansa** ca motoare de execuție backend prin protocolul stdio/ACP. Catalogul este întreținut separat în `src/lib/acp/registry.ts` și **nu** este același cu `CLI_TOOLS`.
 
 ---
 
-## 4. Backlog MITM (neafișat în dashboard)
+## 4. Lista de sarcini MITM (neafișată în panoul de control)
 
-Următoarele CLI-uri nu suportă nativ URL de bază personalizat și **nu sunt listate** în paginile Codului CLI sau Agenților CLI. Ele sunt candidați pentru interceptarea MITM în planul 11:
+Următoarele aplicații CLI nu acceptă în mod nativ un URL de bază personalizat și **nu sunt listate** în paginile CLI Code sau CLI Agents. Acestea sunt candidate pentru interceptarea MITM din planul 11:
 
-| CLI                 | Motiv                                                              |
-| ------------------- | ------------------------------------------------------------------ |
-| windsurf            | BYOK limitat la selectarea modelelor Claude + URL/token corporativ |
-| amp                 | Ecosistem închis (Sourcegraph)                                     |
-| amazon-q / kiro-cli | Autentificare AWS SSO, fără URL personalizat                       |
-| cowork              | Anthropic Desktop, fără punct de finalizare configurabil           |
+| CLI                 | Motiv                                                        |
+| ------------------- | ------------------------------------------------------------ |
+| windsurf            | BYOK limitat la anumite modele Claude + URL/token corporativ |
+| amp                 | Ecosistem închis (Sourcegraph)                               |
+| amazon-q / kiro-cli | Autentificare AWS SSO, fără URL personalizat                 |
+| cowork              | Anthropic Desktop, fără endpoint configurabil                |
 
-Vezi `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` pentru referința completă.
+Consultați `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` pentru referința încrucișată completă.
 
 ---
 
-## 5. API de Detectare Batch
+## 5. API pentru detectarea în lot
 
-Toată detectarea uneltelor este agregată printr-un singur endpoint:
+Detectarea tuturor instrumentelor este agregată printr-un singur endpoint:
 
 **`GET /api/cli-tools/all-statuses`**
 
-- Auth: `requireCliToolsAuth(request)` (la fel ca celelalte rute `/api/cli-tools/`)
+- Autentificare: `requireCliToolsAuth(request)` (la fel ca pentru celelalte rute `/api/cli-tools/`)
 - Returnează: `Record<toolId, ToolBatchStatus>` (tip: `src/shared/types/cliBatchStatus.ts`)
-- Strategie: `Promise.all` pentru toate uneltele, timeout de 5s per unealtă
-- Cache: în memorie LRU indexat după fișierul de configurare `mtime`. Cache invalidat când mtime se schimbă. Resetat la repornirea serverului.
+- Strategie: `Promise.all` pentru toate instrumentele, cu un timeout de 5 s per instrument
+- Cache: LRU în memorie, indexat după `mtime` al fișierului de configurare. Cache-ul este invalidat când `mtime` se modifică. Este resetat la repornirea serverului.
 
-Forma răspunsului per unealtă:
+Structura răspunsului pentru fiecare instrument:
 
 ```ts
 interface ToolBatchStatus {
@@ -202,95 +251,99 @@ interface ToolBatchStatus {
     endpoint?: string | null;
     lastConfiguredAt?: string | null;
   };
-  error?: string; // sanitizat, fără stack traces
+  error?: string; // igienizată, fără urme ale stivei
 }
 ```
 
-## 6. Handleri de Setări pentru Instrumente Noi
+---
 
-Instrumentele noi cu `configType: "custom"` au rute dedicate API pentru setări:
+## 6. Gestionarea setărilor pentru instrumentele noi
 
-| Rută                                        | Instrument                                                       |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                          |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                           |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primary + legacy `~/.deepseek` sync) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Agent de codare Pi                                               |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + cheie dedicată `.env`)      |
+Instrumentele noi cu `configType: "custom"` au rute API dedicate pentru setări:
 
-Toate rutele folosesc `sanitizeErrorMessage()` pentru răspunsurile de eroare (Regulă Strictă #12).
+| Rută                                        | Instrument                                                                       |
+| ------------------------------------------- | -------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                          |
+| `POST /api/cli-tools/jcode-settings`        | jcode (opțiunea --base-url)                                                      |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, moștenit)                                         |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, principal + sincronizare moștenită cu `~/.deepseek`) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                            |
+| `POST /api/cli-tools/pi-settings`           | Agent de programare Pi                                                           |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                            |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + cheie `.env` dedicată)                      |
+
+Toate rutele utilizează `sanitizeErrorMessage()` pentru răspunsurile de eroare (Regula strictă nr. 12).
 
 ---
 
-## 7. Arhitectura Paginilor Dashboard
+## 7. Arhitectura paginilor tabloului de bord
 
-### Cod CLI (`/dashboard/cli-code`)
+### Coduri CLI (`/dashboard/cli-code`)
 
-- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — componentă server
-- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — grid client
-- `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — pagină de detalii a instrumentului
+- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — componentă de server
+- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — grilă client
+- `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — pagina cu detaliile instrumentului
 - `src/app/(dashboard)/dashboard/cli-code/components/` — 12 carduri specializate pentru instrumente + `ToolDetailClient.tsx`
 
 ### Agenți CLI (`/dashboard/cli-agents`)
 
-- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — componentă server
-- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — grid client
+- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — componentă de server
+- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — grilă client
 - `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — reutilizează `ToolDetailClient`
 
 ### Agenți ACP (`/dashboard/acp-agents`)
 
-- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — componentă server (mutată din `agents/`)
+- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — componentă de server (mutată din `agents/`)
 
-### Componente UI Partajate (`src/shared/components/cli/`)
+### Componente UI partajate (`src/shared/components/cli/`)
 
-| Fișier                  | Scop                                                         |
-| ----------------------- | ------------------------------------------------------------ |
-| `CliToolCard.tsx`       | Card de stare inteligent (detecție + configurare + endpoint) |
-| `CliConceptCard.tsx`    | Card de explicație a conceptului pe pagină                   |
-| `CliComparisonCard.tsx` | Comparare pe trei coloane între tipurile CLI                 |
-| `BaseUrlSelect.tsx`     | Dropdown pentru endpoint (Local/Cloud/Custom)                |
-| `ApiKeySelect.tsx`      | Selector pentru cheia API                                    |
-| `ManualConfigModal.tsx` | Modal pentru snippet de configurare copiat                   |
+| Fișier                  | Scop                                                             |
+| ----------------------- | ---------------------------------------------------------------- |
+| `CliToolCard.tsx`       | Card inteligent de stare (detectare + configurare + punct final) |
+| `CliConceptCard.tsx`    | Card explicativ al conceptului pentru fiecare pagină             |
+| `CliComparisonCard.tsx` | Comparație pe trei coloane între tipurile CLI                    |
+| `BaseUrlSelect.tsx`     | Listă derulantă pentru punctul final (Local/Cloud/Personalizat)  |
+| `ApiKeySelect.tsx`      | Selector pentru cheia API                                        |
+| `ManualConfigModal.tsx` | Fereastră modală cu fragment de configurare care poate fi copiat |
 
-### Hook Partajat (`src/shared/hooks/cli/`)
+### Hook partajat (`src/shared/hooks/cli/`)
 
-| Fișier                    | Scop                                                                          |
-| ------------------------- | ----------------------------------------------------------------------------- |
-| `useToolBatchStatuses.ts` | Obține `/api/cli-tools/all-statuses`, gestionează starea de încărcare/refresh |
+| Fișier                    | Scop                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------- |
+| `useToolBatchStatuses.ts` | Preia date din `/api/cli-tools/all-statuses`, gestionează starea de încărcare/reîmprospătare |
+
+---
 
 ## 8. i18n
 
-Namespace-uri noi adăugate în planul 14 F9:
+Spații de nume noi adăugate în planul 14 F9:
 
-| Namespace   | Scop                                                                                   |
-| ----------- | -------------------------------------------------------------------------------------- |
-| `cliCommon` | Șiruri partajate (etichetă carduri, texte concept/comparație, etichete pagină detaliu) |
-| `cliCode`   | Șiruri pagină CLI Code                                                                 |
-| `cliAgents` | Șiruri pagină CLI Agents                                                               |
-| `acpAgents` | Șiruri pagină ACP Agents                                                               |
+| Spațiu de nume | Scop                                                                                                      |
+| -------------- | --------------------------------------------------------------------------------------------------------- |
+| `cliCommon`    | Șiruri comune (etichete pentru carduri, texte conceptuale/comparative, etichete pentru pagina de detalii) |
+| `cliCode`      | Șirurile paginii CLI Code                                                                                 |
+| `cliAgents`    | Șirurile paginii CLI Agents                                                                               |
+| `acpAgents`    | Șirurile paginii ACP Agents                                                                               |
 
-Traduceri complete în PT-BR și EN sunt furnizate. 39 de alte locale revin automat la EN printr-o fuziune la nivel de namespace în `src/i18n/request.ts`.
+Sunt furnizate traduceri complete în PT-BR și EN. Alte 39 de localizări folosesc automat EN ca variantă de rezervă, prin îmbinarea la nivel de spațiu de nume din `src/i18n/request.ts`.
 
 ---
 
-## 9. Începere rapidă
+## 9. Pornire rapidă
 
 ### Pasul 1 — Obțineți o cheie API OmniRoute
 
-1. Deschideți `/dashboard/api-manager` → **Creează cheie API**
-2. Oferiți-i un nume (de exemplu, `cli-tools`) și selectați toate permisiunile
+1. Deschideți `/dashboard/api-manager` → **Creați o cheie API**
+2. Dați-i un nume (de ex. `cli-tools`) și selectați toate permisiunile
 3. Copiați cheia — veți avea nevoie de ea pentru fiecare CLI de mai jos
 
-> Cheia dumneavoastră arată astfel: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Cheia dvs. arată astfel: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Pasul 2 — Instalați uneltele CLI
+### Pasul 2 — Instalați instrumentele CLI
 
-Toate uneltele bazate pe npm necesită Node.js 22.22.2+ sau 24.x:
+Toate instrumentele bazate pe npm necesită Node.js 22.22.2+ sau 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -311,53 +364,53 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (lansabil prin `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI (poate fi lansat prin `omniroute run gemini` → interfața /v1beta)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # bazat pe Rust
+cargo install smelt  # Bazat pe Rust
 
-# Agent de codare Pi
-# vezi https://github.com/zechnerj/pi-coding-agent pentru instalare
+# Agentul de programare Pi
+# consultați https://github.com/zechnerj/pi-coding-agent pentru instalare
 
 # jcode
-# vezi https://github.com/1jehuang/jcode pentru instalare
+# consultați https://github.com/1jehuang/jcode pentru instalare
 ```
 
 ---
 
-### Pasul 3 — Configurați prin Dashboard
+### Pasul 3 — Configurați prin panoul de control
 
 1. Accesați `http://localhost:20128/dashboard/cli-code`
-2. Găsiți uneltele în grilă
-3. Faceți clic pe card pentru a deschide pagina de detalii a uneltei
-4. Selectați cheia API și URL-ul de bază
-5. Faceți clic pe **Aplică Configurația** sau copiați fragmentul de configurație manual
+2. Găsiți instrumentul în grilă
+3. Faceți clic pe card pentru a deschide pagina cu detaliile instrumentului
+4. Selectați cheia API și adresa URL de bază
+5. Faceți clic pe **Aplicați configurația** sau copiați fragmentul de configurare manuală
 
 ---
 
-### Pasul 4 — Setați variabilele de mediu globale
+### Pasul 4 — Setați variabilele globale de mediu
 
 ```bash
-# Punct de acces universal OmniRoute
+# Endpoint universal OmniRoute
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI citește GOOGLE_GEMINI_BASE_URL la RĂDĂCINĂ (SDK-ul său adaugă /v1beta/... singur)
+# Gemini CLI citește GOOGLE_GEMINI_BASE_URL la RĂDĂCINĂ (SDK-ul său adaugă singur /v1beta/...)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Pentru un **server remote** înlocuiți `localhost:20128` cu IP-ul sau domeniul serverului,
-> de exemplu, `http://<your-server-ip>:20128`.
+> Pentru un **server la distanță**, înlocuiți `localhost:20128` cu adresa IP sau domeniul serverului,
+> de ex. `http://<your-server-ip>:20128`.
 
 ---
 
-### Pasul 4 — Configurați fiecare unealtă
+### Pasul 4 — Configurați fiecare instrument
 
 #### Claude Code
 
@@ -373,7 +426,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Utilizați rădăcina unificată a gateway-ului Anthropic pentru Claude Code. Nu adăugați `/v1` aici.
+Utilizați rădăcina gateway-ului Anthropic unificat pentru Claude Code. Nu adăugați `/v1` aici.
 
 **Test:** `claude "say hello"`
 
@@ -381,8 +434,8 @@ Utilizați rădăcina unificată a gateway-ului Anthropic pentru Claude Code. Nu
 
 #### OpenAI Codex
 
-Codex modern (v0.137+) citește doar `~/.codex/config.toml` — vechiul
-`config.yaml` aparține CLI-ului npm legacy și este ignorat în tăcere. Cheia API
+Versiunea modernă Codex (v0.137+) citește numai `~/.codex/config.toml` — vechiul
+`config.yaml` aparține CLI-ului npm vechi și este ignorat fără notificare. Cheia API
 rămâne în variabila de mediu `OMNIROUTE_API_KEY` (`env_key`), niciodată
 în interiorul fișierului:
 
@@ -399,7 +452,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Referință completă (profiluri, `wire_api`, feronete de context): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Referință completă (profiluri, `wire_api`, ferestre de context): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **Test:** `codex "what is 2+2?"`
 
@@ -433,13 +486,13 @@ EOF
 **Test:** `opencode`
 
 > Utilizați `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> pentru a trimite variante de gândire.
+> pentru a trimite variante cu raționament.
 
 ---
 
 #### Cline (CLI sau VS Code)
 
-**Mod CLI:**
+**Modul CLI:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -451,16 +504,16 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Mod VS Code:**
+**Modul VS Code:**
 Setările extensiei Cline → Furnizor API: `OpenAI Compatible` → URL de bază: `http://localhost:20128/v1`
 
-Sau utilizați dashboard-ul OmniRoute → **CLI Tools → Cline → Aplică Configurația**.
+Sau utilizați panoul de control OmniRoute → **Instrumente CLI → Cline → Aplicați configurația**.
 
 ---
 
 #### KiloCode (CLI sau VS Code)
 
-**Mod CLI:**
+**Modul CLI:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
@@ -475,11 +528,11 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Sau utilizați dashboard-ul OmniRoute → **CLI Tools → KiloCode → Aplică Configurația**.
+Sau utilizați panoul de control OmniRoute → **Instrumente CLI → KiloCode → Aplicați configurația**.
 
 ---
 
-#### Continue (Extensie VS Code)
+#### Continue (extensie VS Code)
 
 Editați `~/.continue/config.yaml`:
 
@@ -493,20 +546,20 @@ models:
     default: true
 ```
 
-Reporniti VS Code după editare.
+Reporniți VS Code după editare.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Utilizați acest lucru când VS Code Insiders este configurat pentru modele de puncte finale personalizate și doriți ca OmniRoute să funcționeze fără un câmp de antet personalizat.
+Utilizați această opțiune atunci când VS Code Insiders este configurat pentru modele cu endpoint personalizat și doriți ca OmniRoute să funcționeze fără un câmp de antet personalizat.
 
 **Locație recomandată:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Exemplu folosind aliasul tokenizat OmniRoute:**
+**Exemplu folosind aliasul OmniRoute cu token:**
 
 ```json
 [
@@ -531,26 +584,26 @@ Utilizați acest lucru când VS Code Insiders este configurat pentru modele de p
 **Note:**
 
 - Înlocuiți `sk-your-omniroute-key` cu o cheie API creată în OmniRoute.
-- Câmpul `url` ar trebui să indice către `/api/v1/vscode/{token}/chat/completions`.
-- Câmpul `modelsUrl` ar trebui să indice către `/api/v1/vscode/{token}/models`.
-- Preferiți fluxul normal `/v1` + antet Bearer atunci când clientul suportă antete personalizate.
-- Tokenurile încorporate în URL sunt o soluție de compatibilitate și pot apărea în jurnalele editorului sau în istoricul proxy-ului.
+- Câmpul `url` trebuie să indice către `/api/v1/vscode/{token}/chat/completions`.
+- Câmpul `modelsUrl` trebuie să indice către `/api/v1/vscode/{token}/models`.
+- Preferați fluxul obișnuit `/v1` + antet Bearer atunci când clientul acceptă antete personalizate.
+- Tokenurile încorporate în URL reprezintă o soluție de rezervă pentru compatibilitate și pot apărea în jurnalele editorului sau în istoricul proxy-ului.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Autentificare în contul dvs. AWS/Kiro:
+# Autentificați-vă în contul AWS/Kiro:
 kiro-cli login
 
-# CLI-ul folosește propria sa autentificare — OmniRoute nu este necesar ca backend pentru Kiro CLI în sine.
-# Utilizați kiro-cli împreună cu OmniRoute pentru alte unelte.
+# CLI-ul folosește propria autentificare — OmniRoute nu este necesar ca backend pentru Kiro CLI.
+# Folosiți kiro-cli împreună cu OmniRoute pentru alte instrumente.
 kiro-cli status
 ```
 
-Pentru aplicația desktop **Kiro IDE**, utilizați punctul de acces MITM expus de OmniRoute
-sub `/dashboard/cli-tools → Kiro`.
+Pentru aplicația desktop **Kiro IDE**, utilizați endpointul MITM expus de OmniRoute
+în `/dashboard/cli-tools → Kiro`.
 
 ---
 
@@ -560,12 +613,12 @@ Executabilul `omniroute` oferă comenzi pentru ciclul de viață al serverului, 
 
 ```bash
 omniroute                              # Pornește serverul (port implicit 20128)
-omniroute setup                        # Expert de configurare interactiv
-omniroute doctor                       # Verifică configurația, BD-ul, porturile și mediul de execuție
+omniroute setup                        # Asistent interactiv de configurare
+omniroute doctor                       # Verifică configurația, baza de date, porturile și mediul de execuție
 omniroute providers list               # Conexiuni configurate la furnizori
 omniroute providers test-all           # Testează fiecare conexiune activă
 omniroute reset-password               # Resetează parola de administrator
-omniroute logs                         # Transmite în flux jurnalele cererilor
+omniroute logs                         # Transmite în flux jurnalele solicitărilor
 omniroute health                       # Stare de funcționare detaliată (întrerupătoare, cache, memorie)
 omniroute --version                    # Afișează versiunea
 omniroute --help                       # Afișează toate comenzile
@@ -574,13 +627,13 @@ omniroute --help                       # Afișează toate comenzile
 ### Configurare și inițializare
 
 ```bash
-omniroute setup                        # Expert de configurare interactiv
-omniroute setup --non-interactive      # Mod CI/automatizare (citește variabile de mediu + opțiuni)
+omniroute setup                        # Asistent interactiv de configurare
+omniroute setup --non-interactive      # Mod CI/automatizare (citește variabilele de mediu + opțiunile)
 omniroute setup --password '<value>'   # Setează direct parola de administrator
 omniroute setup --add-provider \
   --provider openai \
   --api-key '<value>' \
-  --test-provider                      # Adaugă și testează un furnizor dintr-o singură operațiune
+  --test-provider                      # Adaugă și testează un furnizor într-o singură etapă
 ```
 
 Variabile de mediu recunoscute pentru configurarea neinteractivă:
@@ -590,31 +643,31 @@ Variabile de mediu recunoscute pentru configurarea neinteractivă:
 | `OMNIROUTE_API_KEY` | Cheia API a furnizorului (asociată cu `--api-key` prin Commander `.env()`) |
 | `DATA_DIR`          | Suprascrie directorul de date OmniRoute                                    |
 
-Toate celelalte intrări neinteractive sunt transmise ca opțiuni, nu ca variabile de mediu:
+Toate celelalte valori de intrare neinteractive sunt transmise ca opțiuni, nu ca variabile de mediu:
 `--password`, `--provider`, `--provider-name`, `--provider-base-url`, `--default-model`
 (consultați opțiunile `omniroute setup` de mai sus).
 
 ### Diagnosticare
 
 ```bash
-omniroute doctor                       # Verifică configurația, BD-ul, porturile, mediul de execuție, memoria și disponibilitatea
-omniroute doctor --json                # JSON procesabil automat
+omniroute doctor                       # Verifică configurația, baza de date, porturile, mediul de execuție, memoria și disponibilitatea
+omniroute doctor --json                # JSON lizibil automat
 omniroute doctor --no-liveness         # Omite verificarea HTTP a stării de funcționare
 omniroute doctor --host 0.0.0.0        # Suprascrie gazda pentru verificarea disponibilității
-omniroute doctor --liveness-url <url>  # Suprascrie URL-ul complet al punctului final de stare
+omniroute doctor --liveness-url <url>  # Suprascrie adresa URL completă a punctului terminal de stare
 ```
 
 Comanda doctor execută următoarele verificări: `Config`, `Database`, `Storage/encryption`,
 `Port availability`, `Node runtime`, `Native binary` (better-sqlite3),
-`Memory` și `Server liveness`. Se încheie cu un cod diferit de zero dacă orice verificare are rezultatul `fail`.
+`Memory` și `Server liveness`. Aceasta se încheie cu un cod diferit de zero dacă rezultatul oricărei verificări este `fail`.
 
 ### Gestionarea furnizorilor
 
 ```bash
 omniroute providers available                       # Catalogul de furnizori OmniRoute
-omniroute providers available --search openai       # Filtrează catalogul după ID/nume/alias/categorie
+omniroute providers available --search openai       # Filtrează catalogul după id/nume/alias/categorie
 omniroute providers available --category api-key    # Filtrează după categorie (api-key, oauth, free, ...)
-omniroute providers available --json                # JSON procesabil automat
+omniroute providers available --json                # JSON lizibil automat
 
 omniroute providers list                            # Conexiuni configurate la furnizori
 omniroute providers list --json
@@ -629,45 +682,57 @@ omniroute providers edit <id|name> --default-model <model>
 omniroute providers remove <id|name> --yes
 ```
 
-`providers add/import/auth/edit/remove` utilizează în primul rând API-ul și, prin urmare, funcționează cu
-contextul local sau la distanță activ. Pentru introducerea acreditărilor trebuie utilizate
+`providers add/import/auth/edit/remove` folosesc API-ul cu prioritate și, prin urmare, funcționează în
+contextul activ local sau la distanță. Pentru introducerea acreditărilor trebuie utilizate
 `--credential-stdin` sau `--credential-env`; `--dry-run --json` raportează numai
 prezența/structura cu datele sensibile mascate. `providers available` citește catalogul OmniRoute;
 `providers list/test/test-all/validate` își păstrează comportamentul SQLite local și
 nu necesită ca serverul să ruleze.
 
+Pentru un nod personalizat compatibil cu OpenAI sau Anthropic, atașați acreditările la
+ID-ul nodului returnat de `omniroute nodes add`, utilizând `omniroute keys add "$NODE_ID" --stdin`.
+Aceasta necesită un server în execuție și autentificare de administrare pentru contextul activ.
+CLI-ul utilizează `POST /api/providers`, care validează nodul și îi copiază setările punctului
+terminal în conexiune. Un nod lipsă, o eroare de autorizare sau un server indisponibil
+returnează o eroare fără a crea o acreditare locală de rezervă.
+
+`nodes add --base-url` setează punctul terminal al nodului; acesta este diferit de adresa serverului
+din `OMNIROUTE_BASE_URL`. Pentru fișiere OpenAPI, utilizați
+`omniroute openapi dump --format json --out ./openapi.json`; opțiunea globală `--output`
+selectează formatul de afișare al CLI-ului, nu numele unui fișier de destinație.
+
 ### Recuperare și resetare
 
 ```bash
 omniroute reset-password                # Resetează parola de administrator (și: omniroute-reset-password)
-omniroute reset-encrypted-columns       # Afișează avertismentul + simularea resetării acreditărilor criptate
+omniroute reset-encrypted-columns       # Afișează avertismentul + simularea pentru resetarea acreditărilor criptate
 omniroute reset-encrypted-columns --force  # Setează efectiv la null acreditările criptate din SQLite
 ```
 
-### Exportarea acreditărilor (⚠ manipulați cu atenție)
+### Exportul acreditărilor (⚠ utilizați cu atenție)
 
 ```bash
-omniroute auth export                                 # Afișează avertismentul + solicitarea de confirmare — fără acces la BD
-omniroute auth export --force                          # Exportă acreditările DECRIPTATE ale TUTUROR conexiunilor în stdout ca JSON
+omniroute auth export                                 # Afișează avertismentul + solicitarea de confirmare — fără acces la baza de date
+omniroute auth export --force                          # Exportă acreditările DECRIPTATE ale TUTUROR conexiunilor la ieșirea standard ca JSON
 omniroute auth export --force --id <id>                 # Exportă numai conexiunea corespunzătoare
 omniroute auth export --force --format env               # Emite linii OMNIROUTE_<PROVIDER>_<FIELD>=<value>
-omniroute auth export --force --out creds.json           # Scrie într-un fișier (creat cu permisiuni 0600)
+omniroute auth export --force --out creds.json           # Scrie într-un fișier (creat cu permisiunile 0600)
 ```
 
-`auth export` funcționează **exclusiv local** (citire SQLite directă, fără rută HTTP) și afișează/scrie în mod intenționat
-valorile `apiKey`/`accessToken`/`refreshToken`/`idToken` în **text simplu** — aceasta este funcționalitatea, nu o
+`auth export` este **exclusiv locală** (citire directă din SQLite, fără rută HTTP) și afișează/scrie intenționat
+valorile **în text simplu** `apiKey`/`accessToken`/`refreshToken`/`idToken` — aceasta este funcționalitatea, nu o
 eroare. Nimic nu este citit din baza de date și nimic nu este decriptat fără `--force`. Un banner de
-avertizare este afișat întotdeauna în stderr înainte de emiterea oricărui text simplu. Necesită ca `STORAGE_ENCRYPTION_KEY` să
-fie setată. Un câmp care nu poate fi decriptat (cheie învechită, text cifrat corupt) este raportat ca
-`<field>DecryptFailed: true`, în loc să anuleze întregul export sau să expună eroarea subiacentă.
+avertizare este afișat întotdeauna în stderr înainte de emiterea oricărui text simplu. Necesită ca
+`STORAGE_ENCRYPTION_KEY` să fie setată. Un câmp care nu poate fi decriptat (cheie învechită, text cifrat corupt) este raportat ca
+`<field>DecryptFailed: true` în loc să întrerupă întregul export sau să divulge eroarea subiacentă.
 
 ### Alte subcomenzi
 
-Acestea presupun că rulează un server OmniRoute, dacă nu se specifică altfel:
+Acestea presupun existența unui server OmniRoute în execuție, dacă nu se specifică altfel:
 
 ```bash
-omniroute status                       # Stare completă în timpul rulării
-omniroute logs                         # Afișează continuu jurnalele cererilor (--json, --search, --follow)
+omniroute status                       # Stare completă a execuției
+omniroute logs                         # Transmite jurnalele cererilor (--json, --search, --follow)
 omniroute config list                  # Afișează instrumentele CLI configurate
 
 omniroute provider list                # Listează furnizorii disponibili (alias pentru providers list)
@@ -676,11 +741,11 @@ omniroute keys add | list | remove     # Gestionează cheile API
 omniroute models [provider]            # Listează modelele (--json, --search)
 omniroute combo list | switch | create | delete
 
-omniroute backup                       # Creează un instantaneu al configurației și al bazei de date
+omniroute backup                       # Creează un instantaneu al configurației și bazei de date
 omniroute restore                      # Restaurează dintr-un instantaneu anterior
 
-omniroute health                       # Stare detaliată (întrerupătoare, cache, memorie)
-omniroute quota                        # Utilizarea cotei furnizorului
+omniroute health                       # Stare de sănătate detaliată (întrerupătoare, cache, memorie)
+omniroute quota                        # Utilizarea cotelor furnizorilor
 omniroute cache                        # Starea cache-ului
 omniroute cache clear                  # Golește cache-urile semantice și de semnături
 
@@ -690,43 +755,43 @@ omniroute a2a status | card            # Starea serverului A2A / fișa agentului
 omniroute tunnel list | create | stop  # Gestionează tunelurile (cloudflare/tailscale/ngrok)
 omniroute env show | get <k> | set <k> <v>  # Inspectează / setează variabilele de mediu (temporar)
 
-omniroute test                         # Test rapid al conectivității furnizorului
+omniroute test                         # Test rapid al conectivității furnizorilor
 omniroute update                       # Verifică dacă există actualizări
 omniroute completion                   # Generează completarea pentru shell
 ```
 
-### Opțiuni uzuale
+### Opțiuni comune
 
-| Opțiune             | Descriere                                                 |
-| ------------------- | --------------------------------------------------------- |
-| `--no-open`         | Nu deschide automat browserul la pornire                  |
-| `--port <n>`        | Suprascrie portul API (implicit 20128)                    |
-| `--mcp`             | Rulează ca server MCP prin stdio (pentru IDE-uri)         |
-| `--non-interactive` | Mod CI (fără solicitări; citește din mediu/opțiuni)       |
-| `--json`            | Ieșire JSON prelucrabilă automat (doctor, providers etc.) |
-| `--help`, `-h`      | Afișează ajutorul specific comenzii                       |
-| `--version`, `-v`   | Afișează versiunea instalată                              |
+| Opțiune             | Descriere                                                |
+| ------------------- | -------------------------------------------------------- |
+| `--no-open`         | Nu deschide automat browserul la pornire                 |
+| `--port <n>`        | Suprascrie portul API (implicit 20128)                   |
+| `--mcp`             | Rulează ca server MCP prin stdio (pentru IDE-uri)        |
+| `--non-interactive` | Mod CI (fără solicitări; citește din mediu/opțiuni)      |
+| `--json`            | Ieșire JSON procesabilă automat (doctor, providers etc.) |
+| `--help`, `-h`      | Afișează ajutorul specific comenzii                      |
+| `--version`, `-v`   | Afișează versiunea instalată                             |
 
 ---
 
-## Endpoint-uri API disponibile
+## Endpointuri API disponibile
 
-| Endpoint                   | Descriere                             | Utilizare                                     |
-| -------------------------- | ------------------------------------- | --------------------------------------------- |
-| `/v1/chat/completions`     | Chat standard (toți furnizorii)       | Toate instrumentele moderne                   |
-| `/v1/responses`            | API pentru răspunsuri (format OpenAI) | Codex, fluxuri agentice                       |
-| `/v1/completions`          | Completări text vechi                 | Instrumente mai vechi care folosesc `prompt:` |
-| `/v1/embeddings`           | Încapsulări text                      | RAG, căutare                                  |
-| `/v1/images/generations`   | Generare imagini                      | GPT-Image, Flux, etc.                         |
-| `/v1/audio/speech`         | Text-to-speech                        | ElevenLabs, OpenAI TTS                        |
-| `/v1/audio/transcriptions` | Speech-to-text                        | Deepgram, AssemblyAI                          |
+| Endpoint                   | Descriere                            | Utilizare pentru                              |
+| -------------------------- | ------------------------------------ | --------------------------------------------- |
+| `/v1/chat/completions`     | Chat standard (toți furnizorii)      | Toate instrumentele moderne                   |
+| `/v1/responses`            | API Responses (format OpenAI)        | Codex, fluxuri de lucru bazate pe agenți      |
+| `/v1/completions`          | Completări de text vechi             | Instrumente mai vechi care folosesc `prompt:` |
+| `/v1/embeddings`           | Reprezentări vectoriale ale textului | RAG, căutare                                  |
+| `/v1/images/generations`   | Generare de imagini                  | GPT-Image, Flux etc.                          |
+| `/v1/audio/speech`         | Conversie text-în-vorbire            | ElevenLabs, OpenAI TTS                        |
+| `/v1/audio/transcriptions` | Conversie vorbire-în-text            | Deepgram, AssemblyAI                          |
 
-Exemple gata de lipit cu un URL tokenizat OmniRoute:
+Exemple gata de lipit, cu un URL OmniRoute care conține un token:
 
 ```txt
-Exemplu token: sk-a3ab3c080beaee3a-69f4a4-070d71af
+Exemplu de token: sk-a3ab3c080beaee3a-69f4a4-070d71af
 
-Baza standard OpenAI: http://localhost:20128/v1
+Bază OpenAI standard: http://localhost:20128/v1
 Modele VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
 Chat VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
 Răspunsuri VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
@@ -738,12 +803,44 @@ Chat Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070
 
 ## Depanare
 
-| Eroare                                        | Cauză                        | Soluție                                                   |
-| --------------------------------------------- | ---------------------------- | --------------------------------------------------------- |
-| `Connection refused`                          | OmniRoute nu rulează         | `omniroute serve`                                         |
-| `401 Unauthorized`                            | Cheie API greșită            | Verifică în `/dashboard/api-manager`                      |
-| `No combo configured`                         | Niciun combo de rutare activ | Configurează în `/dashboard/combos`                       |
-| CLI arată "not installed"                     | Binariul nu este în PATH     | Verifică `which <command>`                                |
-| Dashboard arată "not detected" după instalare | Cache vechi                  | Fă clic pe "⟳ Refresh detection" în dashboard             |
-| Link vechi `/dashboard/cli-tools`             | Marcaj pre-v3.8.6            | Redirecționat automat către `/dashboard/cli-code` (308)   |
-| Link vechi `/dashboard/agents`                | Marcaj pre-v3.8.6            | Redirecționat automat către `/dashboard/acp-agents` (308) |
+| Eroare                                                   | Cauză                             | Remediere                                                 |
+| -------------------------------------------------------- | --------------------------------- | --------------------------------------------------------- |
+| `Connection refused`                                     | OmniRoute nu rulează              | `omniroute serve`                                         |
+| `401 Unauthorized`                                       | Cheie API greșită                 | Verificați în `/dashboard/api-manager`                    |
+| `No combo configured`                                    | Nicio combinație de rutare activă | Configurați în `/dashboard/combos`                        |
+| CLI afișează „not installed”                             | Fișierul binar nu este în PATH    | Verificați cu `which <command>`                           |
+| Panoul de control afișează „not detected” după instalare | Memoria cache este învechită      | Faceți clic pe „⟳ Refresh detection” în panoul de control |
+| Link vechi `/dashboard/cli-tools`                        | Marcaj anterior versiunii v3.8.6  | Redirecționat automat către `/dashboard/cli-code` (308)   |
+| Link vechi `/dashboard/agents`                           | Marcaj anterior versiunii v3.8.6  | Redirecționat automat către `/dashboard/acp-agents` (308) |
+
+## Gestionarea politicii cheilor de inferență cu CLI-ul OmniRoute
+
+Utilizați un context de gestionare autentificat (consultați [Modul la distanță](../guides/REMOTE-MODE.md))
+pentru a inspecta sau actualiza o cheie de inferență existentă după ID-ul acesteia:
+
+```bash
+omniroute --output json keys policy show KEY_ID
+omniroute keys policy set KEY_ID --unrestricted
+omniroute --output json keys policy show KEY_ID
+```
+
+`--unrestricted` este un alias pentru `--model-access-mode all`. Actualizarea golește
+lista de modele permise. Aceasta păstrează domeniile, regulile de conexiune, modelele blocate, limitele de frecvență
+și limitele de cost, astfel încât aceste alte controale pot în continuare să respingă o solicitare. O valoare explicită
+`--allowed-models ""` selectează, de asemenea, `all`; combinați-o cu
+`--model-access-mode restricted` pentru a păstra o cheie restricționată fără modele permise.
+O listă nevidă de valori separate prin virgule selectează `restricted`, cu excepția cazului în care se specifică explicit altceva.
+Combinația contradictorie dintre `all` și o listă nevidă de modele permise este respinsă înainte de trimiterea unei solicitări.
+
+`--rate-limit 30` stabilește numărul de solicitări pe minut și păstrează regulile pentru alte intervale
+de timp. `--max-cost 5` activează plafonul zilnic în USD fără a modifica plafonul săptămânal;
+`--max-cost 0` elimină plafonul zilnic și păstrează comutatorul existent pentru limita de utilizare
+și plafonul săptămânal. Câmpurile de politică omise rămân neschimbate. Modificările limitelor de frecvență citesc
+mai întâi politica actuală; evitați editările simultane ale matricei de limite de frecvență a aceleiași chei.
+
+Comenzile pentru politici utilizează `GET`/`PATCH /api/keys/{id}` autentificat și respectă contextul
+activ și opțiunea globală `--api-key`. Ieșirea JSON conține numai câmpurile politicii,
+fără cheia stocată sau reprezentarea mascată a acesteia. O acreditare destinată exclusiv inferenței
+nu poate autoriza modificări de gestionare. Un răspuns 401/403 impune verificarea acreditării
+și a contextului de gestionare; acesta nu indică o eroare locală a tokenului CLI sau a valorii salt.
+Consultați [Token CLI](../security/CLI_TOKEN.md) pentru contractul separat de autentificare locală.

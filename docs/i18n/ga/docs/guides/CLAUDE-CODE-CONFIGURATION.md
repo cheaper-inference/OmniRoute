@@ -49,94 +49,89 @@ bhfreastalaí, agus ritheann sé `claude` trí exec.
 
 ---
 
-## Ailiasanna fionnachtana — taispeáin samhlacha nach samhlacha Claude iad sa roghnóir `/model`
+## Ailiasanna fionnachtana — nocht samhlacha neamh-Claude sa roghnóir `/model`
 
-Ní liostaíonn fionnachtain samhlacha geata Claude Code ach aitheantais a thosaíonn le
-`claude` nó `anthropic`, mar sin le `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
-ní thaispeánann an roghnóir dúchasach `/model` de ghnáth **ach** samhlacha
-Claude/Anthropic OmniRoute — ní bhíonn `kimi/kimi-k2.6` ná `glm/glm-5.2` le feiceáil
-riamh, cé go ndéantar iad a ródú gan stró.
+Ní liostaíonn fionnachtain samhail gheata Claude Code ach aitheantais a thosaíonn le `claude` nó `anthropic`, mar sin le `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ní thaispeánann an roghnóir dúchais `/model` de ghnáth samhlacha Claude/Anthropic OmniRoute **amháin** — ní thagann `kimi/kimi-k2.6` ná `glm/glm-5.2` chun cinn riamh, cé go ródófar iad gan aon fhadhb.
 
-Is féidir le OmniRoute aon samhail chumasaithe (agus teaglaim) a mhacasamhlú faoi
-aitheantas `claude/…` ionas go n-éiríonn léi dul tríd an scagaire sin agus go
-mbíonn sí le feiceáil sa roghnóir:
+Is féidir le OmniRoute aon tsamhail (agus teaglaim) atá cumasaithe a scáthánú faoi aitheantas `claude/…` ionas go dtéann sí tríd an scagaire sin agus go dtaispeánfar í sa roghnóir:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<teaglaim "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Nuair a roghnaíonn tú ceann díobh seo in Claude Code, baineann OmniRoute an fillteán
-`claude/` chun filleadh ar an bhfíoraitheantas roimh an ródú — fágtar aitheantas
-fíor `claude/<real-claude-model>` (soláthraí iarbhír Claude OAuth) gan athrú i gcónaí.
+Nuair a roghnaíonn tú ceann díobh seo in Claude Code, baineann OmniRoute an timfhilleadh `claude/` den aitheantas agus tugtar ar ais go dtí an fíoraitheantas é sula ródófar é — fágtar aitheantas fíor `claude/<real-claude-model>` (an soláthraí OAuth Claude féin) gan bhaint i gcónaí.
 
-**Tá sé seo múchta de réir réamhshocraithe** agus rialaítear é le geata trí leibhéal
-(bíonn an bua ag an gceann is sainiúla), ionas nach ndéanann gnáthshuiteáil OmniRoute
-a chatalóg a dhúbailt do chliaint nach n-úsáideann Claude Code:
+De réir réamhshocraithe, ní scáthánaítear ach bunaiteantais. Leis an mbratach gnéithe roghnacha `CATALOG_MIRROR_REFINEMENTS_ENABLED` ar siúl, scáthánaítear leaganacha dícheall-réasúnaíochta atá liostaithe ag an gcatalóg cheana féin (m.sh. `codex/gpt-6-sol-high`) mar aon le haon aitheantas eile, ionas gur féidir le Claude Code leibhéal dícheall sainráite a roghnú, agus ní scáthánaítear aitheantais ionsuite `auto/*` nach féidir le conair an iarratais a réadú. Is é `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` a rialaíonn fós cé acu a liostaítear leaganacha dícheall ar chor ar bith — ní chuireann an scáthán leagan leis riamh nach bhfuil sa bhunchatalóg.
 
-| Leibhéal  | Cá háit                                                                                                     |
-| --------- | ----------------------------------------------------------------------------------------------------------- |
-| Samhail   | Leathanach sonraí an tsoláthraí → scorán "Taispeáin in Claude Code" de réir samhla                          |
-| Soláthraí | Leathanach sonraí an tsoláthraí → scorán ar leibhéal an tsoláthraí (clúdaíonn sé a chuid samhlacha go léir) |
-| Domhanda  | Socruithe → Bratacha Gné → `EXPOSE_CC_DISCOVERY_ALIASES` (múchta de réir réamhshocraithe)                   |
+**Tá sé seo múchta de réir réamhshocraithe** agus tá sé faoi rialú geata trí leibhéal (is é an leibhéal is sainiúla a bhuaileann), ionas nach ndúbálann OmniRoute simplí a chatalóg riamh do chliaint nach n-úsáideann Claude Code:
 
-Cuireann an athróg timpeallachta `EXPOSE_CC_DISCOVERY_ALIASES` an leibhéal domhanda
-i bhfeidhm agus bíonn tosaíocht aici ar an sárú ón deais (taispeánann an scáileán
-Bratacha Gné nóta "gníomhach trí athróg timpeallachta" nuair a tharlaíonn sé sin).
-Déanann na scoráin de réir soláthraí agus de réir samhla an roghnú a bheachtú as sin
-amach — m.sh. má tá an socrú domhanda múchta ach soláthraí Kimi casta air, ní
-thaispeántar ach samhlacha Kimi.
+| Leibhéal  | Cá háit                                                                                                  |
+| --------- | -------------------------------------------------------------------------------------------------------- |
+| Samhail   | Leathanach sonraí an tsoláthraí → lasc "Nocht in Claude Code" in aghaidh na samhla                       |
+| Soláthraí | Leathanach sonraí an tsoláthraí → lasc ar leibhéal an tsoláthraí (clúdaíonn sí a cuid samhlacha go léir) |
+| Domhanda  | Socruithe → Bratacha Gnéithe → `EXPOSE_CC_DISCOVERY_ALIASES` (múchta de réir réamhshocraithe)            |
 
-> ⚠️ **Neamhréir fuinneoige ar shamhlacha nach samhlacha Claude iad.** Glacann
-> Claude Code leis go bhfuil fuinneog chomhthéacs 200K ag aon aitheantas nach
-> n-aithníonn sé (ní féidir leis fíorfhuinneog a léamh ó `/v1/models`). I gcás
-> samhla a bhfuil fuinneog níos mó aici (m.sh. 256K Kimi K2), socraigh
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` chuig luach atá faoi bhun fhíorfhuinneog na
-> samhla ionas nach dtosaíonn an t-uath-chomhbhrú róluath. Déanann na próifílí
-> ginte thuas é seo de réir samhla cheana féin.
+Cuirfidh an athróg chomhshaoil `EXPOSE_CC_DISCOVERY_ALIASES` an leibhéal domhanda ar siúl de ghnáth agus beidh tosach aici thar an sárú deise (taispeánann scáileán na mBratacha Gnéithe nóta "gníomhach trí athróg chomhshaoil" nuair is amhlaidh). Déanann na lasca in aghaidh an tsoláthraí agus in aghaidh na samhla an scagadh a mhionchoigeartú as sin amach — m.sh. leis an leibhéal domhanda múchta agus soláthraí Kimi ar siúl, ní nochtaítear ach samhlacha Kimi.
+
+> ⚠️ **Neamhréir fuinneoige ar shamhlacha neamh-Claude.** Glacann Claude Code le fuinneog comhthéacs 200K d'aon aitheantas nach n-aithníonn sé (ní féidir leis fíorfhuinneog a léamh ó `/v1/models`). I gcás samhail le fuinneog níos mó (m.sh. 256K ag Kimi K2), socraigh `CLAUDE_CODE_AUTO_COMPACT_WINDOW` go luach faoi bhun fíorfhuinneog na samhla ionas nach rachaidh an féin-dhlúthú i bhfeidhm roimh am. Déanann na próifílí ginte thuas é seo cheana féin in aghaidh gach samhla.
 
 ---
 
-## Bloc ionduchtaithe ar an deais
+## Bloc ionduchtúcháin ar an deais
 
-Taispeánann cárta uirlisí Claude (**Deais → Cód CLI**) an mhír bheacht `settings.json`
-don ásc seo, in aice leis an gcnaipe faisnéise faoin ailias fionnachtana, mar aon le cnaipe cóipeála:
+Taispeánann cárta uirlisí Claude (**Deais → Cód CLI**) an blúire beacht `settings.json`
+don ásc seo, in aice leis an gcnaipe faisnéise faoin ailias fionnachtana, agus cnaipe cóipeála leis:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<do OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<d'eochair API OmniRoute>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-Is é an bun-URL an ceann a réitigh an cárta (lena n-áirítear sárú saincheaptha a chlóscríobh tú), agus é
-normalaithe cheana féin — gan iarmhír `/v1` ná slais deiridh. **Ní thaispeántar an eochair riamh**: cuirtear
-ionadchoinneálaí sa bhloc, mar sin ní féidir le gabháil scáileáin ná mír ghreamaithe í a sceitheadh. Greamaigh d'eochair ina háit.
+Is é an bun-URL an ceann a réitíonn an cárta (lena n-áirítear sárú saincheaptha a chlóscríobh tú), agus é
+normalaithe cheana féin — gan iarmhír `/v1`, gan slais deiridh. **Ní thaispeántar an eochair riamh**: cuirtear
+ionadchoinneálaí sa bhloc, mar sin ní féidir le gabháil scáileáin ná le blúire greamaithe í a sceitheadh. Greamaigh d'eochair ina áit.
 
-Cuir `CLAUDE_CODE_AUTO_COMPACT_WINDOW` faoin mbloc `env` céanna le haghaidh aon mhúnla nach ionann
-a fhíorfhuinneog chomhthéacs agus 200K — glacann Claude Code leis gur 200K atá ann do gach id nach n-aithníonn sé, mar sin
-tarlaíonn an dlúthú uathoibríoch ag an bpointe mícheart murach sin (féach an rabhadh sa rannán roimhe seo).
-Glacann tógálaí na míre leis an luach sin freisin, ionas gur féidir le glaoiteoir a bhfuil fuinneog an spriocmhúnla ar eolas aige
+Cuir `CLAUDE_CODE_AUTO_COMPACT_WINDOW` faoin mbloc `env` céanna le haghaidh aon samhail nach 200K
+a fíorfhuinneog comhthéacs — glacann Claude Code leis gur 200K atá i gceist do gach id nach n-aithníonn sé, mar sin
+murach sin cuirtear an t-uath-chomhbhrú i ngníomh ag an bpointe mícheart (féach an rabhadh sa roinn roimhe seo).
+Glacann tógálaí na mblúirí leis an luach sin freisin, ionas gur féidir le glaoiteoir a bhfuil fuinneog na sprice-shamhla ar eolas aige
 é a aschur go díreach.
 
-Foinse: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (tógálaí
-íon, tástáilte le tástálacha aonaid) arna thaispeáint ag `ClaudeGatewayOnboardingBlock`.
+Foinse: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (tógálaí íon,
+aonadthástáilte) arna thaispeáint ag `ClaudeGatewayOnboardingBlock`.
+
+### Cuir cuntas amháin in airde (roghnach)
+
+Chun gach iarratas Claude Code a sheoladh trí chuntas soláthraí sonrach amháin, cuir an ceanntásc
+`x-omniroute-connection` leis trí `ANTHROPIC_CUSTOM_HEADERS` sa bhloc `env` céanna:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Cóipeáil an id ón tslis `xxxxxxxx…` ar ró an cheangail ar leathanach an tsoláthraí. Ní bhaineann an socrú seasta
+ach le hidanna aon-samhla (`provider/model`), agus ní bhaineann sé le teaglamaí. Féach
+[Ceangal cuntais de réir iarratais](../reference/API_REFERENCE.md#account-pinning-per-request) chun an
+t-iompar cúltaca beacht a fháil.
 
 ---
 
 ## Próifílí (`CLAUDE_CONFIG_DIR`)
 
-Níl **aon chomhaid phróifíle dhúchasacha** ag Claude Code (murab ionann agus `~/.codex/<name>.config.toml` Codex).
-Is é `CLAUDE_CONFIG_DIR` an mheicníocht ghnáthúil — eolaire cumraíochta ar leith do gach
-próifíl, agus a `settings.json`, dintiúir, stair agus taisce féin ag gach ceann acu.
+Níl **aon chomhad próifíle dúchasach** ag Claude Code (murab ionann agus `~/.codex/<name>.config.toml` Codex).
+Is é `CLAUDE_CONFIG_DIR` an mheicníocht ghnásúil — comhadlann chumraíochta ar leith do gach
+próifíl, agus a `settings.json`, a dintiúir, a stair agus a taisce féin ag gach ceann acu.
 
 Faigheann `omniroute setup-claude` catalóg bheo `/v1/models` agus scríobhann sé
-próifíl amháin in aghaidh an mhúnla ag `~/.claude/profiles/<name>/settings.json`, agus athúsáideann sé
-**na hainmneacha céanna le `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+próifíl amháin do gach samhail ag `~/.claude/profiles/<name>/settings.json`, ag athúsáid na
+**n-ainmneacha céanna le `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -153,20 +148,22 @@ próifíl amháin in aghaidh an mhúnla ag `~/.claude/profiles/<name>/settings.j
 }
 ```
 
-> **Ní scríobhtar an comhartha fíordheimhnithe sa phróifíl riamh.** Seol le
+> **Ní scríobhtar an ceadchomhartha fíordheimhnithe sa phróifíl riamh.** Seol é le
 > `omniroute launch --profile <name>` (insteallann sé `ANTHROPIC_AUTH_TOKEN` ón
 > gcomhthéacs gníomhach), nó easpórtáil `ANTHROPIC_AUTH_TOKEN` tú féin agus rith
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Sioncronú uathoibríoch tar éis fionnachtain samhlacha (roghnach).** Is féidir le OmniRoute na comhaid chéanna
+**Uathshioncronú tar éis aimsiú samhlacha (roghnach).** Is féidir le OmniRoute na comhaid chéanna
 `~/.claude/profiles/<name>/settings.json` a athghiniúint go huathoibríoch aon uair a athraíonn
-sioncronú samhlacha soláthraí an chatalóg bheo — ionas go bhfaighidh samhlacha nua nó athainmnithe próifílí gan an
-t-ordú a rith arís. Tá sé **díchumasaithe de réir réamhshocraithe**: scoránaigh é ón **deais Chód CLI** ("Sioncronú
-uathoibríoch próifílí CLI" → Claude Code), nó socraigh `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (cloíonn sé freisin le
-`CLI_ALLOW_CONFIG_WRITES`, atá cumasaithe de réir réamhshocraithe). Nuair a bhíonn sé cumasaithe, ní scríobhann sé ach comhaid phróifíle; ní athraíonn sé
-do chumraíocht ghníomhach/réamhshocraithe Claude, d'fhíordheimhniú ná `~/.claude/settings.json` riamh.
+sioncronú samhlacha soláthraí an chatalóg bheo — mar sin faigheann samhlacha nua nó athainmnithe
+próifílí gan an t-ordú a rith arís. Tá sé **múchta de réir réamhshocraithe**: scoránaigh é ón
+**deais CLI Code** ("Uathshioncronú próifílí CLI" → Claude Code), nó socraigh
+`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (urramaíonn sé `CLI_ALLOW_CONFIG_WRITES` freisin,
+atá casta air de réir réamhshocraithe). Nuair atá sé cumasaithe, ní scríobhann sé ach comhaid
+phróifíle; ní athraíonn sé do chumraíocht ghníomhach/réamhshocraithe Claude, an fíordheimhniú,
+ná `~/.claude/settings.json` riamh.
 
-### Próifílí a ghiniúint agus a úsáid
+### Próifílí a ghiniúint + a úsáid
 
 ```bash
 # OmniRoute áitiúil
@@ -177,6 +174,10 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Roinnt soláthraithe amháin
 omniroute setup-claude --only glm,kimi
+
+# Scríobh próifílí freisin do sholáthraithe CLI áitiúla (zcode, auggie, devin-cli-agentic,
+# codex-app-server) nach mbraitear ar an óstríomhaire seo (fágtar ar lár iad de réir réamhshocraithe do sprioc áitiúil)
+omniroute setup-claude --include-local
 
 # Réamhamharc gan scríobh
 omniroute setup-claude --dry-run

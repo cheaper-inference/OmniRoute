@@ -17,7 +17,7 @@ It provides a single OpenAI-compatible endpoint (`/v1/*`) and routes traffic acr
 
 Core capabilities:
 
-- OpenAI-compatible API surface for CLI/tools (372 providers, 148 executors)
+- OpenAI-compatible API surface for CLI/tools (375 providers, 156 executor modules)
 - Request/response translation across provider formats
 - Model combo fallback (multi-model sequence)
 - Structured combo steps (`provider + model + connection`) with runtime ordering by `compositeTiers`
@@ -153,6 +153,14 @@ Main pages under `src/app/(dashboard)/dashboard/`:
 - `/dashboard/usage` — per-request usage browser tied to `usage_history`
 - `/dashboard/compression` — compression analytics, statistics, and pipeline assignment
 - `/dashboard/api-manager` — API key lifecycle and model permissions
+
+UI layer: every page renders inside one shell — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (the kit's
+`SidebarProvider`/`SidebarInset`, OmniRoute's `Sidebar.tsx` and `Header.tsx`). Pages import their
+building blocks from `@/shared/components` (adapters over the vendored Keak CI UI Kit in
+`packages/ui-kit`) or from kit component subpaths (`@omniroute/ui-kit/table`, `…/page-header`), and
+icons through `<Icon>` (`ICON_MAP` → Lucide). Theme (`system` by default, light/dark) and tokens come
+from the kit via the bridge in `src/app/globals.css`. Details: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## High-Level System Context
 
@@ -366,9 +374,10 @@ relying on a static combo definition. It powers the `auto/*` model prefix family
 
 Key capabilities:
 
-- **19 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random,
-  **auto**, lkgp, context-optimized, context-relay, **fusion**, plus a fallback path) —
+- **20 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
+  pipeline) —
   auto is the headline addition in v3.8.0; `fusion` (panel fan-out + judge synthesis,
   `open-sse/services/fusion.ts`) is new in v3.8.36.
 - **16-factor scoring**: quota, health, inverse cost, inverse latency, task fit and
@@ -546,6 +555,7 @@ Domain State DB (SQLite):
 - Runtime env validation: `src/lib/env/runtimeEnv.ts` — Zod schema for all environment variables, surfaced as startup errors/warnings
 - Sync tokens: `src/lib/db/syncTokens.ts` — scoped tokens for config bundle download endpoints; backed by `sync_tokens` SQLite table (migration `024_create_sync_tokens.sql`)
 - WebSocket handshake auth: `src/lib/ws/handshake.ts` — validates WS upgrade requests via API key or session cookie
+- Live dashboard WebSocket auth: `src/server/ws/liveServer.ts` — the sidecar (port `LIVE_WS_PORT`) accepts a dashboard session cookie or a Bearer API key holding a management scope (`manage`/`admin`); inference-only keys are refused. Its internal `POST /__omniroute_event` publisher endpoint accepts loopback peers only when no proxy-hop header (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) is present
 
 ## 5) Cloud Sync
 

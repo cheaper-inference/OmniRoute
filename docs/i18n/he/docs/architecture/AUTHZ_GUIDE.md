@@ -15,73 +15,58 @@
 
 ## שני מצבי אימות
 
-### 1. מפתח API‏ (Bearer)
+### 1. מפתח API (Bearer)
 
-משמש עבור ממשקי ה-API של הלקוחות התואמים ל-OpenAI/Anthropic/Gemini ועבור כמה נתיבי ניהול כאשר למפתח יש הרשאת `manage`.
+משמש עבור ממשקי ה-API של הלקוחות התואמים ל-OpenAI/Anthropic/Gemini ולכמה מסלולי ניהול, כאשר למפתח יש את ההיקף `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-מאומת באמצעות `isValidApiKey()` / `extractApiKey()` בקובץ `src/sse/services/auth.ts` ומיוצא מחדש דרך `src/shared/utils/apiAuth.ts`. המאמת מקבל גם את משתני הסביבה `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` כמפתחות מעבר קבועים (סוגיה #1350).
+נבדק על ידי `isValidApiKey()` / `extractApiKey()` ב-`src/sse/services/auth.ts` ומיוצא מחדש דרך `src/shared/utils/apiAuth.ts`. המאמת מקבל גם את משתני הסביבה `OMNIROUTE_API_KEY` ו-`ROUTER_API_KEY` כמפתחות מעבר קבועים (issue #1350).
 
-### 2. סשן לוח הבקרה (קובץ cookie מסוג auth_token)
+### 2. סשן לוח הבקרה (עוגיית auth_token)
 
-עבור דפי לוח הבקרה ופעולות מנהל מערכת.
+עבור דפי לוח הבקרה ופעולות ניהול.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-קובץ cookie נחשב לסשן רק כאשר ה-JWT מאומת **וגם** מכיל `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). כל
-צרכן של קובץ ה-cookie (מגן הנתיבים של לוח הבקרה (`isDashboardSessionAuthenticated()`), רענון צינור ה-authz, לחיצת היד של WebSocket, השרת
-הפעיל, `/api/settings/require-login`, `/api/auth/status`) עובר דרך פונקציית העזר הזו.
-קיימים אסימוני JWT אחרים החתומים באמצעות `JWT_SECRET` — מנגנון המעבר של Cursor CLI מנפיק
-אסימוני `iss "omniroute" / aud "cursor-cli"` למחזיקי מפתחות — והם לעולם אינם סשנים
-(#13298).
+העוגייה היא סשן רק כאשר ה-JWT שלה מאומת **וגם** נושא `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). כל צרכן של העוגייה — שומר המסלולים של לוח הבקרה (`isDashboardSessionAuthenticated()`), צינור רענון האימות, לחיצת היד של WebSocket, השרת החי, `/api/settings/require-login` ו-`/api/auth/status` — עובר דרך העזר הזה.
+קיימים גם JWT-ים אחרים החתומים עם `JWT_SECRET` — למשל, ה-Cursor CLI passthrough מנפיק לבעלי מפתחות אסימונים עם `iss "omniroute" / aud "cursor-cli"`, והם לעולם אינם סשנים (#13298).
 
-האימות מתבצע באמצעות `isDashboardSessionAuthenticated()` בקובץ `src/shared/utils/apiAuth.ts`. צינור העיבוד מרענן אוטומטית את ה-JWT כאשר נותרו פחות מ-7 ימים מתוך משך חייו בן 30 הימים.
+הסשן מאומת על ידי `isDashboardSessionAuthenticated()` ב-`src/shared/utils/apiAuth.ts`. הצינור מרענן את ה-JWT אוטומטית כאשר נותרו לו פחות מ-7 ימים מתוך חיי ה-30 יום שלו.
 
-סשן יכול גם להסתיים לפני ש-30 הימים שלו חולפים, משום שכל מנגנון הנפקה עובר דרך `mintDashboardSessionToken` (עם זמן הנפקה `iat` ומזהה `jti`), והמאמת בודק שתי הגדרות: `sessionsValidAfter`, שמוגדרת בעת שינוי סיסמה כך שכל סשן שהונפק לפניה מפסיק להיות מאומת (הדפדפן שבו שונתה הסיסמה מקבל קובץ cookie חדש), ו-`revokedDashboardSessions`, שאליה `POST /api/auth/logout` מוסיף את ה-`jti` של הסשן שממנו בוצעה היציאה. סשנים שהונפקו על ידי גרסה ישנה יותר אינם מכילים אף אחת מהטענות הללו ונשארים תקפים עד לשינוי הסיסמה הראשון. אם לא ניתן לקרוא את ההגדרות, הסשן אינו נחשב מהימן.
+סשן עשוי להסתיים לפני שחלפו 30 ימיו, מכיוון שכל מנפיק עובר דרך `mintDashboardSessionToken` (וכולל זמן הנפקה `iat` ומזהה `jti`), והמאמת בודק שתי הגדרות: `sessionsValidAfter`, שמוגדרת על ידי שינוי סיסמה כך שכל סשן שהונפק לפניה מפסיק להתאמת (הדפדפן ששינה את הסיסמה מקבל עוגייה חדשה), ו-`revokedDashboardSessions`, שאליה `POST /api/auth/logout` מוסיף את ה-`jti` של הסשן שנותק. לסשנים שהונפקו על ידי גרסה ישנה אין אף אחת משתי התביעות, והם נשארים תקפים עד השינוי הראשון של הסיסמה. אם לא ניתן לקרוא את ההגדרות, הסשן אינו נאמן.
 
-חלק מנתיבי הניהול מקבלים **כל אחד** משני המצבים: קובץ cookie או `Bearer <key>` כאשר למפתח ה-API יש הרשאת `manage` (או `admin`). זה מה שמאפשר את תהליך העבודה "ניתן להגדרה באמצעות קריאות API" שנוסף ב-v3.8.
+חלק ממסלולי הניהול מקבלים **אחד משני** המצבים: עוגייה או `Bearer <key>` כאשר למפתח יש את ההיקף `manage` (או `admin`). זה מה שמאפשר את זרימת העבודה "ניתנת להגדרה באמצעות קריאות API" שנוספה בגרסה v3.8.
 
-#### שער התחברות אופציונלי באמצעות OIDC‏ (#6973)
+#### שער כניסה OIDC אופציונלי (#6973)
 
-התחברות מנהל המערכת ללוח הבקרה תומכת גם בתהליך OIDC‏ (OpenID Connect) **אופציונלי**
-לצד התחברות ברירת המחדל באמצעות סיסמה — התחברות באמצעות סיסמה לעולם אינה מוסרת, אלא רק
-מקבלת אפשרות נוספת:
+כניסת מנהל לוח הבקרה תומכת גם בזרם OIDC (OpenID Connect) **אופציונלי** לצד כניסת הסיסמה ברירת המחדל — כניסת הסיסמה לעולם אינה מוסרת, אלא רק משלימה:
 
-- מושבת אלא אם `settings.oidcEnabled === true` **וגם** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` מוגדרים כולם (הגדרות → אימות).
-  אחרת, `GET /api/auth/oidc/login` מחזיר `400`.
-- `GET /api/auth/oidc/login` מאתר את `authorization_endpoint` מתוך
-  `/.well-known/openid-configuration` של המנפיק (עם חזרה אל
-  `<issuer>/authorize`), בונה את URI ההפניה מחדש מתוך הבקשה הנכנסת
-  (תוך התחשבות ב-`x-forwarded-proto`), ומפנה אל ה-IdP עם `state` אקראי
-  המאוחסן בקובץ cookie מסוג `oidc_state` עם `httpOnly`.
-- `GET /api/auth/oidc/callback` מאמת את `state`, מחליף את קוד ההרשאה
-  ומאמת את חתימת אסימון ה-ID באמצעות ה-JWKS של המנפיק
-  (`createRemoteJWKSet` של `jose`, הנשמר במטמון לפי URI של JWKS), תוך בדיקות
-  `issuer`/`audience`. רשימת ההיתרים האופציונלית `oidcAllowedSubjects` בודקת התאמה לטענת
-  `sub` של האסימון או לטענת `email` שלו — טענת הדוא"ל מתקבלת רק כאשר
-  `email_verified === true`, כך שכתובת דוא"ל לא מאומתת אצל ה-IdP לעולם לא תוכל לעבור
-  את השער.
-- לאחר הצלחה, הוא מנפיק את **אותו** JWT מסוג `auth_token` ל-30 יום שמנפיקה ההתחברות
-  באמצעות סיסמה (`src/app/api/auth/login/route.ts`), כך ששאר
-  צינור סשן לוח הבקרה (רענון אוטומטי, דגלי קובץ cookie) נשאר ללא שינוי —
-  OIDC מחליף רק את האופן שבו קובץ ה-cookie מונפק, ולא את ההרשאות שהוא מעניק.
+- מושבת אלא אם `settings.oidcEnabled === true` **וגם** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` מוגדרים כולם (הגדרות ← אימות). `GET /api/auth/oidc/login` מחזיר `400` אחרת.
+- `GET /api/auth/oidc/login` מאתר את `authorization_endpoint` מתוך `/.well-known/openid-configuration` של ה-issuer (ונופל ל-`<issuer>/authorize` אם צריך), בונה את ה-redirect URI מתוך הבקשה הנכנסת (עם תמיכה ב-`x-forwarded-proto`), ומפנה לספק הזהות עם `state` אקראי השמור בעוגיית `oidc_state` עם `httpOnly`.
+- `GET /api/auth/oidc/callback` מאמת את `state`, מחליף את קוד ההרשאה (authorization code), ומאמת את החתימה של ה-ID token דרך ה-JWKS של ה-issuer (`createRemoteJWKSet` של `jose`, עם מטמון לכל כתובת JWKS) עם בדיקות `issuer` ו-`audience`. רשימת ההיתר `oidcAllowedSubjects` חובה: היא מתאימה לתביעה `sub` של הטוקן או לתביעה `email`, והתביעה `email` נלקחת בחשבון רק כאשר `email_verified === true`, כך שכתובת דוא"ל לא מאומתת אצל ספק הזהות לעולם לא תעבור את השער. עם רשימה ריקה, ה-callback דוחה כל כניסה (`not_configured`).
+- בהצלחה הוא מנפיק **את אותה** עוגיית `auth_token` מסוג JWT לתקופה של 30 ימים שכניסת הסיסמה מנפיקה (`src/app/api/auth/login/route.ts`), כך ששאר צינור הסשן של לוח הבקרה (רענון אוטומטי, דגלי עוגייה) נשאר ללא שינוי — OIDC משנה רק את האופן שבו העוגייה נוצרת, לא את מה שהיא מעניקה.
+- כל הגדרות ה-`oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) נמצאות ב-`SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` עונה `400 PASSWORD_REQUIRED` אלא אם הגוף נושא את סיסמת הניהול כ-`currentPassword` (`401 PASSWORD_MISMATCH` כאשר היא שגויה). `oidcDisablePasswordLogin` אוסר _כניסה_ בסיסמה (`POST /api/auth/login`) אך שומר על hash הסיסמה, ואימות ה-re-auth עדיין בודק את `currentPassword` מולו.
+- גם `corsOrigins` ו-`bruteForceProtection` נמצאים ב-`SECURITY_IMPACTING_SETTINGS_KEYS`: הרחבת אחד מהם מחלישה את הגנות הכניסה, ולכן הם דורשים את אותו re-auth עם `currentPassword` (לשונית האבטחה מבקשת אותו), וייבוא ה-JSON מסיר אותם.
+- כל מפתח מדיניות אבטחה — ערכי `SECURITY_IMPACTING_SETTINGS_KEYS`, כל מפתח `oidc*` ומצב הסשן של לוח הבקרה — הוא **למפעיל בלבד** ב-`PATCH /api/settings`: מפתח API בהיקף `manage` או טוקן גישה `oma_` נדחים עם `403` גם כשהם שולחים `currentPassword` נכון, והדחייה נרשמת כ-`settings.update_failed` עם `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` ב-`src/lib/api/operatorCredential.ts`). הגדרות רגילות (ערכת נושא והעדפות תצוגה) נשארות ניתנות לכתיבה עבור מפתח `manage` או טוקן גישה `admin`. כל שינוי של `/api/settings` עצמו (וגם של `/api/settings/require-login`) דורש גם את היקף טוקן הגישה `admin` (`ADMIN_MUTATION_EXACT_PATHS` ב-`src/server/authz/accessScopes.ts`, התאמה מדויקת של הנתיב); `GET` נשאר `read`, ותתי-המסלולים האחרים של `/api/settings/*` (פרוקסים, ברירות מחדל של שילובים, כינויי מודלים, דחיסה, מחיקות...) שומרים על היקף `write` שמוסק משיטת הבקשה.
+- `POST /api/settings/import-json` מדלג על ה-re-auth הזה, לכן הוא מסיר לפני הכתיבה כל מפתח ב-`IMPORT_STRIPPED_SETTINGS_KEYS` (באותו קובץ): הסיסמה ו-`currentPassword`, כל ערך ב-`SECURITY_IMPACTING_SETTINGS_KEYS`, ומצב הסשן של לוח הבקרה (`sessionsValidAfter`, `revokedDashboardSessions`). לכן ייבוא גיבוי ישן לא יכול להחיות סשן שמשינוי סיסמה או מהתנתקות כבר הסתיים.
 
 ## מחלקות נתיבים
 
-`src/server/authz/types.ts` מגדיר שלוש מחלקות; כל נתיב שלא ניתן לסווג באופן דטרמיניסטי מסווג כברירת מחדל כ-`MANAGEMENT`.
+`src/server/authz/types.ts` מגדיר שלוש מחלקות; כל נתיב שאי אפשר לסווג באופן דטרמיניסטי נופל ל-`MANAGEMENT`.
 
-| מחלקה        | תיאור                                                                                                                                                | אימות נדרש                                                   |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `PUBLIC`     | נתיבים שהוגדרו במפורש כבטוחים — כניסה, יציאה, סטטוס, אתחול, בדיקת תקינות ואתחול תהליך הקליטה.                                                        | ללא                                                          |
-| `CLIENT_API` | נקודות קצה להגשת מודלים — `/api/v1/*`, `/api/v1beta/*`, וכן הכינויים `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | מפתח Bearer כאשר דגל היכולת האפקטיבי `REQUIRE_API_KEY` מופעל |
-| `MANAGEMENT` | דפי לוח הבקרה, הגדרות, ספקים, מפתחות ונקודות קצה לניהול ולאבחון.                                                                                     | הפעלת לוח בקרה או Bearer עם תחום ההרשאה `manage`             |
+| Class        | Description                                                                                                                                          | Auth required                                             |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `PUBLIC`     | נתיבים בטוחים במפורש — כניסה, יציאה, סטטוס, אתחול, בריאות ואתחול ההטמעה הראשוני.                                                                     | אין                                                       |
+| `CLIENT_API` | נקודות קצה להגשת מודלים — `/api/v1/*`, `/api/v1beta/*`, וכן הכינויים `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | מפתח Bearer כאשר דגל התכונה `REQUIRE_API_KEY` הפעיל מופעל |
+| `MANAGEMENT` | דפי לוח הבקרה, הגדרות, ספקים, מפתחות, נקודות קצה של ניהול ואבחון.                                                                                    | סשן לוח הבקרה **או** Bearer עם היקף `manage`              |
+
+כמה פעולות של `MANAGEMENT` הן **למפעיל בלבד**: מפתח `manage` אינו מספיק. ייצוא של אישורים שמורים (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), שחזור גיבוי על גבי הנתונים החיים (`POST /api/db-backups/import` כולל `dryRun=true`, `POST /api/db-backups` לשחזור לפי מזהה, `POST /api/settings/import-json`), והשמדת נקודות שחזור (ניקוי `DELETE /api/db-backups`, וגם `PATCH /api/db-backups` מכיוון שהשמירה שהוא מתמיד בה מניעה את הגיזום האוטומטי אחרי כל גיבוי) — כולן דורשות סשן לוח הבקרה, נושא ה-CLI המקומי, או כניסה מושבתת. הנפקת טוקן סנכרון (`POST /api/sync/tokens`) וטביעת טוקן גישה CLI מסוג `admin` (`POST /api/cli/tokens`) דורשים סשן לוח הבקרה או נושא ה-CLI המקומי בכל מצב כניסה. מפתחות API מכל היקף וטוקני גישה `oma_` אינם אישורי מפעיל: הם מקבלים `403` בכל פעם שנדרש אחד מהם. הבדיקה נמצאת ב-`src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). שינוי הגדרות הכניסה מוגבל למפעיל אף הוא: `POST /api/settings/require-login` (הגדרת סיסמת הניהול / החלפת `requireLogin`) מקבל רק את האישורים האלה לאחר שקיימת סיסמה — חלון האתחול הראשוני בהפעלה הראשונה (עוד אין סיסמה) נשאר כפי שהוא, וסשן לוח הבקרה חייב לשלוח `currentPassword` כדי להחליף את הסיסמה (`403` כשהוא חסר או שגוי, ונרשם כ-`settings.update_failed`). ה-CLI המקומי ומופע עם כניסה מושבתת שומרים על מסלול ההתאוששות, ויכולים להגדיר סיסמה בלעדיו, מכיוון ששניהם קשורים למארח שבבעלותו תיקיית הנתונים.
 
 ## צינור העיבוד
 
@@ -234,13 +219,13 @@ export async function POST(request: Request) {
 
 ## מתג דרישת אימות
 
-`isAuthRequired()` שב-`src/shared/utils/apiAuth.ts` קובעת אם נאכף אימות **כלשהו** עבור בקשה:
+`isAuthRequired()` ב-`src/shared/utils/apiAuth.ts` קובעת אם נאכף **כל** אימות על בקשה:
 
-- `settings.requireLogin === false` → האימות מושבת באופן גלובלי.
-- לא הוגדרה סיסמה **וגם** אין משתנה סביבה `INITIAL_PASSWORD` → מצב האתחול מאפשר את אשף ההגדרה הראשונית ובקשות loopback, אך בקשות מרשת חשופה עדיין דורשות פרטי גישה.
-- כל שגיאת DB → המערכת נכשלת באופן סגור (מאובטח כברירת מחדל).
+- `settings.requireLogin === false` ← האימות מושבת גלובלית, למעט הרמה המוגנת תמיד (ראו [שכבות מגן המסלולים](../security/ROUTE_GUARD_TIERS.md)) והקריאות שמנפיקות אישור שהמערכת מקבלת, והן דורשות את אותו אישור כמו כשהכניסה פעילה: הנפקת טוקני סנכרון, טביעת טוקני גישה CLI בכל היקף, יצירת מפתח API בהיקף `manage`/`admin`, מתן ההיקף הזה למפתח, או יצירה מחדש או חשיפה של מפתח כזה (`requireCredentialForManagementScopedKey()` ב-`src/lib/api/requireManagementAuth.ts`). מפתחות לצורכי הסקה בלבד נשארים פתוחים.
+- לא הוגדרה סיסמה **וגם** אין משתנה הסביבה `INITIAL_PASSWORD` ← מצב האתחול מאפשר את אשף ההטמעה ובקשות מקומיות (loopback), אך בקשות רשת חשופות עדיין דורשות אישורים.
+- כל שגיאה במסד הנתונים ← נכשל בסגירה (secure-by-default).
 
-אכיפת מפתח API של לקוח משתמשת ב-`isRequireApiKeyEnabled()` שב-`src/shared/utils/featureFlags.ts`, ולא בקריאה ישירה של `process.env.REQUIRE_API_KEY`. הדבר חשוב עבור מופעים שנפרסו: החלפת המצב של `REQUIRE_API_KEY` ב-Dashboard → Feature Flags שומרת דריסה ב-DB ומשפיעה מיד על `/v1/*`,‏ `/v1beta/*`,‏ `/models`,‏ `/responses`,‏ `/chat/completions`,‏ `/codex/*` ובדיקות אימות אחרות של API הלקוח המשתמשות באותה פונקציית עזר. אם לא ניתן לקרוא את מאגר דגלי התכונות, אימות API הלקוח נכשל באופן סגור ודורש מפתח.
+אכיפת מפתח API של הלקוח משתמשת ב-`isRequireApiKeyEnabled()` ב-`src/shared/utils/featureFlags.ts`, ולא בקריאה ישירה של `process.env.REQUIRE_API_KEY`. זה חשוב לפריסות: החלפת `REQUIRE_API_KEY` בלוח הבקרה ← דגלי תכונות שומרת עקיפה במסד הנתונים ומשפיעה מיד על `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ועל בדיקות האימות האחרות של ה-API ללקוח שחולקות את העזר הזה. אם לא ניתן לקרוא את מאגר דגלי התכונות, אימות ה-API של הלקוח נכשל בסגירה ודורש מפתח.
 
 ## שינוי שובר תאימות — v3.8.0
 

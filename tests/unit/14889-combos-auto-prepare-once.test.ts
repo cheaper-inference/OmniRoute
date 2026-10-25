@@ -166,7 +166,7 @@ test("GET /api/combos/auto keeps capability reads bounded by a constant", async 
   );
 });
 
-test("without resolved capabilities the same request reads per candidate", async () => {
+test("without resolved capabilities the request builds one snapshot per combo, not per candidate (#16814)", async () => {
   const reads = await countDbReads(async () => {
     const prepared = await virtualFactory.prepareVirtualAutoComboInputs();
     const { AUTO_SUFFIX_VARIANTS } =
@@ -185,20 +185,21 @@ test("without resolved capabilities the same request reads per candidate", async
   // #15378 memoized the synced vision verdict behind the catalog version, so the
   // synced catalog is no longer re-read per candidate on this path either (it
   // stays within the same per-provider bound as the snapshot route). The
-  // capability and override tables are still resolved on demand per candidate,
-  // which is the contrast with the bounded snapshot path pinned above.
+  // capability and override tables used to be resolved on demand per candidate (#16814);
+  // computeAdvertisedLimits now bulk-reads them once per combo it builds.
   const PROVIDER_COUNT = 6;
+  const COMBOS_BUILT = 3;
   assert.ok(
     reads.syncedReads <= 2 * PROVIDER_COUNT,
     `synced model reads should stay memoized (#15378), saw ${reads.syncedReads}`
   );
   assert.ok(
-    reads.capabilityReads > 50,
-    `on-demand resolution should read capabilities per candidate, saw ${reads.capabilityReads}`
+    reads.capabilityReads <= 2 * COMBOS_BUILT,
+    `capabilities should be bulk-read once per combo (#16814), saw ${reads.capabilityReads}`
   );
   assert.ok(
-    reads.overrideReads > 50,
-    `on-demand resolution should read overrides per candidate, saw ${reads.overrideReads}`
+    reads.overrideReads <= 2 * COMBOS_BUILT * PROVIDER_COUNT,
+    `overrides should be bulk-read once per combo (#16814), saw ${reads.overrideReads}`
   );
 });
 

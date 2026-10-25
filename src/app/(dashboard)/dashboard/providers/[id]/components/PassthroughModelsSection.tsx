@@ -14,7 +14,7 @@ import { filterUnavailableModelRows } from "@/lib/providers/mergeProviderModelLi
  * Never imports from ProviderDetailPageClient.
  */
 import React, { useState, useMemo } from "react";
-import { Button } from "@/shared/components";
+import { Button, Input } from "@/shared/components";
 import { generateUniqueModelAlias } from "./passthroughAlias.ts";
 import {
   matchesModelCatalogQuery,
@@ -54,6 +54,7 @@ export interface PassthroughModelsSectionProps {
   availableModels?: CompatModelRow[];
   syncedCatalogAuthoritative?: boolean;
   customModels?: CompatModelRow[];
+  endpointAdapters?: Record<string, "available" | "unavailable" | "unknown">;
   description: string;
   inputLabel: string;
   inputPlaceholder: string;
@@ -73,6 +74,7 @@ export interface PassthroughModelsSectionProps {
   bulkTogglePending?: boolean;
   togglingModelId?: string | null;
   onTestModel?: (modelId: string, fullModel: string) => Promise<void>;
+  onModelsChanged?: () => void | Promise<void>;
   modelTestStatus?: Record<string, "ok" | "error" | "quota" | null>;
   /** Report a model's test-all result so the parent updates the green/red icon. */
   onModelTestStatusChange?: (modelId: string, status: "ok" | "error" | "quota") => void;
@@ -100,6 +102,7 @@ export default function PassthroughModelsSection({
   availableModels = [],
   syncedCatalogAuthoritative = false,
   customModels = [],
+  endpointAdapters = {},
   description,
   inputLabel,
   inputPlaceholder,
@@ -119,6 +122,7 @@ export default function PassthroughModelsSection({
   bulkTogglePending,
   togglingModelId,
   onTestModel,
+  onModelsChanged,
   modelTestStatus,
   onModelTestStatusChange,
   testingModelId,
@@ -391,20 +395,15 @@ export default function PassthroughModelsSection({
 
       {/* Add new model */}
       <div className="flex items-end gap-2">
-        <div className="flex-1">
-          <label htmlFor="new-model-input" className="text-xs text-text-muted mb-1 block">
-            {inputLabel}
-          </label>
-          <input
-            id="new-model-input"
-            type="text"
-            value={newModel}
-            onChange={(e) => setNewModel(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            placeholder={inputPlaceholder}
-            className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
-          />
-        </div>
+        <Input
+          id="new-model-input"
+          label={inputLabel}
+          value={newModel}
+          onChange={(e) => setNewModel(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          placeholder={inputPlaceholder}
+          className="flex-1"
+        />
         <Button size="sm" icon="add" onClick={handleAdd} disabled={!newModel.trim() || adding}>
           {adding ? t("adding") : t("add")}
         </Button>
@@ -451,6 +450,27 @@ export default function PassthroughModelsSection({
                 modelId={modelId}
                 fullModel={fullModel}
                 provider={providerId}
+                endpointInfo={(() => {
+                  const discovered = availableModels.find((row) => row.id === modelId);
+                  const selected = customModelMap.get(modelId);
+                  const catalog = catalogModels.find((row) => row.id === modelId);
+                  return {
+                    supportedEndpoints:
+                      selected?.supportedEndpoints ??
+                      discovered?.supportedEndpoints ??
+                      catalog?.supportedEndpoints,
+                    endpointCapabilitySource:
+                      selected?.endpointCapabilitySource ??
+                      discovered?.endpointCapabilitySource ??
+                      catalog?.endpointCapabilitySource,
+                    discoveredEndpoints: discovered?.supportedEndpoints,
+                    resettable: Boolean(
+                      discovered && selected?.endpointCapabilitySource === "operator"
+                    ),
+                    onChanged: onModelsChanged,
+                    adapterStatuses: endpointAdapters,
+                  };
+                })()}
                 alias={alias}
                 source={source}
                 isFree={isFree}

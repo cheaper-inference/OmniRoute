@@ -221,7 +221,7 @@ test("usage service covers Antigravity quota parsing, exclusions and forbidden a
     loadCodeAssistCall?.url,
     `${ANTIGRAVITY_BOOTSTRAP_BASE_URLS[0]}/v1internal:loadCodeAssist`
   );
-  assert.match(loadCodeAssistCall?.init.headers["User-Agent"], /^antigravity\/ide\/2\.1\.1 /);
+  assert.match(loadCodeAssistCall?.init.headers["User-Agent"], /^antigravity\/ide\/2\.5\.5 /);
   assert.equal(loadCodeAssistCall?.init.headers["X-Goog-Api-Client"], undefined);
   assert.equal(loadCodeAssistCall?.init.headers["Client-Metadata"], undefined);
   assert.deepEqual(
@@ -261,7 +261,7 @@ test("usage service prefers Antigravity retrieveUserQuota over catalog quotaInfo
       return new Response(
         JSON.stringify({
           models: {
-            "gemini-3.7-flash-high": {
+            "gemini-3.8-flash-high": {
               quotaInfo: {
                 remainingFraction: 1,
                 resetTime: new Date(Date.now() + 60_000).toISOString(),
@@ -278,7 +278,7 @@ test("usage service prefers Antigravity retrieveUserQuota over catalog quotaInfo
         JSON.stringify({
           buckets: [
             {
-              modelId: "gemini-3.7-flash-high",
+              modelId: "gemini-3.8-flash-high",
               remainingFraction: 0.25,
               resetTime: new Date(Date.now() + 60_000).toISOString(),
             },
@@ -296,9 +296,9 @@ test("usage service prefers Antigravity retrieveUserQuota over catalog quotaInfo
     accessToken: `ag-token-live-quota-${Date.now()}`,
   });
 
-  assert.equal(usage.quotas["gemini-3.7-flash-high"].remainingPercentage, 25);
-  assert.equal(usage.quotas["gemini-3.7-flash-high"].used, 750);
-  assert.equal(usage.quotas["gemini-3.7-flash-high"].quotaSource, "retrieveUserQuota");
+  assert.equal(usage.quotas["gemini-3.8-flash-high"].remainingPercentage, 25);
+  assert.equal(usage.quotas["gemini-3.8-flash-high"].used, 750);
+  assert.equal(usage.quotas["gemini-3.8-flash-high"].quotaSource, "retrieveUserQuota");
 });
 
 test("usage service preserves Antigravity upstream quota bucket ids", async () => {
@@ -319,9 +319,9 @@ test("usage service preserves Antigravity upstream quota bucket ids", async () =
       return new Response(
         JSON.stringify({
           models: {
-            "gemini-3.7-flash-low": { quotaInfo: { remainingFraction: 1 } },
-            "gemini-3.7-flash-medium": { quotaInfo: { remainingFraction: 1 } },
-            "gemini-3.7-flash-high": { quotaInfo: { remainingFraction: 1 } },
+            "gemini-3.8-flash-low": { quotaInfo: { remainingFraction: 1 } },
+            "gemini-3.8-flash-medium": { quotaInfo: { remainingFraction: 1 } },
+            "gemini-3.8-flash-high": { quotaInfo: { remainingFraction: 1 } },
             "gemini-3-flash-agent": { quotaInfo: { remainingFraction: 1 } },
           },
         }),
@@ -333,8 +333,8 @@ test("usage service preserves Antigravity upstream quota bucket ids", async () =
       return new Response(
         JSON.stringify({
           buckets: [
-            { modelId: "gemini-3.7-flash-high", remainingFraction: 0.5 },
-            { modelId: "gemini-3.7-flash-low", remainingFraction: 0.25 },
+            { modelId: "gemini-3.8-flash-high", remainingFraction: 0.5 },
+            { modelId: "gemini-3.8-flash-low", remainingFraction: 0.25 },
           ],
         }),
         { status: 200 }
@@ -349,9 +349,9 @@ test("usage service preserves Antigravity upstream quota bucket ids", async () =
     accessToken: `ag-token-legacy-buckets-${Date.now()}`,
   });
 
-  assert.equal(usage.quotas["gemini-3.7-flash-high"].remainingPercentage, 50);
-  assert.equal(usage.quotas["gemini-3.7-flash-low"].remainingPercentage, 25);
-  assert.equal(usage.quotas["gemini-3.7-flash-medium"].remainingPercentage, 100);
+  assert.equal(usage.quotas["gemini-3.8-flash-high"].remainingPercentage, 50);
+  assert.equal(usage.quotas["gemini-3.8-flash-low"].remainingPercentage, 25);
+  assert.equal(usage.quotas["gemini-3.8-flash-medium"].remainingPercentage, 100);
   assert.equal(usage.quotas["gemini-3-flash-agent"], undefined);
 });
 
@@ -534,7 +534,7 @@ test("usage service covers Claude OAuth success, legacy fallback and permissions
 
   globalThis.fetch = async (url) => {
     if (String(url).includes("/api/oauth/usage")) {
-      return new Response("fallback", { status: 500 });
+      return new Response("fallback", { status: 404 }); // only 404/405 -> legacy fallback
     }
     if (String(url).endsWith("/v1/settings")) {
       return new Response(
@@ -562,7 +562,7 @@ test("usage service covers Claude OAuth success, legacy fallback and permissions
 
   globalThis.fetch = async (url) => {
     if (String(url).includes("/api/oauth/usage")) {
-      return new Response("fallback", { status: 500 });
+      return new Response("fallback", { status: 404 });
     }
     return new Response("denied", { status: 403 });
   };
@@ -596,7 +596,7 @@ test("usage service covers Claude default-plan fallback, legacy org denial and f
 
   globalThis.fetch = async (url) => {
     if (String(url).includes("/api/oauth/usage")) {
-      return new Response("fallback", { status: 500 });
+      return new Response("fallback", { status: 404 });
     }
     if (String(url).endsWith("/v1/settings")) {
       return new Response(
@@ -1426,8 +1426,13 @@ test("usage service opencode happy path returns plan and three quota windows", a
       { status: 200, headers: { "content-type": "application/json" } }
     );
 
+  // #16344: quota reads go through fetchWithConnectionProxy, which refuses to fetch for a
+  // connection without an id (it cannot resolve the assigned proxy, so it reports an unknown
+  // reading instead of egressing directly). Every production caller passes a stored
+  // connection; give this one an id like they do.
   const result: any = await usageService.getUsageForProvider({
-    provider: "opencode",
+    id: "opencode-happy-conn",
+    provider: "opencode-zen",
     apiKey: "oc-happy-key",
   });
 
@@ -1441,7 +1446,7 @@ test("usage service opencode happy path returns plan and three quota windows", a
 
 test("usage service opencode no-key returns missing-key message", async () => {
   const result: any = await usageService.getUsageForProvider({
-    provider: "opencode",
+    provider: "opencode-zen",
     apiKey: "",
   });
 

@@ -846,10 +846,7 @@ function buildStepOptions(
   // signal. Preserve an explicit per-step opt-out, but do not let the standalone
   // default (codexResponsesConfig.enabled=false) turn a selected stacked step into
   // a no-op.
-  if (
-    (step.engine === "codex-responses" || step.engine === "relevance") &&
-    stepConfig.enabled === undefined
-  ) {
+  if (step.engine === "codex-responses" && stepConfig.enabled === undefined) {
     stepConfig.enabled = true;
   }
   return {

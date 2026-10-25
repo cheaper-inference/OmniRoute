@@ -159,10 +159,10 @@ describe("OpenCode provider family shares the clamp", () => {
     assert.deepEqual(sent, chatBody("mimo-v2.6-pro", "high"));
   });
 
-  it("opencode (noauth) + mimo-v2.5-free clamps max to high on the wire", async (t) => {
+  it("opencode-zen + mimo-v2.5-free clamps max to high on the wire", async (t) => {
     const sent = await captureOutbound(
       t,
-      "opencode",
+      "opencode-zen",
       "mimo-v2.5-free",
       chatBody("mimo-v2.5-free", "max")
     );

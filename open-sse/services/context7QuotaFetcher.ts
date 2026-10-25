@@ -1,6 +1,11 @@
-import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 
 /**
  * Context7 has no dedicated usage/billing endpoint, so quota is read from the
@@ -139,11 +144,12 @@ export async function fetchContext7Quota(
   return dedupeQuotaFetch(connectionId, async () => {
     await throttleQuotaFetch();
     const url = `${CONTEXT7_SEARCH_URL}?query=react`;
-    const response = await fetch(url, {
+    const response = await fetchWithConnectionProxy(connectionId, url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
+    if (!response) return null;
 
     const quota = parseContext7RateLimitHeaders(response.headers);
     if (quota) {
@@ -164,6 +170,7 @@ export function registerContext7QuotaFetcher(): void {
     "context7",
     fetchContext7Quota as (id: string, conn?: Record<string, unknown>) => Promise<QuotaInfo | null>
   );
+  registerQuotaCacheInvalidator("context7", invalidateContext7QuotaCache);
   registerMonitorFetcher(
     "context7",
     fetchContext7Quota as (id: string, conn?: Record<string, unknown>) => Promise<QuotaInfo | null>

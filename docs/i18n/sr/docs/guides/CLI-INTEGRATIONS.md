@@ -67,64 +67,65 @@ omniroute providers remove <connection-id> --yes
 
 Свака команда поштује **активни контекст** (подешен помоћу `omniroute connect`, погледајте
 [Удаљени режим](./REMOTE-MODE.md)) или експлицитне опције `--remote <url> --api-key <key>`.
-„Локално у односу на удаљено“ у наставку значи: без опција циља `http://localhost:20128`;
-са `--remote` (или активним удаљеним контекстом) преузима каталог са тог
+„Локално у односу на удаљено“ у наставку значи: без опција, циља `http://localhost:20128`;
+са `--remote` (или активним удаљеним контекстом), преузима каталог са тог
 сервера и локално уписује конфигурацију.
 
-| Команда                    | Алат                                   | Шта уписује                                                                                                                                                                             | Кључне опције                                                                                                                              | Локално или удаљено |
-| -------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI                       | `~/.codex/<name>.config.toml` — један профил по компатибилном текстуалном моделу (`codex --profile <name>`)                                                                             | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Оба                 |
-| `omniroute setup-claude`   | Claude Code                            | `~/.claude/profiles/<name>/settings.json` — један профил по подударном моделу (`CLAUDE_CONFIG_DIR`)                                                                                     | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Оба                 |
-| `omniroute setup-opencode` | OpenCode (компатибилан са OpenAI-јем)  | `~/.config/opencode/opencode.json` — добављач `omniroute` са сваким моделом из каталога (`opencode -m omniroute/<model>`)                                                               | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Оба                 |
-| `omniroute setup-cline`    | Cline                                  | `~/.cline/data/{globalState,secrets}.json` (CLI режим) + исписује подешавања проширења за VS Code                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Оба                 |
-| `omniroute setup-kilo`     | Kilo Code                              | `~/.local/share/kilo/auth.json` (CLI) + обједињује `kilocode.*` са VS Code датотеком `settings.json`, ако постоји                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Оба                 |
-| `omniroute setup-continue` | Continue / `cn` CLI                    | `~/.continue/config.yaml` — модели са `provider: openai`, кључ преко `${{ secrets.OMNIROUTE_API_KEY }}`                                                                                 | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Оба                 |
-| `omniroute setup-cursor`   | Cursor                                 | Ништа — исписује кораке унутар апликације (Cursor конфигурација је непрозирна SQLite база)                                                                                              | `--remote` `--api-key` `--only` `--port`                                                                                                   | Оба                 |
-| `omniroute setup-roo`      | Roo Code                               | `~/.omniroute/roo-settings.json` (документ за увоз) + поставља `roo-cline.autoImportSettingsPath` ако постоји VS Code датотека `settings.json`                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Оба                 |
-| `omniroute setup-crush`    | Crush                                  | `~/.config/crush/crush.json` — добављач `openai-compat`, кључ преко `$OMNIROUTE_API_KEY`                                                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Оба                 |
-| `omniroute setup-goose`    | Goose                                  | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + исписује упутство за променљиве окружења                                                                 | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Оба                 |
-| `omniroute setup-aider`    | Aider                                  | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + исписује упутство за променљиве окружења                                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Оба                 |
-| `omniroute setup-qwen`     | Qwen Code                              | `~/.qwen/settings.json` — V4 низ `modelProviders.openai` + `OMNIROUTE_API_KEY` у `~/.qwen/.env`                                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Оба                 |
-| `omniroute setup-5dive`    | 5dive (скуп агената)                   | Ништа у `$HOME` — уписује 5dive **профил за аутентификацију** (`/var/lib/5dive/auth-profiles/<name>/`) преко `5dive agent auth set`; само за root корисника, извршава се на хосту скупа | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Оба                 |
-| `omniroute run <target>`   | Покретање током извршавања (генеричко) | Ништа — покреће `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` са одговарајућим окружењем и аргументима; Qwen и Gemini користе привремени изоловани матични директоријум   | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Оба                 |
-| `omniroute launch`         | Claude Code                            | Ништа — покреће `claude` уз уметнуте `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                        | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Оба                 |
-| `omniroute launch-codex`   | OpenAI Codex CLI                       | Ништа — покреће `codex` са добављачем `omniroute` уметнутим преко опција `-c`                                                                                                           | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Оба                 |
+| Команда                    | Алат                                   | Шта уписује                                                                                                                                                                            | Кључне опције                                                                                                                              | Локално или удаљено |
+| -------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI                       | `~/.codex/<name>.config.toml` — један профил по компатибилном текстуалном моделу (`codex --profile <name>`)                                                                            | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Оба                 |
+| `omniroute setup-claude`   | Claude Code                            | `~/.claude/profiles/<name>/settings.json` — један профил по подударном моделу (`CLAUDE_CONFIG_DIR`)                                                                                    | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Оба                 |
+| `omniroute setup-opencode` | OpenCode (компатибилан са openai)      | `~/.config/opencode/opencode.json` — добављач `omniroute` са сваким моделом из каталога (`opencode -m omniroute/<model>`)                                                              | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Оба                 |
+| `omniroute setup-cline`    | Cline                                  | `~/.cline/data/{globalState,secrets}.json` (CLI режим) + исписује подешавања проширења за VS Code                                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Оба                 |
+| `omniroute setup-kilo`     | Kilo Code                              | `~/.local/share/kilo/auth.json` (CLI) + обједињује `kilocode.*` у VS Code `settings.json` ако постоји                                                                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Оба                 |
+| `omniroute setup-continue` | Continue / `cn` CLI                    | `~/.continue/config.yaml` — модели са `provider: openai`, кључ преко `${{ secrets.OMNIROUTE_API_KEY }}`                                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Оба                 |
+| `omniroute setup-cursor`   | Cursor                                 | Ништа — исписује кораке унутар апликације (Cursor конфигурација је непрозирна SQLite база)                                                                                             | `--remote` `--api-key` `--only` `--port`                                                                                                   | Оба                 |
+| `omniroute setup-roo`      | Roo Code                               | `~/.omniroute/roo-settings.json` (документ за увоз) + поставља `roo-cline.autoImportSettingsPath` ако постоји VS Code `settings.json`                                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Оба                 |
+| `omniroute setup-crush`    | Crush                                  | `~/.config/crush/crush.json` — добављач `openai-compat`, кључ преко `$OMNIROUTE_API_KEY`                                                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Оба                 |
+| `omniroute setup-zed`      | Zed                                    | `~/.config/zed/settings.json` — добављач `openai_compatible.omniroute` (≤ 25 модела који подржавају алате), кључ преко `$OMNIROUTE_API_KEY`                                            | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Оба                 |
+| `omniroute setup-goose`    | Goose                                  | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + исписује упутство за променљиве окружења                                                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Оба                 |
+| `omniroute setup-aider`    | Aider                                  | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + исписује упутство за променљиве окружења                                                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Оба                 |
+| `omniroute setup-qwen`     | Qwen Code                              | `~/.qwen/settings.json` — V4 низ `modelProviders.openai` + `OMNIROUTE_API_KEY` у `~/.qwen/.env`                                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Оба                 |
+| `omniroute setup-5dive`    | 5dive (флота агената)                  | Ништа у `$HOME` — уписује 5dive **профил за аутентификацију** (`/var/lib/5dive/auth-profiles/<name>/`) путем `5dive agent auth set`; само за root корисника, покреће се на хосту флоте | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Оба                 |
+| `omniroute run <target>`   | Покретање током извршавања (генеричко) | Ништа — покреће `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` са одговарајућим окружењем и аргументима; Qwen и Gemini користе привремени изоловани матични директоријум  | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Оба                 |
+| `omniroute launch`         | Claude Code                            | Ништа — покреће `claude` са уметнутим `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                      | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Оба                 |
+| `omniroute launch-codex`   | OpenAI Codex CLI                       | Ништа — покреће `codex` са добављачем `omniroute` уметнутим путем заставица `-c`                                                                                                       | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Оба                 |
 
-Напомене о опцијама (проверено у изворном коду команде):
+Напомене о заставицама (проверено у изворном коду команде):
 
 - `--remote <url>` — преузима каталог са удаљеног OmniRoute сервера (има предност над `--port`
-  и активним контекстом). `--api-key <key>` прослеђује акредитив за тај
-  сервер (подразумевано се користи env променљива `OMNIROUTE_API_KEY` или токен активног контекста).
+  и активним контекстом). `--api-key <key>` задаје приступни податак за тај
+  сервер (подразумевано је то променљива окружења `OMNIROUTE_API_KEY` или токен активног контекста).
 - `--only <patterns>` — подниске раздвојене зарезима; задржава само ID-ове модела који се подударају
   (нпр. `--only glm,kimi`). Доступно за `setup-codex`, `setup-claude`,
-  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`.
-- `--dry-run` — исписује тачно оно што би било уписано без измене
-  система датотека. Доступно за сваку команду `setup-*` **осим** `setup-cursor`
+  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
+- `--dry-run` — приказује тачно шта би било уписано без измена у
+  систему датотека. Доступно за сваку команду `setup-*` **осим** `setup-cursor`
   (која никада не уписује датотеку).
 - `--model <id>` — обавезно (или се бира интерактивно) за алате који немају
   аутоматско откривање модела: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Ти алати
   такође прихватају `--yes` за неинтерактивно покретање (које тада захтева `--model`).
-  `setup-opencode` прихвата `--model` ради постављања подразумеваног модела највишег нивоа.
-- `--model <id>` са `omniroute run` прати конфигурацију по циљу из манифеста
-  (`bin/cli/cli-manifest.mjs`): **aider** прима `--model openai/<id>`, а
+  `setup-opencode` прихвата `--model` за постављање подразумеваног модела највишег нивоа.
+- `--model <id>` у команди `omniroute run` прати повезивање специфично за сваки циљ из манифеста
+  (`bin/cli/cli-manifest.mjs`): **aider** добија `--model openai/<id>`, а
   **opencode** `--model omniroute/<id>` (префикс се додаје само када га ID
-  већ не садржи); **qwen** и **gemini** примају ID непромењен;
-  **claude** га добија преко `ANTHROPIC_MODEL`, **goose** преко `GOOSE_MODEL`, а
-  **codex** преко аргумената `-c model_providers.omniroute.*`. **Qwen је једини циљ команде run
+  већ не садржи); **qwen** и **gemini** добијају ID дословно;
+  **claude** га добија путем `ANTHROPIC_MODEL`, **goose** путем `GOOSE_MODEL`, а
+  **codex** путем аргумената `-c model_providers.omniroute.*`. **Qwen је једини циљ команде run
   који строго захтева `--model`** — `omniroute run qwen` без њега завршава се
-  кодом `2` уз експлицитну грешку.
-- `--port <port>` — локални OmniRoute порт (подразумевано `20128`, занемарује се када је
-  постављено `--remote`). Присутно у свим командама `setup-*` и оба покретача.
+  кодом `2` и изричитом грешком.
+- `--port <port>` — локални OmniRoute порт (подразумевано `20128`, занемарује се када је постављено `--remote`).
+  Присутно у свим командама `setup-*` и оба покретача.
 - Излазни кодови команде `omniroute run`: сопствени излазни код подређеног CLI-ја прослеђује се
-  непромењен; `2` = неважећи аргументи (неподржан циљ, недостаје обавезни
-  `--model`, заштита контејнера); `127` = бинарна датотека циља није у `PATH`;
-  `130`/`143`/`129` када се покретање оконча сигналом `SIGINT`/`SIGTERM`/`SIGHUP`;
-  `1` = друга грешка при покретању.
+  дословно; `2` = неважећи аргументи (неподржан циљ, недостаје обавезни
+  `--model`, заштита контејнера); `127` = циљна извршна датотека није у `PATH`;
+  `130`/`143`/`129` када се покретање заврши сигналом `SIGINT`/`SIGTERM`/`SIGHUP`;
+  `1` = друга грешка при покретању током извршавања.
 - Два покретача (`launch`, `launch-codex`) прихватају `--profile <name>` за избор
-  профила који је креирао `setup-claude` / `setup-codex`, као и аргументе који се
-  прослеђују основној бинарној датотеци `claude` / `codex`.
+  профила који је уписала команда `setup-claude` / `setup-codex`, као и аргументе који се
+  прослеђују основној извршној датотеци `claude` / `codex`.
 
-Интерактивни бирач такође користе рецепти за подешавање:
+Интерактивни бирач се такође дели између рецепата за подешавање:
 
 ```bash
 # Изаберите из активног локалног или удаљеног каталога модела и конфигуришите циљ.
@@ -133,26 +134,26 @@ omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
 ```
 
-`configure` тренутно делегира провереним рецептима за `codex`, `claude`,
+`configure` тренутно делегира тестираним рецептима за `codex`, `claude`,
 `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo` и `5dive`.
-Ставке каталога намењене само за IDE,
-MITM и водиче остају експлицитни `setup-*`/ручни токови и
+Ставке каталога које су само за IDE,
+MITM и само за водич и даље користе изричите `setup-*`/ручне токове и
 не приказују се као циљеви који се могу покренути.
 
 > `setup-opencode` је **лагана OpenCode интеграција компатибилна са OpenAI-јем**.
-> Постоји и богатија интеграција додатка — `omniroute setup opencode` — која
-> инсталира `@omniroute/opencode-plugin`. То су различите команде; горња табела
-> документује `setup-opencode`.
+> Постоји и богатија интеграција путем додатка — `omniroute setup opencode` — која
+> инсталира `@omniroute/opencode-plugin`. То су различите команде; табела
+> изнад документује `setup-opencode`.
 >
 > Додатак долази у два пакета, по један за сваку главну верзију OpenCode-а, јер два
 > учитавача очекују различите улазне тачке:
 > `@omniroute/opencode-plugin` за OpenCode v1 и
-> `@omniroute/opencode-plugin-v2` за OpenCode v2. Пакет за v2 је нов
-> (`0.1.0`) и прати уговор са хостом који се још увек мења, па чита
-> структуру коју OpenCode поставља у нацрт каталога уместо да претпоставља одређену структуру. Инсталирајте
+> `@omniroute/opencode-plugin-v2` за OpenCode v2. Пакет v2 је нов
+> (`0.1.0`) и прати уговор хоста који се још мења, па чита
+> структуру коју OpenCode поставља у нацрт каталога уместо да је претпоставља. Инсталирајте
 > га додавањем ставке `plugins` у `opencode.json`; `omniroute setup opencode`
-> и даље инсталира пакет за v1. Опције и редослед проналажења акредитива налазе се у
-> README-у пакета.
+> и даље инсталира пакет v1. Опције и редослед проналажења приступних података налазе се у
+> README датотеци пакета.
 
 ---
 
@@ -274,23 +275,24 @@ API кључ се предаје 5dive-у преко **stdin** (`--api-key=-`), 
 
 ---
 
-## Konvencije baznih URL adresa (koji alati očekuju `/v1`)
+## Конвенције за основни URL (који алати захтевају `/v1`)
 
-OmniRoute izlaže OpenAI površinu na `/v1`, Anthropic površinu na root-u,
-i nativnu Gemini površinu na `/v1beta`. Svaka integracija je povezana sa oblikom koji njen
-alat očekuje (verifikovano u izvornom kodu komande):
+OmniRoute излаже OpenAI интерфејс на `/v1`, Anthropic интерфејс у корену,
+а изворни Gemini интерфејс на `/v1beta`. Свака интеграција је подешена у облику који
+њен алат очекује (проверено у изворном коду команде):
 
-| Integracija                                                                | Upisan bazni URL | `/v1`?                                     |
-| -------------------------------------------------------------------------- | ---------------- | ------------------------------------------ |
-| `setup-cline` (`openAiBaseUrl`)                                            | root             | Ne — Cline dodaje `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | root             | Ne — Goose dodaje putanju                  |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | root             | Ne — LiteLLM dodaje `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | sa `/v1`         | Da                                         |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | root             | Ne — Claude Code dodaje `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | sa `/v1`         | Da                                         |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | sa `/v1`         | Da                                         |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | root             | Ne — SDK dodaje `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` u auth profilu)                        | root             | Ne — Claude Code dodaje `/v1/messages`     |
+| Интеграција                                                                | Уписани основни URL | `/v1`?                                     |
+| -------------------------------------------------------------------------- | ------------------- | ------------------------------------------ |
+| `setup-cline` (`openAiBaseUrl`)                                            | корен               | Не — Cline додаје `/v1/chat/completions`   |
+| `setup-goose` (`OPENAI_HOST`)                                              | корен               | Не — Goose додаје путању                   |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | корен               | Не — LiteLLM додаје `/v1/chat/completions` |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | са `/v1`            | Да                                         |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | са `/v1`            | Да                                         |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | корен               | Не — Claude Code додаје `/v1/messages`     |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | са `/v1`            | Да                                         |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | са `/v1`            | Да                                         |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | корен               | Не — SDK додаје `/v1beta/models/…`         |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` у профилу за аутентификацију)          | корен               | Не — Claude Code додаје `/v1/messages`     |
 
 ---
 

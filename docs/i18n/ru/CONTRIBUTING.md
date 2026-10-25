@@ -12,11 +12,11 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Предварительные требования
 
-- **Node.js** `>=22.22.3 <23` или `>=24.0.0 <27` (рекомендуется: 24 LTS)
+- **Node.js** `>=22.22.2 <23` или `>=24.0.0 <27` (рекомендуется: 24 LTS)
 - **npm** 10+
 
-> **Для пользователей npm v11+ (Node 24+):** После `npm install` убедитесь, что нативные модули установлены:
-> `node -e "require('better-sqlite3')"`. Если команда завершается с ошибкой `MODULE_NOT_FOUND`,
+> **Для пользователей npm v11+ (Node 24+):** После `npm install` убедитесь, что нативные модули были установлены:
+> `node -e "require('better-sqlite3')"`. Если команда завершается ошибкой `MODULE_NOT_FOUND`,
 > выполните `npm approve-scripts better-sqlite3 && npm install`. См.
 > [Устранение неполадок](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -47,20 +47,20 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 | ---------------------- | ------------------------------------ | ---------------------------- |
 | `PORT`                 | `20128`                              | Порт сервера                 |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`             | Базовый URL для фронтенда    |
-| `JWT_SECRET`           | (сгенерируйте выше)                  | Секрет для подписи JWT       |
+| `JWT_SECRET`           | (сгенерировать выше)                 | Секрет для подписи JWT       |
 | `INITIAL_PASSWORD`     | `CHANGEME`                           | Пароль для первого входа     |
-| `APP_LOG_LEVEL`        | `info`                               | Уровень подробности журналов |
+| `APP_LOG_LEVEL`        | `info`                               | Уровень детализации журналов |
 
 ### Настройки панели управления
 
-Панель управления содержит переключатели функций, которые также можно настроить с помощью переменных окружения:
+Панель управления предоставляет переключатели интерфейса для функций, которые также можно настроить с помощью переменных окружения:
 
-| Расположение настройки  | Переключатель            | Описание                                      |
-| ----------------------- | ------------------------ | --------------------------------------------- |
-| Настройки → Расширенные | Режим отладки            | Включить журналы отладки запросов (интерфейс) |
-| Настройки → Общие       | Видимость боковой панели | Показать/скрыть разделы боковой панели        |
+| Расположение настройки    | Переключатель            | Описание                                  |
+| ------------------------- | ------------------------ | ----------------------------------------- |
+| Настройки → Дополнительно | Режим отладки            | Включить отладочные журналы запросов (UI) |
+| Настройки → Общие         | Видимость боковой панели | Показать/скрыть разделы боковой панели    |
 
-Эти настройки сохраняются в базе данных и остаются активными после перезапусков, переопределяя значения переменных окружения по умолчанию, если они заданы.
+Эти настройки хранятся в базе данных и сохраняются между перезапусками, переопределяя заданные значения переменных окружения по умолчанию.
 
 ### Локальный запуск
 
@@ -68,23 +68,23 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 # Режим разработки (горячая перезагрузка)
 npm run dev
 
-# Сборка для рабочей среды
+# Производственная сборка
 npm run build    # next build → .build/next/, затем assembleStandalone → dist/
 npm run start
 
 # Быстрая компиляция только бэкенда/API для проверки изменений от участников
 npm run build:contributor
 
-# Релизная сборка (чистая пересборка + контрольный файл HEAD — требуется для развёртывания)
+# Релизная сборка (чистая пересборка + контрольный маркер HEAD — обязательна для развертывания)
 npm run build:release   # rm -rf .build dist, затем сборка + запись dist/BUILD_SHA
 
-# Типовая конфигурация порта
+# Распространенная конфигурация порта
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Сборка для участников выполняет только проверку компиляции: она не формирует автономный
-дистрибутив и не собирает необязательные ресурсы для нативных пакетов. Используйте обычную
-сборку для рабочей среды, когда требуется проверить готовый к распространению пакет.
+Сборка для участников выполняет только проверку компиляции: она не создает автономный
+дистрибутив и не собирает необязательные ресурсы для нативной упаковки. Используйте обычную производственную сборку, когда
+необходимо проверить готовый к поставке пакет.
 
 ### Структура результатов сборки
 
@@ -92,28 +92,28 @@ PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 | --------- | ---------------------------------------------------------------------------------------- | ------------- |
 | `src/`    | Исходный код приложения (TypeScript / TSX)                                               | Да            |
 | `.build/` | Промежуточные файлы — результат `next build` (игнорируется Git, `distDir = .build/next`) | Нет           |
-| `dist/`   | Готовый к распространению пакет — формируется `assembleStandalone` (игнорируется Git)    | Нет           |
+| `dist/`   | Готовый к поставке пакет — создается `assembleStandalone` (игнорируется Git)             | Нет           |
 
 Конвейер сборки выполняется за один проход:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (результат Next.js)
-  └─ assembleStandalone()                 (копирует автономную сборку + статические + публичные + нативные ресурсы)
+  └─ assembleStandalone()                 (копирует автономную сборку + статические файлы + публичные файлы + нативные ресурсы)
        └─ результат: dist/                (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` дополнительно сначала очищает оба каталога и записывает
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) как контрольный файл целостности развёртывания.
+`npm run build:release` также сначала очищает оба каталога и записывает
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) как контрольный маркер целостности развертывания.
 
 `npm run build:contributor` использует профиль сборки только для бэкенда. Во время сборки он временно заменяет
 файлы интерфейса панели управления заглушками, сохраняет обработчики маршрутов API и восстанавливает исходные файлы
 после сборки. Используйте `npm run build` для изменений, затрагивающих интерфейс панели управления, или для полной
 проверки релиза; профиль для участников не заменяет релизную сборку.
 
-> **Примечание о развёртывании на VPS:** удалённый каталог образа `/usr/lib/node_modules/omniroute/app/`
-> не изменился. Инструменты развёртывания синхронизируют содержимое `dist/` с ним с помощью rsync.
-> Изменился только путь результатов сборки внутри репозитория (`app/` → `dist/`).
+> **Примечание о развертывании на VPS:** удаленный каталог образа `/usr/lib/node_modules/omniroute/app/`
+> остался без изменений. Средства развертывания синхронизируют содержимое `dist/` с ним с помощью rsync.
+> Изменился только путь к результатам сборки внутри репозитория (`app/` → `dist/`).
 
 URL-адреса по умолчанию:
 
@@ -288,65 +288,72 @@ npm run test:combo:live:vps:failover     # добавляет реальный �
 
 ---
 
-## Project Structure
+## Структура проекта
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+├── app/                    # App Router из Next.js 16
+│   ├── (dashboard)/        # Страницы панели управления (23 раздела)
+│   ├── api/                # Маршруты API (51 каталог)
+│   └── login/              # Страницы аутентификации (.tsx)
+├── domain/                 # Механизм политик (policyEngine, comboResolver, costRules и т. д.)
+├── lib/                    # Основная бизнес-логика (.ts)
+│   ├── a2a/                # Сервер протокола Agent-to-Agent v0.3
+│   ├── acp/                # Реестр Agent Communication Protocol
+│   ├── compliance/         # Механизм политик соответствия требованиям
+│   ├── db/                 # Доменные модули SQLite + 130 миграций
+│   ├── memory/             # Постоянная память диалогов
+│   ├── oauth/              # Провайдеры, сервисы и утилиты OAuth
+│   ├── skills/             # Расширяемая платформа навыков
+│   ├── usage/              # Отслеживание использования и расчёт стоимости
+│   └── localDb.ts          # Только слой реэкспорта — никогда не добавляйте сюда логику
+├── middleware/              # Промежуточное ПО запросов (promptInjectionGuard)
+├── mitm/                   # MITM-прокси (сертификаты, DNS, маршрутизация к целевым узлам)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Компоненты React (.tsx)
+│   ├── constants/          # Определения провайдеров (329), области доступа MCP, 20 стратегий маршрутизации
+│   ├── utils/              # Автоматический выключатель, санитайзер, вспомогательные средства аутентификации
+│   └── validation/         # Схемы Zod v4
+└── sse/                    # Конвейер SSE-прокси
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # Рабочее пространство @omniroute/open-sse
+├── executors/              # 150 модулей исполнителей (классы исполнителей + вспомогательные средства для каждого провайдера)
+├── handlers/               # 11 обработчиков запросов (чат, ответы, векторные представления, изображения и т. д.)
+├── mcp-server/             # Сервер MCP (110 уникальных инструментов, 3 транспорта, 33 области доступа)
+├── services/               # 178 сервисов верхнего уровня (combo, autoCombo, rateLimitManager и т. д.)
+├── translator/             # Преобразователи форматов (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Преобразователь Responses API
+└── utils/                  # 22 служебных модуля (потоки, TLS, прокси, журналирование)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Кроссплатформенное настольное приложение Electron
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Средство запуска тестов Node.js (1 574 файла тестов)
+├── integration/            # Интеграционные тесты
+├── e2e/                    # Тесты Playwright
+├── security/               # Тесты безопасности
+├── translator/             # Тесты преобразователей
+└── load/                   # Нагрузочные тесты
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Записи архитектурных решений
+├── architecture/            # Архитектура и отказоустойчивость системы
+├── comparison/              # Сравнение OmniRoute с альтернативами
+├── compression/             # Руководства и правила по сжатию
+├── dev/                     # Руководства по разработке
+├── diagrams/                # Архитектурные диаграммы
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Руководство пользователя, Docker, настройка, устранение неполадок
+├── i18n/                    # Интернационализированные переводы README
+├── marketing/               # Маркетинговые материалы
+├── ops/                     # Развёртывание, прокси, покрытие, выпуски
+├── providers/               # Документация по отдельным провайдерам
+├── reference/               # Справочник по API, переменные среды, инструменты CLI, бесплатные уровни
+├── releases/                # Примечания к выпускам
+├── routing/                 # Механизм автоматических комбинаций, воспроизведение рассуждений
+├── screenshots/             # Снимки экрана панели управления
+├── security/                # Ограничения, соответствие требованиям, скрытность, токены
+└── specs/                   # Проектные спецификации
 ```
 
 ---
@@ -406,9 +413,13 @@ docs/                       # Documentation
 
 ---
 
-## Releasing
+## Выпуск релизов
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Управление релизами осуществляется с помощью рабочего процесса `/generate-release`. При создании нового релиза GitHub пакет **автоматически публикуется в npm** с помощью GitHub Actions.
+
+Для развёртывания на VPS используйте `npm run build:release` (а не `npm run build`) — эта команда выполняет чистую
+пересборку, формирует пакет в `dist/` и записывает сигнальный файл `dist/BUILD_SHA`.
+Затем используйте навыки `/deploy-vps-*-cc`, которые синхронизируют `dist/` с удалённым каталогом `app/` с помощью rsync.
 
 ---
 

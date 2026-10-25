@@ -7,6 +7,7 @@ import {
   isOAuthInvalidToken,
 } from "./accountFallback.ts";
 import { isSubscriptionQuotaText } from "./quotaTextCooldowns.ts";
+import { isModelScopedAccessDenial } from "./accountFallback/modelScopedAccessDenial.ts";
 import { getProviderCategory, getRegistryEntry } from "../config/providerRegistry.ts";
 
 // Terminal stop signals where an empty content payload is still a legitimate,
@@ -400,7 +401,9 @@ export function classifyProviderError(
 ): ProviderErrorType | null {
   const bodyStr = responseBodyToString(responseBody);
   const creditsExhausted = isCreditsExhausted(bodyStr);
-  const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase());
+  // Claude's native weekly 429 wording is provider-scoped; omitting provider
+  // silently classified the long-window quota as a short RPM rate limit.
+  const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase(), provider);
   const accountDeactivated = isAccountDeactivated(bodyStr);
   const oauthInvalid = isOAuthInvalidToken(bodyStr);
   const preserveQuota429 = shouldPreserveQuotaSignalsFor429(provider);
@@ -435,6 +438,10 @@ export function classifyProviderError(
   // make an unknown file/item id valid. (#6827)
   if (statusCode === 404) {
     if (isResourceNotFoundResponse(responseBody)) return null;
+    return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
+  }
+
+  if (isModelScopedAccessDenial(provider, statusCode, responseBody)) {
     return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
   }
 

@@ -42,6 +42,7 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "crof",
   "clinepass",
   "nanogpt",
+  "nan",
   // Apmix (apmix.ai) — monthly weighted-token allowance + self-set daily/weekly caps
   // + top-up credits (GET https://api.apmix.ai/v1/usage, Bearer key)
   "apmix",
@@ -106,4 +107,6 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   // ChatPlayground subscription and daily credits (GET /api/user)
   "chatplayground",
   "cpl",
+  // Cloudflare Workers AI daily neurons vs the 10k/day free allocation (needs Analytics: Read)
+  "cloudflare-ai",
 ];

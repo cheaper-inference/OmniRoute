@@ -107,6 +107,24 @@ function maybeLiftCodexCooldownOnHeadroom(
   }
 }
 
+/**
+ * #10095 — a window the upstream did not report a fraction for is persisted as
+ * `remaining_percentage = 0` with `raw_data = {"fractionReported":false}`. That
+ * 0 is a placeholder, not a reading: consumers that rank or average remaining
+ * quota must skip these rows. Accepts raw and `rowToCamel` shapes.
+ */
+export function isUnreportedQuotaSnapshot(snapshot: QuotaSnapshotRow): boolean {
+  const view = snapshot as unknown as { rawData?: unknown; raw_data?: unknown };
+  const rawData = view.rawData ?? view.raw_data;
+  if (rawData == null) return false;
+  try {
+    const metadata = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+    return (metadata as { fractionReported?: unknown } | null)?.fractionReported === false;
+  } catch {
+    return false;
+  }
+}
+
 export function getQuotaSnapshots(opts: {
   provider?: string;
   connectionId?: string;
@@ -183,6 +201,16 @@ export function getLatestQuotaSnapshotsForConnection(connectionId: string): Quot
   }
 }
 
+/**
+ * Utilization series for the dashboard: ONE point per (bucket, provider-or-connection).
+ *
+ * A provider can report several quota windows at once (a 5h session plus a weekly
+ * window, per-model pools, ...). The point therefore carries the TIGHTEST window of the
+ * bucket (lowest remaining percentage, `windowKey` names it) and is exhausted when ANY
+ * window is. Returning one row per window made consumers pick an arbitrary one, so a
+ * provider whose weekly window was exhausted could be drawn from its half-empty session
+ * window instead. Samples of the same window inside a bucket are still averaged first.
+ */
 export function getAggregatedSnapshots(opts: {
   provider?: string;
   since: string;
@@ -218,15 +246,32 @@ export function getAggregatedSnapshots(opts: {
 
   try {
     const sql = `
-      SELECT
-        datetime((strftime('%s', created_at) / ${bucketSeconds}) * ${bucketSeconds}, 'unixepoch') as bucket,
-        ${selectKey},
-        AVG(remaining_percentage) as remainingPct,
-        MAX(is_exhausted) as isExhausted,
-        window_key
-      FROM quota_snapshots
-      WHERE ${conditions.join(" AND ")}
-      GROUP BY ${groupFields}
+      WITH per_window AS (
+        SELECT
+          datetime((strftime('%s', created_at) / ${bucketSeconds}) * ${bucketSeconds}, 'unixepoch') as bucket,
+          ${selectKey},
+          AVG(remaining_percentage) as remainingPct,
+          MAX(is_exhausted) as isExhausted,
+          window_key
+        FROM quota_snapshots
+        WHERE ${conditions.join(" AND ")}
+        GROUP BY ${groupFields}
+      )
+      SELECT bucket, provider, remainingPct, isExhausted, window_key AS windowKey
+      FROM (
+        SELECT
+          bucket,
+          provider,
+          remainingPct,
+          MAX(isExhausted) OVER (PARTITION BY bucket, provider) AS isExhausted,
+          window_key,
+          ROW_NUMBER() OVER (
+            PARTITION BY bucket, provider
+            ORDER BY remainingPct IS NULL, remainingPct ASC, window_key ASC
+          ) AS rn
+        FROM per_window
+      )
+      WHERE rn = 1
       ORDER BY bucket ASC
     `;
 

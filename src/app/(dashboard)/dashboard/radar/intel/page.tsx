@@ -4,9 +4,20 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 
 import type { RadarIntelFeed } from "@/lib/radar/intelFeedSchema";
 import { Card } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
 
 interface IntelMeta {
   version: string;
@@ -82,38 +93,33 @@ export default function RadarIntelPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+      <PageHeader
+        compact
+        breadcrumbs={
           <Link
             href="/dashboard/radar"
             className="text-sm text-text-muted hover:text-text-main transition-colors"
           >
             ← {t("backToRadar")}
           </Link>
-          <h1 className="mt-3 text-2xl font-bold">{t("title")}</h1>
-          <p className="mt-1 text-sm text-text-muted">{t("subtitle")}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {meta?.supporterVerified === true && (
-            <span
-              data-badge-id="radar-supporter"
-              className="rounded-full border border-violet-500 px-3 py-1 text-sm text-violet-300"
-            >
-              {t("supporterBadge")}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => void sync()}
-            disabled={syncing}
-            className="rounded-lg border border-violet-500 px-4 py-2 text-sm font-medium text-violet-400 disabled:opacity-50"
-          >
-            {syncing ? t("syncing") : t("refresh")}
-          </button>
-        </div>
-      </div>
+        }
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <div className="flex items-center gap-2">
+            {meta?.supporterVerified === true && (
+              <Badge variant="primary" data-badge-id="radar-supporter">
+                {t("supporterBadge")}
+              </Badge>
+            )}
+            <Button variant="outline" onClick={() => void sync()} disabled={syncing}>
+              {syncing ? t("syncing") : t("refresh")}
+            </Button>
+          </div>
+        }
+      />
 
-      {error && <div className="rounded-lg bg-red-500/10 p-3 text-sm text-red-400">{error}</div>}
+      {error && <div className="rounded-lg bg-error/10 p-3 text-sm text-error">{error}</div>}
 
       {loading ? (
         <div className="flex min-h-48 items-center justify-center text-text-muted">
@@ -165,35 +171,30 @@ export default function RadarIntelPage() {
             {intel.rankings.length === 0 ? (
               <p className="py-6 text-center text-text-muted">{t("noRankings")}</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="text-text-muted">
-                    <tr>
-                      <th className="pb-3">#</th>
-                      <th className="pb-3">{t("model")}</th>
-                      <th className="pb-3">{t("category")}</th>
-                      <th className="pb-3 text-right">{t("rating")}</th>
-                      <th className="pb-3 text-right">{t("matches")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {intel.rankings.map((ranking) => (
-                      <tr
-                        key={`${ranking.category}:${ranking.provider}:${ranking.modelId}`}
-                        className="border-t border-border"
-                      >
-                        <td className="py-3">{ranking.rank}</td>
-                        <td className="py-3 font-mono">
-                          {ranking.provider}/{ranking.modelId}
-                        </td>
-                        <td className="py-3">{ranking.category}</td>
-                        <td className="py-3 text-right">{ranking.rating}</td>
-                        <td className="py-3 text-right">{ranking.matches}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <Table className="text-sm" aria-label={t("ranking")} scrollbarLabel={t("ranking")}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>{t("model")}</TableHead>
+                    <TableHead>{t("category")}</TableHead>
+                    <TableHead className="text-right">{t("rating")}</TableHead>
+                    <TableHead className="text-right">{t("matches")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {intel.rankings.map((ranking) => (
+                    <TableRow key={`${ranking.category}:${ranking.provider}:${ranking.modelId}`}>
+                      <TableCell>{ranking.rank}</TableCell>
+                      <TableCell className="font-mono">
+                        {ranking.provider}/{ranking.modelId}
+                      </TableCell>
+                      <TableCell>{ranking.category}</TableCell>
+                      <TableCell className="text-right">{ranking.rating}</TableCell>
+                      <TableCell className="text-right">{ranking.matches}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             )}
           </Card>
         </>

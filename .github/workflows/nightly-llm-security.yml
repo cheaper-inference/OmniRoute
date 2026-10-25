@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   promptfoo-guard:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: promptfoo — injection guard (block mode, no secret)
     # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
     # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
@@ -21,11 +21,32 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with: { node-version: "24", cache: npm }
+      # Fresh runtime state per run (same contract as nightly-schemathesis.yml). The
+      # omni-light runner keeps a persistent $HOME, so the server used to boot on
+      # $HOME/.omniroute, where the database left by older nights sat at migration 134
+      # while the tip ships 200+: the mass-migration guard (#3416, threshold 50) refused
+      # to migrate it, the catalog warm-up hit `no such table: model_capability_overrides`
+      # and the health wait failed every night (no verdict since 2026-08-27). A DATA_DIR
+      # under $RUNNER_TEMP is a new database every run, so every migration applies and
+      # nothing on the box is touched. Auto-backups stay off: one pre-migration backup
+      # per boot had piled up 1.6 GB under the runner's home.
+      - name: Prepare isolated runtime state
+        id: runtime
+        run: |
+          data_dir=$(mktemp -d "$RUNNER_TEMP/omniroute-llm-security.XXXXXX")
+          mkdir "$data_dir/plugins"
+          {
+            echo "DATA_DIR=$data_dir"
+            echo "OMNIROUTE_PLUGINS_DIR=$data_dir/plugins"
+          } >> "$GITHUB_ENV"
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
       - name: Build CLI bundle
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           OMNIROUTE_BUILD_BACKEND_ONLY: "1"
+          OMNIROUTE_USE_TURBOPACK: "0"
         run: npm run build:cli
       # Own port: this box also hosts the deployed server (the a11y job's
       # "20128 is already used" nights prove it). A test server that dies on
@@ -37,6 +58,7 @@ jobs:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           PORT: "21778"
           INJECTION_GUARD_MODE: block
+          DISABLE_SQLITE_AUTO_BACKUP: "true"
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
@@ -47,8 +69,26 @@ jobs:
           echo "::error::Test server did not come up on 21778 in 120s — see server.log. Refusing to run the guard eval against an unknown target."
           tail -40 server.log || true
           exit 1
+      # Pinned, network-isolated promptfoo. Two constraints, both verified on this box:
+      # (1) never `promptfoo@latest`: promptfoo >= 0.123.1 (promptfoo/promptfoo#10866) throws
+      #     `result?.error?.includes is not a function` inside its rate-limit classifier when
+      #     the https provider hands it the parsed 4xx JSON body the guard answers in block
+      #     mode, so every blocked request became an eval ERROR, not a PASS (run 39007982929);
+      # (2) never the lockfile install (`npx --no-install`): #17017 — the lock nests js-yaml
+      #     4.3.2 under @apidevtools/json-schema-ref-parser, so the in-repo promptfoo dies at
+      #     import on `binaryTag` (run 39084298931). `npx --yes promptfoo@<exact>` installs its
+      #     own tree in the npx cache — when run from a directory without that package
+      #     (see the step's working-directory). The version mirrors the devDependency pin in
+      #     package.json; tests/unit/build/llm-security-nightly-promptfoo-pin.test.ts keeps
+      #     the two equal and off the releases proven broken.
+      # `working-directory` OUTSIDE the checkout is load-bearing: npx resolves a package from
+      # the nearest node_modules first, and since #17005 the repo's own promptfoo satisfies
+      # the `@0.123.0` spec, so run from the workspace it picked node_modules/promptfoo and
+      # died on the nested js-yaml again (#17017, run 39095530088). From $RUNNER_TEMP there is
+      # no local install to shadow the npx cache tree.
       - name: promptfoo guard-validation
-        run: npx --yes promptfoo@latest eval -c promptfooconfig.yaml --no-cache
+        working-directory: ${{ runner.temp }}
+        run: npx --yes promptfoo@0.123.0 eval -c "$GITHUB_WORKSPACE/promptfooconfig.yaml" --no-cache
         env:
           OMNIROUTE_URL: http://localhost:21778
           OMNIROUTE_API_KEY: not-needed-blocked-before-upstream
@@ -57,7 +97,7 @@ jobs:
         run: kill "$(cat server.pid)" || true
 
   garak:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: garak probes (skip without provider secret)
     # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
     # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
@@ -86,13 +126,28 @@ jobs:
       - uses: actions/setup-node@v7
         if: steps.gate.outputs.run == 'true'
         with: { node-version: "24", cache: npm }
+      # Same isolation as the promptfoo job above: a fresh DATA_DIR per run, never the
+      # runner's persistent $HOME/.omniroute (stale schema → migration guard → no boot).
+      - name: Prepare isolated runtime state
+        id: runtime
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          data_dir=$(mktemp -d "$RUNNER_TEMP/omniroute-llm-security.XXXXXX")
+          mkdir "$data_dir/plugins"
+          {
+            echo "DATA_DIR=$data_dir"
+            echo "OMNIROUTE_PLUGINS_DIR=$data_dir/plugins"
+          } >> "$GITHUB_ENV"
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
         if: steps.gate.outputs.run == 'true'
       - name: Build CLI bundle
         if: steps.gate.outputs.run == 'true'
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           OMNIROUTE_BUILD_BACKEND_ONLY: "1"
+          OMNIROUTE_USE_TURBOPACK: "0"
         run: npm run build:cli
       # Same contract as the promptfoo job above: dedicated port, and the
       # health wait must fail the job instead of letting garak probe whatever
@@ -102,6 +157,7 @@ jobs:
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           PORT: "21779"
+          DISABLE_SQLITE_AUTO_BACKUP: "true"
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid

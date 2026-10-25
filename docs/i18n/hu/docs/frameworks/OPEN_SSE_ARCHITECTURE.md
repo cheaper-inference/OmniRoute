@@ -33,27 +33,27 @@ open-sse/
 ├── index.ts              # Nyilvános belépési pont
 ├── types.d.ts            # Nyilvános típusexportok
 ├── package.json          # @omniroute/open-sse
-├── config/               # Szolgáltatói konfigurációk, konstansok és nyilvántartások
-├── executors/            # Szolgáltatónkénti HTTP-végrehajtók (67 + base.ts/index.ts)
+├── config/               # Szolgáltatói konfigurációk, konstansok, regiszterek
+├── executors/            # Szolgáltatónkénti HTTP-végrehajtók (150 modul + base.ts/index.ts)
 ├── handlers/             # Kéréskezelők (chatCore, responses stb.)
 ├── lib/                  # Belső segédprogramok
-├── mcp-server/           # Model Context Protocol-szerver
+├── mcp-server/           # Model Context Protocol-kiszolgáló
 ├── services/             # ~298 szolgáltatásmodul
-├── transformer/          # Responses API-formátumátalakító
+├── transformer/          # A Responses API formátumátalakítója
 ├── translator/           # Formátumfordítás (OpenAI ↔ Claude ↔ Gemini)
-└── utils/                # Megosztott segédprogramok (naplózás, hibakezelés, stream stb.)
+└── utils/                # Megosztott segédprogramok (naplózás, hibakezelés, adatfolyam stb.)
 ```
 
-### Modulok száma
+### Modulszámok
 
 | Könyvtár | Fájlok | Rendeltetés |
-| `executors/` | 167 | Szolgáltatónkénti HTTP-végrehajtók (a DefaultExecutor gyár segítségével egységesítve) |
+| `executors/` | 167 | Szolgáltatónkénti HTTP-végrehajtók (a DefaultExecutor gyár révén egységesítve) |
 | `handlers/` | 157 | Kérések belépési pontjai (chatCore, responses, embeddings) |
 | `services/` | ~536 | Útválasztás, gyorsítótárazás, sebességkorlátozás, frissítés stb. |
 | `translator/` | 56 | Formátumkonverzió (OpenAI ↔ Claude ↔ Gemini) |
-| `mcp-server/` | 44 | MCP-eszközök és -átviteli rétegek |
-| `utils/` | ~108 | Több területet érintő segédprogramok (naplózás, hibakezelés, stream) |
-| `config/` | ~339 | Szolgáltatói konfigurációk, konstansok és nyilvántartások |
+| `mcp-server/` | 44 | MCP-eszközök és -átvitelek |
+| `utils/` | ~108 | Több területet átfogó segédprogramok (naplózás, hibakezelés, adatfolyam) |
+| `config/` | ~339 | Szolgáltatói konfigurációk, konstansok, regiszterek |
 
 ---
 
@@ -165,30 +165,30 @@ A hívásnapló artefaktumai (ha engedélyezve vannak) a `${DATA_DIR}/call_logs/
 
 ---
 
-## A fő fájlok részletes bemutatása
+## Kulcsfájlok mélyreható áttekintése
 
 ### chatCore.ts (5977 sor)
 
-A **fő kéréskezelő**. Mérete ellenére világos szerkezettel rendelkezik:
+A **fő kéréskezelő**. Méretére ellenére jól átlátható struktúrával rendelkezik:
 
 ```ts
-// A chatCore.ts pszeudoszerkezete
+// A chatCore.ts pszeudo-struktúrája
 export async function handleChat(request: NextRequest) {
   // 1. Hitelesítés + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. A törzs ellenőrzése
+  // 2. Törzs ellenőrzése
   const body = await parseRequestBody(request);
 
-  // 3. Formátumészlelés + átalakítás
+  // 3. Formátumfelismerés + fordítás
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Kombinációalapú útválasztás
+  // 4. Combo-útválasztás
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Folytatás a következő célponttal
+      // Tovább a következő célra
     }
   }
 
-  // 5. Vészhelyzeti tartalékmegoldás
+  // 5. Vészhelyzeti tartalékmegoldás (fallback)
   return await emergencyFallback(body);
 }
 ```
 
-Annak ellenére, hogy egyetlen hatalmas függvényből áll, **megjegyzésekkel ellátott szakaszokra** tagolódik, amelyek megfelelnek az ötlépcsős folyamatnak.
+Bár egyetlen hatalmas függvényről van szó, **kommentált szakaszokra** van szervezve, amelyek az 5 fázisú feldolgozási lánc lépéseinek felelnek meg.
 
-### combo.ts (4456 kódsor)
+### combo.ts (4456 LOC)
 
-Az **útválasztási motor**, amely egy kombinációt rendezett célpontlistává old fel.
+Az **útválasztó motor**, amely egy combot rendezett célok listájára old fel.
 
 ```ts
 // services/combo.ts
@@ -219,57 +219,56 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
     try {
       return await handleSingleModel(target, body);
     } catch (err) {
-      log.warn("a célpont sikertelen, próbálkozás a következővel", {
-        target,
-        err,
-      });
+      log.warn("target failed, trying next", { target, err });
     }
   }
-  throw new ComboExhaustedError("Minden célpont sikertelen volt");
+  throw new ComboExhaustedError("All targets failed");
 }
 ```
 
-**19 útválasztási stratégiát** támogat (lásd: `src/shared/constants/routingStrategies.ts`):
+**20 útválasztási stratégiát** támogat (lásd: `src/shared/constants/routingStrategies.ts`):
 
-| Stratégia           | Működés                                                                      |
-| ------------------- | ---------------------------------------------------------------------------- |
-| `priority`          | Az első célpontot előnyben részesítő rendezett lista                         |
-| `weighted`          | Valószínűségi választás az egyes célpontok súlya alapján                     |
-| `round-robin`       | A célpontok sorrendben történő ciklikus bejárása                             |
-| `context-relay`     | A kontextus továbbadása a célpontok között                                   |
-| `fill-first`        | A kvóta feltöltése a következő célpontra lépés előtt                         |
-| `p2c`               | Két választási lehetőség közül a jobb                                        |
-| `random`            | Egyenletes véletlenszerű választás                                           |
-| `least-used`        | A legkevesebb közelmúltbeli használattal rendelkező kiválasztása             |
-| `cost-optimized`    | Először a legolcsóbb, megfelelően működő célpont                             |
-| `reset-aware`       | Figyelembe veszi a szolgáltatók visszaállítási időablakait                   |
-| `reset-window`      | Visszaállítási időablakon alapuló útválasztás                                |
-| `headroom`          | Először a legnagyobb fennmaradó kvótatartalék                                |
-| `strict-random`     | Valóban egyenletes véletlenszerű választás, minőségi súlyozás nélkül         |
-| `auto`              | 16 tényezős pontozás használata (`autoCombo/`)                               |
-| `lkgp`              | Először a legutóbb ismerten jól működő szolgáltató                           |
-| `context-optimized` | A legjobb választás hosszú kontextusú kérésekhez                             |
-| `fusion`            | Párhuzamos kiküldés egy panelnek, majd szintézis egy bírálóval (`fusion.ts`) |
+| Stratégia           | Viselkedés                                                                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------- |
+| `priority`          | A lista sorrendjében, az első céltól indulva                                                    |
+| `weighted`          | Valószínűségi alapú, célonkénti súlyok szerint                                                  |
+| `round-robin`       | Körforgó sorrendben járja be a célokat                                                          |
+| `context-relay`     | A kontextust továbbadja a célok között                                                          |
+| `fill-first`        | Kitölti a kvótát, mielőtt a következőre lépne                                                   |
+| `p2c`               | A „power of two choices" módszer (kettő közül a jobb)                                           |
+| `random`            | Egyenletes véletlenszerű                                                                        |
+| `least-used`        | A legkevesebb friss használattal rendelkezőt választja                                          |
+| `cost-optimized`    | Először a legolcsóbb működő cél                                                                 |
+| `reset-aware`       | Figyelembe veszi a szolgáltatók visszaállítási ablakait                                         |
+| `reset-window`      | Visszaállítási ablakon alapuló útválasztás                                                      |
+| `headroom`          | Először a legnagyobb fennmaradó kvótájú cél                                                     |
+| `quota-weighted`    | Kihagyja a kimerült fiókokat, majd a maradék kvóta ÷ folyamatban lévő terhelés arányában sorsol |
+| `strict-random`     | Valóban egyenletes (minőségi súlyozás nélkül)                                                   |
+| `auto`              | 16 tényezős pontozást használ (`autoCombo/`)                                                    |
+| `lkgp`              | Először az utolsó ismert jól működő szolgáltató                                                 |
+| `context-optimized` | Hosszú kontextusú kérésekhez a legjobb                                                          |
+| `cache-optimized`   | Minden újrafelhasználható prompt-prefixet ugyanahhoz a fiókhoz rendel (prompt-cache találatok)  |
+| `fusion`            | Párhuzamosan szétosztja a kérést egy panelnek, majd egy „judge" szintetizálja (`fusion.ts`)     |
+| `pipeline`          | Lépések láncolata — minden cél kimenete a következő bemenetét adja                              |
 
-### base.ts (1170 kódsor)
+### base.ts (1170 LOC)
 
-Az **absztrakt végrehajtó**, amelyet mind a 107 végrehajtó kiterjeszt. A következőket tartalmazza:
+Az **absztrakt végrehajtó (executor)**, amelyből minden végrehajtóosztály származik (közvetlenül, vagy a `DefaultExecutor`-ön és más leszármazottakon keresztül). Tartalma:
 
-- `buildUrl()` — alapértelmezett URL-összeállítás (az alosztályok felülírják egyedi működéshez)
-- `buildHeaders()` — alapértelmezett fejlécek (hitelesítés, tartalomtípus)
-- `transformRequest()` — alapértelmezés szerint változtatás nélküli továbbítás
-- `execute()` — a fő HTTP-ciklus újrapróbálkozással, késleltetéssel és megszakítóval
+- `buildUrl()` — alapértelmezett URL-összeállítás (a leszármazottak felülírják egyedi igény esetén)
+- `buildHeaders()` — alapértelmezett fejlécek (hitelesítés, content-type)
+- `transformRequest()` — alapértelmezetten változatlanul továbbít
+- `execute()` — a fő HTTP-ciklus újrapróbálkozással (retry), backoff-fal és megszakítóval (breaker)
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Az összes OpenAI-/Anthropic-kompatibilis szolgáltatót kezeli
-  // A szolgáltatók konfigurációkat (URL, hitelesítés, fejlécek) regisztrálnak,
-  // de közös végrehajtási logikát használnak
+  // Kezeli az összes OpenAI/Anthropic-kompatibilis szolgáltatót
+  // A szolgáltatók konfigurációkat regisztrálnak (URL, hitelesítés, fejlécek), de a végrehajtólogika közös
 }
 ```
 
-A szolgáltatóspecifikus működés (hitelesítési fejlécek, alap-URL, verziófejlécek) a szolgáltatói nyilvántartáson keresztül van konfigurálva, nem külön végrehajtóosztályokkal.
+A szolgáltatóspecifikus viselkedést (hitelesítési fejlécek, alap-URL, verziófejlécek) a szolgáltatóregiszter konfigurálja, nem külön végrehajtóosztályok.
 
 ````
 
@@ -277,86 +276,86 @@ A szolgáltatóspecifikus működés (hitelesítési fejlécek, alap-URL, verzi�
 
 ## Szolgáltatások (117 modul)
 
-A szolgáltatások **célzott, egyetlen feladatot ellátó modulok**, amelyeket a kezelők állítanak össze. A fő kategóriák:
+A szolgáltatások **fókuszált, egycélú modulok**, amelyeket a handlerek komponálnak össze. A fő kategóriák:
 
-### Útválasztás és kombináció
+### Útválasztás és Combo
 
-- `combo.ts` — belépési pont a kombinált útválasztású kérésekhez
-- `services/autoCombo/` — 16 tényezős pontozás, 8 automatikus útválasztási stratégia
-- `wildcardRouter.ts` — illeszkedik a helyettesítő karakteres útvonalakra (`gpt-*`)
-- `modelFamilyFallback.ts` — T5 családon belüli tartalékmegoldás
+- `combo.ts` — a kombó-útválasztású kérések belépési pontja
+- `services/autoCombo/` — 16 faktoros pontozás, 8 automatikus útválasztási stratégia
+- `wildcardRouter.ts` — wildcard útvonalakat illeszt (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 családon belüli tartalék
 
 ### Sebességkorlátozás és kvóta
 
-- `rateLimitManager.ts` — tokenvödör kulcs+szolgáltató páronként
+- `rateLimitManager.ts` — token bucket kulcs+provider szerint
 - `usage.ts` — használat rögzítése
-- `quotaCache.ts` — memóriában tárolt kvótapillanatképek
+- `quotaCache.ts` — memóriabeli kvóta-pillanatképek
 
 ### Fiók és token
 
-- `tokenRefresh.ts` — OAuth-frissítés 401-es válasz esetén
+- `tokenRefresh.ts` — OAuth frissítés 401-es hiba esetén
 - `accountFallback.ts` — váltás alternatív fiókra
-- `sessionManager.ts` — többfordulós munkamenet állapota
+- `sessionManager.ts` — többkörös munkamenet-állapot
 
 ### Intelligencia
 
 - `intentClassifier.ts` — a kérés szándékának osztályozása
-- `taskAwareRouter.ts` — útválasztás feladattípus alapján
+- `taskAwareRouter.ts` — útválasztás feladattípus szerint
 - `thinkingBudget.ts` — gondolkodási tokenek kiosztása
-- `contextManager.ts` — útválasztási kontextus beillesztése
+- `contextManager.ts` — útválasztási kontextus befecskendezése
 
-### Hibatűrés
+### Rugalmasság
 
-- `resilience.ts` — újrapróbálkozás, visszalépési késleltetés és áramkör-megszakító összehangolása
-- `emergencyFallback.ts` — végső tartalékmegoldás
-- `modelDeprecation.ts` — automatikus átirányítás az utódmodellekhez
+- `resilience.ts` — újrapróbálkozás, backoff és breaker összehangolása
+- `emergencyFallback.ts` — végső mentsvárként szolgáló tartalék
+- `modelDeprecation.ts` — automatikus átirányítás az utódmodellekre
 
 ### Állapot
 
-- `signatureCache.ts` — deduplikáció a kérés aláírása alapján
-- `volumeDetector.ts` — terheléscsökkentés
-- `contextHandoff.ts` — munkamenet szerializálása
+- `signatureCache.ts` — deduplikáció kérés-aláírás alapján
+- `volumeDetector.ts` — terheléseldobás (load shedding)
+- `contextHandoff.ts` — munkamenet-szerializáció
 
 ### Tömörítés
 
-- `compression/` (alkönyvtár) — teljes tömörítési folyamat
-- 39 fájl, amelyek motorokat, szabálycsomagokat és adaptereket fednek le
+- `compression/` (alkönyvtár) — teljes tömörítési pipeline
+- 39 fájl: motorok, szabálycsomagok, adapterek
 
-### Képességek
+### Skills
 
-- (részletesen lásd: [SKILLS.md](./SKILLS.md))
+- (lásd: [SKILLS.md](./SKILLS.md))
 
 ### Memória
 
-- (részletesen lásd: [MEMORY.md](./MEMORY.md))
+- (lásd: [MEMORY.md](./MEMORY.md))
 
 ---
 
-## Végrehajtók (75+ fájl)
+## Executorok (150 modul)
 
-Szolgáltatónként egy fájl. Mindegyik kiterjeszti a `BaseExecutor` osztályt, és felülírja az eltérő részeket.
+Többnyire providerenként egy fájl. Az executorosztályok mindegyike a `BaseExecutor` osztályból származik, és az eltérő részeket írja felül; a többi modul providerenkénti segédmodul (eszközsémák, fetch/TTS adapterek, sajátosságkezelők).
 
 ### Gyakori minták
 
-A szolgáltatók feloldása a `getExecutor(providerId)` segítségével történik, amely a konfigurált végrehajtót adja vissza. Az OpenAI-/Anthropic-kompatibilis szolgáltatók a `DefaultExecutor` végrehajtót (`executors/default.ts`) használják. A szolgáltatóspecifikus viselkedés (alap URL, hitelesítési fejlécek, API-verzió) az `open-sse/config/providers/` könyvtárban van konfigurálva, míg a kéréstörzs átalakításait az `open-sse/translator/` kezeli.
+A providerek feloldása a `getExecutor(providerId)` függvénnyel történik, amely a konfigurált executort adja vissza. Az OpenAI/Anthropic-kompatibilis providerek a `DefaultExecutor`t használják (`executors/default.ts`). A providerspecifikus viselkedés (alap-URL, auth fejlécek, API-verzió) az `open-sse/config/providers/` könyvtárban konfigurálható, míg a kérés törzsének átalakításait az `open-sse/translator/` kezeli.
 
-Az **egyéni URL** a szolgáltató konfigurációján keresztül állítható be:
+**Egyéni URL** a provider-konfigurációban állítható be:
 
 ```ts
-// Szolgáltatói konfiguráció az open-sse/config/providers/ könyvtárban
+// Provider-konfiguráció az open-sse/config/providers/ alatt
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-Az **egyéni hitelesítést** a szolgáltatói nyilvántartás hitelesítési konfigurációja kezeli (API-kulcs, OAuth, fejlécprofilok).
+**Az egyéni hitelesítést** a provider-regiszter auth-konfigurációja kezeli (API-kulcs, OAuth, fejlécprofilok).
 
-Az **egyéni kéréstörzs-átalakítások** (például amikor az Anthropic elkülöníti a `system` elemet a `messages` elemtől) szolgáltatónként vannak regisztrálva az `open-sse/translator/` könyvtárban.
+**Az egyéni kéréstörzs-átalakítások** (pl. az Anthropic a `system`-t különválasztja a `messages`-től) providerenként az `open-sse/translator/` könyvtárban vannak regisztrálva.
 
 ````
 
-### A végrehajtógyár
+### Az executor-factory
 
 Az `executors/index.ts` exportálja a `getExecutor(providerId)` függvényt:
 
@@ -370,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-A feloldás az `ExecutorRegistry` (`executors/registry.ts`) használatával történik: minden specializált végrehajtó deklarálva van az `executors/index.ts` beépített táblájában, és a modul betöltésekor a `registerExecutor(alias, instance)` segítségével regisztrálódik; a `getExecutor()` lekérdezi a nyilvántartást, és minden olyan szolgáltató esetében, amelyhez nincs specializált bejegyzés, egy gyorsítótárazott `DefaultExecutor` végrehajtót használ tartalékmegoldásként. A teljes alias → végrehajtó leképezést a `tests/unit/executor-map-golden.test.ts` etalonteszt írja le.
+A feloldás az `ExecutorRegistry`-n (`executors/registry.ts`) keresztül történik: minden specializált executor az `executors/index.ts` beépített táblázatában van deklarálva, és modulbetöltéskor a `registerExecutor(alias, instance)` hívással regisztrálódik; a `getExecutor()` a registry-t kérdezi le, és minden olyan provider esetén, amelyhez nincs specializált bejegyzés, egy memoizált `DefaultExecutor`ra esik vissza. A teljes alias → executor leképezést a `tests/unit/executor-map-golden.test.ts` golden test jellemzi.
 
 ---
 
@@ -485,17 +484,17 @@ Ez a következőket kezeli:
 
 ## Konfiguráció
 
-Az `open-sse/config/` tartalmazza a konfigurációs réteget:
+Az `open-sse/config/` könyvtár tartalmazza a konfigurációs réteget:
 
-| Fájl                                     | Rendeltetés                                                         |
-| ---------------------------------------- | ------------------------------------------------------------------- |
-| `providerRegistry.ts`                    | Chatmodell-nyilvántartás a 352 szolgáltatót tartalmazó katalógushoz |
-| `providerModels.ts`                      | Modellaliasok, formátumleképezés                                    |
-| `constants.ts`                           | Időtúllépések, korlátok, állapotkódok                               |
-| `defaultThinkingSignature.ts`            | Alapértelmezett Claude-gondolkodási aláírás                         |
-| `modelStrip.ts` (a services könyvtárban) | Szolgáltatónkénti mezőeltávolítás                                   |
+| Fájl                            | Funkció                                                               |
+| ------------------------------- | --------------------------------------------------------------------- |
+| `providerRegistry.ts`           | Chatmodelleket nyilvántartó regiszter a 375 szolgáltatós katalógushoz |
+| `providerModels.ts`             | Modellaliaszok, formátumleképezés                                     |
+| `constants.ts`                  | Időtúllépések, korlátok, státuszkódok                                 |
+| `defaultThinkingSignature.ts`   | Alapértelmezett Claude thinking-aláírás                               |
+| `modelStrip.ts` (a servicesben) | Szolgáltatónkénti mezőeltávolítás                                     |
 
-### A szolgáltatói nyilvántartás sémája
+### A Provider Registry sémája
 
 ```ts
 interface ProviderConfig {
@@ -510,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-A modul betöltésekor végzett Zod-validáció biztosítja, hogy minden szolgáltatói konfiguráció érvényes legyen.
+A Zod-validáció a modul betöltésekor biztosítja, hogy minden szolgáltatókonfiguráció érvényes legyen.
 
 ---
 

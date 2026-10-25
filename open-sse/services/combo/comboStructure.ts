@@ -26,7 +26,6 @@ import { containsMediaKind } from "../../utils/mediaParts.ts";
 import { getResolvedModelCapabilities } from "../modelCapabilities.ts";
 import { parseModel, stripContextWindowSuffix } from "../model.ts";
 import { dedupeTargetsByExecutionKey, isRecord } from "./comboData.ts";
-import { resolveComboTargetModelStr } from "./opencodeTargetAlias.ts";
 import { isComboModelVisible } from "./comboVisibility.ts";
 import { getTargetProvider, MAX_COMBO_DEPTH } from "./comboPredicates.ts";
 import { evaluateContextLimit, getModelContextOverrideValue } from "./contextOverrideGate.ts";
@@ -123,13 +122,8 @@ function normalizeRuntimeStep(
     };
   }
 
-  const declaredModelStr = getComboModelString(step);
-  if (!declaredModelStr) return null;
-  // #11912: rewrite an ambiguous "opencode/<model>" target to the "oc/" alias
-  // so it stays distinct from an explicit "opencode-zen/<model>" sibling
-  // instead of both collapsing onto the same provider — see
-  // opencodeTargetAlias.ts for the full rationale.
-  const modelStr = resolveComboTargetModelStr(declaredModelStr);
+  const modelStr = getComboModelString(step);
+  if (!modelStr) return null;
 
   const connectionId = toTrimmedString(step.connectionId);
   const allowedConnectionIds = implicitPinAllowlist(connectionId, step.allowedConnectionIds);
@@ -666,6 +660,15 @@ export type CompatFilterOptions = {
    * instead of returning an empty list. Default is fail-closed.
    */
   failOpen?: boolean;
+  /**
+   * Opt-in: a known output ceiling below the request's `max_tokens` no longer
+   * removes the target; it keeps its place in the strategy order (operator
+   * priority wins). Clients like Claude Code send max_tokens as a generous
+   * ceiling (128000), which otherwise strips every 64k-output model from the
+   * combo; translators clamp to the model cap, and a real rejection still falls
+   * through to the next target. Default keeps the hard exclusion.
+   */
+  outputLimitAdvisory?: boolean;
 };
 
 function highestKnownOutputLimit(targets: ResolvedComboTarget[]): number {
@@ -755,6 +758,9 @@ export function filterTargetsByRequestCompatibility(
   options?: CompatFilterOptions
 ): ResolvedComboTarget[] {
   if (targets.length === 0) return targets;
+  const outputLimitAdvisory = options?.outputLimitAdvisory === true;
+  const isHardReason = (reason: string) =>
+    HARD_COMPAT_REASONS.has(reason) && !(outputLimitAdvisory && reason === "output_tokens");
   const requirements = deriveRequestCompatibilityRequirements(body);
   const needsFiltering =
     requirements.requiresTools ||
@@ -776,7 +782,7 @@ export function filterTargetsByRequestCompatibility(
   // never remove the only target that could accept the request at runtime.
   const compatible = targets.filter((target) => {
     const reasons = targetReasons.get(target) || [];
-    return !reasons.some((reason) => HARD_COMPAT_REASONS.has(reason));
+    return !reasons.some(isHardReason);
   });
   const hadKnownTooSmallContextTarget = rejected.some((entry) =>
     entry.reasons.includes("context_window")

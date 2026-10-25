@@ -337,7 +337,7 @@ test("buildEvalCaseRequest: model resolution, defaults and headers", async () =>
   );
   assert.equal(caseDefault.url, "http://localhost/api/v1/chat/completions");
   assert.equal(caseDefault.method, "POST");
-  assert.equal(caseDefault.headers.get("authorization"), null);
+  assert.equal(caseDefault.headers.get("authorization")?.startsWith("Bearer "), true);
   assert.deepEqual(JSON.parse(await caseDefault.text()), {
     messages: [{ role: "user", content: "q" }],
     model: "m-a",

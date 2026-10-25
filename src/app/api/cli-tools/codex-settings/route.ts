@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
+import { parse as parseStrictToml } from "smol-toml";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import {
   ensureCliConfigWriteAllowed,
@@ -11,15 +12,30 @@ import {
 } from "@/shared/services/cliRuntime";
 import { createMultiBackup } from "@/shared/services/backupService";
 import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
-import { cliModelConfigSchema } from "@/shared/validation/schemas";
+import { codexSettingsConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveApiKey } from "@/shared/services/apiKeyResolver";
 import { normalizeCodexBaseUrl } from "@/shared/utils/codexBaseUrl";
 import { migrateCodexFeatureFlags } from "@/shared/utils/codexConfig";
+import {
+  getCodexCatalogPath,
+  listOmniRouteChatModels,
+  removeCodexModelCatalog,
+  writeCodexModelCatalog,
+  type CodexCatalogWriteResult,
+} from "@/lib/cliTools/codexModelCatalogWriter";
+import {
+  configClobberRefusalResponse,
+  parseJsonObject,
+  readExistingConfig,
+} from "../_lib/readExistingConfig";
 
 const getCodexConfigPath = () => getCliConfigPaths("codex").config;
 const getCodexAuthPath = () => getCliConfigPaths("codex").auth;
 const getCodexDir = () => path.dirname(getCodexConfigPath());
+// TOML basic strings treat a backslash as an escape and this file's writer does not escape,
+// so the catalog path is stored with forward slashes (Codex accepts them on Windows).
+const toTomlPath = (filePath: string) => filePath.replace(/\\/g, "/");
 
 // Parse TOML config to object (simple parser for codex config)
 const parseToml = (content: string) => {
@@ -79,6 +95,15 @@ const parseToml = (content: string) => {
   });
 
   return result;
+};
+
+// The merge below works on the lightweight line parser above, which silently
+// drops lines it does not understand. Validate with a real TOML parser first so
+// a config.toml that Codex itself could not load is refused instead of being
+// rewritten from whatever fragments the line parser recovered.
+const parseValidatedToml = (content: string) => {
+  parseStrictToml(content);
+  return parseToml(content);
 };
 
 // Format a TOML value: arrays and booleans stay unquoted, strings get quoted
@@ -209,11 +234,12 @@ export async function POST(request: Request) {
     // we always write the full key value to the config file.
     const keyId = typeof rawBody?.keyId === "string" ? rawBody.keyId.trim() : null;
 
-    const validation = validateBody(cliModelConfigSchema, rawBody);
+    const validation = validateBody(codexSettingsConfigSchema, rawBody);
     if (isValidationFailure(validation)) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-    const { baseUrl, model, reasoningEffort, wireApi, modelMappings } = validation.data;
+    const { baseUrl, model, reasoningEffort, wireApi, modelMappings, modelCatalog } =
+      validation.data;
     // Canonical key resolution (#13563): by keyId -> submitted apiKey -> sk_omniroute.
     // Matches cline/forge/openclaw/grok-build/jcode-settings.
     const apiKey = await resolveApiKey(keyId, validation.data.apiKey);
@@ -228,14 +254,19 @@ export async function POST(request: Request) {
     // Backup current configs before modifying
     await createMultiBackup("codex", [configPath, authPath]);
 
-    // Read and parse existing config
-    let parsed: Record<string, any> = { _root: {}, _sections: {} };
-    try {
-      const existingConfig = await fs.readFile(configPath, "utf-8");
-      parsed = parseToml(existingConfig);
-    } catch {
-      /* No existing config */
-    }
+    // Read BOTH files before writing either one. A file that exists but cannot
+    // be read or parsed is not an empty config: the merge below writes the result
+    // back, which would replace every provider/MCP server in config.toml and the
+    // ChatGPT OAuth tokens in auth.json. Only ENOENT means "start fresh".
+    const parsed: Record<string, any> = (await readExistingConfig(
+      configPath,
+      parseValidatedToml
+    )) ?? {
+      _root: {},
+      _sections: {},
+    };
+    const authData: Record<string, any> =
+      (await readExistingConfig(authPath, parseJsonObject)) ?? {};
 
     // Carry the user's intent forward off the deprecated Codex feature flag (#1327).
     migrateCodexFeatureFlags(parsed);
@@ -275,19 +306,23 @@ export async function POST(request: Request) {
       delete parsed._sections["notice.model_migrations"];
     }
 
+    // Point Codex's /model picker at an OmniRoute catalog. Fail-open: on any failure
+    // Apply still succeeds, a previous value is left alone and a warning is returned.
+    let catalog: CodexCatalogWriteResult | null = null;
+    if (modelCatalog === true) {
+      catalog = await writeCodexModelCatalog({
+        codexDir,
+        selectedModels: [model, ...Object.values(modelMappings ?? {})],
+        listModels: () => listOmniRouteChatModels(request),
+      });
+      if (catalog.catalogPath) parsed._root.model_catalog_json = toTomlPath(catalog.catalogPath);
+    }
+
     // Write merged config
     const configContent = toToml(parsed);
     await fs.writeFile(configPath, configContent);
 
     // Update auth.json with OPENAI_API_KEY (Codex reads this first)
-    let authData: Record<string, any> = {};
-    try {
-      const existingAuth = await fs.readFile(authPath, "utf-8");
-      authData = JSON.parse(existingAuth);
-    } catch {
-      /* No existing auth */
-    }
-
     authData.OPENAI_API_KEY = apiKey;
     await fs.writeFile(authPath, JSON.stringify(authData, null, 2));
 
@@ -302,8 +337,14 @@ export async function POST(request: Request) {
       success: true,
       message: "Codex settings applied successfully!",
       configPath,
+      ...(catalog?.catalogPath
+        ? { catalogPath: catalog.catalogPath, catalogModelCount: catalog.count }
+        : {}),
+      ...(catalog?.warning ? { catalogWarning: catalog.warning } : {}),
     });
   } catch (error) {
+    const refusal = configClobberRefusalResponse(error);
+    if (refusal) return refusal;
     console.log("Error updating codex settings:", error);
     return NextResponse.json({ error: "Failed to update codex settings" }, { status: 500 });
   }
@@ -354,6 +395,16 @@ export async function DELETE(request: Request) {
     // Remove omniroute provider section
     delete parsed._sections["model_providers.omniroute"];
 
+    // Remove the model catalog only when it is the one OmniRoute wrote
+    const codexDir = getCodexDir();
+    const catalogValue = parsed._root.model_catalog_json;
+    if (
+      typeof catalogValue === "string" &&
+      toTomlPath(catalogValue) === toTomlPath(getCodexCatalogPath(codexDir))
+    ) {
+      delete parsed._root.model_catalog_json;
+    }
+
     // Write updated config
     const configContent = toToml(parsed);
     await fs.writeFile(configPath, configContent);
@@ -374,6 +425,8 @@ export async function DELETE(request: Request) {
     } catch {
       /* No auth file */
     }
+
+    await removeCodexModelCatalog(codexDir);
 
     // Clear last-configured timestamp
     try {

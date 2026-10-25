@@ -13,30 +13,30 @@
 
 ## O Que É
 
-O OmniRoute regista 329 fornecedores, incluindo 155 entradas de catálogo assinaladas como **gratuitas/sem autenticação**
+O OmniRoute regista 375 fornecedores, incluindo 155 entradas de catálogo marcadas como **gratuitas/sem autenticação**
 (sem autenticação,
 OAuth de nível gratuito ou chave de API de nível gratuito — consulte o
-[Guia de Níveis Gratuitos](../getting-started/FREE-TIERS-GUIDE.md) e o
-[Diretório de Níveis Gratuitos](../reference/FREE_TIERS.md) completo). O problema: a qualidade dos modelos
-varia bastante entre os fornecedores gratuitos. Um fornecedor sem autenticação que disponibilize um modelo de ponta é muito mais útil
-do que um que disponibilize um modelo legado de pequena dimensão.
+[Guia de Níveis Gratuitos](../getting-started/FREE-TIERS-GUIDE.md) e o diretório completo de
+[Níveis Gratuitos](../reference/FREE_TIERS.md)). O senão: os fornecedores gratuitos variam
+enormemente na qualidade dos modelos. Um fornecedor sem autenticação que sirva um modelo de fronteira é muito mais útil
+do que um que sirva um modelo antigo de pequena dimensão.
 
-As **Classificações de Fornecedores Gratuitos** respondem à pergunta "**qual é o fornecedor gratuito que me dá o melhor modelo?**",
-associando o catálogo de cada fornecedor gratuito a **pontuações de qualidade obtidas por crowdsourcing** da
-**tabela classificativa da Arena AI** (ELO de preferências humanas, o mesmo conceito subjacente à arena de
-chatbots da LMArena). Os fornecedores são depois classificados segundo o desempenho do seu **melhor modelo gratuito**.
+As **Classificações de Fornecedores Gratuitos** respondem à pergunta "**qual fornecedor gratuito me dá o melhor modelo?**" ao
+cruzar o catálogo de cada fornecedor gratuito com **pontuações de qualidade obtidas pela comunidade** do
+**leaderboard da Arena AI** (ELO de preferência humana, a mesma ideia por detrás da
+arena de chatbots LMArena). Os fornecedores são então classificados pela força do seu **melhor modelo gratuito**.
 
 A classificação é calculada a partir de três fontes reais:
 
-1. As listas de fornecedores gratuitos — `NOAUTH_PROVIDERS`, além das entradas de `OAUTH_PROVIDERS` /
+1. As listas de fornecedores gratuitos — `NOAUTH_PROVIDERS`, mais as entradas `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` assinaladas com `hasFree`
    (`src/shared/constants/providers.ts`).
-2. O catálogo de modelos de cada fornecedor no registo de fornecedores
+2. O catálogo de modelos de cada fornecedor a partir do registo de fornecedores
    (`open-sse/config/providerRegistry.ts`).
-3. As pontuações de adequação à tarefa derivadas do ELO, armazenadas na tabela `model_intelligence` da base de dados pelo
-   motor de sincronização do ELO da Arena (`src/lib/arenaEloSync.ts`).
+3. Pontuações de adequação a tarefas derivadas de ELO, armazenadas na tabela `model_intelligence` da base de dados pelo
+   motor de sincronização Arena ELO (`src/lib/arenaEloSync.ts`).
 
-A lógica de associação encontra-se em `src/lib/freeProviderRankings.ts`.
+A lógica de junção reside em `src/lib/freeProviderRankings.ts`.
 
 ---
 

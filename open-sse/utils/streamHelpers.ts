@@ -388,6 +388,9 @@ export function hasValuableContent(chunk: Record<string, unknown>, format: strin
     if (typeof delta.refusal === "string" && delta.refusal.length > 0) return true;
     if (hasAnyReasoningSignal(delta)) return true;
     if (Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) return true;
+    // Generated images arrive on their own chunk with nothing else in the delta
+    // (gemini-to-openai inlineData branch) — without this they were all dropped.
+    if (Array.isArray(delta.images) && delta.images.length > 0) return true;
     if (firstChoice.finish_reason) return true;
     if (typeof delta.role === "string" && delta.role.length > 0) return true;
     return false;

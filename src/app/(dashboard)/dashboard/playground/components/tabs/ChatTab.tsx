@@ -1,14 +1,26 @@
 "use client";
 
+import Textarea from "@/shared/components/Textarea";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+
 // src/app/(dashboard)/dashboard/playground/components/tabs/ChatTab.tsx
 
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import MarkdownMessage from "../MarkdownMessage";
 import TokenCostCounter from "../TokenCostCounter";
+import ImageResultsInline, {
+  extractPlaygroundImageResults,
+  type PlaygroundImageResult,
+} from "../ImageResultsInline";
 import { useStreamMetrics } from "../../hooks/useStreamMetrics";
 import { getModelPricing } from "@/lib/playground/types";
 import type { ConfigState } from "../StudioConfigPane";
+import {
+  PLAYGROUND_IMAGE_STREAM_HEADER,
+  restorePlaygroundImageResponse,
+} from "@/shared/utils/playgroundImageStream";
 import type { StreamMetrics } from "@/shared/schemas/playground";
 import { buildReasoningRequestFields } from "../reasoningControlUtils";
 import {
@@ -24,6 +36,7 @@ import {
 interface Message {
   role: "system" | "user" | "assistant";
   content: string;
+  images?: PlaygroundImageResult[];
   metrics?: StreamMetrics;
 }
 
@@ -69,7 +82,11 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
     }
     out.push(
       ...chatMessages
-        .filter((m) => m.role !== "system")
+        .filter(
+          (m) =>
+            m.role !== "system" &&
+            !(m.role === "assistant" && m.images?.length && !m.content.trim())
+        )
         .map((m) => ({
           role: m.role,
           content: m.content,
@@ -141,8 +158,10 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
       const fetchHeaders: Record<string, string> = { "Content-Type": "application/json" };
       const chatEndpoint = isChatCompletionsEndpoint(configState.endpoint);
       const nativeCodex = isNativeCodexPlaygroundModel(configState.model);
+      const imageEndpoint = configState.endpoint === "images" && !nativeCodex;
       const nativeCodexTurnId = nativeCodex ? crypto.randomUUID() : "";
       if (nativeCodex) fetchHeaders.Originator = "codex_omniroute_playground";
+      if (imageEndpoint) fetchHeaders[PLAYGROUND_IMAGE_STREAM_HEADER] = "1";
       const requestBody = nativeCodex
         ? buildNativeCodexPlaygroundRequest({
             model: configState.model,
@@ -159,7 +178,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
               configState.model
             );
 
-      const res = await fetch(
+      let res = await fetch(
         nativeCodex ? "/api/v1/responses" : resolveChatTabRequestPath(configState.endpoint),
         {
           method: "POST",
@@ -168,6 +187,9 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
           signal: controller.signal,
         }
       );
+      if (imageEndpoint) {
+        res = await restorePlaygroundImageResponse(res, controller.signal);
+      }
 
       setResponseStatus(res.status);
 
@@ -186,10 +208,22 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
 
       if (!chatEndpoint && !nativeCodex) {
         const rawText = await res.text();
+        let images: PlaygroundImageResult[] = [];
+        if (configState.endpoint === "images") {
+          try {
+            images = extractPlaygroundImageResults(JSON.parse(rawText));
+          } catch {
+            // Preserve the raw response below when the image payload is not valid JSON.
+          }
+        }
         setMessages((prev) => {
           const next = [...prev];
           const idx = appendIndex !== undefined ? appendIndex : next.length - 1;
-          next[idx] = { ...next[idx], content: formatNonChatResponse(rawText) };
+          next[idx] = {
+            ...next[idx],
+            content: images.length > 0 ? "" : formatNonChatResponse(rawText),
+            images: images.length > 0 ? images : undefined,
+          };
           return next;
         });
         setResponseDuration(Date.now() - startTime);
@@ -341,14 +375,12 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
       {/* Status bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-bg-alt text-xs text-text-muted">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[16px]">chat</span>
+          <Icon name="chat" size={16} />
           <span className="font-medium">{t("tabChat")}</span>
           {responseStatus !== null && (
             <span
               className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                responseStatus < 400
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                responseStatus < 400 ? "bg-success-bg text-success" : "bg-error-bg text-error"
               }`}
             >
               {responseStatus}
@@ -358,22 +390,26 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
         </div>
         <div className="flex items-center gap-2">
           {hasAssistantMessage && !loading && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="refresh"
               onClick={() => void handleRegenerate()}
-              className="flex items-center gap-1 text-xs text-text-muted hover:text-text-main transition-colors"
+              className="text-xs text-text-muted"
               title={t("regenerateLastResponse")}
             >
-              <span className="material-symbols-outlined text-[14px]">refresh</span>
               {t("regenerate")}
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={handleClear}
-            className="p-1 rounded hover:bg-red-500/10 text-text-muted hover:text-red-500 transition-colors"
+            className="text-text-muted hover:text-error"
             title={t("clearChat")}
-          >
-            <span className="material-symbols-outlined text-[16px]">delete</span>
-          </button>
+            aria-label={t("clearChat")}
+            icon="delete"
+          />
         </div>
       </div>
 
@@ -382,10 +418,10 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
         {messages.length === 0 && !loading && (
           <div className="flex items-center justify-center h-full text-text-muted text-sm">
             <div className="text-center space-y-2">
-              <span className="material-symbols-outlined text-[48px] text-text-muted/30">chat</span>
+              <Icon name="chat" size={48} className="text-text-muted/30" />
               <p>{t("startConversation")}</p>
               {!configState.model && (
-                <p className="text-amber-500 text-xs">{t("setModelInConfigFirst")}</p>
+                <p className="text-warning text-xs">{t("setModelInConfigFirst")}</p>
               )}
             </div>
           </div>
@@ -406,11 +442,13 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
               <div
                 className={`px-4 py-2.5 rounded-2xl text-sm ${
                   msg.role === "user"
-                    ? "bg-primary text-primary-foreground rounded-tr-sm"
+                    ? "bg-primary text-accent-foreground rounded-tr-sm"
                     : "bg-bg-alt border border-border text-text-main rounded-tl-sm"
                 }`}
               >
-                {msg.role === "assistant" ? (
+                {msg.images?.length ? (
+                  <ImageResultsInline images={msg.images} />
+                ) : msg.role === "assistant" ? (
                   <MarkdownMessage content={msg.content} />
                 ) : (
                   <span className="whitespace-pre-wrap">{msg.content}</span>
@@ -437,16 +475,14 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
               {t("role.assistant")}
             </span>
             <div className="px-4 py-2 rounded-2xl text-sm bg-bg-alt border border-border rounded-tl-sm text-text-muted flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px] animate-spin">
-                progress_activity
-              </span>
+              <Icon name="progress_activity" size={16} className="animate-spin" />
               {t("generating")}
             </div>
           </div>
         )}
 
         {error && (
-          <div className="text-center p-2 text-sm text-red-500 bg-red-500/10 rounded border border-red-500/20">
+          <div className="text-center p-2 text-sm text-error bg-error/10 rounded border border-error/20">
             {error}
           </div>
         )}
@@ -456,32 +492,34 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
 
       {/* Input area */}
       <div className="p-3 border-t border-border bg-bg-alt flex gap-2 shrink-0">
-        <textarea
+        <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={t("typeMessageWithShortcut")}
-          className="flex-1 min-h-[44px] max-h-[120px] bg-surface border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-y"
           rows={1}
           disabled={loading}
+          aria-label={t("typeMessageWithShortcut")}
+          className="text-sm resize-y flex-1"
         />
         {loading ? (
-          <button
+          <Button
+            variant="outline"
+            icon="stop"
             onClick={handleCancel}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-sm text-text-muted hover:text-text-main hover:bg-black/5 transition-colors shrink-0"
+            className="shrink-0 self-end"
           >
-            <span className="material-symbols-outlined text-[16px]">stop</span>
             {t("stop")}
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
+            icon="send"
             onClick={() => void handleSend()}
             disabled={!input.trim()}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors shrink-0"
+            className="shrink-0 self-end"
           >
-            <span className="material-symbols-outlined text-[16px]">send</span>
             {t("send")}
-          </button>
+          </Button>
         )}
       </div>
     </div>

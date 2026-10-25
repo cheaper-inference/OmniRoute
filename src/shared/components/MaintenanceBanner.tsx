@@ -11,6 +11,8 @@
 import { useState, useEffect } from "react";
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
+import Button from "./Button";
+import Icon from "./Icon";
 
 export default function MaintenanceBanner() {
   const [show, setShow] = useState(false);
@@ -20,18 +22,18 @@ export default function MaintenanceBanner() {
   const t = useTranslations("common");
 
   useEffect(() => {
-    let active = true;
-
     const checkHealth = async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort("Health check timeout"), 8000);
       try {
         // Use lightweight liveness probe (single SELECT 1) instead of the
         // heavy /api/monitoring/health observability endpoint. The heavy
         // endpoint can exceed the 8s client timeout under normal load
         // (e.g. Logs page 3s polling), causing false-positive banners.
         const res = await fetch("/api/health/ping", {
+          signal: controller.signal,
           cache: "no-store",
         });
-        if (!active) return;
         if (res.ok) {
           consecutiveFailuresRef.current = 0;
           dismissedUntilRecoveryRef.current = false;
@@ -46,44 +48,44 @@ export default function MaintenanceBanner() {
           }
         }
       } catch {
-        if (!active) return;
         consecutiveFailuresRef.current += 1;
         if (consecutiveFailuresRef.current >= 2 && !dismissedUntilRecoveryRef.current) {
           setShow(true);
           setMessage(t("maintenanceServerUnreachable"));
         }
+      } finally {
+        clearTimeout(timeoutId);
       }
     };
 
     // Run immediately on mount, then every 10 seconds
     checkHealth();
     const interval = setInterval(checkHealth, 10000);
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [t]);
 
   if (!show) return null;
 
   return (
-    <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 flex items-center justify-between gap-3 animate-in slide-in-from-top">
+    <div
+      role="status"
+      className="bg-warning-bg border-b border-warning/30 px-4 py-2.5 flex items-center justify-between gap-3 animate-in slide-in-from-top"
+    >
       <div className="flex items-center gap-2.5">
-        <span className="material-symbols-outlined text-amber-500 text-[18px] animate-pulse">
-          warning
-        </span>
-        <span className="text-sm text-amber-200">{message}</span>
+        <Icon name="warning" size={18} className="text-warning animate-pulse" />
+        <span className="text-sm text-text-main">{message}</span>
       </div>
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => {
           dismissedUntilRecoveryRef.current = true;
           setShow(false);
         }}
-        className="p-1 rounded hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
         aria-label={t("close")}
       >
-        <span className="material-symbols-outlined text-[16px]">close</span>
-      </button>
+        <Icon name="close" size={16} />
+      </Button>
     </div>
   );
 }

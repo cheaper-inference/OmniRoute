@@ -53,7 +53,6 @@ export type AutoRoutingStrategyValue = (typeof AUTO_ROUTING_STRATEGY_VALUES)[num
 
 export const ACCOUNT_FALLBACK_STRATEGY_VALUES = [
   "priority",
-  "weighted",
   "fill-first",
   "round-robin",
   "p2c",

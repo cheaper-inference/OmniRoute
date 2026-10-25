@@ -44,6 +44,7 @@ import { applyStrategyOrdering } from "./applyStrategyOrdering.ts";
 import { expandTargetsForAllStrategies } from "./connectionAwareExpansion.ts";
 import { clampComboDepth } from "./comboPredicates.ts";
 import {
+  computeCompatRejectedTargets,
   describeCapabilityFilterExhaustion,
   filterTargetsByRequestCompatibility,
   resolveComboTargets,
@@ -140,6 +141,12 @@ export interface ResolvedComboTargetPipeline {
    * pipeline already releases it on any earlyResponse it produces after selection.
    */
   quotaShareRelease: (() => void) | null;
+  /**
+   * #6238 last-resort tier: the targets the compat pre-filter rejected, bounded
+   * by the pre-filter pool. The dispatch loop probes this set when every
+   * compat-kept target was skipped without a single real attempt.
+   */
+  compatRejectedTargets: ResolvedComboTarget[];
 }
 
 export type ResolveComboTargetPipelineResult =
@@ -507,7 +514,11 @@ async function applyContinuityFilters(
   deps: ResolveComboTargetPipelineDeps,
   initialOrderedTargets: ResolvedComboTarget[]
 ): Promise<
-  | { orderedTargets: ResolvedComboTarget[]; sticky: ApplyStickinessResult }
+  | {
+      orderedTargets: ResolvedComboTarget[];
+      sticky: ApplyStickinessResult;
+      compatRejectedTargets: ResolvedComboTarget[];
+    }
   | { earlyResponse: Response }
 > {
   const { strategy, body, combo, config, settings, log, relayOptions } = deps;
@@ -561,10 +572,23 @@ async function applyContinuityFilters(
     (config as { compatFilterFailOpen?: unknown }).compatFilterFailOpen === true ||
     (settings as { compatFilterFailOpen?: unknown } | null | undefined)?.compatFilterFailOpen ===
       true;
+  const outputLimitAdvisory =
+    (config as { outputLimitAdvisory?: unknown }).outputLimitAdvisory === true ||
+    (settings as { outputLimitAdvisory?: unknown } | null | undefined)?.outputLimitAdvisory ===
+      true;
   const preCompatTargets = orderedTargets;
   orderedTargets = filterTargetsByRequestCompatibility(orderedTargets, body, log, undefined, {
     failOpen: compatFilterFailOpen,
+    outputLimitAdvisory,
   });
+  // #6238: keep the targets the compat pre-filter rejected so the dispatch loop
+  // can probe them as a last-resort fallback tier when every compat-kept target
+  // later turns out runtime-unavailable (mirrors the round-robin path).
+  const compatRejectedTargets = computeCompatRejectedTargets(
+    preCompatTargets,
+    orderedTargets,
+    body
+  );
   if (orderedTargets.length === 0 && preCompatTargets.length > 0) {
     const exhaustion = describeCapabilityFilterExhaustion(preCompatTargets, body, combo.name);
     if (exhaustion) {
@@ -610,7 +634,7 @@ async function applyContinuityFilters(
       }),
     };
   }
-  return { orderedTargets, sticky };
+  return { orderedTargets, sticky, compatRejectedTargets };
 }
 
 /**
@@ -904,5 +928,6 @@ export async function resolveComboTargetPipeline(
     sticky: continuity.sticky,
     preScreenMap,
     quotaShareRelease,
+    compatRejectedTargets: continuity.compatRejectedTargets,
   };
 }

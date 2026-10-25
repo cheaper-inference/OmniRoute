@@ -45,7 +45,7 @@ function fixture(t: test.TestContext) {
   const scripts = {
     npm: 'printf "%s\\n%s\\n" "$DATA_DIR" "$OMNIROUTE_PLUGINS_DIR" > "$FIXTURE/build-env"',
     node: 'printf "%s\\n%s\\n" "$DATA_DIR" "$OMNIROUTE_PLUGINS_DIR" > "$FIXTURE/server-env"\n[ "$PROBE_MODE" = dead ] && exit 1\nexec /bin/sleep 60',
-    curl: 'printf "%s\\n" "$@" > "$FIXTURE/health-args"\n/bin/sleep 0.02\n[ "$PROBE_MODE" = healthy ] || [ "$PROBE_MODE" = dead ]',
+    curl: 'printf "%s\\n" "$@" > "$FIXTURE/health-args"\n/bin/sleep 0.02\n{ [ "$PROBE_MODE" = healthy ] && [ -s "$FIXTURE/server-env" ]; } || [ "$PROBE_MODE" = dead ]',
     schemathesis: 'printf "%s\\n" "$@" > "$FIXTURE/fuzz-args"\nexit 42',
     sleep: "/bin/sleep 0.01",
   };
@@ -106,6 +106,8 @@ test("each run gives build and server the same fresh state, distinct from a prio
       "must start with no prior database"
     );
     fs.writeFileSync(path.join(dataDir, "storage.sqlite"), "prior run sentinel");
+    // Each boot must be judged by its own server: drop the previous boot's file first.
+    fs.rmSync(path.join(f.dir, "server-env"), { force: true });
     const result = f.run(start, { PORT: listener.port });
     assert.equal(result.status, 0, result.stderr);
     const healthArgs = fs.readFileSync(path.join(f.dir, "health-args"), "utf8").trim().split("\n");

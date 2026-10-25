@@ -101,15 +101,45 @@ export function readReportedUsage(
   };
 }
 
-/** Usage for a successful call: the trusted report when valid, else `costPerQuery`. */
+/**
+ * Registry price of one successful call. Flat `costPerQuery`, unless the provider
+ * declares `costByMode`: then the price of the `mode` sent in the request body
+ * (unknown/absent mode → `costPerQuery`), plus `extraResultCost` for every result
+ * returned above `includedResults`. Rounded to 6 decimals (no float dust).
+ */
+export function computeSearchCostUsd(
+  config: SearchProviderConfig,
+  requestBody: unknown,
+  resultCount: number
+): number {
+  const byMode = config.costByMode;
+  if (!byMode) return config.costPerQuery;
+  let mode: unknown;
+  try {
+    mode = typeof requestBody === "string" ? JSON.parse(requestBody)?.mode : undefined;
+  } catch {
+    mode = undefined;
+  }
+  const base =
+    typeof mode === "string" && Object.hasOwn(byMode, mode) ? byMode[mode] : config.costPerQuery;
+  const extraResults = Math.max(0, resultCount - (config.includedResults ?? resultCount));
+  const total = base + extraResults * (config.extraResultCost ?? 0);
+  return Math.round(total * 1e6) / 1e6;
+}
+
+/**
+ * Usage for a successful call: the trusted report when valid, else the registry
+ * price (`staticCostUsd`, defaulting to `costPerQuery`).
+ */
 export function resolveSearchUsage(
   config: SearchProviderConfig,
   body: unknown,
   trusted: boolean,
-  log?: WarnLog | null
+  log?: WarnLog | null,
+  staticCostUsd: number = config.costPerQuery
 ): SearchUsage {
   const reported = trusted ? readReportedUsage(body, config.id, log) : null;
-  return reported ?? { queries_used: 1, search_cost_usd: config.costPerQuery };
+  return reported ?? { queries_used: 1, search_cost_usd: staticCostUsd };
 }
 
 const recordedRequestIds = new Set<string>();

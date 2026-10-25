@@ -80,7 +80,10 @@ import {
 import type { ModelCapabilityEntry } from "@/lib/modelsDevSync";
 import { getModelSpec } from "@/shared/constants/modelSpecs";
 import { classifyModelSupportedEndpoints } from "@/shared/constants/modelSupportedEndpoints";
-import { getModelsCatalogPrefixMode } from "@/shared/utils/featureFlags";
+import {
+  getModelsCatalogPrefixMode,
+  isModelsDevEffortTiersEnabled,
+} from "@/shared/utils/featureFlags";
 import {
   isProviderNodePrefixReserved,
   selectCompatibleNodeForPrefix,
@@ -106,6 +109,8 @@ import {
   maybeOmitCatalogModelName,
   getThinkingCapabilityFields,
   mergeComboCapabilities,
+  hasRoutableComboConnection,
+  selectComboLimitPool,
   visionDerivedModalities,
   getConnectionScopedEffortTiers,
   type ConnectionScopedReasoningCatalog,
@@ -128,6 +133,7 @@ import {
   getComboTargetModelId as getComboTargetModelIdFromMaps,
 } from "./catalogProviderMaps";
 import { indexNodeApiTypes, nodeModelEndpoints, overlayEndpoints } from "./catalogNodeModality";
+import { createComboPricingTargetResolver } from "./catalogPricing";
 import {
   getModelCatalogAuthRejection,
   isCodexModelCatalogClient,
@@ -272,8 +278,8 @@ async function buildCatalogPayload(
   let cacheTTL = CATALOG_CACHE_TTL_MS_DEFAULT;
   try {
     // Only the persisted cache section is needed here. The full database-settings
-    // view also calculates dbstat, WAL, schema and integrity diagnostics, which are
-    // synchronous and can pin the event loop after an otherwise cooperative build.
+    // view also calculates dbstat, WAL and schema, which are synchronous and can
+    // pin the event loop after an otherwise cooperative build.
     const dbSettings = getUserDatabaseSettings();
     cacheTTL = dbSettings.cache?.modelCatalogCacheTtlMs ?? CATALOG_CACHE_TTL_MS_DEFAULT;
   } catch {
@@ -337,6 +343,7 @@ async function buildUnifiedModelsResponseCore(
       _qp === "alias" || _qp === "canonical" || _qp === "dual" ? _qp : getModelsCatalogPrefixMode();
     const includeAlias = prefixMode !== "canonical";
     const includeCanonical = prefixMode !== "alias";
+    const modelsDevEffortTiers = isModelsDevEffortTiersEnabled(); // #15944, default off
     const resolveCanonicalProviderId = (aliasOrProviderId: string, fallbackProviderId?: string) =>
       resolveCanonicalProviderIdFromMaps(aliasToProviderId, aliasOrProviderId, fallbackProviderId);
     const aliasMaps = { aliasToProviderId, providerIdToAlias };
@@ -644,7 +651,8 @@ async function buildUnifiedModelsResponseCore(
               eligibleConnectionIds,
               connectionCatalog || {},
               getRegistryModelThinkingEfforts(providerId, modelId),
-              getRegistryThinkingEfforts(providerId, modelId)
+              getRegistryThinkingEfforts(providerId, modelId),
+              modelsDevEffortTiers
             );
       if (
         connectionEfforts === undefined &&
@@ -653,7 +661,10 @@ async function buildUnifiedModelsResponseCore(
         !source.syncedCapability &&
         !source.reasoningEffortsOverride
       ) {
-        return null;
+        // Explicit vision evidence remains valid without registry/synced metadata.
+        return typeof canonical.capabilities.vision === "boolean"
+          ? { capabilities: { vision: canonical.capabilities.vision } }
+          : null;
       }
 
       const synced = getSyncedCapability(providerId, modelId);
@@ -670,11 +681,15 @@ async function buildUnifiedModelsResponseCore(
       const maxInputTokens = isPositiveFiniteNumber(canonical.limits.maxInputTokens)
         ? canonical.limits.maxInputTokens
         : contextLength;
-      const maxOutputTokens = isPositiveFiniteNumber(synced?.limit_output)
-        ? synced.limit_output
-        : isPositiveFiniteNumber(spec?.maxOutputTokens)
-          ? spec.maxOutputTokens
-          : undefined;
+      // #16515: canonical.limits.maxOutputTokens already applies an operator's
+      // max_output_tokens override, as the per-model catalog entry does.
+      const maxOutputTokens = isPositiveFiniteNumber(canonical.limits.maxOutputTokens)
+        ? canonical.limits.maxOutputTokens
+        : isPositiveFiniteNumber(synced?.limit_output)
+          ? synced.limit_output
+          : isPositiveFiniteNumber(spec?.maxOutputTokens)
+            ? spec.maxOutputTokens
+            : undefined;
 
       const syncedVision =
         typeof synced?.attachment === "boolean"
@@ -732,7 +747,8 @@ async function buildUnifiedModelsResponseCore(
               canonical.capabilities.supportsThinking,
               getRegistryThinkingEfforts(providerId, modelId),
               true,
-              syncedReasoningEfforts
+              syncedReasoningEfforts,
+              modelsDevEffortTiers
             )
           : getThinkingCapabilityFields(
               providerId,
@@ -740,7 +756,8 @@ async function buildUnifiedModelsResponseCore(
               connectionEfforts.length > 0 ? true : canonical.capabilities.supportsThinking,
               connectionEfforts,
               true,
-              syncedReasoningEfforts
+              syncedReasoningEfforts,
+              modelsDevEffortTiers
             )
       );
 
@@ -751,6 +768,14 @@ async function buildUnifiedModelsResponseCore(
         ...(inputModalities && inputModalities.length > 0 ? { inputModalities } : {}),
         ...(outputModalities && outputModalities.length > 0 ? { outputModalities } : {}),
         capabilities,
+        routable: isNoAuthProviderKey(providerId, providerAlias, targetModel.providerId)
+          ? !isNoAuthProviderBlocked(
+              blockedProviders,
+              providerId,
+              providerAlias,
+              targetModel.providerId
+            )
+          : hasRoutableComboConnection(target, allProviderConnections),
       };
     };
 
@@ -773,19 +798,18 @@ async function buildUnifiedModelsResponseCore(
         (metadata): metadata is ComboTargetCatalogMetadata => metadata !== null
       );
       if (knownMetadata.length === 0) return baseMetadata;
+      const limitPool = selectComboLimitPool(knownMetadata); // #4627: skip inactive seats
       const contextLength =
         explicitContextLength ??
-        minKnownNumber(knownMetadata.map((metadata) => metadata.contextLength));
+        minKnownNumber(limitPool.map((metadata) => metadata.contextLength));
       const targetMinMaxInput = minKnownNumber(
-        knownMetadata.map((metadata) => metadata.maxInputTokens)
+        limitPool.map((metadata) => metadata.maxInputTokens)
       );
       const maxInputTokens =
         explicitContextLength === undefined
           ? targetMinMaxInput
           : Math.min(explicitContextLength, targetMinMaxInput ?? explicitContextLength);
-      const maxOutputTokens = minKnownNumber(
-        knownMetadata.map((metadata) => metadata.maxOutputTokens)
-      );
+      const maxOutputTokens = minKnownNumber(limitPool.map((metadata) => metadata.maxOutputTokens));
 
       const inputModalities = intersectKnownStringArrays(
         knownMetadata.map((m) => (Array.isArray(m.inputModalities) ? m.inputModalities : []))
@@ -797,6 +821,7 @@ async function buildUnifiedModelsResponseCore(
       const capabilities = mergeComboCapabilities(knownMetadata);
       if (targetMetadata.some((metadata) => metadata === null)) {
         delete capabilities.effort_tiers;
+        delete capabilities.vision;
       }
 
       return {
@@ -813,6 +838,27 @@ async function buildUnifiedModelsResponseCore(
     const models = [];
     const timestamp = Math.floor(Date.now() / 1000);
     const listedIds = new Set<string>();
+    const postFilterContext = {
+      connections,
+      prefixMode,
+      aliasToProviderId,
+      hideNoThinkVariants: settings.hideNoThinkVariants === true,
+      blockedProviders: settings.blockedProviders,
+      // Per-entry `pricing`: a combo is priced as its first visible target.
+      pricing: {
+        providerNodeIdsByPrefix: providerNodeIdByPrefix,
+        resolveComboTarget: createComboPricingTargetResolver(
+          combos,
+          (combo) =>
+            resolveNestedComboTargets(
+              combo as Parameters<typeof resolveNestedComboTargets>[0],
+              combos as Parameters<typeof resolveNestedComboTargets>[1]
+            ) as ComboCatalogTarget[],
+          getComboTargetModelId,
+          (providerId, modelId) => isModelHiddenBulk(providerId, modelId)
+        ),
+      },
+    };
 
     // #8770 follow-up: a quota-exclusive key (allowedQuotas non-empty) only ever
     // receives the pool's `qtSd/*` combos — the key-permission step further down
@@ -837,12 +883,7 @@ async function buildUnifiedModelsResponseCore(
           timestamp,
           (c) => buildComboCatalogMetadata(c, combos)
         );
-        const quotaFinal = await applyCatalogPostFilters(request, quotaModels, {
-          connections,
-          prefixMode,
-          aliasToProviderId,
-          hideNoThinkVariants: settings.hideNoThinkVariants === true,
-        });
+        const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
         return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
           ...corsHeaders,
           ...diagnosticHeaders,
@@ -1113,7 +1154,8 @@ async function buildUnifiedModelsResponseCore(
           !hasDeclaredEffortTiers,
           // Memory only. Do not call getSyncedCapabilities() here — that opens
           // SQLite and runs migrations on a pure catalog read.
-          peekCachedReasoningEfforts(canonicalProviderId, model.id)
+          peekCachedReasoningEfforts(canonicalProviderId, model.id),
+          modelsDevEffortTiers
         );
         const thinkingCapabilities =
           Object.keys(thinkingFields).length > 0 ? { capabilities: thinkingFields } : {};
@@ -1290,6 +1332,10 @@ async function buildUnifiedModelsResponseCore(
           // so the effort_tiers exclusion (codex/glm/kimi) and the entries agree.
           const syncedOwnedBy = resolvePublicOwnerId(providerId, canonicalProviderId);
           const syncedFields = {
+            ...(sm.visibility ? { visibility: sm.visibility } : {}),
+            ...(typeof sm.supportedInApi === "boolean"
+              ? { supported_in_api: sm.supportedInApi }
+              : {}),
             ...(modelType ? { type: modelType } : {}),
             ...(apiFormat !== "chat-completions" ? { api_format: apiFormat } : {}),
             ...(classification.subtype ? { subtype: classification.subtype } : {}),
@@ -2034,12 +2080,7 @@ async function buildUnifiedModelsResponseCore(
       }
     }
     // ?configuredOnly — hide models that have no eligible DB connection.
-    finalModels = await applyCatalogPostFilters(request, finalModels, {
-      connections,
-      prefixMode,
-      aliasToProviderId,
-      hideNoThinkVariants: settings.hideNoThinkVariants === true,
-    });
+    finalModels = await applyCatalogPostFilters(request, finalModels, postFilterContext);
 
     const getDefaultContextFallback = (model: any): number | undefined => {
       if (typeof model.context_length === "number") return undefined;

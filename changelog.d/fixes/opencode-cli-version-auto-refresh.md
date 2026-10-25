@@ -1,1 +1,0 @@
-- **fix(opencode):** the synthesized OpenCode User-Agent now auto-refreshes from the npm registry (`opencode-ai/latest`, 6h cache, pinned fallback offline) instead of rotting on a hardcoded pin.

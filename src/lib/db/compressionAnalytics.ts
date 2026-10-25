@@ -17,7 +17,6 @@ export interface CompressionAnalyticsRow {
   actual_completion_tokens?: number | null;
   actual_total_tokens?: number | null;
   actual_cache_read_tokens?: number | null;
-  estimated_cache_hit_tokens?: number | null;
   actual_cache_write_tokens?: number | null;
   estimated_usd_saved?: number | null;
   mcp_description_tokens_saved?: number | null;
@@ -33,10 +32,6 @@ export interface CompressionAnalyticsRow {
   // ran) but produced no recordable saving. NULL on a normal saving row. Lets
   // analytics distinguish "ran but saved nothing" from "never ran" (#4268).
   skip_reason?: string | null;
-  measurement_scope?: string | null;
-  conversation_id?: string | null;
-  effective_model?: string | null;
-  prompt_estimated_tokens?: number | null;
 }
 
 /**
@@ -91,57 +86,6 @@ export interface CompressionAnalyticsSummary {
   };
 }
 
-export interface GrevCachingAnalytics {
-  totalRuns: number;
-  totalConversations: number;
-  originalTokens: number;
-  compressedTokens: number;
-  tokensSaved: number;
-  averageSavingsPercent: number;
-  requestsWithUsage: number;
-  promptReportingRequests: number;
-  cacheReadReportingRequests: number;
-  actualPromptTokens: number;
-  cacheReadTokens: number;
-  estimatedCacheHitTokens: number;
-  engines: Array<{
-    engine: string;
-    runs: number;
-    originalTokens: number;
-    compressedTokens: number;
-    tokensSaved: number;
-    averageSavingsPercent: number;
-  }>;
-  recentRuns: Array<{
-    timestamp: string;
-    conversationId: string | null;
-    model: string | null;
-    promptEstimatedTokens: number | null;
-    provider: string | null;
-    originalTokens: number;
-    compressedTokens: number;
-    tokensSaved: number;
-    actualPromptTokens: number | null;
-    cacheReadTokens: number | null;
-    estimatedCacheHitTokens: number | null;
-  }>;
-  conversations: Array<{
-    conversationId: string;
-    model: string | null;
-    exchanges: number;
-    promptEstimatedTokens: number;
-    actualPromptTokens: number;
-    promptRequestsReported: number;
-    cacheReadRequestsReported: number;
-    compressionTokensSaved: number;
-    compressionSavingsPercent: number;
-    engineTokensSaved: number;
-    engineSavingsPercent: number;
-    estimatedPrefixTokensReused: number;
-    lastActivity: string;
-  }>;
-}
-
 let columnsEnsuredForDb: unknown = null;
 
 const COMPRESSION_ANALYTICS_COLUMNS = [
@@ -149,7 +93,6 @@ const COMPRESSION_ANALYTICS_COLUMNS = [
   ["actual_completion_tokens", "INTEGER"],
   ["actual_total_tokens", "INTEGER"],
   ["actual_cache_read_tokens", "INTEGER"],
-  ["estimated_cache_hit_tokens", "INTEGER"],
   ["actual_cache_write_tokens", "INTEGER"],
   ["estimated_usd_saved", "REAL"],
   ["mcp_description_tokens_saved", "INTEGER DEFAULT 0"],
@@ -164,10 +107,6 @@ const COMPRESSION_ANALYTICS_COLUMNS = [
   ["rtk_raw_output_pointers", "TEXT"],
   ["rtk_raw_output_total_bytes", "INTEGER"],
   ["skip_reason", "TEXT"],
-  ["measurement_scope", "TEXT"],
-  ["conversation_id", "TEXT"],
-  ["effective_model", "TEXT"],
-  ["prompt_estimated_tokens", "INTEGER"],
 ] as const;
 
 function ensureCompressionAnalyticsColumns(): void {
@@ -185,146 +124,6 @@ function ensureCompressionAnalyticsColumns(): void {
   columnsEnsuredForDb = db;
 }
 
-export function getGrevCachingAnalytics(
-  since: "24h" | "7d" | "30d" | "all" = "7d"
-): GrevCachingAnalytics {
-  const db = getDbInstance();
-  ensureCompressionAnalyticsColumns();
-  ensureCompressionEngineBreakdownTable();
-  const durations: Record<Exclude<typeof since, "all">, number> = {
-    "24h": 24 * 60 * 60 * 1000,
-    "7d": 7 * 24 * 60 * 60 * 1000,
-    "30d": 30 * 24 * 60 * 60 * 1000,
-  };
-  const cutoff = since === "all" ? null : new Date(Date.now() - durations[since]).toISOString();
-  const where = cutoff
-    ? "mode = ? AND timestamp >= ? AND COALESCE(measurement_scope, 'message') = 'message'"
-    : "mode = ? AND COALESCE(measurement_scope, 'message') = 'message'";
-  const params = cutoff ? ["grevcaching", cutoff] : ["grevcaching"];
-  const totals = db
-    .prepare(
-      `SELECT COUNT(*) AS total_runs,
-              COUNT(DISTINCT conversation_id) AS total_conversations,
-              COALESCE(SUM(original_tokens), 0) AS original_tokens,
-              COALESCE(SUM(compressed_tokens), 0) AS compressed_tokens,
-              COALESCE(SUM(tokens_saved), 0) AS tokens_saved,
-              COALESCE(AVG(CASE WHEN original_tokens > 0
-                THEN 100.0 * tokens_saved / original_tokens END), 0) AS average_savings_percent,
-              COUNT(CASE WHEN actual_prompt_tokens IS NOT NULL
-                OR actual_cache_read_tokens IS NOT NULL THEN 1 END) AS requests_with_usage,
-              COUNT(actual_prompt_tokens) AS prompt_reporting_requests,
-              COUNT(actual_cache_read_tokens) AS cache_read_reporting_requests,
-              COALESCE(SUM(actual_prompt_tokens), 0) AS actual_prompt_tokens,
-              COUNT(actual_prompt_tokens) AS prompt_requests_reported,
-              COALESCE(SUM(actual_cache_read_tokens), 0) AS cache_read_tokens,
-              COALESCE(SUM(estimated_cache_hit_tokens), 0) AS estimated_cache_hit_tokens
-       FROM compression_analytics WHERE ${where}`
-    )
-    .get(...params) as Record<string, number>;
-  const recentRuns = db
-    .prepare(
-      `SELECT timestamp, provider, conversation_id, effective_model, prompt_estimated_tokens,
-              original_tokens, compressed_tokens, tokens_saved,
-              actual_prompt_tokens, actual_cache_read_tokens, estimated_cache_hit_tokens
-       FROM compression_analytics WHERE ${where} ORDER BY timestamp DESC, id DESC LIMIT 50`
-    )
-    .all(...params) as Array<Record<string, string | number | null>>;
-  const conversations = db
-    .prepare(
-      `SELECT conversation_id, GROUP_CONCAT(DISTINCT effective_model) AS model,
-              COUNT(*) AS exchanges,
-              COALESCE(SUM(prompt_estimated_tokens), 0) AS prompt_estimated_tokens,
-              COALESCE(SUM(actual_prompt_tokens), 0) AS actual_prompt_tokens,
-              COUNT(actual_prompt_tokens) AS prompt_requests_reported,
-              COUNT(actual_cache_read_tokens) AS cache_read_requests_reported,
-              COALESCE(SUM(tokens_saved), 0) AS compression_tokens_saved,
-              COALESCE(SUM(actual_cache_read_tokens), 0) AS engine_tokens_saved,
-              COALESCE(SUM(estimated_cache_hit_tokens), 0) AS estimated_prefix_tokens_reused,
-              COALESCE(100.0 * SUM(tokens_saved) / NULLIF(SUM(original_tokens), 0), 0)
-                AS compression_savings_percent,
-              COALESCE(100.0 * SUM(actual_cache_read_tokens) /
-                NULLIF(SUM(actual_prompt_tokens), 0), 0) AS engine_savings_percent,
-              MAX(timestamp) AS last_activity
-       FROM compression_analytics WHERE ${where} AND conversation_id IS NOT NULL
-       GROUP BY conversation_id
-       ORDER BY last_activity DESC LIMIT 50`
-    )
-    .all(...params) as Array<Record<string, string | number | null>>;
-  const engineRows = db
-    .prepare(
-      `SELECT b.engine,
-              COUNT(*) AS runs,
-              COALESCE(SUM(b.original_tokens), 0) AS original_tokens,
-              COALESCE(SUM(b.compressed_tokens), 0) AS compressed_tokens,
-              COALESCE(SUM(b.tokens_saved), 0) AS tokens_saved,
-              COALESCE(AVG(CASE WHEN b.original_tokens > 0
-                THEN 100.0 * b.tokens_saved / b.original_tokens END), 0) AS average_savings_percent
-       FROM compression_engine_breakdown b
-       WHERE b.request_id IN (
-         SELECT DISTINCT request_id FROM compression_analytics
-         WHERE ${where} AND request_id IS NOT NULL
-       )
-       GROUP BY b.engine
-       ORDER BY runs DESC, b.engine ASC`
-    )
-    .all(...params) as Array<Record<string, string | number>>;
-  return {
-    totalRuns: totals.total_runs,
-    totalConversations: totals.total_conversations,
-    originalTokens: totals.original_tokens,
-    compressedTokens: totals.compressed_tokens,
-    tokensSaved: totals.tokens_saved,
-    averageSavingsPercent: Math.round(totals.average_savings_percent * 100) / 100,
-    requestsWithUsage: totals.requests_with_usage,
-    promptReportingRequests: totals.prompt_reporting_requests,
-    cacheReadReportingRequests: totals.cache_read_reporting_requests,
-    actualPromptTokens: totals.actual_prompt_tokens,
-    cacheReadTokens: totals.cache_read_tokens,
-    estimatedCacheHitTokens: totals.estimated_cache_hit_tokens,
-    engines: engineRows.map((row) => ({
-      engine: String(row.engine),
-      runs: Number(row.runs),
-      originalTokens: Number(row.original_tokens),
-      compressedTokens: Number(row.compressed_tokens),
-      tokensSaved: Number(row.tokens_saved),
-      averageSavingsPercent: Math.round(Number(row.average_savings_percent) * 100) / 100,
-    })),
-    recentRuns: recentRuns.map((row) => ({
-      timestamp: String(row.timestamp),
-      conversationId: typeof row.conversation_id === "string" ? row.conversation_id : null,
-      model: typeof row.effective_model === "string" ? row.effective_model : null,
-      promptEstimatedTokens:
-        typeof row.prompt_estimated_tokens === "number" ? row.prompt_estimated_tokens : null,
-      provider: typeof row.provider === "string" ? row.provider : null,
-      originalTokens: Number(row.original_tokens ?? 0),
-      compressedTokens: Number(row.compressed_tokens ?? 0),
-      tokensSaved: Number(row.tokens_saved ?? 0),
-      actualPromptTokens:
-        typeof row.actual_prompt_tokens === "number" ? row.actual_prompt_tokens : null,
-      cacheReadTokens:
-        typeof row.actual_cache_read_tokens === "number" ? row.actual_cache_read_tokens : null,
-      estimatedCacheHitTokens:
-        typeof row.estimated_cache_hit_tokens === "number" ? row.estimated_cache_hit_tokens : null,
-    })),
-    conversations: conversations.map((row) => ({
-      conversationId: String(row.conversation_id),
-      model: typeof row.model === "string" ? row.model : null,
-      exchanges: Number(row.exchanges ?? 0),
-      promptEstimatedTokens: Number(row.prompt_estimated_tokens ?? 0),
-      actualPromptTokens: Number(row.actual_prompt_tokens ?? 0),
-      promptRequestsReported: Number(row.prompt_requests_reported ?? 0),
-      cacheReadRequestsReported: Number(row.cache_read_requests_reported ?? 0),
-      compressionTokensSaved: Number(row.compression_tokens_saved ?? 0),
-      compressionSavingsPercent:
-        Math.round(Number(row.compression_savings_percent ?? 0) * 100) / 100,
-      engineTokensSaved: Number(row.engine_tokens_saved ?? 0),
-      engineSavingsPercent: Math.round(Number(row.engine_savings_percent ?? 0) * 100) / 100,
-      estimatedPrefixTokensReused: Number(row.estimated_prefix_tokens_reused ?? 0),
-      lastActivity: String(row.last_activity),
-    })),
-  };
-}
-
 export function insertCompressionAnalyticsRow(row: CompressionAnalyticsRow): void {
   const db = getDbInstance();
   ensureCompressionAnalyticsColumns();
@@ -333,13 +132,12 @@ export function insertCompressionAnalyticsRow(row: CompressionAnalyticsRow): voi
     INSERT INTO compression_analytics (
       timestamp, combo_id, compression_combo_id, engine, provider, mode, original_tokens, compressed_tokens, tokens_saved,
       duration_ms, request_id, actual_prompt_tokens, actual_completion_tokens,
-      actual_total_tokens, actual_cache_read_tokens, estimated_cache_hit_tokens, actual_cache_write_tokens,
+      actual_total_tokens, actual_cache_read_tokens, actual_cache_write_tokens,
       estimated_usd_saved, mcp_description_tokens_saved, multimodal_skip_count,
       receipt_source, validation_fallback, output_mode, rtk_raw_output_pointer, rtk_raw_output_bytes,
-      rtk_raw_output_pointers, rtk_raw_output_total_bytes, skip_reason,
-      measurement_scope, conversation_id, effective_model, prompt_estimated_tokens
+      rtk_raw_output_pointers, rtk_raw_output_total_bytes, skip_reason
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   ).run(
     row.timestamp,
@@ -357,7 +155,6 @@ export function insertCompressionAnalyticsRow(row: CompressionAnalyticsRow): voi
     row.actual_completion_tokens ?? null,
     row.actual_total_tokens ?? null,
     row.actual_cache_read_tokens ?? null,
-    row.estimated_cache_hit_tokens ?? null,
     row.actual_cache_write_tokens ?? null,
     row.estimated_usd_saved ?? null,
     row.mcp_description_tokens_saved ?? 0,
@@ -369,11 +166,7 @@ export function insertCompressionAnalyticsRow(row: CompressionAnalyticsRow): voi
     row.rtk_raw_output_bytes ?? null,
     row.rtk_raw_output_pointers ?? null,
     row.rtk_raw_output_total_bytes ?? null,
-    row.skip_reason ?? null,
-    row.measurement_scope ?? null,
-    row.conversation_id ?? null,
-    row.effective_model ?? null,
-    row.prompt_estimated_tokens ?? null
+    row.skip_reason ?? null
   );
 }
 
@@ -465,43 +258,21 @@ export function attachCompressionUsageReceipt(
   source: "provider" | "estimated" | "stream" = "provider"
 ): void {
   if (!requestId || !usage || typeof usage !== "object") return;
+  const promptTokens = toFiniteInt(usage.prompt_tokens);
+  const completionTokens = toFiniteInt(usage.completion_tokens);
+  const totalTokens =
+    toFiniteInt(usage.total_tokens) ?? (promptTokens ?? 0) + (completionTokens ?? 0);
   const promptDetails =
     usage.prompt_tokens_details && typeof usage.prompt_tokens_details === "object"
       ? (usage.prompt_tokens_details as Record<string, unknown>)
       : {};
-  const inputDetails =
-    usage.input_tokens_details && typeof usage.input_tokens_details === "object"
-      ? (usage.input_tokens_details as Record<string, unknown>)
-      : {};
-  const promptTokens = firstReportedTokenCount(usage.prompt_tokens, usage.input_tokens);
-  const completionTokens = firstReportedTokenCount(usage.completion_tokens, usage.output_tokens);
-  const totalTokens =
-    toFiniteInt(usage.total_tokens) ?? (promptTokens ?? 0) + (completionTokens ?? 0);
-  const cacheReadTokens = firstReportedTokenCount(
-    usage.cache_read_input_tokens,
-    usage.cached_tokens,
-    usage.prompt_cache_hit_tokens,
-    usage.cachedContentTokenCount,
-    promptDetails.cached_tokens,
-    inputDetails.cached_tokens
+  const cacheReadTokens = toFiniteInt(
+    usage.cache_read_input_tokens ?? usage.cached_tokens ?? promptDetails.cached_tokens
   );
-  const cacheWriteTokens = firstReportedTokenCount(
-    usage.cache_creation_input_tokens,
-    usage.cache_write_tokens,
-    promptDetails.cache_creation_tokens,
-    promptDetails.cache_write_tokens,
-    inputDetails.cache_creation_tokens,
-    inputDetails.cache_write_tokens
+  const cacheWriteTokens = toFiniteInt(
+    usage.cache_creation_input_tokens ?? promptDetails.cache_creation_tokens
   );
-  if (
-    promptTokens === null &&
-    completionTokens === null &&
-    totalTokens <= 0 &&
-    cacheReadTokens === null &&
-    cacheWriteTokens === null
-  ) {
-    return;
-  }
+  if (promptTokens === null && completionTokens === null && totalTokens <= 0) return;
 
   const db = getDbInstance();
   ensureCompressionAnalyticsColumns();
@@ -534,28 +305,6 @@ export function attachCompressionUsageReceipt(
   );
 }
 
-/** Attach the per-request stable-prefix reuse estimate to the latest analytics row. */
-export function attachEstimatedCacheHitTokens(
-  requestId: string | null | undefined,
-  estimatedTokens: number | null | undefined
-): void {
-  if (!requestId || typeof estimatedTokens !== "number" || !Number.isFinite(estimatedTokens))
-    return;
-  const db = getDbInstance();
-  ensureCompressionAnalyticsColumns();
-  db.prepare(
-    `UPDATE compression_analytics
-     SET estimated_cache_hit_tokens = ?
-     WHERE request_id = ?
-       AND id = (
-         SELECT id FROM compression_analytics
-         WHERE request_id = ?
-         ORDER BY id DESC
-         LIMIT 1
-       )`
-  ).run(Math.max(0, Math.floor(estimatedTokens)), requestId, requestId);
-}
-
 function toFiniteInt(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, Math.floor(value));
   if (typeof value === "string" && value.trim()) {
@@ -563,11 +312,6 @@ function toFiniteInt(value: unknown): number | null {
     if (Number.isFinite(parsed)) return Math.max(0, Math.floor(parsed));
   }
   return null;
-}
-
-function firstReportedTokenCount(...values: unknown[]): number | null {
-  const counts = values.map(toFiniteInt).filter((value): value is number => value !== null);
-  return counts.find((value) => value > 0) ?? counts[0] ?? null;
 }
 
 function appendCondition(whereClause: string, condition: string): string {

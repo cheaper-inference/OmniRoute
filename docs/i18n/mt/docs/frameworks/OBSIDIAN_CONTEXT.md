@@ -37,34 +37,33 @@ il-karatteristiċi:
 
 ## Konfigurazzjoni
 
-Ma hemm **l-ebda varjabbli tal-ambjent** għat-token jew għall-URL bażi ta’ Obsidian —
-it-tnejn jinħażnu fit-tabella SQLite `key_value` (namespace `obsidian`) permezz ta’
-`src/lib/db/obsidian.ts`. It-token ikun **ikkriptat waqt il-ħażna** (AES-256-GCM, b’għażla
-ta’ kompatibbiltà retroattiva għal plaintext). Ikkonfigura mit-tab **Context Sources**
-tad-dashboard tal-Endpoint (`ObsidianSourceCard`), jew permezz tal-API REST tas-settings.
+Ma hemm **l-ebda varjabbli tal-ambjent** għat-token ta’ Obsidian jew għall-URL bażi — it-tnejn huma
+maħżuna fit-tabella SQLite `key_value` (namespace `obsidian`) permezz ta’
+`src/lib/db/obsidian.ts`. It-token huwa **kripted waqt il-ħżin** (AES-256-GCM, b’għażla
+ta’ kompatibbiltà retroattiva bi plaintext). Ikkonfigurah mit-tab **Context Sources** tad-
+dashboard tal-Endpoint (`ObsidianSourceCard`), jew permezz tal-API REST tas-settings.
 
 > [!IMPORTANT]
-> Il-plugin **Obsidian Local REST API** irid ikun installat u qed jaħdem. L-interfaċċa
-> REST tiegħu tisma’ fuq **HTTP `127.0.0.1:27123`** (il-URL bażi predefinit). Il-port
-> `27124` huwa endpoint MCP/HTTPS _separat_ u jiġi espliċitament miċħud mir-route
-> tas-settings. Jekk qed tikkonnettja minn apparat ieħor, uża
-> `http://<tailscale-ip>:27123`.
+> Il-plugin **Obsidian Local REST API** irid ikun installat u qed jaħdem. L-interfaċċa REST
+> tiegħu tisma’ fuq **HTTP `127.0.0.1:27123`** (il-URL bażi predefinit). Il-port `27124`
+> huwa endpoint MCP/HTTPS _separat_ u jiġi espliċitament miċħud mir-rotta tas-settings.
+> Jekk qed tikkonnettja minn apparat ieħor, uża `http://<tailscale-ip>:27123`.
 
 ### Ċwievet tal-konfigurazzjoni (SQLite `key_value`, namespace `obsidian`)
 
-| Ċavetta           | Għan                                                                   | Ikkriptata |
-| ----------------- | ---------------------------------------------------------------------- | ---------- |
-| `api_key`         | Token bearer tal-Local REST API                                        | iva        |
-| `base_url`        | URL bażi REST (predefinit `http://127.0.0.1:27123`)                    | le         |
-| `vault_path`      | Path assolut għad-direttorju tal-vault (għas-sinkronizzazzjoni)        | le         |
-| `webdav_username` | Username WebDAV iġġenerat (sinkronizzazzjoni tal-vault)                | le         |
-| `webdav_password` | Password WebDAV iġġenerata (sinkronizzazzjoni tal-vault)               | iva        |
-| `webdav_enabled`  | Jekk is-sinkronizzazzjoni tal-vault permezz ta’ WebDAV hijiex attivata | le         |
+| Ċavetta           | Għan                                                                   | Kriptata |
+| ----------------- | ---------------------------------------------------------------------- | -------- |
+| `api_key`         | Token bearer tal-Local REST API                                        | iva      |
+| `base_url`        | URL bażi REST (predefinit `http://127.0.0.1:27123`)                    | le       |
+| `vault_path`      | Mogħdija assoluta għad-direttorju tal-vault (għas-sinkronizzazzjoni)   | le       |
+| `webdav_username` | Isem tal-utent WebDAV iġġenerat (sinkronizzazzjoni tal-vault)          | le       |
+| `webdav_password` | Password WebDAV iġġenerata (sinkronizzazzjoni tal-vault)               | iva      |
+| `webdav_enabled`  | Jekk is-sinkronizzazzjoni tal-vault permezz ta’ WebDAV hijiex attivata | le       |
 
 ### Ikkonfigura permezz ta’ REST
 
 ```bash
-# Issejvja + ivvalida t-token tal-Local REST API (POST jivvalidah permezz ta’ verifika tal-istatus)
+# Issejvja u vvalida t-token tal-Local REST API (POST jivvalida permezz ta’ verifika tal-istatus)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
@@ -76,19 +75,17 @@ curl http://localhost:20128/api/settings/obsidian
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Il-metodi kollha jeħtieġu awtentikazzjoni tad-dashboard. `POST` jiċħad kwalunkwe URL
-fuq il-port `27124` u jivvalida t-token billi jsejjaħ l-endpoint tal-istatus tal-Local
-REST API qabel ma jippersistih.
+Il-metodi kollha jeħtieġu awtentikazzjoni tad-dashboard. `POST` jirrifjuta kwalunkwe URL fuq il-port `27124`
+u jivvalida t-token billi jsejjaħ l-endpoint tal-istatus tal-Local REST API qabel ma jaħżnu b’mod permanenti.
 
 ### Sinkronizzazzjoni tal-vault permezz ta’ WebDAV
 
-`src/app/api/settings/obsidian/webdav/route.ts` jimmaniġġja sinkronizzazzjoni
-fakultattiva tal-vault appoġġjata minn WebDAV (imħaddma minn
-`src/lib/obsidianSync.ts`). Meta tiġi attivata, tidderieġi lil OmniRoute lejn direttorju
-lokali tal-vault u tiġġenera par każwali ta’ username/password għal WebDAV:
+`src/app/api/settings/obsidian/webdav/route.ts` jimmaniġġja sinkronizzazzjoni fakultattiva
+tal-vault appoġġjata minn WebDAV (immexxija minn `src/lib/obsidianSync.ts`). Meta tiġi attivata,
+tidderieġi lil OmniRoute lejn direttorju lokali tal-vault u tiġġenera par każwali ta’ isem tal-utent/password għal WebDAV:
 
 ```bash
-# Attiva s-sinkronizzazzjoni WebDAV għal direttorju tal-vault (tiġġenera username/password)
+# Attiva s-sinkronizzazzjoni WebDAV għal direttorju tal-vault (tiġġenera isem tal-utent/password)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
@@ -96,17 +93,25 @@ curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
 # Ikseb l-istatus tas-sinkronizzazzjoni WebDAV (il-kredenzjali jintbagħtu lura biss waqt li tkun attivata)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# Iddiżattiva s-sinkronizzazzjoni WebDAV (ineħħi l-kredenzjali + il-fajl .stignore ġestit)
+# Iddiżattiva s-sinkronizzazzjoni WebDAV (tneħħi l-kredenzjali u l-.stignore mmaniġġjat)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### Sors ta’ kuntest għal kull API key (fakultattiv)
+### Sors tal-kuntest għal kull ċavetta API (fakultattiv)
 
-Il-konfigurazzjoni ta’ Obsidian tista’ tiġi limitata **għal kull API key** permezz
-tat-tabella `api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Meta
-sejħa MCP tinkludi id awtentikat ta’ API key, `getObsidianConfigForApiKey()` jippreferi
-t-token/URL bażi/path tal-vault ta’ dik iċ-ċavetta stess (`source: "api_key"`) u,
-jekk ma jkunx hemm, juża l-konfigurazzjoni globali (`source: "global"`).
+Il-konfigurazzjoni ta’ Obsidian tista’ tiġi limitata **għal kull ċavetta API** permezz tat-tabella
+`api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Meta sejħa MCP iġġorr id ta’
+ċavetta API awtentikata, `getObsidianConfigForApiKey()` jippreferi t-token/URL-bażi/mogħdija-tal-vault
+proprji ta’ dik iċ-ċavetta (`source: "api_key"`) u, jekk dawn ma jkunux disponibbli, juża l-konfigurazzjoni globali (`source: "global"`).
+
+L-għodod MCP li mhumiex għas-sinkronizzazzjoni jeħtieġu identità solvuta tas-sejjieħ qabel ma jaqraw din il-konfigurazzjoni.
+Sejjieħ mingħajr identità jirċievi `Obsidian API token not configured`, u ma tintbagħat l-ebda
+talba lill-vault. Is-sejjieħa HTTP jiġu solvuti permezz tal-kredenzjali tat-talba tagħhom; is-sejjieħa stdio
+jistgħu jiġu solvuti permezz ta’ `OMNIROUTE_API_KEY` jew `ROUTER_API_KEY`. Sejjieħ HTTP mhux solvut
+ma jistax jiret l-identità tal-ambjent tas-server. IDs ta’ placeholder waħedhom ma jawtorizzawx
+aċċess; kredenzjali valida tal-ambjent li tissolva għal `env-key` tibqa’ appoġġjata.
+Ċwievet awtentikati mingħajr konfigurazzjoni Obsidian speċifika għaċ-ċavetta jibqgħu jużaw il-konfigurazzjoni globali bħala alternattiva.
+L-erba’ għodod `obsidian_sync_*` iżommu l-imġiba separata tagħhom għat-token tas-sinkronizzazzjoni.
 
 ## Għodod MCP (22)
 

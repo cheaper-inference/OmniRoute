@@ -257,10 +257,8 @@ export interface CompressionConfig {
   sessionDedup?: SessionDedupConfig;
   /** CCR (context-cache-retrieval) detail settings (minChars / retrievalRampFactor, #8388). */
   ccr?: CcrConfig;
-  /** Append-preserving CCR detail settings (context-budget archive thresholds). */
-  appendPreservingCcr?: AppendPreservingCcrConfig;
-  /** Exclusive, model/combo-scoped archival context owner. */
-  grevCaching?: GrevCachingConfig;
+  /** Opt-in context rollover: archives old history into ordered CCR markers (default off). */
+  contextRollover?: ContextRolloverConfig;
   /** Provider-delegated context editing (Claude/Anthropic only). */
   contextEditing?: ContextEditingConfig;
   /** Opt-in cache-aligned live-zone compression (default disabled). */
@@ -422,13 +420,6 @@ export const DEFAULT_CODEX_RESPONSES_CONFIG: CodexResponsesConfig = {
   ],
 };
 
-export const DEFAULT_RELEVANCE_CONFIG: RelevanceConfig = {
-  enabled: false,
-  overlapThreshold: 0.1,
-  budgetPercent: 0.5,
-  boilerplateWeight: 0.5,
-};
-
 export const DEFAULT_COMPRESSION_CONFIG: CompressionConfig = {
   enabled: false,
   defaultMode: "off",
@@ -451,7 +442,6 @@ export const DEFAULT_COMPRESSION_CONFIG: CompressionConfig = {
   liveZone: { enabled: false },
   lite: { compressToolResults: true },
   codexResponsesConfig: { ...DEFAULT_CODEX_RESPONSES_CONFIG },
-  relevanceConfig: { ...DEFAULT_RELEVANCE_CONFIG },
 };
 
 export const DEFAULT_CAVEMAN_CONFIG: CavemanConfig = {
@@ -668,7 +658,7 @@ export const DEFAULT_CCR_CONFIG: CcrConfig = {
   retrievalRampFactor: 2,
 };
 
-/** Configuration for append-preserving CCR archival. */
+/** Thresholds of the append-preserving CCR engine (`append-preserving-ccr`). */
 export interface AppendPreservingCcrConfig {
   /** Archive eligible history once this share of the input budget is used. */
   triggerPercent: number;
@@ -690,21 +680,24 @@ export const DEFAULT_APPEND_PRESERVING_CCR_CONFIG: AppendPreservingCcrConfig = {
   maxArchiveSectionChars: 32_000,
 };
 
-/** GrevCaching owns context archival for compatible targets except explicit exclusions. */
-export interface GrevCachingConfig extends AppendPreservingCcrConfig {
+/**
+ * Context rollover: when enabled, the append-preserving CCR engine owns context handling
+ * for every target except the excluded models. Old history is archived into ordered CCR
+ * markers so the replayed prefix stays byte-stable for provider KV/prompt caching.
+ */
+export interface ContextRolloverConfig extends AppendPreservingCcrConfig {
   enabled: boolean;
+  /** `provider/model` keys that keep the normal compression pipeline. */
   excludedModelKeys: string[];
-  excludedComboIds: string[];
-  /** Normal engines applied only to the newly appended prompt, never the replayed prefix. */
-  newBlockPipeline: string[];
+  /** Engines applied only to the newest user prompt, never to the replayed prefix. */
+  currentPromptPipeline: string[];
 }
 
-export const DEFAULT_GREV_CACHING_CONFIG: GrevCachingConfig = {
+export const DEFAULT_CONTEXT_ROLLOVER_CONFIG: ContextRolloverConfig = {
   ...DEFAULT_APPEND_PRESERVING_CCR_CONFIG,
   enabled: false,
   excludedModelKeys: [],
-  excludedComboIds: [],
-  newBlockPipeline: [],
+  currentPromptPipeline: [],
 };
 
 export type { McpAccessibilityConfig } from "./engines/mcpAccessibility/constants.ts";

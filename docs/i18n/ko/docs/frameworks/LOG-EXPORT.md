@@ -16,81 +16,150 @@ OmniRoute 호출 로그를 외부 분석 저장소로 지속적이고 증분 방
 ## 1. 작동 방식
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (로그 탭 필드 집합)
-      → 대상 client.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+서버(구성 복호화 + 검증, 커서 조정)
+  → IPC 시작 → 격리된 exportChild OS 프로세스
+    → 읽기 전용 storage.sqlite → 공유 호출 로그 쿼리/매핑
+      → 비동기 아티팩트 하이드레이션 → 대상 prepare()/send()
+        → 배치 IPC → 서버가 커서 영속화 → ack IPC
+          → 다음 배치; done IPC → 서버가 성공 기록
 ```
 
-- **일정** — 하나의 `JobRegistry` cron 작업인 `log_export`가 있으며, 기본값은 `0 * * * *`(매시간,
-  UTC)입니다. `src/lib/initCloudSync.ts`에 등록되며 `OMNIROUTE_LOG_EXPORT_CRON`으로 재정의할 수 있습니다.
-  각 실행 시 **활성화된** 모든 대상을 순차적으로 비웁니다.
+- **스케줄** — 하나의 `JobRegistry` cron 작업인 `log_export`가 있으며, 기본값은 `0 * * * *`(매시간,
+  UTC)입니다. `src/lib/initCloudSync.ts`에서 등록되며 `OMNIROUTE_LOG_EXPORT_CRON`으로 재정의할 수 있습니다.
+  각 틱에서는 **활성화된** 모든 대상을 순차적으로 처리합니다.
 - **커서** — SQLite의 암시적 `call_logs.rowid`이며, 대상별로
-  `log_export_destinations.cursor_row_id`에 유지됩니다. `timestamp`는 의도적으로 커서로 사용하지 않습니다. 호출자가
-  자체 값을 제공할 수 있으므로, 느린 요청이 나중에 시작된 빠른 요청보다 뒤늦게 기록될 수 있고,
-  타임스탬프 커서를 사용하면 이를 건너뛰게 됩니다.
-- **배치 처리** — 요청당 `batch_size`행(기본값 500), 실행당
-  `max_rows_per_run`행(기본값 10000)을 처리하므로, 대규모 백로그가 한 번의 실행을 차단하지 않고 여러 차례에 걸쳐 소진됩니다.
-- **전달** — 커서는 `send()`가 완료된 후에만 전진합니다. 실패한 배치는 커서를
-  기존 위치에 유지하므로 다음 실행 시 동일한 행을 다시 시도합니다. 보장되는 방식은
-  정확히 한 번이 아니라 최소 한 번 전달과 대상 측 중복 제거입니다. BigQuery는 각 행의 키로 호출 로그 id를 사용하며,
-  자체 중복 제거 기간 내에서 최선형 방식으로 이를 적용합니다.
-- **중복 실행 방지** — cron 실행과 `POST .../run`이 동시에 발생할 수 있습니다. 이미 처리 중인 대상은
-  두 번 처리하는 대신 건너뜁니다(실행 결과에 `skipped: true`로 표시).
-  따라서 동시 실행으로 인해 배치를 다시 전송하거나 커서를 이전 위치로 되돌릴 수 없습니다.
-- **삭제 후 복구** — `cursor_row_id`가 `MAX(rowid)`보다 커지는 경우(전체 테이블이
-  삭제되고 rowid가 다시 시작된 경우), 실행기는 영구적으로 데이터를 감지하지 못하는 상태가 되지 않도록 커서를 0으로 되돌립니다.
+  `log_export_destinations.cursor_row_id`에 영속화됩니다. `timestamp`는 의도적으로 커서로 사용하지 않습니다. 호출자가
+  자체 값을 제공할 수 있으므로, 느린 요청이 나중에 시작된 빠른 요청보다 늦게 기록될 수 있으며
+  타임스탬프 커서는 이를 건너뛰게 됩니다.
+- **배치 처리** — 요청당 `batch_size`개 행(기본값 500), 실행당 `max_rows_per_run`개 행
+  (기본값 10000)을 처리하므로, 대규모 백로그가 한 번의 실행을 차단하는 대신 여러 틱에 걸쳐 소진됩니다.
+- **전송** — 커서는 `send()`가 완료된 후에만 전진합니다. 배치가 실패하면
+  커서는 그대로 유지되므로 다음 실행에서 동일한 행을 다시 시도합니다. 보장 방식은
+  진정한 정확히 한 번(exactly-once)이 아니라 최소 한 번(at-least-once) 전송과 대상 측 중복 제거의 조합입니다. BigQuery는 각
+  행의 키로 호출 로그 ID를 사용하며, 자체 중복 제거 기간 내에서 이를 최선의 방식으로 적용합니다.
+- **중복 실행 방지** — cron 틱과 `POST .../run`이 동시에 실행될 수 있습니다. 이미 처리 중인 대상은
+  두 번 처리되지 않고 건너뜁니다(실행 결과의 `skipped: true`).
+  따라서 동시 실행으로 인해 배치가 재전송되거나 커서가 이전 값으로 되돌아갈 수 없습니다.
+- **삭제 후 복구** — `cursor_row_id`가 `MAX(rowid)`보다 커진 경우(전체 테이블이
+  삭제되고 rowid가 다시 시작된 경우), 실행기는 영구적으로 데이터를 감지하지 못하는 상태가 되는 대신 커서를 0으로 되돌립니다.
+
+### 격리된 실행기 및 제한
+
+Node에서 각 대상 실행은 별도의 단명 OS 자식 프로세스(`worker_threads`가 아닌 IPC 기반
+`child_process`)를 시작합니다. 본문 읽기, 페이로드 JSON 파싱/직렬화, 대상
+`prepare()` 및 대상 네트워크 I/O는 모두 서버의 이벤트 루프가 아닌 해당 프로세스에서 실행됩니다.
+IPC를 통해서는 구성과 작은 진행 상황 메시지만 전달되며, 내보낸 레코드는 서버로 반환되지 않습니다.
+cron 작업과 지금 실행 라우트는 동일한 공개 결과 및 중복 실행 방지 기능을 유지합니다.
+
+자식 프로세스는 서버에서 확인된 `DATA_DIR/storage.sqlite`를 `node:sqlite`를 사용해 읽기 전용으로 열며,
+`busy_timeout=5000` 및 `query_only=ON`을 적용합니다. DB 싱글턴을 가져오지 않으며
+마이그레이션, 백업 또는 SQLite 업데이트를 수행하지 않습니다. 손실되거나 손상된 아티팩트 관련 기록 처리
+(손상된 아티팩트에 대한 UPDATE 포함)는 대시보드 상세 경로에만 남아 있습니다. 두 경로는 순수
+상세 리졸버를 공유합니다. 내보내기는 비동기 파일 시스템 읽기와 동일한 아티팩트 → 레거시
+인라인 → 레거시 디스크 → 없음 해석 순서를 사용합니다. 실행 시 자식 프로세스가 리더를 열 때의 최대 삽입 rowid를
+스냅샷으로 저장하며, 이후 삽입된 데이터는 다음 실행까지 대기합니다. 이는 삽입
+경계이지 장기 실행 SQLite 트랜잭션이 아닙니다. 네트워크 대기 중에도 WAL 작성기와 체크포인트는 자유롭게
+작동할 수 있습니다. 기존 행에 대한 업데이트/삭제는 이 경계에 의해 고정되지 않습니다.
+
+각 배치가 수락된 후 자식 프로세스는 승인을 기다립니다. 서버는 먼저
+`advanceLogExportCursor`로 커서를 영속화한 다음 `ack`를 전송하며, 그전에는 다음 배치가 시작되지 않습니다.
+전송 실패, 충돌 또는 시간 초과가 발생하면 해당 배치의 커서를 전진시키지 않고 실패를 기록합니다. 이전에
+승인된 배치는 커밋된 상태로 유지되며, 승인되지 않은 배치는 최대 하나만 재전송될 수 있습니다.
+성공은 `done` 수신과 자식 프로세스의 정상 종료 후에만 기록됩니다. 실패 시 자식 프로세스는
+SIGTERM으로 종료되며, 500 ms 후에는 SIGKILL로 전환되고 실행기는 프로세스가 완전히 종료될 때까지 기다립니다.
+
+| 환경 변수                                     | 기본값 | 용도                       |
+| --------------------------------------------- | ------ | -------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | 대상별 전체 실행 시간 제한 |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | 자식 V8 old-space 제한(MB) |
+
+유효하지 않거나, 양수가 아니거나, 정수가 아닌 값에는 기본값이 사용됩니다. 힙 설정은 전체
+RSS 제한이 아닙니다. 매우 큰 배치는 여전히 자식 프로세스의 메모리를 고갈시킬 수 있지만 실행은 안전하게 실패합니다.
+기본값 1024 MB는 본문이 활성화된 상태에서 512 KiB 아티팩트 500개로 구성된 기본 배치를 처리할 여유를 제공하며,
+BigQuery의 바이트 청크 기반 JSON 직렬화도 포함합니다. 하지만 이 값이
+본문을 포함한 10000개 행의 배치를 안전하게 만드는 것은 아닙니다. V8 힙 고갈 시 조치 가능한 실패가 기록됩니다. 배치
+크기를 줄이거나 `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`를 높여야 하며, 커서는 마지막으로
+승인된 배치에 유지됩니다. 이전 형식의 인라인/디스크 본문에는 최신 아티팩트 제한이 적용되지 않습니다.
+운영자는 특히 메모리가 제한된 컨테이너 내에서 RSS를 별도로 산정해야 합니다.
+
+자식 프로세스는 확인된 `DATA_DIR`, `NODE_ENV`, 명시적 `TZ`(레거시 파일 이름의
+현지 시간 해석), 존재하는 경우 `ELECTRON_RUN_AS_NODE`, 그리고 다음 아웃바운드 입력만 상속합니다.
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY`(및 각각의 소문자 형식),
+`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
+전역 Undici 디스패처는 `NO_PROXY`를 포함하여 서버의 순수 환경 프록시 해석 및 로컬 호스트
+우회 규칙을 공유합니다. `proxyFetch.ts` 또는 해당 파일의 DB/기능 플래그는 가져오지 않습니다.
+전달되는 출력과 기록된 오류에서는 프록시 자격 증명이 제거됩니다. 대상 자격 증명은
+하나의 시작 IPC 메시지로만 전달되며, argv 또는 환경으로는 절대 전달되지 않습니다. 출력/오류 전달에는
+접두사가 추가되고 민감한 정보가 제거됩니다. 각 cron 실행마다 Node의 SQLite 경고가 반복되는 것을 방지하기 위해
+자식 프로세스의 exec 인수에서는 `ExperimentalWarning`만 비활성화되며, 다른 유형의 경고는 계속 표시됩니다.
+
+대상 모듈은 Next.js/서버 전용 종속성 없이 가져올 수 있어야 합니다. 기존
+BigQuery 구현은 이미 해당 계약을 충족합니다. 액세스 토큰 캐시는 하위 프로세스 실행 중에만 유지되며,
+실행 간에는 유지되지 않습니다. 지원되는 런타임은 Node이지만(`package.json`의 engines), README의 Bun
+설치 섹션과 `Dockerfile.bun`에서도 `bun:sqlite`를 사용하는 프로덕션 호환 경로를
+안내합니다(`src/lib/db/core.ts` / 어댑터). 따라서 Bun에서는 내보내기가 기존
+인프로세스 경로를 유지하고 일회성 경고를 출력합니다. 하위 프로세스의 힙/시간 제한 격리는 사용할 수 없습니다.
+이벤트 루프 및 OOM 격리를 위해서는 Node를 사용하세요. 여기서 Bun은 개발 전용으로 취급되지 않습니다.
+
+`includeBodies`를 활성화한 경우 시간 단위로 페이로드 백로그를 누적하기보다는
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`와 같이 분 단위 주기를 사용하는 것이 좋습니다.
+배치 및 행 제한은 여전히 각 실행의 범위를 제한합니다. 프로세스 시작 비용은 실행마다 각 대상에 대해 발생합니다.
+이는 총 CPU 사용량을 줄이기 위한 것이 아니라, 약간의 시작 비용을 감수하고 서버 이벤트 루프를 격리하기 위한 것입니다.
 
 ### 페이로드(프롬프트 및 완성 결과)
 
 기본적으로 내보내기에는 로그 **목록**에 표시되는 요약 필드만 포함됩니다. **프롬프트 및 응답 내보내기**
-(`includeBodies`)를 켜면 각 호출의 로그 **상세 정보** 창에 표시되는 내용도 추가로 전송됩니다.
+(`includeBodies`)를 활성화하면 각 호출에 대해 로그 **상세 정보** 창에 표시되는 내용도 추가로 전송됩니다.
 
-| 필드                             | 포함되는 내용                                    |
-| -------------------------------- | ------------------------------------------------ |
-| `request_body` / `response_body` | 대시보드에 렌더링되는 호출 페이로드              |
-| `pipeline_route_decision`        | 라우터가 선택한 대상 및 모델                     |
-| `pipeline_client_request`        | 클라이언트가 전송한 원본 요청 그대로             |
-| `pipeline_openai_request`        | 내부 OpenAI 형식으로 변환된 후의 요청            |
-| `pipeline_provider_request`      | 공급자 방언으로 실제 업스트림에 전송된 요청      |
-| `pipeline_provider_response`     | 원본 업스트림 응답                               |
-| `pipeline_client_response`       | 호출자에게 반환된 내용                           |
-| `pipeline_error`                 | 실패한 호출의 파이프라인 수준 오류 상세 정보     |
-| `bodies_truncated`               | 위 필드 중 하나라도 `maxBodyBytes`에 도달하면 참 |
+| 필드                             | 포함되는 내용                                       |
+| -------------------------------- | --------------------------------------------------- |
+| `request_body` / `response_body` | 대시보드에 렌더링되는 호출 페이로드                 |
+| `pipeline_route_decision`        | 라우터가 선택한 대상 및 모델                        |
+| `pipeline_client_request`        | 클라이언트가 보낸 그대로의 원시 요청                |
+| `pipeline_openai_request`        | 내부 OpenAI 형식으로 변환된 후의 요청               |
+| `pipeline_provider_request`      | 프로바이더 형식으로 업스트림에 실제 전송된 요청     |
+| `pipeline_provider_response`     | 원시 업스트림 응답                                  |
+| `pipeline_client_response`       | 호출자에게 반환된 내용                              |
+| `pipeline_error`                 | 실패한 호출에 대한 파이프라인 수준의 오류 상세 정보 |
+| `bodies_truncated`               | 위 필드 중 하나라도 `maxBodyBytes`에 도달한 경우 참 |
 
-이는 프롬프트 콘텐츠이므로 **기본적으로 꺼져 있으며**, 의도적으로 대상별로 선택할 수 있습니다.
-전송되는 내용은 대시보드에 표시되는 내용과 같습니다. 둘 다 `getCallLogById`를 통해 읽기 때문입니다. 페이로드는
-기록될 때 이미 PII가 정제되고 비밀 정보가 마스킹되며, `noLog` API 키로 수행된 호출은
-페이로드를 전혀 저장하지 않으므로 내보낼 내용도 없습니다.
+이는 프롬프트 콘텐츠이므로 **기본적으로 비활성화**되어 있으며, 의도적으로 대상별로 선택할 수 있습니다.
+내보내기와 `getCallLogById`가 동일한 상세 정보 확인 방식을 공유하므로, 전송되는 내용은 대시보드에 표시되는 내용과
+동일합니다. 페이로드는 기록될 때 이미 PII가 정제되고 비밀 정보가 삭제되며, `noLog` API 키로 실행된 호출은
+페이로드 자체를 저장하지 않으므로 내보낼 내용도 없습니다.
 
-페이로드는 행별로 파일 시스템 아티팩트에서 읽으므로, 이를 요청한 대상에 대해서만 하이드레이션이 실행됩니다.
-아티팩트가 누락되거나 손상된 행은 배치를 실패시키고 커서를 멈추는 대신 null
-페이로드와 함께 요약 정보를 내보냅니다.
+페이로드는 파일 시스템 아티팩트에서 행별로 읽으므로, 하이드레이션은 이를 요청한 대상에 대해서만
+실행됩니다. 아티팩트가 없거나 손상된 경우에도 배치를 실패시켜 커서가 진행되지 못하게 하는 대신,
+null 페이로드와 함께 요약 정보를 내보냅니다.
 
-`maxBodyBytes`(기본값 262144)는 각 필드의 크기를 제한합니다. 더 긴 페이로드는 삭제되는 대신
-**잘립니다**. 잘린 프롬프트도 "무엇을 요청했는가"에 대한 답을 제공하며, 해당 행에는
+`maxBodyBytes`(기본값 262144)는 각 필드의 크기를 제한합니다. 더 긴 페이로드는 **삭제되지 않고
+잘립니다**. 잘린 프롬프트도 "무엇을 요청했는가"에 답할 수 있기 때문입니다. 해당 행에는
 `bodies_truncated` 플래그가 설정됩니다. 청크 단위로 스트리밍된 델타는 내보내지 않습니다. 조립된 응답이
-이미 `pipeline_provider_response` 및 `pipeline_client_response`에 포함되어 있기 때문입니다.
+이미 `pipeline_provider_response`와 `pipeline_client_response`에 포함되어 있습니다.
 
 ---
 
 ## 2. 파일
 
-| 구성 요소         | 위치                                         |
-| ----------------- | -------------------------------------------- |
-| 대상 계약         | `src/lib/logExport/types.ts`                 |
-| 레지스트리        | `src/lib/logExport/registry.ts`              |
-| 비밀 정보 처리    | `src/lib/logExport/secrets.ts`               |
-| 실행기(커서 루프) | `src/lib/logExport/runner.ts`                |
-| API 프로젝션      | `src/lib/logExport/presenter.ts`             |
-| BigQuery 대상     | `src/lib/logExport/destinations/bigquery.ts` |
-| Google SA 인증    | `src/lib/logExport/googleServiceAccount.ts`  |
-| 호출 로그 소스    | `src/lib/usage/callLogExportSource.ts`       |
-| 영속성            | `src/lib/db/logExportDestinations.ts`        |
-| Cron 작업         | `src/lib/jobs/logExportJob.ts`               |
-| REST 계층         | `src/app/api/log-export/`                    |
-| 대시보드 페이지   | `src/app/(dashboard)/dashboard/log-export/`  |
+| 구성 요소          | 위치                                         |
+| ------------------ | -------------------------------------------- |
+| 대상 계약          | `src/lib/logExport/types.ts`                 |
+| 레지스트리         | `src/lib/logExport/registry.ts`              |
+| 시크릿 처리        | `src/lib/logExport/secrets.ts`               |
+| 실행기(부모 IPC)   | `src/lib/logExport/runner.ts`                |
+| 프로세스 수명 주기 | `src/lib/logExport/childRunner.ts`           |
+| 자식 진입점        | `src/lib/logExport/exportChild.ts`           |
+| 읽기 전용 오프너   | `src/lib/db/logExportReadOnly.ts`            |
+| 공유 쿼리/매핑     | `src/lib/usage/callLogExportQueries.ts`      |
+| 세부 정보 리졸버   | `src/lib/usage/callLogDetailResolver.ts`     |
+| API 프로젝션       | `src/lib/logExport/presenter.ts`             |
+| BigQuery 대상      | `src/lib/logExport/destinations/bigquery.ts` |
+| Google SA 인증     | `src/lib/logExport/googleServiceAccount.ts`  |
+| 호출 로그 소스     | `src/lib/usage/callLogExportSource.ts`       |
+| 영속성             | `src/lib/db/logExportDestinations.ts`        |
+| Cron 작업          | `src/lib/jobs/logExportJob.ts`               |
+| REST 계층          | `src/app/api/log-export/`                    |
+| 대시보드 페이지    | `src/app/(dashboard)/dashboard/log-export/`  |
 
 스키마: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

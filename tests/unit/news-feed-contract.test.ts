@@ -28,24 +28,6 @@ test("the generic banner is ID-dismissable and independent from the Radar featur
   assert.match(source, /parseDismissedNewsIds/);
   assert.match(source, /localStorage/);
   assert.match(source, /announcement\.id/);
-  assert.match(source, /let active = true/);
-  assert.match(source, /if \(active && value !== null\)/);
-  assert.doesNotMatch(source, /controller\.abort\(\)/);
   assert.doesNotMatch(source, /RADAR_ENABLED/);
   assert.doesNotMatch(source, /method:\s*["']POST["']/);
-});
-
-test("dashboard polling avoids cleanup aborts and stops retrying unauthorized LiveWS connections", async () => {
-  const [recentRequests, maintenanceBanner, liveDashboard] = await Promise.all([
-    readFile(new URL("src/app/(dashboard)/home/HomeRecentRequests.tsx", root), "utf8"),
-    readFile(new URL("src/shared/components/MaintenanceBanner.tsx", root), "utf8"),
-    readFile(new URL("src/hooks/useLiveDashboard.ts", root), "utf8"),
-  ]);
-
-  assert.match(recentRequests, /await load\(\(\) => !cancelled\)/);
-  assert.doesNotMatch(recentRequests, /controller\?\.abort\(\)/);
-  assert.doesNotMatch(maintenanceBanner, /Health check timeout/);
-  assert.match(maintenanceBanner, /if \(!active\) return/);
-  assert.match(liveDashboard, /msg\.code === "UNAUTHORIZED"/);
-  assert.match(liveDashboard, /!authorizationRejectedRef\.current/);
 });

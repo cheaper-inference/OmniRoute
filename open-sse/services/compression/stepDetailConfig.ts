@@ -1,5 +1,5 @@
 // Resolves the persisted per-engine DETAIL sub-object (settings.headroom / .sessionDedup /
-// .ccr / .appendPreservingCcr) for a stacked-pipeline step. Extracted out of strategySelector.ts (frozen at cap by
+// .ccr) for a stacked-pipeline step. Extracted out of strategySelector.ts (frozen at cap by
 // file-size-baseline.json — see scripts/check/check-file-size.mjs) rather than growing that
 // file inline.
 //
@@ -22,8 +22,6 @@ export function resolveStepDetailConfig(
       return config?.sessionDedup ?? {};
     case "ccr":
       return config?.ccr ?? {};
-    case "relevance":
-      return config?.relevanceConfig ?? {};
     default:
       return {};
   }

@@ -256,7 +256,9 @@ export async function GET(
         payload.models = filterModelsForRoute(provider, payload.models, chatOnly);
       }
       if (excludeHidden && payload.models && Array.isArray(payload.models)) {
-        payload.models = payload.models.filter((m: any) => !getModelIsHidden(provider, m.id));
+        payload.models = payload.models.filter(
+          (m: any) => m.visibility !== "hide" && !getModelIsHidden(provider, m.id)
+        );
       }
       return NextResponse.json(payload, statusConfig);
     };
@@ -2171,7 +2173,7 @@ export async function GET(
         // web-cookie providers like voyage-ai, jina-ai, t3-web) are
         // intentionally local-catalog-only; model-sync imports rather than 502s.
         intentional: true,
-        warning: "API unavailable — using local catalog",
+        warning: "Model discovery is not configured for this provider — using local catalog",
       });
     }
     if (!config) {

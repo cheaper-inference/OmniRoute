@@ -1,1 +1,0 @@
-- fix(kiro): fall back from the branded kiro.dev gateway to CodeWhisperer on 400 "Improperly formed request" / REQUEST_BODY_INVALID for Builder ID and amazon-q (#15621)

@@ -11,6 +11,16 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const settingsRoute = await import("../../src/app/api/settings/route.ts");
+const managementPassword = await import("../../src/lib/auth/managementPassword.ts");
+
+// oidcAllowedSubjects is a re-auth-guarded key: a write that passes the allowlist guard
+// still has to carry the management password.
+const PASSWORD = "operator-secret";
+async function seedPassword() {
+  await settingsDb.updateSettings({
+    password: await managementPassword.hashManagementPassword(PASSWORD),
+  });
+}
 
 test.beforeEach(() => {
   core.resetDbInstance();
@@ -74,8 +84,12 @@ test("enabling OIDC without any allowed subject is rejected", async () => {
 
 test("replacing the allowlist with another non-empty one is accepted", async () => {
   await seedEnabled(["admin@example.com"]);
+  await seedPassword();
 
-  const result = await patch({ oidcAllowedSubjects: ["other@example.com"] });
+  const result = await patch({
+    oidcAllowedSubjects: ["other@example.com"],
+    currentPassword: PASSWORD,
+  });
 
   assert.equal(result.status, 200);
   assert.deepEqual((await settingsDb.getSettings()).oidcAllowedSubjects, ["other@example.com"]);
@@ -83,8 +97,9 @@ test("replacing the allowlist with another non-empty one is accepted", async () 
 
 test("the allowlist can be emptied when OIDC is off", async () => {
   await settingsDb.updateSettings({ oidcEnabled: false, oidcAllowedSubjects: ["a@example.com"] });
+  await seedPassword();
 
-  const result = await patch({ oidcAllowedSubjects: [] });
+  const result = await patch({ oidcAllowedSubjects: [], currentPassword: PASSWORD });
 
   assert.equal(result.status, 200);
 });

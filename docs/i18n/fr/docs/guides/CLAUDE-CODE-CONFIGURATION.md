@@ -48,15 +48,11 @@ fonctionne donc directement), vérifie l’état du serveur, puis exécute `clau
 
 ---
 
-## Alias de découverte — afficher les modèles non-Claude dans le sélecteur `/model`
+## Alias de découverte — faire apparaître les modèles non-Claude dans le sélecteur `/model`
 
-La découverte des modèles de passerelle de Claude Code répertorie uniquement les identifiants commençant par `claude`
-ou `anthropic`. Ainsi, avec `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, le sélecteur natif
-`/model` n’affiche normalement **que** les modèles Claude/Anthropic d’OmniRoute — un modèle
-`kimi/kimi-k2.6` ou `glm/glm-5.2` n’apparaît jamais, même si son routage fonctionne correctement.
+La découverte de modèles via la passerelle de Claude Code ne liste que les identifiants qui commencent par `claude` ou `anthropic` : avec `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, le sélecteur natif `/model` n'affiche donc normalement **que** les modèles Claude/Anthropic d'OmniRoute — un `kimi/kimi-k2.6` ou un `glm/glm-5.2` n'y apparaît jamais, même s'il est correctement routé.
 
-OmniRoute peut exposer un alias de n’importe quel modèle activé (ainsi que de toute combinaison) sous un identifiant `claude/…` afin qu’il
-passe ce filtre et apparaisse dans le sélecteur :
+OmniRoute peut refléter n'importe quel modèle activé (et combo) sous un identifiant `claude/…` afin qu'il passe ce filtre et apparaisse dans le sélecteur :
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,74 +60,77 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Lorsque vous sélectionnez l’un de ces modèles dans Claude Code, OmniRoute retire l’enveloppe `claude/`
-pour rétablir l’identifiant réel avant le routage — un véritable identifiant `claude/<real-claude-model>`
-(celui du fournisseur OAuth Claude réel) reste toujours inchangé.
+Lorsque vous sélectionnez l'un de ces alias dans Claude Code, OmniRoute retire l'enrobage `claude/` pour retrouver l'identifiant réel avant le routage — un véritable identifiant `claude/<real-claude-model>` (le fournisseur Claude OAuth réel) n'est jamais modifié.
 
-**Cette fonctionnalité est désactivée par défaut** et contrôlée par trois niveaux (le plus spécifique
-est prioritaire), afin qu’une installation OmniRoute standard ne duplique jamais son catalogue pour les clients qui n’utilisent pas
-Claude Code :
+Par défaut, seuls les identifiants de base sont reflétés. Lorsque le flag de fonctionnalité optionnel `CATALOG_MIRROR_REFINEMENTS_ENABLED` est activé, les variantes de niveau d'effort de raisonnement que le catalogue liste déjà (p. ex. `codex/gpt-6-sol-high`) sont reflétées comme n'importe quel autre identifiant, ce qui permet à Claude Code de choisir un niveau d'effort explicite ; les identifiants intégrés `auto/*`, que le chemin de requête ne peut pas matérialiser, ne sont pas reflétés. La présence ou non des variantes d'effort reste régie par `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — le miroir n'ajoute jamais une variante absente du catalogue de base.
 
-| Niveau      | Emplacement                                                                                        |
-| ----------- | -------------------------------------------------------------------------------------------------- |
-| Modèle      | Page de détails du fournisseur → option « Expose in Claude Code » par modèle                       |
-| Fournisseur | Page de détails du fournisseur → option au niveau du fournisseur (couvre tous ses modèles)         |
-| Global      | Paramètres → Indicateurs de fonctionnalités → `EXPOSE_CC_DISCOVERY_ALIASES` (désactivé par défaut) |
+**Cette fonctionnalité est désactivée par défaut** et contrôlée par un mécanisme à trois niveaux (le plus spécifique l'emporte), de sorte qu'un OmniRoute standard ne double jamais son catalogue pour les clients qui n'utilisent pas Claude Code :
 
-La variable d’environnement `EXPOSE_CC_DISCOVERY_ALIASES` force l’activation au niveau global
-et est prioritaire sur le réglage du tableau de bord (l’écran des indicateurs de fonctionnalités affiche
-une mention « actif via une variable d’environnement » lorsque c’est le cas). Les options par fournisseur et
-par modèle permettent ensuite d’affiner ce comportement — par exemple, niveau global désactivé + fournisseur Kimi activé expose
-uniquement les modèles de Kimi.
+| Niveau      | Où                                                                                      |
+| ----------- | --------------------------------------------------------------------------------------- |
+| Modèle      | Page de détail du fournisseur → bascule « Expose in Claude Code » par modèle            |
+| Fournisseur | Page de détail du fournisseur → bascule au niveau fournisseur (couvre tous ses modèles) |
+| Global      | Paramètres → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (désactivé par défaut)       |
 
-> ⚠️ **Différence de fenêtre pour les modèles non-Claude.** Claude Code suppose une fenêtre de contexte
-> de 200K pour tout identifiant qu’il ne reconnaît pas (il ne peut pas lire la fenêtre réelle depuis
-> `/v1/models`). Pour un modèle disposant d’une fenêtre plus grande (par ex. les 256K de Kimi K2), définissez
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sur une valeur inférieure à la fenêtre réelle du modèle afin que
-> la compaction automatique ne se déclenche pas prématurément. Les profils générés ci-dessus le font déjà
-> pour chaque modèle.
+La variable d'environnement `EXPOSE_CC_DISCOVERY_ALIASES` force l'activation du niveau global et prime sur le réglage du tableau de bord (l'écran Feature Flags affiche alors une note « active via environment variable »). Les bascules par fournisseur et par modèle affinent ensuite ce réglage — par exemple, global désactivé + fournisseur Kimi activé n'expose que les modèles de Kimi.
+
+> ⚠️ **Incohérence de fenêtre sur les modèles non-Claude.** Claude Code suppose une fenêtre de contexte de 200 K pour tout identifiant qu'il ne reconnaît pas (il ne peut pas lire la fenêtre réelle depuis `/v1/models`). Pour un modèle doté d'une fenêtre plus grande (p. ex. les 256 K de Kimi K2), définissez `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sur une valeur inférieure à la fenêtre réelle du modèle afin que l'auto-compaction ne se déclenche pas prématurément. Les profils générés ci-dessus le font déjà pour chaque modèle.
 
 ---
 
-## Bloc d’intégration sur le tableau de bord
+## Bloc d’intégration dans le tableau de bord
 
-La carte de l’outil Claude (**Tableau de bord → Code CLI**) affiche le fragment `settings.json` exact
+La carte de l’outil Claude (**Tableau de bord → CLI Code**) affiche le fragment `settings.json` exact
 pour cette instance, à côté du bouton d’information sur l’alias de découverte, avec un bouton de copie :
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<votre OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<votre clé API OmniRoute>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-L’URL de base est celle résolue par la carte (y compris une valeur de remplacement personnalisée que vous avez saisie), déjà
-normalisée — sans suffixe `/v1` ni barre oblique finale. **La clé n’est jamais affichée** : le bloc contient un
+L’URL de base est celle résolue par la carte (y compris une valeur personnalisée que vous avez saisie), déjà
+normalisée — sans suffixe `/v1` ni barre oblique finale. **La clé n’est jamais affichée** : le bloc fournit un
 espace réservé, afin qu’une capture d’écran ou un extrait collé ne puisse pas la divulguer. Remplacez-le par votre clé.
 
-Ajoutez `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sous le même bloc `env` pour tout modèle dont la fenêtre
-de contexte réelle n’est pas de 200K — Claude Code suppose une valeur de 200K pour chaque identifiant qu’il ne reconnaît pas, de sorte que
-la compression automatique se déclenche sinon au mauvais moment (consultez l’avertissement de la section précédente).
-Le générateur d’extrait accepte également cette valeur, afin qu’un appelant connaissant la fenêtre du modèle cible
-puisse l’émettre directement.
+Ajoutez `CLAUDE_CODE_AUTO_COMPACT_WINDOW` dans le même bloc `env` pour tout modèle dont la fenêtre
+de contexte réelle n’est pas de 200K — Claude Code suppose une fenêtre de 200K pour chaque identifiant qu’il ne
+reconnaît pas, si bien que la compaction automatique se déclenche autrement au mauvais moment (consultez
+l’avertissement de la section précédente). Le générateur d’extrait accepte également cette valeur, afin qu’un appelant
+connaissant la fenêtre du modèle cible puisse l’émettre directement.
 
 Source : `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (générateur
-pur, testé unitairement) affiché par `ClaudeGatewayOnboardingBlock`.
+pur, couvert par des tests unitaires) affiché par `ClaudeGatewayOnboardingBlock`.
+
+### Épingler un compte (facultatif)
+
+Pour acheminer chaque requête Claude Code via un compte fournisseur spécifique, ajoutez l’en-tête
+`x-omniroute-connection` au moyen de `ANTHROPIC_CUSTOM_HEADERS` dans le même bloc `env` :
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Copiez l’identifiant depuis la puce `xxxxxxxx…` sur la ligne de connexion de la page du fournisseur. L’épinglage ne
+s’applique qu’aux identifiants de modèle unique (`provider/model`), et non aux combinaisons. Consultez
+[Épinglage d’un compte par requête](../reference/API_REFERENCE.md#account-pinning-per-request) pour connaître le
+comportement de repli exact.
 
 ---
 
 ## Profils (`CLAUDE_CONFIG_DIR`)
 
 Claude Code ne dispose d’**aucun fichier de profil natif** (contrairement au fichier `~/.codex/<name>.config.toml` de Codex).
-Le mécanisme idiomatique est `CLAUDE_CONFIG_DIR` — un répertoire de configuration distinct pour chaque
-profil, chacun avec ses propres `settings.json`, identifiants, historique et cache.
+Le mécanisme idiomatique est `CLAUDE_CONFIG_DIR` — un répertoire de configuration distinct par
+profil, chacun possédant ses propres paramètres `settings.json`, identifiants, historique et cache.
 
-`omniroute setup-claude` récupère le catalogue `/v1/models` en direct et écrit un
-profil par modèle dans `~/.claude/profiles/<name>/settings.json`, en réutilisant les
-**mêmes noms que `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …) :
+`omniroute setup-claude` récupère le catalogue `/v1/models` actif et écrit un
+profil par modèle dans `~/.claude/profiles/<name>/settings.json`, en réutilisant
+**les mêmes noms que `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …) :
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -150,13 +149,13 @@ profil par modèle dans `~/.claude/profiles/<name>/settings.json`, en réutilisa
 
 > **Le jeton d’authentification n’est jamais écrit dans le profil.** Lancez avec
 > `omniroute launch --profile <name>` (cette commande injecte `ANTHROPIC_AUTH_TOKEN` depuis le
-> contexte actif), ou exportez vous-même `ANTHROPIC_AUTH_TOKEN` et exécutez
+> contexte actif), ou exportez vous-même `ANTHROPIC_AUTH_TOKEN`, puis exécutez
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
 **Synchronisation automatique après la découverte des modèles (facultative).** OmniRoute peut régénérer automatiquement ces mêmes
-fichiers `~/.claude/profiles/<name>/settings.json` chaque fois qu’une synchronisation des modèles d’un fournisseur
-modifie le catalogue en direct — ainsi, les modèles nouveaux ou renommés obtiennent des profils sans qu’il soit nécessaire de réexécuter la
-commande. Cette fonctionnalité est **désactivée par défaut** : activez-la depuis le **tableau de bord Code CLI** (« Synchronisation
+fichiers `~/.claude/profiles/<name>/settings.json` chaque fois qu’une synchronisation des modèles
+d’un fournisseur modifie le catalogue actif — les modèles nouveaux ou renommés obtiennent ainsi des profils sans qu’il soit nécessaire de réexécuter la
+commande. Cette fonctionnalité est **désactivée par défaut** : activez-la depuis le **tableau de bord CLI Code** (« Synchronisation
 automatique des profils CLI » → Claude Code), ou définissez `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (elle respecte également
 `CLI_ALLOW_CONFIG_WRITES`, activé par défaut). Lorsqu’elle est activée, elle écrit uniquement les fichiers de profil ; elle ne
 modifie jamais votre configuration Claude active/par défaut, votre authentification ni le fichier `~/.claude/settings.json`.
@@ -173,10 +172,14 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 # Seulement certains fournisseurs
 omniroute setup-claude --only glm,kimi
 
-# Prévisualisation sans écriture
+# Écrit également des profils pour les fournisseurs CLI locaux (zcode, auggie, devin-cli-agentic,
+# codex-app-server) non détectés sur cet hôte (ignorés par défaut pour une cible locale)
+omniroute setup-claude --include-local
+
+# Aperçu sans écriture
 omniroute setup-claude --dry-run
 
-# Lancer un profil
+# Lance un profil
 omniroute launch --profile kimi-k27
 ```
 

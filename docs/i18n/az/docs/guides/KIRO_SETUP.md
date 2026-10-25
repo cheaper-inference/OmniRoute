@@ -118,30 +118,38 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 ## API Açarının İdxal Axını
 
 API açarı ilə autentifikasiya uzunmüddətli Kiro / AWS CodeWhisperer bearer etimadnamələri üçündür. O,
-OAuth yeniləməsindən istifadə etmir və bununla da ortaq OIDC sessiyasının etibarsızlaşdırılmasının qarşısını alır.
+OAuth yeniləməsindən istifadə etmir və beləliklə, paylaşılan OIDC sessiyasının etibarsızlaşdırılmasının qarşısını alır.
 
 ### İdarəetmə Paneli
 
 1. **İdarəetmə paneli -> Provayderlər -> Kiro** bölməsini açın.
-2. **API Açarı** seçimini edin.
-3. API açarını və istəyə bağlı AWS regionunu (standart olaraq `us-east-1`) daxil edin.
-4. OmniRoute açarı yoxlayır və bağlantını yadda saxlayır.
+2. **API Açarı** seçin.
+3. API açarını daxil edin və AWS regionunu seçin: **Avtomatik aşkarlama** (standart), **ABŞ Şərqi
+   (Şimali Virciniya)** və ya **Avropa (Frankfurt)**.
+4. OmniRoute açarı yoxlayır və bağlantını açarın işlədiyi regiona bağlayaraq yadda saxlayır.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` parametrinin qəbul etdiyi dəyərlər `auto` (standart), `us-east-1` və ya `eu-central-1`-dir; digər bütün dəyərlər
+HTTP 400 xətası ilə rədd edilir.
 
 ### Daxili Müqavilə
 
-API marşrutu açarı `KiroService.validateApiKey()` çağırışı ilə yoxlayır; bu funksiya
-regiona uyğun CodeWhisperer/Amazon Q son nöqtəsinə qarşı `ListAvailableProfiles` istifadə edir
-və bir `profileArn` müəyyənləşdirir.
+API marşrutu `KiroService.validateApiKey()` metodunu çağıraraq açarı yoxlayır; bu metod
+hər region üçün 10 saniyəlik vaxt limiti ilə `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+sorğusunu (Amazon Q səth API-sinin açarla nəticə çıxarma üçün istifadə etdiyi sorğunu) çağırır.
+`auto` rejimində əvvəlcə `us-east-1`, sonra `eu-central-1` sınaqdan keçirilir və açarı
+qəbul edən ilk region yadda saxlanılır. Bütün namizəd regionlarda rədd edilən açarın idxalı
+HTTP 400 xətası ilə uğursuz olur. Daha sonra əlavə `profileArn` dəyərini aşkar etmək üçün
+mümkün olduğu halda `ListAvailableProfiles` çağırılır (AWS əksər API açarları üçün bunu rədd edir).
 
-Yadda saxlanılan bağlantı aşağıdakılardan istifadə edir:
+Yadda saxlanılan bağlantı aşağıdakı strukturu istifadə edir:
 
 ```json
 {
@@ -156,8 +164,11 @@ Yadda saxlanılan bağlantı aşağıdakılardan istifadə edir:
 
 İcra zamanı `KiroExecutor.buildHeaders()` açarı
 `Authorization: Bearer <key>` kimi göndərir və `tokentype: API_KEY` əlavə edir. Kvota/profil çağırışları
-eyni markerdən istifadə edir ki, AWS bearer dəyərini OIDC və ya sosial giriş tokeni deyil,
-uzunmüddətli API açarı kimi qəbul etsin.
+eyni markerdən istifadə edir, beləliklə AWS bearer-i OIDC və ya sosial giriş tokeni deyil,
+uzunmüddətli API açarı kimi qəbul edir. `KiroExecutor.execute()` API açarı ilə nəticə çıxarma sorğularını yalnız
+`https://q.<region>.amazonaws.com/generateAssistantResponse` ünvanına — `us-east-1`
+daxil olmaqla — göndərir, çünki Kiro IDE şlüzü `TokenType=API_KEY` dəyərini rədd edir,
+`codewhisperer.us-east-1` isə API açarı yüklərini etibarsız sorğu gövdəsi kimi rədd edir (HTTP 400).
 
 ---
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Dialog, DialogContent, DialogTitle } from "@omniroute/ui-kit/dialog";
 import {
   SIDEBAR_SECTIONS,
   HIDDEN_SIDEBAR_ITEMS_SETTING_KEY,
@@ -14,6 +15,10 @@ import {
   type SidebarItemDefinition,
   type SidebarSectionChild,
 } from "@/shared/constants/sidebarVisibility";
+import { cn } from "@/shared/utils/cn";
+import Button from "./Button";
+import Icon from "./Icon";
+import Input from "./Input";
 
 function isSidebarGroup(
   child: SidebarSectionChild
@@ -66,6 +71,13 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [radarAdminUrl, setRadarAdminUrl] = useState<unknown>(null);
+  // The palette has no DialogTrigger (Radix's own focus return target) and mounts fresh on
+  // open, so the element focused before the first render is the one to return to on close.
+  const [opener] = useState<HTMLElement | null>(() => {
+    if (typeof document === "undefined") return null;
+    const active = document.activeElement;
+    return active instanceof HTMLElement && active !== document.body ? active : null;
+  });
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -218,11 +230,9 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
   );
 
   useEffect(() => {
+    // Escape is handled by the kit Dialog (onOpenChange(false) → onClose), not here, so it
+    // never fires onClose twice.
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-        return;
-      }
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIndex((prev) => (prev + 1) % Math.max(1, filtered.length));
@@ -241,7 +251,7 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [filtered, selectedIndex, onClose, handleNavigate]);
+  }, [filtered, selectedIndex, handleNavigate]);
 
   useEffect(() => {
     const list = listRef.current;
@@ -251,27 +261,33 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
   }, [selectedIndex]);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[10vh] px-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div
-        className="relative w-full max-w-3xl bg-surface border border-black/10 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("commandPalette.title")}
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      {/* Opens near the top like the legacy palette: the kit centres with translate(-50%, -50%),
+          so the transform and the slide-in keyframes are overridden (fade only). */}
+      <DialogContent
+        showCloseButton={false}
+        aria-describedby={undefined}
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          if (opener?.isConnected) opener.focus();
+        }}
+        className="top-[10vh] max-w-3xl overflow-hidden p-0 [animation-name:ci-fade-in] [transform:translateX(-50%)]"
       >
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-black/5 dark:border-white/5">
-          <span className="material-symbols-outlined text-[20px] text-text-muted shrink-0">
-            search
-          </span>
-          <input
+        <DialogTitle className="ci-sr-only">{t("commandPalette.title")}</DialogTitle>
+        <div className="flex items-center gap-3 border-b border-border px-5 py-3">
+          <Input
             ref={inputRef}
-            type="text"
-            className="flex-1 bg-transparent text-text placeholder:text-text-muted outline-none text-base"
+            type="search"
+            icon="search"
+            className="flex-1 [&_.ci-input-shell]:border-0 [&_.ci-input-shell]:bg-transparent [&_.ci-input-shell]:shadow-none"
+            inputClassName="[&::-webkit-search-cancel-button]:appearance-none"
             placeholder={t("commandPalette.searchPlaceholder")}
+            aria-label={t("commandPalette.searchPlaceholder")}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -281,19 +297,20 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
             spellCheck={false}
           />
           {query && (
-            <button
-              className="text-text-muted hover:text-text transition-colors"
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              tabIndex={-1}
+              aria-label={t("commandPalette.clearSearch")}
               onClick={() => {
                 setQuery("");
                 setSelectedIndex(0);
               }}
-              tabIndex={-1}
-              aria-label={t("commandPalette.clearSearch")}
             >
-              <span className="material-symbols-outlined text-[16px]">close</span>
-            </button>
+              <Icon name="close" size={16} />
+            </Button>
           )}
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-black/5 dark:bg-white/5 text-text-muted border border-black/10 dark:border-white/10 shrink-0">
+          <kbd className="hidden shrink-0 rounded border border-border bg-bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:inline-flex">
             Esc
           </kbd>
         </div>
@@ -301,12 +318,13 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
         {grouped.length > 0 ? (
           <ul
             ref={listRef}
-            className="py-2 max-h-[60vh] overflow-y-auto custom-scrollbar"
             role="listbox"
+            aria-label={t("commandPalette.title")}
+            className="custom-scrollbar max-h-[60vh] overflow-y-auto py-2"
           >
             {grouped.map((group) => (
               <li key={group.sectionId} role="presentation">
-                <div className="sticky top-0 z-10 bg-surface/95 backdrop-blur-sm px-6 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-text-muted border-b border-black/5 dark:border-white/5">
+                <div className="ci-eyebrow sticky top-0 z-10 border-b border-border bg-surface px-5 py-1.5">
                   {group.sectionLabel}
                 </div>
                 <ul role="group" aria-label={group.sectionLabel}>
@@ -316,7 +334,7 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
                       role="presentation"
                     >
                       {subgroup.subgroupLabel && (
-                        <div className="px-6 pt-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted/70">
+                        <div className="px-5 pt-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted">
                           {subgroup.subgroupLabel}
                         </div>
                       )}
@@ -324,53 +342,51 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
                         role={subgroup.subgroupLabel ? "group" : "presentation"}
                         aria-label={subgroup.subgroupLabel ?? undefined}
                       >
-                        {subgroup.items.map(({ item, flatIndex }) => (
-                          <li
-                            key={item.id}
-                            role="option"
-                            aria-selected={flatIndex === selectedIndex}
-                            data-flat-index={flatIndex}
-                          >
-                            <button
-                              className={`w-full flex items-center gap-3 ${
-                                subgroup.subgroupLabel ? "pl-10 pr-6" : "px-6"
-                              } py-2.5 text-left transition-colors ${
-                                flatIndex === selectedIndex
-                                  ? "bg-accent/10 text-accent ring-1 ring-inset ring-accent/20"
-                                  : "text-text hover:bg-black/5 dark:hover:bg-white/5"
-                              }`}
-                              onClick={() => handleNavigate(item.href, item.external)}
-                              onMouseEnter={() => setSelectedIndex(flatIndex)}
+                        {subgroup.items.map(({ item, flatIndex }) => {
+                          const selected = flatIndex === selectedIndex;
+                          return (
+                            <li
+                              key={item.id}
+                              role="option"
+                              aria-selected={selected}
+                              data-flat-index={flatIndex}
                             >
-                              <span
-                                className={`material-symbols-outlined text-[18px] shrink-0 ${
-                                  flatIndex === selectedIndex ? "text-accent" : "text-text-muted"
-                                }`}
-                              >
-                                {item.icon}
-                              </span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{item.label}</p>
-                                {item.subtitle && (
-                                  <p
-                                    className={`text-xs truncate ${
-                                      flatIndex === selectedIndex
-                                        ? "text-accent/70"
-                                        : "text-text-muted"
-                                    }`}
-                                  >
-                                    {item.subtitle}
-                                  </p>
+                              {/* kit-exception: Native button styled as the kit menu row (.ci-menu__item). */}
+                              <button
+                                type="button"
+                                className={cn(
+                                  "ci-menu__item w-full gap-3 py-2.5 text-start",
+                                  subgroup.subgroupLabel ? "ps-10 pe-5" : "px-5",
+                                  selected ? "bg-surface-2 text-heading" : "text-text-main"
                                 )}
-                              </div>
-                              {item.external && (
-                                <span className="material-symbols-outlined text-[14px] text-text-muted shrink-0">
-                                  open_in_new
+                                onClick={() => handleNavigate(item.href, item.external)}
+                                onMouseEnter={() => setSelectedIndex(flatIndex)}
+                              >
+                                <span
+                                  className={cn(
+                                    "shrink-0",
+                                    selected ? "text-heading" : "text-text-muted"
+                                  )}
+                                >
+                                  <Icon name={item.icon} size={18} />
                                 </span>
-                              )}
-                            </button>
-                          </li>
-                        ))}
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm font-medium">{item.label}</p>
+                                  {item.subtitle && (
+                                    <p className="truncate text-xs text-text-muted">
+                                      {item.subtitle}
+                                    </p>
+                                  )}
+                                </div>
+                                {item.external && (
+                                  <span className="shrink-0 text-text-muted">
+                                    <Icon name="open_in_new" size={14} />
+                                  </span>
+                                )}
+                              </button>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </li>
                   ))}
@@ -379,30 +395,28 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
             ))}
           </ul>
         ) : (
-          <div className="py-10 text-center text-text-muted text-sm">{t("noResults")}</div>
+          <div className="py-10 text-center text-sm text-text-muted">{t("noResults")}</div>
         )}
 
-        <div className="flex items-center gap-4 px-4 py-2 border-t border-black/5 dark:border-white/5 text-[11px] text-text-muted">
+        <div className="flex items-center gap-4 border-t border-border px-5 py-2 text-[11px] text-text-muted">
           <span className="flex items-center gap-1">
-            <kbd className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 font-mono">
+            <kbd className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono">
               ↑↓
             </kbd>
             {t("commandPalette.navigate")}
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 font-mono">
-              ↵
-            </kbd>
+            <kbd className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono">↵</kbd>
             {t("commandPalette.open")}
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 font-mono">
+            <kbd className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono">
               Esc
             </kbd>
             {t("commandPalette.close")}
           </span>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

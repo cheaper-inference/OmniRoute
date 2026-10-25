@@ -11,17 +11,18 @@
 תובנות בנושא PII). יש לקרוא אותו במלואו; אין להוסיף כאן מחדש את כללי הפרויקט. כל מה שמופיע להלן חל אך ורק
 על Claude Code — התאמות תפעוליות לכללים שכבר הוגדרו ב-`AGENTS.md`.
 
-## בידוד worktree — פרטים ייחודיים ל-Claude Code
+## בידוד worktree — נקודות ספציפיות ל-Claude Code
 
-פרוטוקול ה-worktree המחייב המלא (אישור ענף הבסיס, הנתיב הקנוני `.claude/worktrees/`,
-`cp -al` עבור node_modules, כללי פירוק) נמצא ב-`AGENTS.md` ← Git Workflow ← "Worktree
-isolation". נקודות ייחודיות ל-Claude Code:
+פרוטוקול ה-worktree המחייב המלא (אישור base-branch, הנתיב הקנוני `.claude/worktrees/`,
+`cp -al` node_modules, כללי teardown) נמצא ב-
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (מסוכם ב-`AGENTS.md` ←
+זרימת עבודה ב-Git ← "בידוד worktree"). נקודות ספציפיות ל-Claude Code:
 
-- יש לאשר את ענף הבסיס מול המפעיל באמצעות `AskUserQuestion` (כלל קשיח #19), אלא אם הוא
-  כבר מסר לך אותו.
-- יש להעדיף את הכלי המובנה `EnterWorktree` — הוא כבר יוצר worktrees תחת
-  `.claude/worktrees/` (הנתיב הקנוני). יש ליצור את ה-worktree באמצעות פקודת `git
-worktree add` המתועדת, ולאחר מכן לקרוא ל-`EnterWorktree` עם ה-`path` שלו.
+- אשר את ה-base branch מול המפעיל באמצעות `AskUserQuestion` (כלל קשיח מס' 19), אלא אם
+  הוא כבר אמר לך.
+- העדף את הכלי המובנה `EnterWorktree` — הוא כבר יוצר worktrees תחת
+  `.claude/worktrees/` (הנתיב הקנוני). צור את ה-worktree באמצעות הפקודה המתועדת `git
+worktree add`, ואז קרא ל-`EnterWorktree` עם ה-`path` שלו.
 
 ## בטיחות בין סשנים — פרטים ייחודיים ל-Claude Code
 

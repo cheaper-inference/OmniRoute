@@ -71,10 +71,20 @@ import { handleAlibabaImageGeneration } from "./imageGeneration/providers/alibab
 import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihorde.ts";
 import * as codexImages from "./imageGeneration/providers/codexImages.ts";
 import { handleZenmuxImageGeneration } from "./imageGeneration/providers/zenmux.ts";
+import { handleMuseImageGeneration } from "./imageGeneration/providers/museImage.ts";
+import { handleGeminiAiImageGeneration } from "./imageGeneration/providers/geminiAiStudio.ts";
+import { handleBlackForestLabsImageGeneration } from "./imageGeneration/providers/blackForestLabs.ts";
+import {
+  fanOutSingleImageCalls,
+  IMAGE_FANOUT_MAX_N,
+  resolveRequestedImageCount,
+  SINGLE_IMAGE_FANOUT_FORMATS,
+} from "./imageGeneration/fanOut.ts";
 import {
   applyPollinationsAnonymousFallback,
   reportPollinationsAnonOutcome,
 } from "./imageGeneration/pollinationsAnonAuth.ts";
+import { fetchImageEndpoint } from "./imageGeneration/openAiImageFetch.ts";
 
 // Re-export so /v1/images/edits can dispatch Firefly reference-image edits.
 export { handleAdobeFireflyImageGeneration };
@@ -320,30 +330,6 @@ function isCodexChatGptModelAccessError(status: number, errorText: string, model
   );
 }
 
-const BFL_MODEL_ENDPOINTS = {
-  "flux-2-max": "/v1/flux-2-max",
-  "flux-2-pro": "/v1/flux-2-pro",
-  "flux-2-flex": "/v1/flux-2-flex",
-  "flux-2-klein-9b": "/v1/flux-2-klein-9b",
-  "flux-2-klein-4b": "/v1/flux-2-klein-4b",
-  "flux-kontext-pro": "/v1/flux-kontext-pro",
-  "flux-kontext-max": "/v1/flux-kontext-max",
-  "flux-pro-1.1": "/v1/flux-pro-1.1",
-  "flux-pro-1.1-ultra": "/v1/flux-pro-1.1-ultra",
-  "flux-dev": "/v1/flux-dev",
-  "flux-pro": "/v1/flux-pro",
-};
-
-const BFL_EDIT_MODELS = new Set([
-  "flux-2-max",
-  "flux-2-pro",
-  "flux-2-flex",
-  "flux-kontext-pro",
-  "flux-kontext-max",
-]);
-
-const BFL_FAILURE_STATUSES = new Set(["Error", "Failed", "Content Moderated", "Request Moderated"]);
-
 const STABILITY_GENERATION_ENDPOINTS = {
   "sd3.5-large": "/v2beta/stable-image/generate/sd3",
   "sd3.5-large-turbo": "/v2beta/stable-image/generate/sd3",
@@ -420,6 +406,9 @@ export async function handleImageGeneration({
   signal = null,
   clientHeaders = null,
   peerLocality = null,
+  // #16260 — IMAGE_GENERATION_LONG_JOBS, injected by the routes (the flag lives in src/):
+  // `{ resolveTimeoutMs }` for the OpenAI-compatible path. Null keeps the default behavior.
+  longJobs = null,
 }) {
   // Retirement guards: the retired-provider sets hold bare provider ids only, so testing
   // the `<provider>/` prefix (or the whole model when it carries no slash) covers both the
@@ -521,6 +510,32 @@ export async function handleImageGeneration({
       body,
       credentials,
       log,
+      signal,
+      longJobs,
+    });
+  }
+
+  const requestedCount = resolveRequestedImageCount(body.n);
+  if (requestedCount > 1 && SINGLE_IMAGE_FANOUT_FORMATS.has(providerConfig.format)) {
+    const count = Math.min(requestedCount, IMAGE_FANOUT_MAX_N);
+    if (count < requestedCount && typeof log?.warn === "function")
+      log.warn("IMAGE", `n=${requestedCount} clamped to ${IMAGE_FANOUT_MAX_N}`);
+    return fanOutSingleImageCalls({
+      body,
+      count,
+      label: `${provider}/${model}`,
+      log,
+      signal,
+      generateOne: (taskBody) =>
+        handleImageGeneration({
+          body: taskBody,
+          credentials,
+          log,
+          resolvedProvider,
+          signal,
+          clientHeaders,
+          peerLocality,
+        }),
     });
   }
 
@@ -533,6 +548,23 @@ export async function handleImageGeneration({
       credentials,
       log,
       signal,
+    });
+  }
+
+  if (providerConfig.format === "muse-image") {
+    return handleMuseImageGeneration({
+      model,
+      provider,
+      body,
+      credentials,
+      log,
+      signal,
+      deps: {
+        saveCallLog,
+        fetchRemoteImage: fetchUntrustedRemoteImage,
+        fetchWithTimeout,
+        isTimeoutError: (err) => err instanceof FetchTimeoutError,
+      },
     });
   }
 
@@ -550,6 +582,26 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "gemini-image") {
     return handleGeminiImageGeneration({ model, providerConfig, body, credentials, log });
+  }
+
+  if (providerConfig.format === "gemini-ai-image") {
+    return handleGeminiAiImageGeneration({
+      model,
+      providerConfig,
+      body,
+      credentials,
+      aspectRatio: normalizeImageAspectRatio(body.aspect_ratio, body.size),
+      signal,
+      log,
+      deps: {
+        saveCallLog,
+        saveErrorResult: saveImageErrorResult,
+        sanitizeProviderError: sanitizeImageProviderError,
+        fetchWithTimeout,
+        isTimeoutError: (err) => err instanceof FetchTimeoutError,
+        timeoutMs: getConfiguredTimeout(),
+      },
+    });
   }
 
   if (providerConfig.format === "imagen3") {
@@ -697,7 +749,15 @@ export async function handleImageGeneration({
   }
 
   if (providerConfig.format === "syntx-image") {
-    return handleSyntxImageGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleSyntxImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "nanobanana") {
@@ -844,7 +904,16 @@ export async function handleImageGeneration({
     });
   }
 
-  return handleOpenAIImageGeneration({ model, provider, providerConfig, body, credentials, log });
+  return handleOpenAIImageGeneration({
+    model,
+    provider,
+    providerConfig,
+    body,
+    credentials,
+    log,
+    signal,
+    longJobs,
+  });
 }
 
 function normalizeKieImageResult(recordData: unknown): string[] {
@@ -1291,6 +1360,8 @@ async function handleOpenAIImageGeneration({
   body,
   credentials,
   log,
+  signal,
+  longJobs,
 }) {
   const startTime = Date.now();
 
@@ -1370,6 +1441,11 @@ async function handleOpenAIImageGeneration({
   }
 
   const requestBody = JSON.stringify(upstreamBody);
+  // #16260 — the deadline always covers the body read (existing budget). The per-connection
+  // timeout and caller cancellation (499) only apply with IMAGE_GENERATION_LONG_JOBS on.
+  const fetchOptions = longJobs
+    ? { signal, timeoutMs: longJobs.resolveTimeoutMs(credentials?.providerSpecificData) }
+    : { timeoutMs: getConfiguredTimeout() };
 
   // Try primary URL
   let result = await fetchImageEndpoint(
@@ -1377,7 +1453,8 @@ async function handleOpenAIImageGeneration({
     headers,
     requestBody,
     provider,
-    log
+    log,
+    fetchOptions
   );
 
   // Fallback for providers with fallbackUrl (e.g., Nebius)
@@ -1394,7 +1471,8 @@ async function handleOpenAIImageGeneration({
       headers,
       requestBody,
       provider,
-      log
+      log,
+      fetchOptions
     );
   }
 
@@ -1518,7 +1596,8 @@ export async function handleOpenAIImageEdit({
     headers,
     multipartBody as unknown as BodyInit,
     provider,
-    log
+    log,
+    { timeoutMs: getConfiguredTimeout() }
   );
 
   saveCallLog({
@@ -1619,7 +1698,8 @@ export async function handleOpenRouterImageEdit({
     headers,
     JSON.stringify(upstreamBody),
     provider,
-    log
+    log,
+    { timeoutMs: getConfiguredTimeout() }
   );
 
   saveCallLog({
@@ -1934,125 +2014,6 @@ async function handleStabilityAIImageGeneration({
   }
 }
 
-async function handleBlackForestLabsImageGeneration({
-  model,
-  provider,
-  providerConfig,
-  body,
-  credentials,
-  log,
-}) {
-  const startTime = Date.now();
-  const token = credentials.apiKey || credentials.accessToken;
-  const endpoint = BFL_MODEL_ENDPOINTS[model];
-
-  if (!endpoint) {
-    return {
-      success: false,
-      status: 400,
-      error: `Unsupported Black Forest Labs image model: ${model}`,
-    };
-  }
-
-  const { imageUrl, maskUrl } = extractImageInputs(body);
-  const upstreamBody: Record<string, unknown> = {
-    prompt: body.prompt,
-    output_format: normalizeRequestedImageFormat(body, "png"),
-  };
-
-  try {
-    if (BFL_EDIT_MODELS.has(model) && imageUrl) {
-      upstreamBody.input_image = (await resolveImageSource(imageUrl)).base64;
-    } else if (imageUrl && isHttpUrl(imageUrl)) {
-      upstreamBody.image_url = imageUrl;
-    }
-
-    if (maskUrl && (model === "flux-pro-1.0-fill" || model === "flux-kontext-pro")) {
-      upstreamBody.mask = (await resolveImageSource(maskUrl)).base64;
-    }
-
-    if (model === "flux-kontext-pro" || model === "flux-kontext-max") {
-      upstreamBody.aspect_ratio = body.aspect_ratio || mapImageSize(body.size);
-    } else if (typeof body.size === "string" && body.size.includes("x")) {
-      const { width, height } = parseSizeToDimensions(body.size, 1024);
-      upstreamBody.width = width;
-      upstreamBody.height = height;
-    }
-
-    if (body.seed !== undefined) upstreamBody.seed = body.seed;
-    if (body.n !== undefined && model.includes("ultra"))
-      upstreamBody.num_images = Number(body.n) || 1;
-    if (body.quality === "hd" && model.includes("ultra")) upstreamBody.raw = true;
-    if (body.left !== undefined) upstreamBody.left = body.left;
-    if (body.right !== undefined) upstreamBody.right = body.right;
-    if (body.top !== undefined) upstreamBody.top = body.top;
-    if (body.bottom !== undefined) upstreamBody.bottom = body.bottom;
-    if (body.steps !== undefined) upstreamBody.steps = body.steps;
-    if (body.guidance !== undefined) upstreamBody.guidance = body.guidance;
-    if (body.grow_mask !== undefined) upstreamBody.grow_mask = body.grow_mask;
-    if (body.safety_tolerance !== undefined) upstreamBody.safety_tolerance = body.safety_tolerance;
-
-    if (log) {
-      const promptPreview = String(body.prompt ?? "").slice(0, 60);
-      log.info("IMAGE", `${provider}/${model} (black-forest-labs) | prompt: "${promptPreview}..."`);
-    }
-
-    const response = await fetch(`${providerConfig.baseUrl.replace(/\/$/, "")}${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "x-key": token,
-      },
-      body: JSON.stringify(upstreamBody),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      if (log)
-        log.error("IMAGE", `${provider} error ${response.status}: ${errorText.slice(0, 200)}`);
-      return saveImageErrorResult({
-        provider,
-        model,
-        status: response.status,
-        startTime,
-        error: errorText,
-        requestBody: upstreamBody,
-      });
-    }
-
-    const initialPayload = await response.json();
-    const finalPayload = initialPayload.polling_url
-      ? await pollBlackForestLabsResult({
-          pollingUrl: initialPayload.polling_url,
-          token,
-          body,
-          log,
-        })
-      : initialPayload;
-
-    const images = await normalizeProviderImagePayload(finalPayload, body, log, "url");
-    return saveImageSuccessResult({
-      provider,
-      model,
-      startTime,
-      requestBody: upstreamBody,
-      responseBody: { images_count: images.length },
-      created: finalPayload.created,
-      images,
-    });
-  } catch (err) {
-    if (log) log.error("IMAGE", `${provider} fetch error: ${err.message}`);
-    return saveImageErrorResult({
-      provider,
-      model,
-      status: 502,
-      startTime,
-      error: `Image provider error: ${sanitizeErrorMessage((err as Error).message || err)}`,
-    });
-  }
-}
-
 async function handleRecraftImageGeneration({
   model,
   provider,
@@ -2216,46 +2177,7 @@ async function handleTopazImageGeneration({
   }
 }
 
-async function pollBlackForestLabsResult({ pollingUrl, token, body, log }) {
-  const timeoutMs = normalizePositiveNumber(body.timeout_ms, 300000);
-  const pollIntervalMs = normalizePositiveNumber(body.poll_interval_ms, 1500);
-  const deadline = Date.now() + timeoutMs;
-
-  while (Date.now() < deadline) {
-    const response = await fetch(pollingUrl, {
-      method: "GET",
-      headers: {
-        "x-key": token,
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`BFL polling failed (${response.status}): ${errorText}`);
-    }
-
-    const payload = await response.json();
-    const status = payload?.status;
-
-    if (status === "Ready") {
-      return payload;
-    }
-
-    if (BFL_FAILURE_STATUSES.has(status)) {
-      throw new Error(`BFL image generation failed: ${status}`);
-    }
-
-    if (log) {
-      log.info("IMAGE", `black-forest-labs polling status: ${String(status || "Pending")}`);
-    }
-
-    await sleep(pollIntervalMs);
-  }
-
-  throw new Error(`BFL polling timed out after ${timeoutMs}ms`);
-}
-
-function extractImageInputs(body) {
+export function extractImageInputs(body) {
   const imageUrls = [];
   const seen = new Set();
 
@@ -2334,7 +2256,7 @@ export async function resolveImageSource(source) {
   };
 }
 
-function parseSizeToDimensions(size, fallback = 1024) {
+export function parseSizeToDimensions(size, fallback = 1024) {
   if (typeof size !== "string" || !size.includes("x")) {
     return { width: fallback, height: fallback };
   }
@@ -2486,7 +2408,7 @@ function firstString(...values) {
   return null;
 }
 
-function isHttpUrl(value) {
+export function isHttpUrl(value) {
   return typeof value === "string" && /^https?:\/\//i.test(value);
 }
 
@@ -2922,104 +2844,6 @@ export function saveImageErrorResult({
 }
 
 /**
- * Fetch a single image endpoint and normalize response
- */
-async function fetchImageEndpoint(url, headers, body, provider, log) {
-  try {
-    let response;
-    try {
-      response = await fetchWithTimeout(url, {
-        method: "POST",
-        headers,
-        body,
-        timeoutMs: getConfiguredTimeout(),
-      });
-    } catch (err: unknown) {
-      const isAbortError =
-        typeof err === "object" &&
-        err !== null &&
-        "name" in err &&
-        (err as { name?: unknown }).name === "AbortError";
-      if (err instanceof FetchTimeoutError || isAbortError) {
-        const message = err instanceof Error ? err.message : String(err);
-        if (log) {
-          log.error("IMAGE", `${provider} fetch error: ${message}`);
-        }
-        return {
-          success: false,
-          status: 504,
-          error: `Image provider error: ${sanitizeErrorMessage(message || err)}`,
-        };
-      }
-      throw err;
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      if (log) {
-        log.error("IMAGE", `${provider} error ${response.status}: ${errorText.slice(0, 200)}`);
-      }
-      return {
-        success: false,
-        status: response.status,
-        error: errorText,
-      };
-    }
-
-    const data = await response.json();
-
-    // Normalize response to OpenAI format
-    const items = Array.isArray(data?.data) ? data.data : [];
-
-    // Some providers return HTTP 2xx with an empty or malformed image
-    // payload (empty data array, missing/blank b64_json and url). Treating that
-    // as success makes image-combo strategies stop on the first leg and hand an
-    // image-less 200 to the client. Require at least one usable image item and
-    // surface an empty 2xx as a retryable 502 so combos fall back to the next
-    // priority leg.
-    const hasUsableImage = items.some(
-      (item: unknown) =>
-        isJsonObject(item) &&
-        ((typeof item.b64_json === "string" && item.b64_json.length > 0) ||
-          (typeof item.url === "string" && item.url.length > 0))
-    );
-    if (!hasUsableImage) {
-      if (log) {
-        log.warn(
-          "IMAGE",
-          `${provider} returned 200 without a usable image payload; treating as retryable 502`
-        );
-      }
-      return {
-        success: false,
-        status: HTTP_STATUS.BAD_GATEWAY,
-        error: sanitizeErrorMessage(
-          "Image provider returned a success status without an image payload"
-        ),
-      };
-    }
-
-    return {
-      success: true,
-      data: {
-        created: data.created || Math.floor(Date.now() / 1000),
-        data: items,
-      },
-    };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (log) {
-      log.error("IMAGE", `${provider} fetch error: ${message}`);
-    }
-    return {
-      success: false,
-      status: 502,
-      error: `Image provider error: ${sanitizeErrorMessage(message || err)}`,
-    };
-  }
-}
-
-/**
  * Handle Hyperbolic image generation
  * Uses { model_name, prompt, height, width } and returns { images: [{ image: base64 }] }
  */
@@ -3376,7 +3200,7 @@ function inferResolutionFromSize(size) {
   return "4K";
 }
 
-function normalizePositiveNumber(value, fallback) {
+export function normalizePositiveNumber(value, fallback) {
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) return fallback;
   return Math.floor(n);

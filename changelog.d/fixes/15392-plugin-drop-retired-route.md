@@ -1,1 +1,0 @@
-- **fix(plugin):** stop requesting the virtual-entries route and publish the gateway `/v1/models` entries as served ([#15392](https://github.com/diegosouzapw/OmniRoute/pull/15392)) — thanks @maxmad64bis, with thanks to @bilalsafdardev for the diagnosis in #14889

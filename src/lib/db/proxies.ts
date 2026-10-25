@@ -60,6 +60,20 @@ export {
   resolveProxyForScopeFromRegistry,
 };
 
+function assertSubscriptionExists(
+  db: ReturnType<typeof getDbInstance>,
+  subscriptionId: string
+): void {
+  const row = db
+    .prepare("SELECT 1 AS one FROM proxy_subscriptions WHERE id = ?")
+    .get(subscriptionId);
+  if (!row) {
+    const err = new Error("Subscription not found") as Error & { status?: number };
+    err.status = 404;
+    throw err;
+  }
+}
+
 // Mutate legacy proxyConfig rows directly so these writes stay inside the same
 // SQLite transaction as the proxy registry row and assignment upsert.
 function clearLegacyProxyForAssignment(
@@ -344,8 +358,9 @@ export async function createProxy(payload: ProxyPayload) {
  * so a write that omits it never revives a proxy the operator or auto-disable turned off.
  *
  * `claimOwnership: false` is reserved for subscription sync: a matched row whose
- * subscription_id differs from the payload's (manual rows included) is not written
- * at all and the call returns `action: "skipped"`. The sync always sends its subscriptionId:
+ * subscription_id differs from the payload's (manual rows included), or whose source
+ * differs from the payload's (a manual row attached to the subscription by id), is not
+ * written at all and the call returns `action: "skipped"`. The sync always sends its subscriptionId:
  * a caller that omits it would find manual rows (null === null) counted as owned.
  */
 export async function upsertProxy(
@@ -366,21 +381,33 @@ export async function upsertProxy(
 
   const existing = db
     .prepare(
-      "SELECT id, subscription_id FROM proxy_registry WHERE host = ? AND port = ? AND username = ? LIMIT 1"
+      "SELECT id, subscription_id, source FROM proxy_registry WHERE host = ? AND port = ? AND username = ? LIMIT 1"
     )
-    .get(host, port, username) as { id?: string; subscription_id?: string | null } | undefined;
+    .get(host, port, username) as
+    { id?: string; subscription_id?: string | null; source?: string | null } | undefined;
 
   if (existing?.id) {
     const claimOwnership = options.claimOwnership ?? true;
     const ownerChanged = (existing.subscription_id ?? null) !== (payload.subscriptionId ?? null);
-    if (!claimOwnership && ownerChanged) {
+    // A manual row attached to the subscription by id shares its owner but not its
+    // source: the sync must not rewrite it into a synced row (which a later feed
+    // omission would then delete).
+    const sourceChanged =
+      payload.source !== undefined && (existing.source ?? "manual") !== payload.source;
+    if (!claimOwnership && (ownerChanged || sourceChanged)) {
       return { proxy: null, action: "skipped" };
     }
     const { status, ...rest } = payload;
     const changes: Partial<ProxyPayload> = isProxyRegistryStatus(status)
       ? { ...rest, status }
       : rest;
-    const updated = await updateProxy(existing.id, changes);
+    // Sync and import paths delegate here with an already-proven subscription
+    // (sync checks the subscription once up front; import payloads never carry
+    // one), so the existence check is skipped on this path. Route updates go
+    // through updateProxy directly and keep the check.
+    const updated = await updateProxy(existing.id, changes, {
+      skipSubscriptionCheck: true,
+    });
     return { proxy: updated, action: "updated" };
   }
 
@@ -388,12 +415,24 @@ export async function upsertProxy(
   return { proxy: created, action: "created" };
 }
 
-export async function updateProxy(id: string, payload: Partial<ProxyPayload>) {
+export async function updateProxy(
+  id: string,
+  payload: Partial<ProxyPayload>,
+  options?: { skipSubscriptionCheck?: boolean }
+) {
   // No status filtering here: callers own the status they send. Writes that must
   // preserve the stored status filter it in upsertProxy before calling this.
   const db = getDbInstance();
   const existing = await getProxyById(id, { includeSecrets: true });
   if (!existing) return null;
+
+  if (
+    !options?.skipSubscriptionCheck &&
+    payload.subscriptionId !== undefined &&
+    payload.subscriptionId !== null
+  ) {
+    assertSubscriptionExists(db, payload.subscriptionId);
+  }
 
   updateProxyRow(db, id, existing, payload, new Date().toISOString());
 
@@ -443,6 +482,10 @@ export async function updateProxyAndAssign(
 ): Promise<ProxyMutationResult | null> {
   const db = getDbInstance();
   const now = new Date().toISOString();
+
+  if (payload.subscriptionId !== undefined && payload.subscriptionId !== null) {
+    assertSubscriptionExists(db, payload.subscriptionId);
+  }
 
   const tx = db.transaction((): ProxyTransactionResult | null => {
     const existing = getProxyRowById(db, id, { includeSecrets: true });

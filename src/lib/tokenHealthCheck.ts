@@ -28,7 +28,10 @@ import {
 } from "@omniroute/open-sse/services/tokenRefresh.ts";
 import { pickMaskedDisplayValue } from "@/shared/utils/maskEmail";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
-import { refreshGithubCopilotSubTokenIfNeeded } from "@/lib/tokenHealthCheckCopilot";
+import {
+  probeGitHubAccessToken,
+  refreshGithubCopilotSubTokenIfNeeded,
+} from "@/lib/tokenHealthCheckCopilot";
 import { checkCursorConnectionIfNeeded } from "@/lib/tokenHealthCheckCursor";
 import { checkKimiWebConnectionIfNeeded } from "@/lib/tokenHealthCheckKimi";
 import {
@@ -60,8 +63,7 @@ const ROTATING_REFRESH_PROVIDERS = new Set([
 
 export function shouldNullRefreshTokenAfterUnrecoverable(provider: unknown): boolean {
   const id = String(provider || "").toLowerCase();
-  if (id === "claude") return false;
-  return ROTATING_REFRESH_PROVIDERS.has(id);
+  return ROTATING_REFRESH_PROVIDERS.has(id) && !preservesRefreshTokenOnUnrecoverable(id);
 }
 
 const EXPIRED_RETRY_BACKOFF_MIN = 5; // backoff between expired retries (minutes)
@@ -748,12 +750,23 @@ export async function checkConnection(conn) {
         },
       };
 
-      const copilotResult = await refreshCopilotToken(
-        conn.accessToken,
-        healthCheckLog,
-        proxyConfig,
-        getCopilotTokenBaseUrl(conn)
-      );
+      // Rotate the Copilot sub-token only when it needs renewal or when an
+      // expired connection needs a recovery probe. A healthy sub-token still
+      // gets a cheap GitHub /user probe so a revoked access token demotes.
+      const shouldProbeCopilot = copilotAboutToExpire || conn.testStatus === "expired";
+
+      const copilotResult = shouldProbeCopilot
+        ? await refreshCopilotToken(
+            conn.accessToken,
+            healthCheckLog,
+            proxyConfig,
+            getCopilotTokenBaseUrl(conn)
+          )
+        : await probeGitHubAccessToken({
+            accessToken: conn.accessToken,
+            apiBaseUrl: getCopilotTokenBaseUrl(conn),
+            proxyConfig,
+          });
       if (copilotResult?.status === 401) {
         await updateProviderConnection(conn.id, {
           testStatus: "expired",

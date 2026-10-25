@@ -336,6 +336,24 @@ function parseAgentrouter(data: any) {
   return quotaEntries(data).map(([quotaKey, quota]) => parseAgentrouterQuota(quotaKey, quota));
 }
 
+// Ollama Cloud `/api/balance` (open-sse/services/ollamaCloudBalance.ts) reports purchased
+// credits as a `credits` USD balance next to the monthly/session/weekly percent windows. Route
+// that row through buildCreditsQuota() so it renders as "$X.XX", not as a percentage bar.
+function normalizeOllamaWindow(name: string, quota: any) {
+  if (quota?.ollamaApiBalance !== true) return normalizeQuotaEntry(name, quota);
+  // A fresh API balance is authoritative even when the reported period end is in the past.
+  return normalizeQuotaEntry(name, { ...quota, resetAt: null }, { resetAt: quota.resetAt });
+}
+
+function parseOllamaCloud(data: any) {
+  return quotaEntries(data).map(([quotaKey, quota]) => {
+    if (quotaKey !== "credits") return normalizeOllamaWindow(quotaKey, quota);
+    const remaining = Math.max(0, Number(quota?.remaining ?? 0) || 0);
+    const currency = quota?.currency || "USD";
+    return buildCreditsQuota("credits", remaining, remaining > 0 ? 100 : 0, { currency });
+  });
+}
+
 // OpenRouter is credit-based, not subscription-based: the `credits` quota entry
 // (open-sse/services/usage/openrouter.ts) carries the account balance in
 // `remaining` + `currency: "USD"` with `unlimited: true` / total 0. The generic
@@ -510,6 +528,7 @@ function parseProviderQuotas(providerId: string, data: any) {
   if (providerId === "deepseek") return parseDeepseek(data);
   if (providerId === "kilocode") return parseKilocode(data);
   if (providerId === "agentrouter") return parseAgentrouter(data);
+  if (providerId === "ollama-cloud") return parseOllamaCloud(data);
   if (providerId === "openrouter") return parseOpenrouter(data);
   return parseGeneric(data);
 }

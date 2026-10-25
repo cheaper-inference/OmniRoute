@@ -118,29 +118,38 @@ Medan `region` menggunakan nilai lalai `us-east-1` apabila tidak disertakan.
 
 ## Aliran Import Kunci API
 
-Pengesahan kunci API adalah untuk kelayakan pembawa Kiro / AWS CodeWhisperer jangka panjang. Ia
-tidak menggunakan penyegaran OAuth, maka pengesahan ini mengelakkan pembatalan sesi OIDC dikongsi.
+Pengesahan kunci API adalah untuk kelayakan pembawa Kiro / AWS CodeWhisperer berjangka panjang. Ia
+tidak menggunakan penyegaran OAuth, maka ia mengelakkan pembatalan sesi OIDC yang dikongsi.
 
 ### Papan Pemuka
 
 1. Buka **Papan Pemuka -> Penyedia -> Kiro**.
 2. Pilih **Kunci API**.
-3. Tampalkan kunci API dan, jika mahu, rantau AWS (`us-east-1` secara lalai).
-4. OmniRoute mengesahkan kunci dan menyimpan sambungan.
+3. Tampalkan kunci API dan pilih rantau AWS: **Kesan secara automatik** (lalai), **AS Timur
+   (Virginia Utara)** atau **Eropah (Frankfurt)**.
+4. OmniRoute mengesahkan kunci dan menyimpan sambungan yang ditetapkan pada rantau tempat
+   kunci tersebut berfungsi.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` menerima `auto` (lalai), `us-east-1` atau `eu-central-1`; sebarang nilai lain akan
+ditolak dengan HTTP 400.
 
 ### Kontrak Dalaman
 
 Laluan API mengesahkan kunci dengan memanggil `KiroService.validateApiKey()`, yang
-menggunakan `ListAvailableProfiles` terhadap titik akhir CodeWhisperer/Amazon Q yang sepadan
-dengan rantau dan menentukan `profileArn`.
+memanggil `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API permukaan Amazon Q yang digunakan oleh inferens kunci API) dengan tamat masa 10 s bagi setiap rantau. Dalam
+mod `auto`, ia mencuba `us-east-1`, kemudian `eu-central-1`, dan menyimpan rantau pertama
+yang menerima kunci tersebut. Kunci yang ditolak di setiap rantau calon menyebabkan import gagal dengan
+HTTP 400. `ListAvailableProfiles` kemudiannya dipanggil secara usaha terbaik untuk menemukan `profileArn`
+pilihan (AWS menolaknya untuk kebanyakan kunci API).
 
 Sambungan yang disimpan menggunakan:
 
@@ -157,8 +166,11 @@ Sambungan yang disimpan menggunakan:
 
 Pada masa jalan, `KiroExecutor.buildHeaders()` menghantar kunci sebagai
 `Authorization: Bearer <key>` dan menambahkan `tokentype: API_KEY`. Panggilan kuota/profil
-menggunakan penanda yang sama supaya AWS menganggap pembawa tersebut sebagai kunci API jangka
-panjang dan bukannya token akses OIDC atau sosial.
+menggunakan penanda yang sama supaya AWS menganggap pembawa tersebut sebagai kunci API berjangka panjang dan bukannya
+token akses OIDC atau sosial. `KiroExecutor.execute()` menghantar inferens kunci API hanya
+ke `https://q.<region>.amazonaws.com/generateAssistantResponse` — termasuk `us-east-1`
+— kerana get laluan IDE Kiro menolak `TokenType=API_KEY` dan
+`codewhisperer.us-east-1` menolak muatan kunci API sebagai isi permintaan yang tidak sah (HTTP 400).
 
 ---
 

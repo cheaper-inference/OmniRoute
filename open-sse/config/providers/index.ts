@@ -161,6 +161,7 @@ import { devin_desktopProvider } from "./registry/devin-desktop/index.ts";
 import { zcodeProvider } from "./registry/zcode/index.ts";
 import { zed_hostedProvider } from "./registry/zed-hosted/index.ts";
 import { nanogptProvider } from "./registry/nanogpt/index.ts";
+import { nanProvider } from "./registry/nan/index.ts";
 import { apmixProvider } from "./registry/apmix/index.ts";
 import { scalewayProvider } from "./registry/scaleway/index.ts";
 import { agentrouterProvider } from "./registry/agentrouter/index.ts";
@@ -201,7 +202,6 @@ import { vercel_ai_gatewayProvider } from "./registry/vercel-ai-gateway/index.ts
 import { v0_vercelProvider } from "./registry/v0-vercel/index.ts";
 import { opencode_zenProvider } from "./registry/opencode/zen/index.ts";
 import { opencode_goProvider } from "./registry/opencode/go/index.ts";
-import { opencodeProvider } from "./registry/opencode/index.ts";
 import { dahlProvider } from "./registry/dahl/index.ts";
 import { maritalkProvider } from "./registry/maritalk/index.ts";
 import { basetenProvider } from "./registry/baseten/index.ts";
@@ -287,6 +287,8 @@ import { seekaiProvider } from "./registry/seekai/index.ts";
 import { tokenmarketProvider } from "./registry/tokenmarket/index.ts";
 import { twinmindProvider } from "./registry/twinmind/index.ts";
 import { syntxProvider } from "./registry/syntx/index.ts";
+import { daoxeProvider } from "./registry/daoxe/index.ts";
+import { demonrouteProvider } from "./registry/demonroute/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
   aimlapi: aimlapiProvider,
@@ -448,6 +450,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   zcode: zcodeProvider,
   "zed-hosted": zed_hostedProvider,
   nanogpt: nanogptProvider,
+  nan: nanProvider,
   apmix: apmixProvider,
   scaleway: scalewayProvider,
   agentrouter: agentrouterProvider,
@@ -489,7 +492,6 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "v0-vercel": v0_vercelProvider,
   "opencode-zen": opencode_zenProvider,
   "opencode-go": opencode_goProvider,
-  opencode: opencodeProvider,
   dahl: dahlProvider,
   maritalk: maritalkProvider,
   baseten: basetenProvider,
@@ -578,4 +580,6 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   tokenmarket: tokenmarketProvider,
   twinmind: twinmindProvider,
   syntx: syntxProvider,
+  daoxe: daoxeProvider,
+  demonroute: demonrouteProvider,
 };

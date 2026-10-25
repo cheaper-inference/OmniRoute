@@ -379,6 +379,9 @@ rank with `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
   is on that list, so a `write` access token still cannot call the MCP HTTP
   surface.
 - Paths in `ADMIN_MUTATION_PREFIXES` require `admin` only for mutations.
+- Paths in `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) require `admin` only for mutations, and only on
+  that exact path — other `/api/settings/*` sub-routes keep `write`.
 
 `PATCH /api/keys/{id}` is a mutation and is not on those admin lists, so a
 `read` token receives 403

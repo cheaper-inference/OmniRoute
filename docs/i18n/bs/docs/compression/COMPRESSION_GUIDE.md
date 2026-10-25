@@ -332,20 +332,20 @@ RTK režim inspirisan je projektom **[RTK - Rust Token Killer](https://github.co
 ## Napredni sistemi kompresije
 
 Pored 7 gore opisanih režima (izvor također prihvata režime `codex-responses` i
-`omniglyph`, koje ovaj vodič ne obuhvata), odjeljci u nastavku opisuju funkcije
-koje rade unutar tih režima ili zajedno s njima: kompresija rezultata alata i progresivno starenje
-predstavljaju korake 1 i 2 agresivnog mehanizma (agresivni režim i korak `aggressive` u
-složenom cjevovodu), složeni cjevovod opisuje kako se izvršava složeni režim, kompresija svjesna keširanja
-snižava `aggressive` i `ultra` na `standard` za pružaoce usluga s keširanjem dok je kompresija
-uključena, a Caveman režim izlaza i stilovi izlaza predstavljaju opcionalne upute sistemskog upita,
-koje su prema zadanim postavkama isključene i oblikuju izlaz modela umjesto da kompresuju zahtjev.
+`omniglyph`, koje ovaj vodič ne obrađuje), odjeljci u nastavku obrađuju funkcije
+koje rade unutar tih režima ili zajedno s njima: Kompresija rezultata alata i Progresivno starenje
+predstavljaju korake 1 i 2 agresivnog mehanizma (Agresivni režim i korak `aggressive`
+složenog cjevovoda), Složeni cjevovod određuje kako radi Složeni režim, Kompresija svjesna
+keša snižava `aggressive` i `ultra` na `standard` za pružaoce usluga s keširanjem dok je kompresija
+uključena, a Režim pećinskog izlaza i Stilovi izlaza predstavljaju opcionalne instrukcije sistemskog odzivnika,
+podrazumijevano isključene, koje oblikuju izlaz modela umjesto kompresije zahtjeva.
 
-### Kompresija svjesna keširanja
+### Kompresija svjesna keša
 
-Neki pružaoci usluga (poput Anthropica s keširanjem upita) podržavaju **keširanje upita**,
-što im omogućava da keširaju dijelove upita radi smanjenja troškova i kašnjenja. Kada je
-keširanje omogućeno, agresivna kompresija zapravo može **pogoršati** performanse
-jer mijenja keširane tokene, čime poništava keš.
+Neki pružaoci usluga (poput Anthropica s keširanjem odzivnika) podržavaju **keširanje odzivnika**,
+što im omogućava da keširaju dijelove odzivnika radi smanjenja troškova i kašnjenja. Kada
+je keširanje omogućeno, agresivna kompresija zapravo može **pogoršati** performanse
+jer mijenja keširane tokene i time poništava keš.
 
 Modul `cachingAware.ts` ovo rješava **otkrivanjem konteksta keširanja** i
 **prilagođavanjem strategije kompresije** u skladu s tim.
@@ -355,10 +355,10 @@ Modul `cachingAware.ts` ovo rješava **otkrivanjem konteksta keširanja** i
 1. **Otkrivanje konteksta keširanja** — Pretražuje tijelo zahtjeva radi oznaka `cache_control`
 2. **Prepoznavanje pružalaca usluga s keširanjem** — Provjerava podržava li ciljni pružalac usluga keširanje
 3. **Prilagođavanje strategije** — Snižava `aggressive`/`ultra` na `standard` za pružaoce usluga s keširanjem
-4. **Preskakanje sistemskog upita** — Sistemski upiti obično se keširaju, pa ih ne treba kompresovati
+4. **Preskakanje sistemskog odzivnika** — Sistemski odzivnici se obično keširaju, pa ih ne treba kompresovati
 
-Pomoćna funkcija strategije također vraća oznaku `deterministicOnly`, ali alat za izgradnju plana koristi
-samo strategiju — trenutno ništa u daljnjem toku ne čita tu oznaku.
+Pomoćna funkcija za strategiju također vraća oznaku `deterministicOnly`, ali alat za izgradnju plana koristi
+samo strategiju — trenutno ništa u daljnjoj obradi ne čita tu oznaku.
 
 #### Primjer koda
 
@@ -383,26 +383,26 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Kada koristiti
 
-Kompresija svjesna keširanja je **uvijek uključena** — nije potrebna nikakva konfiguracija. Aktivira se kad god
-je kompresija uključena i ciljni pružalac usluga podržava keširanje upita (Anthropic, OpenAI
-itd.); eksplicitne oznake `cache_control` nisu potrebne — sam pružalac usluga s keširanjem
-pokreće snižavanje, dok same oznake to nikada ne čine (otkrivanje oznaka opskrbljuje telemetriju
-keša, a ne odluku o strategiji).
+Kompresija svjesna keša je **uvijek uključena** — nije potrebna nikakva konfiguracija. Aktivira se kad god
+je kompresija uključena, a ciljni pružalac usluga podržava keširanje odzivnika (Anthropic, OpenAI
+itd.); eksplicitne oznake `cache_control` nisu obavezne — sam pružalac usluga s keširanjem
+pokreće snižavanje, dok same oznake to nikad ne čine (otkrivanje oznaka služi za telemetriju
+keša, a ne za odluku o strategiji).
 
 ### Progresivno starenje
 
 Dugi razgovori akumuliraju mnogo razmjena poruka, ali starije razmjene postaju manje
 relevantne. Modul `progressiveAging.ts` **degradira poruke prema udaljenosti razmjene**
-(udaljenost se mjeri od kraja razgovora). Sa isporučenim zadanim vrijednostima
+(udaljenost se mjeri od kraja razgovora). Uz isporučene zadane vrijednosti
 (`verbatim: 2, light: 2, moderate: 3`):
 
-- **Posljednja 2 poteza (udaljenost ≤ 2)**: Zadržavaju se doslovno
+- **Posljednje 2 razmjene (udaljenost ≤ 2)**: Zadržavaju se doslovno
 - **Udaljenost 3**: Pećinska kompresija (uklanjanje suvišnih riječi)
-- **Udaljenost 4+**: Poruke asistenta se sažimaju; poruke korisnika svode se na njihov prvi
-  red, ograničen na 120 znakova; ostale uloge ostaju neizmijenjene. Sistemski upiti, već ostarjele
-  poruke i najnovija poruka korisnika uvijek se zadržavaju doslovno bez obzira na udaljenost.
+- **Udaljenost 4+**: Poruke asistenta se sažimaju; korisničke poruke svode se na njihov prvi
+  red, ograničen na 120 znakova; ostale uloge ostaju neizmijenjene. Sistemski odzivnici, već ostarjele
+  poruke i najnovija korisnička poruka uvijek se zadržavaju doslovno bez obzira na udaljenost.
   Ništa se ne odbacuje u potpunosti, a pojas `light`
-  nije moguće dosegnuti sa zadanim postavkama koje se isporučuju (`light` je jednak `verbatim`).
+  nije dostupan s isporučenim zadanim vrijednostima (`light` je jednak `verbatim`).
 
 #### Primjer koda
 
@@ -413,65 +413,65 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... još 50 poteza ...
+  // ... još 50 razmjena ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // posljednja 3 poteza: doslovno
+  verbatim: 3, // posljednje 3 razmjene: doslovno
   light: 8, // udaljenost <= 8: lagana kompresija
   moderate: 20, // udaljenost <= 20: pećinska kompresija
-  fullSummary: 5, // zahtijeva ga tip, ali ga kod za određivanje pojasa ne čita
+  fullSummary: 5, // zahtijeva ga tip, ali ga kod za raspoređivanje u pojaseve ne čita
   // udaljenost > 20: sažeto (asistent) / zadržan prvi red (korisnik)
 });
 
-// saved = broj ušteđenih tokena
+// saved = broj sačuvanih tokena
 ```
 
 #### Kada koristiti
 
-Progresivno starenje je **uvijek uključeno** za način `aggressive` — to je 2. korak funkcije
-`compressAggressive()`. Ultra način ga ne pokreće. Naročito je djelotvorno za:
+Progresivno starenje je **uvijek uključeno** za režim `aggressive` — to je korak 2 funkcije
+`compressAggressive()`. Režim Ultra ga ne izvršava. Posebno je učinkovito za:
 
 - Dugotrajne sesije programiranja
 - Višednevne razgovore
 - Agentske tokove rada s mnogo poziva alata
 
-### Pećinski način izlaza
+### Režim pećinskog izlaza
 
-Pećinski način izlaza dodaje **upute sistemskom upitu** koje od samog modela traže
+Režim pećinskog izlaza dodaje **instrukcije sistemskog odzivnika** koje od samog modela traže
 sažet izlaz — nivo `lite` traži sažete odgovore koji zadržavaju potpune rečenice, `full`
 traži da „odgovara sažeto poput pametnog pećinskog čovjeka“, a `ultra` traži telegrafski izlaz;
-upute samo traže, ne mogu to garantovati. Zahtjevi ih primaju putem
+instrukcije samo postavljaju zahtjev i ne mogu garantovati njegovo ispunjenje. Zahtjevi ih primaju putem
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
-`open-sse/handlers/chatCore.ts` prvo razrješava odabir pomoću prilagodbe za povratnu kompatibilnost
+`open-sse/handlers/chatCore.ts` prvo razrješava odabir pomoću sloja za kompatibilnost unazad
 (`resolveOutputStyleSelection()` u
-`open-sse/services/compression/outputStyles/backCompat.ts`), koja, dok je `outputStyles`
-prazan, mapira omogućeni `cavemanOutputMode` na izlazni stil `terse-prose` pri
-`cavemanOutputMode.intensity` (pogledajte Povratnu kompatibilnost ispod); neprazan odabir
-`outputStyles` koristi se takav kakav jeste, a `cavemanOutputMode.enabled` i `intensity` tada nemaju
-učinka, dok se njegova opcija `autoClarity` i dalje primjenjuje. `outputMode.ts` sadrži
-tekstove uputa (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), zaobilaženje sadržaja i
-pomoćnu funkciju za pozicioniranje koju koristi umetanje; njegova vlastita funkcija za umetanje `applyCavemanOutputMode()` nema
+`open-sse/services/compression/outputStyles/backCompat.ts`), koji, dok je `outputStyles`
+prazan, mapira omogućeni `cavemanOutputMode` na stil izlaza `terse-prose` pri intenzitetu
+`cavemanOutputMode.intensity` (pogledajte Kompatibilnost unazad u nastavku); odabir `outputStyles`
+koji nije prazan koristi se bez izmjena, a `cavemanOutputMode.enabled` i `intensity` tada nemaju
+učinka, dok se njegov prekidač `autoClarity` i dalje primjenjuje. `outputMode.ts` sadrži
+tekstove instrukcija (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), zaobilaženje sadržaja i
+pomoćnu funkciju za pozicioniranje koju koristi ubacivanje; njegov vlastiti ubacivač `applyCavemanOutputMode()` nema
 pozivaoca u produkciji.
 
 #### Kako radi
 
-Ovaj način ne kompresuje ulaz. Dodaje blok uputa u sistemski upit
-(pogledajte Kako umetanje radi ispod), a svaki način kompresije ulaza odabran za zahtjev
-i dalje se izvršava nakon toga, nad tijelom koje sada sadrži taj blok. Ispred zajedničke
-klauzule o ograničenjima kojom završava svaki nivo, engleski nivo `full` glasi:
+Ovaj način rada ne kompresuje ulaz. Dodaje blok uputa sistemskom promptu
+(pogledajte Kako umetanje funkcioniše u nastavku), a svaki način kompresije ulaza odabran za zahtjev
+i dalje se izvršava nakon toga, nad tijelom koje sada sadrži taj blok. Prije zajedničke
+klauzule o granicama kojom se završava svaki nivo, engleski nivo `full` glasi:
 
-> „Odgovaraj sažeto poput pametnog pećinskog čovjeka. Izostavi članove (a/an/the), suvišne riječi (just/really/basically/actually/simply), učtivosti i ograđivanje. Fragmenti su u redu. Koristi kratke sinonime (big, ne extensive; fix, ne implement). Zadrži sav tehnički sadržaj, kod, greške, URL-ove i identifikatore neizmijenjenim.“
+> "Odgovaraj sažeto kao pametan pećinski čovjek. Izostavi članove (a/an/the), suvišne riječi (just/really/basically/actually/simply), učtivosti, ograđivanje. Fragmenti su u redu. Kratki sinonimi (big, ne extensive; fix, ne implement). Zadrži sav tehnički sadržaj, kôd, greške, URL-ove i identifikatore neizmijenjenima."
 
-Ovo naročito dobro funkcioniše za:
+Ovo posebno dobro funkcioniše za:
 
 - Generisanje koda (sažetiji izlaz = manje tokena)
-- Brza pitanja i odgovore (nema potrebe za opširnim objašnjenjima)
-- Paketnu obradu (maksimiziranje propusnosti)
+- Brza pitanja i odgovore (nema potrebe za detaljnim objašnjenjima)
+- Grupnu obradu (maksimalna propusnost)
 
 #### Kada koristiti
 
-Pećinski način izlaza je **opcionalan**. Kada je kompresija uključena (`enabled: true`, glavni prekidač
+Caveman izlazni način rada je **opcionalan**. Kada je kompresija uključena (`enabled: true`, glavni prekidač
 na stranici Postavke kompresije), uključite ga pomoću `cavemanOutputMode.enabled`; `intensity`
 odabire `lite`, `full` ili `ultra`:
 
@@ -485,94 +485,100 @@ odabire `lite`, `full` ili `ultra`:
 }
 ```
 
-Prekidač **Način izlaza** kombinacije kompresije (`outputMode`, s nivoom u `outputModeIntensity`)
+Prekidač **Izlazni način rada** kombinacije kompresije (`outputMode`, s nivoom u `outputModeIntensity`)
 postavlja isti prekidač za zahtjeve na koje se ta kombinacija primjenjuje, a MCP alat
-`omniroute_set_compression_engine` zapisuje ga putem svog logičkog argumenta `outputMode`.
-Neprazan odabir `outputStyles` ima prednost nad ovim prekidačem. Na
-kontrolnoj ploči omogućavanje izlaznog stila **Sažeta proza** umeće isti blok (pogledajte Izlazne
-stilove ispod).
+`omniroute_set_compression_engine` zapisuje ga putem svog Booleovog argumenta `outputMode`.
+Odabir `outputStyles` koji nije prazan ima prednost nad ovim prekidačem. Na
+kontrolnoj ploči omogućavanje izlaznog stila **Sažeta proza** umeće isti blok (pogledajte Izlazni
+stilovi u nastavku).
 
 ### Izlazni stilovi (katalog)
 
-Pećinski način izlaza iznad je **naslijeđeni put jednog stila**. Faza 4 ga je generalizovala
+Gore navedeni Caveman izlazni način rada predstavlja **naslijeđenu putanju jednog stila**. Faza 4 ga je generalizovala
 u katalog izlaznih stilova koji se mogu kombinovati: `OUTPUT_STYLE_CATALOG` u
-`open-sse/services/compression/outputStyles/catalog.ts`. Svaki stil je uputa sistemskog upita
-koja od samog modela traži jeftiniji izlaz; stilovi se mogu omogućiti
+`open-sse/services/compression/outputStyles/catalog.ts`. Svaki stil je uputa sistemskog prompta
+koja od samog modela traži ekonomičniji izlaz; stilovi se mogu omogućiti
 zajedno i umeću se redoslijedom iz kataloga.
 
-| Stil                                  | `id`          | Šta radi                                                                                                                                                                                                                                     | Jezici instrukcija                            |
-| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Sažeta proza                          | `terse-prose` | Izostavlja suvišne riječi/članove/ograđivanja; tehnička suština ostaje precizna. Isti tekst kao u ranijem izlaznom režimu caveman (naveden referencom, nije ponovo unesen).                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Manje koda                            | `less-code`   | YAGNI ljestvica: najmanja funkcionalna izmjena, bez netraženih apstrakcija.                                                                                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Konjski rep (lijeni senior programer) | `ponytail`    | "Najbolji kod je kod koji nikada nije napisan": ponovna upotreba > ponovno pisanje, osnovni uzrok > simptom, najkraći funkcionalni diff.                                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Imam ADHD (prvo radnja)               | `i-have-adhd` | Prvo radnja (naredba/putanja/isječak prije proze), numerirani ograničeni koraci, JEDAN konkretan sljedeći korak, bez uvoda/rekapitulacije/završnih riječi. Prilagođeno iz [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Sažeti CJK (文言)                     | `terse-cjk`   | Odgovor `full`/`ultra` na klasičnom kineskom (文言); `lite` samo traži kratke odgovore bez funkcijskih riječi, učtivosti ili ukrasa.                                                                                                         | zh (ograničeno lokalitetom, pogledajte ispod) |
+| Stil                                  | `id`            | Šta radi                                                                                                                                                                                                                                                                               | Jezici uputa                                    |
+| ------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Sažeta proza                          | `terse-prose`   | Izostavlja suvišne riječi/članove/ograđivanje; čuva tačan tehnički sadržaj. Isti tekst kao u naslijeđenom Caveman izlaznom načinu rada (referenciran, ne prepisan).                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi   |
+| Manje koda                            | `less-code`     | YAGNI ljestvica: najmanja funkcionalna izmjena, bez netraženih apstrakcija.                                                                                                                                                                                                            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi   |
+| Konjski rep (lijeni senior programer) | `ponytail`      | "Najbolji kôd je kôd koji nikad nije napisan": ponovna upotreba > ponovno pisanje, osnovni uzrok > simptom, najkraća funkcionalna razlika.                                                                                                                                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi   |
+| Imam ADHD (radnja na prvom mjestu)    | `i-have-adhd`   | Prvo radnja (naredba/putanja/isječak prije proze), numerisani ograničeni koraci, JEDAN konkretan sljedeći korak, bez uvoda/sažetka/završnih fraza. Prilagođeno iz [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi   |
+| Antislop UI filter                    | `antislop-ui`   | Svaka vizuelna tehnika mora proći test svrhe (hijerarhija, identitet, čitljivost); bez zadanih gradijenata/stakla/sjaja, ograničena paleta, bez šablonskih rasporeda. Oba antislop stila dodaju granicu bez nefunkcionalnih kontrola / izmišljenih tvrdnji.                            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi   |
+| Antislop filter teksta i ljudskosti   | `antislop-copy` | Konkretan tekst (bez duge crtice, generičkih poziva na radnju, pomodnih izraza, završnih fraza chatbota i izmišljenih činjenica), uz pravila za ljude: WCAG AA kontrast, vidljiv fokus, pristup tastaturom, prazna stanja/stanja učitavanja/greške, prilagođavanje mobilnim uređajima. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi   |
+| Sažeti CJK (文言)                     | `terse-cjk`     | Odgovor na `full`/`ultra` nivou na klasičnom kineskom (文言); `lite` traži samo kratke odgovore bez funkcionalnih riječi, učtivosti ili ukrasa.                                                                                                                                        | zh (ograničeno lokalizacijom, pogledajte ispod) |
 
-Svaki stil dolazi s tri nivoa intenziteta — `lite`, `full`, `ultra` — i svaki nivo
+Svaki stil dolazi s tri nivoa intenziteta — `lite`, `full`, `ultra` — a svaki nivo
 završava zajedničkom klauzulom o granicama (`SHARED_BOUNDARIES` u `outputMode.ts`), koja
-čuva blokove koda, putanje datoteka, naredbe, greške i URL-ove u izvornom obliku. Tekstovi nivoa
-za `terse-prose` i `terse-cjk` toj listi dodaju identifikatore.
+čuva blokove koda, putanje datoteka, naredbe, greške i URL-ove neizmijenjenima. Tekstovi nivoa
+`terse-prose` i `terse-cjk` toj listi dodaju identifikatore.
 
-`terse-cjk` je ograničen na lokalitet `zh` na dva mjesta. Stranica Postavke kompresije prikazuje
+`terse-cjk` je ograničen na lokalizaciju `zh` na dva mjesta. Stranica Postavke kompresije prikazuje
 njegov red samo kada je jezik korisničkog interfejsa kontrolne ploče kineski (`zh-CN` ili `zh-TW`), a
 `applyOutputStyles()` ga umeće samo kada je razriješeni jezik zahtjeva (pogledajte Odabir jezika
-ispod) `zh`. Skrivanje reda ne briše sačuvani odabir `terse-cjk`:
-API za postavke prihvata bilo koji ID stila, a čuvanje drugih stilova na stranici zadržava ga. U
-trenutku zahtjeva, provjera jezika u `applyOutputStyles()` jedina je lokalna prepreka.
+u nastavku) `zh`. Skrivanje reda ne briše sačuvani odabir `terse-cjk`:
+API postavki prihvata bilo koji ID stila, a čuvanje drugih stilova na stranici ga zadržava. U
+vrijeme obrade zahtjeva, provjera jezika u `applyOutputStyles()` jedino je lokalizacijsko ograničenje.
 
 #### Kako umetanje funkcioniše
 
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) razrješava
-odabir prema katalogu (nepoznati ID-ovi i stilovi koji ne odgovaraju lokalitetu
-odbacuju se, nikada kao greška; odabir koji se ne razriješi ni u jedan stil ostavlja tijelo
-nepromijenjenim, preskočeno kao `no_styles`), spaja odabrane instrukcije redoslijedom iz kataloga,
-dodaje klauzulu o granicama **jednom** (uz sigurnosnu klauzulu, `SAFETY_BOUNDARIES` ili njen
-prijevod, kada je odabran `less-code` ili `ponytail`) i započinje blok jednim
-markerom idempotentnosti (`[OmniRoute Output Styles]`), tako da ponovna primjena nema efekta. Kada
-razriješeni jezik (pogledajte Odabir jezika ispod) ima prijevod, umeće se lokalizirana
-instrukcija umjesto engleske.
+odabir prema katalogu (nepoznati ID-jevi i stilovi koji ne odgovaraju lokalizaciji
+odbacuju se, bez greške; odabir koji se ne razriješi ni u jedan stil ostavlja tijelo
+nepromijenjenim, preskočeno kao `no_styles`), spaja odabrane upute redoslijedom iz
+kataloga, dodaje klauzulu o granicama **jednom** (zajedno sa sigurnosnom klauzulom,
+`SAFETY_BOUNDARIES` ili njenim prijevodom, kada je odabran `less-code` ili `ponytail`) i
+započinje blok jednim markerom idempotentnosti (`[OmniRoute Output Styles]`), tako da
+ponovna primjena ne radi ništa. Kada razriješeni jezik (pogledajte Odabir jezika ispod)
+ima prijevod, umjesto engleske upute umeće se lokalizirana uputa.
 
 Na tijelu s nepraznim nizom `messages`, provjera idempotentnosti izvršava se prije
-zaobilaženja sadržaja: kada se marker `[OmniRoute Output Styles]` već nalazi u polju najvišeg nivoa
-`system` (string ili niz blokova sadržaja) ili u sistemskoj poruci sa sadržajem tipa string,
-tijelo ostaje nepromijenjeno kao `already_applied` i ne izvršava se provjera ključnih riječi.
-U suprotnom, zaobilaženje sadržaja (`shouldBypassCavemanOutputMode()` u
-`open-sse/services/compression/outputMode.ts`) provjerava tekst posljednje tri
-poruke, bez obzira na njihovu ulogu, i preskače stilove za cijeli potez kada se taj tekst
-podudara s ključnim riječima za sigurnost, nepovratnu radnju ili pojašnjenje, ili s
-nizom osjetljivim na redoslijed: `first`, `then`, `after that`, `before`, `rollback` ili
-`backup`, nakon čega se unutar 240 znakova pojavljuje `delete`, `drop`, `migrate`, `deploy` ili
-`release`. Zaobilaženje se izvršava dok je uključen prekidač **Automatsko zaobilaženje radi jasnoće**
-(`cavemanOutputMode.autoClarity`, uključen prema zadanim postavkama); isključivanjem prekidača preskače se
-provjera ključnih riječi.
+zaobilaženja sadržaja: kada se marker `[OmniRoute Output Styles]` već nalazi u polju
+`system` najvišeg nivoa (niz znakova ili niz blokova sadržaja) ili u sistemskoj poruci sa
+sadržajem u obliku niza znakova, tijelo ostaje nepromijenjeno kao `already_applied` i
+provjera ključnih riječi se ne izvršava. U suprotnom, zaobilaženje sadržaja
+(`shouldBypassCavemanOutputMode()` u
+`open-sse/services/compression/outputMode.ts`) provjerava tekst posljednje tri poruke,
+bez obzira na njihovu ulogu, i preskače stilove za cijeli potez kada taj tekst odgovara
+ključnim riječima za sigurnost, nepovratnu radnju ili pojašnjenje, odnosno redoslijedu
+osjetljivom na poredak: `first`, `then`, `after that`, `before`, `rollback` ili
+`backup`, nakon čega unutar 240 znakova slijedi `delete`, `drop`, `migrate`, `deploy` ili
+`release`. Zaobilaženje se izvršava dok je uključen prekidač **Auto-Clarity Bypass**
+(`cavemanOutputMode.autoClarity`, podrazumijevano uključen); isključivanjem prekidača
+preskače se provjera ključnih riječi.
 
 Kada zaobilaženje propusti potez, `placeSystemInstruction()` (ista datoteka), koji
-nikada ne stvara novi `messages[0]`, postavlja blok na prvo od sljedećih mjesta koje pronađe:
+nikada ne kreira novi `messages[0]`, smješta blok na prvo od sljedećih mjesta koje
+pronađe:
 
-1. Početna sistemska poruka sa sadržajem tipa string: blok se dodaje nakon njenog teksta.
-2. Polje najvišeg nivoa `system`: blok se dodaje nakon teksta stringa ili
-   kao novi tekstualni blok u niz blokova sadržaja.
-3. Prva kasnija sistemska poruka sa sadržajem tipa string: blok se dodaje nakon njenog
-   teksta.
-4. Ništa od navedenog: blok se smješta u novu sistemsku poruku na kraju `messages`.
+1. Početna sistemska poruka sa sadržajem u obliku niza znakova: blok se dodaje nakon
+   njenog teksta.
+2. Polje `system` najvišeg nivoa: blok se dodaje nakon teksta niza znakova ili kao novi
+   tekstualni blok u niz blokova sadržaja.
+3. Prva kasnija sistemska poruka sa sadržajem u obliku niza znakova: blok se dodaje nakon
+   njenog teksta.
+4. Ništa od navedenog: blok se smješta u novu sistemsku poruku na kraju niza `messages`.
 
-Na tijelu bez niza `messages` (ili s praznim nizom) ne izvršava se zaobilaženje sadržaja i
-ne provjerava se polje najvišeg nivoa `system`. Blok se dodaje nakon teksta
-polja `instructions` tipa string, osim ako to polje već sadrži marker
-`[OmniRoute Output Styles]`, kada tijelo ostaje nepromijenjeno kao
-`already_applied`. Kada tijelo nema polje `instructions` tipa string, ali sadrži `input`
-(string ili niz), blok postaje `instructions`, zamjenjujući svaku vrijednost koja nije string
-a koju je to polje sadržavalo. Tijelo koje nema ni polje `instructions` tipa string ni `input`
-tipa string ili niz ostaje nepromijenjeno i preskače se kao `no_messages`.
+Na tijelu bez niza `messages` (ili s praznim nizom) ne izvršava se zaobilaženje sadržaja
+i polje `system` najvišeg nivoa se ne provjerava. Blok se dodaje nakon teksta polja
+`instructions` u obliku niza znakova, osim ako to polje već sadrži marker
+`[OmniRoute Output Styles]`, u kojem slučaju tijelo ostaje nepromijenjeno kao
+`already_applied`. Kada tijelo nema polje `instructions` u obliku niza znakova, ali
+sadrži `input` (niz znakova ili niz), blok postaje `instructions`, zamjenjujući svaku
+vrijednost tog polja koja nije niz znakova. Tijelo koje nema ni polje `instructions` u
+obliku niza znakova ni `input` u obliku niza znakova ili niza ostaje nepromijenjeno i
+preskače se kao `no_messages`.
 
 #### Kako omogućiti
 
 Na kontrolnoj ploči: **Kontekst kompresije → Postavke kompresije**
-(`/dashboard/context/settings`), odjeljak Stilovi izlaza: jedan red po stilu s prekidačem
-za uključivanje/isključivanje i biračem nivoa. Stilovi se ubacuju dok je sama kompresija
-uključena (glavni prekidač stranice, `enabled`). Prekidač **Zaobilaženje automatske jasnoće**
-nalazi se na stranici **Pećinski čovjek** (`/dashboard/context/caveman`), na njenoj kartici
-**Način izlaza**. Programska konfiguracija kompresije čuva odabir kao:
+(`/dashboard/context/settings`), odjeljak Stilovi izlaza: po jedan red za svaki stil, s
+prekidačem za uključivanje/isključivanje i biračem nivoa. Stilovi se umeću dok je sama
+kompresija uključena (glavni prekidač stranice, `enabled`). Prekidač **Auto-Clarity
+Bypass** nalazi se na stranici **Caveman** (`/dashboard/context/caveman`), na njenoj
+kartici **Izlazni način rada**. Programska konfiguracija kompresije čuva odabir kao:
 
 ```json
 {
@@ -583,47 +589,48 @@ nalazi se na stranici **Pećinski čovjek** (`/dashboard/context/caveman`), na n
 }
 ```
 
-Kompatibilnost unazad: dok je `outputStyles` prazan, naslijeđena postavka
-`cavemanOutputMode.enabled` mapira se na `terse-prose` pri intenzitetu
-`cavemanOutputMode.intensity`. Blok tada počinje oznakom `[OmniRoute Output Styles]`,
-dok je naslijeđeni mehanizam za ubacivanje `applyCavemanOutputMode()` upisivao
-`[OmniRoute Caveman Output Mode]`. Ispod oznake tekst se podudara s naslijeđenim
-ubacivanjem za en, pt-BR, es, de, fr, it, ru, id i vi; za ja i zh sadrži jedan dodatni
-razmak prije klauzule o granicama. `terse-prose` je preveden na pt-BR, es, de, fr, it,
-ru, zh, ja, id i vi, pa zahtjev čiji je razriješeni jezik `hu` dobija engleski tekst,
-dok je naslijeđeni mehanizam za ubacivanje koristio mađarski.
+Kompatibilnost unazad: dok je `outputStyles` prazan, zastarjela postavka
+`cavemanOutputMode.enabled` mapira se na `terse-prose` pri
+`cavemanOutputMode.intensity`. Blok tada počinje markerom
+`[OmniRoute Output Styles]`, dok je zastarjeli injektor `applyCavemanOutputMode()`
+umetao `[OmniRoute Caveman Output Mode]`. Ispod markera tekst odgovara zastarjelom
+umetanju na jezicima en, pt-BR, es, de, fr, it, ru, id i vi; na jezicima ja i zh sadrži
+jedan dodatni razmak prije klauzule o granicama. `terse-prose` se prevodi na pt-BR, es,
+de, fr, it, ru, zh, ja, id i vi, pa zahtjev čiji je razriješeni jezik `hu` dobija
+engleski tekst tamo gdje je zastarjeli injektor koristio mađarski tekst.
 
-Odabir jezika stila izlaza (`resolveOutputStyleLanguage()` u
-`outputStyles/apply.ts`): kada je `languageConfig.enabled` uključen, `autoDetect` uzorkuje
-najnoviju korisničku poruku u nizu `messages` zahtjeva koja sadrži tekst (sadržaj u obliku
-niza znakova ili `text` njenih dijelova sadržaja) i nad njom pokreće detektor mehanizma
-Pećinskog čovjeka (`detectCompressionLanguage()`). Detektor vraća `zh` za tekst s Han
-znakovima bez kane; u suprotnom vraća onaj od jezika `it`, `pt-BR`, `es`, `de`, `fr`,
-`ru`, `ja`, `hu` i `id` koji ima najviše podudaranja s naznakama, a `en` kada nema
-podudaranja — tekst koji ne može klasificirati dobija engleski, nikada `defaultLanguage`,
-a `vi` se nikada ne otkriva iako stilovi isporučuju tekst na jeziku `vi`. Tijelo
-Responses API-ja čuva svoje poteze u `input`, koji se ne uzorkuje, pa dobija
-`defaultLanguage`, a zatim engleski. Kada nijedna korisnička poruka u `messages` ne
-sadrži tekst ili kada je `autoDetect` isključen, primjenjuje se `defaultLanguage`, a
-zatim engleski. Kada je `languageConfig.enabled` isključen, jezik je engleski — osim
-ako se na zahtjev primjenjuje kombinacija kompresije (kombinacija dodijeljena kombinaciji
-usmjeravanja zahtjeva ili zadana kombinacija kompresije koju chatCore koristi kao rezervu
-za ugrađeni složeni cjevovod): primjena kombinacije uključuje `languageConfig.enabled`
-za taj zahtjev i postavlja `defaultLanguage` iz jezičkih paketa kombinacije (sačuvana
-vrijednost ako je jedan od paketa kombinacije, inače prvi paket kombinacije, koji je
-zadano `en`), dok se sačuvani `autoDetect` (zadano uključen) i dalje primjenjuje.
-Ulazni mehanizam Pećinskog čovjeka drugačije bira jezik paketa pravila — zasebno za svaki
-tekstualni dio i, kada je automatsko otkrivanje isključeno, uslovljeno postavkom
-`enabledPacks`.
+Odabir jezika izlaznog stila (`resolveOutputStyleLanguage()` u
+`outputStyles/apply.ts`): kada je `languageConfig.enabled` uključen, `autoDetect` uzima
+uzorak iz najnovije korisničke poruke u nizu `messages` zahtjeva koja sadrži tekst
+(sadržaj u obliku niza znakova ili `text` njenih dijelova sadržaja) i nad njim pokreće
+detektor Caveman mehanizma (`detectCompressionLanguage()`). Detektor vraća `zh` za tekst
+s Han znakovima bez kane; u suprotnom vraća onaj od jezika `it`, `pt-BR`, `es`, `de`,
+`fr`, `ru`, `ja`, `hu` i `id` koji ima najviše podudaranja s naznakama, odnosno `en`
+kada nema podudaranja — tekst koji ne može klasificirati dobija engleski, nikada
+`defaultLanguage`, a `vi` se nikada ne detektuje iako stilovi isporučuju tekst na jeziku
+`vi`. Tijelo Responses API-ja čuva svoje poteze u `input`, iz kojeg se ne uzima uzorak,
+pa dobija `defaultLanguage`, a zatim engleski. Kada nijedna korisnička poruka u
+`messages` ne sadrži tekst ili kada je `autoDetect` isključen, primjenjuje se
+`defaultLanguage`, a zatim engleski. Kada je `languageConfig.enabled` isključen, jezik
+je engleski — osim ako se na zahtjev primjenjuje kombinacija kompresije (kombinacija
+dodijeljena kombinaciji usmjeravanja zahtjeva ili podrazumijevana kombinacija kompresije
+na koju se chatCore vraća za ugrađeni naslagani cjevovod): primjena kombinacije uključuje
+`languageConfig.enabled` za taj zahtjev i postavlja `defaultLanguage` iz jezičkih paketa
+kombinacije (sačuvana vrijednost ako pripada paketima kombinacije, u suprotnom prvi
+paket kombinacije, koji podrazumijevano ima vrijednost `en`), dok se sačuvani
+`autoDetect` (podrazumijevano uključen) i dalje primjenjuje. Caveman mehanizam za ulaz
+drugačije bira jezik paketa pravila — za svaki tekstualni dio zasebno i, kada je
+automatsko otkrivanje isključeno, uslovljeno postavkom `enabledPacks`.
 
-Matrica stil × jezik fiksirana je testom
+Matrica stilova × jezika fiksirana je testom
 `tests/unit/compression/output-styles-i18n-matrix.test.ts`: svaki stil kataloga mora imati
-unos u `BASELINE_LANGUAGES` testa; stil koji nije ograničen lokalom mora isporučivati
-prijevod na pt-BR (od ovog pravila izuzet je `terse-cjk`, koji je ograničen lokalom),
-osim ako je naveden u `KNOWN_ENGLISH_ONLY`, koji smije sadržavati samo stilove bez ikakvih
-prijevoda — navedeni stil koji ima bilo koji prijevod ne prolazi test; a stil ne prolazi
-test ni kada izgubi jezik naveden u njegovom unosu `BASELINE_LANGUAGES`. Za dodavanje
-stila pogledajte [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
+unos u testnom skupu `BASELINE_LANGUAGES`; stil koji nije ograničen lokalizacijom mora
+imati pt-BR prijevod (stil `terse-cjk`, koji je ograničen lokalizacijom, izuzet je od
+ovog pravila), osim ako je naveden u `KNOWN_ENGLISH_ONLY`, koji smije sadržavati samo
+stilove bez ikakvih prijevoda — navedeni stil koji ima bilo koji prijevod ne prolazi
+test; stil također ne prolazi test ako izgubi jezik naveden u njegovom unosu u
+`BASELINE_LANGUAGES`. Za dodavanje stila pogledajte
+[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
 ### Kompresija rezultata alata
 
@@ -633,85 +640,88 @@ a prva omogućena strategija čija provjera odgovara sadržaju određuje rezulta
 
 1. **`fileContent`**: sadržaj od 3 ili više redova u kojem barem jedan red, zanemarujući
    početno uvlačenje, počinje sa `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` ili `return ` (ključna riječ i razmak), ili sa `if`,
-   `for` ili `while` nakon čega slijedi `(` ili ` (`, zadržava prvih 20 i posljednjih 5 redova, uz
-   oznaku izostavljenog srednjeg dijela.
+   `const `, `let `, `var ` ili `return ` (ključna riječ praćena razmakom), ili sa `if`,
+   `for` ili `while` nakon čega slijedi `(` ili ` (`, zadržava prvih 20 i posljednjih 5
+   redova, uz oznaku izostavljene sredine.
 2. **`grepSearch`**: sadržaj s barem jednim redom oblika `<path>:<digits>:`,
-   gdje tekst prije prve dvotačke ne sadrži razmake, zadržava samo takve redove, najviše
-   30, nakon čega slijede broj svih dodatnih podudaranja i spisak datoteka s podudaranjima;
-   svi ostali redovi se odbacuju. Jedan takav red dovoljan je za aktiviranje strategije, pa se
-   računa i red dnevnika koji počinje vremenskom oznakom poput `12:30:45`.
-3. **`shellOutput`**: izlaz koji sadrži ANSI CSI sekvencu (`ESC[` nakon čega slijede cifre ili
-   tačke-zarezi, a zatim slovo, kao u kodovima boja) ili znak `$` nakon kojeg slijedi razmak
-   bilo gdje u tekstu gubi te sekvence (ostale izlazne sekvence, poput `ESC[?25l` ili
-   OSC sekvence naslova prozora, zadržavaju se) i zadržava posljednjih 50 redova, pri čemu se
-   uzastopno ponovljeni redovi sažimaju. Budući da se ova provjera izvršava prije `json` i `errorMessage`,
-   JSON ili izlaz greške koji sadrži takav `$` nikada ne stiže do njih dok je
-   `shellOutput` uključen.
+   gdje tekst prije prve dvotačke nema razmake, zadržava samo takve redove, najviše 30,
+   nakon čega slijede broj svih dodatnih podudaranja i spisak datoteka s podudaranjima;
+   svaki drugi red se odbacuje. Jedan takav red dovoljan je za aktiviranje strategije,
+   pa se i red dnevnika koji počinje vremenskom oznakom poput `12:30:45` računa.
+3. **`shellOutput`**: izlaz koji sadrži ANSI CSI sekvencu (`ESC[` nakon čega slijede
+   cifre ili tačke-zarezi, a zatim slovo, kao u kodovima boja) ili znak `$` nakon kojeg
+   bilo gdje u tekstu slijedi razmak, gubi te sekvence (druge izlazne sekvence, poput
+   `ESC[?25l` ili OSC sekvence naslova prozora, zadržavaju se) i zadržava posljednjih 50
+   redova, uz sažimanje uzastopnih ponovljenih redova. Budući da se ova provjera izvršava
+   prije `json` i `errorMessage`, JSON ili izlaz greške koji sadrži takav `$` nikada ne
+   stiže do njih dok je `shellOutput` uključen.
 4. **`json`**: JSON sadržaj duži od 2.000 znakova koji počinje sa `{` ili `[` (nakon
-   opcionalnih razmaka) i koji se može parsirati sažima se: niz s više od 7 stavki zadržava
-   svojih prvih 5 i posljednje 2 stavke te ukupan broj, a objekt zadržava svojih prvih 20
-   ključeva, pri čemu se svaka vrijednost ugniježđenog objekta ili niza zamjenjuje rezerviranim mjestom `{…N keys}`
-   (za niz, N je njegova dužina) i oznakom `_remaining_<N>_keys` koja broji ključeve
-   odbačene nakon prvih 20. Skalarne vrijednosti kopiraju se u cijelosti, pa se objekt s 20
-   ili manje ključeva bez ugniježđenih vrijednosti samo ponovo uvlači — minificirani objekt dobija znakove
-   i ostaje nepromijenjen.
-5. **`errorMessage`**: izlaz koji bilo gdje i bez obzira na veličinu slova sadrži `error:`,
-   `error ` (riječ nakon koje slijedi razmak, kao u `no error found`), `[error]`,
-   `exception:`, `exception `, `[exception]` ili `traceback` zadržava svoj prvi red,
-   narednih 10 redova i posljednja 3, uz oznaku `… [N frames elided] …` umjesto
-   redova između njih. Oznaka se pojavljuje samo kada nakon prvog reda slijedi više od 13
-   redova, pa se izlaz greške od 14 ili manje redova ne skraćuje (kod 12 ili 13 redova
-   posljednja 3 ponavljaju već zadržane redove).
+   opcionalnih razmaka) i koji se može raščlaniti sažima se: niz s više od 7 stavki
+   zadržava prvih 5 i posljednje 2 stavke te ukupan broj, a objekt zadržava prvih 20
+   ključeva, pri čemu se vrijednost svakog ugniježđenog objekta ili niza zamjenjuje
+   oznakom `{…N keys}` (za niz je N njegova dužina) i oznakom `_remaining_<N>_keys`
+   koja broji ključeve odbačene nakon prvih 20. Skalarne vrijednosti kopiraju se u
+   cijelosti, pa se objekt s 20 ili manje ključeva bez ugniježđenih vrijednosti samo
+   ponovo uvlači — minificirani objekt dobija dodatne znakove i ostaje nepromijenjen.
+5. **`errorMessage`**: izlaz koji bilo gdje i bez obzira na velika i mala slova sadrži
+   `error:`, `error ` (riječ nakon koje slijedi razmak, kao u `no error found`),
+   `[error]`, `exception:`, `exception `, `[exception]` ili `traceback` zadržava prvi
+   red, sljedećih 10 redova i posljednja 3, uz oznaku `… [N frames elided] …` umjesto
+   redova između njih. Oznaka se pojavljuje samo kada nakon prvog reda slijedi više od
+   13 redova, pa se izlaz greške od 14 ili manje redova ne skraćuje (kod 12 ili 13
+   redova posljednja 3 ponavljaju već zadržane redove).
 
-Nakon što se strategija podudari, čak i ako ništa ne uštedi, kasnije strategije se ne
-isprobavaju. Kada podudarna strategija ne uštedi nijedan procijenjeni token (dužina ÷ 4, zaokruženo naviše) —
-naprimjer, datoteka nalik kodu s 25 ili manje redova ili JSON niz duži od 2.000
-znakova sa 7 ili manje stavki — agresivni pogon zadržava izvorni rezultat alata:
-oba pozivaoca (`compressAggressive()` i `compressAnthropicToolResultBlock()`)
-zadržavaju izvornik kada je `saved` 0 ili manje, dok sam `compressToolResult()` i dalje
-vraća izlaz te strategije. Korak rezultata alata nije konačan: rezervni
-sažimač pogona i dalje može skratiti poruku tipa `tool` ili `function` dužu
-od 8.192 znaka (`maxTokensPerMessage`, 2.048, pomnoženo sa 4).
+Nakon što strategija pronađe podudaranje, čak i ako ništa ne uštedi, kasnije strategije
+se ne isprobavaju. Kada odgovarajuća strategija ne uštedi nijedan procijenjeni token
+(dužina ÷ 4, zaokruženo naviše) — na primjer, datoteka nalik kodu s 25 ili manje redova
+ili JSON niz duži od 2.000 znakova sa 7 ili manje stavki — agresivni mehanizam zadržava
+izvorni rezultat alata: oba pozivaoca (`compressAggressive()` i
+`compressAnthropicToolResultBlock()`) zadržavaju izvornik kada je `saved` 0 ili manje,
+dok sam `compressToolResult()` i dalje vraća izlaz te strategije. Korak obrade rezultata
+alata nije posljednja instanca: rezervni sažimač mehanizma i dalje može skratiti poruku
+tipa `tool` ili `function` dužu od 8.192 znaka (`maxTokensPerMessage`, 2.048, pomnoženo
+sa 4).
 
 #### Kada koristiti
 
-Kompresija rezultata alata je 1. korak agresivnog pogona (`compressAggressive()` u
-`open-sse/services/compression/aggressive.ts`), pa se izvršava u agresivnom načinu rada i u
-`aggressive` koraku složenog cjevovoda. Kompresira poruke tipa `tool` i `function`
-u OpenAI formatu te tekst unutar Anthropic `tool_result` blokova. Svaka strategija ima vlastiti
-prekidač pod `aggressive.toolStrategies`, a svi su podrazumijevano uključeni. Na nadzornoj ploči
-prekidači se nalaze u prikazu **Advanced** stranice Caveman dok je kompresija uključena i
-podrazumijevani način rada je Aggressive.
+Kompresija rezultata alata prvi je korak agresivnog mehanizma (`compressAggressive()` u
+`open-sse/services/compression/aggressive.ts`), pa se izvršava u agresivnom režimu i u
+koraku `aggressive` složenog cjevovoda. Komprimira poruke tipa `tool` i `function` u
+OpenAI formatu te tekst unutar Anthropic blokova `tool_result`. Svaka strategija ima
+vlastiti prekidač pod `aggressive.toolStrategies`, a svi su podrazumijevano uključeni.
+Na kontrolnoj ploči prekidači se nalaze u prikazu **Advanced** na stranici Caveman dok
+je kompresija uključena i podrazumijevani režim postavljen na Aggressive.
 
 ### Složeni cjevovod
 
-Složeni način rada pokreće **više pogona uzastopno** — obično prvo RTK
-(60–90% uštede na izlazu alata), a zatim Caveman na preostalom tekstu (~46% uštede
-ulaznih podataka). U kombinaciji, to daje **prihvatljivi raspon od 78–95%** (pogledajte Izračun uštede uzvodno
-iznad): `1 - (1 - 0.60..0.90) × (1 - 0.46)` u prosjeku iznosi ≈89%.
+Složeni režim pokreće **više mehanizama uzastopno** — obično prvo RTK
+(60-90% uštede na izlazu alata), a zatim Caveman na preostalom tekstu (~46% uštede
+ulaza). U kombinaciji, to daje **prihvatljivi raspon od 78-95%** (pogledajte prethodni
+odjeljak o matematici uštede uzvodno): `1 - (1 - 0.60..0.90) × (1 - 0.46)` u prosjeku
+iznosi ≈89%.
 
-#### Kako radi
+#### Kako funkcionira
 
 ```
 Ulaz (1000 tokena)
-  → RTK (filter koji prepoznaje naredbe) → 200 tokena
+  → RTK (filter svjestan naredbi) → 200 tokena
     → Caveman (uklanjanje suvišnog sadržaja) → 108 tokena
   → Izlaz (108 tokena, ~89% uštede)
 ```
 
 #### Kada koristiti
 
-Koristite složeni način rada za:
+Koristite složeni režim za:
 
-- Tokove rada koji intenzivno koriste alate (agentsko programiranje, istraživanje)
-- Serijsku obradu osjetljivu na troškove
-- Kada vam je potrebna maksimalna ušteda tokena
+- Radne tokove s intenzivnom upotrebom alata (agentsko programiranje, istraživanje)
+- Grupnu obradu osjetljivu na troškove
+- Situacije kada vam je potrebna maksimalna ušteda tokena
 
-Složeni cjevovodi konfiguriraju se putem globalne postavke kompresije `stackedPipeline`
-ili putem imenovane kombinacije kompresije dodijeljene kombinaciji usmjeravanja (pogledajte
-Nadjačavanje po kombinaciji iznad) — ne putem `modePack` automatske kombinacije (to polje samo
-ponovo ponderira odabir modela automatske kombinacije, a `stacked` nije važeći naziv paketa).
+Složeni cjevovodi konfiguriraju se putem globalne postavke kompresije
+`stackedPipeline` ili putem imenovane kombinacije kompresije dodijeljene kombinaciji
+usmjeravanja (pogledajte prethodni odjeljak o zamjeni postavki po kombinaciji) — ne
+putem `modePack` automatske kombinacije (to polje samo ponovo ponderira odabir modela
+automatske kombinacije, a `stacked` nije važeći naziv paketa).
 
 ---
 

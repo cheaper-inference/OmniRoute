@@ -1,3 +1,5 @@
+import { sharedSymbol } from "@/shared/utils/processSingleton";
+
 /**
  * CLIProxyAPI `X-CPA-TRACE-ID` (#11725).
  *
@@ -6,7 +8,7 @@
  * a request failure. Values that look like emails, paths, or secrets are dropped.
  */
 
-const STAMP = Symbol.for("omniroute.cpaAuthIndex");
+const STAMP = sharedSymbol("cpaAuthIndex");
 const OPAQUE = /^[A-Za-z0-9._:-]{1,128}$/;
 
 function record(value: unknown): Record<string, unknown> | null {

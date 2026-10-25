@@ -105,16 +105,6 @@ export const COMPRESSION_CONTEXT_GROUP: SidebarItemGroup = {
       icon: "settings",
     },
     {
-      id: "context-grev-caching",
-      href: "/dashboard/context/grevcaching",
-      i18nKey: "contextGrevCaching",
-      labelFallback: "GrevCaching",
-      subtitleKey: "contextGrevCachingSubtitle",
-      subtitleFallback: "Exclusive context owner",
-      icon: "inventory_2",
-      iconImageSrc: "/images/grevcaching-icon.webp",
-    },
-    {
       id: "context-combos",
       href: "/dashboard/context/combos",
       i18nKey: "contextCombos",
@@ -817,7 +807,7 @@ const HELP_ITEMS: readonly SidebarItemDefinition[] = [
   },
   {
     id: "issues",
-    href: "https://github.com/diegosouzapw/OmniRoute/issues",
+    href: "https://github.com/cheaper-inference/OmniRoute/issues",
     i18nKey: "issues",
     subtitleKey: "issuesSubtitle",
     icon: "bug_report",

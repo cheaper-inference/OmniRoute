@@ -8,7 +8,8 @@ import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { isCommonChatGptWebRetirementError } from "@/shared/constants/chatgptWebRetirement";
 import { getModelInfo } from "@/sse/services/model";
-import { extractApiKey, getProviderCredentials, isValidApiKey } from "@/sse/services/auth";
+import { getProviderCredentials } from "@/sse/services/auth";
+import { resolveApiKeyUpstreamScope } from "@/shared/utils/apiKeyUpstreamScope";
 import { isCredentialDiagnosticSentinel } from "@/sse/services/credentialSentinel";
 import { safeResolveProxy } from "@/sse/handlers/chatHelpers";
 import * as log from "@/sse/utils/logger";
@@ -60,10 +61,19 @@ export async function POST(request) {
       return estimated;
     }
 
+    // The provider-side count sends the whole conversation upstream, so it must
+    // stay inside the caller key's scope exactly like chat: a key that may not
+    // reach this model, or none of whose allowed connections serve it, gets the
+    // local estimate — never another connection's credential.
+    const keyScope = await resolveApiKeyUpstreamScope(request, requestedModel, modelInfo);
+    if (!keyScope.permitted) {
+      return estimated;
+    }
+
     const credentials = await getProviderCredentials(
       modelInfo.provider,
       null,
-      null,
+      keyScope.allowedConnections,
       modelInfo.model
     );
     if (!credentials || isCredentialDiagnosticSentinel(credentials)) {

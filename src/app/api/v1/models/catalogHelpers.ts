@@ -8,6 +8,7 @@ import {
   extendCodexGpt56EffortValues,
   extendDeepSeekEffortValues,
 } from "@/shared/reasoning/effortStandardization";
+import { knownReasoningEffortTiers } from "@/lib/modelsDevSync/transform";
 
 export interface CustomModelEntry {
   id?: string;
@@ -53,7 +54,34 @@ export type ComboTargetCatalogMetadata = {
   inputModalities?: string[];
   outputModalities?: string[];
   capabilities: Record<string, boolean | string[]>;
+  // false when the target's provider has no active connection it can be routed to.
+  routable?: boolean;
 };
+
+/** True when a combo target has an active connection it may use (all `connections` are active). */
+export function hasRoutableComboConnection(
+  target: ComboCatalogTarget,
+  connections: ReadonlyArray<{ id?: unknown }>
+): boolean {
+  const ids = new Set(connections.map((connection) => connection?.id));
+  if (target.connectionId) return ids.has(target.connectionId);
+  if (target.allowedConnectionIds?.length) {
+    return target.allowedConnectionIds.some((id) => ids.has(id));
+  }
+  return ids.size > 0;
+}
+
+/**
+ * Seats that bound a combo's advertised limits: a seat whose provider has no active connection
+ * is never routed to, so it must not shrink the window. Falls back to every seat when none is
+ * routable, so a fully disabled combo still advertises its conservative minimum.
+ */
+export function selectComboLimitPool(
+  metadata: ComboTargetCatalogMetadata[]
+): ComboTargetCatalogMetadata[] {
+  const routable = metadata.filter((entry) => entry.routable !== false);
+  return routable.length > 0 ? routable : metadata;
+}
 
 export function isPositiveFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value > 0;
@@ -115,7 +143,9 @@ export function getConnectionScopedEffortTiers(
   eligibleConnectionIds: readonly string[] | undefined,
   modelsByConnection: ConnectionScopedReasoningCatalog,
   explicitThinkingEfforts?: readonly string[],
-  fallbackThinkingEfforts?: readonly string[]
+  fallbackThinkingEfforts?: readonly string[],
+  /** MODELS_DEV_EFFORT_TIERS_ENABLED: a declared empty list means "no tiers", not "unknown". */
+  emptyListMeansNoTiers = false
 ): string[] | undefined {
   const eligible = eligibleConnectionIds ? new Set(eligibleConnectionIds) : undefined;
   if (target.connectionId && eligible && !eligible.has(target.connectionId)) return [];
@@ -149,8 +179,10 @@ export function getConnectionScopedEffortTiers(
   if (matching.some((model) => model === undefined)) return [];
 
   const efforts = matching.map((model) => {
-    const resolved = model?.supportedThinkingEfforts?.length
-      ? model.supportedThinkingEfforts
+    const declared = model?.supportedThinkingEfforts;
+    const hasDeclaredList = emptyListMeansNoTiers ? Array.isArray(declared) : !!declared?.length;
+    const resolved = hasDeclaredList
+      ? [...declared!]
       : model?.supportsThinking === true && fallbackThinkingEfforts
         ? [...fallbackThinkingEfforts]
         : [];
@@ -171,14 +203,28 @@ export function getThinkingCapabilityFields(
    * catalog does not synthesize unresolvable `<prefix>/<model>-{tier}` ids. */
   skipCanonicalEffortFallback = false,
   /** Already-loaded synced tiers. This helper must not open SQLite to fetch them. */
-  syncedReasoningEfforts?: readonly string[] | null
+  syncedReasoningEfforts?: readonly string[] | null,
+  /**
+   * MODELS_DEV_EFFORT_TIERS_ENABLED (default off): a declared empty list is a declaration of
+   * no tiers (GLM, ZCode) and suppresses `effort_tiers`, and synced tiers are narrowed to the
+   * known effort vocabulary. Off keeps the previous behavior, where an empty list falls
+   * through to the synced tiers.
+   */
+  modelsDevEffortTiers = false
 ): Record<string, boolean | string[]> {
   const supportsThinking = resolvedThinking;
   if (typeof supportsThinking !== "boolean") return {};
+  const declaredNone =
+    modelsDevEffortTiers &&
+    Array.isArray(supportedThinkingEfforts) &&
+    supportedThinkingEfforts.length === 0;
   const hasDeclaredTiers = supportedThinkingEfforts && supportedThinkingEfforts.length > 0;
+  const syncedCandidates = modelsDevEffortTiers
+    ? knownReasoningEffortTiers(syncedReasoningEfforts)
+    : syncedReasoningEfforts;
   const syncedEfforts =
-    !hasDeclaredTiers && syncedReasoningEfforts && syncedReasoningEfforts.length > 0
-      ? [...syncedReasoningEfforts]
+    !hasDeclaredTiers && !declaredNone && syncedCandidates && syncedCandidates.length > 0
+      ? [...syncedCandidates]
       : null;
   const tiers = hasDeclaredTiers
     ? [...supportedThinkingEfforts!]
@@ -189,12 +235,14 @@ export function getThinkingCapabilityFields(
           modelId,
           extendCodexGpt56EffortValues(providerId, modelId, CANONICAL_EFFORT_VALUES)
         );
+  const advertiseTiers =
+    supportsThinking &&
+    !declaredNone &&
+    (hasDeclaredTiers || syncedEfforts || !skipCanonicalEffortFallback);
   return {
     thinking: supportsThinking,
     supportsThinking,
-    ...(supportsThinking && (hasDeclaredTiers || syncedEfforts || !skipCanonicalEffortFallback)
-      ? { effort_tiers: tiers }
-      : {}),
+    ...(advertiseTiers ? { effort_tiers: tiers } : {}),
   };
 }
 

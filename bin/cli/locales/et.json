@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksimaalne kulu päevas (USD)",
       "allowedModelsOpt": "Komadega eraldatud lubatud mudelite loend",
       "nothingToSet": "Reeglistiku välju ei esitatud. Kasuta --rate-limit, --max-cost või --allowed-models.",
-      "updated": "Reeglistik on uuendatud."
+      "updated": "Reeglistik on uuendatud.",
+      "modelAccessModeOpt": "Mudelite juurdepääsurežiim (all | restricted)",
+      "unrestrictedOpt": "Luba kõik mudelid (--model-access-mode all)"
     },
     "expiration": {
       "title": "Võtme kehtivusaeg",
@@ -1169,32 +1171,18 @@
   "sync": {
     "description": "Sünkroonib seadeid OmniRoute'i eksemplaride vahel",
     "push": {
-      "description": "Saada seaded pilve või kaugeksemplari",
-      "target": "Sihtkoht (cloud või context:nimi)",
-      "bundle": "Sünkroonitavad komplekti osad",
-      "dryRun": "Eelvaade rakendamata muudatustega"
+      "description": "Saada seaded pilve või kaugeksemplari"
     },
     "pull": {
-      "description": "Tõmba seaded pilvest või kaugallikast",
-      "source": "Allikas (cloud või context:nimi)",
-      "merge": "Ühenda olemasolevate seadetega",
-      "replace": "Asenda olemasolevad seaded",
-      "dryRun": "Eelvaade rakendamata"
-    },
-    "diff": {
-      "source": "Lähtekontekst",
-      "target": "Sihtkontekst"
+      "description": "Tõmba seaded pilvest või kaugallikast"
     },
     "bundle": {
       "description": "Ekspordi seadistus paketifailina",
-      "include": "Kaasatavad osad (komadega eraldatud)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Impordi paketifail",
       "dryRun": "Valideeri rakendamata"
-    },
-    "initialize": {
-      "fromCloud": "Lähtesta pilvevarukoopiast"
     },
     "tokens": {
       "description": "Halda sünkroonimistoken'eid",
@@ -1206,9 +1194,6 @@
       "revoke": {
         "yes": "Jäta kinnitus vahele"
       }
-    },
-    "resolve": {
-      "description": "Lahenda sünkroonimiskonfliktid interaktiivselt"
     }
   },
   "config": {

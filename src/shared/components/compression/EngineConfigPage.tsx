@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { EngineConfigField } from "@omniroute/open-sse/services/compression/engines/types";
 import { EngineConfigForm } from "@/shared/components/compression/EngineConfigForm";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import Textarea from "@/shared/components/Textarea";
 import {
   buildEngineDetailUpdate,
   forgetSentEdits,
@@ -41,9 +47,6 @@ const SETTINGS_SUBOBJECT: Record<string, string> = {
   headroom: "headroom",
   "session-dedup": "sessionDedup",
   ccr: "ccr",
-  "append-preserving-ccr": "appendPreservingCcr",
-  "codex-responses": "codexResponsesConfig",
-  relevance: "relevanceConfig",
 };
 
 interface CompressionSettings {
@@ -57,12 +60,6 @@ interface Analytics {
   tokensSaved: number;
   avgSavingsPercent: number;
   days: number;
-}
-
-interface ModelOption {
-  fullModel: string;
-  contextLength?: number;
-  available?: boolean;
 }
 
 interface PreviewDiffSegment {
@@ -95,10 +92,10 @@ const ENGINE_ICON_ALIASES: Record<string, string> = {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 rounded-lg border border-border bg-surface p-3">
+    <Card padding="sm" className="flex flex-col gap-0.5">
       <span className="text-xs text-text-muted">{label}</span>
-      <span className="text-lg font-semibold text-text">{value}</span>
-    </div>
+      <span className="text-lg font-semibold text-text-main">{value}</span>
+    </Card>
   );
 }
 
@@ -118,11 +115,11 @@ function renderDiffSegment(
     "";
 
   return (
-    <div key={`${label}-${index}`} className="rounded border border-border bg-background p-2">
-      <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+    <div key={`${label}-${index}`} className="rounded border border-border bg-bg p-2">
+      <span className="mr-2 rounded bg-bg-subtle px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
         {translateLabel(label)}
       </span>
-      <span className="whitespace-pre-wrap break-words text-text">{text}</span>
+      <span className="whitespace-pre-wrap break-words text-text-main">{text}</span>
     </div>
   );
 }
@@ -139,8 +136,6 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
   // changed since.
   const [savedConfig, setSavedConfig] = useState<Record<string, unknown>>({});
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
-  const [models, setModels] = useState<ModelOption[]>([]);
-  const [selectedModel, setSelectedModel] = useState("");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -162,10 +157,10 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
       setLoading(true);
       setLoadError(null);
 
-      // Fire the independent reads in parallel — load time is the slowest
+      // Fire the three independent reads in parallel — load time is the slowest
       // single request, not their sum. Each resolves to null on failure (fail-soft).
       const asJson = (r: Response) => (r.ok ? r.json() : null);
-      const [enginesData, settingsData, analyticsData, modelData] = await Promise.all([
+      const [enginesData, settingsData, analyticsData] = await Promise.all([
         fetch("/api/compression/engines")
           .then(asJson)
           .catch(() => null) as Promise<{ engines: EngineEntry[] } | null>,
@@ -175,9 +170,6 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
         fetch(`/api/context/analytics/engine?engineId=${engineId}&days=7`)
           .then(asJson)
           .catch(() => null) as Promise<Analytics | null>,
-        fetch("/api/models")
-          .then(asJson)
-          .catch(() => null) as Promise<{ models: ModelOption[] } | null>,
       ]);
 
       const foundEngine = enginesData?.engines?.find((e) => e.id === engineId) ?? null;
@@ -369,95 +361,56 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
     });
   // Only engines with a dedicated settings sub-object can persist their detail here.
   const persistable = Boolean(SETTINGS_SUBOBJECT[engineId]);
-  const selectedModelOption = models.find((model) => model.fullModel === selectedModel);
-  const selectedContextLength = selectedModelOption?.contextLength ?? 0;
-  const triggerPercent = Number(configState.triggerPercent ?? 90);
-  const preserveRecentPercent = Number(configState.preserveRecentPercent ?? 10);
-  const archiveAtTokens = Math.floor((selectedContextLength * triggerPercent) / 100);
-  const directTailTokens = Math.floor((selectedContextLength * preserveRecentPercent) / 100);
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-3xl">
       {/* ── Header ── */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          {engine.icon && (
-            <span
-              className="material-symbols-outlined text-[28px] leading-none text-text-muted"
-              aria-hidden="true"
-            >
-              {ENGINE_ICON_ALIASES[engine.icon] || engine.icon}
-            </span>
-          )}
-          <h1 className="text-2xl font-bold text-text">{engineName}</h1>
-        </div>
-        {subtitle && <p className="text-sm text-text-muted">{subtitle}</p>}
-      </div>
+      <PageHeader
+        compact
+        title={
+          <span className="flex items-center gap-2">
+            {engine.icon && (
+              <Icon
+                name={ENGINE_ICON_ALIASES[engine.icon] || engine.icon}
+                size={28}
+                className="text-text-muted"
+              />
+            )}
+            {engineName}
+          </span>
+        }
+        description={subtitle || undefined}
+      />
 
       {loadError && (
-        <p className="text-xs text-destructive border border-destructive/30 rounded px-3 py-2">
-          {loadError}
-        </p>
+        <Alert
+          variant="critical"
+          icon={<Icon name="error" size={16} />}
+          description={loadError}
+          // Cleared only by a successful reload; the kit Alert has no non-dismissible mode.
+          className="[&>.ci-alert__dismiss]:hidden"
+        />
       )}
 
       {/* ── Panel pointer (on/off + level live there now) ── */}
-      <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-4">
-        <p className="text-xs text-text-muted" data-testid="panel-pointer-notice">
-          {t("panelPointerPrefix")}{" "}
-          <a href="/dashboard/context/settings" className="underline hover:text-text">
-            {t("compressionSettings")}
-          </a>
-          {t("panelPointerSuffix")}
-        </p>
-      </div>
-
-      {engineId === "append-preserving-ccr" && (
-        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-          <div>
-            <h2 className="text-sm font-semibold text-text">{t("modelPlannerTitle")}</h2>
-            <p className="text-xs text-text-muted">{t("modelPlannerDescription")}</p>
-          </div>
-          {models.length > 0 ? (
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-medium text-text">{t("modelPlannerModel")}</span>
-              <select
-                data-testid="append-ccr-model-select"
-                value={selectedModel}
-                onChange={(event) => setSelectedModel(event.target.value)}
-                className="rounded border border-border bg-background px-2 py-1.5 text-text"
-              >
-                {models.map((model) => (
-                  <option key={model.fullModel} value={model.fullModel}>
-                    {model.fullModel}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : (
-            <p className="text-sm text-text-muted">{t("modelPlannerUnavailable")}</p>
-          )}
-          {selectedContextLength > 0 && (
-            <dl className="grid grid-cols-3 gap-3 text-sm" data-testid="append-ccr-model-plan">
-              <div>
-                <dt className="text-xs text-text-muted">{t("modelPlannerContext")}</dt>
-                <dd className="font-medium text-text">{selectedContextLength.toLocaleString(locale)}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-text-muted">{t("modelPlannerArchiveAt")}</dt>
-                <dd className="font-medium text-text">{archiveAtTokens.toLocaleString(locale)}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-text-muted">{t("modelPlannerDirectTail")}</dt>
-                <dd className="font-medium text-text">{directTailTokens.toLocaleString(locale)}</dd>
-              </div>
-            </dl>
-          )}
-        </div>
-      )}
+      <Alert
+        variant="info"
+        icon={<Icon name="info" size={16} />}
+        className="[&>.ci-alert__dismiss]:hidden"
+        description={
+          <span data-testid="panel-pointer-notice">
+            {t("panelPointerPrefix")}{" "}
+            <a href="/dashboard/context/settings" className="underline hover:text-text-main">
+              {t("compressionSettings")}
+            </a>
+            {t("panelPointerSuffix")}
+          </span>
+        }
+      />
 
       {/* ── Config form ── */}
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-        <h2 className="text-sm font-semibold text-text">{t("configuration")}</h2>
+      <Card padding="sm" className="flex flex-col gap-3">
+        <SectionHeader title={t("configuration")} />
         {visibleConfigSchema.length > 0 ? (
           <EngineConfigForm
             schema={visibleConfigSchema}
@@ -469,51 +422,51 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
         )}
         <div className="flex items-center gap-3 pt-1">
           {persistable ? (
-            <button
-              onClick={handleSave}
-              disabled={saving || Boolean(loadError)}
-              className="px-4 py-1.5 rounded bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50"
-            >
+            <Button size="sm" onClick={handleSave} disabled={saving || Boolean(loadError)}>
               {saving ? t("saving") : t("save")}
-            </button>
+            </Button>
           ) : (
             <p className="text-xs text-text-muted" data-testid="no-detail-store-notice">
               {t("globalSettingsOnly")}
             </p>
           )}
-          {saveError && <p className="text-xs text-destructive">{saveError}</p>}
+          {saveError && (
+            <p className="text-xs text-error" role="alert">
+              {saveError}
+            </p>
+          )}
         </div>
-      </div>
+      </Card>
 
       {/* ── Live preview ── */}
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-        <h2 className="text-sm font-semibold text-text">{t("preview")}</h2>
-        <textarea
-          className="border border-border rounded px-3 py-2 text-sm text-text bg-background resize-y min-h-[80px]"
+      <Card padding="sm" className="flex flex-col gap-3">
+        <SectionHeader title={t("preview")} />
+        <Textarea
+          className="min-h-[80px] resize-y"
           value={previewText}
           onChange={(e) => setPreviewText(e.target.value)}
           aria-label={t("previewInput")}
         />
         <div className="flex items-center gap-3">
-          <button
-            onClick={handlePreview}
-            disabled={previewLoading}
-            className="px-4 py-1.5 rounded bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50"
-          >
+          <Button variant="secondary" size="sm" onClick={handlePreview} disabled={previewLoading}>
             {previewLoading ? t("processing") : t("preview")}
-          </button>
+          </Button>
         </div>
-        {previewError && <p className="text-xs text-destructive">{previewError}</p>}
+        {previewError && (
+          <p className="text-xs text-error" role="alert">
+            {previewError}
+          </p>
+        )}
         {preview && (
           <div className="flex flex-col gap-3 pt-1 text-sm">
             <div className="flex flex-wrap gap-4">
               <span className="text-text-muted">
                 {t("originalTokens")}:{" "}
-                <strong className="text-text">{preview.originalTokens}</strong>
+                <strong className="text-text-main">{preview.originalTokens}</strong>
               </span>
               <span className="text-text-muted">
                 {t("compressedTokens")}:{" "}
-                <strong className="text-text">{preview.compressedTokens}</strong>
+                <strong className="text-text-main">{preview.compressedTokens}</strong>
               </span>
               <span className="text-text-muted">
                 {t("savings")}:{" "}
@@ -525,7 +478,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                   {t("original")}
                 </h3>
-                <pre className="max-h-72 overflow-auto rounded border border-border bg-background p-3 whitespace-pre-wrap break-words text-text">
+                <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words rounded border border-border bg-bg p-3 text-text-main">
                   {preview.original ?? ""}
                 </pre>
               </div>
@@ -533,7 +486,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                   {t("compressed")}
                 </h3>
-                <pre className="max-h-72 overflow-auto rounded border border-border bg-background p-3 whitespace-pre-wrap break-words text-text">
+                <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words rounded border border-border bg-bg p-3 text-text-main">
                   {preview.compressed ?? ""}
                 </pre>
               </div>
@@ -555,11 +508,11 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
             )}
           </div>
         )}
-      </div>
+      </Card>
 
       {/* ── Analytics strip ── */}
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-        <h2 className="text-sm font-semibold text-text">{t("last7Days")}</h2>
+      <Card padding="sm" className="flex flex-col gap-3">
+        <SectionHeader title={t("last7Days")} />
         {analytics && analytics.runs === 0 ? (
           <p className="text-sm text-text-muted">{t("noDataYet")}</p>
         ) : analytics ? (
@@ -577,7 +530,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
         ) : (
           <p className="text-sm text-text-muted">{t("noDataYet")}</p>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

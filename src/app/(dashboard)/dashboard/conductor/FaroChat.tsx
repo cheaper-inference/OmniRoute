@@ -16,7 +16,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Badge, Card } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Checkbox from "@/shared/components/Checkbox";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
 
 interface ChatMessage {
   role: "user" | "faro";
@@ -193,7 +198,7 @@ export default function FaroChat() {
                 className={
                   m.role === "user"
                     ? "inline-block rounded px-2 py-1 bg-primary/10"
-                    : "inline-block rounded px-2 py-1 bg-black/5 dark:bg-white/10 whitespace-pre-wrap"
+                    : "inline-block rounded px-2 py-1 bg-bg-subtle whitespace-pre-wrap"
                 }
               >
                 {m.text}
@@ -208,18 +213,19 @@ export default function FaroChat() {
             <Badge variant="warning" dot>
               {t("faroPending")}
             </Badge>
-            <button type="button" className="text-sm underline" onClick={() => void send("sim")}>
+            <Button variant="primary" size="sm" onClick={() => void send("sim")}>
               {t("yes")}
-            </button>
-            <button type="button" className="text-sm underline" onClick={() => void send("não")}>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => void send("não")}>
               {t("no")}
-            </button>
+            </Button>
           </div>
         )}
 
-        <div className="flex items-center gap-2">
-          <input
-            className="flex-1 rounded border border-black/10 dark:border-white/10 bg-transparent px-2 py-1 text-sm"
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            className="min-w-48 flex-1"
+            aria-label={t("faroPlaceholder")}
             placeholder={t("faroPlaceholder")}
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -228,17 +234,12 @@ export default function FaroChat() {
             }}
             disabled={busy}
           />
-          <button
-            type="button"
-            className="text-sm underline"
-            onClick={() => void send(input)}
-            disabled={busy}
-          >
+          <Button variant="primary" size="sm" onClick={() => void send(input)} disabled={busy}>
             {t("faroSend")}
-          </button>
-          <button
-            type="button"
-            className={`text-sm px-2 py-1 rounded ${voice === "listening" ? "bg-red-500/20" : "bg-black/5 dark:bg-white/10"}`}
+          </Button>
+          <Button
+            variant={voice === "listening" ? "danger" : "outline"}
+            size="sm"
             title={t("pushToTalk")}
             aria-pressed={voice === "listening"}
             onMouseDown={() => void startRecording()}
@@ -247,33 +248,32 @@ export default function FaroChat() {
             onTouchStart={() => void startRecording()}
             onTouchEnd={stopRecording}
           >
-            🎙 {voiceLabel[voice]}
-          </button>
-          <label className="flex items-center gap-1 text-xs text-text-muted">
-            <input type="checkbox" checked={speak} onChange={(e) => setSpeak(e.target.checked)} />
-            {t("speakAnswers")}
-          </label>
+            <Icon name="mic" size={14} />
+            {voiceLabel[voice]}
+          </Button>
+          <Checkbox
+            className="text-xs"
+            label={t("speakAnswers")}
+            checked={speak}
+            onChange={(e) => setSpeak(e.target.checked)}
+          />
         </div>
 
         <details className="text-xs text-text-muted">
           <summary>{t("voiceModels")}</summary>
           <div className="flex gap-2 pt-2">
-            <label className="flex-1">
-              STT
-              <input
-                className="w-full rounded border border-black/10 dark:border-white/10 bg-transparent px-2 py-1"
-                value={sttModel}
-                onChange={(e) => persistModels(e.target.value, ttsModel)}
-              />
-            </label>
-            <label className="flex-1">
-              TTS
-              <input
-                className="w-full rounded border border-black/10 dark:border-white/10 bg-transparent px-2 py-1"
-                value={ttsModel}
-                onChange={(e) => persistModels(sttModel, e.target.value)}
-              />
-            </label>
+            <Input
+              className="flex-1"
+              label="STT"
+              value={sttModel}
+              onChange={(e) => persistModels(e.target.value, ttsModel)}
+            />
+            <Input
+              className="flex-1"
+              label="TTS"
+              value={ttsModel}
+              onChange={(e) => persistModels(sttModel, e.target.value)}
+            />
           </div>
         </details>
       </div>

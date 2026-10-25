@@ -92,6 +92,8 @@ test("Copilot static catalog and fallback contain exactly the approved fifteen m
     "mai-code-1.1-flash",
     "kimi-k3",
     "grok-4.6",
+    // Copilot-side model selection (Copilot Free); resolved per request via /auto.
+    "auto",
   ];
   assert.deepEqual(
     getModelsByProviderId("github").map((model) => model.id),

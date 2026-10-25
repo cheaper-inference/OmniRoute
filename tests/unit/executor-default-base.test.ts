@@ -11,6 +11,7 @@ import {
 } from "../../open-sse/executors/base.ts";
 import { shouldForceResponsesUpstream } from "../../open-sse/executors/forceResponsesUpstream.ts";
 import { DefaultExecutor } from "../../open-sse/executors/default.ts";
+import { NO_REFRESH_NEEDED } from "../../open-sse/services/tokenRefresh/shared.ts";
 import { PROVIDERS } from "../../open-sse/config/constants.ts";
 import {
   CLAUDE_CODE_COMPATIBLE_ANTHROPIC_VERSION,
@@ -1204,7 +1205,7 @@ test("BaseExecutor helpers manage custom user agents and upstream extra headers"
 
   setUserAgentHeader(headers, "MyAgent/2.0");
   assert.equal(headers["User-Agent"], "MyAgent/2.0");
-  assert.equal(headers["user-agent"], "MyAgent/2.0");
+  assert.equal(headers["user-agent"], undefined);
 
   applyConfiguredUserAgent(headers, { customUserAgent: "MyAgent/3.0" });
   assert.equal(headers["User-Agent"], "MyAgent/3.0");
@@ -1216,7 +1217,7 @@ test("BaseExecutor helpers manage custom user agents and upstream extra headers"
   });
   assert.equal(headers.Authorization, "Bearer override");
   assert.equal(headers["User-Agent"], "Merged/4.0");
-  assert.equal(headers["user-agent"], "Merged/4.0");
+  assert.equal(headers["user-agent"], undefined);
   assert.equal(headers["X-Upstream"], "1");
 });
 
@@ -1251,10 +1252,63 @@ test("BaseExecutor.needsRefresh returns true only when expiry is near", () => {
   assert.equal(executor.needsRefresh({}), false);
 });
 
-test("DefaultExecutor.refreshCredentials returns null without refresh token", async () => {
+test("DefaultExecutor.refreshCredentials signals nothing to refresh without refresh token", async () => {
   const executor = new DefaultExecutor("gemini");
   const result = await executor.refreshCredentials({}, null);
-  assert.equal(result, null);
+  assert.equal(result, NO_REFRESH_NEEDED);
+});
+
+test("NO_REFRESH_NEEDED is a frozen shared sentinel", () => {
+  assert.equal(Object.isFrozen(NO_REFRESH_NEEDED), true);
+  assert.throws(() => {
+    "use strict";
+    (NO_REFRESH_NEEDED as { error: string }).error = "invalid_grant";
+  }, TypeError);
+  assert.equal(NO_REFRESH_NEEDED.error, "no_refresh_needed");
+});
+
+test("proactive refresh of an API-key connection logs no unrecoverable-sentinel warning", async () => {
+  const originalFetch = globalThis.fetch;
+  const warnings: string[] = [];
+  const sentAuth: string[] = [];
+  globalThis.fetch = async (_url, init = {}) => {
+    sentAuth.push(String(new Headers(init.headers).get("Authorization") ?? ""));
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+  try {
+    const executor = new DefaultExecutor("openai-compatible-test");
+    // Near expiry → needsRefresh() is true, but there is no refresh token.
+    const credentials = {
+      apiKey: "test-key",
+      expiresAt: new Date(Date.now() + 1_000).toISOString(),
+      providerSpecificData: { baseUrl: "https://proxy.example/v1/" },
+    };
+    assert.equal(executor.needsRefresh(credentials), true);
+    await executor.execute({
+      model: "gpt-4.1",
+      body: { model: "gpt-4.1", messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials,
+      log: {
+        debug: () => {},
+        info: () => {},
+        warn: (_tag: string, msg: string) => warnings.push(String(msg)),
+        error: () => {},
+      },
+    } as unknown as Parameters<DefaultExecutor["execute"]>[0]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.deepEqual(
+    warnings.filter((w) => w.includes("unrecoverable sentinel")),
+    [],
+    "an API-key connection has nothing to refresh — no sentinel warning"
+  );
+  assert.equal(sentAuth.length, 1);
+  assert.equal(sentAuth[0], "Bearer test-key");
 });
 
 test("DefaultExecutor.needsRefresh requests a proactive token for GigaChat", () => {

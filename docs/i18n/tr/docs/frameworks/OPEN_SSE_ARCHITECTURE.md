@@ -30,30 +30,30 @@
 
 ```
 open-sse/
-├── index.ts              # Genel kullanıma açık giriş noktası
-├── types.d.ts            # Genel kullanıma açık tür dışa aktarımları
+├── index.ts              # Genel giriş noktası
+├── types.d.ts            # Genel tür dışa aktarımları
 ├── package.json          # @omniroute/open-sse
-├── config/               # Sağlayıcı yapılandırmaları, sabitler, kayıtlar
-├── executors/            # Sağlayıcı başına HTTP yürütücüleri (67 + base.ts/index.ts)
+├── config/               # Sağlayıcı yapılandırmaları, sabitler, kayıt defterleri
+├── executors/            # Sağlayıcı başına HTTP yürütücüleri (150 modül + base.ts/index.ts)
 ├── handlers/             # İstek işleyicileri (chatCore, responses vb.)
 ├── lib/                  # Dahili yardımcı araçlar
 ├── mcp-server/           # Model Context Protocol sunucusu
-├── services/             # Yaklaşık 298 servis modülü
+├── services/             # ~298 hizmet modülü
 ├── transformer/          # Responses API biçim dönüştürücüsü
 ├── translator/           # Biçim çevirisi (OpenAI ↔ Claude ↔ Gemini)
-└── utils/                # Paylaşılan yardımcı araçlar (günlük kaydı, hata, akış vb.)
+└── utils/                # Paylaşılan yardımcı araçlar (günlükleme, hata, akış vb.)
 ```
 
 ### Modül Sayıları
 
 | Dizin | Dosyalar | Amaç |
-| `executors/` | 167 | Sağlayıcı başına HTTP yürütücüleri (DefaultExecutor fabrikası aracılığıyla birleştirilir) |
+| `executors/` | 167 | Sağlayıcı başına HTTP yürütücüleri (DefaultExecutor fabrikası aracılığıyla birleştirilmiş) |
 | `handlers/` | 157 | İstek giriş noktaları (chatCore, responses, embeddings) |
 | `services/` | ~536 | Yönlendirme, önbelleğe alma, hız sınırlama, yenileme vb. |
 | `translator/` | 56 | Biçim dönüştürme (OpenAI ↔ Claude ↔ Gemini) |
 | `mcp-server/` | 44 | MCP araçları ve aktarımları |
-| `utils/` | ~108 | Birden fazla alanı ilgilendiren yardımcı araçlar (günlük kaydı, hata, akış) |
-| `config/` | ~339 | Sağlayıcı yapılandırmaları, sabitler, kayıtlar |
+| `utils/` | ~108 | Birden fazla alanı ilgilendiren yardımcı araçlar (günlükleme, hata, akış) |
+| `config/` | ~339 | Sağlayıcı yapılandırmaları, sabitler, kayıt defterleri |
 
 ---
 
@@ -165,14 +165,14 @@ Yanıttan sonra (başarılı veya başarısız), kullanım kaydedilir:
 
 ---
 
-## Temel Dosyalara Derinlemesine Bakış
+## Temel Dosyalar Derinlemesine İnceleme
 
 ### chatCore.ts (5977 satır)
 
-**Ana istek işleyicisi**. Boyutuna rağmen net bir yapıya sahiptir:
+**Ana istek işleyici**. Boyutuna rağmen net bir yapıya sahiptir:
 
 ```ts
-// chatCore.ts dosyasının sözde yapısı
+// chatCore.ts'in sözde yapısı
 export async function handleChat(request: NextRequest) {
   // 1. Kimlik doğrulama + CORS
   await authenticateRequest(request);
@@ -181,14 +181,14 @@ export async function handleChat(request: NextRequest) {
   // 2. Gövde doğrulaması
   const body = await parseRequestBody(request);
 
-  // 3. Biçim algılama + dönüştürme
+  // 3. Biçim algılama + çeviri
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Kombinasyon yönlendirmesi
+  // 4. Combo yönlendirme
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,7 +196,7 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Sonraki hedefle devam et
+      // Sonraki hedefe devam et
     }
   }
 
@@ -205,11 +205,11 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-Tek ve devasa bir fonksiyon olmasına rağmen, 5 aşamalı işlem hattıyla eşleşen **yorumlarla belirtilmiş bölümler** hâlinde düzenlenmiştir.
+Tek bir devasa fonksiyon olmasına rağmen, 5 aşamalı işlem hattına karşılık gelen **yorumlanmış bölümlere** ayrılmıştır.
 
-### combo.ts (4456 kod satırı)
+### combo.ts (4456 LOC)
 
-Bir kombinasyonu sıralı hedeflere çözümleyen **yönlendirme motoru**.
+Bir komboyu sıralı hedeflere çözen **yönlendirme motoru**.
 
 ```ts
 // services/combo.ts
@@ -219,53 +219,56 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
     try {
       return await handleSingleModel(target, body);
     } catch (err) {
-      log.warn("hedef başarısız oldu, sonraki deneniyor", { target, err });
+      log.warn("target failed, trying next", { target, err });
     }
   }
-  throw new ComboExhaustedError("Tüm hedefler başarısız oldu");
+  throw new ComboExhaustedError("All targets failed");
 }
 ```
 
-**19 yönlendirme stratejisini** destekler (bkz. `src/shared/constants/routingStrategies.ts`):
+**20 yönlendirme stratejisini** destekler (bkz. `src/shared/constants/routingStrategies.ts`):
 
-| Strateji            | Davranış                                                                                            |
-| ------------------- | --------------------------------------------------------------------------------------------------- |
-| `priority`          | İlk hedefe öncelik veren sıralı liste                                                               |
-| `weighted`          | Hedef başına ağırlığa göre olasılıksal seçim                                                        |
-| `round-robin`       | Hedefler arasında sırayla döngü                                                                     |
-| `context-relay`     | Bağlamı hedefler arasında aktarır                                                                   |
-| `fill-first`        | Sonraki hedefe geçmeden önce kotayı doldurur                                                        |
-| `p2c`               | İki seçenekten güçlü olanı                                                                          |
-| `random`            | Eşit olasılıklı rastgele seçim                                                                      |
-| `least-used`        | Son zamanlarda en az kullanılanı seçer                                                              |
-| `cost-optimized`    | Önce en ucuz ve sağlıklı hedef                                                                      |
-| `reset-aware`       | Sağlayıcı sıfırlama pencerelerini dikkate alır                                                      |
-| `reset-window`      | Sıfırlama penceresine dayalı yönlendirme                                                            |
-| `headroom`          | Önce en fazla kalan kota kapasitesine sahip olan                                                    |
-| `strict-random`     | Gerçek anlamda eşit olasılıklı (kalite ağırlığı yok)                                                |
-| `auto`              | 16 faktörlü puanlamayı kullanır (`autoCombo/`)                                                      |
-| `lkgp`              | Önce bilinen son iyi sağlayıcı                                                                      |
-| `context-optimized` | Uzun bağlamlı istekler için en iyisi                                                                |
-| `fusion`            | Paralel olarak bir panele dağıtır, ardından bir değerlendirici aracılığıyla sentezler (`fusion.ts`) |
+| Strateji            | Davranış                                                                                  |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| `priority`          | İlk hedefe göre sıralanmış liste                                                          |
+| `weighted`          | Hedef başına ağırlığa göre olasılıksal                                                    |
+| `round-robin`       | Hedefler arasında sırayla dön                                                             |
+| `context-relay`     | Bağlamı hedefler arasında aktar                                                           |
+| `fill-first`        | Sonrakine geçmeden önce kotayı doldur                                                     |
+| `p2c`               | İki seçenek gücü                                                                          |
+| `random`            | Tekdüze rastgele                                                                          |
+| `least-used`        | Son zamanlarda en az kullanılanı seç                                                      |
+| `cost-optimized`    | Önce en ucuz sağlıklı hedef                                                               |
+| `reset-aware`       | Sağlayıcı sıfırlama pencerelerinin farkında                                               |
+| `reset-window`      | Sıfırlama penceresi tabanlı yönlendirme                                                   |
+| `headroom`          | Önce en fazla kalan kota payına sahip olan                                                |
+| `quota-weighted`    | Tükenmiş hesapları atla, sonra kalan kota ÷ sürmekte olan yük oranına göre çek            |
+| `strict-random`     | Gerçekten tekdüze (kalite ağırlıklandırması yok)                                          |
+| `auto`              | 16 faktörlü puanlama kullan (`autoCombo/`)                                                |
+| `lkgp`              | Önce bilinen son iyi sağlayıcı                                                            |
+| `context-optimized` | Uzun bağlamlı istekler için en iyisi                                                      |
+| `cache-optimized`   | Her yeniden kullanılabilir istem önekini aynı hesaba sabitle (istem önbelleği isabetleri) |
+| `fusion`            | Bir panele paralel olarak dağıt, ardından bir hakem aracılığıyla sentezle (`fusion.ts`)   |
+| `pipeline`          | Adımları zincirle — her hedefin çıktısı bir sonrakini besler                              |
 
-### base.ts (1170 kod satırı)
+### base.ts (1170 LOC)
 
-107 yürütücünün tamamının genişlettiği **soyut yürütücü**. Şunları içerir:
+Her yürütücü sınıfının genişlettiği (doğrudan veya `DefaultExecutor` ve diğer alt sınıflar aracılığıyla) **soyut yürütücü**. Şunları içerir:
 
-- `buildUrl()` — varsayılan URL oluşturma (alt sınıflar özel davranış için geçersiz kılar)
-- `buildHeaders()` — varsayılan üstbilgiler (kimlik doğrulama, içerik türü)
-- `transformRequest()` — varsayılan olarak değişiklik yapmadan geçirir
-- `execute()` — yeniden deneme/artan bekleme/devre kesici özellikli ana HTTP döngüsü
+- `buildUrl()` — varsayılan URL oluşturma (alt sınıflar özelleştirmek için geçersiz kılar)
+- `buildHeaders()` — varsayılan başlıklar (kimlik doğrulama, içerik türü)
+- `transformRequest()` — varsayılan olarak doğrudan geçiş
+- `execute()` — yeniden deneme/geri çekilme/devre kesici içeren ana HTTP döngüsü
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // OpenAI/Anthropic uyumlu tüm sağlayıcıları işler
-  // Sağlayıcılar yapılandırmaları (URL, kimlik doğrulama, üstbilgiler) kaydeder ancak yürütücü mantığını paylaşır
+  // Tüm OpenAI/Anthropic uyumlu sağlayıcıları işler
+  // Sağlayıcılar yapılandırmaları kaydeder (URL, kimlik doğrulama, başlıklar) ancak yürütücü mantığını paylaşır
 }
 ```
 
-Sağlayıcıya özgü davranışlar (kimlik doğrulama üstbilgileri, temel URL, sürüm üstbilgileri) ayrı yürütücü sınıfları üzerinden değil, sağlayıcı kayıt defteri aracılığıyla yapılandırılır.
+Sağlayıcıya özgü davranış (kimlik doğrulama başlıkları, temel URL, sürüm başlıkları) ayrı yürütücü sınıfları yerine sağlayıcı kayıt defteri aracılığıyla yapılandırılır.
 
 ````
 
@@ -273,52 +276,52 @@ Sağlayıcıya özgü davranışlar (kimlik doğrulama üstbilgileri, temel URL,
 
 ## Servisler (117 modül)
 
-Servisler, işleyicilerin bir araya getirdiği **odaklanmış, tek amaçlı modüllerdir**. Başlıca kategoriler:
+Servisler, handler'ların bir araya getirdiği **odaklanmış, tek amaçlı modüllerdir**. Ana kategoriler:
 
-### Yönlendirme ve Combo
+### Yönlendirme & Combo
 
 - `combo.ts` — combo ile yönlendirilen istekler için giriş noktası
 - `services/autoCombo/` — 16 faktörlü puanlama, 8 otomatik yönlendirme stratejisi
-- `wildcardRouter.ts` — joker karakterli rotaları (`gpt-*`) eşleştirir
-- `modelFamilyFallback.ts` — T5 aile içi geri dönüşü
+- `wildcardRouter.ts` — wildcard rotalarını eşleştirir (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 aile içi fallback
 
-### Hız Sınırlama ve Kota
+### Hız Sınırlama & Kota
 
-- `rateLimitManager.ts` — anahtar+sağlayıcı başına token kovası
+- `rateLimitManager.ts` — anahtar+sağlayıcı başına token bucket
 - `usage.ts` — kullanım kaydı
 - `quotaCache.ts` — bellek içi kota anlık görüntüleri
 
-### Hesap ve Token
+### Hesap & Token
 
 - `tokenRefresh.ts` — 401 durumunda OAuth yenileme
 - `accountFallback.ts` — alternatif hesaba geçiş
 - `sessionManager.ts` — çok turlu oturum durumu
 
-### Akıllı İşlemler
+### Zeka
 
 - `intentClassifier.ts` — istek amacını sınıflandırır
-- `taskAwareRouter.ts` — görev türüne göre yönlendirir
+- `taskAwareRouter.ts` — görev tipine göre yönlendirir
 - `thinkingBudget.ts` — düşünme token'larını tahsis eder
-- `contextManager.ts` — yönlendirme bağlamı ekler
+- `contextManager.ts` — yönlendirme bağlamını enjekte eder
 
 ### Dayanıklılık
 
-- `resilience.ts` — yeniden deneme, geri çekilme ve devre kesici orkestrasyonu
-- `emergencyFallback.ts` — son çare geri dönüşü
-- `modelDeprecation.ts` — ardıl modellere otomatik yönlendirme
+- `resilience.ts` — yeniden deneme, backoff, breaker orkestrasyonu
+- `emergencyFallback.ts` — son çare fallback'i
+- `modelDeprecation.ts` — halef modellere otomatik yönlendirme
 
 ### Durum
 
-- `signatureCache.ts` — istek imzasına göre yinelenenleri kaldırır
+- `signatureCache.ts` — istek imzasına göre tekilleştirme
 - `volumeDetector.ts` — yük azaltma
 - `contextHandoff.ts` — oturum serileştirme
 
 ### Sıkıştırma
 
-- `compression/` (alt dizin) — eksiksiz sıkıştırma işlem hattı
+- `compression/` (alt dizin) — tam sıkıştırma pipeline'ı
 - Motorları, kural paketlerini ve adaptörleri kapsayan 39 dosya
 
-### Beceriler
+### Yetenekler
 
 - ([SKILLS.md](./SKILLS.md) dosyasında ele alınmıştır)
 
@@ -328,13 +331,13 @@ Servisler, işleyicilerin bir araya getirdiği **odaklanmış, tek amaçlı mod�
 
 ---
 
-## Yürütücüler (75+ dosya)
+## Executor'lar (150 modül)
 
-Her sağlayıcı için bir dosya bulunur. Bunların tümü `BaseExecutor` sınıfını genişletir ve farklı olan davranışları geçersiz kılar.
+Çoğunlukla sağlayıcı başına bir dosya vardır. Executor sınıflarının tümü `BaseExecutor`'ı genişletir ve farklılık gösteren kısımları geçersiz kılar; diğer modüller sağlayıcıya özgü yardımcılardır (araç şemaları, fetch/TTS adaptörleri, tuhaflık işleyicileri).
 
-### Yaygın Kalıplar
+### Ortak Desenler
 
-Sağlayıcılar, yapılandırılmış yürütücüyü döndüren `getExecutor(providerId)` aracılığıyla çözümlenir. OpenAI/Anthropic uyumlu sağlayıcılar `DefaultExecutor` (`executors/default.ts`) kullanır. Sağlayıcıya özgü davranışlar (temel URL, kimlik doğrulama başlıkları, API sürümü) `open-sse/config/providers/` içinde yapılandırılırken istek gövdesi dönüşümleri `open-sse/translator/` içinde gerçekleştirilir.
+Sağlayıcılar, yapılandırılmış executor'ı döndüren `getExecutor(providerId)` aracılığıyla çözümlenir. OpenAI/Anthropic uyumlu sağlayıcılar `DefaultExecutor`'ı kullanır (`executors/default.ts`). Sağlayıcıya özgü davranışlar (temel URL, kimlik doğrulama başlıkları, API sürümü) `open-sse/config/providers/` altında yapılandırılırken, istek gövdesi dönüşümleri `open-sse/translator/` altında ele alınır.
 
 **Özel URL**, sağlayıcı yapılandırması aracılığıyla ayarlanır:
 
@@ -346,13 +349,13 @@ export default {
 }
 ````
 
-**Özel kimlik doğrulama**, sağlayıcı kayıt sisteminin kimlik doğrulama yapılandırması (API anahtarı, OAuth, başlık profilleri) üzerinden gerçekleştirilir.
+**Özel kimlik doğrulama**, sağlayıcı kayıt defterinin kimlik doğrulama yapılandırması (API anahtarı, OAuth, başlık profilleri) aracılığıyla ele alınır.
 
-**Özel istek gövdesi** dönüşümleri (ör. Anthropic'in `system` öğesini `messages` öğesinden ayırması), `open-sse/translator/` içinde sağlayıcı bazında kaydedilir.
+**Özel istek gövdesi** dönüşümleri (örn. Anthropic'in `system`'i `messages`'tan ayırması) `open-sse/translator/` altında sağlayıcı bazında kaydedilir.
 
 ````
 
-### Yürütücü Fabrikası
+### Executor Fabrikası
 
 `executors/index.ts`, `getExecutor(providerId)` fonksiyonunu dışa aktarır:
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-Çözümleme, `ExecutorRegistry` (`executors/registry.ts`) üzerinden gerçekleştirilir: her özelleştirilmiş yürütücü, `executors/index.ts` içindeki yerleşik tabloda bildirilir ve modül yüklenirken `registerExecutor(alias, instance)` aracılığıyla kaydedilir; `getExecutor()`, kayıt sistemine başvurur ve özelleştirilmiş girdisi bulunmayan herhangi bir sağlayıcı için belleğe alınmış bir `DefaultExecutor` örneğine geri döner. Tam alias → yürütücü eşlemesi, `tests/unit/executor-map-golden.test.ts` altın testiyle tanımlanır.
+Çözümleme `ExecutorRegistry` (`executors/registry.ts`) üzerinden gerçekleşir: her özelleşmiş executor, `executors/index.ts` içindeki yerleşik tabloda bildirilir ve modül yüklenirken `registerExecutor(alias, instance)` aracılığıyla kaydedilir; `getExecutor()` kayıt defterine danışır ve özelleşmiş bir girdisi olmayan sağlayıcılar için memoize edilmiş bir `DefaultExecutor`'a geri döner. Tam takma ad → executor eşlemesi, `tests/unit/executor-map-golden.test.ts` golden testi ile karakterize edilir.
 
 ---
 
@@ -481,15 +484,15 @@ Bu, şunları işler:
 
 ## Yapılandırma
 
-`open-sse/config/`, yapılandırma katmanını barındırır:
+`open-sse/config/` yapılandırma katmanını içerir:
 
-| Dosya                         | Amaç                                                           |
-| ----------------------------- | -------------------------------------------------------------- |
-| `providerRegistry.ts`         | 352 sağlayıcılı katalog üzerindeki sohbet modeli kayıt defteri |
-| `providerModels.ts`           | Model takma adları, format eşleme                              |
-| `constants.ts`                | Zaman aşımları, sınırlar, durum kodları                        |
-| `defaultThinkingSignature.ts` | Varsayılan Claude düşünme imzası                               |
-| `modelStrip.ts` (hizmetlerde) | Sağlayıcı bazında alan kaldırma                                |
+| Dosya                         | Amaç                                                          |
+| ----------------------------- | ------------------------------------------------------------- |
+| `providerRegistry.ts`         | 375 sağlayıcılık katalog üzerinde sohbet modeli kayıt defteri |
+| `providerModels.ts`           | Model takma adları, format eşlemesi                           |
+| `constants.ts`                | Zaman aşımları, limitler, durum kodları                       |
+| `defaultThinkingSignature.ts` | Varsayılan Claude düşünme imzası                              |
+| `modelStrip.ts` (servislerde) | Sağlayıcı başına alan ayıklama                                |
 
 ### Sağlayıcı Kayıt Defteri Şeması
 
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Modül yüklenirken gerçekleştirilen Zod doğrulaması, tüm sağlayıcı yapılandırmalarının geçerli olmasını sağlar.
+Modül yüklenirken yapılan Zod doğrulaması, tüm sağlayıcı yapılandırmalarının geçerli olmasını sağlar.
 
 ---
 

@@ -160,42 +160,6 @@ describe("ccr protocol instruction (#8033)", () => {
     );
     assert.match(instruction, /verbatim|exact/i, "must stress verbatim/exact copying of the hash");
     assert.match(instruction, /24/, "must mention the 24-character length of the hash");
-    assert.match(
-      instruction,
-      /HARD EXECUTION RULE/i,
-      "must frame retrieval as mandatory execution"
-    );
-    assert.match(instruction, /lookup labels/i, "must direct the model to use section previews");
-    assert.match(
-      instruction,
-      /never choose by position/i,
-      "must not retrieve an arbitrary section"
-    );
-    assert.match(instruction, /Do not deliberate in text/i, "must prioritize tool execution");
-    assert.match(instruction, /ONE marker per tool call/i, "must retrieve one section at a time");
-    assert.match(instruction, /preview.*lookup labels/i, "previews must only select a marker");
-    assert.match(instruction, /actual call/i, "must require an actual retrieval tool call");
-    assert.match(
-      instruction,
-      /proposing a tool call is not retrieval/i,
-      "a marker or planned tool call must not be mistaken for a completed retrieval"
-    );
-    assert.match(
-      instruction,
-      /After the tool returns.*returned archived content/i,
-      "must require reading the retrieved content before answering"
-    );
-    assert.match(
-      instruction,
-      /only metadata\/a preview.*not treat it as a successful retrieval/i,
-      "metadata or another preview must not count as retrieved content"
-    );
-    assert.match(
-      instruction,
-      /rather than guessing/i,
-      "must forbid guessing when retrieval did not recover the requested fact"
-    );
-    assert.match(instruction, /exact names, numbers, or phrases/i);
     assert.ok(instruction.includes("dedup:ref"), "must mention the dedup:ref contract");
   });
 

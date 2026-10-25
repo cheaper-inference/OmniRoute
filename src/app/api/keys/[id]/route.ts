@@ -10,7 +10,10 @@ import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
 import { updateKeyPermissionsSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import {
+  requireCredentialForManagementScopedKey,
+  requireManagementAuth,
+} from "@/lib/api/requireManagementAuth";
 import * as log from "@/sse/utils/logger";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 
@@ -88,6 +91,7 @@ export async function PATCH(request, { params }) {
       compressionEnabled,
       allowAutoCombos,
       catalogScope,
+      forcedModel,
       cacheDefaultMode,
       codexServiceMode,
       disableNonPublicModels,
@@ -97,6 +101,9 @@ export async function PATCH(request, { params }) {
       weeklyUsageLimitUsd,
       chaosModeEnabled,
     } = validation.data;
+
+    const scopeAuthError = await requireCredentialForManagementScopedKey(request, scopes);
+    if (scopeAuthError) return scopeAuthError;
 
     const payload: Parameters<typeof updateApiKeyPermissions>[1] = {};
     if (name !== undefined) payload.name = name;
@@ -125,6 +132,7 @@ export async function PATCH(request, { params }) {
     if (codexServiceMode !== undefined) payload.codexServiceMode = codexServiceMode;
     if (allowAutoCombos !== undefined) payload.allowAutoCombos = allowAutoCombos;
     if (catalogScope !== undefined) payload.catalogScope = catalogScope;
+    if (forcedModel !== undefined) payload.forcedModel = forcedModel;
     if (cacheDefaultMode !== undefined) payload.cacheDefaultMode = cacheDefaultMode;
     if (disableNonPublicModels !== undefined)
       payload.disableNonPublicModels = disableNonPublicModels;
@@ -165,6 +173,7 @@ export async function PATCH(request, { params }) {
       ...(compressionEnabled !== undefined && { compressionEnabled }),
       ...(cacheDefaultMode !== undefined && { cacheDefaultMode }),
       ...(codexServiceMode !== undefined && { codexServiceMode }),
+      ...(forcedModel !== undefined && { forcedModel }),
       ...(disableNonPublicModels !== undefined && { disableNonPublicModels }),
       ...(allowUsageCommand !== undefined && { allowUsageCommand }),
       ...(usageLimitEnabled !== undefined && { usageLimitEnabled }),

@@ -17,12 +17,17 @@ import {
   buildQoderCompletionPayload,
   buildQoderPrompt,
   createQoderErrorResponse,
+  isQoderUpstreamBusy,
   parseQoderCliFailure,
+  parseQoderRetryAfterSeconds,
   parseQoderCliResult,
   runQoderCli,
 } from "../services/qoderCli.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import { hasQoderCallerTools, resolveQoderAuthToken } from "../services/qoderCapabilities.ts";
+
+/** Retry hint sent with a 429 `qodercli_busy` (local queue full). */
+const QODER_CLI_BUSY_RETRY_AFTER_SECONDS = 5;
 
 function truncate(text: string, max: number): string {
   if (text.length <= max) return text;
@@ -125,6 +130,18 @@ async function unwrapQoderEnvelope(response: Response): Promise<Response> {
 
   if (errorStatus) {
     reader.cancel();
+    // #3510: a 403 envelope carrying the nested code 10605 is Qoder's temporary
+    // queue throttle, not an auth failure. Surface it as 503 upstream_busy (same
+    // classification as the CLI path) so healthy accounts are not parked on the
+    // auth cooldown.
+    if (isQoderUpstreamBusy(errorMsg)) {
+      return createQoderErrorResponse({
+        status: 503,
+        message: `[qoder error ${errorStatus}: ${sanitizeErrorMessage(truncate(errorMsg, 200))}]`,
+        code: "upstream_busy",
+        retryAfterSeconds: parseQoderRetryAfterSeconds(errorMsg),
+      });
+    }
     const errType =
       errorStatus === 401 || errorStatus === 403 ? "authentication_error" : "provider_error";
     return new Response(
@@ -362,6 +379,23 @@ export class QoderExecutor extends BaseExecutor {
       const abortError = new Error("Aborted");
       abortError.name = "AbortError";
       throw abortError;
+    }
+
+    if (run.busy) {
+      // The local qodercli queue is full — a request-scoped condition, not an
+      // upstream failure: 429 + Retry-After, never a 5xx that would count
+      // against the provider circuit breaker.
+      return {
+        response: createQoderErrorResponse({
+          status: 429,
+          message: sanitizeErrorMessage(run.error || "qodercli is busy"),
+          code: "qodercli_busy",
+          retryAfterSeconds: QODER_CLI_BUSY_RETRY_AFTER_SECONDS,
+        }),
+        url,
+        headers: {},
+        transformedBody: body,
+      };
     }
 
     if (run.error && /enoent|not found|no such file|spawn/i.test(run.error)) {

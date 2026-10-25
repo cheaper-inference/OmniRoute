@@ -1,9 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/shared/components";
+import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import { Field } from "@omniroute/ui-kit/field";
+import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
+import { Badge, Button, Card, Checkbox, EmptyState, Input, Textarea } from "@/shared/components";
 import { isNeedsCoreNode } from "@/lib/proxySubscription/needsCore";
+import { parseLocalCoreEndpoints } from "@/lib/proxySubscription/coreEndpoint";
+import { parseSelectorTag } from "@/lib/proxySubscription/selectorEndpoint";
+import type { SelectorEarlyReasonCounts } from "@/lib/proxySubscription/selectorEarlyReasons";
+
+interface SelectorLastSwitchEntry {
+  at: string;
+  result: string;
+  member: string | null;
+  kind: string | null;
+}
 
 interface SubscriptionRecord {
   id: string;
@@ -23,6 +36,7 @@ interface SubscriptionRecord {
   selectorLastSwitchResult: string | null;
   selectorLastSwitchMember: string | null;
   selectorLastSwitchKind: string | null;
+  selectorLastSwitchBySelector?: Record<string, SelectorLastSwitchEntry | null> | null;
   lastFetchedAt: string | null;
   status: "ok" | "error" | "empty";
   error: string | null;
@@ -81,7 +95,76 @@ function nextSwitchLabel(
   return new Date(next).toISOString();
 }
 
-type SubscriptionsFetchResult = { items?: SubscriptionRecord[]; error?: string };
+/** Selector tags that carry a stored trace entry, in line order. Pure. */
+function selectorTagsWithTrace(sub: SubscriptionRecord): string[] {
+  const bySelector = sub.selectorLastSwitchBySelector;
+  if (!bySelector || typeof bySelector !== "object") return [];
+  return parseLocalCoreEndpoints(sub.localCoreEndpoint)
+    .map((line) => parseSelectorTag(line))
+    .filter((tag): tag is string => tag !== null)
+    .filter((tag) => bySelector[tag] !== undefined && bySelector[tag] !== null);
+}
+
+type SwitchLabels = {
+  (key: "proxySubscription.lastSwitch"): string;
+  (key: "proxySubscription.lastSwitchMember"): string;
+  (key: "proxySubscription.lastSwitchKind"): string;
+  (key: "proxySubscription.nextSwitch"): string;
+  (key: "proxySubscription.nextSwitchNow"): string;
+};
+
+/** Suffix of a switch line: result, member, cause. Pure. */
+function switchLineSuffix(
+  resultValue: string | null,
+  memberValue: string | null,
+  kindLabel: string | null,
+  t: SwitchLabels
+): string {
+  const result = resultValue && resultValue !== "ok" ? ` (${resultValue})` : "";
+  const member = memberValue ? ` · ${t("proxySubscription.lastSwitchMember")}: ${memberValue}` : "";
+  const kind = kindLabel ? ` · ${t("proxySubscription.lastSwitchKind")}: ${kindLabel}` : "";
+  return `${result}${member}${kind}`;
+}
+
+/** Resolved values behind one switch line. Pure. */
+function switchLineValues(
+  sub: SubscriptionRecord,
+  tag: string | null,
+  entry: SelectorLastSwitchEntry | null,
+  switchKindLabel: (kind: string | null) => string | null
+): { at: string; result: string | null; member: string | null; kindLabel: string | null } {
+  return {
+    at: entry?.at ?? sub.selectorLastSwitchAt!,
+    result: entry?.result ?? sub.selectorLastSwitchResult,
+    member: entry?.member ?? (tag === null ? sub.selectorLastSwitchMember : null),
+    kindLabel: switchKindLabel(entry?.kind ?? (tag === null ? sub.selectorLastSwitchKind : null)),
+  };
+}
+
+/** One summary line, or one `"<tag> · …"` line for a selector entry. Pure. */
+function formatSwitchLine(
+  sub: SubscriptionRecord,
+  tag: string | null,
+  entry: SelectorLastSwitchEntry | null,
+  t: SwitchLabels,
+  switchKindLabel: (kind: string | null) => string | null
+): string {
+  const v = switchLineValues(sub, tag, entry, switchKindLabel);
+  const next = nextSwitchLabel({
+    selectorLastSwitchAt: v.at,
+    selectorMinGapSeconds: sub.selectorMinGapSeconds,
+  });
+  const nextText = next === "now" ? t("proxySubscription.nextSwitchNow") : next;
+  const prefix = tag === null ? "" : `${tag} · `;
+  const suffix = switchLineSuffix(v.result, v.member, v.kindLabel, t);
+  return `${prefix}${t("proxySubscription.lastSwitch")}: ${v.at}${suffix} · ${t("proxySubscription.nextSwitch")}: ${nextText}`;
+}
+
+type SubscriptionsFetchResult = {
+  items?: SubscriptionRecord[];
+  earlyReasons?: Partial<SelectorEarlyReasonCounts>;
+  error?: string;
+};
 
 async function fetchSubscriptionsResult(
   loadFailedMessage: string
@@ -90,19 +173,58 @@ async function fetchSubscriptionsResult(
     const res = await fetch("/api/v1/management/proxy-subscriptions");
     if (!res.ok) throw new Error(loadFailedMessage);
     const data = await res.json();
-    return { items: Array.isArray(data.items) ? data.items : [] };
+    return {
+      items: Array.isArray(data.items) ? data.items : [],
+      earlyReasons: data.earlyReasons ?? undefined,
+    };
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) };
   }
 }
 
+type EarlyReasonLabelKey =
+  | "proxySubscription.earlySkipsSinceRestart"
+  | "proxySubscription.error.SELECTOR_EARLY_NO_CONTROL"
+  | "proxySubscription.error.SELECTOR_EARLY_UNMAPPED";
+
+/**
+ * Early selector-skip counts (in-memory, reset on restart). The server only
+ * sends counts > 0 that concern a configured selector; renders nothing
+ * otherwise. Pure.
+ */
+function EarlyReasonsSummary({
+  reasons,
+  text,
+}: {
+  reasons: Partial<SelectorEarlyReasonCounts> | null;
+  text: (key: EarlyReasonLabelKey) => string;
+}) {
+  if (!reasons) return null;
+  const parts = (
+    [
+      ["proxySubscription.error.SELECTOR_EARLY_NO_CONTROL", reasons["no-control"]],
+      ["proxySubscription.error.SELECTOR_EARLY_UNMAPPED", reasons.unmapped],
+    ] as const
+  )
+    .filter(([, count]) => typeof count === "number" && count > 0)
+    .map(([key, count]) => `${text(key)}: ${count}`);
+  if (parts.length === 0) return null;
+  return (
+    <p className="text-xs text-text-muted">
+      {text("proxySubscription.earlySkipsSinceRestart")} — {parts.join(" · ")}
+    </p>
+  );
+}
+
 export default function SubscriptionTab() {
   const [subs, setSubs] = useState<SubscriptionRecord[]>([]);
+  const [earlyReasons, setEarlyReasons] = useState<Partial<SelectorEarlyReasonCounts> | null>(null);
   const [providers, setProviders] = useState<ProviderOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const t = useTranslations("settings");
+  const localCoreId = useId();
 
   // Map a stored refusal kind to a generic display label. Unknown future
   // kinds fall back to plain English so the UI never shows a raw code.
@@ -146,9 +268,17 @@ export default function SubscriptionTab() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  // Field-level validation lives on the fields themselves (Input / CheckboxGroup `error`);
+  // `formError` stays for server responses.
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    url?: string;
+    ruleProviders?: string;
+  }>({});
 
   const applyLoadResult = useCallback((result: SubscriptionsFetchResult) => {
     if (result.items) setSubs(result.items);
+    setEarlyReasons(result.earlyReasons ?? null);
     if (result.error !== undefined) setError(result.error);
     setLoading(false);
   }, []);
@@ -192,6 +322,7 @@ export default function SubscriptionTab() {
     setForm(EMPTY_FORM);
     setEditingId(null);
     setFormError(null);
+    setFieldErrors({});
     setShowForm(false);
   };
 
@@ -210,18 +341,22 @@ export default function SubscriptionTab() {
       updateIntervalMinutes: sub.updateIntervalMinutes,
       enabled: sub.enabled,
     });
+    setFieldErrors({});
     setShowForm(true);
   };
 
   const save = async () => {
-    setSaving(true);
     setFormError(null);
+    const nextFieldErrors: { name?: string; url?: string; ruleProviders?: string } = {};
+    if (!form.name.trim()) nextFieldErrors.name = t("proxySubscription.nameRequired");
+    if (!form.url.trim()) nextFieldErrors.url = t("proxySubscription.urlRequired");
+    if (form.mode === "rule" && form.ruleProviders.length === 0) {
+      nextFieldErrors.ruleProviders = t("proxySubscription.ruleModeProviderRequired");
+    }
+    setFieldErrors(nextFieldErrors);
+    if (Object.keys(nextFieldErrors).length > 0) return;
+    setSaving(true);
     try {
-      if (!form.name.trim()) throw new Error(t("proxySubscription.nameRequired"));
-      if (!form.url.trim()) throw new Error(t("proxySubscription.urlRequired"));
-      if (form.mode === "rule" && form.ruleProviders.length === 0) {
-        throw new Error(t("proxySubscription.ruleModeProviderRequired"));
-      }
       const payload: Record<string, unknown> = {
         name: form.name.trim(),
         url: form.url.trim(),
@@ -310,35 +445,37 @@ export default function SubscriptionTab() {
   // Last switch state comes from the subscription row columns (persisted by
   // the trigger, surfaced by the list API) — the screen never calls the core
   // at open time.
+  //
+  // One line per selector (same tag parser as the server,
+  // `parseSelectorTag`, so the lines shown are the lines stored), or the
+  // single summary line when only one selector exists or the per-selector
+  // column is missing (old DB, single-selector subscription).
   const describeSwitch = useCallback(
     (sub: SubscriptionRecord): string | null => {
       if (!sub.controlUrl) return null;
       if (!sub.selectorLastSwitchAt) return t("proxySubscription.lastSwitchNever");
-      const result =
-        sub.selectorLastSwitchResult && sub.selectorLastSwitchResult !== "ok"
-          ? ` (${sub.selectorLastSwitchResult})`
-          : "";
-      const member = sub.selectorLastSwitchMember
-        ? ` · ${t("proxySubscription.lastSwitchMember")}: ${sub.selectorLastSwitchMember}`
-        : "";
-      const kindLabel = switchKindLabel(sub.selectorLastSwitchKind);
-      const kind = kindLabel ? ` · ${t("proxySubscription.lastSwitchKind")}: ${kindLabel}` : "";
-      const next = nextSwitchLabel(sub);
-      const nextText = next === "now" ? t("proxySubscription.nextSwitchNow") : next;
-      return `${t("proxySubscription.lastSwitch")}: ${sub.selectorLastSwitchAt}${result}${member}${kind} · ${t("proxySubscription.nextSwitch")}: ${nextText}`;
+      const tags = selectorTagsWithTrace(sub);
+      if (tags.length <= 1) return formatSwitchLine(sub, null, null, t, switchKindLabel);
+      const bySelector = sub.selectorLastSwitchBySelector as Record<
+        string,
+        SelectorLastSwitchEntry | null
+      >;
+      return tags
+        .map((tag) => formatSwitchLine(sub, tag, bySelector[tag] ?? null, t, switchKindLabel))
+        .join("\n");
     },
     [t, switchKindLabel]
   );
 
-  const statusBadge: Record<SubscriptionRecord["status"], string> = {
-    ok: "bg-green-500/15 text-green-600 border-green-500/30",
-    error: "bg-red-500/15 text-red-600 border-red-500/30",
-    empty: "bg-yellow-500/15 text-yellow-600 border-yellow-500/30",
+  const statusBadge: Record<SubscriptionRecord["status"], "success" | "error" | "warning"> = {
+    ok: "success",
+    error: "error",
+    empty: "warning",
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-text-muted">{t("proxySubscription.description")}</p>
         {!showForm && (
           <Button size="sm" variant="primary" icon="add" onClick={() => setShowForm(true)}>
@@ -348,277 +485,255 @@ export default function SubscriptionTab() {
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600">
+        <div
+          role="alert"
+          className="rounded-md border border-error/30 bg-error-bg px-3 py-2 text-sm text-error"
+        >
           {error}
         </div>
       )}
 
       {showForm && (
-        <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold">
-              {editingId
-                ? t("proxySubscription.editSubscription")
-                : t("proxySubscription.newSubscription")}
-            </h3>
+        <Card
+          padding="sm"
+          title={
+            editingId
+              ? t("proxySubscription.editSubscription")
+              : t("proxySubscription.newSubscription")
+          }
+          action={
             <Button size="sm" variant="secondary" icon="close" onClick={resetForm}>
               {t("cancel")}
             </Button>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.name")}</span>
-              <input
-                className="rounded border border-border bg-surface px-2 py-1.5 text-text outline-none focus:border-primary"
+          }
+        >
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <Input
+                label={t("proxySubscription.name")}
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, name: e.target.value });
+                  if (fieldErrors.name) setFieldErrors({ ...fieldErrors, name: undefined });
+                }}
                 placeholder={t("proxySubscription.namePlaceholder")}
+                error={fieldErrors.name}
               />
-            </label>
-
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.url")}</span>
-              <input
-                className="rounded border border-border bg-surface px-2 py-1.5 text-text outline-none focus:border-primary"
+              <Input
+                label={t("proxySubscription.url")}
                 value={form.url}
-                onChange={(e) => setForm({ ...form, url: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, url: e.target.value });
+                  if (fieldErrors.url) setFieldErrors({ ...fieldErrors, url: undefined });
+                }}
                 placeholder={t("proxySubscription.urlPlaceholder")}
+                error={fieldErrors.url}
               />
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.mode")}</span>
-              <div className="flex gap-2">
-                {(["global", "rule"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setForm({ ...form, mode: m })}
-                    className={`px-3 py-1.5 rounded text-sm border transition-colors ${
-                      form.mode === m
-                        ? "border-primary bg-primary/20 text-primary"
-                        : "border-border text-text-muted hover:text-text"
-                    }`}
-                  >
-                    {m === "global"
-                      ? t("proxySubscription.globalMode")
-                      : t("proxySubscription.ruleMode")}
-                  </button>
-                ))}
-              </div>
-              <span className="text-xs text-text-muted">
-                {form.mode === "global"
-                  ? t("proxySubscription.globalModeDesc")
-                  : t("proxySubscription.ruleModeDesc")}
-              </span>
             </div>
 
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.localCoreEndpoint")}</span>
-              <textarea
-                rows={3}
-                className="rounded border border-border bg-surface px-2 py-1.5 text-text outline-none focus:border-primary"
-                value={form.localCoreEndpoint}
-                onChange={(e) => setForm({ ...form, localCoreEndpoint: e.target.value })}
-                placeholder={t("proxySubscription.localCoreEndpointPlaceholder")}
-              />
-              <span className="text-xs text-text-muted">
-                {t("proxySubscription.localCoreEndpointDesc")}
-              </span>
-            </label>
-          </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <RadioGroup
+                label={t("proxySubscription.mode")}
+                description={
+                  form.mode === "global"
+                    ? t("proxySubscription.globalModeDesc")
+                    : t("proxySubscription.ruleModeDesc")
+                }
+                orientation="horizontal"
+                value={form.mode}
+                onValueChange={(m) => setForm({ ...form, mode: m === "rule" ? "rule" : "global" })}
+              >
+                <RadioGroupItem value="global" label={t("proxySubscription.globalMode")} />
+                <RadioGroupItem value="rule" label={t("proxySubscription.ruleMode")} />
+              </RadioGroup>
 
-          {form.mode === "rule" && (
-            <div className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.routeByProvider")}</span>
-              {providers.length === 0 ? (
-                <span className="text-xs text-text-muted">
+              <Field
+                label={t("proxySubscription.localCoreEndpoint")}
+                hint={t("proxySubscription.localCoreEndpointDesc")}
+                htmlFor={localCoreId}
+              >
+                <Textarea
+                  id={localCoreId}
+                  rows={3}
+                  value={form.localCoreEndpoint}
+                  onChange={(e) => setForm({ ...form, localCoreEndpoint: e.target.value })}
+                  placeholder={t("proxySubscription.localCoreEndpointPlaceholder")}
+                />
+              </Field>
+            </div>
+
+            {form.mode === "rule" &&
+              (providers.length === 0 ? (
+                <p className="text-xs text-text-muted" role="status">
                   {t("proxySubscription.loadingProviders")}
-                </span>
+                </p>
               ) : (
-                <div className="flex flex-wrap gap-2">
-                  {providers.map((p) => {
-                    const checked = form.ruleProviders.includes(p.id);
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() =>
-                          setForm({
-                            ...form,
-                            ruleProviders: checked
-                              ? form.ruleProviders.filter((x) => x !== p.id)
-                              : [...form.ruleProviders, p.id],
-                          })
-                        }
-                        className={`px-3 py-1 rounded text-xs border transition-colors ${
-                          checked
-                            ? "border-primary bg-primary/20 text-primary"
-                            : "border-border text-text-muted hover:text-text"
-                        }`}
-                      >
-                        {p.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+                <CheckboxGroup
+                  label={t("proxySubscription.routeByProvider")}
+                  error={
+                    fieldErrors.ruleProviders ? (
+                      <span role="alert">{fieldErrors.ruleProviders}</span>
+                    ) : undefined
+                  }
+                >
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {providers.map((p) => {
+                      const checked = form.ruleProviders.includes(p.id);
+                      return (
+                        <Checkbox
+                          key={p.id}
+                          label={p.name}
+                          checked={checked}
+                          onChange={() =>
+                            setForm({
+                              ...form,
+                              ruleProviders: checked
+                                ? form.ruleProviders.filter((x) => x !== p.id)
+                                : [...form.ruleProviders, p.id],
+                            })
+                          }
+                        />
+                      );
+                    })}
+                  </div>
+                </CheckboxGroup>
+              ))}
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.controlUrl")}</span>
-              <input
-                className="rounded border border-border bg-surface px-2 py-1.5 text-text outline-none focus:border-primary"
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <Input
+                label={t("proxySubscription.controlUrl")}
                 value={form.controlUrl}
                 onChange={(e) => setForm({ ...form, controlUrl: e.target.value })}
                 placeholder={t("proxySubscription.controlUrlPlaceholder")}
                 inputMode="url"
               />
-            </label>
-
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.controlSecret")}</span>
-              <input
+              <Input
                 type="password"
                 autoComplete="new-password"
-                className="rounded border border-border bg-surface px-2 py-1.5 text-text outline-none focus:border-primary"
+                label={t("proxySubscription.controlSecret")}
                 value={form.controlSecret}
                 onChange={(e) => setForm({ ...form, controlSecret: e.target.value })}
                 placeholder={t("proxySubscription.controlSecretPlaceholder")}
+                hint={
+                  editingId
+                    ? t("proxySubscription.controlSecretSaved")
+                    : t("proxySubscription.controlSecretNotSet")
+                }
               />
-              <span className="text-xs text-text-muted">
-                {editingId
-                  ? t("proxySubscription.controlSecretSaved")
-                  : t("proxySubscription.controlSecretNotSet")}
-              </span>
-            </label>
-
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.coreConfigPath")}</span>
-              <input
-                className="rounded border border-border bg-surface px-2 py-1.5 text-text outline-none focus:border-primary"
+              <Input
+                label={t("proxySubscription.coreConfigPath")}
                 value={form.coreConfigPath}
                 onChange={(e) => setForm({ ...form, coreConfigPath: e.target.value })}
                 placeholder={t("proxySubscription.coreConfigPathPlaceholder")}
                 inputMode="url"
+                hint={t("proxySubscription.coreConfigPathDesc")}
               />
-              <span className="text-xs text-text-muted">
-                {t("proxySubscription.coreConfigPathDesc")}
-              </span>
-            </label>
-          </div>
+            </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.selectorMinGap")}</span>
-              <input
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <Input
                 type="number"
                 min={0}
                 max={3600}
-                className="rounded border border-border bg-surface px-2 py-1.5 text-text outline-none focus:border-primary"
+                label={t("proxySubscription.selectorMinGap")}
                 value={form.selectorMinGapSeconds}
                 onChange={(e) =>
                   setForm({ ...form, selectorMinGapSeconds: Number(e.target.value) || 0 })
                 }
+                hint={t("proxySubscription.selectorHelp")}
               />
-              <span className="text-xs text-text-muted">{t("proxySubscription.selectorHelp")}</span>
-            </label>
-          </div>
+            </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-text-muted">{t("proxySubscription.autoRefreshInterval")}</span>
-              <input
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:items-end">
+              <Input
                 type="number"
                 min={5}
-                className="rounded border border-border bg-surface px-2 py-1.5 text-text outline-none focus:border-primary"
+                label={t("proxySubscription.autoRefreshInterval")}
                 value={form.updateIntervalMinutes}
                 onChange={(e) =>
                   setForm({ ...form, updateIntervalMinutes: Number(e.target.value) || 60 })
                 }
               />
-            </label>
-            <label className="flex items-center gap-2 text-sm pt-6">
-              <input
-                type="checkbox"
+              <Checkbox
+                className="md:pb-2.5"
                 checked={form.enabled}
                 onChange={(e) => setForm({ ...form, enabled: e.target.checked })}
+                label={t("proxySubscription.enableAfterCreate")}
               />
-              <span>{t("proxySubscription.enableAfterCreate")}</span>
-            </label>
-          </div>
+            </div>
 
-          {formError && <div className="text-sm text-red-600">{formError}</div>}
+            {formError && (
+              <div className="text-sm text-error" role="alert">
+                {formError}
+              </div>
+            )}
 
-          <div className="flex justify-end gap-2">
-            <Button size="sm" variant="secondary" onClick={resetForm}>
-              {t("cancel")}
-            </Button>
-            <Button size="sm" variant="primary" icon="save" onClick={save} disabled={saving}>
-              {saving
-                ? t("proxySubscription.saving")
-                : editingId
-                  ? t("proxySubscription.saveChanges")
-                  : t("proxySubscription.createSubscription")}
-            </Button>
+            <div className="flex justify-end gap-2">
+              <Button size="sm" variant="secondary" onClick={resetForm}>
+                {t("cancel")}
+              </Button>
+              <Button size="sm" variant="primary" icon="save" onClick={save} loading={saving}>
+                {saving
+                  ? t("proxySubscription.saving")
+                  : editingId
+                    ? t("proxySubscription.saveChanges")
+                    : t("proxySubscription.createSubscription")}
+              </Button>
+            </div>
           </div>
-        </div>
+        </Card>
       )}
 
       <div className="space-y-2">
-        {loading && <p className="text-sm text-text-muted">{t("proxySubscription.loading")}</p>}
+        <EarlyReasonsSummary reasons={earlyReasons} text={(key) => t(key)} />
+        {loading && (
+          <p className="text-sm text-text-muted" role="status">
+            {t("proxySubscription.loading")}
+          </p>
+        )}
         {!loading && subs.length === 0 && (
-          <p className="text-sm text-text-muted">{t("proxySubscription.noSubscriptions")}</p>
+          <EmptyState icon="rss_feed" title={t("proxySubscription.noSubscriptions")} />
         )}
         {subs.map((sub) => {
           const needsCoreNodes = (sub.lastNodes ?? []).filter(isNeedsCoreNode);
           const showCoreHint = needsCoreNodes.length > 0 && !sub.localCoreEndpoint;
+          const busy = busyId === sub.id;
           return (
-            <div
-              key={sub.id}
-              className="rounded-lg border border-border bg-surface p-3 flex flex-col gap-2"
-            >
-              <div className="flex items-center justify-between gap-2">
+            <Card key={sub.id} padding="xs" className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium truncate">{sub.name}</span>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded border ${
-                        statusBadge[sub.status] || statusBadge.empty
-                      }`}
-                    >
+                    <Badge size="sm" variant={statusBadge[sub.status] || statusBadge.empty}>
                       {sub.status === "ok"
                         ? t("proxySubscription.statusOk")
                         : sub.status === "error"
                           ? t("proxySubscription.statusError")
                           : t("proxySubscription.statusEmpty")}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded border border-border text-text-muted">
+                    </Badge>
+                    <Badge size="sm">
                       {sub.mode === "global"
                         ? t("proxySubscription.global")
                         : t("proxySubscription.rule")}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded border border-border text-text-muted">
+                    </Badge>
+                    <Badge size="sm">
                       {sub.enabled
                         ? t("proxySubscription.enabled")
                         : t("proxySubscription.disabled")}
-                    </span>
+                    </Badge>
                   </div>
                   <p className="text-xs text-text-muted truncate mt-1" title={sub.url}>
                     {sub.url}
                   </p>
                   {resolveSubError(sub.error) && (
-                    <p className="text-xs text-amber-600 mt-1 break-words">
+                    <p className="text-xs text-warning mt-1 break-words">
                       {resolveSubError(sub.error)}
                     </p>
                   )}
                   {describeSwitch(sub) && (
-                    <p className="text-xs text-text-muted mt-1">{describeSwitch(sub)}</p>
+                    <p className="text-xs text-text-muted mt-1 whitespace-pre-wrap">
+                      {describeSwitch(sub)}
+                    </p>
                   )}
                   {sub.coreConfigPath && (
                     <p className="text-xs text-text-muted mt-1">
@@ -628,7 +743,7 @@ export default function SubscriptionTab() {
                     </p>
                   )}
                   {showCoreHint && (
-                    <div className="mt-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 space-y-1.5">
+                    <div className="mt-2 rounded-md border border-warning/30 bg-warning-bg px-3 py-2 text-xs text-text-main space-y-1.5">
                       <p className="font-medium">
                         {t("proxySubscription.coreHintTitle", { count: needsCoreNodes.length })}
                       </p>
@@ -637,20 +752,17 @@ export default function SubscriptionTab() {
                         <code className="rounded bg-surface px-2 py-1 border border-border">
                           socks5://127.0.0.1:2080
                         </code>
-                        <button
-                          type="button"
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          icon="content_copy"
                           onClick={() => navigator.clipboard?.writeText("socks5://127.0.0.1:2080")}
-                          className="px-2 py-1 rounded border border-border hover:border-primary/50"
                         >
                           {t("proxySubscription.copy")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => startEdit(sub)}
-                          className="px-2 py-1 rounded border border-border hover:border-primary/50"
-                        >
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => startEdit(sub)}>
                           {t("proxySubscription.goConfigure")}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -670,48 +782,32 @@ export default function SubscriptionTab() {
                       : ""}
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    disabled={busyId === sub.id}
+                <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={busy}
                     onClick={() => toggleEnabled(sub)}
-                    className="px-2 py-1 text-xs rounded border border-border hover:border-primary/50"
-                    title={
-                      sub.enabled ? t("proxySubscription.disable") : t("proxySubscription.enable")
-                    }
                   >
                     {sub.enabled ? t("proxySubscription.disable") : t("proxySubscription.enable")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busyId === sub.id}
-                    onClick={() => refresh(sub)}
-                    className="px-2 py-1 text-xs rounded border border-border hover:border-primary/50"
-                    title={t("proxySubscription.refreshNodes")}
-                  >
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={busy} onClick={() => refresh(sub)}>
                     {t("proxySubscription.refreshNodes")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busyId === sub.id}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={busy}
                     onClick={() => startEdit(sub)}
-                    className="px-2 py-1 text-xs rounded border border-border hover:border-primary/50"
-                    title={t("proxySubscription.edit")}
                   >
                     {t("proxySubscription.edit")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busyId === sub.id}
-                    onClick={() => remove(sub)}
-                    className="px-2 py-1 text-xs rounded border border-red-500/30 text-red-600 hover:bg-red-500/10"
-                    title={t("proxySubscription.delete")}
-                  >
+                  </Button>
+                  <Button size="sm" variant="danger" disabled={busy} onClick={() => remove(sub)}>
                     {t("proxySubscription.delete")}
-                  </button>
+                  </Button>
                 </div>
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>

@@ -874,9 +874,7 @@ export async function getCompressionSettings(): Promise<CompressionConfig> {
         break;
       case "sessionDedup":
       case "ccr":
-      case "appendPreservingCcr":
-      case "grevCaching":
-      case "relevanceConfig":
+      case "contextRollover":
         applyDetailConfigUpdate(config, key, parsed);
         break;
       case "contextBudget":

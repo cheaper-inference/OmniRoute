@@ -13,6 +13,7 @@
 
 import { getModelContextLimit } from "../../src/lib/modelCapabilities";
 import { parseModel } from "./model.ts";
+import { resolveProviderModelAlias } from "./modelCanonicalization.ts";
 import {
   CONTEXT_OVERFLOW_REGEX,
   containsModelUnavailableMessage,
@@ -20,6 +21,8 @@ import {
 } from "./errorClassifier.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
 import { isModelSelectable } from "./modelLifecycle.ts";
+import { isModelLocked } from "./accountFallback.ts";
+import { createComboModelVisibility } from "./combo/comboVisibility.ts";
 
 // ── Model Family Definitions ─────────────────────────────────────────────────
 
@@ -249,7 +252,7 @@ function wasCandidateTried(
   for (const attempted of triedModels) {
     const parsed = parseModel(attempted);
     const attemptedModel = parsed.model || attempted;
-    const attemptedProvider = parsed.provider || parsed.providerAlias || provider;
+    const attemptedProvider = parsed.providerAlias || parsed.provider || provider;
     const registryEntry = getRegistryEntry(attemptedProvider);
     if (
       (registryEntry?.id || attemptedProvider) === provider &&
@@ -308,6 +311,66 @@ export function getNextFamilyFallback(
   return null; // family exhausted
 }
 
+function isFamilyFallbackCandidateEligible(
+  provider: string,
+  candidate: string,
+  connectionId: string,
+  isVisible: ReturnType<typeof createComboModelVisibility>
+): boolean {
+  const parsedCandidate = parseModel(candidate);
+  const candidateModel = parsedCandidate.model || candidate;
+  const wireModel = resolveProviderModelAlias(provider, candidateModel);
+  // A public prefix can select a different runtime identity than its catalog id
+  // (agy/ routes to antigravity). Bare wire ids retain the explicit provider hint.
+  const visibilityProvider = parsedCandidate.providerAlias
+    ? parsedCandidate.provider || provider
+    : provider;
+  return (
+    isVisible(candidate, visibilityProvider) &&
+    !isModelLocked(provider, connectionId, candidateModel) &&
+    !isModelLocked(provider, connectionId, wireModel)
+  );
+}
+
+export function isFamilyFallbackEligible(
+  candidate: string,
+  provider: string,
+  connectionId: string
+): boolean {
+  return isFamilyFallbackCandidateEligible(
+    provider,
+    candidate,
+    connectionId,
+    createComboModelVisibility()
+  );
+}
+
+/**
+ * Get the next same-connection family fallback that passes the routing
+ * visibility and resilience gates used by combo targets.
+ */
+export function getNextEligibleFamilyFallback(
+  currentModel: string,
+  triedModels: Set<string>,
+  providerHint: string | null | undefined,
+  connectionId: string
+): string | null {
+  const resolved = resolveProviderFamilyCandidates(currentModel, providerHint);
+  if (!resolved) return null;
+
+  const isVisible = createComboModelVisibility();
+  for (const candidate of resolved.candidates) {
+    if (wasCandidateTried(candidate, resolved.provider, triedModels)) continue;
+    const fallbackModel = `${resolved.outputPrefix}${candidate}`;
+    if (
+      isFamilyFallbackCandidateEligible(resolved.provider, fallbackModel, connectionId, isVisible)
+    ) {
+      return fallbackModel;
+    }
+  }
+  return null;
+}
+
 /**
  * Check if a model belongs to any registered family.
  */
@@ -323,6 +386,48 @@ export function getModelFamily(model: string, providerHint?: string | null): str
   const resolved = resolveProviderFamilyCandidates(model, providerHint);
   if (!resolved) return [model];
   return [model, ...resolved.candidates.map((candidate) => `${resolved.outputPrefix}${candidate}`)];
+}
+
+/** Get same-family siblings that remain eligible on the current connection. */
+export function getEligibleModelFamily(
+  model: string,
+  providerHint: string | null | undefined,
+  connectionId: string
+): string[] {
+  const resolved = resolveProviderFamilyCandidates(model, providerHint);
+  if (!resolved) return [model];
+
+  const isVisible = createComboModelVisibility();
+  const candidates = resolved.candidates
+    .map((candidate) => `${resolved.outputPrefix}${candidate}`)
+    .filter((candidate) =>
+      isFamilyFallbackCandidateEligible(resolved.provider, candidate, connectionId, isVisible)
+    );
+  return [model, ...candidates];
+}
+
+/** Prefer a larger eligible context, then retain normal family fallback order. */
+export function getContextFamilyFallback(
+  currentModel: string,
+  triedModels: Set<string>,
+  providerHint: string | null | undefined,
+  connectionId: string,
+  allowedCandidates?: readonly string[]
+): string | null {
+  const allowed = allowedCandidates === undefined ? null : new Set(allowedCandidates);
+  const excluded = new Set(triedModels);
+  if (allowed) {
+    for (const candidate of getModelFamily(currentModel, providerHint)) {
+      if (!allowed.has(candidate)) excluded.add(candidate);
+    }
+  }
+  const candidates = getEligibleModelFamily(currentModel, providerHint, connectionId).filter(
+    (candidate) => candidate !== currentModel && !excluded.has(candidate)
+  );
+  return (
+    findLargerContextModel(currentModel, candidates, providerHint) ??
+    getNextEligibleFamilyFallback(currentModel, excluded, providerHint, connectionId)
+  );
 }
 
 /**

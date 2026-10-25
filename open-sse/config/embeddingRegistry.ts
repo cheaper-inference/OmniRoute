@@ -460,6 +460,14 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
       },
     ],
   },
+
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "qwen3-embedding", name: "Qwen3 Embedding", dimensions: 4096 }],
+  },
 };
 
 const EMBEDDING_PROVIDER_ALIASES: Record<string, string> = {

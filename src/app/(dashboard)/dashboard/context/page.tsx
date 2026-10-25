@@ -13,16 +13,10 @@ const CONTEXT_TAB_ROUTES: Record<string, string> = {
   "session-dedup": "/dashboard/context/session-dedup",
   sessionDedup: "/dashboard/context/session-dedup",
   ccr: "/dashboard/context/ccr",
-  "append-preserving-ccr": "/dashboard/context/grevcaching",
-  grevCaching: "/dashboard/context/grevcaching",
-  grevcaching: "/dashboard/context/grevcaching",
-  "codex-responses": "/dashboard/context/codex-responses",
-  relevance: "/dashboard/context/relevance",
   llmlingua: "/dashboard/context/llmlingua",
   lite: "/dashboard/context/lite",
   aggressive: "/dashboard/context/aggressive",
   ultra: "/dashboard/context/ultra",
-  omniglyph: "/dashboard/context/omniglyph",
 };
 
 const DEFAULT_CONTEXT_ROUTE = "/dashboard/context/settings";

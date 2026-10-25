@@ -13,9 +13,12 @@ import net from "node:net";
 import http from "node:http";
 import https from "node:https";
 import tls from "node:tls";
-import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+// CommonJS twin of the MITM data-dir + cert-model resolution (src/mitm/dataDir.ts,
+// src/mitm/cert/migration.ts): this script runs with plain `node`, so it cannot load
+// the TypeScript sources. src/mitm/ ships in the npm package next to bin/.
+import { createBridgeTlsProvider } from "../src/mitm/_internal/bridgeCert.cjs";
 
 const PORT = parseInt(process.env.BRIDGE_PORT || "20129", 10);
 const ROUTER_URL = process.env.ROUTER_URL || "http://127.0.0.1:20128/v1/antigravity";
@@ -39,24 +42,19 @@ const httpsAgent = new https.Agent({
   timeout: 120000,
 });
 
-let cachedSslOptions = null;
-function getSslOptions() {
-  if (cachedSslOptions) return cachedSslOptions;
-  const certDir =
-    process.env.CERT_DIR || path.join(process.env.HOME || process.cwd(), ".omniroute", "mitm");
-  const serverKey = path.join(certDir, "server.key");
-  const serverCrt = path.join(certDir, "server.crt");
-
-  if (!fs.existsSync(serverKey) || !fs.existsSync(serverCrt)) {
-    console.error("❌ Certificate files not found in", certDir);
+// TLS material for intercepted hosts, resolved like the AgentBridge MITM server does:
+// `CERT_DIR` (explicit override) or `<DATA_DIR>/mitm`; legacy `server.crt`/`server.key`
+// leaf, or the root CA (`ca.crt`/`ca.key`) minting a leaf per intercepted host.
+let cachedTlsProvider = null;
+function getTlsProvider() {
+  if (cachedTlsProvider) return cachedTlsProvider;
+  try {
+    cachedTlsProvider = createBridgeTlsProvider();
+  } catch (err) {
+    console.error(`❌ ${err.message}`);
     process.exit(1);
   }
-
-  cachedSslOptions = {
-    key: fs.readFileSync(serverKey),
-    cert: fs.readFileSync(serverCrt),
-  };
-  return cachedSslOptions;
+  return cachedTlsProvider;
 }
 
 const TARGET_HOSTS = new Set([
@@ -522,23 +520,37 @@ proxyServer.on("connect", (req, clientSocket, head) => {
   const targetPort = parseInt(targetPortStr || "443", 10);
 
   if (TARGET_HOSTS.has(targetHost)) {
-    // Target host: Terminate TLS locally and route via internalApp
-    clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
+    // Target host: Terminate TLS locally and route via internalApp. The leaf is
+    // resolved before answering the CONNECT, so the client's ClientHello can only
+    // arrive once the socket is wrapped.
+    getTlsProvider()
+      .getSecureContext(targetHost)
+      .then((secureContext) => {
+        if (clientSocket.destroyed) return;
+        clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
 
-    const ssl = getSslOptions();
-    const tlsSocket = new tls.TLSSocket(clientSocket, {
-      isServer: true,
-      key: ssl.key,
-      cert: ssl.cert,
-    });
-    tlsSocket.setNoDelay(true);
+        const tlsSocket = new tls.TLSSocket(clientSocket, {
+          isServer: true,
+          secureContext,
+        });
+        tlsSocket.setNoDelay(true);
 
-    tlsSocket.on("error", (err) => {
-      // Client closed or TLS error
-      clientSocket.destroy();
-    });
+        tlsSocket.on("error", (err) => {
+          // Client closed or TLS error
+          clientSocket.destroy();
+        });
 
-    internalApp.emit("connection", tlsSocket);
+        internalApp.emit("connection", tlsSocket);
+      })
+      .catch((err) => {
+        console.error(
+          `[Bridge] ❌ Could not issue a certificate for ${targetHost}: ${err.message}`
+        );
+        if (!clientSocket.destroyed) {
+          clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+        }
+      });
+    clientSocket.on("error", () => clientSocket.destroy());
   } else {
     // Non-target host: Transparent raw TCP tunnel
     const upstreamSocket = net.connect(targetPort, targetHost, () => {
@@ -574,9 +586,14 @@ export {
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isMain) {
+  // Fail at startup (not on the first intercepted CONNECT) when the cert is missing.
+  const tlsProvider = getTlsProvider();
+  const certModel =
+    tlsProvider.mode === "use-root-ca" ? "root CA, per-host leaf" : "legacy leaf certificate";
   proxyServer.listen(PORT, "127.0.0.1", () => {
     console.log(`🚀 OmniRoute Antigravity Bridge listening on 127.0.0.1:${PORT}`);
     console.log(`   Routing non-Gemini 3.8 model traffic -> ${ROUTER_URL}`);
     console.log(`   Preserving Gemini 3.8 native traffic -> Google`);
+    console.log(`   TLS: ${certModel} from ${tlsProvider.certDir}`);
   });
 }

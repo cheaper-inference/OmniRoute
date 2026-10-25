@@ -18,6 +18,8 @@
  * #8649 disconnect-aware wrapper's "Provider returned empty content" outcome.
  */
 import { buildErrorBody } from "./error.ts";
+import type { StreamFailureSnapshot } from "./streamErrorFormat.ts";
+import { buildStreamFailureSnapshot } from "./streamFailureSnapshot.ts";
 import { buildStreamSummaryFromEvents } from "./streamPayloadCollector.ts";
 
 type StructuredSSEEventLike = {
@@ -29,6 +31,8 @@ type StructuredSSEEventLike = {
 
 type StructuredSSECollectorLike = {
   getEvents: () => StructuredSSEEventLike[];
+  getEventCount: () => number;
+  getSummary: () => unknown;
   build: (summary?: unknown, opts?: { includeEvents?: boolean }) => unknown;
 };
 
@@ -50,6 +54,7 @@ type EmptyChoicesRejectContext = {
         message: string;
         code?: string;
         type?: string;
+        streamSnapshot?: StreamFailureSnapshot;
       }) => boolean | void | Promise<void>)
     | null;
   onComplete?:
@@ -91,7 +96,12 @@ export function rejectEmptyChoicesStream(ctx: EmptyChoicesRejectContext): boolea
 
   if (ctx.onFailure) {
     try {
-      ctx.onFailure({ status: 502, message: error.message, code: "empty_content" });
+      ctx.onFailure({
+        status: 502,
+        message: error.message,
+        code: "empty_content",
+        streamSnapshot: buildStreamFailureSnapshot(ctx.providerPayloadCollector),
+      });
     } catch {
       // best-effort — must never break the stream error path
     }

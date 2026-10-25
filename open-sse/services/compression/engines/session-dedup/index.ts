@@ -297,33 +297,108 @@ type MessageLike = {
 };
 
 /**
+ * Text-bearing slots in a message: string content, top-level text parts, and
+ * Anthropic `tool_result` content (a string or inner text blocks).
+ */
+function collectTextSlots(msg: MessageLike): string[] {
+  if (typeof msg.content === "string") return [msg.content];
+  if (!Array.isArray(msg.content)) return [];
+  const texts: string[] = [];
+  for (const part of msg.content) {
+    if (part["type"] === "text" && typeof part["text"] === "string") {
+      texts.push(part["text"]);
+      continue;
+    }
+    if (part["type"] !== "tool_result") continue;
+    const inner = part["content"];
+    if (typeof inner === "string") {
+      texts.push(inner);
+    } else if (Array.isArray(inner)) {
+      for (const block of inner) {
+        if (block["type"] === "text" && typeof block["text"] === "string") {
+          texts.push(block["text"]);
+        }
+      }
+    }
+  }
+  return texts;
+}
+
+/**
+ * Rebuild a message applying dedup replacements keyed by the slot order used by
+ * {@link collectTextSlots}.
+ */
+function applyTextSlots(
+  msg: MessageLike,
+  baseKey: number,
+  deduped: Map<number, string>
+): MessageLike {
+  if (typeof msg.content === "string") {
+    const replacement = deduped.get(baseKey + 1);
+    return replacement !== undefined ? { ...msg, content: replacement } : { ...msg };
+  }
+  if (!Array.isArray(msg.content)) return { ...msg };
+
+  let slot = 0;
+  let changed = false;
+  const newContent = msg.content.map((part) => {
+    if (part["type"] === "text" && typeof part["text"] === "string") {
+      slot++;
+      const replacement = deduped.get(baseKey + slot);
+      if (replacement !== undefined) {
+        changed = true;
+        return { ...part, text: replacement };
+      }
+      return part;
+    }
+    if (part["type"] !== "tool_result") return part;
+    const inner = part["content"];
+    if (typeof inner === "string") {
+      slot++;
+      const replacement = deduped.get(baseKey + slot);
+      if (replacement !== undefined) {
+        changed = true;
+        return { ...part, content: replacement };
+      }
+      return part;
+    }
+    if (!Array.isArray(inner)) return part;
+    let innerChanged = false;
+    const newInner = inner.map((block) => {
+      if (block["type"] !== "text" || typeof block["text"] !== "string") return block;
+      slot++;
+      const replacement = deduped.get(baseKey + slot);
+      if (replacement !== undefined) {
+        innerChanged = true;
+        return { ...block, text: replacement };
+      }
+      return block;
+    });
+    if (!innerChanged) return part;
+    changed = true;
+    return { ...part, content: newInner };
+  });
+  return changed ? { ...msg, content: newContent } : { ...msg };
+}
+
+/**
  * Process messages: collect text content, run two-pass dedup, apply results.
  */
 function processMessages(
   messages: MessageLike[],
   minBlockChars: number
 ): { messages: MessageLike[]; dedupCount: number } {
-  // Collect (msgIdx, text) for non-system string-content messages.
-  // For multipart, index each text part separately.
+  // Collect (msgIdx, text) for non-system messages, including Anthropic tool_result text.
+  // For multipart, index each text-bearing slot separately.
   const msgTexts: Array<{ msgIdx: number; messageIndex: number; text: string }> = [];
 
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
     if (msg.role === "system") continue;
-    if (typeof msg.content === "string") {
-      msgTexts.push({ msgIdx: i, messageIndex: i, text: msg.content });
-    } else if (Array.isArray(msg.content)) {
-      for (let p = 0; p < msg.content.length; p++) {
-        const part = msg.content[p];
-        if (part["type"] === "text" && typeof part["text"] === "string") {
-          // Composite key: i * 100000 + p + 1 (safe for reasonable message counts)
-          msgTexts.push({
-            msgIdx: i * 100000 + p + 1,
-            messageIndex: i,
-            text: part["text"] as string,
-          });
-        }
-      }
+    const slots = collectTextSlots(msg);
+    for (let s = 0; s < slots.length; s++) {
+      // Composite key: i * 100000 + s + 1 (stride leaves room for 100k slots).
+      msgTexts.push({ msgIdx: i * 100000 + s + 1, messageIndex: i, text: slots[s] });
     }
   }
 
@@ -348,27 +423,7 @@ function processMessages(
   const result = messages.map((msg, i) => {
     if (msg.role === "system") return { ...msg };
 
-    if (typeof msg.content === "string") {
-      const replacement = deduped.get(i);
-      return replacement !== undefined ? { ...msg, content: replacement } : { ...msg };
-    }
-
-    if (Array.isArray(msg.content)) {
-      let changed = false;
-      const newContent = msg.content.map((part, p) => {
-        if (part["type"] !== "text" || typeof part["text"] !== "string") return part;
-        const key = i * 100000 + p + 1;
-        const replacement = deduped.get(key);
-        if (replacement !== undefined) {
-          changed = true;
-          return { ...part, text: replacement };
-        }
-        return part;
-      });
-      return changed ? { ...msg, content: newContent } : { ...msg };
-    }
-
-    return { ...msg };
+    return applyTextSlots(msg, i * 100000, deduped);
   });
 
   return { messages: result, dedupCount };

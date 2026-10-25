@@ -298,13 +298,13 @@ Kľúčové správanie:
 
 ## 🔑 Synchronizačné tokeny a konfiguračný balík _(v3.6.6+)_
 
-Prístup z viacerých zariadení a prístup externých operátorov je teraz možný prostredníctvom **synchronizačných tokenov s definovaným rozsahom**:
+Prístup z viacerých zariadení a prístup externých operátorov je teraz možný prostredníctvom **synchronizačných tokenov s obmedzeným rozsahom**:
 
-- **`POST /api/sync/tokens`** — Vydá nový synchronizačný token (s definovaným rozsahom a voliteľnou platnosťou)
-- **`DELETE /api/sync/tokens/:id`** — Zruší token
-- **`GET /api/sync/bundle`** — Stiahne verziovanú snímku JSON všetkých necitlivých nastavení s kľúčom ETag (heslá sú skryté)
+- **`POST /api/sync/tokens`** — Vydá nový synchronizačný token (s obmedzeným rozsahom a voliteľnou platnosťou)
+- **`DELETE /api/sync/tokens/:id`** — Zneplatní token
+- **`GET /api/sync/bundle`** — Stiahne verziovanú snímku konfigurácie vo formáte JSON identifikovanú pomocou ETag (overenie iba synchronizačným tokenom). Nastavenia overovania, ako je heslo ovládacieho panela, sú odstránené, ale prihlasovacie údaje poskytovateľov a kľúče API sú zahrnuté, preto tento súbor považujte za tajný
 
-Konfiguračný balík vytvára `src/lib/sync/bundle.ts`. Klienti porovnávajú hlavičku odpovede `ETag`, aby zistili zmeny bez opätovného sťahovania celého obsahu.
+Konfiguračný balík sa zostavuje pomocou `src/lib/sync/bundle.ts`. Klienti porovnávajú hlavičku odpovede `ETag`, aby zistili zmeny bez opätovného sťahovania celého obsahu. V rozhraní CLI ho príkaz `omniroute sync bundle <outPath> --token <syncToken>` (alebo `OMNIROUTE_SYNC_TOKEN`) uloží do súboru prístupného iba vlastníkovi.
 
 ---
 
@@ -318,12 +318,12 @@ Vo v3.6.6 pribudlo aj **hybridné počítanie tokenov**: keď poskytovateľ komp
 
 ## 🛡️ Bezpečné odchádzajúce načítavanie a ochrana pred SSRF _(v3.6.6+)_
 
-Všetky volania na overenie poskytovateľov a zisťovanie modelov teraz prechádzajú cez dvojvrstvovú ochranu odchádzajúcich spojení:
+Všetky volania na overenie poskytovateľov a zisťovanie modelov teraz prechádzajú cez dvojvrstvovú ochranu odchádzajúcej komunikácie:
 
-1. **Ochrana URL** (`src/shared/network/outboundUrlGuard.ts`) — Blokuje súkromné, slučkové a lokálne IP rozsahy liniek ešte pred otvorením soketu.
-2. **Bezpečný obal funkcie fetch** (`src/shared/network/safeOutboundFetch.ts`) — Aplikuje ochranu URL, zjednocuje časové limity a pri prechodných chybách opakuje pokusy s exponenciálne rastúcim oneskorením.
+1. **Ochrana URL** (`src/shared/network/outboundUrlGuard.ts`) — Najprv kontroluje názov hostiteľa alebo literál IP cieľa presne v zadanom tvare; v režime iba pre verejné adresy obal bezpečného načítavania zároveň preloží názov a odmietne privátne adresy. Predvolene blokuje koncové body cloudových metadát — celý rozsah 169.254.0.0/16 spolu so známymi názvami hostiteľov metadát; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blokuje aj privátne adresy a adresy spätnej slučky; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (alebo staršie nastavenie `OUTBOUND_SSRF_GUARD_ENABLED=false`) tieto kontroly vypne. Hodnota uložená pomocou prepínača príznaku na ovládacom paneli má prednosť pred príslušnou premennou a vstavaní lokálni poskytovatelia počas overovania kľúča túto ochranu obchádzajú. Pozrite si `docs/reference/ENVIRONMENT.md`.
+2. **Obal bezpečného načítavania** (`src/shared/network/safeOutboundFetch.ts`) — Aplikuje ochranu URL, normalizuje časové limity a pri prechodných chybách opakuje požiadavky s exponenciálnym predlžovaním intervalov.
 
-Porušenia ochrany sa prejavia ako HTTP 422 (`URL_GUARD_BLOCKED`) a prostredníctvom `providerAudit.ts` sa zapíšu do audítorského denníka súladu.
+Porušenia pravidiel ochrany sa zobrazujú ako `URL_GUARD_BLOCKED` — HTTP 503 prostredníctvom `getSafeOutboundFetchErrorStatus` (400 na trase zisťovania modelov) — a skutočné blokovania SSRF počas overovania sa zapisujú do audítorského denníka ako udalosti `provider.validation.ssrf_blocked`.
 
 ---
 

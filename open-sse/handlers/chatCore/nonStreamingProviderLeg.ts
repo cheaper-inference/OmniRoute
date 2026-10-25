@@ -29,12 +29,10 @@ import { unwrapClinepassEnvelope } from "../../utils/clinepassEnvelope.ts";
 import { unwrapClineNonStreamingEnvelope } from "./clineResponseEnvelope.ts";
 import {
   isModelUnavailableError,
-  getNextFamilyFallback,
   isContextOverflowError,
-  findLargerContextModel,
-  getModelFamily,
 } from "../../services/modelFamilyFallback.ts";
 import { isEmptyContentResponse } from "../../services/errorClassifier.ts";
+import { createRequestFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
 import { hasTrustedEmptyTurn } from "../../utils/emptyTurnPolicy.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { hasActiveClaudeThinking } from "../../utils/thinkingBudget.ts";
@@ -62,6 +60,7 @@ export interface ProviderLegInput {
   expectedConnectionId?: string;
   allowAccountRotation: boolean;
   allowModelFallback: boolean;
+  hasApiKeyMetadata?: boolean;
   executeProviderRequest: (
     model: string,
     allowDedup: boolean,
@@ -292,6 +291,7 @@ function finishOk(
     provider: params.provider,
     model: params.model,
     requestBody: params.requestBody,
+    clientRequestBody: input.sourceBody ?? null,
     historyMessages:
       (input.translatedBody as { messages?: unknown[] } | null | undefined)?.messages ??
       input.reasoningReplayHistory ??
@@ -356,6 +356,11 @@ export async function runNonStreamingProviderLeg(
   const targetFormat = input.targetFormat ?? "openai";
   const clientResponseFormat = input.clientResponseFormat ?? "openai";
   const connectionId = input.connectionId ?? "unknown";
+  const familyFallback = createRequestFamilyFallback(provider, {
+    headers: input.clientHeaders,
+    hasApiKeyMetadata: input.hasApiKeyMetadata,
+    connectionId: () => input.getCurrentConnectionId?.() ?? connectionId,
+  });
   const log = input.log;
 
   // -- Phase policy: follow-up blocks rotation and fallback -------------------
@@ -595,7 +600,7 @@ export async function runNonStreamingProviderLeg(
     // -- Model-unavailable -> family fallback (initial only) --------------------
     if (allowModelFallback && isModelUnavailableError(statusCode, message, provider)) {
       const triedModels = new Set<string>([currentModel]);
-      const nextModel = getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getNext(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         input.setRequestWireState({
@@ -669,12 +674,7 @@ export async function runNonStreamingProviderLeg(
     // -- Context overflow -> family fallback (initial only) ---------------------
     if (allowModelFallback && isContextOverflowError(statusCode, message)) {
       const triedModels = new Set<string>([currentModel]);
-      const familyCandidates = getModelFamily(currentModel, provider).filter(
-        (m) => m !== currentModel && !triedModels.has(m)
-      );
-      const nextModel =
-        findLargerContextModel(currentModel, familyCandidates, provider) ??
-        getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getForContextOverflow(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         input.setRequestWireState({
@@ -991,7 +991,7 @@ export async function runNonStreamingProviderLeg(
     const errMsg = "Provider returned empty content";
     if (allowModelFallback) {
       const triedModels = new Set<string>([currentModel]);
-      const nextModel = getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getNext(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         input.setRequestWireState({

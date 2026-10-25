@@ -1,6 +1,9 @@
 import type { CredentialLeaseSelectionContext } from "./exclusiveConnectionLeasePolicy";
+import type { ConnectionRestrictionSource } from "./credentialSelectionDiagnostics.ts";
 
 export interface CredentialSelectionOptions {
+  /** Provenance of the effective allowlist; does not alter authorization. */
+  connectionRestrictionSources?: readonly ConnectionRestrictionSource[];
   /** Exclude credential-specific transports that cannot serve caller tools. */
   requireToolCalling?: boolean;
   allowSuppressedConnections?: boolean;

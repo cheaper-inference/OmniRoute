@@ -66,11 +66,11 @@ describe("append-preserving CCR engine", () => {
     assert.ok(hash);
     assert.equal(retrieveBlock(hash, "test-principal"), `${OLD_CONVERSATION}\n\nEarlier response`);
     assert.ok(
-      messages.some((message) => message.content.includes("[GrevCaching CCR rollover]")),
+      messages.some((message) => message.content.includes("[CCR context rollover]")),
       "rollover adds the CCR handling instruction to the prompt"
     );
     const instruction = messages.find((message) =>
-      message.content.includes("[GrevCaching CCR rollover]")
+      message.content.includes("[CCR context rollover]")
     )?.content;
     assert.ok(instruction);
     assert.match(instruction, /preview and hash are only an index/i);
@@ -323,7 +323,7 @@ describe("append-preserving CCR engine", () => {
     assert.equal(result.compressed, true);
     const messages = result.body.messages as Array<{ content: string }>;
     assert.ok(messages.some((message) => message.content.startsWith("[CCR retrieve hash=")));
-    assert.ok(messages.some((message) => message.content.includes("[GrevCaching CCR rollover]")));
+    assert.ok(messages.some((message) => message.content.includes("[CCR context rollover]")));
   });
 
   it("honors the archive-size and direct-tail configuration", () => {

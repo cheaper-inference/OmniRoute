@@ -24,9 +24,9 @@ import ProviderUsdCostModal from "./ProviderUsdCostModal";
 import type { CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 
 const STATUS_BORDER: Record<CardStatus, string> = {
-  critical: "#ef4444",
-  alert: "#eab308",
-  ok: "#22c55e",
+  critical: "var(--color-error)",
+  alert: "var(--color-warning)",
+  ok: "var(--color-success)",
   empty: "transparent",
 };
 
@@ -44,6 +44,7 @@ interface QuotaCardProps {
           billing?: ProviderBillingStatus | null;
           quotaGroups?: Array<Record<string, unknown>>;
           paidCredits?: CodexPaidCredits;
+          speed?: unknown;
         };
         stale?: { since?: string; reason?: string } | null;
       }
@@ -88,13 +89,18 @@ export default function QuotaCard({
   const isActive = connection.isActive ?? true;
   const [costModalOpen, setCostModalOpen] = useState(false);
   const rawQuotas = quota?.quotas ?? EMPTY_QUOTAS;
+  // Per-account visibility (9router#4767); provider entry is a legacy fallback.
+  const visibilityScope = useMemo(
+    () => ({ connectionId: connection.id, provider: connection.provider }),
+    [connection.id, connection.provider]
+  );
   const quotas = useMemo(
-    () => filterQuotasByVisibility(connection.provider, rawQuotas, quotaVisibility),
-    [connection.provider, rawQuotas, quotaVisibility]
+    () => filterQuotasByVisibility(visibilityScope, rawQuotas, quotaVisibility),
+    [visibilityScope, rawQuotas, quotaVisibility]
   );
   const hiddenQuotaRows = useMemo(
-    () => getHiddenQuotaRows(connection.provider, rawQuotas, quotaVisibility),
-    [connection.provider, rawQuotas, quotaVisibility]
+    () => getHiddenQuotaRows(visibilityScope, rawQuotas, quotaVisibility),
+    [visibilityScope, rawQuotas, quotaVisibility]
   );
   const cardStatus = useMemo<CardStatus>(() => worstStatus(quotas), [quotas]);
   const tierMeta = useMemo(
@@ -176,6 +182,7 @@ export default function QuotaCard({
         hiddenQuotaRows={hiddenQuotaRows}
         onHideQuota={onHideQuota}
         onShowQuota={onShowQuota}
+        speed={quota?.raw?.speed}
         canEditCutoff={canEditCutoff}
         hasCutoffOverrides={hasOverrides}
         canRedeemResetCredit={canRedeemResetCredit}

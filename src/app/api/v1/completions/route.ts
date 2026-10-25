@@ -8,6 +8,7 @@ import {
   withCompressionHeaderEcho,
 } from "@/shared/utils/compressionHeaderEcho";
 import { withChatAdmission } from "@/shared/middleware/withChatAdmission";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 
 let initPromise = null;
 // `logger: null` — the guardrail registry re-evaluates this request inside
@@ -45,6 +46,12 @@ export async function OPTIONS() {
  * @see https://platform.openai.com/docs/api-reference/completions
  */
 async function postHandler(request: Request) {
+  // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
+  // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
+  // handler enforces authentication independently.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
+
   await ensureInitialized();
 
   // #6422 — capture the compression request header once so we can echo it back

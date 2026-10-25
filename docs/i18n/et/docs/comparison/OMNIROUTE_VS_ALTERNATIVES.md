@@ -4,46 +4,46 @@
 
 ---
 
-Objektiivne funktsioonide võrdlus populaarsete avatud lähtekoodiga AI-marsruuteritega.
+Objektiivne funktsioonide võrdlus populaarsete avatud lähtekoodiga AI-ruuteritega.
 
-> **Metoodika**: avalikud repositooriumid auditeeritud 2026-Q2. Versioonid on esitatud tabelis.
-> Esitage parandused PR-i kaudu — soovime, et see oleks täpne.
+> **Metoodika**: Avalikud hoidlad auditeeritud 2026-Q2. Versioonid nagu loetletud.
+> Saatke parandused PR-i kaudu — tahame, et see oleks täpne.
 
-| Funktsioon                                                      |                  OmniRoute 3.8                  |    LiteLLM 1.x    |  OpenRouter (SaaS)  |   Portkey   |
-| --------------------------------------------------------------- | :---------------------------------------------: | :---------------: | :-----------------: | :---------: |
-| **Teenusepakkujad**                                             |                     **329**                     |       ~100        |         ~50         |     ~30     |
-| **Tasuta/autentimiseta kataloogikirjed**                        |                     **155**                     |    ei kohaldu     | läbipaistev edastus | ei kohaldu  |
-| **Ise majutatav**                                               |                       ✅                        |        ✅         |         ❌          | ⚠ tasuline  |
-| **OAuthi kataloogikirjed**                                      |                     **23**                      |      osaline      |         ❌          |     ❌      |
-| **Automaatsed varuvaliku kombinatsioonid**                      |               **19 strateegiat**                | prioriteedipõhine |    tasemepõhine     |  kaalutud   |
-| **Fusioon (paralleelpaneel + hindaja süntees)**                 |                       ✅                        |        ❌         |         ❌          |     ❌      |
-| **1./2./3. taseme varuvalik (tellimus→odav→tasuta)**            |                     ✅ + UI                     |      käsitsi      |     ei kohaldu      |   käsitsi   |
-| **Tokenite tihendamine**                                        | 12-mootoriline pinu (RTK + Caveman + LLMLingua) |      puudub       |       puudub        |   puudub    |
-| **Multimodaalne genereerimine (kõne/muusika/video)**            |                       ✅                        |        ❌         | läbipaistev edastus |     ❌      |
-| **Sisseehitatud MCP-server**                                    |      ✅ 110 tööriista, 33 õiguste ulatust       |        ❌         |         ❌          |     ❌      |
-| **A2A-protokoll**                                               |                   ✅ 6 oskust                   |        ❌         |         ❌          |     ❌      |
-| **Mälu (FTS5 + vektorid)**                                      |                       ✅                        |        ❌         |         ❌          |     ❌      |
-| **Kaitsemeetmed (PII, süstimine, nägemine)**                    |                       ✅                        |      osaline      |         ❌          | ✅ tasuline |
-| **Pilveagentide integratsioonid**                               |           Codex, Cursor, Devin, Jules           |        ❌         |         ❌          |     ❌      |
-| **Kaitselüliti teenusepakkuja kohta**                           |          ✅ 3 olekut, laisk taastumine          |      lihtne       |         ❌          |     ✅      |
-| **TLS-sõrmejälje varjamine (JA3/JA4)**                          |                   ✅ wreq-js                    |        ❌         |         ❌          |     ❌      |
-| **Hindamisraamistik**                                           |                ✅ sisseehitatud                 |        ❌         |         ❌          | ⚠ tasuline  |
-| **MITM-puhverserver (püüab kinni Cursor/Antigravity liikluse)** |               ✅ platvormideülene               |        ❌         |         ❌          |     ❌      |
-| **CLI süsteemisalve toega (ilma Electronita)**                  |                       ✅                        |        ❌         |     ei kohaldu      | ei kohaldu  |
-| **CLI automaatne autentimine masina ID-ga**                     |                       ✅                        |        ❌         |     ei kohaldu      | ei kohaldu  |
-| **Juhtpaneel**                                                  |                   Next.js 16                    |      lihtne       |     omanduslik      | omanduslik  |
-| **i18n**                                                        |                 **42 lokaati**                  |        ❌         |         ❌          |      ⚠      |
-| **Avalikud agendioskused (SKILL.md)**                           |                      ✅ 45                      |        ❌         |         ❌          |     ❌      |
-| **Tunnelite tugi (Cloudflared, Tailscale, Ngrok)**              |                       ✅                        |        ❌         |     ei kohaldu      | ei kohaldu  |
-| **Litsents**                                                    |                       MIT                       |        MIT        |     omanduslik      | omanduslik  |
+| Funktsioon                                                 |                   OmniRoute 3.8                   |    LiteLLM 1.x    | OpenRouter (SaaS) |    Portkey    |
+| ---------------------------------------------------------- | :-----------------------------------------------: | :---------------: | :---------------: | :-----------: |
+| **Pakkujad**                                               |                      **329**                      |       ~100        |        ~50        |      ~30      |
+| **Tasuta/autentimiseta kataloogikirjed**                   |                      **155**                      |         –         |     läbilase      |       –       |
+| **Ise majutatav**                                          |                        ✅                         |        ✅         |        ❌         |  ⚠ tasuline   |
+| **OAuthi kataloogikirjed**                                 |                      **23**                       |      osaline      |        ❌         |      ❌       |
+| **Automaatse tagavaralülituse kombinatsioonid**            |                **20 strateegiat**                 | prioriteedipõhine |   tasemepõhine    |   kaalutud    |
+| **Fusioon (paralleelne paneel + hindaja süntees)**         |                        ✅                         |        ❌         |        ❌         |      ❌       |
+| **1./2./3. taseme tagavaralülitus (tellimus→odav→tasuta)** |                      ✅ + UI                      |      käsitsi      |         –         |    käsitsi    |
+| **Tokenite tihendamine**                                   | 12 mootoriga komplekt (RTK + Caveman + LLMLingua) |      puudub       |      puudub       |    puudub     |
+| **Multimodaalne genereerimine (kõne/muusika/video)**       |                        ✅                         |        ❌         |     läbilase      |      ❌       |
+| **Sisseehitatud MCP-server**                               |           ✅ 110 tööriista, 33 ulatust            |        ❌         |        ❌         |      ❌       |
+| **A2A protokoll**                                          |                    ✅ 6 oskust                    |        ❌         |        ❌         |      ❌       |
+| **Mälu (FTS5 + vektor)**                                   |                        ✅                         |        ❌         |        ❌         |      ❌       |
+| **Kaitsepiirded (PII, injektsioon, arvutinägemine)**       |                        ✅                         |      osaline      |        ❌         |  ✅ tasuline  |
+| **Pilveagentide integratsioonid**                          |            Codex, Cursor, Devin, Jules            |        ❌         |        ❌         |      ❌       |
+| **Kaitselüliti pakkuja kohta**                             |           ✅ 3 olekut, laisk taastumine           |     põhiline      |        ❌         |      ✅       |
+| **TLS-i sõrmejälje peitmine (JA3/JA4)**                    |                    ✅ wreq-js                     |        ❌         |        ❌         |      ❌       |
+| **Hindamisraamistik**                                      |                 ✅ sisseehitatud                  |        ❌         |        ❌         |  ⚠ tasuline   |
+| **MITM-proksi (peab kinni Cursor/Antigravity)**            |               ✅ mitmeplatvormiline               |        ❌         |        ❌         |      ❌       |
+| **CLI süsteemisalvega (ilma Electronita)**                 |                        ✅                         |        ❌         |         –         |       –       |
+| **CLI masina-ID automaatne autentimine**                   |                        ✅                         |        ❌         |         –         |       –       |
+| **Armatuurlaud**                                           |                    Next.js 16                     |     põhiline      |   proprietaarne   | proprietaarne |
+| **i18n**                                                   |                  **67 lokaati**                   |        ❌         |        ❌         |       ⚠       |
+| **Avalikud agendi oskused (SKILL.md)**                     |                       ✅ 45                       |        ❌         |        ❌         |      ❌       |
+| **Tunnelite tugi (Cloudflared, Tailscale, Ngrok)**         |                        ✅                         |        ❌         |         –         |       –       |
+| **Litsents**                                               |                        MIT                        |        MIT        |   proprietaarne   | proprietaarne |
 
 ## Millal valida OmniRoute
 
-- Majutate lahendust ise ja soovite **maksimaalset teenusepakkujate katvust** (329 teenusepakkujat, 155 tasuta/autentimiseta kataloogikirjet)
-- Vajate **sisseehitatud MCP-serverit** (LLM-i tööriistad, mälu ja oskused on saadaval tööriistadena)
-- Vajate agentidevaheliste töövoogude jaoks **A2A-protokolli**
-- Soovite **sõrmejälje varjamist** (JA3/JA4), et vältida ülesvoolu CAPTCHA-de tuvastust
-- Vajate **ettevõttefunktsioone** (kaitsemeetmed, hindamised, auditijälg) ilma SaaS-i arveteta
+- Majutad ise ja soovid **maksimaalset pakkujate katvust** (375 pakkujat, 155 tasuta/autentimiseta kataloogikirjet)
+- Vajad **sisseehitatud MCP-serverit** (LLM-i tööriistad, mälu ja oskused, mis on esitatud tööriistadena)
+- Vajad **A2A-protokolli** agentidevahelisteks töövoogudeks
+- Soovid **sõrmejälje varjamist** (JA3/JA4), et vältida ülesvoolu CAPTCHA-de poolset tuvastamist
+- Vajad **ettevõtte taseme funktsioone** (kaitsepiirangud, hindamised, auditi jälg) ilma SaaS-i arveta
 
 ## Millal valida LiteLLM
 

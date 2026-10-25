@@ -12,12 +12,12 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### ข้อกำหนดเบื้องต้น
 
-- **Node.js** `>=22.22.3 <23` หรือ `>=24.0.0 <27` (แนะนำ: 24 LTS)
+- **Node.js** `>=22.22.2 <23` หรือ `>=24.0.0 <27` (แนะนำ: 24 LTS)
 - **npm** 10+
 
-> **สำหรับผู้ใช้ npm v11+ (Node 24+):** หลังจาก `npm install` ให้ตรวจสอบว่าโมดูลเนทีฟได้รับการติดตั้งแล้ว:
-> `node -e "require('better-sqlite3')"`. หากล้มเหลวโดยแสดง `MODULE_NOT_FOUND`
-> ให้เรียกใช้ `npm approve-scripts better-sqlite3 && npm install` ดู
+> **สำหรับผู้ใช้ npm v11+ (Node 24+):** หลังจากรัน `npm install` ให้ตรวจสอบว่าโมดูลเนทีฟได้รับการติดตั้งแล้ว:
+> `node -e "require('better-sqlite3')"`. หากคำสั่งล้มเหลวพร้อมข้อผิดพลาด `MODULE_NOT_FOUND`
+> ให้รัน `npm approve-scripts better-sqlite3 && npm install` ดูข้อมูลเพิ่มเติมที่
 > [การแก้ไขปัญหา](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)
 
 - **Git**
@@ -43,77 +43,77 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 ตัวแปรสำคัญสำหรับการพัฒนา:
 
-| ตัวแปร                 | ค่าเริ่มต้นสำหรับการพัฒนา | คำอธิบาย                          |
-| ---------------------- | ------------------------- | --------------------------------- |
-| `PORT`                 | `20128`                   | พอร์ตของเซิร์ฟเวอร์               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | URL พื้นฐานสำหรับฟรอนต์เอนด์      |
-| `JWT_SECRET`           | (สร้างตามด้านบน)          | ค่าลับสำหรับลงนาม JWT             |
-| `INITIAL_PASSWORD`     | `CHANGEME`                | รหัสผ่านสำหรับเข้าสู่ระบบครั้งแรก |
-| `APP_LOG_LEVEL`        | `info`                    | ระดับความละเอียดของบันทึก         |
+| ตัวแปร                 | ค่าเริ่มต้นสำหรับการพัฒนา | คำอธิบาย                             |
+| ---------------------- | ------------------------- | ------------------------------------ |
+| `PORT`                 | `20128`                   | พอร์ตของเซิร์ฟเวอร์                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | URL ฐานสำหรับฟรอนต์เอนด์             |
+| `JWT_SECRET`           | (สร้างตามขั้นตอนด้านบน)   | ค่าลับสำหรับลงนาม JWT                |
+| `INITIAL_PASSWORD`     | `CHANGEME`                | รหัสผ่านสำหรับการเข้าสู่ระบบครั้งแรก |
+| `APP_LOG_LEVEL`        | `info`                    | ระดับความละเอียดของบันทึก            |
 
 ### การตั้งค่าแดชบอร์ด
 
-แดชบอร์ดมีสวิตช์ UI สำหรับฟีเจอร์ต่าง ๆ ซึ่งสามารถกำหนดค่าผ่านตัวแปรสภาพแวดล้อมได้เช่นกัน:
+แดชบอร์ดมีตัวเลือก UI สำหรับเปิดหรือปิดฟีเจอร์ต่าง ๆ ซึ่งสามารถกำหนดค่าผ่านตัวแปรสภาพแวดล้อมได้เช่นกัน:
 
-| ตำแหน่งการตั้งค่า    | สวิตช์                | คำอธิบาย                           |
-| -------------------- | --------------------- | ---------------------------------- |
-| การตั้งค่า → ขั้นสูง | โหมดดีบัก             | เปิดใช้บันทึกคำขอดีบัก (UI)        |
-| การตั้งค่า → ทั่วไป  | การมองเห็นแถบด้านข้าง | แสดง/ซ่อนส่วนต่าง ๆ ของแถบด้านข้าง |
+| ตำแหน่งการตั้งค่า    | ตัวเลือก           | คำอธิบาย                                |
+| -------------------- | ------------------ | --------------------------------------- |
+| การตั้งค่า → ขั้นสูง | โหมดดีบัก          | เปิดใช้งานบันทึกคำขอสำหรับการดีบัก (UI) |
+| การตั้งค่า → ทั่วไป  | การแสดงแถบด้านข้าง | แสดง/ซ่อนส่วนต่าง ๆ ของแถบด้านข้าง      |
 
-การตั้งค่าเหล่านี้จะถูกจัดเก็บไว้ในฐานข้อมูลและคงอยู่หลังการรีสตาร์ต โดยจะแทนที่ค่าเริ่มต้นจากตัวแปรสภาพแวดล้อมเมื่อมีการกำหนดค่าไว้
+การตั้งค่าเหล่านี้จะถูกจัดเก็บไว้ในฐานข้อมูลและยังคงอยู่หลังการรีสตาร์ต โดยจะแทนที่ค่าเริ่มต้นจากตัวแปรสภาพแวดล้อมเมื่อมีการกำหนดค่า
 
-### การเรียกใช้ภายในเครื่อง
+### การรันภายในเครื่อง
 
 ```bash
-# โหมดการพัฒนา (โหลดซ้ำอัตโนมัติ)
+# โหมดการพัฒนา (โหลดใหม่อัตโนมัติ)
 npm run dev
 
 # บิลด์สำหรับโปรดักชัน
 npm run build    # next build → .build/next/ จากนั้น assembleStandalone → dist/
 npm run start
 
-# คอมไพล์เฉพาะแบ็กเอนด์/API อย่างรวดเร็วสำหรับการเปลี่ยนแปลงของผู้มีส่วนร่วม
+# คอมไพล์เฉพาะแบ็กเอนด์/API อย่างรวดเร็วสำหรับการเปลี่ยนแปลงของผู้ร่วมพัฒนา
 npm run build:contributor
 
-# บิลด์สำหรับรีลีส (บิลด์ใหม่ทั้งหมด + ตัวตรวจสอบ HEAD — จำเป็นสำหรับการดีพลอย)
-npm run build:release   # rm -rf .build dist && บิลด์ + เขียน dist/BUILD_SHA
+# บิลด์สำหรับรีลีส (บิลด์ใหม่ทั้งหมด + ตัวตรวจสอบ HEAD — จำเป็นสำหรับการ deploy)
+npm run build:release   # rm -rf .build dist แล้วบิลด์ + เขียน dist/BUILD_SHA
 
-# การกำหนดค่าพอร์ตที่ใช้ทั่วไป
+# การกำหนดค่าพอร์ตทั่วไป
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-บิลด์สำหรับผู้มีส่วนร่วมจะตรวจสอบเฉพาะการคอมไพล์เท่านั้น โดยจะไม่ประกอบ
-ดิสทริบิวชันแบบสแตนด์อโลนหรือบิลด์แอสเซ็ตเนทีฟสำหรับแพ็กเกจเสริม ใช้บิลด์สำหรับโปรดักชันตามปกติเมื่อ
-คุณต้องการตรวจสอบบันเดิลที่พร้อมเผยแพร่
+บิลด์สำหรับผู้ร่วมพัฒนาจะตรวจสอบเฉพาะการคอมไพล์ โดยจะไม่ประกอบชุดเผยแพร่แบบสแตนด์อโลน
+หรือบิลด์แอสเซตแพ็กเกจเนทีฟที่เป็นตัวเลือก ใช้บิลด์สำหรับโปรดักชันตามปกติเมื่อ
+ต้องการตรวจสอบชุดไฟล์ที่พร้อมเผยแพร่
 
-### โครงสร้างเอาต์พุตของบิลด์
+### โครงสร้างผลลัพธ์ของบิลด์
 
-| ไดเรกทอรี | เนื้อหา                                                                               | ติดตามใน Git |
-| --------- | ------------------------------------------------------------------------------------- | ------------ |
-| `src/`    | ซอร์สของแอปพลิเคชัน (TypeScript / TSX)                                                | ใช่          |
-| `.build/` | ไฟล์ระหว่างทาง — เอาต์พุตจาก `next build` (ถูกละเว้นโดย Git, `distDir = .build/next`) | ไม่          |
-| `dist/`   | บันเดิลพร้อมเผยแพร่ — ประกอบโดย `assembleStandalone` (ถูกละเว้นโดย Git)               | ไม่          |
+| ไดเรกทอรี | เนื้อหา                                                                                    | ติดตามในระบบควบคุมเวอร์ชัน |
+| --------- | ------------------------------------------------------------------------------------------ | -------------------------- |
+| `src/`    | ซอร์สของแอปพลิเคชัน (TypeScript / TSX)                                                     | ใช่                        |
+| `.build/` | ไฟล์ระหว่างกระบวนการ — ผลลัพธ์จาก `next build` (ถูกละเว้นโดย Git, `distDir = .build/next`) | ไม่                        |
+| `dist/`   | ชุดไฟล์ที่พร้อมเผยแพร่ — ประกอบโดย `assembleStandalone` (ถูกละเว้นโดย Git)                 | ไม่                        |
 
 ไปป์ไลน์การบิลด์ทำงานแบบรอบเดียว:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (เอาต์พุตของ Next.js)
-  └─ assembleStandalone()                 (คัดลอก standalone + static + public + แอสเซ็ตเนทีฟ)
-       └─ เอาต์พุต: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (ผลลัพธ์จาก Next.js)
+  └─ assembleStandalone()                 (คัดลอกไฟล์สแตนด์อโลน + static + public + แอสเซตเนทีฟ)
+       └─ ผลลัพธ์: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-นอกจากนี้ `npm run build:release` จะล้างทั้งสองไดเรกทอรีก่อน และเขียน
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) เป็นตัวตรวจสอบความถูกต้องสำหรับการดีพลอย
+นอกจากนี้ `npm run build:release` จะล้างทั้งสองไดเรกทอรีก่อน แล้วเขียน
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) เพื่อใช้เป็นตัวตรวจสอบความถูกต้องในการ deploy
 
-`npm run build:contributor` ใช้โปรไฟล์บิลด์เฉพาะแบ็กเอนด์ โดยจะสร้างไฟล์จำลองแทน
-ไฟล์ UI ของแดชบอร์ดชั่วคราวระหว่างการบิลด์ เก็บตัวจัดการเส้นทาง API ไว้ และคืนค่าไฟล์ต้นฉบับ
-หลังจากบิลด์เสร็จ ใช้ `npm run build` สำหรับการเปลี่ยนแปลงที่ส่งผลต่อ UI ของแดชบอร์ด หรือสำหรับการ
-ตรวจสอบรีลีสอย่างเต็มรูปแบบ โปรไฟล์สำหรับผู้มีส่วนร่วมไม่สามารถใช้แทนบิลด์สำหรับรีลีสได้
+`npm run build:contributor` ใช้โปรไฟล์การบิลด์เฉพาะแบ็กเอนด์ โดยจะแทนที่ไฟล์
+UI ของแดชบอร์ดด้วยไฟล์ชั่วคราวระหว่างการบิลด์ เก็บตัวจัดการเส้นทาง API ไว้ และคืนค่าไฟล์ต้นฉบับ
+หลังจากบิลด์เสร็จ ใช้ `npm run build` สำหรับการเปลี่ยนแปลงที่ส่งผลต่อ UI ของแดชบอร์ด หรือสำหรับ
+การตรวจสอบรีลีสแบบเต็มรูปแบบ โปรไฟล์สำหรับผู้ร่วมพัฒนาไม่สามารถใช้แทนบิลด์สำหรับรีลีสได้
 
-> **หมายเหตุเกี่ยวกับการดีพลอยบน VPS:** ไดเรกทอรีอิมเมจระยะไกล `/usr/lib/node_modules/omniroute/app/`
-> ไม่มีการเปลี่ยนแปลง เครื่องมือสำหรับการดีพลอยจะใช้ rsync เพื่อซิงก์เนื้อหาของ `dist/` ไปยังไดเรกทอรีดังกล่าว
-> มีเพียงพาธเอาต์พุตของบิลด์ภายในรีโพซิทอรีเท่านั้นที่เปลี่ยน (`app/` → `dist/`)
+> **หมายเหตุเกี่ยวกับการ deploy บน VPS:** ไดเรกทอรีอิมเมจระยะไกล `/usr/lib/node_modules/omniroute/app/`
+> ยังคงไม่เปลี่ยนแปลง เครื่องมือสำหรับ deploy จะใช้ rsync เพื่อซิงค์เนื้อหาของ `dist/` ไปยังไดเรกทอรีดังกล่าว
+> มีเพียงพาธผลลัพธ์ของบิลด์ภายในรีโพซิทอรีเท่านั้นที่เปลี่ยนแปลง (`app/` → `dist/`)
 
 URL เริ่มต้น:
 
@@ -288,65 +288,72 @@ npm run test:combo:live:vps:failover     # เพิ่มสถานการ�
 
 ---
 
-## Project Structure
+## โครงสร้างโปรเจกต์
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # หน้าแดชบอร์ด (23 ส่วน)
+│   ├── api/                # เส้นทาง API (51 ไดเรกทอรี)
+│   └── login/              # หน้าการยืนยันตัวตน (.tsx)
+├── domain/                 # กลไกนโยบาย (policyEngine, comboResolver, costRules ฯลฯ)
+├── lib/                    # ตรรกะธุรกิจหลัก (.ts)
+│   ├── a2a/                # เซิร์ฟเวอร์โปรโตคอล Agent-to-Agent v0.3
+│   ├── acp/                # รีจิสทรี Agent Communication Protocol
+│   ├── compliance/         # กลไกนโยบายการปฏิบัติตามข้อกำหนด
+│   ├── db/                 # โมดูลโดเมน SQLite + การย้ายฐานข้อมูล 130 รายการ
+│   ├── memory/             # หน่วยความจำการสนทนาแบบถาวร
+│   ├── oauth/              # ผู้ให้บริการ บริการ และยูทิลิตี OAuth
+│   ├── skills/             # เฟรมเวิร์กทักษะที่ขยายได้
+│   ├── usage/              # การติดตามการใช้งานและการคำนวณต้นทุน
+│   └── localDb.ts          # ชั้น re-export เท่านั้น — ห้ามเพิ่มตรรกะที่นี่
+├── middleware/              # มิดเดิลแวร์คำขอ (promptInjectionGuard)
+├── mitm/                   # พร็อกซี MITM (ใบรับรอง, DNS, การกำหนดเส้นทางเป้าหมาย)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # คอมโพเนนต์ React (.tsx)
+│   ├── constants/          # นิยามผู้ให้บริการ (329), ขอบเขต MCP, กลยุทธ์การกำหนดเส้นทาง 20 รายการ
+│   ├── utils/              # เซอร์กิตเบรกเกอร์, ตัวทำความสะอาดข้อมูล, ตัวช่วยการยืนยันตัวตน
+│   └── validation/         # สคีมา Zod v4
+└── sse/                    # ไปป์ไลน์พร็อกซี SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # เวิร์กสเปซ @omniroute/open-sse
+├── executors/              # โมดูลตัวดำเนินการ 150 รายการ (คลาสตัวดำเนินการ + ตัวช่วยสำหรับผู้ให้บริการแต่ละราย)
+├── handlers/               # ตัวจัดการคำขอ 11 รายการ (แชต, การตอบกลับ, embeddings, รูปภาพ ฯลฯ)
+├── mcp-server/             # เซิร์ฟเวอร์ MCP (เครื่องมือที่ไม่ซ้ำกัน 110 รายการ, การขนส่ง 3 รูปแบบ, ขอบเขต 33 รายการ)
+├── services/               # บริการระดับบนสุด 178 รายการ (combo, autoCombo, rateLimitManager ฯลฯ)
+├── translator/             # ตัวแปลรูปแบบ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # ตัวแปลง Responses API
+└── utils/                  # โมดูลยูทิลิตี 22 รายการ (สตรีม, TLS, พร็อกซี, การบันทึกล็อก)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # แอปเดสก์ท็อป Electron (ข้ามแพลตฟอร์ม)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # ตัวรันการทดสอบ Node.js (ไฟล์ทดสอบ 1,574 ไฟล์)
+├── integration/            # การทดสอบการทำงานร่วมกัน
+├── e2e/                    # การทดสอบ Playwright
+├── security/               # การทดสอบความปลอดภัย
+├── translator/             # การทดสอบเฉพาะตัวแปล
+└── load/                   # การทดสอบโหลด
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # บันทึกการตัดสินใจด้านสถาปัตยกรรม
+├── architecture/            # สถาปัตยกรรมระบบและความยืดหยุ่น
+├── comparison/              # การเปรียบเทียบ OmniRoute กับทางเลือกอื่น
+├── compression/             # คู่มือและกฎการบีบอัด
+├── dev/                     # คู่มือการพัฒนา
+├── diagrams/                # แผนภาพสถาปัตยกรรม
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # คู่มือผู้ใช้, Docker, การตั้งค่า, การแก้ไขปัญหา
+├── i18n/                    # คำแปล README เป็นภาษาต่างๆ
+├── marketing/               # สื่อการตลาด
+├── ops/                     # การปรับใช้, พร็อกซี, ความครอบคลุม, การเผยแพร่
+├── providers/               # เอกสารเฉพาะผู้ให้บริการ
+├── reference/               # เอกสารอ้างอิง API, ตัวแปรสภาพแวดล้อม, เครื่องมือ CLI, ระดับบริการฟรี
+├── releases/                # บันทึกประจำรุ่น
+├── routing/                 # กลไก auto-combo, การเล่นซ้ำกระบวนการให้เหตุผล
+├── screenshots/             # ภาพหน้าจอแดชบอร์ด
+├── security/                # มาตรการป้องกัน, การปฏิบัติตามข้อกำหนด, การพรางตัว, โทเค็น
+└── specs/                   # ข้อกำหนดการออกแบบ
 ```
 
 ---
@@ -406,9 +413,12 @@ docs/                       # Documentation
 
 ---
 
-## Releasing
+## การเผยแพร่
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+การเผยแพร่ได้รับการจัดการผ่านเวิร์กโฟลว์ `/generate-release` เมื่อมีการสร้าง GitHub Release ใหม่ แพ็กเกจจะถูก **เผยแพร่ไปยัง npm โดยอัตโนมัติ** ผ่าน GitHub Actions
+
+สำหรับการปรับใช้บน VPS ให้ใช้ `npm run build:release` (ไม่ใช่ `npm run build`) — คำสั่งนี้จะดำเนินการบิลด์ใหม่ทั้งหมดตั้งแต่ต้น รวบรวมบันเดิลไว้ใน `dist/` และเขียนไฟล์ sentinel `dist/BUILD_SHA`
+จากนั้นใช้สกิล `/deploy-vps-*-cc` ซึ่งจะใช้ rsync เพื่อซิงค์ `dist/` ไปยังไดเรกทอรี `app/` บนเซิร์ฟเวอร์ระยะไกล
 
 ---
 

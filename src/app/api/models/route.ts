@@ -127,7 +127,9 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
     let syncedModelIdsByCanonicalProvider = new Map<string, Set<string>>();
     let resolveCanonicalProviderIdForStatic: (alias: string) => string = (alias) => alias;
     try {
-      const syncedModelsByProvider = await getAllActiveSyncedModels();
+      const syncedModelsByProvider = await getAllActiveSyncedModels({
+        customModelsByProvider: capabilitySnapshot.customModelsByProvider,
+      });
       const { aliasToProviderId, providerIdToAlias } = buildAliasMaps();
       const resolve = (aliasOrId: string, fallbackProviderId?: string) =>
         resolveCanonicalProviderIdFromMaps(aliasToProviderId, aliasOrId, fallbackProviderId);
@@ -176,8 +178,9 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
         fullModel,
         alias: modelAliases[fullModel] || m.model,
         available,
-        supportsVision: capabilities.supportsVision === true,
-        supportsTools: capabilities.toolCalling,
+        supportsVision:
+          getResolvedModelCapabilities(fullModel, undefined, capabilitySnapshot).supportsVision ===
+          true,
       };
     });
 

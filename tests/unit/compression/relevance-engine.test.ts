@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { relevanceEngine } from "../../../open-sse/services/compression/engines/relevance/index.ts";
-import { resolveStepDetailConfig } from "../../../open-sse/services/compression/stepDetailConfig.ts";
 
 function makeBody(userContent: string, priorContent?: string): Record<string, unknown> {
   const messages: Array<{ role: string; content: string }> = [];
@@ -198,25 +197,6 @@ test("engine metadata is correct", () => {
   assert.equal(relevanceEngine.stackPriority, 18);
   assert.ok(Array.isArray(relevanceEngine.targets));
   assert.ok(relevanceEngine.getConfigSchema().length > 0);
-});
-
-test("persisted relevance detail settings become stacked step configuration", () => {
-  assert.deepEqual(
-    resolveStepDetailConfig("relevance", {
-      relevanceConfig: {
-        enabled: false,
-        overlapThreshold: 0.25,
-        budgetPercent: 0.4,
-        boilerplateWeight: 0.75,
-      },
-    }),
-    {
-      enabled: false,
-      overlapThreshold: 0.25,
-      budgetPercent: 0.4,
-      boilerplateWeight: 0.75,
-    }
-  );
 });
 
 // ── Issue 1: overlapThreshold must actually drop zero-overlap sentences ──────

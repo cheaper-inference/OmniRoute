@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-copilot-catalog-"));
 process.env.DATA_DIR = dataDir;
@@ -168,7 +169,7 @@ test.beforeEach(async () => {
 
 test.afterEach(async () => {
   await new Promise((resolve) => setImmediate(resolve));
-  assert.equal(await callLogs.waitForCallLogSaves(2_000), true);
+  assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
   globalThis.fetch = originalFetch;
 });
 test.after(() => {

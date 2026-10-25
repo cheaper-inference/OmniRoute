@@ -12,6 +12,8 @@ export const opencode_zenProvider: RegistryEntry = {
   authHeader: "Authorization",
   authPrefix: "Bearer",
   defaultContextLength: 200000,
+  // Upstream 400s "name must be at most 64 characters" on chat-completions tools.
+  toolNameMaxLength: 64,
   // Sync with https://opencode.ai/zen/v1/models — this list is regenerated
   // from the live API response so new models work without a code deploy.
   passthroughModels: true,
@@ -79,8 +81,11 @@ export const opencode_zenProvider: RegistryEntry = {
     { id: "gemini-3-flash", name: "Gemini 3 Flash" },
 
     // ── Grok ───────────────────────────────────────────────────
-    { id: "grok-build-0.1", name: "Grok Build 0.1" },
-    { id: "grok-4.6", name: "Grok 4.6" },
+    // The Zen endpoint table (opencode.ai/docs/zen) serves every Grok model on
+    // /responses only; without the declaration they fall through to
+    // /chat/completions, which the upstream rejects for this family.
+    { id: "grok-build-0.1", name: "Grok Build 0.1", targetFormat: "openai-responses" },
+    { id: "grok-4.6", name: "Grok 4.6", targetFormat: "openai-responses" },
 
     // ── Muse ───────────────────────────────────────────────────
     // Muse Spark is served by OpenCode Zen only on the OpenAI Responses API
@@ -178,7 +183,14 @@ export const opencode_zenProvider: RegistryEntry = {
     // nemotron-3-super-free and qwen3.6-plus-free were delisted (401).
     // 2026-08-17 sync: north-mini-code-free delisted; nemotron-3.5-lightning-free
     // and laguna-s-2.1-free added.
-    { id: "deepseek-v4-flash-free", name: "DeepSeek V4 Flash Free", supportsReasoning: true },
+    // 2026-10-18 sync: deepseek-v4-flash-free delisted upstream and replaced by
+    // deepseek-v4.1-flash-free; keep the old id as a compatibility alias.
+    {
+      id: "deepseek-v4.1-flash-free",
+      name: "DeepSeek V4.1 Flash Free",
+      aliases: ["deepseek-v4-flash-free"],
+      supportsReasoning: true,
+    },
     { id: "mimo-v2.5-free", name: "MiMo V2.5 Free", contextLength: 1048576 },
     // MiMo V2.6 Flash Free ships a 1M window upstream (same as V2.5); without
     // this row it falls through to the 200000 provider default and clients

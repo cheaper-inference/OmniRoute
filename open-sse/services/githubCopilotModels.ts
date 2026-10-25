@@ -47,6 +47,7 @@ export const GITHUB_COPILOT_STATIC_FALLBACK_MODELS: readonly string[] = Object.f
   "mai-code-1.1-flash",
   "kimi-k3",
   "grok-4.6",
+  "auto",
 ]);
 
 // Back-compat alias: earlier code + tests imported this name. It is now the

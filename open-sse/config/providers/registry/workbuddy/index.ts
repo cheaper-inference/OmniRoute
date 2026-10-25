@@ -44,7 +44,18 @@ export const workbuddyProvider: RegistryEntry = {
   authHeader: "Authorization",
   authPrefix: "Bearer ",
   // Required on every gateway route, including the device-flow endpoints.
-  headers: { "X-Product": "SaaS" },
+  headers: {
+    "User-Agent": "WorkBuddy/5.5.6",
+    "X-Product": "SaaS",
+    "X-IDE-Type": "WorkBuddy",
+    "X-IDE-Name": "WorkBuddy",
+    "X-IDE-Version": "5.5.6",
+    "X-Requested-With": "XMLHttpRequest",
+    "X-Agent-Intent": "craft",
+    "X-Agent-Purpose": "conversation",
+    "X-Agent-Type": "main",
+    "X-Domain": "www.workbuddy.ai",
+  },
   oauth: {
     initiateUrl: "https://www.workbuddy.ai/v2/plugin/auth/state?platform=CLI",
     pollUrlBase: "https://www.workbuddy.ai/v2/plugin/auth/token",
@@ -54,6 +65,10 @@ export const workbuddyProvider: RegistryEntry = {
   bodyStringReplacements: [
     // The gateway refuses a request whose body names another agent client.
     // Longest first, so "Codex CLI" is not half-replaced by the "Codex" rule.
+    ["x-anthropic-billing-header:", ""],
+    ["You are Claude Code, Anthropic's official CLI for Claude", "You are Claude Code, Anthropic's CLI for Claude"],
+    ["Main branch (you will usually use this for PRs)", "Main branch (usually the base for PRs)"],
+    ["Codex CLI is an open source project led by OpenAI.", "The Codex CLI is an open source project led by OpenAI."],
     ["Codex CLI", "the assistant"],
     ["codex_cli_rs", "assistant"],
     ["OpenAI", "the provider"],

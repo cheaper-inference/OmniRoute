@@ -97,6 +97,8 @@ export async function GET(req: NextRequest) {
     channel: config.mode,
     autoUpdateSupported: validation.supported,
     autoUpdateError: validation.reason,
+    // Host-side compose command for a published-image container (`docker-image` mode).
+    manualUpdateCommand: config.manualUpdateCommand,
     news,
     releaseChannel,
     channels,
@@ -152,6 +154,34 @@ export async function POST(req: NextRequest) {
         error: validation.reason || "Auto-update is not supported in this environment.",
       },
       { status: 400 }
+    );
+  }
+
+  // Socket-free Docker image update: drop a request file in DATA_DIR for the host watcher,
+  // which pulls the image and recreates the container. The dashboard then polls GET.
+  if (config.mode === "docker-trigger") {
+    const launched = await launchAutoUpdate({ latest });
+    if (!launched.started) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: launched.error || "Failed to request the Docker update.",
+          channel: launched.channel,
+        },
+        { status: 500 }
+      );
+    }
+
+    clearLatestVersionCache();
+    return NextResponse.json(
+      {
+        success: true,
+        message: `Update to v${latest} requested. The Docker host is pulling the new image.`,
+        from: current,
+        to: latest,
+        channel: launched.channel,
+      },
+      { status: 202 }
     );
   }
 

@@ -1,1 +1,0 @@
-- **fix(mcp):** sanitize the internal hop's error at the throw so upstream details never reach the client ([#15767](https://github.com/diegosouzapw/OmniRoute/pull/15767)) — thanks @jonlwheat2-gif

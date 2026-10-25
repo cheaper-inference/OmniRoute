@@ -211,11 +211,9 @@ test("registry: unknown provider → getAgent null, isCloudAgentProvider false",
   assert.equal(registryMod.isCloudAgentProvider("cursor"), false);
 });
 
-test("characterization: isCloudAgentProvider currently matches Object.prototype keys (uses `in`)", () => {
-  // `providerId in AGENTS` walks the prototype chain, so inherited names report true while
-  // getAgent() (property read || null) returns a non-agent function for them.
-  assert.equal(registryMod.isCloudAgentProvider("toString"), true);
-  assert.equal(typeof registryMod.getAgent("toString"), "function");
+test("registry rejects Object.prototype keys in provider checks and lookups", () => {
+  assert.equal(registryMod.isCloudAgentProvider("toString"), false);
+  assert.equal(registryMod.getAgent("toString"), null);
 });
 
 test("julesApi: buildJulesApiUrl normalises the leading slash", () => {
@@ -471,7 +469,7 @@ test("getStatus(jules): a pull-request output wins → completed with result", a
   }
 });
 
-test("characterization: base mapStatus currently checks 'pending' before 'approval'", async () => {
+test("base mapStatus prioritizes approval over a generic pending status", async () => {
   // Devin routes its raw status through CloudAgentBase.mapStatus (substring matcher).
   const cases: Array<[string, string]> = [
     ["completed", "completed"],
@@ -481,7 +479,7 @@ test("characterization: base mapStatus currently checks 'pending' before 'approv
     ["executing", "running"],
     ["waiting", "queued"],
     ["needs plan review", "awaiting_approval"],
-    ["pending approval", "queued"], // 'pending' matches first — never awaiting_approval
+    ["pending approval", "awaiting_approval"],
     ["something-else", "queued"],
   ];
   const seen: Array<[string, string]> = [];

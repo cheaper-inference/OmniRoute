@@ -22,7 +22,7 @@ export const PRE_SCREEN_CONCURRENCY = 5;
  * the whole combo for up to 10 minutes before falling through to the next model
  * (escalated cmqlrhd7c). For STREAMING requests this only bounds the time-to-first-headers
  * — token generation streams after the response resolves, so it is NOT cut short. Operators
- * can still raise it per-combo via `targetTimeoutMs` (capped at the upstream ceiling), or set
+ * can still raise it per-combo via `targetTimeoutMs`, or set
  * a longer value for slow non-streaming reasoning combos.
  */
 export const DEFAULT_COMBO_TARGET_TIMEOUT_MS = 120_000;
@@ -123,10 +123,9 @@ const DEFAULT_COMBO_CONFIG = {
   trackMetrics: true,
   reasoningTokenBufferEnabled: true,
   manifestRouting: false,
-  // Complexity-aware auto routing (2026): when on, the auto router scores
-  // candidates by how well their tier matches the request's classified
-  // difficulty (feeds tierAffinity/specificityMatch). Opt-in — off by default.
-  complexityAwareRouting: false,
+  // Complexity-aware auto routing is always-on since #13386 — the
+  // config.complexityAwareRouting flag was removed (it was orphaned by
+  // migration 103 which stripped it as a legacy key).
   resetAwareSessionWeight: 0.35,
   resetAwareWeeklyWeight: 0.65,
   resetAwareTieBandPercent: 5,
@@ -254,10 +253,10 @@ export function resolveComboTargetTimeoutMs(
     ? normalizePositiveTimeoutMs(config.targetTimeoutMs)
     : 0;
 
-  // Explicit per-combo config: honour it, but never extend past the upstream ceiling.
+  // Explicit per-combo config is authoritative. The upstream request deadline, when
+  // enabled, remains enforced separately by the request/executor timeout.
   if (configuredTimeoutMs > 0) {
-    if (ceilingTimeoutMs <= 0) return configuredTimeoutMs;
-    return Math.min(configuredTimeoutMs, ceilingTimeoutMs);
+    return configuredTimeoutMs;
   }
 
   // Unset config: fall back to the saner combo default (when provided) so a hung target

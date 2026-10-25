@@ -12,7 +12,6 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "quota",
   // OmniProxy > Compression Context (Settings → Combos → engines → Studio)
   "context-settings",
-  "context-grev-caching",
   "context-combos",
   "context-caveman",
   "context-rtk",
@@ -148,8 +147,6 @@ export interface SidebarItemDefinition {
   /** Literal subtitle shown when `subtitleKey` is absent/untranslated. */
   subtitleFallback?: string;
   icon: string;
-  /** Optional local image used instead of the Material Symbols glyph in the sidebar. */
-  iconImageSrc?: string;
   exact?: boolean;
   external?: boolean;
   /**

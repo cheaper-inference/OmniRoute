@@ -1,1 +1,0 @@
-- **feat(providers):** Hugging Face connections support an optional Bill-To account sent as the `X-HF-Bill-To` header for cost attribution ([#13016](https://github.com/diegosouzapw/OmniRoute/pull/13016))

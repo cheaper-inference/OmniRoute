@@ -4,6 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card } from "@/shared/components";
 import { fmtCompact } from "@/shared/utils/formatting";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 
 /**
  * Home-page "Recent Requests" panel — the live request feed that sits beside the
@@ -82,8 +90,8 @@ function timeAgo(timestamp: string | undefined, nowMs: number): string {
 
 const STATE_DOT: Record<RequestState, string> = {
   active: "bg-primary animate-pulse",
-  error: "bg-red-500",
-  ok: "bg-green-500",
+  error: "bg-error",
+  ok: "bg-success",
 };
 
 export default function HomeRecentRequests({ enabled = true }: { enabled?: boolean }) {
@@ -99,21 +107,23 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
     return () => clearInterval(id);
   }, [enabled]);
 
-  const load = useCallback(async (isActive: () => boolean) => {
+  const load = useCallback(async (signal: AbortSignal) => {
     try {
       const res = await fetch(`/api/usage/call-logs?limit=${FETCH_LIMIT}&excludeTests=1`, {
         cache: "no-store",
+        signal,
       });
       if (!res.ok) return;
       const data = await res.json();
-      if (!isActive()) return;
+      if (signal.aborted) return;
       const filtered = Array.isArray(data)
         ? (data as CallLogRow[]).filter((row) => !isConnectionTestRow(row)).slice(0, RECENT_LIMIT)
         : [];
       setRows(filtered);
       setLoaded(true);
     } catch (error) {
-      console.error("Failed to load recent requests:", error);
+      const isAbort = error instanceof DOMException && error.name === "AbortError";
+      if (!isAbort) console.error("Failed to load recent requests:", error);
     }
   }, []);
 
@@ -122,11 +132,15 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
 
     let cancelled = false;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let controller: AbortController | null = null;
 
     const tick = async () => {
       // Pause polling while the tab is backgrounded; resume on next tick.
       if (document.visibilityState === "visible") {
-        await load(() => !cancelled);
+        const currentController = new AbortController();
+        controller = currentController;
+        await load(currentController.signal);
+        if (controller === currentController) controller = null;
       }
       if (!cancelled) timeoutId = setTimeout(tick, POLL_INTERVAL_MS);
     };
@@ -135,6 +149,7 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
     return () => {
       cancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
+      controller?.abort();
     };
   }, [enabled, load]);
 
@@ -152,47 +167,58 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto -mx-1 px-1">
-          <table className="w-full min-w-0 border-collapse text-xs">
-            <thead className="sticky top-0 z-10 bg-surface">
-              <tr className="border-b border-border text-text-muted">
-                <th className="w-2 py-1.5" />
-                <th className="py-1.5 text-left font-semibold">{t("recentRequestsModel")}</th>
-                <th className="py-1.5 text-right font-semibold whitespace-nowrap">
+          <Table
+            className="min-w-0 text-xs [&_td]:h-auto [&_th]:h-auto"
+            // Vertical scroll lives on the card body and the header is sticky to it: the kit
+            // container must not become a scroll box (no persistent horizontal bar either).
+            persistentScrollbars={false}
+            containerClassName="overflow-visible rounded-none border-0"
+            scrollbarLabel={t("recentRequests")}
+          >
+            <TableHeader className="sticky top-0 z-10 bg-surface">
+              <TableRow className="border-b border-border text-text-muted">
+                <TableHead className="w-2 py-1.5" />
+                <TableHead className="py-1.5 text-left font-semibold">
+                  {t("recentRequestsModel")}
+                </TableHead>
+                <TableHead className="py-1.5 text-right font-semibold whitespace-nowrap">
                   {t("recentRequestsTokens")}
-                </th>
-                <th className="py-1.5 text-right font-semibold">{t("recentRequestsWhen")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
+                </TableHead>
+                <TableHead className="py-1.5 text-right font-semibold">
+                  {t("recentRequestsWhen")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((row, i) => {
                 const state = requestState(row);
                 return (
-                  <tr key={row.id || i} className="hover:bg-bg-subtle transition-colors">
-                    <td className="py-1.5">
+                  <TableRow key={row.id || i}>
+                    <TableCell className="py-1.5">
                       <span className={`block size-1.5 rounded-full ${STATE_DOT[state]}`} />
-                    </td>
-                    <td
+                    </TableCell>
+                    <TableCell
                       className="py-1.5 font-mono truncate max-w-[140px]"
                       title={row.model || ""}
                     >
                       {row.model || "—"}
-                    </td>
-                    <td className="py-1.5 text-right whitespace-nowrap">
+                    </TableCell>
+                    <TableCell className="py-1.5 text-right whitespace-nowrap">
                       <span className="text-primary">{fmtCompact(row.tokens?.in)}↑</span>{" "}
-                      <span className="text-green-500">{fmtCompact(row.tokens?.out)}↓</span>
-                    </td>
-                    <td className="py-1.5 text-right whitespace-nowrap text-text-muted">
+                      <span className="text-success">{fmtCompact(row.tokens?.out)}↓</span>
+                    </TableCell>
+                    <TableCell className="py-1.5 text-right whitespace-nowrap text-text-muted">
                       {state === "active" ? (
                         <span className="text-primary">•••</span>
                       ) : (
                         timeAgo(row.timestamp, nowMs)
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </Card>

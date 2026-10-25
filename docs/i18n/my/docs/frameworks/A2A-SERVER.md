@@ -47,7 +47,7 @@ JSON-RPC ခေါ်ဆိုမှုများသည် JSON-RPC အမှ�
 
 ### `message/send` — တစ်ပြိုင်တည်း လုပ်ဆောင်ခြင်း
 
-စွမ်းရည်တစ်ခုထံ မက်ဆေ့ချ်ပို့ပြီး ပြီးပြည့်စုံသော တုံ့ပြန်ချက်ကို စောင့်ဆိုင်းသည်။
+skill တစ်ခုထံ မက်ဆေ့ချ်ပို့ပြီး ပြည့်စုံသော တုံ့ပြန်ချက်ကို စောင့်ဆိုင်းသည်။
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,7 +65,18 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**တုံ့ပြန်ချက်-**
+`smart-routing` အတွက် `metadata.combo` သည် gateway request အတွက်
+`metadata.model` ကို အတိအလင်း အစားထိုးသတ်မှတ်ခြင်းဖြစ်ပြီး၊ လျစ်လျူရှုခံရသော `x-combo`
+JSON field အဖြစ်မဟုတ်ဘဲ တကယ့် `model` အဖြစ် ပို့သည်။ Gateway ၏ ပုံမှန် API key နှင့်
+target တစ်ခုချင်းစီအလိုက် ခွင့်ပြုချက်သတ်မှတ်မှုများသည် ဆက်လက်သက်ရောက်သည်။ မမှန်ကန်သော သို့မဟုတ် ဗလာဖြစ်သော combo ကို ငြင်းပယ်သည်။
+
+ရလဒ်တွင် `requested_combo` (ခေါ်ဆိုသူ၏ ရည်ရွယ်ချက်)၊ `dispatched_model`
+(တကယ်ပို့လိုက်သော gateway request)၊ `response_model` (gateway တုံ့ပြန်ချက်) နှင့်
+`confirmed_combo` တို့ကို ဖော်ပြသည်။ Gateway က combo တစ်ခုကို အတိအလင်း
+သတ်မှတ်ဖော်ပြခြင်းမရှိပါက နောက်ဆုံး field သည် `null` ဖြစ်သည်။ A2A ဆုံးဖြတ်ချက် log များသည် လုပ်ဆောင်မှုကို
+အတည်ပြုပြီးသော combo ထံသာ သတ်မှတ်မှတ်တမ်းတင်ပြီး၊ အတည်မပြုရသေးသော request ကို `requestedCombo` အဖြစ် ဆက်လက်ထိန်းသိမ်းထားသည်။
+
+**တုံ့ပြန်ချက်:**
 
 ```json
 {
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE တိုက်ရိုက်ထုတ်လွှင့်ခြင်း
+### `message/stream` — SSE ဖြင့် တိုက်ရိုက်ထုတ်လွှင့်ခြင်း
 
-`message/send` နှင့် တူညီသော်လည်း အချိန်နှင့်တစ်ပြေးညီ တိုက်ရိုက်ထုတ်လွှင့်ရန် Server-Sent Events ကို ပြန်ပေးသည်။
+`message/send` နှင့် တူညီသော်လည်း အချိန်နှင့်တစ်ပြေးညီ တိုက်ရိုက်ထုတ်လွှင့်ရန်အတွက် Server-Sent Events ကို ပြန်ပေးသည်။
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE ဖြစ်ရပ်များ-**
+**SSE Event များ:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — လုပ်ဆောင်ချက်အခြေအနေကို မေးမြန်းခြင်း
+### `tasks/get` — Task အခြေအနေကို မေးမြန်းခြင်း
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — လုပ်ဆောင်ချက်တစ်ခုကို ပယ်ဖျက်ခြင်း
+### `tasks/cancel` — Task တစ်ခုကို ပယ်ဖျက်ခြင်း
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## ရရှိနိုင်သော Skills
+## ရရှိနိုင်သော Skill များ
 
-OmniRoute သည် `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` တွင် ချိတ်ဆက်ထားသော A2A skill ၆ ခုကို ဖော်ထုတ်ပေးထားသည်။ Skill module တစ်ခုစီသည် `src/lib/a2a/skills/` တွင် ရှိသည်။
+OmniRoute သည် `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` တွင် ချိတ်ဆက်ထားသော A2A skill 6 ခုကို ထုတ်ဖော်ပေးထားသည်။ Skill module တစ်ခုချင်းစီသည် `src/lib/a2a/skills/` အတွင်းတွင် တည်ရှိသည်။
 
-| Skill              | ID                   | ဖော်ပြချက်                                                                                                                                                                | Tags                       | ဥပမာများ                                                    |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :---------------------------------------------------------- |
-| Smart Routing      | `smart-routing`      | OmniRoute ၏ combo engine + scoring ကို အသုံးပြု၍ prompt တစ်ခုကို အကောင်းဆုံး provider/combo မှတစ်ဆင့် လမ်းကြောင်းပေးသည်                                                   | routing, providers         | "ဤ prompt ကို အကောင်းဆုံး model မှတစ်ဆင့် လမ်းကြောင်းပေးပါ" |
-| Quota Management   | `quota-management`   | Provider တစ်ခုချင်းစီ၏ quota အခြေအနေကို အစီရင်ခံပြီး throttle လုပ်ရမည့်အချိန် သို့မဟုတ် ပြောင်းလဲအသုံးပြုရမည့်အချိန်ကို ခေါ်ယူသူများ ဆုံးဖြတ်နိုင်ရန် ကူညီပေးသည်          | quota, providers           | "anthropic အတွက် quota ကို စစ်ဆေးပါ"                        |
-| Provider Discovery | `provider-discovery` | ထည့်သွင်းထားသော provider များကို စွမ်းဆောင်ရည်များ၊ အခမဲ့အဆင့် အမှတ်အသားများနှင့် OAuth အခြေအနေတို့နှင့်တကွ စာရင်းပြုစုပေးသည်                                             | providers, discovery       | "မည်သည့် provider များ ရရှိနိုင်သနည်း?"                     |
-| Cost Analysis      | `cost-analysis`      | Catalog နှင့် မကြာသေးမီက အသုံးပြုမှုအပေါ် အခြေခံ၍ request/conversation တစ်ခု၏ ကုန်ကျစရိတ်ကို ခန့်မှန်းပေးသည်                                                              | cost, usage                | "ဤ conversation အတွက် ကုန်ကျစရိတ်ကို ခန့်မှန်းပါ"           |
-| Health Report      | `health-report`      | Provider တစ်ခုချင်းစီ၏ circuit breaker၊ cooldown နှင့် lockout အခြေအနေတို့ကို စုစည်းပေးသည်                                                                                | health, resilience         | "Provider အားလုံး၏ ကျန်းမာရေးအခြေအနေကို ပြပါ"               |
-| List Capabilities  | `list-capabilities`  | Context injection အတွက် raw SKILL.md URL များနှင့်တကွ Agent Skills catalog အပြည့်အစုံဖြစ်သော entry ၄၅ ခု (API ၂၃ + CLI ၂၁ + config ၁) ကို markdown table အဖြစ် ပြန်ပေးသည် | catalog, discovery, skills | "OmniRoute ၏ စွမ်းဆောင်ရည်အားလုံးကို စာရင်းပြုစုပါ"         |
+| Skill              | ID                   | ဖော်ပြချက်                                                                                                                                                       | Tag များ                   | ဥပမာများ                                             |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------- |
+| Smart Routing      | `smart-routing`      | OmniRoute ၏ combo engine + scoring ကို အသုံးပြု၍ prompt တစ်ခုကို အကောင်းဆုံး provider/combo မှတဆင့် လမ်းချိတ်ဆက်ပေးသည်                                           | routing, providers         | "ဤ prompt ကို အကောင်းဆုံး model မှတဆင့် route ပေးပါ" |
+| Quota Management   | `quota-management`   | provider တစ်ခုချင်းစီ၏ quota အခြေအနေကို အစီရင်ခံပြီး၊ callers များအား throttle/switch လုပ်ရမည့်အချိန်ကို ဆုံးဖြတ်နိုင်ရန် ကူညီပေးသည်                             | quota, providers           | "anthropic အတွက် quota ကို စစ်ဆေးပါ"                 |
+| Provider Discovery | `provider-discovery` | install လုပ်ထားသော provider များကို capabilities, free-tier flags, OAuth status တို့နှင့်အတူ စာရင်းပြုစုပေးသည်                                                   | providers, discovery       | "မည်သည့် provider များ ရရှိနိုင်သနည်း?"              |
+| Cost Analysis      | `cost-analysis`      | catalog + မကြာသေးခင်က usage ကို အခြေခံ၍ request/conversation တစ်ခု၏ ကုန်ကျစရိတ်ကို ခန့်မှန်းပေးသည်                                                               | cost, usage                | "ဤ conversation အတွက် ကုန်ကျစရိတ်ကို ခန့်မှန်းပါ"    |
+| Health Report      | `health-report`      | provider တစ်ခုချင်းစီအတွက် circuit breaker, cooldown, lockout အခြေအနေများကို စုစည်းပေးသည်                                                                        | health, resilience         | "provider အားလုံး၏ health status ကို ပြပါ"           |
+| List Capabilities  | `list-capabilities`  | context injection အတွက် raw SKILL.md URLs များပါရှိသော markdown table အဖြစ် Agent Skills catalog 45 ခုစလုံး (API 23 ခု + CLI 21 ခု + config 1 ခု) ကို ပြန်ပေးသည် | catalog, discovery, skills | "OmniRoute capabilities အားလုံးကို စာရင်းပြုစုပါ"    |
 
-> Agent Card ကို လက်ရှိ အသုံးပြုနေသော provider ၃၅၂ ခုပါ catalog နှင့် ကိုက်ညီအောင် ထိန်းသိမ်းထားသင့်သည်။ Provider အရေအတွက်များနှင့် အခမဲ့/အထောက်အထားပြရန်မလိုသော metadata တို့ကို runtime registry မှ ရယူထားသည်။
+> Agent Card ကို provider 375 ခုပါ နောက်ဆုံးပေါ် catalog နှင့် ကိုက်ညီစွာ ထိန်းသိမ်းထားသင့်သည်။ provider အရေအတွက်နှင့် free/no-auth metadata များကို runtime registry မှ ရယူထားခြင်း ဖြစ်သည်။
 
 ### `list-capabilities` Skill အသေးစိတ်
 
-`list-capabilities` skill သည် API call များ မပို့မီ OmniRoute က ဖော်ထုတ်ပေးထားသည့်အရာများကို ရှာဖွေသိရှိရန် လိုအပ်သော ပြင်ပ agent များအတွက် အထူးအသုံးဝင်သည်။ ၎င်းသည် ဖွဲ့စည်းတည်ဆောက်ထားသော markdown table artifact တစ်ခုကို ပြန်ပေးသည်-
+`list-capabilities` skill သည် API calls များ မပို့ခင် OmniRoute မှ ထုတ်ဖော်ပေးထားသည်များကို ရှာဖွေတွေ့ရှိလိုသော ပြင်ပ agents များအတွက် အထူးအသုံးဝင်သည်။ ၎င်းသည် ဖွဲ့စည်းပုံရှိသော markdown table artifact ကို ပြန်ပေးသည်—
 
 ```
-| ID | အမည် | အမျိုးအစား | နယ်ပယ် | Endpoint များ/Command များ | Raw URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | အထောက်အထားစိစစ်ခြင်းနှင့် Session များ | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Row တစ်ခုစီတွင် `rawUrl` column ပါဝင်သောကြောင့် agent များသည် SKILL.md အပြည့်အစုံကို ချက်ချင်း ရယူနိုင်သည်။ `metadata.totalSkills` field သည် catalog အရွယ်အစားနှင့် တူညီသည် (ယနေ့တွင် ၄၅)။ အကောင်အထည်ဖော်ထားသည့်နေရာ- `src/lib/a2a/skills/listCapabilities.ts`။ [AGENT-SKILLS.md](./AGENT-SKILLS.md) ကိုလည်း ကြည့်ပါ။
+Row တစ်ခုချင်းစီတွင် `rawUrl` column ပါဝင်သဖြင့် agents များသည် SKILL.md အပြည့်အစုံကို ချက်ချင်း fetch လုပ်နိုင်သည်။ `metadata.totalSkills` field သည် catalog အရွယ်အစား (ယခုအချိန်တွင် 45) ကို သက်သေပြသည်။ Implementation: `src/lib/a2a/skills/listCapabilities.ts`။ [AGENT-SKILLS.md](./AGENT-SKILLS.md) ကိုလည်း ကြည့်ပါ။
 
 ---
 

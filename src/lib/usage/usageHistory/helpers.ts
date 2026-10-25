@@ -8,6 +8,7 @@
 export { toNumber } from "@/shared/utils/numeric";
 // #13130: shared TPS math (generation-time denominator, reasoning-aware numerator).
 import { resolveGenerationMs, resolveTpsOutputTokens } from "@/shared/utils/logTps";
+import { toNumber as toNumberValue } from "@/shared/utils/numeric";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -24,6 +25,36 @@ export function normalizeServiceTier(value: unknown): string {
   if (tier === "priority" || tier === "fast") return "priority";
   if (tier === "flex") return "flex";
   return "standard";
+}
+
+/** One `usage_history` row as returned by getUsageDb / getUsageHistory. */
+export function mapUsageHistoryRow(row: unknown) {
+  const r = asRecord(row);
+  return {
+    provider: toStringOrNull(r.provider),
+    model: toStringOrNull(r.model),
+    connectionId: toStringOrNull(r.connection_id),
+    apiKeyId: toStringOrNull(r.api_key_id),
+    apiKeyName: toStringOrNull(r.api_key_name),
+    serviceTier: normalizeServiceTier(r.service_tier),
+    providerCredits: r.provider_credits ?? null,
+    providerCostUsd: r.provider_cost_usd ?? null,
+    tokens: {
+      input: toNumberValue(r.tokens_input),
+      output: toNumberValue(r.tokens_output),
+      cacheRead: toNumberValue(r.tokens_cache_read),
+      cacheCreation: toNumberValue(r.tokens_cache_creation),
+      reasoning: toNumberValue(r.tokens_reasoning),
+    },
+    status: toStringOrNull(r.status),
+    success: toNumberValue(r.success) === 1,
+    latencyMs: toNumberValue(r.latency_ms),
+    timeToFirstTokenMs: toNumberValue(r.ttft_ms),
+    errorCode: toStringOrNull(r.error_code),
+    timestamp: toStringOrNull(r.timestamp),
+    cpaAuthIndex: toStringOrNull(r.cpa_auth_index),
+    cpaAccountLabel: null as string | null,
+  };
 }
 
 export function percentile(sortedValues: number[], p: number): number {
@@ -191,13 +222,104 @@ export function buildLatencyStatsEntry(
   };
 }
 
+/** One usage_history row as read by getConnectionSpeedStats(), newest first. */
+export interface ConnectionSpeedRow {
+  model: unknown;
+  latency_ms: unknown;
+  ttft_ms: unknown;
+  tokens_output: unknown;
+  tokens_reasoning: unknown;
+}
+
+export interface ConnectionSpeedSummary {
+  /** Mean decode tokens/sec (generation window: latency - TTFT). */
+  avgTps: number;
+  /** Decode tokens/sec of the newest usable row. */
+  lastTps: number;
+  medianTps: number;
+  /** Mean TTFT over the rows that recorded one; null when none did. */
+  avgTtftMs: number | null;
+  samples: number;
+}
+
+export interface ConnectionSpeedStats extends ConnectionSpeedSummary {
+  /** Per-model breakdown, most-sampled first. */
+  byModel: Array<ConnectionSpeedSummary & { model: string }>;
+}
+
+/** Shorter generation windows are dominated by overhead/jitter, so they are skipped. */
+export const MIN_SPEED_WINDOW_MS = 300;
+
+interface SpeedSample {
+  tps: number;
+  ttftMs: number;
+}
+
+function summarizeSpeedSamples(samples: SpeedSample[]): ConnectionSpeedSummary {
+  const sorted = samples.map((s) => s.tps).sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  const ttfts = samples.map((s) => s.ttftMs).filter((ms) => ms > 0);
+  const round2 = (n: number) => Math.round(n * 100) / 100;
+  return {
+    avgTps: round2(mean(sorted)),
+    lastTps: round2(samples[0].tps),
+    medianTps: round2(median),
+    avgTtftMs: ttfts.length > 0 ? Math.round(mean(ttfts)) : null,
+    samples: samples.length,
+  };
+}
+
+/**
+ * Reduce one connection's recent rows (newest first) into decode-speed stats,
+ * using the same TPS math as the request logger (#13130 helpers), or null when
+ * no row yields a usable sample.
+ */
+export function summarizeConnectionSpeed(rows: ConnectionSpeedRow[]): ConnectionSpeedStats | null {
+  const all: SpeedSample[] = [];
+  const byModel = new Map<string, SpeedSample[]>();
+  for (const row of rows) {
+    const tokens = resolveTpsOutputTokens(Number(row.tokens_output), Number(row.tokens_reasoning));
+    const ttftMs = Number(row.ttft_ms) || 0;
+    const windowMs = resolveGenerationMs(Number(row.latency_ms), ttftMs);
+    if (tokens <= 0 || windowMs === null || windowMs < MIN_SPEED_WINDOW_MS) continue;
+    const sample = { tps: (tokens * 1000) / windowMs, ttftMs };
+    all.push(sample);
+    const model = toStringOrNull(row.model) ?? "unknown";
+    const list = byModel.get(model);
+    if (list) list.push(sample);
+    else byModel.set(model, [sample]);
+  }
+  if (all.length === 0) return null;
+  return {
+    ...summarizeSpeedSamples(all),
+    byModel: [...byModel.entries()]
+      .map(([model, list]) => ({ model, ...summarizeSpeedSamples(list) }))
+      .sort((a, b) => b.samples - a.samples),
+  };
+}
+
 export const MAX_PREVIEW_DEPTH = 6;
 export const MAX_PREVIEW_STRING = 1200;
 export const MAX_PREVIEW_ARRAY_ITEMS = 12;
 export const MAX_PREVIEW_OBJECT_KEYS = 24;
 
+function slicePrefixWithoutSplitSurrogate(value: string, end: number): string {
+  const code = end > 0 ? value.charCodeAt(end - 1) : 0;
+  // A cut that keeps a high surrogate (U+D800–U+DBFF) without its pair becomes
+  // U+FFFD in the Buffer round-trip below. Shorten by one code unit instead.
+  const cut = code >= 0xd800 && code <= 0xdbff ? end - 1 : end;
+  return value.slice(0, cut);
+}
+
 function truncatePreviewString(value: string): string {
-  return value.length > MAX_PREVIEW_STRING ? `${value.slice(0, MAX_PREVIEW_STRING)}...` : value;
+  if (value.length <= MAX_PREVIEW_STRING) return value;
+  // Detach the preview from its source. A bare String#slice() returns a V8
+  // SlicedString that keeps the whole parent string alive, so the pending pool
+  // would retain full multi-megabyte request bodies while only accounting for
+  // the visible preview. Pull the cut off a trailing high surrogate first.
+  const head = slicePrefixWithoutSplitSurrogate(value, MAX_PREVIEW_STRING);
+  return Buffer.from(`${head}...`, "utf8").toString("utf8");
 }
 
 function previewTree(value: unknown, depth: number, cutStrings: boolean): unknown {

@@ -80,6 +80,7 @@ server and writes the config locally.
 | `omniroute setup-cursor`   | Cursor                       | Nothing — prints the in-app steps (Cursor config is opaque SQLite)                                                                                             | `--remote` `--api-key` `--only` `--port`                                                                                                   | Both            |
 | `omniroute setup-roo`      | Roo Code                     | `~/.omniroute/roo-settings.json` (import doc) + sets `roo-cline.autoImportSettingsPath` if a VS Code `settings.json` exists                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Both            |
 | `omniroute setup-crush`    | Crush                        | `~/.config/crush/crush.json` — `openai-compat` provider, key via `$OMNIROUTE_API_KEY`                                                                          | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Both            |
+| `omniroute setup-zed`      | Zed                          | `~/.config/zed/settings.json` — `openai_compatible.omniroute` provider (≤ 25 tool-capable models), key via `$OMNIROUTE_API_KEY`                                | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Both            |
 | `omniroute setup-goose`    | Goose                        | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + prints env recipe                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Both            |
 | `omniroute setup-aider`    | Aider                        | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + prints env recipe                                                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Both            |
 | `omniroute setup-qwen`     | Qwen Code                    | `~/.qwen/settings.json` — V4 `modelProviders.openai` array + `OMNIROUTE_API_KEY` in `~/.qwen/.env`                                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Both            |
@@ -95,7 +96,7 @@ Notes on flags (verified in the command source):
   server (defaults to the `OMNIROUTE_API_KEY` env var, or the active context's token).
 - `--only <patterns>` — comma-separated substrings; keep only model IDs that match
   (e.g. `--only glm,kimi`). Available on `setup-codex`, `setup-claude`,
-  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`.
+  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
 - `--dry-run` — print exactly what would be written without touching the
   filesystem. Available on every `setup-*` command **except** `setup-cursor`
   (which never writes a file).
@@ -284,6 +285,7 @@ tool expects (verified in the command source):
 | `setup-goose` (`OPENAI_HOST`)                                              | root             | No — Goose appends the path                 |
 | `setup-aider` (`OPENAI_API_BASE`)                                          | root             | No — LiteLLM appends `/v1/chat/completions` |
 | `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | with `/v1`       | Yes                                         |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | with `/v1`       | Yes                                         |
 | `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | root             | No — Claude Code appends `/v1/messages`     |
 | `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | with `/v1`       | Yes                                         |
 | `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | with `/v1`       | Yes                                         |

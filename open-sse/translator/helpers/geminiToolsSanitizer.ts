@@ -1,6 +1,8 @@
 import { createHash } from "crypto";
 
 import { cleanJSONSchemaForAntigravity } from "./geminiHelper.ts";
+import { createSchemaBudget } from "./schemaBudget.ts";
+import type { SchemaBudget } from "./schemaBudget.ts";
 
 type GeminiFunctionDeclaration = {
   name: string;
@@ -16,10 +18,39 @@ type GeminiTool = {
 type GeminiToolSanitizationOptions = {
   stripNamespace?: boolean;
   toolNameMap?: Map<string, string> | null;
+  /** Request-wide `$ref` expansion budget; one is created per call when absent. */
+  schemaBudget?: SchemaBudget;
 };
 
 const MAX_GEMINI_TOOL_NAME_LENGTH = 64;
 const GEMINI_TOOL_HASH_LENGTH = 8;
+
+// JSON Schema keywords whose value is an object — never mistaken for a property name.
+const OBJECT_VALUED_SCHEMA_KEYWORDS = new Set([
+  "$defs",
+  "additionalItems",
+  "additionalProperties",
+  "contains",
+  "contentSchema",
+  "default",
+  "definitions",
+  "dependencies",
+  "dependentRequired",
+  "dependentSchemas",
+  "discriminator",
+  "else",
+  "example",
+  "externalDocs",
+  "if",
+  "items",
+  "not",
+  "patternProperties",
+  "propertyNames",
+  "then",
+  "unevaluatedItems",
+  "unevaluatedProperties",
+  "xml",
+]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -41,11 +72,24 @@ function toGeminiParametersSchema(raw: unknown): Record<string, unknown> {
   if (raw.type === "object") {
     return raw;
   }
-  return {
-    ...raw,
-    type: "object",
-    properties: isRecord(raw.properties) ? raw.properties : {},
-  };
+  if (isRecord(raw.properties)) {
+    return { ...raw, type: "object" };
+  }
+  // A typeless root without `properties` may be a bare property map
+  // (`{ action: {...}, args: {...} }`, upstream 9router #4811). Spreading it would
+  // leave the property names as unknown fields on `parameters`, which Gemini 400s
+  // ("Unknown name \"action\" ... Cannot find field"). Move every object-valued key
+  // that is not a JSON Schema keyword under `properties`.
+  const schema: Record<string, unknown> = {};
+  const properties: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (isRecord(value) && !OBJECT_VALUED_SCHEMA_KEYWORDS.has(key) && !key.startsWith("x-")) {
+      properties[key] = value;
+    } else {
+      schema[key] = value;
+    }
+  }
+  return { ...schema, type: "object", properties };
 }
 
 function normalizeGeminiToolName(
@@ -191,6 +235,7 @@ export function buildGeminiTools(
   // sanitized form, or the same raw name repeated across tool groups).
   const seenToolNames = new Set<string>();
   let googleSearchTool: GeminiTool | null = null;
+  const schemaOptions = { budget: options.schemaBudget ?? createSchemaBudget(), location: "tools" };
 
   for (const rawTool of tools) {
     if (!isRecord(rawTool)) {
@@ -215,7 +260,10 @@ export function buildGeminiTools(
         functionDeclarations.push({
           name: sanitizedName,
           description: typeof fn.description === "string" ? fn.description : "",
-          parameters: cleanJSONSchemaForAntigravity(toGeminiParametersSchema(fn.parameters)),
+          parameters: cleanJSONSchemaForAntigravity(
+            toGeminiParametersSchema(fn.parameters),
+            schemaOptions
+          ),
         });
       }
       continue;
@@ -228,7 +276,10 @@ export function buildGeminiTools(
         functionDeclarations.push({
           name: sanitizedName,
           description: typeof rawTool.description === "string" ? rawTool.description : "",
-          parameters: cleanJSONSchemaForAntigravity(toGeminiParametersSchema(rawTool.input_schema)),
+          parameters: cleanJSONSchemaForAntigravity(
+            toGeminiParametersSchema(rawTool.input_schema),
+            schemaOptions
+          ),
         });
       }
       continue;
@@ -246,7 +297,10 @@ export function buildGeminiTools(
         functionDeclarations.push({
           name: sanitizedName,
           description: typeof fn.description === "string" ? fn.description : "",
-          parameters: cleanJSONSchemaForAntigravity(toGeminiParametersSchema(fn.parameters)),
+          parameters: cleanJSONSchemaForAntigravity(
+            toGeminiParametersSchema(fn.parameters),
+            schemaOptions
+          ),
         });
       }
     }

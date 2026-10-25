@@ -141,18 +141,18 @@
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "User-Agent": "antigravity/cli/1.1.5 (aidev_client; os_type=<OS>; arch=<ARCH>; auth_method=consumer)"
+        "User-Agent": "antigravity/cli/1.3.4 (aidev_client; os_type=<OS>; arch=<ARCH>; auth_method=consumer)"
       },
       "nonStream": {
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "User-Agent": "antigravity/cli/1.1.5 (aidev_client; os_type=<OS>; arch=<ARCH>; auth_method=consumer)"
+        "User-Agent": "antigravity/cli/1.3.4 (aidev_client; os_type=<OS>; arch=<ARCH>; auth_method=consumer)"
       },
       "oauth": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "User-Agent": "antigravity/cli/1.1.5 (aidev_client; os_type=<OS>; arch=<ARCH>; auth_method=consumer)"
+        "User-Agent": "antigravity/cli/1.3.4 (aidev_client; os_type=<OS>; arch=<ARCH>; auth_method=consumer)"
       }
     },
     "url": {
@@ -380,18 +380,18 @@
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "User-Agent": "antigravity/ide/2.1.1 <OS>/<ARCH>"
+        "User-Agent": "antigravity/ide/2.5.5 <OS>/<ARCH>"
       },
       "nonStream": {
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "User-Agent": "antigravity/ide/2.1.1 <OS>/<ARCH>"
+        "User-Agent": "antigravity/ide/2.5.5 <OS>/<ARCH>"
       },
       "oauth": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "User-Agent": "antigravity/ide/2.1.1 <OS>/<ARCH>"
+        "User-Agent": "antigravity/ide/2.5.5 <OS>/<ARCH>"
       }
     },
     "url": {
@@ -1762,6 +1762,29 @@
       "stream": "https://inference.dahl.global/v1/chat/completions"
     }
   },
+  "daoxe": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.daoxe.com/v1/chat/completions",
+      "stream": "https://api.daoxe.com/v1/chat/completions"
+    }
+  },
   "databricks": {
     "format": "openai",
     "headers": {
@@ -1875,6 +1898,29 @@
     "url": {
       "nonStream": "https://chat.deepseek.com/api/v0/chat/completion",
       "stream": "https://chat.deepseek.com/api/v0/chat/completion"
+    }
+  },
+  "demonroute": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.demonroute.com/v1/chat/completions",
+      "stream": "https://api.demonroute.com/v1/chat/completions"
     }
   },
   "devin-cli": {
@@ -4299,6 +4345,29 @@
       "stream": "https://api.naga.ac/v1/chat/completions"
     }
   },
+  "nan": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.nan.builders/v1/chat/completions",
+      "stream": "https://api.nan.builders/v1/chat/completions"
+    }
+  },
   "nanogpt": {
     "format": "openai",
     "headers": {
@@ -4714,29 +4783,6 @@
     "url": {
       "nonStream": "https://api.openai.com/v1/chat/completions",
       "stream": "https://api.openai.com/v1/chat/completions"
-    }
-  },
-  "opencode": {
-    "format": "openai",
-    "headers": {
-      "apiKey": {
-        "Accept": "text/event-stream",
-        "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
-      },
-      "nonStream": {
-        "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
-      },
-      "oauth": {
-        "Accept": "text/event-stream",
-        "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
-      }
-    },
-    "url": {
-      "nonStream": "https://opencode.ai/zen/v1",
-      "stream": "https://opencode.ai/zen/v1"
     }
   },
   "opencode-go": {
@@ -6524,18 +6570,45 @@
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "X-Product": "SaaS"
+        "User-Agent": "WorkBuddy/5.5.6",
+        "X-Agent-Intent": "craft",
+        "X-Agent-Purpose": "conversation",
+        "X-Agent-Type": "main",
+        "X-Domain": "www.workbuddy.ai",
+        "X-IDE-Name": "WorkBuddy",
+        "X-IDE-Type": "WorkBuddy",
+        "X-IDE-Version": "5.5.6",
+        "X-Product": "SaaS",
+        "X-Requested-With": "XMLHttpRequest"
       },
       "nonStream": {
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "X-Product": "SaaS"
+        "User-Agent": "WorkBuddy/5.5.6",
+        "X-Agent-Intent": "craft",
+        "X-Agent-Purpose": "conversation",
+        "X-Agent-Type": "main",
+        "X-Domain": "www.workbuddy.ai",
+        "X-IDE-Name": "WorkBuddy",
+        "X-IDE-Type": "WorkBuddy",
+        "X-IDE-Version": "5.5.6",
+        "X-Product": "SaaS",
+        "X-Requested-With": "XMLHttpRequest"
       },
       "oauth": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
-        "X-Product": "SaaS"
+        "User-Agent": "WorkBuddy/5.5.6",
+        "X-Agent-Intent": "craft",
+        "X-Agent-Purpose": "conversation",
+        "X-Agent-Type": "main",
+        "X-Domain": "www.workbuddy.ai",
+        "X-IDE-Name": "WorkBuddy",
+        "X-IDE-Type": "WorkBuddy",
+        "X-IDE-Version": "5.5.6",
+        "X-Product": "SaaS",
+        "X-Requested-With": "XMLHttpRequest"
       }
     },
     "url": {

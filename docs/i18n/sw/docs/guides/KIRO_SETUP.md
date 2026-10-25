@@ -115,30 +115,40 @@ Sehemu ya `region` hutumia `us-east-1` kama chaguo-msingi inapoachwa.
 
 ---
 
-## Mtiririko wa Kuleta API-Key
+## Mtiririko wa Kuingiza Ufunguo wa API
 
-Uthibitishaji wa API-key ni wa vitambulisho vya muda mrefu vya Kiro / AWS CodeWhisperer bearer. Hautumii
-uonyeshaji upya wa OAuth, hivyo huepuka ubatilishaji wa kipindi cha OIDC kinachoshirikiwa.
+Uthibitishaji kwa ufunguo wa API ni kwa ajili ya vitambulisho vya muda mrefu vya bearer vya Kiro / AWS CodeWhisperer. Hautumii
+uonyeshaji upya wa OAuth, kwa hivyo huepuka kubatilishwa kwa kipindi cha OIDC kinachoshirikiwa.
 
-### Dashboard
+### Dashibodi
 
-1. Fungua **Dashboard -> Providers -> Kiro**.
-2. Chagua **API Key**.
-3. Bandika API key na eneo la hiari la AWS (`us-east-1` kwa chaguo-msingi).
-4. OmniRoute huthibitisha key na kuhifadhi muunganisho.
+1. Fungua **Dashibodi -> Watoa huduma -> Kiro**.
+2. Chagua **Ufunguo wa API**.
+3. Bandika ufunguo wa API na uchague eneo la AWS: **Tambua kiotomatiki** (chaguo-msingi), **US East
+   (N. Virginia)** au **Europe (Frankfurt)**.
+4. OmniRoute huhalalisha ufunguo na kuhifadhi muunganisho ukiwa umefungamanishwa na eneo ambako
+   ufunguo unafanya kazi.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` hukubali `auto` (chaguo-msingi), `us-east-1` au `eu-central-1`; thamani nyingine yoyote
+hukataliwa kwa HTTP 400.
 
 ### Mkataba wa Ndani
 
-Njia ya API huthibitisha key kwa kuita `KiroService.validateApiKey()`, ambayo
-hutumia `ListAvailableProfiles` dhidi ya endpoint ya CodeWhisperer/Amazon Q inayolingana na eneo na kutambua `profileArn`.
+Njia ya API huhalalisha ufunguo kwa kuita `KiroService.validateApiKey()`, ambayo
+huita `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API ya uso ambayo uhawilishaji wa ufunguo wa API wa Amazon Q hutumia), ikiwa na kikomo cha muda cha sekunde 10 kwa kila eneo. Katika
+hali ya `auto`, hujaribu `us-east-1`, kisha `eu-central-1`, na kuhifadhi eneo la kwanza
+linalokubali ufunguo. Ufunguo unaokataliwa katika kila eneo linalowezekana husababisha uingizaji ushindwe kwa
+HTTP 400. Kisha `ListAvailableProfiles` huitwa kwa juhudi bora ili kugundua `profileArn`
+ya hiari (AWS huikataa kwa funguo nyingi za API).
 
 Muunganisho uliohifadhiwa hutumia:
 
@@ -153,10 +163,13 @@ Muunganisho uliohifadhiwa hutumia:
 }
 ```
 
-Wakati wa utekelezaji, `KiroExecutor.buildHeaders()` hutuma key kama
-`Authorization: Bearer <key>` na kuongeza `tokentype: API_KEY`. Miito ya quota/profile
-hutumia kiashiria hicho hicho ili AWS ichukulie bearer kama API key ya muda mrefu badala ya
-access token ya OIDC au ya kijamii.
+Wakati wa utekelezaji, `KiroExecutor.buildHeaders()` hutuma ufunguo kama
+`Authorization: Bearer <key>` na kuongeza `tokentype: API_KEY`. Miito ya kiwango/profile
+hutumia kiashiria kilekile ili AWS ichukulie bearer kama ufunguo wa API wa muda mrefu badala ya
+tokeni ya ufikiaji ya OIDC au ya kijamii. `KiroExecutor.execute()` hutuma uhawilishaji wa ufunguo wa API pekee
+kwenda `https://q.<region>.amazonaws.com/generateAssistantResponse` — `us-east-1`
+ikiwa imejumuishwa — kwa sababu lango la Kiro IDE hukataa `TokenType=API_KEY` na
+`codewhisperer.us-east-1` hukataa payload za ufunguo wa API kama mwili batili wa ombi (HTTP 400).
 
 ---
 

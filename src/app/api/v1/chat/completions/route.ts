@@ -35,6 +35,7 @@ import {
 } from "@/shared/utils/compressionHeaderEcho";
 import { resolveModelAliasWithSeedFallbackOnBody } from "@/lib/modelAliasResolver";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import {
   assertRuntimeModelProviderAvailable,
   isRuntimeProviderRetirementError,
@@ -99,6 +100,13 @@ export async function OPTIONS() {
 
 export async function POST(request) {
   await ensureInitialized();
+
+  // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
+  // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
+  // handler enforces authentication independently. Without this, a proxy
+  // bypass means unauthenticated upstream dispatch.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
 
   // Content-Type guard (#6414) — reject non-JSON POST bodies with 415 per RFC 7231.
   // OpenAI/Anthropic reject `text/plain` or missing Content-Type at the edge; matching
@@ -311,10 +319,8 @@ export async function POST(request) {
 
     if (wantsStreaming) {
       const reqId = callerCorrelationId ?? generateRequestId();
-      const {
-        signal: routeDeadlineSignal,
-        deadlineController: routeDeadlineController,
-      } = createStreamDeadlineSignal(request.signal);
+      const { signal: routeDeadlineSignal, deadlineController: routeDeadlineController } =
+        createStreamDeadlineSignal(request.signal);
       // Wrap the real handler response, not the synthetic early-keepalive response. If the
       // client cancels while handleChat is still pending, earlyStreamKeepalive will cancel the
       // eventual handler body; only that confirmed cleanup releases heavyweight capacity.
