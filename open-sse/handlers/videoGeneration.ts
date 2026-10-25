@@ -331,6 +331,7 @@ export async function handleVideoGeneration({
       credentials,
       log,
       signal,
+      recordCall: recordVideoJobCall,
     });
   }
 

@@ -15,7 +15,6 @@
 
 import { randomUUID } from "node:crypto";
 
-import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
 import { RENDERHOUR_BASE_URL } from "../../config/providers/registry/renderhour/mediaModels.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { sleep } from "../../utils/sleep.ts";
@@ -164,29 +163,28 @@ function sniffImageType(bytes: Buffer): string {
   return "image/png";
 }
 
-/** Bytes of a caller-supplied image: a data URI, a public http(s) URL or bare base64. */
-export async function readRenderhourInput(
+/**
+ * Reads a caller-supplied image (data URI, public http(s) URL or bare base64) into bytes.
+ * Injected by the handlers — `resolveImageSource` from ../imageGeneration.ts, which applies
+ * the public-only, DNS-pinned fetch policy — so this client keeps no dependency on src/.
+ */
+export type RenderhourSourceReader = (
   source: string
+) => Promise<{ buffer: Buffer; contentType: string }>;
+
+/** The bytes to upload and a content type RenderHour stores (PNG, JPEG or WebP). */
+export async function readRenderhourInput(
+  source: string,
+  readSource: RenderhourSourceReader
 ): Promise<{ bytes: Buffer; contentType: string }> {
-  const trimmed = source.trim();
-  const dataUri = /^data:([^;,]+);base64,(.+)$/i.exec(trimmed);
-  let bytes: Buffer;
-  let declared = "";
-  if (dataUri) {
-    bytes = Buffer.from(dataUri[2], "base64");
-    declared = dataUri[1];
-  } else if (/^https?:\/\//i.test(trimmed)) {
-    // Caller input: the public-only, DNS-pinned fetch policy applies.
-    const remote = await fetchUntrustedRemoteImage(trimmed);
-    bytes = remote.buffer;
-    declared = remote.contentType;
-  } else {
-    bytes = Buffer.from(trimmed, "base64");
-  }
-  const contentType = declared.split(";")[0].trim().toLowerCase();
+  const { buffer, contentType: declared } = await readSource(source);
+  const contentType = String(declared ?? "")
+    .split(";")[0]
+    .trim()
+    .toLowerCase();
   return {
-    bytes,
-    contentType: UPLOAD_TYPES.has(contentType) ? contentType : sniffImageType(bytes),
+    bytes: buffer,
+    contentType: UPLOAD_TYPES.has(contentType) ? contentType : sniffImageType(buffer),
   };
 }
 
@@ -210,19 +208,22 @@ const authHeaders = (token: string) => ({
   Accept: "application/json",
 });
 
+export interface RenderhourUploadTarget {
+  baseUrl: string;
+  token: string;
+  readSource: RenderhourSourceReader;
+  signal?: AbortSignal | null;
+}
+
 /** Stores one input image on the account and returns its asset id. */
 export async function uploadRenderhourInput({
   baseUrl,
   token,
   source,
+  readSource,
   signal,
-}: {
-  baseUrl: string;
-  token: string;
-  source: string;
-  signal?: AbortSignal | null;
-}): Promise<string> {
-  const { bytes, contentType } = await readRenderhourInput(source);
+}: RenderhourUploadTarget & { source: string }): Promise<string> {
+  const { bytes, contentType } = await readRenderhourInput(source, readSource);
   const form = new FormData();
   form.append("file", new Blob([new Uint8Array(bytes)], { type: contentType }), "input");
   const response = await fetch(`${baseUrl}/v1/uploads`, {
@@ -242,7 +243,7 @@ export async function uploadRenderhourInput({
 /** Uploads every source in order; an empty list costs no request. */
 export async function uploadRenderhourInputs(
   sources: readonly string[],
-  target: { baseUrl: string; token: string; signal?: AbortSignal | null }
+  target: RenderhourUploadTarget
 ): Promise<string[]> {
   const ids: string[] = [];
   for (const source of sources) ids.push(await uploadRenderhourInput({ ...target, source }));
@@ -370,7 +371,9 @@ export function renderhourNumber(value: unknown, fallback: number): number {
 
 /** Turns a thrown upload / network error into the handlers' failure shape. */
 export function renderhourFailure(err: unknown): { status: number; error: string } {
-  if (err instanceof RenderhourRequestError) return { status: err.status, error: err.message };
+  if (err instanceof RenderhourRequestError) {
+    return { status: err.status, error: sanitizeErrorMessage(err.message) };
+  }
   const message = err instanceof Error ? err.message : String(err);
   return { status: 502, error: `RenderHour request failed: ${sanitizeErrorMessage(message)}` };
 }

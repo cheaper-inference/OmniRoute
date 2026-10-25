@@ -4,9 +4,11 @@
  * The job API is shared with images and speech (../mediaGeneration/renderhour.ts). A start
  * frame (`image`, `image_url`, `start_image`…), an end frame (`end_image`, `last_frame`) and
  * reference images (`reference_images`, `image_urls`) are uploaded first and sent by asset id.
+ * The call is recorded through the dispatcher's injected recorder, as job presets are.
  */
 
-import { saveCallLog } from "@/lib/usageDb";
+import { resolveImageSource } from "../imageGeneration.ts";
+import type { RecordVideoJobCall, VideoJobResult } from "./job.ts";
 import {
   RENDERHOUR_VIDEO_RATIOS,
   renderhourAspectRatio,
@@ -18,6 +20,7 @@ import {
   renderhourToken,
   runRenderhourJob,
   uploadRenderhourInputs,
+  type RenderhourUploadTarget,
 } from "../mediaGeneration/renderhour.ts";
 
 type Body = Record<string, unknown>;
@@ -52,7 +55,7 @@ const START_FRAME_KEYS = [
 const END_FRAME_KEYS = ["end_image", "last_frame", "end_image_url", "lastFrame"];
 const REFERENCE_KEYS = ["reference_images", "references", "image_urls", "imageUrls"];
 
-async function uploadVideoInputs(body: Body, target: { baseUrl: string; token: string; signal }) {
+async function uploadVideoInputs(body: Body, target: RenderhourUploadTarget) {
   const start = firstImage(body, START_FRAME_KEYS);
   const end = firstImage(body, END_FRAME_KEYS);
   const [startFrame] = await uploadRenderhourInputs(start ? [start] : [], target);
@@ -77,17 +80,52 @@ async function toVideoItems(urls: string[], wantsBase64: boolean) {
   return items;
 }
 
-function logCall({ provider, model, status, startTime, requestBody, responseBody = null }) {
-  saveCallLog({
-    method: "POST",
-    path: "/v1/videos/generations",
-    status,
-    model: `${provider}/${model}`,
-    provider,
-    duration: Date.now() - startTime,
-    requestBody,
-    responseBody,
-  }).catch(() => {});
+const NO_TOKEN = "RenderHour needs an API key or a signed-in RenderHour account";
+
+async function runVideoJob({
+  model,
+  providerConfig,
+  body,
+  credentials,
+  log,
+  signal,
+}): Promise<VideoJobResult> {
+  const token = renderhourToken(credentials);
+  if (!token) return { success: false, status: 401, error: NO_TOKEN };
+  const baseUrl = renderhourBaseUrl(credentials, providerConfig.baseUrl);
+  const request: Body = {
+    model,
+    prompt: typeof body.prompt === "string" ? body.prompt : "",
+    duration_s: renderhourSeconds(body),
+    aspect_ratio: renderhourAspectRatio(body, RENDERHOUR_VIDEO_RATIOS),
+    config: renderhourConfig(body),
+  };
+  try {
+    request.inputs = await uploadVideoInputs(body, {
+      baseUrl,
+      token,
+      readSource: resolveImageSource,
+      signal,
+    });
+    log?.info?.("VIDEO", `renderhour/${model} | submitting`);
+    const result = await runRenderhourJob({
+      baseUrl,
+      token,
+      request,
+      timeoutMs: renderhourNumber(body.timeout_ms, 900_000),
+      pollIntervalMs: renderhourNumber(body.poll_interval_ms, 5000),
+      log,
+      signal,
+    });
+    if (result.ok === false) return { success: false, status: result.status, error: result.error };
+    const urls = result.job.outputs.map((output) => output.url);
+    const data = await toVideoItems(urls, body.response_format === "b64_json");
+    return { success: true, data: { created: Math.floor(Date.now() / 1000), data } };
+  } catch (err) {
+    const failure = renderhourFailure(err);
+    log?.error?.("VIDEO", `renderhour error: ${failure.error}`);
+    return { success: false, status: failure.status, error: failure.error };
+  }
 }
 
 export async function handleRenderhourVideoGeneration({
@@ -98,57 +136,28 @@ export async function handleRenderhourVideoGeneration({
   credentials,
   log,
   signal = null,
-}) {
+  recordCall,
+}: {
+  model: string;
+  provider: string;
+  providerConfig: { baseUrl: string };
+  body: Body;
+  credentials: unknown;
+  log?: {
+    info?: (tag: string, msg: string) => void;
+    error?: (tag: string, msg: string) => void;
+  } | null;
+  signal?: AbortSignal | null;
+  /** Usage/call-log recorder injected by the dispatcher; the job is not recorded without it. */
+  recordCall?: RecordVideoJobCall;
+}): Promise<VideoJobResult> {
   const startTime = Date.now();
-  const token = renderhourToken(credentials);
-  if (!token) {
-    return {
-      success: false,
-      status: 401,
-      error: "RenderHour needs an API key or a signed-in RenderHour account",
-    };
-  }
-  const baseUrl = renderhourBaseUrl(credentials, providerConfig.baseUrl);
-  const request: Body = {
-    model,
-    prompt: typeof body.prompt === "string" ? body.prompt : "",
-    duration_s: renderhourSeconds(body),
-    aspect_ratio: renderhourAspectRatio(body, RENDERHOUR_VIDEO_RATIOS),
-    config: renderhourConfig(body),
-  };
-
+  const result = await runVideoJob({ model, providerConfig, body, credentials, log, signal });
+  // A recording failure must never turn a finished generation into an error.
   try {
-    request.inputs = await uploadVideoInputs(body, { baseUrl, token, signal });
-    log?.info?.("VIDEO", `${provider}/${model} (renderhour) | submitting`);
-    const result = await runRenderhourJob({
-      baseUrl,
-      token,
-      request,
-      timeoutMs: renderhourNumber(body.timeout_ms, 900_000),
-      pollIntervalMs: renderhourNumber(body.poll_interval_ms, 5000),
-      log,
-      signal,
-    });
-    if (result.ok === false) {
-      logCall({ provider, model, status: result.status, startTime, requestBody: request });
-      return { success: false, status: result.status, error: result.error };
-    }
-
-    const urls = result.job.outputs.map((output) => output.url);
-    const data = await toVideoItems(urls, body.response_format === "b64_json");
-    logCall({
-      provider,
-      model,
-      status: 200,
-      startTime,
-      requestBody: request,
-      responseBody: { job_id: result.job.id, videos_count: data.length },
-    });
-    return { success: true, data: { created: Math.floor(Date.now() / 1000), data } };
-  } catch (err) {
-    const failure = renderhourFailure(err);
-    log?.error?.("VIDEO", `${provider} error: ${failure.error}`);
-    logCall({ provider, model, status: failure.status, startTime, requestBody: request });
-    return { success: false, status: failure.status, error: failure.error };
+    await recordCall?.({ provider, model, result, durationMs: Date.now() - startTime });
+  } catch {
+    // ignored: the generation's own result is what the caller needs
   }
+  return result;
 }

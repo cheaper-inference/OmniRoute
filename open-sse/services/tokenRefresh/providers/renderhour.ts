@@ -14,6 +14,30 @@ function readErrorCode(errorText) {
   }
 }
 
+// A refused refresh: a used or expired refresh token (or a 401) needs a new sign-in; anything
+// else is transient and retried with backoff.
+async function refreshFailure(response, log) {
+  const errorText = await response.text();
+  const errorCode = readErrorCode(errorText);
+  if (UNRECOVERABLE_CODES.has(errorCode) || response.status === 401) {
+    const code = errorCode || "unauthorized";
+    log?.error?.(
+      "TOKEN_REFRESH",
+      "RenderHour refresh token already used or expired. Sign in again.",
+      {
+        status: response.status,
+        errorCode: code,
+      }
+    );
+    return { error: "unrecoverable_refresh_error", code };
+  }
+  log?.error?.("TOKEN_REFRESH", "Failed to refresh RenderHour token", {
+    status: response.status,
+    error: errorText,
+  });
+  return null;
+}
+
 /**
  * Specialized refresh for RenderHour OAuth tokens. RenderHour rotates refresh tokens
  * (rhrt_*): each refresh returns a new pair and the old one stops working at once. Access
@@ -35,25 +59,7 @@ export async function refreshRenderhourToken(refreshToken, log, proxyConfig: unk
         }),
       })
     );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      const errorCode = readErrorCode(errorText);
-      if (UNRECOVERABLE_CODES.has(errorCode) || response.status === 401) {
-        const code = errorCode || "unauthorized";
-        log?.error?.(
-          "TOKEN_REFRESH",
-          "RenderHour refresh token already used or expired. Sign in again.",
-          { status: response.status, errorCode: code }
-        );
-        return { error: "unrecoverable_refresh_error", code };
-      }
-      log?.error?.("TOKEN_REFRESH", "Failed to refresh RenderHour token", {
-        status: response.status,
-        error: errorText,
-      });
-      return null;
-    }
+    if (!response.ok) return await refreshFailure(response, log);
 
     const tokens = await response.json();
     log?.info?.("TOKEN_REFRESH", "Successfully refreshed RenderHour token", {

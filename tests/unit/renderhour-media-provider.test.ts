@@ -15,6 +15,7 @@ import {
   renderhourConfig,
   renderhourSeconds,
 } from "../../open-sse/handlers/mediaGeneration/renderhour.ts";
+import { handleRenderhourVideoGeneration } from "../../open-sse/handlers/videoGeneration/renderhourHandler.ts";
 import { OAUTH_PROVIDERS } from "../../src/shared/constants/providers/oauth.ts";
 import { supportsDualAuthProvider } from "../../src/shared/constants/providers.ts";
 
@@ -209,6 +210,39 @@ test("video: frames are uploaded, length and ratio sent, a moderated job is a 42
   assert.equal(refused.success, false);
   assert.equal(refused.status, 422);
   assert.match(String(refused.error), /moderation/);
+});
+
+test("video: the call is recorded through the dispatcher's recorder, failures too", async () => {
+  fakeRenderhour({
+    outputs: [{ asset_id: "v1", content_type: "video/mp4", url: `${BASE}/files/v1` }],
+  });
+  const records: Array<{ provider: string; model: string; status?: number; success: boolean }> = [];
+  const recordCall = ({ provider, model, result }) => {
+    records.push({ provider, model, success: result.success, status: result.status });
+  };
+  const ok = await handleRenderhourVideoGeneration({
+    model: "kling-3.0",
+    provider: "renderhour",
+    providerConfig: { baseUrl: BASE },
+    body: { prompt: "x", poll_interval_ms: 1 },
+    credentials: { apiKey: "rh_key" },
+    recordCall,
+  });
+  assert.equal(ok.success, true);
+
+  const missing = await handleRenderhourVideoGeneration({
+    model: "kling-3.0",
+    provider: "renderhour",
+    providerConfig: { baseUrl: BASE },
+    body: { prompt: "x" },
+    credentials: {},
+    recordCall,
+  });
+  assert.equal(missing.success, false);
+  assert.deepEqual(records, [
+    { provider: "renderhour", model: "kling-3.0", success: true, status: undefined },
+    { provider: "renderhour", model: "kling-3.0", success: false, status: 401 },
+  ]);
 });
 
 test("speech: the input becomes the job's text and the file is streamed back", async () => {
