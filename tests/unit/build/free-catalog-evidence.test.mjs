@@ -253,12 +253,17 @@ test("CLI compares candidate debt to the event baseline, including merge queues 
       "utf8"
     )
   );
-  // The immutable seed can retain identities subsequently removed from the catalog.
-  // Bootstrap only live rows; retired identities must not become valid debt again.
-  const liveKeys = new Set(FREE_MODEL_BUDGETS.map((entry) => `${entry.provider}/${entry.modelId}`));
-  const allDebt = frozen.entries
-    .map((entry) => `${entry.provider}/${entry.modelId}`)
-    .filter((key) => liveKeys.has(key));
+  const currentPolicy = JSON.parse(
+    readFileSync(
+      new URL("../../../config/quality/free-catalog-evidence.json", import.meta.url),
+      "utf8"
+    )
+  );
+  // Exercise baseline admission with the current valid policy. New catalog rows
+  // still need their evidence; removing that evidence would test a different
+  // violation and make even the legitimate bootstrap fail after a catalog refresh.
+  const allDebt = currentPolicy.debt;
+  assert.ok(allDebt.length > 0, "the reintroduction scenario needs a legacy identity");
   const git = (...args) =>
     execFileSync("git", args, {
       cwd: dir,
@@ -267,7 +272,7 @@ test("CLI compares candidate debt to the event baseline, including merge queues 
     }).trim();
   const policyPath = join(dir, "config/quality/free-catalog-evidence.json");
   const writePolicy = (debt) =>
-    writeFileSync(policyPath, JSON.stringify({ schemaVersion: 1, debt, evidence: [] }));
+    writeFileSync(policyPath, JSON.stringify({ ...currentPolicy, debt }));
   try {
     git("init");
     git("config", "user.name", "Catalog Test");
