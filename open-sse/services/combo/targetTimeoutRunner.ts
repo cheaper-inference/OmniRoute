@@ -120,6 +120,75 @@ export function resolveFirstOutputWaitMs(floorMs: number, declaredMs: number | u
   return Math.max(floorMs, Math.min(declaredMs, DECLARED_FIRST_OUTPUT_WAIT_CAP_MS));
 }
 
+interface FirstOutputGateParams {
+  dispatched: Response;
+  modelStr: string;
+  target?: SingleModelTarget;
+  effectiveTimeoutMs: number;
+  startedAt: number;
+  timeoutController: AbortController;
+  resolveDeclaredTargetBudgetMs?: (
+    target?: SingleModelTarget
+  ) => Promise<number | undefined> | number | undefined;
+  log: ComboLogger;
+}
+
+/**
+ * The dispatch settles as soon as the upstream sends headers, so its budget says nothing
+ * about whether the body will produce a single token. Hold a successful stream until it
+ * carries output; otherwise a target that only holds the socket open keeps the combo
+ * waiting until the client gives up.
+ */
+async function gateFirstOutput(params: FirstOutputGateParams): Promise<Response> {
+  const {
+    dispatched,
+    modelStr,
+    target,
+    effectiveTimeoutMs,
+    startedAt,
+    timeoutController,
+    resolveDeclaredTargetBudgetMs,
+    log,
+  } = params;
+  if (!dispatched.ok || !isEventStreamResponse(dispatched)) return dispatched;
+
+  const firstOutputBudgetMs = resolveFirstOutputWaitMs(
+    effectiveTimeoutMs,
+    await resolveDeclaredTargetBudgetMs?.(target)
+  );
+  const gate = await awaitFirstOutput(
+    dispatched,
+    firstOutputBudgetMs - (Date.now() - startedAt),
+    timeoutController.signal
+  );
+  if (gate.kind === "output") return gate.response;
+
+  if (gate.reason !== "budget") {
+    // Cancelled from outside (hedge winner, client disconnect) or the body closed empty.
+    // Neither is the target's fault, so the response goes back with its body unread and the
+    // existing empty/cancel handling classifies it — never as combo_target_timeout.
+    log.debug?.(
+      "COMBO",
+      `Model ${modelStr} stream ended before output (${gate.reason}) after ${Date.now() - startedAt}ms — not counted as a timeout`
+    );
+    return dispatched;
+  }
+
+  const stallErr = new Error(COMBO_PER_MODEL_TIMEOUT_REASON);
+  recordTimeoutContext({
+    modelStr,
+    timeoutMs: firstOutputBudgetMs,
+    abortError: stallErr,
+    timestamp: Date.now(),
+  });
+  timeoutController.abort(stallErr);
+  log.warn(
+    "COMBO",
+    `Model ${modelStr} opened a stream but produced no output within ${Date.now() - startedAt}ms of dispatch (first-output budget ${firstOutputBudgetMs}ms) — falling back`
+  );
+  return targetTimeoutResponse(modelStr);
+}
+
 export function buildTargetTimeoutRunner(deps: {
   handleSingleModel: HandleSingleModel;
   comboTargetTimeoutMs: number;
@@ -239,47 +308,16 @@ export function buildTargetTimeoutRunner(deps: {
     }
 
     try {
-      // The dispatch settles as soon as the upstream sends headers, so its budget says nothing
-      // about whether the body will produce a single token. Hold a successful stream until it
-      // carries output; otherwise a target that only holds the socket open keeps the combo
-      // waiting until the client gives up.
-      if (!dispatched.ok || !isEventStreamResponse(dispatched)) return dispatched;
-
-      const firstOutputBudgetMs = resolveFirstOutputWaitMs(
-        effectiveTimeoutMs,
-        await resolveDeclaredTargetBudgetMs?.(target)
-      );
-      const gate = await awaitFirstOutput(
+      return await gateFirstOutput({
         dispatched,
-        firstOutputBudgetMs - (Date.now() - startedAt),
-        timeoutController.signal
-      );
-      if (gate.kind === "output") return gate.response;
-
-      if (gate.reason !== "budget") {
-        // Cancelled from outside (hedge winner, client disconnect) or the body closed empty.
-        // Neither is the target's fault, so the response goes back with its body unread and the
-        // existing empty/cancel handling classifies it — never as combo_target_timeout.
-        log.debug?.(
-          "COMBO",
-          `Model ${modelStr} stream ended before output (${gate.reason}) after ${Date.now() - startedAt}ms — not counted as a timeout`
-        );
-        return dispatched;
-      }
-
-      const stallErr = new Error(COMBO_PER_MODEL_TIMEOUT_REASON);
-      recordTimeoutContext({
         modelStr,
-        timeoutMs: firstOutputBudgetMs,
-        abortError: stallErr,
-        timestamp: Date.now(),
+        target,
+        effectiveTimeoutMs,
+        startedAt,
+        timeoutController,
+        resolveDeclaredTargetBudgetMs,
+        log,
       });
-      timeoutController.abort(stallErr);
-      log.warn(
-        "COMBO",
-        `Model ${modelStr} opened a stream but produced no output within ${Date.now() - startedAt}ms of dispatch (first-output budget ${firstOutputBudgetMs}ms) — falling back`
-      );
-      return targetTimeoutResponse(modelStr);
     } finally {
       // The parent hedge can cancel this target at any point up to here, including while the
       // first-output gate is still waiting.

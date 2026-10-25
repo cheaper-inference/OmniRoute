@@ -681,24 +681,37 @@ export async function resolveDeclaredTargetBudgetMs(
 ): Promise<number | undefined> {
   if (hasExplicitComboTargetTimeout(config)) return undefined;
   if (!target || !("provider" in target) || !target.provider) return undefined;
-  if (target.connectionId) {
-    try {
-      const connection = await getCachedProviderConnectionById(target.connectionId);
-      const connectionTimeoutMs = resolveConnectionTimeoutMs(connection?.providerSpecificData);
-      if (connectionTimeoutMs !== undefined) return connectionTimeoutMs;
-    } catch (err) {
-      log?.debug?.(
-        "COMBO",
-        `resolveDeclaredTargetBudgetMs connection lookup failed: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
+  const connectionTimeoutMs = await lookupConnectionDeclaredTimeoutMs(target.connectionId, log);
+  if (connectionTimeoutMs !== undefined) return connectionTimeoutMs;
+  return resolveRegistryDeclaredTimeoutMs(target.provider, target.modelStr);
+}
+
+/** Connection-level `providerSpecificData.timeoutMs`; a failed lookup only logs and yields undefined. */
+async function lookupConnectionDeclaredTimeoutMs(
+  connectionId: string | null | undefined,
+  log?: Pick<ComboLogger, "debug"> | null
+): Promise<number | undefined> {
+  if (!connectionId) return undefined;
+  try {
+    const connection = await getCachedProviderConnectionById(connectionId);
+    return resolveConnectionTimeoutMs(connection?.providerSpecificData);
+  } catch (err) {
+    log?.debug?.(
+      "COMBO",
+      `resolveDeclaredTargetBudgetMs connection lookup failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return undefined;
   }
-  const modelId = parseModel(target.modelStr).model || target.modelStr;
-  const modelTimeoutMs = getModelTimeoutMs(target.provider, modelId);
+}
+
+/** Registry per-model `timeoutMs`, then the provider-level one. */
+function resolveRegistryDeclaredTimeoutMs(provider: string, modelStr: string): number | undefined {
+  const modelId = parseModel(modelStr).model || modelStr;
+  const modelTimeoutMs = getModelTimeoutMs(provider, modelId);
   if (typeof modelTimeoutMs === "number" && modelTimeoutMs > 0) return modelTimeoutMs;
-  const providerTimeoutMs = getRegistryEntry(target.provider)?.timeoutMs;
+  const providerTimeoutMs = getRegistryEntry(provider)?.timeoutMs;
   return typeof providerTimeoutMs === "number" && providerTimeoutMs > 0
     ? providerTimeoutMs
     : undefined;
