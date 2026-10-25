@@ -459,6 +459,79 @@ test("streamed envelope with media-only summary stays unmeasured", async () => {
   }
 });
 
+// The stream producer stamps the aggregated reply with the same marker it puts
+// on the envelope, so the summary carries it too.
+test("streamed envelope whose summary carries the streamed marker counts as content", async () => {
+  const id = "ccp-stream-marker-text";
+  const collector = createStructuredSSECollector({ format: FORMATS.OPENAI });
+  collector.push({
+    id: "chatcmpl_1",
+    object: "chat.completion.chunk",
+    created: 123,
+    model: "test-model",
+    choices: [{ index: 0, delta: { role: "assistant", content: "Hello " } }],
+  });
+  collector.push({
+    id: "chatcmpl_1",
+    object: "chat.completion.chunk",
+    created: 123,
+    model: "test-model",
+    choices: [{ index: 0, delta: { content: "world" } }],
+  });
+  const summary = { ...(collector.getSummary() as Record<string, unknown>), _streamed: true };
+  await saveCallLog({
+    id,
+    status: 200,
+    tokens: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+    clientResponse: collector.build(summary, { includeEvents: false }),
+  });
+  try {
+    assert.equal(rowFor(id).has_content, 1);
+  } finally {
+    cleanup([id]);
+  }
+});
+
+test("streamed envelope whose summary carries the streamed marker without visible text counts as no content", async () => {
+  const id = "ccp-stream-marker-empty";
+  const collector = createStructuredSSECollector({ format: FORMATS.OPENAI });
+  collector.push({
+    id: "chatcmpl_1",
+    object: "chat.completion.chunk",
+    created: 123,
+    model: "test-model",
+    choices: [{ index: 0, delta: { role: "assistant" } }],
+  });
+  const summary = { ...(collector.getSummary() as Record<string, unknown>), _streamed: true };
+  await saveCallLog({
+    id,
+    status: 200,
+    tokens: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+    clientResponse: collector.build(summary, { includeEvents: false }),
+  });
+  try {
+    assert.equal(rowFor(id).has_content, 0);
+  } finally {
+    cleanup([id]);
+  }
+});
+
+// Stay-green guard: a summary whose shape says nothing stays unmeasured.
+test("streamed envelope with an unknown summary shape stays unmeasured", async () => {
+  const id = "ccp-stream-unknown-summary";
+  await saveCallLog({
+    id,
+    status: 200,
+    tokens: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+    clientResponse: { _streamed: true, summary: { _streamed: true, unknown: "shape" } },
+  });
+  try {
+    assert.equal(rowFor(id).has_content, null);
+  } finally {
+    cleanup([id]);
+  }
+});
+
 test("log detail exposes an empty reply apart from missing metering", async () => {
   const emptyId = "ccp-detail-empty";
   const silentId = "ccp-detail-silent";

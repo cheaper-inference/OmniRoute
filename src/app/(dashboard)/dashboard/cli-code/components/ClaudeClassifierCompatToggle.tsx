@@ -2,15 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import { cn } from "@/shared/utils/cn";
 
 type CompatMode = "off" | "auto" | "always";
 
 const MODES: CompatMode[] = ["off", "auto", "always"];
 
 const MODE_STYLES: Record<CompatMode, string> = {
-  off: "bg-black/5 dark:bg-white/5 text-text-muted border-border",
-  auto: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/40",
-  always: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/40",
+  off: "bg-bg-subtle text-text-muted border-border",
+  auto: "bg-warning/10 text-warning border-warning/40",
+  always: "bg-success/10 text-success border-success/40",
 };
 
 function isCompatMode(value: unknown): value is CompatMode {
@@ -79,7 +81,7 @@ export default function ClaudeClassifierCompatToggle() {
   }, [mode, t]);
 
   return (
-    <div className="rounded-lg border border-border bg-surface/40 p-3">
+    <div className="rounded-lg border border-border bg-bg-subtle p-3">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h4 className="text-xs font-semibold text-text-main">{t("classifierCompatTitle")}</h4>
@@ -89,17 +91,18 @@ export default function ClaudeClassifierCompatToggle() {
             })}
           </p>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
           onClick={cycle}
           disabled={loading || saving}
           title={t("classifierCompatCycle")}
-          className={`shrink-0 rounded border px-3 py-1.5 text-xs font-medium uppercase tracking-wide transition-colors disabled:opacity-50 ${MODE_STYLES[mode]}`}
+          className={cn("shrink-0 text-xs font-medium uppercase tracking-wide", MODE_STYLES[mode])}
         >
           {t(`classifierCompatMode.${mode}`)}
-        </button>
+        </Button>
       </div>
-      {error ? <p className="mt-2 text-xs text-red-500">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-error">{error}</p> : null}
     </div>
   );
 }

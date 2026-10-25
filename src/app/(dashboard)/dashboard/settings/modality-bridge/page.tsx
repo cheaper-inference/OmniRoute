@@ -3,6 +3,8 @@
 import { Suspense, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 
 import ModalityBridgeAudioTab from "@/app/(dashboard)/dashboard/settings/components/modalityBridge/ModalityBridgeAudioTab";
 import ModalityBridgeVideoTab from "@/app/(dashboard)/dashboard/settings/components/modalityBridge/ModalityBridgeVideoTab";
@@ -18,6 +20,7 @@ const TABS: ReadonlyArray<{ id: TabId; labelKey: string }> = [
 
 function ModalityBridgePageContent() {
   const t = useTranslations("settings");
+  const tSidebar = useTranslations("sidebar");
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -35,36 +38,34 @@ function ModalityBridgePageContent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-text-muted">{t("modalityBridgeIntro")}</p>
-      <div
-        className="flex gap-1 overflow-x-auto border-b border-border"
-        role="tablist"
-        aria-label={t("modalityBridgeSubTabsAria")}
+      <PageHeader
+        compact
+        title={tSidebar("settingsModalityBridge")}
+        description={t("modalityBridgeIntro")}
+      />
+      <Tabs
+        variant="underline"
+        value={activeTab}
+        onValueChange={(next) => handleTabChange(next as TabId)}
       >
+        <TabsList
+          aria-label={t("modalityBridgeSubTabsAria")}
+          className="max-w-full overflow-x-auto"
+        >
+          {TABS.map((tab) => (
+            <TabsTrigger key={tab.id} value={tab.id}>
+              {t(tab.labelKey)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
         {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            aria-controls="modality-bridge-tabpanel"
-            onClick={() => handleTabChange(tab.id)}
-            className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-              activeTab === tab.id
-                ? "border-primary text-primary"
-                : "border-transparent text-text-muted hover:text-text"
-            }`}
-          >
-            {t(tab.labelKey)}
-          </button>
+          <TabsContent key={tab.id} value={tab.id} className="pt-4">
+            {tab.id === "vision" && <ModalityBridgeVisionTab />}
+            {tab.id === "audio" && <ModalityBridgeAudioTab />}
+            {tab.id === "video" && <ModalityBridgeVideoTab />}
+          </TabsContent>
         ))}
-      </div>
-
-      <div id="modality-bridge-tabpanel" role="tabpanel">
-        {activeTab === "vision" && <ModalityBridgeVisionTab />}
-        {activeTab === "audio" && <ModalityBridgeAudioTab />}
-        {activeTab === "video" && <ModalityBridgeVideoTab />}
-      </div>
+      </Tabs>
     </div>
   );
 }

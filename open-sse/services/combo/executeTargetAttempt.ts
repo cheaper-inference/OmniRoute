@@ -889,7 +889,12 @@ export async function executeTargetAttempt(
     // only holds within a homogeneous same-model pool).
     // #15917: with CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED on, a content-policy refusal
     // stops the combo even with different models remaining.
-    const remainderHomogeneous = remainderIsHomogeneous(state.orderedTargets, i, modelStr);
+    const remainderHomogeneous =
+      remainderIsHomogeneous(state.orderedTargets, i, modelStr) &&
+      // Earlier heterogeneous attempts can still be pending in a hedge.
+      // Preserve suffix short-circuiting for serial dispatch.
+      (!(deps.config.zeroLatencyOptimizationsEnabled && deps.config.hedging) ||
+        state.orderedTargets.every((candidate) => candidate.modelStr === modelStr));
     const isInputBoundFailure = shouldAbortOnInputBoundFailure({
       structuredError,
       remainderIsHomogeneous: remainderHomogeneous,

@@ -749,7 +749,15 @@ export async function handleImageGeneration({
   }
 
   if (providerConfig.format === "syntx-image") {
-    return handleSyntxImageGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleSyntxImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "nanobanana") {

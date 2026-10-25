@@ -45,9 +45,9 @@ Authorization: Bearer YOUR_OMNIROUTE_API_KEY
 
 ## Μέθοδοι JSON-RPC 2.0
 
-### `message/send` — Σύγχρονη Εκτέλεση
+### `message/send` — Σύγχρονη εκτέλεση
 
-Αποστέλλει ένα μήνυμα σε μια δεξιότητα και αναμένει την πλήρη απόκριση.
+Στέλνει ένα μήνυμα σε μια δεξιότητα και περιμένει την πλήρη απόκριση.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Για το `smart-routing`, το `metadata.combo` αποτελεί ρητή παράκαμψη του
+`metadata.model` για το αίτημα προς την πύλη· αποστέλλεται ως το πραγματικό `model`
+και όχι ως ένα αγνοούμενο πεδίο JSON `x-combo`. Εξακολουθούν να ισχύουν το κανονικό κλειδί API της πύλης και
+η εξουσιοδότηση ανά προορισμό. Ένα μη έγκυρο ή κενό combo απορρίπτεται.
+
+Το αποτέλεσμα εκθέτει τα `requested_combo` (πρόθεση καλούντος), `dispatched_model`
+(το πραγματικό αίτημα προς την πύλη), `response_model` (απόκριση πύλης) και
+`confirmed_combo`. Το τελευταίο πεδίο είναι `null`, εκτός εάν η πύλη
+προσδιορίσει ρητά ένα combo. Τα αρχεία καταγραφής αποφάσεων A2A αποδίδουν την εκτέλεση μόνο σε ένα
+επιβεβαιωμένο combo, διατηρώντας ένα μη επιβεβαιωμένο αίτημα ως `requestedCombo`.
+
 **Απόκριση:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Ροή SSE
 
-Ίδιο με το `message/send` αλλά επιστρέφει Server-Sent Events για ροή σε πραγματικό χρόνο.
+Όπως το `message/send`, αλλά επιστρέφει Server-Sent Events για ροή σε πραγματικό χρόνο.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Ερώτημα Κατάστασης Εργασίας
+### `tasks/get` — Έλεγχος κατάστασης εργασίας
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Ακύρωση Εργασίας
+### `tasks/cancel` — Ακύρωση εργασίας
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Διαθέσιμες Δεξιότητες
 
-Το OmniRoute διαθέτει 6 δεξιότητες A2A, οι οποίες είναι συνδεδεμένες στο `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Κάθε άρθρωμα δεξιότητας βρίσκεται στο `src/lib/a2a/skills/`.
+Το OmniRoute εκθέτει 6 δεξιότητες A2A που είναι συνδεδεμένες στο `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Κάθε μονάδα δεξιότητας βρίσκεται στο `src/lib/a2a/skills/`.
 
-| Δεξιότητα              | ID                   | Περιγραφή                                                                                                                                                                        | Ετικέτες                          | Παραδείγματα                                                 |
-| :--------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- | :----------------------------------------------------------- |
-| Έξυπνη Δρομολόγηση     | `smart-routing`      | Δρομολογεί μια προτροπή μέσω του βέλτιστου παρόχου/συνδυασμού, χρησιμοποιώντας τη μηχανή συνδυασμών και τη βαθμολόγηση του OmniRoute                                             | δρομολόγηση, πάροχοι              | "Δρομολόγησε αυτήν την προτροπή μέσω του καλύτερου μοντέλου" |
-| Διαχείριση Ποσοστώσεων | `quota-management`   | Αναφέρει την κατάσταση ποσόστωσης ανά πάροχο και βοηθά τους καλούντες να αποφασίσουν πότε να περιορίσουν τον ρυθμό ή να αλλάξουν πάροχο                                          | ποσόστωση, πάροχοι                | "Έλεγξε την ποσόστωση για το anthropic"                      |
-| Εντοπισμός Παρόχων     | `provider-discovery` | Παραθέτει τους εγκατεστημένους παρόχους μαζί με τις δυνατότητες, τις ενδείξεις δωρεάν βαθμίδας και την κατάσταση OAuth                                                           | πάροχοι, εντοπισμός               | "Ποιοι πάροχοι είναι διαθέσιμοι;"                            |
-| Ανάλυση Κόστους        | `cost-analysis`      | Εκτιμά το κόστος ενός αιτήματος/μιας συνομιλίας με βάση τον κατάλογο και την πρόσφατη χρήση                                                                                      | κόστος, χρήση                     | "Εκτίμησε το κόστος αυτής της συνομιλίας"                    |
-| Αναφορά Υγείας         | `health-report`      | Συγκεντρώνει την κατάσταση του διακόπτη κυκλώματος, της περιόδου αναμονής και του αποκλεισμού ανά πάροχο                                                                         | υγεία, ανθεκτικότητα              | "Εμφάνισε την κατάσταση υγείας όλων των παρόχων"             |
-| Παράθεση Δυνατοτήτων   | `list-capabilities`  | Επιστρέφει τον πλήρη κατάλογο 45 Καταχωρίσεων Δεξιοτήτων Πράκτορα (23 API + 21 CLI + 1 διαμόρφωση) ως πίνακα markdown με ακατέργαστα URL του SKILL.md για εισαγωγή περιβάλλοντος | κατάλογος, εντοπισμός, δεξιότητες | "Παράθεσε όλες τις δυνατότητες του OmniRoute"                |
+| Δεξιότητα          | ID                   | Περιγραφή                                                                                                                                                  | Ετικέτες                   | Παραδείγματα                                             |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------------- |
+| Smart Routing      | `smart-routing`      | Δρομολογεί ένα prompt μέσω του βέλτιστου provider/combo χρησιμοποιώντας τη μηχανή combo + βαθμολόγηση του OmniRoute                                        | routing, providers         | "Δρομολόγησε αυτό το prompt μέσω του καλύτερου μοντέλου" |
+| Quota Management   | `quota-management`   | Αναφέρει την κατάσταση quota ανά provider, βοηθά τους καλούντες να αποφασίσουν πότε να επιβραδύνουν/αλλάξουν                                               | quota, providers           | "Έλεγξε το quota για το anthropic"                       |
+| Provider Discovery | `provider-discovery` | Καταγράφει τους εγκατεστημένους providers με δυνατότητες, σημαίες δωρεάν επιπέδου, κατάσταση OAuth                                                         | providers, discovery       | "Ποιοι providers είναι διαθέσιμοι;"                      |
+| Cost Analysis      | `cost-analysis`      | Εκτιμά το κόστος ενός αιτήματος/συνομιλίας με βάση τον κατάλογο + την πρόσφατη χρήση                                                                       | cost, usage                | "Εκτίμησε το κόστος για αυτή τη συνομιλία"               |
+| Health Report      | `health-report`      | Συγκεντρώνει την κατάσταση circuit breaker, cooldown, lockout ανά provider                                                                                 | health, resilience         | "Εμφάνισε την κατάσταση υγείας όλων των providers"       |
+| List Capabilities  | `list-capabilities`  | Επιστρέφει τον πλήρη κατάλογο 45 καταχωρήσεων Agent Skills (23 API + 21 CLI + 1 config) ως πίνακα markdown με ακατέργαστα URL SKILL.md για έγχυση πλαισίου | catalog, discovery, skills | "Κατάγραψε όλες τις δυνατότητες του OmniRoute"           |
 
-> Η Κάρτα Πράκτορα θα πρέπει να διατηρείται ευθυγραμμισμένη με τον ενεργό κατάλογο 374 παρόχων· οι αριθμοί παρόχων και τα μεταδεδομένα δωρεάν χρήσης/χρήσης χωρίς έλεγχο ταυτότητας προέρχονται από το μητρώο χρόνου εκτέλεσης.
+> Η Agent Card θα πρέπει να παραμένει ευθυγραμμισμένη με τον ζωντανό κατάλογο 375 providers· οι αριθμοί providers και τα μεταδεδομένα free/no-auth προέρχονται από το μητρώο χρόνου εκτέλεσης.
 
-### Λεπτομέρειες Δεξιότητας `list-capabilities`
+### Λεπτομέρειες δεξιότητας `list-capabilities`
 
-Η δεξιότητα `list-capabilities` είναι ιδιαίτερα χρήσιμη για εξωτερικούς πράκτορες που πρέπει να ανακαλύψουν τι προσφέρει το OmniRoute πριν στείλουν κλήσεις API. Επιστρέφει ένα δομημένο τεχνούργημα πίνακα markdown:
+Η δεξιότητα `list-capabilities` είναι ιδιαίτερα χρήσιμη για εξωτερικούς agents που πρέπει να ανακαλύψουν τι εκθέτει το OmniRoute πριν στείλουν κλήσεις API. Επιστρέφει ένα δομημένο artifact πίνακα markdown:
 
 ```
-| ID | Όνομα | Κατηγορία | Περιοχή | Τελικά σημεία/Εντολές | Ακατέργαστο URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Έλεγχος ταυτότητας & Συνεδρίες | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Κάθε γραμμή περιλαμβάνει τη στήλη `rawUrl`, ώστε οι πράκτορες να μπορούν να ανακτήσουν αμέσως το πλήρες SKILL.md. Το πεδίο `metadata.totalSkills` αντικατοπτρίζει το μέγεθος του καταλόγου (45 σήμερα). Υλοποίηση: `src/lib/a2a/skills/listCapabilities.ts`. Δείτε επίσης το [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Κάθε γραμμή περιλαμβάνει τη στήλη `rawUrl` ώστε οι agents να μπορούν να ανακτήσουν αμέσως το πλήρες SKILL.md. Το πεδίο `metadata.totalSkills` αντικατοπτρίζει το μέγεθος του καταλόγου (45 σήμερα). Υλοποίηση: `src/lib/a2a/skills/listCapabilities.ts`. Δείτε επίσης [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

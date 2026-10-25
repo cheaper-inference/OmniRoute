@@ -1,3 +1,5 @@
+"use client";
+
 import { Input } from "@/shared/components";
 import { useTranslations } from "next-intl";
 
@@ -78,8 +80,8 @@ export default function FusionDefaultsFields({
         onChange={(e) => setTuning({ panelHardTimeoutMs: num(e.target.value) })}
         className="text-sm md:col-span-2"
       />
-      <div className="md:col-span-2 rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
-        <p className="text-xs text-blue-700 dark:text-blue-300">
+      <div className="md:col-span-2 rounded-lg border border-info/20 bg-info/5 p-3">
+        <p className="text-xs text-info">
           {translateOrFallback(
             t,
             "fusionDefaultsNote",

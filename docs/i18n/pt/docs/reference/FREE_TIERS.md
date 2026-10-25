@@ -46,15 +46,15 @@ Maiores contribuidores **documentados**: `mistral` 1.00B, `nara` 210M, `llm7` 15
 
 ## Atualização de 2026-06-17 — o que mudou desde 2026-06-05
 
-Uma ronda de pesquisa na Web realizada por 50 agentes (documentação oficial + notícias dos últimos 7 dias, com verificação adversarial) atualizou todo o catálogo. Destaques:
+Uma ronda de investigação na Web com 50 agentes (documentação oficial + notícias dos últimos 7 dias, com verificação contraditória) atualizou todo o catálogo. Destaques:
 
-- **Removidos / sem nível gratuito (2026):** `chutes` (o nível gratuito terminou em 2026-03), `phind` (a empresa encerrou em 2026-01), `kluster` (descontinuado em 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (acesso gratuito ao MiMo revogado em 2026-05-24, promoção do Nemotron terminada em 2026-06 — novamente verificado em 2026-06-18), `aimlapi` (nível gratuito suspenso — novamente verificado em 2026-06-18), `yi` (Yi-Light descontinuado, pagamento consoante a utilização — novamente verificado em 2026-06-18), `featherless-ai` (sem nível gratuito atualmente), `chipotle` (o «Pepper AI» da Chipotle — o widget de chat Amelia de `amelia.chipotle.com`, alvo de engenharia inversa e com o qual o fornecedor comunicava, devolve agora 404 em todas as rotas, incluindo a raiz; backend desativado/transferido, confirmado em 2026-09-15 — totalmente removido do catálogo, #13131/#4037). `iflytek` / `sparkdesk` permanecem listados, mas incluem uma nota de precaução sobre os Termos de Serviço (o Spark Lite é gratuito; os Termos de Serviço restringem a utilização como proxy/relay).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` foram desativados em 2026-06-01 e o `2.5 Pro` deixou o nível gratuito (2026-04); o nível gratuito está agora limitado **apenas à família Flash** (2.5/3/3.1/3.5 Flash + Gemma). O catálogo agora **agrupa** a família Flash (o valor anterior estava inflacionado por contabilizar cada variante separadamente: 462M → 60M).
-- **Valores corrigidos:** `cloudflare-ai` 122M → **30M** (valor real de 10 mil Neurons/dia), `doubao` reclassificado como um crédito único de registo (não recorrente), `llm7` 4M → **150M** (5M tokens/dia documentados), endpoints «-Free» do `together` descontinuados → crédito de registo de $25 também removido (exige uma compra mínima de $5, sem avaliação gratuita), Preview do `longcat` terminado + modelos Flash descontinuados → apenas **LongCat-2.0**, reclassificado como um crédito único de registo de **10M** tokens (sujeito a KYC, não recorrente).
-- **Novos fornecedores gratuitos descobertos:** ⭐ **Kilo Code** (`kilo-gateway` — conjunto rotativo «Auto Free»: família NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 modelos gratuitos de programação em rotação), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash permanentemente gratuitos + bónus de registo de 20M) e Trinity Large Preview da `arcee-ai`.
-- **Novos níveis transparentes** (consulte a Metodologia): uma categoria de _acesso permanentemente gratuito, mas sem limite_ (acesso recorrente real, sem limite de tokens contabilizável) e um _aumento desbloqueado por depósito_ (OpenRouter $10 → +24M/mês), ambos apresentados **separadamente**, para nunca inflacionarem o valor principal.
+- **Removidos / sem nível gratuito (2026):** `chutes` (o nível gratuito terminou em 2026-03), `phind` (a empresa encerrou em 2026-01), `kluster` (descontinuado em 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (acesso gratuito ao MiMo revogado em 2026-05-24, promoção do Nemotron terminada em 2026-06 — novamente verificado em 2026-06-18), `aimlapi` (nível gratuito suspenso — novamente verificado em 2026-06-18), `yi` (Yi-Light retirado, pagamento por utilização — novamente verificado em 2026-06-18), `featherless-ai` (sem nível gratuito atualmente), `chipotle` (o «Pepper AI» da Chipotle — o widget de chat Amelia com engenharia inversa em `amelia.chipotle.com`, com o qual o fornecedor comunicava, devolve agora 404 em todas as rotas, incluindo a raiz; backend desativado/transferido, confirmado em 2026-09-15 — totalmente removido do catálogo, #13131/#4037). `iflytek` / `sparkdesk` permanecem na lista, mas incluem uma nota de precaução relativa aos Termos de Serviço (o Spark Lite é gratuito; os Termos de Serviço restringem a utilização como proxy/relay).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` foram desativados em 2026-06-01 e `2.5 Pro` saiu do nível gratuito (2026-04); o nível gratuito está agora limitado **apenas à família Flash** (2.5/3/3.1/3.5 Flash + Gemma). O catálogo agora **agrupa** a família Flash (anteriormente, o valor estava inflacionado por contar cada variante separadamente: 462M → 60M).
+- **Valores corrigidos:** `cloudflare-ai` 122M → **30M** (valor real de 10 mil Neurons/dia), `doubao` reclassificado como crédito único de registo (não recorrente), `llm7` 4M → **150M** (5M tokens/dia documentados), endpoints «-Free» do `together` descontinuados → crédito de registo de $25 também removido (exige uma compra mínima de $5, sem avaliação gratuita), Preview do `longcat` terminado + modelos Flash retirados → apenas **LongCat-2.0**, reclassificado como crédito único de registo de **10M** tokens (sujeito a KYC, não recorrente).
+- **Novos fornecedores gratuitos descobertos:** ⭐ **Kilo Code** (`kilo-gateway` — conjunto rotativo «Auto Free»: família NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 modelos gratuitos rotativos para programação, atualizado em 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash permanentemente gratuitos + bónus de registo de 20M) e Trinity Large Preview do `arcee-ai`.
+- **Novos níveis transparentes** (consulte a Metodologia): uma categoria _permanentemente gratuita mas sem limite definido_ (acesso recorrente real, sem limite de tokens contabilizável) e um _aumento desbloqueado por depósito_ (OpenRouter $10 → +24M/mês), ambos apresentados **separadamente** para nunca inflacionarem o total principal.
 
-> A tabela detalhada por fornecedor, mais abaixo, corresponde à **captura de 2026-06-05**; as alterações acima sobrepõem-se à mesma. A fonte canónica e atualizada é o catálogo por modelo `open-sse/config/freeModelCatalog.ts`.
+> A tabela detalhada por fornecedor, mais abaixo, corresponde ao **instantâneo de 2026-06-05**; as alterações acima substituem-na. A fonte canónica e atualizada é o catálogo por modelo `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -243,73 +243,73 @@ A maioria dos valores de «tokens gratuitos por mês» neste espaço resulta da 
 
 ## Nível gratuito por fornecedor (Bytez/Nous verificados em 2026-10-15; linhas novamente auditadas em 2026-09-02; restantes em 2026-06-17)
 
-> Regenerado a partir do catálogo por modelo (`open-sse/config/freeModelCatalog.ts`), com duplicados entre pools removidos. Ordenado por tokens recorrentes estáveis/mês. `uncapped*` = permanentemente gratuito, mas sem limite de tokens publicado (limitado por taxa/concorrência) — acesso real, **não** incluído no total em destaque. `—` = apenas créditos / sem chave / não quantificável em tokens.
+> Regenerado a partir do catálogo por modelo (`open-sse/config/freeModelCatalog.ts`), com eliminação de duplicados por pool. Ordenado por tokens/mês recorrentes em regime estável. `uncapped*` = permanentemente gratuito, mas sem limite de tokens publicado (limitado por taxa/concorrência) — acesso real, **não** incluído no total em destaque. `—` = apenas crédito / sem chave / não quantificável em tokens.
 
-| Fornecedor       | Tipo gratuito      | Tokens regulares/mês | Crédito no primeiro mês | Termos       | Modelos |
-| ---------------- | ------------------ | -------------------- | ----------------------- | ------------ | ------- |
-| `mistral`        | recorrente         | ~1.00B               | —                       | cautela      | 5       |
-| `nara`           | recorrente         | ~210M                | —                       | cautela      | 8       |
-| `llm7`           | recorrente         | ~150M                | —                       | cautela      | 4       |
-| `xkiro`          | recorrente         | ~150M                | —                       | cautela      | 39      |
-| `longcat`        | pontual            | —                    | 10M                     | cautela      | 1       |
-| `cerebras`       | pontual            | —                    | $5 de crédito           | cautela      | 2       |
-| `cloudflare-ai`  | recorrente         | ~30M                 | —                       | cautela      | 9       |
-| `groq`           | recorrente         | ~30M                 | —                       | cautela      | 5       |
-| `api-airforce`   | recorrente         | ~24M                 | —                       | cautela      | 7       |
-| `bluesminds`     | recorrente         | ~7M                  | —                       | ambíguo      | 22      |
-| `sambanova`      | recorrente         | ~6M                  | —                       | cautela      | 5       |
-| `arcee-ai`       | recorrente         | ~5M                  | —                       | cautela      | 1       |
-| `bazaarlink`     | recorrente         | ~4M                  | —                       | cautela      | 32      |
-| `openrouter`     | recorrente         | ~1M                  | —                       | cautela      | 1       |
-| `cohere`         | recorrente         | ~800K                | —                       | cautela      | 6       |
-| `huggingchat`    | recorrente         | ~500K                | —                       | cautela      | 4       |
-| `morph`          | recorrente         | ~400K                | —                       | adequado     | 2       |
-| `huggingface`    | recorrente         | ~200K                | —                       | cautela      | 6       |
-| `kiro`           | recorrente         | ~25K                 | —                       | a evitar     | 12      |
-| `glm-cn`         | sem limite         | sem limite\*         | ~20M                    | adequado     | 4       |
-| `baidu`          | sem limite         | sem limite\*         | —                       | cautela      | 1       |
-| `gemini`         | sem limite         | sem limite\*         | —                       | cautela      | 4       |
-| `kilo-gateway`   | sem limite         | sem limite\*         | —                       | cautela      | 7       |
-| `ollama-cloud`   | sem limite         | sem limite\*         | —                       | ambíguo      | 8       |
-| `opencode-zen`   | sem limite         | sem limite\*         | —                       | cautela      | 6       |
-| `tencent`        | sem limite         | sem limite\*         | —                       | cautela      | 1       |
-| `vertex`         | crédito de registo | —                    | ~300M                   | cautela      | 10      |
-| `agentrouter`    | crédito de registo | —                    | ~200M                   | cautela      | 4       |
-| `predibase`      | crédito de registo | —                    | ~25M                    | cautela      | 1       |
-| `doubao`         | crédito de registo | —                    | ~15M                    | ambíguo      | 1       |
-| `ai21`           | crédito de registo | —                    | ~10M                    | a evitar     | 2       |
-| `deepseek`       | crédito de registo | —                    | ~5M                     | adequado     | 2       |
-| `hyperbolic`     | crédito de registo | —                    | ~5M                     | adequado     | 8       |
-| `nscale`         | crédito de registo | —                    | ~5M                     | cautela      | 6       |
-| `bytez`          | crédito (rec.)     | —                    | desconhecido            | ambíguo      | 1       |
-| `deepinfra`      | crédito de registo | —                    | ~1M                     | cautela      | 22      |
-| `fireworks`      | crédito de registo | —                    | ~1M                     | a evitar     | 10      |
-| `nebius`         | crédito de registo | —                    | ~1M                     | cautela      | 1       |
-| `qoder`          | crédito de registo | —                    | ~1M                     | cautela      | 14      |
-| `scaleway`       | crédito de registo | —                    | ~1M                     | adequado     | 6       |
-| `novita`         | crédito de registo | —                    | ~500K                   | cautela      | 1       |
-| `agy`            | sem chave          | —                    | —                       | a evitar     | 16      |
-| `baichuan`       | sem chave          | —                    | —                       | ambíguo      | 1       |
-| `blackbox`       | sem chave          | —                    | —                       | a evitar     | 6       |
-| `coze`           | sem chave          | —                    | —                       | a evitar     | 1       |
-| `duckduckgo-web` | sem chave          | —                    | —                       | a evitar     | 6       |
-| `freemodel-dev`  | sem chave          | —                    | —                       | desconhecido | 4       |
-| `friendliai`     | sem chave          | —                    | —                       | a evitar     | 2       |
-| `iflytek`        | sem chave          | —                    | —                       | a evitar     | 1       |
-| `inference-net`  | sem chave          | —                    | —                       | cautela      | 3       |
-| `liquid`         | sem chave          | —                    | —                       | desconhecido | 1       |
-| `monsterapi`     | sem chave          | —                    | —                       | ambíguo      | 1       |
-| `muse-spark-web` | sem chave          | —                    | —                       | a evitar     | 3       |
-| `nlpcloud`       | sem chave          | —                    | —                       | a evitar     | 1       |
-| `nvidia`         | sem chave          | —                    | —                       | cautela      | 13      |
-| `pollinations`   | sem chave          | —                    | —                       | cautela      | 31      |
-| `publicai`       | sem chave          | —                    | —                       | cautela      | 3       |
-| `reka`           | sem chave          | —                    | —                       | cautela      | 2       |
-| `sensenova`      | sem chave          | —                    | —                       | cautela      | 1       |
-| `sparkdesk`      | sem chave          | —                    | —                       | atenção      | 1       |
-| `stepfun`        | sem chave          | —                    | —                       | ok           | 1       |
-| `t3-web`         | sem chave          | —                    | —                       | evitar       | 23      |
-| `uncloseai`      | sem chave          | —                    | —                       | atenção      | 3       |
+| Fornecedor       | Tipo gratuito      | Tokens estáveis/mês | Crédito no primeiro mês | Termos        | Modelos |
+| ---------------- | ------------------ | ------------------- | ----------------------- | ------------- | ------- |
+| `mistral`        | recorrente         | ~1.00B              | —                       | cautela       | 5       |
+| `nara`           | recorrente         | ~210M               | —                       | cautela       | 8       |
+| `llm7`           | recorrente         | ~150M               | —                       | cautela       | 4       |
+| `xkiro`          | recorrente         | ~150M               | —                       | cautela       | 39      |
+| `longcat`        | utilização única   | —                   | 10M                     | cautela       | 1       |
+| `cerebras`       | utilização única   | —                   | $5 de crédito           | cautela       | 2       |
+| `cloudflare-ai`  | recorrente         | ~30M                | —                       | cautela       | 9       |
+| `groq`           | recorrente         | ~30M                | —                       | cautela       | 5       |
+| `api-airforce`   | recorrente         | ~24M                | —                       | cautela       | 7       |
+| `bluesminds`     | recorrente         | ~7M                 | —                       | ambíguos      | 22      |
+| `sambanova`      | recorrente         | ~6M                 | —                       | cautela       | 5       |
+| `arcee-ai`       | recorrente         | ~5M                 | —                       | cautela       | 1       |
+| `bazaarlink`     | recorrente         | ~4M                 | —                       | cautela       | 32      |
+| `openrouter`     | recorrente         | ~1M                 | —                       | cautela       | 1       |
+| `cohere`         | recorrente         | ~800K               | —                       | cautela       | 6       |
+| `huggingchat`    | recorrente         | ~500K               | —                       | cautela       | 4       |
+| `morph`          | recorrente         | ~400K               | —                       | aceitáveis    | 2       |
+| `huggingface`    | recorrente         | ~200K               | —                       | cautela       | 6       |
+| `kiro`           | recorrente         | ~25K                | —                       | evitar        | 12      |
+| `glm-cn`         | ilimitado          | ilimitado\*         | ~20M                    | aceitáveis    | 4       |
+| `baidu`          | ilimitado          | ilimitado\*         | —                       | cautela       | 1       |
+| `gemini`         | ilimitado          | ilimitado\*         | —                       | cautela       | 4       |
+| `kilo-gateway`   | ilimitado          | ilimitado\*         | —                       | cautela       | 7       |
+| `ollama-cloud`   | ilimitado          | ilimitado\*         | —                       | ambíguos      | 8       |
+| `opencode-zen`   | ilimitado          | ilimitado\*         | —                       | cautela       | 10      |
+| `tencent`        | ilimitado          | ilimitado\*         | —                       | cautela       | 1       |
+| `vertex`         | crédito de registo | —                   | ~300M                   | cautela       | 10      |
+| `agentrouter`    | crédito de registo | —                   | ~200M                   | cautela       | 4       |
+| `predibase`      | crédito de registo | —                   | ~25M                    | cautela       | 1       |
+| `doubao`         | crédito de registo | —                   | ~15M                    | ambíguos      | 1       |
+| `ai21`           | crédito de registo | —                   | ~10M                    | evitar        | 2       |
+| `deepseek`       | crédito de registo | —                   | ~5M                     | aceitáveis    | 2       |
+| `hyperbolic`     | crédito de registo | —                   | ~5M                     | aceitáveis    | 8       |
+| `nscale`         | crédito de registo | —                   | ~5M                     | cautela       | 6       |
+| `bytez`          | crédito (rec.)     | —                   | desconhecido            | ambíguos      | 1       |
+| `deepinfra`      | crédito de registo | —                   | ~1M                     | cautela       | 22      |
+| `fireworks`      | crédito de registo | —                   | ~1M                     | evitar        | 10      |
+| `nebius`         | crédito de registo | —                   | ~1M                     | cautela       | 1       |
+| `qoder`          | crédito de registo | —                   | ~1M                     | cautela       | 14      |
+| `scaleway`       | crédito de registo | —                   | ~1M                     | aceitáveis    | 6       |
+| `novita`         | crédito de registo | —                   | ~500K                   | cautela       | 1       |
+| `agy`            | sem chave          | —                   | —                       | evitar        | 16      |
+| `baichuan`       | sem chave          | —                   | —                       | ambíguos      | 1       |
+| `blackbox`       | sem chave          | —                   | —                       | evitar        | 6       |
+| `coze`           | sem chave          | —                   | —                       | evitar        | 1       |
+| `duckduckgo-web` | sem chave          | —                   | —                       | evitar        | 6       |
+| `freemodel-dev`  | sem chave          | —                   | —                       | desconhecidos | 4       |
+| `friendliai`     | sem chave          | —                   | —                       | evitar        | 2       |
+| `iflytek`        | sem chave          | —                   | —                       | evitar        | 1       |
+| `inference-net`  | sem chave          | —                   | —                       | cautela       | 3       |
+| `liquid`         | sem chave          | —                   | —                       | desconhecidos | 1       |
+| `monsterapi`     | sem chave          | —                   | —                       | ambíguos      | 1       |
+| `muse-spark-web` | sem chave          | —                   | —                       | evitar        | 3       |
+| `nlpcloud`       | sem chave          | —                   | —                       | evitar        | 1       |
+| `nvidia`         | sem chave          | —                   | —                       | cautela       | 13      |
+| `pollinations`   | sem chave          | —                   | —                       | cautela       | 31      |
+| `publicai`       | sem chave          | —                   | —                       | cautela       | 3       |
+| `reka`           | sem chave          | —                   | —                       | cautela       | 2       |
+| `sensenova`      | sem chave          | —                   | —                       | cautela       | 1       |
+| `sparkdesk`      | keyless            | —                   | —                       | atenção       | 1       |
+| `stepfun`        | keyless            | —                   | —                       | ok            | 1       |
+| `t3-web`         | keyless            | —                   | —                       | evitar        | 23      |
+| `uncloseai`      | keyless            | —                   | —                       | atenção       | 3       |
 
 ---
 

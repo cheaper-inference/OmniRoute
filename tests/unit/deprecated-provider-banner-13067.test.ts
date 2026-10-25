@@ -30,9 +30,11 @@ test("providers page mounts the leftover banner", () => {
   assert.match(source, /DeprecatedProviderBanner/);
 });
 
-test("providers page stays frozen at 2020 lines", () => {
+// KEA-7886 (lote 2b): the kit migration (SectionHeader / Modal / EmptyState) shrank the page
+// from 2020 to 2010 lines; the freeze is re-pinned at the measured size.
+test("providers page stays frozen at 2010 lines", () => {
   const lines = fs.readFileSync(pagePath, "utf8").split("\n").length;
-  assert.equal(lines, 2020);
+  assert.equal(lines, 2010);
 });
 
 test("purge surfaces notify.error when POST is not ok", () => {

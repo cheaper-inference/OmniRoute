@@ -127,7 +127,7 @@ function applyFinishReason(
 
 /** Extract usageMetadata into the OpenAI-shaped usage object, if present. */
 function applyUsageMetadata(parsed: Record<string, unknown>, acc: GeminiSSEAccumulator): void {
-  const response = parsed.response as Record<string, unknown> | undefined;
+  const response = (parsed.response ?? parsed) as Record<string, unknown>;
   const um = response?.usageMetadata as Record<string, unknown> | undefined;
   if (!um) return;
   const promptTokens = Number(um.promptTokenCount) || 0;
@@ -156,7 +156,7 @@ function applyGeminiSSEDataLine(payload: string, acc: GeminiSSEAccumulator): voi
       acc.sawContent = true;
     }
 
-    const response = parsed.response as Record<string, unknown> | undefined;
+    const response = (parsed.response ?? parsed) as Record<string, unknown>;
     const candidates = response?.candidates;
     const candidate = Array.isArray(candidates)
       ? (candidates[0] as Record<string, unknown> | undefined)

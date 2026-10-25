@@ -48,51 +48,58 @@ põhjal baas-URL-i ja tõendi (seega pärast `omniroute connect <vps>` käsku
 
 ---
 
-## Tuvastusaliased — muuda muud kui Claude'i mudelid valijas `/model` nähtavaks
+## Avastusaliased — mitte-Claude'i mudelite kuvamine `/model`-valijas
 
-Claude Code'i lüüsi mudelituvastus loetleb ainult ID-d, mis algavad prefiksiga
-`claude` või `anthropic`, mistõttu kuvab omavalija `/model` väärtusega
+Claude Code'i lüüsi mudeliavastus loetleb ainult ID-sid, mis algavad eesliitega `claude`
+või `anthropic`, seega näitab sisseehitatud `/model`-valija koos väärtusega
 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` tavaliselt **ainult** OmniRoute'i
 Claude'i/Anthropicu mudeleid — `kimi/kimi-k2.6` või `glm/glm-5.2` ei ilmu kunagi,
-kuigi nende marsruutimine toimib.
+kuigi need marsruutimisel tõrgeteta töötavad.
 
-OmniRoute saab peegeldada mis tahes lubatud mudelit (ja kombinatsiooni) ID all
-`claude/…`, et see läbiks filtri ja ilmuks valijasse:
+OmniRoute suudab iga lubatud mudeli (ja kombo) peegeldada `claude/…` ID alla, et see
+läbiks selle filtri ja ilmuks valijasse:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<kombinatsioon "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kui valid Claude Code'is ühe neist, eemaldab OmniRoute enne marsruutimist
-`claude/` ümbrise, taastades tegeliku ID — ehtne ID
-`claude/<real-claude-model>` (tegelik Claude OAuthi pakkuja) jäetakse alati muutmata.
+Kui valite Claude Code'is mõne neist, eemaldab OmniRoute enne marsruutimist `claude/`
+ümbrise ja taastab tegeliku ID — ehtne `claude/<real-claude-model>` ID (tegelik
+Claude'i OAuth-i pakkuja) jäetakse alati puutumata.
 
-**See on vaikimisi välja lülitatud** ja seda juhib kolmetasemeline kontroll
-(kõige konkreetsem seadistus võidab), nii et tavaline OmniRoute ei kahekordista
-oma kataloogi klientide jaoks, mis Claude Code'i ei kasuta:
+Vaikimisi peegeldatakse ainult põhi-ID-sid. Kui valikuline funktsioonilipp
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` on sisse lülitatud, peegeldatakse kataloogis juba
+loetletud mõtlemispingutuse variante (nt `codex/gpt-6-sol-high`) nagu iga teist ID-d,
+nii et Claude Code saab valida konkreetse pingutustaseme, ja sisseehitatud `auto/*`
+ID-sid, mida päringutee ei suuda realiseerida, ei peegeldata. Seda, kas
+pingutusvariandid üldse loetletakse, määrab endiselt
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — peegel ei lisa kunagi varianti, mida
+põhikataloogis pole.
 
-| Tase      | Asukoht                                                                        |
-| --------- | ------------------------------------------------------------------------------ |
-| Mudel     | Pakkuja üksikasjade leht → mudelipõhine lüliti „Kuva Claude Code'is”           |
-| Pakkuja   | Pakkuja üksikasjade leht → pakkujapõhine lüliti (hõlmab kõiki selle mudeleid)  |
-| Globaalne | Seaded → Funktsioonilülitid → `EXPOSE_CC_DISCOVERY_ALIASES` (vaikimisi väljas) |
+**See on vaikimisi välja lülitatud** ja seda juhitakse kolmetasemelise väravaga
+(kõige spetsiifilisem võidab), nii et tavaline OmniRoute ei kahekordista kunagi oma
+kataloogi klientide jaoks, kes Claude Code'i ei kasuta:
 
-Keskkonnamuutuja `EXPOSE_CC_DISCOVERY_ALIASES` sunnib globaalse taseme sisse
-ja on juhtpaneeli alistusest kõrgema prioriteediga (funktsioonilülitite ekraanil
-kuvatakse sel juhul märkus „aktiivne keskkonnamuutuja kaudu”). Pakkuja- ja
-mudelipõhised lülitid täpsustavad seda edasi — näiteks globaalne tase väljas +
-Kimi pakkuja sees kuvab ainult Kimi mudelid.
+| Tase      | Kus                                                                          |
+| --------- | ---------------------------------------------------------------------------- |
+| Mudel     | Pakkuja detailleht → mudelipõhine lüliti „Expose in Claude Code"             |
+| Pakkuja   | Pakkuja detailleht → pakkuja taseme lüliti (katab kõik selle mudelid)        |
+| Globaalne | Seaded → Funktsioonilipud → `EXPOSE_CC_DISCOVERY_ALIASES` (vaikimisi väljas) |
 
-> ⚠️ **Akna mittevastavus muudel kui Claude'i mudelitel.** Claude Code eeldab
-> 200K kontekstiakent iga ID puhul, mida see ei tunne (see ei saa tegelikku akent
-> lõpp-punktist `/v1/models` lugeda). Suurema aknaga mudeli puhul (nt Kimi K2
-> 256K) määra `CLAUDE_CODE_AUTO_COMPACT_WINDOW` väärtuseks mudeli tegelikust
-> aknast väiksem väärtus, et automaatne tihendamine ei käivituks liiga vara.
-> Eespool genereeritud profiilid teevad seda juba iga mudeli jaoks eraldi.
+Keskkonnamuutuja `EXPOSE_CC_DISCOVERY_ALIASES` lülitab globaalse taseme jõuliselt
+sisse ja on tähtsam kui armatuurlaua seadistus (sel juhul kuvatakse
+funktsioonilippude ekraanil märge „active via environment variable"). Pakkuja- ja
+mudelipõhised lülitid täpsustavad sealt edasi — nt globaalne tase väljas + Kimi
+pakkuja sees paljastab ainult Kimi mudelid.
 
----
+> ⚠️ **Kontekstiakna mittevastavus mitte-Claude'i mudelitel.** Claude Code eeldab
+> iga tundmatu ID puhul 200K kontekstiakent (see ei suuda tegelikku akent
+> `/v1/models` lõppunktist lugeda). Suurema aknaga mudeli (nt Kimi K2 256K) puhul
+> seadistage `CLAUDE_CODE_AUTO_COMPACT_WINDOW` mudeli tegelikust aknast madalamale
+> väärtusele, et automaatne tihendamine ei käivituks enneaegselt. Ülaltoodud
+> genereeritud profiilid teevad seda juba iga mudeli kohta.
 
 ## Sisseelamisplokk töölaual
 

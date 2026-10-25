@@ -923,7 +923,8 @@ async function handleComboChatInner({
     hiddenModelsByProvider,
   });
   if ("earlyResponse" in targetResolution) return targetResolution.earlyResponse;
-  const { stickyWeightedLimit, getWeightedStepKeyForTarget, preScreenMap } = targetResolution;
+  const { stickyWeightedLimit, getWeightedStepKeyForTarget, preScreenMap, compatRejectedTargets } =
+    targetResolution;
   const _sticky = targetResolution.sticky;
   let orderedTargets = targetResolution.orderedTargets;
   const quotaCutoffResetWindowConfig = resolveResetWindowConfig(config as Record<string, unknown>);
@@ -1192,6 +1193,7 @@ async function handleComboChatInner({
     comboCooldownBudgetLeftMs,
     evaluateGates: evaluateExecuteTargetGates,
     executeAttempt: executeTargetAttempt,
+    compatRejectedTargets,
   };
 
   // FASE 2.1: acquire the per-connection concurrency slot for the selected

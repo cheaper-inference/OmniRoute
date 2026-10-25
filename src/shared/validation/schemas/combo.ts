@@ -408,8 +408,10 @@ export const createComboSchema = z
     context_cache_protection: z.boolean().optional(),
     context_length: z.number().int().min(1000).max(2000000).optional(),
     // Optional embedding dimensions override for embedding combos.
-    // When set, the value is injected into every upstream embedding request as
-    // the `dimensions` field (and translated to `outputDimensionality` for Gemini).
+    // When set, the value is forwarded to every upstream embedding request as
+    // the `dimensions` field. Gemini's native embedContent transport maps it to
+    // `output_dimensionality` itself; the OpenAI-compatible endpoint honors
+    // `dimensions` natively, so no translation happens here (see #17158).
     // Stored as a string to match the OpenAI API convention; coerced to number
     // by the embedding handler. Leave unset to use each model's default.
     dimensions: z

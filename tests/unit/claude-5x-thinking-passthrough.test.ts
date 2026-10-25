@@ -14,14 +14,16 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-claude5-t
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
+const { closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 const { isAdaptiveThinkingOnly } = await import("../../src/shared/constants/modelSpecs.ts");
 const { normalizeClaudeAdaptiveThinking } =
   await import("../../open-sse/services/claudeAdaptiveThinking.ts");
 const originalFetch = globalThis.fetch;
 
-test.after(() => {
+test.after(async () => {
   globalThis.fetch = originalFetch;
+  await closeCallLogSaves();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });

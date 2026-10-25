@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` uchun `metadata.combo` shlyuz soʻrovidagi
+`metadata.model` qiymatini aniq almashtiradi; u eʼtiborsiz qoldiriladigan `x-combo` JSON maydoni sifatida emas, balki haqiqiy `model` sifatida yuboriladi.
+Shlyuzning odatiy API kaliti va har bir maqsad uchun avtorizatsiyasi hamon qoʻllaniladi. Notoʻgʻri yoki boʻsh kombinatsiya rad etiladi.
+
+Natija `requested_combo` (chaqiruvchining maqsadi), `dispatched_model`
+(shlyuzga yuborilgan haqiqiy soʻrov), `response_model` (shlyuz javobi) va
+`confirmed_combo` qiymatlarini taqdim etadi. Agar shlyuz kombinatsiyani aniq
+koʻrsatmasa, oxirgi maydon `null` boʻladi. A2A qaror jurnallari bajarilishni faqat
+tasdiqlangan kombinatsiyaga bogʻlaydi, tasdiqlanmagan soʻrov esa `requestedCombo` sifatida saqlanadi.
+
 **Javob:**
 
 ```json
@@ -76,28 +86,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE oqimi
+### `message/stream` — SSE orqali oqimli uzatish
 
 `message/send` bilan bir xil, ammo real vaqt rejimida oqimli uzatish uchun Server-Sent Events hodisalarini qaytaradi.
 
@@ -146,33 +149,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Mavjud ko‘nikmalar
+## Mavjud Skill'lar
 
-OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ichida bog‘langan 6 ta A2A ko‘nikmasini taqdim etadi. Har bir ko‘nikma moduli `src/lib/a2a/skills/` ichida joylashgan.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ichida ulangan 6 ta A2A skill'ni taqdim etadi. Har bir skill moduli `src/lib/a2a/skills/` katalogida joylashgan.
 
-| Ko‘nikma                | ID                   | Tavsif                                                                                                                                                                                                             | Teglar                         | Misollar                                           |
-| :---------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------- |
-| Aqlli yo‘naltirish      | `smart-routing`      | OmniRoute kombinatsiya mexanizmi va baholash tizimidan foydalanib, so‘rovni optimal provayder yoki kombinatsiya orqali yo‘naltiradi                                                                                | yo‘naltirish, provayderlar     | "Bu so‘rovni eng yaxshi model orqali yo‘naltiring" |
-| Kvotani boshqarish      | `quota-management`   | Har bir provayder bo‘yicha kvota holatini taqdim etadi va chaqiruvchilarga tezlikni cheklash yoki provayderni almashtirish vaqtini aniqlashda yordam beradi                                                        | kvota, provayderlar            | "anthropic kvotasini tekshiring"                   |
-| Provayderlarni aniqlash | `provider-discovery` | O‘rnatilgan provayderlarni imkoniyatlari, bepul tarif belgilari va OAuth holati bilan birga ro‘yxatlaydi                                                                                                           | provayderlar, aniqlash         | "Qaysi provayderlar mavjud?"                       |
-| Xarajatlar tahlili      | `cost-analysis`      | Katalog va so‘nggi foydalanish ma’lumotlari asosida so‘rov yoki suhbat xarajatini hisoblab beradi                                                                                                                  | xarajat, foydalanish           | "Bu suhbat xarajatini hisoblang"                   |
-| Holat hisoboti          | `health-report`      | Har bir provayder bo‘yicha avtomatik uzgich, kutish va bloklanish holatlarini jamlaydi                                                                                                                             | holat, bardoshlilik            | "Barcha provayderlarning holatini ko‘rsating"      |
-| Imkoniyatlar ro‘yxati   | `list-capabilities`  | Kontekstni kiritish uchun xom SKILL.md URL manzillari bilan birga 45 ta yozuvdan iborat to‘liq Agent ko‘nikmalari katalogini (23 ta API + 21 ta CLI + 1 ta konfiguratsiya) markdown jadvali ko‘rinishida qaytaradi | katalog, aniqlash, ko‘nikmalar | "Barcha OmniRoute imkoniyatlarini ro‘yxatlang"     |
+| Skill              | ID                   | Tavsif                                                                                                                                                            | Teglar                     | Misollar                                               |
+| :----------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :----------------------------------------------------- |
+| Smart Routing      | `smart-routing`      | Prompt'ni OmniRoute'ning combo dvigateli + ball berish tizimi yordamida optimal provayder/kombo orqali yo'naltiradi                                               | routing, providers         | "Ushbu prompt'ni eng yaxshi model orqali yo'naltiring" |
+| Quota Management   | `quota-management`   | Har bir provayder bo'yicha kvota holati haqida hisobot beradi, chaqiruvchilarga qachon sekinlashtirish/almashtirish kerakligini hal qilishda yordam beradi        | quota, providers           | "anthropic uchun kvotani tekshiring"                   |
+| Provider Discovery | `provider-discovery` | O'rnatilgan provayderlarni imkoniyatlari, bepul daraja bayroqlari va OAuth holati bilan ro'yxatlaydi                                                              | providers, discovery       | "Qanday provayderlar mavjud?"                          |
+| Cost Analysis      | `cost-analysis`      | Katalog va so'nggi foydalanish ma'lumotlariga asoslanib so'rov/suhbat narxini taxmin qiladi                                                                       | cost, usage                | "Ushbu suhbat narxini taxmin qiling"                   |
+| Health Report      | `health-report`      | Har bir provayder bo'yicha circuit breaker, cooldown va lockout holatini jamlaydi                                                                                 | health, resilience         | "Barcha provayderlarning holatini ko'rsating"          |
+| List Capabilities  | `list-capabilities`  | To'liq 45 yozuvli Agent Skills katalogini (23 API + 21 CLI + 1 config) kontekst kiritish uchun xom SKILL.md URL'lari bilan markdown jadval ko'rinishida qaytaradi | catalog, discovery, skills | "Barcha OmniRoute imkoniyatlarini ro'yxatlang"         |
 
-> Agent kartasi amaldagi 374 ta provayderdan iborat katalog bilan muvofiq saqlanishi kerak; provayderlar soni hamda bepul/autentifikatsiyasiz foydalanish metama’lumotlari ish vaqtidagi reyestrdan olinadi.
+> Agent Card jonli 375 provayderli katalog bilan mos holda saqlanishi kerak; provayderlar soni va bepul/avtorizatsiyasiz metadata ish vaqti reestrida (runtime registry) olinadi.
 
-### `list-capabilities` ko‘nikmasi tafsilotlari
+### `list-capabilities` Skill'i tafsilotlari
 
-`list-capabilities` ko‘nikmasi API chaqiruvlarini yuborishdan oldin OmniRoute taqdim etadigan imkoniyatlarni aniqlashi kerak bo‘lgan tashqi agentlar uchun ayniqsa foydalidir. U tuzilmali markdown jadval artefaktini qaytaradi:
+`list-capabilities` skill'i API chaqiruvlarini yuborishdan oldin OmniRoute nimalarni taqdim etishini aniqlashi kerak bo'lgan tashqi agentlar uchun ayniqsa foydali. U tuzilgan markdown jadval artefaktini qaytaradi:
 
 ```
-| ID | Nomi | Toifa | Soha | Endpointlar/Buyruqlar | Xom URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentifikatsiya va seanslar | api | autentifikatsiya | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Agentlar to‘liq SKILL.md faylini darhol olishi uchun har bir qator `rawUrl` ustunini o‘z ichiga oladi. `metadata.totalSkills` maydoni katalog hajmini aks ettiradi (hozirda 45 ta). Amalga oshirish: `src/lib/a2a/skills/listCapabilities.ts`. Shuningdek, [AGENT-SKILLS.md](./AGENT-SKILLS.md) ga qarang.
+Har bir qator `rawUrl` ustunini o'z ichiga oladi, shuning uchun agentlar to'liq SKILL.md faylini darhol olishlari mumkin. `metadata.totalSkills` maydoni katalog hajmini aks ettiradi (bugun 45). Implementatsiya: `src/lib/a2a/skills/listCapabilities.ts`. Shuningdek qarang: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

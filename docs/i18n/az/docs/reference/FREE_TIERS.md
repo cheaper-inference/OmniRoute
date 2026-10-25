@@ -44,17 +44,17 @@ Bu rəqəmlər kataloqdakı ayrı-ayrı üçüncü tərəf hesablarını və uy�
 
 ---
 
-## 2026-06-17 yeniləməsi — 2026-06-05 tarixindən bəri nə dəyişib
+## 2026-06-17 yeniləməsi — 2026-06-05 tarixindən bəri nələr dəyişib
 
-50 agentlə aparılan veb araşdırması (rəsmi sənədlər + son 7 günün xəbərləri, ziddiyyətli yoxlamalarla təsdiqlənib) bütün kataloqu yenilədi. Əsas məqamlar:
+50 agentdən ibarət veb-araşdırma mərhələsi (rəsmi sənədlər + son 7 günün xəbərləri, ziddiyyətli yoxlama ilə təsdiqlənib) bütün kataloqu yenilədi. Əsas məqamlar:
 
-- **Silinib / pulsuz səviyyə yoxdur (2026):** `chutes` (pulsuz səviyyə 2026-03 tarixində dayandırılıb), `phind` (şirkət 2026-01 tarixində fəaliyyətini dayandırıb), `kluster` (2026-06-09 tarixində dayandırılıb → MITO), `gitlawb` + `gitlawb-gmi` (MiMo pulsuz girişi 2026-05-24 tarixində ləğv edilib, Nemotron kampaniyası 2026-06 tarixində başa çatıb — 2026-06-18 tarixində yenidən yoxlanılıb), `aimlapi` (pulsuz səviyyə dayandırılıb — 2026-06-18 tarixində yenidən yoxlanılıb), `yi` (Yi-Light istifadədən çıxarılıb, istifadəyə görə ödənişlidir — 2026-06-18 tarixində yenidən yoxlanılıb), `featherless-ai` (hazırda pulsuz səviyyəsi yoxdur), `chipotle` (Chipotle-nin "Pepper AI" sistemi — provayderin əlaqə saxladığı əks mühəndisliklə araşdırılmış `amelia.chipotle.com` Amelia söhbət vidceti indi kök ünvan da daxil olmaqla bütün marşrutlarda 404 qaytarır; backend istifadədən çıxarılıb/köçürülüb, 2026-09-15 tarixində təsdiqlənib — kataloqdan tamamilə silinib, #13131/#4037). `iflytek` / `sparkdesk` siyahıda qalır, lakin ToS ilə bağlı ehtiyat qeydi daşıyır (Spark Lite pulsuzdur; ToS proksi/retranslyator istifadəsini məhdudlaşdırır).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01 tarixində dayandırılıb və `2.5 Pro` pulsuz səviyyədən çıxarılıb (2026-04); pulsuz səviyyə indi **yalnız Flash ailəsinə** aiddir (2.5/3/3.1/3.5 Flash + Gemma). Kataloq artıq Flash ailəsini **vahid hovuzda birləşdirir** (əvvəllər hər variant ayrıca hesablandığı üçün göstərici şişirdilmişdi: 462M → 60M).
-- **Düzəldilmiş rəqəmlər:** `cloudflare-ai` 122M → **30M** (faktiki olaraq gündə 10k Neuron), `doubao` birdəfəlik qeydiyyat krediti kimi yenidən təsnif edilib (təkrarlanan deyil), `llm7` 4M → **150M** (sənədləşdirilmiş gündəlik 5M token), `together` "-Free" son nöqtələri dayandırılıb → $25 qeydiyyat krediti də silinib (minimum $5 alış tələb olunur, pulsuz sınaq yoxdur), `longcat` Preview başa çatıb + Flash modelləri istifadədən çıxarılıb → yalnız **LongCat-2.0**, birdəfəlik **10M** tokenlik qeydiyyat krediti kimi yenidən təsnif edilib (KYC tələb olunur, təkrarlanan deyil).
-- **Aşkarlanmış yeni pulsuz provayderlər:** ⭐ **Kilo Code** (`kilo-gateway` — dəyişən "Auto Free" dəsti: NVIDIA Nemotron 3 ailəsi, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — dəyişən 6 pulsuz kodlaşdırma modeli), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash daimi olaraq pulsuzdur + 20M qeydiyyat bonusu) və `arcee-ai` Trinity Large Preview.
-- **Yeni dürüst səviyyələr** (Metodologiyaya baxın): _daimi-pulsuz-lakin-limitsiz_ kateqoriyası (real təkrarlanan giriş, hesablamaq üçün token limiti yoxdur) və _depozitlə aktivləşən artım_ (OpenRouter $10 → +24M/ay); əsas göstəricini heç vaxt şişirtməmələri üçün hər ikisi **ayrıca** göstərilir.
+- **Silinib / pulsuz səviyyə yoxdur (2026):** `chutes` (pulsuz səviyyə 2026-03 tarixində dayandırılıb), `phind` (şirkət 2026-01 tarixində bağlanıb), `kluster` (2026-06-09 tarixində dayandırılıb → MITO), `gitlawb` + `gitlawb-gmi` (MiMo pulsuz girişi 2026-05-24 tarixində ləğv edilib, Nemotron kampaniyası 2026-06 tarixində başa çatıb — 2026-06-18 tarixində yenidən yoxlanılıb), `aimlapi` (pulsuz səviyyə dayandırılıb — 2026-06-18 tarixində yenidən yoxlanılıb), `yi` (Yi-Light istifadədən çıxarılıb, istifadə qədər ödəniş modelinə keçib — 2026-06-18 tarixində yenidən yoxlanılıb), `featherless-ai` (hazırda pulsuz səviyyə yoxdur), `chipotle` (Chipotle şirkətinin "Pepper AI" sistemi — provayderin əlaqə saxladığı, əks mühəndisliklə araşdırılmış `amelia.chipotle.com` Amelia söhbət vidceti indi kök marşrut da daxil olmaqla bütün marşrutlarda 404 qaytarır; server tərəfi istismardan çıxarılıb/köçürülüb, 2026-09-15 tarixində təsdiqlənib — kataloqdan tamamilə silinib, #13131/#4037). `iflytek` / `sparkdesk` siyahıda qalır, lakin ToS ilə bağlı ehtiyat qeydi daşıyır (Spark Lite pulsuzdur; ToS proksi/retranslyator istifadəsini məhdudlaşdırır).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01 tarixində dayandırılıb və `2.5 Pro` pulsuz səviyyədən çıxarılıb (2026-04); pulsuz səviyyə indi **yalnız Flash ailəsindən** ibarətdir (2.5/3/3.1/3.5 Flash + Gemma). Kataloq artıq Flash ailəsini **vahid hovuzda birləşdirir** (əvvəllər hər variant ayrıca hesablandığı üçün göstərici şişirdilmişdi: 462M → 60M).
+- **Düzəldilmiş rəqəmlər:** `cloudflare-ai` 122M → **30M** (faktiki olaraq gündə 10k Neuron), `doubao` birdəfəlik qeydiyyat krediti kimi yenidən təsnif edilib (təkrarlanan deyil), `llm7` 4M → **150M** (sənədləşdirilmiş gündə 5M token), `together` üçün "-Free" son nöqtələri dayandırılıb → $25 qeydiyyat krediti də silinib (minimum $5 alış tələb olunur, pulsuz sınaq yoxdur), `longcat` Preview başa çatıb + Flash modelləri istifadədən çıxarılıb → yalnız **LongCat-2.0**, birdəfəlik **10M** tokenlik qeydiyyat krediti kimi yenidən təsnif edilib (KYC tələb olunur, təkrarlanan deyil).
+- **Aşkarlanmış yeni pulsuz provayderlər:** ⭐ **Kilo Code** (`kilo-gateway` — növbələnən "Auto Free" dəsti: NVIDIA Nemotron 3 ailəsi, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — növbələnən 10 pulsuz proqramlaşdırma modeli, 2026-10-20 tarixində yenilənib), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash daimi olaraq pulsuzdur + 20M qeydiyyat bonusu) və `arcee-ai` Trinity Large Preview.
+- **Yeni dürüst səviyyələr** (Metodologiyaya baxın): _daimi-pulsuz-lakin-limitsiz_ kateqoriyası (real təkrarlanan giriş, hesablanacaq token limiti yoxdur) və _depozitlə açılan artırma_ (OpenRouter $10 → +24M/ay); əsas göstəricini heç vaxt şişirtməmələri üçün hər ikisi **ayrıca** təqdim olunur.
 
-> Aşağıdakı provayderlər üzrə ətraflı cədvəl **2026-06-05 tarixli vəziyyəti** əks etdirir; yuxarıdakı dəyişikliklər onu əvəz edir. Aktual, kanonik mənbə model üzrə tərtib edilmiş `open-sse/config/freeModelCatalog.ts` kataloqudur.
+> Aşağıdakı ətraflı provayder cədvəli **2026-06-05 tarixli görüntüdür**; yuxarıdakı dəyişikliklər onu əvəz edir. Aktual, əsas mənbə model üzrə tərtib edilmiş `open-sse/config/freeModelCatalog.ts` kataloqudur.
 
 ---
 
@@ -238,11 +238,11 @@ Bu sahədəki əksər "aylıq pulsuz token" göstəriciləri model üzrə etiket
 
 ---
 
-## Provayder üzrə pulsuz səviyyə (Bytez/Nous 2026-10-15 tarixində yoxlanılıb; yenidən audit edilmiş sətirlər 2026-09-02; digərləri 2026-06-17)
+## Provayder üzrə pulsuz səviyyə (Bytez/Nous 2026-10-15 tarixində yoxlanılıb; sətirlər 2026-09-02 tarixində yenidən audit edilib; digərləri 2026-06-17)
 
-> Hər model üzrə kataloqdan (`open-sse/config/freeModelCatalog.ts`) yenidən yaradılıb, pul üzrə dublikatlar aradan qaldırılıb. Təkrarlanan sabit token/ay miqdarına görə sıralanıb. `uncapped*` = həmişəlik pulsuzdur, lakin dərc edilmiş token limiti yoxdur (sorğu tezliyi/paralellik məhduddur) — real girişdir, **lakin** əsas göstəricinin cəminə daxil edilməyib. `—` = yalnız kreditlə / açarsız / tokenlə ölçülə bilməyən.
+> Hər model üzrə kataloqdan (`open-sse/config/freeModelCatalog.ts`) yenidən yaradılıb, hovuz üzrə dublikatlar silinib. Aylıq təkrarlanan sabit token sayına görə sıralanıb. `uncapped*` = daimi pulsuzdur, lakin dərc edilmiş token limiti yoxdur (sürət/paralellik məhdudiyyətlidir) — real girişdir, **lakin** əsas göstəricidə cəmlənməyib. `—` = yalnız kreditlə / açarsız / tokenlə ölçülə bilməyən.
 
-| Provayder        | Pulsuz növ        | Sabit token/ay | İlk ay krediti | İstifadə şərtləri | Modellər |
+| Təchizatçı       | Pulsuz növü       | Sabit token/ay | İlk ay krediti | İstifadə şərtləri | Modellər |
 | ---------------- | ----------------- | -------------- | -------------- | ----------------- | -------- |
 | `mistral`        | təkrarlanan       | ~1.00B         | —              | ehtiyat           | 5        |
 | `nara`           | təkrarlanan       | ~210M          | —              | ehtiyat           | 8        |
@@ -268,7 +268,7 @@ Bu sahədəki əksər "aylıq pulsuz token" göstəriciləri model üzrə etiket
 | `gemini`         | limitsiz          | limitsiz\*     | —              | ehtiyat           | 4        |
 | `kilo-gateway`   | limitsiz          | limitsiz\*     | —              | ehtiyat           | 7        |
 | `ollama-cloud`   | limitsiz          | limitsiz\*     | —              | qeyri-müəyyən     | 8        |
-| `opencode-zen`   | limitsiz          | limitsiz\*     | —              | ehtiyat           | 6        |
+| `opencode-zen`   | limitsiz          | limitsiz\*     | —              | ehtiyat           | 10       |
 | `tencent`        | limitsiz          | limitsiz\*     | —              | ehtiyat           | 1        |
 | `vertex`         | qeydiyyat krediti | —              | ~300M          | ehtiyat           | 10       |
 | `agentrouter`    | qeydiyyat krediti | —              | ~200M          | ehtiyat           | 4        |
@@ -303,10 +303,10 @@ Bu sahədəki əksər "aylıq pulsuz token" göstəriciləri model üzrə etiket
 | `publicai`       | açarsız           | —              | —              | ehtiyat           | 3        |
 | `reka`           | açarsız           | —              | —              | ehtiyat           | 2        |
 | `sensenova`      | açarsız           | —              | —              | ehtiyat           | 1        |
-| `sparkdesk`      | açarsız           | —              | —              | ehtiyatlı olun    | 1        |
-| `stepfun`        | açarsız           | —              | —              | uyğundur          | 1        |
+| `sparkdesk`      | açarsız           | —              | —              | ehtiyatlı         | 1        |
+| `stepfun`        | açarsız           | —              | —              | yaxşı             | 1        |
 | `t3-web`         | açarsız           | —              | —              | çəkinin           | 23       |
-| `uncloseai`      | açarsız           | —              | —              | ehtiyatlı olun    | 3        |
+| `uncloseai`      | açarsız           | —              | —              | ehtiyatlı         | 3        |
 
 ---
 

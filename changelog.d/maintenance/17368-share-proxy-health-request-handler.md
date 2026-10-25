@@ -1,0 +1,1 @@
+- **refactor(api):** the dashboard and management proxy-health `GET` routes share one `handleProxyHealthGet()` handler (auth-first order, window parsing, sweep/history enrichment, age clamp and sanitized errors unchanged), with an invalid-credential test for both endpoints ([#17368](https://github.com/diegosouzapw/OmniRoute/pull/17368)) — thanks @JxnLexn

@@ -34,7 +34,7 @@
  * unauthed) because it operates at the Node HTTP transport layer shared by
  * every request — the same tier as the existing `http-method-guard.cjs` /
  * `peer-stamp.mjs` wrappers — never inside Next's per-route code.
- * See: https://github.com/diegosouzapw/OmniRoute/issues/6400
+ * See: https://github.com/cheaper-inference/OmniRoute/issues/6400
  */
 
 function isHeadRequest(req) {

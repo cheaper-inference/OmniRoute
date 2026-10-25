@@ -11,17 +11,18 @@ assistant အားလုံးအတွက် တစ်ခုတည်းသေ
 PII learnings)။ အပြည့်အစုံဖတ်ရှုပါ၊ ပရောဂျက်စည်းမျဉ်းများကို ဤနေရာတွင် ထပ်မံမထည့်ပါနှင့်။ အောက်ပါအချက်အားလုံးသည် Claude Code
 အတွက်သာ သက်ဆိုင်ပြီး `AGENTS.md` တွင် သတ်မှတ်ထားပြီးဖြစ်သော စည်းမျဉ်းများ၏ လုပ်ငန်းဆောင်ရွက်မှုဆိုင်ရာ ပြင်ဆင်ချက်များဖြစ်သည်။
 
-## Worktree သီးခြားခွဲထားမှု — Claude Code ဆိုင်ရာ သီးသန့်အချက်များ
+## Worktree သီးခြားခွဲထုတ်ခြင်း — Claude Code သီးသန့်အချက်များ
 
-မဖြစ်မနေလိုက်နာရမည့် worktree protocol အပြည့်အစုံ (base branch အတည်ပြုခြင်း၊ `.claude/worktrees/` canonical
-path၊ `cp -al` node_modules၊ ဖယ်ရှားသိမ်းဆည်းမှုစည်းမျဉ်းများ) ကို `AGENTS.md` → Git Workflow → "Worktree
-isolation" တွင် ဖော်ပြထားသည်။ Claude-Code ဆိုင်ရာ သီးသန့်အချက်များမှာ-
+မဖြစ်မနေလိုက်နာရမည့် worktree protocol အပြည့်အစုံ (base-branch အတည်ပြုခြင်း၊ `.claude/worktrees/` canonical
+path၊ `cp -al` node_modules၊ teardown စည်းမျဉ်းများ) ကို
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) တွင် ကြည့်ရှုနိုင်ပါသည် (`AGENTS.md` →
+Git Workflow → "Worktree isolation" တွင် အကျဉ်းချုပ်ဖော်ပြထားသည်)။ Claude Code သီးသန့်အချက်များမှာ-
 
-- Operator က ကြိုတင်ပြောထားခြင်းမရှိပါက base branch ကို `AskUserQuestion` မှတစ်ဆင့် အတည်ပြုပါ
-  (Hard Rule #19)။
-- Native `EnterWorktree` tool ကို ဦးစားပေးအသုံးပြုပါ — ၎င်းသည် canonical path ဖြစ်သော
-  `.claude/worktrees/` အောက်တွင် worktree များကို ဖန်တီးပြီးဖြစ်သည်။ မှတ်တမ်းတင်ထားသော `git
-worktree add` command ဖြင့် worktree ကို ဖန်တီးပြီးနောက် ၎င်း၏ `path` ဖြင့် `EnterWorktree` ကို ခေါ်ပါ။
+- operator က ကြိုတင်ပြောပြထားပြီးသားမဟုတ်ပါက `AskUserQuestion` (Hard Rule #19) ဖြင့် base branch ကို
+  operator နှင့် အတည်ပြုပါ။
+- native `EnterWorktree` tool ကို ဦးစားပေးအသုံးပြုပါ — ၎င်းက worktree များကို
+  `.claude/worktrees/` (canonical path) အောက်တွင် ဖန်တီးပေးပြီးသားဖြစ်သည်။ ဖော်ပြထားသည့် `git
+worktree add` command ဖြင့် worktree ကို ဖန်တီးပြီးနောက် ၎င်း၏ `path` ဖြင့် `EnterWorktree` ကို ခေါ်ဆိုပါ။
 
 ## Session များအကြား ဘေးကင်းလုံခြုံမှု — Claude Code ဆိုင်ရာ သီးသန့်အချက်များ
 
