@@ -185,16 +185,19 @@ export function useSessionRecorder() {
     setSession(null);
   }, [session, fetchSessions, stopRecordingWs, flushSnapshots]);
 
-  const deleteSession = useCallback(async (id: string) => {
-    try {
-      await fetch(`/api/tools/traffic-inspector/sessions/${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
-      await fetchSessions();
-    } catch {
-      // ignore
-    }
-  }, [fetchSessions]);
+  const deleteSession = useCallback(
+    async (id: string) => {
+      try {
+        await fetch(`/api/tools/traffic-inspector/sessions/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+        });
+        await fetchSessions();
+      } catch {
+        // ignore
+      }
+    },
+    [fetchSessions]
+  );
 
   useEffect(() => {
     return () => {

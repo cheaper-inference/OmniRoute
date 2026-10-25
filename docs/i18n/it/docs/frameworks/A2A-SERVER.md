@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Per `smart-routing`, `metadata.combo` è una sostituzione esplicita di
+`metadata.model` per la richiesta al gateway; viene inviato come `model` effettivo,
+non come campo JSON `x-combo` ignorato. Continuano ad applicarsi le normali regole del gateway
+per la chiave API e l'autorizzazione per ciascuna destinazione. Una combo non valida o vuota viene rifiutata.
+
+Il risultato espone `requested_combo` (intento del chiamante), `dispatched_model`
+(la richiesta effettiva al gateway), `response_model` (risposta del gateway) e
+`confirmed_combo`. Quest'ultimo campo è `null`, a meno che il gateway non
+identifichi esplicitamente una combo. I log decisionali A2A attribuiscono l'esecuzione solo a una
+combo confermata, mantenendo una richiesta non confermata come `requestedCombo`.
+
 **Risposta:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Streaming SSE
 
-Funziona come `message/send`, ma restituisce Server-Sent Events per lo streaming in tempo reale.
+Come `message/send`, ma restituisce eventi Server-Sent Events per lo streaming in tempo reale.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Verifica dello stato di un'attività
+### `tasks/get` — Consultare lo stato dell'attività
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Annullamento di un'attività
+### `tasks/cancel` — Annullare un'attività
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

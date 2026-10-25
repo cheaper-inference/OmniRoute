@@ -47,7 +47,7 @@ JSON-RPC কলগুলো JSON-RPC ত্রুটি কোড `-32000`-স�
 
 ### `message/send` — সিঙ্ক্রোনাস এক্সিকিউশন
 
-একটি স্কিলে বার্তা পাঠায় এবং সম্পূর্ণ প্রতিক্রিয়ার জন্য অপেক্ষা করে।
+কোনো স্কিলে একটি বার্তা পাঠায় এবং সম্পূর্ণ প্রতিক্রিয়ার জন্য অপেক্ষা করে।
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-এর ক্ষেত্রে, গেটওয়ে অনুরোধের জন্য `metadata.combo` হলো
+`metadata.model`-এর একটি সুস্পষ্ট ওভাররাইড; এটি উপেক্ষিত `x-combo` JSON ফিল্ড হিসেবে নয়,
+প্রকৃত `model` হিসেবে পাঠানো হয়। গেটওয়ের স্বাভাবিক API-কী এবং
+লক্ষ্যভিত্তিক অনুমোদন এখনও প্রযোজ্য। কোনো অবৈধ বা খালি কম্বো প্রত্যাখ্যান করা হয়।
+
+ফলাফলে `requested_combo` (কলকারীর অভিপ্রায়), `dispatched_model`
+(প্রকৃত গেটওয়ে অনুরোধ), `response_model` (গেটওয়ে প্রতিক্রিয়া) এবং
+`confirmed_combo` প্রকাশ করা হয়। গেটওয়ে স্পষ্টভাবে কোনো কম্বো শনাক্ত না করলে শেষ ফিল্ডটি `null`
+থাকে। A2A সিদ্ধান্তের লগ কেবল নিশ্চিত করা কম্বোর সঙ্গেই এক্সিকিউশনকে সংযুক্ত করে এবং অনিশ্চিত অনুরোধকে `requestedCombo` হিসেবে ধরে রাখে।
+
 **প্রতিক্রিয়া:**
 
 ```json
@@ -76,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +102,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE স্ট্রিমিং
 
-`message/send`-এর মতোই, তবে রিয়েল-টাইম স্ট্রিমিংয়ের জন্য Server-Sent Events ফেরত দেয়।
+`message/send`-এর মতোই, তবে রিয়েল-টাইম স্ট্রিমিংয়ের জন্য Server-Sent Events প্রদান করে।
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +129,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — টাস্কের স্ট্যাটাস অনুসন্ধান
+### `tasks/get` — টাস্কের স্থিতি অনুসন্ধান
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +138,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — একটি টাস্ক বাতিল করুন
+### `tasks/cancel` — একটি টাস্ক বাতিল করা
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +265,7 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
 
 ---
 
-## ইন্টিগ্রেশন উদাহরণ
+## ইন্টিগ্রেশনের উদাহরণ
 
 ### Python (requests)
 

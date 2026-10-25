@@ -5,10 +5,10 @@
 ---
 
 > **Automatiškai sugeneruota** iš `src/shared/constants/providers.ts` — neredaguokite rankiniu būdu.
-> Iš naujo sugeneruokite su: `npm run gen:provider-reference`
-> **Paskutinį kartą sugeneruota:** 2026-10-18
+> Sugeneruokite iš naujo naudodami: `npm run gen:provider-reference`
+> **Paskutinį kartą sugeneruota:** 2026-10-20
 
-Iš viso tiekėjų: **375**. Kategorijų paskirstymą žr. žemiau.
+Iš viso teikėjų: **375**. Toliau pateiktas suskirstymas pagal kategorijas.
 
 ## Kategorijos
 
@@ -457,12 +457,12 @@ Norėdami įjungti, sukonfigūruoti ir išbandyti kiekvieną teikėją, naudokit
 | ------ | ------------------------ | ------------------------------- | ------- | -------- | -------- |
 | `auto` | `auto`                   | Automatinis (be konfigūracijos) | Sistema | —        | —        |
 
-## Tiesos šaltiniai
+## Patikimos informacijos šaltiniai
 
 - Katalogas: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Registras (informacija apie kiekvieną modelį): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Vykdytojai (executors): [`open-sse/executors/`](../../open-sse/executors/) (154 įgyvendinimai)
-- Vertėjai (translators): [`open-sse/translator/`](../../open-sse/translator/)
+- Registras (išsami informacija apie kiekvieną modelį): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Vykdyklės: [`open-sse/executors/`](../../open-sse/executors/) (156 realizacijos)
+- Vertikliai: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Taip pat žr.
 

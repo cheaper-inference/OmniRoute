@@ -11,16 +11,17 @@
 PII ඉගෙනුම්). එය සම්පූර්ණයෙන් කියවන්න; ව්යාපෘති නීති මෙහි නැවත එක් නොකරන්න. පහත ඇති සියල්ල අදාළ වන්නේ
 Claude Code සඳහා පමණි — `AGENTS.md` තුළ දැනටමත් අර්ථ දක්වා ඇති නීතිවල මෙහෙයුම්මය පිරිපහදු කිරීම් ලෙසය.
 
-## Worktree හුදකලා කිරීම — Claude Code සඳහා විශේෂ කරුණු
+## Worktree හුදෙකලා කිරීම — Claude Code සඳහා විශේෂිත කරුණු
 
-සම්පූර්ණ අනිවාර්ය worktree ප්රොටෝකෝලය (මූලික ශාඛාව තහවුරු කිරීම, `.claude/worktrees/` සම්මත
-මාර්ගය, `cp -al` node_modules, ඉවත් කිරීමේ නීති) `AGENTS.md` → Git Workflow → "Worktree
-isolation" තුළ ඇත. Claude-Code සඳහා විශේෂ කරුණු:
+සම්පූර්ණ අනිවාර්ය worktree ප්රොටොකෝලය (base-branch තහවුරු කිරීම, `.claude/worktrees/` නිල මාවත, `cp -al` node_modules, ඉවත් කිරීමේ නීති)
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) හි ඇත (`AGENTS.md` →
+Git වැඩ ප්රවාහය → "Worktree හුදෙකලා කිරීම" හි සාරාංශගත කර ඇත). Claude-Code-විශේෂිත කරුණු:
 
-- ක්රියාකරු දැනටමත් එය ඔබට පවසා නොමැති නම්, `AskUserQuestion` හරහා මූලික ශාඛාව තහවුරු කරන්න (දැඩි නීතිය #19).
-- ස්වදේශීය `EnterWorktree` මෙවලම වඩාත් යෝග්යය — එය දැනටමත් `.claude/worktrees/`
-  (සම්මත මාර්ගය) යටතේ worktree නිර්මාණය කරයි. ලේඛනගත `git
-worktree add` විධානයෙන් worktree නිර්මාණය කර, ඉන්පසු එහි `path` සමඟ `EnterWorktree` අමතන්න.
+- ක්රියාකරු දැනටමත් ඔබට පවසා නොමැති නම්, `AskUserQuestion` හරහා ක්රියාකරු සමඟ base branch
+  එක තහවුරු කරගන්න (දැඩි නීතිය #19).
+- ස්වදේශීය `EnterWorktree` මෙවලම වඩාත් කැමති — එය දැනටමත්
+  `.claude/worktrees/` යටතේ (නිල මාවත) worktree සාදයි. ලේඛනගත `git
+worktree add` විධානයෙන් worktree එක සාදන්න, ඉන්පසු එහි `path` සමඟ `EnterWorktree` කැඳවන්න.
 
 ## සැසි අතර ආරක්ෂාව — Claude Code සඳහා විශේෂ කරුණු
 

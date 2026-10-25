@@ -47,7 +47,7 @@ A2A се контролише преко прекидача **Endpoints → A2A*
 
 ### `message/send` — Синхроно извршавање
 
-Шаље поруку вештини и чека комплетан одговор.
+Шаље поруку вештини и чека потпун одговор.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+За `smart-routing`, `metadata.combo` представља експлицитно замењивање вредности
+`metadata.model` за захтев мрежном пролазу; шаље се као стварни `model`,
+а не као игнорисано `x-combo` JSON поље. И даље се примењују уобичајени API кључ
+мрежног пролаза и ауторизација по циљу. Неважећа или празна комбинација се одбија.
+
+Резултат садржи `requested_combo` (намера позиваоца), `dispatched_model`
+(стварни захтев мрежном пролазу), `response_model` (одговор мрежног пролаза) и
+`confirmed_combo`. Последње поље има вредност `null` осим ако мрежни пролаз
+експлицитно не идентификује комбинацију. A2A евиденције одлука приписују извршавање
+само потврђеној комбинацији, док се непотврђени захтев задржава као `requestedCombo`.
+
 **Одговор:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE стриминг
+### `message/stream` — SSE стримовање
 
-Исто као `message/send`, али враћа Server-Sent Events за стриминг у реалном времену.
+Исто као `message/send`, али враћа догађаје које шаље сервер ради стримовања у реалном времену.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ submitted → working → completed
 
 ---
 
-## Primeri integracije
+## Примери интеграције
 
 ### Python (requests)
 

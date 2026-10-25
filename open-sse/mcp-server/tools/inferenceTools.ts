@@ -21,6 +21,7 @@ import { toArray, toFiniteNumber, toRecord, toString, type JsonRecord } from "..
 import { toSafeMcpErrorMessage } from "../errorMessage.ts";
 import { mcpFetchTimeoutSignal } from "../fetchTimeout.ts";
 import { omniRouteFetch } from "../internalFetch.ts";
+import { resolveRequestedComboModel } from "../../utils/resolveRequestedComboModel.ts";
 
 export async function handleRouteRequest(args: {
   model: string;
@@ -32,14 +33,15 @@ export async function handleRouteRequest(args: {
 }) {
   const start = Date.now();
   try {
+    // Explicit combos are selected by the chat gateway's model field. The old
+    // x-combo body property was silently ignored (#17188); ordinary API-key and
+    // target admission checks remain in the gateway.
+    const route = resolveRequestedComboModel(args.model, args.combo);
     const body: Record<string, unknown> = {
-      model: args.model,
+      model: route.model,
       messages: args.messages,
       stream: false, // MCP tool always returns non-streaming
     };
-    if (args.combo) {
-      body["x-combo"] = args.combo;
-    }
 
     const raw = (await omniRouteFetch("/v1/chat/completions", {
       method: "POST",
@@ -57,7 +59,7 @@ export async function handleRouteRequest(args: {
     const result = {
       response: {
         content: toString(firstMessage.content, ""),
-        model: toString(raw.model, args.model),
+        model: toString(raw.model, route.model),
         tokens: {
           prompt: toFiniteNumber(usage.prompt_tokens, 0),
           completion: toFiniteNumber(usage.completion_tokens, 0),
@@ -78,7 +80,7 @@ export async function handleRouteRequest(args: {
 
     await logToolCall(
       "omniroute_route_request",
-      { model: args.model, messageCount: args.messages.length },
+      { model: args.model, combo: route.requestedCombo, messageCount: args.messages.length },
       result.routing,
       Date.now() - start,
       true

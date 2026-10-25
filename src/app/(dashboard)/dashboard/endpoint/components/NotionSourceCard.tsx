@@ -1,11 +1,19 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button, Input, Badge } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Input from "@/shared/components/Input";
+import { cn } from "@/shared/utils/cn";
 
 export default function NotionSourceCard() {
   const t = useTranslations("endpoint");
+  const tc = useTranslations("common");
   const [connected, setConnected] = useState(false);
   const [token, setToken] = useState("");
   const [busy, setBusy] = useState(false);
@@ -122,12 +130,14 @@ export default function NotionSourceCard() {
   return (
     <Card>
       <div className="p-5">
-        <button
+        <Button
+          variant="ghost"
           onClick={() => setExpanded(!expanded)}
-          className="w-full flex items-center gap-3 text-left"
+          aria-expanded={expanded}
+          className="w-full h-auto justify-start gap-3 p-0 text-left font-normal whitespace-normal hover:bg-transparent"
         >
-          <div className="flex items-center justify-center size-10 rounded-lg bg-blue-500/10 shrink-0">
-            <span className="material-symbols-outlined text-xl text-blue-400">description</span>
+          <div className="flex items-center justify-center size-10 rounded-lg bg-info/10 shrink-0">
+            <Icon name="description" className="text-xl text-info" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -145,40 +155,35 @@ export default function NotionSourceCard() {
               )}
             </p>
           </div>
-          <span
-            className={`material-symbols-outlined text-text-muted text-lg transition-transform ${expanded ? "rotate-180" : ""}`}
-          >
-            expand_more
-          </span>
-        </button>
+          <Icon
+            name="expand_more"
+            size={18}
+            className={cn("text-text-muted transition-transform", expanded && "rotate-180")}
+          />
+        </Button>
 
         {expanded && (
           <div className="mt-4 pt-4 border-t border-border/50 flex flex-col gap-3">
             {message && (
-              <div
-                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
-                  message.type === "success"
-                    ? "border-green-500/30 bg-green-500/10 text-green-400"
-                    : "border-red-500/30 bg-red-500/10 text-red-400"
-                }`}
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {message.type === "success" ? "check_circle" : "error"}
-                </span>
-                <span className="flex-1">{message.text}</span>
-              </div>
+              <Alert
+                variant={message.type === "success" ? "success" : "critical"}
+                icon={
+                  <Icon name={message.type === "success" ? "check_circle" : "error"} size={18} />
+                }
+                description={message.text}
+                dismissLabel={tc("close")}
+                onDismiss={() => setMessage(null)}
+              />
             )}
 
             {!connected ? (
               <div className="flex flex-col gap-2">
-                <label className="text-xs text-text-muted font-medium">
-                  {translateOrFallback(
-                    "notionIntegrationToken",
-                    "Notion Internal Integration Token"
-                  )}
-                </label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-end">
                   <Input
+                    label={translateOrFallback(
+                      "notionIntegrationToken",
+                      "Notion Internal Integration Token"
+                    )}
                     type="password"
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
@@ -208,13 +213,7 @@ export default function NotionSourceCard() {
                     "Token configured. Notion tools are available via MCP."
                   )}
                 </span>
-                <Button
-                  onClick={handleDisconnect}
-                  loading={busy}
-                  variant="secondary"
-                  size="sm"
-                  className="border-red-500/30! text-red-400! hover:bg-red-500/10!"
-                >
+                <Button onClick={handleDisconnect} loading={busy} variant="danger" size="sm">
                   {translateOrFallback("notionDisconnect", "Disconnect")}
                 </Button>
               </div>

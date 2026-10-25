@@ -45,7 +45,7 @@ A2A jest kontrolowane za pomocą przełącznika **Endpoints → A2A** i domyśln
 
 ## Metody JSON-RPC 2.0
 
-### `message/send` — wykonywanie synchroniczne
+### `message/send` — Wykonanie synchroniczne
 
 Wysyła wiadomość do umiejętności i oczekuje na pełną odpowiedź.
 
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+W przypadku `smart-routing` wartość `metadata.combo` jawnie zastępuje
+`metadata.model` w żądaniu do bramy; jest wysyłana jako rzeczywisty `model`,
+a nie jako ignorowane pole JSON `x-combo`. Nadal obowiązują standardowy klucz API bramy
+oraz autoryzacja dla poszczególnych elementów docelowych. Nieprawidłowa lub pusta kombinacja jest odrzucana.
+
+Wynik udostępnia pola `requested_combo` (intencja wywołującego), `dispatched_model`
+(rzeczywiste żądanie do bramy), `response_model` (odpowiedź bramy) oraz
+`confirmed_combo`. Ostatnie pole ma wartość `null`, chyba że brama jawnie
+wskaże kombinację. Dzienniki decyzji A2A przypisują wykonanie wyłącznie do
+potwierdzonej kombinacji, zachowując niepotwierdzone żądanie jako `requestedCombo`.
+
 **Odpowiedź:**
 
 ```json
@@ -76,28 +87,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — strumieniowanie SSE
+### `message/stream` — Strumieniowanie SSE
 
 Działa tak samo jak `message/send`, ale zwraca zdarzenia Server-Sent Events, umożliwiając strumieniowanie w czasie rzeczywistym.
 
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — sprawdzanie statusu zadania
+### `tasks/get` — Sprawdzanie stanu zadania
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — anulowanie zadania
+### `tasks/cancel` — Anulowanie zadania
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

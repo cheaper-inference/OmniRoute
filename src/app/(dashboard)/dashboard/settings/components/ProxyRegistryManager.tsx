@@ -1,8 +1,34 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Modal } from "@/shared/components";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@omniroute/ui-kit/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { Checkbox as KitCheckbox } from "@omniroute/ui-kit/checkbox";
+import { Field } from "@omniroute/ui-kit/field";
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Input,
+  Modal,
+  Select,
+  Textarea,
+} from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import { useProxyBatchOperations } from "./useProxyBatchOperations";
 import { ProxyStatusBadge } from "./ProxyStatusBadge";
 import { ProxyHealthCell } from "./ProxyHealthCell";
@@ -90,32 +116,10 @@ export default function ProxyRegistryManager({
     updated: number;
     failed: number;
   } | null>(null);
-  const [actionsOpen, setActionsOpen] = useState(false);
-  const [relayMenuOpen, setRelayMenuOpen] = useState(false);
-  const actionsRef = useRef<HTMLDivElement | null>(null);
-  const relayRef = useRef<HTMLDivElement | null>(null);
-
   const showAnyRelay = showVercelRelay || showDenoRelay || showCloudflareRelay;
-
-  useEffect(() => {
-    if (!actionsOpen && !relayMenuOpen) return;
-    const onMouseDown = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (actionsOpen && actionsRef.current && !actionsRef.current.contains(target)) {
-        setActionsOpen(false);
-      }
-      if (relayMenuOpen && relayRef.current && !relayRef.current.contains(target)) {
-        setRelayMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onMouseDown);
-    return () => document.removeEventListener("mousedown", onMouseDown);
-  }, [actionsOpen, relayMenuOpen]);
-
-  const closeActions = () => {
-    setActionsOpen(false);
-    setRelayMenuOpen(false);
-  };
+  const notesId = useId();
+  const bulkScopeIdsId = useId();
+  const bulkImportDescId = useId();
 
   const editingId = useMemo(() => form.id || "", [form.id]);
 
@@ -653,142 +657,81 @@ export default function ProxyRegistryManager({
               {t("managePool")}
             </Button>
             {showAnyRelay && (
-              <div className="relative inline-flex items-center" ref={relayRef}>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  icon="rocket_launch"
-                  iconRight="expand_more"
-                  onClick={() => {
-                    setRelayMenuOpen((value) => !value);
-                    setActionsOpen(false);
-                  }}
-                  aria-haspopup="menu"
-                  aria-expanded={relayMenuOpen}
-                  data-testid="proxy-registry-deploy-relay"
-                >
-                  {settingsT("deployRelayButton")}
-                </Button>
-                {relayMenuOpen && (
-                  <div
-                    className="absolute right-0 top-full z-50 mt-1 w-56 rounded-md border border-border bg-surface p-1 shadow-xl"
-                    role="menu"
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    icon="rocket_launch"
+                    iconRight="expand_more"
+                    data-testid="proxy-registry-deploy-relay"
                   >
-                    {showVercelRelay && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        icon="cloud_upload"
-                        fullWidth
-                        className="justify-start"
-                        onClick={() => {
-                          onOpenVercelRelay?.();
-                          closeActions();
-                        }}
-                      >
-                        {settingsT("vercelRelayButton")}
-                      </Button>
-                    )}
-                    {showDenoRelay && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        icon="terminal"
-                        fullWidth
-                        className="justify-start"
-                        onClick={() => {
-                          onOpenDenoRelay?.();
-                          closeActions();
-                        }}
-                      >
-                        {settingsT("denoRelayButton")}
-                      </Button>
-                    )}
-                    {showCloudflareRelay && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        icon="cloud"
-                        fullWidth
-                        className="justify-start"
-                        onClick={() => {
-                          onOpenCloudflareRelay?.();
-                          closeActions();
-                        }}
-                      >
-                        {settingsT("cloudflareRelayButton")}
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
+                    {settingsT("deployRelayButton")}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {showVercelRelay && (
+                    <DropdownMenuItem
+                      icon={<Icon name="cloud_upload" size={16} />}
+                      onSelect={() => onOpenVercelRelay?.()}
+                    >
+                      {settingsT("vercelRelayButton")}
+                    </DropdownMenuItem>
+                  )}
+                  {showDenoRelay && (
+                    <DropdownMenuItem
+                      icon={<Icon name="terminal" size={16} />}
+                      onSelect={() => onOpenDenoRelay?.()}
+                    >
+                      {settingsT("denoRelayButton")}
+                    </DropdownMenuItem>
+                  )}
+                  {showCloudflareRelay && (
+                    <DropdownMenuItem
+                      icon={<Icon name="cloud" size={16} />}
+                      onSelect={() => onOpenCloudflareRelay?.()}
+                    >
+                      {settingsT("cloudflareRelayButton")}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
-            <div className="relative inline-flex items-center" ref={actionsRef}>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  setActionsOpen((value) => !value);
-                  setRelayMenuOpen(false);
-                }}
-                aria-label="More actions"
-                aria-haspopup="menu"
-                aria-expanded={actionsOpen}
-                data-testid="proxy-registry-more-actions"
-              >
-                ⋯
-              </Button>
-              {actionsOpen && (
-                <div
-                  className="absolute right-0 top-full z-50 mt-1 w-56 rounded-md border border-border bg-surface p-1 shadow-xl"
-                  role="menu"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon-sm"
+                  variant="secondary"
+                  icon="more_horiz"
+                  aria-label={t("moreActions")}
+                  data-testid="proxy-registry-more-actions"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  icon={<Icon name="upload_file" size={16} />}
+                  onSelect={() => openBulkImport()}
+                  data-testid="proxy-registry-open-bulk-import"
                 >
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    icon="upload_file"
-                    fullWidth
-                    className="justify-start"
-                    onClick={() => {
-                      openBulkImport();
-                      closeActions();
-                    }}
-                    data-testid="proxy-registry-open-bulk-import"
-                  >
-                    {t("bulkImport")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    icon="upload_file"
-                    fullWidth
-                    className="justify-start"
-                    onClick={() => {
-                      handleMigrate();
-                      closeActions();
-                    }}
-                    loading={migrating}
-                    data-testid="proxy-registry-import-legacy"
-                  >
-                    {t("importLegacy")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    icon="account_tree"
-                    fullWidth
-                    className="justify-start"
-                    onClick={() => {
-                      setBulkOpen(true);
-                      closeActions();
-                    }}
-                    data-testid="proxy-registry-open-bulk"
-                  >
-                    {t("bulkAssign")}
-                  </Button>
-                </div>
-              )}
-            </div>
+                  {t("bulkImport")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  icon={<Icon name="upload_file" size={16} />}
+                  onSelect={() => handleMigrate()}
+                  disabled={migrating}
+                  data-testid="proxy-registry-import-legacy"
+                >
+                  {t("importLegacy")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  icon={<Icon name="account_tree" size={16} />}
+                  onSelect={() => setBulkOpen(true)}
+                  data-testid="proxy-registry-open-bulk"
+                >
+                  {t("bulkAssign")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               size="sm"
               icon="add"
@@ -801,143 +744,142 @@ export default function ProxyRegistryManager({
         </div>
 
         {error && (
-          <div className="mb-3 px-3 py-2 rounded border border-red-500/30 bg-red-500/10 text-sm text-red-400">
+          <div
+            role="alert"
+            className="mb-3 px-3 py-2 rounded border border-error/30 bg-error-bg text-sm text-error"
+          >
             {error}
           </div>
         )}
         {relayTested !== null && relayAlive !== null && (
-          <div className="mb-3 px-3 py-2 rounded border border-border/60 bg-surface-alt text-xs text-text-muted">
+          <div
+            role="status"
+            className="mb-3 px-3 py-2 rounded border border-border bg-bg-subtle text-xs text-text-muted"
+          >
             {t("relayProbeSummary", { tested: relayTested, alive: relayAlive })}
           </div>
         )}
 
         {loading ? (
-          <div className="text-sm text-text-muted">{t("loading")}</div>
-        ) : items.length === 0 ? (
-          <div className="text-sm text-text-muted">{t("noProxies")}</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-text-muted border-b border-border">
-                  <th className="py-2 pr-2 w-8">
-                    <input
-                      type="checkbox"
-                      className="accent-blue-500 w-4 h-4 cursor-pointer"
-                      checked={allSelected}
-                      ref={(el) => {
-                        if (el)
-                          el.indeterminate =
-                            !allSelected && items.some((item) => selectedIds.has(item.id));
-                      }}
-                      onChange={() => hookToggleSelectAll(allSelected, items)}
-                      aria-label={t("selectAllProxies")}
-                    />
-                  </th>
-                  <th className="py-2 pr-3">{t("tableName")}</th>
-                  <th className="py-2 pr-3">{t("tableStatus")}</th>
-                  <th className="py-2 pr-3">{t("tableHealth")}</th>
-                  <th className="py-2 pr-3">{t("tableUsage")}</th>
-                  <th className="py-2">{t("tableActions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => {
-                  const usage = usageById[item.id];
-                  const health = healthById[item.id];
-                  return (
-                    <tr key={item.id} className="border-b border-border/60">
-                      <ProxyCheckboxCell
-                        checked={selectedIds.has(item.id)}
-                        onChange={() => toggleSelect(item.id)}
-                        label={t("selectProxy", { name: item.name })}
-                      />
-                      <td className="py-2 pr-3">
-                        <div className="font-medium text-text-main">{item.name}</div>
-                        {item.region && (
-                          <div className="text-xs text-text-muted">{item.region}</div>
-                        )}
-                      </td>
-                      <td className="py-2 pr-3 font-mono text-xs text-text-muted">
-                        {item.type}://{item.host}:{item.port}
-                      </td>
-                      <td className="py-2 pr-3">
-                        <ProxyStatusBadge status={item.status} />
-                      </td>
-                      <td className="py-2 pr-3 text-xs text-text-muted">
-                        <ProxyHealthCell
-                          testResult={testById[item.id] ?? undefined}
-                          health={health ?? undefined}
-                        />
-                      </td>
-                      <td className="py-2 pr-3 text-xs text-text-muted">
-                        {usageById[item.id] != null
-                          ? t("assignmentsCount", { count: usageById[item.id].count })
-                          : t("noData")}
-                      </td>
-                      <td className="py-2">
-                        <div className="flex items-center gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            icon="speed"
-                            onClick={() => void handleTestProxy(item)}
-                            loading={testingId === item.id}
-                          >
-                            {t("test")}
-                          </Button>
-                          {item.relayInfo?.isRelay &&
-                            (item.relayInfo.repairMode === "redeploy" ||
-                              item.relayInfo.repairMode === "recovered") && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                icon="build"
-                                onClick={() => void handleRepairRelay(item)}
-                                loading={repairingId === item.id}
-                                title={t("relayRepairTooltip")}
-                              >
-                                {t("repair")}
-                              </Button>
-                            )}
-                          {item.relayInfo?.isRelay && item.relayInfo.authMissing && (
-                            <span className="ml-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
-                              {t("relayAuthMissing")}
-                            </span>
-                          )}
-                          {repairErrorById[item.id] && (
-                            <span
-                              className="ml-1 text-[10px] text-red-400"
-                              title={repairErrorById[item.id]}
-                            >
-                              {t("relayRepairError")}
-                            </span>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            icon="edit"
-                            onClick={() => openEdit(item)}
-                          >
-                            {t("edit")}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            icon="delete"
-                            onClick={() => void handleDelete(item.id)}
-                            className="!text-red-400"
-                          >
-                            {t("delete")}
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="text-sm text-text-muted" role="status">
+            {t("loading")}
           </div>
+        ) : items.length === 0 ? (
+          <EmptyState icon="dns" title={t("noProxies")} />
+        ) : (
+          <Table scrollbarLabel={t("title")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-8">
+                  {/* Kit Checkbox directly: the adapter does not expose the mixed state. */}
+                  <KitCheckbox
+                    checked={allSelected}
+                    indeterminate={!allSelected && items.some((item) => selectedIds.has(item.id))}
+                    onChange={() => hookToggleSelectAll(allSelected, items)}
+                    aria-label={t("selectAllProxies")}
+                  />
+                </TableHead>
+                <TableHead>{t("tableName")}</TableHead>
+                <TableHead>{t("tableEndpoint")}</TableHead>
+                <TableHead>{t("tableStatus")}</TableHead>
+                <TableHead>{t("tableHealth")}</TableHead>
+                <TableHead>{t("tableUsage")}</TableHead>
+                <TableHead>{t("tableActions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((item) => {
+                const health = healthById[item.id];
+                return (
+                  <TableRow key={item.id}>
+                    <ProxyCheckboxCell
+                      checked={selectedIds.has(item.id)}
+                      onChange={() => toggleSelect(item.id)}
+                      label={t("selectProxy", { name: item.name })}
+                    />
+                    <TableCell>
+                      <div className="font-medium text-text-main">{item.name}</div>
+                      {item.region && <div className="text-xs text-text-muted">{item.region}</div>}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-text-muted">
+                      {item.type}://{item.host}:{item.port}
+                    </TableCell>
+                    <TableCell>
+                      <ProxyStatusBadge status={item.status} />
+                    </TableCell>
+                    <TableCell className="text-xs text-text-muted">
+                      <ProxyHealthCell
+                        testResult={testById[item.id] ?? undefined}
+                        health={health ?? undefined}
+                      />
+                    </TableCell>
+                    <TableCell className="text-xs text-text-muted">
+                      {usageById[item.id] != null
+                        ? t("assignmentsCount", { count: usageById[item.id].count })
+                        : t("noData")}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          icon="speed"
+                          onClick={() => void handleTestProxy(item)}
+                          loading={testingId === item.id}
+                        >
+                          {t("test")}
+                        </Button>
+                        {item.relayInfo?.isRelay &&
+                          (item.relayInfo.repairMode === "redeploy" ||
+                            item.relayInfo.repairMode === "recovered") && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              icon="build"
+                              onClick={() => void handleRepairRelay(item)}
+                              loading={repairingId === item.id}
+                              title={t("relayRepairTooltip")}
+                            >
+                              {t("repair")}
+                            </Button>
+                          )}
+                        {item.relayInfo?.isRelay && item.relayInfo.authMissing && (
+                          <Badge variant="warning" size="sm" className="ml-1">
+                            {t("relayAuthMissing")}
+                          </Badge>
+                        )}
+                        {repairErrorById[item.id] && (
+                          <span
+                            className="ml-1 text-[10px] text-error"
+                            title={repairErrorById[item.id]}
+                          >
+                            {t("relayRepairError")}
+                          </span>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          icon="edit"
+                          onClick={() => openEdit(item)}
+                        >
+                          {t("edit")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          icon="delete"
+                          onClick={() => void handleDelete(item.id)}
+                          className="text-error"
+                        >
+                          {t("delete")}
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         )}
       </Card>
 
@@ -958,115 +900,87 @@ export default function ProxyRegistryManager({
           autoComplete="off"
           data-1p-ignore="true"
         >
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelName")}</label>
-              <input
-                data-testid="proxy-registry-name-input"
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={form.name}
-                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelType")}</label>
-              <select
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={form.type}
-                onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value }))}
-              >
-                <option value="http">HTTP</option>
-                <option value="https">HTTPS</option>
-                <option value="socks5">SOCKS5</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelFamily")}</label>
-              <select
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={form.family}
-                onChange={(e) => setForm((prev) => ({ ...prev, family: e.target.value }))}
-              >
-                <option value="auto">{t("familyAuto")}</option>
-                <option value="ipv4">{t("familyIpv4")}</option>
-                <option value="ipv6">{t("familyIpv6")}</option>
-              </select>
-              <p className="text-[11px] text-text-muted mt-1">{t("familyHint")}</p>
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelHost")}</label>
-              <input
-                data-testid="proxy-registry-host-input"
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={form.host}
-                onChange={(e) => setForm((prev) => ({ ...prev, host: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelPort")}</label>
-              <input
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={form.port}
-                onChange={(e) => setForm((prev) => ({ ...prev, port: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelUsername")}</label>
-              <input
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={form.username}
-                autoComplete="off"
-                data-1p-ignore="true"
-                data-lpignore="true"
-                placeholder={editingId ? t("usernamePlaceholderEdit") : ""}
-                onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelPassword")}</label>
-              <input
-                type="password"
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={form.password}
-                autoComplete="new-password"
-                data-1p-ignore="true"
-                data-lpignore="true"
-                placeholder={editingId ? t("passwordPlaceholderEdit") : ""}
-                onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelRegion")}</label>
-              <input
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={form.region}
-                onChange={(e) => setForm((prev) => ({ ...prev, region: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelStatus")}</label>
-              <select
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={form.status}
-                onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
-                data-testid="proxy-registry-status-select"
-              >
-                <option value="active">{t("statusActive")}</option>
-                <option value="inactive">{t("statusInactive")}</option>
-                {form.status === "dead" && <option value="dead">dead</option>}
-              </select>
-            </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Input
+              label={t("labelName")}
+              data-testid="proxy-registry-name-input"
+              value={form.name}
+              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+            />
+            <Select
+              label={t("labelType")}
+              value={form.type}
+              onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value }))}
+            >
+              <option value="http">HTTP</option>
+              <option value="https">HTTPS</option>
+              <option value="socks5">SOCKS5</option>
+            </Select>
+            <Select
+              label={t("labelFamily")}
+              hint={t("familyHint")}
+              value={form.family}
+              onChange={(e) => setForm((prev) => ({ ...prev, family: e.target.value }))}
+            >
+              <option value="auto">{t("familyAuto")}</option>
+              <option value="ipv4">{t("familyIpv4")}</option>
+              <option value="ipv6">{t("familyIpv6")}</option>
+            </Select>
+            <Input
+              label={t("labelHost")}
+              data-testid="proxy-registry-host-input"
+              value={form.host}
+              onChange={(e) => setForm((prev) => ({ ...prev, host: e.target.value }))}
+            />
+            <Input
+              label={t("labelPort")}
+              value={form.port}
+              onChange={(e) => setForm((prev) => ({ ...prev, port: e.target.value }))}
+            />
+            <Input
+              label={t("labelUsername")}
+              value={form.username}
+              autoComplete="off"
+              data-1p-ignore="true"
+              data-lpignore="true"
+              placeholder={editingId ? t("usernamePlaceholderEdit") : ""}
+              onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
+            />
+            <Input
+              type="password"
+              label={t("labelPassword")}
+              value={form.password}
+              autoComplete="new-password"
+              data-1p-ignore="true"
+              data-lpignore="true"
+              placeholder={editingId ? t("passwordPlaceholderEdit") : ""}
+              onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+            />
+            <Input
+              label={t("labelRegion")}
+              value={form.region}
+              onChange={(e) => setForm((prev) => ({ ...prev, region: e.target.value }))}
+            />
+            <Select
+              label={t("labelStatus")}
+              value={form.status}
+              onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
+              data-testid="proxy-registry-status-select"
+            >
+              <option value="active">{t("statusActive")}</option>
+              <option value="inactive">{t("statusInactive")}</option>
+              {form.status === "dead" && <option value="dead">dead</option>}
+            </Select>
           </div>
 
-          <div>
-            <label className="text-xs text-text-muted mb-1 block">{t("labelNotes")}</label>
-            <textarea
-              className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
+          <Field label={t("labelNotes")} htmlFor={notesId}>
+            <Textarea
+              id={notesId}
               value={form.notes}
               onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
               rows={3}
             />
-          </div>
+          </Field>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
             <Button size="sm" variant="secondary" onClick={() => setModalOpen(false)}>
@@ -1088,49 +1002,42 @@ export default function ProxyRegistryManager({
         maxWidth="lg"
       >
         <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelScope")}</label>
-              <select
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={bulkScope}
-                onChange={(e) => setBulkScope(e.target.value)}
-              >
-                <option value="global">{t("scopeGlobal")}</option>
-                <option value="provider">{t("scopeProvider")}</option>
-                <option value="account">{t("scopeAccount")}</option>
-                <option value="combo">{t("scopeCombo")}</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelProxy")}</label>
-              <select
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={bulkProxyId}
-                onChange={(e) => setBulkProxyId(e.target.value)}
-              >
-                <option value="">{t("clearAssignment")}</option>
-                {items.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} ({item.type}://{item.host}:{item.port})
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Select
+              label={t("labelScope")}
+              value={bulkScope}
+              onChange={(e) => setBulkScope(e.target.value)}
+            >
+              <option value="global">{t("scopeGlobal")}</option>
+              <option value="provider">{t("scopeProvider")}</option>
+              <option value="account">{t("scopeAccount")}</option>
+              <option value="combo">{t("scopeCombo")}</option>
+            </Select>
+            <Select
+              label={t("labelProxy")}
+              value={bulkProxyId}
+              onChange={(e) => setBulkProxyId(e.target.value)}
+            >
+              <option value="">{t("clearAssignment")}</option>
+              {items.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} ({item.type}://{item.host}:{item.port})
+                </option>
+              ))}
+            </Select>
           </div>
 
           {bulkScope !== "global" && (
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("bulkLabelScopeIds")}</label>
-              <textarea
+            <Field label={t("bulkLabelScopeIds")} htmlFor={bulkScopeIdsId}>
+              <Textarea
+                id={bulkScopeIdsId}
                 data-testid="proxy-registry-bulk-scopeids-input"
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
                 rows={5}
                 value={bulkScopeIds}
                 onChange={(e) => setBulkScopeIds(e.target.value)}
                 placeholder={t("bulkScopeIdsPlaceholder")}
               />
-            </div>
+            </Field>
           )}
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
@@ -1162,42 +1069,34 @@ export default function ProxyRegistryManager({
         <div className="flex flex-col gap-3">
           <p className="text-sm text-text-muted">{t("poolDescription")}</p>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-text-muted mb-1 block">{t("labelScope")}</label>
-              <select
-                className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                value={poolScope}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Select
+              label={t("labelScope")}
+              value={poolScope}
+              onChange={(e) => {
+                setPoolScope(e.target.value);
+                setPoolLoaded(false);
+                setPoolMembers([]);
+              }}
+              data-testid="proxy-registry-pool-scope"
+            >
+              <option value="global">{t("scopeGlobal")}</option>
+              <option value="provider">{t("scopeProvider")}</option>
+              <option value="account">{t("scopeAccount")}</option>
+              <option value="combo">{t("scopeCombo")}</option>
+            </Select>
+            {poolScope !== "global" && (
+              <Input
+                label={t("poolScopeIdLabel")}
+                value={poolScopeId}
                 onChange={(e) => {
-                  setPoolScope(e.target.value);
+                  setPoolScopeId(e.target.value);
                   setPoolLoaded(false);
                   setPoolMembers([]);
                 }}
-                data-testid="proxy-registry-pool-scope"
-              >
-                <option value="global">{t("scopeGlobal")}</option>
-                <option value="provider">{t("scopeProvider")}</option>
-                <option value="account">{t("scopeAccount")}</option>
-                <option value="combo">{t("scopeCombo")}</option>
-              </select>
-            </div>
-            {poolScope !== "global" && (
-              <div>
-                <label className="text-xs text-text-muted mb-1 block">
-                  {t("poolScopeIdLabel")}
-                </label>
-                <input
-                  className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                  value={poolScopeId}
-                  onChange={(e) => {
-                    setPoolScopeId(e.target.value);
-                    setPoolLoaded(false);
-                    setPoolMembers([]);
-                  }}
-                  placeholder={t("poolScopeIdPlaceholder")}
-                  data-testid="proxy-registry-pool-scopeid"
-                />
-              </div>
+                placeholder={t("poolScopeIdPlaceholder")}
+                data-testid="proxy-registry-pool-scopeid"
+              />
             )}
           </div>
 
@@ -1216,31 +1115,26 @@ export default function ProxyRegistryManager({
 
           {poolLoaded && (
             <>
-              <div>
-                <label className="text-xs text-text-muted mb-1 block">
-                  {t("poolStrategyLabel")}
-                </label>
-                <select
-                  className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                  value={poolStrategy}
-                  onChange={(e) =>
-                    handlePoolStrategyChange(e.target.value as "round-robin" | "random" | "sticky")
-                  }
-                  data-testid="proxy-registry-pool-strategy"
-                >
-                  {POOL_STRATEGY_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {t(opt.labelKey)}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-text-muted mt-1">{t("poolStrategyHint")}</p>
-              </div>
+              <Select
+                label={t("poolStrategyLabel")}
+                hint={t("poolStrategyHint")}
+                value={poolStrategy}
+                onChange={(e) =>
+                  handlePoolStrategyChange(e.target.value as "round-robin" | "random" | "sticky")
+                }
+                data-testid="proxy-registry-pool-strategy"
+              >
+                {POOL_STRATEGY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {t(opt.labelKey)}
+                  </option>
+                ))}
+              </Select>
 
               <div>
-                <label className="text-xs text-text-muted mb-1 block">
+                <p className="text-sm font-medium mb-1">
                   {t("poolMembersLabel", { count: poolMembers.length })}
-                </label>
+                </p>
                 <PoolEgressObservation query={poolQuery()} />
                 <PoolMemberEgressLines query={poolQuery()} />
                 {poolScope === "provider" && poolScopeId.trim() !== "" && (
@@ -1257,9 +1151,9 @@ export default function ProxyRegistryManager({
                       return (
                         <div
                           key={proxyId}
-                          className="flex items-center justify-between px-3 py-2 rounded border border-border bg-bg-subtle"
+                          className="flex items-center justify-between gap-2 px-3 py-2 rounded border border-border bg-bg-subtle"
                         >
-                          <span className="text-sm">
+                          <span className="min-w-0 break-all text-sm">
                             {proxy
                               ? `${proxy.name} (${proxy.type}://${proxy.host}:${proxy.port})`
                               : proxyId}
@@ -1280,29 +1174,27 @@ export default function ProxyRegistryManager({
                 )}
               </div>
 
-              <div className="flex items-end gap-2 pt-2 border-t border-border">
-                <div className="flex-1">
-                  <label className="text-xs text-text-muted mb-1 block">{t("poolAddLabel")}</label>
-                  <select
-                    className="w-full px-3 py-2 rounded bg-bg-subtle border border-border"
-                    value={poolAddProxyId}
-                    onChange={(e) => setPoolAddProxyId(e.target.value)}
-                    data-testid="proxy-registry-pool-add-select"
-                  >
-                    <option value="">{t("poolSelectProxy")}</option>
-                    {items
-                      .filter(
-                        (item) =>
-                          !poolMembers.includes(item.id) &&
-                          (item.status ?? "").toLowerCase() !== "dead"
-                      )
-                      .map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.name} ({item.type}://{item.host}:{item.port})
-                        </option>
-                      ))}
-                  </select>
-                </div>
+              <div className="flex flex-col gap-2 pt-2 border-t border-border sm:flex-row sm:items-end">
+                <Select
+                  label={t("poolAddLabel")}
+                  className="flex-1"
+                  value={poolAddProxyId}
+                  onChange={(e) => setPoolAddProxyId(e.target.value)}
+                  data-testid="proxy-registry-pool-add-select"
+                >
+                  <option value="">{t("poolSelectProxy")}</option>
+                  {items
+                    .filter(
+                      (item) =>
+                        !poolMembers.includes(item.id) &&
+                        (item.status ?? "").toLowerCase() !== "dead"
+                    )
+                    .map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name} ({item.type}://{item.host}:{item.port})
+                      </option>
+                    ))}
+                </Select>
                 <Button
                   size="sm"
                   icon="add"
@@ -1335,26 +1227,27 @@ export default function ProxyRegistryManager({
         maxWidth="xl"
       >
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-text-muted">{t("bulkImportDescription")}</p>
+          <p className="text-sm text-text-muted" id={bulkImportDescId}>
+            {t("bulkImportDescription")}
+          </p>
 
-          <div>
-            <textarea
-              data-testid="proxy-registry-bulk-import-textarea"
-              className="w-full px-3 py-2 rounded bg-bg-subtle border border-border font-mono text-xs leading-relaxed placeholder:whitespace-pre-wrap placeholder:text-text-muted/70"
-              rows={14}
-              value={bulkImportText}
-              placeholder={BULK_IMPORT_PLACEHOLDER}
-              onChange={(e) => {
-                setBulkImportText(e.target.value);
-                setBulkImportParsedOnce(false);
-                setBulkImportResult(null);
-              }}
-              spellCheck={false}
-            />
-          </div>
+          <Textarea
+            aria-labelledby={bulkImportDescId}
+            data-testid="proxy-registry-bulk-import-textarea"
+            className="font-mono text-xs leading-relaxed placeholder:whitespace-pre-wrap"
+            rows={14}
+            value={bulkImportText}
+            placeholder={BULK_IMPORT_PLACEHOLDER}
+            onChange={(e) => {
+              setBulkImportText(e.target.value);
+              setBulkImportParsedOnce(false);
+              setBulkImportResult(null);
+            }}
+            spellCheck={false}
+          />
 
           {/* Parse button */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Button
               size="sm"
               variant="secondary"
@@ -1366,15 +1259,15 @@ export default function ProxyRegistryManager({
             </Button>
 
             {bulkImportParsedOnce && (
-              <div className="flex items-center gap-3 text-xs">
-                <span className="text-emerald-400">
+              <div className="flex flex-wrap items-center gap-3 text-xs" role="status">
+                <span className="text-success">
                   {t("bulkImportParsed", { count: bulkImportParsed.length })}
                 </span>
                 <span className="text-text-muted">
                   {t("bulkImportSkipped", { count: bulkImportSkipped })}
                 </span>
                 {bulkImportErrors.length > 0 && (
-                  <span className="text-red-400">
+                  <span className="text-error">
                     {t("bulkImportParseErrors", { count: bulkImportErrors.length })}
                   </span>
                 )}
@@ -1384,9 +1277,9 @@ export default function ProxyRegistryManager({
 
           {/* Parse errors */}
           {bulkImportErrors.length > 0 && (
-            <div className="max-h-28 overflow-y-auto rounded border border-red-500/30 bg-red-500/10 p-2">
+            <div className="max-h-28 overflow-y-auto rounded border border-error/30 bg-error-bg p-2">
               {bulkImportErrors.map((err, idx) => (
-                <div key={idx} className="text-xs text-red-400">
+                <div key={idx} className="text-xs text-error">
                   {t("bulkImportErrorLine", { line: err.line, reason: t(err.reason as any) })}
                 </div>
               ))}
@@ -1395,58 +1288,61 @@ export default function ProxyRegistryManager({
 
           {/* Preview table */}
           {bulkImportParsedOnce && bulkImportParsed.length > 0 && (
-            <div className="overflow-x-auto max-h-48 overflow-y-auto rounded border border-border">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="text-left text-text-muted border-b border-border bg-bg-subtle sticky top-0">
-                    <th className="py-1.5 px-2">{t("tableName")}</th>
-                    <th className="py-1.5 px-2">{t("labelType")}</th>
-                    <th className="py-1.5 px-2">{t("labelHost")}</th>
-                    <th className="py-1.5 px-2">{t("labelPort")}</th>
-                    <th className="py-1.5 px-2">{t("labelUsername")}</th>
-                    <th className="py-1.5 px-2">{t("labelRegion")}</th>
-                    <th className="py-1.5 px-2">{t("labelStatus")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bulkImportParsed.map((entry, idx) => (
-                    <tr key={idx} className="border-b border-border/40">
-                      <td className="py-1 px-2 font-medium text-text-main">{entry.name}</td>
-                      <td className="py-1 px-2">
-                        <span className="px-1.5 py-0.5 rounded bg-bg-subtle border border-border text-[10px]">
-                          {entry.type}
-                        </span>
-                      </td>
-                      <td className="py-1 px-2 font-mono text-text-muted">{entry.host}</td>
-                      <td className="py-1 px-2 font-mono text-text-muted">{entry.port}</td>
-                      <td className="py-1 px-2 text-text-muted">{entry.username || "—"}</td>
-                      <td className="py-1 px-2 text-text-muted">{entry.region || "—"}</td>
-                      <td className="py-1 px-2 text-text-muted">
-                        <span
-                          className={entry.status === "active" ? "text-emerald-400" : undefined}
-                        >
-                          {entry.status === "active" && t("statusActive")}
-                          {entry.status === "inactive" && t("statusInactive")}
-                          {!entry.status && "—"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table
+              scrollbarLabel={t("bulkImportTitle")}
+              containerClassName="max-h-48 overflow-y-auto"
+              className="text-xs"
+            >
+              <TableHeader className="sticky top-0">
+                <TableRow>
+                  <TableHead>{t("tableName")}</TableHead>
+                  <TableHead>{t("labelType")}</TableHead>
+                  <TableHead>{t("labelHost")}</TableHead>
+                  <TableHead>{t("labelPort")}</TableHead>
+                  <TableHead>{t("labelUsername")}</TableHead>
+                  <TableHead>{t("labelRegion")}</TableHead>
+                  <TableHead>{t("labelStatus")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bulkImportParsed.map((entry, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="font-medium text-text-main">{entry.name}</TableCell>
+                    <TableCell>
+                      <Badge size="sm">{entry.type}</Badge>
+                    </TableCell>
+                    <TableCell className="font-mono text-text-muted">{entry.host}</TableCell>
+                    <TableCell className="font-mono text-text-muted">{entry.port}</TableCell>
+                    <TableCell className="text-text-muted">{entry.username || "—"}</TableCell>
+                    <TableCell className="text-text-muted">{entry.region || "—"}</TableCell>
+                    <TableCell className="text-text-muted">
+                      <span className={entry.status === "active" ? "text-success" : undefined}>
+                        {entry.status === "active" && t("statusActive")}
+                        {entry.status === "inactive" && t("statusInactive")}
+                        {!entry.status && "—"}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
 
           {/* No valid entries warning */}
           {bulkImportParsedOnce &&
             bulkImportParsed.length === 0 &&
             bulkImportErrors.length === 0 && (
-              <div className="text-sm text-amber-400">{t("bulkImportNoValidEntries")}</div>
+              <div className="text-sm text-warning" role="status">
+                {t("bulkImportNoValidEntries")}
+              </div>
             )}
 
           {/* Import result */}
           {bulkImportResult && (
-            <div className="px-3 py-2 rounded border border-emerald-500/30 bg-emerald-500/10 text-sm text-emerald-400">
+            <div
+              role="status"
+              className="px-3 py-2 rounded border border-success/30 bg-success-bg text-sm text-success"
+            >
               {t("bulkImportSuccess", {
                 created: bulkImportResult.created,
                 updated: bulkImportResult.updated,

@@ -25,8 +25,10 @@
     "confirm": "Are you sure?",
     "refresh": "Refresh",
     "close": "Close",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Previous page",
     "nextPage": "Next page",
+    "pagination": "Pagination",
     "capsLockOn": "Caps Lock is on",
     "dismissNotification": "Dismiss notification",
     "toggleColumns": "Toggle columns",
@@ -182,6 +184,7 @@
     "combos": "Combos",
     "noModelsFound": "No models found",
     "clear": "Clear",
+    "clearFilters": "Clear filters",
     "done": "Done",
     "selectAll": "Select all",
     "unselectAll": "Unselect all",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Used by {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Preview",
     "batchFilePreviewTruncated": "Showing first {shown} lines ({total} total lines)",
-    "batchFileDownloadFull": "Download Full File"
+    "batchFileDownloadFull": "Download Full File",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Send tokens between API keys, share invite codes and connect community servers.",
+    "tokensServerUrlLabel": "Server URL"
   },
   "disabled": "Disabled",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Route budget-exhausted requests to the emergency free fallback provider/model.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 or @channelname",
       "chatIdHint": "The unique numerical identifier or public username of the chat/channel.",
       "tutorial": "How to configure Telegram webhook:"
-    }
+    },
+    "copy": "Copy",
+    "copied": "Copied!",
+    "expandDetails": "Show details",
+    "collapseDetails": "Hide details"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Calls (24h)",
     "mcpMetricSuccessRate": "Success rate",
     "mcpMetricAvgDuration": "Avg duration",
-    "mcpMetricTopTool": "Top tool"
+    "mcpMetricTopTool": "Top tool",
+    "dismissError": "Dismiss error"
   },
   "themesPage": {
     "title": "Themes",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "Quick nav",
     "quickNavigationTitle": "Quick navigation (⌘K / Ctrl+K)",
     "openQuickNavigation": "Open quick navigation",
+    "openMenu": "Open menu",
+    "products": "Keak products",
     "switchToLightMode": "Switch to light mode",
     "switchToDarkMode": "Switch to dark mode",
     "language": "Language",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "Only selected connections",
     "selectAtLeastOneConnection": "Select at least one connection or choose All connections.",
     "allConnectionsDesc": "This key can use any active connection.",
-    "restrictedToConnections": "Restricted to {count, plural, one {# connection} other {# connections}}."
+    "restrictedToConnections": "Restricted to {count, plural, one {# connection} other {# connections}}.",
+    "removeSelection": "Remove {name}"
   },
   "auditLog": {
     "title": "Audit Log",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "Configure the Image→Text bridge in Modality Bridge settings",
     "sttBridgeCta": "Configure the Speech→Text bridge in Modality Bridge settings",
     "existingConnection": "Existing connection",
-    "openrouterSttDescription": "OpenRouter speech-to-text models use your configured OpenRouter connection. No separate credential is required."
+    "openrouterSttDescription": "OpenRouter speech-to-text models use your configured OpenRouter connection. No separate credential is required.",
+    "modalityTabsAria": "Media type",
+    "serviceKindsAria": "Service type"
   },
   "search": {
     "searchQuery": "Search Query",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "Unknown",
     "cliproxyapiUpdate": "Update",
     "cliproxyapiUpdateAvailable": "Update available: v{current} → v{latest}",
-    "cliproxyapiVersion": "Version"
+    "cliproxyapiVersion": "Version",
+    "removeMapping": "Remove mapping"
   },
   "modelCatalog": {
     "title": "Models & Combos",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "No combos configured yet.",
     "playgroundCreateFirst": "Create one first",
     "weighted": "Weighted",
+    "weightPercent": "Weight (%)",
     "leastUsed": "Least-Used",
     "costOpt": "Cost-Opt",
     "strategyGuideTitle": "How to use this strategy",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# account} other {# accounts}}",
     "builderGlobalAdded": "Added",
     "builderGlobalAdd": "Add",
+    "clearSearch": "Clear search",
     "manualModel": "Manual model",
     "manualModelInvalid": "Enter a model as provider/model.",
     "manualModelUnknownProvider": "Unknown provider prefix.",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "Minimum content length (chars)",
     "responseValidationJsonPaths": "JSON-path checks",
     "responseValidationAddCheck": "+ Add check",
+    "responseValidationRemoveCheck": "Remove check",
+    "responseValidationPath": "JSON path",
+    "responseValidationCondition": "Condition",
+    "responseValidationValue": "Expected value",
     "agentFeaturesSystemMessageOverride": "Override system message",
     "agentFeaturesSystemMessagePlaceholder": "You are an expert assistant...",
     "agentFeaturesSystemMessageHint": "System message override for agents",
@@ -5288,7 +5311,8 @@
         "skipped": "already configured",
         "failed": "failed"
       }
-    }
+    },
+    "stepProgress": "Setup progress"
   },
   "providers": {
     "tosAvoidNoticeTitle": "This provider is excluded from auto by default",
@@ -7707,6 +7731,7 @@
     "configured": "configured",
     "none": "None",
     "modelOverrideValuePlaceholder": "Numeric value",
+    "modelOverrideKey": "Override key",
     "modelOverrideReasoningEffortsPlaceholder": "English comma-separated, e.g. low, medium, high",
     "addKeyValue": "Add key value",
     "noModelOverrides": "No overrides configured for this model.",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "Passed",
     "tomlTestFailed": "Failed",
     "tomlImportError": "Could not process the RTK TOML file.",
-    "tomlFileReadError": "Could not read the selected TOML file."
+    "tomlFileReadError": "Could not read the selected TOML file.",
+    "viewMode": "View mode"
   },
   "compressionEngineConfig": {
     "loading": "Loading…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "Language packs: {packs}",
     "dragToReorder": "Drag to reorder step",
     "engine": "Engine",
-    "intensity": "Intensity"
+    "intensity": "Intensity",
+    "compressionOverride": "Compression override"
   },
   "compressionStudio": {
     "noRun": "No compression run available.",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "winner: {winner}",
     "encoder": "encoder",
     "bytes": "bytes",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Studio views"
   },
   "omniglyph": {
     "preview": "Preview",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "Messages shorter than this are not compressed. Lower = more compression.",
     "tooltipMinSavings": "Only compress if it saves at least this many tokens.",
     "ultraSettings": "Ultra Settings",
-    "ultraSettingsDesc": "SLM-powered semantic compression"
+    "ultraSettingsDesc": "SLM-powered semantic compression",
+    "defaultLanguage": "Default language",
+    "viewMode": "View mode"
   },
   "translator": {
     "title": "Translator",
@@ -11078,7 +11108,8 @@
       "message": "Message",
       "error": "Error",
       "completion": "Completion"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Simple Chat",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "{minutes}m ago",
     "hoursAgo": "{hours}h ago",
     "daysAgo": "{days}d ago",
-    "entries": "Entries"
+    "entries": "Entries",
+    "viewSwitcherAria": "Cache view"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11447,6 +11479,7 @@
     "tableHealth": "Health (24h)",
     "tableUsage": "Usage",
     "tableActions": "Actions",
+    "moreActions": "More actions",
     "test": "Test",
     "edit": "Edit",
     "delete": "Delete",
@@ -11809,7 +11842,8 @@
       "nextButton": "Next",
       "runButton": "Run",
       "promptPlaceholder": "Enter your message… (Enter to send, Shift+Enter for newline)"
-    }
+    },
+    "playgroundTabs": "Playground modes"
   },
   "miniPlayground": {
     "endpoint": "Endpoint",
@@ -11880,7 +11914,8 @@
     "assistant": "Assistant",
     "errorLabel": "Error",
     "requestFailed": "Request failed",
-    "stop": "Stop"
+    "stop": "Stop",
+    "messageInputAria": "Message"
   },
   "requestLogger": {
     "recording": "Recording",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "{count} account rotations",
       "resilienceRetried": "Retried empty turn",
       "resilienceContinued": "Resumed mid-stream",
-      "resilienceRecovered": "Recovered by a resilience action"
-    }
+      "resilienceRecovered": "Recovered by a resilience action",
+      "conversationContext": "Conversation Context",
+      "goToBottom": "Go to bottom",
+      "liveRefreshOn": "Live refresh: on",
+      "liveRefreshOff": "Live refresh: off",
+      "liveRefresh": "Live refresh",
+      "continuesFromParent": "continues from parent",
+      "continuesFrom": "Continues from {id}",
+      "viewConversation": "view conversation",
+      "openConversation": "Open conversation {id}"
+    },
+    "tableLabel": "Request logs"
   },
   "proxyLogger": {
     "filterAll": "All",
@@ -12113,7 +12158,9 @@
     "colServedBy": "Served by",
     "filterTraffic": "Traffic",
     "filterTests": "Tests",
-    "filterSource": "Source"
+    "filterSource": "Source",
+    "tableLabel": "Proxy logs",
+    "sortLogs": "Sort logs"
   },
   "endpointOptions": {
     "speech": "Speech",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "EXHAUSTED",
     "statusAlerting": "ALERTING",
     "statusError": "ERROR",
-    "moreSuffix": "+{count} more"
+    "moreSuffix": "+{count} more",
+    "feedFilterLabel": "Filter events"
   },
   "quotaShare": {
     "weightPercent": "Weight %",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "Ungrouped",
     "ungroupedHint": "These pools are not assigned to a known group. Edit a pool to move it into a real group.",
     "removeFailed": "Could not remove this pool.",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "allocationsHeading": "Allocations",
+    "wizardRemoveDimension": "Remove dimension",
+    "wizardRemoveKey": "Remove key"
   },
   "plugins": {
     "title": "Plugins",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "Settings update failed",
       "serviceRevealApiKey": "{actor} revealed API key for {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Dismiss error"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "Go now",
       "message": "The MITM Proxy now lives under AgentBridge.",
       "title": "This page has moved"
-    }
+    },
+    "dnsOn": "DNS on",
+    "dnsOff": "DNS off",
+    "showServerSettings": "Show server settings",
+    "hideServerSettings": "Hide server settings",
+    "upstreamCaTesting": "Testing…",
+    "removeMapping": "Remove mapping",
+    "mappingSourcePlaceholder": "e.g., gemini-3.6-flash-medium, or * for all unmapped",
+    "mappingWildcardHint": "Use * as the source to route every model without an explicit mapping through OmniRoute to the selected target. Exact source matches always win over *.",
+    "wizardDetectingModels": "Detecting models from intercepted traffic...",
+    "wizardDetectedModels": "Found {count, plural, one {# model} other {# models}} in intercepted traffic. Select the ones you want to add:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# models}} selected. You'll map them to OmniRoute models in the next screen.",
+    "wizardAddModels": "Add {count, plural, one {# model} other {# models}}",
+    "wizardNoModelsDetected": "No models detected yet. Use {agent} to make a request, then run this wizard again to auto-detect models from traffic.",
+    "wizardNoModelsHint": "Or close this wizard and add mappings manually in the agent card."
   },
   "providerStats": {
     "unknownError": "Unknown error",
@@ -12686,7 +12752,11 @@
     "avgTtft": "Avg TTFT",
     "avgTotal": "Avg Total",
     "requestTelemetry": "Request Telemetry",
-    "requestTelemetryDescription": "7-phase pipeline breakdown (last 5 minutes)"
+    "requestTelemetryDescription": "7-phase pipeline breakdown (last 5 minutes)",
+    "title": "Provider stats",
+    "description": "Per-provider and per-model traffic, latency and success rates",
+    "combo": "Combo",
+    "toggleModels": "Show models for {provider}"
   },
   "relay": {
     "title": "Serverless Relay Proxies",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "No request body.",
     "noResponseBody": "No response body.",
     "formatted": "Formatted",
-    "raw": "Raw"
+    "raw": "Raw",
+    "requestCount": "{count, plural, one {# request} other {# requests}}",
+    "expandList": "Expand list",
+    "collapseList": "Collapse list",
+    "snippetLanguage": "Snippet language",
+    "headersTable": "Headers",
+    "showSecrets": "Show secrets",
+    "maskSecrets": "Mask secrets",
+    "llmNotAvailable": "LLM metadata not available for this request.",
+    "llmStreamYes": "yes (SSE)",
+    "llmStreamNo": "no",
+    "llmTotalTokens": "Total: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "Share of calls this provider actually answered over the last 24 hours. A dash means it served too little traffic to state a rate.",
     "reliabilitySample": "{successes} of {requests} calls succeeded in the last {hours}h",
     "reliabilityTooFew": "Only {requests} calls in the last {hours}h — too few to state a rate",
-    "reliabilityNoTraffic": "No calls recorded in the last 24h"
+    "reliabilityNoTraffic": "No calls recorded in the last 24h",
+    "categoryFilter": "Task category"
   },
   "discovery": {
     "title": "Provider Discovery",
@@ -13331,7 +13413,11 @@
     "method": "Method",
     "auth": "Auth",
     "feasibility": "Feasibility",
-    "models": "Models"
+    "models": "Models",
+    "provider": "Provider",
+    "status": "Status",
+    "endpoint": "Endpoint",
+    "actions": "Actions"
   },
   "noAuthProvider": {
     "title": "No authentication required",
@@ -13380,7 +13466,8 @@
     "ownProxy": "Own proxy",
     "freeTierPause": "Model {model} paused (429), back at {time}",
     "freeTierPauseProvider": "Paused (429), back at {time}",
-    "freeTierPauseNote": "In-process pause on this instance"
+    "freeTierPauseNote": "In-process pause on this instance",
+    "proxyType": "Proxy type"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "A hidden achievement awaits...",
         "criteria": "Complete the hidden achievement to reveal this badge."
       }
-    }
+    },
+    "leaderboardTitle": "Leaderboard",
+    "leaderboardDescription": "Rankings and achievements across your API keys",
+    "badgeLocked": "Locked"
   },
   "featureFlags": {
     "title": "Feature Flags",
@@ -13794,6 +13884,7 @@
     "latency": "Latency",
     "quota": "Quota",
     "rangeWindow": "{range} window",
+    "timeRange": "Time range",
     "runtimeHealthBlend": "runtime/health blend",
     "averageResponseTime": "average response time",
     "worstQuota": "Worst quota",
@@ -13995,7 +14086,11 @@
     "learnMore": "Learn more",
     "changelogLoadFailed": "Could not load the changelog. Please try again later.",
     "retry": "Retry",
-    "viewFullHistory": "View full history on GitHub"
+    "viewFullHistory": "View full history on GitHub",
+    "title": "News & changelog",
+    "description": "Announcements from the OmniRoute team and the latest release notes",
+    "viewLabel": "View",
+    "loadingNews": "Loading announcements..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "Provider Circuit Breaker State",
       "lastUpdate": "Last update: {timestamp}",
       "uptimeMinutes": "{minutes}m",
-      "uptimeHoursMinutes": "{hours}h {minutes}m"
+      "uptimeHoursMinutes": "{hours}h {minutes}m",
+      "breakerClosed": "Closed",
+      "breakerNotClosed": "Open or half-open"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "Maintenance Details",
         "secondaryAction": "System Status"
       }
+    },
+    "miniapp": {
+      "askAnything": "Ask anything…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} visible / {total} total",
+    "modeLabel": "View mode",
+    "jumpToNow": "Jump to current time, NOW line resets to position {position}%",
+    "laneReuse": "Lane reuse",
+    "laneReuseLabel": "Lane reuse window (minutes)",
+    "laneReuseHint": "Requests sharing a conversation id stay on the same timeline row as long as the gap between them is under this many minutes.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Auto-refresh",
+    "autoRefreshLabel": "Auto-refresh interval (seconds)",
+    "autoRefreshHint": "How often the timeline re-fetches the request list from the server.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in"
   },
   "metadata": {
     "compressionTitle": "Compression",

@@ -25,8 +25,10 @@
     "confirm": "Bạn có chắc không?",
     "refresh": "Làm mới",
     "close": "Đóng",
+    "dialogTitleFallback": "Hộp thoại",
     "previousPage": "Trang trước",
     "nextPage": "Trang sau",
+    "pagination": "Phân trang",
     "capsLockOn": "Caps Lock đang bật",
     "dismissNotification": "Đóng thông báo",
     "toggleColumns": "Bật/tắt cột",
@@ -182,6 +184,7 @@
     "combos": "Combo",
     "noModelsFound": "Không tìm thấy mô hình nào",
     "clear": "Xóa",
+    "clearFilters": "Xóa bộ lọc",
     "done": "Xong",
     "selectAll": "Chọn tất cả",
     "unselectAll": "Bỏ chọn tất cả",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# batch} other {# batch}}",
     "batchFilePreview": "Bản xem trước",
     "batchFilePreviewTruncated": "Hiển thị {shown} dòng đầu tiên (tổng cộng {total} dòng)",
-    "batchFileDownloadFull": "Tải xuống toàn bộ tệp"
+    "batchFileDownloadFull": "Tải xuống toàn bộ tệp",
+    "tokensPageTitle": "Token",
+    "tokensPageDescription": "Gửi token giữa các khóa API, chia sẻ mã mời và kết nối máy chủ cộng đồng.",
+    "tokensServerUrlLabel": "URL máy chủ"
   },
   "disabled": "Đã tắt",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Định tuyến các yêu cầu đã hết ngân sách đến nhà cung cấp/mô hình dự phòng khẩn cấp miễn phí.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 hoặc @channelname",
       "chatIdHint": "Mã định danh số duy nhất hoặc tên người dùng công khai của cuộc trò chuyện/kênh.",
       "tutorial": "Cách cấu hình webhook Telegram:"
-    }
+    },
+    "copy": "Sao chép",
+    "copied": "Đã sao chép!",
+    "expandDetails": "Hiện chi tiết",
+    "collapseDetails": "Ẩn chi tiết"
   },
   "compliance": {
     "auditTitle": "Kiểm toán",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Lượt gọi (24 giờ)",
     "mcpMetricSuccessRate": "Tỷ lệ thành công",
     "mcpMetricAvgDuration": "Thời lượng trung bình",
-    "mcpMetricTopTool": "tool hàng đầu"
+    "mcpMetricTopTool": "tool hàng đầu",
+    "dismissError": "Bỏ qua lỗi"
   },
   "themesPage": {
     "title": "Chủ đề",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "Điều hướng nhanh",
     "quickNavigationTitle": "Điều hướng nhanh (⌘K / Ctrl+K)",
     "openQuickNavigation": "Mở điều hướng nhanh",
+    "openMenu": "Mở menu",
+    "products": "Sản phẩm Keak",
     "switchToLightMode": "Chuyển sang chế độ sáng",
     "switchToDarkMode": "Chuyển sang chế độ tối",
     "language": "Ngôn ngữ",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "Chỉ các kết nối đã chọn",
     "selectAtLeastOneConnection": "Chọn ít nhất một kết nối hoặc chọn Tất cả kết nối.",
     "allConnectionsDesc": "Khóa này có thể dùng bất kỳ kết nối đang hoạt động nào.",
-    "restrictedToConnections": "Giới hạn ở {count, plural, one {# kết nối} other {# kết nối}}."
+    "restrictedToConnections": "Giới hạn ở {count, plural, one {# kết nối} other {# kết nối}}.",
+    "removeSelection": "Xóa {name}"
   },
   "auditLog": {
     "title": "Nhật ký kiểm tra",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "Cấu hình cầu Hình Ảnh→Văn Bản trong cài đặt Cầu Modality",
     "sttBridgeCta": "Cấu hình cầu Nói→Văn bản trong cài đặt Cầu Modality",
     "existingConnection": "Kết nối hiện có",
-    "openrouterSttDescription": "Mô hình chuyển đổi giọng nói thành văn bản của OpenRouter sử dụng kết nối OpenRouter đã được cấu hình của bạn. Không cần thông tin xác thực riêng biệt."
+    "openrouterSttDescription": "Mô hình chuyển đổi giọng nói thành văn bản của OpenRouter sử dụng kết nối OpenRouter đã được cấu hình của bạn. Không cần thông tin xác thực riêng biệt.",
+    "modalityTabsAria": "Loại phương tiện",
+    "serviceKindsAria": "Loại dịch vụ"
   },
   "search": {
     "searchQuery": "Truy vấn tìm kiếm",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "Không rõ",
     "cliproxyapiUpdate": "Cập nhật",
     "cliproxyapiUpdateAvailable": "Có bản cập nhật: v{current} → v{latest}",
-    "cliproxyapiVersion": "Phiên bản"
+    "cliproxyapiVersion": "Phiên bản",
+    "removeMapping": "Xóa ánh xạ"
   },
   "modelCatalog": {
     "title": "Mô hình & Combo",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Chưa cấu hình combo nào.",
     "playgroundCreateFirst": "Tạo combo trước",
     "weighted": "Có trọng số",
+    "weightPercent": "Trọng số (%)",
     "leastUsed": "Ít được sử dụng nhất",
     "costOpt": "Tối ưu hóa chi phí",
     "strategyGuideTitle": "Cách sử dụng chiến lược này",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# tài khoản} other {# tài khoản}}",
     "builderGlobalAdded": "Đã thêm",
     "builderGlobalAdd": "Thêm",
+    "clearSearch": "Xóa tìm kiếm",
     "manualModel": "Mô hình thủ công",
     "manualModelInvalid": "Nhập mô hình theo dạng nhà cung cấp/mô hình.",
     "manualModelUnknownProvider": "Tiền tố nhà cung cấp không xác định.",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "Độ dài nội dung tối thiểu (ký tự)",
     "responseValidationJsonPaths": "Các kiểm tra đường dẫn JSON",
     "responseValidationAddCheck": "+ Thêm kiểm tra",
+    "responseValidationRemoveCheck": "Xóa kiểm tra",
+    "responseValidationPath": "Đường dẫn JSON",
+    "responseValidationCondition": "Điều kiện",
+    "responseValidationValue": "Giá trị mong đợi",
     "agentFeaturesSystemMessageOverride": "Ghi đè thông báo hệ thống",
     "agentFeaturesSystemMessagePlaceholder": "Bạn là một trợ lý chuyên nghiệp...",
     "agentFeaturesSystemMessageHint": "Ghi đè thông báo hệ thống cho tác nhân",
@@ -5288,7 +5311,8 @@
         "skipped": "đã được cấu hình",
         "failed": "thất bại"
       }
-    }
+    },
+    "stepProgress": "Tiến độ thiết lập"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Nhà cung cấp này mặc định bị loại khỏi auto",
@@ -7707,6 +7731,7 @@
     "configured": "đã định cấu hình",
     "none": "Không có",
     "modelOverrideValuePlaceholder": "Giá trị số",
+    "modelOverrideKey": "Khóa ghi đè",
     "modelOverrideReasoningEffortsPlaceholder": "Các giá trị tiếng Anh được phân tách bằng dấu phẩy, ví dụ: low, medium, high",
     "addKeyValue": "Thêm cặp khóa-giá trị",
     "noModelOverrides": "Không có ghi đè nào được định cấu hình cho mô hình này.",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "Đạt",
     "tomlTestFailed": "Không đạt",
     "tomlImportError": "Không thể xử lý tệp RTK TOML.",
-    "tomlFileReadError": "Không thể đọc tệp TOML đã chọn."
+    "tomlFileReadError": "Không thể đọc tệp TOML đã chọn.",
+    "viewMode": "Chế độ xem"
   },
   "compressionEngineConfig": {
     "loading": "Đang tải…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "Gói ngôn ngữ: {packs}",
     "dragToReorder": "Kéo để sắp xếp lại bước",
     "engine": "Bộ máy",
-    "intensity": "Cường độ"
+    "intensity": "Cường độ",
+    "compressionOverride": "Ghi đè nén"
   },
   "compressionStudio": {
     "noRun": "Chưa có lượt nén nào.",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "tốt nhất: {winner}",
     "encoder": "bộ mã hóa",
     "bytes": "byte",
-    "tokensCl100k": "token (cl100k)"
+    "tokensCl100k": "token (cl100k)",
+    "studioViews": "Các chế độ xem của studio"
   },
   "omniglyph": {
     "preview": "Xem trước",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "Tin nhắn ngắn hơn mức này sẽ không được nén. Thấp hơn = nén nhiều hơn.",
     "tooltipMinSavings": "Chỉ nén nếu tiết kiệm được ít nhất ngần này token.",
     "ultraSettings": "Cài đặt tối đa",
-    "ultraSettingsDesc": "Nén ngữ nghĩa sử dụng SLM"
+    "ultraSettingsDesc": "Nén ngữ nghĩa sử dụng SLM",
+    "defaultLanguage": "Ngôn ngữ mặc định",
+    "viewMode": "Chế độ xem"
   },
   "translator": {
     "title": "Trình dịch",
@@ -11078,7 +11108,8 @@
       "message": "Tin nhắn",
       "error": "Lỗi",
       "completion": "Hoàn tất"
-    }
+    },
+    "statusFilter": "Trạng thái"
   },
   "templateNames": {
     "simple-chat": "Trò chuyện đơn giản",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "{minutes} phút trước",
     "hoursAgo": "{hours} giờ trước",
     "daysAgo": "{days} ngày trước",
-    "entries": "Mục"
+    "entries": "Mục",
+    "viewSwitcherAria": "Chế độ xem bộ nhớ đệm"
   },
   "proxyConfigModal": {
     "levelGlobal": "Toàn cầu",
@@ -11447,6 +11479,7 @@
     "tableHealth": "Trạng thái hoạt động (24h)",
     "tableUsage": "Mức sử dụng",
     "tableActions": "Hành động",
+    "moreActions": "Thêm thao tác",
     "test": "Kiểm tra",
     "edit": "Chỉnh sửa",
     "delete": "Xóa",
@@ -11809,7 +11842,8 @@
       "nextButton": "Tiếp theo",
       "runButton": "Chạy",
       "promptPlaceholder": "Nhập tin nhắn của bạn… (Enter để gửi, Shift+Enter để xuống dòng)"
-    }
+    },
+    "playgroundTabs": "Chế độ playground"
   },
   "miniPlayground": {
     "endpoint": "Điểm cuối",
@@ -11880,7 +11914,8 @@
     "assistant": "Trợ lý",
     "errorLabel": "Lỗi",
     "requestFailed": "Yêu cầu thất bại",
-    "stop": "Dừng"
+    "stop": "Dừng",
+    "messageInputAria": "Tin nhắn"
   },
   "requestLogger": {
     "recording": "Đang ghi",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "{count} lần chuyển tài khoản",
       "resilienceRetried": "Đã thử lại lượt trống",
       "resilienceContinued": "Đã tiếp tục giữa luồng",
-      "resilienceRecovered": "Đã khôi phục bằng hành động phục hồi"
-    }
+      "resilienceRecovered": "Đã khôi phục bằng hành động phục hồi",
+      "conversationContext": "Ngữ cảnh hội thoại",
+      "goToBottom": "Xuống cuối",
+      "liveRefreshOn": "Làm mới trực tiếp: bật",
+      "liveRefreshOff": "Làm mới trực tiếp: tắt",
+      "liveRefresh": "Làm mới trực tiếp",
+      "continuesFromParent": "tiếp nối từ yêu cầu cha",
+      "continuesFrom": "Tiếp nối từ {id}",
+      "viewConversation": "xem hội thoại",
+      "openConversation": "Mở hội thoại {id}"
+    },
+    "tableLabel": "Nhật ký yêu cầu"
   },
   "proxyLogger": {
     "filterAll": "Tất cả",
@@ -12113,7 +12158,9 @@
     "colServedBy": "Được phục vụ bởi",
     "filterTraffic": "Lưu lượng",
     "filterTests": "Bài kiểm tra",
-    "filterSource": "Nguồn"
+    "filterSource": "Nguồn",
+    "tableLabel": "Nhật ký proxy",
+    "sortLogs": "Sắp xếp nhật ký"
   },
   "endpointOptions": {
     "speech": "Giọng nói",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "ĐÃ CẠN KIỆT",
     "statusAlerting": "ĐANG CẢNH BÁO",
     "statusError": "LỖI",
-    "moreSuffix": "+{count} nữa"
+    "moreSuffix": "+{count} nữa",
+    "feedFilterLabel": "Lọc sự kiện"
   },
   "quotaShare": {
     "weightPercent": "Trọng số %",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "Chưa phân nhóm",
     "ungroupedHint": "Các pool này chưa được gán cho một nhóm mà hệ thống nhận diện. Hãy chỉnh sửa một pool để chuyển pool đó vào một nhóm hợp lệ.",
     "removeFailed": "Không thể xóa nhóm này.",
-    "dismiss": "Đóng"
+    "dismiss": "Đóng",
+    "allocationsHeading": "Phân bổ",
+    "wizardRemoveDimension": "Xóa chiều hạn mức",
+    "wizardRemoveKey": "Xóa khóa"
   },
   "plugins": {
     "title": "Plugin",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "Cập nhật cài đặt thất bại",
       "serviceRevealApiKey": "{actor} đã hiển thị khóa API của {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Bỏ qua lỗi"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "Đi ngay",
       "message": "MITM Proxy hiện nằm trong AgentBridge.",
       "title": "Trang này đã được di chuyển"
-    }
+    },
+    "dnsOn": "DNS bật",
+    "dnsOff": "DNS tắt",
+    "showServerSettings": "Hiện cài đặt máy chủ",
+    "hideServerSettings": "Ẩn cài đặt máy chủ",
+    "upstreamCaTesting": "Đang kiểm tra…",
+    "removeMapping": "Xóa ánh xạ",
+    "mappingSourcePlaceholder": "vd: gemini-3.6-flash-medium, hoặc * cho tất cả chưa ánh xạ",
+    "mappingWildcardHint": "Dùng * làm nguồn để định tuyến mọi mô hình chưa có ánh xạ qua OmniRoute tới đích đã chọn. Khớp chính xác luôn ưu tiên hơn *.",
+    "wizardDetectingModels": "Đang phát hiện mô hình từ lưu lượng bị chặn...",
+    "wizardDetectedModels": "Tìm thấy {count} mô hình trong lưu lượng bị chặn. Chọn những mô hình bạn muốn thêm:",
+    "wizardSelectedModels": "Đã chọn {count} mô hình. Bạn sẽ ánh xạ chúng tới mô hình OmniRoute ở màn hình tiếp theo.",
+    "wizardAddModels": "Thêm {count} mô hình",
+    "wizardNoModelsDetected": "Chưa phát hiện mô hình nào. Dùng {agent} để gửi một yêu cầu, rồi chạy lại trình hướng dẫn này để tự phát hiện mô hình từ lưu lượng.",
+    "wizardNoModelsHint": "Hoặc đóng trình hướng dẫn này và thêm ánh xạ thủ công trong thẻ tác nhân."
   },
   "providerStats": {
     "unknownError": "Lỗi không xác định",
@@ -12686,7 +12752,11 @@
     "avgTtft": "TTFT trung bình",
     "avgTotal": "Tổng thời gian trung bình",
     "requestTelemetry": "Phân tích từ xa yêu cầu",
-    "requestTelemetryDescription": "Phân tích quy trình 7 giai đoạn trong 5 phút qua"
+    "requestTelemetryDescription": "Phân tích quy trình 7 giai đoạn trong 5 phút qua",
+    "title": "Thống kê nhà cung cấp",
+    "description": "Lưu lượng, độ trễ và tỷ lệ thành công theo nhà cung cấp và mô hình",
+    "combo": "Combo",
+    "toggleModels": "Hiện các mô hình của {provider}"
   },
   "relay": {
     "title": "Relay Proxy không máy chủ",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "Không có phần thân yêu cầu.",
     "noResponseBody": "Không có phần thân phản hồi.",
     "formatted": "Đã định dạng",
-    "raw": "Dữ liệu thô"
+    "raw": "Dữ liệu thô",
+    "requestCount": "{count} yêu cầu",
+    "expandList": "Mở rộng danh sách",
+    "collapseList": "Thu gọn danh sách",
+    "snippetLanguage": "Ngôn ngữ đoạn mã",
+    "headersTable": "Tiêu đề",
+    "showSecrets": "Hiện bí mật",
+    "maskSecrets": "Ẩn bí mật",
+    "llmNotAvailable": "Không có siêu dữ liệu LLM cho yêu cầu này.",
+    "llmStreamYes": "có (SSE)",
+    "llmStreamNo": "không",
+    "llmTotalTokens": "Tổng: {count} token"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "Tỷ lệ lệnh gọi mà nhà cung cấp này thực sự trả lời trong 24 giờ qua. Dấu gạch ngang nghĩa là lưu lượng quá ít để đưa ra tỷ lệ.",
     "reliabilitySample": "{successes} trong {requests} lệnh gọi thành công trong {hours}h qua",
     "reliabilityTooFew": "Chỉ có {requests} lệnh gọi trong {hours}h qua — quá ít để đưa ra tỷ lệ",
-    "reliabilityNoTraffic": "Không ghi nhận lệnh gọi nào trong 24h qua"
+    "reliabilityNoTraffic": "Không ghi nhận lệnh gọi nào trong 24h qua",
+    "categoryFilter": "Danh mục tác vụ"
   },
   "discovery": {
     "title": "Khám phá nhà cung cấp",
@@ -13331,7 +13413,11 @@
     "method": "Phương thức",
     "auth": "Xác thực",
     "feasibility": "Tính khả thi",
-    "models": "Mô hình"
+    "models": "Mô hình",
+    "provider": "Nhà cung cấp",
+    "status": "Trạng thái",
+    "endpoint": "Điểm cuối",
+    "actions": "Hành động"
   },
   "noAuthProvider": {
     "title": "Không cần xác thực",
@@ -13380,7 +13466,8 @@
     "ownProxy": "Proxy riêng",
     "freeTierPause": "Mô hình {model} đã tạm dừng (429), quay lại lúc {time}",
     "freeTierPauseProvider": "Đã tạm dừng (429), quay lại lúc {time}",
-    "freeTierPauseNote": "Tạm dừng trong tiến trình trên phiên bản này"
+    "freeTierPauseNote": "Tạm dừng trong tiến trình trên phiên bản này",
+    "proxyType": "Loại proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "Một thành tích ẩn đang chờ bạn...",
         "criteria": "Hoàn thành thành tích ẩn để mở huy hiệu này."
       }
-    }
+    },
+    "leaderboardTitle": "Bảng xếp hạng",
+    "leaderboardDescription": "Xếp hạng và thành tích giữa các khóa API của bạn",
+    "badgeLocked": "Đã khóa"
   },
   "featureFlags": {
     "title": "Cờ tính năng",
@@ -13794,6 +13884,7 @@
     "latency": "Độ trễ",
     "quota": "Hạn ngạch",
     "rangeWindow": "khung {range}",
+    "timeRange": "Khoảng thời gian",
     "runtimeHealthBlend": "kết hợp runtime/tình trạng",
     "averageResponseTime": "thời gian phản hồi trung bình",
     "worstQuota": "Hạn ngạch thấp nhất",
@@ -13995,7 +14086,11 @@
     "learnMore": "Tìm hiểu thêm",
     "changelogLoadFailed": "Không thể tải lịch sử thay đổi. Vui lòng thử lại sau.",
     "retry": "Thử lại",
-    "viewFullHistory": "Xem toàn bộ lịch sử trên GitHub"
+    "viewFullHistory": "Xem toàn bộ lịch sử trên GitHub",
+    "title": "Tin tức và nhật ký thay đổi",
+    "description": "Thông báo từ nhóm OmniRoute và ghi chú phát hành mới nhất",
+    "viewLabel": "Chế độ xem",
+    "loadingNews": "Đang tải thông báo..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "Trạng thái circuit breaker của provider",
       "lastUpdate": "Cập nhật lần cuối: {timestamp}",
       "uptimeMinutes": "{minutes} phút",
-      "uptimeHoursMinutes": "{hours} giờ {minutes} phút"
+      "uptimeHoursMinutes": "{hours} giờ {minutes} phút",
+      "breakerClosed": "Đóng",
+      "breakerNotClosed": "Mở hoặc nửa mở"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "Chi tiết bảo trì",
         "secondaryAction": "Trạng thái hệ thống"
       }
+    },
+    "miniapp": {
+      "askAnything": "Hỏi bất cứ điều gì…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "Công cụ MCP",
     "scope": "Phạm vi",
-    "apiKey": "Khóa API"
+    "apiKey": "Khóa API",
+    "visibleCount": "{visible} hiển thị / {total} tổng",
+    "modeLabel": "Chế độ xem",
+    "jumpToNow": "Về thời điểm hiện tại, vạch HIỆN TẠI trở về vị trí {position}%",
+    "laneReuse": "Tái dùng làn",
+    "laneReuseLabel": "Khoảng tái dùng làn (phút)",
+    "laneReuseHint": "Các yêu cầu cùng mã hội thoại ở lại cùng một hàng trên dòng thời gian khi khoảng cách giữa chúng nhỏ hơn số phút này.",
+    "laneReuseUnit": "phút",
+    "autoRefresh": "Tự động làm mới",
+    "autoRefreshLabel": "Chu kỳ tự động làm mới (giây)",
+    "autoRefreshHint": "Tần suất dòng thời gian tải lại danh sách yêu cầu từ máy chủ.",
+    "autoRefreshUnit": "giây",
+    "zoomOut": "Thu nhỏ",
+    "zoomIn": "Phóng to"
   },
   "metadata": {
     "compressionTitle": "Nén",

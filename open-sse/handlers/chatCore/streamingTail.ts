@@ -658,7 +658,11 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     clientResponseFormat === FORMATS.OPENAI &&
     !isResponsesEndpoint &&
     !isDroidCLI;
-  const streamStateBody = finalBody || body;
+  // Response arguments belong to the client's schema, before provider cloaking.
+  const streamStateBody =
+    clientResponseFormat === FORMATS.CLAUDE && Array.isArray(body?.tools)
+      ? { ...(finalBody || body), tools: body.tools }
+      : finalBody || body;
 
   // Client's explicit thinking intent (Anthropic Messages shape). Claude Code
   // sends `{type:"enabled"}` or `{type:"adaptive"}` to opt into relaying

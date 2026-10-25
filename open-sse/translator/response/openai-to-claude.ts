@@ -1,7 +1,11 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../request/openai-to-claude.ts";
-import { hasToolCallShim, applyToolCallShimToBuffer } from "../helpers/toolCallShim.ts";
+import {
+  hasToolCallShim,
+  applyToolCallShimToBuffer,
+  findToolCallSchema,
+} from "../helpers/toolCallShim.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
 import { openAIFinishReasonToClaudeStopReason } from "../../utils/finishReason.ts";
 import {
@@ -936,7 +940,11 @@ export function openaiToClaudeResponse(chunk, state) {
       // fully patched JSON before closing the block. A refusal must not release
       // the buffered arguments: the block is closed empty instead.
       if (toolInfo.shimmed && choice.finish_reason !== "content_filter") {
-        const patched = applyToolCallShimToBuffer(toolInfo.name, toolInfo.argBuffer || "");
+        const patched = applyToolCallShimToBuffer(
+          toolInfo.name,
+          toolInfo.argBuffer || "",
+          findToolCallSchema(toolInfo.name, state.toolSchemas)
+        );
         results.push({
           type: "content_block_delta",
           index: toolInfo.blockIndex,

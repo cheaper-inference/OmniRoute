@@ -118,13 +118,15 @@ export function EngineNode({ data }: NodeProps) {
         <span className="text-xs font-semibold truncate flex-1" title={engine as string}>
           {engine as string}
         </span>
-        {skipped && <span className="text-[10px] text-muted px-1 rounded bg-muted/10">skip</span>}
+        {skipped && (
+          <span className="text-[10px] text-text-muted px-1 rounded bg-bg-subtle">skip</span>
+        )}
       </div>
 
       {/* Body — token bar */}
       {!skipped && (
         <div className="px-2.5 py-1.5">
-          <div className="flex justify-between text-[10px] text-muted mb-0.5">
+          <div className="flex justify-between text-[10px] text-text-muted mb-0.5">
             <span>{tokIn.toLocaleString()}</span>
             <span>→</span>
             <span>{tokOut.toLocaleString()}</span>
@@ -150,14 +152,14 @@ export function EngineNode({ data }: NodeProps) {
         )}
         {techniques.length > 0 && (
           <span
-            className="text-[9px] text-muted truncate"
+            className="text-[9px] text-text-muted truncate"
             title={(techniquesUsed as string[]).join(", ")}
           >
             {techniques.join(", ")}
           </span>
         )}
         {durationMs != null && (
-          <span className="text-[9px] text-muted">{(durationMs as number).toFixed(1)}ms</span>
+          <span className="text-[9px] text-text-muted">{(durationMs as number).toFixed(1)}ms</span>
         )}
         {/* Layer pills */}
         {layers.length > 0 && (

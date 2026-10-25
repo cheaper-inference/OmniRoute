@@ -25,8 +25,10 @@
     "confirm": "Tem certeza?",
     "refresh": "Atualizar",
     "close": "Fechar",
+    "dialogTitleFallback": "Diálogo",
     "previousPage": "Página anterior",
     "nextPage": "Próxima página",
+    "pagination": "Paginação",
     "capsLockOn": "Caps Lock está ativado",
     "dismissNotification": "Dispensar notificação",
     "toggleColumns": "Alternar colunas",
@@ -182,6 +184,7 @@
     "combos": "Combinações",
     "noModelsFound": "Nenhum modelo encontrado",
     "clear": "Claro",
+    "clearFilters": "Limpar filtros",
     "done": "Feito",
     "selectAll": "Selecionar tudo",
     "unselectAll": "Desmarcar tudo",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Usado por {count, plural, one {# lote} other {# lotes}}",
     "batchFilePreview": "Prévia",
     "batchFilePreviewTruncated": "Mostrando as primeiras {shown} linhas ({total} linhas no total)",
-    "batchFileDownloadFull": "Baixar Arquivo Completo"
+    "batchFileDownloadFull": "Baixar Arquivo Completo",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Envie tokens entre chaves de API, compartilhe códigos de convite e conecte servidores da comunidade.",
+    "tokensServerUrlLabel": "URL do servidor"
   },
   "disabled": "Desabilitado",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Roteie solicitações com orçamento esgotado para o provedor/modelo de fallback gratuito de emergência.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 ou @nomecanal",
       "chatIdHint": "O identificador numérico único ou nome de usuário público do chat/canal.",
       "tutorial": "Tutorial"
-    }
+    },
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "expandDetails": "Mostrar detalhes",
+    "collapseDetails": "Ocultar detalhes"
   },
   "compliance": {
     "auditTitle": "Auditoria",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Chamadas (24h)",
     "mcpMetricSuccessRate": "Taxa de sucesso",
     "mcpMetricAvgDuration": "Duração média",
-    "mcpMetricTopTool": "Ferramenta principal"
+    "mcpMetricTopTool": "Ferramenta principal",
+    "dismissError": "Dispensar erro"
   },
   "themesPage": {
     "title": "Temas",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "Navegação rápida",
     "quickNavigationTitle": "Navegação rápida (⌘K / Ctrl+K)",
     "openQuickNavigation": "Abrir navegação rápida",
+    "openMenu": "Abrir menu",
+    "products": "Produtos Keak",
     "switchToLightMode": "Mudar para modo claro",
     "switchToDarkMode": "Mudar para modo escuro",
     "language": "Idioma",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "Apenas as conexões selecionadas",
     "selectAtLeastOneConnection": "Selecione pelo menos uma conexão ou escolha Todas as conexões.",
     "allConnectionsDesc": "Esta chave pode usar qualquer conexão ativa.",
-    "restrictedToConnections": "Restrita a {count, plural, one {# conexão} other {# conexões}}."
+    "restrictedToConnections": "Restrita a {count, plural, one {# conexão} other {# conexões}}.",
+    "removeSelection": "Remover {name}"
   },
   "auditLog": {
     "title": "Log de Auditoria",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "Configure a ponte Imagem→Texto nas configurações da Ponte de Modalidade",
     "sttBridgeCta": "Configure a ponte de Fala→Texto nas configurações da Ponte de Modalidade",
     "existingConnection": "Conexão existente",
-    "openrouterSttDescription": "Os modelos de reconhecimento de fala do OpenRouter usam sua conexão OpenRouter configurada. Nenhuma credencial separada é necessária."
+    "openrouterSttDescription": "Os modelos de reconhecimento de fala do OpenRouter usam sua conexão OpenRouter configurada. Nenhuma credencial separada é necessária.",
+    "modalityTabsAria": "Tipo de mídia",
+    "serviceKindsAria": "Tipo de serviço"
   },
   "search": {
     "searchQuery": "Consulta de busca",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "Desconhecido",
     "cliproxyapiUpdate": "Atualizar",
     "cliproxyapiUpdateAvailable": "Atualização disponível: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versão"
+    "cliproxyapiVersion": "Versão",
+    "removeMapping": "Remover mapeamento"
   },
   "modelCatalog": {
     "title": "Modelos e Combos",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Nenhum combo configurado ainda.",
     "playgroundCreateFirst": "Crie um primeiro",
     "weighted": "Ponderado",
+    "weightPercent": "Peso (%)",
     "leastUsed": "Menos Usado",
     "costOpt": "Custo-Otim",
     "strategyGuideTitle": "Como usar esta estratégia",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# conta} other {# contas}}",
     "builderGlobalAdded": "Adicionado",
     "builderGlobalAdd": "Adicionar",
+    "clearSearch": "Limpar busca",
     "manualModel": "Modelo manual",
     "manualModelInvalid": "Insira um modelo como provedor/modelo.",
     "manualModelUnknownProvider": "Prefixo de provedor desconhecido.",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "Tamanho mínimo do conteúdo (caracteres)",
     "responseValidationJsonPaths": "Verificações de JSON-path",
     "responseValidationAddCheck": "+ Adicionar verificação",
+    "responseValidationRemoveCheck": "Remover verificação",
+    "responseValidationPath": "Caminho JSON",
+    "responseValidationCondition": "Condição",
+    "responseValidationValue": "Valor esperado",
     "agentFeaturesSystemMessageOverride": "Substituir mensagem do sistema",
     "agentFeaturesSystemMessagePlaceholder": "Você é um assistente especialista...",
     "agentFeaturesSystemMessageHint": "Substituição de mensagens do sistema para agentes",
@@ -5288,7 +5311,8 @@
         "skipped": "já configurado",
         "failed": "falhou"
       }
-    }
+    },
+    "stepProgress": "Progresso da configuração"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Este provedor é excluído do auto por padrão",
@@ -7707,6 +7731,7 @@
     "configured": "configurado",
     "none": "Nenhum",
     "modelOverrideValuePlaceholder": "Valor numérico",
+    "modelOverrideKey": "Chave da substituição",
     "modelOverrideReasoningEffortsPlaceholder": "Valores em inglês separados por vírgulas, por exemplo: low, medium, high",
     "addKeyValue": "Adicionar valor da chave",
     "noModelOverrides": "Nenhuma substituição configurada para este modelo.",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "Aprovado",
     "tomlTestFailed": "Reprovado",
     "tomlImportError": "Não foi possível processar o arquivo TOML do RTK.",
-    "tomlFileReadError": "Não foi possível ler o arquivo TOML selecionado."
+    "tomlFileReadError": "Não foi possível ler o arquivo TOML selecionado.",
+    "viewMode": "Modo de visualização"
   },
   "compressionEngineConfig": {
     "loading": "Carregando…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "Pacotes de idioma: {packs}",
     "dragToReorder": "Arraste para reordenar a etapa",
     "engine": "Mecanismo",
-    "intensity": "Intensidade"
+    "intensity": "Intensidade",
+    "compressionOverride": "Substituição de compressão"
   },
   "compressionStudio": {
     "noRun": "Nenhuma execução de compressão disponível.",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "vencedor: {winner}",
     "encoder": "codificador",
     "bytes": "bytes",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Visões do estúdio"
   },
   "omniglyph": {
     "preview": "Visualização",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "Mensagens menores que isso não são compactadas. Menor = mais compressão.",
     "tooltipMinSavings": "Compacte apenas se salvar pelo menos esse número de tokens.",
     "ultraSettings": "Configurações Ultra",
-    "ultraSettingsDesc": "Compressão semântica alimentada por SLM"
+    "ultraSettingsDesc": "Compressão semântica alimentada por SLM",
+    "defaultLanguage": "Idioma padrão",
+    "viewMode": "Modo de visualização"
   },
   "translator": {
     "title": "Tradutor",
@@ -11078,7 +11108,8 @@
       "message": "Mensagem",
       "error": "Erro",
       "completion": "Conclusão"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Bate-papo simples",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "{minutes}m atrás",
     "hoursAgo": "{hours}h atrás",
     "daysAgo": "{days}d atrás",
-    "entries": "Entradas"
+    "entries": "Entradas",
+    "viewSwitcherAria": "Visualização do cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globais",
@@ -11442,11 +11474,12 @@
     "loading": "Loading",
     "noProxies": "No Proxies",
     "tableName": "Table Name",
-    "tableEndpoint": "Table Endpoint",
+    "tableEndpoint": "Endpoint",
     "tableStatus": "Table Status",
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Mais ações",
     "test": "Testar",
     "edit": "Editar",
     "delete": "Excluir",
@@ -11809,7 +11842,8 @@
       "nextButton": "Próximo",
       "runButton": "Executar",
       "promptPlaceholder": "Digite sua mensagem… (Enter para enviar, Shift+Enter para nova linha)"
-    }
+    },
+    "playgroundTabs": "Modos do playground"
   },
   "miniPlayground": {
     "endpoint": "Endpoint",
@@ -11880,7 +11914,8 @@
     "assistant": "Assistente",
     "errorLabel": "Erro",
     "requestFailed": "Falha na requisição",
-    "stop": "Pare"
+    "stop": "Pare",
+    "messageInputAria": "Mensagem"
   },
   "requestLogger": {
     "recording": "Gravando",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "{count} rotações de conta",
       "resilienceRetried": "Turno vazio repetido",
       "resilienceContinued": "Retomado no meio do fluxo",
-      "resilienceRecovered": "Recuperado por uma ação de resiliência"
-    }
+      "resilienceRecovered": "Recuperado por uma ação de resiliência",
+      "conversationContext": "Contexto da conversa",
+      "goToBottom": "Ir para o fim",
+      "liveRefreshOn": "Atualização ao vivo: ligada",
+      "liveRefreshOff": "Atualização ao vivo: desligada",
+      "liveRefresh": "Atualização ao vivo",
+      "continuesFromParent": "continua da requisição pai",
+      "continuesFrom": "Continua de {id}",
+      "viewConversation": "ver conversa",
+      "openConversation": "Abrir conversa {id}"
+    },
+    "tableLabel": "Logs de requisições"
   },
   "proxyLogger": {
     "filterAll": "Todos",
@@ -12113,7 +12158,9 @@
     "colServedBy": "Atendido por",
     "filterTraffic": "Tráfego",
     "filterTests": "Testes",
-    "filterSource": "Fonte"
+    "filterSource": "Fonte",
+    "tableLabel": "Logs de proxy",
+    "sortLogs": "Ordenar logs"
   },
   "endpointOptions": {
     "speech": "Fala",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "ESGOTADO",
     "statusAlerting": "ALERTANDO",
     "statusError": "ERRO",
-    "moreSuffix": "+{count} mais"
+    "moreSuffix": "+{count} mais",
+    "feedFilterLabel": "Filtrar eventos"
   },
   "quotaShare": {
     "weightPercent": "Peso %",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "Sem grupo",
     "ungroupedHint": "Estes pools não estão atribuídos a um grupo conhecido. Edite um pool para movê-lo para um grupo real.",
     "removeFailed": "Não foi possível remover este pool.",
-    "dismiss": "Dispensar"
+    "dismiss": "Dispensar",
+    "allocationsHeading": "Alocações",
+    "wizardRemoveDimension": "Remover dimensão",
+    "wizardRemoveKey": "Remover chave"
   },
   "plugins": {
     "title": "Plugins",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "Falha ao atualizar configurações",
       "serviceRevealApiKey": "{actor} visualizou API key de {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Dispensar erro"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "Ir agora",
       "message": "O MITM Proxy agora vive no AgentBridge.",
       "title": "Esta página foi movida"
-    }
+    },
+    "dnsOn": "DNS ativo",
+    "dnsOff": "DNS desativado",
+    "showServerSettings": "Mostrar configurações do servidor",
+    "hideServerSettings": "Ocultar configurações do servidor",
+    "upstreamCaTesting": "Testando…",
+    "removeMapping": "Remover mapeamento",
+    "mappingSourcePlaceholder": "ex.: gemini-3.6-flash-medium, ou * para todos os não mapeados",
+    "mappingWildcardHint": "Use * como origem para rotear pelo OmniRoute, para o destino escolhido, todo modelo sem mapeamento explícito. Correspondências exatas sempre vencem o *.",
+    "wizardDetectingModels": "Detectando modelos no tráfego interceptado...",
+    "wizardDetectedModels": "{count, plural, one {# modelo encontrado} other {# modelos encontrados}} no tráfego interceptado. Selecione os que deseja adicionar:",
+    "wizardSelectedModels": "{count, plural, one {# modelo selecionado} other {# modelos selecionados}}. Você vai mapeá-los para modelos do OmniRoute na próxima tela.",
+    "wizardAddModels": "Adicionar {count, plural, one {# modelo} other {# modelos}}",
+    "wizardNoModelsDetected": "Nenhum modelo detectado ainda. Use o {agent} para fazer uma requisição e rode este assistente de novo para detectar os modelos pelo tráfego.",
+    "wizardNoModelsHint": "Ou feche este assistente e adicione os mapeamentos manualmente no cartão do agente."
   },
   "providerStats": {
     "unknownError": "Erro desconhecido",
@@ -12686,7 +12752,11 @@
     "avgTtft": "TTFT Médio",
     "avgTotal": "Total Médio",
     "requestTelemetry": "Telemetria de Solicitações",
-    "requestTelemetryDescription": "Detalhamento do pipeline de 7 fases (últimos 5 minutos)"
+    "requestTelemetryDescription": "Detalhamento do pipeline de 7 fases (últimos 5 minutos)",
+    "title": "Estatísticas de provedores",
+    "description": "Tráfego, latência e taxa de sucesso por provedor e por modelo",
+    "combo": "Combo",
+    "toggleModels": "Mostrar modelos de {provider}"
   },
   "relay": {
     "title": "Proxies de Relay Serverless",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "Sem corpo de solicitação.",
     "noResponseBody": "Sem corpo de resposta.",
     "formatted": "Formatado",
-    "raw": "Bruto"
+    "raw": "Bruto",
+    "requestCount": "{count, plural, one {# requisição} other {# requisições}}",
+    "expandList": "Expandir lista",
+    "collapseList": "Recolher lista",
+    "snippetLanguage": "Linguagem do snippet",
+    "headersTable": "Cabeçalhos",
+    "showSecrets": "Mostrar segredos",
+    "maskSecrets": "Ocultar segredos",
+    "llmNotAvailable": "Metadados de LLM indisponíveis para esta requisição.",
+    "llmStreamYes": "sim (SSE)",
+    "llmStreamNo": "não",
+    "llmTotalTokens": "Total: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "Proporção de chamadas que este provedor realmente respondeu nas últimas 24 horas. Um traço significa que ele atendeu a um volume de tráfego insuficiente para determinar uma taxa.",
     "reliabilitySample": "{successes} de {requests} chamadas foram bem-sucedidas nas últimas {hours}h",
     "reliabilityTooFew": "Apenas {requests} chamadas nas últimas {hours}h — muito poucas para determinar uma taxa",
-    "reliabilityNoTraffic": "Nenhuma chamada registrada nas últimas 24h"
+    "reliabilityNoTraffic": "Nenhuma chamada registrada nas últimas 24h",
+    "categoryFilter": "Categoria de tarefa"
   },
   "discovery": {
     "title": "Descoberta de provedores",
@@ -13331,7 +13413,11 @@
     "method": "Método",
     "auth": "Autenticação",
     "feasibility": "Viabilidade",
-    "models": "Modelos"
+    "models": "Modelos",
+    "provider": "Provedor",
+    "status": "Status",
+    "endpoint": "Endpoint",
+    "actions": "Ações"
   },
   "noAuthProvider": {
     "title": "Não requer autenticação",
@@ -13380,7 +13466,8 @@
     "ownProxy": "Proxy próprio",
     "freeTierPause": "Modelo {model} pausado (429), volta às {time}",
     "freeTierPauseProvider": "Pausado (429), volta às {time}",
-    "freeTierPauseNote": "Pausa interprocesso nesta instância"
+    "freeTierPauseNote": "Pausa interprocesso nesta instância",
+    "proxyType": "Tipo de proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "Uma conquista oculta espera...",
         "criteria": "Complete a conquista oculta para revelar este emblema."
       }
-    }
+    },
+    "leaderboardTitle": "Ranking",
+    "leaderboardDescription": "Classificação e conquistas entre as suas chaves de API",
+    "badgeLocked": "Bloqueado"
   },
   "featureFlags": {
     "title": "Sinalizadores de recursos",
@@ -13794,6 +13884,7 @@
     "latency": "Latência",
     "quota": "Cota",
     "rangeWindow": "janela de {range}",
+    "timeRange": "Intervalo de tempo",
     "runtimeHealthBlend": "combinação runtime/saúde",
     "averageResponseTime": "tempo médio de resposta",
     "worstQuota": "Pior cota",
@@ -13995,7 +14086,11 @@
     "learnMore": "Saiba mais",
     "changelogLoadFailed": "Não foi possível carregar o changelog. Tente novamente mais tarde.",
     "retry": "Nova tentativa",
-    "viewFullHistory": "Ver histórico completo no GitHub"
+    "viewFullHistory": "Ver histórico completo no GitHub",
+    "title": "Novidades e changelog",
+    "description": "Anúncios da equipe do OmniRoute e as notas das últimas versões",
+    "viewLabel": "Visualização",
+    "loadingNews": "Carregando anúncios..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "Estado do Disjuntor do Provedor",
       "lastUpdate": "Última atualização: {timestamp}",
       "uptimeMinutes": "{minutes}min",
-      "uptimeHoursMinutes": "{hours}h {minutes}min"
+      "uptimeHoursMinutes": "{hours}h {minutes}min",
+      "breakerClosed": "Fechado",
+      "breakerNotClosed": "Aberto ou semiaberto"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "Detalhes da Manutenção",
         "secondaryAction": "Status do Sistema"
       }
+    },
+    "miniapp": {
+      "askAnything": "Pergunte qualquer coisa…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} visíveis / {total} no total",
+    "modeLabel": "Modo de visualização",
+    "jumpToNow": "Ir para o horário atual; a linha AGORA volta para a posição {position}%",
+    "laneReuse": "Reúso de faixa",
+    "laneReuseLabel": "Janela de reúso de faixa (minutos)",
+    "laneReuseHint": "Requisições com o mesmo id de conversa ficam na mesma linha da timeline enquanto o intervalo entre elas for menor que estes minutos.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Atualização automática",
+    "autoRefreshLabel": "Intervalo de atualização automática (segundos)",
+    "autoRefreshHint": "Com que frequência a timeline busca de novo a lista de requisições no servidor.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Diminuir zoom",
+    "zoomIn": "Aumentar zoom"
   },
   "metadata": {
     "compressionTitle": "Compressão",
