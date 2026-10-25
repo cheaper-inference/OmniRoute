@@ -114,9 +114,10 @@ test("combo test route 404s unknown auto ids just like missing persisted combos"
 });
 
 test("combo test route reports an empty candidate pool for unmatched auto ids", async () => {
-  // No credentials + no no-auth provider exposes minimax models, so the
-  // materialized virtual combo has zero candidates.
-  const response = await postTest("auto/minimax");
+  // No credentials + no no-auth provider exposes zai models, so the
+  // materialized virtual combo has zero candidates. The minimax family is not
+  // a negative case: minimax-code is a no-auth provider.
+  const response = await postTest("auto/zai");
   assert.equal(response.status, 400);
   const body = (await response.json()) as { error?: string };
   assert.match(body.error ?? "", /no connected candidates/i);

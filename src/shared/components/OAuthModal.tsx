@@ -15,6 +15,7 @@ import {
   OAuthLoopbackMismatchPanel,
   OAuthManualInputPanel,
 } from "./OAuthModalPanels";
+import { DEVICE_CODE_PROVIDERS } from "@/shared/constants/oauthDeviceCodeProviders";
 import { parseResponseBody, getErrorMessage } from "@/shared/utils/api";
 import { isCredentialBlob, submitCredentialBlob } from "@/shared/components/oauthBlobSubmit";
 import {
@@ -46,19 +47,6 @@ const PKCE_CALLBACK_SERVER_PROVIDERS = new Set(["codex", "xai-oauth", "grok-cli"
 // via the "Device Code" / "Browser Login" / "JWT Token" tabs rendered further
 // down. See the grokBrowserMode state and handleDeviceCodeMode/handleBrowserMode
 // below for how the method choice is threaded into startOAuthFlow.
-const DEVICE_CODE_PROVIDERS = new Set([
-  "github",
-  "kiro",
-  "amazon-q",
-  "kimi-coding",
-  "kilocode",
-  "codebuddy-cn",
-  "codebuddy-intl",
-  "ghe-copilot",
-  "grok-cli",
-  "muse-code",
-]);
-
 const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
 const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-desktop", "devin-cli"]);
 const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "claude"]);

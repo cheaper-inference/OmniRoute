@@ -34,6 +34,7 @@ import { workbuddy } from "./workbuddy";
 import { zed } from "./zed";
 import { zedHosted } from "./zed-hosted";
 import { museCode } from "./muse-code";
+import { minimaxCode } from "./minimax-code";
 
 export const PROVIDERS = {
   claude,
@@ -74,6 +75,10 @@ export const PROVIDERS = {
   zed,
   "zed-hosted": zedHosted,
   "muse-code": museCode,
+  // MiniMax Code — device-code login that writes the credential into the
+  // local MiniMax Code profile (the profile the CLI and the local agent
+  // read), so the provider itself still stores no credential.
+  "minimax-code": minimaxCode,
 };
 
 export default PROVIDERS;

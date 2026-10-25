@@ -16,6 +16,7 @@ import {
   isClaudeCodeCompatibleProvider,
   supportsApiKeyOnFreeProvider,
   supportsDualAuthProvider,
+  supportsDeviceCodeLogin,
 } from "@/shared/constants/providers";
 import { getModelsByProviderId } from "@/shared/constants/models";
 import {
@@ -286,7 +287,17 @@ export default function ProviderDetailPageClient() {
   const providerSupportsOAuth =
     providerInfo?.toggleAuthType === "oauth" ||
     providerInfo?.toggleAuthType === "free" ||
-    oauthProviderId !== providerId;
+    oauthProviderId !== providerId ||
+    // A no-auth provider can still offer a dashboard sign-in: MiniMax Code
+    // takes an account code here and writes the credential into the local
+    // MiniMax Code profile.
+    supportsDeviceCodeLogin(providerId);
+  // A no-auth provider can still offer a dashboard sign-in: MiniMax Code takes
+  // an account code here and writes the credential into the local MiniMax Code
+  // profile.
+  const showAccountRouting =
+    !isUpstreamProxyProvider &&
+    (!isFreeNoAuth || providerSupportsPat || supportsDeviceCodeLogin(providerId));
   const subscriptionRisk = providerInfo?.subscriptionRisk === true;
 
   // ── Phase 1t.3: connection gate + risk-notice modal state ───────────────
@@ -624,7 +635,7 @@ export default function ProviderDetailPageClient() {
           providerName={providerInfo?.name || providerId}
         />
       )}
-      {!isUpstreamProxyProvider && (!isFreeNoAuth || providerSupportsPat) && (
+      {showAccountRouting && (
         <Card>
           <ProviderAccountRoutingCard
             providerKey={providerId}
