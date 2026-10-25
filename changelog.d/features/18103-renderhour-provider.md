@@ -1,0 +1,1 @@
+- **feat(providers):** RenderHour provider for images, video and speech — sign in with a RenderHour subscription (OAuth PKCE, paid in plan credits) or paste an `rh_…` API key (paid from the dollar balance); models as `renderhour/<model>` ([#18103](https://github.com/diegosouzapw/OmniRoute/pull/18103) — thanks @sha367)
