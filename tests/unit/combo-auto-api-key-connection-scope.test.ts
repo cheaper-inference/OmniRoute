@@ -302,3 +302,71 @@ test("resolveAutoStrategyOrder threads the key scope and keeps the entire fallba
     false
   );
 });
+
+test("restricted failClosedWhenEmpty pools never widen to the scoped catalog", async () => {
+  const openaiAllowed = await seedConnection("openai", "openai-fail-closed-allowed");
+  const anthropicAllowed = await seedConnection("anthropic", "anthropic-fail-closed-allowed");
+  await modelsDb.replaceSyncedAvailableModelsForConnection("openai", openaiAllowed.id, [
+    { id: "chat-visible", name: "Chat Visible", supportedEndpoints: ["chat"] },
+  ]);
+  const scope = [openaiAllowed.id, anthropicAllowed.id];
+
+  // Empty fail-closed pool (e.g. auto/subscription with no plan-included capacity).
+  const emptyPool = await expandAutoComboCandidatePool(
+    [],
+    { autoConfig: { failClosedWhenEmpty: true } },
+    scope
+  );
+  assert.deepEqual(emptyPool, []);
+
+  // The same applies when the setting lives under config.auto.
+  const nestedEmptyPool = await expandAutoComboCandidatePool(
+    [],
+    { config: { auto: { failClosedWhenEmpty: true } } },
+    scope
+  );
+  assert.deepEqual(nestedEmptyPool, []);
+
+  // A non-empty fail-closed pool stays exactly the scoped explicit targets.
+  const explicit = await expandAutoComboCandidatePool(
+    [target("openai", "plan-model")],
+    { autoConfig: { failClosedWhenEmpty: true } },
+    scope
+  );
+  assert.deepEqual(
+    explicit.map((entry) => [entry.modelStr, entry.connectionId]),
+    [["openai/plan-model", openaiAllowed.id]]
+  );
+
+  // Control: without failClosedWhenEmpty the same restricted combo does expand.
+  const widened = await expandAutoComboCandidatePool([], { config: {} }, scope);
+  assert.ok(widened.some((entry) => entry.modelStr === "openai/chat-visible"));
+});
+
+test("restricted pool fails closed and logs a sanitized warning when the connection lookup fails", async () => {
+  const openaiAllowed = await seedConnection("openai", "openai-lookup-failure");
+  const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
+  invalidateDbCache();
+  core.getDbInstance().exec("DROP TABLE provider_connections");
+
+  const warnings: string[] = [];
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    warnings.push(args.map(String).join(" "));
+  };
+  try {
+    const expanded = await expandAutoComboCandidatePool(
+      [target("openai", "model-a")],
+      { config: {} },
+      [openaiAllowed.id]
+    );
+    assert.deepEqual(expanded, []);
+  } finally {
+    console.warn = originalWarn;
+  }
+
+  const entry = warnings.find((line) => line.includes("Restricted auto pool"));
+  assert.ok(entry, "the failed lookup must be logged, not swallowed");
+  assert.match(entry, /COMBO_AUTO/);
+  assert.equal(entry.includes(openaiAllowed.id), false, "the scope ids must not be logged");
+});

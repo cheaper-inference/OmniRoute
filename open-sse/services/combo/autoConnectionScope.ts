@@ -56,6 +56,43 @@ export function groupConnectionsByProvider(
   return grouped;
 }
 
+/** A target pinned to a connection survives only when that connection is permitted and active. */
+function bindPinnedTarget(
+  target: ResolvedComboTarget,
+  pinnedConnectionId: string,
+  providerConnections: readonly ActiveConnectionRecord[],
+  scope: ReadonlySet<string>
+): ResolvedComboTarget | null {
+  const resolvedConnectionId = realConnectionId(pinnedConnectionId);
+  if (!scope.has(resolvedConnectionId)) return null;
+  const connection = providerConnections.find((candidate) => candidate.id === resolvedConnectionId);
+  if (!connection) return null;
+  return {
+    ...target,
+    allowedConnectionIds: [resolvedConnectionId],
+    authType:
+      typeof connection.authType === "string" ? connection.authType : (target.authType ?? null),
+  };
+}
+
+/** An unpinned target fans out to one concrete target per permitted (and step-allowed) connection. */
+function expandUnpinnedTarget(
+  target: ResolvedComboTarget,
+  providerConnections: readonly ActiveConnectionRecord[]
+): ResolvedComboTarget[] {
+  const stepScope = normalizeAutoConnectionScope(target.allowedConnectionIds);
+  const eligibleConnections = stepScope
+    ? providerConnections.filter((connection) => stepScope.has(connection.id))
+    : providerConnections;
+  return eligibleConnections.map((connection) => ({
+    ...target,
+    connectionId: connection.id,
+    allowedConnectionIds: [connection.id],
+    authType: typeof connection.authType === "string" ? connection.authType : null,
+    executionKey: `${target.executionKey}@${connection.id}`,
+  }));
+}
+
 /**
  * Bind every restricted auto target to a concrete, active, permitted account.
  * This is deliberately fail-closed: an unknown/inactive pin or an empty
@@ -70,36 +107,12 @@ export function expandTargetsWithinConnectionScope(
   const expanded: ResolvedComboTarget[] = [];
 
   for (const target of targets) {
-    const provider = targetProvider(target);
-    const providerConnections = connectionsByProvider.get(provider) ?? [];
+    const providerConnections = connectionsByProvider.get(targetProvider(target)) ?? [];
     if (target.connectionId) {
-      const resolvedConnectionId = realConnectionId(target.connectionId);
-      if (!scope.has(resolvedConnectionId)) continue;
-      const connection = providerConnections.find(
-        (candidate) => candidate.id === resolvedConnectionId
-      );
-      if (!connection) continue;
-      expanded.push({
-        ...target,
-        allowedConnectionIds: [resolvedConnectionId],
-        authType:
-          typeof connection.authType === "string" ? connection.authType : (target.authType ?? null),
-      });
-      continue;
-    }
-
-    const stepScope = normalizeAutoConnectionScope(target.allowedConnectionIds);
-    const eligibleConnections = stepScope
-      ? providerConnections.filter((connection) => stepScope.has(connection.id))
-      : providerConnections;
-    for (const connection of eligibleConnections) {
-      expanded.push({
-        ...target,
-        connectionId: connection.id,
-        allowedConnectionIds: [connection.id],
-        authType: typeof connection.authType === "string" ? connection.authType : null,
-        executionKey: `${target.executionKey}@${connection.id}`,
-      });
+      const bound = bindPinnedTarget(target, target.connectionId, providerConnections, scope);
+      if (bound) expanded.push(bound);
+    } else {
+      expanded.push(...expandUnpinnedTarget(target, providerConnections));
     }
   }
 
