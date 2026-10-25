@@ -197,6 +197,11 @@ test(
       text += decoder.decode(chunk.value, { stream: true });
     }
     assert.ok(text.includes("Привет"));
+    assert.equal(
+      text.includes("</think>"),
+      false,
+      "OpenAI clients must not receive the marker in visible text"
+    );
     assert.ok(text.includes("reasoning_content"));
     assert.ok(text.includes("private reasoning"));
     assert.ok(text.includes("[DONE]"));

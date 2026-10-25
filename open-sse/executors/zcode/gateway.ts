@@ -7,6 +7,7 @@ import { errorResponse } from "../../utils/error.ts";
 import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import { STREAM_READINESS_TIMEOUT_MS } from "../../config/constants.ts";
 import { isDraining } from "../../../src/lib/gracefulShutdown.ts";
+import { resolveSuppressThinkClose, THINKING_MARKER_HEADER } from "../../utils/thinkCloseMarker.ts";
 import { fetchNativeZcode } from "./nativeProtocol.ts";
 
 type RecordValue = Record<string, unknown>;
@@ -165,13 +166,17 @@ export async function executeZcodeGateway(
         model: input.model,
         log: input.log,
       });
+      const clientHeaders = input.clientHeaders ?? {};
+      const suppressThinkClose = resolveSuppressThinkClose({
+        userAgent: clientHeaders["user-agent"] ?? clientHeaders["User-Agent"] ?? null,
+        thinkingMarkerHeader:
+          clientHeaders[THINKING_MARKER_HEADER] ??
+          clientHeaders["x-omniroute-thinking-marker"] ??
+          null,
+        clientResponseFormat: input.clientResponseFormat ?? null,
+      });
       response = ready.response.ok
-        ? translateSseResponse(
-            ready.response,
-            "zcode",
-            input.model,
-            input.clientResponseFormat === "openai-responses"
-          )
+        ? translateSseResponse(ready.response, "zcode", input.model, suppressThinkClose)
         : ready.response;
       response.headers.set("cache-control", "no-cache");
       response.headers.set("x-accel-buffering", "no");
