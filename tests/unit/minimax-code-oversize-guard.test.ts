@@ -257,3 +257,79 @@ test("a missing credential is not in the model lockout list", async () => {
   // out of the fallbacks.
   assert.equal(DEFAULT_MODEL_LOCKOUT_SETTINGS.errorCodes.includes(401), false);
 });
+
+/**
+ * The hub of the CLI has a byte ceiling of its own: a subscriber holds at
+ * most `512 * 1024 = 524_288` bytes and overflows above that. The token
+ * guard cannot see it — 200 000 tokens of Latin text is about 600 000 bytes,
+ * above the ceiling of the hub — so the prompt is measured in bytes as well.
+ */
+test("the local transport refuses a prompt that overflows the byte ceiling of the CLI", async () => {
+  const { LOCAL_TRANSPORT_MAX_PROMPT_BYTES, isLocalRequestOversizedInBytes } =
+    await import("../../open-sse/executors/minimax-code.ts");
+  // The measured ceiling: the largest prompt the CLI answered, and the raw
+  // ceiling of its hub (524 288 bytes) minus the overhead the measurement
+  // leaves room for.
+  assert.equal(LOCAL_TRANSPORT_MAX_PROMPT_BYTES, 500_000);
+  assert.equal(isLocalRequestOversizedInBytes("x".repeat(LOCAL_TRANSPORT_MAX_PROMPT_BYTES)), false);
+  assert.equal(
+    isLocalRequestOversizedInBytes("x".repeat(LOCAL_TRANSPORT_MAX_PROMPT_BYTES + 1)),
+    true
+  );
+});
+
+test("the byte ceiling of the local transport is counted in bytes, not in characters", async () => {
+  const { LOCAL_TRANSPORT_MAX_PROMPT_BYTES, isLocalRequestOversizedInBytes } =
+    await import("../../open-sse/executors/minimax-code.ts");
+  // A Cyrillic character is two bytes in UTF-8 and one UTF-16 code unit: a
+  // prompt of 250 000 of them is 250 000 characters long and 500 000 bytes
+  // big. A guard that counted characters would let it through.
+  const cyrillic = "Ж".repeat(250_000);
+  assert.equal(cyrillic.length, 250_000);
+  assert.equal(Buffer.byteLength(cyrillic, "utf8"), LOCAL_TRANSPORT_MAX_PROMPT_BYTES);
+  assert.equal(isLocalRequestOversizedInBytes(cyrillic), false);
+  assert.equal(isLocalRequestOversizedInBytes("Ж".repeat(250_001)), true);
+});
+
+test("a prompt that overflows the byte ceiling is refused before the CLI runs", async () => {
+  const { LOCAL_TRANSPORT_MAX_PROMPT_BYTES, MinimaxCodeExecutor } =
+    await import("../../open-sse/executors/minimax-code.ts");
+  let spawned = false;
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "cli",
+    runner: async () => {
+      spawned = true;
+      return {
+        text: "ok",
+        usage: null,
+        state: { text: "ok", usage: null, status: "succeeded", error: null },
+      };
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    // A prompt that fits in the token estimate (about 166k tokens of Latin
+    // text) but not in the byte ceiling of the hub of the CLI.
+    body: {
+      messages: [{ role: "user", content: "x".repeat(LOCAL_TRANSPORT_MAX_PROMPT_BYTES + 1) }],
+    },
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  assert.equal(response.status, 413);
+  // The refusal happens before the CLI is spawned: the run would burn the
+  // quota and die in the hub anyway.
+  assert.equal(spawned, false);
+  const body = await response.json();
+  // The message names the unit that failed and both ceilings, so the operator
+  // can tell which one was hit.
+  assert.match(body.error.message, /bytes/);
+  assert.match(body.error.message, new RegExp(String(LOCAL_TRANSPORT_MAX_PROMPT_BYTES)));
+  assert.match(body.error.message, /200000 tokens/);
+});

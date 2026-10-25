@@ -121,6 +121,15 @@ The CLI adds its own agent scaffolding to the prompt, so a request of
 (incident 2026-10-21). That error trips the in-memory model lockout, so
 the local transport refuses such a request with a fast 413 instead.
 
+The local transport has a second ceiling, 500000 bytes of prompt. The CLI
+buffers the request in its own SSE hub, and that hub holds at most
+`512 * 1024 = 524288` bytes before it overflows with
+`SSE subscriber overflow: <n> items / <n> bytes` — the prompt is counted in
+bytes, so a request that fits in the token estimate (200000 tokens of Latin
+text is about 600000 bytes) can still overflow the hub. Both refusals answer
+with a 413, and both are request-scoped: an overflow says nothing about the
+health of the model, so it must not lock the model out of the fallbacks.
+
 `MINIMAX_CODE_CONTEXT_WINDOW` narrows the request to the window the
 catalog declares as the default of the models (512000) — the plan counts
 less of a request that runs in the narrower window. Without it the gateway

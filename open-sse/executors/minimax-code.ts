@@ -109,6 +109,35 @@ function isTransportFailure(error: unknown): boolean {
 const LOCAL_TRANSPORT_MAX_INPUT_TOKENS = 200_000;
 
 /**
+ * Ceiling on the size in BYTES of one LOCAL CLI request.
+ *
+ * The CLI buffers the request in its own SSE hub before it reaches the model,
+ * and that hub has a hard byte ceiling: a subscriber holds at most
+ * `512 * 1024 = 524_288` bytes and at most 128 items (`maxBytes`/`vEr` and
+ * `maxItems`/`_Er` in the CLI bundle), and it overflows as soon as
+ * `queuedBytes + byteSize > maxBytes` — the error the CLI reports as
+ * `SSE subscriber overflow: <n> items / <n> bytes`. The size of an item is
+ * its UTF-8 byte length, the same measure this guard uses.
+ *
+ * The published item is the whole request frame, so the prompt is only a part
+ * of it: the frame carries the session and turn ids around the prompt, and
+ * the CLI adds its own scaffolding (the system prompt and the host tools) on
+ * top of it. That overhead is not a constant of the bundle — it depends on
+ * the session and on the mode — so the ceiling below is the measured one: a
+ * prompt of 500 000 bytes was answered by the CLI, a prompt of 585 KiB always
+ * died with the overflow. 500 000 bytes is therefore the largest prompt size
+ * that is known to fit (524 288 bytes minus the 24 288 bytes of overhead the
+ * measurement leaves room for), and it sits below the byte equivalent of the
+ * token ceiling above, so the byte guard binds first for a text that fits in
+ * the token estimate.
+ *
+ * The overflow is a property of the request, never of the health of the
+ * model: a request that does not fit is refused the same way on every account
+ * and every run.
+ */
+export const LOCAL_TRANSPORT_MAX_PROMPT_BYTES = 500_000;
+
+/**
  * Whether a prompt is too large for the local transport.
  *
  * The same estimate the gateway path uses, so both refusals name the same
@@ -120,6 +149,18 @@ export function isLocalRequestOversized(prompt: string): boolean {
     messages: [{ role: "user", content: prompt }],
   });
   return estimate > LOCAL_TRANSPORT_MAX_INPUT_TOKENS;
+}
+
+/**
+ * Whether a prompt is too large in BYTES for the local transport.
+ *
+ * The measure is the UTF-8 byte length, because that is what the hub of the
+ * CLI counts: a prompt of multi-byte characters (Cyrillic, CJK, emoji) is
+ * bigger in bytes than in UTF-16 code units, and a guard that counted code
+ * units would let exactly the requests that overflow through.
+ */
+export function isLocalRequestOversizedInBytes(prompt: string): boolean {
+  return Buffer.byteLength(prompt, "utf8") > LOCAL_TRANSPORT_MAX_PROMPT_BYTES;
 }
 
 /**
@@ -147,7 +188,7 @@ export function resolveModelEffort(model: string, body: JsonRecord): string | un
  * health of the model, and a 502 is in the model-lockout list: one refusal
  * would take the model out of every combo for half an hour.
  */
-function cliFailureStatus(message: string): number {
+export function cliFailureStatus(message: string): number {
   if (isCliAuthFailure(message)) return 401;
   if (/too large|too long|context length|exceeds the maximum|maximum context/i.test(message)) {
     return 413;
@@ -155,7 +196,54 @@ function cliFailureStatus(message: string): number {
   if (/model .*(not found|not supported|unknown)|unknown model|invalid model/i.test(message)) {
     return 400;
   }
+  if (isCliRequestTooLargeFailure(message)) return 413;
   return 500;
+}
+
+/**
+ * Whether the CLI refused the request because it does not fit.
+ *
+ * The CLI reports that refusal in two ways: the overflow of its own SSE hub
+ * (`SSE subscriber overflow: <n> items / <n> bytes`) and the run status
+ * `limit_exceeded`. Both are a property of the request — the same request is
+ * refused the same way on every account — so both are answered with a 413.
+ */
+function isCliRequestTooLargeFailure(message: string): boolean {
+  // A quota is a condition of the account, not of the request: the recovery
+  // is a subscription and not a smaller prompt, so quota wording keeps the
+  // status it has today.
+  if (isCliQuotaFailure(message)) return false;
+  if (/sse subscriber overflow/i.test(message)) return true;
+  // The run status has to be a standalone token: the CLI reports an exhausted
+  // entitlement as `entitlement_limit_exceeded`, and that is a quota, not a
+  // refusal of the request.
+  return /(^|[^0-9a-z_])limit_exceeded([^0-9a-z_]|$)/i.test(message);
+}
+
+/**
+ * Whether the message reports an exhausted quota of the CLI.
+ *
+ * The wording of the account (`quota`, `insufficient_quota`, `quota_exhausted`,
+ * `entitlement`) is not a refusal of the request: it has to keep its own
+ * status instead of becoming a request-scoped 413.
+ */
+function isCliQuotaFailure(message: string): boolean {
+  return /quota|entitlement/i.test(message);
+}
+
+/**
+ * The error classification of a failure of the local CLI.
+ *
+ * A request-scoped refusal is marked as one, so the fallback layer keeps it
+ * out of the model lockout: another account of the same model would fail the
+ * same way. Only the statuses that are a property of the request are marked
+ * — a 401 or a 500 stay what they are.
+ */
+export function cliFailureClassification(
+  status: number
+): { type: string; code?: string } | undefined {
+  if (status !== 400 && status !== 413 && status !== 422) return undefined;
+  return { type: "invalid_request_error" };
 }
 
 /**
@@ -1167,17 +1255,35 @@ export class MinimaxCodeExecutor extends BaseExecutor {
         ` clientTools=${clientTools.length} cwd=${this.resolveCwd()}`
     );
 
-    if (transport === "cli" && isLocalRequestOversized(prompt)) {
+    if (transport === "cli") {
       // The local transport would run the request for minutes and answer
       // `limit_exceeded`, which locks the model out of the fallbacks. A
       // request-scoped refusal answers with a fast 413 instead.
-      const message =
-        `MiniMax Code request is too large for the local transport: ` +
-        `~${estimateGatewayInputTokens({ messages: [{ role: "user", content: prompt }] })} ` +
-        `input tokens (limit ${LOCAL_TRANSPORT_MAX_INPUT_TOKENS}). ` +
-        `Trim the conversation and retry.`;
-      input.log?.warn?.("MINIMAX_CODE", message);
-      return errorResponse(413, message);
+      if (isLocalRequestOversized(prompt)) {
+        const tokenEstimate = estimateGatewayInputTokens({
+          messages: [{ role: "user", content: prompt }],
+        });
+        const message =
+          `MiniMax Code request is too large for the local transport: ` +
+          `~${tokenEstimate} input tokens (limit ${LOCAL_TRANSPORT_MAX_INPUT_TOKENS} tokens, ` +
+          `${LOCAL_TRANSPORT_MAX_PROMPT_BYTES} bytes). ` +
+          `Trim the conversation and retry.`;
+        input.log?.warn?.("MINIMAX_CODE", message);
+        return errorResponse(413, message);
+      }
+      // The hub of the CLI has a byte ceiling of its own, and it is lower
+      // than the token ceiling for a text of one byte per character: a
+      // request that fits in the token estimate can still overflow the hub.
+      if (isLocalRequestOversizedInBytes(prompt)) {
+        const byteLength = Buffer.byteLength(prompt, "utf8");
+        const message =
+          `MiniMax Code request is too large for the local transport: ` +
+          `${byteLength} bytes (limit ${LOCAL_TRANSPORT_MAX_PROMPT_BYTES} bytes, ` +
+          `${LOCAL_TRANSPORT_MAX_INPUT_TOKENS} tokens). ` +
+          `Trim the conversation and retry.`;
+        input.log?.warn?.("MINIMAX_CODE", message);
+        return errorResponse(413, message);
+      }
     }
 
     if (transport === "gateway") {
@@ -1287,7 +1393,9 @@ export class MinimaxCodeExecutor extends BaseExecutor {
               const status = cliFailureStatus(message);
               controller.enqueue(
                 encoder.encode(
-                  `data: ${JSON.stringify(buildErrorBody(status, message))}\n\ndata: [DONE]\n\n`
+                  `data: ${JSON.stringify(
+                    buildErrorBody(status, message, undefined, cliFailureClassification(status))
+                  )}\n\ndata: [DONE]\n\n`
                 )
               );
             } finally {
@@ -1316,7 +1424,8 @@ export class MinimaxCodeExecutor extends BaseExecutor {
       input.log?.warn?.("MINIMAX_CODE", message);
       // A refusal of the CLI is not an outage of the model: a 502 would
       // lock the model out of the fallbacks for half an hour.
-      return errorResponse(cliFailureStatus(message), message);
+      const status = cliFailureStatus(message);
+      return errorResponse(status, message, cliFailureClassification(status));
     }
   }
 

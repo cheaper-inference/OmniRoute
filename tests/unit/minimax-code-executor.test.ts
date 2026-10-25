@@ -1359,3 +1359,99 @@ test("an oversized CLI request answers 413", async () => {
   // A refusal of the request is request-scoped: 413 is in no lockout list.
   assert.equal(response.status, 413);
 });
+
+/**
+ * The hub of the CLI has a byte ceiling of its own, and a request that does
+ * not fit is refused by the CLI with the overflow of that hub. The refusal is
+ * a property of the request, never of the health of the model.
+ */
+test("the overflow of the hub of the CLI is a request-scoped refusal", async () => {
+  const { cliFailureStatus } = await loadMinimaxCodeExecutor();
+  assert.equal(cliFailureStatus("SSE subscriber overflow: 128 items / 524288 bytes"), 413);
+  // The run status of the CLI for a request that does not fit.
+  assert.equal(cliFailureStatus("MiniMax Code run failed (limit_exceeded)"), 413);
+});
+
+test("a quota of the CLI is not a refusal of the request", async () => {
+  const { cliFailureStatus } = await loadMinimaxCodeExecutor();
+  // A quota is a condition of the account: the recovery is a subscription and
+  // not a smaller prompt, so it keeps the status it has today.
+  assert.equal(cliFailureStatus("MiniMax Code run failed (insufficient_quota)"), 500);
+  assert.equal(cliFailureStatus("MiniMax Code run failed (quota_exhausted)"), 500);
+  // The CLI reports an exhausted entitlement with a name that contains the run
+  // status of a refusal: it is a quota, not a refusal of the request.
+  assert.equal(cliFailureStatus("MiniMax Code run failed (entitlement_limit_exceeded)"), 500);
+});
+
+test("the classification of a refusal of the CLI marks it as a request error", async () => {
+  const { cliFailureClassification } = await loadMinimaxCodeExecutor();
+  assert.deepEqual(cliFailureClassification(400), { type: "invalid_request_error" });
+  assert.deepEqual(cliFailureClassification(413), { type: "invalid_request_error" });
+  assert.deepEqual(cliFailureClassification(422), { type: "invalid_request_error" });
+  // A credential and an outage are not a property of the request.
+  assert.equal(cliFailureClassification(401), undefined);
+  assert.equal(cliFailureClassification(500), undefined);
+  assert.equal(cliFailureClassification(502), undefined);
+});
+
+test("an overflowing CLI request answers 413 and stays out of the model lockout", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "cli",
+    runner: async () => {
+      throw new Error("SSE subscriber overflow: 128 items / 524288 bytes");
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: false,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  // 413, not 500: a 500 is a server error and would be recorded as a model
+  // outage.
+  assert.equal(response.status, 413);
+  const body = await response.json();
+  // The refusal is marked as a request error, so the fallback layer keeps it
+  // out of the model lockout.
+  assert.equal(body.error.type, "invalid_request_error");
+});
+
+test("an overflowing CLI request carries the refusal into the stream as a request error", async () => {
+  const { MinimaxCodeExecutor } = await loadMinimaxCodeExecutor();
+  const executor = new MinimaxCodeExecutor({
+    command: process.execPath,
+    args: [fixture],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    transport: "cli",
+    runner: async () => {
+      throw new Error("SSE subscriber overflow: 128 items / 524288 bytes");
+    },
+  });
+
+  const result = await executor.execute({
+    model: "MiniMax-M3.1-Flash",
+    body: requestBody(),
+    stream: true,
+    credentials: {},
+  });
+  const response = "response" in result ? result.response : result;
+  const text = await response.text();
+  const payloads = text
+    .split("\n")
+    .filter((line) => line.startsWith("data: ") && !line.includes("[DONE]"))
+    .map((line) => JSON.parse(line.slice("data: ".length)));
+  const failure = payloads.find((payload) => payload.error);
+  assert.ok(failure, "the stream has to carry the failure");
+  // Without the type the combo layer renames the failure to a 502 — and a 502
+  // is in the model-lockout list.
+  assert.equal(failure.error.type, "invalid_request_error");
+  assert.notEqual(failure.error.type, "server_error");
+});
