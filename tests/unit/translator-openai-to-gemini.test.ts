@@ -492,6 +492,66 @@ test("OpenAI -> Gemini request keeps function tools when native web search is pr
   assert.ok(!result.tools?.some((tool) => "googleSearch" in tool));
 });
 
+test("OpenAI -> Gemini warns when native web search is dropped in favour of function tools", () => {
+  const originalWarn = console.warn;
+  const warnings: string[] = [];
+  console.warn = (...args: unknown[]) => {
+    warnings.push(args.map(String).join(" "));
+  };
+  try {
+    openaiToGeminiRequest(
+      "gemini-2.5-pro",
+      {
+        messages: [{ role: "user", content: "Search the web" }],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "weather",
+              description: "Fetch weather",
+              parameters: { type: "object", properties: {} },
+            },
+          },
+          { type: "web_search" },
+        ],
+      },
+      false
+    );
+  } finally {
+    console.warn = originalWarn;
+  }
+
+  assert.ok(
+    warnings.some((line) => line.includes("native web search") && line.includes("function")),
+    `expected a dropped-web-search warning, got: ${JSON.stringify(warnings)}`
+  );
+});
+
+test("OpenAI -> Gemini does not warn when native web search is the only tool", () => {
+  const originalWarn = console.warn;
+  const warnings: string[] = [];
+  console.warn = (...args: unknown[]) => {
+    warnings.push(args.map(String).join(" "));
+  };
+  try {
+    openaiToGeminiRequest(
+      "gemini-2.5-pro",
+      {
+        messages: [{ role: "user", content: "Search the web" }],
+        tools: [{ type: "web_search" }],
+      },
+      false
+    );
+  } finally {
+    console.warn = originalWarn;
+  }
+
+  assert.deepEqual(
+    warnings.filter((line) => line.includes("native web search")),
+    []
+  );
+});
+
 test("OpenAI -> Gemini native web search omits function calling config without declarations", () => {
   const result = openaiToGeminiRequest(
     "gemini-2.5-pro",
