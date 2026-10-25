@@ -33,3 +33,33 @@ export function findComboPage<T extends { id: string | number }>(
   const comboIndex = items.findIndex((combo) => String(combo.id) === comboId);
   return comboIndex < 0 ? 1 : Math.floor(comboIndex / pageSize) + 1;
 }
+
+export function comboListContains(
+  items: unknown,
+  comboId: string
+): items is Array<{ id: string | number }> {
+  return Array.isArray(items) && items.some((combo) => String(combo?.id) === comboId);
+}
+
+/** The combos URL with the strategy filter dropped (other query params are kept). */
+export function buildUnfilteredCombosHref(search: string): string {
+  const params = new URLSearchParams(search);
+  params.delete("filter");
+  const queryString = params.toString();
+  return `/dashboard/combos${queryString ? `?${queryString}` : ""}`;
+}
+
+/** Scroll a card into view once React has rendered it (bounded retries, one per frame). */
+export function scrollToComboCardWhenRendered(comboId: string, maxFrames = 12): void {
+  let remainingFrames = maxFrames;
+  const scrollWhenRendered = () => {
+    const element = document.querySelector(`[data-testid="combo-card-${comboId}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: "auto", block: "center" });
+      return;
+    }
+    remainingFrames -= 1;
+    if (remainingFrames > 0) requestAnimationFrame(scrollWhenRendered);
+  };
+  requestAnimationFrame(scrollWhenRendered);
+}

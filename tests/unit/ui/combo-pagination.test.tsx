@@ -5,7 +5,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   COMBO_PAGE_SIZE,
+  buildUnfilteredCombosHref,
   clampComboPage,
+  comboListContains,
   findComboPage,
   getComboPageCount,
   getComboPageItems,
@@ -65,5 +67,19 @@ describe("combo inventory pagination", () => {
     expect(source).toMatch(
       /<Link\s+href=\{`\/dashboard\/combos\/\$\{combo\.id\}`\}\s+prefetch=\{false\}/
     );
+  });
+
+  it("only reveals a created combo that is present in the refetched inventory", () => {
+    const combos = makeCombos(5);
+
+    expect(comboListContains(combos, "combo-3")).toBe(true);
+    expect(comboListContains(combos, "missing")).toBe(false);
+    expect(comboListContains(null, "combo-3")).toBe(false);
+  });
+
+  it("drops only the strategy filter when returning to the full inventory", () => {
+    expect(buildUnfilteredCombosHref("filter=auto")).toBe("/dashboard/combos");
+    expect(buildUnfilteredCombosHref("filter=auto&tab=usage")).toBe("/dashboard/combos?tab=usage");
+    expect(buildUnfilteredCombosHref("")).toBe("/dashboard/combos");
   });
 });
