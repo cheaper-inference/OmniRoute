@@ -628,46 +628,61 @@ export function isAutoComboDeniedForKey(
   return apiKeyInfo?.allowAutoCombos === false;
 }
 
+function autoComboDeniedResponse(request: Request, modelStr: string): Response {
+  return policyErrorResponse(
+    request,
+    HTTP_STATUS.FORBIDDEN,
+    `Auto combo "${modelStr}" is not allowed for this API key`,
+    `Auto combos are not enabled for this API key. Choose an explicit model or combo.`,
+    "invalid_request_error",
+    HTTP_STATUS.BAD_REQUEST
+  );
+}
+
+/**
+ * Bare `auto` falls through to the built-in router only when no persisted
+ * combo literally named "auto" exists, so resolve the combo before deciding
+ * whether `allowAutoCombos=false` applies. Resolution failure fails closed.
+ */
+async function resolveBareAutoPolicy(
+  context: PolicyContext,
+  requestedComboName: string | null
+): Promise<{ comboName: string | null; rejection: Response | null }> {
+  const { request, apiKeyInfo, modelStr } = context;
+  let comboName = requestedComboName;
+  if (!comboName && isAutoComboDeniedForKey(apiKeyInfo, modelStr)) {
+    try {
+      comboName = await resolveRequestedComboName(String(modelStr));
+    } catch (error) {
+      log.error("API_POLICY", "Bare auto combo resolution failed. Request blocked.", { error });
+      return {
+        comboName: null,
+        rejection: errorResponse(
+          HTTP_STATUS.SERVICE_UNAVAILABLE,
+          "API key combo policy unavailable"
+        ),
+      };
+    }
+  }
+  if (isAutoComboDeniedForKey(apiKeyInfo, modelStr, comboName)) {
+    return { comboName, rejection: autoComboDeniedResponse(request, String(modelStr)) };
+  }
+  return { comboName, rejection: null };
+}
+
 async function validateModelAccess(context: PolicyContext): Promise<Response | null> {
   const { request, apiKey, apiKeyInfo, modelStr } = context;
   if (!modelStr || apiKeyInfo.allowedQuotas?.length) return null;
-  const autoComboDenied = isAutoComboDeniedForKey(apiKeyInfo, modelStr);
-  // `auto/*` always denotes the built-in virtual router. Bare `auto` is
-  // different: a persisted combo literally named "auto" takes precedence, so
-  // resolve ordinary combo access before deciding whether it fell through to
-  // the built-in route.
-  if (autoComboDenied && modelStr !== "auto") {
-    return policyErrorResponse(
-      request,
-      HTTP_STATUS.FORBIDDEN,
-      `Auto combo "${modelStr}" is not allowed for this API key`,
-      `Auto combos are not enabled for this API key. Choose an explicit model or combo.`,
-      "invalid_request_error",
-      HTTP_STATUS.BAD_REQUEST
-    );
+  // `auto/*` always denotes the built-in virtual router; bare `auto` is
+  // resolved against persisted combos in resolveBareAutoPolicy() below.
+  if (modelStr !== "auto" && isAutoComboDeniedForKey(apiKeyInfo, modelStr)) {
+    return autoComboDeniedResponse(request, modelStr);
   }
   const comboAccess = await validateComboAccess(apiKeyInfo.allowedCombos, modelStr);
   if (comboAccess.rejection) return comboAccess.rejection;
-  let requestedComboName = comboAccess.comboName;
-
-  if (autoComboDenied && !requestedComboName) {
-    try {
-      requestedComboName = await resolveRequestedComboName(modelStr);
-    } catch (error) {
-      log.error("API_POLICY", "Bare auto combo resolution failed. Request blocked.", { error });
-      return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key combo policy unavailable");
-    }
-  }
-  if (isAutoComboDeniedForKey(apiKeyInfo, modelStr, requestedComboName)) {
-    return policyErrorResponse(
-      request,
-      HTTP_STATUS.FORBIDDEN,
-      `Auto combo "${modelStr}" is not allowed for this API key`,
-      `Auto combos are not enabled for this API key. Choose an explicit model or combo.`,
-      "invalid_request_error",
-      HTTP_STATUS.BAD_REQUEST
-    );
-  }
+  const autoPolicy = await resolveBareAutoPolicy(context, comboAccess.comboName);
+  if (autoPolicy.rejection) return autoPolicy.rejection;
+  let requestedComboName = autoPolicy.comboName;
 
   const hasModelRestrictions = hasApiKeyModelRestrictions(apiKeyInfo);
   if (!requestedComboName && hasModelRestrictions) {
