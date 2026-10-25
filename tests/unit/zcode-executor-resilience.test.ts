@@ -1,18 +1,4 @@
-/**
- * ZCode executor resilience: native quota refusals, request-scoped attempt
- * cancellations, and our own graceful shutdown.
- *
- * Behaviour map (the four behaviours this PR protects):
- *  - B1 native quota: a native Coding Plan quota refusal keeps its EXACT native
- *    code (429 / insufficient_quota / quota_exhausted) — never flattened into a
- *    generic 402/429 and never mistaken for a provider outage.
- *  - B2 request-scoped: an attempt the ZCode server cancelled is tagged
- *    `upstream_request_cancelled`, so every downstream resilience consumer keeps
- *    it request-scoped (no model lockout, no provider breaker, no cooldown).
- *  - B4 499 only for our own shutdown: an upstream cancellation keeps its own
- *    status (502) so the combo can fall back; 499 is reserved for our own drain
- *    (and for a client abort, where nobody is listening anymore).
- */
+/** ZCode executor tests for native quota refusals, cancellations, and shutdown. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createTempDataDir } from "../_setup/tempDataDir.ts";
