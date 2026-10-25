@@ -3854,8 +3854,9 @@ paths:
                   type: string
                   nullable: true
                   description: >-
-                    Absolute adopted sing-box config path (lowercase .json).
-                    Empty means no generation; each sync writes
+                    Absolute adopted config path: lowercase `.json` renders
+                    sing-box, `.yaml`/`.yml` renders Mihomo. Empty means no
+                    generation; each sync writes
                     `<path>.generated` beside it, never into it.
                 coreBinaryPath:
                   type: string
@@ -16652,8 +16653,9 @@ components:
           type: string
           nullable: true
           description: >-
-            Absolute adopted sing-box config path (lowercase .json).
-            Empty means no generation.
+            Absolute adopted config path: lowercase `.json` renders
+            sing-box, `.yaml`/`.yml` renders Mihomo. Empty means no
+            generation.
         coreBinaryPath:
           type: string
           nullable: true

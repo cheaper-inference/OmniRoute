@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "現在",
       "coreConfigPath": "核心設定檔",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "絕對 .json 路徑（副檔名小寫）。留空 = 不產生。每次同步會在已採用的檔案旁寫入 '<path>'.generated，絕不寫入該檔案本身。",
+      "coreConfigPathDesc": "絕對 .json/.yaml/.yml 路徑（副檔名小寫）。留空 = 不產生。每次同步會在已採用的檔案旁寫入 '<path>'.generated，絕不寫入該檔案本身。",
       "lastSwitchKind": "切換原因",
       "switchKind": {
         "ip_quota_429": "配額",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "未找到有效條目。請檢查格式後重試。",
     "bulkImportSuccess": "匯入完成：已建立 {created} 個，已更新 {updated} 個，失敗 {failed} 個",
     "bulkImportErrorLine": "第 {line} 行：{reason}",
-    "bulkImportMaxExceeded": "每次最多匯入 100 個代理",
+    "bulkImportMaxExceeded": "每次最多匯入 {max} 個代理",
     "bulkImportPreview": "預覽",
     "clearAssignment": "（明確分配）",
     "bulkProxyAssignment": "批次代理分配",

@@ -306,16 +306,24 @@ export async function GET(
       );
     };
 
-    const buildCachedDiscoveryResponse = (warning?: string) =>
+    const buildCachedDiscoveryResponse = (
+      warning?: string,
+      extraPayload: Record<string, unknown> = {}
+    ) =>
       buildResponse({
         provider,
         connectionId,
         models: cachedDiscoveryModels,
         source: "cache",
         ...(warning ? { warning } : {}),
+        ...extraPayload,
       });
 
-    const buildLocalCatalogResponse = (warning?: string, intentional = false) => {
+    const buildLocalCatalogResponse = (
+      warning?: string,
+      intentional = false,
+      extraPayload: Record<string, unknown> = {}
+    ) => {
       const localModels = toLocalCatalogModels();
       if (localModels.length === 0) return null;
       return buildResponse({
@@ -328,6 +336,7 @@ export async function GET(
         // of treating them as a degraded remote-fetch failure (502).
         ...(intentional ? { intentional: true } : {}),
         ...(warning ? { warning } : {}),
+        ...extraPayload,
       });
     };
 
@@ -335,15 +344,17 @@ export async function GET(
       cacheWarning = "API unavailable — using cached catalog",
       localWarning = "API unavailable — using local catalog",
       localIntentional = false,
+      extraPayload = {},
     }: {
       cacheWarning?: string;
       localWarning?: string;
       localIntentional?: boolean;
+      extraPayload?: Record<string, unknown>;
     } = {}) => {
       if (cachedDiscoveryModels.length > 0) {
-        return buildCachedDiscoveryResponse(cacheWarning);
+        return buildCachedDiscoveryResponse(cacheWarning, extraPayload);
       }
-      return buildLocalCatalogResponse(localWarning, localIntentional);
+      return buildLocalCatalogResponse(localWarning, localIntentional, extraPayload);
     };
 
     const buildDiscoveryErrorFallbackResponse = (
@@ -1741,6 +1752,7 @@ export async function GET(
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: "Copilot models API unavailable — using cached catalog",
         localWarning: "Copilot models API unavailable — using local catalog",
+        extraPayload: discovery.failure ? { discoveryFailure: discovery.failure } : {},
       });
       if (fallback) return fallback;
       return buildResponse({
@@ -1749,6 +1761,7 @@ export async function GET(
         models: discovery.models,
         source: "local_catalog",
         warning: "Copilot models API unavailable — using local catalog",
+        ...(discovery.failure ? { discoveryFailure: discovery.failure } : {}),
       });
     }
 

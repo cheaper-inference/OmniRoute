@@ -93,21 +93,21 @@ interface ProviderCardProps {
 }
 
 // Category identity dots (a legend shared with ProviderSummaryCard and the page's section
-// headers): categorical hues, not status colours, and more categories than the kit's five
-// chart tokens — kept as the one sanctioned raw palette on this screen (KEA-7886).
-const DOT_COLORS: Record<string, string> = {
-  free: "bg-green-500",
-  "no-auth": "bg-stone-500",
-  oauth: "bg-blue-500",
-  apikey: "bg-amber-500",
-  compatible: "bg-orange-500",
-  "web-cookie": "bg-purple-500",
-  search: "bg-teal-500",
-  audio: "bg-rose-500",
-  local: "bg-emerald-500",
-  "upstream-proxy": "bg-indigo-500",
-  "cloud-agent": "bg-violet-500",
-};
+// headers) come from the kit chart tokens via providerCategoryPalette.ts (KEA-7886, P8). Only
+// these auth types get their own dot; anything else keeps the API-key dot, as before.
+const CARD_DOT_CATEGORIES = new Set([
+  "free",
+  "no-auth",
+  "oauth",
+  "apikey",
+  "compatible",
+  "web-cookie",
+  "search",
+  "audio",
+  "local",
+  "upstream-proxy",
+  "cloud-agent",
+]);
 
 type ProviderMessageTranslator = ((key: string, values?: Record<string, unknown>) => string) & {
   has?: (key: string) => boolean;
@@ -552,7 +552,7 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
                   />
                 )}
                 <CategoryDot
-                  color={DOT_COLORS[authType] || DOT_COLORS.apikey}
+                  category={CARD_DOT_CATEGORIES.has(authType) ? authType : "apikey"}
                   hasFree={provider.hasFree === true}
                   label={dotLabels[authType] || t("apiKeyLabel")}
                   freeLabel={t("hasFreeTooltip")}
