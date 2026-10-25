@@ -45,6 +45,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/search/providers/route.ts": 3,
     "src/app/api/v1/_shared/elevenLabsProxy.ts": 1,
     "src/app/api/v1/_shared/fishAudioProxy.ts": 1,
+    // #13987: System One decisions (/v1/systemone + /v1/decisions), same
+    // scoped quota-preflight credential lookup as /v1/classify (class B).
+    "src/app/api/v1/_shared/systemOneRoute.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.

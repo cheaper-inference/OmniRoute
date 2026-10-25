@@ -7,7 +7,10 @@
  * logging mirror /v1/classify (Jina passthrough).
  */
 
-import { handleSystemOneProxy } from "@omniroute/open-sse/handlers/systemOne.ts";
+import {
+  handleSystemOneProxy,
+  type SystemOneCredentials,
+} from "@omniroute/open-sse/handlers/systemOne.ts";
 import { resolveSystemOneTarget } from "@omniroute/open-sse/config/systemOneRegistry.ts";
 import {
   getProviderCredentialsWithQuotaPreflight,
@@ -17,6 +20,11 @@ import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import { v1SystemOneSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
@@ -71,12 +79,24 @@ async function postHandler(request: Request): Promise<Response> {
   const policy = await enforceApiKeyPolicy(request, model ?? target.upstreamModel);
   if (policy.rejection) return policy.rejection;
 
-  const credentials = await getProviderCredentialsWithQuotaPreflight(target.provider);
+  // GHSA-3w2r: credential selection stays inside the key's connection scope,
+  // the same scope /v1/classify and chat apply.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+
+  const credentials = await getProviderCredentialsWithQuotaPreflight(
+    target.provider,
+    null,
+    scope.allowedConnections
+  );
   if (!credentials) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,
       `No active credentials for provider: ${target.provider}`
     );
+  }
+  if (isKeyScopeBlockedCredentials(credentials)) {
+    return keyScopeBlockedResponse(target.provider, credentials);
   }
   if (isAllRateLimitedCredentials(credentials)) {
     return rateLimitedProviderResponse(target.provider, credentials);
@@ -86,7 +106,9 @@ async function postHandler(request: Request): Promise<Response> {
     path: new URL(request.url).pathname,
     target,
     body,
-    credentials,
+    // The key-scope-blocked and all-rate-limited sentinels were refused above;
+    // what is left is a real credential record.
+    credentials: credentials as SystemOneCredentials,
     requestedModel: model ?? null,
   });
   if (response.ok) {

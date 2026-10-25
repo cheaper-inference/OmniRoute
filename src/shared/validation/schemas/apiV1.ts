@@ -533,7 +533,7 @@ export const v1SegmentSchema = z
 export const v1SystemOneSchema = z
   .object({
     model: modelIdSchema.optional(),
-    state: z.union([nonEmptyStringSchema, z.record(z.unknown())]),
+    state: z.union([nonEmptyStringSchema, z.record(z.string(), z.unknown())]),
     questions: z.record(z.string().min(1), z.unknown()),
   })
   .catchall(z.unknown())
