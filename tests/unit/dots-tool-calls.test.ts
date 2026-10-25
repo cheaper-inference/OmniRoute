@@ -1,17 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { parseDotsToolCalls, hasDotsToolCalls, stripDotsToolCallBlocks } = await import(
-  "../../open-sse/utils/dotsToolCalls.ts"
-);
+const { parseDotsToolCalls, hasDotsToolCalls, stripDotsToolCallBlocks } =
+  await import("../../open-sse/utils/dotsToolCalls.ts");
 
 test("hasDotsToolCalls: detects <dots_function_call>", () => {
-  assert.equal(hasDotsToolCalls('<dots_function_call>{"name":"x","arguments":{}}</dots_function_call>'), true);
+  assert.equal(
+    hasDotsToolCalls('<dots_function_call>{"name":"x","arguments":{}}</dots_function_call>'),
+    true
+  );
   assert.equal(hasDotsToolCalls("hello world"), false);
 });
 
 test("parseDotsToolCalls: pure JSON fallback becomes tool call", () => {
-  const content = '<dots_function_call>{"name":"search","arguments":{"query":"tables"}}</dots_function_call>';
+  const content =
+    '<dots_function_call>{"name":"search","arguments":{"query":"tables"}}</dots_function_call>';
   const result = parseDotsToolCalls(content);
   assert.equal(result.toolCalls.length, 1);
   assert.equal(result.toolCalls[0].function.name, "search");
@@ -62,7 +65,8 @@ test("parseDotsToolCalls: malformed/unclosed kept as text", () => {
 });
 
 test("parseDotsToolCalls: best-effort typing without schemas keeps scalars raw", () => {
-  const content = '<dots_function_call>{"name":"test","arguments":{"count":3,"active":true}}</dots_function_call>';
+  const content =
+    '<dots_function_call>{"name":"test","arguments":{"count":3,"active":true}}</dots_function_call>';
   const result = parseDotsToolCalls(content);
   assert.equal(result.toolCalls.length, 1);
   const args = JSON.parse(result.toolCalls[0].function.arguments);
@@ -72,9 +76,64 @@ test("parseDotsToolCalls: best-effort typing without schemas keeps scalars raw",
 });
 
 test("stripDotsToolCallBlocks: removes blocks", () => {
-  const content = 'hello <dots_function_call>{"name":"x","arguments":{}}</dots_function_call> world';
+  const content =
+    'hello <dots_function_call>{"name":"x","arguments":{}}</dots_function_call> world';
   const result = stripDotsToolCallBlocks(content);
   assert.equal(result.includes("dots_function_call"), false);
   assert.ok(result.includes("hello"));
   assert.ok(result.includes("world"));
+});
+
+const JSON_BLOCK =
+  '<dots_function_call>{"name":"search","arguments":{"query":"tables"}}</dots_function_call>';
+const INVOKE_BLOCK = `<dots_function_call><invoke name="get_weather"><parameter name="city">Boston</parameter></invoke></dots_function_call>`;
+
+test("parseDotsToolCalls: Anthropic-shaped tools (name/input_schema) are declared tools", () => {
+  const result = parseDotsToolCalls(INVOKE_BLOCK, {
+    tools: [
+      {
+        name: "get_weather",
+        input_schema: { type: "object", properties: { city: { type: "string" } } },
+      },
+    ],
+  });
+  assert.equal(result.toolCalls.length, 1);
+  assert.equal(result.toolCalls[0].function.name, "get_weather");
+  assert.deepEqual(JSON.parse(result.toolCalls[0].function.arguments), { city: "Boston" });
+  assert.equal(result.content, "");
+});
+
+test("parseDotsToolCalls: a declared tool without any schema still parses", () => {
+  for (const tool of [{ name: "search" }, { type: "function", function: { name: "search" } }]) {
+    const result = parseDotsToolCalls(JSON_BLOCK, { tools: [tool] });
+    assert.equal(result.toolCalls.length, 1, JSON.stringify(tool));
+    assert.equal(result.content, "");
+  }
+});
+
+test("parseDotsToolCalls: tool name resolves to the declared spelling", () => {
+  const result = parseDotsToolCalls(JSON_BLOCK, { tools: [{ name: "Search" }] });
+  assert.equal(result.toolCalls[0].function.name, "Search");
+});
+
+test("parseDotsToolCalls: Anthropic input_schema types coerce parameters", () => {
+  const block = `<dots_function_call><invoke name="count"><parameter name="n">7</parameter><parameter name="on">true</parameter></invoke></dots_function_call>`;
+  const result = parseDotsToolCalls(block, {
+    tools: [
+      {
+        name: "count",
+        input_schema: {
+          type: "object",
+          properties: { n: { type: "integer" }, on: { type: "boolean" } },
+        },
+      },
+    ],
+  });
+  assert.deepEqual(JSON.parse(result.toolCalls[0].function.arguments), { n: 7, on: true });
+});
+
+test("parseDotsToolCalls: unknown tool is kept verbatim for Anthropic-shaped tools too", () => {
+  const result = parseDotsToolCalls(JSON_BLOCK, { tools: [{ name: "other" }] });
+  assert.equal(result.toolCalls.length, 0);
+  assert.equal(result.content, JSON_BLOCK);
 });

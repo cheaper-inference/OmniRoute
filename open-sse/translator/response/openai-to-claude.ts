@@ -497,6 +497,34 @@ function toClaudeClientUsage(usage) {
   return clientUsage;
 }
 
+type PendingToolCall = { id: string; name: string; args: Record<string, string> };
+
+/**
+ * Pull Dots Studio `<dots_function_call>` blocks out of a text delta, carrying an
+ * unfinished block across chunks in `state._dotsHoldback`.
+ */
+function extractDotsToolCalls(
+  state: { _dotsHoldback?: string; clientTools?: unknown },
+  text: string
+): { content: string; toolCalls: PendingToolCall[] } {
+  const pending = state._dotsHoldback;
+  state._dotsHoldback = undefined;
+  const input = pending ? pending + text : text;
+  if (!hasDotsToolCalls(input)) return { content: input, toolCalls: [] };
+  const result = parseDotsToolCalls(input, {
+    tools: Array.isArray(state.clientTools) ? state.clientTools : [],
+  });
+  if (result.holdback) state._dotsHoldback = result.holdback;
+  return {
+    content: result.content,
+    toolCalls: result.toolCalls.map((tc) => ({
+      id: tc.id,
+      name: tc.function.name,
+      args: JSON.parse(tc.function.arguments) as Record<string, string>,
+    })),
+  };
+}
+
 // Convert OpenAI stream chunk to Claude format
 export function openaiToClaudeResponse(chunk, state) {
   if (!chunk && !state.pendingClaudeFinishChoice) return flushTruncatedClaudeStream(state);
@@ -721,25 +749,10 @@ export function openaiToClaudeResponse(chunk, state) {
       }
 
       // Dots Studio <dots_function_call> markup
-      let dotsContent = dsmlContent;
-      const dotsPending = state._dotsHoldback;
-      if (dotsPending) {
-        dotsContent = dotsPending + dotsContent;
-        state._dotsHoldback = undefined;
-      }
-      let dotsToolCalls: { id: string; name: string; args: Record<string, string> }[] = [];
-      if (hasDotsToolCalls(dotsContent)) {
-        const dotsResult = parseDotsToolCalls(dotsContent, { tools: state.clientTools });
-        dotsContent = dotsResult.content;
-        if (dotsResult.holdback) {
-          state._dotsHoldback = dotsResult.holdback;
-        }
-        dotsToolCalls = dotsResult.toolCalls.map((tc) => ({
-          id: tc.id,
-          name: tc.function.name,
-          args: JSON.parse(tc.function.arguments) as Record<string, string>,
-        }));
-      }
+      const { content: dotsContent, toolCalls: dotsToolCalls } = extractDotsToolCalls(
+        state,
+        dsmlContent
+      );
 
       // Check for XML <invoke> blocks that some models emit instead of JSON tool_calls
       const { cleaned, toolCalls: xmlToolCalls } = extractXmlInvokeBlocks(

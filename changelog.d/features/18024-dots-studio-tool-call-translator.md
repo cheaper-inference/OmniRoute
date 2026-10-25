@@ -1,0 +1,1 @@
+- **Dots Studio tool-call markup**: `<dots_function_call>` text blocks (structured `<invoke>` or pure JSON) are converted into real tool calls in the Claude stream translator and the OpenAI response sanitizer, accepting both OpenAI-shaped and Anthropic-shaped client tools (including tools declared without a schema) so the markup never leaks to the client (#18024).

@@ -21,6 +21,7 @@
  * blocks are buffered for streaming.
  */
 
+import { findDeclaredToolName } from "../services/declaredToolCasing.ts";
 
 const DOTS_OPEN_RE = /<dots_function_call\b[^>]*>/i;
 const DOTS_CLOSE_RE = /<\/dots_function_call>/i;
@@ -48,86 +49,98 @@ export interface ParseDotsResult {
   holdback: string;
 }
 
+/**
+ * Request tool declarations in either shape: OpenAI (`function.name` +
+ * `function.parameters`) or Anthropic (`name` + `input_schema`). Declared names
+ * resolve through `findDeclaredToolName`; a tool without any schema is still
+ * "declared".
+ */
 export interface DotsParseOptions {
-  tools?: Array<{ type?: string; function?: { name?: string; parameters?: unknown } }>;
+  tools?: unknown[];
   final?: boolean;
 }
 
-function coerceValue(value: string, schema: unknown): unknown {
-  if (!schema || typeof schema !== "object") {
-    const trimmed = value.trim();
-    // Try to parse as JSON if it looks like JSON
-    if (
-      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
-      (trimmed.startsWith("[") && trimmed.endsWith("]"))
-    ) {
-      try {
-        return JSON.parse(trimmed);
-      } catch {
-        return value;
-      }
-    }
-    // Try to parse quoted strings
-    if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-      try {
-        return JSON.parse(trimmed);
-      } catch {
-        return trimmed.slice(1, -1);
-      }
-    }
-    // Try numbers/booleans/null
-    if (trimmed === "true") return true;
-    if (trimmed === "false") return false;
-    if (trimmed === "null") return null;
-    if (/^-?\d+$/.test(trimmed)) return parseInt(trimmed, 10);
-    if (/^-?\d+\.\d+$/.test(trimmed)) return parseFloat(trimmed);
-    return value;
-  }
+type JsonRecord = Record<string, unknown>;
 
-  const schemaObj = schema as Record<string, unknown>;
+function asRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
+
+function isJsonContainerText(text: string): boolean {
+  return (
+    (text.startsWith("{") && text.endsWith("}")) || (text.startsWith("[") && text.endsWith("]"))
+  );
+}
+
+function tryParseJson(text: string, fallback: unknown): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return fallback;
+  }
+}
+
+function coerceScalarGuess(trimmed: string, raw: string): unknown {
+  if (trimmed === "true") return true;
+  if (trimmed === "false") return false;
+  if (trimmed === "null") return null;
+  if (/^-?\d+$/.test(trimmed)) return parseInt(trimmed, 10);
+  if (/^-?\d+\.\d+$/.test(trimmed)) return parseFloat(trimmed);
+  return raw;
+}
+
+/** Best-effort typing when the tool schema says nothing about the parameter. */
+function coerceUntyped(value: string): unknown {
   const trimmed = value.trim();
+  if (isJsonContainerText(trimmed)) return tryParseJson(trimmed, value);
+  if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+    return tryParseJson(trimmed, trimmed.slice(1, -1));
+  }
+  return coerceScalarGuess(trimmed, value);
+}
 
-  if (schemaObj.type === "integer") {
-    const n = parseInt(trimmed, 10);
-    return isNaN(n) ? value : n;
-  }
-  if (schemaObj.type === "number") {
-    const n = parseFloat(trimmed);
-    return isNaN(n) ? value : n;
-  }
-  if (schemaObj.type === "boolean") {
-    if (trimmed === "true") return true;
-    if (trimmed === "false") return false;
-    return value;
-  }
-  if (schemaObj.type === "null") {
-    return null;
-  }
-  if (schemaObj.type === "array" || schemaObj.type === "object") {
-    try {
-      return JSON.parse(trimmed);
-    } catch {
+function coerceNumeric(trimmed: string, raw: string, integer: boolean): unknown {
+  const n = integer ? parseInt(trimmed, 10) : parseFloat(trimmed);
+  return isNaN(n) ? raw : n;
+}
+
+function coerceBoolean(trimmed: string, raw: string): unknown {
+  if (trimmed === "true") return true;
+  if (trimmed === "false") return false;
+  return raw;
+}
+
+function coerceTyped(value: string, type: unknown): unknown {
+  const trimmed = value.trim();
+  switch (type) {
+    case "integer":
+      return coerceNumeric(trimmed, value, true);
+    case "number":
+      return coerceNumeric(trimmed, value, false);
+    case "boolean":
+      return coerceBoolean(trimmed, value);
+    case "null":
+      return null;
+    case "array":
+    case "object":
+      return tryParseJson(trimmed, value);
+    default:
       return value;
-    }
   }
-  // string or unknown
-  return value;
+}
+
+function coerceValue(value: string, schema: unknown): unknown {
+  const schemaObj = asRecord(schema);
+  if (!schemaObj) return coerceUntyped(value);
+  return coerceTyped(value, schemaObj.type);
 }
 
 function resolveSchemaRef(schema: unknown, defs: Record<string, unknown>): unknown {
-  if (!schema || typeof schema !== "object") return schema;
-  const schemaObj = schema as Record<string, unknown>;
-  if (typeof schemaObj.$ref === "string") {
-    const ref = schemaObj.$ref;
-    if (ref.startsWith("#/$defs/")) {
-      const key = ref.slice("#/$defs/".length);
-      return defs[key] || schema;
-    }
-    if (ref.startsWith("#/definitions/")) {
-      const key = ref.slice("#/definitions/".length);
-      return defs[key] || schema;
-    }
-    return schema;
+  const schemaObj = asRecord(schema);
+  if (!schemaObj || typeof schemaObj.$ref !== "string") return schema;
+  const ref = schemaObj.$ref;
+  for (const prefix of ["#/$defs/", "#/definitions/"]) {
+    if (ref.startsWith(prefix)) return defs[ref.slice(prefix.length)] || schema;
   }
   return schema;
 }
@@ -138,33 +151,23 @@ function getParameterSchema(
   defs: Record<string, unknown>
 ): unknown {
   if (!rootSchema || typeof rootSchema !== "object") return undefined;
-  let schema = rootSchema as Record<string, unknown>;
-  schema = resolveSchemaRef(schema, defs) as Record<string, unknown>;
-  const properties = schema.properties as Record<string, unknown> | undefined;
-  if (!properties) return undefined;
-  let paramSchema = properties[paramName];
+  const schema = asRecord(resolveSchemaRef(rootSchema, defs));
+  const properties = asRecord(schema?.properties);
+  const paramSchema = properties?.[paramName];
   if (!paramSchema) return undefined;
-  paramSchema = resolveSchemaRef(paramSchema, defs);
-  return paramSchema;
+  return resolveSchemaRef(paramSchema, defs);
 }
 
 function collectDefs(schema: unknown, defs: Record<string, unknown>): void {
-  if (!schema || typeof schema !== "object") return;
-  const schemaObj = schema as Record<string, unknown>;
-  if (schemaObj.$defs && typeof schemaObj.$defs === "object") {
-    Object.assign(defs, schemaObj.$defs as Record<string, unknown>);
+  const schemaObj = asRecord(schema);
+  if (!schemaObj) return;
+  for (const key of ["$defs", "definitions"]) {
+    const group = asRecord(schemaObj[key]);
+    if (group) Object.assign(defs, group);
   }
-  if (schemaObj.definitions && typeof schemaObj.definitions === "object") {
-    Object.assign(defs, schemaObj.definitions as Record<string, unknown>);
-  }
-  if (Array.isArray(schemaObj.anyOf)) {
-    for (const s of schemaObj.anyOf) collectDefs(s, defs);
-  }
-  if (Array.isArray(schemaObj.oneOf)) {
-    for (const s of schemaObj.oneOf) collectDefs(s, defs);
-  }
-  if (Array.isArray(schemaObj.allOf)) {
-    for (const s of schemaObj.allOf) collectDefs(s, defs);
+  for (const key of ["anyOf", "oneOf", "allOf"]) {
+    const branches = schemaObj[key];
+    if (Array.isArray(branches)) for (const s of branches) collectDefs(s, defs);
   }
 }
 
@@ -186,40 +189,114 @@ function generateCallId(): string {
   return `call_${hex}`;
 }
 
+interface ToolIndex {
+  declared: unknown[];
+  schemas: Map<string, unknown>;
+  defs: Record<string, unknown>;
+}
+
+/** Schema of one tools[] entry in either shape (OpenAI parameters / Anthropic input_schema). */
+function schemaOfTool(tool: unknown): unknown {
+  const item = asRecord(tool);
+  if (!item) return undefined;
+  const fn = asRecord(item.function);
+  return fn?.parameters ?? item.input_schema ?? item.parameters ?? undefined;
+}
+
+function declaredNameOfTool(tool: unknown): string {
+  const item = asRecord(tool);
+  if (!item) return "";
+  const fn = asRecord(item.function);
+  const name = typeof fn?.name === "string" ? fn.name : item.name;
+  return typeof name === "string" ? name.trim() : "";
+}
+
+function buildToolIndex(tools: unknown[]): ToolIndex {
+  const index: ToolIndex = { declared: tools, schemas: new Map(), defs: {} };
+  for (const tool of tools) {
+    const name = declaredNameOfTool(tool);
+    const schema = schemaOfTool(tool);
+    if (!name || !schema) continue;
+    index.schemas.set(name, schema);
+    collectDefs(schema, index.defs);
+  }
+  return index;
+}
+
+/** The declared spelling of `name`; null when tools are declared but none matches; `name` as-is when no tools are declared. */
+function resolveToolName(index: ToolIndex, name: string): string | null {
+  if (index.declared.length === 0) return name;
+  return findDeclaredToolName(index.declared, name);
+}
+
+function makeToolCall(name: string, args: string): DotsToolCall {
+  return { id: generateCallId(), type: "function", function: { name, arguments: args } };
+}
+
+function parseInvokeArgs(
+  invokeInner: string,
+  rootSchema: unknown,
+  defs: Record<string, unknown>
+): Record<string, unknown> {
+  const args: Record<string, unknown> = {};
+  const paramRegex = new RegExp(PARAMETER_RE);
+  let pm: RegExpExecArray | null;
+  while ((pm = paramRegex.exec(invokeInner)) !== null) {
+    args[pm[1]] = coerceValue(pm[2], getParameterSchema(rootSchema, pm[1], defs));
+  }
+  return args;
+}
+
+/** Structured `<invoke name=...>` body. null = no invoke here; undefined = invoke of an undeclared tool. */
+function parseInvokeBody(inner: string, index: ToolIndex): DotsToolCall | null | undefined {
+  const invokeMatch = inner.match(INVOKE_OPEN_RE);
+  if (!invokeMatch) return null;
+  const toolName = resolveToolName(index, invokeMatch[1]);
+  if (toolName === null) return undefined;
+  const invokeEndMatch = inner.match(INVOKE_CLOSE_RE);
+  const invokeInner = invokeEndMatch
+    ? inner.slice((invokeMatch.index ?? 0) + invokeMatch[0].length, invokeEndMatch.index)
+    : "";
+  const args = parseInvokeArgs(invokeInner, index.schemas.get(toolName), index.defs);
+  return makeToolCall(toolName, JSON.stringify(args));
+}
+
+/** Pure-JSON body. undefined = not a usable call (keep as content). */
+function parseJsonBody(inner: string, index: ToolIndex): DotsToolCall | undefined {
+  const jsonMatch = inner.match(DOTS_JSON_RE);
+  if (!jsonMatch) return undefined;
+  const parsed = asRecord(tryParseJson(jsonMatch[0], null));
+  if (!parsed) return undefined;
+  const rawName = parsed.name || asRecord(parsed.function)?.name;
+  if (typeof rawName !== "string" || !rawName) return undefined;
+  const toolName = resolveToolName(index, rawName);
+  if (toolName === null) return undefined;
+  const rawArgs = parsed.arguments || parsed.args || parsed.parameters || {};
+  return makeToolCall(toolName, typeof rawArgs === "string" ? rawArgs : JSON.stringify(rawArgs));
+}
+
+function parseBlockInner(inner: string, index: ToolIndex): DotsToolCall | undefined {
+  const invoked = parseInvokeBody(inner, index);
+  if (invoked !== null) return invoked;
+  return parseJsonBody(inner, index);
+}
+
 export function parseDotsToolCalls(text: string, options: DotsParseOptions = {}): ParseDotsResult {
   if (!text || typeof text !== "string") {
     return { content: text || "", toolCalls: [], holdback: "" };
   }
 
-  const { tools = [] } = options;
-
-  // Build tool schema map
-  const toolMap = new Map<string, unknown>();
-  const allDefs: Record<string, unknown> = {};
-  for (const tool of tools) {
-    if (tool?.function?.name) {
-      if (tool.function.parameters) {
-        toolMap.set(tool.function.name, tool.function.parameters);
-        collectDefs(tool.function.parameters, allDefs);
-      }
-    }
-  }
-
-  let remaining = text;
+  const index = buildToolIndex(Array.isArray(options.tools) ? options.tools : []);
   const toolCalls: DotsToolCall[] = [];
+  let remaining = text;
   let cleaned = "";
 
   while (remaining.length > 0) {
     const openMatch = remaining.match(DOTS_OPEN_RE);
     if (!openMatch || openMatch.index === undefined) {
-      // No more complete blocks
-      cleaned += remaining;
-      return { content: cleaned, toolCalls, holdback: "" };
+      return { content: cleaned + remaining, toolCalls, holdback: "" };
     }
-
-    // Emit text before this block
-    const before = remaining.slice(0, openMatch.index);
-    cleaned += before;
+    cleaned += remaining.slice(0, openMatch.index);
 
     const afterOpen = remaining.slice(openMatch.index + openMatch[0].length);
     const closeMatch = DOTS_CLOSE_RE.exec(afterOpen);
@@ -231,76 +308,9 @@ export function parseDotsToolCalls(text: string, options: DotsParseOptions = {})
     const inner = afterOpen.slice(0, closeMatch.index);
     remaining = afterOpen.slice(closeMatch.index + closeMatch[0].length);
 
-    // Try structured invoke first
-    const invokeMatch = inner.match(INVOKE_OPEN_RE);
-    if (invokeMatch) {
-      const toolName = invokeMatch[1];
-      // Check if tool is declared
-      if (tools.length > 0 && !toolMap.has(toolName)) {
-        // Unknown tool - keep as content
-        cleaned += openMatch[0] + inner + closeMatch[0];
-        continue;
-      }
-
-      const invokeEndMatch = inner.match(INVOKE_CLOSE_RE);
-      const invokeInner = invokeEndMatch
-        ? inner.slice(invokeMatch.index! + invokeMatch[0].length, invokeEndMatch.index!)
-        : "";
-
-      const args: Record<string, unknown> = {};
-      const paramRegex = new RegExp(PARAMETER_RE);
-      let pm: RegExpExecArray | null;
-      const rootSchema = toolMap.get(toolName);
-      while ((pm = paramRegex.exec(invokeInner)) !== null) {
-        const paramName = pm[1];
-        const paramValue = pm[2];
-        const paramSchema = getParameterSchema(rootSchema, paramName, allDefs);
-        args[paramName] = coerceValue(paramValue, paramSchema);
-      }
-
-      toolCalls.push({
-        id: generateCallId(),
-        type: "function",
-        function: {
-          name: toolName,
-          arguments: JSON.stringify(args),
-        },
-      });
-      continue;
-    }
-
-    // Try JSON fallback
-    const jsonMatch = inner.match(DOTS_JSON_RE);
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
-        const toolName = parsed.name || parsed.function?.name;
-        if (!toolName) {
-          cleaned += openMatch[0] + inner + closeMatch[0];
-          continue;
-        }
-        if (tools.length > 0 && !toolMap.has(toolName)) {
-          cleaned += openMatch[0] + inner + closeMatch[0];
-          continue;
-        }
-        const rawArgs = parsed.arguments || parsed.args || parsed.parameters || {};
-        toolCalls.push({
-          id: generateCallId(),
-          type: "function",
-          function: {
-            name: toolName,
-            arguments: typeof rawArgs === "string" ? rawArgs : JSON.stringify(rawArgs),
-          },
-        });
-        continue;
-      } catch {
-        cleaned += openMatch[0] + inner + closeMatch[0];
-        continue;
-      }
-    }
-
-    // Couldn't parse - keep as content
-    cleaned += openMatch[0] + inner + closeMatch[0];
+    const call = parseBlockInner(inner, index);
+    if (call) toolCalls.push(call);
+    else cleaned += openMatch[0] + inner + closeMatch[0]; // unparseable / undeclared: keep as content
   }
 
   return { content: cleaned, toolCalls, holdback: "" };

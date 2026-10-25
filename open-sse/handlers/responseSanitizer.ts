@@ -2,7 +2,11 @@ import {
   copyOpenAICompatibleReasoningFields,
   getReadableReasoningValue,
 } from "../utils/reasoningFields.ts";
-import { hasDotsToolCalls, parseDotsToolCalls, stripDotsToolCallBlocks } from "../utils/dotsToolCalls.ts";
+import {
+  hasDotsToolCalls,
+  parseDotsToolCalls,
+  stripDotsToolCallBlocks,
+} from "../utils/dotsToolCalls.ts";
 import { stripInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
 import { normalizeOpenAICompatibleFinishReason } from "../utils/finishReason.ts";
 import {
@@ -374,7 +378,7 @@ function sanitizeChoice(
 
 function sanitizeMessageContent(msgRecord: JsonRecord, options: ParseOptions = {}): JsonRecord {
   if (typeof msgRecord.content === "string") {
-    let strippedContent = stripInternalReasoningPlaceholder(
+    const strippedContent = stripInternalReasoningPlaceholder(
       stripInternalToolEnvelopeText(msgRecord.content)
     );
     const nativeReasoning = getReadableReasoningValue(msgRecord);
@@ -409,6 +413,27 @@ function applyTextualToolCallSanitization(sanitized: JsonRecord, msgRecord: Json
   }
 }
 
+/** Dots Studio `<dots_function_call>` markup in content (OpenAI leg) becomes structured tool_calls. */
+function applyDotsToolCallSanitization(sanitized: JsonRecord, msgRecord: JsonRecord): void {
+  if (typeof sanitized.content !== "string" || !hasDotsToolCalls(sanitized.content)) return;
+  const dotsResult = parseDotsToolCalls(sanitized.content);
+  if (dotsResult.toolCalls.length > 0 && !msgRecord.tool_calls && !sanitized.tool_calls) {
+    sanitized.content = dotsResult.content || null;
+    sanitized.tool_calls = dotsResult.toolCalls;
+    sanitized.finish_reason = "tool_calls";
+  } else if (dotsResult.content !== sanitized.content) {
+    sanitized.content = dotsResult.content || null;
+  }
+}
+
+/** Scrub dots blocks from reasoning fields if present. */
+function scrubDotsFromReasoning(sanitized: JsonRecord): void {
+  for (const key of ["reasoning_content", "reasoning"]) {
+    const value = sanitized[key];
+    if (typeof value === "string") sanitized[key] = stripDotsToolCallBlocks(value);
+  }
+}
+
 function sanitizeMessage(msg: unknown, options: ParseOptions = {}): unknown {
   const msgRecord = toRecord(msg);
   if (!msgRecord) return msg;
@@ -420,26 +445,9 @@ function sanitizeMessage(msg: unknown, options: ParseOptions = {}): unknown {
 
   Object.assign(sanitized, sanitizeMessageContent(msgRecord, options));
 
-  // Dots Studio tool-call markup in content (OpenAI leg)
-  if (typeof sanitized.content === "string" && hasDotsToolCalls(sanitized.content)) {
-    const dotsResult = parseDotsToolCalls(sanitized.content);
-    if (dotsResult.toolCalls.length > 0 && !msgRecord.tool_calls && !sanitized.tool_calls) {
-      sanitized.content = dotsResult.content || null;
-      sanitized.tool_calls = dotsResult.toolCalls;
-      sanitized.finish_reason = "tool_calls";
-    } else if (dotsResult.content !== sanitized.content) {
-      sanitized.content = dotsResult.content || null;
-    }
-  }
-
+  applyDotsToolCallSanitization(sanitized, msgRecord);
   copyOpenAICompatibleReasoningFields(msgRecord, sanitized);
-  // Scrub dots blocks from reasoning fields if present
-  if (typeof sanitized.reasoning_content === "string") {
-    sanitized.reasoning_content = stripDotsToolCallBlocks(sanitized.reasoning_content);
-  }
-  if (typeof (sanitized as any).reasoning === "string") {
-    (sanitized as any).reasoning = stripDotsToolCallBlocks((sanitized as any).reasoning);
-  }
+  scrubDotsFromReasoning(sanitized);
   applyTextualToolCallSanitization(sanitized, msgRecord);
 
   if (msgRecord.tool_calls) {
