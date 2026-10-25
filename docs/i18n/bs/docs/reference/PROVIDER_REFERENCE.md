@@ -4,11 +4,11 @@
 
 ---
 
-> **Automatski generisano** iz `src/shared/constants/providers.ts` — ne uređujte ručno.
-> Ponovo generišite sa: `npm run gen:provider-reference`
-> **Zadnji put generisano:** 2026-10-18
+> **Automatski generisano** iz `src/shared/constants/providers.ts` — nemojte ručno uređivati.
+> Ponovo generišite pomoću: `npm run gen:provider-reference`
+> **Posljednji put generisano:** 2026-10-20
 
-Ukupno provajdera: **375**. Pogledajte podjelu po kategorijama ispod.
+Ukupan broj provajdera: **375**. U nastavku pogledajte pregled po kategorijama.
 
 ## Kategorije
 
@@ -461,8 +461,8 @@ Koristite dashboard na `/dashboard/providers` da omogućite, konfigurišete i te
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registar (detalji po modelu): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (154 implementacije)
-- Translators: [`open-sse/translator/`](../../open-sse/translator/)
+- Izvršitelji: [`open-sse/executors/`](../../open-sse/executors/) (156 implementacija)
+- Prevodioci: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Pogledajte Također
 

@@ -270,6 +270,18 @@ jobs:
           path: suite-results
           merge-multiple: true
 
+      # Use the immutable workflow revision, not the target checkout (which may
+      # predate this installer). Both scanners are required even for --quick.
+      - name: Prepare pinned workflow scanners
+        id: workflow_scanners
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installer"
+          bash "$installer"
+
       - name: Release-green validation (full)
         id: validate
         env:
@@ -445,6 +457,17 @@ jobs:
           cache: npm
 
       - uses: ./.github/actions/npm-ci-retry
+
+      # main can predate the installer: obtain tooling from the workflow SHA.
+      - name: Prepare pinned workflow scanners
+        id: workflow_scanners
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installer"
+          bash "$installer"
 
       - name: Main-green validation
         id: validate

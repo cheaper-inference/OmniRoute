@@ -4,11 +4,11 @@
 
 ---
 
-> **تم إنشاؤه تلقائيًا** من `src/shared/constants/providers.ts` — لا تُعدّله يدويًا.
-> أعِد إنشاءه باستخدام: `npm run gen:provider-reference`
-> **آخر إنشاء:** 2026-10-18
+> **مُنشأ تلقائيًا** من `src/shared/constants/providers.ts` — لا تعدّله يدويًا.
+> أعد إنشاءه باستخدام: `npm run gen:provider-reference`
+> **آخر إنشاء:** 2026-10-20
 
-إجمالي المزوّدين: **375**. اطّلع على التصنيفات أدناه.
+إجمالي المزوّدين: **375**. انظر تفصيل الفئات أدناه.
 
 ## الفئات
 
@@ -459,9 +459,9 @@
 
 ## مصادر الحقيقة
 
-- الفهرس: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- الكتالوج: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - السجل (تفاصيل كل نموذج): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- المنفِّذون: [`open-sse/executors/`](../../open-sse/executors/) (154 تطبيقًا)
+- المنفِّذات: [`open-sse/executors/`](../../open-sse/executors/) (156 تطبيقًا)
 - المترجمات: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## انظر أيضًا

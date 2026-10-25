@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "දැන්",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "වලංගු ඇතුළත් කිරීම් හමු නොවීය. ආකෘතිය පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
     "bulkImportSuccess": "ආයාතය සම්පූර්ණයි: {created}ක් සාදන ලදී, {updated}ක් යාවත්කාලීන කරන ලදී, {failed}ක් අසමත් විය",
     "bulkImportErrorLine": "පේළිය {line}: {reason}",
-    "bulkImportMaxExceeded": "එක් ආයාතයකට උපරිම ප්රොක්සි 100ක්",
+    "bulkImportMaxExceeded": "එක් ආයාතයකට උපරිම ප්රොක්සි {max}ක්",
     "bulkImportPreview": "පෙරදසුන",
     "clearAssignment": "(පැවරීම ඉවත් කරන්න)",
     "bulkProxyAssignment": "ප්රොක්සි තොග පැවරීම",

@@ -4,11 +4,11 @@
 
 ---
 
-> **स्वयंचलितपणे निर्मित** `src/shared/constants/providers.ts` मधून — हाताने संपादित करू नका.
-> पुन्हा तयार करण्यासाठी: `npm run gen:provider-reference`
-> **शेवटी निर्मित:** 2026-10-18
+> `src/shared/constants/providers.ts` मधून **स्वयं-निर्मित** — स्वतःहून संपादित करू नका.
+> यासह पुन्हा निर्माण करा: `npm run gen:provider-reference`
+> **शेवटचे निर्माण:** 2026-10-20
 
-एकूण प्रदाते: **375**. खाली श्रेणीनुसार विभागणी पहा.
+एकूण प्रदाते: **375**. खाली श्रेणीवार विभागणी पाहा.
 
 ## श्रेण्या
 
@@ -457,11 +457,11 @@
 | ------ | ------ | ----------------------------- | ------ | ------- | ----- |
 | `auto` | `auto` | स्वयंचलित (शून्य-कॉन्फिगरेशन) | सिस्टम | —       | —     |
 
-## सत्याचे स्रोत
+## सत्य माहितीचे स्रोत
 
 - कॅटलॉग: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- रजिस्ट्री (प्रति-मॉडेल तपशील): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- एक्झिक्युटर्स: [`open-sse/executors/`](../../open-sse/executors/) (154 अंमलबजावण्या)
+- रजिस्ट्री (प्रत्येक मॉडेलचे तपशील): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- एक्झिक्युटर्स: [`open-sse/executors/`](../../open-sse/executors/) (156 अंमलबजावण्या)
 - ट्रान्सलेटर्स: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## हे देखील पहा
