@@ -36,10 +36,7 @@ test("bifrostRouting: getBifrostRoutingConfig returns null when unconfigured and
 });
 
 test("bifrostRouting: resolveRelayRoutingBackend resolves configured or auto", () => {
-  assert.equal(
-    resolveRelayRoutingBackend({ OMNIROUTE_RELAY_BACKEND: "bifrost" }),
-    "bifrost"
-  );
+  assert.equal(resolveRelayRoutingBackend({ OMNIROUTE_RELAY_BACKEND: "bifrost" }), "bifrost");
   assert.equal(resolveRelayRoutingBackend({ OMNIROUTE_RELAY_BACKEND: "ts" }), "ts");
   assert.equal(
     resolveRelayRoutingBackend({
