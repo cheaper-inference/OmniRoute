@@ -10,10 +10,8 @@ test("isLocalOnlyPath: /api/services/bifrost/install is local-only", () => {
   assert.equal(isLocalOnlyPath("/api/services/bifrost/install"), true);
 });
 
-test("isLocalOnlyPath: bifrost status is GET-exempt but mutations stay local-only", () => {
+test("isLocalOnlyPath: /api/services/bifrost/status is local-only", () => {
   assert.equal(isLocalOnlyPath("/api/services/bifrost/status"), true);
-  assert.equal(isLocalOnlyPath("/api/services/bifrost/status", "GET"), false);
-  assert.equal(isLocalOnlyPath("/api/services/bifrost/status", "POST"), true);
 });
 
 test("isLocalOnlyPath: /api/services/bifrost/stop is local-only", () => {

@@ -2,33 +2,53 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { isLocalOnlyPath } from "../../../src/server/authz/routeGuard.ts";
 
-const SAFE_REMOTE_STATUS_PATHS = [
+/** Status route whose GET performs no child-process spawn (release-metadata HTTPS query only). */
+const SAFE_REMOTE_STATUS_PATHS = ["/api/services/cliproxy/status"] as const;
+
+/**
+ * Status routes whose GET handler calls `getLatestVersion()`, which runs
+ * `npm view` (execFile) on a cache miss. A non-local caller must be rejected by
+ * the loopback gate BEFORE the handler runs, so no remote request can ever
+ * spawn a process (Hard Rules #15/#17).
+ */
+const NPM_VIEW_STATUS_PATHS = [
   "/api/services/bifrost/status",
-  "/api/services/cliproxy/status",
   "/api/services/dario/status",
   "/api/services/mux/status",
   "/api/services/openwa/status",
 ] as const;
 
-test("exact non-secret embedded-service status GETs are remotely readable", () => {
+const READ_METHODS = ["GET", "HEAD", "OPTIONS"] as const;
+const WRITE_METHODS = ["POST", "PUT", "PATCH", "DELETE"] as const;
+
+test("the spawn-free cliproxy status GET is remotely readable", () => {
   for (const path of SAFE_REMOTE_STATUS_PATHS) {
-    assert.equal(isLocalOnlyPath(path, "GET"), false, `${path} GET should be exempt`);
-    assert.equal(isLocalOnlyPath(path, "HEAD"), false, `${path} HEAD should be exempt`);
-    assert.equal(isLocalOnlyPath(path, "OPTIONS"), false, `${path} OPTIONS should be exempt`);
+    for (const method of READ_METHODS) {
+      assert.equal(isLocalOnlyPath(path, method), false, `${path} ${method} should be exempt`);
+    }
   }
 });
 
 test("status exemptions never allow lifecycle mutations", () => {
   for (const path of SAFE_REMOTE_STATUS_PATHS) {
-    assert.equal(isLocalOnlyPath(path, "POST"), true, `${path} POST must stay local-only`);
-    assert.equal(isLocalOnlyPath(path, "PUT"), true, `${path} PUT must stay local-only`);
-    assert.equal(isLocalOnlyPath(path, "DELETE"), true, `${path} DELETE must stay local-only`);
+    for (const method of WRITE_METHODS) {
+      assert.equal(isLocalOnlyPath(path, method), true, `${path} ${method} must stay local-only`);
+    }
+  }
+});
+
+test("status routes that run `npm view` stay local-only for every method (no remote spawn)", () => {
+  for (const path of NPM_VIEW_STATUS_PATHS) {
+    assert.equal(isLocalOnlyPath(path), true, `${path} [no method] must be local-only`);
+    for (const method of [...READ_METHODS, ...WRITE_METHODS]) {
+      assert.equal(isLocalOnlyPath(path, method), true, `${path} ${method} must be local-only`);
+    }
   }
 });
 
 test("arbitrary service routes and near-matches remain local-only", () => {
   assert.equal(isLocalOnlyPath("/api/services/bifrost/start", "GET"), true);
-  assert.equal(isLocalOnlyPath("/api/services/bifrost/status/extra", "GET"), true);
+  assert.equal(isLocalOnlyPath("/api/services/cliproxy/status/extra", "GET"), true);
   assert.equal(isLocalOnlyPath("/api/services/unknown/status", "GET"), true);
   assert.equal(isLocalOnlyPath("/api/services/9router/status", "GET"), true);
 });
