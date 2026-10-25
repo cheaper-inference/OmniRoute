@@ -49,6 +49,9 @@ const pluginOptionsSchema = z
     hiddenModels: z.array(z.string()).optional(),
     providersAllow: z.array(z.string()).optional(),
     usableOnly: z.boolean().default(false),
+    // Hide every combo when false: no /api/combos request and no combo
+    // rows from /v1/models; models are unchanged.
+    combos: z.boolean().default(true),
     // Combo source: "api" (default) folds /api/combos over each combo's
     // members, so a combo publishes only when every member passes the
     // filters. "models" skips that request and publishes the combo rows
@@ -175,6 +178,7 @@ export function toResolvedOptions(parsed: PluginOptions): ResolvedOptions {
     hiddenModels: parsed.hiddenModels,
     providersAllow: parsed.providersAllow,
     usableOnly: parsed.usableOnly,
+    combos: parsed.combos ?? true,
     combosSource: parsed.combosSource,
     freeOnly: parsed.freeOnly,
     freeSignals: parsed.freeSignals,
