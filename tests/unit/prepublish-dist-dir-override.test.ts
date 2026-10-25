@@ -6,8 +6,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, parse, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { getPrepublishDistDirRefusal } from "../../scripts/build/prepublishPathSafety.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SOURCE = readFileSync(
@@ -42,10 +43,33 @@ test("every --outfile except the CLI entrypoint is derived from DIST_DIR", () =>
   assert.deepEqual(nonDist, ['"--outfile=bin/omniroute.mjs",']);
 });
 
-test("prepublish refuses an OMNIROUTE_DIST_DIR that would wipe the filesystem root or the checkout", () => {
-  const guardAt = SOURCE.indexOf('resolve(DIST_DIR) === resolve("/")');
+test("prepublish refuses an OMNIROUTE_DIST_DIR that would wipe the filesystem root", () => {
+  const projectRoot = resolve(__dirname, "..", "..");
+  const filesystemRoot = parse(projectRoot).root;
+  assert.equal(getPrepublishDistDirRefusal(filesystemRoot, projectRoot), "filesystem root");
+});
+
+test("prepublish refuses the checkout and its parent directories", () => {
+  const projectRoot = resolve(__dirname, "..", "..");
+  assert.equal(getPrepublishDistDirRefusal(projectRoot, projectRoot), "the checkout");
+  assert.equal(
+    getPrepublishDistDirRefusal(dirname(projectRoot), projectRoot),
+    "a parent of the checkout"
+  );
+});
+
+test("prepublish allows repo dist/ and an external scratch directory", () => {
+  const projectRoot = resolve(__dirname, "..", "..");
+  assert.equal(getPrepublishDistDirRefusal(join(projectRoot, "dist"), projectRoot), undefined);
+  assert.equal(
+    getPrepublishDistDirRefusal(join(dirname(projectRoot), "scratch-output"), projectRoot),
+    undefined
+  );
+});
+
+test("prepublish checks path safety before recursively wiping DIST_DIR", () => {
+  const guardAt = SOURCE.indexOf("getPrepublishDistDirRefusal(DIST_DIR, ROOT)");
   const wipeAt = SOURCE.indexOf("rmSync(DIST_DIR, { recursive: true, force: true })");
   assert.ok(guardAt > 0, "guard is present");
-  assert.match(SOURCE, /resolve\(DIST_DIR\) === resolve\(ROOT\)/);
   assert.ok(wipeAt > guardAt, "guard runs before the recursive wipe of DIST_DIR");
 });

@@ -23,13 +23,14 @@ import {
   statSync,
   chmodSync,
 } from "node:fs";
-import { join, dirname, relative, resolve } from "node:path";
+import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { assembleStandalone } from "./assembleStandalone.mjs";
 import { buildMitmUtilities } from "./buildMitm.mjs";
 import { isNativeExecutable, resolveLocalBinEntry } from "./buildToolRunner.mjs";
 import { resolveBundledNpmEntry } from "./resolveNpmEntry.ts";
+import { getPrepublishDistDirRefusal } from "./prepublishPathSafety.ts";
 import {
   APP_STAGING_ALLOWED_EXACT_PATHS,
   APP_STAGING_ALLOWED_PATH_PREFIXES,
@@ -94,10 +95,10 @@ function runBuildTool(
 }
 
 const DIST_DIR = process.env.OMNIROUTE_DIST_DIR || join(ROOT, "dist");
-// Step 1 wipes DIST_DIR recursively: refuse an override that would erase the filesystem
-// root or the checkout itself.
-if (resolve(DIST_DIR) === resolve("/") || resolve(DIST_DIR) === resolve(ROOT)) {
-  console.error(`  ❌ Refusing to use ${DIST_DIR} as the publish dist directory.`);
+// Step 1 wipes DIST_DIR recursively: also refuse parents that would erase the checkout.
+const distDirRefusal = getPrepublishDistDirRefusal(DIST_DIR, ROOT);
+if (distDirRefusal) {
+  console.error(`  ❌ Refusing ${DIST_DIR} as the publish dist directory: ${distDirRefusal}.`);
   process.exit(1);
 }
 const METHOD_GUARD_REQUIRE = 'require("./http-method-guard.cjs").installHttpMethodGuard();\n';
