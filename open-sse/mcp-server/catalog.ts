@@ -24,6 +24,12 @@ type McpCatalogResponse = {
     connectionId?: string;
     status: "unavailable";
   }>;
+  /** Providers whose discovery fell back to the built-in catalog, and why. */
+  degradedProviders?: Array<{
+    provider: string;
+    connectionId?: string;
+    cause?: string;
+  }>;
 };
 
 type ProviderConnectionLike = {
@@ -222,6 +228,25 @@ function emptyCatalogForProvider(requestedProvider: string): McpCatalogResponse 
   };
 }
 
+/**
+ * A discovery that fell back to the built-in catalog says so — and why.
+ * The reason is the value the server published, never a message rebuilt here.
+ */
+function degradedProviderEntry(
+  spec: McpCatalogRequestSpec,
+  raw: JsonRecord
+): NonNullable<McpCatalogResponse["degradedProviders"]> {
+  if (raw.degraded !== true) return [];
+  const cause = toString(raw.error);
+  return [
+    {
+      provider: spec.provider,
+      ...(spec.connectionId ? { connectionId: spec.connectionId } : {}),
+      ...(cause ? { cause } : {}),
+    },
+  ];
+}
+
 function rawModelsFromCatalog(raw: JsonRecord): unknown[] {
   if (Array.isArray(raw.models)) return raw.models;
   if (Array.isArray(raw.data)) return raw.data;
@@ -267,6 +292,7 @@ async function collectCatalogModels(
   const warnings = new Set<string>();
   const sources = new Set<string>();
   const providerFailures: NonNullable<McpCatalogResponse["providerFailures"]> = [];
+  const degradedProviders: NonNullable<McpCatalogResponse["degradedProviders"]> = [];
 
   for (const spec of requestSpecs) {
     let raw: JsonRecord;
@@ -289,10 +315,22 @@ async function collectCatalogModels(
     const warning = raw.warning ? String(raw.warning) : undefined;
     if (warning) warnings.add(warning);
     sources.add(source);
+    degradedProviders.push(...degradedProviderEntry(spec, raw));
     addCatalogModels(raw, spec, source, warning, requestedCapability, collectedModels);
   }
 
-  return { collectedModels, warnings, sources, providerFailures };
+  return { collectedModels, warnings, sources, providerFailures, degradedProviders };
+}
+
+/**
+ * The degraded providers are published only when there is one: the key stays
+ * absent otherwise, so a catalog without a degraded provider keeps its shape.
+ */
+function withDegradedProviders(
+  response: McpCatalogResponse,
+  degradedProviders: NonNullable<McpCatalogResponse["degradedProviders"]>
+): McpCatalogResponse {
+  return degradedProviders.length > 0 ? { ...response, degradedProviders } : response;
 }
 
 export async function getMcpModelsCatalog(
@@ -338,17 +376,21 @@ export async function getMcpModelsCatalog(
     }
   }
 
-  const { collectedModels, warnings, sources, providerFailures } = await collectCatalogModels(
-    requestSpecs,
-    fetchJson,
-    requestedCapability,
-    requestedProvider === null
-  );
+  const { collectedModels, warnings, sources, providerFailures, degradedProviders } =
+    await collectCatalogModels(
+      requestSpecs,
+      fetchJson,
+      requestedCapability,
+      requestedProvider === null
+    );
 
-  return {
-    models: [...collectedModels.values()],
-    source: sources.size === 1 ? [...sources][0] : "aggregated_provider_models",
-    ...(warnings.size > 0 ? { warning: [...warnings].join(" | ") } : {}),
-    ...(providerFailures.length > 0 ? { providerFailures } : {}),
-  };
+  return withDegradedProviders(
+    {
+      models: [...collectedModels.values()],
+      source: sources.size === 1 ? [...sources][0] : "aggregated_provider_models",
+      ...(warnings.size > 0 ? { warning: [...warnings].join(" | ") } : {}),
+      ...(providerFailures.length > 0 ? { providerFailures } : {}),
+    },
+    degradedProviders
+  );
 }
