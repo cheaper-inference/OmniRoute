@@ -7,7 +7,12 @@ import {
 
 import { isVerifiedNativeCodexRequest } from "../config/codexIdentity.ts";
 import { FORMATS } from "../translator/formats.ts";
-import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
+import {
+  buildErrorBody,
+  errorResponse as canonicalErrorResponse,
+  sanitizeErrorMessage,
+} from "../utils/error.ts";
+import { isDraining } from "../../src/lib/gracefulShutdown.ts";
 import { createChatGptWebAdapter } from "../vendor/codex-chatgpt-web/adapters/chatgpt-web/index.ts";
 import { ChatGptBrowserWorker } from "../vendor/codex-chatgpt-web/adapters/chatgpt-web/browser-worker.ts";
 import {
@@ -47,6 +52,28 @@ const SSE_HEADERS = {
   Connection: "keep-alive",
   "Content-Type": "text/event-stream; charset=utf-8",
 };
+
+/**
+ * The status a failed ChatGPT Web (Codex) turn is answered with.
+ *
+ * The browser runtime is stopped BY OUR OWN shutdown (gracefulShutdown.cleanup() calls
+ * stopChatGptWebCodexRuntime()), so a turn that is alive when the shutdown runs fails
+ * with a transport error that is evidence about OUR shutdown, not about the provider's
+ * health. The account state the runtime writes from a 5xx (a provider connection marked
+ * unavailable, a model lockout, a breaker failure, a provider cooldown) OUTLIVES the
+ * restart, so our own teardown must not be recorded as provider ill health. While the
+ * instance is draining, answer 499 (client_disconnected) — like
+ * open-sse/executors/zcode.ts does — because 499 is in neither the model-lockout
+ * error-code list nor the provider-breaker failure statuses (408/500/502/503/504).
+ * A 4xx of the request keeps its own status, and a genuine upstream failure outside a
+ * drain keeps 502.
+ *
+ * The drain flag is read live on every call (never latched): a turn that fails before
+ * the shutdown starts must still be answered with its own status.
+ */
+function chatGptWebCodexFailureStatus(status: number): number {
+  return status >= 500 && isDraining() ? 499 : status;
+}
 
 function errorResponse(status: number, message: unknown, code = "chatgpt_web_codex_error") {
   return new Response(
@@ -399,12 +426,14 @@ export class ChatGptWebCodexExecutor extends BaseExecutor {
         try {
           await adapter.runTurn(parsed, incoming, (event) => events.push(event));
         } catch (error) {
+          const message = sanitizeErrorMessage(error instanceof Error ? error.message : error);
+          const status = chatGptWebCodexFailureStatus(502);
           events.push({
             type: "error",
-            message: sanitizeErrorMessage(error instanceof Error ? error.message : error),
-            status: 502,
-            errorType: "provider_error",
-            code: "chatgpt_web_codex_turn_failed",
+            message,
+            status,
+            errorType: status === 499 ? "client_disconnected" : "provider_error",
+            code: status === 499 ? "client_disconnected" : "chatgpt_web_codex_turn_failed",
           });
         } finally {
           try {
@@ -431,6 +460,17 @@ export class ChatGptWebCodexExecutor extends BaseExecutor {
         const running = run();
         const collected = await events.collect();
         await running;
+        const drainFailure = collected.find(
+          (event) => event.type === "error" && event.status === 499
+        );
+        if (drainFailure?.type === "error") {
+          // Our own shutdown stopped the ChatGPT Web runtime under a request that
+          // was still in flight, so the turn was never really served. Answer 499
+          // (client_disconnected) with the canonical body of the repo's
+          // errorResponse helper, exactly like open-sse/executors/zcode.ts does, so
+          // the runtime does not read our own teardown as provider ill health.
+          return wrapped(canonicalErrorResponse(499, drainFailure.message), expandedBody);
+        }
         const response = buildResponseJSON(collected, input.model, {
           hideThinkingSummary: parsed.options.hideThinkingSummary,
           toolNsMap: maps.namespace,
