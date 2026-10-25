@@ -89870,7 +89870,7 @@
       }
     },
     "docs/reference/FEATURE_FLAGS.md": {
-      "source_hash": "9f2dcab70c937a5ee17a70d5852a57e3c2636c8279bfcf7902af3afe03df3f8b",
+      "source_hash": "217d971492dab0f80ec64422f6eedfef77186166c8519628281539621154adad",
       "locales": {
         "ar": {
           "source_hash": "9f2dcab70c937a5ee17a70d5852a57e3c2636c8279bfcf7902af3afe03df3f8b",
@@ -90198,17 +90198,17 @@
           "updated_at": "2026-10-18T23:29:44.198Z"
         },
         "ja": {
-          "source_hash": "9f2dcab70c937a5ee17a70d5852a57e3c2636c8279bfcf7902af3afe03df3f8b",
-          "target_hash": "4973e2e59ba991a2ba7847ee4b5f6e019b4ce944437a433efa042ff61859dbbb",
+          "source_hash": "217d971492dab0f80ec64422f6eedfef77186166c8519628281539621154adad",
+          "target_hash": "57cd57bd30ba6de59a617624e488d31b5c8056fc6d6e5d27b87b663cb9ea7aad",
           "section_hashes": [
             "b262b53b0362",
             "406fb7034705",
-            "ec56bac78ae1",
+            "abf2a4b7edc6",
             "162d3804b3dd",
             "6d84ccb5428f",
             "3a6f5d25e3a1"
           ],
-          "updated_at": "2026-10-18T23:25:37.318Z"
+          "updated_at": "2026-10-25T10:16:45.689Z"
         },
         "ka": {
           "source_hash": "9f2dcab70c937a5ee17a70d5852a57e3c2636c8279bfcf7902af3afe03df3f8b",
@@ -90237,17 +90237,17 @@
           "updated_at": "2026-10-18T23:28:09.535Z"
         },
         "kn": {
-          "source_hash": "9f2dcab70c937a5ee17a70d5852a57e3c2636c8279bfcf7902af3afe03df3f8b",
-          "target_hash": "9602f883bd9ae92c0e48d001ce4d64a6d8209c8864fdf643db0ce2569dfb9cfd",
+          "source_hash": "217d971492dab0f80ec64422f6eedfef77186166c8519628281539621154adad",
+          "target_hash": "84b3e5e3197e1bd7566e93ea72ddadc5fd22385858f35aad5920df4d1a89b728",
           "section_hashes": [
             "b262b53b0362",
             "406fb7034705",
-            "ec56bac78ae1",
+            "abf2a4b7edc6",
             "162d3804b3dd",
             "6d84ccb5428f",
             "3a6f5d25e3a1"
           ],
-          "updated_at": "2026-10-18T23:29:38.761Z"
+          "updated_at": "2026-10-25T10:26:41.311Z"
         },
         "km": {
           "source_hash": "9f2dcab70c937a5ee17a70d5852a57e3c2636c8279bfcf7902af3afe03df3f8b",
