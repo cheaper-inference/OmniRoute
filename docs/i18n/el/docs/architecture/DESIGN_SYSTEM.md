@@ -4,228 +4,158 @@
 
 ---
 
-> **Κατάσταση:** αναφορά — η τυποποίηση που περιγράφεται εδώ έχει **υλοποιηθεί** (φάσεις 1–6: ταπετσαρία πλέγματος, βασικά στοιχεία, κεντρικοποίηση χρωμάτων κατάστασης, token σταθερού πλάτους, μετάβαση του DataTable σε tokens, focus-ring → accent, βασικά στοιχεία Checkbox/Textarea, `cn()` → tailwind-merge, πλέγμα σε κάθε αυτόνομη οθόνη, ρευστό κέλυφος περιεχομένου για 4K, αδιαφανείς επιφάνειες πινάκων δεδομένων). Αυτό το έγγραφο αποτελεί την κανονική περιγραφή των design tokens, των στοιχείων και των συμβάσεων του dashboard· η παρακάτω διάρθρωση σε φάσεις διατηρείται ως αιτιολόγηση για κάθε απόφαση.
-> **Πεδίο εφαρμογής:** το dashboard του OmniRoute (`src/`) και ο ιστότοπος μάρκετινγκ (`_mono_repo/omnirouteSite/`) μοιράζονται **μία οπτική ταυτότητα** — ίδιο φόντο πλέγματος τύπου χαρτιού μιλιμετρέ (32px), ίδια χρωματικά tokens, τυποποιημένα στοιχεία.
->
-> Πρακτικές σημειώσεις για τους συντηρητές:
->
-> - Αρκετές από τις εναπομείνασες σκληρά κωδικοποιημένες δεκαεξαδικές τιμές είναι **σκόπιμες** (πάντα σκοτεινό τερματικό κονσόλας, περιγράμματα SVG του ReactFlow) και **ΔΕΝ** πρέπει να μεταφερθούν μαζικά σε tokens.
-> - Ένα «μεγαλύτερο» πλέγμα σε ένα ενεργό instance οφείλεται σε παρωχημένο build και όχι στον κώδικα — το μέγεθος του πλέγματος είναι 32px, ίδιο με εκείνο του ιστοτόπου.
-> - Οι τιμές `--table-*` του σκοτεινού θέματος είναι πανομοιότυπες σε επίπεδο byte με τις προ της μετάβασης σκληρά κωδικοποιημένες τιμές rgba· το φωτεινό θέμα διορθώθηκε (ήταν εσφαλμένα πάντα σκοτεινό λόγω ανενεργών εναλλακτικών τιμών `var()`).
+> **Κατάσταση:** ο πίνακας ελέγχου είναι χτισμένος πάνω στο **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), το οποίο διατίθεται ως vendored
+> στο workspace `packages/ui-kit` (`@omniroute/ui-kit`· το upstream snapshot είναι καρφιτσωμένο στο
+> `packages/ui-kit/UPSTREAM.md` και προστατεύεται από το `npm run check:ui-kit-snapshot`). Το θέμα Light είναι το κανονικό
+> θέμα· η προεπιλεγμένη προτίμηση είναι `system`. Το χρώμα έμφασης είναι το Keak lime (`--ci-color-accent`). Η Inter
+> (letter-spacing 0, `--ci-letter-spacing-ui`) είναι η οικογένεια γραμματοσειράς του UI, η Instrument Serif μόνο για μεγάλο αραιό
+> κείμενο προβολής (`.ci-dashboard-display`), η IBM Plex Mono για κώδικα — όλες αυτο-φιλοξενούμενες μέσω των
+> εισαγωγών `@fontsource/*` στην κορυφή του `src/app/globals.css`. Κάθε εικονίδιο είναι ένα glyph της Lucide.
 
----
+## 1. Πού βρίσκονται τα πράγματα
 
-## 1. Σκοπός
+- **Kit.** Το `packages/ui-kit/src` είναι αντίγραφο byte προς byte του upstream `src/` στο commit που είναι καρφιτσωμένο στο
+  `packages/ui-kit/UPSTREAM.md` (το οποίο επίσης καταγράφει την εξουσιοδότηση άδειας χρήσης)· το `PATCHES.md` παραθέτει τα τοπικά
+  patches (κανένα). Καταναλώνεται ως πηγαίος κώδικας, χωρίς build: το `next.config.mjs` το κάνει transpile, και
+  το `tsconfig.json` αντιστοιχίζει το `@omniroute/ui-kit` → `packages/ui-kit/src` και το `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (τα `vitest.config.ts` και `vitest.mcp.config.ts` φέρουν το ίδιο alias). Εισάγετε ένα
+  component του kit μέσω του subpath του (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ποτέ
+  μέσω του barrel `@omniroute/ui-kit`: το barrel τραβάει κάθε component (συμπεριλαμβανομένου του date picker)
+  σε κάθε importer. Το stylesheet του kit εισέρχεται μέσω του `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokens.** Το `packages/ui-kit/src/ci-tokens.css` δηλώνει τα tokens `--ci-*`· το `src/app/globals.css`
+  τα γεφυρώνει με τα παλαιά ονόματα του OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), ώστε οι υπάρχουσες αναγνώσεις `var(--color-*)` και τα
+  utilities του Tailwind να συνεχίζουν να λειτουργούν. Ο νέος κώδικας χρησιμοποιεί τα utilities του Tailwind (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ή τις κλάσεις του kit — ποτέ δεκαεξαδική τιμή
+  (το `tests/unit/design-kit-bridge.test.ts` επιβάλλει τη γέφυρα). Το `text-primary` επιλύεται στο
+  `--color-primary-ink` μέσω του `--text-color-primary` (lime-800 στο φωτεινό θέμα, η απόχρωση έμφασης lime στο σκοτεινό), ώστε
+  το κύριο κείμενο να παραμένει ευανάγνωστο ενώ τα `bg-primary`/`border-primary` διατηρούν την επιφάνεια lime. Οι σειρές γραφημάτων χρησιμοποιούν
+  `--color-chart-1` … `--color-chart-5`.
+- **Θέματα.** Το `<html className="ci-theme">` (`src/app/layout.tsx`) εντάσσει το έγγραφο στο θέμα του kit.
+  Η προτίμηση είναι `light`, `dark` ή `system` (`THEME_CONFIG.defaultTheme = "system"` στο
+  `src/shared/constants/appConfig.ts`· το `system` ακολουθεί το `prefers-color-scheme`). Η `applyTheme()` στο
+  `src/store/themeStore.ts` (η οποία καθρεφτίζεται από το inline bootstrap script στο `src/app/layout.tsx`, που εκτελείται
+  πριν από το hydration) ορίζει `data-theme="dark"|"light"` και εναλλάσσει την κλάση `.dark` στο `<html>` ταυτόχρονα.
+  Το σύνολο tokens σκοτεινού θέματος του kit κλειδώνει στο `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`)·
+  οι δικές του OmniRoute σκοτεινές παρακάμψεις (το μπλοκ `.dark` στο `globals.css`) και τα παλαιά utilities `dark:`
+  του Tailwind κλειδώνουν στην κλάση `.dark`. Δεν υπάρχουν προεπιλογές χρώματος έμφασης: το χρώμα έμφασης προέρχεται πάντα από το
+  kit, και μια αποθηκευμένη προεπιλογή από παλαιότερο build απορρίπτεται όταν φορτώνει το store.
+- **Components (προσαρμογείς).** Το `src/shared/components/index.tsx` διατηρεί το API των components του OmniRoute (ίδια
+  ονόματα, default exports και props), και τα primitives πίσω του είναι προσαρμογείς πάνω από το kit: φόρμες
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), επικαλύψεις και ανατροφοδότηση
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  δομή (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) και πίνακες
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Ένας προσαρμογέας εισάγει το
+  component του kit μέσω subpath και αντιστοιχίζει τα παλαιά props πάνω του — για παράδειγμα το `Button variant="primary"` είναι το
+  κουμπί `default` του kit (`--ci-button-primary-*`: η αντίστροφη επιφάνεια στο φωτεινό θέμα, το χρώμα έμφασης με το
+  μελάνι `--ci-color-accent-foreground` του στο σκοτεινό), το `danger` είναι `destructive`, και το `warning` είναι `outline` συν
+  την επέκταση `.ci-button--warning`. Οι κανόνες `.ci-button--warning` και `.ci-badge[data-tone]` στο
+  τέλος του `globals.css` (`@layer components`) είναι επεκτάσεις του OmniRoute πάνω στις κλάσεις του kit.
+  Τα `tests/unit/ui/adapters/*.test.tsx` καρφιτσώνουν κάθε προσαρμογέα.
+- **Shell.** Το `src/app/(dashboard)/layout.tsx` αποδίδει το `DashboardLayout`, το οποίο αποδίδει το
+  `src/shared/components/layouts/DashboardShell.tsx`: τα `SidebarProvider` / `Sidebar` /
+  `SidebarInset` του kit (`packages/ui-kit/src/sidebar.tsx`), με τη λογική πλοήγησης του OmniRoute στο
+  `src/shared/components/Sidebar.tsx`. Ένας σύνδεσμος «μετάβαση στο περιεχόμενο» προς το `#main-content` είναι το πρώτο στοιχείο
+  που δέχεται εστίαση. Το `src/shared/components/Header.tsx` περιέχει το `SidebarTrigger` του kit (ο μοναδικός διακόπτης
+  sidebar του shell), το Keak `ProductSwitcher` και το κουμπί ανοίγματος της παλέτας εντολών· εμφανίζει τον τίτλο της διαδρομής μόνο όσο
+  δεν υπάρχει mounted `PageHeader` του kit (`.ci-page-header`) μέσα στο `#main-content`, ώστε μια σελίδα με δικό της
+  `PageHeader` να έχει ένα μόνο `h1`. Το `src/shared/components/CommandPalette.tsx` είναι ένα `Dialog` του kit.
+- **Εικονίδια.** Το `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) επιλύει το όνομα (το
+  λεξιλόγιο των Material Symbols που χρησιμοποιούν οι οθόνες) μέσω του `ICON_MAP` (`src/shared/constants/iconMap.ts`) σε ένα
+  glyph Lucide. Η γραμματοσειρά και το πακέτο των Material Symbols έχουν αφαιρεθεί: ένα όνομα που λείπει από τον χάρτη αποδίδει ένα
+  ουδέτερο glyph placeholder (`data-icon-missing="true"`) και καταγράφει μια προειδοποίηση στην κονσόλα εκτός παραγωγής.
+  Το `npm run gen:icon-map` εκτυπώνει τα ονόματα σε χρήση που λείπουν από τον χάρτη
+  (το `tests/unit/icon-map-coverage.test.ts` αποτυγχάνει για οποιοδήποτε όνομα χωρίς εικονίδιο Lucide·
+  το `tests/unit/icon-map-object-values.test.ts` καλύπτει ονόματα αποθηκευμένα σε αντικείμενα lookup)·
+  το `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` μεταγράφει τα literal
+  spans `<span className="material-symbols-outlined">` σε `<Icon>`.
+- **Ταυτότητα μάρκας.** Το `src/shared/components/OmniRouteLogo.tsx` τυλίγει το kit: το default export `OmniRouteLogo`
+  αποδίδει `ProductIcon product="omniroute" variant="glyph"` (inline SVG, ασφαλές ως προς το `basePath`) και
+  το `OmniRouteLockup` αποδίδει `ProductLockup product="omniroute"` (προσβάσιμο όνομα "Keak OmniRoute") ή, για
+  φορείς white-label, τα δικά τους `name`/`logoSrc`. Οι προορισμοί του product-switcher βρίσκονται στο
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Οι αυτόνομες
+  οθόνες — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` και `src/shared/components/ErrorPageScaffold.tsx`
+  — εμφανίζουν το lockup· το `tests/unit/brand-pages-static.test.ts` το επιβλέπει.
 
-Ο ιστότοπος μάρκετινγκ (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) και το dashboard του προϊόντος πρέπει να μοιάζουν με **ένα ενιαίο προϊόν**. Ο ιστότοπος έχει ήδη δανειστεί την παλέτα του από το dashboard — το `css/tokens.css` αναφέρει ακόμη και _«Η παλέτα αντικατοπτρίζει το dashboard του OmniRoute (src/app/globals.css)»_. Επομένως, τα δύο είναι ήδη ευθυγραμμισμένα κατά ~80% σε επίπεδο χρωμάτων. Τι λείπει από το dashboard:
+## 2. Κανόνες
 
-1. Η **ταπετσαρία πλέγματος τύπου χαρτιού μιλιμετρέ** που χρησιμοποιεί ο ιστότοπος σε κάθε σελίδα.
-2. Μερικά **κοινόχρηστα design tokens** που διαθέτει ο ιστότοπος αλλά λείπουν από το dashboard (κλίμακα ακτίνας, διαβάθμιση επωνυμίας, `surface-2`, γραμματοσειρά σταθερού πλάτους).
-3. **Συνέπεια σε επίπεδο στοιχείων** — αρκετά στοιχεία του dashboard παρακάμπτουν τα tokens του θέματος χρησιμοποιώντας σκληρά κωδικοποιημένες τιμές hex/rgba.
+1. Tokens, ποτέ literals. Εξαιρέσεις που τηρούνται επίτηδες: το πάντα σκοτεινό τερματικό κονσόλας, τα SVG
+   strokes του ReactFlow μέσω `STATUS_HEX` (`src/shared/constants/statusColors.ts`), και οι κατηγορικές παλέτες
+   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) και
+   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
+2. Ποτέ μην επιδιορθώνετε το `packages/ui-kit/src` χειροκίνητα: συγχρονίζετε με `scripts/dev/sync-ui-kit.sh <commit>`· η
+   πύλη pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) αποτυγχάνει σε οποιοδήποτε byte που
+   διαφέρει από το καρφιτσωμένο upstream commit (παραλείπεται με προειδοποίηση όταν το upstream clone,
+   `UI_KIT_CLONE` ή `_references/cheaper-inference-ui-kit`, απουσιάζει). Όταν το kit δεν διαθέτει κάτι,
+   δουλέψτε γύρω από αυτό στον adapter ή στην οθόνη και ζητήστε το από το upstream.
+3. Τα προεπιλεγμένα κείμενα του kit είναι στα Αγγλικά (`label = "Loading"`, `loadingLabel = "Loading table"`…) — περνάτε μεταφρασμένα
+   strings από `useTranslations(...)` όποτε ένα component του kit αποδίδει κείμενο.
+4. Τα utilities του Tailwind υπερισχύουν των κλάσεων των components του kit (το kit δηλώνει
+   `@layer theme, base, components, utilities` και οι κανόνες του ζουν στο `components`) — χρησιμοποιείτε utilities για
+   spacing και layout, όχι για να επαναχρωματίσετε components του kit.
+5. Επικεφαλίδες: `.ci-heading` (Inter, χωρίς tracking) για τίτλους σελίδων και ενοτήτων· `.ci-dashboard-display`
+   (Instrument Serif) μόνο για μεγάλο, αραιό display κείμενο όπως ο κωδικός κατάστασης της σελίδας σφάλματος.
+6. Το `tests/unit/dashboard-kit-sweep.test.ts` φυλάει την υιοθέτηση του kit: κανένα Material ligature span κάτω από
+   `src/app` ή `src/shared/components`· στο δέντρο του dashboard (`src/app/(dashboard)` και
+   `src/shared/components`) κανένα ακατέργαστο `<select>`, `<textarea>` ή `<table>` και κανένα χειροποίητο
+   `role="dialog"` εκτός των αναφερόμενων εξαιρέσεων (το native branch του adapter `Select`,
+   `RequestLoggerDetail`)· κάθε ακατέργαστο `<button>` ή `<input>` εκεί χρειάζεται ένα σχόλιο που περιέχει
+   `kit-exception:` (με τον λόγο) και τελειώνει το πολύ 3 γραμμές παραπάνω· οι αποχρώσεις της παλέτας και τα `dark:` variants
+   μόνο στα αρχεία που απαριθμεί το test.
+7. Επαληθεύετε και τα δύο θέματα και το viewport των 390 px πριν από ένα PR (screenshots)· το `tests/e2e/a11y.spec.ts` τρέχει
+   το axe.
 
-Αυτό το έγγραφο περιέχει την ανάλυση και το σχέδιο.
+## 3. Προσθήκη οθόνης
 
----
+1. Ανοίγετε τη σελίδα με το `PageHeader` του kit (`@omniroute/ui-kit/page-header`, `compact` μέσα στο
+   dashboard) — τίτλος, περιγραφή και `actions`. Το header του shell στη συνέχεια αφαιρεί τον δικό του τίτλο.
+2. Χτίζετε controls από το `@/shared/components` (τους adapters) και χρησιμοποιείτε components του kit ανά subpath όπου δεν
+   υπάρχει adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. Εικονίδια: `<Icon name="…" />`. Ένα νέο όνομα μπαίνει στο `ICON_MAP` με το σημασιολογικά αντίστοιχο component του Lucide·
+   το `npm run gen:icon-map` απαριθμεί τα ονόματα που ακόμα λείπουν.
+4. Χρώματα: σημασιολογικά utilities (`text-success`, `bg-warning-bg`, `border-border`…) και
+   `var(--color-chart-N)` για τις σειρές γραφημάτων· χωρίς hex τιμές και χωρίς `dark:` variants που απλώς επαναλαμβάνουν ένα χρώμα.
+5. Κείμενο: κάθε string, συμπεριλαμβανομένων των labels που περνάτε σε components του kit, προέρχεται από το
+   `useTranslations`. Τα νέα keys μπαίνουν στα `src/i18n/messages/en.json`, `pt-BR.json` και `vi.json` (το test parity των Βιετναμέζικων καρφιτσώνει
+   κάθε αγγλικό key)· τα υπόλοιπα locales συμπληρώνονται από το i18n sync.
+6. Τρέχετε τους φύλακες πριν από το PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (ο μόνος έλεγχος που πιάνει ένα διπλότυπο import στο `iconMap.ts`),
+   `npm run check:ui-icu`, και τα δικά της tests της οθόνης.
 
-## 2. Αρχές
+## 4. Προσθήκη ή τροποποίηση προσαρμογέα
 
-- **Μοναδική πηγή αλήθειας = `src/app/globals.css`.** Ο ιστότοπος αντικατοπτρίζει το dashboard, ποτέ το αντίστροφο. Τα νέα tokens προστίθενται πρώτα στο `globals.css`.
-- **Tokens, ποτέ κυριολεκτικές τιμές.** Τα στοιχεία χρησιμοποιούν σημασιολογικά tokens (`bg-surface`, `text-primary`, `border-border`), ποτέ ακατέργαστες τιμές `#hex`.
-- **Διακριτικό, όχι έντονο.** Το πλέγμα είναι μια αμυδρή ταπετσαρία πίσω από το περιεχόμενο — δεν πρέπει ποτέ να μειώνει την αντίθεση του κειμένου ή να ανταγωνίζεται τη διεπαφή χρήστη.
-- **Προσαρμοσμένο στο θέμα.** Τα πάντα λειτουργούν τόσο στο `.dark` (τη χαρακτηριστική εμφάνιση του προϊόντος) όσο και στο φωτεινό θέμα.
-- **Στοχευμένη διάθεση.** Πρώτα κυκλοφορούν το πλέγμα και τα tokens (χαμηλό ρίσκο, υψηλή ορατότητα) και έπειτα οι καθαρισμοί των στοιχείων σε κύματα.
+1. Διατηρήστε το δημόσιο API του `src/shared/components/index.tsx`: ίδια ονόματα εξαγωγών, προεπιλεγμένες εξαγωγές και
+   αποδεκτά props. Αντιστοιχίστε τα παλαιά props στο kit μέσα στον προσαρμογέα (δείτε `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Εισαγάγετε το kit μέσω υποδιαδρομής (`@omniroute/ui-kit/<component>`).
+3. Οι λύσεις για κενά του kit τοποθετούνται στον προσαρμογέα (ή στο `globals.css` `@layer components` όταν η διόρθωση είναι
+   θέμα στυλ), ποτέ στο `packages/ui-kit/src`.
+4. Προσθέστε ή ενημερώστε το `tests/unit/ui/adapters/<name>.test.tsx`. Για έναν προσαρμογέα με πολλούς καλούντες, συγκρίνετε το
+   παραγόμενο markup πριν και μετά την αλλαγή — αλλαγές σε padding ή wrapper διαδίδονται σε κάθε οθόνη.
 
----
+## 5. Ενημέρωση του kit
 
-## 3. Τρέχουσα κατάσταση — τι είναι ήδη ευθυγραμμισμένο και τι όχι
+Το `scripts/dev/sync-ui-kit.sh <commit> [clone]` αντιγράφει το upstream `src/` στο συγκεκριμένο commit μέσα στο
+`packages/ui-kit/src` και εφαρμόζει τον μοναδικό επιτρεπόμενο μετασχηματισμό (αφαιρεί την κατάληξη `.js` από τις
+σχετικές εισαγωγές). Στη συνέχεια: εξετάστε το `git diff packages/ui-kit`, κάντε μια οπτική επισκόπηση στους providers, στις ρυθμίσεις, στα combos,
+στο usage και στο endpoint και στα δύο θέματα, εκτελέστε `npm run check:ui-kit-snapshot` και `npm run test:vitest:ui`, και
+ανοίξτε το PR μαζί με το upstream changelog.
 
-### 3.1 Χρώματα — ήδη ενοποιημένα ✅
+## 6. Ευρετήριο αναφοράς
 
-Κάθε χρώμα επωνυμίας και επιφάνεια αντιστοιχεί ήδη στον ιστότοπο **ως προς την τιμή** (διαφέρουν μόνο τα ονόματα — το dashboard χρησιμοποιεί το πρόθεμα `--color-`). Επαληθεύτηκε στο `src/app/globals.css:30-128`:
-
-| Έννοια                                  | Token ιστοτόπου (`tokens.css`)              | Token dashboard (`globals.css`) | Αντιστοίχιση       |
-| --------------------------------------- | ------------------------------------------- | ------------------------------- | ------------------ |
-| κύριο                                   | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅                 |
-| κύριο κατά την αιώρηση                  | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅                 |
-| έμφαση                                  | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅                 |
-| έμφαση-2                                | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (μετονομάστηκε) |
-| έμφαση-3                                | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (μετονομάστηκε) |
-| επιτυχία / προειδοποίηση / σφάλμα       | `#22c55e / #f59e0b / #ef4444`               | πανομοιότυπα                    | ✅                 |
-| φωτεινές ενδείξεις                      | `#ff5f56 / #ffbd2e / #27c93f`               | πανομοιότυπα                    | ✅                 |
-| σκοτεινό φόντο / επιφάνεια / περίγραμμα | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | πανομοιότυπα                    | ✅                 |
-| φωτεινό φόντο / επιφάνεια / κείμενο     | `#f9f9fb / #fff / #1a1a2e`                  | πανομοιότυπα                    | ✅                 |
-
-**Συμπέρασμα:** δεν απαιτείται μετάβαση χρωμάτων. Η ταυτότητα είναι ήδη κοινή· την _ολοκληρώνουμε_, δεν την ανακατασκευάζουμε.
-
-### 3.2 Κενά — τι λείπει από το dashboard
-
-| Κενό                      | Ο ιστότοπος διαθέτει                                                               | Dashboard                                                                  | Ενέργεια                 |
-| ------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------ |
-| **Ταπετσαρία πλέγματος**  | χαρτί μιλιμετρέ `body::before`, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ προστέθηκε (Φάση 1)**                                                 | **Μέρος A**              |
-| **Κλίμακα ακτίνας**       | `--radius 14px`, `--radius-sm 9px`                                                 | προστέθηκε `--radius 14px`· εκκρεμούν το `-sm` + η επαναστόχευση στοιχείων | **Μέρος B / Φάση 2**     |
-| **Gradient επωνυμίας**    | `--grad-brand 135deg primary→accent-3`                                             | **✅ προστέθηκε το token (Φάση 1)**· χρησιμοποιείται στη Φάση 2            | **Μέρος B**              |
-| **Ένθετη επιφάνεια**      | `--surface-2 #1c2230`                                                              | **✅ προστέθηκε (Φάση 1)**                                                 | **Μέρος B**              |
-| **Γραμματοσειρά mono**    | `--font-mono` (στοίβα ui-monospace)                                                | εκκρεμεί (Φάση 4, μαζί με τα στοιχεία που τη χρησιμοποιούν)                | **Μέρος B**              |
-| **`text-muted` (σκούρο)** | `#8b8b9e`                                                                          | `#a1a1aa` (zinc-400)                                                       | εναρμόνιση — **Μέρος B** |
-
-### 3.3 Μηχανισμοί θεμάτων (ώστε να μη χαλάσουμε τίποτα)
-
-- **Tailwind v4, με προσέγγιση CSS-first** (χωρίς `tailwind.config.*`). Τα tokens ορίζονται στα `:root`/`.dark` και διατίθενται στα utilities μέσω του `@theme inline` (`globals.css:130-179`).
-- **Σκούρο θέμα μέσω της κλάσης `.dark`** στο `<html>` (`@custom-variant dark` στο `globals.css:22`), η οποία εναλλάσσεται από ένα προσαρμοσμένο Zustand store (`src/store/themeStore.ts`), προεπιλεγμένο θέμα = `system` (`src/shared/constants/appConfig.ts:11`). Ο ιστότοπος χρησιμοποιεί αντ’ αυτού `html[data-theme="light"]` — **οι μηχανισμοί διαφέρουν, αλλά δεν συμπίπτουν ποτέ** (ξεχωριστές προελεύσεις), επομένως δεν υπάρχει διένεξη. Διατηρούμε τον μηχανισμό `.dark` του dashboard.
-- **Υπάρχει παράκαμψη του primary κατά τον χρόνο εκτέλεσης** (`themeStore.ts:85-97`, προεπιλογές στο `COLOR_THEMES`) — οι χρήστες μπορούν να αλλάξουν το `--color-primary`. Κάθε νέο token (gradient κ.λπ.) που αναφέρεται στο `--color-primary` κληρονομεί αυτόματα αυτές τις παρακάμψεις. ✅
-- **Δεσμευμένα ονόματα ακτίνας του Tailwind v4:** τα `--radius-sm/md/lg/...` τροφοδοτούν τα utilities `rounded-*`. Ο επαναπροσδιορισμός τους αλλάζει αναδρομικά κάθε υπάρχον `rounded-*` (π.χ. το `rounded-sm` χρησιμοποιείται σε 12 αρχεία). Επομένως, η τιμή της μικρής ακτίνας και η επαναστόχευση των στοιχείων αναβάλλονται σκόπιμα για τη Φάση 2, όπου τα στοιχεία που τις χρησιμοποιούν αλλάζουν ταυτόχρονα.
-
----
-
-## 4. Μέρος A — Το φόντο πλέγματος μιλιμετρέ χαρτιού (κύριο αίτημα) — ΥΛΟΠΟΙΗΘΗΚΕ (Φάση 1)
-
-### 4.1 Τι είναι
-
-Η ακριβής συνταγή από τον ιστότοπο (`_mono_repo/omnirouteSite/css/base.css`): ένα **σταθερό ψευδοστοιχείο πλήρους προβολής** που σχεδιάζει δύο διαβαθμίσεις γραμμών 1px και βρίσκεται σε `z-index:-1` πίσω από όλο το περιεχόμενο.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Γιατί αυτό λειτουργεί παρόλο που το `body` έχει αδιαφανές `background-color`:** ένα `::before` με `z-index:-1` σχεδιάζεται _πάνω_ από το φόντο του ίδιου του στοιχείου, αλλά _κάτω_ από το περιεχόμενό του που βρίσκεται στην κανονική ροή. Επομένως, το `--color-bg` αποτελεί το βασικό γέμισμα, το πλέγμα τοποθετείται πάνω από αυτό και η εφαρμογή αποδίδεται πάνω από το πλέγμα.
-
-### 4.2 Υπάρχον προηγούμενο στη βάση κώδικα
-
-Το `src/app/landing/page.tsx:16-26` **υλοποιεί ήδη το ίδιο πλέγμα ανά σελίδα** — αλλά με **κόκκινες** γραμμές (`#E54D5E`, αδιαφάνεια `0.06`) ανά **50px**, καθώς και κινούμενες σφαίρες. Επομένως, το μοτίβο είναι δοκιμασμένο στο προϊόν· αυτή η εργασία το αναβαθμίζει σε μια **καθολική ταπετσαρία που προσαρμόζεται στο θέμα**.
-
-### 4.3 Διακριτικά σχεδίασης που προστέθηκαν (στο `globals.css`)
-
-```css
-:root {
-  /* φωτεινό θέμα — η αδιαφάνεια του πλέγματος αυξήθηκε από το 0.045 του ιστοτόπου, ώστε η ταπετσαρία
-     να είναι πράγματι ορατή στον πυκνό πίνακα ελέγχου (οι κάρτες/το περιβάλλον εργασίας καλύπτουν το μεγαλύτερο μέρος της προβολής) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* σκοτεινό θέμα — αυξήθηκε από 0.035 για τον ίδιο λόγο */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Το μοναδικό εμπόδιο — αφαιρέθηκε
-
-Το πλέγμα είναι καθολικό εκ κατασκευής (καλύπτει μονομιάς τον πίνακα, τις σελίδες `auth`/`login` και τις σελίδες σφαλμάτων — κάθε διαδρομή). Ακριβώς **ένα** στοιχείο το έκρυβε μέσα στον πίνακα:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — το εξωτερικό wrapper σχεδίαζε ένα αδιαφανές `bg-bg`. Όλα τα στοιχεία κάτω από αυτό είναι ήδη διαφανή (`<main>`, το container κύλισης και το εσωτερικό `max-w-7xl`), επομένως η **αφαίρεση του `bg-bg`** επιτρέπει στο πλέγμα του body να εμφανίζεται μέσα από την περιοχή περιεχομένου (το `--color-bg` του body παραμένει το βασικό γέμισμα).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Αλληλεπίδραση με το περιβάλλον εργασίας (πλευρική γραμμή / κεφαλίδα)
-
-- Τα `Header` (`Header.tsx:207`, `bg-bg`) και `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) παραμένουν **αδιαφανή** → το πλέγμα εμφανίζεται **μόνο στην περιοχή περιεχομένου**, πλαισιωμένο από συμπαγές περιβάλλον εργασίας. Ήρεμη προεπιλεγμένη εμφάνιση, η οποία αντιστοιχεί στον τρόπο με τον οποίο ο ιστότοπος διαχωρίζει το περιβάλλον εργασίας από τον καμβά (απόφαση D3 = συμπαγές).
-
-### 4.6 Σελίδες σύνδεσης / ελέγχου ταυτότητας / σφαλμάτων
-
-Αυτές αποδίδονται απευθείας κάτω από το `<body>` (χωρίς το περιβάλλον εργασίας του πίνακα), επομένως το καθολικό πλέγμα θα πρέπει να εμφανίζεται αυτόματα πίσω τους. **Φάση 5 — ΟΛΟΚΛΗΡΩΘΗΚΕ:** τα αυτόνομα wrappers πλήρους οθόνης ήταν πράγματι αδιαφανή (`min-h-screen … bg-bg`, όπου το `bg-bg` είναι το ίδιο συμπαγές γέμισμα με το `<body>`), με αποτέλεσμα να κρύβουν το πλέγμα σε κάθε οθόνη εκτός του πίνακα — όχι μόνο στη σελίδα σύνδεσης. Όλα είναι πλέον διαφανή, ώστε η κοινόχρηστη ταπετσαρία να εμφανίζεται μέσα από αυτά: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` και `ErrorPageScaffold` (καλύπτει τα `400`/`401`). Αυτό ολοκληρώνει την **D4** (επεκτάθηκε από τη σελίδα σύνδεσης σε κάθε αυτόνομη οθόνη). Προστατεύεται από το `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Σελίδα προορισμού
-
-Το `landing/page.tsx` διατηρεί το πλουσιότερο κινούμενο φόντο του (σφαίρες + βινιέτα) — τη δική του εντυπωσιακή παρουσίαση μάρκετινγκ (απόφαση D5 = παραμένει ως έχει).
-
----
-
-## 5. Μέρος B — Ενοποίηση tokens
-
-Η Φάση 1 προσθέτει τα αδρανή tokens ταυτότητας χωρίς συγκρούσεις (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Η Φάση 2 συνδέει την κλίμακα ακτίνας με το Tailwind και επανακατευθύνει τα components· η Φάση 4 προσθέτει το `--font-mono` μαζί με τους καταναλωτές του.
-
-| Token                      | Γιατί                                                                     | Φάση                                   |
-| -------------------------- | ------------------------------------------------------------------------- | -------------------------------------- |
-| `--radius` / `--radius-sm` | Μία κλίμακα ακτίνας (14/9) αντί για ad-hoc τιμές 6/8/12                   | 1 (τιμή) / 2 (σύνδεση + ανακατεύθυνση) |
-| `--grad-brand`             | Εταιρικό gradient για κύρια CTA (κόκκινο→βιολετί), σε συμφωνία με το site | 1 (token) / 2 (Button)                 |
-| `--surface-2`              | Ένθετα panels / κεφαλίδες πινάκων / εσωτερικές σειρές                     | 1                                      |
-| `--font-mono`              | Μπλοκ κώδικα, terminal, IDs, endpoints                                    | 4                                      |
-| Εναρμόνιση `--text-muted`  | Επιλογή μίας τιμής μεταξύ site↔panel (συνιστάται `#a1a1aa`)               | 2                                      |
-
-**D2 (text-muted):** site `#8b8b9e` έναντι dashboard `#a1a1aa`. Συνιστάται να διατηρηθεί το **`#a1a1aa` του dashboard** και να ενημερωθεί το _site_ ώστε να ταιριάζει. Αισθητική αλλαγή.
-
----
-
-## 6. Μέρος C — Τυποποίηση components (Φάσεις 2–4)
-
-Προσαρμοσμένα components (χωρίς shadcn/Radix), Tailwind v4, με τα semantic tokens να έχουν υιοθετηθεί **ως επί το πλείστον** (195 αρχεία εισάγουν το κοινό barrel). Η εργασία αφορά την αφαίρεση των **παρακάμψεων**. Αρχική θέση: `src/shared/components/`.
-
-| #   | Στοιχείο                                   | Αρχείο(-α)                                                                                                               | Πρόβλημα → Στόχος                                                                                                                                          | Φάση |
-| --- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **Ευθυγράμμιση ακτίνας**                   | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                | ανάμεικτες τιμές 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                | 2    |
-| C2  | **Gradient κουμπιού + παραλλαγή `accent`** | `Button.tsx:5-12`                                                                                                        | το primary είναι επίπεδο κόκκινο→κόκκινο· ευθυγράμμιση με `--grad-brand`· προσθήκη της παραλλαγής `accent` που λείπει. ~195 εισαγωγείς — μέγιστη ορατότητα | 2    |
-| C3  | **Πίνακες**                                | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                      | 100% inline hardcoded rgba + ανύπαρκτες μεταβλητές· μετάβαση σε tokens, απόσυρση αποκλινόντων styles                                                       | 3    |
-| C4  | **Κεντρικοποίηση χρωμάτων κατάστασης**     | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helpers | 6+ αντίγραφα των ίδιων hex → ένα module βασισμένο στα `--color-success/warning/error`                                                                      | 3    |
-| C5  | **Περίγραμμα Card**                        | `Card.tsx:39`                                                                                                            | `border-white/5` → brand `/8`                                                                                                                              | 2    |
-| C6  | **Εναρμόνιση focus ring** ✅ ΟΛΟΚΛΗΡΩΘΗΚΕ  | `globals.css` `--focus-ring` (accent) έναντι του `ring-primary/30` των form controls                                     | ενοποιήθηκε στο **accent (βιολετί)** ώστε να ταιριάζει με το καθολικό ring και να διακρίνεται από το κόκκινο error ring· το error παραμένει κόκκινο        | 4    |
-| C7  | **Προσθήκη `Checkbox` + `Textarea`**       | απευθείας `<input>`/`<textarea>` με inline `accentColor:#6366f1`                                                         | primitives βασισμένα σε tokens                                                                                                                             | 4    |
-| C8  | **Σάρωση για hardcoded hex**               | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, κουκκίδες Modal, ~14 αρχεία γραφημάτων                            | literals → tokens                                                                                                                                          | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**         | `src/shared/utils/cn.ts`                                                                                                 | συσσώρευση αντικρουόμενων κλάσεων· απαιτείται για τις παρακάμψεις του C1                                                                                   | 2    |
-
-**Ήδη ευθυγραμμισμένα με το brand (βασισμένα σε tokens, χρειάζονται μόνο ακτίνα):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Σχέδιο σταδιακής διάθεσης
-
-- **Φάση 1 — Πλέγμα + tokens ταυτότητας (ΑΥΤΟ ΤΟ PR).** Πλέγμα στο `globals.css` + tokens `--surface-2`/`--grad-brand`/`--radius`, ταπετσαρία `body::before`, αφαίρεση του blocker `bg-bg`, στατικό guard test. Χαμηλό ρίσκο, αναστρέψιμο με ένα commit.
-- **Φάση 2 — Primitives (C1, C2, C5) — ΟΛΟΚΛΗΡΩΘΗΚΕ σε αυτό το PR.** Προστέθηκαν μέσω `@theme` τα σημασιολογικά radius utilities `rounded-card` (14px) / `rounded-control` (9px) (προσαρμοσμένα ονόματα, επομένως τα προεπιλεγμένα `rounded-sm/md/lg/xl` παραμένουν ανέγγιχτα — χωρίς μαζικές αλλαγές σε 400 αρχεία)· Card/Modal → 14px, Button/Input/Select → 9px· κύριο Button → `--grad-brand` (κόκκινο→βιολετί) + νέα παραλλαγή `accent`· περιγράμματα Card → token `border-border` (0.08). **Αναβλήθηκε:** το `cn()`→tailwind-merge (C9) χρειάζεται νέα deps· η σάρωση των ad-hoc `rounded-lg` (326 αρχεία) παραμένει ως έχει, καθώς τα primitives καλύπτουν το μεγαλύτερο μέρος της επιφάνειας.
-- **Φάση 3 — Χρώματα κατάστασης + πίνακες (C3, C4) — ΟΛΟΚΛΗΡΩΘΗΚΕ σε αυτό το PR.** ✅ **C4** (`src/shared/constants/statusColors.ts` — το `STATUS_HEX` ως μοναδική πηγή· τα `flow/edgeStyles.ts` + `TokenHealthBadge` ανακατευθύνθηκαν σε αυτή, με πιστή διατήρηση των ίδιων hex). ✅ Token **`--font-mono`**. ✅ **C3 (DataTable)** — αντικαταστάθηκαν όλα τα inline rgba + τα ανενεργά fallbacks `var(--bg-table-header)` / `var(--text-secondary)` με ένα σύνολο tokens `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), του οποίου οι **σκούρες τιμές είναι ακριβώς ίδιες με τα παλιά hardcoded rgba** (πανομοιότυπα bytes στη σκούρα λειτουργία), ενώ οι φωτεινές τιμές διορθώνουν το προηγουμένως μονίμως σκούρο φωτεινό θέμα. Περίγραμμα κεφαλίδας → `--color-border`, δευτερεύον κείμενο → `--color-text-muted`. **Χρειάζεται οπτικός έλεγχος πριν από το merge.** (Δεν τροποποιήθηκαν: το `logTableStyles.ts` και οι legacy κανόνες `.ant-table` του Ant — ξεχωριστά, χαμηλότερης προτεραιότητας.)
-- **Φάση 4 — Εκκαθάριση (C6, C7, C9 ολοκληρώθηκαν· C8 εκκρεμεί).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (τα clsx + tailwind-merge προστέθηκαν ως deps) — το `className` ενός caller πλέον _αντικαθιστά_ σωστά τη conflicting class ενός primitive αντί να προστίθεται πάνω της. ✅ **C7** νέα primitives `Checkbox` + `Textarea` (βασισμένα σε tokens, εξάγονται από το barrel· προσθετική αλλαγή — η υιοθέτησή τους από τα 32 raw checkboxes / 41 raw textareas μπορεί να ακολουθήσει σταδιακά). ✅ **C6** εναρμόνιση focus-ring — τα form controls (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) χρησιμοποιούν πλέον κατά το focus το **accent (βιολετί)** ring, ώστε να ταιριάζουν με το καθολικό `--focus-ring` και να μη συγκρούονται με το κόκκινο error ring· η κόκκινη κατάσταση σφάλματος παραμένει αμετάβλητη. ⏳ **Η σάρωση hex του C8 ΔΕΝ είναι τυφλό find/replace** — επιβεβαιωμένοι παραβάτες που είναι _σκόπιμοι_ και πρέπει να παραμείνουν: `ConsoleLogViewer.tsx:240` (τερματικό που είναι πάντα σκούρο), popover του `TokenHealthBadge`, SVG strokes του ReactFlow. Να μεταφερθούν μόνο τα hex που πράγματι προορίζονται να προσαρμόζονται στο θέμα.
-
-Κάθε φάση: `npm run lint` + `npm run typecheck:core` + οπτικός έλεγχος.
-
----
-
-## 8. Ανοιχτές αποφάσεις (συστάσεις)
-
-- **D1 — Κύριο Button:** να παραμείνει κόκκινο→κόκκινο ή να αλλάξει σε **κόκκινο→βιολετί `--grad-brand`**; Σύσταση: **κόκκινο→βιολετί** (Φάση 2).
-- **D2 — Χρώμα γραμμών πλέγματος:** **ουδέτερο** (στυλ του site) — επιλέχθηκε — έναντι brand-red. Μέγεθος **32px** (μειώθηκε κατά ~30% από τα αρχικά 46px μετά από σχόλια του owner — τα κελιά των 46px έδειχναν υπερβολικά μεγάλα στη διάταξη του dashboard).
-- **D3 — Ζωντάνια chrome:** sidebar/header **συμπαγή** — επιλέχθηκε.
-- **D4 — Πλέγμα auth/login:** ✅ **ΟΛΟΚΛΗΡΩΘΗΚΕ (Φάση 5)** — το αδιαφανές `bg-bg` αφαιρέθηκε από κάθε αυτόνομο wrapper πλήρους οθόνης (όχι μόνο από το login), ώστε το πλέγμα να εμφανίζεται σε όλες τις οθόνες. Βλ. §4.6.
-- **D5 — Σελίδα προορισμού:** διατήρηση του animated splash ως έχει. Επιλέχθηκε.
-- **D6 — Radius 14/9 σε ολόκληρο το προϊόν:** Σύσταση: ναι (Φάση 2).
-- **D7 — Η Φάση 1 διατίθεται πρώτη:** Επιλέχθηκε.
-- **D8 — Πλάτος διάταξης (Φάση 5):** το κέλυφος περιεχομένου του dashboard περιοριζόταν σε `max-w-7xl` (1280px), με αποτέλεσμα να κεντράρεται και να αφήνει μεγάλα κενά πλευρικά περιθώρια σε μεγάλες οθόνες. ✅ **ΟΛΟΚΛΗΡΩΘΗΚΕ** — αυξήθηκε σε ρευστό `max-w-[3840px]` (πραγματικό 4K): το περιεχόμενο πλέον ακολουθεί το viewport έως περίπου 4K και κεντράρεται μόνο πέρα από αυτό (`DashboardLayout.tsx`). Οι σελίδες που είναι σκόπιμα στενές παραμένουν στενές από σχεδιασμό (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Αδιαφανείς πίνακες δεδομένων (Φάση 6):** με την περιοχή περιεχομένου του dashboard πλέον διαφανή (ώστε να φαίνεται από πίσω η ταπετσαρία πλέγματος, Φάση 5), οι πίνακες δεδομένων των οποίων το container _δεν_ ήταν αδιαφανής επιφάνεια επέτρεπαν στο πλέγμα να διακρίνεται μέσα από τις διαφανείς ζυγές γραμμές / το zebra χαμηλού alpha. ✅ **ΟΛΟΚΛΗΡΩΘΗΚΕ** — κάθε πίνακας χωρίς card πλέον αποδίδει `bg-surface` (ή, για το primitive `<DataTable>`, `background: var(--color-surface)` στο scroll container του). Διορθώθηκαν: `DataTable` (primitive), `ProxyLogger`/`RequestLoggerV2` (η απόχρωση `bg-black/5 dark:bg-black/20` του `<Card>` τους υπερίσχυε του `bg-surface` του Card μέσω tailwind-merge → διαφάνεια ~95%), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, καθώς και οι δύο «πίνακες» CSS-grid στις προβολές cache (`bg-surface/35` → `bg-surface`). Οι πίνακες που βρίσκονταν ήδη μέσα σε `<Card>`/Modal επαληθεύτηκαν ως αδιαφανείς και σκόπιμα παρέμειναν ανέγγιχτοι (το bg-surface εκεί είναι περιττό no-op). Το ίδιο το πλέγμα **δεν χρειάστηκε καμία αλλαγή** — το `body::before` του dashboard είναι πανομοιότυπο σε επίπεδο bytes με αυτό του site (`--grid-size: 32px`)· οποιοδήποτε «μεγαλύτερο πλέγμα» εμφανίζεται σε ένα running instance προέρχεται από παλιό build πριν από το `#4143`, όχι από τον κώδικα. Προστατεύεται από το `tests/unit/design-grid-background.test.ts` (block Φάσης 6).
-
----
-
-## 9. Εκτός πεδίου εφαρμογής / κίνδυνοι
-
-- **Καμία αλλαγή παλέτας** — τα χρώματα ήδη ταιριάζουν· προσθέτουμε μόνο τα tokens που λείπουν. Μηδενικός κίνδυνος αλλαγής των χρωμάτων του προϊόντος.
-- **Καμία αλλαγή στον μηχανισμό θεμάτων** — διατηρούνται η `.dark` και το Zustand store.
-- **Η αλλαγή ακτίνας (Φάση 2) είναι εκτεταμένη** — επηρεάζει κάθε κάρτα/κουμπί/πεδίο εισαγωγής· ελέγξτε οπτικά τις σύνθετες οθόνες (πίνακες, modal παράθυρα) πριν από τη συγχώνευση.
-- **Οι πίνακες (C3)** περιέχουν το μεγαλύτερο μέρος του hardcoded styling και παρουσιάζουν τον υψηλότερο κίνδυνο παλινδρόμησης — απομονώστε τους σε ξεχωριστό PR.
-
----
-
-## 10. Ευρετήριο αναφορών
-
-| Περιοχή                                    | Διαδρομή                                                                                                             |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| Tokens του dashboard                       | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Store θέματος                              | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Κέλυφος panel (το grid ενεργοποιείται εδώ) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                                     | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Προηγούμενο για το grid                    | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Βασικά στοιχεία                            | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Πηγές χρωμάτων κατάστασης                  | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Βοηθητικό εργαλείο `cn`                    | `src/shared/utils/cn.ts`                                                                                             |
-| Δοκιμή προστασίας Φάσης 1                  | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Αναφορά ιστοτόπου                          | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — γέφυρα tokens, παρακάμψεις `.dark`, επεκτάσεις OmniRoute `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — καρφιτσωμένο upstream commit και άδεια χρήσης· `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` και οι προσαρμογείς δίπλα του· `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
