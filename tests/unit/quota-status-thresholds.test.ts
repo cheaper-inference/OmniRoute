@@ -19,9 +19,10 @@ const PROVIDER_LIMITS_DIR = join(
 );
 
 const LEVEL_BY_BAR_COLOR: Record<string, "ok" | "alert" | "critical"> = {
-  "#22c55e": "ok",
-  "#eab308": "alert",
-  "#ef4444": "critical",
+  // KEA-7886: the bar colours are the kit status tokens instead of hex.
+  "var(--color-success)": "ok",
+  "var(--color-warning)": "alert",
+  "var(--color-error)": "critical",
 };
 
 test("quota status boundaries keep the live 50/20 policy", () => {
@@ -59,5 +60,5 @@ test("ProviderLimits/index.tsx no longer redeclares the thresholds", () => {
 });
 
 test("getBarColor keeps rendering a non-numeric percentage red", () => {
-  assert.equal(getBarColor(Number.NaN).bar, "#ef4444");
+  assert.equal(getBarColor(Number.NaN).bar, "var(--color-error)");
 });

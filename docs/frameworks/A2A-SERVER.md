@@ -67,6 +67,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+For `smart-routing`, `metadata.combo` is an explicit override of
+`metadata.model` for the gateway request; it is sent as the real `model`,
+not as an ignored `x-combo` JSON field. The gateway's normal API-key and
+per-target authorization still applies. An invalid or empty combo is rejected.
+
+The result exposes `requested_combo` (caller intent), `dispatched_model`
+(the actual gateway request), `response_model` (gateway response) and
+`confirmed_combo`. The last field is `null` unless the gateway explicitly
+identifies a combo. A2A decision logs attribute execution only to a
+confirmed combo, retaining an unconfirmed request as `requestedCombo`.
+
 **Response:**
 
 ```json
@@ -78,6 +89,10 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
       "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
         { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }

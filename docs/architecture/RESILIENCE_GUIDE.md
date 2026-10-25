@@ -453,6 +453,17 @@ exhausted, or the feature off), the terminal response upgrades to
 `429 rate_limit_error` carrying `retry_after` / `reset_at` from the earliest
 transient lock expiry; quota, auth and not-found locks keep the hint-less 503.
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. Request Queue Admission Control (v3.8.49 · issue #6593)
@@ -736,8 +747,7 @@ A rule's `scope` (`model` / `provider` / `connection`) is a separate opt-in
 from `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` only surfaces it as
 `fallbackResult.ruleScope`, and downstream consumers only honor it as
 anything other than an informational label, for providers in the
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` allowlist in the same file (`gated via
-honorsRuleLockScope()` — today only `"agentrouter"`). See "Restated quota
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` allowlist in the same file (gated via `honorsRuleLockScope()` — today only `"agentrouter"`). See "Restated quota
 errors" above for what a `scope: "connection"` match actually does once a
 provider is on that allowlist.
 

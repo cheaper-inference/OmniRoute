@@ -46,15 +46,15 @@ Cei mai mari contribuitori **documentați**: `mistral` 1.00B, `nara` 210M, `llm7
 
 ## Actualizare 2026-06-17 — ce s-a schimbat din 2026-06-05
 
-O rundă de cercetare web realizată de 50 de agenți (documentație oficială + știri din ultimele 7 zile, verificată în mod adversarial) a actualizat întregul catalog. Aspecte importante:
+O rundă de cercetare web cu 50 de agenți (documentație oficială + știri din ultimele 7 zile, verificate în mod adversarial) a actualizat întregul catalog. Aspecte importante:
 
-- **Eliminate / fără nivel gratuit (2026):** `chutes` (nivelul gratuit s-a încheiat în 2026-03), `phind` (compania s-a închis în 2026-01), `kluster` (retras la 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (accesul gratuit MiMo a fost revocat la 2026-05-24, promoția Nemotron s-a încheiat în 2026-06 — reverificat la 2026-06-18), `aimlapi` (nivelul gratuit este suspendat — reverificat la 2026-06-18), `yi` (Yi-Light a fost retras, plată în funcție de utilizare — reverificat la 2026-06-18), `featherless-ai` (niciun nivel gratuit în prezent), `chipotle` („Pepper AI” de la Chipotle — widgetul de chat Amelia de la `amelia.chipotle.com`, reconstruit prin inginerie inversă și cu care comunica furnizorul, returnează acum 404 pentru fiecare rută, inclusiv pentru rădăcină; backend dezafectat/mutat, confirmat la 2026-09-15 — eliminat complet din catalog, #13131/#4037). `iflytek` / `sparkdesk` rămân listate, dar includ o notă de atenționare privind ToS (Spark Lite este gratuit; ToS restricționează utilizarea ca proxy/releu).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` au fost închise la 2026-06-01, iar `2.5 Pro` a părăsit nivelul gratuit (2026-04); nivelul gratuit este acum disponibil **numai pentru familia Flash** (2.5/3/3.1/3.5 Flash + Gemma). Catalogul **grupează** acum familia Flash (anterior, valoarea era umflată prin numărarea separată a fiecărei variante: 462M → 60M).
-- **Valori corectate:** `cloudflare-ai` 122M → **30M** (valoarea reală de 10k-Neurons/zi), `doubao` a fost reclasificat drept credit unic la înregistrare (nu recurent), `llm7` 4M → **150M** (5M de tokenuri/zi conform documentației), endpointurile „-Free” ale `together` au fost retrase → creditul de $25 la înregistrare a fost, de asemenea, eliminat (necesită o achiziție minimă de $5, fără perioadă de încercare gratuită), perioada Preview pentru `longcat` s-a încheiat + modelele Flash au fost retrase → numai **LongCat-2.0**, reclasificat drept credit unic de **10M** tokenuri la înregistrare (condiționat de KYC, nu recurent).
-- **Furnizori gratuiți noi descoperiți:** ⭐ **Kilo Code** (`kilo-gateway` — set rotativ „Auto Free”: familia NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 modele gratuite de programare, prin rotație), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash gratuite permanent + bonus de 20M la înregistrare) și Trinity Large Preview de la `arcee-ai`.
-- **Niveluri noi, prezentate transparent** (consultați Metodologia): o categorie _gratuită permanent, dar fără plafon_ (acces recurent real, fără o limită de tokenuri care să poată fi cuantificată) și un _spor deblocat prin depunere_ (OpenRouter $10 → +24M/lună), ambele afișate **separat**, astfel încât să nu umfle niciodată cifra principală.
+- **Eliminați / fără nivel gratuit (2026):** `chutes` (nivelul gratuit s-a încheiat în 2026-03), `phind` (compania s-a închis în 2026-01), `kluster` (retras la 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (accesul gratuit MiMo a fost revocat la 2026-05-24, promoția Nemotron s-a încheiat în 2026-06 — reverificat la 2026-06-18), `aimlapi` (nivelul gratuit este suspendat — reverificat la 2026-06-18), `yi` (Yi-Light a fost retras, tarifare în funcție de utilizare — reverificat la 2026-06-18), `featherless-ai` (în prezent, fără nivel gratuit), `chipotle` („Pepper AI” de la Chipotle — widgetul de chat Amelia obținut prin inginerie inversă, de la `amelia.chipotle.com`, cu care comunica furnizorul, returnează acum 404 pe fiecare rută, inclusiv pe cea rădăcină; backend dezafectat/mutat, confirmat la 2026-09-15 — eliminat complet din catalog, #13131/#4037). `iflytek` / `sparkdesk` rămân listate, dar includ o notă de avertizare privind ToS (Spark Lite este gratuit; ToS restricționează utilizarea ca proxy/releu).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` au fost retrase la 2026-06-01, iar `2.5 Pro` a părăsit nivelul gratuit (2026-04); nivelul gratuit include acum **doar familia Flash** (2.5/3/3.1/3.5 Flash + Gemma). Catalogul **grupează** acum familia Flash (anterior, valoarea era umflată prin numărarea separată a fiecărei variante: 462M → 60M).
+- **Valori corectate:** `cloudflare-ai` 122M → **30M** (valoarea reală este de 10k Neurons/zi), `doubao` reclasificat drept credit unic la înregistrare (nu recurent), `llm7` 4M → **150M** (5M de tokenuri/zi, conform documentației), endpointurile „-Free” ale `together` au fost retrase → creditul de $25 la înregistrare a fost, de asemenea, eliminat (necesită o achiziție minimă de $5, fără perioadă de încercare gratuită), perioada Preview pentru `longcat` s-a încheiat, iar modelele Flash au fost retrase → doar **LongCat-2.0**, reclasificat drept credit unic de **10M** de tokenuri la înregistrare (condiționat de KYC, nu recurent).
+- **Furnizori noi cu acces gratuit identificați:** ⭐ **Kilo Code** (`kilo-gateway` — set rotativ „Auto Free”: familia NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 modele gratuite pentru programare, actualizate prin rotație, reîmprospătat la 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash gratuite permanent + bonus de 20M la înregistrare) și Trinity Large Preview de la `arcee-ai`.
+- **Niveluri noi, prezentate transparent** (consultați Metodologia): o categorie _gratuită-permanent-dar-fără-plafon_ (acces recurent real, fără limită de tokenuri care să poată fi cuantificată) și o _majorare deblocată prin depunere_ (OpenRouter $10 → +24M/lună), ambele afișate **separat**, astfel încât să nu umfle niciodată cifra principală.
 
-> Tabelul detaliat pentru fiecare furnizor, aflat mai jos, reprezintă **instantaneul din 2026-06-05**; diferențele de mai sus îl înlocuiesc. Sursa canonică și actualizată continuu este catalogul per model `open-sse/config/freeModelCatalog.ts`.
+> Tabelul detaliat pentru fiecare furnizor, aflat mai jos, reprezintă **instantaneul din 2026-06-05**; modificările de mai sus îl înlocuiesc. Sursa canonică actualizată este catalogul per model `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -230,73 +230,73 @@ Majoritatea cifrelor privind „tokenurile gratuite pe lună” din acest domeni
 
 ## Nivel gratuit per furnizor (Bytez/Nous verificate la 2026-10-15; rânduri reauditate la 2026-09-02; celelalte la 2026-06-17)
 
-> Regenerat din catalogul per model (`open-sse/config/freeModelCatalog.ts`), cu deduplicare la nivel de pool. Sortat după numărul recurent stabil de tokenuri/lună. `uncapped*` = gratuit permanent, dar fără o limită publicată de tokenuri (limitat prin rată/concurență) — acces real, **neinclus** în totalul principal. `—` = doar credit / fără cheie / necuantificabil în tokenuri.
+> Regenerat din catalogul per model (`open-sse/config/freeModelCatalog.ts`), cu deduplicare la nivel de pool. Sortat după numărul recurent stabil de tokenuri/lună. `uncapped*` = gratuit permanent, dar fără o limită publicată de tokenuri (limitat ca rată/concurență) — acces real, **neinclus** în totalul principal. `—` = doar credit / fără cheie / necuantificabil în tokenuri.
 
-| Furnizor         | Tip gratuit         | Tokenuri stabile/lună | Credit în prima lună | Condiții   | Modele |
-| ---------------- | ------------------- | --------------------- | -------------------- | ---------- | ------ |
-| `mistral`        | recurent            | ~1.00B                | —                    | prudență   | 5      |
-| `nara`           | recurent            | ~210M                 | —                    | prudență   | 8      |
-| `llm7`           | recurent            | ~150M                 | —                    | prudență   | 4      |
-| `xkiro`          | recurent            | ~150M                 | —                    | prudență   | 39     |
-| `longcat`        | unic                | —                     | 10M                  | prudență   | 1      |
-| `cerebras`       | unic                | —                     | credit de $5         | prudență   | 2      |
-| `cloudflare-ai`  | recurent            | ~30M                  | —                    | prudență   | 9      |
-| `groq`           | recurent            | ~30M                  | —                    | prudență   | 5      |
-| `api-airforce`   | recurent            | ~24M                  | —                    | prudență   | 7      |
-| `bluesminds`     | recurent            | ~7M                   | —                    | ambiguu    | 22     |
-| `sambanova`      | recurent            | ~6M                   | —                    | prudență   | 5      |
-| `arcee-ai`       | recurent            | ~5M                   | —                    | prudență   | 1      |
-| `bazaarlink`     | recurent            | ~4M                   | —                    | prudență   | 32     |
-| `openrouter`     | recurent            | ~1M                   | —                    | prudență   | 1      |
-| `cohere`         | recurent            | ~800K                 | —                    | prudență   | 6      |
-| `huggingchat`    | recurent            | ~500K                 | —                    | prudență   | 4      |
-| `morph`          | recurent            | ~400K                 | —                    | în regulă  | 2      |
-| `huggingface`    | recurent            | ~200K                 | —                    | prudență   | 6      |
-| `kiro`           | recurent            | ~25K                  | —                    | de evitat  | 12     |
-| `glm-cn`         | nelimitat           | nelimitat\*           | ~20M                 | în regulă  | 4      |
-| `baidu`          | nelimitat           | nelimitat\*           | —                    | prudență   | 1      |
-| `gemini`         | nelimitat           | nelimitat\*           | —                    | prudență   | 4      |
-| `kilo-gateway`   | nelimitat           | nelimitat\*           | —                    | prudență   | 7      |
-| `ollama-cloud`   | nelimitat           | nelimitat\*           | —                    | ambiguu    | 8      |
-| `opencode-zen`   | nelimitat           | nelimitat\*           | —                    | prudență   | 6      |
-| `tencent`        | nelimitat           | nelimitat\*           | —                    | prudență   | 1      |
-| `vertex`         | credit la înscriere | —                     | ~300M                | prudență   | 10     |
-| `agentrouter`    | credit la înscriere | —                     | ~200M                | prudență   | 4      |
-| `predibase`      | credit la înscriere | —                     | ~25M                 | prudență   | 1      |
-| `doubao`         | credit la înscriere | —                     | ~15M                 | ambiguu    | 1      |
-| `ai21`           | credit la înscriere | —                     | ~10M                 | de evitat  | 2      |
-| `deepseek`       | credit la înscriere | —                     | ~5M                  | în regulă  | 2      |
-| `hyperbolic`     | credit la înscriere | —                     | ~5M                  | în regulă  | 8      |
-| `nscale`         | credit la înscriere | —                     | ~5M                  | prudență   | 6      |
-| `bytez`          | credit (recurent)   | —                     | necunoscut           | ambiguu    | 1      |
-| `deepinfra`      | credit la înscriere | —                     | ~1M                  | prudență   | 22     |
-| `fireworks`      | credit la înscriere | —                     | ~1M                  | de evitat  | 10     |
-| `nebius`         | credit la înscriere | —                     | ~1M                  | prudență   | 1      |
-| `qoder`          | credit la înscriere | —                     | ~1M                  | prudență   | 14     |
-| `scaleway`       | credit la înscriere | —                     | ~1M                  | în regulă  | 6      |
-| `novita`         | credit la înscriere | —                     | ~500K                | prudență   | 1      |
-| `agy`            | fără cheie          | —                     | —                    | de evitat  | 16     |
-| `baichuan`       | fără cheie          | —                     | —                    | ambiguu    | 1      |
-| `blackbox`       | fără cheie          | —                     | —                    | de evitat  | 6      |
-| `coze`           | fără cheie          | —                     | —                    | de evitat  | 1      |
-| `duckduckgo-web` | fără cheie          | —                     | —                    | de evitat  | 6      |
-| `freemodel-dev`  | fără cheie          | —                     | —                    | necunoscut | 4      |
-| `friendliai`     | fără cheie          | —                     | —                    | de evitat  | 2      |
-| `iflytek`        | fără cheie          | —                     | —                    | de evitat  | 1      |
-| `inference-net`  | fără cheie          | —                     | —                    | prudență   | 3      |
-| `liquid`         | fără cheie          | —                     | —                    | necunoscut | 1      |
-| `monsterapi`     | fără cheie          | —                     | —                    | ambiguu    | 1      |
-| `muse-spark-web` | fără cheie          | —                     | —                    | de evitat  | 3      |
-| `nlpcloud`       | fără cheie          | —                     | —                    | de evitat  | 1      |
-| `nvidia`         | fără cheie          | —                     | —                    | prudență   | 13     |
-| `pollinations`   | fără cheie          | —                     | —                    | prudență   | 31     |
-| `publicai`       | fără cheie          | —                     | —                    | prudență   | 3      |
-| `reka`           | fără cheie          | —                     | —                    | prudență   | 2      |
-| `sensenova`      | fără cheie          | —                     | —                    | prudență   | 1      |
-| `sparkdesk`      | fără cheie          | —                     | —                    | atenție    | 1      |
-| `stepfun`        | fără cheie          | —                     | —                    | ok         | 1      |
-| `t3-web`         | fără cheie          | —                     | —                    | evitați    | 23     |
-| `uncloseai`      | fără cheie          | —                     | —                    | atenție    | 3      |
+| Furnizor         | Tip de gratuitate   | Tokenuri constante/lună | Credit în prima lună | Termeni    | Modele |
+| ---------------- | ------------------- | ----------------------- | -------------------- | ---------- | ------ |
+| `mistral`        | recurent            | ~1.00B                  | —                    | prudență   | 5      |
+| `nara`           | recurent            | ~210M                   | —                    | prudență   | 8      |
+| `llm7`           | recurent            | ~150M                   | —                    | prudență   | 4      |
+| `xkiro`          | recurent            | ~150M                   | —                    | prudență   | 39     |
+| `longcat`        | o singură dată      | —                       | 10M                  | prudență   | 1      |
+| `cerebras`       | o singură dată      | —                       | credit de $5         | prudență   | 2      |
+| `cloudflare-ai`  | recurent            | ~30M                    | —                    | prudență   | 9      |
+| `groq`           | recurent            | ~30M                    | —                    | prudență   | 5      |
+| `api-airforce`   | recurent            | ~24M                    | —                    | prudență   | 7      |
+| `bluesminds`     | recurent            | ~7M                     | —                    | ambiguu    | 22     |
+| `sambanova`      | recurent            | ~6M                     | —                    | prudență   | 5      |
+| `arcee-ai`       | recurent            | ~5M                     | —                    | prudență   | 1      |
+| `bazaarlink`     | recurent            | ~4M                     | —                    | prudență   | 32     |
+| `openrouter`     | recurent            | ~1M                     | —                    | prudență   | 1      |
+| `cohere`         | recurent            | ~800K                   | —                    | prudență   | 6      |
+| `huggingchat`    | recurent            | ~500K                   | —                    | prudență   | 4      |
+| `morph`          | recurent            | ~400K                   | —                    | în regulă  | 2      |
+| `huggingface`    | recurent            | ~200K                   | —                    | prudență   | 6      |
+| `kiro`           | recurent            | ~25K                    | —                    | de evitat  | 12     |
+| `glm-cn`         | nelimitat           | nelimitat\*             | ~20M                 | în regulă  | 4      |
+| `baidu`          | nelimitat           | nelimitat\*             | —                    | prudență   | 1      |
+| `gemini`         | nelimitat           | nelimitat\*             | —                    | prudență   | 4      |
+| `kilo-gateway`   | nelimitat           | nelimitat\*             | —                    | prudență   | 7      |
+| `ollama-cloud`   | nelimitat           | nelimitat\*             | —                    | ambiguu    | 8      |
+| `opencode-zen`   | nelimitat           | nelimitat\*             | —                    | prudență   | 10     |
+| `tencent`        | nelimitat           | nelimitat\*             | —                    | prudență   | 1      |
+| `vertex`         | credit la înscriere | —                       | ~300M                | prudență   | 10     |
+| `agentrouter`    | credit la înscriere | —                       | ~200M                | prudență   | 4      |
+| `predibase`      | credit la înscriere | —                       | ~25M                 | prudență   | 1      |
+| `doubao`         | credit la înscriere | —                       | ~15M                 | ambiguu    | 1      |
+| `ai21`           | credit la înscriere | —                       | ~10M                 | de evitat  | 2      |
+| `deepseek`       | credit la înscriere | —                       | ~5M                  | în regulă  | 2      |
+| `hyperbolic`     | credit la înscriere | —                       | ~5M                  | în regulă  | 8      |
+| `nscale`         | credit la înscriere | —                       | ~5M                  | prudență   | 6      |
+| `bytez`          | credit (recurent)   | —                       | necunoscut           | ambiguu    | 1      |
+| `deepinfra`      | credit la înscriere | —                       | ~1M                  | prudență   | 22     |
+| `fireworks`      | credit la înscriere | —                       | ~1M                  | de evitat  | 10     |
+| `nebius`         | credit la înscriere | —                       | ~1M                  | prudență   | 1      |
+| `qoder`          | credit la înscriere | —                       | ~1M                  | prudență   | 14     |
+| `scaleway`       | credit la înscriere | —                       | ~1M                  | în regulă  | 6      |
+| `novita`         | credit la înscriere | —                       | ~500K                | prudență   | 1      |
+| `agy`            | fără cheie          | —                       | —                    | de evitat  | 16     |
+| `baichuan`       | fără cheie          | —                       | —                    | ambiguu    | 1      |
+| `blackbox`       | fără cheie          | —                       | —                    | de evitat  | 6      |
+| `coze`           | fără cheie          | —                       | —                    | de evitat  | 1      |
+| `duckduckgo-web` | fără cheie          | —                       | —                    | de evitat  | 6      |
+| `freemodel-dev`  | fără cheie          | —                       | —                    | necunoscut | 4      |
+| `friendliai`     | fără cheie          | —                       | —                    | de evitat  | 2      |
+| `iflytek`        | fără cheie          | —                       | —                    | de evitat  | 1      |
+| `inference-net`  | fără cheie          | —                       | —                    | prudență   | 3      |
+| `liquid`         | fără cheie          | —                       | —                    | necunoscut | 1      |
+| `monsterapi`     | fără cheie          | —                       | —                    | ambiguu    | 1      |
+| `muse-spark-web` | fără cheie          | —                       | —                    | de evitat  | 3      |
+| `nlpcloud`       | fără cheie          | —                       | —                    | de evitat  | 1      |
+| `nvidia`         | fără cheie          | —                       | —                    | prudență   | 13     |
+| `pollinations`   | fără cheie          | —                       | —                    | prudență   | 31     |
+| `publicai`       | fără cheie          | —                       | —                    | prudență   | 3      |
+| `reka`           | fără cheie          | —                       | —                    | prudență   | 2      |
+| `sensenova`      | fără cheie          | —                       | —                    | prudență   | 1      |
+| `sparkdesk`      | fără cheie          | —                       | —                    | atenție    | 1      |
+| `stepfun`        | fără cheie          | —                       | —                    | ok         | 1      |
+| `t3-web`         | fără cheie          | —                       | —                    | evitați    | 23     |
+| `uncloseai`      | fără cheie          | —                       | —                    | atenție    | 3      |
 
 ---
 

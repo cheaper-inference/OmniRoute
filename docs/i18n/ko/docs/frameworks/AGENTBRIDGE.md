@@ -16,14 +16,14 @@ AgentBridge는 IDE AI 에이전트의 HTTPS 트래픽을 가로채 OmniRoute의 
 
 ### AgentBridge란?
 
-IDE 에이전트(예: GitHub Copilot, Cursor, Claude Code)가 API를 호출하면 업스트림 AI 제공자(OpenAI, Anthropic 등)에 직접 연결됩니다. AgentBridge는 에이전트 구성을 변경하지 않고도 TLS 계층에서 이 연결을 투명하게 가로채 요청이 OmniRoute를 통하도록 다시 작성합니다.
+IDE 에이전트(예: GitHub Copilot, Cursor, Claude Code)가 API 호출을 수행할 때, 업스트림 AI 제공자(OpenAI, Anthropic 등)에 직접 연결됩니다. AgentBridge는 에이전트 설정 변경 없이 TLS 수준에서 해당 연결을 투명하게 가로채어, 요청을 OmniRoute를 통해 재작성합니다.
 
-이를 통해 다음이 가능합니다.
+이를 통해 다음이 가능합니다:
 
-- **모든 에이전트를 모든 제공자로 재라우팅**: Copilot이 OpenAI와 통신하고 있나요? Anthropic Claude, Gemini 또는 OmniRoute가 지원하는 374개 제공자 중 하나로 리디렉션할 수 있습니다.
-- **모델 매핑 적용**: 핸들러 계층에서 `gemini-3-flash` → `claude-sonnet-4.7` 매핑을 투명하게 적용할 수 있습니다.
-- **모든 에이전트 트래픽 관찰**: 가로챈 모든 요청이 [트래픽 검사기](./TRAFFIC_INSPECTOR.md)에 게시됩니다.
-- **OmniRoute 복원력 적용**: 콤보 라우팅, 회로 차단기, 폴백 및 비용 추적이 IDE 에이전트 트래픽에도 적용됩니다.
+- **모든 에이전트를 모든 제공자로 재라우팅**: Copilot이 OpenAI와 통신하고 있나요? Anthropic Claude, Gemini 또는 OmniRoute의 375개 제공자 중 어디로든 리디렉션할 수 있습니다.
+- **모델 매핑 적용**: `gemini-3-flash` → `claude-sonnet-4.7`을 핸들러 수준에서 투명하게 매핑합니다.
+- **모든 에이전트 트래픽 관찰**: 가로챈 모든 요청이 [Traffic Inspector](./TRAFFIC_INSPECTOR.md)에 게시됩니다.
+- **OmniRoute 복원력 적용**: 콤보 라우팅, 서킷 브레이커, 폴백, 비용 추적이 IDE 에이전트 트래픽에도 동일하게 작동합니다.
 
 ### 시장 내 포지셔닝
 
@@ -39,10 +39,10 @@ IDE 에이전트(예: GitHub Copilot, Cursor, Claude Code)가 API를 호출하�
 | Open Code          |    —    |    —     |        ✓        |             ✓             |
 | Trae               |    —    |    —     |        —        |        🔍 조사 중         |
 | 대시보드 UI        |    ✓    |    ✗     |        ✗        |             ✓             |
-| 트래픽 검사기      |    ✗    |    ✗     |        ✓        |             ✓             |
+| Traffic Inspector  |    ✗    |    ✗     |        ✓        |             ✓             |
 | OmniRoute 라우팅   |    ✗    |    ✗     |        ✗        |             ✓             |
 | 모델 매핑 UI       |    ✗    |    ✗     |        ✗        |             ✓             |
-| 우회 목록          |    ✗    |    ✗     |        ✓        |             ✓             |
+| 우회(Bypass) 목록  |    ✗    |    ✗     |        ✓        |             ✓             |
 | 업스트림 CA 인증서 |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---

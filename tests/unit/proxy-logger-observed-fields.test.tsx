@@ -2,7 +2,17 @@
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -141,7 +151,8 @@ describe("ProxyLogger observed fields", () => {
       await act(async () => {
         root.render(<ProxyLogDetail log={log} onClose={() => {}} />);
       });
-      const text = container.textContent ?? "";
+      // The detail is a kit Dialog (Modal adapter): its content is portaled to document.body.
+      const text = document.body.textContent ?? "";
       await act(async () => root.unmount());
       container.remove();
       return text;

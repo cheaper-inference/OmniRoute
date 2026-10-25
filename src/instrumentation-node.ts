@@ -597,7 +597,7 @@ export async function registerNodejs(): Promise<void> {
   // that cause every connection to be skipped by getProviderCredentials(), making
   // all subsequent requests time out at Bottleneck's maxWaitMs (120 s default).
   // Terminal states (banned / expired / credits_exhausted) are intentionally kept.
-  // See: https://github.com/diegosouzapw/OmniRoute/issues/3625 (Part A)
+  // See: https://github.com/cheaper-inference/OmniRoute/issues/3625 (Part A)
   try {
     const { clearStaleCrashCooldowns } = await import("@/lib/db/providers");
     const { cleared } = clearStaleCrashCooldowns();

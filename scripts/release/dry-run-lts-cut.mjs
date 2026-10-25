@@ -43,7 +43,9 @@ import { fileURLToPath } from "node:url";
 import { load as yamlLoad } from "js-yaml";
 import { resolveDistTag } from "./dist-tag.mjs";
 
-export const CANONICAL_REPO = "diegosouzapw/OmniRoute";
+export const CANONICAL_REPO = "cheaper-inference/OmniRoute";
+/** Former names GitHub still redirects to the canonical repository (transfer of 2026-10-21). */
+export const LEGACY_REPOS = ["diegosouzapw/OmniRoute"];
 const PACKAGE_NAME = "omniroute";
 
 export const DEFAULTS = Object.freeze({
@@ -162,11 +164,17 @@ export function parseCutArgs(argv) {
   };
 }
 
-/** True when a git remote URL (https / ssh / scp-like, with or without .git) is `repo`. */
+/**
+ * True when a git remote URL (https / ssh / scp-like, with or without .git) is `repo` — or one
+ * of its former names: GitHub redirects those to the same repository, so a clone that still
+ * carries the old owner must be treated as canonical too.
+ */
 export function isCanonicalRemoteUrl(url, repo = CANONICAL_REPO) {
   const match = /github\.com[:/]([^/\s]+)\/([^/\s]+?)(?:\.git)?\/?$/i.exec(String(url ?? ""));
   if (!match) return false;
-  return `${match[1]}/${match[2]}`.toLowerCase() === repo.toLowerCase();
+  const slug = `${match[1]}/${match[2]}`.toLowerCase();
+  const names = repo === CANONICAL_REPO ? [repo, ...LEGACY_REPOS] : [repo];
+  return names.some((name) => slug === name.toLowerCase());
 }
 
 // ── preconditions ───────────────────────────────────────────────────────────

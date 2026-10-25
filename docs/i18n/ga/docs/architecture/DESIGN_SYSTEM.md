@@ -4,228 +4,158 @@
 
 ---
 
-> **Stádas:** tagairt — tá an caighdeánú a bhfuil cur síos air anseo **curtha i bhfeidhm** (céimeanna 1–6: cúlbhrat greille, comhpháirteanna bunúsacha, lárú dathanna stádais, comhartha mono, aistriú comharthaí DataTable, fáinne fócais → accent, comhpháirteanna bunúsacha Checkbox/Textarea, `cn()` → tailwind-merge, greille ar gach scáileán neamhspleách, blaosc ábhair shreabhach 4K, dromchlaí teimhneacha tábla sonraí). Is é an doiciméad seo an cur síos canónach ar chomharthaí dearaidh, comhpháirteanna agus coinbhinsiúin an deais; coinnítear creat na gcéimeanna thíos mar réasúnaíocht le gach cinneadh.
-> **Raon feidhme:** tá **aon fhéiniúlacht amhairc amháin** i bpáirt ag deais OmniRoute (`src/`) agus ag an suíomh margaíochta (`_mono_repo/omnirouteSite/`) — an cúlra greille céanna ar nós grafpháipéir (32px), na comharthaí datha céanna, agus comhpháirteanna caighdeánaithe.
->
-> Nótaí praiticiúla do chothaitheoirí:
->
-> - Tá roinnt luachanna heicsidheachúlacha crua-chódaithe atá fágtha **d'aon ghnó** (teirminéal consóil atá dorcha i gcónaí, stríoca SVG ReactFlow) agus **NÍ** ceadmhach iad a aistriú ina gcomharthaí ar bhonn ollghlanacháin.
-> - Is éard atá i ngreille “níos mó” ar ásc atá ag rith ná tógáil sheanchaite, ní an cód — is é 32px méid na greille, díreach mar atá ar an suíomh.
-> - Tá luachanna `--table-*` an téama dhorcha comhionann beart ar bheart leis na luachanna rgba crua-chódaithe a bhí ann roimh an aistriú; deisíodh an téama geal (bhí fabht ann a d'fhág dorcha i gcónaí é mar gheall ar chúltacaí `var()` neamhghníomhacha).
+> **Stádas:** tá an painéal tógtha ar **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), agus é curtha san áireamh
+> mar an spás oibre `packages/ui-kit` (`@omniroute/ui-kit`; tá an pictiúr réamhtheachtach pionnáilte in
+> `packages/ui-kit/UPSTREAM.md` agus cosanta ag `npm run check:ui-kit-snapshot`). Is é an téama geal an téama
+> canónach; is é `system` an rogha réamhshocraithe. Is é glas líoma Keak an dath béime (`--ci-color-accent`). Is é Inter
+> (spásáil litreacha 0, `--ci-letter-spacing-ui`) clófhoireann an chomhéadain úsáideora, agus ní úsáidtear Instrument Serif ach amháin le haghaidh téacs mór taispeána
+> scaipthe (`.ci-dashboard-display`), agus IBM Plex Mono le haghaidh cóid — tá siad uile féinóstáilte trí na
+> hallmhairí `@fontsource/*` ag barr `src/app/globals.css`. Is glife Lucide é gach deilbhín.
 
----
+## 1. Suíomh na gcomhpháirteanna
 
-## 1. Cuspóir
+- **Trealamh.** Is cóip bheart ar bheart é `packages/ui-kit/src` den `src/` réamhtheachtach ag an tiomantas atá socraithe in
+  `packages/ui-kit/UPSTREAM.md` (ina dtaifeadtar údarú an cheadúnais freisin); liostaíonn `PATCHES.md` paistí
+  áitiúla (níl aon cheann ann). Úsáidtear mar chód foinse é, gan tógáil: déanann `next.config.mjs` é a thras-tiomsú, agus
+  mapálann `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` agus `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (tá an ailias céanna in `vitest.config.ts` agus `vitest.mcp.config.ts`). Iompórtáil
+  comhpháirt trealaimh trína fo-chonair (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), agus ná
+  déan é riamh tríd an easpórtáil bhairille `@omniroute/ui-kit`: tarraingíonn an bairille gach comhpháirt (an roghnóir dáta san áireamh)
+  isteach i ngach iompórtálaí. Téann stílbhileog an trealaimh isteach trí `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Comharthaí.** Fógraíonn `packages/ui-kit/src/ci-tokens.css` na comharthaí `--ci-*`; nascann `src/app/globals.css`
+  iad le hainmneacha oidhreachta OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), ionas go leanfaidh na léamha `var(--color-*)` agus fóntais Tailwind
+  ag obair. Úsáideann cód nua fóntais Tailwind (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) nó aicmí an trealaimh — ní úsáideann sé luach heicsidheachúlach riamh
+  (forfheidhmíonn `tests/unit/design-kit-bridge.test.ts` an nasc). Réitíonn `text-primary` go
+  `--color-primary-ink` trí `--text-color-primary` (lime-800 sa téama geal, an bhéim líoma sa téama dorcha), ionas
+  go bhfanann an téacs príomhúil inléite agus go gcoinníonn `bg-primary`/`border-primary` an dromchla líoma. Úsáideann sraitheanna cairte
+  `--color-chart-1` … `--color-chart-5`.
+- **Téamaí.** Cuireann `<html className="ci-theme">` (`src/app/layout.tsx`) an doiciméad faoi théama an trealaimh.
+  Is é `light`, `dark` nó `system` an rogha (`THEME_CONFIG.defaultTheme = "system"` in
+  `src/shared/constants/appConfig.ts`; leanann `system` `prefers-color-scheme`). Socraíonn `applyTheme()` in
+  `src/store/themeStore.ts` (agus a mhacasamhail sa script tosaithe inlíne in `src/app/layout.tsx`, a ritear
+  roimh an hiodráitiú) `data-theme="dark"|"light"` agus scoránaíonn sé an aicme `.dark` ar `<html>` ag an am céanna.
+  Tá tacar comharthaí dorcha an trealaimh bunaithe ar `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  tá sáruithe dorcha OmniRoute féin (an bloc `.dark` in `globals.css`) agus fóntais oidhreachta Tailwind `dark:`
+  bunaithe ar an aicme `.dark`. Níl aon réamhshocruithe datha béime ann: tagann an bhéim ón trealamh i gcónaí,
+  agus baintear réamhshocrú marthanach ó leagan níos sine nuair a lódálann an stór.
+- **Comhpháirteanna (cuibheoirí).** Coinníonn `src/shared/components/index.tsx` API comhpháirte OmniRoute (na
+  hainmneacha, na heaspórtálacha réamhshocraithe agus na hairíonna céanna), agus is cuibheoirí thar an trealamh iad na bunghnéithe taobh thiar de: foirmeacha
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), forleagain agus aiseolas
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  struchtúr (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) agus táblaí
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Iompórtálann cuibheoir comhpháirt an trealaimh
+  trí fho-chonair agus mapálann sé na hairíonna oidhreachta chuici — mar shampla, is é `Button variant="primary"`
+  cnaipe `default` an trealaimh (`--ci-button-primary-*`: an dromchla inbhéartach sa téama geal, an bhéim agus
+  dath téacs `--ci-color-accent-foreground` sa téama dorcha), is é `danger` ná `destructive`, agus is é `warning` ná `outline` móide
+  an síneadh `.ci-button--warning`. Is síntí OmniRoute iad na rialacha `.ci-button--warning` agus `.ci-badge[data-tone]`
+  ag deireadh `globals.css` (`@layer components`) ar aicmí an trealaimh.
+  Daingníonn `tests/unit/ui/adapters/*.test.tsx` gach cuibheoir.
+- **Blaosc.** Rindreálann `src/app/(dashboard)/layout.tsx` `DashboardLayout`, a rindreálann
+  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
+  `SidebarInset` an trealaimh (`packages/ui-kit/src/sidebar.tsx`), agus loighic nascleanúna OmniRoute in
+  `src/shared/components/Sidebar.tsx`. Is é nasc “léim chuig an ábhar” chuig `#main-content` an chéad eilimint
+  ar féidir fócas a chur uirthi. Coinníonn `src/shared/components/Header.tsx` `SidebarTrigger` an trealaimh (an t-aon scorán
+  barra taoibh sa bhlaosc), `ProductSwitcher` Keak agus oscailteoir an phailéid orduithe; ní thaispeánann sé teideal an bhealaigh ach amháin
+  nuair nach bhfuil `PageHeader` (`.ci-page-header`) de chuid an trealaimh feistithe laistigh de `#main-content`, ionas go mbíonn
+  `h1` amháin ar leathanach a bhfuil a `PageHeader` féin aige. Is `Dialog` de chuid an trealaimh é `src/shared/components/CommandPalette.tsx`.
+- **Deilbhíní.** Réitíonn `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) an t-ainm (stór focal
+  Material Symbols a úsáideann na scáileáin) trí `ICON_MAP` (`src/shared/constants/iconMap.ts`) go glif Lucide.
+  Níl cló ná pacáiste Material Symbols ann a thuilleadh: má tá ainm ar iarraidh ón mapa, rindreáiltear glif ionadchoinneála
+  neodrach (`data-icon-missing="true"`) agus logáiltear rabhadh consóil lasmuigh den táirgeadh.
+  Priontálann `npm run gen:icon-map` na hainmneacha atá in úsáid agus atá ar iarraidh ón mapa
+  (teipeann ar `tests/unit/icon-map-coverage.test.ts` i gcás aon ainm gan deilbhín Lucide;
+  clúdaíonn `tests/unit/icon-map-object-values.test.ts` ainmneacha atá stóráilte in oibiachtaí cuardaigh);
+  athscríobhann `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` réisí litriúla
+  `<span className="material-symbols-outlined">` mar `<Icon>`.
+- **Branda.** Timfhilleann `src/shared/components/OmniRouteLogo.tsx` an trealamh: rindreálann an t-easpórtáil réamhshocraithe `OmniRouteLogo`
+  `ProductIcon product="omniroute" variant="glyph"` (SVG inlíne, sábháilte do `basePath`) agus
+  rindreálann `OmniRouteLockup` `ProductLockup product="omniroute"` (ainm inrochtana “Keak OmniRoute”) nó, i gcás
+  oibreoirí lipéid bháin, a `name`/`logoSrc` féin. Tá cinn scríbe an lascaire táirgí in
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Taispeánann na
+  scáileáin neamhspleácha — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` agus `src/shared/components/ErrorPageScaffold.tsx`
+  — an glasáil bhranda; cinntíonn `tests/unit/brand-pages-static.test.ts` é seo.
 
-Ba cheart go mbeadh cuma **aon táirge amháin** ar an suíomh margaíochta (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) agus ar dheais an táirge. Fuair an suíomh a phailéad ar iasacht ón deais cheana féin — deir a `css/tokens.css` fiú _“Is macasamhail é an pailéad de dheais OmniRoute (src/app/globals.css)”_. Mar sin, tá an dá cheann ailínithe ~80% cheana féin ó thaobh dathanna de. Seo a bhfuil in easnamh ar an deais:
+## 2. Rialacha
 
-1. An **cúlpháipéar greille ar nós grafpháipéir** a úsáideann an suíomh ar gach leathanach.
-2. Dornán **comharthaí dearaidh comhroinnte** atá ag an suíomh ach nach bhfuil ag an deais (scála ga, grádán branda, `surface-2`, cló mono).
-3. **Comhsheasmhacht ar leibhéal na gcomhpháirteanna** — seachnaíonn roinnt comhpháirteanna de chuid na deaise na comharthaí téama trí luachanna heicsidheachúlacha/rgba crua-chódaithe a úsáid.
+1. Tóicíní, ní luachanna liteartha riamh. Eisceachtaí a coinníodh d’aon ghnó: teirminéal an chonsóil atá dorcha i gcónaí, stríoca SVG ReactFlow
+   trí `STATUS_HEX` (`src/shared/constants/statusColors.ts`), agus na pailéid chatagóireacha
+   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) agus
+   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
+2. Ná paisteáil `packages/ui-kit/src` de láimh riamh: sioncronaigh le `scripts/dev/sync-ui-kit.sh <commit>`; teipeann
+   ar an ngeata réamh-churtha `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) má tá aon bheart
+   éagsúil ón gcur réamhtheachtach pionnáilte (scipeálann sé le rabhadh nuair nach bhfuil an clón réamhtheachtach,
+   `UI_KIT_CLONE` nó `_references/cheaper-inference-ui-kit`, ar fáil). Nuair atá rud éigin in easnamh ón trealamh,
+   téigh timpeall air sa chuibheoir nó sa scáileán agus iarr é ón bhfoireann réamhtheachtach.
+3. Is i mBéarla atá réamhshocruithe téacs an trealaimh (`label = "Loading"`, `loadingLabel = "Loading table"`…) — cuir teaghráin aistrithe
+   ó `useTranslations(...)` ar fáil aon uair a rindreálann comhpháirt trealaimh téacs.
+4. Bíonn tosaíocht ag fóntais Tailwind ar aicmí comhpháirteanna an trealaimh (fógraíonn an trealamh
+   `@layer theme, base, components, utilities` agus tá a rialacha in `components`) — úsáid fóntais don
+   spásáil agus don leagan amach, ní chun dath comhpháirteanna an trealaimh a athrú.
+5. Ceannteidil: `.ci-heading` (Inter, gan spásáil litreacha) do theidil leathanaigh agus rannáin; `.ci-dashboard-display`
+   (Instrument Serif) do théacs taispeána mór neamhphlódaithe amháin, amhail cód stádais an leathanaigh earráide.
+6. Cosnaíonn `tests/unit/dashboard-kit-sweep.test.ts` glacadh an trealaimh: gan aon span ligature Material faoi
+   `src/app` ná `src/shared/components`; i gcrann na deaise (`src/app/(dashboard)` agus
+   `src/shared/components`) gan aon `<select>`, `<textarea>` ná `<table>` amh agus gan aon
+   `role="dialog"` lámhdhéanta lasmuigh de na heisceachtaí liostaithe (brainse dúchasach an chuibheora `Select`,
+   `RequestLoggerDetail`); teastaíonn nóta ina bhfuil `kit-exception:` (agus an chúis leis) ó gach `<button>` nó `<input>`
+   amh ansin, agus caithfidh sé críochnú 3 líne ar a mhéad os a chionn; ní cheadaítear imreacha pailéid ná athraithigh
+   `dark:` ach amháin sna comhaid atá liostaithe sa tástáil.
+7. Deimhnigh an dá théama agus an t-amharcphort 390 px roimh PR (gabhálacha scáileáin); ritheann
+   `tests/e2e/a11y.spec.ts` axe.
 
-Is é an doiciméad seo an anailís agus an plean.
+## 3. Scáileán a chur leis
 
----
+1. Oscail an leathanach le `PageHeader` an trealaimh (`@omniroute/ui-kit/page-header`, `compact` taobh istigh den
+   deais) — teideal, cur síos agus `actions`. Ansin baineann ceanntásc na blaoisce a theideal féin.
+2. Tóg rialtáin ó `@/shared/components` (na cuibheoirí) agus úsáid comhpháirteanna trealaimh trí fhochonair nuair nach bhfuil
+   cuibheoir ann (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. Deilbhíní: `<Icon name="…" />`. Cuirtear ainm nua le `ICON_MAP` in éineacht leis an gcomhpháirt Lucide
+   a mheaitseálann ó thaobh brí de; liostaíonn `npm run gen:icon-map` na hainmneacha atá fós in easnamh.
+4. Dathanna: fóntais shéimeantacha (`text-success`, `bg-warning-bg`, `border-border`…) agus
+   `var(--color-chart-N)` do shraitheanna cairte; gan luachanna heicsidheachúlacha agus gan athraithigh `dark:` nach ndéanann ach dath a athrá.
+5. Téacs: tagann gach teaghrán, lena n-áirítear na lipéid a thugann tú do chomhpháirteanna trealaimh, ó `useTranslations`. Cuirtear
+   eochracha nua le `src/i18n/messages/en.json`, `pt-BR.json` agus `vi.json` (pionnálann tástáil paireachta na Vítneaimise
+   gach eochair Bhéarla); líonann an sioncronú i18n na logchaighdeáin eile.
+6. Rith na cosaintí roimh an PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (an t-aon seiceáil a aimsíonn iompórtáil dhúblach in `iconMap.ts`),
+   `npm run check:ui-icu`, agus tástálacha an scáileáin féin.
 
-## 2. Prionsabail
+## 4. Cuibheoir a chur leis nó a athrú
 
-- **Foinse aonair na fírinne = `src/app/globals.css`.** Déanann an suíomh macasamhlú ar an deais, agus ní a mhalairt riamh. Cuirtear comharthaí nua le `globals.css` ar dtús.
-- **Comharthaí, ní luachanna litriúla.** Úsáideann comhpháirteanna comharthaí séimeantacha (`bg-surface`, `text-primary`, `border-border`), agus ní úsáideann siad `#hex` amh riamh.
-- **Caolchúiseach, ní glórach.** Is cúlbhrat éadrom é an greille atá taobh thiar den ábhar — ní ceadmhach dó codarsnacht téacs a laghdú ná dul in iomaíocht leis an gcomhéadan úsáideora riamh.
-- **Feasach ar théamaí.** Oibríonn gach rud in `.dark` (cuma shainiúil an táirge) agus sa téama geal araon.
-- **Cur i bhfeidhm máinliachta.** Seol an ghreille + na comharthaí ar dtús (riosca íseal, ard-infheictheacht), agus ansin glan na comhpháirteanna ina dtonnta.
+1. Coinnigh API poiblí `src/shared/components/index.tsx`: na hainmneacha easpórtála céanna, na heaspórtálacha réamhshocraithe céanna agus
+   na props inghlactha céanna. Mapáil props oidhreachta chuig an kit laistigh den chuibheoir (féach `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Iompórtáil an kit de réir fochonair (`@omniroute/ui-kit/<component>`).
+3. Baineann réitigh shealadacha ar easnaimh sa kit leis an gcuibheoir (nó le `globals.css` `@layer components` nuair is
+   ceartúchán stíle é), agus ní bhaineann siad riamh le `packages/ui-kit/src`.
+4. Cuir `tests/unit/ui/adapters/<name>.test.tsx` leis nó nuashonraigh é. I gcás cuibheora a bhfuil go leor glaoiteoirí air, déan comparáid idir
+   an mharcáil rindreáilte roimh an athrú agus ina dhiaidh — leathnaíonn athruithe ar stuáil nó ar chumhdaigh chuig gach scáileán.
 
----
+## 5. An kit a nuashonrú
 
-## 3. An staid reatha — a bhfuil ailínithe cheana féin agus nach bhfuil
+Cóipeálann `scripts/dev/sync-ui-kit.sh <commit> [clone]` an `src/` réamhtheachtach ag an gcur isteach sin isteach i
+`packages/ui-kit/src` agus cuireann sé an t-aon chlaochlú ceadaithe i bhfeidhm (baineann sé an iarmhír `.js` ó
+iompórtálacha coibhneasta). Ansin: athbhreithnigh `git diff packages/ui-kit`, déan seiceáil amhairc ar sholáthraithe, socruithe, teaglamaí,
+úsáid agus críochphointe sa dá théama, rith `npm run check:ui-kit-snapshot` agus `npm run test:vitest:ui`, agus
+oscail an PR leis an loga athruithe réamhtheachtach.
 
-### 3.1 Dathanna — aontaithe cheana féin ✅
+## 6. Innéacs tagartha
 
-Meaitseálann gach dath branda agus dromchla an suíomh **de réir luacha** cheana féin (níl ach na hainmneacha éagsúil — cuireann an deais an réimír `--color-` leo). Deimhnithe in `src/app/globals.css:30-128`:
-
-| Coincheap                         | Comhartha suímh (`tokens.css`)              | Comhartha deaise (`globals.css`) | Meaitseáil        |
-| --------------------------------- | ------------------------------------------- | -------------------------------- | ----------------- |
-| príomhúil                         | `--primary #e54d5e`                         | `--color-primary #e54d5e`        | ✅                |
-| príomhúil-ar-folú                 | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`  | ✅                |
-| béim                              | `--accent #6366f1`                          | `--color-accent #6366f1`         | ✅                |
-| béim-2                            | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`   | ✅ (athainmnithe) |
-| béim-3                            | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`   | ✅ (athainmnithe) |
-| rath / rabhadh / earráid          | `#22c55e / #f59e0b / #ef4444`               | comhionann                       | ✅                |
-| soilse tráchta                    | `#ff5f56 / #ffbd2e / #27c93f`               | comhionann                       | ✅                |
-| cúlra / dromchla / imlíne dhorcha | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | comhionann                       | ✅                |
-| cúlra / dromchla / téacs geal     | `#f9f9fb / #fff / #1a1a2e`                  | comhionann                       | ✅                |
-
-**Conclúid:** níl aon aistriú dathanna le déanamh. Tá an fhéiniúlacht comhroinnte cheana féin; táimid á _cur i gcrích_, ní á hatógáil.
-
-### 3.2 Bearnaí — a bhfuil in easnamh ar an deais
-
-| Bearna                    | Tá ag an suíomh                                                                 | Painéal                                                                     | Gníomh               |
-| ------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | -------------------- |
-| **Cúlbhrat greille**      | grafpháipéar `body::before`, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ curtha leis (Céim 1)**                                                 | **Cuid A**           |
-| **Scála ga**              | `--radius 14px`, `--radius-sm 9px`                                              | `--radius 14px` curtha leis; `-sm` + athphointeáil comhpháirte ar feitheamh | **Cuid B / Céim 2**  |
-| **Grádán branda**         | `--grad-brand 135deg primary→accent-3`                                          | **✅ comhartha curtha leis (Céim 1)**; úsáidfear é i gCéim 2                | **Cuid B**           |
-| **Dromchla neadaithe**    | `--surface-2 #1c2230`                                                           | **✅ curtha leis (Céim 1)**                                                 | **Cuid B**           |
-| **Cló aonspáis**          | `--font-mono` (cruach ui-monospace)                                             | ar feitheamh (Céim 4, in éineacht leis na húsáideoirí)                      | **Cuid B**           |
-| **`text-muted` (dorcha)** | `#8b8b9e`                                                                       | `#a1a1aa` (zinc-400)                                                        | réitigh — **Cuid B** |
-
-### 3.3 Meicníochtaí téamaithe (ionas nach mbrisfimid rud ar bith)
-
-- **Tailwind v4, CSS ar dtús** (gan `tailwind.config.*`). Sainítear comharthaí in `:root`/`.dark` agus cuirtear ar fáil d'fhóntais iad trí `@theme inline` (`globals.css:130-179`).
-- **Mód dorcha trí rang `.dark`** ar `<html>` (`@custom-variant dark` ag `globals.css:22`), arna scoránú ag stór saincheaptha Zustand (`src/store/themeStore.ts`), téama réamhshocraithe = `system` (`src/shared/constants/appConfig.ts:11`). Úsáideann an suíomh `html[data-theme="light"]` ina ionad sin — **tá na meicníochtaí éagsúil ach ní thagann siad le chéile riamh** (foinsí ar leith), mar sin níl aon choinbhleacht ann. Coinnímid meicníocht `.dark` an phainéil.
-- **Tá forscríobh príomhúil ag am rite** (`themeStore.ts:85-97`, réamhshocruithe in `COLOR_THEMES`) — is féidir le húsáideoirí `--color-primary` a mhalartú. Faigheann aon chomhartha nua (grádán, srl.) a dhéanann tagairt do `--color-primary` na forscríobhanna sin le hoidhreacht saor in aisce. ✅
-- **Ainmneacha ga forchoimeádta Tailwind v4:** is iad `--radius-sm/md/lg/...` a thacaíonn leis na fóntais `rounded-*`. Má athshainítear iad, athraítear gach `rounded-*` atá ann cheana go cúlghabhálach (m.sh. úsáidtear `rounded-sm` i 12 chomhad). Dá bhrí sin, cuirtear luach an gha bhig agus athphointeáil na comhpháirte siar d'aon ghnó go Céim 2, áit a n-athrófar na húsáideoirí le chéile.
-
----
-
-## 4. Cuid A — Cúlra na greille grafpháipéir (an príomhiarratas) — CURTHA I BHFEIDHM (Céim 1)
-
-### 4.1 Cad atá ann
-
-An t-oideas cruinn ón suíomh (`_mono_repo/omnirouteSite/css/base.css`): **bréag-eilimint sheasta lánmhéid an amhairc** a phéinteálann dhá ghrádán líne 1px, agus í suite ag `z-index:-1` taobh thiar den ábhar ar fad.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Cén fáth a n-oibríonn sé seo cé go bhfuil `background-color` teimhneach ag `body`:** péinteáiltear `::before` le `z-index:-1` _os cionn_ chúlra na heiliminte féin ach _faoi bhun_ a hábhair insreafa. Mar sin, is é `--color-bg` an bunlíonadh, cuirtear an ghreille ina sraith os a chionn, agus rindreáiltear an aip os cionn na greille.
-
-### 4.2 Fasach atá sa bhonn cód cheana féin
-
-Cuireann `src/app/landing/page.tsx:16-26` **an ghreille chéanna seo i bhfeidhm in aghaidh an leathanaigh cheana féin** — ach le línte **dearga** (`#E54D5E`, teimhneacht `0.06`) ag **50px**, chomh maith le sféir bheoite. Mar sin, tá an patrún cruthaithe sa táirge; ardaíonn an obair seo é go páipéar balla **domhanda atá feasach ar an téama**.
-
-### 4.3 Comharthaí dearaidh a cuireadh leis (in `globals.css`)
-
-```css
-:root {
-  /* geal — méadaíodh teimhneacht na greille ó 0.045 an tsuímh ionas go mbeadh an páipéar balla
-     infheicthe i ndáiríre ar an deais dhlúth (clúdaíonn cártaí/an chróim an chuid is mó den amharc) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* dorcha — méadaíodh í ó 0.035 ar an gcúis chéanna */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 An t-aon bhac — bainte
-
-Tá an ghreille domhanda ó nádúr (clúdaíonn sí an painéal, `auth`/`login`, leathanaigh earráide — gach bealach — in aon iarracht amháin). Ní raibh ach **eilimint amháin** á cur i bhfolach laistigh den phainéal:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — phéinteáil an cumhdach seachtrach `bg-bg` teimhneach. Tá gach rud faoina bhun trédhearcach cheana féin (`<main>`, an coimeádán scrollaithe, an t-inmheánach `max-w-7xl`), mar sin ligeann **baint `bg-bg`** do ghreille an choirp taispeáint tríd an limistéar ábhair (fanann `--color-bg` an choirp mar bhunlíonadh).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Idirghníomhú leis an gcróim (taobhbharra / ceanntásc)
-
-- Fanann `Header` (`Header.tsx:207`, `bg-bg`) agus `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) **teimhneach** → ní thaispeántar an ghreille ach sa **limistéar ábhair**, agus cróim sholadach mar fhráma timpeall uirthi. Réamhshocrú socair é seo, agus meaitseálann sé an chaoi a scarann an suíomh an chróim ón gcanbhás (cinneadh D3 = soladach).
-
-### 4.6 Leathanaigh logála isteach / fíordheimhnithe / earráide
-
-Rindreáiltear iad seo go díreach faoi `<body>` (gan cróim an phainéil), mar sin ba cheart don ghreille dhomhanda a bheith le feiceáil taobh thiar díobh go huathoibríoch. **Céim 5 — DÉANTA:** bhí na cumhdaigh neamhspleácha lánscáileáin teimhneach i ndáiríre (`min-h-screen … bg-bg`, áit arb é `bg-bg` an líonadh soladach céanna agus atá ag `<body>`), rud a chuir an ghreille i bhfolach ar gach scáileán nach scáileán deaise é — ní hamháin an scáileán logála isteach. Tá siad uile trédhearcach anois ionas go dtaispeánfar an páipéar balla comhroinnte tríothu: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding`, agus `ErrorPageScaffold` (clúdaíonn sé `400`/`401`). Cuireann sé seo **D4** i gcrích (leathnaithe ó logáil isteach amháin go gach scáileán neamhspleách). Tá sé cosanta ag `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Leathanach tuirlingthe
-
-Coinníonn `landing/page.tsx` a chúlra beoite níos saibhre (sféir + vignéid) — a scáileán margaíochta féin (cinneadh D5 = fág mar atá).
-
----
-
-## 5. Cuid B — Aontú téacsfhocal
-
-Cuireann Céim 1 na téacsfhocail aitheantais thámha, atá saor ó imbhuailtí, leis (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Nascann Céim 2 scála an gha le Tailwind agus atreoraíonn sí comhpháirteanna; cuireann Céim 4 `--font-mono` leis mar aon lena chuid tomhaltóirí.
-
-| Téacsfhocal                | Cén fáth                                                                         | Céim                              |
-| -------------------------- | -------------------------------------------------------------------------------- | --------------------------------- |
-| `--radius` / `--radius-sm` | Scála aonair ga (14/9) in ionad luachanna ad-hoc 6/8/12                          | 1 (luach) / 2 (nascadh + atreorú) |
-| `--grad-brand`             | Grádán branda do phríomh-CTA-anna (dearg→corcairghorm), ag teacht leis an suíomh | 1 (téacsfhocal) / 2 (Button)      |
-| `--surface-2`              | Painéil neadaithe / ceanntásca tábla / rónna ionsáite                            | 1                                 |
-| `--font-mono`              | Bloic chóid, teirminéal, IDanna, críochphointí                                   | 4                                 |
-| Réiteach `--text-muted`    | Roghnaigh luach amháin don suíomh↔painéal (`#a1a1aa` molta)                      | 2                                 |
-
-**D2 (text-muted):** suíomh `#8b8b9e` i gcomparáid leis an deais `#a1a1aa`. Moltar **`#a1a1aa` na deaise** a choinneáil agus an _suíomh_ a nuashonrú chun teacht leis. Athrú cosmaideach.
-
----
-
-## 6. Cuid C — Caighdeánú comhpháirteanna (Céimeanna 2–4)
-
-Comhpháirteanna saincheaptha (gan shadcn/Radix), Tailwind v4, téacsfhocail shéimeantacha glactha **den chuid is mó** (iompórtálann 195 comhad an bairille comhroinnte). Is é atá i gceist leis an obair ná na **seachbhealaí** a bhaint. Baile: `src/shared/components/`.
-
-| #   | Mír                                   | Comha(i)d                                                                                                                 | Fadhb → Sprioc                                                                                                                                                    | Céim |
-| --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **Ailíniú ga**                        | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                 | meascán de 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                             | 2    |
-| C2  | **Grádán cnaipí + malairt `accent`**  | `Button.tsx:5-12`                                                                                                         | is dearg→dearg cothrom é an príomhstíl; ailínigh le `--grad-brand`; cuir an mhalairt `accent` atá ar iarraidh leis. ~195 iompórtálaí — an infheictheacht is airde | 2    |
-| C3  | **Táblaí**                            | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                       | rgba cruachódaithe inlíne 100% + athróga nach ann dóibh; aistrigh chuig téacsfhocail, scor de stíleanna éagsúla                                                   | 3    |
-| C4  | **Dathanna stádais a lárú**           | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 chúntóir | 6+ chóip den heics chéanna → modúl amháin bunaithe ar `--color-success/warning/error`                                                                             | 3    |
-| C5  | **Imlíne cárta**                      | `Card.tsx:39`                                                                                                             | `border-white/5` → branda `/8`                                                                                                                                    | 2    |
-| C6  | **Réiteach fáinne fócais** ✅ DÉANTA  | `globals.css` `--focus-ring` (accent) i gcomparáid le `ring-primary/30` na rialtán foirme                                 | aontaithe ar **accent (corcairghorm)** chun teacht leis an bhfáinne domhanda + é a idirdhealú ón bhfáinne earráide dearg; fanann an earráid dearg                 | 4    |
-| C7  | **Cuir `Checkbox` + `Textarea` leis** | `<input>`/`<textarea>` amh le `accentColor:#6366f1` inlíne                                                                | primitíbheanna atá á dtiomáint ag téacsfhocail                                                                                                                    | 4    |
-| C8  | **Scuabadh heics cruachódaithe**      | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, poncanna Modal, ~14 chomhad cairte                                 | litreacha → téacsfhocail                                                                                                                                          | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**    | `src/shared/utils/cn.ts`                                                                                                  | cruachtar aicmí contrártha; riachtanach do sháruithe C1                                                                                                           | 2    |
-
-**Ag teacht leis an mbranda cheana féin (á dtiomáint ag téacsfhocail, gan ach an ga de dhíth):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Plean rollta amach
-
-- **Céim 1 — Greille + comharthaí aitheantais (AN PR SEO).** Greille `globals.css` + comharthaí `--surface-2`/`--grad-brand`/`--radius`; cúlbhrat `body::before`; bain an bacaire `bg-bg`; tástáil statach chosanta. Riosca íseal, inchúlaithe in aon commit amháin.
-- **Céim 2 — Bun-chomhpháirteanna (C1, C2, C5) — DÉANTA sa PR seo.** Cuireadh na fóntais shéimeantacha ga `rounded-card` (14px) / `rounded-control` (9px) leis trí `@theme` (ainmneacha saincheaptha, mar sin fanann na réamhshocruithe `rounded-sm/md/lg/xl` gan athrú — gan tionchar forleathan ar 400 comhad); Card/Modal → 14px, Button/Input/Select → 9px; príomh-Button → `--grad-brand` (dearg→corcairghorm) + malairt nua `accent`; imlínte Card → an comhartha `border-border` (0.08). **Curtha siar:** tá spleáchais nua de dhíth ar `cn()`→tailwind-merge (C9); fágtar an scuabadh ad hoc ar `rounded-lg` (326 comhad) mar atá, ós iad na bun-chomhpháirteanna a chuimsíonn formhór an dromchla.
-- **Céim 3 — Dathanna stádais + táblaí (C3, C4) — DÉANTA sa PR seo.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` mar an t-aon fhoinse; athdhíríodh `flow/edgeStyles.ts` + `TokenHealthBadge`, na heics-dathanna céanna go dílis). ✅ Comhartha **`--font-mono`**. ✅ **C3 (DataTable)** — cuireadh tacar comharthaí `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) in ionad gach rgba inlíne agus na gcúlroghanna neamhbheo `var(--bg-table-header)` / `var(--text-secondary)`; tá a **luachanna dorcha díreach mar an gcéanna leis na seanluachanna rgba crua-chódaithe** (na bearta dorcha comhionann), agus ceartaíonn a luachanna geala an téama geal a bhí dorcha i gcónaí roimhe seo. Imlíne an cheanntáisc → `--color-border`, téacs tánaisteach → `--color-text-muted`. **Teastaíonn athbhreithniú amhairc roimh chumasc.** (Níor athraíodh: `logTableStyles.ts` ná na seanrialacha Ant `.ant-table` — obair ar leith ar tosaíocht níos ísle.)
-- **Céim 4 — Glantachán (C6, C7, C9 déanta; C8 ar feitheamh).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (cuireadh clsx + tailwind-merge leis mar spleáchais) — anois _cuirtear_ `className` an ghlaoiteora _in ionad_ aicme chontrártha de chuid bun-chomhpháirte seachas iad a chruachadh. ✅ **C7** bun-chomhpháirteanna nua `Checkbox` + `Textarea` (tiomáinte ag comharthaí, easpórtáilte ón mbairille; suimitheach — is féidir glacadh leis na 32 ticbhosca amh / 41 limistéar téacs amh de réir a chéile). ✅ **C6** réiteach an fháinne fócais — úsáideann na rialtáin foirme (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) an fáinne **accent (corcairghorm)** anois nuair a fhaigheann siad fócas, chun teacht leis an `--focus-ring` domhanda agus chun stop a chur le coimhlint leis an bhfáinne dearg earráide; níl aon athrú ar an staid dhearg earráide. ⏳ **NÍ cuardach/athsholáthar dall é scuabadh heics C8** — ciontóirí deimhnithe atá _d'aon ghnó_ agus nach mór fanacht: `ConsoleLogViewer.tsx:240` (teirminéal atá dorcha i gcónaí), preabfhuinneog `TokenHealthBadge`, stríoca SVG ReactFlow. Ná haistrigh ach heics-dathanna atá ceaptha i ndáiríre a bheith feasach ar an téama.
-
-Gach céim: `npm run lint` + `npm run typecheck:core` + athbhreithniú amhairc.
-
----
-
-## 8. Cinntí oscailte (moltaí)
-
-- **D1 — Príomh-Button:** coinnigh dearg→dearg nó athraigh go **dearg→corcairghorm `--grad-brand`**? Moladh: **dearg→corcairghorm** (Céim 2).
-- **D2 — Dath línte na greille:** **neodrach** (stíl an tsuímh) — roghnaithe — seachas dearg an bhranda. Méid **32px** (laghdaithe ~30% ón 46px bunaidh bunaithe ar aiseolas an úinéara — bhí cuma rómhór ar chealla 46px i leagan amach an deais).
-- **D3 — Beogacht an chrome:** taobhbharra/ceanntásc **soladach** — roghnaithe.
-- **D4 — Greille fíordheimhnithe/logála isteach:** ✅ **DÉANTA (Céim 5)** — baineadh `bg-bg` teimhneach de gach cumhdach neamhspleách lánscáileáin (ní den logáil isteach amháin), mar sin taispeántar an ghreille ar gach scáileán. Féach §4.6.
-- **D5 — Leathanach tuirlingthe:** fág an splancscáileán beoite mar atá. Roghnaithe.
-- **D6 — Ga 14/9 ar fud an táirge:** Moladh: glac leis (Céim 2).
-- **D7 — Scaoiltear Céim 1 ar dtús:** Roghnaithe.
-- **D8 — Leithead an leagain amach (Céim 5):** bhí teorainn `max-w-7xl` (1280px) ar bhlaosc ábhair an deais, rud a lárnaigh í le ciumhaiseanna leathana folmha ar na taobhanna ar mhonatóirí móra. ✅ **DÉANTA** — ardaíodh í go `max-w-[3840px]` sreabhach (fíor-4K): leanann an t-ábhar an t-amharclann anois suas go ~4K agus ní lárnaítear é ach thairis sin (`DashboardLayout.tsx`). Fanann leathanaigh atá cúng d'aon ghnó cúng de réir dearaidh (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Táblaí sonraí teimhneacha (Céim 6):** agus limistéar ábhair an deais trédhearcach anois (chun cúlbhrat na greille a thaispeáint tríd, Céim 5), lig táblaí sonraí nach raibh dromchla teimhneach ina gcoimeádán don ghreille taispeáint trína sraitheanna trédhearcacha cothroma / patrún séabra ar alfa íseal. ✅ **DÉANTA** — péinteálann gach tábla gan chárta `bg-surface` anois (nó, i gcás na bun-chomhpháirte `<DataTable>`, `background: var(--color-surface)` ar a choimeádán scrollaithe). Ceartaithe: `DataTable` (bun-chomhpháirt), `ProxyLogger`/`RequestLoggerV2` (bhí a lí `<Card>` `bg-black/5 dark:bg-black/20` ag sárú `bg-surface` an Card trí tailwind-merge → ~95% trédhearcach), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, chomh maith leis an dá “thábla” CSS-grid sna hamhairc taisce (`bg-surface/35` → `bg-surface`). Deimhníodh go raibh na táblaí a bhí cheana féin taobh istigh de `<Card>`/Modal teimhneach agus fágadh gan athrú iad d'aon ghnó (ní dhéanann bg-surface aon rud breise ansin). Ní raibh **aon athrú** de dhíth ar an ngreille féin — tá `body::before` an deais comhionann leis an suíomh ó thaobh beart de (`--grid-size: 32px`); aon “ghreille níos mó” a fheictear ar ásc atá ag rith, is leagan seanchaite roimh `#4143` atá ann, ní an cód. Cosanta ag `tests/unit/design-grid-background.test.ts` (bloc Chéim 6).
-
----
-
-## 9. Lasmuigh den raon feidhme / rioscaí
-
-- **Gan aon athrú ar an bpailéad** — tá na dathanna ag teacht lena chéile cheana féin; ní chuirimid leis ach na comharthaí atá in easnamh. Níl aon riosca ann go n-athdhathófar an táirge.
-- **Gan aon athrú ar inneall na dtéamaí** — coinnigh `.dark` + stór Zustand.
-- **Tá an t-athrú ga (Céim 2) fairsing** — téann sé i bhfeidhm ar gach cárta/cnaipe/ionchur; déan scáileáin ghnóthacha (táblaí, módúil) a iniúchadh de réir súl roimh an gcumasc.
-- **Is ag táblaí (C3)** atá an chuid is mó den stíliú crua-chódaithe agus an dromchla aischéimnithe is mó — leithlisigh ina PR féin iad.
-
----
-
-## 10. Innéacs tagartha
-
-| Réimse                                       | Conair                                                                                                               |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Comharthaí an deais                          | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Stór téamaí                                  | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Blaosc an phainéil (greille díbhactha anseo) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Fráma                                        | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Fasach greille                               | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Bun-chomhpháirteanna                         | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Foinsí dathanna stádais                      | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Uirlis `cn`                                  | `src/shared/utils/cn.ts`                                                                                             |
-| Tástáil chosanta Chéim 1                     | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Tagairt an tsuímh                            | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — droichead comharthaí, sáruithe `.dark`, síntí OmniRoute `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — cur isteach réamhtheachtach pionnáilte agus údarú ceadúnais; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` agus na cuibheoirí in aice leis; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

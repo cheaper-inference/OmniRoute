@@ -1,4 +1,5 @@
 import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "./emptyTurnPolicy.ts";
+import { normalizeStreamFailurePayload, type StreamFailurePayload } from "./streamErrorFormat.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
 import {
@@ -42,6 +43,8 @@ export type StreamReadinessResult =
       upstreamDiagnostic?: string;
       code: string;
       type: string;
+      /** An actual upstream rejection, not a readiness stall eligible for a probe retry. */
+      upstreamFailure?: true;
     };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -224,6 +227,7 @@ const LEGIT_EMPTY_TERMINAL_REASONS = new Set([
   "content_filter",
   "max_tokens",
   "tool_use",
+  "refusal",
 ]);
 
 // #16438 content probe only (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): Claude terminals
@@ -231,7 +235,6 @@ const LEGIT_EMPTY_TERMINAL_REASONS = new Set([
 // into a retryable empty_content failure. The default watcher keeps the set above.
 const CONTENT_PROBE_LEGIT_EMPTY_TERMINAL_REASONS: ReadonlySet<string> = new Set([
   ...LEGIT_EMPTY_TERMINAL_REASONS,
-  "refusal",
   "pause_turn",
   "model_context_window_exceeded",
 ]);
@@ -509,6 +512,7 @@ type StreamReadinessSignalState = {
   dataLines: string[];
   pendingLine: string;
   upstreamDiagnostic: string | null;
+  cursorFailure?: StreamFailurePayload | null;
 };
 
 function resetCurrentEvent(state: StreamReadinessSignalState): void {
@@ -525,6 +529,13 @@ function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean
 
   try {
     const payload: unknown = JSON.parse(data);
+    // Cursor emits classified terminal failures as chat chunks (with choices).
+    // Consume them at the existing pre-handoff boundary, not as readiness/success.
+    // Stop at the same first event as before; never probe a healthy stream ahead.
+    if (state.cursorFailure !== undefined && isRecord(payload) && isRecord(payload.error)) {
+      state.cursorFailure = normalizeStreamFailurePayload(payload);
+      return true;
+    }
     if (!state.upstreamDiagnostic && isRecord(payload) && isErrorOnlyStructuredPayload(payload)) {
       const error = payload.error;
       const rawMessage =
@@ -538,7 +549,12 @@ function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean
     }
     return hasNonPingStructuredPayload(payload, eventType);
   } catch {
-    return data.length > 0;
+    // A non-JSON payload under data: (a proxy error page, a raw log line, a
+    // truncated fragment) is not a readiness signal. The previous non-empty
+    // tolerance released such garbage as a false 200; refusing it here lets a
+    // non-SSE text upstream fail with a classified error instead. Only a
+    // non-ping JSON payload under data: is a signal.
+    return false;
   }
 }
 
@@ -557,6 +573,13 @@ function processStreamReadinessLine(state: StreamReadinessSignalState, line: str
   if (trimmed.startsWith("data:")) {
     state.dataLines.push(trimmed.slice(5).trimStart());
   }
+
+  // Any other line outside data: is not a readiness signal. A structural SSE
+  // field (id: / retry:) carries no payload — `retry:` commonly opens a stream
+  // and some servers stamp `id:` on every frame including pings — so it must not
+  // release the gate. Keeping it refused also leaves a non-SSE text upstream (a
+  // raw HTML page, a bare log line) failing with a classified error instead of
+  // being replayed as a false 200.
   return false;
 }
 
@@ -741,6 +764,7 @@ export async function ensureStreamReadiness(
     dataLines: [],
     pendingLine: "",
     upstreamDiagnostic: null,
+    ...(options.provider === "cursor" ? { cursorFailure: null } : {}),
   };
   const startedAt = Date.now();
   const effectiveTimeoutMs = Math.max(0, Math.floor(options.timeoutMs));
@@ -999,11 +1023,11 @@ export async function ensureStreamReadiness(
         continue;
       }
 
-      // Liveness extension: bytes arrived → connection is alive, not dead.
-      // Reset the deadline so slow-but-alive upstreams (reasoning warm-ups,
-      // keepalive-only phases) are not aborted.  The hard ceiling (maxDeadline)
-      // prevents unbounded waits and preserves the operator's fast-fail intent
-      // for truly dead connections.
+      // Liveness extension: only a chunk carrying a readiness signal or
+      // reasoning progress extends the deadline — the same "alive" test the
+      // gate below uses. Ping/keepalive-only chunks let the initial deadline
+      // run, so a ping-only upstream fails at the first deadline. The hard
+      // ceiling (maxDeadline) bounds the extension and is never raised here.
       // Parked streams: heartbeat comment frames suspend (freeze) the stall
       // deadline instead of extending it — the stall clock does not run
       // during the park. Data frames use the normal liveness path.
@@ -1013,7 +1037,10 @@ export async function ensureStreamReadiness(
         // Suspend: push the deadline forward by exactly the time spent
         // waiting, so the stall clock does not run during the park.
         deadline = Math.min(deadlineBeforeRead + (now - readStart), maxDeadline);
-      } else if (deadline < maxDeadline) {
+      } else if (
+        deadline < maxDeadline &&
+        (hasStreamReadinessSignal(decodedChunk) || isReasoningProgressFrame(decodedChunk))
+      ) {
         deadline = Math.min(now + effectiveTimeoutMs, maxDeadline);
         if (now - startedAt > effectiveTimeoutMs) {
           options.log?.debug?.(
@@ -1024,6 +1051,21 @@ export async function ensureStreamReadiness(
       }
 
       if (appendStreamReadinessSignal(readinessState, decodedChunk)) {
+        const failure = readinessState.cursorFailure;
+        if (failure) {
+          void reader.cancel(failure.message).catch(() => {});
+          const code = failure.code || "upstream_error";
+          const type = failure.type || "api_error";
+          return {
+            ok: false,
+            reason: sanitizeErrorMessage(failure.message),
+            classificationReason: failure.message,
+            upstreamFailure: true,
+            code,
+            type,
+            response: createErrorResponse(failure.status, failure.message, code, type),
+          };
+        }
         if (
           contentWatcher &&
           !contentWatcher.sawContent() &&

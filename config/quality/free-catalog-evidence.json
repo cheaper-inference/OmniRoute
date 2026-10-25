@@ -41,10 +41,6 @@
     "ollama-cloud/qwen3.5:397b",
     "opencode-zen/opencode/big-pickle",
     "opencode-zen/opencode/deepseek-v4.1-flash-free",
-    "opencode-zen/opencode/mimo-v2.5-free",
-    "opencode-zen/opencode/nemotron-3-super-free",
-    "opencode-zen/opencode/nemotron-3-ultra-free",
-    "opencode-zen/opencode/north-mini-code-free",
     "requesty/mistral/leanstral-1-5",
     "requesty/nvidia/nemotron-3-nano-30b-a3b",
     "requesty/openai/gpt-oss-120b",
@@ -219,6 +215,102 @@
       "verifiedBy": "OmniRoute maintainers",
       "summary": "Public model list reports zero prompt and completion prices for this exact ID.",
       "limitations": "Availability, rate limits and upstream data-use terms apply; capacity is not guaranteed."
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/beam-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea",
+      "sourceType": "public-page",
+      "sourceUrl": "https://opencode.ai/docs/zen/",
+      "checkedAt": "2026-10-20",
+      "claim": "recurring-free-access",
+      "verifiedBy": "OmniRoute maintainers",
+      "summary": "OpenCode Zen pricing page lists this exact model with free input, output and cached read, and the public https://opencode.ai/zen/v1/models endpoint serves the id beam-free.",
+      "limitations": "OpenCode documents its free models as free for a limited time and the set rotates, so access can disappear without notice. The terms-of-service rating stays at caution. No numeric token allowance is published in the consulted sources. This record does not establish unlimited capacity or billing protection."
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/mimo-v2.6-flash-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea",
+      "sourceType": "public-page",
+      "sourceUrl": "https://opencode.ai/docs/zen/",
+      "checkedAt": "2026-10-20",
+      "claim": "recurring-free-access",
+      "verifiedBy": "OmniRoute maintainers",
+      "summary": "OpenCode Zen pricing page lists this exact model with free input, output and cached read, and the public https://opencode.ai/zen/v1/models endpoint serves the id mimo-v2.6-flash-free.",
+      "limitations": "OpenCode documents its free models as free for a limited time and the set rotates, so access can disappear without notice. The terms-of-service rating stays at caution. No numeric token allowance is published in the consulted sources. This record does not establish unlimited capacity or billing protection."
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/nemotron-3.5-super-vl-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea",
+      "sourceType": "public-page",
+      "sourceUrl": "https://opencode.ai/docs/zen/",
+      "checkedAt": "2026-10-20",
+      "claim": "recurring-free-access",
+      "verifiedBy": "OmniRoute maintainers",
+      "summary": "OpenCode Zen pricing page lists this exact model with free input, output and cached read, and the public https://opencode.ai/zen/v1/models endpoint serves the id nemotron-3.5-super-vl-free.",
+      "limitations": "OpenCode documents its free models as free for a limited time and the set rotates, so access can disappear without notice. The terms-of-service rating stays at caution. No numeric token allowance is published in the consulted sources. This record does not establish unlimited capacity or billing protection."
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/nemotron-3.5-lightning-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea",
+      "sourceType": "public-page",
+      "sourceUrl": "https://opencode.ai/docs/zen/",
+      "checkedAt": "2026-10-20",
+      "claim": "recurring-free-access",
+      "verifiedBy": "OmniRoute maintainers",
+      "summary": "OpenCode Zen pricing page lists this exact model with free input, output and cached read, and the public https://opencode.ai/zen/v1/models endpoint serves the id nemotron-3.5-lightning-free.",
+      "limitations": "OpenCode documents its free models as free for a limited time and the set rotates, so access can disappear without notice. The terms-of-service rating stays at caution. No numeric token allowance is published in the consulted sources. This record does not establish unlimited capacity or billing protection."
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/jev-1.13-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea",
+      "sourceType": "public-page",
+      "sourceUrl": "https://opencode.ai/docs/zen/",
+      "checkedAt": "2026-10-20",
+      "claim": "recurring-free-access",
+      "verifiedBy": "OmniRoute maintainers",
+      "summary": "OpenCode Zen pricing page lists this exact model with free input, output and cached read, and the public https://opencode.ai/zen/v1/models endpoint serves the id jev-1.13-free.",
+      "limitations": "OpenCode documents its free models as free for a limited time and the set rotates, so access can disappear without notice. The terms-of-service rating stays at caution. No numeric token allowance is published in the consulted sources. This record does not establish unlimited capacity or billing protection."
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/longcat-2.5-preview-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea",
+      "sourceType": "public-page",
+      "sourceUrl": "https://opencode.ai/docs/zen/",
+      "checkedAt": "2026-10-20",
+      "claim": "recurring-free-access",
+      "verifiedBy": "OmniRoute maintainers",
+      "summary": "OpenCode Zen pricing page lists this exact model with free input, output and cached read, and the public https://opencode.ai/zen/v1/models endpoint serves the id longcat-2.5-preview-free.",
+      "limitations": "OpenCode documents its free models as free for a limited time and the set rotates, so access can disappear without notice. The terms-of-service rating stays at caution. No numeric token allowance is published in the consulted sources. This record does not establish unlimited capacity or billing protection."
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/glm-5.3-flash-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea",
+      "sourceType": "public-page",
+      "sourceUrl": "https://opencode.ai/docs/zen/",
+      "checkedAt": "2026-10-20",
+      "claim": "recurring-free-access",
+      "verifiedBy": "OmniRoute maintainers",
+      "summary": "OpenCode Zen pricing page lists this exact model with free input, output and cached read, and the public https://opencode.ai/zen/v1/models endpoint serves the id glm-5.3-flash-free.",
+      "limitations": "OpenCode documents its free models as free for a limited time and the set rotates, so access can disappear without notice. The terms-of-service rating stays at caution. No numeric token allowance is published in the consulted sources. This record does not establish unlimited capacity or billing protection."
+    },
+    {
+      "provider": "opencode-zen",
+      "modelId": "opencode/minimax-m3.1-flash-free",
+      "catalogHash": "21ded89fa51fae9e099362787a6104343f8a905ab7640265b98f626fc8d215ea",
+      "sourceType": "public-page",
+      "sourceUrl": "https://opencode.ai/docs/zen/",
+      "checkedAt": "2026-10-20",
+      "claim": "recurring-free-access",
+      "verifiedBy": "OmniRoute maintainers",
+      "summary": "OpenCode Zen pricing page lists this exact model with free input, output and cached read, and the public https://opencode.ai/zen/v1/models endpoint serves the id minimax-m3.1-flash-free.",
+      "limitations": "OpenCode documents its free models as free for a limited time and the set rotates, so access can disappear without notice. The terms-of-service rating stays at caution. No numeric token allowance is published in the consulted sources. This record does not establish unlimited capacity or billing protection."
     }
   ]
 }

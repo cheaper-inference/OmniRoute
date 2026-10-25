@@ -14,36 +14,36 @@ Is é AgentBridge seachfhreastalaí MITM (Man-in-the-Middle) OmniRoute a idirche
 
 ## §1 Forbhreathnú
 
-### Cad is AgentBridge ann?
+### Cad é AgentBridge?
 
-Nuair a dhéanann gníomhaire IDE (m.sh., GitHub Copilot, Cursor, Claude Code) glao API, nascann sé go díreach leis an soláthraí AI réamhtheachtach (OpenAI, Anthropic, etc.). Idircheapann AgentBridge an nasc sin go trédhearcach ag an leibhéal TLS — gan aon athrú ar chumraíocht an ghníomhaire a bheith riachtanach — agus athscríobhann sé an t-iarratas trí OmniRoute.
+Nuair a dhéanann gníomhaire IDE (m.sh., GitHub Copilot, Cursor, Claude Code) glao API, nascann sé go díreach leis an soláthraí AI uas-abhann (OpenAI, Anthropic, srl.). Idircheapann AgentBridge an nasc sin go trédhearcach ag leibhéal TLS — gan aon athrú ar chumraíocht an ghníomhaire a éileamh — agus athscríobhann sé an t-iarratas trí OmniRoute.
 
 Ciallaíonn sé seo gur féidir leat:
 
-- **Aon ghníomhaire a atreorú chuig aon soláthraí**: Copilot ag cumarsáid le OpenAI? Atreoraigh é chuig Anthropic Claude, Gemini, nó aon cheann de 374 soláthraí OmniRoute.
+- **Aon ghníomhaire a athródú chuig aon soláthraí**: Copilot ag caint le OpenAI? Atreoraigh é chuig Anthropic Claude, Gemini, nó aon cheann de 375 soláthraí OmniRoute.
 - **Mapálacha samhlacha a chur i bhfeidhm**: `gemini-3-flash` → `claude-sonnet-4.7` go trédhearcach ag leibhéal an láimhseálaí.
-- **Trácht uile na ngníomhairí a bhreathnú**: foilsítear gach iarratas idircheaptha chuig an [Cigire Tráchta](./TRAFFIC_INSPECTOR.md).
-- **Athléimneacht OmniRoute a chur i bhfeidhm**: oibríonn ródú teaglama, scoradáin chiorcaid, cúltacaí agus rianú costas do thrácht gníomhairí IDE freisin.
+- **Gach trácht gníomhaire a bhreathnú**: foilsítear gach iarratas idircheaptha chuig an [Cigire Tráchta](./TRAFFIC_INSPECTOR.md).
+- **Athléimneacht OmniRoute a chur i bhfeidhm**: oibríonn ródú teaglama, briseoirí ciorcaid, cúláiseanna, agus rianú costais do thrácht gníomhaire IDE chomh maith.
 
-### Suíomh sa mhargadh
+### Suíomh i gcomparáid leis an margadh
 
-| Gné                        | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| -------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot             |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                 |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex               |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                 |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries             |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                |    —    |    —     |        ✓        |             ✓             |
-| Open Code                  |    —    |    —     |        ✓        |             ✓             |
-| Trae                       |    —    |    —     |        —        |       🔍 Á fhiosrú        |
-| Comhéadan an deais         |    ✓    |    ✗     |        ✗        |             ✓             |
-| Cigire Tráchta             |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ródú OmniRoute             |    ✗    |    ✗     |        ✗        |             ✓             |
-| Comhéadan mapála samhlacha |    ✗    |    ✗     |        ✗        |             ✓             |
-| Liosta seachanta           |    ✗    |    ✗     |        ✓        |             ✓             |
-| Teastas CA réamhtheachtach |    ✗    |    ✗     |        ✓        |             ✓             |
+| Gné                   | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| --------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity           |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot        |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)            |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex          |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE            |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries        |    —    |    ✓     |        —        |             ✓             |
+| Claude Code           |    —    |    —     |        ✓        |             ✓             |
+| Open Code             |    —    |    —     |        ✓        |             ✓             |
+| Trae                  |    —    |    —     |        —        |       🔍 Á imscrúdú       |
+| Comhéadan Painéil     |    ✓    |    ✗     |        ✗        |             ✓             |
+| Cigire Tráchta        |    ✗    |    ✗     |        ✓        |             ✓             |
+| Ródú OmniRoute        |    ✗    |    ✗     |        ✗        |             ✓             |
+| UI mapála samhlacha   |    ✗    |    ✗     |        ✗        |             ✓             |
+| Liosta seachána       |    ✗    |    ✗     |        ✓        |             ✓             |
+| Teastas CA uas-abhann |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

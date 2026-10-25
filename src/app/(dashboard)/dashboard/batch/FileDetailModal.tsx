@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
 import { Button } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import Modal from "@/shared/components/Modal";
 
 type FileTranslator = ReturnType<typeof useTranslations>;
 
@@ -95,13 +98,7 @@ export default function FileDetailModal({
     (b) => b.inputFileId === file.id || b.outputFileId === file.id || b.errorFileId === file.id
   );
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [onClose]);
+  // Escape, the overlay click and the focus trap come from the Modal adapter (kit Dialog).
 
   const handleDownload = () => {
     const a = document.createElement("a");
@@ -133,179 +130,153 @@ export default function FileDetailModal({
     : [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+    <Modal
+      isOpen
+      onClose={onClose}
+      size="full"
+      className="sm:max-w-3xl"
+      title={
+        <span className="flex items-center gap-3">
+          <Icon name="description" size={20} className="text-text-muted" />
+          {t("batchFileContents")}
+        </span>
+      }
+      bodyClassName="p-6 flex flex-col gap-6 max-h-[calc(90vh-120px)] overflow-y-auto"
+    >
+      <div className="-mt-2 flex items-center gap-2">
+        <p className="text-xs text-text-muted font-mono">{file.id}</p>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => {
+            navigator.clipboard.writeText(file.id);
+          }}
+          className="size-6 text-text-muted hover:text-text-main"
+          title={t("batchFileDetailCopyId")}
+          aria-label={t("batchFileDetailCopyId")}
+        >
+          <Icon name="content_copy" size={12} />
+        </Button>
+      </div>
 
-      {/* Panel */}
-      <div className="relative w-full sm:max-w-3xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-t-2xl sm:rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-200 max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[20px] text-[var(--color-text-muted)]">
-              description
-            </span>
-            <div>
-              <h2 className="text-base font-semibold text-[var(--color-text-main)]">
-                {t("batchFileContents")}
-              </h2>
-              <div className="flex items-center gap-2 mt-0.5">
-                <p className="text-xs text-[var(--color-text-muted)] font-mono">{file.id}</p>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(file.id);
-                  }}
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
-                  title={t("batchFileDetailCopyId")}
-                >
-                  <span className="material-symbols-outlined text-[12px]">content_copy</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t("batchFileDetailClose")}
-            className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors"
-          >
-            <span className="material-symbols-outlined text-[20px]">close</span>
-          </button>
+      {/* Metadata */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-bg-alt border border-border">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+            {t("batchFilesSizeColumn")}
+          </span>
+          <span className="text-sm text-text-main">{formatBytes(file.bytes)}</span>
         </div>
-
-        {/* Body */}
-        <div className="overflow-y-auto flex-1 p-6 flex flex-col gap-6">
-          {/* Metadata */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-[var(--color-bg-alt)] border border-[var(--color-border)]">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[10px] uppercase tracking-wider font-medium text-[var(--color-text-muted)]">
-                {t("batchFilesSizeColumn")}
-              </span>
-              <span className="text-sm text-[var(--color-text-main)]">
-                {formatBytes(file.bytes)}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[10px] uppercase tracking-wider font-medium text-[var(--color-text-muted)]">
-                {t("batchFilesPurpose")}
-              </span>
-              <span className="text-sm text-[var(--color-text-main)]">{file.purpose}</span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[10px] uppercase tracking-wider font-medium text-[var(--color-text-muted)]">
-                {t("batchDetailCreated")}
-              </span>
-              <span className="text-sm text-[var(--color-text-main)]">
-                {createdAtTs ? relativeTime(createdAtTs, t) : "—"}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[10px] uppercase tracking-wider font-medium text-[var(--color-text-muted)]">
-                {t("batchFilesExpires")}
-              </span>
-              <span className="text-sm text-[var(--color-text-main)]">
-                {expiresAtTs ? relativeExpiration(expiresAtTs, t) : t("batchFilesNeverExpires")}
-              </span>
-            </div>
-          </div>
-
-          {/* Related batches */}
-          {relatedBatches.length > 0 && (
-            <div>
-              <h3 className="text-[11px] uppercase tracking-wider font-medium text-[var(--color-text-muted)] mb-2">
-                {t("batchFileUsedByCount", { count: relatedBatches.length })}
-              </h3>
-              <div className="space-y-1.5">
-                {relatedBatches.map((b) => (
-                  <div
-                    key={b.id}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-border)] text-xs"
-                  >
-                    <span className="material-symbols-outlined text-[14px] text-[var(--color-text-muted)]">
-                      pending_actions
-                    </span>
-                    <span className="font-mono text-[var(--color-text-main)] truncate">{b.id}</span>
-                    <span
-                      className={`ml-auto px-1.5 py-0.5 rounded text-[10px] font-medium border ${
-                        b.status === "completed"
-                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25"
-                          : b.status === "failed"
-                            ? "bg-red-500/15 text-red-400 border-red-500/25"
-                            : "bg-gray-500/15 text-gray-400 border-gray-500/25"
-                      }`}
-                    >
-                      {BATCH_STATUS_TRANSLATION_KEYS[b.status]
-                        ? t(BATCH_STATUS_TRANSLATION_KEYS[b.status])
-                        : b.status.replaceAll("_", " ")}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Contents */}
-          <div className="flex-1 flex flex-col min-h-[300px]">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                {t("batchFilePreview")}
-              </h3>
-              {contents && (
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded border border-[var(--color-border)] bg-[var(--color-bg-alt)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[14px]">
-                    {copied ? "check" : "content_copy"}
-                  </span>
-                  {copied ? t("copied") : t("copy")}
-                </button>
-              )}
-            </div>
-
-            <div className="flex-1 relative group">
-              {loading ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-bg)]/50 rounded-lg">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-accent)]" />
-                </div>
-              ) : contents ? (
-                <div className="h-full flex flex-col">
-                  <pre className="flex-1 overflow-auto text-[11px] bg-[var(--color-bg)] rounded-lg p-4 border border-[var(--color-border)] text-[var(--color-text-muted)] font-mono leading-relaxed">
-                    {displayedLines.join("\n")}
-                  </pre>
-                  {isTruncated && (
-                    <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/25 rounded-lg text-xs text-yellow-400 flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[16px]">warning</span>
-                      {t("batchFilePreviewTruncated", { shown: 1000, total: lineCount })}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full py-12 rounded-lg border border-dashed border-[var(--color-border)] text-[var(--color-text-muted)]">
-                  <span className="material-symbols-outlined text-[40px] mb-2 opacity-20">
-                    find_in_page
-                  </span>
-                  <p className="text-sm">{t("batchFileDetailFailedToLoad")}</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Footer Action */}
-          <div className="flex justify-end gap-3 mt-2">
-            <Button
-              onClick={handleDownload}
-              className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
-            >
-              <span className="material-symbols-outlined text-[18px]">download</span>
-              {t("batchFileDownloadFull")}
-            </Button>
-          </div>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+            {t("batchFilesPurpose")}
+          </span>
+          <span className="text-sm text-text-main">{file.purpose}</span>
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+            {t("batchDetailCreated")}
+          </span>
+          <span className="text-sm text-text-main">
+            {createdAtTs ? relativeTime(createdAtTs, t) : "—"}
+          </span>
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+            {t("batchFilesExpires")}
+          </span>
+          <span className="text-sm text-text-main">
+            {expiresAtTs ? relativeExpiration(expiresAtTs, t) : t("batchFilesNeverExpires")}
+          </span>
         </div>
       </div>
-    </div>
+
+      {/* Related batches */}
+      {relatedBatches.length > 0 && (
+        <div>
+          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-2">
+            {t("batchFileUsedByCount", { count: relatedBatches.length })}
+          </h3>
+          <div className="space-y-1.5">
+            {relatedBatches.map((b) => (
+              <div
+                key={b.id}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg bg-bg-alt border border-border text-xs"
+              >
+                <Icon name="pending_actions" size={14} className="text-text-muted" />
+                <span className="font-mono text-text-main truncate">{b.id}</span>
+                <Badge
+                  variant={
+                    b.status === "completed"
+                      ? "success"
+                      : b.status === "failed"
+                        ? "error"
+                        : "default"
+                  }
+                  size="sm"
+                  className="ml-auto"
+                >
+                  {BATCH_STATUS_TRANSLATION_KEYS[b.status]
+                    ? t(BATCH_STATUS_TRANSLATION_KEYS[b.status])
+                    : b.status.replaceAll("_", " ")}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Contents */}
+      <div className="flex-1 flex flex-col min-h-[300px]">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+            {t("batchFilePreview")}
+          </h3>
+          {contents && (
+            <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5 text-xs">
+              <Icon name={copied ? "check" : "content_copy"} size={14} />
+              {copied ? t("copied") : t("copy")}
+            </Button>
+          )}
+        </div>
+
+        <div className="flex-1 relative group">
+          {loading ? (
+            <div
+              role="status"
+              aria-label={t("loading")}
+              className="absolute inset-0 flex items-center justify-center bg-bg/50 rounded-lg"
+            >
+              <Icon name="progress_activity" size={32} className="animate-spin text-accent" />
+            </div>
+          ) : contents ? (
+            <div className="h-full flex flex-col">
+              <pre className="flex-1 overflow-auto text-[11px] bg-bg rounded-lg p-4 border border-border text-text-muted font-mono leading-relaxed">
+                {displayedLines.join("\n")}
+              </pre>
+              {isTruncated && (
+                <div className="mt-3 p-3 bg-warning/10 border border-warning/25 rounded-lg text-xs text-warning flex items-center gap-2">
+                  <Icon name="warning" size={16} />
+                  {t("batchFilePreviewTruncated", { shown: 1000, total: lineCount })}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full py-12 rounded-lg border border-dashed border-border text-text-muted">
+              <Icon name="find_in_page" size={40} className="mb-2 opacity-20" />
+              <p className="text-sm">{t("batchFileDetailFailedToLoad")}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Footer Action */}
+      <div className="flex justify-end gap-3 mt-2">
+        <Button onClick={handleDownload} className="gap-2">
+          <Icon name="download" size={18} />
+          {t("batchFileDownloadFull")}
+        </Button>
+      </div>
+    </Modal>
   );
 }

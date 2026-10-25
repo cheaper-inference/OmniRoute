@@ -10,6 +10,9 @@
 // Fix: move the single height cap to the outermost dialog wrapper (`role="dialog"`)
 // and stop giving the inner body container its own independent `max-h-`/`overflow`
 // cap, so there is exactly one scroll owner for the whole modal.
+//
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: the dialog is portaled to
+// document.body, so it is queried there rather than inside the render container.
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, afterEach } from "vitest";
@@ -52,28 +55,29 @@ describe("AddApiKeyModal — cookie modal sizing (#6265)", () => {
   it("caps height on the OUTERMOST dialog wrapper, not on an inner body div", () => {
     // perplexity-web is a `kind: "cookie"` web-session provider — same shared modal
     // path lmarena/claude-web/gemini-web/kimi-web/z-ai all go through.
-    const el = render({ provider: "perplexity-web", providerName: "Perplexity Web" });
+    render({ provider: "perplexity-web", providerName: "Perplexity Web" });
 
-    const dialog = el.querySelector<HTMLElement>('[role="dialog"]');
+    const dialog = document.body.querySelector<HTMLElement>('[role="dialog"]');
     expect(dialog).toBeTruthy();
 
     // The outermost wrapper must be the single owner of the height cap + scroll.
     expect(dialog!.className).toMatch(/max-h-\[90vh\]/);
     expect(dialog!.className).toMatch(/overflow-y-auto/);
 
-    // The body container (last child of the dialog — header is first, no footer
-    // prop is used by AddApiKeyModal) must NOT carry its own independent max-h/
+    // The body container (`data-slot="modal-body"`, last child of the dialog — no
+    // footer prop is used by AddApiKeyModal) must NOT carry its own independent max-h/
     // overflow cap — otherwise the outer cap and the inner cap fight (double cap),
     // clipping content before the outer 90vh bound ever kicks in.
     const bodyDiv = dialog!.children[dialog!.children.length - 1] as HTMLElement;
     expect(bodyDiv).toBeTruthy();
+    expect(bodyDiv.getAttribute("data-slot")).toBe("modal-body");
     expect(bodyDiv.className).not.toMatch(/max-h-/);
     expect(bodyDiv.className).not.toMatch(/overflow-y-auto/);
 
     // Sanity: the cookie helper text and Save button are both present in the DOM
     // (this modal renders the full guide + form Save/Cancel inline in the body).
-    expect(el.textContent).toContain("How to get the session credential");
-    const saveBtn = Array.from(el.querySelectorAll("button")).find(
+    expect(dialog!.textContent).toContain("How to get the session credential");
+    const saveBtn = Array.from(dialog!.querySelectorAll("button")).find(
       (b) => b.textContent?.trim() === "save"
     );
     expect(saveBtn).toBeTruthy();

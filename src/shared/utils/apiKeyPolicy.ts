@@ -84,6 +84,7 @@ export interface ApiKeyMetadata {
   blockedModels?: string[];
   allowedCombos?: string[];
   allowedConnections?: string[];
+  preferredConnections?: string[];
   allowedQuotas?: string[];
   noLog?: boolean;
   autoResolve?: boolean;
