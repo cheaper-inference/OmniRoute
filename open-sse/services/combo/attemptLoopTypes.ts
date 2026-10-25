@@ -39,6 +39,10 @@ export type AttemptLoopState = {
   exhaustedProviders: Set<string>;
   exhaustedConnections: Set<string>;
   transientRateLimitedProviders: Set<string>;
+  /** Durable exhaustion carried across set retries (quota, credits, auth). */
+  durableExhaustedProviders?: Set<string>;
+  /** Durable exhaustion carried across set retries, keyed `provider:connectionId`. */
+  durableExhaustedConnections?: Set<string>;
   abortControllers: Map<number, AbortController>;
   dispatchedTargets: Set<string>;
   targetFailureTrust: Map<string, { observedFailure: boolean; allObservedFailuresQuota: boolean }>;

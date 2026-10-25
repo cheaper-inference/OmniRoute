@@ -950,6 +950,7 @@ export async function executeTargetAttempt(
     const {
       target: targetWithConnection,
       providerExhausted,
+      durableExhaustion,
       isModelScopedClaudeQuota,
       isConnectionScopedClaudeQuota,
       modelScopedClaudeCooldownMs,
@@ -959,6 +960,17 @@ export async function executeTargetAttempt(
     // #6692: this connection was just classified as provider/connection-level
     // exhausted — if it's the currently sticky-bound one, release the pin now
     // rather than waiting for the next turn's lazy headroom/status recheck.
+    // Record the durable exhaustion so the next set retry skips the same
+    // provider or connection instead of replaying a dead call.
+    if (durableExhaustion) {
+      if (durableExhaustion.scope === "connection") {
+        (state.durableExhaustedConnections ??= new Set()).add(
+          `${durableExhaustion.provider}:${durableExhaustion.connectionId}`
+        );
+      } else {
+        (state.durableExhaustedProviders ??= new Set()).add(durableExhaustion.provider);
+      }
+    }
     deps.releaseStickyPinOnFailure(deps.sticky.messageHash, targetWithConnection.connectionId);
     if (
       providerExhausted ||
