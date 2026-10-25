@@ -133,6 +133,7 @@ import {
   getComboTargetModelId as getComboTargetModelIdFromMaps,
 } from "./catalogProviderMaps";
 import { indexNodeApiTypes, nodeModelEndpoints, overlayEndpoints } from "./catalogNodeModality";
+import { createComboPricingTargetResolver } from "./catalogPricing";
 import {
   getModelCatalogAuthRejection,
   isCodexModelCatalogClient,
@@ -843,6 +844,20 @@ async function buildUnifiedModelsResponseCore(
       aliasToProviderId,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
       blockedProviders: settings.blockedProviders,
+      // Per-entry `pricing`: a combo is priced as its first visible target.
+      pricing: {
+        providerNodeIdsByPrefix: providerNodeIdByPrefix,
+        resolveComboTarget: createComboPricingTargetResolver(
+          combos,
+          (combo) =>
+            resolveNestedComboTargets(
+              combo as Parameters<typeof resolveNestedComboTargets>[0],
+              combos as Parameters<typeof resolveNestedComboTargets>[1]
+            ) as ComboCatalogTarget[],
+          getComboTargetModelId,
+          (providerId, modelId) => isModelHiddenBulk(providerId, modelId)
+        ),
+      },
     };
 
     // #8770 follow-up: a quota-exclusive key (allowedQuotas non-empty) only ever

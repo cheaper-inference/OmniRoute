@@ -6,9 +6,9 @@
 
 🌐 **Jazyky:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Základná referenčná dokumentácia pre API OmniRoute. Zahŕňa verejné rozhranie `/v1` a najpoužívanejšie koncové body správy; úplnými zdrojmi sú strojovo čitateľný súbor [`docs/openapi.yaml`](../openapi.yaml) a strom trás v `src/app/api/`.
+Základná referenčná príručka k API OmniRoute. Zahŕňa verejné rozhranie `/v1` a najpoužívanejšie koncové body správy; vyčerpávajúcimi zdrojmi sú strojovo čitateľný súbor [`docs/openapi.yaml`](../openapi.yaml) a strom trás v `src/app/api/`.
 
-Podrobnosti o protokole kompatibilnom s OpenAI a matici možností poskytovateľov nájdete v dokumente
+Podrobný protokol kompatibilný s OpenAI a maticu možností poskytovateľov nájdete v dokumente
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
 ---
@@ -16,7 +16,7 @@ Podrobnosti o protokole kompatibilnom s OpenAI a matici možností poskytovateľ
 ## Obsah
 
 - [Dokončenia chatu](#chat-completions)
-- [Exkluzívne prenájmy spravovaných relácií](#exclusive-managed-session-leases)
+- [Výhradné prenájmy spravovaných relácií](#exclusive-managed-session-leases)
 - [Vektorové reprezentácie](#embeddings)
 - [Generovanie obrázkov](#image-generation)
 - [OCR dokumentov](#document-ocr)
@@ -27,7 +27,7 @@ Podrobnosti o protokole kompatibilnom s OpenAI a matici možností poskytovateľ
 - [API dávok](#batches-api)
 - [API vyhľadávania](#search-api)
 - [Streamovanie cez WebSocket](#websocket-streaming)
-- [Kvóty a nahlasovanie problémov](#quotas--issues-reporting)
+- [Kvóty a hlásenie problémov](#quotas--issues-reporting)
 - [Sémantická vyrovnávacia pamäť](#semantic-cache)
 - [Ovládací panel a správa](#dashboard--management)
 - [Správa kombinácií](#combo-management)
@@ -64,32 +64,32 @@ Content-Type: application/json
 
 ### Vlastné hlavičky
 
-| Hlavička                 | Smer       | Popis                                                                                                                                                                                                            |
-| ------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Požiadavka | Nastavte na `true`, ak chcete obísť vyrovnávaciu pamäť                                                                                                                                                           |
-| `x-omniroute-no-memory`  | Požiadavka | Nastavte na `true`, ak chcete pre túto požiadavku preskočiť vkladanie pamäte a zručností (zodpovedá režimu bez vyrovnávacej pamäte; zabraňuje réžii tokenov a nákladov pri každom volaní)                        |
-| `X-OmniRoute-Progress`   | Požiadavka | Nastavte na `true`, ak chcete dostávať udalosti priebehu                                                                                                                                                         |
-| `X-Session-Id`           | Požiadavka | Trvalý kľúč relácie pre externú afinitu relácie                                                                                                                                                                  |
-| `x_session_id`           | Požiadavka | Akceptovaný je aj variant s podčiarkovníkom (priame HTTP)                                                                                                                                                        |
-| `X-OmniRoute-Session-Id` | Požiadavka | Značka relácie/konverzácie poskytnutá volajúcim (používa sa aj pre pamäť). Ak je prítomná, uloží sa bez zmien do `call_logs.session_tag` na priradenie nákladov k relácii (#8249) — ak chýba, nikdy sa nevytvára |
-| `Idempotency-Key`        | Požiadavka | Kľúč na odstránenie duplicít (5-sekundové okno)                                                                                                                                                                  |
-| `X-Request-Id`           | Požiadavka | Alternatívny kľúč na odstránenie duplicít                                                                                                                                                                        |
-| `x-omniroute-connection` | Požiadavka | Pripne požiadavku s jedným modelom ku konkrétnemu pripojeniu poskytovateľa (účtu) podľa jeho identifikátora — pozrite si [Pripnutie účtu pre jednotlivé požiadavky](#account-pinning-per-request)                |
-| `X-OmniRoute-Cache`      | Odpoveď    | `HIT` alebo `MISS` (bez streamovania)                                                                                                                                                                            |
-| `X-OmniRoute-Idempotent` | Odpoveď    | `true`, ak boli odstránené duplicity                                                                                                                                                                             |
-| `X-OmniRoute-Progress`   | Odpoveď    | `enabled`, ak je zapnuté sledovanie priebehu                                                                                                                                                                     |
-| `X-OmniRoute-Session-Id` | Odpoveď    | Efektívne ID relácie používané službou OmniRoute                                                                                                                                                                 |
-| `X-OmniRoute-Request-Id` | Odpoveď    | Korelačný identifikátor požiadavky (ak je známy)                                                                                                                                                                 |
-| `X-OmniRoute-Version`    | Odpoveď    | Verzia zostavy OmniRoute (vždy prítomná)                                                                                                                                                                         |
-| `X-OmniRoute-Cost-Saved` | Odpoveď    | Suma v USD, ktorá sa ušetrila vďaka vyrovnávacej pamäti pri `HIT` (iba pri zásahoch do vyrovnávacej pamäte)                                                                                                      |
-| `X-OmniRoute-Decision`   | Odpoveď    | Záznam smerovania: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` je kombinovaná stratégia alebo `single` pri nekombinovanej požiadavke) — vždy prítomný v odpovediach po dokončení               |
+| Hlavička                 | Smer       | Popis                                                                                                                                                                                                                   |
+| ------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Požiadavka | Nastavte na `true`, ak chcete obísť vyrovnávaciu pamäť                                                                                                                                                                  |
+| `x-omniroute-no-memory`  | Požiadavka | Nastavte na `true`, ak chcete pre túto požiadavku vynechať vkladanie pamäte a zručností (funguje podobne ako vypnutie vyrovnávacej pamäte; zabraňuje réžii tokenov a nákladov pri každom volaní)                        |
+| `X-OmniRoute-Progress`   | Požiadavka | Nastavte na `true`, ak chcete prijímať udalosti priebehu                                                                                                                                                                |
+| `X-Session-Id`           | Požiadavka | Kľúč stabilnej relácie pre externú afinitu relácie                                                                                                                                                                      |
+| `x_session_id`           | Požiadavka | Akceptuje sa aj variant s podčiarkovníkom (priame HTTP)                                                                                                                                                                 |
+| `X-OmniRoute-Session-Id` | Požiadavka | Značka relácie/konverzácie zadaná volajúcim (používa sa aj pre pamäť). Ak je prítomná, uloží sa bez zmien do `call_logs.session_tag` na priradenie nákladov jednotlivým reláciám (#8249) — ak chýba, nikdy sa nevytvára |
+| `Idempotency-Key`        | Požiadavka | Kľúč na deduplikáciu (5-sekundové okno)                                                                                                                                                                                 |
+| `X-Request-Id`           | Požiadavka | Alternatívny kľúč na deduplikáciu                                                                                                                                                                                       |
+| `x-omniroute-connection` | Požiadavka | Pripne požiadavku na jeden model k jednému pripojeniu poskytovateľa (účtu) podľa jeho ID — pozrite si [Pripnutie účtu pre jednotlivé požiadavky](#account-pinning-per-request)                                          |
+| `X-OmniRoute-Cache`      | Odpoveď    | `HIT` alebo `MISS` (bez streamovania)                                                                                                                                                                                   |
+| `X-OmniRoute-Idempotent` | Odpoveď    | `true`, ak bola požiadavka deduplikovaná                                                                                                                                                                                |
+| `X-OmniRoute-Progress`   | Odpoveď    | `enabled`, ak je zapnuté sledovanie priebehu                                                                                                                                                                            |
+| `X-OmniRoute-Session-Id` | Odpoveď    | Efektívne ID relácie používané službou OmniRoute                                                                                                                                                                        |
+| `X-OmniRoute-Request-Id` | Odpoveď    | Korelačné ID požiadavky (ak je známe)                                                                                                                                                                                   |
+| `X-OmniRoute-Version`    | Odpoveď    | Verzia zostavy OmniRoute (vždy prítomná)                                                                                                                                                                                |
+| `X-OmniRoute-Cost-Saved` | Odpoveď    | Suma v USD ušetrená vďaka vyrovnávacej pamäti pri výsledku HIT (iba pri zásahoch vyrovnávacej pamäte)                                                                                                                   |
+| `X-OmniRoute-Decision`   | Odpoveď    | Záznam smerovania: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` je stratégia kombinácie alebo `single` pri požiadavke bez kombinácie) — vždy je prítomný v odpovediach po dokončení                    |
 
-> Poznámka k Nginx: ak používate hlavičky s podčiarkovníkom (napríklad `x_session_id`), povoľte `underscores_in_headers on;`.
+> Poznámka k Nginx: ak používate hlavičky s podčiarkovníkmi (napríklad `x_session_id`), povoľte `underscores_in_headers on;`.
 
 #### Pripnutie účtu pre jednotlivé požiadavky
 
-Keď má poskytovateľ viacero pripojení (účtov alebo kľúčov), OmniRoute zvyčajne vyberie jedno
-pomocou svojej stratégie výberu účtu. Požiadavka však môže namiesto toho pripnúť konkrétne pripojenie
+Keď má poskytovateľ viacero pripojení (účtov alebo kľúčov), OmniRoute zvyčajne jedno z nich vyberie
+pomocou svojej stratégie výberu účtu. Požiadavka však môže pripnúť konkrétne pripojenie
 pomocou hlavičky `x-omniroute-connection`:
 
 ```bash
@@ -100,25 +100,25 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Kde nájsť id.** Otvorte stránku poskytovateľa na ovládacom paneli
+- **Kde nájsť id.** Otvorte stránku poskytovateľa v ovládacom paneli
   (**Ovládací panel → Poskytovatelia → <provider>**) a kliknite na štítok id `xxxxxxxx…` v riadku
   pripojenia — tým sa skopíruje celé id pripojenia.
-- **Ktoré požiadavky ho rešpektujú.** Požiadavky na jeden model (`provider/model`) na
-  `/v1/chat/completions`, `/v1/messages` a `/v1/responses`. Kombinácie túto hlavičku ignorujú:
-  namiesto toho pripnite účet pre každý krok kombinácie prostredníctvom vlastného pripojenia daného kroku.
-- **Pripnutie je striktné, nejde len o preferenciu.** Používa sa výhradne pripnuté pripojenie. Zlyhanie
-  v rámci požiadavky zaznamená dobu pozastavenia účtu, ale **neprepne** na iný účet
-  rovnakého poskytovateľa.
-- **Doba pozastavenia a kvóta pripnutie uvoľnia.** Kým je pripnuté pripojenie pozastavené,
-  má vyčerpanú kvótu alebo je zablokované pravidlami kvóty, neskoršie požiadavky sa prepnú na ostatné
+- **Ktoré požiadavky ho rešpektujú.** Požiadavky s jedným modelom (`provider/model`) na
+  `/v1/chat/completions`, `/v1/messages` a `/v1/responses`. Kombinácie túto hlavičku ignorujú: účet
+  pre každý krok kombinácie pripnite prostredníctvom vlastného pripojenia daného kroku.
+- **Pripnutie je striktné, nejde len o preferenciu.** Pripnuté pripojenie sa používa výhradne. Zlyhanie
+  v rámci požiadavky zaznamená obdobie čakania účtu, ale **neprepne** na
+  iný účet toho istého poskytovateľa.
+- **Obdobie čakania a kvóta pripnutie uvoľnia.** Kým je pripnuté pripojenie v období čakania,
+  má vyčerpanú kvótu alebo je zablokované pravidlami kvóty, neskoršie požiadavky prejdú na ostatné
   pripojenia poskytovateľa presne tak ako nepripnutá prevádzka.
-- **Neznáme alebo zakázané id zlyhajú.** id, ktoré nie je v aktívnom fonde poskytovateľa (bolo odstránené,
-  deaktivované alebo patrí inému poskytovateľovi), nezanechá žiadny vhodný účet, takže požiadavka
-  zlyhá namiesto toho, aby bola bez upozornenia presmerovaná inam.
+- **Neznáme alebo zakázané id spôsobia zlyhanie.** Ak id nie je v aktívnom fonde poskytovateľa (bolo
+  odstránené, deaktivované alebo patrí inému poskytovateľovi), nezostane žiadny vhodný účet, takže požiadavka
+  zlyhá namiesto toho, aby bola bez upozornenia smerovaná inam.
 
-Claude Code odosiela vlastné hlavičky prostredníctvom `ANTHROPIC_CUSTOM_HEADERS`. Umiestnite ho do bloku `env`
-v `~/.claude/settings.json` alebo do súboru `.claude/settings.json` na úrovni projektu, ak chcete pre každý
-projekt pripnúť iný účet:
+Claude Code odosiela vlastné hlavičky prostredníctvom `ANTHROPIC_CUSTOM_HEADERS`. Vložte ho do bloku `env`
+v súbore `~/.claude/settings.json` alebo do projektového súboru `.claude/settings.json`, ak chcete pre každý projekt
+pripnúť iný účet:
 
 ```jsonc
 {
@@ -130,22 +130,22 @@ projekt pripnúť iný účet:
 }
 ```
 
-Zdroj: `src/sse/handlers/chat.ts` (načítanie hlavičky), `src/sse/services/auth.ts` a
+Zdroj: `src/sse/handlers/chat.ts` (čítanie hlavičky), `src/sse/services/auth.ts` a
 `src/sse/services/sessionAffinityPin.ts` (uvoľnenie pripnutia a kontrola neprítomnosti vo fonde).
 
-> **Hlavičky telemetrie nákladov:** úspešné odpovede bez streamovania obsahujú aj súpravu telemetrie nákladov `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, pevne 10 desatinných miest; `0.0000000000` pre bezplatné položky alebo položky bez určenej ceny), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` a `X-OmniRoute-Fallback-Attempts` (iba keď > 0), ako aj `X-OmniRoute-Request-Id` a `X-OmniRoute-Version`. Tieto hlavičky sa generujú pri dokončovaní chatu, pre `/v1/responses`, `/v1/messages` **aj koncové body médií** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` a `/v1/moderations` (náklady sú vždy `0`). Náklady na médiá sa vypočítavajú podľa modality (za obrázok, za sekundu, za znak, za jednotku vyhľadávania), keď sú k dispozícii cenové údaje; inak sú `0` (fail-open).
+> **Hlavičky telemetrie nákladov:** úspešné odpovede bez streamovania obsahujú aj súpravu telemetrie nákladov `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, presne 10 desatinných miest; `0.0000000000` pre bezplatné položky alebo položky bez stanovenej ceny), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` a `X-OmniRoute-Fallback-Attempts` (iba keď > 0), ako aj `X-OmniRoute-Request-Id` a `X-OmniRoute-Version`. Generujú ich dokončenia chatu, `/v1/responses`, `/v1/messages` **aj koncové body médií** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` a `/v1/moderations` (náklady vždy `0`). Náklady na médiá sa počítajú podľa modality (za obrázok, za sekundu, za znak, za vyhľadávaciu jednotku), ak sú dostupné cenové údaje; v opačnom prípade sú `0` (prístup fail-open).
 
-> **Sémantika nákladov pri zásahu vyrovnávacej pamäte:** pri zásahu v sémantickej vyrovnávacej pamäti (`X-OmniRoute-Cache-Hit: true`) sa nevykoná žiadne volanie nadradenej služby, takže `X-OmniRoute-Response-Cost` je `0.0000000000` (**prírastkové** náklady na obslúženie zásahu). Pôvodné/predpokladané náklady sa uvádzajú samostatne v `X-OmniRoute-Cost-Saved`. Systémy spracúvajúce fakturáciu by mali sčítavať `X-OmniRoute-Response-Cost` (zásahy nič nestoja); analýzy vyrovnávacej pamäte môžu agregovať `X-OmniRoute-Cost-Saved`.
+> **Sémantika nákladov pri zásahu do vyrovnávacej pamäte:** pri zásahu do sémantickej vyrovnávacej pamäte (`X-OmniRoute-Cache-Hit: true`) sa nevykoná žiadne volanie nadradenej služby, takže `X-OmniRoute-Response-Cost` je `0.0000000000` (**prírastkové** náklady na obslúženie zásahu). Pôvodné/predpokladané náklady sa vykazujú samostatne v `X-OmniRoute-Cost-Saved`. Systémy spracúvajúce fakturáciu by mali sčítavať `X-OmniRoute-Response-Cost` (zásahy nič nestoja); analytické systémy vyrovnávacej pamäte môžu agregovať `X-OmniRoute-Cost-Saved`.
 
 ## Exkluzívne spravované prenájmy relácií
 
-Exkluzívne spravované prenájmy relácií sú voliteľnou, klient-neutrálnou smerovacou zmluvou: jeden aktívny vlastník
+Exkluzívny spravovaný prenájom relácie je voliteľná smerovacia zmluva nezávislá od klienta: jeden aktívny vlastník
 drží jedno oprávnené pripojenie OmniRoute. Neprenajíma model, nevyžaduje OAuth, neidentifikuje
 konkrétneho klienta ani nevyžaduje konkrétneho poskytovateľa.
 
-Autentifikačný API kľúč musí mať rozsah `lease:exclusive` a explicitný neprázdny
-zoznam `allowedConnections`. Hranica mutácie databázy vynucuje obe polia spoločne pri vytváraní kľúča
-a čiastočných aktualizáciách.
+Overujúci API kľúč musí mať rozsah oprávnenia `lease:exclusive` a explicitný neprázdny
+zoznam `allowedConnections`. Hranica databázových mutácií vynucuje obe polia spoločne pri vytváraní
+kľúča aj pri čiastočných aktualizáciách.
 
 ```http
 POST /api/v1/session-leases
@@ -156,9 +156,9 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-Úspešné odpovede na získanie, obnovenie a uvoľnenie zobrazujú časové pečiatky, `state` a presnú kladnú
-`generation`, ale nikdy vybrané pripojenie alebo poverenia. Obnovenie a uvoľnenie dodávajú
-generáciu v tele JSON:
+Úspešné odpovede na získanie, obnovenie a uvoľnenie uvádzajú časové pečiatky, `state` a presnú kladnú
+hodnotu `generation`, nikdy však vybrané pripojenie ani prihlasovacie údaje. Pri obnovení a uvoľnení sa
+generácia uvádza v tele JSON:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -168,7 +168,7 @@ generáciu v tele JSON:
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-Aktívny vlastník prenájmu môže explicitne požiadať o metadáta zobrazenia chrániace súkromie pre svoje aktuálne viazanie:
+Vlastník aktívneho prenájmu si môže explicitne vyžiadať zobrazované metadáta chrániace súkromie pre svoju aktuálnu väzbu:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -188,38 +188,37 @@ Aktívny vlastník prenájmu môže explicitne požiadať o metadáta zobrazenia
 }
 ```
 
-Táto voliteľná akcia stavu je ohraničená nepriehľadným vlastníkom, autentifikovaným spravovaným API kľúčom a presnou
-aktívnou generáciou v jednej databázovej transakcii. `displayName` je iba orezaný nakonfigurovaný
-názov pripojenia; je `null`, ak neexistuje bezpečný nakonfigurovaný názov. OmniRoute nikdy nenahrádza
-e-mail ani vygenerovanú identitu účtu. Hodnota poskytovateľa je nesenzitívny zobrazovací štítok a nikdy
-vygenerovaný kompatibilný identifikátor poskytovateľa. Poverenia, tokeny, súbory cookie, surové ID pripojenia alebo API kľúča,
-hashy vlastníkov, tajomstvá ohradenia a interné smerovacie údaje sú vylúčené.
+Táto voliteľná akcia stavu je v rámci jednej databázovej transakcie ohraničená nepriehľadným vlastníkom, overeným spravovaným API kľúčom a presnou
+aktívnou generáciou. `displayName` obsahuje iba nakonfigurovaný názov
+pripojenia bez okolitých medzier; ak neexistuje žiadny bezpečný nakonfigurovaný názov, má hodnotu `null`. OmniRoute ho nikdy nenahrádza
+e-mailom ani vygenerovanou identitou účtu. Hodnota poskytovateľa je necitlivý zobrazovaný názov a nikdy
+nejde o vygenerovaný identifikátor kompatibilného poskytovateľa. Prihlasovacie údaje, tokeny, súbory cookie, nespracované ID pripojení alebo API
+kľúčov, haše vlastníkov, tajné údaje ohraničenia a interné smerovacie údaje sú vylúčené.
 
-Nesprávny kľúč, nesprávny vlastník, zastaraná generácia, chýbajúce, expirované, uvoľnené a neplatné vyhľadávania
-všetky vracajú rovnakú chybu `409 LEASE_FENCE_STALE` bez metadát pripojenia. Klient, ktorý prijal
-odpoveď na čakanie na kapacitu, nemá žiadne aktívne viazanie na kontrolu. Keď smerovanie prechádza aktívny prenájom,
-rovnaká generácia zostáva platná a stav atomicky vráti nové viazanie, nikdy nie staré.
+Vyhľadania s nesprávnym kľúčom, nesprávnym vlastníkom, zastaranou generáciou, ako aj chýbajúce, exspirované, uvoľnené a zneplatnené vyhľadania
+vracajú rovnakú chybu `409 LEASE_FENCE_STALE` bez metadát pripojenia. Klient, ktorý dostal odpoveď o čakaní na kapacitu, nemá žiadnu aktívnu väzbu, ktorú by bolo možné preskúmať. Keď smerovanie prepne aktívny prenájom,
+rovnaká generácia zostáva platná a stav atomicky vráti novú väzbu, nikdy nie starú.
 Existujúci klienti zostávajú nezmenení, pretože odpovede na získanie, obnovenie, uvoľnenie a čakanie si zachovávajú
-svoje predchádzajúce tvary.
+svoje predchádzajúce formáty.
 
-Táto serverová zmluva nemení štandardný OpenAI Codex `/status`. Štandardný Codex v súčasnosti hlási svojho
-poskytovateľa modelu a vstavaný stav autentifikácie/účtu, ale nezobrazuje ľubovoľné vlastné
-metadáta účtu poskytovateľa; neskoršia integrácia klienta musí zavolať túto akciu a rozhodnúť sa, ako
+Táto zmluva servera nemení štandardný príkaz OpenAI Codex `/status`. Štandardný Codex momentálne uvádza svojho
+poskytovateľa modelu a vstavaný stav overenia/účtu, ale nezobrazuje ľubovoľné vlastné
+metadáta účtu poskytovateľa; budúca integrácia klienta musí zavolať túto akciu a rozhodnúť, ako
 zobraziť `connection.displayName`.
 
-Každá spravovaná požiadavka na inferenciu potom dodáva obe riadiace hlavičky:
+Každá spravovaná požiadavka na inferenciu potom uvádza obe riadiace hlavičky:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-Presný vlastník, generácia, aktívne pripojenie a autentifikovaný API kľúč sú ohradené
-bezprostredne pred každým podporovaným pokusom o upstream. Opakované prehrávanie vlastníka a generácie s iným kľúčom zlyhá,
-aj keď tento kľúč povoľuje rovnaké pripojenie. Surové vlastníctvo sa neuchováva, neloguje, neuchováva v snímke požiadavky
-ani neposiela upstream.
+Presný vlastník, generácia, aktívne pripojenie a overený API kľúč sa ohraničia bezprostredne
+pred každým podporovaným pokusom smerom k nadradenej službe. Opätovné použitie vlastníka a generácie s iným kľúčom zlyhá aj
+vtedy, keď tento kľúč povoľuje rovnaké pripojenie. Nespracované hodnoty vlastníkov sa neukladajú, nezaznamenávajú do protokolov, neuchovávajú v
+snímke požiadavky ani neposielajú nadradenej službe.
 
-Dočasná kolízia vráti HTTP `429` s `Retry-After` a:
+Dočasný konflikt vracia HTTP `429` s `Retry-After` a:
 
 ```json
 {
@@ -230,42 +229,42 @@ Dočasná kolízia vráti HTTP `429` s `Retry-After` a:
 }
 ```
 
-Táto odpoveď znamená iba to, že bežná oprávnená sada nebola prázdna a každý voľný kandidát bol
-držaný cudzím aktívnym prenájmom. Nepodporované modely/poskytovatelia, nesúlad politiky, cooldown, kvóta,
-zdravie a iné bežné zlyhania oprávnenosti si zachovávajú svoje existujúce odpovede OmniRoute.
+Táto odpoveď znamená iba to, že bežná množina oprávnených pripojení nebola prázdna a každý voľný kandidát bol
+držaný cudzím aktívnym prenájmom. Nepodporované modely/poskytovatelia, nesúlad so zásadami, čakacia lehota, kvóta,
+stav služby a ďalšie bežné zlyhania oprávnenosti si zachovávajú svoje existujúce odpovede OmniRoute.
 
 ### `x-omniroute-compression`
 
-Prepísanie plánu kompresie pre každú požiadavku. Najvyššia priorita – prekonáva prepísanie smerovacej kombinácie,
-aktívny profil, automatické spustenie a predvolené nastavenie panela. Hodnoty:
+Prepísanie plánu kompresie pre konkrétnu požiadavku. Má najvyššiu prioritu — prevažuje nad prepísaním kombinácie
+smerovania, aktívnym profilom, automatickým spustením aj predvoleným nastavením panela. Hodnoty:
 
-| Hodnota       | Účinok                                                                                               |
-| ------------- | ---------------------------------------------------------------------------------------------------- |
-| `off`         | Žiadna kompresia pre túto požiadavku.                                                                |
-| `default`     | Predvolený profil odvodený z panela (ignoruje aktívny profil). Stratové enginy sú vypnuté.           |
-| `safe`        | Iba deduplikácia a skladanie medzier.                                                                |
-| `allow-lossy` | Zachovať plán operátora pre túto požiadavku, vrátane súhrnov a prepisov štýlov.                      |
-| `engine:<id>` | Jeden engine, ak je povolený, napr. `engine:rtk`. Voliteľné pre každú požiadavku pre tento engine.   |
-| `<combo>`     | Pomenovaná kombinácia, najprv zhodná podľa názvu (nerozlišuje veľké a malé písmená), potom podľa ID. |
+| Hodnota       | Účinok                                                                                                          |
+| ------------- | --------------------------------------------------------------------------------------------------------------- |
+| `off`         | Bez kompresie pre túto požiadavku.                                                                              |
+| `default`     | Predvolený profil odvodený od panela (ignoruje aktívny profil). Stratové mechanizmy zostávajú vypnuté.          |
+| `safe`        | Iba deduplikácia a zlučovanie bielych znakov.                                                                   |
+| `allow-lossy` | Zachová plán operátora pre túto požiadavku vrátane súhrnov a prepisovania štýlu.                                |
+| `engine:<id>` | Jeden mechanizmus, ak je povolený, napr. `engine:rtk`. Voliteľná aktivácia tohto mechanizmu pre požiadavku.     |
+| `<combo>`     | Pomenovaná kombinácia, ktorá sa najprv porovná podľa názvu (bez rozlišovania veľkosti písmen) a potom podľa ID. |
 
 Poznámky:
 
-- Neznáme hodnoty sú ignorované (požiadavka nikdy nie je zamietnutá); rozlíšenie prechádza na normálnu prioritu operátora.
-- Ak viaceré kombinácie zdieľajú názov, pre deterministickú zhodu odovzdajte **ID** kombinácie.
-- Kombinácia, ktorej názov je `off` alebo `default`, nemôže byť vybraná podľa názvu (tieto kľúčové slová sú interpretované ako prvé); odkazujte na takúto kombináciu podľa jej ID.
-- Hlavný prepínač kompresie je tvrdá brána: keď je kompresia globálne zakázaná, táto hlavička ju nemôže povoliť.
+- Neznáme hodnoty sa ignorujú (požiadavka sa nikdy neodmietne); vyhodnocovanie pokračuje podľa bežného poradia priorít operátora.
+- Ak má viacero kombinácií rovnaký názov, na jednoznačné priradenie odovzdajte **id** kombinácie.
+- Kombináciu s názvom `off` alebo `default` nemožno vybrať podľa názvu (tieto kľúčové slová sa interpretujú ako prvé); na takúto kombináciu odkazujte pomocou jej ID.
+- Hlavný prepínač kompresie predstavuje neprekročiteľnú podmienku: keď je kompresia globálne zakázaná, táto hlavička ju nemôže povoliť.
 
-Použitý plán je zopakovaný v hlavičke odpovede:
+Použitý plán sa zopakuje v hlavičke odpovede:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
 ```
 
-kde `<source>` je jedna z `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` alebo `off`.
+kde `<source>` je jedna z hodnôt `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` alebo `off`.
 
 ---
 
-## Vnorovania
+## Vektorové reprezentácie
 
 ```bash
 POST /v1/embeddings
@@ -280,11 +279,16 @@ Content-Type: application/json
 
 Dostupní poskytovatelia: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
 
-Identifikátory v katalógu majú formát `provider/model` (príklad: `jina-ai/jina-embeddings-v5-omni-small`). Samostatné identifikátory modelov Jina uvedené v registri (napríklad `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) sa takisto rozpoznajú. Operácie embed/rerank/classify/segment služby Jina najprv používajú prihlasovacie údaje `jina-ai` z ovládacieho panela; `JINA_AI_API_KEY` slúži ako záložná možnosť iba vtedy, keď v ovládacom paneli neexistuje žiadny kľúč. Karta `jina-reader` je určená iba pre Reader / `r.jina.ai` (`POST /v1/web/fetch`) a nikdy neposkytuje vnorovania ani zmenu poradia.
+Identifikátory katalógu majú formát `provider/model` (príklad: `jina-ai/jina-embeddings-v5-omni-small`). Samostatné identifikátory modelov Jina, ktoré sa nachádzajú v registri (napríklad `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`), sa tiež rozpoznajú. Operácie embed/rerank/classify/segment služby Jina najprv používajú prihlasovacie údaje `jina-ai` z ovládacieho panela; `JINA_AI_API_KEY` sa použije ako záložná možnosť iba vtedy, keď v ovládacom paneli neexistuje žiadny kľúč. Karta `jina-reader` je určená iba pre Reader / `r.jina.ai` (`POST /v1/web/fetch`) a nikdy neposkytuje vektorové reprezentácie ani zmenu poradia.
 
-Modely v registri, ktoré deklarujú podporu multimodality, akceptujú aj najviac 32 štruktúrovaných položiek nezávislých od poskytovateľa. Typy mediálnych položiek sú `text`, `image`, `audio`, `video` a `document`. Ich mediálny `source` má buď podobu `{"type":"url","url":"https://..."}`, alebo `{"type":"base64","data":"...","media_type":"..."}`.
+Modely v registri, ktoré deklarujú podporu multimodality, prijímajú aj najviac 32 štruktúrovaných
+položiek nezávislých od poskytovateľa. Typy multimediálnych položiek sú `text`, `image`, `audio`, `video` a `document`. Ich multimediálny `source`
+má buď podobu `{"type":"url","url":"https://..."}`, alebo
+`{"type":"base64","data":"...","media_type":"..."}`.
 
-Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano` a alias rodiny `jina-ai/jina-embeddings-v5-omni` → omni-small) akceptuje aj natívne dokumenty EmbeddingsV5Request služby Jina a **preposiela ich bez úprav** na `https://api.jina.ai/v1/embeddings`:
+Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`
+a alias rodiny `jina-ai/jina-embeddings-v5-omni` → omni-small) prijíma aj natívne dokumenty
+EmbeddingsV5Request služby Jina a **bez zmeny ich preposiela** na `https://api.jina.ai/v1/embeddings`:
 
 ```json
 {
@@ -294,26 +298,38 @@ Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-
   "input": [
     { "text": "a red bicycle" },
     { "image": "https://example.com/bike.png" },
-    {
-      "content": [{ "text": "caption" }, { "image": "data:image/png;base64,..." }]
-    }
+    { "content": [{ "text": "caption" }, { "image": "data:image/png;base64,..." }] }
   ]
 }
 ```
 
-Natívne hodnoty `{ image | audio | video | pdf }` môžu byť verejná URL adresa HTTPS, URI typu `data:` alebo nespracované dáta base64. OmniRoute tieto objekty neprevádza na reťazce ani nenačítava natívne URL adresy obrázkov — verejné médiá načítava samotná služba Jina. Ďalšie polia služby Jina (`task`, `normalized`, `truncate`, `embedding_type`) sa preposielajú. Produkty Jina určené iba pre text naďalej odmietajú netextové dokumenty.
+Natívne hodnoty `{ image | audio | video | pdf }` môžu byť verejná adresa URL HTTPS, URI `data:` alebo nespracované
+dáta base64. OmniRoute tieto objekty neprevádza na reťazce ani nenačítava natívne adresy URL obrázkov — verejné
+médiá načíta samotná služba Jina. Dodatočné polia Jina (`task`, `normalized`, `truncate`, `embedding_type`) sa
+preposielajú. SKU Jina určené iba pre text naďalej odmietajú netextové dokumenty.
 
 Bezpečnostné a prenosové obmedzenia:
 
-- Vzdialené URL adresy médií musia byť verejné a používať HTTPS. Kanonické položky `{type,source:url}` sa načítajú na strane servera (opätovné overenie presmerovaní, časový limit, obmedzenia veľkosti, verejný DNS, pripnutie pripojenia) a pred volaním poskytovateľa sa vložia priamo do požiadavky. Natívne položky Jina `{image:"https://..."}` sa po rovnakej kontrole verejného HTTPS prepošlú bez úprav; URL adresu načíta služba Jina.
-- Médiá base64 vložené priamo do požiadavky sú obmedzené na 8 MiB dekódovaných dát na položku a 16 MiB dekódovaných dát v celej požiadavke.
+- Vzdialené adresy URL médií musia byť verejné adresy HTTPS. Kanonické položky `{type,source:url}` sa načítavajú
+  na strane servera (opätovné overenie presmerovaní, časový limit, obmedzenia veľkosti, verejný DNS, pripnutie pripojenia) a
+  pred volaním poskytovateľa sa vložia priamo do požiadavky. Natívne položky Jina `{image:"https://..."}` sa preposielajú bez zmien
+  po rovnakej kontrole verejnej adresy HTTPS; adresu URL načíta služba Jina.
+- Multimédiá base64 vložené priamo v požiadavke sú obmedzené na 8 MiB dekódovaných dát na položku a 16 MiB dekódovaných dát v rámci celej požiadavky.
 
-Preklad pre poskytovateľov (kanonické položky sa nikdy nepreposielajú bez úprav):
+Prevod pre poskytovateľov (kanonické položky sa nikdy nepreposielajú bez zmien):
 
-- Multimodálne modely Jina: každá položka najvyššej úrovne sa zmení na jeden objekt s kľúčom modality (`text` / `image` / `audio` / `video` / `pdf`), pričom vložené médiá používajú URI typu data; jeden vektor na každú položku najvyššej úrovne.
-- Rodina Gemini Embedding 2: jedno pole najvyššej úrovne sa zmení na jednu natívnu požiadavku `models/{model}:embedContent` s `content.parts` (`text` alebo `inline_data`).
-- llama.cpp (`llama-cpp/<model>`, ľubovoľný model načítaný lokálnym serverom): kanonické položky `text` sa zmenia na obyčajné reťazce a položky `image` / `audio` / `video` sa zmenia každá na jeden objekt `{"content": [part]}`, pričom používajú časti obsahu chatu servera llama-server (`image_url`, `input_audio` s formátom `wav` / `mp3` / `flac`, `input_video`) a priamo vložené dáta; jeden vektor na každú položku najvyššej úrovne. Server musí byť spustený s `--embedding --mmproj …`; bez projektora médiá odmietne samotný server. Typ `document` nie je podporovaný.
-- Neznáme/dynamické modely bez explicitných metadát modalít odmietnu štruktúrovaný vstup s HTTP 400.
+- Multimodálne modely Jina: každá položka najvyššej úrovne sa zmení na jeden objekt s kľúčom modality
+  (`text` / `image` / `audio` / `video` / `pdf`), pričom pre médiá vložené priamo v požiadavke sa použijú URI dát; pre každú
+  položku najvyššej úrovne sa vytvorí jeden vektor.
+- Rodina Gemini Embedding 2: jedno pole najvyššej úrovne sa zmení na jednu natívnu
+  požiadavku `models/{model}:embedContent` s `content.parts` (`text` alebo `inline_data`).
+- llama.cpp (`llama-cpp/<model>`, ľubovoľný model načítaný lokálnym serverom): kanonické položky `text`
+  sa zmenia na obyčajné reťazce a položky `image` / `audio` / `video` sa zmenia každá na jeden
+  objekt `{"content": [part]}`, pričom sa použijú časti konverzačného obsahu llama-server (`image_url`,
+  `input_audio` s formátom `wav` / `mp3` / `flac`, `input_video`) s priamo vloženými dátami; pre každú
+  položku najvyššej úrovne sa vytvorí jeden vektor. Server musí byť spustený s `--embedding --mmproj …`; bez projektora
+  sám odmietne médiá. Typ `document` nie je podporovaný.
+- Neznáme/dynamické modely bez explicitných metadát modality odmietnu štruktúrovaný vstup s kódom HTTP 400.
 
 ```json
 {
@@ -330,10 +346,11 @@ Preklad pre poskytovateľov (kanonické položky sa nikdy nepreposielajú bez ú
 }
 ```
 
-Nepodporované kombinácie modelu a modality vrátia HTTP 400 namiesto vynútenej konverzie položky. Rozširujúce polia mimo vstupu v starších požiadavkách s reťazcami/tokenmi sa naďalej preposielajú bez úprav.
+Nepodporované kombinácie modelov a modalít vrátia HTTP 400 namiesto konverzie položky. Rozširujúce polia
+mimo vstupu v starších požiadavkách s reťazcami/tokenmi sa naďalej preposielajú bez zmien.
 
 ```bash
-# Zobrazenie všetkých modelov vnorovania
+# Zobrazenie všetkých modelov vektorových reprezentácií
 GET /v1/embeddings
 ```
 
@@ -353,36 +370,37 @@ Content-Type: application/json
 }
 ```
 
-Medzi dostupných poskytovateľov patria OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokálne), ComfyUI (lokálne).
+Medzi dostupných poskytovateľov patria OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokálny) a ComfyUI (lokálny).
 
-Parameter `n` vráti `n` obrázkov v poli `data[]`. Pri poskytovateľoch, ktorých upstreamové API vracia jeden obrázok na volanie
+`n` vráti `n` obrázkov v `data[]`. Pri poskytovateľoch, ktorých nadradené API vracia jeden obrázok na volanie
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), sa vykoná `n` samostatných upstreamových volaní, pričom súbežne prebiehajú najviac 4. Pevná hodnota `seed` sa posúva podľa indexu volania (`seed`, `seed + 1`, …), takže obrázky sa líšia, ale zostávajú
-reprodukovateľné. Hodnota `n` je obmedzená na 10. Ak ktorékoľvek volanie zlyhá, zlyhá celá požiadavka. Zoznam
-formátov s rozdelením do viacerých volaní je `SINGLE_IMAGE_FANOUT_FORMATS` v súbore
+NVIDIA NIM, Cloudflare Workers AI), sa vykoná `n` samostatných nadradených volaní, pričom súčasne môžu prebiehať najviac 4. Pevná
+hodnota `seed` sa posunie o index volania (`seed`, `seed + 1`, …), takže obrázky sa líšia, ale zostávajú
+reprodukovateľné. Hodnota `n` je obmedzená na 10. Ak zlyhá ktorékoľvek volanie, zlyhá celá požiadavka. Zoznam
+formátov s rozdelením na viacero volaní je `SINGLE_IMAGE_FANOUT_FORMATS` v súbore
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux opätovne používa existujúce pripojenie s kľúčom API a akceptuje prefixy `zenmux/` alebo `zm/`:
+ZenMux opätovne používa existujúce pripojenie s kľúčom API a prijíma predpony `zenmux/` alebo `zm/`:
 
-- `zenmux/openai/gpt-image-2` používa OpenAI Images API služby ZenMux. Medzi možnosti patria `size`,
+- `zenmux/openai/gpt-image-2` používa OpenAI Images API od ZenMux. Medzi možnosti patria `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background` a `response_format`.
-- Ostatní vydavatelia, napríklad `zm/meta/muse-image-1.0`, používajú endpoint `:predict` služby Vertex AI od ZenMux.
-  Parameter `n` sa mapuje na `sampleCount`, `aspect_ratio` na `aspectRatio` a `image_size`
-  (`1K`, `2K`, `4K`) na `sampleImageSize`. Rozmer `size` uvedený v pixeloch určuje iba pomer strán,
+- Ostatní vydavatelia, napríklad `zm/meta/muse-image-1.0`, používajú koncový bod Vertex AI `:predict`
+  od ZenMux. `n` sa mapuje na `sampleCount`, `aspect_ratio` na `aspectRatio` a `image_size`
+  (`1K`, `2K`, `4K`) na `sampleImageSize`. Hodnota `size` v pixeloch určuje iba pomer strán,
   nie zaručené rozmery v pixeloch. Podporované pomery strán, rozlíšenia a počty sa líšia podľa modelu.
-- `zm/inclusionai/ming-image-0.1-design` si volí vlastné rozmery. Vynechajte `size`,
+- `zm/inclusionai/ming-image-0.1-design` si vyberá vlastné rozmery. Vynechajte `size`,
   `aspect_ratio` a `image_size`; explicitné hodnoty vrátia HTTP 400. Formáty PNG, JPEG a WebP
   možno vyžiadať pomocou `output_format`.
 
-Táto integrácia podporuje generovanie obrázkov z textu, nie úpravu referenčných obrázkov. Výstup služby Vertex
-sa normalizuje do `data[].b64_json`; `response_format: "url"` vráti upstreamovú
-adresu URL protokolu HTTPS alebo údajovú adresu URL vo formáte base64, ak sú k dispozícii iba bajty obrázka. Prázdne alebo odfiltrované výstupy
+Táto integrácia podporuje generovanie obrázkov z textu, nie úpravu referenčných obrázkov. Výstup Vertex
+sa normalizuje do `data[].b64_json`; `response_format: "url"` vráti nadradenú
+adresu URL HTTPS alebo dátovú adresu URL base64, ak sú k dispozícii iba bajty obrázka. Prázdne alebo odfiltrované výstupy
 vrátia chybu namiesto prázdnej úspešnej odpovede. Prístup k modelom závisí od účtu ZenMux.
-Pozrite si dokumentáciu [Vertex API služby ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) a
+Pozrite si [Vertex API od ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) a
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
 ```bash
-# Zobraziť všetky modely obrázkov
+# Zobrazenie všetkých obrazových modelov
 GET /v1/images/generations
 ```
 
@@ -405,20 +423,20 @@ Content-Type: application/json
 ```
 
 `model` vyberá poskytovateľa OCR pomocou predpony `provider/model`; samotný identifikátor modelu (napr.
-`mistral-ocr-latest`) sa priradí k jeho registrovanému poskytovateľovi a pri vynechaní hodnoty `model` sa predvolene použije
+`mistral-ocr-latest`) sa priradí k jeho registrovanému poskytovateľovi a pri vynechaní `model` sa predvolene použije
 Mistral (`mistral-ocr-latest`). Registrovaní poskytovatelia (`open-sse/config/ocrRegistry.ts`):
 
-| Identifikátor poskytovateľa   | Identifikátor modelu | Hodnota `model`                                               | Poznámky                                                                                                                                               |
-| ----------------------------- | -------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (alebo iba `mistral-ocr-latest`) | Synchrónne — odpoveď sa vráti priamo z jediného volania nadradenej služby.                                                                             |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                   | Asynchrónna nadradená služba (`analyze` + dopytovanie) — pozrite nižšie.                                                                               |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                       | Synchrónne, prostredníctvom partnerského koncového bodu Vertex AI `openapi/chat/completions` — podrobnosti o autentifikácii/adrese URL nájdete nižšie. |
+| ID poskytovateľa              | ID modelu            | Hodnota `model`                                                   | Poznámky                                                                                                                                           |
+| ----------------------------- | -------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (alebo samotné `mistral-ocr-latest`) | Synchrónne — odpoveď sa vráti priamo z jediného nadradeného volania.                                                                               |
+| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                       | Asynchrónne nadradené rozhranie (`analyze` + dopytovanie) — pozrite nižšie.                                                                        |
+| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                           | Synchrónne, prostredníctvom partnerského koncového bodu Vertex AI `openapi/chat/completions` — informácie o overovaní a adrese URL nájdete nižšie. |
 
-Všetci traja poskytovatelia odpovedajú v rovnakom tele v tvare Mistral:
+Všetci traja poskytovatelia odpovedajú rovnakým telom v tvare Mistral:
 
 ```json
 {
-  "pages": [{ "index": 0, "markdown": "# Extrahovaný text..." }],
+  "pages": [{ "index": 0, "markdown": "# Extracted text..." }],
   "model": "mistral-ocr-latest",
   "usage_info": { "pages_processed": 1 }
 }
@@ -426,26 +444,26 @@ Všetci traja poskytovatelia odpovedajú v rovnakom tele v tvare Mistral:
 
 ### Priebeh dopytovania Azure Document Intelligence
 
-Rozhranie API `analyze` služby Azure Document Intelligence je asynchrónne: počiatočná požiadavka namiesto tela vráti
-hlavičku `Operation-Location` a výsledok sa musí opakovane zisťovať. Obslužná rutina
-(`open-sse/handlers/ocr.ts`) zisťuje stav na danej adrese URL každú sekundu, najviac počas 30 pokusov, okamžite zlyhá (v
-zisťovaní nepokračuje), ak odpoveď na zisťovanie nemá stav `ok` alebo má stav `"failed"`, a vráti `504`, ak
-operácia po vyčerpaní počtu pokusov stále prebieha. Konečná odpoveď Azure sa pred vrátením
-volajúcemu normalizuje do rovnakého tvaru `pages`/`markdown`, aký používa Mistral, takže klientsky kód
-nemusí pre poskytovateľa implementovať osobitné spracovanie.
+API `analyze` služby Azure Document Intelligence je asynchrónne: počiatočná požiadavka vráti hlavičku
+`Operation-Location` namiesto tela a výsledok sa musí získavať opakovaným dopytovaním. Obslužný program
+(`open-sse/handlers/ocr.ts`) sa na túto adresu URL dopytuje každú sekundu, najviac však 30-krát; okamžite zlyhá (nepokračuje
+v dopytovaní) pri odpovedi na dopyt, ktorá nie je `ok`, alebo pri stave `"failed"`, a vráti `504`, ak
+operácia stále prebieha po vyčerpaní limitu pokusov. Konečná odpoveď Azure sa
+pred vrátením volajúcemu normalizuje do rovnakého tvaru `pages`/`markdown`, aký používa Mistral,
+takže klientsky kód nemusí poskytovateľa spracovávať osobitne.
 
-### Autentifikácia a určenie koncového bodu OCR DeepSeek v službe Vertex AI
+### Overovanie a rozpoznanie koncového bodu Vertex AI DeepSeek OCR
 
-`vertex-deepseek-ocr` opätovne používa rovnakú autentifikáciu Vertex AI, ktorú OmniRoute už podporuje pre
-prenos konverzácií/obrázkov (`open-sse/executors/vertex.ts`): kľúč API pripojenia je buď
-poverenie Service Account vo formáte JSON (vymenené za krátkodobý prístupový token OAuth prostredníctvom
-postupu JWT-bearer), alebo už vydaný prístupový token OAuth, ktorý sa použije bez zmeny. Adresa URL nadradeného koncového bodu je všeobecný
-partnerský koncový bod Vertex `openapi/chat/completions`, zostavený z projektu a
-regiónu pripojenia — explicitné hodnoty `providerSpecificData.project`/`providerSpecificData.region` majú vždy prednosť;
-v opačnom prípade sa projekt odvodí z hodnoty `project_id` v JSON Service Account a región má predvolenú hodnotu
-`us-central1`. Obe hodnoty sa určujú v súbore `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) a pred odoslaním do `handleOcr` ich používa
-`src/app/api/v1/ocr/route.ts`.
+`vertex-deepseek-ocr` opätovne používa rovnaké overovanie Vertex AI, ktoré OmniRoute už podporuje pre
+chatovú a obrazovú komunikáciu (`open-sse/executors/vertex.ts`): kľúč API pripojenia je buď
+poverenie Service Account JSON (vymenené za krátkodobý prístupový token OAuth prostredníctvom toku JWT bearer),
+alebo už vydaný prístupový token OAuth použitý bez zmeny. Nadradená adresa URL koncového bodu je všeobecný
+partnerský koncový bod Vertex `openapi/chat/completions`, zostavený z projektu a regiónu pripojenia
+— explicitná hodnota `providerSpecificData.project`/`providerSpecificData.region` má vždy prednosť;
+inak sa projekt odvodí z `project_id` v Service Account JSON a ako predvolený región
+sa použije `us-central1`. Obe rozpoznania prebiehajú v `open-sse/handlers/ocr.ts`
+(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) a používa ich
+`src/app/api/v1/ocr/route.ts` pred odoslaním do `handleOcr`.
 
 ---
 
@@ -455,45 +473,87 @@ v opačnom prípade sa projekt odvodí z hodnoty `project_id` v JSON Service Acc
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ Vráti všetky chatové, embeddingové a obrazové modely + kombinácie vo formáte OpenAI
+→ Vráti všetky četové, embeddingové a obrazové modely + kombinácie vo formáte OpenAI
 ```
 
-### Predpony ID modelov (`?prefix=`)
+### Ceny modelov (`pricing`)
 
-Väčšina modelov sa zobrazuje pod **predponou poskytovateľa**. Použitú predponu určuje
-príznak funkcie `MODELS_CATALOG_PREFIX_MODE` a možno ju prepísať **pre každú požiadavku** pomocou
-parametra dotazu — čo je užitočné pre klienta, ktorý chce prehľadný zoznam bez zmeny nastavenia
-celého servera pre všetkých ostatných:
+Položka obsahuje objekt `pricing`, keď OmniRoute pozná cenu modelu. Cena pochádza
+z cenovej tabuľky používanej na účtovanie nákladov: vstavané predvolené hodnoty, synchronizované ceny a
+prepísania nastavené prostredníctvom `/api/pricing`. Ide o cenníkové ceny, takže poskytovatelia predplatného tiež
+zobrazujú cenu za token.
+
+```json
+"pricing": {
+  "prompt": "0.000005",
+  "completion": "0.000025",
+  "input_cache_read": "0.0000005",
+  "input_cache_write": "0.00000625",
+  "input": 5,
+  "output": 25,
+  "cached": 0.5,
+  "cache_creation": 6.25
+}
+```
+
+| Polia                                                           | Jednotka                        | Poznámky                                                                                                                                                  |
+| --------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prompt`, `completion`, `input_cache_read`, `input_cache_write` | USD za token, desatinný reťazec | Kompatibilné s OpenRouter, nikdy nie v exponenciálnom zápise. Dve polia vyrovnávacej pamäte sa zobrazia iba vtedy, keď existuje cena vyrovnávacej pamäte. |
+| `input`, `output`, `cached`, `cache_creation`                   | USD za 1 mil. tokenov, číslo    | Polia zo starších verzií katalógu, zachované pre existujúcich klientov. `reasoning` a `long_context` sa tiež zobrazia, keď ich cenový riadok obsahuje.    |
+
+- **Kombinácie** obsahujú cenu svojho prvého viditeľného cieľa. Vstavané kombinácie `auto/*` vyberajú
+  cieľ v čase požiadavky, takže nemajú `pricing`.
+- **Bezplatné modely** zobrazujú `"0"` (a `0`), keď je ich cena nulová. Model bez cenového riadka
+  tiež zobrazuje `"0"`, keď ho katalóg označuje ako bezplatný (`free: true`) alebo keď sa nachádza vo vstavanom katalógu
+  bezplatných modelov.
+- **Neznáma cena:** položka nemá kľúč `pricing`.
+- **Poskytovatelia účtujúci kredity** (napríklad Kiro) účtujú za požiadavku, nie za token. Ich
+  položky si zachovávajú číselné polia ceny za 1 milión tokenov, ktoré mali predtým, a neobsahujú reťazcové polia ceny za token.
+- **Varianty** (id intenzity uvažovania, aliasy bez uvažovania, vyhľadávacie a bránové zrkadlá)
+  kopírujú cenu modelu, na ktorý smerujú.
+- Polia obsahujú iba základné sadzby. Úrovne pre dlhý kontext (číselné pole `long_context`) a
+  násobitele úrovne služby (napríklad Codex fast alebo flex) nemenia `prompt` ani
+  `completion`.
+- Objekt je rovnaký pre každý spôsob autentifikácie vrátane požiadavky v štýle Anthropic
+  s `x-api-key` a `anthropic-version` (odpoveď zostáva `{ "object": "list",
+"data": [...] }`). Implementácia: `src/app/api/v1/models/catalogPricing.ts`.
+
+### Predpony id modelov (`?prefix=`)
+
+Väčšina modelov sa zobrazuje pod **predponou poskytovateľa**. To, ktorú predponu dostanete, riadi
+príznak funkcie `MODELS_CATALOG_PREFIX_MODE` a možno ho prepísať **pre každú požiadavku** pomocou
+parametra dopytu — je to užitočné pre klienta, ktorý chce prehľadný zoznam bez zmeny celoserverového
+nastavenia pre všetkých ostatných:
 
 ```bash
-GET /v1/models?prefix=alias        # jedno ID na model — krátka predpona aliasu
-GET /v1/models?prefix=dual         # oba tvary (predvolené nastavenie servera)
-GET /v1/models?prefix=canonical    # iba úplná predpona ID poskytovateľa
+GET /v1/models?prefix=alias        # jedno id na model — krátka predpona aliasu
+GET /v1/models?prefix=dual         # obe formy (predvolené nastavenie servera)
+GET /v1/models?prefix=canonical    # iba úplná predpona id poskytovateľa
 ```
 
-| Režim       | Vypisuje                                                | Poznámky                                                                                                                                                                                                        |
-| ----------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **a** `claude/claude-sonnet-4-6` | **Predvolené.** Obe ID smerujú na rovnaký model; zachované preto, aby konfigurácie klientov, ktoré napevno používajú ktorýkoľvek z týchto tvarov, naďalej fungovali. Veľkosť katalógu sa približne zdvojnásobí. |
-| `alias`     | `cc/claude-sonnet-4-6`                                  | Jedna položka na model. Poskytovatelia bez osobitného aliasu stále vypisujú svoju položku, takže sa nič nestratí.                                                                                               |
-| `canonical` | `claude/claude-sonnet-4-6`                              | Jedna položka na model pod úplnou predponou ID poskytovateľa. Poskytovatelia bez osobitného aliasu (napr. `antigravity/…`, `agy/…`) tu takisto vypisujú svoje jediné ID, takže sa nič nestratí.                 |
+| Režim       | Poskytuje                                               | Poznámky                                                                                                                                                                                        |
+| ----------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dual`      | `cc/claude-sonnet-4-6` **a** `claude/claude-sonnet-4-6` | **Predvolené.** Obe id smerujú na rovnaký model; zachované, aby konfigurácie klientov, ktoré majú napevno nastavenú ktorúkoľvek formu, naďalej fungovali. Približne zdvojnásobuje katalóg.      |
+| `alias`     | `cc/claude-sonnet-4-6`                                  | Jedna položka na model. Poskytovatelia bez samostatného aliasu stále poskytujú svoju položku, takže sa nič nestratí.                                                                            |
+| `canonical` | `claude/claude-sonnet-4-6`                              | Jedna položka na model pod úplnou predponou id poskytovateľa. Poskytovatelia bez samostatného aliasu (napr. `antigravity/…`, `agy/…`) tu tiež poskytujú svoje jediné id, takže sa nič nestratí. |
 
-Zrkadlovú položku v režime `dual` možno rozpoznať aj bez parametra dotazu: obsahuje pole `parent`
-odkazujúce na primárne ID.
+Zrkadlo režimu `dual` možno rozpoznať aj bez parametra dopytu: obsahuje pole `parent`
+odkazujúce na primárne id.
 
-Klienti zobrazujúci výber modelu by mali požadovať `?prefix=alias` — takto postupuje aj
+Klienti, ktorí zobrazujú výber modelu, by mali požadovať `?prefix=alias` — takto to robí
 [rozšírenie OmniCopilot pre VS Code](../guides/VSCODE-COPILOT.md).
 
 ### Filtre vyhľadávania (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-`GET /v1/models` podporuje voliteľné filtre vyhľadávania. Bez nich zostáva odpoveď
-nezmenená. Zužujú katalóg, ktorý už volajúci vidí (najprv sa uplatnia oprávnenia API kľúča),
-a spúšťajú sa pred stránkovaním `limit` / `after` v štýle OpenAI:
+`GET /v1/models` podporuje voliteľné filtre vyhľadávania. Bez ktoréhokoľvek z nich zostáva odpoveď
+nezmenená. Zužujú katalóg, ktorý už volajúci vidí (najskôr sa uplatnia oprávnenia kľúča API),
+a spúšťajú sa pred stránkovaním v štýle OpenAI pomocou `limit` / `after`:
 
 ```bash
-GET /v1/models?capability=vision&capability=tool_calling   # každá uvedená schopnosť musí byť aktívna
+GET /v1/models?capability=vision&capability=tool_calling   # každá uvedená schopnosť musí byť pravdivá
 GET /v1/models?capability=vision,reasoning&min_context=200000
-GET /v1/models?kind=embedding                              # katalógový `type`; riadky bez neho sú `chat`
-GET /v1/models?q=sonnet&limit=10                           # zhoda v ID alebo názve bez rozlišovania veľkosti písmen
+GET /v1/models?kind=embedding                              # katalógové `type`; riadky bez neho sú `chat`
+GET /v1/models?q=sonnet&limit=10                           # zhoda bez rozlišovania veľkosti písmen v id alebo názve
 ```
 
 | Parameter     | Hodnoty                                                                                             |
@@ -501,7 +561,7 @@ GET /v1/models?q=sonnet&limit=10                           # zhoda v ID alebo n�
 | `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
 | `min_context` | nezáporné celé číslo porovnávané s `context_length`                                                 |
 | `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
-| `q`           | 1 až 200 znakov                                                                                     |
+| `q`           | 1–200 znakov                                                                                        |
 
 Neznáma hodnota alebo `min_context`, ktorý nie je nezáporným celým číslom (napríklad `1.5`),
 vráti HTTP `400` a správa uvedie platné hodnoty. Implementácia:
@@ -510,7 +570,7 @@ vráti HTTP `400` a správa uvedie platné hodnoty. Implementácia:
 ### Užší výber modelov (`POST /v1/models/query`)
 
 `POST /v1/models/query` vráti krátky, deterministický zoznam z rovnakého katalógu s rovnakým
-overovaním a viditeľnosťou podľa jednotlivých kľúčov ako `GET /v1/models`:
+overovaním a viditeľnosťou pre jednotlivé kľúče ako `GET /v1/models`:
 
 ```bash
 POST /v1/models/query
@@ -523,35 +583,43 @@ Content-Type: application/json
 → { "object": "list", "data": [ ...models ] }
 ```
 
-Každé pole je voliteľné. `capabilities` a `exclude` prijímajú pole alebo reťazec oddelený čiarkami;
-`max_output` sa porovnáva s `max_output_tokens`. Výsledky sú zoradené podľa `owned_by` a potom podľa `id`.
-Predvolená hodnota `limit` je `20` a hodnoty vyššie ako `100` sú obmedzené na `100`. Neplatný JSON, neznáme
-pole alebo neplatná hodnota vráti HTTP `400`.
+Každé pole je voliteľné. `capabilities` a `exclude` prijímajú pole alebo reťazec s hodnotami
+oddelenými čiarkami; `max_output` sa porovnáva s `max_output_tokens`. Výsledky sú zoradené podľa
+`owned_by` a následne podľa `id`. Predvolená hodnota `limit` je `20` a hodnoty nad `100` sú
+obmedzené na `100`. Neplatný JSON, neznáme pole alebo neplatná hodnota vrátia HTTP `400`.
 
-### Samostatne skryté chatové modely
+### Individuálne skryté četové modely
 
 Model označený na stránke svojho poskytovateľa ako **Skrytý** je vylúčený z katalógu a pri
-explicitnom vyžiadaní odmietnutý s HTTP `404` / `model_not_found`. Kontrola používa rozpoznaného
-poskytovateľa a model vrátane aliasov poskytovateľov, predpôn uzlov kompatibilných poskytovateľov
-a predvolených nastavení pripojenia. Kombinácia preskočí skryté ciele a môže použiť viditeľnú
-alternatívu; ak nezostane žiadny spustiteľný cieľ, vráti rovnaký kód chyby. Zrušenie skrytia sa
-prejaví pri nasledujúcej požiadavke. Prepísania viditeľnosti týkajúce sa iba obrázkov neskryjú
-chatový model s rovnakým ID.
+explicitnom vyžiadaní odmietnutý s HTTP `404` / `model_not_found`. Kontrola používa určeného
+poskytovateľa a model vrátane aliasov poskytovateľov, prefixov uzlov kompatibilných
+poskytovateľov a predvolených nastavení pripojenia. Kombinácia preskočí skryté ciele a môže
+použiť viditeľný súvisiaci model; ak nezostane žiadny spustiteľný cieľ, vráti rovnaký chybový
+kód. Zrušenie skrytia sa prejaví pri nasledujúcej požiadavke. Nastavenia viditeľnosti iba pre
+obrázky neskryjú četový model s rovnakým ID.
 
-Toto nastavenie jednotlivých modelov je oddelené od
-[zoznamov povolenia/zakázania sprístupnenia modelov](../routing/MODEL_EXPOSURE_LIST.md), ktoré filtrujú
-zobrazenie v katalógu a kandidátov na automatické smerovanie, pričom zachovávajú explicitné odosielanie.
-Oprávnenia modelov pre API kľúče sa naďalej uplatňujú nezávisle. Predvolený režim predpony katalógu zostáva `dual`.
+Toto individuálne nastavenie modelu je oddelené od
+[zoznamov povolených a zakázaných modelov](../routing/MODEL_EXPOSURE_LIST.md), ktoré filtrujú
+zverejnenie v katalógu a kandidátov na automatické smerovanie, pričom zachovávajú explicitné
+odoslanie. Oprávnenia modelov pre API kľúče sa naďalej uplatňujú nezávisle. Predvolený režim
+prefixov katalógu zostáva `dual`.
 
 ### Varianty modelov bez premýšľania
 
-Pre modely Claude podporujúce premýšľanie `/v1/models` zobrazuje aj variant **bez premýšľania**, ktorého ID má predponu `claude-3-omniroute-no-thinking/`:
+Pre modely Claude podporujúce premýšľanie `/v1/models` propaguje aj variant **bez premýšľania**,
+ktorého ID má prefix `claude-3-omniroute-no-thinking/`:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-Výber tohto ID (napr. v konfigurácii Claude Code, ktorá vždy pripája blok `thinking`) sa spätne preloží na skutočný model `<provider>/<model>` s potlačeným uvažovaním — pomocou `thinking:{type:"disabled"}` na ceste `/v1/messages` alebo vynechaním polí `reasoning`/`reasoning_effort` na ceste `/v1/chat/completions`. Variant sa uvádza iba pre modely z rodiny Claude, ktoré podporujú uvažovanie **a zároveň** rešpektujú hodnotu `disabled` (takže napr. modely podporujúce iba adaptívny režim, ktoré hodnotu `disabled` odmietajú, sú vylúčené). Operátori môžu tento variant pre jednotlivé modely vynútene zapnúť alebo vypnúť prostredníctvom `ModelSpec.noThinkingAlias`.
+Výber tohto ID (napr. v konfigurácii Claude Code, ktorá vždy pripája blok `thinking`) sa preloží
+späť na skutočný `<provider>/<model>` s potlačeným uvažovaním — `thinking:{type:"disabled"}` na
+ceste `/v1/messages` alebo s vynechanými poľami `reasoning`/`reasoning_effort` na ceste
+`/v1/chat/completions`. Variant sa uvádza iba pre modely z rodiny Claude, ktoré podporujú
+premýšľanie **a zároveň** rešpektujú `disabled` (takže napr. modely výhradne s adaptívnym režimom,
+ktoré odmietajú `disabled`, sú vylúčené). Prevádzkovatelia môžu variant pre jednotlivé modely
+vynútene zapnúť alebo vypnúť pomocou `ModelSpec.noThinkingAlias`.
 
 ---
 
@@ -561,13 +629,93 @@ Výber tohto ID (napr. v konfigurácii Claude Code, ktorá vždy pripája blok `
 GET /api/v1/provider-plugin-manifest
 ```
 
-Vráti manifest doplnkov poskytovateľov kompatibilný s formátom JSON, ktorý používajú Bifrost, CLIProxyAPI a budúce smerovače typu sidecar. Odpoveď sa generuje z registra poskytovateľov v TypeScripte a zámerne neobsahuje klientske tajomstvá OAuth, rozlíšenie prostredia za behu, vykonávacie funkcie, hlavičky požiadaviek ani údaje účtov.
+Vracia manifest doplnkov poskytovateľov bezpečný pre JSON, ktorý používajú Bifrost, CLIProxyAPI a
+budúce smerovače typu sidecar. Odpoveď sa generuje z registra poskytovateľov v jazyku TypeScript
+a zámerne nezahŕňa klientske tajomstvá OAuth, riešenie prostredia za behu,
+vykonávacie funkcie, hlavičky požiadaviek ani údaje účtov.
 
-Tento koncový bod použite, keď sidecar beží mimo procesu a nemôže priamo importovať `open-sse/config/providerPluginManifestRegistry.ts`.
+Tento koncový bod použite, keď sidecar beží mimo procesu a nemôže priamo importovať
+`open-sse/config/providerPluginManifestRegistry.ts`.
 
 ---
 
-## Koncové body kompatibility
+## Generovanie zvuku pomocou ElevenLabs
+
+Nakonfigurujte v OmniRoute pripojenie poskytovateľa `elevenlabs` pomocou svojho kľúča API ElevenLabs.
+Klienti sa autentifikujú pomocou svojho kľúča **OmniRoute** (`Authorization: Bearer $OMNIROUTE_API_KEY`);
+brána poskytne uložený kľúč poskytovateľa ako `xi-api-key`. Nikdy neposielajte kľúč ElevenLabs
+ako bearer token brány.
+
+| Metóda | Cesta                       | Odpoveď                                  | Kategória koncového bodu kľúča API |
+| ------ | --------------------------- | ---------------------------------------- | ---------------------------------- |
+| POST   | `/v1/sound-generation`      | Natívne zvukové bajty                    | `elevenlabs`                       |
+| POST   | `/v1/music`                 | Natívne zvukové bajty                    | `music`                            |
+| POST   | `/v1/music/stream`          | Streamované zvukové bajty                | `music`                            |
+| POST   | `/v1/music/detailed`        | Natívny multipart zvuk a plán kompozície | `music`                            |
+| POST   | `/v1/music/detailed/stream` | Natívne metadáta SSE a zvukové bloky     | `music`                            |
+| POST   | `/v1/music/plan`            | Plán kompozície vo formáte JSON          | `music`                            |
+
+Tieto koncové body dopĺňajú existujúce trasy `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}` a `/v1/speech-to-text`. Natívne polia JSON
+a parametre dopytu, ako napríklad `output_format` a `enable_logging`, sa zachovávajú.
+Odpovede `/v1/music/detailed` si zachovávajú svoje multipart hranice; spracujte ich ako multipart.
+`/v1/music/detailed/stream` vracia `text/event-stream` s metadátami kompozície a
+zvukovými blokmi base64 v udalostiach SSE. Všetkých šesť trás podporuje predbežné požiadavky CORS.
+
+```bash
+export OMNIROUTE_BASE_URL="http://localhost:20128"
+export OMNIROUTE_API_KEY="your-omniroute-api-key"
+
+# Krátky zvukový efekt. Trvanie: 0,5 až 30 sekúnd.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/sound-generation?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"A single soft bell chime","duration_seconds":1,"model_id":"eleven_text_to_sound_v2"}' \
+  --output effect.mp3
+
+# Trvanie hudby sa vyjadruje v milisekundách: 3000 až 600000.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Gentle instrumental piano","music_length_ms":10000,"force_instrumental":true,"model_id":"music_v1"}' \
+  --output music.mp3
+```
+
+Na postupné doručovanie zvuku použite `/v1/music/stream` s rovnakým telom JSON. Kompozícia
+prijíma presne jedno z `prompt` alebo `composition_plan`; `/v1/music/plan` vyžaduje `prompt`
+a voliteľne prijíma `source_composition_plan`. Natívne schémy zachovávajú ďalšie
+polia poskytovateľa, takže verzie plánu kompozície a možnosti dolaďovania sa prenesú do ElevenLabs.
+
+Zjednotený koncový bod `/v1/music/generations` tiež prijíma `elevenlabs/music_v1`,
+`elevenlabs/music_v2` a `elevenlabs/music_v2_5`. Pri aktívnom pripojení ElevenLabs
+sú tieto modely dostupné v hudobnom katalógu. Tento koncový bod vracia
+`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. Jeho pole `duration` je uvedené
+v sekundách a mapuje sa na `music_length_ms`; explicitné `music_length_ms` má prednosť.
+`instrumental` sa mapuje na `force_instrumental`, pričom natívne pole má prednosť.
+Na streamovanie používajte natívne streamovacie koncové body a na požiadavky riadené
+iba plánom kompozície použite natívny koncový bod kompozície.
+
+```bash
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
+```
+
+Pred volaním nadradenej služby sa uplatnia obmedzenia koncového bodu, modelu, rozpočtu a pripojenia. Natívne
+trasy vracajú stavové kódy a telá chýb nadradenej služby bez zmien vrátane `402` pri obmedzení
+plánu a `429` pri prekročení kvóty. Hlavičky `character-cost`, `song-id`, `request-id` a `retry-after`
+sa zachovajú, ak sú prítomné. Bezplatný zostatok kreditu nezaručuje prístup ku každému
+hudobnému modelu, výstupnému formátu ani funkcii API: o oprávnení pre každú požiadavku rozhoduje ElevenLabs.
+Zjednotený koncový bod zachováva stavové kódy chýb v normalizovanej chybovej obálke OmniRoute.
+
+Zmluvy nadradenej služby: [zvukové efekty](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+[kompozícia hudby](https://elevenlabs.io/docs/api-reference/music/compose) a
+[podrobnosti streamovania hudby](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
+
+---
+
+## Kompatibilné koncové body
 
 | Metóda | Cesta                                     | Formát                                |
 | ------ | ----------------------------------------- | ------------------------------------- |
@@ -576,10 +724,10 @@ Tento koncový bod použite, keď sidecar beží mimo procesu a nemôže priamo 
 | POST   | `/v1/responses`                           | OpenAI Responses                      |
 | POST   | `/v1/embeddings`                          | OpenAI                                |
 | POST   | `/v1/images/generations`                  | OpenAI Images                         |
-| POST   | `/v1/images/edits`                        | OpenAI Images (úprava/inpainting)     |
+| POST   | `/v1/images/edits`                        | OpenAI Images (úprava/dokresľovanie)  |
 | POST   | `/v1/videos/generations`                  | Generovanie videa v štýle OpenAI      |
 | POST   | `/v1/music/generations`                   | Generovanie hudby v štýle OpenAI      |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
+| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (prevod reči na text)    |
 | POST   | `/v1/audio/speech`                        | OpenAI TTS (vracia telo so zvukom)    |
 | POST   | `/v1/rerank`                              | Preusporiadanie v štýle Cohere/Voyage |
 | POST   | `/v1/classify`                            | Klasifikácia Jina (`api.jina.ai`)     |
@@ -598,12 +746,12 @@ Tento koncový bod použite, keď sidecar beží mimo procesu a nemôže priamo 
 | POST   | `/api/v1/vscode/{token}/api/chat`         | Tokenizovaný alias Ollama             |
 | GET    | `/api/v1/vscode/{token}/api/tags`         | Tokenizovaný alias značiek Ollama     |
 
-Všetky trasy POST majú rovnakú štruktúru: `Bearer your-api-key` + telo JSON overené pomocou Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` atď.; pozrite si `src/shared/validation/schemas.ts`). Pri zlyhaní overenia schémy sa vráti stav 4xx.
+Všetky trasy POST majú rovnakú štruktúru: `Bearer your-api-key` + telo JSON overené pomocou Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` atď.; pozrite si `src/shared/validation/schemas.ts`). Pri zlyhaní overenia schémy sa vráti stavový kód 4xx.
 
-Pre klientov, ktorí nemôžu pripojiť hlavičku `Authorization: Bearer ...`, OmniRoute prijíma kľúče API aj v URL, a to buď prostredníctvom kompatibilného reťazca dopytu (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), alebo prostredníctvom vyhradených koncových bodov `/api/v1/vscode/{token}/...` zdokumentovaných nižšie.
+Klientom, ktoré nedokážu pripojiť `Authorization: Bearer ...`, umožňuje OmniRoute odovzdať kľúče API aj v adrese URL, a to buď prostredníctvom kompatibilných parametrov reťazca dopytu (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), alebo cez vyhradené koncové body `/api/v1/vscode/{token}/...` zdokumentované nižšie.
 
 ```bash
-# Preusporiadanie (poskytovateľ cloudového registra alebo uzol poskytovateľa kompatibilného s OpenAI vo formáte "<prefix>/<model>")
+# Preusporiadanie výsledkov (poskytovateľ z cloudového registra alebo uzol poskytovateľa kompatibilného s OpenAI vo forme "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # Klasifikácia Jina (prihlasovacie údaje Foundation API)
@@ -618,7 +766,7 @@ POST /v1/search      { "query": "...", "provider": "jina-search" }
 # Moderovanie
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — vracia telo audio/mpeg (alebo požadovaný formát)
+# TTS — vracia telo vo formáte audio/mpeg (alebo v požadovanom formáte)
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
 # Soniox TTS vyžaduje jazyk a hlas: predvolená hodnota `language` je "en"; chýbajúci
@@ -636,26 +784,26 @@ POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 > **Uzly poskytovateľov pre preradenie:** `POST /v1/rerank` smeruje požiadavky aj na uzly poskytovateľov kompatibilné s OpenAI
 > (oMLX, vLLM, Infinity, TEI za bránou, …), ktoré sú adresované ako `<node-prefix>/<model>`. Uzly spätnej slučky
 > (`localhost`, `127.0.0.1`, `172.16.0.0/12`) sú vždy oprávnené, rovnako ako názvy hostiteľov, ktoré
-> prevádzkovateľ uvedie v `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (napr. názov služby Docker/Compose, ako
+> operátor uvedie v `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (napr. názov služby Docker/Compose, ako
 > `http://reranker:8080/v1`; tieto sa volajú priamo, nikdy nie cez `HTTP(S)_PROXY` ani pripnutý proxy server
 > pripojenia). Uzly na akomkoľvek inom
-> hostiteľovi — zariadení v sieti LAN alebo uzle Tailscale — sú oprávnené iba vtedy, keď prevádzkovateľ povolí
-> príznak funkcie `RERANK_REMOTE_PROVIDER_NODES` **a zároveň** základná URL adresa uzla vyhovuje pravidlám poskytovateľa
-> pre odchádzajúce URL adresy (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Krok preradenia pamäťového enginu volá túto trasu cez
+> hostiteľovi — zariadenie v sieti LAN alebo partnerské zariadenie Tailscale — sú oprávnené iba vtedy, keď operátor povolí
+> príznak funkcie `RERANK_REMOTE_PROVIDER_NODES` **a zároveň** základná URL adresa uzla spĺňa pravidlá
+> odchádzajúcich URL adries poskytovateľa (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
+> Krok preradenia pamäťového mechanizmu volá túto trasu cez
 > spätnú slučku, takže rovnaké pravidlo sa vzťahuje na `rerankProviderModel` v nastaveniach pamäte.
 >
-> **Podoby lokálneho servera:** uzol sa volá na adrese `<base>/v1/rerank` a pri odpovedi 404 na adrese `<base>/rerank`
-> (Infinity, TEI). Telo požiadavky odoslanej upstreamu obsahuje zápis Cohere/OpenAI (`documents`,
-> `return_documents`) aj zápis TEI (`texts`, `return_text`) a odpoveď upstreamu sa
+> **Podoby lokálnych serverov:** uzol sa volá na adrese `<base>/v1/rerank` a pri odpovedi 404 na adrese `<base>/rerank`
+> (Infinity, TEI). Telo požiadavky upstreamu obsahuje pravopis variantu Cohere/OpenAI (`documents`,
+> `return_documents`) aj variantu TEI (`texts`, `return_text`) a odpoveď upstreamu sa
 > normalizuje do obálky Cohere: holé pole TEI `[{index, score, text}]`, `{results: [{index, score}]}`
-> z jednoduchých brán aj formát Voyage `{data: [...]}` sa klientovi vracajú ako
-> `{results: [{index, relevance_score, document?}]}`, zoradené podľa skóre a obmedzené na `top_n`.
+> z jednoduchých brán aj formát Voyage `{data: [...]}` sa klientovi vrátia ako
+> `{results: [{index, relevance_score, document?}]}`, zoradené podľa skóre a obmedzené hodnotou `top_n`.
 
 > **Vyhľadávanie uzlov poskytovateľov:** modely na uzle poskytovateľa kompatibilnom s OpenAI sa zobrazujú v `GET /v1/models`
-> pod prefixom uzla. Riadky bez metadát koncového bodu (typické pre lokálne výpisy `/v1/models`)
-> zdedia `apiType` uzla, takže modely uzla `embeddings` majú `type: "embedding"` a modely
-> uzla `rerank` majú `type: "rerank"` namiesto predvoleného typu chatu; explicitné
+> pod prefixom uzla. Riadky, ktoré neobsahujú metadáta koncového bodu (typické pre lokálne výpisy `/v1/models`),
+> dedia `apiType` uzla, takže modely uzla `embeddings` majú `type: "embedding"` a modely
+> uzla `rerank` majú `type: "rerank"` namiesto predvoleného nastavenia na chat; explicitná hodnota
 > `supportedEndpoints` v synchronizovanom alebo manuálne pridanom riadku má naďalej prednosť.
 
 ### Vyhradené trasy poskytovateľov
@@ -672,21 +820,21 @@ Ak prefix poskytovateľa chýba, pridá sa automaticky. Nezhodujúce sa modely v
 
 ## Files API
 
-Koncový bod kompatibilný s OpenAI na prácu so súbormi pre dávkový vstup/výstup a nahrávanie súborov s určeným účelom.
+Koncový bod súborov kompatibilný s OpenAI na dávkový vstup/výstup a nahrávanie súborov podľa účelu.
 
-| Metóda | Cesta                    | Popis                                                                                                        |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| POST   | `/v1/files`              | Nahrá súbor (multipart: `file`, `purpose`, `expires_after[anchor]`, `expires_after[seconds]`) — max. 512 MiB |
-| GET    | `/v1/files`              | Zobrazí zoznam súborov pre overený kľúč API                                                                  |
-| GET    | `/v1/files/[id]`         | Načíta metadáta súboru                                                                                       |
-| DELETE | `/v1/files/[id]`         | Odstráni súbor                                                                                               |
-| GET    | `/v1/files/[id]/content` | Odošle nespracované telo súboru späť formou streamu                                                          |
+| Metóda | Cesta                    | Popis                                                                                                            |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| POST   | `/v1/files`              | Nahranie súboru (multipart: `file`, `purpose`, `expires_after[anchor]`, `expires_after[seconds]`) — max. 512 MiB |
+| GET    | `/v1/files`              | Zoznam súborov pre overený kľúč API                                                                              |
+| GET    | `/v1/files/[id]`         | Získanie metadát súboru                                                                                          |
+| DELETE | `/v1/files/[id]`         | Odstránenie súboru                                                                                               |
+| GET    | `/v1/files/[id]/content` | Odoslanie nespracovaného obsahu súboru späť formou streamu                                                       |
 
-**Overenie:** Kľúč API typu Bearer — súbory sú vymedzené podľa jednotlivých kľúčov API prostredníctvom `getApiKeyRequestScope`. Kľúč
-vidí, sťahuje a odstraňuje iba svoje vlastné súbory; relácia ovládacieho panela bez kľúča má prístup na čítanie v rámci
-celej inštancie; súbor bez vlastníka (anonymné nahratie alebo nahratie prostredníctvom relácie ovládacieho panela) je zamietnutý každému
-volajúcemu bez relácie. `GET /v1/files` odmietne anonymného volajúceho — aj zadaný kľúč, ktorý
-sa nepodarí rozpoznať — s kódom `401`, a to aj vtedy, keď `REQUIRE_API_KEY=false`, namiesto zobrazenia súborov
+**Autorizácia:** Kľúč API typu Bearer — rozsah súborov je obmedzený podľa kľúča API prostredníctvom `getApiKeyRequestScope`. Kľúč
+vidí, sťahuje a odstraňuje iba vlastné súbory; relácia ovládacieho panela bez kľúča má prístup na čítanie v rámci
+celej inštancie; prístup k súboru bez vlastníka (anonymné nahranie alebo nahranie prostredníctvom relácie ovládacieho panela) je zamietnutý každému
+volajúcemu bez relácie. `GET /v1/files` odmietne anonymného volajúceho — aj poskytnutý kľúč, ktorý
+sa nepodarí rozpoznať — s kódom `401`, a to aj vtedy, keď `REQUIRE_API_KEY=false`, namiesto zobrazenia zoznamu súborov
 všetkých nájomníkov (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
 
 ---
@@ -695,30 +843,30 @@ všetkých nájomníkov (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
 
 Dávkové spracovanie kompatibilné s OpenAI.
 
-| Metóda | Cesta                     | Popis                                                                                                         |
-| ------ | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| POST   | `/v1/batches`             | Vytvorí dávku — telo overené pomocou `v1BatchCreateSchema` (`input_file_id`, `endpoint`, `completion_window`) |
-| GET    | `/v1/batches`             | Zobrazí zoznam dávok                                                                                          |
-| GET    | `/v1/batches/[id]`        | Načíta stav dávky + `request_counts`                                                                          |
-| DELETE | `/v1/batches/[id]`        | Odstráni dokončenú/neúspešnú dávku                                                                            |
-| POST   | `/v1/batches/[id]/cancel` | Zruší prebiehajúcu dávku                                                                                      |
+| Metóda | Cesta                     | Popis                                                                                                            |
+| ------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| POST   | `/v1/batches`             | Vytvorenie dávky — telo overené pomocou `v1BatchCreateSchema` (`input_file_id`, `endpoint`, `completion_window`) |
+| GET    | `/v1/batches`             | Zoznam dávok                                                                                                     |
+| GET    | `/v1/batches/[id]`        | Získanie stavu dávky a `request_counts`                                                                          |
+| DELETE | `/v1/batches/[id]`        | Odstránenie dokončenej/neúspešnej dávky                                                                          |
+| POST   | `/v1/batches/[id]/cancel` | Zrušenie prebiehajúcej dávky                                                                                     |
 
-**Overenie:** Kľúč API typu Bearer. Dávky sú vymedzené podľa jednotlivých kľúčov API na základe rovnakého trojstranného pravidla ako
-súbory: iba vlastný kľúč, relácia ovládacieho panela v rámci celej inštancie, záznamy s nulovým vlastníkom zamietnuté každému
-volajúcemu bez relácie (načítanie, odstránenie, zrušenie a kontrola `input_file_id` pri vytváraní).
+**Autorizácia:** Kľúč API typu Bearer. Rozsah dávok je obmedzený podľa kľúča API na základe rovnakého trojitého pravidla ako pri
+súboroch: iba vlastný kľúč, relácia ovládacieho panela v rámci celej inštancie, záznamy bez vlastníka sú zamietnuté každému
+volajúcemu bez relácie (získanie, odstránenie, zrušenie a kontrola `input_file_id` pri vytváraní).
 `GET /v1/batches` odmietne anonymného volajúceho s kódom `401`, a to aj vtedy, keď `REQUIRE_API_KEY=false`.
 
 ---
 
-## Search API
+## API vyhľadávania
 
 Abstrakcia poskytovateľov webového vyhľadávania (Tavily, Brave, Exa, Serper atď.).
 
-| Metóda | Cesta                  | Popis                                                                                                                             |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Zoznam nakonfigurovaných poskytovateľov vyhľadávania a ich možností                                                               |
-| POST   | `/v1/search`           | Spustenie vyhľadávacieho dopytu — telo validované pomocou `v1SearchSchema`, podporuje ukladanie do vyrovnávacej pamäte/zlučovanie |
-| GET    | `/v1/search/analytics` | Štatistiky zásahov, latencie a vyrovnávacej pamäte podľa poskytovateľa                                                            |
+| Metóda | Cesta                  | Popis                                                                                                                    |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | Zoznam nakonfigurovaných poskytovateľov vyhľadávania a ich možností                                                      |
+| POST   | `/v1/search`           | Spustenie vyhľadávacieho dopytu — telo overuje `v1SearchSchema`, podporuje ukladanie do vyrovnávacej pamäte a zlučovanie |
+| GET    | `/v1/search/analytics` | Štatistiky úspešnosti, latencie a vyrovnávacej pamäte pre jednotlivých poskytovateľov                                    |
 
 **Autentifikácia:** API kľúč typu Bearer (`extractApiKey` + `isValidApiKey`). Pravidlá vyhľadávania sa vynucujú prostredníctvom `enforceApiKeyPolicy`.
 
@@ -726,8 +874,8 @@ Abstrakcia poskytovateľov webového vyhľadávania (Tavily, Brave, Exa, Serper 
 
 Exa a Tavily čítajú polia špecifické pre poskytovateľa z menného priestoru:
 `provider_options.exa` (alebo `provider_options["exa-search"]`) a `provider_options.tavily`
-(alebo `provider_options["tavily-search"]`). Preposielajú sa iba kľúče uvedené nižšie. Každý z nich sa
-kontroluje podľa vlastnej schémy Zod v `open-sse/handlers/search/providerOptionsPassthrough.ts`
+(alebo `provider_options["tavily-search"]`). Odosielajú sa iba kľúče uvedené nižšie. Každý z nich sa
+kontroluje podľa vlastnej schémy Zod v súbore `open-sse/handlers/search/providerOptionsPassthrough.ts`
 a kľúč s nesprávnym typom sa zahodí. Všetky ostatné kľúče sa ignorujú vrátane autentifikácie, základnej URL,
 `stream` a `outputSchema`. Ploché kľúče používané inými poskytovateľmi (`cx`, `depth`, ...) fungujú
 rovnako ako predtým.
@@ -738,52 +886,52 @@ rovnako ako predtým.
 | Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                        |
 
 Všeobecné polia majú vždy prednosť: `query`, `max_results`, `filters` (domény), `country` a
-téma odvodená z `search_type`. V prípade Exa hodnota `search_type: "news"` zachová `category: "news"`.
-Tavily tiež akceptuje `search_type: "finance"` (`topic: "finance"`).
+téma odvodená z `search_type`. V Exa hodnota `search_type: "news"` zachová `category: "news"`.
+Tavily akceptuje aj `search_type: "finance"` (`topic: "finance"`).
 
-Všeobecné pole `time_range` sa teraz odovzdáva obom poskytovateľom: Exa dostane `startPublishedDate` (časovú
-pečiatku ISO) a Tavily dostane `start_date` (`YYYY-MM-DD`). Explicitný dátum v `provider_options`
-prepíše namapovanú hodnotu.
+Všeobecné pole `time_range` sa teraz prenáša k obom poskytovateľom: Exa dostane `startPublishedDate` (časová
+pečiatka ISO) a Tavily dostane `start_date` (`YYYY-MM-DD`). Explicitný dátum v `provider_options`
+má prednosť pred mapovanou hodnotou.
 
 Výsledky Exa zachovávajú `id`, `highlight_scores`, `summary`, `subpages`, `entities` a `extras` v
 `provider_raw`. Výsledky Tavily zachovávajú `images` a `favicon`.
 
-Účtovanie nákladov naďalej používa plochý register `costPerQuery`. Tavily účtuje za
-`search_depth: "advanced"` viac kreditov za volanie a tento rozdiel sa neodráža v
+Účtovanie nákladov naďalej používa plochý register `costPerQuery`. Tavily účtuje
+za `search_depth: "advanced"` viac kreditov na jedno volanie a tento rozdiel sa neodráža v
 `usage.search_cost_usd`.
 
 ---
 
-## Web Fetch API
+## API Web Fetch
 
 Extrahuje obsah z URL prostredníctvom nakonfigurovaného poskytovateľa webového načítania (Firecrawl, Jina
 Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
 
-Parallel Extract (`parallel-search`, rovnaký API kľúč ako Parallel Search) vracia iba Markdown
-— akýkoľvek iný `format` spôsobí chybu `400` — a obmedzuje obsah na 100 000 znakov. Ak
-samotnú cieľovú stránku nemožno extrahovať, nadradená služba to oznámi v odpovedi HTTP 200;
-OmniRoute to sprístupní ako chybu `422` s pevne stanovenou správou.
+Parallel Extract (`parallel-search`, rovnaký kľúč API ako Parallel Search) vracia iba Markdown
+— akýkoľvek iný `format` vedie k odpovedi `400` — a obmedzuje obsah na 100 000 znakov. Keď
+samotnú cieľovú stránku nemožno extrahovať, nadradená služba to oznámi v rámci HTTP 200;
+OmniRoute to sprístupní ako `422` s pevne stanovenou správou.
 
-| Metóda | Cesta           | Popis                                                          |
+| Metóda | Cesta           | Opis                                                           |
 | ------ | --------------- | -------------------------------------------------------------- |
 | POST   | `/v1/web/fetch` | Načíta/extrahuje URL — telo overené pomocou `v1WebFetchSchema` |
 
-**Autentifikácia:** API kľúč typu Bearer (`extractApiKey` + `isValidApiKey`). Zásady sa vynucujú prostredníctvom `enforceApiKeyPolicy`.
+**Autentifikácia:** Kľúč API typu Bearer (`extractApiKey` + `isValidApiKey`). Zásady sa vynucujú prostredníctvom `enforceApiKeyPolicy`.
 
-**Náhradný mechanizmus zohľadňujúci kvóty (#8297):** ak nie je explicitne zadaný žiadny `provider`, fond
+**Záložný mechanizmus zohľadňujúci kvóty (#8297):** keď nie je uvedený explicitný `provider`, fond
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
 `parallel-search`) sa
 prechádza v pevnom
-poradí priorít (fill-first) — nakonfigurovaný poskytovateľ s obmedzenou frekvenciou požiadaviek sa preskočí
-namiesto predčasného ukončenia požiadavky a opakovateľné zlyhanie nadradenej služby alebo zlyhanie kvóty
-(HTTP 429 vždy; 402/403 pre bezplatné úrovne s kvótami služieb Firecrawl/Tavily/TinyFish —
-nie pre Jina Reader a nikdy nie pre bežnú chybnú požiadavku 400) spôsobí za behu požiadavky prechod na
-ďalšieho ešte nevyskúšaného poskytovateľa s dostupnými prihlasovacími údajmi. Keď sú všetci poskytovatelia vo
-fonde vyčerpaní, koncový bod vráti jedinú chybu `429` (s hlavičkou `Retry-After`)
-namiesto predchádzajúcej všeobecnej chyby `400`. Keď je vyžiadaný explicitný `provider`,
-**nepoužije sa** žiadny tichý náhradný mechanizmus — pri explicitne zadanom poskytovateľovi s obmedzenou
-frekvenciou požiadaviek alebo so zlyhaním sa priamo vráti jeho vlastná chyba (`429` pri obmedzení frekvencie,
-inak stav nadradenej služby).
+poradí priorít (najprv sa naplní prvý) — nakonfigurovaný poskytovateľ s obmedzenou frekvenciou požiadaviek sa preskočí
+namiesto okamžitého ukončenia požiadavky a opakovateľné zlyhanie nadradenej služby alebo zlyhanie pre vyčerpanú kvótu
+(HTTP 429 vždy; 402/403 pre bezplatné úrovne služieb Firecrawl/Tavily/TinyFish s kvótami —
+nie pre Jina Reader a nikdy nie pre obyčajnú chybnú požiadavku 400) spôsobí počas spracovania požiadavky prechod na
+ďalšieho doteraz nevyskúšaného poskytovateľa s nakonfigurovanými prihlasovacími údajmi. Keď sú všetci poskytovatelia vo
+fonde vyčerpaní, koncový bod vráti jednu odpoveď `429` (s hlavičkou `Retry-After`)
+namiesto predchádzajúcej všeobecnej odpovede `400`. Keď sa požaduje explicitný `provider`,
+**nepoužije sa žiadny** tichý záložný mechanizmus — explicitný poskytovateľ s obmedzenou frekvenciou požiadaviek alebo so zlyhaním
+sprístupní svoju vlastnú chybu (`429`, ak je obmedzená frekvencia požiadaviek, inak stav nadradenej
+služby).
 
 ---
 
@@ -793,109 +941,109 @@ inak stav nadradenej služby).
 GET /v1/ws?handshake=1
 ```
 
-Overí nadviazanie spojenia s prechodom na WebSocket a vráti vzorové správy drôtového protokolu (`request`, `cancel`). Skutočné rámce WS spracúva pribalený server WS mimo tabuľky trás Next.js.
+Overí inicializačnú požiadavku na prechod na WebSocket a vráti vzorové správy drôtového protokolu (`request`, `cancel`). Skutočné rámce WS spracúva pribalený server WS mimo tabuľky trás Next.js.
 
-**Autentifikácia:** API kľúč typu Bearer počas nadväzovania spojenia.
+**Autentifikácia:** Kľúč API typu Bearer počas inicializácie spojenia.
 
 ### Responses API cez WebSocket (iba codex)
 
 ```bash
-# Rovnaký hostiteľ:port ako HTTP API (predvolene 20128); prepnite pripojenie:
+# Rovnaký hostiteľ a port ako API HTTP (predvolene 20128); prepnite pripojenie:
 wscat -c "ws://localhost:20128/v1/responses?api_key=<OMNIROUTE_API_KEY>"
 # (alebo: -H "Authorization: Bearer <OMNIROUTE_API_KEY>")
 
-# Prvý rámec MUSÍ byť response.create:
+# Prvým rámcom MUSÍ byť response.create:
 { "type": "response.create", "model": "gpt-5.5", "input": [ { "role": "user", "content": "hi" } ] }
 ```
 
-Proxy Responses-API-over-WebSocket je prepojené **výhradne s `codex`** (backend
-ChatGPT). Počúva na rovnakom porte ako API/ovládací panel na cestách `/v1/responses`,
+Proxy Responses API cez WebSocket je napojené **výhradne na `codex`** (backend ChatGPT).
+Počúva na rovnakom porte ako API/ovládací panel na cestách `/v1/responses`,
 `/responses` a `/api/v1/responses`. Pri prvom rámci `response.create`
-vykoná autentifikáciu + prípravu prostredníctvom interného mosta `codex-responses-ws`, vyberie
-pripojenie OAuth codex a vytvorí tunel k `wss://chatgpt.com/backend-api/codex/responses`
-prostredníctvom transportu `wreq-js`. **Modely, ktoré nie sú codex, sa odmietnu** (`codex_ws_provider_required`).
-Na smerovanie podľa zdieľania kvóty použite `model: "qtSd/<group>/codex/<model>"`. Implementované v
+vykoná autentifikáciu a prípravu prostredníctvom interného mosta `codex-responses-ws`, vyberie
+pripojenie codex OAuth a vytvorí tunel k `wss://chatgpt.com/backend-api/codex/responses`
+prostredníctvom transportu `wreq-js`. **Modely iné ako codex sa odmietnu** (`codex_ws_provider_required`).
+Na smerovanie s podielom kvóty použite `model: "qtSd/<group>/codex/<model>"`. Implementované v
 `app/server-ws.mjs` + `scripts/dev/responses-ws-proxy.mjs` + `src/app/api/internal/codex-responses-ws/route.ts`.
 
-**Autentifikácia:** API kľúč typu Bearer počas nadväzovania spojenia. Pribalený HTTP server (`server-ws.mjs`)
+**Autentifikácia:** Kľúč API typu Bearer počas inicializácie spojenia. Pribalený server HTTP (`server-ws.mjs`)
 musí byť aktívnym vstupným bodom (predvolene ním je, keď existuje `app/server-ws.mjs`).
 
 #### ID modelu: použite základné ID ChatGPT (bez predpony `codex/`)
 
-**Codex CLI** od OpenAI overuje názov modelu na strane klienta, keď je
-`supports_websockets = true`, a **odmieta ID s predponou poskytovateľa**, ako napríklad
+OpenAI **Codex CLI** overuje názov modelu na strane klienta, keď je
+`supports_websockets = true`, a **odmieta ID s predponou poskytovateľa**, ako je
 `codex/gpt-5.5` (`The 'codex/gpt-5.5' model is not supported when using Codex with
 a ChatGPT account`). Odošlite **základné** ID (napr. `gpt-5.5`). Most OmniRoute je
-určený iba pre codex, takže pred vytvorením tunela k nadradenej službe opätovne vyhodnotí základné ID ako model codex
-(`resolveCodexWsModelInfo`) — aj keď by sa inak základné
-`gpt-5.5` cez HTTP smerovalo k inému poskytovateľovi.
+určený iba pre codex, preto pred vytvorením tunela k nadradenej službe znova vyhodnotí základné ID ako model codex
+(`resolveCodexWsModelInfo`) — aj keď by sa základné
+`gpt-5.5` cez HTTP inak smerovalo k inému poskytovateľovi.
 
 #### Konfigurácia OpenAI Codex CLI
 
 Nasmerujte Codex CLI na OmniRoute pridaním vlastného poskytovateľa s podporou WebSocket
-do `~/.codex/config.toml` (použite samostatný `CODEX_HOME`, aby ste nezasiahli
-do existujúcej konfigurácie):
+do `~/.codex/config.toml` (použite samostatný `CODEX_HOME`, aby ste neovplyvnili
+existujúcu konfiguráciu):
 
 ```toml
-model = "gpt-5.5"                 # základné ID — NIE "codex/gpt-5.5"
+model = "gpt-5.5"                 # základné ID — NIE „codex/gpt-5.5“
 model_provider = "omniroute"
 
 [model_providers.omniroute]
 name = "OmniRoute (WS)"
 base_url = "http://localhost:20128/v1"   # bez koncovej lomky; URL WS sa odvodí (v produkcii použite https/wss)
 wire_api = "responses"                    # jediná podporovaná hodnota od februára 2026
-supports_websockets = true                # povoľuje transport Responses-over-WS
-env_key = "OMNIROUTE_API_KEY"             # obsahuje API kľúč OmniRoute (Bearer)
+supports_websockets = true                # povoľuje transport Responses cez WS
+env_key = "OMNIROUTE_API_KEY"             # obsahuje kľúč API OmniRoute (Bearer)
 ```
 
 ```bash
-export OMNIROUTE_API_KEY=sk-...           # API kľúč OmniRoute (ľubovoľný kľúč, ak REQUIRE_API_KEY=false)
+export OMNIROUTE_API_KEY=sk-...           # kľúč API OmniRoute (ľubovoľný kľúč, ak REQUIRE_API_KEY=false)
 codex exec "Responda apenas: PONG"
 ```
 
-CLI prepne `base_url + /responses` na WebSocket a OmniRoute vytvorí tunel
-k vybranému pripojeniu OAuth codex. Overené od začiatku do konca voči lokálnemu
-serveru: ChatGPT vracia `codex.rate_limits` + `response.created` a streamuje
+CLI prepne `base_url + /responses` na WebSocket a OmniRoute ho tuneluje
+k vybranému pripojeniu codex OAuth. Overené komplexne voči lokálnemu
+serveru: ChatGPT vráti `codex.rate_limits` + `response.created` a streamuje
 dokončenie.
 
 ---
 
 ## Kvóty a hlásenie problémov
 
-| Metóda | Cesta               | Popis                                                                                        |
-| ------ | ------------------- | -------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Predbežne overí kvótu pre `provider` + `accountId` pred vydaním registrovaného kľúča         |
-| POST   | `/v1/issues/report` | Nahlási zlyhanie kvóty alebo vydania kľúča na GitHub (vyžaduje `GITHUB_ISSUES_REPO` + token) |
+| Metóda | Cesta               | Popis                                                                                           |
+| ------ | ------------------- | ----------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Predbežné overenie kvóty pre `provider` + `accountId` pred vydaním registrovaného kľúča         |
+| POST   | `/v1/issues/report` | Nahlásenie zlyhania kvóty alebo vydania kľúča na GitHub (vyžaduje `GITHUB_ISSUES_REPO` + token) |
 
-**Autentifikácia:** API kľúč Bearer (`isAuthenticated`).
+**Autentifikácia:** Bearer API kľúč (`isAuthenticated`).
 
 ---
 
-## Samoobslužné použitie (`/api/usage/om-usage`)
+## Samoobslužné používanie (`/api/usage/om-usage`)
 
-Ľubovoľný API kľúč môže čítať **vlastné** využitie a kvóty — bez správcovskej autentifikácie. Toto je koncový bod, ktorý
+Ľubovoľný API kľúč môže čítať **svoje vlastné** využitie a kvóty — bez autentifikácie na správu. Toto je koncový bod, ktorý
 klient (CLI, panel OmniCopilot) používa na zobrazenie výdavkov držiteľovi kľúča.
 
 ```bash
-# Textový formát (historický kontrakt — obyčajný text pre terminál)
+# Textová forma (historický kontrakt — obyčajný text pre terminál)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Štruktúrovaný formát — používaný používateľským rozhraním
+# Štruktúrovaná forma — používaná používateľským rozhraním
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Kľúč musí mať povolenú možnosť **`allowUsageCommand`** (predvolene je vypnutá — správca API kľúčov na ovládacom paneli
-ju prepína pre každý kľúč samostatne). Bez nej koncový bod odpovie stavom `403`.
+Kľúč musí mať povolené **`allowUsageCommand`** (predvolene je vypnuté — správca API kľúčov na ovládacom paneli
+ho prepína pre každý kľúč samostatne). Bez tohto povolenia koncový bod odpovie stavom `403`.
 
-`?format=json` vracia rozlišovaný tvar, takže volajúci nikdy nečíta dátové pole z
+`?format=json` vracia rozlíšiteľnú štruktúru, takže volajúci nikdy nečíta dátové pole z
 odmietnutej odpovede. Pri úspechu:
 
 ```jsonc
 {
   "allowed": true,
-  // prítomné iba vtedy, keď má kľúč aktivované limity využitia pre daný kľúč (denné/týždenné v USD):
+  // prítomné iba vtedy, keď má kľúč zapnuté limity využitia pre konkrétny kľúč (denné/týždenné v USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -904,13 +1052,8 @@ odmietnutej odpovede. Pri úspechu:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snímka kvóty vybraného poskytovateľa alebo null, ak zatiaľ nie je nič uložené vo vyrovnávacej pamäti:
-  "provider": {
-    "connectionId": "…",
-    "provider": "claude",
-    "plan": "…",
-    "quotas": {/* … */},
-  },
+  // snímka kvóty vybraného poskytovateľa alebo null, ak zatiaľ nie je nič vo vyrovnávacej pamäti:
+  "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
   // snímka každého pripojenia, aby používateľské rozhranie mohlo vykresliť viacero poskytovateľov vedľa seba:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
@@ -919,31 +1062,32 @@ odmietnutej odpovede. Pri úspechu:
 }
 ```
 
-Pri odmietnutí (`401` neplatný kľúč / `403` nepovolené) rovnaká trasa vráti
+Pri odmietnutí (`401` neplatný kľúč / `403` nepovolené) tá istá trasa vráti
 `{ "allowed": false, "error": { "message": "…" } }` — prítomné, ale prázdne `personal`/`provider`
-(kľúč je povolený, ale zatiaľ neboli získané žiadne údaje) predstavuje iný stav než odmietnutie a rozlišuje ich iba formát JSON.
+(kľúč je povolený, ale zatiaľ neboli získané žiadne údaje) predstavuje iný stav než odmietnutie a rozlišuje ich
+iba forma JSON.
 
-**Autentifikácia:** vlastný Bearer API kľúč volajúceho overený pomocou `isValidApiKey` — toto _nie je_
-správcovské rozhranie (`/api/keys/…`), ktoré zostáva chránené pomocou `requireManagementAuth`.
+**Autentifikácia:** vlastný Bearer API kľúč volajúceho, overený pomocou `isValidApiKey` — toto _nie je_
+rozhranie na správu (`/api/keys/…`), ktoré zostáva chránené pomocou `requireManagementAuth`.
 
-### Nespracované percentá kvót verzus percentá upravené podľa hranice
+### Nespracované percentá kvót verzus percentá upravené podľa hraničnej hodnoty
 
-Pri používaní `/api/usage/om-usage` by si volajúci mali všimnúť rozdiel medzi
-percentami uvádzanými vo **výstupe vo formáte obyčajného textu** a v štruktúrovanom **výstupe JSON**:
+Pri používaní `/api/usage/om-usage` by volajúci mali brať do úvahy rozdiel medzi
+percentami uvádzanými vo **výstupe obyčajného textu** a štruktúrovanom **výstupe JSON**:
 
-| Aspekt                 | Formát obyčajného textu (`/api/usage/om-usage` / `@@om-usage`)                                     | Formát JSON (`?format=json`)                                                                    |
-| :--------------------- | :------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
-| **Výstupné pole**      | `NN% left` (napr. `20% left`)                                                                      | `provider.quotas` / `providers[].quotas`                                                        |
-| **Meranie**            | **Použiteľný limit upravený podľa hranice**: zostávajúca kapacita nad hraničnou hodnotou           | **Nespracovaná kvóta zo zdroja**: neupravené meranie poskytovateľa                              |
-| **Škálovanie hranice** | Škálované pomocou `effectiveRemainingPercent()`, takže chránená rezerva sa zobrazuje ako `0% left` | Žiadne (nespracované hodnoty snímky podľa údajov poskytovateľa)                                 |
-| **Údaje o hranici**    | Zahrnuté do zobrazeného percenta                                                                   | Uložené v `quotaWindowThresholds` pre každé pripojenie (alebo predvolené hodnoty servera)       |
-| **Hlavný používateľ**  | Interaktívne CLI, terminálové výzvy, ľudskí operátori                                              | Programové integrácie, ovládacie panely, analytické nástroje, nástroje na sledovanie fakturácie |
+| Aspekt                 | Formát obyčajného textu (`/api/usage/om-usage` / `@@om-usage`)                                    | Formát JSON (`?format=json`)                                                              |
+| :--------------------- | :------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------- |
+| **Výstupné pole**      | `NN% left` (napr. `20% left`)                                                                     | `provider.quotas` / `providers[].quotas`                                                  |
+| **Meranie**            | **Použiteľná kapacita upravená podľa hraničnej hodnoty**: zostávajúca kapacita nad prahom         | **Nespracovaná upstreamová kvóta**: neupravené meranie poskytovateľa                      |
+| **Úprava podľa prahu** | Upravené pomocou `effectiveRemainingPercent()`, takže chránená rezerva sa zobrazuje ako `0% left` | Žiadna (nespracované hodnoty snímky nahlásené poskytovateľom)                             |
+| **Údaje o prahu**      | Zahrnuté do zobrazeného percenta                                                                  | Uložené v `quotaWindowThresholds` pre každé pripojenie (alebo predvolené hodnoty servera) |
+| **Hlavný používateľ**  | Interaktívne CLI, terminálové výzvy, ľudskí operátori                                             | Programové integrácie, ovládacie panely, analytika, nástroje na sledovanie fakturácie     |
 
-#### Vzorec úpravy podľa hranice
+#### Vzorec úpravy podľa hraničnej hodnoty
 
-OmniRoute podporuje proaktívne hranice kvót, aby zabránil vyčerpaniu zdroja (nakonfigurované prostredníctvom
-`quotaWindowThresholds` pripojenia, predvolených hodnôt poskytovateľa alebo globálnych nastavení odolnosti). Keď je v okne kvóty
-aktívna hraničná hodnota (napr. `cutoff = 25%`), textové vykresľovanie vypočíta zostávajúci limit takto:
+OmniRoute podporuje proaktívne hraničné hodnoty kvót, ktoré zabraňujú vyčerpaniu upstreamových zdrojov (konfigurované prostredníctvom
+`quotaWindowThresholds` pripojenia, predvolených hodnôt poskytovateľa alebo globálnych nastavení odolnosti). Keď je v intervale kvóty aktívny hraničný prah
+(napr. `cutoff = 25%`), textový renderer vypočíta zostávajúcu kapacitu takto:
 
 - Ak `remaining <= cutoff`: vráti `0%`.
 - Ak `remaining > cutoff`: vráti `((remaining - cutoff) / (100 - cutoff)) * 100`.
@@ -952,30 +1096,30 @@ Formátovaný textový výstup túto hodnotu zaokrúhli na najbližšie celé č
 
 #### Ilustračný príklad
 
-Predstavme si okno poskytovateľa s **60 % nespracovaného využitia** (teda so **40 % zostávajúcej nespracovanej kvóty**) a nakonfigurovanou
-hraničnou hodnotou **25 % zostávajúcej kvóty**:
+Predstavte si interval poskytovateľa so **60 % nespracovaného využitia** (teda **40 % nespracovanej zostávajúcej kvóty**) a nakonfigurovaným
+prahom **25 % zostávajúcej kvóty**:
 
 | Reprezentácia                          | Výpočet                                            | Zostáva  |            Odvodené využitie             |
 | :------------------------------------- | :------------------------------------------------- | :------: | :--------------------------------------: |
-| **Nespracovaný JSON (`?format=json`)** | Snímka zo zdroja (`quotas[window]`)                | **40 %** |                 **60 %**                 |
+| **Nespracovaný JSON (`?format=json`)** | Upstreamová snímka (`quotas[window]`)              | **40 %** |                 **60 %**                 |
 | **Textový formát (`NN% left`)**        | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20 %** | **80 %** (pri výpočte `100 - remaining`) |
 
-- **Prečo text zobrazuje 20 % zostávajúcej kapacity:** Zo 40 % fyzickej kvóty zostávajúcej na účte je 25 % rezervovaných
-  pravidlom hranice. Volajúcemu zostáva iba 15 % zo 75 % použiteľnej rezervy, než smerovač prestane
-  smerovať požiadavky do tohto pripojenia. Škálovanie zabezpečuje, že pripojenie signalizuje vyčerpanie (`0% left`) presne vtedy,
-  keď sa smerovanie zastaví.
+- **Prečo text zobrazuje 20 % zostávajúcej kapacity:** Z 40 % fyzickej kvóty zostávajúcej na účte je 25 % rezervovaných
+  zásadou hraničnej hodnoty. Volajúcemu zostáva len 15 % zo 75 % použiteľnej rezervy predtým, ako smerovač prestane
+  smerovať požiadavky na toto pripojenie. Úprava zabezpečuje, že pripojenie signalizuje vyčerpanie (`0% left`) presne vtedy, keď
+  sa smerovanie ukončí.
 - **Prečo JSON zachováva nespracované hodnoty:** Obsah JSON vracia presnú snímku poskytovateľa (`UsageSnapshot`),
-  takže externé nástroje majú prístup k skutočnému využitiu zdroja a hodnotám
-  `quotaWindowThresholds` na úrovni pripojenia bez stratového škálovania na strane servera.
+  takže externé nástroje majú prístup k skutočnému upstreamovému využitiu a hodnotám
+  `quotaWindowThresholds` na úrovni pripojenia bez stratovej úpravy na strane servera.
 
 #### Pokyny na migráciu používateľov
 
 Ak externá integrácia (napríklad doplnok editora alebo rozšírenie agenta) predtým získavala údaje z textového
-koncového bodu (`NN% left`) a počítala percento využitia ako `100 - NN`, migrácia na `?format=json` znamená:
+koncového bodu (`NN% left`) a vypočítavala použité percento ako `100 - NN`, prechod na `?format=json` znamená:
 
-- Čítanie nespracovaných hodnôt JSON bude odrážať **skutočnú spotrebu zdroja** (v uvedenom príklade 60 % využitia).
-- Ak chce integrácia zachovať sémantiku použiteľného limitu textového koncového bodu, môže vzorec efektívnej zostávajúcej kapacity
-  vyhodnotiť na strane klienta s použitím `quotaWindowThresholds` pre nastavenia prepísané na úrovni pripojenia.
+- Čítanie nespracovaných hodnôt JSON bude odrážať **skutočnú spotrebu v nadradenom systéme** (v príklade vyššie je použitých 60 %).
+- Ak chce integrácia zachovať sémantiku použiteľného zostávajúceho limitu textového koncového bodu, môže vzorec
+  efektívneho zostávajúceho limitu vyhodnotiť na strane klienta pomocou `quotaWindowThresholds` pre prepísania na úrovni pripojenia.
 
 ---
 
@@ -1008,35 +1152,31 @@ Príklad odpovede:
 
 ### Vplyv na latenciu
 
-ZÁSAH do sémantickej vyrovnávacej pamäte poskytne odpoveď z vyrovnávacej pamäte **bez volania
-nadradenej služby**, takže hlásená hodnota `X-OmniRoute-Response-Latency` je takmer nulová
-(bez ohľadu na pôvodnú latenciu nadradenej služby). Klienti citliví na latenciu
-(benchmarking, monitorovanie p50/p99) by mali skontrolovať hlavičku odpovede
-`X-OmniRoute-Cache-Latency`:
+Pri ZÁSAHU do sémantickej vyrovnávacej pamäte sa odpoveď poskytne z vyrovnávacej pamäte **bez volania nadradenej služby**, takže hlásená hodnota `X-OmniRoute-Response-Latency` je takmer nulová (bez ohľadu na pôvodnú latenciu nadradenej služby). Klienti citliví na latenciu (porovnávacie testovanie, monitorovanie p50/p99) by mali kontrolovať hlavičku odpovede `X-OmniRoute-Cache-Latency`:
 
 | Hodnota     | Význam                                                                                      |
 | ----------- | ------------------------------------------------------------------------------------------- |
 | `synthetic` | Odpoveď poskytnutá z vyrovnávacej pamäte; latencia nie je skutočným časom nadradenej služby |
 | _(chýba)_   | Odpoveď zo skutočného volania nadradenej služby                                             |
 
-### Obídenie vyrovnávacej pamäte podľa kľúča
+### Obídenie vyrovnávacej pamäte pre jednotlivé kľúče
 
-API kľúče môžu pomocou `cacheDefaultMode` vypnúť čítanie zo sémantickej vyrovnávacej pamäte:
+Kľúče API môžu zrušiť používanie čítania zo sémantickej vyrovnávacej pamäte prostredníctvom `cacheDefaultMode`:
 
-| Hodnota  | Správanie                                                                        |
-| -------- | -------------------------------------------------------------------------------- |
-| `legacy` | Normálne správanie vyrovnávacej pamäte (predvolené)                              |
-| `bypass` | Úplne preskočí vyhľadávanie vo vyrovnávacej pamäti; vždy zavolá nadradenú službu |
+| Hodnota  | Správanie                                                                               |
+| -------- | --------------------------------------------------------------------------------------- |
+| `legacy` | Bežné správanie vyrovnávacej pamäte (predvolené)                                        |
+| `bypass` | Úplné preskočenie vyhľadávania vo vyrovnávacej pamäti; vždy sa použije nadradená služba |
 
-Nastavte pri vytvorení kľúča (`POST /api/keys`) alebo pri aktualizácii (`PATCH /api/keys/[id]`):
+Nastavte pri vytváraní kľúča (`POST /api/keys`) alebo aktualizácii (`PATCH /api/keys/[id]`):
 
 ```json
 { "cacheDefaultMode": "bypass" }
 ```
 
-### Obídenie pre jednotlivú požiadavku
+### Obídenie pre jednotlivé požiadavky
 
-Každá požiadavka môže obísť vyrovnávaciu pamäť bez ohľadu na nastavenia kľúča:
+Ľubovoľná požiadavka môže obísť vyrovnávaciu pamäť bez ohľadu na nastavenia kľúča:
 
 ```
 X-OmniRoute-No-Cache: true
@@ -1046,23 +1186,22 @@ X-OmniRoute-No-Cache: true
 
 ## Ovládací panel a správa
 
-Trasy správy (`/api/*` okrem verejného overenia totožnosti/prihlásenia) **nie sú** autorizované
-bežnými kľúčmi API na inferenciu. Rodiny prihlasovacích údajov, rozsahy a príklady použitia curl:
-[Overenie totožnosti pre správu](../guides/MANAGEMENT-AUTH.md).
+Trasy správy (`/api/*` okrem verejného overovania/prihlásenia) **nie sú** autorizované bežnými kľúčmi API na inferenciu. Skupiny prihlasovacích údajov, rozsahy a príklady použitia curl:
+[Overovanie pre správu](../guides/MANAGEMENT-AUTH.md).
 
-### Overenie totožnosti
+### Overovanie
 
-| Koncový bod                   | Metóda   | Popis                                                                                                                                                                                                                                                                                                                                |
-| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/auth/login`             | POST     | Prihlásenie                                                                                                                                                                                                                                                                                                                          |
-| `/api/auth/logout`            | POST     | Odhlásenie                                                                                                                                                                                                                                                                                                                           |
-| `/api/settings/require-login` | GET/POST | Stav prihlásenia (GET, verejné). POST nastaví heslo alebo prepne prihlasovanie: keď už heslo existuje, je dostupné iba operátorovi (relácia ovládacieho panela, lokálne CLI alebo vypnuté prihlasovanie — kľúče API a tokeny `oma_` dostanú odpoveď `403`); relácia ovládacieho panela odošle `currentPassword`, aby nahradila heslo |
+| Koncový bod                   | Metóda   | Popis                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Prihlásenie                                                                                                                                                                                                                                                                                                                       |
+| `/api/auth/logout`            | POST     | Odhlásenie                                                                                                                                                                                                                                                                                                                        |
+| `/api/settings/require-login` | GET/POST | Stav prihlásenia (GET, verejné). POST nastaví heslo/prepne požiadavku na prihlásenie: po vytvorení hesla je k dispozícii iba operátorovi (relácia ovládacieho panela, lokálne CLI alebo vypnuté prihlasovanie — kľúče API a tokeny `oma_` dostanú `403`); relácia ovládacieho panela odošle `currentPassword` na nahradenie hesla |
 
 ### Správa poskytovateľov
 
 | Koncový bod                             | Metóda                    | Popis                                                                                                                                                                        |
 | --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Zobrazenie zoznamu/vytvorenie poskytovateľov                                                                                                                                 |
+| `/api/providers`                        | GET/POST                  | Zobrazenie zoznamu / vytvorenie poskytovateľov                                                                                                                               |
 | `/api/providers/[id]`                   | GET/PUT/DELETE            | Správa poskytovateľa                                                                                                                                                         |
 | `/api/providers/[id]/test`              | POST                      | Test pripojenia k poskytovateľovi                                                                                                                                            |
 | `/api/providers/[id]/models`            | GET                       | Zobrazenie zoznamu modelov poskytovateľa                                                                                                                                     |
@@ -1070,25 +1209,25 @@ bežnými kľúčmi API na inferenciu. Rodiny prihlasovacích údajov, rozsahy a
 | `/api/providers/bulk`                   | POST                      | Hromadné pridanie kľúčov API pre JEDNÉHO poskytovateľa                                                                                                                       |
 | `/api/providers/import`                 | POST                      | Import heterogénneho ZOZNAMU poskytovateľov zo spracovaného súboru CSV/JSON (#6836); výsledky čiastočných zlyhaní pre jednotlivé riadky                                      |
 | `/api/provider-nodes*`                  | Rôzne                     | Správa uzlov poskytovateľov                                                                                                                                                  |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Vlastné modely a prepísania nastavení jednotlivých modelov (pridanie, aktualizácia, skrytie/zobrazenie, odstránenie)                                                         |
-| `/api/provider-models/validate-and-add` | POST                      | Voliteľné striktné overenie pripojenia s overením totožnosti pre správu a atomická registrácia vlastného modelu; pozrite si [Overenie modelu](../guides/MODEL-VALIDATION.md) |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Vlastné modely a prepísania pre jednotlivé modely (pridanie, aktualizácia, skrytie/zobrazenie, odstránenie)                                                                  |
+| `/api/provider-models/validate-and-add` | POST                      | Voliteľné striktné overenie pripojenia s overeným správcovským prístupom a atómová registrácia vlastného modelu; pozrite si [Overenie modelu](../guides/MODEL-VALIDATION.md) |
 
-Pre synchronizované/importované modely prijíma `PUT /api/provider-models` položky `provider`, `modelId` a
+Pre synchronizované/importované modely prijíma `PUT /api/provider-models` hodnoty `provider`, `modelId` a
 `maxOutputTokenOverride`: kladné celé číslo nastaví manuálny limit výstupných tokenov a hodnota `null`
-ho zruší, čím obnoví predvolenú hodnotu. `GET /api/provider-models?provider=<provider>` vracia tieto
-hodnoty v `modelOutputOverrides` vrátane modelov bez záznamu vlastného modelu. Prepísanie
-používa schopnosť `max_output_tokens` za behu a pretrvá aj po opätovnej synchronizácii modelu. Stránka
+ho zruší, čím sa obnoví predvolené nastavenie. `GET /api/provider-models?provider=<provider>` vracia tieto
+hodnoty v `modelOutputOverrides` vrátane modelov bez riadka vlastného modelu. Prepísanie
+používa runtime schopnosť `max_output_tokens` a zachová sa aj po opätovnej synchronizácii modelu. Stránka
 poskytovateľa kompatibilného s OpenAI ponúka rovnaké ovládacie prvky na úpravu/zrušenie a označuje modely s explicitnou podporou obrazu.
 
 Vlastné uzly Chat Completions prispôsobujú explicitné vypnutie uvažovania nadradenému backendu. Úspešný
 test pripojenia automaticky vyberie ovládacie prvky šablóny chatu pre každé presné ID modelu,
-ktorého položka `/models` preukáže rozpoznanú hodnotu `owned_by`: `vllm`, `sglang` alebo `llamacpp`.
-Transparentné obálky kompatibilné s OpenAI môžu zachovať pôvodnú položku modelu vo vnorenom
-objekte `openai`; detekcia sleduje najviac tri takéto obálky. Modely s chýbajúcim, neznámym alebo
-konfliktným vlastníctvom si zachovajú bežné správanie OpenAI. Detekcia opätovne používa existujúcu požiadavku na katalóg,
-nevytvára žiadne tokeny dokončenia a zneplatní sa pri zmene koncového bodu pripojenia.
+ktorého položka `/models` preukazuje rozpoznanú hodnotu `owned_by`: `vllm`, `sglang` alebo `llamacpp`.
+Transparentné obalové vrstvy kompatibilné s OpenAI môžu zachovať pôvodnú položku modelu vo vnorenom
+objekte `openai`; detekcia prechádza až tromi takýmito obálkami. Modely s chýbajúcim, neznámym alebo
+konfliktným vlastníctvom si zachovajú bežné správanie OpenAI. Detekcia opätovne využíva existujúcu požiadavku na katalóg,
+negeneruje žiadne tokeny dokončenia a zneplatní sa pri zmene koncového bodu pripojenia.
 
-Ak chcete toto správanie vynútiť pre backend, ktorý tieto metadáta neposkytuje, použite existujúce API
+Ak chcete toto správanie pevne nastaviť pre backend, ktorý tieto metadáta neposkytuje, použite existujúce rozhranie API
 na čiastočnú aktualizáciu poskytovateľa:
 
 ```json
@@ -1099,24 +1238,24 @@ na čiastočnú aktualizáciu poskytovateľa:
 }
 ```
 
-Odošlite toto telo pomocou `PUT /api/providers/<connection-id>`. Pri tomto pripojení sa explicitná
-úroveň úsilia pri uvažovaní `none` odosiela ako `chat_template_kwargs.thinking=false` a
-`chat_template_kwargs.enable_thinking=false`. Explicitné natívne hodnoty šablóny zostávajú rozhodujúce,
-pokiaľ pravidlo uvažovania na strane servera nevynúti určitú úroveň úsilia. Nastavenie sa použije iba vtedy, keď vlastné
+Toto telo odošlite pomocou `PUT /api/providers/<connection-id>`. Pri danom pripojení sa explicitná
+intenzita uvažovania `none` odošle ako `chat_template_kwargs.thinking=false` a
+`chat_template_kwargs.enable_thinking=false`. Explicitné hodnoty natívnej šablóny zostávajú rozhodujúce,
+pokiaľ pravidlo uvažovania na strane servera nevynúti určitú intenzitu. Nastavenie sa uplatňuje iba vtedy, keď vlastné
 pripojenie kompatibilné s OpenAI odosiela telo Chat Completions; požiadavky Responses a bežní
-poskytovatelia si zachovajú svoj natívny formát požiadavky. Nastavte `reasoningControl` na `openai`, ak chcete vynútiť bežné
-odovzdávanie `reasoning_effort` služby OpenAI, alebo ho vynechajte/nastavte na `null`, ak chcete použiť automatickú detekciu.
+poskytovatelia si zachovávajú svoj natívny tvar požiadavky. Nastavte `reasoningControl` na `openai`, ak chcete vynútiť bežné odovzdanie
+`reasoning_effort` do OpenAI, alebo ho vynechajte/nastavte na `null`, ak chcete použiť automatickú detekciu.
 
-Požiadavky klasifikátora v automatickom režime Claude Code majú natívne uvažovanie predvolene zakázané, ak neobsahujú
-žiadne explicitné ovládacie prvky uvažovania. Detekcia používa systémovú značku klasifikátora v požiadavkách
-vo formáte Claude, nie názvy modelov ani limity dokončenia. Explicitné ovládacie prvky tela, podporované hlavičky úsilia/uvažovania,
-pravidlá smerovania a vyriešená úroveň úsilia modelu si zachovávajú svoju existujúcu prioritu. Obe fázy klasifikátora
-si zachovávajú svoje výzvy, limity dokončenia, sekvencie zastavenia a skutočné rozhodnutia nadradenej služby
-o povoleniach; druhá fáza môže naďalej vytvárať požadované viditeľné uvažovanie ako obyčajný text.
+Požiadavky klasifikátora automatického režimu Claude Code predvolene nastavujú natívne premýšľanie ako vypnuté, ak neobsahujú
+žiadne explicitné ovládacie prvky uvažovania. Detekcia používa systémovú značku klasifikátora v požiadavkách vo formáte Claude,
+nie názvy modelov ani limity dokončenia. Explicitné ovládacie prvky tela, podporované hlavičky intenzity/premýšľania,
+pravidlá smerovania a vyriešená intenzita modelu si zachovávajú svoju existujúcu prioritu. Obe fázy klasifikátora
+si zachovávajú svoje prompty, limity dokončenia, sekvencie zastavenia a skutočné rozhodnutia nadradeného systému
+o oprávneniach; druhá fáza môže naďalej vytvárať požadované viditeľné uvažovanie ako bežný text.
 
 ### Toky OAuth
 
-| Koncový bod                      | Metóda | Popis                              |
+| Koncový bod                      | Metóda | Popis špecifický pre poskytovateľa |
 | -------------------------------- | ------ | ---------------------------------- |
 | `/api/oauth/[provider]/[action]` | Rôzne  | OAuth špecifické pre poskytovateľa |
 
@@ -1127,55 +1266,55 @@ o povoleniach; druhá fáza môže naďalej vytvárať požadované viditeľné 
 | `/api/models/alias`   | GET/POST | Aliasy modelov                           |
 | `/api/models/catalog` | GET      | Všetky modely podľa poskytovateľa a typu |
 | `/api/combos*`        | Rôzne    | Správa kombinácií                        |
-| `/api/keys*`          | Rôzne    | Správa kľúčov API                        |
+| `/api/keys*`          | Rôzne    | Správa API kľúčov                        |
 | `/api/pricing`        | GET      | Ceny modelov                             |
 
 ### Používanie a analytika
 
-| Koncový bod                      | Metóda          | Popis                                                                                                                                                                                                                                                                                                                                    |
-| -------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | História používania                                                                                                                                                                                                                                                                                                                      |
-| `/api/usage/logs`                | GET             | Protokoly používania                                                                                                                                                                                                                                                                                                                     |
-| `/api/usage/request-logs`        | GET             | Protokoly na úrovni požiadaviek                                                                                                                                                                                                                                                                                                          |
-| `/api/usage/[connectionId]`      | GET             | Používanie podľa jednotlivých pripojení                                                                                                                                                                                                                                                                                                  |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Rozpočty limitov tokenov podľa jednotlivých kľúčov API                                                                                                                                                                                                                                                                                   |
-| `/api/usage/model-latency-stats` | GET             | Priebežný agregát latencie podľa poskytovateľa/modelu (avg/p50/p95/p99, miera úspešnosti); filtre: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                       |
-| `/api/usage/cache-health`        | GET             | Súhrn stavu vyrovnávacej pamäte výziev nad `call_logs` — pomer zápisov/čítaní, distribúcia veľkosti zápisov p50/p90/p99, koncentrácia rozsiahlych zápisov, rozdelenie podľa modelov a verdikt `healthy`/`degraded`/`thrash`/`no-data`; parametre dotazu `range` (`1h`\|`24h`\|`7d`\|`30d`, predvolene `24h`) a voliteľný `model` (#8827) |
+| Koncový bod                      | Metóda          | Popis                                                                                                                                                                                                                                                                                                                                                |
+| -------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | História používania                                                                                                                                                                                                                                                                                                                                  |
+| `/api/usage/logs`                | GET             | Záznamy o používaní                                                                                                                                                                                                                                                                                                                                  |
+| `/api/usage/request-logs`        | GET             | Záznamy na úrovni požiadaviek                                                                                                                                                                                                                                                                                                                        |
+| `/api/usage/[connectionId]`      | GET             | Používanie podľa jednotlivých pripojení                                                                                                                                                                                                                                                                                                              |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Rozpočty limitov tokenov pre jednotlivé API kľúče                                                                                                                                                                                                                                                                                                    |
+| `/api/usage/model-latency-stats` | GET             | Priebežné agregované štatistiky latencie podľa poskytovateľa/modelu (priemer/p50/p95/p99, miera úspešnosti); filtre: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                 |
+| `/api/usage/cache-health`        | GET             | Súhrn stavu vyrovnávacej pamäte promptov na základe `call_logs` — pomer zápisov/čítaní, rozdelenie veľkosti zápisov p50/p90/p99, koncentrácia veľkých zápisov, členenie podľa modelov a verdikt `healthy`/`degraded`/`thrash`/`no-data`; parametre dotazu `range` (`1h`\|`24h`\|`7d`\|`30d`, predvolene `24h`) a voliteľný parameter `model` (#8827) |
 
-### Povolenia kľúčov API
+### Oprávnenia API kľúčov
 
-`PATCH /api/keys/{id}` aktualizuje povolenia existujúceho kľúča. Rovnako ako každá trasa `/api/keys*` vyžaduje autorizáciu na správu (pozrite si [Autentifikáciu správy](../guides/MANAGEMENT-AUTH.md)), nie inferenčný kľúč. Odošlite iba polia, ktoré chcete zmeniť; požiadavka bez ktoréhokoľvek z nich bude odmietnutá s hlásením `No valid fields to update`. Akceptované polia definuje `updateKeyPermissionsSchema` v `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` aktualizuje oprávnenia existujúceho kľúča. Rovnako ako každá trasa `/api/keys*` vyžaduje autorizáciu na správu (pozrite si [Autentifikáciu správy](../guides/MANAGEMENT-AUTH.md)), nie inferenčný kľúč. Odošlite iba polia, ktoré chcete zmeniť; požiadavka bez ktoréhokoľvek z nich bude zamietnutá s hlásením `No valid fields to update`. Akceptované polia definuje `updateKeyPermissionsSchema` v súbore `src/shared/validation/schemas/keys.ts`.
 
-| Pole                                        | Typ                                                                            | Poznámky                                                                                                                      |
-| ------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | reťazec, 1 – 200 znakov                                                        |                                                                                                                               |
-| `isActive`                                  | logická hodnota                                                                |                                                                                                                               |
-| `isBanned`                                  | logická hodnota                                                                |                                                                                                                               |
-| `expiresAt`                                 | dátum a čas vo formáte ISO 8601 alebo `null`                                   | `null` zruší platnosť času exspirácie                                                                                         |
-| `modelAccessMode`                           | `all` \| `restricted`                                                          | `allowedModels` musí byť prázdne, keď je režim nastavený na `all`                                                             |
-| `allowedModels`, `blockedModels`            | pole reťazcov, najviac 1000 položiek                                           |                                                                                                                               |
-| `allowedCombos`                             | pole reťazcov, najviac 500 položiek                                            | Určuje, ktoré kombinácie môže kľúč volať; priame modely sa riadia pomocou `modelAccessMode` / `allowedModels`                 |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                          | `allowedConnections` nesmie byť prázdne pri nastavení `restricted` a musí byť prázdne pri nastavení `all`                     |
-| `allowedConnections`                        | pole UUID, najviac 100 položiek                                                |                                                                                                                               |
-| `allowAutoCombos`                           | logická hodnota                                                                | Hodnota `false` odmietne požiadavky na modely `auto/*` s týmto kľúčom; kľúče, pre ktoré nebola nikdy nastavená, sú povolené   |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                  | Určuje, čo `GET /v1/models` zobrazí pre tento kľúč (iba kombinácie, iba modely alebo oboje); nemení, čo môže kľúč volať       |
-| `forcedModel`                               | reťazec s najviac 300 znakmi alebo `null`                                      | Smeruje chatové požiadavky na tento model/kombináciu namiesto `X-Route-Model` a `body.model`; obmedzenia kľúča naďalej platia |
-| `noLog`, `autoResolve`                      | logická hodnota                                                                |                                                                                                                               |
-| `throttleDelayMs`                           | celé číslo, 0 – 300000                                                         |                                                                                                                               |
-| `maxSessions`                               | celé číslo, 0 – 10000                                                          |                                                                                                                               |
-| `rateLimits`                                | pole objektov `{ limit, window }` (kladné celé čísla, najviac 50) alebo `null` | `null` zruší limity                                                                                                           |
-| `accessSchedule`                            | objekt plánu alebo `null`                                                      | `null` zruší plán                                                                                                             |
-| `scopes`                                    | pole reťazcov, najviac 32 položiek                                             |                                                                                                                               |
-| `allowedEndpoints`                          | pole reťazcov, najviac 20 položiek                                             |                                                                                                                               |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                             |                                                                                                                               |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                           | Pozrite si [Obídenie vyrovnávacej pamäte podľa kľúča](#per-key-cache-bypass)                                                  |
-| `compressionEnabled`                        | logická hodnota                                                                |                                                                                                                               |
-| `codexServiceMode`                          | jeden z režimov služby Codex                                                   |                                                                                                                               |
-| `disableNonPublicModels`                    | boolean                                                                        |                                                                                                                               |
-| `allowUsageCommand`                         | boolean                                                                        |                                                                                                                               |
-| `usageLimitEnabled`                         | boolean                                                                        |                                                                                                                               |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 alebo `null`                                                       |                                                                                                                               |
-| `chaosModeEnabled`                          | boolean                                                                        |                                                                                                                               |
+| Pole                                        | Typ                                                                            | Poznámky                                                                                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | reťazec, 1 – 200 znakov                                                        |                                                                                                                                        |
+| `isActive`                                  | logická hodnota                                                                |                                                                                                                                        |
+| `isBanned`                                  | logická hodnota                                                                |                                                                                                                                        |
+| `expiresAt`                                 | dátum a čas podľa ISO 8601 alebo `null`                                        | `null` zruší platnosť času vypršania                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                                          | `allowedModels` musí byť prázdne, keď je režim nastavený na `all`                                                                      |
+| `allowedModels`, `blockedModels`            | pole reťazcov, najviac 1000                                                    |                                                                                                                                        |
+| `allowedCombos`                             | pole reťazcov, najviac 500                                                     | Určuje, ktoré kombinácie môže kľúč volať; priame modely sa riadia nastaveniami `modelAccessMode` / `allowedModels`                     |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                          | `allowedConnections` nesmie byť prázdne pri nastavení `restricted` a musí byť prázdne pri nastavení `all`                              |
+| `allowedConnections`                        | pole UUID, najviac 100                                                         |                                                                                                                                        |
+| `allowAutoCombos`                           | logická hodnota                                                                | `false` odmietne požiadavky na modely `auto/*` s týmto kľúčom; kľúče, ktoré túto hodnotu nikdy nenastavili, sú povolené                |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                  | Určuje, čo `GET /v1/models` vypíše pre tento kľúč (iba kombinácie, iba modely alebo oboje); nemení, čo môže kľúč volať                 |
+| `forcedModel`                               | reťazec s najviac 300 znakmi alebo `null`                                      | Smeruje chatové požiadavky na tento model/kombináciu s prednosťou pred `X-Route-Model` a `body.model`; obmedzenia kľúča naďalej platia |
+| `noLog`, `autoResolve`                      | logická hodnota                                                                |                                                                                                                                        |
+| `throttleDelayMs`                           | celé číslo, 0 – 300000                                                         |                                                                                                                                        |
+| `maxSessions`                               | celé číslo, 0 – 10000                                                          |                                                                                                                                        |
+| `rateLimits`                                | pole objektov `{ limit, window }` (kladné celé čísla, najviac 50) alebo `null` | `null` zruší obmedzenia                                                                                                                |
+| `accessSchedule`                            | objekt harmonogramu alebo `null`                                               | `null` zruší harmonogram                                                                                                               |
+| `scopes`                                    | pole reťazcov, najviac 32                                                      |                                                                                                                                        |
+| `allowedEndpoints`                          | pole reťazcov, najviac 20                                                      |                                                                                                                                        |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                             |                                                                                                                                        |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                           | Pozrite si [Obídenie vyrovnávacej pamäte pre jednotlivé kľúče](#per-key-cache-bypass)                                                  |
+| `compressionEnabled`                        | logická hodnota                                                                |                                                                                                                                        |
+| `codexServiceMode`                          | jeden z režimov služby Codex                                                   |                                                                                                                                        |
+| `disableNonPublicModels`                    | boolean                                                                        |                                                                                                                                        |
+| `allowUsageCommand`                         | boolean                                                                        |                                                                                                                                        |
+| `usageLimitEnabled`                         | boolean                                                                        |                                                                                                                                        |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | číslo >= 0 alebo `null`                                                        |                                                                                                                                        |
+| `chaosModeEnabled`                          | boolean                                                                        |                                                                                                                                        |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1186,127 +1325,128 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Nastavenia
 
-| Koncový bod                           | Metóda        | Popis                                                                                                                                                                                                                                                                                  |
-| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Všeobecné nastavenia. Kľúče bezpečnostných politík (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) vyžadujú `currentPassword` a poverenie operátora — API kľúče a tokeny `oma_` dostanú `403`; každá zmena vyžaduje rozsah prístupového tokenu `admin` |
-| `/api/settings/proxy`                 | GET/PUT       | Konfigurácia sieťového proxy                                                                                                                                                                                                                                                           |
-| `/api/settings/proxy/test`            | POST          | Test pripojenia cez proxy                                                                                                                                                                                                                                                              |
-| `/api/settings/ip-filter`             | GET/PUT       | Zoznam povolených/blokovaných IP adries                                                                                                                                                                                                                                                |
-| `/api/settings/thinking-budget`       | GET/PUT       | Režim prepisovania **požiadaviek** na premýšľanie/uvažovanie (bez zmeny / automatické odstránenie / vlastný / adaptívny). Nezávislé od kompresie. Pozrite si [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                       |
-| `/api/settings/system-prompt`         | GET/PUT       | Globálna systémová výzva                                                                                                                                                                                                                                                               |
-| `/api/settings/compression`           | GET/PUT       | Globálna konfigurácia kompresie                                                                                                                                                                                                                                                        |
-| `/api/settings/purge-request-history` | POST          | Vymazanie riadkov denníka požiadaviek a lokálnych artefaktov denníka volaní                                                                                                                                                                                                            |
+| Koncový bod                           | Metóda        | Popis                                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Všeobecné nastavenia. Kľúče bezpečnostných zásad (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) vyžadujú `currentPassword` a prihlasovací údaj operátora — API kľúče a tokeny `oma_` dostanú `403`; každá zmena vyžaduje rozsah prístupového tokenu `admin` |
+| `/api/settings/proxy`                 | GET/PUT       | Konfigurácia sieťového proxy servera                                                                                                                                                                                                                                                         |
+| `/api/settings/proxy/test`            | POST          | Otestovanie pripojenia cez proxy server                                                                                                                                                                                                                                                      |
+| `/api/settings/ip-filter`             | GET/PUT       | Zoznam povolených/blokovaných IP adries                                                                                                                                                                                                                                                      |
+| `/api/settings/thinking-budget`       | GET/PUT       | Režim prepisovania **požiadaviek** na premýšľanie/uvažovanie (bez zmeny / automatické odstránenie / vlastný / adaptívny). Nezávisí od kompresie. Pozrite si [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                              |
+| `/api/settings/system-prompt`         | GET/PUT       | Globálna systémová výzva                                                                                                                                                                                                                                                                     |
+| `/api/settings/compression`           | GET/PUT       | Globálna konfigurácia kompresie                                                                                                                                                                                                                                                              |
+| `/api/settings/purge-request-history` | POST          | Vymazanie riadkov denníka požiadaviek a lokálnych artefaktov denníka volaní                                                                                                                                                                                                                  |
 
 ### Kontext a kompresia
 
-| Koncový bod                            | Metóda         | Popis                                                                                      |
-| -------------------------------------- | -------------- | ------------------------------------------------------------------------------------------ |
-| `/api/compression/preview`             | POST           | Náhľad kompresie off/lite/standard/aggressive/ultra/RTK/stacked                            |
-| `/api/compression/language-packs`      | GET            | Zoznam dostupných jazykových balíkov Caveman                                               |
-| `/api/compression/rules`               | GET            | Zoznam metadát pravidiel Caveman                                                           |
-| `/api/context/caveman/config`          | GET/PUT        | Alias nastavení špecifických pre Caveman                                                   |
-| `/api/context/rtk/config`              | GET/PUT        | Nastavenia špecifické pre RTK vrátane vlastných filtrov a uchovania nespracovaného výstupu |
-| `/api/context/rtk/filters`             | GET            | Katalóg filtrov RTK a diagnostika vlastných filtrov                                        |
-| `/api/context/rtk/test`                | POST           | Spustenie náhľadu/testu RTK s textovým obsahom                                             |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Načítanie uchovaného redigovaného nespracovaného výstupu podľa ID ukazovateľa              |
-| `/api/context/combos`                  | GET/POST       | Zoznam/vytvorenie kombinácií kompresie                                                     |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Podrobnosti/aktualizácia/odstránenie kombinácie kompresie                                  |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Priradenie kombinácií kompresie ku kombináciám smerovania                                  |
-| `/api/context/analytics`               | GET            | Alias analytiky kompresie                                                                  |
+| Endpoint                               | Metóda         | Popis                                                                                        |
+| -------------------------------------- | -------------- | -------------------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | Náhľad kompresie off/lite/standard/aggressive/ultra/RTK/stacked                              |
+| `/api/compression/language-packs`      | GET            | Zoznam dostupných jazykových balíkov Caveman                                                 |
+| `/api/compression/rules`               | GET            | Zoznam metadát pravidiel Caveman                                                             |
+| `/api/context/caveman/config`          | GET/PUT        | Alias nastavení špecifických pre Caveman                                                     |
+| `/api/context/rtk/config`              | GET/PUT        | Nastavenia špecifické pre RTK vrátane vlastných filtrov a uchovávania nespracovaného výstupu |
+| `/api/context/rtk/filters`             | GET            | Katalóg filtrov RTK a diagnostika vlastných filtrov                                          |
+| `/api/context/rtk/test`                | POST           | Spustenie náhľadu/testu RTK nad textovým dátovým obsahom                                     |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Načítanie uchovaného redigovaného nespracovaného výstupu podľa ID ukazovateľa                |
+| `/api/context/combos`                  | GET/POST       | Zoznam/vytvorenie kombinácií kompresie                                                       |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Podrobnosti/aktualizácia/odstránenie kombinácie kompresie                                    |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Priradenie kombinácií kompresie ku kombináciám smerovania                                    |
+| `/api/context/analytics`               | GET            | Alias analytiky kompresie                                                                    |
 
 ### Monitorovanie
 
-| Koncový bod                          | Metóda     | Popis                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Sledovanie aktívnych relácií                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `/api/rate-limits`                   | GET        | Limity požiadaviek pre jednotlivé účty                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `/api/monitoring/health`             | GET        | Kontrola stavu + súhrn poskytovateľov (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Zobrazenie správy obsahuje `credentialHealth`: skalárne hodnoty vyrovnávacej pamäte sond, `failedConnections`, keď `failed>0`, a `staleDbNonOkCount` (trvalý `test_status` databázy SQLite, nie ukazovateľ). Pozrite si [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Štatistiky vyrovnávacej pamäte / vymazanie                                                                                                                                                                                                                                                                                                                                                                                                |
-| `/api/modality-bridge/stats`         | GET        | Hodnoty `attempts` v pamäti, úspechy/`bridged`, zlyhania, zásahy do vyrovnávacej pamäte, `totalLatencyMs`, `latencySamples`, hodnotu `averageLatencyMs` počítanú podľa počtu vzoriek a čas posledného použitia (vynuluje sa pri reštarte; vyžaduje overenie správy)                                                                                                                                                                       |
-| `/api/modality-bridge/video/runtime` | GET        | Striktná kontrola dôveryhodného rozhrania spätnej slučky pred overením správy/sondou; sanitizovaná dostupnosť a verzie FFmpeg/ffprobe (bez ukladania)                                                                                                                                                                                                                                                                                     |
-| `/api/modality-bridge/video/extract` | POST       | Interný autentifikovaný sprostredkovateľ bajtov cez dôveryhodné rozhranie spätnej slučky; vstup 50 MiB, obmedzený front/výstup 32 MiB, kapacita `503`, odpojenie `499`, konečný termín `504`; nejde o verejné API na nahrávanie                                                                                                                                                                                                           |
+| Endpoint                             | Metóda     | Popis                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Sledovanie aktívnych relácií                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/rate-limits`                   | GET        | Limity požiadaviek pre jednotlivé účty                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/monitoring/health`             | GET        | Kontrola stavu + súhrn poskytovateľov (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Zobrazenie správy zahŕňa `credentialHealth`: skalárne hodnoty vyrovnávacej pamäte sond, `failedConnections`, keď `failed>0`, a `staleDbNonOkCount` (trvalý `test_status` databázy SQLite, nie ukazovateľ). Pozrite si [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Štatistiky vyrovnávacej pamäte / vymazanie                                                                                                                                                                                                                                                                                                                                                                                              |
+| `/api/modality-bridge/stats`         | GET        | Hodnoty `attempts` v pamäti, úspechy/`bridged`, zlyhania, zásahy vyrovnávacej pamäte, `totalLatencyMs`, `latencySamples`, hodnota `averageLatencyMs` vypočítaná podľa počtu vzoriek a čas posledného použitia (obnoví sa pri reštarte; vyžaduje overenie správy)                                                                                                                                                                        |
+| `/api/modality-bridge/video/runtime` | GET        | Striktná kontrola dôveryhodného lokálneho rozhrania pred overením správcu/sondou; sanitizované údaje o dostupnosti a verziách FFmpeg/ffprobe (bez ukladania)                                                                                                                                                                                                                                                                            |
+| `/api/modality-bridge/video/extract` | POST       | Interný autentifikovaný sprostredkovateľ bajtov cez dôveryhodné lokálne rozhranie; vstup 50 MiB, ohraničený front/výstup 32 MiB, `503` pri nedostatočnej kapacite, `499` pri odpojení, `504` pri prekročení časového limitu; nejde o verejné API na nahrávanie súborov                                                                                                                                                                  |
 
 ### Zálohovanie a export/import
 
-| Koncový bod                 | Metóda | Popis                                                                              |
-| --------------------------- | ------ | ---------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Zoznam dostupných záloh                                                            |
-| `/api/db-backups`           | PUT    | Vytvorenie manuálnej zálohy                                                        |
-| `/api/db-backups`           | POST   | Obnovenie z konkrétnej zálohy                                                      |
-| `/api/db-backups`           | PATCH  | Uloženie nastavení uchovávania záloh (iba pre operátora)                           |
-| `/api/db-backups`           | DELETE | Prečistenie uložených záloh podľa nastavení uchovávania (iba pre operátora)        |
-| `/api/db-backups/export`    | GET    | Stiahnutie databázy ako súbor .sqlite                                              |
-| `/api/db-backups/import`    | POST   | Nahratie súboru .sqlite na nahradenie databázy (`?dryRun=true` iba overí platnosť) |
-| `/api/db-backups/exportAll` | GET    | Stiahnutie úplnej zálohy ako archívu .tar.gz                                       |
+| Endpoint                    | Metóda | Popis                                                                    |
+| --------------------------- | ------ | ------------------------------------------------------------------------ |
+| `/api/db-backups`           | GET    | Zobraziť dostupné zálohy                                                 |
+| `/api/db-backups`           | PUT    | Vytvoriť manuálnu zálohu                                                 |
+| `/api/db-backups`           | POST   | Obnoviť z konkrétnej zálohy                                              |
+| `/api/db-backups`           | PATCH  | Uložiť nastavenia uchovávania záloh (len pre operátora)                  |
+| `/api/db-backups`           | DELETE | Odstrániť uložené zálohy podľa nastavení uchovávania (len pre operátora) |
+| `/api/db-backups/export`    | GET    | Stiahnuť databázu ako súbor .sqlite                                      |
+| `/api/db-backups/import`    | POST   | Nahrať súbor .sqlite a nahradiť databázu (`?dryRun=true` iba overuje)    |
+| `/api/db-backups/exportAll` | GET    | Stiahnuť úplnú zálohu ako archív .tar.gz                                 |
 
 `/api/db-backups/export`, `/api/db-backups/exportAll` a `/api/settings/export-json` poskytujú
-všetky uložené prihlasovacie údaje, preto vyžadujú reláciu dashboardu alebo lokálne CLI (prípadne
-vypnuté prihlasovanie). Kľúče API s ľubovoľným rozsahom a prístupové tokeny `oma_` dostanú odpoveď
-`403`. Rovnaké obmedzenie platí aj pre obnovenia: `POST /api/db-backups/import` (vrátane
-`dryRun=true`), `POST /api/db-backups` (obnovenie podľa id) a `POST /api/settings/import-json`
-nahrádzajú aktívnu databázu alebo nastavenia, takže prihlasovacie údaje stroja aj v týchto prípadoch
-dostanú odpoveď `403`; `omniroute sync import` odosiela prihlasovacie údaje lokálneho CLI. To isté
-platí pre `DELETE /api/db-backups` (prečistenie uložených záloh) a `PATCH /api/db-backups` (nastavenia
-uchovávania: uložené hodnoty riadia automatické prečistenie po každom zálohovaní). Zobrazenie zoznamu
-(`GET`) a vytvorenie manuálnej zálohy (`PUT`) naďalej používajú bežné overovanie správy.
+všetky uložené prihlasovacie údaje, preto vyžadujú reláciu ovládacieho panela alebo lokálne CLI
+(prípadne vypnuté prihlasovanie). Kľúče API s ľubovoľným rozsahom a prístupové tokeny `oma_`
+dostanú odpoveď `403`. Na obnovenia sa vzťahuje rovnaké obmedzenie: `POST /api/db-backups/import`
+(vrátane `dryRun=true`), `POST /api/db-backups` (obnovenie podľa id) a
+`POST /api/settings/import-json` nahrádzajú aktívnu databázu alebo nastavenia, takže prihlasovacie
+údaje stroja dostanú odpoveď `403` aj v týchto prípadoch; `omniroute sync import` odosiela
+prihlasovacie údaje lokálneho CLI. To isté platí pre `DELETE /api/db-backups` (odstránenie
+uložených záloh) a `PATCH /api/db-backups` (nastavenia uchovávania: uložené hodnoty riadia
+automatické odstraňovanie po každej zálohe). Výpis (`GET`) a vytvorenie manuálnej zálohy (`PUT`)
+naďalej používajú bežné overovanie pre správu.
 
-### Cloudová synchronizácia
+### Synchronizácia s cloudom
 
-| Koncový bod            | Metóda | Popis                             |
+| Endpoint               | Metóda | Popis                             |
 | ---------------------- | ------ | --------------------------------- |
-| `/api/sync/cloud`      | Rôzne  | Operácie cloudovej synchronizácie |
-| `/api/sync/initialize` | POST   | Inicializácia synchronizácie      |
+| `/api/sync/cloud`      | Rôzne  | Operácie synchronizácie s cloudom |
+| `/api/sync/initialize` | POST   | Inicializovať synchronizáciu      |
 | `/api/cloud/*`         | Rôzne  | Správa cloudu                     |
 
 ### Tunely
 
-| Koncový bod                | Metóda | Popis                                                                       |
-| -------------------------- | ------ | --------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET    | Načítanie stavu inštalácie a behu Cloudflare Quick Tunnel pre dashboard     |
-| `/api/tunnels/cloudflared` | POST   | Povolenie alebo zakázanie Cloudflare Quick Tunnel (`action=enable/disable`) |
-| `/api/tunnels/ngrok`       | GET    | Načítanie stavu behu ngrok Tunnel pre dashboard                             |
-| `/api/tunnels/ngrok`       | POST   | Povolenie alebo zakázanie ngrok Tunnel (`action=enable/disable`)            |
+| Endpoint                   | Metóda | Popis                                                                     |
+| -------------------------- | ------ | ------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET    | Načítať pre ovládací panel stav inštalácie a behu Cloudflare Quick Tunnel |
+| `/api/tunnels/cloudflared` | POST   | Povoliť alebo zakázať Cloudflare Quick Tunnel (`action=enable/disable`)   |
+| `/api/tunnels/ngrok`       | GET    | Načítať pre ovládací panel stav behu tunela ngrok                         |
+| `/api/tunnels/ngrok`       | POST   | Povoliť alebo zakázať tunel ngrok (`action=enable/disable`)               |
 
 ### Nástroje CLI
 
-| Koncový bod                        | Metóda | Popis             |
-| ---------------------------------- | ------ | ----------------- |
-| `/api/cli-tools/claude-settings`   | GET    | Stav Claude CLI   |
-| `/api/cli-tools/codex-settings`    | GET    | Stav Codex CLI    |
-| `/api/cli-tools/droid-settings`    | GET    | Stav Droid CLI    |
-| `/api/cli-tools/openclaw-settings` | GET    | Stav OpenClaw CLI |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | Všeobecný beh CLI |
+| Endpoint                           | Metóda | Popis                           |
+| ---------------------------------- | ------ | ------------------------------- |
+| `/api/cli-tools/claude-settings`   | GET    | Stav CLI Claude                 |
+| `/api/cli-tools/codex-settings`    | GET    | Stav CLI Codex                  |
+| `/api/cli-tools/droid-settings`    | GET    | Stav CLI Droid                  |
+| `/api/cli-tools/openclaw-settings` | GET    | Stav CLI OpenClaw               |
+| `/api/cli-tools/runtime/[toolId]`  | GET    | Všeobecné behové prostredie CLI |
 
 Odpovede CLI obsahujú: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
 ### Agenti ACP
 
-| Koncový bod       | Metóda | Popis                                                                  |
-| ----------------- | ------ | ---------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | Zoznam všetkých zistených agentov (vstavaných aj vlastných) so stavom  |
-| `/api/acp/agents` | POST   | Pridanie vlastného agenta alebo obnovenie vyrovnávacej pamäte detekcie |
-| `/api/acp/agents` | DELETE | Odstránenie vlastného agenta podľa parametra dopytu `id`               |
+| Endpoint          | Metóda | Popis                                                                   |
+| ----------------- | ------ | ----------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Zobraziť všetkých zistených agentov (vstavaných aj vlastných) so stavom |
+| `/api/acp/agents` | POST   | Pridať vlastného agenta alebo obnoviť vyrovnávaciu pamäť zisťovania     |
+| `/api/acp/agents` | DELETE | Odstrániť vlastného agenta podľa parametra dopytu `id`                  |
 
 Odpoveď GET obsahuje `agents[]` (id, name, binary, version, installed, protocol, isCustom) a `summary` (total, installed, notFound, builtIn, custom).
 
 ### Odolnosť a limity požiadaviek
 
-| Koncový bod                       | Metóda    | Popis                                                                                                           |
-| --------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Získanie/aktualizácia frontu požiadaviek, časového odstupu pripojenia, ističa poskytovateľa a nastavení čakania |
-| `/api/resilience/reset`           | POST      | Resetovanie ističov okruhov poskytovateľov                                                                      |
-| `/api/resilience/model-cooldowns` | GET       | Zoznam aktívnych blokovaní podľa (poskytovateľa, pripojenia, modelu), zoradený podľa zostávajúceho času         |
-| `/api/resilience/model-cooldowns` | DELETE    | Zrušenie blokovania modelu — telo `{provider, model}` alebo `{all: true}` na vymazanie všetkého                 |
-| `/api/rate-limits`                | GET       | Stav limitov požiadaviek podľa účtu                                                                             |
-| `/api/rate-limit`                 | GET       | Globálna konfigurácia limitov požiadaviek                                                                       |
+| Koncový bod                       | Metóda    | Popis                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | Získanie/aktualizácia frontu požiadaviek, času čakania pripojenia, ističa poskytovateľa a nastavení čakania                                                                                                                                                                                                                                                                                                                               |
+| `/api/resilience/reset`           | POST      | Resetovanie ističov poskytovateľov                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `/api/resilience/model-cooldowns` | GET       | Zoznam aktívnych blokovaní pre jednotlivé kombinácie (poskytovateľ, pripojenie, model), zoradený podľa zostávajúceho času                                                                                                                                                                                                                                                                                                                 |
+| `/api/resilience/model-cooldowns` | DELETE    | Zrušenie blokovania modelu — telo `{provider, model}` alebo `{all: true}` na vymazanie všetkých blokovaní                                                                                                                                                                                                                                                                                                                                 |
+| `/api/rate-limits`                | GET/POST  | Stav limitu požiadaviek pre jednotlivé účty (GET) alebo prepnutie ochrany pred prekročením limitu pre pripojenie (POST `{connectionId, enabled}`). Podporovaný spôsob zápisu pre `rateLimitProtection` (nikdy sa neupravuje prostredníctvom `PUT /api/providers/[id]`). Poznámka: `enabled: false` vypne explicitnú ochranu, ale nevyradí aktívne pripojenie s kľúčom API z globálnej automatickej ochrany (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Globálna konfigurácia limitu požiadaviek (zastarané; alias pre `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                        |
 
-> Všetky štyri trasy `/api/resilience/*` vyžadujú **overenie správy** (`requireManagementAuth`). Úplný rozpis rozdielov medzi ističom poskytovateľa, časovým odstupom pripojenia a blokovaním modelu nájdete v časti [Odolnosť (rozšírené)](#resilience-extended).
+> Všetky štyri trasy `/api/resilience/*` vyžadujú **overenie správy** (`requireManagementAuth`). Úplný rozpis rozdielov medzi ističom poskytovateľa, časom čakania pripojenia a blokovaním modelu nájdete v časti [Odolnosť (rozšírené)](#resilience-extended).
 
 ### Vyhodnotenia
 
-| Koncový bod  | Metóda   | Popis                                                  |
-| ------------ | -------- | ------------------------------------------------------ |
-| `/api/evals` | GET/POST | Zoznam vyhodnocovacích súprav / spustenie vyhodnotenia |
+| Koncový bod  | Metóda   | Popis                                           |
+| ------------ | -------- | ----------------------------------------------- |
+| `/api/evals` | GET/POST | Zoznam sád vyhodnotení / spustenie vyhodnotenia |
 
 ### Zásady
 
@@ -1316,9 +1456,9 @@ Odpoveď GET obsahuje `agents[]` (id, name, binary, version, installed, protocol
 
 ### Súlad s predpismi
 
-| Koncový bod                 | Metóda | Popis                                 |
-| --------------------------- | ------ | ------------------------------------- |
-| `/api/compliance/audit-log` | GET    | Protokol auditu súladu (posledných N) |
+| Koncový bod                 | Metóda | Popis                                          |
+| --------------------------- | ------ | ---------------------------------------------- |
+| `/api/compliance/audit-log` | GET    | Protokol auditu súladu (posledných N záznamov) |
 
 ### v1beta (kompatibilné s Gemini)
 
@@ -1327,21 +1467,21 @@ Odpoveď GET obsahuje `agents[]` (id, name, binary, version, installed, protocol
 | `/v1beta/models`           | GET    | Zoznam modelov vo formáte Gemini     |
 | `/v1beta/models/{...path}` | POST   | Koncový bod Gemini `generateContent` |
 
-Tieto koncové body kopírujú formát API Gemini pre klientov, ktorí vyžadujú natívnu kompatibilitu so súpravou Gemini SDK.
+Tieto koncové body kopírujú formát API služby Gemini pre klientov, ktorí očakávajú natívnu kompatibilitu so súpravou Gemini SDK.
 
 ### Interné/systémové API
 
-| Koncový bod              | Metóda | Popis                                                                    |
-| ------------------------ | ------ | ------------------------------------------------------------------------ |
-| `/api/init`              | GET    | Kontrola inicializácie aplikácie (používa sa pri prvom spustení)         |
-| `/api/tags`              | GET    | Značky modelov kompatibilné s Ollama (pre klientov Ollama)               |
-| `/api/restart`           | POST   | Spustenie korektného reštartu servera                                    |
-| `/api/shutdown`          | POST   | Spustenie korektného vypnutia servera                                    |
-| `/api/system/env/repair` | POST   | Oprava premenných prostredia poskytovateľa OAuth                         |
-| `/api/system/version`    | GET    | Aktuálna/najnovšia verzia, stav aktualizácie, kanál vydaní               |
-| `/api/system/version`    | POST   | Spustenie aktualizácie na najnovšiu verziu s ohľadom na spôsob nasadenia |
+| Koncový bod              | Metóda | Popis                                                             |
+| ------------------------ | ------ | ----------------------------------------------------------------- |
+| `/api/init`              | GET    | Kontrola inicializácie aplikácie (používa sa pri prvom spustení)  |
+| `/api/tags`              | GET    | Značky modelov kompatibilné s Ollama (pre klientov Ollama)        |
+| `/api/restart`           | POST   | Spustenie riadeného reštartu servera                              |
+| `/api/shutdown`          | POST   | Spustenie riadeného vypnutia servera                              |
+| `/api/system/env/repair` | POST   | Oprava premenných prostredia poskytovateľa OAuth                  |
+| `/api/system/version`    | GET    | Aktuálna/najnovšia verzia, stav aktualizácie a kanál vydania      |
+| `/api/system/version`    | POST   | Spustenie aktualizácie na najnovšiu verziu s ohľadom na nasadenie |
 
-> **Poznámka:** Tieto koncové body používa systém interne alebo slúžia na kompatibilitu s klientmi Ollama. Koncoví používatelia ich zvyčajne nevolajú.
+> **Poznámka:** Tieto koncové body používa interne systém alebo slúžia na kompatibilitu s klientmi Ollama. Koncoví používatelia ich zvyčajne nevolajú.
 
 ### Oprava prostredia OAuth _(v3.6.1+)_
 
@@ -1364,16 +1504,16 @@ Opraví chýbajúce alebo poškodené premenné prostredia OAuth pre konkrétneh
 }
 ```
 
-### Verzia a kanál vydaní
+### Verzia a kanál vydania
 
 ```bash
 GET /api/system/version
 ```
 
-Trasa správy dostupná iba cez rozhranie loopback (overenie správcu). Vracia spustenú verziu, najnovšiu
-publikovanú verziu a stav automatických aktualizácií. `releaseChannel` a `channels` sú prídavné
-polia (vetva 3.8.54); `channel` si zachováva svoj význam — režim nasadenia, ktorý používa nástroj na aktualizáciu
-ovládacieho panela (`npm`, `source` alebo `docker-compose`).
+Trasa na správu dostupná iba cez loopback (overenie správcu). Vráti spustenú verziu, najnovšiu
+publikovanú verziu a stav automatických aktualizácií. `releaseChannel` a `channels` sú pridané
+polia (vetva 3.8.54); `channel` si zachováva svoj význam — režim nasadenia, ktorý používa nástroj
+na aktualizáciu ovládacieho panela (`npm`, `source` alebo `docker-compose`).
 
 ```json
 {
@@ -1389,17 +1529,17 @@ ovládacieho panela (`npm`, `source` alebo `docker-compose`).
 }
 ```
 
-- `releaseChannel` — kanál npm spustenej zostavy: `nightly` pre verzie `-nightly.*`,
+- `releaseChannel` — npm kanál spustenej zostavy: `nightly` pre verzie `-nightly.*`,
   `next` pre ostatné predbežné vydania (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` pre stabilnú verziu
-  staršej hlavnej verzie než `channels.latest`, inak `latest`. Rovnaké pravidlá používa
-  `scripts/release/dist-tag.mjs`, ktorý pri publikovaní vyberá dist-tag npm.
-- `channels` — najnovšia publikovaná verzia každého dist-tagu z `npm view omniroute dist-tags` (s náhradným
-  načítaním cez HTTP registra), uložená vo vyrovnávacej pamäti s rovnakou 10-minútovou dobou TTL ako `latest`. `latest` je vždy prítomné
-  (ako náhradná hodnota sa použije pole `latest` a potom `"unavailable"`); `next`, `nightly` a `lts` sa zobrazia
-  iba vtedy, keď daný dist-tag existuje. Požiadavka s `Cache-Control: no-cache` obnoví obe vyhľadávania.
+  staršej hlavnej verzie než `channels.latest`, inak `latest`. Rovnaké pravidlá ako v
+  `scripts/release/dist-tag.mjs`, ktorý pri publikovaní vyberá npm dist-tag.
+- `channels` — najnovšia publikovaná verzia každého dist-tagu získaná pomocou `npm view omniroute dist-tags` (s použitím
+  registra HTTP ako záložnej možnosti), uložená vo vyrovnávacej pamäti s rovnakou 10-minútovou dobou platnosti ako `latest`. `latest` je vždy prítomné
+  (ako záložná hodnota sa použije pole `latest` a následne `"unavailable"`); `next`, `nightly` a `lts` sa zobrazia
+  iba vtedy, keď daný dist-tag existuje. Požiadavka `Cache-Control: no-cache` obnoví obe vyhľadávania.
 
-Model kanálov (`latest` = v3 až do všeobecnej dostupnosti 4.0, `next` = rc, `nightly` = zostavy vetvy `develop`,
-`lts` = opravy v3 po všeobecnej dostupnosti 4.0) je opísaný v `docs/ops/RELEASE_STRATEGY.md`.
+Model kanálov (`latest` = v3 až do všeobecnej dostupnosti verzie 4.0, `next` = rc, `nightly` = zostavy z vetvy `develop`,
+`lts` = opravy v3 po všeobecnej dostupnosti verzie 4.0) je opísaný v `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
@@ -1411,9 +1551,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Prepisujte zvukové súbory pomocou ľubovoľného nakonfigurovaného poskytovateľa STT. Prvý segment
-cesty vyberá natívneho poskytovateľa (`openai/…`, `deepgram/…`). Brány, ktoré
-opätovne sprístupňujú model iného poskytovateľa, používajú kvalifikovaný identifikátor
+Prepisujte zvukové súbory pomocou ľubovoľného nakonfigurovaného poskytovateľa STT. Prvý segment cesty vyberá natívneho poskytovateľa (`openai/…`, `deepgram/…`). Brány, ktoré opätovne sprístupňujú model iného poskytovateľa, používajú kvalifikovaný identifikátor
 (`openrouter/deepgram/nova-3`).
 
 **Požiadavka:**
@@ -1438,7 +1576,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **Príklady identifikátorov modelov:** `openai/whisper-1` (vyžaduje kľúč OpenAI),
 `openrouter/deepgram/nova-3` (vyžaduje kľúč OpenRouter),
-`deepgram/nova-3` (vyžaduje natívny kľúč Deepgram). Požiadavka s nekvalifikovaným identifikátorom
+`deepgram/nova-3` (vyžaduje natívny kľúč Deepgram). Samostatná požiadavka
 `deepgram/nova-3` **nepoužíva** OpenRouter.
 
 **Podporované formáty:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
@@ -1453,15 +1591,15 @@ Pre klientov, ktorí používajú formát API služby Ollama:
 # Koncový bod chatu (formát Ollama)
 POST /v1/api/chat
 
-# Zoznam modelov (formát Ollama)
+# Výpis modelov (formát Ollama)
 GET /api/tags
 ```
 
 Požiadavky sa automaticky prekladajú medzi formátom Ollama a internými formátmi.
 
-## Aliasy s tokenmi pre VS Code / aliasy bez hlavičiek
+## Aliasové adresy s tokenom pre VS Code / bez hlavičky
 
-Tieto aliasy použite, keď integrácia nedokáže vložiť hlavičku `Authorization` a potrebuje mať kľúč API vložený v základnej URL adrese.
+Tieto aliasové adresy použite, keď integrácia nedokáže vložiť hlavičku `Authorization` a potrebuje kľúč API zahrnúť do základnej adresy URL.
 
 ```bash
 # Alias katalógu v štýle OpenAI
@@ -1488,16 +1626,16 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
 
 Poznámky:
 
-- Aliasy s tokenmi opätovne používajú rovnaké obslužné rutiny ako `/v1/*` a `/api/tags`; štruktúry odpovedí zostávajú rovnaké.
+- Aliasové adresy s tokenom opätovne používajú rovnaké obslužné rutiny ako `/v1/*` a `/api/tags`; štruktúry odpovedí zostávajú identické.
 - Vždy, keď klient podporuje vlastné hlavičky, uprednostnite `Authorization: Bearer ...`.
-- Tokeny v URL adresách sa môžu objaviť v protokoloch reverzného proxy servera, histórii prehliadača a telemetrii mimo OmniRoute. Považujte ich za možnosť kompatibility, nie za predvolený spôsob autentifikácie.
+- Tokeny v adresách URL sa môžu objaviť v protokoloch reverzného proxy servera, histórii prehliadača a telemetrii mimo OmniRoute. Považujte ich za možnosť na zaistenie kompatibility, nie za predvolený spôsob overovania.
 
 ---
 
 ## Telemetria
 
 ```bash
-# Získanie súhrnu telemetrie latencie (p50/p95/p99 pre každého poskytovateľa)
+# Získať súhrn telemetrie latencie (p50/p95/p99 pre každého poskytovateľa)
 GET /api/telemetry/summary
 ```
 
@@ -1517,10 +1655,10 @@ GET /api/telemetry/summary
 ## Rozpočet
 
 ```bash
-# Získanie stavu rozpočtu pre všetky kľúče API
+# Získať stav rozpočtu pre všetky kľúče API
 GET /api/usage/budget
 
-# Nastavenie alebo aktualizácia rozpočtu
+# Nastaviť alebo aktualizovať rozpočet
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1534,14 +1672,14 @@ Content-Type: application/json
 }
 ```
 
-> **Poznámky k schéme** (`setBudgetSchema`): `apiKeyId` je povinné; aspoň jedna z hodnôt `dailyLimitUsd`, `weeklyLimitUsd` alebo `monthlyLimitUsd` musí byť väčšia než nula. Voliteľné polia: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Starší formát `{keyId, limit, period}` vráti `400 Bad Request`.
+> **Poznámky k schéme** (`setBudgetSchema`): `apiKeyId` je povinné; aspoň jedna z hodnôt `dailyLimitUsd`, `weeklyLimitUsd` alebo `monthlyLimitUsd` musí byť väčšia ako nula. Voliteľné polia: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Zastaraný formát `{keyId, limit, period}` vráti `400 Bad Request`.
 
 ## Limity tokenov
 
-Rozpočty **tokenov** pre jednotlivé API kľúče (odlišné od rozpočtu založeného na USD uvedeného vyššie). Vynucujú sa priamo počas spracovania požiadavky: keď využitie kľúča v aktuálnom časovom okne dosiahne jeho limit, požiadavky sa odmietnu s odpoveďou `429 Too Many Requests`. Limity môžu byť obmedzené na konkrétny `model`, `provider` alebo sa môžu uplatňovať `global`ne na celý kľúč; keď požiadavke zodpovedá viacero limitov, použije sa najprísnejší z nich.
+Rozpočty **tokenov** pre jednotlivé API kľúče (odlišné od rozpočtu založeného na USD uvedeného vyššie). Vynucujú sa priamo pri spracovaní požiadavky: keď využitie kľúča v aktuálnom časovom okne dosiahne svoj limit, požiadavky sa odmietnu s chybou `429 Too Many Requests`. Limity možno obmedziť na konkrétny `model`, `provider` alebo ich použiť globálne pre celý kľúč (`global`); keď požiadavke zodpovedá viacero limitov, použije sa najprísnejší.
 
 ```bash
-# Zobrazenie limitov tokenov kľúča (vrátane aktuálneho využitia časového okna)
+# Zobrazenie limitov tokenov kľúča (vrátane aktuálneho využitia okna)
 GET /api/usage/token-limits?apiKeyId=key-123
 
 # Vytvorenie alebo aktualizácia limitu tokenov
@@ -1561,32 +1699,32 @@ Content-Type: application/json
 DELETE /api/usage/token-limits?id=tl-abc
 ```
 
-> **Poznámky k schéme** (`setTokenLimitSchema`): `apiKeyId` a `scopeType` (`model` | `provider` | `global`) sú povinné. `scopeValue` je povinné, pokiaľ `scopeType` nie je `global` (napr. id modelu pre rozsah `model`, id poskytovateľa pre rozsah `provider`). `tokenLimit` musí byť kladné celé číslo (konvertované z reťazca). Voliteľné: `id` (vynechajte pri vytváraní, uveďte pri aktualizácii), `resetInterval` (`daily` | `weekly` | `monthly`, predvolená hodnota `monthly`), `resetTime` (`HH:MM`), `enabled` (predvolená hodnota `true`). Odpovede `GET` dopĺňajú každý limit o `tokensUsed`, `remaining`, `windowStart`, `periodStartAt` a `nextResetAt`. Ide o koncový bod triedy správy (autorizácia je centrálne vynucovaná prostredníctvom pipeline authz).
+> **Poznámky k schéme** (`setTokenLimitSchema`): `apiKeyId` a `scopeType` (`model` | `provider` | `global`) sú povinné. `scopeValue` je povinné, pokiaľ `scopeType` nie je `global` (napr. ID modelu pre rozsah `model`, ID poskytovateľa pre rozsah `provider`). `tokenLimit` musí byť kladné celé číslo (konvertované z reťazca). Voliteľné: `id` (vynechajte pri vytváraní, zadajte pri aktualizácii), `resetInterval` (`daily` | `weekly` | `monthly`, predvolená hodnota `monthly`), `resetTime` (`HH:MM`), `enabled` (predvolená hodnota `true`). Odpovede `GET` dopĺňajú každý limit o `tokensUsed`, `remaining`, `windowStart`, `periodStartAt` a `nextResetAt`. Ide o koncový bod triedy správy (autentifikácia sa vynucuje centrálne prostredníctvom autorizačného reťazca).
 
 ## Spracovanie požiadaviek
 
 1. Klient odošle požiadavku na `/v1/*`
 2. Obslužná rutina trasy zavolá `handleChat`, `handleEmbedding`, `handleAudioTranscription` alebo `handleImageGeneration`
-3. Model sa rozpozná (priamy poskytovateľ/model alebo alias/combo)
-4. Prihlasovacie údaje sa vyberú z lokálnej DB s filtrovaním podľa dostupnosti účtu
-5. Pre chat: `handleChatCore` skontroluje sémantickú/signatúrnu vyrovnávaciu pamäť a načíta nastavenia kompresie combo
+3. Model sa rozpozná (priamy poskytovateľ/model alebo alias/kombinácia)
+4. Z lokálnej databázy sa vyberú prihlasovacie údaje s filtrovaním podľa dostupnosti účtu
+5. Pre konverzáciu: `handleChatCore` skontroluje sémantickú/signatúrnu vyrovnávaciu pamäť a určí nastavenia kompresie kombinácie
 6. Ak je povolená, pred prekladom pre poskytovateľa sa spustí proaktívna kompresia (`lite`, Caveman, RTK alebo ich kombinácia)
-7. Vykonávací modul poskytovateľa odošle požiadavku upstream službe
-8. Odpoveď sa preloží späť do formátu klienta (chat) alebo sa vráti bez zmien (embeddings/images/audio)
-9. Zaznamenajú sa údaje o využití, analytika kompresie a protokoly požiadaviek
-10. Pri chybách sa podľa pravidiel combo použije záložný postup
+7. Vykonávací modul poskytovateľa odošle požiadavku nadradenej službe
+8. Odpoveď sa preloží späť do formátu klienta (konverzácia) alebo sa vráti bez zmien (vektorové reprezentácie/obrázky/zvuk)
+9. Zaznamená sa využitie, analytika kompresie a protokoly požiadaviek
+10. Pri chybách sa podľa pravidiel kombinácie použije záložné riešenie
 
 Úplný prehľad architektúry: [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 
 ---
 
-## Správa combo
+## Správa kombinácií
 
-Kombinácie smerovania vyššej úrovne (už zhrnuté v časti `/api/combos*`) možno tiež mapovať v pomere 1:1 zo vzoru id modelu, čo umožňuje transparentné presmerovanie id modelu v štýle OpenAI na combo.
+Kombinácie smerovania vyššej úrovne (už zhrnuté v časti `/api/combos*`) možno tiež mapovať v pomere 1 : 1 zo vzoru ID modelu, čo umožňuje transparentné presmerovanie ID modelu v štýle OpenAI na kombináciu.
 
 | Metóda | Cesta                            | Popis                                                                             |
 | ------ | -------------------------------- | --------------------------------------------------------------------------------- |
-| GET    | `/api/model-combo-mappings`      | Zobrazí všetky mapovania model→combo                                              |
+| GET    | `/api/model-combo-mappings`      | Zobrazí všetky mapovania model→kombinácia                                         |
 | POST   | `/api/model-combo-mappings`      | Vytvorí mapovanie — telo: `{pattern, comboId, priority?, enabled?, description?}` |
 | GET    | `/api/model-combo-mappings/[id]` | Načíta jedno mapovanie                                                            |
 | PUT    | `/api/model-combo-mappings/[id]` | Aktualizuje polia existujúceho mapovania                                          |
@@ -1598,34 +1736,34 @@ Kombinácie smerovania vyššej úrovne (už zhrnuté v časti `/api/combos*`) m
 
 ## Webhooky
 
-Odber odchádzajúcich webhookov pre udalosti OmniRoute (dokončenie požiadavky, vyčerpanie kvóty, rotácia kľúča atď.).
+Odchádzajúce odbery webhookov pre udalosti OmniRoute (dokončenie požiadavky, vyčerpanie kvóty, rotácia kľúča atď.).
 
 | Metóda | Cesta                     | Popis                                                                      |
 | ------ | ------------------------- | -------------------------------------------------------------------------- |
-| GET    | `/api/webhooks`           | Zoznam webhookov (tajné kľúče sú maskované ako `<prefix>...`)              |
+| GET    | `/api/webhooks`           | Zoznam webhookov (tajné hodnoty sú maskované ako `<prefix>...`)            |
 | POST   | `/api/webhooks`           | Vytvorenie webhooku — telo: `{url, events?: ["*"], secret?, description?}` |
 | GET    | `/api/webhooks/[id]`      | Získanie webhooku                                                          |
-| PUT    | `/api/webhooks/[id]`      | Aktualizácia url/events/secret/description                                 |
+| PUT    | `/api/webhooks/[id]`      | Aktualizácia adresy URL/udalostí/tajnej hodnoty/p opisu                    |
 | DELETE | `/api/webhooks/[id]`      | Odstránenie webhooku                                                       |
 | POST   | `/api/webhooks/[id]/test` | Odoslanie testovacích údajov na URL webhooku a vrátenie stavu doručenia    |
 
-**Autentifikácia:** relácia správy/API kľúč (`requireManagementAuth`).
+**Autentifikácia:** relácia správy/kľúč API (`requireManagementAuth`).
 
 ---
 
 ## Registrované kľúče (automatická správa)
 
-Používa ich podsystém automatickej správy kľúčov na vydávanie a rotáciu API kľúčov voči poskytovateľovi/účtu na pozadí s dennými/hodinovými kvótami.
+Používa ich subsystém automatickej správy kľúčov na vydávanie a rotáciu kľúčov API u podkladového poskytovateľa alebo účtu s dennými a hodinovými kvótami.
 
-| Metóda | Cesta                                 | Popis                                                                                                                                                                                                          |
-| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Zobrazí zoznam registrovaných kľúčov (iba maskovaná predpona)                                                                                                                                                  |
-| POST   | `/api/v1/registered-keys`             | Vydá nový registrovaný kľúč — telo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Nespracovaný kľúč vráti **iba raz**. Pri odmietnutí z dôvodu kvóty vráti `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Načíta metadáta registrovaného kľúča (bez nespracovaného kľúča)                                                                                                                                                |
-| DELETE | `/api/v1/registered-keys/[id]`        | Zruší platnosť registrovaného kľúča                                                                                                                                                                            |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicitný koncový bod na zrušenie platnosti (rovnaký účinok ako DELETE)                                                                                                                                       |
+| Metóda | Cesta                                 | Popis                                                                                                                                                                                                                   |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Zoznam registrovaných kľúčov (iba maskovaný prefix)                                                                                                                                                                     |
+| POST   | `/api/v1/registered-keys`             | Vydanie nového registrovaného kľúča — telo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Nespracovaný kľúč sa vráti **iba raz**. Pri odmietnutí pre kvótu sa vráti `429`. |
+| GET    | `/api/v1/registered-keys/[id]`        | Získanie metadát registrovaného kľúča (bez nespracovanej hodnoty)                                                                                                                                                       |
+| DELETE | `/api/v1/registered-keys/[id]`        | Zrušenie registrovaného kľúča                                                                                                                                                                                           |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicitný koncový bod na zrušenie (rovnaký účinok ako DELETE)                                                                                                                                                          |
 
-**Autentifikácia:** relácia správy/API kľúč (`requireManagementAuth`) — rovnaký mechanizmus ochrany ako pri `/api/keys`: relácia ovládacieho panela, lokálny token CLI alebo API kľúč s rozsahom `manage`/`admin`; API kľúče určené iba na inferenciu dostanú odpoveď `403`. Pozrite si tiež `/v1/quotas/check` a `/v1/issues/report`.
+**Autentifikácia:** relácia správy/kľúč API (`requireManagementAuth`) — rovnaká ochrana ako pri `/api/keys`: relácia ovládacieho panela, lokálny token CLI alebo kľúč API s rozsahom `manage`/`admin`; kľúče API určené iba na inferenciu dostanú odpoveď `403`. Pozrite si tiež `/v1/quotas/check` a `/v1/issues/report`.
 
 ---
 
@@ -1642,7 +1780,7 @@ Používa ich podsystém automatickej správy kľúčov na vydávanie a rotáciu
 | POST   | `/api/v1/agents/tasks/[id]`   | Rozlíšená akcia: `{action: "approve"}`, `{action: "message", message}` alebo `{action: "cancel"}`                                                |
 | DELETE | `/api/v1/agents/tasks/[id]`   | Odstránenie konkrétnej úlohy podľa ID                                                                                                            |
 
-> **Autentifikácia:** pri každej metóde sa vyžaduje autentifikácia správy (`requireCloudAgentManagementAuth`). Pred verziou v3.8.0 boli tieto metódy neautentifikované — zásadnú zmenu nájdete v commite `588a0333`.
+> **Autentifikácia:** pri každej metóde sa vyžaduje autentifikácia správy (`requireCloudAgentManagementAuth`). Pred verziou v3.8.0 neboli tieto metódy autentifikované — zlomovú zmenu nájdete v commite `588a0333`.
 
 ```bash
 # Vytvorenie cloudovej úlohy Claude Code
@@ -1656,122 +1794,128 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks \
 
 ## Proxy servery správy
 
-Odchádzajúce HTTP(S)/SOCKS proxy servery, ktoré možno priradiť poskytovateľom, účtom alebo globálne.
+Odchádzajúce proxy servery HTTP(S)/SOCKS, ktoré možno priradiť poskytovateľom, účtom alebo globálne.
 
-| Metóda | Cesta                                        | Popis                                                                                                                                                         |
-| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/management/proxies`                 | Zoznam proxy serverov (s `?id=` vráti jeden; s `?id=&where_used=1` vráti graf priradení)                                                                      |
-| POST   | `/api/v1/management/proxies`                 | Vytvorenie proxy servera — telo overené pomocou `createProxyRegistrySchema`                                                                                   |
-| PATCH  | `/api/v1/management/proxies`                 | Aktualizácia proxy servera — telo overené pomocou `updateProxyRegistrySchema` (vyžaduje `id`)                                                                 |
-| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Odstránenie proxy servera (na zrušenie priradení použite `force=1`)                                                                                           |
-| GET    | `/api/v1/management/proxies/assignments`     | Zoznam priradení — možno filtrovať podľa `proxy_id`, `scope`, `scope_id`; odovzdaním `resolve_connection_id=<id>` získate aktívny proxy server pre pripojenie |
-| PUT    | `/api/v1/management/proxies/assignments`     | Priradenie — telo overené pomocou `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`). Vymaže vyrovnávaciu pamäť dispečera                                |
-| PUT    | `/api/v1/management/proxies/bulk-assign`     | Hromadné priradenie — telo overené pomocou `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`)                                                      |
-| GET    | `/api/v1/management/proxies/health?hours=24` | Súhrnný stav proxy serverov (počty úspechov/zlyhaní, latencia) za časové obdobie                                                                              |
+| Metóda | Cesta                                        | Popis                                                                                                                                                               |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/management/proxies`                 | Zoznam proxy serverov (s `?id=` vráti jeden; s `?id=&where_used=1` vráti graf priradení)                                                                            |
+| POST   | `/api/v1/management/proxies`                 | Vytvorenie proxy servera — telo overené pomocou `createProxyRegistrySchema`                                                                                         |
+| PATCH  | `/api/v1/management/proxies`                 | Aktualizácia proxy servera — telo overené pomocou `updateProxyRegistrySchema` (vyžaduje `id`)                                                                       |
+| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Odstránenie proxy servera (na zrušenie priradení použite `force=1`)                                                                                                 |
+| GET    | `/api/v1/management/proxies/assignments`     | Zoznam priradení — možno filtrovať podľa `proxy_id`, `scope`, `scope_id`; na určenie aktívneho proxy servera pre pripojenie odovzdajte `resolve_connection_id=<id>` |
+| PUT    | `/api/v1/management/proxies/assignments`     | Priradenie — telo overené pomocou `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`). Vymaže vyrovnávaciu pamäť dispečera                                      |
+| PUT    | `/api/v1/management/proxies/bulk-assign`     | Hromadné priradenie — telo overené pomocou `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`)                                                            |
+| GET    | `/api/v1/management/proxies/health?hours=24` | Agregovaný stav proxy serverov (počty úspechov/zlyhaní, latencia) za časové obdobie                                                                                 |
 
-**Autentifikácia:** relácia správy/kľúč API na každej trase (`requireManagementAuth`).
+**Autentifikácia:** pri každej trase sa vyžaduje relácia správy/kľúč API (`requireManagementAuth`).
 
-> Trasy `POST /api/v1/management/proxies/[id]/assignments` a `POST /api/v1/management/proxies/[id]/health` uvedené v popise úlohy sú obsluhované plochými trasami `/assignments` a `/health` zobrazenými vyššie — v kódovej základni neexistujú žiadne podtrasy pre jednotlivé ID.
+> Trasy `POST /api/v1/management/proxies/[id]/assignments` a `POST /api/v1/management/proxies/[id]/health` uvedené v popise úlohy obsluhujú vyššie zobrazené ploché trasy `/assignments` a `/health` — v zdrojovom kóde neexistujú žiadne podtrasy pre jednotlivé ID.
 
 ---
 
 ## Odolnosť (rozšírené)
 
-OmniRoute poskytuje tri nezávislé mechanizmy dočasných zlyhaní; nižšie uvedené koncové body na správu umožňujú operátorom čítať a meniť ich nastavenia:
+OmniRoute poskytuje tri nezávislé mechanizmy dočasného zlyhania; nižšie uvedené koncové body správy umožňujú operátorom čítať a prepisovať ich stav:
 
-| Rozsah                    | Úložisko stavu                                   | Čítanie                                   | Resetovanie / vymazanie                                          |
-| ------------------------- | ------------------------------------------------ | ----------------------------------------- | ---------------------------------------------------------------- |
-| Istič poskytovateľa       | `domain_circuit_breakers` + v pamäti             | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                     |
-| Čakacia lehota pripojenia | `rateLimitedUntil` v pripojeniach poskytovateľov | `/api/rate-limits`, `/api/providers/[id]` | (opätovne sa aktivuje odložene; vymazanie cez PUT poskytovateľa) |
-| Blokovanie modelu         | Register dostupnosti modelov v pamäti            | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                         |
+| Rozsah                  | Ukladanie stavu                                  | Čítanie                                   | Resetovanie / vymazanie                                      |
+| ----------------------- | ------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------ |
+| Istič poskytovateľa     | `domain_circuit_breakers` + v pamäti             | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                 |
+| Časový limit pripojenia | `rateLimitedUntil` v pripojeniach poskytovateľov | `/api/rate-limits`, `/api/providers/[id]` | (opätovne sa povolí lenivo; vymaže sa cez PUT poskytovateľa) |
+| Uzamknutie modelu       | Register dostupnosti modelov v pamäti            | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                     |
 
-`PATCH /api/resilience` prijíma prepisy ističov poskytovateľov v rámci `providerBreaker.oauth` a `providerBreaker.apikey`. Každý profil podporuje `degradationThreshold`, `failureThreshold` a `resetTimeoutMs`; rovnaké polia sú dostupné v Ovládacom paneli → Nastavenia → Odolnosť.
+`PATCH /api/resilience` prijíma prepísania ističov poskytovateľov v `providerBreaker.oauth` a `providerBreaker.apikey`. Každý profil podporuje `degradationThreshold`, `failureThreshold` a `resetTimeoutMs`; rovnaké polia sú dostupné v Ovládací panel → Nastavenia → Odolnosť.
 
 ```bash
-# Vymazanie blokovania jedného modelu
+# Vymazanie uzamknutia jedného modelu
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"provider":"openai","model":"gpt-4o-mini"}'
 
-# Vymazanie všetkých blokovaní
+# Vymazanie všetkých uzamknutí
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -d '{"all":true}'
 ```
 
-Úplný koncepčný prehľad a predvolené nastavenia ističov: pozrite si [`CLAUDE.md`](../../CLAUDE.md) → „Stav behu odolnosti“.
+Úplnú koncepčnú referenciu a predvolené hodnoty ističov nájdete v [`CLAUDE.md`](../../CLAUDE.md) → „Stav modulu odolnosti počas behu“ a [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md).
+
+### Front požiadaviek s obmedzením frekvencie a poistka automatického povolenia
+
+- **Podporovaný spôsob zápisu**: `POST /api/rate-limits` s telom `{"connectionId": "<id>", "enabled": true|false}` je podporovaný koncový bod správy na prepínanie ochrany pripojenia pred obmedzením frekvencie. `PUT /api/providers/[id]` zámerne neupravuje ani neprepína `rateLimitProtection` (#11278).
+- **Sémantika `enabled: false`**: Nastavenie `enabled: false` odstráni explicitnú ochranu pripojenia, ale **nevyradí** aktívne pripojenie s API kľúčom z globálnej poistky automatického povolenia (`autoEnableApiKeyProviders = true`). V `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`) sú hodnoty `false` a `undefined` ekvivalentné; aktívne pripojenia s API kľúčom bez explicitnej ochrany zostávajú chránené globálnou poistkou automatického povolenia.
+- **Globálne vypnutie**: Ak chcete používať pripojenia s API kľúčom bez frontov požiadaviek s obmedzením frekvencie, globálne vypnite túto poistku pomocou `RATE_LIMIT_AUTO_ENABLE=false` (premenná prostredia) alebo `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Nastavenia → Odolnosť / `PATCH /api/resilience`).
 
 ---
 
 ## Zručnosti
 
-Framework zručností na rozšírenie OmniRoute o vlastné spustiteľné obslužné programy spolu s integráciami trhovísk.
+Framework zručností na rozšírenie OmniRoute o vlastné spustiteľné obslužné programy a integrácie s trhoviskami.
 
-| Metóda | Cesta                             | Popis                                                                                                                                         |
-| ------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/skills`                     | Zoznam nainštalovaných zručností — možno filtrovať pomocou `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local`, so stránkovaním |
-| GET    | `/api/skills/[id]`                | Získanie jednej zručnosti                                                                                                                     |
-| PUT    | `/api/skills/[id]`                | Aktualizácia zručnosti (názov, popis, režim, schéma, obslužný program, značky)                                                                |
-| DELETE | `/api/skills/[id]`                | Odinštalovanie zručnosti                                                                                                                      |
-| POST   | `/api/skills/install`             | Inštalácia zručnosti zo surového manifestu — telo: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`             |
-| GET    | `/api/skills/executions`          | Zoznam nedávnych spustení zručností (auditný záznam so vstupmi/výstupmi/trvaním)                                                              |
-| GET    | `/api/skills/marketplace?q=...`   | Vyhľadávanie/zoznam obľúbených položiek z trhoviska SkillsMP (vyžaduje nastavenie `skillsmpApiKey`)                                           |
-| POST   | `/api/skills/marketplace/install` | Inštalácia zručnosti podľa id zo SkillsMP                                                                                                     |
-| GET    | `/api/skills/skillssh?q=&limit=`  | Vyhľadávanie v registri skills.sh                                                                                                             |
-| POST   | `/api/skills/skillssh/install`    | Inštalácia zručnosti podľa id zo skills.sh                                                                                                    |
+| Metóda | Cesta                             | Popis                                                                                                                                   |
+| ------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/skills`                     | Zoznam nainštalovaných zručností — filtrovanie podľa `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local`, so stránkovaním |
+| GET    | `/api/skills/[id]`                | Načítanie jednej zručnosti                                                                                                              |
+| PUT    | `/api/skills/[id]`                | Aktualizácia zručnosti (názov, popis, režim, schéma, obslužný program, značky)                                                          |
+| DELETE | `/api/skills/[id]`                | Odinštalovanie zručnosti                                                                                                                |
+| POST   | `/api/skills/install`             | Inštalácia zručnosti zo surového manifestu — telo: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`       |
+| GET    | `/api/skills/executions`          | Zoznam nedávnych spustení zručností (auditný záznam so vstupmi, výstupmi a trvaním)                                                     |
+| GET    | `/api/skills/marketplace?q=...`   | Vyhľadávanie/zoznam obľúbených položiek z trhoviska SkillsMP (vyžaduje nastavenie `skillsmpApiKey`)                                     |
+| POST   | `/api/skills/marketplace/install` | Inštalácia zručnosti podľa ID zo SkillsMP                                                                                               |
+| GET    | `/api/skills/skillssh?q=&limit=`  | Vyhľadávanie v registri skills.sh                                                                                                       |
+| POST   | `/api/skills/skillssh/install`    | Inštalácia zručnosti podľa ID zo skills.sh                                                                                              |
 
-**Autentifikácia:** relácia správy/kľúč API. Trasy vyhľadávania na trhovisku akceptujú autentifikáciu správy alebo kľúč API typu Bearer (`isAuthenticated`).
+**Overenie totožnosti:** relácia správy/API kľúč. Trasy vyhľadávania na trhovisku akceptujú overenie totožnosti správy alebo API kľúč typu Bearer (`isAuthenticated`).
 
 ---
 
 ## Pamäť
 
-Trvalé úložisko konverzačnej/faktickej pamäte, oddelené podľa API kľúča/relácie.
+Trvalé úložisko konverzačnej/faktickej pamäte s rozsahom obmedzeným na kľúč API/reláciu.
 
 | Metóda | Cesta                | Popis                                                                                                                   |
 | ------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/memory`        | Zoznam pamätí — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, so stránkovaním pomocou `offset/limit` alebo `page/limit` |
-| POST   | `/api/memory`        | Vytvorenie pamäte — telo validované pomocou Zod: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}`  |
+| POST   | `/api/memory`        | Vytvorenie pamäte — telo overované pomocou Zod: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}`   |
 | GET    | `/api/memory/[id]`   | Načítanie jednej pamäte                                                                                                 |
 | DELETE | `/api/memory/[id]`   | Odstránenie pamäte                                                                                                      |
-| GET    | `/api/memory/health` | Stav pamäťového subsystému (pripojenie k DB, backend vektorových reprezentácií, stav vektorového indexu)                |
+| GET    | `/api/memory/health` | Stav podsystému pamäte (pripojenie k databáze, backend vnorení, stav vektorového indexu)                                |
 
-**Autentifikácia:** relácia správy/API kľúč (`requireManagementAuth`). Výčtový typ `type`: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (pozri `MemoryType` v `src/lib/memory/types.ts`).
+**Autentifikácia:** relácia správy/kľúč API (`requireManagementAuth`). Enum `type`: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (pozrite si `MemoryType` v `src/lib/memory/types.ts`).
 
 ---
 
 ## Server MCP
 
-OmniRoute obsahuje vstavaný server Model Context Protocol s 3 transportmi (stdio, SSE, streamable-http) a nástrojmi s definovaným rozsahom oprávnení. Koncové body ovládacieho panela uvedené nižšie načítavajú údaje o stave/audite a sprostredkúvajú HTTP transporty.
+OmniRoute obsahuje vstavaný server Model Context Protocol s 3 transportmi (stdio, SSE, streamable-http) a nástrojmi s obmedzeným rozsahom. Nižšie uvedené koncové body ovládacieho panela načítavajú údaje o stave/audite a zastupujú transporty HTTP.
 
 | Metóda | Cesta | Popis |
 | ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Signál aktivity, transport, online stav, posledné volanie, najpoužívanejšie nástroje, úspešnosť za 24 h |
+| GET | `/api/mcp/status` | Signál aktivity, transport, stav online, posledné volanie, najpoužívanejšie nástroje, 24-hodinová miera úspešnosti |
 | GET | `/api/mcp/tools` | Zoznam nástrojov MCP s `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Otvorenie SSE streamu pre transport SSE (vráti `503`, ak je MCP zakázané alebo sa transport nezhoduje) |
-| POST | `/api/mcp/sse` | Odoslanie rámca JSON-RPC cez transport SSE |
-| GET | `/api/mcp/stream` | Otvorenie SSE strany transportu Streamable HTTP (správy iniciované serverom) |
-| POST | `/api/mcp/stream` | Odoslanie rámca JSON-RPC cez transport Streamable HTTP |
+| GET | `/api/mcp/sse` | Otvorenie prúdu SSE pre transport SSE (vráti `503`, ak je MCP deaktivovaný alebo sa transport nezhoduje) |
+| POST | `/api/mcp/sse` | Odoslanie rámca JSON-RPC prostredníctvom transportu SSE |
+| GET | `/api/mcp/stream` | Otvorenie strany SSE transportu Streamable HTTP (správy iniciované serverom) |
+| POST | `/api/mcp/stream` | Odoslanie rámca JSON-RPC prostredníctvom transportu Streamable HTTP |
 | DELETE | `/api/mcp/stream` | Ukončenie relácie Streamable HTTP |
 | GET | `/api/mcp/audit` | Dotazovanie denníka auditu — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Súhrnné štatistiky auditu (celkové počty, úspešnosť, priemerné trvanie, najpoužívanejšie nástroje) |
+| GET | `/api/mcp/audit/stats` | Agregované štatistiky auditu (celkové počty, miera úspešnosti, priemerné trvanie, najpoužívanejšie nástroje) |
 
-**Autentifikácia:** transporty `sse`/`stream` rešpektujú autentifikačné rozhranie špecifické pre MCP (API kľúč Bearer s rozsahom `mcp`); trasy `status`/`tools`/`audit*` sú čitateľné z ovládacieho panela (nie je potrebná žiadna ďalšia autentifikácia okrem prístupu k hostiteľovi ovládacieho panela).
+**Autentifikácia:** transporty `sse`/`stream` rešpektujú autentifikačné rozhranie špecifické pre MCP (kľúč API typu Bearer s rozsahom `mcp`); trasy `status`/`tools`/`audit*` sú čitateľné z ovládacieho panela (okrem prístupu k hostiteľovi ovládacieho panela sa nevyžaduje žiadna ďalšia autentifikácia).
 
-> Oba HTTP transporty sú riadené nastaveniami `settings.mcpEnabled` a `settings.mcpTransport` — nezhoda transportu vráti `400`, zakázaný stav MCP vráti `503`.
+> Oba transporty HTTP sú riadené nastaveniami `settings.mcpEnabled` a `settings.mcpTransport` — nezhoda transportu vráti `400`, deaktivovaný stav MCP vráti `503`.
 
 ---
 
 ## Server A2A
 
-OmniRoute poskytuje koncový bod A2A (Agent-to-Agent) JSON-RPC 2.0 spolu s obalom REST na účely kontroly a použitia v informačnom paneli.
+OmniRoute poskytuje koncový bod A2A (Agent-to-Agent) JSON-RPC 2.0 spolu s obalom REST na účely kontroly a použitia v ovládacom paneli.
 
 ### JSON-RPC
 
 ```bash
 POST /a2a
-Authorization: Bearer your-api-key   # voliteľné, ak nie je nastavená premenná OMNIROUTE_API_KEY
+Authorization: Bearer your-api-key   # voliteľné, pokiaľ nie je nastavené OMNIROUTE_API_KEY
 Content-Type: application/json
 
 {
@@ -1780,19 +1924,19 @@ Content-Type: application/json
   "method": "message/send",
   "params": {
     "skill": "smart-routing",
-    "messages": [{"role": "user", "content": "Smeruj túto programátorskú úlohu"}]
+    "messages": [{"role": "user", "content": "Route this coding task"}]
   }
 }
 ```
 
-Podporované metódy (všetky podmienené nastavením `settings.a2aEnabled`):
+Podporované metódy (všetky závisia od `settings.a2aEnabled`):
 
-| Metóda           | Popis                                                                 |
-| ---------------- | --------------------------------------------------------------------- |
-| `message/send`   | Synchrónne vykonanie zručnosti; vráti `{task, artifacts, metadata}`   |
-| `message/stream` | Vykonanie rovnakej množiny zručností prostredníctvom streamovania SSE |
-| `tasks/get`      | Načíta úlohu podľa `taskId`                                           |
-| `tasks/cancel`   | Zruší úlohu podľa `taskId`                                            |
+| Metóda           | Popis                                                                |
+| ---------------- | -------------------------------------------------------------------- |
+| `message/send`   | Synchrónne vykonanie zručnosti; vracia `{task, artifacts, metadata}` |
+| `message/stream` | Streamované vykonanie rovnakej množiny zručností cez SSE             |
+| `tasks/get`      | Načíta úlohu podľa `taskId`                                          |
+| `tasks/cancel`   | Zruší úlohu podľa `taskId`                                           |
 
 Vstavané zručnosti: `smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report`.
 
@@ -1802,7 +1946,7 @@ Vstavané zručnosti: `smart-routing`, `quota-management`, `provider-discovery`,
 GET /.well-known/agent.json
 ```
 
-Vráti verejnú kartu agenta A2A (názov, popis, funkcie, katalóg zručností, schému autentifikácie) — verejne sa ukladá do vyrovnávacej pamäte na 1 hodinu. Autentifikácia sa nevyžaduje.
+Vracia verejnú kartu agenta A2A (názov, popis, možnosti, katalóg zručností, schéma autentifikácie) — verejne uloženú vo vyrovnávacej pamäti na 1 hodinu. Nevyžaduje sa autentifikácia.
 
 ### Pomocné rozhrania REST
 
@@ -1810,30 +1954,30 @@ Vráti verejnú kartu agenta A2A (názov, popis, funkcie, katalóg zručností, 
 | ------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/a2a/status`            | Stav povolenia A2A + štatistiky úloh + súhrn karty agenta z vyrovnávacej pamäte                                  |
 | GET    | `/api/a2a/tasks`             | Zoznam úloh — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
-| POST   | `/api/a2a/tasks`             | (Nie je implementované ako pomocné rozhranie REST — vytvorte prostredníctvom JSON-RPC `message/send`)            |
+| POST   | `/api/a2a/tasks`             | (Nie je implementované ako pomocné rozhranie REST — vytvárajte prostredníctvom JSON-RPC `message/send`)          |
 | GET    | `/api/a2a/tasks/[id]`        | Načíta jednu úlohu                                                                                               |
 | POST   | `/api/a2a/tasks/[id]/cancel` | Zruší úlohu                                                                                                      |
 
-**Autentifikácia:** pomocné rozhrania REST fungujú bez autentifikácie na správu (sú čitateľné z informačného panela); trasa JSON-RPC `/a2a` používa Bearer `OMNIROUTE_API_KEY`, ak je nakonfigurovaný.
+**Autentifikácia:** pomocné rozhrania REST fungujú bez autentifikácie na správu (sú čitateľné ovládacím panelom); trasa JSON-RPC `/a2a` používa nosný token `OMNIROUTE_API_KEY`, ak je nakonfigurovaný.
 
 ---
 
-## Cloud, evaluácie a posudzovanie
+## Cloud, Evals a Assess
 
 | Metóda | Cesta | Popis |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| POST | `/api/cloud/auth` | Overí kľúč Bearer a vráti maskované pripojenia poskytovateľov + aliasy modelov pre klientov cloudovej synchronizácie |
-| POST | `/api/cloud/credentials/update` | Aktualizuje šifrované prihlasovacie údaje pre poskytovateľa synchronizovaného s cloudom |
+| POST | `/api/cloud/auth` | Overí nosný kľúč a vráti maskované pripojenia poskytovateľov + aliasy modelov pre klientov cloudovej synchronizácie |
+| POST | `/api/cloud/credentials/update` | Aktualizuje šifrované prihlasovacie údaje poskytovateľa synchronizovaného s cloudom |
 | POST | `/api/cloud/model/resolve` | Preloží logické ID modelu na konkrétneho poskytovateľa/model pomocou lokálnej smerovacej tabuľky |
 | GET | `/api/cloud/models/alias` | Zobrazí zoznam aliasov modelov sprístupnených cloudovej synchronizácii |
-| GET | `/api/assess` | Načíta najnovšie kategorizácie posúdení (podľa poskytovateľa/modelu) |
-| POST | `/api/assess` | Spustí posúdenie — telo: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | Zobrazí zoznam vstavaných evaluačných súprav + najnovších spustení |
-| POST | `/api/evals` | Spustí evaluáciu |
-| POST | `/api/evals/suites` | Vytvorí vlastnú evaluačnú súpravu — telo overené pomocou `evalSuiteSaveSchema` |
-| GET | `/api/evals/suites/[id]` | Načíta vlastnú evaluačnú súpravu |
+| GET | `/api/assess` | Načíta najnovšie kategorizácie hodnotení (podľa poskytovateľa/modelu) |
+| POST | `/api/assess` | Spustí hodnotenie — telo: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
+| GET | `/api/evals` | Zobrazí zoznam vstavaných sád evalov + najnovších behov |
+| POST | `/api/evals` | Spustí beh evalu |
+| POST | `/api/evals/suites` | Vytvorí vlastnú sadu evalov — telo overené pomocou `evalSuiteSaveSchema` |
+| GET | `/api/evals/suites/[id]` | Načíta vlastnú sadu evalov |
 
-**Autentifikácia:** `/api/cloud/auth` priamo overuje kľúč Bearer a vracia maskovaný kľúč a `projectId` každého pripojenia iba pre kľúč s rozsahom `manage` / `admin`; ostatné trasy `/api/cloud/*`, `/api/evals/*` a `/api/assess` vyžadujú reláciu správy/kľúč API. POST na `/api/assess` používa `validateBody` so schémou rozsahu s diskriminovanou úniou.
+**Autentifikácia:** `/api/cloud/auth` priamo overuje nosný kľúč a vracia maskovaný kľúč a `projectId` každého pripojenia iba pre kľúč s rozsahom `manage` / `admin`; ostatné trasy `/api/cloud/*`, `/api/evals/*` a `/api/assess` vyžadujú reláciu na správu/kľúč API. POST `/api/assess` používa `validateBody` so schémou rozsahu typu diskriminovaného zjednotenia.
 
 ---
 
@@ -1845,7 +1989,7 @@ ako podradené procesy. Tieto koncové body spravujú detekciu agentov ACP a reg
 | ------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | GET    | `/api/acp/agents` | Zobrazí všetkých známych agentov CLI (vstavaných aj vlastných) so stavom inštalácie, verziou a binárnym súborom                                                                |
 | POST   | `/api/acp/agents` | Zaregistruje vlastného agenta ACP alebo obnoví vyrovnávaciu pamäť — telo: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` alebo `{action: "refresh"}` |
-| DELETE | `/api/acp/agents` | Odstráni vlastného agenta ACP — parameter dotazu: `?id=<agentId>`                                                                                                              |
+| DELETE | `/api/acp/agents` | Odstráni vlastného agenta ACP — parameter dopytu: `?id=<agentId>`                                                                                                              |
 
 **Príklad odpovede** (`GET /api/acp/agents`):
 
@@ -1878,20 +2022,20 @@ ako podradené procesy. Tieto koncové body spravujú detekciu agentov ACP a reg
 
 **Autentifikácia:** Vyžaduje reláciu správy (súbor cookie `auth_token` ovládacieho panela) alebo kľúč API s rozsahom správy.
 
-Úplné podrobnosti nájdete v dokumentácii [ACP Framework](../frameworks/ACP.md).
+Úplné podrobnosti nájdete v dokumentácii [Framework ACP](../frameworks/ACP.md).
 
 ---
 
 ## Analytika a pozorovateľnosť
 
-Koncové body analytiky v reálnom čase na monitorovanie smerovania, kompresie a diverzity poskytovateľov. Používajú ich stránky `/dashboard/analytics/*`.
+Koncové body analytiky v reálnom čase na monitorovanie smerovania, kompresie a diverzity poskytovateľov. Tieto koncové body zabezpečujú fungovanie stránok `/dashboard/analytics/*`.
 
 ### Analytika automatického smerovania
 
-| Metóda | Cesta                                | Popis                                                                                                                      |
-| ------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/analytics/auto-routing`        | Agregované štatistiky automatického smerovania: celkový počet volaní, rozdelenie stratégií, úrovní a hlavní poskytovatelia |
-| GET    | `/api/analytics/auto-routing?days=7` | Štatistiky za časové okno (predvolene 24 h)                                                                                |
+| Metóda | Cesta                                | Popis                                                                                                                                         |
+| ------ | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/analytics/auto-routing`        | Agregované štatistiky automatického smerovania: celkový počet volaní, rozdelenie stratégií, rozdelenie úrovní, najpoužívanejší poskytovatelia |
+| GET    | `/api/analytics/auto-routing?days=7` | Štatistiky za časové okno (predvolene 24 h)                                                                                                   |
 
 **Príklad odpovede**:
 
@@ -1923,7 +2067,7 @@ Koncové body analytiky v reálnom čase na monitorovanie smerovania, kompresie 
 
 | Metóda | Cesta                        | Popis                                                                                                   |
 | ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/analytics/compression` | Agregované štatistiky kompresie: ušetrené tokeny, percento úspory, rozdelenie režimov a využitie jadier |
+| GET    | `/api/analytics/compression` | Agregované štatistiky kompresie: ušetrené tokeny, percento úspory, rozdelenie režimov, využitie enginov |
 
 **Príklad odpovede**:
 
@@ -1952,7 +2096,7 @@ Koncové body analytiky v reálnom čase na monitorovanie smerovania, kompresie 
 
 | Metóda | Cesta                      | Popis                                                                                                                      |
 | ------ | -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/analytics/diversity` | Sledovanie diverzity založené na Shannonovej entropii: predchádza jediným bodom zlyhania meraním rozloženia poskytovateľov |
+| GET    | `/api/analytics/diversity` | Sledovanie diverzity založené na Shannonovej entropii: meraním rozloženia poskytovateľov predchádza jediným bodom zlyhania |
 
 **Príklad odpovede**:
 
@@ -1985,27 +2129,27 @@ Koncové body určené iba správcom na prevádzkovú správu.
 | GET    | `/api/admin/concurrency` | Načítanie aktuálnych limitov súbežnosti (globálnych + pre jednotlivých poskytovateľov)            |
 | POST   | `/api/admin/concurrency` | Aktualizácia limitov súbežnosti — telo: `{global?: number, perProvider?: Record<string, number>}` |
 
-**Autorizácia:** Vyžaduje reláciu správy s rozsahom správcu.
+**Autorizácia:** Vyžaduje reláciu na správu s rozsahom oprávnení správcu.
 
 ---
 
 ## Správa nástrojov CLI
 
-Spravujte nástroje CLI, ktoré sa integrujú s OmniRoute (antigravity, commandCode,
-devin-cli atď.). Úplný zoznam nájdete v [referenčnej príručke poskytovateľov](./PROVIDER_REFERENCE.md).
+Spravujte nástroje CLI, ktoré sa integrujú so službou OmniRoute (antigravity, commandCode,
+devin-cli atď.). Úplný zoznam nájdete v [referenčnej dokumentácii poskytovateľov](./PROVIDER_REFERENCE.md).
 
-| Metóda | Cesta                                   | Popis                                                                                                                                                                      |
-| ------ | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/cli-tools/all-statuses`           | Stav všetkých nástrojov CLI (nainštalované, verzia, naposledy zaznamenané)                                                                                                 |
-| GET    | `/api/cli-tools/status`                 | Podrobnosti o stave jedného nástroja CLI (parameter dopytu `?tool=`)                                                                                                       |
-| POST   | `/api/cli-tools/apply`                  | Zapíše vygenerovanú konfiguráciu nástroja (`dryRun` zobrazí náhľad; `422` + `containerEphemeralTarget` pri použití kontajnera; `migration` upozorní na starší YAML Codexu) |
-| GET    | `/api/cli-tools/backups`                | Zoznam záloh konfigurácií nástrojov CLI                                                                                                                                    |
-| POST   | `/api/cli-tools/backups`                | Vytvorí zálohu konfigurácií všetkých nástrojov CLI                                                                                                                         |
-| POST   | `/api/cli-tools/backups`                | Obnovenie: rovnaký koncový bod s `{tool, backupId}` v tele požiadavky obnoví danú zálohu                                                                                   |
-| GET    | `/api/cli-tools/antigravity-mitm`       | Stav proxy MITM nástroja Antigravity (nástroj CLI „antigravity-mitm“)                                                                                                      |
-| POST   | `/api/cli-tools/antigravity-mitm/alias` | Nakonfiguruje aliasy antigravity-mitm                                                                                                                                      |
+| Metóda | Cesta                                   | Popis                                                                                                                                                                         |
+| ------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/cli-tools/all-statuses`           | Stav všetkých nástrojov CLI (inštalácia, verzia, posledné zaznamenanie)                                                                                                       |
+| GET    | `/api/cli-tools/status`                 | Podrobný stav jedného nástroja CLI (parameter dopytu `?tool=`)                                                                                                                |
+| POST   | `/api/cli-tools/apply`                  | Zápis vygenerovanej konfigurácie nástroja (`dryRun` zobrazí náhľad; `422` + `containerEphemeralTarget` pri spustení v kontajneri; `migration` upozorní na starší YAML Codexu) |
+| GET    | `/api/cli-tools/backups`                | Zoznam záloh konfigurácií nástrojov CLI                                                                                                                                       |
+| POST   | `/api/cli-tools/backups`                | Vytvorenie zálohy konfigurácií všetkých nástrojov CLI                                                                                                                         |
+| POST   | `/api/cli-tools/backups`                | Obnovenie: rovnaký koncový bod s `{tool, backupId}` v tele obnoví danú zálohu                                                                                                 |
+| GET    | `/api/cli-tools/antigravity-mitm`       | Stav proxy servera MITM Antigravity (nástroj CLI „antigravity-mitm“)                                                                                                          |
+| POST   | `/api/cli-tools/antigravity-mitm/alias` | Konfigurácia aliasov antigravity-mitm                                                                                                                                         |
 
-**Autentifikácia:** Vyžaduje reláciu správy.
+**Autorizácia:** Vyžaduje reláciu na správu.
 
 ---
 
@@ -2020,25 +2164,25 @@ Spravujte zručnosti agentov AI (podobné vlastným GPT od OpenAI, ale určené 
 | POST   | `/api/agent-skills`          | Vytvorenie vlastnej zručnosti agenta — telo: `{name, description, prompt, model?, temperature?}` |
 | PUT    | `/api/agent-skills/[id]`     | Aktualizácia vlastnej zručnosti agenta                                                           |
 | DELETE | `/api/agent-skills/[id]`     | Odstránenie vlastnej zručnosti agenta                                                            |
-| GET    | `/api/agent-skills/[id]/raw` | Získanie nespracovanej výzvy + metadát (bez vykonania)                                           |
+| GET    | `/api/agent-skills/[id]/raw` | Získanie nespracovaného promptu + metadát (bez vykonania)                                        |
 | POST   | `/api/agent-skills/generate` | Vygenerovanie novej zručnosti pomocou AI z opisu v prirodzenom jazyku                            |
 
-**Autorizácia:** Vyžaduje reláciu správy alebo kľúč API s rozsahom správy.
+**Autorizácia:** Vyžaduje reláciu na správu alebo kľúč API s rozsahom oprávnení na správu.
 
 ---
 
 ## Správa vyrovnávacej pamäte
 
-Spravujte sémantickú vyrovnávaciu pamäť a vyrovnávaciu pamäť odôvodnení.
+Spravujte sémantickú vyrovnávaciu pamäť a vyrovnávaciu pamäť uvažovania.
 
 | Metóda | Cesta                  | Popis                                                                                                                                  |
 | ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/cache`           | Prehľad vyrovnávacej pamäte: celkový počet záznamov, miera zásahov, veľkosť na disku                                                   |
 | GET    | `/api/cache/entries`   | Zoznam záznamov vo vyrovnávacej pamäti (so stránkovaním)                                                                               |
-| DELETE | `/api/cache/entries`   | Odstránenie záznamov z vyrovnávacej pamäte (filtrovanie podľa parametrov dopytu)                                                       |
-| GET    | `/api/cache/stats`     | Podrobné štatistiky vyrovnávacej pamäte (podľa poskytovateľa a modelu)                                                                 |
-| GET    | `/api/cache/reasoning` | Stav vyrovnávacej pamäte odôvodnení (na opätovné prehranie odôvodnení)                                                                 |
-| DELETE | `/api/cache/reasoning` | Vymazanie vyrovnávacej pamäte odôvodnení — parametre dopytu: `?toolCallId=<id>` (jeden), `?provider=<p>` alebo bez parametrov (všetky) |
+| DELETE | `/api/cache/entries`   | Odstránenie záznamov z vyrovnávacej pamäte (filtrovanie podľa parametrov dotazu)                                                       |
+| GET    | `/api/cache/stats`     | Podrobné štatistiky vyrovnávacej pamäte (podľa jednotlivých poskytovateľov a modelov)                                                  |
+| GET    | `/api/cache/reasoning` | Stav vyrovnávacej pamäte uvažovania (na opätovné prehratie uvažovania)                                                                 |
+| DELETE | `/api/cache/reasoning` | Vymazanie vyrovnávacej pamäte uvažovania — parametre dotazu: `?toolCallId=<id>` (jeden), `?provider=<p>` alebo bez parametrov (všetky) |
 
 **Autorizácia:** Vyžaduje reláciu správy.
 
@@ -2050,11 +2194,11 @@ Spravujte trvalú pamäť (FTS5 + vektorové vnorenia).
 
 | Metóda | Cesta              | Popis                                                                               |
 | ------ | ------------------ | ----------------------------------------------------------------------------------- |
-| GET    | `/api/memory`      | Zoznam záznamov pamäte (filtrovanie podľa rozsahu, typu a vyhľadávacieho dopytu)    |
-| POST   | `/api/memory`      | Vytvorenie nového záznamu pamäte — telo: `{scope, type, content, metadata?}`        |
-| GET    | `/api/memory/[id]` | Získanie konkrétneho záznamu pamäte                                                 |
-| PUT    | `/api/memory/[id]` | Aktualizácia záznamu pamäte                                                         |
-| DELETE | `/api/memory/[id]` | Odstránenie záznamu pamäte                                                          |
+| GET    | `/api/memory`      | Zoznam záznamov v pamäti (filtrovanie podľa rozsahu, typu a vyhľadávacieho dotazu)  |
+| POST   | `/api/memory`      | Vytvorenie nového záznamu v pamäti — telo: `{scope, type, content, metadata?}`      |
+| GET    | `/api/memory/[id]` | Získanie konkrétneho záznamu v pamäti                                               |
+| PUT    | `/api/memory/[id]` | Aktualizácia záznamu v pamäti                                                       |
+| DELETE | `/api/memory/[id]` | Odstránenie záznamu z pamäte                                                        |
 | GET    | `/api/memory?q=`   | Vyhľadávanie v pamäti (FTS5 + vektory) — štatistiky sú zahrnuté v rovnakej odpovedi |
 
 **Autorizácia:** Vyžaduje reláciu správy alebo kľúč API s rozsahom správy.
@@ -2072,7 +2216,7 @@ Spravujte odbery webhookov pre udalosti.
 | GET    | `/api/webhooks/[id]`            | Získanie konkrétneho odberu webhooku                                   |
 | PUT    | `/api/webhooks/[id]`            | Aktualizácia odberu webhooku                                           |
 | DELETE | `/api/webhooks/[id]`            | Odstránenie odberu webhooku                                            |
-| GET    | `/api/webhooks/[id]/deliveries` | Zoznam histórie doručení webhooku (záznam úspechov a zlyhaní)          |
+| GET    | `/api/webhooks/[id]/deliveries` | Zoznam histórie doručení webhooku (záznam úspechov/neúspechov)         |
 | POST   | `/api/webhooks/[id]/test`       | Odoslanie testovacej udalosti webhooku                                 |
 
 **Autorizácia:** Vyžaduje reláciu správy.
@@ -2081,22 +2225,22 @@ Spravujte odbery webhookov pre udalosti.
 
 ---
 
-## Framework zručností
+## Framework Skills
 
-Spravujte zručnosti (framework agentných rozšírení).
+Spravujte Skills (framework agentických rozšírení).
 
-| Metóda | Cesta                    | Popis                                                                                      |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------ |
-| GET    | `/api/skills`            | Zobrazí zoznam všetkých nainštalovaných zručností (vstavaných aj vlastných)                |
-| POST   | `/api/skills/install`    | Nainštaluje zručnosť z lokálnej cesty alebo adresy URL                                     |
-| DELETE | `/api/skills/[id]`       | Odinštaluje zručnosť                                                                       |
-| PUT    | `/api/skills/[id]`       | Povolí alebo zakáže zručnosť — telo: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
-| POST   | `/api/skills/executions` | Spustí zručnosť — telo: `{skillName, apiKeyId, input?, sessionId?}`                        |
-| GET    | `/api/skills/executions` | Zobrazí históriu spustení všetkých zručností (filtrovanie pomocou `?apiKeyId=`)            |
+| Metóda | Cesta                    | Popis                                                                                         |
+| ------ | ------------------------ | --------------------------------------------------------------------------------------------- |
+| GET    | `/api/skills`            | Zoznam všetkých nainštalovaných Skills (vstavaných aj vlastných)                              |
+| POST   | `/api/skills/install`    | Inštalácia Skill z lokálnej cesty alebo URL                                                   |
+| DELETE | `/api/skills/[id]`       | Odinštalovanie Skill                                                                          |
+| PUT    | `/api/skills/[id]`       | Povolenie alebo zakázanie Skill — telo: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
+| POST   | `/api/skills/executions` | Spustenie Skill — telo: `{skillName, apiKeyId, input?, sessionId?}`                           |
+| GET    | `/api/skills/executions` | Zoznam histórie spustení všetkých Skills (filtrovanie podľa `?apiKeyId=`)                     |
 
 **Autorizácia:** Vyžaduje reláciu správy alebo kľúč API s rozsahom správy.
 
-Úplné podrobnosti nájdete v dokumente [Framework zručností](../frameworks/SKILLS.md).
+Úplné podrobnosti nájdete v dokumente [Framework Skills](../frameworks/SKILLS.md).
 
 ---
 
@@ -2104,15 +2248,15 @@ Spravujte zručnosti (framework agentných rozšírení).
 
 Spravujte pluginy OmniRoute (rozšírenia tretích strán).
 
-| Metóda | Cesta                              | Popis                                   |
-| ------ | ---------------------------------- | --------------------------------------- |
-| GET    | `/api/plugins`                     | Zobrazí zoznam nainštalovaných pluginov |
-| POST   | `/api/plugins/marketplace/install` | Nainštaluje plugin z trhoviska          |
-| DELETE | `/api/plugins/[name]`              | Odinštaluje plugin                      |
-| POST   | `/api/plugins/[name]/activate`     | Aktivuje plugin                         |
-| POST   | `/api/plugins/[name]/deactivate`   | Deaktivuje plugin                       |
-| GET    | `/api/plugins/[name]/config`       | Získa konfiguráciu pluginu              |
-| PUT    | `/api/plugins/[name]/config`       | Aktualizuje konfiguráciu pluginu        |
+| Metóda | Cesta                              | Popis                             |
+| ------ | ---------------------------------- | --------------------------------- |
+| GET    | `/api/plugins`                     | Zoznam nainštalovaných pluginov   |
+| POST   | `/api/plugins/marketplace/install` | Inštalácia pluginu z marketplace  |
+| DELETE | `/api/plugins/[name]`              | Odinštalovanie pluginu            |
+| POST   | `/api/plugins/[name]/activate`     | Aktivácia pluginu                 |
+| POST   | `/api/plugins/[name]/deactivate`   | Deaktivácia pluginu               |
+| GET    | `/api/plugins/[name]/config`       | Získanie konfigurácie pluginu     |
+| PUT    | `/api/plugins/[name]/config`       | Aktualizácia konfigurácie pluginu |
 
 **Autorizácia:** Vyžaduje reláciu správy.
 
@@ -2122,18 +2266,18 @@ Spravujte pluginy OmniRoute (rozšírenia tretích strán).
 
 ## Tieňové smerovanie
 
-Tieňové porovnávanie poskytovateľov alebo ich porovnávanie typu A/B **nie je samostatným rozhraním REST** — konfiguruje sa prostredníctvom kombinovaného smerovania (pozrite si [Automatické kombinácie](../routing/AUTO-COMBO.md)). Metriky porovnávania pre jednotlivé kombinácie poskytuje `GET /api/combos/metrics`.
+Tieňové porovnávanie poskytovateľov / porovnávanie A-B **nie je samostatným rozhraním REST** — konfiguruje sa prostredníctvom kombinovaného smerovania (pozrite si [Automatické kombinácie](../routing/AUTO-COMBO.md)). Metriky porovnávania pre jednotlivé kombinácie poskytuje `GET /api/combos/metrics`.
 
 ---
 
 ## Ochranné mechanizmy
 
-Kontrolujte ochranné mechanizmy pri behu systému (detekcia osobných údajov, detekcia vloženia škodlivej inštrukcie do promptu, premostenie videnia). Ochranné mechanizmy sa spúšťajú pri každej požiadavke; zrušenie pre jednotlivé volania sa vykonáva prostredníctvom hlavičky požiadavky `x-omniroute-disabled-guardrails` — neexistuje trvalé rozhranie na ich povolenie alebo zakázanie.
+Kontrolujte ochranné mechanizmy za behu (detekcia osobných údajov, detekcia vloženia promptu, premostenie počítačového videnia). Ochranné mechanizmy sa spúšťajú pri každej požiadavke; odhlásenie pre jednotlivé volania sa vykonáva prostredníctvom hlavičky požiadavky `x-omniroute-disabled-guardrails` — neexistuje trvalé rozhranie na ich povolenie alebo zakázanie.
 
-| Metóda | Cesta                  | Popis                                                                                                |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET    | `/api/guardrails`      | Zobrazí zoznam registrovaných ochranných mechanizmov a ich stav (názov / povolenie / priorita)       |
-| POST   | `/api/guardrails/test` | Vykoná skúšobný beh postupu pred volaním nad vzorovým vstupom — telo: `{input, disabledGuardrails?}` |
+| Metóda | Cesta                  | Popis                                                                                               |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------- |
+| GET    | `/api/guardrails`      | Zoznam registrovaných ochranných mechanizmov a ich stavov (názov / povolené / priorita)             |
+| POST   | `/api/guardrails/test` | Skúšobné spustenie postupu pred volaním nad vzorovým vstupom — telo: `{input, disabledGuardrails?}` |
 
 **Autorizácia:** Vyžaduje reláciu správy.
 
@@ -2145,12 +2289,12 @@ Kontrolujte ochranné mechanizmy pri behu systému (detekcia osobných údajov, 
 
 ## Autentifikácia
 
-Štyri skupiny prihlasovacích údajov (relácia ovládacieho panela, lokálny token CLI, prístupový token `oma_live_…`, kľúč API s rozsahom správy) a ich rozdiely oproti kľúčom na inferenciu nájdete v časti [Autentifikácia správy](../guides/MANAGEMENT-AUTH.md).
+Informácie o štyroch skupinách prihlasovacích údajov (relácia ovládacieho panela, lokálny token CLI, prístupový token `oma_live_…`, kľúč API s rozsahom správy) a o tom, ako sa líšia od kľúčov na inferenciu, nájdete v časti [Autentifikácia správy](../guides/MANAGEMENT-AUTH.md).
 
 - Trasy ovládacieho panela (`/dashboard/*`) používajú súbor cookie `auth_token`
-- Prihlásenie používa uložený hash hesla; záložnou možnosťou je `INITIAL_PASSWORD`
+- Prihlásenie používa uložený hash hesla; ako záložná možnosť sa používa `INITIAL_PASSWORD`
 - Nastavenie `requireLogin` možno prepínať prostredníctvom `/api/settings/require-login`
-- Trasy `/v1/*` môžu vyžadovať kľúč API typu Bearer, keď je nastavené `REQUIRE_API_KEY=true`
-- Pojem „token správy“ / „kľúč API s rozsahom správy“ v tejto dokumentácii označuje jednu zo skupín uvedených v danej príručke — nejde o nedefinovaný dodatočný typ tajného kľúča
+- Trasy `/v1/*` môžu voliteľne vyžadovať kľúč API typu Bearer, keď je `REQUIRE_API_KEY=true`
+- „token správy“ / „kľúč API s rozsahom správy“ v tejto referenčnej príručke označuje jednu zo skupín uvedených v danej príručke — nejde o nedefinovaný dodatočný typ tajného údaja
 
-> **Nekompatibilná zmena (v3.8.0)** — `/api/v1/agents/tasks/*` a koncové body správy doby čakania teraz vyžadujú **autentifikáciu správy** (súbor cookie `auth_token` ovládacieho panela alebo kľúč API s rozsahom správy). Klienti, ktorí predtým volali tieto trasy bez autentifikácie, dostanú odpoveď `401 Unauthorized`. Pozrite si commit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).
+> **Nekompatibilná zmena (v3.8.0)** — `/api/v1/agents/tasks/*` a koncové body správy časového obmedzenia teraz vyžadujú **autentifikáciu správy** (súbor cookie `auth_token` ovládacieho panela alebo kľúč API s rozsahom správy). Klienti, ktorí predtým volali tieto trasy bez autentifikácie, dostanú odpoveď `401 Unauthorized`. Pozrite si commit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).

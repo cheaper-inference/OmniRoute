@@ -28,6 +28,16 @@ import {
 
 export { pruneResilienceSettingsToProvided };
 
+// Memoization cache for resolveResilienceSettings: keyed by the settings object
+// reference returned by getCachedSettings(). The TTLCache in readCache.ts returns
+// the same object identity within its 5s window, so this cache is naturally
+// invalidated when settings are updated (the old object is evicted and a new one
+// is created). WeakMap avoids holding onto stale settings objects.
+// Env-derived defaults (RATE_LIMIT_*, PROVIDER_COOLDOWN_*, STREAM_RECOVERY_*) are read
+// once per settings object, so they stay frozen for that object's lifetime (bounded by the
+// 5s cache TTL). The returned object is shared across callers and must be treated as read-only.
+const resolvedSettingsCache = new WeakMap<Record<string, unknown>, ResilienceSettings>();
+
 // Re-export the settings shape (moved to ./settings/types) so this module's
 // public API is unchanged.
 export type {
@@ -343,10 +353,14 @@ export function resolveResilienceSettings(
   settings: Record<string, unknown> | null | undefined
 ): ResilienceSettings {
   const record = asRecord(settings);
+  const cacheKey = record; // the exact object reference from getCachedSettings()
+  const cached = resolvedSettingsCache.get(cacheKey);
+  if (cached) return cached;
+
   const current = asRecord(record.resilienceSettings);
   const fallback = buildLegacyFallback(record);
 
-  return {
+  const resolved: ResilienceSettings = {
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
@@ -409,6 +423,9 @@ export function resolveResilienceSettings(
       fallback.credentialHealthCheck
     ),
   };
+
+  resolvedSettingsCache.set(cacheKey, resolved);
+  return resolved;
 }
 
 export function mergeResilienceSettings(

@@ -202,6 +202,8 @@ export interface PreflightQuotaThresholds {
    * point.
    */
   resolveWarnRemainingPercent?: (window: string | null) => number;
+  /** Whether this window's cutoff is an operator-configured policy, not the factory fallback. */
+  isConfiguredCutoff?: (window: string | null) => boolean;
 }
 
 function resolveOrDefault(
@@ -417,6 +419,44 @@ function windowedQuotaCutoffResult(
  * Pure cutoff evaluator used by routing paths that already fetched quota.
  * Mirrors preflightQuota threshold semantics without performing I/O or logging.
  */
+function configuredCurrentWindows(
+  windows: NonNullable<QuotaInfo["windows"]>,
+  configured: (window: string | null) => boolean
+): NonNullable<QuotaInfo["windows"]> {
+  const groups = groupQuotaWindowsByBase(windows);
+  const selected: NonNullable<QuotaInfo["windows"]> = {};
+  for (const entries of groups.values()) {
+    if (!entries.some(([name]) => configured(name))) continue;
+    for (const [name, info] of entries) {
+      if (!info.resetAt || new Date(info.resetAt).getTime() > Date.now()) {
+        selected[name] = info;
+      }
+    }
+  }
+  return selected;
+}
+
+function healthyQuotaCutoffResult(
+  quota: QuotaInfo,
+  thresholds: PreflightQuotaThresholds | undefined,
+  scope: QuotaCutoffScope | undefined
+): PreflightQuotaResult {
+  const configured = thresholds?.isConfiguredCutoff;
+  if (!configured) return { proceed: true, quotaPercent: quota.percentUsed };
+  const windows = quota.windows;
+  if (windows && Object.keys(windows).length > 0) {
+    const scoped = windowsForScope(windows, scope);
+    const cutoff = quotaWindowCutoffResult(
+      configuredCurrentWindows(scoped, configured),
+      thresholds
+    );
+    return cutoff ?? { proceed: true, quotaPercent: quota.percentUsed };
+  }
+  return configured(null) && (!quota.resetAt || new Date(quota.resetAt).getTime() > Date.now())
+    ? quotaPercentCutoffResult(quota, thresholds)
+    : { proceed: true, quotaPercent: quota.percentUsed };
+}
+
 export function evaluateQuotaCutoff(
   quota: QuotaInfo | null | undefined,
   thresholds?: PreflightQuotaThresholds,
@@ -432,9 +472,10 @@ export function evaluateQuotaCutoff(
   ) {
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
-  // #14359 — same escape as the dispatch-time predicates: a recent success is not exhaustion.
+  // #14359 — a recent success discounts default exhaustion hints. Explicit
+  // cutoffs are still evaluated against their measured windows (#17879).
   if (scope?.connectionId && isQuotaHealthy(scope.connectionId)) {
-    return { proceed: true, quotaPercent: quota.percentUsed };
+    return healthyQuotaCutoffResult(quota, thresholds, scope);
   }
 
   const windowedResult = windowedQuotaCutoffResult(quota, thresholds, scope);
@@ -545,38 +586,20 @@ export async function preflightQuota(
     return decision;
   }
 
-  // Legacy single-signal path for fetchers that don't expose per-window data.
-  const minRemainingPercent = resolveOrDefault(
-    thresholds?.resolveMinRemainingPercent,
-    null,
-    DEFAULT_MIN_REMAINING_PERCENT
-  );
-  const warnRemainingPercent = resolveOrDefault(
-    thresholds?.resolveWarnRemainingPercent,
-    null,
-    DEFAULT_WARN_REMAINING_PERCENT
-  );
-
-  const { percentUsed } = quota;
-  const remainingPercent = remainingPercentFrom(percentUsed);
-
-  if (isRemainingAtOrBelowThreshold(remainingPercent, minRemainingPercent)) {
-    console.info(
-      `[QuotaPreflight] ${provider}/${connectionId}: ${remainingPercent.toFixed(1)}% remaining — switching (cutoff ${minRemainingPercent}%)`
+  // Legacy single-signal warning; the evaluator already made the cutoff decision.
+  if (Number.isFinite(quota.percentUsed)) {
+    const warnRemainingPercent = resolveOrDefault(
+      thresholds?.resolveWarnRemainingPercent,
+      null,
+      DEFAULT_WARN_REMAINING_PERCENT
     );
-    return {
-      proceed: false,
-      reason: "quota_exhausted",
-      quotaPercent: percentUsed,
-      resetAt: quota.resetAt ?? null,
-    };
+    const remainingPercent = remainingPercentFrom(quota.percentUsed);
+    if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
+      console.warn(
+        `[QuotaPreflight] ${provider}/${connectionId}: ${remainingPercent.toFixed(1)}% remaining — approaching cutoff`
+      );
+    }
   }
 
-  if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
-    console.warn(
-      `[QuotaPreflight] ${provider}/${connectionId}: ${remainingPercent.toFixed(1)}% remaining — approaching cutoff`
-    );
-  }
-
-  return { proceed: true, quotaPercent: percentUsed };
+  return decision;
 }

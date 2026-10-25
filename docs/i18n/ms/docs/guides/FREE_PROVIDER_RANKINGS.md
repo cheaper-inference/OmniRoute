@@ -11,32 +11,32 @@
 
 ---
 
-## Apakah Ini
+## Apa Itu
 
-OmniRoute mendaftarkan 374 penyedia, termasuk 155 entri katalog yang ditandakan sebagai **percuma/tanpa pengesahan**
-(tanpa pengesahan,
-OAuth peringkat percuma atau kunci API peringkat percuma — lihat
-[Panduan Peringkat Percuma](../getting-started/FREE-TIERS-GUIDE.md) dan
-[Direktori Peringkat Percuma](../reference/FREE_TIERS.md) yang lengkap). Kekangannya: penyedia percuma mempunyai
-kualiti model yang sangat berbeza-beza. Penyedia tanpa pengesahan yang menyediakan model tercanggih jauh lebih berguna
-berbanding penyedia yang menyediakan model legasi kecil.
+OmniRoute mendaftarkan 375 pembekal, termasuk 155 entri katalog bertanda **free/no-auth**
+(no-auth, OAuth peringkat percuma, atau kunci API peringkat percuma — lihat
+[Panduan Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) dan direktori penuh
+[Free Tiers](../reference/FREE_TIERS.md)). Masalahnya: pembekal percuma sangat
+berbeza-beza dari segi kualiti model. Pembekal no-auth yang menyediakan model frontier
+jauh lebih berguna daripada yang menyediakan model legasi kecil.
 
-**Kedudukan Penyedia Percuma** menjawab "**penyedia percuma manakah yang memberikan saya model terbaik?**" dengan
-menggabungkan katalog setiap penyedia percuma dengan **skor kualiti sumber ramai** daripada
-**papan pendahulu Arena AI** (ELO berdasarkan keutamaan manusia, konsep yang sama di sebalik arena
-chatbot LMArena). Penyedia kemudiannya diberi kedudukan berdasarkan keupayaan **model percuma terbaik** mereka.
+**Free Provider Rankings** menjawab soalan "**pembekal percuma manakah yang memberikan saya model terbaik?**" dengan
+menggabungkan katalog setiap pembekal percuma dengan **skor kualiti sumber ramai** daripada
+**papan pendahulu Arena AI** (ELO keutamaan manusia, idea yang sama di sebalik arena
+chatbot LMArena). Pembekal kemudiannya disusun mengikut kekuatan **model percuma terbaik** mereka.
 
-Kedudukan tersebut dikira daripada tiga sumber sebenar:
+Kedudukan ini dikira daripada tiga sumber sebenar:
 
-1. Senarai penyedia percuma — `NOAUTH_PROVIDERS`, serta entri `OAUTH_PROVIDERS` /
+1. Senarai pembekal percuma — `NOAUTH_PROVIDERS`, serta entri `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` yang ditandakan `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Katalog model setiap penyedia daripada daftar penyedia
+2. Katalog model setiap pembekal daripada pendaftar pembekal
    (`open-sse/config/providerRegistry.ts`).
-3. Skor kesesuaian tugas berasaskan ELO yang disimpan dalam jadual DB `model_intelligence` oleh
-   enjin penyegerakan ELO Arena (`src/lib/arenaEloSync.ts`).
+3. Skor kesesuaian tugas yang diperoleh daripada ELO yang disimpan dalam jadual DB
+   `model_intelligence` oleh enjin penyegerakan Arena ELO
+   (`src/lib/arenaEloSync.ts`).
 
-Logik penggabungan terdapat dalam `src/lib/freeProviderRankings.ts`.
+Logik gabungan ini terletak dalam `src/lib/freeProviderRankings.ts`.
 
 ---
 

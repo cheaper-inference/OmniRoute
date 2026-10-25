@@ -11,9 +11,17 @@
  *   <Breadcrumbs />
  */
 
+import { Fragment } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@omniroute/ui-kit/breadcrumb";
 
 const PATH_LABELS = {
   dashboard: "dashboard",
@@ -132,52 +140,25 @@ export default function Breadcrumbs() {
   }));
 
   return (
-    <nav
-      aria-label={t("ariaLabel")}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "6px",
-        fontSize: "13px",
-        color: "var(--text-secondary, #888)",
-        padding: "8px 0",
-        marginBottom: "8px",
-      }}
-    >
-      {crumbs.map((crumb, i) => (
-        <span key={crumb.href} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          {i > 0 && (
-            <span style={{ opacity: 0.4, fontSize: "11px" }} aria-hidden="true">
-              ›
-            </span>
-          )}
-          {crumb.isLast ? (
-            <span
-              aria-current="page"
-              style={{ color: "var(--text-primary, #e0e0e0)", fontWeight: 500 }}
-            >
-              {crumb.label}
-            </span>
-          ) : (
-            <Link
-              href={crumb.href}
-              style={{
-                color: "var(--text-secondary, #888)",
-                textDecoration: "none",
-                transition: "color 0.15s",
-              }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.color = "var(--accent, #818cf8)")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.color = "var(--text-secondary, #888)")
-              }
-            >
-              {crumb.label}
-            </Link>
-          )}
-        </span>
-      ))}
-    </nav>
+    <Breadcrumb aria-label={t("ariaLabel")} className="mb-2 py-2">
+      <BreadcrumbList>
+        {crumbs.map((crumb, i) => (
+          <Fragment key={crumb.href}>
+            {i > 0 && <BreadcrumbSeparator />}
+            <BreadcrumbItem>
+              {crumb.isLast ? (
+                <BreadcrumbPage aria-current="page">{crumb.label}</BreadcrumbPage>
+              ) : (
+                // The kit BreadcrumbLink is a plain <a> (no asChild); next/link keeps client-side
+                // navigation, so it carries the kit link slot + class itself.
+                <Link href={crumb.href} data-slot="breadcrumb-link" className="ci-breadcrumb__link">
+                  {crumb.label}
+                </Link>
+              )}
+            </BreadcrumbItem>
+          </Fragment>
+        ))}
+      </BreadcrumbList>
+    </Breadcrumb>
   );
 }

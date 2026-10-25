@@ -1,4 +1,5 @@
 import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "./emptyTurnPolicy.ts";
+import { normalizeStreamFailurePayload, type StreamFailurePayload } from "./streamErrorFormat.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
 import {
@@ -42,6 +43,8 @@ export type StreamReadinessResult =
       upstreamDiagnostic?: string;
       code: string;
       type: string;
+      /** An actual upstream rejection, not a readiness stall eligible for a probe retry. */
+      upstreamFailure?: true;
     };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -509,6 +512,7 @@ type StreamReadinessSignalState = {
   dataLines: string[];
   pendingLine: string;
   upstreamDiagnostic: string | null;
+  cursorFailure?: StreamFailurePayload | null;
 };
 
 function resetCurrentEvent(state: StreamReadinessSignalState): void {
@@ -525,6 +529,13 @@ function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean
 
   try {
     const payload: unknown = JSON.parse(data);
+    // Cursor emits classified terminal failures as chat chunks (with choices).
+    // Consume them at the existing pre-handoff boundary, not as readiness/success.
+    // Stop at the same first event as before; never probe a healthy stream ahead.
+    if (state.cursorFailure !== undefined && isRecord(payload) && isRecord(payload.error)) {
+      state.cursorFailure = normalizeStreamFailurePayload(payload);
+      return true;
+    }
     if (!state.upstreamDiagnostic && isRecord(payload) && isErrorOnlyStructuredPayload(payload)) {
       const error = payload.error;
       const rawMessage =
@@ -741,6 +752,7 @@ export async function ensureStreamReadiness(
     dataLines: [],
     pendingLine: "",
     upstreamDiagnostic: null,
+    ...(options.provider === "cursor" ? { cursorFailure: null } : {}),
   };
   const startedAt = Date.now();
   const effectiveTimeoutMs = Math.max(0, Math.floor(options.timeoutMs));
@@ -1024,6 +1036,21 @@ export async function ensureStreamReadiness(
       }
 
       if (appendStreamReadinessSignal(readinessState, decodedChunk)) {
+        const failure = readinessState.cursorFailure;
+        if (failure) {
+          void reader.cancel(failure.message).catch(() => {});
+          const code = failure.code || "upstream_error";
+          const type = failure.type || "api_error";
+          return {
+            ok: false,
+            reason: sanitizeErrorMessage(failure.message),
+            classificationReason: failure.message,
+            upstreamFailure: true,
+            code,
+            type,
+            response: createErrorResponse(failure.status, failure.message, code, type),
+          };
+        }
         if (
           contentWatcher &&
           !contentWatcher.sawContent() &&

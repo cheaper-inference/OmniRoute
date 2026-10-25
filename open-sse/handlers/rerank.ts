@@ -225,6 +225,8 @@ function transformAlibabaQwen3Response(data, options: RerankResponseOptions) {
  * @param {string} [options.connectionId] - Connection ID for per-connection proxy resolution
  * @param {Object} [options.resolvedProvider] - Runtime provider config for dynamic endpoints
  * @param {string} [options.resolvedModel] - Model ID after removing a dynamic provider prefix
+ * @param {function} [options.onPricedCall] - Receives `{ provider, model, costUsd }` after a
+ *   successful priced call so the caller can charge the key's budget
  * @returns {Response}
  */
 /** @returns {Promise<unknown>} */
@@ -240,6 +242,7 @@ export async function handleRerank({
   apiKeyName = null,
   resolvedProvider = null,
   resolvedModel = null,
+  onPricedCall = null,
 }) {
   const startTime = Date.now();
   if (!model) return errorResponse(400, "model is required");
@@ -342,6 +345,8 @@ export async function handleRerank({
     const costUsd = await calculateModalCost("rerank", effectiveProviderId, modelId, {
       searchUnits,
     });
+    // The caller charges the priced call to the key's budget (injected: no open-sse → src edge).
+    onPricedCall?.({ provider: effectiveProviderId, model: modelId, costUsd });
 
     saveCallLog({
       method: "POST",

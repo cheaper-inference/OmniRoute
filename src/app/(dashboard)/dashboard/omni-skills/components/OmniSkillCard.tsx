@@ -1,6 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import { cn } from "@/shared/utils/cn";
 
 export interface OmniSkill {
   id: string;
@@ -27,59 +31,52 @@ export function OmniSkillCard({ skill, selected, onClick }: OmniSkillCardProps):
 
   const modeColor =
     effectiveMode === "on"
-      ? "text-emerald-400"
+      ? "text-success"
       : effectiveMode === "auto"
-        ? "text-amber-400"
+        ? "text-warning"
         : "text-text-muted";
 
   const modeDot =
-    effectiveMode === "on"
-      ? "bg-emerald-400"
-      : effectiveMode === "auto"
-        ? "bg-amber-400"
-        : "bg-border";
+    effectiveMode === "on" ? "bg-success" : effectiveMode === "auto" ? "bg-warning" : "bg-border";
 
   return (
-    <button
+    <Button
+      variant="outline"
       role="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`w-full text-left rounded-lg border p-3 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500/50 ${
+      className={cn(
+        "h-auto w-full justify-start whitespace-normal p-3 text-left font-normal",
         selected
-          ? "border-violet-500 bg-violet-500/5"
-          : "border-border bg-surface/30 hover:border-border/80 hover:bg-surface/50"
-      }`}
+          ? "border-primary bg-primary/10"
+          : "border-border bg-bg-subtle hover:border-border/80 hover:bg-surface-2"
+      )}
     >
       <div className="flex items-start gap-2">
         <div
           className={`flex items-center justify-center size-8 rounded-md shrink-0 ${
-            selected ? "bg-violet-500/20" : "bg-surface/60"
+            selected ? "bg-primary/20" : "bg-surface-2"
           }`}
         >
-          <span className="material-symbols-outlined text-[18px] text-text-muted">
-            auto_fix_high
-          </span>
+          <Icon name="auto_fix_high" size={18} className="text-text-muted" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold text-text-main truncate">{skill.name}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface/60 text-text-muted shrink-0">
+            <Badge size="sm" className="shrink-0">
               v{skill.version}
-            </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface/60 text-text-muted shrink-0">
+            </Badge>
+            <Badge size="sm" className="shrink-0">
               {(skill.sourceProvider || "local").toUpperCase()}
-            </span>
+            </Badge>
           </div>
           <p className="text-xs text-text-muted mt-0.5 line-clamp-2">{skill.description}</p>
           {Array.isArray(skill.tags) && skill.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1.5">
               {skill.tags.slice(0, 3).map((tag) => (
-                <span
-                  key={`${skill.id}-${tag}`}
-                  className="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-300"
-                >
+                <Badge key={`${skill.id}-${tag}`} variant="primary" size="sm">
                   {tag}
-                </span>
+                </Badge>
               ))}
             </div>
           )}
@@ -87,11 +84,13 @@ export function OmniSkillCard({ skill, selected, onClick }: OmniSkillCardProps):
         <div className="flex items-center gap-1.5 shrink-0">
           <span className={`inline-block size-2 rounded-full ${modeDot}`} />
           <span className={`text-[10px] font-medium ${modeColor}`}>
-            {t(effectiveMode === "on" ? "onMode" : effectiveMode === "auto" ? "autoMode" : "offMode")}
+            {t(
+              effectiveMode === "on" ? "onMode" : effectiveMode === "auto" ? "autoMode" : "offMode"
+            )}
           </span>
         </div>
       </div>
-    </button>
+    </Button>
   );
 }
 

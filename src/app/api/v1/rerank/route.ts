@@ -1,4 +1,5 @@
 import { handleRerank } from "@omniroute/open-sse/handlers/rerank.ts";
+import { recordModalCallCost } from "@/domain/costRules";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import {
   getProviderCredentialsWithQuotaPreflight,
@@ -260,6 +261,7 @@ export async function handleValidatedRerankRequestBody(
       connectionId: (credentials as { connectionId?: string } | null)?.connectionId || null,
       apiKeyId: meta.apiKeyId || null,
       apiKeyName: meta.apiKeyName || null,
+      onPricedCall: (call) => recordModalCallCost(meta.apiKeyId, call),
     });
     if (response?.ok) {
       await clearRecoveredProviderState(credentials);

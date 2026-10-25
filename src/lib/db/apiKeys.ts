@@ -23,6 +23,7 @@ import {
 } from "./apiKeyUsageLimitFields";
 import { setNoLog } from "../compliance/noLog";
 import { resolveModelAlias } from "@omniroute/open-sse/services/modelDeprecation.ts";
+import { stripNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias.ts";
 import { getProviderAlias, resolveProviderId } from "@/shared/constants/providers";
 import { isSelfLoopBearer, selfLoopKeyOverrides } from "./apiKeys/selfLoopKey";
 import {
@@ -1591,6 +1592,10 @@ export async function isModelAllowedForKey(
   // If no key provided, allow (request may be using different auth method like JWT)
   // If no modelId provided, deny (invalid request)
   if (!key) return true;
+  if (!modelId) return false;
+  // `no-think/<provider>/<model>` is stripped before the chat handler's key check, so
+  // judge it as the real model. The catalog then lists exactly the variants that dispatch.
+  modelId = stripNoThinkingAlias(modelId);
   if (!modelId) return false;
 
   // Create cache key

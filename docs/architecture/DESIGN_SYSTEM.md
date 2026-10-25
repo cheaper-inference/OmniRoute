@@ -1,232 +1,162 @@
 ---
 title: "Design System & Visual Identity"
-lastUpdated: 2026-07-11
+lastUpdated: 2026-10-22
 ---
 
 # OmniRoute — Design System & Visual Identity
 
-> **Status:** reference — the standardization described here is **implemented** (phases 1–6: grid wallpaper, primitives, status-color centralization, mono token, DataTable token migration, focus-ring → accent, Checkbox/Textarea primitives, `cn()` → tailwind-merge, grid on every standalone screen, fluid 4K content shell, opaque data-table surfaces). This document is the canonical description of the dashboard's design tokens, components, and conventions; the phase framing below is kept as the rationale for each decision.
-> **Scope:** the OmniRoute dashboard (`src/`) and the marketing site (`_mono_repo/omnirouteSite/`) share **one visual identity** — same graph-paper grid background (32px), same color tokens, standardized components.
->
-> Practical notes for maintainers:
->
-> - Several remaining hardcoded hex values are **intentional** (always-dark console terminal, ReactFlow SVG strokes) and must **NOT** be swept into tokens.
-> - A "bigger" grid on a running instance is a stale build, not code — the grid size is 32px, identical to the site.
-> - Dark-theme `--table-*` values are byte-identical to the pre-migration hardcoded rgba; light theme was fixed (it was buggy always-dark via dead `var()` fallbacks).
+> **Status:** the dashboard is built on the **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
+> as the workspace `packages/ui-kit` (`@omniroute/ui-kit`; the upstream snapshot is pinned in
+> `packages/ui-kit/UPSTREAM.md` and guarded by `npm run check:ui-kit-snapshot`). Light is the canonical
+> theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Inter
+> (letter-spacing 0, `--ci-letter-spacing-ui`) is the UI family, Instrument Serif only for large sparse
+> display text (`.ci-dashboard-display`), IBM Plex Mono for code — all self-hosted through the
+> `@fontsource/*` imports at the top of `src/app/globals.css`. Every icon is a Lucide glyph.
 
----
+## 1. Where things live
 
-## 1. Purpose
+- **Kit.** `packages/ui-kit/src` is a byte-for-byte copy of the upstream `src/` at the commit pinned in
+  `packages/ui-kit/UPSTREAM.md` (which also records the license authorization); `PATCHES.md` lists local
+  patches (none). It is consumed as source, with no build: `next.config.mjs` transpiles it, and
+  `tsconfig.json` maps `@omniroute/ui-kit` → `packages/ui-kit/src` and `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` and `vitest.mcp.config.ts` carry the same alias). Import a
+  kit component by its subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), never
+  through the `@omniroute/ui-kit` barrel: the barrel pulls every component (including the date picker)
+  into each importer. The kit stylesheet enters through `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokens.** `packages/ui-kit/src/ci-tokens.css` declares the `--ci-*` tokens; `src/app/globals.css`
+  bridges them to the legacy OmniRoute names (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), so the existing `var(--color-*)` reads and Tailwind
+  utilities keep working. New code uses the Tailwind utilities (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) or kit classes — never a hex value
+  (`tests/unit/design-kit-bridge.test.ts` enforces the bridge). `text-primary` resolves to
+  `--color-primary-ink` through `--text-color-primary` (lime-800 in light, the lime accent in dark), so
+  primary text stays readable while `bg-primary`/`border-primary` keep the lime surface. Chart series use
+  `--color-chart-1` … `--color-chart-5`.
+- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) opts the document into the kit theme.
+  The preference is `light`, `dark` or `system` (`THEME_CONFIG.defaultTheme = "system"` in
+  `src/shared/constants/appConfig.ts`; `system` follows `prefers-color-scheme`). `applyTheme()` in
+  `src/store/themeStore.ts` (mirrored by the inline bootstrap script in `src/app/layout.tsx`, which runs
+  before hydration) sets `data-theme="dark"|"light"` and toggles the `.dark` class on `<html>` together.
+  The kit's dark token set is keyed on `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  OmniRoute's own dark overrides (the `.dark` block in `globals.css`) and the legacy Tailwind `dark:`
+  utilities key on the `.dark` class. There are no accent color presets: the accent always comes from the
+  kit, and a persisted preset from an older build is dropped when the store loads.
+- **Components (adapters).** `src/shared/components/index.tsx` keeps the OmniRoute component API (same
+  names, default exports and props), and the primitives behind it are adapters over the kit: forms
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays and feedback
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  structure (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) and tables
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). An adapter imports the kit
+  component by subpath and maps the legacy props onto it — for example `Button variant="primary"` is the
+  kit `default` button (`--ci-button-primary-*`: the inverse surface in light, the accent with its
+  `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is `outline` plus
+  the `.ci-button--warning` extension. The `.ci-button--warning` and `.ci-badge[data-tone]` rules at the
+  end of `globals.css` (`@layer components`) are OmniRoute extensions on top of the kit classes.
+  `tests/unit/ui/adapters/*.test.tsx` pin each adapter.
+- **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which renders
+  `src/shared/components/layouts/DashboardShell.tsx`: the kit `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), with OmniRoute's navigation logic in
+  `src/shared/components/Sidebar.tsx`. A "skip to content" link to `#main-content` is the first focusable
+  element. `src/shared/components/Header.tsx` holds the kit `SidebarTrigger` (the shell's only sidebar
+  toggle), the Keak `ProductSwitcher` and the command-palette opener; it shows the route title only while
+  no kit `PageHeader` (`.ci-page-header`) is mounted inside `#main-content`, so a page with its own
+  `PageHeader` has a single `h1`. `src/shared/components/CommandPalette.tsx` is a kit `Dialog`.
+- **Icons.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) resolves the name (the
+  Material Symbols vocabulary the screens use) through `ICON_MAP` (`src/shared/constants/iconMap.ts`) to a
+  Lucide glyph. The Material Symbols font and package are gone: a name missing from the map renders a
+  neutral placeholder glyph (`data-icon-missing="true"`) and logs a console warning outside production.
+  `npm run gen:icon-map` prints the names in use that are missing from the map
+  (`tests/unit/icon-map-coverage.test.ts` fails on any name without a Lucide icon;
+  `tests/unit/icon-map-object-values.test.ts` covers names stored in lookup objects);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` rewrites literal
+  `<span className="material-symbols-outlined">` spans to `<Icon>`.
+- **Brand.** `src/shared/components/OmniRouteLogo.tsx` wraps the kit: the default export `OmniRouteLogo`
+  renders `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath`-safe) and
+  `OmniRouteLockup` renders `ProductLockup product="omniroute"` (accessible name "Keak OmniRoute") or, for
+  white-label operators, their own `name`/`logoSrc`. Product-switcher destinations live in
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). The standalone
+  screens — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` and `src/shared/components/ErrorPageScaffold.tsx`
+  — show the lockup; `tests/unit/brand-pages-static.test.ts` guards it.
 
-The marketing site (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) and the product dashboard should look like **one product**. The site already borrowed its palette from the dashboard — its `css/tokens.css` even says _"Palette mirrors the OmniRoute dashboard (src/app/globals.css)"_. So the two are already ~80% aligned at the color level. What's missing on the dashboard:
+## 2. Rules
 
-1. The **graph-paper grid wallpaper** the site uses on every page.
-2. A handful of **shared design tokens** the site has but the dashboard lacks (radius scale, brand gradient, `surface-2`, mono font).
-3. **Component-level consistency** — a number of dashboard components bypass the theme tokens with hardcoded hex/rgba.
+1. Tokens, never literals. Exceptions kept on purpose: the always-dark console terminal, ReactFlow SVG
+   strokes via `STATUS_HEX` (`src/shared/constants/statusColors.ts`), and the categorical palettes
+   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) and
+   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
+2. Never patch `packages/ui-kit/src` by hand: sync with `scripts/dev/sync-ui-kit.sh <commit>`; the
+   pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) fails on any byte that
+   differs from the pinned upstream commit (it skips with a warning when the upstream clone,
+   `UI_KIT_CLONE` or `_references/cheaper-inference-ui-kit`, is absent). When the kit lacks something,
+   work around it in the adapter or the screen and ask upstream for it.
+3. Kit text defaults are English (`label = "Loading"`, `loadingLabel = "Loading table"`…) — pass translated
+   strings from `useTranslations(...)` whenever a kit component renders text.
+4. Tailwind utilities win over kit component classes (the kit declares
+   `@layer theme, base, components, utilities` and its rules live in `components`) — use utilities for
+   spacing and layout, not to re-color kit components.
+5. Headings: `.ci-heading` (Inter, no tracking) for page and section titles; `.ci-dashboard-display`
+   (Instrument Serif) only for large, sparse display text such as the error-page status code.
+6. `tests/unit/dashboard-kit-sweep.test.ts` guards the kit adoption: no Material ligature span under
+   `src/app` or `src/shared/components`; in the dashboard tree (`src/app/(dashboard)` and
+   `src/shared/components`) no raw `<select>`, `<textarea>` or `<table>` and no hand-rolled
+   `role="dialog"` outside the listed exceptions (the `Select` adapter's native branch,
+   `RequestLoggerDetail`); every raw `<button>` or `<input>` there needs a comment containing
+   `kit-exception:` (with the reason) ending at most 3 lines above it; palette hues and `dark:` variants
+   only in the files the test lists.
+7. Verify both themes and the 390 px viewport before a PR (screenshots); `tests/e2e/a11y.spec.ts` runs
+   axe.
 
-This document is the analysis and the plan.
+## 3. Adding a screen
 
----
+1. Open the page with the kit `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` inside the
+   dashboard) — title, description and `actions`. The shell header then drops its own title.
+2. Build controls from `@/shared/components` (the adapters) and use kit components by subpath where no
+   adapter exists (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. Icons: `<Icon name="…" />`. A new name goes into `ICON_MAP` with the semantically matching Lucide
+   component; `npm run gen:icon-map` lists the names still missing.
+4. Colors: semantic utilities (`text-success`, `bg-warning-bg`, `border-border`…) and
+   `var(--color-chart-N)` for chart series; no hex values and no `dark:` variants that only repeat a color.
+5. Text: every string, including the labels you pass to kit components, comes from `useTranslations`. New
+   keys go into `src/i18n/messages/en.json`, `pt-BR.json` and `vi.json` (the Vietnamese parity test pins
+   every English key); the other locales are filled by the i18n sync.
+6. Run the guards before the PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (the only check that catches a duplicated import in `iconMap.ts`),
+   `npm run check:ui-icu`, and the screen's own tests.
 
-## 2. Principles
+## 4. Adding or changing an adapter
 
-- **Single source of truth = `src/app/globals.css`.** The site mirrors the dashboard, never the other way around. New tokens land in `globals.css` first.
-- **Tokens, never literals.** Components consume semantic tokens (`bg-surface`, `text-primary`, `border-border`), never raw `#hex`.
-- **Subtle, not loud.** The grid is a faint wallpaper that sits behind content — it must never reduce text contrast or fight the UI.
-- **Theme-aware.** Everything works in both `.dark` (the product's signature look) and light.
-- **Surgical rollout.** Ship the grid + tokens first (low risk, high visibility), then component cleanups in waves.
+1. Keep the public API of `src/shared/components/index.tsx`: same export names, default exports and
+   accepted props. Map legacy props onto the kit inside the adapter (see `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Import the kit by subpath (`@omniroute/ui-kit/<component>`).
+3. Workarounds for kit gaps live in the adapter (or in `globals.css` `@layer components` when the fix is a
+   style), never in `packages/ui-kit/src`.
+4. Add or update `tests/unit/ui/adapters/<name>.test.tsx`. For an adapter with many callers, compare the
+   rendered markup before and after the change — padding or wrapper changes spread to every screen.
 
----
+## 5. Updating the kit
 
-## 3. Current state — what's already aligned vs. what's not
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` copies the upstream `src/` at that commit into
+`packages/ui-kit/src` and applies the single allowed transformation (it drops the `.js` suffix from
+relative imports). Then: review `git diff packages/ui-kit`, do a visual pass on providers, settings, combos,
+usage and endpoint in both themes, run `npm run check:ui-kit-snapshot` and `npm run test:vitest:ui`, and
+open the PR with the upstream changelog.
 
-### 3.1 Colors — already unified ✅
+## 6. Reference index
 
-Every brand color and surface already matches the site **by value** (only the names differ — dashboard prefixes with `--color-`). Verified in `src/app/globals.css:30-128`:
-
-| Concept                    | Site token (`tokens.css`)                   | Dashboard token (`globals.css`) | Match        |
-| -------------------------- | ------------------------------------------- | ------------------------------- | ------------ |
-| primary                    | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅           |
-| primary-hover              | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅           |
-| accent                     | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅           |
-| accent-2                   | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (renamed) |
-| accent-3                   | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (renamed) |
-| success / warning / error  | `#22c55e / #f59e0b / #ef4444`               | identical                       | ✅           |
-| traffic lights             | `#ff5f56 / #ffbd2e / #27c93f`               | identical                       | ✅           |
-| dark bg / surface / border | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identical                       | ✅           |
-| light bg / surface / text  | `#f9f9fb / #fff / #1a1a2e`                  | identical                       | ✅           |
-
-**Conclusion:** there is no color migration to do. The identity is already shared; we are _finishing_ it, not rebuilding it.
-
-### 3.2 Gaps — what the dashboard is missing
-
-| Gap                     | Site has                                                                       | Dashboard                                                | Action                 |
-| ----------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------- | ---------------------- |
-| **Grid wallpaper**      | `body::before` graph-paper, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ added (Phase 1)**                                   | **Part A**             |
-| **Radius scale**        | `--radius 14px`, `--radius-sm 9px`                                             | `--radius 14px` added; `-sm` + component repoint pending | **Part B / Phase 2**   |
-| **Brand gradient**      | `--grad-brand 135deg primary→accent-3`                                         | **✅ token added (Phase 1)**; consumed in Phase 2        | **Part B**             |
-| **Nested surface**      | `--surface-2 #1c2230`                                                          | **✅ added (Phase 1)**                                   | **Part B**             |
-| **Mono font**           | `--font-mono` (ui-monospace stack)                                             | pending (Phase 4, with consumers)                        | **Part B**             |
-| **`text-muted` (dark)** | `#8b8b9e`                                                                      | `#a1a1aa` (zinc-400)                                     | reconcile — **Part B** |
-
-### 3.3 Theming mechanics (so we don't break anything)
-
-- **Tailwind v4, CSS-first** (no `tailwind.config.*`). Tokens are defined in `:root`/`.dark` and exposed to utilities via `@theme inline` (`globals.css:130-179`).
-- **Dark via `.dark` class** on `<html>` (`@custom-variant dark` at `globals.css:22`), toggled by a custom Zustand store (`src/store/themeStore.ts`), default theme = `system` (`src/shared/constants/appConfig.ts:11`). The site uses `html[data-theme="light"]` instead — **the mechanisms differ but never meet** (separate origins), so no conflict. We keep the dashboard's `.dark` mechanism.
-- **Runtime primary override** exists (`themeStore.ts:85-97`, presets in `COLOR_THEMES`) — users can swap `--color-primary`. Any new token (gradient, etc.) that references `--color-primary` inherits those overrides for free. ✅
-- **Tailwind v4 reserved radius names:** `--radius-sm/md/lg/...` back the `rounded-*` utilities. Redefining them retroactively changes every existing `rounded-*` (e.g. `rounded-sm` is used in 12 files). So the small-radius value and component repoint are deliberately deferred to Phase 2, where consumers change together.
-
----
-
-## 4. Part A — The graph-paper grid background (headline ask) — IMPLEMENTED (Phase 1)
-
-### 4.1 What it is
-
-The exact recipe from the site (`_mono_repo/omnirouteSite/css/base.css`): a **fixed, full-viewport pseudo-element** painting two 1px line gradients, sitting at `z-index:-1` behind all content.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Why this works even though `body` has an opaque `background-color`:** a `::before` with `z-index:-1` paints _above_ the element's own background but _below_ its in-flow content. So `--color-bg` is the base fill, the grid is layered on top of it, and the app renders above the grid.
-
-### 4.2 Precedent already in the codebase
-
-`src/app/landing/page.tsx:16-26` **already implements this same grid per-page** — but with **red** lines (`#E54D5E`, opacity `0.06`) at **50px**, plus animated orbs. So the pattern is proven in the product; this work promotes it to a **global, theme-aware** wallpaper.
-
-### 4.3 Tokens added (in `globals.css`)
-
-```css
-:root {
-  /* light — grid opacity tuned up from the site's 0.045 so the wallpaper is
-     actually visible on the dense dashboard (cards/chrome cover most of the viewport) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* dark — tuned up from 0.035 for the same reason */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 The single blocker — removed
-
-The grid is global by construction (it covers the panel, `auth`/`login`, error pages — every route — at once). Exactly **one** element hid it inside the panel:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — the outer wrapper painted an opaque `bg-bg`. Everything below it is already transparent (`<main>`, the scroll container, the `max-w-7xl` inner), so **removing `bg-bg`** lets the body grid show through the content area (the body's `--color-bg` remains the base fill).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Chrome interaction (sidebar / header)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) and `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) stay **opaque** → the grid shows in the **content area only**, with solid chrome framing it. Calm default, matches how the site separates chrome from canvas (decision D3 = solid).
-
-### 4.6 Login / auth / error pages
-
-These render directly under `<body>` (no panel chrome), so the global grid should appear behind them automatically. **Phase 5 — DONE:** the standalone full-screen wrappers were in fact opaque (`min-h-screen … bg-bg`, where `bg-bg` is the same solid fill as `<body>`), which hid the grid on every non-dashboard screen — not just login. All of them are now transparent so the shared wallpaper shows through: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding`, and `ErrorPageScaffold` (covers `400`/`401`). This closes **D4** (extended from login-only to every standalone screen). Guarded by `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Landing page
-
-`landing/page.tsx` keeps its richer animated background (orbs + vignette) — its own marketing splash (decision D5 = leave as-is).
-
----
-
-## 5. Part B — Token unification
-
-Phase 1 adds the inert, collision-free identity tokens (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Phase 2 wires the radius scale into Tailwind and repoints components; Phase 4 adds `--font-mono` with its consumers.
-
-| Token                      | Why                                                             | Phase                          |
-| -------------------------- | --------------------------------------------------------------- | ------------------------------ |
-| `--radius` / `--radius-sm` | One radius scale (14/9) instead of 6/8/12 ad-hoc                | 1 (value) / 2 (wire + repoint) |
-| `--grad-brand`             | Brand gradient for primary CTAs (red→violet), matching the site | 1 (token) / 2 (Button)         |
-| `--surface-2`              | Nested panels / table headers / inset rows                      | 1                              |
-| `--font-mono`              | Code blocks, terminal, IDs, endpoints                           | 4                              |
-| `--text-muted` reconcile   | Pick one value site↔panel (`#a1a1aa` recommended)               | 2                              |
-
-**D2 (text-muted):** site `#8b8b9e` vs dashboard `#a1a1aa`. Recommend keeping the **dashboard's `#a1a1aa`** and updating the _site_ to match. Cosmetic.
-
----
-
-## 6. Part C — Component standardization (Phases 2–4)
-
-Custom components (no shadcn/Radix), Tailwind v4, semantic tokens **mostly** adopted (195 files import the shared barrel). The work is removing the **bypasses**. Home: `src/shared/components/`.
-
-| #   | Item                                   | File(s)                                                                                                                  | Problem → Target                                                                                                    | Phase |
-| --- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- | ----- |
-| C1  | **Radius alignment**                   | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                | mixed 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                    | 2     |
-| C2  | **Button gradient + `accent` variant** | `Button.tsx:5-12`                                                                                                        | primary is flat red→red; align to `--grad-brand`; add missing `accent` variant. ~195 importers — highest visibility | 2     |
-| C3  | **Tables**                             | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                      | 100% inline hardcoded rgba + non-existent vars; migrate to tokens, retire divergent styles                          | 3     |
-| C4  | **Centralize status colors**           | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helpers | 6+ copies of the same hex → one module off `--color-success/warning/error`                                          | 3     |
-| C5  | **Card border**                        | `Card.tsx:39`                                                                                                            | `border-white/5` → brand `/8`                                                                                       | 2     |
-| C6  | **Focus ring reconcile** ✅ DONE       | `globals.css` `--focus-ring` (accent) vs form controls' `ring-primary/30`                                                | unified on **accent (violet)** to match the global ring + disambiguate from the red error ring; error stays red     | 4     |
-| C7  | **Add `Checkbox` + `Textarea`**        | raw `<input>`/`<textarea>` w/ inline `accentColor:#6366f1`                                                               | token-driven primitives                                                                                             | 4     |
-| C8  | **Hardcoded-hex sweep**                | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, Modal dots, ~14 chart files                                       | literals → tokens                                                                                                   | 4     |
-| C9  | **`cn()` → clsx + tailwind-merge**     | `src/shared/utils/cn.ts`                                                                                                 | conflicting classes stack; needed for C1 overrides                                                                  | 2     |
-
-**Already on-brand (token-driven, only need radius):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Rollout plan
-
-- **Phase 1 — Grid + identity tokens (THIS PR).** `globals.css` grid + `--surface-2`/`--grad-brand`/`--radius` tokens; `body::before` wallpaper; remove the `bg-bg` blocker; static guard test. Low risk, reversible in one commit.
-- **Phase 2 — Primitives (C1, C2, C5) — DONE in this PR.** Semantic radius utilities `rounded-card` (14px) / `rounded-control` (9px) added via `@theme` (custom names, so the default `rounded-sm/md/lg/xl` stay untouched — no 400-file blast); Card/Modal → 14px, Button/Input/Select → 9px; Button primary → `--grad-brand` (red→violet) + new `accent` variant; Card borders → the `border-border` token (0.08). **Deferred:** `cn()`→tailwind-merge (C9) needs new deps; the ad-hoc `rounded-lg` sweep (326 files) is left as-is since the primitives carry the bulk of the surface.
-- **Phase 3 — Status colors + tables (C3, C4) — DONE in this PR.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` single source; `flow/edgeStyles.ts` + `TokenHealthBadge` repointed, faithful/same hex). ✅ **`--font-mono`** token. ✅ **C3 (DataTable)** — replaced every inline rgba + the dead `var(--bg-table-header)` / `var(--text-secondary)` fallbacks with a `--table-*` token set (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) whose **dark values exactly equal the old hardcoded rgba** (dark byte-identical) and whose light values fix the previously-always-dark light theme. Header border → `--color-border`, secondary text → `--color-text-muted`. **Wants a visual pass before merge.** (Not touched: `logTableStyles.ts` and the legacy Ant `.ant-table` rules — separate, lower priority.)
-- **Phase 4 — Cleanup (C6, C7, C9 done; C8 pending).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge added as deps) — a caller's `className` now correctly _replaces_ a primitive's conflicting class instead of stacking. ✅ **C7** new `Checkbox` + `Textarea` primitives (token-driven, exported from the barrel; additive — adoption of the 32 raw checkboxes / 41 raw textareas can follow incrementally). ✅ **C6** focus-ring reconcile — the form controls (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) now focus on the **accent (violet)** ring to match the global `--focus-ring` and to stop colliding with the red error ring; the red error state is unchanged. ⏳ **C8 hex-sweep is NOT a blind find/replace** — confirmed offenders that are _intentional_ and must stay: `ConsoleLogViewer.tsx:240` (always-dark terminal), `TokenHealthBadge` popover, ReactFlow SVG strokes. Only migrate hex genuinely meant to be theme-aware.
-
-Each phase: `npm run lint` + `npm run typecheck:core` + a visual pass.
-
----
-
-## 8. Open decisions (recommendations)
-
-- **D1 — Button primary:** keep red→red or switch to **red→violet `--grad-brand`**? Rec: **red→violet** (Phase 2).
-- **D2 — Grid line color:** **neutral** (site style) — chosen — vs brand-red. Size **32px** (shrunk ~30% from the original 46px on owner feedback — 46px cells read too large on the dashboard layout).
-- **D3 — Chrome vibrancy:** sidebar/header **solid** — chosen.
-- **D4 — Auth/login grid:** ✅ **DONE (Phase 5)** — opaque `bg-bg` removed from every standalone full-screen wrapper (not just login), so the grid shows on all screens. See §4.6.
-- **D5 — Landing page:** leave animated splash as-is. Chosen.
-- **D6 — Radius 14/9 product-wide:** Rec: yes (Phase 2).
-- **D7 — Phase 1 ships first:** Chosen.
-- **D8 — Layout width (Phase 5):** the dashboard content shell was capped at `max-w-7xl` (1280px), centering with wide empty side gutters on large monitors. ✅ **DONE** — raised to a fluid `max-w-[3840px]` (true 4K): content now follows the viewport up to ~4K and only centers beyond it (`DashboardLayout.tsx`). Deliberately-narrow pages stay narrow by design (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Opaque data tables (Phase 6):** with the dashboard content area now transparent (so the grid wallpaper shows through, Phase 5), data tables whose container was _not_ an opaque surface let the grid bleed through their transparent even-rows / low-alpha zebra. ✅ **DONE** — every card-less table now paints `bg-surface` (or, for the `<DataTable>` primitive, `background: var(--color-surface)` on its scroll container). Fixed: `DataTable` (primitive), `ProxyLogger`/`RequestLoggerV2` (their `<Card>` `bg-black/5 dark:bg-black/20` tint was winning over the Card's `bg-surface` via tailwind-merge → ~95% transparent), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, plus the two CSS-grid "tables" in the cache views (`bg-surface/35` → `bg-surface`). Tables already inside a `<Card>`/Modal were verified opaque and deliberately left untouched (bg-surface there is a redundant no-op). The grid itself needed **no change** — dashboard `body::before` is byte-identical to the site (`--grid-size: 32px`); any "bigger grid" seen on a running instance is a stale pre-`#4143` build, not code. Guarded by `tests/unit/design-grid-background.test.ts` (Phase 6 block).
-
----
-
-## 9. Out of scope / risks
-
-- **No palette change** — colors already match; we only add missing tokens. Zero risk of recoloring the product.
-- **No theme-engine change** — keep `.dark` + Zustand store.
-- **Radius shift (Phase 2) is broad** — touches every card/button/input; eyeball busy screens (tables, modals) before merge.
-- **Tables (C3)** carry the most hardcoded styling and the highest regression surface — isolate in their own PR.
-
----
-
-## 10. Reference index
-
-| Area                              | Path                                                                                                                 |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Dashboard tokens                  | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Theme store                       | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Panel shell (grid unblocked here) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                            | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Grid precedent                    | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Primitives                        | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Status-color sources              | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` util                         | `src/shared/utils/cn.ts`                                                                                             |
-| Phase 1 guard test                | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Site reference                    | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` extensions
+- `packages/ui-kit/UPSTREAM.md` — pinned upstream commit and license authorization; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` and the adapters next to it; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

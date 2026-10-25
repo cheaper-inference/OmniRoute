@@ -490,6 +490,39 @@ export function egressBucketedLockProviders(): string[] {
 }
 
 /**
+ * Pure parser for OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS (exported for tests).
+ * Only the literal `all` widens the quota-refusal egress scope; anything else — including a
+ * provider list — is ignored rather than guessed, because the widened scope parks a pool
+ * member for EVERY provider, and a typo must not silently turn that on.
+ */
+export function egressQuotaRotationAllFromEnv(raw: string | undefined): boolean {
+  return (raw ?? "").trim().toLowerCase() === "all";
+}
+
+/**
+ * Providers whose 429 is treated as per-egress-IP QUOTA evidence: the pool member the refusal
+ * came through is set aside so the next pick egresses elsewhere. True for the IP-bucketed
+ * family above (#9611) and, when the operator sets
+ * OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS=all, for every provider — the free and keyless
+ * ones answer 429 per IP too, because there is no account key to bucket by.
+ *
+ * Read per call, not at module load: this is an operator switch on a refusal path (one env
+ * lookup per response outcome, never on the request's selection hot path), so it applies
+ * live. Unset keeps the pre-existing scope byte-for-byte.
+ *
+ * WIDENING TRADE-OFF: the refusal store is keyed by egress address, not by
+ * (provider, egress), so a widened 429 parks that member for every provider until the period
+ * elapses (5 min, doubling to 15 min). Only the per-address quota providers justify that;
+ * an account-scoped 429 parks a member other providers could still use.
+ */
+export function rotatesEgressOnQuotaRefusal(provider: string | null | undefined): boolean {
+  return (
+    isEgressBucketedLockScope(provider) ||
+    egressQuotaRotationAllFromEnv(process.env.OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS)
+  );
+}
+
+/**
  * Providers whose BUILT-IN catalog rules match on the FULL upstream error
  * text. checkFallbackError's rule lookup normally passes only the structured
  * error ({code, type} — message stripped by the combo callers), which is

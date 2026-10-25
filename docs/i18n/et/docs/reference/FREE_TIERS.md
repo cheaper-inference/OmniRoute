@@ -44,17 +44,17 @@ Suurimad **dokumenteeritud** panustajad: `mistral` 1,00B, `nara` 210M, `llm7` 15
 
 ---
 
-## 2026-06-17 värskendus — mis on muutunud alates 2026-06-05
+## 2026-06-17 värskendus — mis on muutunud pärast 2026-06-05
 
-50 agendiga veebiuuring (ametlik dokumentatsioon + viimase 7 päeva uudised, vastandmeetodil kontrollitud) värskendas kogu kataloogi. Tähtsamad muudatused:
+Kogu kataloogi värskendati 50 agendiga veebiuuringu käigus (ametlik dokumentatsioon + viimase 7 päeva uudised, kontrollitud vastuoluliste allikate abil). Tähtsaimad muudatused:
 
-- **Eemaldatud / tasuta taset pole (2026):** `chutes` (tasuta tase lõppes 2026-03), `phind` (ettevõte lõpetas tegevuse 2026-01), `kluster` (suleti 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo tasuta juurdepääs tühistati 2026-05-24, Nemotroni kampaania lõppes 2026-06 — uuesti kontrollitud 2026-06-18), `aimlapi` (tasuta tase peatatud — uuesti kontrollitud 2026-06-18), `yi` (Yi-Light kasutus lõpetati, nüüd kasutuspõhine hinnastus — uuesti kontrollitud 2026-06-18), `featherless-ai` (praegu tasuta tase puudub), `chipotle` (Chipotle’i „Pepper AI“ — pöördprojekteeritud `amelia.chipotle.com` Amelia vestlusvidin, millega teenusepakkuja suhtles, tagastab nüüd kõigil marsruutidel, sealhulgas juurURL-il, veakoodi 404; tagasüsteem on kasutusest kõrvaldatud või teisaldatud, kinnitatud 2026-09-15 — kataloogist täielikult eemaldatud, #13131/#4037). `iflytek` / `sparkdesk` jäävad loendisse, kuid neile on lisatud kasutustingimuste hoiatus (Spark Lite on tasuta; kasutustingimused piiravad puhverserveri-/vahendusteenusena kasutamist).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` suleti 2026-06-01 ning `2.5 Pro` eemaldati tasuta tasemelt (2026-04); tasuta tase hõlmab nüüd **ainult Flashi perekonda** (2.5/3/3.1/3.5 Flash + Gemma). Kataloogis on Flashi perekond nüüd **koondatud** (varem oli maht paisutatud, lugedes iga varianti eraldi: 462M → 60M).
-- **Parandatud arvud:** `cloudflare-ai` 122M → **30M** (tegelikult 10k neuronit päevas), `doubao` liigitati ümber ühekordseks registreerumiskrediidiks (mitte korduvaks), `llm7` 4M → **150M** (dokumenteeritud 5M sõnet päevas), `together` „-Free“ lõpp-punktid lõpetati → eemaldati ka $25 registreerumiskrediit (nõutav on vähemalt $5 ost, tasuta prooviperioodi pole), `longcat` Preview lõppes + Flashi mudelid eemaldati kasutusest → ainult **LongCat-2.0**, liigitatud ümber ühekordseks **10M** sõnega registreerumiskrediidiks (nõuab KYC-d, pole korduv).
-- **Avastatud uued tasuta teenusepakkujad:** ⭐ **Kilo Code** (`kilo-gateway` — vahelduv „Auto Free“ valik: NVIDIA Nemotron 3 perekond, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 vahelduvat tasuta programmeerimismudelit), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash püsivalt tasuta + 20M registreerumisboonus) ja `arcee-ai` Trinity Large Preview.
-- **Uued ausad tasemed** (vt metoodikat): _püsivalt tasuta, kuid piiramatu_ kategooria (tegelik korduv juurdepääs, millel puudub loendatav sõnepiirang) ja _sissemaksega avatav võimendus_ (OpenRouter $10 → +24M kuus); mõlemad kuvatakse **eraldi**, et need ei suurendaks kunagi põhinäitajat.
+- **Eemaldatud / tasuta pakett puudub (2026):** `chutes` (tasuta pakett lõpetati 2026-03), `phind` (ettevõte lõpetas tegevuse 2026-01), `kluster` (suleti 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo tasuta juurdepääs tühistati 2026-05-24, Nemotroni kampaania lõppes 2026-06 — kontrolliti uuesti 2026-06-18), `aimlapi` (tasuta pakett peatatud — kontrolliti uuesti 2026-06-18), `yi` (Yi-Light kasutus lõpetati, nüüd kasutuspõhine hinnastus — kontrolliti uuesti 2026-06-18), `featherless-ai` (praegu tasuta pakett puudub), `chipotle` (Chipotle'i „Pepper AI” — pöördprojekteeritud Amelia vestlusvidin aadressil `amelia.chipotle.com`, millega teenusepakkuja suhtles, tagastab nüüd kõigil marsruutidel, sealhulgas juurmarsruudil, veakoodi 404; tagasüsteem kasutuselt kõrvaldatud või teisaldatud, kinnitatud 2026-09-15 — kataloogist täielikult eemaldatud, #13131/#4037). `iflytek` / `sparkdesk` jäävad loendisse, kuid neile on lisatud kasutustingimuste hoiatus (Spark Lite on tasuta; kasutustingimused piiravad puhverserveri-/edastuskasutust).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` suleti 2026-06-01 ja `2.5 Pro` eemaldati tasuta paketist (2026-04); tasuta pakett hõlmab nüüd **ainult Flashi perekonda** (2.5/3/3.1/3.5 Flash + Gemma). Kataloogis on Flashi perekonna maht nüüd **koondatud** (varem oli see iga variandi eraldi arvestamise tõttu paisutatud: 462M → 60M).
+- **Parandatud arvud:** `cloudflare-ai` 122M → **30M** (tegelik piirang 10k neuronit päevas), `doubao` liigitati ümber ühekordseks registreerumiskrediidiks (mitte korduvaks), `llm7` 4M → **150M** (dokumenteeritud 5M tokenit päevas), `together` „-Free” lõpp-punktid lõpetati → eemaldati ka 25 $ registreerumiskrediit (nõuab vähemalt 5 $ ostu, tasuta prooviperioodi pole), `longcat` Preview lõppes + Flashi mudelid eemaldati kasutuselt → ainult **LongCat-2.0**, liigitati ümber ühekordseks **10M** tokeniga registreerumiskrediidiks (nõuab KYC-kontrolli, ei kordu).
+- **Avastatud uued tasuta teenusepakkujad:** ⭐ **Kilo Code** (`kilo-gateway` — vahelduv „Auto Free” valik: NVIDIA Nemotron 3 perekond, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 vahelduvat tasuta programmeerimismudelit, värskendatud 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash püsivalt tasuta + 20M registreerumisboonus) ja `arcee-ai` Trinity Large Preview.
+- **Uued ausad paketid** (vt metoodikat): kategooria _püsivalt tasuta, kuid ülempiirita_ (tegelik korduv juurdepääs, arvestatav tokenipiirang puudub) ja _sissemaksega avatav lisamaht_ (OpenRouter 10 $ → +24M kuus); mõlemad kuvatakse **eraldi**, et need ei paisutaks kunagi põhinäitajat.
 
-> Allpool olev üksikasjalik teenusepakkujate tabel on **2026-06-05 seisuga hetktõmmis**; ülaltoodud muudatused on selle suhtes ülimuslikud. Ajakohane kanooniline allikas on mudelipõhine kataloog `open-sse/config/freeModelCatalog.ts`.
+> Allpool olev üksikasjalik teenusepakkujate tabel kajastab **2026-06-05 seisuga hetktõmmist**; ülaltoodud muudatused on selle suhtes ülimuslikud. Ajakohane kanooniline allikas on mudelipõhine kataloog `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -226,53 +226,53 @@ Enamik selles valdkonnas esitatud „tasuta tokenite arv kuus” näitajaid saad
 
 ---
 
-## Teenusepakkujate kaupa tasuta kasutustase (Bytez/Nous kontrollitud 2026-10-15; read uuesti auditeeritud 2026-09-02; teised 2026-06-17)
+## Teenusepakkuja-põhine tasuta kasutustase (Bytez/Nous kontrollitud 2026-10-15; read uuesti auditeeritud 2026-09-02; teised 2026-06-17)
 
-> Taasloodud mudelipõhisest kataloogist (`open-sse/config/freeModelCatalog.ts`) ja kogumite lõikes duplikaatidest puhastatud. Sorditud korduvate stabiilsete tokenite arvu järgi kuus. `uncapped*` = püsivalt tasuta, kuid avaldatud tokenipiiranguta (piiratud päringusageduse/samaaegsusega) — tegelik juurdepääs, mida **ei** arvestata koondnäitajasse. `—` = ainult krediidipõhine / võtmeta / tokenites mittekvantifitseeritav.
+> Uuesti genereeritud mudelipõhisest kataloogist (`open-sse/config/freeModelCatalog.ts`) ja puulide lõikes deduplikeeritud. Sorditud igakuiste korduvate püsimahus tokenite järgi. `uncapped*` = püsivalt tasuta, kuid avaldatud tokenipiiranguta (piiratud päringusageduse/samaaegsusega) — tegelik juurdepääs, mida **ei** liideta koondarvule. `—` = ainult krediidipõhine / võtmeta / tokenites mittekvantifitseeritav.
 
-| Pakkuja          | Tasuta tüüp           | Püsivad tokenid/kuu | Esimese kuu krediit | Kasutustingimused | Mudelid |
+| Teenusepakkuja   | Tasuta tüüp           | Püsivad tokenid/kuu | Esimese kuu krediit | Kasutustingimused | Mudelid |
 | ---------------- | --------------------- | ------------------- | ------------------- | ----------------- | ------- |
-| `mistral`        | korduv                | ~1.00B              | —                   | ettevaatust       | 5       |
-| `nara`           | korduv                | ~210M               | —                   | ettevaatust       | 8       |
-| `llm7`           | korduv                | ~150M               | —                   | ettevaatust       | 4       |
-| `xkiro`          | korduv                | ~150M               | —                   | ettevaatust       | 39      |
-| `longcat`        | ühekordne             | —                   | 10M                 | ettevaatust       | 1       |
-| `cerebras`       | ühekordne             | —                   | $5 krediiti         | ettevaatust       | 2       |
-| `cloudflare-ai`  | korduv                | ~30M                | —                   | ettevaatust       | 9       |
-| `groq`           | korduv                | ~30M                | —                   | ettevaatust       | 5       |
-| `api-airforce`   | korduv                | ~24M                | —                   | ettevaatust       | 7       |
+| `mistral`        | korduv                | ~1.00B              | —                   | ettevaatus        | 5       |
+| `nara`           | korduv                | ~210M               | —                   | ettevaatus        | 8       |
+| `llm7`           | korduv                | ~150M               | —                   | ettevaatus        | 4       |
+| `xkiro`          | korduv                | ~150M               | —                   | ettevaatus        | 39      |
+| `longcat`        | ühekordne             | —                   | 10M                 | ettevaatus        | 1       |
+| `cerebras`       | ühekordne             | —                   | $5 krediiti         | ettevaatus        | 2       |
+| `cloudflare-ai`  | korduv                | ~30M                | —                   | ettevaatus        | 9       |
+| `groq`           | korduv                | ~30M                | —                   | ettevaatus        | 5       |
+| `api-airforce`   | korduv                | ~24M                | —                   | ettevaatus        | 7       |
 | `bluesminds`     | korduv                | ~7M                 | —                   | ebaselge          | 22      |
-| `sambanova`      | korduv                | ~6M                 | —                   | ettevaatust       | 5       |
-| `arcee-ai`       | korduv                | ~5M                 | —                   | ettevaatust       | 1       |
-| `bazaarlink`     | korduv                | ~4M                 | —                   | ettevaatust       | 32      |
-| `openrouter`     | korduv                | ~1M                 | —                   | ettevaatust       | 1       |
-| `cohere`         | korduv                | ~800K               | —                   | ettevaatust       | 6       |
-| `huggingchat`    | korduv                | ~500K               | —                   | ettevaatust       | 4       |
+| `sambanova`      | korduv                | ~6M                 | —                   | ettevaatus        | 5       |
+| `arcee-ai`       | korduv                | ~5M                 | —                   | ettevaatus        | 1       |
+| `bazaarlink`     | korduv                | ~4M                 | —                   | ettevaatus        | 32      |
+| `openrouter`     | korduv                | ~1M                 | —                   | ettevaatus        | 1       |
+| `cohere`         | korduv                | ~800K               | —                   | ettevaatus        | 6       |
+| `huggingchat`    | korduv                | ~500K               | —                   | ettevaatus        | 4       |
 | `morph`          | korduv                | ~400K               | —                   | sobiv             | 2       |
-| `huggingface`    | korduv                | ~200K               | —                   | ettevaatust       | 6       |
+| `huggingface`    | korduv                | ~200K               | —                   | ettevaatus        | 6       |
 | `kiro`           | korduv                | ~25K                | —                   | vältida           | 12      |
-| `glm-cn`         | piiramatu             | piiramatu\*         | ~20M                | sobiv             | 4       |
-| `baidu`          | piiramatu             | piiramatu\*         | —                   | ettevaatust       | 1       |
-| `gemini`         | piiramatu             | piiramatu\*         | —                   | ettevaatust       | 4       |
-| `kilo-gateway`   | piiramatu             | piiramatu\*         | —                   | ettevaatust       | 7       |
-| `ollama-cloud`   | piiramatu             | piiramatu\*         | —                   | ebaselge          | 8       |
-| `opencode-zen`   | piiramatu             | piiramatu\*         | —                   | ettevaatust       | 6       |
-| `tencent`        | piiramatu             | piiramatu\*         | —                   | ettevaatust       | 1       |
-| `vertex`         | registreerumiskrediit | —                   | ~300M               | ettevaatust       | 10      |
-| `agentrouter`    | registreerumiskrediit | —                   | ~200M               | ettevaatust       | 4       |
-| `predibase`      | registreerumiskrediit | —                   | ~25M                | ettevaatust       | 1       |
+| `glm-cn`         | piiranguta            | piiranguta\*        | ~20M                | sobiv             | 4       |
+| `baidu`          | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 1       |
+| `gemini`         | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 4       |
+| `kilo-gateway`   | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 7       |
+| `ollama-cloud`   | piiranguta            | piiranguta\*        | —                   | ebaselge          | 8       |
+| `opencode-zen`   | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 10      |
+| `tencent`        | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 1       |
+| `vertex`         | registreerumiskrediit | —                   | ~300M               | ettevaatus        | 10      |
+| `agentrouter`    | registreerumiskrediit | —                   | ~200M               | ettevaatus        | 4       |
+| `predibase`      | registreerumiskrediit | —                   | ~25M                | ettevaatus        | 1       |
 | `doubao`         | registreerumiskrediit | —                   | ~15M                | ebaselge          | 1       |
 | `ai21`           | registreerumiskrediit | —                   | ~10M                | vältida           | 2       |
 | `deepseek`       | registreerumiskrediit | —                   | ~5M                 | sobiv             | 2       |
 | `hyperbolic`     | registreerumiskrediit | —                   | ~5M                 | sobiv             | 8       |
-| `nscale`         | registreerumiskrediit | —                   | ~5M                 | ettevaatust       | 6       |
+| `nscale`         | registreerumiskrediit | —                   | ~5M                 | ettevaatus        | 6       |
 | `bytez`          | krediit (korduv)      | —                   | teadmata            | ebaselge          | 1       |
-| `deepinfra`      | registreerumiskrediit | —                   | ~1M                 | ettevaatust       | 22      |
+| `deepinfra`      | registreerumiskrediit | —                   | ~1M                 | ettevaatus        | 22      |
 | `fireworks`      | registreerumiskrediit | —                   | ~1M                 | vältida           | 10      |
-| `nebius`         | registreerumiskrediit | —                   | ~1M                 | ettevaatust       | 1       |
-| `qoder`          | registreerumiskrediit | —                   | ~1M                 | ettevaatust       | 14      |
+| `nebius`         | registreerumiskrediit | —                   | ~1M                 | ettevaatus        | 1       |
+| `qoder`          | registreerumiskrediit | —                   | ~1M                 | ettevaatus        | 14      |
 | `scaleway`       | registreerumiskrediit | —                   | ~1M                 | sobiv             | 6       |
-| `novita`         | registreerumiskrediit | —                   | ~500K               | ettevaatust       | 1       |
+| `novita`         | registreerumiskrediit | —                   | ~500K               | ettevaatus        | 1       |
 | `agy`            | võtmeta               | —                   | —                   | vältida           | 16      |
 | `baichuan`       | võtmeta               | —                   | —                   | ebaselge          | 1       |
 | `blackbox`       | võtmeta               | —                   | —                   | vältida           | 6       |
@@ -281,19 +281,19 @@ Enamik selles valdkonnas esitatud „tasuta tokenite arv kuus” näitajaid saad
 | `freemodel-dev`  | võtmeta               | —                   | —                   | teadmata          | 4       |
 | `friendliai`     | võtmeta               | —                   | —                   | vältida           | 2       |
 | `iflytek`        | võtmeta               | —                   | —                   | vältida           | 1       |
-| `inference-net`  | võtmeta               | —                   | —                   | ettevaatust       | 3       |
+| `inference-net`  | võtmeta               | —                   | —                   | ettevaatus        | 3       |
 | `liquid`         | võtmeta               | —                   | —                   | teadmata          | 1       |
 | `monsterapi`     | võtmeta               | —                   | —                   | ebaselge          | 1       |
 | `muse-spark-web` | võtmeta               | —                   | —                   | vältida           | 3       |
 | `nlpcloud`       | võtmeta               | —                   | —                   | vältida           | 1       |
-| `nvidia`         | võtmeta               | —                   | —                   | ettevaatust       | 13      |
-| `pollinations`   | võtmeta               | —                   | —                   | ettevaatust       | 31      |
-| `publicai`       | võtmeta               | —                   | —                   | ettevaatust       | 3       |
-| `reka`           | võtmeta               | —                   | —                   | ettevaatust       | 2       |
-| `sensenova`      | võtmeta               | —                   | —                   | ettevaatust       | 1       |
+| `nvidia`         | võtmeta               | —                   | —                   | ettevaatus        | 13      |
+| `pollinations`   | võtmeta               | —                   | —                   | ettevaatus        | 31      |
+| `publicai`       | võtmeta               | —                   | —                   | ettevaatus        | 3       |
+| `reka`           | võtmeta               | —                   | —                   | ettevaatus        | 2       |
+| `sensenova`      | võtmeta               | —                   | —                   | ettevaatus        | 1       |
 | `sparkdesk`      | võtmeta               | —                   | —                   | ettevaatust       | 1       |
 | `stepfun`        | võtmeta               | —                   | —                   | korras            | 1       |
-| `t3-web`         | võtmeta               | —                   | —                   | väldi             | 23      |
+| `t3-web`         | võtmeta               | —                   | —                   | vältida           | 23      |
 | `uncloseai`      | võtmeta               | —                   | —                   | ettevaatust       | 3       |
 
 ---

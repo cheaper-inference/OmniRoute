@@ -48,13 +48,13 @@ A legnagyobb **dokumentált** hozzájárulók: `mistral` 1.00B, `nara` 210M, `ll
 
 Egy 50 ügynökös webes kutatás (hivatalos dokumentáció + az elmúlt 7 nap hírei, ellenérdekű ellenőrzéssel) frissítette a teljes katalógust. Főbb változások:
 
-- **Eltávolítva / nincs ingyenes csomag (2026):** `chutes` (az ingyenes csomag 2026-03-ban megszűnt), `phind` (a vállalat 2026-01-ban megszűnt), `kluster` (kivezetve 2026-06-09-én → MITO), `gitlawb` + `gitlawb-gmi` (a MiMo ingyenes hozzáférését 2026-05-24-én visszavonták, a Nemotron promóció 2026-06-ban véget ért — ismételten ellenőrizve: 2026-06-18), `aimlapi` (az ingyenes csomag szünetel — ismételten ellenőrizve: 2026-06-18), `yi` (a Yi-Light kivezetve, használatalapú díjazás — ismételten ellenőrizve: 2026-06-18), `featherless-ai` (jelenleg nincs ingyenes csomag), `chipotle` (a Chipotle „Pepper AI”-ja — a visszafejtett `amelia.chipotle.com` Amelia csevegőmodul, amellyel a szolgáltató kommunikált, mostantól minden útvonalon, a gyökérútvonalat is beleértve, 404-es hibát ad; a háttérrendszert leállították vagy áthelyezték, megerősítve: 2026-09-15 — teljesen eltávolítva a katalógusból, #13131/#4037). Az `iflytek` / `sparkdesk` továbbra is szerepel a listán, de a szolgáltatási feltételekre vonatkozó figyelmeztető megjegyzéssel (a Spark Lite ingyenes; a szolgáltatási feltételek korlátozzák a proxyként/átjátszóként való használatot).
-- **Gemini** — a `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01-én megszűnt, a `2.5 Pro` pedig kikerült az ingyenes csomagból (2026-04); az ingyenes csomagban most már **csak a Flash család** érhető el (2.5/3/3.1/3.5 Flash + Gemma). A katalógus mostantól **összevonja** a Flash családot (korábban az egyes változatok külön számlálása felfújta az értéket: 462M → 60M).
-- **Javított számadatok:** `cloudflare-ai` 122M → **30M** (a valós korlát napi 10k Neuron), `doubao` egyszeri regisztrációs jóváírásként lett újrabesorolva (nem ismétlődő), `llm7` 4M → **150M** (a dokumentáció szerint napi 5M token), a `together` „-Free” végpontjai megszűntek → a $25 regisztrációs jóváírást is eltávolítottuk (legalább $5 értékű vásárlás szükséges, nincs ingyenes próbaidőszak), a `longcat` Preview véget ért, a Flash modelleket pedig kivezették → csak a **LongCat-2.0** maradt, egyszeri, **10M** tokenes regisztrációs jóváírásként újrabesorolva (KYC-ellenőrzéshez kötött, nem ismétlődő).
-- **Újonnan felfedezett ingyenes szolgáltatók:** ⭐ **Kilo Code** (`kilo-gateway` — változó összetételű „Auto Free” készlet: NVIDIA Nemotron 3 család, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 változó összetételben elérhető ingyenes kódolási modell), ⭐ **Z.AI / Zhipu** (`glm-cn` — a GLM-4-Flash / 4.5-Flash / 4.7-Flash tartósan ingyenes + 20M regisztrációs bónusz), valamint az `arcee-ai` Trinity Large Preview.
-- **Új, valósághű kategóriák** (lásd a Módszertant): egy _tartósan ingyenes, de felső korlát nélküli_ kategória (valódi ismétlődő hozzáférés, számszerűsíthető tokenkorlát nélkül), valamint egy _befizetéssel feloldható bővítés_ (OpenRouter $10 → +24M/hó); mindkettő **külön** jelenik meg, így soha nem növelik mesterségesen a kiemelt összesítést.
+- **Eltávolítva / nincs ingyenes csomag (2026):** `chutes` (az ingyenes csomag 2026-03-ban megszűnt), `phind` (a vállalat 2026-01-ben megszűnt), `kluster` (kivezetve 2026-06-09-én → MITO), `gitlawb` + `gitlawb-gmi` (a MiMo ingyenes hozzáférését 2026-05-24-én visszavonták, a Nemotron-promóció 2026-06-ban véget ért — újból ellenőrizve: 2026-06-18), `aimlapi` (az ingyenes csomag szünetel — újból ellenőrizve: 2026-06-18), `yi` (a Yi-Light kivezetve, használatalapú díjazás — újból ellenőrizve: 2026-06-18), `featherless-ai` (jelenleg nincs ingyenes csomag), `chipotle` (a Chipotle „Pepper AI” szolgáltatása — a visszafejtett `amelia.chipotle.com` Amelia csevegőmodul, amellyel a szolgáltató kommunikált, mostantól minden útvonalon 404-es hibát ad, beleértve a gyökérútvonalat is; a háttérrendszert leállították vagy áthelyezték, megerősítve: 2026-09-15 — teljesen eltávolítva a katalógusból, #13131/#4037). Az `iflytek` / `sparkdesk` továbbra is szerepel a listán, de a szolgáltatási feltételekre figyelmeztető megjegyzéssel (a Spark Lite ingyenes; a szolgáltatási feltételek korlátozzák a proxyként/továbbítóként való használatot).
+- **Gemini** — a `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01-én leállt, a `2.5 Pro` pedig kikerült az ingyenes csomagból (2026-04); az ingyenes csomagban most már **csak a Flash-termékcsalád** érhető el (2.5/3/3.1/3.5 Flash + Gemma). A katalógus most **összevonja** a Flash-termékcsalád keretét (korábban az egyes változatok külön számítása felfújta az értéket: 462M → 60M).
+- **Javított számok:** `cloudflare-ai` 122M → **30M** (a valós keret napi 10 ezer neuron), `doubao` átsorolva egyszeri regisztrációs jóváírássá (nem ismétlődő), `llm7` 4M → **150M** (dokumentáltan napi 5M token), a `together` „-Free” végpontjait megszüntették → a 25 dolláros regisztrációs jóváírás is eltávolítva (legalább 5 dolláros vásárlást igényel, nincs ingyenes próbaidőszak), a `longcat` Preview időszaka véget ért, a Flash-modelleket pedig kivezették → már csak **LongCat-2.0**, átsorolva egyszeri, **10M** tokenes regisztrációs jóváírássá (KYC-ellenőrzéshez kötött, nem ismétlődő).
+- **Újonnan felfedezett ingyenes szolgáltatók:** ⭐ **Kilo Code** (`kilo-gateway` — változó „Auto Free” készlet: NVIDIA Nemotron 3 termékcsalád, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 változó ingyenes programozási modell, frissítve: 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — a GLM-4-Flash / 4.5-Flash / 4.7-Flash tartósan ingyenes + 20M regisztrációs bónusz), valamint az `arcee-ai` Trinity Large Preview.
+- **Új, valósághű kategóriák** (lásd a Módszertant): egy _tartósan ingyenes, de felső korlát nélküli_ kategória (valós, ismétlődő hozzáférés, számszerűsíthető tokenkorlát nélkül), valamint egy _befizetéssel feloldható keretnövelés_ (OpenRouter 10 dollár → +24M/hó); mindkettő **külön** jelenik meg, így soha nem növelik mesterségesen a fő számadatot.
 
-> A lentebb található részletes, szolgáltatónkénti táblázat a **2026-06-05-i pillanatfelvétel**; a fenti változások felülírják. Az aktuális, hiteles forrás a modellenkénti `open-sse/config/freeModelCatalog.ts` katalógus.
+> A lentebb található részletes, szolgáltatónkénti táblázat a **2026-06-05-i pillanatképet** mutatja; a fenti változások felülírják azt. Az aktuális, kanonikus forrás a modellenkénti `open-sse/config/freeModelCatalog.ts` katalógus.
 
 ---
 
@@ -240,75 +240,75 @@ Az ezen a területen szereplő legtöbb „havi ingyenes token” érték modell
 
 ---
 
-## Szolgáltatónkénti ingyenes csomag (Bytez/Nous ellenőrizve: 2026-10-15; újra auditált sorok: 2026-09-02; egyebek: 2026-06-17)
+## Szolgáltatónkénti ingyenes csomag (Bytez/Nous ellenőrizve: 2026-10-15; sorok újraauditálva: 2026-09-02; a többi: 2026-06-17)
 
-> Újragenerálva a modellenkénti katalógusból (`open-sse/config/freeModelCatalog.ts`), készletek szerint deduplikálva. Az ismétlődő, stabil havi tokenmennyiség alapján rendezve. Az `uncapped*` = tartósan ingyenes, de nincs közzétett tokenkorlát (sebesség-/párhuzamosság-korlátozott) — valós hozzáférés, **nincs** beleszámítva a fő összesítésbe. A `—` = csak kreditalapú / kulcs nélküli / tokenekben nem számszerűsíthető.
+> Újragenerálva a modellenkénti katalógusból (`open-sse/config/freeModelCatalog.ts`), készletek közötti duplikációk eltávolításával. Az ismétlődően elérhető stabil token/hó mennyiség szerint rendezve. `uncapped*` = tartósan ingyenes, de nincs közzétett tokenkorlát (sebesség- vagy párhuzamossági korlátozás vonatkozik rá) — valós hozzáférés, de **nincs** beleszámítva a fő összesítésbe. `—` = csak jóváírásalapú / kulcs nélküli / tokenben nem számszerűsíthető.
 
-| Szolgáltató      | Ingyenes típus       | Stabil token/hó | Első havi kredit | ÁSZF        | Modellek |
-| ---------------- | -------------------- | --------------- | ---------------- | ----------- | -------- |
-| `mistral`        | ismétlődő            | ~1.00B          | —                | óvatosan    | 5        |
-| `nara`           | ismétlődő            | ~210M           | —                | óvatosan    | 8        |
-| `llm7`           | ismétlődő            | ~150M           | —                | óvatosan    | 4        |
-| `xkiro`          | ismétlődő            | ~150M           | —                | óvatosan    | 39       |
-| `longcat`        | egyszeri             | —               | 10M              | óvatosan    | 1        |
-| `cerebras`       | egyszeri             | —               | $5 kredit        | óvatosan    | 2        |
-| `cloudflare-ai`  | ismétlődő            | ~30M            | —                | óvatosan    | 9        |
-| `groq`           | ismétlődő            | ~30M            | —                | óvatosan    | 5        |
-| `api-airforce`   | ismétlődő            | ~24M            | —                | óvatosan    | 7        |
-| `bluesminds`     | ismétlődő            | ~7M             | —                | bizonytalan | 22       |
-| `sambanova`      | ismétlődő            | ~6M             | —                | óvatosan    | 5        |
-| `arcee-ai`       | ismétlődő            | ~5M             | —                | óvatosan    | 1        |
-| `bazaarlink`     | ismétlődő            | ~4M             | —                | óvatosan    | 32       |
-| `openrouter`     | ismétlődő            | ~1M             | —                | óvatosan    | 1        |
-| `cohere`         | ismétlődő            | ~800K           | —                | óvatosan    | 6        |
-| `huggingchat`    | ismétlődő            | ~500K           | —                | óvatosan    | 4        |
-| `morph`          | ismétlődő            | ~400K           | —                | rendben     | 2        |
-| `huggingface`    | ismétlődő            | ~200K           | —                | óvatosan    | 6        |
-| `kiro`           | ismétlődő            | ~25K            | —                | kerülendő   | 12       |
-| `glm-cn`         | korlátlan            | korlátlan\*     | ~20M             | rendben     | 4        |
-| `baidu`          | korlátlan            | korlátlan\*     | —                | óvatosan    | 1        |
-| `gemini`         | korlátlan            | korlátlan\*     | —                | óvatosan    | 4        |
-| `kilo-gateway`   | korlátlan            | korlátlan\*     | —                | óvatosan    | 7        |
-| `ollama-cloud`   | korlátlan            | korlátlan\*     | —                | bizonytalan | 8        |
-| `opencode-zen`   | korlátlan            | korlátlan\*     | —                | óvatosan    | 6        |
-| `tencent`        | korlátlan            | korlátlan\*     | —                | óvatosan    | 1        |
-| `vertex`         | regisztrációs kredit | —               | ~300M            | óvatosan    | 10       |
-| `agentrouter`    | regisztrációs kredit | —               | ~200M            | óvatosan    | 4        |
-| `predibase`      | regisztrációs kredit | —               | ~25M             | óvatosan    | 1        |
-| `doubao`         | regisztrációs kredit | —               | ~15M             | bizonytalan | 1        |
-| `ai21`           | regisztrációs kredit | —               | ~10M             | kerülendő   | 2        |
-| `deepseek`       | regisztrációs kredit | —               | ~5M              | rendben     | 2        |
-| `hyperbolic`     | regisztrációs kredit | —               | ~5M              | rendben     | 8        |
-| `nscale`         | regisztrációs kredit | —               | ~5M              | óvatosan    | 6        |
-| `bytez`          | kredit (ism.)        | —               | ismeretlen       | bizonytalan | 1        |
-| `deepinfra`      | regisztrációs kredit | —               | ~1M              | óvatosan    | 22       |
-| `fireworks`      | regisztrációs kredit | —               | ~1M              | kerülendő   | 10       |
-| `nebius`         | regisztrációs kredit | —               | ~1M              | óvatosan    | 1        |
-| `qoder`          | regisztrációs kredit | —               | ~1M              | óvatosan    | 14       |
-| `scaleway`       | regisztrációs kredit | —               | ~1M              | rendben     | 6        |
-| `novita`         | regisztrációs kredit | —               | ~500K            | óvatosan    | 1        |
-| `agy`            | kulcs nélküli        | —               | —                | kerülendő   | 16       |
-| `baichuan`       | kulcs nélküli        | —               | —                | bizonytalan | 1        |
-| `blackbox`       | kulcs nélküli        | —               | —                | kerülendő   | 6        |
-| `coze`           | kulcs nélküli        | —               | —                | kerülendő   | 1        |
-| `duckduckgo-web` | kulcs nélküli        | —               | —                | kerülendő   | 6        |
-| `freemodel-dev`  | kulcs nélküli        | —               | —                | ismeretlen  | 4        |
-| `friendliai`     | kulcs nélküli        | —               | —                | kerülendő   | 2        |
-| `iflytek`        | kulcs nélküli        | —               | —                | kerülendő   | 1        |
-| `inference-net`  | kulcs nélküli        | —               | —                | óvatosan    | 3        |
-| `liquid`         | kulcs nélküli        | —               | —                | ismeretlen  | 1        |
-| `monsterapi`     | kulcs nélküli        | —               | —                | bizonytalan | 1        |
-| `muse-spark-web` | kulcs nélküli        | —               | —                | kerülendő   | 3        |
-| `nlpcloud`       | kulcs nélküli        | —               | —                | kerülendő   | 1        |
-| `nvidia`         | kulcs nélküli        | —               | —                | óvatosan    | 13       |
-| `pollinations`   | kulcs nélküli        | —               | —                | óvatosan    | 31       |
-| `publicai`       | kulcs nélküli        | —               | —                | óvatosan    | 3        |
-| `reka`           | kulcs nélküli        | —               | —                | óvatosan    | 2        |
-| `sensenova`      | kulcs nélküli        | —               | —                | óvatosan    | 1        |
-| `sparkdesk`      | kulcs nélküli        | —               | —                | óvatosan    | 1        |
-| `stepfun`        | kulcs nélküli        | —               | —                | rendben     | 1        |
-| `t3-web`         | kulcs nélküli        | —               | —                | kerülendő   | 23       |
-| `uncloseai`      | kulcs nélküli        | —               | —                | óvatosan    | 3        |
+| Szolgáltató      | Ingyenes típus       | Folyamatos token/hó | Első havi kredit | ÁSZF       | Modellek |
+| ---------------- | -------------------- | ------------------- | ---------------- | ---------- | -------- |
+| `mistral`        | ismétlődő            | ~1.00B              | —                | óvatosság  | 5        |
+| `nara`           | ismétlődő            | ~210M               | —                | óvatosság  | 8        |
+| `llm7`           | ismétlődő            | ~150M               | —                | óvatosság  | 4        |
+| `xkiro`          | ismétlődő            | ~150M               | —                | óvatosság  | 39       |
+| `longcat`        | egyszeri             | —                   | 10M              | óvatosság  | 1        |
+| `cerebras`       | egyszeri             | —                   | $5 kredit        | óvatosság  | 2        |
+| `cloudflare-ai`  | ismétlődő            | ~30M                | —                | óvatosság  | 9        |
+| `groq`           | ismétlődő            | ~30M                | —                | óvatosság  | 5        |
+| `api-airforce`   | ismétlődő            | ~24M                | —                | óvatosság  | 7        |
+| `bluesminds`     | ismétlődő            | ~7M                 | —                | kétértelmű | 22       |
+| `sambanova`      | ismétlődő            | ~6M                 | —                | óvatosság  | 5        |
+| `arcee-ai`       | ismétlődő            | ~5M                 | —                | óvatosság  | 1        |
+| `bazaarlink`     | ismétlődő            | ~4M                 | —                | óvatosság  | 32       |
+| `openrouter`     | ismétlődő            | ~1M                 | —                | óvatosság  | 1        |
+| `cohere`         | ismétlődő            | ~800K               | —                | óvatosság  | 6        |
+| `huggingchat`    | ismétlődő            | ~500K               | —                | óvatosság  | 4        |
+| `morph`          | ismétlődő            | ~400K               | —                | rendben    | 2        |
+| `huggingface`    | ismétlődő            | ~200K               | —                | óvatosság  | 6        |
+| `kiro`           | ismétlődő            | ~25K                | —                | kerülendő  | 12       |
+| `glm-cn`         | korlátlan            | korlátlan\*         | ~20M             | rendben    | 4        |
+| `baidu`          | korlátlan            | korlátlan\*         | —                | óvatosság  | 1        |
+| `gemini`         | korlátlan            | korlátlan\*         | —                | óvatosság  | 4        |
+| `kilo-gateway`   | korlátlan            | korlátlan\*         | —                | óvatosság  | 7        |
+| `ollama-cloud`   | korlátlan            | korlátlan\*         | —                | kétértelmű | 8        |
+| `opencode-zen`   | korlátlan            | korlátlan\*         | —                | óvatosság  | 10       |
+| `tencent`        | korlátlan            | korlátlan\*         | —                | óvatosság  | 1        |
+| `vertex`         | regisztrációs kredit | —                   | ~300M            | óvatosság  | 10       |
+| `agentrouter`    | regisztrációs kredit | —                   | ~200M            | óvatosság  | 4        |
+| `predibase`      | regisztrációs kredit | —                   | ~25M             | óvatosság  | 1        |
+| `doubao`         | regisztrációs kredit | —                   | ~15M             | kétértelmű | 1        |
+| `ai21`           | regisztrációs kredit | —                   | ~10M             | kerülendő  | 2        |
+| `deepseek`       | regisztrációs kredit | —                   | ~5M              | rendben    | 2        |
+| `hyperbolic`     | regisztrációs kredit | —                   | ~5M              | rendben    | 8        |
+| `nscale`         | regisztrációs kredit | —                   | ~5M              | óvatosság  | 6        |
+| `bytez`          | kredit (ism.)        | —                   | ismeretlen       | kétértelmű | 1        |
+| `deepinfra`      | regisztrációs kredit | —                   | ~1M              | óvatosság  | 22       |
+| `fireworks`      | regisztrációs kredit | —                   | ~1M              | kerülendő  | 10       |
+| `nebius`         | regisztrációs kredit | —                   | ~1M              | óvatosság  | 1        |
+| `qoder`          | regisztrációs kredit | —                   | ~1M              | óvatosság  | 14       |
+| `scaleway`       | regisztrációs kredit | —                   | ~1M              | rendben    | 6        |
+| `novita`         | regisztrációs kredit | —                   | ~500K            | óvatosság  | 1        |
+| `agy`            | kulcs nélküli        | —                   | —                | kerülendő  | 16       |
+| `baichuan`       | kulcs nélküli        | —                   | —                | kétértelmű | 1        |
+| `blackbox`       | kulcs nélküli        | —                   | —                | kerülendő  | 6        |
+| `coze`           | kulcs nélküli        | —                   | —                | kerülendő  | 1        |
+| `duckduckgo-web` | kulcs nélküli        | —                   | —                | kerülendő  | 6        |
+| `freemodel-dev`  | kulcs nélküli        | —                   | —                | ismeretlen | 4        |
+| `friendliai`     | kulcs nélküli        | —                   | —                | kerülendő  | 2        |
+| `iflytek`        | kulcs nélküli        | —                   | —                | kerülendő  | 1        |
+| `inference-net`  | kulcs nélküli        | —                   | —                | óvatosság  | 3        |
+| `liquid`         | kulcs nélküli        | —                   | —                | ismeretlen | 1        |
+| `monsterapi`     | kulcs nélküli        | —                   | —                | kétértelmű | 1        |
+| `muse-spark-web` | kulcs nélküli        | —                   | —                | kerülendő  | 3        |
+| `nlpcloud`       | kulcs nélküli        | —                   | —                | kerülendő  | 1        |
+| `nvidia`         | kulcs nélküli        | —                   | —                | óvatosság  | 13       |
+| `pollinations`   | kulcs nélküli        | —                   | —                | óvatosság  | 31       |
+| `publicai`       | kulcs nélküli        | —                   | —                | óvatosság  | 3        |
+| `reka`           | kulcs nélküli        | —                   | —                | óvatosság  | 2        |
+| `sensenova`      | kulcs nélküli        | —                   | —                | óvatosság  | 1        |
+| `sparkdesk`      | kulcs nélküli        | —                   | —                | óvatosan   | 1        |
+| `stepfun`        | kulcs nélküli        | —                   | —                | rendben    | 1        |
+| `t3-web`         | kulcs nélküli        | —                   | —                | kerülendő  | 23       |
+| `uncloseai`      | kulcs nélküli        | —                   | —                | óvatosan   | 3        |
 
 ---
 

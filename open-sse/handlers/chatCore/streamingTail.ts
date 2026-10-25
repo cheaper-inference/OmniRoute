@@ -34,7 +34,7 @@ import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import { resolveStreamReadinessTimeout } from "../../utils/streamReadinessPolicy.ts";
 import { maybeFallbackAfterReadiness } from "./streamReadinessFallback.ts";
 import { captureStreamReasoningForReplay } from "./streamReasoningCapture.ts";
-import { meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
+import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { resolveSuppressThinkClose } from "../../utils/thinkCloseMarker.ts";
 import { hasActiveClaudeThinking } from "../../utils/thinkingBudget.ts";
 import { buildCacheUsageLogMeta } from "./cacheUsageMeta.ts";
@@ -56,9 +56,9 @@ import { recordFinalInputCalibration } from "./contextEstimation.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
 import { getExecutorTimeoutMs, resolveConnectionTimeoutMs } from "./upstreamTimeouts.ts";
-import { recordCost } from "@/domain/costRules";
+import { recordCost, recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { extractFacts } from "@/lib/memory/extraction";
-import { calculateCost } from "@/lib/usage/costCalculator";
+import { calculateCost, calculateCostDetailed } from "@/lib/usage/costCalculator";
 import { appendRequestLog, trackPendingRequest } from "@/lib/usageDb";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../../services/streamRecovery.ts";
@@ -264,10 +264,15 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // cooldown and no forced exclusion: the round-robin picker may rotate
   // fingerprint slots opportunistically, a single slot simply replays the same
   // account. Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
-  // back to the current behavior. Translate-path streams only (mirror of the
-  // empty-stream guard); flag off = byte-for-byte unchanged. Bounded reader
-  // (abandon past the cap, never a full `text()` read); the original
+  // back to the current behavior. Flag off = byte-for-byte unchanged. Bounded
+  // reader (abandon past the cap, never a full `text()` read); the original
   // reconstructed response is piped, only the bounded copy is classified.
+  // #17461: armed for EVERY path, not only translated ones. The condition this
+  // loop recovers from is detected by the empty-stream guard on every path
+  // (`rejectEmptyChoicesStream` lives in the shared SSE transform), so a direct
+  // openai→openai turn — the shape most degenerate turns arrive in — was
+  // exactly the case the loop never saw. The judge stays conservative: a turn
+  // it cannot summarize passes through unchanged.
   // Known TTFT cost when armed: a small valid turn under the cap is fully
   // buffered before the first client byte (flag off by default, so the
   // streaming path is untouched unless opted in).
@@ -278,10 +283,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     } catch {
       flushEmptyRetryArmed = false;
     }
-    const isTranslatePath =
-      targetFormat === FORMATS.OPENAI_RESPONSES ||
-      needsTranslation(targetFormat, clientResponseFormat);
-    if (flushEmptyRetryArmed && isTranslatePath) {
+    if (flushEmptyRetryArmed) {
       const retried = await runEmptyTurnRetryLoop({
         providerResponse,
         credentials,
@@ -544,11 +546,17 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       model,
       streamUsage,
       serviceTier: effectiveServiceTier,
-      calculateCost,
+      calculateCost: calculateCostDetailed,
       // Only the budget-consumable share may draw down the allowance.
       recordCost: (apiKeyId, cost, details) => {
         const budgetCost = meteredBudgetCost(provider, cost);
         if (budgetCost > 0) recordCost(apiKeyId, budgetCost, details);
+      },
+      // A metered model with no price must not pass the dollar budget as $0.
+      recordUnpricedCost: (apiKeyId, cost) => {
+        if (isUnpricedMeteredCost(provider, cost)) {
+          recordUnpricedBudgetUsage(apiKeyId, { provider, model });
+        }
       },
       ledger: buildStreamLedgerDetails(effectiveServiceTier, normalizedStreamStatus < 400, traceId),
     });
@@ -642,6 +650,9 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       }),
   });
 
+  // The pipeline can fail before the awaited response hooks return to chatCore.
+  deps.registerStreamFinalizers?.(onPipelineStreamError, onClientDisconnectFinalize);
+
   // For providers using Responses API format, translate stream back to openai (Chat Completions) format
   // UNLESS client is Droid CLI which expects openai-responses format back
   const needsResponsesTranslation =
@@ -649,7 +660,11 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     clientResponseFormat === FORMATS.OPENAI &&
     !isResponsesEndpoint &&
     !isDroidCLI;
-  const streamStateBody = finalBody || body;
+  // Response arguments belong to the client's schema, before provider cloaking.
+  const streamStateBody =
+    clientResponseFormat === FORMATS.CLAUDE && Array.isArray(body?.tools)
+      ? { ...(finalBody || body), tools: body.tools }
+      : finalBody || body;
 
   // Client's explicit thinking intent (Anthropic Messages shape). Claude Code
   // sends `{type:"enabled"}` or `{type:"adaptive"}` to opt into relaying
@@ -718,7 +733,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       }),
       requestedThinking,
       customToolNames,
-      requestToolIdentityMap
+      requestToolIdentityMap,
+      // The CLIENT's declared tools[]: an Anthropic-format client gets its own
+      // tool-name casing back from any provider (OpenCode `read`, Claude Code `Read`).
+      (body as Record<string, unknown> | null | undefined)?.tools ?? null
     );
   } else {
     log?.debug?.("STREAM", `Standard passthrough mode`);
@@ -733,7 +751,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       apiKeyInfo,
       handleStreamFailure,
       clientResponseFormat,
-      requestToolIdentityMap
+      requestToolIdentityMap,
+      (body as Record<string, unknown> | null | undefined)?.tools ?? null
     );
   }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Input from "@/shared/components/Input";
 import { FieldLabelWithHelp } from "./parts";
 
 type TranslationFn = {
@@ -39,9 +40,6 @@ function secondsInputToOptionalMs(value: string, maxSeconds = MAX_SECONDS): numb
   return Math.min(maxSeconds, Math.round(seconds)) * MS_PER_SECOND;
 }
 
-const INPUT_CLASS =
-  "w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none";
-
 export default function ComboTimeoutFields({ config, setConfig, t, showHelp = true }: Props) {
   return (
     <>
@@ -56,7 +54,7 @@ export default function ComboTimeoutFields({ config, setConfig, t, showHelp = tr
           showHelp={showHelp}
           htmlFor="combo-target-timeout-ms"
         />
-        <input
+        <Input
           id="combo-target-timeout-ms"
           data-testid="combo-target-timeout-ms"
           type="number"
@@ -71,7 +69,6 @@ export default function ComboTimeoutFields({ config, setConfig, t, showHelp = tr
               targetTimeoutMs: secondsInputToOptionalMs(e.target.value),
             })
           }
-          className={INPUT_CLASS}
         />
       </div>
       <div>
@@ -85,7 +82,7 @@ export default function ComboTimeoutFields({ config, setConfig, t, showHelp = tr
           showHelp={showHelp}
           htmlFor="combo-combo-timeout-ms"
         />
-        <input
+        <Input
           id="combo-combo-timeout-ms"
           data-testid="combo-combo-timeout-ms"
           type="number"
@@ -100,7 +97,6 @@ export default function ComboTimeoutFields({ config, setConfig, t, showHelp = tr
               comboTimeoutMs: secondsInputToOptionalMs(e.target.value),
             })
           }
-          className={INPUT_CLASS}
         />
       </div>
     </>
