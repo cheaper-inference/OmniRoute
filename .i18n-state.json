@@ -13870,14 +13870,14 @@
           "updated_at": "2026-10-20T12:37:31.258Z"
         },
         "hu": {
-          "source_hash": "160ea7188dd5cbc726815717d7cf61d1a10f58bf19b5c3e4914054e428d4995a",
-          "target_hash": "9a211e3bde4832179b3c13caf24a3c1178bd041302e9fc4ed6a4037dec139b9e",
+          "source_hash": "aa00f8a956d5e25e5f7576916767f2693208eb2e5211ec1fc276bc7924e5c5c2",
+          "target_hash": "35a64c8fadb40899d0534dccfcbf8b7e7dad7233da2ffe2af618f35a9f082146",
           "section_hashes": [
             "26c153cd9cc0",
-            "aa3929d4fa86",
-            "aa62c8ec1b70",
-            "64ca5a75ab96",
-            "cfea1a2522f8",
+            "d6aaa350bb37",
+            "bb1b5a8b1a4d",
+            "66b9e96e081b",
+            "52862de5c071",
             "a1e2d1692282",
             "b7b95d891013",
             "152950966765",
@@ -13888,7 +13888,7 @@
             "bdadf4401c7c",
             "f231837e6c99"
           ],
-          "updated_at": "2026-10-20T12:37:31.258Z"
+          "updated_at": "2026-10-25T01:47:29.914Z"
         },
         "id": {
           "source_hash": "aa00f8a956d5e25e5f7576916767f2693208eb2e5211ec1fc276bc7924e5c5c2",
@@ -14689,14 +14689,14 @@
           "updated_at": "2026-10-24T23:10:00.758Z"
         },
         "pa": {
-          "source_hash": "160ea7188dd5cbc726815717d7cf61d1a10f58bf19b5c3e4914054e428d4995a",
-          "target_hash": "8889cc829b59aa8f86e4638b58e9378dbaf2b1e9230b481ec8aca2f997dfce0b",
+          "source_hash": "aa00f8a956d5e25e5f7576916767f2693208eb2e5211ec1fc276bc7924e5c5c2",
+          "target_hash": "c229502a5c0f4d6020d725de4a7d564e5eb7e49d77d86a422100cda1bb8bdaeb",
           "section_hashes": [
             "26c153cd9cc0",
-            "aa3929d4fa86",
-            "aa62c8ec1b70",
-            "64ca5a75ab96",
-            "cfea1a2522f8",
+            "d6aaa350bb37",
+            "bb1b5a8b1a4d",
+            "66b9e96e081b",
+            "52862de5c071",
             "a1e2d1692282",
             "b7b95d891013",
             "152950966765",
@@ -14707,7 +14707,7 @@
             "bdadf4401c7c",
             "f231837e6c99"
           ],
-          "updated_at": "2026-10-20T12:37:31.258Z"
+          "updated_at": "2026-10-25T01:47:27.432Z"
         },
         "ne": {
           "source_hash": "160ea7188dd5cbc726815717d7cf61d1a10f58bf19b5c3e4914054e428d4995a",

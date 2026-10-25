@@ -19,107 +19,110 @@ eligazodhasson a könyvtárstruktúrában, megérthesse a futásidejű rétegző
 
 ---
 
-## 1. Technológiai környezet
+## 1. Technológiai stack
 
-| Terület             | Választás                                                                                                                         |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Webes keretrendszer | **Next.js 16** (App Router, önálló kimenet, globális middleware nélkül)                                                           |
-| Nyelv               | **TypeScript 6.0+** — cél: `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                               |
-| Futtatókörnyezet    | **Node.js** `>=22.22.2 <23` vagy `>=24.0.0 <27` (az `engines` + `SUPPORTED_NODE_RANGE` kényszeríti ki)                            |
-| Adatbázis           | **SQLite** a `better-sqlite3` használatával (singleton, WAL-naplózás)                                                             |
-| Asztali alkalmazás  | **Electron 41** + `electron-builder` 26.10 (külön munkaterület az `electron/` könyvtárban)                                        |
-| Tesztek             | **Node natív tesztfuttató** (egység-/integrációs), **Vitest** (MCP, autoCombo, gyorsítótár), **Playwright** (e2e + protocols-e2e) |
-| Build               | Önálló Next.js-build a `scripts/build/build-next-isolated.mjs` használatával                                                      |
-| Lint/formázás       | ESLint flat config + Prettier (`lint-staged` a Husky pre-commit hookján keresztül)                                                |
-| Modulrendszer       | Mindenhol ESM (`"type": "module"`)                                                                                                |
-| Munkaterületek      | npm-munkaterület — az `open-sse` az egyetlen almunkaterület                                                                       |
+| Terület             | Választás                                                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Webes keretrendszer | **Next.js 16** (App Router, önálló kimenet, globális middleware nélkül)                                                         |
+| Nyelv               | **TypeScript 6.0+** — target `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                           |
+| Futási környezet    | **Node.js** `>=22.22.2 <23` vagy `>=24.0.0 <27` (az `engines` + `SUPPORTED_NODE_RANGE` által kikényszerítve)                    |
+| Adatbázis           | **SQLite** a `better-sqlite3` segítségével (singleton, WAL-naplózás)                                                            |
+| Asztali alkalmazás  | **Electron 41** + `electron-builder` 26.10 (külön workspace az `electron/` alatt)                                               |
+| Tesztek             | **Node beépített tesztfuttató** (egység-/integrációs), **Vitest** (MCP, autoCombo, cache), **Playwright** (e2e + protocols-e2e) |
+| Build               | Next.js standalone a `scripts/build/build-next-isolated.mjs` segítségével                                                       |
+| Lint/formázás       | ESLint flat config + Prettier (`lint-staged` Husky pre-commit hookon keresztül)                                                 |
+| Modulrendszer       | ESM mindenhol (`"type": "module"`)                                                                                              |
+| Vezérlőpult felület | **Tailwind CSS 4** + a beépített (vendored) **Keak CI UI Kit** (`packages/ui-kit`), Lucide ikonok — lásd: `DESIGN_SYSTEM.md`    |
+| Workspace-ek        | npm workspace-ek — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                       |
 
-Útvonalaliasok (`tsconfig.json`):
+Útvonal-aliasok (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
-Alapértelmezett HTTP-port: **`20128`** (az API és a vezérlőpult ugyanazt a folyamatot használja). Az adatkönyvtárat
-a `DATA_DIR` környezeti változó határozza meg; alapértelmezett értéke `~/.omniroute/`.
+Alapértelmezett HTTP-port: **`20128`** (az API és a vezérlőpult ugyanazt a folyamatot használja). Az
+adatkönyvtár a `DATA_DIR` környezeti változóval adható meg, alapértelmezés szerint `~/.omniroute/`.
 
 ---
 
-## 2. Az adattár felépítése
+## 2. A repository felépítése
 
 ```
 OmniRoute/
-├── src/                  Next.js-alkalmazás (App Router, könyvtárak, tartomány, kiszolgáló, megosztott elemek)
-├── open-sse/             Streamelési motor munkaterülete (@omniroute/open-sse)
-├── electron/             Asztali alkalmazásburkoló (Electron 41 főfolyamat + preload)
+├── src/                  Next.js-alkalmazás (App Router, libs, domain, server, shared)
+├── open-sse/             Streaming-motor workspace (@omniroute/open-sse)
+├── packages/             Workspace-ek: ui-kit (beépített Keak CI UI Kit), browser-pool
+├── electron/             Asztali burkoló (Electron 41 main + preload)
 ├── bin/                  CLI-belépési pontok (omniroute, reset-password)
-├── tests/                Egység-, integrációs, e2e-, protocols-e2e-, fordító- és biztonsági tesztek, valamint tesztadatok
-├── scripts/              Build-, szinkronizálási, ellenőrzési, migrációs és futásidejű segédszkriptek
+├── tests/                Unit-, integration-, e2e-, protocols-e2e-, translator- és security-tesztek, fixtures
+├── scripts/              Build-, szinkronizációs, ellenőrzési, migrációs és futásidejű segédszkriptek
 ├── docs/                 Nyilvános dokumentáció (ez a könyvtár)
-├── public/               Statikus erőforrások, PWA-manifeszt, service worker
-├── config/               Futásidejű konfigurációs minták
-├── images/               Marketing- és képernyőkép-erőforrások
-├── _ideia/, _references/, _mono_repo/, _tasks/   Belső jegyzetek / tervezési anyagok (nem részei a kiadásnak)
-├── CLAUDE.md             Az adattár Claude Code-ra vonatkozó szabályai
-├── AGENTS.md             Részletesebb architekturális referencia az ügynökök számára
-├── package.json          v3.8.51, munkaterület gyökere
-└── tsconfig.json         Útvonalaliasok + alapvető fordítóbeállítások
+├── public/               Statikus assetek, PWA-manifest, service worker
+├── config/               Futásidejű konfigurációs példák
+├── images/               Marketing- és képernyőkép-assetek
+├── _ideia/, _references/, _mono_repo/, _tasks/   Belső piszkozatok / tervezés (nem kerül kiadásra)
+├── CLAUDE.md             A repó szabályai a Claude Code számára
+├── AGENTS.md             Részletesebb architektúra-referencia az agentek számára
+├── package.json          v3.8.51, workspace-gyökér
+└── tsconfig.json         Útvonal-aliasok + alapvető compilerbeállítások
 ```
 
 ---
 
-## 3. `src/` — Next.js-alkalmazás
+## 3. `src/` — Next.js alkalmazás
 
 ```
 src/
-├── app/                  App Router-oldalak + API-útvonalak
-├── lib/                  Alapvető könyvtárak (DB, hitelesítés, OAuth, készségek, memória, …)
-├── domain/               Tiszta tartományi réteg (szabályzat, tartalék, költség, kizárás, …)
-├── server/               Kizárólag szerveroldali modulok (jogosultságkezelés, CORS, hitelesítés)
-├── shared/               Típusok, konstansok, ellenőrzés, szerződések, segédprogramok (határokon át biztonságos)
-├── mitm/                 Közbeékelődéses proxy segédeszközei a CLI-integrációhoz
-├── models/               Helyi modellek metaadatai / álnevei
-├── sse/                  Régi SSE-kezelők, amelyek továbbra is az src/ alatt találhatók (nem az open-sse/ alatt)
+├── app/                  App Router oldalak + API-útvonalak
+├── lib/                  Alapvető könyvtárak (DB, auth, OAuth, skills, memory, …)
+├── domain/               Tiszta doménréteg (policy, fallback, cost, lockout, …)
+├── server/               Kizárólag szerveroldali modulok (authz, cors, auth)
+├── shared/               Típusok, konstansok, validáció, szerződések, segédeszközök (határokon át biztonságos)
+├── mitm/                 Man-in-the-middle proxy-segédfüggvények CLI-integrációhoz
+├── models/               Helyi modellek metaadatai / álnévkezelés
+├── sse/                  Örökölt SSE-kezelők, amelyek még mindig a src/ alatt találhatók (nem open-sse/)
 ├── store/                Kliensoldali állapottárolók
-├── middleware/           Útvonalszintű middleware-segédprogramok (nem globális Next.js middleware)
-├── scripts/              Az alkalmazáskód által importálható, forrásfán belüli szkriptek
-├── types/                Környezeti és megosztott TS-típusok
-├── i18n/                 Területi beállítások csomagjai
-├── instrumentation.ts    Next.js-instrumentációs horog
+├── middleware/           Útvonalszintű middleware-segédeszközök (nem Next.js globális middleware)
+├── scripts/              A forrásfában lévő, alkalmazáskódból importálható szkriptek
+├── types/                Ambient és megosztott TS-típusok
+├── i18n/                 Nyelvi csomagok
+├── instrumentation.ts    Next.js instrumentation hook
 ├── instrumentation-node.ts
-└── proxy.ts              Legfelső szintű proxyindítási segéd
+└── proxy.ts              Legfelső szintű proxy-bootstrap segédfüggvény
 ```
 
 ### 3.1 `src/app/` — App Router
 
-Az App Router a vezérlőpult felhasználói felületét és a nyilvános/felügyeleti HTTP API-t egyaránt elérhetővé teszi.
+Az App Router a dashboard felhasználói felületét és a nyilvános/felügyeleti HTTP API-t egyaránt kiszolgálja.
 **Nincs globális middleware** — az elfogás útvonalanként történik.
 
-A `src/app/` legfelső szintű szegmensei:
+A `src/app/` alatti legfelső szintű szegmensek:
 
-| Útvonal                                                                       | Rendeltetés                                                           |
-| ----------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `api/`                                                                        | Minden HTTP API-útvonal (a bontást lásd alább)                        |
-| `a2a/`                                                                        | A2A JSON-RPC 2.0 végpont (`POST /a2a`)                                |
-| `.well-known/agent.json/`                                                     | A2A Agent Card felderítési dokumentum                                 |
-| `(dashboard)/`                                                                | Vezérlőpult felhasználói felülete (útvonalcsoport, URL-előtag nélkül) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Hitelesítési folyamatok                                               |
-| `landing/`                                                                    | Marketing-/nyitóoldal                                                 |
-| `docs/`                                                                       | Beágyazott API-dokumentáció-megjelenítő                               |
-| `status/`, `maintenance/`, `offline/`                                         | Üzemeltetési oldalak                                                  |
-| `privacy/`, `terms/`                                                          | Jogi oldalak                                                          |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statikus hibaoldalak                                                  |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Keretrendszerszintű hiba- és betöltési határok                        |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Gyökérszintű alkalmazásváz                                            |
+| Útvonal                                                                       | Rendeltetés                                      |
+| ----------------------------------------------------------------------------- | ------------------------------------------------ |
+| `api/`                                                                        | Az összes HTTP API-útvonal (lásd a bontást lent) |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 végpont (`POST /a2a`)           |
+| `.well-known/agent.json/`                                                     | A2A Agent Card felderítési dokumentum            |
+| `(dashboard)/`                                                                | Dashboard UI (útvonalcsoport, URL-előtag nélkül) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Hitelesítési folyamatok                          |
+| `landing/`                                                                    | Marketing-/céloldal                              |
+| `docs/`                                                                       | Beágyazott API-dokumentációmegjelenítő           |
+| `status/`, `maintenance/`, `offline/`                                         | Üzemeltetési oldalak                             |
+| `privacy/`, `terms/`                                                          | Jogi oldalak                                     |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statikus hibaoldalak                             |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Keretrendszer-szintű hiba-/betöltési határok     |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Gyökér-shell                                     |
 
-#### 3.1.1 `src/app/(dashboard)/dashboard/` — Felhasználói felületi oldalak
+#### 3.1.1 `src/app/(dashboard)/dashboard/` — UI-oldalak
 
 `agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, valamint a gyökérszintű `page.tsx`, `HomePageClient.tsx`,
-`BootstrapBanner.tsx`.
+`translator`, `usage`, `webhooks`, valamint a gyökérszintű `page.tsx`,
+`HomePageClient.tsx`, `BootstrapBanner.tsx`.
 
 #### 3.1.2 `src/app/api/` — Legfelső szintű API-csoportok
 
@@ -185,38 +188,38 @@ src/app/api/
 
 #### 3.1.2a `src/app/api/services/` — Beágyazott szolgáltatások kezelése
 
-Útvonalak a 9Router és a CLIProxyAPI telepítéséhez, elindításához, leállításához és megfigyeléséhez.
-Minden útvonal **LOCAL_ONLY** besorolású (csak visszacsatolási interfészen, 17. szigorú szabály), mivel
-meghívhatják az `npm install` parancsot, és gyermekfolyamatokat indíthatnak.
+Útvonalak a 9Router és a CLIProxyAPI telepítéséhez, indításához, leállításához és monitorozásához.
+Minden útvonal **LOCAL_ONLY** besorolású (kizárólag loopback, 17. szigorú szabály), mivel
+`npm install` parancsot futtathatnak és gyermekfolyamatokat indíthatnak.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             getOrInitSupervisor() segédfüggvény
-│   ├── install/route.ts    POST — npm install az execFile használatával
+│   ├── _lib.ts             getOrInitSupervisor() segéd
+│   ├── install/route.ts    POST — npm install execFile segítségével
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — újabb verzió telepítése az npm segítségével
+│   ├── update/route.ts     POST — npm install újabb verzióra
 │   ├── rotate-key/route.ts POST — új API-kulcs generálása + újraindítás
-│   ├── status/route.ts     GET  — élő + adatbázisbeli állapot + verzió-metaadatok
-│   └── auto-start/route.ts POST — az auto_start jelző átváltása
+│   ├── status/route.ts     GET  — élő + DB-státusz + verzió-metaadatok
+│   └── auto-start/route.ts POST — az auto_start kapcsoló átváltása
 ├── cliproxy/
-│   ├── _lib.ts             getOrInitSupervisor() segédfüggvény
+│   ├── _lib.ts             getOrInitSupervisor() segéd
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — újabb verzió telepítése az npm segítségével
-│   ├── status/route.ts     GET  — élő + adatbázisbeli állapot + verzió-metaadatok
-│   └── auto-start/route.ts POST — az auto_start jelző átváltása
+│   ├── update/route.ts     POST — npm install újabb verzióra
+│   ├── status/route.ts     GET  — élő + DB-státusz + verzió-metaadatok
+│   └── auto-start/route.ts POST — az auto_start kapcsoló átváltása
 └── [name]/
-    └── logs/route.ts       GET  — SSE-naplófolyam vége (minden szolgáltatás közösen használja)
+    └── logs/route.ts       GET  — SSE naplófolyam (minden szolgáltatás közösen használja)
 ```
 
 A hozzá tartozó irányítópult-felület:
-`src/app/(dashboard)/dashboard/providers/services/` — kétlapos oldal (CLIProxyAPI + 9Router).
-Fordított proxy a 9Router beágyazott felületéhez:
+`src/app/(dashboard)/dashboard/providers/services/` — kétfüles oldal (CLIProxyAPI + 9Router).
+Reverse proxy a 9Router beágyazott felhasználói felületéhez:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
 Részletes leírás: `docs/frameworks/EMBEDDED-SERVICES.md`
@@ -226,92 +229,93 @@ Részletes leírás: `docs/frameworks/EMBEDDED-SERVICES.md`
 ```
 v1/
 ├── accounts/[id]/                       fióklekérdezés
-├── agents/tasks/[id]/, agents/tasks/    A2A-jellegű feladat-végpontok
-├── api/                                 a v1/api alatt elérhető belső API-segédfüggvények
+├── agents/tasks/[id]/, agents/tasks/    A2A-jellegű feladatvégpontok
+├── api/                                 belső API-segédek a v1/api alatt
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    csevegési kiegészítések (a fő végpont)
-├── completions/                         örökölt szövegkiegészítések
-├── embeddings/                          beágyazások
-├── files/[id]/, files/                  fájl-API
-├── _helpers/                            megosztott útvonal-segédfüggvények (nincs nyilvános URL)
-├── images/{edits, generations}/         képgenerálás + szerkesztés
-├── issues/                              osztályozási segédvégpontok
-├── management/{proxies}/                felügyeleti hatókörű útvonalak a v1-en belül
-├── messages/{count_tokens}/             Anthropic-stílusú üzenetkompatibilitás
-├── models/                              modelllista (`route.ts`, `catalog.ts`)
-├── moderations/                         moderálás
-├── music/                               zenegenerálás
-├── providers/[provider]/                szolgáltatónkénti műveletek
-├── quotas/{check}                       kvótaellenőrzések
-├── registered-keys/                     regisztrált kulcsok adminisztrációja
-├── rerank/                              újrarangsorolás
-├── responses/[...path]/                 OpenAI Responses API (mindent elfogó)
-├── search/                              webes keresés
-├── videos/                              videógenerálás
+├── chat/completions/                    Chat Completions (a fő végpont)
+├── completions/                         Régi (legacy) text completions
+├── embeddings/                          Embeddingek
+├── files/[id]/, files/                  Files API
+├── _helpers/                            Közös route-segédek (nincs nyilvános URL)
+├── images/{edits, generations}/         Képgenerálás + szerkesztés
+├── issues/                              Triage segédvégpontok
+├── management/{proxies}/                Management-hatókörű route-ok a v1-en belül
+├── messages/{count_tokens}/             Anthropic-stílusú messages-kompatibilitás
+├── models/                              Modelllista (`route.ts`, `catalog.ts`)
+├── moderations/                         Moderálás
+├── music/                               Zenegenerálás
+├── providers/[provider]/                Szolgáltatónkénti műveletek
+├── quotas/{check}                       Kvóta-lekérdezések
+├── registered-keys/                     Regisztrált kulcsok adminisztrációja
+├── rerank/                              Újrarangsorolás
+├── responses/[...path]/                 OpenAI Responses API (catch-all)
+├── search/                              Webkeresés
+├── videos/                              Videógenerálás
 ├── ws/                                  WebSocket-híd
-└── route.ts                             indexkezelő
+└── route.ts                             Index-handler
 ```
 
-Minden útvonalfájl ugyanazt a mintát követi:
+Minden route-fájl ugyanazt a mintát követi:
 
 ```
-Útvonal → CORS-előzetes kérés → Zod-törzsellenőrzés → opcionális hitelesítés
-        → API-kulcs-szabályzat érvényesítése → delegálás a kezelőnek (open-sse)
+Route → CORS preflight → Zod body-validáció → opcionális hitelesítés
+      → API-kulcs-szabályok kikényszerítése → handler-delegálás (open-sse)
 ```
 
-A `v1beta/` a Gemini-stílusú kompatibilitási felület (egy vékony burkoló, amely
-ugyanabba az `open-sse/handlers/` folyamatba fordítja át a kéréseket).
+A `v1beta/` a Gemini-stílusú kompatibilitási felület (egy vékony wrapper, amely ugyanarra
+az `open-sse/handlers/` feldolgozási sorra fordít).
 
-### 3.2 `src/lib/` — Alapkönyvtárak
+### 3.2 `src/lib/` — Alapvető könyvtárak
 
-Az adatokat, a szinkronizálást, az OAuth-ot, a készségeket, a memóriát stb. mindig ezeken a modulokon keresztül importálja. A
-táblázat a tényleges könyvtárakat és a jelentősebb legfelső szintű fájlokat csoportosítja.
+Az adatokat, a szinkronizálást, az OAuth-ot, a skilleket, a memóriát stb. mindig ezeken a
+modulokon keresztül importáld. A táblázat a tényleges könyvtárakat és a jelentősebb
+legfelső szintű fájlokat csoportosítja.
 
-| Modul             | Rendeltetés                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A protokollkiszolgáló: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 képesség: költségelemzés, állapotjelentés, szolgáltatófelderítés, kvótakezelés, intelligens útválasztás, képességek listázása)                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `api/`            | Belső API-segédeszközök: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `auth/`           | `managementPassword.ts` (jelszó-visszaállítás / kivonatolás)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `batches/`        | OpenAI Batches API-szolgáltatás (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `catalog/`        | OpenRouter-katalógus szinkronizálása (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `cloudAgent/`     | Felhőügynökök nyilvántartása: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `combos/`         | Segédeszközök kombinációk feloldásához                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `compliance/`     | Auditálás + szolgáltatói auditálás: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `config/`         | Futásidejű konfigurációs összekötő réteg                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `db/`             | SQLite tartománymodulok (lásd: §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `display/`        | Az API-válaszok által használt felhasználóifelület- és megjelenítési segédeszközök                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `embeddings/`     | Beágyazási szolgáltatások nyilvántartása                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `env/`            | Környezeti változók betöltése + vizsgálata                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `evals/`          | Kiértékelési futtatókörnyezet                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `jobs/`           | Háttérfeladatok (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `memory/`         | Tartós memória: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `oauth/`          | OAuth-/importálási szolgáltatói modulok (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, továbbá `services/`, `utils/` és `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                       |
-| `plugins/`        | Beépülőmodul-betöltő (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `providerModels/` | Felügyelt modell-életciklus: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `providers/`      | Szolgáltatói segédeszközök: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `resilience/`     | `settings.ts` — az áramkör-megszakító, a várakozási idő és a kizárás beállításai                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `runtime/`        | Futásidejű funkcióészlelés                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `services/`       | Beágyazott szolgáltatási keretrendszer: `ServiceSupervisor.ts` (általános gyermekfolyamat-felügyelő műveleti zárral, gyűrűpufferrel és állapotellenőrzővel), `bootstrap.ts` (folyamatszintű regisztráció és automatikus indítás), `registry.ts` (eszköz → felügyelő leképezés), `apiKey.ts` (AES-256-GCM-kulcstároló), `modelSync.ts` (időszakos modell-szinkronizálás), `ringBuffer.ts` (5 MB-os körkörös naplópuffer), `healthCheck.ts` (HTTP-állapotvizsgálat), `types.ts`, `embedWsProxy.ts` (WebSocket-proxy), `installers/{ninerouter,cliproxy}.ts`. Lásd: `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                          |
-| `agentSkills/`    | Ügynökképesség-katalógus + generátor: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → a `skills/{id}/SKILL.md` fájlba ír), `openapiParser.ts` (REST-végpontokat nyer ki az OpenAPI-specifikációból), `cliRegistryParser.ts` (CLI-alparancsokat nyer ki a bin/cli-registry-ből), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). REST-útvonalak (`/api/agent-skills/*`), MCP-eszközök (`omniroute_agent_skills_*`) és az A2A `list-capabilities` képesség használják. Lásd: [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Képesség-keretrendszer: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, valamint `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `spend/`          | `batchWriter.ts` (késleltetett írási puffer)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `sync/`           | `bundle.ts`, `tokens.ts` (felhőszinkronizálás)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `system/`         | Rendszerszintű segédeszközök                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `translator/`     | Felső szintű fordítási összekötő réteg (az `open-sse/translator/` számára delegál)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `usage/`          | Használatelszámolás: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `versionManager/` | Automatikus frissítés + verziójegyzék                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `ws/`             | WebSocket-híd                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `zed-oauth/`      | A Zed szerkesztő OAuth-folyamata                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Modul             | Rendeltetés                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A protokollszerver: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 készség: költségelemzés, állapotjelentés, szolgáltató-felfedezés, kvótakezelés, intelligens útválasztás, list-capabilities)                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `api/`            | Belső API-segédfüggvények: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `auth/`           | `managementPassword.ts` (jelszó-visszaállítás / hashelés)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `batches/`        | OpenAI Batches API-szolgáltatás (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `catalog/`        | OpenRouter-katalógus szinkronizálása (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `cloudAgent/`     | Cloud-ügynökök nyilvántartása: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `combos/`         | Kombófeloldási segédfüggvények                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `compliance/`     | Audit + szolgáltatói audit: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `config/`         | Futásidejű konfigurációs ragasztókód                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `db/`             | SQLite tartományi modulok (lásd: §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `display/`        | Az API-válaszok által használt UI-/megjelenítési segédfüggvények                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `embeddings/`     | Embedding-szolgáltatások nyilvántartása                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `env/`            | Környezeti változók betöltése + introspekció                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `evals/`          | Eval futtatókörnyezet                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `jobs/`           | Háttérfeladatok (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `memory/`         | Perzisztens memória: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `oauth/`          | OAuth-/importszolgáltatói modulok (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, valamint `services/`, `utils/` és `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                |
+| `plugins/`        | Plugin-betöltő (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `providerModels/` | Kezelt modellek életciklusa: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `providers/`      | Szolgáltatói segédmodulok: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `resilience/`     | `settings.ts` — beállítások a circuit breakerhez, cooldownhoz és lockouthoz                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `runtime/`        | Futásidejű funkciófelismerés                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `services/`       | Beágyazott szolgáltatások keretrendszere: `ServiceSupervisor.ts` (általános gyermekfolyamat-felügyelő műveleti zárral, gyűrűpufferrel és állapotellenőrzővel), `bootstrap.ts` (folyamatszintű regisztráció és automatikus indítás), `registry.ts` (eszköz → supervisor leképezés), `apiKey.ts` (AES-256-GCM kulcstár), `modelSync.ts` (időszakos modellszinkronizáció), `ringBuffer.ts` (5 MB-os körkörös naplópuffer), `healthCheck.ts` (HTTP állapotpróba), `types.ts`, `embedWsProxy.ts` (WebSocket-proxy), `installers/{ninerouter,cliproxy}.ts`. Lásd: `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                   |
+| `agentSkills/`    | Agent Skills-katalógus + generátor: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → létrehozza a `skills/{id}/SKILL.md` fájlt), `openapiParser.ts` (REST-végpontokat nyer ki az OpenAPI-specifikációból), `cliRegistryParser.ts` (CLI-alparancsokat nyer ki a bin/cli-registry-ból), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). A REST-útvonalak (`/api/agent-skills/*`), MCP-eszközök (`omniroute_agent_skills_*`) és az A2A `list-capabilities` skill használják. Lásd: [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Skill-keretrendszer: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, plusz `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `spend/`          | `batchWriter.ts` (write-behind puffer)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `sync/`           | `bundle.ts`, `tokens.ts` (felhőszinkronizálás)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `system/`         | Rendszerszintű segédeszközök                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `translator/`     | Legfelső szintű translator-összekötő réteg (az `open-sse/translator/` alá delegál)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `usage/`          | Használatelszámolás: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `versionManager/` | Automatikus frissítés + verziójegyzék                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `ws/`             | WebSocket-híd                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `zed-oauth/`      | A Zed szerkesztő OAuth-folyamata                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 A `src/lib/` legfelső szintű fájljai:
 
-- A régi `localDb.ts` gyűjtőmodult eltávolítottuk — a felhasználók közvetlenül importálják az egyes `src/lib/db/*` modulokat.
+- A régi `localDb.ts` barrel-modul eltávolításra került — a fogyasztók mostantól közvetlenül a konkrét `src/lib/db/*` modulokat importálják.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -325,14 +329,14 @@ A `src/lib/` legfelső szintű fájljai:
 
 #### 3.2.1 `src/lib/db/`
 
-Singleton SQLite-adatbázis (`getDbInstance()` a `core.ts` fájlban, WAL-naplózással).
-**Soha ne írjon nyers SQL-t útvonalakba vagy kezelőkbe** — használja ezeket a modulokat.
+Egypéldányos (singleton) SQLite adatbázis (`getDbInstance()` a `core.ts`-ben, WAL naplózással).
+**Soha ne írj nyers SQL-t route-okba vagy handlerekbe** — mindig ezeken a modulokon keresztül dolgozz.
 
-![Az adatbázisséma áttekintése (kiválasztott központi táblák)](../diagrams/exported/db-schema-overview.svg)
+![Adatbázis-séma áttekintése (kiválasztott alaptáblák)](../diagrams/exported/db-schema-overview.svg)
 
 > Forrás: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Tartománymodulok (mindegyik egy vagy több táblát kezel): `apiKeys.ts`, `backup.ts`,
+Domain-modulok (mindegyik egy vagy több táblát kezel): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -346,8 +350,7 @@ Tartománymodulok (mindegyik egy vagy több táblát kezel): `apiKeys.ts`, `back
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-A `migrations/` 168 verziózott `.sql` fájlt tartalmaz (idempotens, tranzakciós), amelyeket
-a `migrationRunner.ts` hajt végre rendszerindításkor.
+A `migrations/` könyvtár 168 verziózott `.sql` fájlt tartalmaz (idempotensek, tranzakciósak), amelyeket a `migrationRunner.ts` futtat le indításkor.
 
 A migrációk során létrehozott táblák (összesen 123):
 
@@ -365,53 +368,53 @@ A migrációk során létrehozott táblák (összesen 123):
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (valamint FTS5 virtuális táblák a memóriában történő kereséshez).
+`webhooks` (plusz FTS5 virtuális táblák a memóriakereséshez).
 
-### 3.3 `src/domain/` — Tartományi réteg
+### 3.3 `src/domain/` — Domain réteg
 
-Tiszta üzleti logika, I/O nélkül. Az útvonalak és kezelők importálják.
+Tiszta üzleti logika, I/O nélkül. A route-ok és a handlerek importálják.
 
-| Fájl                                       | Rendeltetés                                                |
-| ------------------------------------------ | ---------------------------------------------------------- |
-| `policyEngine.ts`                          | Legfelső szintű házirend-feloldó                           |
-| `fallbackPolicy.ts`                        | Tartalékmegoldási döntési fa                               |
-| `costRules.ts`                             | Költségszámítási szabályok                                 |
-| `lockoutPolicy.ts`                         | Modellkizárási döntések                                    |
-| `tagRouter.ts`                             | Címkealapú útválasztás                                     |
-| `comboResolver.ts`                         | Kombináció feloldása a kérésből → céllistává               |
-| `connectionModelRules.ts`                  | Kapcsolatonkénti modellszűrők                              |
-| `modelAvailability.ts`                     | Modell elérhetőségének ellenőrzése                         |
-| `degradation.ts`                           | Csökkentett funkcionalitású mód átmenetei                  |
-| `providerExpiration.ts`                    | Lejárt fiókok/kulcsok észlelése                            |
-| `quotaCache.ts`                            | Gyorsítótárazott kvótadöntések                             |
-| `responses.ts`, `omnirouteResponseMeta.ts` | A válaszstruktúrákat segítő elemek                         |
-| `configAudit.ts`                           | Konfigurációmódosítások auditálása                         |
-| `assessment/`                              | Modellértékelés (az RFC szerint, részlegesen megvalósítva) |
-| `types.ts`                                 | Megosztott tartománytípusok                                |
+| Fájl                                       | Rendeltetés                                         |
+| ------------------------------------------ | --------------------------------------------------- |
+| `policyEngine.ts`                          | Legfelső szintű policy-feloldó                      |
+| `fallbackPolicy.ts`                        | Fallback döntési fa                                 |
+| `costRules.ts`                             | Költségszámítási szabályok                          |
+| `lockoutPolicy.ts`                         | Modellzárolási döntések                             |
+| `tagRouter.ts`                             | Címkealapú útválasztás                              |
+| `comboResolver.ts`                         | Combo-feloldás kérés → céllista alapján             |
+| `connectionModelRules.ts`                  | Kapcsolatonkénti modellszűrők                       |
+| `modelAvailability.ts`                     | Modell-elérhetőség ellenőrzése                      |
+| `degradation.ts`                           | Degradált üzemmódú átmenetek                        |
+| `providerExpiration.ts`                    | Lejárt fiókok/kulcsok felismerése                   |
+| `quotaCache.ts`                            | Gyorsítótárazott kvótadöntések                      |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Válaszforma-segédfüggvények                         |
+| `configAudit.ts`                           | Konfigurációs változások auditálása                 |
+| `assessment/`                              | Modellértékelés (RFC szerint, részben megvalósítva) |
+| `types.ts`                                 | Közös domain-típusok                                |
 
-### 3.4 `src/server/` — Kizárólag szerveroldali
+### 3.4 `src/server/` — Csak szerveroldali
 
-Nem importálható klienskomponensekből.
+Kliensoldali komponensekből nem importálható.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Nyilvános vagy felügyeleti útvonalak osztályozása
-│   ├── assertAuth.ts      Segédfüggvény helyességi feltételek ellenőrzéséhez
-│   ├── context.ts         Kérésenkénti hitelesítési kontextus
+│   ├── classify.ts        Nyilvános vs. management route-ok osztályozása
+│   ├── assertAuth.ts      Ellenőrző segédfüggvény
+│   ├── context.ts         Kérésenkénti authz kontextus
 │   ├── headers.ts
-│   ├── pipeline.ts        Hitelesítési feldolgozási lánc
-│   ├── policies/          Konkrét házirendek
+│   ├── pipeline.ts        Authz pipeline
+│   ├── policies/          Konkrét policy-k
 │   └── types.ts
-└── cors/origins.ts        Engedélyezett CORS-források listája
+└── cors/origins.ts        CORS origin engedélyezőlista
 ```
 
 ### 3.5 `src/shared/` — Biztonságosan megosztható
 
-Célzott alkönyvtárakra felosztva:
+Jól elkülönülő alkönyvtárakra bontva:
 
-- `constants/` — `providers.ts` (Zod által validált szolgáltatókatalógus), `models.ts`,
+- `constants/` — `providers.ts` (Zod által validált szolgáltatói katalógus), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
   `headers.ts`, `upstreamHeaders.ts` (tiltólista), `mcpScopes.ts`,
@@ -420,7 +423,7 @@ Célzott alkönyvtárakra felosztva:
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
 - `validation/` — `schemas.ts` (~80 Zod-séma), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — az npm-en közzétett nyilvános API-szerződések.
+- `contracts/` — az npm-re szállított nyilvános API-kontraktusok.
 - `types/` — megosztott TS-típusok.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -429,144 +432,156 @@ Célzott alkönyvtárakra felosztva:
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, valamint vezérlőpulti hookok/komponensek a `services/`, `network/`,
-  `middleware/`, `schemas/`, `hooks/`, `components/` alatt.
+  `a11yAudit.ts`, valamint az irányítópulthoz tartozó hook-ok/komponensek a
+  `services/`, `network/`, `middleware/`, `schemas/`, `hooks/`, `components/`
+  alatt.
+- `components/` — az irányítópult komponens-API-ja (`index.tsx` barrel: `Button`,
+  `Input`, `Select`, `Modal`, `Card`, `DataTable`, …). A primitívek adapterek a
+  vendored kit felett (`packages/ui-kit`, amelyet komponens-alútvonalakon
+  keresztül importálunk, például `@omniroute/ui-kit/button`), így a képernyők
+  megtartják az importjaikat, miközben a markup a kité. A shell a
+  `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx` (kit
+  `SidebarProvider`/`SidebarInset`), a `Sidebar.tsx`-szel és a
+  `Header.tsx`-szel; az ikonok az `Icon.tsx`-en és a `constants/iconMap.ts`-en
+  keresztül működnek. Lásd: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
-## 4. `open-sse/` — Streamelési motor munkaterülete
+## 4. `open-sse/` — A streamingmotor workspace-e
 
-Különálló npm-munkaterület, amely `@omniroute/open-sse` néven van közzétéve. A kérések
-feldolgozásáért, a végrehajtókért, a fordítókért, a szolgáltatásokért, a transzformátorért és az MCP-kiszolgálóért felel.
+Külön npm workspace, amely `@omniroute/open-sse` néven kerül közzétételre. Itt
+található a kérések feldolgozása, az executorok, a translatorok, a szolgáltatások,
+a transformer és az MCP-szerver.
 
 ```
 open-sse/
 ├── index.ts                Nyilvános exportok
-├── package.json            Munkaterület-manifeszt
+├── package.json            Workspace-leírás (manifest)
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Szolgáltatói nyilvántartások, fejlécprofilok, identitás, …
-├── handlers/               Kéréskezelők (csevegés, beágyazások, hang, kép, …)
-├── executors/              156 szolgáltatói végrehajtómodul (végrehajtóosztályok + szolgáltatónkénti segédmodulok)
+├── config/                 Provider-regisztrációk, fejlécprofilok, identitás, …
+├── handlers/               Kéréskezelők (chat, embeddings, hang, kép, …)
+├── executors/              156 provider-executormodul (executorosztályok + providerenkénti segédek)
 ├── translator/             Formátumkonverzió (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions adatfolyam-transzformátor
-├── services/               Több mint 80 szolgáltatásmodul (kombinációk, tartalékmechanizmusok, kvóták, identitás, …)
-├── utils/                  Streamelési segédmodulok, TLS-kliens, AWS SigV4, proxys lekérés, …
-└── mcp-server/             MCP-kiszolgáló (3 átviteli mód, 33 hatókör, 110 eszköz)
+├── transformer/            Responses API ↔ Chat Completions stream-transformer
+├── services/               80+ szolgáltatásmodul (kombók, fallback, kvóták, identitás, …)
+├── utils/                  Streaming-segédek, TLS-kliens, AWS SigV4, proxy-fetch, …
+└── mcp-server/             MCP-szerver (3 transport, 33 scope, 110 eszköz)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Kezelő                  | Rendeltetés                                                                                            |
-| ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `chatCore.ts`           | Fő csevegési folyamat (gyorsítótár, sebességkorlátozás, kombinált útválasztás, végrehajtó továbbítása) |
-| `responsesHandler.ts`   | Az OpenAI Responses API belépési pontja                                                                |
-| `embeddings.ts`         | Beágyazások                                                                                            |
-| `imageGeneration.ts`    | Képgenerálás                                                                                           |
-| `audioSpeech.ts`        | Szöveg beszéddé alakítása                                                                              |
-| `audioTranscription.ts` | Beszéd szöveggé alakítása                                                                              |
-| `videoGeneration.ts`    | Videógenerálás                                                                                         |
-| `musicGeneration.ts`    | Zenegenerálás                                                                                          |
-| `rerank.ts`             | Újrarangsorolás                                                                                        |
-| `moderations.ts`        | Moderálás                                                                                              |
-| `search.ts`             | Webes keresés                                                                                          |
-| `sseParser.ts`          | SSE-eseményelemző                                                                                      |
-| `usageExtractor.ts`     | Tokenszámok kinyerése a felsőbb szintű adatfolyamokból                                                 |
-| `responseSanitizer.ts`  | Szolgáltatóspecifikus zaj eltávolítása                                                                 |
-| `responseTranslator.ts` | Kapcsolóréteg a szolgáltatói válasz és a fordítási réteg között                                        |
+| Kezelő                  | Rendeltetés                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Fő chat-feldolgozási folyamat (gyorsítótár, sebességkorlát, kombó-útválasztás, executor-továbbítás) |
+| `responsesHandler.ts`   | OpenAI Responses API belépési pont                                                                  |
+| `embeddings.ts`         | Beágyazások                                                                                         |
+| `imageGeneration.ts`    | Képgenerálás                                                                                        |
+| `audioSpeech.ts`        | Szöveg-beszéd átalakítás                                                                            |
+| `audioTranscription.ts` | Beszéd-szöveg átalakítás                                                                            |
+| `videoGeneration.ts`    | Videógenerálás                                                                                      |
+| `musicGeneration.ts`    | Zenegenerálás                                                                                       |
+| `rerank.ts`             | Újrarangsorolás                                                                                     |
+| `moderations.ts`        | Moderálás                                                                                           |
+| `search.ts`             | Webes keresés                                                                                       |
+| `sseParser.ts`          | SSE-eseményfeldolgozó                                                                               |
+| `usageExtractor.ts`     | Tokenszámok kinyerése az upstream streamekből                                                       |
+| `responseSanitizer.ts`  | Providerspecifikus zaj eltávolítása                                                                 |
+| `responseTranslator.ts` | Összekötő réteg a providerválasz és a translatorréteg között                                        |
 
 ### 4.2 `open-sse/executors/`
 
-156 felső szintű végrehajtómodul (`*.ts`, a `base.ts`, az `index.ts` és a tesztek nélkül — ezt a számot
-az `npm run check:docs-counts` méri). Minden végrehajtóosztály a `BaseExecutor` (`base.ts`) osztályt
-terjeszti ki közvetlenül, vagy a `DefaultExecutor`, illetve egy másik végrehajtó közvetítésével; a fennmaradó modulok szolgáltatónkénti
-segédmodulok (eszközsémák, lekérési/TTS-adapterek, sajátosságkezelők). A végrehajtók közé tartoznak:
+156 felső szintű executormodul (`*.ts` mínusz `base.ts`, `index.ts` és a tesztek — ezt
+a darabszámot méri az `npm run check:docs-counts`). Minden executorosztály a
+`BaseExecutor`-ból (`base.ts`) származik, közvetlenül vagy a `DefaultExecutor`-ön,
+illetve egy másik executoron keresztül; a többi modul providerenkénti segéd
+(eszközsémák, fetch/TTS-adapterek, sajátosságkezelők). Az executorok közé tartoznak:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, továbbá a `claudeIdentity.ts`
-(megosztott identitási segédmodul) és az `index.ts` (nyilvántartás).
+(közös identitássegéd) és az `index.ts` (registry).
 
-> Megjegyzés: az itt fel nem sorolt szolgáltatókat a `default.ts` szolgálja ki az általános,
-> OpenAI-kompatibilis végrehajtó használatával. A teljes szolgáltatói katalógus (375 szolgáltató) a
+> Megjegyzés: az itt fel nem sorolt providereket a `default.ts` szolgálja ki az általános
+> OpenAI-kompatibilis executorral. A teljes providerkatalógus (375 provider) a
 > `src/shared/constants/providers.ts` fájlban található.
 
 ### 4.3 `open-sse/translator/`
 
-Központi elosztó- és küllős fordítási architektúra (a központ az OpenAI).
+Küllős (hub-and-spoke) felépítésű fordítás — az OpenAI a központ.
 
-- **9 kérésfordító** (`translator/request/`):
+- **9 kérés-translator** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 válaszfordító** (`translator/response/`):
+- **9 válasz-translator** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`.
 - **9 segédmodul** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, valamint
-  segédmodultesztek.
-- **Képkezelési segédmodulok** (`translator/image/sizeMapper.ts`).
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, továbbá
+  a segédek tesztjei.
+- **Képsegédek** (`translator/image/sizeMapper.ts`).
 - Felső szint: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — `TransformStream`-alapú Responses API ↔ Chat
-  Completions konverter (a `responses/` útvonal általános kezelője használja).
+  Completions konverter (a `responses/` útvonal catch-all kezelője használja).
 
 ### 4.5 `open-sse/services/`
 
-Főbb elemek (a teljes lista az `open-sse/services/` alatt található):
+Kiemeltek (a teljes lista az `open-sse/services/` alatt):
 
 | Terület                 | Fájlok                                                                                                                                                                                                                                                   |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kombinált útválasztás   | `combo.ts` (20 stratégia), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
-| Auto Combo motor        | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Hibatűrés               | `accountFallback.ts` (lehűlési idő + zárolás), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                     |
+| Combo-útválasztás       | `combo.ts` (20 stratégia), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
+| Auto Combo-motor        | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Hibatűrés               | `accountFallback.ts` (cooldown + kizárás), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
 | Kvóták                  | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
 | Gyorsítótárazás         | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Intelligens útválasztás | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Modellkezelés           | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Tömörítés               | `compression/` — a teljes tömörítési motor integrációja                                                                                                                                                                                                  |
+| Tömörítés               | `compression/` — a teljes tömörítési motor bekötése                                                                                                                                                                                                      |
 | Token + munkamenet      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Szint / manifeszt       | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| Szint / manifest        | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / hálózat            | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Kötegelt feldolgozás    | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Kötegek                 | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | Használat               | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 egyedi eszköz** van bekötve a `server.ts` fájlban (45 kanonikus a `schemas/tools.ts` fájlban +
-  memória-, készség-, GitHub-készség-, készlet-, gamifikációs, beépülőmodul-, Notion-, Obsidian-,
-  helyikorpusz- és tömörítési modulok — az uniót a `countUniqueMcpTools` számolja).
-- **3 átviteli mód**: stdio, HTTP Streamable, SSE.
-- **33 hatókör** van futásidőben kikényszerítve — az alaplista a `src/shared/constants/mcpScopes.ts` fájlban található, a teljes készlet pedig az egyes eszközmodulok által deklarált hatókörök uniója.
-- Auditálási tábla: `mcp_tool_audit` (az `audit.ts` tölti fel).
+- **110 egyedi eszköz** bekötve a `server.ts`-ben (45 kanonikus a `schemas/tools.ts`-ban +
+  memória-, skills-, GitHub-skills-, pool-, gamification-, plugin-, Notion-, Obsidian-,
+  local-corpus- és tömörítésmodulok — az uniót a `countUniqueMcpTools` számolja).
+- **3 transport**: stdio, HTTP Streamable, SSE.
+- **33 scope** futásidőben kikényszerítve — az alaplista a `src/shared/constants/mcpScopes.ts`-ben található, a teljes halmaz az egyes eszközmodulok által deklarált scope-ok uniója.
+- Audit tábla: `mcp_tool_audit` (az `audit.ts` tölti fel).
 - Fájlok: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  valamint tesztek a `__tests__/` alatt.
-- A teljes eszközkatalógust lásd az [MCP-SERVER.md](../frameworks/MCP-SERVER.md) dokumentumban.
+  plusz tesztek a `__tests__/` alatt.
+- A teljes eszközkatalógusért lásd: [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### 4.7 `open-sse/config/`
 
-Szolgáltatói nyilvántartások (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), formátumonkénti modellnyilvántartások (`audioRegistry.ts`,
+Provider-regiszterek (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), formátumonkénti modellregiszterek (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-identitássegédletek (`codexIdentity.ts`, `codexInstructions.ts`,
+identitássegédek (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-hitelesítőadat-segédletek (`credentialLoader.ts`, `codexClient.ts`) és felhőadapterek
+hitelesítőadat-segédek (`credentialLoader.ts`, `codexClient.ts`) és felhőadapterek
 (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Streamelési primitívek és szolgáltatói segédfájlok: `stream.ts`, `streamHandler.ts`,
+Streaming-primitívek és szolgáltatói segédfüggvények: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
