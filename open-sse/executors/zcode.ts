@@ -10,6 +10,7 @@ import {
 } from "./base.ts";
 import { ZcodeAppServerClient, type ZcodeClientLike } from "./zcodeProtocol.ts";
 import { executeZcodeGateway } from "./zcode/gateway.ts";
+import { readZcodeIndividualCodingPlanApiKey } from "./zcode/profileAuth.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { MAX_CURSOR_IMAGES, resolveCursorImages } from "../utils/cursorImages.ts";
 
@@ -442,8 +443,30 @@ export class ZcodeExecutor extends BaseExecutor {
     } catch (error) {
       return errorResponse(400, sanitizeErrorMessage(errorText(error)));
     }
-    if (transport === "gateway")
-      return executeZcodeGateway({ ...input, model: resolution.model }, request);
+    if (transport === "gateway") {
+      const providerId =
+        this.options.providerId || process.env.ZCODE_PROVIDER_ID || ACCOUNT_PROVIDER_ID;
+      if (providerId !== ACCOUNT_PROVIDER_ID && providerId !== "builtin:zai-coding-plan") {
+        return errorResponse(
+          503,
+          "Direct ZCode streaming currently requires the Individual Coding Plan; Start Plan needs its official host runtime-auth callback."
+        );
+      }
+      let apiKey: string;
+      try {
+        apiKey = await readZcodeIndividualCodingPlanApiKey(providerId);
+      } catch (error) {
+        input.log?.warn?.(
+          "ZCODE_GATEWAY",
+          error instanceof Error ? error.name : "Profile credential unavailable"
+        );
+        return errorResponse(
+          401,
+          "The selected Individual Coding Plan credential is unavailable or its local config is not safely readable."
+        );
+      }
+      return executeZcodeGateway({ ...input, model: resolution.model }, request, { apiKey });
+    }
     const client = this.createClient();
     try {
       const cwd = resolve(this.workingDirectory());
