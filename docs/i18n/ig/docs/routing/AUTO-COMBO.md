@@ -327,20 +327,13 @@ Injin ngwakọta OmniRoute na-akwado **usoro ntụgharị ụzọ 20** (akọwap
 Maka ntụgharị siri ike, jiri `round-robin`; ịdị arọ hà nhata na `weighted` na-enye nguzozi nke ọnụ ọgụgụ — ọ bụghị
 nke siri ike.
 
-### Ọnọdụ pipeline nke agentic
+### Ụdị pipeline nke onye nnọchi anya (Agentic)
 
-Ngwakọta `pipeline` nwere opekata mpe model abụọ nwere ike ịhọrọ iji nhazi ụzọ planner/executor site na
-`config.agenticOrchestration.enabled`. Target nke mbụ na-ahụ maka ime atụmatụ na azịza ikpeazụ;
-target nke abụọ na-ewepụta oku tool nke kwekọrọ na client. OmniRoute na-achọpụta njikọ na-aga n'ihu nke tool-result
-site na protocol nke arịrịọ ahụ, jụọ planner ma achọrọ okirikiri tool ọzọ,
-ma mee ka executor ma ọ bụ planner bụrụ nzọụkwụ ikpeazụ client ga-ahụ n'ụzọ na-agbanwe agbanwe.
+Ngwakọta `pipeline` nwere opekata mpe ụdị abụọ nwere ike ịhọrọ ịbanye na ntụgharị onye na-eme atụmatụ/onye na-eme ihe (planner/executor) na `config.agenticOrchestration.enabled`. Ihe mgbaru ọsọ mbụ na-ahụ maka atụmatụ na azịza ikpeazụ; ihe mgbaru ọsọ nke abụọ na-ewepụta oku ngwaọrụ nke onye ahịa (client-native). OmniRoute na-achọpụta ntinye nsonaazụ ngwaọrụ site na usoro arịrịọ, na-ajụ onye na-eme atụmatụ ma ọ bụrụ na achọrọ gburugburu ngwaọrụ ọzọ, ma na-eme ka onye na-eme ihe ma ọ bụ onye na-eme atụmatụ bụrụ usoro ikpeazụ nke onye ahịa na-ahụ.
 
-Model ndị ọzọ dị mgbe target nke abụọ gasịrị bụ executor ndabere ahaziri n'usoro. Nzaghachi
-HTTP dara ada ma ọ bụ transport exception na-eme ka usoro ahụ gaa na executor na-esote, na-eburu
-otu mkpebi planner ahụ na native tools mana jiri step prompt nke executor ahụ n'onwe ya na
-njikọ edoziri. A na-eweghachi nzaghachi izizi gara nke ọma n'enweghị mgbanwe, gụnyere
-SSE streaming; enweghị ike ịnwale ọdịda ọzọ ebe a ma ọ bụrụ na stream gara nke ọma amalitela.
-Ọ bụrụ na executor niile adaa, a na-eweghachi ọdịda ikpeazụ. Nkwụsị sitere n'aka client na-akwụsị dispatch.
+Na ntinye nsonaazụ ngwaọrụ, OmniRoute na-akwụsịkwa mmezu mgbe gburugburu abụọ emechara na-emeghachi otu oku ngwaọrụ ahụ na nsonaazụ na-agbanweghị agbanwe, ma ọ bụ mgbe nsonaazụ ọ bụla akara nke ọma na gburugburu abụọ dara. Nsonaazụ ndị gbanwere na-enye ohere maka oku ugboro ugboro (dịka ọmụmaatụ, polling). Onye nche ahụ na-atọgharị na arịrịọ onye ọrụ ọhụrụ, na-achịkọta oku ndị yiri ya n'otu gburugburu, ma na-akwado akụkọ ihe mere eme nke Anthropic, Chat Completions, Responses na Gemini. Onye na-eme atụmatụ na-anata ihe kpatara ya ma na-ahụ maka azịza ikpeazụ ọbụlagodi ma ọ bụrụ na ọ rịọ maka gburugburu ngwaọrụ ọzọ.
+
+Ụdị ndị ọzọ mgbe ihe mgbaru ọsọ nke abụọ gasịrị bụ nkwado onye na-eme ihe (executor backups) n'usoro. Nzaghachi HTTP dara ada ma ọ bụ mwepu njem na-aga n'ihu na onye na-eme ihe na-esote, na-ebu otu mkpebi onye na-eme atụmatụ na ngwaọrụ ala (native tools) mana na-eji ngwa ngwa nzọụkwụ nke onye na-eme ihe ahụ na njikọ edozi. A na-eweghachi nzaghachi mbụ gara nke ọma n'agbanweghị, gụnyere SSE streaming; ọdịda mgbe iyi na-aga nke ọma malitere enweghị ike ịnwale ọzọ ebe a. Ọ bụrụ na ndị niile na-eme ihe dara, a na-eweghachi ọdịda ikpeazụ. Ịkwụsị nke onye ahịa na-akwụsị nzipu.
 
 ```json
 {
@@ -352,11 +345,7 @@ SSE streaming; enweghị ike ịnwale ọdịda ọzọ ebe a ma ọ bụrụ na
 }
 ```
 
-Executor nwere ike iwepụta ọtụtụ oku nọọrọ onwe ha n'otu nzaghachi. A na-ahazi oku ndị
-dabere n'ibe ha na ntụgharị tool-result nke client ndị na-esote, ebe planner na-enyocha nsonaazụ ọ bụla.
-`maxToolRounds` nwere ndabara `8` ma na-anabata `1`–`32`; ozugbo e ruru ya, planner ga-
-ewepụta azịza ikpeazụ kacha mma dị. A na-echekwa mkpebi ime planner na buffer, ebe
-nzaghachi ahọpụtara nke client ga-ahụ na-edobe mmasị streaming mbụ.
+Onye na-eme ihe nwere ike iwepụta ọtụtụ oku nọọrọ onwe ha n'otu nzaghachi. A na-ejikwa oku ndị dabere na ya na ntụgharị nsonaazụ ngwaọrụ onye ahịa mgbe e mesịrị, ebe onye na-eme atụmatụ na-enyocha nsonaazụ ọ bụla. `maxToolRounds` na-adị na `8` site na ndabara ma na-anabata `1`–`32`; ozugbo erutere, onye na-eme atụmatụ ga-emepụta azịza ikpeazụ kacha mma dị. Mkpebi onye na-eme atụmatụ n'ime na-echekwa (buffered), ebe nzaghachi ahọpụtara nke onye ahịa na-ahụ na-echekwa mmasị nkwanye (streaming) mbụ.
 
 ### Batch nke `round-robin` na-anọgide otu ebe na mgbasawanye akaụntụ
 

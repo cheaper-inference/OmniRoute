@@ -321,21 +321,13 @@ Il-magna tal-combos ta' OmniRoute tappoġġja **20 strateġija tar-rotot** (iddi
 Għal rotazzjoni stretta uża `round-robin`; piżijiet indaqs fuq `weighted` jagħtu bilanċ
 statistiku — mhux strett.
 
-### Modalità ta’ pipeline aġentika
+### Modalità pipeline aġentika
 
-Kombinazzjoni `pipeline` b’mill-inqas żewġ mudelli tista’ tagħżel ir-routing tal-pjanifikatur/eżekutur
-permezz ta’ `config.agenticOrchestration.enabled`. L-ewwel mira tieħu ħsieb l-ippjanar u t-tweġibiet finali;
-it-tieni mira toħroġ sejħiet tal-għodod nattivi għall-klijent. OmniRoute jidentifika l-kontinwazzjonijiet
-tar-riżultati tal-għodod mill-protokoll tat-talba, jistaqsi lill-pjanifikatur jekk hemmx bżonn ċiklu ieħor
-tal-għodod, u b’mod dinamiku jagħmel jew lill-eżekutur jew lill-pjanifikatur il-pass finali
-li jidher lill-klijent.
+Combo tat-tip `pipeline` b'mill-inqas żewġ mudelli tista' tagħżel ir-routing ta' planner/executor b' `config.agenticOrchestration.enabled`. L-ewwel mira hija responsabbli għall-ippjanar u t-tweġibiet finali; it-tieni mira toħroġ sejħiet għal għodod (tool calls) nattivi għall-klijent. OmniRoute tiskopri kontinwazzjonijiet tar-riżultati tal-għodod mill-protokoll tat-talba, tistaqsi lill-planner jekk hemmx bżonn rawnd ieħor ta' għodod, u b'mod dinamiku tagħmel jew lill-executor jew lill-planner il-pass finali li jħares lejn il-klijent.
 
-Mudelli addizzjonali wara t-tieni mira jiġu ordnati bħala riżervi tal-eżekutur. Rispons
-HTTP li jfalli jew eċċezzjoni tat-trasport iwasslu għall-eżekutur li jmiss, filwaqt li jinżammu
-l-istess deċiżjoni tal-pjanifikatur u għodod nattivi, iżda jintużaw il-prompt tal-pass u
-l-konnessjoni riżolta ta’ dak l-eżekutur. L-ewwel rispons li jirnexxi jintbagħat lura mingħajr tibdil, inkluż
-l-istreaming SSE; fallimenti wara li jibda stream b’suċċess ma jistgħux jerġgħu jiġu ppruvati hawnhekk.
-Jekk l-eżekuturi kollha jfallu, jintbagħat lura l-aħħar falliment. L-abbandun mill-klijent iwaqqaf id-dispaċċ.
+Fuq kontinwazzjonijiet tar-riżultati tal-għodod, OmniRoute twaqqaf ukoll l-eżekuzzjoni meta żewġ rawnds kompluti konsekuttivi jirrepetu l-istess sejħiet għal għodod b'riżultati mhux mibdula, jew meta kull riżultat immarkat b'mod espliċitu f'żewġ rawnds konsekuttivi falla. Riżultati mibdula jippermettu sejħiet ripetuti (pereżempju, polling). Il-guard tirrisettja fuq talba ġdida mill-utent, tiġbor sejħiet paralleli f'rawnd wieħed, u tappoġġja l-istorja ta' Anthropic, Chat Completions, Responses u Gemini. Il-planner jirċievi r-raġuni u huwa responsabbli għat-tweġiba finali anke jekk jitlob rawnd ieħor ta' għodod.
+
+Mudelli addizzjonali wara t-tieni mira huma backups tal-executor ordnati. Rispons HTTP fallut jew eċċezzjoni ta' trasport tavvanza għall-executor li jmiss, u ġġorr l-istess deċiżjoni tal-planner u għodod nattivi iżda l-prompt tal-pass u l-konnessjoni riżolta ta' dak l-executor stess. L-ewwel rispons ta' suċċess jiġi rritornat mingħajr tibdil, inkluż l-istrimjar SSE; fallimenti wara li jibda stream ta' suċċess ma jistgħux jerġgħu jiġu ppruvati hawn. Jekk l-executors kollha jfallu, l-aħħar falliment jiġi rritornat. L-aborts tal-klijent iwaqqfu d-dispatch.
 
 ```json
 {
@@ -347,11 +339,7 @@ Jekk l-eżekuturi kollha jfallu, jintbagħat lura l-aħħar falliment. L-abbandu
 }
 ```
 
-L-eżekutur jista’ joħroġ diversi sejħiet indipendenti f’rispons wieħed. Sejħiet dipendenti jiġu
-ġestiti f’ċikli sussegwenti tar-riżultati tal-għodod tal-klijent, bil-pjanifikatur jirrevedi kull riżultat.
-`maxToolRounds` għandu valur predefinit ta’ `8` u jaċċetta `1`–`32`; ladarba jintlaħaq, il-pjanifikatur irid
-jipproduċi l-aħjar tweġiba finali disponibbli. Id-deċiżjonijiet interni tal-pjanifikatur jinżammu f’buffer, filwaqt li
-r-rispons magħżul li jidher lill-klijent iżomm il-preferenza oriġinali tal-istreaming.
+L-executor jista' joħroġ sejħiet indipendenti multipli f'rispons wieħed. Sejħiet dipendenti jiġu mmaniġġjati f'dawriet ta' riżultati ta' għodod tal-klijent aktar tard, bil-planner jirrevedi kull riżultat. `maxToolRounds` huwa default għal `8` u jaċċetta `1`–`32`; ladarba jintlaħaq, il-planner għandu jipproduċi l-aħjar tweġiba finali disponibbli. Id-deċiżjonijiet interni tal-planner huma buffered, filwaqt li r-rispons magħżul li jħares lejn il-klijent jippreserva l-preferenza oriġinali tal-istrimjar.
 
 ### Lott persistenti `round-robin` u espansjoni tal-kontijiet
 

@@ -308,11 +308,13 @@ OmniRoute kombināciju dzinējs atbalsta **20 maršrutēšanas stratēģijas** (
 
 Stingrai rotācijai izmantojiet `round-robin`; vienādi svari ar `weighted` nodrošina statistisku, nevis stingru līdzsvaru.
 
-### Aģentiskā konveijera režīms
+### Aģentu konveijera režīms (Agentic pipeline mode)
 
-`pipeline` kombinācija ar vismaz diviem modeļiem var iespējot plānotāja/izpildītāja maršrutēšanu, izmantojot `config.agenticOrchestration.enabled`. Pirmais mērķis veic plānošanu un sagatavo galīgās atbildes; otrais mērķis ģenerē klienta protokolam atbilstošus rīku izsaukumus. OmniRoute nosaka rīku rezultātu turpinājumus pēc pieprasījuma protokola, vaicā plānotājam, vai nepieciešama vēl viena rīku izpildes kārta, un dinamiski izvēlas izpildītāju vai plānotāju par klientam paredzēto pēdējo posmu.
+`pipeline` kombinācija ar vismaz diviem modeļiem var izvēlēties plānotāja/izpildītāja maršrutēšanu, izmantojot `config.agenticOrchestration.enabled`. Pirmais mērķis veic plānošanu un sniedz galīgās atbildes; otrais mērķis izsūta klienta vietējos rīku izsaukumus. OmniRoute nosaka rīka rezultātu turpinājumus no pieprasījuma protokola, jautā plānotājam, vai ir nepieciešams vēl viens rīka raunds, un dinamiski padara vai nu izpildītāju, vai plānotāju par klientam redzamo pēdējo soli.
 
-Papildu modeļi pēc otrā mērķa tiek sakārtoti kā izpildītāja rezerves varianti. Neveiksmīgas HTTP atbildes vai transporta izņēmuma gadījumā tiek izmantots nākamais izpildītājs, saglabājot to pašu plānotāja lēmumu un sākotnējos rīkus, taču izmantojot šī izpildītāja posma uzvedni un atrisināto savienojumu. Pirmā veiksmīgā atbilde tiek atgriezta bez izmaiņām, tostarp saglabājot SSE straumēšanu; kļūmes pēc veiksmīgas straumes sākšanas šeit nevar mēģināt apstrādāt atkārtoti. Ja visi izpildītāji cieš neveiksmi, tiek atgriezta pēdējā kļūme. Klienta atcelšana aptur nosūtīšanu.
+Rīka rezultātu turpinājumu gadījumā OmniRoute arī pārtrauc izpildi, kad divi secīgi pabeigti raundi atkārto tos pašus rīku izsaukumus ar nemainīgiem rezultātiem, vai kad katrs skaidri atzīmētais rezultāts divos secīgos raundos ir cietis neveiksmi. Mainīti rezultāti atļauj atkārtotus izsaukumus (piemēram, aptauju). Aizsardzības mehānisms atiestatās pēc jauna lietotāja pieprasījuma, grupē paralēlos izsaukumus vienā raundā un atbalsta Anthropic, Chat Completions, Responses un Gemini vēstures. Plānotājs saņem iemeslu un kontrolē galīgo atbildi, pat ja tas pieprasa vēl vienu rīka raundu.
+
+Papildu modeļi pēc otrā mērķa ir sakārtoti izpildītāja dublējumi. Neveiksmīga HTTP atbilde vai transporta izņēmums pāriet uz nākamo izpildītāju, saglabājot to pašu plānotāja lēmumu un vietējos rīkus, bet izmantojot attiecīgā izpildītāja paša soļa uzvedni un atrisināto savienojumu. Pirmā veiksmīgā atbilde tiek atgriezta nemainīta, ieskaitot SSE straumēšanu; kļūmes pēc veiksmīgas straumes sākuma šeit nevar tikt mēģinātas atkārtoti. Ja visi izpildītāji neizdodas, tiek atgriezta pēdējā kļūda. Klienta pārtraukumi aptur nosūtīšanu.
 
 ```json
 {
@@ -324,7 +326,7 @@ Papildu modeļi pēc otrā mērķa tiek sakārtoti kā izpildītāja rezerves va
 }
 ```
 
-Izpildītājs vienā atbildē var ģenerēt vairākus neatkarīgus izsaukumus. Atkarīgie izsaukumi tiek apstrādāti turpmākajos klienta rīku rezultātu soļos, plānotājam pārskatot katru rezultātu. `maxToolRounds` noklusējuma vērtība ir `8`, un tas pieņem vērtības no `1` līdz `32`; sasniedzot šo ierobežojumu, plānotājam jāizveido labākā pieejamā galīgā atbilde. Plānotāja iekšējie lēmumi tiek buferēti, savukārt atlasītajā klientam paredzētajā atbildē tiek saglabāta sākotnējā straumēšanas preference.
+Izpildītājs var izsūtīt vairākus neatkarīgus izsaukumus vienā atbildē. Atkarīgie izsaukumi tiek apstrādāti vēlākās klienta rīka rezultātu apmaiņās, plānotājam pārskatot katru rezultātu. `maxToolRounds` noklusējuma vērtība ir `8`, un tas pieņem vērtības no `1` līdz `32`; kad šis limits ir sasniegts, plānotājam ir jāsniedz labākā pieejamā galīgā atbilde. Iekšējie plānotāja lēmumi tiek buferēti, savukārt izvēlētā klientam redzamā atbilde saglabā sākotnējo straumēšanas preferenci.
 
 ### `round-robin` piesaistītā pakešu apstrāde un kontu izvēršana
 

@@ -326,21 +326,13 @@ Motorul de combinații OmniRoute acceptă **20 de strategii de rutare** (declara
 Pentru rotație strictă, utilizați `round-robin`; ponderile egale pentru `weighted` oferă un echilibru statistic — nu
 strict.
 
-### Modul de pipeline agentic
+### Modul pipeline agentic
 
-O combinație `pipeline` cu cel puțin două modele poate activa rutarea planificator/executor prin
-`config.agenticOrchestration.enabled`. Prima țintă gestionează planificarea și răspunsurile finale;
-a doua țintă emite apeluri de instrumente native pentru client. OmniRoute detectează continuările
-cu rezultate ale instrumentelor din protocolul cererii, întreabă planificatorul dacă este necesară
-încă o rundă de instrumente și stabilește dinamic dacă executorul sau planificatorul reprezintă
-etapa finală transmisă clientului.
+O combinație `pipeline` cu cel puțin două modele poate opta pentru rutarea planificator/executor cu `config.agenticOrchestration.enabled`. Prima țintă gestionează planificarea și răspunsurile finale; a doua țintă emite apeluri de instrumente native pentru client. OmniRoute detectează continuările rezultatelor instrumentelor din protocolul de cerere, întreabă planificatorul dacă este necesară o altă rundă de instrumente și face dinamic fie executorul, fie planificatorul pasul final orientat către client.
 
-Modelele suplimentare de după a doua țintă sunt copii de rezervă ordonate ale executorului. Un răspuns
-HTTP eșuat sau o excepție de transport determină trecerea la următorul executor, păstrând aceeași
-decizie a planificatorului și aceleași instrumente native, dar utilizând propriul prompt de etapă și
-propria conexiune rezolvată ale executorului respectiv. Primul răspuns reușit este returnat nemodificat, inclusiv
-streamingul SSE; eșecurile survenite după începerea unui flux reușit nu pot fi reîncercate aici.
-Dacă toți executorii eșuează, este returnat ultimul eșec. Anulările efectuate de client opresc distribuirea.
+La continuările rezultatelor instrumentelor, OmniRoute oprește, de asemenea, execuția atunci când două runde finalizate consecutive repetă aceleași apeluri de instrumente cu rezultate neschimbate, sau când fiecare rezultat marcat explicit în două runde consecutive a eșuat. Rezultatele modificate permit apeluri repetate (de exemplu, polling). Mecanismul de protecție se resetează la o cerere nouă a utilizatorului, grupează apelurile paralele într-o singură rundă și acceptă istoricele Anthropic, Chat Completions, Responses și Gemini. Planificatorul primește motivul și gestionează răspunsul final, chiar dacă solicită o altă rundă de instrumente.
+
+Modelele suplimentare de după a doua țintă sunt copii de rezervă ordonate ale executorului. Un răspuns HTTP eșuat sau o excepție de transport avansează la următorul executor, păstrând aceeași decizie a planificatorului și aceleași instrumente native, dar utilizând promptul de pas și conexiunea rezolvată ale acelui executor. Primul răspuns reușit este returnat neschimbat, inclusiv streaming-ul SSE; eșecurile după începerea unui stream reușit nu pot fi reîncercate aici. Dacă toți executorii eșuează, este returnat ultimul eșec. Întreruperile clientului opresc expedierea.
 
 ```json
 {
@@ -352,11 +344,7 @@ Dacă toți executorii eșuează, este returnat ultimul eșec. Anulările efectu
 }
 ```
 
-Executorul poate emite mai multe apeluri independente într-un singur răspuns. Apelurile dependente sunt
-gestionate în interacțiunile ulterioare ale clientului cu rezultate ale instrumentelor, planificatorul examinând fiecare rezultat.
-`maxToolRounds` are valoarea implicită `8` și acceptă `1`–`32`; odată ce limita este atinsă, planificatorul trebuie
-să producă cel mai bun răspuns final disponibil. Deciziile interne ale planificatorului sunt păstrate într-un buffer, iar
-răspunsul selectat pentru client păstrează preferința inițială de streaming.
+Executorul poate emite mai multe apeluri independente într-un singur răspuns. Apelurile dependente sunt gestionate în turele ulterioare de rezultate ale instrumentelor clientului, planificatorul revizuind fiecare rezultat. `maxToolRounds` are valoarea implicită `8` și acceptă `1`–`32`; odată atinsă, planificatorul trebuie să producă cel mai bun răspuns final disponibil. Deciziile interne ale planificatorului sunt stocate în buffer, în timp ce răspunsul selectat orientat către client păstrează preferința de streaming originală.
 
 ### Loturi persistente `round-robin` și extinderea conturilor
 

@@ -328,21 +328,13 @@ curl -sS http://localhost:20128/v1/chat/completions \
 Fún yíyí tó muna, lo `round-robin`; fífún `weighted` ní àwọn ìwọ̀n tó dọ́gba ń fúnni ní ìwọ̀ntúnwọ̀nsì oníṣirò — kì í ṣe
 èyí tó muna.
 
-### Ìpo pipeline aláṣojú
+### Ìpò pipeline ti agentic
 
-Àkójọpọ̀ `pipeline` kan tó ní ó kéré tán àwọn model méjì lè yan ìdarí planner/executor pẹ̀lú
-`config.agenticOrchestration.enabled`. Target àkọ́kọ́ ló ń ṣètò ètò àti àwọn ìdáhùn ìkẹyìn;
-target kejì ló ń mú àwọn tool call abinibi client jáde. OmniRoute máa ń ṣàwárí àwọn ìtẹ̀síwájú
-tool-result láti inú protocol request, ó máa ń béèrè lọ́wọ́ planner bóyá tool round míì
-ṣì ṣe pàtàkì, ó sì máa ń yan executor tàbí planner ní ìmúdàgba gẹ́gẹ́ bí ìgbésẹ̀ ìkẹyìn
-tí client máa rí.
+Àpapọ̀ `pipeline` tó ní ó kéré tán àwọn model méjì lè yan láti lo ìdarí planner/executor pẹ̀lú `config.agenticOrchestration.enabled`. Àfojúsùn àkọ́kọ́ ló ń ṣàkóso ìpinnu àti àwọn ìdáhùn tó kẹ́yìn; àfojúsùn kejì ló ń gbé àwọn ìpè irinṣẹ́ (tool calls) tó jẹ́ ti oníbàárà jáde. OmniRoute máa ń wá àwọn ìtẹ̀síwájú ìyọrísí irinṣẹ́ (tool-result continuations) láti inú ìlànà ìbéèrè, ó máa ń béèrè lọ́wọ́ planner bóyá a nílò yíyí irinṣẹ́ mìíràn, ó sì máa ń sọ executor tàbí planner di ìgbésẹ̀ tó kẹ́yìn tó dojú kọ oníbàárà ní ọ̀nà tó rọrùn.
 
-Àwọn model àfikún lẹ́yìn target kejì ni a tò sí executor backups. HTTP response tó kuna
-tàbí transport exception máa ń mú kí a lọ sí executor tó kàn, pẹ̀lú planner decision
-kan náà àti native tools kan náà, ṣùgbọ́n pẹ̀lú step prompt ti executor náà fúnra rẹ̀ àti
-resolved connection rẹ̀. Response àkọ́kọ́ tó ṣàṣeyọrí ni a máa dá padà láìyípadà, pẹ̀lú
-SSE streaming; àwọn ìkùnà lẹ́yìn tí stream tó ṣàṣeyọrí bá ti bẹ̀rẹ̀ kò ṣeé gbìyànjú lẹ́ẹ̀kan sí i níbí.
-Tí gbogbo executors bá kuna, ìkùnà tó kẹ́yìn ni a máa dá padà. Client aborts máa dá dispatch dúró.
+Nígbà tí àwọn ìtẹ̀síwájú ìyọrísí irinṣẹ́ bá wáyé, OmniRoute tún máa ń dá iṣẹ́ dúró nígbà tí àwọn yíyí (rounds) méjì tó parí ní tẹ̀léra bá tún àwọn ìpè irinṣẹ́ kan náà ṣe pẹ̀lú àwọn ìyọrísí tí kò yí padà, tàbí nígbà tí gbogbo ìyọrísí tó jẹ́ mímọ́ gbangba nínú àwọn yíyí méjì tó tẹ̀ lé ara wọn bá kùnà. Àwọn ìyọrísí tó yí padà gba àwọn ìpè tó tún wáyé láàyè (fún àpẹẹrẹ, polling). Ìṣọ́ náà máa ń tún bẹ̀rẹ̀ lórí ìbéèrè tuntun láti ọ̀dọ̀ oníbàárà, ó máa ń ṣàjọ àwọn ìpè tó ń lọ lọ́wọ́ ní àkókò kan náà sínú yíyí kan, ó sì ń ṣètìlẹ́yìn fún Anthropic, Chat Completions, Responses àti àwọn ìtàn Gemini. Planner máa ń gba ìdí rẹ̀, ó sì ń ṣàkóso ìdáhùn tó kẹ́yìn kódà tí ó bá béèrè fún yíyí irinṣẹ́ mìíràn.
+
+Àwọn model àfikún lẹ́yìn àfojúsùn kejì jẹ́ àwọn àfẹ́yinti executor tí a tò lẹ́sẹẹsẹ. Ìdáhùn HTTP tó kùnà tàbí àìsàn ọkọ̀ gbigbe (transport exception) máa ń lọ sí executor tó tẹ̀ lé e, ó ń gbé ìpinnu planner kan náà àti àwọn irinṣẹ́ abínibí ṣùgbọ́n ó ń lo ìtọ́sọ́nà ìgbésẹ̀ (step prompt) àti ìsopọ̀ tó yanjú ti executor yẹn. Ìdáhùn àkọ́kọ́ tó ṣàṣeyọrí ni a máa ń dá padà láìyí padà, pẹ̀lú SSE streaming; àwọn ìkùnà lẹ́yìn tí ṣiṣan (stream) tó ṣàṣeyọrí bá bẹ̀rẹ̀ kò lè tún wáyé níhìn-ín. Tí gbogbo àwọn executor bá kùnà, ìkùnà tó kẹ́yìn ni a máa ń dá padà. Àwọn ìdádúró oníbàárà máa ń dá ìránṣẹ́ dúró.
 
 ```json
 {
@@ -354,11 +346,7 @@ Tí gbogbo executors bá kuna, ìkùnà tó kẹ́yìn ni a máa dá padà. Clie
 }
 ```
 
-Executor lè mú ọ̀pọ̀ independent calls jáde nínú response kan. Àwọn dependent calls ni a
-máa bójú tó ní àwọn client tool-result turns tó tẹ̀ lé e, nígbà tí planner yóò ṣe àyẹ̀wò gbogbo result.
-Ìye àìròtẹ́lẹ̀ ti `maxToolRounds` jẹ́ `8`, ó sì gba `1`–`32`; nígbà tí a bá dé iye náà, planner gbọ́dọ̀
-mú ìdáhùn ìkẹyìn tó dára jù lọ tó wà jáde. A máa ń fi àwọn internal planner decisions pamọ́ sínú buffer, nígbà tí
-client-facing response tí a yàn máa ń pa streaming preference àkọ́kọ́ mọ́.
+Executor lè gbé ọ̀pọ̀lọpọ̀ ìpè tó dá dúró níbẹ̀ jáde nínú ìdáhùn kan. Àwọn ìpè tó sinmi lórí ara wọn ni a máa ń ṣètọ́jú nínú àwọn ìyípadà ìyọrísí irinṣẹ́ oníbàárà tó tẹ̀ lé e, pẹ̀lú planner tó ń ṣàyẹ̀wò gbogbo ìyọrísí. `maxToolRounds` máa ń wà ní `8` gẹ́gẹ́ bí àìyípadà, ó sì gba `1`–`32`; nígbà tí ó bá dé ibẹ̀, planner gbọ́dọ̀ gbé ìdáhùn tó kẹ́yìn tó dára jù lọ jáde. Àwọn ìpinnu planner inú ilé ni a máa ń fi pamọ́ (buffered), nígbà tí ìdáhùn tó dojú kọ oníbàárà tí a yàn máa ń pa ìfẹ́-ọkàn ṣiṣan (streaming preference) àtìbẹ̀rẹ̀pẹ̀rẹ̀ mọ́.
 
 ### `round-robin` sticky batch àti account expansion
 

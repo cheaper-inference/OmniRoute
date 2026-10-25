@@ -328,11 +328,13 @@ Kombinační engine OmniRoute podporuje **20 strategií směrování** (deklarov
 
 Pro striktní rotaci použijte `round-robin`; stejné váhy u strategie `weighted` zajišťují statistické — nikoli striktní — vyvážení.
 
-### Režim agentního pipeline
+### Režim agentní pipeline
 
-Kombinace `pipeline` s alespoň dvěma modely může aktivovat směrování plánovač/executor pomocí `config.agenticOrchestration.enabled`. První cíl zajišťuje plánování a finální odpovědi; druhý cíl generuje volání nástrojů v nativním formátu klienta. OmniRoute rozpoznává pokračování s výsledky nástrojů podle protokolu požadavku, ptá se plánovače, zda je potřeba další kolo nástrojů, a dynamicky určuje, zda bude finálním krokem pro klienta executor, nebo plánovač.
+Kombinace `pipeline` s alespoň dvěma modely se může rozhodnout pro směrování plánovač/vykonavatel (planner/executor) pomocí `config.agenticOrchestration.enabled`. První cíl má na starosti plánování a konečné odpovědi; druhý cíl vysílá volání nástrojů nativní pro klienta. OmniRoute detekuje pokračování výsledků nástrojů z protokolu požadavků, zeptá se plánovače, zda je potřeba další kolo nástrojů, a dynamicky určí buď vykonavatele, nebo plánovače jako konečný krok směřující ke klientovi.
 
-Další modely za druhým cílem jsou seřazené záložní executory. Neúspěšná odpověď HTTP nebo výjimka přenosu způsobí přechod k dalšímu executoru, přičemž se zachová stejné rozhodnutí plánovače a nativní nástroje, ale použije se vlastní výzva pro daný krok a vyřešené připojení tohoto executoru. První úspěšná odpověď je vrácena beze změny, včetně streamování SSE; selhání po zahájení úspěšného streamu zde nelze opakovat. Pokud selžou všechny executory, vrátí se poslední selhání. Přerušení ze strany klienta zastaví odesílání.
+Při pokračování výsledků nástrojů OmniRoute také zastaví provádění, pokud dvě po sobě jdoucí dokončená kola opakují stejná volání nástrojů se nezměněnými výsledky, nebo pokud každý explicitně označený výsledek ve dvou po sobě jdoucích kolech selhal. Změněné výsledky umožňují opakovaná volání (například dotazování). Ochranný mechanismus se resetuje při novém požadavku uživatele, seskupuje paralelní volání do jednoho kola a podporuje historie Anthropic, Chat Completions, Responses a Gemini. Plánovač obdrží důvod a vlastní konečnou odpověď, i když si vyžádá další kolo nástrojů.
+
+Další modely za druhým cílem jsou seřazené zálohy vykonavatele. Neúspěšná HTTP odpověď nebo výjimka přenosu postoupí k dalšímu vykonavateli, přičemž si nese stejné rozhodnutí plánovače a nativní nástroje, ale vlastní prompt kroku a vyřešené připojení daného vykonavatele. První úspěšná odpověď je vrácena beze změny, včetně SSE streamování; selhání po zahájení úspěšného streamu zde nelze opakovat. Pokud všichni vykonavatelé selžou, je vráceno poslední selhání. Přerušení ze strany klienta zastaví odesílání.
 
 ```json
 {
@@ -344,7 +346,7 @@ Další modely za druhým cílem jsou seřazené záložní executory. Neúspě�
 }
 ```
 
-Executor může v jedné odpovědi vygenerovat několik nezávislých volání. Závislá volání se zpracovávají v pozdějších klientských kolech s výsledky nástrojů, přičemž plánovač kontroluje každý výsledek. Výchozí hodnota `maxToolRounds` je `8` a podporovaný rozsah je `1`–`32`; po dosažení limitu musí plánovač vytvořit nejlepší dostupnou finální odpověď. Interní rozhodnutí plánovače se ukládají do vyrovnávací paměti, zatímco vybraná odpověď určená klientovi zachovává původní preferenci streamování.
+Vykonavatel může v jedné odpovědi vyslat více nezávislých volání. Závislá volání jsou zpracována v pozdějších tazích výsledků nástrojů klienta, přičemž plánovač kontroluje každý výsledek. `maxToolRounds` má výchozí hodnotu `8` a přijímá `1`–`32`; jakmile je dosaženo limitu, plánovač musí vytvořit nejlepší dostupnou konečnou odpověď. Interní rozhodnutí plánovače jsou ukládána do vyrovnávací paměti, zatímco vybraná odpověď směřující ke klientovi zachovává původní preferenci streamování.
 
 ### Lepivé dávky `round-robin` a rozšíření podle účtů
 

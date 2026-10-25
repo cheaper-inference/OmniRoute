@@ -330,21 +330,13 @@ OmniRouteov kombinovani mehanizam podržava **20 strategija usmjeravanja** (dekl
 Za strogu rotaciju koristite `round-robin`; jednake težine uz `weighted` daju statističku — ne
 strogu — ravnotežu.
 
-### Način rada agentskog pipelinea
+### Agentni pipeline mod
 
-`pipeline` kombinacija s najmanje dva modela može omogućiti usmjeravanje planer/izvršilac pomoću
-`config.agenticOrchestration.enabled`. Prvi cilj je zadužen za planiranje i konačne odgovore;
-drugi cilj šalje pozive alata u izvornom formatu klijenta. OmniRoute prepoznaje nastavke s
-rezultatima alata na osnovu protokola zahtjeva, pita planer da li je potreban još jedan krug
-korištenja alata te dinamički određuje da li će izvršilac ili planer biti završni korak
-prema klijentu.
+`pipeline` kombinacija sa najmanje dva modela može se odlučiti za usmjeravanje (routing) planer/izvršilac pomoću `config.agenticOrchestration.enabled`. Prvi cilj (target) posjeduje planiranje i konačne odgovore; drugi cilj emituje pozive alata izvornih za klijenta (client-native tool calls). OmniRoute detektuje nastavke rezultata alata iz protokola zahtjeva, pita planera da li je potreban još jedan krug alata, i dinamički čini ili izvršioca ili planera konačnim korakom okrenutim ka klijentu.
 
-Dodatni modeli nakon drugog cilja predstavljaju redoslijedom poredane rezervne izvršioce. Neuspješan
-HTTP odgovor ili izuzetak u prijenosu prebacuje obradu na sljedećeg izvršioca, uz zadržavanje
-iste odluke planera i izvornih alata, ali korištenje vlastitog prompta koraka tog izvršioca i
-razriješene veze. Prvi uspješan odgovor vraća se neizmijenjen, uključujući
-SSE streaming; neuspjesi nakon početka uspješnog streama ovdje se ne mogu ponovo pokušati.
-Ako svi izvršioci ne uspiju, vraća se posljednji neuspjeh. Prekidi od strane klijenta zaustavljaju slanje.
+Kod nastavaka rezultata alata, OmniRoute takođe zaustavlja izvršavanje kada dva uzastopna završena kruga ponavljaju iste pozive alata sa nepromijenjenim rezultatima, ili kada svaki eksplicitno označeni rezultat u dva uzastopna kruga ne uspije. Promijenjeni rezultati dozvoljavaju ponovljene pozive (na primjer, polling). Zaštita (guard) se resetuje na novi korisnički zahtjev, grupiše paralelne pozive u jedan krug, i podržava Anthropic, Chat Completions, Responses i Gemini historije. Planer prima razlog i posjeduje konačan odgovor čak i ako zahtijeva još jedan krug alata.
+
+Dodatni modeli nakon drugog cilja su poredane rezervne kopije izvršioca. Neuspjeli HTTP odgovor ili izuzetak transporta napreduje do sljedećeg izvršioca, noseći istu odluku planera i izvorne alate, ali prompt koraka tog izvršioca i razriješenu konekciju. Prvi uspješan odgovor se vraća nepromijenjen, uključujući SSE streaming; neuspjesi nakon početka uspješnog streama se ovdje ne mogu ponovo pokušati. Ako svi izvršioci ne uspiju, vraća se posljednji neuspjeh. Prekidi klijenta zaustavljaju otpremanje (dispatch).
 
 ```json
 {
@@ -356,11 +348,7 @@ Ako svi izvršioci ne uspiju, vraća se posljednji neuspjeh. Prekidi od strane k
 }
 ```
 
-Izvršilac može poslati više nezavisnih poziva u jednom odgovoru. Zavisni pozivi
-obrađuju se u kasnijim klijentskim iteracijama s rezultatima alata, pri čemu planer pregledava svaki rezultat.
-`maxToolRounds` podrazumijevano iznosi `8` i prihvata vrijednosti `1`–`32`; nakon dostizanja ograničenja planer mora
-generisati najbolji dostupni konačni odgovor. Interne odluke planera smještaju se u međuspremnik, dok
-odabrani odgovor prema klijentu zadržava izvornu postavku streaminga.
+Izvršilac može emitovati više nezavisnih poziva u jednom odgovoru. Zavisni pozivi se obrađuju u kasnijim krugovima rezultata alata klijenta, pri čemu planer pregleda svaki rezultat. `maxToolRounds` je podrazumijevano `8` i prihvata `1`–`32`; kada se dostigne, planer mora proizvesti najbolji dostupni konačni odgovor. Interne odluke planera su baferovane, dok odabrani odgovor okrenut klijentu zadržava originalnu preferenciju streaminga.
 
 ### `round-robin` ljepljive grupe i proširenje računa
 

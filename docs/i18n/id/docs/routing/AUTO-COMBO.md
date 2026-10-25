@@ -329,21 +329,13 @@ Mesin kombo OmniRoute mendukung **20 strategi perutean** (dideklarasikan dalam `
 Untuk rotasi ketat, gunakan `round-robin`; bobot yang sama pada `weighted` menghasilkan keseimbangan statistik — bukan
 ketat.
 
-### Mode pipeline agentik
+### Mode pipeline agentic
 
-Kombinasi `pipeline` dengan setidaknya dua model dapat mengaktifkan perutean perencana/eksekutor melalui
-`config.agenticOrchestration.enabled`. Target pertama menangani perencanaan dan jawaban akhir;
-target kedua menghasilkan pemanggilan alat native klien. OmniRoute mendeteksi kelanjutan hasil alat
-dari protokol permintaan, menanyakan kepada perencana apakah putaran alat lain
-diperlukan, lalu secara dinamis menjadikan eksekutor atau perencana sebagai langkah akhir
-yang ditampilkan kepada klien.
+Kombo `pipeline` dengan setidaknya dua model dapat memilih perutean planner/executor dengan `config.agenticOrchestration.enabled`. Target pertama memiliki perencanaan dan jawaban akhir; target kedua memancarkan panggilan alat (tool calls) asli klien. OmniRoute mendeteksi kelanjutan hasil alat dari protokol permintaan, menanyakan kepada planner apakah putaran alat lain diperlukan, dan secara dinamis menjadikan executor atau planner sebagai langkah akhir yang menghadap klien.
 
-Model tambahan setelah target kedua diurutkan sebagai cadangan eksekutor. Respons
-HTTP yang gagal atau pengecualian transportasi akan beralih ke eksekutor berikutnya, dengan membawa
-keputusan perencana dan alat native yang sama, tetapi menggunakan prompt langkah milik eksekutor tersebut dan
-koneksi yang telah di-resolve. Respons pertama yang berhasil dikembalikan tanpa perubahan, termasuk
-streaming SSE; kegagalan setelah stream yang berhasil dimulai tidak dapat dicoba ulang di sini.
-Jika semua eksekutor gagal, kegagalan terakhir akan dikembalikan. Pembatalan oleh klien menghentikan pengiriman.
+Pada kelanjutan hasil alat, OmniRoute juga menghentikan eksekusi ketika dua putaran selesai berturut-turut mengulangi panggilan alat yang sama dengan hasil yang tidak berubah, atau ketika setiap hasil yang ditandai secara eksplisit dalam dua putaran berturut-turut gagal. Hasil yang berubah mengizinkan panggilan berulang (misalnya, polling). Penjaga (guard) diatur ulang pada permintaan pengguna baru, mengelompokkan panggilan paralel ke dalam satu putaran, dan mendukung riwayat Anthropic, Chat Completions, Responses, dan Gemini. Planner menerima alasan dan memiliki jawaban akhir meskipun meminta putaran alat lain.
+
+Model tambahan setelah target kedua adalah cadangan executor yang diurutkan. Respons HTTP yang gagal atau pengecualian transport berlanjut ke executor berikutnya, membawa keputusan planner dan alat asli yang sama tetapi dengan prompt langkah dan koneksi yang diselesaikan milik executor tersebut. Respons sukses pertama dikembalikan tanpa perubahan, termasuk streaming SSE; kegagalan setelah streaming sukses dimulai tidak dapat dicoba ulang di sini. Jika semua executor gagal, kegagalan terakhir dikembalikan. Pembatalan klien menghentikan pengiriman.
 
 ```json
 {
@@ -355,11 +347,7 @@ Jika semua eksekutor gagal, kegagalan terakhir akan dikembalikan. Pembatalan ole
 }
 ```
 
-Eksekutor dapat menghasilkan beberapa pemanggilan independen dalam satu respons. Pemanggilan yang saling bergantung
-ditangani pada giliran hasil alat klien berikutnya, dengan perencana meninjau setiap hasil.
-`maxToolRounds` memiliki nilai default `8` dan menerima `1`–`32`; setelah batas tercapai, perencana harus
-menghasilkan jawaban akhir terbaik yang tersedia. Keputusan internal perencana disimpan dalam buffer, sementara
-respons terpilih yang ditampilkan kepada klien mempertahankan preferensi streaming asli.
+Executor dapat memancarkan beberapa panggilan independen dalam satu respons. Panggilan dependen ditangani dalam giliran hasil alat klien berikutnya, dengan planner meninjau setiap hasil. `maxToolRounds` defaultnya adalah `8` dan menerima `1`–`32`; setelah tercapai, planner harus menghasilkan jawaban akhir terbaik yang tersedia. Keputusan planner internal di-buffer, sementara respons yang dipilih yang menghadap klien mempertahankan preferensi streaming asli.
 
 ### Batch sticky `round-robin` dan perluasan akun
 

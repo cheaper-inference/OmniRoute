@@ -330,11 +330,13 @@ O motor de combinações do OmniRoute suporta **20 estratégias de encaminhament
 
 Para uma rotação estrita, utilize `round-robin`; ponderações iguais em `weighted` proporcionam um equilíbrio estatístico — não estrito.
 
-### Modo de pipeline agêntico
+### Modo de pipeline agentic
 
-Um combo `pipeline` com pelo menos dois modelos pode ativar o encaminhamento entre planeador e executor através de `config.agenticOrchestration.enabled`. O primeiro destino é responsável pelo planeamento e pelas respostas finais; o segundo destino emite chamadas de ferramentas nativas do cliente. O OmniRoute deteta continuações de resultados de ferramentas a partir do protocolo do pedido, pergunta ao planeador se é necessária outra ronda de ferramentas e, dinamicamente, define o executor ou o planeador como o passo final apresentado ao cliente.
+Um combo `pipeline` com pelo menos dois modelos pode optar pelo encaminhamento planeador/executor com `config.agenticOrchestration.enabled`. O primeiro alvo é responsável pelo planeamento e pelas respostas finais; o segundo alvo emite chamadas de ferramentas nativas do cliente. O OmniRoute deteta continuações de resultados de ferramentas a partir do protocolo de pedido, pergunta ao planeador se é necessária outra ronda de ferramentas e torna dinamicamente o executor ou o planeador o passo final voltado para o cliente.
 
-Os modelos adicionais após o segundo destino são cópias de segurança ordenadas do executor. Uma resposta HTTP com falha ou uma exceção de transporte faz avançar para o executor seguinte, mantendo a mesma decisão do planeador e as mesmas ferramentas nativas, mas utilizando o próprio prompt de passo e a ligação resolvida desse executor. A primeira resposta bem-sucedida é devolvida sem alterações, incluindo streaming SSE; as falhas após o início de um stream bem-sucedido não podem ser repetidas aqui. Se todos os executores falharem, é devolvida a última falha. Os cancelamentos do cliente interrompem o encaminhamento.
+Em continuações de resultados de ferramentas, o OmniRoute também interrompe a execução quando duas rondas concluídas consecutivas repetem as mesmas chamadas de ferramentas com resultados inalterados, ou quando todos os resultados explicitamente marcados em duas rondas consecutivas falharam. Resultados alterados permitem chamadas repetidas (por exemplo, polling). O mecanismo de proteção reinicia num novo pedido do utilizador, agrupa chamadas paralelas numa única ronda e suporta históricos Anthropic, Chat Completions, Responses e Gemini. O planeador recebe o motivo e é responsável pela resposta final, mesmo que solicite outra ronda de ferramentas.
+
+Modelos adicionais após o segundo alvo são backups de executor ordenados. Uma resposta HTTP falhada ou uma exceção de transporte avança para o executor seguinte, transportando a mesma decisão do planeador e ferramentas nativas, mas o prompt de passo e a ligação resolvida desse executor. A primeira resposta bem-sucedida é devolvida inalterada, incluindo streaming SSE; falhas após o início de um stream bem-sucedido não podem ser tentadas novamente aqui. Se todos os executores falharem, a última falha é devolvida. Abortos do cliente interrompem o envio.
 
 ```json
 {
@@ -346,7 +348,7 @@ Os modelos adicionais após o segundo destino são cópias de segurança ordenad
 }
 ```
 
-O executor pode emitir várias chamadas independentes numa única resposta. As chamadas dependentes são processadas em turnos posteriores de resultados de ferramentas do cliente, com o planeador a rever cada resultado. `maxToolRounds` tem o valor predefinido `8` e aceita `1`–`32`; uma vez atingido o limite, o planeador tem de produzir a melhor resposta final disponível. As decisões internas do planeador são colocadas em memória intermédia, enquanto a resposta selecionada e apresentada ao cliente preserva a preferência de streaming original.
+O executor pode emitir múltiplas chamadas independentes numa única resposta. Chamadas dependentes são processadas em turnos de resultados de ferramentas do cliente posteriores, com o planeador a rever cada resultado. `maxToolRounds` tem o valor predefinido de `8` e aceita `1`–`32`; uma vez atingido, o planeador deve produzir a melhor resposta final disponível. As decisões internas do planeador são armazenadas em buffer, enquanto a resposta selecionada voltada para o cliente preserva a preferência de streaming original.
 
 ### Lote persistente e expansão de contas de `round-robin`
 

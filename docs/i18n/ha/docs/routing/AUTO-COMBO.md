@@ -325,20 +325,13 @@ Injin haɗa-hadar OmniRoute yana goyon bayan **dabarun turowa guda 20** (waɗand
 Don juyawa mai tsauri yi amfani da `round-robin`; nauyi iri ɗaya a kan `weighted` yana ba da daidaito na ƙididdiga — ba
 mai tsauri ba.
 
-### Yanayin bututun wakili
+### Yanayin "Agentic pipeline"
 
-Haɗin `pipeline` mai aƙalla samfura biyu zai iya kunna rabawar mai tsarawa/mai aiwatarwa ta hanyar
-`config.agenticOrchestration.enabled`. Manufa ta farko ce ke da alhakin tsarawa da amsoshin ƙarshe;
-manufa ta biyu tana fitar da kiran kayan aiki na asalin abokin ciniki. OmniRoute yana gano ci gaban
-sakamakon kayan aiki daga ƙa'idar buƙatar, yana tambayar mai tsarawa ko ana buƙatar wani zagayen kayan aiki,
-sannan a sauƙaƙe yana sanya ko dai mai aiwatarwa ko mai tsarawa ya zama matakin ƙarshe da abokin ciniki zai gani.
+Wani "combo" na `pipeline` tare da aƙalla samfura guda biyu na iya zaɓar hanyar "planner/executor routing" tare da `config.agenticOrchestration.enabled`. Manufa ta farko tana kula da tsarawa da amsoshin ƙarshe; manufa ta biyu tana fitar da kiran kayan aiki na "client-native". OmniRoute yana gano ci gaban sakamakon kayan aiki daga yarjejeniyar buƙata, yana tambayar "planner" ko ana buƙatar wani zagaye na kayan aiki, kuma yana sanya ko dai "executor" ko "planner" a matsayin matakin ƙarshe da abokin ciniki zai gani.
 
-Ƙarin samfuran da ke bayan manufa ta biyu ana jera su a matsayin madadin masu aiwatarwa. Amsar
-HTTP da ta gaza ko keɓantacciyar matsalar sufuri tana matsawa zuwa mai aiwatarwa na gaba, tare da
-ɗaukar shawarar mai tsarawa iri ɗaya da kayan aiki na asali, amma da umarnin matakin wannan mai aiwatarwar da
-haɗin da aka warware. Ana dawo da amsa ta farko da ta yi nasara ba tare da canji ba, ciki har da
-watsawar SSE; gazawar da ta faru bayan fara watsa bayanan da ya yi nasara ba za a iya sake gwadawa a nan ba.
-Idan duk masu aiwatarwa sun gaza, ana dawo da gazawa ta ƙarshe. Katsewar abokin ciniki yana dakatar da aikawa.
+A kan ci gaban sakamakon kayan aiki, OmniRoute kuma yana dakatar da aiwatarwa lokacin da zagaye biyu da aka kammala a jere suka maimaita kiran kayan aiki iri ɗaya tare da sakamako marasa canzawa, ko lokacin da kowane sakamako da aka yiwa alama a fili a cikin zagaye biyu a jere ya gaza. Sakamakon da aka canza yana ba da damar maimaita kiran (misali, "polling"). "Guard" ɗin yana sake saita kansa akan sabuwar buƙatar mai amfani, yana haɗa kiran da ke gudana a lokaci guda zuwa zagaye ɗaya, kuma yana goyan bayan tarihin Anthropic, Chat Completions, Responses da Gemini. "Planner" yana karɓar dalilin kuma yana da alhakin amsar ƙarshe koda kuwa ya nemi wani zagaye na kayan aiki.
+
+Ƙarin samfura bayan manufa ta biyu su ne madadin "executor" da aka tsara. Amsar HTTP da ta gaza ko keɓancewar sufuri tana ci gaba zuwa "executor" na gaba, tana ɗauke da shawarar "planner" iri ɗaya da kayan aiki na asali amma tare da "step prompt" na wancan "executor" da haɗin da aka warware. Amsar farko da ta yi nasara ana mayar da ita ba tare da canji ba, gami da "SSE streaming"; gazawa bayan an fara "stream" mai nasara ba za a iya sake gwada su a nan ba. Idan duk "executors" sun gaza, ana mayar da gazawar ƙarshe. "Client aborts" suna dakatar da aikawa.
 
 ```json
 {
@@ -350,11 +343,7 @@ Idan duk masu aiwatarwa sun gaza, ana dawo da gazawa ta ƙarshe. Katsewar abokin
 }
 ```
 
-Mai aiwatarwa na iya fitar da kiraye-kiraye masu zaman kansu da yawa a cikin amsa ɗaya. Kiraye-kirayen da suka dogara da juna
-ana sarrafa su a zagayen sakamakon kayan aiki na abokin ciniki na gaba, inda mai tsarawa yake duba kowane sakamako.
-`maxToolRounds` yana amfani da `8` a matsayin tsoho kuma yana karɓar `1`–`32`; da zarar an kai iyakar, dole ne mai tsarawa
-ya samar da mafi kyawun amsar ƙarshe da ake da ita. Ana ajiyar shawarwarin mai tsarawa na ciki, yayin da
-amsar da aka zaɓa don abokin ciniki take kiyaye zaɓin watsawa na asali.
+"Executor" na iya fitar da kiran da ba su dogara ga juna ba da yawa a cikin amsa ɗaya. Kiran da suka dogara ga juna ana sarrafa su a cikin juyawar sakamakon kayan aiki na abokin ciniki na gaba, tare da "planner" yana duba kowane sakamako. `maxToolRounds` yana da tsohon saiti na `8` kuma yana karɓar `1`–`32`; da zarar an kai ga wannan, "planner" dole ne ya samar da mafi kyawun amsar ƙarshe da ake da ita. Shawarar "planner" na ciki ana ajiye su a cikin "buffer", yayin da amsar da aka zaɓa wacce abokin ciniki zai gani tana kiyaye zaɓin "streaming" na asali.
 
 ### Rukunin manne na `round-robin` da faɗaɗa asusu
 

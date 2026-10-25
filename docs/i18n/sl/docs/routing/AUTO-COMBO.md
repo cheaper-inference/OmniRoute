@@ -325,20 +325,13 @@ Mehanizem kombinacij OmniRoute podpira **20 strategij usmerjanja** (deklariranih
 
 Za strogo rotacijo uporabite `round-robin`; enake uteži pri `weighted` zagotavljajo statistično — ne pa strogo — uravnoteženost.
 
-### Način agentskega cevovoda
+### Način agentic pipeline
 
-Kombinacija `pipeline` z vsaj dvema modeloma lahko vključi usmerjanje načrtovalca/izvajalca z možnostjo
-`config.agenticOrchestration.enabled`. Prvi cilj je odgovoren za načrtovanje in končne odgovore;
-drugi cilj oddaja klice orodij v izvorni obliki odjemalca. OmniRoute zazna nadaljevanja z rezultati
-orodij iz protokola zahteve, vpraša načrtovalca, ali je potreben še en krog uporabe orodij,
-in dinamično določi bodisi izvajalca bodisi načrtovalca kot zadnji korak, prikazan odjemalcu.
+Kombinacija `pipeline` z vsaj dvema modeloma se lahko odloči za usmerjanje načrtovalec/izvajalec s `config.agenticOrchestration.enabled`. Prvi cilj upravlja načrtovanje in končne odgovore; drugi cilj oddaja izvorne orodne klice odjemalca. OmniRoute zazna nadaljevanja rezultatov orodij iz protokola zahteve, vpraša načrtovalca, ali je potreben še en krog orodij, in dinamično določi bodisi izvajalca bodisi načrtovalca kot končni korak, ki je viden odjemalcu.
 
-Dodatni modeli za drugim ciljem so razvrščeni kot rezervni izvajalci. Neuspešen
-odziv HTTP ali izjema pri prenosu povzroči prehod na naslednjega izvajalca, pri čemer se
-ohranijo ista odločitev načrtovalca in izvorna orodja, uporabijo pa se lasten poziv za korak
-tega izvajalca in razrešena povezava. Prvi uspešen odziv je vrnjen nespremenjen, vključno
-s pretakanjem SSE; napak po začetku uspešnega pretakanja tukaj ni mogoče znova poskusiti.
-Če odpovejo vsi izvajalci, je vrnjena zadnja napaka. Prekinitve odjemalca ustavijo razpošiljanje.
+Pri nadaljevanjih rezultatov orodij OmniRoute tudi ustavi izvajanje, ko dva zaporedna zaključena kroga ponovita iste klice orodij z nespremenjenimi rezultati ali ko vsak izrecno označen rezultat v dveh zaporednih krogih ne uspe. Spremenjeni rezultati dovoljujejo ponovljene klice (na primer, anketiranje). Varovalo se ponastavi ob novi uporabniški zahtevi, združi vzporedne klice v en krog in podpira zgodovine Anthropic, Chat Completions, Responses in Gemini. Načrtovalec prejme razlog in upravlja končni odgovor, tudi če zahteva še en krog orodij.
+
+Dodatni modeli za drugim ciljem so urejene varnostne kopije izvajalca. Neuspešen HTTP odziv ali transportna izjema napreduje do naslednjega izvajalca, pri čemer nosi isto odločitev načrtovalca in izvorna orodja, vendar z lastnim pozivom koraka in razrešeno povezavo tega izvajalca. Prvi uspešen odziv se vrne nespremenjen, vključno s SSE pretakanjem; napak po začetku uspešnega pretoka tukaj ni mogoče ponovno poskusiti. Če vsi izvajalci odpovejo, se vrne zadnja napaka. Prekinitve s strani odjemalca ustavijo pošiljanje.
 
 ```json
 {
@@ -350,11 +343,7 @@ s pretakanjem SSE; napak po začetku uspešnega pretakanja tukaj ni mogoče znov
 }
 ```
 
-Izvajalec lahko v enem odzivu odda več neodvisnih klicev. Odvisni klici so
-obravnavani v poznejših odjemalčevih korakih z rezultati orodij, načrtovalec pa pregleda vsak rezultat.
-`maxToolRounds` ima privzeto vrednost `8` in sprejema vrednosti `1`–`32`; ko je meja dosežena, mora
-načrtovalec pripraviti najboljši razpoložljivi končni odgovor. Notranje odločitve načrtovalca se medpomnijo,
-izbrani odziv, prikazan odjemalcu, pa ohrani prvotno nastavitev pretakanja.
+Izvajalec lahko v enem odzivu odda več neodvisnih klicev. Odvisni klici se obravnavajo v kasnejših obratih rezultatov orodij odjemalca, pri čemer načrtovalec pregleda vsak rezultat. `maxToolRounds` ima privzeto vrednost `8` in sprejema `1`–`32`; ko je dosežena, mora načrtovalec pripraviti najboljši možni končni odgovor. Notranje odločitve načrtovalca so medpomnjene, medtem ko izbrani odziv, viden odjemalcu, ohranja prvotno nastavitev pretakanja.
 
 ### Lepljivi paketi `round-robin` in razširitev računov
 

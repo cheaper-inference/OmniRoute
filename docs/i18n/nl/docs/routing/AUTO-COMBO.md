@@ -329,20 +329,13 @@ De combo-engine van OmniRoute ondersteunt **20 routeringsstrategieën** (gedecla
 Gebruik voor strikte rotatie `round-robin`; gelijke gewichten bij `weighted` zorgen voor een statistische — niet
 strikte — verdeling.
 
-### Agentische pijplijnmodus
+### Agentic pipeline-modus
 
-Een `pipeline`-combinatie met ten minste twee modellen kan planner-/executorroutering inschakelen met
-`config.agenticOrchestration.enabled`. Het eerste doelmodel verzorgt de planning en definitieve antwoorden;
-het tweede doelmodel genereert client-native toolaanroepen. OmniRoute detecteert voortzettingen met
-toolresultaten vanuit het aanvraagprotocol, vraagt de planner of er nog een toolronde nodig is
-en maakt dynamisch de executor of planner tot de laatste stap die naar de client wordt gestuurd.
+Een `pipeline`-combo met ten minste twee modellen kan kiezen voor planner/executor-routing met `config.agenticOrchestration.enabled`. Het eerste doel beheert de planning en definitieve antwoorden; het tweede doel verstuurt client-native tool-aanroepen. OmniRoute detecteert tool-resultaat-continuaties vanuit het request-protocol, vraagt de planner of er nog een tool-ronde nodig is, en maakt dynamisch ofwel de executor of de planner de client-gerichte laatste stap.
 
-Aanvullende modellen na het tweede doelmodel zijn geordende reserve-executors. Bij een mislukte
-HTTP-respons of transportuitzondering wordt doorgegaan naar de volgende executor, met behoud van
-dezelfde plannerbeslissing en native tools, maar met de eigen stapprompt en
-opgeloste verbinding van die executor. De eerste geslaagde respons wordt ongewijzigd geretourneerd, inclusief
-SSE-streaming; fouten nadat een geslaagde stream is gestart, kunnen hier niet opnieuw worden geprobeerd.
-Als alle executors mislukken, wordt de laatste fout geretourneerd. Afbrekingen door de client stoppen de verzending.
+Bij tool-resultaat-continuaties stopt OmniRoute ook de uitvoering wanneer twee opeenvolgende voltooide rondes dezelfde tool-aanroepen herhalen met ongewijzigde resultaten, of wanneer elk expliciet gemarkeerd resultaat in twee opeenvolgende rondes is mislukt. Gewijzigde resultaten staan herhaalde aanroepen toe (bijvoorbeeld polling). De guard reset bij een nieuw gebruikersverzoek, groepeert parallelle aanroepen in één ronde, en ondersteunt Anthropic, Chat Completions, Responses en Gemini-geschiedenissen. De planner ontvangt de reden en beheert het definitieve antwoord, zelfs als deze om nog een tool-ronde verzoekt.
+
+Aanvullende modellen na het tweede doel zijn geordende executor-back-ups. Een mislukte HTTP-respons of transport-exceptie gaat door naar de volgende executor, met behoud van dezelfde planner-beslissing en native tools, maar met de eigen step-prompt en opgeloste verbinding van die executor. De eerste succesvolle respons wordt ongewijzigd geretourneerd, inclusief SSE-streaming; fouten nadat een succesvolle stream is gestart, kunnen hier niet opnieuw worden geprobeerd. Als alle executors falen, wordt de laatste fout geretourneerd. Client-aborts stoppen de dispatch.
 
 ```json
 {
@@ -354,11 +347,7 @@ Als alle executors mislukken, wordt de laatste fout geretourneerd. Afbrekingen d
 }
 ```
 
-De executor kan in één respons meerdere onafhankelijke aanroepen genereren. Afhankelijke aanroepen worden
-afgehandeld in latere clientrondes met toolresultaten, waarbij de planner elk resultaat beoordeelt.
-`maxToolRounds` is standaard `8` en accepteert `1`–`32`; zodra deze limiet is bereikt, moet de planner
-het best beschikbare definitieve antwoord produceren. Interne plannerbeslissingen worden gebufferd, terwijl
-de geselecteerde, naar de client gestuurde respons de oorspronkelijke streamingvoorkeur behoudt.
+De executor kan meerdere onafhankelijke aanroepen in één respons versturen. Afhankelijke aanroepen worden afgehandeld in latere client tool-resultaat-beurten, waarbij de planner elk resultaat beoordeelt. `maxToolRounds` staat standaard op `8` en accepteert `1`–`32`; zodra dit is bereikt, moet de planner het best beschikbare definitieve antwoord produceren. Interne planner-beslissingen worden gebufferd, terwijl de geselecteerde client-gerichte respons de oorspronkelijke streaming-voorkeur behoudt.
 
 ### Sticky batches en accountuitbreiding voor `round-robin`
 

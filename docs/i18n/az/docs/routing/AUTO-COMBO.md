@@ -334,21 +334,13 @@ OmniRoute-un kombinasiya mühərriki **20 marşrutlaşdırma strategiyasını** 
 
 Sərt rotasiya üçün `round-robin` istifadə edin; `weighted` strategiyasında bərabər çəkilər statistik — sərt deyil — balans təmin edir.
 
-### Agent əsaslı pipeline rejimi
+### Agentic pipeline rejimi
 
-Ən azı iki modeli olan `pipeline` kombinasiyası
-`config.agenticOrchestration.enabled` vasitəsilə planlaşdırıcı/işə salıcı marşrutlaşdırmasını aktivləşdirə bilər. Birinci hədəf planlaşdırmaya və yekun cavablara cavabdehdir;
-ikinci hədəf isə müştərinin doğma formatında alət çağırışları yaradır. OmniRoute sorğu protokolundan alət nəticələrinin
-davamlarını aşkarlayır, planlaşdırıcıdan başqa bir alət raundunun lazım olub-olmadığını
-soruşur və dinamik şəkildə ya işə salıcını, ya da planlaşdırıcını müştəriyə təqdim olunan yekun
-mərhələyə çevirir.
+Ən azı iki modeli olan `pipeline` kombinasiyası `config.agenticOrchestration.enabled` ilə planlayıcı/icraçı marşrutlaşdırmasını seçə bilər. İlk hədəf planlaşdırma və yekun cavabları idarə edir; ikinci hədəf isə müştəri-yerli (client-native) alət çağırışlarını həyata keçirir. OmniRoute sorğu protokolundan alət nəticəsinin davamını aşkar edir, planlayıcıdan başqa bir alət dövrəsinin lazım olub-olmadığını soruşur və dinamik olaraq icraçını və ya planlayıcını müştəriyə yönəlmiş yekun addım kimi təyin edir.
 
-İkinci hədəfdən sonrakı əlavə modellər ardıcıllıqla işə salıcının ehtiyat variantlarıdır. Uğursuz
-HTTP cavabı və ya nəqliyyat istisnası növbəti işə salıcıya keçir və bu zaman
-eyni planlaşdırıcı qərarı və doğma alətlər saxlanılır, lakin həmin işə salıcının öz mərhələ sorğusu və
-müəyyən edilmiş bağlantısı istifadə olunur. İlk uğurlu cavab dəyişdirilmədən, o cümlədən
-SSE axını ilə birlikdə qaytarılır; uğurlu axın başladıqdan sonrakı xətaları burada təkrar sınamaq
-mümkün deyil. Bütün işə salıcılar uğursuz olarsa, son xəta qaytarılır. Müştərinin ləğvetmə sorğuları göndərişi dayandırır.
+Alət nəticəsinin davamında, OmniRoute həmçinin iki ardıcıl tamamlanmış dövrə eyni alət çağırışlarını dəyişməz nəticələrlə təkrarladıqda və ya iki ardıcıl dövrədə açıq şəkildə qeyd olunan hər bir nəticə uğursuz olduqda icranı dayandırır. Dəyişdirilmiş nəticələr təkrarlanan çağırışlara (məsələn, sorğulama/polling) icazə verir. Mühafizə mexanizmi (guard) yeni istifadəçi sorğusunda sıfırlanır, paralel çağırışları bir dövrədə qruplaşdırır və Anthropic, Chat Completions, Responses və Gemini tarixçələrini dəstəkləyir. Planlayıcı səbəbi qəbul edir və başqa bir alət dövrəsi tələb etsə belə, yekun cavaba sahiblik edir.
+
+İkinci hədəfdən sonrakı əlavə modellər sıralanmış icraçı ehtiyat nüsxələridir. Uğursuz HTTP cavabı və ya nəqliyyat istisnası (transport exception) növbəti icraçıya keçir, eyni planlayıcı qərarını və yerli alətləri daşıyır, lakin həmin icraçının öz addım sorğusunu (step prompt) və həll edilmiş bağlantısını istifadə edir. İlk uğurlu cavab, SSE axını da daxil olmaqla, dəyişdirilmədən qaytarılır; uğurlu axın başladıqdan sonra baş verən uğursuzluqlar burada yenidən cəhd edilə bilməz. Bütün icraçılar uğursuz olarsa, sonuncu uğursuzluq qaytarılır. Müştəri ləğvləri göndərişi dayandırır.
 
 ```json
 {
@@ -360,11 +352,7 @@ mümkün deyil. Bütün işə salıcılar uğursuz olarsa, son xəta qaytarılı
 }
 ```
 
-İşə salıcı bir cavabda bir neçə müstəqil çağırış yarada bilər. Asılı çağırışlar
-müştərinin sonrakı alət nəticəsi addımlarında işlənir və planlaşdırıcı hər nəticəni nəzərdən keçirir.
-`maxToolRounds` üçün standart dəyər `8`-dir və `1`–`32` qəbul edir; həddə çatdıqda planlaşdırıcı
-mövcud olan ən yaxşı yekun cavabı hazırlamalıdır. Daxili planlaşdırıcı qərarları buferlənir, seçilmiş
-müştəriyə təqdim olunan cavab isə ilkin axın seçimini qoruyur.
+İcraçı bir cavabda bir neçə müstəqil çağırış edə bilər. Asılı çağırışlar sonrakı müştəri alət-nəticə növbələrində idarə olunur və planlayıcı hər bir nəticəni nəzərdən keçirir. `maxToolRounds` standart olaraq `8`-dir və `1`–`32` aralığını qəbul edir; bu həddə çatdıqda, planlayıcı mövcud olan ən yaxşı yekun cavabı verməlidir. Daxili planlayıcı qərarları buferlənir, seçilmiş müştəriyə yönəlmiş cavab isə orijinal axın seçimini qoruyub saxlayır.
 
 ### `round-robin` yapışqan paketi və hesab genişləndirilməsi
 

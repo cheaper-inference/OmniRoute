@@ -333,24 +333,13 @@ OmniRoute'ning kombinatsiya mexanizmi **20 ta marshrutlash strategiyasini** qoʻ
 Qatʼiy rotatsiya uchun `round-robin`dan foydalaning; `weighted`da teng vaznlar qatʼiy
 emas, statistik muvozanatni taʼminlaydi.
 
-### Agentik konveyer rejimi
+### Agentic pipeline rejimi
 
-Kamida ikkita modelga ega `pipeline` kombinatsiyasi
-`config.agenticOrchestration.enabled` orqali rejalashtiruvchi/bajaruvchi marshrutlashini
-yoqishi mumkin. Birinchi maqsad rejalashtirish va yakuniy javoblar uchun javob beradi;
-ikkinchi maqsad mijozga xos vosita chaqiruvlarini chiqaradi. OmniRoute soʻrov
-protokolidan vosita natijasi davomlarini aniqlaydi, rejalashtiruvchidan yana bir vosita
-bosqichi kerak yoki kerak emasligini soʻraydi va mijozga koʻrinadigan yakuniy bosqich
-sifatida bajaruvchi yoki rejalashtiruvchini dinamik tarzda tanlaydi.
+Kamida ikkita modelga ega `pipeline` kombinatsiyasi `config.agenticOrchestration.enabled` yordamida rejalashtiruvchi/bajaruvchi (planner/executor) marshrutizatsiyasini tanlashi mumkin. Birinchi maqsad rejalashtirish va yakuniy javoblar uchun javobgardir; ikkinchi maqsad esa mijozga xos vosita chaqiruvlarini (client-native tool calls) amalga oshiradi. OmniRoute soʻrov protokolidan vosita natijalarining davomini aniqlaydi, rejalashtiruvchidan yana bir vosita bosqichi kerakligini soʻraydi va dinamik ravishda bajaruvchi yoki rejalashtiruvchini mijozga koʻrinadigan yakuniy qadamga aylantiradi.
 
-Ikkinchi maqsaddan keyingi qoʻshimcha modellar tartiblangan zaxira bajaruvchilardir.
-Muvaffaqiyatsiz HTTP javobi yoki transport istisnosi keyingi bajaruvchiga oʻtadi va
-ayni rejalashtiruvchi qarori hamda mahalliy vositalarni saqlab qoladi, biroq oʻsha
-bajaruvchining oʻz bosqich koʻrsatmasi va aniqlangan ulanishidan foydalanadi. Birinchi
-muvaffaqiyatli javob oʻzgartirilmasdan qaytariladi, jumladan SSE oqimi ham; muvaffaqiyatli
-oqim boshlangandan keyingi xatoliklarni bu yerda qayta urinish orqali bajarib boʻlmaydi.
-Agar barcha bajaruvchilar muvaffaqiyatsiz boʻlsa, oxirgi xatolik qaytariladi. Mijoz
-tomonidan bekor qilish joʻnatishni toʻxtatadi.
+Vosita natijalarining davomida, OmniRoute, shuningdek, ketma-ket ikki marta yakunlangan bosqichlar oʻzgarmagan natijalar bilan bir xil vosita chaqiruvlarini takrorlaganda yoki ketma-ket ikki bosqichdagi har bir aniq belgilangan natija muvaffaqiyatsizlikka uchraganda bajarishni toʻxtatadi. Oʻzgargan natijalar takroriy chaqiruvlarga (masalan, soʻrov oʻtkazish/polling) ruxsat beradi. Himoya mexanizmi (guard) yangi foydalanuvchi soʻrovida qayta oʻrnatiladi, parallel chaqiruvlarni bitta bosqichga guruhlaydi va Anthropic, Chat Completions, Responses va Gemini tarixlarini qoʻllab-quvvatlaydi. Rejalashtiruvchi sababni qabul qiladi va hatto boshqa vosita bosqichini talab qilsa ham, yakuniy javob uchun javobgar boʻladi.
+
+Ikkinchi maqsaddan keyingi qoʻshimcha modellar tartiblangan bajaruvchi zaxiralari hisoblanadi. Muvaffaqiyatsiz HTTP javobi yoki transport istisnosi keyingi bajaruvchiga oʻtadi, bunda xuddi shu rejalashtiruvchi qarori va mahalliy vositalar saqlanib qoladi, lekin oʻsha bajaruvchining oʻz qadam taklifi (step prompt) va hal qilingan ulanishi ishlatiladi. Birinchi muvaffaqiyatli javob oʻzgarishsiz qaytariladi, shu jumladan SSE oqimi (streaming); muvaffaqiyatli oqim boshlangandan keyingi nosozliklarni bu yerda qayta urinib boʻlmaydi. Agar barcha bajaruvchilar muvaffaqiyatsizlikka uchrasa, oxirgi xatolik qaytariladi. Mijoz tomonidan bekor qilish (aborts) joʻnatishni toʻxtatadi.
 
 ```json
 {
@@ -362,12 +351,7 @@ tomonidan bekor qilish joʻnatishni toʻxtatadi.
 }
 ```
 
-Bajaruvchi bitta javobda bir nechta mustaqil chaqiruv chiqarishi mumkin. Bogʻliq chaqiruvlar
-mijozning keyingi vosita natijasi bosqichlarida qayta ishlanadi va rejalashtiruvchi har bir
-natijani koʻrib chiqadi. `maxToolRounds`ning standart qiymati `8` boʻlib, `1`–`32`
-oraligʻidagi qiymatlarni qabul qiladi; chegaraga yetilgach, rejalashtiruvchi mavjud eng
-yaxshi yakuniy javobni yaratishi kerak. Rejalashtiruvchining ichki qarorlari buferlanadi,
-mijozga koʻrinadigan tanlangan javob esa asl oqim uzatish afzalligini saqlab qoladi.
+Bajaruvchi bitta javobda bir nechta mustaqil chaqiruvlarni amalga oshirishi mumkin. Bogʻliq chaqiruvlar keyingi mijoz vositasi natijalari navbatlarida koʻrib chiqiladi, bunda rejalashtiruvchi har bir natijani tekshiradi. `maxToolRounds` sukut boʻyicha `8` ga teng va `1`–`32` oraligʻini qabul qiladi; bu chegaraga yetganda, rejalashtiruvchi mavjud boʻlgan eng yaxshi yakuniy javobni taqdim etishi shart. Ichki rejalashtiruvchi qarorlari buferlanadi, tanlangan mijozga koʻrinadigan javob esa asl oqim (streaming) afzalligini saqlab qoladi.
 
 ### `round-robin`ning biriktirilgan toʻplami va hisoblarni kengaytirish
 

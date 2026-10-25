@@ -329,21 +329,13 @@ OmniRouten yhdistelmämoottori tukee **20 reititysstrategiaa** (määritelty tie
 Käytä tiukkaan kiertoon `round-robin`-strategiaa; yhtäläiset painot `weighted`-strategiassa tuottavat tilastollisen — eivät
 tiukan — tasapainon.
 
-### Agenttinen liukuhihnatila
+### Agentic pipeline -tila
 
-Vähintään kaksi mallia sisältävä `pipeline`-yhdistelmä voi ottaa käyttöön suunnittelijan ja suorittajan välisen reitityksen asetuksella
-`config.agenticOrchestration.enabled`. Ensimmäinen kohde vastaa suunnittelusta ja lopullisista vastauksista;
-toinen kohde tuottaa asiakasohjelman natiiveja työkalukutsuja. OmniRoute tunnistaa työkalutulosten
-jatkopyynnöt pyyntöprotokollasta, kysyy suunnittelijalta, tarvitaanko uusi työkalukierros,
-ja valitsee dynaamisesti joko suorittajan tai suunnittelijan viimeiseksi asiakkaalle näkyväksi
-vaiheeksi.
+`pipeline`-yhdistelmä, jossa on vähintään kaksi mallia, voi valita suunnittelija/toteuttaja-reitityksen (planner/executor routing) käyttämällä asetusta `config.agenticOrchestration.enabled`. Ensimmäinen kohde vastaa suunnittelusta ja lopullisista vastauksista; toinen kohde lähettää asiakaskohtaiset työkalukutsut. OmniRoute tunnistaa työkalutulosten jatkumot pyyntöprotokollasta, kysyy suunnittelijalta, tarvitaanko uusi työkalukierros, ja tekee dynaamisesti joko toteuttajasta tai suunnittelijasta asiakkaalle näkyvän viimeisen vaiheen.
 
-Toisen kohteen jälkeen määritetyt lisämallit ovat järjestyksessä käytettäviä suorittajan varamalleja. Epäonnistunut
-HTTP-vastaus tai siirtopoikkeus siirtää käsittelyn seuraavalle suorittajalle säilyttäen
-saman suunnittelijan päätöksen ja natiivit työkalut mutta käyttäen kyseisen suorittajan omaa vaihekohtaista kehotetta ja
-ratkaistua yhteyttä. Ensimmäinen onnistunut vastaus palautetaan muuttamattomana, mukaan lukien
-SSE-suoratoisto; onnistuneen suoratoiston alkamisen jälkeisiä virheitä ei voida tässä yrittää uudelleen.
-Jos kaikki suorittajat epäonnistuvat, viimeinen virhe palautetaan. Asiakkaan keskeytykset lopettavat välityksen.
+Työkalutulosten jatkumoiden kohdalla OmniRoute pysäyttää suorituksen myös silloin, kun kaksi peräkkäistä suoritettua kierrosta toistaa samat työkalukutsut muuttumattomin tuloksin, tai kun jokainen eksplisiittisesti merkitty tulos kahdella peräkkäisellä kierroksella epäonnistui. Muuttuneet tulokset sallivat toistuvat kutsut (esimerkiksi polling). Suojaus nollautuu uuden käyttäjäpyynnön yhteydessä, ryhmittelee rinnakkaiset kutsut yhdeksi kierrokseksi ja tukee Anthropic-, Chat Completions-, Responses- ja Gemini-historiatietoja. Suunnittelija vastaanottaa syyn ja vastaa lopullisesta vastauksesta, vaikka se pyytäisi uutta työkalukierrosta.
+
+Toisen kohteen jälkeiset lisämallit ovat järjestettyjä toteuttajan varajärjestelmiä. Epäonnistunut HTTP-vastaus tai siirtovirhe siirtää suorituksen seuraavalle toteuttajalle, joka käyttää samaa suunnittelijan päätöstä ja natiiveja työkaluja, mutta kyseisen toteuttajan omaa vaihekehotetta ja ratkaistua yhteyttä. Ensimmäinen onnistunut vastaus palautetaan muuttumattomana, mukaan lukien SSE-suoratoisto; onnistuneen suoratoiston alkamisen jälkeisiä virheitä ei voi yrittää uudelleen tässä. Jos kaikki toteuttajat epäonnistuvat, viimeisin virhe palautetaan. Asiakkaan keskeytykset pysäyttävät lähetyksen.
 
 ```json
 {
@@ -355,11 +347,7 @@ Jos kaikki suorittajat epäonnistuvat, viimeinen virhe palautetaan. Asiakkaan ke
 }
 ```
 
-Suorittaja voi tuottaa yhdessä vastauksessa useita toisistaan riippumattomia kutsuja. Riippuvaiset kutsut
-käsitellään asiakkaan myöhemmillä työkalutuloskierroksilla, ja suunnittelija tarkistaa jokaisen tuloksen.
-`maxToolRounds`-asetuksen oletusarvo on `8`, ja se hyväksyy arvot `1`–`32`; kun raja saavutetaan, suunnittelijan on
-tuotettava paras saatavilla oleva lopullinen vastaus. Suunnittelijan sisäiset päätökset puskuroidaan, kun taas
-valittu asiakkaalle näkyvä vastaus säilyttää alkuperäisen suoratoistoasetuksen.
+Toteuttaja voi lähettää useita riippumattomia kutsuja yhdessä vastauksessa. Riippuvat kutsut käsitellään myöhemmillä asiakkaan työkalutulosvuoroilla, jolloin suunnittelija tarkistaa jokaisen tuloksen. `maxToolRounds`-asetuksen oletusarvo on `8` ja se hyväksyy arvot `1`–`32`; kun tämä raja saavutetaan, suunnittelijan on tuotettava paras mahdollinen lopullinen vastaus. Sisäiset suunnittelijan päätökset puskuroidaan, kun taas valittu asiakkaalle näkyvä vastaus säilyttää alkuperäisen suoratoistoasetuksen.
 
 ### `round-robin`-strategian pysyvä erä ja tilikohtainen laajennus
 

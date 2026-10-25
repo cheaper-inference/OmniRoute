@@ -335,20 +335,13 @@ O mecanismo de combos do OmniRoute oferece suporte a **20 estratégias de roteam
 Para rotação estrita, use `round-robin`; pesos iguais em `weighted` fornecem um balanceamento estatístico — não
 estrito.
 
-### Modo de pipeline agêntico
+### Modo de pipeline agente
 
-Uma combinação `pipeline` com pelo menos dois modelos pode habilitar o roteamento entre planejador e executor com
-`config.agenticOrchestration.enabled`. O primeiro destino é responsável pelo planejamento e pelas respostas finais;
-o segundo destino emite chamadas de ferramentas nativas do cliente. O OmniRoute detecta continuações de
-resultados de ferramentas com base no protocolo da solicitação, pergunta ao planejador se outra rodada de ferramentas
-é necessária e torna dinamicamente o executor ou o planejador a etapa final voltada para o cliente.
+Um combo `pipeline` com pelo menos dois modelos pode optar pelo roteamento planejador/executor com `config.agenticOrchestration.enabled`. O primeiro alvo é responsável pelo planejamento e pelas respostas finais; o segundo alvo emite chamadas de ferramenta nativas do cliente. O OmniRoute detecta continuações de resultados de ferramentas a partir do protocolo de solicitação, pergunta ao planejador se outra rodada de ferramentas é necessária e torna dinamicamente o executor ou o planejador a etapa final voltada para o cliente.
 
-Os modelos adicionais após o segundo destino são backups ordenados do executor. Uma resposta
-HTTP com falha ou uma exceção de transporte avança para o próximo executor, mantendo a
-mesma decisão do planejador e as ferramentas nativas, mas usando o prompt da etapa e a
-conexão resolvida desse executor. A primeira resposta bem-sucedida é retornada sem alterações, incluindo
-streaming SSE; falhas após o início de um fluxo bem-sucedido não podem ser repetidas aqui.
-Se todos os executores falharem, a última falha será retornada. Cancelamentos pelo cliente interrompem o envio.
+Em continuações de resultados de ferramentas, o OmniRoute também interrompe a execução quando duas rodadas concluídas consecutivas repetem as mesmas chamadas de ferramenta com resultados inalterados, ou quando todos os resultados explicitamente marcados em duas rodadas consecutivas falharam. Resultados alterados permitem chamadas repetidas (por exemplo, polling). A proteção é redefinida em uma nova solicitação do usuário, agrupa chamadas paralelas em uma rodada e oferece suporte a históricos Anthropic, Chat Completions, Responses e Gemini. O planejador recebe o motivo e é responsável pela resposta final, mesmo que solicite outra rodada de ferramentas.
+
+Modelos adicionais após o segundo alvo são backups de executor ordenados. Uma resposta HTTP com falha ou exceção de transporte avança para o próximo executor, carregando a mesma decisão do planejador e ferramentas nativas, mas o prompt de etapa e a conexão resolvida desse executor. A primeira resposta bem-sucedida é retornada inalterada, incluindo streaming SSE; falhas após o início de um stream bem-sucedido não podem ser repetidas aqui. Se todos os executores falharem, a última falha é retornada. Abortos do cliente interrompem o despacho.
 
 ```json
 {
@@ -360,11 +353,7 @@ Se todos os executores falharem, a última falha será retornada. Cancelamentos 
 }
 ```
 
-O executor pode emitir várias chamadas independentes em uma única resposta. Chamadas dependentes são
-tratadas em turnos posteriores de resultados de ferramentas do cliente, com o planejador revisando cada resultado.
-O valor padrão de `maxToolRounds` é `8`, e ele aceita de `1` a `32`; quando o limite é atingido, o planejador deve
-produzir a melhor resposta final disponível. As decisões internas do planejador são armazenadas em buffer, enquanto
-a resposta selecionada voltada para o cliente preserva a preferência de streaming original.
+O executor pode emitir múltiplas chamadas independentes em uma resposta. Chamadas dependentes são tratadas em turnos posteriores de resultados de ferramentas do cliente, com o planejador revisando cada resultado. `maxToolRounds` tem como padrão `8` e aceita `1`–`32`; uma vez atingido, o planejador deve produzir a melhor resposta final disponível. As decisões internas do planejador são armazenadas em buffer, enquanto a resposta selecionada voltada para o cliente preserva a preferência de streaming original.
 
 ### Lote fixo de `round-robin` e expansão de contas
 

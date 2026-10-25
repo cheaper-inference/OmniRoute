@@ -310,22 +310,13 @@ OmniRoutes kombinationsmotor understøtter **20 routingstrategier** (deklareret 
 Brug `round-robin` til streng rotation; ens vægte med `weighted` giver statistisk — ikke
 streng — balance.
 
-### Agentisk pipeline-tilstand
+### Agentic pipeline-tilstand
 
-En `pipeline`-kombination med mindst to modeller kan aktivere planner/executor-routing med
-`config.agenticOrchestration.enabled`. Det første mål håndterer planlægning og endelige svar;
-det andet mål udsender klientnative værktøjskald. OmniRoute registrerer fortsættelser med
-værktøjsresultater ud fra anmodningsprotokollen, spørger planlæggeren, om endnu en
-værktøjsrunde er nødvendig, og gør dynamisk enten eksekutoren eller planlæggeren til det
-sidste klientvendte trin.
+En `pipeline`-kombination med mindst to modeller kan tilvælge planner/executor-routing med `config.agenticOrchestration.enabled`. Det første mål står for planlægning og endelige svar; det andet mål udsender klient-native værktøjskald. OmniRoute detekterer fortsættelser af værktøjsresultater fra forespørgselsprotokollen, spørger planlæggeren, om endnu en værktøjsrunde er nødvendig, og gør dynamisk enten executor eller planner til det klientvendte sidste trin.
 
-Yderligere modeller efter det andet mål fungerer som ordnede reserveeksekutorer. Et
-mislykket HTTP-svar eller en transportundtagelse medfører, at der fortsættes til den næste
-eksekutor med den samme planlæggerbeslutning og de samme native værktøjer, men med den
-pågældende eksekutors egen trinprompt og løste forbindelse. Det første vellykkede svar
-returneres uændret, inklusive SSE-streaming; fejl, efter at en vellykket stream er startet,
-kan ikke genforsøges her. Hvis alle eksekutorer mislykkes, returneres den seneste fejl.
-Klientafbrydelser stopper videresendelsen.
+Ved fortsættelser af værktøjsresultater stopper OmniRoute også eksekveringen, når to på hinanden følgende afsluttede runder gentager de samme værktøjskald med uændrede resultater, eller når hvert eksplicit markeret resultat i to på hinanden følgende runder fejlede. Ændrede resultater tillader gentagne kald (for eksempel polling). Beskyttelsen nulstilles ved en ny brugerforespørgsel, grupperer parallelle kald i én runde og understøtter Anthropic-, Chat Completions-, Responses- og Gemini-historikker. Planlæggeren modtager årsagen og ejer det endelige svar, selv hvis den anmoder om endnu en værktøjsrunde.
+
+Yderligere modeller efter det andet mål er ordnede executor-backups. Et mislykket HTTP-svar eller en transport-undtagelse går videre til den næste executor, med samme planner-beslutning og native værktøjer, men med den executors eget trinvise prompt og løste forbindelse. Det første succesfulde svar returneres uændret, inklusive SSE-streaming; fejl efter en succesfuld stream er startet, kan ikke forsøges igen her. Hvis alle executors fejler, returneres den sidste fejl. Klientafbrydelser stopper afsendelsen.
 
 ```json
 {
@@ -337,12 +328,7 @@ Klientafbrydelser stopper videresendelsen.
 }
 ```
 
-Eksekutoren kan udsende flere uafhængige kald i ét svar. Afhængige kald håndteres i
-senere klientrunder med værktøjsresultater, hvor planlæggeren gennemgår hvert resultat.
-`maxToolRounds` er som standard `8` og accepterer `1`–`32`; når grænsen er nået, skal
-planlæggeren levere det bedst mulige endelige svar. Interne planlæggerbeslutninger
-bufferlagres, mens det valgte klientvendte svar bevarer den oprindelige
-streamingpræference.
+Executoren kan udsende flere uafhængige kald i ét svar. Afhængige kald håndteres i senere klient-værktøjsresultat-ture, hvor planlæggeren gennemgår hvert resultat. `maxToolRounds` er som standard `8` og accepterer `1`–`32`; når dette er nået, skal planlæggeren producere det bedst tilgængelige endelige svar. Interne planner-beslutninger bufres, mens det valgte klientvendte svar bevarer den oprindelige streaming-præference.
 
 ### Fast batch og kontoudvidelse for `round-robin`
 

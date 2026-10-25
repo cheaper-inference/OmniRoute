@@ -329,11 +329,13 @@ A `weighted` **kérésenkénti arányos véletlenszerű sorsolást** végez
 
 Szigorú rotációhoz használja a `round-robin` stratégiát; a `weighted` stratégia azonos súlyokkal statisztikai — nem pedig szigorú — kiegyensúlyozást biztosít.
 
-### Ügynökalapú pipeline mód
+### Agentic pipeline mód
 
-Egy legalább két modellt tartalmazó `pipeline` kombináció a `config.agenticOrchestration.enabled` beállítással használhat tervező/végrehajtó alapú útválasztást. Az első cél felel a tervezésért és a végső válaszokért; a második cél a kliens natív eszközhívásait bocsátja ki. Az OmniRoute a kérés protokollja alapján észleli az eszközeredményeket folytató kéréseket, megkérdezi a tervezőt, hogy szükség van-e újabb eszközkörre, majd dinamikusan vagy a végrehajtót, vagy a tervezőt teszi meg a kliens számára látható utolsó lépésnek.
+A legalább két modellt tartalmazó `pipeline` kombináció választhatja a tervező/végrehajtó (planner/executor) útválasztást a `config.agenticOrchestration.enabled` beállítással. Az első célpont felelős a tervezésért és a végső válaszokért; a második célpont a kliens-natív eszközhívásokat bocsátja ki. Az OmniRoute észleli az eszközeredmény-folytatásokat a kérés protokolljából, megkérdezi a tervezőt, hogy szükség van-e újabb eszközfordulóra, és dinamikusan teszi a végrehajtót vagy a tervezőt a kliens felé néző végső lépéssé.
 
-A második cél utáni további modellek sorrendbe állított tartalék végrehajtóként szolgálnak. Sikertelen HTTP-válasz vagy átviteli kivétel esetén a rendszer a következő végrehajtóra lép, megtartva ugyanazt a tervezői döntést és ugyanazokat a natív eszközöket, de az adott végrehajtó saját lépéspromptját és feloldott kapcsolatát használva. Az első sikeres választ változtatás nélkül adja vissza, beleértve az SSE-streamelést is; a sikeres stream elindulása után bekövetkező hibák itt nem próbálhatók újra. Ha minden végrehajtó sikertelen, az utolsó hiba kerül visszaadásra. A kliens általi megszakítás leállítja a továbbítást.
+Az eszközeredmény-folytatásoknál az OmniRoute akkor is leállítja a végrehajtást, ha két egymást követő befejezett forduló ugyanazokat az eszközhívásokat ismétli meg változatlan eredményekkel, vagy ha két egymást követő fordulóban minden kifejezetten megjelölt eredmény sikertelen volt. A megváltozott eredmények lehetővé teszik az ismételt hívásokat (például lekérdezés/polling esetén). A védelmi mechanizmus (guard) alaphelyzetbe áll egy új felhasználói kérésnél, a párhuzamos hívásokat egy fordulóba csoportosítja, és támogatja az Anthropic, Chat Completions, Responses és Gemini előzményeket. A tervező megkapja az indoklást, és ő a felelős a végső válaszért, még akkor is, ha újabb eszközfordulót kér.
+
+A második célpont utáni további modellek sorrendbe állított végrehajtó tartalékok. Egy sikertelen HTTP-válasz vagy szállítási kivétel a következő végrehajtóra léptet tovább, amely ugyanazt a tervezői döntést és natív eszközöket viszi tovább, de már az adott végrehajtó saját lépés-promptjával és feloldott kapcsolatával. Az első sikeres válasz változatlanul kerül visszaadásra, beleértve az SSE streaminget is; a sikeres stream elindulása utáni hibák itt már nem próbálhatók újra. Ha az összes végrehajtó sikertelen, az utolsó hiba kerül visszaadásra. A kliens általi megszakítások leállítják a továbbítást.
 
 ```json
 {
@@ -345,7 +347,7 @@ A második cél utáni további modellek sorrendbe állított tartalék végreha
 }
 ```
 
-A végrehajtó egyetlen válaszban több, egymástól független hívást is kibocsáthat. A függő hívások kezelése a kliens későbbi eszközeredmény-köreiben történik, miközben a tervező minden eredményt felülvizsgál. A `maxToolRounds` alapértelmezett értéke `8`, és `1`–`32` közötti értékeket fogad el; a határ elérésekor a tervezőnek az elérhető legjobb végső választ kell előállítania. A belső tervezői döntések pufferelve vannak, míg a kliens számára kiválasztott válasz megőrzi az eredeti streamelési beállítást.
+A végrehajtó több független hívást is kibocsáthat egy válaszon belül. A függő hívások a későbbi kliens eszközeredmény-körökben kerülnek kezelésre, ahol a tervező minden eredményt felülvizsgál. A `maxToolRounds` alapértelmezett értéke `8`, és `1`–`32` közötti értéket fogad el; amint ezt eléri, a tervezőnek elő kell állítania a rendelkezésre álló legjobb végső választ. A belső tervezői döntések pufferelve vannak, míg a kiválasztott, kliens felé néző válasz megőrzi az eredeti streaming preferenciát.
 
 ### A `round-robin` rögzített kötegelése és a fiókok kibővítése
 

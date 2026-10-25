@@ -309,21 +309,13 @@ Is **tarraingt randamach chomhréireach in aghaidh na hiarrata** é `weighted`
 Le haghaidh rothlú docht úsáid `round-robin`; tugann meáchain chomhionanna ar `weighted` cothromaíocht staitistiúil — ní
 cothromaíocht dhocht.
 
-### Mód píblíne gníomhaithe
+### Mód píblíne gníomhaire (Agentic pipeline mode)
 
-Is féidir le teaglama `pipeline` ina bhfuil dhá shamhail ar a laghad ródú pleanálaí/feidhmitheora a roghnú le
-`config.agenticOrchestration.enabled`. Is leis an gcéad sprioc an phleanáil agus na freagraí deiridh;
-astaíonn an dara sprioc glaonna uirlise dúchasacha don chliant. Aimsíonn OmniRoute leanúintí
-torthaí uirlise ón bprótacal iarratais, fiafraíonn sé den phleanálaí an bhfuil babhta uirlise eile
-de dhíth, agus déanann sé an feidhmitheoir nó an pleanálaí go dinimiciúil mar an chéim dheiridh
-a chuirtear faoi bhráid an chliaint.
+Is féidir le teaglaim `pipeline` le dhá mhúnla ar a laghad rogha a dhéanamh maidir le ródú pleanálaí/forghníomhaí le `config.agenticOrchestration.enabled`. Tá an pleanáil agus na freagraí deiridh ag an gcéad sprioc; eisíonn an dara sprioc glaonna uirlisí dúchasacha don chliant. Braitheann OmniRoute leanúintí torthaí uirlisí ón bprótacal iarratais, fiafraíonn sé den phleanálaí an bhfuil gá le babhta uirlisí eile, agus déanann sé an forghníomhaí nó an pleanálaí mar an chéim dheiridh atá os comhair an chliaint go dinimiciúil.
 
-Is cúltacaí feidhmitheora ordaithe iad samhlacha breise tar éis an dara sprice. Má theipeann
-ar fhreagairt HTTP nó má tharlaíonn eisceacht iompair, bogtar ar aghaidh chuig an gcéad fheidhmitheoir eile, agus
-an cinneadh pleanálaí céanna agus na huirlisí dúchasacha céanna á n-iompar, ach úsáidtear leid céime agus
-nasc réitithe an fheidhmitheora sin féin. Seoltar an chéad fhreagairt rathúil ar ais gan athrú, lena n-áirítear
-sruthú SSE; ní féidir teipeanna tar éis do shruth rathúil tosú a atriail anseo.
-Má theipeann ar gach feidhmitheoir, seoltar an teip dheireanach ar ais. Cuireann cealuithe cliaint stop leis an seoladh.
+Ar leanúintí torthaí uirlisí, stopann OmniRoute an forghníomhú freisin nuair a dhéanann dhá bhabhta críochnaithe as a chéile na glaonna uirlisí céanna a athdhéanamh le torthaí gan athrú, nó nuair a theipeann ar gach toradh atá marcáilte go sainráite i dhá bhabhta as a chéile. Ceadaíonn torthaí athraithe glaonna athchleachtacha (mar shampla, vótaíocht). Athshocraíonn an garda ar iarratas úsáideora úr, grúpálann sé glaonna comhthreomhara isteach i mbabhta amháin, agus tacaíonn sé le staireanna Anthropic, Chat Completions, Responses agus Gemini. Faigheann an pleanálaí an chúis agus tá an freagra deiridh aige fiú má iarrann sé babhta uirlisí eile.
+
+Is cúltacaí forghníomhaí ordaithe iad na múnlaí breise tar éis an dara sprioc. Téann freagra HTTP teipthe nó eisceacht iompair ar aghaidh chuig an gcéad forghníomhaí eile, ag iompar an chinneadh pleanálaí céanna agus na huirlisí dúchasacha ach le pras céime agus nasc réitithe an fhorghníomhaí sin féin. Cuirtear an chéad fhreagra rathúil ar ais gan athrú, lena n-áirítear sruthú SSE; ní féidir teipeanna tar éis tús a chur le sruth rathúil a athiarracht anseo. Má theipeann ar gach forghníomhaí, cuirtear an teip dheiridh ar ais. Stopann cealuithe cliant an seoladh.
 
 ```json
 {
@@ -335,11 +327,7 @@ Má theipeann ar gach feidhmitheoir, seoltar an teip dheireanach ar ais. Cuirean
 }
 ```
 
-Féadfaidh an feidhmitheoir roinnt glaonna neamhspleácha a astú in aon fhreagairt amháin. Láimhseáiltear glaonna spleácha
-i sealanna torthaí uirlise cliaint níos déanaí, agus déanann an pleanálaí athbhreithniú ar gach toradh.
-Is é `8` réamhshocrú `maxToolRounds`, agus glacann sé le `1`–`32`; nuair a shroichtear é, ní mór don phleanálaí
-an freagra deiridh is fearr atá ar fáil a sholáthar. Maolánaítear cinntí inmheánacha an phleanálaí, agus
-caomhnaíonn an fhreagairt roghnaithe a chuirtear faoi bhráid an chliaint an bhunrogha sruthaithe.
+Féadfaidh an forghníomhaí glaonna neamhspleácha iolracha a eisiúint i bhfreagra amháin. Láimhseáiltear glaonna spleácha i gcasanna torthaí uirlisí cliant níos déanaí, agus an pleanálaí ag athbhreithniú gach toradh. Is é `maxToolRounds` an réamhshocrú do `8` agus glacann sé le `1`–`32`; nuair a shroichtear é, ní mór don phleanálaí an freagra deiridh is fearr atá ar fáil a tháirgeadh. Déantar cinntí inmheánacha an phleanálaí a mhaolánú, agus caomhnaíonn an freagra roghnaithe atá os comhair an chliaint an rogha sruthaithe bunaidh.
 
 ### Baisc ghreamaitheach `round-robin` agus leathnú cuntas
 

@@ -333,19 +333,11 @@ griežtą balansą.
 
 ### Agentinio konvejerio režimas
 
-`pipeline` derinys, turintis bent du modelius, gali įjungti planuotojo / vykdytojo maršruto parinkimą
-naudojant `config.agenticOrchestration.enabled`. Pirmasis tikslas atsakingas už planavimą ir galutinius atsakymus;
-antrasis tikslas generuoja kliento vietinio formato įrankių iškvietimus. „OmniRoute“ pagal užklausos protokolą aptinka
-tęsinius su įrankių rezultatais, klausia planuotojo, ar reikia dar vieno įrankių vykdymo ciklo,
-ir dinamiškai parenka vykdytoją arba planuotoją kaip galutinį klientui skirtą
-etapą.
+`pipeline` derinys su bent dviem modeliais gali pasirinkti planuotojo/vykdytojo maršrutizavimą naudojant `config.agenticOrchestration.enabled`. Pirmasis taikinys yra atsakingas už planavimą ir galutinius atsakymus; antrasis taikinys išveda kliento vietinius įrankių iškvietimus. OmniRoute aptinka įrankio rezultato tęsinius iš užklausos protokolo, klausia planuotojo, ar reikalingas dar vienas įrankių raundas, ir dinamiškai nustato, ar vykdytojas, ar planuotojas bus galutinis žingsnis, matomas klientui.
 
-Po antrojo tikslo nurodyti papildomi modeliai yra iš eilės naudojami kaip atsarginiai vykdytojai. Gavus nesėkmingą
-HTTP atsakymą arba įvykus transporto išimčiai pereinama prie kito vykdytojo, išlaikant
-tą patį planuotojo sprendimą bei vietinius įrankius, tačiau naudojant to vykdytojo etapo instrukciją ir
-nustatytą ryšį. Pirmasis sėkmingas atsakymas grąžinamas nepakeistas, įskaitant
-SSE srautinį perdavimą; prasidėjus sėkmingam srautui, vėlesnių trikčių čia pakartotinai apdoroti negalima.
-Jei visi vykdytojai patiria triktį, grąžinama paskutinė triktis. Klientui nutraukus užklausą, siuntimas sustabdomas.
+Vykdant įrankio rezultato tęsinius, OmniRoute taip pat sustabdo vykdymą, kai du iš eilės užbaigti raundai kartoja tuos pačius įrankių iškvietimus su nepakitusiais rezultatais arba kai kiekvienas aiškiai pažymėtas rezultatas dviejuose iš eilės raunduose nepavyko. Pakitę rezultatai leidžia kartoti iškvietimus (pavyzdžiui, apklausą). Apsauga iš naujo nustatoma gavus naują vartotojo užklausą, sugrupuoja lygiagrečius iškvietimus į vieną raundą ir palaiko Anthropic, Chat Completions, Responses bei Gemini istorijas. Planuotojas gauna priežastį ir yra atsakingas už galutinį atsakymą, net jei prašo kito įrankių raundo.
+
+Papildomi modeliai po antrojo taikinio yra išrikiuoti vykdytojo atsarginiai variantai. Nepavykus gauti HTTP atsakymo arba įvykus transportavimo išimčiai, pereinama prie kito vykdytojo, perduodant tą patį planuotojo sprendimą ir vietinius įrankius, tačiau naudojant to vykdytojo žingsnio raginimą (prompt) ir išspręstą ryšį. Pirmasis sėkmingas atsakymas grąžinamas nepakeistas, įskaitant SSE srautinį perdavimą; klaidų, įvykusių prasidėjus sėkmingam srautui, čia pakartoti negalima. Jei visi vykdytojai nepavyksta, grąžinama paskutinė klaida. Kliento nutraukimai sustabdo siuntimą.
 
 ```json
 {
@@ -357,11 +349,7 @@ Jei visi vykdytojai patiria triktį, grąžinama paskutinė triktis. Klientui nu
 }
 ```
 
-Vykdytojas viename atsakyme gali pateikti kelis nepriklausomus iškvietimus. Priklausomi iškvietimai
-apdorojami vėlesniuose kliento įrankių rezultatų cikluose, planuotojui peržiūrint kiekvieną rezultatą.
-Numatytoji `maxToolRounds` reikšmė yra `8`, o priimamas intervalas — `1`–`32`; pasiekus šią ribą, planuotojas turi
-pateikti geriausią įmanomą galutinį atsakymą. Vidiniai planuotojo sprendimai kaupiami buferyje, o
-pasirinktame klientui skirtame atsakyme išlaikoma pradinė srautinio perdavimo nuostata.
+Vykdytojas gali išvesti kelis nepriklausomus iškvietimus viename atsakyme. Priklausomi iškvietimai tvarkomi vėlesniuose kliento įrankio rezultato etapuose, planuotojui peržiūrint kiekvieną rezultatą. `maxToolRounds` numatytoji reikšmė yra `8` ir priima `1`–`32`; pasiekus šią ribą, planuotojas privalo pateikti geriausią įmanomą galutinį atsakymą. Vidiniai planuotojo sprendimai yra buferizuojami, o pasirinktas kliento matomas atsakymas išsaugo pradinę srautinio perdavimo nuostatą.
 
 ### `round-robin` susietas paketinis apdorojimas ir paskyrų išplėtimas
 

@@ -332,11 +332,13 @@ Silnik kombinacji OmniRoute obsługuje **20 strategii routingu** (zadeklarowanyc
 
 Aby uzyskać ścisłą rotację, użyj `round-robin`; równe wagi w strategii `weighted` zapewniają równowagę statystyczną — nie ścisłą.
 
-### Tryb potoku agentowego
+### Tryb potoku agentowego (Agentic pipeline mode)
 
-Kombinacja `pipeline` z co najmniej dwoma modelami może włączyć routing planista/wykonawca za pomocą opcji `config.agenticOrchestration.enabled`. Pierwszy cel odpowiada za planowanie i odpowiedzi końcowe; drugi cel emituje wywołania narzędzi w natywnym formacie klienta. OmniRoute wykrywa kontynuacje z wynikami narzędzi na podstawie protokołu żądania, pyta planistę, czy potrzebna jest kolejna runda użycia narzędzi, i dynamicznie wybiera wykonawcę albo planistę jako końcowy etap zwracany klientowi.
+Kombinacja `pipeline` z co najmniej dwoma modelami może skorzystać z routingu planista/wykonawca (planner/executor) dzięki `config.agenticOrchestration.enabled`. Pierwszy cel odpowiada za planowanie i odpowiedzi końcowe; drugi cel emituje wywołania narzędzi natywne dla klienta. OmniRoute wykrywa kontynuacje wyników narzędzi z protokołu żądania, pyta planistę, czy potrzebna jest kolejna runda narzędzi, i dynamicznie czyni wykonawcę lub planistę krokiem końcowym widocznym dla klienta.
 
-Dodatkowe modele umieszczone po drugim celu pełnią kolejno rolę zapasowych wykonawców. Nieudana odpowiedź HTTP lub wyjątek transportu powoduje przejście do następnego wykonawcy, przy zachowaniu tej samej decyzji planisty i natywnych narzędzi, ale z użyciem własnego promptu kroku tego wykonawcy oraz jego rozstrzygniętego połączenia. Pierwsza pomyślna odpowiedź jest zwracana bez zmian, w tym również strumieniowanie SSE; błędów występujących po rozpoczęciu pomyślnego strumienia nie można tutaj ponowić. Jeśli wszyscy wykonawcy zawiodą, zwracany jest ostatni błąd. Przerwanie przez klienta zatrzymuje wysyłanie żądań.
+W przypadku kontynuacji wyników narzędzi, OmniRoute zatrzymuje również wykonanie, gdy dwie kolejne zakończone rundy powtarzają te same wywołania narzędzi z niezmienionymi wynikami lub gdy każdy jawnie oznaczony wynik w dwóch kolejnych rundach zakończył się niepowodzeniem. Zmienione wyniki pozwalają na powtarzane wywołania (na przykład odpytywanie). Mechanizm ochronny resetuje się przy nowym żądaniu użytkownika, grupuje równoległe wywołania w jedną rundę i obsługuje historie Anthropic, Chat Completions, Responses oraz Gemini. Planista otrzymuje powód i odpowiada za ostateczną odpowiedź, nawet jeśli zażąda kolejnej rundy narzędzi.
+
+Dodatkowe modele po drugim celu są uporządkowanymi kopiami zapasowymi wykonawcy. Nieudana odpowiedź HTTP lub wyjątek transportu powoduje przejście do następnego wykonawcy, przenosząc tę samą decyzję planisty i natywne narzędzia, ale z własnym promptem kroku i rozpoznanym połączeniem danego wykonawcy. Pierwsza udana odpowiedź jest zwracana bez zmian, w tym strumieniowanie SSE; awarie po rozpoczęciu udanego strumienia nie mogą być tutaj ponowione. Jeśli wszyscy wykonawcy zawiodą, zwracany jest ostatni błąd. Przerwania klienta zatrzymują wysyłanie.
 
 ```json
 {
@@ -348,7 +350,7 @@ Dodatkowe modele umieszczone po drugim celu pełnią kolejno rolę zapasowych wy
 }
 ```
 
-Wykonawca może wyemitować wiele niezależnych wywołań w jednej odpowiedzi. Wywołania zależne są obsługiwane w późniejszych turach klienta zawierających wyniki narzędzi, przy czym planista analizuje każdy wynik. Wartość domyślna `maxToolRounds` to `8`, a dozwolony zakres wynosi `1`–`32`; po osiągnięciu limitu planista musi wygenerować najlepszą dostępną odpowiedź końcową. Wewnętrzne decyzje planisty są buforowane, natomiast wybrana odpowiedź zwracana klientowi zachowuje pierwotne ustawienie strumieniowania.
+Wykonawca może emitować wiele niezależnych wywołań w jednej odpowiedzi. Wywołania zależne są obsługiwane w późniejszych turach wyników narzędzi klienta, przy czym planista przegląda każdy wynik. `maxToolRounds` domyślnie wynosi `8` i akceptuje wartości od `1` do `32`; po osiągnięciu tego limitu planista musi wyprodukować najlepszą dostępną odpowiedź końcową. Wewnętrzne decyzje planisty są buforowane, podczas gdy wybrana odpowiedź widoczna dla klienta zachowuje oryginalną preferencję strumieniowania.
 
 ### Przyklejona partia `round-robin` i rozszerzanie kont
 

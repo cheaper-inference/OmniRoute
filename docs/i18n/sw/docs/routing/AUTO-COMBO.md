@@ -328,21 +328,13 @@ Injini ya michanganyiko ya OmniRoute inatumia **mikakati 20 ya uelekezaji** (ili
 Kwa mzunguko mkali tumia `round-robin`; uzani sawa kwenye `weighted` hutoa usawazishaji wa kitakwimu — si
 mkali.
 
-### Modi ya bomba la kiwakala
+### Hali ya pipeline ya wakala (Agentic pipeline mode)
 
-Mchanganyiko wa `pipeline` wenye angalau modeli mbili unaweza kuwasha uelekezaji wa kipangaji/kitekelezaji kupitia
-`config.agenticOrchestration.enabled`. Lengo la kwanza linashughulikia upangaji na majibu ya mwisho;
-lengo la pili hutoa miito ya zana katika umbizo asilia la mteja. OmniRoute hutambua
-mwendelezo wa matokeo ya zana kutoka kwenye itifaki ya ombi, huuliza kipangaji ikiwa duru nyingine ya zana
-inahitajika, na kwa namna inayobadilika hufanya ama kitekelezaji au kipangaji kuwa hatua ya mwisho
-inayowasilishwa kwa mteja.
+Combo ya `pipeline` yenye angalau miundo (models) miwili inaweza kuchagua kuelekeza kwa mpangaji/mtendaji (planner/executor) kwa kutumia `config.agenticOrchestration.enabled`. Lengo la kwanza linamiliki upangaji na majibu ya mwisho; lengo la pili hutoa wito wa zana (tool calls) asilia kwa mteja. OmniRoute hutambua mwendelezo wa matokeo ya zana kutoka kwa itifaki ya ombi, humuuliza mpangaji ikiwa raundi nyingine ya zana inahitajika, na kwa nguvu (dynamically) hufanya ama mtendaji au mpangaji kuwa hatua ya mwisho inayomkabili mteja.
 
-Modeli za ziada baada ya lengo la pili hupangwa kama vitekelezaji vya akiba. Jibu la
-HTTP lililoshindikana au hitilafu ya usafirishaji husogeza mchakato hadi kitekelezaji kinachofuata, huku likibeba
-uamuzi uleule wa kipangaji na zana asilia lakini likitumia kidokezo cha hatua cha kitekelezaji hicho chenyewe pamoja na
-muunganisho wake uliotatuliwa. Jibu la kwanza lililofanikiwa hurejeshwa bila kubadilishwa, ikiwa ni pamoja na
-utiririshaji wa SSE; hitilafu baada ya utiririshaji uliofanikiwa kuanza haziwezi kujaribiwa tena hapa.
-Ikiwa vitekelezaji vyote vitashindwa, hitilafu ya mwisho hurejeshwa. Ukatishaji wa mteja husitisha usambazaji.
+Kwenye mwendelezo wa matokeo ya zana, OmniRoute pia husimamisha utekelezaji wakati raundi mbili mfululizo zilizokamilika zinarudia wito uleule wa zana na matokeo yasiyobadilika, au wakati kila matokeo yaliyotiwa alama wazi katika raundi mbili mfululizo yameshindwa. Matokeo yaliyobadilika huruhusu wito wa kurudiwa (kwa mfano, polling). Mlinzi (guard) hujiweka upya kwenye ombi jipya la mtumiaji, huweka wito sambamba katika raundi moja, na inasaidia historia za Anthropic, Chat Completions, Responses na Gemini. Mpangaji hupokea sababu na kumiliki jibu la mwisho hata kama anaomba raundi nyingine ya zana.
+
+Miundo ya ziada baada ya lengo la pili ni nakala za akiba za mtendaji zilizopangwa. Jibu la HTTP lililoshindwa au ubaguzi wa usafirishaji (transport exception) huendelea hadi kwa mtendaji anayefuata, likibeba uamuzi uleule wa mpangaji na zana asilia lakini likiwa na prompt ya hatua ya mtendaji huyo na muunganisho uliotatuliwa. Jibu la kwanza lililofanikiwa hurejeshwa bila kubadilishwa, ikijumuisha utiririshaji wa SSE; kushindwa baada ya mtiririko uliofanikiwa kuanza hakuwezi kujaribiwa tena hapa. Ikiwa watendaji wote watashindwa, kushindwa kwa mwisho hurejeshwa. Usitishaji wa mteja husimamisha utumaji.
 
 ```json
 {
@@ -354,11 +346,7 @@ Ikiwa vitekelezaji vyote vitashindwa, hitilafu ya mwisho hurejeshwa. Ukatishaji 
 }
 ```
 
-Kitekelezaji kinaweza kutoa miito mingi inayojitegemea katika jibu moja. Miito inayotegemeana
-hushughulikiwa katika zamu zinazofuata za matokeo ya zana ya mteja, huku kipangaji kikikagua kila tokeo.
-`maxToolRounds` ina thamani chaguo-msingi ya `8` na hukubali `1`–`32`; kikomo hicho kikifikiwa, kipangaji lazima
-kitoe jibu bora zaidi la mwisho linalopatikana. Maamuzi ya ndani ya kipangaji huwekwa kwenye bafa, huku
-jibu lililochaguliwa la kuelekezwa kwa mteja likihifadhi mapendeleo ya awali ya utiririshaji.
+Mtendaji anaweza kutoa wito huru nyingi katika jibu moja. Wito tegemezi hushughulikiwa katika zamu za baadaye za matokeo ya zana za mteja, huku mpangaji akipitia kila matokeo. `maxToolRounds` ina thamani ya awali ya `8` na inakubali `1`–`32`; ikishafikiwa, mpangaji lazima atoe jibu bora zaidi la mwisho linalopatikana. Maamuzi ya ndani ya mpangaji huhifadhiwa kwenye buffer, huku jibu lililochaguliwa linalomkabili mteja likihifadhi upendeleo wa awali wa utiririshaji.
 
 ### Bechi thabiti ya `round-robin` na upanuzi wa akaunti
 

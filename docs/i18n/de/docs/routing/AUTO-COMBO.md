@@ -317,21 +317,13 @@ Die Combo-Engine von OmniRoute unterstützt **20 Routing-Strategien** (deklarier
 
 Verwenden Sie für eine strikte Rotation `round-robin`; gleiche Gewichtungen bei `weighted` ergeben eine statistische — keine strikte — Verteilung.
 
-### Agentischer Pipeline-Modus
+### Agentic-Pipeline-Modus
 
-Eine `pipeline`-Kombination mit mindestens zwei Modellen kann über
-`config.agenticOrchestration.enabled` das Planner/Executor-Routing aktivieren. Das erste Ziel übernimmt die Planung und die endgültigen Antworten;
-das zweite Ziel erzeugt clientnative Tool-Aufrufe. OmniRoute erkennt Fortsetzungen mit Tool-Ergebnissen
-anhand des Anfrageprotokolls, fragt den Planner, ob eine weitere Tool-Runde erforderlich ist,
-und legt dynamisch entweder den Executor oder den Planner als letzten, clientseitig sichtbaren
-Schritt fest.
+Eine `pipeline`-Kombination mit mindestens zwei Modellen kann sich mit `config.agenticOrchestration.enabled` für das Planner/Executor-Routing entscheiden. Das erste Ziel ist für die Planung und die endgültigen Antworten zuständig; das zweite Ziel gibt client-native Tool-Aufrufe aus. OmniRoute erkennt Tool-Ergebnis-Fortsetzungen aus dem Anfrageprotokoll, fragt den Planner, ob eine weitere Tool-Runde erforderlich ist, und macht dynamisch entweder den Executor oder den Planner zum clientseitigen Abschlussschritt.
 
-Zusätzliche Modelle nach dem zweiten Ziel dienen in ihrer angegebenen Reihenfolge als Executor-Backups. Bei einer fehlgeschlagenen
-HTTP-Antwort oder einer Transportausnahme wird zum nächsten Executor gewechselt. Dabei werden
-dieselbe Planner-Entscheidung und dieselben nativen Tools übernommen, jedoch mit dem eigenen Schritt-Prompt und
-der aufgelösten Verbindung dieses Executors. Die erste erfolgreiche Antwort wird unverändert zurückgegeben, einschließlich
-SSE-Streaming; Fehler, die nach dem Beginn eines erfolgreichen Streams auftreten, können hier nicht erneut versucht werden.
-Wenn alle Executors fehlschlagen, wird der letzte Fehler zurückgegeben. Abbrüche durch den Client stoppen die Weiterleitung.
+Bei Tool-Ergebnis-Fortsetzungen stoppt OmniRoute die Ausführung außerdem, wenn zwei aufeinanderfolgende abgeschlossene Runden dieselben Tool-Aufrufe mit unveränderten Ergebnissen wiederholen oder wenn jedes explizit markierte Ergebnis in zwei aufeinanderfolgenden Runden fehlgeschlagen ist. Geänderte Ergebnisse erlauben wiederholte Aufrufe (zum Beispiel Polling). Der Schutzmechanismus setzt sich bei einer neuen Benutzeranfrage zurück, gruppiert parallele Aufrufe in einer Runde und unterstützt Anthropic-, Chat Completions-, Responses- und Gemini-Verläufe. Der Planner erhält den Grund und ist für die endgültige Antwort verantwortlich, selbst wenn er eine weitere Tool-Runde anfordert.
+
+Zusätzliche Modelle nach dem zweiten Ziel sind geordnete Executor-Backups. Eine fehlgeschlagene HTTP-Antwort oder eine Transport-Exception führt zum nächsten Executor, wobei die gleiche Planner-Entscheidung und die gleichen nativen Tools beibehalten werden, jedoch mit dem eigenen Step-Prompt und der aufgelösten Verbindung dieses Executors. Die erste erfolgreiche Antwort wird unverändert zurückgegeben, einschließlich SSE-Streaming; Fehler nach Beginn eines erfolgreichen Streams können hier nicht wiederholt werden. Wenn alle Executors fehlschlagen, wird der letzte Fehler zurückgegeben. Client-Abbrüche stoppen den Versand.
 
 ```json
 {
@@ -343,11 +335,7 @@ Wenn alle Executors fehlschlagen, wird der letzte Fehler zurückgegeben. Abbrüc
 }
 ```
 
-Der Executor kann in einer Antwort mehrere unabhängige Aufrufe erzeugen. Abhängige Aufrufe werden
-in späteren Client-Runden mit Tool-Ergebnissen verarbeitet, wobei der Planner jedes Ergebnis überprüft.
-`maxToolRounds` hat standardmäßig den Wert `8` und akzeptiert `1`–`32`; sobald dieser Wert erreicht ist, muss der Planner
-die bestmögliche endgültige Antwort erzeugen. Interne Planner-Entscheidungen werden gepuffert, während
-die ausgewählte clientseitig sichtbare Antwort die ursprüngliche Streaming-Präferenz beibehält.
+Der Executor kann mehrere unabhängige Aufrufe in einer Antwort ausgeben. Abhängige Aufrufe werden in späteren Client-Tool-Ergebnis-Turns behandelt, wobei der Planner jedes Ergebnis überprüft. `maxToolRounds` ist standardmäßig auf `8` gesetzt und akzeptiert `1`–`32`; sobald dieser Wert erreicht ist, muss der Planner die bestmögliche endgültige Antwort liefern. Interne Planner-Entscheidungen werden gepuffert, während die ausgewählte clientseitige Antwort die ursprüngliche Streaming-Präferenz beibehält.
 
 ### Sticky-Batch und Kontoerweiterung bei `round-robin`
 

@@ -330,18 +330,11 @@ mahigpit — na pagbabalanse.
 
 ### Agentic pipeline mode
 
-Ang isang `pipeline` combo na may hindi bababa sa dalawang modelo ay maaaring gumamit ng planner/executor routing sa pamamagitan ng
-`config.agenticOrchestration.enabled`. Ang unang target ang nangangasiwa sa pagpaplano at mga panghuling sagot;
-ang pangalawang target ang naglalabas ng mga client-native na tool call. Tinutukoy ng OmniRoute ang mga pagpapatuloy na
-may tool-result mula sa protocol ng kahilingan, tinatanong ang planner kung kailangan pa ng panibagong tool round,
-at dinamikong ginagawang panghuling hakbang na nakaharap sa client ang executor o ang planner.
+Ang isang `pipeline` combo na may hindi bababa sa dalawang modelo ay maaaring mag-opt in sa planner/executor routing gamit ang `config.agenticOrchestration.enabled`. Ang unang target ang nagmamay-ari ng pagpaplano at mga huling sagot; ang pangalawang target ang naglalabas ng mga client-native tool call. Tinutukoy ng OmniRoute ang mga tool-result continuation mula sa request protocol, tinatanong ang planner kung kailangan pa ng isa pang tool round, at dynamic na ginagawang client-facing final step ang executor o planner.
 
-Ang mga karagdagang modelo pagkatapos ng pangalawang target ay inayos bilang mga backup na executor. Kapag nabigo ang isang
-HTTP response o nagkaroon ng transport exception, lilipat sa susunod na executor, habang dinadala ang
-parehong desisyon ng planner at mga native tool ngunit ginagamit ang sariling step prompt at
-naresolbang koneksyon ng executor na iyon. Ang unang matagumpay na tugon ay ibinabalik nang walang pagbabago, kabilang ang
-SSE streaming; ang mga pagkabigo pagkatapos magsimula ang isang matagumpay na stream ay hindi na maaaring subukang muli rito.
-Kung mabigo ang lahat ng executor, ibinabalik ang huling pagkabigo. Ihihinto ng mga client abort ang pagpapadala.
+Sa mga tool-result continuation, itinitigil din ng OmniRoute ang execution kapag ang dalawang magkasunod na nakumpletong round ay inuulit ang parehong mga tool call na may hindi nagbabagong resulta, o kapag ang bawat malinaw na markadong resulta sa dalawang magkasunod na round ay nabigo. Pinapayagan ng mga nagbagong resulta ang mga paulit-ulit na tawag (halimbawa, polling). Nagre-reset ang guard sa isang bagong request ng user, pinapangkat ang mga parallel call sa isang round, at sumusuporta sa mga history ng Anthropic, Chat Completions, Responses, at Gemini. Natatanggap ng planner ang dahilan at siya ang nagmamay-ari ng huling sagot kahit humiling pa ito ng isa pang tool round.
+
+Ang mga karagdagang modelo pagkatapos ng pangalawang target ay mga naka-order na executor backup. Ang isang nabigong HTTP response o transport exception ay nagpapatuloy sa susunod na executor, dala ang parehong desisyon ng planner at mga native tool ngunit gamit ang sariling step prompt at resolved connection ng executor na iyon. Ang unang matagumpay na response ay ibinabalik nang hindi nababago, kabilang ang SSE streaming; ang mga pagkabigo pagkatapos magsimula ng isang matagumpay na stream ay hindi na maaaring i-retry dito. Kung mabigo ang lahat ng executor, ang huling pagkabigo ang ibabalik. Ang mga client abort ay nagpapatigil sa dispatch.
 
 ```json
 {
@@ -353,11 +346,7 @@ Kung mabigo ang lahat ng executor, ibinabalik ang huling pagkabigo. Ihihinto ng 
 }
 ```
 
-Maaaring maglabas ang executor ng maraming magkakahiwalay na call sa isang tugon. Ang mga magkakaugnay na call ay
-pinangangasiwaan sa mga susunod na client tool-result turn, at sinusuri ng planner ang bawat resulta.
-Ang default ng `maxToolRounds` ay `8` at tumatanggap ito ng `1`–`32`; kapag naabot na ito, dapat
-ibigay ng planner ang pinakamahusay na panghuling sagot na available. Binu-buffer ang mga panloob na desisyon ng planner, habang
-pinapanatili ng napiling tugon na nakaharap sa client ang orihinal na kagustuhan sa streaming.
+Maaaring maglabas ang executor ng maraming independent call sa isang response. Ang mga dependent call ay hinahawakan sa mga susunod na client tool-result turn, kung saan sinusuri ng planner ang bawat resulta. Ang `maxToolRounds` ay default sa `8` at tumatanggap ng `1`–`32`; kapag naabot na ito, dapat ibigay ng planner ang pinakamahusay na available na huling sagot. Ang mga internal na desisyon ng planner ay naka-buffer, habang ang napiling client-facing response ay pinapanatili ang orihinal na streaming preference.
 
 ### `round-robin` sticky batch at pagpapalawak ng account
 

@@ -308,9 +308,11 @@ Per una rotazione rigorosa usa `round-robin`; pesi uguali con `weighted` produco
 
 ### Modalità pipeline agentica
 
-Una combinazione `pipeline` con almeno due modelli può abilitare il routing pianificatore/esecutore tramite `config.agenticOrchestration.enabled`. Il primo target gestisce la pianificazione e le risposte finali; il secondo target emette chiamate agli strumenti native del client. OmniRoute rileva dal protocollo della richiesta le continuazioni con i risultati degli strumenti, chiede al pianificatore se sia necessario un altro ciclo di utilizzo degli strumenti e sceglie dinamicamente l'esecutore o il pianificatore come passaggio finale rivolto al client.
+Una combo `pipeline` con almeno due modelli può optare per il routing planner/executor con `config.agenticOrchestration.enabled`. Il primo target gestisce la pianificazione e le risposte finali; il secondo target emette chiamate a strumenti nativi del client. OmniRoute rileva le continuazioni dei risultati degli strumenti dal protocollo di richiesta, chiede al planner se è necessario un altro round di strumenti e rende dinamicamente l'executor o il planner il passaggio finale rivolto al client.
 
-Gli eventuali modelli aggiuntivi dopo il secondo target vengono ordinati come esecutori di riserva. Una risposta HTTP non riuscita o un'eccezione di trasporto fa passare all'esecutore successivo, mantenendo la stessa decisione del pianificatore e gli strumenti nativi, ma usando il prompt specifico del passaggio e la connessione risolta di quell'esecutore. La prima risposta riuscita viene restituita senza modifiche, incluso lo streaming SSE; gli errori che si verificano dopo l'avvio di uno stream riuscito non possono essere riprovati qui. Se tutti gli esecutori falliscono, viene restituito l'ultimo errore. Le interruzioni da parte del client arrestano l'invio.
+Sulle continuazioni dei risultati degli strumenti, OmniRoute interrompe anche l'esecuzione quando due round completati consecutivi ripetono le stesse chiamate agli strumenti con risultati invariati, o quando ogni risultato esplicitamente contrassegnato in due round consecutivi ha avuto esito negativo. Risultati modificati consentono chiamate ripetute (ad esempio, polling). La protezione si reimposta su una nuova richiesta dell'utente, raggruppa le chiamate parallele in un unico round e supporta le cronologie Anthropic, Chat Completions, Responses e Gemini. Il planner riceve il motivo e gestisce la risposta finale anche se richiede un altro round di strumenti.
+
+I modelli aggiuntivi dopo il secondo target sono backup dell'executor ordinati. Una risposta HTTP fallita o un'eccezione di trasporto avanza al successivo executor, mantenendo la stessa decisione del planner e gli strumenti nativi, ma con il prompt di passaggio e la connessione risolta di quell'executor. La prima risposta riuscita viene restituita invariata, incluso lo streaming SSE; i fallimenti dopo l'avvio di uno stream riuscito non possono essere riprovati qui. Se tutti gli executor falliscono, viene restituito l'ultimo errore. Le interruzioni del client bloccano l'invio.
 
 ```json
 {
@@ -322,7 +324,7 @@ Gli eventuali modelli aggiuntivi dopo il secondo target vengono ordinati come es
 }
 ```
 
-L'esecutore può emettere più chiamate indipendenti in un'unica risposta. Le chiamate dipendenti vengono gestite nei successivi turni del client contenenti i risultati degli strumenti, con il pianificatore che esamina ogni risultato. Il valore predefinito di `maxToolRounds` è `8` e sono accettati valori da `1` a `32`; una volta raggiunto il limite, il pianificatore deve produrre la migliore risposta finale disponibile. Le decisioni interne del pianificatore vengono memorizzate nel buffer, mentre la risposta selezionata rivolta al client mantiene la preferenza di streaming originale.
+L'executor può emettere più chiamate indipendenti in una sola risposta. Le chiamate dipendenti vengono gestite nei turni successivi di risultato dello strumento del client, con il planner che revisiona ogni risultato. `maxToolRounds` è impostato su `8` per impostazione predefinita e accetta valori da `1` a `32`; una volta raggiunto, il planner deve produrre la migliore risposta finale disponibile. Le decisioni interne del planner vengono bufferizzate, mentre la risposta selezionata rivolta al client preserva la preferenza di streaming originale.
 
 ### Batch persistente `round-robin` ed espansione degli account
 

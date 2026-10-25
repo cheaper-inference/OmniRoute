@@ -328,21 +328,13 @@ Enjin kombo OmniRoute menyokong **20 strategi penghalaan** (diisytiharkan dalam 
 Untuk penggiliran ketat, gunakan `round-robin`; pemberat yang sama pada `weighted` menghasilkan keseimbangan statistik — bukan
 ketat.
 
-### Mod saluran paip agen
+### Mod pipeline ejen
 
-Kombo `pipeline` dengan sekurang-kurangnya dua model boleh menggunakan penghalaan perancang/pelaksana melalui
-`config.agenticOrchestration.enabled`. Sasaran pertama mengendalikan perancangan dan jawapan akhir;
-sasaran kedua menghasilkan panggilan alat natif klien. OmniRoute mengesan sambungan
-hasil alat daripada protokol permintaan, bertanya kepada perancang sama ada pusingan alat lain
-diperlukan, dan secara dinamik menjadikan sama ada pelaksana atau perancang sebagai langkah akhir
-yang berhadapan dengan klien.
+Kombo `pipeline` dengan sekurang-kurangnya dua model boleh memilih penghalaan perancang/pelaksana (planner/executor) dengan `config.agenticOrchestration.enabled`. Sasaran pertama mengendalikan perancangan dan jawapan akhir; sasaran kedua mengeluarkan panggilan alat (tool calls) asli klien. OmniRoute mengesan penyambungan hasil alat daripada protokol permintaan, bertanya kepada perancang sama ada pusingan alat lain diperlukan, dan secara dinamik menjadikan sama ada pelaksana atau perancang sebagai langkah akhir yang menghadap klien.
 
-Model tambahan selepas sasaran kedua disusun sebagai pelaksana sandaran. Respons
-HTTP yang gagal atau pengecualian pengangkutan akan beralih kepada pelaksana seterusnya, dengan membawa
-keputusan perancang dan alat natif yang sama tetapi menggunakan gesaan langkah dan
-sambungan terhurai milik pelaksana tersebut. Respons pertama yang berjaya dikembalikan tanpa perubahan, termasuk
-penstriman SSE; kegagalan selepas strim yang berjaya bermula tidak boleh dicuba semula di sini.
-Jika semua pelaksana gagal, kegagalan terakhir dikembalikan. Pembatalan oleh klien menghentikan penghantaran.
+Pada penyambungan hasil alat, OmniRoute juga menghentikan pelaksanaan apabila dua pusingan lengkap berturut-turut mengulangi panggilan alat yang sama dengan hasil yang tidak berubah, atau apabila setiap hasil yang ditandakan secara eksplisit dalam dua pusingan berturut-turut gagal. Hasil yang berubah membenarkan panggilan berulang (contohnya, pengundian/polling). Pengawal (guard) ditetapkan semula pada permintaan pengguna baharu, mengumpulkan panggilan selari ke dalam satu pusingan, dan menyokong sejarah Anthropic, Chat Completions, Responses dan Gemini. Perancang menerima sebab dan memiliki jawapan akhir walaupun ia meminta pusingan alat yang lain.
+
+Model tambahan selepas sasaran kedua adalah sandaran pelaksana yang disusun. Respons HTTP yang gagal atau pengecualian pengangkutan beralih ke pelaksana seterusnya, membawa keputusan perancang dan alat asli yang sama tetapi dengan gesaan langkah (step prompt) dan sambungan yang diselesaikan oleh pelaksana tersebut. Respons berjaya yang pertama dikembalikan tanpa perubahan, termasuk penstriman SSE; kegagalan selepas penstriman berjaya bermula tidak boleh dicuba semula di sini. Jika semua pelaksana gagal, kegagalan terakhir dikembalikan. Pembatalan klien menghentikan penghantaran.
 
 ```json
 {
@@ -354,11 +346,7 @@ Jika semua pelaksana gagal, kegagalan terakhir dikembalikan. Pembatalan oleh kli
 }
 ```
 
-Pelaksana boleh menghasilkan berbilang panggilan bebas dalam satu respons. Panggilan bersandar
-dikendalikan dalam giliran hasil alat klien yang berikutnya, dengan perancang menyemak setiap hasil.
-`maxToolRounds` ditetapkan secara lalai kepada `8` dan menerima `1`–`32`; apabila had dicapai, perancang mesti
-menghasilkan jawapan akhir terbaik yang tersedia. Keputusan dalaman perancang dibufer, manakala
-respons berhadapan dengan klien yang dipilih mengekalkan pilihan penstriman asal.
+Pelaksana mungkin mengeluarkan berbilang panggilan bebas dalam satu respons. Panggilan bersandar dikendalikan dalam giliran hasil alat klien kemudian, dengan perancang menyemak setiap hasil. `maxToolRounds` ditetapkan secara lalai kepada `8` dan menerima `1`–`32`; setelah dicapai, perancang mesti menghasilkan jawapan akhir terbaik yang tersedia. Keputusan perancang dalaman ditimbal (buffered), manakala respons menghadap klien yang dipilih mengekalkan keutamaan penstriman asal.
 
 ### Kelompok lekat `round-robin` dan pengembangan akaun
 

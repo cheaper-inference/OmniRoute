@@ -328,20 +328,13 @@ Kombinačný mechanizmus OmniRoute podporuje **20 stratégií smerovania** (dekl
 Na striktnú rotáciu použite `round-robin`; rovnaké váhy pri stratégii `weighted` poskytujú štatistické — nie
 striktné — vyváženie.
 
-### Režim agentického pipeline
+### Režim agentickej pipeline
 
-Kombinácia `pipeline` s najmenej dvoma modelmi môže pomocou
-`config.agenticOrchestration.enabled` aktivovať smerovanie plánovač/vykonávateľ. Prvý cieľ zabezpečuje plánovanie a konečné odpovede;
-druhý cieľ generuje volania nástrojov v natívnom formáte klienta. OmniRoute rozpoznáva pokračovania
-s výsledkami nástrojov z protokolu požiadavky, zisťuje u plánovača, či je potrebné ďalšie kolo použitia nástrojov,
-a dynamicky určuje vykonávateľa alebo plánovača ako posledný krok komunikujúci s klientom.
+Kombinácia `pipeline` s aspoň dvoma modelmi sa môže rozhodnúť pre smerovanie plánovač/vykonávateľ pomocou `config.agenticOrchestration.enabled`. Prvý cieľ má na starosti plánovanie a konečné odpovede; druhý cieľ vysiela klientské natívne volania nástrojov. OmniRoute deteguje pokračovania výsledkov nástrojov z protokolu požiadaviek, pýta sa plánovača, či je potrebné ďalšie kolo nástrojov, a dynamicky určuje, či bude klientovi čeliť ako posledný krok vykonávateľ alebo plánovač.
 
-Ďalšie modely za druhým cieľom slúžia ako zoradené záložné vykonávatele. Neúspešná
-odpoveď HTTP alebo výnimka prenosu spôsobí prechod na ďalšieho vykonávateľa, pričom sa zachová
-rovnaké rozhodnutie plánovača a natívne nástroje, ale použije sa vlastná výzva pre daný krok
-a vyriešené pripojenie príslušného vykonávateľa. Prvá úspešná odpoveď sa vráti nezmenená vrátane
-streamovania SSE; zlyhania po začatí úspešného streamu tu nemožno zopakovať.
-Ak zlyhajú všetci vykonávatelia, vráti sa posledné zlyhanie. Zrušenie zo strany klienta zastaví odosielanie.
+Pri pokračovaniach výsledkov nástrojov OmniRoute tiež zastaví vykonávanie, keď dve po sebe nasledujúce dokončené kolá zopakujú rovnaké volania nástrojov s nezmenenými výsledkami, alebo keď každý explicitne označený výsledok v dvoch po sebe nasledujúcich kolách zlyhal. Zmenené výsledky umožňujú opakované volania (napríklad polling). Ochranný mechanizmus sa resetuje pri novej požiadavke používateľa, zoskupuje paralelné volania do jedného kola a podporuje histórie Anthropic, Chat Completions, Responses a Gemini. Plánovač dostane dôvod a vlastní konečnú odpoveď, aj keď si vyžiada ďalšie kolo nástrojov.
+
+Ďalšie modely za druhým cieľom sú zoradené ako zálohy vykonávateľa. Zlyhaná HTTP odpoveď alebo transportná výnimka posunie proces na ďalšieho vykonávateľa, pričom si zachováva rovnaké rozhodnutie plánovača a natívne nástroje, ale používa vlastný prompt kroku a vyriešené pripojenie daného vykonávateľa. Prvá úspešná odpoveď sa vráti nezmenená, vrátane SSE streamovania; zlyhania po začatí úspešného streamu tu nie je možné opakovať. Ak všetci vykonávatelia zlyhajú, vráti sa posledná chyba. Prerušenia zo strany klienta zastavia odosielanie.
 
 ```json
 {
@@ -353,11 +346,7 @@ Ak zlyhajú všetci vykonávatelia, vráti sa posledné zlyhanie. Zrušenie zo s
 }
 ```
 
-Vykonávateľ môže v jednej odpovedi vygenerovať viacero nezávislých volaní. Závislé volania sa
-spracujú v neskorších kolách klienta s výsledkami nástrojov, pričom plánovač skontroluje každý výsledok.
-Predvolená hodnota `maxToolRounds` je `8` a akceptovaný rozsah je `1`–`32`; po dosiahnutí limitu musí plánovač
-vytvoriť najlepšiu dostupnú konečnú odpoveď. Interné rozhodnutia plánovača sa ukladajú do vyrovnávacej pamäte, zatiaľ čo
-vybraná odpoveď určená klientovi zachováva pôvodné nastavenie streamovania.
+Vykonávateľ môže v jednej odpovedi vydať viacero nezávislých volaní. Závislé volania sa spracúvajú v neskorších kolách výsledkov nástrojov klienta, pričom plánovač kontroluje každý výsledok. `maxToolRounds` má predvolenú hodnotu `8` a akceptuje `1`–`32`; po dosiahnutí tohto limitu musí plánovač vytvoriť najlepšiu dostupnú konečnú odpoveď. Interné rozhodnutia plánovača sú ukladané do vyrovnávacej pamäte, zatiaľ čo vybraná odpoveď smerujúca ku klientovi zachováva pôvodnú preferenciu streamovania.
 
 ### Dávkové a účtové rozšírenie stratégie `round-robin`
 

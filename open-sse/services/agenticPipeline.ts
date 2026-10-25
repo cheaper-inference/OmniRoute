@@ -8,6 +8,7 @@
  * executor may still emit multiple independent tool calls in parallel.
  */
 import { errorResponse } from "../utils/error.ts";
+import { stalledToolLoopReason } from "./agenticLoopGuard.ts";
 import type { ComboLogger, HandleSingleModel, ResolvedComboTarget } from "./combo/types.ts";
 import { extractPanelText, isToolBearingRequest } from "./fusion.ts";
 import { prependSystemInstruction, type PipelineStep } from "./pipeline.ts";
@@ -242,6 +243,33 @@ function finalPrompt(draft: string): string {
     .join("\n\n");
 }
 
+async function readPlannerDecision(
+  response: Response,
+  model: string,
+  continuation: boolean,
+  log: ComboLogger
+): Promise<RouteDecision | Response> {
+  let decisionText = "";
+  try {
+    decisionText = extractPanelText(await response.clone().json());
+  } catch {
+    return errorResponse(502, `Agentic planner (${model}) returned an unparseable response`);
+  }
+  if (!decisionText.trim()) {
+    return errorResponse(502, `Agentic planner (${model}) returned an empty decision`);
+  }
+
+  const decision = parseDecision(decisionText, continuation);
+  if (!decision.explicit) {
+    log.warn(
+      "AGENTIC_PIPELINE",
+      `Planner ${model} omitted OMNIROUTE_ROUTE; using safe ${decision.route.toUpperCase()} fallback`
+    );
+  }
+
+  return decision;
+}
+
 async function dispatchExecutors(
   body: Body,
   executors: PipelineStep[],
@@ -295,6 +323,7 @@ export async function handleAgenticPipelineChat({
   const maxToolRounds = Math.min(Math.max(config?.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS, 1), 32);
   const toolRounds = countToolResultTurns(body);
   const maxRoundsReached = toolRounds >= maxToolRounds;
+  const stalledReason = continuation ? stalledToolLoopReason(body) : null;
 
   log.info(
     "AGENTIC_PIPELINE",
@@ -315,7 +344,10 @@ export async function handleAgenticPipelineChat({
     withoutTools(body, false),
     [
       planner.prompt,
-      plannerDecisionPrompt(continuation, maxRoundsReached),
+      plannerDecisionPrompt(continuation, maxRoundsReached || Boolean(stalledReason)),
+      stalledReason
+        ? `Tool-loop protection stopped further execution because ${stalledReason}. Explain the blocker using the returned evidence.`
+        : "",
       availableToolsPrompt(body),
     ]
       .filter(Boolean)
@@ -324,25 +356,10 @@ export async function handleAgenticPipelineChat({
   const decisionResponse = await handleSingleModel(decisionBody, plannerModel, stepTarget(planner));
   if (!decisionResponse.ok) return decisionResponse;
 
-  let decisionText = "";
-  try {
-    decisionText = extractPanelText(await decisionResponse.clone().json());
-  } catch {
-    return errorResponse(502, `Agentic planner (${plannerModel}) returned an unparseable response`);
-  }
-  if (!decisionText.trim()) {
-    return errorResponse(502, `Agentic planner (${plannerModel}) returned an empty decision`);
-  }
+  const decision = await readPlannerDecision(decisionResponse, plannerModel, continuation, log);
+  if (decision instanceof Response) return decision;
 
-  const decision = parseDecision(decisionText, continuation);
-  if (!decision.explicit) {
-    log.warn(
-      "AGENTIC_PIPELINE",
-      `Planner ${plannerModel} omitted OMNIROUTE_ROUTE; using safe ${decision.route.toUpperCase()} fallback`
-    );
-  }
-
-  if (decision.route === "tools" && !maxRoundsReached) {
+  if (decision.route === "tools" && !maxRoundsReached && !stalledReason) {
     return dispatchExecutors(body, executors, decision.content, handleSingleModel, log);
   }
 
@@ -350,7 +367,15 @@ export async function handleAgenticPipelineChat({
   // streaming and response translation while keeping the internal decision buffered.
   const finalBody = prependSystemInstruction(
     withoutTools(body, true),
-    [planner.prompt, finalPrompt(decision.content)].filter(Boolean).join("\n\n")
+    [
+      planner.prompt,
+      finalPrompt(decision.content),
+      stalledReason
+        ? `Further tool execution was stopped because ${stalledReason}. Explain the blocker; do not claim unfinished work succeeded.`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n")
   );
   log.info("AGENTIC_PIPELINE", `Routing client-facing final turn to ${plannerModel}`);
   return handleSingleModel(finalBody, plannerModel, stepTarget(planner));

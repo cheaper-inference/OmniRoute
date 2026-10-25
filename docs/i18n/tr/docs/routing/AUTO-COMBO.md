@@ -342,11 +342,13 @@ OmniRoute'un combo motoru **20 yönlendirme stratejisini** destekler (`src/share
 
 Kesin rotasyon için `round-robin` kullanın; `weighted` üzerinde eşit ağırlıklar, kesin değil istatistiksel bir denge sağlar.
 
-### Aracılı işlem hattı modu
+### Agentic pipeline modu
 
-En az iki modele sahip bir `pipeline` kombosu, `config.agenticOrchestration.enabled` ile planlayıcı/yürütücü yönlendirmesini etkinleştirebilir. İlk hedef, planlamayı ve nihai yanıtları üstlenir; ikinci hedef, istemciye özgü araç çağrıları üretir. OmniRoute, istek protokolündeki araç sonucu devamlarını algılar, planlayıcıya başka bir araç turunun gerekli olup olmadığını sorar ve istemciye sunulan son adım olarak yürütücüyü veya planlayıcıyı dinamik biçimde seçer.
+En az iki modele sahip bir `pipeline` kombinasyonu, `config.agenticOrchestration.enabled` ile planlayıcı/yürütücü (planner/executor) yönlendirmesini tercih edebilir. İlk hedef planlamadan ve nihai yanıtlardan sorumludur; ikinci hedef ise istemciye özgü (client-native) araç çağrıları üretir. OmniRoute, istek protokolünden araç sonucu devamlılıklarını (tool-result continuations) algılar, planlayıcıya başka bir araç turuna ihtiyaç olup olmadığını sorar ve dinamik olarak yürütücüyü veya planlayıcıyı istemciye dönük nihai adım haline getirir.
 
-İkinci hedeften sonraki ek modeller, sıralı yürütücü yedekleridir. Başarısız bir HTTP yanıtı veya aktarım istisnası, aynı planlayıcı kararı ve yerel araçlar korunarak bir sonraki yürütücüye geçilmesini sağlar; ancak o yürütücünün kendi adım istemi ve çözümlenmiş bağlantısı kullanılır. İlk başarılı yanıt, SSE akışı dâhil olmak üzere değiştirilmeden döndürülür; başarılı bir akış başladıktan sonraki hatalar burada yeniden denenemez. Tüm yürütücüler başarısız olursa son hata döndürülür. İstemci iptalleri dağıtımı durdurur.
+Araç sonucu devamlılıklarında OmniRoute, iki ardışık tamamlanmış tur aynı araç çağrılarını değişmemiş sonuçlarla tekrarladığında veya iki ardışık turdaki açıkça işaretlenmiş her sonuç başarısız olduğunda yürütmeyi durdurur. Değişen sonuçlar tekrarlanan çağrılara (örneğin, yoklama/polling) izin verir. Koruma (guard), yeni bir kullanıcı isteğinde sıfırlanır, paralel çağrıları tek bir turda gruplandırır ve Anthropic, Chat Completions, Responses ve Gemini geçmişlerini destekler. Planlayıcı nedeni alır ve başka bir araç turu talep etse bile nihai yanıtın sahibidir.
+
+İkinci hedeften sonraki ek modeller, sıralı yürütücü yedekleridir. Başarısız bir HTTP yanıtı veya taşıma istisnası, aynı planlayıcı kararını ve yerel araçları taşıyan ancak o yürütücünün kendi adım istemini (step prompt) ve çözümlenmiş bağlantısını kullanan bir sonraki yürütücüye geçer. İlk başarılı yanıt, SSE akışı dahil olmak üzere değiştirilmeden döndürülür; başarılı bir akış başladıktan sonraki hatalar burada yeniden denenemez. Tüm yürütücüler başarısız olursa, son hata döndürülür. İstemci iptalleri gönderimi durdurur.
 
 ```json
 {
@@ -358,7 +360,7 @@ En az iki modele sahip bir `pipeline` kombosu, `config.agenticOrchestration.enab
 }
 ```
 
-Yürütücü, tek bir yanıtta birden fazla bağımsız çağrı üretebilir. Bağımlı çağrılar, sonraki istemci araç sonucu turlarında işlenir ve planlayıcı her sonucu inceler. `maxToolRounds` varsayılan olarak `8` değerini kullanır ve `1`–`32` aralığını kabul eder; sınıra ulaşıldığında planlayıcı, mevcut en iyi nihai yanıtı üretmelidir. Dahili planlayıcı kararları arabelleğe alınırken istemciye sunulmak üzere seçilen yanıt, özgün akış tercihini korur.
+Yürütücü, tek bir yanıtta birden fazla bağımsız çağrı üretebilir. Bağımlı çağrılar, planlayıcının her sonucu incelemesiyle birlikte sonraki istemci araç-sonucu turlarında ele alınır. `maxToolRounds` varsayılan olarak `8`'dir ve `1`–`32` arası değerleri kabul eder; bu sınıra ulaşıldığında, planlayıcı mevcut en iyi nihai yanıtı üretmelidir. Dahili planlayıcı kararları arabelleğe alınırken, seçilen istemciye dönük yanıt orijinal akış tercihini korur.
 
 ### `round-robin` yapışkan gruplama ve hesap genişletme
 
