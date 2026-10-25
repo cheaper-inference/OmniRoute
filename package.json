@@ -382,7 +382,7 @@
     "marked-terminal": "^7.3.0",
     "mermaid": "^11.17.2",
     "monaco-editor": "^0.56.0",
-    "next": "16.3.8",
+    "next": "16.4.3",
     "next-intl": "^4.14.0",
     "next-themes": "^0.4.6",
     "node-machine-id": "^1.1.12",
