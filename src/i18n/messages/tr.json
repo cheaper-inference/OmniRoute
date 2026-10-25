@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Tüm modeller zaten içe aktarıldı",
     "noNewModelsToImport": "İçe aktarılacak yeni model yok — tüm modeller zaten kayıt defterinde veya özel modeller listesinde",
     "localCatalogFallbackStatus": "Sağlayıcının model listesine ulaşılamadı — yerleşik katalog gösteriliyor",
+    "discoveryDegradedStatus": "Model keşfi başarısız {time}",
     "skippingExistingModels": "{count} mevcut model atlanıyor",
     "autoSync": "Otomatik Senkronizasyon",
     "autoSyncShort": "Senkronize Et",

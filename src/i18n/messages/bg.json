@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Всички модели вече са импортирани",
     "noNewModelsToImport": "Няма нови модели за импортиране — всички модели вече са в регистъра или списъка с персонализирани модели",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Откриването на модел не бе успешно {time}",
     "skippingExistingModels": "Пропускане на {count} съществуващи модела",
     "autoSync": "Автоматично синхронизиране",
     "autoSyncShort": "Синхронизиране",

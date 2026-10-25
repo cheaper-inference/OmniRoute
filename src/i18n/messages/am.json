@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "ሁሉም ሞዴሎች አስቀድመው ገብተዋል",
     "noNewModelsToImport": "የሚገቡ አዲስ ሞዴሎች የሉም — ሁሉም ሞዴሎች አስቀድመው በመዝገቡ ወይም በብጁ ሞዴሎች ዝርዝር ውስጥ ይገኛሉ",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "የሞዴል ግኝት አልተሳካም {time}",
     "skippingExistingModels": "{count} ነባር ሞዴሎችን በመዝለል ላይ",
     "autoSync": "ራስ-ሰር ማመሳሰል",
     "autoSyncShort": "አመሳስል",

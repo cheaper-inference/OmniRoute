@@ -16,7 +16,7 @@ import { Badge, Button, Checkbox, ReorderControl, Select, Toggle } from "@/share
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
-import { shouldShowConnectionLastError } from "./connectionRowHelpers";
+import { shouldShowConnectionLastError, formatRelativeAge } from "./connectionRowHelpers";
 import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import type { ConnectionRowProps } from "./connectionRowTypes";
 import { getStatusPresentation } from "./connectionRowStatus";
@@ -293,33 +293,36 @@ export default function ConnectionRow({
   const effectiveUpstreamProxyMode = upstreamProxyMode ?? "native";
   const autoSyncEnabled = !!(connection.providerSpecificData as Record<string, unknown> | undefined)
     ?.autoSync;
-  const [syncClock, setSyncClock] = useState<number | null>(null);
+  // One clock for the whole row: the age of the last catalog sync and the age
+  // of the last discovery outcome both read from it, so the two never
+  // disagree — and the row never calls Date.now() while rendering.
+  const [rowClock, setRowClock] = useState<number | null>(null);
   useEffect(() => {
-    const update = () => setSyncClock(Date.now());
+    const update = () => setRowClock(Date.now());
     update();
     const timer = setInterval(update, 60_000);
     return () => clearInterval(timer);
   }, []);
   const lastSync = connection.syncedModelsAt ? Date.parse(connection.syncedModelsAt) : NaN;
   const validSync = Number.isFinite(lastSync) && lastSync > 0;
-  const ageMinutes =
-    validSync && syncClock !== null
-      ? Math.max(0, Math.floor((syncClock - lastSync) / 60_000))
-      : null;
-  const ageUnit =
-    ageMinutes === null ? null : ageMinutes < 60 ? "minute" : ageMinutes < 1440 ? "hour" : "day";
-  const ageValue =
-    ageMinutes === null
-      ? 0
-      : ageUnit === "minute"
-        ? ageMinutes
-        : ageUnit === "hour"
-          ? Math.floor(ageMinutes / 60)
-          : Math.floor(ageMinutes / 1440);
-  const syncAgeLabel =
-    ageUnit === null
-      ? null
-      : new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(-ageValue, ageUnit);
+  const syncAgeLabel = rowClock === null ? null : formatRelativeAge(lastSync, rowClock, locale);
+  // The outcome of the last discovery of this connection. Only a failure is
+  // shown: the cause is a technical value next to the label, never a sentence,
+  // and the label says nothing about the model list the page displays.
+  const discoveryState = connection.discoveryState;
+  const discoveryFailed = discoveryState?.status === "degraded";
+  const discoveryAt = discoveryState?.at ? Date.parse(discoveryState.at) : NaN;
+  const discoveryAgeLabel =
+    rowClock === null ? null : formatRelativeAge(discoveryAt, rowClock, locale);
+  const discoveryCause = discoveryFailed && discoveryState?.cause ? discoveryState.cause : null;
+  const discoveryTitle = discoveryFailed
+    ? [
+        discoveryState?.at ? new Date(discoveryState.at).toLocaleString(locale) : null,
+        discoveryCause,
+      ]
+        .filter(Boolean)
+        .join(" — ")
+    : "";
 
   return (
     <div
@@ -477,6 +480,21 @@ export default function ConnectionRow({
                     : t("autoSyncNeverSynced")}
                 </span>
               </>
+            )}
+            {discoveryFailed && discoveryAgeLabel && (
+              <span
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-warning/15 text-warning"
+                title={discoveryTitle}
+                data-testid="connection-discovery-state"
+              >
+                <Icon name="warning" size={11} />
+                {t("discoveryDegradedStatus", { time: discoveryAgeLabel })}
+                {discoveryCause && (
+                  <span className="font-mono opacity-80" data-testid="connection-discovery-cause">
+                    {discoveryCause}
+                  </span>
+                )}
+              </span>
             )}
             {isClaude && (
               <>

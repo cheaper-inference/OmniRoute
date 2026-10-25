@@ -1,4 +1,31 @@
 /**
+ * Render the age of a timestamp as a relative time ("2 hours ago").
+ *
+ * The connection row shows the age of the last catalog sync and the age of the
+ * last discovery outcome; both read the same way, so both go through this
+ * helper. Returns null when the timestamp or the clock cannot be read, so
+ * callers fall back to their own wording instead of rendering a wrong age.
+ */
+export function formatRelativeAge(
+  timestampMs: number,
+  nowMs: number,
+  locale: string
+): string | null {
+  if (!Number.isFinite(timestampMs) || timestampMs <= 0) return null;
+  if (!Number.isFinite(nowMs)) return null;
+
+  const ageMinutes = Math.max(0, Math.floor((nowMs - timestampMs) / 60_000));
+  const unit = ageMinutes < 60 ? "minute" : ageMinutes < 1440 ? "hour" : "day";
+  const value =
+    unit === "minute"
+      ? ageMinutes
+      : unit === "hour"
+        ? Math.floor(ageMinutes / 60)
+        : Math.floor(ageMinutes / 1440);
+  return new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(-value, unit);
+}
+
+/**
  * Decide whether a connection row should render its `lastError` text.
  *
  * A disabled connection (`isActive === false`) is still counted by the provider

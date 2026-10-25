@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "सबै मोडेलहरू पहिले नै आयात गरिएका छन्",
     "noNewModelsToImport": "आयात गर्न कुनै नयाँ मोडेल छैन — सबै मोडेलहरू पहिले नै रजिस्ट्री वा अनुकूलित मोडेलहरूको सूचीमा छन्",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "मोडेल खोज असफल भयो {time}",
     "skippingExistingModels": "अवस्थित {count} मोडेलहरू छोडिँदैछन्",
     "autoSync": "स्वतः-सिङ्क",
     "autoSyncShort": "सिङ्क गर्नुहोस्",

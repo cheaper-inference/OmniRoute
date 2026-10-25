@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "ម៉ូដែលទាំងអស់ត្រូវបាននាំចូលរួចហើយ",
     "noNewModelsToImport": "គ្មានម៉ូដែលថ្មីសម្រាប់នាំចូលទេ — ម៉ូដែលទាំងអស់មាននៅក្នុងបញ្ជីឈ្មោះម៉ូដែល ឬបញ្ជីម៉ូដែលផ្ទាល់ខ្លួនរួចហើយ",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "ការស្វែងរកម៉ូដែលបរាជ័យ {time}",
     "skippingExistingModels": "កំពុងរំលងម៉ូដែលដែលមានស្រាប់ចំនួន {count}",
     "autoSync": "ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ",
     "autoSyncShort": "ធ្វើសមកាលកម្ម",

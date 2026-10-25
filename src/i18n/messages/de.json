@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Alle Modelle sind bereits importiert",
     "noNewModelsToImport": "Keine neuen Modelle zum Importieren — alle Modelle sind bereits in der Registry oder der Liste benutzerdefinierter Modelle",
     "localCatalogFallbackStatus": "Die Modellliste des Anbieters ist nicht erreichbar – der integrierte Katalog wird angezeigt",
+    "discoveryDegradedStatus": "Modellentdeckung fehlgeschlagen {time}",
     "skippingExistingModels": "Überspringe {count} vorhandene Modelle",
     "autoSync": "Automatische Synchronisierung",
     "autoSyncShort": "Synchronisieren",

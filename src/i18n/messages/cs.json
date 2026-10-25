@@ -5579,6 +5579,7 @@
     "allModelsAlreadyImported": "Všechny modely jsou již importovány",
     "noNewModelsToImport": "Žádné nové modely k importu — všechny modely jsou již v registru nebo v seznamu vlastních modelů",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Objevení modelu selhalo {time}",
     "skippingExistingModels": "Přeskakování {count} existujících modelů",
     "autoSync": "Automatická synchronizace",
     "autoSyncShort": "Synchronizace",
