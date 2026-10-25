@@ -9,6 +9,7 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { ZcodeAppServerClient, type ZcodeClientLike } from "./zcodeProtocol.ts";
+import { executeZcodeGateway } from "./zcode/gateway.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { MAX_CURSOR_IMAGES, resolveCursorImages } from "../utils/cursorImages.ts";
 
@@ -432,12 +433,17 @@ export class ZcodeExecutor extends BaseExecutor {
     const resolution = resolveZcodeModel(input.model);
     if (!resolution.ok)
       return errorResponse(400, "error" in resolution ? resolution.error : "Invalid ZCode model");
+    const transport = (process.env.ZCODE_TRANSPORT || "app-server").trim().toLowerCase();
+    if (!["gateway", "app-server"].includes(transport))
+      return errorResponse(400, "Invalid ZCODE_TRANSPORT");
     let request: JsonRecord;
     try {
       request = await prepareZcodeRequest(input.body, resolution.model, input.signal);
     } catch (error) {
       return errorResponse(400, sanitizeErrorMessage(errorText(error)));
     }
+    if (transport === "gateway")
+      return executeZcodeGateway({ ...input, model: resolution.model }, request);
     const client = this.createClient();
     try {
       const cwd = resolve(this.workingDirectory());
