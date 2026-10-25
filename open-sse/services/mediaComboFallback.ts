@@ -84,3 +84,35 @@ export function hasDistinctMediaFallback({
 export function isTargetLocalMediaStatus(status: number): boolean {
   return status === 400 || status === 401 || status === 403;
 }
+
+function credentialConnectionIdOf(credentials: unknown): string | null {
+  if (!credentials || typeof credentials !== "object") return null;
+  const id = (credentials as { connectionId?: unknown }).connectionId;
+  return id ? String(id) : null;
+}
+
+/**
+ * Single decision point shared by the image and speech combos: a failed
+ * dispatch is terminal unless it is a target-local 400/401/403 AND a later
+ * target moves the request onto a distinct provider/account.
+ */
+export function isTerminalMediaFailure({
+  status,
+  provider,
+  credentials,
+  target,
+  remaining,
+}: {
+  status: number;
+  provider: string;
+  credentials: unknown;
+  target: MediaComboFallbackTarget;
+  remaining: ResolvedMediaComboFallbackTarget[];
+}): boolean {
+  if (!isTargetLocalMediaStatus(status)) return false;
+  return !hasDistinctMediaFallback({
+    currentProvider: provider,
+    currentConnectionId: credentialConnectionIdOf(credentials) || target.connectionId || null,
+    remaining,
+  });
+}

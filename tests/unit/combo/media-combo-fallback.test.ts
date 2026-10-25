@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   hasDistinctMediaFallback,
   isTargetLocalMediaStatus,
+  isTerminalMediaFailure,
   narrowMediaConnectionScope,
   pinnedConnectionIds,
 } from "../../../open-sse/services/mediaComboFallback.ts";
@@ -125,4 +126,35 @@ test("image combo keeps a target-local auth failure terminal without a distinct 
 
   assert.equal(result.outcome, "terminal");
   assert.equal(dispatchCount, 1);
+});
+
+test("isTerminalMediaFailure only continues on target-local status with a distinct later target", () => {
+  const remainingDistinct = [{ target: { connectionId: null }, provider: "fal-ai" }];
+  const remainingSame = [{ target: { connectionId: null }, provider: "openrouter" }];
+  const base = {
+    provider: "openrouter",
+    credentials: { connectionId: "or-account-a" },
+    target: { connectionId: null },
+  };
+
+  // target-local status + distinct later provider -> keep going
+  assert.equal(
+    isTerminalMediaFailure({ ...base, status: 403, remaining: remainingDistinct }),
+    false
+  );
+  // target-local status + only the same unpinned provider left -> terminal
+  assert.equal(isTerminalMediaFailure({ ...base, status: 403, remaining: remainingSame }), true);
+  // target-local status + nothing left -> terminal
+  assert.equal(isTerminalMediaFailure({ ...base, status: 401, remaining: [] }), true);
+  // non target-local status is never terminal here (the caller already treats it as retryable)
+  assert.equal(isTerminalMediaFailure({ ...base, status: 503, remaining: [] }), false);
+  // credential connection id wins over the target pin; a different pinned account continues
+  assert.equal(
+    isTerminalMediaFailure({
+      ...base,
+      status: 400,
+      remaining: [{ target: { connectionId: "or-account-b" }, provider: "openrouter" }],
+    }),
+    false
+  );
 });

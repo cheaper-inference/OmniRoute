@@ -35,8 +35,7 @@ import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import {
-  hasDistinctMediaFallback,
-  isTargetLocalMediaStatus,
+  isTerminalMediaFailure,
   narrowMediaConnectionScope,
   pinnedConnectionIds,
 } from "./mediaComboFallback.ts";
@@ -217,23 +216,19 @@ export async function executeSpeechCombo(
       // non-text or already-consumed body — keep the status-line message
     }
 
-    if (isTargetLocalMediaStatus(status)) {
-      const credentialConnectionId =
-        credentials && typeof credentials === "object" && "connectionId" in credentials
-          ? String((credentials as { connectionId?: unknown }).connectionId || "") || null
-          : null;
-      const connectionId = credentialConnectionId || target.connectionId || null;
-      const hasDistinctFallback = hasDistinctMediaFallback({
-        currentProvider: targetProvider,
-        currentConnectionId: connectionId,
+    if (
+      isTerminalMediaFailure({
+        status,
+        provider: targetProvider,
+        credentials,
+        target,
         remaining: speechTargets.slice(targetIndex + 1).map((candidate) => ({
           target: candidate,
           provider: parseSpeechModel(candidate.modelStr, dynamicProviders).provider,
         })),
-      });
-      if (!hasDistinctFallback) {
-        return errorResponse(status, `[${targetProvider}] ${error}`);
-      }
+      })
+    ) {
+      return errorResponse(status, `[${targetProvider}] ${error}`);
     }
 
     lastError = { status, error: `[${targetProvider}] ${error}` };

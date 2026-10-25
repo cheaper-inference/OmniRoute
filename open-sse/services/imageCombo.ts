@@ -31,8 +31,7 @@ import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import * as logger from "@/sse/utils/logger";
 import {
-  hasDistinctMediaFallback,
-  isTargetLocalMediaStatus,
+  isTerminalMediaFailure,
   narrowMediaConnectionScope,
   pinnedConnectionIds,
 } from "./mediaComboFallback.ts";
@@ -183,23 +182,19 @@ export async function runImageComboTargets<T extends ImageComboTarget>(
     // Bad-model/auth failures are local to the provider account that handled
     // the attempt. A genuinely different provider/account may still succeed;
     // retrying the same unpinned account would only duplicate the failure.
-    if (isTargetLocalMediaStatus(status)) {
-      const credentialConnectionId =
-        credentials && typeof credentials === "object" && "connectionId" in credentials
-          ? String((credentials as { connectionId?: unknown }).connectionId || "") || null
-          : null;
-      const connectionId = credentialConnectionId || target.connectionId || null;
-      const hasDistinctFallback = hasDistinctMediaFallback({
-        currentProvider: provider,
-        currentConnectionId: connectionId,
+    if (
+      isTerminalMediaFailure({
+        status,
+        provider,
+        credentials,
+        target,
         remaining: targets.slice(targetIndex + 1).map((candidate) => ({
           target: candidate,
           provider: opts.resolveProvider(candidate).provider,
         })),
-      });
-      if (!hasDistinctFallback) {
-        return { outcome: "terminal", provider, status, error, fallbackCount };
-      }
+      })
+    ) {
+      return { outcome: "terminal", provider, status, error, fallbackCount };
     }
 
     lastError = { status, error: `[${provider}] ${error}` };
@@ -207,6 +202,20 @@ export async function runImageComboTargets<T extends ImageComboTarget>(
   }
 
   return { outcome: "exhausted", fallbackCount, lastError };
+}
+
+/** Credentials for one image combo target, honouring the key scope and the target's account pin. */
+function resolveImageTargetCredentials(
+  provider: string,
+  target: ImageComboTarget,
+  allowedConnections: string[] | null
+) {
+  return getProviderCredentialsWithQuotaPreflight(
+    provider,
+    null,
+    narrowMediaConnectionScope(allowedConnections, pinnedConnectionIds(target)),
+    parseImageModel(target.modelStr).model
+  );
 }
 
 /**
@@ -284,12 +293,7 @@ export async function executeImageCombo(
   const run = await runImageComboTargets(imageTargets, {
     resolveProvider: (target) => parseImageModel(target.modelStr),
     resolveCredentials: (provider, target) =>
-      getProviderCredentialsWithQuotaPreflight(
-        provider,
-        null,
-        narrowMediaConnectionScope(allowedConnections, pinnedConnectionIds(target)),
-        parseImageModel(target.modelStr).model
-      ),
+      resolveImageTargetCredentials(provider, target, allowedConnections),
     dispatch: async ({ target, provider, model, credentials }) =>
       (await runImageRequestWithAccounting(
         {
