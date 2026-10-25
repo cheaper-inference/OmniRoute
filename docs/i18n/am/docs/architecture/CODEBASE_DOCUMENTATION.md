@@ -19,51 +19,54 @@
 
 ---
 
-## 1. የቴክኖሎጂ ስብስብ
+## 1. የቴክኖሎጂ ክምር
 
-| ጉዳይ        | ምርጫ                                                                                                                      |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------ |
-| የድር ማዕቀፍ   | **Next.js 16** (App Router፣ ራሱን የቻለ ውጤት፣ ዓለም አቀፍ middleware የለም)                                                         |
-| ቋንቋ        | **TypeScript 6.0+** — ዒላማ `ES2022`፣ `module: esnext`፣ `moduleResolution: bundler`፣ `strict: false`                       |
-| የአሂድ ጊዜ    | **Node.js** `>=22.22.2 <23` ወይም `>=24.0.0 <27` (በ`engines` + `SUPPORTED_NODE_RANGE` የሚያስገደድ)                             |
-| የውሂብ ጎታ    | **SQLite** በ`better-sqlite3` በኩል (singleton፣ WAL journaling)                                                             |
-| ዴስክቶፕ      | **Electron 41** + `electron-builder` 26.10 (በ`electron/` የሚገኝ የተለየ workspace)                                            |
-| ሙከራዎች      | **Node native test runner** (unit/integration)፣ **Vitest** (MCP፣ autoCombo፣ cache)፣ **Playwright** (e2e + protocols-e2e) |
-| ግንባታ       | Next.js standalone በ`scripts/build/build-next-isolated.mjs` በኩል                                                          |
-| Lint/ቅርጸት  | ESLint flat config + Prettier (`lint-staged` በHusky pre-commit በኩል)                                                      |
-| የሞጁል ስርዓት  | ESM በሁሉም ቦታ (`"type": "module"`)                                                                                         |
-| Workspaces | npm workspace — `open-sse` ብቸኛው ንዑስ-workspace ነው                                                                         |
+| ጉዳይ        | ምርጫ                                                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| የድር ፍሬምወርክ | **Next.js 16** (App Router፣ ብቻውን የሚቆም ውጤት (standalone output)፣ አጠቃላይ middleware የለም)                                      |
+| ቋንቋ        | **TypeScript 6.0+** — ዒላማ `ES2022`፣ `module: esnext`፣ `moduleResolution: bundler`፣ `strict: false`                        |
+| ራንታይም      | **Node.js** `>=22.22.2 <23` ወይም `>=24.0.0 <27` (በ `engines` + `SUPPORTED_NODE_RANGE` የሚገበድ)                               |
+| ዳታቤዝ       | **SQLite** በ `better-sqlite3` (ብቸኛ ምሳሌ (singleton)፣ WAL መመዝገቢያ (journaling))                                              |
+| ዴስክቶፕ      | **Electron 41** + `electron-builder` 26.10 (በ `electron/` ላይ የተለየ workspace)                                              |
+| ሙከራዎች      | **Node native test runner** (ዩኒት/ውህደት)፣ **Vitest** (MCP፣ autoCombo፣ cache)፣ **Playwright** (e2e + protocols-e2e)          |
+| ግንባታ       | Next.js standalone በ `scripts/build/build-next-isolated.mjs`                                                              |
+| ሊንት/ቅርጸት   | ESLint flat config + Prettier (`lint-staged` በ Husky pre-commit)                                                          |
+| የሞጁል ስርዓት  | በሁሉም ቦታ ESM (`"type": "module"`)                                                                                          |
+| የዳሽቦርድ UI  | **Tailwind CSS 4** + አብሮ የተሸከመው (vendored) **Keak CI UI Kit** (`packages/ui-kit`)፣ Lucide አዶዎች — `DESIGN_SYSTEM.md` ይመልከቱ |
+| Workspaces | npm workspaces — `open-sse`፣ `packages/browser-pool`፣ `packages/ui-kit`                                                   |
 
-የዱካ ተለዋጭ ስሞች (`tsconfig.json`)፦
+የመንገድ ቅጽል ስሞች (path aliases) (`tsconfig.json`)፦
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`፣ `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
-ነባሪ HTTP port፦ **`20128`** (API እና dashboard ተመሳሳዩን process ይጋራሉ)። የውሂብ
-ማውጫው `DATA_DIR` env var ሲሆን፣ ነባሪ ዋጋው `~/.omniroute/` ነው።
+ነባሪ HTTP ወደብ፦ **`20128`** (API እና ዳሽቦርዱ ተመሳሳይ ሂደት ይጋራሉ)። የውሂብ ማውጫ
+`DATA_DIR` የአካባቢ ተለዋዋጭ ነው፣ ነባሪው `~/.omniroute/` ነው።
 
 ---
 
-## 2. የማከማቻው አቀማመጥ
+## 2. የሪፖዚቶሪ አቀማመጥ
 
 ```
 OmniRoute/
-├── src/                  የNext.js መተግበሪያ (App Router፣ libs፣ domain፣ server፣ shared)
-├── open-sse/             የStreaming engine workspace (@omniroute/open-sse)
-├── electron/             የዴስክቶፕ wrapper (Electron 41 main + preload)
-├── bin/                  የCLI መግቢያ ነጥቦች (omniroute፣ reset-password)
-├── tests/                Unit፣ integration፣ e2e፣ protocols-e2e፣ translator፣ security፣ fixtures
-├── scripts/              የግንባታ፣ ማመሳሰል፣ ፍተሻ፣ migration እና የአሂድ ጊዜ አጋዥ scripts
-├── docs/                 ይፋዊ ሰነዶች (ይህ ማውጫ)
-├── public/               Static assets፣ PWA manifest፣ service worker
-├── config/               የአሂድ ጊዜ config ናሙናዎች
-├── images/               የግብይት/ቅጽበታዊ ገጽ እይታ assets
-├── _ideia/, _references/, _mono_repo/, _tasks/   ውስጣዊ ሙከራ / ዕቅድ (በምርቱ ውስጥ አይካተትም)
-├── CLAUDE.md             ለClaude Code የማከማቻ ደንቦች
-├── AGENTS.md             ለagents የበለጠ ጥልቅ የሥነ ሕንፃ ማጣቀሻ
-├── package.json          v3.8.51፣ የworkspace root
-└── tsconfig.json         የዱካ ተለዋጭ ስሞች + ዋና የcompiler አማራጮች
+├── src/                  የ Next.js መተግበሪያ (App Router, libs, domain, server, shared)
+├── open-sse/             የስትሪሚንግ ሞተር ወርክስፔስ (@omniroute/open-sse)
+├── packages/             ወርክስፔሶች: ui-kit (የተካተተ Keak CI UI Kit), browser-pool
+├── electron/             የዴስክቶፕ መጠቅለያ (Electron 41 main + preload)
+├── bin/                  የ CLI መግቢያ ነጥቦች (omniroute, reset-password)
+├── tests/                Unit, integration, e2e, protocols-e2e, translator, security, fixtures
+├── scripts/              የገንባ፣ ማመሳሰያ፣ ማረጋገጫ፣ ማዛወሪያ እና የሩንታይም ረዳት ስክሪፕቶች
+├── docs/                 ሕዝባዊ ሰነዶች (ይህ ዳይሬክተሪ)
+├── public/               ስታቲክ ንብረቶች፣ የ PWA manifest፣ service worker
+├── config/               የሩንታይም ኮንፊግ ናሙናዎች
+├── images/               የግብይት/ስክሪንሾት ንብረቶች
+├── _ideia/, _references/, _mono_repo/, _tasks/   የውስጣዊ ስክራች / ዕቅድ (አይላክም)
+├── CLAUDE.md             ለ Claude Code የሪፖ ህጎች
+├── AGENTS.md             ለኤጀንቶች ጥልቅ የአርክቴክቸር ማጣቀሻ
+├── package.json          v3.8.51፣ የወርክስፔስ ሥር
+└── tsconfig.json         የመንገድ ቅጽል ስሞች + መሰረታዊ የኮምፓይለር አማራጮች
 ```
 
 ---
@@ -72,45 +75,45 @@ OmniRoute/
 
 ```
 src/
-├── app/                  የApp Router ገጾች + API መስመሮች
-├── lib/                  ዋና ቤተ-መጻሕፍት (DB፣ ማረጋገጫ፣ OAuth፣ ክህሎቶች፣ ማህደረ ትውስታ፣ …)
-├── domain/               ንጹህ የዶሜይን ንብርብር (ፖሊሲ፣ አማራጭ፣ ወጪ፣ መቆለፍ፣ …)
-├── server/               የሰርቨር-ብቻ ሞጁሎች (ፈቃድ አሰጣጥ፣ cors፣ ማረጋገጫ)
-├── shared/               ዓይነቶች፣ ቋሚዎች፣ ማረጋገጫ፣ ውሎች፣ መገልገያዎች (ድንበር ተሻጋሪ አስተማማኝ)
-├── mitm/                 ከCLI ጋር ለማዋሃድ የመካከለኛ-ሰው ፕሮክሲ አጋዦች
-├── models/               የአካባቢያዊ ሞዴል ሜታዳታ / ቅጽል ስም አሰጣጥ
-├── sse/                  አሁንም በsrc/ ሥር ያሉ የቆዩ SSE አስተናጋጆች (በopen-sse/ ውስጥ ያልሆኑ)
-├── store/                የደንበኛ-ወገን ሁኔታ ማከማቻዎች
-├── middleware/           የመስመር-ደረጃ መካከለኛ ሶፍትዌር መገልገያዎች (የNext.js ዓለም-አቀፍ መካከለኛ ሶፍትዌር አይደለም)
-├── scripts/              በመተግበሪያ ኮድ ሊጫኑ የሚችሉ በዛፉ ውስጥ ያሉ ስክሪፕቶች
-├── types/                ዙሪያዊ እና የጋራ TS ዓይነቶች
-├── i18n/                 የቋንቋ ጥቅሎች
-├── instrumentation.ts    የNext.js መሣሪያ-መለኪያ ማያያዣ
+├── app/                  App Router pages + API routes
+├── lib/                  Core libraries (DB, auth, OAuth, skills, memory, …)
+├── domain/               Pure domain layer (policy, fallback, cost, lockout, …)
+├── server/               Server-only modules (authz, cors, auth)
+├── shared/               Types, constants, validation, contracts, utils (cross-boundary safe)
+├── mitm/                 Man-in-the-middle proxy helpers for CLI integration
+├── models/               Local model metadata / aliasing
+├── sse/                  Legacy SSE handlers that still live under src/ (not open-sse/)
+├── store/                Client-side state stores
+├── middleware/           Route-level middleware utilities (not Next.js global middleware)
+├── scripts/              In-tree scripts importable by app code
+├── types/                Ambient and shared TS types
+├── i18n/                 Locale bundles
+├── instrumentation.ts    Next.js instrumentation hook
 ├── instrumentation-node.ts
-└── proxy.ts              ከፍተኛ-ደረጃ የፕሮክሲ ማስነሻ አጋዥ
+└── proxy.ts              Top-level proxy bootstrap helper
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router ሁለቱንም የዳሽቦርድ UI እና የሕዝብ/አስተዳደር HTTP API ያቀርባል።
-**ዓለም-አቀፍ መካከለኛ ሶፍትዌር የለም** — ጣልቃ መግባት በእያንዳንዱ መስመር ይከናወናል።
+App Router የዳሽቦርድ UIን እና የሕዝባዊ/አስተዳደር HTTP APIን ሁለቱንም ይዘት ያቀርባል።
+**አጠቃላይ middleware የለም** — መቆጣጠሪያው በእያንዳዱ route ላይ ይከናወናል።
 
-በ`src/app/` ሥር ያሉ ከፍተኛ-ደረጃ ክፍሎች፦
+ከ`src/app/` በታች ያሉ ከፍተኛ ደረጃ ክፍሎች፦
 
-| ዱካ                                                                            | ዓላማ                                       |
-| ----------------------------------------------------------------------------- | ----------------------------------------- |
-| `api/`                                                                        | ሁሉም የHTTP API መስመሮች (ከታች ያለውን ዝርዝር ይመልከቱ) |
-| `a2a/`                                                                        | የA2A JSON-RPC 2.0 መጨረሻ ነጥብ (`POST /a2a`)  |
-| `.well-known/agent.json/`                                                     | የA2A Agent Card ማግኛ ሰነድ                   |
-| `(dashboard)/`                                                                | የዳሽቦርድ UI (የመስመር ቡድን፣ የURL ቅድመ-ቅጥያ የለውም)  |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | የማረጋገጫ ፍሰቶች                               |
-| `landing/`                                                                    | የግብይት/ማረፊያ ገጽ                             |
-| `docs/`                                                                       | የተካተተ የAPI ሰነዶች መመልከቻ                     |
-| `status/`, `maintenance/`, `offline/`                                         | የክወና ገጾች                                  |
-| `privacy/`, `terms/`                                                          | ሕጋዊ ገጾች                                   |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | የማይለወጡ የስህተት ገጾች                          |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | የፍሬምወርክ ስህተት/ጭነት ድንበሮች                    |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | የሥር መዋቅር                                  |
+| መንገድ                                                                          | ዓላማ                                           |
+| ----------------------------------------------------------------------------- | --------------------------------------------- |
+| `api/`                                                                        | ሁሉም የHTTP API መንገዶች (ከዚህ በታች ያለውን ዝርዝር ይመልከቱ) |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 endpoint (`POST /a2a`)       |
+| `.well-known/agent.json/`                                                     | የA2A Agent Card ማግኘት (discovery) ሰነድ          |
+| `(dashboard)/`                                                                | የዳሽቦርድ UI (የroute ቡድን፣ ያለ URL ቅድመ-ቅጥያ)        |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | የማረጋገጫ (auth) ፍሰቶች                            |
+| `landing/`                                                                    | የገበያ/መግቢያ ገጽ                                  |
+| `docs/`                                                                       | ተካትቶ ያለ የAPI ሰነዶች ማየያ                         |
+| `status/`, `maintenance/`, `offline/`                                         | የአሠራር ገጾች                                     |
+| `privacy/`, `terms/`                                                          | የሕግ ገጾች                                       |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | ቋሚ የስህተት ገጾች                                  |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | የፍሬምወርክ ስህተት/መጫኛ ወሰኖች                         |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | የሥር shell                                     |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — የUI ገጾች
 
@@ -118,10 +121,10 @@ App Router ሁለቱንም የዳሽቦርድ UI እና የሕዝብ/አስተ�
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`፣ እንዲሁም የሥር `page.tsx`, `HomePageClient.tsx`,
+`translator`, `usage`, `webhooks`፣ በተጨማሪም የሥር `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx`።
 
-#### 3.1.2 `src/app/api/` — ከፍተኛ-ደረጃ የAPI ቡድኖች
+#### 3.1.2 `src/app/api/` — ከፍተኛ ደረጃ API ቡድኖች
 
 ```
 src/app/api/
@@ -174,143 +177,142 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   የተካተተ የአገልግሎት አስተዳደር (9router፣ cliproxy) — LOCAL_ONLY
+├── services/   Embedded service management (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         ከOpenAI ጋር ተኳሃኝ የሕዝብ API
-├── v1beta/     የGemini-ዓይነት ተኳሃኝነት
+├── v1/         OpenAI-compatible public API
+├── v1beta/     Gemini-style compat
 ├── version-manager/
 └── webhooks/
 ```
 
 #### 3.1.2a `src/app/api/services/` — የተካተቱ አገልግሎቶች አስተዳደር
 
-9Router እና CLIProxyAPIን ለመጫን፣ ለማስጀመር፣ ለማቆም እና ለመከታተል የሚያገለግሉ መስመሮች።
-`npm install`ን ሊጠሩ እና ንዑስ ሂደቶችን ሊያስነሱ ስለሚችሉ፣ ሁሉም ዱካዎች **LOCAL_ONLY** (loopback ብቻ፣ ጥብቅ ደንብ #17) ተብለው ተመድበዋል።
+9Router እና CLIProxyAPIን ለመጫን፣ ለማስጀመር፣ ለማቆም እና ለመከታተል የሚያገለግሉ መንገዶች።
+ሁሉም መንገዶች **LOCAL_ONLY** (loopback ብቻ፣ ጥብቅ ህግ #17) ተብለው ይመደባሉ ምክክያቱም
+`npm install` መጥራት እና የልጅ ሂደቶች (child processes) መፍጠር ስለሚችሉ።
 
 ```
 src/app/api/services/
 ├── 9router/
 │   ├── _lib.ts             getOrInitSupervisor() ረዳት
-│   ├── install/route.ts    POST — በ execFile በኩል npm install
+│   ├── install/route.ts    POST — npm install በexecFile አማካኝነት
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — አዲስ ስሪትን npm install ማድረግ
-│   ├── rotate-key/route.ts POST — አዲስ API ቁልፍ ማመንጨት + እንደገና ማስጀመር
-│   ├── status/route.ts     GET  — ቀጥታ + DB ሁኔታ + የስሪት ሜታዳታ
-│   └── auto-start/route.ts POST — የ auto_start ጠቋሚን መቀያየር
+│   ├── update/route.ts     POST — npm install አዲስ ስሪት
+│   ├── rotate-key/route.ts POST — አዲስ የAPI ቁልፍ መፍጠር + እንደገና ማስጀመር
+│   ├── status/route.ts     GET  — ቀጥታ + DB ሁኔታ + የስሪት metadata
+│   └── auto-start/route.ts POST — auto_start flag ማንቃት/ማጥፋት
 ├── cliproxy/
 │   ├── _lib.ts             getOrInitSupervisor() ረዳት
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — አዲስ ስሪትን npm install ማድረግ
-│   ├── status/route.ts     GET  — ቀጥታ + DB ሁኔታ + የስሪት ሜታዳታ
-│   └── auto-start/route.ts POST — የ auto_start ጠቋሚን መቀያየር
+│   ├── update/route.ts     POST — npm install አዲስ ስሪት
+│   ├── status/route.ts     GET  — ቀጥታ + DB ሁኔታ + የስሪት metadata
+│   └── auto-start/route.ts POST — auto_start flag ማንቃት/ማጥፋት
 └── [name]/
-    └── logs/route.ts       GET  — የ SSE ሎግ ጭራ (በሁሉም አገልግሎቶች የሚጋራ)
+    └── logs/route.ts       GET  — SSE log tail (በሁሉም አገልግሎቶች የጋራ)
 ```
 
-ተዛማጅ የዳሽቦርድ UI፦
-`src/app/(dashboard)/dashboard/providers/services/` — ባለሁለት-ትር ገጽ (CLIProxyAPI + 9Router)።
-ለተካተተው የ9Router UI የተገላቢጦሽ ፕሮክሲ፦
+የሚዛመደው የዳሽቦርድ UI፡
+`src/app/(dashboard)/dashboard/providers/services/` — ሁለት-ትር ያለው ገጽ (CLIProxyAPI + 9Router)።
+ለ9Router embedded UI reverse proxy፡
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-ጥልቅ ማብራሪያ፦ `docs/frameworks/EMBEDDED-SERVICES.md`
+ዝርዝር፡ `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — ከOpenAI ጋር ተኳሃኝ የሕዝብ API
+#### 3.1.3 `src/app/api/v1/` — ከOpenAI ጋር ተኳሃኝ ይፋዊ API
 
 ```
 v1/
 ├── accounts/[id]/                       የመለያ ፍለጋ
-├── agents/tasks/[id]/, agents/tasks/    የA2A ቅርጽ ያላቸው የተግባር መገልገያዎች
-├── api/                                 በ v1/api ስር የቀረቡ የውስጥ API ረዳቶች
+├── agents/tasks/[id]/, agents/tasks/    A2A-ዘይቤ ያላቸው የtask endpoints
+├── api/                                 በv1/api ስር የሚጋለጡ ውስጣዊ የAPI ረዳቶች
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    Chat Completions (ዋናው መገልገያ)
-├── completions/                         የቆዩ የጽሑፍ ማጠናቀቂያዎች
-├── embeddings/                          ኢምቤዲንጎች
+├── chat/completions/                    Chat Completions (ዋናው endpoint)
+├── completions/                         አሮጌ የጽሑፍ completions
+├── embeddings/                          Embeddings
 ├── files/[id]/, files/                  Files API
-├── _helpers/                            የጋራ የመስመር ረዳቶች (የሕዝብ URL የለውም)
-├── images/{edits, generations}/         ምስል ማመንጨት + ማርትዕ
-├── issues/                              የመለየትና የማስቀደም ረዳት መገልገያዎች
-├── management/{proxies}/                በ v1 ውስጥ በአስተዳደር ወሰን ያሉ መስመሮች
-├── messages/{count_tokens}/             ከAnthropic-ቅጥ መልዕክቶች ጋር ተኳኋኝነት
+├── _helpers/                            የጋራ route ረዳቶች (ይፋዊ URL የለም)
+├── images/{edits, generations}/         የምስል ማመንጨት + ማስተካከል
+├── issues/                              Triage ረዳት endpoints
+├── management/{proxies}/                በv1 ውስጥ አስተዳደር-ወሰን ያላቸው routes
+├── messages/{count_tokens}/             Anthropic-ዘይቤ የmessages ተኳሃኝነት
 ├── models/                              የሞዴል ዝርዝር (`route.ts`, `catalog.ts`)
-├── moderations/                         ይዘት ማጣራት
+├── moderations/                         Moderation
 ├── music/                               ሙዚቃ ማመንጨት
-├── providers/[provider]/                ለእያንዳንዱ አቅራቢ የተለዩ ክዋኔዎች
-├── quotas/{check}                       የኮታ መመርመሪያዎች
+├── providers/[provider]/                የእያንዳንዱ-አቅራቢ ኦፕሬሽኖች
+├── quotas/{check}                       የኮታ መፈተሻዎች
 ├── registered-keys/                     የተመዘገቡ ቁልፎች አስተዳደር
-├── rerank/                              እንደገና ደረጃ ማውጣት
-├── responses/[...path]/                 OpenAI Responses API (ሁሉንም የሚይዝ)
+├── rerank/                              እንደገና መደርደር
+├── responses/[...path]/                 OpenAI Responses API (catch-all)
 ├── search/                              የድር ፍለጋ
 ├── videos/                              ቪዲዮ ማመንጨት
-├── ws/                                  የWebSocket ድልድይ
-└── route.ts                             የማውጫ አስተናጋጅ
+├── ws/                                  WebSocket ድልድይ
+└── route.ts                             የindex handler
 ```
 
-እያንዳንዱ የመስመር ፋይል ተመሳሳይ ንድፍ ይከተላል፦
+እያንዳንዱ የroute ፋይል አንድ ዓይነት ንድፍ ይከተላል፡
 
 ```
-መስመር → የCORS ቅድመ-በረራ → የZod የይዘት ማረጋገጫ → አማራጭ ማረጋገጫ
-       → የAPI ቁልፍ ፖሊሲ ማስፈጸም → ለአስተናጋጁ ማስተላለፍ (open-sse)
+Route → CORS preflight → Zod የbody ማረጋገጫ → አማራጭ auth
+      → የAPI ቁልፍ ፖሊሲ አፈጻጸም → ወደ handler ማስተላለፍ (open-sse)
 ```
 
-`v1beta/` የGemini-ቅጥ ተኳኋኝነት ገጽታ ነው (ወደተመሳሳዩ
-የ `open-sse/handlers/` የሂደት መስመር የሚተረጉም ቀላል መጠቅለያ)።
+`v1beta/` Gemini-ዘይቤ ያለው ተኳሃኝ ገጽ ነው (ወደ ተመሳሳዩ `open-sse/handlers/` ፓይፕላይን የሚተረጉም ቀጭን wrapper)።
 
-### 3.2 `src/lib/` — ዋና ቤተ-መጻሕፍት
+### 3.2 `src/lib/` — ዋና ላይብረሪዎች
 
-ውሂብን፣ ማመሳሰልን፣ OAuthን፣ ክህሎትን፣ ማህደረ ትውስታን ወዘተ ሁልጊዜ በእነዚህ ሞጁሎች በኩል ያስመጡ።
-ሰንጠረዡ ትክክለኛዎቹን ማውጫዎችና ታዋቂ ከፍተኛ-ደረጃ ፋይሎችን በቡድን ያቀርባል።
+data፣ sync፣ OAuth፣ skill፣ memory ወዘተ ሁልጊዜ በእነዚህ ሞጁሎች አማካኝነት ያስመጡ። ሰንጠረዡ ትክክለኛዎቹን ዳይሬክቶሪዎችን እና ምሩጽ ከፍተኛ-ደረጃ ፋይሎችን በቡድን ያደራጃል።
 
-| ሞጁል               | ዓላማ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A ፕሮቶኮል ሰርቨር፦ `taskManager.ts`፣ `streaming.ts`፣ `taskExecution.ts`፣ `routingLogger.ts`፣ `skills/` (6 ክህሎቶች፦ የወጪ ትንተና፣ የጤና ሪፖርት፣ የአቅራቢ ፍለጋ፣ የኮታ አስተዳደር፣ ብልጥ ማዘዋወር፣ ችሎታዎችን መዘርዘር)                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `acp/`            | Agent-Control-Protocol፦ `index.ts`፣ `manager.ts`፣ `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `api/`            | የውስጥ API አጋዥ መሳሪያዎች፦ `requireManagementAuth.ts`፣ `requireCliToolsAuth.ts`፣ `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `auth/`           | `managementPassword.ts` (የይለፍ ቃል ዳግም ማስጀመር / ሃሺንግ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `batches/`        | የOpenAI Batches API አገልግሎት (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `catalog/`        | የOpenRouter ካታሎግ ማመሳሰል (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `cloudAgent/`     | የደመና ወኪል መዝገብ፦ `api.ts`፣ `baseAgent.ts`፣ `db.ts`፣ `index.ts`፣ `registry.ts`፣ `types.ts`፣ `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `combos/`         | የጥምረት መፍቻ አጋዥ መሳሪያዎች                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `compliance/`     | ኦዲት + የአቅራቢ ኦዲት፦ `index.ts`፣ `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `config/`         | የአሂድ ጊዜ ውቅር ማገናኛ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `db/`             | የSQLite ጎራ ሞጁሎች (§3.2.1ን ይመልከቱ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `display/`        | በAPI ምላሾች ውስጥ ጥቅም ላይ የሚውሉ የUI/ማሳያ አጋዥ መሳሪያዎች                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `embeddings/`     | የመክተት አገልግሎት መዝገብ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `env/`            | የEnv መጫን + ውስጣዊ ፍተሻ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `evals/`          | የግምገማ አሂድ ጊዜ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `guardrails/`     | `piiMasker.ts`፣ `promptInjection.ts`፣ `visionBridge.ts`፣ `visionBridgeHelpers.ts`፣ `registry.ts`፣ `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `jobs/`           | የጀርባ ሥራዎች (`autoUpdate.ts`፣ …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `memory/`         | ቋሚ ማህደረ ትውስታ፦ `store.ts`፣ `cache.ts`፣ `retrieval.ts`፣ `summarization.ts`፣ `extraction.ts`፣ `injection.ts`፣ `qdrant.ts`፣ `settings.ts`፣ `verify.ts`፣ `schemas.ts`፣ `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `oauth/`          | OAuth/የአቅራቢ ማስመጣት ሞጁሎች (22)፦ `agy`፣ `antigravity`፣ `claude`፣ `cline`፣ `codebuddy-cn`፣ `codex`፣ `cursor`፣ `devin-desktop`፣ `ghe-copilot`፣ `github`፣ `gitlab-duo`፣ `grok-cli-oauth`፣ `grok-cli`፣ `kilocode`፣ `kimi-coding`፣ `kiro`፣ `openference`፣ `qoder`፣ `trae`፣ `xai-oauth`፣ `zed-hosted`፣ `zed`፣ እንዲሁም `services/`፣ `utils/` እና `constants/oauth.ts`                                                                                                                                                                                                                                                                                                        |
-| `plugins/`        | የፕለጊን ጫኚ (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `promptCache/`    | `prefixAnalyzer.ts`፣ `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `providerModels/` | የሚተዳደር የሞዴል የሕይወት ዑደት፦ `modelDiscovery.ts`፣ `managedModelImport.ts`፣ `managedAvailableModels.ts`፣ `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `providers/`      | የአቅራቢ አጋዥ መሳሪያዎች፦ `catalog.ts`፣ `validation.ts`፣ `imageValidation.ts`፣ `claudeExtraUsage.ts`፣ `codexConnectionDefaults.ts`፣ `codexFastTier.ts`፣ `webCookieAuth.ts`፣ `managedAvailableModels.ts`፣ `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `resilience/`     | `settings.ts` — የወረዳ ሰባሪ፣ የማቀዝቀዣ ጊዜ እና የመቆለፊያ ቅንብሮች                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `runtime/`        | የአሂድ ጊዜ ባህሪ ማወቂያ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `services/`       | የተካተቱ አገልግሎቶች ማዕቀፍ፦ `ServiceSupervisor.ts` (የክወና መቆለፊያ፣ የቀለበት ቋት እና የጤና ፈታሽ ያለው አጠቃላይ የልጅ-ሂደት ተቆጣጣሪ)፣ `bootstrap.ts` (በሂደት ደረጃ ምዝገባ እና ራስ-ሰር ማስጀመር)፣ `registry.ts` (መሳሪያ → ተቆጣጣሪ ካርታ)፣ `apiKey.ts` (የAES-256-GCM ቁልፍ ማከማቻ)፣ `modelSync.ts` (ወቅታዊ የሞዴል ማመሳሰል)፣ `ringBuffer.ts` (5 MB ክብ የምዝግብ ማስታወሻ ቋት)፣ `healthCheck.ts` (የHTTP ጤና መመርመሪያ)፣ `types.ts`፣ `embedWsProxy.ts` (የWebSocket ተኪ)፣ `installers/{ninerouter,cliproxy}.ts`። `docs/frameworks/EMBEDDED-SERVICES.md`ን ይመልከቱ                                                                                                                                                                                |
-| `agentSkills/`    | የወኪል ክህሎቶች ካታሎግ + አመንጪ፦ `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage)፣ `generator.ts` (generateAgentSkills → ወደ `skills/{id}/SKILL.md` ይጽፋል)፣ `openapiParser.ts` (ከOpenAPI ዝርዝር መግለጫ REST መጨረሻ ነጥቦችን ያወጣል)፣ `cliRegistryParser.ts` (ከbin/cli-registry የCLI ንዑስ ትዕዛዞችን ያወጣል)፣ `schemas.ts` (Zod፦ AgentSkillSchema፣ SkillCoverageSchema፣ ListQuerySchema፣ GenerateBodySchema)፣ `types.ts` (AgentSkill፣ SkillCoverage፣ SkillMarkdown፣ GeneratorReport)። በREST መስመሮች (`/api/agent-skills/*`)፣ MCP መሳሪያዎች (`omniroute_agent_skills_*`) እና A2A ክህሎት `list-capabilities` ጥቅም ላይ ይውላል። [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md)ን ይመልከቱ። |
-| `skills/`         | የክህሎት ማዕቀፍ፦ `registry.ts`፣ `executor.ts`፣ `interception.ts`፣ `injection.ts`፣ `sandbox.ts`፣ `custom.ts`፣ `hybrid.ts`፣ `builtins.ts`፣ `a2a.ts`፣ `providerSettings.ts`፣ `schemas.ts`፣ `skillssh.ts`፣ `types.ts`፣ በተጨማሪም `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `spend/`          | `batchWriter.ts` (የኋላ-ጽሁፍ ቋት)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `sync/`           | `bundle.ts`፣ `tokens.ts` (የደመና ማመሳሰል)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `system/`         | የስርዓት-ደረጃ አጋዥ መሳሪያዎች                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `translator/`     | ከፍተኛ-ደረጃ የተርጓሚ ማገናኛ (ወደ `open-sse/translator/` ውክልና ይሰጣል)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `usage/`          | የአጠቃቀም ሒሳብ፦ `costCalculator.ts`፣ `tokenAccounting.ts`፣ `usageHistory.ts`፣ `aggregateHistory.ts`፣ `usageStats.ts`፣ `callLogs.ts`፣ `callLogArtifacts.ts`፣ `fetcher.ts`፣ `providerLimits.ts`፣ `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `versionManager/` | ራስ-ሰር ማዘመን + የስሪት ማኒፌስት                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `ws/`             | የWebSocket ድልድይ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `zed-oauth/`      | የZed አርታዒ OAuth ፍሰት                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ሞዱል               | ዓላማ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | የA2A ፕሮቶኮል ሰርቨር፡ `taskManager.ts`፣ `streaming.ts`፣ `taskExecution.ts`፣ `routingLogger.ts`፣ `skills/` (6 ክህሎታት፡ የወጪ ትንተና፣ የጤና ሪፖርት፣ የአቅራቢ ግኝት፣ የኮታ አስተዳደር፣ ብልጥ መዘዋወር፣ ችሎታዎችን መዘርዘር)                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `acp/`            | Agent-Control-Protocol፡ `index.ts`፣ `manager.ts`፣ `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `api/`            | የውስጥ API ረዳቢዎች፡ `requireManagementAuth.ts`፣ `requireCliToolsAuth.ts`፣ `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `auth/`           | `managementPassword.ts` (የይለፍ ቃል ዳግም ማስጀመር / ሃሺንግ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `batches/`        | የOpenAI Batches API አገልግሎት (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `catalog/`        | የOpenRouter ካታሎግ ማመሳሰል (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `cloudAgent/`     | የክላውድ ወኪል ምዝገባ: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `combos/`         | የኮምቦ መፍትሔ ረዳቶች                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `compliance/`     | ኦዲት + የአቅራቢ ኦዲት: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `config/`         | የሩንታይም ውቅር ማገናኛ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `db/`             | የSQLite ጎራ ሞጁሎች (§3.2.1 ይመልከቱ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `display/`        | በAPI ምላሾች ውስጥ የሚጠቀሙ የUI/ማሳያ ረዳቶች                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `embeddings/`     | የኢምቤዲንግ አገልግሎት ምዝገባ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `env/`            | የአካባቢ ጭነት + ውስጣዊ ምርመራ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `evals/`          | የግምገማ ራንታይም                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `jobs/`           | የጀርባ ስራዎች (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `memory/`         | ቋሚ ትውስታ፦ `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `oauth/`          | የOAuth/ማስመጫ አቅራቢ ሞጁሎች (22)፦ `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, በተጨማሪም `services/`, `utils/`, እና `constants/oauth.ts`                                                                                                                                                                                                                                                                                             |
+| `plugins/`        | የፕላጊን ጫኝ (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `providerModels/` | የተደራጀ ሞዴል የህይወት ዑደት: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `providers/`      | የአቅራቢ ረዳቶች: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `resilience/`     | `settings.ts` — የ circuit breaker፣ cooldown እና lockout ቅንብሮች                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `runtime/`        | የሩንታይም ባህሪ መለያ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `services/`       | የእምበድ አገልግሎቶች ማዕቀፍ: `ServiceSupervisor.ts` (አጠቃላይ የልጅ-ሂደት ተቆጣጣሪ ከኦፔሬሽን መቆልፊያ፣ ሪንግ ባፈር እና የጤነት መፈተሻ ጋር)፣ `bootstrap.ts` (የሂደት-ደረጃ ምዝገባ እና ራስ-ሰር ጅምር)፣ `registry.ts` (መሣሪያ → ተቆጣጣሪ ካርታ)፣ `apiKey.ts` (AES-256-GCM ቁልፍ ማከማቻ)፣ `modelSync.ts` (የወቅታዊ ሞዴል ማመሳሰል)፣ `ringBuffer.ts` (5 MB ክበባዊ የሎግ ባፈር)፣ `healthCheck.ts` (HTTP የጤነት መርመራ)፣ `types.ts`፣ `embedWsProxy.ts` (WebSocket ፕሮክሲ)፣ `installers/{ninerouter,cliproxy}.ts`. ይመልከቱ `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                                                                             |
+| `agentSkills/`    | የወኪል ክህሎቶች ካታሎግ + አመንጭ: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage)፣ `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md` ይጽፋል)፣ `openapiParser.ts` (ከ OpenAPI ስፔክ REST መጨረሻ ነጥቦችን ያውጣል)፣ `cliRegistryParser.ts` (ከ bin/cli-registry CLI ንዑስ ትዕዛዞችን ያውጣል)፣ `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema)፣ `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport)። በ REST መንገዶች (`/api/agent-skills/*`)፣ በ MCP መሣሪያዎች (`omniroute_agent_skills_*`) እና በ A2A ክህሎት `list-capabilities` የሚጠቀም። ይመልከቱ [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md)። |
+| `skills/`         | የክህሎት ማዕቀፍ: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, በተጨማሪም `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `spend/`          | `batchWriter.ts` (ዘግይቶ የሚጻፍ ቋት)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `sync/`           | `bundle.ts`፣ `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `system/`         | የስርዓት-ደረጃ ረዳቶች                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `translator/`     | ከፍተኛ-ደረጃ የተርጓሚ ማገናኛ (ወደ `open-sse/translator/` ውክልና ይሰጣል)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `usage/`          | የአጠቃቀም ሒሳብ፦ `costCalculator.ts`፣ `tokenAccounting.ts`፣ `usageHistory.ts`፣ `aggregateHistory.ts`፣ `usageStats.ts`፣ `callLogs.ts`፣ `callLogArtifacts.ts`፣ `fetcher.ts`፣ `providerLimits.ts`፣ `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `versionManager/` | ራስ-ሰር ማዘመኛ + የስሪት ማኒፌስት                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `ws/`             | የWebSocket ድልድይ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `zed-oauth/`      | የZed አርታዒ OAuth ፍሰት                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 በ`src/lib/` ውስጥ ያሉ ከፍተኛ-ደረጃ ፋይሎች፦
 
-- የቀድሞው `localDb.ts` barrel ተወግዷል — ተጠቃሚዎች የተወሰኑ `src/lib/db/*` ሞጁሎችን በቀጥታ import ያደርጋሉ።
+- አሮጌው `localDb.ts` barrel ተወግዷል — ተጠቃሚዎች አሁን የተወሰኑትን `src/lib/db/*` ሞጁሎች በቀጥታ ያስመጣሉ።
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -324,14 +326,14 @@ v1/
 
 #### 3.2.1 `src/lib/db/`
 
-Singleton SQLite የውሂብ ጎታ (`getDbInstance()` በ`core.ts` ውስጥ፣ WAL journaling)።
-**በroutes ወይም handlers ውስጥ raw SQL ፈጽሞ አይጻፉ** — በእነዚህ ሞጁሎች በኩል ይጠቀሙ።
+ነጠላ (Singleton) የ SQLite ዳታቤዝ (`getDbInstance()` በ`core.ts` ውስጥ፣ WAL ጆርናሊንግ)።
+**ጥሬ SQL በ routes ወይም በ handlers ውስጥ በጭራሽ አይጻፉ** — በእነዚህ ሞጁሎች በኩል ይሂዱ።
 
-![የውሂብ ጎታ schema አጠቃላይ እይታ (የተመረጡ ዋና ሰንጠረዦች)](../diagrams/exported/db-schema-overview.svg)
+![የዳታቤዝ ስኪማ አጠቃላይ እይታ (የተመረጡ ዋና ሰንጠረዦች)](../diagrams/exported/db-schema-overview.svg)
 
-> ምንጭ፦ [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
+> ምንጭ፡ [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-የdomain ሞጁሎች (እያንዳንዱ የአንድ ወይም ከዚያ በላይ ሰንጠረዦች ባለቤት ነው)፦ `apiKeys.ts`, `backup.ts`,
+የጎራ (domain) ሞጁሎች (እያንዳንዱ አንድ ወይም ከዚያ በላይ ሰንጠረዦችን ይዟል)፡ `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -343,12 +345,11 @@ Singleton SQLite የውሂብ ጎታ (`getDbInstance()` በ`core.ts` ውስጥ�
 `readCache.ts`, `reasoningCache.ts`, `registeredKeys.ts`, `secrets.ts`,
 `sessionAccountAffinity.ts`, `settings.ts`, `stateReset.ts`, `stats.ts`,
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
-`webhooks.ts`።
+`webhooks.ts`.
 
-`migrations/` 168 ስሪት የተሰጣቸው `.sql` ፋይሎችን (idempotent፣ transactional) ይይዛል፣ እና
-ሲነሳ በ`migrationRunner.ts` ይፈጸማል።
+`migrations/` 168 የቀጠሮ (versioned) `.sql` ፋይሎችን ይዟል (idempotent፣ transactional) እና በ`migrationRunner.ts` በስርዓት ጅምር (boot) ጊዜ ይፈጸማሉ።
 
-በmigrations በሙሉ የተፈጠሩ ሰንጠረዦች (በድምሩ 123)፦
+በ migrations ሂደት ውስጥ የተፈጠሩ ሰንጠረዦች (በጠቅላላው 123)፡
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -364,62 +365,62 @@ Singleton SQLite የውሂብ ጎታ (`getDbInstance()` በ`core.ts` ውስጥ�
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (በተጨማሪም ለmemory ፍለጋ የFTS5 virtual ሰንጠረዦች)።
+`webhooks` (ከዚያም በተጨማሪ ለ memory ፍለጋ የ FTS5 ቨርቹዋል ሰንጠረዦች)።
 
-### 3.3 `src/domain/` — የDomain ንብርብር
+### 3.3 `src/domain/` — የጎራ (Domain) ንብርብር
 
-I/O የሌለው ንጹህ የንግድ ሎጂክ። በroutes እና handlers import ይደረጋል።
+ንጹህ የቢዝነስ ሎጂክ፣ ያለ I/O። በ routes እና በ handlers ይጠቀሙበታል (የሚመጣ)።
 
-| ፋይል                                        | ዓላማ                                   |
-| ------------------------------------------ | ------------------------------------- |
-| `policyEngine.ts`                          | ከፍተኛ-ደረጃ የpolicy resolver             |
-| `fallbackPolicy.ts`                        | የFallback ውሳኔ ዛፍ                      |
-| `costRules.ts`                             | የወጪ ስሌት ደንቦች                          |
-| `lockoutPolicy.ts`                         | የሞዴል lockout ውሳኔዎች                    |
-| `tagRouter.ts`                             | በtag ላይ የተመሠረተ routing                |
-| `comboResolver.ts`                         | ከrequest → ዒላማ ዝርዝር የcombo resolution |
-| `connectionModelRules.ts`                  | ለእያንዳንዱ connection የሞዴል filters       |
-| `modelAvailability.ts`                     | የሞዴል ተገኝነት ማረጋገጫ                      |
-| `degradation.ts`                           | ወደ degraded-mode የሚደረጉ transitions    |
-| `providerExpiration.ts`                    | ጊዜው ያለፈበትን account/key መለየት           |
-| `quotaCache.ts`                            | Cache የተደረጉ የquota ውሳኔዎች              |
-| `responses.ts`, `omnirouteResponseMeta.ts` | የresponse shape አጋዥ መሣሪያዎች            |
-| `configAudit.ts`                           | የconfig ለውጥ audit                     |
-| `assessment/`                              | የሞዴል ግምገማ (በRFC መሠረት፣ በከፊል ተተግብሯል)    |
-| `types.ts`                                 | የጋራ የdomain types                     |
+| ፋይል                                        | ዓላማ                                    |
+| ------------------------------------------ | -------------------------------------- |
+| `policyEngine.ts`                          | የከፍተኛ-ደረጃ ፖሊሲ ፈቺ                       |
+| `fallbackPolicy.ts`                        | የ fallback ውሳኔ ዛፍ                      |
+| `costRules.ts`                             | የወጪ ስሌት ደንቦች                           |
+| `lockoutPolicy.ts`                         | የሞዴል መቆለፊያ (lockout) ውሳኔዎች             |
+| `tagRouter.ts`                             | በመለያ (tag) ላይ የተመሰረተ ማዞሪያ (routing)    |
+| `comboResolver.ts`                         | የ combo መፍታት ከጥያቄ → ወደ ዒላማ ዝርዝር        |
+| `connectionModelRules.ts`                  | በእያንዳንዱ ግንኙነት (connection) የሞዴል ማጣሪያዎች |
+| `modelAvailability.ts`                     | የሞዴል ተገኝነት ማረጋገጫ                       |
+| `degradation.ts`                           | የተቀነሰ-ሁነታ (degraded-mode) ሽግግሮች        |
+| `providerExpiration.ts`                    | ጊዜያቸው ያለፈ መለያ/ቁልፍ መለያ (detection)      |
+| `quotaCache.ts`                            | በካሽ የተቀመጡ የኮታ ውሳኔዎች                    |
+| `responses.ts`, `omnirouteResponseMeta.ts` | የምላሽ ቅርጽ ረዳቶች                          |
+| `configAudit.ts`                           | የውቅረት (config) ለውጥ ኦዲት                 |
+| `assessment/`                              | የሞዴል ግምገማ (በ RFC መሰረት፣ በከፊል የተተገበረ)    |
+| `types.ts`                                 | የተጋሩ የጎራ ዓይነቶች (types)                 |
 
-### 3.4 `src/server/` — ለServer ብቻ
+### 3.4 `src/server/` — ለሰርቨር ብቻ
 
-ከclient components import ማድረግ አይቻልም።
+ከ client ኮምፖነንቶች መጠቀም (ማስመጣት) አይቻልም።
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        routesን public ወይም management በማለት ይመድባል
-│   ├── assertAuth.ts      የAssertion አጋዥ
-│   ├── context.ts         ለእያንዳንዱ request የauthz context
+│   ├── classify.ts        Classifies routes as public vs management
+│   ├── assertAuth.ts      Assertion helper
+│   ├── context.ts         Per-request authz context
 │   ├── headers.ts
-│   ├── pipeline.ts        የAuthz pipeline
-│   ├── policies/          ተጨባጭ policies
+│   ├── pipeline.ts        Authz pipeline
+│   ├── policies/          Concrete policies
 │   └── types.ts
-└── cors/origins.ts        የCORS origin allowlist
+└── cors/origins.ts        CORS origin allowlist
 ```
 
-### 3.5 `src/shared/` — ለማጋራት ደህንነቱ የተጠበቀ
+### 3.5 `src/shared/` — ለመጋራት ደህና
 
-ትኩረት ወዳላቸው ንዑስ ማውጫዎች ተከፍሏል፦
+በትኩረት የተደራጁ ንዑስ ማውጫዎች ተከፋፍሏል፡
 
-- `constants/` — `providers.ts` (በZod የተረጋገጠ የአቅራቢዎች ካታሎግ)፣ `models.ts`፣
+- `constants/` — `providers.ts` (በ Zod የተረጋገጠ የአቅራቢዎች ካታሎግ)፣ `models.ts`፣
   `modelSpecs.ts`፣ `modelCompat.ts`፣ `pricing.ts`፣ `cliTools.ts`፣
   `cliCompatProviders.ts`፣ `routingStrategies.ts`፣ `comboConfigMode.ts`፣
   `headers.ts`፣ `upstreamHeaders.ts` (የተከለከሉ ዝርዝር)፣ `mcpScopes.ts`፣
   `errorCodes.ts`፣ `publicApiRoutes.ts`፣ `batch.ts`፣ `batchEndpoints.ts`፣
   `bodySize.ts`፣ `colors.ts`፣ `appConfig.ts`፣ `config.ts`፣
   `sidebarVisibility.ts`፣ `visionBridgeDefaults.ts`።
-- `validation/` — `schemas.ts` (~80 የZod መርሃግብሮች)፣ `compressionConfigSchemas.ts`፣
+- `validation/` — `schemas.ts` (~80 የ Zod ስኪማዎች)፣ `compressionConfigSchemas.ts`፣
   `providerSchema.ts`፣ `settingsSchemas.ts`፣ `helpers.ts`።
-- `contracts/` — ወደ npm የሚላኩ ይፋዊ API ውሎች።
+- `contracts/` — ወደ npm የሚላኩ የሕዝባዊ API ውሎች።
 - `types/` — የጋራ TS ዓይነቶች።
 - `utils/` — `circuitBreaker.ts`፣ `apiAuth.ts`፣ `apiKey.ts`፣ `apiKeyPolicy.ts`፣
   `api.ts`፣ `classify429.ts`፣ `cliCompat.ts`፣ `clipboard.ts`፣ `cloud.ts`፣ `cn.ts`፣
@@ -428,120 +429,123 @@ server/
   `machine.ts`፣ `machineId.ts`፣ `maskEmail.ts`፣ `modelCatalogSearch.ts`፣
   `nodeRuntimeSupport.ts`፣ `parseApiKeys.ts`፣ `providerHints.ts`፣
   `providerModelAliases.ts`፣ `rateLimiter.ts`፣ `releaseNotes.ts`፣
-  `a11yAudit.ts`፣ እንዲሁም በ`services/`፣ `network/`፣
-  `middleware/`፣ `schemas/`፣ `hooks/`፣ `components/` ስር ያሉ የዳሽቦርድ hooks/components።
+  `a11yAudit.ts`፣ በተጨማሪም `services/`፣ `network/`፣
+  `middleware/`፣ `schemas/`፣ `hooks/`፣ `components/` ሥር ያሉ የዳሽቦርድ hooks እና ኮምፖነንቶች።
+- `components/` — የዳሽቦርዱ ኮምፖነንት API (`index.tsx` barrel፡ `Button`፣ `Input`፣
+  `Select`፣ `Modal`፣ `Card`፣ `DataTable`፣ …)። ግማሽ ክፍሎቹ (primitives) በተጣመረው ኪት
+  (`packages/ui-kit`፣ እንደ `@omniroute/ui-kit/button` ባለ ኮምፖነንት ንዑስ-መንገድ የሚገባ) ላይ የተገነቡ
+  አዳፕተሮች ናቸው፤ ስለዚህ ማያ ገጾች imports-አቸውን ይጠብቃሉ፣ markup-ው ግን የኪቱ ነው።
+  shell-ው `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx` ነው
+  (የኪት `SidebarProvider`/`SidebarInset`) ከ `Sidebar.tsx` እና `Header.tsx` ጋር፤ አዶዎች
+  በ `Icon.tsx` እና `constants/iconMap.ts` በኩል ያልፋሉ። `docs/architecture/DESIGN_SYSTEM.md`ን ይመልከቱ።
 
 ---
 
-## 4. `open-sse/` — የዥረት ማቀናበሪያ የሥራ ቦታ
+## 4. `open-sse/` — የስትሪሚንግ ሞተር workspace
 
-እንደ `@omniroute/open-sse` የታተመ የተለየ npm የሥራ ቦታ። የጥያቄ ማቀናበርን፣
-አስፈጻሚዎችን፣ ተርጓሚዎችን፣ አገልግሎቶችን፣ ቀያሪውን እና MCP አገልጋዩን ይይዛል።
+እንደ `@omniroute/open-sse` የሚታተም የተለየ npm workspace። የጥያቄ ማስኬድን፣ executorsን፣ ተርጓሚዎችን፣ አገልግሎቶችን፣ transformerን እና MCP serverን ይገዛል።
 
 ```
 open-sse/
-├── index.ts                ይፋዊ ወደ ውጭ ላኪዎች
-├── package.json            የሥራ ቦታ ማኒፌስት
+├── index.ts                የሕዝባዊ exports
+├── package.json            የworkspace manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 የአቅራቢ መዝገቦች፣ የራስጌ መገለጫዎች፣ ማንነት፣ …
-├── handlers/               የጥያቄ ተቆጣጣሪዎች (ውይይት፣ embeddings፣ ድምፅ፣ ምስል፣ …)
-├── executors/              156 የአቅራቢ አስፈጻሚ ሞጁሎች (የአስፈጻሚ ክፍሎች + የእያንዳንዱ አቅራቢ አጋዥ ክፍሎች)
+├── config/                 የአቅራቢ registries፣ header profiles፣ identity፣ …
+├── handlers/               የጥያቄ handlers (ቻት፣ embeddings፣ ድምጽ፣ ምስል፣ …)
+├── executors/              156 የአቅራቢ executor ሞጁሎች (executor ክላሶች + የእያንዳንዱ አቅራቢ helpers)
 ├── translator/             የቅርጸት ልወጣ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions የዥረት ቀያሪ
-├── services/               80+ የአገልግሎት ሞጁሎች (ጥምረቶች፣ ተተኪ፣ ኮታዎች፣ ማንነት፣ …)
-├── utils/                  የዥረት አጋዥ ክፍሎች፣ TLS ደንበኛ፣ AWS SigV4፣ የተኪ fetch፣ …
-└── mcp-server/             MCP አገልጋይ (3 ማጓጓዣዎች፣ 33 ወሰኖች፣ 110 መሣሪያዎች)
+├── transformer/            Responses API ↔ Chat Completions የዥረት transformer
+├── services/               80+ የአገልግሎት ሞጁሎች (combos፣ fallback፣ quotas፣ identity፣ …)
+├── utils/                  የስትሪሚንግ helpers፣ TLS client፣ AWS SigV4፣ proxy fetch፣ …
+└── mcp-server/             MCP server (3 transports፣ 33 scopes፣ 110 መሳሪያዎች)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| ተቆጣጣሪ                   | ዓላማ                                                               |
-| ----------------------- | ----------------------------------------------------------------- |
-| `chatCore.ts`           | ዋና የውይይት የማቀናበሪያ መስመር (መሸጎጫ፣ የፍጥነት ገደብ፣ የጥምረት ማዞሪያ፣ የአስፈጻሚ ማሰማራት) |
-| `responsesHandler.ts`   | የOpenAI Responses API መግቢያ ነጥብ                                    |
-| `embeddings.ts`         | Embeddings                                                        |
-| `imageGeneration.ts`    | ምስል ማመንጨት                                                         |
-| `audioSpeech.ts`        | ጽሑፍን ወደ ንግግር መቀየር                                                 |
-| `audioTranscription.ts` | ንግግርን ወደ ጽሑፍ መቀየር                                                 |
-| `videoGeneration.ts`    | ቪዲዮ ማመንጨት                                                         |
-| `musicGeneration.ts`    | ሙዚቃ ማመንጨት                                                         |
-| `rerank.ts`             | ዳግም ደረጃ ማውጣት                                                      |
-| `moderations.ts`        | ይዘት ማጣራት                                                          |
-| `search.ts`             | የድር ፍለጋ                                                           |
-| `sseParser.ts`          | የSSE ክስተት ተንታኝ                                                    |
-| `usageExtractor.ts`     | ከላይኛው ምንጭ ዥረቶች የቶከን ብዛቶችን ማውጣት                                    |
-| `responseSanitizer.ts`  | ለአቅራቢው የተለየ አላስፈላጊ ይዘትን ማስወገድ                                     |
-| `responseTranslator.ts` | በአቅራቢው ምላሽ እና በትርጉም ንብርብሩ መካከል ያለው ማገናኛ                           |
+| Handler                 | ዓላማ                                                                   |
+| ----------------------- | --------------------------------------------------------------------- |
+| `chatCore.ts`           | ዋና የቻት pipeline (cache፣ rate limit፣ combo routing፣ executor dispatch) |
+| `responsesHandler.ts`   | OpenAI Responses API የመግቢያ ነጥብ                                        |
+| `embeddings.ts`         | Embeddings                                                            |
+| `imageGeneration.ts`    | የምስል ማመንጨት                                                            |
+| `audioSpeech.ts`        | ጽሑፍ-ወደ-ንግግር                                                           |
+| `audioTranscription.ts` | ንግግር-ወደ-ጽሑፍ                                                           |
+| `videoGeneration.ts`    | የቪዲዮ ማመንጨት                                                            |
+| `musicGeneration.ts`    | የሙዚቃ ማመንጨት                                                            |
+| `rerank.ts`             | እንደገና ደረጃ መስጠት                                                        |
+| `moderations.ts`        | የይዘት ቁጥጥር                                                             |
+| `search.ts`             | የድር ፍለጋ                                                               |
+| `sseParser.ts`          | SSE ክስተት መተንተኛ                                                        |
+| `usageExtractor.ts`     | ከupstream ዥረቶች የtoken ቆጠራዎችን ማውጣት                                     |
+| `responseSanitizer.ts`  | አቅራቢ-ተኮር ጫጫታ ማስወገድ                                                    |
+| `responseTranslator.ts` | በአቅራቢ ምላሽ እና በtranslator ንድፍ መካከል ማገናኛ                                |
 
 ### 4.2 `open-sse/executors/`
 
-156 ከፍተኛ ደረጃ የአስፈጻሚ ሞጁሎች (`*.ts`፣ `base.ts`፣ `index.ts` እና ሙከራዎችን ሳይጨምር — ብዛቱን
-`npm run check:docs-counts` ይለካል)። እያንዳንዱ የአስፈጻሚ ክፍል `BaseExecutor` (`base.ts`)ን፣
-በቀጥታ ወይም በ`DefaultExecutor` ወይም በሌላ አስፈጻሚ በኩል ይወርሳል፤ የቀሩት ሞጁሎች ለእያንዳንዱ አቅራቢ
-የተዘጋጁ አጋዥ ክፍሎች ናቸው (የመሣሪያ ንድፎች፣ fetch/TTS አስማሚዎች፣ ያልተለመዱ ባህሪያት ተቆጣጣሪዎች)። አስፈጻሚዎቹ የሚከተሉትን ያካትታሉ፦
+156 የከፍተኛ-ደረጃ executor ሞጁሎች (`*.ts` ከ`base.ts`፣ `index.ts` እና tests በስተቀር — `npm run check:docs-counts` የሚለካው ብዛት)። እያንዳንዱ executor ክላስ `BaseExecutor` (`base.ts`)ን ያራዝማል፣ በቀጥታ ወይም በ`DefaultExecutor` ወይም በሌላ executor በኩል; ቀሪዎቹ ሞጁሎች የእያንዳንዱ አቅራቢ helpers ናቸው (tool schemas፣ fetch/TTS adapters፣ quirk handlers)። Executors የሚከተሉትን ያካትታሉ፦
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`፣ እንዲሁም `claudeIdentity.ts`
-(የጋራ የማንነት አጋዥ) እና `index.ts` (መዝገብ)።
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts`
+(የጋራ identity ረዳት) እና `index.ts` (registry)።
 
-> ማስታወሻ፦ እዚህ ያልተዘረዘሩ አቅራቢዎች አጠቃላይ
-> ከOpenAI ጋር ተኳኋኝ የሆነውን አስፈጻሚ በመጠቀም በ`default.ts` ይስተናገዳሉ። ሙሉው የአቅራቢዎች ካታሎግ (375 አቅራቢዎች) በ
-> `src/shared/constants/providers.ts` ውስጥ ይገኛል።
+> ማስታወሻ: እዚህ ያልተዘረዘሩ አቅራቢዎች `default.ts`ን በመጠቀም በአጠቃላይ
+> OpenAI-ተኳሃኝ executor ይተገለገላሉ። ሙሉው የአቅራቢዎች ካታሎግ (375 አቅራቢዎች)
+> በ`src/shared/constants/providers.ts` ውስጥ ይገኛል።
 
 ### 4.3 `open-sse/translator/`
 
-የማዕከል-እና-ቅርንጫፍ ትርጉም (OpenAI ማዕከሉ ነው)።
+ሀብ-አንድ-ስፖክ ትርጉም (OpenAI ሀብ ነው)።
 
-- **9 የጥያቄ ተርጓሚዎች** (`translator/request/`)፦
+- **9 የጥያቄ ተርጓሚዎች** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 የምላሽ ተርጓሚዎች** (`translator/response/`)፦
+- **9 የምላሽ ተርጓሚዎች** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`.
-- **9 አጋዥ ክፍሎች** (`translator/helpers/`)፦
+- **9 ረዳቶች** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`፣ እና
-  የአጋዥ ክፍል ሙከራዎች።
-- **የምስል አጋዥ ክፍሎች** (`translator/image/sizeMapper.ts`)።
-- ከፍተኛ ደረጃ፦ `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`።
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, በተጨማሪም
+  የhelper tests.
+- **የምስል ረዳቶች** (`translator/image/sizeMapper.ts`).
+- የከፍተኛ-ደረጃ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — በ`TransformStream` ላይ የተመሠረተ Responses API ↔ Chat
-  Completions ቀያሪ (በ`responses/` መንገድ ሁሉን-ያዥ የሚጠቀምበት)።
+- `responsesTransformer.ts` — `TransformStream`-ተኮር Responses API ↔ Chat
+  Completions መቀየሪያ (በ`responses/` route catch-all ውስጥ ጥቅም ላይ የሚውል)።
 
 ### 4.5 `open-sse/services/`
 
-ዋና ዋና ነጥቦች (ሙሉው ዝርዝር በ`open-sse/services/` ስር ይገኛል)፦
+ዋና ነጥቦች (ሙሉ ዝርዝር በ`open-sse/services/` ስር)፦
 
-| ጉዳይ             | ፋይሎች                                                                                                                                                                                                                                                     |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| የCombo ማዘዋወር    | `combo.ts` (20 ስልቶች), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                          |
-| ራስ-ሰር Combo ሞተር | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| የመቋቋም ችሎታ       | `accountFallback.ts` (የማቀዝቀዣ ጊዜ + መቆለፍ), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                           |
-| ኮታዎች            | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| መሸጎጫ            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| የማዘዋወር ብልህነት    | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| የሞዴል አያያዝ       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| ማመቅ             | `compression/` — የተሟላ የማመቂያ ሞተር ሽቦ አገናኝ                                                                                                                                                                                                                  |
-| Token + session | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| ደረጃ / manifest  | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / አውታረ መረብ   | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| ባችዎች            | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| አጠቃቀም           | `usage.ts`                                                                                                                                                                                                                                               |
+| ጉዳይ            | ፋይሎች                                                                                                                                                                                                                                                     |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Combo ማዘዋወር    | `combo.ts` (20 ስልቶች), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                          |
+| Auto Combo ሞተር | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| የብልሽት መቋቋም     | `accountFallback.ts` (የማቀዝቀዣ ጊዜ + መቆለፍ), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                           |
+| ኮታዎች           | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| መሸጎጫ           | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| የማዘዋወር ብልህነት   | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| የሞዴል አያያዝ      | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| መጭመቅ           | `compression/` — ሙሉ የመጭመቂያ ሞተር ሽቦ አገናኝ                                                                                                                                                                                                                   |
+| Token + ክፍለ ጊዜ | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| ደረጃ / ማኒፌስት    | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / አውታረ መረብ  | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| ባችዎች           | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| አጠቃቀም          | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- በ`server.ts` ውስጥ የተገናኙ **110 ልዩ መሣሪያዎች** (45 መደበኛ መሣሪያዎች በ`schemas/tools.ts` +
-  የማስታወሻ፣ ክህሎቶች፣ GitHub-ክህሎቶች፣ ስብስብ፣ ጨዋታዊነት፣ ተሰኪ፣ Notion፣ Obsidian፣
-  አካባቢያዊ-ኮርፐስ እና የማመቂያ ሞጁሎች — ድምሩ በ`countUniqueMcpTools` ተቆጥሯል)።
+- **110 ልዩ መሣሪያዎች** በ`server.ts` ውስጥ ተገናኝተዋል (45 መደበኛ መሣሪያዎች በ`schemas/tools.ts` ውስጥ +
+  የማህደረ ትውስታ፣ ክህሎቶች፣ GitHub-ክህሎቶች፣ ማጠራቀሚያ፣ ጌሚፊኬሽን፣ ፕለጊን፣ Notion፣ Obsidian፣
+  የአካባቢ ኮርፐስ እና የመጭመቂያ ሞጁሎች — ውህዱ በ`countUniqueMcpTools` ተቆጥሯል)።
 - **3 ማጓጓዣዎች**፦ stdio፣ HTTP Streamable፣ SSE።
-- **33 ወሰኖች** በአሂድ ጊዜ ተፈጻሚ ይሆናሉ — መሠረታዊው ዝርዝር በ`src/shared/constants/mcpScopes.ts` ውስጥ ሲሆን፣ ሙሉው ስብስብ በእያንዳንዱ የመሣሪያ ሞጁል የተገለጹት ወሰኖች ድምር ነው።
+- **33 ወሰኖች** በአሂድ ጊዜ ተፈጻሚ ይደረጋሉ — መሠረታዊው ዝርዝር በ`src/shared/constants/mcpScopes.ts` ውስጥ ሲሆን፣ ሙሉው ስብስብ በእያንዳንዱ የመሣሪያ ሞጁል የተገለጹት ወሰኖች ውህድ ነው።
 - የኦዲት ሰንጠረዥ፦ `mcp_tool_audit` (በ`audit.ts` የሚሞላ)።
 - ፋይሎች፦ `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
@@ -552,28 +556,28 @@ open-sse/
 ### 4.7 `open-sse/config/`
 
 የአቅራቢ መዝገቦች (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`)፣ በቅርጸት የተከፋፈሉ የሞዴል መዝገቦች (`audioRegistry.ts`,
+`providerHeaderProfiles.ts`)፣ ለእያንዳንዱ ቅርጸት የተዘጋጁ የሞዴል መዝገቦች (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`)፣
-የማንነት አጋዥ መሣሪያዎች (`codexIdentity.ts`, `codexInstructions.ts`,
+የማንነት አጋዦች (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`)፣
-የማረጋገጫ መረጃ አጋዥ መሣሪያዎች (`credentialLoader.ts`, `codexClient.ts`) እና የደመና
+የማረጋገጫ መረጃ አጋዦች (`credentialLoader.ts`, `codexClient.ts`) እና የደመና
 አስማሚዎች (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`)።
 
 ### 4.8 `open-sse/utils/`
 
-የዥረት መሠረታዊ ክፍሎች እና የአቅራቢ ረዳቶች፦ `stream.ts`፣ `streamHandler.ts`፣
-`streamHelpers.ts`፣ `streamPayloadCollector.ts`፣ `streamReadiness.ts`፣
-`sseHeartbeat.ts`፣ `proxyFetch.ts`፣ `proxyDispatcher.ts`፣ `tlsClient.ts`፣
-`networkProxy.ts`፣ `awsSigV4.ts`፣ `cacheControlPolicy.ts`፣
-`cursorChecksum.ts`፣ `cursorAgentProtobuf.ts`፣ `cursorVersionDetector.ts`፣
-`comfyuiClient.ts`፣ `kieTask.ts`፣ `bypassHandler.ts`፣ `aiSdkCompat.ts`፣
-`thinkTagParser.ts`፣ `urlSanitize.ts`፣ `usageTracking.ts`፣ `requestLogger.ts`፣
-`progressTracker.ts`፣ `cors.ts`፣ `error.ts`፣ `logger.ts`፣ `sleep.ts`፣
-`ollamaTransform.ts`።
+የስትሪሚንግ መሰረታዊ ክፍሎች እና የአቅራቢ ረዳቶች፦ `stream.ts`, `streamHandler.ts`,
+`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
+`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
+`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
+`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
+`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
+`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
+`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
+`ollamaTransform.ts`.
 
 ---
 
