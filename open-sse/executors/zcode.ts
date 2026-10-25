@@ -13,7 +13,6 @@ import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { MAX_CURSOR_IMAGES, resolveCursorImages } from "../utils/cursorImages.ts";
 
 const ZCODE_URL = "zcode://app-server/stdio";
-const DEFAULT_PROVIDER_ID = "builtin:zai-coding-plan";
 const ACCOUNT_PROVIDER_ID = "account:zai-individual-coding-plan";
 const DEFAULT_TURN_TIMEOUT_MS = 600_000;
 const ZCODE_MODEL_ALLOWLIST = new Set(ZCODE_MODELS.map((model) => model.id));
@@ -53,7 +52,9 @@ function findNativeModelEntry(
   providerId?: string
 ): NativeModelEntry | null {
   const providers = asRecord(view).providers;
-  const allowed = providerId ? [providerId] : [ACCOUNT_PROVIDER_ID, DEFAULT_PROVIDER_ID];
+  // Default only to the explicitly identified Individual Plan account. The
+  // builtin profile has no proven plan identity, so it requires an exact pin.
+  const allowed = providerId ? [providerId] : [ACCOUNT_PROVIDER_ID];
   for (const id of allowed) {
     const provider = (Array.isArray(providers) ? providers : [])
       .map(asRecord)

@@ -116,20 +116,15 @@ test("ZCode resolves the native bounded maxOutputTokens from the model option sp
     options: { reasoningLevel: "high" },
   });
   assert.equal(resolveZcodeMaxTokens(boundedSelectionView(), "glm-5.3-flash"), 128000);
-  // Models without a token bound receive no fabricated limit.
-  const unbounded = resolveZcodeSelection(
-    {
-      providers: [
-        {
-          providerId: "builtin:zai-coding-plan",
-          models: [{ modelId: "glm-5.2", config: {} }],
-        },
-      ],
-    },
-    "glm-5.2"
-  );
+  // The builtin login is a distinct profile with unknown plan identity. It is
+  // unavailable by default and must be selected explicitly.
+  assert.throws(() => resolveZcodeSelection(unboundedView(), "glm-5.2"), /not enabled/);
+  const unbounded = resolveZcodeSelection(unboundedView(), "glm-5.2", "builtin:zai-coding-plan");
   assert.deepEqual(unbounded.options, undefined);
-  assert.equal(resolveZcodeMaxTokens(unboundedView(), "glm-5.2"), undefined);
+  assert.equal(
+    resolveZcodeMaxTokens(unboundedView(), "glm-5.2", "builtin:zai-coding-plan"),
+    undefined
+  );
 });
 
 function unboundedView() {
@@ -184,7 +179,7 @@ test("ZCode clamps caller token limits into the native model option range", asyn
   assert.equal(second.maxOutputTokens, 512);
 });
 
-test("ZCode selects exact native Coding Plan IDs and required reasoning without a custom-provider fallback", async () => {
+test("ZCode selects exact Coding Plan profiles without implicit fallback", async () => {
   const { resolveZcodeSelection } = await loadZcodeExecutor();
   const view = {
     providers: [
@@ -198,6 +193,10 @@ test("ZCode selects exact native Coding Plan IDs and required reasoning without 
           },
         ],
       },
+      {
+        providerId: "account:zai-start-plan",
+        models: [{ modelId: "GLM-5.3-Flash", config: {} }],
+      },
     ],
   };
   assert.deepEqual(resolveZcodeSelection(view, "glm-5.3-flash"), {
@@ -205,11 +204,30 @@ test("ZCode selects exact native Coding Plan IDs and required reasoning without 
     modelId: "GLM-5.3-Flash",
     options: { reasoningLevel: "high" },
   });
+  assert.deepEqual(resolveZcodeSelection(view, "glm-5.3-flash", "account:zai-start-plan"), {
+    providerId: "account:zai-start-plan",
+    modelId: "GLM-5.3-Flash",
+  });
   assert.throws(
     () => resolveZcodeSelection({ providers: [view.providers[0]] }, "glm-5.3-flash"),
     /not enabled/
   );
   assert.throws(() => resolveZcodeSelection(view, "glm-5.3-flash", "missing"), /not enabled/);
+  assert.throws(
+    () =>
+      resolveZcodeSelection(
+        {
+          providers: [
+            {
+              providerId: "builtin:zai-coding-plan",
+              models: [{ modelId: "glm-5.2", config: {} }],
+            },
+          ],
+        },
+        "glm-5.2"
+      ),
+    /not enabled/
+  );
   assert.deepEqual(
     resolveZcodeSelection(
       {
@@ -217,7 +235,8 @@ test("ZCode selects exact native Coding Plan IDs and required reasoning without 
           { providerId: "builtin:zai-coding-plan", models: [{ modelId: "glm-5.2", config: {} }] },
         ],
       },
-      "glm-5.2"
+      "glm-5.2",
+      "builtin:zai-coding-plan"
     ),
     {
       providerId: "builtin:zai-coding-plan",
