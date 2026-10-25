@@ -17487,7 +17487,7 @@
       }
     },
     "docs/architecture/REPOSITORY_MAP.md": {
-      "source_hash": "3b1b62ca7b129c68b86ea05bab0bb6ae0d60642709fff170f533e3bf946d4d95",
+      "source_hash": "86843b56adb6f20bdcaf70689bf93b766fd4f88feb5cdccf07835bd703a857da",
       "locales": {
         "pl": {
           "source_hash": "3b1b62ca7b129c68b86ea05bab0bb6ae0d60642709fff170f533e3bf946d4d95",
@@ -18975,18 +18975,19 @@
           "updated_at": "2026-10-19T05:34:39.719Z"
         },
         "te": {
-          "source_hash": "3b1b62ca7b129c68b86ea05bab0bb6ae0d60642709fff170f533e3bf946d4d95",
-          "target_hash": "8033237c5ceaf4224bb2336d6b382f83994e5a6b1621c430427ffcca1681ec3b",
+          "source_hash": "86843b56adb6f20bdcaf70689bf93b766fd4f88feb5cdccf07835bd703a857da",
+          "target_hash": "c1c71b52af219a1b5c4bb64a42118d2d92df4519046b1f4d11026a094aaaaf38",
           "section_hashes": [
             "f7207ebf7e7d",
-            "75e04abb9164",
+            "d1d88554fd64",
             "98518a6786a4",
-            "120d691e0391",
+            "3603804af262",
             "bc02b897b4b4",
+            "f80dac7f2628",
             "592040e070a4",
             "1870c95b7c76",
             "4cd013a886d5",
-            "bf301661218c",
+            "cf8c928ec79e",
             "d9aa6345c3fe",
             "ec8eb8e8e8e3",
             "fc00b85417fb",
@@ -18999,7 +19000,7 @@
             "2c14c63f3cb0",
             "11fc5c5c741c"
           ],
-          "updated_at": "2026-10-19T05:34:17.461Z"
+          "updated_at": "2026-10-25T03:05:44.030Z"
         },
         "th": {
           "source_hash": "3b1b62ca7b129c68b86ea05bab0bb6ae0d60642709fff170f533e3bf946d4d95",
