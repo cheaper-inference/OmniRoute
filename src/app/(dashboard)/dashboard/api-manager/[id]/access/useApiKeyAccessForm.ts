@@ -296,13 +296,15 @@ function initialScopeState(apiKey: StoredApiKey) {
   };
 }
 
-type BehaviourStateField =
+type CatalogBehaviourField =
   | "streamDefaultMode"
   | "compressionEnabled"
   | "allowAutoCombos"
   | "allowCcDiscoveryAliases"
   | "catalogScope"
-  | "forcedModel"
+  | "forcedModel";
+
+type UsageBehaviourField =
   | "disableNonPublicModels"
   | "allowUsageCommand"
   | "usageLimitEnabled"
@@ -310,9 +312,11 @@ type BehaviourStateField =
   | "weeklyUsageLimitUsd"
   | "chaosModeEnabled";
 
-function initialBehaviourState(
+type BehaviourStateField = CatalogBehaviourField | UsageBehaviourField;
+
+function initialCatalogBehaviourState(
   apiKey: StoredApiKey
-): Pick<ApiKeyAccessFormState, BehaviourStateField> {
+): Pick<ApiKeyAccessFormState, CatalogBehaviourField> {
   return {
     streamDefaultMode: apiKey?.streamDefaultMode === "json" ? "json" : "legacy",
     compressionEnabled: apiKey?.compressionEnabled !== false,
@@ -320,6 +324,13 @@ function initialBehaviourState(
     allowCcDiscoveryAliases: apiKey?.allowCcDiscoveryAliases !== false,
     catalogScope: apiKey?.catalogScope ?? "all",
     forcedModel: apiKey?.forcedModel ?? "",
+  };
+}
+
+function initialUsageBehaviourState(
+  apiKey: StoredApiKey
+): Pick<ApiKeyAccessFormState, UsageBehaviourField> {
+  return {
     disableNonPublicModels: apiKey?.disableNonPublicModels === true,
     allowUsageCommand: apiKey?.allowUsageCommand === true,
     usageLimitEnabled: apiKey?.usageLimitEnabled === true,
@@ -327,6 +338,12 @@ function initialBehaviourState(
     weeklyUsageLimitUsd: positiveUsdLimitText(apiKey?.weeklyUsageLimitUsd),
     chaosModeEnabled: apiKey?.chaosModeEnabled === true,
   };
+}
+
+function initialBehaviourState(
+  apiKey: StoredApiKey
+): Pick<ApiKeyAccessFormState, BehaviourStateField> {
+  return { ...initialCatalogBehaviourState(apiKey), ...initialUsageBehaviourState(apiKey) };
 }
 
 // The groups are spread in the original field order, so JSON.stringify (the dirty check) sees
