@@ -126,67 +126,75 @@ describe("FreePoolTab source toggles", () => {
     }
   });
 
-  it("renders a toggle group with exactly 4 buttons", async () => {
+  // The source toggles are a kit CheckboxGroup (KEA-7886): each source is a checkbox whose
+  // `checked` state is what `aria-pressed` used to carry.
+  it("renders a toggle group with exactly 4 source checkboxes", async () => {
     const el = renderTab();
     await waitForCondition(() => el.querySelector("[role='group']") !== null);
     const bar = el.querySelector("[role='group']")!;
     expect(bar).toBeTruthy();
-    const buttons = bar.querySelectorAll("button");
+    const buttons = bar.querySelectorAll<HTMLInputElement>("input[type=checkbox]");
     expect(buttons.length).toBe(4);
   });
 
-  it("all toggles start enabled (aria-pressed=true)", async () => {
+  it("all toggles start enabled (checked)", async () => {
     const el = renderTab();
     await waitForCondition(() => el.querySelector("[role='group']") !== null);
-    const buttons = Array.from(el.querySelector("[role='group']")!.querySelectorAll("button"));
-    buttons.forEach((btn) => expect(btn.getAttribute("aria-pressed")).toBe("true"));
+    const buttons = Array.from(
+      el.querySelector("[role='group']")!.querySelectorAll<HTMLInputElement>("input[type=checkbox]")
+    );
+    buttons.forEach((btn) => expect(btn.checked).toBe(true));
   });
 
-  it("clicking a toggle disables it (aria-pressed=false)", async () => {
+  it("clicking a toggle disables it (unchecked)", async () => {
     const el = renderTab();
     await waitForCondition(() => el.querySelector("[role='group']") !== null);
     const bar = el.querySelector("[role='group']")!;
-    const first = bar.querySelectorAll("button")[0];
+    const first = bar.querySelectorAll<HTMLInputElement>("input[type=checkbox]")[0];
     act(() => {
       first.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(first.getAttribute("aria-pressed")).toBe("false");
+    expect(first.checked).toBe(false);
   });
 
   it("clicking a disabled toggle re-enables it", async () => {
     const el = renderTab();
     await waitForCondition(() => el.querySelector("[role='group']") !== null);
     const bar = el.querySelector("[role='group']")!;
-    const first = bar.querySelectorAll("button")[0];
+    const first = bar.querySelectorAll<HTMLInputElement>("input[type=checkbox]")[0];
     act(() => {
       first.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(first.getAttribute("aria-pressed")).toBe("false");
+    expect(first.checked).toBe(false);
     act(() => {
       first.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(first.getAttribute("aria-pressed")).toBe("true");
+    expect(first.checked).toBe(true);
   });
 
   it("multiple sources can be disabled independently", async () => {
     const el = renderTab();
     await waitForCondition(() => el.querySelector("[role='group']") !== null);
-    const buttons = el.querySelector("[role='group']")!.querySelectorAll("button");
+    const buttons = el
+      .querySelector("[role='group']")!
+      .querySelectorAll<HTMLInputElement>("input[type=checkbox]");
     act(() => {
       buttons[0].dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     act(() => {
       buttons[2].dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(buttons[0].getAttribute("aria-pressed")).toBe("false");
-    expect(buttons[1].getAttribute("aria-pressed")).toBe("true"); // second still enabled
-    expect(buttons[2].getAttribute("aria-pressed")).toBe("false");
+    expect(buttons[0].checked).toBe(false);
+    expect(buttons[1].checked).toBe(true); // second still enabled
+    expect(buttons[2].checked).toBe(false);
   });
 
   it("disabled source is persisted in localStorage", async () => {
     const el = renderTab();
     await waitForCondition(() => el.querySelector("[role='group']") !== null);
-    const first = el.querySelector("[role='group']")!.querySelectorAll("button")[0];
+    const first = el
+      .querySelector("[role='group']")!
+      .querySelectorAll<HTMLInputElement>("input[type=checkbox]")[0];
     act(() => {
       first.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -195,12 +203,13 @@ describe("FreePoolTab source toggles", () => {
     expect(stored).toContain("1proxy");
   });
 
-  it("button labels are 1proxy, Proxifly, IPLocate, Webshare", async () => {
+  it("toggle labels are 1proxy, Proxifly, IPLocate, Webshare", async () => {
     const el = renderTab();
     await waitForCondition(() => el.querySelector("[role='group']") !== null);
-    const texts = Array.from(el.querySelector("[role='group']")!.querySelectorAll("button")).map(
-      (b) => b.textContent?.trim()
-    );
+    // Each checkbox is named by its wrapping kit <label>.
+    const texts = Array.from(
+      el.querySelector("[role='group']")!.querySelectorAll<HTMLInputElement>("input[type=checkbox]")
+    ).map((b) => b.closest("label")?.textContent?.trim());
     expect(texts).toContain("1proxy");
     expect(texts).toContain("Proxifly");
     expect(texts).toContain("IPLocate");
@@ -236,7 +245,10 @@ describe("FreePoolTab data loading", () => {
   it("disabling a source re-fetches with sources= filter", async () => {
     const mockFetch = vi.fn((url: string) => {
       if (String(url).includes("/stats")) return okJson({ stats: defaultStats });
-      return okJson({ success: true, data: { proxies: [], total: 0, hasMore: false, stats: defaultStats, syncErrors: {} } });
+      return okJson({
+        success: true,
+        data: { proxies: [], total: 0, hasMore: false, stats: defaultStats, syncErrors: {} },
+      });
     });
     vi.stubGlobal("fetch", mockFetch);
 
@@ -249,7 +261,7 @@ describe("FreePoolTab data loading", () => {
     const initialCallCount = mockFetch.mock.calls.length;
 
     const bar = el.querySelector("[role='group']")!;
-    const first = bar.querySelectorAll("button")[0]; // disable 1proxy
+    const first = bar.querySelectorAll<HTMLInputElement>("input[type=checkbox]")[0]; // disable 1proxy
     act(() => {
       first.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -289,7 +301,10 @@ describe("FreePoolTab sync error surfacing (#5595)", () => {
         });
       }
       if (String(url).includes("/stats")) return okJson({ stats: defaultStats });
-      return okJson({ success: true, data: { proxies: [], total: 0, hasMore: false, stats: defaultStats, syncErrors: {} } });
+      return okJson({
+        success: true,
+        data: { proxies: [], total: 0, hasMore: false, stats: defaultStats, syncErrors: {} },
+      });
     });
     vi.stubGlobal("fetch", mockFetch);
 

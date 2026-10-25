@@ -209,6 +209,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "quota_exhausted",
   "quota_not_allocated",
   "quota_only",
+  "quota_share_blocked",
   "rate_limit_error",
   "rate_limit_exceeded",
   "rate_limit_execution_timeout",

@@ -1,3 +1,7 @@
+import {
+  applyToolCallShimToBuffer,
+  findToolCallSchema,
+} from "../translator/helpers/toolCallShim.ts";
 import { FORMATS } from "../translator/formats.ts";
 import {
   buildGeminiThoughtSignatureKey,
@@ -726,6 +730,7 @@ export function translateNonStreamingResponse(
       toRecord(intermediateOpenAI),
       toolNameMap ?? null,
       requestedThinking,
+      toolSchemas,
       clientTools
     );
   }
@@ -762,6 +767,43 @@ function resolveReasoningText(messageObj: JsonRecord): string {
 }
 
 /**
+ * Parse an OpenAI tool call's `arguments` into the object Claude's `tool_use.input` needs.
+ * Empty, missing or null arguments are a zero-argument call and yield `{}`. A malformed
+ * payload (unparseable non-empty string, or JSON that is not an object) used to throw a raw
+ * JSON.parse error (or let a non-object through) out of the translator, which the caller
+ * classified as a provider outage; it now fails with a typed, request-scoped error that
+ * keeps the original cause for the logs.
+ */
+function parseToolCallArguments(rawArguments: unknown): Record<string, unknown> {
+  if (!rawArguments) return {};
+  let parsed: unknown = rawArguments;
+  if (typeof rawArguments === "string") {
+    try {
+      parsed = JSON.parse(rawArguments);
+    } catch (cause) {
+      throw new SyntaxError("Tool-call arguments must be a JSON object", { cause });
+    }
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+    throw new SyntaxError("Tool-call arguments must be a JSON object");
+  return parsed as Record<string, unknown>;
+}
+
+/**
+ * Parse a tool call's arguments into `tool_use.input`. Malformed arguments fail typed
+ * (#17198) before any shim runs; Read then keeps the client-declared path spelling (#17294).
+ */
+function parseToolUseInput(
+  name: string,
+  rawArguments: unknown,
+  schema: ReturnType<typeof findToolCallSchema>
+): Record<string, unknown> {
+  const parsed = parseToolCallArguments(rawArguments);
+  if (name.toLowerCase() !== "read" || !schema) return parsed;
+  return JSON.parse(applyToolCallShimToBuffer(name, JSON.stringify(parsed), schema));
+}
+
+/**
  * Helper to convert an OpenAI chat.completion JSON object to Claude format for non-streaming.
  *
  * `toolNameMap` carries request-side aliases; when it does not resolve a name,
@@ -776,6 +818,7 @@ function convertOpenAINonStreamingToClaude(
   openaiResponse: JsonRecord,
   toolNameMap?: Map<string, string> | null,
   requestedThinking?: boolean,
+  toolSchemas?: Map<string, JsonRecord> | null,
   clientTools?: unknown
 ): JsonRecord {
   const choices = openaiResponse.choices as unknown[] | undefined;
@@ -852,12 +895,13 @@ function convertOpenAINonStreamingToClaude(
       const fn = toRecord(toolObj.function);
       // An id-less call gets a random id; a timestamp collides across calls.
       const rawId = toString(toolObj.id) || undefined;
+      const name = restoreDeclaredToolName(toString(fn.name), toolNameMap ?? null, clientTools);
+      const schema = findToolCallSchema(name, toolSchemas);
       content.push({
         type: "tool_use",
         id: sanitizeToolId(rawId),
-        name: restoreDeclaredToolName(toString(fn.name), toolNameMap ?? null, clientTools),
-        input:
-          typeof fn.arguments === "string" ? JSON.parse(fn.arguments || "{}") : fn.arguments || {},
+        name,
+        input: parseToolUseInput(name, fn.arguments, schema),
       });
     }
   }

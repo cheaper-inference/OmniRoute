@@ -314,6 +314,17 @@ glm-4.7=3
 
 同一个门控也覆盖预调度场景（#16319）：当组合的每个目标在任何尝试发生之前都被跳过，因为其模型处于短暂临时锁定状态时，零尝试路径会在相同的上限下等待锁解除并重新调度，而不是返回一个没有提示的 `503 ALL_TARGETS_SKIPPED`。当不允许等待时（达到上限、尝试次数或预算耗尽，或该功能关闭），最终响应会升级为 `429 rate_limit_error`，并携带最早临时锁过期时间的 `retry_after` / `reset_at`；配额、认证和未找到锁定则保持无提示的 503。
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. 请求队列准入控制（v3.8.49 · issue #6593）
@@ -374,138 +385,184 @@ glm-4.7=3
 
 ---
 
-## 7. 上游状态码重述（误报的配额错误）
+## 7. 上游状态码重述（状态码误报的配额错误）
 
-**范围：** 一个以错误的 HTTP 状态码报告临时配额耗尽的上游网关。
+**范围：** 一个使用错误 HTTP 状态码报告临时配额耗尽的上游网关。
 
-**目的：** 在分类之前纠正误导性的状态码，使下游消费者（回退引擎、组合聚合、面向客户端的响应）能够看到失败的真实可重试本质。
+**目的：** 在分类（classification）**之前**纠正误导性的状态码，使下游消费者（回退引擎、combo 聚合、面向客户端的响应）都能看到故障真正的可重试本质。
 
-某些网关会用不可重试的 HTTP 状态码来表示临时配额耗尽。`agentrouter.org` 返回 `403`（有时是 `400`），并附带中文响应体（`用户额度不足` / `额度不足`），而非标准的 `429`。像 Claude Code 这样的客户端会将 `403` 视为永久性错误并中止会话；如果不加纠正，回退引擎会将其归类为 `AUTH_ERROR`，而不是配额事件。
+某些网关会用不可重试的 HTTP 状态码来表示**临时性**的配额耗尽。`agentrouter.org` 返回 `403`（有时是 `400`），响应体为中文（`用户额度不足` / `额度不足`），而不是标准的 `429`。像 Claude Code 这样的客户端会将 `403` 视为永久性错误并中止会话，而如果不加纠正，回退引擎会将其归类为 `AUTH_ERROR` 而不是配额事件。
 
 **实现：**
 
-- 注册表 + 匹配器：`open-sse/config/upstreamStatusRestatement.ts` —— 按提供者划分的规则列表（`{id, fromStatuses, toStatus, textMarkers,
+- 注册表 + 匹配器：`open-sse/config/upstreamStatusRestatement.ts` —— 一份按提供者划分的规则列表（`{id, fromStatuses, toStatus, textMarkers,
 excludeMarkers, defaultRetryAfterMs}`），通过 `applyStatusRestatement()` 进行匹配。
-- 调用位置：`open-sse/handlers/chatCore.ts` 中的 `providerFailure:` 代码块
-  （约第 3654 行），恰好位于 `parseUpstreamError()` 解析带有错误 HTTP 状态（`!providerResponse.ok`）的上游响应之后、任何分类逻辑运行之前，因此所有下游消费者看到的都是纠正后的状态码。嵌入在 `200` SSE 流内部的错误走的是另一条更靠后的流解析路径，目前**不**受此钩子覆盖——这是已知限制，而 agentrouter 的状态误报（以错误 HTTP 状态码的形式出现）暂时还不需要它。
-- 重试资格：`429` 包含在 `RETRY_AFTER_ELIGIBLE_STATUSES`
-  （`open-sse/services/combo/unavailableRetryGate.ts`）中，因此重述后的错误会携带真实的重试窗口，而不会以一个“死掉的” `403` 呈现。
-- 合成的 `60s` `defaultRetryAfterMs`（`upstreamStatusRestatement.ts`）
-  只是重述后的响应告知**客户端**的内容；它本身并不是连接内部的冷却/锁定时长——该时长由实际处理重述错误的机制独立决定（连接冷却（Connection Cooldown）的递增退避，§2，对 API 密钥提供者基准为 `3s`；或模型锁定（Model Lockout），§3，用于 agentrouter 这类按模型配额的提供者）。路由器内部可能比它向客户端宣告的 60 秒窗口更早获得重试资格——这是有意预留的余量，而非缺陷。
+- 调用点：`open-sse/handlers/chatCore.ts` 中的 `providerFailure:` 代码块（约第 3654 行），位于 `parseUpstreamError()` 解析出带有错误 HTTP 状态码（`!providerResponse.ok`）的上游响应之后、任何分类逻辑运行之前，因此每个下游消费者都能看到纠正后的状态码。嵌入在 `200` SSE 流中的错误走的是另一条独立的、更靠后的流解析路径，目前**不**被此 hook 覆盖——这是一个已知的限制，但 agentrouter 的状态码误报（以错误 HTTP 状态码的形式出现）还不需要覆盖该路径。
+- 重试资格：`429` 在 `RETRY_AFTER_ELIGIBLE_STATUSES`（`open-sse/services/combo/unavailableRetryGate.ts`）中，因此重述后的错误会携带真实的重试窗口，而不是以一个无解的 `403` 呈现出来。
+- 合成的 `60s` `defaultRetryAfterMs`（`upstreamStatusRestatement.ts`）只是重述后的响应告知**客户端**的内容；它本身并不是连接内部的冷却/锁定时长——后者由实际处理该重述错误的机制单独控制（连接冷却的逐级退避，§2，API 密钥提供者的基础值为 `3s`；或模型锁定，§3，适用于 agentrouter 这类按模型配额的提供者）。路由器内部可能早于它向客户端宣告的 60 秒窗口就具备重试资格——这是有意预留的余量，不是 bug。
 
-永久性错误（agentrouter 的 `无权访问模型` —— 即无权访问该模型）绝不会被重述：即使 `textMarkers` 命中，`excludeMarkers` 也会否决该规则，因此错误保留其原始状态码，没有任何东西会对它进行无休止的重试。匹配的提供者分类规则（`open-sse/config/providerErrorRules.ts` 中的 `agentrouter-model-access-denied`：`reason: "auth_error"`、`scope: "model"`、声明的基准冷却时间为 `6h`）由 `checkFallbackError`（`open-sse/services/accountFallback.ts`）在通用的 apikey 类别 `FORBIDDEN` 提前返回_之前_查询，并受 `honorsRuleLockScope(provider)` 门控（#10334——目前通过 `providerErrorRules.ts` 中的 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 允许列表仅限 agentrouter）。该规则声明的 6 小时冷却时间会作为 `fallbackResult.baseCooldownMs` 传递下去，但它仍汇入既有的按模型配额锁定路径（`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`，除冷却时间来源外不受 #10334 影响）：与其他所有模型锁定一样，它会被钳制到运维人员配置的 `mlSettings.maxCooldownMs`（默认 `1_800_000ms` / 30 分钟），且_持久化的锁定原因_仍是既有硬编码的 `"forbidden"`，而非规则的 `"auth_error"` ——只有冷却时长被端到端地遵循，原因字符串则不然。连接本身保持活跃；同一连接上的同级模型不受影响。
+永久性错误（agentrouter 的 `无权访问模型`——即无权访问该模型）永远不会被重述：即使 `textMarkers` 命中，`excludeMarkers` 也会否决该规则，因此错误保留其原始状态码，不会有任何机制对它进行无休止的重试。匹配的提供者分类规则（`open-sse/config/providerErrorRules.ts` 中的 `agentrouter-model-access-denied`：`reason: "auth_error"`，`scope: "model"`，声明的基础冷却时间为 `6h`）由 `checkFallbackError`（`open-sse/services/accountFallback.ts`）在通用的 apikey 类别 `FORBIDDEN` 提前返回_之前_查询，并受 `honorsRuleLockScope(provider)` 门控（#10334——目前通过 `providerErrorRules.ts` 中的 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 允许列表仅限 agentrouter）。该规则声明的 6 小时冷却时间作为 `fallbackResult.baseCooldownMs` 传递，但它仍然进入既有的按模型配额锁定路径（`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`，除冷却时间来源外未被 #10334 改动）：与所有其他模型锁定一样，它会被钳制到运维人员配置的 `mlSettings.maxCooldownMs`（默认 `1_800_000ms` / 30 分钟），并且_持久化的锁定原因_仍然是既有硬编码的 `"forbidden"`，而不是规则的 `"auth_error"`——端到端生效的只有冷却时长，而不是原因字符串。连接本身保持活跃；同一连接上的其他兄弟模型不受影响。
 
-重述后的额度错误（`额度不足`）会命中生产环境中的一个 provider 规则（`agentrouter-user-quota-exhausted`：`reason: "quota_exhausted"`，`scope: "connection"`，自身未声明冷却时间——应用持久化层的缩放退避默认值）。自 #10334 起，`ProviderErrorRuleMatch` 上的 `scope` 已端到端被消费，但**仅**针对 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 白名单中的 provider（`providerErrorRules.ts`——目前只有 `"agentrouter"`，通过 `honorsRuleLockScope()` 进行门控）。对于其他所有 provider，`scope` 仍只是信息性的，与 #10334 之前完全一致。`checkFallbackError` 将匹配规则的 scope 暴露为 `fallbackResult.ruleScope`；`isAgentrouterConnectionQuotaScope()`（`src/sse/services/auth.ts`）是共享的守卫函数，用于确认某个 `ruleScope` 确实可以安全地作为连接级、可自我恢复的信号来采纳（scope 为 `"connection"`，reason 为 `quota_exhausted`，绝不接受 `permanent`，绝不接受 `creditsExhausted`——这是为了防御未来某条规则把 scope `"connection"` 与永久性账户状态配对的情况）。有两个消费方调用它：
+重述后的配额错误（`额度不足`）在生产环境中会命中一条提供者规则（`agentrouter-user-quota-exhausted`：`reason: "quota_exhausted"`，`scope: "connection"`，自身没有声明冷却时间——适用持久化层的按比例退避默认值）。自 #10334 起，`ProviderErrorRuleMatch` 上的 `scope` 确实被端到端消费，但**仅**适用于 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 允许列表中的提供者（`providerErrorRules.ts`——目前只有 `"agentrouter"`，通过 `honorsRuleLockScope()` 门控）。对于其他所有提供者，`scope` 仍然只是信息性的，与 #10334 之前完全相同。`checkFallbackError` 将匹配规则的 scope 暴露为 `fallbackResult.ruleScope`；`isAgentrouterConnectionQuotaScope()`（`src/sse/services/auth.ts`）是一个共享的守卫函数，用于确认某个 `ruleScope` 确实可以安全地作为连接范围的、可自我恢复的信号来采纳（scope 为 `"connection"`，reason 为 `quota_exhausted`，绝不为 `permanent`，绝不为 `creditsExhausted`——这是为了防御未来某条规则将 scope `"connection"` 与永久账户状态配对的情况）。有两个消费者调用它：
 
-- **持久化**（`markAccountUnavailable()`，`src/sse/services/auth.ts`）：不再落入透传 provider 的**按模型**锁定分支（agentrouter 为 `passthroughModels: true` → `hasPerModelQuota()` 返回 `true`），而是应用**临时连接冷却**——`testStatus: "unavailable"` + `rateLimitedUntil`，绝不使用终态状态（`credits_exhausted`/`banned`/`expired`）——这样连接在冷却期满后能够自我恢复，而无需手动重置凭据。对于设置了 `disableCooling: true`（#2997）的连接会跳过此逻辑：这种 opt-out 会转而落入按模型锁定分支（这是一个已记录在案的权衡——参见该分支上方的代码注释）。
-- **同一请求内的 combo 路由**（`applyComboTargetExhaustion()`，`open-sse/services/combo/targetExhaustion.ts`）：同一个守卫会把该连接标记进内存中的 `exhaustedConnections` 集合，键为 `${provider}:${connectionId}`。这只会跳过那些_自身 target 对象上已经携带该确切 `connectionId`_ 的同一请求剩余 target（`getExhaustedTargetSkipReason()`，`open-sse/services/combo/comboPredicates.ts`，在 `exhaustedConnections` 查找之前有 `if (provider && connectionId)` 判断）——而普通的模型列表 combo（其兄弟 target 自身不携带固定的 `connectionId`，只在每次分发时根据响应的 `X-OmniRoute-Selected-Connection-Id` 头解析出一个连接）永远不会命中这个键匹配。对于这种常见情况，防止剩余分支复用刚耗尽账户的真正保护机制并不是这个 Set——而是上述持久化层（该连接的 `rateLimitedUntil` 现在已被设为未来时间），再结合同一个守卫抑制了这次失败的 `transientRateLimitedProviders`（参见"两阶段设计"以及 `targetExhaustion.ts` 中 `isAgentrouterConnectionQuotaScope` 分支上的代码注释）：由于该 Set 未被标记，`combo.ts` 的 `allowRateLimitedConnection` 强制放行（`open-sse/services/combo.ts:1005-1013`、`:2734-2738`）不会对该 provider 的剩余分支生效，因此凭据选择中的 `rateLimitedUntil` 过滤器（`src/sse/services/auth.ts:1238`）会被正常遵守，剩余分支要么选择另一个仍有资格的 agentrouter 连接，要么因无可用凭据而失败——它不会强行回到该分支刚刚冷却的连接上。
+- **持久化**（`markAccountUnavailable()`，`src/sse/services/auth.ts`）：
+  不再落入 passthrough 提供者的**按模型**锁定分支
+  （agentrouter 为 `passthroughModels: true` → `hasPerModelQuota()`
+  返回 `true`），而是应用**临时连接冷却**——
+  `testStatus: "unavailable"` + `rateLimitedUntil`，永远不会是终止状态
+  （`credits_exhausted`/`banned`/`expired`）——因此连接在冷却期
+  结束后会自行恢复，而无需手动重置凭据。
+  对于设置了 `disableCooling: true` 的连接则跳过此逻辑（#2997）：
+  该 opt-out 会转而落入按模型锁定（这是一个已记录在案的权衡——
+  请参阅该分支上方的代码注释）。
+- **同一请求内的 combo 路由**（`applyComboTargetExhaustion()`，
+  `open-sse/services/combo/targetExhaustion.ts`）：同一个守卫会把该连接
+  标记进内存中的 `exhaustedConnections` 集合，键为
+  `${provider}:${connectionId}`。这只会跳过那些_自身目标对象上已经
+  携带该确切 `connectionId`_ 的同一请求（SAME-REQUEST）剩余目标
+  （`getExhaustedTargetSkipReason()`，
+  `open-sse/services/combo/comboPredicates.ts`，即在 `exhaustedConnections`
+  查找之前的 `if (provider &&
+connectionId)`）——而普通的模型列表 combo
+  中，兄弟目标自身并不携带固定的 `connectionId`，只在每次分发时根据响应的
+  `X-OmniRoute-Selected-Connection-Id` 头解析出一个，因此永远不会
+  命中该键匹配。对于这种常见情况，真正防止剩余分支（leg）复用
+  刚刚耗尽的账户的并不是这个 Set——而是上面的持久化层
+  （该连接的 `rateLimitedUntil` 现在已位于未来时间），再加上
+  同一个守卫抑制了该失败的 `transientRateLimitedProviders`
+  （参见"两阶段设计"以及 `targetExhaustion.ts` 中
+  `isAgentrouterConnectionQuotaScope` 分支上的代码注释）：由于
+  该 Set 未被标记，`combo.ts` 的 `allowRateLimitedConnection` 强制放行
+  （`open-sse/services/combo.ts:1005-1013`、`:2734-2738`）不会对
+  该提供者的剩余分支生效，因此凭据选择的 `rateLimitedUntil`
+  过滤器（`src/sse/services/auth.ts:1238`）会被正常遵守，
+  剩余分支要么选择一个不同的、仍然符合条件的 agentrouter
+  连接，要么因无可用凭据而失败——它不会强行
+  回到这个分支刚刚冷却的连接上。
 
 ### 两阶段设计：先状态重述，再分类
 
-状态重述（`upstreamStatusRestatement.ts`）与 provider 分类规则（`open-sse/config/providerErrorRules.ts`，`providerRuleRegistry`）是两个独立的注册表，都以 provider id 和文本标记作为键，但它们在不同位置运行、服务于不同目的：重述在 `chatCore.ts` 的早期阶段重写 HTTP 状态码；分类规则则在 `checkFallbackError()`（`open-sse/services/accountFallback.ts`）内部确定回退 `reason` 和锁定 `scope`（`model` / `provider` / `connection`）。
+状态重述（`upstreamStatusRestatement.ts`）与提供者
+分类规则（`open-sse/config/providerErrorRules.ts`，
+`providerRuleRegistry`）是两个独立的注册表，二者都以提供者 id
+和文本标记作为键，但它们在不同位置运行、服务于不同
+目的：重述在 `chatCore.ts` 的早期阶段重写 HTTP 状态；
+分类规则则在 `checkFallbackError()`
+（`open-sse/services/accountFallback.ts`）内部选择回退 `reason`
+并锁定 `scope`（`model` / `provider` / `connection`）。
 
-分类规则仅对 `providerErrorRules.ts` 中 `FULL_TEXT_RULE_PROVIDERS` 白名单内的 provider 才能看到完整的错误**文本**（这是匹配 `额度不足` 这类正文标记所必需的）——目前只有 `"agentrouter"`。对于其他所有**内置目录** provider，`checkFallbackError` 只把结构化错误（`{code, type}`）交给 `getProviderErrorRuleMatch`，这足以满足基于 header/状态码/code 的规则，但无法看到正文文本标记。辅助函数 `resolveRuleMatchBody()` 执行这一选择：白名单内的 provider 使用完整错误文本，否则使用结构化错误。将某个**内置** provider 加入 `FULL_TEXT_RULE_PROVIDERS` 是一种显式的逐 provider opt-in——它的存在是为了让不在名单上的每个 provider 的默认路径保持逐字节不变。
+只有对 `providerErrorRules.ts` 中 `FULL_TEXT_RULE_PROVIDERS`
+允许列表里列出的提供者，分类规则才能看到完整的错误**文本**
+（这是匹配 `额度不足` 这类正文标记所必需的）——目前
+只有 `"agentrouter"`。对于其他所有**内置目录**提供者，
+`checkFallbackError` 只把结构化错误（`{code, type}`）交给
+`getProviderErrorRuleMatch`，这对于基于 header/状态/代码的规则
+已经足够，但对正文文本标记则无能为力。
+辅助函数 `resolveRuleMatchBody()` 执行这一选择：允许列表中的
+提供者获得完整错误文本，其他提供者则获得结构化错误。将
+**内置**提供者添加到 `FULL_TEXT_RULE_PROVIDERS` 是一个显式的
+逐提供者 opt-in——其存在是为了让不在列表中的每个提供者的
+默认路径保持逐字节不变。
 
-规则的 `scope`（`model` / `provider` / `connection`）是与 `FULL_TEXT_RULE_PROVIDERS` 相互独立的另一项 opt-in：`checkFallbackError` 仅将其暴露为 `fallbackResult.ruleScope`，并且下游消费方仅对同一文件中 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 白名单内的 provider（`gated via honorsRuleLockScope()`——目前只有 `"agentrouter"`）才会将其作为信息性标签之外的东西来采纳。关于 provider 进入该白名单后 `scope: "connection"` 匹配的实际行为，参见上文"重述后的额度错误"部分。
+规则的 `scope`（`model` / `provider` / `connection`）是独立于
+`FULL_TEXT_RULE_PROVIDERS` 的另一个 opt-in：
+`checkFallbackError` 只将其作为 `fallbackResult.ruleScope` 暴露出来，
+而下游消费者只有对同一文件中
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` 允许列表里的提供者，才会把它当作
+信息性标签以外的东西来遵守（通过 `honorsRuleLockScope()` 进行门控——目前只有 `"agentrouter"`）。关于提供者进入该允许列表后
+`scope: "connection"` 匹配实际会做什么，请参阅上文的
+"重述的配额错误"。
 
-**#11104 — 运营方声明的规则会绕过两个允许名单。** 运营方可以在运行时通过 `settings.providerErrorRules`
+**#11104——运营者声明的规则绕过两个允许列表。** 运营者可以
+在运行时通过 `settings.providerErrorRules`
 （`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`）
-声明针对单个 provider 的规则，而无需编辑本文件。若将运营方规则置于
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` 之后进行门控——这两个允许名单的本意是保护内置目录规则的**默认**行为——会使
-settings 机制对除已列入名单之外的所有 provider 失效，因为声明规则本身就已经是运营方的显式
-opt-in。`resolveRuleMatchBody()` 和 `honorsRuleLockScope()` 都会首先检查
-`hasOperatorRuleForProvider()`：拥有运营方规则的 provider 会获得原始错误文本，其声明的
-`scope` 也会被遵循，无论该 provider 是否同时出现在任一允许名单中。
+声明逐提供者规则，而无需编辑此文件。若将运营者规则门控在
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` 之后
+——这些允许列表旨在保护内置目录规则的**默认**行为——
+将使设置机制对除已列入其中的提供者之外的所有提供者失效，
+因为声明规则本身已经是运营者的显式
+opt-in。`resolveRuleMatchBody()` 和 `honorsRuleLockScope()` 都会先检查
+`hasOperatorRuleForProvider()`：拥有运营者规则的提供者会获得
+原始错误文本，并且其声明的 `scope` 会被遵守，无论它
+是否也出现在任一允许列表中。
 
-**已知缺口——HTTP 400 从不查询 `providerRuleRegistry`。**
-`checkFallbackError` 的 `BAD_REQUEST` 分支完全通过自己的模式数组
-（`accountFallback.ts` 中的 `MODEL_ACCESS_DENIED_PATTERNS`、
-`CONTEXT_OVERFLOW_PATTERNS` 等）对 400 状态进行分类，并在到达其上方的
-`configuredRule`/`getProviderErrorRuleMatch` 分支之前就返回。
-带有 `status: 400` 的内置目录规则（或运营方规则）在语法上是合法的，但永远不会触发。目前没有任何现有规则针对
-400，因此生产环境不受影响——但未来的 400 规则需要先改动这个分支，这比添加一条规则的改动更大（它会为所有已经依赖模式数组行为的
-provider 重新分类 400），超出了单 provider 规则新增的范围。
+**已知缺口——HTTP 400 从不咨询 `providerRuleRegistry`。**
+`checkFallbackError` 的 `BAD_REQUEST` 分支完全通过它自己的
+模式数组（`accountFallback.ts` 中的 `MODEL_ACCESS_DENIED_PATTERNS`、
+`CONTEXT_OVERFLOW_PATTERNS` 等）对状态 400 进行分类，
+并在到达其上方的
+`configuredRule`/`getProviderErrorRuleMatch` 分支之前返回。
+带有 `status: 400` 的内置目录规则（或运营者规则）在语法上
+是有效的，但永远不会触发。目前没有任何现有规则针对
+400，因此生产环境不受影响——但未来的 400 规则需要先
+改动此分支，这比添加一条规则的改动更大（它会为每个
+已经依赖模式数组行为的提供者重新分类 400），
+并且超出了单个提供者规则添加的范围。
 
 ### 添加新的配额误报网关
 
 1. 在 `statusRestatementRegistry`
    （`open-sse/config/upstreamStatusRestatement.ts`）中注册一个规则数组。保持 `textMarkers`
-   具有 provider 特异性；绝不要复用与
+   提供者专属；切勿复用会与
    `CREDITS_EXHAUSTED_SIGNALS`（`open-sse/services/accountFallback.ts`）冲突的通用英文短语。
 2. 可选地在
-   `open-sse/config/providerErrorRules.ts`（`providerRuleRegistry`）中注册分类规则，以选择正确的锁定范围（账户级配额用
-   `connection`，单模型错误用
-   `model`）。此步骤仅对规则需要完整错误文本（body 标记）的 provider 在生产环境中生效：在同一文件中将
-   provider id 添加到 `FULL_TEXT_RULE_PROVIDERS`——否则
-   `checkFallbackError` 只会把结构化的
-   `{code, type}` 错误交给规则，基于 body 文本的规则将永远无法匹配实时流量。纯粹基于
-   `status`/`headers` 匹配的规则（如 Opencode 或
-   Minimax 的）不需要此 opt-in。另外，如果规则声明了
-   `scope: "connection"`，且意图是实现实际的连接级冷却加同请求 combo 跳过（而不仅仅是一个信息性标签），请在同一文件中将
-   provider id 添加到 `HONORS_RULE_LOCK_SCOPE_PROVIDERS`——这正是
-   `markAccountUnavailable()`（`src/sse/services/auth.ts`）和
+   `open-sse/config/providerErrorRules.ts`（`providerRuleRegistry`）中注册分类规则，以选择正确的锁定范围（账户级配额用 `connection`，按模型的错误用 `model`）。此步骤仅对那些规则需要完整错误文本（body 标记）的提供者在生产环境中生效：将提供者 id 加入同一文件中的 `FULL_TEXT_RULE_PROVIDERS` —— 否则 `checkFallbackError` 只会把结构化的 `{code, type}` 错误交给规则，body 文本规则将永远无法匹配实时流量。纯粹基于 `status`/`headers` 匹配的规则（如 Opencode 或 Minimax 的规则）不需要此显式启用。另外，如果规则声明了 `scope: "connection"` 且意图是实际的连接级冷却加同请求 combo 跳过（而不仅是信息性标签），请将提供者 id 加入同一文件中的 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` —— 正是它门控着 `markAccountUnavailable()`（`src/sse/services/auth.ts`）和
    `applyComboTargetExhaustion()`
-   （`open-sse/services/combo/targetExhaustion.ts`）中
-   `isAgentrouterConnectionQuotaScope()` 式消费的门控；没有它，`scope`
-   仍会通过 `fallbackResult.ruleScope` 传递，但没有任何逻辑对其采取行动。
-3. 添加镜像 `tests/unit/upstream-status-restatement.test.ts`
+   （`open-sse/services/combo/targetExhaustion.ts`）中 `isAgentrouterConnectionQuotaScope()` 式的消费；没有它，`scope` 仍会流经 `fallbackResult.ruleScope`，但没有任何逻辑对其采取行动。
+3. 添加参照 `tests/unit/upstream-status-restatement.test.ts`
    和 `tests/unit/agentrouter-error-rules.test.ts` 的单元测试（包括
-   not-permanent / not-creditsExhausted 的防护断言，以及——如果该 provider 需要允许名单——一个断言
-   `resolveRuleMatchBody()` 仅对该 provider 返回完整文本的测试）。
+   not-permanent / not-creditsExhausted 守卫，以及 —— 如果该提供者需要允许列表 —— 一个断言 `resolveRuleMatchBody()` 仅对该提供者返回完整文本的测试）。
 
 无需更改 `chatCore.ts`、`classifyError` 或 combo。
 
-#### 按出口分桶锁定（#10880）
+#### 出口分桶锁定 (#10880)
 
-`EGRESS_BUCKETED_LOCK_PROVIDERS` 中的 provider（opencode 家族）被视为按 IP
-分桶的上游（opencode 免费档是按 IP 分桶的，而非按账户分桶——见 #9611）：被分类为
-`quota_exhausted` **或** `rate_limit_exceeded` 的 429
-状态会在轮询尝试之前，冷却允许名单家族中所有最后已知出口 IP
-与失败连接相同的连接——避免 N-1
-次必然失败的上游调用（与 #10460/#10525 同构）。
-纳入 `rate_limit_exceeded` 是有意为之：在 `markAccountUnavailable`
-路径上，opencode 专属规则永远不会匹配（没有 headers/body 传给
-`checkFallbackError`，且 opencode 不在 `FULL_TEXT_RULE_PROVIDERS`
-中），因此 body 携带订阅配额文本（"monthly usage limit
-reached"）的 429 会在到达 `status_429` 规则之前，被配额文本兜底
-（`buildSubscriptionQuotaFallback`，`accountFallback.ts`；冷却 1 小时）分类为
-`quota_exhausted`——而不含配额文本的 429（纯粹的速率限制）则通过
-`status_429` 规则分类为 `rate_limit_exceeded`，并且仍然会冷却该 IP
-家族。对于允许名单中的 provider，按 IP 分桶的速率限制与配额耗尽是相同的信号。如实说明其局限：
+`EGRESS_BUCKETED_LOCK_PROVIDERS` 中的提供者（opencode 家族）被视为按 IP 分桶的上游（opencode 免费层是按 IP 分桶的，而非按账户分桶 —— 见 #9611）：被分类为 `quota_exhausted` **或** `rate_limit_exceeded` 的 status-429 会在轮换尝试之前，冷却所有最后已知出口 IP 与失败连接相匹配的允许列表家族连接
+—— 避免 N-1 次注定失败的上游调用（与 #10460/#10525 形态相同）。`rate_limit_exceeded` 是有意包含的：在 `markAccountUnavailable`
+路径上，opencode 专属规则从不匹配（没有 headers/body 被交给
+`checkFallbackError`，opencode 也不在 `FULL_TEXT_RULE_PROVIDERS` 中），因此 body 携带订阅配额文本（"monthly usage limit
+reached"）的 429 会在 `status_429` 规则被触及之前，就被配额文本回退
+（`buildSubscriptionQuotaFallback`，`accountFallback.ts`；1 小时冷却）分类为 `quota_exhausted` —— 而不含配额文本的 429（纯速率限制）通过 `status_429` 规则分类为 `rate_limit_exceeded`，并且仍会冷却该 IP 家族。对于允许列表中的提供者，按 IP 分桶的速率限制与配额耗尽是同一信号。如实说明的局限：
 
-- **尽力而为**:锁从 `proxy_logs` 解析该连接最近已知的 `egress_ip`
-  (24 小时窗口、同步、无缓存)。冷缓存(出口 IP 从未被探测过)或无记录行
-  → 失败的连接仍会被该分支冷却(像今天一样记录),只是不锁定任何同级连接。
-- **永不终止**:冷却是一个可续期的配额窗口
-  (`testStatus: "unavailable"`);绝不会从 IP 级信号推导出永久状态。
-  `disableCooling` 连接完全跳过该分支。
-- **白名单族的锁定粒度变化**:这是一个作用域变更,而不仅仅是同级优化。
-  opencode 是一个 `passthroughModels` 提供者,因此在此分支之前,429 会产生
-  按模型(per-MODEL)的锁定;现在它产生连接级冷却——包括对于只运行单个
-  连接、根本没有同级的运营者。这正是 opencode 规则表已经声明为正确的粒度
-  (`scope: "connection"`,`providerErrorRules.ts`),但由于 opencode 不在
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 中,迄今从未被遵守。该分支自行写入失败
-  连接的冷却 + `backoffLevel`,镜像连接作用域的 agentrouter 分支,然后返回
-  ——按模型锁定块和下方的通用路径永远不会被执行到。
-- **包含组合(Combo)**:与 agentrouter 分支一样,该作用域有意忽略组合
-  调用方对 429 应用的 `persistUnavailableState`/`isCombo` 降级。按模型锁定
-  不是此作用域的较弱形式,而是错误的单位:它完全没有说明已耗尽的 IP,
-  因此组合轮换会继续为每个同级燃烧一次注定失败的调用。
-- **同级安全**:已处于终止状态(banned/credits_exhausted)或已处于更长
-  冷却期的同级永远不会被覆盖。
-- **独占白名单**:扩大 `EGRESS_BUCKETED_LOCK_PROVIDERS` 是明确的负责人
-  决策;不做通用接线(pattern #10334/#10419)。同级查询绑定同一个白名单,
-  而不是将其作为 SQL 字面量重复,因此扩大它仍是一行改动。
-- **出口 IP 轮换,两个方向**:查询窗口(24 小时)远宽于出口 IP 缓存
-  TTL(5 分钟),因此"最近已知 IP"是历史记录,而非当前状态。如果连接的
-  代理在窗口内发生了轮换,锁可能会**错过**一个真正共享的 IP(记录的 IP
-  是新的、未耗尽的)——对称地,它也可能**冷却一个已经轮换离开**该已耗尽
-  IP 的同级。第二种情况会让该同级损失一个冷却窗口;两者都是基于历史记录
-  的查询所接受的尽力而为的局限。
-- **成本**:对 `proxy_logs` 的两次有界扫描(通过 `idx_pl_timestamp`
-  进行窗口过滤),仅以 429 的频率发生。无新索引(migration 134 YAGNI)。
-  在中等规模的真实流量数据库副本上测量;高吞吐实例在同一窗口内按比例持有
-  更多行。
+- **尽力而为**：锁从 `proxy_logs` 解析该连接最近已知的 `egress_ip`
+  （24 小时窗口，同步，无缓存）。缓存冷启动（出口 IP 从未探测过）
+  或没有记录 → 失败的连接仍会被该分支冷却（与今天一样记录），
+  只是没有同级连接被锁定。
+- **永不终结**：冷却是一个可续期的配额窗口
+  （`testStatus: "unavailable"`）；永远不会从 IP 级信号推导出
+  永久状态。`disableCooling` 连接会完全跳过该分支。
+- **白名单家族的锁定粒度发生变化**：这是一个作用域变更，而不仅仅是
+  同级优化。opencode 是一个 `passthroughModels` 提供者，因此在此分支
+  之前，429 会产生按模型的锁定；现在它会产生连接级冷却——包括对于
+  运行单个连接且完全没有同级连接的操作者。这正是 opencode 规则表
+  已声明为正确的粒度（`scope: "connection"`，
+  `providerErrorRules.ts`），但由于 opencode 不在
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 中，至今从未被遵守。该分支自行
+  写入失败连接的冷却 + `backoffLevel`，镜像了连接作用域的
+  agentrouter 分支，然后返回——下方的按模型块和通用路径永远不会
+  被执行到。
+- **包含组合调用**：与 agentrouter 分支一样，该作用域刻意忽略
+  组合调用方对 429 应用的 `persistUnavailableState`/`isCombo` 降级。
+  按模型锁定并不是该作用域的更弱形式，而是错误的单位：它对已耗尽的
+  IP 没有任何说明，因此组合轮换会继续在每个同级连接上浪费一次
+  注定失败的调用。
+- **同级安全**：已处于终结状态（banned/credits_exhausted）或已处于
+  更长冷却期的同级连接永远不会被覆盖。
+- **排他性白名单**：扩展 `EGRESS_BUCKETED_LOCK_PROVIDERS` 是所有者的
+  明确决定；不做通用接线（模式 #10334/#10419）。同级查询绑定同一个
+  白名单，而不是将其作为 SQL 字面量重复，因此扩展它仍然只需
+  一行改动。
+- **出口 IP 轮换，双向影响**：查找窗口（24 小时）远宽于出口 IP 缓存
+  TTL（5 分钟），因此"最近已知 IP"是历史记录，而非当前状态。如果
+  连接的代理在窗口内发生了轮换，锁可能会**错过**一个真正共享的 IP
+  （记录的 IP 是新的、未耗尽的）——对称地，它也可能会**冷却一个
+  已经从耗尽的 IP 轮换走的同级连接**。第二种情况会让该同级连接
+  损失一个冷却窗口；两者都是基于历史记录的查找所接受的
+  尽力而为的局限。
+- **成本**：对 `proxy_logs` 进行两次有界扫描（通过
+  `idx_pl_timestamp` 进行窗口过滤），仅在 429 频率下发生。不新增
+  索引（迁移 134 YAGNI）。在中等规模的真实流量数据库副本上测量；
+  高吞吐量实例在同一窗口内按比例持有更多行。
 
 ---
 

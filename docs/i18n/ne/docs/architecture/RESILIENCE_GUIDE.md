@@ -416,6 +416,17 @@ Gemini-वर्गका TPM/RPM विन्डोहरू (~60s retry-after)
 सबैभन्दा चाँडो सकिने अस्थायी लकको `retry_after` / `reset_at`
 बोक्छ; quota, auth र not-found लकहरूले भने संकेत-विहीन 503 नै राख्छन्।
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. अनुरोध क्यू एडमिसन नियन्त्रण (v3.8.49 · issue #6593)
@@ -473,134 +484,279 @@ Gemini-वर्गका TPM/RPM विन्डोहरू (~60s retry-after)
 
 ---
 
-## 7. अपस्ट्रिम स्ट्याटस पुनःकथन (गलत रूपमा बताइएका कोटा त्रुटिहरू)
+## 7. अपस्ट्रिम स्ट्याटस पुनःव्याख्या (गलत रिपोर्ट गरिएका कोटा त्रुटिहरू)
 
-**दायरा:** अस्थायी कोटा समाप्तिलाई गलत HTTP स्ट्याटससँग रिपोर्ट गर्ने एउटा अपस्ट्रिम गेटवे।
+**दायरा:** एउटा अपस्ट्रिम गेटवे जसले अस्थायी कोटा समाप्ति गलत HTTP स्ट्याटससँग रिपोर्ट गर्छ।
 
-**उद्देश्य:** वर्गीकरणअघि नै भ्रामक स्ट्याटस सच्याउनु, ताकि डाउनस्ट्रिम उपभोक्ताहरू (फलब्याक इन्जिन, कम्बो एग्रिगेसन, क्लायन्ट-सामुन्नेको प्रतिक्रिया) ले असफलताको साँचो पुनःप्रयासयोग्य स्वभाव देखून्।
+**उद्देश्य:** वर्गीकरणअघि नै भ्रामक स्ट्याटस सच्याउनु, ताकि डाउनस्ट्रिम उपभोक्ताहरू (फलब्याक इन्जिन, कम्बो एग्रिगेसन, ग्राहक-सामुनेको प्रतिक्रिया) ले असफलताको वास्तविक पुनःप्रयासयोग्य स्वभाव देखून्।
 
-केही गेटवेहरूले अस्थायी कोटा समाप्तिलाई गैर-पुनःप्रयासयोग्य HTTP स्ट्याटससँग संकेत गर्छन्। `agentrouter.org` ले मानक `429` को सट्टा चिनियाँ बडी (`用户额度不足` / `额度不足`) सहित `403` (कहिलेकाहीँ `400`) फर्काउँछ। Claude Code जस्ता क्लायन्टहरूले `403` लाई स्थायी ठानेर सत्र रद्द गर्छन्, र सच्याइएको छैन भने फलब्याक इन्जिनले यसलाई कोटा इभेन्टको सट्टा `AUTH_ERROR` भनेर वर्गीकृत गर्नेछ।
+केही गेटवेहरूले अस्थायी कोटा समाप्ति गैर-पुनःप्रयासयोग्य HTTP
+स्ट्याटससँग संकेत गर्छन्। `agentrouter.org` ले मानक `429` को सट्टा
+चिनियाँ बडी (`用户额度不足` / `额度不足`) सहित `403` (कहिलेकाहीँ `400`)
+फर्काउँछ। Claude Code जस्ता क्लायन्टहरूले `403` लाई स्थायी ठान्छन् र
+सत्र रद्द गर्छन्, र सच्याइँ नभएमा फलब्याक इन्जिनले यसलाई कोटा
+घटनाको सट्टा `AUTH_ERROR` का रूपमा वर्गीकृत गर्नेछ।
 
 **कार्यान्वयन:**
 
-- रजिस्ट्री + म्याचर: `open-sse/config/upstreamStatusRestatement.ts` — प्रति-प्रोभाइडर नियमहरूको सूची (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`), `applyStatusRestatement()` मार्फत मिलाइन्छ।
-- कल साइट: `open-sse/handlers/chatCore.ts` को `providerFailure:` ब्लक (करिब लाइन 3654), ठीक `parseUpstreamError()` ले त्रुटि HTTP स्ट्याटस (`!providerResponse.ok`) भएको अपस्ट्रिम प्रतिक्रिया पार्स गरेपछि, र कुनै पनि वर्गीकरण चल्नुअघि, ताकि प्रत्येक डाउनस्ट्रिम उपभोक्ताले सच्याइएको स्ट्याटस देखोस्। `200` SSE स्ट्रिमभित्र इम्बेड गरिएका त्रुटिहरू छुट्टै, पछिल्लो स्ट्रिम-पार्सिङ मार्ग पछ्याउँछन् र आज यो हुकद्वारा **समेटिएका छैनन्** — एउटा ज्ञात सीमा, जुन agentrouter को गलत-स्ट्याटसका लागि अहिलेसम्म आवश्यक छैन (जुन त्रुटि HTTP स्ट्याटसका रूपमा देखा पर्छ)।
-- पुनःप्रयास योग्यता: `429` `RETRY_AFTER_ELIGIBLE_STATUSES` मा छ (`open-sse/services/combo/unavailableRetryGate.ts`), त्यसैले पुनःकथित त्रुटिले मृत `403` का रूपमा देखिनुको सट्टा वास्तविक पुनःप्रयास विन्डो बोक्छ।
-- कृत्रिम `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`) केवल पुनःकथित प्रतिक्रियाले **क्लायन्टलाई** बताउने कुरा हो; यो आफैमा कनेक्सनको आन्तरिक कुलडाउन/लकआउट अवधि होइन — त्यो पुनःकथित त्रुटि वास्तवमा जुन संयन्त्रले ह्यान्डल गर्छ त्यसद्वारा अलग्गै नियन्त्रित हुन्छ (Connection Cooldown को बढ्दो ब्याकअफ, §2, API-key प्रोभाइडरहरूका लागि आधार `3s`; वा agentrouter जस्ता प्रति-मोडेल-कोटा प्रोभाइडरहरूका लागि Model Lockout, §3)। राउटर क्लायन्टलाई घोषणा गरेको 60s विन्डोभन्दा चाँडै आन्तरिक रूपमा पुनःप्रयासका लागि योग्य बन्न सक्छ — जानाजानी राखिएको मार्जिन हो, बग होइन।
+- रजिस्ट्री + म्याचर: `open-sse/config/upstreamStatusRestatement.ts` —
+  प्रति-प्रोभाइडर नियमहरूको सूची (`{id, fromStatuses, toStatus, textMarkers,
+excludeMarkers, defaultRetryAfterMs}`), `applyStatusRestatement()` मार्फत मिलान गरिन्छ।
+- कल साइट: `open-sse/handlers/chatCore.ts` भित्रको `providerFailure:` ब्लक
+  (करिब लाइन 3654), `parseUpstreamError()` ले त्रुटि HTTP स्ट्याटस
+  (`!providerResponse.ok`) भएको अपस्ट्रिम प्रतिक्रिया पार्स गरेपछि तुरुन्तै,
+  र कुनै पनि वर्गीकरण चल्नुअघि, ताकि हरेक डाउनस्ट्रिम उपभोक्ताले
+  सच्याइएको स्ट्याटस देखोस्। `200` SSE स्ट्रिमभित्र इम्बेड गरिएका
+  त्रुटिहरू छुट्टै, पछिल्लो स्ट्रिम-पार्सिङ मार्गबाट जान्छन् र आज यो
+  हुकद्वारा समेटिएका **छैनन्** — एउटा ज्ञात सीमा, जुन agentrouter को
+  गलत स्ट्याटसका लागि अहिलेसम्म आवश्यक छैन (जुन त्रुटि HTTP
+  स्ट्याटसका रूपमा देखिन्छ)।
+- पुनःप्रयास योग्यता: `429`, `RETRY_AFTER_ELIGIBLE_STATUSES`
+  (`open-sse/services/combo/unavailableRetryGate.ts`) भित्र छ, त्यसैले
+  पुनःव्याख्या गरिएको त्रुटिले मृत `403` का रूपमा देखिनुको सट्टा
+  वास्तविक पुनःप्रयास सञ्झ्याल बोक्छ।
+- कृत्रिम `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
+  केवल पुनःव्याख्या गरिएको प्रतिक्रियाले **क्लायन्ट**लाई बताउने कुरा हो;
+  यो आफैँमा कनेक्सनको आन्तरिक कूलडाउन/लकआउट अवधि होइन — त्यो
+  अलग्गै नियन्त्रण हुन्छ, पुनःव्याख्या गरिएको त्रुटिलाई वास्तवमा जुनसुकै
+  संयन्त्रले ह्यान्डल गर्छ त्यसैद्वारा (Connection Cooldown को बढ्दो
+  ब्याकअफ, §2, API-key प्रोभाइडरहरूका लागि आधार `3s`; वा
+  Model Lockout, §3, agentrouter जस्ता प्रति-मोडेल-कोटा
+  प्रोभाइडरहरूका लागि)। राउटर क्लायन्टलाई घोषणा गरेको 60s
+  सञ्झ्यालभन्दा चाँडै आन्तरिक रूपमा पुनःप्रयास योग्य बन्न सक्छ —
+  जानाजानी छोडिएको खाली ठाउँ (headroom), बग होइन।
 
-स्थायी त्रुटिहरू (agentrouter को `无权访问模型` — यस मोडेलमा पहुँच छैन) कहिल्यै पुनःकथित गरिँदैनन्: `textMarkers` मिले पनि `excludeMarkers` ले नियमलाई भिटो गर्छ, त्यसैले त्रुटिले आफ्नो मौलिक स्ट्याटस कायम राख्छ र केहीले पनि यसलाई सधैंभरि पुनःप्रयास गर्दैन। मिल्ने प्रोभाइडर वर्गीकरण नियम (`open-sse/config/providerErrorRules.ts` मा `agentrouter-model-access-denied`: `reason: "auth_error"`, `scope: "model"`, `6h` घोषित आधार कुलडाउन) सामान्य apikey-श्रेणीको `FORBIDDEN` अर्ली-रिटर्न _अघि_ `checkFallbackError` (`open-sse/services/accountFallback.ts`) द्वारा परामर्श गरिन्छ, जुन `honorsRuleLockScope(provider)` मा गेट गरिएको छ (#10334 — हाल `providerErrorRules.ts` भित्रको `HONORS_RULE_LOCK_SCOPE_PROVIDERS` एलाउलिस्ट मार्फत agentrouter-मात्र)। नियमको घोषित 6h कुलडाउन `fallbackResult.baseCooldownMs` का रूपमा प्रवाहित हुन्छ, तर यसले अझै पनि पूर्व-अवस्थित प्रति-मोडेल-कोटा लकआउट मार्गलाई नै फिड गर्छ (`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`, कुलडाउन स्रोत बाहेक #10334 बाट परिवर्तित छैन): अरू हरेक मोडेल लकआउट जस्तै, यो अपरेटरको `mlSettings.maxCooldownMs` (पूर्वनिर्धारित `1_800_000ms` / 30 मिनेट) मा झारेर सीमित गरिन्छ, र _पर्सिस्ट गरिएको लकआउट कारण_ भने पूर्व-अवस्थित हार्डकोड गरिएको `"forbidden"` नै रहन्छ, नियमको `"auth_error"` होइन — अन्त्यदेखि-अन्त्यसम्म केवल कुलडाउन अवधि मात्र सम्मानित हुन्छ, कारण स्ट्रिङ होइन। कनेक्सन आफैँ सक्रिय नै रहन्छ; उही कनेक्सनमा रहेका भाइचारा मोडेलहरू असरग्रस्त हुँदैनन्।
+स्थायी त्रुटिहरू (agentrouter को `无权访问模型` — यो मोडेलमा पहुँच छैन)
+कहिल्यै पनि पुनःव्याख्या गरिँदैन: `textMarkers` मिले पनि `excludeMarkers`
+ले नियमलाई भिटो गर्छ, त्यसैले त्रुटिले आफ्नो मौलिक स्ट्याटस राख्छ र
+केहीले पनि यसलाई सधैँभरि पुनःप्रयास गर्दैन। मिल्ने प्रोभाइडर वर्गीकरण नियम
+(`open-sse/config/providerErrorRules.ts` भित्रको
+`agentrouter-model-access-denied`: `reason: "auth_error"`, `scope: "model"`,
+घोषित आधार कूलडाउन `6h`) `checkFallbackError`
+(`open-sse/services/accountFallback.ts`) द्वारा सामान्य apikey-कोटि
+`FORBIDDEN` अर्ली-रिटर्नभन्दा _अघि_ सोधिन्छ, `honorsRuleLockScope(provider)`
+मा गेट गरिएको (#10334 — हाल `providerErrorRules.ts` भित्रको
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` अनुमति-सूचीमार्फत agentrouter-मात्र)।
+नियमको घोषित 6h कूलडाउन `fallbackResult.baseCooldownMs` का रूपमा बग्छ,
+तर यसले अझै पनि पूर्व-अवस्थित प्रति-मोडेल-कोटा लकआउट मार्गलाई
+खुवाउँछ (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, कूलडाउन स्रोतबाहेक #10334 ले परिवर्तन
+गरेको छैन): यो अपरेटरको `mlSettings.maxCooldownMs` (डिफल्ट
+`1_800_000ms` / 30min) सम्म घटाइन्छ, अन्य हरेक मोडेल लकआउटजस्तै, र
+_पर्सिस्ट गरिएको लकआउट कारण_ पूर्व-अवस्थित हार्डकोड गरिएको
+`"forbidden"` नै रहन्छ, नियमको `"auth_error"` होइन — एन्ड-टु-एन्ड केवल
+कूलडाउन अवधि मात्र मानिन्छ, कारण स्ट्रिङ होइन। कनेक्सन आफैँ सक्रिय
+रहन्छ; उही कनेक्सनका साथी मोडेलहरू अप्रभावित रहन्छन्।
 
-पुनः व्याख्या गरिएका कोटा त्रुटिहरू (`额度不足`) प्रोडक्शनमा एउटा प्रोभाइडर नियमसम्म पुग्छन्
-(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
-"connection"`, आफ्नै घोषित cooldown छैन — persistence तहको
-scaled backoff डिफल्ट लागू हुन्छ)। #10334 देखि, `ProviderErrorRuleMatch` मा रहेको
-`scope` end-to-end उपभोग गरिन्छ नै, तर **केवल**
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` allowlist मा रहेका प्रोभाइडरहरूका लागि (`providerErrorRules.ts` —
-आज केवल `"agentrouter"`, `honorsRuleLockScope()` मार्फत गेट गरिएको)। अन्य हरेक
-प्रोभाइडरका लागि `scope` जानकारीमूलक मात्र रहन्छ, #10334 भन्दा अघिकै जस्तै।
-`checkFallbackError` ले मिलान भएको नियमको scope लाई
-`fallbackResult.ruleScope` को रूपमा देखाउँछ; `isAgentrouterConnectionQuotaScope()`
-(`src/sse/services/auth.ts`) भनेको साझा guard हो जसले कुनै
-`ruleScope` लाई connection-wide, आफैँ-रिकभर हुने सिग्नलको रूपमा मान्न वास्तवमै सुरक्षित छ कि छैन भनी
-पुष्टि गर्छ (scope `"connection"`, reason `quota_exhausted`, कहिल्यै `permanent` होइन,
-कहिल्यै `creditsExhausted` होइन — भविष्यमा कुनै नियमले scope
-`"connection"` लाई स्थायी खाता अवस्थासँग जोड्न सक्ने सम्भावनाविरुद्धको रक्षा)। दुई उपभोक्ताहरूले यसलाई कल गर्छन्:
+पुनःव्याख्या गरिएका कोटा त्रुटिहरू (`额度不足`) प्रोडक्सनमा एउटा प्रोभाइडर
+नियमसम्म पुग्छन् (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`,
+`scope: "connection"`, आफ्नै घोषित कूलडाउन छैन — पर्सिस्टेन्स तहको
+स्केल गरिएको ब्याकअफ डिफल्ट लागू हुन्छ)। #10334 देखि,
+`ProviderErrorRuleMatch` मा `scope` एन्ड-टु-एन्ड उपभोग गरिन्छ, तर
+**केवल** `HONORS_RULE_LOCK_SCOPE_PROVIDERS` अनुमति-सूचीमा भएका
+प्रोभाइडरहरूका लागि (`providerErrorRules.ts` — आज केवल `"agentrouter"`,
+`honorsRuleLockScope()` मार्फत गेट गरिएको)। अन्य हरेक प्रोभाइडरका लागि
+`scope` सूचनात्मक मात्र रहन्छ, #10334 भन्दा अघिकै जस्तै।
+`checkFallbackError` ले मिलेको नियमको scope लाई
+`fallbackResult.ruleScope` का रूपमा देखाउँछ;
+`isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) त्यो
+साझा गार्ड हो जसले पुष्टि गर्छ कि `ruleScope` लाई कनेक्सन-व्यापी,
+आफैँ-निको हुने संकेतका रूपमा मान्नु साँच्चै सुरक्षित छ (scope
+`"connection"`, कारण `quota_exhausted`, कहिल्यै `permanent` होइन,
+कहिल्यै `creditsExhausted` होइन — scope `"connection"` लाई स्थायी
+खाता अवस्थासँग जोड्ने भावी नियमविरुद्धको सुरक्षा)। यसलाई दुई
+उपभोक्ताले कल गर्छन्:
 
-- **स्थायी भण्डारण (persistence)** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  passthrough-provider को **per-model** lockout शाखामा खस्नुको सट्टा
-  (agentrouter `passthroughModels: true` भएकाले → `hasPerModelQuota()`
-  ले `true` फर्काउँछ), यसले **अस्थायी connection cooldown** लागू गर्छ —
-  `testStatus: "unavailable"` + `rateLimitedUntil`, कहिल्यै terminal status होइन
-  (`credits_exhausted`/`banned`/`expired`) — त्यसैले cooldown सकिएपछि connection
-  आफैँ रिकभर हुन्छ, म्यानुअल credential रिसेट आवश्यक पर्दैन।
-  `disableCooling: true` भएका connectionहरूका लागि यो छोडिन्छ (#2997): त्यो opt-out
-  त्यसोभए per-model lockout मा नै खस्छ (लेखित trade-off —
-  शाखा माथिको कोड कमेन्ट हेर्नुहोस्)।
-- **उही-अनुरोध combo routing** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): उही guard ले
-  connection लाई in-memory `exhaustedConnections` सेटमा चिन्ह लगाउँछ, key
-  `${provider}:${connectionId}` सहित। यसले केवल बाँकी SAME-REQUEST target लाई छोड्छ जसले
-  _आफैँ त्यही ठीक `connectionId` बोकेको_ हुन्छ आफ्नै
-  target object मा (`getExhaustedTargetSkipReason()`,
-  `open-sse/services/combo/comboPredicates.ts`, `exhaustedConnections` lookup भन्दा अघिको `if (provider &&
-connectionId)`) — साधारण
-  model-list combo, जहाँ sibling targetहरूले आफ्नै pinned `connectionId` बोक्दैनन्
-  र एउटा मात्र response को
-  `X-OmniRoute-Selected-Connection-Id` header बाट per-dispatch resolve हुन्छ, कहिल्यै त्यो key match मा पुग्दैन।
-  त्यो सामान्य अवस्थामा, बाँकी leg ले भर्खरै exhausted गरिएको खाता पुनः प्रयोग गर्नबाट जोगाउने वास्तविक सुरक्षा यो
-  Set नै होइन — यो माथिको persistence तह हो
-  (connection को `rateLimitedUntil` अब भविष्यमा छ) र यही guard ले
-  असफलताका लागि `transientRateLimitedProviders` लाई दबाउनुको संयोजन हो
-  ("दुई-चरणीय डिजाइन" र `targetExhaustion.ts` मा रहेको
-  `isAgentrouterConnectionQuotaScope` शाखाको कोड कमेन्ट हेर्नुहोस्): त्यो
-  Set चिन्ह नलगाइएकाले, `combo.ts` को `allowRateLimitedConnection` force-allow
-  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) प्रोभाइडरका बाँकी legहरूका लागि लागू
-  हुँदैन, त्यसैले credential selection को `rateLimitedUntil`
-  फिल्टर (`src/sse/services/auth.ts:1238`) सामान्य रूपमा मानिन्छ र
-  बाँकी leg ले या त फरक, अझै योग्य agentrouter
-  connection छान्छ, या कुनै credential उपलब्ध नभएर असफल हुन्छ — यसले यो शाखाले भर्खरै cool down गरेको
-  connection मा जबर्जस्ती फर्कने बाटो बनाउँदैन।
+- **स्थायित्व** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  passth्रु-प्रदायकको **प्रति-मोडेल** लकआउट शाखामा पर्नुको सट्टा
+  (agentrouter मा `passthroughModels: true` छ → `hasPerModelQuota()`
+  ले `true` फर्काउँछ), यसले **अस्थायी जडान कूलडाउन** लागू गर्छ —
+  `testStatus: "unavailable"` + `rateLimitedUntil`, कहिल्यै पनि अन्तिम स्थिति
+  (`credits_exhausted`/`banned`/`expired`) होइन — जसले गर्दा कूलडाउन सकिएपछि
+  म्यानुअल क्रेडेन्सियल रिसेट आवश्यक नपरी जडान आफैँ पुनःसञ्चालित हुन्छ।
+  `disableCooling: true` भएका जडानहरूका लागि यसलाई छोडिन्छ (#2997): त्यो अप्ट-आउट
+  बरु प्रति-मोडेल लकआउटमा पुग्छ (एउटा दस्तावेजीकृत सम्झौता —
+  शाखामाथिको कोड टिप्पणी हेर्नुहोस्)।
+- **एउटै-अनुरोध कम्बो राउटिङ** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): उही गार्डले जडानलाई
+  इन-मेमोरी `exhaustedConnections` सेटमा चिन्ह लगाउँछ, जसको कुञ्जी
+  `${provider}:${connectionId}` हुन्छ। यसले बाँकी रहेको SAME-REQUEST
+  लक्ष्यलाई तब मात्र छोड्छ, जब _त्यसले स्वयं ठ्याक्कै त्यही `connectionId`_
+  आफ्नै लक्ष्य वस्तुमा बोकेको हुन्छ (`getExhaustedTargetSkipReason()`,
+  `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
+connectionId)` लाई `exhaustedConnections` लुकअपभन्दा अगाडि) — सामान्य
+  मोडेल-सूची कम्बोमा, जहाँ सहोदर लक्ष्यहरूले आफ्नै पिन गरिएको `connectionId`
+  बोक्दैनन् र एउटा जडानलाई प्रतिक्रियाको
+  `X-OmniRoute-Selected-Connection-Id` हेडरबाट प्रत्येक डिस्प्याचमा मात्र
+  रिजोल्भ गरिन्छ, त्यो कुञ्जी कहिल्यै मेल खाँदैन। त्यस सामान्य अवस्थामा,
+  बाँकी लेगले भर्खरै समाप्त भएको खाता पुनः प्रयोग गर्न नपाओस् भन्ने वास्तविक
+  सुरक्षा यो Set होइन — यो माथिको स्थायित्व तह हो (जडानको
+  `rateLimitedUntil` अब भविष्यमा छ), साथै यही गार्डले उक्त असफलताका लागि
+  `transientRateLimitedProviders` लाई दबाउँछ ("दुई-चरणीय डिजाइन" र
+  `targetExhaustion.ts` को `isAgentrouterConnectionQuotaScope` शाखामा रहेको
+  कोड टिप्पणी हेर्नुहोस्): त्यो Set लाई अचिह्नित छोड्दा, `combo.ts` को
+  `allowRateLimitedConnection` बलपूर्वक-अनुमति
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) प्रदायकका बाँकी
+  लेगहरूका लागि सक्रिय हुँदैन, त्यसैले क्रेडेन्सियल चयनको
+  `rateLimitedUntil` फिल्टर (`src/sse/services/auth.ts:1238`) सामान्य रूपमा
+  पालना हुन्छ र बाँकी लेगले या त अर्को, अझै योग्य agentrouter जडान छान्छ
+  वा कुनै क्रेडेन्सियल उपलब्ध नभएकाले असफल हुन्छ — यो शाखाले भर्खरै कूलडाउनमा
+  राखेको जडानमा यसले बलपूर्वक फर्किने प्रयास गर्दैन।
 
-### दुई-चरणीय डिजाइन: status पुनः व्याख्या, त्यसपछि वर्गीकरण
+### दुई-चरणीय डिजाइन: स्थिति पुनर्व्याख्या, त्यसपछि वर्गीकरण
 
-Status पुनः व्याख्या (`upstreamStatusRestatement.ts`) र प्रोभाइडर
+स्थिति पुनर्व्याख्या (`upstreamStatusRestatement.ts`) र प्रदायक
 वर्गीकरण नियमहरू (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) छुट्टाछुट्टै रजिस्ट्रीहरू हुन् जुन दुवै प्रोभाइडर id
-र text markerहरूमा key गर्छन्, तर तिनीहरू फरक ठाउँमा चल्छन् र फरक
-उद्देश्य पूरा गर्छन्: पुनः व्याख्याले `chatCore.ts` मा चाँडै HTTP status पुनः लेख्छ;
-वर्गीकरण नियमहरूले `checkFallbackError()`
-(`open-sse/services/accountFallback.ts`) भित्र fallback `reason` र lock `scope`
-(`model` / `provider` / `connection`) छान्छन्।
+`providerRuleRegistry`) दुई अलग रजिस्ट्री हुन्, जसले प्रदायक आईडी र पाठ
+मार्कर दुवैलाई कुञ्जीका रूपमा प्रयोग गर्छन्, तर तिनीहरू फरक स्थानमा चल्छन् र
+फरक उद्देश्य पूरा गर्छन्: पुनर्व्याख्याले `chatCore.ts` मा सुरुमै HTTP स्थिति
+पुनर्लेखन गर्छ; वर्गीकरण नियमहरूले `checkFallbackError()` भित्र
+(`open-sse/services/accountFallback.ts`) फलब्याक `reason` र लक `scope`
+(`model` / `provider` / `connection`) चयन गर्छन्।
 
-वर्गीकरण नियमहरूले पूर्ण त्रुटि **text** (`额度不足`
-जस्ता body markerहरू मिलान गर्न आवश्यक) `providerErrorRules.ts` मा रहेको `FULL_TEXT_RULE_PROVIDERS`
-allowlist मा सूचीबद्ध प्रोभाइडरहरूका लागि मात्र देख्छन् — हाल केवल `"agentrouter"`। अन्य हरेक
-**built-in catalog** प्रोभाइडरका लागि, `checkFallbackError` ले
-`getProviderErrorRuleMatch` लाई structured error (`{code, type}`) मात्र दिन्छ,
-जुन header/status/code-आधारित नियमहरूका लागि पर्याप्त छ तर body-text markerहरूप्रति अन्धो।
-`resolveRuleMatchBody()` helper ले यो चयन गर्छ: allowlist गरिएका प्रोभाइडरहरूका लागि पूर्ण त्रुटि
-text, अन्यथा structured error। `FULL_TEXT_RULE_PROVIDERS` मा **built-in** प्रोभाइडर थप्नु
-स्पष्ट per-provider opt-in हो — यो यसैकारण राखिएको हो कि सूचीमा नभएका हरेक प्रोभाइडरको
-डिफल्ट path byte-for-byte अपरिवर्तित रहोस्।
+वर्गीकरण नियमहरूले पूर्ण त्रुटि **पाठ** (जस्तै `额度不足` जस्ता बडी
+मार्करसँग मिलाउन आवश्यक) `providerErrorRules.ts` को
+`FULL_TEXT_RULE_PROVIDERS` अनुमति-सूचीमा रहेका प्रदायकहरूका लागि मात्र
+देख्छन् — हाल केवल `"agentrouter"`। अन्य प्रत्येक **बिल्ट-इन क्याटलग**
+प्रदायकका लागि, `checkFallbackError` ले `getProviderErrorRuleMatch` लाई
+संरचित त्रुटि (`{code, type}`) मात्र दिन्छ, जुन हेडर/स्थिति/कोड-आधारित
+नियमहरूका लागि पर्याप्त हुन्छ तर बडी-पाठ मार्करहरू देख्न सक्दैन।
+`resolveRuleMatchBody()` सहायकले यो चयन गर्छ: अनुमति-सूचीमा रहेका
+प्रदायकहरूका लागि पूर्ण त्रुटि पाठ, अन्यथा संरचित त्रुटि। कुनै
+**बिल्ट-इन** प्रदायकलाई `FULL_TEXT_RULE_PROVIDERS` मा थप्नु भनेको स्पष्ट
+प्रति-प्रदायक अप्ट-इन हो — सूचीमा नभएका प्रत्येक प्रदायकको पूर्वनिर्धारित
+मार्ग बाइट-का-बाइट अपरिवर्तित रहोस् भनेर यो व्यवस्था गरिएको हो।
 
-नियमको `scope` (`model` / `provider` / `connection`) `FULL_TEXT_RULE_PROVIDERS` भन्दा छुट्टै
-opt-in हो: `checkFallbackError` ले यसलाई
-`fallbackResult.ruleScope` को रूपमा मात्र देखाउँछ, र downstream उपभोक्ताहरूले
-यसलाई जानकारीमूलक लेबल बाहेक अरू केहीको रूपमा उही फाइलको
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` allowlist मा रहेका प्रोभाइडरहरूका लागि मात्र मान्छन् (`gated via
-honorsRuleLockScope()` — आज केवल `"agentrouter"`)।
-प्रोभाइडर त्यो allowlist मा भएपछि `scope: "connection"` match ले वास्तवमा के गर्छ भनी माथिको "पुनः व्याख्या गरिएका
-कोटा त्रुटिहरू" हेर्नुहोस्।
+नियमको `scope` (`model` / `provider` / `connection`) भनेको
+`FULL_TEXT_RULE_PROVIDERS` भन्दा अलग अप्ट-इन हो: `checkFallbackError` ले
+यसलाई `fallbackResult.ruleScope` का रूपमा मात्र बाहिर ल्याउँछ, र पछिल्ला
+उपभोक्ताहरूले यसलाई केवल त्यही फाइलको
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` अनुमति-सूचीमा रहेका प्रदायकहरूका लागि
+सूचनात्मक लेबलभन्दा बढीका रूपमा मान्छन् (`honorsRuleLockScope()` मार्फत
+गेट गरिएको — अहिले केवल `"agentrouter"`)। कुनै प्रदायक त्यो अनुमति-सूचीमा
+परेपछि `scope: "connection"` मिलानले वास्तवमा के गर्छ भन्ने जान्न माथिको
+"पुनर्व्याख्या गरिएका कोटा त्रुटिहरू" हेर्नुहोस्।
 
-**#11104 — operator-घोषित rules ले दुवै allowlist बाइपास गर्छन्।** Operator ले यो फाइल सम्पादन नगरी runtime मा `settings.providerErrorRules` (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) मार्फत per-provider rule घोषणा गर्न सक्छ। Operator rule लाई `FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` पछाडि gate गर्नु — built-in catalog rules को **default** व्यवहार जोगाउन बनाइएका allowlists — ले त्यहाँ पहिल्यै सूचीबद्ध भएकाहरू बाहेक हरेक provider का लागि settings mechanism निष्क्रिय बनाइदिनेछ, किनकि rule घोषणा गर्नु आफैंमा operator को स्पष्ट opt-in हो। `resolveRuleMatchBody()` र `honorsRuleLockScope()` दुवैले पहिले `hasOperatorRuleForProvider()` जाँच्छन्: operator rule भएको provider ले raw error text पाउँछ र यसको घोषित `scope` मान्य हुन्छ, यो कुनै पनि allowlist मा छ कि छैन भन्ने कुराले फरक पार्दैन।
+**#11104 — अपरेटरले घोषणा गरेका नियमहरूले दुवै अनुमति-सूचीलाई बाइपास गर्छन्।**
+अपरेटरले यो फाइल सम्पादन नगरी रनटाइममा `settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
+मार्फत प्रति-प्रदायक नियम घोषणा गर्न सक्छ। अपरेटर नियमलाई
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` पछाडि गेट
+गर्दा — यी अनुमति-सूची बिल्ट-इन क्याटलग नियमहरूको **पूर्वनिर्धारित**
+व्यवहार जोगाउन बनाइएका हुन् — त्यहाँ पहिल्यै सूचीबद्ध प्रदायकहरूबाहेक
+अरू सबैका लागि सेटिङ संयन्त्र निष्क्रिय हुन्थ्यो, किनकि नियम घोषणा गर्नु
+आफैँमा अपरेटरको स्पष्ट अप्ट-इन हो। `resolveRuleMatchBody()` र
+`honorsRuleLockScope()` दुवैले पहिले `hasOperatorRuleForProvider()` जाँच
+गर्छन्: अपरेटर नियम भएको प्रदायकले कच्चा त्रुटि पाठ पाउँछ र त्यसले घोषणा
+गरेको `scope` लाई सम्मान गरिन्छ, चाहे त्यो कुनै पनि अनुमति-सूचीमा देखिएको
+होस् वा नहोस्।
 
-**चिनिएको खाली ठाउँ — `providerRuleRegistry` HTTP 400 का लागि कहिल्यै सोधपुछ गरिँदैन।** `checkFallbackError` को `BAD_REQUEST` branch ले status 400 लाई पूरै आफ्नै pattern arrays (`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`, आदि `accountFallback.ts` मा) मार्फत वर्गीकृत गर्छ र यसभन्दा माथि रहेको `configuredRule`/`getProviderErrorRuleMatch` branch मा पुग्नुअघि नै return गर्छ। `status: 400` भएको built-in catalog rule (वा operator rule) सिन्ट्याक्टिक रूपमा मान्य छ तर कहिल्यै fire हुँदैन। आज कुनै पनि अवस्थित rule ले 400 लक्षित गर्दैन, त्यसैले production मा केही पनि प्रभावित छैन — तर भविष्यको 400 rule लाई पहिले यो branch छोएको चाहिन्छ, जुन rule थप्नुभन्दा ठूलो परिवर्तन हो (यसले pattern-array व्यवहारमा पहिल्यै निर्भर रहेका हरेक provider का लागि 400 पुनः वर्गीकृत गर्छ) र single-provider rule थप्ने कामको दायरा बाहिर छ।
+**ज्ञात कमी — HTTP 400 का लागि `providerRuleRegistry` कहिल्यै जाँचिँदैन।**
+`checkFallbackError` को `BAD_REQUEST` शाखाले स्थिति 400 लाई पूर्ण रूपमा
+आफ्नै प्याटर्न एरेहरू (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS`, आदि `accountFallback.ts` मा) मार्फत वर्गीकरण
+गर्छ र त्यसभन्दा माथिको `configuredRule`/`getProviderErrorRuleMatch` शाखामा
+पुग्नुअघि नै फर्कन्छ। `status: 400` भएको बिल्ट-इन क्याटलग नियम (वा अपरेटर
+नियम) सिन्ट्याक्सका हिसाबले मान्य हुन्छ, तर कहिल्यै सक्रिय हुँदैन। अहिले
+कुनै विद्यमान नियमले 400 लाई लक्षित गर्दैन, त्यसैले उत्पादनमा केही पनि
+प्रभावित भएको छैन — तर भविष्यको 400 नियमका लागि पहिले यो शाखा परिमार्जन
+गर्नुपर्छ, जुन केवल नियम थप्नुभन्दा ठूलो परिवर्तन हो (यसले प्याटर्न-एरे
+व्यवहारमा पहिल्यै निर्भर प्रत्येक प्रदायकका लागि 400 लाई पुनर्वर्गीकृत
+गर्छ) र एकल-प्रदायक नियम थप्ने कार्यक्षेत्रभन्दा बाहिर पर्छ।
 
-### नयाँ quota-गलत बताउने gateway थप्दै
+### नयाँ कोटा-गलतबयान गर्ने गेटवे थप्ने
 
-1. `statusRestatementRegistry` (`open-sse/config/upstreamStatusRestatement.ts`) मा एउटा rule array दर्ता गर्नुहोस्। `textMarkers` लाई provider-विशेष राख्नुहोस्; `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`) सँग टकराउने सामान्य अंग्रेजी वाक्यांशहरू कहिल्यै पुनः प्रयोग नगर्नुहोस्।
-2. सही lock scope छान्न वैकल्पिक रूपमा `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) मा classification rules दर्ता गर्नुहोस् (account-व्यापी quota का लागि `connection`, per-model errors का लागि `model`)। यो चरण production मा ती provider हरूका लागि मात्र प्रभावकारी हुन्छ जसका rules लाई पूर्ण error text (body markers) चाहिन्छ: उही फाइलमा provider id लाई `FULL_TEXT_RULE_PROVIDERS` मा थप्नुहोस् — अन्यथा `checkFallbackError` ले rule लाई संरचित `{code, type}` error मात्र हस्तान्तरण गर्छ र body-text rule ले live traffic कहिल्यै मिलाउँदैन। खाली `status`/`headers` मा मिल्ने rules (जस्तै Opencode को वा Minimax को) लाई यो opt-in चाहिँदैन। अलग्गै, यदि rule ले `scope: "connection"` घोषणा गर्छ र उद्देश्य वास्तविक connection-व्यापी cooldown प्लस same-request combo skip हो (केवल सूचनात्मक label होइन), उही फाइलमा provider id लाई `HONORS_RULE_LOCK_SCOPE_PROVIDERS` मा थप्नुहोस् — यहीले `markAccountUnavailable()` (`src/sse/services/auth.ts`) र `applyComboTargetExhaustion()` (`open-sse/services/combo/targetExhaustion.ts`) मा `isAgentrouterConnectionQuotaScope()`-शैलीको consumption लाई gate गर्छ; यो बिना, `scope` अझै पनि `fallbackResult.ruleScope` बाट बग्छ तर केही पनि यसमा कार्य गर्दैन।
-3. `tests/unit/upstream-status-restatement.test.ts` र `tests/unit/agentrouter-error-rules.test.ts` लाई मिरर गर्ने unit tests थप्नुहोस् (not-permanent / not-creditsExhausted guards सहित, र — यदि provider लाई allowlist चाहिन्छ भने — `resolveRuleMatchBody()` ले पूर्ण text त्यो provider का लागि मात्र फर्काउँछ भनी assert गर्ने test)।
+1. `statusRestatementRegistry`
+   (`open-sse/config/upstreamStatusRestatement.ts`) मा एउटा नियम array दर्ता गर्नुहोस्। `textMarkers`
+   लाई प्रदायक-विशिष्ट राख्नुहोस्; `CREDITS_EXHAUSTED_SIGNALS`
+   (`open-sse/services/accountFallback.ts`) सँग टकरिने सामान्य अंग्रेजी वाक्यांशहरू कहिल्यै पुनः प्रयोग नगर्नुहोस्।
+2. सही लक स्कोप छनोट गर्नका लागि वैकल्पिक रूपमा
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) मा वर्गीकरण नियमहरू दर्ता गर्नुहोस्
+   (खाता-व्यापी कोटाका लागि `connection`, प्रति-मोडेल त्रुटिहरूका लागि
+   `model`)। यो चरण प्रोडक्सनमा ती प्रदायकहरूका लागि मात्र प्रभावकारी हुन्छ जसका नियमहरूलाई पूरा त्रुटि पाठ (बडी मार्करहरू) चाहिन्छ: उही फाइलमा
+   `FULL_TEXT_RULE_PROVIDERS` मा प्रदायक id थप्नुहोस् — अन्यथा
+   `checkFallbackError` ले नियमलाई सधैँ संरचित
+   `{code, type}` त्रुटि मात्र दिन्छ र बडी-पाठ नियमले लाइभ ट्राफिकसँग कहिल्यै मेल खाँदैन।
+   शुद्ध रूपमा `status`/`headers` मा मात्र मेल खाने नियमहरूलाई (जस्तै Opencode वा
+   Minimax का) यो opt-in चाहिँदैन। छुट्टै, यदि नियमले
+   `scope: "connection"` घोषणा गर्छ र उद्देश्य वास्तविक कनेक्सन-व्यापी कुलडाउन
+   र उही-अनुरोध combo स्किप हो (केवल सूचनात्मक लेबल होइन), उही फाइलमा
+   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` मा प्रदायक id थप्नुहोस् — यही नै
+   `markAccountUnavailable()` (`src/sse/services/auth.ts`) र
+   `applyComboTargetExhaustion()`
+   (`open-sse/services/combo/targetExhaustion.ts`) मा `isAgentrouterConnectionQuotaScope()`-शैलीको उपभोगलाई गेट गर्ने हो; यस बिना, `scope`
+   अझै `fallbackResult.ruleScope` मार्फत बग्छ तर केहीले पनि यसमा कार्य गर्दैन।
+3. `tests/unit/upstream-status-restatement.test.ts`
+   र `tests/unit/agentrouter-error-rules.test.ts` उस्तै ढाँचाका युनिट परीक्षणहरू थप्नुहोस् (not-permanent / not-creditsExhausted गार्डहरू सहित, र — यदि प्रदायकलाई
+   allowlist चाहिन्छ भने — `resolveRuleMatchBody()` ले पूरा पाठ उही प्रदायकका लागि मात्र फर्काउँछ भनी assert गर्ने परीक्षण)।
 
 `chatCore.ts`, `classifyError`, वा combo मा कुनै परिवर्तन आवश्यक छैन।
 
-#### Egress-बकेट गरिएको lock (#10880)
+#### Egress-bucketed लक (#10880)
 
-`EGRESS_BUCKETED_LOCK_PROVIDERS` मा रहेका provider हरू (opencode परिवार) लाई IP-बकेट गरिएको upstream को रूपमा व्यवहार गरिन्छ (opencode free tier IP-बकेट गरिएको हो, account-बकेट गरिएको होइन — #9611 हेर्नुहोस्): status-429 वर्गीकृत `quota_exhausted` **वा** `rate_limit_exceeded` ले rotation ले तिनीहरूलाई प्रयास गर्नुअघि नै, असफल connection को अन्तिम चिनिएको egress IP सँग मेल खाने हरेक allowlisted-परिवार connection लाई cool down गर्छ — N-1 ग्यारेन्टी गरिएका-असफल upstream calls बाट बचाउँदै (#10460/#10525 जस्तै आकार)। `rate_limit_exceeded` जानाजानी समावेश गरिएको हो: `markAccountUnavailable` path मा opencode-विशेष rules कहिल्यै मिल्दैनन् (`checkFallbackError` लाई कुनै headers/body हस्तान्तरण गरिँदैन, opencode `FULL_TEXT_RULE_PROVIDERS` मा छैन), त्यसैले जुन 429 को body मा subscription-quota text ("monthly usage limit reached") हुन्छ त्यसलाई quota-text fallback (`buildSubscriptionQuotaFallback`, `accountFallback.ts`; 1h cooldown) ले `status_429` rule मा कहिल्यै पुग्नुअघि नै `quota_exhausted` वर्गीकृत गर्छ — जबकि quota-text-विहीन 429 (सामान्य rate limiting) `status_429` rule मार्फत `rate_limit_exceeded` को रूपमा वर्गीकृत हुन्छ र अझै पनि IP परिवारलाई cool down गर्छ। Allowlisted provider का लागि IP-बकेट गरिएको rate limit समाप्त भएको quota सँग उही signal हो। इमानदार सीमाहरू:
+`EGRESS_BUCKETED_LOCK_PROVIDERS` (opencode परिवार) मा रहेका प्रदायकहरूलाई
+IP-bucketed अपस्ट्रिमका रूपमा व्यवहार गरिन्छ (opencode फ्री टियर IP-bucketed हो,
+खाता-bucketed होइन — हेर्नुहोस् #9611): `quota_exhausted`
+**वा** `rate_limit_exceeded` भनी वर्गीकृत status-429 ले, रोटेसनले तिनीहरूलाई प्रयास गर्नुअघि नै,
+असफल कनेक्सनको IP सँग आफ्नो अन्तिम चिनिएको egress IP मेल खाने
+प्रत्येक allowlisted-परिवार कनेक्सनलाई कुलडाउनमा राख्छ
+— जसले N-1 वटा निश्चित-असफल अपस्ट्रिम कलहरूबाट बचाउँछ (#10460/#10525 जस्तै आकृति)।
+`rate_limit_exceeded` जानेबुझी समावेश गरिएको हो: `markAccountUnavailable`
+मार्गमा opencode-विशिष्ट नियमहरू कहिल्यै मेल खाँदैनन् (`checkFallbackError` लाई कुनै headers/body दिइँदैन,
+opencode `FULL_TEXT_RULE_PROVIDERS` मा छैन), त्यसैले बडीमा सदस्यता-कोटा पाठ
+("monthly usage limit reached") बोकेको 429 लाई, `status_429`
+नियमसम्म कहिल्यै पुग्नुअघि नै, कोटा-पाठ फलब्याकले
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; 1h कुलडाउन) `quota_exhausted` भनी वर्गीकरण गर्छ
+— जबकि कोटा-पाठरहित 429 (सादा
+रेट लिमिटिङ) `status_429` नियम मार्फत `rate_limit_exceeded` भनी वर्गीकृत हुन्छ
+र IP परिवारलाई अझै पनि कुलडाउनमा राख्छ। allowlisted प्रदायकका लागि IP-bucketed
+रेट लिमिट भनेको सकिएको कोटासँग बराबर संकेत हो। इमानदार सीमाहरू:
 
-- **Best-effort**: लकले कनेक्सनको अन्तिम ज्ञात `egress_ip` लाई `proxy_logs` बाट निर्धारण गर्छ (24 घण्टे विन्डो, synchronous, कुनै क्यास छैन)। कोल्ड क्यास (egress IP कहिल्यै probe गरिएको छैन) वा कुनै row छैन भने → असफल कनेक्सनलाई ब्रान्चले अझै पनि cool गर्छ (आजकाल जस्तै रेकर्ड गरिन्छ), केवल कुनै sibling लक हुँदैन।
-- **कहिल्यै terminal हुँदैन**: cooldown एउटा नवीकरण हुने quota window हो
-  (`testStatus: "unavailable"`); IP-स्तरको संकेतबाट स्थायी अवस्था कहिल्यै निकालिँदैन। `disableCooling` कनेक्सनहरूले ब्रान्चलाई पूरै skip गर्छन्।
-- **Allowlist गरिएको परिवारका लागि लक granularity परिवर्तन हुन्छ**: यो scope परिवर्तन हो, केवल sibling optimization मात्र होइन। opencode एउटा `passthroughModels`
-  provider हो, त्यसैले यो ब्रान्चअघि 429 ले per-MODEL lockout उत्पन्न गर्थ्यो; अब यसले कनेक्सन cooldown उत्पन्न गर्छ — एउटै कनेक्सन चलाउने र कुनै sibling नै नभएको operator का लागि समेत। त्यो granularity नै opencode rule तालिकाले पहिलेदेखि नै सही भनी घोषणा गरेको छ (`scope: "connection"`,
-  `providerErrorRules.ts`), तर अहिलेसम्म कहिल्यै honor गरिएको थिएन किनकि opencode
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` मा छैन। ब्रान्चले असफल कनेक्सनको cooldown + `backoffLevel` आफैँ लेख्छ, connection-scoped agentrouter ब्रान्चलाई mirror गर्दै, र return गर्छ — per-model block र तलको generic path कहिल्यै पुगिँदैन।
-- **Combo समावेश**: agentrouter ब्रान्च जस्तै, scope ले combo caller ले 429 मा लागू गर्ने `persistUnavailableState`/`isCombo` downgrade लाई जानाजानी बेवास्ता गर्छ। per-model lockout यो scope को कमजोर रूप होइन, यो गलत एकाइ हो: यसले exhaust भएको IP बारे केही भन्दैन, त्यसैले combo rotation ले प्रत्येक sibling का लागि एउटा निश्चित-असफल call जलाइरहन्थ्यो।
-- **Sibling सुरक्षा**: पहिल्यै terminal (banned/credits_exhausted) भएको
-  वा पहिल्यै लामो cooldown मा रहेको sibling कहिल्यै overwrite हुँदैन।
-- **विशेष allowlist**: `EGRESS_BUCKETED_LOCK_PROVIDERS` फराकिलो बनाउनु owner को स्पष्ट निर्णय हो; कुनै generic wiring छैन (pattern #10334/#10419)। sibling query ले त्यही allowlist लाई bind गर्छ, SQL literal को रूपमा दोहोर्याउनुको सट्टा, त्यसैले यसलाई फराकिलो बनाउनु एक-लाइनको परिवर्तनमै सीमित रहन्छ।
-- **Egress IP rotation, दुवै दिशामा**: lookup window (24 घण्टा) egress-IP cache TTL (5 मिनेट) भन्दा धेरै फराकिलो छ, त्यसैले "अन्तिम ज्ञात IP" इतिहास हो, हालको अवस्था होइन। यदि कनेक्सनको proxy विन्डोभित्र rotate भएको छ भने लकले साँच्चै साझा भएको IP लाई **miss** गर्न सक्छ (रेकर्ड गरिएको IP नयाँ, unexhausted एउटा हो) — र सममित रूपमा यसले **त्यस्तो sibling लाई cool गर्न सक्छ जुन exhausted IP बाट rotate भइसकेको छ**। दोस्रो केसमा त्यस sibling ले एउटा cooldown window गुमाउँछ; दुवै history-आधारित lookup का स्वीकृत best-effort सीमाहरू हुन्।
-- **लागत**: `proxy_logs` का दुई सीमित scan (`idx_pl_timestamp` मार्फत window-filter गरिएको), केवल 429 frequency मा। कुनै नयाँ index छैन (migration 134 YAGNI)। मध्यम आकारको real-traffic DB copy मा नापिएको; high-throughput instance ले उही विन्डोमा अनुपातिक रूपमा बढी row राख्छ।
+- **सर्वोत्तम-प्रयास**: लकले कनेक्सनको अन्तिम चिन्हिएको `egress_ip`
+  `proxy_logs` बाट निकाल्छ (24h विन्डो, सिङ्क्रोनस, कुनै क्यास छैन)। कोल्ड
+  क्यास (egress IP कहिल्यै प्रोब गरिएको छैन) वा कुनै रो छैन भने → fail
+  भएको कनेक्सनलाई ब्रान्चले अझै पनि कूल गर्छ (आजकै जस्तै रेकर्ड गरिन्छ),
+  केवल कुनै सिब्लिङ लक हुँदैन।
+- **कहिल्यै टर्मिनल हुँदैन**: कूलडाउन भनेको नवीकरण हुँदै रहने कोटा विन्डो
+  हो (`testStatus: "unavailable"`); IP-स्तरको संकेतबाट स्थायी अवस्था कहिल्यै
+  व्युत्पन्न गरिँदैन। `disableCooling` कनेक्सनहरूले ब्रान्चलाई पूरै
+  छोड्छन्।
+- **एलाउलिस्ट गरिएको परिवारका लागि लक ग्रानुलारिटी परिवर्तन हुन्छ**: यो
+  स्कोप परिवर्तन हो, केवल सिब्लिङ अप्टिमाइजेसन मात्र होइन। opencode एउटा
+  `passthroughModels` प्रोभाइडर हो, त्यसैले यो ब्रान्चअघि 429 ले
+  प्रति-MODEL लकआउट दिन्थ्यो; अब यसले कनेक्सन कूलडाउन दिन्छ — कुनै सिब्लिङ
+  नै नभएको एउटै कनेक्सन चलाइरहेको अपरेटरका लागि समेत। त्यही ग्रानुलारिटी
+  हो जुन opencode नियम तालिकाले पहिल्यैदेखि सही भनी घोषणा गर्दै आएको छ
+  (`scope: "connection"`, `providerErrorRules.ts`), तर opencode
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` मा नभएकाले अहिलेसम्म कहिल्यै पालना
+  गरिएको थिएन। ब्रान्चले fail भएको कनेक्सनको कूलडाउन + `backoffLevel`
+  आफैं लेख्छ, connection-scoped agentrouter ब्रान्चको अनुकरण गर्दै, र
+  return हुन्छ — प्रति-मोडेल ब्लक र तलको जेनेरिक path कहिल्यै पुगिँदैन।
+- **कम्बो समेटिएको छ**: agentrouter ब्रान्चजस्तै, स्कोपले कम्बो caller ले
+  429 मा लागू गर्ने `persistUnavailableState`/`isCombo` डाउनग्रेडलाई
+  जानाजान बेवास्ता गर्छ। प्रति-मोडेल लकआउट यो स्कोपको कमजोर रूप होइन, यो
+  गलत एकाइ हो: यसले exhausted IP बारे केही भन्दैन, त्यसैले कम्बो रोटेसनले
+  प्रत्येक सिब्लिङमा एउटा निश्चित-असफल call जलाइरहन्छ।
+- **सिब्लिङ सुरक्षा**: पहिल्यैदेखि टर्मिनल (banned/credits_exhausted) वा
+  पहिल्यै लामो कूलडाउनमा रहेको सिब्लिङ कहिल्यै ओभरराइट हुँदैन।
+- **विशेष एलाउलिस्ट**: `EGRESS_BUCKETED_LOCK_PROVIDERS` फराकिलो बनाउनु
+  स्पष्ट owner निर्णय हो; कुनै जेनेरिक वायरिङ छैन (ढाँचा #10334/#10419)।
+  सिब्लिङ क्वेरीले SQL literal को रूपमा दोहोर्याउनुको सट्टा त्यही
+  एलाउलिस्टलाई bind गर्छ, त्यसैले यसलाई फराकिलो बनाउनु एक-लाइनको
+  परिवर्तनमै रहन्छ।
+- **Egress IP रोटेसन, दुवै दिशामा**: लुकअप विन्डो (24h) egress-IP क्यास
+  TTL (5 मिनेट) भन्दा धेरै फराकिलो छ, त्यसैले "अन्तिम चिन्हिएको IP" वर्तमान
+  अवस्था होइन, इतिहास हो। यदि कनेक्सनको प्रोक्सी विन्डोभित्र रोटेट भएको छ
+  भने लकले साँच्चै साझा IP **मिस** गर्न सक्छ (रेकर्ड गरिएको IP नयाँ,
+  unexhausted एक हो) — र सममित रूपमा यसले exhausted IP बाट त्यसपछि
+  **रोटेट भइसकेको सिब्लिङलाई कूल** गर्न सक्छ। दोस्रो केसले त्यस सिब्लिङको
+  एउटा कूलडाउन विन्डो खर्च गर्छ; दुवै इतिहास-आधारित लुकअपका स्वीकृत
+  सर्वोत्तम-प्रयास सीमाहरू हुन्।
+- **लागत**: `proxy_logs` का दुई बाउन्डेड स्क्यान (`idx_pl_timestamp`
+  मार्फत विन्डो-फिल्टर गरिएको), केवल 429 आवृत्तिमा। कुनै नयाँ इन्डेक्स
+  छैन (माइग्रेसन 134 YAGNI)। मध्यम आकारको वास्तविक-ट्राफिक DB प्रतिलिपिमा
+  नापिएको; उच्च-थ्रुपुट इन्स्ट्यान्सले उही विन्डोमा अनुपातिक रूपमा बढी
+  रोहरू राख्छ।
 
 ---
 

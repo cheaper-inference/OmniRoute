@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Input from "@/shared/components/Input";
 import { HmacRecipeBlock } from "../../shared/HmacRecipeBlock";
 
 export interface CustomConfig {
@@ -62,46 +63,33 @@ export function CustomConfigForm({ value, onChange, t, isEditing }: CustomConfig
 
   return (
     <div className="space-y-4">
-      <div>
-        <label className="text-xs font-medium uppercase tracking-wider text-text-muted">
-          {t("custom.endpointUrl")}
-        </label>
-        <input
-          value={value.endpointUrl}
-          onChange={(e) => onChange({ ...value, endpointUrl: e.target.value })}
-          placeholder={t("custom.endpointUrlPlaceholder")}
-          className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
-        />
-        {urlHint && (
-          <p
-            className={`mt-1 text-xs ${
-              urlState === "ok"
-                ? "text-emerald-500"
-                : urlState === "checking"
-                  ? "text-text-muted"
-                  : "text-red-500"
-            }`}
-          >
-            {urlHint}
-          </p>
-        )}
-      </div>
-      <div>
-        <label className="text-xs font-medium uppercase tracking-wider text-text-muted">
-          {t("custom.secretKey")}
-        </label>
-        <input
-          type="password"
-          value={value.secretKey}
-          onChange={(e) => onChange({ ...value, secretKey: e.target.value })}
-          placeholder={isEditing ? t("secretEditPlaceholder") : t("custom.secretKeyPlaceholder")}
-          autoComplete="new-password"
-          className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
-        />
-        <p className="mt-1 text-xs text-text-muted">{t("custom.secretKeyHint")}</p>
-      </div>
+      <Input
+        label={t("custom.endpointUrl")}
+        value={value.endpointUrl}
+        onChange={(e) => onChange({ ...value, endpointUrl: e.target.value })}
+        placeholder={t("custom.endpointUrlPlaceholder")}
+        error={urlHint && urlState !== "ok" && urlState !== "checking" ? urlHint : undefined}
+        hint={
+          <>
+            {urlHint && (urlState === "ok" || urlState === "checking") && (
+              <span className={`block ${urlState === "ok" ? "text-success" : ""}`}>{urlHint}</span>
+            )}
+          </>
+        }
+      />
+      <Input
+        label={t("custom.secretKey")}
+        type="password"
+        value={value.secretKey}
+        onChange={(e) => onChange({ ...value, secretKey: e.target.value })}
+        placeholder={isEditing ? t("secretEditPlaceholder") : t("custom.secretKeyPlaceholder")}
+        autoComplete="new-password"
+        hint={t("custom.secretKeyHint")}
+      />
       <HmacRecipeBlock
         title={t("howItWorks.hmacRecipeTitle")}
+        copyLabel={t("copy")}
+        copiedLabel={t("copied")}
         snippets={[
           { label: "Node.js", code: t("howItWorks.hmacRecipe") },
           { label: "Python", code: t("howItWorks.hmacRecipePython") },

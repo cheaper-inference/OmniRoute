@@ -47,7 +47,7 @@ JSON-RPC ఎర్రర్ కోడ్ `-32000`తో HTTP 503ను తిర
 
 ### `message/send` — సమకాలిక అమలు
 
-ఒక స్కిల్కు సందేశాన్ని పంపి, పూర్తి ప్రతిస్పందన కోసం వేచి ఉంటుంది.
+ఒక నైపుణ్యానికి సందేశాన్ని పంపి, పూర్తి ప్రతిస్పందన కోసం వేచి ఉంటుంది.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` కోసం, గేట్వే అభ్యర్థనలో `metadata.combo` అనేది
+`metadata.model`ను స్పష్టంగా భర్తీ చేస్తుంది; ఇది విస్మరించబడే `x-combo`
+JSON ఫీల్డ్గా కాకుండా, అసలైన `model`గా పంపబడుతుంది. గేట్వే యొక్క సాధారణ API-కీ మరియు
+ప్రతి లక్ష్యానికి సంబంధించిన అధికార నిర్ధారణ ఇప్పటికీ వర్తిస్తాయి. చెల్లని లేదా ఖాళీ కాంబో తిరస్కరించబడుతుంది.
+
+ఫలితం `requested_combo` (కాలర్ ఉద్దేశం), `dispatched_model`
+(వాస్తవ గేట్వే అభ్యర్థన), `response_model` (గేట్వే ప్రతిస్పందన) మరియు
+`confirmed_combo`ను అందుబాటులో ఉంచుతుంది. గేట్వే ఒక కాంబోను స్పష్టంగా
+గుర్తిస్తే తప్ప, చివరి ఫీల్డ్ `null`గా ఉంటుంది. A2A నిర్ణయ లాగ్లు అమలును
+నిర్ధారించబడిన కాంబోకే ఆపాదిస్తాయి, నిర్ధారించబడని అభ్యర్థనను `requestedCombo`గా ఉంచుతాయి.
+
 **ప్రతిస్పందన:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE స్ట్రీమింగ్
 
-`message/send` మాదిరిగానే ఉంటుంది, కానీ రియల్-టైమ్ స్ట్రీమింగ్ కోసం Server-Sent Eventsను తిరిగి అందిస్తుంది.
+`message/send` మాదిరిగానే ఉంటుంది, కానీ నిజ-సమయ స్ట్రీమింగ్ కోసం Server-Sent Eventsను తిరిగి ఇస్తుంది.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ JSON-RPC ఎండ్పాయింట్ `/a2a` ప్రామాణిక A2
 
 ---
 
-## ఇంటిగ్రేషన్ ఉదాహరణలు
+## సమీకరణ ఉదాహరణలు
 
 ### Python (requests)
 

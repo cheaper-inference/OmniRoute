@@ -4,11 +4,11 @@
 
 ---
 
-> **Automātiski ģenerēts** no `src/shared/constants/providers.ts` — nerediģēt manuāli.
-> Reģenerēt ar: `npm run gen:provider-reference`
-> **Pēdējoreiz ģenerēts:** 2026-10-18
+> **Automātiski ģenerēts** no `src/shared/constants/providers.ts` — nerediģējiet manuāli.
+> Atkārtoti ģenerējiet ar: `npm run gen:provider-reference`
+> **Pēdējoreiz ģenerēts:** 2026-10-20
 
-Kopējais nodrošinātāju skaits: **375**. Skatiet kategoriju sadalījumu zemāk.
+Kopējais pakalpojumu sniedzēju skaits: **375**. Kategoriju sadalījumu skatiet tālāk.
 
 ## Kategorijas
 
@@ -457,11 +457,11 @@ Izmantojiet informācijas paneli adresē `/dashboard/providers`, lai iespējotu,
 | ------ | ------------ | -------------------------------- | ------- | -------------- | -------- |
 | `auto` | `auto`       | Automātisks (bez konfigurācijas) | Sistēma | —              | —        |
 
-## Patiesības avoti
+## Patiesās informācijas avoti
 
 - Katalogs: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Reģistrs (informācija par katru modeli): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Izpildītāji: [`open-sse/executors/`](../../open-sse/executors/) (154 implementācijas)
+- Reģistrs (detalizēta informācija par katru modeli): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Izpildītāji: [`open-sse/executors/`](../../open-sse/executors/) (156 implementācijas)
 - Tulkotāji: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Skatiet arī

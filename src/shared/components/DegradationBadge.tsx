@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Badge as KitBadge } from "@omniroute/ui-kit/badge";
+import Icon from "@/shared/components/Icon";
 
 export default function DegradationBadge() {
   const [isDegraded, setDegraded] = useState(false);
-  const t = useTranslations("common"); // Or a specific namespace if needed
+  const t = useTranslations("common");
 
   useEffect(() => {
     const checkDegradation = async () => {
@@ -16,7 +18,7 @@ export default function DegradationBadge() {
           const data = await res.json();
           setDegraded(data.isDegraded);
         }
-      } catch (err) {
+      } catch {
         // Ignore error
       }
     };
@@ -28,14 +30,20 @@ export default function DegradationBadge() {
 
   if (!isDegraded) return null;
 
+  // Warning tone of the kit badge (`.ci-badge[data-tone="warning"]` in globals.css), rendered
+  // as the link itself so the whole pill stays one focusable target.
   return (
-    <Link
-      href="/dashboard/health"
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-colors border border-amber-500/20"
-      title={t("warning")} // Using common warning text, or we could just use English / fixed string if i18n is not strict
+    <KitBadge
+      asChild
+      variant="outline"
+      shape="pill"
+      data-tone="warning"
+      icon={<Icon name="healing" size={14} />}
+      className="whitespace-nowrap no-underline"
     >
-      <span className="material-symbols-outlined text-[16px]">healing</span>
-      <span className="text-xs font-semibold whitespace-nowrap">{t("degraded")}</span>
-    </Link>
+      <Link href="/dashboard/health" title={t("warning")}>
+        {t("degraded")}
+      </Link>
+    </KitBadge>
   );
 }

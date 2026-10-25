@@ -24,7 +24,10 @@ import {
   getReasoningEffortsOverride,
 } from "@/lib/db/modelCapabilityOverrides";
 import { getModelCompatVisionOverride } from "@/lib/db/models/compat";
-import { getProviderNodePrefixSync } from "@/lib/db/providers/nodePrefix";
+import {
+  getProviderNodeIdByPrefixSync,
+  getProviderNodePrefixSync,
+} from "@/lib/db/providers/nodePrefix";
 import { getCustomModelVisionOverride, getSyncedAvailableModelVision } from "@/lib/db/models";
 import type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 import { resolveAudioCapability, resolveVideoCapability } from "@/lib/modelCapabilityModalities";
@@ -785,15 +788,22 @@ function getCompatVisionOverride(
   snapshot?: ModelCapabilityResolutionSnapshot | null
 ): boolean | null {
   if (!resolved.provider || !resolved.model) return null;
-  const providerCandidates = Array.from(
-    new Set(
-      [
-        ...getNoAuthHydrationProviderIds(resolved.provider),
-        resolved.rawProvider,
-        resolved.rawProvider ? resolveProviderAlias(resolved.rawProvider) : null,
-      ].filter((value): value is string => Boolean(value))
-    )
-  );
+  const directCandidates = [
+    ...getNoAuthHydrationProviderIds(resolved.provider),
+    resolved.rawProvider,
+    resolved.rawProvider ? resolveProviderAlias(resolved.rawProvider) : null,
+  ].filter((value): value is string => Boolean(value));
+  // A custom node is addressable both by its internal id (combo steps store it,
+  // #2778) and by its user-defined prefix (the catalog id and prefix-addressed
+  // requests use it, see catalog.ts's `alias = prefix || ...`). The override is
+  // keyed by whichever form PUT /api/provider-models was given — normally the
+  // node id — so map every candidate prefix back to its node id. Mapped ids go
+  // LAST: a direct key match always wins, so this can only ADD a resolution that
+  // the direct candidates missed.
+  const mappedNodeIds = directCandidates
+    .map((candidate) => getProviderNodeIdByPrefixSync(candidate))
+    .filter((value): value is string => Boolean(value));
+  const providerCandidates = Array.from(new Set([...directCandidates, ...mappedNodeIds]));
   const modelCandidates = Array.from(
     new Set([resolved.model, resolved.rawModel].filter((value): value is string => Boolean(value)))
   );

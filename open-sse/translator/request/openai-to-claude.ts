@@ -85,6 +85,36 @@ type ClaudeTool = {
  * text block has text: "". Must also recurse into nested tool_result.content.
  * Ref: sub2api PR #1212
  */
+/**
+ * Anthropic rejects `cache_control` anywhere inside `tool_result.content`:
+ *
+ *   messages.N.content.0.tool_result.content.0.cache_control: cache_control may
+ *   not be specified within `tool_result.content`. Instead, place it directly
+ *   on `tool_result`
+ *
+ * Strip every nested marker off a tool_result's content blocks and return the
+ * first one so the caller can place it on the `tool_result` block itself. The
+ * marker is only meaningful once per block, so the first wins.
+ */
+export function hoistNestedToolResultCacheControl(content: unknown): {
+  content: unknown;
+  cacheControl: unknown;
+} {
+  if (!Array.isArray(content)) return { content, cacheControl: undefined };
+  let cacheControl: unknown;
+  let found = false;
+  const cleaned = content.map((block) => {
+    if (!block || typeof block !== "object") return block;
+    const rec = block as Record<string, unknown>;
+    if (rec.cache_control === undefined) return block;
+    found = true;
+    const { cache_control, ...rest } = rec;
+    if (cacheControl === undefined) cacheControl = cache_control;
+    return rest;
+  });
+  return { content: found ? cleaned : content, cacheControl };
+}
+
 export function stripEmptyTextBlocks(content: unknown[] | undefined): unknown[] {
   if (!Array.isArray(content)) return content ?? [];
   return content
@@ -614,14 +644,23 @@ function getContentBlocksFromMessage(
     const toolContent = normalizeToolResultImages(
       Array.isArray(msg.content) ? stripEmptyTextBlocks(msg.content) : msg.content
     );
+    // A nested `cache_control` is invalid inside `tool_result.content`; hoist it
+    // onto the tool_result block. Also accept a marker already hoisted onto the
+    // tool MESSAGE by filterToOpenAIFormat (openai-compat passthrough path).
+    const { content: hoistedContent, cacheControl } = hoistNestedToolResultCacheControl(toolContent);
+    const toolResultCacheControl =
+      msg.cache_control !== undefined ? msg.cache_control : cacheControl;
     blocks.push({
       type: "tool_result",
       tool_use_id: sanitizedToolUseId,
-      content: toolContent,
+      content: hoistedContent,
       // Zed's cloud proxy (cloud.zed.dev/completions) strictly requires
       // `is_error` on every Anthropic tool_result block. OpenAI tool messages
       // carry no such flag, so default to false unless the caller set it explicitly.
       is_error: msg.is_error ?? false,
+      // The hoisted `cache_control` marker belongs on the tool_result block
+      // itself — Anthropic rejects it inside `tool_result.content`.
+      ...(toolResultCacheControl !== undefined && { cache_control: toolResultCacheControl }),
     });
   } else if (msg.role === "user") {
     if (typeof msg.content === "string") {
@@ -642,13 +681,18 @@ function getContentBlocksFromMessage(
           const resultContent = normalizeToolResultImages(
             Array.isArray(part.content) ? stripEmptyTextBlocks(part.content) : part.content
           );
+          // Same tool_result.content restriction as the role:"tool" branch above.
+          const hoisted = hoistNestedToolResultCacheControl(resultContent);
+          const partCacheControl =
+            part.cache_control !== undefined ? part.cache_control : hoisted.cacheControl;
           blocks.push({
             type: "tool_result",
             tool_use_id: toolUseId, // #7705
-            content: resultContent,
+            content: hoisted.content,
             // Always emit a boolean: Zed's strict Anthropic parser rejects
             // tool_result blocks with a missing `is_error` field.
             is_error: part.is_error ?? false,
+            ...(partCacheControl !== undefined && { cache_control: partCacheControl }),
           });
         } else if (part.type === "image_url" || part.type === "image") {
           const imageBlock = openAiImagePartToClaudeBlock(part);

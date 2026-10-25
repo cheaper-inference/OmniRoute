@@ -404,6 +404,17 @@ TPM/RPM ウィンドウ（約 60 秒の retry-after）をカバーします。�
 `retry_after` / `reset_at` を含む `429 rate_limit_error` にアップグレード
 されます。クォータ、認証、not-found のロックはヒントなしの 503 のままです。
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. リクエストキューアドミッション制御 (v3.8.49 · issue #6593)
@@ -483,177 +494,228 @@ usage のみのイベントや空のイベントは無視し、ツール呼び�
 
 ---
 
-## 7. アップストリームステータスの再表明 (誤表明されたクォータエラー)
+## 7. アップストリームステータスの書き換え（誤表示されるクォータエラー）
 
-**対象範囲:** 一時的なクォータ枯渇を誤った HTTP ステータスで報告する 1 つの
-アップストリームゲートウェイ。
+**スコープ:** 一時的なクォータ枯渇を誤った HTTP ステータスで報告する、1 つのアップストリームゲートウェイ。
 
-**目的:** 分類を行う前に誤解を招くステータスを修正し、下流のコンシューマー
-(フォールバックエンジン、コンボ集約、クライアント向けレスポンス) が障害の真の
-リトライ可能な性質を認識できるようにすること。
+**目的:** 分類の実行前に誤解を招くステータスを修正し、下流のコンシューマー（フォールバックエンジン、コンボ集約、クライアント向けレスポンス）が障害の真のリトライ可能な性質を認識できるようにする。
 
-一部のゲートウェイは、一時的なクォータ枯渇をリトライ不可能な HTTP ステータスで
-通知します。`agentrouter.org` は標準の `429` の代わりに、中国語の本文
-(`用户额度不足` / `额度不足`) とともに `403` (場合によっては `400`) を返します。
-Claude Code のようなクライアントは `403` を永続的なものとして扱いセッションを
-中止し、修正がなければフォールバックエンジンはそれをクォータイベントではなく
-`AUTH_ERROR` として分類してしまいます。
+一部のゲートウェイは、一時的なクォータ枯渇をリトライ不可能な HTTP ステータスで通知します。`agentrouter.org` は標準の `429` の代わりに、中国語の本文（`用户额度不足` / `额度不足`）とともに `403`（場合によっては `400`）を返します。Claude Code のようなクライアントは `403` を永続的なエラーとして扱いセッションを中断するため、修正を行わなければフォールバックエンジンはこれをクォータイベントではなく `AUTH_ERROR` として分類してしまいます。
 
 **実装:**
 
-- レジストリ + マッチャー: `open-sse/config/upstreamStatusRestatement.ts` —
-  プロバイダーごとのルールリスト (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`) で、`applyStatusRestatement()` によって
-  マッチングされます。
-- 呼び出し箇所: `open-sse/handlers/chatCore.ts` (3654 行目付近) の
-  `providerFailure:` ブロック。`parseUpstreamError()` がエラー HTTP ステータス
-  (`!providerResponse.ok`) を持つアップストリームレスポンスをパースした直後、かつ
-  あらゆる分類が実行される前に位置するため、すべての下流コンシューマーが修正後の
-  ステータスを認識します。`200` SSE ストリーム内に埋め込まれたエラーは、別の後段の
-  ストリームパースパスをたどり、現時点ではこのフックの対象**外**です — これは既知の
-  制限であり、(エラー HTTP ステータスとして表面化する) agentrouter の誤ステータス
-  にはまだ必要とされていません。
-- リトライ適格性: `429` は `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`) に含まれているため、再表明
-  されたエラーは、行き止まりの `403` として表面化するのではなく、実際のリトライ
-  ウィンドウを持つことになります。
-- 合成された `60s` の `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`) は、
-  再表明されたレスポンスが**クライアント**に伝える内容にすぎません。それ自体が接続の
-  内部クールダウン/ロックアウト期間ではありません — それは、再表明されたエラーを
-  実際に処理する側のメカニズムによって個別に管理されます (Connection Cooldown の
-  段階的バックオフ (§2、API キープロバイダーではベース `3s`)、または agentrouter の
-  ようなモデル単位クォータプロバイダー向けの Model Lockout (§3))。ルーターは、
-  クライアントに通知している 60 秒のウィンドウよりも早く内部的にリトライ可能に
-  なる場合があります — これは意図的なヘッドルームであり、バグではありません。
+- レジストリ + マッチャー: `open-sse/config/upstreamStatusRestatement.ts` — プロバイダーごとのルールリスト（`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`）で、`applyStatusRestatement()` 経由でマッチングされます。
+- 呼び出し箇所: `open-sse/handlers/chatCore.ts` の `providerFailure:` ブロック（3654 行目付近）で、`parseUpstreamError()` がエラー HTTP ステータス（`!providerResponse.ok`）を持つアップストリームレスポンスをパースした直後、かつ分類が実行される前に配置されており、すべての下流コンシューマーが修正後のステータスを参照します。`200` SSE ストリーム内に埋め込まれたエラーは、別の後段のストリームパースパスをたどるため、現時点ではこのフックの対象**外**です。これは既知の制限であり、agentrouter の誤ステータス（エラー HTTP ステータスとして表面化する）に対してはまだ必要とされていません。
+- リトライ適格性: `429` は `RETRY_AFTER_ELIGIBLE_STATUSES`（`open-sse/services/combo/unavailableRetryGate.ts`）に含まれるため、書き換えられたエラーは無効な `403` として表面化する代わりに、実際のリトライウィンドウを持ちます。
+- 合成された `60s` の `defaultRetryAfterMs`（`upstreamStatusRestatement.ts`）は、書き換えられたレスポンスが**クライアント**に伝える値にすぎません。これ自体は接続の内部クールダウン/ロックアウト期間ではありません。それは、書き換えられたエラーを実際に処理するメカニズム（接続クールダウンのエスカレーティングバックオフ、§2、API キープロバイダーの場合はベース `3s`、または agentrouter のようなモデルごとクォータプロバイダーの場合はモデルロックアウト、§3）によって個別に管理されます。ルーターはクライアントに通知する 60 秒のウィンドウよりも早く、内部的にリトライ可能になることがあります。これは意図的な余裕であり、バグではありません。
 
-永続的なエラー (agentrouter の `无权访问模型` — このモデルへのアクセス権がありません)
-は決して再表明されません。`excludeMarkers` が `textMarkers` のヒット時であっても
-ルールを拒否するため、エラーは元のステータスを保持し、永久にリトライされません。
-マッチするプロバイダー分類ルール (`open-sse/config/providerErrorRules.ts` の
-`agentrouter-model-access-denied`: `reason: "auth_error"`、`scope: "model"`、
-宣言されたベースクールダウン `6h`) は、`checkFallbackError`
-(`open-sse/services/accountFallback.ts`) によって、汎用の apikey カテゴリの
-`FORBIDDEN` 早期リターンの_前_に参照されますが、これは
-`honorsRuleLockScope(provider)` でゲートされています (#10334 — 現在は
-`providerErrorRules.ts` の `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 許可リストにより
-agentrouter 専用)。ルールが宣言する 6 時間のクールダウンは
-`fallbackResult.baseCooldownMs` として流れますが、それは依然として既存のモデル単位
-クォータロックアウトパス (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`、#10334 ではクールダウンの供給元以外は変更なし) に
-供給されます。他のすべてのモデルロックアウトと同様にオペレーターの
-`mlSettings.maxCooldownMs` (デフォルト `1_800_000ms` / 30 分) にクランプダウン
-され、_永続化されるロックアウト理由_はルールの `"auth_error"` ではなく既存の
-ハードコード済みの `"forbidden"` のままです — エンドツーエンドで尊重されるのは
-クールダウン期間のみで、理由文字列ではありません。接続自体はアクティブなままで
-あり、同じ接続上の兄弟モデルは影響を受けません。
+永続的なエラー（agentrouter の `无权访问模型` — このモデルへのアクセス権なし）は決して書き換えられません。`textMarkers` がヒットした場合でも `excludeMarkers` がルールを拒否するため、エラーは元のステータスを保持し、永久にリトライされません。マッチするプロバイダー分類ルール（`open-sse/config/providerErrorRules.ts` の `agentrouter-model-access-denied`: `reason: "auth_error"`, `scope: "model"`, 宣言されたベースクールダウン `6h`）は、`checkFallbackError`（`open-sse/services/accountFallback.ts`）によって、汎用の apikey カテゴリの `FORBIDDEN` 早期リターンの_前_に参照されます。これは `honorsRuleLockScope(provider)` でゲートされており（#10334 — 現在は `providerErrorRules.ts` の `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 許可リストにより agentrouter 専用）、ルールで宣言された 6 時間のクールダウンは `fallbackResult.baseCooldownMs` として流れますが、それでも既存のモデルごとクォータのロックアウトパス（`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`、#10334 で変更されたのはクールダウンのソースのみ）に供給されます。他のすべてのモデルロックアウトと同様に、オペレーターの `mlSettings.maxCooldownMs`（デフォルト `1_800_000ms` / 30 分）にクランプされ、_永続化されるロックアウト理由_はルールの `"auth_error"` ではなく、既存のハードコードされた `"forbidden"` のままです。エンドツーエンドで尊重されるのはクールダウン期間のみであり、理由文字列ではありません。接続自体はアクティブのままで、同じ接続上の兄弟モデルは影響を受けません。
 
-再述されたクォータエラー（`额度不足`）は、本番環境でプロバイダールール（`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`、`scope:
-"connection"`、独自のクールダウンは宣言されていない — 永続化レイヤーのスケールされたバックオフのデフォルトが適用される）に到達します。#10334 以降、`ProviderErrorRuleMatch` の `scope` はエンドツーエンドで消費されるようになっていますが、`HONORS_RULE_LOCK_SCOPE_PROVIDERS` 許可リスト（`providerErrorRules.ts` — 現在は `"agentrouter"` のみ、`honorsRuleLockScope()` でゲートされている）にあるプロバイダーに**限られます**。それ以外のすべてのプロバイダーでは、`scope` は #10334 以前とまったく同様に、情報提供のみのものにとどまります。`checkFallbackError` はマッチしたルールのスコープを `fallbackResult.ruleScope` として表面化します。`isAgentrouterConnectionQuotaScope()`（`src/sse/services/auth.ts`）は、`ruleScope` が接続全体に及ぶ自己回復型のシグナルとして尊重して本当に安全であることを確認する共有ガードです（スコープ `"connection"`、理由 `quota_exhausted`、`permanent` では決してなく、`creditsExhausted` でも決してない — 将来のルールがスコープ `"connection"` を永続的なアカウント状態と組み合わせる場合への防御）。2つのコンシューマーがこれを呼び出します：
+書き換えられたクォータエラー（`额度不足`）は、本番環境でプロバイダールール（`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, 独自の宣言クールダウンなし — 永続化レイヤーのスケールドバックオフのデフォルトが適用される）に到達します。#10334 以降、`ProviderErrorRuleMatch` の `scope` はエンドツーエンドで消費されますが、`HONORS_RULE_LOCK_SCOPE_PROVIDERS` 許可リスト（`providerErrorRules.ts` — 現在は `"agentrouter"` のみ、`honorsRuleLockScope()` でゲート）内のプロバイダーに**限られます**。その他のすべてのプロバイダーでは、`scope` は #10334 以前とまったく同じく、情報提供のみのままです。`checkFallbackError` はマッチしたルールのスコープを `fallbackResult.ruleScope` として表面化します。`isAgentrouterConnectionQuotaScope()`（`src/sse/services/auth.ts`）は、`ruleScope` が接続全体にわたる自己回復シグナルとして尊重しても本当に安全であることを確認する共有ガードです（スコープ `"connection"`、理由 `quota_exhausted`、決して `permanent` ではなく、決して `creditsExhausted` ではない — 将来のルールがスコープ `"connection"` を永続的なアカウント状態と組み合わせることへの防御）。これを呼び出すコンシューマーは 2 つあります:
 
 - **永続化**（`markAccountUnavailable()`、`src/sse/services/auth.ts`）:
-  パススループロバイダーの**モデルごとの**ロックアウト分岐（agentrouter は `passthroughModels: true` → `hasPerModelQuota()` は `true` を返す）に落ちる代わりに、**一時的な接続クールダウン** — `testStatus: "unavailable"` + `rateLimitedUntil` であり、終端ステータス（`credits_exhausted`/`banned`/`expired`）には決してならない — を適用します。これにより、手動での認証情報リセットを必要とせず、クールダウンが経過すれば接続が自己回復します。`disableCooling: true` の接続ではスキップされます（#2997）：そのオプトアウトは代わりにモデルごとのロックアウトへフォールスルーします（文書化されたトレードオフ — 分岐の上のコードコメントを参照）。
-- **同一リクエストのコンボルーティング**（`applyComboTargetExhaustion()`、`open-sse/services/combo/targetExhaustion.ts`）: 同じガードが、接続を `${provider}:${connectionId}` をキーとするメモリ内の `exhaustedConnections` セットにマークします。これがスキップするのは、自身のターゲットオブジェクト上に_すでにその正確な `connectionId` を持っている_残りの同一リクエストターゲットだけです（`getExhaustedTargetSkipReason()`、`open-sse/services/combo/comboPredicates.ts`、`exhaustedConnections` ルックアップの前に `if (provider &&
-connectionId)`）— 兄弟ターゲットが独自にピン留めされた `connectionId` を持たず、ディスパッチごとにレスポンスの `X-OmniRoute-Selected-Connection-Id` ヘッダーからしか解決されない、素のモデルリストコンボでは、そのキーマッチには決してヒットしません。その一般的なケースでは、枯渇したばかりのアカウントを残りのレグが再利用するのに対する本当の保護はこの Set ではありません — それは上記の永続化レイヤー（接続の `rateLimitedUntil` が今や未来の時刻になっている）と、この失敗について同じガードが `transientRateLimitedProviders` を抑制すること（「二段階設計」と `targetExhaustion.ts` の `isAgentrouterConnectionQuotaScope` 分岐のコードコメントを参照）の組み合わせです。その Set がマークされないままであるため、`combo.ts` の `allowRateLimitedConnection` 強制許可（`open-sse/services/combo.ts:1005-1013`、`:2734-2738`）はプロバイダーの残りのレグに対して発動せず、認証情報選択の `rateLimitedUntil` フィルター（`src/sse/services/auth.ts:1238`）が通常どおり尊重され、残りのレグは別のまだ有効な agentrouter 接続を選択するか、利用可能な認証情報なしで失敗します — この分岐がちょうどクールダウンした接続へ強制的に戻ることはありません。
+  パススループロバイダーの**モデル単位**ロックアウト分岐に入る代わりに
+  （agentrouter は `passthroughModels: true` → `hasPerModelQuota()` が
+  `true` を返す）、**一時的な接続クールダウン**を適用する ——
+  `testStatus: "unavailable"` + `rateLimitedUntil` であり、終端ステータス
+  （`credits_exhausted`/`banned`/`expired`）には決してならない —— そのため、
+  手動での認証情報リセットを必要とせず、クールダウンが経過すれば接続は
+  自己回復する。
+  `disableCooling: true` の接続ではスキップされる（#2997）: そのオプトアウトは
+  代わりにモデル単位のロックアウトにフォールスルーする（文書化された
+  トレードオフ —— 分岐の直上のコードコメントを参照）。
+- **同一リクエストのコンボルーティング**（`applyComboTargetExhaustion()`、
+  `open-sse/services/combo/targetExhaustion.ts`）: 同じガードが、インメモリの
+  `exhaustedConnections` セットに接続を登録する。キーは
+  `${provider}:${connectionId}`。これは、_自身のターゲットオブジェクト上に
+  すでにまさにその `connectionId` を持っている_ 同一リクエスト内の残りの
+  ターゲットのみをスキップする（`getExhaustedTargetSkipReason()`、
+  `open-sse/services/combo/comboPredicates.ts`、`exhaustedConnections`
+  ルックアップの前の `if (provider &&
+connectionId)`）—— 兄弟ターゲットが自身の
+  固定された `connectionId` を持たず、ディスパッチごとにレスポンスの
+  `X-OmniRoute-Selected-Connection-Id` ヘッダーから初めて解決される、
+  通常のモデルリストコンボでは、そのキーマッチには決して到達しない。
+  その一般的なケースでは、枯渇したばかりのアカウントを残りのレグが
+  再利用することに対する本当の保護はこの Set ではない —— それは上記の
+  永続化レイヤー（接続の `rateLimitedUntil` が未来の時刻になっている）と、
+  同じガードがその失敗に対して `transientRateLimitedProviders` を抑制する
+  ことの組み合わせである（「二段階設計」と `targetExhaustion.ts` の
+  `isAgentrouterConnectionQuotaScope` 分岐のコードコメントを参照）。
+  その Set がマークされないままであるため、`combo.ts` の
+  `allowRateLimitedConnection` による強制許可
+  （`open-sse/services/combo.ts:1005-1013`、`:2734-2738`）はプロバイダーの
+  残りのレグには発動せず、認証情報選択の `rateLimitedUntil` フィルタ
+  （`src/sse/services/auth.ts:1238`）が通常どおり尊重される。したがって、
+  残りのレグは別のまだ有効な agentrouter 接続を選択するか、利用可能な
+  認証情報なしで失敗する —— この分岐がクールダウンしたばかりの接続に
+  強制的に戻ることはない。
 
-### 二段階設計：ステータスの再述、次に分類
+### 二段階設計: ステータス再宣言、その後に分類
 
-ステータスの再述（`upstreamStatusRestatement.ts`）とプロバイダー分類ルール（`open-sse/config/providerErrorRules.ts`、`providerRuleRegistry`）は、どちらもプロバイダー ID とテキストマーカーをキーとする別々のレジストリですが、実行される場所が異なり、目的も異なります：再述は `chatCore.ts` の早い段階で HTTP ステータスを書き換えます。分類ルールは `checkFallbackError()`（`open-sse/services/accountFallback.ts`）内でフォールバックの `reason` とロック `scope`（`model` / `provider` / `connection`）を選択します。
+ステータス再宣言（`upstreamStatusRestatement.ts`）とプロバイダー分類ルール
+（`open-sse/config/providerErrorRules.ts`、`providerRuleRegistry`）は、
+どちらもプロバイダー ID とテキストマーカーをキーとする別個のレジストリだが、
+実行される場所も目的も異なる。再宣言は `chatCore.ts` の早い段階で HTTP
+ステータスを書き換える。分類ルールは `checkFallbackError()`
+（`open-sse/services/accountFallback.ts`）内でフォールバックの `reason` と
+ロック `scope`（`model` / `provider` / `connection`）を決定する。
 
-分類ルールが完全なエラー**テキスト**（`额度不足` のようなボディマーカーにマッチするために必要）を参照できるのは、`providerErrorRules.ts` の `FULL_TEXT_RULE_PROVIDERS` 許可リストに載っているプロバイダーのみです — 現在は `"agentrouter"` のみ。それ以外のすべての**組み込みカタログ**プロバイダーでは、`checkFallbackError` は `getProviderErrorRuleMatch` に構造化エラー（`{code, type}`）のみを渡します。これはヘッダー/ステータス/コードベースのルールには十分ですが、ボディテキストマーカーは見えません。ヘルパー `resolveRuleMatchBody()` がこの選択を実行します：許可リストにあるプロバイダーには完全なエラーテキストを、それ以外には構造化エラーを渡します。**組み込み**プロバイダーを `FULL_TEXT_RULE_PROVIDERS` に追加することは、プロバイダーごとの明示的なオプトインです — これは、リストにないすべてのプロバイダーのデフォルトパスがバイト単位で変更されないままであるようにするために存在します。
+分類ルールが完全なエラー**テキスト**を参照できるのは（`额度不足` のような
+本文マーカーにマッチするために必要）、`providerErrorRules.ts` の
+`FULL_TEXT_RULE_PROVIDERS` 許可リストに載っているプロバイダーのみである
+—— 現在は `"agentrouter"` のみ。その他のすべての**ビルトインカタログ**
+プロバイダーでは、`checkFallbackError` は `getProviderErrorRuleMatch` に
+構造化エラー（`{code, type}`）のみを渡す。これはヘッダー/ステータス/
+コードベースのルールには十分だが、本文テキストマーカーは見えない。
+ヘルパー `resolveRuleMatchBody()` がこの選択を行う: 許可リストにある
+プロバイダーには完全なエラーテキストを、それ以外には構造化エラーを渡す。
+**ビルトイン**プロバイダーを `FULL_TEXT_RULE_PROVIDERS` に追加することは、
+プロバイダーごとの明示的なオプトインである —— これは、リストにない
+すべてのプロバイダーのデフォルトパスがバイト単位で変わらないようにする
+ために存在する。
 
-ルールの `scope`（`model` / `provider` / `connection`）は `FULL_TEXT_RULE_PROVIDERS` とは別のオプトインです：`checkFallbackError` はそれを `fallbackResult.ruleScope` として表面化するだけであり、ダウンストリームのコンシューマーが情報提供ラベル以外のものとしてそれを尊重するのは、同じファイル内の `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 許可リスト（`gated via
-honorsRuleLockScope()` — 現在は `"agentrouter"` のみ）にあるプロバイダーに限られます。プロバイダーがその許可リストに載った後に `scope: "connection"` マッチが実際に何を行うかについては、上記の「再述されたクォータエラー」を参照してください。
+ルールの `scope`（`model` / `provider` / `connection`）は
+`FULL_TEXT_RULE_PROVIDERS` とは別のオプトインである。
+`checkFallbackError` はそれを `fallbackResult.ruleScope` として表面化する
+だけであり、下流のコンシューマーが情報的ラベル以外のものとしてそれを尊重
+するのは、同じファイル内の `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 許可リストに
+あるプロバイダーの場合のみである（`honorsRuleLockScope()` でゲート ——
+現在は `"agentrouter"` のみ）。プロバイダーがその許可リストに入った後に
+`scope: "connection"` マッチが実際に何をするかについては、上記の
+「再宣言されたクォータエラー」を参照。
 
-**#11104 — オペレーター宣言のルールは両方の許可リストをバイパスする。** オペレーターは、
-このファイルを編集することなく、`settings.providerErrorRules`
-（`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`）を介して
-実行時にプロバイダーごとのルールを宣言できる。オペレータールールを
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` —— ビルトインの
-カタログルールの**デフォルト**動作を保護するための許可リスト —— の背後で
-ゲーティングすると、ルールの宣言自体がすでにオペレーターの明示的なオプトインで
-あるため、そこにすでにリストされているプロバイダー以外のすべてのプロバイダーで
-設定メカニズムが無力化してしまう。`resolveRuleMatchBody()` と
-`honorsRuleLockScope()` はどちらも最初に `hasOperatorRuleForProvider()` を
-チェックする。オペレータールールを持つプロバイダーは、どちらかの許可リストにも
-載っているかどうかに関係なく、生のエラーテキストを受け取り、宣言された `scope`
-が尊重される。
+**#11104 —— オペレーター宣言ルールは両方の許可リストをバイパスする。**
+オペレーターは、このファイルを編集せずに、`settings.providerErrorRules`
+（`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`）を
+通じて実行時にプロバイダーごとのルールを宣言できる。オペレータールールを
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+（ビルトインカタログルールの**デフォルト**動作を保護するための許可リスト）
+の背後にゲートすると、ルールを宣言すること自体がすでにオペレーターの
+明示的なオプトインであるため、そこにすでに載っているプロバイダー以外の
+すべてのプロバイダーで設定メカニズムが無力化してしまう。
+`resolveRuleMatchBody()` と `honorsRuleLockScope()` はどちらも最初に
+`hasOperatorRuleForProvider()` をチェックする: オペレータールールを持つ
+プロバイダーは、どちらかの許可リストにも載っているかどうかに関係なく、
+生のエラーテキストを受け取り、宣言された `scope` が尊重される。
 
-**既知のギャップ — `providerRuleRegistry` は HTTP 400 では一切参照されない。**
-`checkFallbackError` の `BAD_REQUEST` ブランチは、ステータス 400 を完全に独自の
-パターン配列（`accountFallback.ts` 内の `MODEL_ACCESS_DENIED_PATTERNS`、
+**既知のギャップ —— HTTP 400 では `providerRuleRegistry` が一切参照されない。**
+`checkFallbackError` の `BAD_REQUEST` 分岐は、ステータス 400 を完全に独自の
+パターン配列（`accountFallback.ts` の `MODEL_ACCESS_DENIED_PATTERNS`、
 `CONTEXT_OVERFLOW_PATTERNS` など）で分類し、その上にある
-`configuredRule`/`getProviderErrorRuleMatch` ブランチに到達する前に return する。
-`status: 400` を持つビルトインのカタログルール（またはオペレータールール）は
-構文的には有効だが、発火することはない。現時点で 400 を対象とする既存ルールは
-存在しないため、本番環境で影響を受けるものはない。しかし、将来 400 のルールを
-追加するには、まずこのブランチに手を入れる必要があり、それはルールの追加よりも
-大きな変更であり（パターン配列の動作にすでに依存しているすべてのプロバイダーに
-ついて 400 を再分類することになる）、単一プロバイダーのルール追加のスコープ外で
-ある。
+`configuredRule`/`getProviderErrorRuleMatch` 分岐に到達する前にリターンする。
+`status: 400` のビルトインカタログルール（またはオペレータールール）は
+構文的には有効だが、発動することは決してない。現在 400 を対象とする既存
+ルールはないため、本番環境への影響はない —— しかし、将来の 400 ルールには
+この分岐を先に変更する必要があり、それはルール追加よりも大きな変更であり
+（パターン配列の動作にすでに依存しているすべてのプロバイダーについて
+400 を再分類する）、単一プロバイダーのルール追加のスコープ外である。
 
-### クォータを誤って報告する新しいゲートウェイの追加
+### クォータを誤って報告するゲートウェイの追加
 
 1. `statusRestatementRegistry`
    （`open-sse/config/upstreamStatusRestatement.ts`）にルール配列を 1 つ登録する。
-   `textMarkers` はプロバイダー固有に保つこと。`CREDITS_EXHAUSTED_SIGNALS`
-   （`open-sse/services/accountFallback.ts`）と衝突する汎用的な英語フレーズを
-   再利用してはならない。
-2. 必要に応じて、`open-sse/config/providerErrorRules.ts`
-   （`providerRuleRegistry`）に分類ルールを登録し、適切なロックスコープ
-   （アカウント全体のクォータには `connection`、モデル単位のエラーには `model`）
-   を選択する。このステップが本番環境で効果を持つのは、ルールが完全なエラー
-   テキスト（ボディマーカー）を必要とするプロバイダーのみである。同じファイル内の
-   `FULL_TEXT_RULE_PROVIDERS` にプロバイダー ID を追加すること。さもなければ、
-   `checkFallbackError` はルールに構造化された `{code, type}` エラーしか渡さず、
-   ボディテキストのルールは実際のトラフィックに決してマッチしない。
-   `status`/`headers` のみでマッチするルール（Opencode や Minimax のものなど）は
-   このオプトインを必要としない。さらに別途、ルールが `scope: "connection"` を
-   宣言し、その意図が実際の接続全体のクールダウンと同一リクエスト内でのコンボ
-   スキップ（単なる情報ラベルではない）である場合は、同じファイル内の
-   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` にプロバイダー ID を追加すること。これが
-   `markAccountUnavailable()`（`src/sse/services/auth.ts`）および
-   `applyComboTargetExhaustion()`（`open-sse/services/combo/targetExhaustion.ts`）
-   における `isAgentrouterConnectionQuotaScope()` 形式の消費をゲーティングする
-   ものである。これがなければ、`scope` は引き続き `fallbackResult.ruleScope` を
-   通じて流れるが、それに基づいて動作するものは何もない。
-3. `tests/unit/upstream-status-restatement.test.ts` および
-   `tests/unit/agentrouter-error-rules.test.ts` を参考にしたユニットテストを追加する
-   （permanent でない / creditsExhausted でないことのガードを含め、さらに
-   プロバイダーが許可リストを必要とする場合は、`resolveRuleMatchBody()` がその
-   プロバイダーに対してのみ完全なテキストを返すことをアサートするテストも含める）。
+   `textMarkers` はプロバイダ固有のものに保ち、
+   `CREDITS_EXHAUSTED_SIGNALS`（`open-sse/services/accountFallback.ts`）と衝突するような
+   汎用的な英語フレーズは決して再利用しないこと。
+2. 必要に応じて `open-sse/config/providerErrorRules.ts`（`providerRuleRegistry`）に
+   分類ルールを登録し、適切なロックスコープ（アカウント全体のクォータには
+   `connection`、モデル単位のエラーには `model`）を選択する。このステップは、
+   ルールがエラー全文（ボディマーカー）を必要とするプロバイダの場合にのみ本番環境で
+   有効になる：同じファイル内の `FULL_TEXT_RULE_PROVIDERS` にプロバイダ ID を追加すること
+   — さもなければ `checkFallbackError` はルールに構造化された
+   `{code, type}` エラーしか渡さず、ボディテキストのルールは実際のトラフィックに
+   決してマッチしない。`status`/`headers` のみでマッチするルール
+   （Opencode や Minimax のものなど）はこのオプトインを必要としない。別途、ルールが
+   `scope: "connection"` を宣言し、その意図が実際の接続全体のクールダウンと
+   同一リクエストでのコンボスキップ（単なる情報的なラベルではない）である場合は、
+   同じファイル内の `HONORS_RULE_LOCK_SCOPE_PROVIDERS` にプロバイダ ID を追加すること
+   — これが `markAccountUnavailable()`（`src/sse/services/auth.ts`）および
+   `applyComboTargetExhaustion()`
+   （`open-sse/services/combo/targetExhaustion.ts`）における
+   `isAgentrouterConnectionQuotaScope()` 形式の消費をゲートするものである。
+   これがなければ、`scope` は `fallbackResult.ruleScope` を通じて流れ続けるが、
+   それに基づいて動作するものは何もない。
+3. `tests/unit/upstream-status-restatement.test.ts`
+   および `tests/unit/agentrouter-error-rules.test.ts` を模倣したユニットテストを追加する
+   （not-permanent / not-creditsExhausted のガードを含み、プロバイダが
+   許可リストを必要とする場合は、`resolveRuleMatchBody()` がそのプロバイダに対して
+   のみ全文を返すことをアサートするテストも含める）。
 
 `chatCore.ts`、`classifyError`、コンボへの変更は不要。
 
-#### egress バケット単位のロック（#10880）
+#### エグレスバケット型ロック（#10880）
 
-`EGRESS_BUCKETED_LOCK_PROVIDERS`（opencode ファミリー）のプロバイダーは、
-IP バケット化されたアップストリームとして扱われる（opencode の無料ティアは
-アカウント単位ではなく IP 単位でバケット化されている — #9611 を参照）。
-ステータス 429 が `quota_exhausted` **または** `rate_limit_exceeded` に分類されると、
-ローテーションがそれらを試す前に、最後に確認された egress IP が失敗した接続の
-ものと一致する、許可リスト済みファミリーのすべての接続がクールダウンされる。
-これにより、失敗が保証された N-1 回のアップストリーム呼び出しを回避できる
+`EGRESS_BUCKETED_LOCK_PROVIDERS`（opencode ファミリー）内のプロバイダは
+IP バケット型のアップストリームとして扱われる（opencode の無料ティアは
+アカウントバケット型ではなく IP バケット型である — #9611 を参照）：ステータス 429 が
+`quota_exhausted` **または** `rate_limit_exceeded` に分類された場合、ローテーションが
+それらを試行する前に、最後に既知のエグレス IP が失敗した接続のものと一致する
+許可リストファミリーのすべての接続をクールダウンする
+— これにより、N-1 回の必ず失敗するアップストリーム呼び出しを回避する
 （#10460/#10525 と同じ形）。
-`rate_limit_exceeded` が含まれているのは意図的である。`markAccountUnavailable`
+`rate_limit_exceeded` が含まれているのは意図的である：`markAccountUnavailable`
 パスでは opencode 固有のルールは決してマッチしない（`checkFallbackError` に
-ヘッダー/ボディが渡されず、opencode は `FULL_TEXT_RULE_PROVIDERS` に入っていない
-ため）。そのため、ボディにサブスクリプションクォータのテキスト（"monthly usage
-limit reached"）を含む 429 は、`status_429` ルールに到達する前に、クォータ
-テキストのフォールバック（`buildSubscriptionQuotaFallback`、`accountFallback.ts`。
-1 時間のクールダウン）によって `quota_exhausted` に分類される。一方、クォータ
-テキストを含まない 429（単なるレート制限）は `status_429` ルールによって
-`rate_limit_exceeded` に分類され、それでもなお IP ファミリーをクールダウンする。
-許可リスト済みプロバイダーにとって、IP バケット化されたレート制限はクォータ
-枯渇と同じシグナルである。率直な限界:
+ヘッダーもボディも渡されず、opencode は `FULL_TEXT_RULE_PROVIDERS` に含まれていない）
+ため、ボディにサブスクリプションクォータのテキスト（"monthly usage limit
+reached"）を含む 429 は、`status_429` ルールに到達する前に、クォータテキストの
+フォールバック（`buildSubscriptionQuotaFallback`、`accountFallback.ts`、1 時間の
+クールダウン）によって `quota_exhausted` に分類される — 一方、クォータテキストのない
+429（単純なレート制限）は `status_429` ルールによって `rate_limit_exceeded` に
+分類され、それでも IP ファミリーをクールダウンする。許可リストに含まれる
+プロバイダにとって、IP バケット型のレート制限は枯渇したクォータと同じシグナルである。
+既知の制限：
 
-- **ベストエフォート**: ロックは接続の最後に既知の `egress_ip` を `proxy_logs` から解決する（24時間ウィンドウ、同期、キャッシュなし）。コールドキャッシュ（egress IP が一度もプローブされていない）または行が存在しない場合 → 失敗した接続は引き続きブランチによってクールダウンされる（従来どおり記録される）、兄弟がロックされないだけである。
-- **終端状態に決してならない**: クールダウンは更新され続けるクォータウィンドウ（`testStatus: "unavailable"`）であり、IP レベルのシグナルから永続的な状態が導出されることは決してない。`disableCooling` の接続はこのブランチを完全にスキップする。
-- **許可リスト対象ファミリーのロック粒度の変更**: これはスコープの変更であり、単なる兄弟の最適化ではない。opencode は `passthroughModels` プロバイダーであるため、このブランチ以前は 429 がモデル単位のロックアウトを発生させていたが、現在は接続クールダウンを発生させる — 兄弟がまったく存在しない単一接続を運用するオペレーターの場合も含む。これは opencode のルールテーブルがすでに正しいと宣言している粒度である（`scope: "connection"`、`providerErrorRules.ts`）が、opencode が `HONORS_RULE_LOCK_SCOPE_PROVIDERS` に含まれていないため、これまで一度も尊重されてこなかった。このブランチは失敗した接続のクールダウンと `backoffLevel` を自ら書き込み、接続スコープの agentrouter ブランチを踏襲して return する — モデル単位のブロックと後続の汎用パスには到達しない。
-- **コンボも対象**: agentrouter ブランチと同様に、このスコープはコンボ呼び出し元が 429 に適用する `persistUnavailableState`/`isCombo` のダウングレードを意図的に無視する。モデル単位のロックアウトはこのスコープの弱い形ではなく、間違った単位である: 枯渇した IP について何も示さないため、コンボローテーションは兄弟ごとに失敗が確定した呼び出しを1回ずつ浪費し続けることになる。
-- **兄弟の安全性**: すでに終端状態（banned/credits_exhausted）にある兄弟、またはすでにより長いクールダウン中の兄弟が上書きされることは決してない。
-- **排他的許可リスト**: `EGRESS_BUCKETED_LOCK_PROVIDERS` の拡大は明示的なオーナーの決定であり、汎用的なワイヤリングは行わない（パターン #10334/#10419）。兄弟クエリは SQL リテラルとして繰り返すのではなく同じ許可リストをバインドするため、拡大は1行の変更のままである。
-- **egress IP ローテーション、双方向**: ルックアップウィンドウ（24時間）は egress-IP キャッシュ TTL（5分）よりはるかに広いため、「最後に既知の IP」は現在の状態ではなく履歴である。接続のプロキシがウィンドウ内でローテーションした場合、ロックは真に共有されている IP を**見逃す**可能性があり（記録された IP は新しい、枯渇していないものである）、対称的に、枯渇した IP から**その後ローテーションで離れた兄弟をクールダウンする**可能性もある。後者の場合、その兄弟はクールダウンウィンドウ1回分のコストを負う。どちらも履歴ベースのルックアップにおける許容されたベストエフォートの限界である。
-- **コスト**: `proxy_logs` の範囲限定スキャン2回（`idx_pl_timestamp` によるウィンドウフィルタリング）、429 の発生頻度でのみ実行。新しいインデックスは不要（マイグレーション 134 は YAGNI）。中規模の実トラフィック DB コピーで測定済み。高スループットのインスタンスでは同じウィンドウ内に比例して多くの行が保持される。
+- **ベストエフォート**: ロックは接続の最後に既知の `egress_ip` を
+  `proxy_logs` から解決します(24時間ウィンドウ、同期、キャッシュなし)。
+  コールドキャッシュ(egress IP が一度もプローブされていない)または行が
+  存在しない場合 → 失敗した接続はブランチによって引き続きクールダウン
+  されます(現状通り記録されます)が、兄弟はロックされません。
+- **終端状態にはならない**: クールダウンは更新されるクォータウィンドウ
+  です(`testStatus: "unavailable"`)。IP レベルのシグナルから永続的な
+  状態が導出されることはありません。`disableCooling` の接続はこの
+  ブランチを完全にスキップします。
+- **許可リスト対象ファミリーのロック粒度の変更**: これはスコープの変更
+  であり、単なる兄弟の最適化ではありません。opencode は
+  `passthroughModels` プロバイダーであるため、このブランチ以前は 429 が
+  モデル単位のロックアウトを発生させていましたが、現在は接続の
+  クールダウンを発生させます — 兄弟がまったく存在しない単一接続を運用
+  しているオペレーターの場合も含めて。これは opencode のルールテーブルが
+  すでに正しいと宣言している粒度です(`scope: "connection"`、
+  `providerErrorRules.ts`)。opencode が
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` に含まれていないため、これまで一度も
+  尊重されていませんでした。ブランチは失敗した接続のクールダウン +
+  `backoffLevel` を自ら書き込み、接続スコープの agentrouter ブランチを
+  ミラーして return します — モデル単位のブロックと後続の汎用パスには
+  到達しません。
+- **コンボも対象**: agentrouter ブランチと同様に、このスコープはコンボの
+  呼び出し元が 429 に適用する `persistUnavailableState`/`isCombo` の
+  ダウングレードを意図的に無視します。モデル単位のロックアウトはこの
+  スコープの弱い形ではなく、間違った単位です。枯渇した IP については
+  何も示さないため、コンボローテーションは兄弟ごとに失敗が確定している
+  呼び出しを1回ずつ浪費し続けることになります。
+- **兄弟の安全性**: すでに終端状態(banned/credits_exhausted)にある
+  兄弟、またはすでにより長いクールダウン中の兄弟が上書きされることは
+  ありません。
+- **排他的な許可リスト**: `EGRESS_BUCKETED_LOCK_PROVIDERS` の拡大は
+  明示的なオーナーの決定です。汎用的な配線はありません
+  (パターン #10334/#10419)。兄弟クエリは、それを SQL リテラルとして
+  繰り返すのではなく同じ許可リストをバインドするため、拡大は1行の
+  変更のままです。
+- **Egress IP ローテーション、双方向**: ルックアップウィンドウ(24時間)
+  は egress-IP キャッシュ TTL(5分)よりはるかに広いため、「最後に既知の
+  IP」は現在の状態ではなく履歴です。接続のプロキシがウィンドウ内で
+  ローテーションした場合、ロックは真に共有されている IP を**見逃す**
+  可能性があります(記録されている IP は新しい、枯渇していないものです)
+  — 対称的に、枯渇した IP から**その後ローテーションで離れた兄弟を
+  クールダウンする**可能性もあります。後者の場合、その兄弟は1回分の
+  クールダウンウィンドウを犠牲にします。どちらも履歴ベースのルックアップ
+  における許容されたベストエフォートの限界です。
+- **コスト**: `proxy_logs` の2回の有界スキャン(`idx_pl_timestamp` で
+  ウィンドウフィルタリング)、429 の発生頻度でのみ。新しいインデックスは
+  なし(マイグレーション 134 は YAGNI)。中規模の実トラフィック DB コピー
+  で測定済み。高スループットのインスタンスでは、同じウィンドウ内に比例
+  して多くの行が保持されます。
 
 ---
 

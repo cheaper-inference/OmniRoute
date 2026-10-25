@@ -350,6 +350,17 @@ gönderir. Beklemeye izin verilmediğinde (üst sınır, deneme veya bütçe tü
 `reset_at` değerlerini taşıyan `429 rate_limit_error` yanıtına yükseltilir; kota,
 kimlik doğrulama ve bulunamadı kilitleri ipucu içermeyen 503'ü korur.
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. İstek Kuyruğu Kabul Kontrolü (v3.8.49 · issue #6593)
@@ -506,190 +517,290 @@ böylece kullanım muhasebesi ve semafor serbest bırakma işlemi tekrarlanmaz.
 
 ---
 
-## 7. Upstream Status Restatement (yanlış bildirilen kota hataları)
+## 7. Upstream Durum Yeniden İfadesi (yanlış bildirilen kota hataları)
 
-**Kapsam:** geçici kota tükenmesini yanlış HTTP durumuyla bildiren tek bir upstream gateway.
+**Kapsam:** geçici kota tükenmesini yanlış bir HTTP durumuyla bildiren tek bir upstream ağ geçidi.
 
-**Amaç:** sınıflandırmadan ÖNCE yanıltıcı bir durumu düzeltmek; böylece aşağı akış tüketicileri (fallback motoru, combo toplaması, istemciye dönük yanıt) hatanın gerçek yeniden denenebilir (retryable) doğasını görür.
+**Amaç:** sınıflandırmadan ÖNCE yanıltıcı bir durumu düzeltmek; böylece aşağı akış tüketicileri (fallback motoru, combo agregasyonu, istemciye dönen yanıt) hatanın gerçek yeniden denenebilir niteliğini görür.
 
-Bazı gateway'ler GEÇİCİ kota tükenmesini yeniden denenemez bir HTTP
-durumuyla bildirir. `agentrouter.org`, standart `429` yerine Çince bir gövdeyle
-(`用户额度不足` / `额度不足`) `403` (bazen `400`) döndürür. Claude Code gibi
-istemciler `403`'ü kalıcı olarak değerlendirip oturumu iptal eder ve düzeltme
-olmadan fallback motoru bunu bir kota olayı yerine `AUTH_ERROR` olarak
-sınıflandırır.
+Bazı ağ geçitleri GEÇİCİ kota tükenmesini yeniden denenemez bir HTTP
+durumuyla işaret eder. `agentrouter.org`, standart `429` yerine Çince bir
+gövdeyle (`用户额度不足` / `额度不足`) `403` (bazen `400`) döndürür. Claude
+Code gibi istemciler `403`'ü kalıcı olarak değerlendirip oturumu sonlandırır;
+düzeltme yapılmazsa fallback motoru bunu bir kota olayı yerine `AUTH_ERROR`
+olarak sınıflandırır.
 
 **Uygulama:**
 
-- Kayıt + eşleştirici: `open-sse/config/upstreamStatusRestatement.ts` — sağlayıcı
-  başına bir kural listesi (`{id, fromStatuses, toStatus, textMarkers,
+- Kayıt + eşleştirici: `open-sse/config/upstreamStatusRestatement.ts` —
+  sağlayıcı başına bir kural listesi (`{id, fromStatuses, toStatus, textMarkers,
 excludeMarkers, defaultRetryAfterMs}`), `applyStatusRestatement()` aracılığıyla eşleştirilir.
-- Çağrı noktası: `open-sse/handlers/chatCore.ts` içindeki `providerFailure:` bloğu
-  (yaklaşık 3654. satır), `parseUpstreamError()` hata HTTP durumuna sahip bir
-  upstream yanıtını (`!providerResponse.ok`) ayrıştırdıktan hemen sonra ve
-  herhangi bir sınıflandırma çalışmadan önce; böylece tüm aşağı akış tüketicileri
-  düzeltilmiş durumu görür. Bir `200` SSE akışının içine gömülü hatalar ayrı ve
-  daha sonraki bir akış ayrıştırma yolunu izler ve bugün bu kanca (hook) tarafından
-  kapsan**maz** — bilinen bir sınırlamadır; agentrouter'ın yanlış durumu (bir hata
-  HTTP durumu olarak ortaya çıkan) için henüz gerekli değildir.
+- Çağrı noktası: `open-sse/handlers/chatCore.ts` içindeki `providerFailure:`
+  bloğu (yaklaşık 3654. satır), `parseUpstreamError()` hata HTTP durumu
+  taşıyan bir upstream yanıtını ayrıştırdıktan (`!providerResponse.ok`) hemen
+  sonra ve herhangi bir sınıflandırma çalışmadan önce; böylece tüm aşağı akış
+  tüketicileri düzeltilmiş durumu görür. Bir `200` SSE akışının içine gömülü
+  hatalar, ayrı ve daha geç işleyen bir akış-ayrıştırma yolunu izler ve bugün
+  bu hook tarafından **kapsanmaz** — bilinen bir sınırlamadır; agentrouter'ın
+  yanlış durum bildirimi için (ki bu bir hata HTTP durumu olarak ortaya çıkar)
+  henüz gerekli değildir.
 - Yeniden deneme uygunluğu: `429`, `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`) içindedir; bu nedenle yeniden
-  ifade edilen bir hata, ölü bir `403` olarak görünmek yerine gerçek bir yeniden
-  deneme penceresi taşır.
-- Sentetik `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`) yalnızca
-  yeniden ifade edilen yanıtın **istemciye** söylediği değerdir; kendisi bağlantının
-  dahili cooldown/lockout süresi değildir — bu süre, yeniden ifade edilen hatayı
-  gerçekte ele alan mekanizma tarafından ayrıca yönetilir (Connection Cooldown'un
-  artan backoff'u, §2, API-key sağlayıcıları için taban `3s`; veya agentrouter gibi
-  model-başına-kota sağlayıcıları için Model Lockout, §3). Yönlendirici (router),
-  istemciye duyurduğu 60 saniyelik pencereden daha önce dahili olarak yeniden
-  denemeye uygun hale gelebilir — kasıtlı bir paydır, hata değil.
+  içindedir (`open-sse/services/combo/unavailableRetryGate.ts`); bu nedenle
+  yeniden ifade edilen bir hata, ölü bir `403` olarak görünmek yerine gerçek
+  bir yeniden deneme penceresi taşır.
+- Sentetik `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`),
+  yalnızca yeniden ifade edilen yanıtın **istemciye** bildirdiği değerdir;
+  bağlantının dahili cooldown/lockout süresinin kendisi değildir — bu süre,
+  yeniden ifade edilen hatayı fiilen ele alan mekanizma tarafından ayrıca
+  yönetilir (Connection Cooldown'un kademeli artan backoff'u, §2, API-key
+  sağlayıcıları için taban `3s`; ya da agentrouter gibi model-başına-kota
+  sağlayıcıları için Model Lockout, §3). Yönlendirici, istemciye duyurduğu
+  60s penceresinden daha önce dahili olarak yeniden denemeye uygun hale
+  gelebilir — bu kasıtlı bırakılmış bir paydır, hata değildir.
 
-Kalıcı hatalar (agentrouter'ın `无权访问模型` hatası — bu modele erişim yok) ASLA
-yeniden ifade edilmez: `textMarkers` eşleşse bile `excludeMarkers` kuralı veto eder,
-böylece hata orijinal durumunu korur ve hiçbir şey onu sonsuza dek yeniden denemez.
-Eşleşen sağlayıcı sınıflandırma kuralına
-(`open-sse/config/providerErrorRules.ts` içindeki `agentrouter-model-access-denied`:
-`reason: "auth_error"`, `scope: "model"`, beyan edilmiş `6h` taban cooldown)
-`checkFallbackError` (`open-sse/services/accountFallback.ts`) tarafından, genel
-apikey kategorisi `FORBIDDEN` erken dönüşünden _önce_ başvurulur; bu,
-`honorsRuleLockScope(provider)` koşuluna bağlıdır (#10334 — şu anda
-`providerErrorRules.ts` içindeki `HONORS_RULE_LOCK_SCOPE_PROVIDERS` izin listesi
-aracılığıyla yalnızca agentrouter'a özeldir). Kuralın beyan edilen 6 saatlik
-cooldown'u `fallbackResult.baseCooldownMs` olarak akar, ancak yine de önceden var
-olan model-başına-kota lockout yolunu besler (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`; cooldown kaynağı dışında #10334 tarafından
-değiştirilmemiştir): diğer tüm model lockout'ları gibi operatörün
-`mlSettings.maxCooldownMs` değerine (varsayılan `1_800_000ms` / 30 dk) kırpılır ve
-_kalıcılaştırılan lockout nedeni_ kuralın `"auth_error"` değeri değil, önceden var
-olan sabit kodlanmış `"forbidden"` olarak kalır — uçtan uca yalnızca cooldown süresi
-dikkate alınır, neden dizgisi değil. Bağlantının kendisi aktif kalır; aynı
-bağlantıdaki kardeş modeller etkilenmez.
+Kalıcı hatalar (agentrouter'ın `无权访问模型` hatası — bu modele erişim yok)
+ASLA yeniden ifade edilmez: `textMarkers` eşleşse bile `excludeMarkers` kuralı
+veto eder; böylece hata orijinal durumunu korur ve hiçbir şey onu sonsuza dek
+yeniden denemez. Eşleşen sağlayıcı sınıflandırma kuralı
+(`open-sse/config/providerErrorRules.ts` içindeki
+`agentrouter-model-access-denied`: `reason: "auth_error"`, `scope: "model"`,
+bildirilmiş `6h` taban cooldown), `checkFallbackError`
+(`open-sse/services/accountFallback.ts`) tarafından genel apikey kategorisindeki
+`FORBIDDEN` erken dönüşünden _önce_, `honorsRuleLockScope(provider)` koşuluna
+bağlı olarak değerlendirilir (#10334 — şu anda `providerErrorRules.ts`
+içindeki `HONORS_RULE_LOCK_SCOPE_PROVIDERS` izin listesi aracılığıyla yalnızca
+agentrouter'a özeldir). Kuralın bildirilmiş 6h cooldown'u
+`fallbackResult.baseCooldownMs` olarak akar, ancak yine de önceden var olan
+model-başına-kota lockout yolunu besler (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`; cooldown kaynağı dışında #10334 ile
+değişmemiştir): diğer tüm model lockout'ları gibi operatörün
+`mlSettings.maxCooldownMs` değerine (varsayılan `1_800_000ms` / 30dk)
+sınırlandırılır ve _persist edilen lockout nedeni_, kuralın `"auth_error"`
+değeri değil, önceden var olan sabit kodlanmış `"forbidden"` değeri olarak
+kalır — uçtan uca yalnızca cooldown süresi dikkate alınır, neden dizgisi
+değil. Bağlantının kendisi aktif kalır; aynı bağlantıdaki kardeş modeller
+etkilenmez.
 
-Yeniden ifade edilen kota hataları (`额度不足`), üretim ortamında bir sağlayıcı kuralına ulaşır
-(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
-"connection"`, kendine ait bildirilmiş bir cooldown yok — kalıcılık katmanının
-ölçeklendirilmiş backoff varsayılanı uygulanır). #10334'ten bu yana,
-`ProviderErrorRuleMatch` üzerindeki `scope` uçtan uca tüketilmektedir, ancak **yalnızca**
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` izin listesindeki sağlayıcılar için (`providerErrorRules.ts` —
-bugün yalnızca `"agentrouter"`, `honorsRuleLockScope()` aracılığıyla geçiş kontrollü). Diğer
-her sağlayıcı için `scope`, tam olarak #10334 öncesindeki gibi bilgilendirici kalır.
-`checkFallbackError`, eşleşen kuralın scope'unu
-`fallbackResult.ruleScope` olarak ortaya çıkarır; `isAgentrouterConnectionQuotaScope()`
-(`src/sse/services/auth.ts`), bir `ruleScope`'un bağlantı genelinde, kendi kendini onaran
-bir sinyal olarak dikkate alınmasının gerçekten güvenli olduğunu doğrulayan ortak
-koruyucudur (scope `"connection"`, reason `quota_exhausted`, asla `permanent` değil,
-asla `creditsExhausted` değil — gelecekte bir kuralın `"connection"` scope'unu kalıcı bir hesap
-durumuyla eşleştirmesine karşı bir savunma). İki tüketici bunu çağırır:
+Yeniden ifade edilen kota hataları (`额度不足`) üretimde bir sağlayıcı kuralına
+ulaşır (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, kendine ait bildirilmiş bir cooldown'u yok — kalıcılık katmanının
+ölçeklenen backoff varsayılanı uygulanır). #10334'ten bu yana,
+`ProviderErrorRuleMatch` üzerindeki `scope` uçtan uca TÜKETİLMEKTEDİR, ancak
+**yalnızca** `HONORS_RULE_LOCK_SCOPE_PROVIDERS` izin listesindeki sağlayıcılar
+için (`providerErrorRules.ts` — bugün yalnızca `"agentrouter"`,
+`honorsRuleLockScope()` aracılığıyla koşula bağlıdır). Diğer tüm sağlayıcılar
+için `scope`, tam olarak #10334 öncesindeki gibi bilgilendirici olarak kalır.
+`checkFallbackError`, eşleşen kuralın scope'unu `fallbackResult.ruleScope`
+olarak ortaya çıkarır; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`), bir `ruleScope`'un bağlantı genelinde, kendi
+kendine iyileşen bir sinyal olarak dikkate alınmasının gerçekten güvenli
+olduğunu doğrulayan paylaşılan koruyucudur (scope `"connection"`, reason
+`quota_exhausted`, asla `permanent`, asla `creditsExhausted` — gelecekte scope
+`"connection"`ı kalıcı bir hesap durumuyla eşleştirebilecek bir kurala karşı
+bir savunma). Bunu iki tüketici çağırır:
 
 - **Kalıcılık** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  passthrough sağlayıcı **model başına** kilitleme dalına düşmek yerine
-  (agentrouter `passthroughModels: true` → `hasPerModelQuota()`
-  `true` döndürür), **geçici bir bağlantı cooldown'u** uygular —
+  passthrough sağlayıcının **model başına** kilitleme dalına düşmek yerine
+  (agentrouter `passthroughModels: true` → `hasPerModelQuota()` `true`
+  döndürür), **geçici bir bağlantı soğuma süresi** uygular —
   `testStatus: "unavailable"` + `rateLimitedUntil`, asla nihai bir durum değil
-  (`credits_exhausted`/`banned`/`expired`) — böylece bağlantı, cooldown dolduğunda manuel bir kimlik bilgisi sıfırlaması gerektirmek yerine kendi kendini onarır.
-  `disableCooling: true` olan bağlantılar için atlanır (#2997): bu katılmama seçeneği bunun yerine model başına kilitlemeye akar (belgelenmiş bir ödünleşim —
-  dalın üzerindeki kod yorumuna bakın).
-- **Aynı istek combo yönlendirmesi** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): aynı koruyucu, bağlantıyı
-  `${provider}:${connectionId}` ile anahtarlanan bellek içi `exhaustedConnections` kümesine işaretler. Bu, yalnızca kendi hedef nesnesinde _zaten tam olarak o `connectionId`'yi taşıyan_ kalan bir AYNI İSTEK hedefini atlar (`getExhaustedTargetSkipReason()`,
-  `open-sse/services/combo/comboPredicates.ts`, `exhaustedConnections` aramasından önce `if (provider &&
-connectionId)`) — kardeş hedeflerin kendilerine ait sabitlenmiş bir `connectionId` taşımadığı ve birinin yalnızca gönderim başına yanıtın
-  `X-OmniRoute-Selected-Connection-Id` başlığından çözümlendiği düz bir
-  model-listesi combo'su, bu anahtar eşleşmesine asla denk gelmez. Bu yaygın durum için, kalan bir ayağın az önce tükenmiş hesabı yeniden kullanmasına karşı gerçek koruma bu Set DEĞİLDİR — o, yukarıdaki kalıcılık katmanıdır
-  (bağlantının `rateLimitedUntil` değeri artık gelecekte bir zamandır) ve bu hata için aynı koruyucunun `transientRateLimitedProviders`'ı bastırmasıyla birleşir ("İki aşamalı tasarım"a ve
-  `targetExhaustion.ts` içindeki `isAgentrouterConnectionQuotaScope` dalındaki kod yorumuna bakın): o
-  Set işaretlenmeden bırakıldığında, `combo.ts`'nin `allowRateLimitedConnection` zorla-izin vermesi
-  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) sağlayıcının kalan ayakları için devreye GİRMEZ, böylece kimlik bilgisi seçiminin `rateLimitedUntil`
-  filtresi (`src/sse/services/auth.ts:1238`) normal şekilde dikkate alınır ve kalan bir ayak ya farklı, hâlâ uygun bir agentrouter
-  bağlantısı seçer ya da kullanılabilir kimlik bilgisi olmadan başarısız olur — bu dalın az önce cooldown'a aldığı bağlantıya zorla geri dönmez.
+  (`credits_exhausted`/`banned`/`expired`) — böylece bağlantı, soğuma süresi
+  dolduğunda manuel bir kimlik bilgisi sıfırlaması gerektirmek yerine kendini
+  kurtarır. `disableCooling: true` olan bağlantılar için atlanır (#2997): bu
+  vazgeçme (opt-out) bunun yerine model başına kilitlemeye düşer (belgelenmiş
+  bir ödünleşim — dalın üzerindeki kod yorumuna bakın).
+- **Aynı istek içi combo yönlendirmesi** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): aynı koruma, bağlantıyı
+  bellek içi `exhaustedConnections` kümesine `${provider}:${connectionId}`
+  anahtarıyla işaretler. Bu, yalnızca _kendi hedef nesnesinde bu tam
+  `connectionId` değerini zaten taşıyan_ kalan bir AYNI-İSTEK hedefini atlar
+  (`getExhaustedTargetSkipReason()`, `open-sse/services/combo/comboPredicates.ts`,
+  `exhaustedConnections` aramasından önce `if (provider && connectionId)`) —
+  kardeş hedeflerin kendilerine ait sabitlenmiş bir `connectionId` taşımadığı
+  ve birinin yalnızca yanıtın `X-OmniRoute-Selected-Connection-Id` başlığından
+  gönderim başına çözümlendiği düz bir model listesi combo'su, bu anahtar
+  eşleşmesine asla takılmaz. Bu yaygın durum için, kalan bir ayağın az önce
+  tükenmiş hesabı yeniden kullanmasına karşı gerçek koruma bu küme DEĞİLDİR —
+  yukarıdaki kalıcılık katmanıdır (bağlantının `rateLimitedUntil` değeri artık
+  gelecekte bir zamandadır) ve aynı korumanın bu hata için
+  `transientRateLimitedProviders`'ı bastırmasıyla birleşir (bkz. "İki aşamalı
+  tasarım" ve `targetExhaustion.ts` içindeki `isAgentrouterConnectionQuotaScope`
+  dalındaki kod yorumu): bu küme işaretlenmemiş bırakıldığında, `combo.ts`'nin
+  `allowRateLimitedConnection` zorla-izin-ver mekanizması
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) sağlayıcının kalan
+  ayakları için devreye GİRMEZ, böylece kimlik bilgisi seçiminin
+  `rateLimitedUntil` filtresi (`src/sse/services/auth.ts:1238`) normal şekilde
+  uygulanır ve kalan bir ayak ya farklı, hâlâ uygun bir agentrouter bağlantısı
+  seçer ya da kullanılabilir kimlik bilgisi olmadan başarısız olur — bu dalın
+  az önce soğumaya aldığı bağlantıya kendini zorla geri sokmaz.
 
-### İki aşamalı tasarım: önce durum yeniden ifadesi, sonra sınıflandırma
+### İki aşamalı tasarım: durum yeniden ifadesi, ardından sınıflandırma
 
 Durum yeniden ifadesi (`upstreamStatusRestatement.ts`) ve sağlayıcı
 sınıflandırma kuralları (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`), her ikisi de sağlayıcı kimliği ve metin işaretçileri üzerinden anahtarlanan ayrı kayıt defterleridir, ancak farklı yerlerde çalışır ve farklı amaçlara hizmet ederler: yeniden ifade, HTTP durumunu `chatCore.ts` içinde erken aşamada yeniden yazar;
-sınıflandırma kuralları ise yedek `reason`'ı ve kilit `scope`'unu
-(`model` / `provider` / `connection`) `checkFallbackError()` içinde seçer
-(`open-sse/services/accountFallback.ts`).
+`providerRuleRegistry`), her ikisi de sağlayıcı kimliği ve metin işaretçileri
+üzerinden anahtarlanan ayrı kayıt defterleridir, ancak farklı yerlerde çalışır
+ve farklı amaçlara hizmet eder: yeniden ifade, HTTP durumunu `chatCore.ts`
+içinde erken bir aşamada yeniden yazar; sınıflandırma kuralları ise yedek
+(fallback) `reason` değerini seçer ve `scope`'u (`model` / `provider` /
+`connection`) `checkFallbackError()` (`open-sse/services/accountFallback.ts`)
+içinde kilitler.
 
-Sınıflandırma kuralları, tam hata **metnini** ( `额度不足` gibi gövde
-işaretçilerini eşleştirmek için gereklidir) yalnızca `providerErrorRules.ts` içindeki `FULL_TEXT_RULE_PROVIDERS`
-izin listesinde listelenen sağlayıcılar için görür — şu anda yalnızca `"agentrouter"`. Diğer
-her **yerleşik katalog** sağlayıcısı için `checkFallbackError`,
-`getProviderErrorRuleMatch`'e yalnızca yapılandırılmış hatayı (`{code, type}`) verir; bu, başlık/durum/kod tabanlı kurallar için yeterlidir ancak gövde metni işaretçilerine karşı kördür.
-`resolveRuleMatchBody()` yardımcısı bu seçimi gerçekleştirir: izin listesindeki sağlayıcılar için tam hata metni, aksi hâlde yapılandırılmış hata. `FULL_TEXT_RULE_PROVIDERS`'a **yerleşik** bir sağlayıcı eklemek, sağlayıcı başına açık bir
-katılımdır — listede olmayan her sağlayıcı için varsayılan yolun bayt bayt değişmeden kalması için vardır.
+Sınıflandırma kuralları, tam hata **metnini** (`额度不足` gibi gövde
+işaretçilerini eşleştirmek için gereklidir) yalnızca `providerErrorRules.ts`
+içindeki `FULL_TEXT_RULE_PROVIDERS` izin listesinde yer alan sağlayıcılar için
+görür — şu anda yalnızca `"agentrouter"`. Diğer her **yerleşik katalog**
+sağlayıcısı için `checkFallbackError`, `getProviderErrorRuleMatch`'e yalnızca
+yapılandırılmış hatayı (`{code, type}`) verir; bu, başlık/durum/kod tabanlı
+kurallar için yeterlidir ancak gövde metni işaretçilerine karşı kördür.
+`resolveRuleMatchBody()` yardımcısı bu seçimi gerçekleştirir: izin listesindeki
+sağlayıcılar için tam hata metni, aksi hâlde yapılandırılmış hata.
+`FULL_TEXT_RULE_PROVIDERS`'a **yerleşik** bir sağlayıcı eklemek, sağlayıcı
+başına açık bir katılımdır (opt-in) — listede olmayan her sağlayıcının
+varsayılan yolu bayt bayta değişmeden kalsın diye vardır.
 
-Bir kuralın `scope`'u (`model` / `provider` / `connection`), `FULL_TEXT_RULE_PROVIDERS`'tan ayrı bir
-katılımdır: `checkFallbackError` bunu yalnızca
-`fallbackResult.ruleScope` olarak ortaya çıkarır ve aşağı akış tüketicileri bunu, aynı dosyadaki
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` izin listesindeki sağlayıcılar için bilgilendirici bir etiketten farklı bir şey olarak ancak o zaman dikkate alır (`gated via
-honorsRuleLockScope()` — bugün yalnızca `"agentrouter"`). Bir sağlayıcı o izin listesine girdiğinde `scope: "connection"` eşleşmesinin gerçekte ne yaptığı için yukarıdaki "Yeniden ifade edilen kota
-hataları" bölümüne bakın.
+Bir kuralın `scope`'u (`model` / `provider` / `connection`),
+`FULL_TEXT_RULE_PROVIDERS`'dan ayrı bir katılımdır: `checkFallbackError` bunu
+yalnızca `fallbackResult.ruleScope` olarak sunar ve aşağı akış tüketicileri de
+bunu, aynı dosyadaki `HONORS_RULE_LOCK_SCOPE_PROVIDERS` izin listesindeki
+sağlayıcılar için, bilgilendirici bir etiketten öte bir şey olarak ancak
+dikkate alır (`honorsRuleLockScope()` üzerinden denetlenir — bugün yalnızca
+`"agentrouter"`). Bir sağlayıcı bu izin listesine girdiğinde bir
+`scope: "connection"` eşleşmesinin gerçekte ne yaptığı için yukarıdaki
+"Yeniden ifade edilen kota hataları" bölümüne bakın.
 
-**#11104 — operatör tarafından tanımlanan kurallar her iki izin listesini de atlar.** Bir operatör, bu dosyayı düzenlemeden `settings.providerErrorRules` (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) aracılığıyla çalışma zamanında sağlayıcı başına bir kural tanımlayabilir. Bir operatör kuralını `FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — yerleşik katalog kurallarının **varsayılan** davranışını korumak için tasarlanmış izin listeleri — arkasına almak, kuralı tanımlamanın zaten operatörün açık onayı (opt-in) olması nedeniyle, ayar mekanizmasını burada zaten listelenmiş olanlar dışındaki her sağlayıcı için işlevsiz hale getirir. `resolveRuleMatchBody()` ve `honorsRuleLockScope()` her ikisi de önce `hasOperatorRuleForProvider()` kontrolü yapar: operatör kuralına sahip bir sağlayıcı, her iki izin listesinde yer alıp almadığına bakılmaksızın ham hata metnini alır ve tanımladığı `scope` değeri uygulanır.
+**#11104 — operatör tarafından bildirilen kurallar her iki izin listesini de
+atlar.** Bir operatör, bu dosyayı düzenlemeden çalışma zamanında
+`settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
+aracılığıyla sağlayıcı başına bir kural bildirebilir. Bir operatör kuralını
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` arkasına
+kapılamak — yerleşik katalog kurallarının **varsayılan** davranışını korumak
+için tasarlanmış izin listeleri — kuralı bildirmenin zaten operatörün açık
+katılımı olduğu göz önüne alındığında, ayarlar mekanizmasını zaten orada
+listelenmiş olanlar dışındaki her sağlayıcı için etkisiz kılardı.
+`resolveRuleMatchBody()` ve `honorsRuleLockScope()` ikisi de önce
+`hasOperatorRuleForProvider()`'ı kontrol eder: bir operatör kuralına sahip
+sağlayıcı, her iki izin listesinde de yer alıp almadığına bakılmaksızın ham
+hata metnini alır ve bildirilen `scope`'u uygulanır.
 
-**Bilinen eksik — HTTP 400 için `providerRuleRegistry`'ye asla danışılmıyor.** `checkFallbackError` fonksiyonunun `BAD_REQUEST` dalı, 400 durumunu tamamen kendi desen dizileri (`accountFallback.ts` içindeki `MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS` vb.) üzerinden sınıflandırır ve üzerindeki `configuredRule`/`getProviderErrorRuleMatch` dalına ulaşılmadan önce döner. `status: 400` içeren yerleşik bir katalog kuralı (veya bir operatör kuralı) sözdizimsel olarak geçerlidir ancak asla tetiklenmez. Bugün mevcut hiçbir kural 400'ü hedeflemiyor, dolayısıyla üretimde hiçbir şey etkilenmiyor — ancak gelecekteki bir 400 kuralı önce bu dalın elden geçirilmesini gerektirir; bu, bir kural eklemekten daha büyük bir değişikliktir (desen dizisi davranışına güvenen her sağlayıcı için 400'ü yeniden sınıflandırır) ve tek sağlayıcılı bir kural eklemenin kapsamı dışındadır.
+**Bilinen eksik — HTTP 400 için `providerRuleRegistry`'ye asla
+başvurulmaz.** `checkFallbackError`'ın `BAD_REQUEST` dalı, 400 durumunu
+tamamen kendi desen dizileri (`accountFallback.ts` içindeki
+`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS` vb.) üzerinden
+sınıflandırır ve üzerindeki `configuredRule`/`getProviderErrorRuleMatch`
+dalına ulaşılmadan önce döner. `status: 400` içeren yerleşik bir katalog
+kuralı (veya bir operatör kuralı) sözdizimsel olarak geçerlidir ancak asla
+tetiklenmez. Bugün hiçbir mevcut kural 400'ü hedeflemiyor, dolayısıyla
+üretimde hiçbir şey etkilenmiyor — ancak gelecekteki bir 400 kuralı önce bu
+dalın elden geçirilmesini gerektirir; bu, bir kural eklemekten daha büyük bir
+değişikliktir (desen dizisi davranışına zaten dayanan her sağlayıcı için
+400'ü yeniden sınıflandırır) ve tek sağlayıcılı bir kural eklemesinin kapsamı
+dışındadır.
 
 ### Kotayı yanlış bildiren yeni bir ağ geçidi ekleme
 
-1. `statusRestatementRegistry` (`open-sse/config/upstreamStatusRestatement.ts`) içine bir kural dizisi kaydedin. `textMarkers` değerlerini sağlayıcıya özgü tutun; `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`) ile çakışan genel İngilizce ifadeleri asla yeniden kullanmayın.
-2. İsteğe bağlı olarak, doğru kilit kapsamını seçmek (hesap genelinde kota için `connection`, model başına hatalar için `model`) üzere `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) içine sınıflandırma kuralları kaydedin. Bu adım üretimde yalnızca kuralları tam hata metnine (gövde işaretçileri) ihtiyaç duyan sağlayıcılar için etkili olur: sağlayıcı kimliğini aynı dosyadaki `FULL_TEXT_RULE_PROVIDERS` listesine ekleyin — aksi takdirde `checkFallbackError` kurala yalnızca yapılandırılmış `{code, type}` hatasını verir ve bir gövde metni kuralı canlı trafikte asla eşleşmez. Yalnızca `status`/`headers` üzerinden eşleşen kuralların (Opencode'unkiler veya Minimax'inkiler gibi) bu açık onaya ihtiyacı yoktur. Ayrıca, kural `scope: "connection"` tanımlıyorsa ve amaç gerçek bir bağlantı genelinde bekleme süresi ile aynı istekte combo atlama ise (yalnızca bilgilendirici bir etiket değilse), sağlayıcı kimliğini aynı dosyadaki `HONORS_RULE_LOCK_SCOPE_PROVIDERS` listesine ekleyin — `markAccountUnavailable()` (`src/sse/services/auth.ts`) ve `applyComboTargetExhaustion()` (`open-sse/services/combo/targetExhaustion.ts`) içindeki `isAgentrouterConnectionQuotaScope()` tarzı tüketimi kontrol eden kapı budur; bu olmadan `scope` yine de `fallbackResult.ruleScope` üzerinden akar ancak hiçbir şey ona göre hareket etmez.
-3. `tests/unit/upstream-status-restatement.test.ts` ve `tests/unit/agentrouter-error-rules.test.ts` dosyalarını örnek alan birim testleri ekleyin (kalıcı-değil / creditsExhausted-değil korumaları ve — sağlayıcının izin listesine ihtiyacı varsa — `resolveRuleMatchBody()` fonksiyonunun tam metni yalnızca o sağlayıcı için döndürdüğünü doğrulayan bir test dahil).
+1. `statusRestatementRegistry` içine tek bir kural dizisi kaydedin
+   (`open-sse/config/upstreamStatusRestatement.ts`). `textMarkers`
+   değerlerini sağlayıcıya özgü tutun; `CREDITS_EXHAUSTED_SIGNALS`
+   (`open-sse/services/accountFallback.ts`) ile çakışan genel İngilizce
+   ifadeleri asla yeniden kullanmayın.
+2. İsteğe bağlı olarak, doğru kilit kapsamını seçmek için
+   `open-sse/config/providerErrorRules.ts` içine (`providerRuleRegistry`)
+   sınıflandırma kuralları kaydedin (hesap genelinde kota için `connection`,
+   model bazlı hatalar için `model`). Bu adım, üretim ortamında yalnızca
+   kuralları tam hata metnine (gövde işaretçileri) ihtiyaç duyan sağlayıcılar
+   için etkili olur: sağlayıcı kimliğini aynı dosyadaki
+   `FULL_TEXT_RULE_PROVIDERS` listesine ekleyin — aksi takdirde
+   `checkFallbackError` kurala yalnızca yapılandırılmış `{code, type}`
+   hatasını iletir ve gövde metnine dayalı bir kural canlı trafikte asla
+   eşleşmez. Yalnızca `status`/`headers` üzerinden eşleşen kurallar
+   (Opencode'un veya Minimax'in kuralları gibi) bu katılıma ihtiyaç duymaz.
+   Bundan ayrı olarak, kural `scope: "connection"` bildiriyorsa ve amaç
+   gerçek bir bağlantı genelinde bekleme süresi ile aynı istek içinde combo
+   atlama ise (yalnızca bilgilendirici bir etiket değil), sağlayıcı kimliğini
+   aynı dosyadaki `HONORS_RULE_LOCK_SCOPE_PROVIDERS` listesine ekleyin — bu,
+   `markAccountUnavailable()` (`src/sse/services/auth.ts`) ve
+   `applyComboTargetExhaustion()` (`open-sse/services/combo/targetExhaustion.ts`)
+   içindeki `isAgentrouterConnectionQuotaScope()` tarzı tüketimi denetleyen
+   mekanizmadır; bu olmadan `scope` yine de `fallbackResult.ruleScope`
+   üzerinden akar ancak hiçbir şey buna göre hareket etmez.
+3. `tests/unit/upstream-status-restatement.test.ts` ve
+   `tests/unit/agentrouter-error-rules.test.ts` dosyalarını örnek alan birim
+   testleri ekleyin (not-permanent / not-creditsExhausted korumaları dahil
+   ve — sağlayıcının izin listesine ihtiyacı varsa —
+   `resolveRuleMatchBody()` fonksiyonunun tam metni yalnızca o sağlayıcı
+   için döndürdüğünü doğrulayan bir test).
 
 `chatCore.ts`, `classifyError` veya combo'da herhangi bir değişiklik gerekmez.
 
-#### Çıkış IP'sine göre gruplandırılmış kilit (#10880)
+#### Egress gruplu kilit (#10880)
 
-`EGRESS_BUCKETED_LOCK_PROVIDERS` içindeki sağlayıcılar (opencode ailesi), yukarı akışta IP'ye göre gruplandırılmış olarak ele alınır (opencode ücretsiz katmanı hesaba göre değil IP'ye göre gruplandırılmıştır — bkz. #9611): `quota_exhausted` **veya** `rate_limit_exceeded` olarak sınıflandırılan bir 429 durumu, rotasyon bunları denemeden önce, son bilinen çıkış IP'si başarısız olan bağlantınınkiyle eşleşen izin listesindeki ailenin tüm bağlantılarını beklemeye alır — böylece N-1 adet kesin başarısız olacak yukarı akış çağrısı önlenir (#10460/#10525 ile aynı yapı). `rate_limit_exceeded` bilinçli olarak dahil edilmiştir: `markAccountUnavailable` yolunda opencode'a özgü kurallar asla eşleşmez (`checkFallbackError`'a başlık/gövde verilmez, opencode `FULL_TEXT_RULE_PROVIDERS` içinde değildir), bu nedenle gövdesinde abonelik kotası metni ("monthly usage limit reached") taşıyan bir 429, `status_429` kuralına hiç ulaşılmadan önce kota metni yedeği (`buildSubscriptionQuotaFallback`, `accountFallback.ts`; 1 saatlik bekleme) tarafından `quota_exhausted` olarak sınıflandırılır — kota metni içermeyen bir 429 (düz hız sınırlaması) ise `status_429` kuralı üzerinden `rate_limit_exceeded` olarak sınıflandırılır ve yine de IP ailesini beklemeye alır. İzin listesindeki bir sağlayıcı için IP'ye göre gruplandırılmış bir hız sınırı, tükenmiş bir kota ile aynı sinyaldir. Açıkça belirtilen sınırlamalar:
+`EGRESS_BUCKETED_LOCK_PROVIDERS` içindeki sağlayıcılar (opencode ailesi),
+IP gruplu upstream olarak ele alınır (opencode ücretsiz katmanı hesap gruplu
+değil, IP grupludur — bkz. #9611): `quota_exhausted` **veya**
+`rate_limit_exceeded` olarak sınıflandırılan bir status-429, rotasyon bunları
+deneyemeden önce, son bilinen çıkış IP'si başarısız olan bağlantınınkiyle
+eşleşen izin listesindeki aileye ait her bağlantıyı beklemeye alır
+— böylece N-1 adet garantili başarısız upstream çağrısı önlenir
+(#10460/#10525 ile aynı yapı).
+`rate_limit_exceeded` kasıtlı olarak dahil edilmiştir:
+`markAccountUnavailable` yolunda opencode'a özgü kurallar asla eşleşmez
+(`checkFallbackError`'a hiçbir header/gövde verilmez, opencode
+`FULL_TEXT_RULE_PROVIDERS` içinde değildir), dolayısıyla gövdesinde abonelik
+kotası metnini ("monthly usage limit reached") taşıyan bir 429, `status_429`
+kuralına hiç ulaşılmadan önce kota-metni geri dönüş mekanizması
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; 1 saatlik bekleme)
+tarafından `quota_exhausted` olarak sınıflandırılır — buna karşılık kota
+metni içermeyen bir 429 (düz hız sınırlama) `status_429` kuralı üzerinden
+`rate_limit_exceeded` olarak sınıflandırılır ve yine de IP ailesini beklemeye
+alır. İzin listesindeki bir sağlayıcı için IP gruplu bir hız sınırı, tükenmiş
+bir kotayla aynı sinyaldir. Dürüst sınırlar:
 
-- **En iyi çaba (best-effort)**: kilit, bağlantının bilinen son `egress_ip`
-  değerini `proxy_logs` üzerinden çözümler (24 saatlik pencere, eşzamanlı,
-  önbellek yok). Soğuk önbellek (egress IP hiç yoklanmamış) veya satır yok →
-  başarısız bağlantı dal tarafından yine de soğutulur (bugünkü gibi
-  kaydedilir), yalnızca hiçbir kardeş kilitlenmez.
-- **Asla nihai değil**: soğutma, kendini yenileyen bir kota penceresidir
-  (`testStatus: "unavailable"`); IP düzeyinde bir sinyalden asla kalıcı bir
-  durum türetilmez. `disableCooling` bağlantıları dalı tamamen atlar.
-- **İzin listesindeki aile için kilit ayrıntı düzeyi değişir**: bu yalnızca
-  bir kardeş optimizasyonu değil, bir kapsam değişikliğidir. opencode bir
-  `passthroughModels` sağlayıcısıdır; bu nedenle bu daldan önce bir 429,
-  MODEL başına kilitleme üretiyordu; artık bir bağlantı soğutması üretir —
-  hiç kardeşi olmayan tek bir bağlantı çalıştıran bir operatör için de
-  geçerli. Bu, opencode kural tablosunun zaten doğru ilan ettiği ayrıntı
-  düzeyidir (`scope: "connection"`, `providerErrorRules.ts`); opencode
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` içinde olmadığı için şimdiye kadar hiç
-  uygulanmadı. Dal, bağlantı kapsamlı agentrouter dalını yansıtarak başarısız
-  bağlantının soğutmasını + `backoffLevel` değerini kendisi yazar ve döner —
-  model başına blok ve aşağıdaki genel yola asla ulaşılmaz.
-- **Kombo dahil**: agentrouter dalında olduğu gibi, kapsam, bir kombo
-  çağıranının 429'a uyguladığı `persistUnavailableState`/`isCombo`
-  düşürümünü bilinçli olarak yok sayar. Model başına kilitleme, bu kapsamın
-  daha zayıf bir biçimi değil, yanlış birimdir: tükenmiş IP hakkında hiçbir
-  şey söylemez; bu nedenle kombo rotasyonu, kardeş başına başarısız olması
-  garantili bir çağrıyı yakmaya devam ederdi.
-- **Kardeş güvenliği**: zaten nihai durumda olan (banned/credits_exhausted)
-  veya zaten daha uzun bir soğutmada bulunan bir kardeş asla ezilmez.
-- **Özel izin listesi**: `EGRESS_BUCKETED_LOCK_PROVIDERS` listesini
-  genişletmek açık bir sahip kararıdır; genel bir kablolama yok (desen
-  #10334/#10419). Kardeş sorgusu, aynı izin listesini SQL sabiti olarak
-  tekrarlamak yerine bağlar; böylece genişletme tek satırlık bir değişiklik
-  olarak kalır.
-- **Egress IP rotasyonu, her iki yönde**: arama penceresi (24 saat),
-  egress-IP önbellek TTL'sinden (5 dk) çok daha geniştir; bu nedenle "bilinen
-  son IP" güncel durum değil, geçmiştir. Bir bağlantının vekil sunucusu
-  pencere içinde rotasyona girdiyse, kilit gerçekten paylaşılan bir IP'yi
-  **ıskalayabilir** (kayıtlı IP, yeni ve tükenmemiş olandır) — ve simetrik
-  olarak, tükenmiş IP'den **o zamandan beri uzaklaşmış bir kardeşi
-  soğutabilir**. İkinci durum, o kardeşe bir soğutma penceresine mal olur;
-  her ikisi de geçmişe dayalı bir aramanın kabul edilmiş en iyi çaba
-  sınırlarıdır.
-- **Maliyet**: `proxy_logs` üzerinde iki sınırlı tarama
-  (`idx_pl_timestamp` ile pencere filtreli), yalnızca 429 sıklığında. Yeni
-  dizin yok (migration 134 YAGNI). Orta büyüklükte, gerçek trafikli bir DB
-  kopyası üzerinde ölçüldü; yüksek işlem hacimli bir örnek, aynı pencerede
-  orantılı olarak daha fazla satır tutar.
+- **Best-effort**: kilit, bağlantının bilinen son `egress_ip` değerini `proxy_logs`
+  üzerinden çözümler (24 saatlik pencere, senkron, önbellek yok). Soğuk önbellek
+  (egress IP hiç yoklanmamış) veya satır yok → başarısız olan bağlantı yine de dal
+  tarafından soğutulur (bugünkü gibi kaydedilir), yalnızca hiçbir kardeş
+  kilitlenmez.
+- **Asla nihai değil**: soğuma, yenilenen bir kota penceresidir
+  (`testStatus: "unavailable"`); IP düzeyindeki bir sinyalden asla kalıcı bir durum
+  türetilmez. `disableCooling` bağlantıları dalı tamamen atlar.
+- **İzin listesindeki aile için kilit granülaritesi değişiyor**: bu bir kapsam
+  değişikliğidir, yalnızca bir kardeş optimizasyonu değil. opencode bir
+  `passthroughModels` sağlayıcısıdır; dolayısıyla bu daldan önce bir 429, MODEL
+  başına kilitlenme üretiyordu; artık bir bağlantı soğuması üretiyor — hiç kardeşi
+  olmayan tek bir bağlantı çalıştıran bir operatör için bile. Bu, opencode kural
+  tablosunun zaten doğru olarak bildirdiği granülaritedir (`scope: "connection"`,
+  `providerErrorRules.ts`); ancak opencode `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+  içinde olmadığı için şimdiye kadar hiç uygulanmadı. Dal, başarısız bağlantının
+  soğumasını ve `backoffLevel` değerini kendisi yazar; bağlantı kapsamlı
+  agentrouter dalını birebir yansıtır ve döner — model başına blok ile aşağıdaki
+  genel yola asla ulaşılmaz.
+- **Combo dahil**: agentrouter dalında olduğu gibi, kapsam, bir combo
+  çağırıcısının 429'a uyguladığı `persistUnavailableState`/`isCombo` düşürmesini
+  kasıtlı olarak yok sayar. Model başına kilitlenme bu kapsamın daha zayıf bir
+  biçimi değildir, yanlış birimdir: tükenen IP hakkında hiçbir şey söylemez;
+  dolayısıyla combo rotasyonu kardeş başına garantili başarısız bir çağrı yakmaya
+  devam eder.
+- **Kardeş güvenliği**: zaten nihai durumda (banned/credits_exhausted) veya zaten
+  daha uzun bir soğumada bulunan bir kardeşin üzerine asla yazılmaz.
+- **Özel izin listesi**: `EGRESS_BUCKETED_LOCK_PROVIDERS` listesini genişletmek
+  açık bir sahip kararıdır; genel bir bağlantı yoktur (pattern #10334/#10419).
+  Kardeş sorgusu, aynı izin listesini bir SQL sabiti olarak tekrarlamak yerine
+  bağlar; böylece genişletme tek satırlık bir değişiklik olarak kalır.
+- **Egress IP rotasyonu, her iki yönde**: arama penceresi (24 saat), egress-IP
+  önbellek TTL'sinden (5 dk) çok daha geniştir; dolayısıyla "bilinen son IP"
+  güncel durum değil, geçmiştir. Bir bağlantının vekil sunucusu pencere içinde
+  değiştiyse kilit, gerçekten paylaşılan bir IP'yi **ıskalayabilir** (kaydedilen
+  IP yeni, tükenmemiş olandır) — ve simetrik olarak, o zamandan beri tükenen
+  IP'den **uzaklaşmış bir kardeşi soğutabilir**. İkinci durum, söz konusu kardeşe
+  bir soğuma penceresine mal olur; her ikisi de geçmişe dayalı bir aramanın kabul
+  edilmiş best-effort sınırlarıdır.
+- **Maliyet**: `proxy_logs` üzerinde iki sınırlı tarama (`idx_pl_timestamp`
+  aracılığıyla pencere filtreli), yalnızca 429 sıklığında. Yeni indeks yok
+  (migration 134 YAGNI). Orta büyüklükte, gerçek trafikli bir DB kopyasında
+  ölçüldü; yüksek işlem hacimli bir örnek, aynı pencerede orantılı olarak daha
+  fazla satır tutar.
 
 ---
 

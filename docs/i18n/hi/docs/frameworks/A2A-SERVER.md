@@ -47,7 +47,7 @@ JSON-RPC त्रुटि कोड `-32000` के साथ HTTP 503 लौ�
 
 ### `message/send` — समकालिक निष्पादन
 
-किसी कौशल को संदेश भेजता है और पूर्ण प्रतिक्रिया की प्रतीक्षा करता है।
+किसी स्किल को संदेश भेजता है और पूर्ण प्रतिक्रिया की प्रतीक्षा करता है।
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` के लिए, `metadata.combo` गेटवे अनुरोध में
+`metadata.model` को स्पष्ट रूप से ओवरराइड करता है; इसे वास्तविक `model` के रूप में भेजा जाता है,
+न कि उपेक्षित `x-combo` JSON फ़ील्ड के रूप में। गेटवे की सामान्य API-कुंजी और
+प्रति-लक्ष्य प्राधिकरण नीति अभी भी लागू होती है। अमान्य या खाली कॉम्बो अस्वीकार कर दिया जाता है।
+
+परिणाम `requested_combo` (कॉलर की मंशा), `dispatched_model`
+(वास्तविक गेटवे अनुरोध), `response_model` (गेटवे प्रतिक्रिया) और
+`confirmed_combo` को प्रदर्शित करता है। अंतिम फ़ील्ड तब तक `null` रहता है, जब तक गेटवे स्पष्ट रूप से
+किसी कॉम्बो की पहचान न करे। A2A निर्णय लॉग निष्पादन का श्रेय केवल
+पुष्ट कॉम्बो को देते हैं और अपुष्ट अनुरोध को `requestedCombo` के रूप में बनाए रखते हैं।
+
 **प्रतिक्रिया:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — कार्य की स्थिति पूछें
+### `tasks/get` — टास्क की स्थिति पूछें
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — कार्य रद्द करें
+### `tasks/cancel` — टास्क रद्द करें
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ JSON-RPC एंडपॉइंट `/a2a` प्रामाणिक A2A प्�
 
 ---
 
-## एकीकरण उदाहरण
+## एकीकरण के उदाहरण
 
 ### Python (requests)
 

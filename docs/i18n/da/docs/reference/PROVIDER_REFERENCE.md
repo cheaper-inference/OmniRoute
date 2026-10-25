@@ -4,11 +4,11 @@
 
 ---
 
-> **Auto-genereret** fra `src/shared/constants/providers.ts` — må ikke redigeres manuelt.
-> Regenerer med: `npm run gen:provider-reference`
-> **Sidst genereret:** 2026-10-18
+> **Automatisk genereret** fra `src/shared/constants/providers.ts` — må ikke redigeres manuelt.
+> Generer igen med: `npm run gen:provider-reference`
+> **Senest genereret:** 2026-10-20
 
-Antal udbydere i alt: **375**. Se kategorifordelingen nedenfor.
+Antal udbydere i alt: **375**. Se kategorioversigten nedenfor.
 
 ## Kategorier
 
@@ -461,8 +461,8 @@ Brug kontrolpanelet på `/dashboard/providers` til at aktivere, konfigurere og t
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Register (detaljer pr. model): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (154 implementeringer)
-- Translators: [`open-sse/translator/`](../../open-sse/translator/)
+- Eksekveringsmoduler: [`open-sse/executors/`](../../open-sse/executors/) (156 implementeringer)
+- Oversættere: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Se også
 

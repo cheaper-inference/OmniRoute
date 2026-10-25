@@ -134,10 +134,16 @@ describe("maybeReapDispatcherPool()", () => {
     );
   });
 
-  it("removes slots even when close fails", () => {
+  it("removes both failed cloud slots when closing fails and preserves the local pool", () => {
+    const localBefore = getDefaultDispatcher(LOCAL_HOST);
+    const localRetryBefore = getRetryDispatcher(LOCAL_HOST);
     const broken = getDefaultDispatcher(CLOUD_HOST);
+    const brokenRetry = getRetryDispatcher(CLOUD_HOST);
     broken.close = () => {
       throw new Error("close failed");
+    };
+    brokenRetry.close = () => {
+      throw new Error("retry close failed");
     };
 
     maybeReapDispatcherPool(CLOUD_HOST, false, 1_000);
@@ -147,6 +153,9 @@ describe("maybeReapDispatcherPool()", () => {
       undefined,
       "slots must be dropped even when closing fails"
     );
+    assert.equal(getRetryCachedDispatcher(), undefined, "failed retry slot must also be dropped");
+    assert.equal(getLocalDefaultCachedDispatcher(), localBefore);
+    assert.equal(getLocalRetryCachedDispatcher(), localRetryBefore);
   });
 });
 

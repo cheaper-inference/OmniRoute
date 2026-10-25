@@ -43,11 +43,11 @@ aadressile `POST /a2a` annavad HTTP 503 koos JSON-RPC veakoodiga `-32000`.
 
 ---
 
-## JSON-RPC 2.0 Meetodid
+## JSON-RPC 2.0 meetodid
 
-### `message/send` — Sünkroonne Täitmine
+### `message/send` — sünkroonne täitmine
 
-Saadab sõnumi oskusele ja ootab täielikku vastust.
+Saadab oskusele sõnumi ja ootab täielikku vastust.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-u puhul alistab `metadata.combo` lüüsipäringus sõnaselgelt
+`metadata.model`-i; see saadetakse tegeliku `model`-ina, mitte eiratava
+`x-combo` JSON-väljana. Lüüsis kehtivad endiselt tavapärased API-võtme ja
+sihtkohapõhised autoriseerimisreeglid. Sobimatu või tühi kombinatsioon lükatakse tagasi.
+
+Tulemus sisaldab välju `requested_combo` (kutsuja kavatsus), `dispatched_model`
+(tegelik lüüsipäring), `response_model` (lüüsi vastus) ja
+`confirmed_combo`. Viimane väli on `null`, välja arvatud juhul, kui lüüs
+tuvastab kombinatsiooni sõnaselgelt. A2A otsustuslogid omistavad täitmise ainult
+kinnitatud kombinatsioonile, säilitades kinnitamata päringu väljana `requestedCombo`.
+
 **Vastus:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE Voog
+### `message/stream` — SSE voogedastus
 
-Sarnane `message/send`-iga, aga tagastab Server-Sent Events reaalajas voogu jaoks.
+Sama mis `message/send`, kuid tagastab reaalajas voogedastuseks Server-Sent Events sündmused.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE Sündmused:**
+**SSE sündmused:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Küsi Ülesande Olekut
+### `tasks/get` — ülesande oleku pärimine
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Tühista Ülesanne
+### `tasks/cancel` — ülesande tühistamine
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ esitatud → töös → valmis
 
 ---
 
-## Integreerimisnäited
+## Integratsiooninäited
 
 ### Python (requests)
 

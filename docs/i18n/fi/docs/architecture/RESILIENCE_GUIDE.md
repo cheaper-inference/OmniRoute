@@ -412,6 +412,17 @@ lopullinen vastaus muuttuu muotoon `429 rate_limit_error`, joka sisältää
 päättymisajankohdasta; quota-, auth- ja not-found-lukot säilyttävät vihjeettömän
 503-vastauksen.
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. Pyyntöjonoon pääsyn hallinta (v3.8.49 · ongelma #6593)
@@ -573,273 +584,294 @@ käytön kirjanpito ja semaforin vapautus eivät toistu.
 
 ---
 
-## 7. Ylävirran tilan uudelleentulkinta (virheellisesti ilmoitetut kiintiövirheet)
+## 7. Upstream-statuksen oikaisu (virheellisesti ilmoitetut kiintiövirheet)
 
-**Laajuus:** yksi ylävirran yhdyskäytävä, joka ilmoittaa tilapäisen kiintiön loppumisen väärällä HTTP-tilalla.
+**Kattavuus:** yksi upstream-gateway, joka ilmoittaa väliaikaisen kiintiön loppumisen väärällä HTTP-statuksella.
 
-**Tarkoitus:** korjata harhaanjohtava tila ENNEN luokittelua, jotta alavirran kuluttajat (varamoottori, combo-aggregaatio, asiakkaalle näkyvä vastaus) näkevät virheen todellisen uudelleenyrityskelpoisen luonteen.
+**Tarkoitus:** korjata harhaanjohtava status ENNEN luokittelua, jotta alavirran kuluttajat (fallback-moottori, combo-aggregointi, asiakkaalle näkyvä vastaus) näkevät virheen todellisen, uudelleenyrityskelpoisen luonteen.
 
-Jotkin yhdyskäytävät ilmoittavat TILAPÄISEN kiintiön loppumisen
-ei-uudelleenyrityskelpoisella HTTP-tilalla. `agentrouter.org` palauttaa `403`
-(joskus `400`) kiinankielisellä sisällöllä (`用户额度不足` / `额度不足`)
-vakiomuotoisen `429`:n sijaan. Asiakkaat kuten Claude Code tulkitsevat `403`:n
-pysyväksi ja keskeyttävät istunnon, ja ilman korjausta varamoottori luokittelisi
-sen `AUTH_ERROR`:ksi kiintiötapahtuman sijaan.
+Jotkin gatewayt ilmaisevat VÄLIAIKAISEN kiintiön loppumisen HTTP-statuksella, joka ei ole uudelleenyrityskelpoinen. `agentrouter.org` palauttaa `403`-statuksen (joskus `400`) kiinalaisella viestirungolla (`用户额度不足` / `额度不足`) standardin `429`:n sijaan. Claude Coden kaltaiset asiakkaat tulkitsevat `403`:n pysyväksi ja keskeyttävät istunnon, ja ilman oikaisua fallback-moottori luokittelisi sen `AUTH_ERROR`:ksi kiintiötapahtuman sijaan.
 
 **Toteutus:**
 
-- Rekisteri + sovitin: `open-sse/config/upstreamStatusRestatement.ts` —
-  tarjoajakohtainen sääntöluettelo (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), joka sovitetaan `applyStatusRestatement()`-funktiolla.
+- Rekisteri + täsmääjä: `open-sse/config/upstreamStatusRestatement.ts` —
+  tarjoajakohtainen sääntölista (`{id, fromStatuses, toStatus, textMarkers,
+excludeMarkers, defaultRetryAfterMs}`), joka täsmätään
+  `applyStatusRestatement()`-funktiolla.
 - Kutsukohta: `providerFailure:`-lohko tiedostossa `open-sse/handlers/chatCore.ts`
   (noin rivi 3654), heti sen jälkeen kun `parseUpstreamError()` on jäsentänyt
-  ylävirran vastauksen, jolla on virheellinen HTTP-tila (`!providerResponse.ok`),
-  ja ennen kuin mikään luokittelu suoritetaan, jotta jokainen alavirran kuluttaja
-  näkee korjatun tilan. `200` SSE -virran sisään upotetut virheet kulkevat
-  erillistä, myöhempää virran jäsentämispolkua, eivätkä kuulu tämän koukun
-  piiriin nykyään — kyseessä on tunnettu rajoitus, jota agentrouterin virheellinen
-  tilakoodi ei vielä vaadi (se ilmenee virheellisenä HTTP-tilana).
-- Uudelleenyrityskelpoisuus: `429` on `RETRY_AFTER_ELIGIBLE_STATUSES`-listassa
-  (`open-sse/services/combo/unavailableRetryGate.ts`), joten uudelleentulkittu
-  virhe saa todellisen uudelleenyritysikkunan sen sijaan, että se näkyisi
-  umpikujana olevana `403`:na.
-- Synteettinen `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
-  on vain se, mitä uudelleentulkittu vastaus kertoo **asiakkaalle**; se ei
-  ole itsessään yhteyden sisäinen cooldown-/lockout-aika — sitä säätelee
-  erikseen se mekanismi, joka todella käsittelee uudelleentulkittua virhettä
-  (Connection Cooldownin kiihtyvä backoff, §2, perusta `3s`
-  API-avaintarjoajille; tai Model Lockout, §3, mallikohtaisen kiintiön
-  tarjoajille kuten agentrouter). Reititin voi tulla sisäisesti
-  uudelleenyrityskelpoiseksi aikaisemmin kuin asiakkaalle ilmoittamansa
-  60 s:n ikkuna — kyseessä on tarkoituksellinen pelivara, ei bugi.
+  virheellisen HTTP-statuksen sisältävän upstream-vastauksen
+  (`!providerResponse.ok`) ja ennen kuin mikään luokittelu suoritetaan, jotta
+  jokainen alavirran kuluttaja näkee korjatun statuksen. `200`-SSE-virran
+  sisään upotetut virheet kulkevat erillistä, myöhempää virranjäsennysreittiä,
+  eikä tämä hook kata niitä tänään — kyseessä on tunnettu rajoitus, jota ei
+  vielä tarvita agentrouterin väärän statuksen käsittelyyn (joka ilmenee
+  virheellisenä HTTP-statuksena).
+- Uudelleenyritysoikeus: `429` kuuluu joukkoon `RETRY_AFTER_ELIGIBLE_STATUSES`
+  (`open-sse/services/combo/unavailableRetryGate.ts`), joten oikaistu virhe
+  saa todellisen uudelleenyritysikkunan sen sijaan, että se näkyisi kuolleena
+  `403`:na.
+- Synteettinen `60s`:n `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
+  on vain se, minkä oikaistu vastaus kertoo **asiakkaalle**; se ei itsessään
+  ole yhteyden sisäinen cooldown-/lockout-kesto — sitä säätelee erikseen se
+  mekanismi, joka todella käsittelee oikaistun virheen (Connection Cooldownin
+  kiihtyvä backoff, §2, perusarvo `3s` API-avaintarjoajille; tai Model
+  Lockout, §3, mallikohtaisen kiintiön tarjoajille kuten agentrouter).
+  Reititin voi tulla sisäisesti uudelleenyrityskelpoiseksi jo ennen kuin
+  asiakkaalle ilmoitettu 60 sekunnin ikkuna on kulunut — kyseessä on
+  tarkoituksellinen varmuusmarginaali, ei bugi.
 
-Pysyviä virheitä (agentrouterin `无权访问模型` — ei käyttöoikeutta tähän malliin) EI
-koskaan tulkita uudelleen: `excludeMarkers` antaa veton säännölle vaikka
-`textMarkers` osuisi, joten virhe säilyttää alkuperäisen tilansa, eikä mikään
-yritä sitä uudelleen ikuisesti. Vastaavaa tarjoajan luokittelusääntöä
-(`agentrouter-model-access-denied` tiedostossa `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, ilmoitettu `6h` perus-cooldown) konsultoi
-`checkFallbackError` (`open-sse/services/accountFallback.ts`) _ennen_ yleisen
-apikey-kategorian `FORBIDDEN`-aikaista paluuta, ehdollisena
-`honorsRuleLockScope(provider)`-funktioon (#10334 — tällä hetkellä vain
-agentrouterille `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-sallittujen listan kautta
-tiedostossa `providerErrorRules.ts`). Säännön ilmoitettu 6 h:n cooldown kulkeutuu
-muodossa `fallbackResult.baseCooldownMs`, mutta se syöttää edelleen aiemmin
-olemassa olevan mallikohtaisen kiintiön lockout-polun (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, joita #10334 ei muuttanut paitsi cooldownin lähteen
-osalta): se leikataan operaattorin `mlSettings.maxCooldownMs`-arvoon (oletus
-`1_800_000ms` / 30 min) kuten kaikki muutkin mallilukitukset, ja _säilytetty
-lockout-syy_ pysyy aiemmin olemassa olevana kovakoodattuna `"forbidden"`-arvona,
-ei säännön `"auth_error"` — vain cooldownin kesto kunnioitetaan alusta loppuun,
-ei syymerkkijonoa. Yhteys itsessään pysyy aktiivisena; saman yhteyden sisarmallit
-eivät vaikutu.
+Pysyviä virheitä (agentrouterin `无权访问模型` — ei käyttöoikeutta tähän
+malliin) ei KOSKAAN oikaista: `excludeMarkers` torjuu säännön silloinkin, kun
+`textMarkers` osuu, joten virhe säilyttää alkuperäisen statuksensa eikä mikään
+yritä sitä uudelleen loputtomiin. Vastaavaa tarjoajan luokittelusääntöä
+(`agentrouter-model-access-denied` tiedostossa
+`open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`, `scope:
+"model"`, ilmoitettu `6h`:n perus-cooldown) konsultoi `checkFallbackError`
+(`open-sse/services/accountFallback.ts`) _ennen_ yleisen apikey-kategorian
+`FORBIDDEN`-early-returnia, ehdollisena `honorsRuleLockScope(provider)`-
+tarkistukselle (#10334 — tällä hetkellä vain agentrouterille
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS`-sallittujen listan kautta tiedostossa
+`providerErrorRules.ts`). Säännön ilmoitettu 6 tunnin cooldown välittyy
+muodossa `fallbackResult.baseCooldownMs`, mutta se syöttää edelleen olemassa
+olevaan mallikohtaisen kiintiön lukituspolkuun (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, jota #10334 ei muuttanut paitsi cooldownin
+lähteen osalta): se leikataan operaattorin `mlSettings.maxCooldownMs`-arvoon
+(oletus `1_800_000ms` / 30 min), kuten jokainen muukin mallilukitus, ja
+_persistoitu lukituksen syy_ pysyy aiemmin kovakoodattuna
+`"forbidden"`-arvona, ei säännön `"auth_error"`:na — vain cooldownin kesto
+otetaan huomioon päästä päähän, ei syymerkkijonoa. Yhteys itsessään pysyy
+aktiivisena; saman yhteyden sisarmallit eivät vaikutu.
 
-Uudelleenmuotoillut kiintiövirheet (`额度不足`) osuvat tuotannossa palveluntarjoajasääntöön (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, ei omaa määriteltyä cooldownia — käytössä on pysyvyykerroksen skaalautuva backoff-oletus). Muutoksesta #10334 lähtien `scope`-kenttää `ProviderErrorRuleMatch`-osumassa käytetään päästä päähän, mutta **vain** palveluntarjoajille, jotka kuuluvat `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-sallittujen listaan (`providerErrorRules.ts` — tällä hetkellä vain `"agentrouter"`, rajattu `honorsRuleLockScope()`-funktiolla). Kaikille muille palveluntarjoajille `scope` pysyy informatiivisena, täsmälleen kuten ennen muutosta #10334. `checkFallbackError` paljastaa osuneen säännön scopen muodossa `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) on jaettu vartija, joka varmistaa, että `ruleScope` on todella turvallinen kunnioittaa koko yhteyden kattavana, itsestään palautuvana signaalina (scope `"connection"`, reason `quota_exhausted`, ei koskaan `permanent`, ei koskaan `creditsExhausted` — puolustus tulevaa sääntöä vastaan, joka yhdistäisi scopen `"connection"` pysyvään tilitilaan). Kaksi kuluttajaa kutsuu sitä:
+Oikaistut kiintiövirheet (`额度不足`) osuvat tuotannossa tarjoajasääntöön
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, ei omaa ilmoitettua cooldownia — sovelletaan
+persistointikerroksen skaalautuvaa backoff-oletusta). Muutoksesta #10334
+lähtien `ProviderErrorRuleMatch`-tyypin `scope` KULUTETAAN päästä päähän,
+mutta **vain** tarjoajille, jotka kuuluvat
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS`-sallittujen listalle
+(`providerErrorRules.ts` — tänään vain `"agentrouter"`, ehdollisena
+`honorsRuleLockScope()`-tarkistuksen kautta). Kaikilla muilla tarjoajilla
+`scope` pysyy vain informatiivisena, aivan kuten ennen #10334:ttä.
+`checkFallbackError` näyttää osuneen säännön scopen muodossa
+`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) on jaettu vartija, joka varmistaa, että
+`ruleScope` on aidosti turvallinen kunnioittaa koko yhteyden kattavana,
+itsestään palautuvana signaalina (scope `"connection"`, syy
+`quota_exhausted`, ei koskaan `permanent`, ei koskaan `creditsExhausted` —
+puolustus tulevaa sääntöä vastaan, joka parittaisi scopen `"connection"`
+pysyvän tilitilan kanssa). Kaksi kuluttajaa kutsuu sitä:
 
-- **Pysyvyykerros** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  sen sijaan että se putoaisi passthrough-palveluntarjoajan **mallikohtaiseen**
-  lukitushaaraan (agentrouter on `passthroughModels: true` →
-  `hasPerModelQuota()` palauttaa `true`), se soveltaa **väliaikaista
-  yhteyden cooldownia** — `testStatus: "unavailable"` + `rateLimitedUntil`,
-  ei koskaan lopullista tilaa (`credits_exhausted`/`banned`/`expired`) — jotta
-  yhteys palautuu itsestään cooldownin päätyttyä sen sijaan että se vaatisi
-  manuaalista tunnistetietojen nollausta. Ohitetaan sellaisten yhteyksien
-  osalta, joilla on `disableCooling: true` (#2997): kyseinen opt-out putoaa
-  sen sijaan mallikohtaiseen lukitukseen (dokumentoitu kompromissi — katso
-  koodikommentti haaran yläpuolella).
+- **Pysyvyys** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  sen sijaan että se joutuisi passthrough-palveluntarjoajan **mallikohtaiseen**
+  lukitushaaraan (agentrouter on `passthroughModels: true` → `hasPerModelQuota()`
+  palauttaa `true`), se määrää **väliaikaisen yhteyden jäähdytysajan** —
+  `testStatus: "unavailable"` + `rateLimitedUntil`, ei koskaan lopullista tilaa
+  (`credits_exhausted`/`banned`/`expired`) — joten yhteys palautuu itsestään
+  jäähdytysajan päätyttyä sen sijaan että se vaatisi tunnistetietojen
+  manuaalista nollausta. Ohitetaan yhteyksille, joilla on `disableCooling: true`
+  (#2997): tämä opt-out jatkaa sen sijaan mallikohtaiseen lukitukseen
+  (dokumentoitu kompromissi — katso koodikommentti haaran yläpuolella).
 - **Saman pyynnön combo-reititys** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): sama vartija merkitsee
-  yhteyden muistissa olevaan `exhaustedConnections`-joukkoon avaimella
+  `open-sse/services/combo/targetExhaustion.ts`): sama suojaus merkitsee
+  yhteyden muistissa olevaan `exhaustedConnections`-joukkoon, avaimena
   `${provider}:${connectionId}`. Tämä ohittaa vain jäljellä olevan SAMAN
-  PYYNNÖN kohteen, joka _itse jo kantaa täsmälleen kyseistä `connectionId`:tä_
-  omalla kohdeobjektillaan (`getExhaustedTargetSkipReason()`,
+  PYNNÖN kohteen, joka _itse jo kantaa kyseistä `connectionId`:tä_ omassa
+  kohdeobjektissaan (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
 connectionId)` ennen `exhaustedConnections`-hakua) — tavallinen
-  mallilista-combo, jossa sisarkohteet eivät kanna omaa kiinnitettyä
-  `connectionId`:tä, vaan sellainen ratkaistaan vasta jokaisen lähetyksen
-  yhteydessä vastauksen `X-OmniRoute-Selected-Connection-Id`-otsakkeesta, ei
-  koskaan osu tuohon avainvastaavuuteen. Tämän yleisen tapauksen osalta
-  todellinen suoja siltä, että jäljellä oleva osuus käyttäisi uudelleen juuri
-  ehtynyttä tiliä, EI ole tämä Set — se on edellä kuvattu pysyvyykerros
-  (yhteyden `rateLimitedUntil` on nyt tulevaisuudessa) yhdistettynä siihen,
-  että tämä sama vartija estää virheen merkitsemisen
-  `transientRateLimitedProviders`-joukkoon (katso kohta "Kaksivaiheinen
-  suunnittelu" ja koodikommentti `isAgentrouterConnectionQuotaScope`-haarassa
-  tiedostossa `targetExhaustion.ts`): kun kyseinen Set jätetään
-  merkitsemättä, `combo.ts`:n `allowRateLimitedConnection`-pakotettu
-  salliminen (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) EI
-  aktivoidu palveluntarjoajan jäljellä oleville osuuksille, joten
-  tunnistetietojen valinnan `rateLimitedUntil`-suodatinta
-  (`src/sse/services/auth.ts:1238`) noudatetaan normaalisti ja jäljellä
-  oleva osuus joko valitsee toisen, edelleen kelvollisen
-  agentrouter-yhteyden tai epäonnistuu ilman saatavilla olevia
-  tunnistetietoja — se ei pakota tietään takaisin yhteyteen, jonka tämä
+  mallilista-combo, jossa sisarkohteilla ei ole omaa kiinteää
+  `connectionId`:tä ja sellainen ratkaistaan vain lähetyskohtaisesti vastauksen
+  `X-OmniRoute-Selected-Connection-Id`-otsakkeesta, ei koskaan osu kyseiseen
+  avainvastaavuuteen. Tässä yleisessä tapauksessa todellinen suoja sitä
+  vastaan, että jäljellä oleva osa käyttäisi uudelleen juuri loppuun
+  käytettyä tiliä, EI ole tämä Set — se on yllä oleva pysyvyyskerros (yhteyden
+  `rateLimitedUntil` on nyt tulevaisuudessa) yhdistettynä siihen, että tämä
+  sama suojaus vaimentaa `transientRateLimitedProviders`-merkinnän kyseiselle
+  virheelle (katso "Kaksivaiheinen rakenne" ja koodikommentti
+  `isAgentrouterConnectionQuotaScope`-haarassa tiedostossa
+  `targetExhaustion.ts`): kun kyseinen Set jätetään merkitsemättä, `combo.ts`:n
+  `allowRateLimitedConnection`-pakotettu sallinta
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) EI tule voimaan
+  palveluntarjoajan jäljellä oleville osille, joten tunnistetietojen valinnan
+  `rateLimitedUntil`-suodatin (`src/sse/services/auth.ts:1238`) otetaan
+  huomioon normaalisti ja jäljellä oleva osa joko valitsee toisen, edelleen
+  kelvollisen agentrouter-yhteyden tai epäonnistuu ilman käytettävissä olevia
+  tunnistetietoja — se ei pääse pakkokeinoin takaisin yhteyteen, jonka tämä
   haara juuri jäähdytti.
 
-### Kaksivaiheinen suunnittelu: tilan uudelleenmuotoilu, sitten luokittelu
+### Kaksivaiheinen rakenne: tilakoodin uudelleenmuotoilu, sitten luokittelu
 
-Tilan uudelleenmuotoilu (`upstreamStatusRestatement.ts`) ja palveluntarjoajan
-luokittelusäännöt (`open-sse/config/providerErrorRules.ts`,
+Tilakoodin uudelleenmuotoilu (`upstreamStatusRestatement.ts`) ja
+palveluntarjoajan luokittelusäännöt (`open-sse/config/providerErrorRules.ts`,
 `providerRuleRegistry`) ovat erillisiä rekistereitä, jotka molemmat
-käyttävät avaimina palveluntarjoajan tunnusta ja tekstimerkkejä, mutta ne
-ajetaan eri paikoissa ja palvelevat eri tarkoituksia: uudelleenmuotoilu
-kirjoittaa HTTP-tilan uudelleen varhaisessa vaiheessa `chatCore.ts`:ssä;
-luokittelusäännöt valitsevat fallback-`reason`:n ja lukitsevat `scope`:n
-(`model` / `provider` / `connection`) `checkFallbackError()`-funktion
-sisällä (`open-sse/services/accountFallback.ts`).
+avainnoituvat palveluntarjoajan tunnuksen ja tekstimerkkien perusteella, mutta
+ne suoritetaan eri paikoissa ja palvelevat eri tarkoituksia: uudelleenmuotoilu
+kirjoittaa HTTP-tilakoodin uudelleen varhaisessa vaiheessa `chatCore.ts`:ssä;
+luokittelusäännöt valitsevat varavastauksen `reason`-arvon ja lukitsevat
+`scope`-arvon (`model` / `provider` / `connection`) funktion
+`checkFallbackError()` sisällä (`open-sse/services/accountFallback.ts`).
 
-Luokittelusäännöt näkevät koko virhe**tekstin** (jota tarvitaan runkomerkkien
-kuten `额度不足` täsmäyttämiseen) vain niiden palveluntarjoajien kohdalla,
-jotka on lueteltu `FULL_TEXT_RULE_PROVIDERS`-sallittujen listassa tiedostossa
-`providerErrorRules.ts` — tällä hetkellä vain `"agentrouter"`. Kaikkien
-muiden **sisäänrakennetun katalogin** palveluntarjoajien kohdalla
-`checkFallbackError` antaa `getProviderErrorRuleMatch`-funktiolle vain
-jäsennellyn virheen (`{code, type}`), mikä riittää otsake-, tila- ja
-koodipohjaisille säännöille mutta on sokea runkotekstimerkeille. Apufunktio
-`resolveRuleMatchBody()` tekee tämän valinnan: koko virheteksti sallituilla
+Luokittelusäännöt näkevät täyden virhe**tekstin** (tarvitaan runkotekstin
+merkkien, kuten `额度不足`, täsmäämiseen) vain palveluntarjoajille, jotka on
+lueteltu `FULL_TEXT_RULE_PROVIDERS`-sallittujen listalla tiedostossa
+`providerErrorRules.ts` — tällä hetkellä vain `"agentrouter"`. Kaikkien muiden
+**sisäänrakennetun luettelon** palveluntarjoajien osalta `checkFallbackError`
+antaa `getProviderErrorRuleMatch`-funktiolle vain jäsennellyn virheen
+(`{code, type}`), mikä riittää otsake-, tilakoodi- ja koodipohjaisille
+säännöille mutta on sokea runkotekstin merkeille. Apufunktio
+`resolveRuleMatchBody()` tekee tämän valinnan: täysi virheteksti sallittujen
 listalla oleville palveluntarjoajille, muulloin jäsennelty virhe.
-**Sisäänrakennetun** palveluntarjoajan lisääminen
-`FULL_TEXT_RULE_PROVIDERS`-listaan on nimenomainen palveluntarjoajakohtainen
-opt-in — se on olemassa, jotta jokaisen listan ulkopuolisen palveluntarjoajan
-oletuspolku pysyy tavu tavulta muuttumattomana.
+**Sisäänrakennetun** palveluntarjoajan lisääminen listaan
+`FULL_TEXT_RULE_PROVIDERS` on nimenomainen palveluntarjoajakohtainen opt-in —
+se on olemassa, jotta jokaisen listalla olemattoman palveluntarjoajan
+oletuspolku pysyy tavua tavulta muuttumattomana.
 
 Säännön `scope` (`model` / `provider` / `connection`) on erillinen opt-in
 kuin `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` vain paljastaa sen
-muodossa `fallbackResult.ruleScope`, ja downstream-kuluttajat kunnioittavat
-sitä muuna kuin informatiivisena tunnisteena vain niiden palveluntarjoajien
-kohdalla, jotka ovat `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-sallittujen listassa
-samassa tiedostossa (`gated via honorsRuleLockScope()` — tällä hetkellä vain
-`"agentrouter"`). Katso yllä oleva kohta "Uudelleenmuotoillut kiintiövirheet"
-saadaksesi selville, mitä `scope: "connection"`-osuma todella tekee, kun
-palveluntarjoaja on kyseisellä sallittujen listalla.
+muodossa `fallbackResult.ruleScope`, ja jälkikäteen tulevat kuluttajat
+kunnioittavat sitä muuna kuin informatiivisena merkintänä vain
+palveluntarjoajille, jotka ovat `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-sallittujen
+listalla samassa tiedostossa (portattu `honorsRuleLockScope()`-funktion kautta —
+tänään vain `"agentrouter"`). Katso yllä oleva kohta "Uudelleenmuotoillut
+kiintiövirheet" nähdäksesi, mitä `scope: "connection"`-osuma todella tekee,
+kun palveluntarjoaja on kyseisellä sallittujen listalla.
 
-**#11104 — operaattorin julistamat säännöt ohittavat molemmat sallittujen listat.** Operaattori voi
-julistaa palveluntarjoajakohtaisen säännön ajonaikaisesti asetuksen `settings.providerErrorRules`
+**#11104 — operaattorin määrittelemät säännöt ohittavat molemmat sallittujen
+listat.** Operaattori voi määritellä palveluntarjoajakohtaisen säännön
+ajonaikaisesti asetuksen `settings.providerErrorRules` kautta
 (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-kautta muokkaamatta tätä tiedostoa. Operaattorisäännön asettaminen
-`FULL_TEXT_RULE_PROVIDERS`-/`HONORS_RULE_LOCK_SCOPE_PROVIDERS`-listojen — sallittujen listojen,
-jotka on tarkoitettu suojaamaan sisäänrakennettujen luettelosääntöjen **oletuskäyttäytymistä** — taakse
-tekisi asetusmekanismista tehottoman kaikille palveluntarjoajille paitsi niille, jotka on jo
-siellä lueteltu, sillä säännön julistaminen on jo itsessään operaattorin nimenomainen
-valinta. `resolveRuleMatchBody()` ja `honorsRuleLockScope()` tarkistavat molemmat ensin
-`hasOperatorRuleForProvider()`: palveluntarjoaja, jolla on operaattorisääntö, saa
-raa'an virhetekstin ja sen julistettua `scope`-arvoa noudatetaan riippumatta
-siitä, esiintyykö se myös kummallakaan sallittujen listalla.
+muokkaamatta tätä tiedostoa. Operaattorisäännön porttaaminen listojen
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` taakse —
+listojen, joiden tarkoitus on suojata sisäänrakennettujen luettelosääntöjen
+**oletus**käyttäytymistä — tekisi asetusmekanismista tehottoman jokaiselle
+palveluntarjoajalle paitsi niille, jotka on jo siellä lueteltu, koska säännön
+määritteleminen itsessään on jo operaattorin nimenomainen opt-in.
+`resolveRuleMatchBody()` ja `honorsRuleLockScope()` tarkistavat molemmat ensin
+`hasOperatorRuleForProvider()`: palveluntarjoaja, jolla on operaattorisääntö,
+saa raa'an virhetekstin ja sen määriteltyä `scope`-arvoa kunnioitetaan
+riippumatta siitä, esiintyykö se myös jommallakummalla sallittujen listalla.
 
-**Tunnettu puute — `providerRuleRegistry`-rekisteriä ei koskaan käytetä HTTP 400 -tilalle.**
-`checkFallbackError`-funktion `BAD_REQUEST`-haara luokittelee tilan 400 kokonaan
-omien kuviotaulukkojensa perusteella (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS` jne. tiedostossa `accountFallback.ts`) ja palautuu ennen
-kuin sen yläpuolella olevaan `configuredRule`/`getProviderErrorRuleMatch`-haaraan päästään.
-Sisäänrakennettu luettelosääntö (tai operaattorisääntö), jolla on `status: 400`, on
-syntaktisesti kelvollinen, mutta ei koskaan laukea. Mikään nykyinen sääntö ei kohdistu 400:een,
-joten tämä ei vaikuta tuotannossa mihinkään — mutta tuleva 400-sääntö edellyttää, että tähän
-haaraan kosketaan ensin, mikä on suurempi muutos kuin säännön lisääminen (se
-luokittelee 400:n uudelleen jokaiselle palveluntarjoajalle, joka jo tukeutuu kuviotaulukkojen
-käyttäytymiseen), ja se ei kuulu yhden palveluntarjoajan sääntölisäyksen piiriin.
+**Tunnettu puute — `providerRuleRegistry`-rekisteriä ei koskaan käytetä
+HTTP 400 -tilakoodille.** `checkFallbackError`-funktion `BAD_REQUEST`-haara
+luokittelee tilakoodin 400 kokonaan omien mallitaulukoidensa avulla
+(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS` jne. tiedostossa
+`accountFallback.ts`) ja palauttaa ennen kuin sen yläpuolella olevaan
+`configuredRule`/`getProviderErrorRuleMatch`-haaraan päästään. Sisäänrakennettu
+luettelosääntö (tai operaattorisääntö), jolla on `status: 400`, on
+syntaktisesti kelvollinen mutta ei koskaan laukea. Mikään olemassa oleva
+sääntö ei tänään kohdistu tilakoodiin 400, joten tuotannossa ei ole
+vaikutuksia — mutta tuleva 400-sääntö edellyttää, että tähän haaraan
+kosketaan ensin, mikä on suurempi muutos kuin säännön lisääminen (se
+luokittelee 400-tilakoodin uudelleen jokaisen palveluntarjoajan osalta, joka
+jo nojaa mallitaulukkokäyttäytymiseen), ja se on yhden palveluntarjoajan
+sääntölisäyksen laajuuden ulkopuolella.
 
-### Uuden kiintiötietoa vääristelevän yhdyskulun lisääminen
+### Uuden kiintiötiedot virheellisesti ilmoittavan gatewayn lisääminen
 
-1. Rekisteröi yksi sääntötaulukko rekisteriin `statusRestatementRegistry`
+1. Rekisteröi yksi sääntötaulukko kohteeseen `statusRestatementRegistry`
    (`open-sse/config/upstreamStatusRestatement.ts`). Pidä `textMarkers`
-   palveluntarjoajakohtaisena; älä koskaan käytä uudelleen yleispäteviä englanninkielisiä
-   ilmauksia, jotka törmäävät signaalien `CREDITS_EXHAUSTED_SIGNALS` kanssa
+   palveluntarjoajakohtaisena; älä koskaan käytä uudelleen yleisiä englanninkielisiä
+   ilmauksia, jotka törmäävät `CREDITS_EXHAUSTED_SIGNALS`-kokoelman kanssa
    (`open-sse/services/accountFallback.ts`).
 2. Rekisteröi halutessasi luokittelusäännöt tiedostossa
    `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) oikean
-   lukitusalueen valitsemiseksi (`connection` tilinlaajuiselle kiintiölle, `model`
-   mallikohtaisille virheille). Tämä vaihe vaikuttaa tuotannossa vain
-   palveluntarjoajiin, joiden säännöt tarvitsevat koko virhetekstin (runkomerkinnät): lisää
-   palveluntarjoajan tunnus listaan `FULL_TEXT_RULE_PROVIDERS` samassa tiedostossa — muuten
-   `checkFallbackError` antaa säännölle aina vain rakenteisen
-   `{code, type}` -virheen, eikä runkotekstisääntö koskaan täsmää tuotantoliikenteeseen.
-   Säännöt, jotka täsmäävät puhtaasti `status`-/`headers`-kenttien perusteella (kuten Opencoden tai
-   Minimaxin), eivät tarvitse tätä valintaa. Jos sääntö erikseen julistaa
-   `scope: "connection"` ja tarkoituksena on todellinen yhteydenlaajuinen jäähdytys
-   sekä saman pyynnön combo-ohitus (ei pelkkä informatiivinen tunniste), lisää
-   palveluntarjoajan tunnus listaan `HONORS_RULE_LOCK_SCOPE_PROVIDERS` samassa tiedostossa — tämä
-   ohjaa `isAgentrouterConnectionQuotaScope()`-tyylistä käyttöä
-   funktiossa `markAccountUnavailable()` (`src/sse/services/auth.ts`) ja
-   `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); ilman sitä `scope`
-   kulkee edelleen `fallbackResult.ruleScope`-kentän kautta, mutta mikään ei toimi sen varassa.
-3. Lisää yksikkötestit tiedostojen `tests/unit/upstream-status-restatement.test.ts`
-   ja `tests/unit/agentrouter-error-rules.test.ts` mukaisesti (mukaan lukien
-   not-permanent- / not-creditsExhausted-varmistukset sekä — jos palveluntarjoaja tarvitsee
-   sallittujen listan — testi, joka varmistaa, että `resolveRuleMatchBody()` palauttaa
-   koko tekstin vain kyseiselle palveluntarjoajalle).
+   lukituslaajuuden valitsemiseksi (`connection` tilinlaajuiselle kiintiölle,
+   `model` mallikohtaisille virheille). Tämä vaihe vaikuttaa tuotannossa vain
+   niiden palveluntarjoajien osalta, joiden säännöt tarvitsevat koko
+   virhetekstin (body-merkit): lisää palveluntarjoajan tunnus
+   `FULL_TEXT_RULE_PROVIDERS`-listaan samassa tiedostossa — muuten
+   `checkFallbackError` antaa säännölle ainoastaan rakenteisen `{code, type}`
+   -virheen, eikä body-tekstisääntö koskaan täsmää tuotantoliikenteessä.
+   Säännöt, jotka täsmäävät puhtaasti `status`-/`headers`-kenttien perusteella
+   (kuten Opencoden tai Minimaxin), eivät vaadi tätä opt-in-valintaa. Jos sääntö
+   lisäksi määrittelee `scope: "connection"` ja tarkoituksena on todellinen
+   yhteyslaajuinen jäähdytys sekä saman pyynnön combo-ohitus (ei pelkkä
+   informatiivinen merkintä), lisää palveluntarjoajan tunnus
+   `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-listaan samassa tiedostossa — tämä on se,
+   mikä sallii `isAgentrouterConnectionQuotaScope()`-tyyppisen käytön
+   funktioissa `markAccountUnavailable()` (`src/sse/services/auth.ts`) ja
+   `applyComboTargetExhaustion()` (`open-sse/services/combo/targetExhaustion.ts`);
+   ilman sitä `scope` kulkee edelleen läpi `fallbackResult.ruleScope`-kentän,
+   mutta mikään ei toimi sen perusteella.
+3. Lisää yksikkötestit mallina tiedostot
+   `tests/unit/upstream-status-restatement.test.ts` ja
+   `tests/unit/agentrouter-error-rules.test.ts` (mukaan lukien not-permanent-
+   ja not-creditsExhausted-varmistukset sekä — jos palveluntarjoaja tarvitsee
+   sallittujen listan — testi, joka varmistaa, että `resolveRuleMatchBody()`
+   palauttaa koko tekstin vain kyseiselle palveluntarjoajalle).
 
-Muutoksia tiedostoon `chatCore.ts`, funktioon `classifyError` tai comboon ei tarvita.
+Muutoksia kohteisiin `chatCore.ts`, `classifyError` tai combo ei tarvita.
 
-#### Lähtevän IP:n mukaan ryhmitelty lukitus (#10880)
+#### Egress-bucketoitu lukitus (#10880)
 
-Listan `EGRESS_BUCKETED_LOCK_PROVIDERS` palveluntarjoajia (opencode-perhe) käsitellään
-IP-ryhmiteltyinä ylävirtoina (opencoden ilmaistaso on IP-ryhmitelty, ei
-tiliryhmitelty — katso #9611): tilaksi `quota_exhausted`
-**tai** `rate_limit_exceeded` luokiteltu status-429 jäähdyttää kaikki sallittuun perheeseen
-kuuluvat yhteydet, joiden viimeksi tunnettu lähtevä IP vastaa epäonnistuvan yhteyden IP:tä,
-ennen kuin kierto ehtii kokeilla niitä
-— välttäen N-1 taatusti epäonnistuvaa ylävirran kutsua (sama kaava kuin #10460/#10525).
-`rate_limit_exceeded` on mukana tarkoituksella: `markAccountUnavailable`-polulla
-opencode-kohtaiset säännöt eivät koskaan täsmää (`checkFallbackError`-funktiolle ei
-anneta otsakkeita eikä runkoa, eikä opencode ole listassa `FULL_TEXT_RULE_PROVIDERS`), joten 429,
-jonka runko sisältää tilauskiintiötekstin ("monthly usage limit
-reached"), luokitellaan tilaksi `quota_exhausted` kiintiötekstin varaluokittelun
-(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; 1h jäähdytys) toimesta ennen
-kuin `status_429`-sääntöön koskaan päästään — kun taas kiintiötekstistä vapaa 429 (pelkkä
-nopeusrajoitus) luokitellaan `status_429`-säännön kautta tilaksi `rate_limit_exceeded`
-ja jäähdyttää silti IP-perheen. Sallittujen listalla olevalle palveluntarjoajalle IP-ryhmitelty
-nopeusrajoitus on sama signaali kuin loppunut kiintiö. Rehelliset rajoitukset:
+`EGRESS_BUCKETED_LOCK_PROVIDERS`-listan palveluntarjoajia (opencode-perhe)
+kohdellaan IP-bucketoituina upstream-palveluina (opencoden ilmaistaso on
+IP-bucketoitu, ei tilibucketoitu — ks. #9611): status-429:llä luokiteltu
+`quota_exhausted` **tai** `rate_limit_exceeded` jäähdyttää jokaisen sallittuun
+perheeseen kuuluvan yhteyden, jonka viimeksi tunnettu egress-IP vastaa
+epäonnistuneen yhteyden IP-osoitetta, ennen kuin kierto ehtii kokeilla niitä
+— näin vältetään N-1 takuuvarmasti epäonnistuvaa upstream-kutsua (sama malli
+kuin #10460/#10525). `rate_limit_exceeded` on mukana tarkoituksella:
+`markAccountUnavailable`-polulla opencode-kohtaiset säännöt eivät koskaan
+täsmää (`checkFallbackError`-funktiolle ei luovuteta headers-/body-tietoja,
+eikä opencode ole `FULL_TEXT_RULE_PROVIDERS`-listassa), joten 429-virhe, jonka
+body sisältää tilauskiintiötekstin ("monthly usage limit reached"),
+luokitellaan `quota_exhausted`-luokkaan kiintiötekstin varatoiminnolla
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; 1 h jäähdytys) ennen
+kuin `status_429`-sääntöön koskaan ehditäisiin — kun taas kiintiötekstistä
+vapaa 429 (pelkkä nopeusrajoitus) luokitellaan `status_429`-säännön kautta
+`rate_limit_exceeded`-luokkaan ja jäähdyttää silti IP-perheen. Sallittujen
+listalla olevalle palveluntarjoajalle IP-bucketoitu nopeusrajoitus on sama
+signaali kuin loppuun kulunut kiintiö. Rehelliset rajoitukset:
 
-- **Best-effort**: lukitus ratkaisee yhteyden viimeksi tunnetun `egress_ip`-arvon
-  `proxy_logs`-taulusta (24 tunnin ikkuna, synkroninen, ei välimuistia). Kylmä
-  välimuisti (egress-IP:tä ei koskaan kokeiltu) tai puuttuva rivi → epäonnistuva
+- **Best-effort**: lukitus selvittää yhteyden viimeksi tunnetun `egress_ip`-arvon
+  `proxy_logs`-lokista (24 tunnin ikkuna, synkroninen, ei välimuistia). Kylmä
+  välimuisti (egress-IP:tä ei koskaan koeheta) tai ei riviä → epäonnistuva
   yhteys jäähdytetään silti haaran toimesta (tallennetaan kuten nykyään), vain
-  sisaryhteyttä ei lukita.
-- **Ei koskaan lopullinen**: jäähdytys on uusiutuva kiintiöikkuna
-  (`testStatus: "unavailable"`); pysyvää tilaa ei koskaan johdeta
-  IP-tason signaalista. `disableCooling`-yhteydet ohittavat haaran kokonaan.
-- **Lukituksen granulariteetti muuttuu sallitun perheen osalta**: kyseessä on
-  laajuuden muutos, ei pelkkä sisaryhteysoptimointi. opencode on
-  `passthroughModels`-palveluntarjoaja, joten ennen tätä haaraa 429 tuotti
-  mallikohtaisen eston; nyt se tuottaa yhteyden jäähdytyksen — myös
-  operaattorille, jolla on käytössä yksi ainoa yhteys ilman yhtään
-  sisaryhteyttä. Tämä on se granulariteetti, jonka opencoden sääntötaulukko jo
-  julistaa oikeaksi (`scope: "connection"`, `providerErrorRules.ts`), mutta jota
-  ei ole tähän asti noudatettu, koska opencode ei ole
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-listassa. Haara kirjoittaa itse
-  epäonnistuvan yhteyden jäähdytyksen ja `backoffLevel`-arvon, peilaten
-  yhteyslaajuista agentrouter-haaraa, ja palaa — mallikohtaista estoa ja alla
-  olevaa yleistä polkua ei koskaan saavuteta.
-- **Combo mukana**: kuten agentrouter-haara, laajuus jättää tarkoituksella
-  huomioimatta `persistUnavailableState`/`isCombo`-lievennyksen, jonka
-  combo-kutsuja soveltaa 429:ään. Mallikohtainen esto ei ole tämän laajuuden
-  heikompi muoto, vaan väärä yksikkö: se ei kerro mitään ehtyneestä IP:stä,
-  joten combo-kierto jatkaisi yhden taatusti epäonnistuvan kutsun polttamista
-  sisaryhteyttä kohden.
-- **Sisaryhteyden turvallisuus**: sisaryhteyttä, joka on jo lopputilassa
-  (banned/credits_exhausted) tai jo pidemmässä jäähdytyksessä, ei koskaan
-  ylikirjoiteta.
+  sitä, ettei sisaryhteyttä lukita.
+- **Ei koskaan lopullinen**: jäähy on uusiutuva kiintiöikkuna
+  (`testStatus: "unavailable"`); pysyvää tilaa ei koskaan johdeta IP-tason
+  signaalista. `disableCooling`-yhteydet ohittavat haaran kokonaan.
+- **Lukituksen granulariteetti muuttuu sallittujen listalla olevalle
+  perheelle**: kyseessä on laajuuden muutos, ei vain sisaroptimointi. opencode
+  on `passthroughModels`-palveluntarjoaja, joten ennen tätä haaraa 429 tuotti
+  mallikohtaisen (per-MODEL) lockoutin; nyt se tuottaa yhteyden jäähyn — myös
+  operaattorille, joka ajaa yhtä yhteyttä ilman yhtään sisaryhteyttä. Tämä on
+  se granulariteetti, jonka opencoden sääntötaulukko jo julistaa oikeaksi
+  (`scope: "connection"`, `providerErrorRules.ts`), mutta jota ei ole
+  toistaiseksi noudatettu, koska opencode ei ole
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-listalla. Haara kirjoittaa itse
+  epäonnistuvan yhteyden jäähyn + `backoffLevel`-arvon, yhteyksen laajuista
+  agentrouter-haaraa mukaillen, ja palaa — mallikohtaista lohkoa ja sen
+  alapuolella olevaa yleistä polkua ei koskaan saavuteta.
+- **Combo mukana**: kuten agentrouter-haara, laajuus ohittaa tahallaan
+  `persistUnavailableState`/`isCombo`-alennuksen, jonka combo-kutsuja soveltaa
+  429:ään. Mallikohtainen lockout ei ole heikompi muoto tästä laajuudesta,
+  vaan väärä yksikkö: se ei sano mitään loppuneesta IP:stä, joten combo-kierto
+  jatkaisi yhden taatusti epäonnistuvan kutsun polttamista sisaryhteyttä
+  kohti.
+- **Sisarusten turvallisuus**: jo lopullisessa tilassa olevan
+  (banned/credits_exhausted) tai jo pidemmässä jäähyssä olevan sisaruksen
+  päälle ei koskaan kirjoiteta.
 - **Eksklusiivinen sallittujen lista**: `EGRESS_BUCKETED_LOCK_PROVIDERS`-listan
-  laajentaminen on nimenomainen omistajan päätös; ei yleistä kytkentää
-  (kaava #10334/#10419). Sisaryhteyskysely sitoo saman sallittujen listan sen
-  sijaan, että se toistettaisiin SQL-literaalina, joten sen laajentaminen pysyy
-  yhden rivin muutoksena.
-- **Egress-IP:n kierto molempiin suuntiin**: hakuiakkuna (24 h) on paljon
-  leveämpi kuin egress-IP-välimuistin TTL (5 min), joten "viimeksi tunnettu IP"
-  on historiaa, ei nykytilaa. Jos yhteyden proxy on kiertynyt ikkunan sisällä,
-  lukitus voi **olla osumatta** aidosti jaettuun IP:hen (tallennettu IP on uusi,
-  ehtymätön) — ja symmetrisesti se voi **jäähdyttää sisaryhteyden, joka on
-  sittemmin kiertynyt pois** ehtyneestä IP:stä. Jälkimmäinen tapaus maksaa
-  kyseiselle sisaryhteydelle yhden jäähdytysikkunan; molemmat ovat hyväksyttyjä
-  historiapohjaisen haun best-effort-rajoitteita.
+  laajentaminen on eksplisiittinen omistajan päätös; ei geneeristä kytkentää
+  (malli #10334/#10419). Sisarkysely sitoo saman sallittujen listan sen sijaan
+  että toistaisi sen SQL-literaalina, joten laajentaminen pysyy yhden rivin
+  muutoksena.
+- **Egress-IP:n kierto, molempiin suuntiin**: hakui kkuna (24 h) on paljon
+  leveämpi kuin egress-IP-välimuistin TTL (5 min), joten "viimeksi tunnettu
+  IP" on historiaa, ei nykytilaa. Jos yhteyden välityspalvelin kierti ikkunan
+  sisällä, lukitus voi **jättää huomaamatta** aidosti jaetun IP:n (tallennettu
+  IP on uusi, käyttämätön) — ja symmetrisesti se voi **jäähdyttää
+  sisaryhteyden, joka on sittemmin kiertänyt pois** loppuneesta IP:stä.
+  Jälkimmäinen tapaus maksaa kyseiselle sisaryhteydelle yhden jäähyikkunan;
+  molemmat ovat hyväksyttyjä historiaan perustuvan haun best-effort-rajoja.
 - **Kustannus**: kaksi rajattua `proxy_logs`-skannausta (ikkunasuodatettuna
-  `idx_pl_timestamp`-indeksin kautta), vain 429-virheiden taajuudella. Ei uutta
-  indeksiä (migraatio 134 YAGNI). Mitattu kohtalaisen kokoisella, todellisen
-  liikenteen tietokantakopiolla; suuren läpäisyn instanssissa on suhteessa
-  enemmän rivejä samassa ikkunassa.
-
----
+  `idx_pl_timestamp`-indeksin kautta), vain 429-virheiden taajuudella. Ei
+  uutta indeksiä (migraatio 134 YAGNI). Mitattu kohtalaisen kokoisella
+  todellisen liikenteen tietokantakopiolla; korkean läpäisyn instanssi pitää
+  suhteessa enemmän rivejä samassa ikkunassa.
 
 ## Muut vikasietoisuusominaisuudet
 

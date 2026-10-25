@@ -47,7 +47,7 @@ A2A 由 **Endpoints → A2A** 切換開關控制，預設為停用。停用時�
 
 ### `message/send` — 同步執行
 
-將訊息傳送給技能，並等待完整回應。
+將訊息傳送至技能，並等待完整回應。
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+對於 `smart-routing`，`metadata.combo` 是閘道請求中對
+`metadata.model` 的明確覆寫；它會作為真正的 `model` 傳送，
+而不是作為被忽略的 `x-combo` JSON 欄位。閘道的一般 API 金鑰與
+各目標授權仍然適用。無效或空白的組合會被拒絕。
+
+結果會公開 `requested_combo`（呼叫者意圖）、`dispatched_model`
+（實際的閘道請求）、`response_model`（閘道回應）以及
+`confirmed_combo`。除非閘道明確識別出某個組合，否則最後一個欄位會是 `null`。
+A2A 決策日誌只會將執行歸因於已確認的組合，並將未確認的請求保留為 `requestedCombo`。
+
 **回應：**
 
 ```json
@@ -76,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }

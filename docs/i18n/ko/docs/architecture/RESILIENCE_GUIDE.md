@@ -407,6 +407,19 @@ quota-share 디스패치가 양의 `max_concurrent`를 선언한 연결을 대�
 `503 ALL_TARGETS_SKIPPED`로 응답하는 대신 동일한 상한 아래에서 잠금이 풀릴 때까지 기다렸다가 재디스패치합니다. 대기가 허용되지 않는 경우(상한, 시도 횟수 또는 예산 소진, 또는 기능 꺼짐), 최종 응답은 가장 빠른 일시적 잠금 만료 시점의 `retry_after` / `reset_at`을 담은
 `429 rate_limit_error`로 업그레이드됩니다; 쿼터, 인증, 찾을 수 없음 잠금은 힌트 없는 503을 유지합니다.
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
+---
+
 ## 5. 요청 큐 어드미션 제어 (v3.8.49 · issue #6593)
 
 **범위**: 로컬 프로바이더+커넥션별 레이트 리밋 큐(`open-sse/services/rateLimitManager.ts`,
@@ -550,137 +563,220 @@ Chat Completions 및 Responses API 출력 이벤트의 텍스트 델타를
 
 ---
 
-## 7. 업스트림 상태 재표기 (잘못 표기된 할당량 오류)
+## 7. 업스트림 상태 재기술 (잘못 표기된 할당량 오류)
 
 **범위:** 일시적인 할당량 소진을 잘못된 HTTP 상태로 보고하는 하나의 업스트림 게이트웨이.
 
-**목적:** 오해를 유발하는 상태를 분류 **전에** 바로잡아, 하위 소비자(폴백 엔진, 콤보 집계, 클라이언트 대면 응답)가 실패의 진정한 재시도 가능 특성을 볼 수 있도록 합니다.
+**목적:** 분류가 이루어지기 전에 오도하는 상태를 수정하여, 다운스트림 소비자(폴백 엔진, 콤보 집계, 클라이언트 대면 응답)가 실패의 진정한 재시도 가능한 특성을 볼 수 있도록 합니다.
 
-일부 게이트웨이는 **일시적인** 할당량 소진을 재시도 불가능한 HTTP
-상태로 신호합니다. `agentrouter.org`는 표준 `429` 대신 중국어 본문
-(`用户额度不足` / `额度不足`)과 함께 `403`(때로는 `400`)을 반환합니다.
-Claude Code와 같은 클라이언트는 `403`을 영구 오류로 처리하여 세션을 중단하며,
-수정이 없으면 폴백 엔진이 이를 할당량 이벤트 대신 `AUTH_ERROR`로
-분류하게 됩니다.
+일부 게이트웨이는 일시적인 할당량 소진을 재시도 불가능한 HTTP 상태로 신호합니다. `agentrouter.org`는 표준 `429` 대신 중국어 본문(`用户额度不足` / `额度不足`)과 함께 `403`(때로는 `400`)을 반환합니다. Claude Code 같은 클라이언트는 `403`을 영구 오류로 간주하여 세션을 중단하며, 수정 없이는 폴백 엔진이 이를 할당량 이벤트 대신 `AUTH_ERROR`로 분류하게 됩니다.
 
 **구현:**
 
-- 레지스트리 + 매처: `open-sse/config/upstreamStatusRestatement.ts` —
-  프로바이더별 규칙 목록(`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`)이며, `applyStatusRestatement()`를 통해 매칭됩니다.
-- 호출 지점: `open-sse/handlers/chatCore.ts`의 `providerFailure:` 블록
-  (약 3654행)으로, `parseUpstreamError()`가 오류 HTTP 상태
-  (`!providerResponse.ok`)를 가진 업스트림 응답을 파싱한 직후이자
-  어떤 분류도 실행되기 전이므로, 모든 하위 소비자가 수정된
-  상태를 보게 됩니다. `200` SSE 스트림 내부에 내장된 오류는 별도의
-  더 늦은 스트림 파싱 경로를 따르며 현재 이 훅의 적용을 받지
-  **않습니다**. 이는 알려진 제한 사항으로, (오류 HTTP 상태로
-  표면화되는) agentrouter의 상태 오표기에는 아직 필요하지 않습니다.
-- 재시도 자격: `429`는 `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`)에 포함되어 있으므로,
-  재표기된 오류는 막다른 `403`으로 표면화되는 대신 실제 재시도
-  윈도우를 갖게 됩니다.
-- 합성된 `60s` `defaultRetryAfterMs`(`upstreamStatusRestatement.ts`)는
-  재표기된 응답이 **클라이언트**에 알려주는 값일 뿐이며, 그 자체가
-  연결의 내부 쿨다운/락아웃 기간은 아닙니다. 이는 재표기된 오류를
-  실제로 처리하는 메커니즘(API 키 프로바이더의 경우 연결 쿨다운의
-  점증적 백오프, §2, 기본 `3s`; agentrouter와 같은 모델별
-  할당량 프로바이더의 경우 모델 락아웃, §3)에 의해 별도로 관리됩니다.
-  라우터는 클라이언트에 알린 60초 윈도우보다 내부적으로 더 빨리
-  재시도 자격을 얻을 수 있습니다. 이는 버그가 아닌 의도적인 여유입니다.
+- 레지스트리 + 매처: `open-sse/config/upstreamStatusRestatement.ts` — 프로바이더별 규칙 목록(`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`)이며, `applyStatusRestatement()`를 통해 매칭됩니다.
+- 호출 지점: `open-sse/handlers/chatCore.ts`의 `providerFailure:` 블록(약 3654번째 줄)으로, `parseUpstreamError()`가 오류 HTTP 상태(`!providerResponse.ok`)를 가진 업스트림 응답을 파싱한 직후, 어떤 분류도 실행되기 전에 위치하여 모든 다운스트림 소비자가 수정된 상태를 보게 됩니다. `200` SSE 스트림 내부에 내장된 오류는 별도의 후속 스트림 파싱 경로를 따르며, 현재 이 훅의 적용을 받지 **않습니다** — 이는 알려진 제한 사항으로, agentrouter의 잘못된 상태(오류 HTTP 상태로 표면화됨)에는 아직 필요하지 않습니다.
+- 재시도 적격성: `429`는 `RETRY_AFTER_ELIGIBLE_STATUSES`(`open-sse/services/combo/unavailableRetryGate.ts`)에 포함되어 있으므로, 재기술된 오류는 죽은 `403`으로 표면화되는 대신 실제 재시도 창을 갖게 됩니다.
+- 합성된 `60s` `defaultRetryAfterMs`(`upstreamStatusRestatement.ts`)는 재기술된 응답이 **클라이언트**에게 알려주는 값일 뿐이며, 그 자체로 연결의 내부 쿨다운/잠금 지속 시간은 아닙니다. 이는 재기술된 오류를 실제로 처리하는 메커니즘(API 키 프로바이더의 경우 연결 쿨다운의 점진적 백오프, §2, 기본 `3s`; agentrouter 같은 모델별 할당량 프로바이더의 경우 모델 잠금, §3)에 의해 별도로 관리됩니다. 라우터는 클라이언트에게 알리는 60초 창보다 내부적으로 더 빨리 재시도 적격 상태가 될 수 있습니다 — 이는 의도된 여유이며 버그가 아닙니다.
 
-영구 오류(agentrouter의 `无权访问模型` — 이 모델에 대한 접근 권한 없음)는
-절대 재표기되지 않습니다. `textMarkers`가 일치하더라도 `excludeMarkers`가
-규칙을 거부하므로, 오류는 원래 상태를 유지하고 어떤 것도 이를 끝없이
-재시도하지 않습니다. 일치하는 프로바이더 분류 규칙
-(`open-sse/config/providerErrorRules.ts`의 `agentrouter-model-access-denied`:
-`reason: "auth_error"`, `scope: "model"`, 선언된 기본 쿨다운 `6h`)은
-`checkFallbackError`(`open-sse/services/accountFallback.ts`)에 의해
-일반 apikey 범주 `FORBIDDEN` 조기 반환 _전에_ 참조되며,
-`honorsRuleLockScope(provider)`에 의해 게이트됩니다(#10334 — 현재
-`providerErrorRules.ts`의 `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-허용 목록을 통해 agentrouter 전용). 규칙에 선언된 6시간 쿨다운은
-`fallbackResult.baseCooldownMs`로 전달되지만, 여전히 기존의
-모델별 할당량 락아웃 경로(`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, 쿨다운 소스를 제외하고 #10334에 의해
-변경되지 않음)로 흘러 들어갑니다. 다른 모든 모델 락아웃과 마찬가지로
-운영자의 `mlSettings.maxCooldownMs`(기본값 `1_800_000ms` / 30분)로
-클램프되며, _지속되는 락아웃 사유_는 규칙의 `"auth_error"`가 아닌
-기존에 하드코딩된 `"forbidden"`으로 유지됩니다. 엔드 투 엔드로
-존중되는 것은 쿨다운 기간뿐이며 사유 문자열은 아닙니다.
-연결 자체는 활성 상태로 유지되며, 동일 연결의 형제 모델은
-영향을 받지 않습니다.
+영구 오류(agentrouter의 `无权访问模型` — 이 모델에 대한 접근 권한 없음)는 절대 재기술되지 않습니다. `textMarkers`가 일치하더라도 `excludeMarkers`가 규칙을 거부하므로, 오류는 원래 상태를 유지하고 어떤 것도 이를 무한히 재시도하지 않습니다. 일치하는 프로바이더 분류 규칙(`open-sse/config/providerErrorRules.ts`의 `agentrouter-model-access-denied`: `reason: "auth_error"`, `scope: "model"`, 선언된 기본 쿨다운 `6h`)은 `checkFallbackError`(`open-sse/services/accountFallback.ts`)에 의해 일반 apikey 카테고리 `FORBIDDEN` 조기 반환보다 _먼저_ 참조되며, `honorsRuleLockScope(provider)`로 게이트됩니다(#10334 — 현재는 `providerErrorRules.ts`의 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 허용 목록을 통해 agentrouter 전용). 규칙에 선언된 6시간 쿨다운은 `fallbackResult.baseCooldownMs`로 전달되지만, 여전히 기존의 모델별 할당량 잠금 경로(`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`, 쿨다운 소스를 제외하고는 #10334에 의해 변경되지 않음)로 흘러갑니다. 다른 모든 모델 잠금과 마찬가지로 운영자의 `mlSettings.maxCooldownMs`(기본값 `1_800_000ms` / 30분)로 하한 제한되며, _영속화된 잠금 사유_는 규칙의 `"auth_error"`가 아닌 기존에 하드코딩된 `"forbidden"`으로 유지됩니다 — 사유 문자열이 아닌 쿨다운 지속 시간만이 엔드 투 엔드로 적용됩니다. 연결 자체는 활성 상태로 유지되며, 동일 연결의 형제 모델은 영향을 받지 않습니다.
 
-재해석된 할당량 오류(`额度不足`)는 프로덕션에서 프로바이더 규칙에 도달합니다(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, 자체적으로 선언된 쿨다운 없음 — 영속성 계층의 스케일된 백오프 기본값이 적용됨). #10334 이후 `ProviderErrorRuleMatch`의 `scope`는 엔드투엔드로 소비되지만, `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 허용 목록에 있는 프로바이더에 대해**만** 그렇습니다(`providerErrorRules.ts` — 현재는 `"agentrouter"`뿐이며, `honorsRuleLockScope()`를 통해 게이트됨). 그 외 모든 프로바이더의 경우 `scope`는 #10334 이전과 정확히 동일하게 정보 제공용으로만 남습니다. `checkFallbackError`는 매치된 규칙의 스코프를 `fallbackResult.ruleScope`로 노출합니다. `isAgentrouterConnectionQuotaScope()`(`src/sse/services/auth.ts`)는 `ruleScope`가 커넥션 전체에 적용되고 자체 복구되는 신호로서 실제로 안전하게 적용될 수 있는지를 확인하는 공유 가드입니다(스코프 `"connection"`, 사유 `quota_exhausted`, 절대 `permanent` 아님, 절대 `creditsExhausted` 아님 — 향후 어떤 규칙이 스코프 `"connection"`을 영구적인 계정 상태와 짝짓는 경우에 대한 방어책). 두 개의 컨슈머가 이 가드를 호출합니다:
+재기술된 할당량 오류(`额度不足`)는 프로덕션에서 프로바이더 규칙(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, 자체 선언 쿨다운 없음 — 영속화 계층의 스케일드 백오프 기본값이 적용됨)에 도달합니다. #10334 이후 `ProviderErrorRuleMatch`의 `scope`는 엔드 투 엔드로 소비되지만, `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 허용 목록(`providerErrorRules.ts` — 현재는 `"agentrouter"`뿐이며, `honorsRuleLockScope()`으로 게이트됨)에 있는 프로바이더에**만** 적용됩니다. 다른 모든 프로바이더에서 `scope`는 #10334 이전과 정확히 동일하게 정보 제공용으로만 남아 있습니다. `checkFallbackError`는 일치한 규칙의 스코프를 `fallbackResult.ruleScope`로 표면화하며, `isAgentrouterConnectionQuotaScope()`(`src/sse/services/auth.ts`)는 `ruleScope`가 연결 전체에 적용되는 자체 복구 가능한 신호로 존중해도 진정으로 안전한지 확인하는 공유 가드입니다(스코프 `"connection"`, 사유 `quota_exhausted`, 절대 `permanent` 아님, 절대 `creditsExhausted` 아님 — 향후 규칙이 스코프 `"connection"`을 영구 계정 상태와 결합하는 경우에 대한 방어). 두 개의 소비자가 이를 호출합니다:
 
-- **영속성**(`markAccountUnavailable()`, `src/sse/services/auth.ts`): 패스스루 프로바이더의 **모델별** 잠금 브랜치로 빠지는 대신(agentrouter는 `passthroughModels: true` → `hasPerModelQuota()`가 `true`를 반환), **임시 커넥션 쿨다운**을 적용합니다 — `testStatus: "unavailable"` + `rateLimitedUntil`이며 종결 상태(`credits_exhausted`/`banned`/`expired`)는 절대 아닙니다 — 따라서 커넥션은 수동 자격 증명 재설정을 요구하는 대신 쿨다운이 만료되면 스스로 복구됩니다. `disableCooling: true`인 커넥션에서는 건너뜁니다(#2997): 해당 옵트아웃은 대신 모델별 잠금으로 폴스루합니다(문서화된 트레이드오프 — 해당 브랜치 위의 코드 주석 참조).
-- **동일 요청 콤보 라우팅**(`applyComboTargetExhaustion()`, `open-sse/services/combo/targetExhaustion.ts`): 동일한 가드가 커넥션을 인메모리 `exhaustedConnections` 집합에 `${provider}:${connectionId}`를 키로 하여 표시합니다. 이는 자체 타겟 객체에 _바로 그 `connectionId`를 이미 가지고 있는_ 남은 동일 요청(SAME-REQUEST) 타겟만 건너뜁니다(`getExhaustedTargetSkipReason()`, `open-sse/services/combo/comboPredicates.ts`, `exhaustedConnections` 조회 전의 `if (provider && connectionId)`) — 형제 타겟들이 자체적으로 고정된 `connectionId`를 가지지 않고 그중 하나가 디스패치 시점에 응답의 `X-OmniRoute-Selected-Connection-Id` 헤더로부터만 해석되는 평범한 모델 목록 콤보는 결코 그 키 매치에 도달하지 않습니다. 이러한 일반적인 경우, 방금 소진된 계정을 남은 레그가 재사용하는 것을 막는 실질적인 보호 장치는 이 Set이 아닙니다 — 바로 위의 영속성 계층(커넥션의 `rateLimitedUntil`이 이제 미래 시점으로 설정됨)과 이 실패에 대해 동일한 가드가 `transientRateLimitedProviders`를 억제하는 것의 조합입니다("2단계 설계" 및 `targetExhaustion.ts`의 `isAgentrouterConnectionQuotaScope` 브랜치에 달린 코드 주석 참조): 해당 Set이 표시되지 않은 채로 남아 있으면 `combo.ts`의 `allowRateLimitedConnection` 강제 허용(`open-sse/services/combo.ts:1005-1013`, `:2734-2738`)이 프로바이더의 남은 레그에 대해 발동하지 않으므로, 자격 증명 선택의 `rateLimitedUntil` 필터(`src/sse/services/auth.ts:1238`)가 정상적으로 적용되고 남은 레그는 여전히 자격이 있는 다른 agentrouter 커넥션을 선택하거나 사용 가능한 자격 증명이 없어 실패합니다 — 이 브랜치가 방금 쿨다운시킨 커넥션으로 억지로 되돌아가지 않습니다.
+- **영속화** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  패스스루 프로바이더의 **모델별** 잠금 브랜치로 빠지는 대신
+  (agentrouter는 `passthroughModels: true`이므로 → `hasPerModelQuota()`가
+  `true`를 반환), **임시 연결 쿨다운**을 적용합니다 —
+  `testStatus: "unavailable"` + `rateLimitedUntil`을 설정하며, 종료 상태
+  (`credits_exhausted`/`banned`/`expired`)는 절대 설정하지 않습니다 —
+  따라서 수동 자격 증명 재설정이 필요한 대신 쿨다운이 끝나면 연결이
+  스스로 복구됩니다. `disableCooling: true`인 연결에서는 건너뜁니다
+  (#2997): 이 옵트아웃은 대신 모델별 잠금으로 넘어갑니다 (문서화된
+  트레이드오프 — 해당 브랜치 위의 코드 주석 참조).
+- **동일 요청 콤보 라우팅** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): 동일한 가드가 연결을
+  인메모리 `exhaustedConnections` 집합에 `${provider}:${connectionId}`를
+  키로 하여 표시합니다. 이것은 자신의 대상 객체에 _이미 정확히 그
+  `connectionId`를 스스로 지니고 있는_ 남은 동일 요청(SAME-REQUEST)
+  대상만 건너뜁니다 (`getExhaustedTargetSkipReason()`,
+  `open-sse/services/combo/comboPredicates.ts`, `exhaustedConnections`
+  조회 전의 `if (provider &&
+connectionId)`) — 형제 대상들이 고정된
+  `connectionId`를 지니지 않고 디스패치 시마다 응답의
+  `X-OmniRoute-Selected-Connection-Id` 헤더로부터만 하나가 해석되는
+  일반적인 모델-리스트 콤보는 이 키 매치에 절대 해당하지 않습니다. 이
+  흔한 경우에, 방금 소진된 계정을 남은 레그가 재사용하는 것을 막는 진짜
+  보호 장치는 이 Set이 아닙니다 — 바로 위의 영속화 계층(연결의
+  `rateLimitedUntil`이 이제 미래 시각으로 설정됨)과, 이 실패에 대해
+  동일한 가드가 `transientRateLimitedProviders`를 억제하는 것의
+  조합입니다 ("2단계 설계" 및 `targetExhaustion.ts`의
+  `isAgentrouterConnectionQuotaScope` 브랜치에 달린 코드 주석 참조):
+  해당 Set이 표시되지 않은 상태로 남아 있으면, `combo.ts`의
+  `allowRateLimitedConnection` 강제 허용
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`)이 프로바이더의
+  남은 레그에 대해 작동하지 않으므로, 자격 증명 선택의 `rateLimitedUntil`
+  필터(`src/sse/services/auth.ts:1238`)가 정상적으로 적용되고, 남은
+  레그는 아직 유효한 다른 agentrouter 연결을 선택하거나 사용 가능한
+  자격 증명 없이 실패합니다 — 이 브랜치가 방금 쿨다운시킨 연결로
+  억지로 되돌아가지는 않습니다.
 
 ### 2단계 설계: 상태 재해석, 그 다음 분류
 
-상태 재해석(`upstreamStatusRestatement.ts`)과 프로바이더 분류 규칙(`open-sse/config/providerErrorRules.ts`, `providerRuleRegistry`)은 둘 다 프로바이더 ID와 텍스트 마커를 키로 삼는 별개의 레지스트리이지만, 실행되는 위치가 다르고 목적도 다릅니다: 재해석은 `chatCore.ts`의 초반에서 HTTP 상태를 다시 쓰고, 분류 규칙은 `checkFallbackError()`(`open-sse/services/accountFallback.ts`) 내부에서 폴백 `reason`과 잠금 `scope`(`model` / `provider` / `connection`)를 선택합니다.
+상태 재해석(`upstreamStatusRestatement.ts`)과 프로바이더 분류 규칙
+(`open-sse/config/providerErrorRules.ts`, `providerRuleRegistry`)은 둘 다
+프로바이더 id와 텍스트 마커를 키로 사용하는 별개의 레지스트리이지만,
+실행되는 위치와 목적이 다릅니다: 재해석은 `chatCore.ts` 초반부에서 HTTP
+상태를 재작성하고, 분류 규칙은 `checkFallbackError()`
+(`open-sse/services/accountFallback.ts`) 내부에서 폴백 `reason`을
+선택하고 잠금 `scope`(`model` / `provider` / `connection`)를 결정합니다.
 
-분류 규칙은 `providerErrorRules.ts`의 `FULL_TEXT_RULE_PROVIDERS` 허용 목록에 나열된 프로바이더에 대해서만(`额度不足` 같은 본문 마커를 매칭하는 데 필요한) 전체 오류 **텍스트**를 볼 수 있습니다 — 현재는 `"agentrouter"`뿐입니다. 그 외 모든 **내장 카탈로그** 프로바이더의 경우, `checkFallbackError`는 `getProviderErrorRuleMatch`에 구조화된 오류(`{code, type}`)만 전달하는데, 이는 헤더/상태/코드 기반 규칙에는 충분하지만 본문 텍스트 마커는 볼 수 없습니다. 헬퍼 `resolveRuleMatchBody()`가 이 선택을 수행합니다: 허용 목록에 있는 프로바이더에는 전체 오류 텍스트를, 그 외에는 구조화된 오류를 전달합니다. **내장** 프로바이더를 `FULL_TEXT_RULE_PROVIDERS`에 추가하는 것은 프로바이더별 명시적 옵트인입니다 — 목록에 없는 모든 프로바이더의 기본 경로가 바이트 단위 그대로 변경 없이 유지되도록 하기 위해 존재합니다.
+분류 규칙은 `providerErrorRules.ts`의 `FULL_TEXT_RULE_PROVIDERS` 허용
+목록에 등재된 프로바이더에 대해서만 전체 오류 **텍스트**를 볼 수
+있습니다 (`额度不足` 같은 본문 마커를 매칭하는 데 필요) — 현재는
+`"agentrouter"`뿐입니다. 그 외 모든 **내장 카탈로그** 프로바이더에
+대해 `checkFallbackError`는 `getProviderErrorRuleMatch`에 구조화된
+오류(`{code, type}`)만 전달하며, 이는 헤더/상태/코드 기반 규칙에는
+충분하지만 본문 텍스트 마커는 볼 수 없습니다. 헬퍼
+`resolveRuleMatchBody()`가 이 선택을 수행합니다: 허용 목록에 있는
+프로바이더에는 전체 오류 텍스트를, 그 외에는 구조화된 오류를
+전달합니다. **내장** 프로바이더를 `FULL_TEXT_RULE_PROVIDERS`에 추가하는
+것은 명시적인 프로바이더별 옵트인입니다 — 이는 목록에 없는 모든
+프로바이더의 기본 경로가 바이트 단위까지 변경되지 않도록 하기 위해
+존재합니다.
 
-규칙의 `scope`(`model` / `provider` / `connection`)는 `FULL_TEXT_RULE_PROVIDERS`와는 별개의 옵트인입니다: `checkFallbackError`는 이를 `fallbackResult.ruleScope`로 노출할 뿐이며, 다운스트림 컨슈머는 같은 파일의 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 허용 목록에 있는 프로바이더에 대해서만(`gated via honorsRuleLockScope()` — 현재는 `"agentrouter"`뿐) 이를 정보성 레이블 이상의 의미로 적용합니다. 프로바이더가 해당 허용 목록에 올라간 후 `scope: "connection"` 매치가 실제로 무엇을 하는지는 위의 "재해석된 할당량 오류" 섹션을 참조하세요.
+규칙의 `scope`(`model` / `provider` / `connection`)는
+`FULL_TEXT_RULE_PROVIDERS`와는 별개의 옵트인입니다:
+`checkFallbackError`는 이를 `fallbackResult.ruleScope`로만 노출하며,
+다운스트림 소비자는 같은 파일의 `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+허용 목록에 있는 프로바이더(`honorsRuleLockScope()`로 게이트됨 —
+현재는 `"agentrouter"`뿐)에 대해서만 이를 정보성 레이블 이상의 의미로
+적용합니다. 프로바이더가 해당 허용 목록에 올라간 후
+`scope: "connection"` 매치가 실제로 무엇을 하는지는 위의 "재해석된
+쿼터 오류"를 참조하세요.
 
-**#11104 — 운영자가 선언한 규칙은 두 허용 목록을 모두 우회합니다.** 운영자는 이 파일을 수정하지 않고도 `settings.providerErrorRules`(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)를 통해 런타임에 프로바이더별 규칙을 선언할 수 있습니다. 내장 카탈로그 규칙의 **기본** 동작을 보호하기 위한 허용 목록인 `FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` 뒤에 운영자 규칙을 게이팅하면, 규칙을 선언하는 행위 자체가 이미 운영자의 명시적 옵트인이므로, 이미 목록에 등재된 프로바이더를 제외한 모든 프로바이더에 대해 설정 메커니즘이 무력화됩니다. `resolveRuleMatchBody()`와 `honorsRuleLockScope()`는 모두 `hasOperatorRuleForProvider()`를 먼저 확인합니다. 운영자 규칙이 있는 프로바이더는 어느 허용 목록에도 등재되어 있는지와 관계없이 원시 오류 텍스트를 받고 선언된 `scope`가 존중됩니다.
+**#11104 — 운영자 선언 규칙은 두 허용 목록을 모두 우회합니다.**
+운영자는 이 파일을 편집하지 않고도 `settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)를
+통해 런타임에 프로바이더별 규칙을 선언할 수 있습니다. 운영자 규칙을
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — 내장
+카탈로그 규칙의 **기본** 동작을 보호하기 위한 허용 목록 — 뒤로
+게이트하면, 규칙을 선언하는 것 자체가 이미 운영자의 명시적
+옵트인이므로, 이미 목록에 있는 프로바이더를 제외한 모든 프로바이더에
+대해 설정 메커니즘이 무력해집니다. `resolveRuleMatchBody()`와
+`honorsRuleLockScope()` 모두 `hasOperatorRuleForProvider()`를 먼저
+확인합니다: 운영자 규칙이 있는 프로바이더는 어느 허용 목록에도
+등장하는지와 관계없이 원시 오류 텍스트를 받고 선언된 `scope`가
+적용됩니다.
 
-**알려진 간극 — `providerRuleRegistry`는 HTTP 400에 대해 절대 참조되지 않습니다.** `checkFallbackError`의 `BAD_REQUEST` 분기는 상태 400을 전적으로 자체 패턴 배열(`accountFallback.ts`의 `MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS` 등)을 통해 분류하고, 그 위에 있는 `configuredRule`/`getProviderErrorRuleMatch` 분기에 도달하기 전에 반환합니다. `status: 400`을 가진 내장 카탈로그 규칙(또는 운영자 규칙)은 구문적으로는 유효하지만 절대 실행되지 않습니다. 현재 400을 대상으로 하는 규칙이 없으므로 프로덕션에는 아무 영향이 없습니다. 하지만 향후 400 규칙을 추가하려면 이 분기를 먼저 손봐야 하며, 이는 규칙 하나를 추가하는 것보다 훨씬 큰 변경(패턴 배열 동작에 이미 의존하는 모든 프로바이더에 대해 400을 재분류함)이므로 단일 프로바이더 규칙 추가의 범위를 벗어납니다.
+**알려진 갭 — HTTP 400에 대해서는 `providerRuleRegistry`가 절대
+참조되지 않습니다.** `checkFallbackError`의 `BAD_REQUEST` 브랜치는 상태
+400을 전적으로 자체 패턴 배열(`accountFallback.ts`의
+`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS` 등)을 통해
+분류하고, 그 위의 `configuredRule`/`getProviderErrorRuleMatch` 브랜치에
+도달하기 전에 반환합니다. `status: 400`인 내장 카탈로그 규칙(또는
+운영자 규칙)은 구문상 유효하지만 절대 발동하지 않습니다. 현재 400을
+대상으로 하는 기존 규칙이 없으므로 프로덕션에 영향은 없습니다 —
+하지만 향후 400 규칙을 추가하려면 이 브랜치를 먼저 수정해야 하며,
+이는 규칙 하나를 추가하는 것보다 큰 변경이고(패턴 배열 동작에 이미
+의존하는 모든 프로바이더에 대해 400을 재분류함) 단일 프로바이더 규칙
+추가의 범위를 벗어납니다.
 
-### 할당량을 잘못 표시하는 새 게이트웨이 추가
+### 할당량을 잘못 보고하는 새 게이트웨이 추가
 
-1. `statusRestatementRegistry`(`open-sse/config/upstreamStatusRestatement.ts`)에 규칙 배열 하나를 등록합니다. `textMarkers`는 프로바이더별로 유지하세요. `CREDITS_EXHAUSTED_SIGNALS`(`open-sse/services/accountFallback.ts`)와 충돌하는 일반적인 영어 구문을 절대 재사용하지 마세요.
-2. 선택적으로 `open-sse/config/providerErrorRules.ts`(`providerRuleRegistry`)에 분류 규칙을 등록하여 올바른 잠금 범위(계정 전체 할당량이면 `connection`, 모델별 오류면 `model`)를 선택합니다. 이 단계는 규칙에 전체 오류 텍스트(본문 마커)가 필요한 프로바이더의 경우에만 프로덕션에서 효력을 갖습니다. 같은 파일의 `FULL_TEXT_RULE_PROVIDERS`에 프로바이더 ID를 추가하세요. 그렇지 않으면 `checkFallbackError`는 규칙에 구조화된 `{code, type}` 오류만 전달하며, 본문 텍스트 규칙은 실제 트래픽에서 절대 일치하지 않습니다. 순수하게 `status`/`headers`만으로 일치하는 규칙(Opencode나 Minimax의 규칙처럼)은 이 옵트인이 필요하지 않습니다. 별도로, 규칙이 `scope: "connection"`을 선언하고 그 의도가 실제 연결 전체 쿨다운과 동일 요청 콤보 건너뛰기(단순한 정보성 레이블이 아님)라면, 같은 파일의 `HONORS_RULE_LOCK_SCOPE_PROVIDERS`에 프로바이더 ID를 추가하세요. 이것이 `markAccountUnavailable()`(`src/sse/services/auth.ts`) 및 `applyComboTargetExhaustion()`(`open-sse/services/combo/targetExhaustion.ts`)에서 `isAgentrouterConnectionQuotaScope()` 스타일의 소비를 게이팅하는 장치입니다. 이것이 없으면 `scope`는 여전히 `fallbackResult.ruleScope`를 통해 흘러가지만 이에 따라 동작하는 것은 아무것도 없습니다.
-3. `tests/unit/upstream-status-restatement.test.ts`와 `tests/unit/agentrouter-error-rules.test.ts`를 본뜬 단위 테스트를 추가합니다(not-permanent / not-creditsExhausted 가드 포함. 그리고 프로바이더에 허용 목록이 필요한 경우 `resolveRuleMatchBody()`가 해당 프로바이더에 대해서만 전체 텍스트를 반환함을 단언하는 테스트).
+1. `statusRestatementRegistry`
+   (`open-sse/config/upstreamStatusRestatement.ts`)에 규칙 배열 하나를
+   등록합니다. `textMarkers`는 프로바이더별로 유지하고,
+   `CREDITS_EXHAUSTED_SIGNALS`(`open-sse/services/accountFallback.ts`)와
+   충돌하는 일반적인 영어 문구는 절대 재사용하지 마세요.
+2. 필요에 따라 `open-sse/config/providerErrorRules.ts`에 분류 규칙을
+   등록(`providerRuleRegistry`)하여 올바른 잠금 범위(계정 전체 할당량이면
+   `connection`, 모델별 오류면 `model`)를 선택합니다. 이 단계는 전체 오류
+   텍스트(본문 마커)가 필요한 규칙을 가진 프로바이더에서만 프로덕션에
+   적용됩니다: 같은 파일의 `FULL_TEXT_RULE_PROVIDERS`에 프로바이더 id를
+   추가하세요 — 그렇지 않으면 `checkFallbackError`는 규칙에 구조화된
+   `{code, type}` 오류만 전달하므로 본문 텍스트 규칙은 실제 트래픽에서 절대
+   매칭되지 않습니다. 순수하게 `status`/`headers`만으로 매칭되는 규칙
+   (Opencode나 Minimax의 규칙처럼)은 이 옵트인이 필요하지 않습니다. 별도로,
+   규칙이 `scope: "connection"`을 선언하고 그 의도가 실제 연결 전체 쿨다운과
+   동일 요청 내 콤보 건너뛰기(단순한 정보성 레이블이 아닌)라면, 같은 파일의
+   `HONORS_RULE_LOCK_SCOPE_PROVIDERS`에 프로바이더 id를 추가하세요 — 바로
+   이것이 `markAccountUnavailable()`(`src/sse/services/auth.ts`)와
+   `applyComboTargetExhaustion()`
+   (`open-sse/services/combo/targetExhaustion.ts`)에서
+   `isAgentrouterConnectionQuotaScope()` 스타일 소비를 게이팅하는 요소입니다;
+   이것이 없으면 `scope`는 여전히 `fallbackResult.ruleScope`를 통해
+   흐르지만 이에 따라 동작하는 것은 아무것도 없습니다.
+3. `tests/unit/upstream-status-restatement.test.ts`와
+   `tests/unit/agentrouter-error-rules.test.ts`를 본뜬 단위 테스트를
+   추가합니다(not-permanent / not-creditsExhausted 가드를 포함하고,
+   프로바이더가 허용 목록을 필요로 하는 경우에는 `resolveRuleMatchBody()`가
+   해당 프로바이더에 대해서만 전체 텍스트를 반환하는지 단언하는 테스트도
+   포함).
 
-`chatCore.ts`, `classifyError` 또는 콤보는 변경할 필요가 없습니다.
+`chatCore.ts`, `classifyError`, 콤보에는 변경이 필요하지 않습니다.
 
-#### 이그레스 버킷 잠금 (#10880)
+#### 이그레스 버킷 기반 잠금 (#10880)
 
-`EGRESS_BUCKETED_LOCK_PROVIDERS`(opencode 계열)에 속한 프로바이더는 IP 버킷 업스트림으로 취급됩니다(opencode 무료 티어는 계정 버킷이 아니라 IP 버킷입니다 — #9611 참조). `quota_exhausted` **또는** `rate_limit_exceeded`로 분류된 상태 429는 로테이션이 해당 연결들을 시도하기 전에, 마지막으로 알려진 이그레스 IP가 실패한 연결의 것과 일치하는 허용 목록 계열의 모든 연결을 쿨다운시킵니다. 이를 통해 실패가 보장된 N-1개의 업스트림 호출을 방지합니다(#10460/#10525와 동일한 형태). `rate_limit_exceeded`가 포함된 것은 의도적입니다. `markAccountUnavailable` 경로에서는 opencode 전용 규칙이 절대 일치하지 않으므로(`checkFallbackError`에 헤더/본문이 전달되지 않고, opencode가 `FULL_TEXT_RULE_PROVIDERS`에 없음), 본문에 구독 할당량 텍스트("monthly usage limit reached")가 실린 429는 `status_429` 규칙에 도달하기 전에 할당량 텍스트 폴백(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; 1시간 쿨다운)에 의해 `quota_exhausted`로 분류됩니다. 반면 할당량 텍스트가 없는 429(순수한 속도 제한)는 `status_429` 규칙을 통해 `rate_limit_exceeded`로 분류되며, 여전히 IP 계열을 쿨다운시킵니다. 허용 목록에 있는 프로바이더에게 IP 버킷 속도 제한은 소진된 할당량과 동일한 신호입니다. 정직한 한계:
+`EGRESS_BUCKETED_LOCK_PROVIDERS`(opencode 계열)에 속한 프로바이더는 IP 버킷
+단위 업스트림으로 처리됩니다(opencode 무료 티어는 계정 버킷이 아니라 IP 버킷
+단위입니다 — #9611 참조): `quota_exhausted` **또는** `rate_limit_exceeded`로
+분류된 status-429는 로테이션이 해당 연결들을 시도하기 전에, 마지막으로 알려진
+이그레스 IP가 실패한 연결의 IP와 일치하는 허용 목록 계열의 모든 연결을
+쿨다운시킵니다
+— 이를 통해 실패가 보장된 N-1개의 업스트림 호출을 피합니다(#10460/#10525와
+동일한 형태). `rate_limit_exceeded`가 의도적으로 포함된 것입니다:
+`markAccountUnavailable` 경로에서는 opencode 전용 규칙이 절대 매칭되지
+않고(`checkFallbackError`에 헤더/본문이 전달되지 않으며, opencode가
+`FULL_TEXT_RULE_PROVIDERS`에 없음), 따라서 본문에 구독 할당량 텍스트
+("monthly usage limit reached")를 포함하는 429는 `status_429` 규칙에 도달하기
+전에 할당량 텍스트 폴백(`buildSubscriptionQuotaFallback`,
+`accountFallback.ts`; 1시간 쿨다운)에 의해 `quota_exhausted`로 분류됩니다 —
+반면 할당량 텍스트가 없는 429(순수한 레이트 리밋)는 `status_429` 규칙을 통해
+`rate_limit_exceeded`로 분류되며 여전히 IP 계열을 쿨다운시킵니다. 허용 목록
+프로바이더에서 IP 버킷 레이트 리밋은 할당량 소진과 동일한 신호입니다.
+솔직한 한계:
 
-- **최선 노력(best-effort)**: 잠금은 `proxy_logs`에서 연결의 마지막으로 알려진
-  `egress_ip`를 확인합니다(24시간 윈도우, 동기식, 캐시 없음). 콜드 캐시
-  (egress IP가 한 번도 프로브되지 않음)이거나 행이 없는 경우 → 실패한 연결은
-  여전히 브랜치에 의해 쿨다운되고(오늘날과 동일하게 기록됨), 형제만 잠기지
-  않습니다.
-- **절대 종료 상태가 되지 않음**: 쿨다운은 갱신되는 할당량 윈도우입니다
-  (`testStatus: "unavailable"`); IP 수준 신호로부터 영구 상태가 파생되는 일은
-  없습니다. `disableCooling` 연결은 이 브랜치를 완전히 건너뜁니다.
-- **허용 목록 패밀리에 대한 잠금 세분성 변경**: 이는 형제 최적화만이 아니라
-  범위(scope) 변경입니다. opencode는 `passthroughModels` 프로바이더이므로,
-  이 브랜치 이전에는 429가 모델별(per-MODEL) 잠금을 유발했지만, 이제는 연결
-  쿨다운을 유발합니다 — 형제가 전혀 없는 단일 연결을 운영하는 운영자의
-  경우에도 마찬가지입니다. 이것이 바로 opencode 규칙 테이블이 이미 올바른
-  것으로 선언하고 있는 세분성입니다(`scope: "connection"`,
-  `providerErrorRules.ts`). opencode가 `HONORS_RULE_LOCK_SCOPE_PROVIDERS`에
-  없기 때문에 지금까지 한 번도 적용된 적이 없습니다. 이 브랜치는 연결 범위
-  agentrouter 브랜치를 미러링하여, 실패한 연결의 쿨다운 + `backoffLevel`을
-  직접 기록하고 반환합니다 — 모델별 블록과 아래의 일반 경로에는 도달하지
+- **최선 노력(best-effort)**: 이 락은 연결의 마지막으로 알려진 `egress_ip`를
+  `proxy_logs`에서 조회합니다(24시간 윈도우, 동기식, 캐시 없음). 콜드
+  캐시(egress IP가 한 번도 프로브된 적 없음)이거나 행이 없는 경우 → 실패한
+  연결은 여전히 브랜치에 의해 쿨다운되며(현재와 동일하게 기록됨), 다만
+  형제는 잠기지 않습니다.
+- **종결 상태 아님**: 쿨다운은 갱신되는 할당량 윈도우
+  (`testStatus: "unavailable"`)이며, IP 수준 신호에서 영구 상태는 절대
+  파생되지 않습니다. `disableCooling` 연결은 이 브랜치를 완전히 건너뜁니다.
+- **허용 목록 패밀리의 락 세분성 변경**: 이는 형제 최적화뿐만 아니라 범위
+  변경입니다. opencode는 `passthroughModels` 프로바이더이므로, 이 브랜치
+  이전에는 429가 모델 단위 잠금을 발생시켰지만 이제는 연결 쿨다운을
+  발생시킵니다 — 형제가 전혀 없는 단일 연결을 운영하는 운영자의 경우도
+  포함합니다. 이것이 opencode 규칙 테이블이 이미 올바르다고 선언하고 있는
+  세분성(`scope: "connection"`, `providerErrorRules.ts`)이며, opencode가
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`에 없기 때문에 지금까지 한 번도
+  적용되지 않았습니다. 이 브랜치는 연결 범위의 agentrouter 브랜치를
+  미러링하여 실패한 연결의 쿨다운 + `backoffLevel`을 직접 기록하고
+  반환합니다 — 모델 단위 블록과 아래의 일반 경로에는 절대 도달하지
   않습니다.
 - **콤보 포함**: agentrouter 브랜치와 마찬가지로, 이 범위는 콤보 호출자가
-  429에 적용하는 `persistUnavailableState`/`isCombo` 다운그레이드를 의도적으로
-  무시합니다. 모델별 잠금은 이 범위의 약한 형태가 아니라 잘못된 단위입니다:
-  소진된 IP에 대해 아무것도 말해주지 않으므로, 콤보 로테이션은 형제마다 실패가
-  보장된 호출을 하나씩 계속 소비하게 됩니다.
-- **형제 안전성**: 이미 종료 상태(banned/credits_exhausted)이거나 이미 더 긴
-  쿨다운 중인 형제는 절대 덮어쓰지 않습니다.
-- **배타적 허용 목록**: `EGRESS_BUCKETED_LOCK_PROVIDERS`를 확장하는 것은
-  명시적인 소유자 결정입니다; 일반적인 와이어링은 없습니다(패턴
-  #10334/#10419). 형제 쿼리는 이를 SQL 리터럴로 반복하는 대신 동일한 허용
-  목록을 바인딩하므로, 확장은 한 줄 변경으로 유지됩니다.
-- **Egress IP 로테이션, 양방향 모두**: 조회 윈도우(24시간)가 egress-IP 캐시
-  TTL(5분)보다 훨씬 넓기 때문에, "마지막으로 알려진 IP"는 현재 상태가 아니라
-  이력입니다. 연결의 프록시가 윈도우 내에서 로테이션되었다면 잠금이 실제로
-  공유된 IP를 **놓칠 수** 있고(기록된 IP는 소진되지 않은 새 IP이므로) —
-  대칭적으로 소진된 IP에서 **이후 로테이션으로 벗어난 형제를 쿨다운시킬 수**
-  있습니다. 두 번째 경우는 해당 형제에게 쿨다운 윈도우 하나의 비용이 듭니다;
-  두 경우 모두 이력 기반 조회에서 허용되는 최선 노력의 한계입니다.
-- **비용**: `proxy_logs`에 대한 두 번의 제한된 스캔(`idx_pl_timestamp`로 윈도우
-  필터링됨), 429 빈도에서만 발생합니다. 새 인덱스 없음(마이그레이션 134
-  YAGNI). 중간 규모의 실제 트래픽 DB 복사본에서 측정했으며, 처리량이 높은
-  인스턴스는 동일한 윈도우 내에 비례적으로 더 많은 행을 보유합니다.
+  429에 적용하는 `persistUnavailableState`/`isCombo` 다운그레이드를
+  의도적으로 무시합니다. 모델 단위 잠금은 이 범위의 약한 형태가 아니라
+  잘못된 단위입니다: 소진된 IP에 대해서는 아무것도 말해주지 않으므로, 콤보
+  로테이션은 형제마다 실패가 보장된 호출을 하나씩 계속 소모하게 됩니다.
+- **형제 안전성**: 이미 종결 상태(banned/credits_exhausted)이거나 이미 더
+  긴 쿨다운에 있는 형제는 절대 덮어쓰지 않습니다.
+- **배타적 허용 목록**: `EGRESS_BUCKETED_LOCK_PROVIDERS`의 확장은 명시적인
+  소유자 결정이며, 일반화된 와이어링은 없습니다(패턴 #10334/#10419). 형제
+  쿼리는 동일한 허용 목록을 SQL 리터럴로 반복하는 대신 바인딩하므로,
+  확장은 여전히 한 줄 변경으로 유지됩니다.
+- **Egress IP 로테이션, 양방향**: 조회 윈도우(24시간)는 egress-IP 캐시
+  TTL(5분)보다 훨씬 넓으므로, "마지막으로 알려진 IP"는 현재 상태가 아니라
+  이력입니다. 연결의 프록시가 윈도우 내에서 로테이션된 경우 락이 실제로
+  공유 중인 IP를 **놓칠 수** 있고(기록된 IP는 새롭고 소진되지 않은 IP),
+  대칭적으로 소진된 IP에서 **이후 로테이션으로 벗어난 형제를 쿨다운시킬
+  수도** 있습니다. 두 번째 경우는 해당 형제에게 쿨다운 윈도우 하나의
+  비용이 들며, 둘 다 이력 기반 조회에서 수용되는 최선 노력 한계입니다.
+- **비용**: `proxy_logs`에 대한 두 번의 제한된 스캔(`idx_pl_timestamp`로
+  윈도우 필터링), 429 빈도에서만 발생합니다. 새 인덱스는 없습니다
+  (마이그레이션 134 YAGNI). 중간 규모의 실제 트래픽 DB 복사본에서
+  측정했으며, 처리량이 높은 인스턴스는 동일한 윈도우에 비례적으로 더 많은
+  행을 보유합니다.
 
 ---
 

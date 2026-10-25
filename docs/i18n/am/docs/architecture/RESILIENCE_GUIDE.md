@@ -348,6 +348,17 @@ glm-4.7=3
 
 ተመሳሳዩ በር ከመላክ በፊት ያለውን ሁኔታ (#16319) ይሸፍናል፦ የኮምቦው እያንዳንዱ ዒላማ ማንኛውም ሙከራ ከመድረጉ በፊት ሞዴሉ በአጭር ጊዜያዊ መቆለፊያ ውስጥ ስለሚቀመጥ ሲዝለል፣ የዜሮ-ሙከራ መንገዱ ቆለፉን በተመሳሳይ ገደቦች ሥር ይጠብቃል እና እንደገና ይልካል፣ ምልክት-አልባ `503 ALL_TARGETS_SKIPPED` ከመመለስ ይልቅ። መጠበቅ ሳይፈቀድ ሲቀር (ገደብ፣ ሙከራ ወይም በጀት ሲያልቅ፣ ወይም ባህሪው ሲጠፋ)፣ የመጨረሻው ምላሽ ወደ `429 rate_limit_error` ይሻረዋል ከቀዳሚው ጊዜያዊ ቆለፍ ማብቂያ `retry_after` / `reset_at` ጋር; የኮታ፣ የማረጋገጫ እና አልተገኘም ቆለፎች ምልክት-አልባውን 503 ያዝናሉ።
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. የጥያቄ ሰልፍ መግቢያ ቁጥጥር (v3.8.49 · ጉዳይ #6593)
@@ -412,191 +423,283 @@ glm-4.7=3
 
 ---
 
-## 7. የ Upstream ሁኔታ እንደገና መግለጽ (Status Restatement) (በስህተት የተገለጹ የ quota ስህተቶች)
+## 7. የአፕስትሪም ሁኔታ እንደገና መግለጽ (ተሳሳተ የኩባንያ ስህተቶች)
 
-**ወሰን፦** ጊዜያዊ የ quota መጠናቀቅን በተሳሳተ የ HTTP ሁኔታ የሚያሳውቅ አንድ upstream ጌትዌይ።
+**ወሰን፡** አንድ አፕስትሪም ጌትዌይ ጊዜያዊ የኩባንያ ጥያቄ መጨረሻን በተሳሳተ የHTTP ሁኔታ የሚገልጽ።
 
-**ዓላማ፦** ከ classiﬁcation **በፊት** የሚያሳስት ሁኔታን ማስተካከል፣ ስለዚህ ቀጣይ ተጠቃሚዎች (fallback ሞተር፣ combo አሃዛዊ ስብስብ፣ ለደንበኛ የሚቀርበው ምላሽ) የውድቀቱን እውነተኛ እንደገና-ሙከራ-ሚችል (retryable) ባህሪ ያያሉ።
+**ዓላማ፡** ከምደባ በፊት የሚያምታታውን ሁኔታ ማረም፣ በዚህም የታችኛው ዥረት ተጠቃሚዎች
+(fallback engine, combo aggregation, client-facing response) የስህተቱን እውነተኛ
+እንደገና ሞክር የሚያደርግ ባህሪ እንዲመለከቱ ማድረግ ነው።
 
-አንዳንድ ጌትዌዮች **ጊዜያዊ** የ quota መጠናቀቅን በእንደገና-መሞከር-በማይቻል (non-retryable) የ HTTP ሁኔታ ያመለክታሉ። `agentrouter.org` እንደ መደበኛው `429` በምትኩ `403` (አንዳንዴ `400`) ከቻይንኛ አካላት ጋር (`用户额度不足` / `额度不足`) ይመልሳል። እንደ Claude Code ያሉ ደንበኞች `403`ን እንደ ቋሚ (permanent) ይቆጥሩታል እና ክፍለ-ጊዜውን ያቋርጣሉ፣ እና ማስተካከያ ከሌለ fallback ሞተሩ እንደ quota ክስተት ሳይሆን እንደ `AUTH_ERROR` ይመድበዋል።
+አንዳንድ ጌትዌዮች ጊዜያዊ የኩባንያ ጥያቄ መጨረሻን በእንደገና ሞክር የማይቻል HTTP ሁኔታ ይገልጻሉ።
+`agentrouter.org` የመደበኛውን `429` በማያደርግበት መልኩ `403` (አንዳንዴ `400`) በቻይናኛ
+የሰውነት ጽሑፍ (`用户额度不足` / `额度不足`) ይመልሳል። ክሎድ ኮድ የመሰሉ ደንበኞች `403`ን
+ዘላለማዊ ብለው ያስባሉ እና ክፍለ ጊዜውን ያቋርጣሉ፣ እና ማረም ሳይደረግ fallback engine እንደ ኩባንያ
+ክስተት በመተካት እንደ `AUTH_ERROR` ይመድበው ነበር።
 
-**ትግበራ፦**
+**ተግባራዊነት፡**
 
-- Registry + matcher፦ `open-sse/config/upstreamStatusRestatement.ts` — በእያንዳንዱ provider የህግጋት ዝርዝር (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`)፣ በ `applyStatusRestatement()` የሚዛመድ።
-- የጥሪ ቦታ (call site)፦ በ `open-sse/handlers/chatCore.ts` ውስጥ ያለው `providerFailure:` ብሎክ (ወደ መስመር 3654 አካባቢ)፣ `parseUpstreamError()` በስህተት HTTP ሁኔታ (`!providerResponse.ok`) ያለውን upstream ምላሽ ከተንታነ በኋላ ወዲያውኑ፣ እና ማንኛውም classification ከመሮጡ በፊት፣ ስለዚህ እያንዳንዱ ቀጣይ ተጠቃሚ የተስተካከለውን ሁኔታ ያያል። በ `200` SSE ፍሰት ውስጥ የተከተቡ ስህተቶች የተለየ፣ የኋለኛ የፍሰት-ተንታኝ መንገድ ይከተላሉ እና በዛሬው ጊዜ በዚህ hook **አይሸፈኑም** — ይህ የታወቀ ገደብ ነው፣ ለ agentrouter የተሳሳተ ሁኔታ (misstatus) ገና አያስፈልገውም (ይህም እንደ ስህተት HTTP ሁኔታ ነው የሚታየው)።
-- የእንደገና-ሙከራ ብቁነት፦ `429` በ `RETRY_AFTER_ELIGIBLE_STATUSES` ውስጥ ነው (`open-sse/services/combo/unavailableRetryGate.ts`)፣ ስለዚህ እንደገና የተገለጸ (restated) ስህተት እንደ ሞተ `403` ከመታየት ይልቅ እውነተኛ የእንደገና-ሙከራ መስኮት ይሸከማል።
-- የተፈጠረው (synthetic) `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`) የሚነግረው እንደገና የተገለጸው ምላሽ ለ**ደንበኛው** ብቻ ነው፤ ይህ ራሱ የግንኙነቱ ውስጣዊ cooldown/lockout ቆይታ አይደለም — ያ የሚገዛው በተናጠል በዚያው እንደገና በተገለጸው ስህተት ላይ በትክክል የሚሰራው ስርዓት ነው (የ Connection Cooldown ተጨምራ ተግባረ-መዘግየት፣ §2፣ ለ API-key አቅራቢዎች መሰረታዊ `3s`፤ ወይም Model Lockout፣ §3፣ እንደ agentrouter ላሉ በእያንዳንዱ-ሞዴል-quota አቅራቢዎች)። Routerው በውስጡ ከሚያስታውቀው 60s መስኮት በፊት ለእንደገና ሙከራ ብቁ ሊሆን ይችላል — ይህ በእቅድ የተወሰደ የጭራሽ ቦታ (intentional headroom) ነው፣ ትህትና (bug) አይደለም።
+- የመዝገብ ሥፍራ + matcher፡ `open-sse/config/upstreamStatusRestatement.ts` — ለአንድ አቅራቢ
+  ደንቦች ዝርዝር (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers,
+defaultRetryAfterMs}`), በ `applyStatusRestatement()` የሚዛመድ።
+- የጥሪ ቦታ፡ `open-sse/handlers/chatCore.ts` ውስጥ ያለው `providerFailure:` ብሎክ (ወደ 3654ኛ
+  መስመር አካባቢ)፣ `parseUpstreamError()` አንድን የአፕስትሪም ምላሽ በስህተት HTTP ሁኔታ
+  (`!providerResponse.ok`) ካተነተነ በኋላ፣ ከምንም ዓይነት ምደባ ከመሮጡ በፊት ነው፣ በመሆኑም ንብረት
+  የሚመለከቱ ተጠቃሚዎች ሁሉ የተረሙትን ሁኔታ ያያሉ። በ`200` SSE ዥረት ውስጥ የተቀመጡ ስህተቶች ተለየ እና በኋላ
+  የዥረት ትንተና መንገድ ይከተላሉ እና ዛሬ በዚህ ማገድ የማይሸፈኑ ናቸው — የታወቀ ገደብ ነው፣ ለagentrouter አሁን
+  የሚታየው ተሳሳተ ሁኔታ (እንደ ስህተት HTTP ሁኔታ የሚወጣው) ገና አያስፈልግም።
+- የእንደገና ሞክር ብቁነት፡ `429` በ `RETRY_AFTER_ELIGIBLE_STATUSES` ውስጥ ነው
+  (`open-sse/services/combo/unavailableRetryGate.ts`)፣ በመሆኑም እንደገና የተገለጸው ስህተት
+  እውነተኛ የእንደገና ሞክር መስኮት ያለው ሆኖ ይመጣል እንጂ እንደ ያልሰራ `403` አይወጣም።
+- በሰነድ የተዘጋጀው `60s` `defaultRetryAfterMs`
+  (`upstreamStatusRestatement.ts`) የተረሙትን ምላሽ ለ**ደንበኛው** የሚነግረው ብቻ ነው፤ ራሱ
+  የኮኔክሽኑ ውስጣዊ cooldown/lockout ቆይታ አይደለም — ያ የሚቆጠጠረው እንደገና የተገለጸውን ስህተት በእውነት
+  የሚያስተናግደው ስርዓት ነው (የኮኔክሽን Cooldown በሚያድግ backoff, §2, ለAPI-key አቅራቢዎች መሠረት
+  `3s`፤ ወይም ለአንድ አንድ ሞዴል ኩባንያ አቅራቢዎች እንደ agentrouter Model Lockout, §3)። ራውተሩ
+  ለደንበኛው ከሚያስታውቀው 60s መስኮት በፊት በውስጡ እንደገና ለሞክር ብቁ መሆን ይችላል — አላማ የተደረገ ክፍተት
+  ነው፤ bug አይደለም።
 
-ቋሚ ስህተቶች (የ agentrouter `无权访问模型` — ለዚህ ሞዴል መዳረሻ የለም) ፈጽሞ እንደገና አይገለጹም፦ `textMarkers` ቢገናኝ እንኳ `excludeMarkers` ህግጋቱን ይከለክላል፣ ስለዚህ ስህተቱ የመጀመሪያ ሁኔታውን ይይዛል እና ምንም ለዘላለም አይሞክረውም። ተዛማጁ የ provider classiﬁcation ህግጋት (`agentrouter-model-access-denied` በ `open-sse/config/providerErrorRules.ts` ውስጥ፦ `reason: "auth_error"`፣ `scope: "model"`፣ ተገልጿል የ `6h` መሰረታዊ cooldown) ከአጠቃላዩ apikey-ምድብ `FORBIDDEN` ቀደም-ተኮር መመለስ በፊት በ `checkFallbackError` (`open-sse/services/accountFallback.ts`) ይማከራል፣ ይህም በ `honorsRuleLockScope(provider)` (#10334 — በአሁኑ ጊዜ በ `providerErrorRules.ts` ውስጥ ባለው `HONORS_RULE_LOCK_SCOPE_PROVIDERS` allowlist ለ agentrouter ብቻ የተወሰነ) የተጠበቀ ነው። የህግጋቱ የተገለጸ 6h cooldown እንደ `fallbackResult.baseCooldownMs` ይፈስሳል፣ ግን አሁንም ወደ ቀድሞውኑ የነበረው በእያንዳንዱ-ሞዴል-quota lockout መንገድ (`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`፣ በ #10334 ከ cooldown ምንጭ በስተቀር ያልተቀየረ) ይግባል፦ እንደ ሌላው እያንዳንዱ model lockout ወደ ኦፔሬተሩ `mlSettings.maxCooldownMs` (ነባሪ `1_800_000ms` / 30min) ይቀንሳል፣ እና _የተቀመጠው የ lockout ምክንያት_ ቀድሞውኑ የነበረው hardcoded `"forbidden"` ይሆናል፣ የህግጋቱ `"auth_error"` አይደለም — ከጫፍ እስከ ጫፍ የሚከበረው የ cooldown ቆይታው ብቻ ነው፣ የምክንያቱ ሕብረቁምፊ (reason string) አይደለም። ግንኙነቱ ራሱ ንቁ ይቆያል፤ በተመሳሳይ ግንኙነት ላይ ያሉ አጎራባች ሞዴሎች አይጎዱም።
+ዘላለማዊ ስህተቶች (የagentrouter `无权访问模型` — ይህንን ሞዴል ለመድረስ መብት የለውም) በጭራሽ አይረሙም፤
+`excludeMarkers` ደንቡን ያግዳል፣ `textMarkers` ቢመታው እንኳን፣ በመሆኑም ስህተቱ የገዛውን ዋና ሁኔታ ያቆየዋል
+እና ምንም ነገር ለዘላለም እንደገና አይሞክረውም። የሚዛመደው የአቅራቢ ምደባ ደንብ
+(`agentrouter-model-access-denied` በ `open-sse/config/providerErrorRules.ts` ውስጥ፡
+`reason: "auth_error"`, `scope: "model"`, የተዘረዘረው መሠረታዊ `6h` cooldown) በ
+`checkFallbackError` (`open-sse/services/accountFallback.ts`) የሚከናወነው ከባጠቃላዩ
+apikey-መደብ `FORBIDDEN` _አስቀድሞ-መመለስ_ በፊት ነው፣ በ `honorsRuleLockScope(provider)` (#10334 —
+በአሁኑ ጊዜ ብቻ agentrouter የሚያከናውነው በ `providerErrorRules.ts` ውስጥ ያለውን
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` allowlist በመጠቀም) የሚቆጠበር። ደንቡ የደነገገው 6h cooldown
+እንደ `fallbackResult.baseCooldownMs` ያልፋል፣ ነገር ግን አሁን ያለውን በአንድ ሞዴል ኩባንያ መሠረት
+የሚቆለፍ መንገድ (`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`, ከcooldown
+ምንጩ በስተቀር በ#10334 ሳይቀየር) ያመረቅዛል፤ ወደ የአስተዳዳሪውን `mlSettings.maxCooldownMs` (ነባሪ
+`1_800_000ms` / 30 ደቂቃ) እንደ ሌሎች ሁሉ የሞዴል ቆላፊዎች ይታጠቃል፣ እና _የተቆለፈው ምክንያት_ የነበረውን በኮድ
+የተገነባ `"forbidden"` ይቆየዋል፣ የደንቡን `"auth_error"` አይደለም — የሚከበረው ከመጨረሻ እስከ መጨረሻ
+የcooldown ቆይታው ብቻ ነው፣ የምክንያቱ ሐረግ አይደለም። ኮኔክሽኑ ራሱ ንቁ ይቆያል፤ በዚያው ኮኔክሽን ላይ ያሉ
+የተዛማጅ ሞዴሎች አይተጎዱም።
 
-እንደገና የተገለጹ የኮታ ስህተቶች (`额度不足`) በምርት አካባቢ ወደ አቅራቢ ደንብ ይደርሳሉ
+እንደገና የተገለጹ የኩባንያ ስህተቶች (`额度不足`) በምርት ላይ ያለውን የአቅራቢ ደንብ ይደርሳሉ
 (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
-"connection"`፣ የራሱ የተገለጸ cooldown የለውም — የ persistence layer
-scaled backoff ነባሪ ተግባራዊ ይሆናል)። ከ#10334 ጀምሮ፣ በ
-`ProviderErrorRuleMatch` ላይ ያለው `scope` ከጫፍ እስከ ጫፍ በእርግጥ ጥቅም ላይ ይውላል፣ ነገር ግን
-በ`HONORS_RULE_LOCK_SCOPE_PROVIDERS` የተፈቀዱ ዝርዝር ውስጥ ላሉ አቅራቢዎች
-**ብቻ** ነው (`providerErrorRules.ts` —
-በአሁኑ ጊዜ `"agentrouter"` ብቻ፣ በ`honorsRuleLockScope()` በኩል የተገደበ)። ለሌሎች
-አቅራቢዎች ሁሉ `scope` ከ#10334 በፊት እንደነበረው መረጃ ሰጪ ሆኖ ይቀራል።
-`checkFallbackError` የተዛመደውን ደንብ ወሰን እንደ
-`fallbackResult.ruleScope` ያቀርባል፤ `isAgentrouterConnectionQuotaScope()`
-(`src/sse/services/auth.ts`) አንድ
-`ruleScope` ለግንኙነቱ በሙሉ የሚሠራና በራሱ የሚያገግም
-ምልክት እንደሆነ በደህና ማክበር እንደሚቻል የሚያረጋግጠው የጋራ መከላከያ ነው
-(scope `"connection"`፣ reason `quota_exhausted`፣ በፍጹም `permanent`
-አይደለም፣ በፍጹም `creditsExhausted` አይደለም — ወደፊት አንድ ደንብ scope
-`"connection"`ን ከቋሚ የመለያ ሁኔታ ጋር እንዳያጣምር የሚከላከል ጥበቃ)። ሁለት ተጠቃሚዎች ይጠሩታል፦
+"connection"`, የራሱ የተዘረዘረ cooldown የለውም — የማቆየት ክፍል ሚዛናዊ backoff ነባሪ ይተገብራል)።
+ከ#10334 ጀምሮ፣ በ `ProviderErrorRuleMatch` ላይ ያለው `scope` ከመጀመሪያ እስከ መጨረሻ ይወጣል፣ ነገር ግን
+**ብቻ** በ `HONORS_RULE_LOCK_SCOPE_PROVIDERS` allowlist (`providerErrorRules.ts` —
+ዛሬ ለ `"agentrouter"` ብቻ፣ በ `honorsRuleLockScope()` የሚቆጠበር) ውስጥ ላሉ አቅራቢዎች ነው። ለሌሎች ሁሉ
+አቅራቢዎች `scope` ከ#10334 በፊት እንደነበረው ሁሉ መረጃዊ ይቆያል። `checkFallbackError` የተዛመደውን ደንብ
+scope እንደ `fallbackResult.ruleScope` ያቀርባል፤ `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) የጋራ ጠባቂ ነው፣ ያንን `ruleScope` በእውነት እንደ ኮኔክሽን-ስፋት፣
+ራስን-እንደገና የሚያገናኝ ምልክት ለማክበር ደህንነቱ የተጠበቀ መሆኑን የሚያረጋግጥ (scope `"connection"`, reason
+`quota_exhausted`, በጭራሽ `permanent` አይሆንም፣ በጭራሽ `creditsExhausted` አይሆንም — በወደፊት scope
+`"connection"`ን ከዘላለማዊ የአካውንት ሁኔታ ጋር የሚያገናኝ ደንብን ለመከላከል)። ሁለት ተጠቃሚዎች ይደውሉታል፡
 
-- **Persistence** (`markAccountUnavailable()`, `src/sse/services/auth.ts`)፦
-  ወደ passthrough-provider **per-model** lockout
-  ቅርንጫፍ ከመውደቅ ይልቅ (agentrouter `passthroughModels: true` ነው → `hasPerModelQuota()`
-  `true`ን ይመልሳል)፣ **ጊዜያዊ የግንኙነት cooldown** ይተገብራል —
-  `testStatus: "unavailable"` + `rateLimitedUntil`፣ በፍጹም የመጨረሻ ሁኔታ
-  (`credits_exhausted`/`banned`/`expired`) አይደለም — በዚህም ግንኙነቱ
-  cooldown ካለፈ በኋላ በእጅ የምስክርነት መረጃ ዳግም ማስጀመር ሳያስፈልገው በራሱ ያገግማል።
-  `disableCooling: true` ላላቸው ግንኙነቶች ይዘለላል (#2997)፦ ያ opt-out
-  በምትኩ ወደ per-model lockout ይወርዳል (በሰነድ የተገለጸ trade-off ነው —
+- **ዘላቂ ማከማቻ** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  ወደ passthrough-provider **በእያንዳንዱ ሞዴል** የመቆለፍ
+  ቅርንጫፍ ከመግባት ይልቅ (agentrouter `passthroughModels: true` ነው → `hasPerModelQuota()`
+  `true` ይመልሳል)፣ **ጊዜያዊ የግንኙነት ማቀዝቀዣ ጊዜ** ይተገብራል —
+  `testStatus: "unavailable"` + `rateLimitedUntil`፣ ፈጽሞ የመጨረሻ ሁኔታ
+  (`credits_exhausted`/`banned`/`expired`) አይደለም — ስለዚህ ማቀዝቀዣው
+  ጊዜው ሲያልቅ ግንኙነቱ በእጅ የማረጋገጫ መረጃ ዳግም ማስጀመር ሳያስፈልገው
+  ራሱን ያገግማል። `disableCooling: true` ላላቸው ግንኙነቶች ይዘለላል
+  (#2997)፦ ያ የመውጣት ምርጫ በምትኩ ወደ በእያንዳንዱ ሞዴል መቆለፍ
+  ያልፋል (በሰነድ የተገለጸ የጥቅምና ጉዳት ሚዛን —
   ከቅርንጫፉ በላይ ያለውን የኮድ አስተያየት ይመልከቱ)።
-- **በተመሳሳይ ጥያቄ ውስጥ የcombo ማዘዋወር** (`applyComboTargetExhaustion()`,
+- **በተመሳሳይ ጥያቄ ውስጥ የcombo ማስተላለፊያ** (`applyComboTargetExhaustion()`,
   `open-sse/services/combo/targetExhaustion.ts`)፦ ተመሳሳዩ መከላከያ ግንኙነቱን
-  `${provider}:${connectionId}` ቁልፍ ወደሆነው በማህደረ ትውስታ ውስጥ ወዳለው `exhaustedConnections` set ምልክት ያደርገዋል። ይህ በራሱ
-  target object ላይ ያንኑ ትክክለኛ `connectionId` አስቀድሞ የያዘን ቀሪ የSAME-REQUEST
-  target **ብቻ** ይዘላል (`getExhaustedTargetSkipReason()`,
+  `${provider}:${connectionId}` በሚለው ቁልፍ ወደ ውስጠ-ማህደረ ትውስታው
+  `exhaustedConnections` ስብስብ ያክለዋል። ይህ የሚዘለው ቀሪ
+  የተመሳሳይ-ጥያቄ ዒላማን ብቻ ሲሆን፣ ዒላማው _ራሱ በራሱ ዒላማ
+  ነገር ላይ ያንኑ `connectionId` የያዘ_ ከሆነ ነው
+  (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` ከ`exhaustedConnections` lookup በፊት) — ተጓዳኝ targets የራሳቸው
-  pinned `connectionId` የሌላቸውበት እና አንዱ ከምላሹ
-  `X-OmniRoute-Selected-Connection-Id` header በእያንዳንዱ dispatch ብቻ የሚፈታበት ተራ
-  model-list combo ያንን የቁልፍ ማዛመጃ በፍጹም አያገኝም። ለዚያ
-  የተለመደ ሁኔታ፣ አንድ ቀሪ leg አሁን ኮታው ያለቀበትን መለያ
-  እንዳይጠቀም የሚያደርገው እውነተኛ ጥበቃ ይህ Set **አይደለም** — ከላይ ያለው persistence layer
-  (የግንኙነቱ `rateLimitedUntil` አሁን ወደፊት ነው) ከዚሁ መከላከያ ለውድቀቱ
-  `transientRateLimitedProviders`ን ከማፈኑ ጋር ተጣምሮ ነው ("ባለሁለት-ደረጃ ንድፍ"ን እና በ
-  `targetExhaustion.ts` ውስጥ ባለው
-  `isAgentrouterConnectionQuotaScope` ቅርንጫፍ ላይ ያለውን የኮድ አስተያየት ይመልከቱ)፦ ያ
-  Set ሳይመለከት ሲቀር፣ የ`combo.ts` `allowRateLimitedConnection` force-allow
-  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) ለአቅራቢው
-  ቀሪ legs ተግባራዊ **አይሆንም**፤ ስለዚህ የምስክርነት መረጃ ምርጫ `rateLimitedUntil`
-  filter (`src/sse/services/auth.ts:1238`) በተለመደው ሁኔታ ይከበራል፣ እና
-  አንድ ቀሪ leg የተለየ፣ አሁንም ብቁ የሆነ agentrouter
-  connection ይመርጣል ወይም ምንም ምስክርነት መረጃ ስለማይገኝ ይወድቃል — ይህ ቅርንጫፍ አሁን ወደ cooldown መልሶት ወደነበረው
-  connection በግድ ተመልሶ አይገባም።
+connectionId)` ከ`exhaustedConnections` ፍለጋ በፊት) — ቀላል
+  የሞዴል-ዝርዝር combo፣ ወንድም ዒላማዎቹ የራሳቸው የተወሰነ `connectionId`
+  የሌላቸውበትና አንዱ ከምላሹ `X-OmniRoute-Selected-Connection-Id`
+  ራስጌ በእያንዳንዱ መላክ ብቻ የሚፈታበት፣ ያንን የቁልፍ ማዛመድ
+  ፈጽሞ አያገኝም። በዚያ የተለመደ ሁኔታ፣ ቀሪ እርምጃ አሁን የተሟጠጠውን
+  መለያ ዳግም እንዳይጠቀም የሚያደርገው እውነተኛ ጥበቃ ይህ Set
+  አይደለም — ከላይ ያለው የዘላቂ ማከማቻ ንብርብር
+  (የግንኙነቱ `rateLimitedUntil` አሁን ወደፊት ነው) ከዚሁ መከላከያ
+  ጋር ተጣምሮ ለውድቀቱ `transientRateLimitedProviders` እንዳይካተት
+  ማድረጉ ነው (ከታች «ባለሁለት-ደረጃ ንድፍ»ን እና
+  በ`targetExhaustion.ts` ውስጥ ባለው
+  `isAgentrouterConnectionQuotaScope` ቅርንጫፍ ላይ ያለውን የኮድ
+  አስተያየት ይመልከቱ)፦ ያ Set ሳይመረጥ፣ የ`combo.ts`
+  `allowRateLimitedConnection` በግድ የመፍቀድ ባህሪ
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) ለቀሩት
+  የአቅራቢው እርምጃዎች አይነሳም፤ ስለዚህ የማረጋገጫ መረጃ ምርጫው
+  `rateLimitedUntil` ማጣሪያ (`src/sse/services/auth.ts:1238`) በመደበኛው
+  ሁኔታ ይከበራል፣ እና ቀሪ እርምጃው ሌላ፣ አሁንም ብቁ የሆነ
+  agentrouter ግንኙነት ይመርጣል ወይም ምንም የማረጋገጫ መረጃ
+  ባለመኖሩ ይወድቃል — ይህ ቅርንጫፍ አሁን ወደ ማቀዝቀዣ ጊዜ
+  ያስገባውን ግንኙነት በግድ ዳግም አይጠቀምም።
 
-### ባለሁለት-ደረጃ ንድፍ፦ መጀመሪያ የሁኔታ ዳግም መግለጽ፣ ከዚያም ምደባ
+### ባለሁለት-ደረጃ ንድፍ፦ የሁኔታ ዳግም መግለጽ፣ ከዚያም ምደባ
 
 የሁኔታ ዳግም መግለጽ (`upstreamStatusRestatement.ts`) እና የአቅራቢ
 ምደባ ደንቦች (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) ሁለቱም በአቅራቢ id
-እና በጽሑፍ ምልክቶች ቁልፍ የሚያደርጉ የተለያዩ registries ናቸው፣ ነገር ግን በተለያዩ
-ቦታዎች ይሠራሉ እና የተለያዩ ዓላማዎችን ያገለግላሉ፦ restatement በ`chatCore.ts` ውስጥ የHTTP statusን ቀደም ብሎ እንደገና ይጽፋል፤
-የምደባ ደንቦች በ`checkFallbackError()` ውስጥ fallback `reason`ን እና lock `scope`ን
-(`model` / `provider` / `connection`) ይመርጣሉ
+`providerRuleRegistry`) ሁለቱም በአቅራቢ መለያ እና በጽሑፍ ምልክቶች
+ላይ ቁልፍ የሚያደርጉ የተለያዩ መዝገቦች ናቸው፣ ነገር ግን በተለያዩ
+ቦታዎች ይሰራሉ እና የተለያዩ ዓላማዎችን ያገለግላሉ፦ ዳግም መግለጹ
+በ`chatCore.ts` ውስጥ የHTTP ሁኔታን ቀድሞ ይጽፈዋል፤ የምደባ
+ደንቦች ደግሞ በ`checkFallbackError()` ውስጥ የfallback `reason`ን
+እና የመቆለፊያ `scope`ን (`model` / `provider` / `connection`) ይመርጣሉ
 (`open-sse/services/accountFallback.ts`)።
 
-የምደባ ደንቦች ሙሉ የስህተት **ጽሑፍ**ን (እንደ
-`额度不足` ያሉ body markersን ለማዛመድ ያስፈልጋል) የሚያዩት በ`providerErrorRules.ts` ውስጥ ባለው
-`FULL_TEXT_RULE_PROVIDERS` የተፈቀዱ ዝርዝር ውስጥ ላሉ አቅራቢዎች ብቻ ነው — በአሁኑ ጊዜ `"agentrouter"` ብቻ። ለሌሎች
-**built-in catalog** አቅራቢዎች ሁሉ፣ `checkFallbackError`
-ለ`getProviderErrorRuleMatch` የሚያስተላልፈው የተዋቀረውን ስህተት (`{code, type}`) ብቻ ነው፤ ይህም
-በheader/status/code ላይ ለተመሠረቱ ደንቦች በቂ ቢሆንም body-text markersን ማየት አይችልም።
-`resolveRuleMatchBody()` ረዳት ይህን ምርጫ ያከናውናል፦ በተፈቀዱት ዝርዝር ውስጥ ላሉ አቅራቢዎች
-ሙሉ የስህተት ጽሑፍ፣ ካልሆነ የተዋቀረው ስህተት። አንድ
-**built-in** አቅራቢን ወደ `FULL_TEXT_RULE_PROVIDERS` ማከል በእያንዳንዱ አቅራቢ ደረጃ የሚደረግ ግልጽ
-opt-in ነው — ይህ የሚገኘው በዝርዝሩ ላይ ላልሆነ እያንዳንዱ አቅራቢ ነባሪው መንገድ
-byte-for-byte ሳይለወጥ እንዲቆይ ነው።
+የምደባ ደንቦች ሙሉ የስህተት **ጽሑፍ**ን (`额度不足` ያሉ የbody
+ምልክቶችን ለማዛመድ የሚያስፈልግ) የሚያዩት በ`providerErrorRules.ts`
+ውስጥ ባለው `FULL_TEXT_RULE_PROVIDERS` የፍቃድ ዝርዝር ውስጥ ላሉ
+አቅራቢዎች ብቻ ነው — በአሁኑ ጊዜ `"agentrouter"` ብቻ። ለሌሎች
+ሁሉም **አብሮገነብ ካታሎግ** አቅራቢዎች፣ `checkFallbackError`
+ለ`getProviderErrorRuleMatch` የሚያስተላልፈው የተዋቀረውን ስህተት
+ብቻ ነው (`{code, type}`)፤ ይህም በራስጌ/ሁኔታ/ኮድ ላይ ለተመሠረቱ
+ደንቦች በቂ ቢሆንም የbody-ጽሑፍ ምልክቶችን አያይም።
+`resolveRuleMatchBody()` ረዳት ይህን ምርጫ ያከናውናል፦ በፍቃድ
+ዝርዝሩ ውስጥ ላሉ አቅራቢዎች ሙሉ የስህተት ጽሑፍ፣ ለሌሎቹ ደግሞ
+የተዋቀረው ስህተት። **አብሮገነብ** አቅራቢን ወደ
+`FULL_TEXT_RULE_PROVIDERS` ማከል ግልጽ የበእያንዳንዱ-አቅራቢ
+የመግባት ምርጫ ነው — ይህ የተፈጠረው በዝርዝሩ ላይ ለሌለ
+እያንዳንዱ አቅራቢ ነባሪው መንገድ ባይት-በ-ባይት ሳይለወጥ
+እንዲቆይ ነው።
 
 የአንድ ደንብ `scope` (`model` / `provider` / `connection`) ከ
-`FULL_TEXT_RULE_PROVIDERS` የተለየ opt-in ነው፦ `checkFallbackError` እንደ
-`fallbackResult.ruleScope` ብቻ ያቀርበዋል፣ እና downstream consumers በዚያው ፋይል ውስጥ ባለው
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` የተፈቀዱ ዝርዝር ውስጥ ላሉ አቅራቢዎች ብቻ
-ከመረጃ ሰጪ መለያነት በላይ ያከብሩታል (`gated via
-honorsRuleLockScope()` — በአሁኑ ጊዜ `"agentrouter"` ብቻ)። አንድ አቅራቢ በዚያ የተፈቀዱ ዝርዝር ውስጥ ከገባ በኋላ
-የ`scope: "connection"` ማዛመጃ በተግባር ምን እንደሚያደርግ ከላይ ያለውን "እንደገና የተገለጹ የኮታ
-ስህተቶች" ክፍል ይመልከቱ።
+`FULL_TEXT_RULE_PROVIDERS` የተለየ የመግባት ምርጫ ነው፦
+`checkFallbackError` እንደ `fallbackResult.ruleScope` ብቻ ያቀርበዋል፣
+እና በታችኛው ፍሰት ያሉ ተጠቃሚዎች እንደ መረጃ መለያ ከመቁጠር
+ውጪ የሚያከብሩት፣ በዚያው ፋይል ውስጥ ባለው
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` የፍቃድ ዝርዝር ውስጥ ላሉ
+አቅራቢዎች ብቻ ነው (በ`honorsRuleLockScope()` በኩል የተገደበ —
+ዛሬ `"agentrouter"` ብቻ)። አንድ አቅራቢ በዚያ የፍቃድ ዝርዝር
+ውስጥ ከገባ በኋላ የ`scope: "connection"` ማዛመድ በትክክል ምን
+እንደሚያደርግ ከላይ «ዳግም የተገለጹ የኮታ ስህተቶች»ን ይመልከቱ።
 
-**#11104 — በኦፕሬተር የሚገለጹ ህጎች ሁለቱንም allowlists ያልፋሉ።** ኦፕሬተር ይህንን ፋይል ሳያርትም በሰርጥ ጊዜ (runtime) በአንድ-አቅራቢ ህግ ማውገዝ ይችላል በ`settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) መንገድ። የኦፕሬተር ህግን ከ
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` ጀርባ መዝጋት — የተቀረጹ የካታሎግ ህጎች **ነባሪ** ባህሪያትን ለመጠበቅ የታሰቡ allowlists — ህጉን ማውገዝ ራሱ የኦፕሬተሩ ግልጽ opt-in ስለሆነ፣ የቅንብሮቹን ሥርዓት ከዚያ በዝርዝሩ ከተመዘገቡት አቅራቢዎች በስተቀር ለሁሉም አቅራቢ ዋጋ-አልባ ያደርገዋል። `resolveRuleMatchBody()` እና `honorsRuleLockScope()` ሁለቱም መጀመሪያ
-`hasOperatorRuleForProvider()` ን ያመላክታሉ፦ የኦፕሬተር ህግ ያለው አቅራቢ ጥሬውን የስህተት ጽሑፍ ያገኛል እና የተገለጸለት `scope` ይከበርለታል — በማንኛውም allowlist ውስጥ ከሆነም ሆነ ካልሆነ።
+**#11104 — በኦፕሬተር የተገለጹ ደንቦች ሁለቱንም የፍቃድ ዝርዝሮች
+ያልፋሉ።** አንድ ኦፕሬተር ይህን ፋይል ሳያርትዕ በruntime
+በ`settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
+በኩል ለእያንዳንዱ አቅራቢ ደንብ ሊገልጽ ይችላል። የኦፕሬተርን
+ደንብ በ`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+ጀርባ መገደብ — የ**አብሮገነብ** ካታሎግ ደንቦችን ነባሪ ባህሪ
+ለመጠበቅ የታሰቡ የፍቃድ ዝርዝሮች — ደንቡን መግለጹ ራሱ
+የኦፕሬተሩ ግልጽ የመግባት ምርጫ በመሆኑ፣ በዝርዝሩ ውስጥ
+አስቀድመው ካሉት በስተቀር ለሁሉም አቅራቢዎች የቅንብሮችን
+ዘዴ ከንቱ ያደርገዋል። `resolveRuleMatchBody()` እና
+`honorsRuleLockScope()` ሁለቱም መጀመሪያ `hasOperatorRuleForProvider()`
+ይፈትሻሉ፦ የኦፕሬተር ደንብ ያለው አቅራቢ፣ በሁለቱ የፍቃድ
+ዝርዝሮች ውስጥ ቢኖርም ባይኖርም፣ ጥሬውን የስህተት ጽሑፍ
+ያገኛል እና የገለጸው `scope` ይከበርለታል።
 
-**የታወቀ ክፍተት — `providerRuleRegistry` ለHTTP 400 ፈጽሞ አይጠየቅም።**
-የ`checkFallbackError` `BAD_REQUEST` ቅርንጫፍ status 400 ን ሙሉ በሙሉ በራሱ pattern arrays (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS` ወዘተ በ`accountFallback.ts`) ያደራጃል እና ከላይ ካለው `configuredRule`/`getProviderErrorRuleMatch` ቅርንጫፍ ከመድረሱ በፊት ይመልሳል። `status: 400` ያለው የተቀረጸ የካታሎግ ህግ (ወይም የኦፕሬተር ህግ) በአገባብ ትክክል ነው ግን ፈጽሞ አይሰራም። ዛሬ ምንም ያለው ህግ 400 ን አይለይም፣ ስለዚህ በምርት ላይ ያለ ምንም ነገር አይነካም — ግን የወደፊት 400 ህግ መጀመሪያ ይህን ቅርንጫፍ መንካት ያስፈልገዋል፣ ይህም ከህግ መጨመር የሚበልጥ ትልቅ ለውጥ ነው (400 ን ለpattern-array ባህሪያት ላይ ገነት ቀርበው ላሉ አቅራቢዎች ሁሉ እንደገና ያደራጃል) እና ለነጠላ-አቅራቢ ህግ ተጨማሪነት ከሥፍራ ውጭ ነው።
+**የሚታወቅ ክፍተት — `providerRuleRegistry` ለHTTP 400 ፈጽሞ
+አይመከርም።** የ`checkFallbackError` `BAD_REQUEST` ቅርንጫፍ
+ሁኔታ 400ን ሙሉ በሙሉ በራሱ የስርዓተ-ጥለት ድርድሮች
+(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`, ወዘተ
+በ`accountFallback.ts` ውስጥ) ይመድባል፣ እና ከላዩ ያለው
+`configuredRule`/`getProviderErrorRuleMatch` ቅርንጫፍ ከመድረሱ በፊት
+ይመለሳል። `status: 400` ያለው አብሮገነብ የካታሎግ ደንብ
+(ወይም የኦፕሬተር ደንብ) በአገባብ ትክክለኛ ቢሆንም ፈጽሞ
+አይነሳም። ዛሬ ምንም ነባር ደንብ 400ን አያነጣጥርም፣ ስለዚህ
+በምርት ላይ ምንም ነገር አይጎዳም — ነገር ግን የወደፊት 400
+ደንብ መጀመሪያ ይህ ቅርንጫፍ እንዲሻሻል ያስፈልገዋል፤ ይህም
+ደንብ ብቻ ከማከል የበለጠ ትልቅ ለውጥ ነው (አስቀድመው
+በስርዓተ-ጥለት ድርድር ባህሪ ላይ ለሚመሰረቱ ሁሉም አቅራቢዎች
+400ን እንደገና ይመድባል)፣ እና የአንድ-አቅራቢ ደንብ ማከል
+ወሰን ውጭ ነው።
 
-### አዲስ quota-ን የሚሳሳት gateway ማከል
+### አዲስ quota-ን በተሳሳተ መንገድ የሚገልጽ gateway ማከል
 
-1. አንድ የህግ array በ`statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`) ውስጥ ይመዝግቡ። `textMarkers` ን ለአቅራቢው የሚመለከት ያድርጉት፤ ከ
-   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`) ጋር የሚጋጩ አጠቃላይ የእንግሊዝኛ ሐረጎችን ፈጽሞ አይድገሙ።
-2. በአማራጭነት ማደራጀት ህጎችን በ
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) ውስጥ ይመዝግቡ ትክክለኛውን የመዝጊያ scope ለመምረጥ (`connection` ለመለያ-አቀፍ quota፣ `model` ለአንድ-ሞዴል ስህተቶች)። ይህ ደረጃ በምርት ላይ ህጎቻቸው ሙሉውን የስህተት ጽሑፍ (body markers) ለሚፈልጉ አቅራቢዎች ብቻ ነው ሚና የሚጫወተው፦ የአቅራቢውን id በተመሳሳይ ፋይል ውስጥ ወደ `FULL_TEXT_RULE_PROVIDERS` ይጨምሩ — አለበለዚያ
-   `checkFallbackError` ህጉን የተዋቀረውን
-   `{code, type}` ስህተት ብቻ ይሰጠዋል እና body-text ህግ በቀጥታ ትራፊክ ላይ ፈጽሞ አይዛመድም።
-   በ`status`/`headers` ላይ ብቻ የሚዛመዱ ህጎች (እንደ Opencode's ወይም
-   Minimax's) ይህንን opt-in አይፈልጉም። በተናጠል፣ ህጉ
-   `scope: "connection"` ካወገዘ እና ዓላማው እውነተኛ የግንኙነት-አቀፍ cooldown
-   ተጨምሮ በተመሳሳይ ጥያቄ combo skip (የመረጃ መለያ ብቻ ሳይሆን) ከሆነ፣ የአቅራቢውን id በተመሳሳይ ፋይል ውስጥ ወደ `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ይጨምሩ — ይህ ነው
+1. አንድ የህግ ድርድር በ `statusRestatementRegistry` ውስጥ ይመዝግቡ
+   (`open-sse/config/upstreamStatusRestatement.ts`)። `textMarkers`
+   ለአቅራቢው ልዩ እንዲሆኑ ያድርጉ፤ ከ
+   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`)
+   ጋር የሚጋጩ አጠቃላይ የእንግሊዝኛ ሐረጎችን በፍጹም እንደገና አይጠቀሙ።
+2. በአማራጭነት ትክክለኛውን የመቆለፊያ መዳሰሻ ለመምረጥ
+   (`connection` ለመለያ-አቀፍ quota፣ `model` ለእያንዳንዱ-ሞዴል ስህተቶች)
+   የመደበኛ ህጎችን በ
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`)
+   ውስጥ ይመዝግቡ። ይህ ደረጃ በምርት (production) ውስጥ ህጎቻቸው ሙሉውን የስህተት ጽሑፍ
+   (የሰውነት ምልክቶች) ለሚፈልጉ አቅራቢዎች ብቻ ነው ውጤት የሚያስገኘው፦ የአቅራቢውን id
+   በተመሳሳይ ፋይል ውስጥ ወደ `FULL_TEXT_RULE_PROVIDERS` ያክሉ — አለበለዚያ
+   `checkFallbackError` ለህጉ ሁልጊዜ የተዋቀረውን
+   `{code, type}` ስህተት ብቻ ይሰጣል እና የሰውነት-ጽሑፍ ህግ በቀጥታ ትራፊክ
+   ላይ በፍጹም አይዛመድም። በብቸኛነት በ `status`/`headers` ላይ የሚዛመዱ ህጎች
+   (እንደ Opencode ወይም Minimax) ይህንን opt-in አያስፈልጋቸውም። በተለይም፣ ህጉ
+   `scope: "connection"` ከገለጸ እና ዓላማው እውነተኛ ግንኙነት-አቀፍ መቀዝቀዝ
+   በተጨማሪ በተመሳሳይ-ጥያቄ combo መዝለል (የሚያሳይ መለያ ብቻ ሳይሆን) ከሆነ፣
+   የአቅራቢውን id በተመሳሳይ ፋይል ውስጥ ወደ
+   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ያክሉ — ይህ ነው
+   `isAgentrouterConnectionQuotaScope()`-አይነት ፍጆታን በ
    `markAccountUnavailable()` (`src/sse/services/auth.ts`) እና
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`) ውስጥ `isAgentrouterConnectionQuotaScope()`-ዓይነት ፍጆታን የሚቆጣጠረው፤ ያለ እሱ፣ `scope`
-   በ`fallbackResult.ruleScope` አቅጣጫ ማለፉን ይቀጥላል ግን ምንም ነገር ላይ እርምጃ አይወስድበትም።
-3. `tests/unit/upstream-status-restatement.test.ts` ን እና
-   `tests/unit/agentrouter-error-rules.test.ts` ን የሚያንጸባርቁ unit tests ይጨምሩ (not-permanent / not-creditsExhausted ጥበቃዎችን ጨምሮ፣ እና — አቅራቢው allowlist ከፈለገ — `resolveRuleMatchBody()` ሙሉውን ጽሑፍ ለዚያ አቅራቢ ብቻ እንደሚመልስ የሚያረጋግጥ test)።
+   (`open-sse/services/combo/targetExhaustion.ts`) ውስጥ የሚቆጣጠረው፤
+   ያለ እሱ `scope` አሁንም በ `fallbackResult.ruleScope` በኩል ይፈስሳል
+   ነገር ግን ምንም ነገር በእሱ ላይ አይተገብርም።
+3. `tests/unit/upstream-status-restatement.test.ts` እና
+   `tests/unit/agentrouter-error-rules.test.ts` የሚመስሉ የክፍል ሙከራዎችን
+   ያክሉ (የ not-permanent / not-creditsExhausted ጠባቂዎችን ጨምሮ፣ እና —
+   አቅራቢው allowlist ከፈለገ — `resolveRuleMatchBody()` ሙሉውን ጽሑፍ
+   ለዚያ አቅራቢ ብቻ እንደሚመልስ የሚያረጋግጥ ሙከራ)።
 
-ለ`chatCore.ts`፣ `classifyError`፣ ወይም combo ምንም ለውጦች አያስፈልጉም።
+በ `chatCore.ts`፣ `classifyError` ወይም combo ላይ ምንም ለውጦች አያስፈልጉም።
 
-#### በEgress-bucket የተከፈተ መዝጊያ (#10880)
+#### በ egress-ባልዲ የተከፋፈለ መቆለፊያ (#10880)
 
-በ`EGRESS_BUCKETED_LOCK_PROVIDERS` (opencode ቤተሰብ) ውስጥ ያሉ አቅራቢዎች እንደ IP-bucketed upstream ይወሰዳሉ (የopencode ነጻ ደረጃ IP-bucketed ነው፣ account-bucketed አይደለም — #9611 ን ይመልከቱ)፦ status-429 `quota_exhausted` ተብሎ የተመደበ
-**ወይም** `rate_limit_exceeded`፣ ሮቴሽኑ መሞከር ከመቻሉ በፊት፣ የመጨረሻ የታወቀው egress IP ከወደቀው ግንኙነት ጋር ከሚዛመድ እያንዳንዱን allowlisted-family ግንኙነት ያቀዝቅዛል
-— N-1 የሚያውቁ-ወድቀው የupstream ጥሪዎችን ለማስወገድ (ከ#10460/#10525 ጋር ተመሳሳይ ቅርጽ)።
-`rate_limit_exceeded` በታቀደ ያካተተ ነው፦ በ`markAccountUnavailable`
-መንገድ ላይ የopencode-ን የሚመለከቱ ህጎች ፈጽሞ አይዛመዱም (ለ`checkFallbackError` ምንም headers/body አይሰጥም፣ opencode በ`FULL_TEXT_RULE_PROVIDERS` ውስጥ የለም)፣ ስለዚህ body ውስጥ የደንበኝነት ምዝገባ-quota ጽሑፍ የሚሸከም 429 ("monthly usage limit
-reached")፣ የ`status_429` ህግ ከመድረሱ በፊት በquota-text fallback
-(`buildSubscriptionQuotaFallback`፣ `accountFallback.ts`፤ 1h cooldown) `quota_exhausted` ተብሎ ይመደባል — በዚያን ጊዜ quota-text የሌለው 429 (ተራ rate limiting) በ`status_429` ህግ በኩል `rate_limit_exceeded` ተብሎ ይመደባል እና የIP ቤተሰቡን አሁንም ያቀዝቅዛል። ለallowlisted አቅራቢ IP-bucketed rate limit ከአለቀ quota ጋር ተመሳሳይ ምልክት ነው። ታማኝ ገደቦች፦
+በ `EGRESS_BUCKETED_LOCK_PROVIDERS` ውስጥ ያሉ አቅራቢዎች (opencode ቤተሰብ)
+እንደ IP-ባልዲ upstream ይቆጠራሉ (የ opencode ነፃ ደረጃ IP-ባልዲ ነው፣
+account-ባልዲ አይደለም — #9611 ይመልከቱ)፦ በ status-429 የተመደበ
+`quota_exhausted` **ወይም** `rate_limit_exceeded` የመጨረሻ የታወቀው egress IP
+ከወደቀው ግንኙነት ጋር ከሚዛመድ እያንዳንዱን የ allowlisted-ቤተሰብ ግንኙነት
+ያቀዝቅዋል — rotation እነዚህን ከመሞከሩ በፊት — N-1 እርግጠኛ-የማይሳኩ
+upstream ጥሪዎችን ለማስወገድ (ከ #10460/#10525 ጋር ተመሳሳይ ቅርጽ)።
+`rate_limit_exceeded` በዓላማ ተካትቷል፦ በ `markAccountUnavailable`
+መንገድ ላይ ለ-opencode-ልዩ ህጎች በፍጹም አይዛመዱም (ምንም headers/body
+ለ `checkFallbackError` አይሰጥም፣ opencode በ
+`FULL_TEXT_RULE_PROVIDERS` ውስጥ አይደለም)፣ ስለዚህ ሰውነቱ የደንበኝነት-ምዝገባ-quota
+ጽሑፍን ("monthly usage limit reached") የሚሸከም 429
+`status_429` ህግ ከመድረሱ በፊት በ quota-ጽሑፍ fallback
+(`buildSubscriptionQuotaFallback`፣ `accountFallback.ts`፤ የ 1h መቀዝቀዝ)
+`quota_exhausted` ተብሎ ይመደባል — በዚያን ጊዜ quota-ጽሑፍ-አልባ 429
+(ቀላል የመጠን ገደብ) በ `status_429` ህግ በኩል `rate_limit_exceeded` ተብሎ
+ይመደባል እና አሁንም የ IP ቤተሰቡን ያቀዝቅዋል። ለ allowlisted አቅራቢ፣
+IP-ባልዲ የመጠን ገደብ ከአልቋል ካለ quota ጋር ተመሳሳይ ምልክት ነው። ታማኝ
+ገደቦች፦
 
-- **በሚቻለው መጠን**፦ መቆለፊያው ከ`proxy_logs` የግንኙነቱን የመጨረሻ የታወቀ
-  `egress_ip` ይፈልጋል (የ24h መስኮት፣ የተመሳሰለ፣ ያለ መሸጎጫ)። ባዶ መሸጎጫ (የመውጫ
-  IP ፈጽሞ ካልተፈተሸ) ወይም ምንም ረድፍ ከሌለ → ያልተሳካው ግንኙነት አሁንም በቅርንጫፉ
-  ወደ ማቀዝቀዣ ጊዜ ይገባል (እንደ ዛሬው ይመዘገባል)፤ የማይቆለፈው ወንድም ግንኙነት ብቻ ነው።
-- **ፈጽሞ ቋሚ አይደለም**፦ የማቀዝቀዣ ጊዜው የሚታደስ የኮታ መስኮት ነው
+- **በተቻለ መጠን**: መቆለፊያው የግንኙነቱን የመጨረሻ የታወቀ `egress_ip`
+  ከ`proxy_logs` ያገኛል (የ24h መስኮት፣ የተመሳሰለ፣ ያለ መሸጎጫ)። ቀዝቃዛ መሸጎጫ (የመውጫ
+  IP ፈጽሞ ያልተፈተሸ) ወይም ረድፍ አለመኖር → የወደቀው ግንኙነት አሁንም በ
+  ቅርንጫፉ ይቀዘቅዛል (እንደ አሁኑ ይመዘገባል)፣ የማይቆለፈው ወንድም ግንኙነት ብቻ ነው።
+- **ፈጽሞ ቋሚ አይደለም**: ማቀዝቀዣው የሚታደስ የኮታ መስኮት ነው
   (`testStatus: "unavailable"`)፤ ቋሚ ሁኔታ ከIP-ደረጃ ምልክት ፈጽሞ አይወሰንም።
-  `disableCooling` ያላቸው ግንኙነቶች ቅርንጫፉን ሙሉ በሙሉ ይዘሉታል።
-- **ለተፈቀደለት ቤተሰብ የመቆለፊያው ዝርዝርነት ይለወጣል**፦ ይህ የወሰን
-  ለውጥ ነው፤ የወንድም ግንኙነት ማመቻቸት ብቻ አይደለም። opencode የ`passthroughModels`
-  አቅራቢ ነው፤ ስለዚህ ከዚህ ቅርንጫፍ በፊት 429 በእያንዳንዱ MODEL ደረጃ መቆለፍን ያስከትል
-  ነበር፤ አሁን ግን የግንኙነት ማቀዝቀዣ ጊዜን ያስከትላል — ምንም ወንድም ግንኙነት
-  ሳይኖር አንድ ግንኙነት ብቻ ለሚያስኬድ ኦፕሬተርም ጭምር። የopencode ደንብ ሰንጠረዥ
-  ቀድሞውኑ ትክክል ነው ብሎ የገለጸው ዝርዝርነት ይህ ነው (`scope: "connection"`,
-  `providerErrorRules.ts`)፤ ሆኖም opencode በ`HONORS_RULE_LOCK_SCOPE_PROVIDERS` ውስጥ
-  ስለሌለ እስካሁን ተግባራዊ አልሆነም። ቅርንጫፉ ከግንኙነት ወሰን ካለው የagentrouter
-  ቅርንጫፍ ጋር በተመሳሳይ መንገድ ያልተሳካውን ግንኙነት የማቀዝቀዣ ጊዜ +
-  `backoffLevel` ራሱ ይጽፍና ይመለሳል — ከዚህ በታች ያሉት በእያንዳንዱ ሞዴል
-  ደረጃ የሚደረገው እገዳና አጠቃላይ መንገዱ ፈጽሞ አይደረስባቸውም።
-- **Combo ተካትቷል**፦ እንደ agentrouter ቅርንጫፍ ሁሉ፣ ይህ ወሰን combo ጠሪ በ429 ላይ
-  የሚተገብረውን የ`persistUnavailableState`/`isCombo` ደረጃ ቅነሳ ሆን ብሎ ችላ
-  ይላል። በእያንዳንዱ ሞዴል ደረጃ የሚደረግ መቆለፍ የዚህ ወሰን ደካማ ቅርጽ አይደለም፤
-  የተሳሳተ አሃድ ነው፦ ስለተሟጠጠው IP ምንም አይናገርም፤ ስለዚህ የcombo ሽክርክሪት
-  በእያንዳንዱ ወንድም ግንኙነት አንድ በእርግጠኝነት የሚወድቅ ጥሪ ማባከኑን ይቀጥላል።
-- **የወንድም ግንኙነት ደኅንነት**፦ ቀድሞውኑ ቋሚ ሁኔታ ላይ ያለ
-  (banned/credits_exhausted) ወይም ረዘም ያለ የማቀዝቀዣ ጊዜ ውስጥ ያለ ወንድም
-  ግንኙነት ፈጽሞ አይተካም።
-- **የተወሰነ የፍቃድ ዝርዝር**፦ `EGRESS_BUCKETED_LOCK_PROVIDERS`ን ማስፋት ግልጽ
-  የባለቤት ውሳኔ ነው፤ አጠቃላይ ሽቦ አገናኝ የለም (ስርዓተ-ጥለት #10334/#10419)።
-  የወንድም ግንኙነት መጠይቁ ያንኑ የፍቃድ ዝርዝር እንደ SQL ቀጥተኛ እሴት ከመድገም
-  ይልቅ ያስተሳስረዋል፤ ስለዚህ ዝርዝሩን ማስፋት የአንድ መስመር ለውጥ ሆኖ ይቆያል።
-- **የመውጫ IP ሽክርክሪት፣ በሁለቱም አቅጣጫዎች**፦ የፍለጋ መስኮቱ (24h)
-  ከመውጫ-IP መሸጎጫ TTL (5 min) እጅግ የሰፋ ነው፤ ስለዚህ "የመጨረሻ የታወቀ IP"
-  ታሪክ እንጂ የአሁኑ ሁኔታ አይደለም። የግንኙነቱ proxy በመስኮቱ ውስጥ ከተቀያየረ፣
-  መቆለፊያው በእውነት የሚጋራውን IP **ሊያመልጠው** ይችላል (የተመዘገበው IP አዲሱ፣
-  ያልተሟጠጠው ነው) — በተመሳሳይም ከተሟጠጠው IP ከዚያ በኋላ ተቀይሮ የወጣን
-  ወንድም ግንኙነት **ወደ ማቀዝቀዣ ጊዜ ሊያስገባ** ይችላል። ሁለተኛው ሁኔታ ለዚያ
-  ወንድም ግንኙነት አንድ የማቀዝቀዣ ጊዜ መስኮት ያስከፍለዋል፤ ሁለቱም በታሪክ ላይ
-  የተመሠረተ ፍለጋ እንደሚኖሩት በሚቻለው መጠን የሚደረግ ገደቦች ተቀባይነት አግኝተዋል።
-- **ወጪ**፦ ሁለት የተገደቡ የ`proxy_logs` ቅኝቶች (በ`idx_pl_timestamp` በኩል
-  በመስኮት የተጣሩ)፣ በ429 ድግግሞሽ ጊዜ ብቻ። አዲስ ማውጫ የለም (migration 134
+  `disableCooling` ያላቸው ግንኙነቶች ቅርንጫፉን ሙሉ በሙሉ ይዘላሉ።
+- **ለተፈቀደለት ቤተሰብ የመቆለፊያ ጥራጥሬነት ይለወጣል**: ይህ የወሰን
+  ለውጥ ነው፣ የወንድም ግንኙነት ማመቻቸት ብቻ አይደለም። opencode የ`passthroughModels`
+  አቅራቢ ነው፣ ስለዚህ ከዚህ ቅርንጫፍ በፊት 429 በእያንዳንዱ MODEL የሚተገበር መቆለፍ ያስከትል ነበር፤ አሁን
+  ግን የግንኙነት ማቀዝቀዣን ያስከትላል — ምንም ወንድም ግንኙነት ሳይኖረው አንድ
+  ግንኙነት ብቻ ለሚያስኬድ ኦፕሬተርም ጭምር። ይህ የopencode ደንብ
+  ሰንጠረዥ ቀድሞውኑ ትክክል ነው ብሎ የሚገልጸው ጥራጥሬነት ነው (`scope: "connection"`,
+  `providerErrorRules.ts`)፤ opencode በ
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ውስጥ ስለሌለ እስካሁን ፈጽሞ አልተከበረም። ቅርንጫፉ የወደቀውን
+  ግንኙነት ማቀዝቀዣ + `backoffLevel` ራሱ ይጽፋል፣ የ
+  ግንኙነት-ወሰን ያለውን agentrouter ቅርንጫፍ በመኮረጅ፣ ከዚያም ይመለሳል — በእያንዳንዱ ሞዴል የሚተገበረው እገዳና
+  ከታች ያለው አጠቃላይ መንገድ ፈጽሞ አይደረስባቸውም።
+- **Combo ተካትቷል**: እንደ agentrouter ቅርንጫፍ፣ ወሰኑ አንድ combo ጠሪ
+  በ429 ላይ የሚተገብረውን `persistUnavailableState`/`isCombo` ደረጃ ቅነሳ ሆን ብሎ
+  ችላ ይላል። በእያንዳንዱ ሞዴል የሚተገበር መቆለፍ የዚህ ወሰን ደካማ ቅርጽ አይደለም፤
+  የተሳሳተ አሃድ ነው፦ ስለተሟጠጠው IP ምንም ነገር አይገልጽም፣ ስለዚህ የcombo
+  ሽክርክሪቱ በእያንዳንዱ ወንድም ግንኙነት አንድ በእርግጠኝነት የሚወድቅ ጥሪ ማባከኑን ይቀጥላል።
+- **የወንድም ግንኙነት ደህንነት**: ቀድሞውኑ ቋሚ ሁኔታ ላይ ያለ (banned/credits_exhausted)
+  ወይም ቀድሞውኑ ረዘም ያለ ማቀዝቀዣ ውስጥ ያለ ወንድም ግንኙነት ፈጽሞ አይተካም።
+- **ብቸኛ የፍቃድ ዝርዝር**: `EGRESS_BUCKETED_LOCK_PROVIDERS`ን ማስፋት ግልጽ
+  የባለቤት ውሳኔ ነው፤ አጠቃላይ ሽቦ አልባ ትስስር የለም (pattern #10334/#10419)። የ
+  ወንድም ግንኙነት መጠይቁ ያንኑ የፍቃድ ዝርዝር እንደ SQL
+  ሊተራል ከመድገም ይልቅ ያስራል፣ ስለዚህ ማስፋቱ የአንድ መስመር ለውጥ ሆኖ ይቆያል።
+- **የመውጫ IP ሽክርክሪት፣ በሁለቱም አቅጣጫዎች**: የፍለጋ መስኮቱ (24h) ከ
+  የመውጫ-IP መሸጎጫ TTL (5 min) በጣም ሰፊ ነው፣ ስለዚህ "የመጨረሻ የታወቀ IP" ታሪክ እንጂ
+  የአሁን ሁኔታ አይደለም። የአንድ ግንኙነት ፕሮክሲ በመስኮቱ ውስጥ ከተቀየረ
+  መቆለፊያው በእውነት የጋራ የሆነን IP **ሊያመልጠው** ይችላል (የተመዘገበው IP አዲሱ፣
+  ያልተሟጠጠው ነው) — በተመሳሳይም ከተሟጠጠው IP ከዚያ በኋላ
+  ርቆ የተቀየረን ወንድም ግንኙነት **ሊያቀዘቅዝ** ይችላል። ሁለተኛው ሁኔታ ያንን ወንድም ግንኙነት አንድ
+  የማቀዝቀዣ መስኮት ያስከፍለዋል፤ ሁለቱም በታሪክ ላይ የተመሠረተ ፍለጋ እንደሚኖሩት በተቻለ መጠን
+  የሚሠሩ ገደቦች ሆነው ተቀባይነት አግኝተዋል።
+- **ወጪ**: ሁለት ወሰን ያላቸው የ`proxy_logs` ቅኝቶች (በ
+  `idx_pl_timestamp` በኩል በመስኮት የተጣሩ)፣ በ429 ድግግሞሽ ብቻ። አዲስ ኢንዴክስ የለም (migration 134
   YAGNI)። መጠነኛ መጠን ባለው የእውነተኛ ትራፊክ DB ቅጂ ላይ ተለክቷል፤
-  ከፍተኛ-የውጤት መጠን ያለው ኢንስታንስ በዚያው መስኮት ውስጥ በተመጣጣኝ ሁኔታ
-  ተጨማሪ ረድፎችን ይይዛል።
+  ከፍተኛ ፍሰት ያለው ኢንስታንስ በዚያው መስኮት ውስጥ በተመጣጣኝ ሁኔታ ተጨማሪ ረድፎችን ይይዛል።
 
 ---
 

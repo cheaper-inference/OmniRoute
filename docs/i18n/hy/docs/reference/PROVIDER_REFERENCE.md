@@ -4,11 +4,11 @@
 
 ---
 
-> **Ավտոմատ ստեղծված** է `src/shared/constants/providers.ts` ֆայլից — մի՛ խմբագրեք ձեռքով։
-> Վերագեներացնելու համար՝ `npm run gen:provider-reference`
-> **Վերջին գեներացումը՝** 2026-10-18
+> **Ավտոմատ գեներացված է** `src/shared/constants/providers.ts`-ից — ձեռքով մի՛ խմբագրեք։
+> Վերագեներացրեք հետևյալով՝ `npm run gen:provider-reference`
+> **Վերջին գեներացումը՝** 2026-10-20
 
-Ընդհանուր պրովայդերներ՝ **375**։ Կատեգորիաների բաշխումը տե՛ս ստորև։
+Պրովայդերների ընդհանուր քանակը՝ **375**։ Ստորև տե՛ս բաժանումն ըստ կատեգորիաների։
 
 ## Կատեգորիաներ
 
@@ -460,8 +460,8 @@
 ## Ճշմարտության աղբյուրներ
 
 - Կատալոգ՝ [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Գրանցամատյան (մանրամասներ ըստ մոդելի)՝ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Կատարողներ՝ [`open-sse/executors/`](../../open-sse/executors/) (154 իրականացում)
+- Ռեեստր (յուրաքանչյուր մոդելի մանրամասները)՝ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Կատարիչներ՝ [`open-sse/executors/`](../../open-sse/executors/) (156 իրականացում)
 - Թարգմանիչներ՝ [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Տես նաև

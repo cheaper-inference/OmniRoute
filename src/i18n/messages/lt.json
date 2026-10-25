@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Dabar",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "Tinkamų įrašų nerasta. Patikrinkite formatą ir bandykite dar kartą.",
     "bulkImportSuccess": "Importavimas baigtas: sukurta – {created}, atnaujinta – {updated}, nepavyko – {failed}",
     "bulkImportErrorLine": "Eilutė {line}: {reason}",
-    "bulkImportMaxExceeded": "Vienu kartu galima importuoti ne daugiau kaip 100 tarpinių serverių",
+    "bulkImportMaxExceeded": "Vienu kartu galima importuoti ne daugiau kaip {max} tarpinių serverių",
     "bulkImportPreview": "Peržiūra",
     "clearAssignment": "(išvalyti priskyrimą)",
     "bulkProxyAssignment": "Masinis tarpinių serverių priskyrimas",

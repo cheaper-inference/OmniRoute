@@ -43,11 +43,11 @@ A na-achịkwa A2A site na mgba ọkụ **Endpoints → A2A**, ma agbanyụrụ 
 
 ---
 
-## Metọd JSON-RPC 2.0
+## Usoro JSON-RPC 2.0
 
-### `message/send` — Mmezu Kwekọrọ Oge
+### `message/send` — Mmezu Mekọrịta Ozugbo
 
-Na-eziga ozi na nka ma chere nzaghachi zuru ezu.
+Na-eziga ozi na nka ma chere maka nzaghachi zuru ezu.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Maka `smart-routing`, `metadata.combo` bụ mgbanwe doro anya nke na-akagbu
+`metadata.model` maka arịrịọ gateway ahụ; a na-eziga ya dịka ezigbo `model`,
+ọ bụghị dịka oghere JSON `x-combo` nke a na-eleghara anya. Igodo API nkịtị nke gateway na
+ikike nnweta maka ebe ọ bụla ka na-emetụta. A na-ajụ combo na-adịghị irè ma ọ bụ nke tọgbọ chakoo.
+
+Nsonaazụ ahụ na-egosi `requested_combo` (ebumnuche onye kpọrọ ya), `dispatched_model`
+(ezigbo arịrịọ gateway), `response_model` (nzaghachi gateway) na
+`confirmed_combo`. Oghere ikpeazụ ahụ ga-abụ `null` ma ọ bụrụ na gateway akọwaghị
+combo kpọmkwem. Ndekọ mkpebi A2A na-ejikọta mmezu naanị na
+combo akwadoro, ma na-edobe arịrịọ a na-akwadoghị dịka `requestedCombo`.
+
 **Nzaghachi:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Mgbasa SSE
+### `message/stream` — Nkwanye SSE Na-aga n'Ihu
 
-Ọ bụ otu ihe ahụ dị ka `message/send`, mana ọ na-eweghachi Mmemme Sava Zitere maka mgbasa ozugbo.
+Ọ bụ otu ihe ahụ dịka `message/send`, mana ọ na-eweghachi Server-Sent Events maka nkwanye ozugbo.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Mmemme SSE:**
+**Ihe Omume SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Jụọ Ọnọdụ Ọrụ
+### `tasks/get` — Nyochaa Ọnọdụ Ọrụ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ submitted → working → completed
 
 ---
 
-## Ihe Nlereanya Mwekota
+## Ọmụmaatụ Njikọ
 
 ### Python (requests)
 

@@ -380,6 +380,17 @@ concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled` ค่า
 เกตเดียวกันนี้ยังครอบคลุมกรณีก่อน dispatch ด้วย (#16319): เมื่อเป้าหมายทุกตัวของคอมโบถูกข้ามก่อนที่จะมีการพยายามใด ๆ เนื่องจากโมเดลของมันติดการล็อกชั่วคราวระยะสั้น เส้นทางแบบ zero-attempt จะรอการล็อกนั้นภายใต้เพดานเดียวกันแล้ว dispatch ใหม่ แทนที่จะตอบกลับด้วย `503 ALL_TARGETS_SKIPPED` ที่ไม่มีคำใบ้ เมื่อไม่อนุญาตให้รอ (เพดาน จำนวนครั้ง หรืองบประมาณหมด หรือฟีเจอร์ถูกปิด) การตอบกลับขั้นสุดท้ายจะถูกอัปเกรดเป็น
 `429 rate_limit_error` พร้อมพก `retry_after` / `reset_at` จากการหมดอายุของการล็อกชั่วคราวที่เร็วที่สุด ส่วนการล็อก quota, auth และ not-found จะยังคงเป็น 503 ที่ไม่มีคำใบ้
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. การควบคุมการเข้าคิวของ Request (v3.8.49 · issue #6593)
@@ -528,269 +539,217 @@ replay แบบไม่ตรวจสอบเด็ดขาด มีเพ
 
 ---
 
-## 7. การปรับสถานะ Upstream ใหม่ (Upstream Status Restatement) (ข้อผิดพลาดโควตาที่รายงานสถานะผิด)
+## 7. การตีความสถานะ Upstream ใหม่ (ข้อผิดพลาดโควตาที่รายงานสถานะผิด)
 
-**ขอบเขต:** upstream gateway หนึ่งแห่งที่รายงานการหมดโควตาชั่วคราวด้วย HTTP status ที่ไม่ถูกต้อง
+**ขอบเขต:** เกตเวย์ upstream แห่งเดียวที่รายงานการหมดโควตาชั่วคราวด้วยสถานะ HTTP ที่ไม่ถูกต้อง
 
-**วัตถุประสงค์:** แก้ไขสถานะที่ทำให้เข้าใจผิดก่อนการจำแนกประเภท (classification) เพื่อให้ผู้บริโภคฝั่ง downstream (fallback engine, การรวม combo, response ที่ส่งถึง client) เห็นธรรมชาติที่แท้จริงของความล้มเหลวว่าสามารถ retry ได้
+**วัตถุประสงค์:** แก้ไขสถานะที่ทำให้เข้าใจผิดก่อนการจำแนกประเภท (classification) เพื่อให้ผู้ใช้ปลายทาง (fallback engine, combo aggregation, และ response ที่ส่งถึง client) เห็นธรรมชาติที่แท้จริงของความล้มเหลวว่าสามารถ retry ได้
 
-Gateway บางแห่งส่งสัญญาณการหมดโควตาแบบชั่วคราวด้วย HTTP status ที่ไม่สามารถ
-retry ได้ `agentrouter.org` ส่งกลับ `403` (บางครั้ง `400`) พร้อม body ภาษาจีน
-(`用户额度不足` / `额度不足`) แทนที่จะเป็น `429` ตามมาตรฐาน Client อย่าง Claude
-Code ถือว่า `403` เป็นแบบถาวรและยกเลิก session และหากไม่มีการแก้ไข fallback
-engine จะจำแนกมันเป็น `AUTH_ERROR` แทนที่จะเป็น quota event
+เกตเวย์บางแห่งส่งสัญญาณการหมดโควตาชั่วคราวด้วยสถานะ HTTP ที่ไม่สามารถ retry ได้ `agentrouter.org` ส่งกลับ `403` (บางครั้ง `400`) พร้อมเนื้อความภาษาจีน (`用户额度不足` / `额度不足`) แทนที่จะเป็น `429` ตามมาตรฐาน Client อย่าง Claude Code ตีความ `403` เป็นความล้มเหลวถาวรและยกเลิกเซสชัน และหากไม่มีการแก้ไข fallback engine จะจำแนกมันเป็น `AUTH_ERROR` แทนที่จะเป็นเหตุการณ์โควตา
 
-**การใช้งานจริง (Implementation):**
+**การ implement:**
 
-- Registry + matcher: `open-sse/config/upstreamStatusRestatement.ts` — รายการกฎ
-  แยกตาม provider (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`) ซึ่งจับคู่ผ่าน `applyStatusRestatement()`
-- จุดเรียกใช้: บล็อก `providerFailure:` ใน `open-sse/handlers/chatCore.ts`
-  (ประมาณบรรทัดที่ 3654) ทันทีหลังจากที่ `parseUpstreamError()` แปลง upstream
-  response ที่มี error HTTP status (`!providerResponse.ok`) และก่อนที่การจำแนก
-  ประเภทใด ๆ จะทำงาน เพื่อให้ผู้บริโภค downstream ทุกตัวเห็นสถานะที่แก้ไขแล้ว
-  ข้อผิดพลาดที่ฝังอยู่ภายในสตรีม SSE ที่เป็น `200` จะไปตามเส้นทาง stream-parsing
-  แยกต่างหากในภายหลัง และ**ไม่**อยู่ในความคุ้มครองของ hook นี้ในปัจจุบัน — เป็น
-  ข้อจำกัดที่ทราบแล้ว ซึ่งยังไม่จำเป็นสำหรับ misstatus ของ agentrouter (ซึ่งปรากฏ
-  เป็น error HTTP status)
-- สิทธิ์ในการ retry: `429` อยู่ใน `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`) ดังนั้นข้อผิดพลาดที่ถูกปรับ
-  สถานะใหม่จึงมีช่วงเวลา retry จริง แทนที่จะปรากฏเป็น `403` ที่ใช้การไม่ได้แล้ว
-- ค่า `60s` แบบสังเคราะห์ของ `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
-  เป็นเพียงสิ่งที่ response ที่ถูกปรับสถานะใหม่บอกกับ **client** เท่านั้น มันไม่ใช่
-  ระยะเวลา cooldown/lockout ภายในของ connection เอง — ส่วนนั้นถูกควบคุมแยก
-  ต่างหากโดยกลไกใดก็ตามที่จัดการข้อผิดพลาดที่ถูกปรับสถานะใหม่จริง ๆ (escalating
-  backoff ของ Connection Cooldown, §2, ค่าฐาน `3s` สำหรับ provider แบบ API-key
-  หรือ Model Lockout, §3 สำหรับ provider แบบ per-model-quota เช่น agentrouter)
-  Router สามารถกลับมามีสิทธิ์ retry ภายในได้เร็วกว่าช่วงเวลา 60 วินาทีที่ประกาศให้
-  client ทราบ — เป็น headroom ที่ตั้งใจไว้ ไม่ใช่บั๊ก
+- Registry + matcher: `open-sse/config/upstreamStatusRestatement.ts` — รายการกฎต่อ provider หนึ่งรายการ (`{id, fromStatuses, toStatus, textMarkers,
+excludeMarkers, defaultRetryAfterMs}`) จับคู่ผ่าน `applyStatusRestatement()`
+- จุดเรียกใช้: บล็อก `providerFailure:` ใน `open-sse/handlers/chatCore.ts` (ประมาณบรรทัดที่ 3654) ทันทีหลังจากที่ `parseUpstreamError()` แยกวิเคราะห์ response จาก upstream ที่มีสถานะ HTTP แสดงข้อผิดพลาด (`!providerResponse.ok`) และก่อนที่การจำแนกประเภทใด ๆ จะทำงาน เพื่อให้ผู้ใช้ปลายทางทุกตัวเห็นสถานะที่แก้ไขแล้ว ข้อผิดพลาดที่ฝังอยู่ภายใน SSE stream ที่มีสถานะ `200` จะไปตามเส้นทางการแยกวิเคราะห์ stream แยกต่างหากในภายหลัง และ**ไม่**อยู่ภายใต้ hook นี้ในปัจจุบัน — เป็นข้อจำกัดที่รู้กัน ซึ่งยังไม่จำเป็นสำหรับสถานะผิดของ agentrouter (ซึ่งปรากฏเป็นสถานะ HTTP แสดงข้อผิดพลาด)
+- สิทธิ์ในการ retry: `429` อยู่ใน `RETRY_AFTER_ELIGIBLE_STATUSES` (`open-sse/services/combo/unavailableRetryGate.ts`) ดังนั้นข้อผิดพลาดที่ถูกตีความใหม่จึงมีช่วงเวลา retry ที่แท้จริง แทนที่จะปรากฏเป็น `403` ที่ตายสนิท
+- `defaultRetryAfterMs` แบบสังเคราะห์ `60s` (`upstreamStatusRestatement.ts`) เป็นเพียงสิ่งที่ response ที่ถูกตีความใหม่บอกกับ **client** เท่านั้น มันไม่ใช่ระยะเวลา cooldown/lockout ภายในของ connection — ส่วนนั้นถูกควบคุมแยกต่างหากโดยกลไกที่จัดการข้อผิดพลาดที่ถูกตีความใหม่จริง ๆ (backoff ที่เพิ่มขึ้นเรื่อย ๆ ของ Connection Cooldown, §2, ฐาน `3s` สำหรับ provider แบบ API-key หรือ Model Lockout, §3 สำหรับ provider แบบ per-model-quota เช่น agentrouter) Router สามารถกลับมามีสิทธิ์ retry ภายในได้เร็วกว่าช่วงเวลา 60 วินาทีที่ประกาศให้ client ทราบ — เป็นส่วนเผื่อที่ตั้งใจไว้ ไม่ใช่บั๊ก
 
-ข้อผิดพลาดแบบถาวร (`无权访问模型` ของ agentrouter — ไม่มีสิทธิ์เข้าถึงโมเดลนี้)
-จะไม่ถูกปรับสถานะใหม่เด็ดขาด: `excludeMarkers` จะยับยั้งกฎนั้นแม้ว่า `textMarkers`
-จะตรงก็ตาม ดังนั้นข้อผิดพลาดจึงคงสถานะเดิมไว้ และไม่มีอะไร retry มันตลอดไป กฎการ
-จำแนกประเภทของ provider ที่ตรงกัน (`agentrouter-model-access-denied` ใน
-`open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`, `scope: "model"`,
-base cooldown ที่ประกาศไว้ `6h`) จะถูกปรึกษาโดย `checkFallbackError`
-(`open-sse/services/accountFallback.ts`) _ก่อน_ early-return แบบ `FORBIDDEN`
-ทั่วไปของหมวด apikey โดยถูกควบคุมเงื่อนไขด้วย `honorsRuleLockScope(provider)`
-(#10334 — ปัจจุบันใช้เฉพาะ agentrouter ผ่าน allowlist
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` ใน `providerErrorRules.ts`) cooldown
-6 ชั่วโมงที่ประกาศไว้ของกฎจะไหลผ่านเป็น `fallbackResult.baseCooldownMs` แต่ยังคง
-ป้อนเข้าสู่เส้นทาง lockout แบบ per-model-quota ที่มีอยู่ก่อนแล้ว
-(`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()` ซึ่งไม่เปลี่ยนแปลง
-โดย #10334 ยกเว้นแหล่งที่มาของ cooldown): มันถูกบีบลงให้ไม่เกิน
-`mlSettings.maxCooldownMs` ของผู้ดูแลระบบ (ค่าเริ่มต้น `1_800_000ms` / 30 นาที)
-เช่นเดียวกับ model lockout อื่น ๆ ทุกตัว และ _เหตุผลของ lockout ที่ถูกบันทึกถาวร_
-ยังคงเป็น `"forbidden"` ที่ hardcode ไว้ก่อนหน้า ไม่ใช่ `"auth_error"` ของกฎ — มี
-เพียงระยะเวลา cooldown เท่านั้นที่ถูกเคารพตลอด end-to-end ไม่ใช่ reason string
-ตัว connection เองยังคงทำงานอยู่ โมเดลอื่นบน connection เดียวกันไม่ได้รับผลกระทบ
+ข้อผิดพลาดถาวร (`无权访问模型` ของ agentrouter — ไม่มีสิทธิ์เข้าถึงโมเดลนี้) จะไม่ถูกตีความใหม่เสมอ: `excludeMarkers` คัดค้านกฎแม้ว่า `textMarkers` จะตรง ดังนั้นข้อผิดพลาดจึงคงสถานะเดิมไว้ และไม่มีอะไร retry มันไปตลอดกาล กฎการจำแนกประเภท provider ที่ตรงกัน (`agentrouter-model-access-denied` ใน `open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`, `scope: "model"`, มี base cooldown ที่ประกาศไว้ `6h`) ถูกปรึกษาโดย `checkFallbackError` (`open-sse/services/accountFallback.ts`) _ก่อน_ early-return แบบทั่วไปของหมวด apikey `FORBIDDEN` โดยมีเงื่อนไขที่ `honorsRuleLockScope(provider)` (#10334 — ปัจจุบันใช้เฉพาะ agentrouter ผ่าน allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ใน `providerErrorRules.ts`) cooldown 6 ชั่วโมงที่ประกาศไว้ของกฎไหลผ่านไปเป็น `fallbackResult.baseCooldownMs` แต่ยังคงป้อนเข้าสู่เส้นทาง lockout แบบ per-model-quota ที่มีอยู่เดิม (`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()` ไม่เปลี่ยนแปลงโดย #10334 ยกเว้นแหล่งที่มาของ cooldown): มันถูก clamp ลงให้เท่ากับ `mlSettings.maxCooldownMs` ของผู้ดูแลระบบ (ค่าเริ่มต้น `1_800_000ms` / 30 นาที) เช่นเดียวกับ model lockout อื่น ๆ ทุกตัว และ _เหตุผล lockout ที่ถูกบันทึกถาวร_ ยังคงเป็น `"forbidden"` ที่ hardcode ไว้เดิม ไม่ใช่ `"auth_error"` ของกฎ — มีเพียงระยะเวลา cooldown เท่านั้นที่ถูกนำไปใช้ตลอดทั้งเส้นทาง ไม่ใช่สตริงเหตุผล ตัว connection เองยังคง active อยู่ โมเดลอื่น ๆ บน connection เดียวกันไม่ได้รับผลกระทบ
 
-ข้อผิดพลาดโควตาที่ถูกกล่าวซ้ำ (`额度不足`) ไปถึงกฎของผู้ให้บริการในระบบโปรดักชัน
-(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
-"connection"`, ไม่มีการประกาศคูลดาวน์ของตัวเอง — ค่าเริ่มต้น scaled backoff ของชั้น
-persistence จะมีผล) ตั้งแต่ #10334 เป็นต้นมา `scope` บน
-`ProviderErrorRuleMatch` ถูกนำไปใช้แบบ end-to-end แต่ **เฉพาะ** สำหรับผู้ให้บริการใน
-allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` —
-ปัจจุบันมีเพียง `"agentrouter"` ซึ่งถูกควบคุมผ่าน `honorsRuleLockScope()`) สำหรับ
-ผู้ให้บริการอื่นทั้งหมด `scope` ยังคงเป็นข้อมูลประกอบเท่านั้น เหมือนก่อน #10334
-ทุกประการ `checkFallbackError` จะเปิดเผย scope ของกฎที่ตรงกันเป็น
-`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
-(`src/sse/services/auth.ts`) เป็น guard ที่ใช้ร่วมกันซึ่งยืนยันว่า
-`ruleScope` นั้นปลอดภัยจริงที่จะปฏิบัติตามในฐานะสัญญาณระดับ connection ที่ฟื้นตัวได้เอง
-(scope `"connection"`, reason `quota_exhausted`, ไม่ใช่ `permanent` เด็ดขาด,
-ไม่ใช่ `creditsExhausted` เด็ดขาด — เป็นการป้องกันกฎในอนาคตที่อาจจับคู่ scope
-`"connection"` กับสถานะบัญชีแบบถาวร) มีผู้เรียกใช้สองราย:
+ข้อผิดพลาดโควตาที่ถูกตีความใหม่ (`额度不足`) ไปถึงกฎ provider ใน production (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, ไม่มี cooldown ที่ประกาศไว้เอง — ใช้ค่าเริ่มต้น backoff แบบปรับสเกลของชั้น persistence) ตั้งแต่ #10334 เป็นต้นมา `scope` บน `ProviderErrorRuleMatch` ถูกนำไปใช้ตลอดทั้งเส้นทาง แต่**เฉพาะ**สำหรับ provider ที่อยู่ใน allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` — วันนี้มีเฉพาะ `"agentrouter"` ควบคุมผ่าน `honorsRuleLockScope()`) สำหรับ provider อื่นทุกตัว `scope` ยังคงเป็นเพียงข้อมูลประกอบ เช่นเดียวกับก่อน #10334 `checkFallbackError` แสดง scope ของกฎที่ตรงกันเป็น `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) คือ guard ที่ใช้ร่วมกันซึ่งยืนยันว่า `ruleScope` ปลอดภัยที่จะนำไปใช้เป็นสัญญาณระดับ connection ที่กู้คืนตัวเองได้อย่างแท้จริง (scope `"connection"`, reason `quota_exhausted`, ไม่เคยเป็น `permanent`, ไม่เคยเป็น `creditsExhausted` — เป็นการป้องกันกฎในอนาคตที่จับคู่ scope `"connection"` กับสถานะบัญชีถาวร) มีผู้ใช้สองรายที่เรียกใช้มัน:
 
-- **Persistence** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  แทนที่จะตกไปยังสาขา lockout **ระดับโมเดล** ของผู้ให้บริการแบบ passthrough
-  (agentrouter เป็น `passthroughModels: true` → `hasPerModelQuota()`
-  คืนค่า `true`) มันจะใช้ **คูลดาวน์ของ connection ชั่วคราว** —
-  `testStatus: "unavailable"` + `rateLimitedUntil` ไม่ใช้สถานะสุดท้าย
-  (`credits_exhausted`/`banned`/`expired`) เด็ดขาด — เพื่อให้ connection
-  ฟื้นตัวได้เองเมื่อคูลดาวน์สิ้นสุดลง แทนที่จะต้องรีเซ็ตข้อมูลรับรองด้วยมือ
-  จะถูกข้ามสำหรับ connection ที่มี `disableCooling: true` (#2997): การ opt-out
-  นั้นจะตกไปยัง lockout ระดับโมเดลแทน (เป็น trade-off ที่บันทึกไว้ —
-  ดูความคิดเห็นในโค้ดเหนือสาขาดังกล่าว)
-- **การกำหนดเส้นทาง combo ในคำขอเดียวกัน** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): guard ตัวเดียวกันจะทำเครื่องหมาย
-  connection ลงในชุด `exhaustedConnections` ในหน่วยความจำ โดยมีคีย์เป็น
-  `${provider}:${connectionId}` การข้ามนี้จะเกิดขึ้นเฉพาะกับ target ที่เหลืออยู่ใน
-  คำขอเดียวกันที่ _มี `connectionId` นั้นอยู่แล้วบนออบเจกต์ target ของตัวเอง_
-  (`getExhaustedTargetSkipReason()`,
+- **การคงสถานะ** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  แทนที่จะเข้าสู่แขนงการล็อก **รายโมเดล** ของผู้ให้บริการแบบส่งผ่าน
+  (agentrouter มีค่า `passthroughModels: true` → `hasPerModelQuota()`
+  คืนค่า `true`) ระบบจะใช้ **ช่วงพักการเชื่อมต่อชั่วคราว** —
+  `testStatus: "unavailable"` + `rateLimitedUntil` โดยไม่กำหนดสถานะสิ้นสุดถาวร
+  (`credits_exhausted`/`banned`/`expired`) — เพื่อให้การเชื่อมต่อกู้คืนได้เอง
+  เมื่อช่วงพักสิ้นสุดลง แทนที่จะต้องรีเซ็ตข้อมูลประจำตัวด้วยตนเอง
+  ระบบจะข้ามขั้นตอนนี้สำหรับการเชื่อมต่อที่มี `disableCooling: true` (#2997):
+  การเลือกไม่ใช้ดังกล่าวจะเข้าสู่การล็อกรายโมเดลแทน (เป็นข้อแลกเปลี่ยนที่มีการบันทึกไว้ —
+  ดูความคิดเห็นในโค้ดเหนือแขนงนี้)
+- **การกำหนดเส้นทางแบบผสมภายในคำขอเดียวกัน** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): guard เดียวกันจะทำเครื่องหมาย
+  การเชื่อมต่อไว้ในชุดข้อมูล `exhaustedConnections` ภายในหน่วยความจำ โดยใช้คีย์
+  `${provider}:${connectionId}` การดำเนินการนี้จะข้ามเฉพาะเป้าหมายที่เหลือใน
+  คำขอเดียวกันซึ่ง _มี `connectionId` เดียวกันนั้นอยู่แล้ว_ ในออบเจ็กต์เป้าหมาย
+  ของตัวเอง (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` ก่อนการค้นหา `exhaustedConnections`) — combo แบบรายการโมเดล
-  ธรรมดา ซึ่ง target พี่น้องไม่มี `connectionId` ที่ปักหมุดไว้ของตัวเอง และจะถูก
-  resolve ต่อการ dispatch แต่ละครั้งจาก header
-  `X-OmniRoute-Selected-Connection-Id` ของการตอบกลับ จะไม่ตรงกับคีย์นั้นเลย สำหรับ
-  กรณีทั่วไปนั้น การป้องกันจริงจากการที่ leg ที่เหลือจะนำบัญชีที่เพิ่งหมดไปใช้ซ้ำนั้น
-  **ไม่ใช่** Set นี้ — แต่เป็นชั้น persistence ข้างต้น (ตอนนี้
-  `rateLimitedUntil` ของ connection อยู่ในอนาคต) ประกอบกับ guard ตัวเดียวกันนี้ที่
-  ระงับ `transientRateLimitedProviders` สำหรับความล้มเหลวดังกล่าว (ดู "การออกแบบ
-  สองขั้นตอน" และความคิดเห็นในโค้ดบนสาขา
+connectionId)` ก่อนค้นหาใน `exhaustedConnections`) — ชุดผสมแบบรายการโมเดลธรรมดา
+  ซึ่งเป้าหมายข้างเคียงไม่มี `connectionId` ที่ตรึงไว้เป็นของตัวเอง และระบบจะระบุ
+  การเชื่อมต่อเฉพาะในแต่ละครั้งที่ส่งคำขอจากส่วนหัว
+  `X-OmniRoute-Selected-Connection-Id` ของการตอบกลับ จะไม่มีทางพบคีย์ที่ตรงกันนั้น
+  สำหรับกรณีทั่วไปนี้ กลไกป้องกันที่แท้จริงไม่ให้ส่วนที่เหลือนำบัญชีที่เพิ่งหมดโควตา
+  กลับมาใช้ซ้ำจึงไม่ใช่ Set นี้ — แต่เป็นเลเยอร์การคงสถานะข้างต้น
+  (`rateLimitedUntil` ของการเชื่อมต่อถูกกำหนดเป็นเวลาในอนาคตแล้ว) ร่วมกับ guard
+  เดียวกันนี้ที่ระงับ `transientRateLimitedProviders` สำหรับความล้มเหลวดังกล่าว
+  (ดู "การออกแบบสองขั้นตอน" และความคิดเห็นในโค้ดของแขนง
   `isAgentrouterConnectionQuotaScope` ใน `targetExhaustion.ts`): เมื่อ Set นั้น
-  ไม่ถูกทำเครื่องหมาย การ force-allow ของ `allowRateLimitedConnection` ใน
-  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) จะ **ไม่**
-  ทำงานสำหรับ leg ที่เหลือของผู้ให้บริการ ดังนั้นฟิลเตอร์ `rateLimitedUntil`
-  ของการเลือกข้อมูลรับรอง (`src/sse/services/auth.ts:1238`) จะถูกปฏิบัติตามตามปกติ
-  และ leg ที่เหลือจะเลือก connection ของ agentrouter อีกตัวที่ยังมีสิทธิ์ หรือ
-  ล้มเหลวโดยไม่มีข้อมูลรับรองให้ใช้ — มันจะไม่บังคับกลับไปยัง
-  connection ที่สาขานี้เพิ่งทำให้เย็นลง
+  ไม่ถูกทำเครื่องหมาย การบังคับอนุญาตด้วย `allowRateLimitedConnection` ของ
+  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) จะไม่ทำงาน
+  กับส่วนที่เหลือของผู้ให้บริการ ดังนั้นตัวกรอง `rateLimitedUntil` ของการเลือก
+  ข้อมูลประจำตัว (`src/sse/services/auth.ts:1238`) จึงถูกใช้งานตามปกติ และส่วนที่เหลือ
+  จะเลือกการเชื่อมต่อ agentrouter อื่นที่ยังใช้งานได้ หรือไม่ก็ล้มเหลวเนื่องจาก
+  ไม่มีข้อมูลประจำตัวที่พร้อมใช้งาน — โดยจะไม่บังคับย้อนกลับไปใช้การเชื่อมต่อ
+  ที่แขนงนี้เพิ่งกำหนดช่วงพักไว้
 
-### การออกแบบสองขั้นตอน: การกล่าวซ้ำสถานะ แล้วจึงจัดประเภท
+### การออกแบบสองขั้นตอน: กำหนดสถานะใหม่ แล้วจึงจัดประเภท
 
-การกล่าวซ้ำสถานะ (`upstreamStatusRestatement.ts`) และกฎการจัดประเภทผู้ให้บริการ
-(`open-sse/config/providerErrorRules.ts`, `providerRuleRegistry`) เป็น registry
-แยกกันที่ทั้งคู่ใช้ provider id และ text markers เป็นคีย์ แต่ทำงานคนละที่และมี
-จุดประสงค์ต่างกัน: การกล่าวซ้ำจะเขียนสถานะ HTTP ใหม่ตั้งแต่เนิ่นๆ ใน `chatCore.ts`;
-กฎการจัดประเภทจะเลือก `reason` ของ fallback และล็อก `scope`
+การกำหนดสถานะใหม่ (`upstreamStatusRestatement.ts`) และกฎการจัดประเภทผู้ให้บริการ
+(`open-sse/config/providerErrorRules.ts`, `providerRuleRegistry`) เป็นรีจิสทรี
+คนละชุดที่ต่างก็ใช้รหัสผู้ให้บริการและตัวบ่งชี้ข้อความเป็นคีย์ แต่ทำงานคนละตำแหน่ง
+และมีวัตถุประสงค์ต่างกัน: การกำหนดสถานะใหม่จะแก้ไขสถานะ HTTP ตั้งแต่ช่วงต้นใน
+`chatCore.ts`; ส่วนกฎการจัดประเภทจะเลือก `reason` สำรองและ `scope` ของการล็อก
 (`model` / `provider` / `connection`) ภายใน `checkFallbackError()`
 (`open-sse/services/accountFallback.ts`)
 
-กฎการจัดประเภทจะเห็นเฉพาะ **ข้อความ** ข้อผิดพลาดแบบเต็ม (ซึ่งจำเป็นสำหรับการจับคู่
-body marker อย่าง `额度不足`) สำหรับผู้ให้บริการที่อยู่ใน allowlist
+กฎการจัดประเภทจะมองเห็น **ข้อความ** ข้อผิดพลาดฉบับเต็มเท่านั้น (ซึ่งจำเป็นต่อการจับคู่
+ตัวบ่งชี้ในเนื้อหา เช่น `额度不足`) สำหรับผู้ให้บริการที่อยู่ในรายการอนุญาต
 `FULL_TEXT_RULE_PROVIDERS` ใน `providerErrorRules.ts` — ปัจจุบันมีเพียง
-`"agentrouter"` สำหรับผู้ให้บริการ **built-in catalog** อื่นทั้งหมด
-`checkFallbackError` จะส่งเฉพาะข้อผิดพลาดแบบมีโครงสร้าง (`{code, type}`) ให้
-`getProviderErrorRuleMatch` ซึ่งเพียงพอสำหรับกฎที่อิง header/status/code แต่ไม่เห็น
-body-text marker ตัวช่วย `resolveRuleMatchBody()` ทำการเลือกนี้: ข้อความ
-ข้อผิดพลาดแบบเต็มสำหรับผู้ให้บริการที่อยู่ใน allowlist และข้อผิดพลาดแบบมีโครงสร้าง
-ในกรณีอื่น การเพิ่มผู้ให้บริการ **built-in** ลงใน `FULL_TEXT_RULE_PROVIDERS`
-เป็นการ opt-in ต่อผู้ให้บริการอย่างชัดเจน — มันมีอยู่เพื่อให้เส้นทางเริ่มต้นสำหรับ
-ผู้ให้บริการทุกรายที่ไม่อยู่ในรายการยังคงเหมือนเดิมทุกไบต์
+`"agentrouter"` สำหรับผู้ให้บริการรายอื่นทุกรายใน **แค็ตตาล็อกที่มีมาให้ในระบบ**
+`checkFallbackError` จะส่งให้ `getProviderErrorRuleMatch` เฉพาะข้อผิดพลาดแบบมีโครงสร้าง
+(`{code, type}`) ซึ่งเพียงพอสำหรับกฎที่อิงส่วนหัว/สถานะ/รหัส แต่ไม่สามารถตรวจจับ
+ตัวบ่งชี้ในข้อความเนื้อหาได้ ตัวช่วย `resolveRuleMatchBody()` เป็นผู้ดำเนินการเลือกนี้:
+ใช้ข้อความข้อผิดพลาดฉบับเต็มสำหรับผู้ให้บริการในรายการอนุญาต และใช้ข้อผิดพลาด
+แบบมีโครงสร้างสำหรับรายอื่น การเพิ่มผู้ให้บริการ **ที่มีมาให้ในระบบ** ลงใน
+`FULL_TEXT_RULE_PROVIDERS` เป็นการเลือกใช้โดยชัดแจ้งแยกตามผู้ให้บริการ —
+กลไกนี้มีไว้เพื่อให้เส้นทางเริ่มต้นของผู้ให้บริการทุกรายที่ไม่อยู่ในรายการ
+ยังคงเหมือนเดิมทุกไบต์
 
-`scope` ของกฎ (`model` / `provider` / `connection`) เป็นการ opt-in แยกต่างหากจาก
-`FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` จะเปิดเผยมันเป็น
-`fallbackResult.ruleScope` เท่านั้น และ consumer ปลายทางจะปฏิบัติตามในฐานะสิ่งอื่นที่
-ไม่ใช่แค่ป้ายข้อมูลประกอบ เฉพาะสำหรับผู้ให้บริการใน allowlist
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` ในไฟล์เดียวกัน (`gated via
-honorsRuleLockScope()` — ปัจจุบันมีเพียง `"agentrouter"`) ดู "ข้อผิดพลาดโควตาที่
-ถูกกล่าวซ้ำ" ข้างต้นเพื่อทราบว่าการจับคู่ `scope: "connection"` ทำอะไรจริงๆ
-เมื่อผู้ให้บริการอยู่ใน allowlist นั้นแล้ว
+`scope` ของกฎ (`model` / `provider` / `connection`) เป็นการเลือกใช้ที่แยกต่างหาก
+จาก `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` เพียงเปิดเผยค่านี้เป็น
+`fallbackResult.ruleScope` และตัวใช้งานปลายทางจะปฏิบัติต่อค่านี้เป็นอย่างอื่น
+นอกเหนือจากป้ายกำกับให้ข้อมูล เฉพาะสำหรับผู้ให้บริการที่อยู่ในรายการอนุญาต
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` ในไฟล์เดียวกันเท่านั้น (ควบคุมผ่าน
+`honorsRuleLockScope()` — ปัจจุบันมีเพียง `"agentrouter"`) ดูหัวข้อ
+"ข้อผิดพลาดโควตาที่กำหนดสถานะใหม่" ด้านบนสำหรับรายละเอียดว่าการจับคู่
+`scope: "connection"` จะทำอะไรจริงเมื่อผู้ให้บริการอยู่ในรายการอนุญาตดังกล่าว
 
-**#11104 — กฎที่ผู้ปฏิบัติการประกาศจะข้าม allowlist ทั้งสองรายการ** ผู้ปฏิบัติการสามารถ
-ประกาศกฎรายผู้ให้บริการได้ในขณะรันไทม์ผ่าน `settings.providerErrorRules`
+**#11104 — กฎที่ผู้ปฏิบัติงานประกาศจะข้ามรายการอนุญาตทั้งสองรายการ**
+ผู้ปฏิบัติงานสามารถประกาศกฎแยกตามผู้ให้บริการขณะรันไทม์ผ่าน
+`settings.providerErrorRules`
 (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-โดยไม่ต้องแก้ไขไฟล์นี้ การนำกฎของผู้ปฏิบัติการไปผูกกับเงื่อนไข
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — ซึ่งเป็น allowlist
-ที่มีไว้เพื่อปกป้องพฤติกรรม**ค่าเริ่มต้น**ของกฎในแคตตาล็อกที่มาพร้อมระบบ — จะ
-ทำให้กลไกการตั้งค่ากลายเป็นสิ่งที่ไร้ผลสำหรับทุกผู้ให้บริการยกเว้นเฉพาะรายที่ระบุไว้ที่นั่นแล้ว
-เนื่องจากการประกาศกฎถือเป็นการเลือกเข้าร่วมอย่างชัดเจนของผู้ปฏิบัติการอยู่แล้ว
-ทั้ง `resolveRuleMatchBody()` และ `honorsRuleLockScope()` ต่างตรวจสอบ
-`hasOperatorRuleForProvider()` ก่อน: ผู้ให้บริการที่มีกฎของผู้ปฏิบัติการจะได้รับ
-ข้อความข้อผิดพลาดแบบดิบและมี `scope` ที่ประกาศไว้ได้รับความเคารพ
-ไม่ว่าจะปรากฏอยู่ใน allowlist ทั้งสองรายการหรือไม่ก็ตาม
+โดยไม่ต้องแก้ไขไฟล์นี้ การนำกฎของผู้ปฏิบัติงานไปควบคุมด้วย
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — ซึ่งเป็น
+รายการอนุญาตที่มีไว้เพื่อปกป้องพฤติกรรม **เริ่มต้น** ของกฎในแค็ตตาล็อกที่มีมาให้ในระบบ —
+จะทำให้กลไกการตั้งค่าไม่เกิดผลกับผู้ให้บริการทุกราย ยกเว้นรายที่มีอยู่ในรายการแล้ว
+เนื่องจากการประกาศกฎก็คือการเลือกใช้อย่างชัดแจ้งของผู้ปฏิบัติงานอยู่แล้ว
+ทั้ง `resolveRuleMatchBody()` และ `honorsRuleLockScope()` จะตรวจสอบ
+`hasOperatorRuleForProvider()` ก่อน: ผู้ให้บริการที่มีกฎของผู้ปฏิบัติงานจะได้รับ
+ข้อความข้อผิดพลาดดิบและมีการบังคับใช้ `scope` ที่ประกาศไว้ ไม่ว่าจะปรากฏอยู่ใน
+รายการอนุญาตใดรายการหนึ่งด้วยหรือไม่ก็ตาม
 
-**ช่องโหว่ที่ทราบกัน — `providerRuleRegistry` ไม่เคยถูกตรวจสอบสำหรับ HTTP 400**
-สาขา `BAD_REQUEST` ของ `checkFallbackError` จำแนกสถานะ 400 ทั้งหมด
-ผ่านอาร์เรย์แพตเทิร์นของตัวเอง (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS` ฯลฯ ใน `accountFallback.ts`) และคืนค่าก่อนที่
-สาขา `configuredRule`/`getProviderErrorRuleMatch` ที่อยู่เหนือขึ้นไปจะถูกเข้าถึง
-กฎในแคตตาล็อกที่มาพร้อมระบบ (หรือกฎของผู้ปฏิบัติการ) ที่มี `status: 400`
-นั้นถูกต้องตามไวยากรณ์แต่จะไม่ถูกเรียกใช้เลย ในปัจจุบันยังไม่มีกฎใดพุ่งเป้าไปที่ 400
-ดังนั้นจึงไม่มีอะไรในโปรดักชันได้รับผลกระทบ — แต่กฎ 400 ในอนาคตจำเป็นต้องแก้ไข
-สาขานี้ก่อน ซึ่งเป็นการเปลี่ยนแปลงที่ใหญ่กว่าการเพิ่มกฎ (เพราะมันจำแนก 400 ใหม่
-สำหรับทุกผู้ให้บริการที่พึ่งพาพฤติกรรมของอาร์เรย์แพตเทิร์นอยู่แล้ว) และอยู่นอกขอบเขต
-ของการเพิ่มกฎสำหรับผู้ให้บริการรายเดียว
+**ช่องว่างที่ทราบ — ไม่มีการเรียกใช้ `providerRuleRegistry` สำหรับ HTTP 400**
+แขนง `BAD_REQUEST` ของ `checkFallbackError` จะจัดประเภทสถานะ 400 ทั้งหมด
+ผ่านอาร์เรย์รูปแบบของตัวเอง (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS` และอื่น ๆ ใน `accountFallback.ts`) และคืนค่าก่อน
+ที่จะไปถึงแขนง `configuredRule`/`getProviderErrorRuleMatch` ที่อยู่ด้านบน
+กฎในแค็ตตาล็อกที่มีมาให้ในระบบ (หรือกฎของผู้ปฏิบัติงาน) ที่มี `status: 400`
+มีไวยากรณ์ที่ถูกต้อง แต่จะไม่มีวันทำงาน ปัจจุบันไม่มีกฎใดกำหนดเป้าหมายเป็น 400
+ดังนั้นจึงไม่มีสิ่งใดในระบบที่ใช้งานจริงได้รับผลกระทบ — แต่กฎ 400 ในอนาคต
+จำเป็นต้องแก้ไขแขนงนี้ก่อน ซึ่งเป็นการเปลี่ยนแปลงที่ใหญ่กว่าการเพิ่มกฎ
+(เพราะจะจัดประเภท 400 ใหม่สำหรับผู้ให้บริการทุกรายที่พึ่งพาพฤติกรรมของอาร์เรย์รูปแบบ
+อยู่แล้ว) และอยู่นอกขอบเขตของการเพิ่มกฎสำหรับผู้ให้บริการเพียงรายเดียว
 
-### การเพิ่มเกตเวย์ที่รายงานโควตาผิดรายใหม่
+### การเพิ่มเกตเวย์ที่รายงานสถานะโควตาผิดพลาด
 
-1. ลงทะเบียนอาร์เรย์กฎหนึ่งรายการใน `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`) ให้ `textMarkers`
-   เจาะจงเฉพาะผู้ให้บริการ ห้ามนำวลีภาษาอังกฤษทั่วไปที่ทับซ้อนกับ
-   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`) มาใช้ซ้ำเด็ดขาด
-2. อาจเลือกที่จะลงทะเบียนกฎการจำแนกใน
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) เพื่อเลือก
-   ขอบเขตการล็อกที่ถูกต้อง (`connection` สำหรับโควตาระดับบัญชี, `model` สำหรับ
-   ข้อผิดพลาดระดับโมเดล) ขั้นตอนนี้จะเกิดผลในโปรดักชันเฉพาะกับผู้ให้บริการที่กฎ
-   ต้องการข้อความข้อผิดพลาดแบบเต็ม (ตัวทำเครื่องหมายในบอดี) เท่านั้น: ให้เพิ่ม
-   id ผู้ให้บริการลงใน `FULL_TEXT_RULE_PROVIDERS` ในไฟล์เดียวกัน — มิฉะนั้น
-   `checkFallbackError` จะส่งให้กฎเพียงข้อผิดพลาดแบบมีโครงสร้าง `{code, type}`
-   และกฎที่อ้างอิงข้อความในบอดีจะไม่มีทางจับคู่กับทราฟฟิคจริงได้เลย กฎที่จับคู่
-   บนพื้นฐานของ `status`/`headers` ล้วน ๆ (เช่นของ Opencode หรือ Minimax)
-   ไม่จำเป็นต้องเลือกเข้าร่วมนี้ แยกกันออกไป หากกฎประกาศ `scope: "connection"`
-   และเจตนาคือการคูลดาวน์ทั่วทั้ง connection จริง ๆ พร้อมกับการข้ามคอมโบในคำขอ
-   เดียวกัน (ไม่ใช่แค่ป้ายกำกับเชิงข้อมูล) ให้เพิ่ม id ผู้ให้บริการลงใน
-   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ในไฟล์เดียวกัน — นี่คือสิ่งที่ควบคุมการใช้
-   แบบ `isAgentrouterConnectionQuotaScope()` ใน `markAccountUnavailable()`
-   (`src/sse/services/auth.ts`) และ `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); หากไม่มีสิ่งนี้ `scope`
-   จะยังคงไหลผ่าน `fallbackResult.ruleScope` แต่ก็ไม่มีอะไรมาดำเนินการกับมัน
-3. เพิ่มยูนิตเทสต์โดยอิงตาม `tests/unit/upstream-status-restatement.test.ts`
-   และ `tests/unit/agentrouter-error-rules.test.ts` (รวมถึงตัวป้องกัน
-   not-permanent / not-creditsExhausted และ — หากผู้ให้บริการต้องการ
-   allowlist — เทสต์ที่ยืนยันว่า `resolveRuleMatchBody()` คืนค่าข้อความแบบเต็ม
-   สำหรับผู้ให้บริการรายนั้นเพียงรายเดียว)
+1. ลงทะเบียนอาร์เรย์กฎหนึ่งชุดใน `statusRestatementRegistry`
+   (`open-sse/config/upstreamStatusRestatement.ts`) โดยต้องทำให้ `textMarkers`
+   เฉพาะเจาะจงกับผู้ให้บริการแต่ละราย ห้ามนำวลีภาษาอังกฤษทั่วไปที่ชนกับ
+   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`) มาใช้ซ้ำ
+2. (ไม่บังคับ) ลงทะเบียนกฎการจำแนกประเภทใน
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) เพื่อเลือกขอบเขต
+   การล็อกที่ถูกต้อง (`connection` สำหรับโควตาระดับบัญชี, `model` สำหรับ
+   ข้อผิดพลาดระดับโมเดล) ขั้นตอนนี้จะมีผลใน production เฉพาะกับผู้ให้บริการ
+   ที่กฎของตนต้องการข้อความข้อผิดพลาดแบบเต็ม (body markers): ให้เพิ่ม provider id
+   ลงใน `FULL_TEXT_RULE_PROVIDERS` ในไฟล์เดียวกัน — มิฉะนั้น
+   `checkFallbackError` จะส่งเฉพาะข้อผิดพลาดที่มีโครงสร้าง `{code, type}`
+   ให้กับกฎเสมอ และกฎที่อิงข้อความ body จะไม่มีวันตรงกับทราฟฟิกจริง
+   กฎที่ตรงจาก `status`/`headers` เพียงอย่างเดียว (เช่น ของ Opencode หรือ
+   Minimax) ไม่จำเป็นต้อง opt-in นี้ อีกประการหนึ่ง หากกฎประกาศ
+   `scope: "connection"` และเจตนาคือการคูลดาวน์ทั้งการเชื่อมต่อจริง พร้อมข้าม
+   combo ในรีเควสต์เดียวกัน (ไม่ใช่แค่ป้ายกำกับเพื่อให้ข้อมูล) ให้เพิ่ม
+   provider id ลงใน `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ในไฟล์เดียวกัน —
+   นี่คือสิ่งที่ควบคุมการใช้งานสไตล์ `isAgentrouterConnectionQuotaScope()` ใน
+   `markAccountUnavailable()` (`src/sse/services/auth.ts`) และ
+   `applyComboTargetExhaustion()`
+   (`open-sse/services/combo/targetExhaustion.ts`) หากไม่มีสิ่งนี้ `scope`
+   จะยังคงไหลผ่าน `fallbackResult.ruleScope` แต่จะไม่มีอะไรนำไปใช้งาน
+3. เพิ่ม unit test โดยอิงตาม `tests/unit/upstream-status-restatement.test.ts`
+   และ `tests/unit/agentrouter-error-rules.test.ts` (รวมถึง guard สำหรับ
+   not-permanent / not-creditsExhausted และ — หากผู้ให้บริการต้องการ allowlist —
+   เทสต์ที่ยืนยันว่า `resolveRuleMatchBody()` คืนข้อความเต็มเฉพาะสำหรับ
+   ผู้ให้บริการนั้น)
 
-ไม่จำเป็นต้องแก้ไข `chatCore.ts`, `classifyError` หรือ combo ใด ๆ
+ไม่จำเป็นต้องเปลี่ยนแปลง `chatCore.ts`, `classifyError` หรือ combo แต่อย่างใด
 
-#### การล็อกแบบแบ่งตาม egress (#10880)
+#### การล็อกแบบกลุ่ม egress (#10880)
 
-ผู้ให้บริการใน `EGRESS_BUCKETED_LOCK_PROVIDERS` (ตระกูล opencode) จะถูกปฏิบัติ
-เสมือนเป็นอัปสตรีมที่แบ่งกลุ่มตาม IP (ระดับฟรีของ opencode แบ่งตาม IP ไม่ใช่
-แบ่งตามบัญชี — ดู #9611): สถานะ 429 ที่ถูกจำแนกเป็น `quota_exhausted`
-**หรือ** `rate_limit_exceeded` จะทำให้ทุก connection ในตระกูลที่อยู่ใน allowlist
-ซึ่ง IP ขาออกล่าสุดที่ทราบตรงกับของ connection ที่ล้มเหลว ถูกคูลดาวน์ก่อน
-ที่การหมุนเวียนจะได้ลองใช้งาน
-— เพื่อหลีกเลี่ยงการเรียกอัปสตรีมที่จะล้มเหลวแน่นอน N-1 ครั้ง (รูปแบบเดียวกับ #10460/#10525)
-ที่รวม `rate_limit_exceeded` ไว้ด้วยนั้นเป็นเจตนา: บนเส้นทาง `markAccountUnavailable`
-กฎเฉพาะของ opencode จะไม่ถูกจับคู่เลย (ไม่มี headers/body ส่งให้
-`checkFallbackError`, opencode ไม่ได้อยู่ใน `FULL_TEXT_RULE_PROVIDERS`) ดังนั้น 429
-ที่บอดีมีข้อความโควตาการสมัครใช้บริการ ("monthly usage limit
-reached") จะถูกจำแนกเป็น `quota_exhausted` โดยการสำรองข้อความโควตา
-(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; คูลดาวน์ 1 ชม.) ก่อน
-ที่กฎ `status_429` จะถูกเข้าถึงเสียอีก — ในขณะที่ 429 ที่ไม่มีข้อความโควตา
-(การจำกัดอัตราปกติ) จะถูกจำแนกผ่านกฎ `status_429` เป็น `rate_limit_exceeded`
-และยังคงคูลดาวน์ตระกูล IP อยู่ สำหรับผู้ให้บริการที่อยู่ใน allowlist การจำกัด
-อัตราแบบแบ่งตาม IP ถือเป็นสัญญาณเดียวกันกับโควตาที่หมดไป ข้อจำกัดอย่างตรงไปตรงมา:
+ผู้ให้บริการใน `EGRESS_BUCKETED_LOCK_PROVIDERS` (กลุ่ม opencode) จะถูกปฏิบัติ
+เหมือน upstream ที่จัดกลุ่มตาม IP (free tier ของ opencode จัดกลุ่มตาม IP
+ไม่ใช่ตามบัญชี — ดู #9611): เมื่อ status-429 ถูกจำแนกเป็น `quota_exhausted`
+**หรือ** `rate_limit_exceeded` การเชื่อมต่อทุกตัวในกลุ่มที่อยู่ใน allowlist
+ซึ่งมี egress IP ล่าสุดที่ทราบตรงกับของการเชื่อมต่อที่ล้มเหลว จะถูกคูลดาวน์
+ก่อนที่ rotation จะได้ลองใช้งาน
+— เพื่อหลีกเลี่ยงการเรียก upstream ที่รับประกันว่าล้มเหลว N-1 ครั้ง (รูปแบบเดียวกับ #10460/#10525)
+การรวม `rate_limit_exceeded` นั้นตั้งใจไว้โดยเจตนา: บนเส้นทาง `markAccountUnavailable`
+กฎเฉพาะของ opencode จะไม่ตรงเลย (ไม่มี headers/body ถูกส่งให้
+`checkFallbackError`, opencode ไม่ได้อยู่ใน `FULL_TEXT_RULE_PROVIDERS`) ดังนั้น
+429 ที่ body มีข้อความโควตาสมาชิก ("monthly usage limit
+reached") จะถูกจำแนกเป็น `quota_exhausted` โดย quota-text fallback
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; คูลดาวน์ 1 ชั่วโมง)
+ก่อนที่กฎ `status_429` จะถูกพิจารณา — ขณะที่ 429 ที่ไม่มีข้อความโควตา
+(rate limiting ธรรมดา) จะถูกจำแนกผ่านกฎ `status_429` เป็น `rate_limit_exceeded`
+และยังคงคูลดาวน์กลุ่ม IP นั้นอยู่ดี สำหรับผู้ให้บริการที่อยู่ใน allowlist
+rate limit แบบจัดกลุ่มตาม IP คือสัญญาณเดียวกับโควตาที่หมดไป ข้อจำกัดที่ต้องยอมรับ:
 
-- **Best-effort**: ล็อกจะค้นคืน `egress_ip` ล่าสุดที่รู้จักของการเชื่อมต่อ
-  จาก `proxy_logs` (หน้าต่าง 24 ชั่วโมง, ทำงานแบบ synchronous, ไม่มี cache)
-  หาก cold cache (ไม่เคย probe egress IP) หรือไม่มีแถวข้อมูล →
-  การเชื่อมต่อที่ล้มเหลวยังคงถูก cool โดย branch นี้อยู่ดี
-  (บันทึกเหมือนเดิม) เพียงแต่ไม่มี sibling ใดถูกล็อก
-- **ไม่มีทางเป็น terminal**: cooldown คือหน้าต่างโควต้าที่ต่ออายุได้
-  (`testStatus: "unavailable"`); สถานะถาวรจะไม่ถูกสร้างขึ้นจาก
-  สัญญาณระดับ IP เสมอ การเชื่อมต่อที่ `disableCooling` จะข้าม branch
-  นี้ทั้งหมด
-- **ความละเอียดของล็อกเปลี่ยนไปสำหรับตระกูลที่อยู่ใน allowlist**: นี่คือ
-  การเปลี่ยน scope ไม่ใช่แค่การ optimize sibling opencode เป็น
-  provider แบบ `passthroughModels` ดังนั้นก่อนมี branch นี้ 429 จะก่อให้เกิด
-  lockout แบบต่อ-MODEL; ตอนนี้มันสร้าง connection cooldown แทน —
-  รวมถึงกรณี operator ที่รันการเชื่อมต่อเดียวโดยไม่มี sibling เลยก็ตาม
-  นั่นคือความละเอียดที่ตาราง rule ของ opencode ประกาศไว้แล้วว่าถูกต้อง
-  (`scope: "connection"`, `providerErrorRules.ts`) แต่ยังไม่เคยถูกใช้งานจริง
-  เพราะ opencode ไม่ได้อยู่ใน
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` branch นี้เขียน cooldown +
-  `backoffLevel` ของการเชื่อมต่อที่ล้มเหลวด้วยตัวเอง โดยเลียนแบบ branch ของ
-  agentrouter ที่เป็น connection-scoped แล้ว return — บล็อก per-model
-  และ generic path ด้านล่างจะไม่ถูกเข้าถึงเลย
-- **รวม combo ด้วย**: เช่นเดียวกับ branch ของ agentrouter scope นี้จงใจ
-  เพิกเฉยต่อการ downgrade `persistUnavailableState`/`isCombo` ที่
-  combo caller ใช้กับ 429 lockout แบบ per-model ไม่ใช่ scope นี้
-  ในรูปแบบที่อ่อนกว่า แต่มันคือหน่วยที่ผิด: มันไม่บอกอะไรเลยเกี่ยวกับ IP
-  ที่หมดโควต้า ดังนั้น combo rotation จึงจะยังคงเผาผลาญ call ที่รับประกันว่า
-  ล้มเหลวหนึ่งครั้งต่อ sibling
-- **ความปลอดภัยของ sibling**: sibling ที่เป็น terminal อยู่แล้ว
+- **แบบพยายามเต็มที่ (best-effort)**: ล็อกจะแกะหา `egress_ip` ล่าสุดที่ทราบ
+  ของการเชื่อมต่อจาก `proxy_logs` (ช่วงย้อนหลัง 24 ชั่วโมง แบบ synchronous
+  ไม่มีแคช) กรณีแคชว่าง (ไม่เคยตรวจสอบ egress IP มาก่อน) หรือไม่มีแถวข้อมูล
+  → การเชื่อมต่อที่ล้มเหลวยังคงถูก cool โดย branch นั้น (บันทึกเหมือนปัจจุบัน)
+  เพียงแต่ไม่มี sibling ใดถูกล็อก
+- **ไม่เป็นสถานะสิ้นสุดเสมอ (never terminal)**: cooldown คือหน้าต่างโควต้าที่
+  ต่ออายุได้ (`testStatus: "unavailable"`); สถานะถาวรจะไม่ถูกอนุมานมาจาก
+  สัญญาณระดับ IP เสมอไป การเชื่อมต่อแบบ `disableCooling` จะข้าม branch
+  นี้ไปทั้งหมด
+- **ความละเอียดของล็อกเปลี่ยนไปสำหรับตระกูลที่อยู่ใน allowlist**: นี่คือการ
+  เปลี่ยนขอบเขต ไม่ใช่เพียงการเพิ่มประสิทธิภาพ sibling opencode เป็น
+  provider แบบ `passthroughModels` ดังนั้นก่อน branch นี้ 429 จะทำให้เกิด
+  การล็อกเอาต์ระดับต่อ-MODEL; ตอนนี้มันสร้าง connection cooldown แทน —
+  รวมถึงกรณี operator ที่รันการเชื่อมต่อเพียงตัวเดียวโดยไม่มี sibling เลย
+  นั่นคือความละเอียดที่ตารางกฎของ opencode ประกาศไว้แล้วว่าถูกต้อง
+  (`scope: "connection"`, `providerErrorRules.ts`) แต่ยังไม่เคยถูกใช้จริง
+  เพราะ opencode ไม่ได้อยู่ใน `HONORS_RULE_LOCK_SCOPE_PROVIDERS` branch
+  นี้เขียน cooldown + `backoffLevel` ของการเชื่อมต่อที่ล้มเหลวเอง โดยเลียนแบบ
+  branch ของ agentrouter ที่ใช้ขอบเขตระดับ connection แล้ว return —
+  การบล็อกแบบต่อ-model และเส้นทางทั่วไปด้านล่างจะไม่ถูกเรียกถึงเลย
+- **รวม combo ด้วย**: เช่นเดียวกับ branch ของ agentrouter ขอบเขตนี้จงใจ
+  เพิกเฉยต่อการลดระดับ `persistUnavailableState`/`isCombo` ที่ผู้เรียกแบบ
+  combo ใช้กับ 429 การล็อกเอาต์แบบต่อ-model ไม่ใช่รูปแบบที่อ่อนกว่าของ
+  ขอบเขตนี้ แต่เป็นหน่วยที่ผิด: มันไม่ได้บอกอะไรเลยเกี่ยวกับ IP ที่หมดโควต้า
+  ดังนั้นการหมุนเวียน combo จะยังคงเผาการเรียกที่การันตีว่าล้มเหลวหนึ่งครั้ง
+  ต่อ sibling หนึ่งตัว
+- **ความปลอดภัยของ sibling**: sibling ที่เป็นสถานะสิ้นสุดอยู่แล้ว
   (banned/credits_exhausted) หรืออยู่ใน cooldown ที่ยาวกว่าอยู่แล้ว
   จะไม่ถูกเขียนทับเด็ดขาด
-- **Allowlist แบบปิด**: การขยาย `EGRESS_BUCKETED_LOCK_PROVIDERS` เป็น
-  การตัดสินใจอย่างชัดแจ้งของเจ้าของ; ไม่มีการ wiring แบบ generic
-  (pattern #10334/#10419) query ของ sibling จะ bind กับ allowlist
-  เดียวกันนั้นแทนที่จะเขียนซ้ำเป็น SQL literal ทำให้การขยาย allowlist
-  ยังคงเป็นการแก้ไขเพียงบรรทัดเดียว
-- **การหมุนเวียน Egress IP ทั้งสองทิศทาง**: หน้าต่างการค้นหา (24 ชั่วโมง)
-  กว้างกว่า TTL ของ egress-IP cache (5 นาที) มาก ดังนั้น "IP ล่าสุดที่รู้จัก"
-  จึงเป็นประวัติ ไม่ใช่สถานะปัจจุบัน หาก proxy ของการเชื่อมต่อหมุนเวียน
-  ภายในหน้าต่างนั้น ล็อกอาจ **พลาด** IP ที่ใช้ร่วมกันจริงๆ (IP ที่บันทึกไว้คือ
-  IP ใหม่ที่ยังไม่หมดโควต้า) — และในทางกลับกัน มันอาจ **cool sibling ที่
-  หมุนออกไปแล้ว** จาก IP ที่หมดโควต้า กรณีหลังทำให้ sibling นั้นเสีย
-  หน้าต่าง cooldown ไปหนึ่งรอบ; ทั้งสองกรณีเป็นข้อจำกัดแบบ best-effort
-  ที่ยอมรับได้ของการค้นหาที่อิงจากประวัติ
-- **ต้นทุน**: การ scan แบบมีขอบเขตสองครั้งบน `proxy_logs` (กรองตามหน้าต่างผ่าน
-  `idx_pl_timestamp`) เฉพาะเมื่อเกิด 429 เท่านั้น ไม่มี index ใหม่
-  (migration 134 YAGNI) วัดผลบนสำเนา DB จากทราฟฟิกจริงขนาดปานกลาง;
-  instance ที่มี throughput สูงจะเก็บแถวข้อมูลมากขึ้นตามสัดส่วน
-  ในหน้าต่างเดียวกัน
+- **Allowlist แบบจำกัดเฉพาะ**: การขยาย `EGRESS_BUCKETED_LOCK_PROVIDERS`
+  เป็นการตัดสินใจโดยชัดแจ้งของเจ้าของ; ไม่มีการเดินสายแบบทั่วไป
+  (pattern #10334/#10419) คิวรี sibling จะผูกกับ allowlist เดียวกันนั้น
+  แทนที่จะเขียนซ้ำเป็น SQL literal ดังนั้นการขยายจึงยังคงเป็นการเปลี่ยนแปลง
+  เพียงบรรทัดเดียว
+- **การหมุนเวียน Egress IP ทั้งสองทิศทาง**: ช่วงเวลาการค้นหา (24 ชั่วโมง)
+  กว้างกว่า TTL ของแคช egress-IP (5 นาที) มาก ดังนั้น "IP ล่าสุดที่ทราบ"
+  จึงเป็นประวัติ ไม่ใช่สถานะปัจจุบัน หากพร็อกซีของการเชื่อมต่อหมุนเวียน
+  ภายในช่วงเวลานั้น ล็อกอาจ **พลาด** IP ที่ใช้ร่วมกันจริง (IP ที่บันทึกไว้
+  คือ IP ใหม่ที่ยังไม่หมดโควต้า) — และในทางกลับกันอย่างสมมาตร อาจ
+  **cool sibling ที่หมุนออกไปแล้ว** จาก IP ที่หมดโควต้า กรณีหลังทำให้
+  sibling นั้นเสียหน้าต่าง cooldown ไปหนึ่งรอบ; ทั้งสองกรณีถือเป็นข้อจำกัด
+  แบบ best-effort ที่ยอมรับได้ของการค้นหาที่อิงประวัติ
+- **ต้นทุน**: การสแกน `proxy_logs` แบบจำกัดขอบเขตสองครั้ง (กรองตามช่วงเวลา
+  ผ่าน `idx_pl_timestamp`) เฉพาะตามความถี่ของ 429 เท่านั้น ไม่มีดัชนีใหม่
+  (migration 134 YAGNI) วัดผลบนสำเนาฐานข้อมูลทราฟฟิกจริงขนาดปานกลาง;
+  อินสแตนซ์ที่มีทรูพุตสูงจะเก็บแถวในช่วงเวลาเดียวกันมากขึ้นตามสัดส่วน
 
 ---
 

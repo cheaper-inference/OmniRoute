@@ -4,11 +4,11 @@
 
 ---
 
-> **በራስ-ሰር የተፈጠረ** ከ `src/shared/constants/providers.ts` — በእጅ አታርትዙት።
-> በዚህ እንደገና ይፍጠሩ፦ `npm run gen:provider-reference`
-> **በመጨረሻ የተፈጠረው፦** 2026-10-18
+> `src/shared/constants/providers.ts` ውስጥ ካለው **በራስ-ሰር የተፈጠረ** — በእጅ አያርትዑ።
+> በዚህ እንደገና ያመንጩ፦ `npm run gen:provider-reference`
+> **ለመጨረሻ ጊዜ የተፈጠረው፦** 2026-10-20
 
-ጠቅላላ አቅራቢዎች፦ **375**። የምድብ ክፍፍሉን ከዚህ በታች ይመልከቱ።
+ጠቅላላ አቅራቢዎች፦ **375**። የምድብ ዝርዝሩን ከዚህ በታች ይመልከቱ።
 
 ## ምድቦች
 
@@ -459,10 +459,10 @@
 
 ## የእውነት ምንጮች
 
-- ካታሎግ፡ [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- መዝገብ (ለእያንዳንዱ ሞዴል ዝርዝሮች)፡ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- አስፈጻሚዎች፡ [`open-sse/executors/`](../../open-sse/executors/) (154 ትግበራዎች)
-- ተርጓሚዎች፡ [`open-sse/translator/`](../../open-sse/translator/)
+- ካታሎግ፦ [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- መዝገብ (የእያንዳንዱ ሞዴል ዝርዝሮች)፦ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- አስፈጻሚዎች፦ [`open-sse/executors/`](../../open-sse/executors/) (156 ትግበራዎች)
+- ተርጓሚዎች፦ [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ተጨማሪ ይመልከቱ
 

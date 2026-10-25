@@ -459,6 +459,17 @@ agotados, o la función desactivada), la respuesta terminal se eleva a
 `429 rate_limit_error` portando `retry_after` / `reset_at` desde la expiración de bloqueo transitorio
 más temprana; los bloqueos por cuota, auth y not-found mantienen el 503 sin pistas.
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. Control de admisión de la cola de solicitudes (v3.8.49 · issue #6593)
@@ -543,248 +554,251 @@ liberación del semáforo no se duplican.
 
 ---
 
-## 7. Reformulación de estados upstream (errores de cuota con estado incorrecto)
+## 7. Reexpresión del estado upstream (errores de cuota con estado incorrecto)
 
-**Alcance:** un gateway upstream que informa el agotamiento temporal de cuota con un estado HTTP incorrecto.
+**Ámbito:** un gateway upstream que informa el agotamiento temporal de la cuota con el estado HTTP incorrecto.
 
-**Propósito:** corregir un estado engañoso ANTES de la clasificación, de modo que los consumidores downstream (motor de fallback, agregación de combos, la respuesta orientada al cliente) vean la verdadera naturaleza reintentable del fallo.
+**Propósito:** corregir un estado engañoso ANTES de la clasificación, de modo que los consumidores posteriores (el motor de fallback, la agregación de combos, la respuesta orientada al cliente) vean la verdadera naturaleza reintentable del fallo.
 
-Algunos gateways señalan el agotamiento TEMPORAL de cuota con un estado HTTP no
-reintentable. `agentrouter.org` devuelve `403` (a veces `400`) con un cuerpo en chino
-(`用户额度不足` / `额度不足`) en lugar del `429` estándar. Clientes como Claude
-Code tratan el `403` como permanente y abortan la sesión, y sin corrección
+Algunos gateways señalan el agotamiento TEMPORAL de la cuota con un estado HTTP
+no reintentable. `agentrouter.org` devuelve `403` (a veces `400`) con un cuerpo
+en chino (`用户额度不足` / `额度不足`) en lugar del `429` estándar. Clientes como
+Claude Code tratan el `403` como permanente y abortan la sesión, y sin corrección
 el motor de fallback lo clasificaría como `AUTH_ERROR` en lugar de un evento
 de cuota.
 
 **Implementación:**
 
-- Registro + matcher: `open-sse/config/upstreamStatusRestatement.ts` — una
+- Registro + comparador: `open-sse/config/upstreamStatusRestatement.ts` — una
   lista de reglas por proveedor (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), cotejadas mediante `applyStatusRestatement()`.
-- Punto de llamada: el bloque `providerFailure:` en `open-sse/handlers/chatCore.ts`
+excludeMarkers, defaultRetryAfterMs}`), comparadas mediante `applyStatusRestatement()`.
+- Punto de invocación: el bloque `providerFailure:` en `open-sse/handlers/chatCore.ts`
   (alrededor de la línea 3654), justo después de que `parseUpstreamError()` analice
   una respuesta upstream con un estado HTTP de error (`!providerResponse.ok`), y antes
   de que se ejecute cualquier clasificación, de modo que todos los consumidores
-  downstream vean el estado corregido. Los errores incrustados dentro de un stream
-  SSE `200` siguen una ruta de análisis de streams separada y posterior, y **no**
-  están cubiertos por este hook hoy en día — una limitación conocida, aún no
-  necesaria para el estado incorrecto de agentrouter (que se manifiesta como un
-  estado HTTP de error).
+  posteriores vean el estado corregido. Los errores incrustados dentro de un flujo
+  SSE `200` siguen una ruta de análisis de flujo separada y posterior, y hoy **no**
+  están cubiertos por este hook: una limitación conocida, aún no necesaria para el
+  estado erróneo de agentrouter (que se manifiesta como un estado HTTP de error).
 - Elegibilidad de reintento: `429` está en `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`), por lo que un error
-  reformulado lleva una ventana de reintento real en lugar de aparecer como un
-  `403` definitivo.
+  (`open-sse/services/combo/unavailableRetryGate.ts`), de modo que un error
+  reexpresado conlleva una ventana de reintento real en lugar de aparecer como
+  un `403` sin remedio.
 - El `defaultRetryAfterMs` sintético de `60s` (`upstreamStatusRestatement.ts`)
-  es solo lo que la respuesta reformulada comunica al **cliente**; no es en sí
-  mismo la duración del cooldown/lockout interno de la conexión — eso se rige por
-  separado por el mecanismo que realmente maneje el error reformulado (el backoff
-  progresivo de Connection Cooldown, §2, base `3s` para proveedores de API key;
+  es solo lo que la respuesta reexpresada comunica al **cliente**; no es en sí
+  mismo la duración interna de cooldown/bloqueo de la conexión — esa se rige por
+  separado por el mecanismo que realmente gestione el error reexpresado (el backoff
+  escalonado de Connection Cooldown, §2, base `3s` para proveedores con clave API;
   o Model Lockout, §3, para proveedores con cuota por modelo como agentrouter).
-  El router puede volverse elegible para reintentar internamente antes de la
-  ventana de 60 s que anuncia al cliente — margen intencional, no un bug.
+  El router puede volverse elegible para reintentar internamente antes de la ventana
+  de 60 s que anuncia al cliente: margen intencional, no un bug.
 
 Los errores permanentes (el `无权访问模型` de agentrouter — sin acceso a este modelo)
-NUNCA se reformulan: `excludeMarkers` veta la regla incluso cuando `textMarkers`
+NUNCA se reexpresan: `excludeMarkers` veta la regla incluso cuando `textMarkers`
 coincide, de modo que el error conserva su estado original y nada lo reintenta
-indefinidamente. La regla de clasificación del proveedor correspondiente
+indefinidamente. La regla de clasificación de proveedor correspondiente
 (`agentrouter-model-access-denied` en `open-sse/config/providerErrorRules.ts`:
 `reason: "auth_error"`, `scope: "model"`, un cooldown base declarado de `6h`) es
 consultada por `checkFallbackError` (`open-sse/services/accountFallback.ts`)
 _antes_ del retorno anticipado `FORBIDDEN` genérico de la categoría apikey,
 condicionada por `honorsRuleLockScope(provider)` (#10334 — actualmente exclusivo
-de agentrouter mediante la lista blanca `HONORS_RULE_LOCK_SCOPE_PROVIDERS` en
-`providerErrorRules.ts`). El cooldown declarado de 6 h de la regla fluye como
-`fallbackResult.baseCooldownMs`, pero sigue alimentando la ruta de lockout por
-cuota de modelo preexistente (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, sin cambios por #10334 salvo por la fuente del
-cooldown): se limita al `mlSettings.maxCooldownMs` del operador (por defecto
-`1_800_000ms` / 30 min), como cualquier otro lockout de modelo, y la
-_razón de lockout persistida_ sigue siendo el valor hardcodeado preexistente
-`"forbidden"`, no el `"auth_error"` de la regla — solo la duración del cooldown
-se respeta de extremo a extremo, no la cadena de la razón. La conexión en sí
-permanece activa; los modelos hermanos en la misma conexión no se ven afectados.
+de agentrouter mediante la lista permitida `HONORS_RULE_LOCK_SCOPE_PROVIDERS` en
+`providerErrorRules.ts`). El cooldown de 6 h declarado por la regla fluye como
+`fallbackResult.baseCooldownMs`, pero aún alimenta la ruta de bloqueo por cuota
+por modelo preexistente (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, sin cambios por #10334 salvo en la fuente del
+cooldown): se limita al `mlSettings.maxCooldownMs` del operador
+(por defecto `1_800_000ms` / 30 min), como cualquier otro bloqueo de modelo, y la
+_razón de bloqueo persistida_ sigue siendo el valor preexistente hardcodeado
+`"forbidden"`, no el `"auth_error"` de la regla — solo la duración del cooldown se
+respeta de extremo a extremo, no la cadena de la razón. La conexión en sí permanece
+activa; los modelos hermanos en la misma conexión no se ven afectados.
 
-Los errores de cuota reformulados (`额度不足`) llegan a una regla de proveedor en producción (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, sin un cooldown declarado propio — se aplica el backoff escalado predeterminado de la capa de persistencia). Desde #10334, `scope` en `ProviderErrorRuleMatch` SÍ se consume de extremo a extremo, pero **solo** para los proveedores en la lista permitida `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` — hoy solo `"agentrouter"`, controlado mediante `honorsRuleLockScope()`). Para cualquier otro proveedor, `scope` sigue siendo informativo, exactamente igual que antes de #10334. `checkFallbackError` expone el scope de la regla coincidente como `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) es la guarda compartida que confirma que un `ruleScope` es realmente seguro de respetar como una señal de autorrecuperación a nivel de toda la conexión (scope `"connection"`, reason `quota_exhausted`, nunca `permanent`, nunca `creditsExhausted` — una defensa contra una futura regla que combine scope `"connection"` con un estado de cuenta permanente). Dos consumidores la invocan:
+Los errores de cuota reexpresados (`额度不足`) alcanzan una regla de proveedor en
+producción (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, sin cooldown declarado propio — se aplica el backoff escalado por
+defecto de la capa de persistencia). Desde #10334, el `scope` de
+`ProviderErrorRuleMatch` SÍ se consume de extremo a extremo, pero **solo** para los
+proveedores en la lista permitida `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+(`providerErrorRules.ts` — hoy solo `"agentrouter"`, condicionado mediante
+`honorsRuleLockScope()`). Para cualquier otro proveedor, `scope` sigue siendo
+informativo, exactamente igual que antes de #10334.
+`checkFallbackError` expone el scope de la regla coincidente como
+`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) es la guarda compartida que confirma que un
+`ruleScope` es genuinamente seguro de respetar como una señal auto-recuperable
+a nivel de conexión (scope `"connection"`, razón `quota_exhausted`, nunca `permanent`,
+nunca `creditsExhausted` — una defensa contra una futura regla que empareje el
+scope `"connection"` con un estado de cuenta permanente). Dos consumidores la
+invocan:
 
 - **Persistencia** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  en lugar de caer en la rama de bloqueo **por modelo** del proveedor passthrough (agentrouter es `passthroughModels: true` → `hasPerModelQuota()`
-  devuelve `true`), aplica un **cooldown temporal de conexión** —
+  en lugar de caer en la rama de bloqueo **por modelo** del proveedor de passthrough
+  (agentrouter tiene `passthroughModels: true` → `hasPerModelQuota()`
+  devuelve `true`), aplica un **enfriamiento temporal de la conexión** —
   `testStatus: "unavailable"` + `rateLimitedUntil`, nunca un estado terminal
-  (`credits_exhausted`/`banned`/`expired`) — de modo que la conexión se autorrecupera
-  una vez que el cooldown expira, en lugar de requerir un restablecimiento manual de credenciales.
-  Se omite para conexiones con `disableCooling: true` (#2997): esa exclusión
-  cae en su lugar en el bloqueo por modelo (un compromiso documentado —
-  véase el comentario del código sobre la rama).
+  (`credits_exhausted`/`banned`/`expired`) — para que la conexión se recupere
+  automáticamente cuando venza el enfriamiento, en lugar de requerir un
+  restablecimiento manual de las credenciales.
+  Se omite para las conexiones con `disableCooling: true` (#2997): esa exclusión
+  voluntaria desemboca en el bloqueo por modelo (un compromiso documentado —
+  consulta el comentario del código situado encima de la rama).
 - **Enrutamiento de combos en la misma solicitud** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): la misma guarda marca la
-  conexión en el conjunto en memoria `exhaustedConnections`, con clave
-  `${provider}:${connectionId}`. Esto solo omite un objetivo restante DE LA MISMA
-  SOLICITUD que _ya lleva ese `connectionId` exacto_ en su propio
-  objeto target (`getExhaustedTargetSkipReason()`,
+  `open-sse/services/combo/targetExhaustion.ts`): la misma protección marca la
+  conexión en el conjunto en memoria `exhaustedConnections`, cuya clave es
+  `${provider}:${connectionId}`. Esto solo omite un destino restante de la misma
+  solicitud que _por sí mismo ya contiene ese `connectionId` exacto_ en su propio
+  objeto de destino (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` antes de la consulta a `exhaustedConnections`) — un combo
-  simple de lista de modelos, donde los objetivos hermanos no llevan ningún `connectionId`
-  fijado propio y uno solo se resuelve por despacho a partir del encabezado
-  `X-OmniRoute-Selected-Connection-Id` de la respuesta, nunca alcanza esa coincidencia
-  de clave. Para ese caso común, la protección real contra que una etapa restante
-  reutilice la cuenta recién agotada NO es este Set — es la capa de persistencia
-  anterior (el `rateLimitedUntil` de la conexión ahora está en el futuro)
-  combinada con esta misma guarda suprimiendo `transientRateLimitedProviders` para
-  el fallo (véase "Diseño en dos etapas" y el comentario del código en la
-  rama `isAgentrouterConnectionQuotaScope` de `targetExhaustion.ts`): con
-  ese Set sin marcar, el permiso forzado `allowRateLimitedConnection` de
-  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NO se
-  activa para las etapas restantes del proveedor, por lo que el filtro
-  `rateLimitedUntil` de la selección de credenciales (`src/sse/services/auth.ts:1238`)
-  se respeta normalmente y una etapa restante o bien elige una conexión
-  agentrouter diferente y aún elegible, o bien falla por falta de credenciales
-  disponibles — no se abre paso a la fuerza de vuelta a la conexión que esta
-  rama acaba de enfriar.
+connectionId)` antes de la consulta a `exhaustedConnections`) — un combo simple
+  de lista de modelos, cuyos destinos hermanos no tienen su propio `connectionId`
+  fijado y uno de ellos solo se resuelve en cada despacho a partir del encabezado
+  `X-OmniRoute-Selected-Connection-Id` de la respuesta, nunca coincide con esa
+  clave. Para ese caso común, la protección real contra que un tramo restante
+  vuelva a usar la cuenta que acaba de agotarse NO es este Set — es la capa de
+  persistencia anterior (el `rateLimitedUntil` de la conexión ahora está en el
+  futuro), junto con el hecho de que esta misma protección suprima
+  `transientRateLimitedProviders` para el fallo (consulta "Diseño en dos etapas"
+  y el comentario del código de la rama
+  `isAgentrouterConnectionQuotaScope` en `targetExhaustion.ts`): al dejar ese
+  Set sin marcar, la autorización forzada de `allowRateLimitedConnection` en
+  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NO se activa
+  para los tramos restantes del proveedor, por lo que el filtro `rateLimitedUntil`
+  de la selección de credenciales (`src/sse/services/auth.ts:1238`) se respeta
+  normalmente y un tramo restante selecciona una conexión de agentrouter
+  diferente que siga siendo elegible o falla porque no hay credenciales
+  disponibles; no fuerza su regreso a la conexión que esta rama acaba de poner
+  en enfriamiento.
 
-### Diseño en dos etapas: reformulación del estado, luego clasificación
+### Diseño en dos etapas: reformulación del estado y luego clasificación
 
-La reformulación de estado (`upstreamStatusRestatement.ts`) y las reglas de
+La reformulación del estado (`upstreamStatusRestatement.ts`) y las reglas de
 clasificación de proveedores (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) son registros separados que ambos se indexan por id de proveedor
-y marcadores de texto, pero se ejecutan en lugares diferentes y sirven a propósitos
-distintos: la reformulación reescribe el estado HTTP al inicio de `chatCore.ts`;
-las reglas de clasificación eligen el `reason` de fallback y fijan el `scope`
+`providerRuleRegistry`) son registros independientes que se indexan tanto por el
+identificador del proveedor como por marcadores de texto, pero se ejecutan en
+lugares distintos y cumplen propósitos diferentes: la reformulación reescribe el
+estado HTTP al principio de `chatCore.ts`; las reglas de clasificación eligen el
+`reason` de reserva y fijan el `scope`
 (`model` / `provider` / `connection`) dentro de `checkFallbackError()`
 (`open-sse/services/accountFallback.ts`).
 
-Las reglas de clasificación solo ven el **texto** completo del error (necesario para
-coincidir con marcadores del cuerpo como `额度不足`) para los proveedores listados en
-la lista permitida `FULL_TEXT_RULE_PROVIDERS` en `providerErrorRules.ts` —
-actualmente solo `"agentrouter"`. Para cualquier otro proveedor del **catálogo
-integrado**, `checkFallbackError` entrega a
-`getProviderErrorRuleMatch` solo el error estructurado (`{code, type}`), que
-es suficiente para reglas basadas en encabezados/estado/código, pero ciego a los
-marcadores de texto del cuerpo.
-El helper `resolveRuleMatchBody()` realiza esta selección: texto completo del error
-para proveedores en la lista permitida, el error estructurado en caso contrario. Añadir un proveedor
-**integrado** a `FULL_TEXT_RULE_PROVIDERS` es una adhesión explícita por proveedor
-— existe para que la ruta predeterminada de cada proveedor que no está en la
-lista permanezca sin cambios byte a byte.
+Las reglas de clasificación solo ven el **texto** completo del error (necesario
+para buscar marcadores del cuerpo como `额度不足`) para los proveedores incluidos en
+la lista de permitidos `FULL_TEXT_RULE_PROVIDERS` de `providerErrorRules.ts` —
+actualmente, solo `"agentrouter"`. Para cualquier otro proveedor **del catálogo
+integrado**, `checkFallbackError` solo pasa a `getProviderErrorRuleMatch` el error
+estructurado (`{code, type}`), lo que basta para las reglas basadas en
+encabezados/estado/código, pero no permite detectar marcadores del texto del
+cuerpo. La función auxiliar `resolveRuleMatchBody()` realiza esta selección: el
+texto completo del error para los proveedores incluidos en la lista de
+permitidos y el error estructurado en los demás casos. Añadir un proveedor
+**integrado** a `FULL_TEXT_RULE_PROVIDERS` es una habilitación explícita por
+proveedor; esta lista existe para que la ruta predeterminada de todos los
+proveedores que no figuran en ella permanezca idéntica byte por byte.
 
-El `scope` de una regla (`model` / `provider` / `connection`) es una adhesión separada
-de `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` solo lo expone como
-`fallbackResult.ruleScope`, y los consumidores descendentes solo lo respetan como
-algo más que una etiqueta informativa, para los proveedores en la
-lista permitida `HONORS_RULE_LOCK_SCOPE_PROVIDERS` en el mismo archivo (`gated via
-honorsRuleLockScope()` — hoy solo `"agentrouter"`). Véase "Errores de cuota
-reformulados" más arriba para saber qué hace realmente una coincidencia con
-`scope: "connection"` una vez que un proveedor está en esa lista permitida.
+La habilitación del `scope` de una regla (`model` / `provider` / `connection`) es
+independiente de `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` solo lo expone
+como `fallbackResult.ruleScope`, y los consumidores posteriores solo lo hacen
+valer como algo más que una etiqueta informativa para los proveedores incluidos
+en la lista de permitidos `HONORS_RULE_LOCK_SCOPE_PROVIDERS` del mismo archivo
+(controlado mediante `honorsRuleLockScope()`; actualmente solo `"agentrouter"`).
+Consulta "Errores de cuota reformulados" más arriba para saber qué hace realmente
+una coincidencia `scope: "connection"` cuando un proveedor figura en esa lista.
 
-**#11104 — las reglas declaradas por el operador omiten ambas listas de permitidos.** Un operador puede declarar una regla por proveedor en tiempo de ejecución mediante `settings.providerErrorRules` (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) sin editar este archivo. Condicionar una regla de operador a `FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — listas de permitidos destinadas a proteger el comportamiento **predeterminado** de las reglas integradas del catálogo — haría que el mecanismo de configuración quedara inerte para todos los proveedores excepto los que ya figuran allí, ya que declarar la regla ya constituye el opt-in explícito del operador. `resolveRuleMatchBody()` y `honorsRuleLockScope()` comprueban primero `hasOperatorRuleForProvider()`: un proveedor con una regla de operador recibe el texto de error sin procesar y su `scope` declarado se respeta, independientemente de si también aparece en alguna de las listas de permitidos.
+**#11104 — las reglas declaradas por el operador eluden ambas listas de permitidos.** Un operador puede
+declarar en tiempo de ejecución una regla por proveedor mediante `settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
+sin editar este archivo. Condicionar una regla del operador a
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — listas
+concebidas para proteger el comportamiento **predeterminado** de las reglas del
+catálogo integrado — haría que el mecanismo de configuración no tuviera efecto
+para ningún proveedor salvo los que ya figuran en ellas, ya que declarar la regla
+ya constituye la habilitación explícita del operador. Tanto
+`resolveRuleMatchBody()` como `honorsRuleLockScope()` comprueban primero
+`hasOperatorRuleForProvider()`: un proveedor con una regla del operador recibe el
+texto de error sin procesar y se respeta su `scope` declarado,
+independientemente de que también aparezca en cualquiera de las dos listas.
 
-**Limitación conocida — `providerRuleRegistry` nunca se consulta para HTTP 400.**
-La rama `BAD_REQUEST` de `checkFallbackError` clasifica el estado 400 completamente a través de sus propios arrays de patrones (`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`, etc. en `accountFallback.ts`) y retorna antes de que se alcance la rama `configuredRule`/`getProviderErrorRuleMatch` situada encima. Una regla integrada del catálogo (o una regla de operador) con `status: 400` es sintácticamente válida pero nunca se disparará. Hoy ninguna regla existente apunta al 400, así que nada en producción se ve afectado — pero una futura regla para 400 requiere modificar primero esta rama, lo cual es un cambio mayor que añadir una regla (reclasifica el 400 para cada proveedor que ya depende del comportamiento de los arrays de patrones) y está fuera del alcance de la adición de una regla para un solo proveedor.
+**Brecha conocida — `providerRuleRegistry` nunca se consulta para HTTP 400.**
+La rama `BAD_REQUEST` de `checkFallbackError` clasifica el estado 400 por
+completo mediante sus propias matrices de patrones (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS`, etc. en `accountFallback.ts`) y retorna antes de
+que se alcance la rama `configuredRule`/`getProviderErrorRuleMatch` que aparece
+arriba. Una regla del catálogo integrado (o una regla del operador) con
+`status: 400` es sintácticamente válida, pero nunca se activará. Actualmente,
+ninguna regla existente apunta al 400, por lo que nada en producción se ve
+afectado — pero una futura regla para 400 requiere modificar primero esta
+rama, lo que supone un cambio mayor que añadir una regla (reclasifica el 400
+para todos los proveedores que ya dependen del comportamiento de las matrices de
+patrones) y queda fuera del alcance de añadir una regla para un único proveedor.
 
-### Añadir una nueva pasarela que falsea la cuota
+### Agregar un nuevo gateway que falsea la cuota
 
 1. Registra un array de reglas en `statusRestatementRegistry`
    (`open-sse/config/upstreamStatusRestatement.ts`). Mantén los `textMarkers`
    específicos del proveedor; nunca reutilices frases genéricas en inglés que
-   colisionen con `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
+   colisionen con `CREDITS_EXHAUSTED_SIGNALS`
+   (`open-sse/services/accountFallback.ts`).
 2. Opcionalmente, registra reglas de clasificación en
    `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) para elegir
-   el alcance de bloqueo correcto (`connection` para cuota a nivel de cuenta,
+   el ámbito de bloqueo correcto (`connection` para cuota a nivel de cuenta,
    `model` para errores por modelo). Este paso solo tiene efecto en producción
-   para proveedores cuyas reglas necesitan el texto de error completo
+   para los proveedores cuyas reglas necesitan el texto completo del error
    (marcadores del cuerpo): añade el id del proveedor a
-   `FULL_TEXT_RULE_PROVIDERS` en el mismo archivo — de lo contrario,
-   `checkFallbackError` solo entregará a la regla el error estructurado
+   `FULL_TEXT_RULE_PROVIDERS` en el mismo archivo; de lo contrario,
+   `checkFallbackError` solo le entrega a la regla el error estructurado
    `{code, type}` y una regla basada en el texto del cuerpo nunca coincidirá
-   con el tráfico real. Las reglas que coinciden puramente por
-   `status`/`headers` (como las de Opencode o las de Minimax) no necesitan
-   este opt-in. Por separado, si la regla declara `scope: "connection"` y la
+   con el tráfico en vivo. Las reglas que coinciden únicamente por
+   `status`/`headers` (como las de Opencode o Minimax) no necesitan esta
+   activación. Por separado, si la regla declara `scope: "connection"` y la
    intención es un enfriamiento real a nivel de conexión más la omisión del
-   combo en la misma petición (no solo una etiqueta informativa), añade el id
-   del proveedor a `HONORS_RULE_LOCK_SCOPE_PROVIDERS` en el mismo archivo —
-   esto es lo que controla el consumo al estilo
+   combo en la misma solicitud (no solo una etiqueta informativa), añade el id
+   del proveedor a `HONORS_RULE_LOCK_SCOPE_PROVIDERS` en el mismo archivo:
+   esto es lo que controla el consumo al estilo de
    `isAgentrouterConnectionQuotaScope()` en `markAccountUnavailable()`
    (`src/sse/services/auth.ts`) y `applyComboTargetExhaustion()`
    (`open-sse/services/combo/targetExhaustion.ts`); sin ello, `scope` sigue
    fluyendo a través de `fallbackResult.ruleScope` pero nada actúa sobre él.
-3. Añade pruebas unitarias que reflejen `tests/unit/upstream-status-restatement.test.ts`
-   y `tests/unit/agentrouter-error-rules.test.ts` (incluyendo las guardas de
-   no-permanente / no-creditsExhausted, y — si el proveedor necesita la lista
-   de permitidos — una prueba que verifique que `resolveRuleMatchBody()`
-   devuelve el texto completo solo para ese proveedor).
+3. Añade pruebas unitarias que reflejen
+   `tests/unit/upstream-status-restatement.test.ts` y
+   `tests/unit/agentrouter-error-rules.test.ts` (incluidas las guardas de no
+   permanente / no creditsExhausted y, si el proveedor necesita la lista de
+   permitidos, una prueba que verifique que `resolveRuleMatchBody()` devuelve
+   el texto completo solo para ese proveedor).
 
 No se necesitan cambios en `chatCore.ts`, `classifyError` ni en combo.
 
 #### Bloqueo agrupado por IP de salida (#10880)
 
 Los proveedores en `EGRESS_BUCKETED_LOCK_PROVIDERS` (familia opencode) se
-tratan como upstream agrupado por IP (el nivel gratuito de opencode se agrupa
-por IP, no por cuenta — ver #9611): un 429 clasificado como `quota_exhausted`
-**o** `rate_limit_exceeded` enfría cada conexión de la familia incluida en la
-lista de permitidos cuya última IP de salida conocida coincide con la de la
-conexión fallida, antes de que la rotación pueda probarlas
-— evitando N-1 llamadas upstream con fallo garantizado (misma forma que #10460/#10525).
+tratan como upstream agrupado por IP (el nivel gratuito de opencode está
+agrupado por IP, no por cuenta — véase #9611): un 429 por código de estado
+clasificado como `quota_exhausted` **o** `rate_limit_exceeded` enfría todas
+las conexiones de la familia incluida en la lista de permitidos cuya última
+IP de salida conocida coincide con la de la conexión que falló, antes de que
+la rotación pueda intentarlas — evitando así N-1 llamadas al upstream con
+fallo garantizado (misma forma que #10460/#10525).
 `rate_limit_exceeded` se incluye deliberadamente: en la ruta de
 `markAccountUnavailable` las reglas específicas de opencode nunca coinciden
-(no se entregan cabeceras/cuerpo a `checkFallbackError`, opencode no está en
-`FULL_TEXT_RULE_PROVIDERS`), así que un 429 cuyo cuerpo contiene el texto de
-cuota de suscripción ("monthly usage limit reached") se clasifica como
+(no se entregan headers/body a `checkFallbackError`, opencode no está en
+`FULL_TEXT_RULE_PROVIDERS`), por lo que un 429 cuyo cuerpo contiene el texto
+de cuota de suscripción ("monthly usage limit reached") se clasifica como
 `quota_exhausted` por el fallback de texto de cuota
 (`buildSubscriptionQuotaFallback`, `accountFallback.ts`; enfriamiento de 1 h)
-antes de que se alcance la regla `status_429` — mientras que un 429 sin texto
-de cuota (limitación de velocidad simple) se clasifica mediante la regla
-`status_429` como `rate_limit_exceeded` y aún así enfría la familia de IP.
-Para un proveedor incluido en la lista de permitidos, un límite de velocidad
-agrupado por IP es la misma señal que una cuota agotada. Límites honestos:
+antes de que se llegue a evaluar la regla `status_429` — mientras que un 429
+sin texto de cuota (limitación de tasa simple) se clasifica mediante la regla
+`status_429` como `rate_limit_exceeded` y aun así enfría la familia de IP.
+Para un proveedor de la lista de permitidos, un límite de tasa agrupado por
+IP es la misma señal que una cuota agotada. Limitaciones honestas:
 
-- **De mejor esfuerzo**: el bloqueo resuelve la última `egress_ip` conocida
-  de la conexión desde `proxy_logs` (ventana de 24 h, síncrono, sin caché).
-  Caché fría (IP de egreso nunca sondeada) o sin fila → la rama sigue
-  aplicando cooldown a la conexión que falló (registrada igual que hoy),
-  solo que no se bloquea ningún hermano.
-- **Nunca terminal**: el cooldown es una ventana de cuota renovable
-  (`testStatus: "unavailable"`); nunca se deriva un estado permanente de una
-  señal a nivel de IP. Las conexiones `disableCooling` omiten la rama por
-  completo.
-- **La granularidad del bloqueo cambia para la familia de la lista de
-  permitidos**: esto es un cambio de alcance, no solo una optimización entre
-  hermanos. opencode es un proveedor `passthroughModels`, así que antes de
-  esta rama un 429 producía un bloqueo por MODELO; ahora produce un cooldown
-  de conexión — incluso para un operador que ejecuta una única conexión sin
-  ningún hermano. Esa es la granularidad que la tabla de reglas de opencode
-  ya declara correcta (`scope: "connection"`, `providerErrorRules.ts`),
-  nunca respetada hasta ahora porque opencode no está en
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. La rama escribe por sí misma el
-  cooldown de la conexión que falló + `backoffLevel`, reflejando la rama de
-  agentrouter con alcance de conexión, y retorna — el bloqueo por modelo y
-  la ruta genérica de más abajo nunca se alcanzan.
-- **Combo incluido**: al igual que la rama de agentrouter, el alcance ignora
-  deliberadamente la degradación `persistUnavailableState`/`isCombo` que un
-  llamante combo aplica a un 429. Un bloqueo por modelo no es una forma más
-  débil de este alcance, es la unidad equivocada: no dice nada sobre la IP
-  agotada, así que la rotación del combo seguiría quemando una llamada con
-  fallo garantizado por hermano.
-- **Seguridad de los hermanos**: un hermano ya terminal
-  (banned/credits_exhausted) o ya en un cooldown más largo nunca se
-  sobrescribe.
-- **Lista de permitidos exclusiva**: ampliar `EGRESS_BUCKETED_LOCK_PROVIDERS`
-  es una decisión explícita del propietario; sin cableado genérico (patrón
-  #10334/#10419). La consulta de hermanos enlaza esa misma lista de
-  permitidos en lugar de repetirla como un literal SQL, así que ampliarla
-  sigue siendo un cambio de una línea.
-- **Rotación de la IP de egreso, en ambas direcciones**: la ventana de
-  búsqueda (24 h) es mucho más amplia que el TTL de la caché de IP de egreso
-  (5 min), así que la "última IP conocida" es historial, no estado actual.
-  Si el proxy de una conexión rotó dentro de la ventana, el bloqueo puede
-  **pasar por alto** una IP genuinamente compartida (la IP registrada es la
-  nueva, no agotada) — y simétricamente puede **aplicar cooldown a un
-  hermano que desde entonces ha rotado fuera** de la IP agotada. El segundo
-  caso le cuesta a ese hermano una ventana de cooldown; ambos son límites
-  aceptados de tipo mejor esfuerzo de una búsqueda basada en el historial.
-- **Costo**: dos escaneos acotados de `proxy_logs` (filtrados por ventana
-  vía `idx_pl_timestamp`), solo con la frecuencia de los 429. Sin índice
-  nuevo (migración 134 YAGNI). Medido sobre una copia de BD con tráfico real
-  de tamaño moderado; una instancia de alto rendimiento mantiene
-  proporcionalmente más filas en la misma ventana.
+- **Mejor esfuerzo**: el bloqueo resuelve la última `egress_ip` conocida de la conexión desde `proxy_logs` (ventana de 24 h, síncrono, sin caché). Caché fría (IP de salida nunca sondeada) o sin fila → la conexión fallida igualmente es enfriada por la rama (registrada como hoy), solo que no se bloquea ningún hermano.
+- **Nunca terminal**: el enfriamiento es una ventana de cuota renovable (`testStatus: "unavailable"`); nunca se deriva un estado permanente de una señal a nivel de IP. Las conexiones `disableCooling` omiten la rama por completo.
+- **La granularidad del bloqueo cambia para la familia incluida en la lista de permitidos**: esto es un cambio de alcance, no solo una optimización de hermanos. opencode es un proveedor `passthroughModels`, así que antes de esta rama un 429 producía un bloqueo por MODELO; ahora produce un enfriamiento de conexión — incluso para un operador que ejecuta una sola conexión sin ningún hermano. Esa es la granularidad que la tabla de reglas de opencode ya declara correcta (`scope: "connection"`, `providerErrorRules.ts`), nunca respetada hasta ahora porque opencode no está en `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. La rama escribe por sí misma el enfriamiento + `backoffLevel` de la conexión fallida, reflejando la rama de agentrouter con alcance de conexión, y retorna — el bloqueo por modelo y la ruta genérica de abajo nunca se alcanzan.
+- **Combo incluido**: al igual que la rama de agentrouter, el alcance ignora deliberadamente la degradación `persistUnavailableState`/`isCombo` que un llamante combo aplica a un 429. Un bloqueo por modelo no es una forma más débil de este alcance, es la unidad equivocada: no dice nada sobre la IP agotada, así que la rotación del combo seguiría quemando una llamada con fallo garantizado por hermano.
+- **Seguridad de hermanos**: un hermano ya terminal (baneado/credits_exhausted) o ya en un enfriamiento más largo nunca se sobrescribe.
+- **Lista de permitidos exclusiva**: ampliar `EGRESS_BUCKETED_LOCK_PROVIDERS` es una decisión explícita del propietario; sin cableado genérico (patrón #10334/#10419). La consulta de hermanos vincula esa misma lista de permitidos en lugar de repetirla como un literal SQL, así que ampliarla sigue siendo un cambio de una línea.
+- **Rotación de IP de salida, en ambas direcciones**: la ventana de búsqueda (24 h) es mucho más amplia que el TTL de la caché de IP de salida (5 min), así que "última IP conocida" es historial, no estado actual. Si el proxy de una conexión rotó dentro de la ventana, el bloqueo puede **no detectar** una IP genuinamente compartida (la IP registrada es la nueva, no agotada) — y simétricamente puede **enfriar a un hermano que desde entonces rotó fuera** de la IP agotada. El segundo caso le cuesta a ese hermano una ventana de enfriamiento; ambos son límites aceptados de mejor esfuerzo de una búsqueda basada en historial.
+- **Costo**: dos escaneos acotados de `proxy_logs` (filtrados por ventana mediante `idx_pl_timestamp`), solo con la frecuencia de los 429. Sin índice nuevo (migración 134, YAGNI). Medido sobre una copia de BD con tráfico real de tamaño moderado; una instancia de alto rendimiento mantiene proporcionalmente más filas en la misma ventana.
 
 ---
 

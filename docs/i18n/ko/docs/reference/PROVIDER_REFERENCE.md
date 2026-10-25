@@ -4,11 +4,11 @@
 
 ---
 
-> `src/shared/constants/providers.ts`에서 **자동 생성됨** — 직접 편집하지 마세요.
-> 재생성 명령: `npm run gen:provider-reference`
-> **마지막 생성일:** 2026-10-18
+> **자동 생성됨**: `src/shared/constants/providers.ts`에서 생성됨 — 직접 편집하지 마세요.
+> 다음 명령으로 다시 생성: `npm run gen:provider-reference`
+> **마지막 생성일:** 2026-10-20
 
-총 프로바이더 수: **375**개. 카테고리별 분류는 아래를 참조하세요.
+총 제공자 수: **375**. 아래에서 카테고리별 분류를 확인하세요.
 
 ## 카테고리
 
@@ -460,9 +460,9 @@
 ## 신뢰할 수 있는 정보 출처
 
 - 카탈로그: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- 레지스트리 (모델별 세부 정보): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- 실행기(Executors): [`open-sse/executors/`](../../open-sse/executors/) (154개 구현)
-- 변환기(Translators): [`open-sse/translator/`](../../open-sse/translator/)
+- 레지스트리(모델별 세부 정보): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- 실행기: [`open-sse/executors/`](../../open-sse/executors/) (156개 구현)
+- 변환기: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## 같이 보기
 

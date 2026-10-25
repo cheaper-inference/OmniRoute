@@ -7255,7 +7255,7 @@
       "nextSwitchNow": "Հիմա",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -11526,7 +11526,7 @@
     "bulkImportNoValidEntries": "Վավեր գրառումներ չեն գտնվել։ Ստուգեք ձևաչափը և կրկին փորձեք։",
     "bulkImportSuccess": "Ներմուծումն ավարտված է․ ստեղծվել է՝ {created}, թարմացվել է՝ {updated}, ձախողվել է՝ {failed}",
     "bulkImportErrorLine": "Տող {line}․ {reason}",
-    "bulkImportMaxExceeded": "Մեկ ներմուծման համար առավելագույնը՝ 100 պրոքսի",
+    "bulkImportMaxExceeded": "Մեկ ներմուծման համար առավելագույնը՝ {max} պրոքսի",
     "bulkImportPreview": "Նախադիտում",
     "clearAssignment": "(մաքրել վերագրումը)",
     "bulkProxyAssignment": "Պրոքսիների զանգվածային վերագրում",

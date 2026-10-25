@@ -43,11 +43,11 @@ A2A **Endpoints → A2A** keçidi ilə idarə olunur və standart olaraq deaktiv
 
 ---
 
-## JSON-RPC 2.0 metodları
+## JSON-RPC 2.0 Metodları
 
-### `message/send` — Sinxron icra
+### `message/send` — Sinxron İcra
 
-Bacarıqa mesaj göndərir və tam cavabı gözləyir.
+Bacarıq moduluna mesaj göndərir və tam cavabı gözləyir.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` üçün `metadata.combo`, şlüz sorğusunda `metadata.model` dəyərini açıq şəkildə əvəz edir; o, nəzərə alınmayan `x-combo` JSON sahəsi kimi deyil, həqiqi `model` kimi göndərilir. Şlüzün standart API açarı və hər bir hədəf üzrə avtorizasiya qaydaları qüvvədə qalır. Yanlış və ya boş kombinasiya rədd edilir.
+
+Nəticə `requested_combo` (çağıranın niyyəti), `dispatched_model` (faktiki şlüz sorğusu), `response_model` (şlüz cavabı) və `confirmed_combo` sahələrini təqdim edir. Şlüz kombinasiyanı açıq şəkildə müəyyən etmədikdə sonuncu sahə `null` olur. A2A qərar jurnalları icranı yalnız təsdiqlənmiş kombinasiyaya aid edir və təsdiqlənməmiş sorğunu `requestedCombo` kimi saxlayır.
+
 **Cavab:**
 
 ```json
@@ -76,30 +80,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE axını
+### `message/stream` — SSE Axın Ötürməsi
 
-`message/send` ilə eynidir, lakin real vaxt axını üçün server tərəfindən göndərilən hadisələri qaytarır.
+`message/send` ilə eynidir, lakin real vaxt rejimində axın ötürməsi üçün Server-Sent Events qaytarır.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +113,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE hadisələri:**
+**SSE Hadisələri:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +123,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Tapşırıq statusunun sorğulanması
+### `tasks/get` — Tapşırıq Statusunun Sorğulanması
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +132,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Tapşırığın ləğv edilməsi
+### `tasks/cancel` — Tapşırığın Ləğv Edilməsi
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +259,7 @@ təqdim edilib → icra olunur → tamamlanıb
 
 ---
 
-## İnteqrasiya Nümunələri
+## İnteqrasiya nümunələri
 
 ### Python (requests)
 

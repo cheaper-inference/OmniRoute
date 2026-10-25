@@ -363,6 +363,17 @@ glm-4.7=3
 
 אותו שער מכסה גם את המקרה שלפני השיגור (#16319): כאשר כל יעד של קומבו מדולג לפני שנעשתה בקשה כלשהי מפני שהמודל שלו נמצא בנעילה חולפת קצרה, המסלול של אפס ניסיונות ממתין לנעילה תחת אותן תקרות ומשגר מחדש, במקום להשיב `503 ALL_TARGETS_SKIPPED` בלי רמז. כאשר אין אפשרות להמתין (תקרה, ניצול מקסימלי של ניסיונות או תקציב, או שהתכונה כבויה), התגובה הסופית משתדרגת ל-`429 rate_limit_error` הנושאת `retry_after` / `reset_at` מפקיעת הנעילה החולפת המוקדמת ביותר; נעילות מכסה, אימות ולא-נמצא נשארות עם 503 בלי רמז.
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. בקרת קבלה לתור הבקשות (v3.8.49 · issue #6593)
@@ -443,197 +454,262 @@ upstream שעדיין שולח chunks אך מפיק פלט assistant בקצב ה
 
 ---
 
-## 7. הצהרה מחדש של סטטוס Upstream (שגיאות מכסה מדווחות באופן שגוי)
+## 7. ניסוח מחדש של סטטוס Upstream (שגיאות מכסה המדווחות בסטטוס שגוי)
 
-**היקף:** שער upstream יחיד שמדווח על מיצוי מכסה זמני עם קוד סטטוס HTTP שגוי.
+**תחום:** שער upstream יחיד שמדווח על מיצוי מכסה זמני עם סטטוס HTTP שגוי.
 
-**מטרה:** לתקן סטטוס מטעה לפני הסיווג, כך שצרכנים במורד הזרימה (מנוע ה-fallback, צבירת combo, התגובה הפונה ללקוח) יראו את האופי האמיתי של הכשל ככזה שניתן לנסות שוב.
+**מטרה:** לתקן סטטוס מטעה **לפני** הסיווג, כך שצרכני ה-downstream (מנוע ה-fallback, אגרגציית ה-combo, התגובה הפונה ללקוח) יראו את האופי האמיתי של הכשל כניתן לניסיון חוזר.
 
-חלק מהשערים מסמנים מיצוי מכסה זמני (TEMPORARY) עם סטטוס HTTP
-שאינו ניתן לניסיון חוזר. `agentrouter.org` מחזיר `403` (לפעמים `400`) עם גוף
-בסינית (`用户额度不足` / `额度不足`) במקום ה-`429` הסטנדרטי. לקוחות כמו Claude
-Code מתייחסים ל-`403` כאל קבוע ומפסיקים את הסשן, ובלי תיקון
-מנוע ה-fallback היה מסווג אותו כ-`AUTH_ERROR` במקום כאירוע
-מכסה.
+חלק מהשערים מאותתים על מיצוי מכסה **זמני** עם סטטוס HTTP שאינו ניתן
+לניסיון חוזר. `agentrouter.org` מחזיר `403` (לפעמים `400`) עם גוף תגובה
+בסינית (`用户额度不足` / `额度不足`) במקום ה-`429` הסטנדרטי. לקוחות כמו
+Claude Code מתייחסים ל-`403` כאל שגיאה קבועה ומפסיקים את הסשן, וללא
+התיקון מנוע ה-fallback היה מסווג אותה כ-`AUTH_ERROR` במקום כאירוע מכסה.
 
 **מימוש:**
 
-- Registry + matcher: `open-sse/config/upstreamStatusRestatement.ts` — רשימה
-  לפי ספק של כללים (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), המותאמים באמצעות `applyStatusRestatement()`.
-- מקום הקריאה: בלוק ה-`providerFailure:` ב-`open-sse/handlers/chatCore.ts`
-  (בסביבות שורה 3654), מיד לאחר ש-`parseUpstreamError()` מנתח תגובת upstream
-  עם סטטוס HTTP של שגיאה (`!providerResponse.ok`), ולפני שרץ סיווג כלשהו,
-  כך שכל צרכן במורד הזרימה רואה את הסטטוס המתוקן. שגיאות המוטמעות בתוך זרם
-  SSE של `200` עוברות מסלול נפרד ומאוחר יותר של ניתוח זרם ו**אינן** מכוסות
-  על ידי ה-hook הזה כיום — מגבלה ידועה, שעדיין אינה נדרשת עבור
-  הסטטוס השגוי של agentrouter (שמתגלה כסטטוס HTTP של שגיאה).
+- מרשם (registry) + matcher: `open-sse/config/upstreamStatusRestatement.ts` —
+  רשימת כללים פר-ספק (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`),
+  שההתאמה שלה מתבצעת באמצעות `applyStatusRestatement()`.
+- נקודת הקריאה: הבלוק `providerFailure:` ב-`open-sse/handlers/chatCore.ts`
+  (בסביבות שורה 3654), מיד לאחר ש-`parseUpstreamError()` מנתח תגובת
+  upstream עם סטטוס HTTP של שגיאה (`!providerResponse.ok`), ולפני שרץ כל
+  סיווג, כך שכל צרכן downstream רואה את הסטטוס המתוקן. שגיאות המוטמעות
+  בתוך זרם SSE של `200` עוברות בנתיב פרסור-זרם נפרד ומאוחר יותר, ו**אינן**
+  מכוסות על ידי ה-hook הזה כיום — מגבלה ידועה, שעדיין לא נדרשת עבור
+  הסטטוס השגוי של agentrouter (שצץ כסטטוס HTTP של שגיאה).
 - זכאות לניסיון חוזר: `429` נמצא ב-`RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`), כך ששגיאה שהוצהרה מחדש
-  נושאת חלון ניסיון חוזר אמיתי במקום להתגלות כ-`403` מת.
+  (`open-sse/services/combo/unavailableRetryGate.ts`), כך ששגיאה שעברה
+  ניסוח מחדש נושאת חלון ניסיון חוזר אמיתי במקום לצוץ כ-`403` מת.
 - ה-`defaultRetryAfterMs` הסינתטי של `60s` (`upstreamStatusRestatement.ts`)
-  הוא רק מה שהתגובה המוצהרת מחדש אומרת ל**לקוח**; הוא אינו
-  משך ה-cooldown/ה-lockout הפנימי של החיבור עצמו — זה נשלט
-  בנפרד על ידי המנגנון שבפועל מטפל בשגיאה המוצהרת מחדש
-  (ה-backoff המתגבר של Connection Cooldown, §2, בסיס `3s` עבור ספקי
-  API-key; או Model Lockout, §3, עבור ספקים עם מכסת פר-מודל כמו
-  agentrouter). ה-router יכול להפוך לזכאי לניסיון חוזר פנימי מוקדם יותר
-  מחלון ה-60s שהוא מפרסם ללקוח — מרווח מכוון,
-  לא באג.
+  הוא רק מה שהתגובה המנוסחת מחדש אומרת ל**לקוח**; הוא אינו בעצמו משך
+  ה-cooldown/lockout הפנימי של החיבור — זה נקבע בנפרד על ידי המנגנון
+  שמטפל בפועל בשגיאה המנוסחת מחדש (ה-backoff המסלים של Connection
+  Cooldown, §2, בסיס `3s` עבור ספקי API-key; או Model Lockout, §3, עבור
+  ספקי מכסה-פר-מודל כמו agentrouter). הראוטר יכול להפוך זכאי לניסיון
+  חוזר באופן פנימי מוקדם יותר מחלון ה-60s שהוא מפרסם ללקוח — מרווח
+  מכוון, לא באג.
 
-שגיאות קבועות (`无权访问模型` של agentrouter — אין גישה למודל זה)
-לעולם אינן מוצהרות מחדש: `excludeMarkers` מבטל את הכלל גם כאשר `textMarkers` מתאימים,
-כך שהשגיאה שומרת על הסטטוס המקורי שלה ושום דבר אינו מנסה אותה שוב לנצח. כלל
-הסיווג התואם לספק
-(`agentrouter-model-access-denied` ב-`open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, בסיס cooldown מוצהר של `6h`) נבדק
-על ידי `checkFallbackError` (`open-sse/services/accountFallback.ts`)
-_לפני_ ה-early-return הגנרי של קטגוריית apikey מסוג `FORBIDDEN`, בכפוף ל-
-`honorsRuleLockScope(provider)` (#10334 — כיום בלעדי ל-agentrouter דרך
-רשימת ההיתר `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ב-
-`providerErrorRules.ts`). ה-cooldown המוצהר של 6h של הכלל זורם הלאה כ-
-`fallbackResult.baseCooldownMs`, אך הוא עדיין מוזן למסלול ה-lockout הקיים-מראש
-של מכסה פר-מודל (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, ללא שינוי ב-#10334 למעט מקור ה-cooldown):
-הוא מוקטן ל-`mlSettings.maxCooldownMs` של המפעיל
-(ברירת מחדל `1_800_000ms` / 30 דק'), כמו כל lockout אחר של מודל, ו-
-_סיבת ה-lockout הנשמרת_ נשארת ה-`"forbidden"` הקבוע-מראש, ולא
-ה-`"auth_error"` של הכלל — רק משך ה-cooldown מכובד
-מקצה לקצה, לא מחרוזת הסיבה. החיבור עצמו נשאר פעיל;
-מודלים אחים על אותו חיבור אינם מושפעים.
+שגיאות קבועות (`无权访问模型` של agentrouter — אין גישה למודל זה) **אף פעם
+לא** מנוסחות מחדש: `excludeMarkers` מטיל וטו על הכלל גם כאשר `textMarkers`
+מותאמים, כך שהשגיאה שומרת על הסטטוס המקורי שלה ושום דבר לא מנסה אותה שוב
+לנצח. כלל סיווג הספק התואם (`agentrouter-model-access-denied`
+ב-`open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`,
+`scope: "model"`, cooldown בסיס מוצהר של `6h`) נשאל על ידי
+`checkFallbackError` (`open-sse/services/accountFallback.ts`) _לפני_
+ה-early-return הגנרי `FORBIDDEN` של קטגוריית apikey, מותנה
+ב-`honorsRuleLockScope(provider)` (#10334 — כרגע בלעדי ל-agentrouter דרך
+רשימת ההיתרים `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+ב-`providerErrorRules.ts`). ה-cooldown המוצהר של 6h של הכלל זורם הלאה
+כ-`fallbackResult.baseCooldownMs`, אבל הוא עדיין מוזן לנתיב ה-lockout
+הקיים של מכסה-פר-מודל (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, ללא שינוי על ידי #10334 פרט למקור
+ה-cooldown): הוא נחתך כלפי מטה ל-`mlSettings.maxCooldownMs` של המפעיל
+(ברירת מחדל `1_800_000ms` / 30 דקות), כמו כל model lockout אחר, ו_סיבת
+ה-lockout השמורה_ נשארת ה-hardcoded הקיים `"forbidden"`, ולא ה-`"auth_error"`
+של הכלל — רק משך ה-cooldown נכבד מקצה לקצה, לא מחרוזת הסיבה. החיבור עצמו
+נשאר פעיל; מודלים אחים על אותו חיבור אינם מושפעים.
 
-שגיאות מכסה משוכתבות (`额度不足`) מגיעות לכלל ספק בסביבת הייצור
-(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, ללא cooldown מוצהר משלו — חלה ברירת המחדל של ה-backoff המדורג של שכבת השימור). מאז #10334, ה-`scope` ב-`ProviderErrorRuleMatch` אכן נצרך מקצה לקצה, אבל **רק** עבור ספקים ברשימת ההיתרים `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` — כיום רק `"agentrouter"`, מותנה דרך `honorsRuleLockScope()`). עבור כל ספק אחר `scope` נשאר אינפורמטיבי, בדיוק כפי שהיה לפני #10334. `checkFallbackError` חושף את ה-scope של הכלל שהותאם כ-`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) הוא שומר הסף המשותף שמוודא ש-`ruleScope` באמת בטוח לכיבוד כסיגנל ברמת-חיבור המתאושש מעצמו (scope `"connection"`, reason `quota_exhausted`, לעולם לא `permanent`, לעולם לא `creditsExhausted` — הגנה מפני כלל עתידי שיזווג scope `"connection"` עם מצב חשבון קבוע). שני צרכנים קוראים לו:
+שגיאות מכסה מנוסחות מחדש (`额度不足`) מגיעות לכלל ספק בפרודקשן
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`,
+`scope: "connection"`, ללא cooldown מוצהר משלו — חלה ברירת המחדל של
+ה-backoff המדורג של שכבת ה-persistence). מאז #10334, ה-`scope` על
+`ProviderErrorRuleMatch` **כן** נצרך מקצה לקצה, אבל **רק** עבור ספקים
+ברשימת ההיתרים `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts`
+— כיום רק `"agentrouter"`, מותנה דרך `honorsRuleLockScope()`). עבור כל
+ספק אחר, `scope` נשאר אינפורמטיבי, בדיוק כמו לפני #10334.
+`checkFallbackError` חושף את ה-scope של הכלל שהותאם כ-`fallbackResult.ruleScope`;
+`isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) הוא
+השומר (guard) המשותף שמאשר ש-`ruleScope` באמת בטוח לכיבוד כאות ברמת
+החיבור כולו ובר-התאוששות עצמית (scope `"connection"`, reason
+`quota_exhausted`, לעולם לא `permanent`, לעולם לא `creditsExhausted` —
+הגנה מפני כלל עתידי שיזווג scope `"connection"` עם מצב חשבון קבוע). שני
+צרכנים קוראים לו:
 
-- **שכבת שימור (Persistence)** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  במקום ליפול לענף הנעילה **פר-מודל** של ספקי passthrough (agentrouter הוא `passthroughModels: true` → `hasPerModelQuota()` מחזיר `true`), מוחל **cooldown זמני על החיבור** — `testStatus: "unavailable"` + `rateLimitedUntil`, לעולם לא סטטוס סופי (`credits_exhausted`/`banned`/`expired`) — כך שהחיבור מתאושש מעצמו עם תום תקופת ה-cooldown, במקום לדרוש איפוס אישורים ידני. מדולג עבור חיבורים עם `disableCooling: true` (#2997): ביטול-ההסכמה הזה ממשיך במקום זאת לנעילה פר-מודל (פשרה מתועדת — ראו את הערת הקוד מעל הענף).
+- **שמירה מתמשכת** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  במקום לעבור לענף הנעילה **לכל מודל** של ספק passthrough
+  (‏agentrouter הוא `passthroughModels: true` ← ‏`hasPerModelQuota()`
+  מחזיר `true`), מוחלת **תקופת צינון זמנית של החיבור** —
+  `testStatus: "unavailable"` + `rateLimitedUntil`, ולעולם לא סטטוס סופי
+  (`credits_exhausted`/`banned`/`expired`) — כך שהחיבור מתאושש מעצמו
+  לאחר שתקופת הצינון חולפת, במקום לדרוש איפוס ידני של פרטי ההזדהות.
+  הפעולה מדולגת עבור חיבורים עם `disableCooling: true` (#2997): ביטול זה
+  מוביל במקום זאת לענף הנעילה לכל מודל (פשרה מתועדת —
+  ראו את הערת הקוד שמעל לענף).
 - **ניתוב קומבו בתוך אותה בקשה** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): אותו שומר מסמן את החיבור לתוך סט ה-`exhaustedConnections` שבזיכרון, תחת המפתח `${provider}:${connectionId}`. פעולה זו מדלגת רק על יעד נותר **של אותה בקשה** ש_הוא עצמו כבר נושא בדיוק את אותו `connectionId`_ באובייקט היעד שלו (`getExhaustedTargetSkipReason()`, `open-sse/services/combo/comboPredicates.ts`, `if (provider && connectionId)` לפני בדיקת ה-`exhaustedConnections`) — קומבו רגיל מסוג רשימת-מודלים, שבו ליעדים האחים אין `connectionId` מוצמד משלהם והוא נפתר רק בכל שיגור מתוך כותרת התגובה `X-OmniRoute-Selected-Connection-Id`, לעולם אינו מגיע להתאמת מפתח שכזו. במקרה הנפוץ הזה, ההגנה האמיתית מפני שימוש חוזר של רגל נותרת בחשבון שזה עתה מוצה היא **לא** הסט הזה — אלא שכבת השימור שלמעלה (ה-`rateLimitedUntil` של החיבור נמצא כעת בעתיד) בשילוב עם אותו שומר שמדכא את `transientRateLimitedProviders` עבור הכשל (ראו "עיצוב דו-שלבי" ואת הערת הקוד על ענף `isAgentrouterConnectionQuotaScope` ב-`targetExhaustion.ts`): כשהסט ההוא נותר לא מסומן, ה-force-allow של `allowRateLimitedConnection` ב-`combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) **לא** נכנס לפעולה עבור הרגליים הנותרות של הספק, כך שמסנן ה-`rateLimitedUntil` של בחירת האישורים (`src/sse/services/auth.ts:1238`) מכובד כרגיל, ורגל נותרת בוחרת חיבור agentrouter אחר שעדיין זכאי, או נכשלת ללא אישורים זמינים — היא אינה פולשת בכוח חזרה לחיבור שענף זה זה עתה צינן.
+  `open-sse/services/combo/targetExhaustion.ts`): אותו guard מסמן את
+  החיבור בתוך קבוצת `exhaustedConnections` שבזיכרון, לפי המפתח
+  `${provider}:${connectionId}`. הדבר מדלג רק על יעד שנותר באותה בקשה
+  ושכבר _מכיל בעצמו בדיוק את אותו `connectionId`_ באובייקט היעד שלו
+  (`getExhaustedTargetSkipReason()`,
+  `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
+connectionId)` לפני החיפוש ב-`exhaustedConnections`) — קומבו רגיל של
+  רשימת מודלים, שבו יעדים מקבילים אינם מכילים `connectionId` מוצמד
+  משלהם והוא נפתר רק בכל dispatch מכותרת
+  `X-OmniRoute-Selected-Connection-Id` של התגובה, לעולם אינו תואם למפתח
+  הזה. במקרה הנפוץ הזה, ההגנה האמיתית מפני שימוש חוזר של שלב שנותר
+  בחשבון שזה עתה מוצה אינה ה-Set הזה — אלא שכבת השמירה המתמשכת שלעיל
+  (ה-`rateLimitedUntil` של החיבור נמצא כעת בעתיד), בשילוב עם דיכוי
+  `transientRateLimitedProviders` עבור הכשל על ידי אותו guard
+  (ראו "תכנון דו-שלבי" ואת הערת הקוד בענף
+  `isAgentrouterConnectionQuotaScope` ב-`targetExhaustion.ts`): כאשר
+  ה-Set הזה אינו מסומן, ההתרה הכפויה `allowRateLimitedConnection` של
+  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) אינה
+  מופעלת עבור השלבים הנותרים של הספק, ולכן מסנן `rateLimitedUntil` של
+  בחירת פרטי ההזדהות (`src/sse/services/auth.ts:1238`) מכובד כרגיל,
+  ושלב שנותר בוחר חיבור agentrouter אחר שעדיין כשיר או נכשל משום שאין
+  פרטי הזדהות זמינים — הוא אינו כופה את דרכו חזרה אל החיבור שהענף הזה
+  הכניס זה עתה לתקופת צינון.
 
-### עיצוב דו-שלבי: שכתוב סטטוס, ואז סיווג
+### תכנון דו-שלבי: ניסוח מחדש של הסטטוס, ולאחר מכן סיווג
 
-שכתוב סטטוס (`upstreamStatusRestatement.ts`) וכללי סיווג הספקים (`open-sse/config/providerErrorRules.ts`, `providerRuleRegistry`) הם רג'יסטרים נפרדים ששניהם ממופים לפי מזהה ספק וסמני טקסט, אבל הם רצים במקומות שונים ומשרתים מטרות שונות: שכתוב כותב מחדש את סטטוס ה-HTTP בשלב מוקדם ב-`chatCore.ts`; כללי סיווג בוחרים את ה-`reason` של ה-fallback ואת `scope` הנעילה (`model` / `provider` / `connection`) בתוך `checkFallbackError()` (`open-sse/services/accountFallback.ts`).
+ניסוח מחדש של הסטטוס (`upstreamStatusRestatement.ts`) וכללי סיווג הספקים
+(`open-sse/config/providerErrorRules.ts`,
+`providerRuleRegistry`) הם מאגרים נפרדים ששניהם מבוססים על מזהה הספק
+ועל סמני טקסט, אך הם פועלים במקומות שונים ומשרתים מטרות שונות: הניסוח
+מחדש משכתב את סטטוס ה-HTTP בשלב מוקדם ב-`chatCore.ts`; כללי הסיווג
+בוחרים את ערך ה-`reason` החלופי ואת `scope` הנעילה
+(`model` / `provider` / `connection`) בתוך `checkFallbackError()`
+(`open-sse/services/accountFallback.ts`).
 
-כללי סיווג רואים את **הטקסט** המלא של השגיאה (נדרש כדי להתאים סמני גוף כמו `额度不足`) רק עבור ספקים הרשומים ברשימת ההיתרים `FULL_TEXT_RULE_PROVIDERS` ב-`providerErrorRules.ts` — כיום רק `"agentrouter"`. עבור כל ספק אחר ב**קטלוג המובנה**, `checkFallbackError` מוסר ל-`getProviderErrorRuleMatch` רק את השגיאה המובנית (`{code, type}`), שמספיקה לכללים מבוססי כותרת/סטטוס/קוד אבל עיוורת לסמני טקסט בגוף. הפונקציה העוזרת `resolveRuleMatchBody()` מבצעת את הבחירה הזו: טקסט שגיאה מלא לספקים ברשימת ההיתרים, השגיאה המובנית בכל מקרה אחר. הוספת ספק **מובנה** ל-`FULL_TEXT_RULE_PROVIDERS` היא הצטרפות (opt-in) מפורשת לכל ספק — היא קיימת כדי שנתיב ברירת המחדל עבור כל ספק שאינו ברשימה יישאר זהה בית-אחר-בית.
+כללי הסיווג רואים את **טקסט** השגיאה המלא (הדרוש להתאמת סמנים בגוף
+כמו `额度不足`) רק עבור ספקים המופיעים ברשימת ההיתרים
+`FULL_TEXT_RULE_PROVIDERS` שב-`providerErrorRules.ts` — כרגע רק
+`"agentrouter"`. עבור כל ספק **קטלוג מובנה** אחר, `checkFallbackError`
+מעביר אל `getProviderErrorRuleMatch` רק את השגיאה המובנית (`{code, type}`),
+המספיקה לכללים המבוססים על כותרת/סטטוס/קוד אך אינה יכולה לראות סמני
+טקסט בגוף. פונקציית העזר `resolveRuleMatchBody()` מבצעת בחירה זו: טקסט
+השגיאה המלא עבור ספקים שברשימת ההיתרים, והשגיאה המובנית בכל מקרה אחר.
+הוספת ספק **מובנה** אל `FULL_TEXT_RULE_PROVIDERS` היא הצטרפות מפורשת
+לכל ספק — היא קיימת כדי שמסלול ברירת המחדל של כל ספק שאינו ברשימה
+יישאר ללא שינוי, בית אחר בית.
 
-ה-`scope` של כלל (`model` / `provider` / `connection`) הוא הצטרפות נפרדת מ-`FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` רק חושף אותו כ-`fallbackResult.ruleScope`, וצרכנים במורד הזרם מכבדים אותו כמשהו מעבר לתווית אינפורמטיבית רק עבור ספקים ברשימת ההיתרים `HONORS_RULE_LOCK_SCOPE_PROVIDERS` באותו קובץ (`gated via honorsRuleLockScope()` — כיום רק `"agentrouter"`). ראו "שגיאות מכסה משוכתבות" לעיל לגבי מה שהתאמה של `scope: "connection"` עושה בפועל לאחר שספק נמצא ברשימת ההיתרים ההיא.
+ה-`scope` של כלל (`model` / `provider` / `connection`) הוא הצטרפות נפרדת
+מ-`FULL_TEXT_RULE_PROVIDERS`: ‏`checkFallbackError` רק חושף אותו בתור
+`fallbackResult.ruleScope`, וצרכנים בהמשך התהליך מכבדים אותו כיותר
+מתווית מידע רק עבור ספקים שברשימת ההיתרים
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` שבאותו קובץ (באמצעות
+`honorsRuleLockScope()` — כיום רק `"agentrouter"`). ראו "שגיאות מכסה
+שנוסחו מחדש" לעיל כדי להבין מה התאמה עם `scope: "connection"` עושה
+בפועל לאחר שספק נוסף לרשימת ההיתרים הזו.
 
-**#11104 — כללים שהוכרזו על-ידי מפעיל עוקפים את שתי רשימות ההיתר.** מפעיל יכול
-להכריז על כלל ייעודי לספק בזמן ריצה באמצעות `settings.providerErrorRules`
+**#11104 — כללים שהוגדרו על ידי המפעיל עוקפים את שתי רשימות ההיתרים.**
+מפעיל יכול להצהיר בזמן ריצה על כלל לכל ספק באמצעות
+`settings.providerErrorRules`
 (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-מבלי לערוך את הקובץ הזה. הצבת שער לכלל מפעיל מאחורי
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — רשימות היתר
-שנועדו להגן על התנהגות **ברירת המחדל** של כללי הקטלוג המובנים — תהפוך
-את מנגנון ההגדרות לחסר תועלת עבור כל ספק מלבד אלה שכבר רשומים שם,
-מכיוון שהכרזת הכלל היא כבר ההצטרפות (opt-in) המפורשת של המפעיל.
-`resolveRuleMatchBody()` ו-`honorsRuleLockScope()` בודקים שניהם קודם את
-`hasOperatorRuleForProvider()`: ספק עם כלל מפעיל מקבל את טקסט השגיאה הגולמי
-וה-`scope` המוכרז שלו נכבד, ללא קשר לשאלה אם הוא מופיע גם באחת מרשימות ההיתר.
+מבלי לערוך קובץ זה. הכפפת כלל של מפעיל ל-
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — רשימות
+היתרים שנועדו להגן על התנהגות **ברירת המחדל** של כללי הקטלוג המובנים —
+הייתה הופכת את מנגנון ההגדרות לחסר פעולה עבור כל ספק מלבד אלה שכבר
+מופיעים שם, משום שעצם הצהרת הכלל היא כבר הצטרפות מפורשת מצד המפעיל.
+`resolveRuleMatchBody()` ו-`honorsRuleLockScope()` בודקים תחילה את
+`hasOperatorRuleForProvider()`: ספק עם כלל מפעיל מקבל את טקסט השגיאה
+הגולמי, וה-`scope` שהוצהר עבורו מכובד, בין אם הוא מופיע גם באחת
+מרשימות ההיתרים ובין אם לאו.
 
-**פער ידוע — `providerRuleRegistry` לעולם אינו נבדק עבור HTTP 400.**
-ענף ה-`BAD_REQUEST` של `checkFallbackError` מסווג סטטוס 400 כולו
-דרך מערכי התבניות שלו עצמו (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS` וכו' ב-`accountFallback.ts`) וחוזר לפני
-שהענף `configuredRule`/`getProviderErrorRuleMatch` שמעליו מגיע לטיפול.
-כלל קטלוג מובנה (או כלל מפעיל) עם `status: 400` הוא
-תקין תחבירית אך לעולם לא יופעל. אף כלל קיים אינו מכוון ל-400 נכון להיום,
-ולכן שום דבר בפרודקשן אינו מושפע — אבל כלל 400 עתידי דורש לגעת קודם
-בענף הזה, וזהו שינוי גדול יותר מהוספת כלל (הוא
-מסווג מחדש את 400 עבור כל ספק שכבר מסתמך על התנהגות מערך-התבניות)
-והוא מחוץ לתחום של הוספת כלל לספק בודד.
+**פער ידוע — לעולם לא מתבצעת פנייה אל `providerRuleRegistry` עבור HTTP 400.**
+ענף `BAD_REQUEST` של `checkFallbackError` מסווג סטטוס 400 במלואו
+באמצעות מערכי התבניות שלו (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS` וכו' ב-`accountFallback.ts`) ומחזיר תוצאה
+לפני ההגעה לענף `configuredRule`/`getProviderErrorRuleMatch` שמעליו.
+כלל קטלוג מובנה (או כלל מפעיל) עם `status: 400` תקין מבחינה תחבירית,
+אך לעולם לא יופעל. כיום שום כלל קיים אינו מכוון ל-400, ולכן שום דבר
+בסביבת הייצור אינו מושפע — אך כלל 400 עתידי יחייב קודם שינוי בענף זה,
+וזהו שינוי גדול יותר מהוספת כלל (הוא מסווג מחדש את 400 עבור כל ספק
+שכבר מסתמך על ההתנהגות המבוססת על מערכי התבניות), ולכן הוא מחוץ
+לתחום של הוספת כלל לספק יחיד.
 
-### הוספת שער חדש המצהיר מכסה באופן שגוי
+### הוספת gateway חדש שמצהיר על מצב quota באופן שגוי
 
 1. רשמו מערך כללים אחד ב-`statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). שמרו על `textMarkers`
-   ספציפיים לספק; לעולם אל תעשו שימוש חוזר בביטויי אנגלית גנריים שמתנגשים עם
+   (`open-sse/config/upstreamStatusRestatement.ts`). שמרו את `textMarkers`
+   ספציפיים לספק; לעולם אל תעשו שימוש חוזר בביטויים גנריים באנגלית שמתנגשים עם
    `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
-2. באופן רשות, רשמו כללי סיווג ב-
+2. באופן אופציונלי, רשמו כללי סיווג ב-
    `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) כדי לבחור
-   את טווח הנעילה הנכון (`connection` עבור מכסה ברמת-החשבון כולו, `model` עבור
-   שגיאות ברמת-מודל בודד). שלב זה משפיע בפרודקשן רק עבור
-   ספקים שהכללים שלהם זקוקים לטקסט השגיאה המלא (סמני גוף): הוסיפו את
-   מזהה הספק ל-`FULL_TEXT_RULE_PROVIDERS` באותו קובץ — אחרת
+   את היקף הנעילה הנכון (`connection` עבור quota ברמת-החשבון כולה, `model` עבור
+   שגיאות ברמת-מודל בודד). שלב זה נכנס לתוקף בפרודקשן רק עבור
+   ספקים שהכללים שלהם זקוקים לטקסט השגיאה המלא (סמני body): הוסיפו את
+   מזהה הספק ל-`FULL_TEXT_RULE_PROVIDERS` באותו הקובץ — אחרת
    `checkFallbackError` מעביר לכלל תמיד רק את השגיאה המובנית
-   `{code, type}` וכלל טקסט-גוף לעולם לא יתאים לתעבורה חיה.
-   כללים המתאימים אך ורק על בסיס `status`/`headers` (כמו של Opencode או
-   של Minimax) אינם זקוקים להצטרפות זו. בנפרד, אם הכלל מכריז
-   `scope: "connection"` והכוונה היא צינון אמיתי ברמת-החיבור כולו
-   בתוספת דילוג על קומבו באותה בקשה (ולא רק תווית אינפורמטיבית), הוסיפו את
-   מזהה הספק ל-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` באותו קובץ — זה
-   מה שמגן על צריכה בסגנון `isAgentrouterConnectionQuotaScope()` ב-
-   `markAccountUnavailable()` (`src/sse/services/auth.ts`) וב-
+   `{code, type}` וכלל המבוסס על טקסט-body לעולם לא יתאים לתעבורה חיה.
+   כללים המתאימים אך ורק על בסיס `status`/`headers` (כמו אלו של Opencode או
+   של Minimax) אינם זקוקים ל-opt-in זה. בנפרד, אם הכלל מצהיר
+   `scope: "connection"` והכוונה היא cooldown אמיתי ברמת-החיבור כולו
+   בתוספת דילוג על combo באותה הבקשה (ולא רק תווית אינפורמטיבית), הוסיפו את
+   מזהה הספק ל-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` באותו הקובץ — זה מה
+   ששולט בצריכה בסגנון `isAgentrouterConnectionQuotaScope()` בתוך
+   `markAccountUnavailable()` (`src/sse/services/auth.ts`) ובתוך
    `applyComboTargetExhaustion()`
    (`open-sse/services/combo/targetExhaustion.ts`); בלעדיו, `scope`
-   עדיין זורם דרך `fallbackResult.ruleScope` אך שום דבר לא פועל על פיו.
-3. הוסיפו בדיקות יחידה המשקפות את `tests/unit/upstream-status-restatement.test.ts`
-   ואת `tests/unit/agentrouter-error-rules.test.ts` (כולל
-   שומרי not-permanent / not-creditsExhausted, ו— אם הספק זקוק
-   לרשימת ההיתר — בדיקה המוודאת ש-`resolveRuleMatchBody()` מחזיר את
-   הטקסט המלא רק עבור אותו ספק).
+   עדיין זורם דרך `fallbackResult.ruleScope` אך דבר לא פועל על פיו.
+3. הוסיפו unit tests במתכונת של `tests/unit/upstream-status-restatement.test.ts`
+   ושל `tests/unit/agentrouter-error-rules.test.ts` (כולל שומרי
+   not-permanent / not-creditsExhausted, וגם — אם הספק זקוק לרשימת ההיתר —
+   בדיקה המאמתת ש-`resolveRuleMatchBody()` מחזירה את הטקסט המלא רק עבור
+   אותו הספק).
 
-אין צורך בשינויים ב-`chatCore.ts`, `classifyError`, או בקומבו.
+אין צורך בשינויים ב-`chatCore.ts`, ב-`classifyError` או ב-combo.
 
-#### נעילה מקובצת לפי דלי-יציאה (#10880)
+#### נעילה בדליי egress (#10880)
 
 ספקים ב-`EGRESS_BUCKETED_LOCK_PROVIDERS` (משפחת opencode) מטופלים
-כ-upstream מקובץ לפי IP (השכבה החינמית של opencode מקובצת לפי IP, לא
-לפי חשבון — ראו #9611): סטטוס-429 שסווג `quota_exhausted`
-**או** `rate_limit_exceeded` מצנן כל חיבור ממשפחה שברשימת ההיתר
-שכתובת ה-IP היוצאת האחרונה הידועה שלו תואמת לזו של החיבור הכושל, לפני
-שהרוטציה מספיקה לנסות אותם
-— ובכך נמנעות N-1 קריאות upstream המובטחות לכשל (אותו דפוס כמו #10460/#10525).
-`rate_limit_exceeded` נכלל במכוון: בנתיב `markAccountUnavailable`
-הכללים הייעודיים ל-opencode לעולם לא מתאימים (לא מועברים headers/body ל-
-`checkFallbackError`, opencode לא נמצא ב-`FULL_TEXT_RULE_PROVIDERS`), ולכן 429
-שהגוף שלו נושא את טקסט מכסת-המנוי ("monthly usage limit
-reached") מסווג `quota_exhausted` על-ידי מנגנון הגיבוי של טקסט-המכסה
-(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; צינון של שעה אחת) לפני
-שכלל ה-`status_429` בכלל מגיע לטיפול — בעוד ש-429 נטול טקסט-מכסה (הגבלת
-קצב רגילה) מסווג דרך כלל ה-`status_429` כ-`rate_limit_exceeded`
-ועדיין מצנן את משפחת ה-IP. עבור ספק ברשימת ההיתר, הגבלת
-קצב מקובצת-IP היא אותו אות כמו מכסה ממוצת. מגבלות בכנות:
+כ-upstream מקובץ-IP (השכבה החינמית של opencode מקובצת-IP, ולא
+מקובצת-חשבון — ראו #9611): status-429 שסווג כ-`quota_exhausted`
+**או** `rate_limit_exceeded` מכניס ל-cooldown כל חיבור ממשפחה שברשימת
+ההיתר שכתובת ה-egress IP האחרונה הידועה שלו תואמת לזו של החיבור שנכשל,
+לפני שהרוטציה מספיקה לנסות אותם
+— ובכך נחסכות N-1 קריאות upstream שמובטח שיכשלו (אותה צורה כמו #10460/#10525).
+`rate_limit_exceeded` נכלל בכוונה: בנתיב `markAccountUnavailable`
+הכללים הספציפיים ל-opencode לעולם אינם מתאימים (לא מועברים headers/body
+ל-`checkFallbackError`, ו-opencode אינו ב-`FULL_TEXT_RULE_PROVIDERS`), ולכן 429
+שה-body שלו נושא את טקסט ה-quota של המנוי ("monthly usage limit
+reached") מסווג כ-`quota_exhausted` על ידי ה-fallback של טקסט-quota
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; cooldown של שעה) לפני
+שבכלל מגיעים לכלל ה-`status_429` — בעוד ש-429 נטול טקסט-quota (rate
+limiting רגיל) מסווג דרך כלל ה-`status_429` כ-`rate_limit_exceeded`
+ועדיין מכניס את משפחת ה-IP ל-cooldown. עבור ספק שברשימת ההיתר, rate limit
+מקובץ-IP הוא אותו סיגנל כמו quota מוצת. מגבלות בכנות:
 
-- **מאמץ מרבי**: הנעילה פותרת את ה-`egress_ip` הידוע האחרון של החיבור מתוך
-  `proxy_logs` (חלון של 24 שעות, סינכרוני, ללא מטמון). מטמון קר (ה-egress IP
-  מעולם לא נבדק) או היעדר שורה → החיבור הכושל עדיין מצטנן על-ידי
-  הענף (נרשם כמו היום), רק שאף אח לא ננעל.
+- **מאמץ מרבי**: הנעילה מפענחת את ה-`egress_ip` הידוע האחרון של החיבור
+  מתוך `proxy_logs` (חלון של 24 שעות, סינכרוני, ללא מטמון). מטמון קר
+  (egress IP מעולם לא נחקר) או היעדר שורה ← החיבור הכושל עדיין מצונן על
+  ידי הענף (נרשם כמו היום), רק שאף אח לא ננעל.
 - **לעולם לא סופי**: הצינון הוא חלון מכסה מתחדש
-  (`testStatus: "unavailable"`); מצב קבוע לעולם אינו נגזר מאות
-  ברמת-IP. חיבורי `disableCooling` מדלגים על הענף לחלוטין.
-- **גרנולריות הנעילה משתנה עבור המשפחה שברשימת ההיתר**: זהו שינוי
-  היקף, לא רק אופטימיזציית אחים. opencode הוא ספק `passthroughModels`,
-  ולכן לפני הענף הזה 429 היה מייצר נעילה פר-מודל; כעת הוא מייצר
-  צינון חיבור — כולל עבור מפעיל שמריץ חיבור יחיד בלי אף אח
-  בכלל. זוהי הגרנולריות שטבלת הכללים של opencode כבר מצהירה כנכונה
+  (`testStatus: "unavailable"`); מצב קבוע לעולם אינו נגזר מאות ברמת IP.
+  חיבורי `disableCooling` מדלגים על הענף לחלוטין.
+- **רמת הפירוט של הנעילה משתנה עבור המשפחה שברשימת ההיתרים**: זהו שינוי
+  סקופ, לא רק אופטימיזציית אחים. opencode הוא ספק `passthroughModels`,
+  ולכן לפני הענף הזה 429 יצר נעילה ברמת מודל (per-MODEL); כעת הוא מייצר
+  צינון חיבור — כולל עבור מפעיל שמריץ חיבור יחיד ללא אח בכלל. זוהי רמת
+  הפירוט שטבלת הכללים של opencode כבר מכריזה עליה כנכונה
   (`scope: "connection"`, `providerErrorRules.ts`), ומעולם לא כובדה עד
-  כה מכיוון ש-opencode אינו נמצא ב-
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. הענף כותב בעצמו את הצינון +
-  ה-`backoffLevel` של החיבור הכושל, במקביל לענף agentrouter
-  שברמת-החיבור, וחוזר — הבלוק הפר-מודלי והנתיב הגנרי שלמטה לעולם
-  אינם מושגים.
-- **Combo כלול**: כמו ענף agentrouter, ההיקף מתעלם בכוונה
-  מהורדת-הדרגה של `persistUnavailableState`/`isCombo` שקורא combo
-  מחיל על 429. נעילה פר-מודל אינה צורה חלשה יותר של ההיקף הזה, היא
-  היחידה השגויה: היא לא אומרת דבר על ה-IP המוצה, ולכן רוטציית
-  ה-combo תמשיך לשרוף קריאה אחת שמובטח לה להיכשל לכל אח.
-- **בטיחות אחים**: אח שכבר במצב סופי (banned/credits_exhausted)
-  או שכבר נמצא בצינון ארוך יותר לעולם לא נדרס.
-- **רשימת היתר בלעדית**: הרחבת `EGRESS_BUCKETED_LOCK_PROVIDERS` היא
-  החלטה מפורשת של הבעלים; אין חיווט גנרי (תבנית #10334/#10419).
-  שאילתת האחים מקשרת את אותה רשימת-היתר במקום לחזור עליה כליטרל
-  SQL, כך שהרחבתה נשארת שינוי של שורה אחת.
-- **רוטציית egress IP, בשני הכיוונים**: חלון החיפוש (24 שעות) רחב
-  בהרבה מ-TTL של מטמון ה-egress-IP (5 דקות), ולכן "ה-IP הידוע
-  האחרון" הוא היסטוריה, לא מצב נוכחי. אם ה-proxy של חיבור עבר רוטציה
-  בתוך החלון, הנעילה עלולה **לפספס** IP משותף ממש (ה-IP הרשום הוא
-  החדש, שעוד לא מוצה) — ובאופן סימטרי היא עלולה **לצנן אח שמאז עבר
-  רוטציה הרחק** מה-IP המוצה. המקרה השני עולה לאותו אח חלון צינון אחד;
-  שניהם מגבלות מאמץ-מרבי מקובלות של חיפוש מבוסס-היסטוריה.
+  כה מכיוון ש-opencode אינו נמצא ב-`HONORS_RULE_LOCK_SCOPE_PROVIDERS`.
+  הענף כותב בעצמו את הצינון + `backoffLevel` של החיבור הכושל, בשיקוף של
+  ענף agentrouter שבסקופ החיבור, וחוזר — הבלוק ברמת המודל והנתיב הגנרי
+  שלמטה לעולם אינם מושגים.
+- **קומבו נכלל**: כמו ענף agentrouter, הסקופ מתעלם בכוונה משדרוג-המטה של
+  `persistUnavailableState`/`isCombo` שמתקשר מסוג קומבו מחיל על 429.
+  נעילה ברמת מודל אינה צורה חלשה יותר של הסקופ הזה, היא היחידה השגויה:
+  היא לא אומרת דבר על ה-IP המוצה, ולכן רוטציית הקומבו תמשיך לשרוף קריאה
+  אחת עם כישלון מובטח לכל אח.
+- **בטיחות אחים**: אח שכבר סופי (banned/credits_exhausted) או שכבר נמצא
+  בצינון ארוך יותר לעולם אינו נדרס.
+- **רשימת היתרים בלעדית**: הרחבת `EGRESS_BUCKETED_LOCK_PROVIDERS` היא
+  החלטה מפורשת של הבעלים; אין חיווט גנרי (תבנית #10334/#10419). שאילתת
+  האחים מקשרת את אותה רשימת היתרים במקום לחזור עליה כליטרל SQL, ולכן
+  הרחבתה נשארת שינוי של שורה אחת.
+- **רוטציית egress IP, בשני הכיוונים**: חלון החיפוש (24 שעות) רחב בהרבה
+  מ-TTL של מטמון ה-egress IP (5 דקות), ולכן "ה-IP הידוע האחרון" הוא
+  היסטוריה, לא מצב נוכחי. אם ה-proxy של חיבור ביצע רוטציה בתוך החלון,
+  הנעילה עלולה **לפספס** IP משותף ממש (ה-IP הרשום הוא החדש,
+  הבלתי-מוצה) — ובאופן סימטרי היא עלולה **לצנן אח שמאז ביצע רוטציה
+  והתרחק** מה-IP המוצה. המקרה השני עולה לאותו אח חלון צינון אחד; שניהם
+  מגבלות מקובלות של מאמץ-מרבי בחיפוש מבוסס-היסטוריה.
 - **עלות**: שתי סריקות חסומות של `proxy_logs` (מסוננות לפי חלון דרך
   `idx_pl_timestamp`), רק בתדירות של 429. אין אינדקס חדש (מיגרציה 134
-  YAGNI). נמדד על עותק DB של תנועה אמיתית בגודל בינוני; מופע בעל
-  תפוקה גבוהה מחזיק יותר שורות באופן יחסי באותו חלון.
+  YAGNI). נמדד על עותק DB של תעבורה אמיתית בגודל בינוני; מופע בתפוקה
+  גבוהה מחזיק באופן יחסי יותר שורות באותו חלון.
 
 ---
 

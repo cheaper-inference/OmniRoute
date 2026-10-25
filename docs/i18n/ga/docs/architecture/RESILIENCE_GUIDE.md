@@ -363,6 +363,17 @@ Do gach straitéis chumaisc (nuair atá sí cumasaithe), má chruthódh iarratas
 
 Clúdaíonn an geata céanna an cás réamhsheolta (#16319): nuair a léimtear gach sprioc de chumasc sula ndéantar iarracht ar bith mar go bhfuil a mhúnla faoi ghlasáil ghearr thráthach, fanann an chonair nialas-iarracht an glas amach faoi na huasteorainneacha céanna agus athsheolann sí, in ionad freagra gan leid `503 ALL_TARGETS_SKIPPED` a thabhairt. Nuair nach gceadaítear feitheamh ar bith (uasteorainn, iarrachtaí nó buiséad ídithe, nó an ghné múchta), uasghrádaítear an freagra críochfoirt go `429 rate_limit_error` agus `retry_after` / `reset_at` á n-iompar aige ó dhul in éag an ghlasála thráthaigh is luaithe; coinníonn glasanna cuóta, údaraithe agus gan aimsiú an 503 gan leid.
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. Rialú Iontrála Scuaine Iarratas (v3.8.49 · eagrán #6593)
@@ -510,248 +521,301 @@ aonuaire, mar sin ní dhéantar cuntasaíocht úsáide ná scaoileadh an tseamaf
 
 ---
 
-## 7. Athshonrú Stádais Réamhtheachtaigh (earráidí cuóta a sonraíodh go mícheart)
+## 7. Athshonnú Stádais Uasghréasáin (earráidí cuóta míshonraithe)
 
-**Raon feidhme:** geata réamhtheachtach amháin a thuairiscíonn ídiú sealadach cuóta leis an stádas HTTP mícheart.
+**Scóip:** geata uasghréasáin amháin a thuairiscíonn díomáil cuóta shealadaigh leis an stádas HTTP mícheart.
 
-**Cuspóir:** stádas míthreorach a cheartú ROIMH aicmiú, ionas go bhfeicfidh tomhaltóirí iartheachtacha (inneall cúltaca, comhiomlánú teaglama, an freagra don chliant) fíorchineál in-atriailte na teipe.
+**Cuspóir:** stádas míthreorach a cheartú SULA ndéantar aicmiú, ionas go bhfeiceann tomhaltóirí íosghréasáin (inneall fabhtcheilge, comhiomlánú teaglama, an freagra don chliant) fíornádúr in-atrialfach an teipe.
 
-Cuireann roinnt geataí ídiú SEALADACH cuóta in iúl le stádas HTTP nach féidir a
-atriail. Tugann `agentrouter.org` `403` ar ais (`400` uaireanta) le corp Sínise
-(`用户额度不足` / `额度不足`) in ionad an `429` chaighdeánaigh. Caitheann cliaint ar nós Claude
-Code le `403` mar earráid bhuan agus scoireann siad den seisiún, agus gan cheartú
-d'aicmeodh an t-inneall cúltaca é mar `AUTH_ERROR` in ionad teagmhas
-cuóta.
+Comharthaíonn roinnt geataí díomáil cuóta SHEALADAIGH le stádas HTTP nach
+bhfuil in-atrialfach. Filleann `agentrouter.org` `403` (uaireanta `400`) le
+corp Síneach (`用户额度不足` / `额度不足`) in ionad an `429` chaighdeánaigh.
+Déileálann cliaint ar nós Claude Code le `403` mar rud buan agus cuireann siad
+deireadh tobann leis an seisiún, agus gan ceartú d'aicmeodh inneall an
+fhabhtcheilge é mar `AUTH_ERROR` in ionad imeacht cuóta.
 
-**Cur chun feidhme:**
+**Cur i bhfeidhm:**
 
 - Clárlann + meaitseálaí: `open-sse/config/upstreamStatusRestatement.ts` — liosta
-  rialacha de réir soláthraí (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), arna mheaitseáil trí `applyStatusRestatement()`.
-- Suíomh glao: an bloc `providerFailure:` in `open-sse/handlers/chatCore.ts`
-  (timpeall líne 3654), díreach tar éis do `parseUpstreamError()` freagra
-  réamhtheachtach a bhfuil stádas earráide HTTP aige (`!providerResponse.ok`) a pharsáil,
-  agus sula ritear aon aicmiú, ionas go bhfeicfidh gach tomhaltóir iartheachtach an
-  stádas ceartaithe. Leanann earráidí atá leabaithe taobh istigh de shruth SSE `200`
-  conair pharsála srutha ar leith níos déanaí agus **ní** chlúdaíonn an duán seo iad
-  faoi láthair — teorainn aitheanta nach bhfuil ag teastáil fós le haghaidh stádas mícheart
-  agentrouter (a thagann chun solais mar stádas earráide HTTP).
-- Incháilitheacht atrialach: tá `429` in `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`), mar sin bíonn fíorfhuinneog
-  atrialach ag earráid athshonraithe in ionad í a nochtadh mar `403` marbh.
-- Ní léiríonn an `60s` sintéiseach `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
-  ach an méid a insíonn an freagra athshonraithe don **chliant**; ní hé féin fad
-  fuaraithe/frithdhúnta inmheánaigh an naisc — rialaíonn cibé sásra a láimhseálann
-  an earráid athshonraithe é sin ar leithligh (cúlú méadaitheach Fhuarú an Naisc,
-  §2, bonn `3s` do sholáthraithe eochrach API; nó Frithdhúnadh Samhla, §3, do
-  sholáthraithe cuóta de réir samhla amhail agentrouter). Féadfaidh an ródaire bheith
-  incháilithe chun atriail go hinmheánach níos luaithe ná an fhuinneog 60s a fhógraíonn
-  sé don chliant — spás sábháilteachta d'aon ghnó atá ann, ní fabht.
+  rialacha in aghaidh an tsoláthraí (`{id, fromStatuses, toStatus, textMarkers,
+excludeMarkers, defaultRetryAfterMs}`), meaitseáilte trí `applyStatusRestatement()`.
+- Suíomh glaonna: an bloc `providerFailure:` in `open-sse/handlers/chatCore.ts`
+  (thart ar líne 3654), díreach tar éis do `parseUpstreamError()` freagra
+  uasghréasáin le stádas HTTP earráide (`!providerResponse.ok`) a pharsáil, agus
+  sula ritheann aon aicmiú, ionas go bhfeiceann gach tomhaltóir íosghréasáin an
+  stádas ceartaithe. Leanann earráidí leabaithe taobh istigh de shruth SSE `200`
+  cosán ar leith parsála srutha níos déanaí agus **níl** siad clúdaithe ag an
+  hook seo inniu — teorannú aitheanta, nach bhfuil de dhíth fós do mhí-stádas
+  agentrouter (a thagann chun solais mar stádas HTTP earráide).
+- Incháilitheacht atriala: tá `429` in `RETRY_AFTER_ELIGIBLE_STATUSES`
+  (`open-sse/services/combo/unavailableRetryGate.ts`), mar sin iompraíonn earráid
+  athshonraithe fíorfhuinneog atriala in ionad teacht chun solais mar `403` marbh.
+- Níl sa `60s` sintéiseach `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
+  ach an méid a insíonn an freagra athshonraithe don **chliant**; ní hé é féin
+  fad fuaraithe/glasála inmheánach an chomhcheangail — rialaítear é sin ar leith
+  ag cibé meicníocht a láimhseálann an earráid athshonraithe i ndáiríre
+  (culghabháil éascach Connection Cooldown, §2, bun `3s` do sholáthraithe
+  API-key; nó Model Lockout, §3, do sholáthraithe cuóta in aghaidh an mhúnla ar
+  nós agentrouter). Is féidir leis an ródaire a bheith incháilithe le hatriail
+  go hinmheánach níos luaithe ná an fhuinneog 60s a fhógairtear don chliant —
+  corrlach d'aon ghnó, ní fabht.
 
-Ní athshonraítear earráidí buana (`无权访问模型` agentrouter — gan rochtain ar an tsamhail seo)
-RIAMH: cuireann `excludeMarkers` an riail ar ceal fiú nuair a mheaitseálann `textMarkers`,
-mar sin coimeádann an earráid a stádas bunaidh agus ní atriailtear go deo í. Téitear i
-gcomhairle leis an riail aicmithe soláthraí chomhfhreagrach
-(`agentrouter-model-access-denied` in `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, bunfhuarú dearbhaithe `6h`) ag
-`checkFallbackError` (`open-sse/services/accountFallback.ts`)
-_roimh_ an luathfhilleadh cineálach `FORBIDDEN` don chatagóir eochrach API, faoi réir
-`honorsRuleLockScope(provider)` (#10334 — eisiach do agentrouter faoi láthair tríd
-an liosta ceadaithe `HONORS_RULE_LOCK_SCOPE_PROVIDERS` in
+Ní dhéantar earráidí buana (`无权访问模型` agentrouter — gan rochtain ar an múnla
+seo) a athshonnú GO DEO: cuireann `excludeMarkers` véitó ar an riail fiú nuair a
+aimsíonn `textMarkers`, ionas go gcoinníonn an earráid a stádas bunaidh agus
+nach ndéanann aon rud í a atriail go deo. Déantar an riail aicmithe soláthraí
+meaitseála (`agentrouter-model-access-denied` in
+`open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`, `scope:
+"model"`, bunfhuarú dearbhaithe `6h`) a chomhairliú ag `checkFallbackError`
+(`open-sse/services/accountFallback.ts`) _sula_ dtarlaíonn an luath-thuairisceán
+ginearálta `FORBIDDEN` de chatagóir apikey, faoi gheata ag
+`honorsRuleLockScope(provider)` (#10334 — eisiach do agentrouter faoi láthair
+tríd an liosta ceadaithe `HONORS_RULE_LOCK_SCOPE_PROVIDERS` in
 `providerErrorRules.ts`). Sreabhann fuarú dearbhaithe 6h na rialach tríd mar
-`fallbackResult.baseCooldownMs`, ach cothaíonn sé fós an chonair frithdhúnta
-cuóta de réir samhla a bhí ann cheana (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, gan athrú ag #10334 seachas foinse an fhuaraithe):
-teanntar síos é go `mlSettings.maxCooldownMs` an oibreora
-(`1_800_000ms` / 30min de réir réamhshocraithe), cosúil le gach frithdhúnadh samhla eile,
-agus fanann _cúis mharthanach an fhrithdhúnta_ mar an `"forbidden"` crua-chódaithe
-a bhí ann cheana, ní `"auth_error"` na rialach — ní thugtar éifeacht ó cheann ceann
-ach d'fhad an fhuaraithe, ní do theaghrán na cúise. Fanann an nasc féin gníomhach;
-ní dhéantar difear do shamhlacha eile ar an nasc céanna.
+`fallbackResult.baseCooldownMs`, ach beathaíonn sé fós an cosán glasála cuóta in
+aghaidh an mhúnla a bhí ann cheana (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, gan athrú ag #10334 ach amháin maidir le foinse
+an fhuaraithe): clampáiltear síos é go dtí `mlSettings.maxCooldownMs` an
+oibreora (réamhshocrú `1_800_000ms` / 30min), ar nós gach glasála múnla eile,
+agus fanann an _fáth glasála seasmhaí_ mar an `"forbidden"` crua-chódaithe a bhí
+ann cheana, ní `"auth_error"` na rialach — ní urramaítear ó thosach go deireadh
+ach fad an fhuaraithe, ní teaghrán an fátha. Fanann an ceangal féin gníomhach;
+ní chuirtear isteach ar mhúnlaí deartháireacha ar an gceangal céanna.
 
-Earráidí cuóta athráite (`额度不足`) sroicheann siad riail soláthraí i dtáirgeadh
+Sroicheann earráidí cuóta athshonraithe (`额度不足`) riail soláthraí i dtáirgeadh
 (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
-"connection"`, gan aon fhuarú dearbhaithe dá chuid féin — cuirtear réamhshocrú
-cúlú scálaithe an chiseal buanseasmhachta i bhfeidhm). Ó #10334 i leith, déantar
-`scope` ar `ProviderErrorRuleMatch` a ídiú ó cheann ceann, ach **amháin** do
-sholáthraithe atá sa liosta ceadaithe `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-(`providerErrorRules.ts` — inniu, níl ann ach `"agentrouter"`, faoi ghlas trí
-`honorsRuleLockScope()`). Maidir le gach soláthraí eile, fanann `scope`
-faisnéiseach, díreach mar a bhí roimh #10334. Nochtann `checkFallbackError`
-scóip na rialach meaitseáilte mar `fallbackResult.ruleScope`; is é
+"connection"`, gan fuarú dearbhaithe dá cuid féin — baineann réamhshocrú
+culghabhála scálaithe an tsraithe sheasmhachta leis). Ó #10334, TÓGTAR `scope`
+ar `ProviderErrorRuleMatch` ó thosach go deireadh, ach **amháin** do
+sholáthraithe sa liosta ceadaithe `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+(`providerErrorRules.ts` — inniu `"agentrouter"` amháin, faoi gheata trí
+`honorsRuleLockScope()`). Do gach soláthraí eile fanann `scope` faisnéiseach,
+díreach mar a bhí roimh #10334. Tugann `checkFallbackError` scóip na rialach
+meaitseáilte chun solais mar `fallbackResult.ruleScope`; is é
 `isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) an garda
-comhroinnte a dhearbhaíonn go bhfuil `ruleScope` sábháilte go fírinneach le
-honórú mar chomhartha féin-aisghabhála ar fud an naisc (scóip `"connection"`,
-cúis `quota_exhausted`, riamh `permanent`, riamh `creditsExhausted` — cosaint
-i gcoinne riail sa todhchaí a chuirfeadh scóip `"connection"` le staid chuntais
-bhuan). Glaonn dhá thomhaltóir air:
+comhroinnte a dhearbhaíonn go bhfuil `ruleScope` fíor-shábháilte le honóráil mar
+chomhartha ar fud an chomhcheangail, féin-aisghabhálach (scóip `"connection"`,
+fáth `quota_exhausted`, gan `permanent` riamh, gan `creditsExhausted` riamh —
+cosaint i gcoinne riail amach anseo a phéireálfeadh scóip `"connection"` le
+staid chuntais bhuan). Glaonn dhá thomhaltóir air:
 
-- **Buanseasmhacht** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  in ionad titim isteach sa bhrainse glasála **in aghaidh an mhúnla** den
-  soláthraí pas-trí (is é agentrouter `passthroughModels: true` →
-  `hasPerModelQuota()` a fhilleann `true`), cuireann sé **fuarú sealadach ar
-  an nasc** i bhfeidhm — `testStatus: "unavailable"` + `rateLimitedUntil`,
-  riamh stádas críochfoirt (`credits_exhausted`/`banned`/`expired`) — ionas go
-  n-aisghabhann an nasc é féin nuair a théann an fuarú in éag in ionad
-  athshocrú láimhe ar dhintiúir a éileamh. Scipeáiltear é do naisc le
-  `disableCooling: true` (#2997): titeann an rogha sin tríd go dtí an glasáil
-  in aghaidh an mhúnla ina ionad (malartú doiciméadaithe — féach an trácht
-  cóid os cionn an bhrainse).
-- **Ródú teaglama an iarratais chéanna** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): marcálann an garda céanna an
-  nasc isteach sa tacar `exhaustedConnections` sa chuimhne, eochairthe
-  `${provider}:${connectionId}`. Ní scipeálann sé seo ach sprioc `SAME-REQUEST`
-  atá fágtha a _iompraíonn an `connectionId` cruinn sin cheana féin_ ar a réad
-  sprice féin (`getExhaustedTargetSkipReason()`,
+- **Marthanacht** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  in ionad titim isteach i mbrainse frithdhúnta **de réir samhla**
+  an tsoláthraí pas-tríd (is é `passthroughModels: true` agentrouter →
+  filleann `hasPerModelQuota()` `true`), cuireann sé **tréimhse fuaraithe
+  shealadach don nasc** i bhfeidhm — `testStatus: "unavailable"` +
+  `rateLimitedUntil`, agus ní stádas foirceanta riamh
+  (`credits_exhausted`/`banned`/`expired`) — ionas go dtagann an nasc
+  chuige féin nuair a théann an tréimhse fuaraithe in éag, seachas athshocrú
+  láimhe dintiúr a bheith riachtanach. Déantar é seo a scipeáil i gcás nasc
+  a bhfuil `disableCooling: true` aige (#2997): titeann an rogha diúltaithe
+  sin tríd go dtí an frithdhúnadh de réir samhla ina ionad (comhréiteach
+  doiciméadaithe — féach an nóta sa chód os cionn an bhrainse).
+- **Ródú teaglama laistigh den iarratas céanna** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): marcálann an garda céanna
+  an nasc sa tacar cuimhne `exhaustedConnections`, leis an eochair
+  `${provider}:${connectionId}`. Ní dhéanann sé seo ach sprioc atá fágtha san
+  IARRATAS CÉANNA a scipeáil nuair a _iompraíonn an sprioc sin féin an
+  `connectionId` beacht sin cheana_ ar a réad sprice féin
+  (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` roimh an cuardach `exhaustedConnections`) — teaglama simplí de
-  liosta múnlaí, áit nach n-iompraíonn spriocanna siblíneacha aon `connectionId`
-  bioráin dá gcuid féin agus nach réitítear ceann amháin ach in aghaidh an
-  seolta ó cheanntásc `X-OmniRoute-Selected-Connection-Id` an fhreagra, ní
-  bhuaileann sé an meaitseáil eochrach sin riamh. Don chás coitianta sin, NÍL
-  an `Set` seo an fíorchosaint i gcoinne cos atá fágtha ag athúsáid an chuntais
-  atá díreach ídithe — is é an ciseal buanseasmhachta thuas é (tá
-  `rateLimitedUntil` an naisc sa todhchaí anois) in éineacht leis an garda
-  céanna seo ag cur `transientRateLimitedProviders` faoi chois don teip (féach
-  "Dearadh dhá chéim" agus an trácht cóid ar an mbrainse
-  `isAgentrouterConnectionQuotaScope` i `targetExhaustion.ts`): leis an `Set`
-  sin fágtha gan mharcáil, NÍ chuireann `allowRateLimitedConnection`
-  forfheidhmithe `combo.ts` (`open-sse/services/combo.ts:1005-1013`,
-  `:2734-2738`) isteach ar chosa atá fágtha an tsoláthraí, mar sin déantar
-  scagaire `rateLimitedUntil` roghnúcháin dintiúirí
-  (`src/sse/services/auth.ts:1238`) a urramú de ghnáth agus roghnaíonn cos atá
-  fágtha nasc agentrouter difriúil, atá fós incháilithe, nó teipeann air gan
-  aon dintiúirí ar fáil — ní chuireann sé iallach air filleadh ar an nasc a
-  fhuaraigh an brainse seo díreach.
+connectionId)` roimh chuardach `exhaustedConnections`) — i ngnáth-theaglama
+  liosta samhlacha, áit nach n-iompraíonn spriocanna comhchosúla aon
+  `connectionId` pionnáilte dá gcuid féin agus nach réitítear ceann ach
+  amháin in aghaidh gach seolta ó cheanntásc
+  `X-OmniRoute-Selected-Connection-Id` an fhreagra, ní mheaitseáiltear an
+  eochair sin choíche. Sa ghnáthchás sin, NÍ hé an Set seo an chosaint
+  iarbhír ar chéim atá fágtha agus í ag athúsáid an chuntais atá díreach
+  ídithe — is í an tsraith mharthanachta thuas í (`rateLimitedUntil` an naisc
+  sa todhchaí anois), in éineacht leis an ngarda céanna seo a choisceann
+  `transientRateLimitedProviders` don teip (féach "Dearadh dhá chéim" agus an
+  nóta sa chód ar an mbrainse `isAgentrouterConnectionQuotaScope` in
+  `targetExhaustion.ts`): agus an Set sin fágtha gan mharcáil, NÍ chuirtear
+  iachall-cheadú `allowRateLimitedConnection` in `combo.ts`
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) i bhfeidhm ar na
+  céimeanna atá fágtha ag an soláthraí, mar sin cloítear de ghnáth le scagaire
+  `rateLimitedUntil` roghnú na ndintiúr (`src/sse/services/auth.ts:1238`),
+  agus roghnaíonn céim atá fágtha nasc agentrouter eile atá fós incháilithe,
+  nó teipeann uirthi toisc nach bhfuil aon dintiúir ar fáil — ní chuireann sí
+  iallach uirthi féin filleadh ar an nasc a chuir an brainse seo faoi
+  fhuarú díreach anois.
 
-### Dearadh dhá chéim: athrá stádais, ansin aicmiú
+### Dearadh dhá chéim: athshonrú stádais, ansin aicmiú
 
-Is cláir ar leith iad athrá stádais (`upstreamStatusRestatement.ts`) agus
-rialacha aicmithe soláthraithe (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) a eochraíonn ar aitheantas soláthraí agus ar mharcóirí
-téacs, ach ritheann siad in áiteanna éagsúla agus freastalaíonn siad ar
-chuspóirí éagsúla: athscríobhann athrá an stádas HTTP go luath i
-`chatCore.ts`; roghnaíonn rialacha aicmithe an `reason` cúlaithe agus glasálann
-siad `scope` (`model` / `provider` / `connection`) laistigh de
-`checkFallbackError()` (`open-sse/services/accountFallback.ts`).
+Is clárlanna ar leith iad athshonrú stádais
+(`upstreamStatusRestatement.ts`) agus rialacha aicmithe soláthraí
+(`open-sse/config/providerErrorRules.ts`, `providerRuleRegistry`) a úsáideann
+aitheantas an tsoláthraí agus marcóirí téacs mar eochracha, ach ritheann siad
+in áiteanna éagsúla agus feidhmíonn siad cuspóirí éagsúla: athscríobhann an
+t-athshonrú an stádas HTTP go luath in `chatCore.ts`; roghnaíonn na rialacha
+aicmithe an `reason` cúltaca agus `scope` an ghlasála
+(`model` / `provider` / `connection`) laistigh de `checkFallbackError()`
+(`open-sse/services/accountFallback.ts`).
 
-Ní fheiceann rialacha aicmithe ach **téacs** iomlán na hearráide (riachtanach
-chun marcóirí coirp a mheaitseáil mar `额度不足`) do sholáthraithe atá liostaithe
-sa liosta ceadaithe `FULL_TEXT_RULE_PROVIDERS` i
-`providerErrorRules.ts` — faoi láthair níl ann ach `"agentrouter"`. Maidir le
-gach soláthraí **catalóige ionsuite** eile, ní thugann `checkFallbackError` ach
-an earráid struchtúrtha (`{code, type}`) do
-`getProviderErrorRuleMatch`, rud atá leor do rialacha bunaithe ar
-cheanntásc/stádas/cód ach atá dall ar mharcóirí téacs coirp. Déanann an cúntóir
-`resolveRuleMatchBody()` an roghnú seo: téacs iomlán na hearráide do
-sholáthraithe ceadaithe, an earráid struchtúrtha murach sin. Is rogha
-sainráite in aghaidh an tsoláthraí é soláthraí **ionsuite** a chur le
-`FULL_TEXT_RULE_PROVIDERS` — tá sé ann ionas go bhfanann an cosán réamhshocraithe
-do gach soláthraí nach bhfuil ar an liosta gan athrú beart ar bheart.
+Ní fheiceann rialacha aicmithe téacs iomlán na hearráide (atá riachtanach
+chun marcóirí coirp amhail `额度不足` a mheaitseáil) ach amháin i gcás
+soláthraithe atá liostaithe ar liosta ceadaithe `FULL_TEXT_RULE_PROVIDERS`
+in `providerErrorRules.ts` — níl ach `"agentrouter"` air faoi láthair. I gcás
+gach soláthraí **catalóige ionsuite** eile, ní thugann `checkFallbackError`
+do `getProviderErrorRuleMatch` ach an earráid struchtúrtha (`{code, type}`),
+rud ar leor é do rialacha bunaithe ar cheanntásc/stádas/cód ach nach bhfeiceann
+marcóirí téacs sa chorp. Déanann an cúntóir `resolveRuleMatchBody()` an roghnú
+seo: téacs iomlán na hearráide i gcás soláthraithe ar an liosta ceadaithe,
+agus an earráid struchtúrtha i ngach cás eile. Is rogha shainráite
+rogha-isteach de réir soláthraí é soláthraí **ionsuite** a chur le
+`FULL_TEXT_RULE_PROVIDERS` — tá sé ann ionas go bhfanfaidh an chonair
+réamhshocraithe do gach soláthraí nach bhfuil ar an liosta gan athrú, beart
+ar bheart.
 
-Is rogha ar leith é `scope` rialach (`model` / `provider` / `connection`) ó
-`FULL_TEXT_RULE_PROVIDERS`: ní nochtann `checkFallbackError` é ach mar
-`fallbackResult.ruleScope`, agus ní urramaíonn tomhaltóirí iartheachtacha é mar
-rud ar bith seachas lipéad faisnéiseach, do sholáthraithe atá sa liosta
-ceadaithe `HONORS_RULE_LOCK_SCOPE_PROVIDERS` san fhadán céanna (`gated via
-honorsRuleLockScope()` — inniu níl ann ach `"agentrouter"`). Féach "Earráidí
-cuóta athráite" thuas chun a fheiceáil cad a dhéanann meaitseáil
-`scope: "connection"` i ndáiríre nuair a bhíonn soláthraí ar an liosta
-ceadaithe sin.
+Is rogha isteach ar leith ó `FULL_TEXT_RULE_PROVIDERS` é `scope` rialach
+(`model` / `provider` / `connection`): ní nochtann `checkFallbackError` é ach
+mar `fallbackResult.ruleScope`, agus ní thugann tomhaltóirí iartheachtacha
+éifeacht dó thar lipéad faisnéiseach ach amháin i gcás soláthraithe ar liosta
+ceadaithe `HONORS_RULE_LOCK_SCOPE_PROVIDERS` sa chomhad céanna (faoi gheata
+`honorsRuleLockScope()` — níl ach `"agentrouter"` ann inniu). Féach
+"Earráidí cuóta athshonraithe" thuas chun a fháil amach cad a dhéanann
+meaitseáil `scope: "connection"` i ndáiríre a luaithe a bhíonn soláthraí ar
+an liosta ceadaithe sin.
 
-**#11104 — déanann rialacha dearbhaithe ag oibreoir an dá liosta ceadaithe a sheachaint.** Is féidir le hoibreoir
-riail in aghaidh an tsoláthraí a dhearbhú ag am rite trí `settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-gan an comhad seo a chur in eagar. Dá gcuirfí riail oibreora faoi gheata ag
+**#11104 — seachnaíonn rialacha arna ndearbhú ag oibreoir an dá liosta
+ceadaithe.** Is féidir le hoibreoir riail de réir soláthraí a dhearbhú ag am
+rite trí `settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) gan
+an comhad seo a chur in eagar. Dá gcuirfí riail oibreora faoi gheata
 `FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — liostaí
-ceadaithe atá beartaithe chun iompar **réamhshocraithe** rialacha cataloga ionsuite a
-chosaint — dhéanfaí meicníocht na socruithe neamhghníomhach do gach soláthraí ach
-amháin iad siúd atá liostaithe ann cheana féin, ós é dearbhú na rialach rogha
-rannpháirtíochta sainráite an oibreora cheana féin. Seiceálann
-`resolveRuleMatchBody()` agus `honorsRuleLockScope()` araon
-`hasOperatorRuleForProvider()` ar dtús: faigheann soláthraí a bhfuil riail oibreora aige
-an téacs earráide amh agus déantar a `scope` dearbhaithe a urramú, is cuma
-an bhfuil sé ar cheachtar den dá liosta ceadaithe freisin.
+ceadaithe atá ceaptha chun iompar **réamhshocraithe** rialacha na catalóige
+ionsuite a chosaint — d'fhágfaí meicníocht na socruithe neamhéifeachtach do
+gach soláthraí seachas iad siúd atá liostaithe ann cheana, ós rud é gurb é
+dearbhú na rialach féin rogha shainráite isteach an oibreora cheana féin.
+Seiceálann `resolveRuleMatchBody()` agus `honorsRuleLockScope()`
+`hasOperatorRuleForProvider()` ar dtús: faigheann soláthraí a bhfuil riail
+oibreora aige téacs amh na hearráide agus tugtar éifeacht dá `scope`
+dearbhaithe, beag beann ar cé acu atá sé ar cheachtar liosta ceadaithe
+freisin nó nach bhfuil.
 
-**Bearna aithníde — ní dhéantar dul i gcomhairle le `providerRuleRegistry` riamh le haghaidh HTTP 400.**
-Aicmíonn brainse `BAD_REQUEST` de chuid `checkFallbackError` stádas 400 go hiomlán
-trína chuid eagar patrún féin (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS`, srl. in `accountFallback.ts`) agus filleann sé sula
-sroichtear an brainse `configuredRule`/`getProviderErrorRuleMatch` os a chionn.
-Tá riail chatalóg ionsuite (nó riail oibreora) le `status: 400`
-bailí go comhréireach ach ní ghníomhóidh sí riamh. Ní dhíríonn aon riail atá ann ar 400 inniu,
-mar sin ní dhéantar difear d'aon rud i dtáirgeadh — ach teastaíonn ó riail 400 sa todhchaí
-go ndéanfaí teagmháil leis an mbrainse seo ar dtús, agus is athrú níos mó é sin ná riail a chur
-leis (athaicmíonn sé 400 do gach soláthraí atá ag brath cheana féin ar iompar an
-eagair phatrún) agus tá sé lasmuigh de raon feidhme breise rialach do sholáthraí aonair.
+**Bearna aitheanta — ní théitear i gcomhairle le `providerRuleRegistry`
+riamh i gcás HTTP 400.** Aicmíonn brainse `BAD_REQUEST` de
+`checkFallbackError` stádas 400 go hiomlán trína eagair patrún féin
+(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`, etc. in
+`accountFallback.ts`) agus filleann sé sula sroichtear an brainse
+`configuredRule`/`getProviderErrorRuleMatch` os a chionn. Tá riail catalóige
+ionsuite (nó riail oibreora) le `status: 400` bailí ó thaobh comhréire de,
+ach ní chuirfear i ngníomh í choíche. Níl aon riail atá ann faoi láthair
+dírithe ar 400, mar sin ní dhéantar difear d'aon rud sa táirgeadh — ach ní
+mór an brainse seo a athrú ar dtús do riail 400 amach anseo, ar athrú níos
+mó é ná riail a chur leis (ath-aicmíonn sé 400 do gach soláthraí atá ag brath
+cheana ar iompar na n-eagar patrún) agus tá sé lasmuigh de scóip riail a chur
+leis do sholáthraí aonair.
 
-### Geata nua a mhíthuairiscíonn cuóta a chur leis
+### Geata nua a mhíshonraíonn cuóta a chur leis
 
-1. Cláraigh eagar rialach amháin in `statusRestatementRegistry`
+1. Cláraigh eagar rialacha amháin i `statusRestatementRegistry`
    (`open-sse/config/upstreamStatusRestatement.ts`). Coinnigh `textMarkers`
-   sainiúil don soláthraí; ná hathúsáid riamh frásaí ginearálta Béarla a imbhuaileann le
-   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
+   sonrach don tsoláthraí; ná hathúsáid frásaí ginearálta Béarla a
+   imbhuaileann le `CREDITS_EXHAUSTED_SIGNALS`
+   (`open-sse/services/accountFallback.ts`).
 2. Cláraigh rialacha aicmithe go roghnach in
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) chun
-   raon feidhme an ghlais ceart a roghnú (`connection` le haghaidh cuóta ar fud an chuntais,
-   `model` le haghaidh earráidí in aghaidh an mhúnla). Ní thagann an chéim seo i
-   bhfeidhm i dtáirgeadh ach do sholáthraithe a dteastaíonn an téacs earráide
-   iomlán óna gcuid rialacha (marcóirí coirp): cuir aitheantas an tsoláthraí le
-   `FULL_TEXT_RULE_PROVIDERS` sa chomhad céanna — ar shlí eile ní
-   thugann `checkFallbackError` ach an earráid struchtúrtha
-   `{code, type}` don riail riamh agus ní mheaitseálfaidh riail
-   téacs choirp trácht beo riamh.
-   Ní theastaíonn an rogha rannpháirtíochta seo ó rialacha a mheaitseálann go huile is go hiomlán ar
-   `status`/`headers` (cosúil le rialacha Opencode nó
-   Minimax). Ar leithligh, má dhearbhaíonn an riail
-   `scope: "connection"` agus gurb é an rún fuarú iarbhír ar fud an nasctha
-   mór-roinne in éineacht le scipeáil combo san iarratas céanna (ní lipéad faisnéise
-   amháin), cuir aitheantas an tsoláthraí le
-   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` sa chomhad céanna — is é
-   seo a chuireann geata ar iditheoireacht den chineál `isAgentrouterConnectionQuotaScope()`
-   in `markAccountUnavailable()` (`src/sse/services/auth.ts`) agus
-   `applyComboTargetExhaustion()`
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) chun an
+   scóip glais ceart a phiocadh (`connection` do chuóta ar fud an chuntais,
+   `model` d'earráidí in aghaidh an mhúnla). Ní théann an chéim seo i bhfeidhm
+   sa táirgeadh ach do sholáthraithe a dteastaíonn an téacs earráide iomlán
+   óna gcuid rialacha (marcóirí coirp): cuir aitheantas an tsoláthraí le
+   `FULL_TEXT_RULE_PROVIDERS` sa chomhad céanna — ar shlí eile ní thugann
+   `checkFallbackError` don riail riamh ach an earráid struchtúrtha
+   `{code, type}` agus ní mheaitseáilfidh riail atá bunaithe ar théacs an
+   chorp an trácht beo choíche. Ní theastaíonn an rogha isteach seo ó
+   rialacha a mheaitseálann go hiomlán ar `status`/`headers` (cosúil le
+   rialacha Opencode nó Minimax). Ar leithligh, má dhearbhaíonn an riail
+   `scope: "connection"` agus más é an rún fuarú fíor ar fud an nasc mór le
+   scipeáil combo den iarratas céanna (ní lipéad faisnéiseach amháin), cuir
+   aitheantas an tsoláthraí le `HONORS_RULE_LOCK_SCOPE_PROVIDERS` sa chomhad
+   céanna — is é seo a gheataileann an tomhaltas ar nós
+   `isAgentrouterConnectionQuotaScope()` in `markAccountUnavailable()`
+   (`src/sse/services/auth.ts`) agus in `applyComboTargetExhaustion()`
    (`open-sse/services/combo/targetExhaustion.ts`); gan é, sreabhann `scope`
    fós trí `fallbackResult.ruleScope` ach ní ghníomhaíonn aon rud air.
-3. Cuir tástálacha aonaid leis a dhéanann macalla ar `tests/unit/upstream-status-restatement.test.ts`
-   agus `tests/unit/agentrouter-error-rules.test.ts` (lena n-áirítear na
-   gardaí not-permanent / not-creditsExhausted, agus — má theastaíonn an
-   liosta ceadaithe ón soláthraí — tástáil a dhearbhaíonn go bhfillfidh `resolveRuleMatchBody()`
-   an téacs iomlán don soláthraí sin amháin).
+3. Cuir tástálacha aonaid leis a mhacasamhlaíonn
+   `tests/unit/upstream-status-restatement.test.ts` agus
+   `tests/unit/agentrouter-error-rules.test.ts` (lena n-áirítear na gardaí
+   not-permanent / not-creditsExhausted, agus — má theastaíonn an liosta
+   ceadaithe ón soláthraí — tástáil a dhearbhaíonn nach bhfilleann
+   `resolveRuleMatchBody()` an téacs iomlán ach don soláthraí sin).
 
-Níl aon athruithe ag teastáil ar `chatCore.ts`, `classifyError`, nó combo.
+Níl aon athruithe ar `chatCore.ts`, `classifyError`, nó combo ag teastáil.
 
-#### Glas buicéadaithe de réir asachta (#10880)
+#### Glas buicéadaithe de réir IP eisrigh (#10880)
 
-Caitear le soláthraithe in `EGRESS_BUCKETED_LOCK_PROVIDERS` (fine opencode)
-mar uasshruth buicéadaithe de réir IP (tá an tsraith saor in aisce opencode
-buicéadaithe de réir IP, ní buicéadaithe de réir cuntais — féach #9611):
-fuaróidh stádas 429 a aicmítear mar `quota_exhausted`
-**nó** `rate_limit_exceeded` gach nasc de theaghlach an liosta cheadaithe
-ar meaitseálann a IP asachta is déanaí ar eolas IP an nasctha a theipeann air,
-sula bhféadfaidh an rothlú triail a bhaint astu
-— rud a sheachnaíonn N-1 glao uasshrutha a bhfuil a dteip ráthaithe (an cruth céanna le #10460/#10525).
-Cuirtear `rate_limit_exceeded` san áireamh d'aon ghnó: ar chonair `markAccountUnavailable`
-ní mheaitseálann na rialacha atá sainiúil do opencode riamh (ní thugtar
-ceanntásca ná corp do `checkFallbackError`, níl opencode in
-`FULL_TEXT_RULE_PROVIDERS`), mar sin aicmítear 429
-a iompraíonn a chorp téacs an chuóta síntiúis ("monthly usage limit
-reached") mar `quota_exhausted` ag an gcúltaca téacs-chuóta
-(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; fuarú 1 uair an chloig) sula
-sroichtear riail `status_429` riamh — cé go n-aicmítear 429 atá saor
-ó théacs cuóta (gnáth-theorannú rátaí) trí riail `status_429` mar
-`rate_limit_exceeded` agus go bhfuaróidh sé teaghlach an IP fós. Do sholáthraí
-ar an liosta ceadaithe, is é an comhartha céanna é teorainn rátaí atá buicéadaithe
-de réir IP agus cuóta ídithe. Teorainneacha macánta:
+Déileáiltear le soláthraithe in `EGRESS_BUCKETED_LOCK_PROVIDERS` (teaghlach
+opencode) mar shruthuas buicéadaithe de réir IP (tá leibhéal saor in aisce
+opencode buicéadaithe de réir IP, ní buicéadaithe de réir cuntais — féach
+#9611): fuaróidh earráid stádas-429 a aicmítear mar `quota_exhausted` **nó**
+`rate_limit_exceeded` gach nasc de theaghlach na liosta ceadaithe a bhfuil a
+IP eisrigh deireanach aitheanta mar an gcéanna le IP an nasc a theipeann air,
+sular féidir leis an rothlú iad a thriail — agus N-1 glao suas shruth atá
+ráthaithe go dteipfidh orthu á seachaint (an cruth céanna le
+#10460/#10525). Tá `rate_limit_exceeded` san áireamh d'aon turas: ar chonair
+`markAccountUnavailable` ní mheaitseálann na rialacha atá sonrach do opencode
+riamh (ní thugtar ceanntásca ná corp do `checkFallbackError`, agus níl
+opencode in `FULL_TEXT_RULE_PROVIDERS`), mar sin aicmítear 429 a bhfuil téacs
+an chuóta síntiúis ina chorp ("monthly usage limit reached") mar
+`quota_exhausted` ag an gcúlbhealach téacs cuóta
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; fuarú 1 uair an
+chloig) sula sroictear riail `status_429` riamh — fad is go n-aicmítear 429
+atá saor ó théacs cuóta (gnáth-theorannú ráta) trí riail `status_429` mar
+`rate_limit_exceeded` agus fuaróidh sé an teaghlach IP i gcónaí. Do
+sholáthraí ar an liosta ceadaithe, is é an comhartha céanna é teorainn ráta
+buicéadaithe de réir IP agus cuóta atá ídithe. Teorainneacha macánta:
 
-- **Dícheall is fearr**: réitíonn an glas `egress_ip` deireanach ar eolas an chnáisc ó `proxy_logs` (fuinneog 24u, sioncrónach, gan taisce). Taisce fuar (IP asachta nár probáladh riamh) nó gan aon rónna → fós fuaráiltear an nasc teipthe ag an mbrainse (taifeadta mar inniu), ach ní ghlasáiltear aon tsiblín.
-- **Riamh deiridh**: is fuinneog chuóta athnuachanach í an tréimhse fhuaraithe (`testStatus: "unavailable"`); ní dhíorthaítear staid bhuan riamh ó chomhartha ag leibhéal IP. Léimeann naisc `disableCooling` an brainse ar fad.
-- **Athraíonn gráinneacht an ghlas don teaghlach ar an liosta ceadaithe**: is athrú raoin é seo, ní optamú siblíne amháin. Is soláthraí `passthroughModels` é opencode, mar sin roimh an mbrainse seo tháirgigh 429 glasáil in aghaidh an MHUNLA; anois táirgeann sé tréimhse fhuaraithe an chnáisc — lena n-áirítear d'oibreoir a ritheann nasc amháin gan aon tsiblín ar chor ar bith. Sin í an ghráinneacht a dhearbhaíonn tábla rialacha opencode a bheith ceart cheana féin (`scope: "connection"`, `providerErrorRules.ts`), nár uramaíodh go dtí seo mar nach bhfuil opencode i `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Scríobhann an brainse féin tréimhse fhuaraithe an chnáisc teipthe + `backoffLevel`, ar aon dul le brainse agentrouter atá faoi scóip an chnáisc, agus filleann sé — ní shroichtear riamh an bloc in aghaidh an mhúnla ná an chonair ghinearálta thíos.
-- **Teaglaim san áireamh**: cosúil le brainse agentrouter, déanann an scóip neamhaird go d'aon ghnó ar an íosghrádú `persistUnavailableState`/`isCombo` a chuireann glaoiteoir teaglama i bhfeidhm ar 429. Ní leagan níos laige den scóip seo í an ghlasáil in aghaidh an mhúnla, is í an t-aonad mícheart í: ní deir sí faic faoin IP atá ídithe, mar sin leanfadh rothlú an teaglama ag dó glao amháin le teip ráthaithe in aghaidh na siblíne.
-- **Sábháilteacht siblíní**: ní fhorscríobhtar riamh siblín atá deiridh cheana féin (banned/credits_exhausted) nó atá i dtréimhse fhuaraithe níos faide cheana féin.
-- **Liosta ceadaithe eisiach**: is cinneadh sainráite de chuid an úinéara é `EGRESS_BUCKETED_LOCK_PROVIDERS` a leathnú; gan sreangú ginearálta (patrún #10334/#10419). Ceanglaíonn iarratas na siblíne an liosta ceadaithe céanna sin seachas é a athdhéanamh mar litriúil SQL, agus mar sin fanann é a leathnú ina athrú aonlíne.
-- **Rothlú an IP asachta, sa dá threo**: tá fuinneog an chuardaigh (24u) i bhfad níos leithne ná TTL thaisce an IP asachta (5 nóim), mar sin is stair é "an IP deireanach ar eolas", ní an staid reatha. Má rothlaigh seachfhreastalaí an chnáisc laistigh den fhuinneog, féadfaidh an glas **IP a roinntear go fírinneach a chailleadh** (is é an IP taifeadta an ceann nua neamhídithe) — agus go siméadrach féadfaidh sé **siblín a chur faoi fhuarú a rothlaigh ó shin** ón IP ídithe. Cosnaíonn an dara cás fuinneog fhuaraithe amháin ar an tsiblín sin; glactar leis an mbeirt mar theorainneacha dícheall-is-fhearr de chuardach bunaithe ar stair.
-- **Costas**: dhá scanadh teoranta ar `proxy_logs` (scagtha de réir fuinneoige trí `idx_pl_timestamp`), ag minicíocht 429 amháin. Gan innéacs nua (migration 134 YAGNI). Tomhaiste ar chóip DB de thrácht fíor de mheánmhéid; coinníonn cás ard-tréchuir níos mó rónna go comhréireach laistigh den fhuinneog chéanna.
+- **Dícheall is fearr**: réitíonn an glas an `egress_ip` is déanaí ar eolas
+  den cheangal as `proxy_logs` (fuinneog 24 uair, sioncrónach, gan taisce).
+  Taisce fuar (nár tástáladh an IP aschuir riamh) nó gan ró ar bith →
+  fuarófar an ceangal teipthe fós ag an mbrainse (taifeadtar é mar a dhéantar
+  inniu), ach ní ghlasálfar aon tsiblín.
+- **Ní teirminithe riamh**: is fuinneog chuóta athnuacháin í an fhuarú
+  (`testStatus: "unavailable"`); ní dhiorthaítear staid bhuan riamh ó
+  chomhartha ar leibhéal IP. Seachnaíonn ceangail `disableCooling` an
+  brainse ar fad.
+- **Athraíonn gráinneacht an ghlas don teaghlach ceadliostathe**: is athrú
+  raon feidhme é seo, ní barrfheabhsú siblíne amháin. Is soláthraí
+  `passthroughModels` é opencode, mar sin roimh an mbrainse seo bhí glasáil
+  in aghaidh an MHUNLA ag 429; anois is fuarú ceangail a tháirgtear — lena
+  n-áirítear d'oibreoir a ritheann ceangal amháin gan siblín ar bith. Sin í
+  an ghráinneacht a dhearbhaíonn tábla rialacha opencode cheana féin a bheith
+  ceart (`scope: "connection"`, `providerErrorRules.ts`), nár urramaíodh go
+  dtí seo toisc nach bhfuil opencode in `HONORS_RULE_LOCK_SCOPE_PROVIDERS`.
+  Scríobhann an brainse fuarú an cheangail theipthe + `backoffLevel` leis
+  féin, ag macasamhlú brainse agentrouter atá raon-ceilte ar an gceangal,
+  agus filleann sé — ní shroictear riamh an bloc in aghaidh an mhúnla ná an
+  chonair chineálach thíos.
+- **Combo san áireamh**: cosúil le brainse agentrouter, déanann an raon
+  feidhme neamhaird go d'aon ghnó den íosghrádú
+  `persistUnavailableState`/`isCombo` a chuireann glaodóir combo i bhfeidhm
+  ar 429. Ní foirm níos laige den raon feidhme seo í glasáil in aghaidh an
+  mhúnla, is aonad mícheart í: ní deir sí aon rud faoin IP atá ídithe, mar
+  sin leanfadh rothlú an combo ag dó glao amháin in aghaidh na siblíne atá
+  cinnte go dteipfidh.
+- **Sábháilteacht siblíne**: ní fhorscríobhtar riamh siblín atá teirminithe
+  cheana féin (coiscthe/credits_exhausted) nó atá i bhfuarú níos faide cheana
+  féin.
+- **Ceadliosta eisiach**: is cinneadh sainráite ón úinéir é
+  `EGRESS_BUCKETED_LOCK_PROVIDERS` a leathnú; gan sreangú cineálach ar bith
+  (patrún #10334/#10419). Ceanglaíonn ceist na siblíne an ceadliosta céanna
+  sin seachas é a athdhéanamh mar liteartha SQL, ionas go bhfanann a leathnú
+  ina athrú aon líne amháin.
+- **Rothlú an IP aschuir, an dá threo**: tá an fhuinneog chuardaigh (24 uair)
+  i bhfad níos leithne ná TTL an taisce IP aschuir (5 nóim), mar sin is stair
+  í "an IP is déanaí ar eolas", ní staid reatha. Má rothlaigh proksi ceangail
+  laistigh den fhuinneog, d'fhéadfadh an glas **IP a roinntear go fíor a
+  chailleadh** (is é an IP taifeadta an ceann nua, neamh-ídithe) — agus go
+  siméadrach d'fhéadfadh sé **siblín a fhuarú a rothlaigh ó shin** ón IP
+  ídithe. Sa dara cás, costaíonn sé fuinneog fhuaraithe amháin don tsiblín
+  sin; glacadh leis an dá cheann mar theorainneacha dícheall-is-fearr de
+  chuardach bunaithe ar stair.
+- **Costas**: dhá scanadh teoranta ar `proxy_logs` (scagtha de réir
+  fuinneoige trí `idx_pl_timestamp`), ag minicíocht 429 amháin. Gan innéacs
+  nua (imirce 134 YAGNI). Tomhaiste ar chóip DB de thrácht fíor de mhéid
+  measartha; coimeádann instans ardthráchtála níos mó rónna go comhréireach
+  san fhuinneog chéanna.
 
 ---
 

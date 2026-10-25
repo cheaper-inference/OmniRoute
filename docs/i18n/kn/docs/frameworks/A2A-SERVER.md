@@ -45,9 +45,9 @@ JSON-RPC ದೋಷ ಕೋಡ್ `-32000` ಜೊತೆಗೆ HTTP 503 ಅನ್�
 
 ## JSON-RPC 2.0 ವಿಧಾನಗಳು
 
-### `message/send` — ಸಮಕಾಲಿಕ ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆ
+### `message/send` — ಸಮಕಾಲೀನ ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆ
 
-ಕೌಶಲ್ಯಕ್ಕೆ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಿ, ಸಂಪೂರ್ಣ ಪ್ರತಿಕ್ರಿಯೆಗಾಗಿ ಕಾಯುತ್ತದೆ.
+ಕೌಶಲ್ಯವೊಂದಕ್ಕೆ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಿ, ಸಂಪೂರ್ಣ ಪ್ರತಿಕ್ರಿಯೆಗಾಗಿ ಕಾಯುತ್ತದೆ.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` ಗಾಗಿ, ಗೇಟ್ವೇ ವಿನಂತಿಯಲ್ಲಿ `metadata.combo` ಎಂಬುದು
+`metadata.model` ಗೆ ಸ್ಪಷ್ಟವಾದ ಅತಿಕ್ರಮಣವಾಗಿದೆ; ಇದನ್ನು ನಿರ್ಲಕ್ಷಿಸಲಾದ `x-combo`
+JSON ಕ್ಷೇತ್ರವಾಗಿ ಅಲ್ಲದೆ, ನಿಜವಾದ `model` ಆಗಿ ಕಳುಹಿಸಲಾಗುತ್ತದೆ. ಗೇಟ್ವೇಯ ಸಾಮಾನ್ಯ API-ಕೀ ಮತ್ತು
+ಪ್ರತಿ-ಗುರಿಯ ದೃಢೀಕರಣವು ಇನ್ನೂ ಅನ್ವಯಿಸುತ್ತದೆ. ಅಮಾನ್ಯ ಅಥವಾ ಖಾಲಿ ಕಾಂಬೊವನ್ನು ತಿರಸ್ಕರಿಸಲಾಗುತ್ತದೆ.
+
+ಫಲಿತಾಂಶವು `requested_combo` (ಕರೆ ಮಾಡುವವರ ಉದ್ದೇಶ), `dispatched_model`
+(ನಿಜವಾದ ಗೇಟ್ವೇ ವಿನಂತಿ), `response_model` (ಗೇಟ್ವೇ ಪ್ರತಿಕ್ರಿಯೆ) ಮತ್ತು
+`confirmed_combo` ಅನ್ನು ಬಹಿರಂಗಪಡಿಸುತ್ತದೆ. ಗೇಟ್ವೇ ಸ್ಪಷ್ಟವಾಗಿ ಕಾಂಬೊವನ್ನು
+ಗುರುತಿಸದಿದ್ದರೆ ಕೊನೆಯ ಕ್ಷೇತ್ರವು `null` ಆಗಿರುತ್ತದೆ. A2A ನಿರ್ಧಾರ ಲಾಗ್ಗಳು ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆಯನ್ನು
+ದೃಢೀಕರಿಸಿದ ಕಾಂಬೊಗೆ ಮಾತ್ರ ಸಂಬಂಧಿಸುತ್ತವೆ ಮತ್ತು ದೃಢೀಕರಿಸದ ವಿನಂತಿಯನ್ನು `requestedCombo` ಆಗಿ ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ.
+
 **ಪ್ರತಿಕ್ರಿಯೆ:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE ಸ್ಟ್ರೀಮಿಂಗ್
 
-`message/send` ನಂತೆಯೇ ಇರುತ್ತದೆ, ಆದರೆ ನೈಜ-ಸಮಯದ ಸ್ಟ್ರೀಮಿಂಗ್ಗಾಗಿ ಸರ್ವರ್-ಸೆಂಟ್ ಈವೆಂಟ್ಗಳನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ.
+`message/send` ನಂತೆಯೇ ಇರುತ್ತದೆ, ಆದರೆ ನೈಜ-ಸಮಯದ ಸ್ಟ್ರೀಮಿಂಗ್ಗಾಗಿ Server-Sent Events ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE ಈವೆಂಟ್ಗಳು:**
+**SSE ಘಟನೆಗಳು:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -262,7 +266,7 @@ JSON-RPC ಎಂಡ್ಪಾಯಿಂಟ್ `/a2a` ಅಂಗೀಕೃತ A2A ಪ�
 
 ---
 
-## ಸಂಯೋಜನೆ ಉದಾಹರಣೆಗಳು
+## ಏಕೀಕರಣದ ಉದಾಹರಣೆಗಳು
 
 ### Python (requests)
 

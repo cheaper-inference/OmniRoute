@@ -427,6 +427,17 @@ respons terminal dinaik taraf kepada `429 rate_limit_error` yang membawa
 `retry_after` / `reset_at` daripada waktu tamat sekatan sementara paling awal;
 sekatan kuota, pengesahan dan tidak dijumpai mengekalkan 503 tanpa petunjuk.
 
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. Kawalan Kemasukan Giliran Permintaan (v3.8.49 · isu #6593)
@@ -502,166 +513,255 @@ diduplikasi.
 
 ---
 
-## 7. Penyataan Semula Status Huluan (ralat kuota yang tersalah nyata)
+## 7. Penyataan Semula Status Upstream (ralat kuota tersilap nyata)
 
-**Skop:** satu gerbang huluan yang melaporkan kehabisan kuota sementara dengan status HTTP yang salah.
+**Skop:** satu gateway upstream yang melaporkan kehabisan kuota sementara dengan status HTTP yang salah.
 
-**Tujuan:** membetulkan status yang mengelirukan SEBELUM pengelasan, supaya pengguna hiliran (enjin fallback, agregasi kombo, respons yang berdepan klien) melihat sifat sebenar kegagalan itu yang boleh dicuba semula.
+**Tujuan:** membetulkan status yang mengelirukan SEBELUM pengelasan, supaya pengguna hiliran (enjin fallback, agregasi combo, respons yang berdepan klien) melihat sifat kegagalan yang sebenar boleh dicuba semula.
 
-Sesetengah gerbang mengisyaratkan kehabisan kuota SEMENTARA dengan status HTTP
-yang tidak boleh dicuba semula. `agentrouter.org` mengembalikan `403` (kadang-kadang
-`400`) dengan badan berbahasa Cina (`用户额度不足` / `额度不足`) dan bukannya `429`
-yang standard. Klien seperti Claude Code menganggap `403` sebagai kekal dan
-membatalkan sesi, dan tanpa pembetulan, enjin fallback akan mengelaskannya sebagai
-`AUTH_ERROR` dan bukannya peristiwa kuota.
+Sesetengah gateway mengisyaratkan kehabisan kuota SEMENTARA dengan status HTTP
+yang tidak boleh dicuba semula. `agentrouter.org` mengembalikan `403`
+(kadangkala `400`) dengan badan berbahasa Cina (`用户额度不足` / `额度不足`)
+dan bukannya `429` standard. Klien seperti Claude Code menganggap `403`
+sebagai kekal dan membatalkan sesi, dan tanpa pembetulan enjin fallback akan
+mengelaskannya sebagai `AUTH_ERROR` dan bukannya peristiwa kuota.
 
 **Pelaksanaan:**
 
-- Pendaftar + pemadan: `open-sse/config/upstreamStatusRestatement.ts` — senarai
-  peraturan mengikut penyedia (`{id, fromStatuses, toStatus, textMarkers,
+- Registry + pemadanan: `open-sse/config/upstreamStatusRestatement.ts` — satu
+  senarai peraturan mengikut penyedia (`{id, fromStatuses, toStatus, textMarkers,
 excludeMarkers, defaultRetryAfterMs}`), dipadankan melalui `applyStatusRestatement()`.
 - Lokasi panggilan: blok `providerFailure:` dalam `open-sse/handlers/chatCore.ts`
-  (sekitar baris 3654), sejurus selepas `parseUpstreamError()` menghurai respons
-  huluan dengan status HTTP ralat (`!providerResponse.ok`), dan sebelum sebarang
-  pengelasan dijalankan, supaya setiap pengguna hiliran melihat status yang telah
-  dibetulkan. Ralat yang tertanam di dalam strim SSE `200` mengikut laluan
-  penghuraian strim yang berasingan dan lebih lewat, dan **tidak** dilindungi oleh
-  cangkuk ini pada masa ini — satu batasan yang diketahui, yang belum diperlukan
-  untuk status-salah agentrouter (yang muncul sebagai status HTTP ralat).
-- Kelayakan cuba semula: `429` berada dalam `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`), jadi ralat yang dinyatakan
-  semula membawa tetingkap cuba semula yang sebenar dan bukannya muncul sebagai
-  `403` yang mati.
-- `defaultRetryAfterMs` sintetik `60s` (`upstreamStatusRestatement.ts`) hanyalah
-  apa yang diberitahu oleh respons yang dinyatakan semula kepada **klien**; ia
-  bukan dengan sendirinya tempoh cooldown/lockout dalaman sambungan — itu dikawal
-  secara berasingan oleh mekanisme mana pun yang sebenarnya mengendalikan ralat
-  yang dinyatakan semula (backoff berperingkat Connection Cooldown, §2, asas `3s`
-  untuk penyedia kunci API; atau Model Lockout, §3, untuk penyedia kuota setiap
-  model seperti agentrouter). Router boleh menjadi layak untuk mencuba semula
-  secara dalaman lebih awal daripada tetingkap 60s yang diiklankan kepada klien —
-  ruang longgar yang disengajakan, bukan pepijat.
+  (sekitar baris 3654), sejurus selepas `parseUpstreamError()` menghuraikan
+  respons upstream dengan status HTTP ralat (`!providerResponse.ok`), dan
+  sebelum sebarang pengelasan dijalankan, supaya setiap pengguna hiliran
+  melihat status yang telah dibetulkan. Ralat yang tertanam di dalam strim SSE
+  `200` mengikut laluan penghuraian strim yang berasingan dan lebih lewat,
+  serta **tidak** diliputi oleh hook ini pada masa ini — satu batasan yang
+  diketahui, belum diperlukan untuk status silap agentrouter (yang muncul
+  sebagai status HTTP ralat).
+- Kelayakan cuba semula: `429` terdapat dalam `RETRY_AFTER_ELIGIBLE_STATUSES`
+  (`open-sse/services/combo/unavailableRetryGate.ts`), jadi ralat yang
+  dinyatakan semula membawa tetingkap cuba semula yang sebenar dan bukannya
+  muncul sebagai `403` mati.
+- `defaultRetryAfterMs` sintetik `60s` (`upstreamStatusRestatement.ts`)
+  hanyalah apa yang diberitahu oleh respons yang dinyatakan semula kepada
+  **klien**; ia bukan dengan sendirinya tempoh cooldown/lockout dalaman
+  sambungan — itu ditadbir secara berasingan oleh mana-mana mekanisme yang
+  sebenarnya mengendalikan ralat yang dinyatakan semula itu (backoff semakin
+  meningkat Connection Cooldown, §2, asas `3s` untuk penyedia kunci API; atau
+  Model Lockout, §3, untuk penyedia kuota setiap model seperti agentrouter).
+  Router boleh menjadi layak untuk mencuba semula secara dalaman lebih awal
+  daripada tetingkap 60s yang diiklankannya kepada klien — ruang lega yang
+  disengajakan, bukan pepijat.
 
 Ralat kekal (`无权访问模型` agentrouter — tiada akses kepada model ini) TIDAK
 PERNAH dinyatakan semula: `excludeMarkers` memveto peraturan itu walaupun
-`textMarkers` sepadan, jadi ralat itu mengekalkan status asalnya dan tiada apa
-yang mencubanya semula selamanya. Peraturan pengelasan penyedia yang sepadan
-(`agentrouter-model-access-denied` dalam `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, cooldown asas yang diisytiharkan `6h`)
-dirujuk oleh `checkFallbackError` (`open-sse/services/accountFallback.ts`) _sebelum_
-pulangan awal `FORBIDDEN` kategori apikey yang generik, dihadkan oleh
-`honorsRuleLockScope(provider)` (#10334 — pada masa ini eksklusif untuk agentrouter
-melalui senarai benar `HONORS_RULE_LOCK_SCOPE_PROVIDERS` dalam
-`providerErrorRules.ts`). Cooldown 6j yang diisytiharkan oleh peraturan itu mengalir
-sebagai `fallbackResult.baseCooldownMs`, tetapi ia masih menyalurkan laluan lockout
-kuota setiap model yang sedia ada (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, tidak diubah oleh #10334 kecuali sumber cooldown):
-ia dikatkan kepada `mlSettings.maxCooldownMs` pengendali (lalai `1_800_000ms` /
-30min), seperti setiap lockout model yang lain, dan _sebab lockout yang disimpan_
-kekal sebagai `"forbidden"` yang diprogramkan keras sedia ada, bukan `"auth_error"`
-peraturan itu — hanya tempoh cooldown yang dihormati dari hujung ke hujung, bukan
-rentetan sebabnya. Sambungan itu sendiri kekal aktif; model-model sebaya pada
-sambungan yang sama tidak terjejas.
+`textMarkers` sepadan, jadi ralat mengekalkan status asalnya dan tiada apa
+yang akan mencubanya semula selama-lamanya. Peraturan pengelasan penyedia yang
+sepadan (`agentrouter-model-access-denied` dalam
+`open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`, `scope:
+"model"`, cooldown asas `6h` yang diisytiharkan) dirujuk oleh
+`checkFallbackError` (`open-sse/services/accountFallback.ts`) _sebelum_
+early-return `FORBIDDEN` kategori apikey generik, dikawal oleh
+`honorsRuleLockScope(provider)` (#10334 — pada masa ini eksklusif untuk
+agentrouter melalui senarai benar `HONORS_RULE_LOCK_SCOPE_PROVIDERS` dalam
+`providerErrorRules.ts`). Cooldown 6h yang diisytiharkan oleh peraturan itu
+mengalir melalui sebagai `fallbackResult.baseCooldownMs`, tetapi ia masih
+menyalur ke laluan lockout kuota setiap model sedia ada
+(`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`, tidak diubah
+oleh #10334 kecuali untuk sumber cooldown): ia dihadkan kepada
+`mlSettings.maxCooldownMs` operator (lalai `1_800_000ms` / 30min), seperti
+setiap lockout model lain, dan _sebab lockout yang kekal disimpan_ tetap
+menjadi `"forbidden"` hardkod sedia ada, bukan `"auth_error"` peraturan —
+hanya tempoh cooldown yang dihormati dari hujung ke hujung, bukan rentetan
+sebab. Sambungan itu sendiri kekal aktif; model-model sebaya pada sambungan
+yang sama tidak terjejas.
 
-Ralat kuota yang dinyatakan semula (`额度不足`) mencapai peraturan pembekal dalam pengeluaran (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, tiada cooldown yang diisytiharkan sendiri — lalai backoff berskala milik lapisan persisten terpakai). Sejak #10334, `scope` pada `ProviderErrorRuleMatch` DIGUNAKAN secara hujung ke hujung, tetapi **hanya** untuk pembekal dalam senarai benar `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` — hari ini hanya `"agentrouter"`, dikawal melalui `honorsRuleLockScope()`). Bagi setiap pembekal lain, `scope` kekal sebagai maklumat sahaja, tepat seperti sebelum #10334. `checkFallbackError` memaparkan scope peraturan yang sepadan sebagai `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) ialah pengawal bersama yang mengesahkan bahawa sesuatu `ruleScope` benar-benar selamat untuk dihormati sebagai isyarat seluruh sambungan yang pulih sendiri (scope `"connection"`, reason `quota_exhausted`, tidak pernah `permanent`, tidak pernah `creditsExhausted` — satu pertahanan terhadap peraturan masa depan yang memadankan scope `"connection"` dengan keadaan akaun kekal). Dua pengguna memanggilnya:
+Ralat kuota yang dinyatakan semula (`额度不足`) mencapai peraturan penyedia
+dalam pengeluaran (`agentrouter-user-quota-exhausted`: `reason:
+"quota_exhausted"`, `scope: "connection"`, tiada cooldown tersendiri yang
+diisytiharkan — lalai backoff berskala lapisan persistence digunakan). Sejak
+#10334, `scope` pada `ProviderErrorRuleMatch` MEMANG digunakan dari hujung ke
+hujung, tetapi **hanya** untuk penyedia dalam senarai benar
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` — hari ini hanya
+`"agentrouter"`, dikawal melalui `honorsRuleLockScope()`). Untuk setiap
+penyedia lain, `scope` kekal bersifat maklumat sahaja, tepat seperti sebelum
+#10334. `checkFallbackError` memaparkan skop peraturan yang sepadan sebagai
+`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) ialah pengawal kongsi yang mengesahkan bahawa
+sesuatu `ruleScope` benar-benar selamat untuk dihormati sebagai isyarat
+seluruh sambungan yang pulih sendiri (skop `"connection"`, sebab
+`quota_exhausted`, tidak pernah `permanent`, tidak pernah `creditsExhausted` —
+satu pertahanan terhadap peraturan masa hadapan yang memasangkan skop
+`"connection"` dengan keadaan akaun yang kekal). Dua pengguna memanggilnya:
 
-- **Persisten** (`markAccountUnavailable()`, `src/sse/services/auth.ts`): daripada jatuh ke dalam cabang sekatan **setiap model** pembekal passthrough (agentrouter ialah `passthroughModels: true` → `hasPerModelQuota()` mengembalikan `true`), ia mengenakan **cooldown sambungan sementara** — `testStatus: "unavailable"` + `rateLimitedUntil`, tidak pernah status terminal (`credits_exhausted`/`banned`/`expired`) — supaya sambungan itu pulih sendiri sebaik sahaja cooldown berakhir, dan bukannya memerlukan tetapan semula kredensial secara manual. Dilangkau untuk sambungan dengan `disableCooling: true` (#2997): pilihan keluar itu sebaliknya jatuh ke sekatan setiap model (satu kompromi yang didokumentasikan — lihat komen kod di atas cabang tersebut).
-- **Penghalaan combo permintaan yang sama** (`applyComboTargetExhaustion()`, `open-sse/services/combo/targetExhaustion.ts`): pengawal yang sama menandakan sambungan ke dalam set dalam ingatan `exhaustedConnections`, berkunci `${provider}:${connectionId}`. Ini hanya melangkau sasaran PERMINTAAN YANG SAMA yang tinggal yang _sendiri sudah membawa `connectionId` yang tepat itu_ pada objek sasarannya sendiri (`getExhaustedTargetSkipReason()`, `open-sse/services/combo/comboPredicates.ts`, `if (provider && connectionId)` sebelum carian `exhaustedConnections`) — combo senarai model biasa, di mana sasaran seinduk tidak membawa `connectionId` tersemat sendiri dan satu hanya diselesaikan pada setiap penghantaran daripada pengepala `X-OmniRoute-Selected-Connection-Id` respons, tidak pernah mencapai padanan kunci itu. Untuk kes lazim itu, perlindungan sebenar terhadap kaki yang tinggal yang menggunakan semula akaun yang baru kehabisan BUKANLAH Set ini — ia adalah lapisan persisten di atas (`rateLimitedUntil` sambungan kini berada di masa hadapan) digabungkan dengan pengawal yang sama yang menyekat `transientRateLimitedProviders` untuk kegagalan itu (lihat "Reka bentuk dua peringkat" dan komen kod pada cabang `isAgentrouterConnectionQuotaScope` dalam `targetExhaustion.ts`): dengan Set itu dibiarkan tidak bertanda, pembolehan paksa `allowRateLimitedConnection` milik `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) TIDAK berkuat kuasa untuk kaki pembekal yang tinggal, jadi penapis `rateLimitedUntil` dalam pemilihan kredensial (`src/sse/services/auth.ts:1238`) dihormati seperti biasa dan kaki yang tinggal sama ada memilih sambungan agentrouter lain yang masih layak atau gagal dengan tiada kredensial tersedia — ia tidak memaksa jalannya kembali ke sambungan yang baru sahaja disejukkan oleh cabang ini.
+- **Persisten** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  daripada jatuh ke dalam cawangan sekatan **per-model** pembekal passthrough
+  (agentrouter ialah `passthroughModels: true` → `hasPerModelQuota()`
+  mengembalikan `true`), ia mengenakan **tempoh bertenang sambungan sementara** —
+  `testStatus: "unavailable"` + `rateLimitedUntil`, tidak pernah status terminal
+  (`credits_exhausted`/`banned`/`expired`) — supaya sambungan itu pulih sendiri
+  sebaik sahaja tempoh bertenang tamat, bukannya memerlukan tetapan semula
+  kredential secara manual. Dilangkau untuk sambungan dengan `disableCooling: true`
+  (#2997): pengecualian itu jatuh melalui ke sekatan per-model sebaliknya
+  (satu kompromi yang didokumentasikan — lihat ulasan kod di atas cawangan tersebut).
+- **Penghalaan kombo permintaan-sama** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): pengawal yang sama menandakan
+  sambungan ke dalam set dalam ingatan `exhaustedConnections`, dengan kunci
+  `${provider}:${connectionId}`. Ini hanya melangkau sasaran PERMINTAAN-SAMA yang
+  tinggal yang _sendiri sudah membawa `connectionId` yang tepat itu_ pada objek
+  sasarnya sendiri (`getExhaustedTargetSkipReason()`,
+  `open-sse/services/combo/comboPredicates.ts`, `if (provider && connectionId)`
+  sebelum carian `exhaustedConnections`) — kombo senarai-model biasa, di mana
+  sasaran seiring tidak membawa `connectionId` terpaku mereka sendiri dan satu
+  hanya diselesaikan setiap penghantaran daripada pengepala
+  `X-OmniRoute-Selected-Connection-Id` respons, tidak pernah mencapai padanan
+  kunci itu. Untuk kes biasa itu, perlindungan sebenar terhadap kaki yang tinggal
+  menggunakan semula akaun yang baru sahaja kehabisan itu BUKANLAH Set ini — ia
+  ialah lapisan persisten di atas (`rateLimitedUntil` sambungan kini berada di masa
+  hadapan) digabungkan dengan pengawal yang sama ini menyekat
+  `transientRateLimitedProviders` untuk kegagalan itu (lihat "Reka bentuk dua
+  peringkat" dan ulasan kod pada cawangan `isAgentrouterConnectionQuotaScope` dalam
+  `targetExhaustion.ts`): dengan Set itu dibiarkan tidak ditanda, benaran paksa
+  `allowRateLimitedConnection` dalam `combo.ts` (`open-sse/services/combo.ts:1005-1013`,
+  `:2734-2738`) TIDAK berkuat kuasa untuk kaki-kaki pembekal yang tinggal, jadi
+  penapis `rateLimitedUntil` pemilihan kredential (`src/sse/services/auth.ts:1238`)
+  dihormati seperti biasa dan kaki yang tinggal sama ada memilih sambungan
+  agentrouter lain yang masih layak atau gagal tanpa kredential tersedia — ia
+  tidak memaksa masuk semula ke sambungan yang baru sahaja dikenakan tempoh
+  bertenang oleh cawangan ini.
 
-### Reka bentuk dua peringkat: penyataan semula status, kemudian pengelasan
+### Reka bentuk dua peringkat: pernyataan semula status, kemudian pengelasan
 
-Penyataan semula status (`upstreamStatusRestatement.ts`) dan peraturan pengelasan pembekal (`open-sse/config/providerErrorRules.ts`, `providerRuleRegistry`) ialah pendaftar berasingan yang kedua-duanya berkunci pada id pembekal dan penanda teks, tetapi ia berjalan di tempat yang berbeza dan memenuhi tujuan yang berbeza: penyataan semula menulis semula status HTTP pada awal dalam `chatCore.ts`; peraturan pengelasan memilih `reason` sandaran dan `scope` kunci (`model` / `provider` / `connection`) di dalam `checkFallbackError()` (`open-sse/services/accountFallback.ts`).
+Pernyataan semula status (`upstreamStatusRestatement.ts`) dan peraturan
+pengelasan pembekal (`open-sse/config/providerErrorRules.ts`,
+`providerRuleRegistry`) ialah pendaftar berasingan yang kedua-duanya berkunci
+pada id pembekal dan penanda teks, tetapi ia dijalankan di tempat berbeza dan
+mempunyai tujuan berbeza: pernyataan semula menulis semula status HTTP lebih
+awal dalam `chatCore.ts`; peraturan pengelasan memilih `reason` sandaran dan
+mengunci `scope` (`model` / `provider` / `connection`) di dalam
+`checkFallbackError()` (`open-sse/services/accountFallback.ts`).
 
-Peraturan pengelasan hanya melihat **teks** ralat penuh (diperlukan untuk memadankan penanda badan seperti `额度不足`) untuk pembekal yang disenaraikan dalam senarai benar `FULL_TEXT_RULE_PROVIDERS` dalam `providerErrorRules.ts` — buat masa ini hanya `"agentrouter"`. Bagi setiap pembekal **katalog terbina dalam** yang lain, `checkFallbackError` menyerahkan kepada `getProviderErrorRuleMatch` hanya ralat berstruktur (`{code, type}`), yang memadai untuk peraturan berasaskan pengepala/status/kod tetapi buta terhadap penanda teks badan. Pembantu `resolveRuleMatchBody()` melakukan pemilihan ini: teks ralat penuh untuk pembekal dalam senarai benar, sebaliknya ralat berstruktur. Menambah pembekal **terbina dalam** ke `FULL_TEXT_RULE_PROVIDERS` ialah pilihan masuk eksplisit bagi setiap pembekal — ia wujud supaya laluan lalai untuk setiap pembekal yang tidak tersenarai kekal tidak berubah bait demi bait.
+Peraturan pengelasan hanya melihat **teks** ralat penuh (diperlukan untuk
+memadankan penanda badan seperti `额度不足`) untuk pembekal yang disenaraikan
+dalam senarai benar `FULL_TEXT_RULE_PROVIDERS` dalam `providerErrorRules.ts` —
+buat masa ini hanya `"agentrouter"`. Untuk setiap pembekal **katalog terbina
+dalam** yang lain, `checkFallbackError` menyerahkan kepada
+`getProviderErrorRuleMatch` hanya ralat berstruktur (`{code, type}`), yang
+memadai untuk peraturan berasaskan pengepala/status/kod tetapi buta terhadap
+penanda teks badan. Pembantu `resolveRuleMatchBody()` melakukan pemilihan ini:
+teks ralat penuh untuk pembekal dalam senarai benar, ralat berstruktur
+sebaliknya. Menambah pembekal **terbina dalam** ke `FULL_TEXT_RULE_PROVIDERS`
+ialah penyertaan eksplisit setiap pembekal — ia wujud supaya laluan lalai untuk
+setiap pembekal yang tiada dalam senarai kekal tidak berubah bait demi bait.
 
-`scope` sesuatu peraturan (`model` / `provider` / `connection`) ialah pilihan masuk yang berasingan daripada `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` hanya memaparkannya sebagai `fallbackResult.ruleScope`, dan pengguna hiliran hanya menghormatinya sebagai sesuatu selain label maklumat, untuk pembekal dalam senarai benar `HONORS_RULE_LOCK_SCOPE_PROVIDERS` dalam fail yang sama (`gated via honorsRuleLockScope()` — hari ini hanya `"agentrouter"`). Lihat "Ralat kuota yang dinyatakan semula" di atas untuk apa yang sebenarnya dilakukan oleh padanan `scope: "connection"` sebaik sahaja sesebuah pembekal berada dalam senarai benar itu.
+`scope` sesuatu peraturan (`model` / `provider` / `connection`) ialah
+penyertaan berasingan daripada `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError`
+hanya memaparkannya sebagai `fallbackResult.ruleScope`, dan pengguna hiliran
+hanya menghormatinya sebagai sesuatu selain label maklumat, untuk pembekal
+dalam senarai benar `HONORS_RULE_LOCK_SCOPE_PROVIDERS` dalam fail yang sama
+(dikawal melalui `honorsRuleLockScope()` — hari ini hanya `"agentrouter"`).
+Lihat "Ralat kuota yang dinyatakan semula" di atas untuk apa yang sebenarnya
+dilakukan oleh padanan `scope: "connection"` sebaik sahaja sesebuah pembekal
+berada dalam senarai benar itu.
 
-**#11104 — peraturan yang diisytiharkan pengendali memintas kedua-dua senarai benar.** Pengendali boleh
-mengisytiharkan peraturan per penyedia pada masa jalan melalui `settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-tanpa menyunting fail ini. Menyekat peraturan pengendali di sebalik
+**#11104 — peraturan yang diisytiharkan pengendali memintasi kedua-dua senarai
+benar.** Pengendali boleh mengisytiharkan peraturan setiap pembekal semasa
+masa jalan melalui `settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) tanpa
+mengedit fail ini. Mengawal peraturan pengendali di belakang
 `FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — senarai benar
-yang bertujuan melindungi tingkah laku **lalai** peraturan katalog terbina dalam — akan
-menjadikan mekanisme tetapan tidak berfungsi untuk setiap penyedia kecuali yang sudah
-tersenarai di situ, memandangkan pengisytiharan peraturan itu sendiri sudah merupakan
-penyertaan eksplisit pengendali. `resolveRuleMatchBody()` dan `honorsRuleLockScope()` kedua-duanya menyemak
-`hasOperatorRuleForProvider()` dahulu: penyedia yang mempunyai peraturan pengendali akan menerima
-teks ralat mentah dan `scope` yang diisytiharkannya akan dihormati, tanpa mengira
-sama ada ia turut muncul dalam mana-mana senarai benar.
+yang bertujuan melindungi tingkah laku **lalai** peraturan katalog terbina
+dalam — akan menjadikan mekanisme tetapan lengai untuk setiap pembekal kecuali
+yang sudah disenaraikan di situ, memandangkan pengisytiharan peraturan itu
+sendiri sudah merupakan penyertaan eksplisit pengendali. `resolveRuleMatchBody()`
+dan `honorsRuleLockScope()` kedua-duanya menyemak `hasOperatorRuleForProvider()`
+terlebih dahulu: pembekal dengan peraturan pengendali mendapat teks ralat mentah
+dan `scope` yang diisytiharkannya dihormati, tanpa mengira sama ada ia turut
+muncul dalam mana-mana senarai benar.
 
-**Jurang yang diketahui — `providerRuleRegistry` tidak pernah dirujuk untuk HTTP 400.**
-Cabang `BAD_REQUEST` dalam `checkFallbackError` mengklasifikasikan status 400 sepenuhnya
-melalui tatasusunan coraknya sendiri (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS`, dsb. dalam `accountFallback.ts`) dan kembali sebelum
-cabang `configuredRule`/`getProviderErrorRuleMatch` di atasnya dicapai.
-Peraturan katalog terbina dalam (atau peraturan pengendali) dengan `status: 400` adalah
-sah dari segi sintaks tetapi tidak akan pernah dicetuskan. Tiada peraturan sedia ada yang menyasarkan 400 buat masa ini,
-jadi tiada apa dalam pengeluaran yang terjejas — tetapi peraturan 400 pada masa hadapan memerlukan
-cabang ini diubah dahulu, yang merupakan perubahan lebih besar daripada menambah peraturan (ia
-mengklasifikasikan semula 400 untuk setiap penyedia yang sudah bergantung pada tingkah laku
-tatasusunan corak) dan berada di luar skop penambahan peraturan penyedia tunggal.
+**Jurang yang diketahui — `providerRuleRegistry` tidak pernah dirujuk untuk
+HTTP 400.** Cawangan `BAD_REQUEST` dalam `checkFallbackError` mengelaskan status
+400 sepenuhnya melalui tatasusunan coraknya sendiri
+(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`, dll. dalam
+`accountFallback.ts`) dan kembali sebelum cawangan
+`configuredRule`/`getProviderErrorRuleMatch` di atasnya dicapai. Peraturan
+katalog terbina dalam (atau peraturan pengendali) dengan `status: 400` adalah
+sah dari segi sintaks tetapi tidak akan pernah dicetuskan. Tiada peraturan
+sedia ada yang menyasarkan 400 hari ini, jadi tiada apa-apa dalam pengeluaran
+yang terjejas — tetapi peraturan 400 pada masa hadapan memerlukan cawangan ini
+diubah terlebih dahulu, yang merupakan perubahan lebih besar daripada sekadar
+menambah peraturan (ia mengelaskan semula 400 untuk setiap pembekal yang sudah
+bergantung pada tingkah laku tatasusunan corak) dan berada di luar skop untuk
+penambahan peraturan pembekal tunggal.
 
-### Menambah gerbang baharu yang salah menyatakan kuota
+### Menambah gateway baharu yang salah menyatakan kuota
 
 1. Daftarkan satu tatasusunan peraturan dalam `statusRestatementRegistry`
    (`open-sse/config/upstreamStatusRestatement.ts`). Pastikan `textMarkers`
-   khusus untuk penyedia; jangan sekali-kali menggunakan semula frasa Inggeris generik yang bercanggah dengan
-   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
-2. Secara pilihan, daftarkan peraturan klasifikasi dalam
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) untuk memilih
-   skop kunci yang betul (`connection` untuk kuota seluruh akaun, `model` untuk
-   ralat per model). Langkah ini hanya berkuat kuasa dalam pengeluaran untuk
-   penyedia yang peraturannya memerlukan teks ralat penuh (penanda badan): tambahkan
-   ID penyedia ke `FULL_TEXT_RULE_PROVIDERS` dalam fail yang sama — jika tidak,
-   `checkFallbackError` hanya akan menyerahkan ralat berstruktur
-   `{code, type}` kepada peraturan tersebut dan peraturan teks badan tidak akan pernah
-   sepadan dengan trafik langsung.
-   Peraturan yang sepadan semata-mata pada `status`/`headers` (seperti milik Opencode atau
-   Minimax) tidak memerlukan penyertaan ini. Secara berasingan, jika peraturan mengisytiharkan
-   `scope: "connection"` dan tujuannya ialah penyejukan seluruh sambungan
-   yang sebenar serta pelangkauan combo dalam permintaan yang sama (bukan sekadar label maklumat), tambahkan
-   ID penyedia ke `HONORS_RULE_LOCK_SCOPE_PROVIDERS` dalam fail yang sama — inilah
-   yang menyekat penggunaan gaya `isAgentrouterConnectionQuotaScope()` dalam
+   khusus untuk penyedia; jangan sekali-kali menggunakan semula frasa Inggeris
+   generik yang bercanggah dengan `CREDITS_EXHAUSTED_SIGNALS`
+   (`open-sse/services/accountFallback.ts`).
+2. Secara pilihan, daftarkan peraturan pengelasan dalam
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) untuk
+   memilih skop kunci yang betul (`connection` untuk kuota seluruh akaun,
+   `model` untuk ralat setiap model). Langkah ini hanya berkuat kuasa dalam
+   pengeluaran untuk penyedia yang peraturannya memerlukan teks ralat penuh
+   (penanda badan): tambahkan id penyedia ke `FULL_TEXT_RULE_PROVIDERS` dalam
+   fail yang sama — jika tidak, `checkFallbackError` hanya akan menyerahkan
+   ralat berstruktur `{code, type}` kepada peraturan itu dan peraturan teks
+   badan tidak akan pernah sepadan dengan trafik langsung. Peraturan yang
+   sepadan semata-mata pada `status`/`headers` (seperti milik Opencode atau
+   Minimax) tidak memerlukan opt-in ini. Secara berasingan, jika peraturan itu
+   mengisytiharkan `scope: "connection"` dan tujuannya ialah penyejukan
+   seluruh sambungan yang sebenar serta langkau kombo bagi permintaan yang
+   sama (bukan sekadar label bermaklumat), tambahkan id penyedia ke
+   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` dalam fail yang sama — inilah yang
+   mengawal penggunaan gaya `isAgentrouterConnectionQuotaScope()` dalam
    `markAccountUnavailable()` (`src/sse/services/auth.ts`) dan
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); tanpanya, `scope`
-   masih mengalir melalui `fallbackResult.ruleScope` tetapi tiada apa yang bertindak ke atasnya.
+   (`open-sse/services/combo/targetExhaustion.ts`); tanpanya, `scope` masih
+   mengalir melalui `fallbackResult.ruleScope` tetapi tiada apa yang bertindak
+   ke atasnya.
 3. Tambahkan ujian unit yang meniru `tests/unit/upstream-status-restatement.test.ts`
-   dan `tests/unit/agentrouter-error-rules.test.ts` (termasuk
-   pengawal bukan kekal / bukan creditsExhausted, dan — jika penyedia memerlukan
-   senarai benar — ujian yang menegaskan `resolveRuleMatchBody()` mengembalikan
-   teks penuh hanya untuk penyedia tersebut).
+   dan `tests/unit/agentrouter-error-rules.test.ts` (termasuk pengawal
+   not-permanent / not-creditsExhausted, dan — jika penyedia memerlukan
+   senarai benar — ujian yang mengesahkan `resolveRuleMatchBody()`
+   mengembalikan teks penuh hanya untuk penyedia itu).
 
-Tiada perubahan pada `chatCore.ts`, `classifyError`, atau combo diperlukan.
+Tiada perubahan pada `chatCore.ts`, `classifyError`, atau kombo diperlukan.
 
-#### Kunci berkelompok egress (#10880)
+#### Kunci berbucket egress (#10880)
 
-Penyedia dalam `EGRESS_BUCKETED_LOCK_PROVIDERS` (keluarga opencode) dianggap
-sebagai hulu berkelompok IP (peringkat percuma opencode adalah berkelompok IP, bukan
-berkelompok akaun — lihat #9611): status 429 yang diklasifikasikan sebagai `quota_exhausted`
-**atau** `rate_limit_exceeded` akan menyejukkan setiap sambungan keluarga tersenarai benar
-yang IP egress terakhir diketahuinya sepadan dengan milik sambungan yang gagal, sebelum
-putaran sempat mencubanya
-— mengelakkan N-1 panggilan hulu yang pasti gagal (pola yang sama seperti #10460/#10525).
-`rate_limit_exceeded` disertakan dengan sengaja: pada laluan `markAccountUnavailable`,
-peraturan khusus opencode tidak pernah sepadan (tiada pengepala/badan diserahkan kepada
-`checkFallbackError`, opencode tiada dalam `FULL_TEXT_RULE_PROVIDERS`), jadi 429
-yang badannya membawa teks kuota langganan ("monthly usage limit
-reached") diklasifikasikan sebagai `quota_exhausted` oleh sandaran teks kuota
-(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; penyejukan 1 jam) sebelum
-peraturan `status_429` dicapai — manakala 429 tanpa teks kuota (pengehadan
-kadar biasa) diklasifikasikan melalui peraturan `status_429` sebagai `rate_limit_exceeded`
-dan masih menyejukkan keluarga IP. Bagi penyedia tersenarai benar, had kadar
-berkelompok IP adalah isyarat yang sama dengan kuota yang telah habis. Batasan sebenar:
+Penyedia dalam `EGRESS_BUCKETED_LOCK_PROVIDERS` (keluarga opencode) dilayan
+sebagai upstream berbucket IP (peringkat percuma opencode adalah berbucket IP,
+bukan berbucket akaun — lihat #9611): status-429 yang dikelaskan sebagai
+`quota_exhausted` **atau** `rate_limit_exceeded` menyejukkan setiap sambungan
+keluarga tersenarai benar yang IP egress terakhir diketahuinya sepadan dengan
+milik sambungan yang gagal, sebelum putaran sempat mencubanya
+— mengelakkan N-1 panggilan upstream yang pasti gagal (corak yang sama seperti #10460/#10525).
+`rate_limit_exceeded` disertakan secara sengaja: pada laluan
+`markAccountUnavailable`, peraturan khusus opencode tidak pernah sepadan
+(tiada headers/body diserahkan kepada `checkFallbackError`, opencode tiada
+dalam `FULL_TEXT_RULE_PROVIDERS`), jadi 429 yang badannya membawa teks kuota
+langganan ("monthly usage limit reached") dikelaskan sebagai `quota_exhausted`
+oleh fallback teks kuota (`buildSubscriptionQuotaFallback`,
+`accountFallback.ts`; penyejukan 1h) sebelum peraturan `status_429` sempat
+dicapai — manakala 429 tanpa teks kuota (pengehadan kadar biasa) dikelaskan
+melalui peraturan `status_429` sebagai `rate_limit_exceeded` dan masih
+menyejukkan keluarga IP itu. Bagi penyedia tersenarai benar, had kadar
+berbucket IP adalah isyarat yang sama seperti kuota yang telah kehabisan.
+Batasan sebenar:
 
-- **Best-effort**: kunci itu menyelesaikan `egress_ip` terakhir yang diketahui bagi sambungan daripada `proxy_logs` (tetingkap 24 jam, segerak, tanpa cache). Cache sejuk (IP egress tidak pernah diselidik) atau tiada baris → sambungan yang gagal masih disejukkan oleh cabang (direkodkan seperti hari ini), hanya tiada sibling yang dikunci.
-- **Tidak pernah terminal**: cooldown ialah tetingkap kuota yang sentiasa diperbaharui (`testStatus: "unavailable"`); keadaan kekal tidak pernah diperoleh daripada isyarat peringkat IP. Sambungan `disableCooling` melangkau cabang ini sepenuhnya.
-- **Granulariti kunci berubah untuk keluarga tersenarai benar**: ini ialah perubahan skop, bukan sekadar pengoptimuman sibling. opencode ialah pembekal `passthroughModels`, jadi sebelum cabang ini 429 menghasilkan sekatan per-MODEL; ia kini menghasilkan cooldown sambungan — termasuk untuk operator yang menjalankan satu sambungan tanpa sebarang sibling langsung. Itulah granulariti yang telah diisytiharkan betul oleh jadual peraturan opencode (`scope: "connection"`, `providerErrorRules.ts`), tetapi setakat ini tidak pernah dihormati kerana opencode tiada dalam `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Cabang ini menulis sendiri cooldown + `backoffLevel` sambungan yang gagal, mencerminkan cabang agentrouter berskop sambungan, dan kembali — blok per-model dan laluan generik di bawah tidak pernah dicapai.
-- **Combo disertakan**: seperti cabang agentrouter, skop ini dengan sengaja mengabaikan penurunan `persistUnavailableState`/`isCombo` yang dikenakan oleh pemanggil combo terhadap 429. Sekatan per-model bukan bentuk yang lebih lemah bagi skop ini, ia ialah unit yang salah: ia tidak menyatakan apa-apa tentang IP yang kehabisan, jadi putaran combo akan terus membakar satu panggilan yang pasti gagal bagi setiap sibling.
+- **Usaha terbaik**: kunci menyelesaikan `egress_ip` terakhir yang diketahui bagi sambungan daripada `proxy_logs` (tetingkap 24 jam, segerak, tanpa cache). Cache sejuk (IP egress tidak pernah dikesan) atau tiada baris → sambungan yang gagal masih disejukkan oleh cabang ini (direkodkan seperti hari ini), hanya tiada sibling yang dikunci.
+- **Tidak pernah terminal**: cooldown ialah tetingkap kuota yang diperbaharui semula (`testStatus: "unavailable"`); keadaan kekal tidak pernah diperoleh daripada isyarat peringkat IP. Sambungan `disableCooling` melangkau cabang ini sepenuhnya.
+- **Granulariti kunci berubah untuk keluarga tersenarai putih**: ini ialah perubahan skop, bukan sekadar pengoptimuman sibling. opencode ialah penyedia `passthroughModels`, jadi sebelum cabang ini, 429 menghasilkan penguncian per-MODEL; kini ia menghasilkan cooldown sambungan — termasuk untuk operator yang menjalankan satu sambungan tanpa sebarang sibling langsung. Itulah granulariti yang telah diisytiharkan betul oleh jadual peraturan opencode (`scope: "connection"`, `providerErrorRules.ts`), tetapi tidak pernah dihormati setakat ini kerana opencode tiada dalam `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Cabang ini menulis sendiri cooldown + `backoffLevel` sambungan yang gagal, mencerminkan cabang agentrouter berskop sambungan, kemudian kembali — blok per-model dan laluan generik di bawah tidak pernah dicapai.
+- **Combo disertakan**: seperti cabang agentrouter, skop ini sengaja mengabaikan penurunan taraf `persistUnavailableState`/`isCombo` yang dikenakan oleh pemanggil combo pada 429. Penguncian per-model bukan bentuk skop ini yang lebih lemah, ia unit yang salah: ia tidak menyatakan apa-apa tentang IP yang telah kehabisan, jadi putaran combo akan terus membakar satu panggilan yang pasti gagal bagi setiap sibling.
 - **Keselamatan sibling**: sibling yang sudah terminal (banned/credits_exhausted) atau sudah berada dalam cooldown yang lebih lama tidak pernah ditulis ganti.
-- **Senarai benar eksklusif**: meluaskan `EGRESS_BUCKETED_LOCK_PROVIDERS` ialah keputusan pemilik yang eksplisit; tiada pendawaian generik (corak #10334/#10419). Pertanyaan sibling mengikat senarai benar yang sama dan bukannya mengulanginya sebagai literal SQL, jadi meluaskannya kekal sebagai perubahan satu baris.
-- **Putaran IP egress, kedua-dua arah**: tetingkap carian (24 jam) jauh lebih luas daripada TTL cache IP egress (5 minit), jadi "IP terakhir diketahui" ialah sejarah, bukan keadaan semasa. Jika proksi sesebuah sambungan berputar dalam tetingkap itu, kunci mungkin **terlepas** IP yang benar-benar dikongsi (IP yang direkodkan ialah IP baharu yang belum kehabisan) — dan secara simetrinya ia mungkin **menyejukkan sibling yang telah berputar keluar** daripada IP yang kehabisan itu. Kes kedua mengorbankan satu tetingkap cooldown bagi sibling itu; kedua-duanya ialah had best-effort yang diterima bagi carian berasaskan sejarah.
-- **Kos**: dua imbasan terhad `proxy_logs` (ditapis mengikut tetingkap melalui `idx_pl_timestamp`), hanya pada kekerapan 429. Tiada indeks baharu (migrasi 134 YAGNI). Diukur pada salinan DB trafik sebenar bersaiz sederhana; instans berdaya pemprosesan tinggi memegang lebih banyak baris secara berkadar dalam tetingkap yang sama.
+- **Senarai putih eksklusif**: pelebaran `EGRESS_BUCKETED_LOCK_PROVIDERS` ialah keputusan eksplisit pemilik; tiada pendawaian generik (corak #10334/#10419). Pertanyaan sibling mengikat senarai putih yang sama dan bukannya mengulanginya sebagai literal SQL, jadi pelebarannya kekal sebagai perubahan satu baris.
+- **Putaran IP egress, kedua-dua arah**: tetingkap carian (24 jam) jauh lebih luas daripada TTL cache IP egress (5 minit), jadi "IP terakhir diketahui" ialah sejarah, bukan keadaan semasa. Jika proksi sambungan berputar dalam tetingkap itu, kunci mungkin **terlepas** IP yang benar-benar dikongsi (IP yang direkodkan ialah IP baharu yang belum kehabisan) — dan secara simetrinya ia mungkin **menyejukkan sibling yang telah berputar keluar** daripada IP yang kehabisan itu. Kes kedua menyebabkan sibling itu kehilangan satu tetingkap cooldown; kedua-duanya ialah had usaha terbaik yang diterima bagi carian berasaskan sejarah.
+- **Kos**: dua imbasan terbatas `proxy_logs` (ditapis mengikut tetingkap melalui `idx_pl_timestamp`), hanya pada kekerapan 429. Tiada indeks baharu (migrasi 134 YAGNI). Diukur pada salinan DB trafik sebenar yang bersaiz sederhana; instans dengan throughput tinggi memegang lebih banyak baris secara berkadar dalam tetingkap yang sama.
 
 ---
 

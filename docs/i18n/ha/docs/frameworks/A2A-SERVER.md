@@ -47,7 +47,7 @@ Ana sarrafa A2A ta maɓallin kunnawa na **Endpoints → A2A**, kuma a tsohuwa a 
 
 ### `message/send` — Aiwatarwa Mai Jira
 
-Yana aika saƙo zuwa wata ƙwarewa kuma ya jira cikakkiyar amsa.
+Yana aika saƙo zuwa wata ƙwarewa kuma yana jiran cikakkiyar amsa.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Ga `smart-routing`, `metadata.combo` takamaiman maye ne na
+`metadata.model` don buƙatar gateway; ana aika shi a matsayin ainihin `model`,
+ba a matsayin filin JSON na `x-combo` da ake yin watsi da shi ba. Har yanzu ana
+aiwatar da ƙa'idar maɓallin API ta gateway da izini ga kowane manufa. Ana ƙin combo mara inganci ko wanda babu komai a cikinsa.
+
+Sakamakon yana bayyana `requested_combo` (niyyar mai kira), `dispatched_model`
+(ainihin buƙatar gateway), `response_model` (amsar gateway) da
+`confirmed_combo`. Filin ƙarshe yana zama `null` sai idan gateway ya bayyana
+combo a sarari. Bayanai na shawarar A2A suna danganta aiwatarwa ne kawai ga
+combo da aka tabbatar, tare da riƙe buƙatar da ba a tabbatar ba a matsayin `requestedCombo`.
+
 **Amsa:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Watsawar SSE
+### `message/stream` — Yawo ta SSE
 
-Daidai yake da `message/send`, amma yana dawo da Abubuwan da Saba ke Aikawa don watsawa kai tsaye.
+Daidai yake da `message/send`, amma yana mayar da Server-Sent Events don yawo a ainihin lokaci.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Abubuwan SSE:**
+**Abubuwan da Suka Faru na SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Bincika Matsayin Aiki
+### `tasks/get` — Duba Matsayin Aiki
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ an gabatar → ana aiki → an kammala
 
 ---
 
-## Misalai na Haɗin Kai
+## Misalan Haɗin Kai
 
 ### Python (requests)
 

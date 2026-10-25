@@ -2295,6 +2295,18 @@ async function handleSingleModelChat(
         return result.response;
       }
 
+      // #17132: a Quota Share absolute-cap block is a decision about THIS API key,
+      // never about the shared connection. The pre-hook already finalized the
+      // pending-request slot and built the clean 429 (operator reason + retry hint)
+      // — return it untouched. Letting the 429 account-fallback machinery below run
+      // on this result would cool down the shared connection (hurting the other
+      // pool keys), poison the quota cache and trip the provider breaker over a
+      // per-key policy decision — before the fix it even crashed on
+      // `result.response.headers` (bare Response) and returned a 500/502.
+      if (result.errorCode === "quota_share_blocked") {
+        return withSelectedConnectionHeader(result.response, credentials.connectionId);
+      }
+
       // Missing Cloud Code project assignment is configuration, not a transient failure.
       // Preserve the typed fail-closed 422; marking it unavailable would trigger cooldown
       // redispatch and repeat bootstrap within the same logical request.
