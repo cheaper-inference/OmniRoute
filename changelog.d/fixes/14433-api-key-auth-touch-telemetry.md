@@ -1,1 +1,0 @@
-- **fix(auth):** record bounded, coalesced audit events for successful API-key metadata and discovery reads while honoring no-log keys, trusted-proxy attribution, multi-credential identity, application-log retention, and credential redaction.

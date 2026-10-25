@@ -131,6 +131,11 @@ const SENSITIVE_AUDIT_KEYS = new Set([
 export const API_KEY_AUTH_TOUCH_ACTION = "api_key.auth.touch";
 export const API_KEY_AUTH_TOUCH_MAX_ROWS = 1_000;
 const API_KEY_AUTH_TOUCH_COALESCE_MS = 5 * 60 * 1_000;
+/**
+ * A coalesced row is only re-stamped once it is this old, so a hot metadata poll
+ * (e.g. GET /v1/models) costs one indexed read per request instead of a write.
+ */
+const API_KEY_AUTH_TOUCH_REFRESH_MS = 60 * 1_000;
 const API_KEY_AUTH_TOUCH_PATH_MAX_LENGTH = 256;
 const API_KEY_AUTH_TOUCH_USER_AGENT_MAX_LENGTH = 256;
 
@@ -410,6 +415,83 @@ export function logAuditEvent(entry: {
   }
 }
 
+type ApiKeyAuthTouch = {
+  apiKeyId: string;
+  timestamp: string;
+  timestampMs: number;
+  ipAddress: string | null;
+  requestId: string | null;
+  serializedMetadata: string | null;
+};
+
+/**
+ * Coalesce into the newest identical touch row when one exists. Returns true when
+ * the touch was absorbed (re-stamped, or left alone while still fresh).
+ */
+function coalesceApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): boolean {
+  const cutoff = new Date(touch.timestampMs - API_KEY_AUTH_TOUCH_COALESCE_MS).toISOString();
+  const recent = db
+    .prepare(
+      `SELECT id, timestamp
+       FROM audit_log
+       WHERE action = ? AND target = ? AND status = 'success'
+         AND ip_address IS ? AND metadata IS ? AND timestamp >= ?
+       ORDER BY timestamp DESC, id DESC
+       LIMIT 1`
+    )
+    .get(
+      API_KEY_AUTH_TOUCH_ACTION,
+      touch.apiKeyId,
+      touch.ipAddress,
+      touch.serializedMetadata,
+      cutoff
+    ) as { id?: number; timestamp?: string } | undefined;
+  if (!recent?.id) return false;
+
+  // Fresh enough: skip the write entirely (no per-request write amplification).
+  const lastStampMs = Date.parse(recent.timestamp ?? "");
+  if (
+    Number.isFinite(lastStampMs) &&
+    touch.timestampMs - lastStampMs < API_KEY_AUTH_TOUCH_REFRESH_MS
+  ) {
+    return true;
+  }
+  db.prepare(`UPDATE audit_log SET timestamp = ?, request_id = ? WHERE id = ?`).run(
+    touch.timestamp,
+    touch.requestId,
+    recent.id
+  );
+  return true;
+}
+
+function insertApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): void {
+  db.prepare(
+    `INSERT INTO audit_log (
+      timestamp, action, actor, target, details, ip_address,
+      resource_type, status, request_id, metadata
+    ) VALUES (?, ?, ?, ?, ?, ?, 'api_key', 'success', ?, ?)`
+  ).run(
+    touch.timestamp,
+    API_KEY_AUTH_TOUCH_ACTION,
+    "api_key",
+    touch.apiKeyId,
+    touch.serializedMetadata,
+    touch.ipAddress,
+    touch.requestId,
+    touch.serializedMetadata
+  );
+
+  db.prepare(
+    `DELETE FROM audit_log
+     WHERE id IN (
+       SELECT id FROM audit_log
+       WHERE action = ?
+       ORDER BY timestamp DESC, id DESC
+       LIMIT -1 OFFSET ?
+     )`
+  ).run(API_KEY_AUTH_TOUCH_ACTION, API_KEY_AUTH_TOUCH_MAX_ROWS);
+}
+
 /**
  * Record a successful metadata/discovery API-key authentication without
  * creating an inference call-log row. Identical touches are coalesced for a
@@ -436,70 +518,26 @@ export function recordApiKeyAuthTouch(entry: {
 
   try {
     ensureAuditLogSchema(db);
-    const createdAt = entry.createdAt || new Date().toISOString();
-    const createdAtMs = Date.parse(createdAt);
-    const timestamp = Number.isFinite(createdAtMs) ? createdAt : new Date().toISOString();
-    const ipAddress = sanitizeBoundedAuditText(entry.ipAddress, 64);
-    const requestId = sanitizeBoundedAuditText(entry.requestId, 128);
-    const metadata = {
+    const createdAtMs = Date.parse(entry.createdAt || "");
+    const validCreatedAt = Number.isFinite(createdAtMs);
+    const timestampMs = validCreatedAt ? createdAtMs : Date.now();
+    const serializedMetadata = serializeAuditValue({
       method,
       path: normalizeAuditPath(entry.normalizedPath),
       userAgent: sanitizeBoundedAuditText(
         entry.userAgent,
         API_KEY_AUTH_TOUCH_USER_AGENT_MAX_LENGTH
       ),
-    };
-    const serializedMetadata = serializeAuditValue(metadata);
-    const cutoff = new Date(
-      (Number.isFinite(createdAtMs) ? createdAtMs : Date.now()) - API_KEY_AUTH_TOUCH_COALESCE_MS
-    ).toISOString();
-
-    const recent = db
-      .prepare(
-        `SELECT id
-         FROM audit_log
-         WHERE action = ? AND target = ? AND status = 'success'
-           AND ip_address IS ? AND metadata IS ? AND timestamp >= ?
-         ORDER BY timestamp DESC, id DESC
-         LIMIT 1`
-      )
-      .get(API_KEY_AUTH_TOUCH_ACTION, apiKeyId, ipAddress, serializedMetadata, cutoff) as
-      { id?: number } | undefined;
-
-    if (recent?.id) {
-      db.prepare(
-        `UPDATE audit_log
-         SET timestamp = ?, request_id = ?
-         WHERE id = ?`
-      ).run(timestamp, requestId, recent.id);
-      return;
-    }
-
-    db.prepare(
-      `INSERT INTO audit_log (
-        timestamp, action, actor, target, details, ip_address,
-        resource_type, status, request_id, metadata
-      ) VALUES (?, ?, ?, ?, ?, ?, 'api_key', 'success', ?, ?)`
-    ).run(
-      timestamp,
-      API_KEY_AUTH_TOUCH_ACTION,
-      "api_key",
+    });
+    const touch: ApiKeyAuthTouch = {
       apiKeyId,
+      timestamp: validCreatedAt ? String(entry.createdAt) : new Date(timestampMs).toISOString(),
+      timestampMs,
+      ipAddress: sanitizeBoundedAuditText(entry.ipAddress, 64),
+      requestId: sanitizeBoundedAuditText(entry.requestId, 128),
       serializedMetadata,
-      ipAddress,
-      requestId,
-      serializedMetadata
-    );
-
-    db.prepare(
-      `DELETE FROM audit_log
-       WHERE id IN (
-         SELECT id FROM audit_log
-         WHERE action = ?
-         ORDER BY timestamp DESC, id DESC
-         LIMIT -1 OFFSET ?
-       )`
-    ).run(API_KEY_AUTH_TOUCH_ACTION, API_KEY_AUTH_TOUCH_MAX_ROWS);
+    };
+    if (!coalesceApiKeyAuthTouch(db, touch)) insertApiKeyAuthTouch(db, touch);
   } catch {
     // Authentication observability is best effort and must never block a request.
   }

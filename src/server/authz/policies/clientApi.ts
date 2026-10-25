@@ -53,6 +53,34 @@ function getAuthTouchClientIp(ctx: PolicyContext): string {
   });
 }
 
+/**
+ * Best-effort audit of a successful GET/HEAD API-key authentication (metadata and
+ * discovery reads that never reach the inference call log). Honours noLog keys and
+ * the env key, and redacts every presented credential from the recorded path/UA.
+ */
+async function recordClientApiAuthTouch(
+  ctx: PolicyContext,
+  credential: string,
+  credentials: string[]
+): Promise<void> {
+  const method = ctx.request.method.toUpperCase();
+  if (method !== "GET" && method !== "HEAD") return;
+  const { getApiKeyMetadata } = await import("../../../lib/db/apiKeys");
+  const metadata = await getApiKeyMetadata(credential);
+  if (!metadata || metadata.id === "env-key" || metadata.noLog === true) return;
+  recordApiKeyAuthTouch({
+    apiKeyId: metadata.id,
+    method,
+    normalizedPath: redactCredentials(ctx.classification.normalizedPath, credentials) || "/",
+    ipAddress: getAuthTouchClientIp(ctx),
+    userAgent: redactCredentials(ctx.request.headers.get("user-agent"), [
+      ...credentials,
+      metadata.keyHash,
+    ]),
+    requestId: ctx.requestId,
+  });
+}
+
 export const clientApiPolicy: RoutePolicy = {
   routeClass: "CLIENT_API",
   async evaluate(ctx: PolicyContext): Promise<AuthOutcome> {
@@ -84,29 +112,12 @@ export const clientApiPolicy: RoutePolicy = {
       return reject(401, "AUTH_002", "Authentication required");
     }
 
-    const { getApiKeyMetadata, validateApiKey } = await import("../../../lib/db/apiKeys");
+    const { validateApiKey } = await import("../../../lib/db/apiKeys");
     for (const credential of credentials) {
       // The subject is the credential that actually validated, so identity and
       // usage never bind to a stale Bearer sent next to a valid x-api-key.
       if (await validateApiKey(credential)) {
-        const method = ctx.request.method.toUpperCase();
-        if (method === "GET" || method === "HEAD") {
-          const metadata = await getApiKeyMetadata(credential);
-          if (metadata && metadata.id !== "env-key" && metadata.noLog !== true) {
-            recordApiKeyAuthTouch({
-              apiKeyId: metadata.id,
-              method,
-              normalizedPath:
-                redactCredentials(ctx.classification.normalizedPath, credentials) || "/",
-              ipAddress: getAuthTouchClientIp(ctx),
-              userAgent: redactCredentials(ctx.request.headers.get("user-agent"), [
-                ...credentials,
-                metadata.keyHash,
-              ]),
-              requestId: ctx.requestId,
-            });
-          }
-        }
+        await recordClientApiAuthTouch(ctx, credential, credentials);
         return allow({ kind: "client_api_key", id: maskKeyId(credential) });
       }
     }

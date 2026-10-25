@@ -278,6 +278,49 @@ test("identical touches coalesce and the telemetry action is hard-capped", async
   );
 });
 
+test("repeat touches inside the refresh window do not write; older ones refresh the row", async () => {
+  const created = await apiKeysDb.createApiKey("refresh-window", "machine-refresh-window");
+  const base = Date.parse("2026-09-21T12:00:00.000Z");
+  const touch = (offsetMs: number) =>
+    compliance.recordApiKeyAuthTouch({
+      apiKeyId: created.id,
+      method: "GET",
+      normalizedPath: "/api/v1/models",
+      ipAddress: "127.0.0.1",
+      userAgent: "same-client",
+      requestId: `req_${offsetMs}`,
+      createdAt: new Date(base + offsetMs).toISOString(),
+    });
+  const onlyRow = () => {
+    const rows = authTouchRows();
+    assert.equal(rows.length, 1, "identical touches stay a single row");
+    return rows[0];
+  };
+
+  touch(0);
+  const first = onlyRow();
+  assert.equal(new Date(first.timestamp).toISOString(), new Date(base).toISOString());
+
+  // A hot /v1/models poll must not turn into one SQLite write per request.
+  touch(30_000);
+  const withinWindow = onlyRow();
+  assert.equal(
+    new Date(withinWindow.timestamp).toISOString(),
+    new Date(base).toISOString(),
+    "a repeat inside the refresh window must not rewrite the row"
+  );
+  assert.equal(withinWindow.request_id, first.request_id);
+
+  // Past the refresh window (but inside the coalesce window) the row is refreshed.
+  touch(120_000);
+  const refreshed = onlyRow();
+  assert.equal(
+    new Date(refreshed.timestamp).toISOString(),
+    new Date(base + 120_000).toISOString(),
+    "a repeat past the refresh window must bump the existing row's timestamp"
+  );
+});
+
 test("auth-touch rows follow existing application-log retention", async () => {
   const created = await apiKeysDb.createApiKey("retention", "machine-retention");
   compliance.recordApiKeyAuthTouch({
