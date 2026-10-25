@@ -59,6 +59,7 @@ const ROTATING_REFRESH_PROVIDERS = new Set([
   "gitlab-duo",
   "claude",
   "openference",
+  "renderhour",
 ]);
 
 export function shouldNullRefreshTokenAfterUnrecoverable(provider: unknown): boolean {

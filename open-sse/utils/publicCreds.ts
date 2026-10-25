@@ -170,6 +170,8 @@ const EMBEDDED_DEFAULTS = {
   // Openference OAuth — public PKCE client id. The plaintext equals the first
   // nine bytes of MASK, so its XOR-masked representation is nine zero bytes.
   openference_id: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  // RenderHour OAuth — public PKCE client id (no secret), built into renderhour.com
+  renderhour_id: [29, 5, 13, 54, 29, 2, 27, 29, 23, 66, 5, 1, 7],
   // Trae Cloud IDE — public oauth client id
   trae_id: [10, 3, 95, 6, 10, 22, 66, 3, 11, 90, 72, 31, 91, 2],
   // Microsoft 365 Copilot web (m365.cloud.microsoft) — public SPA client id

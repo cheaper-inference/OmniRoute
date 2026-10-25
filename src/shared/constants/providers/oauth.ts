@@ -49,6 +49,17 @@ export const OAUTH_PROVIDERS = {
     authHint:
       "Sign in with your Openference account to route requests through api.openference.com. Includes free-tier access to Qwen3.8 27b and Llama 3.2 3B — see openference.com/pricing for current plan terms.",
   },
+  renderhour: {
+    id: "renderhour",
+    serviceKinds: ["image", "video", "tts"],
+    name: "RenderHour",
+    icon: "movie",
+    color: "#FF5A1F",
+    textIcon: "RH",
+    website: "https://renderhour.com",
+    authHint:
+      "Sign in with your RenderHour account to spend its subscription credits on images (Nano Banana Pro, GPT Image 2, Seedream), video (Seedance, Kling, Veo) and speech, or paste an rh_… API key from renderhour.com/developers to pay from the API's dollar balance. Address models as renderhour/<model>.",
+  },
   "grok-cli": {
     id: "grok-cli",
     serviceKinds: ["llm"],

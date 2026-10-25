@@ -190,6 +190,17 @@ export const OPENFERENCE_CONFIG = {
   callbackHost: "127.0.0.1",
 };
 
+// RenderHour OAuth Configuration (Authorization Code Flow with PKCE, public client).
+// A RenderHour subscription pays in plan credits; renderhour.com accepts a loopback
+// redirect on any port (RFC 8252 §7.3). No scopes: the token acts for the account.
+export const RENDERHOUR_CONFIG = {
+  clientId: resolvePublicCred("renderhour_id"),
+  authorizeUrl: "https://renderhour.com/oauth/authorize",
+  tokenUrl: "https://renderhour.com/api/oauth/token",
+  userinfoUrl: "https://renderhour.com/api/oauth/userinfo",
+  codeChallengeMethod: "S256",
+};
+
 // Muse Code (Meta) OAuth — RFC 8628 device grant + subscription key mint.
 // Public CLI client id (Muse Code CLI); PKCE is not used on this grant.
 export const MUSE_CODE_CONFIG = {
@@ -543,6 +554,7 @@ export const PROVIDERS = {
   GROK_CLI: "grok-cli",
   XAI_OAUTH: "xai-oauth",
   OPENFERENCE: "openference",
+  RENDERHOUR: "renderhour",
   ZED: "zed",
   ZED_HOSTED: "zed-hosted",
   MUSE_CODE: "muse-code",

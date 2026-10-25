@@ -19,6 +19,7 @@ import { AI_HORDE_IMAGE_PROVIDER } from "./providers/registry/aihorde/imageModel
 import { toRegistryImageModels as toSyntxImageModels } from "../services/syntxMediaCatalog.ts";
 import { ZENMUX_IMAGE_PROVIDER } from "./providers/registry/zenmux/imageModels.ts";
 import { MUSE_CODE_IMAGE_PROVIDER } from "./providers/registry/muse-code/imageModels.ts";
+import { RENDERHOUR_IMAGE_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
 
 export interface ImageModelEntry {
   id: string;
@@ -985,6 +986,9 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     models: [{ id: "@cf/black-forest-labs/flux-1-schnell", name: "FLUX.1 Schnell (Workers AI)" }],
     supportedSizes: ["1024x1024", "768x768", "512x512"],
   },
+  // Last on purpose: bare model ids resolve first-wins, so RenderHour's ids never shadow
+  // an earlier provider's. Address them as renderhour/<model>.
+  renderhour: RENDERHOUR_IMAGE_PROVIDER,
 };
 
 /**

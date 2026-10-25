@@ -359,4 +359,12 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     refreshable: true,
     acceptStatuses: [402],
   },
+  // RenderHour: the account's balance is a free authenticated read (credits and dollars).
+  renderhour: {
+    url: "https://renderhour.com/v1/balance",
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    refreshable: true,
+  },
 };

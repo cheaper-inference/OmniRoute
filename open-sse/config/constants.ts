@@ -152,6 +152,11 @@ export const OAUTH_ENDPOINTS = {
     auth: "https://openference.com/app/oauth/authorize",
     clientId: resolvePublicCred("openference_id"),
   },
+  renderhour: {
+    token: "https://renderhour.com/api/oauth/token",
+    auth: "https://renderhour.com/oauth/authorize",
+    clientId: resolvePublicCred("renderhour_id"),
+  },
 };
 
 // Cache TTLs (seconds)
