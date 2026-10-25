@@ -90471,17 +90471,17 @@
           "updated_at": "2026-10-18T23:39:55.649Z"
         },
         "or": {
-          "source_hash": "9f2dcab70c937a5ee17a70d5852a57e3c2636c8279bfcf7902af3afe03df3f8b",
-          "target_hash": "b5c95a56a2795ceffba3d9204ac90b230d37209453327a5e30bd049c9784c718",
+          "source_hash": "217d971492dab0f80ec64422f6eedfef77186166c8519628281539621154adad",
+          "target_hash": "f8467af917f0da2b633b062f69a7459953823afbe238507338ae345bc3ca754b",
           "section_hashes": [
             "b262b53b0362",
             "406fb7034705",
-            "ec56bac78ae1",
+            "abf2a4b7edc6",
             "162d3804b3dd",
             "6d84ccb5428f",
             "3a6f5d25e3a1"
           ],
-          "updated_at": "2026-10-18T23:43:57.460Z"
+          "updated_at": "2026-10-25T11:46:52.886Z"
         },
         "ru": {
           "source_hash": "9f2dcab70c937a5ee17a70d5852a57e3c2636c8279bfcf7902af3afe03df3f8b",
