@@ -10,77 +10,77 @@ _Son güncelleme: 2026-06-28_
 
 ## Yönetici Özeti
 
-OmniRoute, Next.js üzerine inşa edilmiş yerel bir AI yönlendirme ağ geçidi ve kontrol panelidir.
-Tek bir OpenAI uyumlu uç nokta (`/v1/*`) sağlar ve trafiği; çeviri, yedekleme (fallback), token yenileme ve kullanım takibi ile birden fazla upstream sağlayıcı arasında yönlendirir.
+OmniRoute, Next.js üzerine inşa edilmiş yerel bir yapay zekâ yönlendirme ağ geçidi ve kontrol panelidir.
+Tek bir OpenAI uyumlu uç nokta (`/v1/*`) sağlar ve trafiği çeviri, geri dönüş, token yenileme ve kullanım takibi özellikleriyle birden fazla üst sağlayıcı arasında yönlendirir.
 
 Temel yetenekler:
 
 - CLI/araçlar için OpenAI uyumlu API yüzeyi (375 sağlayıcı, 156 yürütücü modülü)
-- Sağlayıcı formatları arasında istek/yanıt çevirisi
-- Model kombo yedeklemesi (çoklu model sıralaması)
-- `compositeTiers` ile çalışma zamanında sıralanan yapılandırılmış kombo adımları (`provider + model + connection`)
-- Hesap düzeyinde yedekleme (sağlayıcı başına çoklu hesap)
-- Ana sohbet yolunda kota ön kontrolü ve kota-duyarlı P2C hesap seçimi
-- OAuth + API anahtarı sağlayıcı bağlantı yönetimi (27 OAuth sağlayıcı modülü)
-- `/v1/embeddings` aracılığıyla embedding oluşturma (18 sağlayıcı)
-- `/v1/images/generations` aracılığıyla görüntü oluşturma (10+ sağlayıcı, 20+ model)
-- `/v1/audio/transcriptions` aracılığıyla ses transkripsiyonu (18 sağlayıcı)
-- `/v1/audio/speech` aracılığıyla metinden konuşmaya (24 yerleşik sağlayıcı)
-- `/v1/videos/generations` aracılığıyla video oluşturma (ComfyUI + SD WebUI)
-- `/v1/music/generations` aracılığıyla müzik oluşturma (ComfyUI)
-- `/v1/search` aracılığıyla web araması (20 sağlayıcı)
-- `/v1/moderations` aracılığıyla moderasyon
-- `/v1/rerank` aracılığıyla yeniden sıralama
-- Akıl yürütme modelleri için think etiketi ayrıştırma (`<think>...</think>`)
+- Sağlayıcı biçimleri arasında istek/yanıt çevirisi
+- Model kombinasyonu geri dönüşü (çok modelli sıra)
+- `compositeTiers` tarafından çalışma zamanında sıralanan yapılandırılmış kombinasyon adımları (`provider + model + connection`)
+- Hesap düzeyinde geri dönüş (sağlayıcı başına birden fazla hesap)
+- Ana sohbet yolunda kota ön kontrolü ve kotayı dikkate alan P2C hesap seçimi
+- OAuth + API anahtarı sağlayıcı bağlantısı yönetimi (27 OAuth sağlayıcı modülü)
+- `/v1/embeddings` üzerinden gömme oluşturma (18 sağlayıcı)
+- `/v1/images/generations` üzerinden görüntü oluşturma (10+ sağlayıcı, 20+ model)
+- `/v1/audio/transcriptions` üzerinden ses transkripsiyonu (18 sağlayıcı)
+- `/v1/audio/speech` üzerinden metinden konuşmaya dönüştürme (24 yerleşik sağlayıcı)
+- `/v1/videos/generations` üzerinden video oluşturma (ComfyUI + SD WebUI)
+- `/v1/music/generations` üzerinden müzik oluşturma (ComfyUI)
+- `/v1/search` üzerinden web araması (20 sağlayıcı)
+- `/v1/moderations` üzerinden moderasyon
+- `/v1/rerank` üzerinden yeniden sıralama
+- Akıl yürütme modelleri için düşünme etiketi ayrıştırma (`<think>...</think>`)
 - Katı OpenAI SDK uyumluluğu için yanıt temizleme
-- Sağlayıcılar arası uyumluluk için rol normalizasyonu (developer→system, system→user)
-- Yapılandırılmış çıktı dönüşümü (json_schema → Gemini responseSchema)
-- Sağlayıcılar, anahtarlar, takma adlar, kombolar, ayarlar ve fiyatlandırma için yerel kalıcılık (122 DB modülü)
-- Kullanım/maliyet takibi ve istek günlük kaydı
-- Çoklu cihaz/durum senkronizasyonu için isteğe bağlı bulut senkronizasyonu
-- API erişim kontrolü için IP izin listesi/engel listesi
-- Düşünme bütçesi yönetimi (passthrough/auto/custom/adaptive)
-- Genel sistem istemi enjeksiyonu
-- Oturum takibi ve parmak izi alma
-- Sağlayıcıya özel profillerle hesap başına gelişmiş hız sınırlama
-- Sağlayıcı dayanıklılığı için devre kesici deseni
-- Mutex kilitleme ile thundering herd (sürü baskını) koruması
+- Sağlayıcılar arası uyumluluk için rol normalleştirme (developer→system, system→user)
+- Yapılandırılmış çıktı dönüştürme (json_schema → Gemini responseSchema)
+- Sağlayıcılar, anahtarlar, takma adlar, kombinasyonlar, ayarlar ve fiyatlandırma için yerel kalıcılık (122 DB modülü)
+- Kullanım/maliyet takibi ve istek günlükleme
+- Birden fazla cihaz/durum senkronizasyonu için isteğe bağlı bulut senkronizasyonu
+- API erişim denetimi için IP izin listesi/engelleme listesi
+- Düşünme bütçesi yönetimi (doğrudan geçiş/otomatik/özel/uyarlanabilir)
+- Genel sistem istemi ekleme
+- Oturum takibi ve parmak izi oluşturma
+- Sağlayıcıya özgü profillerle hesap başına gelişmiş hız sınırlama
+- Sağlayıcı dayanıklılığı için devre kesici kalıbı
+- Mutex kilitleme ile yoğun eşzamanlı istek koruması
 - İmza tabanlı istek tekilleştirme önbelleği
-- Domain katmanı: maliyet kuralları, yedekleme politikası, kilitleme politikası
-- Context Relay: hesap rotasyonu sürekliliği için oturum devir özetleri
-- Domain durumu kalıcılığı (yedeklemeler, bütçeler, kilitlemeler ve devre kesiciler için SQLite write-through önbelleği)
-- Merkezi istek değerlendirmesi için politika motoru (kilitleme → bütçe → yedekleme)
-- p50/p95/p99 gecikme toplamasıyla istek telemetrisi
-- `combo_execution_key` / `combo_step_id` aracılığıyla kombo hedef telemetrisi ve geçmiş kombo hedef sağlığı
-- Uçtan uca izleme için Korelasyon ID'si (X-Request-Id)
-- API anahtarı başına devre dışı bırakma seçeneğiyle uyumluluk denetim günlüğü
-- LLM kalite güvencesi için eval çerçevesi
-- Gerçek zamanlı sağlayıcı devre kesici durumu içeren sağlık paneli
-- 3 aktarım (stdio/SSE/Streamable HTTP) ile MCP Sunucusu (110 araç)
-- Beceriler ve görev yaşam döngüsüne sahip A2A Sunucusu (JSON-RPC 2.0 + SSE)
-- Bellek sistemi (çıkarma, enjeksiyon, getirme, özetleme)
-- Beceri sistemi (kayıt defteri, yürütücü, kum kutusu, yerleşik beceriler)
-- Sertifika yönetimi ve DNS işleme özellikli MITM proxy
-- İstem enjeksiyonu koruma middleware'i
-- Caveman, RTK, yığılmış hatlar, sıkıştırma komboları, dil paketleri ve analitik içeren istem sıkıştırma hattı
-- ACP (Agent Communication Protocol) kayıt defteri
+- Etki alanı katmanı: maliyet kuralları, geri dönüş politikası, kilitleme politikası
+- Bağlam Aktarımı: hesap rotasyonu sürekliliği için oturum devretme özetleri
+- Etki alanı durumu kalıcılığı (geri dönüşler, bütçeler, kilitlemeler ve devre kesiciler için SQLite üzerinden yazma önbelleği)
+- Merkezî istek değerlendirmesi için politika motoru (kilitleme → bütçe → geri dönüş)
+- p50/p95/p99 gecikme süresi toplama özelliğine sahip istek telemetrisi
+- `combo_execution_key` / `combo_step_id` aracılığıyla kombinasyon hedefi telemetrisi ve geçmiş kombinasyon hedefi sağlığı
+- Uçtan uca izleme için korelasyon kimliği (X-Request-Id)
+- API anahtarı başına devre dışı bırakma seçeneğine sahip uyumluluk denetimi günlüklemesi
+- LLM kalite güvencesi için değerlendirme çerçevesi
+- Gerçek zamanlı sağlayıcı devre kesici durumuna sahip sağlık kontrol paneli
+- 3 aktarım yöntemine (stdio/SSE/Streamable HTTP) sahip MCP Sunucusu (110 araç)
+- Becerilere ve görev yaşam döngüsüne sahip A2A Sunucusu (JSON-RPC 2.0 + SSE)
+- Bellek sistemi (çıkarma, ekleme, erişim, özetleme)
+- Beceri sistemi (kayıt defteri, yürütücü, korumalı alan, yerleşik beceriler)
+- Sertifika yönetimi ve DNS işleme özelliklerine sahip MITM proxy
+- İstem enjeksiyonu koruma ara yazılımı
+- Caveman, RTK, yığınlanmış işlem hatları, sıkıştırma kombinasyonları, dil paketleri ve analitik özelliklerine sahip istem sıkıştırma işlem hattı
+- ACP (Ajan İletişim Protokolü) kayıt defteri
 - Modüler OAuth sağlayıcıları (`src/lib/oauth/providers/` altında 22 ayrı modül)
 - Kaldırma/tam kaldırma betikleri
-- OAuth ortam onarım eylemi
+- OAuth ortamı onarma eylemi
 - OpenAI uyumlu WS istemcileri için WebSocket köprüsü (`/v1/ws`)
-- Senkronizasyon token yönetimi (verme/iptal, ETag sürümlü yapılandırma paketi indirme)
-- GLM Thinking (`glmt`) birinci sınıf sağlayıcı ön ayarı
-- Hibrit token sayımı (tahmin yedeklemesiyle sağlayıcı tarafında `/messages/count_tokens`)
-- Model takma adı otomatik tohumlama (başlangıçta 30+ proxy'ler arası lehçe normalizasyonu)
-- SSRF koruması, özel URL engelleme ve yapılandırılabilir yeniden deneme ile güvenli dışa dönük istekler
-- Yapılandırılabilir `requestRetry` ve `maxRetryIntervalSec` ile bekleme süresine duyarlı sohbet yeniden denemeleri
-- Başlangıçta Zod ile çalışma zamanı ortam doğrulaması
-- Sayfalama, sağlayıcı CRUD olayları ve SSRF tarafından engellenen doğrulama günlük kaydı içeren uyumluluk denetimi v2
+- Senkronizasyon token'ı yönetimi (oluşturma/iptal etme, ETag sürümlü yapılandırma paketi indirme)
+- Birinci sınıf sağlayıcı ön ayarı olarak GLM Thinking (`glmt`)
+- Hibrit token sayımı (tahmin geri dönüşüyle sağlayıcı tarafında `/messages/count_tokens`)
+- Model takma adlarını otomatik başlangıç verileriyle doldurma (başlangıçta 30+ proxy'ler arası lehçe normalleştirmesi)
+- SSRF koruması, özel URL engelleme ve yapılandırılabilir yeniden deneme özelliklerine sahip güvenli giden fetch
+- Yapılandırılabilir `requestRetry` ve `maxRetryIntervalSec` ile bekleme süresini dikkate alan sohbet yeniden denemeleri
+- Başlangıçta Zod ile çalışma zamanı ortamı doğrulaması
+- Sayfalama, sağlayıcı CRUD olayları ve SSRF tarafından engellenen doğrulamaların günlüklenmesi özelliklerine sahip uyumluluk denetimi v2
 
 Birincil çalışma zamanı modeli:
 
 - `src/app/api/*` altındaki Next.js uygulama rotaları hem kontrol paneli API'lerini hem de uyumluluk API'lerini uygular
-- `src/sse/*` + `open-sse/*` içindeki paylaşılan SSE/yönlendirme çekirdeği; sağlayıcı yürütme, çeviri, akış, yedekleme ve kullanım işlemlerini yönetir
+- `src/sse/*` + `open-sse/*` içindeki paylaşılan SSE/yönlendirme çekirdeği; sağlayıcı yürütme, çeviri, akış, geri dönüş ve kullanım işlemlerini gerçekleştirir
 
 ## Referans Diyagramları
 
@@ -114,51 +114,52 @@ diğerlerine alana özgü kılavuzlardan bağlantı verilmiştir.
 - Yerel süreç dışındaki sağlayıcı SLA'sı/kontrol düzlemi
 - Harici CLI ikili dosyalarının kendileri (Claude CLI, Codex CLI vb.)
 
-## Kontrol Paneli Yüzeyi (Güncel)
+## Dashboard Yüzeyi (Mevcut)
 
 `src/app/(dashboard)/dashboard/` altındaki ana sayfalar:
 
-- `/dashboard` — hızlı başlangıç + sağlayıcı genel bakışı
-- `/dashboard/endpoint` — endpoint proxy + MCP + A2A + API endpoint sekmeleri
+- `/dashboard` — hızlı başlangıç + sağlayıcıya genel bakış
+- `/dashboard/endpoint` — endpoint proxy'si + MCP + A2A + API endpoint sekmeleri
 - `/dashboard/providers` — sağlayıcı bağlantıları ve kimlik bilgileri
-- `/dashboard/combos` — kombo stratejileri, şablonlar, adım tabanlı oluşturucu, model yönlendirme kuralları, manuel kalıcı sıralama
+- `/dashboard/combos` — combo stratejileri, şablonlar, adım tabanlı oluşturucu, model yönlendirme kuralları, kalıcı manuel sıralama
 - `/dashboard/auto-combo` — Auto Combo Engine: puanlama ağırlıkları, mod paketleri, sanal fabrika ön ayarları, telemetri
 - `/dashboard/costs` — maliyet toplama ve fiyatlandırma görünürlüğü
-- `/dashboard/analytics` — kullanım analitiği, değerlendirmeler, kombo hedef sağlığı
+- `/dashboard/analytics` — kullanım analitiği, değerlendirmeler, combo hedeflerinin durumu
 - `/dashboard/limits` — kota/hız kontrolleri
-- `/dashboard/cli-tools` — CLI başlangıcı, çalışma zamanı algılama, yapılandırma üretimi
+- `/dashboard/cli-tools` — CLI ilk kurulumu, çalışma zamanı algılama, yapılandırma oluşturma
 - `/dashboard/agents` — algılanan ACP ajanları + özel ajan kaydı
 - `/dashboard/cloud-agents` — bulutta barındırılan ajan görevleri (Codex Cloud, Devin, Jules) ve görev yaşam döngüsü
-- `/dashboard/skills` — A2A yetenek kayıt defteri, sanal alan (sandbox) yürütmesi, yerleşik yetenek kataloğu
-- `/dashboard/memory` — kalıcı konuşma belleği inceleme ve geri getirme
+- `/dashboard/skills` — A2A yetenek kayıt defteri, sandbox yürütme, yerleşik yetenek kataloğu
+- `/dashboard/memory` — kalıcı konuşma belleğini inceleme ve erişim
 - `/dashboard/webhooks` — giden webhook abonelikleri, gizli anahtar rotasyonu, yeniden deneme istatistikleri
-- `/dashboard/batch` — toplu iş gönderimi ve ilerleme
-- `/dashboard/cache` — read-through ve reasoning önbellek istatistikleri, tahliye kontrolleri
-- `/dashboard/playground` — yapılandırılmış herhangi bir kombo/modele karşı etkileşimli sohbet oyun alanı
-- `/dashboard/changelog` — uygulama içi değişiklik günlüğü görüntüleyici (`CHANGELOG.md` dosyasını işler)
-- `/dashboard/system` — çalışma zamanı tanılamaları, sürüm bilgisi, ortam doğrulama yüzeyi
+- `/dashboard/batch` — toplu iş gönderimi ve ilerleme durumu
+- `/dashboard/cache` — salt okunur ve akıl yürütme önbelleği istatistikleri, çıkarma kontrolleri
+- `/dashboard/playground` — yapılandırılmış herhangi bir combo/model ile etkileşimli sohbet deneme alanı
+- `/dashboard/changelog` — uygulama içi değişiklik günlüğü görüntüleyicisi (`CHANGELOG.md` dosyasını işler)
+- `/dashboard/system` — çalışma zamanı tanılamaları, sürüm bilgileri, ortam doğrulama yüzeyi
 - `/dashboard/onboarding` — yeni kurulumlar için ilk çalıştırma kurulum sihirbazı
-- `/dashboard/media` — görüntü/video/müzik oyun alanı
+- `/dashboard/media` — görsel/video/müzik deneme alanı
 - `/dashboard/search-tools` — arama sağlayıcısı testi ve geçmişi
 - `/dashboard/health` — çalışma süresi, devre kesiciler, hız sınırları, kota izlemeli oturumlar
 - `/dashboard/logs` — istek/proxy/denetim/konsol günlükleri
-- `/dashboard/settings` — sistem ayarları sekmeleri (genel, yönlendirme, kombo varsayılanları vb.)
+- `/dashboard/settings` — sistem ayarları sekmeleri (genel, yönlendirme, combo varsayılanları vb.)
 - `/dashboard/context/caveman` — Caveman sıkıştırma kuralları, dil paketleri, önizleme ve çıktı modu
 - `/dashboard/context/rtk` — RTK komut çıktısı filtreleri, önizleme ve çalışma zamanı güvenlik ayarları
-- `/dashboard/context/combos` — yönlendirme kombolarına atanmış adlandırılmış sıkıştırma hatları
-- `/dashboard/translator` — çevirmen incelemesi ve istek formatı dönüştürme önizlemesi
-- `/dashboard/audit` — sayfalama ve yapılandırılmış meta verilerle uyumluluk denetim günlüğü tarayıcısı
-- `/dashboard/usage` — `usage_history` ile bağlantılı istek bazında kullanım tarayıcısı
-- `/dashboard/compression` — sıkıştırma analitiği, istatistikler ve hat ataması
+- `/dashboard/context/combos` — yönlendirme combo'larına atanan adlandırılmış sıkıştırma işlem hatları
+- `/dashboard/translator` — çevirmen incelemesi ve istek biçimi dönüştürme önizlemesi
+- `/dashboard/audit` — sayfalama ve yapılandırılmış meta veriler içeren uyumluluk denetim günlüğü tarayıcısı
+- `/dashboard/usage` — `usage_history` ile ilişkilendirilmiş istek başına kullanım tarayıcısı
+- `/dashboard/compression` — sıkıştırma analitiği, istatistikleri ve işlem hattı ataması
 - `/dashboard/api-manager` — API anahtarı yaşam döngüsü ve model izinleri
 
-UI katmanı: her sayfa tek bir kabuk içinde işlenir — `src/app/(dashboard)/layout.tsx` →
-`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (kit'in
-`SidebarProvider`/`SidebarInset` bileşenleri, OmniRoute'un `Sidebar.tsx` ve `Header.tsx` dosyaları). Sayfalar
-yapı taşlarını `@/shared/components` altından (`packages/ui-kit` içindeki tedarik edilmiş Keak CI UI Kit
-üzerindeki adaptörler) veya kit bileşeni alt yollarından (`@omniroute/ui-kit/table`, `…/page-header`) içe aktarır ve
-ikonları `<Icon>` aracılığıyla kullanır (`ICON_MAP` → Lucide). Tema (varsayılan olarak `system`, açık/koyu) ve
-token'lar, `src/app/globals.css` içindeki köprü aracılığıyla kit'ten gelir. Ayrıntılar: `docs/architecture/DESIGN_SYSTEM.md`.
+Kullanıcı arayüzü katmanı: her sayfa tek bir kabuk içinde işlenir — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (kitin
+`SidebarProvider`/`SidebarInset` bileşenleri, OmniRoute'un `Sidebar.tsx` ve `Header.tsx` bileşenleri). Sayfalar,
+yapı taşlarını `@/shared/components` üzerinden (`packages/ui-kit` içindeki paketlenmiş Keak CI UI Kit
+üzerindeki adaptörler) veya kit bileşeni alt yollarından (`@omniroute/ui-kit/table`, `…/page-header`) ve
+simgeleri `<Icon>` üzerinden (`ICON_MAP` → Lucide) içe aktarır. Tema (varsayılan olarak `system`, açık/koyu)
+ve belirteçler, `src/app/globals.css` içindeki köprü aracılığıyla kitten gelir. Ayrıntılar:
+`docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Üst Düzey Sistem Bağlamı
 

@@ -8,79 +8,79 @@
 
 _Son yenilənmə: 2026-06-28_
 
-## İcra Xülasəsi
+## İcra xülasəsi
 
-OmniRoute, Next.js üzərində qurulmuş lokal AI marşrutlaşdırma şlüzü və idarəetmə panelidir.
-O, vahid OpenAI-uyğun son nöqtə (`/v1/*`) təqdim edir və trafiki tərcümə, fallback, token yenilənməsi və istifadə izlənməsi ilə bir neçə yuxarı axın provayderi arasında yönləndirir.
+OmniRoute Next.js üzərində qurulmuş lokal süni intellekt marşrutlaşdırma şlüzü və idarəetmə panelidir.
+O, vahid OpenAI-uyğun son nöqtə (`/v1/*`) təqdim edir və trafiki format çevirməsi, alternativə keçid, token yenilənməsi və istifadə izlənməsi ilə bir neçə yuxarı səviyyəli provayder arasında marşrutlaşdırır.
 
 Əsas imkanlar:
 
-- CLI/alətlər üçün OpenAI-uyğun API səthi (375 provayder, 156 icraçı modulu)
-- Provayder formatları arasında sorğu/cavab tərcüməsi
-- Model kombinasiyası fallback-i (çoxmodelli ardıcıllıq)
-- `compositeTiers` ilə icra vaxtı sıralamasına malik strukturlaşdırılmış kombo addımları (`provider + model + connection`)
-- Hesab səviyyəli fallback (provayder başına çoxlu hesab)
-- Əsas söhbət yolunda kvota ilkin yoxlanışı və kvotaya həssas P2C hesab seçimi
-- OAuth + API açarı provayder bağlantılarının idarə edilməsi (27 OAuth provayder modulu)
+- CLI/alətlər üçün OpenAI-uyğun API səthi (375 provayder, 156 icraçı modul)
+- Provayder formatları arasında sorğu/cavab çevirməsi
+- Model kombinasiyası üzrə alternativə keçid (çoxmodelli ardıcıllıq)
+- `compositeTiers` əsasında icra zamanı sıralanan strukturlaşdırılmış kombinasiya addımları (`provider + model + connection`)
+- Hesab səviyyəsində alternativə keçid (hər provayder üçün bir neçə hesab)
+- Əsas çat axınında kvotanın əvvəlcədən yoxlanılması və kvotanı nəzərə alan P2C hesab seçimi
+- OAuth + API açarı ilə provayder bağlantılarının idarə edilməsi (27 OAuth provayder modulu)
 - `/v1/embeddings` vasitəsilə embedding generasiyası (18 provayder)
 - `/v1/images/generations` vasitəsilə şəkil generasiyası (10+ provayder, 20+ model)
 - `/v1/audio/transcriptions` vasitəsilə audio transkripsiyası (18 provayder)
-- `/v1/audio/speech` vasitəsilə mətn-səs çevrilməsi (24 daxili provayder)
+- `/v1/audio/speech` vasitəsilə mətndən nitqə çevirmə (24 daxili provayder)
 - `/v1/videos/generations` vasitəsilə video generasiyası (ComfyUI + SD WebUI)
 - `/v1/music/generations` vasitəsilə musiqi generasiyası (ComfyUI)
-- `/v1/search` vasitəsilə veb axtarış (20 provayder)
+- `/v1/search` vasitəsilə veb axtarışı (20 provayder)
 - `/v1/moderations` vasitəsilə moderasiya
 - `/v1/rerank` vasitəsilə yenidən sıralama
-- Mühakimə modelləri üçün think teqinin təhlili (`<think>...</think>`)
+- Məntiq yürütmə modelləri üçün Think teqlərinin (`<think>...</think>`) təhlili
 - Ciddi OpenAI SDK uyğunluğu üçün cavabların təmizlənməsi
-- Provayderlərarası uyğunluq üçün rolların normallaşdırılması (developer→system, system→user)
+- Provayderlərarası uyğunluq üçün rol normallaşdırması (developer→system, system→user)
 - Strukturlaşdırılmış çıxışın çevrilməsi (json_schema → Gemini responseSchema)
-- Provayderlər, açarlar, ləqəblər, kombolar, parametrlər və qiymətlər üçün lokal saxlanma (122 DB modulu)
-- İstifadə/xərc izlənməsi və sorğu jurnallaşdırılması
-- Çoxcihazlı/vəziyyət sinxronizasiyası üçün istəyə bağlı bulud sinxronizasiyası
-- API girişinə nəzarət üçün IP icazə/blok siyahıları
-- Düşüncə büdcəsinin idarə edilməsi (passthrough/auto/custom/adaptive)
-- Qlobal sistem promptunun injeksiyası
-- Sessiya izlənməsi və barmaq izi götürülməsi
-- Provayderə xas profillərlə hesab başına təkmilləşdirilmiş sorğu tezliyinin məhdudlaşdırılması
-- Provayder dayanıqlığı üçün circuit breaker nümunəsi
-- Mutex kilidləməsi ilə anti-thundering herd qorunması
-- İmza əsaslı sorğu deduplikasiya keşi
-- Domen qatı: xərc qaydaları, fallback siyasəti, bloklama siyasəti
-- Context Relay: hesab rotasiyasının davamlılığı üçün sessiya ötürmə xülasələri
-- Domen vəziyyətinin saxlanması (fallback-lər, büdcələr, bloklamalar və circuit breaker-lər üçün SQLite write-through keşi)
-- Mərkəzləşdirilmiş sorğu qiymətləndirilməsi üçün siyasət mühərriki (bloklama → büdcə → fallback)
+- Provayderlər, açarlar, aliaslar, kombinasiyalar, parametrlər və qiymətləndirmə üçün lokal davamlı saxlanma (122 DB modulu)
+- İstifadə/xərc izlənməsi və sorğuların jurnallaşdırılması
+- Çoxsaylı cihazlar/vəziyyət sinxronizasiyası üçün istəyə bağlı bulud sinxronizasiyası
+- API girişinə nəzarət üçün IP icazə siyahısı/bloklama siyahısı
+- Düşünmə büdcəsinin idarə edilməsi (dəyişdirilmədən ötürmə/avtomatik/fərdi/adaptiv)
+- Qlobal sistem promptunun əlavə edilməsi
+- Sessiyaların izlənməsi və barmaq izinin yaradılması
+- Provayderə xas profillərlə hər hesab üzrə təkmilləşdirilmiş sürət məhdudlaşdırması
+- Provayder dayanıqlılığı üçün dövrə kəsici şablonu
+- Muteks kilidləməsi ilə kütləvi paralel sorğulardan qorunma
+- İmza əsaslı sorğu deduplikasiyası keşi
+- Domen qatı: xərc qaydaları, alternativə keçid siyasəti, kilidləmə siyasəti
+- Context Relay: hesab rotasiyası zamanı davamlılıq üçün sessiya təhvil xülasələri
+- Domen vəziyyətinin davamlı saxlanması (alternativə keçidlər, büdcələr, kilidləmələr və dövrə kəsicilər üçün SQLite birbaşa yazmalı keş)
+- Mərkəzləşdirilmiş sorğu qiymətləndirməsi üçün siyasət mühərriki (kilidləmə → büdcə → alternativə keçid)
 - p50/p95/p99 gecikmə aqreqasiyası ilə sorğu telemetriyası
-- `combo_execution_key` / `combo_step_id` vasitəsilə kombo hədəfi telemetriyası və tarixi kombo hədəfi sağlamlığı
-- Ucdan-uca izləmə üçün korrelyasiya ID-si (X-Request-Id)
-- API açarı başına imtina seçimi ilə uyğunluq auditinin jurnallaşdırılması
-- LLM keyfiyyət təminatı üçün eval çərçivəsi
-- Real vaxt rejimində provayder circuit breaker statusu ilə sağlamlıq paneli
-- 3 transport rejimi ilə MCP Server (110 alət) (stdio/SSE/Streamable HTTP)
-- Bacarıqlar və tapşırıq həyat dövrü ilə A2A Server (JSON-RPC 2.0 + SSE)
-- Yaddaş sistemi (çıxarılma, injeksiya, əldə etmə, xülasələmə)
+- `combo_execution_key` / `combo_step_id` vasitəsilə kombinasiya hədəfi telemetriyası və kombinasiya hədəflərinin tarixi sağlamlıq vəziyyəti
+- Başdan sona izləmə üçün korrelyasiya ID-si (X-Request-Id)
+- Hər API açarı üzrə imtina imkanı ilə uyğunluq auditi jurnalı
+- LLM keyfiyyət təminatı üçün qiymətləndirmə çərçivəsi
+- Provayderlərin dövrə kəsici vəziyyətini real vaxtda göstərən sağlamlıq paneli
+- 3 ötürmə üsuluna (stdio/SSE/Streamable HTTP) malik MCP Server (110 alət)
+- Bacarıqlar və tapşırıq həyat dövrünə malik A2A Server (JSON-RPC 2.0 + SSE)
+- Yaddaş sistemi (çıxarma, əlavə etmə, əldə etmə, xülasələşdirmə)
 - Bacarıqlar sistemi (reyestr, icraçı, sandbox, daxili bacarıqlar)
 - Sertifikat idarəetməsi və DNS emalı ilə MITM proksisi
-- Prompt injeksiyası qoruyucu middleware-i
-- Caveman, RTK, qatlı boru xətləri, sıxılma komboları, dil paketləri və analitika ilə prompt sıxılma boru xətti
+- Prompt inyeksiyasından qoruyan middleware
+- Caveman, RTK, yığılmış konveyerlər, sıxılma kombinasiyaları, dil paketləri və analitika ilə prompt sıxılma konveyeri
 - ACP (Agent Communication Protocol) reyestri
-- Modulyar OAuth provayderləri (`src/lib/oauth/providers/` altında 22 fərdi modul)
+- Modul OAuth provayderləri (`src/lib/oauth/providers/` daxilində 22 fərdi modul)
 - Silmə/tam silmə skriptləri
-- OAuth mühitini təmir etmə əməliyyatı
-- OpenAI-uyğun WS müştəriləri üçün WebSocket körpüsü (`/v1/ws`)
-- Sinxronizasiya tokeninin idarə edilməsi (verilmə/ləğv, ETag versiyalı konfiqurasiya paketinin yüklənməsi)
-- GLM Thinking (`glmt`) birinci dərəcəli provayder hazır parametri
-- Hibrid token sayımı (qiymətləndirmə fallback-i ilə provayder tərəfində `/messages/count_tokens`)
-- Model ləqəblərinin avtomatik toxumlanması (başlanğıcda 30+ proksilərarası dialekt normallaşdırılması)
-- SSRF qoruyucusu, özəl URL bloklaması və konfiqurasiya edilə bilən təkrar cəhd ilə təhlükəsiz xarici fetch
-- Konfiqurasiya edilə bilən `requestRetry` və `maxRetryIntervalSec` ilə cooldown-a həssas söhbət təkrar cəhdləri
-- Başlanğıcda Zod ilə icra mühitinin doğrulanması
-- Səhifələmə, provayder CRUD hadisələri və SSRF ilə bloklanmış doğrulama jurnallaşdırılması ilə uyğunluq auditi v2
+- OAuth mühitinin bərpası əməliyyatı
+- OpenAI-uyğun WS klientləri üçün WebSocket körpüsü (`/v1/ws`)
+- Sinxronizasiya tokenlərinin idarə edilməsi (buraxma/ləğv etmə, ETag versiyalı konfiqurasiya paketinin endirilməsi)
+- Birinci dərəcəli provayder ön ayarı kimi GLM Thinking (`glmt`)
+- Hibrid token sayımı (qiymətləndirməyə alternativ keçidlə provayder tərəfində `/messages/count_tokens`)
+- Model aliaslarının avtomatik ilkin yaradılması (işə salınma zamanı 30+ proksilərarası dialekt normallaşdırması)
+- SSRF qoruması, şəxsi URL-lərin bloklanması və konfiqurasiya edilə bilən təkrar cəhd ilə təhlükəsiz xarici fetch
+- Konfiqurasiya edilə bilən `requestRetry` və `maxRetryIntervalSec` ilə gözləmə müddətini nəzərə alan çat təkrar cəhdləri
+- İşə salınma zamanı Zod ilə icra mühitinin yoxlanılması
+- Səhifələmə, provayder CRUD hadisələri və SSRF tərəfindən bloklanmış yoxlamaların jurnallaşdırılması ilə uyğunluq auditi v2
 
-Əsas icra vaxtı modeli:
+Əsas icra modeli:
 
 - `src/app/api/*` altındakı Next.js tətbiq marşrutları həm idarəetmə paneli API-lərini, həm də uyğunluq API-lərini həyata keçirir
-- `src/sse/*` + `open-sse/*` daxilindəki paylaşılan SSE/marşrutlaşdırma nüvəsi provayder icrasını, tərcüməni, axınlaşdırmanı, fallback-i və istifadəni idarə edir
+- `src/sse/*` + `open-sse/*` daxilindəki ortaq SSE/marşrutlaşdırma nüvəsi provayder icrasını, çevirməni, axın ötürməsini, alternativə keçidi və istifadəni idarə edir
 
 ## İstinad Diaqramları
 
@@ -114,52 +114,51 @@ qalanlarına müvafiq sahə üzrə təlimatlardan keçid verilir.
 - Lokal prosesdən kənar provayder SLA-sı/idarəetmə müstəvisi
 - Xarici CLI binar fayllarının özləri (Claude CLI, Codex CLI və s.)
 
-## Dashboard Səthi (Cari)
+## İdarəetmə Paneli İnterfeysi (Cari)
 
-`src/app/(dashboard)/dashboard/` altındakı əsas səhifələr:
+`src/app/(dashboard)/dashboard/` altında yerləşən əsas səhifələr:
 
 - `/dashboard` — sürətli başlanğıc + provayder icmalı
-- `/dashboard/endpoint` — endpoint proksi + MCP + A2A + API endpoint tabları
+- `/dashboard/endpoint` — son nöqtə proksisi + MCP + A2A + API son nöqtəsi vərəqləri
 - `/dashboard/providers` — provayder bağlantıları və giriş məlumatları
-- `/dashboard/combos` — kombo strategiyaları, şablonlar, addımlar üzərində qurulan konstruktor, model marşrutlaşdırma qaydaları, əl ilə yadda saxlanılan sıralama
-- `/dashboard/auto-combo` — Auto Combo Engine: qiymətləndirmə çəkiləri, rejim paketləri, virtual zavod presetləri, telemetriya
-- `/dashboard/costs` — xərclərin aqreqasiyası və qiymətlərin görünürlüyü
-- `/dashboard/analytics` — istifadə analitikası, qiymətləndirmələr, kombo hədəflərinin sağlamlığı
-- `/dashboard/limits` — kvota/sürət nəzarətləri
-- `/dashboard/cli-tools` — CLI onboarding, runtime aşkarlanması, konfiqurasiya generasiyası
-- `/dashboard/agents` — aşkarlanmış ACP agentləri + xüsusi agent qeydiyyatı
-- `/dashboard/cloud-agents` — buludda host edilmiş agent tapşırıqları (Codex Cloud, Devin, Jules) və tapşırıq həyat dövrü
-- `/dashboard/skills` — A2A bacarıq reyestri, sandbox icrası, daxili bacarıq kataloqu
-- `/dashboard/memory` — davamlı söhbət yaddaşının yoxlanması və əldə edilməsi
-- `/dashboard/webhooks` — gedən webhook abunəlikləri, secret rotasiyası, təkrar cəhd statistikası
-- `/dashboard/batch` — batch tapşırıqlarının göndərilməsi və irəliləyiş
-- `/dashboard/cache` — read-through və reasoning keşi statistikası, keşdən çıxarılma nəzarətləri
-- `/dashboard/playground` — istənilən konfiqurasiya olunmuş kombo/model ilə interaktiv söhbət meydançası
-- `/dashboard/changelog` — tətbiqdaxili changelog görüntüləyicisi (`CHANGELOG.md` faylını render edir)
-- `/dashboard/system` — runtime diaqnostikası, versiya məlumatı, mühit yoxlama səthi
-- `/dashboard/onboarding` — yeni quraşdırmalar üçün ilk işə salma quraşdırma sehrbazı
-- `/dashboard/media` — şəkil/video/musiqi meydançası
-- `/dashboard/search-tools` — axtarış provayderinin sınanması və tarixçəsi
-- `/dashboard/health` — uptime, circuit breaker-lər, sürət limitləri, kvota ilə izlənən sessiyalar
-- `/dashboard/logs` — sorğu/proksi/audit/konsol loqları
-- `/dashboard/settings` — sistem parametrləri tabları (ümumi, marşrutlaşdırma, standart kombo dəyərləri və s.)
-- `/dashboard/context/caveman` — Caveman sıxılma qaydaları, dil paketləri, önbaxış və çıxış rejimi
-- `/dashboard/context/rtk` — RTK əmr-çıxışı filtrləri, önbaxış və runtime təhlükəsizlik parametrləri
-- `/dashboard/context/combos` — marşrutlaşdırma kombolarına təyin olunmuş adlandırılmış sıxılma pipeline-ları
-- `/dashboard/translator` — tərcüməçi yoxlanışı və sorğu formatı çevrilməsinin önbaxışı
-- `/dashboard/audit` — səhifələmə və strukturlaşdırılmış metaməlumatlar ilə uyğunluq auditi loq brauzeri
-- `/dashboard/usage` — `usage_history` cədvəlinə bağlı sorğu üzrə istifadə brauzeri
-- `/dashboard/compression` — sıxılma analitikası, statistikası və pipeline təyinatı
+- `/dashboard/combos` — kombinasiya strategiyaları, şablonlar, addım əsaslı konstruktor, model marşrutlaşdırma qaydaları, əl ilə saxlanılan sıralama
+- `/dashboard/auto-combo` — Auto Combo Engine: qiymətləndirmə çəkiləri, rejim paketləri, virtual fabrik ilkin ayarları, telemetriya
+- `/dashboard/costs` — xərclərin aqreqasiyası və qiymət görünüşü
+- `/dashboard/analytics` — istifadə analitikası, qiymətləndirmələr, kombinasiya hədəflərinin vəziyyəti
+- `/dashboard/limits` — kvota/tezlik idarəetmələri
+- `/dashboard/cli-tools` — CLI ilkin quraşdırması, icra mühitinin aşkarlanması, konfiqurasiya generasiyası
+- `/dashboard/agents` — aşkarlanmış ACP agentləri + fərdi agent qeydiyyatı
+- `/dashboard/cloud-agents` — buludda yerləşdirilən agent tapşırıqları (Codex Cloud, Devin, Jules) və tapşırığın həyat dövrü
+- `/dashboard/skills` — A2A bacarıq reyestri, sandbox icrası, daxili bacarıqlar kataloqu
+- `/dashboard/memory` — davamlı danışıq yaddaşının yoxlanılması və məlumatların əldə edilməsi
+- `/dashboard/webhooks` — gedən webhook abunəlikləri, məxfi açarların rotasiyası, təkrar cəhd statistikası
+- `/dashboard/batch` — paket tapşırıqlarının göndərilməsi və gedişatı
+- `/dashboard/cache` — oxuma zamanı keşləmə və mühakimə keşinin statistikası, təmizləmə idarəetmələri
+- `/dashboard/playground` — konfiqurasiya edilmiş istənilən kombinasiya/model üçün interaktiv söhbət sınaq mühiti
+- `/dashboard/changelog` — tətbiqdaxili dəyişiklik jurnalı görüntüləyicisi (`CHANGELOG.md` faylını render edir)
+- `/dashboard/system` — icra mühiti diaqnostikası, versiya məlumatları, mühitin doğrulanması interfeysi
+- `/dashboard/onboarding` — yeni quraşdırmalar üçün ilk işəsalma quraşdırma köməkçisi
+- `/dashboard/media` — şəkil/video/musiqi sınaq mühiti
+- `/dashboard/search-tools` — axtarış provayderinin sınaqdan keçirilməsi və tarixçə
+- `/dashboard/health` — fasiləsiz işləmə müddəti, dövrə açarları, tezlik limitləri, kvotası izlənən sessiyalar
+- `/dashboard/logs` — sorğu/proksi/audit/konsol jurnalları
+- `/dashboard/settings` — sistem parametrləri vərəqləri (ümumi, marşrutlaşdırma, standart kombinasiya ayarları və s.)
+- `/dashboard/context/caveman` — Caveman sıxılma qaydaları, dil paketləri, önizləmə və çıxış rejimi
+- `/dashboard/context/rtk` — RTK əmr çıxışı filtrləri, önizləmə və icra mühitinin təhlükəsizlik parametrləri
+- `/dashboard/context/combos` — marşrutlaşdırma kombinasiyalarına təyin edilmiş adlandırılmış sıxılma konveyerləri
+- `/dashboard/translator` — tərcüməçinin yoxlanılması və sorğu formatının çevrilməsi üçün önizləmə
+- `/dashboard/audit` — səhifələmə və strukturlaşdırılmış metadata ilə uyğunluq auditi jurnalı brauzeri
+- `/dashboard/usage` — `usage_history` ilə əlaqəli hər sorğu üzrə istifadə brauzeri
+- `/dashboard/compression` — sıxılma analitikası, statistika və konveyer təyinatı
 - `/dashboard/api-manager` — API açarının həyat dövrü və model icazələri
 
-UI qatı: hər səhifə vahid bir shell daxilində render olunur — `src/app/(dashboard)/layout.tsx` →
-`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (kitin
-`SidebarProvider`/`SidebarInset`, OmniRoute-un `Sidebar.tsx` və `Header.tsx` komponentləri). Səhifələr öz
-qurucu bloklarını `@/shared/components`-dən (`packages/ui-kit`-də yerləşən, daxil edilmiş (vendored)
-Keak CI UI Kit üzərində qurulmuş adapterlər) və ya kit komponent alt yollarından
-(`@omniroute/ui-kit/table`, `…/page-header`) idxal edir, ikonları isə `<Icon>` vasitəsilə
-(`ICON_MAP` → Lucide). Mövzu (defolt olaraq `system`, işıqlı/tünd) və tokenlər
-`src/app/globals.css`-dəki körpü vasitəsilə kitdən gəlir. Təfərrüatlar: `docs/architecture/DESIGN_SYSTEM.md`.
+UI qatı: hər səhifə vahid bir örtük daxilində render edilir — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (dəstin
+`SidebarProvider`/`SidebarInset` komponentləri, OmniRoute-un `Sidebar.tsx` və `Header.tsx` komponentləri). Səhifələr öz
+qurucu bloklarını `@/shared/components` daxilindən (`packages/ui-kit` daxilindəki təchiz edilmiş Keak CI UI Kit üzərində
+adapterlər) və ya dəst komponentlərinin alt yollarından (`@omniroute/ui-kit/table`, `…/page-header`) idxal edir,
+ikonları isə `<Icon>` (`ICON_MAP` → Lucide) vasitəsilə istifadə edir. Mövzu (standart olaraq `system`, açıq/tünd) və tokenlər
+dəstdən `src/app/globals.css` daxilindəki körpü vasitəsilə gəlir. Təfərrüatlar: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Yüksək Səviyyəli Sistem Konteksti
 

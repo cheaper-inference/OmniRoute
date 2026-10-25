@@ -19,101 +19,101 @@ ba tare da ƙirƙiro sabbin modules ba.
 
 ---
 
-## 1. Tsarin Fasaha
+## 1. Tarin Fasahohi
 
-| Bangare           | Zabi                                                                                                                           |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Tsarin yanar gizo | **Next.js 16** (App Router, fitarwa mai zaman kanta, babu middleware na gaba ɗaya)                                             |
-| Harshe            | **TypeScript 6.0+** — target `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                          |
-| Lokacin gudu      | **Node.js** `>=22.22.2 <23` ko `>=24.0.0 <27` (ana tilasta shi ta `engines` + `SUPPORTED_NODE_RANGE`)                          |
-| Tashar bayanai    | **SQLite** ta `better-sqlite3` (singleton, WAL journaling)                                                                     |
-| Kwamfutar tebur   | **Electron 41** + `electron-builder` 26.10 (workspace na daban a `electron/`)                                                  |
-| Gwaje-gwaje       | **Node native test runner** (naúrar ɗaya/hade-hade), **Vitest** (MCP, autoCombo, cache), **Playwright** (e2e + protocols-e2e)  |
-| Gina              | Next.js standalone ta `scripts/build/build-next-isolated.mjs`                                                                  |
-| Lint/tsarawa      | ESLint flat config + Prettier (`lint-staged` ta Husky pre-commit)                                                              |
-| Tsarin module     | ESM a duk wurin (`"type": "module"`)                                                                                           |
-| Fuskar dashboard  | **Tailwind CSS 4** + **Keak CI UI Kit** da aka haɗa a cikin repo (`packages/ui-kit`), gumakan Lucide — duba `DESIGN_SYSTEM.md` |
-| Yankunan aiki     | npm workspaces — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                        |
+| Fanni             | Zaɓi                                                                                                                                         |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tsarin yanar gizo | **Next.js 16** (App Router, fitowar standalone, babu middleware na gama-gari)                                                                |
+| Harshe            | **TypeScript 6.0+** — manufa `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                                        |
+| Muhallin aiki     | **Node.js** `>=22.22.2 <23` ko `>=24.0.0 <27` (ana tilasta shi ta hanyar `engines` + `SUPPORTED_NODE_RANGE`)                                 |
+| Ma’ajiyar bayanai | **SQLite** ta hanyar `better-sqlite3` (singleton, rubutun mujallar WAL)                                                                      |
+| Manhajar tebur    | **Electron 41** + `electron-builder` 26.10 (workspace na daban a `electron/`)                                                                |
+| Gwaje-gwaje       | **Mai gudanar da gwaje-gwaje na asali na Node** (unit/integration), **Vitest** (MCP, autoCombo, cache), **Playwright** (e2e + protocols-e2e) |
+| Gina              | Next.js standalone ta hanyar `scripts/build/build-next-isolated.mjs`                                                                         |
+| Lint/tsarawa      | ESLint flat config + Prettier (`lint-staged` ta hanyar Husky pre-commit)                                                                     |
+| Tsarin module     | ESM a ko’ina (`"type": "module"`)                                                                                                            |
+| UI na dashboard   | **Tailwind CSS 4** + **Keak CI UI Kit** da aka haɗa cikin manhajar (`packages/ui-kit`), alamomin Lucide — duba `DESIGN_SYSTEM.md`            |
+| Workspaces        | npm workspaces — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                                      |
 
-Gajerun hanyoyi (`tsconfig.json`):
+Laƙabban hanyoyi (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
 - `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
-Tashar HTTP ta asali: **`20128`** (API da dashboard suna raba wannan process ɗaya). Kundin
-bayanai shine canjin muhalli `DATA_DIR`, wanda ke da asali `~/.omniroute/`.
+Tsohuwar tashar HTTP: **`20128`** (API da dashboard suna amfani da tsari guda). Kundin
+bayanai shi ne env var na `DATA_DIR`, wanda tsohuwar ƙimarsa ita ce `~/.omniroute/`.
 
 ---
 
-## 2. Tsarin Repository
+## 2. Tsarin Ma'ajiyar Lamba
 
 ```
 OmniRoute/
-├── src/                  Aikace-aikacen Next.js (App Router, libs, domain, server, shared)
-├── open-sse/             Wurin aikin injin streaming (@omniroute/open-sse)
-├── packages/             Wuraren aiki: ui-kit (Keak CI UI Kit da aka haɗa ciki), browser-pool
-├── electron/             Rufin Desktop (Electron 41 main + preload)
-├── bin/                  Mabuɗan shigar CLI (omniroute, reset-password)
-├── tests/                Gwaje-gwajen unit, integration, e2e, protocols-e2e, translator, security, da fixtures
-├── scripts/              Scripts na taimako don gini, daidaitawa, bincike, ƙaura, da runtime
-├── docs/                 Takaddun bayani na jama'a (wannan directory)
-├── public/               Kadarori na tsaye, PWA manifest, service worker
-├── config/               Samfuran saitin runtime
-├── images/               Kadarun talla da hotunan allo
-├── _ideia/, _references/, _mono_repo/, _tasks/   Rubuce-rubuce / tsare-tsare na ciki (ba a isar da su ba)
-├── CLAUDE.md             Dokokin Repo don Claude Code
-├── AGENTS.md             Ƙarin zurfin bayanin gine-gine don agents
-├── package.json          v3.8.51, tushen workspace
-└── tsconfig.json         Gajerun sunayen hanyoyi + mahimman zaɓuɓɓukan compiler
+├── src/                  Manhajar Next.js (App Router, dakunan karatu, yanki, sabar, abubuwan gama-gari)
+├── open-sse/             Wurin aikin injin watsa bayanai (@omniroute/open-sse)
+├── packages/             Wuraren aiki: ui-kit (Keak CI UI Kit da aka haɗa), browser-pool
+├── electron/             Marufin manhajar tebur (Electron 41 main + preload)
+├── bin/                  Wuraren shigar CLI (omniroute, reset-password)
+├── tests/                Gwaje-gwajen ɓangare, haɗaka, e2e, protocols-e2e, fassara, tsaro, da bayanan gwaji
+├── scripts/              Rubutun taimako na ginawa, aiki tare, dubawa, ƙaura, da lokacin gudana
+├── docs/                 Takardun bayani na jama'a (wannan kundin adireshi)
+├── public/               Kadarorin tsaye, PWA manifest, service worker
+├── config/               Samfuran saitunan lokacin gudana
+├── images/               Kadarorin talla/hotunan allo
+├── _ideia/, _references/, _mono_repo/, _tasks/   Rubuce-rubucen wucin gadi / tsare-tsare na ciki (ba a rarraba su)
+├── CLAUDE.md             Dokokin ma'ajiyar lamba don Claude Code
+├── AGENTS.md             Cikakken bayani kan tsarin gine-gine don wakilai
+├── package.json          v3.8.51, tushen wurin aiki
+└── tsconfig.json         Laƙaban hanyoyi + muhimman zaɓuɓɓukan compiler
 ```
 
 ---
 
-## 3. `src/` — Aikace-aikacen Next.js
+## 3. `src/` — Manhajar Next.js
 
 ```
 src/
-├── app/                  App Router pages + API routes
-├── lib/                  Core libraries (DB, auth, OAuth, skills, memory, …)
-├── domain/               Pure domain layer (policy, fallback, cost, lockout, …)
-├── server/               Server-only modules (authz, cors, auth)
-├── shared/               Types, constants, validation, contracts, utils (cross-boundary safe)
-├── mitm/                 Man-in-the-middle proxy helpers for CLI integration
-├── models/               Local model metadata / aliasing
-├── sse/                  Legacy SSE handlers that still live under src/ (not open-sse/)
-├── store/                Client-side state stores
-├── middleware/           Route-level middleware utilities (not Next.js global middleware)
-├── scripts/              In-tree scripts importable by app code
-├── types/                Ambient and shared TS types
-├── i18n/                 Locale bundles
-├── instrumentation.ts    Next.js instrumentation hook
+├── app/                  Shafukan App Router + hanyoyin API
+├── lib/                  Manyan ɗakunan karatu (DB, auth, OAuth, skills, memory, …)
+├── domain/               Tsantsar shimfiɗar domain (policy, fallback, cost, lockout, …)
+├── server/               Modules na uwar garke kawai (authz, cors, auth)
+├── shared/               Nau'uka, constants, validation, contracts, utils (amintattu a ƙetaren iyakoki)
+├── mitm/                 Mataimakan proxy na man-in-the-middle don haɗin CLI
+├── models/               Metadata / aliasing na model na gida
+├── sse/                  Tsofaffin handlers na SSE da har yanzu suke ƙarƙashin src/ (ba open-sse/ ba)
+├── store/                Ma'ajiyoyin state na ɓangaren client
+├── middleware/           Kayan aikin middleware na matakin route (ba global middleware na Next.js ba)
+├── scripts/              Scripts da ke cikin tree waɗanda code na app zai iya import
+├── types/                Nau'ukan TS na ambient da na gama-gari
+├── i18n/                 Kundin harsunan locale
+├── instrumentation.ts    Hook na instrumentation na Next.js
 ├── instrumentation-node.ts
-└── proxy.ts              Top-level proxy bootstrap helper
+└── proxy.ts              Mataimakin fara proxy na matakin sama
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router yana bayyana duka UI na dashboard da kuma HTTP API na jama'a/gudanarwa.
-**Babu middleware na gaba ɗaya** — ana yin katangar bisa kowace hanya.
+App Router yana samar da UI na dashboard da kuma HTTP API na jama'a/gudanarwa.
+Babu **global middleware** — ana yin interception a kowane route.
 
-Rassa na matakin sama a ƙarƙashin `src/app/`:
+Segments na matakin sama ƙarƙashin `src/app/`:
 
-| Hanya                                                                         | Manufa                                              |
+| Path                                                                          | Manufa                                              |
 | ----------------------------------------------------------------------------- | --------------------------------------------------- |
-| `api/`                                                                        | Dukkan hanyoyin HTTP API (duba rarrabewa a ƙasa)    |
+| `api/`                                                                        | Duk hanyoyin HTTP API (duba rarrabawar da ke ƙasa)  |
 | `a2a/`                                                                        | Endpoint na A2A JSON-RPC 2.0 (`POST /a2a`)          |
 | `.well-known/agent.json/`                                                     | Takardar gano A2A Agent Card                        |
-| `(dashboard)/`                                                                | UI na dashboard (rukunin hanya, babu prefix na URL) |
+| `(dashboard)/`                                                                | UI na dashboard (rukunin route, babu prefix na URL) |
 | `auth/`, `login/`, `forgot-password/`, `callback/`                            | Hanyoyin tantancewa                                 |
-| `landing/`                                                                    | Shafin talla/landing                                |
-| `docs/`                                                                       | Mai kallon takardun API da aka sanya a ciki         |
-| `status/`, `maintenance/`, `offline/`                                         | Shafukan aiki                                       |
+| `landing/`                                                                    | Shafin talla/shigarwa                               |
+| `docs/`                                                                       | Mai duba takardun API da aka haɗa ciki              |
+| `status/`, `maintenance/`, `offline/`                                         | Shafukan gudanar da aiki                            |
 | `privacy/`, `terms/`                                                          | Shafukan doka                                       |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Shafukan kurakurai na tsaye                         |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Tsayayyun shafukan kuskure                          |
 | `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Iyakokin kuskure/lodawa na framework                |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Shell na tushe                                      |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Babban shell                                        |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — Shafukan UI
 
@@ -121,10 +121,10 @@ Rassa na matakin sama a ƙarƙashin `src/app/`:
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, tare da `page.tsx` na tushe, `HomePageClient.tsx`,
+`translator`, `usage`, `webhooks`, tare da tushen `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx`.
 
-#### 3.1.2 `src/app/api/` — Ƙungiyoyin API na matakin sama
+#### 3.1.2 `src/app/api/` — Rukunin API na matakin sama
 
 ```
 src/app/api/
@@ -177,144 +177,144 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   Embedded service management (9router, cliproxy) — LOCAL_ONLY
+├── services/   Gudanar da services da aka haɗa ciki (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         OpenAI-compatible public API
-├── v1beta/     Gemini-style compat
+├── v1/         API na jama'a mai jituwa da OpenAI
+├── v1beta/     Jituwa irin ta Gemini
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — Gudanar da Ayyukan da aka Sanya a ciki
+#### 3.1.2a `src/app/api/services/` — Gudanar da Services da Aka Haɗa Ciki
 
-Hanyoyin girkawa, farawa, tsayarwa, da kuma sa ido kan 9Router da CLIProxyAPI.
-An rarraba dukkan hanyoyin a matsayin **LOCAL_ONLY** (loopback kawai, doka mai ƙarfi #17)
-saboda suna iya aiwatar da `npm install` da kuma haifar da child processes.
+Routes don girkawa, farawa, tsayarwa, da sa ido kan 9Router da CLIProxyAPI.
+An ware dukkan paths a matsayin **LOCAL_ONLY** (loopback kawai, ƙa'ida mai tsauri #17) saboda suna
+iya kiran `npm install` da ƙaddamar da child processes.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             mataimakin getOrInitSupervisor()
-│   ├── install/route.ts    POST — npm install ta execFile
+│   ├── _lib.ts             mai taimaka wa getOrInitSupervisor()
+│   ├── install/route.ts    POST — npm install ta hanyar execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install sabuwar sigar
-│   ├── rotate-key/route.ts POST — ƙirƙiri sabon API key + sake kunna
-│   ├── status/route.ts     GET  — yanayi kai tsaye + DB + metadata na sigar
-│   └── auto-start/route.ts POST — canza tutar auto_start
+│   ├── update/route.ts     POST — npm install na sabuwar siga
+│   ├── rotate-key/route.ts POST — samar da sabon maɓallin API + sake farawa
+│   ├── status/route.ts     GET  — halin kai-tsaye + na DB + bayanan siga
+│   └── auto-start/route.ts POST — kunna ko kashe alamar auto_start
 ├── cliproxy/
-│   ├── _lib.ts             mataimakin getOrInitSupervisor()
+│   ├── _lib.ts             mai taimaka wa getOrInitSupervisor()
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install sabuwar sigar
-│   ├── status/route.ts     GET  — yanayi kai tsaye + DB + metadata na sigar
-│   └── auto-start/route.ts POST — canza tutar auto_start
+│   ├── update/route.ts     POST — npm install na sabuwar siga
+│   ├── status/route.ts     GET  — halin kai-tsaye + na DB + bayanan siga
+│   └── auto-start/route.ts POST — kunna ko kashe alamar auto_start
 └── [name]/
-    └── logs/route.ts       GET  — SSE log tail (duk ayyukan suna amfani da shi)
+    └── logs/route.ts       GET  — ƙarshen log na SSE (duk ayyuka suna amfani da shi)
 ```
 
-UI na dashboard da ya dace:
+UI na dashboard mai dacewa:
 `src/app/(dashboard)/dashboard/providers/services/` — shafi mai tab biyu (CLIProxyAPI + 9Router).
-Reverse proxy na embedded UI na 9Router:
+Reverse proxy don UI na 9Router da aka saka:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Zurfin bayani: `docs/frameworks/EMBEDDED-SERVICES.md`
+Cikakken bayani: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — API na jama'a mai jituwa da OpenAI
+#### 3.1.3 `src/app/api/v1/` — API na jama'a mai dacewa da OpenAI
 
 ```
 v1/
-├── accounts/[id]/                       binciken asusu
-├── agents/tasks/[id]/, agents/tasks/    endpoints na ayyuka na salon A2A
-├── api/                                 mataimakan API na ciki da aka fallasa a ƙarƙashin v1/api
+├── accounts/[id]/                       nemo asusu
+├── agents/tasks/[id]/, agents/tasks/    wuraren ƙarshen ayyuka masu salon A2A
+├── api/                                 mataimakan API na ciki da aka fallasa ƙarƙashin v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    Chat Completions (babban endpoint)
-├── completions/                         text completions na tsohuwar sigar
-├── embeddings/                          Embeddings
-├── files/[id]/, files/                  Files API
-├── _helpers/                            mataimakan route da aka raba (babu URL na jama'a)
-├── images/{edits, generations}/         ƙirƙirar hoto + gyara
-├── issues/                              endpoints mataimakan triage
-├── management/{proxies}/                routes waɗanda ke cikin iyakar management a cikin v1
-├── messages/{count_tokens}/             jituwa da messages na salon Anthropic
-├── models/                              jerin samfurori (`route.ts`, `catalog.ts`)
-├── moderations/                         Moderation
-├── music/                               ƙirƙirar kiɗa
-├── providers/[provider]/                ayyukan kowane provider
-├── quotas/{check}                       gwajin quota
+├── chat/completions/                    Chat Completions (babban wurin ƙarshe)
+├── completions/                         tsofaffin kammalawar rubutu
+├── embeddings/                          embeddings
+├── files/[id]/, files/                  API na fayiloli
+├── _helpers/                            mataimakan hanya da ake rabawa (babu URL na jama'a)
+├── images/{edits, generations}/         samarwa + gyaran hoto
+├── issues/                              wuraren ƙarshe masu taimakawa tantance matsaloli
+├── management/{proxies}/                hanyoyi masu iyakar gudanarwa a cikin v1
+├── messages/{count_tokens}/             dacewar saƙonni irin na Anthropic
+├── models/                              jerin samfura (`route.ts`, `catalog.ts`)
+├── moderations/                         tace abun ciki
+├── music/                               samar da kiɗa
+├── providers/[provider]/                ayyuka na kowane mai bayarwa
+├── quotas/{check}                       binciken ƙayyadaddun amfani
 ├── registered-keys/                     gudanar da maɓallan da aka yi rajista
-├── rerank/                              Reranking
-├── responses/[...path]/                 OpenAI Responses API (catch-all)
+├── rerank/                              sake jera matsayi
+├── responses/[...path]/                 OpenAI Responses API (mai kama duk)
 ├── search/                              binciken yanar gizo
-├── videos/                              ƙirƙirar bidiyo
+├── videos/                              samar da bidiyo
 ├── ws/                                  gadar WebSocket
-└── route.ts                             mai sarrafa index
+└── route.ts                             mai sarrafa fihirisa
 ```
 
-Kowane fayil na route yana bin wannan tsari ɗaya:
+Kowane fayil na hanya yana bin tsari iri ɗaya:
 
 ```
-Route → CORS preflight → tantance body ta Zod → auth na zaɓi
-      → tilasta manuƙar API key → mika aiki ga handler (open-sse)
+Hanya → binciken share-fagen CORS → tabbatar da body ta Zod → auth na zaɓi
+      → tilasta manufofin maɓallin API → miƙa aiki ga mai sarrafawa (open-sse)
 ```
 
-`v1beta/` ita ce fuskar jituwa ta salon Gemini (wrapper mara nauyi wadda take fassara zuwa
-wannan pipeline ɗin `open-sse/handlers/`).
+`v1beta/` ita ce shimfiɗar dacewa mai salon Gemini (siririn wrapper wanda ke fassara zuwa
+bututun `open-sse/handlers/` iri ɗaya).
 
-### 3.2 `src/lib/` — Laburare na asali
+### 3.2 `src/lib/` — Muhimman ɗakunan karatu
 
-Koyaushe yi import ɗin data, sync, OAuth, skill, memory, da dai sauransu ta waɗannan modules.
-Jadawalin yana rarraba ainihin directories da sanannun fayiloli na babban mataki.
+Koyaushe shigo da bayanai, sync, OAuth, skill, memory, da sauransu ta waɗannan modules. Wannan
+teburin yana haɗa ainihin kundin adireshi da fitattun fayilolin matakin sama.
 
-| Modul             | Manufa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | Uwar garken yarjejeniyar A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (ƙwarewa 6: nazarin farashi, rahoton lafiya, gano masu samarwa, gudanar da rabo, juyin hanya mai wayo, list-capabilities)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `api/`            | Mataimakan API na ciki: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `auth/`           | `managementPassword.ts` (sake saita kalmar sirri / hashing)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `batches/`        | Sabis ɗin OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `catalog/`        | Dacewar catalog na OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `cloudAgent/`     | Rajistar wakilan cloud: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `combos/`         | Mataimakan warware combo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `compliance/`     | Bincike + binciken mai samarwa: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `config/`         | Mahaɗin runtime config                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `db/`             | Modulolan yankin SQLite (dubi §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `display/`        | Mataimakan UI/nuni waɗanda amsoshin API suke amfani da su                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `embeddings/`     | Rajistar sabis na embedding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `env/`            | Ɗaukar env + binciken ciki                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `evals/`          | Runtime na Eval                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `jobs/`           | Ayyukan bango (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `memory/`         | Ƙwaƙwalwar ajiya dindindin: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `oauth/`          | Modulolan masu samar da OAuth/shigowa (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, da kuma `services/`, `utils/`, da `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                  |
-| `plugins/`        | Mai lodin plugin (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `providerModels/` | Tsarin rayuwar samfurin da ake sarrafawa: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `providers/`      | Mataimakan masu samarwa: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `resilience/`     | `settings.ts` — saituna don circuit breaker, cooldown, da lockout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `runtime/`        | Gano fasalolin runtime                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `services/`       | Tsarin ayyukan da aka haɗa: `ServiceSupervisor.ts` (mai kula da child-process na gama-gari tare da kulle aiki, ring buffer, da mai duba lafiya), `bootstrap.ts` (rajista a matakin tsari da farawa ta atomatik), `registry.ts` (taswirar tool → mai kula), `apiKey.ts` (majiyar maɓalli ta AES-256-GCM), `modelSync.ts` (daidaita samfura lokaci-lokaci), `ringBuffer.ts` (ma'ajin log mai zagaye na 5 MB), `healthCheck.ts` (binciken lafiya na HTTP), `types.ts`, `embedWsProxy.ts` (WebSocket proxy), `installers/{ninerouter,cliproxy}.ts`. Duba `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                                |
-| `agentSkills/`    | Katalogin Agent Skills + mai ƙirƙira: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → yana rubuta `skills/{id}/SKILL.md`), `openapiParser.ts` (yana fitar da REST endpoints daga OpenAPI spec), `cliRegistryParser.ts` (yana fitar da ƙananan umarni na CLI daga bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Ana amfani da shi ta hanyoyin REST (`/api/agent-skills/*`), kayan aikin MCP (`omniroute_agent_skills_*`), da A2A skill `list-capabilities`. Duba [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Tsarin Skill: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, tare da `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `spend/`          | `batchWriter.ts` (buffer na rubutawa a bayan fage)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `system/`         | Mataimaka na matakin tsarin                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `translator/`     | Haɗin fassara na matakin sama (yana miƙa aiki zuwa `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `usage/`          | Lissafin amfani: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `versionManager/` | Kai-sabuntawa + manifest ɗin sigar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `ws/`             | Gadar WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `zed-oauth/`      | Tsarin kwararar OAuth na editan Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Module            | Manufa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a2a/`            | Uwar garken ka'idar A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (ƙwarewa 6: nazarin farashi, rahoton lafiya, gano mai samarwa, sarrafa ƙayyadadden amfani, turawa ta fasaha, jera iyawa)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `acp/`            | Ka'idar Sarrafa Wakili: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `api/`            | Kayan taimako na API na ciki: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `auth/`           | `managementPassword.ts` (sake saita kalmar sirri / yin hashing)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `batches/`        | Sabis na OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `catalog/`        | Daidaita kundin OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `cloudAgent/`     | Rijistar wakilan gajimare: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `combos/`         | Mataimakan warware haɗuwa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `compliance/`     | Binciken bin ƙa'ida + binciken mai samarwa: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `config/`         | Manne-haɗin saiti na lokacin aiki                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `db/`             | Modulan fannin SQLite (duba §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `display/`        | Mataimakan UI/nuni da martanin API ke amfani da su                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `embeddings/`     | Rijistar sabis na embedding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `env/`            | Loda Env + binciken cikinsa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `evals/`          | Muhallin gudanar da kimantawa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `jobs/`           | Ayyukan bango (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `memory/`         | Ma’adanar ƙwaƙwalwa mai ɗorewa: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `oauth/`          | Modulan masu samar da OAuth/shigo da bayanai (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, tare da `services/`, `utils/`, da `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                               |
+| `plugins/`        | Mai loda plugin (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `providerModels/` | Zagayowar rayuwar samfuri da ake sarrafawa: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `providers/`      | Mataimakan mai bayarwa: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `resilience/`     | `settings.ts` — saitunan mai katse da'ira, lokacin hucewa, da kullewa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `runtime/`        | Gano fasalolin lokacin aiki                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `services/`       | Tsarin ayyukan da aka haɗa ciki: `ServiceSupervisor.ts` (mai kula da ƙaramin tsari na bai ɗaya tare da makullin aiki, ma'ajiyar zobe, da mai duba lafiya), `bootstrap.ts` (rajista da farawa ta atomatik a matakin tsari), `registry.ts` (taswirar kayan aiki → mai kulawa), `apiKey.ts` (ma'ajiyar maɓalli ta AES-256-GCM), `modelSync.ts` (aiki tare na samfura lokaci-lokaci), `ringBuffer.ts` (ma'ajiyar log mai zagayawa ta 5 MB), `healthCheck.ts` (gwajin lafiyar HTTP), `types.ts`, `embedWsProxy.ts` (wakilin WebSocket), `installers/{ninerouter,cliproxy}.ts`. Duba `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                          |
+| `agentSkills/`    | Katalojin Ƙwarewar Wakili + janareta: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → yana rubuta `skills/{id}/SKILL.md`), `openapiParser.ts` (yana ciro wuraren ƙarshen REST daga ƙayyadaddun OpenAPI), `cliRegistryParser.ts` (yana ciro ƙananan umarnin CLI daga bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Hanyoyin REST (`/api/agent-skills/*`), kayan aikin MCP (`omniroute_agent_skills_*`), da ƙwarewar A2A `list-capabilities` suna amfani da shi. Duba [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Tsarin ƙwarewa: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, tare da `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `spend/`          | `batchWriter.ts` (ma'ajiyar jinkirta rubutawa)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Daidaitawar Cloud)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `system/`         | Mataimaka na matakin tsarin                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `translator/`     | Manne-mai-fassara na babban mataki (yana miƙa aiki zuwa `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `usage/`          | Lissafin amfani: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `versionManager/` | Sabuntawa ta atomatik + fayil ɗin bayanan sigar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `ws/`             | Gadar WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `zed-oauth/`      | Tsarin OAuth na editan Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
-Fayilolin matakin sama a cikin `src/lib/`:
+Fayilolin babban mataki a cikin `src/lib/`:
 
-- An cire tsohon barrel na `localDb.ts` — masu amfani yanzu suna shigo da takamaiman modules na `src/lib/db/*` kai tsaye.
+- An cire tsohon fayil ɗin tattarawa na `localDb.ts` — masu amfani suna shigo da takamaiman modulolin `src/lib/db/*` kai tsaye.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -328,14 +328,14 @@ Fayilolin matakin sama a cikin `src/lib/`:
 
 #### 3.2.1 `src/lib/db/`
 
-Database na SQLite na Singleton (`getDbInstance()` a cikin `core.ts`, tare da WAL journaling).
-**Kada ku taɓa rubuta SQL guda a cikin routes ko handlers** — ku wuce ta waɗannan modules.
+Ma’ajiyar bayanan SQLite mai instance guda (`getDbInstance()` a cikin `core.ts`, rubutun mujallar WAL).
+**Kada a taɓa rubuta ɗanyen SQL a cikin routes ko handlers** — a bi ta waɗannan modulolin.
 
-![Bayanin gaba ɗaya na schema na database (zaɓaɓɓun core tables)](../diagrams/exported/db-schema-overview.svg)
+![Bayanin tsarin ma’ajiyar bayanai gaba ɗaya (zaɓaɓɓun manyan teburori)](../diagrams/exported/db-schema-overview.svg)
 
-> Tushe: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
+> Madogara: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Modules na domain (kowanne yana mallakar tables ɗaya ko fiye): `apiKeys.ts`, `backup.ts`,
+Modulolin domain (kowannensu yana kula da tebur ɗaya ko fiye): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -349,10 +349,10 @@ Modules na domain (kowanne yana mallakar tables ɗaya ko fiye): `apiKeys.ts`, `b
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/` yana ɗauke da fayiloli 168 na `.sql` waɗanda aka tsara ta sigogi (idempotent, transactional) kuma
-`migrationRunner.ts` yana aiwatar da su lokacin ƙaddamarwa.
+`migrations/` yana ɗauke da fayilolin `.sql` guda 168 masu lamba bisa sigar (idempotent, transactional), kuma
+`migrationRunner.ts` ne yake aiwatar da su a lokacin farawa.
 
-Tables da aka ƙirƙira a duk migrations (jimlar 123):
+Teburorin da aka ƙirƙira a cikin migrations (jimilla 123):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -368,63 +368,63 @@ Tables da aka ƙirƙira a duk migrations (jimlar 123):
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (da kuma FTS5 virtual tables don binciken memory).
+`webhooks` (tare da teburorin kama-da-wane na FTS5 don neman bayanan ƙwaƙwalwa).
 
 ### 3.3 `src/domain/` — Matakin domain
 
-Tsantsar logic na kasuwanci, babu I/O. Routes da handlers ne ke shigo da shi.
+Tsantsar dabarun kasuwanci, babu I/O. Routes da handlers ne suke shigo da su.
 
-| Fayil                                      | Manufa                                                       |
-| ------------------------------------------ | ------------------------------------------------------------ |
-| `policyEngine.ts`                          | Mai warware policy na mataki mafi girma                      |
-| `fallbackPolicy.ts`                        | Bishiyar yanke shawara ta fallback                           |
-| `costRules.ts`                             | Dokokin ƙididdigar kuɗi                                      |
-| `lockoutPolicy.ts`                         | Yanke shawarar kulle model                                   |
-| `tagRouter.ts`                             | Routing bisa tag                                             |
-| `comboResolver.ts`                         | Warware combo daga request → jerin target                    |
-| `connectionModelRules.ts`                  | Matattarar model ga kowane connection                        |
-| `modelAvailability.ts`                     | Binciken samuwar model                                       |
-| `degradation.ts`                           | Canje-canjen yanayin degraded                                |
-| `providerExpiration.ts`                    | Gano account/key da ya ƙare                                  |
-| `quotaCache.ts`                            | Yanke shawarar quota da aka cache                            |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Matukin siffar response                                      |
-| `configAudit.ts`                           | Binciken canjin config                                       |
-| `assessment/`                              | Kimantar model (bisa RFC, an aiwatar da shi ta wani ɓangare) |
-| `types.ts`                                 | Nau'o'in domain da aka raba                                  |
+| Fayil                                      | Manufa                                                 |
+| ------------------------------------------ | ------------------------------------------------------ |
+| `policyEngine.ts`                          | Babban mai warware manufofi                            |
+| `fallbackPolicy.ts`                        | Bishiyar yanke shawarar fallback                       |
+| `costRules.ts`                             | Dokokin ƙididdige kuɗi                                 |
+| `lockoutPolicy.ts`                         | Shawarwarin kulle samfuri                              |
+| `tagRouter.ts`                             | Routing bisa tags                                      |
+| `comboResolver.ts`                         | Warware combo daga buƙata → jerin wuraren nufi         |
+| `connectionModelRules.ts`                  | Matatun samfuri na kowace connection                   |
+| `modelAvailability.ts`                     | Binciken samuwar samfuri                               |
+| `degradation.ts`                           | Sauye-sauyen yanayin degraded                          |
+| `providerExpiration.ts`                    | Gano account/key da wa’adinsu ya ƙare                  |
+| `quotaCache.ts`                            | Shawarwarin quota da aka adana a cache                 |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Masu taimakawa wajen tsara response                    |
+| `configAudit.ts`                           | Binciken sauye-sauyen config                           |
+| `assessment/`                              | Kimanta samfuri (bisa RFC, an aiwatar da wani ɓangare) |
+| `types.ts`                                 | Nau’ikan domain da ake rabawa                          |
 
-### 3.4 `src/server/` — Server kawai
+### 3.4 `src/server/` — Na server kawai
 
-Ba za a iya shigo da shi daga components na client ba.
+Ba za a iya shigo da shi daga client components ba.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Yana rarraba routes azaman public ko management
-│   ├── assertAuth.ts      Matakin assertion
-│   ├── context.ts         Context na authz na kowane request
+│   ├── classify.ts        Yana rarraba routes zuwa na jama’a ko na gudanarwa
+│   ├── assertAuth.ts      Mai taimakawa wajen tabbatarwa
+│   ├── context.ts         Authz context na kowace buƙata
 │   ├── headers.ts
-│   ├── pipeline.ts        Pipeline na authz
-│   ├── policies/          Policies na gaske
+│   ├── pipeline.ts        Authz pipeline
+│   ├── policies/          Ainihin manufofi
 │   └── types.ts
-└── cors/origins.ts        Jerin origins da aka ƙyale na CORS
+└── cors/origins.ts        Jerin CORS origins da aka yarda da su
 ```
 
-### 3.5 `src/shared/` — Aminci don raba shi
+### 3.5 `src/shared/` — Amintacce don rabawa
 
-An raba shi zuwa ƙananan directories masu takamaiman manufa:
+An raba shi zuwa ƙananan kundin adireshi masu takamaiman manufa:
 
-- `constants/` — `providers.ts` (catalog ɗin providers da Zod ke tantancewa), `models.ts`,
+- `constants/` — `providers.ts` (kundin masu samarwa da aka inganta ta Zod), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (jerin haramtattu), `mcpScopes.ts`,
+  `headers.ts`, `upstreamHeaders.ts` (jerin hanawa), `mcpScopes.ts`,
   `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
   `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
-- `validation/` — `schemas.ts` (kimanin schemas 80 na Zod), `compressionConfigSchemas.ts`,
+- `validation/` — `schemas.ts` (kimanin tsarin Zod 80), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — kwangilolin API na jama'a da ake wallafawa zuwa npm.
-- `types/` — nau'ikan TS na gama gari.
+- `contracts/` — kwangilolin API na jama'a da ake turawa zuwa npm.
+- `types/` — nau'ikan TS da ake amfani da su tare.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
   `cors.ts`, `featureFlags.ts`,
@@ -432,152 +432,150 @@ An raba shi zuwa ƙananan directories masu takamaiman manufa:
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, da kuma hooks da components na dashboard a ƙarƙashin `services/`, `network/`,
+  `a11yAudit.ts`, tare da hooks/abubuwan dashboard a ƙarƙashin `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/`.
-- `components/` — API na components na dashboard (`index.tsx` barrel: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). Primitives ɗin adapters ne a kan
-  vendored kit ɗin (`packages/ui-kit`, da ake shigo da shi ta component subpath kamar
-  `@omniroute/ui-kit/button`), don haka screens na ci gaba da riƙe imports ɗinsu yayin da
-  markup ɗin na kit ɗin ne. Shell ɗin shine `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (kit `SidebarProvider`/`SidebarInset`) tare da `Sidebar.tsx` da `Header.tsx`; icons
-  suna wucewa ta `Icon.tsx` da `constants/iconMap.ts`. Ga `docs/architecture/DESIGN_SYSTEM.md`.
+- `components/` — API ɗin abubuwan dashboard (`index.tsx` barrel: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Primitives ɗin adapters ne a kan kit ɗin
+  da aka haɗa (`packages/ui-kit`, wanda ake shigo da shi ta subpath na component kamar
+  `@omniroute/ui-kit/button`), don haka screens suna riƙe imports ɗinsu yayin da markup
+  ɗin ya kasance na kit ɗin. Shell ɗin shi ne `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (kit `SidebarProvider`/`SidebarInset`) tare da `Sidebar.tsx` da `Header.tsx`; icons suna bi
+  ta `Icon.tsx` da `constants/iconMap.ts`. Duba `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
-## 4. `open-sse/` — Wurin aikin injin streaming
+## 4. `open-sse/` — Filin aikin injin yawo
 
-Wurin aikin npm na daban wanda aka buga a matsayin `@omniroute/open-sse`. Yana kula da
-sarrafa buƙatu, masu aiwatarwa (executors), masu fassara, ayyuka, mai canza fasali, da uwar garken MCP.
+Wani filin aikin npm ne na daban da ake wallafawa a matsayin `@omniroute/open-sse`. Yana kula da sarrafa buƙatu, masu aiwatarwa, masu fassara, ayyuka, mai sauyawa, da sabar MCP.
 
 ```
 open-sse/
-├── index.ts                Abubuwan fitarwa na jama'a
-├── package.json            Manifest na wurin aiki
+├── index.ts                Fitarwa na jama'a
+├── package.json            Bayanin filin aiki
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Rajistojin masu samarwa, profiles na header, ainihi, …
+├── config/                 Rijistocin masu samarwa, bayanan martabar kanun bayanai, shaida, …
 ├── handlers/               Masu sarrafa buƙatu (taɗi, embeddings, sauti, hoto, …)
-├── executors/              156 modules na executor na masu samarwa (azuzuwan executor + mataimaka na kowane mai samarwa)
-├── translator/             Canjin tsari (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Mai canza stream na Responses API ↔ Chat Completions
-├── services/               Fiye da modules na ayyuka 80 (combos, fallback, quotas, ainihi, …)
-├── utils/                  Mataimakan streaming, abokin ciniki TLS, AWS SigV4, proxy fetch, …
-└── mcp-server/             Uwar garken MCP (hanyoyin watsawa 3, scopes 33, kayan aiki 110)
+├── executors/              Modulolin masu aiwatarwa na masu samarwa guda 156 (azuzuwan aiwatarwa + mataimaka na kowane mai samarwa)
+├── translator/             Sauya tsari (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Mai sauya Responses API ↔ Chat Completions stream
+├── services/               Modulolin sabis sama da 80 (haɗe-haɗe, madadin, ƙididdiga, shaida, …)
+├── utils/                  Mataimakan yawo, abokin cinikin TLS, AWS SigV4, proxy fetch, …
+└── mcp-server/             Sabar MCP (hanyoyin sufuri 3, iyakoki 33, kayan aiki 110)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Mai sarrafa             | Dalili                                                                                       |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Babban layin sarrafa taɗi (cache, iyakar yawan buƙatu, jagorantar combo, tura zuwa executor) |
-| `responsesHandler.ts`   | Maɓallin shiga na OpenAI Responses API                                                       |
-| `embeddings.ts`         | Embeddings                                                                                   |
-| `imageGeneration.ts`    | Samar da hotuna                                                                              |
-| `audioSpeech.ts`        | Rubutu-zuwa-magana                                                                           |
-| `audioTranscription.ts` | Magana-zuwa-rubutu                                                                           |
-| `videoGeneration.ts`    | Samar da bidiyo                                                                              |
-| `musicGeneration.ts`    | Samar da kiɗa                                                                                |
-| `rerank.ts`             | Sake tsara matsayi                                                                           |
-| `moderations.ts`        | Daidaita abun ciki                                                                           |
-| `search.ts`             | Binciken yanar gizo                                                                          |
-| `sseParser.ts`          | Mai fassara abubuwan SSE                                                                     |
-| `usageExtractor.ts`     | Cire ƙidayan tokens daga cikin streams na upstream                                           |
-| `responseSanitizer.ts`  | Cire sharar da ta shafi mai samarwa                                                          |
-| `responseTranslator.ts` | Mahaɗi tsakanin amsar mai samarwa da matakin mai fassara                                     |
+| Mai sarrafawa           | Manufa                                                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Babban tsarin taɗi (ma'ajiyar wucin gadi, iyakar ƙima, tura haɗe-haɗe, aika zuwa mai aiwatarwa) |
+| `responsesHandler.ts`   | Mashigar OpenAI Responses API                                                                   |
+| `embeddings.ts`         | Embeddings                                                                                      |
+| `imageGeneration.ts`    | Samar da hoto                                                                                   |
+| `audioSpeech.ts`        | Rubutu-zuwa-magana                                                                              |
+| `audioTranscription.ts` | Magana-zuwa-rubutu                                                                              |
+| `videoGeneration.ts`    | Samar da bidiyo                                                                                 |
+| `musicGeneration.ts`    | Samar da kiɗa                                                                                   |
+| `rerank.ts`             | Sake jera matsayi                                                                               |
+| `moderations.ts`        | Daidaita abun ciki                                                                              |
+| `search.ts`             | Binciken yanar gizo                                                                             |
+| `sseParser.ts`          | Mai tantance aukuwar SSE                                                                        |
+| `usageExtractor.ts`     | Ciro ƙididdigar token daga rafukan tushe                                                        |
+| `responseSanitizer.ts`  | Cire gurɓatattun bayanai na musamman ga mai samarwa                                             |
+| `responseTranslator.ts` | Haɗin tsakanin martanin mai samarwa da matakin fassara                                          |
 
 ### 4.2 `open-sse/executors/`
 
-Akwai modules 156 na executor a babban mataki (`*.ts` ban da `base.ts`, `index.ts` da gwaje-gwaje —
-ƙidayar da `npm run check:docs-counts` ke aunawa). Kowace aji na executor yana gudanar da
-`BaseExecutor` (`base.ts`), kai tsaye ko ta hanyar `DefaultExecutor` ko wani executor; sauran
-modules mataimaka ne na kowane mai samarwa (schemas na kayan aiki, masu daidaita fetch/TTS,
-masu sarrafa quirks). Masu aiwatarwa sun haɗa da:
+Modulolin masu aiwatarwa na babban mataki guda 156 (`*.ts` ban da `base.ts`, `index.ts` da gwaje-gwaje — wannan shi ne adadin da
+`npm run check:docs-counts` ke aunawa). Kowane ajin mai aiwatarwa yana faɗaɗa `BaseExecutor` (`base.ts`),
+kai tsaye ko ta hanyar `DefaultExecutor` ko wani mai aiwatarwa; sauran modulolin mataimaka ne na kowane mai samarwa
+(tsarin kayan aiki, adaftocin fetch/TTS, masu sarrafa halaye na musamman). Masu aiwatarwar sun haɗa da:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, tare da `claudeIdentity.ts`
-(mataimakin ainihi na gama gari) da `index.ts` (rajista).
+(mataimakin shaida da ake rabawa) da `index.ts` (rijista).
 
-> Lura: ana yin hidima ga masu samarwar da ba a lissafa a nan ba ta hanyar `default.ts` ta
-> amfani da executor na gama gari mai jituwa da OpenAI. Cikakken katalojin masu samarwa
-> (masu samarwa 375) yana cikin `src/shared/constants/providers.ts`.
+> Lura: masu samarwar da ba a jera a nan ba, `default.ts` ne ke yi musu hidima ta amfani da gama-garin
+> mai aiwatarwa mai dacewa da OpenAI. Cikakken kundin masu samarwa (masu samarwa 375) yana cikin
+> `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Fassarar tsarin hub-and-spoke (OpenAI ita ce cibiyar).
+Fassara ta tsarin cibiya-da-rassa (OpenAI ne cibiyar).
 
-- **Masu fassara buƙatu 9** (`translator/request/`):
+- **Masu fassara buƙatu guda 9** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **Masu fassara amsoshi 9** (`translator/response/`):
+- **Masu fassara martani guda 9** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`.
-- **Mataimaka 9** (`translator/helpers/`):
+- **Mataimaka guda 9** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, tare da
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, da
   gwaje-gwajen mataimaka.
 - **Mataimakan hoto** (`translator/image/sizeMapper.ts`).
-- Na babban mataki: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- Babban mataki: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Mai canza Responses API ↔ Chat
-  Completions wanda ya dogara kan `TransformStream` (wanda hanyar `responses/` route catch-all take amfani da shi).
+- `responsesTransformer.ts` — Mai sauya Responses API ↔ Chat Completions mai amfani da `TransformStream`
+  (hanyar `responses/` mai kama duk buƙatun da ba su dace da wata hanya ba ce ke amfani da shi).
 
 ### 4.5 `open-sse/services/`
 
-Fitattun abubuwa (cikakken jeri a ƙarƙashin `open-sse/services/`):
+Muhimman abubuwa (cikakken jeri yana ƙarƙashin `open-sse/services/`):
 
-| Batutuwa            | Fayiloli                                                                                                                                                                                                                                                 |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jagorar Combo       | `combo.ts` (dabaru 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                        |
-| Injin Auto Combo    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Juriya              | `accountFallback.ts` (cooldown + kullewa), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
-| Iyakoki             | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Ajiye cache         | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Hankalin jagora     | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Gudanar da samfura  | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Matsawa             | `compression/` — cikakken haɗin injin matsawa                                                                                                                                                                                                            |
-| Token + zama        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Mataki / manifest   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / hanyar sadarwa | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Rukuni-rukuni       | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Amfani              | `usage.ts`                                                                                                                                                                                                                                               |
+| Abin damuwa                 | Fayiloli                                                                                                                                                                                                                                                 |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jagorantar Combo            | `combo.ts` (dabaru 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                        |
+| Injin Auto Combo            | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Juriya                      | `accountFallback.ts` (lokacin jira + kullewa), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                     |
+| Ƙayyadaddun amfani          | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Adana bayanai na wucin gadi | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Basirar jagorantar buƙatu   | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Sarrafa samfuri             | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Matsawa                     | `compression/` — cikakken haɗin injin matsawa                                                                                                                                                                                                            |
+| Token + zaman               | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Mataki / manifest           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / hanyar sadarwa         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Rukunin sarrafawa           | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Amfani                      | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **Tools 110 na musamman** an haɗa su a `server.ts` (45 na canonical a `schemas/tools.ts` +
-  memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
-  local-corpus da modules na matsawa — ƙawantarsu `countUniqueMcpTools` ne ke ƙidaya).
-- **Hanyoyin watsawa 3**: stdio, HTTP Streamable, SSE.
-- **Scopes 33** ana tilasta su lokacin aiki — jerin tushe yana cikin `src/shared/constants/mcpScopes.ts`, cikakken saiti shine ƙawantar scopes da kowane module na tool ya bayyana.
-- Teburin binciken aiki: `mcp_tool_audit` (`audit.ts` ne ke cika shi).
+- **Kayan aiki na musamman 110** da aka haɗa a cikin `server.ts` (na asali 45 a cikin `schemas/tools.ts` +
+  ƙwaƙwalwa, ƙwarewa, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
+  local-corpus da manhajojin matsawa — haɗin jimillar da `countUniqueMcpTools` ya ƙirga).
+- **Hanyoyin sufuri 3**: stdio, HTTP Streamable, SSE.
+- **Scopes 33** da ake tilasta wa yayin aiki — jerin asali yana cikin `src/shared/constants/mcpScopes.ts`, cikakken jerin kuwa haɗin scopes ne da kowace manhajar kayan aiki ta ayyana.
+- Teburin binciken bin diddigi: `mcp_tool_audit` (wanda `audit.ts` ke cike wa).
 - Fayiloli: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  tare da gwaje-gwaje a ƙarƙashin `__tests__/`.
-- Duba [MCP-SERVER.md](../frameworks/MCP-SERVER.md) don cikakken katalogin tools.
+  tare da gwaje-gwajen da ke ƙarƙashin `__tests__/`.
+- Duba [MCP-SERVER.md](../frameworks/MCP-SERVER.md) don cikakken kundin kayan aiki.
 
 ### 4.7 `open-sse/config/`
 
-Rajistar masu samarwa (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), rajistar samfura ta kowane tsari (`audioRegistry.ts`,
+Rajistocin masu samarwa (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), rajistocin samfuri na kowane tsari (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-mataimakan shaida (`codexIdentity.ts`, `codexInstructions.ts`,
+mataimakan tantance ainihi (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-mataimakan takardun shaida (`credentialLoader.ts`, `codexClient.ts`), da
-mataimakan girgije (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+mataimakan bayanan shaidar shiga (`credentialLoader.ts`, `codexClient.ts`), da
+adaftocin cloud (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Abubuwan asali na streaming da mataimakan mai bayarwa: `stream.ts`, `streamHandler.ts`,
+Ginshiƙan farko na yawo da mataimakan masu samarwa: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,

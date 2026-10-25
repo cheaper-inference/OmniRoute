@@ -4,150 +4,151 @@
 
 ---
 
-> **Status:** het dashboard is gebouwd op de **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
-> als de workspace `packages/ui-kit` (`@omniroute/ui-kit`; de upstream-snapshot is vastgepind in
-> `packages/ui-kit/UPSTREAM.md` en wordt bewaakt door `npm run check:ui-kit-snapshot`). Light is het canonieke
-> thema; de standaardvoorkeur is `system`. De accentkleur is Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) is de fontfamilie van de UI, Instrument Serif alleen voor grote,
-> spaarzame displaytekst (`.ci-dashboard-display`), IBM Plex Mono voor code — allemaal self-hosted via de
-> `@fontsource/*`-imports bovenaan `src/app/globals.css`. Elk icoon is een Lucide-glyf.
+> **Status:** het dashboard is gebouwd op de **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), opgenomen
+> als de workspace `packages/ui-kit` (`@omniroute/ui-kit`; de upstream-snapshot is vastgezet in
+> `packages/ui-kit/UPSTREAM.md` en wordt bewaakt door `npm run check:ui-kit-snapshot`). Licht is het canonieke
+> thema; de standaardvoorkeur is `system`. De accentkleur is Keak-limoengroen (`--ci-color-accent`). Inter
+> (letterafstand 0, `--ci-letter-spacing-ui`) is het UI-lettertype, Instrument Serif wordt alleen gebruikt voor grote, ruim opgezette
+> weergavetekst (`.ci-dashboard-display`) en IBM Plex Mono voor code — allemaal lokaal gehost via de
+> `@fontsource/*`-imports bovenaan `src/app/globals.css`. Elk pictogram is een Lucide-glyph.
 
 ## 1. Waar alles zich bevindt
 
-- **Kit.** `packages/ui-kit/src` is een byte-voor-byte-kopie van de upstream-`src/` op de commit die is vastgepind in
-  `packages/ui-kit/UPSTREAM.md` (waarin ook de licentieautorisatie is vastgelegd); `PATCHES.md` bevat de lokale
-  patches (geen). Het wordt als broncode gebruikt, zonder build: `next.config.mjs` transpileert het, en
-  `tsconfig.json` mapt `@omniroute/ui-kit` → `packages/ui-kit/src` en `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` en `vitest.mcp.config.ts` hebben dezelfde alias). Importeer een
-  kit-component via zijn subpad (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nooit
-  via de `@omniroute/ui-kit`-barrel: de barrel trekt elke component (inclusief de datepicker)
-  mee in elke importer. De kit-stylesheet komt binnen via `src/app/globals.css`
+- **Kit.** `packages/ui-kit/src` is een byte-voor-bytekopie van de upstream-`src/` bij de commit die is vastgezet in
+  `packages/ui-kit/UPSTREAM.md` (waarin ook de licentietoestemming is vastgelegd); `PATCHES.md` vermeldt lokale
+  patches (geen). De kit wordt rechtstreeks als broncode gebruikt, zonder build: `next.config.mjs` transpileert deze, en
+  `tsconfig.json` koppelt `@omniroute/ui-kit` → `packages/ui-kit/src` en `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` en `vitest.mcp.config.ts` bevatten dezelfde alias). Importeer een
+  kitcomponent via het subpad (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nooit
+  via het `@omniroute/ui-kit`-barrelbestand: het barrelbestand neemt elk component (inclusief de datumkiezer)
+  op in elke importer. De stylesheet van de kit wordt ingeladen via `src/app/globals.css`
   (`@import "../../packages/ui-kit/src/ci-ui.css"`).
 - **Tokens.** `packages/ui-kit/src/ci-tokens.css` declareert de `--ci-*`-tokens; `src/app/globals.css`
-  vormt een brug naar de legacy OmniRoute-namen (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), zodat de bestaande `var(--color-*)`-leesacties en Tailwind-
+  koppelt deze aan de oudere OmniRoute-namen (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), zodat bestaande verwijzingen met `var(--color-*)` en Tailwind-
   utilities blijven werken. Nieuwe code gebruikt de Tailwind-utilities (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) of kit-klassen — nooit een hex-waarde
-  (`tests/unit/design-kit-bridge.test.ts` dwingt de brug af). `text-primary` resolveert naar
-  `--color-primary-ink` via `--text-color-primary` (lime-800 in light, het lime-accent in dark), zodat
-  primaire tekst leesbaar blijft terwijl `bg-primary`/`border-primary` het lime-oppervlak behouden. Grafiekseries
-  gebruiken `--color-chart-1` … `--color-chart-5`.
-- **Thema's.** `<html className="ci-theme">` (`src/app/layout.tsx`) koppelt het document aan het kit-thema.
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) of kitklassen — nooit een hexadecimale waarde
+  (`tests/unit/design-kit-bridge.test.ts` dwingt deze koppeling af). `text-primary` wordt via
+  `--text-color-primary` omgezet naar `--color-primary-ink` (lime-800 in het lichte thema, het lime-accent in het donkere thema), zodat
+  primaire tekst leesbaar blijft terwijl `bg-primary`/`border-primary` het lime-oppervlak behouden. Grafiekreeksen gebruiken
+  `--color-chart-1` … `--color-chart-5`.
+- **Thema's.** `<html className="ci-theme">` (`src/app/layout.tsx`) laat het document het kitthema gebruiken.
   De voorkeur is `light`, `dark` of `system` (`THEME_CONFIG.defaultTheme = "system"` in
   `src/shared/constants/appConfig.ts`; `system` volgt `prefers-color-scheme`). `applyTheme()` in
-  `src/store/themeStore.ts` (gespiegeld door het inline bootstrap-script in `src/app/layout.tsx`, dat vóór de
-  hydratatie draait) stelt `data-theme="dark"|"light"` in en schakelt tegelijkertijd de `.dark`-klasse op `<html>`
-  om. De dark-token-set van de kit reageert op `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute's eigen dark-overrides (het `.dark`-blok in `globals.css`) en de legacy Tailwind `dark:`-
-  utilities reageren op de `.dark`-klasse. Er zijn geen accentkleur-presets: het accent komt altijd uit de
-  kit, en een bewaarde preset uit een oudere build wordt verwijderd zodra de store laadt.
+  `src/store/themeStore.ts` (gespiegeld door het inline bootstrapscript in `src/app/layout.tsx`, dat vóór
+  hydratatie wordt uitgevoerd) stelt `data-theme="dark"|"light"` in en schakelt tegelijkertijd de `.dark`-klasse op `<html>`.
+  De donkere tokenset van de kit is gekoppeld aan `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  OmniRoute's eigen donkere overrides (het `.dark`-blok in `globals.css`) en de oudere Tailwind-`dark:`-
+  utilities zijn gekoppeld aan de `.dark`-klasse. Er zijn geen voorinstellingen voor accentkleuren: het accent komt altijd uit de
+  kit, en een opgeslagen voorinstelling uit een oudere build wordt verwijderd wanneer de store wordt geladen.
 - **Componenten (adapters).** `src/shared/components/index.tsx` behoudt de OmniRoute-component-API (dezelfde
-  namen, default exports en props), en de primitieven erachter zijn adapters bovenop de kit: formulieren
+  namen, standaardexports en props), en de onderliggende primitives zijn adapters rond de kit: formulieren
   (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays en feedback
   (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
   structuur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) en tabellen
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Een adapter importeert de kit-
-  component via het subpad en mapt de legacy-props daarop — zo is bijvoorbeeld `Button variant="primary"` de
-  `default`-knop van de kit (`--ci-button-primary-*`: het inverse oppervlak in light, het accent met zijn
-  `--ci-color-accent-foreground`-ink in dark), `danger` is `destructive`, en `warning` is `outline` plus
-  de `.ci-button--warning`-extensie. De `.ci-button--warning`- en `.ci-badge[data-tone]`-regels aan het
-  einde van `globals.css` (`@layer components`) zijn OmniRoute-extensies bovenop de kit-klassen.
-  `tests/unit/ui/adapters/*.test.tsx` legt elke adapter vast.
-- **Shell.** `src/app/(dashboard)/layout.tsx` rendert `DashboardLayout`, die op zijn beurt
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Een adapter importeert het kitcomponent
+  via het subpad en zet de oudere props erop om — `Button variant="primary"` is bijvoorbeeld de
+  `default`-knop van de kit (`--ci-button-primary-*`: het omgekeerde oppervlak in het lichte thema, het accent met de bijbehorende
+  `--ci-color-accent-foreground`-tekstkleur in het donkere thema), `danger` is `destructive`, en `warning` is `outline` plus
+  de `.ci-button--warning`-uitbreiding. De regels voor `.ci-button--warning` en `.ci-badge[data-tone]` aan het
+  einde van `globals.css` (`@layer components`) zijn OmniRoute-uitbreidingen boven op de kitklassen.
+  `tests/unit/ui/adapters/*.test.tsx` leggen elke adapter vast.
+- **Shell.** `src/app/(dashboard)/layout.tsx` rendert `DashboardLayout`, die
   `src/shared/components/layouts/DashboardShell.tsx` rendert: de kit-`SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), met de navigatielogica van OmniRoute in
-  `src/shared/components/Sidebar.tsx`. Een "ga naar inhoud"-link naar `#main-content` is het eerste focusbare
-  element. `src/shared/components/Header.tsx` bevat de kit-`SidebarTrigger` (de enige sidebar-toggle van de
-  shell), de Keak-`ProductSwitcher` en de opener van het commandopalet; hij toont de routetitel alleen zolang
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), met OmniRoute's navigatielogica in
+  `src/shared/components/Sidebar.tsx`. Een link 'naar inhoud springen' naar `#main-content` is het eerste element
+  dat focus kan krijgen. `src/shared/components/Header.tsx` bevat de kit-`SidebarTrigger` (de enige zijbalkschakelaar
+  van de shell), de Keak-`ProductSwitcher` en de opener voor het opdrachtenpalet; de routetitel wordt alleen weergegeven zolang
   er geen kit-`PageHeader` (`.ci-page-header`) binnen `#main-content` is gemount, zodat een pagina met een eigen
-  `PageHeader` precies één `h1` heeft. `src/shared/components/CommandPalette.tsx` is een kit-`Dialog`.
-- **Iconen.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) resolveert de naam (het
-  Material Symbols-vocabulaire dat de schermen gebruiken) via `ICON_MAP` (`src/shared/constants/iconMap.ts`)
-  naar een Lucide-glyph. Het Material Symbols-font en -pakket zijn verdwenen: een naam die niet in de map
-  voorkomt, rendert een neutrale placeholder-glyph (`data-icon-missing="true"`) en logt buiten productie een
-  console-waarschuwing. `npm run gen:icon-map` print de gebruikte namen die in de map ontbreken
-  (`tests/unit/icon-map-coverage.test.ts` faalt bij elke naam zonder Lucide-icoon;
-  `tests/unit/icon-map-object-values.test.ts` dekt namen die in lookup-objecten zijn opgeslagen);
+  `PageHeader` slechts één `h1` heeft. `src/shared/components/CommandPalette.tsx` is een kit-`Dialog`.
+- **Pictogrammen.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) zet de naam (de
+  Material Symbols-woordenschat die de schermen gebruiken) via `ICON_MAP` (`src/shared/constants/iconMap.ts`) om naar een
+  Lucide-pictogram. Het Material Symbols-lettertype en -pakket zijn verwijderd: een naam die in de mapping ontbreekt, rendert een
+  neutraal tijdelijkeaanduidingspictogram (`data-icon-missing="true"`) en schrijft buiten productie een waarschuwing naar de console.
+  `npm run gen:icon-map` toont de gebruikte namen die in de mapping ontbreken
+  (`tests/unit/icon-map-coverage.test.ts` faalt voor elke naam zonder Lucide-pictogram;
+  `tests/unit/icon-map-object-values.test.ts` dekt namen die in lookupobjecten zijn opgeslagen);
   `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` herschrijft letterlijke
   `<span className="material-symbols-outlined">`-spans naar `<Icon>`.
-- **Merk.** `src/shared/components/OmniRouteLogo.tsx` is een wrapper rond de kit: de default export
-  `OmniRouteLogo` rendert `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath`-veilig) en
+- **Merk.** `src/shared/components/OmniRouteLogo.tsx` is een wrapper rond de kit: de standaardexport `OmniRouteLogo`
+  rendert `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath`-veilig) en
   `OmniRouteLockup` rendert `ProductLockup product="omniroute"` (toegankelijke naam "Keak OmniRoute") of, voor
-  white-label-operators, hun eigen `name`/`logoSrc`. De bestemmingen van de product-switcher staan in
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). De standalone-
+  white-labeloperators, hun eigen `name`/`logoSrc`. De bestemmingen van de productschakelaar staan in
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). De zelfstandige
   schermen — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` en `src/shared/components/ErrorPageScaffold.tsx`
-  — tonen de lockup; `tests/unit/brand-pages-static.test.ts` bewaakt dit.
+  — tonen de lock-up; `tests/unit/brand-pages-static.test.ts` bewaakt dit.
 
 ## 2. Regels
 
-1. Tokens, nooit literals. Uitzonderingen bewust behouden: de altijd-donkere consoleterminal, ReactFlow SVG-streken via `STATUS_HEX` (`src/shared/constants/statusColors.ts`), en de categorische paletten
+1. Tokens, nooit letterlijke waarden. Bewust behouden uitzonderingen: de altijd donkere consoleterminal, ReactFlow SVG-
+   lijnen via `STATUS_HEX` (`src/shared/constants/statusColors.ts`) en de categorische paletten
    `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) en
    `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
 2. Pas `packages/ui-kit/src` nooit handmatig aan: synchroniseer met `scripts/dev/sync-ui-kit.sh <commit>`; de
-   pre-commit-controle `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) faalt op elke byte die
-   afwijkt van de gepinde upstream-commit (de controle wordt met een waarschuwing overgeslagen wanneer de upstream-kloon,
-   `UI_KIT_CLONE` of `_references/cheaper-inference-ui-kit`, afwezig is). Wanneer de kit iets mist,
-   werk er dan omheen in de adapter of het scherm en vraag het upstream aan.
+   pre-commitcontrole `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) mislukt bij elke byte die
+   afwijkt van de vastgezette upstream-commit (de controle wordt met een waarschuwing overgeslagen wanneer de upstream-kloon,
+   `UI_KIT_CLONE` of `_references/cheaper-inference-ui-kit`, ontbreekt). Als de kit iets niet bevat,
+   werk je eromheen in de adapter of het scherm en vraag je upstream om toevoeging ervan.
 3. De standaardteksten van de kit zijn Engels (`label = "Loading"`, `loadingLabel = "Loading table"`…) — geef vertaalde
-   strings uit `useTranslations(...)` door wanneer een kit-component tekst weergeeft.
-4. Tailwind-utilities hebben voorrang op kit-componentklassen (de kit declareert
-   `@layer theme, base, components, utilities` en zijn regels leven in `components`) — gebruik utilities voor
-   spacing en layout, niet om kit-componenten opnieuw te kleuren.
-5. Koppen: `.ci-heading` (Inter, geen tracking) voor pagina- en sectietitels; `.ci-dashboard-display`
-   (Instrument Serif) alleen voor grote, schaarse displaytekst zoals de statuscode van de foutpagina.
-6. `tests/unit/dashboard-kit-sweep.test.ts` bewaakt de kit-adoptie: geen Material-ligatuur-span onder
-   `src/app` of `src/shared/components`; in de dashboardboom (`src/app/(dashboard)` en
-   `src/shared/components`) geen onbewerkte `<select>`, `<textarea>` of `<table>` en geen zelfgebouwde
-   `role="dialog"` buiten de vermelde uitzonderingen (de native tak van de `Select`-adapter,
-   `RequestLoggerDetail`); elke onbewerkte `<button>` of `<input>` daar heeft commentaar nodig met daarin
-   `kit-exception:` (met de reden), eindigend maximaal 3 regels erboven; palettinten en `dark:`-varianten
-   alleen in de bestanden die de test opsomt.
-7. Controleer beide thema's en de viewport van 390 px vóór een PR (screenshots); `tests/e2e/a11y.spec.ts` voert
+   tekenreeksen uit `useTranslations(...)` door wanneer een kitcomponent tekst rendert.
+4. Tailwind-utilities hebben voorrang op kitcomponentklassen (de kit declareert
+   `@layer theme, base, components, utilities` en de regels ervan staan in `components`) — gebruik utilities voor
+   witruimte en lay-out, niet om kitcomponenten een andere kleur te geven.
+5. Koppen: `.ci-heading` (Inter, zonder tekenafstand) voor pagina- en sectietitels; `.ci-dashboard-display`
+   (Instrument Serif) alleen voor grote, spaarzaam gebruikte weergavetekst, zoals de statuscode op een foutpagina.
+6. `tests/unit/dashboard-kit-sweep.test.ts` bewaakt het gebruik van de kit: geen Material-ligatuurspan onder
+   `src/app` of `src/shared/components`; in de dashboardstructuur (`src/app/(dashboard)` en
+   `src/shared/components`) geen onbewerkte `<select>`, `<textarea>` of `<table>` en geen zelfgemaakte
+   `role="dialog"` buiten de vermelde uitzonderingen (de native vertakking van de `Select`-adapter,
+   `RequestLoggerDetail`); elke onbewerkte `<button>` of `<input>` daar vereist een commentaarregel met
+   `kit-exception:` (met de reden) die maximaal 3 regels erboven eindigt; palettinten en `dark:`-varianten
+   zijn alleen toegestaan in de bestanden die door de test worden vermeld.
+7. Controleer vóór een PR beide thema's en de viewport van 390 px (met schermafbeeldingen); `tests/e2e/a11y.spec.ts` voert
    axe uit.
 
 ## 3. Een scherm toevoegen
 
-1. Open de pagina met de kit-`PageHeader` (`@omniroute/ui-kit/page-header`, `compact` binnen het
-   dashboard) — titel, beschrijving en `actions`. De shell-header laat dan zijn eigen titel vervallen.
-2. Bouw bedieningselementen op vanuit `@/shared/components` (de adapters) en gebruik kit-componenten via hun subpath
-   waar geen adapter bestaat (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+1. Open de pagina met de `PageHeader` van de kit (`@omniroute/ui-kit/page-header`, `compact` binnen het
+   dashboard) — titel, beschrijving en `actions`. De shellheader laat vervolgens zijn eigen titel weg.
+2. Bouw bedieningselementen met `@/shared/components` (de adapters) en gebruik kitcomponenten via een subpad wanneer er geen
+   adapter bestaat (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
    `Slider`…).
-3. Iconen: `<Icon name="…" />`. Een nieuwe naam gaat in `ICON_MAP` met de semantisch passende Lucide-
-   component; `npm run gen:icon-map` somt de namen op die nog ontbreken.
+3. Pictogrammen: `<Icon name="…" />`. Voeg een nieuwe naam toe aan `ICON_MAP` met de semantisch overeenkomende Lucide-
+   component; `npm run gen:icon-map` geeft de namen weer die nog ontbreken.
 4. Kleuren: semantische utilities (`text-success`, `bg-warning-bg`, `border-border`…) en
-   `var(--color-chart-N)` voor grafiekreeksen; geen hex-waarden en geen `dark:`-varianten die alleen een kleur herhalen.
-5. Tekst: elke string, inclusief de labels die je aan kit-componenten doorgeeft, komt uit `useTranslations`. Nieuwe
-   sleutels gaan in `src/i18n/messages/en.json`, `pt-BR.json` en `vi.json` (de Vietnamese pariteitstest zet
-   elke Engelse sleutel vast); de andere locales worden gevuld door de i18n-synchronisatie.
+   `var(--color-chart-N)` voor grafiekreeksen; geen hexwaarden en geen `dark:`-varianten die alleen een kleur herhalen.
+5. Tekst: elke tekenreeks, inclusief de labels die je aan kitcomponenten doorgeeft, komt uit `useTranslations`. Nieuwe
+   sleutels worden toegevoegd aan `src/i18n/messages/en.json`, `pt-BR.json` en `vi.json` (de Vietnamese pariteitstest
+   vereist elke Engelse sleutel); de overige locales worden ingevuld door de i18n-synchronisatie.
 6. Voer vóór de PR de controles uit: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (de enige controle die een dubbele import in `iconMap.ts` onderschept),
-   `npm run check:ui-icu`, en de eigen tests van het scherm.
+   `npm run check:dashboard-typecheck` (de enige controle die een dubbele import in `iconMap.ts` detecteert),
+   `npm run check:ui-icu` en de eigen tests van het scherm.
 
 ## 4. Een adapter toevoegen of wijzigen
 
-1. Behoud de publieke API van `src/shared/components/index.tsx`: dezelfde exportnamen, default-exports en
-   geaccepteerde props. Breng legacy-props binnen de adapter over naar de kit (zie `Button.tsx`: `VARIANT_TO_KIT`,
+1. Behoud de publieke API van `src/shared/components/index.tsx`: dezelfde exportnamen, standaardexports en
+   geaccepteerde props. Wijs verouderde props binnen de adapter toe aan de kit (zie `Button.tsx`: `VARIANT_TO_KIT`,
    `SIZE_TO_KIT`).
 2. Importeer de kit via een subpad (`@omniroute/ui-kit/<component>`).
-3. Workarounds voor hiaten in de kit horen in de adapter thuis (of in `globals.css` `@layer components` wanneer de fix
-   een stijl betreft), nooit in `packages/ui-kit/src`.
-4. Voeg `tests/unit/ui/adapters/<name>.test.tsx` toe of werk deze bij. Vergelijk bij een adapter met veel aanroepers
-   de gerenderde markup vóór en na de wijziging — wijzigingen in padding of wrappers verspreiden zich naar elk scherm.
+3. Tijdelijke oplossingen voor ontbrekende functionaliteit in de kit horen in de adapter (of in `globals.css` `@layer components` wanneer de oplossing een
+   stijl betreft), nooit in `packages/ui-kit/src`.
+4. Voeg `tests/unit/ui/adapters/<name>.test.tsx` toe of werk dit bestand bij. Vergelijk voor een adapter met veel aanroepers de
+   gerenderde markup vóór en na de wijziging — wijzigingen in padding of wrappers werken door in elk scherm.
 
 ## 5. De kit bijwerken
 
 `scripts/dev/sync-ui-kit.sh <commit> [clone]` kopieert de upstream-`src/` van die commit naar
-`packages/ui-kit/src` en past de enige toegestane transformatie toe (het verwijdert het achtervoegsel `.js` van
-relatieve imports). Daarna: controleer `git diff packages/ui-kit`, doe een visuele controle van providers, settings,
-combos, usage en endpoint in beide thema's, voer `npm run check:ui-kit-snapshot` en `npm run test:vitest:ui` uit, en
+`packages/ui-kit/src` en past de enige toegestane transformatie toe (het verwijdert het achtervoegsel `.js` uit
+relatieve imports). Daarna: controleer `git diff packages/ui-kit`, voer in beide thema's een visuele controle uit op providers, instellingen, combo's,
+gebruik en endpoint, voer `npm run check:ui-kit-snapshot` en `npm run test:vitest:ui` uit en
 open de PR met de upstream-changelog.
 
 ## 6. Referentie-index
 
-- `src/app/globals.css` — token-bridge, `.dark`-overschrijvingen, OmniRoute-`@layer components`-uitbreidingen
-- `packages/ui-kit/UPSTREAM.md` — vastgezette upstream-commit en licentieautorisatie; `packages/ui-kit/PATCHES.md`
+- `src/app/globals.css` — tokenbridge, `.dark`-overrides, OmniRoute-uitbreidingen voor `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — vastgelegde upstream-commit en licentieautorisatie; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
 - `src/shared/components/index.tsx` en de adapters ernaast; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`

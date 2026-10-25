@@ -10,77 +10,77 @@ _Kemas kini terakhir: 2026-06-28_
 
 ## Ringkasan Eksekutif
 
-OmniRoute ialah gerbang penghalaan AI setempat dan papan pemuka yang dibina atas Next.js.
-Ia menyediakan satu endpoint serasi OpenAI (`/v1/*`) dan menghalakan trafik merentasi berbilang penyedia upstream dengan terjemahan, fallback, penyegaran token, dan penjejakan penggunaan.
+OmniRoute ialah gerbang penghalaan AI setempat dan papan pemuka yang dibina berasaskan Next.js.
+Ia menyediakan satu titik akhir yang serasi dengan OpenAI (`/v1/*`) dan menghalakan trafik merentasi berbilang penyedia huluan dengan terjemahan, mekanisme sandaran, penyegaran token dan penjejakan penggunaan.
 
 Keupayaan teras:
 
-- Permukaan API serasi OpenAI untuk CLI/alatan (375 penyedia, 156 modul pelaksana)
+- Permukaan API yang serasi dengan OpenAI untuk CLI/alat (375 penyedia, 156 modul pelaksana)
 - Terjemahan permintaan/respons merentasi format penyedia
-- Fallback kombo model (urutan berbilang model)
-- Langkah kombo berstruktur (`provider + model + connection`) dengan pengisihan masa jalanan oleh `compositeTiers`
-- Fallback peringkat akaun (berbilang akaun setiap penyedia)
-- Pra-semakan kuota dan pemilihan akaun P2C peka kuota dalam laluan sembang utama
+- Mekanisme sandaran gabungan model (jujukan berbilang model)
+- Langkah gabungan berstruktur (`provider + model + connection`) dengan pengisihan masa jalan mengikut `compositeTiers`
+- Mekanisme sandaran peringkat akaun (berbilang akaun bagi setiap penyedia)
+- Prapemeriksaan kuota dan pemilihan akaun P2C yang mengambil kira kuota dalam laluan sembang utama
 - Pengurusan sambungan penyedia OAuth + kunci API (27 modul penyedia OAuth)
-- Penjanaan embedding melalui `/v1/embeddings` (18 penyedia)
+- Penjanaan pembenaman melalui `/v1/embeddings` (18 penyedia)
 - Penjanaan imej melalui `/v1/images/generations` (10+ penyedia, 20+ model)
 - Transkripsi audio melalui `/v1/audio/transcriptions` (18 penyedia)
-- Teks-kepada-pertuturan melalui `/v1/audio/speech` (24 penyedia terbina dalam)
+- Teks kepada pertuturan melalui `/v1/audio/speech` (24 penyedia terbina dalam)
 - Penjanaan video melalui `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Penjanaan muzik melalui `/v1/music/generations` (ComfyUI)
 - Carian web melalui `/v1/search` (20 penyedia)
-- Moderasi melalui `/v1/moderations`
-- Penyusunan semula (reranking) melalui `/v1/rerank`
-- Penghuraian tag think (`<think>...</think>`) untuk model penaakulan
-- Sanitisasi respons untuk keserasian ketat SDK OpenAI
-- Normalisasi peranan (developer→system, system→user) untuk keserasian merentas penyedia
+- Penyederhanaan melalui `/v1/moderations`
+- Pengisihan semula melalui `/v1/rerank`
+- Penghuraian tag pemikiran (`<think>...</think>`) untuk model penaakulan
+- Pembersihan respons untuk keserasian ketat dengan SDK OpenAI
+- Penormalan peranan (developer→system, system→user) untuk keserasian merentas penyedia
 - Penukaran output berstruktur (json_schema → Gemini responseSchema)
-- Ketersimpanan setempat untuk penyedia, kunci, alias, kombo, tetapan, harga (122 modul DB)
+- Penyimpanan setempat untuk penyedia, kunci, alias, gabungan, tetapan dan harga (122 modul DB)
 - Penjejakan penggunaan/kos dan pengelogan permintaan
 - Penyegerakan awan pilihan untuk penyegerakan berbilang peranti/keadaan
-- Senarai benar/senarai sekat IP untuk kawalan akses API
-- Pengurusan bajet pemikiran (passthrough/auto/custom/adaptive)
-- Suntikan prompt sistem global
-- Penjejakan sesi dan pengecapan
-- Pengehadan kadar dipertingkat setiap akaun dengan profil khusus penyedia
+- Senarai IP yang dibenarkan/disekat untuk kawalan akses API
+- Pengurusan belanjawan pemikiran (laluan terus/automatik/tersuai/adaptif)
+- Penyuntikan gesaan sistem global
+- Penjejakan sesi dan pencapjarian
+- Pengehadan kadar dipertingkat bagi setiap akaun dengan profil khusus penyedia
 - Corak pemutus litar untuk daya tahan penyedia
-- Perlindungan anti-thundering herd dengan penguncian mutex
-- Cache penyahpenduaan permintaan berasaskan tandatangan
-- Lapisan domain: peraturan kos, dasar fallback, dasar penguncian
-- Context Relay: rumusan serah terima sesi untuk kesinambungan putaran akaun
-- Ketersimpanan keadaan domain (cache tulis-terus SQLite untuk fallback, bajet, penguncian, pemutus litar)
-- Enjin dasar untuk penilaian permintaan berpusat (penguncian → bajet → fallback)
-- Telemetri permintaan dengan agregasi latensi p50/p95/p99
-- Telemetri sasaran kombo dan kesihatan sasaran kombo bersejarah melalui `combo_execution_key` / `combo_step_id`
-- ID Korelasi (X-Request-Id) untuk pengesanan hujung ke hujung
-- Pengelogan audit pematuhan dengan pilihan keluar setiap kunci API
-- Rangka kerja eval untuk jaminan kualiti LLM
+- Perlindungan daripada lonjakan permintaan serentak dengan penguncian mutex
+- Cache penyahduplikasian permintaan berasaskan tandatangan
+- Lapisan domain: peraturan kos, dasar sandaran, dasar penguncian
+- Geganti Konteks: ringkasan penyerahan sesi untuk kesinambungan penggiliran akaun
+- Penyimpanan keadaan domain (cache tulis terus SQLite untuk sandaran, belanjawan, penguncian dan pemutus litar)
+- Enjin dasar untuk penilaian permintaan berpusat (penguncian → belanjawan → sandaran)
+- Telemetri permintaan dengan pengagregatan kependaman p50/p95/p99
+- Telemetri sasaran gabungan dan sejarah kesihatan sasaran gabungan melalui `combo_execution_key` / `combo_step_id`
+- ID korelasi (X-Request-Id) untuk penjejakan hujung ke hujung
+- Pengelogan audit pematuhan dengan pilihan untuk tidak menyertai bagi setiap kunci API
+- Rangka kerja penilaian untuk jaminan kualiti LLM
 - Papan pemuka kesihatan dengan status pemutus litar penyedia masa nyata
-- Pelayan MCP (110 alatan) dengan 3 pengangkutan (stdio/SSE/Streamable HTTP)
-- Pelayan A2A (JSON-RPC 2.0 + SSE) dengan kemahiran dan kitar hayat tugas
-- Sistem memori (pengekstrakan, suntikan, capaian, peringkasan)
-- Sistem kemahiran (registri, pelaksana, sandbox, kemahiran terbina dalam)
+- Pelayan MCP (110 alat) dengan 3 pengangkutan (stdio/SSE/HTTP Boleh Distrim)
+- Pelayan A2A (JSON-RPC 2.0 + SSE) dengan kemahiran dan kitaran hayat tugas
+- Sistem memori (pengekstrakan, penyuntikan, pemerolehan, peringkasan)
+- Sistem kemahiran (pendaftaran, pelaksana, kotak pasir, kemahiran terbina dalam)
 - Proksi MITM dengan pengurusan sijil dan pengendalian DNS
-- Middleware pengawal suntikan prompt
-- Pipeline mampatan prompt dengan Caveman, RTK, pipeline bertindih, kombo mampatan, pek bahasa, dan analitik
-- Registri ACP (Agent Communication Protocol)
+- Perisian tengah pelindung suntikan gesaan
+- Saluran pemampatan gesaan dengan Caveman, RTK, saluran bertindan, gabungan pemampatan, pek bahasa dan analitik
+- Pendaftaran ACP (Protokol Komunikasi Ejen)
 - Penyedia OAuth modular (22 modul individu di bawah `src/lib/oauth/providers/`)
 - Skrip nyahpasang/nyahpasang penuh
 - Tindakan pembaikan persekitaran OAuth
-- Jambatan WebSocket untuk klien WS serasi OpenAI (`/v1/ws`)
-- Pengurusan token segerak (terbit/batal, muat turun berkas konfigurasi bervarsi ETag)
-- Pratetap penyedia kelas pertama GLM Thinking (`glmt`)
-- Pengiraan token hibrid (`/messages/count_tokens` sebelah penyedia dengan fallback anggaran)
-- Pembibitan automatik alias model (30+ normalisasi dialek merentas proksi semasa permulaan)
-- Fetch keluar selamat dengan pengawal SSRF, penyekatan URL peribadi, dan cuba semula boleh konfigurasi
-- Cuba semula sembang peka cooldown dengan `requestRetry` dan `maxRetryIntervalSec` boleh konfigurasi
-- Pengesahan persekitaran masa jalanan dengan Zod semasa permulaan
-- Audit pematuhan v2 dengan penomboran halaman, peristiwa CRUD penyedia, dan pengelogan pengesahan tersekat SSRF
+- Jambatan WebSocket untuk klien WS yang serasi dengan OpenAI (`/v1/ws`)
+- Pengurusan token penyegerakan (pengeluaran/pembatalan, muat turun berkas konfigurasi diversi ETag)
+- GLM Thinking (`glmt`) sebagai pratetap penyedia kelas pertama
+- Pengiraan token hibrid (`/messages/count_tokens` di pihak penyedia dengan anggaran sebagai sandaran)
+- Penyemaian automatik alias model (30+ penormalan dialek merentas proksi semasa permulaan)
+- Pengambilan keluar yang selamat dengan pelindung SSRF, penyekatan URL peribadi dan percubaan semula yang boleh dikonfigurasikan
+- Percubaan semula sembang yang mengambil kira tempoh bertenang dengan `requestRetry` dan `maxRetryIntervalSec` yang boleh dikonfigurasikan
+- Pengesahan persekitaran masa jalan dengan Zod semasa permulaan
+- Audit pematuhan v2 dengan penomboran halaman, peristiwa CRUD penyedia dan pengelogan pengesahan yang disekat SSRF
 
-Model masa jalanan utama:
+Model masa jalan utama:
 
-- Laluan aplikasi Next.js di bawah `src/app/api/*` melaksanakan kedua-dua API papan pemuka dan API keserasian
-- Teras SSE/penghalaan dikongsi dalam `src/sse/*` + `open-sse/*` mengendalikan pelaksanaan penyedia, terjemahan, penstriman, fallback, dan penggunaan
+- Laluan aplikasi Next.js di bawah `src/app/api/*` melaksanakan API papan pemuka dan API keserasian
+- Teras SSE/penghalaan yang dikongsi dalam `src/sse/*` + `open-sse/*` mengendalikan pelaksanaan penyedia, terjemahan, penstriman, mekanisme sandaran dan penggunaan
 
 ## Rajah Rujukan
 
@@ -114,51 +114,51 @@ selebihnya dipautkan daripada panduan khusus domain masing-masing.
 - SLA/satah kawalan penyedia di luar proses setempat
 - Binari CLI luaran itu sendiri (Claude CLI, Codex CLI, dll.)
 
-## Permukaan Papan Pemuka (Semasa)
+## Permukaan Dashboard (Semasa)
 
 Halaman utama di bawah `src/app/(dashboard)/dashboard/`:
 
 - `/dashboard` — mula pantas + gambaran keseluruhan penyedia
-- `/dashboard/endpoint` — proksi endpoint + tab MCP + A2A + endpoint API
-- `/dashboard/providers` — sambungan penyedia dan kredential
-- `/dashboard/combos` — strategi kombo, templat, pembina berasaskan langkah, peraturan penghalaan model, pengisihan berterusan manual
-- `/dashboard/auto-combo` — Auto Combo Engine: pemberat penskoran, pek mod, pratetap kilang maya, telemetri
-- `/dashboard/costs` — pengagregatan kos dan kebolehlihatan penetapan harga
-- `/dashboard/analytics` — analitik penggunaan, penilaian, kesihatan sasaran kombo
+- `/dashboard/endpoint` — tab proksi titik akhir + MCP + A2A + titik akhir API
+- `/dashboard/providers` — sambungan dan kelayakan penyedia
+- `/dashboard/combos` — strategi combo, templat, pembina berasaskan langkah, peraturan penghalaan model, susunan tersimpan manual
+- `/dashboard/auto-combo` — Enjin Auto Combo: pemberat pemarkahan, pek mod, pratetap kilang maya, telemetri
+- `/dashboard/costs` — pengagregatan kos dan keterlihatan harga
+- `/dashboard/analytics` — analitik penggunaan, penilaian, tahap kesihatan sasaran combo
 - `/dashboard/limits` — kawalan kuota/kadar
-- `/dashboard/cli-tools` — orientasi CLI, pengesanan runtime, penjanaan konfigurasi
+- `/dashboard/cli-tools` — orientasi CLI, pengesanan masa jalan, penjanaan konfigurasi
 - `/dashboard/agents` — ejen ACP yang dikesan + pendaftaran ejen tersuai
-- `/dashboard/cloud-agents` — tugas ejen yang dihoskan awan (Codex Cloud, Devin, Jules) dan kitar hayat tugas
-- `/dashboard/skills` — pendaftar kemahiran A2A, pelaksanaan sandbox, katalog kemahiran terbina dalam
-- `/dashboard/memory` — pemeriksaan dan pengambilan memori perbualan berterusan
-- `/dashboard/webhooks` — langganan webhook keluar, pergiliran rahsia, statistik cubaan semula
-- `/dashboard/batch` — penyerahan kerja kelompok dan kemajuan
-- `/dashboard/cache` — statistik cache read-through dan penaakulan, kawalan pengusiran
-- `/dashboard/playground` — playground sembang interaktif terhadap mana-mana kombo/model yang dikonfigurasikan
-- `/dashboard/changelog` — pemapar changelog dalam aplikasi (memaparkan `CHANGELOG.md`)
-- `/dashboard/system` — diagnostik runtime, maklumat versi, permukaan pengesahan persekitaran
-- `/dashboard/onboarding` — pendeta persediaan masa jalan pertama untuk pemasangan baharu
-- `/dashboard/media` — playground imej/video/muzik
-- `/dashboard/search-tools` — pengujian penyedia carian dan sejarah
+- `/dashboard/cloud-agents` — tugas ejen yang dihoskan dalam awan (Codex Cloud, Devin, Jules) dan kitar hayat tugas
+- `/dashboard/skills` — daftar kemahiran A2A, pelaksanaan kotak pasir, katalog kemahiran terbina dalam
+- `/dashboard/memory` — pemeriksaan dan pengambilan semula memori perbualan berterusan
+- `/dashboard/webhooks` — langganan webhook keluar, putaran rahsia, statistik percubaan semula
+- `/dashboard/batch` — penyerahan tugas kelompok dan kemajuan
+- `/dashboard/cache` — statistik cache baca lalu dan penaakulan, kawalan penyingkiran
+- `/dashboard/playground` — ruang uji sembang interaktif menggunakan mana-mana combo/model yang dikonfigurasikan
+- `/dashboard/changelog` — pemapar log perubahan dalam aplikasi (memaparkan `CHANGELOG.md`)
+- `/dashboard/system` — diagnostik masa jalan, maklumat versi, permukaan pengesahan persekitaran
+- `/dashboard/onboarding` — pendeta persediaan penggunaan pertama untuk pemasangan baharu
+- `/dashboard/media` — ruang uji imej/video/muzik
+- `/dashboard/search-tools` — pengujian dan sejarah penyedia carian
 - `/dashboard/health` — masa operasi, pemutus litar, had kadar, sesi yang dipantau kuota
 - `/dashboard/logs` — log permintaan/proksi/audit/konsol
-- `/dashboard/settings` — tab tetapan sistem (umum, penghalaan, lalai kombo, dsb.)
-- `/dashboard/context/caveman` — peraturan pemampatan Caveman, pek bahasa, pratonton, dan mod output
-- `/dashboard/context/rtk` — penapis output perintah RTK, pratonton, dan tetapan keselamatan runtime
-- `/dashboard/context/combos` — saluran paip pemampatan bernama yang ditetapkan kepada kombo penghalaan
+- `/dashboard/settings` — tab tetapan sistem (umum, penghalaan, lalai combo dan sebagainya)
+- `/dashboard/context/caveman` — peraturan pemampatan Caveman, pek bahasa, pratonton dan mod output
+- `/dashboard/context/rtk` — penapis output perintah RTK, pratonton dan tetapan keselamatan masa jalan
+- `/dashboard/context/combos` — saluran paip pemampatan bernama yang ditugaskan kepada combo penghalaan
 - `/dashboard/translator` — pemeriksaan penterjemah dan pratonton penukaran format permintaan
 - `/dashboard/audit` — pelayar log audit pematuhan dengan penomboran halaman dan metadata berstruktur
-- `/dashboard/usage` — pelayar penggunaan setiap permintaan yang terikat kepada `usage_history`
-- `/dashboard/compression` — analitik pemampatan, statistik, dan penetapan saluran paip
+- `/dashboard/usage` — pelayar penggunaan bagi setiap permintaan yang dipautkan kepada `usage_history`
+- `/dashboard/compression` — analitik pemampatan, statistik dan penugasan saluran paip
 - `/dashboard/api-manager` — kitar hayat kunci API dan kebenaran model
 
-Lapisan UI: setiap halaman dipaparkan di dalam satu shell — `src/app/(dashboard)/layout.tsx` →
+Lapisan UI: setiap halaman dipaparkan dalam satu cangkerang — `src/app/(dashboard)/layout.tsx` →
 `src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset`
-milik kit, `Sidebar.tsx` dan `Header.tsx` milik OmniRoute). Halaman mengimport blok binaan mereka daripada
-`@/shared/components` (penyesuai ke atas Keak CI UI Kit yang di-vendor dalam `packages/ui-kit`) atau daripada
-sublaluan komponen kit (`@omniroute/ui-kit/table`, `…/page-header`), dan ikon melalui `<Icon>`
-(`ICON_MAP` → Lucide). Tema (`system` secara lalai, cerah/gelap) dan token datang daripada kit melalui
-jambatan dalam `src/app/globals.css`. Butiran: `docs/architecture/DESIGN_SYSTEM.md`.
+daripada kit, serta `Sidebar.tsx` dan `Header.tsx` daripada OmniRoute). Halaman mengimport blok
+binaannya daripada `@/shared/components` (penyesuai bagi Kit UI Keak CI yang disertakan dalam
+`packages/ui-kit`) atau daripada sublaluan komponen kit (`@omniroute/ui-kit/table`, `…/page-header`), dan
+ikon melalui `<Icon>` (`ICON_MAP` → Lucide). Tema (`system` secara lalai, cerah/gelap) dan token diperoleh
+daripada kit melalui jambatan dalam `src/app/globals.css`. Butiran: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Konteks Sistem Peringkat Tinggi
 

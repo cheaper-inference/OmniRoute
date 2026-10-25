@@ -10,77 +10,77 @@ _Paskutinį kartą atnaujinta: 2026-06-28_
 
 ## Santrauka vadovams
 
-OmniRoute yra vietinis AI maršrutizavimo šliuzas ir valdymo skydas, sukurtas Next.js pagrindu.
-Jis suteikia vieną su OpenAI suderinamą galinį tašką (`/v1/*`) ir nukreipia srautą per kelis pirminius teikėjus, užtikrindamas vertimą, atsarginį perjungimą, prieigos raktų atnaujinimą ir naudojimo sekimą.
+„OmniRoute“ yra vietinis dirbtinio intelekto užklausų maršruto parinkimo šliuzas ir valdymo skydelis, sukurtas naudojant „Next.js“.
+Jis suteikia vieną su „OpenAI“ suderinamą galinį tašką (`/v1/*`) ir nukreipia srautą keliems pirminiams paslaugų teikėjams, užtikrindamas formatų konvertavimą, atsarginį perjungimą, prieigos raktų atnaujinimą ir naudojimo stebėjimą.
 
 Pagrindinės galimybės:
 
-- Su OpenAI suderinama API sąsaja CLI/įrankiams (375 teikėjai, 156 vykdytojų moduliai)
-- Užklausų/atsakymų vertimas tarp skirtingų teikėjų formatų
-- Modelių kombinacijų atsarginis perjungimas (kelių modelių seka)
-- Struktūriniai kombinacijos žingsniai (`provider + model + connection`) su vykdymo metu nustatoma tvarka pagal `compositeTiers`
-- Paskyros lygmens atsarginis perjungimas (kelios paskyros vienam teikėjui)
-- Kvotų išankstinis patikrinimas ir kvotas atsižvelgiantis P2C paskyros pasirinkimas pagrindiniame pokalbių kelyje
-- OAuth + API rakto teikėjų prisijungimų valdymas (27 OAuth teikėjų moduliai)
-- Įterpimų (embedding) generavimas per `/v1/embeddings` (18 teikėjų)
-- Vaizdų generavimas per `/v1/images/generations` (10+ teikėjų, 20+ modelių)
-- Garso transkripcija per `/v1/audio/transcriptions` (18 teikėjų)
-- Teksto pavertimas kalba per `/v1/audio/speech` (24 integruoti teikėjai)
-- Vaizdo įrašų generavimas per `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Muzikos generavimas per `/v1/music/generations` (ComfyUI)
-- Paieška žiniatinklyje per `/v1/search` (20 teikėjų)
-- Moderavimas per `/v1/moderations`
-- Rerikiavimas per `/v1/rerank`
-- Mąstymo žymų analizavimas (`<think>...</think>`) samprotaujantiems modeliams
-- Atsakymų išvalymas, siekiant griežto suderinamumo su OpenAI SDK
-- Rolių normalizavimas (developer→system, system→user) suderinamumui tarp teikėjų
-- Struktūrinio išvesties konvertavimas (json_schema → Gemini responseSchema)
-- Vietinė teikėjų, raktų, pseudonimų, kombinacijų, nustatymų ir kainodaros saugykla (122 DB moduliai)
-- Naudojimo/išlaidų sekimas ir užklausų žurnalizavimas
-- Pasirenkamas debesų sinchronizavimas keliems įrenginiams/būsenos sinchronizavimui
-- IP leidžiamųjų/uždraudžiamųjų sąrašai API prieigos valdymui
-- Mąstymo biudžeto valdymas (passthrough/auto/custom/adaptive)
-- Globalaus sistemos raginimo įterpimas
-- Sesijų sekimas ir identifikavimas
-- Patobulintas užklausų ribojimas kiekvienai paskyrai su konkrečiam teikėjui pritaikytais profiliais
-- Grandinės pertraukiklio (circuit breaker) šablonas teikėjų atsparumui
-- Apsauga nuo „griaustinio bandos" (thundering herd) efekto su mutex užraktinimu
-- Parašais pagrįstas užklausų dubliavimosi šalinimo talpykla
-- Domenų sluoksnis: išlaidų taisyklės, atsarginio perjungimo politika, blokavimo politika
-- Context Relay: sesijos perdavimo santraukos paskyros rotacijos tęstinumui
-- Domenų būsenos išsaugojimas (SQLite write-through talpykla atsarginiams perjungimams, biudžetams, blokavimams, grandinės pertraukikliams)
-- Politikų variklis centralizuotam užklausų vertinimui (blokavimas → biudžetas → atsarginis perjungimas)
+- Su „OpenAI“ suderinama API sąsaja, skirta CLI ir įrankiams (375 paslaugų teikėjai, 156 vykdymo moduliai)
+- Užklausų ir atsakymų konvertavimas tarp paslaugų teikėjų formatų
+- Modelių derinio atsarginis perjungimas (kelių modelių seka)
+- Struktūrizuoti derinio žingsniai (`provider + model + connection`) su vykdymo metu nustatoma tvarka pagal `compositeTiers`
+- Paskyros lygmens atsarginis perjungimas (kelios paskyros vienam paslaugų teikėjui)
+- Išankstinis kvotos tikrinimas ir į kvotą atsižvelgiantis P2C paskyros parinkimas pagrindiniame pokalbių sraute
+- OAuth ir API raktais pagrįstas paslaugų teikėjų ryšių valdymas (27 OAuth paslaugų teikėjų moduliai)
+- Įterpinių generavimas per `/v1/embeddings` (18 paslaugų teikėjų)
+- Vaizdų generavimas per `/v1/images/generations` (daugiau nei 10 paslaugų teikėjų, daugiau nei 20 modelių)
+- Garso transkribavimas per `/v1/audio/transcriptions` (18 paslaugų teikėjų)
+- Teksto vertimas į kalbą per `/v1/audio/speech` (24 integruoti paslaugų teikėjai)
+- Vaizdo įrašų generavimas per `/v1/videos/generations` („ComfyUI“ ir „SD WebUI“)
+- Muzikos generavimas per `/v1/music/generations` („ComfyUI“)
+- Paieška žiniatinklyje per `/v1/search` (20 paslaugų teikėjų)
+- Turinio moderavimas per `/v1/moderations`
+- Pakartotinis reitingavimas per `/v1/rerank`
+- Mąstymo žymų analizė (`<think>...</think>`), skirta samprotavimo modeliams
+- Atsakymų išvalymas, užtikrinantis griežtą suderinamumą su „OpenAI“ SDK
+- Vaidmenų normalizavimas (developer→system, system→user), užtikrinantis skirtingų paslaugų teikėjų suderinamumą
+- Struktūrizuotos išvesties konvertavimas (json_schema → Gemini responseSchema)
+- Vietinis paslaugų teikėjų, raktų, alternatyviųjų pavadinimų, derinių, nustatymų ir kainodaros duomenų saugojimas (122 DB moduliai)
+- Naudojimo ir išlaidų stebėjimas bei užklausų registravimas
+- Pasirinktinis debesų sinchronizavimas, skirtas kelių įrenginių ir būsenos sinchronizavimui
+- Leidžiamų ir blokuojamų IP adresų sąrašai, skirti API prieigai valdyti
+- Mąstymo biudžeto valdymas (tiesioginis perdavimas / automatinis / pasirinktinis / adaptyvus)
+- Visuotinės sistemos instrukcijos įterpimas
+- Seansų stebėjimas ir skaitmeninių atspaudų nustatymas
+- Patobulintas paskyros lygmens užklausų dažnio ribojimas naudojant konkretiems paslaugų teikėjams skirtus profilius
+- Grandinės pertraukiklio šablonas, didinantis paslaugų teikėjų atsparumą
+- Apsauga nuo vienalaikių užklausų antplūdžio naudojant abipusio blokavimo mechanizmą
+- Parašais pagrįsta pasikartojančių užklausų šalinimo podėlio sistema
+- Domeno sluoksnis: išlaidų taisyklės, atsarginio perjungimo politika, blokavimo politika
+- Konteksto perdavimas: seanso perdavimo santraukos, užtikrinančios tęstinumą keičiant paskyras
+- Domeno būsenos saugojimas (tiesioginio įrašymo „SQLite“ podėlis, skirtas atsarginiams perjungimams, biudžetams, blokavimams ir grandinės pertraukikliams)
+- Centralizuoto užklausų vertinimo strategijų variklis (blokavimas → biudžetas → atsarginis perjungimas)
 - Užklausų telemetrija su p50/p95/p99 delsos agregavimu
-- Kombinacijos tikslų telemetrija ir istorinė kombinacijos tikslų būklė per `combo_execution_key` / `combo_step_id`
-- Koreliacijos ID (X-Request-Id) visapusiškam sekimui
-- Atitikties audito žurnalizavimas su galimybe atsisakyti kiekvienam API raktui
-- Vertinimo (eval) karkasas LLM kokybės užtikrinimui
-- Būklės skydas su realaus laiko teikėjų grandinės pertraukiklių būsena
-- MCP serveris (110 įrankių) su 3 transportais (stdio/SSE/Streamable HTTP)
-- A2A serveris (JSON-RPC 2.0 + SSE) su įgūdžiais ir užduočių gyvavimo ciklu
-- Atminties sistema (išgavimas, įterpimas, gavimas, santraukos)
-- Įgūdžių sistema (registras, vykdytojas, smėlio dėžė, integruoti įgūdžiai)
+- Derinio paskirties telemetrija ir istorinė derinio paskirties būklė naudojant `combo_execution_key` / `combo_step_id`
+- Koreliacijos ID (X-Request-Id), skirtas visos užklausos eigos sekimui
+- Atitikties audito registravimas su galimybe atsisakyti kiekvienam API raktui
+- Vertinimo sistema, skirta LLM kokybei užtikrinti
+- Būklės valdymo skydelis su realiuoju laiku rodoma paslaugų teikėjų grandinės pertraukiklių būsena
+- MCP serveris (110 įrankių) su 3 perdavimo būdais (stdio/SSE/srautinis HTTP)
+- A2A serveris (JSON-RPC 2.0 ir SSE) su gebėjimais ir užduočių gyvavimo ciklu
+- Atminties sistema (išgavimas, įterpimas, gavimas, apibendrinimas)
+- Gebėjimų sistema (registras, vykdyklė, izoliuota aplinka, integruoti gebėjimai)
 - MITM tarpinis serveris su sertifikatų valdymu ir DNS apdorojimu
-- Raginimų įterpimo apsaugos tarpinė programinė įranga (middleware)
-- Raginimų suspaudimo grandinė su Caveman, RTK, sluoksniuotomis grandinėmis, suspaudimo kombinacijomis, kalbų paketais ir analitika
-- ACP (Agent Communication Protocol) registras
-- Moduliniai OAuth teikėjai (22 atskiri moduliai kataloge `src/lib/oauth/providers/`)
-- Pašalinimo/visiško pašalinimo scenarijai
+- Apsaugos nuo instrukcijų įterpimo tarpinė programinė įranga
+- Instrukcijų glaudinimo konvejeris su „Caveman“, RTK, sudėtiniais konvejeriais, glaudinimo deriniais, kalbų paketais ir analitika
+- ACP (agentų komunikacijos protokolo) registras
+- Moduliniai OAuth paslaugų teikėjai (22 atskiri moduliai kataloge `src/lib/oauth/providers/`)
+- Pašalinimo ir visiško pašalinimo scenarijai
 - OAuth aplinkos taisymo veiksmas
-- WebSocket tiltas su OpenAI suderinamiems WS klientams (`/v1/ws`)
-- Sinchronizavimo prieigos raktų valdymas (išdavimas/atšaukimas, konfigūracijos rinkinio atsisiuntimas su ETag versijavimu)
-- GLM Thinking (`glmt`) kaip pirmos klasės teikėjo išankstinis nustatymas
-- Hibridinis žetonų skaičiavimas (teikėjo pusės `/messages/count_tokens` su atsarginiu įvertinimu)
-- Automatinis modelių pseudonimų inicijavimas (30+ tarpinių proxy dialektų normalizavimų paleidimo metu)
-- Saugus išeinantis gavimas (fetch) su SSRF apsauga, privačių URL blokavimu ir konfigūruojamu pakartotiniu bandymu
-- Atsinaujinimo (cooldown) laikotarpius atsižvelgiantys pokalbių pakartotiniai bandymai su konfigūruojamais `requestRetry` ir `maxRetryIntervalSec`
-- Vykdymo aplinkos validacija su Zod paleidimo metu
-- Atitikties auditas v2 su puslapiavimu, teikėjų CRUD įvykiais ir SSRF užblokuotos validacijos žurnalizavimu
+- „WebSocket“ tiltas, skirtas su „OpenAI“ suderinamiems WS klientams (`/v1/ws`)
+- Sinchronizavimo prieigos raktų valdymas (išdavimas / atšaukimas, ETag versijuojamo konfigūracijos paketo atsisiuntimas)
+- GLM mąstymas (`glmt`) kaip visavertė paslaugų teikėjo išankstinė parinktis
+- Hibridinis žetonų skaičiavimas (paslaugų teikėjo pusės `/messages/count_tokens` su atsarginiu apytiksliu vertinimu)
+- Automatinis modelių alternatyviųjų pavadinimų pradinis užpildymas (daugiau nei 30 skirtingų tarpinių serverių dialektų normalizavimų paleidimo metu)
+- Saugus siunčiamųjų užklausų vykdymas su SSRF apsauga, privačių URL blokavimu ir konfigūruojamais pakartotiniais bandymais
+- Į laukimo laikotarpius atsižvelgiantys pakartotiniai pokalbių užklausų bandymai su konfigūruojamais `requestRetry` ir `maxRetryIntervalSec`
+- Vykdymo aplinkos tikrinimas naudojant „Zod“ paleidimo metu
+- Atitikties audito 2 versija su puslapiavimu, paslaugų teikėjų CRUD įvykiais ir SSRF užblokuotų tikrinimų registravimu
 
 Pagrindinis vykdymo modelis:
 
-- Next.js programos maršrutai kataloge `src/app/api/*` įgyvendina tiek valdymo skydo API, tiek suderinamumo API
-- Bendras SSE/maršrutizavimo branduolys `src/sse/*` + `open-sse/*` atsakingas už teikėjų vykdymą, vertimą, srautinę perduodą, atsarginį perjungimą ir naudojimo sekimą
+- „Next.js“ programos maršrutai kataloge `src/app/api/*` įgyvendina ir valdymo skydelio API, ir suderinamumo API
+- Bendras SSE ir maršruto parinkimo branduolys kataloguose `src/sse/*` ir `open-sse/*` apdoroja paslaugų teikėjų vykdymą, konvertavimą, srautinį perdavimą, atsarginį perjungimą ir naudojimo apskaitą
 
 ## Etaloninės diagramos
 
@@ -114,51 +114,51 @@ likusios susietos su konkrečioms sritims skirtais vadovais.
 - Teikėjo SLA / valdymo sluoksnis už vietinio proceso ribų
 - Patys išoriniai CLI vykdomieji failai (Claude CLI, Codex CLI ir kt.)
 
-## Dashboard paviršius (dabartinis)
+## Valdymo skydelio sąsaja (dabartinė)
 
-Pagrindiniai puslapiai kataloge `src/app/(dashboard)/dashboard/`:
+Pagrindiniai puslapiai, esantys `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — greita pradžia + teikėjų apžvalga
-- `/dashboard/endpoint` — galinio taško tarpinis serveris + MCP + A2A + API galinių taškų kortelės
-- `/dashboard/providers` — teikėjų prisijungimai ir prisijungimo duomenys
-- `/dashboard/combos` — kombinacijų strategijos, šablonai, žingsniais pagrįstas kūrimo įrankis, modelių maršrutizavimo taisyklės, rankinė išsaugota rikiavimo tvarka
-- `/dashboard/auto-combo` — Auto Combo variklis: vertinimo svoriai, režimų paketai, virtualūs gamykliniai išankstiniai nustatymai, telemetrija
-- `/dashboard/costs` — sąnaudų agregavimas ir kainodaros matomumas
-- `/dashboard/analytics` — naudojimo analitika, vertinimai, kombinacijos tikslų būklė
-- `/dashboard/limits` — kvotų / užklausų dažnio valdikliai
-- `/dashboard/cli-tools` — CLI naudojimo pradžia, vykdymo aplinkos aptikimas, konfigūracijos generavimas
-- `/dashboard/agents` — aptikti ACP agentai + pasirinktinių agentų registracija
-- `/dashboard/cloud-agents` — debesyje talpinamų agentų užduotys (Codex Cloud, Devin, Jules) ir užduočių gyvavimo ciklas
-- `/dashboard/skills` — A2A įgūdžių registras, vykdymas smėlio dėžėje, integruotų įgūdžių katalogas
-- `/dashboard/memory` — nuolatinės pokalbių atminties tikrinimas ir paieška
-- `/dashboard/webhooks` — išeinančių webhook prenumeratos, slaptųjų raktų rotavimas, pakartotinių bandymų statistika
+- `/dashboard` — greitoji pradžia ir teikėjų apžvalga
+- `/dashboard/endpoint` — galinio taško tarpinis serveris ir MCP, A2A bei API galinių taškų skirtukai
+- `/dashboard/providers` — teikėjų ryšiai ir prisijungimo duomenys
+- `/dashboard/combos` — derinių strategijos, šablonai, veiksmais pagrįsta kūrimo priemonė, modelių maršruto parinkimo taisyklės, rankiniu būdu išsaugoma tvarka
+- `/dashboard/auto-combo` — automatinio derinių variklio vertinimo svoriai, režimų rinkiniai, virtualios gamyklos išankstinės parinktys ir telemetrija
+- `/dashboard/costs` — išlaidų agregavimas ir kainodaros matomumas
+- `/dashboard/analytics` — naudojimo analitika, vertinimai, derinių paskirties vietų būklė
+- `/dashboard/limits` — kvotų ir užklausų dažnio valdikliai
+- `/dashboard/cli-tools` — CLI pradinis parengimas, vykdymo aplinkos aptikimas, konfigūracijos generavimas
+- `/dashboard/agents` — aptikti ACP agentai ir pasirinktinių agentų registravimas
+- `/dashboard/cloud-agents` — debesijoje talpinamos agentų užduotys (Codex Cloud, Devin, Jules) ir užduočių gyvavimo ciklas
+- `/dashboard/skills` — A2A įgūdžių registras, vykdymas izoliuotoje aplinkoje, integruotų įgūdžių katalogas
+- `/dashboard/memory` — nuolatinės pokalbių atminties tikrinimas ir gavimas
+- `/dashboard/webhooks` — išeinančių „webhook“ prenumeratos, paslapčių rotacija, pakartotinių bandymų statistika
 - `/dashboard/batch` — paketinių užduočių pateikimas ir eiga
-- `/dashboard/cache` — read-through ir samprotavimų talpyklos statistika, išstūmimo valdikliai
-- `/dashboard/playground` — interaktyvi pokalbių testavimo aikštelė su bet kuria sukonfigūruota kombinacija / modeliu
-- `/dashboard/changelog` — programoje integruota pakeitimų žurnalo peržiūros priemonė (atvaizduoja `CHANGELOG.md`)
-- `/dashboard/system` — vykdymo aplinkos diagnostika, versijos informacija, aplinkos tikrinimo paviršius
-- `/dashboard/onboarding` — pirmojo paleidimo sąrankos vedlys naujiems diegimams
-- `/dashboard/media` — paveikslų / vaizdo įrašų / muzikos testavimo aikštelė
+- `/dashboard/cache` — skaidriai skaitomos ir samprotavimo podėlių statistika, šalinimo valdikliai
+- `/dashboard/playground` — interaktyvi pokalbių bandymų aplinka, skirta bet kuriam sukonfigūruotam deriniui ar modeliui
+- `/dashboard/changelog` — programoje pateikiama pakeitimų žurnalo peržiūros priemonė (atvaizduoja `CHANGELOG.md`)
+- `/dashboard/system` — vykdymo aplinkos diagnostika, versijos informacija, aplinkos tikrinimo sąsaja
+- `/dashboard/onboarding` — pirmojo paleidimo sąrankos vediklis naujiems diegimams
+- `/dashboard/media` — vaizdų, vaizdo įrašų ir muzikos bandymų aplinka
 - `/dashboard/search-tools` — paieškos teikėjų testavimas ir istorija
-- `/dashboard/health` — veikimo laikas, grandinės pertraukikliai, užklausų dažnio ribos, kvotomis stebimos sesijos
-- `/dashboard/logs` — užklausų / tarpinio serverio / audito / konsolės žurnalai
-- `/dashboard/settings` — sistemos nustatymų kortelės (bendrieji, maršrutizavimo, kombinacijų numatytieji nustatymai ir t. t.)
+- `/dashboard/health` — veikimo laikas, grandinės išjungikliai, užklausų dažnio apribojimai, pagal kvotas stebimos sesijos
+- `/dashboard/logs` — užklausų, tarpinio serverio, audito ir konsolės žurnalai
+- `/dashboard/settings` — sistemos nustatymų skirtukai (bendrieji, maršruto parinkimo, numatytųjų derinių ir kt.)
 - `/dashboard/context/caveman` — Caveman glaudinimo taisyklės, kalbų paketai, peržiūra ir išvesties režimas
 - `/dashboard/context/rtk` — RTK komandų išvesties filtrai, peržiūra ir vykdymo aplinkos saugos nustatymai
-- `/dashboard/context/combos` — pavadinti glaudinimo konvejeriai, priskirti maršrutizavimo kombinacijoms
+- `/dashboard/context/combos` — įvardyti glaudinimo konvejeriai, priskirti maršruto parinkimo deriniams
 - `/dashboard/translator` — vertėjo tikrinimas ir užklausos formato konvertavimo peržiūra
-- `/dashboard/audit` — atitikties audito žurnalo naršyklė su puslapiavimu ir struktūrizuotais metaduomenimis
+- `/dashboard/audit` — atitikties audito žurnalo naršyklė su puslapių numeracija ir struktūriniais metaduomenimis
 - `/dashboard/usage` — atskirų užklausų naudojimo naršyklė, susieta su `usage_history`
 - `/dashboard/compression` — glaudinimo analitika, statistika ir konvejerių priskyrimas
 - `/dashboard/api-manager` — API raktų gyvavimo ciklas ir modelių leidimai
 
-UI sluoksnis: kiekvienas puslapis atvaizduojamas viename karkase — `src/app/(dashboard)/layout.tsx` →
+UI sluoksnis: kiekvienas puslapis atvaizduojamas viename apvalkale — `src/app/(dashboard)/layout.tsx` →
 `src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (rinkinio
 `SidebarProvider`/`SidebarInset`, OmniRoute `Sidebar.tsx` ir `Header.tsx`). Puslapiai importuoja savo
-konstrukcinius blokus iš `@/shared/components` (adapteriai virš į projektą įtraukto Keak CI UI Kit,
-esančio `packages/ui-kit`) arba iš rinkinio komponentų pakelių (`@omniroute/ui-kit/table`, `…/page-header`), o
-piktogramas — per `<Icon>` (`ICON_MAP` → Lucide). Tema (pagal numatymą `system`, šviesi / tamsi) ir
-žetonai gaunami iš rinkinio per tiltą `src/app/globals.css`. Išsamiau: `docs/architecture/DESIGN_SYSTEM.md`.
+kūrimo blokus iš `@/shared/components` (adapteriai, naudojami virš projekte pateikto Keak CI UI Kit,
+esančio `packages/ui-kit`) arba iš rinkinio komponentų vidinių kelių (`@omniroute/ui-kit/table`, `…/page-header`), o
+piktogramas — per `<Icon>` (`ICON_MAP` → Lucide). Tema (numatytoji — `system`, šviesi / tamsi) ir dizaino kintamieji gaunami
+iš rinkinio per susiejimo sluoksnį faile `src/app/globals.css`. Išsami informacija: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Aukšto lygio sistemos kontekstas
 

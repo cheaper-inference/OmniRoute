@@ -8,79 +8,79 @@
 
 _Nuashonraithe an uair dheireanach: 2026-06-28_
 
-## Achoimre Fheidhmiúcháin
+## Achoimre Feidhmiúcháin
 
-Is geata ródúcháin AI áitiúil agus deais é OmniRoute atá tógtha ar Next.js.
-Soláthraíonn sé críochphointe amháin comhoiriúnach le OpenAI (`/v1/*`) agus ródann sé trácht thar ilsholáthraithe uasshrutha le haistriúchán, cúltaca, athnuachan comharthaí, agus rianú úsáide.
+Is geata ródaithe AI áitiúil agus painéal é OmniRoute atá tógtha ar Next.js.
+Soláthraíonn sé críochphointe aonair atá comhoiriúnach le OpenAI (`/v1/*`) agus ródaíonn sé trácht thar iliomad soláthraithe réamhtheachtacha le haistriúchán, cúltaca, athnuachan comharthaí agus rianú úsáide.
 
-Croíchumais:
+Príomhchumais:
 
-- Dromchla API comhoiriúnach le OpenAI le haghaidh CLI/uirlisí (375 soláthraí, 156 modúl feidhmeora)
-- Aistriúchán iarratais/freagartha thar fhormáidí soláthraí
-- Cúltaca teaglaim samhlacha (seicheamh ilshamhlacha)
-- Céimeanna teaglaim struchtúrtha (`provider + model + connection`) le hordú rith-ama de réir `compositeTiers`
-- Cúltaca ar leibhéal an chuntais (ilchuntais in aghaidh an tsoláthraí)
-- Réamhsheiceáil cuóta agus roghnú cuntas P2C feasach ar chuóta sa phríomhchonair chomhrá
-- Bainistíocht ceangail soláthraí OAuth + eochair API (27 modúl soláthraí OAuth)
-- Giniúint leabúcháin trí `/v1/embeddings` (18 soláthraí)
+- Dromchla API atá comhoiriúnach le OpenAI le haghaidh CLI/uirlisí (375 soláthraí, 156 modúl rite)
+- Aistriú iarrataí/freagraí idir formáidí soláthraithe
+- Cúltaca teaglama samhlacha (seicheamh il-samhail)
+- Céimeanna struchtúrtha teaglama (`provider + model + connection`) le hordú ag am rite de réir `compositeTiers`
+- Cúltaca ar leibhéal cuntais (ilchuntais in aghaidh an tsoláthraí)
+- Réamheiceáil cuóta agus roghnú cuntais P2C atá feasach ar chuóta sa phríomhchonair comhrá
+- Bainistíocht nasc soláthraithe trí OAuth + eochracha API (27 modúl soláthraí OAuth)
+- Giniúint leabuithe trí `/v1/embeddings` (18 soláthraí)
 - Giniúint íomhánna trí `/v1/images/generations` (10+ soláthraí, 20+ samhail)
 - Tras-scríobh fuaime trí `/v1/audio/transcriptions` (18 soláthraí)
 - Téacs-go-hurlabhra trí `/v1/audio/speech` (24 soláthraí ionsuite)
 - Giniúint físe trí `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Giniúint ceoil trí `/v1/music/generations` (ComfyUI)
 - Cuardach gréasáin trí `/v1/search` (20 soláthraí)
-- Measúnuithe trí `/v1/moderations`
+- Modhnóireachtaí trí `/v1/moderations`
 - Athrangú trí `/v1/rerank`
-- Parsáil clibeanna smaoineamh (`<think>...</think>`) do shamhlacha réasúnaíochta
-- Glanadh freagartha le haghaidh comhoiriúnacht dhian le SDK OpenAI
-- Normalú ról (developer→system, system→user) le haghaidh comhoiriúnacht idir sholáthraithe
-- Tiontú aschuir struchtúrtha (json_schema → responseSchema Gemini)
-- Marthanacht áitiúil do sholáthraithe, eochracha, ailiasanna, teaglaim, socruithe, praghsáil (122 modúl DB)
-- Rianú úsáide/costais agus logáil iarratas
-- Sioncrónú roghnach scamall le haghaidh sioncrónú ilfheiste/stáit
-- Liosta ceadaithe/blocáilte IP le haghaidh rialú rochtana API
-- Bainistíocht buiséid smaoinimh (passthrough/auto/custom/adaptive)
-- Instealladh domhanda leid chórais
-- Rianú seisiúin agus méarlorgú
-- Teorannú rátaí feabhsaithe in aghaidh an chuntais le próifílí sainiúla don soláthraí
-- Patrún briseoir ciorcaid le haghaidh athléimneacht soláthraí
-- Cosaint in aghaidh 'thundering herd' le glasáil frithghlais
-- Taisce dídhúbailte iarratas bunaithe ar shíniú
-- Ciseal fearainn: rialacha costais, beartas cúltaca, beartas glasála amach
-- Context Relay: achoimrí aistrithe seisiúin le haghaidh leanúnachais rothlaithe cuntas
-- Marthanacht stáit fearainn (taisce write-through SQLite do chúltacaí, buiséid, glasálacha amach, briseoirí ciorcaid)
-- Inneall beartais le haghaidh meastóireacht láraithe ar iarratais (glasáil amach → buiséad → cúltaca)
-- Teiliméadracht iarratais le comhiomlánú moille p50/p95/p99
-- Teiliméadracht sprioc teaglaim agus sláinte stairiúil sprioc teaglaim trí `combo_execution_key` / `combo_step_id`
-- ID comhchoibhnis (X-Request-Id) le haghaidh lorgaireachta ó cheann go ceann
-- Logáil iniúchta comhlíonta leis an rogha éirí as in aghaidh na heochrach API
-- Creat measúnaithe le haghaidh dearbhú cáilíochta LLM
-- Deais sláinte le stádas briseoir ciorcaid soláthraí i bhfíor-am
-- Freastalaí MCP (110 uirlis) le 3 iompar (stdio/SSE/Streamable HTTP)
-- Freastalaí A2A (JSON-RPC 2.0 + SSE) le scileanna agus saolré tasc
+- Parsáil clibeanna smaointeoireachta (`<think>...</think>`) le haghaidh samhlacha réasúnaíochta
+- Sláintiú freagraí ar mhaithe le dian-chomhoiriúnacht le OpenAI SDK
+- Normalú ról (developer→system, system→user) ar mhaithe le comhoiriúnacht idir soláthraithe
+- Tiontú aschuir struchtúrtha (json_schema → Gemini responseSchema)
+- Stóráil mharthanach áitiúil do sholáthraithe, eochracha, ailiasanna, teaglamaí, socruithe agus praghsáil (122 modúl DB)
+- Rianú úsáide/costais agus logáil iarrataí
+- Sioncronú néil roghnach le haghaidh sioncronú ilghléasanna/stáit
+- Liosta ceada/liosta coiscthe IP le haghaidh rialú rochtana API
+- Bainistíocht buiséid smaointeoireachta (pas-tríd/uathoibríoch/saincheaptha/oiriúnaitheach)
+- Instealladh leid chórais dhomhanda
+- Rianú seisiún agus méarlorgaireacht
+- Teorannú ráta feabhsaithe in aghaidh an chuntais le próifílí a bhaineann go sonrach le soláthraithe
+- Patrún scoradáin chiorcaid le haghaidh athléimneacht soláthraithe
+- Cosaint i gcoinne borradh comhuaineach iarrataí le glasáil mutex
+- Taisce dí-dhúblála iarrataí bunaithe ar shíniú
+- Sraith fearainn: rialacha costais, beartas cúltaca, beartas frithdhúnadh
+- Sealaíocht Chomhthéacs: achoimrí aistrithe seisiúin chun leanúnachas a choinneáil le linn rothlú cuntas
+- Stóráil mharthanach staid fearainn (taisce SQLite le scríobh tríd le haghaidh cúltacaí, buiséad, frithdhúnadh agus scoradán ciorcaid)
+- Inneall beartais le haghaidh meastóireacht láraithe iarrataí (frithdhúnadh → buiséad → cúltaca)
+- Teiliméadracht iarrataí le comhiomlánú aga folaigh p50/p95/p99
+- Teiliméadracht sprice teaglama agus sláinte stairiúil spriocanna teaglama trí `combo_execution_key` / `combo_step_id`
+- Aitheantas comhghaolmhaireachta (X-Request-Id) le haghaidh rianú ó cheann ceann
+- Logáil iniúchta comhlíontachta le rogha díliostála in aghaidh na heochrach API
+- Creat meastóireachta le haghaidh dearbhú cáilíochta LLM
+- Painéal sláinte le stádas fíor-ama scoradán ciorcaid soláthraithe
+- Freastalaí MCP (110 uirlis) le 3 mhodh iompair (stdio/SSE/Streamable HTTP)
+- Freastalaí A2A (JSON-RPC 2.0 + SSE) le scileanna agus saolré tascanna
 - Córas cuimhne (eastóscadh, instealladh, aisghabháil, achoimriú)
-- Córas scileanna (clárlann, feidhmeoir, bosca gainimh, scileanna ionsuite)
+- Córas scileanna (clárlann, riteoir, bosca gainimh, scileanna ionsuite)
 - Seachfhreastalaí MITM le bainistíocht teastas agus láimhseáil DNS
-- Idirbhogearraí garda in aghaidh insteallta leideanna
-- Píblíne comhbhrú leide le Caveman, RTK, píblínte cruachta, teaglaim chomhbhrú, pacáistí teanga, agus anailísíocht
+- Meánearra cosanta ar instealladh leid
+- Píblíne comhbhrúite leid le Caveman, RTK, píblínte cruachta, teaglamaí comhbhrúite, pacáistí teanga agus anailísíocht
 - Clárlann ACP (Agent Communication Protocol)
-- Soláthraithe OAuth modúlacha (22 modúl aonair faoi `src/lib/oauth/providers/`)
+- Soláthraithe modúlacha OAuth (22 modúl aonair faoi `src/lib/oauth/providers/`)
 - Scripteanna díshuiteála/díshuiteála iomláine
-- Gníomh deisiúcháin timpeallachta OAuth
-- Droichead WebSocket do chliaint WS comhoiriúnacha le OpenAI (`/v1/ws`)
-- Bainistíocht comharthaí sioncrónaithe (eisiúint/cúlghairm, íoslódáil bheart cumraíochta le leaganú ETag)
-- Réamhshocrú soláthraí céadaicme GLM Thinking (`glmt`)
-- Comhaireamh hibrideach comharthaí (`/messages/count_tokens` ar thaobh an tsoláthraí le cúltaca meastacháin)
-- Féinshíolú ailias samhlacha (30+ normalú canúna tras-proxy ag tosú)
-- Fetch amach slán le garda SSRF, blocáil URLanna príobháideacha, agus atriail inchumraithe
-- Atrialacha comhrá feasacha ar an tréimhse fuaraithe le `requestRetry` agus `maxRetryIntervalSec` inchumraithe
-- Bailíochtú timpeallachta rith-ama le Zod ag tosú
-- Iniúchadh comhlíonta v2 le leathánú, imeachtaí CRUD soláthraí, agus logáil bhailíochtaithe SSRF-blocáilte
+- Gníomh deisithe timpeallachta OAuth
+- Droichead WebSocket le haghaidh cliaint WS atá comhoiriúnach le OpenAI (`/v1/ws`)
+- Bainistíocht comharthaí sioncronaithe (eisiúint/cúlghairm, íoslódáil beart cumraíochta le leaganacha ETag)
+- Smaointeoireacht GLM (`glmt`) mar réamhshocrú soláthraí den chéad scoth
+- Comhaireamh hibrideach comharthaí (`/messages/count_tokens` ar thaobh an tsoláthraí le meastachán mar chúltaca)
+- Réamhshíolú uathoibríoch ailiasanna samhlacha (30+ normalú traschanúintí seachfhreastalaí ag am tosaithe)
+- Gabháil amach sábháilte le cosaint SSRF, bac ar URLanna príobháideacha agus atriail inchumraithe
+- Atrialacha comhrá atá feasach ar thréimhse mharbhánta le `requestRetry` agus `maxRetryIntervalSec` inchumraithe
+- Bailíochtú timpeallachta rite le Zod ag am tosaithe
+- Iniúchadh comhlíontachta v2 le huimhriú leathanach, teagmhais CRUD soláthraithe agus logáil bailíochtaithe nuair a chuireann SSRF bac ar iarratas
 
-Príomh-mhúnla rith-ama:
+Príomhshamhail rite:
 
-- Cuireann bealaí aip Next.js faoi `src/app/api/*` APIanna deais agus APIanna comhoiriúnachta i bhfeidhm araon
-- Láimhseálann croí comhroinnte SSE/ródúcháin in `src/sse/*` + `open-sse/*` feidhmiú soláthraí, aistriúchán, sruthú, cúltaca, agus úsáid
+- Cuireann bealaí feidhmchláir Next.js faoi `src/app/api/*` APIanna painéil agus APIanna comhoiriúnachta araon i bhfeidhm
+- Láimhseálann croílár comhroinnte SSE/ródaithe in `src/sse/*` + `open-sse/*` rith soláthraithe, aistriúchán, sruthú, cúltaca agus úsáid
 
 ## Léaráidí Tagartha
 
@@ -116,49 +116,48 @@ tá na cinn eile nasctha óna dtreoracha sainiúla fearainn.
 
 ## Dromchla an Deais (Reatha)
 
-Príomhleathanaigh faoi `src/app/(dashboard)/dashboard/`:
+Na príomhleathanaigh faoi `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — tosú tapa + forbhreathnú soláthraithe
+- `/dashboard` — tús tapa + forléargas ar sholáthraithe
 - `/dashboard/endpoint` — seachfhreastalaí críochphointe + cluaisíní críochphointe MCP + A2A + API
-- `/dashboard/providers` — naisc sholáthraithe agus dintiúir
-- `/dashboard/combos` — straitéisí teaglama, teimpléid, tógálaí céimbhunaithe, rialacha ródúcháin samhla, ordú láimhe seasmhach
-- `/dashboard/auto-combo` — Inneall Auto Combo: meáchain scórála, pacáistí mód, réamhshocruithe monarchan fíorúla, teileaméadracht
-- `/dashboard/costs` — comhiomlánú costais agus infheictheacht praghsála
-- `/dashboard/analytics` — anailísíocht úsáide, meastóireachtaí, sláinte sprioc teaglama
+- `/dashboard/providers` — naisc agus dintiúir soláthraithe
+- `/dashboard/combos` — straitéisí teaglama, teimpléid, tógálaí céim-bhunaithe, rialacha ródaithe samhlacha, ordú láimhe marthanach
+- `/dashboard/auto-combo` — Inneall Uath-theaglama: ualuithe scórála, pacáistí mód, réamhshocruithe monarchan fíorúla, teiliméadracht
+- `/dashboard/costs` — comhiomlánú costas agus infheictheacht praghsála
+- `/dashboard/analytics` — anailísíocht úsáide, meastóireachtaí, sláinte spriocanna teaglama
 - `/dashboard/limits` — rialuithe cuóta/ráta
-- `/dashboard/cli-tools` — dúshuíomh CLI, braite rith-ama, giniúint cumraíochta
-- `/dashboard/agents` — gníomhairí ACP braite + clárú gníomhaire saincheaptha
-- `/dashboard/cloud-agents` — tascanna gníomhaire a óstáiltear sa scamall (Codex Cloud, Devin, Jules) agus saolré tasc
-- `/dashboard/skills` — clár scileanna A2A, cur i bhfeidhm bosca gainimh, catalóg scileanna ionsuite
-- `/dashboard/memory` — iniúchadh agus aisghabháil cuimhne chomhlabaithe seasmhaí
-- `/dashboard/webhooks` — síntiúis webhook amach, rothlú rúin, staitisticí aththriail
-- `/dashboard/batch` — cur isteach post baisc agus dul chun cinn
-- `/dashboard/cache` — staitisticí taisce léamh-trí agus réasúnaíochta, rialuithe díbeartha
-- `/dashboard/playground` — clós súgartha comhrá idirghníomhach in aghaidh aon teaglaim/shamhail chumraithe
-- `/dashboard/changelog` — amharcóir loga athruithe san aip (déanann sé `CHANGELOG.md` a rindreáil)
-- `/dashboard/system` — diagnóisic rith-ama, eolas leagain, dromchla bailíochtaithe timpeallachta
-- `/dashboard/onboarding` — treoraí sraithe don chéad rith do shuiteálacha nua
-- `/dashboard/media` — clós súgartha íomhá/físe/ceoil
-- `/dashboard/search-tools` — tástáil soláthraí cuardaigh agus stair
-- `/dashboard/health` — am suas, bristeacha ciorcad, teorainneacha ráta, seisiúin faoi mhonatóireacht cuóta
-- `/dashboard/logs` — logaí iarratais/seachfhreastalaí/iniúchta/consól
-- `/dashboard/settings` — cluaisíní socruithe córais (ginearálta, ródúchán, réamhshocruithe teaglama, srl.)
-- `/dashboard/context/caveman` — rialacha comhbhrúite Caveman, pacáistí teanga, réamhamharc, agus mód aschuir
-- `/dashboard/context/rtk` — scagairí aschuir ordaithe RTK, réamhamharc, agus socruithe sábháilteachta rith-ama
-- `/dashboard/context/combos` — píblínte comhbhrúite ainmnithe sannaithe do theaglaim ródúcháin
-- `/dashboard/translator` — iniúchadh aistritheora agus réamhamharc tiontaithe formáide iarratais
-- `/dashboard/audit` — brabhsálaí loga iniúchta comhlíontachta le leathanaigh agus meiteashonraí struchtúrtha
-- `/dashboard/usage` — brabhsálaí úsáide in aghaidh an iarratais ceangailte le `usage_history`
-- `/dashboard/compression` — anailísíocht comhbhrúite, staitisticí, agus sannadh píblíne
-- `/dashboard/api-manager` — saolré eochair API agus ceadanna samhla
+- `/dashboard/cli-tools` — ionduchtú CLI, brath am rite, giniúint cumraíochta
+- `/dashboard/agents` — gníomhairí ACP braite + clárú gníomhairí saincheaptha
+- `/dashboard/cloud-agents` — tascanna gníomhairí néalóstáilte (Codex Cloud, Devin, Jules) agus saolré tascanna
+- `/dashboard/skills` — clárlann scileanna A2A, rith bosca gainimh, catalóg scileanna ionsuite
+- `/dashboard/memory` — iniúchadh agus aisghabháil cuimhne comhrá marthanaí
+- `/dashboard/webhooks` — síntiúis webhook amach, rothlú rúin, staitisticí atrialach
+- `/dashboard/batch` — cur isteach jabanna baisce agus dul chun cinn
+- `/dashboard/cache` — staitisticí taisce léite tríd agus taisce réasúnaíochta, rialuithe díshealbhaithe
+- `/dashboard/playground` — clós súgartha idirghníomhach comhrá in aghaidh aon teaglama/samhla cumraithe
+- `/dashboard/changelog` — amharcóir loga athruithe san aip (rindreálann sé `CHANGELOG.md`)
+- `/dashboard/system` — diagnóisic am rite, faisnéis leagain, dromchla bailíochtaithe timpeallachta
+- `/dashboard/onboarding` — treoraí socraithe céadrite do shuiteálacha nua
+- `/dashboard/media` — clós súgartha íomhá/físeáin/ceoil
+- `/dashboard/search-tools` — tástáil soláthraithe cuardaigh agus stair
+- `/dashboard/health` — aga fónaimh, scoradáin chiorcaid, teorainneacha ráta, seisiúin a ndéantar monatóireacht cuóta orthu
+- `/dashboard/logs` — logaí iarratais/seachfhreastalaí/iniúchóireachta/consóil
+- `/dashboard/settings` — cluaisíní socruithe córais (ginearálta, ródú, réamhshocruithe teaglama, srl.)
+- `/dashboard/context/caveman` — rialacha comhbhrúite Caveman, pacáistí teanga, réamhamharc agus mód aschuir
+- `/dashboard/context/rtk` — scagairí aschuir orduithe RTK, réamhamharc agus socruithe sábháilteachta am rite
+- `/dashboard/context/combos` — píblínte comhbhrúite ainmnithe a shanntar do theaglamaí ródaithe
+- `/dashboard/translator` — iniúchadh aistritheora agus réamhamharc ar thiontú formáide iarratais
+- `/dashboard/audit` — brabhsálaí loga iniúchóireachta comhlíontachta le huimhriú leathanach agus meiteashonraí struchtúrtha
+- `/dashboard/usage` — brabhsálaí úsáide de réir iarratais atá ceangailte le `usage_history`
+- `/dashboard/compression` — anailísíocht comhbhrúite, staitisticí agus sannadh píblínte
+- `/dashboard/api-manager` — saolré eochracha API agus ceadanna samhlacha
 
-Ciseal UI: déanann gach leathanach rindreáil laistigh d'aon bhlaosc amháin — `src/app/(dashboard)/layout.tsx` →
-`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset`
-an fhoireann uirlisí, `Sidebar.tsx` agus `Header.tsx` OmniRoute). Iompórtálann na leathanaigh a mbaill
-tógála ó `@/shared/components` (oiriúntóirí thar an Keak CI UI Kit díolmhaithe i
-`packages/ui-kit`) nó ó fho-chonairí comhpháirteanna an fhoireann uirlisí (`@omniroute/ui-kit/table`, `…/page-header`), agus
-deilbhíní trí `<Icon>` (`ICON_MAP` → Lucide). Tagann an téama (`system` de réir réamhshocraithe, solas/dorcha) agus na comharthaí
-ón bhfoireann uirlisí tríd an droichead i `src/app/globals.css`. Sonraí: `docs/architecture/DESIGN_SYSTEM.md`.
+Ciseal UI: rindreáiltear gach leathanach laistigh d'aon bhlaosc amháin — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset` na foirne, `Sidebar.tsx` agus `Header.tsx` OmniRoute). Iompórtálann leathanaigh a
+mbloic thógála ó `@/shared/components` (cuibheoirí thar Keak CI UI Kit atá cuachta in
+`packages/ui-kit`) nó ó fhochosáin chomhpháirteanna na foirne (`@omniroute/ui-kit/table`, `…/page-header`), agus
+deilbhíní trí `<Icon>` (`ICON_MAP` → Lucide). Tagann an téama (`system` de réir réamhshocraithe, geal/dorcha) agus na comharthaí
+ón bhfoireann tríd an droichead in `src/app/globals.css`. Sonraí: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Comhthéacs Ardleibhéil an Chórais
 

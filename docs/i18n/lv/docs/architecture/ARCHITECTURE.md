@@ -10,77 +10,77 @@ _Pēdējoreiz atjaunināts: 2026-06-28_
 
 ## Kopsavilkums
 
-OmniRoute ir lokāla AI maršrutēšanas vārteja un vadības panelis, kas izveidota uz Next.js bāzes.
-Tā nodrošina vienu ar OpenAI saderīgu galapunktu (`/v1/*`) un maršrutē trafiku pa vairākiem upstream nodrošinātājiem ar tulkošanu, rezerves pārslēgšanos (fallback), token atsvaidzināšanu un lietojuma izsekošanu.
+OmniRoute ir lokāla AI maršrutēšanas vārteja un informācijas panelis, kas izveidots uz Next.js bāzes.
+Tas nodrošina vienotu ar OpenAI saderīgu galapunktu (`/v1/*`) un maršrutē datplūsmu starp vairākiem augšupējiem pakalpojumu sniedzējiem, veicot formātu pārveidošanu, rezerves pārslēgšanu, pilnvaru atsvaidzināšanu un lietojuma uzskaiti.
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API virsma CLI/rīkiem (375 nodrošinātāji, 156 izpildītāju moduļi)
-- Pieprasījumu/atbilžu tulkošana starp nodrošinātāju formātiem
-- Modeļu kombināciju rezerves pārslēgšanās (vairāku modeļu secība)
-- Strukturēti kombinācijas soļi (`provider + model + connection`) ar izpildlaika kārtošanu pēc `compositeTiers`
-- Kontu līmeņa rezerves pārslēgšanās (vairāki konti vienam nodrošinātājam)
-- Kvotu sākotnējā pārbaude (preflight) un kvotu ņemoša P2C kontu izvēle galvenajā tērzēšanas ceļā
-- OAuth + API atslēgu nodrošinātāju savienojumu pārvaldība (27 OAuth nodrošinātāju moduļi)
-- Iegulsmju (embedding) ģenerēšana caur `/v1/embeddings` (18 nodrošinātāji)
-- Attēlu ģenerēšana caur `/v1/images/generations` (10+ nodrošinātāji, 20+ modeļi)
-- Audio transkripcija caur `/v1/audio/transcriptions` (18 nodrošinātāji)
-- Teksta pārveidošana runā caur `/v1/audio/speech` (24 iebūvēti nodrošinātāji)
-- Video ģenerēšana caur `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Mūzikas ģenerēšana caur `/v1/music/generations` (ComfyUI)
-- Tīmekļa meklēšana caur `/v1/search` (20 nodrošinātāji)
-- Moderēšana caur `/v1/moderations`
-- Rezultātu pārkārtošana caur `/v1/rerank`
-- Think tagu parsēšana (`<think>...</think>`) spriešanas (reasoning) modeļiem
-- Atbilžu sanitizācija stingrai OpenAI SDK saderībai
-- Lomu normalizācija (developer→system, system→user) saderībai starp nodrošinātājiem
-- Strukturētas izvades konvertēšana (json_schema → Gemini responseSchema)
-- Lokāla datu saglabāšana nodrošinātājiem, atslēgām, aizstājvārdiem, kombinācijām, iestatījumiem un cenām (122 DB moduļi)
-- Lietojuma/izmaksu izsekošana un pieprasījumu reģistrēšana
-- Neobligāta mākoņa sinhronizācija vairāku ierīču/stāvokļa sinhronizēšanai
-- IP atļauto/bloķēto saraksti API piekļuves kontrolei
-- Thinking budžeta pārvaldība (passthrough/auto/custom/adaptive)
-- Globāla sistēmas uzvednes (system prompt) injekcija
-- Sesiju izsekošana un digitālo nospiedumu (fingerprinting) noteikšana
-- Uzlabota pieprasījumu ātruma ierobežošana (rate limiting) katram kontam ar nodrošinātājam specifiskiem profiliem
-- Circuit breaker shēma nodrošinātāju noturībai
-- Aizsardzība pret "thundering herd" efektu ar mutex bloķēšanu
-- Uz parakstiem balstīta pieprasījumu deduplikācijas kešatmiņa
-- Domēna slānis: izmaksu noteikumi, rezerves pārslēgšanās politika, bloķēšanas politika
-- Context Relay: sesijas nodošanas kopsavilkumi kontu rotācijas nepārtrauktībai
-- Domēna stāvokļa saglabāšana (SQLite write-through kešatmiņa rezerves pārslēgšanām, budžetiem, bloķējumiem un circuit breaker)
-- Politikas dzinējs centralizētai pieprasījumu novērtēšanai (lockout → budget → fallback)
-- Pieprasījumu telemetrija ar p50/p95/p99 latentuma agregāciju
-- Kombinācijas mērķu telemetrija un vēsturiskā kombinācijas mērķu veselība caur `combo_execution_key` / `combo_step_id`
-- Korelācijas ID (X-Request-Id) izsekošanai no gala līdz galam
-- Atbilstības audita reģistrēšana ar atteikšanās (opt-out) iespēju katrai API atslēgai
-- Eval ietvars LLM kvalitātes nodrošināšanai
-- Veselības vadības panelis ar reāllaika nodrošinātāju circuit breaker statusu
+- Ar OpenAI saderīga API saskarne CLI/rīkiem (375 pakalpojumu sniedzēji, 156 izpildītāju moduļi)
+- Pieprasījumu/atbilžu formātu pārveidošana starp pakalpojumu sniedzējiem
+- Modeļu kombināciju rezerves pārslēgšana (vairāku modeļu secība)
+- Strukturēti kombināciju soļi (`provider + model + connection`) ar izpildlaika secības noteikšanu pēc `compositeTiers`
+- Konta līmeņa rezerves pārslēgšana (vairāki konti katram pakalpojumu sniedzējam)
+- Kvotas priekšpārbaude un kvotu ņemoša vērā P2C konta atlase galvenajā tērzēšanas plūsmā
+- OAuth un API atslēgu pakalpojumu sniedzēju savienojumu pārvaldība (27 OAuth pakalpojumu sniedzēju moduļi)
+- Iegultņu ģenerēšana, izmantojot `/v1/embeddings` (18 pakalpojumu sniedzēji)
+- Attēlu ģenerēšana, izmantojot `/v1/images/generations` (vairāk nekā 10 pakalpojumu sniedzēji, vairāk nekā 20 modeļi)
+- Audio transkribēšana, izmantojot `/v1/audio/transcriptions` (18 pakalpojumu sniedzēji)
+- Teksta pārvēršana runā, izmantojot `/v1/audio/speech` (24 iebūvēti pakalpojumu sniedzēji)
+- Video ģenerēšana, izmantojot `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Mūzikas ģenerēšana, izmantojot `/v1/music/generations` (ComfyUI)
+- Meklēšana tīmeklī, izmantojot `/v1/search` (20 pakalpojumu sniedzēji)
+- Satura moderēšana, izmantojot `/v1/moderations`
+- Rezultātu atkārtota ranžēšana, izmantojot `/v1/rerank`
+- Domāšanas tagu (`<think>...</think>`) parsēšana spriešanas modeļiem
+- Atbilžu sanitizēšana stingrai saderībai ar OpenAI SDK
+- Lomu normalizēšana (developer→system, system→user), lai nodrošinātu saderību starp pakalpojumu sniedzējiem
+- Strukturētās izvades pārveidošana (json_schema → Gemini responseSchema)
+- Pakalpojumu sniedzēju, atslēgu, aizstājvārdu, kombināciju, iestatījumu un cenu lokāla pastāvīga glabāšana (122 DB moduļi)
+- Lietojuma/izmaksu uzskaite un pieprasījumu žurnalēšana
+- Neobligāta mākoņsinhronizācija vairāku ierīču/stāvokļa sinhronizācijai
+- IP atļauto/bloķēto adrešu saraksti API piekļuves kontrolei
+- Domāšanas budžeta pārvaldība (nemainīta pārsūtīšana/automātisks/pielāgots/adaptīvs)
+- Globālās sistēmas uzvednes ievietošana
+- Sesiju izsekošana un digitālo nospiedumu veidošana
+- Uzlabota ātruma ierobežošana katram kontam ar pakalpojumu sniedzējam specifiskiem profiliem
+- Ķēdes pārtraucēja modelis pakalpojumu sniedzēju noturībai
+- Aizsardzība pret vienlaicīgu pieprasījumu lavīnu, izmantojot mutex bloķēšanu
+- Uz parakstiem balstīta pieprasījumu dublikātu novēršanas kešatmiņa
+- Domēna slānis: izmaksu noteikumi, rezerves pārslēgšanas politika, bloķēšanas politika
+- Context Relay: sesiju nodošanas kopsavilkumi nepārtrauktības nodrošināšanai kontu rotācijas laikā
+- Domēna stāvokļa pastāvīga glabāšana (SQLite tūlītējas ierakstīšanas kešatmiņa rezerves pārslēgšanas stāvokļiem, budžetiem, bloķējumiem un ķēdes pārtraucējiem)
+- Politiku dzinis centralizētai pieprasījumu izvērtēšanai (bloķēšana → budžets → rezerves pārslēgšana)
+- Pieprasījumu telemetrija ar p50/p95/p99 latentuma apkopošanu
+- Kombināciju mērķu telemetrija un kombināciju mērķu vēsturiskais veselības stāvoklis, izmantojot `combo_execution_key` / `combo_step_id`
+- Korelācijas ID (X-Request-Id) pilnīgai izsekošanai no sākuma līdz beigām
+- Atbilstības audita žurnalēšana ar iespēju to atspējot katrai API atslēgai
+- Izvērtēšanas ietvars LLM kvalitātes nodrošināšanai
+- Veselības stāvokļa informācijas panelis ar pakalpojumu sniedzēju ķēdes pārtraucēju statusu reāllaikā
 - MCP serveris (110 rīki) ar 3 transportiem (stdio/SSE/Streamable HTTP)
 - A2A serveris (JSON-RPC 2.0 + SSE) ar prasmēm un uzdevumu dzīves ciklu
-- Atmiņas sistēma (izvilkšana, injekcija, izgūšana, kopsavilkšana)
-- Prasmju sistēma (reģistrs, izpildītājs, sandbox, iebūvētās prasmes)
+- Atmiņas sistēma (izgūšana, ievietošana, atlase, apkopošana)
+- Prasmju sistēma (reģistrs, izpildītājs, smilškaste, iebūvētas prasmes)
 - MITM starpniekserveris ar sertifikātu pārvaldību un DNS apstrādi
-- Prompt injekcijas aizsardzības starpprogrammatūra (middleware)
-- Prompt saspiešanas konveijers ar Caveman, RTK, slāņotiem konveijeriem, saspiešanas kombinācijām, valodu pakotnēm un analītiku
+- Uzvedņu injekciju aizsardzības starpprogrammatūra
+- Uzvedņu saspiešanas konveijers ar Caveman, RTK, sakrautiem konveijeriem, saspiešanas kombinācijām, valodu pakotnēm un analītiku
 - ACP (Agent Communication Protocol) reģistrs
-- Modulāri OAuth nodrošinātāji (22 atsevišķi moduļi mapē `src/lib/oauth/providers/`)
+- Modulāri OAuth pakalpojumu sniedzēji (22 atsevišķi moduļi mapē `src/lib/oauth/providers/`)
 - Atinstalēšanas/pilnīgas atinstalēšanas skripti
 - OAuth vides labošanas darbība
 - WebSocket tilts ar OpenAI saderīgiem WS klientiem (`/v1/ws`)
-- Sinhronizācijas token pārvaldība (izdoša/anulēšana, ETag versiju konfigurācijas komplekta lejupielāde)
-- GLM Thinking (`glmt`) pirmšķirīgs nodrošinātāja sākumiestatījums
-- Hibrīdā token skaitīšana (nodrošinātāja pusē `/messages/count_tokens` ar novērtējuma rezerves variantu)
-- Modeļu aizstājvārdu automātiskā aizpildīšana (30+ starp-starpniekserveru dialektu normalizācijas startēšanas laikā)
-- Droša izejošā fetch ar SSRF aizsardzību, privātu URL bloķēšanu un konfigurējamu atkārtošanu
-- Atdzesēšanas (cooldown) laikā ņemti vērā tērzēšanas atkārtojumi ar konfigurējamiem `requestRetry` un `maxRetryIntervalSec`
+- Sinhronizācijas pilnvaru pārvaldība (izsniegšana/atsaukšana, ar ETag versijota konfigurācijas komplekta lejupielāde)
+- GLM Thinking (`glmt`) kā pilnvērtīgs pakalpojumu sniedzēja sākotnējais iestatījums
+- Hibrīda pilnvaru skaitīšana (pakalpojumu sniedzēja puses `/messages/count_tokens` ar rezerves novērtēšanu)
+- Modeļu aizstājvārdu automātiska sākotnējā izveide (vairāk nekā 30 starpniekserveru dialektu normalizācijas startēšanas laikā)
+- Droša izejošā datu izgūšana ar SSRF aizsardzību, privāto URL bloķēšanu un konfigurējamiem atkārtotiem mēģinājumiem
+- Dzesēšanas periodu ņemoši vērā tērzēšanas atkārtotie mēģinājumi ar konfigurējamiem `requestRetry` un `maxRetryIntervalSec`
 - Izpildlaika vides validācija ar Zod startēšanas laikā
-- Atbilstības audits v2 ar lapošanu, nodrošinātāju CRUD notikumiem un SSRF bloķēto validācijas reģistrēšanu
+- Atbilstības audits v2 ar lapošanu, pakalpojumu sniedzēju CRUD notikumiem un SSRF bloķētas validācijas žurnalēšanu
 
-Galvenais izpildlaika modelis:
+Primārais izpildlaika modelis:
 
-- Next.js lietotnes maršruti mapē `src/app/api/*` realizē gan vadības paneļa API, gan saderības API
-- Koplietojams SSE/marhutēšanas kodols mapēs `src/sse/*` + `open-sse/*` apstrādā nodrošinātāju izpildi, tulkošanu, straumēšanu, rezerves pārslēgšanos un lietojumu
+- Next.js lietotnes maršruti zem `src/app/api/*` realizē gan informācijas paneļa API, gan saderības API
+- Kopīgs SSE/maršrutēšanas kodols mapēs `src/sse/*` un `open-sse/*` apstrādā pakalpojumu sniedzēju izpildi, formātu pārveidošanu, straumēšanu, rezerves pārslēgšanu un lietojumu
 
 ## Atsauces diagrammas
 
@@ -114,52 +114,51 @@ pārējās ir pieejamas saitēs to domēnspecifiskajās rokasgrāmatās.
 - Nodrošinātāja SLA/vadības plakne ārpus lokālā procesa
 - Paši ārējie CLI binārie faili (Claude CLI, Codex CLI u. c.)
 
-## Vadības paneļa virsma (pašreizējā)
+## Informācijas paneļa sadaļas (pašlaik)
 
-Galvenās lapas mapē `src/app/(dashboard)/dashboard/`:
+Galvenās lapas zem `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — ātrā sākšana + pakalpojumu sniedzēju pārskats
-- `/dashboard/endpoint` — galapunktu starpniekserveris + MCP + A2A + API galapunktu cilnes
+- `/dashboard` — ātrā darba sākšana un pakalpojumu sniedzēju pārskats
+- `/dashboard/endpoint` — galapunktu starpniekservera, MCP, A2A un API galapunktu cilnes
 - `/dashboard/providers` — pakalpojumu sniedzēju savienojumi un akreditācijas dati
-- `/dashboard/combos` — combo stratēģijas, veidnes, pa soļiem balstīts veidotājs, modeļu maršrutēšanas noteikumi, manuāli saglabātā secība
-- `/dashboard/auto-combo` — Auto Combo Engine: vērtēšanas svari, režīmu pakas, virtuālie rūpnīcas priekšiestatījumi, telemetrija
-- `/dashboard/costs` — izmaksu apkopošana un cenu redzamība
-- `/dashboard/analytics` — lietojuma analītika, izvērtējumi, combo mērķu stāvoklis
-- `/dashboard/limits` — kvotu/ātruma ierobežojumu vadība
-- `/dashboard/cli-tools` — CLI ievadīšana, izpildlaika vides noteikšana, konfigurācijas ģenerēšana
-- `/dashboard/agents` — atklātie ACP aģenti + pielāgotu aģentu reģistrācija
-- `/dashboard/cloud-agents` — mākonī izvietotie aģentu uzdevumi (Codex Cloud, Devin, Jules) un uzdevumu dzīves cikls
-- `/dashboard/skills` — A2A prasmju reģistrs, izpilde smilškastē, iebūvēto prasmju katalogs
+- `/dashboard/combos` — kombināciju stratēģijas, veidnes, soļos balstīts veidotājs, modeļu maršrutēšanas kārtulas un manuāli saglabāta secība
+- `/dashboard/auto-combo` — Auto Combo Engine: vērtēšanas svari, režīmu pakotnes, virtuālās rūpnīcas priekšiestatījumi un telemetrija
+- `/dashboard/costs` — izmaksu apkopošana un cenu pārskatāmība
+- `/dashboard/analytics` — lietojuma analītika, novērtējumi un kombināciju mērķu stāvoklis
+- `/dashboard/limits` — kvotu un pieprasījumu biežuma vadīklas
+- `/dashboard/cli-tools` — CLI darba sākšana, izpildvides noteikšana un konfigurācijas ģenerēšana
+- `/dashboard/agents` — noteiktie ACP aģenti un pielāgotu aģentu reģistrācija
+- `/dashboard/cloud-agents` — mākonī mitināto aģentu uzdevumi (Codex Cloud, Devin, Jules) un uzdevumu dzīves cikls
+- `/dashboard/skills` — A2A prasmju reģistrs, izpilde smilškastē un iebūvēto prasmju katalogs
 - `/dashboard/memory` — pastāvīgās sarunu atmiņas pārbaude un izgūšana
-- `/dashboard/webhooks` — izejošo webhook abonementi, noslēpumu rotācija, atkārtojumu statistika
-- `/dashboard/batch` — pakešu uzdevumu iesniegšana un progress
-- `/dashboard/cache` — read-through un spriešanas kešatmiņas statistika, izstumšanas vadība
-- `/dashboard/playground` — interaktīva tērzēšanas izmēģinājumu vide ar jebkuru konfigurētu combo/modeli
-- `/dashboard/changelog` — lietotnes iekšējais izmaiņu žurnāla skatītājs (attēlo `CHANGELOG.md`)
-- `/dashboard/system` — izpildlaika diagnostika, versijas informācija, vides validācijas virsma
+- `/dashboard/webhooks` — izejošo tīmekļa aizķeru abonementi, noslēpumu rotācija un atkārtotu mēģinājumu statistika
+- `/dashboard/batch` — pakešuzdevumu iesniegšana un izpildes progress
+- `/dashboard/cache` — nolasīšanas un spriešanas kešatmiņas statistika un izstumšanas vadīklas
+- `/dashboard/playground` — interaktīva tērzēšanas izmēģinājumu vide jebkurai konfigurētai kombinācijai vai modelim
+- `/dashboard/changelog` — lietotnē iebūvēts izmaiņu žurnāla skatītājs (atveido `CHANGELOG.md`)
+- `/dashboard/system` — izpildvides diagnostika, versijas informācija un vides validācijas saskarne
 - `/dashboard/onboarding` — pirmās palaišanas iestatīšanas vednis jaunām instalācijām
-- `/dashboard/media` — attēlu/video/mūzikas izmēģinājumu vide
+- `/dashboard/media` — attēlu, video un mūzikas izmēģinājumu vide
 - `/dashboard/search-tools` — meklēšanas pakalpojumu sniedzēju testēšana un vēsture
-- `/dashboard/health` — darblaiks, ķēdes pārtraucēji, pieprasījumu ātruma ierobežojumi, ar kvotu uzraudzītas sesijas
-- `/dashboard/logs` — pieprasījumu/starpniekservera/audita/konsoles žurnāli
-- `/dashboard/settings` — sistēmas iestatījumu cilnes (vispārīgie, maršrutēšana, combo noklusējumi utt.)
-- `/dashboard/context/caveman` — Caveman saspiešanas noteikumi, valodu pakas, priekšskatījums un izvades režīms
-- `/dashboard/context/rtk` — RTK komandu izvades filtri, priekšskatījums un izpildlaika drošības iestatījumi
-- `/dashboard/context/combos` — nosauktie saspiešanas konveijeri, kas piešķirti maršrutēšanas combo
-- `/dashboard/translator` — tulkotāja pārbaude un pieprasījuma formāta konvertēšanas priekšskatījums
-- `/dashboard/audit` — atbilstības audita žurnālu pārlūks ar dalījumu pa lapām un strukturētiem metadatiem
-- `/dashboard/usage` — lietojuma pārlūks pa pieprasījumiem, saistīts ar `usage_history`
+- `/dashboard/health` — darbspējas laiks, ķēdes pārtraucēji, pieprasījumu biežuma ierobežojumi un sesijas ar kvotu uzraudzību
+- `/dashboard/logs` — pieprasījumu, starpniekservera, audita un konsoles žurnāli
+- `/dashboard/settings` — sistēmas iestatījumu cilnes (vispārīgie iestatījumi, maršrutēšana, kombināciju noklusējumi utt.)
+- `/dashboard/context/caveman` — Caveman saspiešanas kārtulas, valodu pakotnes, priekšskatījums un izvades režīms
+- `/dashboard/context/rtk` — RTK komandu izvades filtri, priekšskatījums un izpildvides drošības iestatījumi
+- `/dashboard/context/combos` — nosaukti saspiešanas konveijeri, kas piešķirti maršrutēšanas kombinācijām
+- `/dashboard/translator` — tulkotāja pārbaude un pieprasījuma formāta pārveidošanas priekšskatījums
+- `/dashboard/audit` — atbilstības audita žurnāla pārlūks ar lappušu dalījumu un strukturētiem metadatiem
+- `/dashboard/usage` — atsevišķu pieprasījumu lietojuma pārlūks, kas piesaistīts `usage_history`
 - `/dashboard/compression` — saspiešanas analītika, statistika un konveijeru piešķiršana
 - `/dashboard/api-manager` — API atslēgu dzīves cikls un modeļu atļaujas
 
-UI slānis: katra lapa tiek attēlota vienā apvalkā — `src/app/(dashboard)/layout.tsx` →
+UI slānis: katra lapa tiek atveidota vienā čaulā — `src/app/(dashboard)/layout.tsx` →
 `src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (komplekta
 `SidebarProvider`/`SidebarInset`, OmniRoute `Sidebar.tsx` un `Header.tsx`). Lapas importē savus
-būvelementus no `@/shared/components` (adapteri virs iegultā Keak CI UI Kit mapē
-`packages/ui-kit`) vai no komplekta komponentu apakšceļiem (`@omniroute/ui-kit/table`,
-`…/page-header`), bet ikonas — caur `<Icon>` (`ICON_MAP` → Lucide). Tēma (pēc noklusējuma
-`system`, gaišā/tumšā) un tokeni nāk no komplekta caur tiltu `src/app/globals.css`. Sīkāk:
-`docs/architecture/DESIGN_SYSTEM.md`.
+veidojošos blokus no `@/shared/components` (adapteri repozitorijā iekļautajam Keak CI UI Kit, kas atrodas
+`packages/ui-kit`) vai no komplekta komponentu apakšceļiem (`@omniroute/ui-kit/table`, `…/page-header`), bet
+ikonas — ar `<Icon>` (`ICON_MAP` → Lucide). Dizains (`system` pēc noklusējuma, gaišs/tumšs) un marķieri tiek
+iegūti no komplekta, izmantojot tiltu failā `src/app/globals.css`. Plašāka informācija: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Augsta līmeņa sistēmas konteksts
 

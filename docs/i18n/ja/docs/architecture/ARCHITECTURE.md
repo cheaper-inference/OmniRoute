@@ -8,79 +8,79 @@
 
 _最終更新日: 2026-06-28_
 
-## エグゼクティブサマリー
+## 概要
 
-OmniRoute は Next.js 上に構築されたローカル AI ルーティングゲートウェイおよびダッシュボードです。
-単一の OpenAI 互換エンドポイント (`/v1/*`) を提供し、変換、フォールバック、トークンリフレッシュ、使用量追跡とともに、複数のアップストリームプロバイダー間でトラフィックをルーティングします。
+OmniRoute は、Next.js を基盤とするローカル AI ルーティングゲートウェイおよびダッシュボードです。
+単一の OpenAI 互換エンドポイント（`/v1/*`）を提供し、形式変換、フォールバック、トークン更新、使用量追跡を行いながら、複数の上流プロバイダーにトラフィックをルーティングします。
 
-主な機能:
+主な機能：
 
-- CLI/ツール向けの OpenAI 互換 API サーフェス (375 プロバイダー、156 の executor モジュール)
-- プロバイダーフォーマット間のリクエスト/レスポンス変換
-- モデルコンボフォールバック (マルチモデルシーケンス)
-- `compositeTiers` による実行時の順序付けを備えた構造化コンボステップ (`provider + model + connection`)
-- アカウントレベルのフォールバック (プロバイダーごとのマルチアカウント)
-- メインチャットパスにおけるクォータプリフライトとクォータ対応の P2C アカウント選択
-- OAuth + API キーによるプロバイダー接続管理 (27 の OAuth プロバイダーモジュール)
-- `/v1/embeddings` による埋め込み生成 (18 プロバイダー)
-- `/v1/images/generations` による画像生成 (10+ プロバイダー、20+ モデル)
-- `/v1/audio/transcriptions` による音声文字起こし (18 プロバイダー)
-- `/v1/audio/speech` によるテキスト読み上げ (24 の組み込みプロバイダー)
-- `/v1/videos/generations` による動画生成 (ComfyUI + SD WebUI)
-- `/v1/music/generations` による音楽生成 (ComfyUI)
-- `/v1/search` による Web 検索 (20 プロバイダー)
+- CLI／ツール向けの OpenAI 互換 API サーフェス（375 プロバイダー、156 エグゼキューターモジュール）
+- プロバイダー形式間でのリクエスト／レスポンス変換
+- モデルコンボのフォールバック（複数モデルのシーケンス）
+- 構造化されたコンボステップ（`provider + model + connection`）と、`compositeTiers` によるランタイム順序付け
+- アカウント単位のフォールバック（プロバイダーごとの複数アカウント）
+- メインチャット処理におけるクォータの事前チェックと、クォータを考慮した P2C アカウント選択
+- OAuth および API キーによるプロバイダー接続管理（27 の OAuth プロバイダーモジュール）
+- `/v1/embeddings` による埋め込み生成（18 プロバイダー）
+- `/v1/images/generations` による画像生成（10 以上のプロバイダー、20 以上のモデル）
+- `/v1/audio/transcriptions` による音声文字起こし（18 プロバイダー）
+- `/v1/audio/speech` によるテキスト読み上げ（24 の組み込みプロバイダー）
+- `/v1/videos/generations` による動画生成（ComfyUI + SD WebUI）
+- `/v1/music/generations` による音楽生成（ComfyUI）
+- `/v1/search` による Web 検索（20 プロバイダー）
 - `/v1/moderations` によるモデレーション
 - `/v1/rerank` によるリランキング
-- 推論モデル向けの think タグ解析 (`<think>...</think>`)
+- 推論モデル向けの Think タグ解析（`<think>...</think>`）
 - 厳密な OpenAI SDK 互換性のためのレスポンスサニタイズ
-- プロバイダー間互換性のためのロール正規化 (developer→system、system→user)
-- 構造化出力変換 (json_schema → Gemini responseSchema)
-- プロバイダー、キー、エイリアス、コンボ、設定、価格のローカル永続化 (122 の DB モジュール)
-- 使用量/コスト追跡とリクエストロギング
-- マルチデバイス/状態同期のためのオプションのクラウド同期
-- API アクセス制御のための IP 許可リスト/ブロックリスト
-- Thinking バジェット管理 (passthrough/auto/custom/adaptive)
-- グローバルシステムプロンプト注入
+- プロバイダー間の互換性を確保するためのロール正規化（developer→system、system→user）
+- 構造化出力の変換（json_schema → Gemini responseSchema）
+- プロバイダー、キー、エイリアス、コンボ、設定、料金情報のローカル永続化（122 の DB モジュール）
+- 使用量／コストの追跡とリクエストログ記録
+- 複数デバイス間／状態同期のためのオプションのクラウド同期
+- API アクセス制御用の IP 許可リスト／ブロックリスト
+- 思考バジェット管理（パススルー／自動／カスタム／適応型）
+- グローバルシステムプロンプトの注入
 - セッション追跡とフィンガープリンティング
-- プロバイダー固有プロファイルによるアカウントごとの強化レート制限
-- プロバイダーの耐障害性のためのサーキットブレーカーパターン
-- ミューテックスロックによるサンダリングハード防止
+- プロバイダー固有のプロファイルを使用した、アカウント単位の強化されたレート制限
+- プロバイダーの耐障害性を高めるサーキットブレーカーパターン
+- ミューテックスロックによるサンダリングハード対策
 - シグネチャベースのリクエスト重複排除キャッシュ
-- ドメイン層: コストルール、フォールバックポリシー、ロックアウトポリシー
-- Context Relay: アカウントローテーションの継続性のためのセッション引き継ぎサマリー
-- ドメイン状態の永続化 (フォールバック、バジェット、ロックアウト、サーキットブレーカー向けの SQLite ライトスルーキャッシュ)
-- 一元化されたリクエスト評価のためのポリシーエンジン (ロックアウト → バジェット → フォールバック)
-- p50/p95/p99 レイテンシ集約を備えたリクエストテレメトリ
-- `combo_execution_key` / `combo_step_id` によるコンボターゲットテレメトリと過去のコンボターゲットの健全性
-- エンドツーエンドトレーシングのための相関 ID (X-Request-Id)
-- API キーごとのオプトアウトを備えたコンプライアンス監査ロギング
-- LLM 品質保証のための Eval フレームワーク
-- リアルタイムのプロバイダーサーキットブレーカーステータスを備えたヘルスダッシュボード
-- 3 つのトランスポート (stdio/SSE/Streamable HTTP) を備えた MCP サーバー (110 ツール)
-- スキルとタスクライフサイクルを備えた A2A サーバー (JSON-RPC 2.0 + SSE)
-- メモリシステム (抽出、注入、検索、要約)
-- スキルシステム (レジストリ、executor、サンドボックス、組み込みスキル)
+- ドメインレイヤー：コストルール、フォールバックポリシー、ロックアウトポリシー
+- Context Relay：アカウントローテーション時の継続性を確保するセッション引き継ぎサマリー
+- ドメイン状態の永続化（フォールバック、バジェット、ロックアウト、サーキットブレーカー向け SQLite ライトスルーキャッシュ）
+- 一元的なリクエスト評価を行うポリシーエンジン（ロックアウト → バジェット → フォールバック）
+- p50／p95／p99 レイテンシ集計を備えたリクエストテレメトリ
+- `combo_execution_key`／`combo_step_id` によるコンボターゲットのテレメトリと、過去のコンボターゲットの健全性
+- エンドツーエンドのトレーシングに使用する相関 ID（X-Request-Id）
+- API キーごとのオプトアウトに対応したコンプライアンス監査ログ
+- LLM の品質保証向け評価フレームワーク
+- プロバイダーのサーキットブレーカー状態をリアルタイム表示するヘルスダッシュボード
+- 3 種類のトランスポート（stdio／SSE／Streamable HTTP）を備えた MCP Server（110 ツール）
+- スキルとタスクライフサイクルを備えた A2A Server（JSON-RPC 2.0 + SSE）
+- メモリシステム（抽出、注入、取得、要約）
+- スキルシステム（レジストリ、エグゼキューター、サンドボックス、組み込みスキル）
 - 証明書管理と DNS 処理を備えた MITM プロキシ
-- プロンプトインジェクションガードミドルウェア
-- Caveman、RTK、スタックパイプライン、圧縮コンボ、言語パック、分析を備えたプロンプト圧縮パイプライン
-- ACP (Agent Communication Protocol) レジストリ
-- モジュール化された OAuth プロバイダー (`src/lib/oauth/providers/` 配下の 22 の個別モジュール)
-- アンインストール/完全アンインストールスクリプト
+- プロンプトインジェクション防止ミドルウェア
+- Caveman、RTK、スタック型パイプライン、圧縮コンボ、言語パック、分析機能を備えたプロンプト圧縮パイプライン
+- ACP（Agent Communication Protocol）レジストリ
+- モジュール式 OAuth プロバイダー（`src/lib/oauth/providers/` 配下の 22 個の個別モジュール）
+- アンインストール／完全アンインストールスクリプト
 - OAuth 環境修復アクション
-- OpenAI 互換 WS クライアント向けの WebSocket ブリッジ (`/v1/ws`)
-- 同期トークン管理 (発行/失効、ETag バージョン付き設定バンドルのダウンロード)
-- GLM Thinking (`glmt`) ファーストクラスプロバイダープリセット
-- ハイブリッドトークンカウント (推定フォールバック付きのプロバイダー側 `/messages/count_tokens`)
-- モデルエイリアスの自動シード (起動時に 30+ のクロスプロキシ方言正規化)
-- SSRF ガード、プライベート URL ブロック、設定可能なリトライを備えた安全なアウトバウンド fetch
-- 設定可能な `requestRetry` と `maxRetryIntervalSec` によるクールダウン対応チャットリトライ
-- 起動時の Zod によるランタイム環境バリデーション
-- ページネーション、プロバイダー CRUD イベント、SSRF ブロックのバリデーションロギングを備えたコンプライアンス監査 v2
+- OpenAI 互換 WS クライアント向け WebSocket ブリッジ（`/v1/ws`）
+- 同期トークン管理（発行／失効、ETag でバージョン管理された設定バンドルのダウンロード）
+- GLM Thinking（`glmt`）をファーストクラスのプロバイダープリセットとしてサポート
+- ハイブリッドトークンカウント（プロバイダー側の `/messages/count_tokens` と推定フォールバック）
+- モデルエイリアスの自動シード（起動時に 30 以上のクロスプロキシ方言を正規化）
+- SSRF ガード、プライベート URL のブロック、設定可能な再試行機能を備えた安全なアウトバウンドフェッチ
+- 設定可能な `requestRetry` と `maxRetryIntervalSec` を使用する、クールダウンを考慮したチャット再試行
+- 起動時の Zod によるランタイム環境検証
+- ページネーション、プロバイダー CRUD イベント、SSRF ブロック検証ログを備えたコンプライアンス監査 v2
 
-主要なランタイムモデル:
+主要なランタイムモデル：
 
-- `src/app/api/*` 配下の Next.js アプリルートがダッシュボード API と互換性 API の両方を実装
-- `src/sse/*` + `open-sse/*` の共有 SSE/ルーティングコアがプロバイダー実行、変換、ストリーミング、フォールバック、使用量を処理
+- `src/app/api/*` 配下の Next.js アプリルートが、ダッシュボード API と互換 API の両方を実装
+- `src/sse/*` + `open-sse/*` の共有 SSE／ルーティングコアが、プロバイダーの実行、変換、ストリーミング、フォールバック、使用量処理を担当
 
 ## 参照図
 
@@ -114,52 +114,52 @@ v3.8.0 プラットフォームの正規かつバージョン管理された Mer
 - ローカルプロセス外のプロバイダー SLA/コントロールプレーン
 - 外部 CLI バイナリ自体（Claude CLI、Codex CLI など）
 
-## ダッシュボード画面（現在）
+## ダッシュボード画面（現行）
 
 `src/app/(dashboard)/dashboard/` 配下の主要ページ：
 
 - `/dashboard` — クイックスタート + プロバイダー概要
 - `/dashboard/endpoint` — エンドポイントプロキシ + MCP + A2A + API エンドポイントのタブ
 - `/dashboard/providers` — プロバイダー接続と認証情報
-- `/dashboard/combos` — コンボ戦略、テンプレート、ステップベースのビルダー、モデルルーティングルール、手動での永続的な並び替え
-- `/dashboard/auto-combo` — Auto Combo Engine：スコアリングの重み付け、モードパック、仮想ファクトリープリセット、テレメトリ
+- `/dashboard/combos` — コンボ戦略、テンプレート、ステップベースのビルダー、モデルルーティングルール、手動で永続化される順序
+- `/dashboard/auto-combo` — Auto Combo Engine：スコアリングの重み、モードパック、仮想ファクトリープリセット、テレメトリ
 - `/dashboard/costs` — コスト集計と料金の可視化
 - `/dashboard/analytics` — 使用状況分析、評価、コンボターゲットの健全性
-- `/dashboard/limits` — クォータ/レート制御
-- `/dashboard/cli-tools` — CLI のオンボーディング、ランタイム検出、設定生成
-- `/dashboard/agents` — 検出された ACP エージェント + カスタムエージェントの登録
-- `/dashboard/cloud-agents` — クラウドホスト型エージェントタスク（Codex Cloud、Devin、Jules）とタスクライフサイクル
+- `/dashboard/limits` — クォータ／レート制御
+- `/dashboard/cli-tools` — CLI オンボーディング、ランタイム検出、設定生成
+- `/dashboard/agents` — 検出された ACP エージェント + カスタムエージェント登録
+- `/dashboard/cloud-agents` — クラウドホスト型エージェントタスク（Codex Cloud、Devin、Jules）とタスクのライフサイクル
 - `/dashboard/skills` — A2A スキルレジストリ、サンドボックス実行、組み込みスキルカタログ
 - `/dashboard/memory` — 永続的な会話メモリの検査と取得
-- `/dashboard/webhooks` — 送信 Webhook サブスクリプション、シークレットローテーション、リトライ統計
+- `/dashboard/webhooks` — 送信 Webhook サブスクリプション、シークレットのローテーション、再試行統計
 - `/dashboard/batch` — バッチジョブの送信と進捗
 - `/dashboard/cache` — リードスルーキャッシュと推論キャッシュの統計、エビクション制御
-- `/dashboard/playground` — 設定済みの任意のコンボ/モデルに対するインタラクティブなチャットプレイグラウンド
-- `/dashboard/changelog` — アプリ内の変更履歴ビューア（`CHANGELOG.md` をレンダリング）
+- `/dashboard/playground` — 設定済みの任意のコンボ／モデルを使用する対話型チャットプレイグラウンド
+- `/dashboard/changelog` — アプリ内変更履歴ビューアー（`CHANGELOG.md` をレンダリング）
 - `/dashboard/system` — ランタイム診断、バージョン情報、環境検証画面
 - `/dashboard/onboarding` — 新規インストール向けの初回セットアップウィザード
-- `/dashboard/media` — 画像/動画/音楽のプレイグラウンド
+- `/dashboard/media` — 画像／動画／音楽プレイグラウンド
 - `/dashboard/search-tools` — 検索プロバイダーのテストと履歴
-- `/dashboard/health` — 稼働時間、サーキットブレーカー、レート制限、クォータ監視セッション
-- `/dashboard/logs` — リクエスト/プロキシ/監査/コンソールログ
-- `/dashboard/settings` — システム設定タブ（一般、ルーティング、コンボのデフォルトなど）
+- `/dashboard/health` — 稼働時間、サーキットブレーカー、レート制限、クォータ監視対象セッション
+- `/dashboard/logs` — リクエスト／プロキシ／監査／コンソールログ
+- `/dashboard/settings` — システム設定タブ（全般、ルーティング、コンボのデフォルトなど）
 - `/dashboard/context/caveman` — Caveman 圧縮ルール、言語パック、プレビュー、出力モード
 - `/dashboard/context/rtk` — RTK コマンド出力フィルター、プレビュー、ランタイム安全設定
 - `/dashboard/context/combos` — ルーティングコンボに割り当てられた名前付き圧縮パイプライン
 - `/dashboard/translator` — トランスレーターの検査とリクエスト形式変換のプレビュー
-- `/dashboard/audit` — ページネーションと構造化メタデータを備えたコンプライアンス監査ログブラウザ
-- `/dashboard/usage` — `usage_history` に紐づいたリクエスト単位の使用状況ブラウザ
+- `/dashboard/audit` — ページネーションと構造化メタデータを備えたコンプライアンス監査ログブラウザー
+- `/dashboard/usage` — `usage_history` に紐づくリクエスト単位の使用状況ブラウザー
 - `/dashboard/compression` — 圧縮分析、統計、パイプライン割り当て
 - `/dashboard/api-manager` — API キーのライフサイクルとモデル権限
 
-UI レイヤー：すべてのページは 1 つのシェル内でレンダリングされます — `src/app/(dashboard)/layout.tsx` →
+UI レイヤー：すべてのページは単一のシェル内でレンダリングされます — `src/app/(dashboard)/layout.tsx` →
 `src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx`（キットの
-`SidebarProvider`/`SidebarInset`、OmniRoute の `Sidebar.tsx` と `Header.tsx`）。各ページは
-`@/shared/components`（`packages/ui-kit` にベンダー化された Keak CI UI Kit 上のアダプター）または
-キットコンポーネントのサブパス（`@omniroute/ui-kit/table`、`…/page-header`）から構成要素を
-インポートし、アイコンは `<Icon>`（`ICON_MAP` → Lucide）経由で使用します。テーマ（デフォルトは
-`system`、ライト/ダーク）とトークンは `src/app/globals.css` のブリッジを介してキットから提供
-されます。詳細：`docs/architecture/DESIGN_SYSTEM.md`。
+`SidebarProvider`/`SidebarInset`、OmniRoute の `Sidebar.tsx` と `Header.tsx`）。各ページは、
+`@/shared/components`（`packages/ui-kit` にベンダー管理されている Keak CI UI Kit のアダプター）、
+またはキットのコンポーネントサブパス（`@omniroute/ui-kit/table`、`…/page-header`）から
+構成要素をインポートし、アイコンは `<Icon>`（`ICON_MAP` → Lucide）を介して使用します。
+テーマ（デフォルトは `system`、ライト／ダーク）とトークンは、`src/app/globals.css` のブリッジを介して
+キットから提供されます。詳細：`docs/architecture/DESIGN_SYSTEM.md`。
 
 ## システム全体のコンテキスト
 

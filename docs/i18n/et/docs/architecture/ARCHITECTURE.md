@@ -12,77 +12,77 @@ _Viimati uuendatud: 2026-06-28_
 
 ## Kokkuvõte
 
-OmniRoute on Next.js peale ehitatud kohalik tehisintellekti ruutimislüüs ja töölaud.
-See pakub ühtset OpenAI-ühilduvat lõpp-punkti (`/v1/*`) ning suunab liiklust mitme ülesvoo pakkuya vahel, pakkudes tõlkimist, varumehhanisme, tokenite värskendamist ja kasutuse jälgimist.
+OmniRoute on Next.js-il põhinev kohalik tehisintellekti marsruutimislüüs ja juhtpaneel.
+See pakub ühtset OpenAI-ga ühilduvat lõpp-punkti (`/v1/*`) ning marsruudib liikluse mitme ülesvoolu teenusepakkuja vahel, toetades teisendamist, tõrkesiiret, lubade värskendamist ja kasutuse jälgimist.
 
-Põhivõimed:
+Põhivõimekused:
 
-- OpenAI-ühilduv API-pind CLI-/tööriistade jaoks (375 pakkujat, 156 täiturimoodulit)
-- Päringu/vastuse tõlge pakkujate formaatide vahel
-- Mudelikombo varumehhanism (mitme mudeli jada)
-- Struktureeritud kombosammud (`provider + model + connection`) koos käitusajalise järjestusega `compositeTiers` alusel
-- Kontotasandi varumehhanism (mitu kontot pakkuya kohta)
-- Kvoodi eelkontroll ja kvooditeadlik P2C-kontode valik peamises vestlustees
-- OAuth- ja API-võtmega pakkujate ühenduste haldus (27 OAuth-pakkujamoodulit)
-- Embeddingute genereerimine `/v1/embeddings` kaudu (18 pakkujat)
-- Piltide genereerimine `/v1/images/generations` kaudu (10+ pakkujat, 20+ mudelit)
-- Heli transkribeerimine `/v1/audio/transcriptions` kaudu (18 pakkujat)
-- Tekstist-kõneks teisendus `/v1/audio/speech` kaudu (24 sisseehitatud pakkujat)
+- OpenAI-ga ühilduv API-liides CLI-dele ja tööriistadele (375 teenusepakkujat, 156 käivitusmoodulit)
+- Päringute ja vastuste teisendamine teenusepakkujate vormingute vahel
+- Mudelikombinatsioonide tõrkesiire (mitme mudeli järjestus)
+- Struktureeritud kombinatsioonisammud (`provider + model + connection`) käitusaegse järjestamisega `compositeTiers` alusel
+- Kontotaseme tõrkesiire (mitu kontot teenusepakkuja kohta)
+- Kvoodi eelkontroll ja kvooditeadlik P2C-konto valimine peamises vestlusteekonnas
+- OAuthi ja API-võtme põhine teenusepakkuja ühenduste haldus (27 OAuthi teenusepakkuja moodulit)
+- Manuste genereerimine `/v1/embeddings` kaudu (18 teenusepakkujat)
+- Piltide genereerimine `/v1/images/generations` kaudu (üle 10 teenusepakkuja, üle 20 mudeli)
+- Heli transkribeerimine `/v1/audio/transcriptions` kaudu (18 teenusepakkujat)
+- Tekst-kõneks teisendus `/v1/audio/speech` kaudu (24 sisseehitatud teenusepakkujat)
 - Videote genereerimine `/v1/videos/generations` kaudu (ComfyUI + SD WebUI)
 - Muusika genereerimine `/v1/music/generations` kaudu (ComfyUI)
-- Veebiotsing `/v1/search` kaudu (20 pakkujat)
+- Veebiotsing `/v1/search` kaudu (20 teenusepakkujat)
 - Modereerimine `/v1/moderations` kaudu
 - Ümberjärjestamine `/v1/rerank` kaudu
-- Think-sildi parsimine (`<think>...</think>`) mõtlemismudelite jaoks
+- Mõtlemismärgendite sõelumine (`<think>...</think>`) arutlusmudelite jaoks
 - Vastuste puhastamine range OpenAI SDK ühilduvuse tagamiseks
-- Rollide normaliseerimine (developer→system, system→user) pakkujatevahelise ühilduvuse jaoks
+- Rollide normaliseerimine (developer→system, system→user) teenusepakkujateülese ühilduvuse tagamiseks
 - Struktureeritud väljundi teisendamine (json_schema → Gemini responseSchema)
-- Kohalik püsisalvestus pakkujate, võtmete, aliaste, kombode, sätete ja hinnastiku jaoks (122 andmebaasimoodulit)
-- Kasutuse/kulu jälgimine ja päringute logimine
-- Valikuline pilvesünkroniseerimine mitme seadme ja oleku sünkroniseerimiseks
-- IP lubamis-/blokeerimisnimekiri API juurdepääsu kontrollimiseks
-- Mõtlemiseelarve haldus (passthrough/auto/custom/adaptive)
-- Globaalne süsteemprompdi sisestamine
-- Sessioonide jälgimine ja sõrmejälje tuvastamine
-- Kontopõhine täiustatud päringusageduse piiramine pakkujapõhiste profiilidega
-- Kaitselüliti (circuit breaker) muster pakkujate tõrkekindluse tagamiseks
-- Thundering herd’i efekti vastane kaitse mutex-lukustusega
-- Signatuuripõhine päringute dedupleerimise vahemälu
-- Domeenikiht: kulureeglid, varumehhanismi poliitika, blokeerimispoliitika
-- Context Relay: sessiooni üleandmise kokkuvõtted kontode rotatsiooni järjepidevuse tagamiseks
-- Domeeni oleku püsisalvestus (SQLite läbiva kirjutusega vahemälu varumehhanismide, eelarvete, blokeeringute ja kaitselülitite jaoks)
-- Poliitikamootor päringute tsentraliseeritud hindamiseks (blokeering → eelarve → varumehhanism)
-- Päringute telemeetria p50/p95/p99 latentsuse agregeerimisega
-- Kombo sihtmärkide telemeetria ja ajalooline kombo sihtmärkide seisund `combo_execution_key` / `combo_step_id` kaudu
-- Korrelatsiooni-ID (X-Request-Id) otsast-otsani jälgimiseks
+- Teenusepakkujate, võtmete, aliaste, kombinatsioonide, seadete ja hinnastuse kohalik püsitalletus (122 andmebaasimoodulit)
+- Kasutuse ja kulude jälgimine ning päringute logimine
+- Valikuline pilvesünkroonimine mitme seadme ja oleku sünkroonimiseks
+- IP-lubamis- ja blokeerimisloend API juurdepääsu juhtimiseks
+- Arutluseelarve haldus (passthrough/auto/custom/adaptive)
+- Globaalse süsteemiviiba sisestamine
+- Seansside jälgimine ja sõrmejäljestamine
+- Kontopõhine täiustatud päringusageduse piiramine teenusepakkujapõhiste profiilidega
+- Kaitselüliti muster teenusepakkujate töökindluse tagamiseks
+- Päringulaviini vastane kaitse mutex-lukustusega
+- Allkirjapõhine päringute deduplitseerimise vahemälu
+- Domeenikiht: kulureeglid, tõrkesiirdepoliitika, lukustuspoliitika
+- Context Relay: seansi üleandmise kokkuvõtted järjepidevuse säilitamiseks kontode vahetamisel
+- Domeeni oleku püsitalletus (SQLite'i kohese kirjutamisega vahemälu tõrkesiirete, eelarvete, lukustuste ja kaitselülitite jaoks)
+- Poliitikamootor päringute tsentraliseeritud hindamiseks (lukustus → eelarve → tõrkesiire)
+- Päringute telemeetria koos p50/p95/p99 latentsuse koondamisega
+- Kombinatsiooni sihtmärkide telemeetria ja nende ajalooline seisund `combo_execution_key` / `combo_step_id` kaudu
+- Korrelatsiooni-ID (X-Request-Id) läbivaks jälgimiseks
 - Vastavusauditi logimine koos API-võtmepõhise loobumisvõimalusega
-- Hindamisraamistik (eval) LLM-i kvaliteedi tagamiseks
-- Seisunditöölaud pakkujate kaitselülitite reaalajas olekuga
-- MCP-server (110 tööriista) 3 transpordimehhanismiga (stdio/SSE/Streamable HTTP)
+- Hindamisraamistik LLM-ide kvaliteedi tagamiseks
+- Seisundi juhtpaneel teenusepakkujate kaitselülitite reaalajas olekuga
+- MCP-server (110 tööriista) kolme transpordiga (stdio/SSE/Streamable HTTP)
 - A2A-server (JSON-RPC 2.0 + SSE) oskuste ja ülesannete elutsükliga
-- Mälusüsteem (eraldamine, sisestamine, pärimine, kokkuvõtete tegemine)
-- Oskuste süsteem (register, täitur, liivakast, sisseehitatud oskused)
-- MITM-puhverserver sertifikaatide haldamise ja DNS-i käsitlemisega
-- Prompt-injektsiooni kaitsevahevara
-- Promptide tihendamise konveier koos Cavemani, RTK, virnastatud konveierite, tihenduskombode, keelepakettide ja analüütikaga
+- Mälusüsteem (eraldamine, sisestamine, otsimine, kokkuvõtete loomine)
+- Oskuste süsteem (register, käivitaja, liivakast, sisseehitatud oskused)
+- MITM-puhverserver sertifikaatide halduse ja DNS-i käsitlusega
+- Viibasüstide vastane vahevarakiht
+- Viipade tihendamise konveier Cavemani, RTK, virnastatud konveierite, tihenduskombinatsioonide, keelepakettide ja analüütikaga
 - ACP (Agent Communication Protocol) register
-- Modulaarsed OAuth-pakkujad (22 eraldi moodulit kataloogis `src/lib/oauth/providers/`)
-- Desinstallimise/täieliku desinstallimise skriptid
-- OAuth-keskkonna parandamise toiming
-- WebSocketi sild OpenAI-ühilduvatele WS-klientidele (`/v1/ws`)
-- Sünkroniseerimistokenite haldus (väljastamine/tühistamine, ETag-versiooniga konfiguratsioonipaketi allalaadimine)
-- GLM Thinking (`glmt`) esmaklasselise pakkujaeelseadistusena
-- Hübriidne tokenite loendamine (pakkujapoolne `/messages/count_tokens` koos hinnangulise varulahendusega)
-- Mudelialiaste automaatne seemendamine (30+ puhversüsteemidevahelist dialektide normaliseerimist käivitamisel)
-- Turvaline väljuvate päringute tegemine SSRF-kaitse, privaatsete URL-ide blokeerimise ja seadistatava korduskatsega
-- Jahutusperioodi arvestavad vestluse korduskatsed koos seadistatavate `requestRetry` ja `maxRetryIntervalSec` parameetritega
+- Modulaarsed OAuthi teenusepakkujad (22 eraldiseisvat moodulit kataloogis `src/lib/oauth/providers/`)
+- Desinstallimise ja täieliku desinstallimise skriptid
+- OAuthi keskkonna parandustoiming
+- WebSocketi sild OpenAI-ga ühilduvatele WS-klientidele (`/v1/ws`)
+- Sünkroonimisloadade haldus (väljastamine/tühistamine, ETag-versioonitud konfiguratsioonipaketi allalaadimine)
+- GLM Thinkingu (`glmt`) esmaklassiline teenusepakkuja eelseadistus
+- Hübriidne lubade loendamine (teenusepakkujapoolne `/messages/count_tokens` koos varumeetodina kasutatava hinnanguga)
+- Mudelialiaste automaatne algväärtustamine (üle 30 puhverserveriteülese dialektinormaliseeringu käivitamisel)
+- Turvaline väljaminev päringumehhanism SSRF-kaitse, privaatsete URL-ide blokeerimise ja seadistatavate korduskatsetega
+- Ooteajateadlikud vestluse korduskatsed seadistatavate `requestRetry` ja `maxRetryIntervalSec` väärtustega
 - Käituskeskkonna valideerimine Zodiga käivitamisel
-- Vastavusaudit v2 leheküljenduse, pakkujate CRUD-sündmuste ja SSRF-i tõttu blokeeritud valideerimiste logimisega
+- Vastavusaudit v2 koos lehekülgjaotuse, teenusepakkujate CRUD-sündmuste ja SSRF-i blokeeritud valideerimise logimisega
 
-Põhiline käitusmudel:
+Peamine käitusmudel:
 
-- Next.js-i rakenduse marsruudid kataloogis `src/app/api/*` rakendavad nii töölaua API-sid kui ka ühilduvus-API-sid
-- Ühine SSE-/ruutimistuum kataloogides `src/sse/*` + `open-sse/*` tegeleb pakkujate päringute täitmise, tõlkimise, voogesituse, varumehhanismide ja kasutuse arvestusega
+- Next.js-i rakenduse marsruudid kataloogis `src/app/api/*` rakendavad nii juhtpaneeli API-sid kui ka ühilduvus-API-sid
+- Ühine SSE- ja marsruutimistuumik kataloogides `src/sse/*` + `open-sse/*` haldab teenusepakkuja käivitamist, teisendamist, voogedastust, tõrkesiiret ja kasutust
 
 ## Viitediagrammid
 
@@ -114,51 +114,51 @@ kaustas [`docs/diagrams/`](../diagrams/README.md). Allpool on toodud kaks näide
 - Teenusepakkuja SLA/juhtimistasand väljaspool kohalikku protsessi
 - Välised CLI binaarfailid (Claude CLI, Codex CLI, jne)
 
-## Armatuurlaua pind (praegune)
+## Juhtpaneeli vaated (praegused)
 
 Peamised lehed kataloogis `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — kiire alustamine + pakkujate ülevaade
-- `/dashboard/endpoint` — lõpp-punkti proksi + MCP + A2A + API lõpp-punktide vahelehed
-- `/dashboard/providers` — pakkujate ühendused ja mandaadid
-- `/dashboard/combos` — kombo strateegiad, mallid, sammupõhine koostaja, mudeli marsruutimisreeglid, käsitsi salvestatud järjestus
-- `/dashboard/auto-combo` — Auto Combo Engine: skoorimise kaalud, režiimipaketid, virtuaalsed tehase eelseaded, telemeetria
-- `/dashboard/costs` — kulude agregeerimine ja hinnakujunduse nähtavus
-- `/dashboard/analytics` — kasutusanalüütika, hindamised, kombo sihtmärkide seisund
-- `/dashboard/limits` — kvoodi/sageduse juhtimine
-- `/dashboard/cli-tools` — CLI kasutuselevõtt, käituskeskkonna tuvastus, konfiguratsiooni genereerimine
-- `/dashboard/agents` — tuvastatud ACP agendid + kohandatud agentide registreerimine
-- `/dashboard/cloud-agents` — pilves majutatud agendiülesanded (Codex Cloud, Devin, Jules) ja ülesande elutsükkel
-- `/dashboard/skills` — A2A oskuste register, täitmine liivakastis, sisseehitatud oskuste kataloog
-- `/dashboard/memory` — püsiva vestlusmälu ülevaade ja pärimine
-- `/dashboard/webhooks` — väljuvate webhookide tellimused, saladuse rotatsioon, korduskatsete statistika
+- `/dashboard` — kiirkäivitus ja teenusepakkujate ülevaade
+- `/dashboard/endpoint` — lõpp-punkti puhverserveri ning MCP, A2A ja API lõpp-punktide vahekaardid
+- `/dashboard/providers` — teenusepakkujate ühendused ja pääsuandmed
+- `/dashboard/combos` — kombinatsioonistrateegiad, mallid, sammupõhine koostur, mudelite marsruutimisreeglid ja käsitsi määratud püsiv järjestus
+- `/dashboard/auto-combo` — automaatne kombinatsioonimootor: hindamiskaalud, režiimipaketid, virtuaalse tehase eelseadistused ja telemeetria
+- `/dashboard/costs` — kulude koondamine ja hinnastuse nähtavus
+- `/dashboard/analytics` — kasutusanalüütika, hindamised ja kombinatsiooni sihtmärkide seisund
+- `/dashboard/limits` — kvoodi- ja kiirusepiirangud
+- `/dashboard/cli-tools` — CLI kasutuselevõtt, käituskeskkonna tuvastamine ja konfiguratsiooni genereerimine
+- `/dashboard/agents` — tuvastatud ACP agendid ja kohandatud agentide registreerimine
+- `/dashboard/cloud-agents` — pilves majutatud agentide ülesanded (Codex Cloud, Devin, Jules) ja ülesannete elutsükkel
+- `/dashboard/skills` — A2A oskuste register, isoleeritud keskkonnas käitamine ja sisseehitatud oskuste kataloog
+- `/dashboard/memory` — püsiva vestlusmälu uurimine ja sealt teabe hankimine
+- `/dashboard/webhooks` — väljaminevate veebihaakide tellimused, saladuste roteerimine ja korduskatsete statistika
 - `/dashboard/batch` — pakktööde esitamine ja edenemine
-- `/dashboard/cache` — läbilugemis- ja järeldusvahemälu statistika, väljatõrjumise juhtimine
-- `/dashboard/playground` — interaktiivne vestlusmänguväljak mis tahes konfigureeritud kombo/mudeli vastu
-- `/dashboard/changelog` — rakendusesisene muudatuste logi vaatur (renderdab `CHANGELOG.md`)
-- `/dashboard/system` — käitusaja diagnostika, versiooniinfo, keskkonna valideerimise pind
-- `/dashboard/onboarding` — esmakäivituse seadistusviisard uutele paigaldustele
-- `/dashboard/media` — pildi/video/muusika mänguväljak
-- `/dashboard/search-tools` — otsingupakkujate testimine ja ajalugu
-- `/dashboard/health` — tööaeg, ahelakatkestid, sageduspiirangud, kvoodiga jälgitud seansid
-- `/dashboard/logs` — päringu/proksi/auditi/konsooli logid
-- `/dashboard/settings` — süsteemi seadete vahelehed (üldised, marsruutimine, kombo vaikeseaded jne)
+- `/dashboard/cache` — läbiloetava ja arutluskäigu vahemälu statistika ning eemaldamise juhtelemendid
+- `/dashboard/playground` — interaktiivne vestluse katsekeskkond mis tahes konfigureeritud kombinatsiooni või mudeli jaoks
+- `/dashboard/changelog` — rakendusesisene muudatuste logi vaatur (renderdab faili `CHANGELOG.md`)
+- `/dashboard/system` — käituskeskkonna diagnostika, versiooniteave ja keskkonna valideerimise vaade
+- `/dashboard/onboarding` — uute paigalduste esmase seadistamise viisard
+- `/dashboard/media` — piltide, videote ja muusika katsekeskkond
+- `/dashboard/search-tools` — otsinguteenuse pakkujate testimine ja ajalugu
+- `/dashboard/health` — töövõimeaeg, kaitselülitid, kiirusepiirangud ja kvoodijälgimisega seansid
+- `/dashboard/logs` — päringu-, puhverserveri-, auditi- ja konsoolilogid
+- `/dashboard/settings` — süsteemiseadete vahekaardid (üldine, marsruutimine, kombinatsioonide vaikeväärtused jne)
 - `/dashboard/context/caveman` — Cavemani tihendusreeglid, keelepaketid, eelvaade ja väljundrežiim
-- `/dashboard/context/rtk` — RTK käsuväljundi filtrid, eelvaade ja käitusaja ohutusseaded
-- `/dashboard/context/combos` — marsruutimiskombodele määratud nimetatud tihendus-pipeline'id
-- `/dashboard/translator` — tõlkija ülevaade ja päringuvormingu teisenduse eelvaade
-- `/dashboard/audit` — vastavusauditi logi sirvija leheküljenduse ja struktureeritud metaandmetega
-- `/dashboard/usage` — päringupõhine kasutuse sirvija, mis on seotud `usage_history`-ga
-- `/dashboard/compression` — tihendusanalüütika, statistika ja pipeline'i määramine
-- `/dashboard/api-manager` — API-võtme elutsükkel ja mudeli õigused
+- `/dashboard/context/rtk` — RTK käsuväljundi filtrid, eelvaade ja käituskeskkonna ohutusseaded
+- `/dashboard/context/combos` — nimega tihenduskonveierid, mis on määratud marsruutimiskombinatsioonidele
+- `/dashboard/translator` — tõlkija uurimine ja päringuvormingu teisendamise eelvaade
+- `/dashboard/audit` — lehekülgjaotuse ja struktureeritud metaandmetega vastavusauditi logi brauser
+- `/dashboard/usage` — üksikpäringute kasutusandmete brauser, mis on seotud tabeliga `usage_history`
+- `/dashboard/compression` — tihendusanalüütika, statistika ja konveierite määramine
+- `/dashboard/api-manager` — API võtmete elutsükkel ja mudelite õigused
 
-UI kiht: iga leht renderdatakse ühe kesta sees — `src/app/(dashboard)/layout.tsx` →
-`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (kitti
-`SidebarProvider`/`SidebarInset`, OmniRoute'i `Sidebar.tsx` ja `Header.tsx`). Lehed impordivad oma
-ehitusplokid asukohast `@/shared/components` (adapterid `packages/ui-kit`-is reposse kaasatud Keak CI
-UI Kit'i peal) või kitti komponentide alamteedelt (`@omniroute/ui-kit/table`, `…/page-header`) ning
-ikoonid `<Icon>` kaudu (`ICON_MAP` → Lucide). Teema (vaikimisi `system`, hele/tume) ja tokenid tulevad
-kittist `src/app/globals.css`-is oleva silla kaudu. Üksikasjad: `docs/architecture/DESIGN_SYSTEM.md`.
+Kasutajaliidese kiht: iga leht renderdatakse ühes kestas — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (komplekti
+`SidebarProvider`/`SidebarInset` ning OmniRoute'i `Sidebar.tsx` ja `Header.tsx`). Lehed impordivad oma
+koosteplokid moodulist `@/shared/components` (projekti kaasatud Keak CI UI Kiti adapterid kataloogis
+`packages/ui-kit`) või komplekti komponentide alamteedelt (`@omniroute/ui-kit/table`, `…/page-header`) ning
+ikoone komponendi `<Icon>` kaudu (`ICON_MAP` → Lucide). Teema (vaikimisi `system`, hele/tume) ja tõendid pärinevad
+komplektist faili `src/app/globals.css` silla kaudu. Üksikasjad: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Kõrgetasemeline süsteemikontekst
 

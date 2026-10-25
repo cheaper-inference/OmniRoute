@@ -762,7 +762,14 @@ export function openaiToClaudeResponse(chunk, state) {
     // (requestedThinking === false): for `true` and for legacy `undefined` the
     // reasoning already went out as a thinking block above, and synthesizing a
     // text block too would double-expose it.
-    if (!state.textBlockStarted && state._reasoningAccum && state.requestedThinking === false) {
+    if (
+      !state.textBlockStarted &&
+      state._reasoningAccum &&
+      state.requestedThinking === false &&
+      // reasoning-ONLY replies only: a reply with tool calls is not "empty", and turning
+      // its reasoning into visible text leaks it into the transcript (every agent turn).
+      !(state.toolCalls instanceof Map && state.toolCalls.size > 0)
+    ) {
       state.textBlockIndex = state.nextBlockIndex++;
       state.textBlockStarted = true;
       state.textBlockClosed = false;

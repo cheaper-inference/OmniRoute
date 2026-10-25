@@ -8,79 +8,79 @@
 
 _បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖ 2026-06-28_
 
-## សេចក្តីសង្ខេបប្រតិបត្តិការ
+## សេចក្តីសង្ខេបសម្រាប់ថ្នាក់ដឹកនាំ
 
-OmniRoute គឺជា AI routing gateway និង dashboard ដែលដំណើរការក្នុងស្រុក (local) សាងសង់លើ Next.js។
-វាផ្តល់នូវ endpoint តែមួយដែលឆបគ្នាជាមួយ OpenAI (`/v1/*`) ហើយបញ្ជូន traffic ឆ្លងកាត់ upstream provider ជាច្រើន ដោយមានការបកប្រែ, fallback, ការធ្វើ token refresh និងការតាមដានការប្រើប្រាស់។
+OmniRoute គឺជា gateway សម្រាប់បញ្ជូនផ្លូវ AI មូលដ្ឋាន និង dashboard ដែលត្រូវបានបង្កើតឡើងលើ Next.js។
+វាផ្តល់ endpoint តែមួយដែលឆបគ្នាជាមួយ OpenAI (`/v1/*`) និងបញ្ជូនចរាចរណ៍ឆ្លងកាត់ upstream providers ជាច្រើន ដោយមានការបម្លែងទ្រង់ទ្រាយ ការបម្រុងទុក ការធ្វើឱ្យ token ស្រស់ឡើងវិញ និងការតាមដានការប្រើប្រាស់។
 
 សមត្ថភាពស្នូល៖
 
-- ផ្ទៃ API ដែលឆបគ្នាជាមួយ OpenAI សម្រាប់ CLI/ឧបករណ៍ (provider ចំនួន 375, ម៉ូឌុល executor ចំនួន 156)
-- ការបកប្រែ request/response ឆ្លងកាត់ទ្រង់ទ្រាយរបស់ provider ផ្សេងៗ
-- Model combo fallback (លំដាប់ម៉ូដែលច្រើន)
-- ជំហាន combo ដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយនឹងការរៀបលំដាប់នៅ runtime តាម `compositeTiers`
-- fallback នៅកម្រិតគណនី (គណនីច្រើនក្នុងមួយ provider)
-- ការត្រួតពិនិត្យ quota ជាមុន (preflight) និងការជ្រើសរើសគណនី P2C ដែលយល់ដឹងពី quota នៅក្នុងផ្លូវ chat ចម្បង
-- ការគ្រប់គ្រងការភ្ជាប់ provider ប្រភេទ OAuth + API key (ម៉ូឌុល OAuth provider ចំនួន 27)
-- ការបង្កើត embedding តាមរយៈ `/v1/embeddings` (provider ចំនួន 18)
-- ការបង្កើតរូបភាព តាមរយៈ `/v1/images/generations` (provider ចំនួន 10+, ម៉ូដែលចំនួន 20+)
-- ការចម្លងអក្សរពីសំឡេង តាមរយៈ `/v1/audio/transcriptions` (provider ចំនួន 18)
-- ការបម្លែងអក្សរទៅជាសំឡេង តាមរយៈ `/v1/audio/speech` (provider ដែលមានស្រាប់ចំនួន 24)
-- ការបង្កើតវីដេអូ តាមរយៈ `/v1/videos/generations` (ComfyUI + SD WebUI)
-- ការបង្កើតតន្ត្រី តាមរយៈ `/v1/music/generations` (ComfyUI)
-- ការស្វែងរកបណ្តាញ តាមរយៈ `/v1/search` (provider ចំនួន 20)
-- ការត្រួតពិនិត្យមាតិកា តាមរយៈ `/v1/moderations`
-- ការរៀបលំដាប់ឡើងវិញ តាមរយៈ `/v1/rerank`
-- ការញែក think tag (`<think>...</think>`) សម្រាប់ម៉ូដែល reasoning
-- ការសម្អាត response សម្រាប់ភាពឆបគ្នាយ៉ាងតឹងរ៉ឹងជាមួយ OpenAI SDK
-- ការធ្វើឱ្យ role ស្រប (developer→system, system→user) សម្រាប់ភាពឆបគ្នាឆ្លង provider
-- ការបម្លែង output ដែលមានរចនាសម្ព័ន្ធ (json_schema → Gemini responseSchema)
-- ការរក្សាទុកក្នុងស្រុកសម្រាប់ provider, key, alias, combo, ការកំណត់ និងតម្លៃ (ម៉ូឌុល DB ចំនួន 122)
-- ការតាមដានការប្រើប្រាស់/ចំណាយ និងការកត់ត្រា request
-- ការធ្វើសមកាលកម្ម cloud ជាជម្រើស សម្រាប់ការធ្វើសមកាលកម្មច្រើនឧបករណ៍/ស្ថានភាព
-- IP allowlist/blocklist សម្រាប់ការគ្រប់គ្រងការចូលប្រើ API
+- ផ្ទៃ API ដែលឆបគ្នាជាមួយ OpenAI សម្រាប់ CLI/tools (375 providers, 156 executor modules)
+- ការបម្លែង request/response រវាងទ្រង់ទ្រាយរបស់ provider ផ្សេងៗ
+- ការបម្រុងទុកដោយប្រើ model combo (លំដាប់ multi-model)
+- ជំហាន combo ដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយការរៀបលំដាប់ពេលដំណើរការដោយ `compositeTiers`
+- ការបម្រុងទុកនៅកម្រិត account (account ច្រើនសម្រាប់ provider នីមួយៗ)
+- ការត្រួតពិនិត្យ quota ជាមុន និងការជ្រើសរើស account តាម P2C ដែលគិតគូរពី quota នៅក្នុងផ្លូវ chat ចម្បង
+- ការគ្រប់គ្រងការតភ្ជាប់ provider តាម OAuth + API key (27 OAuth provider modules)
+- ការបង្កើត embedding តាមរយៈ `/v1/embeddings` (18 providers)
+- ការបង្កើតរូបភាពតាមរយៈ `/v1/images/generations` (10+ providers, 20+ models)
+- ការចម្លងសំឡេងទៅជាអត្ថបទតាមរយៈ `/v1/audio/transcriptions` (18 providers)
+- ការបម្លែងអត្ថបទទៅជាសំឡេងតាមរយៈ `/v1/audio/speech` (24 built-in providers)
+- ការបង្កើតវីដេអូតាមរយៈ `/v1/videos/generations` (ComfyUI + SD WebUI)
+- ការបង្កើតតន្ត្រីតាមរយៈ `/v1/music/generations` (ComfyUI)
+- ការស្វែងរកលើបណ្ដាញតាមរយៈ `/v1/search` (20 providers)
+- ការត្រួតពិនិត្យខ្លឹមសារតាមរយៈ `/v1/moderations`
+- ការរៀបចំណាត់ថ្នាក់ឡើងវិញតាមរយៈ `/v1/rerank`
+- ការញែក think tag (`<think>...</think>`) សម្រាប់ reasoning models
+- ការសម្អាត response ដើម្បីឱ្យឆបគ្នាយ៉ាងតឹងរ៉ឹងជាមួយ OpenAI SDK
+- ការធ្វើឱ្យ role មានស្តង់ដារ (developer→system, system→user) ដើម្បីឱ្យឆបគ្នារវាង providers
+- ការបម្លែង structured output (json_schema → Gemini responseSchema)
+- ការរក្សាទុកទិន្នន័យក្នុងមូលដ្ឋានសម្រាប់ providers, keys, aliases, combos, settings និង pricing (122 DB modules)
+- ការតាមដានការប្រើប្រាស់/ការចំណាយ និងការកត់ត្រា request
+- ជម្រើស cloud sync សម្រាប់ធ្វើសមកាលកម្មឧបករណ៍ច្រើន/ស្ថានភាព
+- បញ្ជី IP ដែលអនុញ្ញាត/ទប់ស្កាត់ សម្រាប់ការគ្រប់គ្រងសិទ្ធិចូលប្រើ API
 - ការគ្រប់គ្រង thinking budget (passthrough/auto/custom/adaptive)
-- ការចាក់បញ្ចូល system prompt ជាសាកល
-- ការតាមដាន session និង fingerprinting
-- ការកំណត់ rate កម្រិតខ្ពស់ក្នុងមួយគណនី ជាមួយ profile ជាក់លាក់របស់ provider នីមួយៗ
+- ការបញ្ចូល global system prompt
+- ការតាមដាន session និងការកំណត់ fingerprint
+- ការកំណត់កម្រិតអត្រាដែលប្រសើរឡើងតាម account នីមួយៗ ជាមួយ profile ជាក់លាក់តាម provider
 - លំនាំ circuit breaker សម្រាប់ភាពធន់របស់ provider
-- ការការពារ thundering herd ជាមួយ mutex locking
-- cache លុប request ស្ទួន ដោយផ្អែកលើ signature
-- ស្រទាប់ domain៖ ច្បាប់ចំណាយ, គោលនយោបាយ fallback, គោលនយោបាយ lockout
-- Context Relay៖ សេចក្តីសង្ខេបនៃការប្រគល់ផ្ទេរ session សម្រាប់ភាពបន្តទាក់ទងនៃការប្តូរគណនី
-- ការរក្សាទុកស្ថានភាព domain (SQLite write-through cache សម្រាប់ fallback, budget, lockout និង circuit breaker)
-- ម៉ាស៊ីនគោលនយោបាយសម្រាប់ការវាយតម្លៃ request ពីមជ្ឈមណ្ឌល (lockout → budget → fallback)
-- request telemetry ជាមួយការបូកសរុប latency នៅ p50/p95/p99
-- telemetry គោលដៅ combo និងសុខភាពគោលដៅ combo តាមប្រវត្តិ តាមរយៈ `combo_execution_key` / `combo_step_id`
-- Correlation ID (X-Request-Id) សម្រាប់ការតាមដានពីដើមដល់ចុង
-- ការកត់ត្រាសវនកម្មអនុលោម ជាមួយនឹង opt-out ក្នុងមួយ API key
-- ក្របខ័ណ្ឌ eval សម្រាប់ការធានាគុណភាព LLM
-- dashboard សុខភាព ជាមួយនឹងស្ថានភាព circuit breaker របស់ provider ជាក់ស្តែង
-- MCP Server (ឧបករណ៍ចំនួន 110) ជាមួយ transport ចំនួន 3 (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) ជាមួយ skill និងវដ្តជីវិតភារកិច្ច
-- ប្រព័ន្ធអង្គចងចាំ (ការស្រង់, ការចាក់បញ្ចូល, ការទាញយក និងការសង្ខេប)
-- ប្រព័ន្ធ skill (registry, executor, sandbox និង skill ដែលមានស្រាប់)
-- MITM proxy ជាមួយការគ្រប់គ្រងវិញ្ញាបនបត្រ និងការដោះស្រាយ DNS
-- middleware ការពារការចាក់បញ្ចូល prompt
-- pipeline បង្ហាប់ prompt ជាមួយ Caveman, RTK, pipeline ជាន់គ្នា, combo បង្ហាប់, កញ្ចប់ភាសា និងការវិភាគ
+- ការការពារបាតុភូត anti-thundering herd ដោយប្រើ mutex locking
+- cache សម្រាប់លុប request ស្ទួនដោយផ្អែកលើ signature
+- ស្រទាប់ domain៖ ច្បាប់ចំណាយ គោលការណ៍ fallback និងគោលការណ៍ lockout
+- Context Relay៖ សេចក្តីសង្ខេបសម្រាប់ផ្ទេរ session ដើម្បីរក្សាភាពបន្តនៅពេលប្ដូរ account
+- ការរក្សាទុកស្ថានភាព domain (SQLite write-through cache សម្រាប់ fallbacks, budgets, lockouts និង circuit breakers)
+- policy engine សម្រាប់វាយតម្លៃ request ជាកណ្តាល (lockout → budget → fallback)
+- telemetry របស់ request ជាមួយការប្រមូលផ្តុំ latency p50/p95/p99
+- telemetry របស់ combo target និងសុខភាព combo target ជាប្រវត្តិសាស្ត្រ តាមរយៈ `combo_execution_key` / `combo_step_id`
+- Correlation ID (X-Request-Id) សម្រាប់ការតាមដានពីដើមដល់ចប់
+- ការកត់ត្រាសវនកម្មអនុលោមភាព ជាមួយជម្រើសដកខ្លួនតាម API key នីមួយៗ
+- eval framework សម្រាប់ការធានាគុណភាព LLM
+- health dashboard ជាមួយស្ថានភាព circuit breaker របស់ provider តាមពេលវេលាជាក់ស្តែង
+- MCP Server (110 tools) ជាមួយ 3 transports (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) ជាមួយ skills និងវដ្តជីវិត task
+- ប្រព័ន្ធ memory (ការស្រង់ ការបញ្ចូល ការទាញយក និងការសង្ខេប)
+- ប្រព័ន្ធ skills (registry, executor, sandbox និង built-in skills)
+- MITM proxy ជាមួយការគ្រប់គ្រង certificate និងការដោះស្រាយ DNS
+- middleware ការពារ prompt injection
+- pipeline បង្ហាប់ prompt ជាមួយ Caveman, RTK, stacked pipelines, compression combos, language packs និង analytics
 - registry របស់ ACP (Agent Communication Protocol)
-- OAuth provider ជាម៉ូឌុល (ម៉ូឌុលនីមួយៗចំនួន 22 នៅក្រោម `src/lib/oauth/providers/`)
-- ស្គ្រីប uninstall/full-uninstall
-- សកម្មភាពជួសជុលបរិស្ថាន OAuth
-- ស្ពាន WebSocket សម្រាប់ម៉ាស៊ីនភ្ញៀវ WS ដែលឆបគ្នាជាមួយ OpenAI (`/v1/ws`)
-- ការគ្រប់គ្រង sync token (ចេញ/ដកហូត, ការទាញយក config bundle ដែលមានកំណែតាម ETag)
-- preset provider កម្រិត first-class សម្រាប់ GLM Thinking (`glmt`)
-- ការរាប់ token បែបចម្រុះ (provider-side `/messages/count_tokens` ជាមួយនឹង fallback ការប៉ាន់ស្មាន)
-- ការដាំដុះដោយស្វ័យប្រវត្តិនៃ model alias (ការធ្វើឱ្យស្របនៃភាសាក្តារឆ្លង proxy ចំនួន 30+ នៅពេលចាប់ផ្តើម)
-- ការទាញយកចេញក្រៅដោយសុវត្ថិភាព ជាមួយការការពារ SSRF, ការរារាំង URL ឯកជន និងការព្យាយាមម្តងទៀតដែលអាចកំណត់បាន
-- ការព្យាយាម chat ម្តងទៀតដែលយល់ដឹងពី cooldown ជាមួយ `requestRetry` និង `maxRetryIntervalSec` ដែលអាចកំណត់បាន
-- ការផ្ទៀងផ្ទាត់បរិស្ថាន runtime ជាមួយ Zod នៅពេលចាប់ផ្តើម
-- សវនកម្មអនុលោម v2 ជាមួយការបែងចែកទំព័រ, ព្រឹត្តិការណ៍ CRUD របស់ provider និងការកត់ត្រាការផ្ទៀងផ្ទាត់ដែលត្រូវបានរារាំងដោយ SSRF
+- OAuth providers បែប modular (22 individual modules ក្រោម `src/lib/oauth/providers/`)
+- scripts សម្រាប់ uninstall/full-uninstall
+- សកម្មភាពជួសជុល OAuth environment
+- WebSocket bridge សម្រាប់ OpenAI-compatible WS clients (`/v1/ws`)
+- ការគ្រប់គ្រង sync token (ការចេញ/ដកហូត និងការទាញយក config bundle ដែលមាន version តាម ETag)
+- GLM Thinking (`glmt`) ជា provider preset កម្រិត first-class
+- ការរាប់ token បែប hybrid (តាម provider-side `/messages/count_tokens` ជាមួយ estimation fallback)
+- ការបង្កើត model alias ដោយស្វ័យប្រវត្តិជាមុន (30+ cross-proxy dialect normalizations នៅពេលចាប់ផ្ដើម)
+- outbound fetch ប្រកបដោយសុវត្ថិភាព ជាមួយ SSRF guard, ការទប់ស្កាត់ private URL និង retry ដែលអាចកំណត់រចនាសម្ព័ន្ធបាន
+- chat retries ដែលគិតគូរពី cooldown ជាមួយ `requestRetry` និង `maxRetryIntervalSec` ដែលអាចកំណត់រចនាសម្ព័ន្ធបាន
+- ការផ្ទៀងផ្ទាត់ runtime environment ជាមួយ Zod នៅពេលចាប់ផ្ដើម
+- ការធ្វើសវនកម្មអនុលោមភាព v2 ជាមួយ pagination, provider CRUD events និងការកត់ត្រាការផ្ទៀងផ្ទាត់ដែល SSRF បានទប់ស្កាត់
 
-ម៉ូដែល runtime ចម្បង៖
+ម៉ូដែលដំណើរការចម្បង៖
 
-- Next.js app routes នៅក្រោម `src/app/api/*` អនុវត្តទាំង dashboard API និង compatibility API
-- ស្នូល SSE/routing ដែលចែករំលែកគ្នានៅក្នុង `src/sse/*` + `open-sse/*` ដោះស្រាយការប្រតិបត្តិ provider, ការបកប្រែ, streaming, fallback និងការប្រើប្រាស់
+- Next.js app routes ក្រោម `src/app/api/*` អនុវត្តទាំង dashboard APIs និង compatibility APIs
+- ស្នូល SSE/routing រួមក្នុង `src/sse/*` + `open-sse/*` គ្រប់គ្រងការប្រតិបត្តិ provider ការបម្លែងទ្រង់ទ្រាយ streaming fallback និងការប្រើប្រាស់
 
 ## ដ្យាក្រាមយោង
 
@@ -116,44 +116,49 @@ OmniRoute គឺជា AI routing gateway និង dashboard ដែលដំណ
 
 ## ផ្ទៃ Dashboard (បច្ចុប្បន្ន)
 
-ទំព័រសំខាន់ៗនៅក្នុង `src/app/(dashboard)/dashboard/`៖
+ទំព័រសំខាន់ៗនៅក្រោម `src/app/(dashboard)/dashboard/`៖
 
-- `/dashboard` — ការចាប់ផ្តើមរហ័ស + ទិដ្ឋភាពទូទៅរបស់ provider
-- `/dashboard/endpoint` — ថេប endpoint proxy + MCP + A2A + API endpoint
-- `/dashboard/providers` — ការតភ្ជាប់ provider និង credentials
-- `/dashboard/combos` — យុទ្ធសាស្ត្របន្សំ combo, គំរូ, ឧបករណ៍បង្កើតតាមជំហាន, ច្បាប់ផ្លាស់ប្តូរម៉ូដែល, ការរៀបលំដាប់ដោយដៃដែលបានរក្សាទុក
-- `/dashboard/auto-combo` — ម៉ាស៊ីន Auto Combo៖ ទម្ងន់ដាក់ពិន្ទុ, កញ្ចប់របៀប, ការកំណត់ជាមុនរបស់ virtual factory, telemetry
-- `/dashboard/costs` — ការបូកសរុបចំណាយ និងភាពមើលឃើញនៃតម្លៃ
-- `/dashboard/analytics` — វិភាគការប្រើប្រាស់, ការវាយតម្លៃ, សុខភាពគោលដៅ combo
-- `/dashboard/limits` — ការគ្រប់គ្រង quota/rate
-- `/dashboard/cli-tools` — ការណែនាំ CLI, ការរកឃើញ runtime, ការបង្កើតការកំណត់រចនាសម្ព័ន្ធ
-- `/dashboard/agents` — agent របស់ ACP ដែលបានរកឃើញ + ការចុះបញ្ជី agent ផ្ទាល់ខ្លួន
-- `/dashboard/cloud-agents` — ភារកិច្ច agent ដែលដាក់ឱ្យដំណើរការនៅលើ cloud (Codex Cloud, Devin, Jules) និងវដ្តជីវិតភារកិច្ច
-- `/dashboard/skills` — បញ្ជីជាតិជំនាញ A2A, ការប្រតិបត្តិក្នុង sandbox, កាតាឡុកជំនាញដែលមានស្រាប់
-- `/dashboard/memory` — ការពិនិត្យមើល និងស្វែងរកអង្គចងចាំសន្ទនាជាអចិន្ត្រៃយ៍
-- `/dashboard/webhooks` — ការជាវ webhook ទៅក្រៅ, ការប្តូរ secret, ស្ថិតិព្យាយាមម្តងទៀត
-- `/dashboard/batch` — ការដាក់ស្នើការងារជាកុម្ម៉ង់ និងវឌ្ឍនភាព
-- `/dashboard/cache` — ស្ថិតិ cache ប្រភេទ read-through និង reasoning, ការគ្រប់គ្រងការដកចេញ
-- `/dashboard/playground` — ទីលានជជែកអន្តរកម្មប្រឆាំងនឹង combo/model ណាមួយដែលបានកំណត់រចនាសម្ព័ន្ធ
-- `/dashboard/changelog` — កម្មវិធីមើល changelog ក្នុងកម្មវិធី (បង្ហាញ `CHANGELOG.md`)
-- `/dashboard/system` — ការធ្វើរោគវិនិច្ឆ័យ runtime, ព័ត៌មានកំណែ, ផ្ទៃផ្ទៀងផ្ទាត់បរិស្ថាន
-- `/dashboard/onboarding` — អ្នកជំនួយការដំឡើងដំបូងសម្រាប់ការដំឡើងថ្មី
-- `/dashboard/media` — ទីលានរូបភាព/វីដេអូ/តន្ត្រី
-- `/dashboard/search-tools` — ការសាកល្បង search provider និងប្រវត្តិ
-- `/dashboard/health` — ពេលវេលាដំណើរការ, circuit breaker, ដែនកំណត់អត្រា, សម័យដែលត្រួតពិនិត្យ quota
-- `/dashboard/logs` — កំណត់ហេតុស្នើសុំ/proxy/audit/console
-- `/dashboard/settings` — ថេបការកំណត់ប្រព័ន្ធ (ទូទៅ, ការផ្លាស់ប្តូរ, លំនាំដើម combo, ។ល។)
-- `/dashboard/context/caveman` — ច្បាប់បង្ហាប់ Caveman, កញ្ចប់ភាសា, ការមើលជាមុន, និងរបៀបលទ្ធផល
-- `/dashboard/context/rtk` — តម្រងលទ្ធផលពាក្យបញ្ជា RTK, ការមើលជាមុន, និងការកំណត់សុវត្ថិភាព runtime
-- `/dashboard/context/combos` — ខ្សែដំណើរការបង្ហាប់ដែលមានឈ្មោះ ដែលបានចាត់តាំងទៅ routing combo
-- `/dashboard/translator` — ការពិនិត្យមើលអ្នកបកប្រែ និងការមើលជាមុននៃការបំលែងទ្រង់ទ្រាយស្នើសុំ
-- `/dashboard/audit` — កម្មវិធីរកមើលកំណត់ហេតុសវនកម្មអនុលោមភាព ដែលមានការបែងទំព័រ និងទិន្នន័យរចនាសម្ព័ន្ធ
-- `/dashboard/usage` — កម្មវិធីរកមើលការប្រើប្រាស់តាមស្នើសុំ ដែលភ្ជាប់ទៅ `usage_history`
-- `/dashboard/compression` — វិភាគការបង្ហាប់, ស្ថិតិ, និងការចាត់តាំងខ្សែដំណើរការ
-- `/dashboard/api-manager` — វដ្តជីវិត API key និងការអនុញ្ញាតម៉ូដែល
+- `/dashboard` — ការចាប់ផ្ដើមរហ័ស + ទិដ្ឋភាពទូទៅនៃអ្នកផ្ដល់សេវា
+- `/dashboard/endpoint` — ផ្ទាំង endpoint proxy + MCP + A2A + API endpoint
+- `/dashboard/providers` — ការតភ្ជាប់ និងព័ត៌មានសម្ងាត់របស់អ្នកផ្ដល់សេវា
+- `/dashboard/combos` — យុទ្ធសាស្ត្រ combo, template, កម្មវិធីបង្កើតតាមជំហាន, ច្បាប់កំណត់ផ្លូវ model និងលំដាប់ដែលបានរក្សាទុកដោយដៃ
+- `/dashboard/auto-combo` — Auto Combo Engine៖ ទម្ងន់ពិន្ទុ, mode pack, virtual factory preset និង telemetry
+- `/dashboard/costs` — ការបូកសរុបចំណាយ និងការមើលឃើញតម្លៃ
+- `/dashboard/analytics` — ការវិភាគការប្រើប្រាស់, ការវាយតម្លៃ និងស្ថានភាពគោលដៅ combo
+- `/dashboard/limits` — ការគ្រប់គ្រងកូតា/អត្រា
+- `/dashboard/cli-tools` — ការណែនាំចាប់ផ្ដើម CLI, ការរកឃើញ runtime និងការបង្កើតការកំណត់រចនាសម្ព័ន្ធ
+- `/dashboard/agents` — ACP agent ដែលបានរកឃើញ + ការចុះឈ្មោះ agent ផ្ទាល់ខ្លួន
+- `/dashboard/cloud-agents` — កិច្ចការរបស់ agent ដែលបង្ហោះលើ cloud (Codex Cloud, Devin, Jules) និងវដ្តជីវិតកិច្ចការ
+- `/dashboard/skills` — បញ្ជីជំនាញ A2A, ការប្រតិបត្តិក្នុង sandbox និងកាតាឡុកជំនាញដែលភ្ជាប់មកជាមួយ
+- `/dashboard/memory` — ការត្រួតពិនិត្យ និងការទាញយកអង្គចងចាំសន្ទនាអចិន្ត្រៃយ៍
+- `/dashboard/webhooks` — ការជាវ webhook ចេញ, ការប្ដូរ secret និងស្ថិតិនៃការព្យាយាមឡើងវិញ
+- `/dashboard/batch` — ការដាក់ស្នើ batch job និងវឌ្ឍនភាព
+- `/dashboard/cache` — ស្ថិតិ read-through cache និង reasoning cache ព្រមទាំងការគ្រប់គ្រងការបណ្ដេញទិន្នន័យ
+- `/dashboard/playground` — ទីលានសាកល្បងជជែកអន្តរកម្មជាមួយ combo/model ដែលបានកំណត់រចនាសម្ព័ន្ធណាមួយ
+- `/dashboard/changelog` — កម្មវិធីមើលបញ្ជីផ្លាស់ប្ដូរនៅក្នុងកម្មវិធី (បង្ហាញ `CHANGELOG.md`)
+- `/dashboard/system` — ការវិនិច្ឆ័យ runtime, ព័ត៌មានកំណែ និងផ្ទៃផ្ទៀងផ្ទាត់បរិស្ថាន
+- `/dashboard/onboarding` — អ្នកជំនួយការរៀបចំសម្រាប់ការដំណើរការលើកដំបូងនៃការដំឡើងថ្មី
+- `/dashboard/media` — ទីលានសាកល្បងរូបភាព/វីដេអូ/តន្ត្រី
+- `/dashboard/search-tools` — ការសាកល្បងអ្នកផ្ដល់សេវាស្វែងរក និងប្រវត្តិ
+- `/dashboard/health` — រយៈពេលដំណើរការ, circuit breaker, ដែនកំណត់អត្រា និង session ដែលត្រូវបានត្រួតពិនិត្យកូតា
+- `/dashboard/logs` — កំណត់ហេតុ request/proxy/audit/console
+- `/dashboard/settings` — ផ្ទាំងការកំណត់ប្រព័ន្ធ (ទូទៅ, ការកំណត់ផ្លូវ, លំនាំដើម combo ជាដើម)
+- `/dashboard/context/caveman` — ច្បាប់បង្ហាប់ Caveman, language pack, ការមើលជាមុន និងទម្រង់ output
+- `/dashboard/context/rtk` — តម្រង output របស់ command RTK, ការមើលជាមុន និងការកំណត់សុវត្ថិភាព runtime
+- `/dashboard/context/combos` — pipeline បង្ហាប់ដែលមានឈ្មោះ និងត្រូវបានចាត់តាំងទៅ routing combo
+- `/dashboard/translator` — ការត្រួតពិនិត្យកម្មវិធីបកប្រែ និងការមើលជាមុននៃការបម្លែងទម្រង់ request
+- `/dashboard/audit` — កម្មវិធីរុករកកំណត់ហេតុសវនកម្មអនុលោមភាព ដែលមានការបែងចែកទំព័រ និង metadata មានរចនាសម្ព័ន្ធ
+- `/dashboard/usage` — កម្មវិធីរុករកការប្រើប្រាស់សម្រាប់ request នីមួយៗ ដែលភ្ជាប់ជាមួយ `usage_history`
+- `/dashboard/compression` — ការវិភាគការបង្ហាប់, ស្ថិតិ និងការចាត់តាំង pipeline
+- `/dashboard/api-manager` — វដ្តជីវិត API key និងសិទ្ធិប្រើប្រាស់ model
 
-ស្រទាប់ UI៖ គ្រប់ទំព័របង្ហាញនៅក្នុង shell តែមួយ — `src/app/(dashboard)/layout.tsx` →
-`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset` របស់ kit, និង `Sidebar.tsx` និង `Header.tsx` របស់ OmniRoute)។ ទំព័រនាំចូលប្លុករចនាសម្ព័ន្ធរបស់ខ្លួនពី `@/shared/components` (adapter សម្រាប់ Keak CI UI Kit ដែល vendored នៅក្នុង `packages/ui-kit`) ឬពី subpath សម្មៗរបស់ kit (`@omniroute/ui-kit/table`, `…/page-header`), ហើយរូបតំណាងតាមរយៈ `<Icon>` (`ICON_MAP` → Lucide)។ Theme (`system` ជាលំនាំដើម, light/dark) និង token មកពី kit តាមរយៈ bridge នៅក្នុង `src/app/globals.css`។ ព័ត៌មានលម្អិត៖ `docs/architecture/DESIGN_SYSTEM.md`។
+ស្រទាប់ UI៖ គ្រប់ទំព័រទាំងអស់ត្រូវបានបង្ហាញនៅក្នុង shell តែមួយ — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset` របស់ kit និង
+`Sidebar.tsx` ព្រមទាំង `Header.tsx` របស់ OmniRoute)។ ទំព័រនានា import ផ្នែកស្ថាបនារបស់ខ្លួនពី
+`@/shared/components` (adapter លើ Keak CI UI Kit ដែលបានបញ្ចូលក្នុង
+`packages/ui-kit`) ឬពី subpath នៃ component របស់ kit (`@omniroute/ui-kit/table`, `…/page-header`) ហើយ
+icon តាមរយៈ `<Icon>` (`ICON_MAP` → Lucide)។ Theme (`system` ជាលំនាំដើម, light/dark) និង token មកពី
+kit តាមរយៈ bridge នៅក្នុង `src/app/globals.css`។ ព័ត៌មានលម្អិត៖ `docs/architecture/DESIGN_SYSTEM.md`។
 
 ## បរិបទប្រព័ន្ធកម្រិតខ្ពស់
 
