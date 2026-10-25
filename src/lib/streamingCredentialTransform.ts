@@ -72,10 +72,22 @@ export async function resolveCredentialGate(args: {
   }
   let disabled: string[] = [];
   try {
-    const resolver =
-      args.resolveDisabledGuardrails ?? (await import("./guardrails")).resolveDisabledGuardrails;
-    disabled =
-      resolver({ apiKeyInfo: args.apiKeyInfo, body: args.body, headers: args.headers }) ?? [];
+    if (args.resolveDisabledGuardrails) {
+      disabled =
+        args.resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo,
+          body: args.body,
+          headers: args.headers,
+        }) ?? [];
+    } else {
+      const { resolveDisabledGuardrails } = await import("./guardrails");
+      disabled =
+        resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo as Record<string, unknown> | null | undefined,
+          body: args.body,
+          headers: args.headers as Headers | Record<string, unknown> | null | undefined,
+        }) ?? [];
+    }
   } catch {
     disabled = [];
   }
