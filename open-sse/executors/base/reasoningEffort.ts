@@ -451,6 +451,9 @@ export function sanitizeReasoningEffortForProvider(
   // ── MiniMax models ───────────────────────────────────────────────────────
   // Accepts none|minimal|low|medium|high. Clamp xhigh/max/ultra → high.
   if (MINIMAX_REASONING_PATTERN.test(modelStr)) {
+    // MiniMax M3.1 Flash explicitly supports the full graduated effort
+    // vocabulary, including xhigh and max.
+    if (/(?:^|\/|\b)minimax-m3\.1(?:-|\b)/i.test(modelStr)) return body;
     if (effortStr === "xhigh" || effortStr === "max" || effortStr === "ultra") {
       log?.info?.(
         "REASONING_SANITIZE",
