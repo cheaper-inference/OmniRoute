@@ -197,7 +197,11 @@ function hasNonPingStructuredPayload(payload: unknown, eventType = ""): boolean 
 }
 
 export function hasUsefulStreamContent(text: string, options: UsefulContentOptions = {}): boolean {
-  const lines = text.split(/\r?\n/);
+  // A chunk split without its newline rejoins two frames on one line
+  // (`...}}data: {...}`). Restore the boundary so a valid payload is not
+  // hidden by its framing; pure garbage has no such boundary and stays refused.
+  // Only split after `}`/`]` before JSON, never inside a word like `somedata:`.
+  const lines = text.replace(/([}\]])data:(?=\s*[[{"])/g, "$1\n data:").split(/\r?\n/);
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -211,7 +215,9 @@ export function hasUsefulStreamContent(text: string, options: UsefulContentOptio
     try {
       if (hasUsefulJsonPayload(JSON.parse(data), options.contentProbe === true)) return true;
     } catch {
-      if (data.length > 0) return true;
+      // A non-JSON `data:` line is not useful stream content: skip it and
+      // inspect the next line instead of failing the whole text.
+      continue;
     }
   }
 
@@ -549,7 +555,9 @@ function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean
     }
     return hasNonPingStructuredPayload(payload, eventType);
   } catch {
-    return data.length > 0;
+    // A non-JSON `data:` line is refused as a readiness signal: a proxy error
+    // page or other garbage served under `data:` must not release the stream.
+    return false;
   }
 }
 
@@ -567,8 +575,13 @@ function processStreamReadinessLine(state: StreamReadinessSignalState, line: str
 
   if (trimmed.startsWith("data:")) {
     state.dataLines.push(trimmed.slice(5).trimStart());
+    return false;
   }
-  return false;
+
+  // A raw line outside `data:` is itself a readiness signal: a plain-text
+  // (non-SSE) upstream is live, so the gate releases on it rather than
+  // timing out on a stream that is already producing output.
+  return true;
 }
 
 function appendStreamReadinessSignal(state: StreamReadinessSignalState, chunk: string): boolean {

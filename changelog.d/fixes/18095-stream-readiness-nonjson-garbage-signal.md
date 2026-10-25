@@ -1,0 +1,1 @@
+- **fix(sse):** refuse non-JSON data lines in stream readiness and content checks ([#18095](https://github.com/cheaper-inference/OmniRoute/pull/18095)) — thanks @maxmad64bis
