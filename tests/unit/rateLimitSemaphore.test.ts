@@ -90,3 +90,96 @@ describe("rateLimitSemaphore queue depth (#3872)", () => {
     resetAll();
   });
 });
+
+describe("rateLimitSemaphore gate limit frozen at creation", () => {
+  it("keeps the creation limit when a later acquire passes a larger limit", async () => {
+    const key = "gate-freeze-a";
+    const releases: Array<() => void> = [];
+    try {
+      releases.push(await acquire(key, { maxConcurrency: 2, timeoutMs: 500 }));
+      releases.push(await acquire(key, { maxConcurrency: 10, timeoutMs: 500 }));
+      assert.equal(getStats()[key].max, 2);
+    } finally {
+      for (const release of releases) release();
+      resetAll();
+    }
+  });
+
+  it("drains queued requests at the creation limit when a later acquire passes a larger limit", async () => {
+    const key = "gate-freeze-b";
+    let active = 0;
+    let peak = 0;
+    const tracked: Array<() => void> = [];
+    const observe = (release: () => void): (() => void) => {
+      active += 1;
+      if (active > peak) peak = active;
+      let done = false;
+      return () => {
+        if (done) return;
+        done = true;
+        active -= 1;
+        release();
+      };
+    };
+    let releaseA: (() => void) | null = null;
+    let releaseB: (() => void) | null = null;
+    // Unbounded queue: maxQueueSize omitted, so every waiter queues.
+    const pending: Array<Promise<void>> = [];
+    try {
+      releaseA = await acquire(key, { maxConcurrency: 2, timeoutMs: 500 });
+      releaseB = await acquire(key, { maxConcurrency: 2, timeoutMs: 500 });
+      active = 2;
+      peak = 2;
+      for (let i = 0; i < 3; i += 1) {
+        pending.push(
+          acquire(key, { maxConcurrency: 2, timeoutMs: 500 })
+            .then((release) => {
+              tracked.push(observe(release));
+            })
+            .catch(() => {})
+        );
+      }
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      pending.push(
+        acquire(key, { maxConcurrency: 10, timeoutMs: 500 })
+          .then((release) => {
+            tracked.push(observe(release));
+          })
+          .catch(() => {})
+      );
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      const heldA = releaseA;
+      releaseA = null;
+      active -= 1;
+      heldA();
+      const heldB = releaseB;
+      releaseB = null;
+      active -= 1;
+      heldB();
+      await Promise.all(pending);
+      assert.equal(getStats()[key].max, 2);
+      assert.ok(peak <= 2, `expected peak <= 2, saw ${peak}`);
+    } finally {
+      if (releaseA) releaseA();
+      if (releaseB) releaseB();
+      for (const release of tracked) release();
+      resetAll();
+      await Promise.all(pending.map((entry) => entry.catch(() => {})));
+    }
+  });
+
+  it("applies the new limit when the gate is recreated after eviction", async () => {
+    const key = "gate-freeze-c";
+    let second: (() => void) | null = null;
+    try {
+      const first = await acquire(key, { maxConcurrency: 2, timeoutMs: 500 });
+      first();
+      assert.equal(getStats()[key], undefined);
+      second = await acquire(key, { maxConcurrency: 10, timeoutMs: 500 });
+      assert.equal(getStats()[key].max, 10);
+    } finally {
+      if (second) second();
+      resetAll();
+    }
+  });
+});

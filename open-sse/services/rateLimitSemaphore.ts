@@ -61,8 +61,6 @@ function getGate(modelStr: string, maxConcurrency = 3): ModelGate {
     });
   }
   const gate = gates.get(modelStr)!;
-  // Update max if config changed
-  gate.max = maxConcurrency;
   return gate;
 }
 
@@ -188,9 +186,8 @@ export function acquire(
  * @param {number} cooldownMs - How long to block (milliseconds)
  */
 export function markRateLimited(modelStr: string, cooldownMs: number): void {
-  // Keep the limit the gate was acquired with. getGate() writes its argument into
-  // gate.max, so the bare default here would reset a configured limit to 3 and the
-  // post-cooldown drain would release that many queued requests at once.
+  // getGate() freezes the limit at creation: forward the current max so a
+  // first-seen gate keeps its configured limit instead of falling back to 3.
   const gate = getGate(modelStr, gates.get(modelStr)?.max);
   // A shorter cooldown must not shorten an active limit — keep the later expiry.
   gate.rateLimitedUntil = Math.max(gate.rateLimitedUntil ?? 0, Date.now() + cooldownMs);
