@@ -44,17 +44,17 @@ Najveći **dokumentirani** doprinosi: `mistral` 1.00B, `nara` 210M, `llm7` 150M,
 
 ---
 
-## Osvježenje 2026-06-17 — što se promijenilo od 2026-06-05
+## Osvježenje od 2026-06-17 — što se promijenilo od 2026-06-05
 
-Prolaz internetskog istraživanja s 50 agenata (službena dokumentacija + vijesti iz posljednjih 7 dana, kontradiktorno provjereno) osvježio je cijeli katalog. Najvažnije:
+Provedeno je istraživanje weba s 50 agenata (službena dokumentacija + vijesti iz posljednjih 7 dana, kontradiktorno provjereno), čime je osvježen cijeli katalog. Najvažnije promjene:
 
-- **Uklonjeno / nema besplatne razine (2026.):** `chutes` (besplatna razina ukinuta 2026-03), `phind` (tvrtka ugašena 2026-01), `kluster` (ugašen 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (besplatan pristup modelu MiMo opozvan 2026-05-24, promocija za Nemotron završila 2026-06 — ponovno provjereno 2026-06-18), `aimlapi` (besplatna razina pauzirana — ponovno provjereno 2026-06-18), `yi` (Yi-Light povučen, naplata prema potrošnji — ponovno provjereno 2026-06-18), `featherless-ai` (trenutačno nema besplatne razine), `chipotle` (Chipotleov „Pepper AI” — obrnuto projektirani widget za razgovor Amelia na `amelia.chipotle.com` s kojim je pružatelj komunicirao sada vraća 404 na svakoj ruti, uključujući korijensku; pozadinski sustav povučen iz upotrebe/premješten, potvrđeno 2026-09-15 — potpuno uklonjeno iz kataloga, #13131/#4037). `iflytek` / `sparkdesk` ostaju navedeni, ali sadrže napomenu o oprezu u vezi s ToS-om (Spark Lite je besplatan; ToS ograničava upotrebu posredničkih/prosljeđivačkih usluga).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ugašeni su 2026-06-01, a `2.5 Pro` uklonjen je iz besplatne razine (2026-04); besplatna razina sada obuhvaća **samo obitelj Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalog sada **objedinjuje** obitelj Flash (prethodno je broj bio prenapuhan zasebnim brojanjem svake varijante: 462M → 60M).
-- **Ispravljene brojke:** `cloudflare-ai` 122M → **30M** (stvarnih 10k neurona/dan), `doubao` reklasificiran je kao jednokratni kredit pri registraciji (ne obnavlja se), `llm7` 4M → **150M** (dokumentiranih 5M tokena/dan), `together` krajnje točke „-Free” ukinute → uklonjen je i kredit od $25 pri registraciji (zahtijeva minimalnu kupnju od $5, nema besplatnog probnog razdoblja), završilo je Preview razdoblje za `longcat`, a modeli Flash su povučeni → samo **LongCat-2.0**, reklasificiran kao jednokratni kredit od **10M** tokena pri registraciji (uvjetovan KYC-om, ne obnavlja se).
-- **Otkriveni novi besplatni pružatelji:** ⭐ **Kilo Code** (`kilo-gateway` — rotirajući skup „Auto Free”: obitelj NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 rotirajućih besplatnih modela za programiranje), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash trajno su besplatni + bonus od 20M pri registraciji) i `arcee-ai` Trinity Large Preview.
-- **Nove transparentne razine** (pogledajte Metodologiju): kategorija _trajno besplatno, ali bez ograničenja_ (stvaran pristup koji se obnavlja, bez ograničenja tokena koje bi se moglo uračunati) i _povećanje otključano pologom_ (OpenRouter $10 → +24M/mj.), obje prikazane **zasebno** kako nikada ne bi uvećavale istaknutu ukupnu brojku.
+- **Uklonjeno / nema besplatne razine (2026.):** `chutes` (besplatna razina ukinuta 2026-03), `phind` (tvrtka ugašena 2026-01), `kluster` (ugašen 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (besplatan pristup modelu MiMo ukinut 2026-05-24, promocija za Nemotron završila 2026-06 — ponovno provjereno 2026-06-18), `aimlapi` (besplatna razina pauzirana — ponovno provjereno 2026-06-18), `yi` (Yi-Light povučen, naplata prema potrošnji — ponovno provjereno 2026-06-18), `featherless-ai` (trenutačno nema besplatne razine), `chipotle` (Chipotleov „Pepper AI” — widget za razgovor Amelia na `amelia.chipotle.com`, izrađen obrnutim inženjeringom, s kojim je pružatelj komunicirao, sada vraća 404 na svakoj ruti, uključujući korijensku; pozadinski sustav ukinut/premješten, potvrđeno 2026-09-15 — potpuno uklonjeno iz kataloga, #13131/#4037). `iflytek` / `sparkdesk` ostaju na popisu, ali imaju napomenu o oprezu u vezi s uvjetima korištenja (Spark Lite je besplatan; uvjeti korištenja ograničavaju upotrebu proxyja/posrednika).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ugašeni su 2026-06-01, a `2.5 Pro` uklonjen je iz besplatne razine (2026-04); besplatna razina sada obuhvaća **samo obitelj Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalog sada **objedinjuje** obitelj Flash (prethodna je vrijednost bila napuhana zasebnim brojenjem svake varijante: 462M → 60M).
+- **Ispravljene vrijednosti:** `cloudflare-ai` 122M → **30M** (stvarnih 10k neurona/dan), `doubao` je reklasificiran kao jednokratni kredit pri registraciji (ne obnavlja se), `llm7` 4M → **150M** (dokumentiranih 5M tokena/dan), ukinute su krajnje točke „-Free” pružatelja `together` → uklonjen je i kredit od $25 pri registraciji (zahtijeva minimalnu kupnju od $5, bez besplatnog probnog razdoblja), razdoblje Preview za `longcat` završilo je, a modeli Flash povučeni su → dostupan je samo **LongCat-2.0**, reklasificiran kao jednokratni kredit od **10M** tokena pri registraciji (uvjetovan KYC-om, ne obnavlja se).
+- **Otkriveni novi besplatni pružatelji:** ⭐ **Kilo Code** (`kilo-gateway` — rotirajući skup „Auto Free”: obitelj NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 rotirajućih besplatnih modela za programiranje, osvježeno 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash trajno besplatni + bonus od 20M pri registraciji) i `arcee-ai` Trinity Large Preview.
+- **Nove transparentne razine** (pogledajte Metodologiju): kategorija _trajno besplatno, ali bez ograničenja_ (stvarni pristup koji se obnavlja, bez ograničenja tokena koje bi se moglo uračunati) i _povećanje koje se otključava uplatom pologa_ (OpenRouter $10 → +24M/mj.), obje prikazane **zasebno** kako nikada ne bi umjetno povećavale istaknutu ukupnu vrijednost.
 
-> Detaljna tablica po pružateljima u nastavku predstavlja **snimku stanja od 2026-06-05**; gore navedene promjene imaju prednost. Aktivni, mjerodavni izvor jest katalog po modelima `open-sse/config/freeModelCatalog.ts`.
+> Detaljna tablica po pružateljima u nastavku predstavlja **snimku stanja od 2026-06-05**; prethodno navedene promjene imaju prednost pred njom. Aktualni, kanonski izvor jest katalog po modelima `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -240,38 +240,38 @@ Većina brojki za „besplatne tokene mjesečno” u ovom području zbroj je ozn
 
 ---
 
-## Besplatna razina po pružatelju (Bytez/Nous provjereni 2026-10-15; ponovno revidirani redci 2026-09-02; ostali 2026-06-17)
+## Besplatna razina po pružatelju (Bytez/Nous provjereno 2026-10-15; retci ponovno provjereni 2026-09-02; ostali 2026-06-17)
 
-> Ponovno generirano iz kataloga po modelima (`open-sse/config/freeModelCatalog.ts`), uz uklanjanje duplikata prema skupu. Poredano prema redovitim stabilnim tokenima/mj. `uncapped*` = trajno besplatno, ali bez objavljenog ograničenja tokena (ograničeno brzinom/istodobnošću) — stvaran pristup, **nije** pribrojen istaknutom ukupnom iznosu. `—` = samo krediti / bez ključa / nije mjerljivo u tokenima.
+> Ponovno generirano iz kataloga po modelu (`open-sse/config/freeModelCatalog.ts`), uz uklanjanje duplikata na razini skupa. Poredano prema stalnom broju tokena mjesečno. `uncapped*` = trajno besplatno, ali bez objavljenog ograničenja tokena (ograničeno brzinom/istodobnošću) — stvaran pristup, **nije** uračunat u istaknutu ukupnu vrijednost. `—` = samo krediti / bez ključa / nije moguće kvantificirati u tokenima.
 
-| Pružatelj        | Vrsta besplatnog plana  | Stalni tokeni/mj. | Kredit za prvi mjesec | Uvjeti korištenja | Modeli |
+| Pružatelj        | Vrsta besplatne ponude  | Stalni tokeni/mj. | Kredit za prvi mjesec | Uvjeti korištenja | Modeli |
 | ---------------- | ----------------------- | ----------------- | --------------------- | ----------------- | ------ |
-| `mistral`        | obnavljajući            | ~1.00B            | —                     | oprez             | 5      |
-| `nara`           | obnavljajući            | ~210M             | —                     | oprez             | 8      |
-| `llm7`           | obnavljajući            | ~150M             | —                     | oprez             | 4      |
-| `xkiro`          | obnavljajući            | ~150M             | —                     | oprez             | 39     |
-| `longcat`        | jednokratni             | —                 | 10M                   | oprez             | 1      |
-| `cerebras`       | jednokratni             | —                 | kredit od $5          | oprez             | 2      |
-| `cloudflare-ai`  | obnavljajući            | ~30M              | —                     | oprez             | 9      |
-| `groq`           | obnavljajući            | ~30M              | —                     | oprez             | 5      |
-| `api-airforce`   | obnavljajući            | ~24M              | —                     | oprez             | 7      |
-| `bluesminds`     | obnavljajući            | ~7M               | —                     | nejasno           | 22     |
-| `sambanova`      | obnavljajući            | ~6M               | —                     | oprez             | 5      |
-| `arcee-ai`       | obnavljajući            | ~5M               | —                     | oprez             | 1      |
-| `bazaarlink`     | obnavljajući            | ~4M               | —                     | oprez             | 32     |
-| `openrouter`     | obnavljajući            | ~1M               | —                     | oprez             | 1      |
-| `cohere`         | obnavljajući            | ~800K             | —                     | oprez             | 6      |
-| `huggingchat`    | obnavljajući            | ~500K             | —                     | oprez             | 4      |
-| `morph`          | obnavljajući            | ~400K             | —                     | u redu            | 2      |
-| `huggingface`    | obnavljajući            | ~200K             | —                     | oprez             | 6      |
-| `kiro`           | obnavljajući            | ~25K              | —                     | izbjegavati       | 12     |
-| `glm-cn`         | bez ograničenja         | bez ograničenja\* | ~20M                  | u redu            | 4      |
-| `baidu`          | bez ograničenja         | bez ograničenja\* | —                     | oprez             | 1      |
-| `gemini`         | bez ograničenja         | bez ograničenja\* | —                     | oprez             | 4      |
-| `kilo-gateway`   | bez ograničenja         | bez ograničenja\* | —                     | oprez             | 7      |
-| `ollama-cloud`   | bez ograničenja         | bez ograničenja\* | —                     | nejasno           | 8      |
-| `opencode-zen`   | bez ograničenja         | bez ograničenja\* | —                     | oprez             | 6      |
-| `tencent`        | bez ograničenja         | bez ograničenja\* | —                     | oprez             | 1      |
+| `mistral`        | periodično              | ~1.00B            | —                     | oprez             | 5      |
+| `nara`           | periodično              | ~210M             | —                     | oprez             | 8      |
+| `llm7`           | periodično              | ~150M             | —                     | oprez             | 4      |
+| `xkiro`          | periodično              | ~150M             | —                     | oprez             | 39     |
+| `longcat`        | jednokratno             | —                 | 10M                   | oprez             | 1      |
+| `cerebras`       | jednokratno             | —                 | kredit od $5          | oprez             | 2      |
+| `cloudflare-ai`  | periodično              | ~30M              | —                     | oprez             | 9      |
+| `groq`           | periodično              | ~30M              | —                     | oprez             | 5      |
+| `api-airforce`   | periodično              | ~24M              | —                     | oprez             | 7      |
+| `bluesminds`     | periodično              | ~7M               | —                     | nejasno           | 22     |
+| `sambanova`      | periodično              | ~6M               | —                     | oprez             | 5      |
+| `arcee-ai`       | periodično              | ~5M               | —                     | oprez             | 1      |
+| `bazaarlink`     | periodično              | ~4M               | —                     | oprez             | 32     |
+| `openrouter`     | periodično              | ~1M               | —                     | oprez             | 1      |
+| `cohere`         | periodično              | ~800K             | —                     | oprez             | 6      |
+| `huggingchat`    | periodično              | ~500K             | —                     | oprez             | 4      |
+| `morph`          | periodično              | ~400K             | —                     | u redu            | 2      |
+| `huggingface`    | periodično              | ~200K             | —                     | oprez             | 6      |
+| `kiro`           | periodično              | ~25K              | —                     | izbjegavati       | 12     |
+| `glm-cn`         | neograničeno            | neograničeno\*    | ~20M                  | u redu            | 4      |
+| `baidu`          | neograničeno            | neograničeno\*    | —                     | oprez             | 1      |
+| `gemini`         | neograničeno            | neograničeno\*    | —                     | oprez             | 4      |
+| `kilo-gateway`   | neograničeno            | neograničeno\*    | —                     | oprez             | 7      |
+| `ollama-cloud`   | neograničeno            | neograničeno\*    | —                     | nejasno           | 8      |
+| `opencode-zen`   | neograničeno            | neograničeno\*    | —                     | oprez             | 10     |
+| `tencent`        | neograničeno            | neograničeno\*    | —                     | oprez             | 1      |
 | `vertex`         | kredit pri registraciji | —                 | ~300M                 | oprez             | 10     |
 | `agentrouter`    | kredit pri registraciji | —                 | ~200M                 | oprez             | 4      |
 | `predibase`      | kredit pri registraciji | —                 | ~25M                  | oprez             | 1      |
@@ -280,7 +280,7 @@ Većina brojki za „besplatne tokene mjesečno” u ovom području zbroj je ozn
 | `deepseek`       | kredit pri registraciji | —                 | ~5M                   | u redu            | 2      |
 | `hyperbolic`     | kredit pri registraciji | —                 | ~5M                   | u redu            | 8      |
 | `nscale`         | kredit pri registraciji | —                 | ~5M                   | oprez             | 6      |
-| `bytez`          | kredit (obnavljajući)   | —                 | nepoznato             | nejasno           | 1      |
+| `bytez`          | kredit (period.)        | —                 | nepoznato             | nejasno           | 1      |
 | `deepinfra`      | kredit pri registraciji | —                 | ~1M                   | oprez             | 22     |
 | `fireworks`      | kredit pri registraciji | —                 | ~1M                   | izbjegavati       | 10     |
 | `nebius`         | kredit pri registraciji | —                 | ~1M                   | oprez             | 1      |

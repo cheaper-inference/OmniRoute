@@ -312,6 +312,80 @@ test("getProviderCredentialsWithQuotaPreflight persists exhausted accounts until
   );
 });
 
+test("#17879 per-connection weekly cutoff skips a recently successful account", async () => {
+  const resetAt = futureIso(120_000);
+  const blocked = await seedConnection("openai", { priority: 1 });
+  const sibling = await seedConnection("openai", { priority: 2 });
+  await providersDb.updateProviderConnection(blocked.id, {
+    quotaWindowThresholds: { "weekly (7d)": 10 },
+  });
+  quotaCache.markQuotaHealthy(blocked.id);
+
+  const quotaPreflight = await import("../../open-sse/services/quotaPreflight.ts");
+  quotaPreflight.registerQuotaFetcher("openai", async (connectionId) => ({
+    used: connectionId === blocked.id ? 90 : 40,
+    total: 100,
+    percentUsed: connectionId === blocked.id ? 0.9 : 0.4,
+    windows: {
+      "weekly (7d)": {
+        percentUsed: connectionId === blocked.id ? 0.9 : 0.4,
+        resetAt,
+      },
+    },
+  }));
+
+  const selected = await auth.getProviderCredentialsWithQuotaPreflight("openai");
+  assert.equal(selected.connectionId, sibling.id);
+  const blockedAfter = await providersDb.getProviderConnectionById(blocked.id);
+  assert.equal(blockedAfter?.lastErrorSource, "quota_preflight");
+  assert.equal(blockedAfter?.rateLimitedUntil, resetAt);
+
+  const selectedAgain = await auth.getProviderCredentialsWithQuotaPreflight("openai");
+  assert.equal(selectedAgain.connectionId, sibling.id);
+});
+
+test("#17879 a pinned connection cannot bypass its weekly cutoff after a recent success", async () => {
+  const resetAt = futureIso(120_000);
+  const blocked = await seedConnection("openai");
+  const sibling = await seedConnection("openai");
+  await providersDb.updateProviderConnection(blocked.id, {
+    quotaWindowThresholds: { "weekly (7d)": 10 },
+  });
+  quotaCache.markQuotaHealthy(blocked.id);
+
+  const quotaPreflight = await import("../../open-sse/services/quotaPreflight.ts");
+  quotaPreflight.registerQuotaFetcher("openai", async (connectionId) => ({
+    used: connectionId === blocked.id ? 90 : 40,
+    total: 100,
+    percentUsed: connectionId === blocked.id ? 0.9 : 0.4,
+    windows: {
+      "weekly (7d)": {
+        percentUsed: connectionId === blocked.id ? 0.9 : 0.4,
+        resetAt,
+      },
+    },
+  }));
+
+  const selected = await auth.getProviderCredentialsWithQuotaPreflight(
+    "openai",
+    null,
+    [blocked.id],
+    null,
+    { forcedConnectionId: blocked.id }
+  );
+  assert.equal(selected.allRateLimited, true);
+  assert.equal(selected.lastErrorCode, 429);
+  assert.match(selected.lastError, /quota preflight/i);
+  assert.notEqual(
+    selected.connectionId,
+    sibling.id,
+    "a pinned target must not use another account"
+  );
+  const blockedAfter = await providersDb.getProviderConnectionById(blocked.id);
+  assert.equal(blockedAfter?.lastErrorSource, "quota_preflight");
+  assert.equal(blockedAfter?.rateLimitedUntil, resetAt);
+});
+
 test("getProviderCredentialsWithQuotaPreflight returns allRateLimited when a forced connection is blocked by preflight", async () => {
   const blocked = await seedConnection("openai", {
     name: "quota-preflight-forced",

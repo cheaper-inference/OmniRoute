@@ -98,9 +98,9 @@ export default function StorageIntegrityCheckControl() {
           <p className="text-sm font-semibold">{t("storageIntegrityCheck")}</p>
           <p className="text-sm text-text-muted">
             {state.integrityCheck === "ok" ? (
-              <span className="text-green-500">{t("storageIntegrityOk")}</span>
+              <span className="text-success">{t("storageIntegrityOk")}</span>
             ) : state.integrityCheck === "error" ? (
-              <span className="text-red-500">{t("storageIntegrityError")}</span>
+              <span className="text-error">{t("storageIntegrityError")}</span>
             ) : (
               t("storageIntegrityNotChecked")
             )}
@@ -113,7 +113,7 @@ export default function StorageIntegrityCheckControl() {
       </div>
       {status.message ? (
         <div
-          className="mt-3 p-3 rounded-lg text-sm bg-red-500/10 text-red-500 border border-red-500/20"
+          className="mt-3 p-3 rounded-lg text-sm bg-error/10 text-error border border-error/20"
           role="alert"
         >
           {status.message}

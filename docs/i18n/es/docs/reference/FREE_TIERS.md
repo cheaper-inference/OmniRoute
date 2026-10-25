@@ -44,15 +44,15 @@ Mayores contribuyentes **documentados**: `mistral` 1.00B, `nara` 210M, `llm7` 15
 
 ---
 
-## Actualización del 2026-06-17 — qué ha cambiado desde el 2026-06-05
+## Actualización del 2026-06-17 — qué cambió desde el 2026-06-05
 
-Una revisión web realizada por 50 agentes (documentación oficial + noticias de los últimos 7 días, con verificación adversarial) actualizó todo el catálogo. Aspectos destacados:
+Una investigación web realizada por 50 agentes (documentación oficial + noticias de los últimos 7 días, verificadas de forma adversarial) actualizó todo el catálogo. Aspectos destacados:
 
-- **Eliminados / sin nivel gratuito (2026):** `chutes` (el nivel gratuito terminó en 2026-03), `phind` (la empresa cerró en 2026-01), `kluster` (retirado el 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (se revocó el acceso gratuito a MiMo el 2026-05-24 y la promoción de Nemotron terminó en 2026-06; vuelto a verificar el 2026-06-18), `aimlapi` (nivel gratuito suspendido; vuelto a verificar el 2026-06-18), `yi` (Yi-Light retirado, ahora es de pago por uso; vuelto a verificar el 2026-06-18), `featherless-ai` (actualmente sin nivel gratuito), `chipotle` ("Pepper AI" de Chipotle: el widget de chat Amelia de `amelia.chipotle.com`, obtenido mediante ingeniería inversa y con el que se comunicaba el proveedor, ahora devuelve 404 en todas las rutas, incluida la raíz; backend retirado o trasladado, confirmado el 2026-09-15; eliminado por completo del catálogo, #13131/#4037). `iflytek` / `sparkdesk` siguen apareciendo, pero incluyen una nota de precaución sobre los términos de servicio (Spark Lite es gratuito; los términos de servicio restringen el uso como proxy/relay).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` se retiraron el 2026-06-01 y `2.5 Pro` dejó el nivel gratuito (2026-04); ahora, el nivel gratuito incluye **solo la familia Flash** (2.5/3/3.1/3.5 Flash + Gemma). El catálogo ahora **agrupa** la familia Flash (antes la cifra estaba inflada al contar cada variante por separado: 462M → 60M).
-- **Cifras corregidas:** `cloudflare-ai` 122M → **30M** (el límite real es de 10k Neurons/día), `doubao` se reclasificó como crédito único de registro (no recurrente), `llm7` 4M → **150M** (5M tokens/día documentados), se retiraron los endpoints `"-Free"` de `together` → también se eliminó el crédito de registro de $25 (requiere una compra mínima de $5, sin prueba gratuita), terminó la Preview de `longcat` y se retiraron los modelos Flash → solo queda **LongCat-2.0**, reclasificado como crédito único de registro de **10M** tokens (condicionado a KYC, no recurrente).
-- **Nuevos proveedores gratuitos descubiertos:** ⭐ **Kilo Code** (`kilo-gateway` — conjunto rotatorio "Auto Free": familia NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 modelos de programación gratuitos y rotatorios), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash gratuitos permanentemente + bonificación de registro de 20M) y Trinity Large Preview de `arcee-ai`.
-- **Nuevos niveles transparentes** (consulte la Metodología): una categoría _gratuita permanentemente, pero sin límite_ (acceso recurrente real, sin un límite de tokens que contabilizar) y un _aumento desbloqueado mediante depósito_ (OpenRouter $10 → +24M/mes), ambos mostrados **por separado** para que nunca inflen la cifra principal.
+- **Eliminados / sin nivel gratuito (2026):** `chutes` (el nivel gratuito finalizó en 2026-03), `phind` (la empresa cerró en 2026-01), `kluster` (retirado el 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (se revocó el acceso gratuito a MiMo el 2026-05-24, la promoción de Nemotron finalizó en 2026-06 — verificado de nuevo el 2026-06-18), `aimlapi` (nivel gratuito en pausa — verificado de nuevo el 2026-06-18), `yi` (Yi-Light retirado, pago por uso — verificado de nuevo el 2026-06-18), `featherless-ai` (actualmente sin nivel gratuito), `chipotle` («Pepper AI» de Chipotle — el widget de chat Amelia de `amelia.chipotle.com`, sometido a ingeniería inversa y con el que se comunicaba el proveedor, ahora devuelve errores 404 en todas las rutas, incluida la raíz; backend retirado o trasladado, confirmado el 2026-09-15 — eliminado por completo del catálogo, #13131/#4037). `iflytek` / `sparkdesk` siguen incluidos, pero llevan una nota de precaución sobre los términos del servicio (Spark Lite es gratuito; los términos del servicio restringen el uso como proxy/relay).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` se retiraron el 2026-06-01 y `2.5 Pro` abandonó el nivel gratuito (2026-04); ahora, el nivel gratuito incluye **únicamente la familia Flash** (2.5/3/3.1/3.5 Flash + Gemma). El catálogo ahora **agrupa** la familia Flash (antes la cifra estaba inflada al contar cada variante por separado: 462M → 60M).
+- **Cifras corregidas:** `cloudflare-ai` 122M → **30M** (límite real de 10k neuronas/día), `doubao` se reclasificó como crédito único de registro (no recurrente), `llm7` 4M → **150M** (5M tokens/día documentados), se discontinuaron los endpoints «-Free» de `together` → también se eliminó el crédito de registro de $25 (requiere una compra mínima de $5, sin prueba gratuita), finalizó la Preview de `longcat` y se retiraron los modelos Flash → únicamente **LongCat-2.0**, reclasificado como crédito único de registro de **10M** tokens (sujeto a KYC, no recurrente).
+- **Nuevos proveedores gratuitos descubiertos:** ⭐ **Kilo Code** (`kilo-gateway` — conjunto rotativo «Auto Free»: familia NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 modelos gratuitos de programación en rotación, actualizados el 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash permanentemente gratuitos + bonificación de registro de 20M) y Trinity Large Preview de `arcee-ai`.
+- **Nuevas categorías transparentes** (consulta la Metodología): una categoría _permanentemente gratuita pero sin límite definido_ (acceso recurrente real, sin límite de tokens contabilizable) y una categoría _aumento desbloqueado mediante depósito_ (OpenRouter $10 → +24M/mes), ambas mostradas **por separado** para que nunca inflen la cifra principal.
 
 > La tabla detallada por proveedor que aparece más abajo corresponde a la **instantánea del 2026-06-05**; los cambios anteriores la sustituyen. La fuente canónica y actualizada es el catálogo por modelo `open-sse/config/freeModelCatalog.ts`.
 
@@ -241,18 +241,18 @@ La mayoría de las cifras de «tokens gratuitos al mes» de este sector son suma
 
 ---
 
-## Nivel gratuito por proveedor (Bytez/Nous comprobados el 2026-10-15; filas auditadas de nuevo el 2026-09-02; los demás, el 2026-06-17)
+## Nivel gratuito por proveedor (Bytez/Nous comprobados el 2026-10-15; filas auditadas de nuevo el 2026-09-02; otros el 2026-06-17)
 
-> Regenerado a partir del catálogo por modelo (`open-sse/config/freeModelCatalog.ts`), eliminando duplicados entre grupos. Ordenado por tokens recurrentes estables al mes. `uncapped*` = permanentemente gratuito, pero sin un límite de tokens publicado (limitado por tasa/concurrencia): acceso real, **no** incluido en el total destacado. `—` = solo créditos / sin clave / no cuantificable en tokens.
+> Regenerado a partir del catálogo por modelo (`open-sse/config/freeModelCatalog.ts`), eliminando duplicados del conjunto. Ordenado por tokens recurrentes estables/mes. `uncapped*` = gratuito permanentemente, pero sin un límite de tokens publicado (limitado por tasa/concurrencia): acceso real, **no** incluido en la suma del total destacado. `—` = solo créditos / sin clave / no cuantificable en tokens.
 
-| Proveedor        | Tipo gratuito       | Tokens estables/mes | Crédito del primer mes | Condiciones | Modelos |
+| Proveedor        | Tipo gratuito       | Tokens estables/mes | Crédito del primer mes | TyC         | Modelos |
 | ---------------- | ------------------- | ------------------- | ---------------------- | ----------- | ------- |
 | `mistral`        | recurrente          | ~1.00B              | —                      | precaución  | 5       |
 | `nara`           | recurrente          | ~210M               | —                      | precaución  | 8       |
 | `llm7`           | recurrente          | ~150M               | —                      | precaución  | 4       |
 | `xkiro`          | recurrente          | ~150M               | —                      | precaución  | 39      |
 | `longcat`        | único               | —                   | 10M                    | precaución  | 1       |
-| `cerebras`       | único               | —                   | crédito de $5          | precaución  | 2       |
+| `cerebras`       | único               | —                   | $5 de crédito          | precaución  | 2       |
 | `cloudflare-ai`  | recurrente          | ~30M                | —                      | precaución  | 9       |
 | `groq`           | recurrente          | ~30M                | —                      | precaución  | 5       |
 | `api-airforce`   | recurrente          | ~24M                | —                      | precaución  | 7       |
@@ -266,13 +266,13 @@ La mayoría de las cifras de «tokens gratuitos al mes» de este sector son suma
 | `morph`          | recurrente          | ~400K               | —                      | aceptable   | 2       |
 | `huggingface`    | recurrente          | ~200K               | —                      | precaución  | 6       |
 | `kiro`           | recurrente          | ~25K                | —                      | evitar      | 12      |
-| `glm-cn`         | ilimitado           | ilimitado\*         | ~20M                   | aceptable   | 4       |
-| `baidu`          | ilimitado           | ilimitado\*         | —                      | precaución  | 1       |
-| `gemini`         | ilimitado           | ilimitado\*         | —                      | precaución  | 4       |
-| `kilo-gateway`   | ilimitado           | ilimitado\*         | —                      | precaución  | 7       |
-| `ollama-cloud`   | ilimitado           | ilimitado\*         | —                      | ambiguo     | 8       |
-| `opencode-zen`   | ilimitado           | ilimitado\*         | —                      | precaución  | 6       |
-| `tencent`        | ilimitado           | ilimitado\*         | —                      | precaución  | 1       |
+| `glm-cn`         | sin límite          | sin límite\*        | ~20M                   | aceptable   | 4       |
+| `baidu`          | sin límite          | sin límite\*        | —                      | precaución  | 1       |
+| `gemini`         | sin límite          | sin límite\*        | —                      | precaución  | 4       |
+| `kilo-gateway`   | sin límite          | sin límite\*        | —                      | precaución  | 7       |
+| `ollama-cloud`   | sin límite          | sin límite\*        | —                      | ambiguo     | 8       |
+| `opencode-zen`   | sin límite          | sin límite\*        | —                      | precaución  | 10      |
+| `tencent`        | sin límite          | sin límite\*        | —                      | precaución  | 1       |
 | `vertex`         | crédito de registro | —                   | ~300M                  | precaución  | 10      |
 | `agentrouter`    | crédito de registro | —                   | ~200M                  | precaución  | 4       |
 | `predibase`      | crédito de registro | —                   | ~25M                   | precaución  | 1       |

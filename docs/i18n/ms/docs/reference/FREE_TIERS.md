@@ -46,15 +46,15 @@ Penyumbang **terdokumentasi** terbesar: `mistral` 1.00B, `nara` 210M, `llm7` 150
 
 ## Kemas kini 2026-06-17 — perkara yang berubah sejak 2026-06-05
 
-Penyelidikan web oleh 50 ejen (dokumentasi rasmi + berita 7 hari terakhir, disahkan secara adversarial) telah mengemas kini keseluruhan katalog. Sorotan:
+Tinjauan penyelidikan web oleh 50 ejen (dokumentasi rasmi + berita 7 hari terakhir, disahkan secara adversarial) telah mengemas kini keseluruhan katalog. Sorotan:
 
-- **Dikeluarkan / tiada peringkat percuma (2026):** `chutes` (peringkat percuma tamat pada 2026-03), `phind` (syarikat ditutup pada 2026-01), `kluster` (ditamatkan pada 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (akses percuma MiMo ditarik balik pada 2026-05-24, promosi Nemotron tamat pada 2026-06 — disahkan semula pada 2026-06-18), `aimlapi` (peringkat percuma dijeda — disahkan semula pada 2026-06-18), `yi` (Yi-Light ditamatkan, bayar mengikut penggunaan — disahkan semula pada 2026-06-18), `featherless-ai` (tiada peringkat percuma pada masa ini), `chipotle` ("Pepper AI" milik Chipotle — widget sembang Amelia `amelia.chipotle.com` hasil kejuruteraan terbalik yang digunakan oleh penyedia kini mengembalikan 404 pada setiap laluan, termasuk root; bahagian belakang dinyahoperasikan/dipindahkan, disahkan pada 2026-09-15 — dikeluarkan sepenuhnya daripada katalog, #13131/#4037). `iflytek` / `sparkdesk` kekal disenaraikan tetapi disertakan nota amaran ToS (Spark Lite adalah percuma; ToS mengehadkan penggunaan proksi/geganti).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ditamatkan pada 2026-06-01 dan `2.5 Pro` meninggalkan peringkat percuma (2026-04); peringkat percuma kini **khusus untuk keluarga Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalog kini **menghimpunkan** keluarga Flash (sebelum ini dibesar-besarkan dengan mengira setiap varian secara berasingan: 462M → 60M).
-- **Angka yang dibetulkan:** `cloudflare-ai` 122M → **30M** (sebenarnya 10k Neuron/hari), `doubao` diklasifikasikan semula sebagai kredit pendaftaran sekali sahaja (bukan berulang), `llm7` 4M → **150M** (5M token/hari yang didokumentasikan), titik akhir "-Free" `together` dihentikan → kredit pendaftaran $25 turut dikeluarkan (memerlukan pembelian minimum $5, tiada percubaan percuma), Pratonton `longcat` tamat + model Flash ditamatkan → **LongCat-2.0** sahaja, diklasifikasikan semula sebagai kredit pendaftaran sekali sahaja sebanyak **10M** token (memerlukan KYC, bukan berulang).
-- **Penyedia percuma baharu yang ditemukan:** ⭐ **Kilo Code** (`kilo-gateway` — set "Auto Free" bergilir: keluarga NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 model pengekodan percuma bergilir), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash percuma secara kekal + bonus pendaftaran 20M), dan Trinity Large Preview daripada `arcee-ai`.
-- **Peringkat telus baharu** (lihat Metodologi): kategori _percuma secara kekal tetapi tanpa had_ (akses berulang sebenar, tanpa had token untuk dikira) dan _peningkatan yang dibuka melalui deposit_ (OpenRouter $10 → +24M/bln), kedua-duanya dipaparkan **secara berasingan** supaya tidak sekali-kali meningkatkan angka utama.
+- **Dikeluarkan / tiada peringkat percuma (2026):** `chutes` (peringkat percuma berakhir pada 2026-03), `phind` (syarikat ditutup pada 2026-01), `kluster` (ditamatkan pada 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (akses percuma MiMo ditarik balik pada 2026-05-24, promosi Nemotron berakhir pada 2026-06 — disahkan semula pada 2026-06-18), `aimlapi` (peringkat percuma dijeda — disahkan semula pada 2026-06-18), `yi` (Yi-Light ditamatkan, bayar mengikut penggunaan — disahkan semula pada 2026-06-18), `featherless-ai` (tiada peringkat percuma semasa), `chipotle` ("Pepper AI" milik Chipotle — widget sembang Amelia `amelia.chipotle.com` hasil kejuruteraan balik yang dihubungi oleh penyedia kini mengembalikan 404 pada setiap laluan, termasuk akar; bahagian belakang dinyahaktifkan/dipindahkan, disahkan pada 2026-09-15 — dikeluarkan sepenuhnya daripada katalog, #13131/#4037). `iflytek` / `sparkdesk` kekal disenaraikan tetapi disertakan nota berhati-hati tentang ToS (Spark Lite adalah percuma; ToS mengehadkan penggunaan proksi/geganti).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ditamatkan pada 2026-06-01 dan `2.5 Pro` meninggalkan peringkat percuma (2026-04); peringkat percuma kini **khusus untuk keluarga Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalog kini **mengumpulkan** keluarga Flash (sebelum ini angkanya melambung kerana setiap varian dikira secara berasingan: 462M → 60M).
+- **Angka yang dibetulkan:** `cloudflare-ai` 122M → **30M** (sebenarnya 10k Neuron/hari), `doubao` diklasifikasikan semula sebagai kredit pendaftaran sekali sahaja (bukan berulang), `llm7` 4M → **150M** (5M token/hari seperti yang didokumenkan), titik akhir "-Free" `together` dihentikan → kredit pendaftaran $25 turut dikeluarkan (memerlukan pembelian minimum $5, tiada percubaan percuma), Pratonton `longcat` berakhir + model Flash ditamatkan → **LongCat-2.0** sahaja, diklasifikasikan semula sebagai kredit pendaftaran sekali sahaja sebanyak **10M** token (memerlukan KYC, bukan berulang).
+- **Penyedia percuma baharu yang ditemukan:** ⭐ **Kilo Code** (`kilo-gateway` — set "Auto Free" yang bergilir: keluarga NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 model pengekodan percuma yang bergilir, dikemas kini pada 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash percuma secara kekal + bonus pendaftaran 20M), dan Pratonton Trinity Large `arcee-ai`.
+- **Peringkat jujur baharu** (lihat Metodologi): kategori _percuma-secara-kekal-tetapi-tanpa-had_ (akses berulang sebenar, tanpa had token untuk dikira) dan _peningkatan yang dibuka melalui deposit_ (OpenRouter $10 → +24M/bulan), kedua-duanya dipaparkan **secara berasingan** supaya tidak sesekali melambungkan angka utama.
 
-> Jadual terperinci bagi setiap penyedia di bawah ialah **petikan keadaan 2026-06-05**; perubahan di atas menggantikannya. Sumber kanonik langsung ialah katalog bagi setiap model `open-sse/config/freeModelCatalog.ts`.
+> Jadual terperinci bagi setiap penyedia di bawah ialah **petikan keadaan 2026-06-05**; perubahan di atas menggantikannya. Sumber kanonik semasa ialah katalog bagi setiap model `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -226,75 +226,75 @@ Kebanyakan angka "token percuma sebulan" dalam bidang ini ialah hasil tambah lab
 
 ---
 
-## Peringkat percuma mengikut penyedia (Bytez/Nous disemak pada 2026-10-15; baris diaudit semula pada 2026-09-02; yang lain pada 2026-06-17)
+## Tahap percuma mengikut penyedia (Bytez/Nous disemak pada 2026-10-15; baris diaudit semula pada 2026-09-02; yang lain pada 2026-06-17)
 
-> Dijana semula daripada katalog setiap model (`open-sse/config/freeModelCatalog.ts`), dengan pendua kumpulan dibuang. Diisih mengikut token stabil berulang/bulan. `uncapped*` = percuma secara kekal tetapi tanpa had token yang diterbitkan (dihadkan oleh kadar/konkurensi) — akses sebenar, **tidak** dimasukkan dalam jumlah utama. `—` = kredit sahaja / tanpa kunci / tidak dapat dikuantifikasikan berdasarkan token.
+> Dijana semula daripada katalog setiap model (`open-sse/config/freeModelCatalog.ts`), dengan pendua kumpulan disingkirkan. Diisih mengikut token berulang yang stabil/bulan. `uncapped*` = percuma secara kekal tetapi tanpa had token yang diterbitkan (dihadkan mengikut kadar/konkurensi) — akses sebenar, **tidak** dijumlahkan dalam angka utama. `—` = kredit sahaja / tanpa kunci / tidak boleh dikuantifikasikan dalam bentuk token.
 
-| Penyedia         | Jenis percuma      | Token tetap/bln | Kredit bulan pertama | Terma           | Model |
-| ---------------- | ------------------ | --------------- | -------------------- | --------------- | ----- |
-| `mistral`        | berulang           | ~1.00B          | —                    | waspada         | 5     |
-| `nara`           | berulang           | ~210M           | —                    | waspada         | 8     |
-| `llm7`           | berulang           | ~150M           | —                    | waspada         | 4     |
-| `xkiro`          | berulang           | ~150M           | —                    | waspada         | 39    |
-| `longcat`        | sekali sahaja      | —               | 10M                  | waspada         | 1     |
-| `cerebras`       | sekali sahaja      | —               | kredit $5            | waspada         | 2     |
-| `cloudflare-ai`  | berulang           | ~30M            | —                    | waspada         | 9     |
-| `groq`           | berulang           | ~30M            | —                    | waspada         | 5     |
-| `api-airforce`   | berulang           | ~24M            | —                    | waspada         | 7     |
-| `bluesminds`     | berulang           | ~7M             | —                    | samar           | 22    |
-| `sambanova`      | berulang           | ~6M             | —                    | waspada         | 5     |
-| `arcee-ai`       | berulang           | ~5M             | —                    | waspada         | 1     |
-| `bazaarlink`     | berulang           | ~4M             | —                    | waspada         | 32    |
-| `openrouter`     | berulang           | ~1M             | —                    | waspada         | 1     |
-| `cohere`         | berulang           | ~800K           | —                    | waspada         | 6     |
-| `huggingchat`    | berulang           | ~500K           | —                    | waspada         | 4     |
-| `morph`          | berulang           | ~400K           | —                    | ok              | 2     |
-| `huggingface`    | berulang           | ~200K           | —                    | waspada         | 6     |
-| `kiro`           | berulang           | ~25K            | —                    | elakkan         | 12    |
-| `glm-cn`         | tanpa had          | tanpa had\*     | ~20M                 | ok              | 4     |
-| `baidu`          | tanpa had          | tanpa had\*     | —                    | waspada         | 1     |
-| `gemini`         | tanpa had          | tanpa had\*     | —                    | waspada         | 4     |
-| `kilo-gateway`   | tanpa had          | tanpa had\*     | —                    | waspada         | 7     |
-| `ollama-cloud`   | tanpa had          | tanpa had\*     | —                    | samar           | 8     |
-| `opencode-zen`   | tanpa had          | tanpa had\*     | —                    | waspada         | 6     |
-| `tencent`        | tanpa had          | tanpa had\*     | —                    | waspada         | 1     |
-| `vertex`         | kredit pendaftaran | —               | ~300M                | waspada         | 10    |
-| `agentrouter`    | kredit pendaftaran | —               | ~200M                | waspada         | 4     |
-| `predibase`      | kredit pendaftaran | —               | ~25M                 | waspada         | 1     |
-| `doubao`         | kredit pendaftaran | —               | ~15M                 | samar           | 1     |
-| `ai21`           | kredit pendaftaran | —               | ~10M                 | elakkan         | 2     |
-| `deepseek`       | kredit pendaftaran | —               | ~5M                  | ok              | 2     |
-| `hyperbolic`     | kredit pendaftaran | —               | ~5M                  | ok              | 8     |
-| `nscale`         | kredit pendaftaran | —               | ~5M                  | waspada         | 6     |
-| `bytez`          | kredit (berulang)  | —               | tidak diketahui      | samar           | 1     |
-| `deepinfra`      | kredit pendaftaran | —               | ~1M                  | waspada         | 22    |
-| `fireworks`      | kredit pendaftaran | —               | ~1M                  | elakkan         | 10    |
-| `nebius`         | kredit pendaftaran | —               | ~1M                  | waspada         | 1     |
-| `qoder`          | kredit pendaftaran | —               | ~1M                  | waspada         | 14    |
-| `scaleway`       | kredit pendaftaran | —               | ~1M                  | ok              | 6     |
-| `novita`         | kredit pendaftaran | —               | ~500K                | waspada         | 1     |
-| `agy`            | tanpa kunci        | —               | —                    | elakkan         | 16    |
-| `baichuan`       | tanpa kunci        | —               | —                    | samar           | 1     |
-| `blackbox`       | tanpa kunci        | —               | —                    | elakkan         | 6     |
-| `coze`           | tanpa kunci        | —               | —                    | elakkan         | 1     |
-| `duckduckgo-web` | tanpa kunci        | —               | —                    | elakkan         | 6     |
-| `freemodel-dev`  | tanpa kunci        | —               | —                    | tidak diketahui | 4     |
-| `friendliai`     | tanpa kunci        | —               | —                    | elakkan         | 2     |
-| `iflytek`        | tanpa kunci        | —               | —                    | elakkan         | 1     |
-| `inference-net`  | tanpa kunci        | —               | —                    | waspada         | 3     |
-| `liquid`         | tanpa kunci        | —               | —                    | tidak diketahui | 1     |
-| `monsterapi`     | tanpa kunci        | —               | —                    | samar           | 1     |
-| `muse-spark-web` | tanpa kunci        | —               | —                    | elakkan         | 3     |
-| `nlpcloud`       | tanpa kunci        | —               | —                    | elakkan         | 1     |
-| `nvidia`         | tanpa kunci        | —               | —                    | waspada         | 13    |
-| `pollinations`   | tanpa kunci        | —               | —                    | waspada         | 31    |
-| `publicai`       | tanpa kunci        | —               | —                    | waspada         | 3     |
-| `reka`           | tanpa kunci        | —               | —                    | waspada         | 2     |
-| `sensenova`      | tanpa kunci        | —               | —                    | waspada         | 1     |
-| `sparkdesk`      | tanpa kunci        | —               | —                    | berhati-hati    | 1     |
-| `stepfun`        | tanpa kunci        | —               | —                    | baik            | 1     |
-| `t3-web`         | tanpa kunci        | —               | —                    | elakkan         | 23    |
-| `uncloseai`      | tanpa kunci        | —               | —                    | berhati-hati    | 3     |
+| Penyedia         | Jenis percuma      | Token tetap/bln | Kredit bulan pertama | Terma Perkhidmatan | Model |
+| ---------------- | ------------------ | --------------- | -------------------- | ------------------ | ----- |
+| `mistral`        | berulang           | ~1.00B          | —                    | berhati-hati       | 5     |
+| `nara`           | berulang           | ~210M           | —                    | berhati-hati       | 8     |
+| `llm7`           | berulang           | ~150M           | —                    | berhati-hati       | 4     |
+| `xkiro`          | berulang           | ~150M           | —                    | berhati-hati       | 39    |
+| `longcat`        | sekali sahaja      | —               | 10M                  | berhati-hati       | 1     |
+| `cerebras`       | sekali sahaja      | —               | kredit $5            | berhati-hati       | 2     |
+| `cloudflare-ai`  | berulang           | ~30M            | —                    | berhati-hati       | 9     |
+| `groq`           | berulang           | ~30M            | —                    | berhati-hati       | 5     |
+| `api-airforce`   | berulang           | ~24M            | —                    | berhati-hati       | 7     |
+| `bluesminds`     | berulang           | ~7M             | —                    | tidak jelas        | 22    |
+| `sambanova`      | berulang           | ~6M             | —                    | berhati-hati       | 5     |
+| `arcee-ai`       | berulang           | ~5M             | —                    | berhati-hati       | 1     |
+| `bazaarlink`     | berulang           | ~4M             | —                    | berhati-hati       | 32    |
+| `openrouter`     | berulang           | ~1M             | —                    | berhati-hati       | 1     |
+| `cohere`         | berulang           | ~800K           | —                    | berhati-hati       | 6     |
+| `huggingchat`    | berulang           | ~500K           | —                    | berhati-hati       | 4     |
+| `morph`          | berulang           | ~400K           | —                    | baik               | 2     |
+| `huggingface`    | berulang           | ~200K           | —                    | berhati-hati       | 6     |
+| `kiro`           | berulang           | ~25K            | —                    | elakkan            | 12    |
+| `glm-cn`         | tanpa had          | tanpa had\*     | ~20M                 | baik               | 4     |
+| `baidu`          | tanpa had          | tanpa had\*     | —                    | berhati-hati       | 1     |
+| `gemini`         | tanpa had          | tanpa had\*     | —                    | berhati-hati       | 4     |
+| `kilo-gateway`   | tanpa had          | tanpa had\*     | —                    | berhati-hati       | 7     |
+| `ollama-cloud`   | tanpa had          | tanpa had\*     | —                    | tidak jelas        | 8     |
+| `opencode-zen`   | tanpa had          | tanpa had\*     | —                    | berhati-hati       | 10    |
+| `tencent`        | tanpa had          | tanpa had\*     | —                    | berhati-hati       | 1     |
+| `vertex`         | kredit pendaftaran | —               | ~300M                | berhati-hati       | 10    |
+| `agentrouter`    | kredit pendaftaran | —               | ~200M                | berhati-hati       | 4     |
+| `predibase`      | kredit pendaftaran | —               | ~25M                 | berhati-hati       | 1     |
+| `doubao`         | kredit pendaftaran | —               | ~15M                 | tidak jelas        | 1     |
+| `ai21`           | kredit pendaftaran | —               | ~10M                 | elakkan            | 2     |
+| `deepseek`       | kredit pendaftaran | —               | ~5M                  | baik               | 2     |
+| `hyperbolic`     | kredit pendaftaran | —               | ~5M                  | baik               | 8     |
+| `nscale`         | kredit pendaftaran | —               | ~5M                  | berhati-hati       | 6     |
+| `bytez`          | kredit (berulang)  | —               | tidak diketahui      | tidak jelas        | 1     |
+| `deepinfra`      | kredit pendaftaran | —               | ~1M                  | berhati-hati       | 22    |
+| `fireworks`      | kredit pendaftaran | —               | ~1M                  | elakkan            | 10    |
+| `nebius`         | kredit pendaftaran | —               | ~1M                  | berhati-hati       | 1     |
+| `qoder`          | kredit pendaftaran | —               | ~1M                  | berhati-hati       | 14    |
+| `scaleway`       | kredit pendaftaran | —               | ~1M                  | baik               | 6     |
+| `novita`         | kredit pendaftaran | —               | ~500K                | berhati-hati       | 1     |
+| `agy`            | tanpa kunci        | —               | —                    | elakkan            | 16    |
+| `baichuan`       | tanpa kunci        | —               | —                    | tidak jelas        | 1     |
+| `blackbox`       | tanpa kunci        | —               | —                    | elakkan            | 6     |
+| `coze`           | tanpa kunci        | —               | —                    | elakkan            | 1     |
+| `duckduckgo-web` | tanpa kunci        | —               | —                    | elakkan            | 6     |
+| `freemodel-dev`  | tanpa kunci        | —               | —                    | tidak diketahui    | 4     |
+| `friendliai`     | tanpa kunci        | —               | —                    | elakkan            | 2     |
+| `iflytek`        | tanpa kunci        | —               | —                    | elakkan            | 1     |
+| `inference-net`  | tanpa kunci        | —               | —                    | berhati-hati       | 3     |
+| `liquid`         | tanpa kunci        | —               | —                    | tidak diketahui    | 1     |
+| `monsterapi`     | tanpa kunci        | —               | —                    | tidak jelas        | 1     |
+| `muse-spark-web` | tanpa kunci        | —               | —                    | elakkan            | 3     |
+| `nlpcloud`       | tanpa kunci        | —               | —                    | elakkan            | 1     |
+| `nvidia`         | tanpa kunci        | —               | —                    | berhati-hati       | 13    |
+| `pollinations`   | tanpa kunci        | —               | —                    | berhati-hati       | 31    |
+| `publicai`       | tanpa kunci        | —               | —                    | berhati-hati       | 3     |
+| `reka`           | tanpa kunci        | —               | —                    | berhati-hati       | 2     |
+| `sensenova`      | tanpa kunci        | —               | —                    | berhati-hati       | 1     |
+| `sparkdesk`      | keyless            | —               | —                    | berhati-hati       | 1     |
+| `stepfun`        | keyless            | —               | —                    | baik               | 1     |
+| `t3-web`         | keyless            | —               | —                    | elakkan            | 23    |
+| `uncloseai`      | keyless            | —               | —                    | berhati-hati       | 3     |
 
 ---
 

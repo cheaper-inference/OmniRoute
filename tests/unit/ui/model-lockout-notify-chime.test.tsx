@@ -175,7 +175,7 @@ describe("Model lockout optional notification sound", () => {
     vi.stubGlobal("Audio", legacyAudio);
 
     const { container } = await renderCard();
-    const toggles = [...container.querySelectorAll<HTMLButtonElement>('button[role="switch"]')];
+    const toggles = [...container.querySelectorAll<HTMLButtonElement>('[role="switch"]')];
     expect(toggles).toHaveLength(2);
 
     act(() => toggles[0]?.click());
@@ -210,7 +210,7 @@ describe("Model lockout optional notification sound", () => {
     vi.stubGlobal("webkitAudioContext", AudioContextMock);
 
     const { container } = await renderCard();
-    const toggle = container.querySelector<HTMLButtonElement>('button[role="switch"]');
+    const toggle = container.querySelector<HTMLButtonElement>('[role="switch"]');
     act(() => toggle?.click());
 
     expect(contexts).toHaveLength(1);
@@ -224,7 +224,7 @@ describe("Model lockout optional notification sound", () => {
     vi.stubGlobal("AudioContext", AudioContextMock);
 
     const { container } = await renderCard();
-    const toggle = container.querySelector<HTMLButtonElement>('button[role="switch"]');
+    const toggle = container.querySelector<HTMLButtonElement>('[role="switch"]');
     await act(async () => {
       toggle?.click();
       await Promise.resolve();
@@ -238,7 +238,7 @@ describe("Model lockout optional notification sound", () => {
     vi.stubGlobal("AudioContext", undefined);
 
     const { container } = await renderCard();
-    const toggles = [...container.querySelectorAll<HTMLButtonElement>('button[role="switch"]')];
+    const toggles = [...container.querySelectorAll<HTMLButtonElement>('[role="switch"]')];
     act(() => toggles[0]?.click());
     act(() => toggles[1]?.click());
 
@@ -254,7 +254,7 @@ describe("Model lockout optional notification sound", () => {
     vi.stubGlobal("AudioContext", AudioContextMock);
 
     const { container } = await renderCard();
-    const toggle = container.querySelector<HTMLButtonElement>('button[role="switch"]');
+    const toggle = container.querySelector<HTMLButtonElement>('[role="switch"]');
     await act(async () => {
       toggle?.click();
       await Promise.resolve();
@@ -271,7 +271,7 @@ describe("Model lockout optional notification sound", () => {
     vi.stubGlobal("AudioContext", AudioContextMock);
 
     const rendered = await renderCard();
-    const toggle = rendered.container.querySelector<HTMLButtonElement>('button[role="switch"]');
+    const toggle = rendered.container.querySelector<HTMLButtonElement>('[role="switch"]');
     act(() => toggle?.click());
     expect(contexts).toHaveLength(1);
 

@@ -348,9 +348,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
 
         if (state.inThinking && content) {
           emitReasoningDelta(state, emit, content);
-          // Pre-existing behaviour (unrelated to #8081): a still-open
-          // textual <think> block ends this chunk's handling early.
-          return events;
+          // Keep processing this chunk: reasoning text can arrive in the same
+          // delta as a tool call and/or finish_reason.
+          content = "";
         }
       }
 

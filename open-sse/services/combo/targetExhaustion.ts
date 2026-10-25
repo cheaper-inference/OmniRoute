@@ -42,7 +42,7 @@ import { isAgentrouterConnectionQuotaScope } from "@/sse/services/auth";
 import { isVertexConnectionWidePermissionDenied } from "@/sse/services/vertexErrorClassifier";
 import { isSharedWalletCredits402 } from "../accountFallback/sharedWalletCredits.ts";
 import { isClaudeMinuteRateLimitText, isExplicitClaudeQuota429Text } from "../usage/claudeQuota.ts";
-import { getCachedClaudeQuotaScopeDecision } from "@/domain/quotaCache";
+import { getCachedClaudeQuotaScopeDecision } from "../claudeQuotaScopeBridge.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import { LOCAL_MODEL_COOLDOWN_HEADER } from "../../utils/localCooldownHeader.ts";
 import { isExplicitModelCapacityFailure } from "../accountFallback/perModelFailureScope.ts";

@@ -9,6 +9,10 @@ import { z } from "zod";
 import { CONNECTION_TEST_PROMPT_MAX_LENGTH } from "@/shared/constants/connectionTest";
 import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
 import { MAX_REQUEST_BODY_LIMIT_MB, MIN_REQUEST_BODY_LIMIT_MB } from "@/shared/constants/bodySize";
+import {
+  PROXY_BULK_IMPORT_LIMIT_MAX,
+  PROXY_BULK_IMPORT_LIMIT_MIN,
+} from "@/shared/constants/proxyBulkImport";
 import { HIDEABLE_SIDEBAR_GROUP_IDS } from "@/shared/constants/sidebarGroupVisibility";
 import { HIDEABLE_SIDEBAR_ITEM_IDS, SIDEBAR_SECTIONS } from "@/shared/constants/sidebarVisibility";
 import { ACCOUNT_FALLBACK_STRATEGY_VALUES } from "@/shared/constants/routingStrategies";
@@ -104,6 +108,13 @@ const transformObfuscateWordsSchema = z.object({
 
 export const updateSettingsSchema = z.object({
   connectionTestPrompt: z.string().trim().min(1).max(CONNECTION_TEST_PROMPT_MAX_LENGTH).optional(),
+  /** #13917: per-request proxy bulk-import ceiling; resolved by resolveProxyBulkImportLimit. */
+  proxyBulkImportLimit: z
+    .number()
+    .int()
+    .min(PROXY_BULK_IMPORT_LIMIT_MIN)
+    .max(PROXY_BULK_IMPORT_LIMIT_MAX)
+    .optional(),
   /** #7784: opt-in optimistic concurrency — must match GET settingsRevision / ETag. */
   expectedRevision: z.number().int().nonnegative().optional(),
   newPassword: z.string().min(1).max(200).optional(),

@@ -32,6 +32,35 @@ describe("reconcileContextWindows (5004)", () => {
     assert.equal(r.scanned, 1);
   });
 
+  it("does not rewrite an auto override that already holds the discovered window", () => {
+    const discovered: DiscoveredWindow[] = [
+      { provider: "openai", modelId: "gpt-x", window: 400000 },
+    ];
+    const { deps, writes, removes } = makeDeps(
+      { "openai/gpt-x": 128000 },
+      { "openai/gpt-x": "auto:discovery" }
+    );
+    deps.getExistingWindow = () => 400000;
+    const r = reconcileContextWindows(discovered, deps);
+    assert.deepEqual(writes, []);
+    assert.deepEqual(removes, []);
+    assert.equal(r.written, 0);
+  });
+
+  it("rewrites an auto override whose stored window differs from the discovered one", () => {
+    const discovered: DiscoveredWindow[] = [
+      { provider: "openai", modelId: "gpt-x", window: 400000 },
+    ];
+    const { deps, writes } = makeDeps(
+      { "openai/gpt-x": 128000 },
+      { "openai/gpt-x": "auto:discovery" }
+    );
+    deps.getExistingWindow = () => 256000;
+    const r = reconcileContextWindows(discovered, deps);
+    assert.deepEqual(writes, [["openai", "gpt-x", 400000]]);
+    assert.equal(r.written, 1);
+  });
+
   it("does nothing when the discovered window already matches the catalog", () => {
     const discovered: DiscoveredWindow[] = [
       { provider: "openai", modelId: "gpt-x", window: 128000 },

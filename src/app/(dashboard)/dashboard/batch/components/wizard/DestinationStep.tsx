@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import Icon from "@/shared/components/Icon";
+import Select from "@/shared/components/Select";
 import { BATCH_SUPPORTED_PROVIDERS, SUPPORTED_BATCH_ENDPOINTS } from "@/lib/batches/types";
 import type { WizardDestination } from "@/lib/batches/types";
 
@@ -32,15 +34,11 @@ export default function DestinationStep({
   if (batchProviders.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
-        <span className="material-symbols-outlined text-4xl text-[var(--color-text-muted)]">
-          cloud_off
-        </span>
-        <p className="text-sm text-[var(--color-text-muted)] max-w-sm">
-          {t("wizardEmptyProviders")}
-        </p>
+        <Icon name="cloud_off" size={36} className="text-text-muted" />
+        <p className="text-sm text-text-muted max-w-sm">{t("wizardEmptyProviders")}</p>
         <Link
           href="/dashboard/providers"
-          className="text-sm text-[var(--color-accent)] underline underline-offset-2 hover:opacity-80"
+          className="text-sm text-accent underline underline-offset-2 hover:opacity-80"
         >
           {t("wizardDestinationConnectProvider")}
         </Link>
@@ -52,8 +50,7 @@ export default function DestinationStep({
   const selectedEndpoint = destination?.endpoint ?? "/v1/chat/completions";
   const selectedModel = destination?.model ?? "";
 
-  const providerModels =
-    batchProviders.find((p) => p.id === selectedProvider)?.models ?? [];
+  const providerModels = batchProviders.find((p) => p.id === selectedProvider)?.models ?? [];
 
   function handleProviderChange(providerId: string) {
     if (!providerId) {
@@ -92,70 +89,50 @@ export default function DestinationStep({
     });
   }
 
-  const selectClass =
-    "w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-alt)] " +
-    "px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none " +
-    "focus:ring-1 focus:ring-[var(--color-accent)] disabled:opacity-50";
-
   return (
     <div className="flex flex-col gap-6">
       {/* Provider */}
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-[var(--color-text-muted)]">
-          {t("wizardProviderLabel")}
-        </label>
-        <select
-          className={selectClass}
-          value={selectedProvider}
-          onChange={(e) => handleProviderChange(e.target.value)}
-        >
-          <option value="">{t("wizardDestinationSelectProvider")}</option>
-          {batchProviders.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label={t("wizardProviderLabel")}
+        value={selectedProvider}
+        onChange={(e) => handleProviderChange(e.target.value)}
+      >
+        <option value="">{t("wizardDestinationSelectProvider")}</option>
+        {batchProviders.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
+      </Select>
 
       {/* Endpoint */}
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-[var(--color-text-muted)]">
-          {t("wizardEndpointLabel")}
-        </label>
-        <select
-          className={selectClass}
-          value={selectedEndpoint}
-          disabled={!selectedProvider}
-          onChange={(e) => handleEndpointChange(e.target.value)}
-        >
-          {SUPPORTED_BATCH_ENDPOINTS.map((ep) => (
-            <option key={ep} value={ep}>
-              {ep}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label={t("wizardEndpointLabel")}
+        value={selectedEndpoint}
+        disabled={!selectedProvider}
+        onChange={(e) => handleEndpointChange(e.target.value)}
+      >
+        {SUPPORTED_BATCH_ENDPOINTS.map((ep) => (
+          <option key={ep} value={ep}>
+            {ep}
+          </option>
+        ))}
+      </Select>
 
       {/* Model */}
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-[var(--color-text-muted)]">
-          {t("wizardModelLabel")}
-        </label>
-        <select
-          className={selectClass}
-          value={selectedModel}
-          disabled={!selectedProvider || providerModels.length === 0}
-          onChange={(e) => handleModelChange(e.target.value)}
-        >
-          <option value="">{t("wizardDestinationSelectModel")}</option>
-          {providerModels.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label={t("wizardModelLabel")}
+        value={selectedModel}
+        disabled={!selectedProvider || providerModels.length === 0}
+        onChange={(e) => handleModelChange(e.target.value)}
+      >
+        <option value="">{t("wizardDestinationSelectModel")}</option>
+        {providerModels.map((m) => (
+          <option key={m} value={m}>
+            {m}
+          </option>
+        ))}
+      </Select>
     </div>
   );
 }

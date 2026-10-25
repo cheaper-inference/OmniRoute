@@ -30,6 +30,8 @@ test("fuzzyDedup flag drives the session-dedup lane to produce a CCR marker", as
       messages: [
         { role: "user", content: A },
         { role: "user", content: A + " sigma" },
+        // The live (current) turn is never rewritten, so close it with an assistant message.
+        { role: "assistant", content: "acknowledged" },
       ],
       engineId: "session-dedup",
       fuzzyDedup: { enabled: true },
