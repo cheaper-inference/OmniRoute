@@ -1,8 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+type GatewayPayload = {
+  output_config?: { effort?: string };
+  [key: string]: unknown;
+};
+
 async function loadGateway() {
-  return import("../../open-sse/executors/minimaxCodeGateway.ts");
+  const gateway = await import("../../open-sse/executors/minimaxCodeGateway.ts");
+  return {
+    ...gateway,
+    // The builder answers a JSON record; this is the shape it posts, so the
+    // assertions below read the effort level through one narrow type instead
+    // of casting at every access.
+    buildGatewayPayload: (body: Record<string, unknown>, model: string): GatewayPayload =>
+      gateway.buildGatewayPayload(body, model) as GatewayPayload,
+  };
 }
 
 async function loadExecutor() {

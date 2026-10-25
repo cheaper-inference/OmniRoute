@@ -1,8 +1,25 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+type GatewayMessage = { role: string; content: unknown };
+type GatewayPayload = {
+  model?: string;
+  system?: unknown;
+  tools?: unknown;
+  messages: GatewayMessage[];
+  [key: string]: unknown;
+};
+
 async function loadGateway() {
-  return import("../../open-sse/executors/minimaxCodeGateway.ts");
+  const gateway = await import("../../open-sse/executors/minimaxCodeGateway.ts");
+  return {
+    ...gateway,
+    // The builder answers a JSON record; this is the shape it posts, so the
+    // assertions below read it through one narrow type instead of casting at
+    // every access.
+    buildGatewayPayload: (body: Record<string, unknown>, model: string): GatewayPayload =>
+      gateway.buildGatewayPayload(body, model) as GatewayPayload,
+  };
 }
 
 test("gateway payload maps system, user and assistant turns", async () => {
@@ -356,7 +373,6 @@ test("a token refresh keeps the CLI session state in sync", async () => {
   assert.equal(state.expiresAtMs, profile.expiresAtMs);
 });
 
-
 test("the live credential record wins over an older generation", async () => {
   const { readAuthProfile, readAuthProfiles } = await loadGateway();
   const { mkdtemp, writeFile } = await import("node:fs/promises");
@@ -510,7 +526,6 @@ test("a consumed refresh token falls through to the next record", async () => {
   assert.equal(token, "older-access-token");
 });
 
-
 test("a transient gateway error is retried with a backoff", async () => {
   const { callGateway } = await loadGateway();
   const { createServer } = await import("node:http");
@@ -549,7 +564,6 @@ test("a transient gateway error is retried with a backoff", async () => {
     server.close();
   }
 });
-
 
 test("the region decides the profile path case-insensitively", async () => {
   const { resolveAuthFile } = await loadGateway();
@@ -902,7 +916,10 @@ test("two concurrent dashboard writes get different generations", async () => {
   // as expired: two credentials must never share one generation.
   assert.notEqual(first.generation, second.generation);
   const auth = JSON.parse(await readFile(authFile, "utf8"));
-  assert.equal(auth.records["account-live"].generation, Math.max(first.generation, second.generation));
+  assert.equal(
+    auth.records["account-live"].generation,
+    Math.max(first.generation, second.generation)
+  );
 });
 
 test("the profile is created when the host has no MiniMax Code login yet", async () => {
