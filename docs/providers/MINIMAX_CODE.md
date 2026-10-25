@@ -14,9 +14,11 @@ speaks the native tool protocol: a request that carries client `tools` comes bac
 as OpenAI `tool_calls`, a plain chat turn comes back as the text of the
 assistant.
 
-The credential is not in OmniRoute. The provider reads the access and the refresh
-token from your own local MiniMax Code profile (`~/.minimax`), and when the
-account rotates the token it **writes the refreshed credential back** into it.
+OmniRoute does not persist a separate provider credential in its connection
+database. During a request, the provider reads the access and refresh tokens
+from your local MiniMax Code profile (`~/.minimax`) to authenticate with the
+gateway; when the account rotates a token, it **writes the refreshed credential
+back** to that profile.
 
 ## Setup
 

@@ -37,9 +37,9 @@ import { isDraining } from "../../src/lib/gracefulShutdown.ts";
  * with the tool calls the client has to run, and a plain chat turn is answered
  * with the text of the assistant.
  *
- * OmniRoute stores no credential of its own: the provider reads the local
- * MiniMax Code profile (`~/.minimax`) to authenticate the call and writes the
- * rotated credential back to it.
+ * The provider does not persist a separate credential in OmniRoute's
+ * connection database. It reads the local MiniMax Code profile (`~/.minimax`)
+ * to authenticate the call and writes a rotated credential back to that file.
  */
 
 const MINIMAX_CODE_URL = "minimax-code://gateway";
