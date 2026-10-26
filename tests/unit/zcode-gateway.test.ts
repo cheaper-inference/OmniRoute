@@ -133,6 +133,8 @@ function backend(t: TestContext, key: string, respond: () => Response) {
       0
     );
     const request = JSON.parse(String(options.body));
+    if (request.stream === true)
+      assert.equal(h.get("accept"), "text/event-stream", "stream requests must negotiate SSE");
     assert.equal(request.model, "GLM-5.3-Flash");
     assert.deepEqual(request.output_config, { effort: "low" });
     return respond();

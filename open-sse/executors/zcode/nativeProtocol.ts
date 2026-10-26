@@ -207,6 +207,8 @@ export async function fetchNativeZcode(
   const headers: Record<string, string> = {
     ...zcodeSourceHeaders(),
     "Content-Type": "application/json",
+    Accept:
+      (body as { stream?: boolean }).stream === true ? "text/event-stream" : "application/json",
     "anthropic-version": "2023-06-01",
     Authorization: "Bearer " + apiKey,
     "x-api-key": apiKey,
