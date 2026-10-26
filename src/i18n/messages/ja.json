@@ -25,8 +25,10 @@
     "confirm": "よろしいですか？",
     "refresh": "リフレッシュ",
     "close": "閉じる",
+    "dialogTitleFallback": "ダイアログ",
     "previousPage": "前のページ",
     "nextPage": "次のページ",
+    "pagination": "ページネーション",
     "capsLockOn": "Caps Lockがオンです",
     "dismissNotification": "通知を閉じる",
     "toggleColumns": "列の切り替え",
@@ -182,6 +184,7 @@
     "combos": "コンボ",
     "noModelsFound": "モデルが見つかりません",
     "clear": "クリア",
+    "clearFilters": "フィルターをクリア",
     "done": "完了",
     "selectAll": "すべて選択",
     "unselectAll": "選択をすべて解除",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "プレビュー",
     "batchFilePreviewTruncated": "最初の {shown} 行を表示中 ({total} 行中)",
     "batchFileDownloadFull": "フルファイルをダウンロード",
-    "dialogTitleFallback": "ダイアログ",
-    "pagination": "ページネーション",
-    "clearFilters": "フィルターをクリア",
     "tokensPageTitle": "トークン",
     "tokensPageDescription": "APIキー間でトークンを送信したり、招待コードを共有したり、コミュニティサーバーに接続したりできます。",
     "tokensServerUrlLabel": "サーバーURL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "クイックナビ",
     "quickNavigationTitle": "クイックナビゲーション (⌘K / Ctrl+K)",
     "openQuickNavigation": "クイックナビゲーションを開く",
+    "openMenu": "メニューを開く",
+    "products": "Keak製品",
     "switchToLightMode": "ライトモードに切り替える",
     "switchToDarkMode": "ダークモードに切り替える",
     "language": "言語",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "高度なペイロードルール、リクエスト制限、プロキシAPI設定",
     "mitmProxyDescription": "トラフィック検査とデバッグ用のMITMプロキシ設定を構成",
     "oneProxyDescription": "高度なプロキシチェーン用の1Proxy設定を構成",
-    "omniSkillsDescription": "自動化されたプロンプトとツールの実行のためのサンドボックススキルをインストールして管理します",
-    "openMenu": "メニューを開く",
-    "products": "Keak製品"
+    "omniSkillsDescription": "自動化されたプロンプトとツールの実行のためのサンドボックススキルをインストールして管理します"
   },
   "cloudSyncStatus": {
     "synced": "同期済み",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "コンボ → {name}"
   },
   "combos": {
+    "title": "コンボ",
+    "description": "重み付けルーティングとフォールバックのサポートを備えたモデルのコンボを作成する",
+    "autoCatalogTitle": "自動ルーティングカタログ",
     "autoTosLoadError": "利用規約のポリシーを読み込めませんでした。変更する前に再試行してください。",
     "autoTosSaveError": "利用規約のポリシーを保存できませんでした。以前の設定が引き続き表示されています。再試行してください。",
     "autoTosIncludeLabel": "ToS: avoid とマークされたプロバイダーを auto に含める",
     "autoTosDescription": "デフォルトではオフです。1つのアカウントだけでなく、すべての auto コンボに適用されます。プロバイダーを接続しても、このオプションは有効になりません。",
-    "title": "コンボ",
-    "description": "重み付けルーティングとフォールバックのサポートを備えたモデルのコンボを作成する",
-    "autoCatalogTitle": "自動ルーティングカタログ",
     "autoCatalogTemplateCount": "{count} テンプレート",
     "autoCatalogDescription": "接続されたプロバイダーから動的に解決される組み込みの auto/* コンボ。これらの ID のいずれかをモデル フィールドとして使用します。設定は必要ありません。",
     "autoCatalogExpand": "自動ルーティングカタログを展開する",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "コンボがまだ設定されていません。",
     "playgroundCreateFirst": "最初に作成してください",
     "weighted": "加重",
+    "weightPercent": "重み（%）",
     "leastUsed": "最も使用頻度の低いもの",
     "costOpt": "コスト最適化",
     "strategyGuideTitle": "この戦略の使用方法",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# アカウント} other {# アカウント}}",
     "builderGlobalAdded": "追加されました",
     "builderGlobalAdd": "追加",
+    "clearSearch": "検索をクリア",
     "manualModel": "手動モデル",
     "manualModelInvalid": "モデルを provider/model として入力してください。",
     "manualModelUnknownProvider": "不明なプロバイダープレフィックスです。",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "最小コンテンツ長 (文字数)",
     "responseValidationJsonPaths": "JSON-path チェック",
     "responseValidationAddCheck": "+ チェックを追加",
+    "responseValidationRemoveCheck": "チェックを削除",
+    "responseValidationPath": "JSONパス",
+    "responseValidationCondition": "条件",
+    "responseValidationValue": "期待値",
     "agentFeaturesSystemMessageOverride": "システムメッセージを上書きする",
     "agentFeaturesSystemMessagePlaceholder": "あなたはエキスパートアシスタントです...",
     "agentFeaturesSystemMessageHint": "エージェントのシステム メッセージ オーバーライド",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "このテンプレートに一致する現在接続されているプロバイダー/モデルを編集可能なコンボとしてスナップショットします。",
     "duplicateAutoComboFailedPrefix": "オートコンボの複製に失敗しました：",
     "duplicateAutoComboUnknownError": "不明なエラー",
-    "duplicateAutoComboTitle": "{name}から静的コンボを作成",
-    "weightPercent": "重み（%）",
-    "clearSearch": "検索をクリア",
-    "responseValidationRemoveCheck": "チェックを削除",
-    "responseValidationPath": "JSONパス",
-    "responseValidationCondition": "条件",
-    "responseValidationValue": "期待値"
+    "duplicateAutoComboTitle": "{name}から静的コンボを作成"
   },
   "costs": {
     "title": "コスト",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API形式ラベル",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "中国本土",
+    "apiRegionHint": "APIアクセスとクォータ追跡に使用するエンドポイントリージョンを選択してください。",
+    "apiRegionInternational": "インターナショナル",
+    "apiRegionLabel": "APIリージョン",
     "apikey": "APIキー",
     "audio": "音声",
     "audioProvidersHeading": "音声プロバイダーの見出し",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "このアカウントが5時間の使用上限に達し、Anthropicから低優先度レーンが提供された場合、OmniRouteはそれを受け入れ、接続をクールダウンする代わりに、ウィンドウがリセットされるまで anthropic-usage-limit: slow を指定してリクエストの送信を続けます。週間上限は引き続き適用され、空き容量が生じるまで応答が待機する場合があります。",
     "claudeAutoLimitResetLabel": "セッション上限を自動リセット（週1回）",
     "claudeAutoLimitResetDescription": "このアカウントが5時間の使用上限に達し、セッション上限のリセットが利用可能な場合、OmniRouteは自動的にそれを適用し、通常速度で再試行します。アカウントの週1回のリセットを使用し、使用量は引き続き週間上限にカウントされます。",
+    "codexPaidCreditsShort": "追加クレジット",
+    "codexPaidCreditsToggleTitle": "サブスクリプションのクォータを使い切った後に有料の Codex クレジットを許可する（追加料金が発生する場合があります）",
+    "codexPaidCreditsEnabled": "Codex の有料クレジットを有効にしました（追加料金が発生する場合があります）",
+    "codexPaidCreditsDisabled": "Codex の有料クレジットを無効にしました",
+    "failedUpdateCodexPaidCredits": "Codex の有料クレジットのポリシーを更新できませんでした",
+    "allowCodexPaidCreditsLabel": "Codex の有料クレジットを許可",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "一時的なクールダウンをスキップし、回復可能なエラーの後でもこの接続を対象として維持します (banned/expired などの終端状態は引き続き適用されます)。",
     "disableCoolingLabel": "この接続のクールダウンを無効化",
     "bulkPasteAdded": "{count, plural, one {1件のキーを追加しました} other {#件のキーを追加しました}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "monsterapi.aiでAPIキーを取得",
       "moonshot": "APIキーを使用してMoonshot AIに接続します。",
       "morph": "無料プラン：250Kクレジット/月、$0",
+      "apmix": "apmix.ai/dashboard のAPIキーでApmixに接続 — 1つのサブスクリプションで多数のモデル。",
       "nanogpt": "APIキーを使用してNanoGPTに接続します。",
       "nebius": "APIテスト用に登録時に約1ドルのトライアルクレジット",
       "nlpcloud": "NLP CloudはOpenAIのchat/completionsの代わりに独自のチャットボットAPIを使用します。OmniRouteはOpenAIメッセージをinput/context/historyに適応させ、サポートされているチャットボットモデルのローカルカタログを公開します。",
@@ -6634,8 +6642,7 @@
       "kiro": "無料枠: 50クレジット/月（約25K〜100Kトークン）。⚠️ Kiroの利用規約（ToS）は、サードパーティのプロキシやハーネスの使用を禁止しています。",
       "codex": "既存のOAuthフローを使用してOpenAI Codexに接続します。",
       "qwen": "既存のOAuthフローを使用してQwen Codeに接続します。",
-      "github-models": "github.com/settings/tokens で 'models: read' スコープを持つGitHub PATを作成",
-      "apmix": "apmix.ai/dashboard のAPIキーでApmixに接続 — 1つのサブスクリプションで多数のモデル。"
+      "github-models": "github.com/settings/tokens で 'models: read' スコープを持つGitHub PATを作成"
     },
     "passthroughModelsDescription": "{provider} は、プロバイダーネイティブのモデル ID を受け入れます。 /models からインポートするか、ルーティング用のカスタム ID を追加します。",
     "bedrockModelsDescription": "Amazon Bedrock モデルは、AWS リージョンによって範囲が定められています。 /models からインポートするか、選択したリージョンで有効になっている Bedrock モデル ID を追加します。",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "モデルごとの同時実行上限",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "任意: 1 行に 1 つ model=cap を指定します。アップストリームのモデル ID と完全一致で照合されます。超過したリクエストはローカルで待機します。空欄の場合、モデルごとの上限はありません。",
-    "rateLimitOverridesModelConcurrencyInvalid": "モデルごとの同時実行の指定「{entry}」が無効です — model=cap の形式で、cap は 1 から {max} までの整数にしてください。",
-    "codexPaidCreditsShort": "追加クレジット",
-    "codexPaidCreditsToggleTitle": "サブスクリプションのクォータを使い切った後に有料の Codex クレジットを許可する（追加料金が発生する場合があります）",
-    "codexPaidCreditsEnabled": "Codex の有料クレジットを有効にしました（追加料金が発生する場合があります）",
-    "codexPaidCreditsDisabled": "Codex の有料クレジットを無効にしました",
-    "failedUpdateCodexPaidCredits": "Codex の有料クレジットのポリシーを更新できませんでした",
-    "allowCodexPaidCreditsLabel": "Codex の有料クレジットを許可",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "モデルごとの同時実行の指定「{entry}」が無効です — model=cap の形式で、cap は 1 から {max} までの整数にしてください。"
   },
   "settings": {
     "title": "設定",
@@ -7702,6 +7702,7 @@
     "configured": "設定済み",
     "none": "なし",
     "modelOverrideValuePlaceholder": "数値",
+    "modelOverrideKey": "オーバーライドキー",
     "modelOverrideReasoningEffortsPlaceholder": "英語のカンマ区切り（例：low, medium, high）",
     "addKeyValue": "キーと値を追加",
     "noModelOverrides": "このモデル用に設定されたオーバーライドはありません。",
@@ -8945,8 +8946,7 @@
       "statsTitle": "再起動以降の検出",
       "statsEmpty": "まだ検出はありません。",
       "statsRequest": "リクエスト"
-    },
-    "modelOverrideKey": "オーバーライドキー"
+    }
   },
   "contextRtk": {
     "title": "RTKエンジン",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "ストリームの変換に失敗しました"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Codex の有料クレジット",
+    "codexPaidCreditsAvailable": "利用可能（残高は未報告）",
+    "codexPaidCreditsUnavailable": "利用不可、または支出上限に達しました",
+    "codexPaidCreditsUnlimited": "無制限",
     "title": "使用法",
     "grokExtraUsageCredits": "追加の使用クレジット",
     "grokAutoTopUp": "自動チャージ",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "最終更新",
     "providerQuota": "プロバイダークォータ",
     "providerQuotaHomeHint": "接続されたアカウント全体のライブステータス",
-    "codexPaidCreditsLabel": "Codex の有料クレジット",
-    "codexPaidCreditsAvailable": "利用可能（残高は未報告）",
-    "codexPaidCreditsUnavailable": "利用不可、または支出上限に達しました",
-    "codexPaidCreditsUnlimited": "無制限",
     "claudeResetCreditDefaultTitle": "Claude 制限のリセット",
     "confirmRedeemClaudeResetCredit": "引き換えると、対象となる Claude の利用制限が即座にリセットされ、このクレジットは完全に消費されます。",
     "claudeResetCreditsModalTitle": "Claude リセットクレジット",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "その他の操作",
     "test": "テスト",
     "edit": "編集",
     "delete": "削除",
@@ -11610,8 +11611,7 @@
     "notMeasured": "未測定",
     "upstream4xx": "{count}件の上流クライアントエラー",
     "upstream5xx": "{count}件の上流サーバーエラー",
-    "uniformEgressLine": "{affected}個の{exits}エグジットが、過去{hours}時間に{provider}上で同時に障害を起こしています — エグジット側の問題ではありません",
-    "moreActions": "その他の操作"
+    "uniformEgressLine": "{affected}個の{exits}エグジットが、過去{hours}時間に{provider}上で同時に障害を起こしています — エグジット側の問題ではありません"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "レイテンシ",
     "quota": "クォータ",
     "rangeWindow": "{range} ウィンドウ",
+    "timeRange": "期間",
     "runtimeHealthBlend": "ランタイム/ヘルスブレンド",
     "averageResponseTime": "平均応答時間",
     "worstQuota": "最悪のクォータ",
@@ -13912,8 +13913,7 @@
     "unknown": "不明",
     "unknownProvider": "不明なプロバイダー",
     "unknownModel": "不明なモデル",
-    "resolvedTargetMetrics": "{requests} req · {success} 成功 · {latency} · クォータ {quota}",
-    "timeRange": "期間"
+    "resolvedTargetMetrics": "{requests} req · {success} 成功 · {latency} · クォータ {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD使用量クォータ",

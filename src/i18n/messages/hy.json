@@ -25,8 +25,10 @@
     "confirm": "Վստա՞հ եք",
     "refresh": "Թարմացնել",
     "close": "Փակել",
+    "dialogTitleFallback": "Երկխոսության պատուհան",
     "previousPage": "Նախորդ էջ",
     "nextPage": "Հաջորդ էջ",
+    "pagination": "Էջավորում",
     "capsLockOn": "Caps Lock-ը միացված է",
     "dismissNotification": "Փակել ծանուցումը",
     "toggleColumns": "Փոխարկել սյունակների ցուցադրումը",
@@ -182,6 +184,7 @@
     "combos": "Կոմբինացիաներ",
     "noModelsFound": "Մոդելներ չեն գտնվել",
     "clear": "Մաքրել",
+    "clearFilters": "Մաքրել զտիչները",
     "done": "Պատրաստ է",
     "selectAll": "Ընտրել բոլորը",
     "unselectAll": "Ապաընտրել բոլորը",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Նախադիտում",
     "batchFilePreviewTruncated": "Ցուցադրվում են առաջին {shown} տողերը (ընդամենը՝ {total} տող)",
     "batchFileDownloadFull": "Ներբեռնել ամբողջական ֆայլը",
-    "dialogTitleFallback": "Երկխոսության պատուհան",
-    "pagination": "Էջավորում",
-    "clearFilters": "Մաքրել զտիչները",
     "tokensPageTitle": "Թոքեններ",
     "tokensPageDescription": "Ուղարկեք թոքեններ API բանալիների միջև, տարածեք հրավերի կոդերը և միացրեք համայնքային սերվերները։",
     "tokensServerUrlLabel": "Սերվերի URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Արագ նավարկում",
     "quickNavigationTitle": "Արագ նավարկում (⌘K / Ctrl+K)",
     "openQuickNavigation": "Բացել արագ նավարկումը",
+    "openMenu": "Բացել ընտրացանկը",
+    "products": "Keak-ի արտադրանքներ",
     "switchToLightMode": "Անցնել բաց ռեժիմի",
     "switchToDarkMode": "Անցնել մուգ ռեժիմի",
     "language": "Լեզու",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Օգտակար բեռի ընդլայնված կանոններ, հարցումների սահմանաչափեր և պրոքսի API-ի կարգավորումներ",
     "mitmProxyDescription": "Կարգավորեք MITM պրոքսիի պարամետրերը՝ տրաֆիկի ստուգման և վրիպազերծման համար",
     "oneProxyDescription": "Կարգավորեք 1Proxy-ի պարամետրերը՝ պրոքսիների ընդլայնված շղթայակցման համար",
-    "omniSkillsDescription": "Տեղադրեք և կառավարեք sandbox հմտությունները՝ հուշումների և գործիքների ավտոմատ կատարման համար",
-    "openMenu": "Բացել ընտրացանկը",
-    "products": "Keak-ի արտադրանքներ"
+    "omniSkillsDescription": "Տեղադրեք և կառավարեք sandbox հմտությունները՝ հուշումների և գործիքների ավտոմատ կատարման համար"
   },
   "cloudSyncStatus": {
     "synced": "Համաժամեցված է",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Համակցություն → {name}"
   },
   "combos": {
+    "title": "Կոմբինացիաներ",
+    "description": "Ստեղծեք մոդելների կոմբինացիաներ՝ կշռված երթուղավորմամբ և պահուստային անցման աջակցությամբ",
+    "autoCatalogTitle": "Ավտոմատ երթուղավորման կատալոգ",
     "autoTosLoadError": "Չհաջողվեց բեռնել ծառայության պայմանների քաղաքականությունը։ Փոխելուց առաջ կրկին փորձեք։",
     "autoTosSaveError": "Չհաջողվեց պահպանել ծառայության պայմանների քաղաքականությունը։ Դեռ ցուցադրվում է նախորդ կարգավորումը։ Կրկին փորձեք։",
     "autoTosIncludeLabel": "auto-ում ներառել ToS: avoid նշումով մատակարարներին",
     "autoTosDescription": "Լռելյայն անջատված է։ Կիրառվում է բոլոր auto համակցությունների, ոչ միայն մեկ հաշվի համար։ Մատակարարին միացնելը չի միացնում այս ընտրանքը։",
-    "title": "Կոմբինացիաներ",
-    "description": "Ստեղծեք մոդելների կոմբինացիաներ՝ կշռված երթուղավորմամբ և պահուստային անցման աջակցությամբ",
-    "autoCatalogTitle": "Ավտոմատ երթուղավորման կատալոգ",
     "autoCatalogTemplateCount": "{count} ձևանմուշ",
     "autoCatalogDescription": "Ներկառուցված auto/* կոմբինացիաները դինամիկորեն որոշվում են միացված պրովայդերների հիման վրա։ Այս նույնացուցիչներից ցանկացածն օգտագործեք որպես model դաշտի արժեք․ կարգավորում չի պահանջվում։",
     "autoCatalogExpand": "Ընդարձակել ավտոմատ երթուղավորման կատալոգը",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Դեռևս կարգավորված կոմբոներ չկան։",
     "playgroundCreateFirst": "Նախ ստեղծեք մեկը",
     "weighted": "Կշռված",
+    "weightPercent": "Կշիռ (%)",
     "leastUsed": "Ամենաքիչ օգտագործված",
     "costOpt": "Ծախսերի օպտիմալացում",
     "strategyGuideTitle": "Ինչպես օգտագործել այս ռազմավարությունը",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# հաշիվ} other {# հաշիվ}}",
     "builderGlobalAdded": "Ավելացված է",
     "builderGlobalAdd": "Ավելացնել",
+    "clearSearch": "Մաքրել որոնումը",
     "manualModel": "Ձեռքով նշվող մոդել",
     "manualModelInvalid": "Մուտքագրեք մոդելը provider/model ձևաչափով։",
     "manualModelUnknownProvider": "Մատակարարի անհայտ նախածանց։",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Բովանդակության նվազագույն երկարություն (նիշերով)",
     "responseValidationJsonPaths": "JSON ուղիների ստուգումներ",
     "responseValidationAddCheck": "+ Ավելացնել ստուգում",
+    "responseValidationRemoveCheck": "Հեռացնել ստուգումը",
+    "responseValidationPath": "JSON ուղի",
+    "responseValidationCondition": "Պայման",
+    "responseValidationValue": "Ակնկալվող արժեք",
     "agentFeaturesSystemMessageOverride": "Վերասահմանել համակարգային հաղորդագրությունը",
     "agentFeaturesSystemMessagePlaceholder": "Դուք փորձառու օգնական եք...",
     "agentFeaturesSystemMessageHint": "Համակարգային հաղորդագրության վերասահմանում գործակալների համար",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Այս ձևանմուշին համապատասխանող՝ ներկայումս միացված մատակարարների/մոդելների պատճենը կպահվի որպես խմբագրվող կոմբինացիա։",
     "duplicateAutoComboFailedPrefix": "Չհաջողվեց կրկնօրինակել ավտոմատ կոմբինացիան՝",
     "duplicateAutoComboUnknownError": "Անհայտ սխալ",
-    "duplicateAutoComboTitle": "Ստեղծել ստատիկ կոմբինացիա {name}-ից",
-    "weightPercent": "Կշիռ (%)",
-    "clearSearch": "Մաքրել որոնումը",
-    "responseValidationRemoveCheck": "Հեռացնել ստուգումը",
-    "responseValidationPath": "JSON ուղի",
-    "responseValidationCondition": "Պայման",
-    "responseValidationValue": "Ակնկալվող արժեք"
+    "duplicateAutoComboTitle": "Ստեղծել ստատիկ կոմբինացիա {name}-ից"
   },
   "costs": {
     "title": "Ծախսեր",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API ձևաչափի պիտակ",
     "apiKeyOptionalHint": "Թողեք դատարկ, եթե ձեր տեղային կարգավորումը կամ մատակարարը նույնականացում չի պահանջում։",
     "apiKeyOptionalLabel": "API բանալի (ըստ ցանկության)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Մայրցամաքային Չինաստան",
+    "apiRegionHint": "Ընտրեք վերջակետի տարածաշրջանը, որն օգտագործվում է API հասանելիության և քվոտայի հետևման համար։",
+    "apiRegionInternational": "Միջազգային",
+    "apiRegionLabel": "API տարածաշրջան",
     "apikey": "API բանալի",
     "audio": "Ձայնանյութ",
     "audioProvidersHeading": "Ձայնանյութի մատակարարների վերնագիր",
@@ -6545,6 +6545,7 @@
       "monsterapi": "Ստացեք API բանալի monsterapi.ai հասցեում",
       "moonshot": "Միացրեք Kimi-ն API բանալիով։",
       "morph": "Անվճար մակարդակ՝ ամսական 250K կրեդիտ, $0",
+      "apmix": "Միացրեք Apmix-ը apmix.ai/dashboard-ից API բանալիով — մեկ բաժանորդագրություն, շատ մոդելներ:",
       "nanogpt": "Միացրեք NanoGPT-ն API բանալիով։",
       "nebius": "Գրանցվելիս՝ մոտ $1-ի փորձնական կրեդիտներ API-ի փորձարկման համար",
       "nlpcloud": "NLP Cloud-ն OpenAI-ի chat/completions-ի փոխարեն օգտագործում է սեփական չաթբոտի API։ OmniRoute-ը OpenAI-ի հաղորդագրությունները հարմարեցնում է input/context/history ձևաչափին և տրամադրում է աջակցվող չաթբոտի մոդելների տեղային կատալոգ։",
@@ -6641,8 +6642,7 @@
       "kiro": "Անվճար մակարդակ՝ ամսական 50 կրեդիտ (~25K–100K թոքեն)։ ⚠️ Kiro-ի ToS-ն արգելում է երրորդ կողմի պրոքսիի/գործիքակազմի օգտագործումը։",
       "codex": "Միացրեք OpenAI Codex-ը առկա OAuth հոսքով։",
       "qwen": "Միացրեք Qwen Code-ը առկա OAuth հոսքով։",
-      "github-models": "Ստեղծեք GitHub PAT՝ 'models: read' տիրույթով, github.com/settings/tokens հասցեում",
-      "apmix": "Միացրեք Apmix-ը apmix.ai/dashboard-ից API բանալիով — մեկ բաժանորդագրություն, շատ մոդելներ:"
+      "github-models": "Ստեղծեք GitHub PAT՝ 'models: read' տիրույթով, github.com/settings/tokens հասցեում"
     },
     "passthroughModelsDescription": "{provider}-ն ընդունում է մատակարարին բնորոշ մոդելների ID-ներ։ Ներմուծեք /models-ից կամ երթուղավորման համար ավելացրեք հատուկ ID-ներ։",
     "bedrockModelsDescription": "Amazon Bedrock մոդելները սահմանափակված են ըստ AWS տարածաշրջանի։ Ներմուծեք /models-ից կամ ավելացրեք ընտրված տարածաշրջանում միացված Bedrock մոդելների ID-ները։",
@@ -7702,6 +7702,7 @@
     "configured": "կարգավորված",
     "none": "Չկա",
     "modelOverrideValuePlaceholder": "Թվային արժեք",
+    "modelOverrideKey": "Վերագրման բանալի",
     "modelOverrideReasoningEffortsPlaceholder": "Անգլերեն՝ ստորակետերով բաժանված, օրինակ՝ low, medium, high",
     "addKeyValue": "Ավելացնել բանալի-արժեք",
     "noModelOverrides": "Այս մոդելի համար վերասահմանումներ կարգավորված չեն։",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Հայտնաբերումներ վերագործարկումից ի վեր",
       "statsEmpty": "Դեռ հայտնաբերումներ չկան։",
       "statsRequest": "Հարցումներ"
-    },
-    "modelOverrideKey": "Վերագրման բանալի"
+    }
   },
   "contextRtk": {
     "title": "RTK շարժիչ",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Աշխատունակություն (24 ժ.)",
     "tableUsage": "Օգտագործում",
     "tableActions": "Գործողություններ",
+    "moreActions": "Լրացուցիչ գործողություններ",
     "test": "Ստուգել",
     "edit": "Խմբագրել",
     "delete": "Ջնջել",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Չի չափվել",
     "upstream4xx": "{count} վերահոսքային հաճախորդի սխալներ",
     "upstream5xx": "{count} վերահոսքային սերվերի սխալներ",
-    "uniformEgressLine": "{affected}-ը {exits} ելքերից միասին ձախողվում են {provider}-ում (վերջին {hours}ժ) — ելքի խնդիր չէ",
-    "moreActions": "Լրացուցիչ գործողություններ"
+    "uniformEgressLine": "{affected}-ը {exits} ելքերից միասին ձախողվում են {provider}-ում (վերջին {hours}ժ) — ելքի խնդիր չէ"
   },
   "playground": {
     "title": "Մոդելների փորձարկման հարթակ",
@@ -13858,6 +13858,7 @@
     "latency": "Ուշացում",
     "quota": "Քվոտա",
     "rangeWindow": "{range} ժամանակահատված",
+    "timeRange": "Ժամանակային միջակայք",
     "runtimeHealthBlend": "կատարման ժամանակի/աշխատանքային վիճակի համակցում",
     "averageResponseTime": "պատասխանի միջին ժամանակ",
     "worstQuota": "Ամենավատ քվոտա",
@@ -13912,8 +13913,7 @@
     "unknown": "անհայտ",
     "unknownProvider": "անհայտ մատակարար",
     "unknownModel": "անհայտ մոդել",
-    "resolvedTargetMetrics": "{requests} հարցում · {success} հաջողված · {latency} · քվոտա՝ {quota}",
-    "timeRange": "Ժամանակային միջակայք"
+    "resolvedTargetMetrics": "{requests} հարցում · {success} հաջողված · {latency} · քվոտա՝ {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Օգտագործման քվոտա՝ USD-ով",

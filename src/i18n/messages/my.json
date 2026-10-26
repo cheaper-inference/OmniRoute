@@ -25,8 +25,10 @@
     "confirm": "သေချာပါသလား။",
     "refresh": "ပြန်လည်တင်မည်",
     "close": "ပိတ်မည်",
+    "dialogTitleFallback": "ဒိုင်ယာလော့ဂ်",
     "previousPage": "ယခင်စာမျက်နှာ",
     "nextPage": "နောက်စာမျက်နှာ",
+    "pagination": "စာမျက်နှာခွဲခြင်း",
     "capsLockOn": "Caps Lock ဖွင့်ထားသည်",
     "dismissNotification": "အကြောင်းကြားချက်ကို ပယ်မည်",
     "toggleColumns": "ကော်လံများကို ပြောင်းလဲပြသမည်",
@@ -182,6 +184,7 @@
     "combos": "ပေါင်းစပ်မှုများ",
     "noModelsFound": "မော်ဒယ်များ မတွေ့ပါ",
     "clear": "ရှင်းလင်းရန်",
+    "clearFilters": "စစ်ထုတ်မှုများကို ရှင်းလင်းရန်",
     "done": "ပြီးပါပြီ",
     "selectAll": "အားလုံးကို ရွေးရန်",
     "unselectAll": "အားလုံးကို မရွေးတော့ရန်",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "အစမ်းကြည့်ရှုခြင်း",
     "batchFilePreviewTruncated": "ပထမ {shown} ကြောင်းကို ပြသနေသည် (စုစုပေါင်း {total} ကြောင်း)",
     "batchFileDownloadFull": "ဖိုင်အပြည့်အစုံကို ဒေါင်းလုဒ်လုပ်ရန်",
-    "dialogTitleFallback": "ဒိုင်ယာလော့ဂ်",
-    "pagination": "စာမျက်နှာခွဲခြင်း",
-    "clearFilters": "စစ်ထုတ်မှုများကို ရှင်းလင်းရန်",
     "tokensPageTitle": "တိုကင်များ",
     "tokensPageDescription": "API ကီးများအကြား တိုကင်များ ပေးပို့ခြင်း၊ ဖိတ်ခေါ်ကုဒ်များ မျှဝေခြင်းနှင့် အသိုင်းအဝိုင်းဆာဗာများကို ချိတ်ဆက်ခြင်း ပြုလုပ်ပါ။",
     "tokensServerUrlLabel": "ဆာဗာ URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "အမြန်လမ်းညွှန်",
     "quickNavigationTitle": "အမြန်လမ်းညွှန် (⌘K / Ctrl+K)",
     "openQuickNavigation": "အမြန်လမ်းညွှန်ကို ဖွင့်ရန်",
+    "openMenu": "မီနူးကို ဖွင့်ရန်",
+    "products": "Keak ထုတ်ကုန်များ",
     "switchToLightMode": "အလင်းရောင်မုဒ်သို့ ပြောင်းရန်",
     "switchToDarkMode": "အမှောင်မုဒ်သို့ ပြောင်းရန်",
     "language": "ဘာသာစကား",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "အဆင့်မြင့် ပေးပို့ဒေတာ စည်းမျဉ်းများ၊ တောင်းဆိုမှုကန့်သတ်ချက်များနှင့် ပရောက်စီ API ဆက်တင်များ",
     "mitmProxyDescription": "ကွန်ရက်အသွားအလာကို စစ်ဆေးခြင်းနှင့် ချို့ယွင်းချက်ရှာဖွေခြင်းအတွက် MITM ပရောက်စီ ဆက်တင်များကို ဖွဲ့စည်းသတ်မှတ်ရန်",
     "oneProxyDescription": "အဆင့်မြင့် ပရောက်စီဆက်တိုက်ချိတ်ဆက်မှုအတွက် 1Proxy ဆက်တင်များကို ဖွဲ့စည်းသတ်မှတ်ရန်",
-    "omniSkillsDescription": "အလိုအလျောက် ပရောမ့်နှင့် ကိရိယာဆောင်ရွက်မှုအတွက် sandbox စွမ်းရည်များကို ထည့်သွင်းပြီး စီမံခန့်ခွဲရန်",
-    "openMenu": "မီနူးကို ဖွင့်ရန်",
-    "products": "Keak ထုတ်ကုန်များ"
+    "omniSkillsDescription": "အလိုအလျောက် ပရောမ့်နှင့် ကိရိယာဆောင်ရွက်မှုအတွက် sandbox စွမ်းရည်များကို ထည့်သွင်းပြီး စီမံခန့်ခွဲရန်"
   },
   "cloudSyncStatus": {
     "synced": "စင့်ခ်လုပ်ပြီးပါပြီ",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid ဟု သတ်မှတ်ထားသော ဝန်ဆောင်မှုပေးသူများကို auto တွင် ထည့်သွင်းရန်",
-    "autoTosDescription": "မူလအတိုင်း ပိတ်ထားသည်။ အကောင့်တစ်ခုတည်းအတွက် မဟုတ်ဘဲ auto combo အားလုံးအတွက် သက်ရောက်သည်။ ဝန်ဆောင်မှုပေးသူကို ချိတ်ဆက်ခြင်းက ဤရွေးချယ်မှုကို ဖွင့်မပေးပါ။",
-    "autoTosSaveError": "ToS မူဝါဒကို မသိမ်းဆည်းနိုင်ပါ။ ယခင်ဆက်တင်ကိုသာ ပြထားဆဲဖြစ်သည်။ ထပ်မံကြိုးစားပါ။",
-    "autoTosLoadError": "ToS မူဝါဒကို မဖတ်ယူနိုင်ပါ။ မပြောင်းမီ ထပ်မံကြိုးစားပါ။",
     "title": "ပေါင်းစပ်မော်ဒယ်များ",
     "description": "အလေးချိန်အလိုက် လမ်းကြောင်းခွဲခြင်းနှင့် အရန်ပံ့ပိုးမှုပါဝင်သော မော်ဒယ်ပေါင်းစပ်မှုများကို ဖန်တီးပါ",
     "autoCatalogTitle": "အလိုအလျောက် လမ်းကြောင်းခွဲခြင်း ကတ်တလောက်",
+    "autoTosLoadError": "ToS မူဝါဒကို မဖတ်ယူနိုင်ပါ။ မပြောင်းမီ ထပ်မံကြိုးစားပါ။",
+    "autoTosSaveError": "ToS မူဝါဒကို မသိမ်းဆည်းနိုင်ပါ။ ယခင်ဆက်တင်ကိုသာ ပြထားဆဲဖြစ်သည်။ ထပ်မံကြိုးစားပါ။",
+    "autoTosIncludeLabel": "ToS: avoid ဟု သတ်မှတ်ထားသော ဝန်ဆောင်မှုပေးသူများကို auto တွင် ထည့်သွင်းရန်",
+    "autoTosDescription": "မူလအတိုင်း ပိတ်ထားသည်။ အကောင့်တစ်ခုတည်းအတွက် မဟုတ်ဘဲ auto combo အားလုံးအတွက် သက်ရောက်သည်။ ဝန်ဆောင်မှုပေးသူကို ချိတ်ဆက်ခြင်းက ဤရွေးချယ်မှုကို ဖွင့်မပေးပါ။",
     "autoCatalogTemplateCount": "တမ်းပလိတ် {count} ခု",
     "autoCatalogDescription": "ချိတ်ဆက်ထားသော ဝန်ဆောင်မှုပေးသူများမှ ပြောင်းလဲမှုနှင့်အညီ သတ်မှတ်ပေးသည့် အသင့်ပါ auto/* ပေါင်းစပ်မှုများ။ ဤ ID များထဲမှ မည်သည့်တစ်ခုကိုမဆို model အကွက်အဖြစ် အသုံးပြုနိုင်ပြီး စနစ်ထည့်သွင်းရန် မလိုပါ။",
     "autoCatalogExpand": "အလိုအလျောက် လမ်းကြောင်းခွဲခြင်း ကတ်တလောက်ကို ဖြန့်ကြည့်ရန်",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "ကွန်ဘိုများကို မဖွဲ့စည်းရသေးပါ။",
     "playgroundCreateFirst": "ပထမဦးစွာ တစ်ခုဖန်တီးပါ",
     "weighted": "အလေးချိန်အလိုက်",
+    "weightPercent": "အလေးချိန် (%)",
     "leastUsed": "အသုံးပြုမှုအနည်းဆုံး",
     "costOpt": "ကုန်ကျစရိတ် အကောင်းဆုံးဖြစ်အောင်",
     "strategyGuideTitle": "ဤနည်းဗျူဟာကို အသုံးပြုနည်း",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# အကောင့်} other {# အကောင့်များ}}",
     "builderGlobalAdded": "ထည့်ပြီး",
     "builderGlobalAdd": "ထည့်မည်",
+    "clearSearch": "ရှာဖွေမှုကို ရှင်းလင်းရန်",
     "manualModel": "ကိုယ်တိုင်သတ်မှတ်သည့် မော်ဒယ်",
     "manualModelInvalid": "မော်ဒယ်တစ်ခုကို provider/model ပုံစံဖြင့် ထည့်သွင်းပါ။",
     "manualModelUnknownProvider": "မသိသော ဝန်ဆောင်မှုပေးသူ ရှေ့ဆက်စာသား။",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "အနည်းဆုံး အကြောင်းအရာအရှည် (အက္ခရာများ)",
     "responseValidationJsonPaths": "JSON-path စစ်ဆေးချက်များ",
     "responseValidationAddCheck": "+ စစ်ဆေးချက် ထည့်ရန်",
+    "responseValidationRemoveCheck": "စစ်ဆေးမှုကို ဖယ်ရှားရန်",
+    "responseValidationPath": "JSON လမ်းကြောင်း",
+    "responseValidationCondition": "အခြေအနေ",
+    "responseValidationValue": "မျှော်မှန်းတန်ဖိုး",
     "agentFeaturesSystemMessageOverride": "စနစ်မက်ဆေ့ချ်ကို အစားထိုးသတ်မှတ်ရန်",
     "agentFeaturesSystemMessagePlaceholder": "သင်သည် ကျွမ်းကျင်သော လက်ထောက်တစ်ဦးဖြစ်သည်...",
     "agentFeaturesSystemMessageHint": "အေးဂျင့်များအတွက် စနစ်မက်ဆေ့ချ် အစားထိုးသတ်မှတ်ချက်",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "ဤလုပ်ဆောင်ချက်သည် လက်ရှိချိတ်ဆက်ထားပြီး ဤတမ်းပလိတ်နှင့် ကိုက်ညီသော ဝန်ဆောင်မှုပေးသူများ/မော်ဒယ်များကို တည်းဖြတ်နိုင်သည့် ပေါင်းစပ်မှုတစ်ခုအဖြစ် လက်ရှိအခြေအနေအတိုင်း မှတ်တမ်းတင်မည်။",
     "duplicateAutoComboFailedPrefix": "အလိုအလျောက်ပေါင်းစပ်မှုကို မိတ္တူပွား၍မရပါ:",
     "duplicateAutoComboUnknownError": "မသိသော အမှား",
-    "duplicateAutoComboTitle": "{name} မှ တည်ငြိမ်သော ပေါင်းစပ်မှုတစ်ခု ဖန်တီးရန်",
-    "weightPercent": "အလေးချိန် (%)",
-    "clearSearch": "ရှာဖွေမှုကို ရှင်းလင်းရန်",
-    "responseValidationRemoveCheck": "စစ်ဆေးမှုကို ဖယ်ရှားရန်",
-    "responseValidationPath": "JSON လမ်းကြောင်း",
-    "responseValidationCondition": "အခြေအနေ",
-    "responseValidationValue": "မျှော်မှန်းတန်ဖိုး"
+    "duplicateAutoComboTitle": "{name} မှ တည်ငြိမ်သော ပေါင်းစပ်မှုတစ်ခု ဖန်တီးရန်"
   },
   "costs": {
     "title": "ကုန်ကျစရိတ်များ",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API Format အညွှန်း",
     "apiKeyOptionalHint": "သင့် local setup သို့မဟုတ် provider က authentication မလိုအပ်ပါက ကွက်လပ်ထားပါ။",
     "apiKeyOptionalLabel": "API Key (မဖြစ်မနေမဟုတ်ပါ)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "တရုတ်ပြည်မကြီး",
+    "apiRegionHint": "API အသုံးပြုမှုနှင့် quota ခြေရာခံခြင်းအတွက် အသုံးပြုမည့် endpoint ဒေသကို ရွေးချယ်ပါ။",
+    "apiRegionInternational": "နိုင်ငံတကာ",
+    "apiRegionLabel": "API ဒေသ",
     "apikey": "API Key",
     "audio": "အသံ",
     "audioProvidersHeading": "အသံ Provider များ၏ ခေါင်းစဉ်",
@@ -6545,6 +6545,7 @@
       "monsterapi": "monsterapi.ai တွင် API key ရယူပါ",
       "moonshot": "Kimi ကို API key ဖြင့် ချိတ်ဆက်ပါ။",
       "morph": "အခမဲ့အဆင့်- တစ်လလျှင် credits 250K၊ $0",
+      "apmix": "apmix.ai/dashboard မှ API key ဖြင့် Apmix ကို ချိတ်ဆက်ပါ — စာရင်းသွင်းမှုတစ်ခု၊ မော်ဒယ်များစွာ။",
       "nanogpt": "NanoGPT ကို API key ဖြင့် ချိတ်ဆက်ပါ။",
       "nebius": "API စမ်းသပ်ရန် စာရင်းသွင်းချိန်တွင် စမ်းသပ်သုံးစွဲခွင့် credits ~$1 ရရှိပါသည်",
       "nlpcloud": "NLP Cloud သည် OpenAI chat/completions အစား ကိုယ်ပိုင် chatbot API ကို အသုံးပြုသည်။ OmniRoute သည် OpenAI messages များကို input/context/history အဖြစ် ပြောင်းလဲညှိနှိုင်းပြီး ပံ့ပိုးထားသော chatbot models များ၏ local catalog ကို ဖော်ပြပေးသည်။",
@@ -6641,8 +6642,7 @@
       "kiro": "အခမဲ့အဆင့်- တစ်လလျှင် credit 50 (~25K–100K tokens)။ ⚠️ Kiro ToS သည် ပြင်ပ proxy/harness အသုံးပြုမှုကို တားမြစ်ထားသည်။",
       "codex": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် OpenAI Codex ကို ချိတ်ဆက်ပါ။",
       "qwen": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် Qwen Code ကို ချိတ်ဆက်ပါ။",
-      "github-models": "github.com/settings/tokens တွင် 'models: read' scope ပါဝင်သည့် GitHub PAT တစ်ခု ဖန်တီးပါ",
-      "apmix": "apmix.ai/dashboard မှ API key ဖြင့် Apmix ကို ချိတ်ဆက်ပါ — စာရင်းသွင်းမှုတစ်ခု၊ မော်ဒယ်များစွာ။"
+      "github-models": "github.com/settings/tokens တွင် 'models: read' scope ပါဝင်သည့် GitHub PAT တစ်ခု ဖန်တီးပါ"
     },
     "passthroughModelsDescription": "{provider} သည် provider-native model IDs များကို လက်ခံသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် routing အတွက် စိတ်ကြိုက် IDs များ ထည့်ပါ။",
     "bedrockModelsDescription": "Amazon Bedrock မော်ဒယ်များကို AWS region အလိုက် ကန့်သတ်ထားသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် ရွေးချယ်ထားသည့် region တွင် ဖွင့်ထားသော Bedrock model IDs များ ထည့်ပါ။",
@@ -7702,6 +7702,7 @@
     "configured": "စီစဉ်သတ်မှတ်ပြီး",
     "none": "မရှိပါ",
     "modelOverrideValuePlaceholder": "ကိန်းဂဏန်းတန်ဖိုး",
+    "modelOverrideKey": "အစားထိုးသတ်မှတ်သည့် ကီး",
     "modelOverrideReasoningEffortsPlaceholder": "အင်္ဂလိပ်ကော်မာဖြင့် ခွဲထားပါ၊ ဥပမာ low, medium, high",
     "addKeyValue": "ကီး-တန်ဖိုး ထည့်ရန်",
     "noModelOverrides": "ဤမော်ဒယ်အတွက် အစားထိုးသတ်မှတ်ချက်များ မရှိသေးပါ။",
@@ -8945,8 +8946,7 @@
       "statsTitle": "ပြန်စတင်ပြီးနောက် တွေ့ရှိမှုများ",
       "statsEmpty": "တွေ့ရှိမှု မရှိသေးပါ။",
       "statsRequest": "တောင်းဆိုမှုများ"
-    },
-    "modelOverrideKey": "အစားထိုးသတ်မှတ်သည့် ကီး"
+    }
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11453,6 +11453,7 @@
     "tableHealth": "လုပ်ဆောင်မှုအခြေအနေ (24h)",
     "tableUsage": "အသုံးပြုမှု",
     "tableActions": "လုပ်ဆောင်ချက်များ",
+    "moreActions": "နောက်ထပ်လုပ်ဆောင်ချက်များ",
     "test": "စမ်းသပ်ရန်",
     "edit": "တည်းဖြတ်ရန်",
     "delete": "ဖျက်ရန်",
@@ -11610,8 +11611,7 @@
     "notMeasured": "မတိုင်းတာရသေးပါ",
     "upstream4xx": "{count} ကလိန်းအတွက် အမှားအယွင်းများ",
     "upstream5xx": "{count} ဆာဗာအတွက် အမှားအယွင်းများ",
-    "uniformEgressLine": "{provider} ပေါ်ရှိ exit {exits} ခုအနက် {affected} ခု တစ်ပြိုင်နက် ကျရှုံးနေသည် (နောက်ဆုံး {hours} နာရီအတွင်း) — exit ပြဿနာ မဟုတ်ပါ",
-    "moreActions": "နောက်ထပ်လုပ်ဆောင်ချက်များ"
+    "uniformEgressLine": "{provider} ပေါ်ရှိ exit {exits} ခုအနက် {affected} ခု တစ်ပြိုင်နက် ကျရှုံးနေသည် (နောက်ဆုံး {hours} နာရီအတွင်း) — exit ပြဿနာ မဟုတ်ပါ"
   },
   "playground": {
     "title": "မော်ဒယ် စမ်းသပ်ခန်း",
@@ -13858,6 +13858,7 @@
     "latency": "ကြာချိန်",
     "quota": "ခွဲတမ်း",
     "rangeWindow": "{range} အချိန်ကာလ",
+    "timeRange": "အချိန်အပိုင်းအခြား",
     "runtimeHealthBlend": "လည်ပတ်မှု/စနစ်အခြေအနေ ပေါင်းစပ်မှု",
     "averageResponseTime": "ပျမ်းမျှတုံ့ပြန်ချိန်",
     "worstQuota": "အဆိုးဆုံး ခွဲတမ်း",
@@ -13912,8 +13913,7 @@
     "unknown": "မသိရှိပါ",
     "unknownProvider": "အမည်မသိ provider",
     "unknownModel": "အမည်မသိ မော်ဒယ်",
-    "resolvedTargetMetrics": "တောင်းဆိုမှု {requests} ခု · အောင်မြင်မှု {success} ခု · {latency} · ခွဲတမ်း {quota}",
-    "timeRange": "အချိန်အပိုင်းအခြား"
+    "resolvedTargetMetrics": "တောင်းဆိုမှု {requests} ခု · အောင်မြင်မှု {success} ခု · {latency} · ခွဲတမ်း {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD အသုံးပြုမှု ခွဲတမ်း",

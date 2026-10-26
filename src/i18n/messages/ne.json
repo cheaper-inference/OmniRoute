@@ -25,8 +25,10 @@
     "confirm": "के तपाईं निश्चित हुनुहुन्छ?",
     "refresh": "रिफ्रेस गर्नुहोस्",
     "close": "बन्द गर्नुहोस्",
+    "dialogTitleFallback": "संवाद बाकस",
     "previousPage": "अघिल्लो पृष्ठ",
     "nextPage": "अर्को पृष्ठ",
+    "pagination": "पृष्ठाङ्कन",
     "capsLockOn": "Caps Lock सक्रिय छ",
     "dismissNotification": "सूचना हटाउनुहोस्",
     "toggleColumns": "स्तम्भहरू देखाउनुहोस् वा लुकाउनुहोस्",
@@ -182,6 +184,7 @@
     "combos": "कम्बोहरू",
     "noModelsFound": "कुनै मोडेल फेला परेन",
     "clear": "खाली गर्नुहोस्",
+    "clearFilters": "फिल्टरहरू हटाउनुहोस्",
     "done": "सम्पन्न",
     "selectAll": "सबै चयन गर्नुहोस्",
     "unselectAll": "सबै चयन हटाउनुहोस्",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "पूर्वावलोकन",
     "batchFilePreviewTruncated": "पहिला {shown} पङ्क्तिहरू देखाइँदै (कुल {total} पङ्क्तिहरू)",
     "batchFileDownloadFull": "पूरा फाइल डाउनलोड गर्नुहोस्",
-    "dialogTitleFallback": "संवाद बाकस",
-    "pagination": "पृष्ठाङ्कन",
-    "clearFilters": "फिल्टरहरू हटाउनुहोस्",
     "tokensPageTitle": "टोकनहरू",
     "tokensPageDescription": "API कुञ्जीहरूबीच टोकनहरू पठाउनुहोस्, आमन्त्रण कोडहरू साझा गर्नुहोस् र सामुदायिक सर्भरहरू जडान गर्नुहोस्।",
     "tokensServerUrlLabel": "सर्भर URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "द्रुत नेभिगेसन",
     "quickNavigationTitle": "द्रुत नेभिगेसन (⌘K / Ctrl+K)",
     "openQuickNavigation": "द्रुत नेभिगेसन खोल्नुहोस्",
+    "openMenu": "मेनु खोल्नुहोस्",
+    "products": "Keak उत्पादनहरू",
     "switchToLightMode": "उज्यालो मोडमा बदल्नुहोस्",
     "switchToDarkMode": "गाढा मोडमा बदल्नुहोस्",
     "language": "भाषा",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "उन्नत पेलोड नियमहरू, अनुरोध सीमाहरू र प्रोक्सी API सेटिङहरू",
     "mitmProxyDescription": "ट्राफिक निरीक्षण र डिबगिङका लागि MITM प्रोक्सी सेटिङहरू कन्फिगर गर्नुहोस्",
     "oneProxyDescription": "उन्नत प्रोक्सी चेनिङका लागि 1Proxy सेटिङहरू कन्फिगर गर्नुहोस्",
-    "omniSkillsDescription": "स्वचालित प्रम्प्ट र उपकरण कार्यान्वयनका लागि स्यान्डबक्स सीपहरू स्थापना र व्यवस्थापन गर्नुहोस्",
-    "openMenu": "मेनु खोल्नुहोस्",
-    "products": "Keak उत्पादनहरू"
+    "omniSkillsDescription": "स्वचालित प्रम्प्ट र उपकरण कार्यान्वयनका लागि स्यान्डबक्स सीपहरू स्थापना र व्यवस्थापन गर्नुहोस्"
   },
   "cloudSyncStatus": {
     "synced": "सिङ्क भएको छ",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "कम्बो → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid चिन्ह लगाइएका प्रदायकहरूलाई auto मा समावेश गर्नुहोस्",
-    "autoTosDescription": "पूर्वनिर्धारित रूपमा बन्द छ। एउटा खातामा मात्र होइन, सबै auto कम्बोमा लागू हुन्छ। प्रदायक जोड्दा यो विकल्प सक्रिय हुँदैन।",
-    "autoTosSaveError": "ToS नीति सुरक्षित गर्न सकिएन। अघिल्लो सेटिङ नै देखाइएको छ। फेरि प्रयास गर्नुहोस्।",
-    "autoTosLoadError": "ToS नीति लोड गर्न सकिएन। परिवर्तन गर्नुअघि फेरि प्रयास गर्नुहोस्।",
     "title": "कम्बोहरू",
     "description": "भारित राउटिङ र फलब्याक समर्थनसहित मोडेल कम्बोहरू सिर्जना गर्नुहोस्",
     "autoCatalogTitle": "स्वतः-राउटिङ क्याटलग",
+    "autoTosLoadError": "ToS नीति लोड गर्न सकिएन। परिवर्तन गर्नुअघि फेरि प्रयास गर्नुहोस्।",
+    "autoTosSaveError": "ToS नीति सुरक्षित गर्न सकिएन। अघिल्लो सेटिङ नै देखाइएको छ। फेरि प्रयास गर्नुहोस्।",
+    "autoTosIncludeLabel": "ToS: avoid चिन्ह लगाइएका प्रदायकहरूलाई auto मा समावेश गर्नुहोस्",
+    "autoTosDescription": "पूर्वनिर्धारित रूपमा बन्द छ। एउटा खातामा मात्र होइन, सबै auto कम्बोमा लागू हुन्छ। प्रदायक जोड्दा यो विकल्प सक्रिय हुँदैन।",
     "autoCatalogTemplateCount": "{count} टेम्प्लेटहरू",
     "autoCatalogDescription": "जडान गरिएका प्रदायकहरूबाट गतिशील रूपमा समाधान गरिएका बिल्ट-इन auto/* कम्बोहरू। यीमध्ये कुनै पनि ID लाई मोडेल फिल्डको रूपमा प्रयोग गर्नुहोस् — कुनै सेटअप आवश्यक छैन।",
     "autoCatalogExpand": "स्वतः-राउटिङ क्याटलग विस्तार गर्नुहोस्",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "अहिलेसम्म कुनै कम्बो कन्फिगर गरिएको छैन।",
     "playgroundCreateFirst": "पहिले एउटा सिर्जना गर्नुहोस्",
     "weighted": "भारित",
+    "weightPercent": "भार (%)",
     "leastUsed": "सबैभन्दा कम प्रयोग भएको",
     "costOpt": "लागत-अनुकूलित",
     "strategyGuideTitle": "यो रणनीति कसरी प्रयोग गर्ने",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# खाता} other {# खाताहरू}}",
     "builderGlobalAdded": "थपियो",
     "builderGlobalAdd": "थप्नुहोस्",
+    "clearSearch": "खोज खाली गर्नुहोस्",
     "manualModel": "म्यानुअल मोडेल",
     "manualModelInvalid": "मोडेललाई provider/model ढाँचामा प्रविष्ट गर्नुहोस्।",
     "manualModelUnknownProvider": "अज्ञात प्रदायक उपसर्ग।",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "न्यूनतम सामग्री लम्बाइ (वर्णहरू)",
     "responseValidationJsonPaths": "JSON-पाथ जाँचहरू",
     "responseValidationAddCheck": "+ जाँच थप्नुहोस्",
+    "responseValidationRemoveCheck": "जाँच हटाउनुहोस्",
+    "responseValidationPath": "JSON पथ",
+    "responseValidationCondition": "सर्त",
+    "responseValidationValue": "अपेक्षित मान",
     "agentFeaturesSystemMessageOverride": "सिस्टम सन्देश ओभरराइड गर्नुहोस्",
     "agentFeaturesSystemMessagePlaceholder": "तपाईं एक विशेषज्ञ सहायक हुनुहुन्छ...",
     "agentFeaturesSystemMessageHint": "एजेन्टहरूका लागि सिस्टम सन्देश ओभरराइड",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "यसले यो टेम्प्लेटसँग मेल खाने हाल जडान भएका प्रदायक/मोडेलहरूको स्न्यापसट लिएर सम्पादनयोग्य कम्बो बनाउनेछ।",
     "duplicateAutoComboFailedPrefix": "स्वचालित कम्बो डुप्लिकेट गर्न असफल भयो:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटि",
-    "duplicateAutoComboTitle": "{name} बाट स्थिर कम्बो सिर्जना गर्नुहोस्",
-    "weightPercent": "भार (%)",
-    "clearSearch": "खोज खाली गर्नुहोस्",
-    "responseValidationRemoveCheck": "जाँच हटाउनुहोस्",
-    "responseValidationPath": "JSON पथ",
-    "responseValidationCondition": "सर्त",
-    "responseValidationValue": "अपेक्षित मान"
+    "duplicateAutoComboTitle": "{name} बाट स्थिर कम्बो सिर्जना गर्नुहोस्"
   },
   "costs": {
     "title": "लागत",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API ढाँचा लेबल",
     "apiKeyOptionalHint": "तपाईंको स्थानीय सेटअप वा प्रदायकलाई प्रमाणीकरण आवश्यक पर्दैन भने खाली छोड्नुहोस्।",
     "apiKeyOptionalLabel": "API कुञ्जी (वैकल्पिक)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "मुख्य भू-भाग चीन",
+    "apiRegionHint": "API पहुँच र कोटा ट्र्याकिङका लागि प्रयोग गरिने एन्डपोइन्ट क्षेत्र चयन गर्नुहोस्।",
+    "apiRegionInternational": "अन्तर्राष्ट्रिय",
+    "apiRegionLabel": "API क्षेत्र",
     "apikey": "API कुञ्जी",
     "audio": "अडियो",
     "audioProvidersHeading": "अडियो प्रदायकहरूको शीर्षक",
@@ -6545,6 +6545,7 @@
       "monsterapi": "monsterapi.ai मा API कुञ्जी प्राप्त गर्नुहोस्",
       "moonshot": "Kimi लाई API कुञ्जीसँग जडान गर्नुहोस्।",
       "morph": "निःशुल्क तह: 250K क्रेडिट/महिना, $0",
+      "apmix": "apmix.ai/dashboard बाट API किसहित Apmix जोड्नुहोस् — एउटा सदस्यता, धेरै मोडेलहरू।",
       "nanogpt": "NanoGPT लाई API कुञ्जीसँग जडान गर्नुहोस्।",
       "nebius": "API परीक्षणका लागि साइनअप गर्दा ~$1 परीक्षण क्रेडिट",
       "nlpcloud": "NLP Cloud ले OpenAI chat/completions को सट्टा स्वामित्वयुक्त च्याटबट API प्रयोग गर्छ। OmniRoute ले OpenAI सन्देशहरूलाई input/context/history मा अनुकूलित गर्छ र समर्थित च्याटबट मोडेलहरूको स्थानीय क्याटलग उपलब्ध गराउँछ।",
@@ -6641,8 +6642,7 @@
       "kiro": "निःशुल्क तह: 50 क्रेडिट/महिना (~25K–100K टोकन)। ⚠️ Kiro ToS ले तेस्रो-पक्ष प्रोक्सी/हार्नेसको प्रयोग निषेध गर्छ।",
       "codex": "विद्यमान OAuth प्रवाहमार्फत OpenAI Codex जडान गर्नुहोस्।",
       "qwen": "विद्यमान OAuth प्रवाहमार्फत Qwen Code जडान गर्नुहोस्।",
-      "github-models": "github.com/settings/tokens मा 'models: read' स्कोपसहित GitHub PAT सिर्जना गर्नुहोस्",
-      "apmix": "apmix.ai/dashboard बाट API किसहित Apmix जोड्नुहोस् — एउटा सदस्यता, धेरै मोडेलहरू।"
+      "github-models": "github.com/settings/tokens मा 'models: read' स्कोपसहित GitHub PAT सिर्जना गर्नुहोस्"
     },
     "passthroughModelsDescription": "{provider} ले प्रदायक-मूल मोडेल ID हरू स्वीकार गर्छ। /models बाट आयात गर्नुहोस् वा राउटिङका लागि अनुकूलन ID हरू थप्नुहोस्।",
     "bedrockModelsDescription": "Amazon Bedrock मोडेलहरू AWS क्षेत्रअनुसार सीमित हुन्छन्। /models बाट आयात गर्नुहोस् वा चयन गरिएको क्षेत्रमा सक्षम गरिएका Bedrock मोडेल ID हरू थप्नुहोस्।",
@@ -7702,6 +7702,7 @@
     "configured": "कन्फिगर गरिएको",
     "none": "कुनै पनि छैन",
     "modelOverrideValuePlaceholder": "सङ्ख्यात्मक मान",
+    "modelOverrideKey": "ओभरराइड कुञ्जी",
     "modelOverrideReasoningEffortsPlaceholder": "अङ्ग्रेजी अल्पविरामद्वारा छुट्याइएको, जस्तै low, medium, high",
     "addKeyValue": "कुञ्जी र मान थप्नुहोस्",
     "noModelOverrides": "यस मोडेलका लागि कुनै ओभरराइड कन्फिगर गरिएको छैन।",
@@ -8945,8 +8946,7 @@
       "statsTitle": "पुनः सुरु भएदेखिका पहिचानहरू",
       "statsEmpty": "अहिलेसम्म कुनै पहिचान छैन।",
       "statsRequest": "अनुरोधहरू"
-    },
-    "modelOverrideKey": "ओभरराइड कुञ्जी"
+    }
   },
   "contextRtk": {
     "title": "RTK इन्जिन",
@@ -11453,6 +11453,7 @@
     "tableHealth": "स्वास्थ्य (24h)",
     "tableUsage": "प्रयोग",
     "tableActions": "कार्यहरू",
+    "moreActions": "थप कार्यहरू",
     "test": "परीक्षण गर्नुहोस्",
     "edit": "सम्पादन गर्नुहोस्",
     "delete": "मेटाउनुहोस्",
@@ -11610,8 +11611,7 @@
     "notMeasured": "मापन गरिएको छैन",
     "upstream4xx": "{count} अपस्ट्रीम क्लाइन्ट त्रुटिहरू",
     "upstream5xx": "{count} अपस्ट्रीम सर्भर त्रुटिहरू",
-    "uniformEgressLine": "{provider} मा {exits} एक्जिटहरूमध्ये {affected} वटा सँगै असफल (पछिल्लो {hours}h) — एक्जिट समस्या होइन",
-    "moreActions": "थप कार्यहरू"
+    "uniformEgressLine": "{provider} मा {exits} एक्जिटहरूमध्ये {affected} वटा सँगै असफल (पछिल्लो {hours}h) — एक्जिट समस्या होइन"
   },
   "playground": {
     "title": "मोडेल प्लेग्राउन्ड",
@@ -13858,6 +13858,7 @@
     "latency": "विलम्बता",
     "quota": "कोटा",
     "rangeWindow": "{range} अवधि",
+    "timeRange": "समयावधि",
     "runtimeHealthBlend": "रनटाइम/स्वास्थ्य मिश्रण",
     "averageResponseTime": "औसत प्रतिक्रिया समय",
     "worstQuota": "सबैभन्दा कमजोर कोटा",
@@ -13912,8 +13913,7 @@
     "unknown": "अज्ञात",
     "unknownProvider": "अज्ञात प्रदायक",
     "unknownModel": "अज्ञात मोडेल",
-    "resolvedTargetMetrics": "{requests} अनुरोध · {success} सफल · {latency} · कोटा {quota}",
-    "timeRange": "समयावधि"
+    "resolvedTargetMetrics": "{requests} अनुरोध · {success} सफल · {latency} · कोटा {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD प्रयोग कोटा",

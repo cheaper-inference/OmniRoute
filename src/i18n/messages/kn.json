@@ -25,8 +25,10 @@
     "confirm": "ನಿಮಗೆ ಖಚಿತವೇ?",
     "refresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
     "close": "ಮುಚ್ಚಿ",
+    "dialogTitleFallback": "ಸಂವಾದ ಪೆಟ್ಟಿಗೆ",
     "previousPage": "ಹಿಂದಿನ ಪುಟ",
     "nextPage": "ಮುಂದಿನ ಪುಟ",
+    "pagination": "ಪುಟ ವಿನ್ಯಾಸ",
     "capsLockOn": "Caps Lock ಆನ್ ಆಗಿದೆ",
     "dismissNotification": "ಅಧಿಸೂಚನೆಯನ್ನು ವಜಾಗೊಳಿಸಿ",
     "toggleColumns": "ಕಾಲಮ್ಗಳನ್ನು ಟಾಗಲ್ ಮಾಡಿ",
@@ -182,6 +184,7 @@
     "combos": "ಸಂಯೋಜನೆಗಳು",
     "noModelsFound": "ಯಾವುದೇ ಮಾದರಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
     "clear": "ತೆರವುಗೊಳಿಸಿ",
+    "clearFilters": "ಫಿಲ್ಟರ್ಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ",
     "done": "ಮುಗಿದಿದೆ",
     "selectAll": "ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ",
     "unselectAll": "ಎಲ್ಲದರ ಆಯ್ಕೆಯನ್ನು ರದ್ದುಮಾಡಿ",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "ಮುನ್ನೋಟ",
     "batchFilePreviewTruncated": "ಮೊದಲ {shown} ಸಾಲುಗಳನ್ನು ತೋರಿಸುತ್ತಿದೆ ({total} ಒಟ್ಟು ಸಾಲುಗಳು)",
     "batchFileDownloadFull": "ಸಂಪೂರ್ಣ ಫೈಲ್ ಡೌನ್ಲೋಡ್ ಮಾಡಿ",
-    "dialogTitleFallback": "ಸಂವಾದ ಪೆಟ್ಟಿಗೆ",
-    "pagination": "ಪುಟ ವಿನ್ಯಾಸ",
-    "clearFilters": "ಫಿಲ್ಟರ್ಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ",
     "tokensPageTitle": "ಟೋಕನ್ಗಳು",
     "tokensPageDescription": "API ಕೀಗಳ ನಡುವೆ ಟೋಕನ್ಗಳನ್ನು ಕಳುಹಿಸಿ, ಆಹ್ವಾನ ಕೋಡ್ಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ ಮತ್ತು ಸಮುದಾಯ ಸರ್ವರ್ಗಳನ್ನು ಸಂಪರ್ಕಿಸಿ.",
     "tokensServerUrlLabel": "ಸರ್ವರ್ URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "ತ್ವರಿತ ನ್ಯಾವಿಗೇಶನ್",
     "quickNavigationTitle": "ತ್ವರಿತ ನ್ಯಾವಿಗೇಶನ್ (⌘K / Ctrl+K)",
     "openQuickNavigation": "ತ್ವರಿತ ನ್ಯಾವಿಗೇಶನ್ ತೆರೆಯಿರಿ",
+    "openMenu": "ಮೆನು ತೆರೆಯಿರಿ",
+    "products": "Keak ಉತ್ಪನ್ನಗಳು",
     "switchToLightMode": "ಲೈಟ್ ಮೋಡ್ಗೆ ಬದಲಾಯಿಸಿ",
     "switchToDarkMode": "ಡಾರ್ಕ್ ಮೋಡ್ಗೆ ಬದಲಾಯಿಸಿ",
     "language": "ಭಾಷೆ",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "ಸುಧಾರಿತ ಪೇಲೋಡ್ ನಿಯಮಗಳು, ವಿನಂತಿ ಮಿತಿಗಳು, ಮತ್ತು ಪ್ರಾಕ್ಸಿ API ಸೆಟ್ಟಿಂಗ್ಗಳು",
     "mitmProxyDescription": "ಟ್ರಾಫಿಕ್ ಪರಿಶೀಲನೆ ಮತ್ತು ಡೀಬಗ್ಗಿಂಗ್ಗಾಗಿ MITM ಪ್ರಾಕ್ಸಿ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
     "oneProxyDescription": "ಸುಧಾರಿತ ಪ್ರಾಕ್ಸಿ ಚೈನಿಂಗ್ಗಾಗಿ 1Proxy ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
-    "omniSkillsDescription": "ಸ್ವಯಂಚಾಲಿತ ಪ್ರಾಂಪ್ಟ್ ಮತ್ತು ಟೂಲ್ ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆಗಾಗಿ ಸ್ಯಾಂಡ್ಬಾಕ್ಸ್ ಕೌಶಲ್ಯಗಳನ್ನು ಸ್ಥಾಪಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ",
-    "openMenu": "ಮೆನು ತೆರೆಯಿರಿ",
-    "products": "Keak ಉತ್ಪನ್ನಗಳು"
+    "omniSkillsDescription": "ಸ್ವಯಂಚಾಲಿತ ಪ್ರಾಂಪ್ಟ್ ಮತ್ತು ಟೂಲ್ ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆಗಾಗಿ ಸ್ಯಾಂಡ್ಬಾಕ್ಸ್ ಕೌಶಲ್ಯಗಳನ್ನು ಸ್ಥಾಪಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"
   },
   "cloudSyncStatus": {
     "synced": "ಸಿಂಕ್ ಆಗಿದೆ",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "ಕಾಂಬೊ → {name}"
   },
   "combos": {
+    "title": "ಸಂಯೋಜನೆಗಳು",
+    "description": "ತೂಕಾಧಾರಿತ ರೌಟಿಂಗ್ ಮತ್ತು ಫಾಲ್ಬ್ಯಾಕ್ ಬೆಂಬಲದೊಂದಿಗೆ ಮಾದರಿ ಸಂಯೋಜನೆಗಳನ್ನು ರಚಿಸಿ",
+    "autoCatalogTitle": "ಸ್ವಯಂಚಾಲಿತ ರೌಟಿಂಗ್ ಕ್ಯಾಟಲಾಗ್",
     "autoTosLoadError": "ಸೇವಾ ನಿಯಮಗಳ ನೀತಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಬದಲಾಯಿಸುವ ಮೊದಲು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "autoTosSaveError": "ಸೇವಾ ನಿಯಮಗಳ ನೀತಿಯನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಹಿಂದಿನ ಸೆಟ್ಟಿಂಗ್ ಇನ್ನೂ ತೋರಿಸಲಾಗುತ್ತಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "autoTosIncludeLabel": "ToS: avoid ಎಂದು ಗುರುತಿಸಲಾದ ಪೂರೈಕೆದಾರರನ್ನು auto ದಲ್ಲಿ ಸೇರಿಸಿ",
     "autoTosDescription": "ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ. ಇದು ಒಂದು ಖಾತೆಗೆ ಮಾತ್ರವಲ್ಲ, ಎಲ್ಲಾ auto ಸಂಯೋಜನೆಗಳಿಗೂ ಅನ್ವಯಿಸುತ್ತದೆ. ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸುವುದರಿಂದ ಈ ಆಯ್ಕೆ ಆನ್ ಆಗುವುದಿಲ್ಲ.",
-    "title": "ಸಂಯೋಜನೆಗಳು",
-    "description": "ತೂಕಾಧಾರಿತ ರೌಟಿಂಗ್ ಮತ್ತು ಫಾಲ್ಬ್ಯಾಕ್ ಬೆಂಬಲದೊಂದಿಗೆ ಮಾದರಿ ಸಂಯೋಜನೆಗಳನ್ನು ರಚಿಸಿ",
-    "autoCatalogTitle": "ಸ್ವಯಂಚಾಲಿತ ರೌಟಿಂಗ್ ಕ್ಯಾಟಲಾಗ್",
     "autoCatalogTemplateCount": "{count} ಟೆಂಪ್ಲೇಟ್ಗಳು",
     "autoCatalogDescription": "ಸಂಪರ್ಕಿತ ಪ್ರೊವೈಡರ್ಗಳಿಂದ ಡೈನಾಮಿಕ್ ಆಗಿ ನಿರ್ಧರಿಸಲಾಗುವ ಬಿಲ್ಟ್-ಇನ್ auto/* ಸಂಯೋಜನೆಗಳು. ಈ IDs ಗಳಲ್ಲಿ ಯಾವುದನ್ನಾದರೂ ಮಾದರಿ ಕ್ಷೇತ್ರವಾಗಿ ಬಳಸಿ — ಸೆಟಪ್ ಅಗತ್ಯವಿಲ್ಲ.",
     "autoCatalogExpand": "ಸ್ವಯಂಚಾಲಿತ ರೌಟಿಂಗ್ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ವಿಸ್ತರಿಸಿ",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "ಇನ್ನೂ ಯಾವುದೇ ಕಾಂಬೊಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿಲ್ಲ.",
     "playgroundCreateFirst": "ಮೊದಲು ಒಂದನ್ನು ರಚಿಸಿ",
     "weighted": "ತೂಕದ",
+    "weightPercent": "ತೂಕ (%)",
     "leastUsed": "ಕನಿಷ್ಠ-ಬಳಕೆಯ",
     "costOpt": "ವೆಚ್ಚ-ಆಪ್ಟಿಮೈಸ್ಡ್",
     "strategyGuideTitle": "ಈ ತಂತ್ರವನ್ನು ಹೇಗೆ ಬಳಸುವುದು",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# ಖಾತೆ} other {# ಖಾತೆಗಳು}}",
     "builderGlobalAdded": "ಸೇರಿಸಲಾಗಿದೆ",
     "builderGlobalAdd": "ಸೇರಿಸಿ",
+    "clearSearch": "ಹುಡುಕಾಟವನ್ನು ತೆರವುಗೊಳಿಸಿ",
     "manualModel": "ಹಸ್ತಚಾಲಿತ ಮಾದರಿ",
     "manualModelInvalid": "ಮಾದರಿಯನ್ನು provider/model ಸ್ವರೂಪದಲ್ಲಿ ನಮೂದಿಸಿ.",
     "manualModelUnknownProvider": "ಅಜ್ಞಾತ ಪೂರೈಕೆದಾರ ಪೂರ್ವಪ್ರತ್ಯಯ.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "ಕನಿಷ್ಠ ವಿಷಯದ ಉದ್ದ (ಅಕ್ಷರಗಳು)",
     "responseValidationJsonPaths": "JSON-path ಪರಿಶೀಲನೆಗಳು",
     "responseValidationAddCheck": "+ ಪರಿಶೀಲನೆಯನ್ನು ಸೇರಿಸಿ",
+    "responseValidationRemoveCheck": "ಪರಿಶೀಲನೆಯನ್ನು ತೆಗೆದುಹಾಕಿ",
+    "responseValidationPath": "JSON ಪಥ",
+    "responseValidationCondition": "ಷರತ್ತು",
+    "responseValidationValue": "ನಿರೀಕ್ಷಿತ ಮೌಲ್ಯ",
     "agentFeaturesSystemMessageOverride": "ಸಿಸ್ಟಂ ಸಂದೇಶವನ್ನು ಅತಿಕ್ರಮಿಸಿ",
     "agentFeaturesSystemMessagePlaceholder": "ನೀವು ಪರಿಣತ ಸಹಾಯಕರಾಗಿದ್ದೀರಿ...",
     "agentFeaturesSystemMessageHint": "ಏಜೆಂಟ್ಗಳಿಗಾಗಿ ಸಿಸ್ಟಂ ಸಂದೇಶದ ಅತಿಕ್ರಮಣ",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "ಈ ಟೆಂಪ್ಲೇಟ್ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಪ್ರಸ್ತುತ ಸಂಪರ್ಕಿತ ಪೂರೈಕೆದಾರರು/ಮಾಡೆಲ್ಗಳ ಸ್ನ್ಯಾಪ್ಶಾಟ್ ತೆಗೆದು, ಅದನ್ನು ಸಂಪಾದಿಸಬಹುದಾದ ಕಾಂಬೊ ಆಗಿ ರಚಿಸಲಾಗುತ್ತದೆ.",
     "duplicateAutoComboFailedPrefix": "ಸ್ವಯಂ-ಕಾಂಬೊವನ್ನು ನಕಲಿಸಲು ವಿಫಲವಾಗಿದೆ:",
     "duplicateAutoComboUnknownError": "ಅಜ್ಞಾತ ದೋಷ",
-    "duplicateAutoComboTitle": "{name} ನಿಂದ ಸ್ಥಿರ ಕಾಂಬೊವನ್ನು ರಚಿಸಿ",
-    "weightPercent": "ತೂಕ (%)",
-    "clearSearch": "ಹುಡುಕಾಟವನ್ನು ತೆರವುಗೊಳಿಸಿ",
-    "responseValidationRemoveCheck": "ಪರಿಶೀಲನೆಯನ್ನು ತೆಗೆದುಹಾಕಿ",
-    "responseValidationPath": "JSON ಪಥ",
-    "responseValidationCondition": "ಷರತ್ತು",
-    "responseValidationValue": "ನಿರೀಕ್ಷಿತ ಮೌಲ್ಯ"
+    "duplicateAutoComboTitle": "{name} ನಿಂದ ಸ್ಥಿರ ಕಾಂಬೊವನ್ನು ರಚಿಸಿ"
   },
   "costs": {
     "title": "ವೆಚ್ಚಗಳು",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API ಸ್ವರೂಪದ ಲೇಬಲ್",
     "apiKeyOptionalHint": "ನಿಮ್ಮ ಸ್ಥಳೀಯ ಸೆಟಪ್ ಅಥವಾ ಪೂರೈಕೆದಾರರಿಗೆ ದೃಢೀಕರಣದ ಅಗತ್ಯವಿಲ್ಲದಿದ್ದರೆ ಖಾಲಿ ಬಿಡಿ.",
     "apiKeyOptionalLabel": "API ಕೀ (ಐಚ್ಛಿಕ)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "ಚೀನಾದ ಮುಖ್ಯ ಭೂಭಾಗ",
+    "apiRegionHint": "API ಪ್ರವೇಶ ಮತ್ತು ಕೋಟಾ ಟ್ರ್ಯಾಕಿಂಗ್ಗಾಗಿ ಬಳಸಲಾಗುವ ಎಂಡ್ಪಾಯಿಂಟ್ ಪ್ರದೇಶವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    "apiRegionInternational": "ಅಂತರರಾಷ್ಟ್ರೀಯ",
+    "apiRegionLabel": "API ಪ್ರದೇಶ",
     "apikey": "API ಕೀ",
     "audio": "ಆಡಿಯೊ",
     "audioProvidersHeading": "ಆಡಿಯೊ ಪೂರೈಕೆದಾರರ ಶೀರ್ಷಿಕೆ",
@@ -6545,6 +6545,7 @@
       "monsterapi": "monsterapi.ai ನಲ್ಲಿ API ಕೀ ಪಡೆಯಿರಿ.",
       "moonshot": "API ಕೀ ಬಳಸಿ Kimi ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "morph": "ಉಚಿತ ಹಂತ: ತಿಂಗಳಿಗೆ 250K ಕ್ರೆಡಿಟ್ಗಳು, $0",
+      "apmix": "apmix.ai/dashboard ನಿಂದ API ಕೀ ಮೂಲಕ Apmix ಅನ್ನು ಸಂಪರ್ಕಿಸಿ — ಒಂದು ಚಂದಾದಾರಿಕೆ, ಹಲವು ಮಾದರಿಗಳು.",
       "nanogpt": "API ಕೀ ಬಳಸಿ NanoGPT ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "nebius": "API ಪರೀಕ್ಷೆಗಾಗಿ ಸೈನ್ ಅಪ್ ಮಾಡಿದಾಗ ಸುಮಾರು $1 ಮೌಲ್ಯದ ಪ್ರಾಯೋಗಿಕ ಕ್ರೆಡಿಟ್ಗಳು",
       "nlpcloud": "NLP Cloud, OpenAI chat/completions ಬದಲಿಗೆ ಸ್ವಾಮ್ಯದ ಚಾಟ್ಬಾಟ್ API ಅನ್ನು ಬಳಸುತ್ತದೆ. OmniRoute, OpenAI ಸಂದೇಶಗಳನ್ನು ಇನ್ಪುಟ್/ಸಂದರ್ಭ/ಇತಿಹಾಸಕ್ಕೆ ಹೊಂದಿಸುತ್ತದೆ ಮತ್ತು ಬೆಂಬಲಿತ ಚಾಟ್ಬಾಟ್ ಮಾದರಿಗಳ ಸ್ಥಳೀಯ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಒದಗಿಸುತ್ತದೆ.",
@@ -6641,8 +6642,7 @@
       "kiro": "ಉಚಿತ ಹಂತ: ತಿಂಗಳಿಗೆ 50 ಕ್ರೆಡಿಟ್ಗಳು (~25K–100K ಟೋಕನ್ಗಳು). ⚠️ Kiro ToS ಮೂರನೇ-ಪಕ್ಷದ proxy/harness ಬಳಕೆಯನ್ನು ನಿಷೇಧಿಸುತ್ತದೆ.",
       "codex": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ OpenAI Codex ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "qwen": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ Qwen Code ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
-      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ",
-      "apmix": "apmix.ai/dashboard ನಿಂದ API ಕೀ ಮೂಲಕ Apmix ಅನ್ನು ಸಂಪರ್ಕಿಸಿ — ಒಂದು ಚಂದಾದಾರಿಕೆ, ಹಲವು ಮಾದರಿಗಳು."
+      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ"
     },
     "passthroughModelsDescription": "{provider} ಪೂರೈಕೆದಾರ-ಸ್ಥಳೀಯ ಮಾಡೆಲ್ IDಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ರೂಟಿಂಗ್ಗಾಗಿ ಕಸ್ಟಮ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
     "bedrockModelsDescription": "Amazon Bedrock ಮಾಡೆಲ್ಗಳು AWS ಪ್ರದೇಶದ ವ್ಯಾಪ್ತಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತವೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿದ ಪ್ರದೇಶದಲ್ಲಿ ಸಕ್ರಿಯಗೊಳಿಸಲಾದ Bedrock ಮಾಡೆಲ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
@@ -7702,6 +7702,7 @@
     "configured": "ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ",
     "none": "ಯಾವುದೂ ಇಲ್ಲ",
     "modelOverrideValuePlaceholder": "ಸಂಖ್ಯಾತ್ಮಕ ಮೌಲ್ಯ",
+    "modelOverrideKey": "ಓವರ್ರೈಡ್ ಕೀ",
     "modelOverrideReasoningEffortsPlaceholder": "ಇಂಗ್ಲಿಷ್ನಲ್ಲಿ ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಡಿಸಿದ ಮೌಲ್ಯಗಳು, ಉದಾ. low, medium, high",
     "addKeyValue": "ಕೀ-ಮೌಲ್ಯವನ್ನು ಸೇರಿಸಿ",
     "noModelOverrides": "ಈ ಮಾದರಿಗೆ ಯಾವುದೇ ಓವರ್ರೈಡ್ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿಲ್ಲ.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "ಮರುಪ್ರಾರಂಭದ ನಂತರದ ಪತ್ತೆಗಳು",
       "statsEmpty": "ಇನ್ನೂ ಯಾವುದೇ ಪತ್ತೆ ಇಲ್ಲ.",
       "statsRequest": "ವಿನಂತಿಗಳು"
-    },
-    "modelOverrideKey": "ಓವರ್ರೈಡ್ ಕೀ"
+    }
   },
   "contextRtk": {
     "title": "RTK ಎಂಜಿನ್",
@@ -11453,6 +11453,7 @@
     "tableHealth": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ (24h)",
     "tableUsage": "ಬಳಕೆ",
     "tableActions": "ಕ್ರಿಯೆಗಳು",
+    "moreActions": "ಹೆಚ್ಚಿನ ಕ್ರಿಯೆಗಳು",
     "test": "ಪರೀಕ್ಷಿಸಿ",
     "edit": "ತಿದ್ದಿ",
     "delete": "ಅಳಿಸಿ",
@@ -11610,8 +11611,7 @@
     "notMeasured": "ಅಳೆಯಲಾಗಿಲ್ಲ",
     "upstream4xx": "{count} ಅಪ್‌ಸ್ಟ್ರೀಮ್ ಕ್ಲೈಂಟ್ ದೋಷಗಳು",
     "upstream5xx": "{count} ಅಪ್‌ಸ್ಟ್ರೀಮ್ ಸರ್ವರ್ ದೋಷಗಳು",
-    "uniformEgressLine": "{provider} ನಲ್ಲಿ {exits} ಎಕ್ಸಿಟ್‌ಗಳ ಪೈಕಿ {affected} ಒಟ್ಟಿಗೆ ವಿಫಲವಾಗಿವೆ (ಕಳೆದ {hours}ಗಂ) — ಎಕ್ಸಿಟ್ ಸಮಸ್ಯೆಯಲ್ಲ",
-    "moreActions": "ಹೆಚ್ಚಿನ ಕ್ರಿಯೆಗಳು"
+    "uniformEgressLine": "{provider} ನಲ್ಲಿ {exits} ಎಕ್ಸಿಟ್‌ಗಳ ಪೈಕಿ {affected} ಒಟ್ಟಿಗೆ ವಿಫಲವಾಗಿವೆ (ಕಳೆದ {hours}ಗಂ) — ಎಕ್ಸಿಟ್ ಸಮಸ್ಯೆಯಲ್ಲ"
   },
   "playground": {
     "title": "ಮಾದರಿ ಪ್ರಯೋಗಾಂಗಣ",
@@ -13858,6 +13858,7 @@
     "latency": "ಸುಪ್ತತೆ",
     "quota": "ಕೋಟಾ",
     "rangeWindow": "{range} ಅವಧಿ",
+    "timeRange": "ಸಮಯದ ವ್ಯಾಪ್ತಿ",
     "runtimeHealthBlend": "ರನ್ಟೈಮ್/ಆರೋಗ್ಯ ಸ್ಥಿತಿಯ ಸಂಯೋಜನೆ",
     "averageResponseTime": "ಸರಾಸರಿ ಪ್ರತಿಕ್ರಿಯೆ ಸಮಯ",
     "worstQuota": "ಅತ್ಯಂತ ಕಡಿಮೆ ಕೋಟಾ",
@@ -13912,8 +13913,7 @@
     "unknown": "ತಿಳಿದಿಲ್ಲ",
     "unknownProvider": "ತಿಳಿಯದ ಪೂರೈಕೆದಾರ",
     "unknownModel": "ತಿಳಿಯದ ಮಾದರಿ",
-    "resolvedTargetMetrics": "{requests} ವಿನಂತಿಗಳು · {success} ಯಶಸ್ಸು · {latency} · ಕೋಟಾ {quota}",
-    "timeRange": "ಸಮಯದ ವ್ಯಾಪ್ತಿ"
+    "resolvedTargetMetrics": "{requests} ವಿನಂತಿಗಳು · {success} ಯಶಸ್ಸು · {latency} · ಕೋಟಾ {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD ಬಳಕೆ ಕೋಟಾ",

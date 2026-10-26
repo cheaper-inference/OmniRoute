@@ -25,8 +25,10 @@
     "confirm": "დარწმუნებული ხართ?",
     "refresh": "განახლება",
     "close": "დახურვა",
+    "dialogTitleFallback": "დიალოგი",
     "previousPage": "წინა გვერდი",
     "nextPage": "შემდეგი გვერდი",
+    "pagination": "გვერდებად დაყოფა",
     "capsLockOn": "Caps Lock ჩართულია",
     "dismissNotification": "შეტყობინების დახურვა",
     "toggleColumns": "სვეტების ჩართვა/გამორთვა",
@@ -182,6 +184,7 @@
     "combos": "კომბოები",
     "noModelsFound": "მოდელები ვერ მოიძებნა",
     "clear": "გასუფთავება",
+    "clearFilters": "ფილტრების გასუფთავება",
     "done": "მზადაა",
     "selectAll": "ყველას მონიშვნა",
     "unselectAll": "ყველა მონიშვნის გაუქმება",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "წინასწარი ნახვა",
     "batchFilePreviewTruncated": "ნაჩვენებია პირველი {shown} ხაზი (სულ {total} ხაზი)",
     "batchFileDownloadFull": "სრული ფაილის ჩამოტვირთვა",
-    "dialogTitleFallback": "დიალოგი",
-    "pagination": "გვერდებად დაყოფა",
-    "clearFilters": "ფილტრების გასუფთავება",
     "tokensPageTitle": "ტოკენები",
     "tokensPageDescription": "გაგზავნეთ ტოკენები API გასაღებებს შორის, გააზიარეთ მოწვევის კოდები და დააკავშირეთ საზოგადოების სერვერები.",
     "tokensServerUrlLabel": "სერვერის URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "სწრაფი ნავიგაცია",
     "quickNavigationTitle": "სწრაფი ნავიგაცია (⌘K / Ctrl+K)",
     "openQuickNavigation": "სწრაფი ნავიგაციის გახსნა",
+    "openMenu": "მენიუს გახსნა",
+    "products": "Keak-ის პროდუქტები",
     "switchToLightMode": "ღია რეჟიმზე გადართვა",
     "switchToDarkMode": "მუქ რეჟიმზე გადართვა",
     "language": "ენა",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "payload-ის გაფართოებული წესები, მოთხოვნების ლიმიტები და პროქსი API-ის პარამეტრები",
     "mitmProxyDescription": "ტრაფიკის შემოწმებისა და გამართვისთვის MITM პროქსის პარამეტრების კონფიგურაცია",
     "oneProxyDescription": "პროქსების გაფართოებული ჯაჭვური დაკავშირებისთვის 1Proxy-ის პარამეტრების კონფიგურაცია",
-    "omniSkillsDescription": "პრომპტებისა და ინსტრუმენტების ავტომატიზებული შესრულებისთვის sandbox-ის უნარების დაყენება და მართვა",
-    "openMenu": "მენიუს გახსნა",
-    "products": "Keak-ის პროდუქტები"
+    "omniSkillsDescription": "პრომპტებისა და ინსტრუმენტების ავტომატიზებული შესრულებისთვის sandbox-ის უნარების დაყენება და მართვა"
   },
   "cloudSyncStatus": {
     "synced": "სინქრონიზებულია",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "კომბინაცია → {name}"
   },
   "combos": {
+    "title": "კომბინაციები",
+    "description": "შექმენით მოდელების კომბინაციები შეწონილი მარშრუტიზაციითა და სარეზერვო ვარიანტის მხარდაჭერით",
+    "autoCatalogTitle": "ავტომარშრუტიზაციის კატალოგი",
     "autoTosLoadError": "მომსახურების პირობების პოლიტიკის ჩატვირთვა ვერ მოხერხდა. შეცვლამდე ხელახლა სცადეთ.",
     "autoTosSaveError": "მომსახურების პირობების პოლიტიკის შენახვა ვერ მოხერხდა. კვლავ წინა პარამეტრი ჩანს. ხელახლა სცადეთ.",
     "autoTosIncludeLabel": "auto-ში ToS: avoid ნიშნით მონიშნული პროვაიდერების ჩართვა",
     "autoTosDescription": "ნაგულისხმევად გამორთულია. ვრცელდება ყველა auto კომბინაციაზე და არა მხოლოდ ერთ ანგარიშზე. პროვაიდერის დაკავშირება ამ პარამეტრს არ რთავს.",
-    "title": "კომბინაციები",
-    "description": "შექმენით მოდელების კომბინაციები შეწონილი მარშრუტიზაციითა და სარეზერვო ვარიანტის მხარდაჭერით",
-    "autoCatalogTitle": "ავტომარშრუტიზაციის კატალოგი",
     "autoCatalogTemplateCount": "{count} შაბლონი",
     "autoCatalogDescription": "ჩაშენებული auto/* კომბინაციები დინამიკურად განისაზღვრება დაკავშირებული პროვაიდერების მიხედვით. გამოიყენეთ ამ ID-თაგან ნებისმიერი მოდელის ველში — კონფიგურაცია საჭირო არ არის.",
     "autoCatalogExpand": "ავტომარშრუტიზაციის კატალოგის გაშლა",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "კომბოები ჯერ არ არის კონფიგურირებული.",
     "playgroundCreateFirst": "ჯერ შექმენით ერთი",
     "weighted": "შეწონილი",
+    "weightPercent": "წონა (%)",
     "leastUsed": "ყველაზე ნაკლებად გამოყენებული",
     "costOpt": "ღირებულებით ოპტიმიზებული",
     "strategyGuideTitle": "როგორ გამოიყენოთ ეს სტრატეგია",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# ანგარიში} other {# ანგარიში}}",
     "builderGlobalAdded": "დამატებულია",
     "builderGlobalAdd": "დამატება",
+    "clearSearch": "ძიების გასუფთავება",
     "manualModel": "მოდელის ხელით დამატება",
     "manualModelInvalid": "შეიყვანეთ მოდელი ფორმატით provider/model.",
     "manualModelUnknownProvider": "პროვაიდერის უცნობი პრეფიქსი.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "კონტენტის მინიმალური სიგრძე (სიმბოლოები)",
     "responseValidationJsonPaths": "JSON-path-ის შემოწმებები",
     "responseValidationAddCheck": "+ შემოწმების დამატება",
+    "responseValidationRemoveCheck": "შემოწმების წაშლა",
+    "responseValidationPath": "JSON-ის გზა",
+    "responseValidationCondition": "პირობა",
+    "responseValidationValue": "მოსალოდნელი მნიშვნელობა",
     "agentFeaturesSystemMessageOverride": "სისტემური შეტყობინების ჩანაცვლება",
     "agentFeaturesSystemMessagePlaceholder": "თქვენ ხართ ექსპერტი ასისტენტი...",
     "agentFeaturesSystemMessageHint": "აგენტებისთვის სისტემური შეტყობინების ჩანაცვლება",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "ამჟამად დაკავშირებული პროვაიდერებისა და მოდელების, რომლებიც ამ შაბლონს შეესაბამება, მიმდინარე მდგომარეობა დაფიქსირდება რედაქტირებად კომბოდ.",
     "duplicateAutoComboFailedPrefix": "ავტოკომბოს დუბლირება ვერ მოხერხდა:",
     "duplicateAutoComboUnknownError": "უცნობი შეცდომა",
-    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან",
-    "weightPercent": "წონა (%)",
-    "clearSearch": "ძიების გასუფთავება",
-    "responseValidationRemoveCheck": "შემოწმების წაშლა",
-    "responseValidationPath": "JSON-ის გზა",
-    "responseValidationCondition": "პირობა",
-    "responseValidationValue": "მოსალოდნელი მნიშვნელობა"
+    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან"
   },
   "costs": {
     "title": "ხარჯები",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API ფორმატის ეტიკეტი",
     "apiKeyOptionalHint": "დატოვეთ ცარიელი, თუ თქვენი ლოკალური კონფიგურაცია ან პროვაიდერი ავთენტიფიკაციას არ მოითხოვს.",
     "apiKeyOptionalLabel": "API გასაღები (არასავალდებულო)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "კონტინენტური ჩინეთი",
+    "apiRegionHint": "აირჩიეთ endpoint-ის რეგიონი, რომელიც გამოიყენება API წვდომისა და კვოტის თვალყურის დევნებისთვის.",
+    "apiRegionInternational": "საერთაშორისო",
+    "apiRegionLabel": "API რეგიონი",
     "apikey": "API გასაღები",
     "audio": "აუდიო",
     "audioProvidersHeading": "აუდიო პროვაიდერების სათაური",
@@ -6545,6 +6545,7 @@
       "monsterapi": "მიიღეთ API გასაღები მისამართზე monsterapi.ai",
       "moonshot": "დააკავშირეთ Kimi API გასაღებით.",
       "morph": "უფასო დონე: 250K კრედიტი თვეში, $0",
+      "apmix": "დააკავშირეთ Apmix API გასაღებით apmix.ai/dashboard-დან — ერთი გამოწერა, მრავალი მოდელი.",
       "nanogpt": "დააკავშირეთ NanoGPT API გასაღებით.",
       "nebius": "რეგისტრაციისას დაახლოებით $1-ის საცდელი კრედიტი API-ის ტესტირებისთვის",
       "nlpcloud": "NLP Cloud OpenAI-ის chat/completions-ის ნაცვლად ჩატბოტის საკუთარ API-ს იყენებს. OmniRoute OpenAI-ის შეტყობინებებს input/context/history ფორმატზე ადაპტირებს და მხარდაჭერილი ჩატბოტის მოდელების ლოკალურ კატალოგს გვთავაზობს.",
@@ -6641,8 +6642,7 @@
       "kiro": "უფასო ტარიფი: 50 კრედიტი/თვე (~25K–100K ტოკენი). ⚠️ Kiro-ს მომსახურების პირობები კრძალავს მესამე მხარის პროქსის/ჰარნესის გამოყენებას.",
       "codex": "დააკავშირეთ OpenAI Codex არსებული OAuth პროცესით.",
       "qwen": "დააკავშირეთ Qwen Code არსებული OAuth პროცესით.",
-      "github-models": "შექმენით GitHub PAT 'models: read' წვდომის სფეროთი მისამართზე github.com/settings/tokens",
-      "apmix": "დააკავშირეთ Apmix API გასაღებით apmix.ai/dashboard-დან — ერთი გამოწერა, მრავალი მოდელი."
+      "github-models": "შექმენით GitHub PAT 'models: read' წვდომის სფეროთი მისამართზე github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} იღებს პროვაიდერის ნატიურ მოდელის ID-ებს. შემოიტანეთ ისინი /models განყოფილებიდან ან მარშრუტიზაციისთვის დაამატეთ მორგებული ID-ები.",
     "bedrockModelsDescription": "Amazon Bedrock-ის მოდელები შეზღუდულია AWS-ის რეგიონის მიხედვით. შემოიტანეთ ისინი /models განყოფილებიდან ან დაამატეთ არჩეულ რეგიონში ჩართული Bedrock მოდელების ID-ები.",
@@ -7702,6 +7702,7 @@
     "configured": "კონფიგურირებულია",
     "none": "არცერთი",
     "modelOverrideValuePlaceholder": "რიცხვითი მნიშვნელობა",
+    "modelOverrideKey": "გადაფარვის გასაღები",
     "modelOverrideReasoningEffortsPlaceholder": "ინგლისურად, მძიმით გამოყოფილი, მაგ. low, medium, high",
     "addKeyValue": "გასაღები-მნიშვნელობის დამატება",
     "noModelOverrides": "ამ მოდელისთვის გადაფარვები კონფიგურირებული არ არის.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "აღმოჩენები გადატვირთვის შემდეგ",
       "statsEmpty": "აღმოჩენები ჯერ არ არის.",
       "statsRequest": "მოთხოვნები"
-    },
-    "modelOverrideKey": "გადაფარვის გასაღები"
+    }
   },
   "contextRtk": {
     "title": "RTK ძრავა",
@@ -11453,6 +11453,7 @@
     "tableHealth": "მდგომარეობა (24 სთ)",
     "tableUsage": "გამოყენება",
     "tableActions": "მოქმედებები",
+    "moreActions": "მეტი მოქმედება",
     "test": "ტესტირება",
     "edit": "რედაქტირება",
     "delete": "წაშლა",
@@ -11610,8 +11611,7 @@
     "notMeasured": "არ არის გაზომილი",
     "upstream4xx": "{count} ზედა კლიენტის შეცდომები",
     "upstream5xx": "{count} ზემოდან მომავალი სერვერის შეცდომები",
-    "uniformEgressLine": "{affected} {exits} ეგზიტიდან {provider}-ზე ერთად ვარდება (ბოლო {hours}სთ) — ეს ეგზიტის პრობლემა არ არის",
-    "moreActions": "მეტი მოქმედება"
+    "uniformEgressLine": "{affected} {exits} ეგზიტიდან {provider}-ზე ერთად ვარდება (ბოლო {hours}სთ) — ეს ეგზიტის პრობლემა არ არის"
   },
   "playground": {
     "title": "მოდელების სატესტო გარემო",
@@ -13858,6 +13858,7 @@
     "latency": "დაყოვნება",
     "quota": "კვოტა",
     "rangeWindow": "{range} პერიოდი",
+    "timeRange": "დროის დიაპაზონი",
     "runtimeHealthBlend": "გაშვებისა და მდგომარეობის კომბინაცია",
     "averageResponseTime": "პასუხის საშუალო დრო",
     "worstQuota": "ყველაზე ცუდი კვოტა",
@@ -13912,8 +13913,7 @@
     "unknown": "უცნობი",
     "unknownProvider": "უცნობი პროვაიდერი",
     "unknownModel": "უცნობი მოდელი",
-    "resolvedTargetMetrics": "{requests} მოთხოვნა · {success} წარმატებული · {latency} · კვოტა {quota}",
-    "timeRange": "დროის დიაპაზონი"
+    "resolvedTargetMetrics": "{requests} მოთხოვნა · {success} წარმატებული · {latency} · კვოტა {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-ის გამოყენების კვოტა",

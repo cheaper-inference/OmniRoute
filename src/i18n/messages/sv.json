@@ -25,8 +25,10 @@
     "confirm": "Är du säker?",
     "refresh": "Uppdatera",
     "close": "Stäng",
+    "dialogTitleFallback": "Dialogruta",
     "previousPage": "Föregående sida",
     "nextPage": "Nästa sida",
+    "pagination": "Sidnumrering",
     "capsLockOn": "Caps Lock är på",
     "dismissNotification": "Avvisa avisering",
     "toggleColumns": "Växla kolumner",
@@ -182,6 +184,7 @@
     "combos": "Kombinationer",
     "noModelsFound": "Inga modeller hittades",
     "clear": "Rensa",
+    "clearFilters": "Rensa filter",
     "done": "Klar",
     "selectAll": "Markera alla",
     "unselectAll": "Avmarkera alla",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Förhandsgranskning",
     "batchFilePreviewTruncated": "Visar de första {shown} raderna ({total} totalt rader)",
     "batchFileDownloadFull": "Ladda Ner Hela Filen",
-    "dialogTitleFallback": "Dialogruta",
-    "pagination": "Sidnumrering",
-    "clearFilters": "Rensa filter",
     "tokensPageTitle": "Tokens",
     "tokensPageDescription": "Skicka tokens mellan API-nycklar, dela inbjudningskoder och anslut communityservrar.",
     "tokensServerUrlLabel": "Server-URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Snabbnavigering",
     "quickNavigationTitle": "Snabbnavigering (⌘K / Ctrl+K)",
     "openQuickNavigation": "Öppna snabbnavigering",
+    "openMenu": "Öppna meny",
+    "products": "Keak-produkter",
     "switchToLightMode": "Växla till ljust läge",
     "switchToDarkMode": "Växla till mörkt läge",
     "language": "Språk",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Avancerade nyttolastregler, gränser för förfrågningar och inställningar för proxy-API",
     "mitmProxyDescription": "Konfigurera MITM-proxyinställningar för trafikinspektion och felsökning",
     "oneProxyDescription": "Konfigurera 1Proxy-inställningar för avancerad proxykedjning",
-    "omniSkillsDescription": "Installera och hantera sandlådefärdigheter för automatiserad körning av prompter och verktyg",
-    "openMenu": "Öppna meny",
-    "products": "Keak-produkter"
+    "omniSkillsDescription": "Installera och hantera sandlådefärdigheter för automatiserad körning av prompter och verktyg"
   },
   "cloudSyncStatus": {
     "synced": "Synkroniserad",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Kombination → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Inkludera leverantörer märkta ToS: avoid i auto",
-    "autoTosDescription": "Av som standard. Gäller alla auto-kombinationer, inte bara ett konto. Att ansluta en leverantör aktiverar inte det här alternativet.",
-    "autoTosSaveError": "Det gick inte att spara ToS-policyn. Den tidigare inställningen visas fortfarande. Försök igen.",
-    "autoTosLoadError": "Det gick inte att läsa in ToS-policyn. Försök igen innan du ändrar den.",
     "title": "Kombinationer",
     "description": "Skapa modellkombinationer med viktad routing och reservstöd",
     "autoCatalogTitle": "Katalog för automatisk routing",
+    "autoTosLoadError": "Det gick inte att läsa in ToS-policyn. Försök igen innan du ändrar den.",
+    "autoTosSaveError": "Det gick inte att spara ToS-policyn. Den tidigare inställningen visas fortfarande. Försök igen.",
+    "autoTosIncludeLabel": "Inkludera leverantörer märkta ToS: avoid i auto",
+    "autoTosDescription": "Av som standard. Gäller alla auto-kombinationer, inte bara ett konto. Att ansluta en leverantör aktiverar inte det här alternativet.",
     "autoCatalogTemplateCount": "{count} mallar",
     "autoCatalogDescription": "Inbyggda auto/*-kombinationer lösts dynamiskt från anslutna leverantörer. Använd något av dessa ID:n som modellfält – ingen installation behövs.",
     "autoCatalogExpand": "Utöka katalogen för automatisk routing",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Inga kombor har konfigurerats ännu.",
     "playgroundCreateFirst": "Skapa en först",
     "weighted": "Viktad",
+    "weightPercent": "Vikt (%)",
     "leastUsed": "Minst använda",
     "costOpt": "Kostnadsoptimering",
     "strategyGuideTitle": "Så använder du den här strategin",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# konto} other {# konton}}",
     "builderGlobalAdded": "Tillagd",
     "builderGlobalAdd": "Lägg till",
+    "clearSearch": "Rensa sökning",
     "manualModel": "Manuell modell",
     "manualModelInvalid": "Ange en modell som provider/model.",
     "manualModelUnknownProvider": "Okänt leverantörsprefix.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Minsta innehållslängd (tecken)",
     "responseValidationJsonPaths": "JSON-path-kontroller",
     "responseValidationAddCheck": "+ Lägg till kontroll",
+    "responseValidationRemoveCheck": "Ta bort kontroll",
+    "responseValidationPath": "JSON-sökväg",
+    "responseValidationCondition": "Villkor",
+    "responseValidationValue": "Förväntat värde",
     "agentFeaturesSystemMessageOverride": "Åsidosätt systemmeddelande",
     "agentFeaturesSystemMessagePlaceholder": "Du är en sakkunnig assistent...",
     "agentFeaturesSystemMessageHint": "Systemmeddelande åsidosättande för agenter",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Detta kommer att ta en ögonblicksbild av de för närvarande anslutna leverantörerna/modellerna som matchar denna mall i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering av automatisk kombination misslyckades:",
     "duplicateAutoComboUnknownError": "Okänt fel",
-    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}",
-    "weightPercent": "Vikt (%)",
-    "clearSearch": "Rensa sökning",
-    "responseValidationRemoveCheck": "Ta bort kontroll",
-    "responseValidationPath": "JSON-sökväg",
-    "responseValidationCondition": "Villkor",
-    "responseValidationValue": "Förväntat värde"
+    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}"
   },
   "costs": {
     "title": "Kostnader",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Etikett för API-format",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Fastlandskina",
+    "apiRegionHint": "Välj slutpunktsregionen som används för API-åtkomst och kvotspårning.",
+    "apiRegionInternational": "Internationell",
+    "apiRegionLabel": "API-region",
     "apikey": "API-nyckel",
     "audio": "Ljud",
     "audioProvidersHeading": "Rubrik för ljudleverantörer",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "När det här kontot når sin användningsgräns på 5 timmar och Anthropic erbjuder kön med lägre prioritet, accepterar OmniRoute den och fortsätter att skicka förfrågningar med anthropic-usage-limit: slow tills tidsfönstret återställs, i stället för att låta anslutningen svalna. Veckogränsen gäller fortfarande och svar kan behöva vänta på ledig kapacitet.",
     "claudeAutoLimitResetLabel": "Återställ sessionsgränsen automatiskt (en gång i veckan)",
     "claudeAutoLimitResetDescription": "När det här kontot når sin användningsgräns på 5 timmar och en återställning av sessionsgränsen är tillgänglig, aktiverar OmniRoute den automatiskt och försöker igen med full hastighet. Detta använder kontots återställning som är tillgänglig en gång i veckan och räknas fortfarande mot veckogränsen.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Hoppa över den tillfälliga cooldown-perioden så att denna anslutning förblir tillgänglig även efter återställningsbara fel (slutgiltiga tillstånd som banned/expired gäller fortfarande).",
     "disableCoolingLabel": "Inaktivera cooldown för denna anslutning",
     "bulkPasteAdded": "{count, plural, one {1 nyckel tillagd} other {# nycklar tillagda}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Hämta API-nyckel på monsterapi.ai",
       "moonshot": "Anslut Moonshot AI med en API-nyckel.",
       "morph": "Gratisnivå: 250K krediter/månad, 0 $",
+      "apmix": "Anslut Apmix med en API-nyckel från apmix.ai/dashboard — en prenumeration, många modeller.",
       "nanogpt": "Anslut NanoGPT med en API-nyckel.",
       "nebius": "~1 $ i testkrediter vid registrering för API-testning",
       "nlpcloud": "NLP Cloud använder ett proprietärt chatbot-API istället för OpenAI chat/completions. OmniRoute anpassar OpenAI-meddelanden till indata/kontext/historik och exponerar en lokal katalog över chatbot-modeller som stöds.",
@@ -6634,8 +6642,7 @@
       "kiro": "Gratisnivå: 50 krediter/månad (~25K–100K tokens). ⚠️ Kiros användarvillkor förbjuder användning av tredjepartsproxy/harness.",
       "codex": "Anslut OpenAI Codex med det befintliga OAuth-flödet.",
       "qwen": "Anslut Qwen Code med det befintliga OAuth-flödet.",
-      "github-models": "Skapa en GitHub PAT med omfånget 'models: read' på github.com/settings/tokens",
-      "apmix": "Anslut Apmix med en API-nyckel från apmix.ai/dashboard — en prenumeration, många modeller."
+      "github-models": "Skapa en GitHub PAT med omfånget 'models: read' på github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} accepterar leverantörsbaserade modell-ID:n. Importera från /models eller lägg till anpassade ID:n för routing.",
     "bedrockModelsDescription": "Amazon Bedrock-modeller omfattas av AWS-regionen. Importera från /models eller lägg till Bedrock-modell-ID:n aktiverade i den valda regionen.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Inställningar",
@@ -7702,6 +7702,7 @@
     "configured": "konfigurerad",
     "none": "Ingen",
     "modelOverrideValuePlaceholder": "Numeriskt värde",
+    "modelOverrideKey": "Åsidosättningsnyckel",
     "modelOverrideReasoningEffortsPlaceholder": "Engelska, kommaseparerade, t.ex. low, medium, high",
     "addKeyValue": "Lägg till nyckelvärde",
     "noModelOverrides": "Inga åsidosättningar har konfigurerats för denna modell.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Upptäckter sedan omstart",
       "statsEmpty": "Inga upptäckter än.",
       "statsRequest": "Förfrågningar"
-    },
-    "modelOverrideKey": "Åsidosättningsnyckel"
+    }
   },
   "contextRtk": {
     "title": "RTK-motor",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Misslyckades med att transformera strömmen"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Användning",
     "grokExtraUsageCredits": "Extra Användningskrediter",
     "grokAutoTopUp": "Automatisk Påfyllning",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Senast uppdaterad",
     "providerQuota": "Leverantörskvot",
     "providerQuotaHomeHint": "Livestatus för anslutna konton",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Återställning av Claude-gräns",
     "confirmRedeemClaudeResetCredit": "Inlösen återställer omedelbart de berättigade Claude-användningsgränserna och förbrukar denna kredit permanent.",
     "claudeResetCreditsModalTitle": "Claude-återställningskrediter",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Fler åtgärder",
     "test": "Testa",
     "edit": "Redigera",
     "delete": "Ta bort",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Inte mätt",
     "upstream4xx": "{count} uppströms klientfel",
     "upstream5xx": "{count} uppströms serverfel",
-    "uniformEgressLine": "{affected} av {exits} utgångar fallerar samtidigt hos {provider} (senaste {hours}h) — inte ett utgångsproblem",
-    "moreActions": "Fler åtgärder"
+    "uniformEgressLine": "{affected} av {exits} utgångar fallerar samtidigt hos {provider} (senaste {hours}h) — inte ett utgångsproblem"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Latens",
     "quota": "Kvot",
     "rangeWindow": "{range}-fönster",
+    "timeRange": "Tidsintervall",
     "runtimeHealthBlend": "runtime-/hälsomix",
     "averageResponseTime": "genomsnittlig svarstid",
     "worstQuota": "Sämsta kvot",
@@ -13912,8 +13913,7 @@
     "unknown": "okänd",
     "unknownProvider": "okänd leverantör",
     "unknownModel": "okänd modell",
-    "resolvedTargetMetrics": "{requests} anrop · {success} lyckade · {latency} · kvot {quota}",
-    "timeRange": "Tidsintervall"
+    "resolvedTargetMetrics": "{requests} anrop · {success} lyckade · {latency} · kvot {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-användningskvot",

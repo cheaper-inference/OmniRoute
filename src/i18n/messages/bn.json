@@ -25,8 +25,10 @@
     "confirm": "আপনি কি নিশ্চিত?",
     "refresh": "রিফ্রেশ করুন",
     "close": "বন্ধ করুন",
+    "dialogTitleFallback": "ডায়ালগ",
     "previousPage": "পূর্ববর্তী পৃষ্ঠা",
     "nextPage": "পরবর্তী পৃষ্ঠা",
+    "pagination": "পৃষ্ঠা বিন্যাস",
     "capsLockOn": "Caps Lock চালু আছে",
     "dismissNotification": "বিজ্ঞপ্তি খারিজ করুন",
     "toggleColumns": "কলাম টগল করুন",
@@ -182,6 +184,7 @@
     "combos": "কম্বোসমূহ",
     "noModelsFound": "কোনো মডেল পাওয়া যায়নি",
     "clear": "সাফ করুন",
+    "clearFilters": "ফিল্টার মুছুন",
     "done": "সম্পন্ন",
     "selectAll": "সব নির্বাচন করুন",
     "unselectAll": "নির্বাচন বাতিল করুন",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "পূর্বদর্শন",
     "batchFilePreviewTruncated": "প্রথম {shown} লাইন দেখানো হচ্ছে ({total} মোট লাইন)",
     "batchFileDownloadFull": "পূর্ণ ফাইল ডাউনলোড করুন",
-    "dialogTitleFallback": "ডায়ালগ",
-    "pagination": "পৃষ্ঠা বিন্যাস",
-    "clearFilters": "ফিল্টার মুছুন",
     "tokensPageTitle": "টোকেন",
     "tokensPageDescription": "API কী-গুলোর মধ্যে টোকেন পাঠান, আমন্ত্রণ কোড শেয়ার করুন এবং কমিউনিটি সার্ভার সংযুক্ত করুন।",
     "tokensServerUrlLabel": "সার্ভার URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "দ্রুত নেভিগেশন",
     "quickNavigationTitle": "দ্রুত নেভিগেশন (⌘K / Ctrl+K)",
     "openQuickNavigation": "দ্রুত নেভিগেশন খুলুন",
+    "openMenu": "মেনু খুলুন",
+    "products": "Keak পণ্যসমূহ",
     "switchToLightMode": "লাইট মোডে পরিবর্তন করুন",
     "switchToDarkMode": "ডার্ক মোডে পরিবর্তন করুন",
     "language": "ভাষা",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "উন্নত পেলোড নিয়ম, অনুরোধ সীমা এবং প্রক্সি API সেটিংস",
     "mitmProxyDescription": "ট্রাফিক পরিদর্শন ও ডিবাগিংয়ের জন্য MITM প্রক্সি সেটিংস কনফিগার করুন",
     "oneProxyDescription": "উন্নত প্রক্সি চেইনিংয়ের জন্য 1Proxy সেটিংস কনফিগার করুন",
-    "omniSkillsDescription": "স্বয়ংক্রিয় প্রম্পট ও টুল এক্সিকিউশনের জন্য স্যান্ডবক্স স্কিল ইনস্টল ও পরিচালনা করুন",
-    "openMenu": "মেনু খুলুন",
-    "products": "Keak পণ্যসমূহ"
+    "omniSkillsDescription": "স্বয়ংক্রিয় প্রম্পট ও টুল এক্সিকিউশনের জন্য স্যান্ডবক্স স্কিল ইনস্টল ও পরিচালনা করুন"
   },
   "cloudSyncStatus": {
     "synced": "সিঙ্ক হয়েছে",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "কম্বো → {name}"
   },
   "combos": {
+    "title": "কম্বোসমূহ",
+    "description": "ওজনভিত্তিক রাউটিং ও ফলব্যাক সমর্থনসহ মডেল কম্বো তৈরি করুন",
+    "autoCatalogTitle": "স্বয়ংক্রিয়-রাউটিং ক্যাটালগ",
     "autoTosLoadError": "পরিষেবার শর্তাবলির নীতি লোড করা যায়নি। পরিবর্তন করার আগে আবার চেষ্টা করুন।",
     "autoTosSaveError": "পরিষেবার শর্তাবলির নীতি সংরক্ষণ করা যায়নি। আগের সেটিংটিই দেখানো হচ্ছে। আবার চেষ্টা করুন।",
     "autoTosIncludeLabel": "ToS: avoid হিসেবে চিহ্নিত প্রদানকারীদের auto-তে অন্তর্ভুক্ত করুন",
     "autoTosDescription": "ডিফল্টভাবে বন্ধ। এটি শুধু একটি অ্যাকাউন্টের জন্য নয়, সব auto কম্বোর জন্য প্রযোজ্য। কোনো প্রদানকারীকে সংযুক্ত করলে এই বিকল্প চালু হয় না।",
-    "title": "কম্বোসমূহ",
-    "description": "ওজনভিত্তিক রাউটিং ও ফলব্যাক সমর্থনসহ মডেল কম্বো তৈরি করুন",
-    "autoCatalogTitle": "স্বয়ংক্রিয়-রাউটিং ক্যাটালগ",
     "autoCatalogTemplateCount": "{count} টেমপ্লেট",
     "autoCatalogDescription": "অন্তর্নির্মিত স্বয়ংক্রিয়/* কম্বোগুলি সংযুক্ত প্রদানকারীদের থেকে গতিশীলভাবে সমাধান করা হয়েছে। মডেল ক্ষেত্র হিসাবে এই আইডিগুলির যে কোনও একটি ব্যবহার করুন — কোনও সেটআপের প্রয়োজন নেই৷",
     "autoCatalogExpand": "স্বয়ংক্রিয়-রাউটিং ক্যাটালগ প্রসারিত করুন",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "এখনও কোনো কম্বো কনফিগার করা হয়নি।",
     "playgroundCreateFirst": "প্রথমে একটি তৈরি করুন",
     "weighted": "ওজনভিত্তিক",
+    "weightPercent": "ওজন (%)",
     "leastUsed": "সবচেয়ে কম ব্যবহৃত",
     "costOpt": "খরচ-অনুকূল",
     "strategyGuideTitle": "এই কৌশলটি কীভাবে ব্যবহার করবেন",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# অ্যাকাউন্ট} other {# অ্যাকাউন্ট}}",
     "builderGlobalAdded": "যোগ করা হয়েছে",
     "builderGlobalAdd": "যোগ করুন",
+    "clearSearch": "অনুসন্ধান মুছুন",
     "manualModel": "ম্যানুয়াল মডেল",
     "manualModelInvalid": "provider/model হিসেবে একটি মডেল লিখুন।",
     "manualModelUnknownProvider": "অজানা প্রোভাইডার প্রিফিক্স।",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "সর্বনিম্ন কন্টেন্ট দৈর্ঘ্য (অক্ষর)",
     "responseValidationJsonPaths": "JSON-path চেকসমূহ",
     "responseValidationAddCheck": "+ চেক যোগ করুন",
+    "responseValidationRemoveCheck": "চেক সরান",
+    "responseValidationPath": "JSON পাথ",
+    "responseValidationCondition": "শর্ত",
+    "responseValidationValue": "প্রত্যাশিত মান",
     "agentFeaturesSystemMessageOverride": "সিস্টেম মেসেজ ওভাররাইড করুন",
     "agentFeaturesSystemMessagePlaceholder": "আপনি একজন বিশেষজ্ঞ সহকারী...",
     "agentFeaturesSystemMessageHint": "এজেন্টদের জন্য সিস্টেম মেসেজ ওভাররাইড",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "এটি এই টেমপ্লেটের সাথে মিলে যায় এমন বর্তমান সংযুক্ত প্রদানকারী/মডেলগুলিকে একটি সম্পাদনযোগ্য কম্বোতে স্ন্যাপশট নেবে।",
     "duplicateAutoComboFailedPrefix": "অটোকম্বো ডুপ্লিকেশন ব্যর্থ:",
     "duplicateAutoComboUnknownError": "অজানা ত্রুটি",
-    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন",
-    "weightPercent": "ওজন (%)",
-    "clearSearch": "অনুসন্ধান মুছুন",
-    "responseValidationRemoveCheck": "চেক সরান",
-    "responseValidationPath": "JSON পাথ",
-    "responseValidationCondition": "শর্ত",
-    "responseValidationValue": "প্রত্যাশিত মান"
+    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন"
   },
   "costs": {
     "title": "খরচ",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API ফরম্যাট লেবেল",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "চীনের মূল ভূখণ্ড",
+    "apiRegionHint": "API অ্যাক্সেস এবং কোটা ট্র্যাকিংয়ের জন্য ব্যবহৃত এন্ডপয়েন্ট অঞ্চল নির্বাচন করুন।",
+    "apiRegionInternational": "আন্তর্জাতিক",
+    "apiRegionLabel": "API অঞ্চল",
     "apikey": "API কী",
     "audio": "অডিও",
     "audioProvidersHeading": "অডিও প্রদানকারীদের শিরোনাম",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "এই অ্যাকাউন্ট যখন তার ৫-ঘণ্টার ব্যবহারের সীমায় পৌঁছায় এবং Anthropic নিম্ন-অগ্রাধিকার লেন অফার করে, OmniRoute তা গ্রহণ করে এবং উইন্ডো রিসেট না হওয়া পর্যন্ত anthropic-usage-limit: slow সহ অনুরোধ পাঠাতে থাকে, সংযোগ কুল-ডাউন করার বদলে। সাপ্তাহিক সীমা তখনও প্রযোজ্য এবং উত্তরগুলো অতিরিক্ত সক্ষমতার জন্য অপেক্ষা করতে পারে।",
     "claudeAutoLimitResetLabel": "সেশনের সীমা স্বয়ংক্রিয়ভাবে রিসেট করুন (সপ্তাহে একবার)",
     "claudeAutoLimitResetDescription": "এই অ্যাকাউন্ট যখন তার ৫-ঘণ্টার ব্যবহারের সীমায় পৌঁছায় এবং একটি সেশন-সীমার রিসেট পাওয়া যায়, OmniRoute তা স্বয়ংক্রিয়ভাবে দাবি করে এবং সম্পূর্ণ গতিতে আবার চেষ্টা করে। অ্যাকাউন্টের সপ্তাহে-একবার রিসেট ব্যবহার করে এবং তবুও সাপ্তাহিক সীমার মধ্যে গণনা হয়।",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "অস্থায়ী কুলডাউন এড়িয়ে যান যাতে পুনরুদ্ধারযোগ্য ত্রুটির পরেও এই সংযোগটি যোগ্য থাকে (নিষিদ্ধ/মেয়াদোত্তীর্ণের মতো টার্মিনাল অবস্থাগুলি এখনও প্রযোজ্য)।",
     "disableCoolingLabel": "এই সংযোগের জন্য কুলডাউন নিষ্ক্রিয় করুন",
     "bulkPasteAdded": "{count, plural, one {১টি কী যোগ করা হয়েছে} other {#টি কী যোগ করা হয়েছে}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "monsterapi.ai-এ API কী পান",
       "moonshot": "একটি API কী দিয়ে Moonshot AI কানেক্ট করুন।",
       "morph": "ফ্রি টিয়ার: প্রতি মাসে 250K ক্রেডিট, $0",
+      "apmix": "apmix.ai/dashboard থেকে API কী দিয়ে Apmix সংযোগ করুন — একটি সাবস্ক্রিপশন, অনেক মডেল।",
       "nanogpt": "একটি API কী দিয়ে NanoGPT কানেক্ট করুন।",
       "nebius": "API টেস্টিংয়ের জন্য সাইন আপে ~$1 ট্রায়াল ক্রেডিট",
       "nlpcloud": "NLP Cloud, OpenAI chat/completions-এর পরিবর্তে একটি প্রোপ্রাইটরি চ্যাটবট API ব্যবহার করে। OmniRoute, OpenAI মেসেজগুলোকে ইনপুট/কনটেক্সট/হিস্ট্রিতে মানিয়ে নেয় এবং সমর্থিত চ্যাটবট মডেলগুলোর একটি লোকাল ক্যাটালগ প্রকাশ করে।",
@@ -6634,8 +6642,7 @@
       "kiro": "ফ্রি টিয়ার: 50 ক্রেডিট/মাস (~25K–100K টোকেন)। ⚠️ Kiro ToS তৃতীয় পক্ষের প্রক্সি/হারনেস ব্যবহার নিষিদ্ধ করে।",
       "codex": "বিদ্যমান OAuth ফ্লো-এর সাথে OpenAI Codex সংযুক্ত করুন।",
       "qwen": "বিদ্যমান OAuth ফ্লো-এর সাথে Qwen Code সংযুক্ত করুন।",
-      "github-models": "github.com/settings/tokens-এ 'models: read' স্কোপ সহ একটি GitHub PAT তৈরি করুন",
-      "apmix": "apmix.ai/dashboard থেকে API কী দিয়ে Apmix সংযোগ করুন — একটি সাবস্ক্রিপশন, অনেক মডেল।"
+      "github-models": "github.com/settings/tokens-এ 'models: read' স্কোপ সহ একটি GitHub PAT তৈরি করুন"
     },
     "passthroughModelsDescription": "{provider} প্রদানকারী-নেটিভ মডেল আইডি গ্রহণ করে। /মডেল থেকে আমদানি করুন বা রাউটিং এর জন্য কাস্টম আইডি যোগ করুন।",
     "bedrockModelsDescription": "অ্যামাজন বেডরক মডেলগুলি AWS অঞ্চল দ্বারা স্কোপ করা হয়েছে৷ /মডেল থেকে আমদানি করুন বা নির্বাচিত অঞ্চলে সক্ষম বেডরক মডেল আইডি যোগ করুন।",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "সেটিংস",
@@ -7702,6 +7702,7 @@
     "configured": "কনফিগার করা হয়েছে",
     "none": "কোনোটিই নয়",
     "modelOverrideValuePlaceholder": "সংখ্যাসূচক মান",
+    "modelOverrideKey": "ওভাররাইড কী",
     "modelOverrideReasoningEffortsPlaceholder": "ইংরেজিতে কমা দিয়ে আলাদা করা, যেমন low, medium, high",
     "addKeyValue": "কী ভ্যালু যোগ করুন",
     "noModelOverrides": "এই মডেলের জন্য কোনো ওভাররাইড কনফিগার করা হয়নি।",
@@ -8945,8 +8946,7 @@
       "statsTitle": "পুনরায় চালুর পর থেকে শনাক্তকরণ",
       "statsEmpty": "এখনও কোনো শনাক্তকরণ নেই।",
       "statsRequest": "অনুরোধ"
-    },
-    "modelOverrideKey": "ওভাররাইড কী"
+    }
   },
   "contextRtk": {
     "title": "RTK ইঞ্জিন",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "স্ট্রিম রূপান্তর করতে ব্যর্থ হয়েছে"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "ব্যবহার",
     "grokExtraUsageCredits": "অতিরিক্ত ব্যবহার ক্রেডিট",
     "grokAutoTopUp": "অটো টপ-আপ",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "সর্বশেষ রিফ্রেশ করা হয়েছে",
     "providerQuota": "প্রোভাইডার কোটা",
     "providerQuotaHomeHint": "সংযুক্ত অ্যাকাউন্টগুলোর লাইভ স্ট্যাটাস",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Claude সীমা রিসেট",
     "confirmRedeemClaudeResetCredit": "রিডিম করার সাথে সাথে উপযুক্ত Claude ব্যবহারের সীমা রিসেট হয়ে যায় এবং এই ক্রেডিটটি স্থায়ীভাবে ব্যবহৃত হয়।",
     "claudeResetCreditsModalTitle": "Claude রিসেট ক্রেডিট",
@@ -11453,6 +11453,7 @@
     "tableHealth": "স্বাস্থ্য (২৪ ঘণ্টা)",
     "tableUsage": "ব্যবহার",
     "tableActions": "অ্যাকশন",
+    "moreActions": "আরও অ্যাকশন",
     "test": "পরীক্ষা করুন",
     "edit": "সম্পাদনা করুন",
     "delete": "মুছুন",
@@ -11610,8 +11611,7 @@
     "notMeasured": "পরিমাপ করা হয়নি",
     "upstream4xx": "{count} উপস্ট্রিম ক্লায়েন্ট ত্রুটি",
     "upstream5xx": "{count} উপস্ট্রিম সার্ভার ত্রুটি",
-    "uniformEgressLine": "{affected} টি {exits} এক্সিট একসাথে ব্যর্থ হয়েছে {provider} এ (শেষ {hours} ঘন্টা) — এটি এক্সিট সমস্যা নয়",
-    "moreActions": "আরও অ্যাকশন"
+    "uniformEgressLine": "{affected} টি {exits} এক্সিট একসাথে ব্যর্থ হয়েছে {provider} এ (শেষ {hours} ঘন্টা) — এটি এক্সিট সমস্যা নয়"
   },
   "playground": {
     "title": "মডেল প্লেগ্রাউন্ড",
@@ -13858,6 +13858,7 @@
     "latency": "লেটেন্সি",
     "quota": "কোটা",
     "rangeWindow": "{range} উইন্ডো",
+    "timeRange": "সময়সীমা",
     "runtimeHealthBlend": "রানটাইম/স্বাস্থ্যের মিশ্রণ",
     "averageResponseTime": "গড় প্রতিক্রিয়া সময়",
     "worstQuota": "সবচেয়ে খারাপ কোটা",
@@ -13912,8 +13913,7 @@
     "unknown": "অজানা",
     "unknownProvider": "অজানা প্রোভাইডার",
     "unknownModel": "অজানা মডেল",
-    "resolvedTargetMetrics": "{requests} req · {success} সফল · {latency} · কোটা {quota}",
-    "timeRange": "সময়সীমা"
+    "resolvedTargetMetrics": "{requests} req · {success} সফল · {latency} · কোটা {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD ব্যবহারের কোটা",
