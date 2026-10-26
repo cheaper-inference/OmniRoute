@@ -16,10 +16,10 @@ jobs:
     # two listeners, jobs ≤ ~6 GB). Falls back to hosted when USE_VPS_RUNNER is off.
     runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with: { node-version: "24", cache: npm }
       # Fresh runtime state per run (same contract as nightly-schemathesis.yml). The
       # omni-light runner keeps a persistent $HOME, so the server used to boot on
@@ -62,7 +62,7 @@ jobs:
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
-          for i in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl -sf http://localhost:21778/api/monitoring/health >/dev/null; then echo up; exit 0; fi
             sleep 2
           done
@@ -119,11 +119,11 @@ jobs:
             echo "run=false" >> "$GITHUB_OUTPUT"
             echo "::notice::PROMPTFOO_PROVIDER_KEY not set — skipping garak probes (advisory)."
           fi
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
         if: steps.gate.outputs.run == 'true'
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         if: steps.gate.outputs.run == 'true'
         with: { node-version: "24", cache: npm }
       # Same isolation as the promptfoo job above: a fresh DATA_DIR per run, never the
@@ -161,14 +161,14 @@ jobs:
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
-          for i in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl -sf http://localhost:21779/api/monitoring/health >/dev/null; then echo up; exit 0; fi
             sleep 2
           done
           echo "::error::Test server did not come up on 21779 in 120s — see server.log."
           tail -40 server.log || true
           exit 1
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         if: steps.gate.outputs.run == 'true'
         with: { python-version: "3.12" }
       - run: pip install garak

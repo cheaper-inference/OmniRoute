@@ -50,7 +50,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 concurrency:
   # push storms during merge campaigns collapse to the newest commit per branch;
@@ -129,14 +128,14 @@ jobs:
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ needs.resolve-target.outputs.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
-          cache: npm
+          package-manager-cache: false
       - uses: ./.github/actions/npm-ci-retry
       - name: Run the suite and record its result
         env:
@@ -163,7 +162,7 @@ jobs:
           exit "$code"
       - name: Upload the suite result
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-green-suite-${{ matrix.name }}
           path: suite-results/
@@ -171,6 +170,9 @@ jobs:
           retention-days: 7
 
   release-green:
+    permissions:
+      contents: read
+      issues: write
     name: Validate active release branch
     # On a push, only run for release/* pushes — a push to main is handled by the
     # main-green job below. Schedule/dispatch always run (they validate the highest release).
@@ -194,7 +196,7 @@ jobs:
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -254,17 +256,17 @@ jobs:
         id: revision
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
-          cache: npm
+          package-manager-cache: false
 
       - uses: ./.github/actions/npm-ci-retry
 
       - name: Collect the hosted suite results
         if: github.event_name != 'push'
         continue-on-error: true
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: release-green-suite-*
           path: suite-results
@@ -396,7 +398,7 @@ jobs:
       - name: Upload report artifact
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-green-report
           path: |
@@ -421,6 +423,9 @@ jobs:
   # opens a "🔴 main not green" tracking issue. The PREVENTION is the companion-PR reflex
   # (Hard Rule #21 area / _shared/merge-gates.md §8); this is the automated backstop.
   main-green:
+    permissions:
+      contents: read
+      issues: write
     name: Validate main branch
     # On a push, only run for a push to main — a push to release/* is handled by
     # release-green above. Dispatch always runs. On schedule, only the 05:23 cron sweeps
@@ -441,7 +446,7 @@ jobs:
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event_name == 'push' && github.sha || 'main' }}
           fetch-depth: 0
@@ -451,10 +456,10 @@ jobs:
         id: revision
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
-          cache: npm
+          package-manager-cache: false
 
       - uses: ./.github/actions/npm-ci-retry
 
@@ -562,7 +567,7 @@ jobs:
       - name: Upload report artifact
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: main-green-report
           path: |
@@ -612,9 +617,10 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Resolve active release branch
         id: branch
@@ -647,10 +653,10 @@ jobs:
           git checkout "$TARGET"
           git log -1 --oneline
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
-          cache: npm
+          package-manager-cache: false
 
       - uses: ./.github/actions/npm-ci-retry
 
@@ -700,7 +706,8 @@ jobs:
           git checkout -B "$BANK_BRANCH"
           git add config/quality/
           git commit -m "chore(quality): bank ratchet shrinks measured on ${TARGET}"
-          git push --force origin "$BANK_BRANCH"
+          gh auth setup-git
+          git push --force-with-lease origin "$BANK_BRANCH"
 
           {
             echo "Automated banking of quality-ratchet **shrinks** already present in"
@@ -743,15 +750,15 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 1
           persist-credentials: false
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
-          cache: npm
+          package-manager-cache: false
 
       - uses: ./.github/actions/npm-ci-retry
 
@@ -764,7 +771,7 @@ jobs:
 
       - name: Upload headroom report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: baseline-headroom-${{ github.run_id }}
           path: reports/quality/headroom.*
