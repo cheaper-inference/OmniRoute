@@ -3,6 +3,7 @@ import fs from "node:fs";
 import { DEFAULT_DATABASE_SETTINGS, type DatabaseSettings } from "@/types/databaseSettings";
 
 import { backupDbFile, setDbBackupMaxFiles } from "./backup";
+import { toBooleanSetting } from "./booleanSetting";
 import { DATA_DIR, SQLITE_FILE, applyDatabaseOptimizationSettings, getDbInstance } from "./core";
 import { invalidateDbCache } from "./readCache";
 import { registerDbStateResetter } from "./stateReset";
@@ -109,17 +110,6 @@ function parseStoredValue(rawValue: unknown): unknown {
   } catch {
     return rawValue;
   }
-}
-
-function toBooleanSetting(value: unknown): boolean | null {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return !Number.isNaN(value) && value !== 0;
-  if (typeof value !== "string") return null;
-
-  const normalized = value.trim().toLowerCase();
-  if (["1", "true", "yes", "on"].includes(normalized)) return true;
-  if (["0", "false", "no", "off"].includes(normalized)) return false;
-  return null;
 }
 
 function normalizeOptimizationSettings(settings: UserDatabaseSettings) {
