@@ -54,7 +54,8 @@ export function nativeZcodeBody(input: ExecuteInput, request: RecordValue): Reco
         : null;
   if (!model) throw new Error("Native gateway supports the ZCode individual plan GLM-5.3 models");
   const raw = record(input.body),
-    effort = record(raw.output_config).effort ?? raw.reasoning_effort ?? "low";
+    requestedEffort = record(raw.output_config).effort ?? raw.reasoning_effort ?? "low",
+    effort = requestedEffort === "none" ? "low" : requestedEffort;
   if (!["low", "high", "max"].includes(String(effort)))
     throw new Error("Invalid ZCode reasoning level");
   const messages: RecordValue[] = [],

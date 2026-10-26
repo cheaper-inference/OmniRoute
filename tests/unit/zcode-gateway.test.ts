@@ -175,6 +175,24 @@ test("native request defaults omitted effort to low and preserves explicit level
   }
 });
 
+test("native request maps no-effort to the minimum supported low level", () => {
+  for (const requestBody of [
+    { ...body, reasoning_effort: "none" },
+    { ...body, output_config: { effort: "none" } },
+  ]) {
+    const requestInput = { ...input, body: requestBody };
+    assert.equal(
+      (
+        nativeZcodeBody(requestInput, buildZcodeModelRequest(requestBody)).output_config as Record<
+          string,
+          unknown
+        >
+      ).effort,
+      "low"
+    );
+  }
+});
+
 test(
   "native signing is valid and deltas arrive before completion",
   { timeout: 10000 },
