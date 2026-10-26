@@ -69,26 +69,15 @@ jobs:
           echo "::error::Test server did not come up on 21778 in 120s — see server.log. Refusing to run the guard eval against an unknown target."
           tail -40 server.log || true
           exit 1
-      # Pinned, network-isolated promptfoo. Two constraints, both verified on this box:
-      # (1) never `promptfoo@latest`: promptfoo >= 0.123.1 (promptfoo/promptfoo#10866) throws
-      #     `result?.error?.includes is not a function` inside its rate-limit classifier when
-      #     the https provider hands it the parsed 4xx JSON body the guard answers in block
-      #     mode, so every blocked request became an eval ERROR, not a PASS (run 39007982929);
-      # (2) never the lockfile install (`npx --no-install`): #17017 — the lock nests js-yaml
-      #     4.3.2 under @apidevtools/json-schema-ref-parser, so the in-repo promptfoo dies at
-      #     import on `binaryTag` (run 39084298931). `npx --yes promptfoo@<exact>` installs its
-      #     own tree in the npx cache — when run from a directory without that package
-      #     (see the step's working-directory). The version mirrors the devDependency pin in
-      #     package.json; tests/unit/build/llm-security-nightly-promptfoo-pin.test.ts keeps
-      #     the two equal and off the releases proven broken.
-      # `working-directory` OUTSIDE the checkout is load-bearing: npx resolves a package from
-      # the nearest node_modules first, and since #17005 the repo's own promptfoo satisfies
-      # the `@0.123.0` spec, so run from the workspace it picked node_modules/promptfoo and
-      # died on the nested js-yaml again (#17017, run 39095530088). From $RUNNER_TEMP there is
-      # no local install to shadow the npx cache tree.
+      # Pin the CLI to the lockfile version and execute outside the checkout so
+      # npx cannot select a conflicting local dependency tree (#17017).
+      # 0.125.1 still treats object.error as a scheduler failure (#10866); the
+      # config requires HTTP 400 and serializes the complete JSON body before
+      # assertions inspect SECURITY_001. The offline HTTP fixture verifies both
+      # accepted blocks and rejected wrong-code/status responses.
       - name: promptfoo guard-validation
         working-directory: ${{ runner.temp }}
-        run: npx --yes promptfoo@0.123.0 eval -c "$GITHUB_WORKSPACE/promptfooconfig.yaml" --no-cache
+        run: npx --yes promptfoo@0.125.1 eval -c "$GITHUB_WORKSPACE/promptfooconfig.yaml" --no-cache
         env:
           OMNIROUTE_URL: http://localhost:21778
           OMNIROUTE_API_KEY: not-needed-blocked-before-upstream
