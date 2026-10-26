@@ -1,7 +1,8 @@
+import { createCatalogConnectionExclusionFilter } from "@/lib/providerModels/copilotCatalogRejections";
 import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
 import { getCombos } from "@/lib/db/combos";
-import { isComboNameAllowedForKey } from "@/shared/utils/apiKeyPolicy";
+import { createHiddenModelLookup } from "@/lib/hiddenModelLookup";
 import { getSettings } from "@/lib/db/settings";
 import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import { createLazyConnectionView } from "@/lib/db/providers/lazyConnectionView";
@@ -33,13 +34,10 @@ import { CODEX_NATIVE_UNPREFIXED_MODELS } from "@omniroute/open-sse/services/mod
 import { isModelSelectable } from "@omniroute/open-sse/services/modelLifecycle";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo";
 import {
-  AUTO_TEMPLATE_VARIANTS,
-  AUTO_SUFFIX_VARIANTS,
-  AUTO_FAMILY_IDS,
-  createBuiltinAutoCombo,
   prepareBuiltinAutoComboInputs,
   isPaidTierAutoId,
 } from "@omniroute/open-sse/services/autoCombo/builtinCatalog";
+import { getAdvertisedAutoIds, materializeAdvertisedAutoCombo } from "./autoCatalogIds";
 import {
   getSyncedAvailableModelsByConnection,
   SYNCED_AVAILABLE_MODELS_MALFORMED,
@@ -79,7 +77,10 @@ import {
 import type { ModelCapabilityEntry } from "@/lib/modelsDevSync";
 import { getModelSpec } from "@/shared/constants/modelSpecs";
 import { classifyModelSupportedEndpoints } from "@/shared/constants/modelSupportedEndpoints";
-import { getModelsCatalogPrefixMode } from "@/shared/utils/featureFlags";
+import {
+  getModelsCatalogPrefixMode,
+  isModelsDevEffortTiersEnabled,
+} from "@/shared/utils/featureFlags";
 import {
   isProviderNodePrefixReserved,
   selectCompatibleNodeForPrefix,
@@ -105,6 +106,8 @@ import {
   maybeOmitCatalogModelName,
   getThinkingCapabilityFields,
   mergeComboCapabilities,
+  hasRoutableComboConnection,
+  selectComboLimitPool,
   visionDerivedModalities,
   getConnectionScopedEffortTiers,
   type ConnectionScopedReasoningCatalog,
@@ -127,6 +130,7 @@ import {
   getComboTargetModelId as getComboTargetModelIdFromMaps,
 } from "./catalogProviderMaps";
 import { indexNodeApiTypes, nodeModelEndpoints, overlayEndpoints } from "./catalogNodeModality";
+import { createComboPricingTargetResolver } from "./catalogPricing";
 import {
   getModelCatalogAuthRejection,
   isCodexModelCatalogClient,
@@ -271,8 +275,8 @@ async function buildCatalogPayload(
   let cacheTTL = CATALOG_CACHE_TTL_MS_DEFAULT;
   try {
     // Only the persisted cache section is needed here. The full database-settings
-    // view also calculates dbstat, WAL, schema and integrity diagnostics, which are
-    // synchronous and can pin the event loop after an otherwise cooperative build.
+    // view also calculates dbstat, WAL and schema, which are synchronous and can
+    // pin the event loop after an otherwise cooperative build.
     const dbSettings = getUserDatabaseSettings();
     cacheTTL = dbSettings.cache?.modelCatalogCacheTtlMs ?? CATALOG_CACHE_TTL_MS_DEFAULT;
   } catch {
@@ -295,11 +299,9 @@ async function buildUnifiedModelsResponseCore(
   // dashboard WS heartbeat). Yield every `catYIELD_EVERY` items across the hot loops.
   const catYIELD_EVERY = 5;
   let catYieldCount = 0;
+  // Call it at the TOP of each loop body so `continue`-skipped entries count too.
   const maybeYieldCatalogBuild = async (): Promise<void> => {
-    catYieldCount++;
-    if (catYieldCount % catYIELD_EVERY === 0) {
-      await yieldCatalogBuildTurn();
-    }
+    if (++catYieldCount % catYIELD_EVERY === 0) await yieldCatalogBuildTurn();
   };
   try {
     // #9147/#12172: bulk-load the hidden-model map once PER MODALITY (memoized below,
@@ -308,11 +310,11 @@ async function buildUnifiedModelsResponseCore(
     // literal model id and must be hideable independently (#12172). Deliberately kept
     // INSIDE this try block: the builder's catch below sanitizes a build-time failure
     // into a 500 instead of a rejected promise.
-    const hiddenModelsByModality = new Map<string, Map<string, Set<string>>>();
-    const getHiddenModelsForModality = (modality: string): Map<string, Set<string>> => {
+    const hiddenModelsByModality = new Map<string, ReturnType<typeof createHiddenModelLookup>>();
+    const getHiddenModelsForModality = (modality: string) => {
       let m = hiddenModelsByModality.get(modality);
       if (!m) {
-        m = getHiddenModelsByProvider(modality);
+        m = createHiddenModelLookup(getHiddenModelsByProvider(modality), providerNodes, modality);
         hiddenModelsByModality.set(modality, m);
       }
       return m;
@@ -338,6 +340,7 @@ async function buildUnifiedModelsResponseCore(
       _qp === "alias" || _qp === "canonical" || _qp === "dual" ? _qp : getModelsCatalogPrefixMode();
     const includeAlias = prefixMode !== "canonical";
     const includeCanonical = prefixMode !== "alias";
+    const modelsDevEffortTiers = isModelsDevEffortTiersEnabled(); // #15944, default off
     const resolveCanonicalProviderId = (aliasOrProviderId: string, fallbackProviderId?: string) =>
       resolveCanonicalProviderIdFromMaps(aliasToProviderId, aliasOrProviderId, fallbackProviderId);
     const aliasMaps = { aliasToProviderId, providerIdToAlias };
@@ -451,16 +454,15 @@ async function buildUnifiedModelsResponseCore(
       if (!providerKey || !modelId) return false;
       const canonical = canonicalProviderId || resolveCanonicalProviderId(providerKey);
       const alias = providerIdToAlias[canonical] || providerIdToAlias[providerKey] || undefined;
-      const nodePrefix = providerIdToPrefix[providerKey] || providerIdToPrefix[canonical];
+      const prefix = providerIdToPrefix[providerKey] || providerIdToPrefix[canonical];
+      const nodePrefix = [providerKey, canonical].includes(providerNodeIdByPrefix[prefix])
+        ? prefix
+        : undefined;
       const keysToCheck = [providerKey, canonical, alias, nodePrefix].filter((k): k is string =>
         Boolean(k)
       );
-      const hiddenModelsForModality = getHiddenModelsForModality(modality);
-      for (const key of keysToCheck) {
-        const hiddenSet = hiddenModelsForModality.get(key);
-        if (hiddenSet?.has(modelId)) return true;
-      }
-      return false;
+      const isHidden = getHiddenModelsForModality(modality);
+      return keysToCheck.some((key) => isHidden(key, modelId));
     };
 
     // Get combos
@@ -530,13 +532,11 @@ async function buildUnifiedModelsResponseCore(
     // at request time in getProviderCredentials(); mirror the same rule in the
     // catalog so ghost models do not appear as available. A model is hidden when
     // the provider HAS connections but NONE of them is eligible for it.
-    const isExcludedByProviderConnections = (providerKey: string, modelId: string) => {
-      const providerId = aliasToProviderId[providerKey] || providerKey;
-      const alias = providerIdToAlias[providerId] || providerKey;
-      const providerConnections = getConnectionsForProvider(providerId, alias, providerKey);
-      if (providerConnections.length === 0) return false; // noAuth / no DB row: keep
-      return !hasEligibleConnectionForModel(providerConnections, modelId);
-    };
+    const isExcludedByProviderConnections = await createCatalogConnectionExclusionFilter(
+      aliasToProviderId,
+      providerIdToAlias,
+      getConnectionsForProvider
+    );
 
     const providerSupportsModel = (providerKey: string, modelId: string) => {
       const providerId = aliasToProviderId[providerKey] || providerKey;
@@ -648,7 +648,8 @@ async function buildUnifiedModelsResponseCore(
               eligibleConnectionIds,
               connectionCatalog || {},
               getRegistryModelThinkingEfforts(providerId, modelId),
-              getRegistryThinkingEfforts(providerId, modelId)
+              getRegistryThinkingEfforts(providerId, modelId),
+              modelsDevEffortTiers
             );
       if (
         connectionEfforts === undefined &&
@@ -657,7 +658,10 @@ async function buildUnifiedModelsResponseCore(
         !source.syncedCapability &&
         !source.reasoningEffortsOverride
       ) {
-        return null;
+        // Explicit vision evidence remains valid without registry/synced metadata.
+        return typeof canonical.capabilities.vision === "boolean"
+          ? { capabilities: { vision: canonical.capabilities.vision } }
+          : null;
       }
 
       const synced = getSyncedCapability(providerId, modelId);
@@ -674,11 +678,15 @@ async function buildUnifiedModelsResponseCore(
       const maxInputTokens = isPositiveFiniteNumber(canonical.limits.maxInputTokens)
         ? canonical.limits.maxInputTokens
         : contextLength;
-      const maxOutputTokens = isPositiveFiniteNumber(synced?.limit_output)
-        ? synced.limit_output
-        : isPositiveFiniteNumber(spec?.maxOutputTokens)
-          ? spec.maxOutputTokens
-          : undefined;
+      // #16515: canonical.limits.maxOutputTokens already applies an operator's
+      // max_output_tokens override, as the per-model catalog entry does.
+      const maxOutputTokens = isPositiveFiniteNumber(canonical.limits.maxOutputTokens)
+        ? canonical.limits.maxOutputTokens
+        : isPositiveFiniteNumber(synced?.limit_output)
+          ? synced.limit_output
+          : isPositiveFiniteNumber(spec?.maxOutputTokens)
+            ? spec.maxOutputTokens
+            : undefined;
 
       const syncedVision =
         typeof synced?.attachment === "boolean"
@@ -736,7 +744,8 @@ async function buildUnifiedModelsResponseCore(
               canonical.capabilities.supportsThinking,
               getRegistryThinkingEfforts(providerId, modelId),
               true,
-              syncedReasoningEfforts
+              syncedReasoningEfforts,
+              modelsDevEffortTiers
             )
           : getThinkingCapabilityFields(
               providerId,
@@ -744,7 +753,8 @@ async function buildUnifiedModelsResponseCore(
               connectionEfforts.length > 0 ? true : canonical.capabilities.supportsThinking,
               connectionEfforts,
               true,
-              syncedReasoningEfforts
+              syncedReasoningEfforts,
+              modelsDevEffortTiers
             )
       );
 
@@ -755,6 +765,14 @@ async function buildUnifiedModelsResponseCore(
         ...(inputModalities && inputModalities.length > 0 ? { inputModalities } : {}),
         ...(outputModalities && outputModalities.length > 0 ? { outputModalities } : {}),
         capabilities,
+        routable: isNoAuthProviderKey(providerId, providerAlias, targetModel.providerId)
+          ? !isNoAuthProviderBlocked(
+              blockedProviders,
+              providerId,
+              providerAlias,
+              targetModel.providerId
+            )
+          : hasRoutableComboConnection(target, allProviderConnections),
       };
     };
 
@@ -777,19 +795,18 @@ async function buildUnifiedModelsResponseCore(
         (metadata): metadata is ComboTargetCatalogMetadata => metadata !== null
       );
       if (knownMetadata.length === 0) return baseMetadata;
+      const limitPool = selectComboLimitPool(knownMetadata); // #4627: skip inactive seats
       const contextLength =
         explicitContextLength ??
-        minKnownNumber(knownMetadata.map((metadata) => metadata.contextLength));
+        minKnownNumber(limitPool.map((metadata) => metadata.contextLength));
       const targetMinMaxInput = minKnownNumber(
-        knownMetadata.map((metadata) => metadata.maxInputTokens)
+        limitPool.map((metadata) => metadata.maxInputTokens)
       );
       const maxInputTokens =
         explicitContextLength === undefined
           ? targetMinMaxInput
           : Math.min(explicitContextLength, targetMinMaxInput ?? explicitContextLength);
-      const maxOutputTokens = minKnownNumber(
-        knownMetadata.map((metadata) => metadata.maxOutputTokens)
-      );
+      const maxOutputTokens = minKnownNumber(limitPool.map((metadata) => metadata.maxOutputTokens));
 
       const inputModalities = intersectKnownStringArrays(
         knownMetadata.map((m) => (Array.isArray(m.inputModalities) ? m.inputModalities : []))
@@ -801,6 +818,7 @@ async function buildUnifiedModelsResponseCore(
       const capabilities = mergeComboCapabilities(knownMetadata);
       if (targetMetadata.some((metadata) => metadata === null)) {
         delete capabilities.effort_tiers;
+        delete capabilities.vision;
       }
 
       return {
@@ -817,6 +835,27 @@ async function buildUnifiedModelsResponseCore(
     const models = [];
     const timestamp = Math.floor(Date.now() / 1000);
     const listedIds = new Set<string>();
+    const postFilterContext = {
+      connections,
+      prefixMode,
+      aliasToProviderId,
+      hideNoThinkVariants: settings.hideNoThinkVariants === true,
+      blockedProviders: settings.blockedProviders,
+      // Per-entry `pricing`: a combo is priced as its first visible target.
+      pricing: {
+        providerNodeIdsByPrefix: providerNodeIdByPrefix,
+        resolveComboTarget: createComboPricingTargetResolver(
+          combos,
+          (combo) =>
+            resolveNestedComboTargets(
+              combo as Parameters<typeof resolveNestedComboTargets>[0],
+              combos as Parameters<typeof resolveNestedComboTargets>[1]
+            ) as ComboCatalogTarget[],
+          getComboTargetModelId,
+          (providerId, modelId) => isModelHiddenBulk(providerId, modelId)
+        ),
+      },
+    };
 
     // #8770 follow-up: a quota-exclusive key (allowedQuotas non-empty) only ever
     // receives the pool's `qtSd/*` combos — the key-permission step further down
@@ -841,12 +880,7 @@ async function buildUnifiedModelsResponseCore(
           timestamp,
           (c) => buildComboCatalogMetadata(c, combos)
         );
-        const quotaFinal = await applyCatalogPostFilters(request, quotaModels, {
-          connections,
-          prefixMode,
-          aliasToProviderId,
-          hideNoThinkVariants: settings.hideNoThinkVariants === true,
-        });
+        const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
         return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
           ...corsHeaders,
           ...diagnosticHeaders,
@@ -871,11 +905,7 @@ async function buildUnifiedModelsResponseCore(
     const autoCombosDisallowedForKey = earlyKeyMeta?.allowAutoCombos === false;
     let materializedAutoCount = 0;
     const autoMeta = memoizeTargetMetadata(getComboTargetCatalogMetadata, maybeYieldCatalogBuild);
-    for (const autoId of [
-      ...Object.keys(AUTO_TEMPLATE_VARIANTS),
-      ...AUTO_SUFFIX_VARIANTS,
-      ...AUTO_FAMILY_IDS,
-    ]) {
+    for (const autoId of getAdvertisedAutoIds()) {
       // #9418: skip the entire loop when hideAutoCombos is on — the ids are still
       // routable when sent explicitly, just not advertised in the catalog.
       if (hideAuto || autoCombosDisallowedForKey) break;
@@ -901,7 +931,11 @@ async function buildUnifiedModelsResponseCore(
           preparedAutoInputs = await prepareBuiltinAutoComboInputs(capabilityResolutionSnapshot);
           await yieldCatalogBuildTurn();
         }
-        const virtualCombo = await createBuiltinAutoCombo(autoId, suffix, preparedAutoInputs);
+        const virtualCombo = await materializeAdvertisedAutoCombo(
+          autoId,
+          suffix,
+          preparedAutoInputs
+        );
         if (virtualCombo.models.length === 0) continue; // zero live candidates — can't dispatch
         const contextLength = virtualCombo.advertisedContextLength || 128000;
         const maxOutputTokens = virtualCombo.advertisedMaxOutputTokens || 8192;
@@ -956,6 +990,7 @@ async function buildUnifiedModelsResponseCore(
 
     // Add combos first (they appear at the top) — only active ones
     for (const combo of combos) {
+      await maybeYieldCatalogBuild();
       if (combo.isActive === false || combo.isHidden === true) continue;
       if (typeof combo.name !== "string" || combo.name.length === 0) continue;
       if (listedIds.has(combo.name)) continue; // #4164: don't shadow a built-in auto/* id
@@ -999,9 +1034,6 @@ async function buildUnifiedModelsResponseCore(
         ...(comboDescription ? { description: comboDescription } : {}),
         ...comboMetadata,
       });
-
-      // #9147: combos can number hundreds at catalog scale — yield periodically.
-      await maybeYieldCatalogBuild();
     }
 
     let syncedModelsByProvider: Record<string, SyncedAvailableModel[]> = {};
@@ -1048,6 +1080,7 @@ async function buildUnifiedModelsResponseCore(
 
     // Add provider models (chat)
     for (const [alias, providerModels] of Object.entries(PROVIDER_MODELS)) {
+      await maybeYieldCatalogBuild();
       const providerId = aliasToProviderId[alias] || alias;
       const canonicalProviderId = resolveCanonicalProviderId(alias, providerId);
 
@@ -1064,6 +1097,7 @@ async function buildUnifiedModelsResponseCore(
       }
 
       for (const model of providerModels) {
+        await maybeYieldCatalogBuild();
         // Synced models replace static base entries they COVER, but they do not
         // carry aliases registered for provider-specific reasoning variants, and
         // static models the synced list does NOT cover must be preserved (the
@@ -1117,7 +1151,8 @@ async function buildUnifiedModelsResponseCore(
           !hasDeclaredEffortTiers,
           // Memory only. Do not call getSyncedCapabilities() here — that opens
           // SQLite and runs migrations on a pure catalog read.
-          peekCachedReasoningEfforts(canonicalProviderId, model.id)
+          peekCachedReasoningEfforts(canonicalProviderId, model.id),
+          modelsDevEffortTiers
         );
         const thinkingCapabilities =
           Object.keys(thinkingFields).length > 0 ? { capabilities: thinkingFields } : {};
@@ -1164,9 +1199,6 @@ async function buildUnifiedModelsResponseCore(
             ...thinkingCapabilities,
           });
         }
-
-        // #9147: static model walk is the densest loop — yield periodically.
-        await maybeYieldCatalogBuild();
       }
     }
 
@@ -1200,6 +1232,7 @@ async function buildUnifiedModelsResponseCore(
       ];
 
       for (const entry of entries) {
+        await maybeYieldCatalogBuild();
         if (models.some((existingModel) => existingModel.id === entry.id)) continue;
         models.push({
           id: entry.id,
@@ -1215,6 +1248,7 @@ async function buildUnifiedModelsResponseCore(
 
     try {
       for (const [providerId, syncedModels] of Object.entries(syncedModelsByProvider)) {
+        await maybeYieldCatalogBuild();
         if (providerUsesCuratedModelsOnly(providerId)) continue;
         if (!Array.isArray(syncedModels) || syncedModels.length === 0) continue;
         if (blockedProviders.has(providerId)) continue;
@@ -1246,6 +1280,7 @@ async function buildUnifiedModelsResponseCore(
               }))
             )
           : syncedModels) {
+          await maybeYieldCatalogBuild();
           if (!isUnifiedChatSourceModelSelectable(canonicalProviderId, sm)) continue;
           if (!providerSupportsModel(canonicalProviderId, sm.id)) continue;
           if (canonicalProviderId === "codex" && isCodexDiscoveryModelExcluded(sm)) {
@@ -1294,6 +1329,10 @@ async function buildUnifiedModelsResponseCore(
           // so the effort_tiers exclusion (codex/glm/kimi) and the entries agree.
           const syncedOwnedBy = resolvePublicOwnerId(providerId, canonicalProviderId);
           const syncedFields = {
+            ...(sm.visibility ? { visibility: sm.visibility } : {}),
+            ...(typeof sm.supportedInApi === "boolean"
+              ? { supported_in_api: sm.supportedInApi }
+              : {}),
             ...(modelType ? { type: modelType } : {}),
             ...(apiFormat !== "chat-completions" ? { api_format: apiFormat } : {}),
             ...(classification.subtype ? { subtype: classification.subtype } : {}),
@@ -1372,9 +1411,6 @@ async function buildUnifiedModelsResponseCore(
               });
             }
           }
-
-          // #9147: synced-model union is usually the largest walk — yield periodically.
-          await maybeYieldCatalogBuild();
         }
       }
     } catch (err) {
@@ -1390,6 +1426,7 @@ async function buildUnifiedModelsResponseCore(
         const openRouterCatalog = await getOpenRouterCatalog();
         const openRouterCaps: Record<string, ModelCapabilityEntry> = {};
         for (const openRouterModel of openRouterCatalog.data || []) {
+          await maybeYieldCatalogBuild();
           if (!openRouterModel?.id || typeof openRouterModel.id !== "string") continue;
           const qualifiedId = qualifyOpenRouterModelId(openRouterModel.id);
           if (models.some((existingModel: any) => existingModel?.id === qualifiedId)) continue;
@@ -1453,7 +1490,6 @@ async function buildUnifiedModelsResponseCore(
             capabilities
           );
           if (capEntry) openRouterCaps[openRouterModel.id] = capEntry;
-          await maybeYieldCatalogBuild();
         }
         upsertSyncedCapabilities("openrouter", openRouterCaps);
       } catch (err) {
@@ -1514,6 +1550,7 @@ async function buildUnifiedModelsResponseCore(
 
     // Add embedding models (filtered by active providers)
     for (const embModel of getAllEmbeddingModels()) {
+      await maybeYieldCatalogBuild();
       if (!isProviderActive(embModel.provider)) continue;
       const rawModelId = getSpecialtyModelRelativeId(embModel.id, embModel.provider);
       if (!providerSupportsModel(embModel.provider, rawModelId)) continue;
@@ -1557,6 +1594,7 @@ async function buildUnifiedModelsResponseCore(
       }
     }
     for (const imgModel of getAllImageModels()) {
+      await maybeYieldCatalogBuild();
       if (!isProviderActive(imgModel.provider)) continue;
       const parsedImageModel = parseImageModel(imgModel.id);
       const rawModelId =
@@ -1581,6 +1619,7 @@ async function buildUnifiedModelsResponseCore(
 
     // Add rerank models (filtered by active providers)
     for (const rerankModel of getAllRerankModels()) {
+      await maybeYieldCatalogBuild();
       if (!isProviderActive(rerankModel.provider)) continue;
       const rawModelId = getSpecialtyModelRelativeId(rerankModel.id, rerankModel.provider);
       if (!providerSupportsModel(rerankModel.provider, rawModelId)) continue;
@@ -1600,6 +1639,7 @@ async function buildUnifiedModelsResponseCore(
 
     // Add audio models (filtered by active providers)
     for (const audioModel of getAllAudioModels()) {
+      await maybeYieldCatalogBuild();
       if (!isProviderActive(audioModel.provider)) continue;
       const rawModelId = getSpecialtyModelRelativeId(audioModel.id, audioModel.provider);
       if (!providerSupportsModel(audioModel.provider, rawModelId)) continue;
@@ -1616,6 +1656,7 @@ async function buildUnifiedModelsResponseCore(
 
     // Add moderation models (filtered by active providers)
     for (const modModel of getAllModerationModels()) {
+      await maybeYieldCatalogBuild();
       if (!isProviderActive(modModel.provider)) continue;
       const rawModelId = getSpecialtyModelRelativeId(modModel.id, modModel.provider);
       if (!providerSupportsModel(modModel.provider, rawModelId)) continue;
@@ -1631,6 +1672,7 @@ async function buildUnifiedModelsResponseCore(
 
     // Add video models (filtered by active providers)
     for (const videoModel of getAllVideoModels()) {
+      await maybeYieldCatalogBuild();
       if (!isProviderActive(videoModel.provider)) continue;
       const rawModelId = getSpecialtyModelRelativeId(videoModel.id, videoModel.provider);
       if (!providerSupportsModel(videoModel.provider, rawModelId)) continue;
@@ -1652,6 +1694,7 @@ async function buildUnifiedModelsResponseCore(
 
     // Add music models (filtered by active providers)
     for (const musicModel of getAllMusicModels()) {
+      await maybeYieldCatalogBuild();
       if (!isProviderActive(musicModel.provider)) continue;
       const rawModelId = getSpecialtyModelRelativeId(musicModel.id, musicModel.provider);
       if (!providerSupportsModel(musicModel.provider, rawModelId)) continue;
@@ -1669,6 +1712,7 @@ async function buildUnifiedModelsResponseCore(
     try {
       const customModelsMap = (await getAllCustomModels()) as Record<string, unknown>;
       for (const [providerId, rawProviderCustomModels] of Object.entries(customModelsMap)) {
+        await maybeYieldCatalogBuild();
         if (providerUsesCuratedModelsOnly(providerId)) continue;
         // Skip Gemini — handled by syncedAvailableModels above
         if (providerId === "gemini") continue;
@@ -1698,6 +1742,7 @@ async function buildUnifiedModelsResponseCore(
           continue;
 
         for (const model of providerCustomModels) {
+          await maybeYieldCatalogBuild();
           const modelId = typeof model.id === "string" ? model.id : null;
           if (!modelId) continue;
           if (!isUnifiedChatSourceModelSelectable(canonicalProviderId, { ...model, id: modelId }))
@@ -1838,9 +1883,6 @@ async function buildUnifiedModelsResponseCore(
               ...(providerVisionFields || {}),
             });
           }
-
-          // #9147: custom-model walk — yield periodically.
-          await maybeYieldCatalogBuild();
         }
       }
     } catch (e) {
@@ -1858,6 +1900,7 @@ async function buildUnifiedModelsResponseCore(
       const modelAliases = await getModelAliases();
       const aliasBacked = extractAliasBackedModels(modelAliases);
       for (const { providerKey, modelId } of aliasBacked) {
+        await maybeYieldCatalogBuild();
         const canonicalProviderId = resolveCanonicalProviderId(providerKey);
         if (!canonicalProviderId) continue;
         if (
@@ -1961,6 +2004,7 @@ async function buildUnifiedModelsResponseCore(
       const canonicalProviderId = resolveCanonicalProviderId(alias, providerId);
 
       for (const model of fallbackModels) {
+        await maybeYieldCatalogBuild();
         const modelId = typeof model.id === "string" ? model.id : null;
         if (!modelId) continue;
         if (isModelHiddenBulk(providerId, modelId, canonicalProviderId)) continue;
@@ -1992,9 +2036,6 @@ async function buildUnifiedModelsResponseCore(
           ...(contextLength ? { context_length: contextLength } : {}),
           ...(visionFields || {}),
         });
-
-        // #9147: per-connection fallback walk — yield periodically.
-        await maybeYieldCatalogBuild();
       }
     }
 
@@ -2002,13 +2043,13 @@ async function buildUnifiedModelsResponseCore(
     const apiKey = extractApiKey(request);
     let finalModels = models;
     if (apiKey) {
-      const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
-      const { isCatalogModelAllowedForKey } = await import("./catalogKeyFilter");
+      const apiKeyPermissions = await import("@/lib/db/apiKeys");
+      const { filterCatalogModelsForKey } = await import("./catalogKeyFilter");
 
       // Quota-exclusive keys (allowedQuotas non-empty): list ONLY the pool's qtSd/*
       // virtual models. #4806: build from the hidden qtSd/* combos directly — the base
       // `models` list drops hidden combos, so filtering it returned nothing (0 models).
-      const keyMeta = await getApiKeyMetadata(apiKey);
+      const keyMeta = await apiKeyPermissions.getApiKeyMetadata(apiKey);
       if (keyMeta && keyMeta.allowedQuotas && keyMeta.allowedQuotas.length > 0) {
         const { buildQuotaExclusiveModels } = await import("@/lib/quota/quotaCombos");
         finalModels = await buildQuotaExclusiveModels(
@@ -2026,41 +2067,17 @@ async function buildUnifiedModelsResponseCore(
         // Without this branch, isModelAllowedForKey returns false for every model
         // (metadata missing → deny), collapsing /v1/models to 0 entries.
       } else {
-        // Per-key catalog scope: `combos` advertises only combo rows, `models`
-        // only provider models, `all` (the default) both. This is a listing
-        // preference, not an access control — dispatch is unaffected either way.
-        const catalogScope = keyMeta.catalogScope ?? "all";
-        const filtered = [];
-        for (const m of models) {
-          const isComboRow = m.owned_by === "combo";
-          if (catalogScope === "combos" && !isComboRow) continue;
-          if (catalogScope === "models" && isComboRow) continue;
-          // A combo is gated by `allowedCombos`, not by the model allow/deny lists:
-          // those govern provider models. Without this branch a `restricted` key with
-          // an empty `allowedModels` gets an EMPTY catalog even though every combo in
-          // its `allowedCombos` dispatches fine — the catalog contradicted the key.
-          // Listing a combo the key can already dispatch grants no new access.
-          // auto/* rows are exempt: they fail open at dispatch (they resolve to no
-          // stored combo), and `allowAutoCombos` already gated their synthesis above.
-          if (m.owned_by === "combo" && !String(m.id).startsWith("auto/")) {
-            if (isComboNameAllowedForKey(keyMeta.allowedCombos, String(m.id))) {
-              filtered.push(m);
-            }
-            continue;
-          }
-          // m.id decides; a bare m.root also matches a bare allowlist entry (#781, #15409).
-          if (await isCatalogModelAllowedForKey(apiKey, m, keyMeta.blockedModels)) filtered.push(m);
-        }
-        finalModels = filtered;
+        finalModels = await filterCatalogModelsForKey(
+          apiKey,
+          models,
+          keyMeta,
+          apiKeyPermissions,
+          maybeYieldCatalogBuild
+        );
       }
     }
     // ?configuredOnly — hide models that have no eligible DB connection.
-    finalModels = await applyCatalogPostFilters(request, finalModels, {
-      connections,
-      prefixMode,
-      aliasToProviderId,
-      hideNoThinkVariants: settings.hideNoThinkVariants === true,
-    });
+    finalModels = await applyCatalogPostFilters(request, finalModels, postFilterContext);
 
     const getDefaultContextFallback = (model: any): number | undefined => {
       if (typeof model.context_length === "number") return undefined;

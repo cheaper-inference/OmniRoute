@@ -73,6 +73,7 @@ import { registerSetupContinue } from "./setup-continue.mjs";
 import { registerSetupCursor } from "./setup-cursor.mjs";
 import { registerSetupRoo } from "./setup-roo.mjs";
 import { registerSetupCrush } from "./setup-crush.mjs";
+import { registerSetupZed } from "./setup-zed.mjs";
 import { registerSetupGoose } from "./setup-goose.mjs";
 import { registerSetupAider } from "./setup-aider.mjs";
 import { registerSetupQwen } from "./setup-qwen.mjs";
@@ -163,6 +164,7 @@ export function registerCommands(program) {
   registerSetupCursor(program);
   registerSetupRoo(program);
   registerSetupCrush(program);
+  registerSetupZed(program);
   registerSetupGoose(program);
   registerSetupAider(program);
   registerSetupQwen(program);

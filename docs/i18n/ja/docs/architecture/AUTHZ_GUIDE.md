@@ -13,71 +13,122 @@ OmniRouteには、すべてのAPIリクエストをゲートするルート認�
 
 > ソース: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## 2つの認証モード
+## 2 つの認証モード
 
-### 1. APIキー（Bearer）
+### 1. API キー（Bearer）
 
-OpenAI/Anthropic/Gemini互換のクライアントAPI、およびキーに`manage`スコープがある場合の一部の管理ルートで使用されます。
+OpenAI/Anthropic/Gemini 互換のクライアント API、およびキーに `manage` スコープがある場合の一部の管理ルートで使用されます。
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`src/sse/services/auth.ts`の`isValidApiKey()` / `extractApiKey()`で検証され、`src/shared/utils/apiAuth.ts`を通じて再エクスポートされます。また、バリデーターは`OMNIROUTE_API_KEY` / `ROUTER_API_KEY`環境変数を永続的なパススルーキーとして受け入れます（issue #1350）。
+`src/sse/services/auth.ts` の `isValidApiKey()` / `extractApiKey()` によって検証され、`src/shared/utils/apiAuth.ts` を通じて再エクスポートされます。バリデーターは、永続的なパススルーキーとして `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` 環境変数も受け入れます（issue #1350）。
 
 ### 2. ダッシュボードセッション（auth_token Cookie）
 
-ダッシュボードページと管理操作に使用されます。
+ダッシュボードページおよび管理操作に使用されます。
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Cookieがセッションとして扱われるのは、JWTの検証に成功し、**かつ**`authenticated: true`を含む場合のみです
-（`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`）。このCookieを利用するすべてのコンシューマー（ダッシュボードのルートガード（`isDashboardSessionAuthenticated()`）、認可パイプラインの更新、WebSocketハンドシェイク、ライブ
+JWT の検証に成功し、**かつ** `authenticated: true` が含まれている場合に限り、Cookie はセッションとして扱われます
+（`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`）。Cookie を使用するすべての
+コンシューマー（ダッシュボードのルートガード（`isDashboardSessionAuthenticated()`）、認可パイプラインの更新、WebSocket ハンドシェイク、ライブ
 サーバー、`/api/settings/require-login`、`/api/auth/status`）は、このヘルパーを経由します。
-`JWT_SECRET`で署名された他のJWTも存在します。Cursor CLIパススルーは、
-キーホルダー向けに`iss "omniroute" / aud "cursor-cli"`トークンを発行しますが、これらがセッションとして扱われることはありません
+`JWT_SECRET` で署名されたその他の JWT も存在します。Cursor CLI パススルーは、キー所有者向けに
+`iss "omniroute" / aud "cursor-cli"` トークンを発行しますが、これらがセッションとして扱われることはありません
 （#13298）。
 
-`src/shared/utils/apiAuth.ts`の`isDashboardSessionAuthenticated()`によって検証されます。パイプラインは、30日間の有効期間のうち残りが7日未満になると、JWTを自動更新します。
+`src/shared/utils/apiAuth.ts` の `isDashboardSessionAuthenticated()` によって検証されます。パイプラインは、30 日間の有効期間の残りが 7 日未満になると、JWT を自動的に更新します。
 
-すべての発行処理は`mintDashboardSessionToken`を経由し、発行時刻`iat`とID`jti`が付与されます。また、検証側では2つの設定を確認するため、セッションは30日が経過する前に終了する場合もあります。1つは`sessionsValidAfter`で、パスワード変更時に設定され、それより前に発行されたすべてのセッションが検証を通過しなくなります（パスワードを変更したブラウザーには新しいCookieが発行されます）。もう1つは`revokedDashboardSessions`で、`POST /api/auth/logout`はサインアウトしたセッションの`jti`をここに追加します。古いリリースで発行されたセッションにはどちらのクレームも含まれず、最初にパスワードが変更されるまで有効なままです。設定を読み取れない場合、そのセッションは信頼されません。
+すべての発行処理は `mintDashboardSessionToken` を経由し、発行時刻 `iat` と ID `jti` が付与されます。また、検証処理では 2 つの設定が確認されるため、セッションは 30 日が経過する前に終了する場合もあります。`sessionsValidAfter` はパスワード変更時に設定され、それ以前に発行されたすべてのセッションが検証に失敗するようになります（パスワードを変更したブラウザーには新しい Cookie が付与されます）。また、`revokedDashboardSessions` には、`POST /api/auth/logout` によってログアウトしたセッションの `jti` が追加されます。以前のリリースで発行されたセッションには、どちらのクレームも含まれていないため、最初のパスワード変更までは有効なままです。設定を読み取れない場合、そのセッションは信頼されません。
 
-一部の管理ルートでは、Cookie、またはAPIキーに`manage`（もしくは`admin`）スコープがある場合の`Bearer <key>`の、**いずれか**のモードを受け入れます。これにより、v3.8で追加された「API呼び出しによって設定可能」なワークフローが実現されています。
+一部の管理ルートでは、**いずれか**のモードを使用できます。つまり、Cookie、または API キーに `manage`（あるいは `admin`）スコープがある場合の `Bearer <key>` です。これにより、v3.8 で追加された「API 呼び出しによる設定」ワークフローが可能になります。
 
-#### オプションのOIDCログインゲート（#6973）
+#### オプションの OIDC ログインゲート（#6973）
 
-ダッシュボードの管理者ログインでは、デフォルトのパスワードログインに加えて、**オプトイン方式**のOIDC（OpenID Connect）フローもサポートされます。パスワードログインが削除されることはなく、追加の方式として提供されます。
+ダッシュボードの管理者ログインでは、デフォルトのパスワードログインに加えて、**オプトイン**の OIDC（OpenID Connect）フローもサポートされます。パスワードログインが削除されることはなく、あくまで
+補完されるだけです。
 
-- `settings.oidcEnabled === true`であり、**かつ**`oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret`がすべて設定されている場合（Settings → Auth）を除き、無効です。
-  それ以外の場合、`GET /api/auth/oidc/login`は`400`を返します。
-- `GET /api/auth/oidc/login`は、発行者の
-  `/.well-known/openid-configuration`から`authorization_endpoint`を検出し（失敗した場合は
-  `<issuer>/authorize`を使用）、受信リクエストからリダイレクトURIを構築し
-  （`x-forwarded-proto`を考慮）、ランダムな`state`を
-  `httpOnly`の`oidc_state` Cookieに保存してIdPへリダイレクトします。
-- `GET /api/auth/oidc/callback`は`state`を検証し、認可
-  コードを交換して、発行者のJWKSを介してIDトークンの署名を検証します
-  （`jose`の`createRemoteJWKSet`を使用し、JWKS URIごとにキャッシュ）。このとき`issuer`/`audience`
-  のチェックも行います。オプションの`oidcAllowedSubjects`許可リストは、トークンの
-  `sub`クレームまたは`email`クレームと照合されます。emailクレームが認められるのは
-  `email_verified === true`の場合のみであるため、IdPで未検証のメールアドレスが
-  ゲートを通過することはありません。
-- 成功すると、パスワードログイン
-  （`src/app/api/auth/login/route.ts`）が発行するものと**まったく同じ**、有効期間30日の`auth_token` JWTを発行します。そのため、ダッシュボードセッションパイプラインのその他の部分
-  （自動更新、Cookieフラグ）は変更されません。OIDCが置き換えるのはCookieの発行方法のみであり、付与される権限ではありません。
+- `settings.oidcEnabled === true` **かつ** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` がすべて設定されている場合（設定 → 認証）を除き、無効です。
+  それ以外の場合、`GET /api/auth/oidc/login` は `400` を返します。
+- `GET /api/auth/oidc/login` は、発行者の
+  `/.well-known/openid-configuration` から `authorization_endpoint` を検出し（見つからない場合は
+  `<issuer>/authorize` にフォールバック）、受信リクエストからリダイレクト URI を構築し
+  （`x-forwarded-proto` に対応）、ランダムな `state` とともに IdP へリダイレクトします。
+  `state` は `httpOnly` の `oidc_state` Cookie に保存されます。
+- `GET /api/auth/oidc/callback` は `state` を検証し、認可
+  コードを交換して、発行者の JWKS を介して ID トークンの署名を検証します
+  （`jose` の `createRemoteJWKSet` を使用し、JWKS URI ごとにキャッシュ）。また、`issuer`/`audience`
+  のチェックも行います。ダッシュボードへのアクセス許可には、空でない `oidcAllowedSubjects` リスト、
+  `oidcAdmissionClaim` ポリシー、またはその両方が必要です。サブジェクトリストは、`email_verified === true`
+  の場合にのみ `sub` または `email` と照合されます。オプションのクレームポリシーは、
+  ドット区切りの ID トークンクレームパス（例: `realm_access.roles`）と
+  許可する値の配列を受け取ります。解決されたクレームは文字列の配列であり、
+  許可された値を少なくとも 1 つ含んでいる必要があります。両方のポリシーが設定されている場合は、
+  両方を満たす必要があります。クレームが欠落している、または不正な形式の場合は拒否され、
+  どちらのポリシーもない場合、コールバックはログインを拒否します（`not_configured`）。
+  既存のサブジェクトのみの設定は、変更されることなく引き続き機能します。
+- Keycloak は通常、レルムロールをアクセストークンにマッピングしますが、必ずしも ID
+  トークンにマッピングするとは限りません。レルムロール `admin` を必須にするには、このクライアント用に、
+  **ID トークン**に `realm_access.roles` を含めるプロトコルマッパーを設定し、そのうえで
+  `oidcAdmissionClaim` を `{ "path": "realm_access.roles", "values": ["admin"] }` に設定します。
+  ロールのみでのアクセス許可を有効にする前に、このクライアントの実際の ID トークンクレームを
+  確認してください。アプリケーションはアクセストークンのロールを読み取りません。IdP 側でのトークン
+  発行拒否は、このアプリケーション側のチェックを補完できますが、置き換えることはできません。
+- 成功すると、パスワードログインが発行するものと**まったく同じ**有効期間 30 日の `auth_token` JWT
+  （`src/app/api/auth/login/route.ts`）が発行されるため、ダッシュボードセッションの残りの
+  パイプライン（自動更新、Cookie フラグ）は変更されません。OIDC が置き換えるのは Cookie の
+  発行方法だけであり、Cookie が付与する権限ではありません。IdP のロールやグループを変更しても、
+  既存の OmniRoute セッションは無効になりません。その有効期間は引き続き、ログアウト、
+  パスワードのローテーション、またはセッションの有効期限によって管理されます。
+- すべての `oidc*` 設定（`oidcEnabled`、`oidcDisablePasswordLogin`、
+  `oidcIssuer`、`oidcClientId`、`oidcClientSecret`、`oidcAllowedSubjects`、
+  `oidcAdmissionClaim`、`oidcRedirectPath`、`oidcScopes`）は `SECURITY_IMPACTING_SETTINGS_KEYS`
+  （`src/shared/constants/securityImpactingSettings.ts`）に含まれます。そのため、リクエスト本文に
+  管理パスワードを `currentPassword` として含めない限り、`PATCH /api/settings` は
+  `400 PASSWORD_REQUIRED` を返します（パスワードが間違っている場合は `401 PASSWORD_MISMATCH`）。
+  `oidcDisablePasswordLogin` はパスワードによる_ログイン_（`POST /api/auth/login`）を拒否しますが、
+  保存されているパスワードハッシュは維持され、再認証では引き続き
+  `currentPassword` がそのハッシュに対して検証されます。
+- `corsOrigins` と `bruteForceProtection` も `SECURITY_IMPACTING_SETTINGS_KEYS`
+  に含まれます。いずれかを緩和するとログイン防御が弱まるため、同じ
+  `currentPassword` による再認証が必要であり（「セキュリティ」タブで入力を求められます）、
+  JSON インポートではこれらが除外されます。
+- すべてのセキュリティポリシーキー（`SECURITY_IMPACTING_SETTINGS_KEYS` のエントリ、
+  すべての `oidc*` キー、およびダッシュボードのセッション状態）は、`PATCH /api/settings` において
+  **オペレーター専用**です。`manage` スコープの API キーまたは `oma_` アクセストークンは、
+  正しい `currentPassword` を送信した場合でも `403` で拒否され、その拒否は
+  `reason: OPERATOR_REQUIRED` とともに `settings.update_failed` として監査ログに記録されます
+  （`src/lib/api/operatorCredential.ts` の `requireOperatorCredential()`）。
+  通常の設定（テーマ、表示設定）は、`manage` キーまたは `admin` アクセストークンで
+  引き続き書き込み可能です。`/api/settings` 自体（および
+  `/api/settings/require-login`）に対するすべての変更には、`admin` アクセストークンスコープも
+  必要です（`src/server/authz/accessScopes.ts` の `ADMIN_MUTATION_EXACT_PATHS`、完全パス
+  一致）。`GET` は引き続き `read` であり、その他の `/api/settings/*` サブルート（プロキシ、
+  コンボのデフォルト、モデルエイリアス、圧縮、パージなど）では、メソッドから推論される
+  `write` スコープが維持されます。
+- `POST /api/settings/import-json` はこの再認証を省略するため、書き込み前に
+  `IMPORT_STRIPPED_SETTINGS_KEYS`（同じファイル）内のすべてのキーを除外します。対象は、パスワードと
+  `currentPassword`、`SECURITY_IMPACTING_SETTINGS_KEYS` のすべてのエントリ、および
+  ダッシュボードのセッション状態（`sessionsValidAfter`、`revokedDashboardSessions`）です。
+  したがって、古いバックアップをインポートしても、パスワード変更やサインアウトによって
+  すでに終了したセッションが復活することはありません。
 
-## ルートクラス
+## ルートのクラス
 
-`src/server/authz/types.ts` では3つのクラスを定義しています。決定的に分類できないルートはすべて `MANAGEMENT` にフォールバックします。
+`src/server/authz/types.ts` は 3 つのクラスを定義します。決定的に分類できないルートはすべて `MANAGEMENT` にフォールバックします。
 
-| クラス       | 説明                                                                                                                                                       | 必要な認証                                                     |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `PUBLIC`     | 明示的に安全なルート — ログイン、ログアウト、ステータス、初期化、ヘルスチェック、オンボーディングのブートストラップ。                                      | なし                                                           |
-| `CLIENT_API` | モデル提供エンドポイント — `/api/v1/*`、`/api/v1beta/*`、およびエイリアス `/v1/*`、`/v1beta/*`、`/chat/completions`、`/responses`、`/models`、`/codex/*`。 | 有効な `REQUIRE_API_KEY` 機能フラグが有効な場合はBearerキー    |
-| `MANAGEMENT` | ダッシュボードページ、設定、プロバイダー、キー、管理および診断エンドポイント。                                                                             | ダッシュボードセッション、または `manage` スコープを持つBearer |
+| Class        | Description                                                                                                                                                  | Auth required                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `PUBLIC`     | 明示的に安全なルート — ログイン、ログアウト、ステータス、初期化、ヘルスチェック、オンボーディングのブートストラップ。                                        | なし                                                                  |
+| `CLIENT_API` | モデル提供エンドポイント — `/api/v1/*`、`/api/v1beta/*`、およびエイリアスの `/v1/*`、`/v1beta/*`、`/chat/completions`、`/responses`、`/models`、`/codex/*`。 | 有効な `REQUIRE_API_KEY` フィーチャーフラグが有効な場合は Bearer キー |
+| `MANAGEMENT` | ダッシュボードのページ、設定、プロバイダー、キー、管理者および診断エンドポイント。                                                                           | ダッシュボードセッション、または `manage` スコープの Bearer           |
+
+一部の `MANAGEMENT` 操作は **オペレーター専用** です。`manage` キーだけでは不十分です。保存済みの認証情報のエクスポート（`GET /api/settings/export-json`、`GET /api/db-backups/export`、`GET /api/db-backups/exportAll`）、ライブデータへのバックアップの復元（`dryRun=true` を含む `POST /api/db-backups/import`、ID による `POST /api/db-backups` の復元、`POST /api/settings/import-json`）、復元ポイントの破棄（`DELETE /api/db-backups` のクリーンアップ、および `PATCH /api/db-backups`。このエンドポイントで永続化される保持期間設定は、バックアップのたびに実行される自動削除を制御するためです）には、ダッシュボードセッション、ローカル CLI のサブジェクト、またはログインが無効であることが必要です。同期トークンの発行（`POST /api/sync/tokens`）と `admin` の CLI アクセストークンの発行（`POST /api/cli/tokens`）には、すべてのログインモードでダッシュボードセッションまたはローカル CLI のサブジェクトが必要です。どのスコープの API キーも、`oma_` アクセストークンも、オペレーターの認証情報ではありません。これらが必要とされる場合は、常に `403` が返されます。このチェックは `src/lib/api/operatorCredential.ts`（`resolveOperatorCredential()` / `requireOperatorCredential()`）にあります。ログイン設定の変更もオペレーター専用です。`POST /api/settings/require-login`（管理パスワードの設定、`requireLogin` の切り替え）は、パスワードが存在すると、これらの認証情報のみを受け付けます。最初の実行時のブートストラップ期間（パスワードがまだない状態）は変更されません。ダッシュボードセッションでパスワードを置き換えるには `currentPassword` の送信が必要です（欠落または誤りの場合は `403` で、`settings.update_failed` として監査ログに記録されます）。ローカル CLI とログインが無効なインスタンスは復旧パスを維持し、このパラメーターなしでパスワードを設定できます。どちらもデータディレクトリを所有するホストに紐づけられているためです。
 
 ## パイプライン
 
@@ -217,15 +268,15 @@ APIキーには`scopes`配列が含まれています（`api_keys.scopes`にJSON
 
 `oma_live_…`トークンに対する`read` / `write` / `admin`は、`scopeSatisfies`（`src/lib/accessTokens/scopes.ts`）によってランク付けされます。このランクはアクセストークン資格情報にのみ適用されます。[管理認証](../guides/MANAGEMENT-AUTH.md)を参照してください。
 
-## 認証必須の切り替え
+## 認証必須トグル
 
-`src/shared/utils/apiAuth.ts` の `isAuthRequired()` は、リクエストに対して**何らかの**認証を適用するかどうかを決定します。
+`src/shared/utils/apiAuth.ts` の `isAuthRequired()` は、リクエストに対して **いかなる** 認証を適用するかを決定します：
 
-- `settings.requireLogin === false` → 認証はグローバルに無効になります。
-- パスワードが設定されておらず、かつ `INITIAL_PASSWORD` 環境変数もない場合 → ブートストラップモードではオンボーディングウィザードとループバックリクエストが許可されますが、外部ネットワークに公開されたリクエストには引き続き認証情報が必要です。
-- DB エラーが発生した場合 → フェイルクローズします（セキュア・バイ・デフォルト）。
+- `settings.requireLogin === false` → 認証はグローバルに無効になります。ただし、常に保護される階層（[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) を参照）と、認証情報を発行する操作は例外です。これらの操作では、ログインが有効な場合と同じ認証情報が必要です。具体的には、同期トークンの発行、任意のスコープでの CLI アクセストークンの発行、`manage`/`admin` スコープを持つ API キーの作成、そのスコープのキーへの付与、そのようなキーの再生成または表示（`src/lib/api/requireManagementAuth.ts` の `requireCredentialForManagementScopedKey()`）です。推論専用のキーは引き続きオープンです。
+- パスワードが設定されておらず **かつ** `INITIAL_PASSWORD` 環境変数もない → ブートストラップモードでは、オンボーディングウィザードとループバックからのリクエストを許可しますが、外部ネットワークからのリクエストには引き続き認証情報が必要です。
+- DB エラーが発生した場合 → フェイルクローズ（セキュアバイデフォルト）。
 
-クライアント API キーの適用では、`process.env.REQUIRE_API_KEY` を直接読み取るのではなく、`src/shared/utils/featureFlags.ts` の `isRequireApiKeyEnabled()` を使用します。これはデプロイ済みインスタンスで重要です。Dashboard → Feature Flags で `REQUIRE_API_KEY` を切り替えると、DB オーバーライドとして保存され、`/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*`、およびこのヘルパーを共有するその他のクライアント API 認証チェックに即座に反映されます。フィーチャーフラグストアを読み取れない場合、クライアント API 認証はフェイルクローズし、キーを必須とします。
+クライアント API キーの強制には、`process.env.REQUIRE_API_KEY` を直接読み取るのではなく、`src/shared/utils/featureFlags.ts` の `isRequireApiKeyEnabled()` を使用します。これは本番環境のインスタンスで重要です。ダッシュボード → Feature Flags で `REQUIRE_API_KEY` を切り替えると DB オーバーライドが保存され、即座に `/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*` および、このヘルパーを共有する他のクライアント API 認証チェックに影響します。フィーチャーフラグストアを読み取れない場合、クライアント API 認証はフェイルクローズし、キーを要求します。
 
 ## 破壊的変更 — v3.8.0
 

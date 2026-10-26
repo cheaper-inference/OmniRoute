@@ -48,55 +48,63 @@ z aktivního kontextu (takže po `omniroute connect <vps>` stačí spustit
 
 ---
 
-## Aliasy pro zjišťování modelů — zobrazení modelů jiných než Claude v nástroji `/model`
+## Aliasy pro detekci — zobrazení modelů mimo Claude ve výběru `/model`
 
-Zjišťování modelů brány v Claude Code zobrazuje pouze ID začínající na `claude`
-nebo `anthropic`, takže při nastavení `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
-nativní nástroj `/model` běžně zobrazuje **pouze** modely Claude/Anthropic z OmniRoute —
-`kimi/kimi-k2.6` ani `glm/glm-5.2` se nikdy nezobrazí, přestože směrování funguje správně.
+Detekce modelů brány v Claude Code vypisuje pouze ID začínající na `claude`
+nebo `anthropic`, takže s `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` nativní
+výběr `/model` obvykle zobrazuje **pouze** Claude/Anthropic modely OmniRoute —
+`kimi/kimi-k2.6` nebo `glm/glm-5.2` se nikdy neobjeví, přestože směrování funguje.
 
-OmniRoute může zrcadlit libovolný povolený model (i kombinaci) pod ID `claude/…`,
-aby prošel tímto filtrem a zobrazil se ve výběru:
+OmniRoute může libovolný povolený model (a kombinaci) zrcadlit pod ID `claude/…`,
+takže projde tímto filtrem a zobrazí se ve výběru:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<kombinace "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Když v Claude Code vyberete některý z těchto modelů, OmniRoute před směrováním
-odebere obal `claude/` a obnoví skutečné ID — pravé ID `claude/<real-claude-model>`
-(skutečného poskytovatele Claude OAuth) vždy ponechá beze změny.
+Když v Claude Code jeden z těchto aliasů vyberete, OmniRoute před směrováním
+odstraní obal `claude/` a vrátí skutečné ID — opravdové ID `claude/<real-claude-model>`
+(skutečný poskytovatel Claude OAuth) zůstane vždy nedotčeno.
 
-**Ve výchozím nastavení je tato funkce vypnutá** a řídí ji tříúrovňové nastavení
-(nejkonkrétnější úroveň má přednost), takže běžný OmniRoute nezdvojuje svůj katalog
-pro klienty, kteří Claude Code nepoužívají:
+Ve výchozím nastavení se zrcadlí pouze základní ID. S opt-in příznakem funkce
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` se varianty úrovně uvažování (reasoning effort),
+které katalog již obsahuje (např. `codex/gpt-6-sol-high`), zrcadlí jako jakékoli jiné
+ID, takže Claude Code může vybrat explicitní úroveň úsilí, a vestavěná ID `auto/*`,
+která cesta zpracování požadavku nedokáže materializovat, se nezrcadlí. Zda se
+varianty úsilí vůbec vypisují, stále řídí `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` —
+zrcadlení nikdy nepřidá variantu, kterou základní katalog nemá.
 
-| Úroveň       | Kde                                                                                                  |
-| ------------ | ---------------------------------------------------------------------------------------------------- |
-| Model        | Stránka podrobností poskytovatele → přepínač „Zobrazit v Claude Code“ pro každý model                |
-| Poskytovatel | Stránka podrobností poskytovatele → přepínač na úrovni poskytovatele (platí pro všechny jeho modely) |
-| Globální     | Nastavení → Příznaky funkcí → `EXPOSE_CC_DISCOVERY_ALIASES` (ve výchozím nastavení vypnuto)          |
+**Tato funkce je ve výchozím nastavení vypnutá** a řídí se tříúrovňovou bránou
+(vítězí nejkonkrétnější), takže obyčejná instance OmniRoute nikdy nezdvojuje svůj
+katalog pro klienty, kteří nepoužívají Claude Code:
+
+| Úroveň       | Kde                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------- |
+| Model        | Stránka detailu poskytovatele → přepínač „Zveřejnit v Claude Code“ u jednotlivých modelů       |
+| Poskytovatel | Stránka detailu poskytovatele → přepínač na úrovni poskytovatele (pokrývá všechny jeho modely) |
+| Globální     | Nastavení → Příznaky funkcí → `EXPOSE_CC_DISCOVERY_ALIASES` (ve výchozím nastavení vypnuto)    |
 
 Proměnná prostředí `EXPOSE_CC_DISCOVERY_ALIASES` vynutí zapnutí globální úrovně
-a má přednost před nastavením v ovládacím panelu (obrazovka Příznaky funkcí zobrazí
-poznámku „aktivní prostřednictvím proměnné prostředí“, pokud je takto aktivována).
-Přepínače pro jednotlivé poskytovatele a modely toto nastavení dále upřesňují —
-například globálně vypnuto + zapnutý poskytovatel Kimi zobrazí pouze modely Kimi.
+a má přednost před přepsáním z dashboardu (obrazovka Příznaky funkcí v takovém
+případě zobrazuje poznámku „aktivní prostřednictvím proměnné prostředí“). Přepínače
+pro jednotlivé poskytovatele a modely nastavení dále zpřesňují — např. globálně
+vypnuto + poskytovatel Kimi zapnut zveřejní pouze modely Kimi.
 
-> ⚠️ **Neshoda velikosti okna u modelů jiných než Claude.** Claude Code předpokládá
-> kontextové okno o velikosti 200K pro každé ID, které nerozpozná (skutečnou velikost
-> okna nedokáže z `/v1/models` načíst). Pro model s větším oknem (např. 256K u Kimi K2)
-> nastavte `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na hodnotu nižší, než je skutečná velikost
-> okna modelu, aby se automatická kompakce nespouštěla předčasně. Výše uvedené
-> vygenerované profily toto již nastavují pro každý model.
+> ⚠️ **Nesoulad kontextového okna u modelů mimo Claude.** Claude Code předpokládá
+> kontextové okno 200K pro jakékoli ID, které nepozná (skutečné okno nemůže přečíst
+> z `/v1/models`). U modelu s větším oknem (např. 256K u Kimi K2) nastavte
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na hodnotu pod skutečným oknem modelu, aby se
+> automatická kompaktace nespustila předčasně. Výše vygenerované profily to již
+> provádějí pro každý model zvlášť.
 
 ---
 
-## Úvodní blok na řídicím panelu
+## Blok pro úvodní nastavení na řídicím panelu
 
 Karta nástroje Claude (**Řídicí panel → CLI Code**) zobrazuje přesný fragment `settings.json`
-pro tuto instanci vedle informačního tlačítka aliasu pro zjišťování modelů a obsahuje tlačítko pro kopírování:
+pro tuto instanci vedle informačního tlačítka aliasu pro zjišťování a obsahuje tlačítko pro zkopírování:
 
 ```jsonc
 {
@@ -108,28 +116,41 @@ pro tuto instanci vedle informačního tlačítka aliasu pro zjišťování mode
 }
 ```
 
-Základní URL je adresa, kterou karta vyhodnotila (včetně vlastního přepsání, které jste zadali), a je již
+Základní URL je adresa vyhodnocená kartou (včetně vámi zadaného vlastního přepsání), která je již
 normalizovaná — bez přípony `/v1` a bez koncového lomítka. **Klíč se nikdy nezobrazuje**: blok obsahuje
-zástupný text, takže jej nelze vyzradit snímkem obrazovky ani vloženým úryvkem. Nahraďte jej svým klíčem.
+zástupný text, takže jej nelze odhalit snímkem obrazovky ani vloženým úryvkem. Nahraďte jej svým klíčem.
 
-Pro každý model, jehož skutečné kontextové okno nemá velikost 200K, přidejte do stejného bloku `env`
-proměnnou `CLAUDE_CODE_AUTO_COMPACT_WINDOW` — Claude Code předpokládá velikost 200K u každého ID,
-které nerozpozná, takže automatická kompakce by se jinak spustila v nesprávný okamžik (viz upozornění
-v předchozí části). Generátor úryvku tuto hodnotu rovněž přijímá, takže ji volající, který zná velikost
-kontextového okna cílového modelu, může přímo vygenerovat.
+Pro každý model, jehož skutečné kontextové okno není 200K, přidejte do stejného bloku `env`
+proměnnou `CLAUDE_CODE_AUTO_COMPACT_WINDOW` — Claude Code předpokládá 200K u každého id, které
+nerozpozná, takže automatická komprimace by se jinak spustila v nesprávný okamžik (viz upozornění
+v předchozí části). Generátor úryvku přijímá i tuto hodnotu, takže volající, který zná velikost
+kontextového okna cílového modelu, ji může uvést přímo.
 
 Zdroj: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (čistý
 generátor pokrytý jednotkovými testy), vykreslovaný komponentou `ClaudeGatewayOnboardingBlock`.
+
+### Připnutí jednoho účtu (volitelné)
+
+Chcete-li odesílat všechny požadavky Claude Code přes jeden konkrétní účet poskytovatele, přidejte
+hlavičku `x-omniroute-connection` prostřednictvím `ANTHROPIC_CUSTOM_HEADERS` do stejného bloku `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Zkopírujte id z čipu `xxxxxxxx…` na řádku připojení na stránce poskytovatele. Připnutí se vztahuje
+pouze na id jednotlivých modelů (`provider/model`), nikoli na kombinace. Přesné chování při použití
+náhradní možnosti najdete v části [Připnutí účtu pro jednotlivé požadavky](../reference/API_REFERENCE.md#account-pinning-per-request).
 
 ---
 
 ## Profily (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **nemá nativní soubory profilů** (na rozdíl od souboru `~/.codex/<name>.config.toml`
-nástroje Codex). Standardním mechanismem je `CLAUDE_CONFIG_DIR` — samostatný konfigurační adresář
-pro každý profil, přičemž každý má vlastní soubor `settings.json`, přihlašovací údaje, historii a mezipaměť.
+Claude Code nemá **žádné nativní soubory profilů** (na rozdíl od `~/.codex/<name>.config.toml` v Codexu).
+Obvyklým mechanismem je `CLAUDE_CONFIG_DIR` — samostatný konfigurační adresář pro každý
+profil, přičemž každý má vlastní `settings.json`, přihlašovací údaje, historii a mezipaměť.
 
-Příkaz `omniroute setup-claude` načte aktuální katalog `/v1/models` a zapíše jeden
+`omniroute setup-claude` načte aktuální katalog `/v1/models` a zapíše jeden
 profil pro každý model do `~/.claude/profiles/<name>/settings.json`, přičemž znovu použije
 **stejné názvy jako `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
@@ -148,19 +169,18 @@ profil pro každý model do `~/.claude/profiles/<name>/settings.json`, přičem�
 }
 ```
 
-> **Ověřovací token se do profilu nikdy nezapisuje.** Spusťte profil pomocí
-> `omniroute launch --profile <name>` (příkaz vloží `ANTHROPIC_AUTH_TOKEN` z aktivního
-> kontextu), nebo sami exportujte `ANTHROPIC_AUTH_TOKEN` a spusťte
+> **Ověřovací token se do profilu nikdy nezapisuje.** Spusťte jej pomocí
+> `omniroute launch --profile <name>` (tento příkaz vloží `ANTHROPIC_AUTH_TOKEN` z
+> aktivního kontextu), nebo sami exportujte `ANTHROPIC_AUTH_TOKEN` a spusťte
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Automatická synchronizace po zjištění modelů (volitelná).** OmniRoute může stejné soubory
-`~/.claude/profiles/<name>/settings.json` automaticky znovu vygenerovat pokaždé, když synchronizace
-modelů poskytovatele změní aktuální katalog — nové nebo přejmenované modely tak získají profily bez
-nutnosti znovu spouštět příkaz. Ve výchozím nastavení je tato funkce **vypnutá**: zapněte ji na
-**řídicím panelu CLI Code** („Automatická synchronizace profilů CLI“ → Claude Code) nebo nastavte
-`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (respektuje také `CLI_ALLOW_CONFIG_WRITES`, které je ve
-výchozím nastavení zapnuté). Je-li funkce povolena, zapisuje pouze soubory profilů; nikdy nemění vaši
-aktivní/výchozí konfiguraci Claude, ověřování ani soubor `~/.claude/settings.json`.
+**Automatická synchronizace po zjištění modelů (volitelná).** OmniRoute může automaticky znovu vygenerovat stejné
+soubory `~/.claude/profiles/<name>/settings.json`, kdykoli synchronizace modelů poskytovatele
+změní aktuální katalog — nové či přejmenované modely tak získají profily bez opětovného spuštění
+příkazu. Ve výchozím nastavení je tato funkce **vypnutá**: zapněte ji na **ovládacím panelu CLI Code** („Automatická
+synchronizace profilů CLI“ → Claude Code) nebo nastavte `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (respektuje také
+`CLI_ALLOW_CONFIG_WRITES`, které je ve výchozím nastavení zapnuté). Je-li tato funkce povolená, zapisuje pouze soubory profilů; nikdy
+nemění aktivní ani výchozí konfiguraci Claude, ověřování ani `~/.claude/settings.json`.
 
 ### Generování a používání profilů
 
@@ -173,6 +193,10 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Pouze někteří poskytovatelé
 omniroute setup-claude --only glm,kimi
+
+# Zapsat také profily pro poskytovatele s místním CLI (zcode, auggie, devin-cli-agentic,
+# codex-app-server), kteří nebyli na tomto hostiteli zjištěni (pro místní cíl jsou ve výchozím nastavení přeskočeni)
+omniroute setup-claude --include-local
 
 # Náhled bez zápisu
 omniroute setup-claude --dry-run

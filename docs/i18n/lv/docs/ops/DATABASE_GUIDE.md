@@ -511,12 +511,12 @@ Ja tiek atgriezts jebkas cits, nevis `ok`, **nekavējoties pārtrauciet datubāz
 
 ## Avārijas atkopšana
 
-### 1. scenārijs: pazaudēts WAL fails
+### 1. scenārijs: WAL fails ir pazaudēts
 
-Trūkst `-wal` faila, bet `-shm` fails un galvenā datubāze nav bojāti:
+`-wal` faila nav, bet `-shm` fails un galvenā datubāze nav bojāti:
 
 ```bash
-# Automātiski atkopsies nākamajā atvēršanas reizē
+# Automātiski tiek atkopts nākamajā atvēršanas reizē
 omniroute
 ```
 
@@ -528,17 +528,20 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### 2. scenārijs: bojāts galvenais datubāzes fails
+### 2. scenārijs: galvenais datubāzes fails ir bojāts
 
-Atjaunojiet no dublējumkopijas:
+Atjaunojiet no dublējuma:
 
 ```bash
-omniroute sync pull --merge   # vai: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### 3. scenārijs: pazaudēta šifrēšanas atslēga
+`omniroute sync pull [outPath]` tikai lejupielādē pilnu `.tar.gz` arhīvu no servera, kas darbojas
+(`GET /api/db-backups/exportAll`, nepieciešami operatora akreditācijas dati); šī komanda neko neatjauno.
 
-Bez atslēgas **atkopšana nav iespējama**. Šifrētie lauki nav nolasāmi. Manuāli pievienojiet visus pakalpojumu sniedzējus no jauna, izmantojot jaunus akreditācijas datus.
+### 3. scenārijs: šifrēšanas atslēga ir pazaudēta
+
+Bez atslēgas **atkopšana nav iespējama**. Šifrētie lauki nav nolasāmi. Manuāli atkārtoti pievienojiet visus pakalpojumu sniedzējus, izmantojot jaunus akreditācijas datus.
 
 > **Riska mazināšana**: vienmēr atsevišķi dublējiet šifrēšanas atslēgu, vēlams paroļu pārvaldniekā vai KMS.
 

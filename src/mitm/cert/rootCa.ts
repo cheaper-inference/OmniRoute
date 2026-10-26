@@ -71,3 +71,40 @@ export async function loadOrCreateMitmCa(
 
   return { key: ca.key, cert: ca.cert, keyPath, certPath };
 }
+
+/**
+ * Replace the persisted MITM root CA with a freshly generated one (operator
+ * "regenerate cert" under the root-CA model). Unlike
+ * {@link loadOrCreateMitmCa}, this always mints a new pair.
+ *
+ * The new pair is written to temp files first and then renamed over
+ * `ca.key`/`ca.crt`, so a generation failure never leaves the cert dir
+ * without a CA pair — which `decideCertMigration()` would read as "legacy
+ * leaf only" on an install that still has an old `server.crt`/`server.key`,
+ * silently flipping the cert model. The key is created `0o600`.
+ *
+ * Trust-store handling (untrusting the old CA, trusting the new one) is the
+ * caller's job — see `cert/regenerate.ts`.
+ */
+export async function rotateMitmCa(certDir: string = resolveMitmCertDir()): Promise<MitmCaPair> {
+  const { keyPath, certPath } = caPaths(certDir);
+  const ca = await generateMitmCa();
+
+  fs.mkdirSync(certDir, { recursive: true });
+  const suffix = `.rotate-${process.pid}-${Date.now()}`;
+  const tmpKey = `${keyPath}${suffix}`;
+  const tmpCert = `${certPath}${suffix}`;
+  try {
+    fs.writeFileSync(tmpKey, ca.key, { mode: 0o600 });
+    fs.chmodSync(tmpKey, 0o600);
+    fs.writeFileSync(tmpCert, ca.cert);
+    fs.renameSync(tmpKey, keyPath);
+    fs.renameSync(tmpCert, certPath);
+  } finally {
+    for (const leftover of [tmpKey, tmpCert]) {
+      if (fs.existsSync(leftover)) fs.rmSync(leftover, { force: true });
+    }
+  }
+
+  return { key: ca.key, cert: ca.cert, keyPath, certPath };
+}

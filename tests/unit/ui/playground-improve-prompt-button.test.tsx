@@ -1,17 +1,17 @@
 // @vitest-environment jsdom
-import React from "react";
+import React, { type SetStateAction } from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { DEFAULT_PARAMS } = await import(
-  "../../../src/app/(dashboard)/dashboard/playground/components/ParamSliders"
-);
-const { default: ImprovePromptButton } = await import(
-  "../../../src/app/(dashboard)/dashboard/playground/components/ImprovePromptButton"
-);
+import type { ConfigState } from "../../../src/app/(dashboard)/dashboard/playground/components/StudioConfigPane";
 
-const BASE_CONFIG = {
+const { DEFAULT_PARAMS } =
+  await import("../../../src/app/(dashboard)/dashboard/playground/components/ParamSliders");
+const { default: ImprovePromptButton } =
+  await import("../../../src/app/(dashboard)/dashboard/playground/components/ImprovePromptButton");
+
+const BASE_CONFIG: ConfigState = {
   endpoint: "chat.completions" as const,
   baseUrl: "http://localhost:20128",
   model: "openai/gpt-4o",
@@ -21,14 +21,18 @@ const BASE_CONFIG = {
 
 const containers: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElement }> = [];
 
+beforeEach(() => {
+  (
+    globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+  ).IS_REACT_ACT_ENVIRONMENT = true;
+});
+
 function renderButton(config = BASE_CONFIG, setConfig = vi.fn()): HTMLDivElement {
   const el = document.createElement("div");
   document.body.appendChild(el);
   const root = createRoot(el);
   act(() => {
-    root.render(
-      <ImprovePromptButton configState={config} setConfigState={setConfig} />,
-    );
+    root.render(<ImprovePromptButton configState={config} setConfigState={setConfig} />);
   });
   containers.push({ root, el });
   return el;
@@ -43,6 +47,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+// KEA-7886: the confirmation is the kit Dialog (ConfirmModal adapter), portaled to
+// document.body — dialog queries go to the document, not to the render container.
 describe("ImprovePromptButton", () => {
   it("renders the Improve prompt button", () => {
     const el = renderButton();
@@ -68,9 +74,11 @@ describe("ImprovePromptButton", () => {
     const el = renderButton();
     const btn = el.querySelector("[aria-label='Improve prompt using AI']") as HTMLButtonElement;
 
-    await act(async () => { btn.click(); });
+    await act(async () => {
+      btn.click();
+    });
 
-    const modal = el.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='dialog']");
     expect(modal).not.toBeNull();
     expect(modal?.textContent).toContain("Improve prompt");
   });
@@ -79,9 +87,11 @@ describe("ImprovePromptButton", () => {
     const el = renderButton();
     const btn = el.querySelector("[aria-label='Improve prompt using AI']") as HTMLButtonElement;
 
-    await act(async () => { btn.click(); });
+    await act(async () => {
+      btn.click();
+    });
 
-    const modal = el.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='dialog']");
     expect(modal?.textContent).toContain("quota");
   });
 
@@ -89,9 +99,11 @@ describe("ImprovePromptButton", () => {
     const el = renderButton();
     const btn = el.querySelector("[aria-label='Improve prompt using AI']") as HTMLButtonElement;
 
-    await act(async () => { btn.click(); });
+    await act(async () => {
+      btn.click();
+    });
 
-    const modal = el.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='dialog']");
     expect(modal?.textContent).toContain("openai/gpt-4o");
   });
 
@@ -100,13 +112,19 @@ describe("ImprovePromptButton", () => {
     const el = renderButton();
     const btn = el.querySelector("[aria-label='Improve prompt using AI']") as HTMLButtonElement;
 
-    await act(async () => { btn.click(); });
+    await act(async () => {
+      btn.click();
+    });
 
-    const cancelBtn = el.querySelector("[role='dialog'] button:first-child") as HTMLButtonElement;
-    await act(async () => { cancelBtn.click(); });
+    const cancelBtn = document.querySelector(
+      "[role='dialog'] button:first-child"
+    ) as HTMLButtonElement;
+    await act(async () => {
+      cancelBtn.click();
+    });
 
     // Modal should close
-    expect(el.querySelector("[role='dialog']")).toBeNull();
+    expect(document.querySelector("[role='dialog']")).toBeNull();
     expect(vi.mocked(fetch)).not.toHaveBeenCalled();
   });
 
@@ -124,26 +142,30 @@ describe("ImprovePromptButton", () => {
           new Response(JSON.stringify(mockResponse), {
             status: 200,
             headers: { "content-type": "application/json" },
-          }),
-        ),
-      ) as typeof fetch,
+          })
+        )
+      ) as typeof fetch
     );
 
     const setConfig = vi.fn();
     const el = renderButton(BASE_CONFIG, setConfig);
 
     const btn = el.querySelector("[aria-label='Improve prompt using AI']") as HTMLButtonElement;
-    await act(async () => { btn.click(); });
+    await act(async () => {
+      btn.click();
+    });
 
     // Click confirm (Improve button)
-    const modal = el.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='dialog']");
     const allBtns = modal?.querySelectorAll("button") ?? [];
     const improveBtn = Array.from(allBtns).find(
-      (b) => b.textContent?.includes("Improve") && !b.textContent?.includes("Improve prompt"),
+      (b) => b.textContent?.includes("Improve") && !b.textContent?.includes("Improve prompt")
     ) as HTMLButtonElement;
     expect(improveBtn).not.toBeNull();
 
-    await act(async () => { improveBtn.click(); });
+    await act(async () => {
+      improveBtn.click();
+    });
     await act(async () => {
       await Promise.resolve();
       await Promise.resolve();
@@ -151,13 +173,28 @@ describe("ImprovePromptButton", () => {
 
     // fetch should have been called with POST to improve-prompt
     expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
-    const [url, opts] = (vi.mocked(fetch) as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+    const [url, opts] = (vi.mocked(fetch) as ReturnType<typeof vi.fn>).mock.calls[0] as [
+      string,
+      RequestInit,
+    ];
     expect(url).toContain("improve-prompt");
     expect(opts.method).toBe("POST");
 
     // setConfigState should have been called with improved system prompt
     expect(setConfig).toHaveBeenCalledTimes(1);
-    const updatedConfig = setConfig.mock.calls[0][0] as typeof BASE_CONFIG;
+    const update = setConfig.mock.calls[0][0] as SetStateAction<ConfigState>;
+    const latestConfig: ConfigState = {
+      ...BASE_CONFIG,
+      baseUrl: "http://localhost:30128",
+      model: "latest-provider/model-latest",
+      provider: "latest-provider",
+      reasoning: { show: true, effortOptions: ["high"] },
+    };
+    const updatedConfig = typeof update === "function" ? update(latestConfig) : update;
     expect(updatedConfig.systemPrompt).toBe("You are a highly specialized assistant.");
+    expect(updatedConfig.baseUrl).toBe(latestConfig.baseUrl);
+    expect(updatedConfig.model).toBe(latestConfig.model);
+    expect(updatedConfig.provider).toBe(latestConfig.provider);
+    expect(updatedConfig.reasoning).toEqual(latestConfig.reasoning);
   });
 });

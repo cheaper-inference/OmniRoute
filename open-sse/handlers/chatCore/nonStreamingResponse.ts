@@ -4,7 +4,7 @@
  * deps, and the values the barrel reads afterwards leave through carry.
  */
 
-import { meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
+import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { readCpaAuthIndex } from "../chatCore/failureUsage.ts";
 
 import { createRoutingEvent, emitRoutingEvent } from "../../services/routing/index.ts";
@@ -42,6 +42,7 @@ export {
 };
 
 import { HTTP_STATUS } from "../../config/constants.ts";
+import { buildMalformedResponseDiagnostic } from "../../utils/responseShapeDiagnostic.ts";
 
 import { lockModel } from "../../services/accountFallback.ts";
 
@@ -49,6 +50,10 @@ import { buildPostCallGuardrailContext } from "../chatCore/postCallGuardrailCont
 import { buildNonStreamingResponseHeaders } from "../chatCore/nonStreamingResponseHeaders.ts";
 import { maybeWrapForcedNonStreamingResponsesJson } from "../chatCore/responsesJsonToSse.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
+import {
+  createRequestFamilyFallback,
+  modelAfterFamilyFallback,
+} from "../../services/modelFamilyFallbackPolicy.ts";
 import { runNonStreamingProviderLeg } from "../chatCore/nonStreamingProviderLeg.ts";
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import { finalizeToolLoopError } from "../chatCore/nonStreamingFinalization.ts";
@@ -63,6 +68,7 @@ import {
   toAntigravityDiagnosticPayload,
 } from "../../executors/antigravityUpstreamError.ts";
 import { routingFinishReason } from "../chatCore/routingFinishReason.ts";
+import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
 import { extractFacts } from "@/lib/memory/extraction";
 // The leaf body is unchanged from the barrel, so its closed-over values keep
@@ -83,7 +89,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     buildCacheUsageLogMeta,
     buildCostCtx,
     buildErrorBody,
-    calculateCost,
+    calculateCostDetailed,
     calibrationEstimatedInputTokens,
     claudePromptCacheLogMeta: _claudePromptCacheLogMeta,
     clientRawRequest,
@@ -195,6 +201,11 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     traceEnabled,
     videoBridgeObserved,
   } = deps;
+  const familyFallback = createRequestFamilyFallback(provider, {
+    headers: clientRawRequest?.headers,
+    hasApiKeyMetadata: Boolean(apiKeyInfo),
+    connectionId: () => String(getCurrentConnectionId() || connectionId || ""),
+  });
 
   let claudePromptCacheLogMeta,
     currentModel,
@@ -226,6 +237,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       currentModel = pipelineModel;
       triedModels.add(pipelineModel);
       return runProviderExecutionPipeline({
+        getNextFamilyFallback: familyFallback.getNext,
         policy,
         target: {
           provider,
@@ -247,6 +259,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             assertManagedLeaseFence(id);
           },
           getProviderCredentials,
+          allowedConnections: deps.allowedConnections ?? null,
         },
         wire: {
           body: translatedBody as Record<string, unknown>,
@@ -331,6 +344,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         : undefined,
       allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
       allowModelFallback: true,
+      hasApiKeyMetadata: Boolean(apiKeyInfo),
       executeProviderRequest: (modelToCall, allowDedup) =>
         executeProviderRequest(modelToCall, allowDedup),
       runProviderExecution: runNonStreamingPipeline,
@@ -385,7 +399,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         reqLogger.logTargetRequest(captured.url, captured.headers, captured.body);
       }
       reqLogger.logError(new Error(err.error || "Provider request failed"), finalBody);
-      const isNetworkThrow = Boolean(err.originalError);
+      const isNetworkThrow = Boolean(err.originalError) && errUpstreamBody == null;
       // #3229: Antigravity terminal failures are diagnosed from the bounded projection, never
       // from the upstream payload — see isAntigravityProvider in antigravityUpstreamError.ts.
       const isAgyProvider = isAntigravityProvider(provider);
@@ -394,7 +408,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? agyDiagnostic
         : isNetworkThrow
           ? undefined
-          : err.response;
+          : errUpstreamBody;
       if (isAgyProvider) {
         reqLogger.logProviderDiagnostic(agyDiagnostic);
       } else if (err.response && !isNetworkThrow) {
@@ -402,7 +416,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           err.status,
           err.response.statusText || "Error",
           err.response.headers,
-          err.response
+          persistedProviderErrorBody
         );
       }
       appendRequestLog({
@@ -768,9 +782,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? translatedResponse.usage
         : null;
     const costUsage = normalizeUsage(responseUsage);
-    const estimatedCost = costUsage
-      ? await calculateCost(provider, model, costUsage, { serviceTier: effectiveServiceTier })
-      : 0;
+    const costResult = costUsage
+      ? await calculateCostDetailed(provider, model, costUsage, {
+          serviceTier: effectiveServiceTier,
+        })
+      : null;
+    const estimatedCost = costResult?.costUsd ?? 0;
+    // A metered model with no price must not pass the dollar budget as $0.
+    const unpricedBudgetCost = isUnpricedMeteredCost(provider, costResult);
     const chatCostCtx = buildCostCtx(provider, model, usage, effectiveServiceTier, traceId);
 
     if (postCallGuardrails.blocked) {
@@ -796,7 +815,8 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         apiKeyInfo,
         meteredBudgetCost(provider, estimatedCost),
         chatCostCtx,
-        false
+        false,
+        unpricedBudgetCost
       );
       log?.warn?.(
         "GUARDRAIL",
@@ -827,8 +847,17 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     // this check runs after translation + sanitization + tool-call execution to catch
     // cases where a provider returns a structurally valid raw body that translates into
     // choices:[] or output:[] with no usable content (Responses API shape included).
-    const malformedTranslatedReason = detectMalformedNonStream(translatedResponse, provider);
+    const malformedTranslatedReason = detectMalformedNonStream(
+      translatedResponse,
+      provider,
+      hasTrustedEmptyTurn(providerResponse)
+    );
     if (malformedTranslatedReason) {
+      const malformedDiagnostic = buildMalformedResponseDiagnostic(
+        malformedTranslatedReason,
+        responseBody,
+        translatedResponse
+      );
       const totalLatency = Date.now() - startTime;
       const rawBytes = (() => {
         try {
@@ -870,6 +899,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         : sanitizedMalformedResponse;
       persistAttemptLogs({
         status: HTTP_STATUS.BAD_GATEWAY,
+        error: malformedDiagnostic,
         tokens: usage,
         responseBody: sanitizedMalformedResponse,
         providerRequest: finalBody || translatedBody,
@@ -962,7 +992,13 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       claudeCacheUsageMeta: cacheUsageLogMeta,
       cacheSource: "upstream",
     });
-    recordChatCallCost(apiKeyInfo, meteredBudgetCost(provider, estimatedCost), chatCostCtx, true);
+    recordChatCallCost(
+      apiKeyInfo,
+      meteredBudgetCost(provider, estimatedCost),
+      chatCostCtx,
+      true,
+      unpricedBudgetCost
+    );
 
     // === Quota Share POST-hook (B/F7) — fire-and-forget, fail-open ===
     await scheduleQuotaShareConsumption({
@@ -983,9 +1019,10 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       providerResponse: responseBody,
       clientResponse: translatedResponse,
     });
+    const responseModel = modelAfterFamilyFallback(model, currentModel, effectiveModel, finalBody);
     const responseHeaders = buildNonStreamingResponseHeaders({
       provider,
-      model,
+      model: responseModel,
       startTime,
       responseUsage,
       estimatedCost,
@@ -1000,7 +1037,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     // differs from the resolved backend id we advertised in the header, leaving
     // strict clients unable to reconcile the two. Rewrite body.model to `model`
     // FIRST, then let #1311 echo override it when the opt-in setting is on.
-    if (typeof model === "string" && model) echoModelInObject(translatedResponse, model);
+    if (responseModel) echoModelInObject(translatedResponse, responseModel);
     // #1311: echo the requested alias/combo name in the non-streaming response model.
     if (echoModel) echoModelInObject(translatedResponse, echoModel);
 
@@ -1058,11 +1095,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     return {
       response: {
         success: true,
-        response: maybeWrapForcedNonStreamingResponsesJson({
-          clientRequestedResponsesStream,
-          body: translatedResponse,
-          headers: responseHeaders,
-        }),
+        response: inheritEmptyTurnPolicy(
+          providerResponse,
+          maybeWrapForcedNonStreamingResponsesJson({
+            clientRequestedResponsesStream,
+            body: translatedResponse,
+            headers: responseHeaders,
+          })
+        ),
       },
       carry: {
         translatedBody,

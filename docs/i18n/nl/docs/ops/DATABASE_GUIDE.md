@@ -516,7 +516,7 @@ Als dit iets anders dan `ok` retourneert, **stop dan onmiddellijk met het gebrui
 Het `-wal`-bestand ontbreekt, maar `-shm` en de hoofddatabase zijn intact:
 
 ```bash
-# Wordt automatisch hersteld wanneer de database opnieuw wordt geopend
+# Wordt automatisch hersteld bij de volgende opening
 omniroute
 ```
 
@@ -533,21 +533,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Herstel vanuit een back-up:
 
 ```bash
-omniroute sync pull --merge   # of: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` downloadt alleen een volledig `.tar.gz`-archief van een actieve server
+(`GET /api/db-backups/exportAll`, operatorreferenties vereist); er wordt niets hersteld.
 
 ### Scenario 3: Encryptiesleutel verloren
 
-**Herstel is niet mogelijk** zonder de sleutel. De versleutelde velden zijn onleesbaar. Voeg alle providers handmatig opnieuw toe met nieuwe aanmeldgegevens.
+**Herstel is niet mogelijk** zonder de sleutel. De versleutelde velden zijn onleesbaar. Voeg alle providers handmatig opnieuw toe met nieuwe referenties.
 
-> **Maatregel**: Maak altijd afzonderlijk een back-up van de encryptiesleutel, bij voorkeur in een wachtwoordmanager of KMS.
+> **Beperkende maatregel**: Maak altijd afzonderlijk een back-up van de encryptiesleutel, bij voorkeur in een wachtwoordbeheerder of KMS.
 
 ### Scenario 4: Schijf vol
 
-SQLite retourneert `SQLITE_FULL`-fouten. Maak schijfruimte vrij en voer daarna het volgende uit:
+SQLite retourneert `SQLITE_FULL`-fouten. Maak schijfruimte vrij en voer vervolgens het volgende uit:
 
 ```bash
-# Maak een WAL-checkpoint om ruimte vrij te maken
+# Voer een checkpoint uit op de WAL om ruimte vrij te maken
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

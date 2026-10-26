@@ -2,7 +2,10 @@ name: Quality Gates
 
 on:
   push:
-    branches: [main, "release/**"]
+    # release/** pushes are covered by the PR run of each change plus Release-Green on the
+    # merged combination (see ci.yml for the 2026-10-18 measurement); the per-push run here
+    # only ever queued hosted slots and was cancelled by the next merge.
+    branches: [main]
   pull_request:
     branches: [main, "release/**"]
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, edited]
@@ -36,6 +39,8 @@ jobs:
       i18n: ${{ steps.classify.outputs.i18n }}
       workflow: ${{ steps.classify.outputs.workflow }}
       testsOnly: ${{ steps.classify.outputs.testsOnly }}
+      # Exposure only (one-CI-policy step 1, RFC #8084): no job depends on it yet.
+      domains: ${{ steps.classify.outputs.domains }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -47,6 +52,10 @@ jobs:
           node-version: ${{ env.CI_NODE_VERSION }}
       - name: Validate gate inventory
         run: npm run check:gate-manifest
+      - name: Validate recurring free catalog evidence
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: npm run check:free-catalog-evidence
       - id: classify
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -60,6 +69,7 @@ jobs:
               echo "i18n=true"
               echo "workflow=true"
               echo "testsOnly=false"
+              echo "domains=build,catalog,cli,core,db,docs,i18n,provider,routing,tests,ui,workflow"
             } >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -241,9 +251,11 @@ jobs:
           # Ratchet-mode gates append --ratchet. `cycles` belongs here since #15281
           # (69cb18dca8): check-cycles.mjs exits 1 on ANY cycle without --ratchet, and
           # the frozen ceiling lives in quality-baseline.json → metrics.cycles — same
-          # `check:cycles:ratchet` semantics ci.yml runs (base-red #15306).
+          # `check:cycles:ratchet` semantics ci.yml runs (base-red #15306). `boundary`
+          # caps the open-sse → src edge count (measure-boundary.mjs --ratchet, ceiling
+          # quality-baseline.json → metrics.boundaryOpenSseToSrc) — same as ci.yml lint.
           ratchet_gates=(
-            secrets vuln-ratchet workflows openapi-breaking cycles
+            secrets vuln-ratchet workflows openapi-breaking cycles boundary
           )
           failed=()
           for g in "${gates[@]}"; do
@@ -265,7 +277,16 @@ jobs:
           done
           for g in "${ratchet_gates[@]}"; do
             echo "::group::check:$g (ratchet)"
-            npm run "check:$g" -- --ratchet || failed+=("$g")
+            # boundary is base-relative on PR events, like file-size (#8522): the ceiling
+            # becomes max(baseline ceiling, edges on the PR base), so open-sse → src edges
+            # other merges added after the seed never red an innocent PR; only edges this
+            # PR adds block. workflow_dispatch (no PR base) keeps the absolute ceiling.
+            case "$g" in boundary) BASE_RELATIVE=1 ;; *) BASE_RELATIVE= ;; esac
+            if [ -n "$BASE_RELATIVE" ] && [ -n "${PR_BASE_SHA:-}" ]; then
+              npm run "check:$g" -- --ratchet --base-ref "$PR_BASE_SHA" || failed+=("$g")
+            else
+              npm run "check:$g" -- --ratchet || failed+=("$g")
+            fi
             echo "::endgroup::"
           done
           echo "::group::typecheck:core"
@@ -409,7 +430,7 @@ jobs:
       - name: Upload test results to Trunk (advisory)
         if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         continue-on-error: true
-        uses: trunk-io/analytics-uploader@14c0f18990953eecd01c9c5afe3cc63a73b6c371 # v2.1.5
+        uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
         with:
           junit-paths: trunk-junit/**/*.xml
           org-slug: omniroute

@@ -66,8 +66,22 @@ function mapArch(arch: string): string {
   return arch;
 }
 
+const GROK_CLIENT_VERSION_PATTERN =
+  /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+
 export function getGrokBuildClientVersion(): string {
-  return GROK_BUILD_DEFAULT_CLIENT_VERSION;
+  const raw = typeof process !== "undefined" ? process.env.GROK_CLI_CLIENT_VERSION || "" : "";
+  // Reject line breaks before trimming: this value is sent in HTTP headers.
+  if (/[\r\n]/.test(raw)) return GROK_BUILD_DEFAULT_CLIENT_VERSION;
+  const version = raw.trim();
+  if (!version || version.length > 128) return GROK_BUILD_DEFAULT_CLIENT_VERSION;
+  const match = GROK_CLIENT_VERSION_PATTERN.exec(version);
+  if (!match) return GROK_BUILD_DEFAULT_CLIENT_VERSION;
+  // SemVer permits leading zeros in build metadata, but not numeric prerelease identifiers.
+  if (match[4]?.split(".").some((identifier) => /^0[0-9]+$/.test(identifier))) {
+    return GROK_BUILD_DEFAULT_CLIENT_VERSION;
+  }
+  return version;
 }
 
 export function getGrokBuildUserAgent(): string {

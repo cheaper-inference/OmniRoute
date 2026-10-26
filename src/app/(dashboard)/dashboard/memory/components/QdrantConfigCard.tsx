@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useId, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import { Switch } from "@omniroute/ui-kit/switch";
+import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+import Modal from "@/shared/components/Modal";
+import Select from "@/shared/components/Select";
 
 interface QdrantSettings {
   enabled: boolean;
@@ -21,6 +28,8 @@ interface EmbeddingModelOption {
 
 export default function QdrantConfigCard() {
   const t = useTranslations("memory");
+  const embeddingModelId = useId();
+  const apiKeyId = useId();
   const [qdrant, setQdrant] = useState<QdrantSettings>({
     enabled: false,
     host: "",
@@ -57,6 +66,18 @@ export default function QdrantConfigCard() {
   // settings save and read the pre-save configuration) can never be applied
   // out of order.
   const healthSeqRef = useRef(0);
+  const saveStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      healthSeqRef.current += 1;
+      if (saveStatusTimerRef.current !== null) clearTimeout(saveStatusTimerRef.current);
+      saveStatusTimerRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -104,6 +125,10 @@ export default function QdrantConfigCard() {
 
   const save = useCallback(
     async (updates: Partial<QdrantSettings> & { apiKey?: string }) => {
+      if (saveStatusTimerRef.current !== null) {
+        clearTimeout(saveStatusTimerRef.current);
+        saveStatusTimerRef.current = null;
+      }
       const prev = qdrant;
       const next = { ...qdrant, ...updates };
       // Settings are changing, so any prior health result is stale: drop it and
@@ -128,8 +153,10 @@ export default function QdrantConfigCard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
+        if (!mountedRef.current) return;
         if (res.ok) {
           const data = await res.json().catch(() => next);
+          if (!mountedRef.current) return;
           setQdrant(data);
           setApiKeyInput("");
           setSaveStatus("saved");
@@ -143,16 +170,20 @@ export default function QdrantConfigCard() {
           healthSeqRef.current += 1;
           setHealth(null);
           void checkHealth();
-          setTimeout(() => setSaveStatus(""), 2000);
+          saveStatusTimerRef.current = setTimeout(() => {
+            saveStatusTimerRef.current = null;
+            setSaveStatus("");
+          }, 2000);
         } else {
           setQdrant(prev);
           setSaveStatus("error");
         }
       } catch {
+        if (!mountedRef.current) return;
         setQdrant(prev);
         setSaveStatus("error");
       } finally {
-        setSaving(false);
+        if (mountedRef.current) setSaving(false);
       }
     },
     [qdrant, checkHealth]
@@ -225,22 +256,21 @@ export default function QdrantConfigCard() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            database
-          </span>
+        <div className="p-2 rounded-lg bg-success/10 text-success shrink-0">
+          <Icon name="database" size={20} />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-text-main">{t("qdrant.title")}</h3>
           <p className="text-xs text-text-muted">{t("qdrant.description")}</p>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             data-testid="qdrant-setup-tutorial"
             onClick={() => setTutorialOpen(true)}
-            className="mt-1 text-xs font-medium text-emerald-500 hover:underline"
+            className="mt-1 h-auto px-0 text-xs font-medium text-success hover:underline"
           >
             Como configurar o Qdrant corretamente
-          </button>
+          </Button>
         </div>
         <span
           className={`inline-flex items-center gap-1.5 text-xs font-medium ${
@@ -249,8 +279,8 @@ export default function QdrantConfigCard() {
               : health === null
                 ? "text-text-muted"
                 : health.ok
-                  ? "text-emerald-500"
-                  : "text-red-500"
+                  ? "text-success"
+                  : "text-error"
           }`}
         >
           <span
@@ -260,8 +290,8 @@ export default function QdrantConfigCard() {
                 : health === null
                   ? "bg-border"
                   : health.ok
-                    ? "bg-emerald-500"
-                    : "bg-red-500"
+                    ? "bg-success"
+                    : "bg-error"
             }`}
           />
           {qdrant.enabled
@@ -275,46 +305,40 @@ export default function QdrantConfigCard() {
       </div>
 
       {/* Tier 1 vs Tier 2 guidance */}
-      <div className="mb-4 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-xs text-text-muted leading-relaxed">
+      <div className="mb-4 p-3 rounded-lg bg-success/10 border border-success/20 text-xs text-text-muted leading-relaxed">
         {t("qdrant.banner")}
       </div>
 
       {/* Enable toggle + test connection */}
-      <div className="flex items-center justify-between p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+      <div className="flex items-center justify-between p-4 rounded-lg bg-bg-subtle border border-border/30 mb-4">
         <div>
           <p className="text-sm font-medium">{t("qdrant.enableLabel")}</p>
           <p className="text-xs text-text-muted mt-0.5">{t("qdrant.enableDesc")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             data-testid="qdrant-test-connection"
             onClick={checkHealth}
             disabled={checking || saving}
-            className="px-3 h-8 text-xs font-medium rounded-lg bg-white/5 border border-border/60 hover:bg-white/10 disabled:opacity-50 transition-colors"
+            className="text-xs"
           >
             {checking ? t("qdrant.testing") : t("qdrant.testConnection")}
-          </button>
-          <button
+          </Button>
+          <Switch
             data-testid="qdrant-enabled-switch"
-            onClick={() => save({ enabled: !qdrant.enabled })}
-            disabled={saving || (!qdrant.enabled && !searchValidated)}
-            role="switch"
+            aria-label={t("qdrant.enableLabel")}
+            checked={qdrant.enabled}
             aria-checked={qdrant.enabled}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              qdrant.enabled ? "bg-emerald-500" : "bg-border"
-            }`}
-          >
-            <span
-              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                qdrant.enabled ? "translate-x-5" : "translate-x-0"
-              }`}
-            />
-          </button>
+            onCheckedChange={() => save({ enabled: !qdrant.enabled })}
+            disabled={saving || (!qdrant.enabled && !searchValidated)}
+          />
         </div>
       </div>
 
       {!qdrant.enabled && !searchValidated && (
-        <p className="-mt-2 mb-4 text-xs text-amber-500">
+        <p className="-mt-2 mb-4 text-xs text-warning">
           Execute um teste de busca bem-sucedido antes de ativar. Ele valida o modelo de embedding e
           a dimensão da coleção.
         </p>
@@ -322,18 +346,16 @@ export default function QdrantConfigCard() {
 
       {health && (
         <div
-          className={`mb-4 text-xs font-medium flex items-center gap-1 ${health.ok ? "text-emerald-500" : "text-red-500"}`}
+          className={`mb-4 text-xs font-medium flex items-center gap-1 ${health.ok ? "text-success" : "text-error"}`}
         >
-          <span className="material-symbols-outlined text-[14px]">
-            {health.ok ? "check_circle" : "error"}
-          </span>
+          <Icon name={health.ok ? "check_circle" : "error"} size={14} />
           {health.ok
             ? t("qdrant.healthOk", { latencyMs: health.latencyMs })
             : (health.error ?? t("qdrant.healthError"))}
         </div>
       )}
       {health?.collection && (
-        <div className="mb-4 rounded-lg border border-border/50 bg-surface/30 p-3 text-xs text-text-muted">
+        <div className="mb-4 rounded-lg border border-border/50 bg-bg-subtle p-3 text-xs text-text-muted">
           {health.collection.exists ? (
             <>
               Coleção compatível com vetores de dimensão{" "}
@@ -351,29 +373,29 @@ export default function QdrantConfigCard() {
       )}
 
       {saveStatus === "saved" && (
-        <div className="mb-4 text-xs font-medium text-emerald-500 flex items-center gap-1">
-          <span className="material-symbols-outlined text-[14px]">check_circle</span>
+        <div className="mb-4 text-xs font-medium text-success flex items-center gap-1">
+          <Icon name="check_circle" size={14} />
           {t("qdrant.saved")}
         </div>
       )}
       {saveStatus === "error" && (
-        <div className="mb-4 text-xs font-medium text-red-500">{t("qdrant.saveError")}</div>
+        <div className="mb-4 text-xs font-medium text-error">{t("qdrant.saveError")}</div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30">
-          <label className="text-xs font-medium block mb-1.5">{t("qdrant.hostLabel")}</label>
-          <input
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+          <Input
+            label={t("qdrant.hostLabel")}
+            hint={t("qdrant.hostHelp")}
             value={qdrant.host}
             onChange={(e) => setQdrant((s) => ({ ...s, host: e.target.value }))}
             placeholder="http://127.0.0.1"
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            inputClassName="font-mono"
           />
-          <p className="text-[11px] text-text-muted mt-1.5">{t("qdrant.hostHelp")}</p>
         </div>
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30">
-          <label className="text-xs font-medium block mb-1.5">{t("qdrant.portLabel")}</label>
-          <input
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+          <Input
+            label={t("qdrant.portLabel")}
             value={qdrant.port}
             type="number"
             onChange={(e) =>
@@ -383,113 +405,118 @@ export default function QdrantConfigCard() {
               }))
             }
             placeholder="6333"
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            inputClassName="font-mono"
           />
         </div>
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30">
-          <label className="text-xs font-medium block mb-1.5">{t("qdrant.collectionLabel")}</label>
-          <input
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+          <Input
+            label={t("qdrant.collectionLabel")}
+            hint={t("qdrant.collectionHelp")}
             value={qdrant.collection}
             onChange={(e) => setQdrant((s) => ({ ...s, collection: e.target.value }))}
             placeholder="omniroute_memory"
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            inputClassName="font-mono"
           />
-          <p className="text-[11px] text-text-muted mt-1.5">{t("qdrant.collectionHelp")}</p>
         </div>
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30">
-          <label className="text-xs font-medium block mb-1.5">
-            {t("qdrant.embeddingModelLabel")}
-          </label>
-          {embeddingOptions.length > 0 && (
-            <select
-              value=""
-              onChange={(e) => {
-                if (e.target.value) setQdrant((s) => ({ ...s, embeddingModel: e.target.value }));
-              }}
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm mb-2 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="">{t("qdrant.quickSelectModel")}</option>
-              {embeddingOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.value}
-                </option>
-              ))}
-            </select>
-          )}
-          <input
-            value={qdrant.embeddingModel}
-            onChange={(e) => setQdrant((s) => ({ ...s, embeddingModel: e.target.value }))}
-            placeholder="openai/text-embedding-3-small"
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          />
-          <p className="text-[11px] text-text-muted mt-1.5">{t("qdrant.embeddingModelHelp")}</p>
-        </div>
-        <div className="p-3 rounded-lg bg-surface/30 border border-border/30 md:col-span-2">
-          <label className="text-xs font-medium block mb-1.5">
-            API Key ({t("qdrant.optional")}){" "}
-            {qdrant.hasApiKey && qdrant.apiKeyMasked ? (
-              <span className="text-text-muted font-mono">{qdrant.apiKeyMasked}</span>
-            ) : null}
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="password"
-              value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
-              placeholder={
-                qdrant.hasApiKey ? t("qdrant.apiKeyKeepPlaceholder") : t("qdrant.apiKeyOptional")
-              }
-              className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-            {qdrant.hasApiKey && (
-              <button
-                onClick={() => save({ apiKey: "" })}
-                disabled={saving}
-                className="px-3 py-2 text-sm font-medium rounded-lg bg-white/5 border border-border/60 hover:bg-white/10 disabled:opacity-50"
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30">
+          <Field label={t("qdrant.embeddingModelLabel")} htmlFor={embeddingModelId}>
+            {embeddingOptions.length > 0 && (
+              <Select
+                value=""
+                aria-label={t("qdrant.quickSelectModel")}
+                onChange={(e) => {
+                  if (e.target.value) setQdrant((s) => ({ ...s, embeddingModel: e.target.value }));
+                }}
+                className="mb-2"
               >
-                {t("qdrant.removeApiKey")}
-              </button>
+                <option value="">{t("qdrant.quickSelectModel")}</option>
+                {embeddingOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.value}
+                  </option>
+                ))}
+              </Select>
             )}
-            <button
-              onClick={() => save(apiKeyInput.trim() ? { apiKey: apiKeyInput } : {})}
-              disabled={saving}
-              className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50"
-            >
-              {saving ? t("saving") : t("save")}
-            </button>
-          </div>
+            <Input
+              id={embeddingModelId}
+              hint={t("qdrant.embeddingModelHelp")}
+              value={qdrant.embeddingModel}
+              onChange={(e) => setQdrant((s) => ({ ...s, embeddingModel: e.target.value }))}
+              placeholder="openai/text-embedding-3-small"
+              inputClassName="font-mono"
+            />
+          </Field>
+        </div>
+        <div className="p-3 rounded-lg bg-bg-subtle border border-border/30 md:col-span-2">
+          <Field
+            htmlFor={apiKeyId}
+            label={
+              <>
+                API Key ({t("qdrant.optional")}){" "}
+                {qdrant.hasApiKey && qdrant.apiKeyMasked ? (
+                  <span className="text-text-muted font-mono">{qdrant.apiKeyMasked}</span>
+                ) : null}
+              </>
+            }
+          >
+            <div className="flex gap-2">
+              <Input
+                id={apiKeyId}
+                type="password"
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                placeholder={
+                  qdrant.hasApiKey ? t("qdrant.apiKeyKeepPlaceholder") : t("qdrant.apiKeyOptional")
+                }
+                className="flex-1"
+                inputClassName="font-mono"
+              />
+              {qdrant.hasApiKey && (
+                <Button variant="outline" onClick={() => save({ apiKey: "" })} disabled={saving}>
+                  {t("qdrant.removeApiKey")}
+                </Button>
+              )}
+              <Button
+                onClick={() => save(apiKeyInput.trim() ? { apiKey: apiKeyInput } : {})}
+                disabled={saving}
+              >
+                {saving ? t("saving") : t("save")}
+              </Button>
+            </div>
+          </Field>
         </div>
       </div>
 
       {/* Search test */}
-      <div className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-3">
+      <div className="p-4 rounded-lg bg-bg-subtle border border-border/30 mb-3">
         <p className="text-sm font-medium mb-2">{t("qdrant.searchTestTitle")}</p>
         <div className="flex gap-2">
-          <input
+          <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("qdrant.searchPlaceholder")}
+            aria-label={t("qdrant.searchTestTitle")}
             onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="flex-1"
           />
-          <button
+          <Button
+            variant="outline"
             data-testid="qdrant-search-test"
             onClick={runSearch}
             disabled={searching || !searchQuery.trim()}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-white/5 border border-border/60 hover:bg-white/10 disabled:opacity-50"
           >
             {searching ? t("qdrant.searching") : t("qdrant.search")}
-          </button>
+          </Button>
         </div>
         {searchResults.length > 0 && (
           <div className="mt-3 space-y-2">
             {searchResults.map((r) => (
               <div
                 key={r.id}
-                className="p-2 rounded bg-background/40 border border-border/40 flex items-center justify-between"
+                className="p-2 rounded bg-bg/40 border border-border/40 flex items-center justify-between"
               >
                 <span className="text-xs font-mono text-text-muted truncate">{r.id}</span>
-                <span className="text-xs font-mono text-emerald-400 shrink-0">
+                <span className="text-xs font-mono text-success shrink-0">
                   {r.score.toFixed(4)}
                 </span>
               </div>
@@ -499,67 +526,50 @@ export default function QdrantConfigCard() {
       </div>
 
       {/* Cleanup */}
-      <div className="p-4 rounded-lg bg-surface/30 border border-border/30">
+      <div className="p-4 rounded-lg bg-bg-subtle border border-border/30">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium">{t("qdrant.cleanupTitle")}</p>
             <p className="text-xs text-text-muted mt-0.5">{t("qdrant.cleanupDesc")}</p>
           </div>
-          <button
+          <Button
+            variant="outline"
             data-testid="qdrant-cleanup"
             onClick={runCleanup}
             disabled={cleanupLoading}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-white/5 border border-border/60 hover:bg-white/10 disabled:opacity-50"
           >
             {cleanupLoading ? t("qdrant.cleaning") : t("qdrant.cleanNow")}
-          </button>
+          </Button>
         </div>
         {cleanupMsg && <p className="mt-2 text-xs text-text-muted">{cleanupMsg}</p>}
       </div>
-      {tutorialOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Tutorial de configuração do Qdrant"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-        >
-          <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-background p-6 shadow-xl">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h4 className="text-lg font-semibold">Tutorial rápido: memória com Qdrant</h4>
-                <p className="mt-2 text-sm text-text-muted">
-                  O Qdrant guarda vetores e metadados das memórias para recuperar contexto
-                  relevante. Ele não comprime tokens diretamente; a economia é indireta, ao evitar
-                  contexto sem relação com a solicitação.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setTutorialOpen(false)}
-                aria-label="Fechar tutorial"
-              >
-                ×
-              </button>
-            </div>
-            <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm text-text-muted">
-              <li>Proteja o servidor com HTTPS e API key antes de uso produtivo.</li>
-              <li>
-                Informe host, porta, coleção e um modelo no formato provider/model com credencial
-                configurada.
-              </li>
-              <li>
-                A dimensão da coleção precisa ser igual à dimensão produzida pelo modelo. Uma
-                coleção existente de 2048 dimensões não aceita embeddings de 1536 dimensões.
-              </li>
-              <li>Salve, teste a conexão e execute o teste de busca. Só então ative o Qdrant.</li>
-            </ol>
-            <pre className="mt-5 overflow-x-auto rounded-lg bg-surface p-3 text-xs">{`PUT /collections/minha_memoria\n{\n  "vectors": { "size": <dimensão-do-modelo>, "distance": "Cosine" }\n}`}</pre>
-            <p className="mt-5 text-xs text-text-muted">
-              Créditos: Rafa Martins — rafacpti@gmail.com
-            </p>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={tutorialOpen}
+        onClose={() => setTutorialOpen(false)}
+        size="full"
+        className="max-w-2xl"
+        title="Tutorial rápido: memória com Qdrant"
+      >
+        <p className="text-sm text-text-muted">
+          O Qdrant guarda vetores e metadados das memórias para recuperar contexto relevante. Ele
+          não comprime tokens diretamente; a economia é indireta, ao evitar contexto sem relação com
+          a solicitação.
+        </p>
+        <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm text-text-muted">
+          <li>Proteja o servidor com HTTPS e API key antes de uso produtivo.</li>
+          <li>
+            Informe host, porta, coleção e um modelo no formato provider/model com credencial
+            configurada.
+          </li>
+          <li>
+            A dimensão da coleção precisa ser igual à dimensão produzida pelo modelo. Uma coleção
+            existente de 2048 dimensões não aceita embeddings de 1536 dimensões.
+          </li>
+          <li>Salve, teste a conexão e execute o teste de busca. Só então ative o Qdrant.</li>
+        </ol>
+        <pre className="mt-5 overflow-x-auto rounded-lg bg-bg-subtle p-3 text-xs">{`PUT /collections/minha_memoria\n{\n  "vectors": { "size": <dimensão-do-modelo>, "distance": "Cosine" }\n}`}</pre>
+        <p className="mt-5 text-xs text-text-muted">Créditos: Rafa Martins — rafacpti@gmail.com</p>
+      </Modal>
     </Card>
   );
 }

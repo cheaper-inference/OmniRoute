@@ -21,24 +21,26 @@ tanpa mencipta modul baharu.
 
 ## 1. Tindanan Teknologi
 
-| Aspek          | Pilihan                                                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Kerangka web   | **Next.js 16** (App Router, output kendiri, tiada perisian tengah global)                                                |
-| Bahasa         | **TypeScript 6.0+** — sasaran `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                   |
-| Masa jalan     | **Node.js** `>=22.22.2 <23` atau `>=24.0.0 <27` (dikuatkuasakan melalui `engines` + `SUPPORTED_NODE_RANGE`)              |
-| Pangkalan data | **SQLite** melalui `better-sqlite3` (tunggal, penjurnalan WAL)                                                           |
-| Desktop        | **Electron 41** + `electron-builder` 26.10 (ruang kerja berasingan di `electron/`)                                       |
-| Ujian          | **Pelaksana ujian asli Node** (unit/integrasi), **Vitest** (MCP, autoCombo, cache), **Playwright** (e2e + protocols-e2e) |
-| Binaan         | Next.js kendiri melalui `scripts/build/build-next-isolated.mjs`                                                          |
-| Lint/format    | Konfigurasi rata ESLint + Prettier (`lint-staged` melalui pra-komit Husky)                                               |
-| Sistem modul   | ESM di semua tempat (`"type": "module"`)                                                                                 |
-| Ruang kerja    | Ruang kerja npm — `open-sse` ialah satu-satunya subruang kerja                                                           |
+| Aspek            | Pilihan                                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Rangka kerja web | **Next.js 16** (App Router, output kendiri, tanpa perisian tengah global)                                                   |
+| Bahasa           | **TypeScript 6.0+** — sasaran `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                      |
+| Masa jalan       | **Node.js** `>=22.22.2 <23` atau `>=24.0.0 <27` (dikuatkuasakan melalui `engines` + `SUPPORTED_NODE_RANGE`)                 |
+| Pangkalan data   | **SQLite** melalui `better-sqlite3` (tunggal, penjurnalan WAL)                                                              |
+| Desktop          | **Electron 41** + `electron-builder` 26.10 (ruang kerja berasingan di `electron/`)                                          |
+| Ujian            | **Pelaksana ujian asli Node** (unit/integrasi), **Vitest** (MCP, autoCombo, cache), **Playwright** (e2e + protocols-e2e)    |
+| Binaan           | Next.js kendiri melalui `scripts/build/build-next-isolated.mjs`                                                             |
+| Lint/format      | Konfigurasi rata ESLint + Prettier (`lint-staged` melalui pra-komit Husky)                                                  |
+| Sistem modul     | ESM di seluruh sistem (`"type": "module"`)                                                                                  |
+| UI papan pemuka  | **Tailwind CSS 4** + **Keak CI UI Kit** yang disertakan bersama (`packages/ui-kit`), ikon Lucide — lihat `DESIGN_SYSTEM.md` |
+| Ruang kerja      | ruang kerja npm — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                    |
 
 Alias laluan (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
 Port HTTP lalai: **`20128`** (API dan papan pemuka berkongsi proses yang sama). Direktori
 data ialah pemboleh ubah persekitaran `DATA_DIR`, dengan nilai lalai `~/.omniroute/`.
@@ -51,10 +53,11 @@ data ialah pemboleh ubah persekitaran `DATA_DIR`, dengan nilai lalai `~/.omnirou
 OmniRoute/
 ├── src/                  Aplikasi Next.js (App Router, pustaka, domain, pelayan, dikongsi)
 ├── open-sse/             Ruang kerja enjin penstriman (@omniroute/open-sse)
-├── electron/             Pembalut desktop (proses utama + pramuat Electron 41)
+├── packages/             Ruang kerja: ui-kit (Kit UI Keak CI yang disertakan), browser-pool
+├── electron/             Pembalut desktop (Electron 41 utama + pramuat)
 ├── bin/                  Titik masuk CLI (omniroute, reset-password)
-├── tests/                Unit, integrasi, e2e, protocols-e2e, penterjemah, keselamatan, lekapan
-├── scripts/              Skrip bantuan binaan, penyegerakan, semakan, migrasi dan masa jalan
+├── tests/                Unit, penyepaduan, e2e, protocols-e2e, penterjemah, keselamatan, lekapan
+├── scripts/              Skrip pembinaan, penyegerakan, semakan, migrasi dan pembantu masa jalan
 ├── docs/                 Dokumentasi awam (direktori ini)
 ├── public/               Aset statik, manifes PWA, pekerja perkhidmatan
 ├── config/               Sampel konfigurasi masa jalan
@@ -72,9 +75,9 @@ OmniRoute/
 
 ```
 src/
-├── app/                  Halaman App Router + laluan API
+├── app/                  Halaman Penghala Aplikasi + laluan API
 ├── lib/                  Pustaka teras (DB, pengesahan, OAuth, kemahiran, memori, …)
-├── domain/               Lapisan domain tulen (dasar, sandaran, kos, sekatan, …)
+├── domain/               Lapisan domain tulen (dasar, sandaran, kos, penguncian, …)
 ├── server/               Modul khusus pelayan (authz, cors, pengesahan)
 ├── shared/               Jenis, pemalar, pengesahan, kontrak, utiliti (selamat merentas sempadan)
 ├── mitm/                 Pembantu proksi orang tengah untuk penyepaduan CLI
@@ -84,25 +87,25 @@ src/
 ├── middleware/           Utiliti perisian tengah peringkat laluan (bukan perisian tengah global Next.js)
 ├── scripts/              Skrip dalam pepohon yang boleh diimport oleh kod aplikasi
 ├── types/                Jenis TS ambien dan dikongsi
-├── i18n/                 Himpunan lokal
+├── i18n/                 Himpunan penempatan
 ├── instrumentation.ts    Cangkuk instrumentasi Next.js
 ├── instrumentation-node.ts
-└── proxy.ts              Pembantu pemula proksi peringkat atas
+└── proxy.ts              Pembantu pemula proksi peringkat teratas
 ```
 
-### 3.1 `src/app/` — App Router
+### 3.1 `src/app/` — Penghala Aplikasi
 
-App Router mendedahkan kedua-dua UI papan pemuka dan API HTTP awam/pengurusan.
+Penghala Aplikasi menyediakan kedua-dua UI papan pemuka dan API HTTP awam/pengurusan.
 **Tiada perisian tengah global** — pemintasan dilakukan bagi setiap laluan.
 
-Segmen peringkat atas di bawah `src/app/`:
+Segmen peringkat teratas di bawah `src/app/`:
 
 | Laluan                                                                        | Tujuan                                              |
 | ----------------------------------------------------------------------------- | --------------------------------------------------- |
 | `api/`                                                                        | Semua laluan API HTTP (lihat pecahan di bawah)      |
-| `a2a/`                                                                        | Titik akhir JSON-RPC 2.0 A2A (`POST /a2a`)          |
+| `a2a/`                                                                        | Titik akhir A2A JSON-RPC 2.0 (`POST /a2a`)          |
 | `.well-known/agent.json/`                                                     | Dokumen penemuan Kad Ejen A2A                       |
-| `(dashboard)/`                                                                | UI papan pemuka (kumpulan laluan, tiada awalan URL) |
+| `(dashboard)/`                                                                | UI papan pemuka (kumpulan laluan, tanpa awalan URL) |
 | `auth/`, `login/`, `forgot-password/`, `callback/`                            | Aliran pengesahan                                   |
 | `landing/`                                                                    | Halaman pemasaran/pendaratan                        |
 | `docs/`                                                                       | Pemapar dokumentasi API terbenam                    |
@@ -121,7 +124,7 @@ Segmen peringkat atas di bawah `src/app/`:
 `translator`, `usage`, `webhooks`, serta `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx` akar.
 
-#### 3.1.2 `src/app/api/` — Kumpulan API peringkat atas
+#### 3.1.2 `src/app/api/` — Kumpulan API peringkat teratas
 
 ```
 src/app/api/
@@ -186,8 +189,8 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Pengurusan Perkhidmatan Terbenam
 
 Laluan untuk memasang, memulakan, menghentikan dan memantau 9Router serta CLIProxyAPI.
-Semua laluan dikelaskan sebagai **LOCAL_ONLY** (gelung balik sahaja, peraturan tegas #17) kerana laluan ini
-boleh menjalankan `npm install` dan mencetuskan proses anak.
+Semua laluan diklasifikasikan sebagai **LOCAL_ONLY** (gelung balik sahaja, peraturan tegas #17) kerana laluan ini
+boleh menggunakan `npm install` dan mencipta proses anak.
 
 ```
 src/app/api/services/
@@ -211,7 +214,7 @@ src/app/api/services/
 │   ├── status/route.ts     GET  — status langsung + DB + metadata versi
 │   └── auto-start/route.ts POST — togol bendera auto_start
 └── [name]/
-    └── logs/route.ts       GET  — ekor log SSE (dikongsi oleh semua perkhidmatan)
+    └── logs/route.ts       GET  — penghujung log SSE (dikongsi oleh semua perkhidmatan)
 ```
 
 UI papan pemuka yang sepadan:
@@ -221,63 +224,63 @@ Proksi songsang untuk UI terbenam 9Router:
 
 Kupasan mendalam: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — API awam serasi OpenAI
+#### 3.1.3 `src/app/api/v1/` — API awam yang serasi dengan OpenAI
 
 ```
 v1/
 ├── accounts/[id]/                       carian akaun
-├── agents/tasks/[id]/, agents/tasks/    titik akhir tugas bercirikan A2A
+├── agents/tasks/[id]/, agents/tasks/    titik akhir tugas berasaskan A2A
 ├── api/                                 pembantu API dalaman yang didedahkan di bawah v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
-├── batches/[id]/{cancel}, batches/      API Kelompok OpenAI
-├── chat/completions/                    Pelengkapan Sembang (titik akhir utama)
-├── completions/                         Pelengkapan teks legasi
-├── embeddings/                          Pembenaman
-├── files/[id]/, files/                  API Fail
-├── _helpers/                            Pembantu laluan dikongsi (tiada URL awam)
-├── images/{edits, generations}/         Penjanaan + penyuntingan imej
-├── issues/                              Titik akhir pembantu triage
-├── management/{proxies}/                Laluan berskop pengurusan dalam v1
-├── messages/{count_tokens}/             Keserasian mesej gaya Anthropic
-├── models/                              Penyenaraian model (`route.ts`, `catalog.ts`)
-├── moderations/                         Penyederhanaan
-├── music/                               Penjanaan muzik
-├── providers/[provider]/                Operasi mengikut penyedia
-├── quotas/{check}                       Probe kuota
-├── registered-keys/                     Pentadbir kunci berdaftar
-├── rerank/                              Penyusunan semula kedudukan
-├── responses/[...path]/                 API Respons OpenAI (tangkap semua)
-├── search/                              Carian web
-├── videos/                              Penjanaan video
-├── ws/                                  Jambatan WebSocket
-└── route.ts                             Pengendali indeks
+├── batches/[id]/{cancel}, batches/      API OpenAI Batches
+├── chat/completions/                    Chat Completions (titik akhir utama)
+├── completions/                         pelengkapan teks legasi
+├── embeddings/                          pembenaman
+├── files/[id]/, files/                  API Files
+├── _helpers/                            pembantu laluan dikongsi (tiada URL awam)
+├── images/{edits, generations}/         penjanaan + penyuntingan imej
+├── issues/                              titik akhir pembantu pengelasan
+├── management/{proxies}/                laluan berskop pengurusan dalam v1
+├── messages/{count_tokens}/             keserasian mesej gaya Anthropic
+├── models/                              penyenaraian model (`route.ts`, `catalog.ts`)
+├── moderations/                         penyederhanaan
+├── music/                               penjanaan muzik
+├── providers/[provider]/                operasi mengikut penyedia
+├── quotas/{check}                       semakan kuota
+├── registered-keys/                     pentadbiran kunci berdaftar
+├── rerank/                              penyusunan semula kedudukan
+├── responses/[...path]/                 API OpenAI Responses (tangkap semua)
+├── search/                              carian web
+├── videos/                              penjanaan video
+├── ws/                                  jambatan WebSocket
+└── route.ts                             pengendali indeks
 ```
 
 Setiap fail laluan mengikut corak yang sama:
 
 ```
-Laluan → Praterbang CORS → Pengesahan badan Zod → pengesahan pilihan
-       → Penguatkuasaan dasar kunci API → delegasi pengendali (open-sse)
+Laluan → prapenerbangan CORS → pengesahan badan Zod → pengesahan pilihan
+       → penguatkuasaan dasar kunci API → delegasi pengendali (open-sse)
 ```
 
-`v1beta/` ialah permukaan keserasian gaya Gemini (pembalut nipis yang menterjemah kepada
+`v1beta/` ialah permukaan keserasian gaya Gemini (pembalut nipis yang menterjemahkan kepada
 saluran paip `open-sse/handlers/` yang sama).
 
 ### 3.2 `src/lib/` — Pustaka teras
 
-Sentiasa import data, penyegerakan, OAuth, kemahiran, memori dan sebagainya melalui modul ini.
-Jadual tersebut mengumpulkan direktori sebenar dan fail peringkat atas yang penting.
+Sentiasa import data, penyegerakan, OAuth, kemahiran, memori dan sebagainya melalui modul ini. Jadual
+menghimpunkan direktori sebenar dan fail peringkat teratas yang penting.
 
 | Modul             | Tujuan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`            | Pelayan protokol A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 kemahiran: analisis kos, laporan kesihatan, penemuan penyedia, pengurusan kuota, penghalaan pintar, senarai keupayaan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `acp/`            | Protokol Kawalan Ejen: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `api/`            | Pembantu API dalaman: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `auth/`           | `managementPassword.ts` (penetapan semula kata laluan / pencincangan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `batches/`        | Perkhidmatan OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `catalog/`        | Penyegerakan katalog OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `cloudAgent/`     | Daftar ejen awan: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `combos/`         | Pembantu peleraian gabungan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `combos/`         | Pembantu resolusi kombo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `compliance/`     | Audit + audit penyedia: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `config/`         | Perekat konfigurasi masa jalan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `db/`             | Modul domain SQLite (lihat §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -297,21 +300,21 @@ Jadual tersebut mengumpulkan direktori sebenar dan fail peringkat atas yang pent
 | `resilience/`     | `settings.ts` — tetapan untuk pemutus litar, tempoh bertenang, penguncian                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `runtime/`        | Pengesanan ciri masa jalan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `services/`       | Rangka kerja perkhidmatan terbenam: `ServiceSupervisor.ts` (penyelia proses anak generik dengan kunci operasi, penimbal cincin, pemeriksa kesihatan), `bootstrap.ts` (pendaftaran peringkat proses dan permulaan automatik), `registry.ts` (peta alat → penyelia), `apiKey.ts` (storan kunci AES-256-GCM), `modelSync.ts` (penyegerakan model berkala), `ringBuffer.ts` (penimbal log bulat 5 MB), `healthCheck.ts` (prob kesihatan HTTP), `types.ts`, `embedWsProxy.ts` (proksi WebSocket), `installers/{ninerouter,cliproxy}.ts`. Lihat `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                                 |
+| `services/`       | Rangka kerja perkhidmatan terbenam: `ServiceSupervisor.ts` (penyelia proses anak generik dengan kunci operasi, penimbal gelang, pemeriksa kesihatan), `bootstrap.ts` (pendaftaran aras proses dan permulaan automatik), `registry.ts` (pemetaan alat → penyelia), `apiKey.ts` (storan kunci AES-256-GCM), `modelSync.ts` (penyegerakan model berkala), `ringBuffer.ts` (penimbal log kitaran 5 MB), `healthCheck.ts` (prob kesihatan HTTP), `types.ts`, `embedWsProxy.ts` (proksi WebSocket), `installers/{ninerouter,cliproxy}.ts`. Lihat `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                                |
 | `agentSkills/`    | Katalog + penjana Kemahiran Ejen: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → menulis `skills/{id}/SKILL.md`), `openapiParser.ts` (mengekstrak titik akhir REST daripada spesifikasi OpenAPI), `cliRegistryParser.ts` (mengekstrak subperintah CLI daripada bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Digunakan oleh laluan REST (`/api/agent-skills/*`), alat MCP (`omniroute_agent_skills_*`), dan kemahiran A2A `list-capabilities`. Lihat [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
 | `skills/`         | Rangka kerja kemahiran: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, serta `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `spend/`          | `batchWriter.ts` (penimbal tulis-kemudian)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `sync/`           | `bundle.ts`, `tokens.ts` (Penyegerakan Awan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `system/`         | Pembantu peringkat sistem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `translator/`     | Perekat penterjemah peringkat atas (mewakilkan kepada `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `translator/`     | Penghubung penterjemah peringkat atasan (mewakilkan kepada `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `usage/`          | Perakaunan penggunaan: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `versionManager/` | Kemas kini automatik + manifes versi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `ws/`             | Jambatan WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `zed-oauth/`      | Aliran OAuth editor Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `zed-oauth/`      | Aliran OAuth penyunting Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
-Fail peringkat teratas dalam `src/lib/`:
+Fail peringkat atasan dalam `src/lib/`:
 
-- Fail barrel lama `localDb.ts` telah dialih keluar — pengguna mengimport modul `src/lib/db/*` tertentu secara langsung.
+- `localDb.ts` barrel lama telah dialih keluar — pengguna mengimport modul `src/lib/db/*` tertentu secara langsung.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -326,13 +329,13 @@ Fail peringkat teratas dalam `src/lib/`:
 #### 3.2.1 `src/lib/db/`
 
 Pangkalan data SQLite tunggal (`getDbInstance()` dalam `core.ts`, penjurnalan WAL).
-**Jangan sekali-kali menulis SQL mentah dalam laluan atau pengendali** — gunakan modul-modul ini.
+**Jangan sekali-kali menulis SQL mentah dalam route atau handler** — gunakan modul-modul ini.
 
 ![Gambaran keseluruhan skema pangkalan data (jadual teras terpilih)](../diagrams/exported/db-schema-overview.svg)
 
 > Sumber: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Modul domain (setiap satu mengurus satu atau lebih jadual): `apiKeys.ts`, `backup.ts`,
+Modul domain (setiap satu memiliki satu atau lebih jadual): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -349,7 +352,7 @@ Modul domain (setiap satu mengurus satu atau lebih jadual): `apiKeys.ts`, `backu
 `migrations/` mengandungi 168 fail `.sql` berversi (idempoten, bertransaksi) dan
 dilaksanakan oleh `migrationRunner.ts` semasa permulaan.
 
-Jadual yang dicipta merentas migrasi (jumlah 123):
+Jadual yang dicipta merentasi migrasi (123 kesemuanya):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -369,12 +372,12 @@ Jadual yang dicipta merentas migrasi (jumlah 123):
 
 ### 3.3 `src/domain/` — Lapisan domain
 
-Logik perniagaan tulen, tanpa I/O. Diimport oleh laluan dan pengendali.
+Logik perniagaan tulen, tanpa I/O. Diimport oleh route dan handler.
 
 | Fail                                       | Tujuan                                                   |
 | ------------------------------------------ | -------------------------------------------------------- |
-| `policyEngine.ts`                          | Penyelesai dasar peringkat teratas                       |
-| `fallbackPolicy.ts`                        | Pepohon keputusan sandaran                               |
+| `policyEngine.ts`                          | Penyelesai dasar peringkat tertinggi                     |
+| `fallbackPolicy.ts`                        | Pepohon keputusan fallback                               |
 | `costRules.ts`                             | Peraturan pengiraan kos                                  |
 | `lockoutPolicy.ts`                         | Keputusan sekatan model                                  |
 | `tagRouter.ts`                             | Penghalaan berasaskan tag                                |
@@ -382,9 +385,9 @@ Logik perniagaan tulen, tanpa I/O. Diimport oleh laluan dan pengendali.
 | `connectionModelRules.ts`                  | Penapis model bagi setiap sambungan                      |
 | `modelAvailability.ts`                     | Semakan ketersediaan model                               |
 | `degradation.ts`                           | Peralihan mod terdegradasi                               |
-| `providerExpiration.ts`                    | Pengesanan akaun/kunci yang telah tamat tempoh           |
+| `providerExpiration.ts`                    | Pengesanan akaun/kunci tamat tempoh                      |
 | `quotaCache.ts`                            | Keputusan kuota yang dicache                             |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Pembantu bentuk respons                                  |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Pembantu struktur respons                                |
 | `configAudit.ts`                           | Audit perubahan konfigurasi                              |
 | `assessment/`                              | Penilaian model (mengikut RFC, dilaksanakan sebahagian)  |
 | `types.ts`                                 | Jenis domain dikongsi                                    |
@@ -397,19 +400,19 @@ Tidak boleh diimport daripada komponen klien.
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Mengelaskan laluan sebagai awam atau pengurusan
+│   ├── classify.ts        Mengelaskan route sebagai awam atau pengurusan
 │   ├── assertAuth.ts      Pembantu penegasan
 │   ├── context.ts         Konteks authz bagi setiap permintaan
 │   ├── headers.ts
-│   ├── pipeline.ts        Saluran paip authz
+│   ├── pipeline.ts        Pipeline authz
 │   ├── policies/          Dasar konkrit
 │   └── types.ts
-└── cors/origins.ts        Senarai asal CORS yang dibenarkan
+└── cors/origins.ts        Senarai origin CORS yang dibenarkan
 ```
 
 ### 3.5 `src/shared/` — Selamat untuk dikongsi
 
-Dibahagikan kepada subdirektori khusus:
+Dibahagikan kepada subdirektori yang berfokus:
 
 - `constants/` — `providers.ts` (katalog penyedia yang disahkan oleh Zod), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
@@ -420,7 +423,7 @@ Dibahagikan kepada subdirektori khusus:
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
 - `validation/` — `schemas.ts` (~80 skema Zod), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — kontrak API awam yang diterbitkan ke npm.
+- `contracts/` — kontrak API awam yang diedarkan ke npm.
 - `types/` — jenis TS yang dikongsi.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -431,12 +434,20 @@ Dibahagikan kepada subdirektori khusus:
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
   `a11yAudit.ts`, serta cangkuk/komponen papan pemuka di bawah `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/`.
+- `components/` — API komponen papan pemuka (fail barrel `index.tsx`: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Primitif tersebut ialah penyesuai untuk kit
+  yang disertakan (`packages/ui-kit`, diimport melalui sublaluan komponen seperti
+  `@omniroute/ui-kit/button`), supaya skrin mengekalkan importnya sementara penanda ialah
+  milik kit tersebut. Cangkerangnya ialah `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (`SidebarProvider`/`SidebarInset` daripada kit) dengan `Sidebar.tsx` dan `Header.tsx`; ikon
+  melalui `Icon.tsx` dan `constants/iconMap.ts`. Lihat `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
 ## 4. `open-sse/` — Ruang kerja enjin penstriman
 
-Ruang kerja npm berasingan yang diterbitkan sebagai `@omniroute/open-sse`. Mengendalikan pemprosesan permintaan, pelaksana, penterjemah, perkhidmatan, pengubah, dan pelayan MCP.
+Ruang kerja npm berasingan yang diterbitkan sebagai `@omniroute/open-sse`. Bertanggungjawab terhadap
+pemprosesan permintaan, pelaksana, penterjemah, perkhidmatan, pengubah dan pelayan MCP.
 
 ```
 open-sse/
@@ -446,37 +457,40 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Daftar penyedia, profil pengepala, identiti, …
 ├── handlers/               Pengendali permintaan (sembang, pembenaman, audio, imej, …)
-├── executors/              108 pelaksana HTTP khusus penyedia
+├── executors/              156 modul pelaksana penyedia (kelas pelaksana + pembantu bagi setiap penyedia)
 ├── translator/             Penukaran format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Pengubah strim Responses API ↔ Chat Completions
-├── services/               80+ modul perkhidmatan (gabungan, sandaran, kuota, identiti, …)
+├── services/               80+ modul perkhidmatan (kombo, sandaran, kuota, identiti, …)
 ├── utils/                  Pembantu penstriman, klien TLS, AWS SigV4, pengambilan proksi, …
 └── mcp-server/             Pelayan MCP (3 pengangkutan, 33 skop, 110 alat)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Pengendali              | Tujuan                                                                                     |
-| ----------------------- | ------------------------------------------------------------------------------------------ |
-| `chatCore.ts`           | Saluran paip sembang utama (cache, had kadar, penghalaan gabungan, penghantaran pelaksana) |
-| `responsesHandler.ts`   | Titik masuk OpenAI Responses API                                                           |
-| `embeddings.ts`         | Pembenaman                                                                                 |
-| `imageGeneration.ts`    | Penjanaan imej                                                                             |
-| `audioSpeech.ts`        | Teks kepada pertuturan                                                                     |
-| `audioTranscription.ts` | Pertuturan kepada teks                                                                     |
-| `videoGeneration.ts`    | Penjanaan video                                                                            |
-| `musicGeneration.ts`    | Penjanaan muzik                                                                            |
-| `rerank.ts`             | Penyusunan semula kedudukan                                                                |
-| `moderations.ts`        | Penyederhanaan                                                                             |
-| `search.ts`             | Carian web                                                                                 |
-| `sseParser.ts`          | Penghurai peristiwa SSE                                                                    |
-| `usageExtractor.ts`     | Mengekstrak kiraan token daripada strim huluan                                             |
-| `responseSanitizer.ts`  | Membuang hingar khusus penyedia                                                            |
-| `responseTranslator.ts` | Penghubung antara respons penyedia dengan lapisan penterjemah                              |
+| Pengendali              | Tujuan                                                                                         |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Saluran paip sembang utama (cache, pengehadan kadar, penghalaan kombo, penghantaran pelaksana) |
+| `responsesHandler.ts`   | Titik masuk OpenAI Responses API                                                               |
+| `embeddings.ts`         | Pembenaman                                                                                     |
+| `imageGeneration.ts`    | Penjanaan imej                                                                                 |
+| `audioSpeech.ts`        | Teks kepada pertuturan                                                                         |
+| `audioTranscription.ts` | Pertuturan kepada teks                                                                         |
+| `videoGeneration.ts`    | Penjanaan video                                                                                |
+| `musicGeneration.ts`    | Penjanaan muzik                                                                                |
+| `rerank.ts`             | Penyusunan semula kedudukan                                                                    |
+| `moderations.ts`        | Penyederhanaan                                                                                 |
+| `search.ts`             | Carian web                                                                                     |
+| `sseParser.ts`          | Penghurai peristiwa SSE                                                                        |
+| `usageExtractor.ts`     | Mengekstrak kiraan token daripada strim huluan                                                 |
+| `responseSanitizer.ts`  | Menyingkirkan hingar khusus penyedia                                                           |
+| `responseTranslator.ts` | Penghubung antara respons penyedia dengan lapisan penterjemah                                  |
 
 ### 4.2 `open-sse/executors/`
 
-108 pelaksana penyedia, setiap satunya melanjutkan `BaseExecutor` (`base.ts`):
+156 modul pelaksana aras atas (`*.ts` tidak termasuk `base.ts`, `index.ts` dan ujian — bilangan
+yang diukur oleh `npm run check:docs-counts`). Setiap kelas pelaksana mewarisi `BaseExecutor` (`base.ts`),
+sama ada secara langsung atau melalui `DefaultExecutor` atau pelaksana lain; modul selebihnya ialah
+pembantu bagi setiap penyedia (skema alat, penyesuai pengambilan/TTS, pengendali kekhususan). Pelaksana termasuk:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -484,13 +498,13 @@ open-sse/
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, serta `claudeIdentity.ts`
 (pembantu identiti dikongsi) dan `index.ts` (daftar).
 
-> Nota: penyedia yang tidak disenaraikan di sini disediakan oleh `default.ts` menggunakan pelaksana
-> generik yang serasi dengan OpenAI. Katalog penyedia penuh (355 penyedia) terletak di
+> Nota: penyedia yang tidak disenaraikan di sini dikendalikan oleh `default.ts` menggunakan
+> pelaksana generik yang serasi dengan OpenAI. Katalog penyedia lengkap (375 penyedia) terdapat dalam
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Penterjemahan hab dan jejari (OpenAI ialah hab).
+Terjemahan model hab-dan-jejari (OpenAI ialah hab).
 
 - **9 penterjemah permintaan** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -505,12 +519,12 @@ Penterjemahan hab dan jejari (OpenAI ialah hab).
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, serta
   ujian pembantu.
 - **Pembantu imej** (`translator/image/sizeMapper.ts`).
-- Peringkat atas: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- Aras atas: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Penukar Responses API ↔ Chat Completions berasaskan
-  `TransformStream` (digunakan oleh tangkapan menyeluruh laluan `responses/`).
+- `responsesTransformer.ts` — Penukar Responses API ↔ Chat Completions berasaskan `TransformStream`
+  (digunakan oleh laluan tangkap-semua `responses/`).
 
 ### 4.5 `open-sse/services/`
 
@@ -518,33 +532,33 @@ Sorotan (senarai penuh di bawah `open-sse/services/`):
 
 | Perkara               | Fail                                                                                                                                                                                                                                                     |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Penghalaan kombo      | `combo.ts` (19 strategi), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
+| Penghalaan Combo      | `combo.ts` (20 strategi), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
 | Enjin Auto Combo      | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Daya tahan            | `accountFallback.ts` (tempoh bertenang + penguncian), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                              |
+| Ketahanan             | `accountFallback.ts` (tempoh bertenang + penguncian), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                              |
 | Kuota                 | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Cache                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Kecerdasan penghalaan | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Caching               | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Kepintaran penghalaan | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Pengendalian model    | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Pemampatan            | `compression/` — pendawaian enjin pemampatan penuh                                                                                                                                                                                                       |
+| Pemampatan            | `compression/` — pendawaian penuh enjin pemampatan                                                                                                                                                                                                       |
 | Token + sesi          | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Tahap / manifes       | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| Peringkat / manifes   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / rangkaian        | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
 | Kelompok              | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | Penggunaan            | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 alat unik** yang disepadukan dalam `server.ts` (45 alat kanonik dalam `schemas/tools.ts` +
-  modul memori, kemahiran, kemahiran GitHub, kumpulan, gamifikasi, pemalam, Notion, Obsidian,
+- **110 alat unik** disambungkan dalam `server.ts` (45 alat kanonik dalam `schemas/tools.ts` +
+  modul memori, kemahiran, GitHub-skills, kumpulan, gamifikasi, pemalam, Notion, Obsidian,
   korpus setempat dan pemampatan — kesatuan dikira oleh `countUniqueMcpTools`).
 - **3 pengangkutan**: stdio, HTTP Streamable, SSE.
-- **33 skop** dikuatkuasakan semasa masa jalan — senarai asas dalam `src/shared/constants/mcpScopes.ts`, set penuh ialah kesatuan skop yang diisytiharkan oleh setiap modul alat.
+- **33 skop** dikuatkuasakan semasa masa jalan — senarai asas dalam `src/shared/constants/mcpScopes.ts`, set lengkap ialah kesatuan skop yang diisytiharkan oleh setiap modul alat.
 - Jadual audit: `mcp_tool_audit` (diisi oleh `audit.ts`).
 - Fail: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
   serta ujian di bawah `__tests__/`.
-- Lihat [MCP-SERVER.md](../frameworks/MCP-SERVER.md) untuk katalog alat penuh.
+- Lihat [MCP-SERVER.md](../frameworks/MCP-SERVER.md) untuk katalog alat lengkap.
 
 ### 4.7 `open-sse/config/`
 
@@ -555,7 +569,7 @@ Daftar penyedia (`providerRegistry.ts`, `providerModels.ts`,
 pembantu identiti (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-pembantu kelayakan (`credentialLoader.ts`, `codexClient.ts`), dan penyesuai
+pembantu kelayakan (`credentialLoader.ts`, `codexClient.ts`) dan penyesuai
 awan (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
@@ -655,7 +669,7 @@ Perintah lazim:
 
 ## 8. `scripts/`
 
-Disusun ke dalam 6 subfolder mengikut tujuan.
+Disusun mengikut tujuan ke dalam 6 subfolder.
 
 - **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
   `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
@@ -667,7 +681,11 @@ Disusun ke dalam 6 subfolder mengikut tujuan.
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`.
+  `system-info.mjs`, serta pembantu pemantauan PR baca sahaja
+  `ci-discriminate.sh` (mengisih tandatangan semakan gagal bagi sesuatu PR kepada milik sendiri / diwarisi /
+  tidak diketahui berdasarkan PR rujukan atau isu base-red) dan `audit-worktree.sh`
+  (fail kotor, permukaan yang dilindungi, penegasan yang dialih keluar, bilangan
+  penyekatan, baki tsconfig sementara, kepala PR berbanding HEAD setempat — sebelum PR pekerja diterima).
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,

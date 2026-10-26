@@ -38,34 +38,34 @@ kolme vahekaardiga Studioks, mis ühendab veebiotsingu, veebisisu kraapimise ja 
 
 ### Otsingu vahekaart
 
-Muudab olemasolevad `SearchForm` + `ResultsPanel` + `RerankPanel` vahekaardiks:
+Arendab olemasoleva `SearchForm` + `ResultsPanel` + `RerankPanel` vahekaardiks:
 
-- Päring → tulemused (pealkiri, URL, katkend, asjakohasuse skoor).
-- Teenusepakkuja metaandmed seadistuspaanil (kulu, kvoot, olek).
-- Ümberjärjestuse jaotis: valige ümberjärjestuse mudel, järjestage tulemused ümber ja kuvage `positionDelta`.
-- Tühi olek koos tegevuskutsega, kui ühtegi otsinguteenuse pakkujat pole seadistatud.
-- Otsinguajalugu komponendi `SearchHistory.tsx` kaudu.
-- Kutsub `POST /v1/search` (olemasolev lõpp-punkt, muudatusteta).
+- Päring → tulemused (pealkiri, URL, väljavõte, asjakohasuse skoor).
+- Pakkuja metaandmed Config-paanil (maksumus, kvoot, olek).
+- Ümberjärjestamise jaotis: vali ümberjärjestamise mudel, järjesta tulemused ümber, kuva `positionDelta`.
+- Tühi olek koos CTA-ga, kui ühtegi otsingupakkujat pole seadistatud.
+- Otsinguajalugu `SearchHistory.tsx` kaudu.
+- Kutsub välja `POST /v1/search` (olemasolev lõpp-punkt, muudatusteta).
 
 ### Kraapimise vahekaart
 
-Uus vahekaart URL-ilt sisu eraldamiseks päringu `POST /v1/web/fetch` kaudu (loodud plaanis 05):
+Uus vahekaart sisu eraldamiseks URL-ilt `POST /v1/web/fetch` kaudu (loodud plaanis 05):
 
-- Sisend: URL + kogu lehe lüliti + vormingu valija (markdown / tekst / HTML).
-- Esitamine → hankimine → komponendi `ScrapeResult.tsx` renderdamine.
-- `ScrapeResult` renderdab markdown-eelvaate ja toorvaate lüliti.
-- Piirang: kui vastuse keha on suurem kui **256 KB**, kuvab kasutajaliides teksti `(kärbitud, vaata toorandmeid)` ja avab toorandmed Monaco modaalaknas (D21).
-- Metaandmete paneel: teenusepakkuja (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latentsus, kulu, vastuse suurus, linkide arv.
-- Kasutab hook'i `useScrapeFetch.ts`.
+- Sisend: URL + kogu lehekülje lüliti + vorminguvalija (markdown / tekst / HTML).
+- Saatmine → toomine → `ScrapeResult.tsx` renderdamine.
+- `ScrapeResult` renderdab markdown-eelvaate + toorkuva lüliti.
+- Piirang: kui vastuse keha on suurem kui **256 KB**, kuvab kasutajaliides `(kärbitud, kuva toorandmeid)` ja avab toorandmed Monaco modaalaknas (D21).
+- Metaandmete paneel: pakkuja (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latentsus, maksumus, vastuse suurus, linkide arv.
+- Kasutab `useScrapeFetch.ts` hook'i.
 
 ### Võrdluse vahekaart
 
-Käitab sama päringut/URL-i paralleelselt kuni **4 teenusepakkuja kaudu** (D22):
+Käitab sama päringut/URL-i paralleelselt kuni **4 pakkuja kaudu** (D22):
 
-- Kõrvuti veerud iga teenusepakkuja kohta.
-- Mõõdikud: latentsus, kulu, tulemuste arv, vastuse suurus.
-- URL-ide kattuvuse arvutamine otsingu puhul (jagatud URL-ide arv võrreldes esialgse tulemusega).
-- Kutsub iga teenusepakkuja kohta `POST /v1/search` (otsing) või `POST /v1/web/fetch` (kraapimine).
+- Kõrvuti veerud iga pakkuja kohta.
+- Mõõdikud: latentsus, maksumus, tulemuste arv, vastuse suurus.
+- URL-ide kattuvuse arvutus otsingu puhul (jagatud URL-ide arv võrreldes algse tulemusega).
+- Kutsub iga pakkuja kohta välja `POST /v1/search` (otsing) või `POST /v1/web/fetch` (kraapimine).
 
 ---
 
@@ -98,14 +98,14 @@ Käitab sama päringut/URL-i paralleelselt kuni **4 teenusepakkuja kaudu** (D22)
 
 ---
 
-## Teenusepakkujate kataloog
+## Pakkujate kataloog
 
-`ProviderCatalog.tsx` kuvab täieliku teenusepakkujate loendi lõpp-punktist `GET /api/search/providers`
-(laiendatud F4-s, et hõlmata sisu hankimise teenusepakkujaid):
+`ProviderCatalog.tsx` kuvab täieliku pakkujate loendi päringust `GET /api/search/providers`
+(mida laiendati F4-s toomispakkujate lisamiseks):
 
-| `kind` | `"search"` (20 teenusepakkujat) või `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 pakkujat) või `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Olek **tuletatakse päringu tegemise ajal**, kontrollides, kas mandaat on olemas ja kas
+Olek **tuletatakse päringu ajal**, kontrollides, kas identimisteave on olemas ja kas
 kõik võtmed on parajasti ooteajal.
 
 ---
@@ -118,17 +118,17 @@ API-võtme kohatäide on alati `$OMNIROUTE_API_KEY` (D11, jagatud Playground Stu
 
 ---
 
-## Taustsüsteemi muudatused
+## Taustasüsteemi muudatused
 
-Selle funktsiooni jaoks oli vaja ainult üht taustsüsteemi muudatust:
+Selle funktsiooni jaoks oli vaja ainult üht taustasüsteemi muudatust:
 
 ### Laiendatud `GET /api/search/providers`
 
 Faili `src/app/api/search/providers/route.ts` laiendati järgmiselt:
 
-- Massiivi lisati kõik 6 sisu hankimise teenusepakkujat (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`).
+- Massiivi lisati kõik andmete hankimise pakkujad (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
 - Igale elemendile lisati `kind: "search" | "fetch"`.
-- Lisati `status: "configured" | "missing" | "rate_limited"`, mis tuletatakse mandaatide reaalajas olekust.
+- Igale elemendile lisati reaalajas mandaadi olekust tuletatud `status: "configured" | "missing" | "rate_limited"`.
 - Säilitati tagasiühilduvus — olemasolevad väljad (`id`, `name` jne) jäid muutmata.
 
 ---

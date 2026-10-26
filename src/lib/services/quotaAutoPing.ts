@@ -41,6 +41,7 @@ import {
   QUOTA_AUTOPING_TICK_INTERVAL_MS,
   type QuotaAutoPingProviderConfig,
 } from "@/shared/constants/quotaAutoPing";
+import { readCodexPingOutcome } from "./quotaAutoPingOutcome";
 
 const log = logger("QuotaAutoPing");
 
@@ -150,7 +151,9 @@ export async function resolveQuotaAutoPingModel(
 export function createDefaultQuotaAutoPingDeps(): QuotaAutoPingDeps {
   return {
     getSettings,
-    getProviderConnections,
+    // DB rows are untyped records; the scheduler only reads the QuotaAutoPingConnection fields.
+    getProviderConnections:
+      getProviderConnections as unknown as QuotaAutoPingDeps["getProviderConnections"],
     updateProviderConnection,
     refreshAndUpdateCredentials: async (connection) =>
       refreshAndUpdateCredentialsWithResolver(connection, loadQuotaAutoPingExecutor),
@@ -169,7 +172,7 @@ function cacheKey(provider: string, connectionId: string): string {
   return `${provider}:${connectionId}`;
 }
 
-function normalizeResetKey(resetAt: string): string {
+export function normalizeResetKey(resetAt: string): string {
   const ms = new Date(resetAt).getTime();
   if (!Number.isFinite(ms)) return resetAt;
   // Round to the minute so a few seconds of clock jitter between reads never
@@ -193,7 +196,7 @@ function toFiniteNumber(value: unknown): number | null {
   return null;
 }
 
-function isQuotaExhausted(quota: JsonRecord | undefined): boolean {
+export function isQuotaExhausted(quota: JsonRecord | undefined): boolean {
   if (!quota || quota.unlimited === true) return false;
   const remaining = toFiniteNumber(quota.remaining);
   if (remaining !== null) return remaining <= 0;
@@ -202,7 +205,7 @@ function isQuotaExhausted(quota: JsonRecord | undefined): boolean {
   return total !== null && total > 0 && used !== null && used >= total;
 }
 
-function hasExhaustedBlockingQuota(quotas: JsonRecord, sessionKey: string): boolean {
+export function hasExhaustedBlockingQuota(quotas: JsonRecord, sessionKey: string): boolean {
   return Object.entries(quotas).some(([name, quota]) => {
     if (name === sessionKey) return false;
     if (String(name).toLowerCase().includes("session")) return false;
@@ -250,33 +253,17 @@ function buildCodexPingBody(providerConfig: ResolvedQuotaAutoPingProviderConfig)
   };
 }
 
-async function drainResponseBody(response: Response | undefined): Promise<void> {
-  if (!response) return;
-  if (typeof response.text === "function") {
-    await response.text().catch(() => undefined);
-    return;
-  }
-  const reader = (response as { body?: ReadableStream<Uint8Array> }).body?.getReader?.();
-  if (!reader) return;
-  try {
-    for (;;) {
-      const { done } = await reader.read();
-      if (done) return;
-    }
-  } finally {
-    reader.releaseLock?.();
-  }
-}
-
-async function sendCodexPing(
+export async function sendCodexPing(
   connection: QuotaAutoPingConnection,
   providerConfig: ResolvedQuotaAutoPingProviderConfig,
-  deps: QuotaAutoPingDeps
+  deps: QuotaAutoPingDeps,
+  signal?: AbortSignal
 ): Promise<boolean> {
   const executor = await deps.getExecutor("codex");
   const result = await executor.execute({
     model: providerConfig.pingModel,
     stream: true,
+    signal,
     credentials: {
       accessToken: connection.accessToken,
       connectionId: connection.id,
@@ -294,9 +281,9 @@ async function sendCodexPing(
     }
     return false;
   }
-  // Codex only starts the 5h window after the streaming response completes.
-  await drainResponseBody(response);
-  return true;
+  // Codex only starts the 5h window after the streaming response completes, and it
+  // reports many failures inside a 200 stream — only `response.completed` counts.
+  return (await readCodexPingOutcome(response)) === "completed";
 }
 
 function shouldPingForReset(

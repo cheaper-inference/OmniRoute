@@ -1,1 +1,0 @@
-- **fix(timeout):** configure the streaming fetch-start response-header cap while preserving its 110-second default.

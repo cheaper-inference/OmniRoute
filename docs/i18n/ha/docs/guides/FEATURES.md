@@ -296,15 +296,15 @@ Muhimman halaye:
 
 ---
 
-## 🔑 Alamomin Aiki Tare & Kundin Saituna _(v3.6.6+)_
+## 🔑 Alamomin Aiki Tare & Kunshin Saituna _(v3.6.6+)_
 
-Yanzu ana iya samun dama daga na'urori da yawa da kuma ta masu gudanarwa na waje ta hanyar **alamomin aiki tare masu iyakantaccen izini**:
+Yanzu ana iya samun damar amfani da na'urori da yawa da kuma ma'aikatan waje ta hanyar **alamomin aiki tare masu iyakantaccen izini**:
 
-- **`POST /api/sync/tokens`** — Ƙirƙiri sabon alamar aiki tare (mai iyakantaccen izini, tare da lokacin ƙarewa na zaɓi)
-- **`DELETE /api/sync/tokens/:id`** — Soke alama
-- **`GET /api/sync/bundle`** — Sauke kwafin JSON mai sigar da maɓallin ETag na duk saitunan da ba su da matuƙar sirri (an ɓoye kalmomin sirri)
+- **`POST /api/sync/tokens`** — Ƙirƙiri sabon alamar aiki tare (mai iyakantaccen izini, tare da zaɓin lokacin ƙarewa)
+- **`DELETE /api/sync/tokens/:id`** — Soke wata alama
+- **`GET /api/sync/bundle`** — Sauke hoton JSON na saituna mai sigar da kuma mabuɗin ETag (ana tantancewa da alamar aiki tare kawai). Ana cire saitunan tantancewa kamar kalmar sirrin dashboard, amma ana haɗa bayanan shaidar masu samar da sabis da maɓallan API, don haka a ɗauki fayil ɗin a matsayin sirri
 
-`src/lib/sync/bundle.ts` ne ke gina kundin saitunan. Masu amfani suna kwatanta kan martanin `ETag` don gano sauye-sauye ba tare da sake sauke dukkan bayanan ba.
+Ana gina kunshin saitunan ta `src/lib/sync/bundle.ts`. Masu amfani suna kwatanta taken amsa na `ETag` don gano canje-canje ba tare da sake sauke dukkan bayanan ba. Daga CLI, `omniroute sync bundle <outPath> --token <syncToken>` (ko `OMNIROUTE_SYNC_TOKEN`) yana adana shi a cikin fayil da mai shi kaɗai zai iya amfani da shi.
 
 ---
 

@@ -1,5 +1,7 @@
 import { FORMATS } from "../translator/formats.ts";
+import { isContentPolicyRefusal } from "./contentPolicyError.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
+import { classifyProviderSafetyError, isProviderSafetyStopsEnabled } from "./providerSafety.ts";
 import { projectResponsesFailureOutput } from "./responsesFailureOutput.ts";
 import { SYNTHETIC_RESPONSES_SEQUENCE_NUMBER } from "./responsesSequence.ts";
 
@@ -12,11 +14,19 @@ import { SYNTHETIC_RESPONSES_SEQUENCE_NUMBER } from "./responsesSequence.ts";
 
 type JsonRecord = Record<string, unknown>;
 
+export type StreamFailureSnapshot = {
+  providerEventCount: number;
+  providerSummary?: unknown;
+};
+
 export type StreamFailurePayload = {
   status: number;
   message: string;
   code?: string;
   type?: string;
+  /** The stream had already forwarded text/reasoning/tool output to the client. */
+  outputEmitted?: boolean;
+  streamSnapshot?: StreamFailureSnapshot;
 };
 
 export type ProjectedStreamFailureEvent = {
@@ -39,12 +49,20 @@ export function projectCompletedStreamError(
   const status = Number.isInteger(failure.status) ? failure.status : 502;
   return buildErrorBody(status, failure.message, undefined, {
     type: failure.type ?? "server_error",
-    code: String(failure.status ?? 502),
+    // PROVIDER_SAFETY_STOPS_TERMINAL (#17049) keeps the upstream code; off, the status is the code.
+    code:
+      (isProviderSafetyStopsEnabled() ? failure.code : undefined) ?? String(failure.status ?? 502),
   }).error;
 }
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+function copyFailureSnapshot(record: JsonRecord): Pick<StreamFailurePayload, "streamSnapshot"> {
+  const snapshot = record.streamSnapshot;
+  if (snapshot === undefined) return {};
+  return { streamSnapshot: snapshot as StreamFailureSnapshot };
 }
 
 const RESPONSES_FAILURE_SCALAR_FIELDS = [
@@ -190,19 +208,31 @@ export function normalizeStreamFailurePayload(payload: unknown): StreamFailurePa
               ? record.message
               : "Upstream failure";
   const requestScopedInputFailure =
+    isContentPolicyRefusal(error) ||
+    type === "invalid_request" ||
+    code === "invalid_request" ||
     type === "invalid_request_error" ||
     code === "invalid_request_error" ||
     type === "context_length_exceeded" ||
     code === "context_length_exceeded" ||
     type === "context_window_exceeded" ||
     code === "context_window_exceeded";
-  const status =
+  const explicitStatus =
     toStreamFailureStatus(error.status_code) ??
     toStreamFailureStatus(error.status) ??
     toStreamFailureStatus(response.status_code) ??
     toStreamFailureStatus(response.status) ??
     toStreamFailureStatus(record.status_code) ??
-    toStreamFailureStatus(record.status) ??
+    toStreamFailureStatus(record.status);
+  const safety = classifyProviderSafetyError({
+    status: explicitStatus,
+    code: error.code,
+    type,
+    message,
+  });
+  const status =
+    explicitStatus ??
+    safety?.status ??
     (requestScopedInputFailure
       ? 400
       : type === "authentication_error" || code === "invalid_api_key"
@@ -216,8 +246,9 @@ export function normalizeStreamFailurePayload(payload: unknown): StreamFailurePa
   return {
     status,
     message,
-    code,
-    ...(type ? { type } : {}),
+    code: safety?.code ?? code,
+    ...(safety ? { type: "invalid_request_error" } : type ? { type } : {}),
+    ...copyFailureSnapshot(record),
   };
 }
 

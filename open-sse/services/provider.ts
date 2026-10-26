@@ -9,10 +9,17 @@ import {
   maybeAppendSkillsBeta,
 } from "./claudeCodeCompatible.ts";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
-import { buildClineHeaders } from "@/shared/utils/clineAuth";
+import { buildClinepassHeaders } from "@/shared/utils/clineAuth";
 import { usesCcWireImage } from "./ccWireImageBuiltins.ts";
 
 const OPENAI_COMPATIBLE_PREFIX = "openai-compatible-";
+const OPENAI_COMPATIBLE_ID_TYPES = [
+  "responses",
+  "embeddings",
+  "audio-transcriptions",
+  "audio-speech",
+  "images-generations",
+] as const;
 const OPENAI_COMPATIBLE_DEFAULTS = {
   baseUrl: "https://api.openai.com/v1",
 };
@@ -61,12 +68,14 @@ export function getOpenAICompatibleType(
   ) {
     return configuredType;
   }
-  if (provider.includes("responses")) return "responses";
-  if (provider.includes("embeddings")) return "embeddings";
-  if (provider.includes("audio-transcriptions")) return "audio-transcriptions";
-  if (provider.includes("audio-speech")) return "audio-speech";
-  if (provider.includes("images-generations")) return "images-generations";
-  return "chat";
+  // Legacy fallback: the type is the fixed segment right after the prefix
+  // (`openai-compatible-<type>-<suffix>`, or the bare `openai-compatible-<type>`).
+  // Anchored so an operator-chosen suffix (e.g. `-chat-my-responses`) never flips it.
+  const marker = provider.slice(OPENAI_COMPATIBLE_PREFIX.length);
+  const legacyType = OPENAI_COMPATIBLE_ID_TYPES.find(
+    (type) => marker === type || marker.startsWith(`${type}-`)
+  );
+  return legacyType || "chat";
 }
 
 function buildOpenAICompatibleUrl(baseUrl, apiType) {
@@ -411,11 +420,26 @@ export function buildProviderHeaders(provider, credentials, stream = true, body 
     if (!stream) {
       headers["Accept"] = "application/json";
     }
-  } else if (provider === "cline") {
-    // Cline's API requires the bearer token prefixed with `workos:` plus a set
-    // of Cline client-identification headers; plain `Bearer <token>` is rejected
-    // upstream. buildClineHeaders() emits both.
-    Object.assign(headers, buildClineHeaders(credentials.apiKey || credentials.accessToken));
+  } else if (provider === "cline" || provider === "clinepass") {
+    // Cline is dual-auth (#16298): an OAuth connection carries a WorkOS token in
+    // `accessToken` and MUST be sent as `Bearer workos:<token>`; a BYOK connection
+    // carries an `sk_...` key in `apiKey` and MUST be sent as a plain
+    // `Bearer <key>` — the `workos:` prefix is rejected upstream for BYOK keys.
+    //
+    // The decision is keyed off the CREDENTIAL SHAPE (`accessToken` present or not),
+    // not off `authType`, which can diverge from the real stored credential. The
+    // previous `credentials.apiKey || credentials.accessToken` order sent a BYOK key
+    // through buildClineHeaders() and prefixed it with `workos:`, so every BYOK
+    // Cline request was rejected. The `apiKey ||` order was copied generic
+    // boilerplate from the sibling branches (b9fdcfc006 / #4787), back when Cline
+    // was OAuth-only and had no BYOK path; it never meant an OAuth token lives in
+    // `apiKey` — every Cline OAuth write site persists to `accessToken` (see
+    // src/lib/oauth/providers/cline.ts mapTokens and
+    // src/lib/oauth/connectionPersistence.ts).
+    //
+    // buildClinepassHeaders() is the single source of truth for that decision and
+    // also emits the Cline client-identification headers.
+    Object.assign(headers, buildClinepassHeaders(credentials, credentials.apiKey));
   } else if (entry) {
     // Registry-driven auth
     const authHeader = entry.authHeader || "bearer";

@@ -7,6 +7,10 @@ import path from "node:path";
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-model-catalog-low-noise-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "catalog-low-noise-test-secret";
+const originalCatalogBuildTimeout = process.env.CATALOG_BUILD_TIMEOUT_MS;
+// Match the other catalog fixtures: prefix semantics need a completed cold
+// catalog, while 12627-catalog-inflight-timeout.test.ts owns the deadline contract.
+process.env.CATALOG_BUILD_TIMEOUT_MS = originalCatalogBuildTimeout || "120000";
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
@@ -42,6 +46,7 @@ async function seedConnection(provider: string, accessToken: string) {
 async function getIds(url = "http://localhost/api/v1/models"): Promise<Set<string>> {
   const response = await v1ModelsCatalog.getUnifiedModelsResponse(new Request(url));
   const body = (await response.json()) as ModelsResponseBody;
+  assert.equal(response.status, 200, JSON.stringify(body));
   return new Set(body.data.map((item) => item.id));
 }
 
@@ -50,6 +55,8 @@ test.beforeEach(async () => {
 });
 
 test.after(async () => {
+  if (originalCatalogBuildTimeout === undefined) delete process.env.CATALOG_BUILD_TIMEOUT_MS;
+  else process.env.CATALOG_BUILD_TIMEOUT_MS = originalCatalogBuildTimeout;
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -160,6 +167,7 @@ async function getRows(url = "http://localhost/api/v1/models"): Promise<CatalogR
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
   const response = await v1ModelsCatalog.getUnifiedModelsResponse(new Request(url));
   const body = (await response.json()) as { data: CatalogRow[] };
+  assert.equal(response.status, 200, JSON.stringify(body));
   return body.data;
 }
 
@@ -311,14 +319,14 @@ test("#11632 canonical mode re-roots the surviving row instead of dangling at a 
   // static PROVIDER_MODELS catalog, which made the native loop's parent rule
   // observable on its own (every other root is first emitted, correctly
   // re-rooted, by the static loop and the native loop's first-wins dedupe skips
-  // its entry). It is retired (#14903) and no longer emitted at all, so the rule
-  // is asserted as a catalog-wide invariant instead.
+  // its entry). #16299 restored this hidden-but-inference-capable model, so
+  // assert its parent and the catalog-wide invariant together.
   await seedCodexConnection("codex-primary");
 
   const rows = await getRows("http://localhost/api/v1/models?prefix=canonical");
   assert.ok(rows.length > 100, `expected a populated catalog, got ${rows.length} rows`);
 
-  assert.deepEqual(rowsForRoot(rows, "codex-auto-review"), []);
+  assert.deepEqual(rowsForRoot(rows, "codex-auto-review"), [["codex/codex-auto-review", null]]);
   assert.deepEqual(rowsForRoot(rows, CODEX_NATIVE_ROOT), EXPECTED_CANONICAL_MODE_ROWS);
 
   const ids = new Set(rows.map((row) => row.id));
@@ -454,8 +462,8 @@ test("#11632 regression guard: the already-gated cxa/ alias loop is untouched", 
 test("#11632 backward compatibility: dual-mode Codex-native chain is preserved", async () => {
   // Freezes the same contract as tests/unit/models-catalog-route.test.ts
   // (bare Codex-preferred IDs) so the fix cannot satisfy the new matrix by
-  // flattening the default mode. `codex-auto-review` was the sampled root until
-  // it was retired (#14903); it must now be absent from the chain.
+  // flattening the default mode. The restored codex-auto-review model must
+  // obey the same alias/canonical/bare chain (#16299).
   await seedCodexConnection("codex-primary");
 
   const rows = await getRows("http://localhost/api/v1/models");
@@ -472,7 +480,7 @@ test("#11632 backward compatibility: dual-mode Codex-native chain is preserved",
   assert.equal(canonical.parent, `cx/${CODEX_NATIVE_ROOT}`);
   assert.equal(alias.parent, null);
   assert.equal(find(`openai/${CODEX_NATIVE_ROOT}`), undefined);
-  assert.equal(find("codex-auto-review"), undefined);
-  assert.equal(find("codex/codex-auto-review"), undefined);
-  assert.equal(find("cx/codex-auto-review"), undefined);
+  assert.equal(find("codex-auto-review")?.parent, "codex/codex-auto-review");
+  assert.equal(find("codex/codex-auto-review")?.parent, "cx/codex-auto-review");
+  assert.equal(find("cx/codex-auto-review")?.parent, null);
 });

@@ -101,31 +101,40 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ## جریان وارد کردن کلید API
 
-احراز هویت با کلید API برای اعتبارنامههای bearer بلندمدت Kiro / AWS CodeWhisperer است.
-این روش از نوسازی OAuth استفاده نمیکند، بنابراین از نامعتبر شدن نشست مشترک OIDC جلوگیری میکند.
+احراز هویت با کلید API برای اعتبارنامههای bearer با عمر طولانی Kiro / AWS CodeWhisperer است. این روش
+از نوسازی OAuth استفاده نمیکند، بنابراین از نامعتبر شدن نشست مشترک OIDC جلوگیری میکند.
 
 ### داشبورد
 
-1. مسیر **داشبورد -> ارائهدهندگان -> Kiro** را باز کنید.
-2. **کلید API** را انتخاب کنید.
-3. کلید API و منطقه اختیاری AWS را وارد کنید (مقدار پیشفرض `us-east-1` است).
-4. OmniRoute کلید را اعتبارسنجی کرده و اتصال را ذخیره میکند.
+1. **Dashboard -> Providers -> Kiro** را باز کنید.
+2. **API Key** را انتخاب کنید.
+3. کلید API را جایگذاری کرده و منطقه AWS را انتخاب کنید: **Auto-detect** (پیشفرض)، **US East
+   (N. Virginia)** یا **Europe (Frankfurt)**.
+4. OmniRoute کلید را اعتبارسنجی میکند و اتصال را به منطقهای که کلید در آن کار میکند
+   متصل کرده و ذخیره میکند.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` مقادیر `auto` (پیشفرض)، `us-east-1` یا `eu-central-1` را میپذیرد؛ هر مقدار دیگری
+با HTTP 400 رد میشود.
 
 ### قرارداد داخلی
 
 مسیر API با فراخوانی `KiroService.validateApiKey()` کلید را اعتبارسنجی میکند؛ این متد
-از `ListAvailableProfiles` در برابر نقطه پایانی CodeWhisperer/Amazon Q متناظر با منطقه
-استفاده کرده و یک `profileArn` را تعیین میکند.
+`GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+را (که API سطح Amazon Q برای استنتاج با کلید API از آن استفاده میکند) با مهلت زمانی 10 ثانیه برای هر منطقه فراخوانی میکند. در
+حالت `auto`، ابتدا `us-east-1` و سپس `eu-central-1` را امتحان کرده و نخستین منطقهای را
+که کلید را میپذیرد ذخیره میکند. اگر کلید در تمام مناطق کاندید رد شود، وارد کردن آن با
+HTTP 400 ناموفق خواهد بود. سپس `ListAvailableProfiles` بهصورت best-effort فراخوانی میشود تا یک
+`profileArn` اختیاری شناسایی شود (AWS برای بیشتر کلیدهای API دسترسی به آن را رد میکند).
 
-اتصال ذخیرهشده از ساختار زیر استفاده میکند:
+اتصال ذخیرهشده از موارد زیر استفاده میکند:
 
 ```json
 {
@@ -140,8 +149,11 @@ curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
 
 در زمان اجرا، `KiroExecutor.buildHeaders()` کلید را بهصورت
 `Authorization: Bearer <key>` ارسال کرده و `tokentype: API_KEY` را اضافه میکند. فراخوانیهای سهمیه/پروفایل
-از همین نشانگر استفاده میکنند تا AWS این bearer را بهعنوان یک کلید API بلندمدت در نظر بگیرد، نه
-یک توکن دسترسی OIDC یا اجتماعی.
+از همین نشانگر استفاده میکنند تا AWS با bearer بهعنوان یک کلید API با عمر طولانی رفتار کند، نه
+یک توکن دسترسی OIDC یا شبکه اجتماعی. `KiroExecutor.execute()` استنتاج با کلید API را فقط
+به `https://q.<region>.amazonaws.com/generateAssistantResponse` ارسال میکند — از جمله `us-east-1`
+— زیرا درگاه Kiro IDE، `TokenType=API_KEY` را رد میکند و
+`codewhisperer.us-east-1` نیز payloadهای کلید API را بهعنوان بدنه درخواست نامعتبر رد میکند (HTTP 400).
 
 ---
 

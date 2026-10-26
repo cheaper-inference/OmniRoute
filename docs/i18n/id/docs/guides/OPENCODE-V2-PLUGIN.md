@@ -75,31 +75,32 @@ apa yang hilang — sehingga penyebab pemilih yang terdegradasi selalu jelas.
 
 ## Opsi
 
-| Kunci                            | Default                                             | Catatan                                                                                                        |
-| -------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                       | ID penyedia, ID integrasi, dan prefiks tempat model ditampilkan                                                |
-| `baseURL`                        | wajib                                               | Root gateway, hanya `http(s)`; sufiks `/v1` ditambahkan jika diperlukan                                        |
-| `apiKey`                         | kredensial yang terhubung, lalu `OMNIROUTE_API_KEY` | Kunci chat untuk `/v1/*`                                                                                       |
-| `managementReadToken`            | menggunakan `apiKey` sebagai fallback               | Kunci untuk `/api/*` — biasanya **bukan** kunci yang sama                                                      |
-| `displayName`                    | `"OmniRoute"`                                       | Nama penyedia di pemilih                                                                                       |
-| `timeoutMs`                      | `10000`                                             | Batas waktu pengambilan per endpoint (kombinasi otomatis menggunakan 5 dtk)                                    |
-| `modelCacheTtlMs`                | `300000`                                            | TTL cache katalog; snapshot di disk mempercepat cold start                                                     |
-| `timeouts`                       | menggunakan `timeoutMs` sebagai fallback            | Batas waktu per endpoint dalam ms: `models`, `combos`, `autoCombos`, `enrichment`                              |
-| `enrichment`                     | `true`                                              | Ambil nama, harga, dan kuota tingkat gratis                                                                    |
-| `providerTag`                    | `true`                                              | Awali nama tampilan dengan penyedia upstream yang menjadi tujuan peruteannya                                   |
-| `usableOnly`                     | `false`                                             | Hanya pertahankan penyedia yang dilaporkan gateway sebagai telah disediakan                                    |
-| `showcasePerOwner`               | `10`                                                | Entri tampilan default yang dipertahankan per penyedia                                                         |
-| `freshPerOwner`                  | `10`                                                | Entri baru pada tampilan default yang dipertahankan per penyedia                                               |
-| `freshWindowDays`                | `90`                                                | Rentang kebaruan dalam hari untuk cabang entri baru                                                            |
-| `usageMemory`                    | `true`                                              | Pulihkan entri yang dihapus secara statis berdasarkan analitik penggunaan 30 hari (memerlukan token manajemen) |
-| `visibleModels` / `hiddenModels` | `[]`                                                | Daftar izin berdasarkan kecocokan persis atau sufiks; penolakan selalu diutamakan                              |
-| `geminiSanitization`             | `true`                                              | Hapus kata kunci JSON-Schema yang ditolak Gemini dari skema alat (alat `$ref` diteruskan tanpa perubahan)      |
-| `apiFormat.allowAnthropic`       | `false`                                             | Rutekan ID yang diizinkan melalui blok API Anthropic                                                           |
-| `apiFormat.anthropicModels`      | `[]`                                                | ID model lengkap yang dirutekan ke Anthropic                                                                   |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                    | Tingkat verbositas logger                                                                                      |
+| Kunci                            | Default                                        | Catatan                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `providerId`                     | `"omniroute"`                                  | ID penyedia, ID integrasi, dan prefiks yang menaungi model                                                                                 |
+| `baseURL`                        | wajib                                          | Root gateway, hanya `http(s)`; sufiks `/v1` ditambahkan jika diperlukan                                                                    |
+| `apiKey`                         | kredensial terhubung, lalu `OMNIROUTE_API_KEY` | Kunci chat untuk `/v1/*`                                                                                                                   |
+| `managementReadToken`            | kembali ke `apiKey`                            | Kunci untuk `/api/*` — biasanya **bukan** kunci yang sama                                                                                  |
+| `displayName`                    | `"OmniRoute"`                                  | Nama penyedia dalam pemilih                                                                                                                |
+| `timeoutMs`                      | `10000`                                        | Batas waktu pengambilan per endpoint (kombo otomatis menggunakan 5s)                                                                       |
+| `modelCacheTtlMs`                | `300000`                                       | TTL cache katalog; snapshot disk mempercepat cold start                                                                                    |
+| `timeouts`                       | kembali ke `timeoutMs`                         | Batas waktu per endpoint dalam ms: `models`, `combos`, `autoCombos`, `enrichment`                                                          |
+| `enrichment`                     | `true`                                         | Ambil nama, harga, dan batas penggunaan tingkat gratis                                                                                     |
+| `providerTag`                    | `true`                                         | Awali nama tampilan dengan penyedia upstream yang menjadi tujuan peruteannya                                                               |
+| `usableOnly`                     | `false`                                        | Hanya pertahankan penyedia yang dilaporkan gateway sebagai telah disediakan                                                                |
+| `combosSource`                   | `"api"`                                        | `"models"` melewati `/api/combos` dan memublikasikan baris kombo `/v1/models`; filter tingkat anggota mempertahankan `"api"`               |
+| `showcasePerOwner`               | `10`                                           | Entri tampilan default yang dipertahankan per penyedia                                                                                     |
+| `freshPerOwner`                  | `10`                                           | Entri baru tampilan default yang dipertahankan per penyedia                                                                                |
+| `freshWindowDays`                | `90`                                           | Jangka waktu kebaruan dalam hari untuk cabang baru                                                                                         |
+| `usageMemory`                    | `true`                                         | Pulihkan entri yang dihapus secara statis dan teridentifikasi oleh analitik penggunaan 30 hari (memerlukan token manajemen)                |
+| `visibleModels` / `hiddenModels` | `[]`                                           | Daftar izin berdasarkan kecocokan persis atau sufiks; penolakan diutamakan; `*` memublikasikan katalog lengkap (filter lain tetap berlaku) |
+| `geminiSanitization`             | `true`                                         | Hapus kata kunci JSON-Schema yang ditolak Gemini dari skema alat (alat `$ref` diteruskan tanpa perubahan)                                  |
+| `apiFormat.allowAnthropic`       | `false`                                        | Rutekan ID dalam daftar izin melalui blok API Anthropic                                                                                    |
+| `apiFormat.anthropicModels`      | `[]`                                           | ID model lengkap yang dirutekan ke Anthropic                                                                                               |
+| `logLevel` / `startupDebug`      | `warn` / `false`                               | Tingkat verbositas pencatat                                                                                                                |
 
 Memori penggunaan aktif secara default. Tanpa token manajemen, fitur ini tetap tidak aktif
-(notifikasi saat startup dicatat dalam log) dan tidak ada apa pun yang dipulihkan.
+(pemberitahuan startup dicatat) dan tidak ada yang dipulihkan.
 
 ## Cara katalog tetap mutakhir
 
@@ -126,13 +127,18 @@ tidak berubah. Alat yang memuat `$ref` diteruskan tanpa perubahan alih-alih diha
 referensi tersebut akan memperluas skema menjadi "terima apa pun".
 Atur `"geminiSanitization": false` untuk menonaktifkannya.
 
-## Pemecahan masalah
+## Pemecahan Masalah
 
-| Gejala                                    | Penyebab                                                                                                                   |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Pemilih tidak menampilkan model OmniRoute | Tidak ada kunci yang ditemukan (periksa peringatan saat startup), atau gateway tidak dapat dijangkau                       |
-| ID model mentah, tanpa kombo, tanpa harga | Endpoint manajemen menolak token — atur `managementReadToken`                                                              |
-| Sesi disematkan ke `opencode-<id>/…`      | Plugin v1 memublikasikan `opencode-<id>`; v2 memublikasikan `<id>` tanpa prefiks, jadi pilih ulang model di bawah `<id>/…` |
+| Gejala                                        | Penyebab                                                                                                                     |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Pemilih tidak menampilkan model OmniRoute     | Tidak ada kunci yang berhasil ditemukan (periksa peringatan saat proses dimulai), atau gateway tidak dapat dijangkau         |
+| ID model mentah, tanpa kombinasi, tanpa harga | Endpoint pengelolaan menolak token — atur `managementReadToken`                                                              |
+| Katalog `freeOnly` pendek atau kosong         | Tidak ada token pengelolaan atau token ditolak — baca baris ringkasan penyegaran (jumlah `unmatched-free`) di log host       |
+| Sesi disematkan ke `opencode-<id>/…`          | Plugin v1 memublikasikan `opencode-<id>`; v2 memublikasikan `<id>` secara langsung, jadi pilih ulang model di bawah `<id>/…` |
+
+Variabel lingkungan harus diteruskan ke proses server opencode: ketika host
+berjalan sebagai layanan, shell yang menjalankan `opencode models` dan lingkungan
+server berbeda, jadi ekspor kunci tersebut di tempat server membacanya.
 
 ## Lihat juga
 

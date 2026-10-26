@@ -213,6 +213,7 @@ test("docker image does not ship sensitive security markdown", () => {
 
 test("compiled public docs must not markdown-link sensitive pages", () => {
   const compiledRoots = [
+    "docs/getting-started",
     "docs/architecture",
     "docs/guides",
     "docs/reference",
@@ -221,6 +222,8 @@ test("compiled public docs must not markdown-link sensitive pages", () => {
     "docs/security",
     "docs/compression",
     "docs/ops",
+    "docs/providers",
+    "docs/comparison",
   ];
   const sensitive = new Set(SENSITIVE_PUBLIC_DOCS.map((rel) => path.basename(rel, ".md")));
   const href = /\]\((?:\.\.\/)*security\/([A-Z0-9_-]+)\.md\)|\]\(\.\/([A-Z0-9_-]+)\.md\)/g;

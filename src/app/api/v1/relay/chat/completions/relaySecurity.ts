@@ -1,4 +1,8 @@
 import { createHash } from "node:crypto";
+import {
+  AUTHZ_HEADER_TRUSTED_CLIENT_IP,
+  AUTHZ_HEADER_TRUSTED_PEER_IP,
+} from "@/server/authz/headers";
 
 // Forensic-only sanitization: client IP / user-agent come from untrusted
 // headers and feed recordRelayUsage() rows. Strip CR/LF so a malicious header
@@ -8,12 +12,44 @@ export function sanitizeForensicHeader(value: string | null, max = 256): string 
   return value.replace(/[\r\n]+/g, " ").slice(0, max);
 }
 
-export function getClientIp(request: Request): string {
-  return sanitizeForensicHeader(
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      null
-  );
+/**
+ * The client address the relay works with.
+ *
+ * - `throttleKey` feeds the per-(token, client) throttle. It is the address the authz
+ *   pipeline stamped after resolving it at the trust boundary: the TCP peer on a direct
+ *   connection, or the client a trusted proxy reported for it (so clients behind one reverse
+ *   proxy are told apart), falling back to the stamped socket peer. When neither stamp exists
+ *   (plain `next dev` without the custom server, or no stamp token) every caller of a token
+ *   shares ONE bucket: X-Forwarded-For / X-Real-IP are client-controlled on a direct
+ *   connection, so keying on them would let a caller reset the bucket by rotating the header.
+ *   The DB-backed per-token limit is the real control in that case.
+ * - `forensic` is the best-known address for recordRelayUsage() rows: the trusted value when
+ *   stamped, otherwise the forwarding headers — log-only, never a decision input.
+ */
+export interface RelayClientIp {
+  throttleKey: string;
+  forensic: string;
+}
+
+/** Throttle key shared by every caller whose address the server could not vouch for. */
+export const UNTRUSTED_CLIENT_BUCKET = "untrusted";
+
+export function getClientIp(request: Request): RelayClientIp {
+  const trusted =
+    request.headers.get(AUTHZ_HEADER_TRUSTED_CLIENT_IP) ||
+    request.headers.get(AUTHZ_HEADER_TRUSTED_PEER_IP);
+  if (trusted) {
+    const ip = sanitizeForensicHeader(trusted);
+    return { throttleKey: ip, forensic: ip };
+  }
+  return {
+    throttleKey: UNTRUSTED_CLIENT_BUCKET,
+    forensic: sanitizeForensicHeader(
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        null
+    ),
+  };
 }
 
 export function extractToken(request: Request): string | null {
@@ -41,7 +77,10 @@ export function hashToken(token: string): string {
 const RELAY_IP_PER_MINUTE = Number(process.env.RELAY_IP_PER_MINUTE || "30");
 const ipBuckets = new Map<string, { count: number; windowStart: number }>();
 
-export function checkIpRateLimit(tokenId: string, ip: string): { allowed: boolean; resetIn: number } {
+export function checkIpRateLimit(
+  tokenId: string,
+  ip: string
+): { allowed: boolean; resetIn: number } {
   if (!Number.isFinite(RELAY_IP_PER_MINUTE) || RELAY_IP_PER_MINUTE <= 0) {
     return { allowed: true, resetIn: 0 };
   }

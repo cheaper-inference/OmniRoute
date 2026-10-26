@@ -4,362 +4,386 @@
 
 ---
 
-> **Kasutajatele**: Otsid lihtsat juhendit? Vaata [Tasuta tasemete juhendit](../getting-started/FREE-TIERS-GUIDE.md) samm-sammult juhiste saamiseks tasuta AI saamiseks.
+> **Kasutajatele**: otsite lihtsat juhendit? Üksikasjalikud juhised tasuta tehisintellekti kasutamiseks leiate [tasuta tasemete juhendist](../getting-started/FREE-TIERS-GUIDE.md).
 
-> **Viimati uuritud:** 2026-06-17 — teenusepõhine veebiuuring (ametlikud dokumendid + viimase 7 päeva uudised, 50 agendi läbimine vastandliku kontrolliga), värskendades iga tasuta taseme kvooti + teenusetingimusi. **Osaline kordusaudit 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — vaata allpool olevat kuupäevaga märkust).
-> **Tõe allikas (kataloog):** `open-sse/config/freeModelCatalog.ts` (mudelipõhised eelarved, kogumist deduplitud). Allpool olevad märgi-eelarve numbrid pärinevad reaalajas veebiuuringutest ja on **ligikaudsed** — vaata [Metoodika ja hoiatused](#metoodika--hoiatused).
+> **Viimati uuritud:** 2026-06-17 — teenusepakkujate kaupa tehtud veebiuuring (ametlik dokumentatsioon + viimase 7 päeva uudised, 50 agendiga läbivaatus koos vastandkontrolliga), mille käigus värskendati kõiki tasuta tasemete kvoote ja kasutustingimusi. **Osaline kordusaudit 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — vt allpool kuupäevaga märkust).
+> **Tõeallikas (kataloog):** `open-sse/config/freeModelCatalog.ts` (MUDELIPÕHISED eelarved, puulide kaupa deduplikeeritud). Alltoodud tokenieelarve arvud pärinevad reaalajas veebiuuringust ja on **ligikaudsed** — vt [Metoodika ja piirangud](#methodology--caveats).
 
-## TL;DR — kui palju tasuta järeldusi OmniRoute tegelikult koondab?
+## TL;DR — kui palju tasuta inferentsi OmniRoute tegelikult koondab?
 
-| Mõõdik                                          | Märke kuus  | Tähendus                                                                                                                                                                                                                                                                                                                   |
-| ----------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dokumenteeritud korduv toetus (püsiv)**       | **~1.62B**  | Tasuta taseme **kogumid** (mudelipõhine kataloog), iga jagatud kogum loetud **üks kord**. Reaalajas allikas `/api/free-tier/summary` ja armatuurlaua tasuta taseme eelarve lehe taga. **Kasuta seda numbrit.**                                                                                                             |
-| **+ esimene kuu registreerimiskrediitidega**    | **~2.22B**  | Püsiv + ühekordsed registreerimiskrediidid (Z.AI 20M, DeepSeek 5M, …), deduplitud konto kohta. **Ainult esimene kuu** — ei kordu.                                                                                                                                                                                          |
-| **+ püsivalt tasuta, avaldatud piiranguta**     | _määramatu_ | `siliconflow`, `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud` — reaalne korduv juurdepääs, piiratud kiiruse/samaaegsusega, **märgi piirangut pole, mida lugeda**. Loetletud, kunagi summeerimata (nende lugemine `RPM×24/7` on inflatsioon, mida me tagasi lükkame). |
-| **+ sissemaksega avamise tõuge**                | **+~24M**   | Ühekordne **$10** OpenRouteri täiendus tõstab selle tasuta kogumi 50-lt → 1000-le päringule päevas. Aruandlus eraldi, et see ei paisutaks kunagi püsivat numbrit.                                                                                                                                                          |
-| **+ piirkondliku identiteedi kontrolli taga**   | **+~6M**    | `modelscope` (Alibaba Cloudi sidumine + Mandri-Hiina tegeliku nime kinnitamine). Reaalne korduv kvoot, eksponeeritud kui `gatedRecurringTokens` / `gatedProviders` ja armatuurlaual. Kunagi ei summeerita pealkirjasse: +~6M piirkondliku identiteedi kontrolli taga.                                                      |
-| Teoreetiline lagi (kõik kiirusepiirangud, 24/7) | ~10B        | Iga teenusepakkuja kiirusepiirangu summa ekstrapoleerituna pidevale kasutusele. **Ei ole garantii** — ära seda pealkirjasta.                                                                                                                                                                                               |
+Need arvud kirjeldavad kataloogi eri kolmandate poolte kontosid ja sobivustingimusi. OmniRoute ei anna seda eelarvet: peate hankima vajalikud kontod või identimisteabe, ühendama sobivad teenusepakkujad ja järgima nende piiranguid. Tegelik kasutatav maht võib olla väiksem, sealhulgas null värske installi korral, millel puudub sobiv marsruut. Teenusepakkujad märkega `tos: avoid` jäetakse vaikimisi automaatsest marsruutimisest välja.
 
-**Aus pealkiri:** _OmniRoute koondab **~1.62B dokumenteeritud tasuta märki kuus** (kuni ~2.22B teie esimesel kuul registreerimiskrediitidega) 35 tasuta taseme kogumi kaudu — pluss pikk saba püsivalt tasuta, piiranguteta teenusepakkujaid — ja RTK + Caveman tihendus (15–95% märgi kokkuhoid) laiendab seda veelgi._
+**Kontrollitud 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) pakub ühekordset 5-dollarilist kampaaniakrediiti, mis nõuab makseviisi ja aegub 30 päeva pärast. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) avaldab projekti-, mudeli- ja tasemepõhised kiiruspiirangud; see jääb endiselt kvantifitseeritud kuupõhisest põhinäitajast välja.
 
-> **Miks see langes eelmiselt ~1,94 miljardilt.** 2026-06-17 värskendus on aususe korrektsioon, mitte kaotus: `gemini` on nüüd duplikaatidest puhastatud (oli paisutatud iga Flashi variandi eraldi lugemisega, 462M → 60M), `cloudflare-ai` korrigeeritud tegelikule 10k-neuroni/päevas (122M → 30M), `doubao` ümber klassifitseeritud ühekordseks registreerimiskrediidiks (mitte korduvaks) ja suletud tasemed eemaldatud (`chutes`/`phind`/`kluster` lõpetatud). Osaliselt kompenseeritud `llm7` (õige 5M/päevas → 150M) ja uute tasuta pakkujatega (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+| Mõõdik                                             | Tokeneid kuus        | Tähendus                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dokumenteeritud korduv eraldis (püsiv)**         | **~1.62B**           | Tasuta taseme **puulid** (mudelipõhise kataloogi alusel), iga jagatud puul loetakse **ühe korra**. Reaalajas allikas, mida kasutavad `/api/free-tier/summary` ja juhtpaneeli tasuta taseme eelarve leht. **Kasutage seda arvu.**                                                                                                                              |
+| **+ esimene kuu registreerumiskrediitidega**       | **~2.22B**           | Püsiv eraldis + ühekordsed registreerumiskrediidid (Z.AI 20M, DeepSeek 5M, …), konto kaupa deduplikeeritud. **Ainult esimene kuu** — ei kordu.                                                                                                                                                                                                                |
+| **+ alaliselt tasuta, avaldatud ülempiirita**      | _kvantifitseerimatu_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud` — tegelik korduv juurdepääs, mida piiravad kiirus ja samaaegsus, kuid millel **puudub arvestatav tokenite ülempiir**. Need on loetletud, kuid neid ei liideta kunagi kokku (nende arvestamine valemiga `RPM×24/7` on liialdus, mille me tagasi lükkame). |
+| **+ sissemaksega avatav lisamaht**                 | **+~24M**            | Ühekordne **$10** OpenRouteri saldo lisamine suurendab selle tasuta puuli 50 päringult 1000 päringule päevas. Esitatakse eraldi, et see ei suurendaks kunagi kunstlikult püsivat näitajat.                                                                                                                                                                    |
+| **+ piirkondliku isikutuvastuse taga**             | **+~6M**             | `modelscope` (Alibaba Cloudi sidumine + Mandri-Hiina pärisnimega isikutuvastus). Tegelik korduv kvoot, mis on avaldatud väljadena `gatedRecurringTokens` / `gatedProviders` ja kuvatud juhtpaneelil. Seda ei liideta kunagi põhinäitajasse: +~6M piirkondliku isikutuvastuse taga.                                                                            |
+| Teoreetiline ülempiir (kõik kiiruspiirangud, 24/7) | ~10B                 | Kõigi teenusepakkujate kiiruspiirangute summa, mis on ekstrapoleeritud katkematule kasutusele. **See ei ole garantii** — ärge kasutage seda põhinäitajana.                                                                                                                                                                                                    |
+
+**Aus põhinäitaja:** _OmniRoute koondab **~1.62B dokumenteeritud tasuta tokenit kuus** (registreerumiskrediitidega esimesel kuul kuni ~2.22B) 34 tasuta taseme puuli kaudu — lisaks pikk nimekiri alaliselt tasuta ja ülempiirita teenusepakkujaid — ning RTK + Cavemani tihendus (15–95% tokenisääst) võimaldab neid veelgi rohkem kasutada._
+
+> **Miks see langes varasemalt ~1,94 miljardilt.** 2026-06-17 värskendus on aususe huvides tehtud parandus, mitte kaotus: `gemini` deduplikeeritakse nüüd ühise limiidikogumi alusel (varem oli näit paisutatud, sest iga Flashi varianti arvestati eraldi, 462M → 60M), `cloudflare-ai` parandati selle tegelikule tasemele 10k Neurons päevas (122M → 30M), `doubao` liigitati ümber ühekordseks registreerumiskrediidiks (mitte korduvaks) ning suletud paketid eemaldati (`chutes`/`phind`/`kluster` lõpetati). Seda tasakaalustavad osaliselt `llm7` (õige 5M päevas → 150M) ja uued tasuta teenusepakkujad (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Täiendavalt korrigeeritud ~1,37 miljardile versioonis v3.8.42:** `longcat` klassifitseeriti ümber 150M/kuus korduvast toetusest ühekordseks 10M registreerimiskrediidiks pärast tasuta eelvaate lõppemist. Sama aususe reegel – ühtegi pakkujat ei eemaldatud ekslikult.
+> **Versioonis v3.8.42 parandati näit täiendavalt tasemele ~1,37 miljardit:** `longcat` liigitati pärast tasuta eelvaate lõppu ümber 150M kuus korduvast toetusest ühekordseks 10M registreerumiskrediidiks. Sama aususe põhimõte — ühtegi teenusepakkujat ei eemaldatud ekslikult.
 >
-> **Uuendatud 2026-08-26 pärast Felo Webi pensionile saatmist:** Felo Web on välja jäetud, kuni selle GPL-ist tuletatud päritolu/litsentsimine on OOTEL; allikas teatas sel ajal 38 poolivõtmest. Pooli loend on reaalajas ja CI-ga piiratud (`check:docs-counts` nurjab ehituse, kui ülaltoodud numbrid erinevad `computeFreeModelTotals()`-ist).
+> **Värskendatud 2026-08-26 pärast Felo Webi kasutuselt kõrvaldamist:** Felo Web on välistatud seni, kuni selle GPL-ist tuletatud päritolu/litsentsimine on OOTEL; lähtekood näitas sel ajal 38 limiidikogumi võtit. Limiidikogumite arv on dünaamiline ja CI-ga kontrollitud (`check:docs-counts` nurjab järgu, kui ülaltoodud arvud erinevad funktsiooni `computeFreeModelTotals()` tulemusest).
 >
-> **Uuesti auditeeritud 2026-09-02 pakkujate endi lehtede vastu** (allikad: `// evidence:` kommentaarid iga uuesti auditeeritud kirje kõrval failis `open-sse/config/freeModelCatalog.data.ts`): `gemini` ja `ollama-cloud` ei avalda enam tokenite arvu (Google eemaldas mudelipõhise tasuta tabeli 2025-12-23; Ollama tasuta plaan on "algaja kasutus krediit") ja on nüüd loetletud **piiramatutena**, neid ei summeerita kunagi (−80M); `groq` on viis **mudelipõhist** 200K-TPD piirangut (igaüks 6M, +15M) kolme eemaldatud ID-ga; `nara` on üks 7M/päevas ämber (+60M, 210M). `mistral`i 1B on nähtav ainult konto konsoolis – vt _Tõendiklassid_ jaotises Metoodika.
+> **2026-09-02 auditeeriti uuesti teenusepakkujate enda lehtede põhjal** (allikad: kommentaarid `// evidence:`, mis asuvad iga uuesti auditeeritud kirje kõrval failis `open-sse/config/freeModelCatalog.data.ts`): `gemini` ja `ollama-cloud` ei avalda enam tokenite arvu (Google eemaldas mudelipõhise tasuta taseme tabeli 2025-12-23; Ollama tasuta pakett on „starter usage credits“) ning need on nüüd märgitud kui **piiramata** ja neid ei liideta kunagi kogusummale (−80M); `groq` sisaldab viit **mudelipõhist** 200K-TPD ülempiiri (igaüks 6M, +15M) ning kolm kasutuselt kõrvaldatud ID-d eemaldati; `nara` on üks 7M/päev limiidikogum (+60M, 210M). Teenuse `mistral` 1B on nähtav ainult konto konsoolis — vt metoodika jaotist _Tõendiklassid_.
 >
-> **Korrigeeritud 2026-09-03 (#11773):** `cerebras` klassifitseeriti ümber 30M/kuus korduvast toetusest (vana kaardita 1M tokenit/päevas prooviversioon) ühekordseks 5-dollariliseks registreerimiskrediidiks, mis nõuab makseviisi. Sama aususe reegel nagu LongCatil.
+> **Parandatud 2026-09-03 (#11773):** `cerebras` liigitati ümber 30M kuus korduvast toetusest (vana kaardita prooviperiood 1M tokenit päevas) ühekordseks 5 $ registreerumiskrediidiks, mis nõuab makseviisi lisamist. Sama aususe põhimõte nagu LongCati puhul.
 >
-> **Pluss xKiro (2026-09-03):** uus `xkiro-free` pool (150M/kuus) lisab 35. korduva poolivõtme. Felo Web jääb välja jäetuks, kuni selle GPL-ist tuletatud päritolu/litsentsimine on OOTEL. Allikas teatab nüüd **35 korduvast poolivõtmest** ja **~1,62 miljardist püsivast** – reaalajas, CI-ga piiratud number (`check:docs-counts` nurjab ehituse, kui see erineb `computeFreeModelTotals()`-ist).
+> **Lisaks xKiro (2026-09-03):** uus `xkiro-free` limiidikogum (150M kuus) lisab 35. korduva limiidikogumi võtme. Felo Web jääb välistatuks seni, kuni selle GPL-ist tuletatud päritolu/litsentsimine on OOTEL. Lähtekood näitab nüüd **34 korduva limiidikogumi võtit** ja **~1,62 miljardit püsivalt** — see on dünaamiline, CI-ga kontrollitud arv (`check:docs-counts` nurjab järgu, kui see erineb funktsiooni `computeFreeModelTotals()` tulemusest).
 
-Suurimad **dokumenteeritud** panustajad: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (viis mudelipõhist piirangut), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` on välja jäetud – selle 10M LongCat-2.0 toetus on ühekordne, KYC-ga piiratud registreerimiskrediit, mitte korduv igakuine eelarve.)
+Suurimad **dokumenteeritud** panustajad: `mistral` 1,00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (viis mudelipõhist ülempiiri), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` on välistatud — selle 10M LongCat-2.0 toetus on ühekordne, KYC-ga piiratud registreerumiskrediit, mitte korduv kuueelarve.)
 
-> ⚠️ Teoreetiline lagi (~10B) on paisutatud ainult kiirusepiiranguga pakkujate poolt, kellel **puudub avaldatud tokenite piirang** (`tencent`, `siliconflow`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), kelle näitajad oleksid `RPM/TPM × 24/7 × 30d` – teoreetiline maksimum, mida ükski konto ei suuda säilitada. Need on **välja jäetud** kaitstavast numbrist (näidatud "püsivalt tasuta, piiranguta" real). See on sama inflatsioon, mis muudab konkurentide mitme miljardi suurused väited ebausaldusväärseks.
+> ⚠️ Teoreetilist ülempiiri (~10B) paisutavad teenusepakkujad, kellel on ainult päringusageduse piirang ja **puudub avaldatud tokenite ülempiir** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), mistõttu nende näitajad oleksid `RPM/TPM × 24/7 × 30d` — teoreetiline maksimum, mida ükski konto ei suuda püsivalt hoida. Need on põhjendatavast arvust **välja jäetud** (ja kuvatakse selle asemel real „püsivalt tasuta, ülempiirita“). Sama paisutus muudab konkurentide mitme miljardi suurused väited ebausaldusväärseks.
 
 ---
 
-## 2026-06-17 värskendus – mis muutus alates 2026-06-05
+## 2026-06-17 värskendus — mis on muutunud pärast 2026-06-05
 
-50-agendiline veebiuuringu läbimine (ametlikud dokumendid + viimase 7 päeva uudised, vastupidiselt kontrollitud) värskendas kogu kataloogi. Esiletõstmised:
+Kogu kataloogi värskendati 50 agendiga veebiuuringu käigus (ametlik dokumentatsioon + viimase 7 päeva uudised, kontrollitud vastuoluliste allikate abil). Tähtsaimad muudatused:
 
-- **Eemaldatud / tasuta taset pole (2026):** `chutes` (tasuta tase lõppes 2026-03), `phind` (ettevõte suleti 2026-01), `kluster` (lõpetati 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo tasuta tase tühistati 2026-05-24, Nemotroni kampaania lõppes 2026-06 – uuesti kontrollitud 2026-06-18), `aimlapi` (tasuta tase peatatud – uuesti kontrollitud 2026-06-18), `yi` (Yi-Light eemaldati, tasu vastavalt kasutusele – uuesti kontrollitud 2026-06-18), `featherless-ai` (praegu tasuta taset pole), `chipotle` (Chipotle'i "Pepper AI" – tagurpidi projekteeritud `amelia.chipotle.com` Amelia vestlusvidin, millega pakkuja rääkis, annab nüüd igal marsruudil, sealhulgas juurmarsruudil, 404 vea; dekomissioneeritud/teisaldatud taustaprogramm, kinnitatud 2026-09-15 – täielikult kataloogist eemaldatud, #13131/#4037). `iflytek` / `sparkdesk` jäävad nimekirja, kuid neil on kasutustingimuste hoiatus (Spark Lite on tasuta; kasutustingimused piiravad puhverserveri/relee kasutamist).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` suleti 2026-06-01 ja `2.5 Pro` lahkus tasuta tasemest (2026-04); tasuta tase on nüüd **ainult Flash-perekond** (2.5/3/3.1/3.5 Flash + Gemma). Kataloog **koondab** nüüd Flashi perekonna (oli ülespuhutud, lugedes iga varianti eraldi: 462M → 60M).
-- **Parandatud numbrid:** `cloudflare-ai` 122M → **30M** (tegelik 10k-neuroni/päevas), `doubao` ümber klassifitseeritud ühekordseks registreerimiskrediidiks (mitte korduv), `llm7` 4M → **150M** (dokumenteeritud 5M tokenit/päevas), `together` "-Free" lõpp-punktid lõpetati → 25-dollarine registreerimiskrediit eemaldati samuti (nõuab minimaalselt 5-dollarist ostu, tasuta prooviperioodi pole), `longcat` eelvaade lõppes + Flashi mudelid eemaldati → **LongCat-2.0** ainult, ümber klassifitseeritud ühekordseks **10M**-tokeni registreerimiskrediidiks (KYC-ga piiratud, mitte korduv).
-- **Avastatud uued tasuta pakkujad:** ⭐ **Kilo Code** (`kilo-gateway` — pöörlev "Auto Free" komplekt: NVIDIA Nemotron 3 perekond, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 pöörlevat tasuta kodeerimismudelit), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash püsivalt tasuta + 20M registreerimisboonus) ja `arcee-ai` Trinity Large Preview.
-- **Uued ausad tasemed** (vt metoodikat): _püsivalt tasuta, kuid piiramatu_ kategooria (tegelik korduv juurdepääs, tokeni piirangut pole) ja _deposiidi avamise boost_ (OpenRouter 10 $ → +24M/kuus), mõlemad esitatakse **eraldi**, et need ei paisutaks pealkirja.
+- **Eemaldatud / tasuta pakett puudub (2026):** `chutes` (tasuta pakett lõpetati 2026-03), `phind` (ettevõte lõpetas tegevuse 2026-01), `kluster` (suleti 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo tasuta juurdepääs tühistati 2026-05-24, Nemotroni kampaania lõppes 2026-06 — kontrolliti uuesti 2026-06-18), `aimlapi` (tasuta pakett peatatud — kontrolliti uuesti 2026-06-18), `yi` (Yi-Light kasutus lõpetati, nüüd kasutuspõhine hinnastus — kontrolliti uuesti 2026-06-18), `featherless-ai` (praegu tasuta pakett puudub), `chipotle` (Chipotle'i „Pepper AI” — pöördprojekteeritud Amelia vestlusvidin aadressil `amelia.chipotle.com`, millega teenusepakkuja suhtles, tagastab nüüd kõigil marsruutidel, sealhulgas juurmarsruudil, veakoodi 404; tagasüsteem kasutuselt kõrvaldatud või teisaldatud, kinnitatud 2026-09-15 — kataloogist täielikult eemaldatud, #13131/#4037). `iflytek` / `sparkdesk` jäävad loendisse, kuid neile on lisatud kasutustingimuste hoiatus (Spark Lite on tasuta; kasutustingimused piiravad puhverserveri-/edastuskasutust).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` suleti 2026-06-01 ja `2.5 Pro` eemaldati tasuta paketist (2026-04); tasuta pakett hõlmab nüüd **ainult Flashi perekonda** (2.5/3/3.1/3.5 Flash + Gemma). Kataloogis on Flashi perekonna maht nüüd **koondatud** (varem oli see iga variandi eraldi arvestamise tõttu paisutatud: 462M → 60M).
+- **Parandatud arvud:** `cloudflare-ai` 122M → **30M** (tegelik piirang 10k neuronit päevas), `doubao` liigitati ümber ühekordseks registreerumiskrediidiks (mitte korduvaks), `llm7` 4M → **150M** (dokumenteeritud 5M tokenit päevas), `together` „-Free” lõpp-punktid lõpetati → eemaldati ka 25 $ registreerumiskrediit (nõuab vähemalt 5 $ ostu, tasuta prooviperioodi pole), `longcat` Preview lõppes + Flashi mudelid eemaldati kasutuselt → ainult **LongCat-2.0**, liigitati ümber ühekordseks **10M** tokeniga registreerumiskrediidiks (nõuab KYC-kontrolli, ei kordu).
+- **Avastatud uued tasuta teenusepakkujad:** ⭐ **Kilo Code** (`kilo-gateway` — vahelduv „Auto Free” valik: NVIDIA Nemotron 3 perekond, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 vahelduvat tasuta programmeerimismudelit, värskendatud 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash püsivalt tasuta + 20M registreerumisboonus) ja `arcee-ai` Trinity Large Preview.
+- **Uued ausad paketid** (vt metoodikat): kategooria _püsivalt tasuta, kuid ülempiirita_ (tegelik korduv juurdepääs, arvestatav tokenipiirang puudub) ja _sissemaksega avatav lisamaht_ (OpenRouter 10 $ → +24M kuus); mõlemad kuvatakse **eraldi**, et need ei paisutaks kunagi põhinäitajat.
 
-> Üksikasjalik pakkuja-põhine tabel allpool on **2026-06-05 hetktõmmis**; ülaltoodud erinevused asendavad selle. Reaalajas, kanooniline allikas on mudelipõhine kataloog `open-sse/config/freeModelCatalog.ts`.
+> Allpool olev üksikasjalik teenusepakkujate tabel kajastab **2026-06-05 seisuga hetktõmmist**; ülaltoodud muudatused on selle suhtes ülimuslikud. Ajakohane kanooniline allikas on mudelipõhine kataloog `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
-## Kaks režiimi – lugemine vs otsustamine
+## 2026-10-18 SiliconFlow’ tasuta mudelite parandus (#17028)
 
-OmniRoute vastab küsimusele "kas see on tasuta?" kahe režiimi kaudu, mis loevad tahtlikult erinevaid allikaid:
+Kümme SiliconFlow’ lipulaevmudelit, mille avaldatud sõnepõhised hinnad olid positiivsed, väljastati ekslikult piiramatu korduva tasuta juurdepääsuna `recurring-uncapped`. Need kümme rida on staatilisest kataloogist **eemaldatud** ja selles on nüüd **467 kirjet**. SiliconFlow ei lisa enam staatilistesse koguarvudesse tingimusteta tasuta mudeli rida ega püsivalt tasuta teenusepakkujat.
 
-| Režiim                  | Tõe allikas                                                                                                                                                                    | Esitab                                                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **Lugemine / kuvamine** | Lahendatud kataloog — tarnitud baasjoon, millele on lisatud Radari voog (`getRadarCatalog`)                                                                                    | Tasuta taseme kogusummad, eelarvekaart, armatuurlauad                                                                       |
-| **Otsustamine**         | Ainult tarnitud kataloog (`FREE_MODEL_BUDGETS` failis `open-sse/config/freeModelCatalog.data.ts`) pluss kohalikud heuristikad (`:free` sufiks, nullhinnad, `grantsFreeAccess`) | Iga `src/shared/utils/freeModels.ts` tarbija: mudeli import, `auto/*` marsruutimine, `GET /v1/models` ja brauseri eelvaated |
+See **ei** tähenda, et SiliconFlow’l pole tasuta mudeleid. Ainult tasuta mudelite import ja tähis Free nõuavad nüüd **konkreetse mudeli kohta positiivset tõendit teenusepakkuja reaalajas mudeliandmetest**, näiteks selgesõnalist Boole’i tüüpi tasuta oleku märgendit või mõlema sõnehinna nullväärtust. Selgesõnaline tasulisuse märgend või mis tahes positiivne arvuline hind on optimistliku tasuta oleku märgendi suhtes ülimuslik. Mudelit, mille kohta pole reaalajas tõendeid saadaval, **ei** peeta vaikimisi tasuta mudeliks; uue konto ühekordne krediit ei tõenda korduvat tasuta kasutusmahtu. Kui praegune teenusepakkuja API ei suuda esitada usaldusväärset mudelipõhist hinnateavet, kinnitage see enne päringute suunamist teenusepakkuja konsoolis. See konservatiivne valik ennetab ootamatuid tasusid ainult tasuta mudelite importimisel ja automaatsete kombinatsioonide kasutamisel.
 
-Lugemine võib paraneda, kui voog on saadaval. Otsustamine jääb väljalaske artefaktile, nii et vastus on brauseris ja serveris identne, võrguühenduseta reprodutseeritav ja testitav ilma andmebaasita. Kui brauseri eelvaade loeks ühte allikat, samal ajal kui serveri import loeks teist, tekiks eelvaade, mis ei ühti sellega, mis juhtub klõpsamisel – jagamine on tahtlikult säilitatud.
+Allpool olev ajalooline teenusepakkujate tabel ei ole reaalajas saadavuse lubadus. Selle varasem SiliconFlow’ piiramatu / 10 mudeli kirje puudub tahtlikult, sest see ei kajasta enam tõendatud korduvat tasuta kasutusmahtu.
+
+---
+
+## 2026-10-15 Bytezi ja Nousi parandus
+
+[Bytezi arvelduse](https://docs.bytez.com/model-api/docs/billing) tasuta pakett piirab
+avatud mudelid 7B parameetriga. 70B ja 72B kirjed nõuavad ostetud krediidiga
+avamist ning on eemaldatud. Mistral-7B jääb tüübiks `recurring-credit`: krediiti
+värskendatakse iga nelja nädala järel, kuid arveldamine toimub inferentsisekundite
+alusel ja tokenikogust ei ole avaldatud. Selle tokeniloendurite väärtus on null,
+et tähistada teadmata kogust, asendades toetamata 1M tokeni hinnangu; see ei
+tähenda, et tasuta krediiti pole. Nousi muudatusi kirjeldatakse üksikasjalikult
+allolevas pakkuja märkuses.
+
+## Kaks režiimi — loendamine ja otsustamine
+
+OmniRoute vastab küsimusele „kas see on tasuta?“ kahe režiimi kaudu, mis loevad
+tahtlikult erinevaid allikaid:
+
+| Režiim                    | Tõeallikas                                                                                                                                                                        | Kasutuskohad                                                                                                                           |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Loendamine / kuvamine** | Koondkataloog — tarnitud lähteandmestik, millele on lisatud Radari voo (`getRadarCatalog`) andmed                                                                                 | Tasuta taseme kogusummad, eelarvekaart, töölauad                                                                                       |
+| **Otsustamine**           | Ainult tarnitud kataloog (`FREE_MODEL_BUDGETS` failis `open-sse/config/freeModelCatalog.data.ts`) koos kohalike heuristikatega (`:free` järelliide, nullhind, `grantsFreeAccess`) | Kõik faili `src/shared/utils/freeModels.ts` kasutajad: mudelite import, `auto/*` marsruutimine, `GET /v1/models` ja brauseri eelvaated |
+
+Loendamine võib paraneda iga kord, kui voog on saadaval. Otsustamine põhineb
+endiselt väljalaskeartefaktil, seega on vastus brauseris ja serveris identne,
+võrguühenduseta korratav ning ilma andmebaasita testitav. Kui brauseri eelvaade
+loeks ühest allikast ja serveri import teisest, tekiks eelvaade, mis ei vastaks
+klõpsamisel tegelikult toimuvale — see eristus on tahtlik.
 
 ## Metoodika ja mööndused
 
-- Arvud on **ülempiiri hinnangud**, mis põhinevad iga teenusepakkuja dokumenteeritud tasuta paketi piirangutel seisuga **2026-06-17** ning on kogutud veebiuuringuga. Tasuta paketid muutuvad pidevalt — kontrollige arvud enne nendele tuginemist uuesti üle.
-- **Mida kirje tegelikult kinnitab.** Ühelgi kirjel pole reapõhist usaldusväärsuse hinnangut ja ka API ei väljasta seda — käsitlege iga ülaltoodud arvu sama, täpsustamata kvaliteediga hinnanguna. Kaks fakti on erinevad, sest need on käsitsi koostatud, mitte tuletatud: 44 kirjel on sõltumatult dokumenteeritud kindel peatamispiir (neist 39 on xKiro read, millel kõigil on sama päevane kvoot) ning 13 kirjel on viiba treeninguks kasutamise avalikustus. `hardStopGuaranteed` määratakse ainult siis, kui teenusepakkuja enda tingimustes öeldakse, et tasuta kvoodi ületamisel lükatakse päring tagasi, selle asemel et teile vaikimisi arveid esitama hakata; allikas on kirje kõrval olevas kommentaaris. Selle vaikeväärtuseks ei määrata kunagi `true` ning kirjel, mida keegi pole kontrollinud, jääb see määramata. Seega tähendab puuduva kindla peatamispiiri lipp „pole tõendatud”, mitte „teadaolevalt hakatakse arveid esitama”. **STRICT-režiim** (valikuline marsruutimiskaitse `freeAccessPolicy=strict`) usaldab ainult lipuga kirjeid; kõik muud tasuta paketid välistatakse põhjusega `no-hard-stop` (vt `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kui kaitse kogumit filtreerib, näitab operaatorile nähtav logi nii välistatud kirjete arvu kui ka põhjuse `no-hard-stop` osakaalu.
-- `estMonthlyFreeTokens` = ainult igakuiselt korduvad tokenid. **Ühekordsed registreerumiskrediidid ei kordu** ja nende väärtuseks loetakse 0. Lõpetatud paketid on samuti 0.
-- Päevane tokenite ülempiir → `monthly = daily × 30`. Kui dokumenteeritud on ainult RPD → `RPD × ~800 väljundtokenit × 30`. Kui on ainult RPM/TPM (päevase ülempiirita) → **piiramata** (vt allpool).
-- **Püsivalt tasuta, kuid avaldatud tokenite ülempiirita** (`siliconflow`, `glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): need pakuvad tegelikku korduvat tasuta juurdepääsu, mida piiravad päringusagedus ja samaaegsus. Liigitame need kui `recurring-uncapped` ega **liida neid kunagi kokku** — korrutamine `RPM × 24/7 × 30d` annaks ebarealistliku ülempiiri (sellise näilise paisutamise me välistame). Need on loendis selleks, et teaksite nende olemasolust.
-- **Sissemaksega avatav suurendus:** ühekordne väike sissemakse, mis suurendab tasuta kvooti püsivalt (OpenRouter: $10 → 1000 päringut päevas ≈ +24M kuus). See esitatakse eraldi arvuna ega kuulu stabiilse põhinäitaja hulka.
-- **Sobivustingimusega piiratud kvoodid** (`eligibilityGate: "regional-identity"`): tegelik korduv kvoot, mis avaneb alles pärast piirkonnaga seotud isikusamasuse kontrolli (praegu Mandri-Hiina pärisnimega isikusamasuse kontroll). See arvestatakse sama kogumi duplikaatide eemaldamise reegli alusel eraldi näitajasse (`gatedRecurringTokens`), mitte kunagi stabiilsesse põhinäitajasse. Režiim (`freeType`) ei muutu, seega ei muutu ka marsruutimine.
-- **Tõendusmaterjali klassid.** Reegel: kataloogi arv viitab oma allikale kirje kõrval olevas kommentaaris `// evidence:` — `public-page` (teenusepakkuja leht, mida igaüks saab lugeda), `api-public` (teenusepakkuja autentimata lõpp-punkt, nt NaraRouteri avalik pakettide lõpp-punkt aadressil router.bynara.id) või `console-verified <date> por <who>` (arv on nähtav ainult konto konsoolis; kommentaaris märgitakse, kes ja millal seda nägi, ning avalik leht, kus öeldakse, et ülempiir on olemas). Praegune seis: viis plokki, mida 2026-09-02 uuesti auditeeriti, sisaldavad seda (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); kirjed, mis pärinevad 2026-09-02 uuest auditist varasemast ajast, tuginevad varasematele uuringutele seni, kuni neid muudetakse; iga **uus või muudetud** arv ilma tõendusmaterjali kommentaarita on viga. Praegu on ainult `mistral` konsoolis kontrollitud.
+- Arvud on iga pakkuja dokumenteeritud tasuta taseme piirangutel põhinevad **ülempiiri hinnangud** seisuga **2026-06-17**, mis on kogutud veebiuuringuga. Tasuta tasemed muutuvad pidevalt — kontrollige andmed enne nendele tuginemist uuesti üle.
+- **Mida kirje tegelikult kinnitab.** Ühelgi kirjel pole reapõhist usaldusväärsuse hinnangut ja ka API ei väljasta seda — käsitlege kõiki ülaltoodud arve sama täpsustamata kvaliteediga hinnangutena. Kaks fakti on erinevad, sest need on tuletamise asemel käsitsi kureeritud: 44 kirjel on sõltumatult dokumenteeritud kindel piir (39 neist on xKiro read, millel kõigil on sama päevane kvoot) ja 12 kirjel on viiba treenimiseks kasutamise avalikustus. `hardStopGuaranteed` määratakse ainult siis, kui pakkuja enda tingimused ütlevad, et tasuta kvoodi ületamisel keeldutakse päringust, mitte ei hakata kasutajale märkamatult arvet esitama; allikas on kirje kõrval kommentaaris. Selle vaikeväärtuseks ei määrata kunagi `true` ja kontrollimata kirje puhul jääb see määramata. Seega tähendab kindla peatamise lipu puudumine „pole tõendatud“, mitte „teadaolevalt esitatakse arve“. **STRICT-režiim** (vabatahtlik `freeAccessPolicy=strict` marsruutimiskaitse) usaldab ainult lipuga kirjeid; kõik muud tasuta tasemed jäetakse välja põhjusega `no-hard-stop` (vt `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kui kaitse kogumit filtreerib, näitab operaatorile nähtav logi nii välistatud kirjete arvu kui ka nende `no-hard-stop` osakaalu.
+- `estMonthlyFreeTokens` = ainult igakuiselt korduvad tokenid. **Ühekordsed registreerumiskrediidid ei kordu** ja nende väärtuseks loetakse 0. Lõpetatud tasemete väärtus on samuti 0.
+- Päevane tokenipiir → `monthly = daily × 30`. Kui dokumenteeritud on ainult RPD → `RPD × ~800 väljundtokenit × 30`. Ainult RPM/TPM (päevase piiranguta) → **piiramata** (vt allpool).
+- **Püsivalt tasuta, kuid avaldatud tokenipiiranguta** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): need pakuvad tegelikku korduvat tasuta juurdepääsu, mida piiravad päringusagedus ja samaaegsus. Liigitame need tüübiks `recurring-uncapped` ega **liida neid kunagi kokku** — tehe `RPM × 24/7 × 30d` annaks ebarealistliku ülempiiri (sellisest paisutamisest me keeldume). Need on loetletud, et teaksite nende olemasolust.
+- **Sissemaksega avatav suurendus:** ühekordne väike sissemakse, mis suurendab tasuta kvooti püsivalt (OpenRouter: $10 → 1000 päringut päevas ≈ +24M kuus). Esitatakse eraldi arvuna ja jäetakse püsivast põhinäitajast välja.
+- **Sobivustingimusega kvoodid** (`eligibilityGate: "regional-identity"`): tegelik korduv kvoot, mis avaneb alles pärast piirkonnaga seotud isikusamasuse kontrolli (praegu Mandri-Hiina pärisnime kontroll). See arvestatakse sama kogumi duplikaatide eemaldamise reegli alusel eraldi näitajasse (`gatedRecurringTokens`), mitte kunagi püsivasse põhinäitajasse. Režiim (`freeType`) ei muutu, seega ei muutu ka marsruutimine.
+- **Tõendiklassid.** Reegel: kataloogis oleva arvu allikas viidatakse kirje kõrval olevas `// evidence:` kommentaaris — `public-page` (pakkuja leht, mida igaüks saab lugeda), `api-public` (pakkuja autentimist mittevajav otspunkt, näiteks NaraRouteri avalik pakettide otspunkt aadressil router.bynara.id) või `console-verified <date> por <who>` (arv on nähtav ainult konto halduskonsoolis; kommentaar talletab, kes ja millal seda nägi, ning avaliku lehe, mis kinnitab piirangu olemasolu). Praegune seis: viiel plokil, mida auditeeriti uuesti kuupäeval 2026-09-02, on see olemas (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); kirjed, mis pärinevad ajast enne 2026-09-02 kordusauditit, kasutavad kuni nende muutmiseni varasema uuringu andmeid; iga **uus või muudetud** arv ilma tõendikommentaarita on viga. Praegu on ainult `mistral` konsoolis kontrollitud.
 
 ---
 
-## Miks meie number on väiksem kui teiste koondajate oma
+## Miks on meie arv väiksem kui teistel koondajatel
 
-Enamik "tasuta märke kuus" numbreid selles valdkonnas on mudelipõhiste siltide summad. Meie oma ei ole, ja seda tahtlikult:
+Enamik selles valdkonnas esitatud „tasuta tokenite arv kuus” näitajaid saadakse mudelipõhiste arvude liitmisel. Meie oma ei ole seda taotluslikult:
 
-- **Iga jagatud kogum loetakse üks kord.** Mistrali tasuta pakett on üks 1B/kuu limiit organisatsiooni kohta; selle viie mudeli all loetlemine ei tee sellest 5B. Mudelipõhiselt summeerituna oleks meie enda kataloog **~7.4B** (uuesti arvutatud 2026-09-03; see number ei ole CI-ga piiratud – mõõtke see uuesti, kui kataloog muutub) – pealkiri ütleb **~1.47B**, sest just nii palju saab iga pakkuja konto tegelikult kulutada.
-- **Päevased piirangud teisendatakse, määrad mitte.** Dokumenteeritud märkide/päeva piirangust saab `× 30`; dokumenteeritud päringute/päeva piirangust saab `RPD × ~800 märki × 30`; pakkuja, kes avaldab ainult päringuid minutis, **ei oma** igakuist numbrit ja on loetletud kui _piiramatu_, seda ei summeerita kunagi. Määrade piirangu korrutamine 24/7-ga on inflatsioon, millest me keeldume.
-- **Piirkondliku identiteedi kontrolli taga olevad kvoodid kuvatakse eraldi** (`+~6M piirkondliku identiteedi kontrolli taga`), sest enamik lugejaid ei saa neid kasutada.
-- **Registreerimiskrediidid kehtivad ainult esimesel kuul** ja on esitatud teise numbrina, mitte kunagi segatud püsivasse numbri hulka.
-- **Number on CI-ga jõustatud.** `npm run check:docs-counts` arvutab kogusummad kataloogist uuesti ja ebaõnnestub ehituse, kui see fail, README või eelarvekaart neist erinevad.
-
----
-
-## Kasutustingimuste tähelepanu tabel
-
-> **Kasutustingimuste lipp on soovituslik, mitte marsruutimisvärav.** Pakkujad, mis on märgitud `tos`, on vaikimisi endiselt marsruutimisse ja kombineerimisse/tagavarasse kaasatud; lipp ilmub ainult `/dashboard/free-tiers` ja `/api/free-tier/summary`. Päringuparameeter `excludeTosAvoid` mõjutab ainult kokkuvõttevaadet, mitte globaalset marsruutimist. Otsus asub `open-sse/config/freeTierCatalog.ts` (informatiivne, marsruutimismootorid seda ei loe).
-
-> Kiire lugemine iga pakkuja tingimustest isemajutatava, ühe kasutajaga isikliku puhverserveri kohta. `caution` = isikliku kasutuse või puhverserveri klausel, mida tasub kontrollida; `ambiguous` = ebaselge; `ok` = selgesõnaliselt lubatud. Informatiivne, mitte juriidiline nõuanne – otsustate ise.
-
-### ⚠️ Ettevaatust – isikliku kasutuse / puhverserveri klauslid, mida tasub kontrollida (16)
-
-> Nende tasuta juurdepääs on reaalne ja OmniRoute saab neid marsruutida; alltoodud klauslid on lihtsalt teadmiseks. OAuth/võtmeta variandid ei ole märkidena kvantifitseeritavad, seega ei ole need pealkirja numbris (mitte sellepärast, et need oleksid kasutuskõlbmatud).
-
-| Pakkuja          | Märkus                                                                                                                                                                                                      |
-| :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agy`            | Google Antigravity kasutustingimused keelavad selgesõnaliselt kolmanda osapoole tarkvara, tööriistade või teenuste (sh puhverserverite) kasutamise teenusele juurdepääsuks OAuth kaudu; seda tehes…         |
-| `ai21`           | Kasutustingimuste §4.2/§8.2 keelab API juurdepääsu all-litsentsimise või levitamise kolmandatele osapooltele; §3.3 piirab proovi-/hindamistooteid "sisemiseks hindamiseks…                                  |
-| `amazon-q`       | Toode on uute registreerimiste jaoks katkestatud; olemasolevatele kasutajatele kehtib AWS-i kliendileping, mis reguleerib hallatavate teenuste kasutamist – isemajutatav pro…                               |
-| `blackbox`       | Kasutustingimused keelavad selgesõnaliselt all-litsentsimise, edasimüümise, teenuse kättesaadavaks tegemise kolmandatele osapooltele ja tuletatud teenuste loomise – isemajutatav per…                      |
-| `coze`           | Coze kasutustingimused piiravad selgesõnaliselt kasutamist "isiklikuks ja mitteäriliseks kasutamiseks" ning keelavad teenuse rentimise, levitamise, all-litsentsimise või edasimüümise; a…                  |
-| `duckduckgo-web` | Duck.ai kasutustingimused (duckduckgo.com/duckai/privacy-terms) keelavad selgesõnaliselt "automatiseeritud päringud ja AI-teenuste arendamise või pakkumise" ning möödahiilimise…                           |
-| `featherless-ai` | Individuaalsed plaanid on selgesõnaliselt piiratud "interaktiivse kasutuse või prototüüpimise ja eksperimenteerimisega ostja poolt" – järelduste edasimüük ja puhverserveri kasutamine req…                 |
-| `fireworks`      | Kasutustingimused keelavad selgesõnaliselt puhverserveri/vahendaja kasutamise, API-võtmete edastamise ja all-litsentsimise (jaotised 2.1 ja 2.2(i)(j)); isemajutatavad isiklikud puhverserverid ei ole n…   |
-| `friendliai`     | Kasutustingimuste jaotis 8(e) ja 8(f) keelavad selgesõnaliselt FriendliAI kasutamise puhverserverina või kolmanda osapoole juurdepääsu lubamise eraldiseisvalt ning keelavad edasimüümise/…                 |
-| `iflytek`        | iFlytek Spark LLM teenuselepingu jaotis 2.4(3) keelab selgesõnaliselt "mis tahes automatiseeritud või programmeeritud meetodite kasutamise andmete või väljundi ekstraheerimiseks…                          |
-| `kiro`           | Kiro KKK keelab selgesõnaliselt kasutamise "OpenClaw ja sarnaste tööriistadega, mis kasutavad kolmanda osapoole rakmeid" – isemajutatav AI puhverserver (nagu OmniRoute) rou…                               |
-| `modal`          | Kasutustingimuste jaotis 1.3 keelab selgesõnaliselt "rentida, edasi müüa või muul viisil lubada kolmandal osapoolel teenusele otse juurde pääseda või seda kasutada" – isemajutatava…                       |
-| `muse-spark-web` | Meta kasutustingimused keelavad selgesõnaliselt automatiseeritud juurdepääsu ilma eelneva loata, pöördprojekteerimise ilma kirjaliku loata ja tehnoloogiate möödahiilimise…                                 |
-| `nlpcloud`       | Kasutustingimused keelavad selgesõnaliselt "puhverserveri või muu seadme seadistamise, mis võimaldab teistel teenusele selle kaudu juurde pääseda" ja annavad ainult mitteülekantava,…                      |
-| `opencode`       | Kasutustingimused (Anomaly Innovations, Inc.) piiravad selgesõnaliselt kasutamist "oma sisemiseks kasutamiseks, mitte kolmanda osapoole nimel või kasuks" – ope…                                            |
-| `t3-web`         | Kasutustingimused piiravad selgesõnaliselt kontosid ainult isiklikuks kasutamiseks, keelavad mandaatide jagamise kolmandate osapooltega ja keelavad automatiseeritud/robotite/kraapimise juurdepääsu – a s… |
-
-### ✅ Üldiselt lubav – ettevaatust / ebaselge / ok (ülejäänud)
-
-| Provider         | ToS         | Note                                                                                                                                                                                          |
-| ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `aimlapi`        | ebamäärane  | Kasutustingimused annavad mitteeksklusiivse kasutuslitsentsi, kuid ei luba ega keela otseselt ise hostitud puhverserverit või edasimüüki; puudub "isiklik…                                    |
-| `baichuan`       | ebamäärane  | Avalikult kättesaadavates dokumentides ei leitud otsest keeldu ise hostitud isiklike puhverserverite kohta; siiski, M3 Plusi tasuta plaan…                                                    |
-| `bluesminds`     | ebamäärane  | Ei leitud otseseid kasutustingimuste sätteid ise hostitud puhverserveri või edasimüügi kohta; hinnakiri keskendub funktsioonidele/kiirusepiirangutele…                                        |
-| `bytez`          | ebamäärane  | Otsene kasutustingimuste leht ei olnud ligipääsetav (404); avalikke ainult hindamiseks või puhverserverita sätteid dokumentides ei leitud, kuid platvorm…                                     |
-| `doubao`         | ebamäärane  | Avalikult indekseeritud dokumentatsioonist ei leitud otsest puhverserveri/edasimüügi keeldu; Volcengine on arendajatele suunatud pilv…                                                        |
-| `gitlawb-gmi`    | ebamäärane  | Ei leitud otsest kasutustingimuste sätet, mis keelaks ise hostitud isikliku puhverserveri kasutamise; tasuta Nemotroni mudeliga kaasneb NVIDIA lahtiütlus…                                    |
-| `monsterapi`     | ebamäärane  | MonsterAPI kasutustingimuste leht (monsterapi.ai/terms-of-service) oli uurimise ajal kättesaamatu; puuduvad spetsiifilised puhverserveri/edasimüügi/isikliku…                                 |
-| `nous-research`  | ebamäärane  | Nous Portal ise on agregaator/puhverserveri teenus; selle kasutamine teise ise hostitud puhverserveri taustaprogrammina loob puhverserveri-…                                                  |
-| `ollama-cloud`   | ebamäärane  | Kasutustingimused keelavad teenuse kasutamise "konkureerivate toodete arendamiseks", kuid puudub otsene keeld ise hostitud isiklike puhverserverite kohta…                                    |
-| `stepfun`        | ebamäärane  | Ei leitud otsest keeldu ise hostitud isikliku puhverserveri kohta, kuid Step Plani kasutustingimused on suunatud arendajatele, kes kasutavad spetsiifilisi…                                   |
-| `api-airforce`   | ettevaatust | Kasutustingimused keelavad otseselt "konkureerivate teenuste loomise ilma loata" ja "volituste jagamise" — ise hostitud isiklik…                                                              |
-| `arcee-ai`       | ettevaatust | Tasuta ligipääs toimub OpenRouteri :free marsruutimise kihi kaudu (mitte Arcee otseste API tingimuste alusel); OpenRouteri kasutustingimused lubavad isiklikku arendust…                      |
-| `baidu`          | ettevaatust | Kasutustingimusi ei ole otseselt puhverserveri/edasimüügi sätete osas üle vaadatud, kuid platvorm nõuab reaalse nimega autentimist (tavaliselt Hiina ID…                                      |
-| `baseten`        | ettevaatust | Kasutustingimused piiravad kasutamist "Kliendi sisemisteks ärieesmärkideks" ja keelavad otseselt alllitsentsimise, edasimüügi või lubamise…                                                   |
-| `bazaarlink`     | ettevaatust | Kasutustingimused keelavad otseselt API võtmete edasimüügi või alllitsentsimise kolmandatele osapooltele; ise hostitud isiklik puhverserver isiklikuks…                                       |
-| `brave-search`   | ettevaatust | Kasutustingimused keelavad otsingutulemuste edasijagamise, edasimüügi ja alllitsentsimise; API kasutamine "kopeerimiseks või kopeerimiskatseks…                                               |
-| `byteplus`       | ettevaatust | Tokenid on mitteülekantavad ja ainult ühe konto jaoks; otsest puhverserveri keeldu ei ole, kuid BytePlus jätab endale õiguse…                                                                 |
-| `cerebras`       | ettevaatust | Kasutustingimused annavad mitteeksklusiivse, mitteülekantava, mittealllitsentsitava õiguse isiklikuks või äriliseks kasutamiseks; keelab edasimüügi, alllitsentsimise…                        |
-| `cloudflare-ai`  | ettevaatust | Cloudflare'i iseteeninduse kasutustingimuste §2.2.1(j) keelab teenuste kasutamise "virtuaalse privaatvõrgu või muu sarnase pakkumiseks…                                                       |
-| `cohere`         | ettevaatust | Cohere keelab otseselt proovivõtmete kasutamise "tootmis- või ärilistel eesmärkidel"; ise hostitud isiklik puhverserveri marsruutimine…                                                       |
-| `deepinfra`      | ettevaatust | Kasutustingimused lubavad laialdaselt seaduslikku ärilist kasutamist, kuid keelavad kasutamise "otseselt või kaudselt konkureerivalt ettevõtte mis tahes äriga…                               |
-| `deepseek`       | ettevaatust | Avatud platvormi kasutustingimused (kehtivad alates 2026-04-29) lubavad laialdast kasutamist, sealhulgas "tuletatud toote arendust" ja isiklikku/ärilist…                                     |
-| `dify`           | ettevaatust | Ise hostitud ühe kasutaja isiklik puhverserver on lubatud modifitseeritud Apache 2.0 litsentsi alusel; aga mitme rentnikuga juurutamine…                                                      |
-| `exa-search`     | ettevaatust | Ei leitud otseseid "puhverserverita" või "ainult hindamiseks" sätteid; Exa pakub aktiivselt edasimüüja partnerprogrammi, mis lubab API…                                                       |
-| `firecrawl`      | ettevaatust | Pilve API kasutustingimustes ei leitud otsest isikliku puhverserveri keeldu, kuid avatud lähtekoodiga ise hostitud versioon on AGPL-3.0 (nõuab…                                               |
-| `gemini`         | ettevaatust | Kasutustingimused sätestavad otseselt, et tasuta tase on mõeldud "arendajatele, kes ehitavad Google AI mudelitega professionaalsetel või ärilistel eesmärkidel…                               |
-| `groq`           | ettevaatust | Teenuste leping §6.3 keelab API ligipääsu edasimüügi, alllitsentsimise või levitamise; §3.2 keelab kontode edasimüügi/rentimise…                                                              |
-| `huggingchat`    | ettevaatust | Hugging Face'i kasutustingimused ei keela otseselt isiklikke ise hostitud puhverservereid, kuid täiendavad tingimused (viidatud, kuid mitte täielikult…                                       |
-| `huggingface`    | ettevaatust | Kasutustingimused annavad piiratud litsentsi teenusele ligipääsuks/kasutamiseks; dokument ei luba ega keela otseselt ühe kasutaja…                                                            |
-| `hyperbolic`     | ettevaatust | Kasutustingimused annavad API ligipääsu "ainult teie isiklikeks või sisemisteks ärieesmärkideks" ja keelavad otseselt litsentsimise,…                                                         |
-| `inference-net`  | ettevaatust | Kasutustingimused keelavad otseselt "alllitsentsimise, edasimüügi, levitamise" ja API võtmete edastamise ilma kirjaliku nõusolekuta; ühe kasutaja…                                            |
-| `jina-ai`        | ettevaatust | Tasuta 10M tokenit on otseselt mitteärilised (CC-BY-NC 4.0 mudeli litsents); ühe kasutaja isiklik puhverserver isiklikuks L…                                                                  |
-| `jina-reader`    | ettevaatust | Kasutustingimused keelavad väljundite kasutamise konkureerivate teenuste loomiseks ja keelavad "automatiseeritud meetodid teabe väljavõtmiseks kraapimise teel…                               |
-| `llm7`           | ettevaatust | Kasutustingimused positsioneerivad teenust "eksperimenteerimiseks, arenduseks ja uurimistööks"; puudub otsene keeld ise hostitud isikliku…                                                    |
-| `longcat`        | ettevaatust | API platvormi teenusleping (longcat.chat/platform/private/) lubab ärilist integreerimist ja ise hostitud rakendusi…                                                                           |
-| `mistral`        | ettevaatust | Tarbijate kasutustingimused sätestavad otseselt, et API-sid tohib kasutada ainult "isiklikeks vajadusteks" ja keelavad API võtmete kättesaadavaks tegemise kolmandatele…                      |
-| `morph`          | caution     | Kasutustingimused lubavad üldiselt ärilist kasutamist; ise majutatud puhverserveri juurutused nõuavad müügiosakonnaga selget kokkulepet. Punkt 18.…                                           |
-| `nebius`         | caution     | Kasutustingimused (punkt 5f) keelavad selgesõnaliselt edasimüügi, ümberjagamise või teenuse pakkumise "iseseisvalt" – ise…                                                                    |
-| `nomic`          | caution     | Kasutustingimused annavad mitteeksklusiivse, mitteloovutatava API litsentsi; punkt 6.b keelab konkureeriva teenuse loomise. Kasutades t…                                                      |
-| `novita`         | caution     | Kasutustingimused keelavad edasimüügi ja konkureerivad teenused, kuid ei käsitle selgesõnaliselt isiklikke ise majutatud puhverservereid; isiklik kasutus…                                    |
-| `nscale`         | caution     | AUP keelab "kopeerida, muuta, dubleerida... raamida, peegeldada, uuesti avaldada... levitada kogu Nscale'i platvormi või selle mis tahes osa…                                                 |
-| `nvidia`         | caution     | Tasuta tase on selgesõnaliselt mõeldud ainult prototüüpimiseks/arenduseks/uurimiseks/hindamiseks – tootmiskasutus (reaalsete lõppkasutajate teenindamine) nõuab…                              |
-| `openrouter`     | caution     | Kasutustingimused keelavad selgesõnaliselt API juurdepääsu edasimüügi või konkureeriva teenuse arendamise; ühe kasutaja ise majutatud isiklik puhverserver…                                   |
-| `pollinations`   | caution     | API dokumentatsioonis viidatud MIT litsents viitab liberaalsele taaskasutusele; ise majutatud puhverserveri kasutamise selget keeldu ei leitud. Kuid, u…                                      |
-| `predibase`      | caution     | Predibase on positsioneeritud kui ettevõtte peenhäälestuse/teeninduse platvorm; tasuta prooviperiood on selgesõnaliselt mõeldud uurimiseks ja…                                                |
-| `publicai`       | caution     | Kasutustingimused (publicai.co/tc) määravad teenused "peamiselt uurimis- ja haridusotstarbeks"; selget puhverserveri või edasimüügi keeldu ei ole…                                            |
-| `qoder`          | caution     | Kasutustingimuste leht ei tagastanud loetavat sisu; Qoder on kodeerimise IDE klient (mitte avalik API) ja kolmanda osapoole puhverserveri ümbrised…                                           |
-| `reka`           | caution     | Äritingimused keelavad juurdepääsu alllitsentsimise või kolmandatele osapooltele levitamise; isiklik ühe kasutaja puhverserver on tõenäoliselt sobiv…                                         |
-| `sambanova`      | caution     | Kasutustingimuste punkt 1.5(c) keelab selgesõnaliselt teenuse edasimüügi, alllitsentsimise või kolmandatele osapooltele kättesaadavaks tegemise; ise…                                         |
-| `sensenova`      | caution     | Läbivaadatud kasutustingimustes ei leitud selget puhverserveri või edasimüügi keeldu, kuid tasuta tase on reklaamibeta ilma SLA-ta, Sen…                                                      |
-| `serper-search`  | caution     | Kasutustingimused keelavad selgesõnaliselt "materjalide peegeldamise mis tahes muul serveril sellisel kujul, ilma lisaväärtuseta" – lihtne läbipääsu pr…                                      |
-| `siliconflow`    | caution     | Kasutustingimused (punkt 3.4(e)(f)(p)) keelavad selgesõnaliselt teenuse kättesaadavaks tegemise mis tahes kolmandale osapoolele, edasimüügi/alllitsentsimise,…                                |
-| `sparkdesk`      | caution     | SparkDeski kasutajaleping annab ainult isiklikud, mitteärilised kasutusõigused; API liidese poliitika keelab automatiseeritud andmete…                                                        |
-| `tavily-search`  | caution     | Kasutustingimused sätestavad selgesõnaliselt, et API-d "ei tohi edasi anda, loovutada, jagada ega muul viisil kolmandatele osapooltele kättesaadavaks teha…                                   |
-| `tencent`        | caution     | Tencent Cloudi kasutustingimused keelavad selgesõnaliselt API juurdepääsu alllitsentsimise või edasimüügi; ise majutatud isiklik puhverserver isiklikuks…                                     |
-| `together`       | caution     | Kasutustingimuste punkt 4.3(d) keelab selgesõnaliselt teenuste edasiandmise, levitamise, edasimüügi, rentimise või pakkumise s…                                                               |
-| `uncloseai`      | caution     | Isikliku puhverserveri kasutamine on tõenäoline, kuid mitte selgesõnaliselt lubatud; kasutustingimused keelavad "konkureerivate masinõppeteenuste loomise wi…                                 |
-| `veoaifree-web`  | caution     | Kasutustingimused keelavad selgesõnaliselt automatiseeritud robotid või skriptid, mis töötavad "ebainimliku kiirusega", ja keelavad platvormi kopeerimise, et luua…                           |
-| `vertex`         | caution     | Google Cloudi teenusetingimused piiravad edasimüüki ainult volitatud edasimüüjatega (punkt 14 nõuab edasimüüja lepingut); ise…                                                                |
-| `voyage-ai`      | caution     | Kasutustingimused annavad "isikliku, mitteärilise kasutuse" saidi sisule ja keelavad mandaatide/kontode jagamise kolmandate osapooltega;…                                                     |
-| `xkiro`          | caution     | Kasutustingimused (2026-07-30) keelavad teenuse edasimüügi/ümberjagamise ja ülesvoolu pakkujate tingimuste rikkumise; isiklik pro…                                                            |
-| `360ai`          | unknown     | Arendaja API kasutustingimused ei ole ilma registreerimiseta avalikult kättesaadavad; juurdepääs nõuab taotluse heakskiitu, mis viitab…                                                       |
-| `chutes`         | unknown     | Kasutustingimuste leht asub aadressil chutes.ai/terms, kuid sisu ei olnud WebFetchi kaudu kättesaadav; selgeid puhverserveri/edasimüügi klausleid ei leitud…                                  |
-| `freemodel-dev`  | unknown     | Teenusetingimuste leht (freemodel.dev/terms) tagastas WebFetchi kaudu ainult päise ilma loetava sisuta; klauslit ei ole…                                                                      |
-| `gitlawb`        | unknown     | Kasutustingimusi ega vastuvõetava kasutuse poliitikat ei leitud; puhverserveri/edasimüügi piirangud on teadmata – ise majutatud puhverserveri kasutamisel eeldage ettevaatust.                |
-| `liquid`         | unknown     | Majutatud API-d puhverserveri jaoks ei eksisteeri; avatud lähtekoodiga mudeli äriline kasutamine on tasuta organisatsioonidele, mille aastane tulu on alla 10 miljoni dollari. Ise majutatud… |
-| `yi`             | unknown     | Kasutustingimused ei ole ilma sisselogimiseta avalikult kättesaadavad; puhverserveri/edasimüügi klausleid ei saanud üle vaadata. Ise majutatud isikliku puhverserveri kasutamine st…          |
-| `comfyui`        | ok          | GPL-3.0 avatud lähtekoodiga litsents lubab selgesõnaliselt ise majutatud isikliku puhverserveri kasutamist; Comfy Org ToS kinnitab ärilist kasutamist…                                        |
-| `scaleway`       | ok          | Scaleway üldised teenusetingimused on standardne äriline pilveleping, mis ei keela selgesõnaliselt ise majutatud…                                                                             |
-| `sdwebui`        | ok          | AGPL-3.0 litsents: tasuta ise majutamiseks isiklikuks kasutamiseks ilma kasutusmahu piiranguteta; isiklik puhverserver, mis seda kasutab…                                                     |
-| `searxng-search` | ok          | AGPL-3.0 avatud lähtekoodiga litsents lubab selgesõnaliselt ise majutatud isikliku puhverserveri kasutamist ilma kasutusviisi, edasimüügi piiranguteta…                                       |
-
-## Pakkuja-põhine tasuta tase (värskendatud 2026-09-02 uuesti auditeeritud ridade jaoks; 2026-06-17 muul juhul)
-
-> Genereeritud uuesti mudelipõhisest kataloogist (`open-sse/config/freeModelCatalog.ts`), kogumist dublikaadid eemaldatud. Sorteeritud korduvate püsivate tokenite/kuu järgi. `uncapped*` = püsivalt tasuta, kuid puudub avaldatud tokenite piirang (kiiruse/samaaegsuse piiranguga) — tegelik juurdepääs, **ei** summeerita pealkirja. `—` = ainult krediidipõhine / võtmeta / tokenitega mittemõõdetav.
-
-| Pakkuja          | Tasuta tüüp           | Püsivad märgid/kuu | Esimese kuu krediit | Kasutustingimused | Mudelid |
-| :--------------- | :-------------------- | :----------------- | :------------------ | :---------------- | :------ |
-| `mistral`        | korduv                | ~1.00B             | —                   | ettevaatust       | 5       |
-| `nara`           | korduv                | ~210M              | —                   | ettevaatust       | 8       |
-| `llm7`           | korduv                | ~150M              | —                   | ettevaatust       | 4       |
-| `xkiro`          | korduv                | ~150M              | —                   | ettevaatust       | 39      |
-| `longcat`        | ühekordne             | —                  | 10M                 | ettevaatust       | 1       |
-| `cerebras`       | ühekordne             | —                  | $5 krediit          | ettevaatust       | 2       |
-| `cloudflare-ai`  | korduv                | ~30M               | —                   | ettevaatust       | 9       |
-| `groq`           | korduv                | ~30M               | —                   | ettevaatust       | 5       |
-| `api-airforce`   | korduv                | ~24M               | —                   | ettevaatust       | 7       |
-| `bluesminds`     | korduv                | ~7M                | —                   | kahemõtteline     | 22      |
-| `sambanova`      | korduv                | ~6M                | —                   | ettevaatust       | 5       |
-| `arcee-ai`       | korduv                | ~5M                | —                   | ettevaatust       | 1       |
-| `bazaarlink`     | korduv                | ~4M                | —                   | ettevaatust       | 32      |
-| `openrouter`     | korduv                | ~1M                | —                   | ettevaatust       | 1       |
-| `cohere`         | korduv                | ~800K              | —                   | ettevaatust       | 6       |
-| `huggingchat`    | korduv                | ~500K              | —                   | ettevaatust       | 4       |
-| `morph`          | korduv                | ~400K              | —                   | ok                | 2       |
-| `huggingface`    | korduv                | ~200K              | —                   | ettevaatust       | 6       |
-| `kiro`           | korduv                | ~25K               | —                   | vältida           | 12      |
-| `glm-cn`         | piiramatu             | piiramatu\*        | ~20M                | ok                | 4       |
-| `baidu`          | piiramatu             | piiramatu\*        | —                   | ettevaatust       | 1       |
-| `gemini`         | piiramatu             | piiramatu\*        | —                   | ettevaatust       | 4       |
-| `kilo-gateway`   | piiramatu             | piiramatu\*        | —                   | ettevaatust       | 7       |
-| `ollama-cloud`   | piiramatu             | piiramatu\*        | —                   | kahemõtteline     | 8       |
-| `opencode-zen`   | piiramatu             | piiramatu\*        | —                   | ettevaatust       | 6       |
-| `siliconflow`    | piiramatu             | piiramatu\*        | —                   | ettevaatust       | 10      |
-| `tencent`        | piiramatu             | piiramatu\*        | —                   | ettevaatust       | 1       |
-| `vertex`         | registreerimiskrediit | —                  | ~300M               | ettevaatust       | 10      |
-| `agentrouter`    | registreerimiskrediit | —                  | ~200M               | ettevaatust       | 4       |
-| `predibase`      | registreerimiskrediit | —                  | ~25M                | ettevaatust       | 1       |
-| `doubao`         | registreerimiskrediit | —                  | ~15M                | kahemõtteline     | 1       |
-| `ai21`           | registreerimiskrediit | —                  | ~10M                | vältida           | 2       |
-| `deepseek`       | registreerimiskrediit | —                  | ~5M                 | ok                | 2       |
-| `hyperbolic`     | registreerimiskrediit | —                  | ~5M                 | ok                | 8       |
-| `nscale`         | registreerimiskrediit | —                  | ~5M                 | ettevaatust       | 6       |
-| `bytez`          | registreerimiskrediit | —                  | ~1M                 | kahemõtteline     | 3       |
-| `deepinfra`      | registreerimiskrediit | —                  | ~1M                 | ettevaatust       | 22      |
-| `fireworks`      | registreerimiskrediit | —                  | ~1M                 | vältida           | 10      |
-| `nebius`         | registreerimiskrediit | —                  | ~1M                 | ettevaatust       | 1       |
-| `qoder`          | registreerimiskrediit | —                  | ~1M                 | ettevaatust       | 14      |
-| `scaleway`       | registreerimiskrediit | —                  | ~1M                 | ok                | 6       |
-| `novita`         | registreerimiskrediit | —                  | ~500K               | ettevaatust       | 1       |
-| `agy`            | võtmeta               | —                  | —                   | vältida           | 16      |
-| `baichuan`       | võtmeta               | —                  | —                   | kahemõtteline     | 1       |
-| `blackbox`       | võtmeta               | —                  | —                   | vältida           | 6       |
-| `coze`           | võtmeta               | —                  | —                   | vältida           | 1       |
-| `duckduckgo-web` | võtmeta               | —                  | —                   | vältida           | 6       |
-| `freemodel-dev`  | võtmeta               | —                  | —                   | teadmata          | 4       |
-| `friendliai`     | võtmeta               | —                  | —                   | vältida           | 2       |
-| `iflytek`        | võtmeta               | —                  | —                   | vältida           | 1       |
-| `inference-net`  | võtmeta               | —                  | —                   | ettevaatust       | 3       |
-| `liquid`         | võtmeta               | —                  | —                   | teadmata          | 1       |
-| `monsterapi`     | võtmeta               | —                  | —                   | kahemõtteline     | 1       |
-| `muse-spark-web` | võtmeta               | —                  | —                   | vältida           | 3       |
-| `nlpcloud`       | võtmeta               | —                  | —                   | vältida           | 1       |
-| `nous-research`  | võtmeta               | —                  | —                   | kahemõtteline     | 2       |
-| `nvidia`         | võtmeta               | —                  | —                   | ettevaatust       | 13      |
-| `opencode`       | võtmeta               | —                  | —                   | vältida           | 7       |
-| `pollinations`   | võtmeta               | —                  | —                   | ettevaatust       | 31      |
-| `publicai`       | keyless               | —                  | —                   | hoiatus           | 3       |
-| `reka`           | keyless               | —                  | —                   | hoiatus           | 2       |
-| `sensenova`      | keyless               | —                  | —                   | hoiatus           | 1       |
-| `sparkdesk`      | keyless               | —                  | —                   | hoiatus           | 1       |
-| `stepfun`        | keyless               | —                  | —                   | korras            | 1       |
-| `t3-web`         | keyless               | —                  | —                   | väldi             | 23      |
-| `uncloseai`      | keyless               | —                  | —                   | hoiatus           | 3       |
+- **Iga ühiskasutuses limiit arvestatakse üks kord.** Mistrali tasuta paketil on organisatsiooni kohta üks 1B suurune kuulimiit; selle näitamine viie mudeli all ei muuda seda 5B-ks. Mudelite kaupa liites oleks meie enda kataloogi näitaja **~7.4B** (arvutatud uuesti 2026-09-03; seda näitajat CI ei kontrolli — mõõtke see uuesti iga kord, kui kataloog muutub), kuid pealkirjas on **~1.47B**, sest just nii palju saab ühe kontoga iga teenusepakkuja juures tegelikult kasutada.
+- **Päevalimiidid teisendatakse, kiiruspiiranguid mitte.** Dokumenteeritud tokenite päevalimiit teisendatakse valemiga `× 30`; dokumenteeritud päringute päevalimiit valemiga `RPD × ~800 tokenit × 30`; teenusepakkujal, kes avaldab ainult päringute arvu minutis, **puudub** kuunäitaja ja see märgitakse kui _piiramata_, ilma seda summasse lisamata. Kiiruspiirangu korrutamine ööpäevaringse kasutusega on näitaja kunstlik suurendamine, millest me keeldume.
+- **Piirkondliku isikutuvastuse taga olevad kvoodid kuvatakse eraldi** (`+~6M piirkondliku isikutuvastuse taga`), sest enamik lugejaid ei saa neid kasutada.
+- **Registreerumiskrediit kehtib ainult esimesel kuul** ja esitatakse teise näitajana, mitte ei liideta püsiva näitaja hulka.
+- **Näitaja õigsust jõustab CI.** `npm run check:docs-counts` arvutab kataloogi põhjal kogusummad uuesti ning nurjab järgu, kui see fail, README või eelarvekaart neist kõrvale kaldub.
 
 ---
 
-## OpenCode Free: kliendilepingu piirang (#14313)
+## ToS-i tähelepanutabel
 
-Võtmeta `opencode` pakkuja (avalik `https://opencode.ai/zen/v1`) keeldub igast päringust, mis ei vasta OpenCode'i kliendilepingule, vastates **403 `FreeTierError`** veateatega ja lausega _"OpenCode'i tasuta taset saab kasutada ainult OpenCode'i seest"_. See on päringupõhine keeldumine (sama otsus iga konto puhul sama päringu kuju korral), mitte mudeli keeld ega ühenduse jahtumine — OmniRoute klassifitseerib selle kui `project_route_error`, jätab vahele mudeli lukustuse / jahtumise ja (sünteetilisel `noauth` teel) peatab automaatse kombineeritud uuestivaliku lühikeseks TTL-iks. Saatke päringud, mis sisaldavad mittetühja tööriistade loendit, `stream: true` ja OpenCode'i seansi/UA päiseid (`opencodeFreeTierContract.ts`), või oodake 403 veateadet.
+> **ToS-i märge on nõuandev, mitte marsruutimistõke.** Märkega `tos` teenusepakkujad kaasatakse vaikimisi endiselt marsruutimisse ning kombineeritud/varumarsruutidesse; märge kuvatakse ainult lehtedel `/dashboard/free-tiers` ja `/api/free-tier/summary`. Päringuparameeter `excludeTosAvoid` mõjutab ainult kokkuvõttevaadet, mitte üldist marsruutimist. Hinnang asub failis `open-sse/config/freeTierCatalog.ts` (informatiivne, marsruutimismootorid seda ei loe).
 
-## Mis muutus alates tarnitud kataloogist (`freeNote`)
+> Kiirülevaade iga teenusepakkuja tingimustest ise hostitud, ühele kasutajale mõeldud isikliku puhverserveri korral. `caution` = isiklikku kasutust või puhverserverit puudutav klausel, mida tasub kontrollida; `ambiguous` = ebaselge; `ok` = sõnaselgelt lubatud. See on informatiivne, mitte õigusnõuanne — otsustate ise.
 
-> V3.8.0 ajastu `freeNote` stringid on aegunud. Selle uuringu käigus leitud parandused (need juhivad kataloogi uuendust failis `_tasks/features-v3.8.12`):
+### ⚠️ Ettevaatust — isiklikku kasutust / puhverserverit puudutavad klauslid, mida tasub kontrollida (16)
 
-- **`360ai`** — Saadetud freeNote "Free 360 AI Brain models" tundub aegunud. Praegune juurdepääs on rakendusega piiratud ja tasuline. 2023. aasta käivitamise-aegsed soodustokendid (100M–250M ühekordsed) võisid olla aluseks…
-- **`agentrouter`** — Meie saadetud freeNote ütleb "$200 free credits on signup". Praegune reaalsus näitab, et tavalised (mitte-suunamisega) registreerumised saavad ainult $100; suunamisega registreerumised võivad saada $200, kuid kogukonna kommentaar aprillist 2026…
-- **`agy`** — Meie saadetud freeNote ütleb "(none)", mis viitab tasuta taseme puudumisele, kuid Antigravityl on tasuta OAuth-ga piiratud tase. Kuid teenusetingimused keelavad selgesõnaliselt selle tasuta taseme kasutamise läbi puhverserveri nagu OmniRoute …
-- **`ai21`** — Karmistatud: prooviperiood lühenes "3 kuult" 7 päevani. $10 krediidi summa jääb samaks, kuid kehtivusaeg langes järsult ~90 päevast 7 päevani.
-- **`aimlapi`** — Muutunud oluliselt. Saadetud freeNote reklaamis "$0.025/day free credits — 200+ models", kuid tasuta tase on nüüd peatatud/lõpetatud. $0.025/päev krediidi jaotus (50 000 krediiti/päev, 10 päringut/päev…
-- **`amazon-q`** — Meie saadetud freeNote ütleb "(none)" — reaalsus on hullem: toode on uute registreerumiste jaoks nüüd lõpetatud (15. mai 2026). Varem pakkus tasuta tase 50 agendipäringut/kuus + piiramatult reasiseseid…
-- **`api-airforce`** — Kataloogis on freeNote "(none)", kuid dokumenteeritud tasuta tase on olemas: 1 RPM / 1000 RPD korduv, konto registreerimine nõutav, piiratud põhimudelitega.
-- **`arcee-ai`** — Saadetud freeNote ("Free Trinity Large Thinking model (262K context)") on osaliselt täpne — Trinity Large Thinking on tõepoolest tasuta OpenRouteri kaudu 262K kontekstiga — kuid märkus jätab mainimata, et see…
-- **`baichuan`** — Meie saadetud freeNote ütleb "Free Baichuan models", mis viitab pidevale tasuta juurdepääsule, kuid praegune reaalsus on ainult ühekordne 80 CNY proovikrediit uutele kasutajatele (kehtib 3 kuud). Püsivalt ei ole…
-- **`baidu`** — Kataloogis on kirjas "Free ERNIE Speed/Lite models", mis on üldjoontes täpne, kuid alahindab ulatust: ERNIE-Tiny ja mitmed kontekstiakna variandid (8K ja 128K) on samuti tasuta. Tasuta tase tundub…
-- **`bazaarlink`** — Üldjoontes vastab — saadetud freeNote kirjeldab täpselt auto:free marsruutimist nullkuluga järelduste tegemiseks. Kuid praegune reaalsus hõlmab selgeid kiirusepiiranguid (10-20 RPM, ~150 RPD), mida ei ole mainitud…
-- **`blackbox`** — Meie saadetud freeNote väidab "piiramatu põhivestlus pluss Minimax-M2.5". Tegelikkuses on piiramatu Minimax-M2.5 agendipäringud tasulise plaani funktsioon (Pro+), mitte osa tasuta tasemest. Tasuta tasemel on piiratud…
-- **`bluesminds`** — Meie saadetud freeNote oli "(none)" — kuid BluesMindsil on dokumenteeritud tasuta tase: 500 pi krediiti, 20 RPM, 300 RPD, püsiv tasuta plaan. Kataloog alahindab oluliselt pakkumist.
-- **`brave-search`** — Kataloogis on märge "(none)", mis viitab sellele, et tasuta taset ei jälgitud, kuid tegelikkuses oli tasuta 5000 päringut/kuus tase (kaardita) kuni 12. veebruarini 2026, mis on sellest ajast alates asendatud $5/kuus…
-- **`byteplus`** — Meie kataloogis oli "(none)", kuid BytePlus ModelArk'il on tasuta tase: ühekordne proovikrediit 500k tokenit LLM mudeli kohta uutele kontodele. Kataloog alaraporteerib seda.
-- **`cerebras`** — Kaardita 1M tokenit/päev prooviperiood on kadunud. Reaalajas cerebras.ai/pricing (2026-09-03) on ühekordne $5 registreerumiskrediit, makseviis nõutav, 30-päevane kehtivusaeg. Ümber klassifitseeritud kui `one-time-initial` (LongCat-kujuline); eemaldatud `LEGACY_FREE_PROVIDERS` ja korduvast eelarvest.
-- **`chutes`** — Saadetud freeNote ütleb "Free tier available", kuid alates 15. märtsist 2026 on tasuta tase ametlikult lõpetatud. Kataloogi märge on aegunud ja seda tuleks uuendada, et see kajastaks, et puudub…
-- **`coze`** — Saadetud märge "Free ByteDance agent platform" on suunaliselt täpne, kuid jätab mainimata, et tasuta tase on nüüd rangelt krediidiga piiratud (10 krediiti/päev ≈ 5–100 sõnumit sõltuvalt mudelist), piirang…
-- **`deepinfra`** — Meie saadetud freeNote ütleb "Free signup credits for API testing" — see tundub aegunud. Ametlik hinnakiri nõuab nüüd kaarti/ettemaksu ilma dokumenteeritud üldise tasuta registreerumiskrediidita. Tasuta tase…
-- **`deepseek`** — Meie saadetud märge ütleb "5M free tokens on signup - no credit card required" — see on ühekordse toetuse puhul endiselt täpne, kuid oluline on, et krediidid aeguvad 30 päeva pärast (ei ole mainitud saadetud…
-- **`dify`** — Saadetud freeNote ("Free open-source AI app builder + RAG") on suunaliselt täpne, kuid mittetäielik. Pilve tasuta tase on piiratum kui eeldatud: 200 sõnumikrediiti tundub olevat ühekordne…
-- **`doubao`** — Saadetud freeNote "Free Doubao models (ByteDance)" on suunaliselt õige, kuid alaspetsifitseeritud. Praegune reaalsus on struktureeritum: on olemas kvantifitseeritud korduv igapäevane tasuta tase (2M tokenit/päev v…
-- **`duckduckgo-web`** — Põhiline "tasuta anonüümne juurdepääs" kirjeldus kehtib endiselt, kuid teenus on oluliselt arenenud: sellel on nüüd selged tasulised tasemed (Plus/Pro) kõrgemate piirangutega, mis viitab sellele, et tasuta tase on kiirusega piiratud…
-- **`exa-search`** — Kataloogis on freeNote "(none)", kuid Exal on dokumenteeritud korduv tasuta tase 1000 päringut/kuus. See on oluline lünk — tasuta tase on olemas ja püsiv.
-- **`featherless-ai`** — Meie saadetud freeNote ütleb "Free tier available", kuid üldist tasuta taset ei ole. Ainus tasuta juurdepääs on kutse/rakenduspõhise Builder Series programmi kaudu, mis ei ole standardne tasuta…
-- **`firecrawl`** — Meie kataloogis oli freeNote "(none)", mis viitab tasuta taseme puudumisele. Tegelikkuses on Firecrawlil dokumenteeritud korduv tasuta plaan 1000 krediidiga/kuus — kataloogikirje on vale.
-- **`freemodel-dev`** — Meie saadetud freeNote on "(none)" — see oli tõenäoliselt kohatäide, mis tähendas, et pakkujat ei olnud veel kataloogitud. Tegelikkuses on pakkujal $300 ühekordne proovikrediidi pakkumine. Kuid see on ühekordne…
-- **`friendliai`** — Saadetud freeNote ("Serverless inference'i tasuta pakett") on osaliselt täpne, kuid eksitav. Tasuta juurdepääs on olemas Tier 0 ja tasuta määratud mudelite kaudu, kuid piirangud on määratlemata ja ada…
-- **`gemini`** — Saadetud freeNote ütleb "1500 päringut päevas Gemini 2.5 Flashi jaoks" – see oli täpne enne 2025. aasta detsembrit. Google vähendas 2025. aasta detsembris tasuta paketi piiranguid 50-80%, vähendades Gemini 2.5 Flashi 1500 R-lt…
-- **`gitlawb`** — Saadetud freeNote "Tasuta pakett saadaval" on sisuliselt aegunud. Algne tasuta MiMo juurdepääs eemaldati 2026. aasta mais; ainus allesjäänud "tasuta" valik on ajutine soodusmudel (Nemotron 3 U…
-- **`gitlawb-gmi`** — Osaliselt endiselt täpne – tasuta pakett on olemas, kuid on nüüd kitsendatud ühele mudelile (Nemotron 3 Ultra) pärast MiMo tasuta juurdepääsu tühistamist 2026. aasta mai lõpus. Saadetud märkus "Tasuta pakett saadaval" alahinda…
-- **`groq`** — Saadetud freeNote "30 RPM / 14.4K RPD" on täpne ainult llama-3.1-8b-instant mudeli puhul. Enamikul teistel mudelitel (sealhulgas llama-3.3-70b-versatile) on palju madalam 1K RPD piirang. Märkus jätab välja mudelispetsiifilised … **Lahendatud 2026-09-02:** `freeNote` on nüüd "Tasuta pakett: mudelipõhised piirangud (200K tokenit päevas vestlusmudeli kohta; RPM/RPD kohta vaata console.groq.com/docs/rate-limits) – makseviisi pole esitatud." ja kataloogis on viis mudelipõhist 6M piirangut (llama-3.3-70b-versatile eemaldati tasuta paketist 2026-08-16) – vaata [2026-09-02 uuesti auditeerimise märget](#tldr--how-much-free-inference-does-omniroute-actually-aggregate).
-- **`huggingchat`** — Saadetud freeNote ("Tasuta LLM vestlus – tellimust pole vaja. Kehtivad piirangud.") on osaliselt täpne, kuid alahindab oluliselt piiranguid. Tasuta pakett töötab nüüd range $0.10/…
-- **`huggingface`** — Oluliselt karmistatud. Saadetud freeNote ("Tasuta Inference API tuhandete mudelite jaoks") viitas piiramatule/heldele tasuta juurdepääsule, kuid alates 2025. aasta keskpaigast on tasuta pakett piiratud $0.10/kuus korduva…
-- **`hyperbolic`** — Meie saadetud freeNote ütleb "$1-5 proovikrediiti registreerumisel" – $1 proovikrediidi osa on täpne, kuid "$5" viitab minimaalsele sissemaksele, mis on vajalik GPU rentimise avamiseks (mitte tasuta krediitidele g…
-- **`iflytek`** — Kataloog ütleb "Tasuta Spark Lite mudelid" – see on üldiselt täpne. Kuid praegune reaalsus on nüansirikkam: ainult Spark Lite on tasuta (Max 100M tokeni pakkumine oli ühekordne kampaania, mitte korduv); …
-- **`inference-net`** — Saadetud freeNote ütleb "$25 tasuta krediiti registreerumisel pluss uurimistoetused." Praegune hinnakiri näitab ainult $1 korduvat igakuist krediiti, mainimata $25 registreerumisboonust või uurimistoetust…
-- **`jina-reader`** — Meie saadetud freeNote oli "(puudub)", mis on vale. Jina Readeril on olnud avalikult dokumenteeritud tasuta pakett alates käivitamisest: võtmeta juurdepääs 20 RPM-iga pluss 10M ühekordne tokeni toetus tasuta API võtmega. …
-- **`kiro`** — Kataloogis saadetud freeNote "(puudub)" – kuid Kirol on dokumenteeritud, püsiv tasuta pakett 50 krediiti kuus. Tasuta pakett eksisteeris alates Kiro avalikust käivitamisest (hinnakujundus vormistati ~2025. aasta oktoobris). See on a …
-- **`llm7`** — Piirangud on suurenenud võrreldes saadetud freeNote'iga (20 RPM / 100 päringut tunnis → 40 RPM / 200 päringut tunnis). Väide "registreerumist pole vaja" on nüüd aegunud – nüüd on vaja tasuta tokenit saidilt token.llm7.io (kuigi…
-- **`longcat`** — Avalik eelvaade/beetaversioon lõppes ja Flash-mudelid eemaldati; alles on ainult GA `LongCat-2.0`. Tasuta pakett on **ühekordne 10M-tokeni toetus**, mis avatakse pärast konto registreerimist + **KYC verifitseerimist** – see **ei** nullistu iga päev ega kuu. Pärast toetuse kasutamist on see tasuline.
-- **`mistral`** — Saadetud freeNote ("Tasuta eksperimenteerimispakett: piiratud juurdepääs kõikidele mudelitele") on suunaliselt õige, kuid alahinnatud. Praegune reaalsus lisab spetsiifilised dokumenteeritud piirangud: 2 RPM, 500K TPM, 1B tokenit/…
-- **`monsterapi`** — Saadetud freeNote ütleb "Tasuta krediiti detsentraliseeritud GPU inference'i jaoks", mis on osaliselt täpne – registreerumisel on ühekordsed proovikrediidid. Kuid korduval tasuta paketil on 0 krediiti kuus…
-- **`morph`** — Saadetud freeNote mainib "250K krediiti kuus", mis vastab praegusele krediidi jaotusele; kuid olulisem piirang on 200 päringut kuus, mida algses c…
-- **`muse-spark-web`** — Saadetud freeNote ("Tasuta sisselogimisega – Meta AI platvorm Llama mudelitega") on sisselogimisnõude ja Llama mudelite juurdepääsu osas üldiselt täpne. Tasuta paketi karmistamist ei tuvastatud; see r…
-- **`nlpcloud`** — Saadetud freeNote ütleb "Proovikrediidid uutele kontodele", mis viitab ühekordsele proovile. Tegelikult on NLP Cloudi tasuta pakett korduv igakuine tasuta pakett (10 000 päringut kuus), mitte proovikrediidid…
-- **`nomic`** — Meie saadetud freeNote ütleb "Tasuta Nomic Embed API" ilma kvalifikatsioonita, vihjates pidevale tasuta juurdepääsule. Reaalsus on ainult ühekordne 1M-tokeni proovikrediit – pärast selle tokeni eelarve tarbimist on tasulised tellimused…
-- **`nous-research`** — Saadetud freeNote ("Tasuta pakett: 50 RPM, 500 000 TPM") ei vasta praegusele Nous Portali tootele. Portaal käivitati 27. aprillil 2026 ja selle tasuta pakett on struktureeritud kui $0.10/kuus korduva krediidi…
-- **`nvidia`** — "40 RPM, 70+ mudelit" piirangu element vastab kataloogile, kuid freeNote'i raamimine lihtsa arendaja juurdepääsu paketina alahindab seda, et vana ühekordne krediidipool on eemaldatud – juurdepääs on nüüd tõeliselt…
-- **`ollama-cloud`** — Meie saadetud freeNote on "(puudub)" – see on aegunud. Ollama Cloud käivitas pilve inference'i toote tõelise tasuta paketiga, mis pakub kerget iganädalast GPU-aja-põhist juurdepääsu hostitud avatud mudelitele.
-- **`openrouter`** — RPD vähendati 200-lt 50-le nullkrediidiga kontode puhul (RPM jäi 20-le). Kataloogi märkus oli RPM-i osas täpne, kuid ületas RPD-d 4 korda krediidita baastaseme puhul. **Käitusaja jälgimine (#6842)**: see ei ole enam lihtsalt staatiline märkus — `open-sse/services/openrouterQuotaFetcher.ts` küsib `/api/v1/key` + `/api/v1/credits` kohta võtmepõhise krediidilimiidi/jäägi/lähtestamise ja igapäevase/iganädalase/igakuise USD kulutuse kohta ning `open-sse/services/openrouterFreeWindow.ts` jälgib lokaalselt eespool kirjeldatud `:free`-mudeli 50-või-1000-päevas + 20 RPM aknaid (parandatud `X-RateLimit-*` vastuse päistest 429-de puhul), mis kuvatakse armatuurlaual → Pakkuja kvoot.
-- **`phind`** — Phind suleti 16. jaanuaril 2026. Pakkuja on nüüd **täielikult eemaldatud** kataloogist (register, täitur ja nii veebiküpsise kui ka API-võtme kataloogikirjed) — vastavalt surnud teenuse eemaldamise pretsedendile (#5246 Gemini CLI).
-- **`pollinations`** — Osaliselt vastab — väide "API võtit pole vaja" kehtib endiselt anonüümse juurdepääsu kohta, kuid kataloogi freeNote jätab mainimata, et: (1) kehtivad kiirusepiirangud (intervallpiirang ~1 päring/6-15s anonüümse …
-- **`predibase`** — Kaasasolev freeNote (25 $ tasuta proovikrediiti, 30-päevane kehtivus) vastab endiselt praegusele dokumentatsioonile. Kuid kataloog jätab mainimata samaaegse 20 000 märgi/päevas serverita kiirusepiirangu, mis kehtib …
-- **`publicai`** — Kaasasolev freeNote ("Tasuta kogukonna järelduste tase") on üldjoontes täpne, kuid alahindab spetsiifilisust: 20 RPM kiirusepiirang on nüüd dokumenteeritud. Suuri karmistamisi ei leitud; teenus jääb tasuta …
-- **`puter`** — **Täielikult eemaldatud** kataloogist (register, täitur, tasuta mudelite kataloog ja API-võtme kirje) Puteri omaniku (Nariman Jelveh) palvel — vt eespool mainitud surnud teenuse eemaldamise pretsedenti (`phind`).
-- **`qoder`** — Meie kataloogis on freeNote "(puudub)", kuid Qoderil on tasuta tase: kogukonna väljaanne piiramatu põhimudeli lõpetamisega (päevas piiratud, täpsustamata limiit) pluss ühekordne 14-päevane/300-krediidi Pr…
-- **`sambanova`** — Meie kaasasolev märkus kirjeldas ainult ühekordset 5 $ krediiti (30-päevane kehtivus). Praegune reaalsus hõlmab püsivat korduvat tasuta taset koos dokumenteeritud kiirusepiirangutega (20 RPM, 20 RPD, 200k TPD), mis püsivad …
-- **`sensenova`** — Meie kaasasolev freeNote ütleb "Tasuta SenseTime mudelid", mis on ebamäärane, kuid suunaliselt õige — tasuta juurdepääs on olemas. Kuid tegelikkus on nüansirikkam: tasuta juurdepääs on ajaliselt piiratud avalik beeta (Token…
-- **`serper-search`** — Kaasasolev freeNote ütleb "(puudub)", mis on osaliselt täpne — korduvat tasuta plaani pole —, kuid Serper pakub registreerimisel 2500 ühekordset proovikrediiti. Kataloogi märkus võiks olla täpsem …
-- **`siliconflow`** — Osaliselt vastab, kuid on nüansirikkam: 1 $ tasuta krediit on ühekordne prooviversioon (mitte korduv), samas kui "püsivalt tasuta mudelite" komponent kehtib endiselt — tasuta 0 $ mudelid on endiselt olemas (Qwen3-8B, D…
-- **`sparkdesk`** — Osaliselt vastab — kaasasolev freeNote "Tasuta iFlytek Spark mudelid" on täpne selles osas, et Spark Lite on püsivalt tasuta, kuid alahindab piirangut (2 QPS rakenduse ID kohta) ja ülehindab ulatust (ainult S…
-- **`stepfun`** — Kaasasolev freeNote "Tasuta Step-2 mudelid" on aegunud. Step-2 LLM-i tasuta juurdepääsu enam ei pakuta; platvorm on üle läinud Step 3.x mudelitele tasulise märgi alusel ilma tasuta LLM-i tasemeta. Ainult…
-- **`t3-web`** — Kaasasolev freeNote on üldjoontes täpne (piiratud mudeli juurdepääs, Pro avab 50+ mudelit 8 $ kuus), kuid jätab mainimata kaks olulist uuendust: (1) tasuta tase lähtestatakse nüüd iga päev kuu asemel (muutus umbes …
-- **`tavily-search`** — Kataloogis on freeNote "(puudub)", mis viitab tasuta taseme puudumisele, kuid Tavily pakub tegelikult dokumenteeritud korduvat tasuta taset 1000 krediiti kuus ilma krediitkaarti nõudmata. See on märkimisväärne lahknevus …
-- **`tencent`** — Suures osas vastab — kaasasolev freeNote ("Tasuta Hunyuan Lite mudelid") on täpne. Hunyuan-lite on olnud püsivalt tasuta alates 2024. aasta maist ja jääb nii ka 2026. aastal. Kataloogi märkus alahindab üksikasju …
-- **`together`** — Kaasasolev märkus ütleb "25 $ registreerimiskrediiti + 3 püsivalt tasuta mudelit", kuid Together nõuab nüüd vähemalt 5 $ krediidi ostmist ja ei paku tasuta prooviversiooni. 25 $ registreerimiskrediit eemaldati kataloogist (#12526). Pakkuja hostib endiselt ~80 püsivalt tasuta mudelit, kuid teenusetingimused (punkt 4.3(d)) keelavad selgesõnaliselt teenuste edastamise, levitamise, edasimüümise või pakkumise.
-- **`uncloseai`** — Suures osas vastab — endiselt tasuta igavesti ilma registreerimiseta. Kuid teenusetingimused (terms-of-use.html) selgitavad, et liigse kasutamise korral kehtib IP-põhine piiramine ja keelab konkureerivate ML-teenuste loomise ilma …
-- **`veoaifree-web`** — Kaasasolev freeNote ütleb "6 päringut/tund", kuid sellist selgesõnalist piirangut ei ole praegu veoaifree.com-is dokumenteeritud. Sait väidab piiramatut tasuta genereerimist ilma sisselogimiseta. Loetletud mudelid …
-- **`voyage-ai`** — Kaasasolev freeNote "200M tasuta märki manustamiseks ja ümberjärjestamiseks" on märgiarvu osas suunaliselt õige, kuid eksitav — see jätab mainimata, et see on ühekordne kontopõhine jaotus, mitte korduv …
-- **`yi`** — Kaasasolev freeNote "Tasuta Yi-Light mudelid" viitab mudeli nimele ("Yi-Light"), mis ei esine üheski praeguses 01.AI dokumentatsioonis ega mudelikataloogis — sellist mudelit pole platvormil.01.ai loetletud, …
+> Nende tasuta juurdepääs on tegelik ja OmniRoute saab päringuid neile marsruutida; alltoodud klausleid tasub lihtsalt teada. OAuthi/võtmeta variante ei saa tokenites kvantifitseerida, mistõttu ei sisaldu need pealkirja näitajas (mitte seetõttu, et neid ei saaks kasutada).
+
+| Teenusepakkuja   | Märkus                                                                                                                                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agy`            | Google Antigravity ToS keelab sõnaselgelt kolmanda osapoole tarkvara, tööriistade või teenuste (sealhulgas puhverserverite) kasutamise teenusele OAuthi kaudu juurdepääsuks; see…                 |
+| `ai21`           | ToS-i §4.2/§8.2 keelab API-juurdepääsu all-litsentsimise või kolmandatele osapooltele levitamise; §3.3 piirab prooviversioonide/hindamistoodete kasutuse „sisemise hindamisega…                   |
+| `amazon-q`       | Uutele registreerujatele on toode lõpetatud; olemasolevatele kasutajatele kehtib AWS Customer Agreement, mis reguleerib hallatud teenuste kasutamist — ise hostitud pro…                          |
+| `blackbox`       | ToS keelab sõnaselgelt all-litsentsimise, edasimüügi, teenuse kolmandatele osapooltele kättesaadavaks tegemise ja tuletatud teenuste loomise — ise hostitud is…                                   |
+| `coze`           | Coze ToS piirab kasutuse sõnaselgelt „isikliku ja mitteärilise kasutusega” ning keelab teenuse rentimise, levitamise, all-litsentsimise või edasimüügi; …                                         |
+| `duckduckgo-web` | Duck.ai ToS (duckduckgo.com/duckai/privacy-terms) keelab sõnaselgelt „automatiseeritud päringud ning tehisintellektiteenuste arendamise või pakkumise” ja piirangutest möödahiilimise…            |
+| `featherless-ai` | Individuaalpaketid on sõnaselgelt piiratud „ostja interaktiivse kasutuse või prototüüpimise ja katsetamisega” — inferentsi edasimüük ja puhverserveri kasutamine nõu…                             |
+| `fireworks`      | ToS keelab sõnaselgelt puhverserveri/vahendaja kasutamise, API-võtmete edastamise ja all-litsentsimise (jaotised 2.1 ja 2.2(i)(j)); ise hostitud isiklikud puhverserverid ei…                     |
+| `friendliai`     | ToS-i jaotised 8(e) ja 8(f) keelavad sõnaselgelt FriendliAI kasutamise puhverserverina või kolmanda osapoole eraldiseisva juurdepääsu võimaldamise ning edasimüügi/…                              |
+| `iflytek`        | iFlytek Spark LLM Service Agreementi jaotis 2.4(3) keelab sõnaselgelt „mis tahes automatiseeritud või programmiliste meetodite kasutamise andmete või väljundi eraldamiseks…                      |
+| `kiro`           | Kiro KKK keelab sõnaselgelt kasutamise koos „OpenClawi ja sarnaste tööriistadega, mis kasutavad kolmandate osapoolte rakenduskeskkondi” — ise hostitud AI-puhverserver (nagu OmniRoute), mis mar… |
+| `modal`          | ToS-i jaotis 1.3 keelab sõnaselgelt „rentida, edasi müüa või muul viisil võimaldada kolmandale osapoolele otsest juurdepääsu teenusele või selle kasutamist” — ise hostitud…                      |
+| `muse-spark-web` | Meta ToS keelab sõnaselgelt automatiseeritud juurdepääsu ilma eelneva loata, pöördprojekteerimise ilma kirjaliku loata ja tehnoloogilistest…                                                      |
+| `nlpcloud`       | ToS keelab sõnaselgelt „puhverserveri või muu seadme seadistamise, mis võimaldab teistel selle kaudu teenusele juurde pääseda”, ning annab ainult mitteüleantava,…                                |
+| `t3-web`         | ToS piirab kontod sõnaselgelt ainult isiklikuks kasutuseks, keelab autentimisandmete jagamise kolmandate osapooltega ning automatiseeritud/robootilise/andmekraapimisega juurdepääsu — i…         |
+
+### ✅ Üldiselt lubav — caution / ambiguous / ok (ülejäänud)
+
+| Teenusepakkuja   | Kasutustingimused | Märkus                                                                                                                                                                                 |
+| ---------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aimlapi`        | ebaselge          | Kasutustingimused annavad mitteainuõigusliku kasutuslitsentsi, kuid ei luba ega keela sõnaselgelt isemajutatud puhverserverit või edasimüüki; puudub „isik…                            |
+| `baichuan`       | ebaselge          | Avalikult kättesaadavatest dokumentidest ei leitud isemajutatud isiklike puhverserverite sõnaselget keeldu; tasuta M3 Plus pakett aga…                                                 |
+| `bluesminds`     | ebaselge          | Isemajutatud puhverserverite või edasimüügi kohta ei leitud sõnaselgeid kasutustingimuste klausleid; hinnakujunduse leht keskendub funktsioonide ja päringusageduse piirangutele…      |
+| `bytez`          | ebaselge          | Kasutustingimuste leht polnud kättesaadav (404); dokumentatsioonist ei leitud avalikke üksnes hindamiseks kasutamise ega puhverserverite keelamise klausleid, kuid platvorm…           |
+| `doubao`         | ebaselge          | Avalikult indekseeritud dokumentatsioonist ei leitud puhverserverite või edasimüügi sõnaselget keeldu; Volcengine on arendajatele suunatud pilve…                                      |
+| `gitlawb-gmi`    | ebaselge          | Ei leitud sõnaselget kasutustingimuste klauslit, mis keelaks isemajutatud isikliku puhverserveri kasutamise; tasuta Nemotron mudeliga kaasneb NVIDIA lahtiütlus…                       |
+| `monsterapi`     | ebaselge          | MonsterAPI kasutustingimuste leht (monsterapi.ai/terms-of-service) polnud uurimise ajal kättesaadav; konkreetseid puhverserveri, edasimüügi või isikliku…                              |
+| `nous-research`  | ebaselge          | Nous Portal on ise koondaja/puhverserveri teenus; selle kasutamine teise isemajutatud puhverserveri taustateenusena loob puhverserverist…                                              |
+| `ollama-cloud`   | ebaselge          | Kasutustingimused keelavad teenuse kasutamise „konkureerivate toodete arendamiseks“, kuid isemajutatud isiklikke puhverservereid sõnaselgelt ei keela…                                 |
+| `stepfun`        | ebaselge          | Isemajutatud isiklikku puhverserverit sõnaselgelt ei keelata, kuid Step Plan kasutustingimused on suunatud arendajatele, kes kasutavad konkreetseid…                                   |
+| `api-airforce`   | ettevaatust       | Kasutustingimused keelavad sõnaselgelt „konkureerivate teenuste loomise ilma loata“ ja „pääsuandmete jagamise“ — isemajutatud isiklik…                                                 |
+| `arcee-ai`       | ettevaatust       | Tasuta juurdepääs toimub OpenRouteri `:free` marsruutimiskihi kaudu (mitte Arcee otseste API tingimuste alusel); OpenRouteri kasutustingimused lubavad isiklikku arendust…             |
+| `baidu`          | ettevaatust       | Kasutustingimusi ei vaadatud puhverserveri või edasimüügi klauslite suhtes sõnaselgelt üle, kuid platvorm nõuab pärisnimega autentimist (tavaliselt Hiina isikutunnistus…              |
+| `baseten`        | ettevaatust       | Kasutustingimused piiravad kasutuse „kliendi ettevõttesiseste eesmärkidega“ ning keelavad sõnaselgelt all-litsentsimise, edasimüügi või võimaldamise…                                  |
+| `bazaarlink`     | ettevaatust       | Kasutustingimused keelavad sõnaselgelt API võtmete edasimüügi või all-litsentsimise kolmandatele isikutele; isiklikuks kasutuseks mõeldud isemajutatud isiklik puhverserver…           |
+| `brave-search`   | ettevaatust       | Kasutustingimused keelavad otsingutulemuste edasilevitamise, edasimüügi ja all-litsentsimise; API kasutamine selleks, et „jäljendada või püüda jäljendada…                             |
+| `byteplus`       | ettevaatust       | Tokenid pole üleantavad ja on mõeldud ainult ühele kontole; puhverserverit sõnaselgelt ei keelata, kuid BytePlus jätab endale õiguse…                                                  |
+| `cerebras`       | ettevaatust       | Kasutustingimused annavad isiklikuks või äriliseks kasutuseks mitteainuõigusliku, mitteüleantava ja all-litsentsimatu õiguse; keelatud on edasimüük, a…                                |
+| `cloudflare-ai`  | ettevaatust       | Cloudflare Self-Serve kasutustingimuste §2.2.1(j) keelab teenuste kasutamise „virtuaalse privaatvõrgu või muu sarnase puh…                                                             |
+| `cohere`         | ettevaatust       | Cohere keelab sõnaselgelt proovivõtmete kasutamise „tootmis- või ärilistel eesmärkidel“; päringuid marsruutiv isemajutatud isiklik puhverserver…                                       |
+| `deepinfra`      | ettevaatust       | Kasutustingimused lubavad üldjoontes seaduslikku ärilist kasutust, kuid keelavad kasutuse, mis „konkureerib otseselt või kaudselt ettevõtte mis tahes äritegevusega…                   |
+| `deepseek`       | ettevaatust       | Open Platform kasutustingimused (jõustuvad 2026-04-29) lubavad laialdast kasutust, sealhulgas „tuletatud toodete arendamist“ ning isiklikku/ärilist…                                   |
+| `dify`           | ettevaatust       | Isemajutatud ühe kasutajaga isiklik puhverserver on muudetud Apache 2.0 litsentsi alusel lubatud; mitme rentnikuga juurutused aga…                                                     |
+| `exa-search`     | ettevaatust       | Sõnaselgeid „puhverserveri keelu“ või „ainult hindamiseks“ klausleid ei leitud; Exa pakub aktiivselt edasimüüjatele mõeldud partnerprogrammi, mis lubab API…                           |
+| `firecrawl`      | ettevaatust       | Cloud API kasutustingimustest ei leitud isikliku puhverserveri sõnaselget keeldu, kuid avatud lähtekoodiga isemajutatud versioon kasutab AGPL-3.0 litsentsi (nõ…                       |
+| `gemini`         | ettevaatust       | Kasutustingimused ütlevad sõnaselgelt, et tasuta tase on mõeldud „arendajatele, kes loovad Google AI mudelitega professionaalsetel või ärilistel eesmärkidel…                          |
+| `groq`           | ettevaatust       | Services Agreement §6.3 keelab API juurdepääsu edasimüügi, all-litsentsimise või levitamise; §3.2 keelab juurdepääsu edasimüügi või rentimise…                                         |
+| `huggingchat`    | ettevaatust       | Hugging Face kasutustingimused ei keela sõnaselgelt isiklikke isemajutatud puhverservereid, kuid lisatingimused (millele viidatakse, kuid mida ei ole täielikult…                      |
+| `huggingface`    | ettevaatust       | Kasutustingimused annavad teenusele juurdepääsuks ja selle kasutamiseks piiratud litsentsi; dokument ei luba ega keela sõnaselgelt ühe kasutajaga…                                     |
+| `hyperbolic`     | ettevaatust       | Kasutustingimused annavad API juurdepääsu „üksnes teie enda isiklikeks või ettevõttesisesteks eesmärkideks“ ning keelavad sõnaselgelt litsentsimise,…                                  |
+| `inference-net`  | ettevaatust       | Kasutustingimused keelavad sõnaselgelt „all-litsentsimise, edasimüügi ja levitamise“ ning API võtmete üleandmise ilma kirjaliku nõusolekuta; ühe kasutajaga…                           |
+| `jina-ai`        | ettevaatust       | Tasuta 10M tokenit on sõnaselgelt mitteäriliseks kasutuseks (CC-BY-NC 4.0 mudelilitsents); ühe kasutajaga isiklik puhverserver isiklikuks L…                                           |
+| `jina-reader`    | ettevaatust       | Kasutustingimused keelavad väljundite kasutamise konkureerivate teenuste loomiseks ning „automatiseeritud meetodid teabe hankimiseks kraapimise kaudu…                                 |
+| `llm7`           | ettevaatust       | Kasutustingimused positsioneerivad teenuse „katsetamiseks, arenduseks ja teadustööks“; isemajutatud isiklikku puhverserverit sõnaselgelt ei keelata…                                   |
+| `longcat`        | ettevaatust       | API Platform Service Agreement (longcat.chat/platform/private/) lubab ärilist integratsiooni ja isemajutatud rakendusi…                                                                |
+| `mistral`        | ettevaatust       | Tarbijatele mõeldud kasutustingimustes on sõnaselgelt öeldud, et API-sid võib kasutada ainult „isiklikeks vajadusteks“, ning API võtmete teistele kättesaadavaks tegemine on keelatud… |
+| `morph`          | ettevaatus        | Kasutustingimused lubavad üldiselt ärilist kasutust; isemajutatud puhverserveri juurutamiseks on vaja müügiosakonnaga eraldi kokkulepet. Jaotis 18.…                                   |
+| `nebius`         | ettevaatus        | Kasutustingimused (jaotis 5f) keelavad sõnaselgelt edasimüügi, edasilevitamise või teenuse pakkumise „eraldiseisvana“ — isemajutatud…                                                  |
+| `nomic`          | ettevaatus        | Kasutustingimused annavad API-le mitteeksklusiivse ja mitteüleantava litsentsi; jaotis 6.b keelab konkureeriva teenuse loomise. Selle kasutamine…                                      |
+| `novita`         | ettevaatus        | Kasutustingimused keelavad edasimüügi ja konkureerivad teenused, kuid ei käsitle sõnaselgelt isiklikke isemajutatud puhverservereid; isiklik kasutus…                                  |
+| `nscale`         | ettevaatus        | Lubatud kasutuse eeskirjad keelavad „Nscale'i platvormi mis tahes osa kopeerimise, muutmise, paljundamise… raamimise, peegeldamise, taasavaldamise… levitamise…                        |
+| `nvidia`         | ettevaatus        | Tasuta kasutustase on sõnaselgelt ette nähtud ainult prototüüpimiseks/arenduseks/uurimiseks/hindamiseks — tootmiskasutuseks (tegelike lõppkasutajate teenindamiseks) on vaja…          |
+| `openrouter`     | ettevaatus        | Kasutustingimused keelavad sõnaselgelt API-juurdepääsu edasimüügi või konkureeriva teenuse arendamise; ühe kasutajaga isemajutatud isiklik puhverserver…                               |
+| `pollinations`   | ettevaatus        | API dokumentatsioonis viidatud MIT-litsents viitab vabale taaskasutusele; isemajutatud puhverserveri kasutamise sõnaselget keeldu ei leitud. Siiski…                                   |
+| `predibase`      | ettevaatus        | Predibase'i positsioneeritakse ettevõtetele mõeldud peenhäälestus- ja teenindusplatvormina; tasuta prooviperiood on sõnaselgelt ette nähtud uurimiseks ja…                             |
+| `publicai`       | ettevaatus        | Kasutustingimused (publicai.co/tc) määratlevad teenused „peamiselt teadus- ja hariduskasutuseks“; puhverserveri kasutamise või edasimüügi sõnaselget keeldu…                           |
+| `qoder`          | ettevaatus        | Kasutustingimuste leht ei tagastanud loetavat sisu; Qoder on programmeerimise IDE-klient (mitte avalik API) ja kolmandate osapoolte puhverserveriümbrised…                             |
+| `reka`           | ettevaatus        | Äritingimused keelavad juurdepääsu all-litsentsimise või levitamise kolmandatele isikutele; isiklik ühe kasutajaga puhverserver on tõenäoliselt sobiv…                                 |
+| `sambanova`      | ettevaatus        | Kasutustingimuste jaotis 1.5(c) keelab sõnaselgelt teenuse edasimüügi, all-litsentsimise või kolmandatele isikutele kättesaadavaks tegemise; isemajutatud…                             |
+| `sensenova`      | ettevaatus        | Läbivaadatud kasutustingimustes ei leitud puhverserveri kasutamise või edasimüügi sõnaselget keeldu, kuid tasuta kasutustase on ilma SLA-ta reklaam-beetaversioon, Sen…                |
+| `serper-search`  | ettevaatus        | Kasutustingimused keelavad sõnaselgelt „materjalide muutmata kujul ja lisaväärtuseta peegeldamise mis tahes muus serveris“ — lihtne läbipääsupuhverserver…                             |
+| `siliconflow`    | ettevaatus        | Kasutustingimused (punktid 3.4(e)(f)(p)) keelavad sõnaselgelt teenuse mis tahes kolmandale isikule kättesaadavaks tegemise, edasimüügi/all-litsentsimise,…                             |
+| `sparkdesk`      | ettevaatus        | SparkDeski kasutajaleping annab üksnes isikliku ja mitteärilise kasutuse õigused; API liidese eeskirjad keelavad automatiseeritud andme…                                               |
+| `tavily-search`  | ettevaatus        | Kasutustingimustes öeldakse sõnaselgelt, et API-t „ei tohi üle anda, loovutada, jagada ega muul viisil ühelegi kolmandale isikule kättesaadavaks teha…                                 |
+| `tencent`        | ettevaatus        | Tencent Cloudi kasutustingimused keelavad sõnaselgelt API-juurdepääsu all-litsentsimise või edasimüügi; isemajutatud isiklik puhverserver isiklikuks…                                  |
+| `together`       | ettevaatus        | Kasutustingimuste jaotis 4.3(d) keelab sõnaselgelt teenuste üleandmise, levitamise, edasimüügi, rentimise või nende pakkumise…                                                         |
+| `uncloseai`      | ettevaatus        | Isiklik puhverserverikasutus on mõeldav, kuid pole sõnaselgelt lubatud; kasutustingimused keelavad „konkureerivate masinõppeteenuste loomise…                                          |
+| `veoaifree-web`  | ettevaatus        | Kasutustingimused keelavad sõnaselgelt automatiseeritud robotid või skriptid, mis töötavad „ebainimlikul kiirusel“, ning platvormi kopeerimise selleks, et luua…                       |
+| `vertex`         | ettevaatus        | Google Cloudi teenusetingimused lubavad edasimüüki ainult volitatud edasimüüjatele (jaotis 14 nõuab edasimüügilepingut); isemajutatud…                                                 |
+| `voyage-ai`      | ettevaatus        | Kasutustingimused annavad saidi sisule „isikliku, mitteärilise kasutuse“ õiguse ja keelavad autentimisandmete/konto jagamise kolmandate isikutega;…                                    |
+| `xkiro`          | ettevaatus        | Kasutustingimused (2026-07-30) keelavad teenuse edasimüügi/edasilevitamise ja ülesvoolu teenusepakkujate tingimuste rikkumise; isiklik puhverserver…                                   |
+| `360ai`          | teadmata          | Arendaja API kasutustingimused pole registreerimiseta avalikult kättesaadavad; juurdepääs nõuab taotluse heakskiitmist, mis viitab…                                                    |
+| `chutes`         | teadmata          | Kasutustingimuste leht asub aadressil chutes.ai/terms, kuid selle sisu polnud päringu kaudu kättesaadav; leitud materjalides puudusid sõnaselged puhverserveri/edasimüügi klauslid…    |
+| `freemodel-dev`  | teadmata          | Kasutustingimuste leht (freemodel.dev/terms) tagastas WebFetchi kaudu ainult päise ilma loetava sisuta; ühtegi klauslit…                                                               |
+| `gitlawb`        | teadmata          | Kasutustingimusi ega lubatud kasutuse eeskirju ei leitud; puhverserveri/edasimüügi piirangud on teadmata — isemajutatud puhverserveri kasutamisel tuleb olla ettevaatlik.              |
+| `liquid`         | teadmata          | Puudub majutatud API, mida puhverserveriga vahendada; avatud lähtekoodiga mudeli äriline kasutamine on tasuta organisatsioonidele, mille aastakäive on alla $10M. Isemajutatud…        |
+| `yi`             | teadmata          | Kasutustingimused pole sisselogimiseta avalikult kättesaadavad; puhverserveri/edasimüügi klausleid ei saanud läbi vaadata. Isemajutatud isikliku puhverserveri kasutamine…             |
+| `comfyui`        | sobib             | Avatud lähtekoodi litsents GPL-3.0 lubab sõnaselgelt isemajutatud isikliku puhverserveri kasutamist; Comfy Orgi kasutustingimused kinnitavad ärilise kasutuse…                         |
+| `scaleway`       | sobib             | Scaleway üldised teenusetingimused on standardne äriline pilveteenuse leping, milles puudub isemajutamise sõnaselge keeld…                                                             |
+| `sdwebui`        | sobib             | AGPL-3.0 litsents: isiklikuks kasutuseks võib vabalt isemajutada ilma kasutusmahu piiranguteta; seda kasutav isiklik puhverserver…                                                     |
+| `searxng-search` | sobib             | Avatud lähtekoodi litsents AGPL-3.0 lubab sõnaselgelt isemajutatud isikliku puhverserveri kasutamist ilma kasutusviisi või edasimüügi piiranguteta…                                    |
+
+---
+
+## Teenusepakkuja-põhine tasuta kasutustase (Bytez/Nous kontrollitud 2026-10-15; read uuesti auditeeritud 2026-09-02; teised 2026-06-17)
+
+> Uuesti genereeritud mudelipõhisest kataloogist (`open-sse/config/freeModelCatalog.ts`) ja puulide lõikes deduplikeeritud. Sorditud igakuiste korduvate püsimahus tokenite järgi. `uncapped*` = püsivalt tasuta, kuid avaldatud tokenipiiranguta (piiratud päringusageduse/samaaegsusega) — tegelik juurdepääs, mida **ei** liideta koondarvule. `—` = ainult krediidipõhine / võtmeta / tokenites mittekvantifitseeritav.
+
+| Teenusepakkuja   | Tasuta tüüp           | Püsivad tokenid/kuu | Esimese kuu krediit | Kasutustingimused | Mudelid |
+| ---------------- | --------------------- | ------------------- | ------------------- | ----------------- | ------- |
+| `mistral`        | korduv                | ~1.00B              | —                   | ettevaatus        | 5       |
+| `nara`           | korduv                | ~210M               | —                   | ettevaatus        | 8       |
+| `llm7`           | korduv                | ~150M               | —                   | ettevaatus        | 4       |
+| `xkiro`          | korduv                | ~150M               | —                   | ettevaatus        | 39      |
+| `longcat`        | ühekordne             | —                   | 10M                 | ettevaatus        | 1       |
+| `cerebras`       | ühekordne             | —                   | $5 krediiti         | ettevaatus        | 2       |
+| `cloudflare-ai`  | korduv                | ~30M                | —                   | ettevaatus        | 9       |
+| `groq`           | korduv                | ~30M                | —                   | ettevaatus        | 5       |
+| `api-airforce`   | korduv                | ~24M                | —                   | ettevaatus        | 7       |
+| `bluesminds`     | korduv                | ~7M                 | —                   | ebaselge          | 22      |
+| `sambanova`      | korduv                | ~6M                 | —                   | ettevaatus        | 5       |
+| `arcee-ai`       | korduv                | ~5M                 | —                   | ettevaatus        | 1       |
+| `bazaarlink`     | korduv                | ~4M                 | —                   | ettevaatus        | 32      |
+| `openrouter`     | korduv                | ~1M                 | —                   | ettevaatus        | 1       |
+| `cohere`         | korduv                | ~800K               | —                   | ettevaatus        | 6       |
+| `huggingchat`    | korduv                | ~500K               | —                   | ettevaatus        | 4       |
+| `morph`          | korduv                | ~400K               | —                   | sobiv             | 2       |
+| `huggingface`    | korduv                | ~200K               | —                   | ettevaatus        | 6       |
+| `kiro`           | korduv                | ~25K                | —                   | vältida           | 12      |
+| `glm-cn`         | piiranguta            | piiranguta\*        | ~20M                | sobiv             | 4       |
+| `baidu`          | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 1       |
+| `gemini`         | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 4       |
+| `kilo-gateway`   | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 7       |
+| `ollama-cloud`   | piiranguta            | piiranguta\*        | —                   | ebaselge          | 8       |
+| `opencode-zen`   | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 10      |
+| `tencent`        | piiranguta            | piiranguta\*        | —                   | ettevaatus        | 1       |
+| `vertex`         | registreerumiskrediit | —                   | ~300M               | ettevaatus        | 10      |
+| `agentrouter`    | registreerumiskrediit | —                   | ~200M               | ettevaatus        | 4       |
+| `predibase`      | registreerumiskrediit | —                   | ~25M                | ettevaatus        | 1       |
+| `doubao`         | registreerumiskrediit | —                   | ~15M                | ebaselge          | 1       |
+| `ai21`           | registreerumiskrediit | —                   | ~10M                | vältida           | 2       |
+| `deepseek`       | registreerumiskrediit | —                   | ~5M                 | sobiv             | 2       |
+| `hyperbolic`     | registreerumiskrediit | —                   | ~5M                 | sobiv             | 8       |
+| `nscale`         | registreerumiskrediit | —                   | ~5M                 | ettevaatus        | 6       |
+| `bytez`          | krediit (korduv)      | —                   | teadmata            | ebaselge          | 1       |
+| `deepinfra`      | registreerumiskrediit | —                   | ~1M                 | ettevaatus        | 22      |
+| `fireworks`      | registreerumiskrediit | —                   | ~1M                 | vältida           | 10      |
+| `nebius`         | registreerumiskrediit | —                   | ~1M                 | ettevaatus        | 1       |
+| `qoder`          | registreerumiskrediit | —                   | ~1M                 | ettevaatus        | 14      |
+| `scaleway`       | registreerumiskrediit | —                   | ~1M                 | sobiv             | 6       |
+| `novita`         | registreerumiskrediit | —                   | ~500K               | ettevaatus        | 1       |
+| `agy`            | võtmeta               | —                   | —                   | vältida           | 16      |
+| `baichuan`       | võtmeta               | —                   | —                   | ebaselge          | 1       |
+| `blackbox`       | võtmeta               | —                   | —                   | vältida           | 6       |
+| `coze`           | võtmeta               | —                   | —                   | vältida           | 1       |
+| `duckduckgo-web` | võtmeta               | —                   | —                   | vältida           | 6       |
+| `freemodel-dev`  | võtmeta               | —                   | —                   | teadmata          | 4       |
+| `friendliai`     | võtmeta               | —                   | —                   | vältida           | 2       |
+| `iflytek`        | võtmeta               | —                   | —                   | vältida           | 1       |
+| `inference-net`  | võtmeta               | —                   | —                   | ettevaatus        | 3       |
+| `liquid`         | võtmeta               | —                   | —                   | teadmata          | 1       |
+| `monsterapi`     | võtmeta               | —                   | —                   | ebaselge          | 1       |
+| `muse-spark-web` | võtmeta               | —                   | —                   | vältida           | 3       |
+| `nlpcloud`       | võtmeta               | —                   | —                   | vältida           | 1       |
+| `nvidia`         | võtmeta               | —                   | —                   | ettevaatus        | 13      |
+| `pollinations`   | võtmeta               | —                   | —                   | ettevaatus        | 31      |
+| `publicai`       | võtmeta               | —                   | —                   | ettevaatus        | 3       |
+| `reka`           | võtmeta               | —                   | —                   | ettevaatus        | 2       |
+| `sensenova`      | võtmeta               | —                   | —                   | ettevaatus        | 1       |
+| `sparkdesk`      | võtmeta               | —                   | —                   | ettevaatust       | 1       |
+| `stepfun`        | võtmeta               | —                   | —                   | korras            | 1       |
+| `t3-web`         | võtmeta               | —                   | —                   | vältida           | 23      |
+| `uncloseai`      | võtmeta               | —                   | —                   | ettevaatust       | 3       |
+
+---
+
+## Mis on muutunud pärast avaldatud kataloogi (`freeNote`)
+
+> v3.8.0 ajast pärinevad `freeNote` stringid on aegunud. Selle uurimistöö käigus leitud parandused (need on aluseks kataloogi uuendamisele harus `_tasks/features-v3.8.12`):
+
+- **`360ai`** — Kaasasolev freeNote „Free 360 AI Brain models” näib olevat aegunud. Praegu on juurdepääs taotluspõhine ja tasuline. 2023. aasta turuletoomise aegsed kampaaniatokenid (ühekordselt 100M–250M) võisid olla selle aluseks…
+- **`agentrouter`** — Meie kaasasolev freeNote ütleb „$200 free credits on signup”. Tegelikult saavad tavalised (ilma soovituseta) registreerujad praegu ainult $100; soovituse kaudu registreerujad võivad saada $200, kuid 2026. aasta aprilli kogukonnakommentaar…
+- **`agy`** — Meie kaasasolev freeNote ütleb „(none)”, vihjates tasuta taseme puudumisele, kuid Antigravityl on tasuta OAuth-põhine tase. Kasutustingimused keelavad siiski selgesõnaliselt selle tasuta taseme kasutamise sellise puhverserveri kaudu nagu OmniRoute …
+- **`ai21`** — Piiranguid karmistati: prooviperiood lühenes „3 kuult” 7 päevale. $10 krediidisumma jäi samaks, kuid kehtivusaeg vähenes järsult ligikaudu 90 päevalt 7 päevale.
+- **`aimlapi`** — Oluliselt muutunud. Kaasasolev freeNote reklaamis „$0.025/day free credits — 200+ models”, kuid tasuta tase on nüüd peatatud/lõpetatud. $0.025 suurune päevane krediidieraldis (50 000 krediiti päevas, 10 päringut p…
+- **`amazon-q`** — Meie kaasasolev freeNote ütleb „(none)” — tegelikkus on veel halvem: uued kasutajad ei saa alates 15. maist 2026 enam tootega liituda. Varem pakkus tasuta tase 50 agendipõhist päringut kuus ja piiramatult tekstisiseseid…
+- **`api-airforce`** — Kataloogis on freeNote „(none)”, kuid dokumenteeritud tasuta tase on olemas: korduv limiit 1 RPM / 1 000 RPD, konto registreerimine on nõutav ja saadaval on ainult põhimudelid.
+- **`arcee-ai`** — Kaasasolev freeNote („Free Trinity Large Thinking model (262K context)”) on osaliselt täpne — Trinity Large Thinking on tõepoolest OpenRouteri kaudu tasuta saadaval ja 262K kontekstiaknaga — kuid märkus jätab mainimata, et see…
+- **`baichuan`** — Meie kaasasolev freeNote ütleb „Free Baichuan models”, mis vihjab pidevale tasuta juurdepääsule, kuid praegu saavad uued kasutajad ainult ühekordse 80 CNY proovikrediidi (kehtib 3 kuud). Püsivalt tasuta…
+- **`baidu`** — Kataloog ütleb „Free ERNIE Speed/Lite models”, mis on üldjoontes täpne, kuid alahindab valikut: tasuta on ka ERNIE-Tiny ning mitu erineva kontekstiaknaga varianti (8K ja 128K). Tasuta tase näib…
+- **`bazaarlink`** — Üldjoontes vastab tegelikkusele — kaasasolev freeNote kirjeldab täpselt auto:free marsruutimist tasuta inferentsiks. Praeguses teenuses on aga ka selgesõnalised kiiruspiirangud (10–20 RPM, ~150 RPD), mida pole märgitud…
+- **`blackbox`** — Meie kaasasolev freeNote väidab „unlimited basic chat plus Minimax-M2.5”. Tegelikult on piiramatud Minimax-M2.5 agendipäringud tasulise paketi (Pro+) funktsioon, mitte tasuta taseme osa. Tasuta tasemel on p…
+- **`bluesminds`** — Meie kaasasolev freeNote oli „(none)” — kuid BluesMindsil on dokumenteeritud tasuta tase: 500 pi-krediiti, 20 RPM, 300 RPD ja püsiv tasuta pakett. Kataloog alahindab pakkumist märkimisväärselt.
+- **`brave-search`** — Kataloogis on märgitud „(none)”, mis viitab sellele, et tasuta taset ei jälgitud, kuid tegelikult oli kuni 12. veebruarini 2026 saadaval tasuta tase 5 000 päringuga kuus (kaarti polnud vaja); see on nüüd asendatud $5 kuus maksva…
+- **`byteplus`** — Meie kataloogis oli „(none)”, kuid BytePlus ModelArkil on tasuta tase: uued kontod saavad iga LLM-mudeli kohta ühekordse proovikrediidi 500k tokeni ulatuses. Kataloog kajastab seda puudulikult.
+- **`cerebras`** — Kaardita proovipaketti 1M tokeniga päevas enam ei ole. Veebisaidil cerebras.ai/pricing avaldatud hinnastuse (2026-09-03) järgi antakse registreerumisel ühekordne $5 krediit, nõutakse makseviisi ja krediit kehtib 30 päeva. Liigitati ümber kategooriasse `one-time-initial` (LongCat-tüüpi); eemaldati loendist `LEGACY_FREE_PROVIDERS` ja korduvast eelarvest.
+- **`chutes`** — Kaasasolev freeNote ütleb „Free tier available”, kuid alates 15. märtsist 2026 on tasuta tase ametlikult lõpetatud. Kataloogi märkus on aegunud ja seda tuleks värskendada, et kajastada korduva tasuta taseme puudumist…
+- **`coze`** — Kaasasolev märkus „Free ByteDance agent platform” on üldjoontes täpne, kuid jätab mainimata, et tasuta tase on nüüd rangelt krediidiga piiratud (10 krediiti päevas ≈ 5–100 sõnumit olenevalt mudelist), mis on oluline piirang…
+- **`deepinfra`** — Meie kaasasolev freeNote ütleb „Free signup credits for API testing” — see näib olevat aegunud. Ametlik hinnastamisleht nõuab nüüd kaarti/ettemakset ning üldist tasuta registreerumiskrediiti pole dokumenteeritud. Tasuta ta…
+- **`deepseek`** — Meie kaasasolev märkus ütleb „5M free tokens on signup - no credit card required” — see on ühekordse eraldise kohta endiselt täpne, kuid oluline on see, et krediit aegub 30 päeva pärast (kaasasolevas märkuses seda ei…
+- **`dify`** — Kaasasolev freeNote („Free open-source AI app builder + RAG”) on üldjoontes täpne, kuid puudulik. Pilveteenuse tasuta tase on vihjatust piiratum: 200 sõnumikrediiti näivad olevat ühekordne…
+- **`doubao`** — Kaasasolev freeNote „Free Doubao models (ByteDance)” on üldjoontes õige, kuid ebapiisavalt täpne. Praegune tegelikkus on struktureeritum: olemas on mõõdetav korduv päevane tasuta tase (2M tokenit päevas v…
+- **`duckduckgo-web`** — Põhikirjeldus „free anonymous access” vastab endiselt tõele, kuid teenus on märkimisväärselt arenenud: nüüd on sellel selgelt määratletud tasulised tasemed (Plus/Pro), mille kõrgemad limiidid viitavad sellele, et tasuta taseme päringusagedus on piiratud…
+- **`exa-search`** — Kataloogis on freeNote „(none)”, kuid Exal on dokumenteeritud korduv tasuta tase 1 000 päringuga kuus. See on märkimisväärne puudujääk — tasuta tase on olemas ja püsiv.
+- **`featherless-ai`** — Meie kaasasolev freeNote ütleb „Free tier available”, kuid üldist tasuta taset ei ole. Ainus tasuta juurdepääs toimub kutse-/taotluspõhise Builder Series programmi kaudu, mis ei ole tavapärane tasuta…
+- **`firecrawl`** — Meie kataloogis oli freeNote „(none)”, mis vihjab tasuta taseme puudumisele. Tegelikult on Firecrawlil dokumenteeritud korduv tasuta pakett 1 000 krediidiga kuus — kataloogikirje on vale.
+- **`freemodel-dev`** — Meie kaasasolev freeNote on „(none)” — tõenäoliselt oli see kohatäide, mis tähendas, et teenusepakkujat polnud veel kataloogitud. Tegelikult pakub teenusepakkuja ühekordset $300 proovikrediiti. See on aga ü…
+- **`friendliai`** — Kaasasolev freeNote („Tasuta tase serverita inferentsiks“) on osaliselt täpne, kuid eksitav. Tasuta juurdepääs on olemas Tier 0 ja tasuta kasutuseks määratud mudelite kaudu, kuid kiiruspiirangud pole määratletud ja ada…
+- **`gemini`** — Kaasasolev freeNote ütleb „1 500 päringut päevas Gemini 2.5 Flashi jaoks“ — see oli täpne enne 2025. aasta detsembrit. Google vähendas 2025. aasta detsembris tasuta taseme limiite 50–80%, kärpides Gemini 2.5 Flashi limiiti 1 500 pär…
+- **`gitlawb`** — Kaasasolev freeNote „Tasuta tase on saadaval“ on sisuliselt aegunud. Algne tasuta juurdepääs MiMo-le eemaldati 2026. aasta mais; ainus allesjäänud „tasuta“ võimalus on ajutine kampaaniamudel (Nemotron 3 U…
+- **`gitlawb-gmi`** — Osaliselt endiselt täpne — tasuta tase on olemas, kuid pärast MiMo tasuta juurdepääsu tühistamist 2026. aasta mai lõpus on see nüüd piiratud ühe mudeliga (Nemotron 3 Ultra). Kaasasolev märkus „Tasuta tase on saadaval“ alahin…
+- **`groq`** — Kaasasolev freeNote „30 RPM / 14.4K RPD“ on täpne ainult mudeli llama-3.1-8b-instant puhul. Enamikul teistel mudelitel (sealhulgas llama-3.3-70b-versatile) on palju madalam 1K RPD ülempiir. Märkus jätab mudelipõhised … **Lahendatud 2026-09-02:** `freeNote` ütleb nüüd „Tasuta pakett: mudelipõhised ülempiirid (200K tokenit päevas iga vestlusmudeli kohta; RPM/RPD kohta vt console.groq.com/docs/rate-limits) — makseviisi pole lisatud.“ ja kataloog sisaldab viit mudelipõhist 6M ülempiiri (llama-3.3-70b-versatile eemaldati tasuta tasemest 2026-08-16) — vt [2026-09-02 kordusauditi märkust](#tldr--how-much-free-inference-does-omniroute-actually-aggregate).
+- **`huggingchat`** — Kaasasolev freeNote („Tasuta LLM-vestlus — tellimust pole vaja. Kehtivad kiiruspiirangud.“) on osaliselt täpne, kuid vähendab piirangute olulisust märkimisväärselt. Tasuta tase töötab nüüd jäiga $0.10/…
+- **`huggingface`** — Oluliselt piiratumaks muudetud. Kaasasolev freeNote („Tasuta Inference API tuhandete mudelite jaoks“) jättis mulje piiramatust/heldest tasuta juurdepääsust, kuid alates 2025. aasta keskpaigast on tasuta taseme korduv kuupiir $0.10…
+- **`hyperbolic`** — Meie kaasasolev freeNote ütleb „Registreerumisel $1–5 proovikrediiti“ — $1 proovikrediidi osa on täpne, kuid „$5“ tähistab minimaalset sissemakset, mis on vajalik GPU rentimise avamiseks (mitte tasuta krediiti…
+- **`iflytek`** — Kataloog ütleb „Tasuta Spark Lite’i mudelid“ — see on üldjoontes täpne. Praegune tegelikkus on siiski nüansirikkam: tasuta on ainult Spark Lite (Maxi 100M tokeni pakkumine oli ühekordne kampaania, mitte korduv); …
+- **`inference-net`** — Kaasasolev freeNote ütleb „Registreerumisel $25 tasuta krediiti ja lisaks uurimistoetused.“ Praegusel hinnalehel on näidatud ainult $1 ulatuses igakuist korduvat krediiti ning seal ei mainita $25 registreerumisboonust ega uurimistoetust…
+- **`jina-reader`** — Meie kaasasolev freeNote oli „(puudub)“, mis on vale. Jina Readeril on alates käivitamisest olnud avalikult dokumenteeritud tasuta tase: võtmeta juurdepääs kiirusega 20 RPM ning tasuta API-võtmega ühekordne 10M tokeni eraldis. …
+- **`kiro`** — Kataloogis oli kaasasolev freeNote „(puudub)“ — kuid Kirol on dokumenteeritud püsiv tasuta tase, mis pakub 50 krediiti kuus. Tasuta tase on olemas olnud alates Kiro avalikust käivitamisest (hinnastus vormistati umbes 2025. aasta oktoobris). See on …
+- **`llm7`** — Kiiruspiirangud on kaasasolevas freeNote’is tooduga võrreldes suurenenud (20 RPM / 100 päringut tunnis → 40 RPM / 200 päringut tunnis). Väide „registreerumine pole vajalik“ on nüüd aegunud — nüüd on vajalik tasuta token aadressilt token.llm7.io (ku…
+- **`longcat`** — Avalik eelvaade/beetaversioon lõppes ja Flashi mudelid eemaldati kasutuselt; alles on ainult üldiselt kättesaadav `LongCat-2.0`. Tasuta tase on **ühekordne 10M tokeni eraldis**, mis avatakse pärast konto registreerimist ja **KYC-kontrolli** — see **ei** lähtestu iga päev ega iga kuu. Pärast eraldise ammendumist rakendub kasutuspõhine hinnastus.
+- **`mistral`** — Kaasasolev freeNote („Tasuta Experiment-tase: kiiruspiiranguga juurdepääs kõigile mudelitele“) on üldjoontes õige, kuid vähendab piirangute olulisust. Praeguses olukorras lisanduvad konkreetsed dokumenteeritud limiidid: 2 RPM, 500K TPM, 1B tokenit/…
+- **`monsterapi`** — Kaasasolev freeNote ütleb „Tasuta krediit detsentraliseeritud GPU-inferentsiks“, mis on osaliselt täpne — registreerumisel antakse ühekordset proovikrediiti. Korduval tasuta tasemel on aga 0 krediiti kuus…
+- **`morph`** — Kaasasolev freeNote mainib „250K krediiti kuus“, mis vastab praegusele krediidieraldisele; olulisem piirang on aga 200 päringut kuus, mida algses k…
+- **`muse-spark-web`** — Kaasasolev freeNote („Sisselogimisel tasuta — Llama mudelitega Meta AI platvorm“) on sisselogimisnõude ja Llama mudelitele juurdepääsu osas üldjoontes täpne. Tasuta taseme karmistamist ei tuvastatud; see p…
+- **`nlpcloud`** — Kaasasolev freeNote ütleb „Proovikrediit uutele kontodele“, mis viitab ühekordsele prooviperioodile. Tegelikult on NLP Cloudi tasuta tase korduv igakuine tasuta pakett (10 000 päringut kuus), mitte proovikredi…
+- **`nomic`** — Meie kaasasolev freeNote ütleb ilma täpsustuseta „Tasuta Nomic Embed API“, jättes mulje jätkuvast tasuta juurdepääsust. Tegelikult on tegemist ainult ühekordse 1M tokeni proovikrediidiga — pärast selle tokenieelarve ammendumist on vajalik tasuline tell…
+- **`nous-research`** — Uuesti kontrollitud 2026-10-15: [Nous Portali tasuta pakett](https://portal.nousresearch.com/) pakub tasuta mudeleid $0 igakuise krediidiga, kuid ei tõenda Hermes-4-405B või Hermes-4-70B tasuta kättesaadavust. Mõlemad kontrollimata kirjed on kaasasolevast tasuta kataloogist välja jäetud. See ei tõenda, et Nousil pole tasuta mudeleid.
+- **`nvidia`** — Kiiruspiirangu osa „40 RPM, üle 70 mudeli“ vastab kataloogile, kuid freeNote’i kirjeldus lihtsa arendajatele mõeldud juurdepääsutasemena jätab mainimata, et vana ühekordne krediidivaru on eemaldatud — juurdepääs on nüüd tõe…
+- **`ollama-cloud`** — Meie kaasasolev freeNote on „(puudub)“ — see on aegunud. Ollama Cloud tõi turule pilvinferentsi toote ehtsa tasuta tasemega, mis pakub hostitud avatud mudelitele kerget, iganädalast GPU-ajapõhist juurdepääsu.
+- **`openrouter`** — Nullkrediidiga kontode RPD-d vähendati 200-lt 50-le (RPM jäi muutumatult 20 peale). Kataloogi märkus oli RPM-i osas täpne, kuid hindas krediidita baastaseme RPD-d neli korda üle. **Käitusaegne jälgimine (#6842)**: see ei ole enam pelgalt staatiline märkus — `open-sse/services/openrouterQuotaFetcher.ts` küsitleb otspunkte `/api/v1/key` + `/api/v1/credits`, et saada võtmekohane krediidilimiit, jääk ja lähtestamisaeg ning päevane/nädalane/kuine kulu USD-des, ning `open-sse/services/openrouterFreeWindow.ts` jälgib kohalikult eespool kirjeldatud `:free`-mudelite 50 või 1000 päringut päevas + 20 RPM-i aknaid (mida korrigeeritakse 429-vastuste `X-RateLimit-*` päiste põhjal); need kuvatakse jaotises Töölaud → Teenusepakkuja kvoot.
+- **`phind`** — Phind lõpetas tegevuse 16. jaanuaril 2026. Teenusepakkuja on nüüd kataloogist **täielikult eemaldatud** (register, täitur ning nii veebiküpsise kui ka API-võtme kataloogikirjed) — kooskõlas mittetoimiva teenuse eemaldamise pretsedendiga (#5246 Gemini CLI).
+- **`pollinations`** — Vastab osaliselt — väide „API-võtit pole vaja” kehtib anonüümse juurdepääsu puhul endiselt, kuid kataloogi freeNote jätab mainimata, et: (1) kiiruspiirangud kehtivad siiski (anonüümsetele kasutajatele intervallipiirang ~1 päring/6–15 s …
+- **`predibase`** — Kaasasolev freeNote (25 $ tasuta proovikrediiti, kehtivus 30 päeva) vastab endiselt praegusele dokumentatsioonile. Kataloog jätab aga mainimata samaaegse serverivaba kiiruspiirangu 20 000 tokenit päevas, mis kehtib …
+- **`publicai`** — Kaasasolev freeNote („Tasuta kogukondlik järeldusteenuse tase”) on üldjoontes täpne, kuid pole piisavalt konkreetne: 20 RPM-i kiiruspiirang on nüüd dokumenteeritud. Olulist piirangute karmistamist ei leitud; teenus on endiselt tasu…
+- **`puter`** — **Täielikult eemaldatud** kataloogist (register, täitur, tasuta mudelite kataloog ja API-võtme kirje) Puteri omaniku (Nariman Jelveh) palvel — vt eespool toodud mittetoimiva teenuse eemaldamise pretsedenti (`phind`).
+- **`qoder`** — Meie kataloogi freeNote on „(puudub)”, kuid Qoderil on tasuta tase: Community Edition, mis pakub piiramatult põhimudelite lõpetamisi (päevase, täpsustamata limiidiga), ning ühekordne 14-päevane/300-krediidine Pr…
+- **`sambanova`** — Meie kaasasolev märkus kirjeldas ainult ühekordset 5 $ krediiti (kehtivus 30 päeva). Praegu on olemas ka püsivalt korduv tasuta tase dokumenteeritud kiiruspiirangutega (20 RPM, 20 RPD, 200k TPD), mis püs…
+- **`sensenova`** — Meie kaasasolev freeNote ütleb „Tasuta SenseTime'i mudelid”, mis on ebamäärane, kuid üldjoontes õige — tasuta juurdepääs on olemas. Tegelikkus on siiski nüansirikkam: tasuta juurdepääs on ajaliselt piiratud avalik beetaversioon (Token…
+- **`serper-search`** — Kaasasolev freeNote ütleb „(puudub)”, mis on osaliselt täpne — korduvat tasuta paketti pole —, kuid Serper pakub registreerumisel 2500 ühekordset proovikrediiti. Kataloogi märkus võiks olla täpsem…
+- **`siliconflow`** — Uuendatud 2026-10-18 (#17028): registreerumiskrediit on ühekordne proovipakkumine, mitte korduv tasuta pakett. Staatilisest tasuta kataloogist on eemaldatud kümme tasulist tippmudeli ID-d. Mõned mudelid võivad SiliconFlow reaalajas mudelikataloogis olla endiselt tasuta märgitud; importimine ja märk „Tasuta” nõuavad seda tõendit (kusjuures mis tahes positiivne hind välistab selle). Staatilist piiramata tasuta kvooti ei väideta.
+- **`sparkdesk`** — Vastab osaliselt — kaasasolev freeNote „Tasuta iFlytek Sparki mudelid” on täpne selles osas, et Spark Lite on püsivalt tasuta, kuid kirjeldab piirangut ebapiisavalt (2 QPS-i App ID kohta) ja ulatust liiga laialt (ainult S…
+- **`stepfun`** — Kaasasolev freeNote „Tasuta Step-2 mudelid” on aegunud. Step-2 LLM-i tasuta juurdepääsu enam ei pakuta; platvorm on üle läinud Step 3.x mudelitele, mille eest tasutakse tokenipõhiselt ja millel pole tasuta LLM-i taset. Ainult…
+- **`t3-web`** — Kaasasolev freeNote on üldjoontes täpne (piiratud juurdepääs mudelitele, Pro avab 8 $/kuu eest üle 50 mudeli), kuid jätab mainimata kaks olulist uuendust: (1) tasuta tase lähtestub nüüd kord päevas, mitte kord kuus (muudeti ligikaudu…
+- **`tavily-search`** — Kataloogi freeNote on „(puudub)”, mis vihjab tasuta taseme puudumisele, kuid Tavily pakub tegelikult dokumenteeritud korduvat tasuta taset 1000 krediidiga kuus ja krediitkaarti nõudmata. See on märkimisväärne erine…
+- **`tencent`** — Vastab suures osas — kaasasolev freeNote („Tasuta Hunyuan Lite'i mudelid”) on täpne. Hunyuan-lite on olnud püsivalt tasuta alates 2024. aasta maist ja on seda endiselt ka 2026. aastal. Kataloogi märkus kirjeldab üksikasju ebapiisavalt…
+- **`together`** — Kaasasolev märkus ütleb „25 $ registreerumiskrediiti + 3 püsivalt tasuta mudelit”, kuid Together nõuab nüüd vähemalt 5 $ krediidi ostmist ega paku tasuta prooviperioodi. 25 $ registreerumiskrediit eemaldati kataloogist (#12526). Teenusepakkujal on endiselt umbes 80 püsivalt tasuta mudelit, kuid kasutustingimused (jaotis 4.3(d)) keelavad sõnaselgelt teenuste üleandmise, levitamise, edasimüügi või pakkumise.
+- **`uncloseai`** — Vastab suures osas — endiselt igavesti tasuta ja registreerumist pole vaja. Kasutustingimused (terms-of-use.html) täpsustavad aga, et ülemäärase kasutuse korral rakendatakse IP-põhist piiramist, ning keelavad konkureerivate ML-teenuste loomise ilma…
+- **`veoaifree-web`** — Kaasasolev freeNote märgib „6 päringut tunnis”, kuid sellist selgesõnalist piirangut pole praegu kusagil saidil veoaifree.com dokumenteeritud. Sait väidab, et pakub piiramatut tasuta genereerimist ilma sisselogimiseta. Loetletud mudelid …
+- **`voyage-ai`** — Kaasasolev freeNote „200M tasuta tokenit manuste ja ümberjärjestamise jaoks” on tokenite arvu osas üldjoontes õige, kuid eksitav — see jätab mainimata, et tegemist on ühekordse kontopõhise eraldisega, mitte korduva…
+- **`yi`** — Kaasasolev freeNote „Tasuta Yi-Lighti mudelid” viitab mudelinimele („Yi-Light”), mida ei esine üheski praeguses 01.AI dokumentatsioonis ega mudelikataloogis — platvormil platform.01.ai pole sellist mudelit loetletud, …
 
 ---
 
 ## Sõnastik
 
-| Termin                  | Tähendus                                                                           |
-| :---------------------- | :--------------------------------------------------------------------------------- |
-| **RPM / RPD / RPH**     | Päringuid minuti / päeva / tunni kohta                                             |
-| **TPM / TPD**           | Märke minuti / päeva kohta                                                         |
-| **Documented grant**    | Pakkuja avaldab selgesõnalise igapäevase/igakuise märgipiirangu (kaitstav eelarve) |
-| **Theoretical ceiling** | `rate-limit × 24/7 × 30d` — maksimum, mitte garanteeritud eelarve                  |
-| **Neuron**              | Cloudflare'i arvutusühik (~1 väljundmärk)                                          |
+| Termin                    | Tähendus                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| **RPM / RPD / RPH**       | Päringud minutis / päevas / tunnis                                             |
+| **TPM / TPD**             | Tokenid minutis / päevas                                                       |
+| **Dokumenteeritud maht**  | Teenusepakkuja avaldab selge päevase/kuise tokenilimiidi (põhjendatav eelarve) |
+| **Teoreetiline ülempiir** | `rate-limit × 24/7 × 30d` — maksimum, mitte eraldatud maht                     |
+| **Neuron**                | Cloudflare'i arvutusühik (~1 väljundtoken)                                     |
 
-> Genereeritud pakkuja-põhise uuringu põhjal 2026-06-05. Värskendamiseks käivitage uuesti uurimistöö töövoog (vt `_tasks/features-v3.8.12`).
+> Loodud teenusepakkujapõhiste uuringute põhjal 2026-06-05. Värskendamiseks käivitage uuringu töövoog uuesti (vt `_tasks/features-v3.8.12`).

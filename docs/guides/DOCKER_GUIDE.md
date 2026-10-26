@@ -1,7 +1,7 @@
 ---
 title: "🐳 Docker Guide — OmniRoute"
 version: 3.8.51
-lastUpdated: 2026-09-18
+lastUpdated: 2026-10-16
 ---
 
 # 🐳 Docker Guide — OmniRoute
@@ -22,7 +22,9 @@ lastUpdated: 2026-09-18
 - [Docker Compose with Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
 - [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
 - [Image Tags](#image-tags)
+- [Dashboard updates in Docker](#dashboard-updates-in-docker)
 - [Availability: default SQLite is single-replica](#availability-default-sqlite-is-single-replica)
+- [Gemini regional errors inside Docker](#gemini-regional-errors-inside-docker)
 - [Important Notes](#important-notes)
 
 ---
@@ -574,6 +576,77 @@ A release-branch build can never move `latest`; only an eligible stable semantic
 | Test unreleased `release/v*` commits                           | `:next` (not production)           |
 | Test `main`                                                    | `:main` (not production)           |
 
+## Dashboard updates in Docker
+
+A published-image container cannot replace itself. When OmniRoute detects it runs inside a
+container (no `.git` checkout, not an npm install), the home dashboard's update banner shows the
+host command to run instead of the npm/git instructions, with a copy button:
+
+```bash
+docker compose pull omniroute && docker compose up -d --force-recreate omniroute
+```
+
+The service name comes from `AUTO_UPDATE_SERVICE` (default `omniroute`, the service in
+`docker-compose.selfhost.yml`). `pull` only moves a floating tag (`latest`, `next`); with a pinned
+`:X.Y.Z` tag, edit the tag first.
+
+### One-click updates with a host trigger file
+
+To keep **Update Now** working without mounting `/var/run/docker.sock` (which gives the container
+root on the host — see the `cli` profile warning above), set `DOCKER_UPDATE_TRIGGER_FILE` on the
+OmniRoute service and run a watcher on the host:
+
+```yaml
+services:
+  omniroute:
+    environment:
+      DOCKER_UPDATE_TRIGGER_FILE: /app/data/update/docker-update.request
+    volumes:
+      - ./data:/app/data
+```
+
+The path must be inside `DATA_DIR` (relative values resolve against it); anything else is
+rejected. **Update Now** then writes `{ "requestedAt": "...", "targetVersion": "X.Y.Z" }` to that
+file, answers `202`, and the dashboard polls `/api/system/version` until the new version is live
+and reloads. OmniRoute never runs a shell or Docker command in this mode. Like every update
+action, the request is accepted only from loopback/LAN clients.
+
+A bind-mounted data directory gives the host a stable path to watch. Sample `systemd` units
+(adjust `/srv/omniroute` to the directory holding your compose file and `data/`):
+
+```ini
+# /etc/systemd/system/omniroute-update.path
+[Unit]
+Description=Watch for OmniRoute dashboard update requests
+
+[Path]
+PathExists=/srv/omniroute/data/update/docker-update.request
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```ini
+# /etc/systemd/system/omniroute-update.service
+[Unit]
+Description=Pull and recreate the OmniRoute container
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/omniroute
+ExecStartPre=/usr/bin/rm -f /srv/omniroute/data/update/docker-update.request
+ExecStart=/bin/sh -c 'docker compose pull omniroute || (sleep 15 && docker compose pull omniroute)'
+ExecStart=/usr/bin/docker compose up -d --force-recreate omniroute
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now omniroute-update.path
+```
+
+The service removes the request before pulling so a failed run does not loop. Without
+`DOCKER_UPDATE_TRIGGER_FILE` the dashboard keeps the manual command flow.
+
 ## Availability: default SQLite is single-replica
 
 Stock Docker / Kubernetes OmniRoute is **one Node process + one SQLite writer**. High availability is **not supported** on that topology.
@@ -673,6 +746,85 @@ volumes:
 ```
 
 In-process density (compression off the HTTP isolate) is [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). One logical cluster on shared durable state is [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+
+## Gemini regional errors inside Docker
+
+Google AI Studio / Gemini API can return HTTP 400 with FAILED_PRECONDITION and
+`User location is not supported for the API use.` A successful request on the host
+does not prove that the container uses the same outbound route. DNS ordering,
+IPv4/IPv6 connectivity, VPN routing and configured proxies can differ. Check
+[Google's supported regions](https://ai.google.dev/gemini-api/docs/available-regions)
+as well as the actual connection route; this error alone does not identify a bad API key.
+
+### Prefer a connection-specific proxy
+
+Use OmniRoute's [per-connection proxy configuration](../ops/PROXY_GUIDE.md#4-level-proxy-system)
+for the affected Gemini connection, then repeat **Test Connection** and a small request
+with the same model. This keeps the routing change scoped to that connection. Verify
+that the proxy is reachable from the container, and that the connection really selects
+it. Changing the route does not guarantee upstream regional eligibility.
+
+### Compare host and container networking
+
+Keep the key, model and request identical when comparing authenticated results; never
+paste credentials, proxy passwords or complete authorization headers into an issue.
+First inspect which address families the OS resolver offers, using the same command
+on the host and inside the container:
+
+```bash
+node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
+docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
+```
+
+Replace `omniroute` with the service you run (for example, `omniroute-web`). These
+commands print address families without credentials or IP addresses. A returned `6`
+only shows an IPv6 DNS result: it does **not** prove a usable IPv6 route or API access.
+Where `curl` is installed, compare `curl -4 -I https://generativelanguage.googleapis.com`
+with `curl -6 -I https://generativelanguage.googleapis.com` in both environments.
+An HTTP response proves connectivity for that probe, even if it is an unauthenticated
+error; only the authenticated model request tests Gemini eligibility.
+
+### Host-level alternative: working IPv6 and resolver policy
+
+The reporter of [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) restored
+access in their environment by enabling container IPv6 and changing glibc address
+selection. Treat this as an environment-specific alternative. Confirm working host
+IPv6, container egress/routing and firewall rules before adjusting resolver preferences.
+A private ULA address by itself does not establish public IPv6 connectivity.
+
+For services already attached to Compose's default network, this fragment enables
+IPv6 on that network; retain the rest of your service, ports, volumes and configuration:
+
+```yaml
+networks:
+  default:
+    enable_ipv6: true
+```
+
+For a named network, enable it on the network the service actually joins. Docker can
+allocate a ULA subnet; select an explicit, non-overlapping subnet only when your network
+requires it. See [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/)
+and [Compose network options](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+
+On a **glibc-based image**, `/etc/gai.conf` can change address selection. The current
+repository Dockerfile uses Debian; custom musl-based images do not share this mechanism.
+The reported adjustment changes the ULA label from `label fc00::/7 6` to
+`label fc00::/7 1`. Start from the image's complete policy table and preserve its other
+entries: adding a `label` or `precedence` entry replaces that default table, so a file
+containing only the changed line is insufficient. The
+[glibc configuration reference](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
+documents those semantics. Bind-mount the reviewed file read-only at `/etc/gai.conf`
+and recreate the service to apply it.
+
+This changes OS address selection for **all outbound traffic in that container**.
+It does not force every application to choose IPv6: Node's DNS order and connection
+selection also matter. In particular, `--dns-result-order=ipv4first` prefers IPv4 and
+is not a remedy for an IPv4-only failure. See [Node DNS ordering](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+
+Re-test Gemini and your other providers after any host-level change. To roll back,
+remove the custom `gai.conf` mount, restore the previous network configuration and
+recreate the affected service/network during a maintenance window. Recreating a network
+can interrupt other containers attached to it; do not delete the persistent data volume.
 
 ## Important Notes
 

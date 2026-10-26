@@ -123,7 +123,9 @@
       "maxCostOpt": "1 日あたりの最大コスト（USD）",
       "allowedModelsOpt": "許可するモデルのカンマ区切りリスト",
       "nothingToSet": "ポリシーフィールドが指定されていません。--rate-limit、--max-cost、または --allowed-models を使用してください。",
-      "updated": "ポリシーを更新しました。"
+      "updated": "ポリシーを更新しました。",
+      "modelAccessModeOpt": "モデルアクセスモード (all | restricted)",
+      "unrestrictedOpt": "すべてのモデルを許可 (--model-access-mode all)"
     },
     "expiration": {
       "title": "キーの有効期限",
@@ -254,6 +256,7 @@
     "log": "サーバーログをインラインで表示",
     "no_recovery": "クラッシュ時の自動再起動を無効化（デバッグモード）",
     "max_restarts": "断念するまでの30秒以内のクラッシュ再起動上限回数（デフォルト: 2）",
+    "headless": "プロキシエンジンのみを実行: ダッシュボード無効 (404)、オプションのサブシステムをスキップ (OMNIROUTE_HEADLESS=1 を設定)",
     "tray": "システムトレイで起動（デスクトップ版のみ、オプトイン）",
     "no_tray": "システムトレイアイコンを無効化",
     "ready_timeout": "準備状況プローブのタイムアウト（ミリ秒、OMNIROUTE_READY_TIMEOUT_MS でも設定可能、デフォルト: 60000）",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "OmniRouteインスタンス間で設定を同期",
     "push": {
-      "description": "設定をクラウドまたはリモートインスタンスにプッシュ",
-      "target": "ターゲット（cloudまたはcontext:name）",
-      "bundle": "同期するバンドルの構成要素",
-      "dryRun": "適用せずにプレビュー"
+      "description": "設定をクラウドまたはリモートインスタンスにプッシュ"
     },
     "pull": {
-      "description": "クラウドまたはリモートから設定をプル",
-      "source": "ソース（cloudまたはcontext:name）",
-      "merge": "既存の設定とマージ",
-      "replace": "既存の設定を置換",
-      "dryRun": "適用せずにプレビュー"
-    },
-    "diff": {
-      "source": "ソースコンテキスト",
-      "target": "ターゲットコンテキスト"
+      "description": "クラウドまたはリモートから設定をプル"
     },
     "bundle": {
       "description": "設定をバンドルファイルとしてエクスポート",
-      "include": "含める構成要素（カンマ区切り）"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "バンドルファイルをインポート",
       "dryRun": "適用せずに検証"
-    },
-    "initialize": {
-      "fromCloud": "クラウドバックアップから初期化"
     },
     "tokens": {
       "description": "同期トークンを管理",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "確認をスキップ"
       }
-    },
-    "resolve": {
-      "description": "同期の競合を対話形式で解決"
     }
   },
   "config": {

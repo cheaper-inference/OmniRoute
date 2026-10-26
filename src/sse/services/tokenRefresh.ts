@@ -1,6 +1,7 @@
 // Re-export from open-sse with local logger
 import * as log from "../utils/logger";
 import { updateProviderConnection } from "@/lib/db/providers";
+import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { resolveProxyForProvider, hasBlockingProxyAssignment } from "@/lib/db/proxies";
 import {
@@ -253,8 +254,10 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
   // token providers (Codex/OpenAI) refresh FAR ahead of access_token expiry. This
   // keeps the refresh_token "warm" — refreshed regularly enough that Auth0 doesn't
   // mark it as stale and revoke the token family on first use after long idle.
-  if (updatedCredentials.expiresAt) {
-    const expiresAt = new Date(updatedCredentials.expiresAt).getTime();
+  // parseTokenExpiryMs accepts numeric epochs (s/ms, number or TEXT-column
+  // string) as well as ISO; 0 means "no usable expiry" and never triggers.
+  const expiresAt = parseTokenExpiryMs(updatedCredentials.expiresAt);
+  if (expiresAt > 0) {
     const now = Date.now();
     const refreshLead = _getRefreshLeadMs(provider, updatedCredentials.providerSpecificData);
 

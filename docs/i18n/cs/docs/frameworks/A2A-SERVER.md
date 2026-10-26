@@ -45,7 +45,7 @@ A2A se ovládá přepínačem **Endpoints → A2A** a ve výchozím nastavení j
 
 ## Metody JSON-RPC 2.0
 
-### `message/send` — Synchronní provedení
+### `message/send` — Synchronní provádění
 
 Odešle zprávu dovednosti a počká na úplnou odpověď.
 
@@ -59,11 +59,22 @@ curl -X POST http://localhost:20128/a2a \
     "method": "message/send",
     "params": {
       "skill": "smart-routing",
-      "messages": [{"role": "user", "content": "Napiš Hello World v Pythonu"}],
+      "messages": [{"role": "user", "content": "Write a hello world in Python"}],
       "metadata": {"model": "auto", "combo": "fast-coding"}
     }
   }'
 ```
+
+Pro `smart-routing` představuje `metadata.combo` explicitní přepsání hodnoty
+`metadata.model` pro požadavek brány; odesílá se jako skutečný `model`,
+nikoli jako ignorované pole JSON `x-combo`. Nadále se uplatňuje běžný klíč API brány
+a autorizace pro jednotlivé cíle. Neplatná nebo prázdná kombinace je odmítnuta.
+
+Výsledek obsahuje `requested_combo` (záměr volajícího), `dispatched_model`
+(skutečný požadavek brány), `response_model` (odpověď brány) a
+`confirmed_combo`. Poslední pole má hodnotu `null`, pokud brána kombinaci
+výslovně neidentifikuje. Protokoly rozhodování A2A přiřazují spuštění pouze
+potvrzené kombinaci a nepotvrzený požadavek uchovávají jako `requestedCombo`.
 
 **Odpověď:**
 
@@ -75,23 +86,16 @@ curl -X POST http://localhost:20128/a2a \
     "task": { "id": "uuid", "state": "completed" },
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
-      "routing_explanation": "Vybrán claude-sonnet prostřednictvím poskytovatele \"anthropic\" (latence: 1200ms, cena: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "v rámci limitů rozpočtu a kvóty"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Streamování SSE
 
-Stejné jako `message/send`, ale vrací události Server-Sent Events pro streamování v reálném čase.
+Funguje stejně jako `message/send`, ale vrací události Server-Sent Events pro streamování v reálném čase.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -111,7 +115,7 @@ curl -N -X POST http://localhost:20128/a2a \
     "method": "message/stream",
     "params": {
       "skill": "smart-routing",
-      "messages": [{"role": "user", "content": "Vysvětli kvantové výpočty"}]
+      "messages": [{"role": "user", "content": "Explain quantum computing"}]
     }
   }'
 ```
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Zjištění stavu úlohy
+### `tasks/get` — Dotaz na stav úlohy
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -150,29 +154,29 @@ curl -X POST http://localhost:20128/a2a \
 
 OmniRoute zpřístupňuje 6 dovedností A2A zapojených v `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Každý modul dovednosti se nachází v `src/lib/a2a/skills/`.
 
-| Dovednost                | ID                   | Popis                                                                                                                                                                    | Štítky                          | Příklady                                |
-| :----------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :-------------------------------------- |
-| Chytré směrování         | `smart-routing`      | Směruje výzvu přes optimálního poskytovatele nebo kombinaci pomocí kombinačního enginu a hodnocení OmniRoute                                                             | směrování, poskytovatelé        | "Směruj tuto výzvu přes nejlepší model" |
-| Správa kvót              | `quota-management`   | Hlásí stav kvóty jednotlivých poskytovatelů a pomáhá volajícím rozhodnout, kdy omezit provoz nebo přepnout                                                               | kvóty, poskytovatelé            | "Zkontroluj kvótu pro anthropic"        |
-| Zjišťování poskytovatelů | `provider-discovery` | Vypisuje nainstalované poskytovatele včetně jejich funkcí, příznaků bezplatné úrovně a stavu OAuth                                                                       | poskytovatelé, zjišťování       | "Kteří poskytovatelé jsou k dispozici?" |
-| Analýza nákladů          | `cost-analysis`      | Odhaduje náklady na požadavek nebo konverzaci podle katalogu a nedávného využití                                                                                         | náklady, využití                | "Odhadni náklady na tuto konverzaci"    |
-| Přehled stavu            | `health-report`      | Agreguje stav jističe, čekací doby a uzamčení pro jednotlivé poskytovatele                                                                                               | stav, odolnost                  | "Zobraz stav všech poskytovatelů"       |
-| Výpis funkcí             | `list-capabilities`  | Vrací kompletní katalog 45 dovedností agenta (23 API + 21 CLI + 1 konfigurace) jako tabulku markdown s nezpracovanými adresami URL souborů SKILL.md pro vložení kontextu | katalog, zjišťování, dovednosti | "Vypiš všechny funkce OmniRoute"        |
+| Dovednost          | ID                   | Popis                                                                                                                                                    | Štítky                     | Příklady                                    |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------ |
+| Smart Routing      | `smart-routing`      | Směruje prompt přes optimálního poskytovatele/kombinaci pomocí combo enginu OmniRoute + skórování                                                        | routing, providers         | "Nasměruj tento prompt přes nejlepší model" |
+| Quota Management   | `quota-management`   | Hlásí stav kvót jednotlivých poskytovatelů a pomáhá volajícím rozhodnout, kdy omezit/přepnout                                                            | quota, providers           | "Zkontroluj kvótu pro anthropic"            |
+| Provider Discovery | `provider-discovery` | Vypisuje nainstalované poskytovatele s jejich schopnostmi, příznaky free-tier a stavem OAuth                                                             | providers, discovery       | "Jací poskytovatelé jsou k dispozici?"      |
+| Cost Analysis      | `cost-analysis`      | Odhaduje náklady požadavku/konverzace na základě katalogu + nedávného využití                                                                            | cost, usage                | "Odhadni náklady této konverzace"           |
+| Health Report      | `health-report`      | Agreguje stav circuit breakeru, cooldownu a zablokování pro jednotlivé poskytovatele                                                                     | health, resilience         | "Zobraz stav všech poskytovatelů"           |
+| List Capabilities  | `list-capabilities`  | Vrací kompletní katalog Agent Skills se 45 položkami (23 API + 21 CLI + 1 config) jako markdown tabulku s raw URL adresami SKILL.md pro vložení kontextu | catalog, discovery, skills | "Vypiš všechny schopnosti OmniRoute"        |
 
-> Karta agenta by měla zůstat v souladu s aktuálním katalogem 352 poskytovatelů; počty poskytovatelů a metadata o bezplatném přístupu bez ověření pocházejí z registru za běhu.
+> Agent Card by měl být udržován v souladu s živým katalogem 375 poskytovatelů; počty poskytovatelů a metadata free/no-auth pocházejí z běhového registru.
 
-### Podrobnosti o dovednosti `list-capabilities`
+### Podrobnosti dovednosti `list-capabilities`
 
-Dovednost `list-capabilities` je obzvláště užitečná pro externí agenty, kteří potřebují před odesláním volání API zjistit, co OmniRoute zpřístupňuje. Vrací artefakt ve formě strukturované tabulky markdown:
+Dovednost `list-capabilities` je obzvláště užitečná pro externí agenty, kteří potřebují před odesláním volání API zjistit, co OmniRoute zpřístupňuje. Vrací artefakt ve formě strukturované markdown tabulky:
 
 ```
-| ID | Název | Kategorie | Oblast | Koncové body/příkazy | Nezpracovaná adresa URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Ověřování a relace | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Každý řádek obsahuje sloupec `rawUrl`, aby agenti mohli okamžitě načíst celý soubor SKILL.md. Pole `metadata.totalSkills` odpovídá velikosti katalogu (dnes 45). Implementace: `src/lib/a2a/skills/listCapabilities.ts`. Viz také [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Každý řádek obsahuje sloupec `rawUrl`, takže agenti mohou okamžitě stáhnout celý soubor SKILL.md. Pole `metadata.totalSkills` odráží velikost katalogu (dnes 45). Implementace: `src/lib/a2a/skills/listCapabilities.ts`. Viz také [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

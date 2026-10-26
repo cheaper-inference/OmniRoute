@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "{count, plural, one {# தொகுப்பு} other {# தொகுப்புகள்}}",
     "batchFilePreview": "முன்காட்சி",
     "batchFilePreviewTruncated": "முதல் {shown} வரிகளை காட்டு ({total} மொத்த வரிகள்)",
-    "batchFileDownloadFull": "முழு கோப்பை பதிவிறக்கம் செய்க"
+    "batchFileDownloadFull": "முழு கோப்பை பதிவிறக்கம் செய்க",
+    "dialogTitleFallback": "உரையாடல் பெட்டி",
+    "pagination": "பக்கப் பிரிப்பு",
+    "clearFilters": "வடிப்பான்களை அழி",
+    "tokensPageTitle": "டோக்கன்கள்",
+    "tokensPageDescription": "API விசைகளுக்கு இடையே டோக்கன்களை அனுப்பவும், அழைப்புக் குறியீடுகளைப் பகிரவும், சமூக சேவையகங்களை இணைக்கவும்.",
+    "tokensServerUrlLabel": "சேவையக URL"
   },
   "disabled": "முடக்கப்பட்டது",
   "featureFlagOmnirouteEmergencyFallbackDescription": "பட்ஜெட் தீர்ந்த கோரிக்கைகளை அவசரகால இலவச ஃபால்பேக் வழங்குநர்/மாடலுக்கு வழிசெலுத்துங்கள்.",
@@ -1017,6 +1023,15 @@
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "OMNIROUTE_BATCH_RETENTION_DAYS-ஐ விடப் பழைய, இறுதி நிலையை அடைந்த (completed/failed/cancelled/expired) Batch API பணிகளையும், அவற்றின் ஒவ்வொரு வரிக்குமான checkpoints-ஐயும் தானியங்குச் சுத்தப்படுத்தல் நீக்க அனுமதிக்கவும்; மேலும், தங்களின் expires_at-ஐக் கடந்த பதிவேற்றப்பட்ட கோப்புகளின் BLOB உள்ளடக்கத்தை அழிக்கவும். இயல்பாக முடக்கப்பட்டுள்ளது: ஒரு நிர்வாகி இதைத் தேர்வுசெய்து இயக்கும் வரை, ஏற்கனவே உள்ள ஒவ்வொரு நிறுவலும் இந்தத் தரவை முன்பு போலவே வைத்திருக்கும். நிர்வாகியால் தூண்டப்படும் DELETE /api/v1/batches/delete-completed வழித்தடம் எந்த நிலையிலும் பாதிக்கப்படாது — அது ஒரு தனியான, நிபந்தனையற்ற பொது API ஒப்பந்தமாகும்.",
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "நிலையான static seed-ஐப் பயன்படுத்துவதற்குப் பதிலாக, OAuth bearer token-ஐப் பயன்படுத்தி https://api.x.ai/v1/models இலிருந்து xai-oauth இணைப்புகளுக்கான நிகழ்நேர xAI மாதிரிப் பட்டியலைப் பெறவும். இயல்பாக முடக்கப்பட்டுள்ளது: xai-oauth மாற்றமின்றி static seed-ஐத் தொடர்ந்து வழங்கும். தீர்மானிப்பதில் ஏதேனும் பிழை ஏற்பட்டால், கண்டறிதல் seed-ஐ மாற்றாகப் பயன்படுத்தும்.",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "சேவையகம் கோரிக்கைகளை ஏற்கத் தொடங்கிய பிறகு, தொடக்கநிலை தரவுத்தள ஒருமைப்பாடு/நலச் சோதனையை இயக்கவும்; அது முடியும் வரை தொடக்கத்தைத் தடுக்க வேண்டாம். இயல்பாக முடக்கப்பட்டுள்ளது: இந்த மாற்றத்திற்கு முன்பு போலவே, தொடக்கநிலை சோதனை முடியும் வரை தொடக்கம் தடுக்கப்படும்; எனவே சேதமடைந்த தரவுத்தளம் முதல் கோரிக்கை வழங்கப்படுவதற்கு முன்பே கண்டறியப்படும்.",
+  "featureFlagCatalogMirrorRefinementsEnabledDescription": "/v1/models-இல் claude/ கண்டறிதல் மற்றும் functional-gateway பிரதிபலிப்புகளைச் செம்மைப்படுத்தவும். இயல்பாக முடக்கப்பட்டிருக்கும்: இரண்டு பிரதிபலிப்பு செயல்முறைகளும் முன்பு போலவே செயல்படும். இயக்கப்பட்டிருக்கும்போது: claude/ கண்டறிதல் பிரதிபலிப்புகள் பட்டியலிடப்பட்ட reasoning-effort மாறுபாடுகளையும் (-low/-medium/-high/-xhigh) உள்ளடக்கும்; கோரிக்கைப் பாதையால் உருவாக்க முடியாத உள்ளமைக்கப்பட்ட auto/* ID-களைத் தவிர்க்கும் மற்றும் ஏற்கனவே பட்டியலிடப்பட்ட மாற்றுப்பெயரைத் தவிர்க்கும்; functional-gateway பிரதிபலிப்புகள் சேர்க்கைகளையும் OmniRoute உருவாக்கிய ID-களையும் (claude/, no-think/) தவிர்க்கும், owned_by-இலிருந்து உரிமையாளரைப் பெறும், உரிமையாளரையே அதன் சொந்த gateway-ஆக ஒருபோதும் பயன்படுத்தாது, blockedProviders-இல் முடக்கப்பட்ட gateway-களையும் ஒரு gateway-இன் அதிகாரப்பூர்வ நேரடி பட்டியலுக்கு வெளியே உள்ள models-ஐயும் தவிர்க்கும்.",
+  "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "வெளிப்படையான registry endpoint இல்லாத OpenCode Zen மற்றும் OpenCode Go models, தங்களின் request surface-ஐ ( @ai-sdk/openai-க்கு Responses, @ai-sdk/anthropic-க்கு Messages) வெளியிடப்பட்ட models.opencode.ai catalog-இலிருந்து பெற அனுமதிக்கவும்; அது ஒவ்வொரு 6 மணிநேரத்திற்கும் பின்னணியில் வாசிக்கப்படும். இயல்பாக இது முடக்கப்பட்டிருக்கும்: முன்பு இருந்ததைப் போலவே endpoint, registry heuristics-இலிருந்து பெறப்படும்; catalog ஒருபோதும் பெறப்படாது.",
+  "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go கோரிக்கைகளில் OpenCode v2 CLI கிளையன்ட் கைரேகையை அனுப்பவும்: opencode/latest/<2.x>/cli User-Agent மற்றும் x-opencode-client cli; இலவச அடுக்குக் கோரிக்கைகளில் v2 அமர்வு தலைப்புகள், v2 CLI read/shell கருவித் திட்டவடிவங்கள் ஆகியவற்றை அனுப்பி, tool_choice \"none\" என்பதை அனுப்ப வேண்டாம். இயல்பாக முடக்கப்பட்டிருக்கும்: ஒவ்வொரு OpenCode கோரிக்கையும் தற்போதைய அடையாளம், தலைப்புகள் மற்றும் உடலை மாற்றமின்றி வைத்திருக்கும்.",
+  "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "கருவி அழைப்பு முன்-வடிகட்டி இயங்குவதற்கு முன்பே ஓர் ஆட்டோ காம்போவின் பரிந்துரைக்கப்பட்ட இலக்குகளின் தொகுப்பு காலியாக இருந்தால் (cooldown-கள், lockout-கள் அல்லது வரம்புத் தீர்வு காரணமாக ஒவ்வொரு இலக்கும் தவிர்க்கப்பட்டிருந்தால்), பழைய 400 \"No target supports tool calling\" capability_mismatch என்பதற்குப் பதிலாக 503 no_eligible_targets எனப் பதிலளிக்கவும். இயல்பாக இது முடக்கப்பட்டிருக்கும்: தொகுப்பு காலியாக இருக்கும்போது பழைய 400 பதிலே தொடரும்.",
+  "featureFlagModelEndpointCapabilityGateEnabledDescription": "நம்பகமான மாதிரி முனைப்புள்ளிக் குறிச்சொற்களை (வழங்குநர் பட்டியலால் அறிவிக்கப்பட்டவை, சிறப்பு மாதிரி id-இலிருந்து ஊகிக்கப்பட்டவை, அல்லது இயக்குநரால் அமைக்கப்பட்டவை) கட்டாயப்படுத்தவும்: /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations மற்றும் /v1/audio/* ஆகியவற்றில் மாதிரி சேவை வழங்காத முனைப்புள்ளிக்கு அனுப்பப்படும் கோரிக்கையை அனுப்புவதற்கு முன் HTTP 400 உடன் நிராகரிக்கவும்; குறியிடப்பட்ட முனைப்புள்ளிகளுக்கு OmniRoute adapter இல்லாத மாதிரிகளை /v1/models இலிருந்து மறைக்கவும்; அத்தகைய மாதிரிகளுக்கான dashboard மாதிரிச் சோதனைக்கு 422 எனப் பதிலளிக்கவும். இயல்பாக முடக்கப்பட்டுள்ளது: முனைப்புள்ளிக் குறிச்சொற்கள் தகவலுக்காக மட்டுமே இருக்கும், மேலும் கோரிக்கைகள் முன்பைப் போலவே அனுப்பப்படும்.",
+  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "சாதாரண anthropic-இணக்கமான ரிலேக்களில், உரையாடலின் நடுவே வரும் system turn-களை மேல்நிலை system prompt-க்கு நகர்த்துவதற்குப் பதிலாக message பட்டியலுக்குள்ளேயே வைத்திருங்கள்; இதனால் தற்காலிகச் சேமிப்பில் உள்ள prompt முன்னொட்டு ஒவ்வொரு turn-லும் நிலையாக இருக்கும். கிளையன்ட் தானே mid-conversation-system-2026-04-07 beta-வை அனுப்பியிருக்கும்போது மட்டுமே இது பொருந்தும். இயல்பாக இது முடக்கப்பட்டிருக்கும்: அந்த beta இல்லாத ரிலேக்கள் message பட்டியலிலுள்ள system turn-களை நிராகரிப்பதால், முன்பு இருந்ததைப் போலவே ஒவ்வொரு system turn-மும் system prompt-க்கு நகர்த்தப்படும்.",
+  "featureFlagModelsDevEffortTiersEnabledDescription": "ஆபரேட்டர் மேலெழுதலோ வழங்குநர் பதிவகத்தின் அறிவிப்போ இல்லாதபோது models.dev வெளியிடும் பகுத்தறிவு முயற்சி அடுக்குகளைப் பயன்படுத்தவும்; அறியப்பட்ட முயற்சி நிலைகளை மட்டும் வைத்துக்கொண்டு, காலியான அறிவிக்கப்பட்ட அடுக்குப் பட்டியலை \"அடுக்குகள் இல்லை\" எனக் கருதவும். இயல்பாக முடக்கப்பட்டிருக்கும்: மாதிரி பட்டியலும் தீர்மானிக்கப்பட்ட முயற்சி அடுக்குகளும் முன்பிருந்ததைப் போலவே இருக்கும்.",
+  "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* கோரிக்கைகள், தீர்க்கப்பட்ட மாடல் திறன்கள் (விஷன், ரீசனிங், திங்கிங்) மற்றும் கவனிக்கப்பட்ட தர மதிப்பெண்களுடன், ஒரே மொத்த வாசிப்பில், வேட்பாளர் தொகுப்பை உருவாக்க அனுமதிக்கிறது. இயல்பாக முடக்கப்பட்டுள்ளது: கோரிக்கை நேர வேட்பாளர் எடைகள் முன்பு இருந்தபடியே இருக்கும். இயக்கப்பட்டால்: இந்தச் சமிக்ஞைகள் ஸ்னாப்ஷாட் எடைகளில் சேர்கின்றன, எனவே வேட்பாளர் எடைகளும் தேர்வும் மாறலாம்.",
+  "featureFlagCredentialHealthRetestAutoDisabledDescription": "நற்சான்று நிலை ஆய்வு, நுழைவாயில் தானாகவே முடக்கிய இணைப்புகளை மீண்டும் சோதிக்கவும் (ஒவ்வொன்றையும் அதிகபட்சம் 6 மணிநேரத்திற்கு ஒருமுறை, ஓர் ஆய்வுக்கு 5 இணைப்புகள்), மறுசோதனையில் தேர்ச்சி பெறும் இணைப்பை மீண்டும் இயக்கவும் அனுமதிக்கவும். இயல்பாக இது முடக்கப்பட்டிருக்கும்: ஓர் இயக்குநர் நடவடிக்கை எடுக்கும் வரை அத்தகைய இணைப்புகள் முடக்கப்பட்ட நிலையிலேயே இருக்கும். இயக்குநரால் முடக்கப்பட்ட மற்றும் நிரந்தரமாகத் தடைசெய்யப்பட்ட இணைப்புகள் ஒருபோதும் மீண்டும் சோதிக்கப்படாது.",
   "sidebar": {
     "home": "முகப்பு",
     "dashboard": "கட்டுப்பாட்டுப் பலகம்",
@@ -1476,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 அல்லது @channelname",
       "chatIdHint": "சாட்/சேனலின் தனித்துவமான எண் அடையாளங்காட்டி அல்லது பொதுப் பயனர் பெயர்.",
       "tutorial": "Telegram வெப்ஹூக்கை எவ்வாறு கட்டமைப்பது:"
-    }
+    },
+    "copy": "நகலெடு",
+    "copied": "நகலெடுக்கப்பட்டது!",
+    "expandDetails": "விவரங்களைக் காட்டு",
+    "collapseDetails": "விவரங்களை மறை"
   },
   "compliance": {
     "auditTitle": "தணிக்கை",
@@ -1588,7 +1607,8 @@
     "mcpMetricCalls24h": "அழைப்புகள் (24மா)",
     "mcpMetricSuccessRate": "வெற்றி வீதம்",
     "mcpMetricAvgDuration": "சராசரி காலம்",
-    "mcpMetricTopTool": "மேலான கருவி"
+    "mcpMetricTopTool": "மேலான கருவி",
+    "dismissError": "பிழையை நிராகரி"
   },
   "themesPage": {
     "title": "தீம்கள்",
@@ -1704,7 +1724,9 @@
     "settingsAdvancedDescription": "மேம்பட்ட பேலோடு விதிகள், கோரிக்கை வரம்புகள் மற்றும் ப்ராக்ஸி API அமைப்புகள்",
     "mitmProxyDescription": "போக்குவரத்து ஆய்வு மற்றும் பிழைத்திருத்தத்திற்கான MITM ப்ராக்ஸி அமைப்புகளை உள்ளமைக்கவும்",
     "oneProxyDescription": "மேம்பட்ட ப்ராக்ஸி சங்கிலியிடலுக்கான 1Proxy அமைப்புகளை உள்ளமைக்கவும்",
-    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்"
+    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்",
+    "openMenu": "பட்டியைத் திற",
+    "products": "Keak தயாரிப்புகள்"
   },
   "cloudSyncStatus": {
     "synced": "ஒத்திசைக்கப்பட்டது",
@@ -2470,6 +2492,9 @@
     "emptyFilterClear": "வடிப்பான்களை அழி",
     "disableNonPublicModels": "பொதுவில் இல்லாத மாடல்களை முடக்கு",
     "disableNonPublicModelsDesc": "வழங்குநர் பட்டியலில் கண்டறியப்படாத அல்லது பொதுவானதாகக் குறிக்கப்படாத மாடல்களுக்கான கோரிக்கைகளை நிராகரி",
+    "forcedModel": "கட்டாய மாதிரி",
+    "forcedModelDesc": "இந்த விசையுடன் செய்யப்படும் ஒவ்வொரு அரட்டை கோரிக்கையையும், கிளையன்ட் எந்த மாதிரியைக் கேட்டாலும் (அல்லது எதையும் அனுப்பாவிட்டாலும்), இந்த மாதிரி அல்லது காம்போவுக்கு அனுப்பவும். விசையின் மாதிரி, காம்போ மற்றும் பட்ஜெட் வரம்புகள் தொடர்ந்து பொருந்தும்.",
+    "forcedModelPlaceholder": "கட்டாயமில்லை: கிளையன்ட் கேட்கும் மாதிரியைப் பயன்படுத்தவும்",
     "normalKeysSection": "சாதாரண விசைகள்",
     "quotaKeysSection": "ஒதுக்கீட்டு விசைகள்",
     "bypassProviderQuota": "வழங்குநர் ஒதுக்கீட்டு வரம்புகளைத் தவிர்",
@@ -2483,7 +2508,12 @@
     "onlySelectedConnections": "தேர்ந்தெடுக்கப்பட்ட இணைப்புகள் மட்டும்",
     "selectAtLeastOneConnection": "குறைந்தது ஓர் இணைப்பையாவது தேர்ந்தெடுக்கவும் அல்லது அனைத்து இணைப்புகளும் என்பதைத் தேர்வுசெய்யவும்.",
     "allConnectionsDesc": "இந்த விசை செயலில் உள்ள எந்த இணைப்பையும் பயன்படுத்தலாம்.",
-    "restrictedToConnections": "{count, plural, one {# இணைப்புக்கு} other {# இணைப்புகளுக்கு}} வரையறுக்கப்பட்டுள்ளது."
+    "restrictedToConnections": "{count, plural, one {# இணைப்புக்கு} other {# இணைப்புகளுக்கு}} வரையறுக்கப்பட்டுள்ளது.",
+    "preferredConnections": "விருப்ப இணைப்புகள்",
+    "preferredConnectionsDesc": "ஒவ்வொரு விசைக்குமான முன்னுரிமை வரிசை. விருப்ப இணைப்பு கிடைக்கவில்லை என்றால், ரூட்டிங் அடுத்த தகுதியான இணைப்புக்கு மாறும்.",
+    "preferredConnectionsNone": "எந்த விருப்பமும் அமைக்கப்படவில்லை — இயல்புநிலை ரூட்டிங் உத்தி பயன்படுத்தப்படுகிறது.",
+    "preferredConnectionsClear": "அழி",
+    "removeSelection": "{name} என்பதை அகற்று"
   },
   "auditLog": {
     "title": "தணிக்கைப் பதிவு",
@@ -2595,7 +2625,9 @@
     "imageToTextBridgeCta": "Modality Bridge அமைப்புகளில் Image→Text பாலத்தை கட்டமைக்கவும்",
     "sttBridgeCta": "Modality Bridge அமைப்புகளில் Speech→Text பாலத்தை அமைக்கவும்",
     "existingConnection": "இருக்கிற இணைப்பு",
-    "openrouterSttDescription": "OpenRouter பேச்சு-இலக்கணம் மாதிரிகள் உங்கள் கட்டமைக்கப்பட்ட OpenRouter இணைப்பைப் பயன்படுத்துகின்றன. தனித்துவமான அங்கீகாரம் தேவை இல்லை."
+    "openrouterSttDescription": "OpenRouter பேச்சு-இலக்கணம் மாதிரிகள் உங்கள் கட்டமைக்கப்பட்ட OpenRouter இணைப்பைப் பயன்படுத்துகின்றன. தனித்துவமான அங்கீகாரம் தேவை இல்லை.",
+    "modalityTabsAria": "ஊடக வகை",
+    "serviceKindsAria": "சேவை வகை"
   },
   "search": {
     "searchQuery": "தேடல் வினவல்",
@@ -3009,7 +3041,8 @@
       "prime-agent": "Prime Agent — OpenAI-இணக்கமான வழங்குநர் ஆதரவுடன் தன்னை மேம்படுத்திக்கொள்ளும் RLM குறியீட்டாக்கக் கட்டமைப்பு",
       "warp": "தனிப்பயன் வழங்குநர் ஆதரவுடன் கூடிய Warp AI டெர்மினல்",
       "agent-deck": "Agent Deck பல-முகவர் ஒருங்கிணைப்பாளர்",
-      "5dive": "5dive — சுய-ஹோஸ்ட் செய்யப்பட்ட குறியீட்டு முகவர்களின் கூட்டம்; ஒரு auth சுயவிவரம் அனைத்தையும் OmniRoute-க்கு திருப்புகிறது"
+      "5dive": "5dive — சுய-ஹோஸ்ட் செய்யப்பட்ட குறியீட்டு முகவர்களின் கூட்டம்; ஒரு auth சுயவிவரம் அனைத்தையும் OmniRoute-க்கு திருப்புகிறது",
+      "zed": "Zed குறியீட்டு எடிட்டர் — OpenAI-இணக்கமான வழங்குநர் மூலம் உள்ளமைந்த முகவர்"
     },
     "guides": {
       "cursor": {
@@ -3240,6 +3273,9 @@
     "copilotReloadInstruction": "பின்னர் VS Code-ஐ மீண்டும் ஏற்றி, உள்ளீட்டு வரியில் API விசையை அமைக்கவும்.",
     "wireApiChatCompletions": "அரட்டை நிறைவுகள் (/அரட்டை/நிறைவுகள்)",
     "wireApiResponses": "பதில்கள் API (/பதில்கள்)",
+    "codexModelCatalog": "Codex இன் /model தேர்வியில் OmniRoute மாதிரிகளைக் காட்டு",
+    "codexModelCatalogHint": "நிறுவப்பட்ட Codex இன் சொந்த மாதிரி அட்டவணையிலிருந்து ~/.codex/omniroute-models.json ஐ எழுதுகிறது (ஒரு மாதிரிக்குச் சுமார் 60 KB). Codex ஐ மேம்படுத்திய பின் மீண்டும் பயன்படுத்தவும்.",
+    "codexCatalogWarning": "Codex இன் /model தேர்வி புதுப்பிக்கப்படவில்லை: நிறுவப்பட்ட Codex மாதிரி அட்டவணையை OmniRoute ஆல் படிக்க முடியவில்லை.",
     "cliproxyapiActionFailed": "செயல் தோல்வியுற்றது",
     "cliproxyapiActionSucceeded": "செயல் வெற்றிகரமாக நிறைவுற்றது",
     "cliproxyapiCheckUpdates": "புதுப்பிப்புகளை சரிபார்க்கவும்",
@@ -3262,7 +3298,8 @@
     "cliproxyapiUnknown": "அறியப்படாதது",
     "cliproxyapiUpdate": "புதுப்பிக்கவும்",
     "cliproxyapiUpdateAvailable": "புதுப்பிப்பு கிடைக்கிறது: v{current} → v{latest}",
-    "cliproxyapiVersion": "பதிப்பு"
+    "cliproxyapiVersion": "பதிப்பு",
+    "removeMapping": "மேப்பிங்கை அகற்று"
   },
   "modelCatalog": {
     "title": "மாடல்கள் & காம்போக்கள்",
@@ -3384,6 +3421,10 @@
     "comboRefMember": "காம்போ → {name}"
   },
   "combos": {
+    "autoTosIncludeLabel": "ToS: avoid எனக் குறிக்கப்பட்ட வழங்குநர்களை auto-வில் சேர்க்கவும்",
+    "autoTosDescription": "இயல்பாக முடக்கப்பட்டுள்ளது. ஒரு கணக்குக்கு மட்டுமல்ல, அனைத்து auto கூட்டுகளுக்கும் பொருந்தும். வழங்குநரை இணைப்பதால் இந்தத் தேர்வு இயக்கப்படாது.",
+    "autoTosSaveError": "ToS கொள்கையைச் சேமிக்க முடியவில்லை. முந்தைய அமைப்பே இன்னும் காட்டப்படுகிறது. மீண்டும் முயலவும்.",
+    "autoTosLoadError": "ToS கொள்கையை ஏற்ற முடியவில்லை. மாற்றுவதற்கு முன் மீண்டும் முயலவும்.",
     "title": "காம்போக்கள்",
     "description": "எடையிட்ட வழிப்படுத்தல் மற்றும் மாற்று ஆதரவுடன் மாதிரி காம்போக்களை உருவாக்கவும்",
     "autoCatalogTitle": "தானாக ரூட்டிங் பட்டியல்",
@@ -3916,6 +3957,7 @@
     "builderComboRefStep": "Combo குறிப்பைச் சேர்க்கவும்",
     "builderPinnedAccount": "நிலையாகப் பொருத்தப்பட்ட கணக்கு",
     "builderLegacyEntry": "பழைய பதிவு",
+    "builderStaleModel": "நேரடி பட்டியலில் இல்லை",
     "reviewName": "பெயர்",
     "reviewStrategy": "உத்தி",
     "reviewSteps": "படிகள்",
@@ -3994,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "இந்த டெம்ப்ளேட்டுடன் பொருந்தும் தற்போதைய இணைக்கப்பட்ட வழங்குநர்கள்/மாதிரிகளை திருத்தக்கூடிய கம்போவில் எடுக்கும்.",
     "duplicateAutoComboFailedPrefix": "ஆட்டோகம்போ நகலெடுத்தல் தோல்வியடைந்தது:",
     "duplicateAutoComboUnknownError": "அறியப்படாத பிழை",
-    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்"
+    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்",
+    "weightPercent": "எடை (%)",
+    "clearSearch": "தேடலை அழி",
+    "responseValidationRemoveCheck": "சரிபார்ப்பை அகற்று",
+    "responseValidationPath": "JSON பாதை",
+    "responseValidationCondition": "நிபந்தனை",
+    "responseValidationValue": "எதிர்பார்க்கப்படும் மதிப்பு"
   },
   "costs": {
     "title": "செலவுகள்",
@@ -4090,6 +4138,9 @@
     "showingTopCostRows": "பொருந்தும் {total} வரிசைகளில் {shown} காட்டப்படுகிறது (முதல் 50)."
   },
   "endpoint": {
+    "cloudUploadDestination": "கிளவுட் ஒத்திசைவு இலக்கு (உள்ளூர் காப்புப்பிரதிகளுக்கானது அல்ல):",
+    "cloudUploadWarning": "புதிய நிறுவல்களில் கிளவுட் ஒத்திசைவு இயல்பாக முடக்கப்பட்டிருக்கும். அதை இயக்கினால் வழங்குநர்களின் API விசைகள், OAuth அணுகல் மற்றும் புதுப்பிப்பு டோக்கன்கள், OmniRoute API விசைகள் மற்றும் உள்ளமைவு மேலே உள்ள இலக்கிற்கு இப்போதும் எதிர்கால ஒத்திசைவுகளின்போதும் பதிவேற்றப்படும். இது சேமிப்பகத்தில் உள்ள உள்ளூர் காப்புப்பிரதிகளிலிருந்து தனியானது. அந்தச் சேவையகத்தை நம்பினால் மட்டுமே இதை இயக்கவும்.",
+    "cloudUploadConsent": "இதைப் புரிந்துகொண்டு எனது அங்கீகாரத் தகவல்களை இந்த இலக்கிற்குப் பதிவேற்ற அனுமதிக்கிறேன்.",
     "title": "API முனைப்புள்ளி",
     "subtitle": "பெரும்பாலான SDKs மற்றும் கருவிகளுடன் OpenAI-இணக்கமான முனைப்புள்ளியைப் பயன்படுத்துங்கள்.",
     "testEndpoint": "முனைப்புள்ளியைச் சோதிக்கவும் →",
@@ -5265,9 +5316,13 @@
         "skipped": "முன்னதாக கட்டமைக்கப்பட்டுள்ளது",
         "failed": "தோல்வி"
       }
-    }
+    },
+    "stepProgress": "அமைவு முன்னேற்றம்"
   },
   "providers": {
+    "tosAvoidNoticeTitle": "இந்த வழங்குநர் இயல்பாக auto-விலிருந்து விலக்கப்பட்டுள்ளார்",
+    "tosAvoidNoticeDescription": "இதன் ToS நிலை avoid எனக் குறிக்கப்பட்டுள்ளது. கணக்கை இணைப்பதால் இந்தக் கொள்கை மாறாது. அனைத்து auto கூட்டுகளுக்கும் பொதுவான தேர்வை இயக்குவதற்கு முன் வழங்குநரின் விதிமுறைகளைப் படிக்கவும்.",
+    "tosAvoidNoticeAction": "auto கொள்கையைப் பார்க்கவும்",
     "codexReleaseCooldown": "Clear local cooldown",
     "codexReleaseCooldownHint": "Allow this Codex account to be tried again. Does not redeem a reset credit or change upstream limits.",
     "codexReleasingCooldown": "Clearing…",
@@ -5359,6 +5414,12 @@
     "reorderByAvailabilityTitle": "கிடைக்கும் தன்மையின் அடிப்படையில் இணைப்புகளை மறுவரிசைப்படுத்தவும்",
     "reorderByAvailabilityError": "கிடைக்கும் தன்மையின் அடிப்படையில் இணைப்புகளை மறுவரிசைப்படுத்த முடியவில்லை",
     "distributeProxies": "ப்ராக்ஸிகளை விநியோகிக்கவும்",
+    "clearAccountProxies": "கணக்கு ப்ராக்ஸிகளை அகற்று",
+    "clearAccountProxyAssignments": "ஒதுக்கீடுகளை அகற்று",
+    "clearAccountProxiesConfirm": "இந்த வழங்குநரின் அனைத்து {count} கணக்குகளிலிருந்தும், முடக்கப்பட்ட கணக்குகள் உட்பட, தனிப்பட்ட ப்ராக்ஸி ஒதுக்கீடுகளை அகற்றவா? சேமிக்கப்பட்ட ப்ராக்ஸிகளும் வழங்குநர்/உலகளாவிய ஒதுக்கீடுகளும் பாதுகாக்கப்படும். கணக்குகள் வழங்குநர்/உலகளாவிய ப்ராக்ஸி அமைப்புகளை மீண்டும் பெறும்.",
+    "accountProxiesCleared": "கணக்கு ப்ராக்ஸி ஒதுக்கீடுகள் அகற்றப்பட்டன.",
+    "clearAccountProxiesPartial": "{count} கணக்கை(களை) முழுமையாக மீட்டமைக்க முடியவில்லை. காட்டப்படும் ஒதுக்கீடுகள் புதுப்பிக்கப்பட்டுள்ளன; நீங்கள் மீண்டும் முயற்சிக்கலாம்.",
+    "clearAccountProxiesError": "கணக்கு ப்ராக்ஸிகளை மீட்டமைக்கவோ அவற்றின் நிலையைப் புதுப்பிக்கவோ முடியவில்லை. மீண்டும் ஏற்றி, மீண்டும் முயற்சிக்கவும்.",
     "distributing": "விநியோகிக்கப்படுகிறது...",
     "selectedCount": "{count, plural, one {# தேர்ந்தெடுக்கப்பட்டது} other {# தேர்ந்தெடுக்கப்பட்டன}}",
     "accountsCount": "{count, plural, one {# கணக்கு} other {# கணக்குகள்}}",
@@ -5480,6 +5541,9 @@
     "baseUrlLabel": "அடிப்படை URL",
     "apiTypeLabel": "API வகை",
     "prefixHint": "தேவையானது. மாதிரிப் பெயர்களுக்கான தனித்துவமான முன்னொட்டு.",
+    "providerIdSuffixLabel": "வழங்குநர் ID பின்னொட்டு",
+    "providerIdSuffixHint": "விருப்பத்தேர்வு. சீரற்ற ID-க்குப் பதிலாக வழங்குநர் ID-யுடன் சேர்க்கப்படும் (எழுத்துகள், எண்கள், -, _ மற்றும் . மட்டும்). சீரற்ற ID-க்கு காலியாக விடவும். பின்னர் மாற்ற முடியாது.",
+    "providerIdConflict": "இந்த ID கொண்ட வழங்குநர் ஏற்கனவே உள்ளது. வேறு ID பின்னொட்டைத் தேர்ந்தெடுக்கவும்.",
     "nameHint": "அவசியம். இந்த நோடுக்கான எளிதில் புரியக்கூடிய பெயர்.",
     "baseUrlHint": "அவசியம். வழங்குநர் API அடிப்படை URL.",
     "iconUrlLabel": "சின்னத்தின் URL",
@@ -5561,6 +5625,10 @@
     "autoSyncTooltip": "இயல்பாக ஒவ்வொரு 6 மணிநேரத்திற்கும் மாடல் பட்டியலைத் தானாகப் புதுப்பிக்கும் (MODEL_SYNC_INTERVAL_HOURS மூலம் அமைக்கலாம்)",
     "autoSyncEnabled": "தானியங்கு ஒத்திசைவு இயக்கப்பட்டுள்ளது — மாடல்கள் அவ்வப்போது புதுப்பிக்கப்படும்",
     "autoSyncDisabled": "தானியங்கு ஒத்திசைவு முடக்கப்பட்டுள்ளது",
+    "autoSyncLastSynced": "{time} ஒத்திசைக்கப்பட்டது",
+    "autoSyncNeverSynced": "ஒருபோதும் ஒத்திசைக்கப்படவில்லை",
+    "autoSyncImmediateFailed": "தானியங்கு ஒத்திசைவு இயக்கப்பட்டது, ஆனால் மாடல்களை உடனடியாகப் புதுப்பிப்பது தோல்வியடைந்தது",
+    "autoSyncImmediatePartialFailure": "தானியங்கு ஒத்திசைவு இயக்கப்பட்டது, ஆனால் சில மாடல்களை உடனடியாகப் புதுப்பிப்பது தோல்வியடைந்தது",
     "autoSyncToggleFailed": "தானியங்கு ஒத்திசைவை மாற்ற முடியவில்லை",
     "autoSyncPartialFailure": "சில இணைப்புகளுக்குத் தானியங்கு ஒத்திசைவு புதுப்பிக்கப்பட்டது, ஆனால் அனைத்திற்கும் இல்லை",
     "clearAllModels": "அனைத்து மாடல்களையும் அழி",
@@ -5698,12 +5766,32 @@
     "perKeyProxyEnabledTitle": "இந்த வழங்குநருக்கு ஒரு கீக்கான ப்ராக்ஸி ஒதுக்கீடு இயக்கப்பட்டுள்ளது",
     "perKeyProxyDisabledTitle": "இந்த வழங்குநருக்கு ஒரு கீக்கான ப்ராக்ஸி ஒதுக்கீடு முடக்கப்பட்டுள்ளது",
     "autoPriority": "Auto: {priority}",
+    "copyConnectionId": "இணைப்பு ID-ஐ நகலெடுக்கவும். கோரிக்கையை இந்தக் கணக்கில் பின் செய்ய அதை {header} கோரிக்கை தலைப்பில் அனுப்பவும்.",
+    "connectionIdCopied": "நகலெடுக்கப்பட்டது",
+    "connectionPinTip": "உதவிக்குறிப்பு: ஒரு கோரிக்கையை ஒரு கணக்கில் பின் செய்ய, அதன் இணைப்பு ID-ஐ {header} கோரிக்கை தலைப்பில் அனுப்பவும் (நகலெடுக்க இணைப்பின் ID சிப்பைக் கிளிக் செய்யவும்). பின் செய்யப்பட்ட கணக்கு மட்டுமே பயன்படுத்தப்படும்; அது கூல்டவுனில் இருக்கும்போது அல்லது ஒதுக்கீடு தீர்ந்தபோது, கோரிக்கைகள் மற்ற கணக்குகளுக்குச் செல்லும்.",
     "proxy": "Proxy",
     "retestAuthentication": "அங்கீகாரத்தை மீண்டும் சோதிக்கவும்",
     "retest": "மீண்டும் சோதிக்கவும்",
+    "pingNow": {
+      "label": "இப்போது பிங் செய்",
+      "title": "இந்தக் கணக்கின் ஒதுக்கீட்டு சாளரம் தொடங்க இப்போது ஒரு சிறிய கோரிக்கையை அனுப்பவும். ஒதுக்கீட்டைப் பயன்படுத்தும்; Auto-Ping-ஐ மாற்றாது.",
+      "completed": "பிங் முடிந்தது.",
+      "busy": "இந்தக் கணக்கிற்கு ஏற்கனவே ஒரு பிங் நடைபெறுகிறது.",
+      "inactive": "பிங் செய்வதற்கு முன் இந்தக் கணக்கைச் செயல்படுத்தவும்.",
+      "unavailable": "கணக்கு அல்லது வழங்குநர் இப்போது கிடைக்கவில்லை; கோரிக்கை எதுவும் அனுப்பப்படவில்லை.",
+      "noModel": "பிங் மாதிரி எதுவும் கிடைக்கவில்லை; கோரிக்கை எதுவும் அனுப்பப்படவில்லை.",
+      "authFailed": "அங்கீகாரம் தோல்வியடைந்தது. இந்தக் கணக்கை மீண்டும் இணைக்கவும்.",
+      "quotaUnavailable": "ஒதுக்கீடு கிடைக்கவில்லை; கோரிக்கை எதுவும் அனுப்பப்படவில்லை.",
+      "quotaExhausted": "ஒதுக்கீடு தீர்ந்துவிட்டது; கோரிக்கை எதுவும் அனுப்பப்படவில்லை.",
+      "notCompleted": "வழங்குநர் பிங்கை முடிக்கவில்லை.",
+      "timeout": "பிங் நேரம் முடிந்தது; இருப்பினும் அது சென்றடைந்திருக்கலாம். மீண்டும் முயலும் முன் ஒதுக்கீட்டைச் சரிபார்க்கவும்.",
+      "failed": "பிங் தோல்வியடைந்தது."
+    },
     "disableConnection": "இணைப்பை முடக்கவும்",
     "enableConnection": "இணைப்பை இயக்கவும்",
     "reauthenticateConnection": "இந்த இணைப்பை மீண்டும் அங்கீகரிக்கவும்",
+    "verifyAccount": "கணக்கைச் சரிபார்க்கவும்",
+    "verifyAccountHint": "இந்தக் கணக்கைச் சரிபார்க்க Google கேட்கிறது. இணைப்பைத் திறந்து, சரிபார்ப்பை முடித்து, மீண்டும் முயலவும்.",
     "proxyConfig": "பதிலி உள்ளமைவு",
     "aliasExistsAlert": "\"{alias}\" என்ற மாற்றுப்பெயர் ஏற்கனவே உள்ளது. வேறொரு மாதிரியைப் பயன்படுத்தவும் அல்லது ஏற்கனவே உள்ள மாற்றுப்பெயரைத் திருத்தவும்.",
     "aliasInputPlaceholder": "மாற்றுப்பெயர்",
@@ -5732,10 +5820,13 @@
     "targetFormatAuto": "இயல்புநிலை (தானியங்கி)",
     "targetFormatGemini": "Gemini",
     "targetFormatAntigravity": "Antigravity",
+    "maxOutputTokenOverrideLabel": "அதிகபட்ச வெளியீட்டு டோக்கன்கள்",
+    "maxOutputTokenOverrideHint": "நேர்மறை முழு எண் டோக்கன்களை உள்ளிடவும். இயல்புநிலை மதிப்பிற்கு காலியாக விடவும்.",
     "contextWindowOverrideLabel": "சூழல் சாளர மேலெழுதல்",
     "contextWindowOverridePlaceholder": "எ.கா. 131072",
     "contextWindowOverrideHint": "வழங்குநர் தவறாகப் புகாரளிக்கும் போது, இந்த மாடலின் உண்மையான சூழல் சாளரத்தை (டோக்கன்கள்) கைமுறையாக அமைக்கவும். இது தானாகக் கண்டறியப்பட்ட/கேட்டலாக் மதிப்புகளை விட முன்னுரிமை பெறும் மற்றும் காம்போ ரூட்டிங் மாடலை கைவிடுவதைத் தடுக்கும்.",
     "contextWindowOverrideInvalid": "சூழல் சாளர மேலெழுதல் என்பது டோக்கன்களின் நேர்மறை முழு எண்ணாக இருக்க வேண்டும்",
+    "maxOutputTokenOverrideInvalid": "அதிகபட்ச வெளியீட்டு டோக்கன்கள் மேலெழுதல் என்பது டோக்கன்களின் நேர்மறை முழு எண்ணாக இருக்க வேண்டும்",
     "visionCapableLabel": "பார்வைத் திறன் கொண்டது",
     "visionCapableHint": "வழங்குநரின் கண்டுபிடிப்பு மெட்டாடேட்டா பட உள்ளீட்டு முறையைப் புகாரளிக்காதபோது (சுயமாக ஹோஸ்ட் செய்யப்பட்ட/உள்ளூர் பின்தளங்களுக்குப் பொதுவானது), இந்த மாடலை பார்வைத் திறன் கொண்டதாக கைமுறையாகக் குறிக்கவும்.",
     "compatParamFiltersLabel": "அளவுரு வடிகட்டிகள்",
@@ -6179,6 +6270,16 @@
     "supportedEndpointEmbeddings": "Supported Endpoint Embeddings",
     "supportedEndpointImages": "Supported Endpoint Images",
     "supportedEndpointsLabel": "Supported Endpoints Label",
+    "endpointCapabilitiesEdit": "மாதிரி முனைப்புள்ளிகளைத் திருத்து",
+    "endpointCapabilitiesReset": "கண்டறியப்பட்டவற்றுக்கு மீட்டமை",
+    "endpointCapabilitiesDefaulted": "கருதப்பட்டது",
+    "endpointCapabilitiesDeclared": "அறிவிக்கப்பட்டது",
+    "endpointCapabilitiesInferred": "ஊகிக்கப்பட்டது",
+    "endpointCapabilitiesOperator": "கைமுறை",
+    "endpointCapabilitiesSave": "முனைப்புள்ளிகளைச் சேமி",
+    "endpointCapabilitiesSaveFailed": "மாதிரி முனைப்புள்ளிகளைப் புதுப்பிக்க முடியவில்லை",
+    "endpointCapabilitiesResetFailed": "மாதிரி முனைப்புள்ளிகளை மீட்டமைக்க முடியவில்லை",
+    "endpointCapabilitiesNoAdapter": "இந்த முனைப்புள்ளிக்கான வழங்குநர் adapter இல்லை",
     "tagGroupHint": "குறிச்சொல் குழுக் குறிப்பு",
     "tagGroupLabel": "குறிச்சொல் குழு லேபிள்",
     "tagGroupPlaceholder": "குறிச்சொல் குழு இடநிரப்பி",
@@ -7087,6 +7188,8 @@
         "NEEDS_CORE_NOT_CONFIGURED": "இந்த சந்தாவில் உள்ளூர் proxy core (SS/VMess/Trojan/VLESS) தேவைப்படும் முனைகள் உள்ளன; நீங்கள் local-core SOCKS5 எண்ட்பாயிண்ட்டை உள்ளமைக்கும் வரை அவை வழிநடத்தப்படாது.",
         "NO_USABLE_NODES": "சந்தா பயன்படுத்தக்கூடிய முனைகள் எதையும் வழங்கவில்லை (http/https/socks5 அல்லது உள்ளூர் core எண்ட்பாயிண்ட் கொண்ட முனைகள்).",
         "SELECTOR_SWITCH_FAILED": "ப்ராக்ஸி-கோர் கட்டுப்பாட்டு அழைப்பு தோல்வியடைந்தது; முந்தைய வழி செயலில் உள்ளது. கட்டுப்பாட்டு URL மற்றும் ரகசியத்தைச் சரிபார்த்துப் புதுப்பிக்கவும்.",
+        "SELECTOR_EARLY_NO_CONTROL": "கட்டுப்பாட்டு URL இல்லை",
+        "SELECTOR_EARLY_UNMAPPED": "பொருந்தும் சந்தா இல்லை",
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "உருவாக்கப்பட்ட மூல கட்டமைப்பு ஏற்றுக்கொள்ளப்பட்ட கோப்பை மாற்ற இயலவில்லை; அதற்குப் பதிலாக அருகிலுள்ள நகலே வைக்கப்பட்டது.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
@@ -7118,6 +7221,7 @@
       "createSubscription": "சந்தாவை உருவாக்கவும்",
       "loading": "ஏற்றுகிறது…",
       "noSubscriptions": "இதுவரை சந்தாக்கள் இல்லை. தொடங்குவதற்கு \"சந்தாவைச் சேர்\" என்பதைக் கிளிக் செய்யவும்.",
+      "earlySkipsSinceRestart": "கடைசி மறுதொடக்கத்திலிருந்து தேர்வியின் தவிர்ப்புகள்",
       "statusOk": "சரி",
       "statusError": "பிழை",
       "statusEmpty": "காலி",
@@ -7180,7 +7284,7 @@
       "nextSwitchNow": "இப்போது",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -8108,6 +8212,9 @@
     "storageIntegrityCheck": "நேர்மை சோதனை",
     "storageIntegrityOk": "✓ சரி",
     "storageIntegrityError": "✗ பிழை",
+    "storageIntegrityLastCheck": "கடைசியாக சரிபார்க்கப்பட்டது {date}",
+    "storageIntegrityRunCheck": "ஒருமைப்பாட்டு சரிபார்ப்பை இயக்கவும்",
+    "storageIntegrityCheckFailed": "ஒருமைப்பாட்டு சரிபார்ப்பு தோல்வியடைந்தது",
     "storageUsageTokenBuffer": "பயன்பாட்டு டோக்கன் பஃபர்",
     "storageUsageTokenBufferDesc": "சிஸ்டம் பிராம்ப்ட் மேல்நிலைச் செலவைக் கணக்கிட, புகாரளிக்கப்பட்ட பயன்பாட்டுடன் கூடுதல் டோக்கன்கள் சேர்க்கப்படுகின்றன.",
     "storageUsageTokenBufferHint": "வழங்குநரின் அசல் டோக்கன் எண்ணிக்கையைப் புகாரளிக்க 0 என அமைக்கவும். இயல்புநிலை: 2000.",
@@ -8226,6 +8333,14 @@
       "terse-cjk": {
         "label": "சுருக்கமான CJK (文言)",
         "description": "செம்மொழி-சீன மிகச் சுருக்கமான நடை (சீன மொழிக்கு மட்டுமே கிடைக்கும்)."
+      },
+      "antislop-ui": {
+        "label": "Antislop UI வடிகட்டி",
+        "description": "நோக்கம் சோதிக்கப்பட்ட காட்சிகள்: பொதுவான கிரேடியன்ட்கள், டெம்ப்ளேட் தளவமைப்புகள் அல்லது செயலற்ற கட்டுப்பாடுகள் இல்லை."
+      },
+      "antislop-copy": {
+        "label": "Antislop உரை மற்றும் மனித வடிகட்டி",
+        "description": "நேர்மையான உரை மற்றும் மக்களுக்கான விதிகள்: AI அடையாளங்கள் இல்லை, WCAG AA மாறுபாடு, விசைப்பலகை, நிலைகள், மொபைல் மறுஒழுங்கு."
       }
     },
     "resilienceWaitForCooldown": "கூல்டவுனுக்காக காத்திருங்கள்",
@@ -8310,6 +8425,38 @@
     "codexAutoPingWarning": "ஒவ்வொரு பிங்கிலும் உண்மையான Codex ஒதுக்கீட்டில் ஒரு சிறிய அளவு பயன்படுத்தப்படும். இயல்பாக முடக்கப்பட்டுள்ளது — நீங்கள் செயலில் சார்ந்திருக்கும் இணைப்புகளுக்கு மட்டும் இயக்கவும்.",
     "codexAutoPingSaveError": "Codex தானியங்கி பிங் அமைப்பைப் புதுப்பிக்க முடியவில்லை",
     "codexAutoPingToggleAria": "{connection} இணைப்பிற்கான Codex ஒதுக்கீட்டுத் தானியங்கி பிங்கை மாற்று",
+    "codexWakeups": {
+      "title": "திட்டமிட்ட விழிப்பூட்டல்கள்",
+      "desc": "தேர்ந்தெடுத்த கணக்குகளுக்கு அட்டவணைப்படி பிங் அனுப்புகிறது, இதனால் அவற்றின் ஒதுக்கீட்டுச் சாளரம் நீங்கள் விரும்பும் நேரத்தில் தொடங்கும். ஒவ்வொரு இயக்கமும் சிறிது உண்மையான Codex ஒதுக்கீட்டைப் பயன்படுத்தும்.",
+      "name": "பெயர்",
+      "accounts": "கணக்குகள்",
+      "scheduleKind": "அட்டவணை",
+      "daily": "தினமும் குறிப்பிட்ட நேரத்தில்",
+      "interval": "ஒவ்வொரு N நிமிடத்திற்கும்",
+      "time": "நேரம்",
+      "timezone": "நேர மண்டலம்",
+      "days": "நாட்கள்",
+      "minutes": "நிமிடங்களில் இடைவெளி (5–10080)",
+      "add": "விழிப்பூட்டலைச் சேர்",
+      "runNow": "இப்போது இயக்கு",
+      "delete": "நீக்கு",
+      "toggleAria": "விழிப்பூட்டல் {name} ஐ இயக்கு",
+      "everyMinutes": "ஒவ்வொரு {minutes} நிமி.",
+      "dailyAt": "{days} {time} மணிக்கு ({timezone})",
+      "nextRun": "அடுத்த இயக்கம்: {time}",
+      "lastRun": "கடைசி இயக்கம்: {status}",
+      "saveError": "விழிப்பூட்டலைச் சேமிக்க முடியவில்லை. பெயர், கணக்குகள், அட்டவணையைச் சரிபார்க்கவும்.",
+      "actionError": "செயல் தோல்வியடைந்தது. சிறிது நேரத்தில் மீண்டும் முயலவும்.",
+      "runStarted": "இயக்கம் தொடங்கியது.",
+      "status": {
+        "running": "இயங்குகிறது",
+        "succeeded": "வெற்றி",
+        "failed": "தோல்வி",
+        "skipped": "தவிர்க்கப்பட்டது",
+        "partial": "பகுதி வெற்றி",
+        "interrupted": "இடைநிறுத்தப்பட்டது"
+      }
+    },
     "codexFastTierTierLabel": "சேவை அடுக்கு",
     "codexFastTierTierPriority": "முன்னுரிமை",
     "codexFastTierTierFlex": "ஃப்ளெக்ஸ்",
@@ -8681,6 +8828,7 @@
     "cliproxyapiPort": "போர்ட்",
     "qdrantHost": "விருந்தினர்",
     "qdrantCollection": "கலெக்ஷன்",
+    "catalogVisibilityHint": "மறைக்கப்பட்ட மாதிரி ID-களை அதே அணுகல் அனுமதிகளுடன் தொடர்ந்து அழைக்கலாம்.",
     "catalogScopeTitle": "Models API பட்டியல்",
     "catalogScopeDesc": "இந்த விசைக்காக GET /v1/models எவற்றை அறிவிக்கிறது. பட்டியலைக் குறைப்பது, இந்த விசை எவற்றை அழைக்க முடியும் என்பதை ஒருபோதும் மாற்றாது.",
     "catalogScopeAll": "இரண்டும்",
@@ -8787,7 +8935,53 @@
     "resilienceTokenRefreshScopeProvider": "வழங்குநர் (அனைத்து கணக்குகளும் ஒரே பிரேக்கரைப் பகிர்ந்துகொள்கின்றன)",
     "resilienceTokenRefreshScopeConnection": "இணைப்பு (ஒவ்வொரு கணக்கிற்கும் தனி பிரேக்கர் உள்ளது)",
     "resilienceTokenRefreshThreshold": "இடைநிறுத்துவதற்கு முன் தோல்விகள்",
-    "resilienceTokenRefreshCooldown": "தாவல் பின் இடைநிறுத்தம்"
+    "resilienceTokenRefreshCooldown": "தாவல் பின் இடைநிறுத்தம்",
+    "piiMasking": {
+      "title": "தனிப்பட்ட தரவு மறைப்பு",
+      "description": "எந்த வகை தனிப்பட்ட தரவு மறைக்கப்பட வேண்டும் என்பதைத் தேர்ந்தெடுத்து உங்கள் சொந்த வடிவங்களைச் சேர்க்கவும். கீழே காட்டப்படும் அம்சக் கொடிகளை இயக்கும் வரை மறைப்பு அணைந்தே இருக்கும்.",
+      "requestFlag": "கோரிக்கை மறைப்பு",
+      "responseFlag": "பதில் சுத்திகரிப்பு",
+      "templates": "வார்ப்புருக்கள்",
+      "template": {
+        "minimal": "குறைந்தபட்சம்",
+        "standard": "நிலையானது",
+        "financial": "நிதி",
+        "brazilian": "பிரேசில்",
+        "usa": "அமெரிக்கா",
+        "full": "முழுமை"
+      },
+      "builtinTypes": "உள்ளமைந்த வகைகள்",
+      "types": {
+        "email": "மின்னஞ்சல் முகவரிகள்",
+        "phone_us": "அமெரிக்கத் தொலைபேசி எண்கள்",
+        "phone_br": "பிரேசில் தொலைபேசி எண்கள்",
+        "ssn": "அமெரிக்க சமூகப் பாதுகாப்பு எண்கள்",
+        "credit_card": "கடன் அட்டை எண்கள்",
+        "cpf": "CPF (பிரேசில் வரி செலுத்துவோர் அடையாளம்)",
+        "cnpj": "CNPJ (பிரேசில் நிறுவன அடையாளம்)",
+        "ip_address": "IPv4 முகவரிகள்",
+        "ipv6_address": "IPv6 முகவரிகள்",
+        "aws_key": "AWS அணுகல் விசைகள்",
+        "api_key_generic": "API விசைகள் மற்றும் டோக்கன்கள்"
+      },
+      "customPatterns": "தனிப்பயன் வடிவங்கள்",
+      "customPatternsDesc": "பொருத்தங்கள் [CUSTOM_REDACTED] ஆக மாற்றப்படும். அதிகபட்சம் {max} வடிவங்கள். பேரழிவு பின்னோக்கித் தேடல் அபாயமுள்ள வடிவங்கள் நிராகரிக்கப்படும்.",
+      "typeRegex": "வழக்கமான வெளிப்பாடு",
+      "typeWildcard": "வைல்டுகார்டு (* மற்றும் ?)",
+      "pattern": "வடிவம்",
+      "flags": "கொடிகள் (i, m, s, u)",
+      "sampleText": "வடிவத்தைச் சோதிக்க மாதிரி உரை",
+      "test": "சோதி",
+      "testMatches": "{count} பொருத்தங்கள்",
+      "testFailed": "வடிவம் நிராகரிக்கப்பட்டது: {message}",
+      "add": "வடிவத்தைச் சேர்",
+      "saved": "சேமிக்கப்பட்டது",
+      "saveFailed": "சேமிக்க முடியவில்லை: {message}",
+      "statsTitle": "மறுதொடக்கத்திற்குப் பின் கண்டறிதல்கள்",
+      "statsEmpty": "இதுவரை கண்டறிதல்கள் இல்லை.",
+      "statsRequest": "கோரிக்கைகள்"
+    },
+    "modelOverrideKey": "மேலெழுதும் விசை"
   },
   "contextRtk": {
     "title": "RTK எஞ்சின்",
@@ -8871,7 +9065,8 @@
     "tomlTestPassed": "வெற்றிபெற்றது",
     "tomlTestFailed": "தோல்வியடைந்தது",
     "tomlImportError": "RTK TOML கோப்பை செயலாக்க முடியவில்லை.",
-    "tomlFileReadError": "தேர்ந்தெடுக்கப்பட்ட TOML கோப்பைப் படிக்க முடியவில்லை."
+    "tomlFileReadError": "தேர்ந்தெடுக்கப்பட்ட TOML கோப்பைப் படிக்க முடியவில்லை.",
+    "viewMode": "காட்சி முறை"
   },
   "compressionEngineConfig": {
     "loading": "ஏற்றுகிறது…",
@@ -9093,7 +9288,8 @@
     "languagePacksList": "மொழிப் பொதிகள்: {packs}",
     "dragToReorder": "படியை மறுவரிசைப்படுத்த இழுக்கவும்",
     "engine": "எஞ்சின்",
-    "intensity": "தீவிரம்"
+    "intensity": "தீவிரம்",
+    "compressionOverride": "சுருக்க மேலெழுதல்"
   },
   "compressionStudio": {
     "noRun": "சுருக்க இயக்கம் எதுவும் கிடைக்கவில்லை.",
@@ -9153,7 +9349,8 @@
     "encoderWinner": "வெற்றியாளர்: {winner}",
     "encoder": "என்கோடர்",
     "bytes": "பைட்டுகள்",
-    "tokensCl100k": "டோக்கன்கள் (cl100k)"
+    "tokensCl100k": "டோக்கன்கள் (cl100k)",
+    "studioViews": "Studio காட்சிகள்"
   },
   "omniglyph": {
     "preview": "முன்னோட்டம்",
@@ -9359,7 +9556,9 @@
     "tooltipMinLength": "இதை விட குறைவான செய்திகள் சுருக்கப்படாது. கீழ் = அதிக சுருக்கம்.",
     "tooltipMinSavings": "குறைந்தபட்சம் இத்தனை டோக்கன்களைச் சேமித்தால் மட்டுமே சுருக்கவும்.",
     "ultraSettings": "அல்ட்ரா அமைப்புகள்",
-    "ultraSettingsDesc": "SLM-இயங்கும் சொற்பொருள் சுருக்கம்"
+    "ultraSettingsDesc": "SLM-இயங்கும் சொற்பொருள் சுருக்கம்",
+    "defaultLanguage": "இயல்புநிலை மொழி",
+    "viewMode": "காட்சி முறை"
   },
   "translator": {
     "title": "மொழிபெயர்ப்பி",
@@ -9845,6 +10044,9 @@
     "hideQuotaRow": "இந்த ஒதுக்கீட்டு வரிசையை மறை",
     "showQuotaRow": "இந்த ஒதுக்கீட்டு வரிசையைக் காட்டு",
     "hiddenQuotaRowsLabel": "மறைக்கப்பட்டது:",
+    "quotaSpeedTitle": "இந்தக் கணக்கில் சமீபத்திய டிகோட் வேகம் (கடைசி {count} வெற்றிகரமான கோரிக்கைகள்)",
+    "quotaSpeedLine": "{model}: {avg} tok/s சராசரி · கடைசி {last} · TTFT {ttft}s (n={samples})",
+    "quotaSpeedLineNoTtft": "{model}: {avg} tok/s சராசரி · கடைசி {last} (n={samples})",
     "quotaVisibilityUpdateFailed": "ஒதுக்கீட்டுத் தெரிவுநிலையைப் புதுப்பிக்க முடியவில்லை",
     "account": "கணக்கு",
     "modelQuotas": "மாதிரி ஒதுக்கீடுகள்",
@@ -10124,7 +10326,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude வரம்பு மீட்டமைப்பு",
+    "confirmRedeemClaudeResetCredit": "மீட்பதன் மூலம் தகுதியுள்ள Claude பயன்பாட்டு வரம்புகள் உடனடியாக மீட்டமைக்கப்படும் மற்றும் இந்தக் கிரெடிட் நிரந்தரமாகப் பயன்படுத்தப்படும்.",
+    "claudeResetCreditsModalTitle": "Claude மீட்டமைப்பு கிரெடிட்கள்",
+    "claudeResetCreditsModalExplainer": "இந்தக் கணக்கிற்குக் கிடைக்கும் Claude மீட்டமைப்பு கிரெடிட்கள் மற்றும் வாராந்திர அமர்வு மீட்டமைப்புகள்."
   },
   "modals": {
     "waitingAuth": "அங்கீகாரத்திற்காகக் காத்திருக்கிறது",
@@ -10911,7 +11117,8 @@
       "message": "செய்தி",
       "error": "பிழை",
       "completion": "நிறைவு"
-    }
+    },
+    "statusFilter": "நிலை"
   },
   "templateNames": {
     "simple-chat": "எளிய அரட்டை",
@@ -11092,7 +11299,8 @@
     "minutesAgo": "{minutes}m முன்",
     "hoursAgo": "{hours}h முன்",
     "daysAgo": "{days}d முன்",
-    "entries": "பதிவுகள்"
+    "entries": "பதிவுகள்",
+    "viewSwitcherAria": "தற்காலிகச் சேமிப்பகக் காட்சி"
   },
   "proxyConfigModal": {
     "levelGlobal": "உலகளாவிய",
@@ -11359,7 +11567,7 @@
     "bulkImportNoValidEntries": "சரியான உள்ளீடுகள் எதுவும் இல்லை. வடிவமைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
     "bulkImportSuccess": "இறக்குமதி முடிந்தது: {created} உருவாக்கப்பட்டது, {updated} புதுப்பிக்கப்பட்டது, {failed} தோல்வியடைந்தது",
     "bulkImportErrorLine": "வரி {line}: {reason}",
-    "bulkImportMaxExceeded": "ஒரு இறக்குமதிக்கு அதிகபட்சம் 100 ப்ராக்ஸிகள்",
+    "bulkImportMaxExceeded": "ஒரு இறக்குமதிக்கு அதிகபட்சம் {max} ப்ராக்ஸிகள்",
     "bulkImportPreview": "முன்னோட்டம்",
     "clearAssignment": "(தெளிவான பணி)",
     "bulkProxyAssignment": "மொத்த ப்ராக்ஸி ஒதுக்கீடு",
@@ -11420,6 +11628,7 @@
     "poolSetAsideKindIpQuota429": "IP விகித வரம்பு (429)",
     "poolSetAsideKindSlow": "மெதுவான பதில்கள்",
     "poolSetAsideKindGeoBlocked": "பகுதி தடைசெய்யப்பட்டது (403/451)",
+    "poolSetAsideKindOperatorReported": "ஆபரேட்டர் புகாரளித்த செயலிழப்பு",
     "poolSetAsideUntil": "சுழற்சிக்கு திரும்பு {endsAt}",
     "poolSetAsideRepeat": "ஒதுக்கி வைக்கப்பட்டது {count, plural, one {# முறை} other {# முறை}}",
     "poolUnknownAddress": "தெரியாத முகவரி",
@@ -11436,7 +11645,8 @@
     "notMeasured": "அளவிடப்படவில்லை",
     "upstream4xx": "{count} மேல்நிலை கிளையண்ட் பிழைகள்",
     "upstream5xx": "{count} மேல்நிலை சர்வர் பிழைகள்",
-    "uniformEgressLine": "{provider} இல் {exits} வெளியேற்றங்களில் {affected} ஒன்றாகத் தோல்வியடைகின்றன (கடந்த {hours} மணிநேரம்) — வெளியேற்றப் பிரச்சினை அல்ல"
+    "uniformEgressLine": "{provider} இல் {exits} வெளியேற்றங்களில் {affected} ஒன்றாகத் தோல்வியடைகின்றன (கடந்த {hours} மணிநேரம்) — வெளியேற்றப் பிரச்சினை அல்ல",
+    "moreActions": "மேலும் செயல்கள்"
   },
   "playground": {
     "title": "மாதிரி சோதனைக்களம்",
@@ -11642,7 +11852,8 @@
       "nextButton": "அடுத்து",
       "runButton": "இயக்கு",
       "promptPlaceholder": "உங்கள் செய்தியை உள்ளிடவும்… (அனுப்ப Enter, புதிய வரிக்காக Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground முறைகள்"
   },
   "miniPlayground": {
     "endpoint": "இறுதிப்புள்ளி",
@@ -11713,7 +11924,8 @@
     "assistant": "உதவியாளர்",
     "errorLabel": "பிழை",
     "requestFailed": "கோரிக்கை தோல்வியடைந்தது",
-    "stop": "நிறுத்து"
+    "stop": "நிறுத்து",
+    "messageInputAria": "செய்தி"
   },
   "requestLogger": {
     "recording": "பதிவுசெய்கிறது",
@@ -11900,8 +12112,18 @@
       "resilienceRotations": "{count} கணக்கு சுழற்சிகள்",
       "resilienceRetried": "வெற்று முறை மீண்டும் முயற்சிக்கப்பட்டது",
       "resilienceContinued": "ஸ்ட்ரீமின் நடுவில் தொடரப்பட்டது",
-      "resilienceRecovered": "மீள்தன்மை செயலால் மீட்கப்பட்டது"
-    }
+      "resilienceRecovered": "மீள்தன்மை செயலால் மீட்கப்பட்டது",
+      "conversationContext": "உரையாடல் சூழல்",
+      "goToBottom": "கீழே செல்",
+      "liveRefreshOn": "நேரடிப் புதுப்பிப்பு: இயக்கத்தில்",
+      "liveRefreshOff": "நேரடிப் புதுப்பிப்பு: முடக்கப்பட்டுள்ளது",
+      "liveRefresh": "நேரடிப் புதுப்பிப்பு",
+      "continuesFromParent": "பெற்றோரிலிருந்து தொடர்கிறது",
+      "continuesFrom": "{id} இலிருந்து தொடர்கிறது",
+      "viewConversation": "உரையாடலைக் காண்க",
+      "openConversation": "{id} உரையாடலைத் திறக்கவும்"
+    },
+    "tableLabel": "கோரிக்கைப் பதிவுகள்"
   },
   "proxyLogger": {
     "filterAll": "அனைத்தும்",
@@ -11946,7 +12168,9 @@
     "colServedBy": "சேவையளிக்கப்படுகிறது",
     "filterTraffic": "போக்குவரத்து",
     "filterTests": "சோதனைகள்",
-    "filterSource": "மூலம்"
+    "filterSource": "மூலம்",
+    "tableLabel": "பதிலாள் பதிவுகள்",
+    "sortLogs": "பதிவுகளை வரிசைப்படுத்துக"
   },
   "endpointOptions": {
     "speech": "பேச்சு",
@@ -12031,7 +12255,8 @@
     "statusExhausted": "தீர்ந்துவிட்டது",
     "statusAlerting": "எச்சரிக்கை நிலையில்",
     "statusError": "பிழை",
-    "moreSuffix": "+{count} கூடுதல்"
+    "moreSuffix": "+{count} கூடுதல்",
+    "feedFilterLabel": "நிகழ்வுகளை வடிகட்டுக"
   },
   "quotaShare": {
     "weightPercent": "எடை %",
@@ -12198,7 +12423,10 @@
     "ungroupedTitle": "குழுப்படுத்தப்படாதவை",
     "ungroupedHint": "இந்தப் பூல்கள் அறியப்பட்ட எந்தக் குழுவிலும் ஒதுக்கப்படவில்லை. ஒரு பூலை உண்மையான குழுவிற்கு நகர்த்த அதைத் திருத்தவும்.",
     "removeFailed": "இந்தத் தொகுப்பை அகற்ற முடியவில்லை.",
-    "dismiss": "மூடு"
+    "dismiss": "மூடு",
+    "allocationsHeading": "ஒதுக்கீடுகள்",
+    "wizardRemoveDimension": "பரிமாணத்தை அகற்றுக",
+    "wizardRemoveKey": "விசையை அகற்றுக"
   },
   "plugins": {
     "title": "செருகுநிரல்கள்",
@@ -12356,7 +12584,8 @@
       "settingsUpdateFailed": "அமைப்புகள் புதுப்பிப்பு தோல்வியடைந்தது",
       "serviceRevealApiKey": "{actor} {target}-க்கான API விசையை வெளிப்படுத்தினார்",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "பிழையை நிராகரிக்கவும்"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12489,7 +12718,21 @@
       "goNow": "இப்போது செல்",
       "message": "MITM Proxy இப்போது AgentBridge-இன் கீழ் உள்ளது.",
       "title": "இந்தப் பக்கம் மாற்றப்பட்டுள்ளது"
-    }
+    },
+    "dnsOn": "DNS இயக்கத்தில் உள்ளது",
+    "dnsOff": "DNS முடக்கப்பட்டுள்ளது",
+    "showServerSettings": "சேவையக அமைப்புகளைக் காட்டுக",
+    "hideServerSettings": "சேவையக அமைப்புகளை மறைக்கவும்",
+    "upstreamCaTesting": "சோதிக்கப்படுகிறது…",
+    "removeMapping": "மேப்பிங்கை அகற்றுக",
+    "mappingSourcePlaceholder": "எ.கா., gemini-3.6-flash-medium, அல்லது மேப்பிங் செய்யப்படாத அனைத்திற்கும் *",
+    "mappingWildcardHint": "வெளிப்படையான மேப்பிங் இல்லாத ஒவ்வொரு மாடலையும் OmniRoute வழியாகத் தேர்ந்தெடுக்கப்பட்ட இலக்கிற்கு அனுப்ப, மூலமாக *-ஐப் பயன்படுத்தவும். துல்லியமான மூலப் பொருத்தங்கள் எப்போதும் *-ஐ விட முன்னுரிமை பெறும்.",
+    "wizardDetectingModels": "இடைமறிக்கப்பட்ட போக்குவரத்திலிருந்து மாடல்கள் கண்டறியப்படுகின்றன...",
+    "wizardDetectedModels": "இடைமறிக்கப்பட்ட போக்குவரத்தில் {count, plural, one {# மாடல்} other {# மாடல்கள்}} கண்டறியப்பட்டன. நீங்கள் சேர்க்க விரும்புவனவற்றைத் தேர்ந்தெடுக்கவும்:",
+    "wizardSelectedModels": "{count, plural, one {# மாடல்} other {# மாடல்கள்}} தேர்ந்தெடுக்கப்பட்டன. அடுத்த திரையில் அவற்றை OmniRoute மாடல்களுடன் மேப்பிங் செய்வீர்கள்.",
+    "wizardAddModels": "{count, plural, one {# மாடலை} other {# மாடல்களை}} சேர்க்கவும்",
+    "wizardNoModelsDetected": "இதுவரை எந்த மாடலும் கண்டறியப்படவில்லை. ஒரு கோரிக்கையைச் செய்ய {agent}-ஐப் பயன்படுத்தி, பின்னர் போக்குவரத்திலிருந்து மாடல்களைத் தானாகக் கண்டறிய இந்த வழிகாட்டியை மீண்டும் இயக்கவும்.",
+    "wizardNoModelsHint": "அல்லது இந்த வழிகாட்டியை மூடிவிட்டு, முகவர் அட்டையில் மேப்பிங்குகளை கைமுறையாகச் சேர்க்கவும்."
   },
   "providerStats": {
     "unknownError": "தெரியாத பிழை",
@@ -12519,7 +12762,11 @@
     "avgTtft": "சராசரி TTFT",
     "avgTotal": "சராசரி மொத்தம்",
     "requestTelemetry": "கோரிக்கை டெலிமெட்ரி",
-    "requestTelemetryDescription": "7-கட்ட பைப்லைன் விவரப்பிரிப்பு (கடைசி 5 நிமிடங்கள்)"
+    "requestTelemetryDescription": "7-கட்ட பைப்லைன் விவரப்பிரிப்பு (கடைசி 5 நிமிடங்கள்)",
+    "title": "வழங்குநர் புள்ளிவிவரங்கள்",
+    "description": "ஒவ்வொரு வழங்குநர் மற்றும் மாடலுக்குமான போக்குவரத்து, தாமதம் மற்றும் வெற்றி விகிதங்கள்",
+    "combo": "சேர்க்கை",
+    "toggleModels": "{provider} மாடல்களைக் காட்டுக"
   },
   "relay": {
     "title": "சர்வர்லெஸ் ரிலே ப்ராக்ஸிகள்",
@@ -12680,7 +12927,18 @@
     "noRequestBody": "கோரிக்கை உடல் இல்லை.",
     "noResponseBody": "பதில் உடல் இல்லை.",
     "formatted": "வடிவமைக்கப்பட்டது",
-    "raw": "மூல"
+    "raw": "மூல",
+    "requestCount": "{count, plural, one {# கோரிக்கை} other {# கோரிக்கைகள்}}",
+    "expandList": "பட்டியலை விரிவாக்குக",
+    "collapseList": "பட்டியலைச் சுருக்குக",
+    "snippetLanguage": "குறியீட்டுத் துணுக்கின் மொழி",
+    "headersTable": "தலைப்புகள்",
+    "showSecrets": "இரகசியங்களைக் காட்டுக",
+    "maskSecrets": "இரகசியங்களை மறைக்கவும்",
+    "llmNotAvailable": "இந்தக் கோரிக்கைக்கான LLM மெட்டாடேட்டா கிடைக்கவில்லை.",
+    "llmStreamYes": "ஆம் (SSE)",
+    "llmStreamNo": "இல்லை",
+    "llmTotalTokens": "மொத்தம்: {count} டோக்கன்கள்"
   },
   "cliCommon": {
     "companion": {
@@ -13139,7 +13397,8 @@
     "colReliabilityHelp": "கடந்த 24 மணிநேரத்தில் இந்த வழங்குநர் உண்மையில் பதிலளித்த அழைப்புகளின் விகிதம். கோடு காட்டப்பட்டால், விகிதத்தைக் குறிப்பிட முடியாத அளவிற்கு மிகக் குறைந்த போக்குவரத்தையே அது கையாண்டது என்று பொருள்.",
     "reliabilitySample": "கடந்த {hours} மணிநேரத்தில் {requests} அழைப்புகளில் {successes} வெற்றிபெற்றன",
     "reliabilityTooFew": "கடந்த {hours} மணிநேரத்தில் {requests} அழைப்புகள் மட்டுமே — விகிதத்தைக் குறிப்பிடப் போதுமானவை அல்ல",
-    "reliabilityNoTraffic": "கடந்த 24 மணிநேரத்தில் அழைப்புகள் எதுவும் பதிவாகவில்லை"
+    "reliabilityNoTraffic": "கடந்த 24 மணிநேரத்தில் அழைப்புகள் எதுவும் பதிவாகவில்லை",
+    "categoryFilter": "பணி வகை"
   },
   "discovery": {
     "title": "வழங்குநர் கண்டறிதல்",
@@ -13164,7 +13423,11 @@
     "method": "முறை",
     "auth": "அங்கீகாரம்",
     "feasibility": "சாத்தியக்கூறு",
-    "models": "மாதிரிகள்"
+    "models": "மாதிரிகள்",
+    "provider": "வழங்குநர்",
+    "status": "நிலை",
+    "endpoint": "முனைப்புள்ளி",
+    "actions": "செயல்கள்"
   },
   "noAuthProvider": {
     "title": "அங்கீகாரம் தேவையில்லை",
@@ -13213,7 +13476,8 @@
     "ownProxy": "சொந்த ப்ராக்ஸி",
     "freeTierPause": "மாதிரி {model} இடைநிறுத்தப்பட்டது (429), {time} அன்று மீண்டும்",
     "freeTierPauseProvider": "இடைநிறுத்தப்பட்டது (429), {time} அன்று மீண்டும்",
-    "freeTierPauseNote": "இந்த நிகழ்வில் செயல்முறை இடையே இடைநிறுத்தம்"
+    "freeTierPauseNote": "இந்த நிகழ்வில் செயல்முறை இடையே இடைநிறுத்தம்",
+    "proxyType": "பதிலாள் வகை"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13386,7 +13650,10 @@
         "description": "ஒரு மறைக்கப்பட்ட சாதனை காத்திருக்கிறது...",
         "criteria": "இந்த பேட்ஜை வெளிப்படுத்த மறைக்கப்பட்ட சாதனையை முடிக்கவும்."
       }
-    }
+    },
+    "leaderboardTitle": "தரவரிசைப் பட்டியல்",
+    "leaderboardDescription": "உங்கள் API விசைகள் அனைத்திற்குமான தரவரிசைகள் மற்றும் சாதனைகள்",
+    "badgeLocked": "பூட்டப்பட்டது"
   },
   "featureFlags": {
     "title": "அம்சக் கொடிகள்",
@@ -13681,7 +13948,8 @@
     "unknown": "தெரியாதது",
     "unknownProvider": "தெரியாத வழங்குநர்",
     "unknownModel": "தெரியாத மாதிரி",
-    "resolvedTargetMetrics": "{requests} req · {success} வெற்றி · {latency} · ஒதுக்கீடு {quota}"
+    "resolvedTargetMetrics": "{requests} req · {success} வெற்றி · {latency} · ஒதுக்கீடு {quota}",
+    "timeRange": "கால வரம்பு"
   },
   "usageLimits": {
     "usdUsageQuota": "USD பயன்பாட்டு ஒதுக்கீடு",
@@ -13828,7 +14096,11 @@
     "learnMore": "மேலும் அறிய",
     "changelogLoadFailed": "மாற்றங்களின் பதிவை ஏற்ற முடியவில்லை. பின்னர் மீண்டும் முயற்சிக்கவும்.",
     "retry": "மீண்டும் முயற்சி செய்",
-    "viewFullHistory": "GitHub இல் முழு வரலாற்றையும் காண்க"
+    "viewFullHistory": "GitHub இல் முழு வரலாற்றையும் காண்க",
+    "title": "செய்திகள் & மாற்றப் பதிவு",
+    "description": "OmniRoute குழுவின் அறிவிப்புகள் மற்றும் சமீபத்திய வெளியீட்டுக் குறிப்புகள்",
+    "viewLabel": "காண்க",
+    "loadingNews": "அறிவிப்புகள் ஏற்றப்படுகின்றன..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14230,7 +14502,8 @@
       "never": "-",
       "failureCount": "தோல்வி எண்ணிக்கை",
       "retryAfterMs": "பின் மீண்டும் முயற்சி (ms)",
-      "lastFailureKind": "கடைசி தோல்வி வகை"
+      "lastFailureKind": "கடைசி தோல்வி வகை",
+      "lastClose": "கடைசி மூடல் விலை"
     },
     "empty": {
       "title": "இணைப்புகள் இல்லை",
@@ -14378,7 +14651,9 @@
       "circuitBreakerState": "சேவையாளர் சுற்று முறிவு மாநிலம்",
       "lastUpdate": "கடைசி புதுப்பிப்பு: {timestamp}",
       "uptimeMinutes": "{minutes}மி",
-      "uptimeHoursMinutes": "{hours}மணி {minutes}நிமிடம்"
+      "uptimeHoursMinutes": "{hours}மணி {minutes}நிமிடம்",
+      "breakerClosed": "மூடப்பட்டது",
+      "breakerNotClosed": "திறந்துள்ளது அல்லது பகுதியளவு திறந்துள்ளது"
     },
     "statusPages": {
       "400": {
@@ -14453,6 +14728,9 @@
         "primaryAction": "பராமரிப்பு விவரங்கள்",
         "secondaryAction": "அமைப்பு நிலை"
       }
+    },
+    "miniapp": {
+      "askAnything": "எதையும் கேளுங்கள்…"
     }
   },
   "kiroAuthModal": {
@@ -14486,7 +14764,10 @@
     "importing": "இறக்குமதி செய்கிறேன்...",
     "apiKeyPlaceholder": "உங்கள் {providerLabel} API விசையை ஒட்டவும்...",
     "apiKeyStoredDescription": "நீண்டகாலம் வாழும் பேயர் அங்கீகாரமாக காப்பு செய்யப்பட்ட குறியாக்கம். புதுப்பிப்பு ஓட்டம் இல்லை.",
-    "apiKeyRegionDescription": "கீக்கான AWS பகுதி (இயல்புநிலை: us-east-1)",
+    "apiKeyRegionAuto": "தானாகக் கண்டறி (பரிந்துரைக்கப்படுகிறது)",
+    "apiKeyRegionUsEast1": "யுஎஸ் ஈஸ்ட் (வடக்கு வர்ஜீனியா)",
+    "apiKeyRegionEuCentral1": "ஐரோப்பா (பிராங்க்பர்ட்)",
+    "apiKeyRegionAutoDescription": "தானியங்கு கண்டறிதல் முதலில் யுஎஸ் ஈஸ்ட், பின்னர் ஐரோப்பா (பிராங்க்பர்ட்) ஆகியவற்றை முயற்சித்து, விசை செயல்படும் பிராந்தியத்தைச் சேமிக்கிறது.",
     "validating": "சரிபார்க்கப்படுகிறது...",
     "validateAndSaveApiKey": "சரிபார்க்கவும் மற்றும் API விசையை சேமிக்கவும்",
     "errorAutoDetect": "கோடியை தானாக கண்டறிய முடியவில்லை",
@@ -14546,7 +14827,10 @@
     "distributeProxies": {
       "distributing": "வகுக்கிறது...",
       "complete": "முடித்தது",
-      "defaultLabel": "பிராக்ஸிகளை பகிரவும்"
+      "defaultLabel": "பிராக்ஸிகளை பகிரவும்",
+      "confirmMessage": "இந்தக் குழுவிலுள்ள ஒவ்வொரு கணக்கிற்கும் சேமிக்கப்பட்ட ப்ராக்ஸிகளை ஒதுக்கவா? இது ஏற்கனவே உள்ள கணக்கு ஒதுக்கீடுகளை மாற்றி, முடக்கப்பட்ட கணக்குகள் உட்பட அனைத்திற்கும் ப்ராக்ஸி வழிச்செலுத்தலை இயக்கும்.",
+      "confirmDistribute": "ப்ராக்ஸிகளைப் பகிர்ந்தளி",
+      "cancel": "ரத்துசெய்"
     }
   },
   "providerTest": {
@@ -14637,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} காணக்கூடியவை / மொத்தம் {total}",
+    "modeLabel": "காட்சி முறை",
+    "jumpToNow": "தற்போதைய நேரத்திற்குச் செல்லவும்; NOW கோடு {position}% நிலைக்கு மீட்டமைக்கப்படும்",
+    "laneReuse": "வரிசை மறுபயன்பாடு",
+    "laneReuseLabel": "வரிசை மறுபயன்பாட்டுச் சாளரம் (நிமிடங்கள்)",
+    "laneReuseHint": "ஒரே உரையாடல் id-ஐப் பகிரும் கோரிக்கைகளுக்கு இடையிலான இடைவெளி இத்தனை நிமிடங்களுக்குள் இருந்தால், அவை ஒரே காலவரிசை வரிசையில் இருக்கும்.",
+    "laneReuseUnit": "நிமி",
+    "autoRefresh": "தானாகப் புதுப்பித்தல்",
+    "autoRefreshLabel": "தானாகப் புதுப்பிக்கும் இடைவெளி (விநாடிகள்)",
+    "autoRefreshHint": "சேவையகத்திலிருந்து கோரிக்கைப் பட்டியலைக் காலவரிசை எவ்வளவு அடிக்கடி மீண்டும் பெறும்.",
+    "autoRefreshUnit": "வி",
+    "zoomOut": "சிறிதாக்கு",
+    "zoomIn": "பெரிதாக்கு"
   },
   "metadata": {
     "compressionTitle": "சுருக்கம்",
@@ -14862,5 +15159,43 @@
     "saveMessage": "செய்தியைச் சேமிக்கவும்",
     "defaultModel": "இயல்புநிலை சோதனை மாடல்",
     "defaultModelHint": "இந்தக் கணக்கிற்கான செய்தியைச் சோதிக்கும் பொத்தான்களால் தானாகப் பயன்படுத்தப்படும். இணைப்புடன் சேமிக்கப்படும்; எந்தச் செய்தியும் அனுப்பப்படாது."
+  },
+  "providerTransfer": {
+    "open": "தேர்ந்தெடுத்த இடமாற்றம்",
+    "title": "வழங்குநர்களின் தேர்ந்தெடுத்த இடமாற்றம்",
+    "description": "தேர்ந்தெடுத்த வழங்குநர் கணக்குகளை (அவை பயன்படுத்தும் தனிப்பயன் வழங்குநர் முனைகளையும்) வேறொரு OmniRoute நிறுவலுக்கு நகர்த்துங்கள். கோப்பு ஒரு கடவுச்சொற்றொடரால் முத்திரையிடப்படுகிறது, இறக்குமதி எதையும் ஒருபோதும் நீக்காது.",
+    "exportTab": "ஏற்றுமதி",
+    "importTab": "இறக்குமதி",
+    "searchPlaceholder": "கணக்குகளைத் தேடு…",
+    "selectAll": "அனைத்தையும் தேர்ந்தெடு",
+    "clearSelection": "அழி",
+    "selectedCount": "{count} தேர்ந்தெடுக்கப்பட்டன",
+    "noAccounts": "பொருந்தும் வழங்குநர் கணக்குகள் இல்லை.",
+    "loadFailed": "வழங்குநர் கணக்குகளை ஏற்ற முடியவில்லை.",
+    "passphrase": "கடவுச்சொற்றொடர்",
+    "passphraseConfirm": "கடவுச்சொற்றொடரை உறுதிப்படுத்து",
+    "passphraseHint": "குறைந்தது {min} எழுத்துகள். இது ஒருபோதும் சேமிக்கப்படாது; இது இல்லாமல் கோப்பைத் திறக்க முடியாது.",
+    "passphraseMismatch": "கடவுச்சொற்றொடர்கள் பொருந்தவில்லை.",
+    "oauthWarning": "புதுப்பிப்பு டோக்கனை மாற்றும் OAuth கணக்குகள், மற்ற நிறுவல் அவற்றைப் புதுப்பித்ததும் ஒரு நிறுவலில் வேலை செய்வதை நிறுத்தலாம்.",
+    "acknowledge": "இந்தக் கோப்பில் தேர்ந்தெடுத்த கணக்குகளின் API விசைகளும் டோக்கன்களும் இந்தக் கடவுச்சொற்றொடரால் முத்திரையிடப்பட்டு உள்ளன என்பதை நான் புரிந்துகொள்கிறேன்.",
+    "exportButton": "தேர்ந்தெடுத்தவற்றை ஏற்றுமதி செய்",
+    "exportDone": "{count} கணக்குகள் ஏற்றுமதி செய்யப்பட்டன.",
+    "exportFailed": "ஏற்றுமதி தோல்வியடைந்தது.",
+    "chooseFile": "இடமாற்றக் கோப்பைத் தேர்ந்தெடு",
+    "invalidFile": "இது OmniRoute வழங்குநர் இடமாற்றக் கோப்பு அல்ல.",
+    "previewButton": "முன்னோட்டம்",
+    "previewFailed": "இடமாற்றக் கோப்பைப் படிக்க முடியவில்லை.",
+    "summary": "இந்தக் கோப்பில் {connections} கணக்குகளும் {nodes} வழங்குநர் முனைகளும் உள்ளன. எதுவும் நீக்கப்படாது.",
+    "statusNew": "புதியது",
+    "statusIdentical": "ஒன்றே",
+    "statusConflict": "முரண்பாடு",
+    "statusUnsupported": "ஆதரவில்லை",
+    "actionAdd": "சேர்",
+    "actionSkip": "தவிர்",
+    "actionReplace": "மாற்று",
+    "providerNode": "வழங்குநர் முனை",
+    "importButton": "இறக்குமதி செய்",
+    "importFailed": "இறக்குமதி தோல்வியடைந்தது.",
+    "importSuccess": "{connections} கணக்குகளும் {nodes} வழங்குநர் முனைகளும் இறக்குமதி செய்யப்பட்டன; {skipped} தவிர்க்கப்பட்டன."
   }
 }

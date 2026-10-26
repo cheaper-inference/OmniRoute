@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 // ExclusionsPanel (#8034) — per-model/endpoint compression exclusion filter.
 //
 // Lets the operator name model ids / `provider/model` patterns that must never be
@@ -79,13 +81,8 @@ export default function ExclusionsPanel() {
     >
       <div className="flex flex-col gap-3">
         {loadError !== null && (
-          <p
-            role="alert"
-            className="flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400"
-          >
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              error
-            </span>
+          <p role="alert" className="flex items-center gap-1 text-xs font-medium text-error">
+            <Icon name="error" size={14} />
             {t("failedLoadWithStatus", { status: loadError || t("unknownError") })}
           </p>
         )}
@@ -95,6 +92,7 @@ export default function ExclusionsPanel() {
           disabled={locked}
           placeholder={t("compressionExclusionsPlaceholder")}
           onChange={(e) => setRaw(e.target.value)}
+          aria-label={t("compressionExclusionsTitle")}
           data-testid="compression-exclusions-textarea"
         />
         <div className="flex items-center justify-between gap-3">
@@ -106,17 +104,12 @@ export default function ExclusionsPanel() {
                 : t("compressionExclusionsCount", { count: patterns.length }))}
           </span>
           <div className="flex items-center gap-2">
-            <span role="status" className="text-xs text-emerald-600 dark:text-emerald-400">
+            <span role="status" className="text-xs text-success">
               {status === "saved" && t("compressionExclusionsSaved")}
             </span>
             {status === "error" && (
-              <span
-                role="alert"
-                className="flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400"
-              >
-                <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                  error
-                </span>
+              <span role="alert" className="flex items-center gap-1 text-xs font-medium text-error">
+                <Icon name="error" size={14} />
                 {t("saveFailed")}
               </span>
             )}

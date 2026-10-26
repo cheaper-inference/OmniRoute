@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  containsSensitiveErrorCredential,
+  redactSensitiveErrorText,
   sanitizeErrorMessage,
   sanitizeUpstreamDetails,
 } from "../../open-sse/utils/errorSanitization.ts";
@@ -107,6 +109,9 @@ test("sanitizeErrorMessage covers the canonical credential pattern catalog", () 
     // STRONG_CREDENTIAL_TOKEN fallback, so they reached error bodies verbatim.
     `gsk_${"A".repeat(52)}`,
     `xai-${"A".repeat(80)}`,
+    // House access tokens (`oma_live_` + 43 base64url chars) had no catalog
+    // entry either and reached error bodies verbatim.
+    `oma_live_${"A".repeat(43)}`,
   ];
 
   for (const credential of credentials) {
@@ -114,6 +119,100 @@ test("sanitizeErrorMessage covers the canonical credential pattern catalog", () 
     assert.equal(projected.includes(credential), false, credential.slice(0, 16));
     assert.match(projected, /\[REDACTED(?::[^\]]+)?\]/);
   }
+});
+
+// House access tokens (`oma_live_` + base64url) had no catalog entry and no
+// strong-token fallback, so they reached error bodies verbatim. The sanitizer
+// stamps the generic `[REDACTED]` label (catalog names are dropped on this
+// path); the guardrail keeps the specific `[REDACTED:oma]` label.
+const OMA_SANITIZER_TOKEN = `oma_live_${"A".repeat(43)}`;
+
+test("sanitizeErrorMessage masks house tokens on every detection path", () => {
+  for (const input of [
+    `upstream echoed ${OMA_SANITIZER_TOKEN}`,
+    `request failed for key ${OMA_SANITIZER_TOKEN} on model foo`,
+  ]) {
+    const viaMessage = sanitizeErrorMessage(input);
+    assert.equal(viaMessage.includes(OMA_SANITIZER_TOKEN), false, input);
+    assert.match(viaMessage, /\[REDACTED/);
+
+    const viaText = redactSensitiveErrorText(input);
+    assert.equal(viaText.includes(OMA_SANITIZER_TOKEN), false, input);
+    assert.match(viaText, /\[REDACTED/);
+
+    assert.equal(containsSensitiveErrorCredential(input), true, input);
+  }
+});
+
+test("sanitizeErrorMessage leaves neighboring verdicts and short look-alikes untouched", () => {
+  // Neighboring `sk-ant-` label unchanged (gate criterion).
+  const neighbor = `upstream echoed sk-ant-${"A".repeat(40)}`;
+  assert.match(sanitizeErrorMessage(neighbor), /\[REDACTED/);
+
+  // Short look-alikes and a bare prefix stay intact on every detection path.
+  for (const benign of [
+    "upstream error without any credential",
+    "see oma_live_xxx in the setup guide",
+    `rejected oma_live_${"A".repeat(8)} retry`,
+    "oma_live_not_a_real_token",
+    `rejected oma_live_${"A".repeat(19)} retry`,
+  ]) {
+    assert.equal(sanitizeErrorMessage(benign), benign, benign);
+    assert.equal(redactSensitiveErrorText(benign), benign, benign);
+    assert.equal(containsSensitiveErrorCredential(benign), false, benign);
+  }
+
+  // Lower bound: a 20-char suffix is masked on every detection path.
+  const bound = `rejected oma_live_${"A".repeat(20)} retry`;
+  assert.equal(sanitizeErrorMessage(bound).includes(`oma_live_${"A".repeat(20)}`), false);
+  assert.match(sanitizeErrorMessage(bound), /\[REDACTED/);
+  assert.equal(containsSensitiveErrorCredential(bound), true);
+});
+
+test("sanitizeErrorMessage handles glued prefixes, casing, encoding and off-charset tails", () => {
+  // A letter or digit glued in front makes it part of a larger word: intact.
+  for (const prefix of ["x", "9"]) {
+    const input = `failed ${prefix}${OMA_SANITIZER_TOKEN} end`;
+    assert.equal(sanitizeErrorMessage(input), input, input);
+    assert.equal(containsSensitiveErrorCredential(input), false, input);
+  }
+  // A dash or space keeps the token standalone: masked.
+  for (const prefix of ["-", " "]) {
+    const input = `failed${prefix}${OMA_SANITIZER_TOKEN} end`;
+    assert.equal(sanitizeErrorMessage(input).includes(OMA_SANITIZER_TOKEN), false, input);
+    assert.match(sanitizeErrorMessage(input), /\[REDACTED/);
+  }
+  // An underscore glued in front hides it from the word-boundary catalog but
+  // the strong-token fallback still catches it on sanitizer paths.
+  const glued = `failed_${OMA_SANITIZER_TOKEN} end`;
+  assert.equal(sanitizeErrorMessage(glued).includes(OMA_SANITIZER_TOKEN), false, glued);
+  assert.equal(containsSensitiveErrorCredential(glued), true, glued);
+
+  // Uppercased prefix: the strong-token fallback is case-insensitive, so the
+  // sanitizer still masks it (the catalog-only guardrail does not).
+  const upper = `failed OMA_LIVE_${"A".repeat(43)} end`;
+  assert.match(sanitizeErrorMessage(upper), /\[REDACTED/);
+  assert.equal(containsSensitiveErrorCredential(upper), true, upper);
+
+  // Double-escaped token: escape normalization decodes it before the catalog
+  // pass, so it is masked.
+  const doubled = `failed oma_live_\\u0041${"A".repeat(42)} end`;
+  assert.match(sanitizeErrorMessage(doubled), /\[REDACTED/);
+
+  // Off-charset tail (`.` is outside base64url): matched up to the dot, like
+  // the neighboring loose-bound patterns.
+  const dotted = sanitizeErrorMessage(`failed ${OMA_SANITIZER_TOKEN}.suffix end`);
+  assert.equal(dotted.includes(OMA_SANITIZER_TOKEN), false, dotted);
+
+  // Bare prefix without a suffix stays intact.
+  assert.equal(sanitizeErrorMessage("saw oma_live_ in logs"), "saw oma_live_ in logs");
+});
+
+test("upstream bodies echoing house tokens are refused passthrough", () => {
+  assert.equal(
+    containsSensitiveErrorCredential(`{"message":"bad key ${OMA_SANITIZER_TOKEN}}"}`),
+    true
+  );
 });
 
 test("sanitizeErrorMessage redacts credentials that cross the public length boundary", () => {

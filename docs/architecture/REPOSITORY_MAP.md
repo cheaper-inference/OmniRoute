@@ -17,6 +17,7 @@ lastUpdated: 2026-06-28
 OmniRoute/
 ├── src/                  # Next.js 16 application (UI + API routes + libs + domain + server)
 ├── open-sse/             # Streaming engine workspace (handlers, executors, translator, MCP server)
+├── packages/            # npm workspaces: ui-kit (vendored Keak CI UI Kit) and browser-pool
 ├── electron/             # Desktop wrapper (Electron 41 + electron-builder 26.10)
 ├── bin/                  # CLI entry point and command handlers
 ├── scripts/              # Build, check, sync, and one-off scripts
@@ -121,7 +122,7 @@ src/
 ├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
 ├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
 ├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl config + per-locale message JSON (42 locales)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
 ├── middleware/          # Next.js middleware (request enrichment, locale detection)
 ├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
 │   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
@@ -206,7 +207,7 @@ src/
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Request caching + idempotency                                                                                                                                                                                                                                                                                           |
 | (~30 more top-level files)               | Specialized helpers (logEnv, modelsDevSync, piiSanitizer, etc.)                                                                                                                                                                                                                                                         |
 
-### `src/lib/db/` — Database (137 modules + 193 migrations)
+### `src/lib/db/` — Database (147 modules + 208 migrations)
 
 | Subdir                    | Purpose                                                                                                                                                                    |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -239,21 +240,23 @@ src/
 
 ### `src/shared/`
 
-| Module                           | Purpose                                                                |
-| -------------------------------- | ---------------------------------------------------------------------- |
-| `constants/providers.ts`         | **355 providers** with Zod validation (source of truth)                |
-| `constants/cliTools.ts`          | External CLI tool registry                                             |
-| `constants/routingStrategies.ts` | **19 routing strategies** with priorities                              |
-| `constants/publicApiRoutes.ts`   | Routes that require Bearer (vs management) auth                        |
-| `constants/upstreamHeaders.ts`   | Header denylist for upstream requests                                  |
-| `validation/schemas.ts`          | ~80 Zod schemas (single source of truth for API contracts)             |
-| `validation/helpers.ts`          | Zod validation helpers (`validateBody`, etc.)                          |
-| `types/`                         | Shared TS types                                                        |
-| `contracts/`                     | Public API contracts (consumed by `files:` in `package.json`)          |
-| `utils/circuitBreaker.ts`        | Provider circuit breaker (see `docs/architecture/RESILIENCE_GUIDE.md`) |
-| `utils/apiAuth.ts`               | API key validation, scope checking                                     |
-| `utils/fetchTimeout.ts`          | Timeout/abort wrappers for upstream fetch                              |
-| `utils/releaseNotes.ts`          | Closed v2/legacy announcement parser, localization and ID dismissal    |
+| Module                           | Purpose                                                                                             |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `components/`                    | Dashboard component API: adapters over `packages/ui-kit` — see `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: icon names used by the screens → Lucide components (`<Icon>`)                           |
+| `constants/providers.ts`         | **375 providers** with Zod validation (source of truth)                                             |
+| `constants/cliTools.ts`          | External CLI tool registry                                                                          |
+| `constants/routingStrategies.ts` | **20 routing strategies** with priorities                                                           |
+| `constants/publicApiRoutes.ts`   | Routes that require Bearer (vs management) auth                                                     |
+| `constants/upstreamHeaders.ts`   | Header denylist for upstream requests                                                               |
+| `validation/schemas.ts`          | ~80 Zod schemas (single source of truth for API contracts)                                          |
+| `validation/helpers.ts`          | Zod validation helpers (`validateBody`, etc.)                                                       |
+| `types/`                         | Shared TS types                                                                                     |
+| `contracts/`                     | Public API contracts (consumed by `files:` in `package.json`)                                       |
+| `utils/circuitBreaker.ts`        | Provider circuit breaker (see `docs/architecture/RESILIENCE_GUIDE.md`)                              |
+| `utils/apiAuth.ts`               | API key validation, scope checking                                                                  |
+| `utils/fetchTimeout.ts`          | Timeout/abort wrappers for upstream fetch                                                           |
+| `utils/releaseNotes.ts`          | Closed v2/legacy announcement parser, localization and ID dismissal                                 |
 
 ---
 
@@ -264,7 +267,7 @@ Separate npm workspace (`@omniroute/open-sse`). Handles request processing + pro
 ```
 open-sse/
 ├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
-├── executors/           # 67 provider-specific executors (extend BaseExecutor)
+├── executors/           # 150 executor modules (classes extending BaseExecutor + per-provider helpers)
 ├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
@@ -293,6 +296,15 @@ open-sse/
 | `tools/skillTools.ts`       | 4 skill tools (list/enable/execute/executions)                                 |
 | `tools/compressionTools.ts` | 5 compression tools                                                            |
 | `README.md`                 | Internal MCP server README (cross-linked from `docs/frameworks/MCP-SERVER.md`) |
+
+---
+
+## `packages/` — Workspaces
+
+| Path                     | Purpose                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit` — vendored snapshot of the Keak CI UI Kit (`private`, `UNLICENSED`), consumed as source (no build). `UPSTREAM.md` pins the upstream commit and records the license authorization; `PATCHES.md` lists local patches (none); `src/` is synced only by `scripts/dev/sync-ui-kit.sh` and guarded by `npm run check:ui-kit-snapshot`. See `docs/architecture/DESIGN_SYSTEM.md` |
+| `packages/browser-pool/` | `@omniroute/browser-pool` — optional browser pool service (CloakBrowser and Playwright-backed chat)                                                                                                                                                                                                                                                                                           |
 
 ---
 
@@ -374,6 +386,10 @@ open-sse/
 | `system-info.mjs`                   | Print system/runtime info for support                                      |
 | `healthcheck.mjs`                   | One-shot health check (used by Docker HEALTHCHECK)                         |
 | `uninstall.mjs`                     | Clean uninstall script                                                     |
+| `dev/sync-ui-kit.sh`                | Copy the CI UI Kit `src/` at a pinned commit into `packages/ui-kit/src`    |
+| `check/check-ui-kit-snapshot.mjs`   | Pre-commit gate: `packages/ui-kit/src` matches the pinned upstream commit  |
+| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — icon names in use that `ICON_MAP` does not map    |
+| `dev/codemod-material-icons.mjs`    | Rewrite literal Material Symbols spans to `<Icon>` (migration tooling)     |
 
 ---
 
@@ -396,9 +412,9 @@ open-sse/
 | `COVERAGE_PLAN.md`          | Coverage goals and current state                                                      |
 | `FREE_TIERS.md`             | Curated free-tier providers (48+ free + 11 OAuth)                                     |
 | `CLI-TOOLS.md`              | External CLI integrations + Internal OmniRoute CLI                                    |
-| `I18N.md`                   | i18n architecture, adding a language, 42 locales                                      |
+| `I18N.md`                   | i18n architecture, adding a language, 67 locales                                      |
 | `UNINSTALL.md`              | Clean uninstall steps                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 355 providers (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 375 providers (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem deep-dives
 

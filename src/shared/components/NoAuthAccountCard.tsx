@@ -2,8 +2,14 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "./Icon";
 import Card from "./Card";
 import Button from "./Button";
+import Input from "./Input";
+import Modal from "./Modal";
+import SegmentedControl from "./SegmentedControl";
+import Select from "./Select";
+import { cn } from "@/shared/utils/cn";
 import DistributeProxiesButton from "./DistributeProxiesButton";
 import NoAuthProviderToggle from "./NoAuthProviderToggle";
 import { resolveNoAuthBannerDescription } from "./NoAuthProviderCard";
@@ -290,7 +296,6 @@ export default function NoAuthAccountCard({
   const [freeTierPauses, setFreeTierPauses] = useState<FreeTierPause[] | null>(null);
   const freeTierInflight = useRef(false);
   const [assignments, setAssignments] = useState<EffectiveEgressAssignment[] | null>(null);
-  const popoverRef = useRef<HTMLDivElement>(null);
 
   const fetchConnections = useCallback(async () => {
     try {
@@ -387,18 +392,6 @@ export default function NoAuthAccountCard({
 
     return () => window.clearTimeout(loadTimer);
   }, [fetchConnections, fetchSavedProxies, fetchAssignments]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        setProxyAccountId(null);
-      }
-    };
-    if (proxyAccountId) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [proxyAccountId]);
 
   const checkSetAside = useCallback(async (proxyId: string) => {
     if (!proxyId || setAsideInflight.current.has(proxyId)) return;
@@ -642,8 +635,8 @@ export default function NoAuthAccountCard({
     <Card>
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="inline-flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-green-500/10 text-green-500">
-            <span className="material-symbols-outlined text-[20px]">lock_open</span>
+          <div className="inline-flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-success/10 text-success">
+            <Icon name="lock_open" size={20} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium">{t("title")}</p>
@@ -691,12 +684,13 @@ export default function NoAuthAccountCard({
             </Button>
             {showManualKeyInput && (
               <div className="flex items-center gap-2">
-                <input
+                <Input
                   type="password"
                   value={manualApiKey}
                   onChange={(e) => setManualApiKey(e.target.value)}
                   placeholder="Paste API key..."
-                  className="rounded-md border border-black/10 bg-bg px-2 py-1 text-xs dark:border-white/10"
+                  aria-label={t("manualApiKey")}
+                  inputClassName="text-xs"
                   disabled={addingManualKey || !enabled}
                 />
                 <Button
@@ -707,26 +701,23 @@ export default function NoAuthAccountCard({
                 >
                   {addingManualKey ? t("adding") : t("add")}
                 </Button>
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t("cancel")}
                   onClick={() => {
                     setShowManualKeyInput(false);
                     setManualApiKey("");
                   }}
-                  className="rounded p-1 text-text-muted hover:bg-black/5 dark:hover:bg-white/5"
                 >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
+                  <Icon name="close" size={16} />
+                </Button>
               </div>
             )}
             {!showManualKeyInput && onManualApiKeyAdd && (
-              <button
-                type="button"
-                onClick={() => setShowManualKeyInput(true)}
-                className="rounded-md px-2 py-1 text-xs text-text-muted transition-colors hover:bg-black/5 hover:text-text-main dark:hover:bg-white/5"
-              >
+              <Button variant="ghost" size="sm" onClick={() => setShowManualKeyInput(true)}>
                 {t("manualApiKey")}
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -770,7 +761,7 @@ export default function NoAuthAccountCard({
                 <div
                   key={id}
                   data-account-id={id}
-                  className="group flex items-center gap-2 rounded-lg border border-border bg-bg/40 px-2.5 py-2 transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
+                  className="group flex items-center gap-2 rounded-lg border border-border bg-bg/40 px-2.5 py-2 transition-colors hover:bg-bg-subtle"
                 >
                   <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bg text-[10px] font-medium text-text-muted">
                     {i + 1}
@@ -778,156 +769,146 @@ export default function NoAuthAccountCard({
                   <span className="min-w-0 flex-1 truncate font-mono text-xs text-text-muted">
                     {id.slice(0, 10)}…
                   </span>
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => openProxyConfig(id)}
-                    className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${configured ? "text-blue-400" : egress?.kind === "pool-empty" ? "text-red-400" : "text-text-muted"}`}
+                    className={cn(
+                      "size-6 shrink-0",
+                      configured
+                        ? "text-info"
+                        : egress?.kind === "pool-empty"
+                          ? "text-error"
+                          : "text-text-muted"
+                    )}
                     title={title}
                     aria-label={ariaLabel}
                   >
-                    <span
-                      className="material-symbols-outlined text-[16px]"
-                      style={configured ? { fontVariationSettings: "'FILL' 1" } : undefined}
-                    >
-                      shield
-                    </span>
-                  </button>
-                  <button
-                    type="button"
+                    <Icon name="shield" size={16} fill={configured} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => handleRemoveAccount(id)}
-                    className="shrink-0 rounded p-1 text-text-muted opacity-0 transition-colors hover:bg-red-500/10 hover:text-red-500 group-hover:opacity-100"
+                    className="size-6 shrink-0 text-text-muted opacity-0 hover:bg-error/10 hover:text-error group-hover:opacity-100 focus-visible:opacity-100"
                     aria-label={t("removeAccount")}
                   >
-                    <span className="material-symbols-outlined text-[16px]">delete</span>
-                  </button>
+                    <Icon name="delete" size={16} />
+                  </Button>
                 </div>
               );
             })}
           </div>
         )}
 
-        {proxyAccountId && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div
-              ref={popoverRef}
-              className="w-80 max-w-full rounded-lg border border-black/10 bg-surface p-4 shadow-lg dark:border-white/10"
-            >
-              <p className="mb-3 text-sm font-medium">
-                {t("proxyForAccount", {
+        <Modal
+          isOpen={Boolean(proxyAccountId)}
+          onClose={() => setProxyAccountId(null)}
+          size="sm"
+          title={
+            proxyAccountId
+              ? t("proxyForAccount", {
                   number: allAccountIds.indexOf(proxyAccountId) + 1,
-                })}
-              </p>
-              <div className="space-y-3">
-                {/* #5217 (Gap 1): pick a pre-saved Proxy Pool entry by reference,
-                    or fall back to a one-off custom proxy. */}
-                <div className="flex gap-1 rounded-lg border border-border bg-bg-subtle p-1">
-                  <button
-                    type="button"
-                    onClick={() => setProxyMode("saved")}
-                    className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                      proxyMode === "saved"
-                        ? "bg-primary text-white"
-                        : "text-text-muted hover:text-text-main"
-                    }`}
-                  >
-                    {t("saved")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setProxyMode("custom")}
-                    className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                      proxyMode === "custom"
-                        ? "bg-primary text-white"
-                        : "text-text-muted hover:text-text-main"
-                    }`}
-                  >
-                    {t("custom")}
-                  </button>
-                </div>
+                })
+              : undefined
+          }
+          footer={
+            <>
+              <Button variant="ghost" size="sm" onClick={() => setProxyAccountId(null)}>
+                {t("cancel")}
+              </Button>
+              <Button size="sm" onClick={handleSaveProxy} loading={savingProxy}>
+                {savingProxy ? t("saving") : t("save")}
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-3">
+            {/* #5217 (Gap 1): pick a pre-saved Proxy Pool entry by reference,
+                or fall back to a one-off custom proxy. */}
+            <SegmentedControl
+              aria-label={t("configureProxy")}
+              size="sm"
+              className="w-full"
+              value={proxyMode}
+              onChange={(next) => setProxyMode(next as typeof proxyMode)}
+              options={[
+                { value: "saved", label: t("saved") },
+                { value: "custom", label: t("custom") },
+              ]}
+            />
 
-                {proxyMode === "saved" ? (
-                  <select
-                    value={selectedProxyId}
-                    onChange={(e) => setSelectedProxyId(e.target.value)}
-                    className="w-full rounded-md border border-black/10 bg-bg px-2.5 py-1.5 text-xs dark:border-white/10"
+            {proxyMode === "saved" ? (
+              <Select
+                value={selectedProxyId}
+                onChange={(e) => setSelectedProxyId(e.target.value)}
+                aria-label={t("saved")}
+                selectClassName="text-xs"
+              >
+                <option value="">
+                  {savedProxies.length === 0 ? t("noSavedProxies") : t("inheritConnectionOption")}
+                </option>
+                {savedProxies.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {(p.name || p.host) ?? p.id} ({p.type || "socks5"}://{p.host}:{p.port})
+                  </option>
+                ))}
+              </Select>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <Select
+                    value={proxyType}
+                    onChange={(e) => setProxyType(e.target.value)}
+                    aria-label={t("proxyType")}
+                    className="w-auto shrink-0"
+                    selectClassName="text-xs"
                   >
-                    <option value="">
-                      {savedProxies.length === 0
-                        ? t("noSavedProxies")
-                        : t("inheritConnectionOption")}
-                    </option>
-                    {savedProxies.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {(p.name || p.host) ?? p.id} ({p.type || "socks5"}://{p.host}:{p.port})
+                    {PROXY_TYPES.map((pt) => (
+                      <option key={pt.value} value={pt.value}>
+                        {pt.label}
                       </option>
                     ))}
-                  </select>
-                ) : (
-                  <>
-                    <div className="flex gap-2">
-                      <select
-                        value={proxyType}
-                        onChange={(e) => setProxyType(e.target.value)}
-                        className="flex-shrink-0 rounded-md border border-black/10 bg-bg px-2.5 py-1.5 text-xs dark:border-white/10"
-                      >
-                        {PROXY_TYPES.map((t) => (
-                          <option key={t.value} value={t.value}>
-                            {t.label}
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        type="text"
-                        value={proxyHost}
-                        onChange={(e) => setProxyHost(e.target.value)}
-                        placeholder={t("host")}
-                        className="flex-1 rounded-md border border-black/10 bg-bg px-2.5 py-1.5 text-xs dark:border-white/10"
-                      />
-                      <input
-                        type="text"
-                        value={proxyPort}
-                        onChange={(e) => setProxyPort(e.target.value)}
-                        placeholder={t("port")}
-                        className="w-16 rounded-md border border-black/10 bg-bg px-2.5 py-1.5 text-xs dark:border-white/10"
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      value={proxyUsername}
-                      onChange={(e) => setProxyUsername(e.target.value)}
-                      placeholder={t("usernameOptional")}
-                      className="w-full rounded-md border border-black/10 bg-bg px-2.5 py-1.5 text-xs dark:border-white/10"
-                    />
-                    <input
-                      type="password"
-                      value={proxyPassword}
-                      onChange={(e) => setProxyPassword(e.target.value)}
-                      placeholder={t("passwordOptional")}
-                      className="w-full rounded-md border border-black/10 bg-bg px-2.5 py-1.5 text-xs dark:border-white/10"
-                    />
-                  </>
-                )}
-                <div className="flex justify-end gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setProxyAccountId(null)}
-                    className="rounded-md px-3 py-1.5 text-xs text-text-muted transition-colors hover:bg-black/5 hover:text-text-main dark:hover:bg-white/5"
-                  >
-                    {t("cancel")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveProxy}
-                    disabled={savingProxy}
-                    className="rounded-md bg-primary/10 px-3 py-1.5 text-xs text-primary transition-colors hover:bg-primary/20 disabled:opacity-50"
-                  >
-                    {savingProxy ? t("saving") : t("save")}
-                  </button>
+                  </Select>
+                  <Input
+                    type="text"
+                    value={proxyHost}
+                    onChange={(e) => setProxyHost(e.target.value)}
+                    placeholder={t("host")}
+                    aria-label={t("host")}
+                    className="min-w-0 flex-1"
+                    inputClassName="text-xs"
+                  />
+                  <Input
+                    type="text"
+                    value={proxyPort}
+                    onChange={(e) => setProxyPort(e.target.value)}
+                    placeholder={t("port")}
+                    aria-label={t("port")}
+                    className="w-20 shrink-0"
+                    inputClassName="text-xs"
+                  />
                 </div>
-              </div>
-            </div>
+                <Input
+                  type="text"
+                  value={proxyUsername}
+                  onChange={(e) => setProxyUsername(e.target.value)}
+                  placeholder={t("usernameOptional")}
+                  aria-label={t("usernameOptional")}
+                  inputClassName="text-xs"
+                />
+                <Input
+                  type="password"
+                  value={proxyPassword}
+                  onChange={(e) => setProxyPassword(e.target.value)}
+                  placeholder={t("passwordOptional")}
+                  aria-label={t("passwordOptional")}
+                  inputClassName="text-xs"
+                />
+              </>
+            )}
           </div>
-        )}
+        </Modal>
       </div>
     </Card>
   );

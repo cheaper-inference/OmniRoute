@@ -23,8 +23,11 @@ import {
 } from "../../../open-sse/services/autoCombo/modelFamily";
 
 // First-touch DB migrations run once per worker and can exceed vitest's 5s
-// default in a cold thread; the DB-backed materialization tests below need it.
-vi.setConfig({ testTimeout: 20_000 });
+// default in a cold thread. auto/glm then materializes a ~50-candidate cartesian
+// pool across connected GLM backends plus always-on no-auth catalogs (auggie,
+// cloudflare-playground, devin-cli-agentic, zcode); that step measured ~35s on
+// a loaded runner and blew the previous 20s budget (base-red #15306).
+vi.setConfig({ testTimeout: 90_000 });
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-family-combo-"));
 const ORIGINAL_DATA_DIR = process.env.DATA_DIR;

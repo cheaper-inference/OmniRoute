@@ -13,85 +13,155 @@ thêm các đích khác.
 
 ---
 
-## 1. Cách hoạt động
+## 1. Cách thức hoạt động
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (tập trường của tab Logs)
-      → destination client.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+máy chủ (giải mã + xác thực cấu hình, đối soát con trỏ)
+  → khởi động IPC → tiến trình HĐH exportChild biệt lập
+    → storage.sqlite chỉ đọc → truy vấn/ánh xạ nhật ký cuộc gọi dùng chung
+      → nạp artifact bất đồng bộ → prepare()/send() của đích
+        → IPC theo lô → máy chủ lưu con trỏ → IPC ack
+          → lô tiếp theo; IPC done → máy chủ ghi nhận thành công
 ```
 
-- **Lịch chạy** — một tác vụ cron `JobRegistry`, `log_export`, mặc định là `0 * * * *` (mỗi giờ,
+- **Lịch chạy** — một tác vụ cron `JobRegistry`, `log_export`, mặc định là `0 * * * *` (hàng giờ,
   UTC). Được đăng ký trong `src/lib/initCloudSync.ts`; có thể ghi đè bằng `OMNIROUTE_LOG_EXPORT_CRON`.
-  Mỗi lần kích hoạt sẽ lần lượt xử lý hết dữ liệu cho mọi đích **đã bật**.
+  Mỗi lần chạy sẽ lần lượt xử lý mọi đích **đã bật**.
 - **Con trỏ** — `call_logs.rowid` ngầm định của SQLite, được lưu riêng cho từng đích trong
   `log_export_destinations.cursor_row_id`. `timestamp` được chủ ý không dùng làm con trỏ: bên gọi
-  có thể cung cấp giá trị riêng, do đó một yêu cầu chậm có thể được ghi sau một yêu cầu nhanh hơn nhưng bắt đầu
-  muộn hơn, và con trỏ theo dấu thời gian sẽ bỏ qua yêu cầu đó.
+  có thể cung cấp giá trị riêng, vì vậy một yêu cầu chậm có thể được ghi sau một yêu cầu nhanh hơn
+  dù yêu cầu nhanh bắt đầu muộn hơn, và con trỏ dựa trên dấu thời gian sẽ bỏ qua yêu cầu đó.
 - **Chia lô** — `batch_size` hàng cho mỗi yêu cầu (mặc định 500), `max_rows_per_run` hàng cho mỗi lần chạy
-  (mặc định 10000), để lượng dữ liệu tồn đọng lớn được xử lý qua nhiều lần kích hoạt thay vì chặn một lần chạy.
-- **Phân phối** — con trỏ chỉ tiến lên sau khi `send()` hoàn tất. Một lô bị lỗi sẽ giữ nguyên
-  vị trí con trỏ, vì vậy cùng các hàng đó sẽ được thử lại trong lần chạy tiếp theo. Cơ chế bảo đảm là
-  ít nhất một lần cùng với việc khử trùng lặp ở phía đích, chứ không thực sự chính xác một lần: BigQuery định danh mỗi
-  hàng bằng id nhật ký cuộc gọi và áp dụng điều này theo khả năng tốt nhất trong khoảng thời gian khử trùng lặp riêng của nó.
-- **Bảo vệ khỏi chạy chồng lấn** — lần kích hoạt cron và `POST .../run` có thể xảy ra đồng thời. Một đích
+  (mặc định 10000), để lượng tồn đọng lớn được xử lý qua nhiều lần chạy thay vì chặn trong một lần.
+- **Phân phối** — con trỏ chỉ tiến lên sau khi `send()` hoàn tất. Một lô thất bại sẽ giữ nguyên
+  con trỏ, vì vậy các hàng đó được thử lại trong lần chạy tiếp theo. Cơ chế bảo đảm là
+  ít nhất một lần cộng với việc loại bỏ trùng lặp ở phía đích, chứ không phải chính xác một lần thực sự: BigQuery
+  định danh từng hàng bằng id của nhật ký cuộc gọi và áp dụng điều này theo khả năng tối đa trong cửa sổ khử trùng lặp riêng.
+- **Bảo vệ khỏi chạy chồng lấn** — lần chạy cron và `POST .../run` có thể được kích hoạt cùng lúc. Một đích
   đang được xử lý sẽ bị bỏ qua thay vì được xử lý hai lần (`skipped: true` trong kết quả chạy),
   vì vậy một lần chạy đồng thời không thể gửi lại một lô hoặc ghi lùi con trỏ.
 - **Khôi phục sau khi xóa dữ liệu** — nếu `cursor_row_id` lớn hơn `MAX(rowid)` (toàn bộ bảng đã bị
-  xóa và rowid được khởi tạo lại), trình chạy sẽ đưa con trỏ về 0 thay vì mất khả năng nhìn thấy dữ liệu vĩnh viễn.
+  xóa sạch và rowid bắt đầu lại), trình chạy sẽ tua con trỏ về 0 thay vì vĩnh viễn không thấy dữ liệu mới.
 
-### Payload (prompt và nội dung hoàn thành)
+### Trình chạy biệt lập và các giới hạn
 
-Theo mặc định, dữ liệu xuất chỉ chứa các trường tóm tắt hiển thị trong **danh sách** Logs. Việc bật
-**Xuất prompt và phản hồi** (`includeBodies`) sẽ gửi thêm những gì khung **chi tiết**
-Logs hiển thị cho mỗi cuộc gọi:
+Mỗi lần chạy một đích trên Node sẽ khởi động một tiến trình con HĐH riêng biệt, tồn tại trong thời gian ngắn (`child_process`
+với IPC, không phải `worker_threads`). Việc đọc nội dung, phân tích/chuyển đổi tuần tự JSON của payload, thao tác
+`prepare()` của đích và I/O mạng của đích đều chạy tại đó, không chạy trên vòng lặp sự kiện của máy chủ.
+Chỉ cấu hình và các thông báo tiến độ nhỏ được truyền qua IPC; các bản ghi đã xuất không bao giờ quay lại
+máy chủ. Tác vụ cron và route Chạy ngay vẫn giữ nguyên kết quả công khai và cơ chế bảo vệ khỏi chạy chồng lấn.
 
-| Trường                           | Nội dung lưu trữ                                                            |
+Tiến trình con mở `DATA_DIR/storage.sqlite` đã được máy chủ phân giải ở chế độ chỉ đọc bằng `node:sqlite`,
+với `busy_timeout=5000` và `query_only=ON`. Nó không nhập singleton DB và không thực hiện
+migration, sao lưu hay cập nhật SQLite. Việc theo dõi artifact bị thiếu/hỏng (bao gồm cả
+UPDATE cho artifact hỏng) chỉ nằm trong đường dẫn chi tiết của bảng điều khiển. Cả hai đường dẫn dùng chung một
+trình phân giải chi tiết thuần túy; thao tác xuất dùng các lần đọc hệ thống tệp bất đồng bộ và cùng thứ tự phân giải
+artifact → nội tuyến kiểu cũ → đĩa kiểu cũ → không có. Một lần chạy sẽ chụp lại rowid chèn tối đa
+khi tiến trình con mở trình đọc; các bản ghi được chèn sau đó sẽ chờ đến lần chạy tiếp theo. Đây là một ranh giới
+chèn, không phải một giao dịch SQLite tồn tại lâu: các trình ghi WAL và checkpoint vẫn có thể hoạt động tự do trong
+thời gian chờ mạng. Các thao tác cập nhật/xóa hàng hiện có không bị đóng băng bởi ranh giới này.
+
+Sau mỗi lô được chấp nhận, tiến trình con sẽ chờ xác nhận. Trước tiên, máy chủ lưu
+con trỏ bằng `advanceLogExportCursor`, sau đó gửi `ack`; lô tiếp theo sẽ không bắt đầu trước thời điểm đó.
+Lỗi gửi, sự cố tiến trình hoặc hết thời gian chờ sẽ được ghi nhận là thất bại mà không đẩy con trỏ qua lô đó. Các lô
+đã được xác nhận trước đó vẫn được cam kết; nhiều nhất chỉ lô chưa được xác nhận mới có thể bị gửi lại.
+Thành công chỉ được ghi nhận sau `done` và khi tiến trình con thoát sạch. Khi có lỗi, tiến trình con bị kết thúc
+bằng SIGTERM, sau 500 ms sẽ nâng lên SIGKILL, và trình chạy chờ tiến trình đóng hoàn toàn.
+
+| Biến môi trường                               | Mặc định | Mục đích                                               |
+| --------------------------------------------- | -------- | ------------------------------------------------------ |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Giới hạn thời gian thực cho mỗi đích                   |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Giới hạn old-space V8 của tiến trình con, tính bằng MB |
+
+Các giá trị không hợp lệ/không dương/không phải số nguyên sẽ dùng giá trị mặc định. Thiết lập heap không phải là giới hạn
+RSS tổng thể; các lô rất lớn vẫn có thể làm cạn bộ nhớ của tiến trình con và khiến lần chạy thất bại một cách an toàn.
+Mức mặc định 1024 MB chừa đủ dung lượng cho lô mặc định 500 hàng gồm các artifact 512 KiB khi
+bật nội dung, bao gồm cả quá trình chuyển đổi tuần tự JSON theo từng khối byte của BigQuery. Mức này không bảo đảm an toàn cho
+một lô 10000 hàng có kèm nội dung. Khi V8 cạn heap, hệ thống sẽ ghi lại lỗi kèm hành động khắc phục: giảm kích thước lô
+hoặc tăng `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; con trỏ vẫn ở lô cuối cùng
+đã được xác nhận. Các nội dung nội tuyến/trên đĩa kiểu cũ không chịu giới hạn artifact hiện đại.
+Đơn vị vận hành phải lập ngân sách RSS riêng, đặc biệt là bên trong các container bị giới hạn bộ nhớ.
+
+Tiến trình con chỉ kế thừa `DATA_DIR` đã phân giải, `NODE_ENV`, `TZ` được chỉ định rõ ràng (để phân giải
+giờ địa phương trong tên tệp kiểu cũ), `ELECTRON_RUN_AS_NODE` khi có, và các đầu vào kết nối ra ngoài sau:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (cùng các dạng viết thường tương ứng),
+`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
+Một dispatcher Undici toàn cục dùng chung logic thuần túy của máy chủ để phân giải proxy từ môi trường và các quy tắc
+bỏ qua proxy cho máy chủ cục bộ, bao gồm `NO_PROXY`; nó không nhập `proxyFetch.ts` hoặc các cờ DB/tính năng của tệp này.
+Thông tin xác thực proxy được che khỏi đầu ra được chuyển tiếp và các lỗi được ghi nhận. Thông tin xác thực của đích
+chỉ được truyền trong một thông báo IPC khởi động, không bao giờ qua argv hoặc môi trường; việc chuyển tiếp đầu ra/lỗi
+được thêm tiền tố và làm sạch. Chỉ `ExperimentalWarning` bị tắt trong các đối số thực thi của tiến trình con để tránh
+lặp lại cảnh báo SQLite của Node trong mỗi lần chạy cron; các loại cảnh báo khác vẫn hiển thị.
+
+Các mô-đun đích phải có thể được import mà không cần các phần phụ thuộc chỉ dành cho Next.js/máy chủ. Phần triển khai
+BigQuery hiện tại đã đáp ứng hợp đồng đó. Bộ nhớ đệm access token chỉ tồn tại trong lần chạy của tiến trình con,
+không tồn tại xuyên suốt nhiều lần chạy. Node là runtime được hỗ trợ (`package.json` engines), nhưng phần cài đặt
+Bun trong README và `Dockerfile.bun` cũng công bố một lộ trình tương thích cho môi trường production sử dụng
+`bun:sqlite` (`src/lib/db/core.ts` / các adapter). Vì vậy, dưới Bun, các tác vụ xuất vẫn giữ lại
+luồng xử lý trong cùng tiến trình trước đây và phát cảnh báo một lần: không hỗ trợ cô lập heap/timeout của tiến trình con. Hãy dùng
+Node để cô lập event loop và OOM; Bun không được xem là chỉ dành cho môi trường phát triển ở đây.
+
+Khi bật `includeBodies`, nên ưu tiên tần suất theo phút, chẳng hạn như
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, thay vì tích lũy lượng payload tồn đọng trong một giờ.
+Các giới hạn về batch và hàng vẫn ràng buộc mỗi lần chạy. Chi phí khởi động tiến trình được tính cho từng đích trong mỗi lần chạy;
+đây là sự đánh đổi một khoản chi phí khởi động nhỏ để đổi lấy khả năng cô lập event loop của máy chủ, chứ không làm giảm tổng mức sử dụng CPU.
+
+### Payload (prompt và phần hoàn thành)
+
+Theo mặc định, dữ liệu xuất chỉ chứa các trường tóm tắt mà danh sách **list** của Logs hiển thị. Việc bật
+**Xuất prompt và phản hồi** (`includeBodies`) sẽ gửi thêm những gì ngăn **detail**
+của Logs hiển thị cho mỗi lệnh gọi:
+
+| Trường                           | Nội dung                                                                    |
 | -------------------------------- | --------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Payload cuộc gọi theo cách bảng điều khiển hiển thị                         |
-| `pipeline_route_decision`        | Đích và mô hình mà router đã chọn                                           |
+| `request_body` / `response_body` | Payload của lệnh gọi như được hiển thị trên bảng điều khiển                 |
+| `pipeline_route_decision`        | Đích và model mà bộ định tuyến đã chọn                                      |
 | `pipeline_client_request`        | Yêu cầu thô chính xác như client đã gửi                                     |
-| `pipeline_openai_request`        | Sau khi được chuyển đổi sang định dạng OpenAI nội bộ                        |
+| `pipeline_openai_request`        | Sau khi được chuyển đổi sang cấu trúc OpenAI nội bộ                         |
 | `pipeline_provider_request`      | Dữ liệu thực tế được gửi lên thượng nguồn, theo phương ngữ của nhà cung cấp |
 | `pipeline_provider_response`     | Phản hồi thô từ thượng nguồn                                                |
 | `pipeline_client_response`       | Nội dung được trả lại cho bên gọi                                           |
-| `pipeline_error`                 | Chi tiết lỗi ở cấp pipeline cho một cuộc gọi thất bại                       |
+| `pipeline_error`                 | Chi tiết lỗi ở cấp pipeline cho một lệnh gọi thất bại                       |
 | `bodies_truncated`               | True khi bất kỳ trường nào ở trên đạt `maxBodyBytes`                        |
 
-Đây là nội dung prompt, vì vậy tính năng này **bị tắt theo mặc định** và được chủ ý cấu hình riêng cho từng đích.
-Dữ liệu được gửi chính là dữ liệu bảng điều khiển hiển thị, vì cả hai đều đọc qua `getCallLogById`: payload
-đã được làm sạch PII và che thông tin bí mật khi được ghi, còn cuộc gọi được thực hiện bằng khóa API
-`noLog` hoàn toàn không lưu payload, nên không có gì để xuất.
+Đây là nội dung prompt, vì vậy tính năng này **bị tắt theo mặc định** và được thiết kế để lựa chọn riêng cho từng đích.
+Nội dung được gửi chính là những gì bảng điều khiển hiển thị, vì dữ liệu xuất và `getCallLogById` dùng chung cơ chế
+phân giải chi tiết: các payload
+đã được loại bỏ PII và che thông tin bí mật khi ghi, đồng thời một lệnh gọi được thực hiện bằng
+API key `noLog` hoàn toàn không lưu payload, nên không có gì để xuất.
 
-Payload được đọc theo từng hàng từ artifact trên hệ thống tệp, vì vậy quá trình nạp dữ liệu chỉ chạy cho các đích
-đã yêu cầu tính năng này. Một hàng có artifact bị thiếu hoặc hỏng sẽ xuất phần tóm tắt với các payload
-null thay vì làm hỏng lô và khiến con trỏ bị mắc kẹt.
+Payload được đọc theo từng hàng từ artifact trên hệ thống tệp, vì vậy quá trình hydrate chỉ chạy cho những đích
+đã yêu cầu dữ liệu này. Khi artifact bị thiếu hoặc hỏng, phần tóm tắt của hàng vẫn được xuất với các payload null
+thay vì khiến batch thất bại và làm con trỏ bị mắc kẹt.
 
-`maxBodyBytes` (mặc định 262144) giới hạn kích thước của từng trường. Payload dài hơn sẽ được **cắt ngắn thay vì
-loại bỏ** — một prompt bị cắt vẫn trả lời được câu hỏi "đã hỏi điều gì" — và hàng đó được đánh dấu bằng
-`bodies_truncated`. Các delta được truyền trực tuyến theo từng phần không được xuất; phản hồi đã ghép hoàn chỉnh
+`maxBodyBytes` (mặc định 262144) giới hạn kích thước từng trường. Các payload dài hơn sẽ **bị cắt ngắn thay vì
+bị loại bỏ** — một prompt bị cắt vẫn trả lời được câu hỏi "đã hỏi điều gì" — và hàng đó được đánh dấu bằng
+`bodies_truncated`. Các delta được truyền trực tuyến theo từng chunk không được xuất; phản hồi đã lắp ráp
 đã có trong `pipeline_provider_response` và `pipeline_client_response`.
 
 ---
 
 ## 2. Tệp
 
-| Thành phần                    | Vị trí                                       |
-| ----------------------------- | -------------------------------------------- |
-| Hợp đồng đích                 | `src/lib/logExport/types.ts`                 |
-| Registry                      | `src/lib/logExport/registry.ts`              |
-| Xử lý bí mật                  | `src/lib/logExport/secrets.ts`               |
-| Trình chạy (vòng lặp con trỏ) | `src/lib/logExport/runner.ts`                |
-| Ánh xạ API                    | `src/lib/logExport/presenter.ts`             |
-| Đích BigQuery                 | `src/lib/logExport/destinations/bigquery.ts` |
-| Xác thực Google SA            | `src/lib/logExport/googleServiceAccount.ts`  |
-| Nguồn nhật ký cuộc gọi        | `src/lib/usage/callLogExportSource.ts`       |
-| Lưu trữ bền vững              | `src/lib/db/logExportDestinations.ts`        |
-| Tác vụ cron                   | `src/lib/jobs/logExportJob.ts`               |
-| Lớp REST                      | `src/app/api/log-export/`                    |
-| Trang bảng điều khiển         | `src/app/(dashboard)/dashboard/log-export/`  |
+| Thành phần                 | Vị trí                                       |
+| -------------------------- | -------------------------------------------- |
+| Hợp đồng đích              | `src/lib/logExport/types.ts`                 |
+| Registry                   | `src/lib/logExport/registry.ts`              |
+| Xử lý bí mật               | `src/lib/logExport/secrets.ts`               |
+| Trình chạy (IPC cha)       | `src/lib/logExport/runner.ts`                |
+| Vòng đời tiến trình        | `src/lib/logExport/childRunner.ts`           |
+| Điểm vào tiến trình con    | `src/lib/logExport/exportChild.ts`           |
+| Trình mở chỉ đọc           | `src/lib/db/logExportReadOnly.ts`            |
+| Truy vấn/ánh xạ dùng chung | `src/lib/usage/callLogExportQueries.ts`      |
+| Trình phân giải chi tiết   | `src/lib/usage/callLogDetailResolver.ts`     |
+| Phép chiếu API             | `src/lib/logExport/presenter.ts`             |
+| Đích BigQuery              | `src/lib/logExport/destinations/bigquery.ts` |
+| Xác thực SA của Google     | `src/lib/logExport/googleServiceAccount.ts`  |
+| Nguồn nhật ký cuộc gọi     | `src/lib/usage/callLogExportSource.ts`       |
+| Lưu trữ bền vững           | `src/lib/db/logExportDestinations.ts`        |
+| Tác vụ cron                | `src/lib/jobs/logExportJob.ts`               |
+| Lớp REST                   | `src/app/api/log-export/`                    |
+| Trang bảng điều khiển      | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Lược đồ: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

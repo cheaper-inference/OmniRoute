@@ -1,4 +1,5 @@
-import { WEB_COOKIE_PROVIDERS } from "@/shared/constants/providers";
+import { WEB_COOKIE_PROVIDERS, resolveProviderId } from "@/shared/constants/providers";
+import { findWordPressLoggedInEntry } from "@omniroute/open-sse/utils/wordpressSessionKey.ts";
 
 export type WebSessionCredentialRequirement =
   | {
@@ -227,10 +228,10 @@ export const WEB_SESSION_CREDENTIAL_REQUIREMENTS = {
   },
   "venice-web": {
     kind: "cookie",
-    credentialName: "session",
-    placeholder: "session=... or full Cookie header from venice.ai",
+    credentialName: "__client",
+    placeholder: "__client=... or full Cookie header from clerk.venice.ai",
     acceptsFullCookieHeader: true,
-    storageKeys: ["cookie", "session"],
+    storageKeys: ["cookie", "__client"],
   },
   "v0-vercel-web": {
     kind: "cookie",
@@ -410,6 +411,13 @@ export const WEB_SESSION_CREDENTIAL_REQUIREMENTS = {
       "uid",
     ],
   },
+  "veoaifree-web": {
+    kind: "cookie",
+    credentialName: "wordpress_logged_in cookie",
+    placeholder: "wordpress_logged_in_...=... or full Cookie header from veoaifree.com",
+    acceptsFullCookieHeader: true,
+    storageKeys: ["cookie", "wordpress_logged_in"],
+  },
 } satisfies Record<string, WebSessionCredentialRequirement> &
   Record<keyof typeof WEB_COOKIE_PROVIDERS, WebSessionCredentialRequirement>;
 
@@ -417,10 +425,15 @@ export function getWebSessionCredentialRequirement(
   providerId: unknown
 ): WebSessionCredentialRequirement | null {
   if (typeof providerId !== "string") return null;
+  const canonical = resolveProviderId(providerId);
   return (
     WEB_SESSION_CREDENTIAL_REQUIREMENTS[
+      canonical as keyof typeof WEB_SESSION_CREDENTIAL_REQUIREMENTS
+    ] ??
+    WEB_SESSION_CREDENTIAL_REQUIREMENTS[
       providerId as keyof typeof WEB_SESSION_CREDENTIAL_REQUIREMENTS
-    ] ?? null
+    ] ??
+    null
   );
 }
 
@@ -448,7 +461,10 @@ export function hasUsableWebSessionCredential(
   if (!providerSpecificData || typeof providerSpecificData !== "object") return false;
 
   const data = providerSpecificData as Record<string, unknown>;
-  return requirement.storageKeys.some((key) => hasNonEmptyString(data[key]));
+  return (
+    requirement.storageKeys.some((key) => hasNonEmptyString(data[key])) ||
+    findWordPressLoggedInEntry(data) !== null
+  );
 }
 
 /**

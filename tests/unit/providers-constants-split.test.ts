@@ -46,6 +46,8 @@
 // Unifically (gateways, #14182) adds one apikey entry — 244.
 // BeatAPI (#14875) extracts one aggregator gateway into apikey/beatapi.ts and spreads it
 // from the barrel — 245.
+// TypeSafe System One (#15278, non-chat `typesafe` credential provider) adds one specialty-media entry — 249.
+// ainetcafe (#13862, OpenAI-compatible gateway) adds one apikey/gateways entry — 253.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
@@ -53,7 +55,10 @@ const P = await import("../../src/shared/constants/providers.ts");
 
 // Apmix (#14821) adds one apikey/regional entry — 246.
 // Token Market (#13191) adds one apikey/gateways entry — measured 248 on the #13191 branch.
-const APIKEY_PROVIDER_COUNT = 248;
+// NaN.Builders adds one apikey/gateways entry — 250.
+// DaoXE adds one apikey/gateways entry — 251.
+// ainetcafe (#13862) adds one apikey/gateways entry — 253.
+const APIKEY_PROVIDER_COUNT = 253;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
@@ -82,6 +87,7 @@ test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into $
   const keys = Object.keys((P as Record<string, object>).APIKEY_PROVIDERS);
   assert.equal(keys.length, APIKEY_PROVIDER_COUNT);
   assert.equal(new Set(keys).size, APIKEY_PROVIDER_COUNT, "duplicate keys after spread-merge");
+  assert.ok(keys.includes("ainetcafe"), "ainetcafe must be in APIKEY_PROVIDERS");
   // the merged object's entry-count equals the sum of the 6 semantic family files plus the
   // beatapi overflow extract; they are a strict partition (every provider in exactly one),
   // so the sum must be exactly APIKEY_PROVIDER_COUNT.
@@ -110,6 +116,7 @@ test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into $
     APIKEY_PROVIDER_COUNT,
     `families must partition all ${APIKEY_PROVIDER_COUNT} providers`
   );
+  assert.ok(seen.has("ainetcafe"), "ainetcafe must live in a family file");
 });
 
 test("AI_PROVIDERS Proxy aggregates all sections; lookups resolve", () => {

@@ -131,6 +131,16 @@ export const command_codeProvider: RegistryEntry = {
       contextLength: 1000000,
       maxOutputTokens: 131072,
     },
+    // Experimental vision variant; remove if the gateway retires the `-exp` id.
+    {
+      id: "deepseek/deepseek-v4-flash-vision-exp",
+      name: "DeepSeek V4 Flash Vision (exp) (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 131072,
+    },
     {
       id: "moonshotai/Kimi-K2.6",
       name: "Kimi K2.6 (CC)",

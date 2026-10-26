@@ -4,7 +4,7 @@
 
 ---
 
-> **TL;DR**: Nainštalujte → Pripojte bezplatného poskytovateľa → Nasmerujte svoje IDE na OmniRoute. Hotovo.
+> **TL;DR**: Nainštalujte → Pripojte oprávneného poskytovateľa → Nasmerujte svoje IDE na OmniRoute. Hotovo.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute sa spustí na adrese `http://localhost:20128`. Ovládací panel sa otv
 
 ---
 
-## Krok 3: Pripojte bezplatného poskytovateľa
+## Krok 3: Pripojenie vhodného poskytovateľa
 
-OmniRoute môžete používať **úplne zadarmo** pripojením bezplatného poskytovateľa.
+Vyberte poskytovateľa, ktorého podmienky a kvóta vyhovujú vašim potrebám. V časti **Dashboard → Providers** pripojte vlastný účet alebo API kľúč a potom pripojenie otestujte. Bezplatný prístup ani dostupnosť bez kľúča nie sú zaručené.
 
-### Možnosť A: Kiro (bezplatný Claude — bez kreditnej karty)
-
-1. Otvorte ovládací panel na adrese `http://localhost:20128`
-2. Prejdite na **Poskytovatelia** → **Pridať poskytovateľa**
-3. Vyberte **Kiro AI**
-4. Kliknite na **Pripojiť** (nie je potrebný žiadny kľúč API!)
-5. Hotovo! Teraz máte bezplatný prístup k modelom Claude.
-
-### Možnosť B: OpenCode Free (bez overenia)
-
-1. Otvorte ovládací panel na adrese `http://localhost:20128`
-2. Prejdite na **Poskytovatelia** → **Pridať poskytovateľa**
-3. Vyberte **OpenCode Free**
-4. Kliknite na **Pripojiť** (nie je potrebný žiadny kľúč API!)
-5. Hotovo! Teraz máte bezplatný prístup k viacerým modelom.
-
-### Možnosť C: Pollinations (bez potreby kľúča)
-
-1. Otvorte ovládací panel na adrese `http://localhost:20128`
-2. Prejdite na **Poskytovatelia** → **Pridať poskytovateľa**
-3. Vyberte **Pollinations**
-4. Kliknite na **Pripojiť** (nie je potrebný žiadny kľúč API!)
-5. Hotovo! Teraz máte bezplatný prístup k modelom GPT-5, Claude, Gemini a ďalším.
+`auto` predvolene vylučuje poskytovateľov označených ako `tos: avoid`, vrátane Kiro. Pripojenie účtu túto zásadu nemení. Výslovný súhlas v časti **Dashboard → Combos** sa vzťahuje na všetky automatické kombinácie. Pred výberom poskytovateľa si prečítajte [Sprievodcu bezplatnými úrovňami](./FREE-TIERS-GUIDE.md).
 
 ---
 
@@ -152,34 +130,34 @@ Podrobnosti požiadavky si môžete pozrieť kliknutím na položku [Monitorovan
 
 ## Čo ďalej?
 
-- **[Sprievodca Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Nechajte OmniRoute vybrať pre vás najlepšiu AI
+- **[Sprievodca automatickými kombináciami](./AUTO-COMBO-GUIDE.md)** — Nechajte OmniRoute vybrať pre vás najlepšiu AI
 - **[Sprievodca poskytovateľmi](./PROVIDERS-GUIDE.md)** — Pripojte ďalších poskytovateľov (bezplatných aj platených)
-- **[Sprievodca bezplatnými úrovňami](./FREE-TIERS-GUIDE.md)** — Získajte bezplatnú AI bez kreditnej karty
-- **[Riešenie problémov](../guides/TROUBLESHOOTING.md)** — Opravte bežné problémy
+- **[Sprievodca bezplatnými úrovňami](./FREE-TIERS-GUIDE.md)** — Pozrite si podmienky poskytovateľov a limity bezplatných úrovní
+- **[Riešenie problémov](../guides/TROUBLESHOOTING.md)** — Vyriešte bežné problémy
 
 ---
 
 ## Časté otázky
 
-### „Potrebujem kľúč API?“
+### „Potrebujem API kľúč?“
 
-**Nie!** Bezplatných poskytovateľov (Kiro, OpenCode Free, Pollinations) môžete používať bez akéhokoľvek kľúča API. Stačí ich pripojiť v ovládacom paneli.
+API kľúč OmniRoute slúži na overenie vašich nástrojov. Prihlasovacie údaje pre upstream služby závisia od poskytovateľa: niektorí vyžadujú API kľúč alebo prihlásenie do účtu. Bezplatný prístup nie je zaručený.
 
 ### „Čo je `auto`?“
 
-`auto` prikazuje OmniRoute, aby pre každú požiadavku automaticky vybral najlepšieho poskytovateľa. Zohľadňuje rýchlosť, cenu, kvalitu a dostupnosť. Podrobnosti nájdete v [Sprievodcovi Auto-Combo](./AUTO-COMBO-GUIDE.md).
+`auto` určuje, aby OmniRoute automaticky vybral najlepšieho poskytovateľa pre každú požiadavku. Zohľadňuje rýchlosť, cenu, kvalitu a dostupnosť. Podrobnosti nájdete v [sprievodcovi Auto-Combo](./AUTO-COMBO-GUIDE.md).
 
 ### „Koľko to stojí?“
 
-Samotný OmniRoute je **bezplatný a má otvorený zdrojový kód**. Platíte iba za poskytovateľov, ktorých používate. Mnohí poskytovatelia majú bezplatné úrovne — pozrite si [Sprievodcu bezplatnými úrovňami](./FREE-TIERS-GUIDE.md).
+Samotný OmniRoute je **bezplatný a má otvorený zdrojový kód**. Platíte iba za poskytovateľov, ktorých používate. Mnohí poskytovatelia ponúkajú bezplatné úrovne – pozrite si [sprievodcu bezplatnými úrovňami](./FREE-TIERS-GUIDE.md).
 
 ### „Môžem ho používať s Claude Code / Cursor / Copilot?“
 
-**Áno!** OmniRoute funguje s každým nástrojom, ktorý podporuje formát OpenAI. Stačí nastaviť základnú URL na `http://localhost:20128/v1`. Konkrétne pokyny na nastavenie nájdete v [Sprievodcovi nástrojmi CLI](../reference/CLI-TOOLS.md).
+**Áno!** OmniRoute funguje s každým nástrojom, ktorý podporuje formát OpenAI. Stačí nastaviť základnú URL adresu na `http://localhost:20128/v1`. Konkrétne pokyny na nastavenie nájdete v [sprievodcovi nástrojmi CLI](../reference/CLI-TOOLS.md).
 
 ### „Čo ak poskytovateľ prestane fungovať?“
 
-OmniRoute automaticky preskočí nefunkčných poskytovateľov a vyskúša ďalšieho. Nemusíte robiť nič. Podrobnosti nájdete v [Sprievodcovi Auto-Combo](./AUTO-COMBO-GUIDE.md).
+OmniRoute automaticky preskočí poskytovateľov, ktorí zlyhali, a vyskúša ďalšieho. Nemusíte robiť nič. Podrobnosti nájdete v [sprievodcovi Auto-Combo](./AUTO-COMBO-GUIDE.md).
 
 ---
 

@@ -176,11 +176,11 @@ test("v1 models catalog includes display names by default", async () => {
     new Request("http://localhost/api/v1/models")
   );
   const body = (await response.json()) as any;
-  const model = body.data.find((item) => item.id === "oc/big-pickle");
+  const model = body.data.find((item) => item.id === "unc/turboderp/Qwen3.8-27B-exl3");
 
   assert.equal(response.status, 200);
   assert.ok(model);
-  assert.equal(model.name, "Big Pickle");
+  assert.equal(model.name, "Qwen3.8 27B exl3 (🆓 Free)");
 });
 
 test("v1 models catalog omits display names when the feature flag is disabled", async () => {
@@ -191,12 +191,12 @@ test("v1 models catalog omits display names when the feature flag is disabled", 
       new Request("http://localhost/api/v1/models")
     );
     const body = (await response.json()) as any;
-    const model = body.data.find((item) => item.id === "oc/big-pickle");
+    const model = body.data.find((item) => item.id === "unc/turboderp/Qwen3.8-27B-exl3");
 
     assert.equal(response.status, 200);
     assert.ok(model);
     assert.equal("name" in model, false);
-    assert.equal(model.root, "big-pickle");
+    assert.equal(model.root, "turboderp/Qwen3.8-27B-exl3");
   } finally {
     featureFlagsDb.removeFeatureFlagOverride("MODEL_CATALOG_INCLUDE_NAMES");
   }
@@ -665,14 +665,8 @@ test("v1 models catalog exposes bare Codex-preferred IDs for native Codex client
   const getModel = (id: string) => body.data.find((item) => item.id === id);
 
   assert.equal(response.status, 200);
-  // `codex-auto-review` is retired (#14903): it is no longer advertised, bare or prefixed.
-  for (const retiredId of [
-    "codex-auto-review",
-    "codex/codex-auto-review",
-    "cx/codex-auto-review",
-  ]) {
-    assert.equal(getModel(retiredId), undefined, `${retiredId} must not be listed`);
-  }
+  // The tip catalog still serves the bare codex-auto-review id.
+  assert.ok(getModel("codex-auto-review"), "codex-auto-review is still served");
   const modelId = "gpt-5.6-sol";
   const bareModel = getModel(modelId);
   const providerModel = getModel(`codex/${modelId}`);
@@ -705,9 +699,9 @@ test("v1 models catalog exposes current Antigravity aliases without retired mode
   assert.equal(ids.has("antigravity/gemini-3.1-pro"), false);
   assert.equal(ids.has("antigravity/gemini-2.5-computer-use-preview-10-2025"), false);
   assert.equal(ids.has("antigravity/rev19-uic3-1p"), false);
-  assert.ok(ids.has("antigravity/gemini-3.7-flash-high"));
-  assert.ok(ids.has("antigravity/gemini-3.7-flash-medium"));
-  assert.ok(ids.has("antigravity/gemini-3.7-flash-low"));
+  assert.ok(ids.has("antigravity/gemini-3.8-flash-high"));
+  assert.ok(ids.has("antigravity/gemini-3.8-flash-medium"));
+  assert.ok(ids.has("antigravity/gemini-3.8-flash-low"));
   assert.equal(ids.has("antigravity/gemini-3.6-flash-high"), false);
   assert.equal(ids.has("antigravity/gemini-3.6-flash-medium"), false);
   assert.equal(ids.has("antigravity/gemini-3.6-flash-low"), false);
@@ -1607,7 +1601,7 @@ test("v1 models catalog computes combo context_length from known targets when so
   );
 });
 
-// Regression test for Issue #2798: noAuth providers (opencode/oc) have no DB connection rows
+// Regression test for Issue #2798: noAuth providers (e.g. uncloseai/unc) have no DB connection rows
 // but their models must still appear in /v1/models.
 test("v1 models catalog includes noAuth provider models when no DB connections exist (#2798)", async () => {
   // No connections seeded — empty DB, simulating a fresh install with no credentials added.
@@ -1618,21 +1612,21 @@ test("v1 models catalog includes noAuth provider models when no DB connections e
   const ids: string[] = body.data.map((item: any) => item.id);
 
   assert.equal(response.status, 200);
-  // opencode (noAuth) models must surface even with zero connection rows.
-  // The registry defines models under alias "oc" (e.g. "oc/big-pickle").
+  // noAuth models must surface even with zero connection rows, under the
+  // provider alias (e.g. "unc/<model>").
   assert.ok(
-    ids.some((id) => id.startsWith("oc/")),
-    `Expected at least one oc/* model in /v1/models but got none. IDs sample: ${ids.slice(0, 10).join(", ")}`
+    ids.some((id) => id.startsWith("unc/")),
+    `Expected at least one unc/* model in /v1/models but got none. IDs sample: ${ids.slice(0, 10).join(", ")}`
   );
   assert.equal(
-    ids.some((id) => id.startsWith("opencode/")),
+    ids.some((id) => id.startsWith("oc/")),
     false,
-    "catalog must not return opencode/* noAuth aliases because opencode/ routes to opencode-zen"
+    "the removed keyless OpenCode provider must not publish oc/* models"
   );
 });
 
 test("v1 models catalog hides disabled noAuth provider models", async () => {
-  await settingsDb.updateSettings({ blockedProviders: ["opencode", "duckduckgo-web"] });
+  await settingsDb.updateSettings({ blockedProviders: ["uncloseai", "duckduckgo-web"] });
 
   const response = await v1ModelsCatalog.getUnifiedModelsResponse(
     new Request("http://localhost/api/v1/models")
@@ -1642,9 +1636,9 @@ test("v1 models catalog hides disabled noAuth provider models", async () => {
 
   assert.equal(response.status, 200);
   assert.equal(
-    ids.some((id) => id.startsWith("oc/")),
+    ids.some((id) => id.startsWith("unc/")),
     false,
-    "OpenCode no-auth models must be hidden while no-auth providers are disabled"
+    "UncloseAI no-auth models must be hidden while no-auth providers are disabled"
   );
   assert.equal(
     ids.some((id) => id.startsWith("ddgw/")),

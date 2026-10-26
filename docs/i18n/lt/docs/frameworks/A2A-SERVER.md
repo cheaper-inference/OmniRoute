@@ -47,7 +47,7 @@ A2A valdoma jungikliu **Endpoints → A2A** ir pagal numatytuosius nustatymus yr
 
 ### `message/send` — sinchroninis vykdymas
 
-Nusiunčia pranešimą įgūdžiui ir laukia išsamaus atsakymo.
+Siunčia pranešimą įgūdžiui ir laukia viso atsakymo.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Naudojant `smart-routing`, `metadata.combo` yra aiškiai nurodytas
+`metadata.model` perrašymas šliuzo užklausai; jis siunčiamas kaip tikrasis `model`,
+o ne kaip ignoruojamas `x-combo` JSON laukas. Įprastas šliuzo API rakto ir
+konkretaus tikslo autorizavimas vis tiek taikomas. Netinkamas arba tuščias derinys atmetamas.
+
+Rezultate pateikiami `requested_combo` (kvietėjo ketinimas), `dispatched_model`
+(faktinė šliuzo užklausa), `response_model` (šliuzo atsakymas) ir
+`confirmed_combo`. Paskutinis laukas yra `null`, nebent šliuzas aiškiai
+nurodo derinį. A2A sprendimų žurnaluose vykdymas priskiriamas tik
+patvirtintam deriniui, o nepatvirtinta užklausa išsaugoma kaip `requestedCombo`.
+
 **Atsakymas:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE srautinis perdavimas
 
-Veikia taip pat kaip `message/send`, tačiau grąžina serverio siunčiamus įvykius (Server-Sent Events), skirtus srautiniam perdavimui realiuoju laiku.
+Veikia taip pat kaip `message/send`, tačiau grąžina „Server-Sent Events“, kad duomenys būtų perduodami srautu realiuoju laiku.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Pasiekiami gebėjimai
+## Prieinami įgūdžiai
 
-OmniRoute pateikia 6 A2A gebėjimus, susietus faile `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kiekvieno gebėjimo modulis yra kataloge `src/lib/a2a/skills/`.
+OmniRoute atveria 6 A2A įgūdžius, prijungtus `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kiekvieno įgūdžio modulis yra `src/lib/a2a/skills/`.
 
-| Gebėjimas             | ID                   | Aprašas                                                                                                                                                | Žymos                           | Pavyzdžiai                                      |
-| :-------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :---------------------------------------------- |
-| Išmanusis nukreipimas | `smart-routing`      | Nukreipia užklausą per optimalų teikėją arba derinį, naudodamas OmniRoute derinių variklį ir vertinimą                                                 | nukreipimas, teikėjai           | „Nukreipkite šią užklausą per geriausią modelį“ |
-| Kvotų valdymas        | `quota-management`   | Pateikia kiekvieno teikėjo kvotos būseną ir padeda kvietėjams nuspręsti, kada riboti srautą arba pakeisti teikėją                                      | kvotos, teikėjai                | „Patikrinkite anthropic kvotą“                  |
-| Teikėjų aptikimas     | `provider-discovery` | Išvardija įdiegtus teikėjus, jų galimybes, nemokamo lygio požymius ir OAuth būseną                                                                     | teikėjai, aptikimas             | „Kokie teikėjai yra pasiekiami?“                |
-| Išlaidų analizė       | `cost-analysis`      | Įvertina užklausos ar pokalbio kainą pagal katalogą ir naujausius naudojimo duomenis                                                                   | išlaidos, naudojimas            | „Įvertinkite šio pokalbio kainą“                |
-| Būklės ataskaita      | `health-report`      | Apibendrina kiekvieno teikėjo grandinės pertraukiklio, atvėsimo laikotarpio ir blokavimo būseną                                                        | būklė, atsparumas               | „Parodykite visų teikėjų būklę“                 |
-| Galimybių sąrašas     | `list-capabilities`  | Grąžina visą 45 įrašų Agent Skills katalogą (23 API + 21 CLI + 1 konfigūracija) kaip markdown lentelę su tiesioginiais SKILL.md URL kontekstui įterpti | katalogas, aptikimas, gebėjimai | „Išvardykite visas OmniRoute galimybes“         |
+| Įgūdis                  | ID                   | Aprašymas                                                                                                                                                       | Žymos                      | Pavyzdžiai                                      |
+| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :---------------------------------------------- |
+| Išmanusis maršrutavimas | `smart-routing`      | Nukreipia užklausą per optimaliausią teikėją/kombinaciją, naudojant OmniRoute kombinacijų variklį + vertinimą balais                                            | routing, providers         | „Nukreipkite šią užklausą per geriausią modelį“ |
+| Kvotų valdymas          | `quota-management`   | Praneša apie kiekvieno teikėjo kvotų būseną, padeda kvietėjams nuspręsti, kada riboti srautą arba persijungti                                                   | quota, providers           | „Patikrinkite anthropic kvotą“                  |
+| Teikėjų aptikimas       | `provider-discovery` | Išvardija įdiegtus teikėjus su jų galimybėmis, nemokamo plano žymėmis ir OAuth būsena                                                                           | providers, discovery       | „Kokie teikėjai prieinami?“                     |
+| Išlaidų analizė         | `cost-analysis`      | Įvertina užklausos/pokalbio kainą pagal katalogą + naujausią naudojimą                                                                                          | cost, usage                | „Įvertinkite šio pokalbio kainą“                |
+| Būklės ataskaita        | `health-report`      | Apibendrina grandinės pertraukiklio (circuit breaker), atvėsimo (cooldown) ir blokavimo (lockout) būsenas kiekvienam teikėjui                                   | health, resilience         | „Rodykite visų teikėjų būklę“                   |
+| Galimybių sąrašas       | `list-capabilities`  | Grąžina visą 45 įrašų agentų įgūdžių katalogą (23 API + 21 CLI + 1 konfigūraciją) kaip markdown lentelę su neapdorotomis (raw) SKILL.md URL konteksto įterpimui | catalog, discovery, skills | „Išvardykite visas OmniRoute galimybes“         |
 
-> Agent Card turi būti suderinta su aktualiu 352 teikėjų katalogu; teikėjų skaičius ir nemokamo lygio bei autentifikavimo nereikalaujančių teikėjų metaduomenys gaunami iš vykdymo laiko registro.
+> Agent Card turėtų būti nuolat suderinama su tiesioginiu 375 teikėjų katalogu; teikėjų skaičiai bei metaduomenys apie nemokamą prieigą / prieigą be autentifikacijos gaunami iš vykdymo laiko registro.
 
-### Išsami informacija apie `list-capabilities` gebėjimą
+### `list-capabilities` įgūdžio detalės
 
-`list-capabilities` gebėjimas ypač naudingas išoriniams agentams, kuriems prieš siunčiant API iškvietimus reikia sužinoti, ką pateikia OmniRoute. Jis grąžina struktūrizuotą markdown lentelės artefaktą:
+`list-capabilities` įgūdis ypač naudingas išoriniams agentams, kuriems prieš siunčiant API užklausas reikia sužinoti, ką atveria OmniRoute. Jis grąžina struktūrizuotą markdown lentelės artefaktą:
 
 ```
-| ID | Pavadinimas | Kategorija | Sritis | Galiniai taškai / komandos | Tiesioginis URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentifikavimas ir seansai | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Kiekvienoje eilutėje yra `rawUrl` stulpelis, todėl agentai gali nedelsdami gauti visą SKILL.md. Laukas `metadata.totalSkills` atitinka katalogo dydį (šiuo metu 45). Įgyvendinimas: `src/lib/a2a/skills/listCapabilities.ts`. Taip pat žr. [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Kiekviena eilutė apima `rawUrl` stulpelį, kad agentai galėtų iškart gauti visą SKILL.md. Laukas `metadata.totalSkills` atspindi katalogo dydį (šiandien – 45). Įgyvendinimas: `src/lib/a2a/skills/listCapabilities.ts`. Taip pat žr. [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -264,7 +268,7 @@ pateikta → vykdoma → užbaigta
 
 ## Integravimo pavyzdžiai
 
-### Python (requests)
+### Python (`requests`)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (`fetch`)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

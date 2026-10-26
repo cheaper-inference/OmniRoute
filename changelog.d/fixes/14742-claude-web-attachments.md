@@ -1,1 +1,0 @@
-- fix(claude-web): forward text file attachments to claude.ai instead of hardcoding empty attachments (#14742)

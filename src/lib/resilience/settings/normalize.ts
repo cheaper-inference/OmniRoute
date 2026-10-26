@@ -11,6 +11,7 @@
 import { resolveFeatureFlag } from "@/shared/utils/featureFlags";
 import type {
   JsonRecord,
+  ResilienceSettings,
   RequestQueueSettings,
   ConnectionCooldownProfileSettings,
   ProviderBreakerProfileSettings,
@@ -19,6 +20,7 @@ import type {
   ComboCooldownWaitSettings,
   QuotaShareConcurrencyLimitSettings,
   StreamStallCooldownSettings,
+  P2CLatencySettings,
   ProviderCooldownSettings,
   QuotaPreflightSettings,
   StreamRecoverySettings,
@@ -416,6 +418,14 @@ export function normalizeStreamStallCooldownSettings(
   return { enabled: toBoolean(record.enabled, fallback.enabled) };
 }
 
+export function normalizeP2CLatencySettings(
+  next: unknown,
+  fallback: P2CLatencySettings
+): P2CLatencySettings {
+  const record = asRecord(next);
+  return { weight: toInteger(record.weight, fallback.weight, { min: 0, max: 20 }) };
+}
+
 export function normalizeProviderCooldownSettings(
   next: unknown,
   fallback: ProviderCooldownSettings
@@ -521,4 +531,66 @@ export function normalizeCredentialHealthCheckSettings(
       max: 1440,
     }),
   };
+}
+
+/**
+ * Keep only the leaves of a normalized resilience object that differ from the
+ * fresh defaults. The PATCH route merges the operator body over the stored
+ * partial (which injects defaults for untouched keys) and then prunes the
+ * result against the current defaults, so only operator-chosen values stay
+ * stored and every other key keeps following the environment and flags.
+ */
+export function pruneResilienceSettingsToProvided(
+  merged: ResilienceSettings,
+  freshDefaults: ResilienceSettings
+): Partial<ResilienceSettings> {
+  const sparse = pruneUnknownToProvided(
+    merged as unknown as JsonRecord,
+    freshDefaults as unknown as JsonRecord
+  ) as unknown as Partial<ResilienceSettings>;
+  return sparse;
+}
+
+function pruneUnknownToProvided(merged: JsonRecord, freshDefaults: JsonRecord): JsonRecord {
+  const sparse: JsonRecord = {};
+  for (const [section, value] of Object.entries(merged)) {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      const prunedSection = pruneUnknownToProvided(
+        asRecord(value),
+        asRecord(freshDefaults[section])
+      );
+      if (Object.keys(prunedSection).length > 0) {
+        sparse[section] = prunedSection;
+      }
+      continue;
+    }
+    if (value === undefined) continue;
+    if (section in freshDefaults && valuesEqual(value, freshDefaults[section])) {
+      continue;
+    }
+    sparse[section] = value;
+  }
+  return sparse;
+}
+
+function valuesEqual(first: unknown, second: unknown): boolean {
+  if (first === second) return true;
+  if (
+    first &&
+    second &&
+    typeof first === "object" &&
+    typeof second === "object" &&
+    !Array.isArray(first) &&
+    !Array.isArray(second)
+  ) {
+    const firstRecord = first as Record<string, unknown>;
+    const secondRecord = second as Record<string, unknown>;
+    const firstKeys = Object.keys(firstRecord);
+    const secondKeys = Object.keys(secondRecord);
+    if (firstKeys.length !== secondKeys.length) return false;
+    return firstKeys.every(
+      (key) => key in secondRecord && valuesEqual(firstRecord[key], secondRecord[key])
+    );
+  }
+  return false;
 }

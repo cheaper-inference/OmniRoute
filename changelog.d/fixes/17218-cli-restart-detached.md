@@ -1,0 +1,1 @@
+- **fix(cli):** `omniroute restart` now returns to the shell — it stopped the daemon and then started the new server in the foreground supervisor (no `daemon: true`), so it never exited and blocked scripts and scheduled tasks; the restarted server now detaches like `serve --daemon` ([#17218](https://github.com/diegosouzapw/OmniRoute/pull/17218)) — thanks @yourspraveen

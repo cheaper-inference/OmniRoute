@@ -116,31 +116,40 @@ Câmpul `region` are valoarea implicită `us-east-1` atunci când este omis.
 
 ---
 
-## Fluxul de importare prin cheie API
+## Fluxul de import al cheii API
 
-Autentificarea prin cheie API este destinată acreditărilor bearer Kiro / AWS CodeWhisperer cu durată lungă de viață. Aceasta
-nu utilizează reîmprospătarea OAuth, evitând astfel invalidarea sesiunilor OIDC partajate.
+Autentificarea prin cheie API este destinată acreditărilor bearer Kiro / AWS CodeWhisperer cu durată lungă de viață. Aceasta nu
+utilizează reîmprospătarea OAuth, evitând astfel invalidarea sesiunilor OIDC partajate.
 
-### Dashboard
+### Panou de control
 
-1. Deschideți **Dashboard -> Providers -> Kiro**.
-2. Alegeți **API Key**.
-3. Inserați cheia API și, opțional, regiunea AWS (`us-east-1` în mod implicit).
-4. OmniRoute validează cheia și salvează conexiunea.
+1. Deschideți **Panou de control -> Furnizori -> Kiro**.
+2. Alegeți **Cheie API**.
+3. Lipiți cheia API și selectați regiunea AWS: **Detectare automată** (implicit), **SUA Est
+   (N. Virginia)** sau **Europa (Frankfurt)**.
+4. OmniRoute validează cheia și salvează conexiunea fixată la regiunea în care
+   funcționează cheia.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` acceptă `auto` (implicit), `us-east-1` sau `eu-central-1`; orice altă valoare este
+respinsă cu HTTP 400.
 
 ### Contract intern
 
 Ruta API validează cheia apelând `KiroService.validateApiKey()`, care
-utilizează `ListAvailableProfiles` pentru endpoint-ul CodeWhisperer/Amazon Q corespunzător regiunii
-și identifică un `profileArn`.
+apelează `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API-ul de suprafață Amazon Q utilizat pentru inferența prin cheie API), cu un timeout de 10 s pentru fiecare regiune. În
+modul `auto`, încearcă `us-east-1`, apoi `eu-central-1` și stochează prima regiune
+care acceptă cheia. O cheie respinsă în toate regiunile candidate determină eșecul importului cu
+HTTP 400. Apoi, `ListAvailableProfiles` este apelat în regim best-effort pentru a descoperi un
+`profileArn` opțional (AWS refuză accesul la acesta pentru majoritatea cheilor API).
 
 Conexiunea salvată utilizează:
 
@@ -155,10 +164,13 @@ Conexiunea salvată utilizează:
 }
 ```
 
-La rulare, `KiroExecutor.buildHeaders()` trimite cheia ca
+În timpul execuției, `KiroExecutor.buildHeaders()` trimite cheia ca
 `Authorization: Bearer <key>` și adaugă `tokentype: API_KEY`. Apelurile pentru cote/profil
-utilizează același marcaj, astfel încât AWS tratează valoarea bearer ca pe o cheie API cu durată lungă de viață, și nu ca pe
-un token de acces OIDC sau social.
+utilizează același marcaj, astfel încât AWS să trateze acreditarea bearer drept o cheie API cu durată lungă de viață, nu
+drept un token de acces OIDC sau social. `KiroExecutor.execute()` trimite inferența prin cheie API numai
+către `https://q.<region>.amazonaws.com/generateAssistantResponse` — inclusiv pentru `us-east-1`
+— deoarece gateway-ul IDE Kiro respinge `TokenType=API_KEY`, iar
+`codewhisperer.us-east-1` respinge sarcinile utile cu cheie API ca având un corp de cerere nevalid (HTTP 400).
 
 ---
 

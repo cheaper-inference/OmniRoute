@@ -31,6 +31,7 @@ export interface ReasoningStateInspection {
 export interface ReasoningInputPolicyOptions {
   provider?: string | null;
   preserveEncryptedReasoning?: boolean;
+  preserveWebSearchCalls?: boolean;
   onIncompatibleReasoning?: "reject" | "drop";
 }
 
@@ -258,7 +259,9 @@ function sanitizeResponsesInput(
   input: unknown[],
   transport: ReasoningTransport,
   dropIncompatible: boolean,
-  stripOrphanedSummaries: boolean
+  stripOrphanedSummaries: boolean,
+  preserveWebSearchCalls: boolean,
+  preserveMessageIds: boolean = false
 ): unknown[] {
   const filtered: unknown[] = [];
   for (const item of input) {
@@ -269,6 +272,10 @@ function sanitizeResponsesInput(
       continue;
     }
     if (record.type === "item_reference") continue;
+    if (preserveWebSearchCalls && record.type === "web_search_call") {
+      filtered.push({ ...record });
+      continue;
+    }
 
     if (record.type === "reasoning") {
       const next = dropIncompatible
@@ -300,7 +307,14 @@ function sanitizeResponsesInput(
     // replayed server id, and a malformed one (e.g. `null`, same opencode/zen
     // omission pattern as the reasoning branch above) must not survive either
     // (#11108).
-    if (cloned.id !== undefined) delete cloned.id;
+    // ChatGPT Web binds the native environment and user instruction to these IDs.
+    // Other upstreams retain their existing replay sanitation.
+    const ownedMessageId =
+      preserveMessageIds &&
+      record.type === "message" &&
+      typeof cloned.id === "string" &&
+      cloned.id.startsWith("msg_");
+    if (cloned.id !== undefined && !ownedMessageId) delete cloned.id;
     filtered.push(cloned);
   }
   return filtered;
@@ -351,7 +365,9 @@ export function applyReasoningInputPolicy(
       body.input,
       transport,
       incompatibleReasoning || mixedState,
-      body.store === false
+      body.store === false,
+      options.preserveWebSearchCalls === true,
+      options.provider === "chatgpt-web-codex"
     );
   }
   return { incompatibleReasoning: false };

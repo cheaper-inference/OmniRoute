@@ -233,6 +233,7 @@ test("v1 image models GET exposes current Codex image models and hides inactive 
       "codex/gpt-5.6-terra-image",
       "codex/gpt-5.6-luna-image",
       "codex/gpt-image-2.5-flare",
+      "codex/gpt-image-2.5-sunburst",
       "codex/gpt-image-2",
     ]
   );

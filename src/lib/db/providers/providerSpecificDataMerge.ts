@@ -1,4 +1,5 @@
 import { getDbInstance } from "../core";
+import { encryptConnectionFields } from "../encryption";
 import { invalidateDbCache } from "../readCache";
 import { parseProviderSpecificData } from "../webSessionDedup";
 
@@ -37,9 +38,13 @@ export async function mergeConnectionProviderSpecificData(
       (row as { provider_specific_data?: unknown }).provider_specific_data
     );
     const merged = { ...existing, ...patch };
+    // A patch carrying a declared secret field in plaintext (a quota fetcher refreshing
+    // a console cookie, an executor minting a bearer) is enveloped exactly like a
+    // full-row write; values already stored as envelopes are left as they are.
+    const stored = encryptConnectionFields({ providerSpecificData: merged }).providerSpecificData;
     db.prepare(
       "UPDATE provider_connections SET provider_specific_data = ?, updated_at = ? WHERE id = ?"
-    ).run(JSON.stringify(merged), new Date().toISOString(), id);
+    ).run(JSON.stringify(stored), new Date().toISOString(), id);
     invalidateDbCache("connections", id, { skipModelCatalog: true });
   })();
 }

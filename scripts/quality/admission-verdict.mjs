@@ -19,6 +19,24 @@ const RESULTS = new Set(["success", "failure", "cancelled", "skipped"]);
 const FLAGS = ["code", "docs", "i18n", "workflow", "testsOnly"];
 const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 
+// GitHub event fields, not a user-supplied label or environment override. The bot
+// ID is Mergify's GitHub App identity; a fork or a forged prefix is not a queue.
+function isMergifyCandidate(context) {
+  return (
+    context?.event === "pull_request" &&
+    context.draft === true &&
+    context.author?.id === 37929162 &&
+    context.author?.login === "mergify[bot]" &&
+    context.author?.type === "Bot" &&
+    typeof context.headRef === "string" &&
+    context.headRef.startsWith("mergify/merge-queue/") &&
+    Number.isSafeInteger(context.repositoryId) &&
+    context.repositoryId > 0 &&
+    context.headRepositoryId === context.repositoryId &&
+    context.baseRepositoryId === context.repositoryId
+  );
+}
+
 function applies(when, flags, event) {
   switch (when) {
     case "always":
@@ -53,7 +71,7 @@ export function evaluateAdmission(policy, profileName, context, needs) {
   if (!/^[a-f0-9]{40}$/.test(context?.sha || "")) errors.push("invalid candidate SHA");
   if (!/^[1-9][0-9]*$/.test(context?.runId || "")) errors.push("invalid run ID");
   if (!/^[1-9][0-9]*$/.test(context?.runAttempt || "")) errors.push("invalid run attempt");
-  if (context?.event === "pull_request" && context.draft !== false)
+  if (context?.event === "pull_request" && context.draft !== false && !isMergifyCandidate(context))
     errors.push("draft or unknown PR readiness");
   if (!isRecord(needs)) errors.push("invalid needs payload");
   const outputs = needs?.changes?.outputs;
@@ -130,6 +148,11 @@ function main() {
       runId: process.env.GITHUB_RUN_ID,
       runAttempt: process.env.GITHUB_RUN_ATTEMPT,
       draft: event.pull_request?.draft,
+      headRef: event.pull_request?.head?.ref,
+      author: event.pull_request?.user,
+      repositoryId: event.repository?.id,
+      headRepositoryId: event.pull_request?.head?.repo?.id,
+      baseRepositoryId: event.pull_request?.base?.repo?.id,
     },
     JSON.parse(process.env.NEEDS_JSON)
   );

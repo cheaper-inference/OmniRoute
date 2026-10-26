@@ -1,6 +1,6 @@
 {
   "name": "omniroute-desktop",
-  "version": "3.8.52",
+  "version": "3.8.53",
   "description": "OmniRoute Desktop Application",
   "main": "main.js",
   "author": {
@@ -28,7 +28,7 @@
     "electron-updater": "^6.8.9"
   },
   "devDependencies": {
-    "electron": "^44.5.1",
+    "electron": "^44.9.1",
     "electron-builder": "^26.15.3"
   },
   "overrides": {
@@ -68,6 +68,7 @@
       "lib/resolveRemoteServerUrl.js",
       "lib/remoteServerPreferences.js",
       "lib/serverReadiness.js",
+      "lib/healthWatchdog.js",
       "lib/windowClosePolicy.js",
       "assets/remoteServerPrompt.html",
       "package.json",

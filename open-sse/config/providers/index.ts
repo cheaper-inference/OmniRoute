@@ -161,6 +161,7 @@ import { devin_desktopProvider } from "./registry/devin-desktop/index.ts";
 import { zcodeProvider } from "./registry/zcode/index.ts";
 import { zed_hostedProvider } from "./registry/zed-hosted/index.ts";
 import { nanogptProvider } from "./registry/nanogpt/index.ts";
+import { nanProvider } from "./registry/nan/index.ts";
 import { apmixProvider } from "./registry/apmix/index.ts";
 import { scalewayProvider } from "./registry/scaleway/index.ts";
 import { agentrouterProvider } from "./registry/agentrouter/index.ts";
@@ -201,7 +202,6 @@ import { vercel_ai_gatewayProvider } from "./registry/vercel-ai-gateway/index.ts
 import { v0_vercelProvider } from "./registry/v0-vercel/index.ts";
 import { opencode_zenProvider } from "./registry/opencode/zen/index.ts";
 import { opencode_goProvider } from "./registry/opencode/go/index.ts";
-import { opencodeProvider } from "./registry/opencode/index.ts";
 import { dahlProvider } from "./registry/dahl/index.ts";
 import { maritalkProvider } from "./registry/maritalk/index.ts";
 import { basetenProvider } from "./registry/baseten/index.ts";
@@ -226,6 +226,7 @@ import { tokenrouterProvider } from "./registry/tokenrouter/index.ts";
 import { token_kioskProvider } from "./registry/token-kiosk/index.ts";
 import { grok_cliProvider } from "./registry/grok-cli/index.ts";
 import { codebuddy_cnProvider } from "./registry/codebuddy-cn/index.ts";
+import { codebuddy_intlProvider } from "./registry/codebuddy-intl/index.ts";
 import { pioneerProvider } from "./registry/pioneer/index.ts";
 import { zenmux_freeProvider } from "./registry/zenmux-free/index.ts";
 import { tinycmsProvider } from "./registry/tinycms/index.ts";
@@ -257,6 +258,7 @@ import { lyceumProvider } from "./registry/lyceum/index.ts";
 import { llmKiwiProvider } from "./registry/llm-kiwi/index.ts";
 import { literouterProvider } from "./registry/literouter/index.ts";
 import { greenptProvider } from "./registry/greenpt/index.ts";
+import { ainetcafeProvider } from "./registry/ainetcafe/index.ts";
 import { onomeoProvider } from "./registry/onomeo/index.ts";
 import { eurouterProvider } from "./registry/eurouter/index.ts";
 import { unificallyProvider } from "./registry/unifically/index.ts";
@@ -286,6 +288,8 @@ import { seekaiProvider } from "./registry/seekai/index.ts";
 import { tokenmarketProvider } from "./registry/tokenmarket/index.ts";
 import { twinmindProvider } from "./registry/twinmind/index.ts";
 import { syntxProvider } from "./registry/syntx/index.ts";
+import { daoxeProvider } from "./registry/daoxe/index.ts";
+import { demonrouteProvider } from "./registry/demonroute/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
   aimlapi: aimlapiProvider,
@@ -447,6 +451,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   zcode: zcodeProvider,
   "zed-hosted": zed_hostedProvider,
   nanogpt: nanogptProvider,
+  nan: nanProvider,
   apmix: apmixProvider,
   scaleway: scalewayProvider,
   agentrouter: agentrouterProvider,
@@ -488,7 +493,6 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "v0-vercel": v0_vercelProvider,
   "opencode-zen": opencode_zenProvider,
   "opencode-go": opencode_goProvider,
-  opencode: opencodeProvider,
   dahl: dahlProvider,
   maritalk: maritalkProvider,
   baseten: basetenProvider,
@@ -515,6 +519,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "token-kiosk": token_kioskProvider,
   "grok-cli": grok_cliProvider,
   "codebuddy-cn": codebuddy_cnProvider,
+  "codebuddy-intl": codebuddy_intlProvider,
   pioneer: pioneerProvider,
   "zenmux-free": zenmux_freeProvider,
   "tinycms-web": tinycmsProvider,
@@ -547,6 +552,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "llm-kiwi": llmKiwiProvider,
   literouter: literouterProvider,
   greenpt: greenptProvider,
+  ainetcafe: ainetcafeProvider,
   onomeo: onomeoProvider,
   eurouter: eurouterProvider,
   unifically: unificallyProvider,
@@ -576,4 +582,6 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   tokenmarket: tokenmarketProvider,
   twinmind: twinmindProvider,
   syntx: syntxProvider,
+  daoxe: daoxeProvider,
+  demonroute: demonrouteProvider,
 };

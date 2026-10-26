@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 /**
  * ProviderModelsSection — Issue #3501 Phase 1m
  *
@@ -12,7 +14,7 @@
  */
 
 import { useState } from "react";
-import { Button } from "@/shared/components";
+import { ActionBar, AutoGrid, Button } from "@/shared/components";
 import { matchesModelCatalogQuery } from "@/shared/utils/modelCatalogSearch";
 import { isFreeModel, sortModelsFreeFirst } from "@/shared/utils/freeModels";
 import {
@@ -45,8 +47,18 @@ export interface ProviderModelsSectionProps {
   allowModelImport: boolean;
 
   // Models data
-  models: Array<{ id: string; name?: string; source?: string }>;
-  modelMeta: { customModels: any[]; modelCompatOverrides?: any[] };
+  models: Array<{
+    id: string;
+    name?: string;
+    source?: string;
+    supportedEndpoints?: string[];
+    endpointCapabilitySource?: string;
+  }>;
+  modelMeta: {
+    customModels: any[];
+    modelCompatOverrides?: any[];
+    endpointAdapters?: Record<string, "available" | "unavailable" | "unknown">;
+  };
   modelAliases: Record<string, string>;
   syncedAvailableModels: any[];
   syncedCatalogAuthoritative?: boolean;
@@ -184,42 +196,46 @@ export default function ProviderModelsSection({
     (connection) => connection.isActive !== false && typeof connection.id === "string"
   );
   const autoFetchModelsToggle = canConfigureAutoFetchModels && (
-    <button
+    <Button
+      size="sm"
+      variant="outline"
       onClick={handleToggleAutoFetchModels}
       disabled={togglingAutoFetchModels}
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border bg-transparent cursor-pointer text-[12px] disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-pressed={isAutoFetchModelsEnabled}
+      className="text-[12px]"
       title={providerText(
         t,
         "autoFetchModelsTooltip",
         "Fetch and cache upstream models when needed"
       )}
     >
-      <span
-        className="material-symbols-outlined text-[16px]"
-        style={{ color: isAutoFetchModelsEnabled ? "#22c55e" : "var(--color-text-muted)" }}
-      >
-        {isAutoFetchModelsEnabled ? "toggle_on" : "toggle_off"}
-      </span>
+      <Icon
+        name={isAutoFetchModelsEnabled ? "toggle_on" : "toggle_off"}
+        size={16}
+        className={isAutoFetchModelsEnabled ? "text-success" : "text-text-muted"}
+      />
       <span className="text-text-main">
         {providerText(t, "autoFetchModels", "Auto-fetch upstream models")}
       </span>
-    </button>
+    </Button>
   );
   const autoSyncToggle = allowModelImport && compatibleSupportsModelImport && canImportModels && (
-    <button
+    <Button
+      size="sm"
+      variant="outline"
       onClick={handleToggleAutoSync}
       disabled={togglingAutoSync}
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border bg-transparent cursor-pointer text-[12px] disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-pressed={isAutoSyncEnabled}
+      className="text-[12px]"
       title={t("autoSyncTooltip")}
     >
-      <span
-        className="material-symbols-outlined text-[16px]"
-        style={{ color: isAutoSyncEnabled ? "#22c55e" : "var(--color-text-muted)" }}
-      >
-        {isAutoSyncEnabled ? "toggle_on" : "toggle_off"}
-      </span>
+      <Icon
+        name={isAutoSyncEnabled ? "toggle_on" : "toggle_off"}
+        size={16}
+        className={isAutoSyncEnabled ? "text-success" : "text-text-muted"}
+      />
       <span className="text-text-main">{t("autoSync")}</span>
-    </button>
+    </Button>
   );
   const modelDiscoveryControls = (
     <>
@@ -229,15 +245,17 @@ export default function ProviderModelsSection({
   );
 
   const clearAllButton = (modelMeta.customModels.length > 0 || providerAliasEntries.length > 0) && (
-    <button
+    <Button
+      size="sm"
+      variant="danger"
+      icon="delete_sweep"
       onClick={handleClearAllModels}
       disabled={clearingModels}
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-red-300 dark:border-red-800 bg-transparent cursor-pointer text-[12px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
       title={t("clearAllModels")}
+      className="text-[12px]"
     >
-      <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
       <span>{t("clearAllModels")}</span>
-    </button>
+    </Button>
   );
 
   if (isManagedAvailableModelsProvider) {
@@ -261,10 +279,10 @@ export default function ProviderModelsSection({
 
     return (
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <ActionBar align="start" className="mb-4">
           {modelDiscoveryControls}
           {clearAllButton}
-        </div>
+        </ActionBar>
         <CompatibleModelsSection
           providerStorageAlias={providerStorageAlias}
           providerDisplayAlias={providerDisplayAlias}
@@ -273,6 +291,7 @@ export default function ProviderModelsSection({
           syncedCatalogAuthoritative={syncedCatalogAuthoritative}
           customModels={modelMeta.customModels}
           fallbackModels={compatibleFallbackModels}
+          endpointAdapters={modelMeta.endpointAdapters ?? {}}
           description={description}
           inputLabel={inputLabel}
           inputPlaceholder={inputPlaceholder}
@@ -329,7 +348,7 @@ export default function ProviderModelsSection({
 
     return (
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <ActionBar align="start" className="mb-4">
           {allowModelImport && (
             <Button
               size="sm"
@@ -346,7 +365,7 @@ export default function ProviderModelsSection({
           {allowModelImport && !canImportModels && (
             <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
           )}
-        </div>
+        </ActionBar>
         <PassthroughModelsSection
           providerAlias={providerAlias}
           modelAliases={modelAliases}
@@ -354,6 +373,7 @@ export default function ProviderModelsSection({
           syncedCatalogAuthoritative={syncedCatalogAuthoritative}
           availableModels={syncedAvailableModels}
           customModels={modelMeta.customModels}
+          endpointAdapters={modelMeta.endpointAdapters ?? {}}
           description={passthroughDescription}
           inputLabel={passthroughInputLabel}
           inputPlaceholder={passthroughInputPlaceholder}
@@ -375,6 +395,7 @@ export default function ProviderModelsSection({
           bulkTogglePending={bulkVisibilityAction !== null}
           togglingModelId={togglingModelId}
           onTestModel={onTestModel}
+          onModelsChanged={fetchProviderModelMeta}
           modelTestStatus={modelTestStatus}
           onModelTestStatusChange={onModelTestStatusChange}
           testingModelId={testingModelId}
@@ -388,7 +409,7 @@ export default function ProviderModelsSection({
   }
 
   const importButton = allowModelImport ? (
-    <div className="flex items-center gap-2 mb-4">
+    <ActionBar align="start" className="mb-4">
       <Button
         size="sm"
         variant="secondary"
@@ -402,7 +423,7 @@ export default function ProviderModelsSection({
       {!canImportModels && (
         <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
       )}
-    </div>
+    </ActionBar>
   ) : null;
 
   if (models.length === 0) {
@@ -497,12 +518,32 @@ export default function ProviderModelsSection({
           onSortFreeFirstChange={setSortFreeFirst}
         />
       )}
-      <div className="flex flex-wrap gap-3">
+      <AutoGrid>
         {displayModels.map((model) => {
           return (
             <ModelRow
               key={model.id}
               model={model}
+              endpointInfo={(() => {
+                const discovered = syncedAvailableModels.find((row) => row.id === model.id);
+                const operator = modelMeta.customModels.find((row) => row.id === model.id);
+                return {
+                  supportedEndpoints:
+                    operator?.supportedEndpoints ??
+                    model.supportedEndpoints ??
+                    discovered?.supportedEndpoints,
+                  endpointCapabilitySource:
+                    operator?.endpointCapabilitySource ??
+                    model.endpointCapabilitySource ??
+                    discovered?.endpointCapabilitySource,
+                  discoveredEndpoints: discovered?.supportedEndpoints,
+                  resettable: Boolean(
+                    discovered && operator?.endpointCapabilitySource === "operator"
+                  ),
+                  onChanged: fetchProviderModelMeta,
+                  adapterStatuses: modelMeta.endpointAdapters ?? {},
+                };
+              })()}
               fullModel={`${providerDisplayAlias}/${model.id}`}
               provider={providerId}
               alias={aliasByModelId[model.id]}
@@ -530,13 +571,13 @@ export default function ProviderModelsSection({
           );
         })}
         {filteredModels.length === 0 && modelFilter && (
-          <p className="text-sm text-text-muted py-2">
+          <p className="col-span-full text-sm text-text-muted py-2">
             {providerText(t, "noModelsMatch", `No models match "${modelFilter}"`, {
               filter: modelFilter,
             })}
           </p>
         )}
-      </div>
+      </AutoGrid>
     </div>
   );
 }

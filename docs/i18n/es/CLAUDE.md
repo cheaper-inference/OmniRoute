@@ -11,15 +11,16 @@
 aprendizajes sobre PII). Léelo por completo; no vuelvas a añadir aquí las reglas del proyecto. Todo lo que aparece a continuación se aplica ÚNICAMENTE
 a Claude Code: ajustes operativos de las reglas ya definidas en `AGENTS.md`.
 
-## Aislamiento de worktrees — aspectos específicos de Claude Code
+## Aislamiento de worktrees — Aspectos específicos de Claude Code
 
-El protocolo obligatorio completo para worktrees (confirmación de la rama base, ruta canónica
-`.claude/worktrees/`, `cp -al` node_modules, reglas de eliminación) está en `AGENTS.md` → Flujo de trabajo de Git → "Aislamiento de
-worktrees". Puntos específicos de Claude Code:
+El protocolo obligatorio completo de worktrees (confirmación de la rama base, ruta canónica
+`.claude/worktrees/`, `cp -al` node_modules, reglas de desmantelamiento) se encuentra en
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (resumido en `AGENTS.md` →
+Flujo de trabajo de Git → "Aislamiento de worktrees"). Puntos específicos de Claude Code:
 
-- Confirma la rama base con el operador mediante `AskUserQuestion` (Regla Estricta #19), salvo que ya
-  te la haya indicado.
-- Prefiere la herramienta nativa `EnterWorktree`, que ya crea worktrees en
+- Confirma la rama base con el operador mediante `AskUserQuestion` (Regla estricta n.º 19), a menos
+  que ya te lo haya indicado.
+- Prefiere la herramienta nativa `EnterWorktree`: ya crea worktrees bajo
   `.claude/worktrees/` (la ruta canónica). Crea el worktree con el comando documentado `git
 worktree add` y luego llama a `EnterWorktree` con su `path`.
 

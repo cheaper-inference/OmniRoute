@@ -16,21 +16,21 @@
  * @module domain/quotaCache
  */
 
+import { hasOllamaPurchasedCredits } from "@omniroute/open-sse/services/ollamaPurchasedCredits.ts";
 import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { safePercentage } from "@/shared/utils/formatting";
-import {
-  saveQuotaSnapshot,
-  cleanupOldSnapshots,
-  getLatestQuotaSnapshotsForConnection,
-} from "@/lib/db/quotaSnapshots";
+import { isQuotaWindowBoundedParkEnabled } from "@/shared/utils/featureFlags";
+import { saveQuotaSnapshot, getLatestQuotaSnapshotsForConnection } from "@/lib/db/quotaSnapshots";
+import { runQuotaSnapshotCleanup } from "./quotaSnapshotCleanup";
 import { recordProviderQuotaResetEventIfChanged } from "@/lib/db/quotaResetEvents";
 import {
   CODEX_SPARK_QUOTA_SESSION,
   CODEX_SPARK_QUOTA_WEEKLY,
   getCodexQuotaWindowFilterForModel,
+  omitCodexDisplayOnlyQuotas,
 } from "@omniroute/open-sse/config/codexQuotaScopes.ts";
 import {
   createCodexAccountPool,
@@ -283,7 +283,29 @@ function normalizeQuotas(rawQuotas: Record<string, unknown>): Record<string, Quo
   return result;
 }
 
+function normalizeConnectionQuotas(rawQuotas: Record<string, unknown>, provider: string) {
+  const quotas = normalizeQuotas(rawQuotas);
+  // Preserve unknown aggregate headroom through snapshots; raw usage retains the plan fraction.
+  if (hasOllamaPurchasedCredits({ quotas: rawQuotas }, provider)) {
+    for (const quota of Object.values(quotas)) quota.fractionReported = false;
+  }
+  return quotas;
+}
+
 // ─── Public API ─────────────────────────────────────────────────────────────
+
+/**
+ * #17000 — opt-in (QUOTA_WINDOW_BOUNDED_PARK, default off): the per-window policy honours the
+ * bounded park (#14359) the account-level check already applies — a passed park deadline, or an
+ * observation older than EXHAUSTED_MAX_PARK_MS, stops excluding the account until a fresh fetch.
+ * Off (or an unreadable flag store): the window keeps blocking on its cached percentage.
+ */
+function isWindowParkReleased(entry: QuotaCacheEntry, now: number): boolean {
+  if (!isQuotaWindowBoundedParkEnabled()) return false;
+  return (
+    advancedWindowResetAt(entry, now) !== null || now - entry.fetchedAt >= EXHAUSTED_MAX_PARK_MS
+  );
+}
 
 export function __clearForTests() {
   getState().cache.clear();
@@ -702,10 +724,13 @@ export function isQuotaExhaustedForRequest(
 export function setQuotaCache(
   connectionId: string,
   provider: string,
-  rawQuotas: Record<string, unknown>,
+  reportedQuotas: Record<string, unknown>,
   rawModelQuotas: Record<string, unknown> = {}
 ) {
-  const quotas = normalizeQuotas(rawQuotas);
+  // Display-only Codex windows (reserve pool) must never drive routing/exhaustion.
+  const rawQuotas =
+    provider === "codex" ? omitCodexDisplayOnlyQuotas(reportedQuotas) : reportedQuotas;
+  const quotas = normalizeConnectionQuotas(rawQuotas, provider);
   const modelQuotas = normalizeQuotas(rawModelQuotas);
   const exhausted = isExhausted(quotas);
   // #4438 — capture the prior entry BEFORE overwriting the cache so we can skip
@@ -939,8 +964,10 @@ export function getQuotaWindowStatus(
     // If reset time has already passed, avoid stale cached percentages blocking selection.
     // #10095 — a window whose fraction upstream never reported is "unknown",
     // not "0% remaining"; never let it reach the exhaustion threshold.
+    // #17000 — opt-in (QUOTA_WINDOW_BOUNDED_PARK): a passed park deadline or an observation
+    // older than the park cap no longer reaches the threshold.
     reachedThreshold:
-      windowExpired || window.fractionReported === false
+      windowExpired || window.fractionReported === false || isWindowParkReleased(entry, now)
         ? false
         : remainingPercentage <= 0
           ? true
@@ -995,13 +1022,31 @@ export function markAccountExhaustedFromCredits(connectionId: string, provider: 
  * with, as a percentage. Returns 0 once the connection is known exhausted so a
  * 402-marked account cannot be weighted back into the draw.
  */
-export function getQuotaWeightedRemainingPercent(connectionId: string): number | null {
+export function getQuotaWeightedRemainingPercent(
+  connectionId: string,
+  requestedModel: string | null = null
+): number | null {
   const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
   if (!entry) return null;
   if (isAccountQuotaExhausted(connectionId)) return 0;
 
-  const remaining = Object.values(entry.quotas)
-    .filter((quota) => quota.fractionReported !== false)
+  const provider = entry.provider;
+  const names = Object.keys(entry.quotas);
+  const codexWindowFilter =
+    requestedModel && provider === "codex"
+      ? getCodexQuotaWindowFilterForModel(requestedModel)
+      : undefined;
+  const scoped =
+    requestedModel && (provider === "antigravity" || provider === "agy")
+      ? selectAntigravityQuotaWindowNames(names, requestedModel)
+      : codexWindowFilter
+        ? names.filter(codexWindowFilter)
+        : names;
+  if (requestedModel && scoped.length === 0) return null;
+
+  const remaining = scoped
+    .map((name) => entry.quotas[name])
+    .filter((quota) => quota && quota.fractionReported !== false)
     .map((quota) => clampPercent(quota.remainingPercentage));
   if (remaining.length === 0) return null;
   return Math.min(...remaining);
@@ -1086,7 +1131,7 @@ async function backgroundRefreshTick() {
   state.tickRunning = true;
 
   try {
-    cleanupOldSnapshots();
+    if (!(await runQuotaSnapshotCleanup())) return;
     const now = Date.now();
     const pending = [...state.cache.values()].filter((e) => needsRefresh(e, now));
 

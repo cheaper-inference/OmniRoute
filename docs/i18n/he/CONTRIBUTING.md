@@ -8,14 +8,14 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## הגדרת סביבת הפיתוח
+## הגדרת סביבת פיתוח
 
-### דרישות מקדימות
+### דרישות מוקדמות
 
-- **Node.js** `>=22.22.3 <23`, או `>=24.0.0 <27` (מומלץ: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, או `>=24.0.0 <27` (מומלץ: 24 LTS)
 - **npm** 10+
 
-> **למשתמשי npm v11+ (עם Node 24+):** לאחר `npm install`, ודאו שהמודולים המקוריים הותקנו:
+> **משתמשי npm v11+‎ (Node 24+):** לאחר `npm install`, ודאו שהמודולים המקומיים הותקנו:
 > `node -e "require('better-sqlite3')"`. אם הפקודה נכשלת עם `MODULE_NOT_FOUND`,
 > הריצו `npm approve-scripts better-sqlite3 && npm install`. ראו
 > [פתרון בעיות](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -43,81 +43,81 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 משתנים עיקריים לפיתוח:
 
-| משתנה                  | ברירת מחדל לפיתוח        | תיאור                     |
-| ---------------------- | ------------------------ | ------------------------- |
-| `PORT`                 | `20128`                  | יציאת השרת                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | כתובת URL בסיסית לממשק    |
-| `JWT_SECRET`           | (יש ליצור לעיל)          | סוד לחתימת JWT            |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | סיסמת ההתחברות הראשונה    |
-| `APP_LOG_LEVEL`        | `info`                   | רמת הפירוט של יומן הרישום |
+| משתנה                  | ברירת מחדל לפיתוח        | תיאור                        |
+| ---------------------- | ------------------------ | ---------------------------- |
+| `PORT`                 | `20128`                  | יציאת השרת                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | כתובת URL בסיסית לממשק הקדמי |
+| `JWT_SECRET`           | (יש ליצור לעיל)          | סוד לחתימת JWT               |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | סיסמת הכניסה הראשונה         |
+| `APP_LOG_LEVEL`        | `info`                   | רמת פירוט הרישום             |
 
 ### הגדרות לוח הבקרה
 
-לוח הבקרה מספק מתגי ממשק משתמש עבור תכונות שניתן להגדיר גם באמצעות משתני סביבה:
+לוח הבקרה מספק מתגים בממשק המשתמש עבור תכונות שניתן להגדיר גם באמצעות משתני סביבה:
 
-| מיקום ההגדרה   | מתג              | תיאור                                  |
-| -------------- | ---------------- | -------------------------------------- |
-| הגדרות ← מתקדם | מצב ניפוי שגיאות | הפעלת יומני בקשות לניפוי שגיאות (ממשק) |
-| הגדרות ← כללי  | נראות סרגל הצד   | הצגה/הסתרה של מקטעים בסרגל הצד         |
+| מיקום ההגדרה   | מתג              | תיאור                                         |
+| -------------- | ---------------- | --------------------------------------------- |
+| הגדרות ← מתקדם | מצב ניפוי שגיאות | הפעלת יומני בקשות לניפוי שגיאות (ממשק המשתמש) |
+| הגדרות ← כללי  | נראות סרגל הצד   | הצגה/הסתרה של מקטעי סרגל הצד                  |
 
-הגדרות אלה נשמרות במסד הנתונים ונשמרות בין הפעלות מחדש, וכאשר הן מוגדרות הן גוברות על ברירות המחדל של משתני הסביבה.
+הגדרות אלה נשמרות במסד הנתונים ונשארות בתוקף לאחר הפעלות מחדש, תוך עקיפת ערכי ברירת המחדל של משתני הסביבה כאשר הן מוגדרות.
 
-### הפעלה מקומית
+### הרצה מקומית
 
 ```bash
-# מצב פיתוח (טעינה מחדש בזמן אמת)
+# מצב פיתוח (טעינה מחדש אוטומטית)
 npm run dev
 
 # בניית ייצור
-npm run build    # next build → .build/next/ ולאחר מכן assembleStandalone → dist/
+npm run build    # next build → .build/next/ ואז assembleStandalone → dist/
 npm run start
 
 # הידור מהיר של צד השרת/API בלבד עבור שינויים של תורמים
 npm run build:contributor
 
-# בניית הפצה (בנייה נקייה מחדש + סמן HEAD — נדרשת לפריסה)
+# בניית גרסה להפצה (בנייה מחדש ונקייה + סמן HEAD — נדרש לפריסה)
 npm run build:release   # rm -rf .build dist && build + כותב את dist/BUILD_SHA
 
-# הגדרת יציאה נפוצה
+# תצורת יציאה נפוצה
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
 בניית התורמים מבצעת אימות הידור בלבד: היא אינה מרכיבה את ההפצה העצמאית
-ואינה בונה נכסי אריזה מקוריים אופציונליים. השתמשו בבניית הייצור הרגילה כאשר
+או בונה נכסי אריזה מקומיים אופציונליים. השתמשו בבניית הייצור הרגילה כאשר
 עליכם לאמת את החבילה המוכנה להפצה.
 
 ### מבנה פלט הבנייה
 
-| ספרייה    | תוכן                                                                     | במעקב |
+| תיקייה    | תוכן                                                                     | במעקב |
 | --------- | ------------------------------------------------------------------------ | ----- |
 | `src/`    | קוד המקור של היישום (TypeScript / TSX)                                   | כן    |
-| `.build/` | קובצי ביניים — פלט `next build` (לא במעקב Git,‏ `distDir = .build/next`) | לא    |
+| `.build/` | תוצרי ביניים — פלט `next build` (לא במעקב Git,‏ `distDir = .build/next`) | לא    |
 | `dist/`   | חבילה מוכנה להפצה — מורכבת באמצעות `assembleStandalone` (לא במעקב Git)   | לא    |
 
-צינור הבנייה מתבצע במעבר יחיד:
+צינור הבנייה פועל במעבר יחיד:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (פלט Next.js)
-  └─ assembleStandalone()                 (מעתיק קבצים עצמאיים + סטטיים + ציבוריים + נכסים מקוריים)
+  └─ assembleStandalone()                 (מעתיקה קבצים עצמאיים + סטטיים + ציבוריים + נכסים מקומיים)
        └─ פלט: dist/                      (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` מנקה תחילה גם את שתי הספריות וכותב את
+`npm run build:release` מנקה תחילה גם את שתי התיקיות וכותבת את
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) כסמן תקינות לפריסה.
 
-`npm run build:contributor` משתמש בפרופיל הבנייה של צד השרת בלבד. במהלך הבנייה הוא מחליף זמנית
-את קובצי ממשק המשתמש של לוח הבקרה בקבצי דמה, משאיר את מטפלי נתיבי ה-API ומשחזר את הקבצים המקוריים
-לאחר הבנייה. השתמשו ב-`npm run build` עבור שינויים המשפיעים על ממשק המשתמש של לוח הבקרה או לצורך
-אימות הפצה מלא; פרופיל התורמים אינו תחליף לבניית ההפצה.
+`npm run build:contributor` משתמשת בפרופיל הבנייה של צד השרת בלבד. היא מחליפה זמנית
+את קובצי ממשק המשתמש של לוח הבקרה בקובצי דמה במהלך הבנייה, משמרת את מטפלי נתיבי ה-API ומשחזרת את הקבצים המקוריים
+לאחר הבנייה. השתמשו ב-`npm run build` עבור שינויים שמשפיעים על ממשק המשתמש של לוח הבקרה או לצורך
+אימות מלא של גרסת הפצה; פרופיל התורמים אינו תחליף לבניית גרסה להפצה.
 
-> **הערה לפריסה ב-VPS:** ספריית תמונת השרת המרוחק `/usr/lib/node_modules/omniroute/app/`
-> נותרת ללא שינוי. כלי הפריסה מסנכרנים באמצעות rsync את התוכן של `dist/` לתוכה.
+> **הערת פריסה ל-VPS:** תיקיית התמונה המרוחקת `/usr/lib/node_modules/omniroute/app/`
+> נותרה ללא שינוי. כלי הפריסה מסנכרנים באמצעות rsync את התוכן של `dist/` לתוכה.
 > רק נתיב פלט הבנייה בתוך המאגר השתנה (`app/` ← `dist/`).
 
 כתובות URL המוגדרות כברירת מחדל:
 
-- **לוח הבקרה**: `http://localhost:20128/dashboard`
+- **לוח בקרה**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -170,20 +170,20 @@ refactor(db): consolidate rate limit tables
 ## הרצת בדיקות
 
 ```bash
-# כל הבדיקות (יחידה + vitest + מערכת אקולוגית + e2e)
+# כל הבדיקות (יחידה + vitest + אקוסיסטם + e2e)
 npm run test:all
 
-# קובץ בדיקה יחיד (מריץ הבדיקות המובנה של Node.js — רוב הבדיקות משתמשות בזה)
+# קובץ בדיקה יחיד (מריץ הבדיקות המובנה של Node.js — רוב הבדיקות משתמשות בו)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # רק בדיקות היחידה המושפעות מהשינוי שלכם (אותו בורר TIA כמו בשער ה-CI, #8084)
 npm run test:scoped            # שינויים ב-commit האחרון (או בעץ העבודה)
-npm run test:scoped:staged     # שינויים שנוספו ל-staging בלבד — משתלב היטב עם הרצה לפני commit
-npm run test:scoped:full       # תחילה בונה מחדש את מפת גרף הייבוא (לאחר הוספה/העברה של קבצים)
-# קוד יציאה 1 + "run the full suite" פירושם שקובץ מרכזי (tsconfig, package.json, …) או קובץ מקור
-# שאינו ממופה השתנה — הבורר נכשל באופן בטוח ולעולם אינו מדלג בשקט.
+npm run test:scoped:staged     # שינויים שנוספו ל-staging בלבד — משתלב היטב בהרצה לפני commit
+npm run test:scoped:full       # בנייה מחדש של מפת גרף הייבוא תחילה (לאחר הוספה/העברה של קבצים)
+# קוד יציאה 1 + "הריצו את כל החבילה" פירושם שקובץ מרכזי (tsconfig, package.json, …) או קובץ מקור
+# שאינו ממופה השתנה — הבורר נכשל באופן בטוח ולעולם אינו מדלג ללא הודעה.
 
-# Vitest (שרת MCP, autoCombo, מטמון)
+# Vitest (שרת MCP,‏ autoCombo, מטמון)
 npm run test:vitest
 
 # בדיקות E2E (דורשות Playwright)
@@ -192,10 +192,10 @@ npm run test:e2e
 # בדיקות E2E של לקוחות פרוטוקול (תעבורות MCP,‏ A2A)
 npm run test:protocols:e2e
 
-# בדיקות תאימות למערכת האקולוגית
+# בדיקות תאימות לאקוסיסטם
 npm run test:ecosystem
 
-# שער כיסוי: 60% מהפקודות/שורות/פונקציות/הסתעפויות
+# שער כיסוי: 60% מההצהרות/שורות/פונקציות/הסתעפויות
 npm run test:coverage
 npm run coverage:report
 
@@ -203,50 +203,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# בדיקת עשן משולבת מול שירותים חיצוניים אמיתיים, המותנית בשער (דורשת גישה ל-VPS + קרדיטים אמיתיים אצל ספקים)
-# פונה לספקים אמיתיים — כרוכה בעלות קטנה. לעולם אינה רצה ב-CI. מדולגת באופן תקין ללא השער.
-# דורשת: גישת ssh root@192.168.0.15 (טוענת תמונת מצב לקריאה בלבד של מסד הנתונים מה-VPS).
+# בדיקת smoke מוגנת של שילוב מול upstream אמיתי (דורשת גישה ל-VPS + קרדיטים אמיתיים אצל ספקים)
+# פונה לספקים אמיתיים — כרוך בעלות קטנה. לעולם אינה רצה ב-CI. מדולגת באופן תקין ללא השער.
+# דורש: גישת ssh root@192.168.0.15 (טוען תמונת מצב לקריאה בלבד של מסד הנתונים מה-VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# בדיקת עשן חיה של שלב 3 ב-VPS — סקריפטים פשוטים של Node ESM, הפונים ישירות לשרת החי ב-.15.
-# דורשת: גישת ssh root@192.168.0.15 (שילובים נוצרים/מפורקים באמצעות SSH sqlite).
-# פונה לספקים אמיתיים (עלות קטנה). יוצרת/מוחקת רק שילובים מסוג __live_test__*. לעולם אינה רצה ב-CI.
-# ב-.15 מוגדר REQUIRE_API_KEY=false, ולכן אין צורך במפתח API, אך ההגדרות COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY מכובדות אם הוגדרו.
+# בדיקת smoke חיה משלב 3 ב-VPS — סקריפטים רגילים של Node ESM, הפונים ישירות לשרת .15 החי.
+# דורש: גישת ssh root@192.168.0.15 (צירופים נוצרים ומפורקים באמצעות SSH sqlite).
+# פונה לספקים אמיתיים (עלות קטנה). יוצר/מוחק רק צירופי __live_test__*. לעולם אינו רץ ב-CI.
+# ב-.15 מוגדר REQUIRE_API_KEY=false, ולכן אין צורך במפתח API, אך נעשה שימוש ב-COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY אם הוגדרו.
 npm run test:combo:live:vps              # 7 תרחישי HTTP (עדיפות/סבב/משוקלל/עלות/מיזוג/אוטומטי + תקינות)
 npm run test:combo:live:vps:failover     # מוסיף תרחיש מעבר לגיבוי אמיתי בין ספקים (8 בסך הכול)
 ```
 
 הערות לגבי כיסוי:
 
-- `npm run test:coverage` מודד את כיסוי קוד המקור עבור חבילת בדיקות היחידה הראשית, אינו כולל את `tests/**`, וכולל את `open-sse/**`
-- בקשות משיכה חייבות לשמור על שער כיסוי של **60%+** מהפקודות/שורות/פונקציות/הסתעפויות
-- אם PR משנה קוד ייצור ב-`src/`, ב-`open-sse/`, ב-`electron/` או ב-`bin/`, יש להוסיף או לעדכן בדיקות אוטומטיות באותו PR
-- `npm run coverage:report` מדפיס דוח מפורט לפי קבצים מהרצת הכיסוי האחרונה
+- `npm run test:coverage` מודד את כיסוי קוד המקור עבור חבילת בדיקות היחידה הראשית, מחריג את `tests/**` וכולל את `open-sse/**`
+- בקשות משיכה חייבות לשמור על שער כיסוי של **60%+** מההצהרות/שורות/פונקציות/הסתעפויות
+- אם PR משנה קוד ייצור ב-`src/`,‏ `open-sse/`,‏ `electron/` או `bin/`, עליו להוסיף או לעדכן בדיקות אוטומטיות באותו PR
+- `npm run coverage:report` מדפיס דוח מפורט לפי קובץ מהרצת הכיסוי האחרונה
 - `npm run test:coverage:legacy` משמר את המדד הישן לצורך השוואה היסטורית
-- ראו `docs/ops/COVERAGE_PLAN.md` עבור מפת הדרכים המדורגת לשיפור הכיסוי
+- ראו `docs/ops/COVERAGE_PLAN.md` למפת הדרכים המדורגת לשיפור הכיסוי
 
 ### דרישות לבקשת משיכה
 
-לפני פתיחת PR, השתמשו ב-[נתיב הזהב לתרומה](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) כדי להריץ את הלולאה הממוקדת עבור
+לפני פתיחת PR, השתמשו ב-
+[נתיב הזהב לתרומה](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) כדי להריץ את הלולאה הממוקדת עבור
 מה ששיניתם. חבילת בדיקות היחידה המלאה (4 פלחי CI),‏ Vitest, שער הכיסוי של **60%+**
 ובניית הייצור הם באחריות ה-CI — הרצתם באופן מקומי אינה מוסיפה מידע שבדיקות ה-PR
 לא יספקו ממילא, ובמחשבים חלשים יותר היא עלולה להעמיס על המארח (#8084):
 
-- הריצו את קובצי הבדיקות המכסים את השינוי שלכם: `node --import tsx/esm --test tests/unit/<file>.test.ts`
-- הריצו `npm run lint`
-- בכל שינוי בקוד ייצור, כללו או עדכנו בדיקות אוטומטיות באותו PR
-- כאשר קוד הייצור השתנה, כללו בתיאור ה-PR את קובצי הבדיקות ששונו או נוספו
+- הריצו את קובצי הבדיקה המכסים את השינוי שלכם: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- הריצו את `npm run lint`
+- הוסיפו או עדכנו בדיקות אוטומטיות באותו PR בכל פעם שקוד הייצור משתנה
+- בקובצי `node:test`, מקמו כל `await` ברמה העליונה (כגון `await import(...)`) לפני ה-`test()` / `describe()` הראשון: תחת `--test-force-exit`, בדיקות שנרשמו אחריו עלולות לא לרוץ כלל ללא הודעה (#18045; נאכף באמצעות `npm run check:test-tla-order`)
+- כאשר קוד הייצור השתנה, כללו בתיאור ה-PR את קובצי הבדיקה ששונו או נוספו
 - בדקו את תוצאת SonarQube ב-PR כאשר סודות הפרויקט מוגדרים ב-CI
 
 מצב הבדיקות הנוכחי: **122 קובצי בדיקות יחידה** המכסים:
 
 - מתרגמי ספקים והמרת פורמטים
 - הגבלת קצב, מפסק זרם ועמידות
-- מטמון סמנטי, אידמפוטנטיות ומעקב התקדמות
+- מטמון סמנטי, אידמפוטנטיות ומעקב אחר התקדמות
 - פעולות מסד נתונים וסכימה (21 מודולי DB)
 - תהליכי OAuth ואימות
-- אימות נקודות קצה של API‏ (Zod v4)
-- כלי שרת MCP ואכיפת היקף
+- אימות נקודות קצה של API ‏(Zod v4)
+- כלי שרת MCP ואכיפת תחום הרשאות
 - מערכות זיכרון ומיומנויות
 
 ---
@@ -287,65 +289,72 @@ npm run test:combo:live:vps:failover     # מוסיף תרחיש מעבר לגי
 
 ---
 
-## Project Structure
+## מבנה הפרויקט
 
 ```
-src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+src/                        # TypeScript‏ (.ts / .tsx)
+├── app/                    # נתב האפליקציה של Next.js 16
+│   ├── (dashboard)/        # דפי לוח הבקרה (23 מקטעים)
+│   ├── api/                # נתיבי API‏ (51 תיקיות)
+│   └── login/              # דפי אימות (.tsx)
+├── domain/                 # מנגנון מדיניות (policyEngine, comboResolver, costRules וכו')
+├── lib/                    # לוגיקה עסקית מרכזית (.ts)
+│   ├── a2a/                # שרת פרוטוקול מסוכן-לסוכן v0.3
+│   ├── acp/                # מרשם Agent Communication Protocol
+│   ├── compliance/         # מנגנון מדיניות תאימות
+│   ├── db/                 # מודולי תחום של SQLite +‏ 130 מיגרציות
+│   ├── memory/             # זיכרון שיחה מתמשך
+│   ├── oauth/              # ספקי OAuth, שירותים וכלי עזר
+│   ├── skills/             # תשתית מיומנויות ניתנת להרחבה
+│   ├── usage/              # מעקב שימוש וחישוב עלויות
+│   └── localDb.ts          # שכבת ייצוא מחדש בלבד — לעולם אין להוסיף כאן לוגיקה
+├── middleware/              # תווכת בקשות (promptInjectionGuard)
+├── mitm/                   # פרוקסי MITM‏ (אישור, DNS, ניתוב יעד)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # רכיבי React‏ (.tsx)
+│   ├── constants/          # הגדרות ספקים (329), תחומי MCP,‏ 20 אסטרטגיות ניתוב
+│   ├── utils/              # מנתק מעגל, מנקה קלט, עזרי אימות
+│   └── validation/         # סכמות Zod v4
+└── sse/                    # צינור עיבוד פרוקסי SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # סביבת העבודה @omniroute/open-sse
+├── executors/              # 150 מודולי ביצוע (מחלקות ביצוע + עזרים לכל ספק)
+├── handlers/               # 11 מטפלי בקשות (צ'אט, תגובות, הטמעות, תמונות וכו')
+├── mcp-server/             # שרת MCP‏ (110 כלים ייחודיים, 3 תעבורות, 33 תחומים)
+├── services/               # 178 שירותים ברמה העליונה (combo, autoCombo, rateLimitManager וכו')
+├── translator/             # ממירי פורמטים (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # ממיר API התגובות
+└── utils/                  # 22 מודולי עזר (הזרמה, TLS, פרוקסי, רישום)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # אפליקציית שולחן עבודה Electron‏ (חוצת פלטפורמות)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # מריץ הבדיקות של Node.js‏ (1,574 קובצי בדיקה)
+├── integration/            # בדיקות אינטגרציה
+├── e2e/                    # בדיקות Playwright
+├── security/               # בדיקות אבטחה
+├── translator/             # בדיקות ייעודיות לממיר
+└── load/                   # בדיקות עומס
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # רשומות החלטות ארכיטקטוניות
+├── architecture/            # ארכיטקטורת מערכת וחוסן
+├── comparison/              # OmniRoute לעומת חלופות
+├── compression/             # מדריכים וכללים לדחיסה
+├── dev/                     # מדריכי פיתוח
+├── diagrams/                # תרשימי ארכיטקטורה
+├── frameworks/              # MCP, A2A, OpenCode, זיכרון, מיומנויות
+├── guides/                  # מדריך למשתמש, Docker, הגדרה, פתרון בעיות
+├── i18n/                    # תרגומי README לשפות שונות
+├── marketing/               # חומרי שיווק
+├── ops/                     # פריסה, פרוקסי, כיסוי, מהדורות
+├── providers/               # תיעוד ייעודי לספקים
+├── reference/               # חומר עזר ל-API, משתני סביבה, כלי CLI, מסלולים חינמיים
+├── releases/                # הערות מהדורה
+├── routing/                 # מנגנון שילוב אוטומטי, הפעלה חוזרת של הסקה
+├── screenshots/             # צילומי מסך של לוח הבקרה
+├── security/                # אמצעי הגנה, תאימות, הסוואה, אסימונים
+└── specs/                   # מפרטי תכנון
 ```
 
 ---
@@ -405,9 +414,13 @@ docs/                       # Documentation
 
 ---
 
-## Releasing
+## פרסום גרסאות
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+פרסום גרסאות מנוהל באמצעות תהליך העבודה `/generate-release`. כאשר נוצרת גרסה חדשה ב-GitHub, החבילה **מתפרסמת אוטומטית ב-npm** באמצעות GitHub Actions.
+
+לפריסות ב-VPS, השתמשו ב-`npm run build:release` (ולא ב-`npm run build`) — הפקודה מבצעת
+בנייה מחדש ונקייה, מרכיבה את החבילה בתוך `dist/` וכותבת את קובץ הסמן `dist/BUILD_SHA`.
+לאחר מכן, השתמשו במיומנויות `/deploy-vps-*-cc`, המסנכרנות באמצעות rsync את `dist/` עם הספרייה המרוחקת `app/`.
 
 ---
 

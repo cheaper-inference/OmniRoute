@@ -10,30 +10,17 @@
 
 ---
 
-## Mikä se on
+## Mikä tämä on
 
-OmniRoute rekisteröi 329 palveluntarjoajaa, joista 155 luettelomerkintää on merkitty **ilmaisiksi / tunnistautumista vaatimattomiksi**
-(ei tunnistautumista,
-ilmaisen tason OAuth tai ilmaisen tason API-avain — katso
-[Ilmaisten tasojen opas](../getting-started/FREE-TIERS-GUIDE.md) ja kattava
-[Ilmaisten tasojen hakemisto](../reference/FREE_TIERS.md)). Haasteena on, että ilmaisten palveluntarjoajien
-mallien laatu vaihtelee huomattavasti. Tunnistautumista vaatimaton palveluntarjoaja, joka tarjoaa huipputason mallia, on paljon hyödyllisempi
-kuin pieniä vanhoja malleja tarjoava palveluntarjoaja.
+OmniRoute rekisteröi 375 palveluntarjoajaa, mukaan lukien 155 luettelomerkintää, jotka on merkitty **ilmainen/ei todennusta** (ei todennusta, ilmaisen tason OAuth tai ilmaisen tason API-avain — katso [Ilmaistasojen opas](../getting-started/FREE-TIERS-GUIDE.md) ja koko [Ilmaistasot-hakemisto](../reference/FREE_TIERS.md)). Siinä on kuitenkin muttansa: ilmaisten palveluntarjoajien mallien laatu vaihtelee suuresti. Huipputason mallia tarjoava todennukseton palveluntarjoaja on paljon hyödyllisempi kuin sellainen, joka tarjoaa pientä vanhentunutta mallia.
 
-**Ilmaisten palveluntarjoajien sijoitukset** vastaa kysymykseen "**mikä ilmainen palveluntarjoaja antaa minulle parhaan mallin?**"
-yhdistämällä kunkin ilmaisen palveluntarjoajan luettelon **joukkoistetusta laadunarvioinnista saatuihin pisteisiin**
-**Arena AI -tulostaulukosta** (ihmisten mieltymyksiin perustuva ELO, sama periaate kuin LMArenan
-chatbottiareenassa). Palveluntarjoajat asetetaan tämän jälkeen järjestykseen niiden **parhaan ilmaisen mallin** vahvuuden perusteella.
+**Ilmaisten palveluntarjoajien sijoitukset** vastaa kysymykseen "**mikä ilmainen palveluntarjoaja antaa minulle parhaan mallin?**" yhdistämällä kunkin ilmaisen palveluntarjoajan luettelon **joukkoutettuihin laatupisteisiin** **Arena AI -tulostaulusta** (ihmisten mieltymyksiin perustuva ELO, sama idea kuin LMArena-chatbot-areenan taustalla). Palveluntarjoajat sijoitetaan sitten niiden **parhaan ilmaisen mallin** vahvuuden mukaan.
 
 Sijoitus lasketaan kolmesta todellisesta lähteestä:
 
-1. Ilmaisten palveluntarjoajien luettelot — `NOAUTH_PROVIDERS` sekä `OAUTH_PROVIDERS`- /
-   `APIKEY_PROVIDERS`-merkinnät, joiden `hasFree`-merkintä on käytössä
-   (`src/shared/constants/providers.ts`).
-2. Kunkin palveluntarjoajan malliluettelo palveluntarjoajarekisteristä
-   (`open-sse/config/providerRegistry.ts`).
-3. ELO-pisteistä johdetut tehtäväsoveltuvuuspisteet, jotka Arena ELO -synkronointimoottori tallentaa
-   `model_intelligence`-tietokantatauluun (`src/lib/arenaEloSync.ts`).
+1. Ilmaisten palveluntarjoajien luettelot — `NOAUTH_PROVIDERS`, sekä `OAUTH_PROVIDERS`- / `APIKEY_PROVIDERS`-merkinnät, joilla on `hasFree`-lippu (`src/shared/constants/providers.ts`).
+2. Kunkin palveluntarjoajan malliluettelo palveluntarjoajarekisteristä (`open-sse/config/providerRegistry.ts`).
+3. ELO-pohjaiset tehtäväsoveltuvuuspisteet, jotka Arena ELO -synkronointimoottori tallentaa tietokannan `model_intelligence`-tauluun (`src/lib/arenaEloSync.ts`).
 
 Yhdistämislogiikka sijaitsee tiedostossa `src/lib/freeProviderRankings.ts`.
 

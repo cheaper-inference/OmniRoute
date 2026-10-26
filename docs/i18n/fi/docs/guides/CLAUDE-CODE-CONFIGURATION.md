@@ -48,55 +48,39 @@ toimii suoraan), tarkistaa palvelimen kunnon ja suorittaa `claude`-komennon.
 
 ---
 
-## Löytämisaliakset — tuo muut kuin Claude-mallit näkyviin `/model`-valitsimessa
+## Discovery-aliakset — muut kuin Claude-mallit näkyviin `/model`-valitsimeen
 
-Claude Coden yhdyskäytävän mallien etsintä luettelee vain tunnisteet, jotka alkavat merkkijonolla `claude`
-tai `anthropic`. Siksi, kun `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, natiivi
-`/model`-valitsin näyttää tavallisesti **vain** OmniRouten Claude-/Anthropic-mallit —
-`kimi/kimi-k2.6` tai `glm/glm-5.2` ei koskaan näy, vaikka sen reititys toimii oikein.
+Claude Coden gateway-mallidiscovery listaa vain tunnisteet, jotka alkavat `claude`- tai `anthropic`-etuliitteellä, joten kun `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` on asetettu, natiivi `/model`-valitsin näyttää normaalisti **vain** OmniRouten Claude/Anthropic-mallit — esimerkiksi `kimi/kimi-k2.6` tai `glm/glm-5.2` ei koskaan ilmesty listaan, vaikka reititys toimisikin moitteettomasti.
 
-OmniRoute voi peilata minkä tahansa käytössä olevan mallin (ja yhdistelmän) `claude/…`-tunnisteen alle,
-jotta se läpäisee suodatuksen ja näkyy valitsimessa:
+OmniRoute voi peilata minkä tahansa käytössä olevan mallin (ja kombon) `claude/…`-tunnisteen alle, jotta se läpäisee kyseisen suodattimen ja näkyy valitsimessa:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<yhdistelmä "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kun valitset jonkin näistä Claude Codessa, OmniRoute poistaa `claude/`-kääreen
-ja palauttaa todellisen tunnisteen ennen reititystä — aito `claude/<real-claude-model>`-tunniste
-(varsinainen Claude OAuth -palveluntarjoaja) jätetään aina koskemattomaksi.
+Kun valitset jonkin näistä Claude Codessa, OmniRoute kuorii `claude/`-kääreen pois ja palauttaa todellisen tunnisteen ennen reititystä — aito `claude/<real-claude-model>`-tunniste (varsinainen Claude OAuth -palveluntarjoaja) jätetään aina koskemattomaksi.
 
-**Tämä on oletusarvoisesti pois käytöstä**, ja sitä hallitaan kolmitasoisella portilla (tarkin
-asetus on ensisijainen), joten tavallinen OmniRoute ei koskaan kaksinkertaista luetteloaan asiakkaille,
-jotka eivät käytä Claude Codea:
+Oletuksena vain perustunnisteet peilataan. Kun valinnainen ominaisuuslippu `CATALOG_MIRROR_REFINEMENTS_ENABLED` on päällä, katalogin jo listaamat päättelyteho-variantit (esim. `codex/gpt-6-sol-high`) peilataan kuten muutkin tunnisteet, jolloin Claude Code voi valita eksplisiittisen tehotason, eikä sisäänrakennettuja `auto/*`-tunnisteita, joita pyyntöpolku ei pysty materialisoimaan, peilata. Sitä, listataanko teho-variantteja lainkaan, määrää edelleen `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — peili ei koskaan lisää varianttia, jota peruskatalogissa ei ole.
 
-| Taso     | Sijainti                                                                                     |
-| -------- | -------------------------------------------------------------------------------------------- |
-| Malli    | Palveluntarjoajan tietosivu → mallikohtainen "Näytä Claude Codessa" -valitsin                |
-| Tarjoaja | Palveluntarjoajan tietosivu → tarjoajakohtainen valitsin (koskee kaikkia sen malleja)        |
-| Globaali | Asetukset → Ominaisuusliput → `EXPOSE_CC_DISCOVERY_ALIASES` (oletusarvoisesti pois käytöstä) |
+**Tämä on oletuksena pois päältä**, ja sitä ohjataan kolmitasoisella portilla (tarkin asetus voittaa), jotta tavallinen OmniRoute ei koskaan tuplaa katalogiaan asiakasohjelmille, jotka eivät käytä Claude Codea:
 
-Ympäristömuuttuja `EXPOSE_CC_DISCOVERY_ALIASES` pakottaa globaalin tason käyttöön
-ja ohittaa hallintapaneelin asetuksen (Ominaisuusliput-näyttö näyttää
-huomautuksen "aktiivinen ympäristömuuttujan kautta", kun näin tapahtuu). Tarjoaja- ja
-mallikohtaiset valitsimet tarkentavat asetusta edelleen — esimerkiksi globaali asetus pois käytöstä + Kimi-tarjoaja käytössä tuo
-näkyviin vain Kimin mallit.
+| Taso             | Sijainti                                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| Malli            | Palveluntarjoajan yksityiskohtasivu → mallikohtainen "Expose in Claude Code" -kytkin      |
+| Palveluntarjoaja | Palveluntarjoajan yksityiskohtasivu → palveluntarjoajatason kytkin (kattaa kaikki mallit) |
+| Globaali         | Asetukset → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (oletuksena pois päältä)        |
 
-> ⚠️ **Ikkunakoon ristiriita muissa kuin Claude-malleissa.** Claude Code olettaa 200K:n konteksti-ikkunan
-> kaikille tunnisteille, joita se ei tunnista (se ei voi lukea todellista ikkunakokoa
-> `/v1/models`-päätepisteestä). Jos mallin ikkuna on suurempi (esim. Kimi K2:n 256K), aseta
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` arvoon, joka on mallin todellista ikkunaa pienempi, jotta
-> automaattinen tiivistys ei käynnisty ennenaikaisesti. Edellä luodut profiilit tekevät
-> tämän jo mallikohtaisesti.
+`EXPOSE_CC_DISCOVERY_ALIASES`-ympäristömuuttuja pakottaa globaalin tason päälle ja ohittaa hallintapaneelin asetuksen (Feature Flags -näyttö näyttää tällöin "active via environment variable" -huomautuksen). Palveluntarjoaja- ja mallikohtaiset kytkimet tarkentavat asetusta tästä eteenpäin — esimerkiksi globaali pois päältä + Kimi-palveluntarjoaja päällä paljastaa vain Kimin mallit.
+
+> ⚠️ **Kontekstiikkunan epäsuhta muissa kuin Claude-malleissa.** Claude Code olettaa 200K:n kontekstiikkunan kaikille tunnisteille, joita se ei tunnista (se ei pysty lukemaan todellista ikkunakokoa `/v1/models`-päätepisteestä). Jos mallin ikkuna on suurempi (esim. Kimi K2:n 256K), aseta `CLAUDE_CODE_AUTO_COMPACT_WINDOW` arvoon, joka on pienempi kuin mallin todellinen ikkuna, jotta automaattinen tiivistäminen (auto-compaction) ei käynnisty ennenaikaisesti. Yllä olevat generoidut profiilit tekevät tämän jo mallikohtaisesti.
 
 ---
 
 ## Käyttöönotto-osio hallintapaneelissa
 
-Claude-työkalukortti (**Hallintapaneeli → CLI Code**) näyttää täsmälleen tämän instanssin `settings.json`-katkelman
-hakualias-tietopainikkeen vieressä sekä kopiointipainikkeen:
+Claude-työkalukortti (**Hallintapaneeli → CLI Code**) näyttää tämän instanssin tarkan `settings.json`-katkelman tunnistusaliaksen tietopainikkeen vieressä sekä kopiointipainikkeen:
 
 ```jsonc
 {
@@ -108,26 +92,29 @@ hakualias-tietopainikkeen vieressä sekä kopiointipainikkeen:
 }
 ```
 
-Perus-URL on kortin selvittämä osoite (mukaan lukien kirjoittamasi mukautettu ohitus), joka on jo
-normalisoitu — ei `/v1`-päätettä eikä lopun vinoviivaa. **Avainta ei koskaan näytetä**: lohko sisältää
-paikkamerkin, joten kuvakaappaus tai liitetty katkelma ei voi vuotaa avainta. Korvaa paikkamerkki avaimellasi.
+Perus-URL on kortin selvittämä osoite (mukaan lukien kirjoittamasi mukautettu ohitus), joka on jo normalisoitu — ei `/v1`-päätettä eikä lopun vinoviivaa. **Avainta ei koskaan näytetä**: lohko sisältää paikkamerkin, joten kuvakaappaus tai liitetty katkelma ei voi vuotaa avainta. Korvaa paikkamerkki omalla avaimellasi.
 
-Lisää `CLAUDE_CODE_AUTO_COMPACT_WINDOW` samaan `env`-lohkoon kaikille malleille, joiden todellinen
-konteksti-ikkuna ei ole 200K — Claude Code olettaa 200K jokaiselle tunnukselle, jota se ei tunnista, joten
-automaattinen tiivistys käynnistyy muuten väärässä kohdassa (katso edellisen osion varoitus).
-Katkelman muodostin hyväksyy myös tämän arvon, joten kohdemallin ikkunan tunteva kutsuja
-voi tuottaa sen suoraan.
+Lisää `CLAUDE_CODE_AUTO_COMPACT_WINDOW` samaan `env`-lohkoon kaikille malleille, joiden todellinen konteksti-ikkuna ei ole 200K — Claude Code olettaa konteksti-ikkunaksi 200K jokaiselle tunnistamattomalle tunnisteelle, joten automaattinen tiivistys käynnistyy muuten väärässä kohdassa (katso edellisen osion varoitus). Katkelman muodostin hyväksyy myös tämän arvon, joten kutsuja, joka tuntee kohdemallin konteksti-ikkunan, voi sisällyttää sen suoraan.
 
-Lähde: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (puhdas,
-yksikkötestattu muodostin), jonka renderöi `ClaudeGatewayOnboardingBlock`.
+Lähde: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (puhdas muodostin, yksikkötestattu), jonka renderöi `ClaudeGatewayOnboardingBlock`.
+
+### Kiinnitä yksi tili (valinnainen)
+
+Jos haluat lähettää kaikki Claude Code -pyynnöt yhden tietyn palveluntarjoajatilin kautta, lisää `x-omniroute-connection`-otsake `ANTHROPIC_CUSTOM_HEADERS`-muuttujan kautta samaan `env`-lohkoon:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kopioi tunniste palveluntarjoajasivun yhteysrivillä olevasta `xxxxxxxx…`-tunnisteesta. Kiinnitys koskee vain yksittäisten mallien tunnisteita (`provider/model`), ei yhdistelmiä. Tarkka varatoiminta on kuvattu kohdassa [Tilin kiinnitys pyyntökohtaisesti](../reference/API_REFERENCE.md#account-pinning-per-request).
 
 ---
 
 ## Profiilit (`CLAUDE_CONFIG_DIR`)
 
 Claude Codessa **ei ole natiiveja profiilitiedostoja** (toisin kuin Codexin `~/.codex/<name>.config.toml`).
-Vakiintunut mekanismi on `CLAUDE_CONFIG_DIR` — erillinen määrityshakemisto kullekin
-profiilille, joista jokaisella on oma `settings.json`-tiedostonsa, tunnistetietonsa, historiansa ja välimuistinsa.
+Suositeltu mekanismi on `CLAUDE_CONFIG_DIR` — erillinen määrityshakemisto kullekin
+profiilille, joista jokaisella on omat `settings.json`-tiedostonsa, tunnistetietonsa, historiansa ja välimuistinsa.
 
 `omniroute setup-claude` hakee ajantasaisen `/v1/models`-luettelon ja kirjoittaa yhden
 profiilin mallia kohden polkuun `~/.claude/profiles/<name>/settings.json` käyttäen
@@ -148,18 +135,18 @@ profiilin mallia kohden polkuun `~/.claude/profiles/<name>/settings.json` käytt
 }
 ```
 
-> **Todennustunnusta ei koskaan kirjoiteta profiiliin.** Käynnistä komennolla
+> **Todennustunnistetta ei koskaan kirjoiteta profiiliin.** Käynnistä komennolla
 > `omniroute launch --profile <name>` (se lisää `ANTHROPIC_AUTH_TOKEN`-arvon aktiivisesta
-> kontekstista) tai vie `ANTHROPIC_AUTH_TOKEN` itse ja suorita
+> kontekstista), tai vie `ANTHROPIC_AUTH_TOKEN` itse ja suorita
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
 **Automaattinen synkronointi mallien löytämisen jälkeen (valinnainen).** OmniRoute voi luoda nämä samat
 `~/.claude/profiles/<name>/settings.json`-tiedostot automaattisesti uudelleen aina, kun palveluntarjoajan mallien
 synkronointi muuttaa ajantasaista luetteloa — näin uudet tai uudelleennimetyt mallit saavat profiilit ilman komennon
-suorittamista uudelleen. Se on **oletusarvoisesti pois käytöstä**: ota se käyttöön **CLI Code -hallintapaneelista** ("CLI-profiilien
+suorittamista uudelleen. Se on **oletusarvoisesti pois käytöstä**: ota se käyttöön **CLI Code -koontinäytöstä** ("CLI-profiilien
 automaattinen synkronointi" → Claude Code) tai aseta `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (se huomioi myös
-muuttujan `CLI_ALLOW_CONFIG_WRITES`, joka on oletusarvoisesti käytössä). Kun toiminto on käytössä, se kirjoittaa vain profiilitiedostoja; se ei koskaan
-muuta aktiivista Claude-oletusmääritystäsi, todennustasi tai tiedostoa `~/.claude/settings.json`.
+`CLI_ALLOW_CONFIG_WRITES`-asetuksen, joka on oletusarvoisesti käytössä). Kun toiminto on käytössä, se kirjoittaa vain profiilitiedostoja; se ei koskaan
+muuta aktiivista Claude-oletusmääritystäsi, todennusta tai tiedostoa `~/.claude/settings.json`.
 
 ### Profiilien luominen ja käyttäminen
 
@@ -167,13 +154,17 @@ muuta aktiivista Claude-oletusmääritystäsi, todennustasi tai tiedostoa `~/.cl
 # Paikallinen OmniRoute
 omniroute setup-claude
 
-# VPS-etäpalvelin (sisällyttää VPS:n URL-osoitteen jokaiseen profiiliin)
+# Etä-VPS (sisällyttää VPS:n URL-osoitteen jokaiseen profiiliin)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Vain tietyt palveluntarjoajat
 omniroute setup-claude --only glm,kimi
 
-# Esikatselu kirjoittamatta
+# Kirjoita profiilit myös paikallisille CLI-palveluntarjoajille (zcode, auggie, devin-cli-agentic,
+# codex-app-server), joita ei havaittu tällä koneella (ohitetaan oletusarvoisesti paikalliselle kohteelle)
+omniroute setup-claude --include-local
+
+# Esikatsele kirjoittamatta
 omniroute setup-claude --dry-run
 
 # Käynnistä profiili

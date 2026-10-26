@@ -1,7 +1,7 @@
 ---
 title: "Resilience Guide"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.52
+lastUpdated: 2026-10-18
 ---
 
 # Resilience Guide
@@ -30,7 +30,7 @@ OmniRoute has three distinct but related resilience mechanisms. Each has a diffe
 **States:**
 
 - `CLOSED` — normal traffic allowed
-- `DEGRADED` — traffic still allowed, but elevated provider failures are being tracked
+- `DEGRADED` — traffic still allowed, but elevated provider failures are being tracked; returns to `CLOSED` on enough successes, on a valid connection test, or after the longest `OPEN` hold for the last failure kind (its `cooldownByKind` value, else `resetTimeout`, × `maxBackoffMultiplier`, at least one cooldown) without a new failure
 - `OPEN` — provider temporarily blocked; combo routing skips it
 - `HALF_OPEN` — reset timeout elapsed; probe request allowed
 
@@ -46,7 +46,7 @@ OmniRoute has three distinct but related resilience mechanisms. Each has a diffe
 
 **Trip codes:** only provider-level statuses `[408, 500, 502, 503, 504]`. Do NOT trip for account-level errors (most 401/403/429 — those belong to cooldown or lockout).
 
-**Lazy recovery:** when `OPEN` expires, `getStatus()`, `canExecute()`, `getRetryAfterMs()` refresh state to `HALF_OPEN`. No background timer needed.
+**Lazy recovery:** when `OPEN` expires, `getStatus()`, `canExecute()`, `getRetryAfterMs()` refresh state to `HALF_OPEN`. The same reads (and the next failure) decay a stale `DEGRADED` back to `CLOSED`. No background timer needed.
 
 ---
 
@@ -98,12 +98,36 @@ Regression guard: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 **Anti-thundering-herd guard:** prevents concurrent failures from over-extending cooldown or double-incrementing `backoffLevel`.
 
+**Concurrency-limit 429s do not climb the backoff ladder.** A `429` whose body reports a
+concurrency limit ("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`) means the account is healthy but busy.
+`checkFallbackError()` returns reason `concurrency_limited`: fail over to the next
+connection now, cool this one for a fixed `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) or the
+upstream retry hint, keep `backoffLevel` unchanged, and set `skipProviderBreaker`.
+An explicit quota body still wins, so a body that also matches a quota pattern stays a quota
+verdict. Detection: `looksLikeConcurrencyLimit()` in `src/shared/utils/classify429.ts`;
+verdict: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (the
+breaker's `FailureKind`) is unchanged and still reads `rate_limit` for these bodies.
+
 **Stream content stalls do not cool the account.** When the content-stall watchdog
 (`open-sse/utils/streamHandler.ts`) gives up on a stream that sent no model output in
 time, `markAccountUnavailable()` records the error on the connection but sets no
 cooldown: the stall belongs to that request, most often a long reasoning turn with no
 output yet. Operators can opt back in with `resilienceSettings.streamStallCooldown.enabled`
 (default `false`).
+
+**Opt-in latency signal for `p2c` account selection.** Each dispatched attempt records its
+time-to-first-byte and outcome per connection (and per connection + model) in an in-memory
+rolling window: the last 20 samples within 15 minutes
+(`open-sse/services/connectionLatencyTracker.ts`, recorded from `safeLogEvents()` in
+`src/sse/handlers/chatHelpers.ts`). When `resilienceSettings.p2cLatency.weight` is above `0`
+(range 0-20, default `0` = off), `compareP2CConnections()` in `src/sse/services/auth.ts` adds
+up to `weight` points to each candidate of the pair. Half of that comes from latency as a ratio to
+the faster candidate (twice as slow takes the full half) and half from the rolling error rate.
+The term applies only when both candidates have at least 3 samples, so new accounts are not
+penalized, and its ceiling stays below the quota-blocked and quota-exhausted penalties. It
+adds no circuit of its own: failing accounts are still handled by the cooldown, lockout and
+breaker layers. Set it with `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
 **Reasoning frames restart the content-stall budget.** A reasoning model can think for
 minutes before its first visible token: Claude streams `thinking_delta` frames whose
@@ -113,6 +137,12 @@ these frames, and the watchdog restarts its budget on each one instead of cancel
 turn. They are still not model output, so a turn that ends with reasoning only is still
 reported as empty, and a turn that stops reasoning and only sends heartbeats still trips
 the watchdog.
+
+Kiro's binary `reasoningContentEvent` frames with a non-empty signature preserve this
+reasoning activity through the executor as an empty `reasoning_content` delta. The signature is
+not forwarded. Metadata, incomplete frames and empty signatures do not restart the
+content budget; the independent active-stream timeout and client cancellation still
+apply (`open-sse/executors/kiro/reasoning.ts`).
 
 **Terminal states (NOT cooldowns):**
 
@@ -427,6 +457,26 @@ rate limit. Bounded by `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts
 `budgetMs`) in **Settings → Resilience**. It never waits on `quota_exhausted`
 (locked until midnight) or auth/not-found reasons.
 
+The same gate covers the pre-dispatch case (#16319): when every target of a
+combo is skipped before any attempt is made because its model sits in a short
+transient lockout, the zero-attempt path waits the lock out under the same
+ceilings and re-dispatches, instead of answering a hint-less
+`503 ALL_TARGETS_SKIPPED`. When no wait is allowed (ceiling, attempt or budget
+exhausted, or the feature off), the terminal response upgrades to
+`429 rate_limit_error` carrying `retry_after` / `reset_at` from the earliest
+transient lock expiry; quota, auth and not-found locks keep the hint-less 503.
+
+```text
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+```
+
 ---
 
 ## 5. Request Queue Admission Control (v3.8.49 · issue #6593)
@@ -470,6 +520,37 @@ changes nothing — clear or update the persisted setting instead.
 Queue residence is bounded by `maxWaitMs`; `maxQueueDepth` below bounds how
 many callers may be queued at once.
 
+**Body-stated retries: pacing vs lockout.** A 429 body can name its own wait
+(Gemini `RetryInfo.retryDelay`, "retry after Ns" text), which
+`updateFromResponseBody` reads. A wait that fits the connection's `maxWaitMs`
+is pacing: the limiter empties its reservoir for that long and queued calls
+dispatch when it refills. A wait longer than `maxWaitMs` is not something the
+queue can sit out — Gemini answers an exhausted daily quota with
+`retryDelay: "86399s"`. The relayed `Retry-After` on the rebuilt 429 (#16528)
+already makes the fallback engine lock the model for that window, but pausing
+the limiter for it too would still stall any call that reaches the key early
+(after a resilience reset, for instance) for the whole `maxWaitMs`. When such a wait comes from a typed Google `RetryInfo`
+detail (the `google_rpc_retry_info` provenance) and the key's limiter is
+already scoped to the model (see `getLimiterKey`), the 429 becomes a model
+lockout on that connection instead (`lockModelForLongBodyRetry` in
+`open-sse/services/rateLimitManager/bodyRetryPause.ts`, capped at 24h), and the
+limiter is left unpaused. Account selection skips on that lock via
+`isModelLocked()`, and so does the combo pre-dispatch gate for targets pinned to
+the connection. On antigravity, whose limiter is per quota family, the lock is
+on the exact model, like its other quota locks. The name the client asked for
+is locked too when an alias resolved it to that model, because those checks use
+the requested name; it is locked exactly (`lockExactModel`), so an alias that
+crosses an antigravity quota family or a codex scope never locks its own. A
+prose hint, an untyped `retryDelay`, or a
+limiter shared by the whole connection keeps the pause. When the limiter the
+429 path just rebuilt does pause, a caller whose remaining queue time ends
+before the pause does is turned away at once with the queue-timeout code
+(`checkLimiterPause`) rather than waiting that time out; the recorded end is
+anchored before the limiter is built, where Bottleneck starts its refresh
+clock, and any later change to the reservoir forgets it. Covered by
+`tests/unit/rate-limit-long-body-retry-lockout.test.ts` and
+`tests/unit/rate-limit-body-retry-pause.test.ts`.
+
 **`maxQueueDepth` — opt-in admission cap (new).** `resilienceSettings.requestQueue.maxQueueDepth`
 bounds how many requests may sit queued (not yet dispatched) for one
 provider+connection at once. When the queue already holds `maxQueueDepth`
@@ -496,6 +577,23 @@ it is unit-testable without a real Bottleneck limiter.
 > change than this issue's scope; it was intentionally **not** implemented
 > here and is left as a follow-up if the CPU-saving win is worth the
 > reordering risk.
+
+### Rate-Limit Auto-Enable Safety Net & Connection Protection (`rateLimitProtection`)
+
+**Auto-enable safety net** (`resilienceSettings.requestQueue.autoEnableApiKeyProviders`, default `true`):
+By default, OmniRoute automatically enables rate-limit queue protection for all active API-key provider connections (`getProviderCategory(provider) === "apikey"`). This ensures incoming requests to rate-sensitive upstream API keys are queued and throttled through Bottleneck rather than bursting into upstream 429 errors. The safety net can be overridden via the `RATE_LIMIT_AUTO_ENABLE` environment variable (`false`/`0`/`off` disables, `true`/`1`/`on` forces on), which takes precedence over the persisted dashboard setting (**Settings → Resilience** / `PATCH /api/resilience`).
+
+**Semantics of per-connection `rateLimitProtection`:**
+Per-connection rate-limit protection is tracked via the `rateLimitProtection` boolean field on provider connections (persisted as `rate_limit_protection` in SQLite):
+
+- **Explicit on (`rateLimitProtection === true`)**: Rate-limit protection is explicitly enabled for this connection, regardless of provider category or whether the auto-enable safety net is turned on.
+- **Explicit off (`rateLimitProtection === false`)**: Disables explicit protection, but **does not** opt an active API-key connection out of the global auto-enable safety net. In `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`), `false` and `undefined` are equivalent: only `rateLimitProtection === true` is treated as an explicit override. If `rateLimitProtection` is `false` (or unset), an active API-key connection still matches the auto-enable condition and remains rate-limit protected.
+- **No per-connection opt-out**: An operator cannot currently express "this single active API-key connection must run without rate-limit queue protection" while keeping auto-enable active for others. To completely run API-key connections without rate-limit queues, the safety net must be turned off globally (`RATE_LIMIT_AUTO_ENABLE=false` or `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false`).
+
+**Supported write paths:**
+
+- **`POST /api/rate-limits`**: The supported management write path to toggle `rateLimitProtection` for a connection (`{ connectionId: string, enabled: boolean }`). Calling this with `enabled: true` turns explicit protection on; calling this with `enabled: false` removes explicit protection (though active API-key connections remain covered under the global safety net if auto-enable is on).
+- **`PUT /api/providers/[id]`**: Deliberately does **not** accept or flip `rateLimitProtection` (#11278). Updating provider connection metadata via `PUT /api/providers/[id]` will never change the persisted rate-limit protection state.
 
 ---
 
@@ -662,8 +760,7 @@ A rule's `scope` (`model` / `provider` / `connection`) is a separate opt-in
 from `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` only surfaces it as
 `fallbackResult.ruleScope`, and downstream consumers only honor it as
 anything other than an informational label, for providers in the
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` allowlist in the same file (`gated via
-honorsRuleLockScope()` — today only `"agentrouter"`). See "Restated quota
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` allowlist in the same file (gated via `honorsRuleLockScope()` — today only `"agentrouter"`). See "Restated quota
 errors" above for what a `scope: "connection"` match actually does once a
 provider is on that allowlist.
 
@@ -790,7 +887,7 @@ rate limit is the same signal as an exhausted quota. Honest limits:
 
 ## Other Resilience Features
 
-- **19 routing strategies** (priority, weighted, round-robin, context-relay, fill-first, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp, context-optimized, cache-optimized, fusion, pipeline) — see [AUTO-COMBO.md](../routing/AUTO-COMBO.md).
+- **20 routing strategies** (priority, weighted, round-robin, context-relay, fill-first, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, fusion, pipeline) — see [AUTO-COMBO.md](../routing/AUTO-COMBO.md).
 - **Reset-aware routing** (v3.8.0) — prioritizes connections by quota reset time.
 - **Background mode degradation** — Responses API `background: true` degraded to sync with warning.
 - **Dynamic tool limit detection** — backs off providers when tool count limits hit.
@@ -806,6 +903,167 @@ rate limit is the same signal as an exhausted quota. Honest limits:
 - One key fails, others should work → prefer connection cooldown over circuit breaker.
 - Only one model fails → prefer model lockout over connection cooldown.
 - State should self-recover but doesn't → check for future timestamp + read path that refreshes expired state. Permanent statuses require manual changes.
+
+---
+
+## Runtime state — agent quick reference
+
+> Moved verbatim from `AGENTS.md` → "Resilience Runtime State" (PR #12743) so the agent
+> guide stays under the 40k context budget. It is the condensed, agent-facing view of the
+> sections above; the numbered sections remain the full reference.
+
+OmniRoute has three related but distinct temporary-failure mechanisms. Keep their
+scope separate when debugging routing behavior. See the
+[3-layer resilience diagram](../diagrams/exported/resilience-3layers.svg)
+(source: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
+for an at-a-glance map.
+
+### Provider Circuit Breaker
+
+**Scope**: whole provider, e.g. `glm`, `openai`, `anthropic`.
+
+**Purpose**: stop sending traffic to a provider that is repeatedly failing at the
+upstream/service level, so one unhealthy provider does not slow down every request.
+
+**Implementation**:
+
+- Core class: `src/shared/utils/circuitBreaker.ts`
+- Chat gate/execution wiring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Runtime status API: `src/app/api/monitoring/health/route.ts`
+- Shared wrappers: `open-sse/services/accountFallback.ts`
+- Persisted state table: `domain_circuit_breakers`
+
+**States** (4 — `src/shared/utils/circuitBreaker.ts`):
+
+- `CLOSED`: normal traffic is allowed.
+- `DEGRADED`: early-warning band — failures crossed the degradation threshold but not the
+  breaker threshold yet; traffic still flows, dashboards show the warning. A valid connection
+  test or a quiet window with no new failure returns it to `CLOSED`
+  (`docs/architecture/RESILIENCE_GUIDE.md` has the window).
+- `OPEN`: provider is temporarily blocked; callers get a provider-circuit-open response
+  or combo routing skips to another target.
+- `HALF_OPEN`: reset timeout has elapsed; allow a probe request. Success closes the
+  breaker, failure opens it again.
+
+**Defaults** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumed via
+`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` →
+`getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). The whole-provider
+breaker runs on `circuitBreakerThreshold` / `circuitBreakerReset`:
+
+| Profile | degrades at | opens at (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
+| ------- | ----------: | -----------------------------------: | ----------------------------: |
+| OAuth   |         `5` |                                  `8` |                         `60s` |
+| API key |         `7` |                                 `12` |                         `30s` |
+| Local   |   (derived) |                                  `2` |                         `15s` |
+
+`PROVIDER_PROFILES` also defines `providerFailureThreshold` (10/15/2),
+`providerFailureWindowMs` (15/30/5 min) and `providerCooldownMs` (5/10/1 min): these power the
+**window gate of the opt-in global Provider Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, default
+off) — a provider-level entry in `open-sse/services/providerCooldownTracker.ts` only counts as
+cooling after `providerFailureThreshold` failures inside `providerFailureWindowMs`, and then
+cools for `providerCooldownMs`. They are NOT the live breaker's thresholds — do not tune them
+expecting breaker behavior. Every default is overridable through the
+`OMNIROUTE_PROVIDER_BREAKER_*` and `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; the
+runtime-accurate reference table lives in `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Only provider-level failure statuses should trip the provider breaker:
+
+```ts
+(408, 500, 502, 503, 504);
+```
+
+Do not trip the whole-provider breaker for normal account/key/model errors like most
+`401`, `403`, or `429` cases. Those usually belong to connection cooldown or model
+lockout. A generic API-key provider `403` should be recoverable unless it is classified
+as a terminal provider/account error.
+
+The breaker uses lazy recovery, not a background timer. When `OPEN` expires, reads such
+as `getStatus()`, `canExecute()`, and `getRetryAfterMs()` refresh the state to
+`HALF_OPEN`, so dashboards and combo candidate builders do not keep excluding an
+expired provider forever.
+
+### Connection Cooldown
+
+**Scope**: one provider connection/account/key.
+
+**Purpose**: temporarily skip one bad key/account while allowing other connections for
+the same provider to continue serving requests.
+
+**Implementation**:
+
+- Write/update path: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Account selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Cooldown calculation: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Settings: `src/lib/resilience/settings.ts`
+
+Important fields on provider connections:
+
+```ts
+rateLimitedUntil;
+testStatus: "unavailable";
+lastError;
+lastErrorType;
+errorCode;
+backoffLevel;
+```
+
+During account selection, a connection is skipped while:
+
+```ts
+new Date(rateLimitedUntil).getTime() > Date.now();
+```
+
+Cooldowns are also lazy: when `rateLimitedUntil` is in the past, the connection becomes
+eligible again. On successful use, `clearAccountError()` clears `testStatus`,
+`rateLimitedUntil`, error fields, and `backoffLevel`.
+
+Default connection cooldown behavior:
+
+- OAuth base cooldown: `5s`.
+- API-key base cooldown: `3s`.
+- API-key `429` should prefer upstream retry hints (`Retry-After`, reset headers, or
+  parseable reset text) when available.
+- Repeated recoverable failures use exponential backoff:
+
+```ts
+baseCooldownMs * 2 ** failureIndex;
+```
+
+The anti-thundering-herd guard prevents concurrent failures on the same connection from
+repeatedly extending the cooldown or double-incrementing `backoffLevel`.
+
+Terminal states are not cooldowns. `banned`, `expired` (which becomes terminal only after N bounded retries via `EXPIRED_RETRY_MAX`), and `credits_exhausted` are
+intended to stay unavailable until credentials/settings change or an operator resets
+them. Do not overwrite terminal states with transient cooldown state.
+
+### Model Lockout
+
+**Scope**: provider + connection + model.
+
+**Purpose**: avoid disabling a whole connection when only one model is unavailable or
+quota-limited for that connection.
+
+Examples:
+
+- Per-model quota providers returning `429`.
+- Local providers returning `404` for one missing model.
+- Provider-specific mode/model permission failures such as selected Grok modes.
+
+Model lockout lives in `open-sse/services/accountFallback.ts` and lets the same
+connection continue serving other models.
+
+### Debugging Guidance
+
+- If all keys for a provider are skipped, inspect both provider breaker state and each
+  connection's `rateLimitedUntil`/`testStatus`.
+- If a provider appears permanently excluded after the reset window, check whether code
+  is reading raw `state` instead of using `getStatus()`/`canExecute()`.
+- If one provider key fails but others should work, prefer connection cooldown over
+  provider breaker.
+- If only one model fails, prefer model lockout over connection cooldown.
+- If a state should self-recover, it should have a future timestamp/reset timeout and a
+  read path that refreshes expired state. Permanent statuses require manual credential
+  or config changes.
 
 ---
 

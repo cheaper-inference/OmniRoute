@@ -26,6 +26,18 @@
 //   • gen-contributors only reads lines that start with "- ", so fragment bullets are collapsed
 //     to a single line (pre-existing section bullets are left verbatim).
 //
+// Lessons baked in (v3.8.52 reconciliation, 2026-10-18):
+//   • a bullet that cites the ISSUE a PR closes (`closingIssuesReferences`) does NOT cover that
+//     PR — only the PR's own primary ref does. The old "closes a cited issue" shortcut hid the own
+//     bullet of nine external PRs (#15113 #15415 #15423 #15703 #15754 #15772 #16091 #16269
+//     #16445) and dropped one author from the Contributors table; it is gone, not behind a flag;
+//   • the fragment inventory is the WORKING TREE (`changelog.d/**` on disk), never a git ref: a
+//     second pass with the first pass's deletions still uncommitted re-read 969 fragments from
+//     HEAD and duplicated ~990 bullets (and `--drop-fragment` for all of them produced 457 spurious
+//     "uncovered" bullets instead). A fragment deleted on disk is consumed; the commit it came from
+//     stays covered through the `([#N](…/pull/N))` link the first pass appended to its bullet.
+//     Only the ORIGIN of a fragment (the commit that added it) still comes from git history.
+//
 // Usage:
 //   node scripts/release/reconcile-changelog.mjs [--version 3.8.51] [--base <ref>] [--head <ref>]
 //        [--release-branch release/v3.8.51] [--credit 12255=backryun] [--carrier 11938]
@@ -263,11 +275,15 @@ export function otherSectionsText(changelog, version) {
   return changelog.slice(0, r.start) + changelog.slice(r.end);
 }
 
-/** Commits covered by the bullets: own PR is a primary ref (or closes a cited issue); no-PR commits by any ref. */
+/**
+ * Commits covered by the bullets: a PR commit only when its OWN PR is a primary ref (a bullet
+ * citing the issue that PR closes is not coverage — v3.8.52 lesson); no-PR commits by any ref or
+ * a documented `direct commit` hash.
+ */
 export function computeCoverage(
   rows,
   bullets,
-  { closingPrs = new Set(), originHashes = new Set(), skipHashes = new Set() } = {}
+  { originHashes = new Set(), skipHashes = new Set() } = {}
 ) {
   const cited = new Set();
   const hashes = [];
@@ -280,7 +296,7 @@ export function computeCoverage(
   const uncovered = rows.filter((r) => {
     const h = r.hash.slice(0, 9);
     if (skipHashes.has(h) || originHashes.has(h)) return false;
-    if (r.pr) return !(cited.has(r.pr) || closingPrs.has(r.pr));
+    if (r.pr) return !cited.has(r.pr);
     return !(documentedHash(r.hash) || r.refs.some((x) => cited.has(x)));
   });
   return { cited, uncovered };
@@ -390,7 +406,7 @@ const gh = (args) => execFileSync("gh", args, { encoding: "utf8", maxBuffer: 1 <
 export function repoSlug(cwd = ROOT) {
   const url = git(["remote", "get-url", "origin"], cwd);
   const m = url.match(/github\.com[:/]([^/]+\/[^/.]+)/);
-  return m ? m[1] : "diegosouzapw/OmniRoute";
+  return m ? m[1] : "cheaper-inference/OmniRoute";
 }
 
 /** Non-merge commits in `base..head` with mailmap identities, PR number and co-author trailers. */
@@ -512,45 +528,22 @@ export function fragmentOrigins(cwd = ROOT, dirs = Object.keys(SECTION_HEADINGS)
   return origins;
 }
 
-/** Read several `ref:path` blobs in one `git cat-file --batch` call → Map(path → text). */
-function readBlobs(ref, paths, cwd = ROOT) {
-  const texts = new Map();
-  if (!paths.length) return texts;
-  const out = execFileSync("git", ["cat-file", "--batch"], {
-    cwd,
-    encoding: "utf8",
-    maxBuffer: 1 << 28,
-    input: paths.map((p) => `${ref}:${p}`).join("\n") + "\n",
-  });
-  let pos = 0;
-  for (const p of paths) {
-    const nl = out.indexOf("\n", pos);
-    const header = out.slice(pos, nl);
-    pos = nl + 1;
-    if (header.endsWith(" missing")) continue;
-    const size = Number(header.split(" ")[2]);
-    texts.set(p, out.slice(pos, pos + size));
-    pos += size + 1; // trailing newline after each object
-  }
-  return texts;
-}
-
-/** Fragment files at `ref` + the commit that ADDED each one (definitive origin of the credit). */
-export function readFragments(ref = "HEAD", cwd = ROOT) {
+/**
+ * Fragment files present in the WORKING TREE under `cwd` + the commit that ADDED each one (the
+ * definitive origin of the credit, from git history). The inventory is deliberately read from disk,
+ * not from a ref: a fragment the previous pass unlinked (deletion not yet committed) is consumed.
+ */
+export function readFragments(cwd = ROOT) {
   const out = [];
   const origins = fragmentOrigins(cwd);
   for (const dir of Object.keys(SECTION_HEADINGS)) {
-    let files = "";
-    try {
-      files = git(["ls-tree", "--name-only", ref, `changelog.d/${dir}/`], cwd);
-    } catch {
-      continue;
-    }
-    const paths = files
-      .split("\n")
-      .filter((x) => x && !/README\.md$|\.gitkeep$/.test(x))
+    const abs = path.join(cwd, "changelog.d", dir);
+    if (!fs.existsSync(abs)) continue;
+    const paths = fs
+      .readdirSync(abs)
+      .filter((x) => x.endsWith(".md") && !/README\.md$|\.gitkeep$/.test(x))
+      .map((x) => `changelog.d/${dir}/${x}`)
       .sort();
-    const texts = readBlobs(ref, paths, cwd);
     for (const f of paths) {
       const origin = origins.get(f) || { hash: "", subject: "" };
       const om = origin.subject.match(/\(#(\d+)\)\s*$/);
@@ -558,7 +551,7 @@ export function readFragments(ref = "HEAD", cwd = ROOT) {
       out.push({
         path: f,
         section: dir,
-        text: (texts.get(f) ?? "").trim(),
+        text: fs.readFileSync(path.join(cwd, f), "utf8").trim(),
         originHash: origin.hash ? origin.hash.slice(0, 9) : null,
         originPr: om ? Number(om[1]) : null,
         prefixPr: pm ? Number(pm[1]) : null,
@@ -688,16 +681,7 @@ export function reconcile({
   const allExisting = Object.values(blocks)
     .flat()
     .filter((b) => b.startsWith("- "));
-  const closingPrs = new Set();
-  const citedIssues = new Set(allExisting.flatMap((b) => refsIn(normalizeLinks(b))));
-  for (const p of prs)
-    for (const ci of p.closingIssuesReferences || [])
-      if (citedIssues.has(ci.number)) closingPrs.add(p.number);
-  const { uncovered } = computeCoverage(rows, allExisting, {
-    closingPrs,
-    originHashes,
-    skipHashes,
-  });
+  const { uncovered } = computeCoverage(rows, allExisting, { originHashes, skipHashes });
 
   const gen = { features: [], fixes: [], maintenance: [] };
   const deps = [];
@@ -829,7 +813,7 @@ export function main(argv = process.argv.slice(2)) {
     const p = fetchPr(repo, n);
     if (p) extraPrs.set(n, p);
   }
-  const fragments = readFragments(head);
+  const fragments = readFragments();
   const changelog = fs.readFileSync(path.join(ROOT, "CHANGELOG.md"), "utf8");
   const baseTip = git(["rev-parse", "--short=10", base]);
   const headTip = git(["rev-parse", "--short=10", head]);

@@ -46,7 +46,9 @@ const providerNodesRoute = await import("../../src/app/api/provider-nodes/route.
 const providersRoute = await import("../../src/app/api/providers/route.ts");
 const providerByIdRoute = await import("../../src/app/api/providers/[id]/route.ts");
 const { testSingleConnection } = await import("../../src/app/api/providers/[id]/test/route.ts");
-const { OPERATOR_DISABLED_AT_KEY } = await import("../../src/lib/providers/operatorDisable.ts");
+const { OPERATOR_DISABLED_AT_KEY, isOperatorDisabled } = await import(
+  "../../src/lib/providers/operatorDisable.ts"
+);
 
 async function readJsonObject(response: Response): Promise<Record<string, unknown>> {
   const text = await response.text();
@@ -114,6 +116,16 @@ test.after(() => {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("operator-disable intent remains authoritative if isActive is true", () => {
+  assert.equal(
+    isOperatorDisabled({
+      isActive: true,
+      providerSpecificData: { [OPERATOR_DISABLED_AT_KEY]: new Date().toISOString() },
+    }),
+    true
+  );
 });
 
 test("a passing test does not re-enable a connection the operator switched off", async () => {

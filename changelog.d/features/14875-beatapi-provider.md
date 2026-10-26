@@ -1,1 +1,0 @@
-- **feat(providers):** add BeatAPI as an OpenAI-compatible gateway ([#14875](https://github.com/diegosouzapw/OmniRoute/pull/14875)) — thanks @erickkkyt

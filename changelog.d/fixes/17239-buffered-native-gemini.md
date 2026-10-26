@@ -1,0 +1,1 @@
+- **fix(sse):** Parse native Gemini SSE candidates and token usage in buffered responses while preserving wrapped Gemini CLI events. ([#17239](https://github.com/diegosouzapw/OmniRoute/pull/17239)) — thanks @pacocartones

@@ -54,13 +54,15 @@ test("dashboard GET skips integrity scans even without a deployment opt-out", as
     const response = await vm.runInContext("GET({})", context);
     assert.equal(response.status, 200, JSON.stringify(response.body));
   }
-  // Three real calls: a skipped scan is never replayed from the diagnosis cache,
-  // otherwise a later full diagnosis would be silently downgraded.
-  assert.equal(calls.length, 3);
+  // Light polls share their own snapshot; they must never satisfy a later full scan.
+  assert.equal(calls.length, 1);
   for (const options of calls) {
     assert.equal(options.autoRepair, false);
     assert.equal(options.skipIntegrityCheck, true);
   }
+  await vm.runInContext("runManagedDbHealthCheck({skipIntegrityCheck:false})", context);
+  assert.equal(calls.length, 2, "a light snapshot must not suppress the full integrity scan");
+  assert.equal(calls[1].skipIntegrityCheck, false);
 });
 
 test("managed checks honor the deployment opt-out, including manual repair", async () => {
@@ -82,7 +84,7 @@ test("explicit repair retains integrity scans when the deployment allows them", 
   assert.equal(calls[0].autoRepair, true);
 });
 
-test("a full diagnosis is still cached, a skipped one is not", async () => {
+test("a full diagnosis is cached and may satisfy subsequent light polling", async () => {
   const { context, calls } = loadCheck(undefined);
   await vm.runInContext("runManagedDbHealthCheck({})", context);
   await vm.runInContext("runManagedDbHealthCheck({})", context);

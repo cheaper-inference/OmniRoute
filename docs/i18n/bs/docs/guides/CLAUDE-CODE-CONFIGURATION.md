@@ -46,11 +46,11 @@ Claude Code komunicira putem **Anthropic Messages API**-ja i usmjeren je na pril
 
 ---
 
-## Alias-i za otkrivanje — prikažite modele koji nisu Claude u `/model` biraču
+## Alijasi za otkrivanje — prikazivanje modela koji nisu Claude u `/model` izborniku
 
-Otkrivanje modela gateway-a u Claude Code-u navodi samo ID-ove koji počinju sa `claude` ili `anthropic`, pa sa `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` izvorni `/model` birač obično prikazuje **samo** OmniRoute Claude/Anthropic modele — `kimi/kimi-k2.6` ili `glm/glm-5.2` se nikada ne pojavljuju, iako se ispravno rutiraju.
+Otkrivanje modela putem gatewaya u Claude Codeu navodi samo ID-ove koji počinju s `claude` ili `anthropic`, pa uz `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ugrađeni `/model` izbornik obično prikazuje **samo** OmniRouteove Claude/Anthropic modele — `kimi/kimi-k2.6` ili `glm/glm-5.2` se nikad ne pojavljuje, iako se usmjerava bez problema.
 
-OmniRoute može preslikati bilo koji omogućeni model (i kombinaciju) pod `claude/…` ID-om tako da prođe taj filter i pojavi se u biraču:
+OmniRoute može zrcaliti bilo koji omogućeni model (i kombinaciju) pod ID-om `claude/…` kako bi prošao taj filter i pojavio se u izborniku:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -58,25 +58,28 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kada odaberete jedan od ovih u Claude Code-u, OmniRoute uklanja `claude/` omotač nazad na pravi ID prije rutiranja — originalni `claude/<real-claude-model>` ID (stvarni Claude OAuth provajder) uvijek ostaje netaknut.
+Kada u Claude Codeu odaberete jedan od ovih, OmniRoute prije usmjeravanja uklanja omotač `claude/` i vraća stvarni ID — pravi `claude/<real-claude-model>` ID (stvarni Claude OAuth provajder) uvijek ostaje netaknut.
 
-**Ovo je po defaultu isključeno** i kontrolisano je troslojnom kapijom (najspecifičnije pobjeđuje), tako da običan OmniRoute nikada ne duplira svoj katalog za klijente koji ne koriste Claude Code:
+Prema zadanim postavkama zrcale se samo osnovni ID-ovi. Kada je uključena opcionalna zastavica funkcije `CATALOG_MIRROR_REFINEMENTS_ENABLED`, varijante s naporom rasuđivanja koje katalog već navodi (npr. `codex/gpt-6-sol-high`) zrcale se kao i svaki drugi ID, tako da Claude Code može odabrati eksplicitnu razinu napora, a ugrađeni `auto/*` ID-ovi koje putanja zahtjeva ne može ostvariti ne zrcale se. Hoće li se varijante napora uopće navoditi i dalje određuje `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — zrcalo nikad ne dodaje varijantu koju osnovni katalog nema.
 
-| Nivo      | Gdje                                                                                         |
+**Ovo je prema zadanim postavkama isključeno** i kontrolirano trostupanjskom provjerom (najspecifičnije pravilo pobjeđuje), tako da obični OmniRoute nikad ne udvostručuje svoj katalog za klijente koji ne koriste Claude Code:
+
+| Razina    | Gdje                                                                                         |
 | --------- | -------------------------------------------------------------------------------------------- |
-| Model     | Stranica sa detaljima provajdera → prekidač "Expose in Claude Code" po modelu                |
-| Provajder | Stranica sa detaljima provajdera → prekidač na nivou provajdera (pokriva sve njegove modele) |
-| Globalno  | Postavke → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (default isključeno)                |
+| Model     | Stranica s detaljima provajdera → prekidač "Prikaži u Claude Codeu" po modelu                |
+| Provajder | Stranica s detaljima provajdera → prekidač na razini provajdera (pokriva sve njegove modele) |
+| Globalno  | Postavke → Zastavice funkcija → `EXPOSE_CC_DISCOVERY_ALIASES` (zadano isključeno)            |
 
-Varijabla okruženja `EXPOSE_CC_DISCOVERY_ALIASES` forsira globalni nivo na uključeno i ima prednost nad nadjačavanjem na kontrolnoj tabli (ekran Feature Flags prikazuje napomenu "active via environment variable" kada se to desi). Prekidači po provajderu i po modelu se odatle preciziraju — npr. globalno isključeno + Kimi provajder uključen izlaže samo Kimi modele.
+Varijabla okruženja `EXPOSE_CC_DISCOVERY_ALIASES` prisilno uključuje globalnu razinu i ima prednost nad nadjačavanjem na nadzornoj ploči (zaslon Zastavica funkcija tada prikazuje napomenu "aktivno putem varijable okruženja"). Prekidači po provajderu i po modelu od toga nadalje preciziraju — npr. globalno isključeno + Kimi provajder uključen izlaže samo Kimijeve modele.
 
-> ⚠️ **Nepodudaranje prozora na modelima koji nisu Claude.** Claude Code pretpostavlja prozor konteksta od 200K za bilo koji ID koji ne prepoznaje (ne može pročitati stvarni prozor iz `/v1/models`). Za model sa većim prozorom (npr. Kimi K2 od 256K), postavite `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na vrijednost ispod stvarnog prozora modela kako se automatsko sažimanje ne bi prerano aktiviralo. Generisani profili iznad to već rade po modelu.
+> ⚠️ **Nepodudarnost kontekstnog prozora kod modela koji nisu Claude.** Claude Code pretpostavlja kontekstni prozor od 200K za svaki ID koji ne prepoznaje (ne može pročitati stvarni prozor s `/v1/models`). Za model s većim prozorom (npr. 256K kod Kimi K2), postavite `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na vrijednost ispod stvarnog prozora modela kako se automatsko sažimanje ne bi prerano pokrenulo. Gore generirani profili to već rade za svaki model.
 
 ---
 
-## Blok za onboarding na kontrolnoj tabli
+## Blok za početno postavljanje na kontrolnoj ploči
 
-Claude alatna kartica (**Dashboard → CLI Code**) prikazuje tačan `settings.json` fragment za ovu instancu, pored dugmeta za informacije o discovery-alias, sa dugmetom za kopiranje:
+Kartica alata Claude (**Kontrolna ploča → CLI Code**) prikazuje tačan fragment datoteke `settings.json`
+za ovu instancu, pored dugmeta s informacijama o aliasu za otkrivanje, zajedno s dugmetom za kopiranje:
 
 ```jsonc
 {
@@ -88,19 +91,44 @@ Claude alatna kartica (**Dashboard → CLI Code**) prikazuje tačan `settings.js
 }
 ```
 
-Osnovni URL je onaj koji je kartica razriješila (uključujući prilagođeno preusmjeravanje koje ste unijeli), već normalizovan — bez `/v1` sufiksa, bez kose crte na kraju. **Ključ se nikada ne prikazuje**: blok isporučuje placeholder, tako da snimak ekrana ili zalijepljeni isječak ne mogu otkriti ključ. Zalijepite svoj ključ preko njega.
+Osnovni URL je onaj koji je kartica razriješila (uključujući prilagođenu vrijednost koju ste unijeli) i već je
+normalizovan — bez sufiksa `/v1` i bez završne kose crte. **Ključ se nikada ne prikazuje**: blok sadrži
+zamjenski tekst, tako da snimak ekrana ili zalijepljeni isječak ne mogu otkriti ključ. Zalijepite svoj ključ umjesto njega.
 
-Dodajte `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ispod istog `env` bloka za bilo koji model čiji stvarni prozor konteksta nije 200K — Claude Code pretpostavlja 200K za svaki ID koji ne prepoznaje, pa se automatsko sažimanje u suprotnom aktivira u pogrešnom trenutku (pogledajte upozorenje u prethodnom odjeljku). Generator isječaka takođe prihvata tu vrijednost, tako da pozivalac koji zna prozor ciljnog modela može direktno da ga emituje.
+Dodajte `CLAUDE_CODE_AUTO_COMPACT_WINDOW` unutar istog bloka `env` za svaki model čiji stvarni
+kontekstni prozor nije 200K — Claude Code pretpostavlja 200K za svaki ID koji ne prepoznaje, pa se
+automatsko sažimanje u suprotnom pokreće u pogrešnom trenutku (pogledajte upozorenje u prethodnom odjeljku).
+Alat za izradu isječka prihvata i tu vrijednost, tako da je pozivalac koji zna veličinu kontekstnog prozora ciljnog modela
+može direktno dodati.
 
-Izvor: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (čisti generator, jedinično testiran) kojeg renderuje `ClaudeGatewayOnboardingBlock`.
+Izvor: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (čisti
+alat za izradu, pokriven jediničnim testovima) koji prikazuje `ClaudeGatewayOnboardingBlock`.
+
+### Prikvačite jedan račun (opcionalno)
+
+Da biste svaki Claude Code zahtjev slali preko jednog određenog računa pružaoca usluge, dodajte
+zaglavlje `x-omniroute-connection` putem `ANTHROPIC_CUSTOM_HEADERS` u istom bloku `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kopirajte ID iz oznake `xxxxxxxx…` u redu veze na stranici pružaoca usluge. Prikvačivanje se
+primjenjuje samo na ID-ove pojedinačnih modela (`provider/model`), a ne na kombinacije. Pogledajte
+[Prikvačivanje računa po zahtjevu](../reference/API_REFERENCE.md#account-pinning-per-request) za
+tačno ponašanje rezervnog mehanizma.
 
 ---
 
-## Profili (CLAUDE_CONFIG_DIR)
+## Profili (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **nema izvorne datoteke profila** (za razliku od Codex-ovog `~/.codex/<name>.config.toml`). Idiomatski mehanizam je `CLAUDE_CONFIG_DIR` — poseban konfiguracioni direktorij po profilu, svaki sa svojim `settings.json`, akreditivima, historijom i kešom.
+Claude Code **nema izvorne datoteke profila** (za razliku od Codexovog `~/.codex/<name>.config.toml`).
+Uobičajeni mehanizam je `CLAUDE_CONFIG_DIR` — zaseban konfiguracijski direktorij za svaki
+profil, pri čemu svaki ima vlastiti `settings.json`, vjerodajnice, historiju i predmemoriju.
 
-`omniroute setup-claude` preuzima katalog `/v1/models` uživo i piše jedan profil po modelu na `~/.claude/profiles/<name>/settings.json`, ponovo koristeći **ista imena kao `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+`omniroute setup-claude` dohvaća aktuelni katalog `/v1/models` i zapisuje po jedan
+profil za svaki model u `~/.claude/profiles/<name>/settings.json`, koristeći
+**iste nazive kao `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -117,27 +145,38 @@ Claude Code **nema izvorne datoteke profila** (za razliku od Codex-ovog `~/.code
 }
 ```
 
-> **Autentifikacioni token se nikada ne upisuje u profil.** Pokrenite sa
-> `omniroute launch --profile <name>` (on ubacuje `ANTHROPIC_AUTH_TOKEN` iz aktivnog konteksta), ili sami izvezite `ANTHROPIC_AUTH_TOKEN` i pokrenite `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
+> **Token za autentifikaciju nikada se ne zapisuje u profil.** Pokrenite pomoću
+> `omniroute launch --profile <name>` (ubacuje `ANTHROPIC_AUTH_TOKEN` iz
+> aktivnog konteksta) ili sami izvezite `ANTHROPIC_AUTH_TOKEN` i pokrenite
+> `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Automatska sinhronizacija nakon otkrivanja modela (opciono).** OmniRoute može automatski regenerisati ove iste `~/.claude/profiles/<name>/settings.json` datoteke kad god sinhronizacija modela provajdera promijeni katalog uživo — tako da novi/preimenovani modeli dobijaju profile bez ponovnog pokretanja komande. **Podrazumijevano je isključeno**: uključite ga sa **CLI Code kontrolne table** ("CLI profile auto-sync" → Claude Code), ili postavite `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (takođe poštuje `CLI_ALLOW_CONFIG_WRITES`, što je podrazumijevano uključeno). Kada je omogućeno, samo upisuje datoteke profila; nikada ne mijenja vašu aktivnu/podrazumijevanu Claude konfiguraciju, autentifikaciju ili `~/.claude/settings.json`.
+**Automatska sinhronizacija nakon otkrivanja modela (opcionalno).** OmniRoute može automatski ponovo generisati iste
+datoteke `~/.claude/profiles/<name>/settings.json` svaki put kada sinhronizacija modela
+pružaoca usluga promijeni aktuelni katalog — tako novi ili preimenovani modeli dobijaju profile bez ponovnog pokretanja
+naredbe. To je **podrazumijevano isključeno**: uključite ga na **CLI Code kontrolnoj ploči** ("Automatska sinhronizacija CLI profila" → Claude Code) ili postavite `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (također poštuje
+`CLI_ALLOW_CONFIG_WRITES`, koji je podrazumijevano uključen). Kada je omogućeno, zapisuje samo datoteke profila; nikada
+ne mijenja vašu aktivnu/zadanu Claude konfiguraciju, autentifikaciju niti `~/.claude/settings.json`.
 
-### Generisanje + korištenje profila
+### Generisanje i korištenje profila
 
 ```bash
 # Lokalni OmniRoute
 omniroute setup-claude
 
-# Udaljeni VPS (ugrađuje VPS URL u svaki profil)
+# Udaljeni VPS (ugrađuje URL VPS-a u svaki profil)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# Samo neki provajderi
+# Samo neki pružaoci usluga
 omniroute setup-claude --only glm,kimi
 
-# Pregled bez upisivanja
+# Također zapiši profile za pružaoce usluga lokalnog CLI-ja (zcode, auggie, devin-cli-agentic,
+# codex-app-server) koji nisu otkriveni na ovom hostu (podrazumijevano se preskaču za lokalno odredište)
+omniroute setup-claude --include-local
+
+# Pregled bez zapisivanja
 omniroute setup-claude --dry-run
 
-# Pokretanje profila
+# Pokreni profil
 omniroute launch --profile kimi-k27
 ```
 

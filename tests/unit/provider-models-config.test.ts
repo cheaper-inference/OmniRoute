@@ -105,6 +105,8 @@ test("GitHub Copilot registry reflects the current supported model lineup", () =
     "mai-code-1.1-flash",
     "kimi-k3",
     "grok-4.6",
+    // Copilot's server-side "auto" model selection (#16679).
+    "auto",
   ]);
   for (const id of [
     "gpt-6-astra",

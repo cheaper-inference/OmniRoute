@@ -268,6 +268,7 @@ test("codex.normalizeCodexModelsResponse parses the Codex live catalog shape", (
   assert.deepEqual(
     parsed.map((m) => ({ id: m.id, name: m.name })),
     [
+      { id: "codex-auto-review", name: "Codex Auto Review" },
       { id: "gpt-5.4", name: "GPT-5.4" },
       { id: "gpt-5.5", name: "GPT-5.5" },
     ]
@@ -310,7 +311,7 @@ test("codex safe discovery classifies public metadata before activating it", () 
 });
 
 test("codex retired ids stay out of the discovery catalog", () => {
-  for (const id of ["gpt-5.3-codex-spark", "codex-auto-review"]) {
+  for (const id of ["gpt-5.3-codex-spark"]) {
     assert.equal(isCodexDiscoveryModelExcluded({ id }), true);
     assert.equal(isSharedCodexDiscoveryModelExcluded({ id }), true);
     assert.deepEqual(
@@ -350,7 +351,7 @@ test("codex retired ids stay out of the discovery catalog", () => {
   );
   assert.deepEqual(
     catalog.map((model) => model.id),
-    ["gpt-6-sol"]
+    ["codex-auto-review", "gpt-6-sol"]
   );
 });
 
@@ -493,7 +494,7 @@ test("codex.normalizeCodexGithubCatalogResponse parses current client catalog me
 
   assert.deepEqual(
     parsed.map((model) => model.id),
-    ["gpt-5.6-sol", "future-model"]
+    ["gpt-5.6-sol", "future-model", "codex-auto-review"]
   );
   assert.equal(parsed[0]?.description, "Latest frontier agentic coding model.");
   assert.equal(parsed[0]?.inputTokenLimit, 372000);
@@ -758,7 +759,10 @@ test("codex.normalizeCodexModelsResponse drops entries without an id", () => {
   );
 });
 
-test("codex.fetchCodexDiscoveryModels returns null for missing token, auth failure, empty, or network error", async () => {
+// Contract change: a recognised empty list (`{data: []}`, `{models: []}`, `[]`) is
+// a successful answer, returned as []. Every other body that yields no models is
+// a failure, returned as null, so callers keep warning about it.
+test("codex.fetchCodexDiscoveryModels separates an empty catalog from a failed fetch", async () => {
   assert.equal(
     await fetchCodexDiscoveryModels({
       accessToken: null,
@@ -775,12 +779,42 @@ test("codex.fetchCodexDiscoveryModels returns null for missing token, auth failu
     null
   );
 
+  for (const emptyList of [{ data: [] }, { models: [] }, []]) {
+    assert.deepEqual(
+      await fetchCodexDiscoveryModels({
+        accessToken: "tok",
+        fetchImpl: async () => Response.json(emptyList),
+      }),
+      [],
+      `${JSON.stringify(emptyList)} is an empty catalog`
+    );
+  }
+
+  for (const notAList of [
+    { error: { message: "quota exhausted", type: "insufficient_quota" } },
+    { error: "bad", models: [] },
+    { detail: "Unauthorized" },
+    { status: "ok" },
+    {},
+    null,
+  ]) {
+    assert.equal(
+      await fetchCodexDiscoveryModels({
+        accessToken: "tok",
+        fetchImpl: async () => Response.json(notAList),
+      }),
+      null,
+      `${JSON.stringify(notAList)} is a failure, not an empty catalog`
+    );
+  }
+
   assert.equal(
     await fetchCodexDiscoveryModels({
       accessToken: "tok",
-      fetchImpl: async () => Response.json({ data: [] }),
+      fetchImpl: async () => new Response("<html>bad gateway</html>", { status: 200 }),
     }),
-    null
+    null,
+    "an unparseable 200 body is a failure"
   );
 
   assert.equal(

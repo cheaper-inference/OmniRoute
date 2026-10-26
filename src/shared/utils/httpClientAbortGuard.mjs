@@ -38,6 +38,17 @@
  * layer already handles took the process down. Both timeout codes are
  * classified in `isRecoverableUpstreamTimeoutError` below.
  *
+ * It escaped again on 2026-10-11 (exit code 7, #16347) with a stream-lifecycle
+ * error: an empty Claude upstream (`empty_response`, stamped by
+ * `open-sse/utils/stream.ts::emitClaudeEmptyStreamErrorAndAbort`) had already
+ * been reported as a 502 / combo failover, but while the combo loop sat in its
+ * retry wait nothing consumed the errored transform stream, so the rejection
+ * reached this guard unclassified. Those errors carry the
+ * `__omniroutePendingRequestCleared` marker (`PENDING_REQUEST_CLEARED_MARKER`,
+ * `open-sse/utils/stream.ts`) once the stream layer has cleared the request's
+ * pending entry — they are classified in `isHandledStreamLifecycleError`
+ * below.
+ *
  * Two layers:
  *   1. `attachRequestStreamGuards(req, res)` — per-request listeners that absorb
  *      client-abort errors so they never bubble to the process level. Call it
@@ -159,6 +170,15 @@ export function isRecoverableUpstreamTimeoutError(err) {
   }
   if (!err || typeof err !== "object") return false;
   const e = /** @type {NodeJS.ErrnoException & { errorCode?: string }} */ (err);
+  // open-sse's withBodyTimeout rejects with a plain Error (no .code). Restrict
+  // this match to its exact name and message shape to preserve crash semantics.
+  if (
+    e.name === "BodyTimeoutError" &&
+    typeof e.message === "string" &&
+    /^Response body read timeout after [1-9]\d*ms$/.test(e.message)
+  ) {
+    return true;
+  }
   return (
     e.code === "DIRECT_RESPONSE_START_TIMEOUT" ||
     e.code === "RELAY_TIMEOUT" ||
@@ -233,6 +253,52 @@ export function isUpstreamNetworkError(err) {
 }
 
 /**
+ * Account-semaphore capacity rejection (`rateLimitSemaphore.acquire`): the queue
+ * wait expired (`SEMAPHORE_TIMEOUT`) or the queue refused the waiter
+ * (`SEMAPHORE_QUEUE_FULL`). The request layer already answers these with a 429
+ * (`open-sse/handlers/chatCore/streamErrorResult.ts::isSemaphoreCapacityError`),
+ * so a stray copy reaching the process-level handlers is a capacity signal, not
+ * a fault. Kept as literal checks because this file must stay build-free (#17229).
+ *
+ * @param {unknown} err
+ * @returns {boolean}
+ */
+function isSemaphoreCapacityError(err) {
+  if (!err || typeof err !== "object") return false;
+  return err.code === "SEMAPHORE_TIMEOUT" || err.code === "SEMAPHORE_QUEUE_FULL";
+}
+
+/**
+ * A stream-lifecycle error OmniRoute's own streaming pipeline already accounted
+ * for. `open-sse/utils/stream.ts` stamps `markPendingRequestCleared()` on every
+ * stream error whose pending-request entry was cleared at emit time (the empty
+ * Claude flush `empty_response`, the upstream-start timeout, the empty-choices
+ * flush, and the `streamFailureBoundary.ts` fallback) — the request layer has
+ * by then already surfaced the failure (502 error event, combo failover,
+ * single-model retry classification), so a stray copy delivered to nobody is a
+ * bookkeeping leftover, not a fault. Kept as literal checks because this file
+ * must stay build-free: canonical definitions are `PENDING_REQUEST_CLEARED_MARKER`
+ * and the `empty_response` stamp in `open-sse/utils/stream.ts` (keep in sync).
+ *
+ * 2026-10-11 production exit 7 (#16347): the combo retry wait left the errored
+ * transform stream unconsumed and the `empty_response` rejection escaped as an
+ * uncaughtException. Same escape class as RELAY_TIMEOUT (#15339) and
+ * RATE_LIMIT_QUEUE_TIMEOUT (#15706).
+ *
+ * @param {unknown} err
+ * @returns {boolean}
+ */
+export function isHandledStreamLifecycleError(err) {
+  if (err === "empty_response") return true;
+  if (!err || typeof err !== "object") return false;
+  const e = /** @type {Error & { code?: string; __omniroutePendingRequestCleared?: boolean }} */ (
+    err
+  );
+  if (e.__omniroutePendingRequestCleared === true) return true;
+  return e.code === "empty_response";
+}
+
+/**
  * Decide whether a process-level uncaughtException/unhandledRejection should be
  * swallowed (benign client-abort, or a recoverable upstream timeout the
  * request layer already handles — #12861 / RELAY_TIMEOUT) or allowed to
@@ -250,7 +316,9 @@ export function shouldSwallowUncaught(err, origin) {
     !isClientAbortError(err) &&
     !isRecoverableUpstreamTimeoutError(err) &&
     !isIntentionalComboAbort(err) &&
-    !isUpstreamNetworkError(err)
+    !isUpstreamNetworkError(err) &&
+    !isHandledStreamLifecycleError(err) &&
+    !isSemaphoreCapacityError(err)
   ) {
     return false;
   }

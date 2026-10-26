@@ -65,14 +65,45 @@ export const createKeySchema = z
     expiresAt: z.string().datetime().nullable().optional(),
     scopes: z.array(z.string().trim().min(1).max(64)).max(32).optional(),
     allowedConnections: z.array(z.string().uuid()).min(1).max(100).optional(),
+    preferredConnections: z.array(z.string().uuid()).max(100).optional(),
   })
   .superRefine((value, ctx) => {
     requireConsistentModelAccess(value, ctx);
     requireExclusiveLeaseConnections(value, ctx);
+    if (value.allowedConnections?.length && value.preferredConnections?.length) {
+      const allowed = new Set(value.allowedConnections);
+      if (value.preferredConnections.some((id) => !allowed.has(id))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "preferredConnections must be a subset of allowedConnections",
+          path: ["preferredConnections"],
+        });
+      }
+    }
   });
+
+const SYNC_TOKEN_TTL_UNIT_MS = { s: 1_000, m: 60_000, h: 3_600_000, d: 86_400_000 } as const;
+/** Longest lifetime a sync token may be issued with. There is no "never expires". */
+export const MAX_SYNC_TOKEN_TTL_MS = 365 * SYNC_TOKEN_TTL_UNIT_MS.d;
+
+/** `30d`, `12h`, `90m`, `3600s` → milliseconds; null when the value is not such a duration. */
+export function parseSyncTokenTtlMs(ttl: string): number | null {
+  const match = /^([1-9]\d{0,6})([smhd])$/.exec(ttl.trim());
+  if (!match) return null;
+  return Number(match[1]) * SYNC_TOKEN_TTL_UNIT_MS[match[2] as keyof typeof SYNC_TOKEN_TTL_UNIT_MS];
+}
 
 export const createSyncTokenSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(200),
+  // Same shape the CLI already sends (`omniroute sync tokens create --ttl 30d`).
+  ttl: z
+    .string()
+    .trim()
+    .refine((value) => {
+      const ms = parseSyncTokenTtlMs(value);
+      return ms !== null && ms <= MAX_SYNC_TOKEN_TTL_MS;
+    }, "ttl must be a duration like 30d, 12h or 90m, at most 365d")
+    .optional(),
 });
 
 export const setKeyQuotaSchema = z.object({
@@ -139,6 +170,7 @@ export const updateKeyPermissionsSchema = z
     blockedModels: z.array(z.string().trim().min(1)).max(1000).optional(),
     allowedCombos: z.array(z.string().trim().min(1).max(200)).max(500).optional(),
     allowedConnections: z.array(z.string().uuid()).max(100).optional(),
+    preferredConnections: z.array(z.string().uuid()).max(100).optional(),
     noLog: z.boolean().optional(),
     autoResolve: z.boolean().optional(),
     isActive: z.boolean().optional(),
@@ -164,6 +196,8 @@ export const updateKeyPermissionsSchema = z
     codexServiceMode: z.enum(API_KEY_CODEX_SERVICE_MODES).optional(),
     allowAutoCombos: z.boolean().optional(),
     catalogScope: z.enum(["all", "combos", "models"]).optional(),
+    // Per-key enforced routing target; null (or blank) clears the pin.
+    forcedModel: z.string().trim().max(300).nullable().optional(),
     cacheDefaultMode: z.enum(["legacy", "bypass"]).optional(),
     disableNonPublicModels: z.boolean().optional(),
     allowUsageCommand: z.boolean().optional(),
@@ -209,6 +243,7 @@ export const updateKeyPermissionsSchema = z
       value.blockedModels === undefined &&
       value.allowedCombos === undefined &&
       value.allowedConnections === undefined &&
+      value.preferredConnections === undefined &&
       value.noLog === undefined &&
       value.autoResolve === undefined &&
       value.isActive === undefined &&
@@ -225,6 +260,7 @@ export const updateKeyPermissionsSchema = z
       value.codexServiceMode === undefined &&
       value.allowAutoCombos === undefined &&
       value.catalogScope === undefined &&
+      value.forcedModel === undefined &&
       value.cacheDefaultMode === undefined &&
       value.disableNonPublicModels === undefined &&
       value.allowUsageCommand === undefined &&
@@ -241,6 +277,16 @@ export const updateKeyPermissionsSchema = z
     }
     if (value.scopes !== undefined && value.allowedConnections !== undefined) {
       requireExclusiveLeaseConnections(value, ctx);
+    }
+    if (value.allowedConnections?.length && value.preferredConnections?.length) {
+      const allowed = new Set(value.allowedConnections);
+      if (value.preferredConnections.some((id) => !allowed.has(id))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "preferredConnections must be a subset of allowedConnections",
+          path: ["preferredConnections"],
+        });
+      }
     }
   });
 

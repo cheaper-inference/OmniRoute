@@ -40,26 +40,26 @@ Traffic Inspector OmniRoute-un daxili HTTPS trafik sazlama alətidir — Charles
 
 ## §2 Tutma rejimləri
 
-Traffic Inspector **eyni vaxtda 5 tutma mənbəyini** dəstəkləyir. Hər biri müstəqil şəkildə aktivləşdirilə və deaktivləşdirilə bilər. Hər `InterceptedRequest` (`src/mitm/inspector/types.ts`) daxilindəki `source` sahəsi `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` və ya `"tproxy"` dəyərlərindən biridir.
+Traffic Inspector **eyni anda 5 tutma mənbəyini** dəstəkləyir. Hər biri müstəqil şəkildə aktivləşdirilə və ya deaktiv edilə bilər. Hər `InterceptedRequest` (`src/mitm/inspector/types.ts`) daxilindəki `source` sahəsi `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` və ya `"tproxy"` dəyərlərindən biridir.
 
 ### Rejim 1 — AgentBridge (standart, həmişə aktiv)
 
-**Mənbə:** AgentBridge işləyiciləri (`src/mitm/handlers/base.ts`)
-**Mexanizm:** `MitmHandlerBase` daxilində hər `intercept()` çağırışı yönləndirmədən əvvəl `hookBufferStart()`, tamamlandıqda isə `hookBufferUpdate()` çağırır. Heç bir əlavə konfiqurasiya tələb olunmur — AgentBridge işə düşən kimi işləyir.
+**Mənbə:** AgentBridge emalçıları (`src/mitm/handlers/base.ts`)
+**Mexanizm:** `MitmHandlerBase` daxilindəki hər `intercept()` çağırışı yönləndirmədən əvvəl `hookBufferStart()`, tamamlandıqda isə `hookBufferUpdate()` çağırır. Heç bir əlavə konfiqurasiya tələb olunmur — AgentBridge işə düşən kimi işləyir.
 **Əhatə dairəsi:** AgentBridge-də konfiqurasiya edilmiş 9 IDE agenti
 **Qeyd:** `InterceptedRequest` daxilindəki `source` sahəsi = `"agent-bridge"`
 
 ### Rejim 2 — Fərdi hostlar (DNS yönləndirməsi)
 
 **Mənbə:** İstifadəçi tərəfindən müəyyən edilmiş host siyahısı (`inspector_custom_hosts` cədvəli)
-**Mexanizm:** UI vasitəsilə host əlavə edildikdə `/etc/hosts` faylına `127.0.0.1 <host>` əlavə olunur (sudo tələb edir). Mövcud AgentBridge MITM serveri (port 443) yeni host üçün dinamik olaraq SNI sertifikatı yaradır.
-**Əhatə dairəsi:** Əlavə edilmiş hostdan istifadə edən istənilən tətbiq — tətbiq konfiqurasiyasını dəyişməyə ehtiyac yoxdur
+**Mexanizm:** UI vasitəsilə host əlavə edildikdə `/etc/hosts` faylına `127.0.0.1 <host>` əlavə olunur (sudo tələb edir). Mövcud AgentBridge MITM serveri (port 443) yeni host üçün dinamik şəkildə SNI sertifikatı yaradır.
+**Əhatə dairəsi:** Əlavə edilmiş hostdan istifadə edən istənilən tətbiq — tətbiq konfiqurasiyasını dəyişmək tələb olunmur
 **Qeyd:** `source` = `"custom-host"`
 
 İstifadə nümunələri:
 
 - Python skriptlərindən `api.openai.com` trafikini izləmək
-- `my-internal-llm.company.com` ünvanında sazlama aparmaq
+- `my-internal-llm.company.com` hostunda sazlama aparmaq
 - Eyni şəbəkədəki mobil cihazlardan gələn trafiki tutmaq (ARP saxtalaşdırması vasitəsilə — qabaqcıl)
 
 ### Rejim 3 — HTTP_PROXY dinləyicisi (port 8080)
@@ -73,53 +73,53 @@ Traffic Inspector **eyni vaxtda 5 tutma mənbəyini** dəstəkləyir. Hər biri 
 # Tək bir əmr üçün sürətli tutma:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Shell sessiyasında daimi tutma:
+# Shell sessiyasında davamlı tutma:
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS məhdudiyyəti:** HTTPS `CONNECT` tunelləri yalnız metadata (host, port, vaxt göstəriciləri) kimi tutulur — standart olaraq TLS gövdəsinin şifrəsi açılmır. Gövdəni tam yoxlamaq üçün "Proksi rejimində HTTPS-in şifrəsini aç" keçidini aktivləşdirin (istəyə bağlıdır, AgentBridge sertifikatına etibar edilməsini tələb edir).
+**TLS məhdudiyyəti:** HTTPS trafiki sadə `CONNECT` tunelindən keçir: dinləyici şifrələnmiş baytları dəyişdirmədən ötürür və yalnız metadatanı (host, port, vaxt göstəriciləri) qeydə alır. O, HTTPS trafikinin şifrəsini heç vaxt açmır və bu rejimdə şifrəaçmanı aktivləşdirən heç bir parametr yoxdur. HTTPS məzmununu tutmaq üçün hostu Rejim 1 (AgentBridge), Rejim 2 (Fərdi hostlar) və ya Rejim 5 (TPROXY şifrəaçması) vasitəsilə yönləndirin.
 
-**Port münaqişəsi:** 8080 portu istifadədədirsə, AgentBridge strukturlaşdırılmış xəta ilə 409 cavabı qaytarır. Portu `INSPECTOR_HTTP_PROXY_PORT` mühit dəyişəni vasitəsilə dəyişdirin.
+**Port ziddiyyəti:** Əgər port 8080 istifadə olunursa, AgentBridge strukturlaşdırılmış xəta ilə 409 cavabı qaytarır. Portu `INSPECTOR_HTTP_PROXY_PORT` mühit dəyişəni vasitəsilə dəyişin.
 
-### Rejim 4 — Sistem miqyaslı proksi (qabaqcıl, istəyə bağlı)
+### Rejim 4 — Sistem miqyaslı proksi (qabaqcıl, könüllü aktivləşdirmə)
 
-**Mənbə:** ƏS səviyyəli proksi parametrləri (maşındakı bütün tətbiqlərə şamil olunur)
-**Mexanizm:** Bütün HTTP/HTTPS trafikini HTTP_PROXY dinləyicisi vasitəsilə yönləndirmək üçün ƏS API-lərindən istifadə edir:
+**Mənbə:** Əməliyyat sistemi səviyyəli proksi parametrləri (kompüterdəki bütün tətbiqlərə şamil olunur)
+**Mexanizm:** Bütün HTTP/HTTPS trafikini HTTP_PROXY dinləyicisi vasitəsilə yönləndirmək üçün əməliyyat sistemi API-lərindən istifadə edir:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Əhatə dairəsi:** Maşında sistem proksi parametrlərini nəzərə alan hər bir tətbiq
+  **Əhatə dairəsi:** Kompüterdə sistem proksi parametrlərini nəzərə alan hər bir tətbiq
   **Qeyd:** `source` = `"system-proxy"`
 
 **Təhlükəsizlik mexanizmləri:**
 
 - Avtomatik deaktivləşdirmə taymeri (standart olaraq 30 dəqiqə, `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` vasitəsilə konfiqurasiya edilə bilər)
-- Əvvəlki sistem proksi vəziyyəti verilənlər bazasında saxlanılır və geri qaytarılarkən bərpa olunur
-- İstifadəçi aktiv olduğu müddətdə səhifədən ayrılarsa, idarəetmə paneli "Sistem proksisi geri qaytarılır" bildirişini göstərir
-- UI `⚠ Qabaqcıl` nişanını və açıq təsdiq xanasını göstərir
+- Əvvəlki sistem proksi vəziyyəti verilənlər bazasında saxlanılır və geri qaytarılarkən bərpa edilir
+- İstifadəçi aktiv olduğu müddətdə səhifədən ayrılarsa, idarə paneli "Sistem proksisi geri qaytarılır" bildirişini göstərir
+- UI `⚠ Qabaqcıl` nişanı və ayrıca təsdiq xanası göstərir
 
-### Rejim 5 — TPROXY şəffaf şifrəaçma (Linux, root, istəyə bağlı)
+### Rejim 5 — TPROXY şəffaf şifrəaçması (Linux, root, könüllü aktivləşdirmə)
 
-**Mənbə:** Kernel TPROXY + siyasət əsaslı marşrutlaşdırma (`src/mitm/tproxy/`)
-**Mexanizm:** `mangle OUTPUT` daxilində hədəf porta (standart olaraq `443`) açılan yeni lokal çıxış TCP bağlantılarını işarələyir, `ip rule` işarələnmiş paketləri lokal çatdırılmaya yönləndirir və `mangle PREROUTING` bölməsinin `TPROXY` hədəfi onları şəffaf (**IP_TRANSPARENT**) dinləyiciyə (standart port `8443`) ötürür. Dinləyici dinamik CA tərəfindən **hər SNI host adı üçün tələb əsasında** verilən yarpaq sertifikatı ilə TLS-i sonlandırır, şifrəsi açılmış mübadiləni tutur və sorğunu yenidən şifrələyərək ilkin təyinat nöqtəsinə yönləndirir.
-**Əhatə dairəsi:** Hədəf portdakı **istənilən** təyinat hostu — `/etc/hosts` saxtalaşdırması, `HTTP_PROXY` mühit dəyişəni və sistem miqyaslı proksi dəyişikliyi tələb olunmur. Tutulan proses üçün konfiqurasiya dəyişikliyi lazım deyil, lakin o, dinamik CA-ya etibar etməlidir.
+**Mənbə:** Nüvə TPROXY-si + siyasət əsaslı marşrutlaşdırma (`src/mitm/tproxy/`)
+**Mexanizm:** `mangle OUTPUT` daxilində hədəf porta (standart olaraq `443`) yönələn yeni lokal TCP bağlantılarını işarələyir, `ip rule` işarələnmiş paketləri lokal çatdırılmaya yönləndirir və `mangle PREROUTING` daxilindəki `TPROXY` hədəfi onları şəffaf (**IP_TRANSPARENT**) dinləyiciyə (standart port `8443`) ötürür. Dinləyici dinamik CA tərəfindən **hər SNI host adı üçün tələb əsasında** verilən son obyekt sertifikatı ilə TLS-i sonlandırır, şifrəsi açılmış mübadiləni tutur və sorğunu yenidən şifrələyərək ilkin təyinat nöqtəsinə yönləndirir.
+**Əhatə dairəsi:** Hədəf portdakı **istənilən** təyinat hostları — `/etc/hosts` saxtalaşdırması, `HTTP_PROXY` mühit dəyişəni və sistem miqyaslı proksi dəyişikliyi tələb olunmur. Tutulan proses üçün heç bir konfiqurasiya dəyişikliyi tələb edilmir, lakin o, dinamik CA-ya etibar etməlidir.
 **Qeyd:** `source` = `"tproxy"`
 
-**Tələblər:** Yalnız Linux (**IP_TRANSPARENT** yalnız Linux-da mövcuddur), **CAP_NET_ADMIN** imkanı (root) və C alətlər dəsti ilə yığılmalı olan yerli N-API əlavəsi (`npm run build:native:tproxy`). Əlçatan olmadıqda idarəetmə panelindəki keçid "TPROXY şifrəaçması Linux + root + yerli əlavə tələb edir" alət ipucu ilə deaktiv edilir. Fayervol qaydaları tranzaksiyalı şəkildə tətbiq edilir/geri qaytarılır (nasazlıq heç vaxt geridə `mangle` qaydası saxlamır) və yenidən başlatma zamanı təmizlənir. SO_MARK əsaslı dövrə əleyhinə mexanizm proksinin öz yenidən şifrələnmiş yönləndirməsinin təkrar tutulmasının qarşısını alır.
+**Tələblər:** Yalnız Linux (**IP_TRANSPARENT** yalnız Linux-da mövcuddur), **CAP_NET_ADMIN** imkanı (root) və C alətlər zənciri ilə qurulmalı olan yerli N-API əlavəsi (`npm run build:native:tproxy`). Bunlar mövcud olmadıqda idarə panelindəki keçid "TPROXY şifrəaçması Linux + root + yerli əlavə tələb edir" ipucu ilə deaktiv edilir. Təhlükəsizlik divarı qaydaları tranzaksiyalı şəkildə tətbiq edilir/geri qaytarılır (qəza heç vaxt geridə `mangle` qaydası saxlamır) və yenidən başladılma zamanı təmizlənir. SO_MARK əsaslı dövrə əleyhinə mexanizm proksinin özünün yenidən şifrələnmiş yönləndirməsinin təkrar tutulmasının qarşısını alır.
 
-Bu, özünə məxsus ayrıca operator təlimatı olan əhəmiyyətli bir altsistemdir — fayervol üzrə tam göstərişlər, hər SNI üçün dinamik CA + etibar anbarı quraşdırıcısı, yalnız lokal marşrut, dövrə əleyhinə təfərrüatlar və konfiqurasiya sxemi üçün `docs/security/MITM-TPROXY-DECRYPT.md` sənədinə baxın (git; `/docs` daxilinə kompilyasiya edilmir). Keçid `GET / POST / DELETE /api/tools/agent-bridge/tproxy` tərəfindən idarə olunur (qeyd: marşrut Traffic Inspector prefiksi deyil, AgentBridge prefiksi altında yerləşir).
+Bu, özünəməxsus xüsusi operator təlimatına malik geniş bir alt sistemdir — təhlükəsizlik divarının tam qaydaları, hər SNI üçün dinamik CA + etibar anbarı quraşdırıcısı, yalnız lokal marşrut, dövrə əleyhinə mexanizmin təfərrüatları və konfiqurasiya sxemi üçün `docs/security/MITM-TPROXY-DECRYPT.md` sənədinə baxın (git; `/docs` daxilində kompilyasiya edilmir). Keçid `GET / POST / DELETE /api/tools/agent-bridge/tproxy` vasitəsilə idarə olunur (qeyd: marşrut Traffic Inspector prefiksi deyil, AgentBridge prefiksi altında yerləşir).
 
 ### Tutma rejimlərinin müqayisəsi
 
-| Rejim               | Quraşdırma                        |              Sudo?              | Əhatə dairəsi                                | Qeydlər                                                                                                                                                         |
-| ------------------- | --------------------------------- | :-----------------------------: | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge      | Avtomatik                         |   Bir dəfə (sertifikat+hosts)   | 9 IDE agenti                                 | Defolt olaraq aktivdir                                                                                                                                          |
-| 2. Xüsusi hostlar   | Hər host üçün daxiletmə           |       Bəli (hosts faylı)        | Həmin hostdan istifadə edən istənilən tətbiq | DB-də saxlanılır                                                                                                                                                |
-| 3. HTTP_PROXY       | `export HTTPS_PROXY=...`          |              Xeyr               | Mühit dəyişənlərinə əməl edən tətbiqlər      | Port 8080, defolt olaraq TLS şifrəsinin açılması yoxdur                                                                                                         |
-| 4. Sistem üzrə      | Keçid + təsdiq                    |              Bəli               | Maşındakı bütün tətbiqlər                    | 30 dəqiqədən sonra avtomatik deaktiv edilir                                                                                                                     |
-| 5. TPROXY şifrəaçma | Keçid (Linux + yerli əlavə modul) | Bəli (root + CA quraşdırılması) | Hədəf portdakı istənilən host                | İstənilən hostun şifrəsini açır; defolt olaraq deaktivdir — `docs/security/MITM-TPROXY-DECRYPT.md` sənədinə baxın (git; `/docs` daxilində kompilyasiya edilmir) |
+| Rejim                | Quraşdırma                         |              Sudo?              | Əhatə dairəsi                                | Qeydlər                                                                                                                                                       |
+| -------------------- | ---------------------------------- | :-----------------------------: | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge       | Avtomatik                          |   Bir dəfə (sertifikat+hosts)   | 9 IDE agenti                                 | Defolt olaraq aktivdir                                                                                                                                        |
+| 2. Fərdi hostlar     | Hər host üçün daxiletmə            |       Bəli (hosts faylı)        | Həmin hostdan istifadə edən istənilən tətbiq | DB-də saxlanılır                                                                                                                                              |
+| 3. HTTP_PROXY        | `export HTTPS_PROXY=...`           |              Xeyr               | Mühit dəyişənlərinə riayət edən tətbiqlər    | Port 8080; HTTPS CONNECT tuneli ilə ötürülür (yalnız metadata, heç vaxt deşifrə edilmir)                                                                      |
+| 4. Sistem miqyasında | Dəyişdirici + təsdiq               |              Bəli               | Kompüterdəki bütün tətbiqlər                 | 30 dəqiqədən sonra avtomatik deaktiv edilir                                                                                                                   |
+| 5. TPROXY deşifrəsi  | Dəyişdirici (Linux + native addon) | Bəli (root + CA quraşdırılması) | Hədəf portdakı istənilən host                | İxtiyari hostları deşifrə edir; defolt olaraq deaktivdir — `docs/security/MITM-TPROXY-DECRYPT.md` faylına baxın (git; `/docs` daxilində kompilyasiya edilmir) |
 
 ---
 
@@ -342,29 +342,29 @@ Hər sessiya aşağıdakı formatlarda ixrac edilə bilər:
 
 ## §6 Təhlükəsizlik
 
-Traffic Inspector avtorizasiya başlıqları və sorğu gövdələri daxil olmaqla, **ələ keçirilmiş bütün HTTPS trafikini** göstərir. Aşağıdakı nəzarət mexanizmləri tətbiq edilir:
+Traffic Inspector avtorizasiya başlıqları və sorğu gövdələri daxil olmaqla, **ələ keçirilmiş bütün HTTPS trafikini** göstərir. Aşağıdakı nəzarət tədbirləri tətbiq edilib:
 
-| Nəzarət mexanizmi                           | Təfərrüatlar                                                                                                                                                                                               |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                              | Bütün marşrutlara və WebSocket son nöqtəsinə yalnız loopback vasitəsilə giriş mümkündür (autentifikasiyadan əvvəl `routeGuard.ts` daxilində məcburi şəkildə tətbiq edilir)                                 |
-| **Məxfi məlumatların maskalanması**         | Xətti `maskSecret()` skaneri RFC 6750 Bearer giriş məlumatlarını, provayder prefiksli açarları və uzun qeyri-şəffaf tokenləri `TrafficBuffer.push()` çağırışından əvvəl redaktə edir                       |
-| **Gövdə ölçüsü limiti**                     | `INSPECTOR_MAX_BODY_KB` həddindən böyük gövdələr (standart olaraq 1024 KB) `"(performans üçün qısaldılıb)"` bildirişi ilə qısaldılır                                                                       |
-| **Başlıqların sanitizasiyası**              | Adlar kiçik hərflərə çevrilir; çərçivələmə/hop-by-hop və proksi autentifikasiyası başlıqları silinir; kukilər tamamilə redaktə edilir; giriş məlumatlarının dəyərləri `maskSecret()` funksiyasına ötürülür |
-| **CSP**                                     | Daxil edilmiş cavab gövdələri vasitəsilə XSS hücumlarının qarşısını almaq üçün Traffic Inspector səhifələrində sərt Content Security Policy tətbiq edilir                                                  |
-| **Standart olaraq davamlı saxlanma yoxdur** | `TrafficBuffer` yaddaşdaxilidir və server yenidən başladıldıqda itirilir. Sessiyalar yalnız açıq şəkildə qeydə alındıqda davamlı yaddaşda saxlanılır                                                       |
+| Nəzarət tədbiri                     | Təfərrüatlar                                                                                                                                                                                      |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                      | Bütün marşrutlar və WebSocket son nöqtəsi yalnız loopback üçün əlçatandır (autentifikasiyadan əvvəl `routeGuard.ts` daxilində məcburi şəkildə tətbiq edilir)                                      |
+| **Məxfi məlumatların maskalanması** | Xətti `maskSecret()` skaneri RFC 6750 Bearer giriş məlumatlarını, provayder prefiksli açarları və uzun qeyri-şəffaf tokenləri `TrafficBuffer.push()` çağırışından əvvəl gizlədir                  |
+| **Gövdə ölçüsü limiti**             | `INSPECTOR_MAX_BODY_KB` dəyərindən böyük gövdələr (standart olaraq 1024 KB) `"(performans üçün qısaldılıb)"` bildirişi ilə qısaldılır                                                             |
+| **Başlıqların sanitizasiyası**      | Adlar kiçik hərflərə çevrilir; freyminq/hop-by-hop və proksi autentifikasiya başlıqları silinir; kukilər tamamilə gizlədilir; giriş məlumatlarının dəyərləri `maskSecret()` funksiyasına ötürülür |
+| **CSP**                             | Daxil edilmiş cavab gövdələri vasitəsilə XSS hücumlarının qarşısını almaq üçün Traffic Inspector səhifələrində ciddi Content Security Policy tətbiq edilir                                        |
+| **Standart olaraq saxlanmır**       | `TrafficBuffer` yaddaşdaxilidir və server yenidən başladıldıqda itir. Sessiyalar yalnız açıq şəkildə qeydə alındıqda saxlanılır                                                                   |
 
-### Tətbiq edilən sərt qaydalar
+### Tətbiq olunan sərt qaydalar
 
-| Qayda                             | Tətbiqi                                                                                      |
-| --------------------------------- | -------------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Traffic Inspector marşrutlarından gələn bütün HTTP xəta cavabları sanitizasiya edilir        |
-| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` LOCAL_ONLY + SPAWN_CAPABLE-dır (sistem proksisi komandaları) |
+| Qayda                             | Tətbiqi                                                                                            |
+| --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **#12** `sanitizeErrorMessage`    | Traffic Inspector marşrutlarından gələn bütün HTTP xəta cavabları sanitizasiya edilir              |
+| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` LOCAL_ONLY + SPAWN_CAPABLE statusundadır (sistem proksisi əmrləri) |
 
 ### Məlum məhdudiyyətlər
 
-- **Sistem miqyaslı proksi rejimi** VPN klientləri və SSO daxil olmaqla, maşındakı bütün tətbiqlərə təsir edir. Həmişə avtomatik söndürmə taymeri ilə istifadə edin. Paylaşılan maşınlarda istifadə etməyin.
-- **CONNECT tuneli üzərindən HTTPS**: TLS ələ keçirilməsi aktiv edilmədiyi halda, Rejim 3 (HTTP_PROXY) HTTPS təyinatları üçün yalnız tunel metadatasını ələ keçirir. Bu, layihələndirmədən irəli gəlir — AgentBridge sertifikatına etibar edilmədən şəffaf ələ keçirmə həmin tətbiqlər üçün TLS yoxlamasını pozardı.
-- **Bəzi komponentlərdə sərt kodlaşdırılmış sətirlər**: Bəzi UI komponentlərində (F7/F8) hələ i18n açarları ilə əhatə olunmayan az sayda sərt kodlaşdırılmış sətir var. Bunlar i18n boşluqları hesabatında Məlum Məhdudiyyət kimi sənədləşdirilib; növbəti mərhələdə miqrasiya ediləcək. Təsirə məruz qalan sətirlər funksional istifadə üçün tərcümə tələb etməyən dekorativ UI etiketləridir.
+- **Sistem miqyaslı proksi rejimi** VPN klientləri və SSO daxil olmaqla, maşındakı bütün tətbiqlərə təsir edir. Həmişə avtomatik deaktivetmə taymeri ilə istifadə edin. Ortaq istifadə edilən maşınlarda istifadə etməyin.
+- **CONNECT tunelində HTTPS**: Rejim 3 (HTTP_PROXY) HTTPS təyinatları üçün yalnız tunel metadatasını ələ keçirir və onları heç vaxt deşifrə etmir. Bu, məqsədyönlüdür — deşifrə üçün hər bir klientin MITM sertifikatına etibar etməsi tələb olunardı, buna görə də dinləyici HTTPS-i başdan-başa şifrələnmiş saxlayır. HTTPS gövdələrinə ehtiyacınız olduqda AgentBridge, Custom Hosts və ya TPROXY deşifrəsindən istifadə edin.
+- **Bəzi komponentlərdə sərt kodlaşdırılmış sətirlər**: Bəzi UI komponentlərində (F7/F8) hələ i18n açarları ilə əhatə olunmayan az sayda sərt kodlaşdırılmış sətir var. Bunlar i18n boşluqları hesabatında Məlum Məhdudiyyət kimi sənədləşdirilib; sonrakı mərhələdə miqrasiya ediləcəklər. Təsirə məruz qalan sətirlər funksional istifadə üçün tərcümə tələb etməyən dekorativ UI etiketləridir.
 
 ---
 
@@ -429,70 +429,69 @@ Bufer `INSPECTOR_BUFFER_SIZE` həddinə (standart olaraq 1000) çatdıqda, yeni 
 
 ## §8 API arayışı
 
-Bütün marşrutlar `LOCAL_ONLY` (yalnız loopback) və `SPAWN_CAPABLE` (sistem proksisi əmrləri) xüsusiyyətlərinə malikdir. `src/server/authz/routeGuard.ts` faylına baxın.
+Bütün marşrutlar `LOCAL_ONLY` (yalnız loopback) və `SPAWN_CAPABLE` (sistem proksi əmrləri) xüsusiyyətlərinə malikdir. `src/server/authz/routeGuard.ts` faylına baxın.
 
 Baza yolu: `/api/tools/traffic-inspector/`
 
 ### Sorğuların idarə edilməsi
 
-| Metod  | Yol                         | Təsvir                                                                                            |
-| ------ | --------------------------- | ------------------------------------------------------------------------------------------------- |
-| GET    | `/requests`                 | Sorğuları siyahıya alır (filtrlənə bilər: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
-| GET    | `/requests/{id}`            | Ayrı-ayrı sorğunun təfərrüatları                                                                  |
-| DELETE | `/requests`                 | Yaddaşdaxili buferi təmizləyir                                                                    |
-| POST   | `/requests/{id}/replay`     | Eyni sorğunu OmniRoute routeri vasitəsilə yenidən icra edir                                       |
-| PUT    | `/requests/{id}/annotation` | Sorğuya dair qeydi saxlayır və ya yeniləyir                                                       |
+| Metod  | Yol                         | Təsvir                                                                                          |
+| ------ | --------------------------- | ----------------------------------------------------------------------------------------------- |
+| GET    | `/requests`                 | Sorğuları siyahılayır (filtrlənə bilər: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
+| GET    | `/requests/{id}`            | Tək sorğunun təfərrüatları                                                                      |
+| DELETE | `/requests`                 | Yaddaşdakı buferi təmizləyir                                                                    |
+| POST   | `/requests/{id}/replay`     | Eyni sorğunu OmniRoute routeri vasitəsilə yenidən icra edir                                     |
+| PUT    | `/requests/{id}/annotation` | Sorğu ilə bağlı qeydi saxlayır və ya yeniləyir                                                  |
 
 ### WebSocket
 
-| Metod | Yol   | Təsvir                                                                                               |
-| ----- | ----- | ---------------------------------------------------------------------------------------------------- |
-| GET   | `/ws` | Canlı WebSocket axını. Qoşulduqda `snapshot`, sonra isə `new`/`update`/`clear` hadisələrini göndərir |
+| Metod | Yol   | Təsvir                                                                                           |
+| ----- | ----- | ------------------------------------------------------------------------------------------------ |
+| GET   | `/ws` | Canlı WebSocket axını. Qoşulduqda `snapshot`, sonra `new`/`update`/`clear` hadisələrini göndərir |
 
-### Eksport
+### İxrac
 
-| Metod | Yol           | Təsvir                                              |
-| ----- | ------------- | --------------------------------------------------- |
-| GET   | `/export.har` | Cari filtrlənmiş siyahını HAR 1.2 kimi eksport edir |
+| Metod | Yol           | Təsvir                                            |
+| ----- | ------------- | ------------------------------------------------- |
+| GET   | `/export.har` | Cari filtrlənmiş siyahını HAR 1.2 kimi ixrac edir |
 
 ### Fərdi hostlar
 
 | Metod  | Yol             | Təsvir                                                  |
 | ------ | --------------- | ------------------------------------------------------- |
-| GET    | `/hosts`        | Fərdi hostları siyahıya alır                            |
+| GET    | `/hosts`        | Fərdi hostları siyahılayır                              |
 | POST   | `/hosts`        | Host əlavə edir (`/etc/hosts` avtomatik redaktə olunur) |
 | DELETE | `/hosts/{host}` | Hostu silir                                             |
 | PATCH  | `/hosts/{host}` | `enabled` vəziyyətini dəyişir                           |
 
 ### Tutma rejimləri
 
-| Metod | Yol                            | Təsvir                                                                                                     |
-| ----- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| GET   | `/capture-modes`               | AgentBridge / fərdi hostlar / HTTP_PROXY / sistem proksisi rejimlərinin vəziyyəti + `tls-intercept` keçidi |
-| POST  | `/capture-modes/http-proxy`    | HTTP_PROXY dinləyicisini başladır/dayandırır (`{action: "start"\|"stop"}`)                                 |
-| POST  | `/capture-modes/system-proxy`  | Sistem miqyaslı proksini tətbiq edir/əvvəlki vəziyyətinə qaytarır (`{action: "apply"\|"revert"}`)          |
-| POST  | `/capture-modes/tls-intercept` | Proksi rejimində HTTPS gövdəsinin deşifrlənməsini aktivləşdirir/deaktivləşdirir (`{enabled: boolean}`)     |
+| Metod | Yol                           | Təsvir                                                                            |
+| ----- | ----------------------------- | --------------------------------------------------------------------------------- |
+| GET   | `/capture-modes`              | AgentBridge / fərdi hostlar / HTTP_PROXY / sistem proksisi rejimlərinin vəziyyəti |
+| POST  | `/capture-modes/http-proxy`   | HTTP_PROXY dinləyicisini başladır/dayandırır (`{action: "start"\|"stop"}`)        |
+| POST  | `/capture-modes/system-proxy` | Sistem miqyaslı proksini tətbiq/ləğv edir (`{action: "apply"\|"revert"}`)         |
 
-> **TPROXY deşifrləməsi** (tutma rejimi 5) AgentBridge prefiksi altındakı
+> **TPROXY deşifrləməsi** (tutma rejimi 5) AgentBridge prefiksi altında yerləşən
 > **ayrıca** marşrutla idarə olunur — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` —
-> `/api/tools/traffic-inspector/` altında deyil. Baxın:
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; `/docs` daxilində tərtib edilmir).
+> `/api/tools/traffic-inspector/` altında deyil. `docs/security/MITM-TPROXY-DECRYPT.md`
+> faylına baxın (git-dədir; `/docs` daxilində kompilyasiya edilmir).
 
 ### Sessiyalar
 
 | Metod  | Yol                         | Təsvir                                                                       |
 | ------ | --------------------------- | ---------------------------------------------------------------------------- |
-| POST   | `/sessions`                 | Qeydəalmanı başladır (`{name?: string}`)                                     |
+| POST   | `/sessions`                 | Yazmanı başladır (`{name?: string}`)                                         |
 | PATCH  | `/sessions/{id}`            | Dayandırır və ya adını dəyişir (`{action: "stop"\|"rename", name?: string}`) |
-| GET    | `/sessions`                 | Bütün saxlanılmış sessiyaları siyahıya alır                                  |
+| GET    | `/sessions`                 | Bütün saxlanmış sessiyaları siyahılayır                                      |
 | GET    | `/sessions/{id}`            | Sessiyanın ani görüntüsü (bütün sorğular)                                    |
 | DELETE | `/sessions/{id}`            | Sessiyanı silir                                                              |
-| GET    | `/sessions/{id}/export.har` | Sessiyanı HAR 1.2 kimi eksport edir                                          |
+| GET    | `/sessions/{id}/export.har` | Sessiyanı HAR 1.2 kimi ixrac edir                                            |
 
-### Daxili qəbul (D4 ehtiyat variantı)
+### Daxili qəbul (D4 ehtiyat mexanizmi)
 
-| Metod | Yol                | Təsvir                                                                                                                |
-| ----- | ------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| POST  | `/internal/ingest` | `server.cjs` keçid yolundan ələ keçirilmiş sorğunu qəbul edir; `INSPECTOR_INTERNAL_INGEST_TOKEN` başlığını tələb edir |
+| Metod | Yol                | Təsvir                                                                                                         |
+| ----- | ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| POST  | `/internal/ingest` | `server.cjs` keçid yolundan tutulan sorğunu qəbul edir; `INSPECTOR_INTERNAL_INGEST_TOKEN` başlığı tələb olunur |
 
 Tam OpenAPI sxemləri: `docs/openapi.yaml` → `Traffic Inspector` teqi.

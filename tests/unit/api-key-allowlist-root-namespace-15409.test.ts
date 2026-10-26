@@ -51,14 +51,14 @@ async function restrictedKey(name: string, allowedModels: string[], blockedModel
     blockedModels,
   } as Parameters<typeof apiKeys.updateApiKeyPermissions>[1]);
   apiKeys.resetApiKeyState();
-  return { key: created.key, blockedModels };
+  return { key: created.key, allowedModels, blockedModels };
 }
 
 async function visible(
-  key: { key: string; blockedModels: string[] },
+  key: { key: string; allowedModels: string[]; blockedModels: string[] },
   model: { id: string; root: string }
 ) {
-  return isCatalogModelAllowedForKey(key.key, model, key.blockedModels, apiKeys);
+  return isCatalogModelAllowedForKey(key.key, model, key, apiKeys);
 }
 
 test("R1: a namespaced root does not leak a cline row into a deepseek-only key", async () => {
@@ -113,13 +113,18 @@ test("R4: a blocked id is not brought back through its root", async () => {
 });
 
 test("R5: the catalog filters provider rows through isCatalogModelAllowedForKey", () => {
-  const catalog = fs.readFileSync(
+  const catalogSource = fs.readFileSync(
     path.join(process.cwd(), "src/app/api/v1/models/catalog.ts"),
     "utf8"
   );
+  assert.ok(catalogSource.includes("finalModels = await filterCatalogModelsForKey("));
+  const catalog = fs.readFileSync(
+    path.join(process.cwd(), "src/app/api/v1/models/catalogKeyFilter.ts"),
+    "utf8"
+  );
   assert.ok(
-    catalog.includes("isCatalogModelAllowedForKey("),
-    "catalog.ts must decide provider-row visibility via isCatalogModelAllowedForKey"
+    catalog.includes("await isCatalogModelAllowedForKey(apiKey, m, keyMeta, deps)"),
+    "catalogKeyFilter.ts must decide provider-row visibility via isCatalogModelAllowedForKey"
   );
   assert.ok(
     !catalog.includes("isModelAllowedForKey(apiKey, m.root)"),

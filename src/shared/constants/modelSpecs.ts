@@ -105,6 +105,23 @@ const AUTHORITATIVE_PROVIDER_CONTEXT_WINDOWS = new Map<string, number>([
   ["opencode-go/glm-5.2", 1000000],
   ["zenmux/z-ai/glm-5.2", 1000000],
   ["zenmux/z-ai/glm-5.2-free", 1000000],
+  // models.dev under-reports Opencode's free Xiaomi MiMo rows at 200000 while
+  // its own non-free siblings (mimo-v2.5, mimo-v2.6-flash) and its other free
+  // row (mimo-v2-pro-free) all declare 1048576. The upstream serves the full
+  // 1M window (sessions observed running past 718K), so the stale sync row
+  // must not cap the advertised context at 200K.
+  ["opencode/mimo-v2.5-free", 1048576],
+  ["opencode-zen/mimo-v2.5-free", 1048576],
+  ["opencode/mimo-v2.6-flash-free", 1048576],
+  ["opencode-zen/mimo-v2.6-flash-free", 1048576],
+  ["opencode-go/mimo-v2.6-flash-free", 1048576],
+  // #16579: imported Go rows may already contain the provider's 200K
+  // placeholder when the catalog enricher runs. Only authoritative windows
+  // replace a non-empty context_length there. These exact Go routes have
+  // upstream-confirmed limits; keep manual operator overrides highest priority.
+  ["opencode-go/deepseek-v4.1-flash", 1000000],
+  ["opencode-go/deepseek-flash", 1000000],
+  ["opencode-go/minimax-m2.5", 204800],
 ]);
 
 const GPT_5_6_MODEL_SPEC = {
@@ -128,6 +145,11 @@ const GEMINI_36_FLASH_MODEL_SPEC = {
 } satisfies ModelSpec;
 
 export const MODEL_SPECS: Record<string, ModelSpec> = {
+  // Public API limits; Codex's smaller window lives in its provider registry.
+  "gpt-6.1-sol": {
+    ...GPT_5_6_MODEL_SPEC,
+    aliases: ["openai/gpt-6.1-sol"],
+  },
   // Public model limits; the Codex registry supplies its smaller OAuth window.
   // https://developers.openai.com/api/docs/models/gpt-6-astra
   "gpt-6-astra": {
@@ -146,7 +168,6 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     ...GPT_5_6_MODEL_SPEC,
     aliases: ["openai/gpt-6-luna"],
   },
-  "gpt-6.1-sol": GPT_5_6_MODEL_SPEC,
   "gpt-5.6": {
     ...GPT_5_6_MODEL_SPEC,
     aliases: ["openai/gpt-5.6"],
@@ -304,6 +325,18 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsThinking: true,
     supportsTools: true,
     supportsVision: true,
+  },
+
+  // ── Gemini 4 Argon ──────────────────────────────────────────────
+  "gemini-4-argon": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    defaultThinkingBudget: 8192,
+    thinkingBudgetCap: 24576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    aliases: ["gemini-4"],
   },
 
   // Provider-neutral compatibility for providers that still serve Gemini 3.6.
@@ -744,6 +777,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-high": {
     maxOutputTokens: 131072,
@@ -751,6 +785,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-low": {
     maxOutputTokens: 131072,
@@ -758,6 +793,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-max": {
     maxOutputTokens: 131072,
@@ -765,6 +801,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     thinkingBudgetCap: 38912,
     supportsThinking: true,
     supportsTools: true,
+    supportsVision: false,
   },
   "glm-5.3-flash-high": {
     maxOutputTokens: 131072,
@@ -857,7 +894,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
   },
   "minimax-m2.5": {
     maxOutputTokens: 131072,
-    contextWindow: 200000,
+    contextWindow: 204800,
     thinkingBudgetCap: 32768,
     supportsThinking: true,
     supportsTools: true,
@@ -943,7 +980,16 @@ function getModelSpecIndex() {
  * getCanonicalModelSpecId() below) — callers that need prefix matching should use
  * that function instead.
  */
-export function findModelSpecIdByExactOrAlias(modelId: string): string | null {
+export function findModelSpecIdByExactOrAlias(
+  modelId: string,
+  options?: { stripNamespace?: boolean }
+): string | null {
+  const slash = modelId.indexOf("/");
+  if (options?.stripNamespace !== false && slash > 0 && slash < modelId.length - 1) {
+    const unnamespaced = modelId.slice(slash + 1);
+    const hit = findModelSpecIdByExactOrAlias(unnamespaced);
+    if (hit) return hit;
+  }
   const lower = modelId.toLowerCase();
   const index = getModelSpecIndex();
   const exactHit = index.exactCi.get(lower);
@@ -953,8 +999,20 @@ export function findModelSpecIdByExactOrAlias(modelId: string): string | null {
   return null;
 }
 
-export function getCanonicalModelSpecId(modelId: string): string | null {
+export function getCanonicalModelSpecId(
+  modelId: string,
+  options?: { stripNamespace?: boolean }
+): string | null {
   if (MODEL_SPECS[modelId]) return modelId;
+
+  // Strip provider/prefix namespace if present (e.g. "vertex/gemini-4-argon" -> "gemini-4-argon",
+  // "agy/gemini-3.8-flash-high" -> "gemini-3.8-flash-high") so provider-qualified IDs match canonical specs.
+  const slash = modelId.indexOf("/");
+  if (options?.stripNamespace !== false && slash > 0 && slash < modelId.length - 1) {
+    const unnamespaced = modelId.slice(slash + 1);
+    const unnamespacedHit = getCanonicalModelSpecId(unnamespaced);
+    if (unnamespacedHit) return unnamespacedHit;
+  }
 
   // Case-insensitive lookups: upstream model ids are often capitalized
   // (e.g. "MiniMax-M2.7") while specs/aliases use lowercase ids (#3141).
@@ -978,8 +1036,11 @@ export function getCanonicalModelSpecId(modelId: string): string | null {
   return null;
 }
 
-export function getModelSpec(modelId: string): ModelSpec | undefined {
-  const canonical = getCanonicalModelSpecId(modelId);
+export function getModelSpec(
+  modelId: string,
+  options?: { stripNamespace?: boolean }
+): ModelSpec | undefined {
+  const canonical = getCanonicalModelSpecId(modelId, options);
   return canonical ? MODEL_SPECS[canonical] : undefined;
 }
 

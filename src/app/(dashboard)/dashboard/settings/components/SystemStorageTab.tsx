@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Card, Button, Badge, ConfirmModal } from "@/shared/components";
 import { useLocale, useTranslations } from "next-intl";
+import { Card, Button, Badge, Checkbox, ConfirmModal, Input, Select } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import DatabaseBackupRetentionCard from "./DatabaseBackupRetentionCard";
+import ProviderTransferPanel from "./ProviderTransferPanel";
 import {
   fetchDatabaseSettingsData,
   isAuthRequiredResponse,
@@ -730,17 +732,15 @@ export default function SystemStorageTab() {
     const className =
       "p-3 rounded-lg text-sm " +
       (isSuccess
-        ? "bg-green-500/10 text-green-500 border border-green-500/20"
+        ? "bg-success/10 text-success border border-success/20"
         : isInfo
-          ? "bg-blue-500/10 text-blue-500 border border-blue-500/20"
-          : "bg-red-500/10 text-red-500 border border-red-500/20");
+          ? "bg-info/10 text-info border border-info/20"
+          : "bg-error/10 text-error border border-error/20");
 
     return (
       <div key={index} className={className} role="alert">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-            {isSuccess ? "check_circle" : isInfo ? "info" : "error"}
-          </span>
+          <Icon name={isSuccess ? "check_circle" : isInfo ? "info" : "error"} size={16} />
           {status.message}
         </div>
       </div>
@@ -754,41 +754,37 @@ export default function SystemStorageTab() {
       <div className="mb-4 p-4 rounded-lg border border-border bg-bg">
         <div className="flex items-center justify-between gap-3 mb-3">
           <h4 className="text-sm font-semibold flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              analytics
-            </span>
+            <Icon name="analytics" size={18} />
             {t("storageDatabaseStatistics")}
           </h4>
           <Button
+            icon="refresh"
             variant="outline"
             size="sm"
             onClick={refreshDatabaseStats}
             loading={dbStatsRefreshing}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              refresh
-            </span>
             {t("refresh")}
           </Button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02]">
+          <div className="p-3 rounded-lg bg-bg-subtle">
             <p className="text-xs text-text-muted mb-1">{t("storageDatabaseSize")}</p>
             <p className="text-sm font-semibold">
               {formatBytes(dbSettings.stats.databaseSizeBytes)}
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02]">
+          <div className="p-3 rounded-lg bg-bg-subtle">
             <p className="text-xs text-text-muted mb-1">{t("storagePageCount")}</p>
             <p className="text-sm font-semibold">{dbSettings.stats.pageCount.toLocaleString()}</p>
           </div>
-          <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02]">
+          <div className="p-3 rounded-lg bg-bg-subtle">
             <p className="text-xs text-text-muted mb-1">{t("storageFreelistCount")}</p>
             <p className="text-sm font-semibold">
               {dbSettings.stats.freelistCount.toLocaleString()}
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02]">
+          <div className="p-3 rounded-lg bg-bg-subtle">
             <p className="text-xs text-text-muted mb-1">{t("storageLastVacuum")}</p>
             <p className="text-sm font-semibold">
               {dbSettings.stats.lastVacuumAt
@@ -796,7 +792,7 @@ export default function SystemStorageTab() {
                 : t("never")}
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02]">
+          <div className="p-3 rounded-lg bg-bg-subtle">
             <p className="text-xs text-text-muted mb-1">{t("storageLastOptimization")}</p>
             <p className="text-sm font-semibold">
               {dbSettings.stats.lastOptimizationAt
@@ -804,13 +800,13 @@ export default function SystemStorageTab() {
                 : t("never")}
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02]">
+          <div className="p-3 rounded-lg bg-bg-subtle">
             <p className="text-xs text-text-muted mb-1">{t("storageIntegrityCheck")}</p>
             <p className="text-sm font-semibold">
               {dbSettings.stats.integrityCheck === "ok" ? (
-                <span className="text-green-500">{t("storageIntegrityOk")}</span>
+                <span className="text-success">{t("storageIntegrityOk")}</span>
               ) : dbSettings.stats.integrityCheck === "error" ? (
-                <span className="text-red-500">{t("storageIntegrityError")}</span>
+                <span className="text-error">{t("storageIntegrityError")}</span>
               ) : (
                 t("storageIntegrityNotChecked")
               )}
@@ -828,22 +824,12 @@ export default function SystemStorageTab() {
       <div className="flex flex-col gap-2 mt-3">
         {backupsLoading ? (
           <div className="flex items-center justify-center py-6 text-text-muted">
-            <span
-              className="material-symbols-outlined animate-spin text-[20px] mr-2"
-              aria-hidden="true"
-            >
-              progress_activity
-            </span>
+            <Icon name="progress_activity" size={20} className="animate-spin mr-2" />
             {t("loadingBackups")}
           </div>
         ) : backups.length === 0 ? (
           <div className="text-center py-6 text-text-muted text-sm">
-            <span
-              className="material-symbols-outlined text-[32px] mb-2 block opacity-40"
-              aria-hidden="true"
-            >
-              folder_off
-            </span>
+            <Icon name="folder_off" size={32} className="mb-2 block opacity-40" />
             {t("noBackupsYet")}
           </div>
         ) : (
@@ -852,29 +838,18 @@ export default function SystemStorageTab() {
               <span className="text-xs text-text-muted">
                 {t("backupsAvailable", { count: backups.length })}
               </span>
-              <button
-                onClick={loadBackups}
-                className="text-xs text-primary hover:underline flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                  refresh
-                </span>
+              <Button variant="ghost" size="sm" icon="refresh" onClick={loadBackups}>
                 {t("refresh")}
-              </button>
+              </Button>
             </div>
             {backups.map((backup) => (
               <div
                 key={backup.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02] border border-border/50 hover:border-border transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg bg-bg-subtle border border-border/50 hover:border-border transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span
-                      className="material-symbols-outlined text-[16px] text-amber-500"
-                      aria-hidden="true"
-                    >
-                      description
-                    </span>
+                    <Icon name="description" size={16} className="text-warning" />
                     <span className="text-sm font-medium truncate">
                       {new Date(backup.createdAt).toLocaleString(locale)}
                     </span>
@@ -900,13 +875,12 @@ export default function SystemStorageTab() {
                 <div className="flex items-center gap-2 ml-3">
                   {confirmRestoreId === backup.id ? (
                     <>
-                      <span className="text-xs text-amber-500 font-medium">{t("confirm")}</span>
+                      <span className="text-xs text-warning font-medium">{t("confirm")}</span>
                       <Button
-                        variant="primary"
+                        variant="warning"
                         size="sm"
                         onClick={() => handleRestore(backup.id)}
                         loading={restoringId === backup.id}
-                        className="!bg-amber-500 hover:!bg-amber-600"
                       >
                         {t("yes")}
                       </Button>
@@ -916,16 +890,11 @@ export default function SystemStorageTab() {
                     </>
                   ) : (
                     <Button
+                      icon="restore"
                       variant="outline"
                       size="sm"
                       onClick={() => setConfirmRestoreId(backup.id)}
                     >
-                      <span
-                        className="material-symbols-outlined text-[14px] mr-1"
-                        aria-hidden="true"
-                      >
-                        restore
-                      </span>
                       {t("restore")}
                     </Button>
                   )}
@@ -958,9 +927,7 @@ export default function SystemStorageTab() {
         <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
           <div>
             <h4 className="text-sm font-semibold flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                schedule
-              </span>
+              <Icon name="schedule" size={18} />
               {t("storageRetentionCleanup")}
             </h4>
             <p className="mt-1 text-xs text-text-muted">{t("storageRetentionCleanupDesc")}</p>
@@ -981,25 +948,23 @@ export default function SystemStorageTab() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {retentionFields.map(([key, label, fallback]) => (
-            <div key={String(key)}>
-              <label className="block text-xs text-text-muted mb-1">{label}</label>
-              <input
-                type="number"
-                min="1"
-                max="365"
-                value={dbSettings.retention[key]}
-                onChange={(e) =>
-                  setDbSettings({
-                    ...dbSettings,
-                    retention: {
-                      ...dbSettings.retention,
-                      [key]: parseInt(e.target.value) || fallback,
-                    },
-                  })
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-bg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
+            <Input
+              key={String(key)}
+              label={label}
+              type="number"
+              min="1"
+              max="365"
+              value={dbSettings.retention[key]}
+              onChange={(e) =>
+                setDbSettings({
+                  ...dbSettings,
+                  retention: {
+                    ...dbSettings.retention,
+                    [key]: parseInt(e.target.value) || fallback,
+                  },
+                })
+              }
+            />
           ))}
         </div>
         <div className="mt-3">
@@ -1038,139 +1003,112 @@ export default function SystemStorageTab() {
     return (
       <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
         <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            tune
-          </span>
+          <Icon name="tune" size={18} />
           {t("storageOptimizationSettings")}
         </h4>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-text-muted mb-1">
-                {t("storageAutoVacuumMode")}
-              </label>
-              <select
-                value={dbSettings.optimization.autoVacuumMode}
-                onChange={(e) =>
-                  setDbSettings({
-                    ...dbSettings,
-                    optimization: {
-                      ...dbSettings.optimization,
-                      autoVacuumMode: e.target.value as "NONE" | "FULL" | "INCREMENTAL",
-                    },
-                  })
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-bg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="NONE">{t("storageJournalModeNone")}</option>
-                <option value="FULL">{t("storageJournalModeFull")}</option>
-                <option value="INCREMENTAL">{t("storageJournalModeIncremental")}</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-text-muted mb-1">
-                {t("storageScheduledVacuum")}
-              </label>
-              <select
-                value={dbSettings.optimization.scheduledVacuum}
-                onChange={(e) =>
-                  setDbSettings({
-                    ...dbSettings,
-                    optimization: {
-                      ...dbSettings.optimization,
-                      scheduledVacuum: e.target.value as "never" | "daily" | "weekly" | "monthly",
-                    },
-                  })
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-bg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="never">{t("storageVacuumNever")}</option>
-                <option value="daily">{t("storageVacuumDaily")}</option>
-                <option value="weekly">{t("storageVacuumWeekly")}</option>
-                <option value="monthly">{t("storageVacuumMonthly")}</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-text-muted mb-1">{t("storageVacuumHour")}</label>
-              <input
-                type="number"
-                min="0"
-                max="23"
-                value={dbSettings.optimization.vacuumHour}
-                onChange={(e) =>
-                  setDbSettings({
-                    ...dbSettings,
-                    optimization: {
-                      ...dbSettings.optimization,
-                      vacuumHour: parseInt(e.target.value) || 2,
-                    },
-                  })
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-bg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-text-muted mb-1">{t("storagePageSize")}</label>
-              <input
-                type="number"
-                min="512"
-                max="65536"
-                step="512"
-                value={dbSettings.optimization.pageSize}
-                onChange={(e) =>
-                  setDbSettings({
-                    ...dbSettings,
-                    optimization: {
-                      ...dbSettings.optimization,
-                      pageSize: parseInt(e.target.value) || 4096,
-                    },
-                  })
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-bg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-text-muted mb-1">
-                {t("storageCacheSizeKb")}
-              </label>
-              <input
-                type="number"
-                min="1"
-                step="1024"
-                value={dbSettings.optimization.cacheSize}
-                onChange={(e) =>
-                  setDbSettings({
-                    ...dbSettings,
-                    optimization: {
-                      ...dbSettings.optimization,
-                      cacheSize: parseInt(e.target.value) || 16384,
-                    },
-                  })
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-bg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="optimize-on-startup"
-              checked={dbSettings.optimization.optimizeOnStartup}
+            <Select
+              label={t("storageAutoVacuumMode")}
+              value={dbSettings.optimization.autoVacuumMode}
               onChange={(e) =>
                 setDbSettings({
                   ...dbSettings,
                   optimization: {
                     ...dbSettings.optimization,
-                    optimizeOnStartup: e.target.checked,
+                    autoVacuumMode: e.target.value as "NONE" | "FULL" | "INCREMENTAL",
                   },
                 })
               }
-              className="w-4 h-4 rounded border-border text-primary focus:ring-2 focus:ring-primary"
+              options={[
+                { value: "NONE", label: t("storageJournalModeNone") },
+                { value: "FULL", label: t("storageJournalModeFull") },
+                { value: "INCREMENTAL", label: t("storageJournalModeIncremental") },
+              ]}
             />
-            <label htmlFor="optimize-on-startup" className="text-sm">
-              {t("storageOptimizeOnStartup")}
-            </label>
+            <Select
+              label={t("storageScheduledVacuum")}
+              value={dbSettings.optimization.scheduledVacuum}
+              onChange={(e) =>
+                setDbSettings({
+                  ...dbSettings,
+                  optimization: {
+                    ...dbSettings.optimization,
+                    scheduledVacuum: e.target.value as "never" | "daily" | "weekly" | "monthly",
+                  },
+                })
+              }
+              options={[
+                { value: "never", label: t("storageVacuumNever") },
+                { value: "daily", label: t("storageVacuumDaily") },
+                { value: "weekly", label: t("storageVacuumWeekly") },
+                { value: "monthly", label: t("storageVacuumMonthly") },
+              ]}
+            />
+            <Input
+              label={t("storageVacuumHour")}
+              type="number"
+              min="0"
+              max="23"
+              value={dbSettings.optimization.vacuumHour}
+              onChange={(e) =>
+                setDbSettings({
+                  ...dbSettings,
+                  optimization: {
+                    ...dbSettings.optimization,
+                    vacuumHour: parseInt(e.target.value) || 2,
+                  },
+                })
+              }
+            />
+            <Input
+              label={t("storagePageSize")}
+              type="number"
+              min="512"
+              max="65536"
+              step="512"
+              value={dbSettings.optimization.pageSize}
+              onChange={(e) =>
+                setDbSettings({
+                  ...dbSettings,
+                  optimization: {
+                    ...dbSettings.optimization,
+                    pageSize: parseInt(e.target.value) || 4096,
+                  },
+                })
+              }
+            />
+            <Input
+              label={t("storageCacheSizeKb")}
+              type="number"
+              min="1"
+              step="1024"
+              value={dbSettings.optimization.cacheSize}
+              onChange={(e) =>
+                setDbSettings({
+                  ...dbSettings,
+                  optimization: {
+                    ...dbSettings.optimization,
+                    cacheSize: parseInt(e.target.value) || 16384,
+                  },
+                })
+              }
+            />
           </div>
+          <Checkbox
+            id="optimize-on-startup"
+            label={t("storageOptimizeOnStartup")}
+            checked={dbSettings.optimization.optimizeOnStartup}
+            onChange={(e) =>
+              setDbSettings({
+                ...dbSettings,
+                optimization: {
+                  ...dbSettings.optimization,
+                  optimizeOnStartup: e.target.checked,
+                },
+              })
+            }
+          />
         </div>
         <div className="mt-3">
           <Button
@@ -1192,73 +1130,56 @@ export default function SystemStorageTab() {
     return (
       <div className="mt-6 p-4 rounded-lg border border-border bg-bg">
         <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            compress
-          </span>
+          <Icon name="compress" size={18} />
           {t("storageCompressionAggregation")}
         </h4>
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="aggregation-enabled"
-              checked={dbSettings.aggregation.enabled}
+          <Checkbox
+            id="aggregation-enabled"
+            label={t("storageEnableAggregation")}
+            checked={dbSettings.aggregation.enabled}
+            onChange={(e) =>
+              setDbSettings({
+                ...dbSettings,
+                aggregation: { ...dbSettings.aggregation, enabled: e.target.checked },
+              })
+            }
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label={t("storageRawDataRetention")}
+              type="number"
+              min="1"
+              max="365"
+              value={dbSettings.aggregation.rawDataRetentionDays}
               onChange={(e) =>
                 setDbSettings({
                   ...dbSettings,
-                  aggregation: { ...dbSettings.aggregation, enabled: e.target.checked },
+                  aggregation: {
+                    ...dbSettings.aggregation,
+                    rawDataRetentionDays: parseInt(e.target.value) || 30,
+                  },
                 })
               }
-              className="w-4 h-4 rounded border-border text-primary focus:ring-2 focus:ring-primary"
             />
-            <label htmlFor="aggregation-enabled" className="text-sm">
-              {t("storageEnableAggregation")}
-            </label>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-text-muted mb-1">
-                {t("storageRawDataRetention")}
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="365"
-                value={dbSettings.aggregation.rawDataRetentionDays}
-                onChange={(e) =>
-                  setDbSettings({
-                    ...dbSettings,
-                    aggregation: {
-                      ...dbSettings.aggregation,
-                      rawDataRetentionDays: parseInt(e.target.value) || 30,
-                    },
-                  })
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-bg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-text-muted mb-1">
-                {t("storageGranularity")}
-              </label>
-              <select
-                value={dbSettings.aggregation.granularity}
-                onChange={(e) =>
-                  setDbSettings({
-                    ...dbSettings,
-                    aggregation: {
-                      ...dbSettings.aggregation,
-                      granularity: e.target.value as "hourly" | "daily" | "weekly",
-                    },
-                  })
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-bg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="hourly">{t("storageHourly")}</option>
-                <option value="daily">{t("storageDaily")}</option>
-                <option value="weekly">{t("storageWeekly")}</option>
-              </select>
-            </div>
+            <Select
+              label={t("storageGranularity")}
+              value={dbSettings.aggregation.granularity}
+              onChange={(e) =>
+                setDbSettings({
+                  ...dbSettings,
+                  aggregation: {
+                    ...dbSettings.aggregation,
+                    granularity: e.target.value as "hourly" | "daily" | "weekly",
+                  },
+                })
+              }
+              options={[
+                { value: "hourly", label: t("storageHourly") },
+                { value: "daily", label: t("storageDaily") },
+                { value: "weekly", label: t("storageWeekly") },
+              ]}
+            />
           </div>
         </div>
         <div className="mt-3">
@@ -1278,11 +1199,9 @@ export default function SystemStorageTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            database
-          </span>
-        </div>
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-muted">
+          <Icon name="database" size={20} />
+        </span>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{t("systemStorage")}</h3>
           <p className="text-xs text-text-muted">{t("allDataLocal")}</p>
@@ -1316,22 +1235,21 @@ export default function SystemStorageTab() {
 
       <div className="pt-3 border-t border-border/50 mb-4">
         <div className="flex items-center gap-2 mb-3">
-          <span
-            className="material-symbols-outlined text-[18px] text-emerald-500"
-            aria-hidden="true"
-          >
-            file_export
-          </span>
+          <Icon name="file_export" size={18} className="text-success" />
           <p className="font-medium">{t("export")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleExport} loading={exportLoading}>
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              download
-            </span>
+          <Button
+            icon="download"
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            loading={exportLoading}
+          >
             {t("exportDatabase")}
           </Button>
           <Button
+            icon="folder_zip"
             variant="outline"
             size="sm"
             onClick={async () => {
@@ -1353,71 +1271,67 @@ export default function SystemStorageTab() {
             }}
             loading={exportLoading}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              folder_zip
-            </span>
             {t("exportAll")}
           </Button>
-          <Button variant="outline" size="sm" onClick={handleImportClick} loading={importLoading}>
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              upload
-            </span>
+          <Button
+            icon="upload"
+            variant="outline"
+            size="sm"
+            onClick={handleImportClick}
+            loading={importLoading}
+          >
             {t("importDatabase")}
           </Button>
-          <input
+          <Input
             ref={fileInputRef}
             type="file"
             accept=".sqlite"
+            aria-label={t("importDatabase")}
+            tabIndex={-1}
             className="hidden"
             onChange={handleFileSelected}
           />
-          <Button variant="outline" size="sm" onClick={handleExportJson} loading={exportLoading}>
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              data_object
-            </span>
+          <Button
+            icon="data_object"
+            variant="outline"
+            size="sm"
+            onClick={handleExportJson}
+            loading={exportLoading}
+          >
             {t("exportJson")}
           </Button>
           <Button
+            icon="data_object"
             variant="outline"
             size="sm"
             onClick={handleImportJsonClick}
             loading={importLoading}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              data_object
-            </span>
             {t("importJson")}
           </Button>
-          <input
+          <Input
             ref={jsonInputRef}
             type="file"
             accept=".json"
+            aria-label={t("importJson")}
+            tabIndex={-1}
             className="hidden"
             onChange={handleJsonSelected}
           />
+          <ProviderTransferPanel />
         </div>
 
         {confirmImport && pendingImportFile && (
-          <div className="p-4 rounded-lg mt-3 bg-amber-500/10 border border-amber-500/30">
+          <div className="p-4 rounded-lg mt-3 bg-warning/10 border border-warning/30">
             <div className="flex items-start gap-3">
-              <span
-                className="material-symbols-outlined text-[20px] text-amber-500 mt-0.5"
-                aria-hidden="true"
-              >
-                warning
-              </span>
+              <Icon name="warning" size={20} className="text-warning mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-amber-500 mb-1">{t("confirmDbImport")}</p>
+                <p className="text-sm font-medium text-warning mb-1">{t("confirmDbImport")}</p>
                 <p className="text-xs text-text-muted mb-2">
                   {t("confirmDbImportDesc", { file: pendingImportFile.name })}
                 </p>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={handleImportConfirm}
-                    className="!bg-amber-500 hover:!bg-amber-600"
-                  >
+                  <Button variant="warning" size="sm" onClick={handleImportConfirm}>
                     {t("yesImport")}
                   </Button>
                   <Button variant="outline" size="sm" onClick={handleImportCancel}>
@@ -1434,87 +1348,71 @@ export default function SystemStorageTab() {
 
       <div className="pt-3 border-t border-border/50 mb-4">
         <div className="flex items-center gap-2 mb-3">
-          <span className="material-symbols-outlined text-[18px] text-blue-500" aria-hidden="true">
-            build
-          </span>
+          <Icon name="build" size={18} className="text-info" />
           <p className="font-medium">{t("maintenance")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
+            icon="delete_sweep"
             variant="outline"
             size="sm"
             loading={clearCacheLoading}
             onClick={handleClearCache}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              delete_sweep
-            </span>
             {t("clearCache")}
           </Button>
           <Button
+            icon="auto_delete"
             variant="outline"
             size="sm"
             loading={purgeLogsLoading}
             onClick={handlePurgeExpiredLogs}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              auto_delete
-            </span>
             {t("purgeExpiredLogs")}
           </Button>
           <Button
+            icon="cleaning_services"
             variant="outline"
             size="sm"
             loading={manualVacuumLoading}
             onClick={handleManualVacuum}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              cleaning_services
-            </span>
             {t("manualVacuum")}
           </Button>
           <Button
+            icon="delete_forever"
             variant="outline"
             size="sm"
             loading={purgeQuotaSnapshotsLoading}
             onClick={handlePurgeQuotaSnapshots}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              delete_forever
-            </span>
             {t("purgeQuotaSnapshots")}
           </Button>
           <Button
+            icon="delete_forever"
             variant="outline"
             size="sm"
             loading={purgeCallLogsLoading}
             onClick={handlePurgeCallLogs}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              delete_forever
-            </span>
             {t("purgeCallLogs")}
           </Button>
           <Button
+            icon="delete_forever"
             variant="outline"
             size="sm"
             loading={purgeDetailedLogsLoading}
             onClick={handlePurgeDetailedLogs}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              delete_forever
-            </span>
             {t("purgeDetailedLogs")}
           </Button>
           <Button
+            icon="restart_alt"
             variant="danger"
             size="sm"
             loading={resetUsageLoading}
             onClick={openResetUsageModal}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              restart_alt
-            </span>
             {t("resetUsageData")}
           </Button>
         </div>
@@ -1535,9 +1433,7 @@ export default function SystemStorageTab() {
 
       <div className="flex items-center justify-between p-3 rounded-lg bg-bg border border-border mb-4">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[16px] text-amber-500" aria-hidden="true">
-            schedule
-          </span>
+          <Icon name="schedule" size={16} className="text-warning" />
           <div>
             <p className="text-sm font-medium">{t("lastBackup")}</p>
             <p className="text-xs text-text-muted">
@@ -1552,14 +1448,12 @@ export default function SystemStorageTab() {
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <Button
+            icon="backup"
             variant="outline"
             size="sm"
             onClick={handleManualBackup}
             loading={manualBackupLoading}
           >
-            <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-              backup
-            </span>
             {t("backupNow")}
           </Button>
           <Button
@@ -1596,17 +1490,15 @@ export default function SystemStorageTab() {
               {t("resetUsageDataDesc") ||
                 "Select how far back you want to delete usage, request logs, and analytics data. Provider configuration, connections, API keys, combos, and settings are preserved. This action cannot be undone."}
             </p>
-            <select
+            <Select
+              aria-label={t("resetUsageData")}
               value={resetUsagePeriod}
               onChange={(e) => setResetUsagePeriod(e.target.value)}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-red-500/40"
-            >
-              {RESET_USAGE_PERIOD_VALUES.map((value) => (
-                <option key={value} value={value}>
-                  {t(`resetUsagePeriod_${value}`) || value}
-                </option>
-              ))}
-            </select>
+              options={RESET_USAGE_PERIOD_VALUES.map((value) => ({
+                value,
+                label: t(`resetUsagePeriod_${value}`) || value,
+              }))}
+            />
           </div>
         }
         confirmText={resetUsageLoading ? t("resetting") : t("reset")}

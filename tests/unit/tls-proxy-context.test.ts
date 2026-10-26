@@ -34,16 +34,16 @@ const ENV_KEYS = [
 
 async function withEnv(env: EnvState, fn: () => Promise<void> | void): Promise<void> {
   const prior = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
+  for (const key of ENV_KEYS) delete process.env[key];
   for (const key of ENV_KEYS) {
-    if (env[key] === undefined) delete process.env[key];
-    else process.env[key] = env[key];
+    if (env[key] !== undefined) process.env[key] = env[key];
   }
   try {
     await fn();
   } finally {
+    for (const key of ENV_KEYS) delete process.env[key];
     for (const key of ENV_KEYS) {
-      if (prior[key] === undefined) delete process.env[key];
-      else process.env[key] = prior[key];
+      if (prior[key] !== undefined) process.env[key] = prior[key];
     }
     setTlsClientForTest(null);
   }

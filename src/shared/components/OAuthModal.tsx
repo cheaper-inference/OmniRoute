@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import Icon from "./Icon";
 import { isCallbackStateAcceptable } from "./oauthCallbackState";
 import { useTranslations } from "next-intl";
+import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 
 import Modal from "./Modal";
 import Button from "./Button";
 import Input from "./Input";
+import Textarea from "./Textarea";
 import {
   OAuthDeviceCodePanel,
   OAuthLoopbackMismatchPanel,
@@ -50,9 +53,11 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "kimi-coding",
   "kilocode",
   "codebuddy-cn",
+  "codebuddy-intl",
   "ghe-copilot",
   "grok-cli",
   "muse-code",
+  "workbuddy",
 ]);
 
 const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
@@ -1020,28 +1025,34 @@ export default function OAuthModal({
             (#7358, default) and the browser PKCE login (#7013) alongside the
             paste-token import. */}
         {supportsTokenPaste && !importTokenOnly && step !== "success" && (
-          <div className="flex gap-2 border-b border-border pb-3">
-            {provider === "grok-cli" && (
-              <button
-                className={`text-sm px-3 py-1 rounded-t ${!showPasteToken && !grokBrowserMode ? "font-semibold border-b-2 border-primary text-primary" : "text-text-muted"}`}
-                onClick={handleDeviceCodeMode}
-              >
-                {t("tabDeviceCode")}
-              </button>
-            )}
-            <button
-              className={`text-sm px-3 py-1 rounded-t ${!showPasteToken && (provider !== "grok-cli" || grokBrowserMode) ? "font-semibold border-b-2 border-primary text-primary" : "text-text-muted"}`}
-              onClick={handleBrowserMode}
-            >
-              {t("tabBrowserLogin")}
-            </button>
-            <button
-              className={`text-sm px-3 py-1 rounded-t ${showPasteToken ? "font-semibold border-b-2 border-primary text-primary" : "text-text-muted"}`}
-              onClick={handlePasteMode}
-            >
-              {t(pasteCopyKeys.tab)}
-            </button>
-          </div>
+          <Tabs
+            variant="underline"
+            value={
+              showPasteToken
+                ? "paste"
+                : provider === "grok-cli" && !grokBrowserMode
+                  ? "device"
+                  : "browser"
+            }
+          >
+            <TabsList aria-label={t("title", { providerName: providerInfo.name })}>
+              {provider === "grok-cli" && (
+                <TabsTrigger
+                  value="device"
+                  aria-controls={undefined}
+                  onClick={handleDeviceCodeMode}
+                >
+                  {t("tabDeviceCode")}
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="browser" aria-controls={undefined} onClick={handleBrowserMode}>
+                {t("tabBrowserLogin")}
+              </TabsTrigger>
+              <TabsTrigger value="paste" aria-controls={undefined} onClick={handlePasteMode}>
+                {t(pasteCopyKeys.tab)}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         )}
 
         {/* Paste-token form (Devin Desktop / Devin CLI / Grok auth.json / Claude setup-token) */}
@@ -1049,8 +1060,8 @@ export default function OAuthModal({
           <div className="flex flex-col gap-3">
             <p className="text-sm text-text-muted">{t(pasteCopyKeys.description)}</p>
             {provider === "grok-cli" ? (
-              <textarea
-                className="w-full h-32 p-3 text-sm font-mono bg-input border border-border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+              <Textarea
+                className="h-32 resize-none font-mono text-sm"
                 value={pasteToken}
                 onChange={(e) => setPasteToken(e.target.value)}
                 placeholder={t("grokAuthJsonPlaceholder")}
@@ -1065,7 +1076,7 @@ export default function OAuthModal({
                 label={t("apiKeyTokenLabel")}
               />
             )}
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && <p className="text-sm text-error">{error}</p>}
             <div className="flex gap-2">
               <Button
                 onClick={handleSaveToken}
@@ -1145,10 +1156,8 @@ export default function OAuthModal({
         {/* Success Step — shown for both OAuth and paste-token flows */}
         {step === "success" && (
           <div className="text-center py-6">
-            <div className="size-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-green-600">
-                check_circle
-              </span>
+            <div className="size-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
+              <Icon name="check_circle" size={30} className="text-success" />
             </div>
             <h3 className="text-lg font-semibold mb-2">{t("success")}</h3>
             <p className="text-sm text-text-muted mb-4">

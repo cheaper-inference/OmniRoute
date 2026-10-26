@@ -123,12 +123,19 @@ export const oauthExchangeSchema = z.object({
   redirectUri: z.string().trim().min(1),
   codeVerifier: z.string().trim().min(1).optional(),
   state: z.string().nullable().optional(),
+  // Re-auth signal from the dashboard: "update THIS connection" even when the
+  // provider's token response carries no email (e.g. kimi-coding). Without it
+  // the completion path can't match and falls through to create, duplicating
+  // the connection on every re-auth.
+  connectionId: z.string().optional(),
 });
 
 export const oauthPollSchema = z.object({
   deviceCode: z.string().trim().min(1),
   codeVerifier: z.string().optional(),
   extraData: z.unknown().optional(),
+  // See oauthExchangeSchema: same email-less re-auth signal for device flows.
+  connectionId: z.string().optional(),
 });
 
 /** Import a raw API token (e.g. WINDSURF_API_KEY) without going through the browser OAuth flow. */
@@ -206,9 +213,18 @@ export const kiroImportSchema = z.object({
   scopes: z.union([z.string(), z.array(z.string())]).optional(),
 });
 
+// Kiro API keys run only on the Amazon Q profile regions; "auto" lets the import probe both
+// (mirrors KIRO_API_KEY_REGION_CHOICES in open-sse/services/kiroRegion.ts). An allowlist, not
+// free text: the region is interpolated into the upstream hostname (SSRF guard).
 export const kiroApiKeyImportSchema = z.object({
   apiKey: z.string().trim().min(1, "API key is required"),
-  region: z.string().trim().default("us-east-1"),
+  region: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .optional()
+    .transform((value) => value || "auto")
+    .pipe(z.enum(["auto", "us-east-1", "eu-central-1"])),
 });
 
 export const zedImportSchema = z.object({

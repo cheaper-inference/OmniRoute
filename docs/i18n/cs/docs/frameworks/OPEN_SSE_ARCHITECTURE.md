@@ -34,25 +34,25 @@ open-sse/
 ├── types.d.ts            # Veřejné exporty typů
 ├── package.json          # @omniroute/open-sse
 ├── config/               # Konfigurace poskytovatelů, konstanty, registry
-├── executors/            # HTTP exekutory pro jednotlivé poskytovatele (67 + base.ts/index.ts)
+├── executors/            # HTTP executory pro jednotlivé poskytovatele (150 modulů + base.ts/index.ts)
 ├── handlers/             # Obslužné rutiny požadavků (chatCore, responses atd.)
-├── lib/                  # Interní nástroje
-├── mcp-server/           # Server Model Context Protocol
-├── services/             # Přibližně 298 modulů služeb
+├── lib/                  # Interní pomocné nástroje
+├── mcp-server/           # Server protokolu Model Context Protocol
+├── services/             # ~298 modulů služeb
 ├── transformer/          # Transformátor formátu Responses API
 ├── translator/           # Překlad formátů (OpenAI ↔ Claude ↔ Gemini)
-└── utils/                # Sdílené nástroje (protokolování, chyby, streamy atd.)
+└── utils/                # Sdílené pomocné nástroje (protokolování, chyby, streamy atd.)
 ```
 
 ### Počty modulů
 
 | Adresář | Soubory | Účel |
-| `executors/` | 167 | HTTP exekutory pro jednotlivé poskytovatele (sjednocené prostřednictvím továrny DefaultExecutor) |
+| `executors/` | 167 | HTTP executory pro jednotlivé poskytovatele (sjednocené pomocí továrny DefaultExecutor) |
 | `handlers/` | 157 | Vstupní body požadavků (chatCore, responses, embeddings) |
-| `services/` | ~536 | Směrování, ukládání do mezipaměti, omezování rychlosti, obnovování atd. |
+| `services/` | ~536 | Směrování, ukládání do mezipaměti, omezování rychlosti, obnovení atd. |
 | `translator/` | 56 | Převod formátů (OpenAI ↔ Claude ↔ Gemini) |
 | `mcp-server/` | 44 | Nástroje a transporty MCP |
-| `utils/` | ~108 | Průřezové nástroje (protokolování, chyby, streamy) |
+| `utils/` | ~108 | Průřezové pomocné nástroje (protokolování, chyby, streamy) |
 | `config/` | ~339 | Konfigurace poskytovatelů, konstanty, registry |
 
 ---
@@ -165,7 +165,7 @@ Artefakty protokolu volání (pokud jsou povoleny) se zapisují do `${DATA_DIR}/
 
 ---
 
-## Podrobný rozbor klíčových souborů
+## Podrobný pohled na klíčové soubory
 
 ### chatCore.ts (5977 řádků)
 
@@ -178,7 +178,7 @@ export async function handleChat(request: NextRequest) {
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Ověření těla požadavku
+  // 2. Validace těla požadavku
   const body = await parseRequestBody(request);
 
   // 3. Detekce formátu + překlad
@@ -188,7 +188,7 @@ export async function handleChat(request: NextRequest) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Směrování komba
+  // 4. Směrování combo
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Pokračovat k dalšímu cíli
+      // Pokračovat na další cíl
     }
   }
 
-  // 5. Nouzový záložní mechanismus
+  // 5. Nouzový fallback
   return await emergencyFallback(body);
 }
 ```
 
-Přestože jde o jednu obří funkci, je uspořádána do **okomentovaných sekcí**, které odpovídají pěti fázím zpracování.
+Přestože jde o jednu obří funkci, je organizována do **komentovaných sekcí**, které odpovídají 5stupňovému pipeline.
 
-### combo.ts (4456 řádků kódu)
+### combo.ts (4456 LOC)
 
-**Směrovací jádro**, které převádí kombo na uspořádané cíle.
+**Směrovací engine**, který pro combo určuje seřazené cíle.
 
 ```ts
 // services/combo.ts
@@ -226,46 +226,49 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Podporuje **19 strategií směrování** (viz `src/shared/constants/routingStrategies.ts`):
+Podporuje **20 směrovacích strategií** (viz `src/shared/constants/routingStrategies.ts`):
 
-| Strategie           | Chování                                                                          |
-| ------------------- | -------------------------------------------------------------------------------- |
-| `priority`          | Uspořádaný seznam s prvním cílem jako prioritním                                 |
-| `weighted`          | Pravděpodobnostní výběr podle váhy jednotlivých cílů                             |
-| `round-robin`       | Cyklické procházení cílů v daném pořadí                                          |
-| `context-relay`     | Předávání kontextu mezi cíli                                                     |
-| `fill-first`        | Vyčerpání kvóty před přechodem k dalšímu cíli                                    |
-| `p2c`               | Volba ze dvou možností                                                           |
-| `random`            | Rovnoměrný náhodný výběr                                                         |
-| `least-used`        | Výběr cíle s nejnižším počtem nedávných použití                                  |
-| `cost-optimized`    | Nejprve nejlevnější dostupný cíl                                                 |
-| `reset-aware`       | Zohlednění časových oken obnovení poskytovatele                                  |
-| `reset-window`      | Směrování založené na časovém okně obnovení                                      |
-| `headroom`          | Nejprve cíl s největší zbývající rezervou kvóty                                  |
-| `strict-random`     | Skutečně rovnoměrný výběr (bez vážení podle kvality)                             |
-| `auto`              | Použití 16faktorového hodnocení (`autoCombo/`)                                   |
-| `lkgp`              | Nejprve poslední známý funkční poskytovatel                                      |
-| `context-optimized` | Nejvhodnější pro požadavky s dlouhým kontextem                                   |
-| `fusion`            | Paralelní distribuce panelu a následná syntéza pomocí posuzovatele (`fusion.ts`) |
+| Strategie           | Chování                                                                                  |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| `priority`          | Seřazený seznam, zkouší se od prvního cíle                                               |
+| `weighted`          | Pravděpodobnostní výběr podle váhy jednotlivých cílů                                     |
+| `round-robin`       | Cyklické střídání cílů v pořadí                                                          |
+| `context-relay`     | Předávání kontextu mezi cíli                                                             |
+| `fill-first`        | Nejdřív vyplní kvótu, pak přejde na další                                                |
+| `p2c`               | Power of two choices (výběr ze dvou možností)                                            |
+| `random`            | Rovnoměrně náhodný výběr                                                                 |
+| `least-used`        | Vybere cíl s nejmenším počtem nedávných použití                                          |
+| `cost-optimized`    | Nejprve nejlevnější funkční cíl                                                          |
+| `reset-aware`       | Zohledňuje okna resetu poskytovatele                                                     |
+| `reset-window`      | Směrování na základě oken resetu                                                         |
+| `headroom`          | Nejprve největší rezerva zbývající kvóty                                                 |
+| `quota-weighted`    | Přeskočí vyčerpané účty, poté losuje podle zbývající kvóty ÷ aktuální zátěž              |
+| `strict-random`     | Skutečně rovnoměrný (bez vážení kvality)                                                 |
+| `auto`              | Používá 16faktorové skórování (`autoCombo/`)                                             |
+| `lkgp`              | Nejprve poslední známý funkční poskytovatel                                              |
+| `context-optimized` | Nejlepší pro požadavky s dlouhým kontextem                                               |
+| `cache-optimized`   | Připíná každý znovupoužitelný prefix promptu ke stejnému účtu (zásahy prompt cache)      |
+| `fusion`            | Paralelně rozešle požadavky panelu a poté je syntetizuje pomocí rozhodčího (`fusion.ts`) |
+| `pipeline`          | Řetězí kroky — výstup každého cíle slouží jako vstup dalšího                             |
 
-### base.ts (1170 řádků kódu)
+### base.ts (1170 LOC)
 
-**Abstraktní vykonavatel**, od kterého je odvozeno všech 107 vykonavatelů. Obsahuje:
+**Abstraktní exekutor**, od kterého dědí každá třída exekutoru (přímo nebo prostřednictvím `DefaultExecutor` a dalších podtříd). Obsahuje:
 
-- `buildUrl()` — výchozí sestavení URL (podtřídy jej přepisují pro vlastní potřeby)
-- `buildHeaders()` — výchozí hlavičky (autentizace, typ obsahu)
-- `transformRequest()` — ve výchozím nastavení předává požadavek beze změny
-- `execute()` — hlavní smyčka HTTP s opakováním, exponenciálním prodlužováním prodlev a jističem
+- `buildUrl()` — výchozí sestavení URL (podtřídy přepisují pro vlastní)
+- `buildHeaders()` — výchozí hlavičky (autentizace, content-type)
+- `transformRequest()` — ve výchozím nastavení pouze předává dál
+- `execute()` — hlavní HTTP smyčka s retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Obsluhuje všechny poskytovatele kompatibilní s OpenAI/Anthropic
-  // Poskytovatelé registrují konfigurace (URL, autentizaci, hlavičky), ale sdílejí logiku vykonavatele
+  // Zpracovává všechny poskytovatele kompatibilní s OpenAI/Anthropic
+  // Poskytovatelé registrují konfigurace (URL, autentizace, hlavičky), ale sdílejí logiku exekutoru
 }
 ```
 
-Chování specifické pro jednotlivé poskytovatele (autentizační hlavičky, základní URL, hlavičky verze) se konfiguruje prostřednictvím registru poskytovatelů, nikoli pomocí samostatných tříd vykonavatelů.
+Chování specifické pro poskytovatele (autentizační hlavičky, základní URL, hlavičky verzí) se konfiguruje prostřednictvím registru poskytovatelů, nikoli samostatnými třídami exekutorů.
 
 ````
 
@@ -273,38 +276,38 @@ Chování specifické pro jednotlivé poskytovatele (autentizační hlavičky, z
 
 ## Služby (117 modulů)
 
-Služby jsou **specializované jednoúčelové moduly**, které handlery skládají dohromady. Hlavní kategorie:
+Služby jsou **cílené, jednoúčelové moduly**, které handlery skládají dohromady. Hlavní kategorie:
 
-### Směrování a kombinace
+### Směrování a Combo
 
-- `combo.ts` — vstupní bod pro požadavky směrované pomocí combo
-- `services/autoCombo/` — hodnocení podle 16 faktorů, 8 strategií automatického směrování
-- `wildcardRouter.ts` — vyhledává odpovídající zástupné trasy (`gpt-*`)
-- `modelFamilyFallback.ts` — záložní řešení v rámci rodiny T5
+- `combo.ts` — vstupní bod pro požadavky směrované přes combo
+- `services/autoCombo/` — 16-faktorové skórování, 8 strategií automatického směrování
+- `wildcardRouter.ts` — páruje trasy se zástupnými znaky (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 fallback v rámci rodiny
 
 ### Omezení rychlosti a kvóty
 
-- `rateLimitManager.ts` — token bucket pro každý klíč a poskytovatele
-- `usage.ts` — zaznamenávání využití
+- `rateLimitManager.ts` — token bucket pro klíč+poskytovatele
+- `usage.ts` — záznam využití
 - `quotaCache.ts` — snímky kvót v paměti
 
-### Účty a tokeny
+### Účet a token
 
 - `tokenRefresh.ts` — obnovení OAuth při 401
-- `accountFallback.ts` — přepnutí na alternativní účet
-- `sessionManager.ts` — stav vícekolové relace
+- `accountFallback.ts` — přepnutí na náhradní účet
+- `sessionManager.ts` — stav vícekolových relací
 
 ### Inteligence
 
 - `intentClassifier.ts` — klasifikace záměru požadavku
 - `taskAwareRouter.ts` — směrování podle typu úlohy
-- `thinkingBudget.ts` — přidělování tokenů pro přemýšlení
+- `thinkingBudget.ts` — přidělování thinking tokenů
 - `contextManager.ts` — vkládání kontextu směrování
 
 ### Odolnost
 
-- `resilience.ts` — orchestrace opakovaných pokusů, prodlev a jističe
-- `emergencyFallback.ts` — záložní řešení poslední instance
+- `resilience.ts` — orchestrace opakování, backoffu a breakerů
+- `emergencyFallback.ts` — fallback poslední instance
 - `modelDeprecation.ts` — automatické směrování na nástupnické modely
 
 ### Stav
@@ -316,7 +319,7 @@ Služby jsou **specializované jednoúčelové moduly**, které handlery skláda
 ### Komprese
 
 - `compression/` (podadresář) — kompletní kompresní pipeline
-- 39 souborů zahrnujících enginy, balíčky pravidel a adaptéry
+- 39 souborů pokrývajících enginy, sady pravidel a adaptéry
 
 ### Dovednosti
 
@@ -328,15 +331,15 @@ Služby jsou **specializované jednoúčelové moduly**, které handlery skláda
 
 ---
 
-## Exekutory (více než 75 souborů)
+## Exekutory (150 modulů)
 
-Jeden soubor pro každého poskytovatele. Všechny rozšiřují `BaseExecutor` a přepisují odlišné části.
+Většinou jeden soubor na poskytovatele. Všechny třídy exekutorů rozšiřují `BaseExecutor` a přepisují to, co se liší; ostatní moduly jsou pomocníci pro jednotlivé poskytovatele (schémata nástrojů, adaptéry fetch/TTS, handlery specifik).
 
 ### Běžné vzory
 
-Poskytovatelé se vyhledávají prostřednictvím `getExecutor(providerId)`, který vrací nakonfigurovaný exekutor. Poskytovatelé kompatibilní s OpenAI/Anthropic používají `DefaultExecutor` (`executors/default.ts`). Chování specifické pro poskytovatele (základní URL, autentizační hlavičky, verze API) se konfiguruje v `open-sse/config/providers/`, zatímco transformace těla požadavku zpracovává `open-sse/translator/`.
+Poskytovatelé se překládají prostřednictvím `getExecutor(providerId)`, který vrací nakonfigurovaného exekutora. Poskytovatelé kompatibilní s OpenAI/Anthropic používají `DefaultExecutor` (`executors/default.ts`). Chování specifické pro poskytovatele (základní URL, autentizační hlavičky, verze API) se konfiguruje v `open-sse/config/providers/`, zatímco transformace těla požadavku se řeší v `open-sse/translator/`.
 
-**Vlastní URL** se nastavuje prostřednictvím konfigurace poskytovatele:
+**Vlastní URL** se nastavuje v konfiguraci poskytovatele:
 
 ```ts
 // Konfigurace poskytovatele v open-sse/config/providers/
@@ -346,9 +349,9 @@ export default {
 }
 ````
 
-**Vlastní autentizace** se zpracovává prostřednictvím konfigurace autentizace v registru poskytovatelů (klíč API, OAuth, profily hlaviček).
+**Vlastní autentizace** se řeší prostřednictvím konfigurace autentizace v registru poskytovatelů (API klíč, OAuth, profily hlaviček).
 
-Transformace **vlastního těla požadavku** (např. oddělení `system` od `messages` u Anthropic) se registrují pro jednotlivé poskytovatele v `open-sse/translator/`.
+Transformace **vlastního těla požadavku** (např. Anthropic oddělující `system` od `messages`) se registrují pro každého poskytovatele zvlášť v `open-sse/translator/`.
 
 ````
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-Vyhledání probíhá prostřednictvím `ExecutorRegistry` (`executors/registry.ts`): každý specializovaný exekutor je deklarován ve vestavěné tabulce v `executors/index.ts` a při načtení modulu zaregistrován pomocí `registerExecutor(alias, instance)`; `getExecutor()` vyhledá exekutor v registru a u každého poskytovatele bez specializované položky použije jako záložní řešení memoizovaný `DefaultExecutor`. Kompletní mapování alias → exekutor charakterizuje referenční test `tests/unit/executor-map-golden.test.ts`.
+Překlad probíhá přes `ExecutorRegistry` (`executors/registry.ts`): každý specializovaný exekutor je deklarován ve vestavěné tabulce `executors/index.ts` a při načtení modulu registrován pomocí `registerExecutor(alias, instance)`; `getExecutor()` se dotazuje registru a u každého poskytovatele bez specializovaného záznamu se vrátí k memoizovanému `DefaultExecutor`. Kompletní mapování alias → exekutor vymezuje golden test `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -485,11 +488,11 @@ Zpracovává:
 
 | Soubor                        | Účel                                                       |
 | ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Registr chatovacích modelů nad katalogem 352 poskytovatelů |
+| `providerRegistry.ts`         | Registr chatovacích modelů nad katalogem 375 poskytovatelů |
 | `providerModels.ts`           | Aliasy modelů, mapování formátů                            |
 | `constants.ts`                | Časové limity, omezení, stavové kódy                       |
-| `defaultThinkingSignature.ts` | Výchozí signatura uvažování Claude                         |
-| `modelStrip.ts` (ve službách) | Odstraňování polí podle poskytovatele                      |
+| `defaultThinkingSignature.ts` | Výchozí podpis myšlení Claude                              |
+| `modelStrip.ts` (v services)  | Odstraňování polí podle poskytovatele                      |
 
 ### Schéma registru poskytovatelů
 
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Validace pomocí Zod při načtení modulu zajišťuje platnost všech konfigurací poskytovatelů.
+Validace pomocí Zod při načtení modulu zajišťuje, že všechny konfigurace poskytovatelů jsou platné.
 
 ---
 

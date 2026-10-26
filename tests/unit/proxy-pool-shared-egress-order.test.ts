@@ -68,7 +68,7 @@ function refuse(m: Member) {
 function logEgress(m: Member, egressIp: string | null) {
   proxyLogger.logProxyEvent({
     status: "success",
-    provider: "opencode",
+    provider: "opencode-go",
     targetUrl: "https://api.opencode.ai/chat",
     proxy: { type: "http", host: m.host, port: m.port },
     egressIp,
@@ -91,7 +91,7 @@ function flush() {
   proxyLogger.flushProxyLogsSync();
 }
 
-function hotFor(members: Member[], provider: string | null = "opencode") {
+function hotFor(members: Member[], provider: string | null = "opencode-go") {
   return rotation.buildHotEgressPredicate(provider, members);
 }
 
@@ -100,14 +100,14 @@ async function dbPool(size: number): Promise<Member[]> {
   for (let i = 0; i < size; i++) {
     const m = member();
     const proxy = await proxiesDb.createProxy({ name: `member ${seq}`, ...m });
-    await proxiesDb.addProxyToScopePool("provider", "opencode", proxy.id);
+    await proxiesDb.addProxyToScopePool("provider", "opencode-go", proxy.id);
     members.push(m);
   }
   return members;
 }
 
 async function pick() {
-  const resolved = await proxiesDb.resolveProxyForScopeFromRegistry("provider", "opencode");
+  const resolved = await proxiesDb.resolveProxyForScopeFromRegistry("provider", "opencode-go");
   return (resolved as { proxy: { host: string } }).proxy.host;
 }
 
@@ -218,16 +218,20 @@ test("normalizeEgressAddressForRanking: v4 whole, v6 /64, mapped, invalid", () =
 });
 
 test("functional: the second request avoids the refused egress address", async () => {
-  const [a, b] = await dbPool(2);
+  const [a, b, c] = await dbPool(3);
   logEgress(a, "203.0.113.7");
   logEgress(b, "203.0.113.7");
+  logEgress(c, "203.0.113.44");
   flush();
   assert.equal(await pick(), a.host);
-  noteProxyOutcome("opencode", {
+  noteProxyOutcome("opencode-go", {
     proxy: { type: "http", host: a.host, port: a.port },
     upstreamStatus: 429,
   });
-  assert.equal(await pick(), b.host);
+  // The refusal memory now decides by (address, provider) at read time: the
+  // member sharing the refused address is skipped too, so the healthy member
+  // serves (before, this pick served b — the address-sharing member).
+  assert.equal(await pick(), c.host);
 });
 
 test("functional: with the flag off the pool serves the head even when egress is shared", async () => {

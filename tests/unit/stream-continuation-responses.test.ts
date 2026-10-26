@@ -61,6 +61,12 @@ function completedStream(sse: string): ReadableStream<Uint8Array> {
 }
 
 async function collectText(stream: ReadableStream<Uint8Array>): Promise<string> {
+  return (await collectTextAndError(stream)).text;
+}
+
+async function collectTextAndError(
+  stream: ReadableStream<Uint8Array>
+): Promise<{ text: string; error: unknown }> {
   const reader = stream.getReader();
   try {
     let out = "";
@@ -68,14 +74,13 @@ async function collectText(stream: ReadableStream<Uint8Array>): Promise<string> 
       let read: ReadableStreamReadResult<Uint8Array>;
       try {
         read = await reader.read();
-      } catch {
+      } catch (error) {
         // A refused continuation surfaces the original truncation error.
-        break;
+        return { text: out, error };
       }
-      if (read.done) break;
+      if (read.done) return { text: out, error: null };
       if (read.value) out += dec.decode(read.value, { stream: true });
     }
-    return out;
   } finally {
     reader.releaseLock();
   }
@@ -244,6 +249,62 @@ test("makeContinuationBody re-sends input unchanged on an empty prefill", () => 
   assert.equal(out.input.length, 1);
 });
 
+test("a Responses stream closed without the final blank line is never resumed", async () => {
+  const sse = textDelta("Hello there") + completed().replace(/\n$/, "");
+  let continuations = 0;
+  const stream = createRecoverableStream(completedStream(sse), async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      continuations += 1;
+      return null;
+    },
+  });
+  const out = await collectText(stream);
+  assert.ok(out.includes("Hello there"));
+  assert.equal(continuations, 0, "a served complete response must not be re-requested");
+});
+
+test("a chat stream closed without the final blank line is never resumed", async () => {
+  const sse = 'data: {"choices":[{"delta":{"content":"hi"}}]}\n\n' + "data: [DONE]\n";
+  let continuations = 0;
+  const stream = createRecoverableStream(completedStream(sse), async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      continuations += 1;
+      return null;
+    },
+  });
+  const out = await collectText(stream);
+  assert.ok(out.includes("hi"));
+  assert.equal(continuations, 0, "a served complete response must not be re-requested");
+});
+
+test("a cut after a closed delta with a truncated tail resumes with the full prefill", async () => {
+  const truncatedTail = completed().slice(0, -8);
+  const initial = streamFrom([textDelta("Hello there world") + truncatedTail]);
+  let prefill = "";
+  let continuations = 0;
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async (soFar: string) => {
+      continuations += 1;
+      prefill = soFar;
+      return completedStream(textDelta("there world, nice to meet you!") + completed());
+    },
+  });
+  const out = await collectText(stream);
+  assert.equal(prefill, "Hello there world");
+  assert.ok(continuations >= 1, "a truncated tail must still trigger a continuation");
+  const scan = scanOpenAiSseText(out);
+  assert.equal(scan.parsedResponses, true);
+  assert.ok(out.includes("response.output_text.delta"));
+  assert.ok(out.includes("nice to meet you!"));
+  assert.ok(out.includes("response.completed"));
+});
+
 // ── trap 1: a short complete Responses stream is never resumed ────────────────
 
 test("a short complete Responses stream is never resumed after serving", async () => {
@@ -345,6 +406,247 @@ test("a finished tool call blocks continuation when the order fix is on", async 
   });
   await collectText(stream);
   assert.equal(continuations, 0);
+});
+
+// ── a cut with nothing rendered re-sends the request on the same stream ───────
+
+test("a cut with only service events re-sends the request and serves the answer", async () => {
+  const initial = streamFrom([textDelta("") + textDone + msgAdded()]);
+  const prefills: string[] = [];
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async (soFar: string) => {
+      prefills.push(soFar);
+      return completedStream(textDelta("fresh answer") + completed());
+    },
+  });
+  const out = await collectText(stream);
+  assert.deepEqual(prefills, [""]);
+  const scan = scanOpenAiSseText(out);
+  assert.equal(scan.parsedResponses, true);
+  assert.ok(out.includes("fresh answer"));
+  assert.ok(out.includes("response.completed"));
+});
+
+test("a failed re-send surfaces the original cut without a second attempt", async () => {
+  const initial = streamFrom([textDelta("") + textDone + msgAdded()]);
+  let attempts = 0;
+  const outcomes: Array<{ attempt?: number; outcome?: string }> = [];
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return null;
+    },
+    onContinueOutcome: (event) => {
+      outcomes.push(event);
+    },
+  });
+  const { text, error } = await collectTextAndError(stream);
+  assert.equal(attempts, 1);
+  assert.ok(error instanceof TruncatedStreamError);
+  assert.ok(!text.includes("response.completed"));
+  assert.ok(
+    outcomes.some((event) => event.outcome === "no-stream"),
+    "a failed re-send reports the existing no-stream outcome"
+  );
+  assert.ok(
+    !outcomes.some((event) => event.outcome === "refused"),
+    "a failed re-send is an attempt, not a refusal"
+  );
+});
+
+test("a re-send cut short again surfaces the original cut with no clean close", async () => {
+  const initial = streamFrom([textDelta("") + textDone + msgAdded()]);
+  let attempts = 0;
+  const outcomes: Array<{ attempt?: number; outcome?: string }> = [];
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return streamFrom([textDelta("")]);
+    },
+    onContinueOutcome: (event) => {
+      outcomes.push(event);
+    },
+  });
+  const { text, error } = await collectTextAndError(stream);
+  assert.equal(attempts, 1);
+  assert.ok(error instanceof TruncatedStreamError);
+  assert.ok(!text.includes("response.completed"));
+  assert.ok(!text.includes("finish_reason"));
+  assert.ok(outcomes.some((event) => event.outcome === "no-stream"));
+});
+
+test("a re-send ending terminal with no text surfaces the original cut", async () => {
+  setOrderFix(true);
+  const initial = streamFrom([textDelta("") + textDone + msgAdded()]);
+  let attempts = 0;
+  const outcomes: Array<{ attempt?: number; outcome?: string }> = [];
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return completedStream(completed());
+    },
+    onContinueOutcome: (event) => {
+      outcomes.push(event);
+    },
+  });
+  const { text, error } = await collectTextAndError(stream);
+  assert.equal(attempts, 1);
+  assert.ok(error instanceof TruncatedStreamError);
+  assert.ok(!text.includes("response.completed"));
+  assert.ok(outcomes.some((event) => event.outcome === "no-stream"));
+});
+
+test("a partial tool call with no text refuses the cut without a re-send", async () => {
+  setOrderFix(true);
+  const initial = streamFrom([fnArgsDelta("item_9", 0, '{"q":1}')]);
+  let attempts = 0;
+  const outcomes: Array<{ outcome?: string; reason?: string }> = [];
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return null;
+    },
+    onContinueOutcome: (event) => {
+      outcomes.push(event);
+    },
+  });
+  await collectText(stream);
+  assert.equal(attempts, 0);
+  assert.ok(outcomes.some((event) => event.outcome === "refused" && event.reason === "tool-call"));
+});
+
+test("a partial tool call with no text refuses the cut when the order fix is off", async () => {
+  setOrderFix(false);
+  const initial = streamFrom([fnArgsDelta("item_9", 0, '{"q":1}')]);
+  let attempts = 0;
+  const outcomes: Array<{ outcome?: string; reason?: string }> = [];
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return null;
+    },
+    onContinueOutcome: (event) => {
+      outcomes.push(event);
+    },
+  });
+  await collectText(stream);
+  assert.equal(attempts, 0);
+  assert.ok(outcomes.some((event) => event.outcome === "refused" && event.reason === "tool-call"));
+});
+
+test("a truncated tool-call fragment in the unscanned tail blocks the re-send", async () => {
+  // A complete service event (marks the format) followed by a tool-call line cut
+  // mid-JSON with no closing blank line: the scanner never sees the call, only the
+  // substring guard catches it.
+  const initial = streamFrom([
+    textDelta("") +
+      'data: {"type":"response.function_call_arguments.delta","item_id":"item_9","output_index":0,"delta":"{\\"q',
+  ]);
+  let attempts = 0;
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return null;
+    },
+  });
+  await collectText(stream);
+  assert.equal(attempts, 0);
+});
+
+test("a terminal marker left in the unscanned tail blocks the re-send", async () => {
+  // The terminal event carries no trailing blank line, so emit() never scans it.
+  const initial = streamFrom([textDelta("") + completed()]);
+  let attempts = 0;
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return null;
+    },
+  });
+  await collectText(stream);
+  assert.equal(attempts, 0);
+});
+
+test("a chat text line left in the unscanned tail blocks the re-send", async () => {
+  // A complete chat content line without its closing blank line is already on the
+  // client (emit() forwards every chunk) but never reaches the scan, so the
+  // re-send must stay off: the client already holds "hello".
+  const initial = streamFrom([
+    textDelta("") + 'data: {"choices":[{"index":0,"delta":{"content":"hello"}}]}',
+  ]);
+  let attempts = 0;
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return null;
+    },
+  });
+  const { text, error } = await collectTextAndError(stream);
+  assert.equal(attempts, 0);
+  assert.ok(error instanceof TruncatedStreamError);
+  assert.ok(text.includes("hello"), "the client already holds the unscanned text");
+});
+
+test("a truncated chat tool-call fragment in the tail blocks the re-send", async () => {
+  // A chat tool call cut mid-JSON never parses, and the chat vocabulary ("tool_calls")
+  // differs from the Responses one: only the substring guard catches it.
+  const initial = streamFrom([
+    textDelta("") +
+      'data: {"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\\"q"}}]}}',
+  ]);
+  let attempts = 0;
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return null;
+    },
+  });
+  const { text, error } = await collectTextAndError(stream);
+  assert.equal(attempts, 0);
+  assert.ok(error instanceof TruncatedStreamError);
+  assert.ok(text.includes("tool_calls"), "the partial call already reached the client");
+});
+
+test("rendered reasoning alone refuses the cut without a re-send", async () => {
+  const initial = streamFrom([summaryDelta("thinking hard")]);
+  let attempts = 0;
+  const outcomes: Array<{ outcome?: string; reason?: string }> = [];
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: jumpingClock(),
+    continueStream: async () => {
+      attempts += 1;
+      return null;
+    },
+    onContinueOutcome: (event) => {
+      outcomes.push(event);
+    },
+  });
+  await collectText(stream);
+  assert.equal(attempts, 0);
+  assert.ok(
+    outcomes.some((event) => event.outcome === "refused" && event.reason === "not-continuable")
+  );
 });
 
 // ── stitched envelope drives the downstream translator to a stop chunk ────────

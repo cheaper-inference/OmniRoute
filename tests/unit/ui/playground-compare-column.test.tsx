@@ -12,9 +12,8 @@ vi.mock("react-markdown", () => ({
   ),
 }));
 
-const { default: CompareColumn } = await import(
-  "../../../src/app/(dashboard)/dashboard/playground/components/CompareColumn"
-);
+const { default: CompareColumn } =
+  await import("../../../src/app/(dashboard)/dashboard/playground/components/CompareColumn");
 
 type ColumnStatus = "idle" | "streaming" | "done" | "error";
 
@@ -27,14 +26,16 @@ const BASE_METRICS = {
   costUsd: null,
 };
 
-function makeColumn(overrides: Partial<{
-  id: string;
-  model: string;
-  status: ColumnStatus;
-  metrics: typeof BASE_METRICS;
-  response: string;
-  errorMessage: string;
-}> = {}) {
+function makeColumn(
+  overrides: Partial<{
+    id: string;
+    model: string;
+    status: ColumnStatus;
+    metrics: typeof BASE_METRICS;
+    response: string;
+    errorMessage: string;
+  }> = {}
+) {
   return {
     id: "col-1",
     model: "openai/gpt-4o",
@@ -50,15 +51,13 @@ const containers: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElemen
 function renderColumn(
   column: ReturnType<typeof makeColumn>,
   onCancel = vi.fn(),
-  onRemove = vi.fn(),
+  onRemove = vi.fn()
 ): HTMLDivElement {
   const el = document.createElement("div");
   document.body.appendChild(el);
   const root = createRoot(el);
   act(() => {
-    root.render(
-      <CompareColumn column={column} onCancel={onCancel} onRemove={onRemove} />,
-    );
+    root.render(<CompareColumn column={column} onCancel={onCancel} onRemove={onRemove} />);
   });
   containers.push({ root, el });
   return el;
@@ -99,18 +98,14 @@ describe("CompareColumn", () => {
   });
 
   it("renders markdown response when streaming and response is non-empty", () => {
-    const el = renderColumn(
-      makeColumn({ status: "streaming", response: "Hello from model" }),
-    );
+    const el = renderColumn(makeColumn({ status: "streaming", response: "Hello from model" }));
     const markdown = el.querySelector("[data-testid='markdown-content']");
     expect(markdown).not.toBeNull();
     expect(markdown?.textContent).toContain("Hello from model");
   });
 
   it("shows error message when status=error", () => {
-    const el = renderColumn(
-      makeColumn({ status: "error", errorMessage: "Rate limit exceeded" }),
-    );
+    const el = renderColumn(makeColumn({ status: "error", errorMessage: "Rate limit exceeded" }));
     expect(el.textContent).toContain("Rate limit exceeded");
   });
 
@@ -142,7 +137,9 @@ describe("CompareColumn", () => {
   it("calls onRemove when remove button clicked", () => {
     const onRemove = vi.fn();
     const el = renderColumn(makeColumn(), vi.fn(), onRemove);
-    const removeBtn = el.querySelector("[aria-label='Remove column for openai/gpt-4o']") as HTMLButtonElement;
+    const removeBtn = el.querySelector(
+      "[aria-label='Remove column for openai/gpt-4o']"
+    ) as HTMLButtonElement;
     expect(removeBtn).not.toBeNull();
     act(() => removeBtn.click());
     expect(onRemove).toHaveBeenCalledWith("col-1");
@@ -169,7 +166,8 @@ describe("CompareColumn", () => {
     });
 
     expect(writeText).toHaveBeenCalledWith("Column-specific answer");
-    expect(copyBtn.textContent).toContain("check");
+    // KEA-7886: icons are Lucide svgs (no ligature text); the copied state shows the check icon.
+    expect(copyBtn.querySelector("svg[data-icon='check']")).not.toBeNull();
   });
 
   it("disables response copy while the column has no response", () => {
@@ -183,7 +181,7 @@ describe("CompareColumn", () => {
   it("updates metrics displayed when metrics change (TTFT after first chunk)", () => {
     const metricsWithTtft = { ...BASE_METRICS, ttftMs: 187 };
     const el = renderColumn(
-      makeColumn({ status: "streaming", metrics: metricsWithTtft, response: "Hi" }),
+      makeColumn({ status: "streaming", metrics: metricsWithTtft, response: "Hi" })
     );
     expect(el.textContent).toContain("187ms");
   });

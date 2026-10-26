@@ -1,4 +1,8 @@
-import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
+import {
+  createModelCapabilityResolutionSnapshot,
+  getResolvedModelCapabilities,
+  type ModelCapabilityResolutionSnapshot,
+} from "@/lib/modelCapabilities";
 import { getTokenLimit } from "../contextManager";
 
 /**
@@ -41,23 +45,26 @@ function isPositiveFiniteNumber(value: unknown): value is number {
 
 /** Resolved context-length limit for one candidate, before the positivity check. */
 function resolveCandidateContextLength(
-  candidate: AdvertisedLimitCandidate
+  candidate: AdvertisedLimitCandidate,
+  snapshot: ModelCapabilityResolutionSnapshot | null
 ): number | null | undefined {
   return candidate.resolvedContextLength !== undefined
     ? candidate.resolvedContextLength
-    : getTokenLimit(candidate.provider, candidate.model);
+    : getTokenLimit(candidate.provider, candidate.model, snapshot);
 }
 
 /** Resolved max-output-tokens limit for one candidate, before the positivity check. */
 function resolveCandidateMaxOutputTokens(
-  candidate: AdvertisedLimitCandidate
+  candidate: AdvertisedLimitCandidate,
+  snapshot: ModelCapabilityResolutionSnapshot | null
 ): number | null | undefined {
   return candidate.resolvedMaxOutputTokens !== undefined
     ? candidate.resolvedMaxOutputTokens
-    : getResolvedModelCapabilities({
-        provider: candidate.provider,
-        model: candidate.model,
-      }).maxOutputTokens;
+    : getResolvedModelCapabilities(
+        { provider: candidate.provider, model: candidate.model },
+        undefined,
+        snapshot
+      ).maxOutputTokens;
 }
 
 /** Folds one candidate's resolved value into the running MAX-across-candidates. */
@@ -68,7 +75,22 @@ function foldIntoMax(runningMax: number | null, resolved: unknown): number | nul
   return runningMax === null ? resolved : Math.max(runningMax, resolved);
 }
 
-export function computeAdvertisedLimits(candidates: AdvertisedLimitCandidate[]): {
+/** True when at least one candidate still needs a capability lookup. */
+function needsCapabilityLookup(candidates: AdvertisedLimitCandidate[]): boolean {
+  return candidates.some(
+    (c) => c.resolvedContextLength === undefined || c.resolvedMaxOutputTokens === undefined
+  );
+}
+
+/**
+ * `snapshot` (#16814, same pattern as #15353): when omitted and any candidate lacks a
+ * pre-resolved value, ONE snapshot is built for the whole pool instead of a DB lookup per
+ * candidate. Advertised values are unchanged — the snapshot is the same data, bulk-read.
+ */
+export function computeAdvertisedLimits(
+  candidates: AdvertisedLimitCandidate[],
+  snapshot?: ModelCapabilityResolutionSnapshot | null
+): {
   contextLength: number | null;
   maxOutputTokens: number | null;
 } {
@@ -76,11 +98,20 @@ export function computeAdvertisedLimits(candidates: AdvertisedLimitCandidate[]):
     return { contextLength: null, maxOutputTokens: null };
   }
 
+  const resolutionSnapshot =
+    snapshot ??
+    (needsCapabilityLookup(candidates) ? createModelCapabilityResolutionSnapshot() : null);
   let contextLength: number | null = null;
   let maxOutputTokens: number | null = null;
   for (const candidate of candidates) {
-    contextLength = foldIntoMax(contextLength, resolveCandidateContextLength(candidate));
-    maxOutputTokens = foldIntoMax(maxOutputTokens, resolveCandidateMaxOutputTokens(candidate));
+    contextLength = foldIntoMax(
+      contextLength,
+      resolveCandidateContextLength(candidate, resolutionSnapshot)
+    );
+    maxOutputTokens = foldIntoMax(
+      maxOutputTokens,
+      resolveCandidateMaxOutputTokens(candidate, resolutionSnapshot)
+    );
   }
   return {
     contextLength,

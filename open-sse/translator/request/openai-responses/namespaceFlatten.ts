@@ -39,3 +39,20 @@ export function flattenNamespaceToolName(nsName: string, leaf: string): string {
   const hash = createHash("sha256").update(qualified).digest("hex").slice(0, 7);
   return `${qualified.slice(0, MAX_TOOL_NAME_LEN - 8)}_${hash}`;
 }
+
+/**
+ * Resolve the Chat wire name a Responses tool_choice (or allowed_tools entry)
+ * should target. A `{ name, namespace }` reference to a child of a flattened
+ * namespace tool is qualified with {@link flattenNamespaceToolName} so the forced
+ * name matches the declared Chat function exactly. When the reference carries no
+ * namespace, or the qualified name was not declared, the leaf is returned as-is.
+ */
+export function resolveNamespacedToolChoiceName(
+  namespace: unknown,
+  name: string,
+  declaredNames: ReadonlySet<string>
+): string {
+  if (typeof namespace !== "string" || !namespace || !name) return name;
+  const qualified = flattenNamespaceToolName(namespace, name);
+  return declaredNames.has(qualified) ? qualified : name;
+}

@@ -16,34 +16,34 @@ AgentBridge ir OmniRoute MITM (Man-in-the-Middle — starpnieka) starpniekserver
 
 ### Kas ir AgentBridge?
 
-Kad IDE aģents (piemēram, GitHub Copilot, Cursor, Claude Code) veic API izsaukumu, tas tieši savienojas ar augšupējo MI nodrošinātāju (OpenAI, Anthropic utt.). AgentBridge caurspīdīgi pārtver šo savienojumu TLS līmenī — nepieprasot nekādas aģenta konfigurācijas izmaiņas — un pārraksta pieprasījumu, novirzot to caur OmniRoute.
+Kad IDE aģents (piem., GitHub Copilot, Cursor, Claude Code) veic API izsaukumu, tas izveido savienojumu tieši ar upstream AI pakalpojumu sniedzēju (OpenAI, Anthropic u.c.). AgentBridge šo savienojumu pārķer caurspīdīgi TLS līmenī — neprasot nekādas aģenta konfigurācijas izmaiņas — un pārraksta pieprasījumu caur OmniRoute.
 
-Tas nozīmē, ka varat:
+Tas nozīmē, ka jūs varat:
 
-- **Pārmaršrutēt jebkuru aģentu uz jebkuru nodrošinātāju**: Copilot sazinās ar OpenAI? Novirziet to uz Anthropic Claude, Gemini vai jebkuru no OmniRoute 352 nodrošinātājiem.
+- **Pāradresēt jebkuru aģentu uz jebkuru pakalpojumu sniedzēju**: Copilot sazinās ar OpenAI? Pāradresējiet to uz Anthropic Claude, Gemini vai jebkuru no OmniRoute 375 pakalpojumu sniedzējiem.
 - **Lietot modeļu kartējumus**: `gemini-3-flash` → `claude-sonnet-4.7` caurspīdīgi apstrādātāja līmenī.
-- **Novērot visu aģentu datplūsmu**: katrs pārtvertais pieprasījums tiek publicēts rīkā [Datplūsmas inspektors](./TRAFFIC_INSPECTOR.md).
-- **Izmantot OmniRoute noturības mehānismus**: kombinētā maršrutēšana, ķēdes pārtraucēji, rezerves varianti un izmaksu uzskaite darbojas arī IDE aģentu datplūsmai.
+- **Vērot visu aģentu trafiku**: katrs pārķertais pieprasījums tiek publicēts [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
+- **Lietot OmniRoute noturību**: kombinētā maršrutēšana, ķēdes pārtraucēji, rezerves maršruti un izmaksu izsekošana darbojas arī IDE aģentu trafikā.
 
 ### Pozicionējums salīdzinājumā ar tirgu
 
-| Funkcija                     | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ---------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                  |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot               |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                   |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                 |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                   |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries               |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                  |    —    |    —     |        ✓        |             ✓             |
-| Open Code                    |    —    |    —     |        ✓        |             ✓             |
-| Trae                         |    —    |    —     |        —        |     🔍 Tiek izpētīts      |
-| Informācijas paneļa saskarne |    ✓    |    ✗     |        ✗        |             ✓             |
-| Datplūsmas inspektors        |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute maršrutēšana       |    ✗    |    ✗     |        ✗        |             ✓             |
-| Modeļu kartēšanas saskarne   |    ✗    |    ✗     |        ✗        |             ✓             |
-| Apiešanas saraksts           |    ✗    |    ✗     |        ✓        |             ✓             |
-| Augšupējais CA sertifikāts   |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkcija                | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity             |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot          |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)              |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex            |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE              |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries          |    —    |    ✓     |        —        |             ✓             |
+| Claude Code             |    —    |    —     |        ✓        |             ✓             |
+| Open Code               |    —    |    —     |        ✓        |             ✓             |
+| Trae                    |    —    |    —     |        —        |     🔍 Notiek izpēte      |
+| Informācijas paneļa UI  |    ✓    |    ✗     |        ✗        |             ✓             |
+| Traffic Inspector       |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute maršrutēšana  |    ✗    |    ✗     |        ✗        |             ✓             |
+| Modeļu kartēšanas UI    |    ✗    |    ✗     |        ✗        |             ✓             |
+| Apiešanas saraksts      |    ✗    |    ✗     |        ✓        |             ✓             |
+| Upstream CA sertifikāts |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -191,16 +191,16 @@ kopīgo hop-by-hop/kadrēšanas aizliegumu sarakstu (tostarp starpniekservera au
 
 ### 3.1 MITM servera palaišana/apturēšana
 
-Izmantojiet AgentBridge servera kartīti sadaļā `/dashboard/tools/agent-bridge`:
+Izmantojiet AgentBridge servera kartīti vietnē `/dashboard/tools/agent-bridge`:
 
-| Darbība                       | Apraksts                                                                          |
-| ----------------------------- | --------------------------------------------------------------------------------- |
-| Palaist serveri               | Palaiž `src/mitm/server.cjs` portā 443                                            |
-| Apturēt serveri               | Korekti aptur pakārtoto procesu                                                   |
-| Restartēt serveri             | Aptur un palaiž (ņem vērā mērķa izmaiņas)                                         |
-| Uzticēties sertifikātam       | Instalē `DATA_DIR/mitm/ca.crt` operētājsistēmas uzticamo sertifikātu krātuvē      |
-| Lejupielādēt sertifikātu      | Lejupielādē `ca.crt` manuālai instalēšanai                                        |
-| Atkārtoti ģenerēt sertifikātu | Izveido jaunu CA atslēgu pāri (visi esošie katra aģenta sertifikāti tiek anulēti) |
+| Darbība                      | Apraksts                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Palaist serveri              | Palaiž `src/mitm/server.cjs` portā 443. Izmantojot saknes CA modeli, pirmajā palaišanas reizē tiek izveidots `ca.crt`, un aktīvais sertifikāts tiek atzīts par uzticamu, ja ir pieejama sudo parole                                                                                                                                                                                                                                                         |
+| Apturēt serveri              | Korekti aptur pakārtoto procesu                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Restartēt serveri            | Aptur un palaiž no jauna (tiek lietotas mērķu izmaiņas un no jauna ģenerētais sertifikāts)                                                                                                                                                                                                                                                                                                                                                                  |
+| Uzticēties sertifikātam      | Instalē aktīvo sertifikātu operētājsistēmas uzticamo sertifikātu krātuvē: `DATA_DIR/mitm/ca.crt`, ja tiek izmantots saknes CA modelis, vai `DATA_DIR/mitm/server.crt`, ja tiek izmantota mantota gala sertifikāta instalācija                                                                                                                                                                                                                               |
+| Lejupielādēt sertifikātu     | Lejupielādē aktīvo sertifikātu manuālai instalēšanai (`omniroute-mitm-ca.crt` = `ca.crt` vai `omniroute-mitm.crt` = `server.crt`, ja tiek izmantota mantota gala sertifikāta instalācija)                                                                                                                                                                                                                                                                   |
+| Ģenerēt sertifikātu no jauna | Nekad nemaina sertifikāta modeli. Mantota gala sertifikāta instalācija: izveido jaunu `server.crt`/`server.key` (restartējiet serveri, lai tas sāktu to izmantot). Saknes CA modelis: nomaina `ca.crt`/`ca.key`; darbība tiek atteikta, kamēr serveris darbojas. Vispirms vecais uzticamais CA tiek noņemts no uzticamo saraksta (nepieciešama sudo parole), pretējā gadījumā nomaiņa tiek atcelta. Pēc tam klientiem jaunais CA atkal jāatzīmē kā uzticams |
 
 ### 3.2 Uzticēšanās sertifikātam
 
@@ -225,34 +225,34 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Vai izmantojiet informācijas paneļa pogu "Uzticēties sertifikātam" (tā izpilda jūsu operētājsistēmai atbilstošo komandu un vajadzības gadījumā parāda sudo uzvedni).
+Varat arī izmantot informācijas paneļa pogu "Uzticēties sertifikātam" (tā izpilda jūsu operētājsistēmai atbilstošo komandu un, ja nepieciešams, pieprasa sudo paroli).
 
 #### Uz Electron balstītas IDE ignorē operētājsistēmas uzticamo sertifikātu krātuvi (`NODE_EXTRA_CA_CERTS`)
 
-Dažas IDE — īpaši **Antigravity IDE**, kā arī citas no Electron / VS Code atvasinātas lietotnes — ietver
-savu Node.js izpildvidi, kas izejošajiem `fetch`/HTTPS pieprasījumiem **neizmanto operētājsistēmas uzticamo sertifikātu krātuvi**.
+Dažas IDE — jo īpaši **Antigravity IDE**, kā arī citas no Electron / VS Code atvasinātas lietotnes — ietver
+savu Node.js izpildlaika vidi, kas izejošajiem `fetch`/HTTPS savienojumiem **neizmanto operētājsistēmas uzticamo sertifikātu krātuvi**.
 Uzticēšanās CA operētājsistēmas/NSS līmenī ir pietiekama IDE vietējam **aizmugursistēmas komponentam**
 (piemēram, Go valodas serverim, kas izmanto operētājsistēmas CA komplektu), taču **Electron priekšgals**
-joprojām nespēs izveidot TLS savienojumu — tas izpaužas tā, ka lietotnē lietotājs tiek _izrakstīts_ vai tiek parādīta
-_"savienojuma kļūda"_, lai gan MITM žurnāls rāda, ka aizmugursistēmas inicializācijas izsaukumi atgriež `200`. Ir
-nepieciešamas divas darbības, un abas ir svarīgas:
+joprojām nespēs izveidot TLS savienojumu — tas izpaužas kā _atteikšanās no lietotnes konta_ vai
+_"savienojuma kļūda"_, lai gan MITM žurnālā redzams, ka aizmugursistēmas inicializācijas izsaukumi atgriež `200`.
+Ir jāveic divas darbības, un svarīgas ir abas:
 
-1. Skaidri norādiet izpildvidei CA:
+1. Skaidri norādiet izpildlaika videi CA:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **Palaidiet IDE no šīs čaulas.** Palaižot to no darbvirsmas ikonas / Dock / izvēlnes Start,
-   čaulas eksportētie mainīgie **netiek** mantoti, un `~/.config/environment.d/*.conf` tiek lietots tikai pēc
-   jaunas pieteikšanās grafiskajā vidē. Vispirms pilnībā aizveriet IDE — Electron vienīgās instances bloķēšana nozīmē, ka otrā
-   palaišana tikai fokusē esošo procesu un jaunā vide tiek ignorēta.
+2. **Palaidiet IDE no šīs čaulas.** Palaižot to no darbvirsmas ikonas / Dock / sākuma izvēlnes,
+   čaulas eksportētie mainīgie **netiek** mantoti, un `~/.config/environment.d/*.conf` stājas spēkā tikai pēc
+   jaunas pieteikšanās grafiskajā vidē. Vispirms pilnībā aizveriet IDE — Electron vienas instances bloķēšanas mehānisma dēļ otrā
+   palaišanas reize tikai pārslēdz fokusu uz esošo procesu, un jaunā vide tiek ignorēta.
 
-Iepriekš minētā uzticēšanās operētājsistēmas līmenī un NSS darbība joprojām ir nepieciešama (Chromium tīkla steks, ko izmanto dažas autentifikācijas
-plūsmas, lasa katra lietotāja NSS krātuvi, un tam ir savas statiskās piesaistes domēnam `*.googleapis.com`, kuras
-lokāli uzticams CA ignorē). `NODE_EXTRA_CA_CERTS` papildus aptver Node `fetch` ceļu.
+Iepriekš aprakstītā uzticēšanās operētājsistēmas līmenī un NSS darbība joprojām ir nepieciešama (Chromium tīkla steks, ko izmanto dažas autentifikācijas
+plūsmas, lasa katra lietotāja NSS krātuvi, un tam ir savas statiskās piesaistes domēniem `*.googleapis.com`, kuras
+lokāli uzticams CA ignorē). Papildus tam `NODE_EXTRA_CA_CERTS` nodrošina Node `fetch` ceļa darbību.
 
 ### 3.3 DNS maršrutēšana
 
-Katram aģentam, kuru vēlaties pārtvert, tā API resursdatoram(-iem) ir jāatrisinās uz `127.0.0.1`. AgentBridge automātiski pārvalda `/etc/hosts` ierakstus, kad iestatīšanas vednī pārslēdzat aģenta DNS.
+Katram aģentam, kura datplūsmu vēlaties pārtvert, tā API resursdatoram vai resursdatoriem ir jāatrisinās uz `127.0.0.1`. AgentBridge automātiski pārvalda `/etc/hosts` ierakstus, kad iestatīšanas vednī ieslēdzat vai izslēdzat DNS konkrētam aģentam.
 
 GitHub Copilot `/etc/hosts` ierakstu piemērs:
 
@@ -272,63 +272,63 @@ Izmantojiet modeļu kartēšanas tabulu katra aģenta kartītē, lai definētu a
 
 Aizstājējzīme `*` kartē jebkuru neatpazītu modeli uz norādīto mērķi. Kartējumi tiek saglabāti tabulā `agent_bridge_mappings`.
 
-> **Padoms — noskaidrojiet aģenta faktiskos modeļu ID.** IDE var sūtīt modeļu nosaukumus, kas atšķiras no
-> tās lietotāja saskarnes apzīmējumiem un mainās starp galvenajām versijām. Piemēram, **Antigravity 2** pa tīklu sūta
+> **Padoms — noskaidrojiet aģenta īstos modeļu ID.** IDE var sūtīt modeļu nosaukumus, kas atšķiras no
+> tās lietotāja saskarnē redzamajiem apzīmējumiem un mainās starp galvenajām versijām. Piemēram, **Antigravity 2** tīklā sūta
 > `gemini-3.1-pro-low`, `gemini-pro-agent` un `gemini-3.1-flash-lite`, nevis vecākā
-> dokumentācijā norādīto `gemini-2.5-pro`. Nosūtiet vienu tērzēšanas ziņojumu, kad nav neviena atbilstoša kartējuma: MITM
-> reģistrēs precīzo ienākošo `model:` vērtību un pārsūtīs pieprasījumu tālāk. Kartējiet šo burtisko vērtību, un
+> dokumentācijā norādīto `gemini-2.5-pro`. Nosūtiet vienu tērzēšanas pieprasījumu, kam nav atbilstoša kartējuma: MITM
+> žurnālā reģistrēs precīzu ienākošo `model:` vērtību un pārsūtīs pieprasījumu tālāk. Kartējiet šo burtisko vērtību, un
 > nākamais pieprasījums tiks pārtverts un maršrutēts uz jūsu mērķi.
 
-### 3.5 Paziņojums par risku
+### 3.5 Riska paziņojums
 
-AgentBridge pārtver akreditācijas datus (OAuth pilnvaras, API atslēgas), ko IDE izmanto autentifikācijai pie augšupējiem pakalpojumu sniedzējiem. Pirms reģistrēšanas tie tiek **maskēti** (skatiet §2.7), taču tie ir redzami OmniRoute MITM slānim. Pirmoreiz aktivizējot katru aģentu, tiek parādīts aizverams modālais logs ar paziņojumu par risku.
+AgentBridge pārtver akreditācijas datus (OAuth pilnvaras, API atslēgas), ko IDE izmanto, lai autentificētos pie augšupējiem pakalpojumu sniedzējiem. Pirms reģistrēšanas žurnālā tie tiek **maskēti** (skatiet §2.7), taču ir redzami OmniRoute MITM slānim. Katra aģenta pirmās aktivizēšanas laikā tiek parādīts aizverams riska paziņojuma modālais logs.
 
 ### 3.6 Uzturēšana un diagnostika
 
-Informācijas panelī ir pieejama kartīte **Uzturēšana un diagnostika** (`AgentBridgeMaintenanceCard`, direktorijā `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), kas parāda operatīvos MITM maršrutus, kuriem iepriekš nebija lietotāja saskarnes. Tās apakšvirsraksts: _"Veiciet tveršanas konveijera pašpārbaudi, atsauciet atlikušo sistēmas stāvokli un pārvietojiet savu konfigurāciju starp datoriem."_ Kartītes klienta palīgfunkcijas atrodas failā `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Informācijas panelī ir pieejama kartīte **Uzturēšana un diagnostika** (`AgentBridgeMaintenanceCard`, kas atrodas `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), kurā redzami operatīvie MITM maršruti, kuriem iepriekš nebija lietotāja saskarnes. Tās apakšvirsraksts: _"Veiciet tveršanas konveijera pašpārbaudi, atceliet atlikušo sistēmas stāvokli un pārvietojiet savu konfigurāciju starp datoriem."_ Kartītes klienta palīgfunkcijas atrodas `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Poga                        | Maršruts                               | Ko tā dara                                                                                                                                                                                                  |
-| --------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diagnosticēt**            | `GET /api/tools/agent-bridge/diagnose` | Palaiž tveršanas konveijera pašpārbaudi un parāda katras pārbaudes atskaiti (✓/✗ + ieteikums problēmas novēršanai).                                                                                         |
-| **Labot**                   | `POST /api/tools/agent-bridge/repair`  | Atceļ pēc avārijas vai SIGKILL palikušo bāreņstāvokli MITM sistēmā (DNS viltošanas ierakstus, saknes CA, sistēmas starpniekserveri). Idempotenta darbība — ja stāvoklis ir tīrs, ziņo „Nav nekā labojama”.  |
-| **Noņemt CA**               | `DELETE /api/tools/agent-bridge/cert`  | Atsauc uzticēšanos MITM saknes CA un noņem to no OS uzticamības krātuves (tieša, idempotenta darbība). Tiek rādīta tikai tad, ja CA pašlaik ir uzticams; nepieciešams iekļauts apstiprinājums „Noņemt CA?”. |
-| **Eksportēt konfigurāciju** | `GET /api/tools/agent-bridge/config`   | Lejupielādē pārnesamo konfigurācijas JSON (skatiet §3.7).                                                                                                                                                   |
-| **Importēt konfigurāciju**  | `POST /api/tools/agent-bridge/config`  | Augšupielādē iepriekš eksportētu konfigurācijas JSON (skatiet §3.7).                                                                                                                                        |
+| Poga                        | Maršruts                               | Darbība                                                                                                                                                                                                                |
+| --------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnosticēt**            | `GET /api/tools/agent-bridge/diagnose` | Palaiž tveršanas konveijera pašpārbaudi un parāda pārskatu par katru pārbaudi (✓/✗ un novēršanas ieteikums).                                                                                                           |
+| **Labot**                   | `POST /api/tools/agent-bridge/repair`  | Atceļ avārijas vai SIGKILL dēļ palikušo bāreņstāvokļa MITM sistēmas stāvokli (DNS viltošanas ierakstus, saknes CA, sistēmas starpniekserveri). Idempotenta darbība — ja stāvoklis ir tīrs, ziņo "Nav nekā labojama".   |
+| **Noņemt CA**               | `DELETE /api/tools/agent-bridge/cert`  | Atsauc uzticēšanos MITM saknes CA un noņem to no OS uzticamības krātuves (skaidri definēta, idempotenta darbība). Tiek rādīta tikai tad, ja CA pašlaik ir uzticams; nepieciešams iekļauts apstiprinājums "Noņemt CA?". |
+| **Eksportēt konfigurāciju** | `GET /api/tools/agent-bridge/config`   | Lejupielādē pārnesamo konfigurācijas JSON (skatiet §3.7).                                                                                                                                                              |
+| **Importēt konfigurāciju**  | `POST /api/tools/agent-bridge/config`  | Augšupielādē iepriekš eksportētu konfigurācijas JSON (skatiet §3.7).                                                                                                                                                   |
 
 Katrai aģenta kartītei ir arī sava poga **Atjaunot noklusējumu** (`POST
-/api/tools/agent-bridge/agents/{id}/reset`) — viena klikšķa atsaukšanas darbība katram aģentam, kas noņem viltojumu tikai šī
+/api/tools/agent-bridge/agents/{id}/reset`) — viena klikšķa atsaukšanas darbība katram aģentam, kas atceļ viltošanu tikai šī
 aģenta resursdatoriem, notīra tā saglabātos modeļu kartējumus un atiestata tā `dns_enabled`/`setup_completed`
-stāvokli, lai pēc pilnīgas restartēšanas IDE atkal sazinātos ar īsto augšupstraumes serveri. Tā **neietekmē**
-koplietoto MITM serveri vai saknes CA (citi aģenti joprojām var būt no tiem atkarīgi) — tie joprojām ir pieejami,
-izmantojot servera kartīti un iepriekš minēto darbību **Noņemt CA**. Operētājsistēmā Windows tā arī pēc iespējas izpilda
-`ipconfig /flushdns`, jo Windows DNS klients kešatmiņā saglabā hosts faila ierakstus un citādi neatmet
-tikko noņemtu viltojumu.
+stāvokli, lai pēc pilnīgas restartēšanas IDE atkal sazinātos ar īsto augšupējo pakalpojumu. Tā **neietekmē**
+koplietoto MITM serveri vai saknes CA (tie joprojām var būt nepieciešami citiem aģentiem) — tie paliek pieejami,
+izmantojot servera kartīti un iepriekš minēto darbību **Noņemt CA**. Operētājsistēmā Windows tā pēc iespējas palaiž arī
+`ipconfig /flushdns`, jo Windows DNS Client kešo hosts faila ierakstus un citādi neizmetīs
+tikko noņemto viltoto ierakstu.
 
-**Diagnostikas pārbaudes** (`summarizeDiagnostics()` failā `src/mitm/inspector/diagnostics.ts`). Maršruts katrai pārbaudei izpilda efektu izraisošo zondi un nodod Būla vērtības tīrajai apkopošanas funkcijai; tiek atgriezts viens `healthy` vērtējums kopā ar ieteikumu katrai neveiksmīgajai pārbaudei:
+**Diagnostikas pārbaudes** (`summarizeDiagnostics()` failā `src/mitm/inspector/diagnostics.ts`). Maršruts katrai pārbaudei izpilda zondi ar blakusefektiem un nodod Būla vērtības tīrajai kopsavilkuma funkcijai; tiek atgriezts viens `healthy` spriedums un ieteikums katrai kļūmei:
 
-| Pārbaudes nosaukums | Ko tā pārbauda                                             | Ieteikums neveiksmes gadījumā                                                                                                                                                 |
-| ------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`    | MITM servera process ir aktīvs                             | „MITM serveris nedarbojas. Palaidiet to AgentBridge cilnē.”                                                                                                                   |
-| `server-reachable`  | MITM serveris pieņem savienojumus savā portā (TCP zonde)   | „MITM serveris nepieņem savienojumus savā portā. Pārbaudiet, vai ports ir brīvs un vai jums ir tiesības to piesaistīt.”                                                       |
-| `cert-exists`       | MITM sertifikāts ir ģenerēts diskā                         | „MITM sertifikāts vēl nav ģenerēts. Ģenerējiet to AgentBridge cilnē.”                                                                                                         |
-| `cert-trusted`      | MITM saknes CA atrodas OS uzticamības krātuvē              | „OS uzticamības krātuve neuzticas MITM saknes CA, tāpēc TLS pārtveršana neizdosies. Atzīmējiet sertifikātu kā uzticamu AgentBridge cilnē.”                                    |
-| `dns-configured`    | Mērķa resursdatoru nosaukumi ir viltoti failā `/etc/hosts` | „Mērķa resursdatoru nosaukumi nav viltoti failā /etc/hosts, tāpēc datplūsma nekad nesasniedz starpniekserveri. Iespējojiet DNS tiem aģentiem, kuru datplūsmu vēlaties tvert.” |
+| Pārbaudes nosaukums | Ko tā pārbauda                                             | Ieteikums kļūmes gadījumā                                                                                                                                                |
+| ------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `server-running`    | MITM servera process ir aktīvs                             | "MITM serveris nedarbojas. Palaidiet to AgentBridge cilnē."                                                                                                              |
+| `server-reachable`  | MITM serveris pieņem savienojumus savā portā (TCP zonde)   | "MITM serveris nepieņem savienojumus savā portā. Pārbaudiet, vai ports ir brīvs un vai jums ir tiesības tam piesaistīties."                                              |
+| `cert-exists`       | MITM sertifikāts ir ģenerēts diskā                         | "MITM sertifikāts vēl nav ģenerēts. Ģenerējiet to AgentBridge cilnē."                                                                                                    |
+| `cert-trusted`      | MITM saknes CA atrodas OS uzticamības krātuvē              | "OS krātuve neuzticas MITM saknes CA, tāpēc TLS pārtveršana neizdosies. Piešķiriet sertifikātam uzticību AgentBridge cilnē."                                             |
+| `dns-configured`    | Mērķa resursdatoru nosaukumi ir viltoti failā `/etc/hosts` | "Mērķa resursdatoru nosaukumi nav viltoti failā /etc/hosts, tāpēc datplūsma nekad nesasniedz starpniekserveri. Iespējojiet DNS aģentiem, kuru datplūsmu vēlaties tvert." |
 
-**Bāreņstāvokļa reklāmkarogs:** kad lapa konstatē pēc avārijas palikušu stāvokli (DNS viltojumu / CA / sistēmas starpniekserveri), kartītē tiek parādīts dzintarkrāsas reklāmkarogs — _„Iepriekšējā sesija atstāja sistēmas stāvokli (DNS viltojumu, CA vai sistēmas starpniekserveri). Palaidiet labošanu, lai to notīrītu.”_ — un tiek izcelta poga **Labot**. `Repair` ir ProxyBridge karoga `--cleanup` analogs lietojumprogrammas slānī (tas deleģē darbību funkcijai `repairMitm()` failā `src/mitm/manager.ts`).
+**Bāreņstāvokļa reklāmjosla:** kad lapa konstatē avārijas dēļ palikušu stāvokli (DNS viltojumu / CA / sistēmas starpniekserveri), kartītē tiek parādīta dzintarkrāsas reklāmjosla — _"Iepriekšējā sesija atstāja sistēmā stāvokli (DNS viltojumu, CA vai sistēmas starpniekserveri). Lai to notīrītu, palaidiet labošanu."_ — un tiek izcelta poga **Labot**. `Repair` ir ProxyBridge karoga `--cleanup` lietojumslāņa analogs (tas deleģē izpildi `repairMitm()` funkcijai failā `src/mitm/manager.ts`).
 
-> MITM saknes CA pēc apturēšanas un palaišanas paliek instalēts, lai izvairītos no atkārtotiem sudo
-> pieprasījumiem (tāda pati darbība kā mitmproxy/Charles), tāpēc tā noņemšanai paredzēta tieša darbība
-> **Noņemt CA**, nevis automātiska noņemšana apturēšanas laikā.
+> MITM saknes CA paliek instalēts arī pēc apturēšanas/palaišanas, lai izvairītos no atkārtotiem sudo
+> pieprasījumiem (tāda pati darbība kā mitmproxy/Charles), tāpēc tā noņemšanai jāizmanto īpaša
+> darbība **Noņemt CA**, nevis tā tiek veikta automātiski apturēšanas laikā.
 
-### 3.7 Pārnesamās konfigurācijas importēšana/eksportēšana
+### 3.7 Pārnesamas konfigurācijas importēšana/eksportēšana
 
-AgentBridge var serializēt **operatora regulējamo** stāvokli versijotā JSON datu blokā, lai iestatījumu varētu replicēt dažādās iekārtās. Serializētājs ir `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), un to validē `AgentBridgeConfigSchema`.
+AgentBridge var serializēt **operatora pielāgojamo** stāvokli versētā JSON objektā, lai iestatījumus varētu replicēt vairākās iekārtās. Serializētājs ir `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), un to validē `AgentBridgeConfigSchema`.
 
 Eksportā ir iekļautas tieši trīs daļas (iebūvētās noklusējuma vērtības apzināti **NETIEK** eksportētas, tāpēc importēšana tās nekad nedublē un nerada ar tām konfliktus):
 
 | Lauks            | Avots                                                                | Piezīmes                                                                 |
 | ---------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `bypassPatterns` | lietotāja definēti apiešanas modeļi (`agent_bridge_bypass`)          | noklusējuma banku/valsts iestāžu/okta modeļi nav iekļauti                |
+| `bypassPatterns` | lietotāja definēti apiešanas modeļi (`agent_bridge_bypass`)          | noklusējuma bank/gov/okta modeļi nav iekļauti                            |
 | `customHosts`    | Traffic Inspector pielāgotie resursdatori (`inspector_custom_hosts`) | katrs: `{ host, kind: "llm"\|"app"\|"custom", label? }`                  |
 | `agentMappings`  | katra aģenta modeļu kartējumi (`agent_bridge_mappings`)              | `{ [agentId]: [{ source, target }] }` katram aģentam, kuram ir kartējumi |
 
@@ -344,13 +344,13 @@ Eksportā ir iekļautas tieši trīs daļas (iebūvētās noklusējuma vērtība
 }
 ```
 
-**Importēšanas darbība** (`POST /api/tools/agent-bridge/config`): apiešanas modeļi un katra aģenta kartējumi tiek **pilnībā aizstāti**; pielāgotie resursdatori tiek pievienoti **idempotenti** (`INSERT OR IGNORE`). Atbildē tiek norādīts, cik katra veida vienību tika lietots:
+**Importēšanas darbība** (`POST /api/tools/agent-bridge/config`): apiešanas modeļi un katra aģenta kartējumi tiek **pilnībā aizstāti**; pielāgotie resursdatori tiek pievienoti **idempotenti** (`INSERT OR IGNORE`). Atbildē tiek norādīts, cik katra veida ierakstu tika lietots:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Kas konfigurācijā **NAV** iekļauts: servera darbības stāvoklis, sertifikātu ceļi, katra aģenta DNS stāvoklis, augšupējās CA ceļš un TPROXY iestatījumi — tie ir resursdatora/izpildlaika stāvokļa dati, nevis pārnesamas preferences.
+Kas konfigurācijā **NAV** iekļauts: servera darbības stāvoklis, sertifikātu ceļi, katra aģenta DNS stāvoklis, augšupstraumes CA ceļš un TPROXY iestatījumi — tie ir resursdatora/izpildlaika stāvokļi, nevis pārnesamas preferences.
 
 ---
 
@@ -510,38 +510,38 @@ Ja AgentBridge pārtver pieprasījumus, bet tie visi neizdodas:
 
 ## §7 API atsauce
 
-Visi maršruti ir `LOCAL_ONLY` (pieejami tikai atgriezeniskās cilpas interfeisā; tas tiek pārbaudīts pirms autentifikācijas) un `SPAWN_CAPABLE`. Skatiet `src/server/authz/routeGuard.ts`.
+Visi maršruti ir `LOCAL_ONLY` (pieejami tikai atgriezeniskās cilpas saskarnē; tas tiek nodrošināts pirms autentifikācijas) un `SPAWN_CAPABLE`. Skatiet `src/server/authz/routeGuard.ts`.
 
 Bāzes ceļš: `/api/tools/agent-bridge/`
 
-| Metode              | Ceļš                                           | Apraksts                                                                                                                                  |
-| ------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Servera globālais stāvoklis un katra aģenta noteikšanas rezultāts/statuss                                                                 |
-| GET                 | `/api/tools/agent-bridge/agents`               | Reģistrēto aģentu saraksts (ID, nosaukums, resursdatori, darboties spēja, stāvoklis)                                                      |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Viena aģenta stāvoklis (mērķa konfigurācija, noteikšanas rezultāts un saglabātais stāvoklis)                                              |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Atjaunināt aģenta `setup_completed`                                                                                                       |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Palaist aģenta noteikšanas pārbaudi (`installed`, `version?`, `path?`)                                                                    |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Iespējot/atspējot aģenta DNS (`{enabled: boolean}`)                                                                                       |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Aģenta modeļu kartējumi                                                                                                                   |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Aizstāt modeļu kartējumus                                                                                                                 |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Atjaunot noklusējuma stāvokli: atcelt šī aģenta DNS viltošanu, notīrīt tā kartējumus un atiestatīt tā stāvokli (skatiet §3.6)             |
-| POST                | `/api/tools/agent-bridge/server`               | Palaist/apturēt/restartēt serveri (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                 |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Sertifikāta statuss (`exists`, `trusted`, `path`)                                                                                         |
-| POST                | `/api/tools/agent-bridge/cert`                 | Uzticēties MITM saknes CA (instalēt to)                                                                                                   |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Noņemt uzticēšanos MITM saknes CA (noņemt to) — idempotenta darbība (skatiet §3.6)                                                        |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Atkārtoti ģenerēt pašparakstīto MITM sertifikātu                                                                                          |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Straumēt PEM sertifikātu lejupielādei                                                                                                     |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Uzskaitīt apiešanas modeļus (`default` + `user`)                                                                                          |
-| POST                | `/api/tools/agent-bridge/bypass`               | Pilnībā aizstāt lietotāja definētos apiešanas modeļus                                                                                     |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Noņemt vienu lietotāja definētu apiešanas modeli                                                                                          |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Tveršanas konveijera pašpārbaude (skatiet §3.6)                                                                                           |
-| POST                | `/api/tools/agent-bridge/repair`               | Atcelt nekorekti atstāto MITM sistēmas stāvokli (skatiet §3.6)                                                                            |
-| GET                 | `/api/tools/agent-bridge/config`               | Eksportēt pārnesamu konfigurāciju JSON formātā (skatiet §3.7)                                                                             |
-| POST                | `/api/tools/agent-bridge/config`               | Importēt pārnesamu konfigurāciju JSON formātā (skatiet §3.7)                                                                              |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Iegūt konfigurēto augšupstraumes CA ceļu                                                                                                  |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Validēt un saglabāt augšupstraumes CA ceļu                                                                                                |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Tikai validēt (izmēģinājuma režīmā) augšupstraumes CA ceļu — nesaglabāt                                                                   |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY caurspīdīgās atšifrēšanas tveršanas režīms — skatiet `docs/security/MITM-TPROXY-DECRYPT.md` (git; netiek kompilēts sadaļā `/docs`) |
+| Metode              | Ceļš                                           | Apraksts                                                                                                                               |
+| ------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Servera globālais stāvoklis un katra aģenta noteikšanas rezultāts/statuss                                                              |
+| GET                 | `/api/tools/agent-bridge/agents`               | Reģistrēto aģentu saraksts (ID, nosaukums, resursdatori, dzīvotspēja, stāvoklis)                                                       |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Viena aģenta stāvoklis (mērķa konfigurācija, noteikšanas rezultāts un saglabātais stāvoklis)                                           |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Atjaunināt aģenta `setup_completed`                                                                                                    |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Palaist aģenta noteikšanas pārbaudi (`installed`, `version?`, `path?`)                                                                 |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Iespējot/atspējot aģenta DNS (`{enabled: boolean}`)                                                                                    |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Aģenta modeļu kartējumi                                                                                                                |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Aizstāt modeļu kartējumus                                                                                                              |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Atjaunot noklusējuma iestatījumus: atcelt šī aģenta DNS viltošanu, notīrīt tā kartējumus un atiestatīt tā stāvokli (skatiet §3.6)      |
+| POST                | `/api/tools/agent-bridge/server`               | Palaist/apturēt/restartēt serveri (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                              |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Sertifikāta statuss (`exists`, `trusted`, `path`)                                                                                      |
+| POST                | `/api/tools/agent-bridge/cert`                 | Uzticēties MITM saknes CA (instalēt to)                                                                                                |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Atcelt uzticēšanos MITM saknes CA (noņemt to) — idempotenta darbība (skatiet §3.6)                                                     |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | No jauna ģenerēt aktīvo sertifikātu, nemainot sertifikāta modeli (mantotais gala sertifikāts vai saknes CA rotācija — skatiet §3.1)    |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Straumēt aktīvo PEM sertifikātu lejupielādei (`ca.crt` saknes CA modelī, `server.crt` mantotā gala sertifikāta instalācijā)            |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Uzskaitīt apiešanas modeļus (`default` + `user`)                                                                                       |
+| POST                | `/api/tools/agent-bridge/bypass`               | Pilnībā aizstāt lietotāja definētos apiešanas modeļus                                                                                  |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Noņemt vienu lietotāja definētu apiešanas modeli                                                                                       |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Tveršanas konveijera pašpārbaude (skatiet §3.6)                                                                                        |
+| POST                | `/api/tools/agent-bridge/repair`               | Atsaukt bez piesaistes palikušo MITM sistēmas stāvokli (skatiet §3.6)                                                                  |
+| GET                 | `/api/tools/agent-bridge/config`               | Eksportēt pārnesamu konfigurācijas JSON (skatiet §3.7)                                                                                 |
+| POST                | `/api/tools/agent-bridge/config`               | Importēt pārnesamu konfigurācijas JSON (skatiet §3.7)                                                                                  |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Iegūt konfigurēto augšupstraumes CA ceļu                                                                                               |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Validēt un saglabāt augšupstraumes CA ceļu                                                                                             |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Tikai validēt augšupstraumes CA ceļu (izmēģinājuma režīmā), to nesaglabājot                                                            |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY caurspīdīgās atšifrēšanas tveršanas režīms — skatiet `docs/security/MITM-TPROXY-DECRYPT.md` (git; nav kompilēts sadaļā `/docs`) |
 
 Pilnas OpenAPI shēmas: `docs/openapi.yaml` → tags `AgentBridge`.
 

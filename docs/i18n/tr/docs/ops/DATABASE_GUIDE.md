@@ -511,14 +511,14 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA integrity_check;"
 
 ### Senaryo 1: WAL Dosyası Kayboldu
 
-`-wal` dosyası eksik, ancak `-shm` ve ana veritabanı sağlam:
+`-wal` dosyası eksik ancak `-shm` ve ana veritabanı sağlam:
 
 ```bash
 # Bir sonraki açılışta otomatik olarak kurtarılır
 omniroute
 ```
 
-SQLite otomatik olarak kurtaramazsa:
+SQLite otomatik kurtarma yapamazsa:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite ".recover" > recovered.sql
@@ -531,21 +531,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Yedekten geri yükleyin:
 
 ```bash
-omniroute sync pull --merge   # veya: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]`, çalışan bir sunucudan yalnızca tam bir `.tar.gz` arşivi indirir
+(`GET /api/db-backups/exportAll`, operatör kimlik bilgileri gereklidir); herhangi bir geri yükleme işlemi gerçekleştirmez.
 
 ### Senaryo 3: Şifreleme Anahtarı Kayboldu
 
 Anahtar olmadan **kurtarma mümkün değildir**. Şifrelenmiş alanlar okunamaz. Tüm sağlayıcıları yeni kimlik bilgileriyle manuel olarak yeniden ekleyin.
 
-> **Risk azaltma**: Şifreleme anahtarını her zaman ayrı bir yerde, tercihen bir parola yöneticisinde veya KMS'de yedekleyin.
+> **Risk azaltma**: Şifreleme anahtarını her zaman ayrı olarak, tercihen bir parola yöneticisinde veya KMS'de yedekleyin.
 
 ### Senaryo 4: Disk Dolu
 
-SQLite, `SQLITE_FULL` hataları döndürür. Diskte yer açın, ardından:
+SQLite, `SQLITE_FULL` hataları döndürür. Diskte yer açtıktan sonra şunu çalıştırın:
 
 ```bash
-# Yer açmak için WAL denetim noktası oluşturun
+# Alan açmak için WAL denetim noktası oluşturun
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

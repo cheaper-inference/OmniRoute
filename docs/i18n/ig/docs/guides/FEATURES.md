@@ -298,13 +298,13 @@ OmniRoute na-akwadozi **WebSocket clients dakọtara na OpenAI** site na `/v1/ws
 
 ## 🔑 Token Mmekọrịta & Ngwugwu Nhazi _(v3.6.6+)_
 
-Ịnweta site na ọtụtụ ngwaọrụ na site n'aka ndị njikwa mpụga adịla ugbu a mfe site na **token mmekọrịta nwere oke ikike**:
+Ịnweta site na ọtụtụ ngwaọrụ na nke ndị ọrụ mpụga ga-ekwe omume ugbu a site na **token mmekọrịta nwere oke ikike**:
 
-- **`POST /api/sync/tokens`** — Mepụta token mmekọrịta ọhụrụ (nwere oke ikike, yana oge ngafe ma ọ bụrụ na achọrọ)
+- **`POST /api/sync/tokens`** — Mepụta token mmekọrịta ọhụrụ (nwere oke ikike, ya na oge ngwụcha ma ọ bụrụ na achọrọ)
 - **`DELETE /api/sync/tokens/:id`** — Kagbuo token
-- **`GET /api/sync/bundle`** — Budata snapshot JSON nwere ụdị mbipụta na igodo ETag nke ntọala niile na-abụghị nke nzuzo (ezochiri okwuntughe)
+- **`GET /api/sync/bundle`** — Budata snapshot JSON nhazi nwere ụdị mbipụta ma jiri ETag dị ka igodo (a na-eji naanị token mmekọrịta enyocha njirimara). A na-ewepụ ntọala nyocha njirimara dịka okwuntughe dashboard, mana a na-etinye nzere ndị na-eweta ọrụ na igodo API, ya mere were faịlụ ahụ dịka ihe nzuzo
 
-Ọ bụ `src/lib/sync/bundle.ts` na-ewu ngwugwu nhazi ahụ. Ndị na-eji ya na-atụnyere nkụnye isi nzaghachi `ETag` iji chọpụta mgbanwe n'ebughị ụzọ budata ọdịnaya niile ọzọ.
+A na-eji `src/lib/sync/bundle.ts` arụ ngwugwu nhazi ahụ. Ndị na-eji ya na-atụnyere nkụnyeisi nzaghachi `ETag` iji chọpụta mgbanwe n’ebughị ụzọ budata payload ahụ niile ọzọ. Site na CLI, `omniroute sync bundle <outPath> --token <syncToken>` (ma ọ bụ `OMNIROUTE_SYNC_TOKEN`) na-echekwa ya na faịlụ naanị onye nwe ya nwere ike ịnweta.
 
 ---
 

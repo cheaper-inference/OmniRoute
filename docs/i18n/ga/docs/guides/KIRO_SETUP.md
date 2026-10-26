@@ -116,31 +116,40 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## Sreabhadh Iompórtála Eochrach API
+## Sreabh Iompórtála Eochrach API
 
-Tá fíordheimhniú le heochair API ceaptha do dhintiúir iompróra fhadtéarmacha Kiro / AWS CodeWhisperer. Ní
-úsáideann sé athnuachan OAuth, agus mar sin seachnaíonn sé neamhbhailíochtú seisiún comhroinnte OIDC.
+Tá fíordheimhniú le heochair API ann do dhintiúir iompróra fhadtéarmacha Kiro / AWS CodeWhisperer. Ní
+úsáideann sé athnuachan OAuth, mar sin seachnaíonn sé neamhbhailíochtú seisiúin chomhroinnte OIDC.
 
-### Deais
+### Painéal
 
-1. Oscail **Deais -> Soláthraithe -> Kiro**.
+1. Oscail **Painéal -> Soláthraithe -> Kiro**.
 2. Roghnaigh **Eochair API**.
-3. Greamaigh an eochair API agus réigiún roghnach AWS (`us-east-1` mar réamhshocrú).
-4. Bailíochtaíonn OmniRoute an eochair agus sábhálann sé an nasc.
+3. Greamaigh an eochair API agus roghnaigh réigiún AWS: **Uathbhraite** (réamhshocrú), **Oirthear SAM
+   (Tuaisceart Virginia)** nó **An Eoraip (Frankfurt)**.
+4. Bailíochtaíonn OmniRoute an eochair agus sábhálann sé an nasc atá ceangailte leis an réigiún ina
+   n-oibríonn an eochair.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+Glacann `region` le `auto` (réamhshocrú), `us-east-1` nó `eu-central-1`; diúltaítear
+d’aon luach eile le HTTP 400.
 
 ### Conradh Inmheánach
 
-Bailíochtaíonn an bealach API an eochair trí `KiroService.validateApiKey()` a ghlaoch, rud a
-úsáideann `ListAvailableProfiles` i gcoinne chríochphointe CodeWhisperer/Amazon Q
-a mheaitseálann an réigiún agus a réitíonn `profileArn`.
+Bailíochtaíonn bealach an API an eochair trí `KiroService.validateApiKey()` a ghlaoch, rud a
+ghlaonn `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(an dromchla Amazon Q a úsáideann tátal le heochair API) le teorainn ama 10 s in aghaidh an réigiúin. Sa
+mhodh `auto`, baineann sé triail as `us-east-1`, ansin `eu-central-1`, agus stórálann sé an chéad réigiún
+a ghlacann leis an eochair. Má dhiúltaítear d’eochair i ngach réigiún iarrthach, teipeann ar an iompórtáil le
+HTTP 400. Glaoitear `ListAvailableProfiles` ansin ar bhonn na hiarrachta is fearr chun
+`profileArn` roghnach a aimsiú (diúltaíonn AWS dó i gcás fhormhór na n-eochracha API).
 
 Úsáideann an nasc sábháilte:
 
@@ -158,7 +167,10 @@ a mheaitseálann an réigiún agus a réitíonn `profileArn`.
 Ag am rite, seolann `KiroExecutor.buildHeaders()` an eochair mar
 `Authorization: Bearer <key>` agus cuireann sé `tokentype: API_KEY` leis. Úsáideann glaonna cuóta/próifíle
 an marcóir céanna ionas go gcaitheann AWS leis an iompróir mar eochair API fhadtéarmach seachas
-mar chomhartha rochtana OIDC nó sóisialta.
+mar chomhartha rochtana OIDC nó sóisialta. Ní sheolann `KiroExecutor.execute()` tátal le heochair API ach
+chuig `https://q.<region>.amazonaws.com/generateAssistantResponse` — `us-east-1`
+san áireamh — toisc go ndiúltaíonn geata Kiro IDE do `TokenType=API_KEY` agus go
+ndiúltaíonn `codewhisperer.us-east-1` d’ualaí pá eochrach API mar chorp iarratais neamhbhailí (HTTP 400).
 
 ---
 

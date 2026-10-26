@@ -144,8 +144,9 @@ async function settle() {
 }
 
 function inputFor(labelKey: string): HTMLInputElement {
-  const input = screen.getByText(labelKey).closest("label")?.querySelector("input");
-  if (!input) throw new Error(`no input next to ${labelKey}`);
+  // Kit Field: the <label for> names the input (no longer a <label> wrapping it).
+  const input = screen.getByLabelText(labelKey);
+  if (!(input instanceof HTMLInputElement)) throw new Error(`no input labelled ${labelKey}`);
   return input;
 }
 

@@ -1,5 +1,10 @@
 import type { RegistryEntry } from "../../shared.ts";
 
+// reasoning_effort enums probed from the upstream's 400 messages: the OpenAI enum plus "max".
+// deepseek-v4-pro rejects "none"/"minimal", so the declared clamp raises both to "low".
+// Models without a probed enum stay undeclared and fall back to the learned clamp.
+const TOKEN_PLAN_EFFORTS = ["none", "minimal", "low", "medium", "high", "xhigh", "max"];
+
 export const qwen_cloud_token_planProvider: RegistryEntry = {
   id: "qwen-cloud-token-plan",
   alias: "qct",
@@ -19,6 +24,7 @@ export const qwen_cloud_token_planProvider: RegistryEntry = {
       toolCalling: true,
       contextLength: 1_000_000,
       maxOutputTokens: 131_072,
+      supportedThinkingEfforts: TOKEN_PLAN_EFFORTS,
     },
     {
       id: "qwen3.7-max",
@@ -46,6 +52,7 @@ export const qwen_cloud_token_planProvider: RegistryEntry = {
       toolCalling: true,
       contextLength: 1_000_000,
       maxOutputTokens: 131_072,
+      supportedThinkingEfforts: TOKEN_PLAN_EFFORTS,
     },
     {
       id: "qwen3.6-flash",
@@ -63,6 +70,7 @@ export const qwen_cloud_token_planProvider: RegistryEntry = {
       toolCalling: true,
       contextLength: 1_000_000,
       maxOutputTokens: 131_072,
+      supportedThinkingEfforts: TOKEN_PLAN_EFFORTS,
     },
     {
       id: "deepseek-v4-pro",
@@ -71,6 +79,7 @@ export const qwen_cloud_token_planProvider: RegistryEntry = {
       toolCalling: true,
       contextLength: 1_000_000,
       maxOutputTokens: 393_216,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
     },
     {
       // https://help.aliyun.com/en/model-studio/deepseek-v4-1-flash (#14232)
@@ -89,6 +98,7 @@ export const qwen_cloud_token_planProvider: RegistryEntry = {
       toolCalling: true,
       contextLength: 1_000_000,
       maxOutputTokens: 393_216,
+      supportedThinkingEfforts: TOKEN_PLAN_EFFORTS,
     },
   ],
 };

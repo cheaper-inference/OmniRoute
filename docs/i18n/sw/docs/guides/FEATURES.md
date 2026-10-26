@@ -298,13 +298,13 @@ Tabia muhimu:
 
 ## 🔑 Tokeni za Usawazishaji na Kifurushi cha Usanidi _(v3.6.6+)_
 
-Ufikiaji wa vifaa vingi na wa waendeshaji wa nje sasa unawezekana kupitia **tokeni za usawazishaji zenye mawanda maalum**:
+Ufikiaji kutoka vifaa vingi na waendeshaji wa nje sasa unawezekana kupitia **tokeni za usawazishaji zenye mawanda maalum**:
 
 - **`POST /api/sync/tokens`** — Toa tokeni mpya ya usawazishaji (yenye mawanda maalum na muda wa hiari wa kuisha)
 - **`DELETE /api/sync/tokens/:id`** — Batilisha tokeni
-- **`GET /api/sync/bundle`** — Pakua picha ya hali ya JSON yenye toleo na ufunguo wa ETag ya mipangilio yote isiyo nyeti (nywila zimefichwa)
+- **`GET /api/sync/bundle`** — Pakua nakala ya JSON ya usanidi yenye toleo na inayotambulishwa kwa `ETag` (inathibitishwa kwa tokeni ya usawazishaji pekee). Mipangilio ya uthibitishaji kama vile nenosiri la dashibodi huondolewa, lakini vitambulisho vya watoa huduma na funguo za API hujumuishwa, kwa hivyo lichukulie faili hilo kama siri
 
-Kifurushi cha usanidi huundwa na `src/lib/sync/bundle.ts`. Watumiaji hulinganisha kichwa cha jibu cha `ETag` ili kugundua mabadiliko bila kupakua tena data yote.
+Kifurushi cha usanidi huundwa na `src/lib/sync/bundle.ts`. Watumiaji hulinganisha kichwa cha jibu cha `ETag` ili kugundua mabadiliko bila kupakua upya data yote. Kutoka kwenye CLI, `omniroute sync bundle <outPath> --token <syncToken>` (au `OMNIROUTE_SYNC_TOKEN`) hukihifadhi kwenye faili inayoweza kufikiwa na mmiliki pekee.
 
 ---
 

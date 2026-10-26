@@ -21,28 +21,28 @@ hinzugefügt werden muss, ohne neue Module zu erfinden.
 
 ## 1. Technologie-Stack
 
-| Bereich       | Auswahl                                                                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Web-Framework | **Next.js 16** (App Router, eigenständige Ausgabe, keine globale Middleware)                                              |
-| Sprache       | **TypeScript 6.0+** — Ziel `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                       |
-| Laufzeit      | **Node.js** `>=22.22.2 <23` oder `>=24.0.0 <27` (durch `engines` + `SUPPORTED_NODE_RANGE` erzwungen)                      |
-| Datenbank     | **SQLite** über `better-sqlite3` (Singleton, WAL-Journaling)                                                              |
-| Desktop       | **Electron 41** + `electron-builder` 26.10 (separater Workspace unter `electron/`)                                        |
-| Tests         | **Nativer Node-Test-Runner** (Unit/Integration), **Vitest** (MCP, autoCombo, Cache), **Playwright** (e2e + protocols-e2e) |
-| Build         | Eigenständiges Next.js-Build über `scripts/build/build-next-isolated.mjs`                                                 |
-| Lint/Format   | ESLint-Flat-Config + Prettier (`lint-staged` über Husky-Pre-Commit)                                                       |
-| Modulsystem   | Durchgehend ESM (`"type": "module"`)                                                                                      |
-| Workspaces    | npm-Workspace — `open-sse` ist der einzige Sub-Workspace                                                                  |
+| Aspekt        | Auswahl                                                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Web-Framework | **Next.js 16** (App Router, eigenständige Ausgabe, keine globale Middleware)                                                     |
+| Sprache       | **TypeScript 6.0+** — Ziel `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                              |
+| Laufzeit      | **Node.js** `>=22.22.2 <23` oder `>=24.0.0 <27` (erzwungen über `engines` + `SUPPORTED_NODE_RANGE`)                              |
+| Datenbank     | **SQLite** über `better-sqlite3` (Singleton, WAL-Journaling)                                                                     |
+| Desktop       | **Electron 41** + `electron-builder` 26.10 (separater Workspace unter `electron/`)                                               |
+| Tests         | **Nativer Node-Test-Runner** (Unit-/Integrationstests), **Vitest** (MCP, autoCombo, Cache), **Playwright** (E2E + Protokoll-E2E) |
+| Build         | Eigenständiges Next.js-Build über `scripts/build/build-next-isolated.mjs`                                                        |
+| Lint/Format   | Flache ESLint-Konfiguration + Prettier (`lint-staged` über Husky-Pre-Commit)                                                     |
+| Modulsystem   | Durchgängig ESM (`"type": "module"`)                                                                                             |
+| Dashboard-UI  | **Tailwind CSS 4** + das integrierte **Keak CI UI Kit** (`packages/ui-kit`), Lucide-Icons — siehe `DESIGN_SYSTEM.md`             |
+| Workspaces    | npm-Workspaces — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                          |
 
 Pfadaliase (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
-Standardmäßiger HTTP-Port: **`20128`** (API und Dashboard nutzen denselben Prozess). Das
-Datenverzeichnis wird durch die Umgebungsvariable `DATA_DIR` festgelegt und verwendet standardmäßig
-`~/.omniroute/`.
+Standardmäßiger HTTP-Port: **`20128`** (API und Dashboard verwenden denselben Prozess). Das Datenverzeichnis wird über die Umgebungsvariable `DATA_DIR` festgelegt und verwendet standardmäßig `~/.omniroute/`.
 
 ---
 
@@ -50,21 +50,22 @@ Datenverzeichnis wird durch die Umgebungsvariable `DATA_DIR` festgelegt und verw
 
 ```
 OmniRoute/
-├── src/                  Next.js-Anwendung (App Router, Bibliotheken, Domäne, Server, gemeinsam genutzter Code)
-├── open-sse/             Workspace der Streaming-Engine (@omniroute/open-sse)
-├── electron/             Desktop-Wrapper (Electron-41-Hauptprozess + Preload)
+├── src/                  Next.js-Anwendung (App Router, Bibliotheken, Domäne, Server, gemeinsam genutzte Komponenten)
+├── open-sse/             Arbeitsbereich der Streaming-Engine (@omniroute/open-sse)
+├── packages/             Arbeitsbereiche: ui-kit (eingebundenes Keak CI UI Kit), browser-pool
+├── electron/             Desktop-Wrapper (Electron 41, Hauptprozess + Preload)
 ├── bin/                  CLI-Einstiegspunkte (omniroute, reset-password)
-├── tests/                Unit-, Integrations-, e2e-, protocols-e2e-, Übersetzer- und Sicherheitstests sowie Fixtures
-├── scripts/              Hilfsskripte für Build, Synchronisierung, Prüfung, Migration und Laufzeit
+├── tests/                Unit-, Integrations-, E2E-, Protokoll-E2E-, Übersetzer- und Sicherheitstests sowie Fixtures
+├── scripts/              Hilfsskripte für Build, Synchronisierung, Prüfungen, Migrationen und Laufzeit
 ├── docs/                 Öffentliche Dokumentation (dieses Verzeichnis)
 ├── public/               Statische Assets, PWA-Manifest, Service Worker
 ├── config/               Beispiele für die Laufzeitkonfiguration
-├── images/               Marketing-/Screenshot-Assets
-├── _ideia/, _references/, _mono_repo/, _tasks/   Interne Entwürfe/Planung (nicht ausgeliefert)
+├── images/               Marketing- und Screenshot-Assets
+├── _ideia/, _references/, _mono_repo/, _tasks/   Interne Entwürfe und Planungen (nicht ausgeliefert)
 ├── CLAUDE.md             Repository-Regeln für Claude Code
-├── AGENTS.md             Ausführlichere Architekturreferenz für Agenten
-├── package.json          v3.8.51, Workspace-Stammverzeichnis
-└── tsconfig.json         Pfadaliase + zentrale Compiler-Optionen
+├── AGENTS.md             Detailliertere Architekturreferenz für Agenten
+├── package.json          v3.8.51, Stammverzeichnis des Arbeitsbereichs
+└── tsconfig.json         Pfad-Aliasse + zentrale Compiler-Optionen
 ```
 
 ---
@@ -76,27 +77,27 @@ src/
 ├── app/                  App-Router-Seiten + API-Routen
 ├── lib/                  Kernbibliotheken (DB, Authentifizierung, OAuth, Skills, Speicher, …)
 ├── domain/               Reine Domänenschicht (Richtlinien, Fallback, Kosten, Sperrung, …)
-├── server/               Ausschließlich serverseitige Module (Autorisierung, CORS, Authentifizierung)
+├── server/               Reine Servermodule (Autorisierung, CORS, Authentifizierung)
 ├── shared/               Typen, Konstanten, Validierung, Verträge, Hilfsfunktionen (grenzübergreifend sicher)
-├── mitm/                 Man-in-the-Middle-Proxy-Hilfsfunktionen für die CLI-Integration
-├── models/               Lokale Modellmetadaten/Aliaszuordnung
-├── sse/                  Ältere SSE-Handler, die sich weiterhin unter src/ befinden (nicht open-sse/)
+├── mitm/                 Man-in-the-Middle-Proxy-Hilfen für die CLI-Integration
+├── models/               Lokale Modellmetadaten / Aliasing
+├── sse/                  Ältere SSE-Handler, die weiterhin unter src/ liegen (nicht open-sse/)
 ├── store/                Clientseitige Zustandsspeicher
 ├── middleware/           Middleware-Hilfsfunktionen auf Routenebene (keine globale Next.js-Middleware)
-├── scripts/              Im Projektbaum enthaltene, durch Anwendungscode importierbare Skripte
+├── scripts/              Im Quellbaum enthaltene Skripte, die vom Anwendungscode importiert werden können
 ├── types/                Globale und gemeinsam genutzte TS-Typen
 ├── i18n/                 Lokalisierungspakete
 ├── instrumentation.ts    Next.js-Instrumentierungs-Hook
 ├── instrumentation-node.ts
-└── proxy.ts              Übergeordnete Proxy-Bootstrap-Hilfsfunktion
+└── proxy.ts              Proxy-Bootstrap-Hilfsfunktion auf oberster Ebene
 ```
 
 ### 3.1 `src/app/` — App Router
 
-Der App Router stellt sowohl die Dashboard-Benutzeroberfläche als auch die öffentliche beziehungsweise administrative HTTP-API bereit.
-Es gibt **keine globale Middleware** — die Abfanglogik wird pro Route implementiert.
+Der App Router stellt sowohl die Dashboard-Benutzeroberfläche als auch die öffentliche bzw. Verwaltungs-HTTP-API bereit.
+Es gibt **keine globale Middleware** — die Interzeption erfolgt pro Route.
 
-Übergeordnete Segmente unter `src/app/`:
+Segmente auf oberster Ebene unter `src/app/`:
 
 | Pfad                                                                          | Zweck                                                        |
 | ----------------------------------------------------------------------------- | ------------------------------------------------------------ |
@@ -111,18 +112,18 @@ Es gibt **keine globale Middleware** — die Abfanglogik wird pro Route implemen
 | `privacy/`, `terms/`                                                          | Rechtliche Seiten                                            |
 | `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statische Fehlerseiten                                       |
 | `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Framework-Grenzen für Fehler und Ladevorgänge                |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Grundgerüst                                                  |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Root-Shell                                                   |
 
-#### 3.1.1 `src/app/(dashboard)/dashboard/` — Benutzeroberflächenseiten
+#### 3.1.1 `src/app/(dashboard)/dashboard/` — UI-Seiten
 
 `agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks` sowie die Stammdateien `page.tsx`, `HomePageClient.tsx`,
+`translator`, `usage`, `webhooks`, sowie die Root-Dateien `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx`.
 
-#### 3.1.2 `src/app/api/` — Übergeordnete API-Gruppen
+#### 3.1.2 `src/app/api/` — API-Gruppen auf oberster Ebene
 
 ```
 src/app/api/
@@ -179,7 +180,7 @@ src/app/api/
 ├── upstream-proxy/
 ├── usage/
 ├── v1/         OpenAI-kompatible öffentliche API
-├── v1beta/     Gemini-ähnliche Kompatibilität
+├── v1beta/     Kompatibilität im Gemini-Stil
 ├── version-manager/
 └── webhooks/
 ```
@@ -193,22 +194,22 @@ Alle Pfade sind als **LOCAL_ONLY** klassifiziert (nur Loopback, feste Regel Nr. 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             Hilfsfunktion getOrInitSupervisor()
-│   ├── install/route.ts    POST — npm-Installation über execFile
+│   ├── _lib.ts             getOrInitSupervisor()-Hilfsfunktion
+│   ├── install/route.ts    POST — npm install über execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — neuere Version mit npm installieren
+│   ├── update/route.ts     POST — npm install einer neueren Version
 │   ├── rotate-key/route.ts POST — neuen API-Schlüssel generieren + neu starten
 │   ├── status/route.ts     GET  — Live- und DB-Status + Versionsmetadaten
 │   └── auto-start/route.ts POST — auto_start-Flag umschalten
 ├── cliproxy/
-│   ├── _lib.ts             Hilfsfunktion getOrInitSupervisor()
-│   ├── install/route.ts    POST — npm-Installation
+│   ├── _lib.ts             getOrInitSupervisor()-Hilfsfunktion
+│   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — neuere Version mit npm installieren
+│   ├── update/route.ts     POST — npm install einer neueren Version
 │   ├── status/route.ts     GET  — Live- und DB-Status + Versionsmetadaten
 │   └── auto-start/route.ts POST — auto_start-Flag umschalten
 └── [name]/
@@ -227,18 +228,18 @@ Ausführliche Erläuterung: `docs/frameworks/EMBEDDED-SERVICES.md`
 ```
 v1/
 ├── accounts/[id]/                       Kontosuche
-├── agents/tasks/[id]/, agents/tasks/    A2A-orientierte Aufgabenendpunkte
-├── api/                                 interne API-Hilfsfunktionen, die unter v1/api verfügbar sind
+├── agents/tasks/[id]/, agents/tasks/    A2A-orientierte Aufgaben-Endpunkte
+├── api/                                 interne API-Hilfsfunktionen, verfügbar unter v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
 ├── chat/completions/                    Chat Completions (der Hauptendpunkt)
-├── completions/                         ältere Textvervollständigungen
+├── completions/                         veraltete Textvervollständigungen
 ├── embeddings/                          Einbettungen
 ├── files/[id]/, files/                  Files API
 ├── _helpers/                            gemeinsam genutzte Routen-Hilfsfunktionen (keine öffentliche URL)
 ├── images/{edits, generations}/         Bildgenerierung + -bearbeitung
 ├── issues/                              Hilfsendpunkte zur Triage
-├── management/{proxies}/                Routen mit Verwaltungsbereich innerhalb von v1
+├── management/{proxies}/                auf die Verwaltung beschränkte Routen innerhalb von v1
 ├── messages/{count_tokens}/             Anthropic-kompatible Nachrichten
 ├── models/                              Modellauflistung (`route.ts`, `catalog.ts`)
 ├── moderations/                         Moderation
@@ -258,61 +259,61 @@ Jede Routendatei folgt demselben Muster:
 
 ```
 Route → CORS-Preflight → Zod-Validierung des Bodys → optionale Authentifizierung
-      → Durchsetzung der API-Schlüsselrichtlinie → Delegierung an Handler (open-sse)
+      → Durchsetzung der API-Schlüsselrichtlinie → Handler-Delegierung (open-sse)
 ```
 
-`v1beta/` ist die Gemini-kompatible Oberfläche (ein dünner Wrapper, der in
+`v1beta/` ist die Gemini-kompatible Oberfläche (ein schlanker Wrapper, der in
 dieselbe `open-sse/handlers/`-Pipeline übersetzt).
 
 ### 3.2 `src/lib/` — Kernbibliotheken
 
-Daten, Synchronisierung, OAuth, Skills, Speicher usw. immer über diese Module importieren. Die
-Tabelle gruppiert die tatsächlichen Verzeichnisse und erwähnenswerte Dateien auf oberster Ebene.
+Importieren Sie Daten, Synchronisierung, OAuth, Skills, Memory usw. stets über diese Module. Die
+Tabelle gruppiert die tatsächlichen Verzeichnisse und wichtigen Dateien auf oberster Ebene.
 
-| Modul             | Zweck                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A-Protokollserver: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 Skills: Kostenanalyse, Zustandsbericht, Anbietererkennung, Kontingentverwaltung, intelligentes Routing, list-capabilities)                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `api/`            | Interne API-Hilfsfunktionen: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `auth/`           | `managementPassword.ts` (Zurücksetzen/Hashing von Passwörtern)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `batches/`        | Dienst für die OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `catalog/`        | OpenRouter-Katalogsynchronisierung (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `cloudAgent/`     | Cloud-Agent-Registry: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `combos/`         | Hilfsfunktionen zur Combo-Auflösung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `compliance/`     | Audit + Anbieteraudit: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `config/`         | Bindeglied für die Laufzeitkonfiguration                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `db/`             | SQLite-Domänenmodule (siehe §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `display/`        | Von API-Antworten verwendete UI-/Anzeigehilfsfunktionen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `embeddings/`     | Registry für Embedding-Dienste                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `env/`            | Laden + Introspektion der Umgebung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `evals/`          | Eval-Laufzeit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `jobs/`           | Hintergrundjobs (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `memory/`         | Persistenter Speicher: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `oauth/`          | OAuth-/Import-Anbietermodule (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, plus `services/`, `utils/` und `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                             |
-| `plugins/`        | Plugin-Loader (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `providerModels/` | Lebenszyklusverwaltung verwalteter Modelle: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `providers/`      | Anbieterhilfsfunktionen: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `resilience/`     | `settings.ts` — Einstellungen für Leistungsschalter, Abklingzeit und Sperrung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `runtime/`        | Erkennung von Laufzeitfunktionen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `services/`       | Framework für eingebettete Dienste: `ServiceSupervisor.ts` (generischer Supervisor für untergeordnete Prozesse mit Operationssperre, Ringpuffer und Zustandsprüfung), `bootstrap.ts` (Registrierung auf Prozessebene und automatischer Start), `registry.ts` (Zuordnung von Tool → Supervisor), `apiKey.ts` (AES-256-GCM-Schlüsselspeicher), `modelSync.ts` (periodische Modellsynchronisierung), `ringBuffer.ts` (zirkulärer 5-MB-Protokollpuffer), `healthCheck.ts` (HTTP-Zustandsprüfung), `types.ts`, `embedWsProxy.ts` (WebSocket-Proxy), `installers/{ninerouter,cliproxy}.ts`. Siehe `docs/frameworks/EMBEDDED-SERVICES.md`                                                                        |
-| `agentSkills/`    | Agent-Skills-Katalog + Generator: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → schreibt `skills/{id}/SKILL.md`), `openapiParser.ts` (extrahiert REST-Endpunkte aus der OpenAPI-Spezifikation), `cliRegistryParser.ts` (extrahiert CLI-Unterbefehle aus bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Verwendet von REST-Routen (`/api/agent-skills/*`), MCP-Tools (`omniroute_agent_skills_*`) und dem A2A-Skill `list-capabilities`. Siehe [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Skill-Framework: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, plus `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `spend/`          | `batchWriter.ts` (Write-behind-Puffer)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud-Synchronisierung)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `system/`         | Hilfsfunktionen auf Systemebene                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `translator/`     | Übergeordnetes Bindeglied für Übersetzer (delegiert an `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `usage/`          | Nutzungsabrechnung: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `versionManager/` | Automatische Aktualisierung + Versionsmanifest                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `ws/`             | WebSocket-Bridge                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `zed-oauth/`      | OAuth-Ablauf für den Zed-Editor                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Modul             | Zweck                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A-Protokollserver: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 Funktionen: Kostenanalyse, Zustandsbericht, Anbietererkennung, Kontingentverwaltung, intelligentes Routing, Auflisten von Funktionen)                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `api/`            | Interne API-Hilfsfunktionen: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `auth/`           | `managementPassword.ts` (Zurücksetzen/Hashing von Passwörtern)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `batches/`        | Dienst für die OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `catalog/`        | OpenRouter-Katalogsynchronisierung (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `cloudAgent/`     | Cloud-Agent-Registry: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `combos/`         | Hilfsfunktionen zur Combo-Auflösung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `compliance/`     | Auditierung + Provider-Auditierung: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `config/`         | Verknüpfung der Laufzeitkonfiguration                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `db/`             | SQLite-Domänenmodule (siehe §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `display/`        | Von API-Antworten verwendete UI-/Anzeigehilfsfunktionen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `embeddings/`     | Registry für Embedding-Dienste                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `env/`            | Laden + Introspektion von Umgebungsvariablen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `evals/`          | Eval-Laufzeit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `jobs/`           | Hintergrundjobs (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `memory/`         | Persistenter Speicher: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `oauth/`          | OAuth-/Import-Provider-Module (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, außerdem `services/`, `utils/` und `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                     |
+| `plugins/`        | Plugin-Loader (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `providerModels/` | Verwaltung des Modelllebenszyklus: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `providers/`      | Provider-Hilfsfunktionen: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `resilience/`     | `settings.ts` — Einstellungen für Schutzschalter, Abklingzeit und Sperrung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `runtime/`        | Erkennung von Laufzeitfunktionen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `services/`       | Framework für eingebettete Dienste: `ServiceSupervisor.ts` (generischer Supervisor für untergeordnete Prozesse mit Operationssperre, Ringpuffer und Zustandsprüfung), `bootstrap.ts` (Registrierung auf Prozessebene und automatischer Start), `registry.ts` (Zuordnung von Werkzeugen zu Supervisoren), `apiKey.ts` (AES-256-GCM-Schlüsselspeicher), `modelSync.ts` (periodische Modellsynchronisierung), `ringBuffer.ts` (kreisförmiger 5-MB-Protokollpuffer), `healthCheck.ts` (HTTP-Zustandsprüfung), `types.ts`, `embedWsProxy.ts` (WebSocket-Proxy), `installers/{ninerouter,cliproxy}.ts`. Siehe `docs/frameworks/EMBEDDED-SERVICES.md`                                                                         |
+| `agentSkills/`    | Agent-Skills-Katalog und -Generator: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → schreibt `skills/{id}/SKILL.md`), `openapiParser.ts` (extrahiert REST-Endpunkte aus der OpenAPI-Spezifikation), `cliRegistryParser.ts` (extrahiert CLI-Unterbefehle aus bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Wird von REST-Routen (`/api/agent-skills/*`), MCP-Werkzeugen (`omniroute_agent_skills_*`) und dem A2A-Skill `list-capabilities` verwendet. Siehe [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Skill-Framework: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts` sowie `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `spend/`          | `batchWriter.ts` (Write-behind-Puffer)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud-Synchronisierung)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `system/`         | Hilfsfunktionen auf Systemebene                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `translator/`     | Übergeordnete Translator-Integration (delegiert an `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `usage/`          | Nutzungsabrechnung: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `versionManager/` | Automatische Aktualisierung + Versionsmanifest                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `ws/`             | WebSocket-Bridge                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `zed-oauth/`      | OAuth-Ablauf des Zed-Editors                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 Dateien auf oberster Ebene in `src/lib/`:
 
-- Das alte Barrel `localDb.ts` wurde entfernt — Verbraucher importieren spezifische `src/lib/db/*`-Module direkt.
+- Die alte Barrel-Datei `localDb.ts` wurde entfernt — Nutzer importieren bestimmte `src/lib/db/*`-Module direkt.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -350,7 +351,7 @@ Domänenmodule (jedes ist für eine oder mehrere Tabellen zuständig): `apiKeys.
 `migrations/` enthält 168 versionierte `.sql`-Dateien (idempotent, transaktional) und wird
 beim Start von `migrationRunner.ts` ausgeführt.
 
-Über die Migrationen hinweg erstellte Tabellen (insgesamt 123):
+Über alle Migrationen hinweg erstellte Tabellen (insgesamt 123):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -370,49 +371,49 @@ beim Start von `migrationRunner.ts` ausgeführt.
 
 ### 3.3 `src/domain/` — Domänenschicht
 
-Reine Geschäftslogik ohne I/O. Wird von Routen und Handlern importiert.
+Reine Geschäftslogik ohne E/A. Wird von Routen und Handlern importiert.
 
 | Datei                                      | Zweck                                            |
 | ------------------------------------------ | ------------------------------------------------ |
 | `policyEngine.ts`                          | Übergeordnete Richtlinienauflösung               |
-| `fallbackPolicy.ts`                        | Entscheidungsbaum für Fallbacks                  |
+| `fallbackPolicy.ts`                        | Fallback-Entscheidungsbaum                       |
 | `costRules.ts`                             | Regeln zur Kostenberechnung                      |
 | `lockoutPolicy.ts`                         | Entscheidungen zur Modellsperrung                |
 | `tagRouter.ts`                             | Tag-basiertes Routing                            |
 | `comboResolver.ts`                         | Combo-Auflösung von Anfrage → Zielliste          |
-| `connectionModelRules.ts`                  | Modellspezifische Filter pro Verbindung          |
+| `connectionModelRules.ts`                  | Modellspezifische Filter je Verbindung           |
 | `modelAvailability.ts`                     | Prüfung der Modellverfügbarkeit                  |
-| `degradation.ts`                           | Übergänge in den eingeschränkten Betriebsmodus   |
+| `degradation.ts`                           | Übergänge in den eingeschränkten Modus           |
 | `providerExpiration.ts`                    | Erkennung abgelaufener Konten/Schlüssel          |
 | `quotaCache.ts`                            | Zwischengespeicherte Kontingententscheidungen    |
 | `responses.ts`, `omnirouteResponseMeta.ts` | Hilfsfunktionen für Antwortstrukturen            |
-| `configAudit.ts`                           | Prüfung von Konfigurationsänderungen             |
+| `configAudit.ts`                           | Audit von Konfigurationsänderungen               |
 | `assessment/`                              | Modellbewertung (gemäß RFC, teilweise umgesetzt) |
-| `types.ts`                                 | Gemeinsam genutzte Domänentypen                  |
+| `types.ts`                                 | Gemeinsam verwendete Domänentypen                |
 
 ### 3.4 `src/server/` — Nur serverseitig
 
-Darf nicht aus Client-Komponenten importiert werden.
+Kann nicht aus Client-Komponenten importiert werden.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Klassifiziert Routen als öffentlich oder administrativ
-│   ├── assertAuth.ts      Hilfsfunktion für Assertions
-│   ├── context.ts         Authz-Kontext pro Anfrage
+│   ├── classify.ts        Klassifiziert Routen als öffentlich oder verwaltungsbezogen
+│   ├── assertAuth.ts      Assertion-Hilfsfunktion
+│   ├── context.ts         Autorisierungskontext pro Anfrage
 │   ├── headers.ts
-│   ├── pipeline.ts        Authz-Pipeline
+│   ├── pipeline.ts        Autorisierungs-Pipeline
 │   ├── policies/          Konkrete Richtlinien
 │   └── types.ts
-└── cors/origins.ts        Positivliste zulässiger CORS-Ursprünge
+└── cors/origins.ts        Positivliste für CORS-Ursprünge
 ```
 
 ### 3.5 `src/shared/` — Sicher gemeinsam nutzbar
 
-In zweckgebundene Unterverzeichnisse aufgeteilt:
+Aufgeteilt in klar abgegrenzte Unterverzeichnisse:
 
-- `constants/` — `providers.ts` (Zod-validierter Anbieterkatalog), `models.ts`,
+- `constants/` — `providers.ts` (Zod-validierter Anbieter-Katalog), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
   `headers.ts`, `upstreamHeaders.ts` (Sperrliste), `mcpScopes.ts`,
@@ -430,63 +431,70 @@ In zweckgebundene Unterverzeichnisse aufgeteilt:
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts` sowie Dashboard-Hooks/-Komponenten unter `services/`, `network/`,
+  `a11yAudit.ts`, sowie Dashboard-Hooks/-Komponenten unter `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/`.
+- `components/` — die Dashboard-Komponenten-API (`index.tsx`-Barrel: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Die Primitive sind Adapter für das
+  eingebundene Kit (`packages/ui-kit`, importiert über Komponenten-Unterpfade wie
+  `@omniroute/ui-kit/button`), sodass die Screens ihre Importe beibehalten, während das Markup
+  aus dem Kit stammt. Die Shell ist `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (`SidebarProvider`/`SidebarInset` des Kits) mit `Sidebar.tsx` und `Header.tsx`; Icons werden
+  über `Icon.tsx` und `constants/iconMap.ts` eingebunden. Siehe `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
-## 4. `open-sse/` — Workspace für die Streaming-Engine
+## 4. `open-sse/` — Arbeitsbereich der Streaming-Engine
 
-Separater npm-Workspace, der als `@omniroute/open-sse` veröffentlicht wird. Zuständig für die Verarbeitung von Anfragen, Executoren, Übersetzer, Dienste, den Transformer und den MCP-Server.
+Separater npm-Arbeitsbereich, der als `@omniroute/open-sse` veröffentlicht wird. Zuständig für die Anfrageverarbeitung, Executoren, Übersetzer, Dienste, den Transformer und den MCP-Server.
 
 ```
 open-sse/
 ├── index.ts                Öffentliche Exporte
-├── package.json            Workspace-Manifest
+├── package.json            Arbeitsbereichsmanifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Anbieterregister, Header-Profile, Identität, …
+├── config/                 Anbieterregistrierungen, Headerprofile, Identität, …
 ├── handlers/               Anfrage-Handler (Chat, Embeddings, Audio, Bilder, …)
-├── executors/              108 anbieterspezifische HTTP-Executoren
+├── executors/              156 Anbieter-Executor-Module (Executor-Klassen + anbieterspezifische Hilfsfunktionen)
 ├── translator/             Formatkonvertierung (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Stream-Transformer für Responses API ↔ Chat Completions
-├── services/               Über 80 Dienstmodule (Kombinationen, Fallback, Kontingente, Identität, …)
-├── utils/                  Streaming-Hilfsfunktionen, TLS-Client, AWS SigV4, Proxy-Fetch, …
-└── mcp-server/             MCP-Server (3 Transportarten, 33 Bereiche, 110 Tools)
+├── services/               Mehr als 80 Dienstmodule (Kombinationen, Fallback, Kontingente, Identität, …)
+├── utils/                  Streaming-Hilfsfunktionen, TLS-Client, AWS SigV4, Proxy-Abruf, …
+└── mcp-server/             MCP-Server (3 Transporte, 33 Bereiche, 110 Werkzeuge)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Zweck                                                                                   |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Zentrale Chat-Pipeline (Cache, Ratenbegrenzung, Kombinationsrouting, Executor-Dispatch) |
-| `responsesHandler.ts`   | Einstiegspunkt der OpenAI Responses API                                                 |
-| `embeddings.ts`         | Embeddings                                                                              |
-| `imageGeneration.ts`    | Bilderzeugung                                                                           |
-| `audioSpeech.ts`        | Text-zu-Sprache                                                                         |
-| `audioTranscription.ts` | Sprache-zu-Text                                                                         |
-| `videoGeneration.ts`    | Videoerzeugung                                                                          |
-| `musicGeneration.ts`    | Musikerzeugung                                                                          |
-| `rerank.ts`             | Neusortierung                                                                           |
-| `moderations.ts`        | Moderation                                                                              |
-| `search.ts`             | Websuche                                                                                |
-| `sseParser.ts`          | SSE-Ereignisparser                                                                      |
-| `usageExtractor.ts`     | Extrahiert Token-Anzahlen aus Upstream-Streams                                          |
-| `responseSanitizer.ts`  | Entfernt anbieterspezifisches Rauschen                                                  |
-| `responseTranslator.ts` | Bindeglied zwischen Anbieterantwort und Übersetzungsschicht                             |
+| Handler                 | Zweck                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| `chatCore.ts`           | Haupt-Chat-Pipeline (Cache, Ratenbegrenzung, Kombinationsrouting, Executor-Dispatch) |
+| `responsesHandler.ts`   | Einstiegspunkt der OpenAI Responses API                                              |
+| `embeddings.ts`         | Embeddings                                                                           |
+| `imageGeneration.ts`    | Bilderzeugung                                                                        |
+| `audioSpeech.ts`        | Text-zu-Sprache                                                                      |
+| `audioTranscription.ts` | Sprache-zu-Text                                                                      |
+| `videoGeneration.ts`    | Videoerzeugung                                                                       |
+| `musicGeneration.ts`    | Musikerzeugung                                                                       |
+| `rerank.ts`             | Neusortierung                                                                        |
+| `moderations.ts`        | Moderation                                                                           |
+| `search.ts`             | Websuche                                                                             |
+| `sseParser.ts`          | SSE-Ereignisparser                                                                   |
+| `usageExtractor.ts`     | Extrahiert Token-Anzahlen aus Upstream-Streams                                       |
+| `responseSanitizer.ts`  | Entfernt anbieterspezifisches Rauschen                                               |
+| `responseTranslator.ts` | Bindeglied zwischen Anbieterantwort und Übersetzungsschicht                          |
 
 ### 4.2 `open-sse/executors/`
 
-108 Anbieter-Executoren, die jeweils `BaseExecutor` (`base.ts`) erweitern:
+156 Executor-Module auf oberster Ebene (`*.ts` abzüglich `base.ts`, `index.ts` und Tests — diese Anzahl wird von `npm run check:docs-counts` ermittelt). Jede Executor-Klasse erweitert `BaseExecutor` (`base.ts`), direkt oder über `DefaultExecutor` beziehungsweise einen anderen Executor; bei den übrigen Modulen handelt es sich um anbieterspezifische Hilfsfunktionen (Werkzeugschemas, Fetch-/TTS-Adapter, Handler für Besonderheiten). Zu den Executoren gehören:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop` sowie `claudeIdentity.ts`
-(gemeinsame Identitäts-Hilfsfunktion) und `index.ts` (Register).
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, außerdem `claudeIdentity.ts`
+(gemeinsam genutzte Identitäts-Hilfsfunktion) und `index.ts` (Registrierung).
 
 > Hinweis: Hier nicht aufgeführte Anbieter werden von `default.ts` über den generischen
-> OpenAI-kompatiblen Executor bedient. Der vollständige Anbieterkatalog (355 Anbieter) befindet sich in
+> OpenAI-kompatiblen Executor bedient. Der vollständige Anbieterkatalog (375 Anbieter) befindet sich in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
@@ -503,7 +511,7 @@ Hub-and-Spoke-Übersetzung (OpenAI ist der Hub).
   `openai-to-claude`.
 - **9 Hilfsfunktionen** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper` sowie
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, sowie
   Tests für Hilfsfunktionen.
 - **Bild-Hilfsfunktionen** (`translator/image/sizeMapper.ts`).
 - Oberste Ebene: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
@@ -511,15 +519,15 @@ Hub-and-Spoke-Übersetzung (OpenAI ist der Hub).
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — Auf `TransformStream` basierender Konverter für Responses API ↔ Chat
-  Completions (wird von der Catch-all-Route `responses/` verwendet).
+  Completions (wird vom Catch-all der Route `responses/` verwendet).
 
 ### 4.5 `open-sse/services/`
 
 Highlights (vollständige Liste unter `open-sse/services/`):
 
-| Aspekt              | Dateien                                                                                                                                                                                                                                                  |
+| Bereich             | Dateien                                                                                                                                                                                                                                                  |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo-Routing       | `combo.ts` (19 Strategien), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| Combo-Routing       | `combo.ts` (20 Strategien), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
 | Auto-Combo-Engine   | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | Ausfallsicherheit   | `accountFallback.ts` (Abklingzeit + Sperrung), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                     |
 | Kontingente         | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
@@ -530,16 +538,16 @@ Highlights (vollständige Liste unter `open-sse/services/`):
 | Token + Sitzung     | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Stufe / Manifest    | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / Netzwerk       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Batches             | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Stapel              | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | Nutzung             | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 eindeutige Tools**, verdrahtet in `server.ts` (45 kanonische in `schemas/tools.ts` +
-  Speicher-, Skills-, GitHub-Skills-, Pool-, Gamification-, Plugin-, Notion-, Obsidian-,
-  lokale Korpus- und Komprimierungsmodule — die Vereinigungsmenge wird von `countUniqueMcpTools` gezählt).
-- **3 Transporte**: stdio, HTTP Streamable, SSE.
-- **33 Scopes**, die zur Laufzeit erzwungen werden — die Basisliste befindet sich in `src/shared/constants/mcpScopes.ts`; der vollständige Satz ist die Vereinigungsmenge der von jedem Tool-Modul deklarierten Scopes.
+- **110 eindeutige Tools**, eingebunden in `server.ts` (45 kanonische in `schemas/tools.ts` +
+  Module für Speicher, Skills, GitHub-Skills, Pool, Gamification, Plugins, Notion, Obsidian,
+  lokalen Korpus und Komprimierung — Vereinigungsmenge, gezählt durch `countUniqueMcpTools`).
+- **3 Transportarten**: stdio, HTTP Streamable, SSE.
+- **33 Scopes**, die zur Laufzeit durchgesetzt werden — die Basisliste befindet sich in `src/shared/constants/mcpScopes.ts`; die vollständige Menge ist die Vereinigungsmenge der von jedem Tool-Modul deklarierten Scopes.
 - Audit-Tabelle: `mcp_tool_audit` (befüllt durch `audit.ts`).
 - Dateien: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
@@ -549,21 +557,21 @@ Highlights (vollständige Liste unter `open-sse/services/`):
 
 ### 4.7 `open-sse/config/`
 
-Provider-Registrierungen (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), modellspezifische Registrierungen je Format (`audioRegistry.ts`,
+Provider-Registrys (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), modellspezifische Registrys je Format (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-Identitäts-Hilfsfunktionen (`codexIdentity.ts`, `codexInstructions.ts`,
+Hilfsfunktionen für Identitäten (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-Anmeldedaten-Hilfsfunktionen (`credentialLoader.ts`, `codexClient.ts`) und Cloud-
+Hilfsfunktionen für Anmeldedaten (`credentialLoader.ts`, `codexClient.ts`) und Cloud-
 Adapter (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Streaming-Grundelemente und Anbieter-Hilfsfunktionen: `stream.ts`, `streamHandler.ts`,
+Streaming-Primitive und Provider-Hilfsfunktionen: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
@@ -668,7 +676,13 @@ Nach Zweck in 6 Unterordner gegliedert.
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`.
+  `system-info.mjs` sowie die schreibgeschützten Hilfsprogramme zur PR-Überwachung
+  `ci-discriminate.sh` (ordnet die Signaturen fehlgeschlagener Prüfungen eines PRs
+  anhand eines Referenz-PRs oder des Issues für Fehler im Basis-Branch in eigene /
+  übernommene / unbekannte ein) und `audit-worktree.sh`
+  (geänderte Dateien, geschützte Bereiche, entfernte Assertions, Anzahl der
+  Unterdrückungen, verbliebene temporäre tsconfigs, PR-Head im Vergleich zum lokalen
+  HEAD — bevor der PR eines Workers akzeptiert wird).
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,

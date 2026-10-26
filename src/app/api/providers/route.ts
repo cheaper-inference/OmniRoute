@@ -1,5 +1,8 @@
 import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
 import { NextResponse } from "next/server";
+import { getSettings } from "@/lib/db/settings";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
+import { isConnectionAutoProtected } from "@omniroute/open-sse/services/rateLimitManager/autoProtection.ts";
 export const dynamic = "force-dynamic";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
 import {
@@ -21,6 +24,7 @@ import {
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
   providerAllowsOptionalApiKey,
+  NOAUTH_PROVIDERS,
   resolveProviderId,
 } from "@/shared/constants/providers";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
@@ -68,6 +72,8 @@ import {
 } from "@omniroute/open-sse/utils/chatgptWebExecutorAdapter.ts";
 import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
+import { hydrateCompatibleNodeCreation } from "@/lib/providers/compatibleNodeCreation";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 
 function projectCodexAccountPoolWithRoutingQuota(
   connection: Parameters<typeof projectCodexAccountPool>[0],
@@ -139,9 +145,10 @@ export async function GET(request: Request) {
       : {};
 
     // Hide or mask sensitive fields
+    const requestQueueSettings = resolveResilienceSettings(await getSettings()).requestQueue;
     const safeConnections = connections.map((c) => {
       const providerSpecificData = c.providerSpecificData
-        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData)
+        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData, { revealKeys })
         : undefined;
       return {
         ...c,
@@ -150,6 +157,17 @@ export async function GET(request: Request) {
         refreshToken: undefined,
         idToken: undefined,
         providerSpecificData,
+        // #16940: the row mapper drops null columns; keep "never synced" an
+        // explicit null so the dashboard contract does not depend on absence.
+        syncedModelsAt: typeof c.syncedModelsAt === "string" ? c.syncedModelsAt : null,
+        rateLimitAutoProtected: isConnectionAutoProtected(
+          {
+            provider: String(c.provider),
+            isActive: c.isActive === true,
+            rateLimitProtection: c.rateLimitProtection === true,
+          },
+          requestQueueSettings
+        ),
         ...(c.provider === "codex"
           ? {
               codexAccountPool: projectCodexAccountPoolWithRoutingQuota(
@@ -203,6 +221,16 @@ export async function POST(request: Request) {
       allowNoCredential,
     } = validation.data;
     const provider = resolveProviderId(requestedProvider);
+    if (provider === "cloudflare-ai" && Object.hasOwn(body, "accountId")) {
+      return NextResponse.json(
+        {
+          error: sanitizeErrorMessage(
+            "Use providerSpecificData.accountId instead of top-level accountId"
+          ),
+        },
+        { status: 400 }
+      );
+    }
     const retirementResponse =
       rejectRetiredCommonChatGptWebProvider(requestedProvider) ??
       rejectRetiredCommonChatGptWebProvider(provider);
@@ -214,11 +242,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Business validation
+    // Business validation. Own-property only: `in` is also true for Object.prototype
+    // keys ("toString", "constructor"), which are not catalogued providers.
+    const isNoAuthProvider =
+      typeof provider === "string" && Object.hasOwn(NOAUTH_PROVIDERS, provider);
     const isValidProvider =
       isManagedProviderConnectionId(provider) ||
       isOpenAICompatibleProvider(provider) ||
-      isAnthropicCompatibleProvider(provider);
+      isAnthropicCompatibleProvider(provider) ||
+      isNoAuthProvider;
 
     if (!isValidProvider) {
       return NextResponse.json({ error: "Invalid provider" }, { status: 400 });
@@ -285,16 +317,11 @@ export async function POST(request: Request) {
 
       // Allow multiple connections for compatible nodes exactly like first-party providers
 
-      providerSpecificData = {
-        ...(providerSpecificData || {}),
-        prefix: node.prefix,
-        apiType: node.apiType,
-        baseUrl: node.baseUrl,
-        nodeName: node.name,
-        ...(node.chatPath ? { chatPath: node.chatPath } : {}),
-        ...(node.modelsPath ? { modelsPath: node.modelsPath } : {}),
-        ...(node.customHeaders ? { customHeaders: node.customHeaders } : {}),
-      };
+      const hydrated = hydrateCompatibleNodeCreation(provider, node, providerSpecificData, true);
+      if (hydrated.error) {
+        return NextResponse.json({ error: sanitizeErrorMessage(hydrated.error) }, { status: 400 });
+      }
+      providerSpecificData = hydrated.data;
     } else if (isAnthropicCompatibleProvider(provider)) {
       const node: any = await resolveProviderNodeForConnection(provider);
       if (!node) {
@@ -310,15 +337,11 @@ export async function POST(request: Request) {
 
       // Allow multiple connections for compatible nodes exactly like first-party providers
 
-      providerSpecificData = {
-        ...(providerSpecificData || {}),
-        prefix: node.prefix,
-        baseUrl: node.baseUrl,
-        nodeName: node.name,
-        ...(node.chatPath ? { chatPath: node.chatPath } : {}),
-        ...(node.modelsPath ? { modelsPath: node.modelsPath } : {}),
-        ...(node.customHeaders ? { customHeaders: node.customHeaders } : {}),
-      };
+      const hydrated = hydrateCompatibleNodeCreation(provider, node, providerSpecificData, false);
+      if (hydrated.error) {
+        return NextResponse.json({ error: sanitizeErrorMessage(hydrated.error) }, { status: 400 });
+      }
+      providerSpecificData = hydrated.data;
     }
 
     providerSpecificData = normalizeProviderSpecificData(provider, providerSpecificData) || null;
@@ -564,7 +587,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!Array.isArray(body.ids) || body.ids.length === 0) {
+  if (!body || typeof body !== "object" || !Array.isArray(body.ids) || body.ids.length === 0) {
     return NextResponse.json(
       { error: "ids must be a non-empty array of connection IDs" },
       { status: 400 }

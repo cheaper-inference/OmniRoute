@@ -9,7 +9,7 @@
  *
  *   GET https://q.{region}.amazonaws.com/ListAvailableModels?origin=AI_EDITOR
  *   Authorization: Bearer <accessToken>
- *   → { models: [ { modelId, modelName?, tokenLimits?: { maxInputTokens } }, ... ] }
+ *   → { models: [ { modelId, modelName?, tokenLimits?: { maxInputTokens, maxOutputTokens } } ] }
  *
  * This works for both "simple" Builder ID / social logins and AWS IAM Identity
  * Center accounts:
@@ -71,6 +71,7 @@ export type KiroModel = {
     agentic: boolean;
   };
   contextLength?: number;
+  outputTokenLimit?: number;
   rateMultiplier?: number;
   upstreamModelId?: string;
   description?: string;
@@ -193,6 +194,9 @@ function expandKiroModels(data: unknown): KiroModel[] {
     const maxInputTokens = Number(tokenLimits.maxInputTokens);
     const contextLength =
       Number.isFinite(maxInputTokens) && maxInputTokens > 0 ? maxInputTokens : undefined;
+    const maxOutputTokens = Number(tokenLimits.maxOutputTokens);
+    const outputTokenLimit =
+      Number.isFinite(maxOutputTokens) && maxOutputTokens > 0 ? maxOutputTokens : undefined;
     const rateMultiplier = Number(item.rateMultiplier);
     const promptCaching = parsePromptCaching(item.promptCaching);
 
@@ -202,6 +206,7 @@ function expandKiroModels(data: unknown): KiroModel[] {
       expanded.push({
         ...variant,
         ...(contextLength ? { contextLength } : {}),
+        ...(outputTokenLimit ? { outputTokenLimit } : {}),
         rateMultiplier: Number.isFinite(rateMultiplier) ? rateMultiplier : 1.0,
         upstreamModelId: upstreamId,
         description: toNonEmptyString(item.description) || "",

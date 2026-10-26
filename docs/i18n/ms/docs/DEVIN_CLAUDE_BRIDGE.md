@@ -4,62 +4,101 @@
 
 ---
 
-`devin-cli-agentic` membolehkan masa jalan Claude Code sebenar menggunakan titik akhir Messages Anthropic setempat OmniRoute sementara CLI Devin rasmi membekalkan respons model melalui ACP stdio. Ia tidak mengubah suai penyedia Anthropic, Claude OAuth, Claude Web, atau `devin-cli` yang sedia ada.
+`devin-cli-agentic` membolehkan masa jalan Claude Code sebenar menggunakan titik akhir
+Messages Anthropic setempat OmniRoute manakala Devin CLI rasmi membekalkan respons model
+melalui stdio ACP. Ia tidak mengubah suai penyedia Anthropic, Claude OAuth, Claude Web,
+atau `devin-cli` yang sedia ada.
 
-> **Status semasa: Claude Code disematkan pada `2.1.258`; pengesahan luar talian dan langsung kali terakhir direkodkan
-> pada `2.1.220`.** Sematan `2.1.220` melengkapkan tiga senario terasing melalui CLI Devin
-> `3000.2.17` dan model `swe-1-7-lightning`; pelaksanaan langsung terakhir itu membuktikan giliran `Read`,
-> `Edit`, dan `Bash` yang dikawal oleh klien, hasil `npm test` yang berjaya, penemuan perintah dan kemahiran
-> projek, penghalaan khusus Devin, serta sifar trafik keluar Claude. Sematan tersebut kemudiannya dinaikkan kepada `2.1.258`
-> (generasi CLI yang ditiru oleh identiti Claude OmniRoute, dan baris pertama yang menyediakan
-> peringkat Fable 5.1 secara natif). Pada sematan baharu, lapisan pemasangan dan `claude --version` telah
-> disahkan pada imej asas yang disematkan, manakala suite unit jambatan, `compose config` dan
-> bukti pengasingan statik berjaya — tetapi senario olok-olok luar talian dan suite tiga senario
-> langsung belum dijalankan semula. Jalankan semula semuanya (lihat "Mengemas kini alat yang disematkan") sebelum bergantung pada
+Untuk panggilan alat milik klien, halakan melalui `devin-cli-agentic` (alias `dva`), iaitu
+penyedia berkeupayaan alat berformat Claude. Pelaksana ACP `devin-cli` (`dv`) legasi hanya
+menyokong teks: ia menjalankan peringkas tanpa alat Devin dan tidak dapat mengembalikan
+panggilan alat. Metadata modelnya ditandakan sewajarnya supaya penghalaan kombo yang
+memerlukan alat akan mengelakkannya.
+
+> **Status semasa: Claude Code `2.1.258` disematkan; pengesahan luar talian dan langsung
+> kali terakhir direkodkan pada `2.1.220`.** Sematan `2.1.220` melengkapkan tiga senario
+> terpencil melalui Devin CLI `3000.2.17` dan model `swe-1-7-lightning`; pelaksanaan langsung
+> terakhir itu membuktikan giliran `Read`, `Edit`, dan `Bash` milik klien, hasil `npm test`
+> yang berjaya, penemuan perintah dan kemahiran projek, penghalaan Devin sahaja, serta sifar
+> trafik keluar Claude. Sematan tersebut kemudiannya dinaikkan kepada `2.1.258` (generasi
+> CLI yang ditiru oleh identiti Claude OmniRoute dan keluaran pertama yang menyediakan
+> peringkat Fable 5.1 secara natif). Pada sematan baharu, lapisan pemasangan dan
+> `claude --version` telah disahkan pada imej asas yang disematkan, dan suite unit jambatan,
+> `compose config` serta bukti pengasingan statik semuanya lulus — tetapi senario olok-olok
+> luar talian dan suite tiga senario langsung masih belum dijalankan semula. Jalankan
+> semula semuanya (lihat "Mengemas kini alat yang disematkan") sebelum bergantung pada
 > jambatan dengan sematan ini.
 
 ## Seni bina
 
 ```text
-Claude Code 2.1.258 (bekas Linux bukan root yang terasing)
+Claude Code 2.1.258 (bekas Linux bukan root yang terpencil)
   -> http://omniroute:20128/v1/messages
-  -> devin-cli-agentic (format Claude, penyedia tanpa pengesahan)
-  -> devin acp --agent-type summarizer (ACP stdio rasmi, tanpa alat Devin)
-  -> Akaun Devin dalam volum devin-auth khusus
+  -> devin-cli-agentic (berformat Claude, penyedia tanpa pengesahan)
+  -> devin acp --agent-type summarizer (stdio ACP rasmi, tanpa alat Devin)
+  -> akaun Devin dalam volum devin-auth khusus
 ```
 
-Ejen ACP lalai CLI rasmi boleh melaksanakan alatnya sendiri, maka jambatan ini tidak menggunakannya. Ia memulakan ejen ACP `summarizer` tetap, yang mod CLI rasminya tidak mempunyai alat, dan merangka permintaan Anthropic bersiri sebagai jejak pelaksanaan. Apabila tindakan lain yang dikawal oleh Claude diperlukan, respons mesti mengandungi tepat satu sampul alat klien. Sebarang `tool_call` atau `tool_call_update` ACP ditolak sebelum sesuatu respons boleh dilaporkan sebagai berjaya.
+Agen ACP lalai CLI rasmi boleh melaksanakan alatnya sendiri, maka jambatan ini tidak
+menggunakannya. Ia memulakan agen ACP `summarizer` yang ditetapkan, yang mod CLI rasminya
+tidak mempunyai alat, dan membingkaikan permintaan Anthropic bersiri sebagai jejak
+pelaksanaan. Apabila tindakan milik Claude yang lain diperlukan, respons mestilah
+mengandungi tepat satu sampul alat klien. Sebarang `tool_call` atau `tool_call_update` ACP
+ditolak sebelum respons boleh dilaporkan sebagai berjaya.
 
-Penyiri dalam `open-sse/executors/devin-agentic/serializer.ts` mengekalkan `system`, `text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice`, dan alat yang dibekalkan oleh Claude Code. Imej dan blok yang tidak diketahui gagal secara eksplisit. Hasil alat yang besar menggunakan penanda pemangkasan yang boleh dilihat.
+Pensiri dalam `open-sse/executors/devin-agentic/serializer.ts` mengekalkan `system`,
+`text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice`, dan alat
+yang dibekalkan oleh Claude Code. Imej dan blok yang tidak diketahui akan gagal secara
+jelas. Hasil alat yang besar menggunakan penanda pemangkasan yang kelihatan.
 
-Penghurai menerima satu sampul `<tool>{...}</tool>` kendiri bagi setiap giliran model. Ia menyemak nama terhadap senarai alat permintaan, mengesahkan argumen terhadap JSON Schema alat tersebut, menolak gabungan naratif/tindakan, dan membenarkan satu pembaikan terhad. Claude Code kemudiannya melaksanakan `tool_use` Anthropic yang terhasil secara setempat dan menghantar semula `tool_result` melalui OmniRoute.
+Penghurai menerima satu sampul kendiri `<tool>{...}</tool>` bagi setiap giliran model. Ia
+menyemak nama terhadap senarai alat permintaan, mengesahkan argumen berdasarkan Skema JSON
+alat tersebut, menolak campuran naratif/tindakan, dan membenarkan satu pembaikan terhad.
+Claude Code kemudian melaksanakan `tool_use` Anthropic yang terhasil secara setempat dan
+menghantar semula `tool_result` melalui OmniRoute.
+
+## Penghalaan automatik
+
+Penyedia ini layak berada dalam kumpulan calon `auto/*` OmniRoute apabila ia tidak disekat.
+Kelayakan calon tidak menjamin pemilihan: strategi penghalaan kombo (contohnya,
+terakhir-diketahui-baik) mungkin mengutamakan penyedia lain. Gunakan `dva/<model>` atau
+kombo yang mengutamakan Devin apabila anda memerlukan setiap permintaan melalui Devin.
 
 ## Pengasingan dan model ancaman
 
-Pemasangan, akaun dan konfigurasi Claude hos berada di luar skop dan dianggap sebagai terlarang. Perkhidmatan Compose:
+Pemasangan, akaun dan konfigurasi Claude pada hos berada di luar skop dan dianggap sebagai
+dilarang. Perkhidmatan Compose:
 
-- berjalan sebagai UID/GID `10001:10001`, dengan sistem fail akar baca sahaja, keupayaan yang digugurkan dan
+- dijalankan sebagai UID/GID `10001:10001`, dengan sistem fail akar baca sahaja, keupayaan yang digugurkan dan
   `no-new-privileges`;
-- menggunakan `/home/bridge` persendirian, volum konfigurasi Claude khusus, data OmniRoute terasing
-  dan volum `devin-auth` berasingan;
-- melekapkan hanya ruang kerja/bukti `.sandbox` pakai buang;
-- tidak melekapkan direktori rumah hos, Keychain, SSH, kelayakan awan atau soket Docker;
-- membina persekitaran eksplisit dan mengalih keluar pemboleh ubah API/OAuth/penghalaan Anthropic;
-- mengarahkan inferens Claude Code hanya ke `http://omniroute:20128` dengan kunci setempat sahaja.
+- menggunakan `/home/bridge` persendirian, volum konfigurasi Claude khusus, data OmniRoute yang diasingkan
+  dan volum `devin-auth` yang berasingan;
+- hanya melekapkan ruang kerja/bukti `.sandbox` pakai buang;
+- tidak melekapkan direktori rumah hos, Keychain, kelayakan SSH, kelayakan awan atau soket Docker;
+- membina persekitaran secara eksplisit dan mengalih keluar pemboleh ubah API/OAuth/penghalaan Anthropic;
+- menghalakan inferens Claude Code hanya ke `http://omniroute:20128` dengan kunci setempat sahaja.
 
-Profil luar talian menggunakan rangkaian dalaman. Dalam profil langsung, OmniRoute mencapai titik akhir Devin rasmi hanya melalui `network-guard`; destinasi yang tidak berkaitan dinafikan. Claude Code mempunyai pengawal trafik keluar tolak-semua yang berasingan dan hanya boleh mencapai perkhidmatan OmniRoute setempat melalui `NO_PROXY`. Fail audit pengawal hanya dilekapkan oleh proses pengawal masing-masing. Skrip mengesahkan pemilikan fail, mod, bilangan pautan dan setiap keputusan sebelum mengeksport bukti tanpa token.
+Profil luar talian menggunakan rangkaian dalaman. Dalam profil langsung, OmniRoute mencapai
+titik akhir rasmi Devin hanya melalui `network-guard`; destinasi yang tidak berkaitan dinafikan.
+Claude Code mempunyai pengawal egress tolak-semua yang berasingan dan hanya boleh mencapai perkhidmatan
+OmniRoute setempat melalui `NO_PROXY`. Fail audit pengawal hanya dilekapkan oleh proses pengawal
+masing-masing. Skrip mengesahkan pemilikan fail, mod, bilangan pautan dan setiap keputusan sebelum mengeksport
+bukti tanpa token.
 
-Jalankan bukti pengasingan secara bebas:
+Jalankan bukti pengasingan secara berasingan:
 
 ```bash
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Ia mengesahkan topologi, lekapan bernama, tetapan bukan root/baca sahaja, penghalaan setempat eksplisit, ketiadaan pemboleh ubah persekitaran sensitif, ketiadaan soket Docker, akses yang disekat kepada `api.anthropic.com` dan `claude.ai`, pemilihan penyedia khusus Devin, serta kegagalan eksplisit apabila bahagian belakang ACP tidak tersedia.
+Ia mengesahkan topologi, pelekap bernama, tetapan bukan akar/baca sahaja, penghalaan setempat yang eksplisit,
+ketiadaan pemboleh ubah persekitaran sensitif, ketiadaan soket Docker, akses yang disekat ke
+`api.anthropic.com` dan `claude.ai`, pemilihan penyedia Devin sahaja serta kegagalan eksplisit apabila
+bahagian belakang ACP tidak tersedia.
 
 ## Persediaan kali pertama dan penggunaan biasa
 
-Bina imej yang dipinkan:
+Bina imej yang ditetapkan versinya:
 
 ```bash
 ./scripts/devin-bridge/build
@@ -72,8 +111,8 @@ ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ```
 
 Perintah log masuk menggunakan aliran token manual rasmi yang ditujukan untuk persekitaran
-jauh/bekas. Nilai tersebut dimasukkan terus ke dalam gesaan CLI; ia tidak dihantar sebagai
-argumen proses, ditulis ke Git, atau disalin daripada hos.
+jauh/bekas. Nilai dimasukkan terus ke dalam gesaan CLI; ia tidak dihantar sebagai
+argumen proses, ditulis ke Git atau disalin daripada hos.
 
 Lancarkan masa jalan Claude Code yang diasingkan:
 
@@ -82,13 +121,13 @@ Lancarkan masa jalan Claude Code yang diasingkan:
 ```
 
 `launch` menyemak semula pengasingan, pengesahan Devin dan penemuan model sebelum memulakan
-Claude Code dalam bekas. Ia tidak pernah menjalankan boleh laku Claude pada hos. Alias model boleh
+Claude Code di dalam bekas. Ia tidak pernah menjalankan boleh laku Claude pada hos. Alias model boleh
 ditetapkan dalam `.env.devin-bridge`; setiap nilai yang dikonfigurasikan mesti mengekalkan
 awalan `devin-cli-agentic/`.
 
 ## Perintah pengesahan
 
-Laluan luar talian yang boleh dihasilkan semula tidak memerlukan akaun Devin dan tidak mempunyai akses Internet semasa masa jalan:
+Laluan luar talian yang boleh dihasilkan semula tidak memerlukan akaun Devin dan tidak mempunyai Internet semasa masa jalan:
 
 ```bash
 ./scripts/devin-bridge/test-unit
@@ -97,34 +136,34 @@ Laluan luar talian yang boleh dihasilkan semula tidak memerlukan akaun Devin dan
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Laluan langsung pilihan yang disahkan ialah:
+Laluan langsung yang memerlukan pengesahan dan penyertaan pilihan ialah:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/test-live-devin
 ```
 
-Pelaksana langsung menunggu antara senario untuk mengelakkan pembukaan sesi ACP secara serentak dan
+Pelaksana langsung menunggu antara senario untuk mengelakkan pembukaan sesi ACP secara bertubi-tubi dan
 mengesahkan peristiwa strim Claude berstruktur dan bukannya mempercayai dakwaan berbentuk teks. Tiga
 senarionya membuktikan:
 
 1. pembacaan projek secara langsung dan analisis kecacatan;
 2. `Edit` sebenar, `Bash` `npm test` milik klien dan hasil terminal;
 3. `/bridge-check` serta penemuan `bridge-proof`, pembacaan projek, satu lagi
-   `npm test` milik klien yang berjaya dan penyelesaian tanpa kerja tertangguh.
+   `npm test` milik klien yang berjaya dan penyelesaian tanpa kerja tertunda.
 
-Get terakhir turut menyemak audit rangkaian Devin dan memerlukan audit egress Claude untuk
+Gerbang akhir turut memeriksa audit rangkaian Devin dan menghendaki audit egress Claude
 kekal kosong.
 
 ## Mengemas kini alat yang dipinkan
 
-Imej tersebut mengepin Node, Claude Code dan Devin CLI dalam
+Imej tersebut meminkan Node, Claude Code dan Devin CLI dalam
 `docker/devin-bridge/Dockerfile`. Untuk mengemas kini:
 
 1. ubah versi eksplisit;
 2. gantikan kedua-dua jumlah semak arkib Devin khusus seni bina dengan nilai untuk artifak
    rasmi;
 3. bina semula dan jalankan setiap perintah pengesahan luar talian;
-4. sahkan versi dalam imej;
+4. sahkan versi di dalam imej;
 5. jalankan semula suit langsung tiga senario yang disahkan.
 
 Jangan pasang mana-mana CLI secara global pada hos atau gantikan pengesahan jumlah semak dengan
@@ -133,20 +172,20 @@ muat turun yang tidak disahkan.
 ## Diagnosis dan pembersihan
 
 - `docker compose -f docker/devin-bridge/compose.yml --profile offline logs omniroute`
-  menunjukkan penghalaan setempat dan ralat pelaksana yang telah dibersihkan.
-- `.sandbox/evidence/mock-acp.jsonl` merekodkan tindakan ACP olok-olok yang deterministik.
-- `.sandbox/evidence/claude-stream.jsonl` merekodkan pelaksanaan luar talian Claude Code yang sebenar.
-- `.sandbox/evidence/live-*.jsonl` merekodkan tiga strim langsung yang disahkan.
+  menunjukkan penghalaan setempat dan ralat pelaksana yang telah dinyahpekakan.
+- `.sandbox/evidence/mock-acp.jsonl` merekodkan tindakan ACP olok-olok yang berketentuan.
+- `.sandbox/evidence/claude-stream.jsonl` merekodkan larian luar talian Claude Code yang sebenar.
+- `.sandbox/evidence/live-*.jsonl` merekodkan tiga strim langsung yang telah disahkan.
 - `.sandbox/evidence/egress.jsonl` dan `.sandbox/evidence/claude-egress.jsonl` ialah salinan audit
-  pengadang yang telah disahkan dan bebas token.
+  kawalan yang telah disahkan dan bebas token.
 
-Hentikan bekas dan rangkaian yang dimiliki sambil mengekalkan volum log masuk/konfigurasi:
+Hentikan bekas dan rangkaian milik sistem sambil mengekalkan volum log masuk/konfigurasi:
 
 ```bash
 ./scripts/devin-bridge/clean
 ```
 
-Alih keluar keseluruhan persekitaran milik perantara, termasuk volum bernama:
+Alih keluar keseluruhan persekitaran milik bridge, termasuk volum bernama:
 
 ```bash
 ./scripts/devin-bridge/clean --all
@@ -154,15 +193,14 @@ Alih keluar keseluruhan persekitaran milik perantara, termasuk volum bernama:
 
 ## Had
 
-- Jambatan ini bergantung pada peranan `summarizer` tanpa alat yang tetap kerana Devin CLI `3000.2.17`
-  tidak menyediakan ejen ACP neutral tanpa alat. Penyesuai mengimbangi respons perantaraan
-  berbentuk ringkasan, tetapi satu pembaikan terbatas masih boleh gagal secara eksplisit.
-- Panggilan ACP langsung boleh mengembalikan respons sementara `502`/`504`. Abah ujian menjarakkan senario;
-  kegagalan berterusan kekal gagal-tertutup dan tidak pernah memilih penyedia lain.
-- Konteks ACP dibina semula daripada setiap permintaan Anthropic; tiada perkaitan
-  proses/sesi.
+- Bridge bergantung pada peranan `summarizer` tanpa alat yang tetap kerana Devin CLI `3000.2.17`
+  tidak menyediakan ejen ACP tanpa alat yang neutral. Penyesuai mengimbangi respons perantaraan
+  berbentuk ringkasan, tetapi satu pembaikan terhad masih boleh gagal secara eksplisit.
+- Panggilan ACP langsung boleh mengembalikan respons `502`/`504` sementara. Abah ujian menjarakkan
+  senario; kegagalan berterusan kekal gagal-tertutup dan tidak pernah memilih penyedia lain.
+- Konteks ACP dibina semula daripada setiap permintaan Anthropic; tiada perkaitan proses/sesi.
 - Satu panggilan alat disokong bagi setiap respons model; panggilan selari ditolak.
-- Imej secara eksplisit tidak disokong. Penglihatan, output pemikiran, kawalan usaha, dan tetingkap
+- Imej secara eksplisit tidak disokong. Penglihatan, output pemikiran, kawalan usaha dan tetingkap
   konteks 1M tidak diiklankan.
-- SSE menggunakan peristiwa kitar hayat Anthropic yang sah tetapi dipancarkan selepas giliran ACP terbatas
-  dikumpulkan; ketulan ACP tidak dimajukan secara berperingkat.
+- SSE menggunakan peristiwa kitar hayat Anthropic yang sah tetapi dipancarkan selepas giliran ACP
+  terhad dikumpulkan; ketulan ACP tidak dimajukan secara berperingkat.

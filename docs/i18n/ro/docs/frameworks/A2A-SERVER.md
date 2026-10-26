@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Pentru `smart-routing`, `metadata.combo` suprascrie în mod explicit
+`metadata.model` pentru cererea către gateway; acesta este trimis drept câmpul `model` real,
+nu drept un câmp JSON `x-combo` ignorat. Autorizarea obișnuită a gateway-ului, bazată pe cheia API și
+specifică fiecărei destinații, se aplică în continuare. Un combo nevalid sau gol este respins.
+
+Rezultatul expune `requested_combo` (intenția apelantului), `dispatched_model`
+(cererea efectivă către gateway), `response_model` (răspunsul gateway-ului) și
+`confirmed_combo`. Ultimul câmp este `null`, cu excepția cazului în care gateway-ul
+identifică în mod explicit un combo. Jurnalele de decizie A2A atribuie execuția numai unui
+combo confirmat, păstrând o cerere neconfirmată drept `requestedCombo`.
+
 **Răspuns:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Transmitere în flux prin SSE
+### `message/stream` — Streaming SSE
 
-La fel ca `message/send`, dar returnează evenimente trimise de server pentru transmiterea în flux în timp real.
+La fel ca `message/send`, dar returnează evenimente trimise de server pentru streaming în timp real.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Abilități disponibile
+## Skill-uri disponibile
 
-OmniRoute expune 6 abilități A2A conectate în `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Fiecare modul de abilitate se află în `src/lib/a2a/skills/`.
+OmniRoute expune 6 skill-uri A2A conectate în `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Fiecare modul de skill se află în `src/lib/a2a/skills/`.
 
-| Abilitate                   | ID                   | Descriere                                                                                                                                                                            | Etichete                        | Exemple                                              |
-| :-------------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :--------------------------------------------------- |
-| Rutare inteligentă          | `smart-routing`      | Rutează un prompt prin furnizorul/combinația optimă, folosind motorul de combinații și sistemul de evaluare OmniRoute                                                                | rutare, furnizori               | „Rutează acest prompt prin cel mai bun model”        |
-| Gestionarea cotelor         | `quota-management`   | Raportează starea cotei pentru fiecare furnizor și ajută apelanții să decidă când să limiteze traficul/schimbe furnizorul                                                            | cote, furnizori                 | „Verifică cota pentru anthropic”                     |
-| Descoperirea furnizorilor   | `provider-discovery` | Listează furnizorii instalați, împreună cu funcționalitățile, opțiunile de nivel gratuit și starea OAuth                                                                             | furnizori, descoperire          | „Ce furnizori sunt disponibili?”                     |
-| Analiza costurilor          | `cost-analysis`      | Estimează costul unei solicitări/conversații pe baza catalogului și a utilizării recente                                                                                             | cost, utilizare                 | „Estimează costul acestei conversații”               |
-| Raport de sănătate          | `health-report`      | Agregă starea întrerupătorului de circuit, a perioadei de așteptare și a blocării pentru fiecare furnizor                                                                            | sănătate, reziliență            | „Afișează starea de sănătate a tuturor furnizorilor” |
-| Listarea funcționalităților | `list-capabilities`  | Returnează catalogul complet cu 45 de intrări Agent Skills (23 API + 21 CLI + 1 configurație) sub forma unui tabel markdown, cu URL-uri SKILL.md brute pentru injectarea contextului | catalog, descoperire, abilități | „Listează toate funcționalitățile OmniRoute”         |
+| Skill              | ID                   | Descriere                                                                                                                                                                    | Etichete                   | Exemple                                              |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------- |
+| Smart Routing      | `smart-routing`      | Direcționează un prompt prin providerul/combinația optimă folosind motorul de combo-uri și scorarea OmniRoute                                                                | routing, providers         | "Direcționează acest prompt prin cel mai bun model"  |
+| Quota Management   | `quota-management`   | Raportează starea cotelor per provider, ajutând apelanții să decidă când să limiteze/comute                                                                                  | quota, providers           | "Verifică cota pentru anthropic"                     |
+| Provider Discovery | `provider-discovery` | Listează providerii instalați cu capabilități, indicatori de nivel gratuit și stare OAuth                                                                                    | providers, discovery       | "Ce provideri sunt disponibili?"                     |
+| Cost Analysis      | `cost-analysis`      | Estimează costul unei cereri/conversații pe baza catalogului și al utilizării recente                                                                                        | cost, usage                | "Estimează costul acestei conversații"               |
+| Health Report      | `health-report`      | Agregă starea circuit breaker, cooldown și lockout per provider                                                                                                              | health, resilience         | "Afișează starea de sănătate a tuturor providerilor" |
+| List Capabilities  | `list-capabilities`  | Returnează catalogul complet de 45 de intrări Agent Skills (23 API + 21 CLI + 1 config) sub formă de tabel markdown cu URL-uri raw către SKILL.md pentru injecția de context | catalog, discovery, skills | "Listează toate capabilitățile OmniRoute"            |
 
-> Agent Card trebuie menținut aliniat cu catalogul activ de 352 de furnizori; numărul furnizorilor și metadatele privind accesul gratuit/fără autentificare provin din registrul de execuție.
+> Cardul de agent ar trebui menținut aliniat cu catalogul live de 375 de provideri; numărul de provideri și metadatele free/no-auth provin din registrul de runtime.
 
-### Detalii despre abilitatea `list-capabilities`
+### Detalii despre skill-ul `list-capabilities`
 
-Abilitatea `list-capabilities` este deosebit de utilă pentru agenții externi care trebuie să descopere ce expune OmniRoute înainte de a trimite apeluri API. Aceasta returnează un artefact structurat sub forma unui tabel markdown:
+Skill-ul `list-capabilities` este deosebit de util pentru agenții externi care trebuie să descopere ce expune OmniRoute înainte de a trimite apeluri API. Returnează un artefact sub formă de tabel markdown structurat:
 
 ```
-| ID | Nume | Categorie | Zonă | Puncte finale/Comenzi | URL brut |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentificare și sesiuni | api | autentificare | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Fiecare rând include coloana `rawUrl`, astfel încât agenții să poată prelua imediat fișierul SKILL.md complet. Câmpul `metadata.totalSkills` reflectă dimensiunea catalogului (45 în prezent). Implementare: `src/lib/a2a/skills/listCapabilities.ts`. Consultați și [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Fiecare rând include coloana `rawUrl`, astfel încât agenții pot prelua imediat SKILL.md complet. Câmpul `metadata.totalSkills` reflectă dimensiunea catalogului (45 în prezent). Implementare: `src/lib/a2a/skills/listCapabilities.ts`. Vezi și [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

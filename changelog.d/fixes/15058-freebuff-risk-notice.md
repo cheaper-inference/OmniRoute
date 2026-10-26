@@ -1,1 +1,0 @@
-- fix(providers): Freebuff now shows an official-client-only risk notice (free mode is suspended when used via proxies) and drops the "automated harvester" wording (#15058)

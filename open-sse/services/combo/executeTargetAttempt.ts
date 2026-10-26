@@ -19,11 +19,13 @@ import {
 } from "../accountFallback.ts";
 import {
   errorResponse,
+  isContentPolicyRefusalComboStopEnabled,
   logRetryHintUnreadable,
   parseRetryAfterHeader,
   readProseRetryAfter,
 } from "../../utils/error.ts";
 import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
+import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { recordComboRequest, getComboMetrics } from "../comboMetrics.ts";
 import {
   expandComboSystemPromptIfPresent,
@@ -51,7 +53,7 @@ import { recordStickyBinding } from "./sessionStickiness.ts";
 import { recordStickyWeightedSuccess } from "./rrState.ts";
 import { resolveReasoningBufferedMaxTokens, toPositiveInteger } from "../reasoningTokenBuffer.ts";
 import { parseModel } from "../model.ts";
-import { getNextFamilyFallback } from "../modelFamilyFallback.ts";
+import { getNextComboFamilyFallback } from "../modelFamilyFallbackPolicy.ts";
 import type { ProviderProfile } from "../accountFallback.ts";
 import {
   MAX_FALLBACK_WAIT_MS,
@@ -62,8 +64,6 @@ import {
   isProviderCircuitOpenResult,
   isComboRequestScopedFailure as isScopedFailure,
   shouldRecordModelLockoutForComboFailure,
-  isStreamReadinessFailureErrorBody,
-  isStreamEarlyEofErrorBody,
   isLocalKeyPolicyBreachErrorBody,
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
@@ -100,22 +100,25 @@ import {
   stopProtectedPriorityTarget,
 } from "./executeTargetClassify.ts";
 import type { CompressionMode } from "../compression/types.ts";
-import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
-import type { ComboErrorBody, ComboRetryAfter, ResolvedComboTarget } from "./types.ts";
+import type { ExecuteTargetResult, ExecuteTargetAttemptOptions } from "./attemptLoopTypes.ts";
+import type { ComboErrorBody, ComboRetryAfter } from "./types.ts";
 import type { ResponseValidationConfig } from "./responseValidation.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
+import { getStrategyTraits } from "./strategyRegistry.ts";
+import {
+  handleEmptyContentRetry,
+  isEmptyContentResponse,
+  isEarlyEofResponse,
+  isReadinessFailure,
+} from "./emptyContentRetry.ts";
+import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
 
-export async function executeTargetAttempt(opts: {
-  index: number;
-  state: AttemptLoopState;
-  deps: AttemptLoopDeps;
-  targetForAttempt: ResolvedComboTarget;
-  profile: unknown;
-  protectedPriorityTarget: boolean;
-}): Promise<ExecuteTargetResult> {
+export async function executeTargetAttempt(
+  opts: ExecuteTargetAttemptOptions
+): Promise<ExecuteTargetResult> {
   const { index: i, state, deps, targetForAttempt, protectedPriorityTarget } = opts;
   const profile = opts.profile as ProviderProfile | undefined;
   const target = state.orderedTargets[i];
@@ -140,6 +143,10 @@ export async function executeTargetAttempt(opts: {
     });
 
   const familyTried = new Set<string>();
+  // #16438 opt-in (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): an empty_content turn spends
+  // this loop's existing retry on a sibling connection with no lockout. Off = release path.
+  const emptyStreamSiblingRecovery = isEmptyStreamSiblingRecoveryEnabled();
+  let emptyTurnConnectionId: string | null = null;
   // Retry loop for transient errors
   for (let retry = 0; retry <= deps.maxRetries; retry++) {
     // Fix #1681: Bail out immediately if the client has disconnected
@@ -221,7 +228,7 @@ export async function executeTargetAttempt(opts: {
       );
       if (persistedRetrySkip) {
         deps.log.info("COMBO", persistedRetrySkip);
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         return null;
       }
     }
@@ -346,6 +353,7 @@ export async function executeTargetAttempt(opts: {
     }
     const result = await deps.handleSingleModelWithTimeout(attemptBody, modelStr, {
       ...targetForAttempt,
+      emptyTurnConnectionId,
       effectiveComboStrategy: deps.strategy,
       failoverBeforeRetry: deps.config.failoverBeforeRetry,
     });
@@ -408,11 +416,16 @@ export async function executeTargetAttempt(opts: {
           error: quality.reason || "upstream response failed quality validation",
           kind: qualityFailure.kind,
         });
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         state.requestScopedFailureSeen ||= qualityFailure.requestScoped;
         if (qualityFailure.requestScoped)
           state.requestScopedRejectedModelKeys?.add(requestScopedReplayKey(modelStr));
-        if (provider && rawModel && !qualityFailure.requestScoped) {
+        if (
+          provider &&
+          rawModel &&
+          !qualityFailure.requestScoped &&
+          !(emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent)
+        ) {
           const mlSettings = resolveModelLockoutSettings(deps.settings);
           if (mlSettings.enabled && mlSettings.errorCodes.includes(qualityFailure.status)) {
             recordModelLockoutFailure(
@@ -439,15 +452,27 @@ export async function executeTargetAttempt(opts: {
           latencyMs: Date.now() - deps.startTime,
         });
         state.observeFailure(false, target.executionKey);
-        if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) continue;
+        if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) {
+          if (emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent) {
+            emptyTurnConnectionId = effectiveConnectionId || null;
+          }
+          continue;
+        }
+        // #15917 (opt-in): return a content-policy refusal instead of routing around it.
+        if (
+          isContentPolicyRefusal(quality.upstreamFailure) &&
+          isContentPolicyRefusalComboStopEnabled()
+        )
+          return qualityValidationFailure(quality);
         familyTried.add(modelStr);
-        // A request-scoped refusal (invalid request, context overflow) is a property of
-        // the request, not of the effort tier — replaying it on a sibling alias of the
-        // same model just repeats the refusal, so let the combo advance instead.
-        const familyNext =
-          provider && provider !== "unknown" && !quality.upstreamFailure?.requestScoped
-            ? getNextFamilyFallback(modelStr, familyTried, provider)
-            : null;
+        const familyNext = await getNextComboFamilyFallback({
+          model: modelStr,
+          tried: familyTried,
+          provider,
+          connectionId: effectiveConnectionId,
+          headers: deps.requestHeaders,
+          requestScoped: quality.upstreamFailure?.requestScoped,
+        });
         if (familyNext && familyNext !== modelStr) {
           deps.log.info("COMBO", `Quality fail ${modelStr} -> family sibling ${familyNext}`);
           modelStr = familyNext;
@@ -519,11 +544,19 @@ export async function executeTargetAttempt(opts: {
 
       // Reset cooldown on success
       if (provider && provider !== "unknown") {
-        recordProviderSuccess(provider, effectiveConnectionId || undefined, {
-          providerProbeSettled: isProviderProbeResponse(result),
-        });
+        recordProviderSuccess(
+          provider,
+          effectiveConnectionId || undefined,
+          {
+            providerProbeSettled: isProviderProbeResponse(result),
+          },
+          deps.log
+        );
       }
-      if (deps.strategy === "weighted" && (deps.stickyWeightedLimit ?? 0) > 1) {
+      if (
+        getStrategyTraits(deps.strategy).stickyPin === "weighted" &&
+        (deps.stickyWeightedLimit ?? 0) > 1
+      ) {
         const stickySuccessKey = deps.getWeightedStepKeyForTarget?.(target);
         if (stickySuccessKey) {
           recordStickyWeightedSuccess(
@@ -623,7 +656,7 @@ export async function executeTargetAttempt(opts: {
       // combo.ts decides whether a successful turn should generate a handoff,
       // while chat.ts injects the handoff after the real connectionId is resolved.
       if (
-        deps.strategy === "context-relay" &&
+        getStrategyTraits(deps.strategy).contextRelay &&
         deps.relayOptions?.sessionId &&
         deps.relayConfig &&
         (deps.relayConfig.handoffProviders ?? []).includes(provider) &&
@@ -757,17 +790,28 @@ export async function executeTargetAttempt(opts: {
       state.lastError = refusal.error;
       state.lastStatus = refusal.status;
       state.comboErrors.push(refusal.outcome);
-      if (i > 0) state.fallbackCount++;
+      state.fallbackCount++;
       return null;
     }
 
-    const isStreamReadinessFailure =
-      (result.status === 502 || result.status === 504) &&
-      isStreamReadinessFailureErrorBody(errorBody);
-    // An early EOF is an upstream failure, not a readiness probe — the breaker must
-    // see it even though the transient-retry path below treats both codes alike.
-    const isStreamEarlyEof =
-      (result.status === 502 || result.status === 504) && isStreamEarlyEofErrorBody(errorBody);
+    if (emptyStreamSiblingRecovery && isEmptyContentResponse(result, errorBody)) {
+      const emptyContentRetry = handleEmptyContentRetry({
+        response: result,
+        errorText,
+        modelStr,
+        retry,
+        protectedPriorityTarget,
+        target,
+        state,
+        deps,
+      });
+      emptyTurnConnectionId = emptyContentRetry.connectionId;
+      if (emptyContentRetry.shouldRetry === true) continue;
+      return emptyContentRetry.result;
+    }
+
+    const isStreamReadinessFailure = isReadinessFailure(result, errorBody);
+    const isStreamEarlyEof = isEarlyEofResponse(result, errorBody);
 
     // FIX 5: a local per-API-key policy 429 (token limit, budget) must not cool shared accounts.
     const isTokenLimitBreach = result.status === 429 && isLocalKeyPolicyBreachErrorBody(errorBody);
@@ -803,7 +847,8 @@ export async function executeTargetAttempt(opts: {
         target: toRecordedTarget(target),
       });
       state.recordedAttempts++;
-      if (i > 0) state.fallbackCount++;
+      // Terminal stop — the combo does not advance to another target, so no
+      // fallback was attempted here whatever the index of the failing target is.
       return { ok: false, response: result };
     }
 
@@ -842,7 +887,14 @@ export async function executeTargetAttempt(opts: {
     // let that case fall through, so only short-circuit when every remaining
     // target is the same model (the "retrying will fail identically" premise
     // only holds within a homogeneous same-model pool).
-    const remainderHomogeneous = remainderIsHomogeneous(state.orderedTargets, i, modelStr);
+    // #15917: with CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED on, a content-policy refusal
+    // stops the combo even with different models remaining.
+    const remainderHomogeneous =
+      remainderIsHomogeneous(state.orderedTargets, i, modelStr) &&
+      // Earlier heterogeneous attempts can still be pending in a hedge.
+      // Preserve suffix short-circuiting for serial dispatch.
+      (!(deps.config.zeroLatencyOptimizationsEnabled && deps.config.hedging) ||
+        state.orderedTargets.every((candidate) => candidate.modelStr === modelStr));
     const isInputBoundFailure = shouldAbortOnInputBoundFailure({
       structuredError,
       remainderIsHomogeneous: remainderHomogeneous,
@@ -850,7 +902,7 @@ export async function executeTargetAttempt(opts: {
     if (isInputBoundFailure) {
       deps.log.warn(
         "COMBO",
-        `Input-bound request failure from ${modelStr} — aborting combo (same input will fail identically on every account)`
+        `Input-bound request failure from ${modelStr} — stopping combo and returning the refusal`
       );
       recordComboRequest(deps.combo.name, modelStr, {
         success: false,
@@ -860,7 +912,8 @@ export async function executeTargetAttempt(opts: {
         target: toRecordedTarget(target),
       });
       state.recordedAttempts++;
-      if (i > 0) state.fallbackCount++;
+      // Terminal stop: the same input would fail identically on every account, so
+      // the combo aborts instead of moving on — no fallback happened.
       return { ok: false, response: result };
     }
     const fallbackResult = checkFallbackError(
@@ -961,7 +1014,8 @@ export async function executeTargetAttempt(opts: {
         code: structuredError?.code,
       });
       state.lastStatus = result.status;
-      if (i > 0) state.fallbackCount++;
+      // Terminal stop ("stopping combo"): no later target is tried, so this is not
+      // a fallback even when the failing target is not the first one.
       deps.log.warn("COMBO", `Model ${modelStr} failed with body-specific error, stopping combo`);
       deps.clearStaleLKGP(
         deps.combo.name,
@@ -1099,7 +1153,7 @@ export async function executeTargetAttempt(opts: {
         // was just observed. Recording it here mirrors the "done retrying" path.
         state.lastError = errorText || String(result.status);
         state.lastStatus = result.status;
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         return null;
       }
       // Record model lockout immediately on the first transient failure —
@@ -1145,7 +1199,7 @@ export async function executeTargetAttempt(opts: {
         // first-failure lockout path, so lastStatus needs recording here too.
         state.lastError = errorText || String(result.status);
         state.lastStatus = result.status;
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         return null;
       }
       continue; // Retry same model (transient error, no lockout recorded)
@@ -1198,7 +1252,7 @@ export async function executeTargetAttempt(opts: {
       code: structuredError?.code,
     });
     state.lastStatus = result.status;
-    if (i > 0) state.fallbackCount++;
+    state.fallbackCount++;
     // Wire combo failures into the resilience dashboard (model-level lockout)
     // alongside the provider-level cooldown below — they govern different scopes.
     if (

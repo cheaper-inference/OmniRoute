@@ -34,11 +34,29 @@ type StripRule = {
 
 const MAX_OUTPUT_TOKEN_KEYS = ["max_tokens", "max_completion_tokens", "max_output_tokens"] as const;
 
+// GitHub Copilot rejects `temperature` (HTTP 400 "Unsupported parameter:
+// 'temperature' is not supported with this model") for GPT-5.4 and newer GPT-5.x
+// (gpt-5.5, gpt-5.6-sol/terra/luna, gpt-5.10, ...) and for GPT-6.x — including
+// ids without a minor version such as gpt-6-astra. Anchored so gpt-5, gpt-5.3-codex
+// and malformed ids like gpt-5.4invalid keep their temperature. A leading
+// `provider/` prefix is ignored. Shared with GithubExecutor.transformRequest.
+const GITHUB_NO_TEMPERATURE_MODEL = /^gpt-(?:5\.(?:[4-9]|[1-9]\d+)|6(?:\.\d+)?)(?:-|$)/i;
+
+export function isGithubTemperatureUnsupportedModel(model: string | null | undefined): boolean {
+  if (typeof model !== "string" || !model) return false;
+  const bare = model.slice(model.lastIndexOf("/") + 1);
+  return GITHUB_NO_TEMPERATURE_MODEL.test(bare);
+}
+
 const STRIP_RULES: StripRule[] = [
   // claude-opus-4 series: temperature is deprecated (Anthropic returns 400). #1748
   { match: /claude-opus-4/i, drop: ["temperature"] },
-  // GitHub Copilot gpt-5.4: temperature unsupported.
-  { provider: "github", match: /gpt-5\.4/i, drop: ["temperature"] },
+  // All Claude models: newer Claude Code clients send a top-level `diagnostics`
+  // telemetry object gated behind a beta OmniRoute does not advertise, so
+  // Anthropic 400s with "diagnostics: Extra inputs are not permitted".
+  { match: /claude/i, drop: ["diagnostics"] },
+  // GitHub Copilot GPT-5.4+ and GPT-6.x: temperature unsupported.
+  { provider: "github", match: isGithubTemperatureUnsupportedModel, drop: ["temperature"] },
   // OpenAI GPT-5.0 family (gpt-5, gpt-5-mini, gpt-5-nano, dated snapshots) always
   // reasons and rejects sampling params with HTTP 400 "Unsupported parameter:
   // 'temperature' is not supported with this model" (same for top_p). Agent

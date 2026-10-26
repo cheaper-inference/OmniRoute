@@ -21,10 +21,13 @@ import { NEWS_JSON_URL, parseActiveNewsPayload } from "@/shared/utils/releaseNot
 import {
   clearLatestVersionCache,
   isNewer,
+  resolveDistTagsCached,
   resolveLatestVersionCached,
 } from "@/lib/system/versionCheck";
+import { describeReleaseChannels } from "@/lib/system/releaseChannel";
 import { resolveGlobalOmniroutePath } from "@/lib/system/globalPackagePath";
 import { restartRunningServer } from "@/lib/system/processManagerRestart";
+import { formatUpdateInstallError } from "@/lib/system/updateInstallError";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
 // #5542 — On Windows npm is `npm.cmd`; Node ≥24 refuses to execFile a `.cmd` without
 // a shell (nodejs/node#52554 → "spawn npm ENOENT"). buildNpmExecOptions enables the
@@ -72,16 +75,21 @@ export async function GET(req: NextRequest) {
   const current = getCurrentVersion();
   const config = getAutoUpdateConfig();
 
-  const [latest, news, validation] = await Promise.all([
-    resolveLatestVersionCached({
-      bypassCache: /(?:^|,)\s*(?:no-cache|no-store)\b/i.test(
-        req.headers.get("Cache-Control") ?? ""
-      ),
-      storeResult: !/(?:^|,)\s*no-store\b/i.test(req.headers.get("Cache-Control") ?? ""),
-    }),
+  const cacheControl = req.headers.get("Cache-Control") ?? "";
+  const cacheOptions = {
+    bypassCache: /(?:^|,)\s*(?:no-cache|no-store)\b/i.test(cacheControl),
+    storeResult: !/(?:^|,)\s*no-store\b/i.test(cacheControl),
+  };
+  const [latest, distTags, news, validation] = await Promise.all([
+    resolveLatestVersionCached(cacheOptions),
+    resolveDistTagsCached(cacheOptions),
     getNews(),
     validateAutoUpdateRuntime(config),
   ]);
+  // Additive (rail 3.8.54): `channel` keeps meaning the deployment mode
+  // (npm / source / docker-compose) the dashboard updater relies on; the npm
+  // release channel of the running build is `releaseChannel`.
+  const { releaseChannel, channels } = describeReleaseChannels(current, distTags, latest);
 
   const body = {
     current,
@@ -90,12 +98,19 @@ export async function GET(req: NextRequest) {
     channel: config.mode,
     autoUpdateSupported: validation.supported,
     autoUpdateError: validation.reason,
+    // Host-side compose command for a published-image container (`docker-image` mode).
+    manualUpdateCommand: config.manualUpdateCommand,
     news,
+    releaseChannel,
+    channels,
   };
   const serialized = JSON.stringify(body);
   const etag = `"${createHash("sha256").update(serialized).digest("base64url")}"`;
   const headers = { "Cache-Control": "private, no-cache, must-revalidate", ETag: etag };
-  const validators = req.headers.get("If-None-Match")?.split(",").map((value) => value.trim());
+  const validators = req.headers
+    .get("If-None-Match")
+    ?.split(",")
+    .map((value) => value.trim());
   if (validators?.some((value) => value === etag || value === `W/${etag}`)) {
     return new NextResponse(null, { status: 304, headers });
   }
@@ -140,6 +155,34 @@ export async function POST(req: NextRequest) {
         error: validation.reason || "Auto-update is not supported in this environment.",
       },
       { status: 400 }
+    );
+  }
+
+  // Socket-free Docker image update: drop a request file in DATA_DIR for the host watcher,
+  // which pulls the image and recreates the container. The dashboard then polls GET.
+  if (config.mode === "docker-trigger") {
+    const launched = await launchAutoUpdate({ latest });
+    if (!launched.started) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: launched.error || "Failed to request the Docker update.",
+          channel: launched.channel,
+        },
+        { status: 500 }
+      );
+    }
+
+    clearLatestVersionCache();
+    return NextResponse.json(
+      {
+        success: true,
+        message: `Update to v${latest} requested. The Docker host is pulling the new image.`,
+        from: current,
+        to: latest,
+        channel: launched.channel,
+      },
+      { status: 202 }
     );
   }
 
@@ -319,11 +362,11 @@ export async function POST(req: NextRequest) {
           return;
         }
         send({ step: "install", status: "running", message: `Installing omniroute@${latest}...` });
-          await execFileAsync(
-            "npm",
-            ["install", "-g", `omniroute@${latest}`, "--ignore-scripts", "--legacy-peer-deps"],
-            buildNpmExecOptions(process.platform, { cwd: PROJECT_ROOT, timeoutMs: 300_000 })
-          );
+        await execFileAsync(
+          "npm",
+          ["install", "-g", `omniroute@${latest}`, "--ignore-scripts", "--legacy-peer-deps"],
+          buildNpmExecOptions(process.platform, { cwd: PROJECT_ROOT, timeoutMs: 300_000 })
+        );
         send({ step: "install", status: "done", message: `Installed omniroute@${latest}` });
 
         // Step 2: Rebuild native modules (critical for better-sqlite3)
@@ -353,7 +396,9 @@ export async function POST(req: NextRequest) {
         });
         console.log(`[AutoUpdate] Successfully updated to v${latest}`);
       } catch (err: any) {
-        const errMsg = err?.stderr || err?.message || String(err);
+        // Windows keeps the running server's package files open, so npm fails with
+        // EBUSY/EPERM — explain the manual recovery instead of dumping npm's stderr.
+        const errMsg = formatUpdateInstallError(err, { platform: process.platform, latest });
         send({ step: "error", status: "failed", message: errMsg });
         console.error(`[AutoUpdate] Update failed:`, err);
       } finally {

@@ -26,33 +26,33 @@
 
 ---
 
-## Aukščiausio lygmens struktūra
+## Aukščiausio lygio struktūra
 
 ```
 open-sse/
 ├── index.ts              # Viešasis įėjimo taškas
-├── types.d.ts            # Viešųjų tipų eksportai
+├── types.d.ts            # Viešasis tipų eksportas
 ├── package.json          # @omniroute/open-sse
 ├── config/               # Teikėjų konfigūracijos, konstantos, registrai
-├── executors/            # Atskirų teikėjų HTTP vykdyklės (67 + base.ts/index.ts)
-├── handlers/             # Užklausų apdorojimo moduliai (chatCore, responses ir kt.)
+├── executors/            # Kiekvieno teikėjo HTTP vykdyklės (150 modulių + base.ts/index.ts)
+├── handlers/             # Užklausų apdorojimo priemonės (chatCore, responses ir kt.)
 ├── lib/                  # Vidinės pagalbinės priemonės
 ├── mcp-server/           # Model Context Protocol serveris
 ├── services/             # ~298 paslaugų moduliai
 ├── transformer/          # Responses API formato transformavimo priemonė
 ├── translator/           # Formatų vertimas (OpenAI ↔ Claude ↔ Gemini)
-└── utils/                # Bendros pagalbinės priemonės (žurnalams, klaidoms, srautams ir kt.)
+└── utils/                # Bendros pagalbinės priemonės (žurnalų rašymas, klaidų ir srautų apdorojimas ir kt.)
 ```
 
 ### Modulių skaičius
 
 | Katalogas | Failai | Paskirtis |
-| `executors/` | 167 | Atskirų teikėjų HTTP vykdyklės (suvienodintos naudojant DefaultExecutor gamyklą) |
+| `executors/` | 167 | Kiekvieno teikėjo HTTP vykdyklės (suvienodintos naudojant DefaultExecutor gamyklą) |
 | `handlers/` | 157 | Užklausų įėjimo taškai (chatCore, responses, embeddings) |
 | `services/` | ~536 | Maršruto parinkimas, podėliavimas, dažnio ribojimas, atnaujinimas ir kt. |
 | `translator/` | 56 | Formatų konvertavimas (OpenAI ↔ Claude ↔ Gemini) |
 | `mcp-server/` | 44 | MCP įrankiai ir perdavimo mechanizmai |
-| `utils/` | ~108 | Skersinės pagalbinės priemonės (žurnalams, klaidoms, srautams) |
+| `utils/` | ~108 | Bendrosios pagalbinės priemonės (žurnalų rašymas, klaidų ir srautų apdorojimas) |
 | `config/` | ~339 | Teikėjų konfigūracijos, konstantos, registrai |
 
 ---
@@ -165,30 +165,30 @@ Iškvietimų žurnalų artefaktai (jei įjungta) įrašomi į `${DATA_DIR}/call_
 
 ---
 
-## Išsami pagrindinių failų apžvalga
+## Pagrindinių failų išsami analizė
 
 ### chatCore.ts (5977 eilutės)
 
-**Pagrindinė užklausų apdorojimo funkcija**. Nepaisant dydžio, jos struktūra yra aiški:
+**Pagrindinis užklausų apdorotojas**. Nepaisant savo dydžio, jis turi aiškią struktūrą:
 
 ```ts
-// Pseudostruktūra faile chatCore.ts
+// chatCore.ts pseudo-struktūra
 export async function handleChat(request: NextRequest) {
-  // 1. Autentifikavimas ir CORS
+  // 1. Autentifikavimas + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
   // 2. Užklausos turinio tikrinimas
   const body = await parseRequestBody(request);
 
-  // 3. Formato aptikimas ir konvertavimas
+  // 3. Formato nustatymas + vertimas
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Derinio maršruto parinkimas
+  // 4. Kombinacijų maršrutizavimas
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,7 +196,7 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Tęsti su kitu tikslu
+      // Pereiti prie kito taikinio
     }
   }
 
@@ -205,11 +205,11 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-Nors tai viena milžiniška funkcija, ji suskirstyta į **komentarais pažymėtas dalis**, atitinkančias 5 etapų konvejerį.
+Nors tai viena milžiniška funkcija, ji suskirstyta į **komentarais pažymėtas sekcijas**, atitinkančias 5 etapų apdorojimo grandinę.
 
-### combo.ts (4456 kodo eilutės)
+### combo.ts (4456 eilučių)
 
-**Maršruto parinkimo mechanizmas**, kuris deriniui nustato išrikiuotus tikslus.
+**Maršrutizavimo variklis**, kuris kombinaciją paverčia surikiuotais taikiniais.
 
 ```ts
 // services/combo.ts
@@ -226,129 +226,132 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Palaiko **19 maršruto parinkimo strategijų** (žr. `src/shared/constants/routingStrategies.ts`):
+Palaiko **20 maršrutizavimo strategijų** (žr. `src/shared/constants/routingStrategies.ts`):
 
-| Strategija          | Veikimas                                                                                         |
-| ------------------- | ------------------------------------------------------------------------------------------------ |
-| `priority`          | Sąrašas, surikiuotas pirmenybę teikiant pirmajam tikslui                                         |
-| `weighted`          | Tikimybinis parinkimas pagal kiekvieno tikslo svorį                                              |
-| `round-robin`       | Tikslai cikliškai parenkami eilės tvarka                                                         |
-| `context-relay`     | Kontekstas perduodamas tarp tikslų                                                               |
-| `fill-first`        | Prieš pereinant prie kito tikslo išnaudojama kvota                                               |
-| `p2c`               | Dviejų pasirinkimų galia                                                                         |
-| `random`            | Tolygus atsitiktinis parinkimas                                                                  |
-| `least-used`        | Pasirenkamas rečiausiai pastaruoju metu naudotas tikslas                                         |
-| `cost-optimized`    | Pirmiausia pasirenkamas pigiausias veikiantis tikslas                                            |
-| `reset-aware`       | Atsižvelgiama į paslaugų teikėjo atkūrimo intervalus                                             |
-| `reset-window`      | Maršrutas parenkamas pagal atkūrimo intervalus                                                   |
-| `headroom`          | Pirmiausia pasirenkamas tikslas, turintis didžiausią likusios kvotos rezervą                     |
-| `strict-random`     | Tikrai tolygus parinkimas (be kokybės svorių)                                                    |
-| `auto`              | Naudojamas 16 veiksnių vertinimas (`autoCombo/`)                                                 |
-| `lkgp`              | Pirmiausia pasirenkamas paskutinis žinomas tinkamai veikęs paslaugų teikėjas                     |
-| `context-optimized` | Geriausiai tinka ilgo konteksto užklausoms                                                       |
-| `fusion`            | Užklausa lygiagrečiai paskirstoma grupei, tada rezultatai susintetinami vertintojo (`fusion.ts`) |
+| Strategija          | Elgsena                                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Surikiuotas sąrašas, pradedant pirmuoju taikiniu                                                              |
+| `weighted`          | Tikimybinis pasirinkimas pagal kiekvieno taikinio svorį                                                       |
+| `round-robin`       | Taikiniai perrenkami cikliškai eilės tvarka                                                                   |
+| `context-relay`     | Kontekstas perduodamas iš taikinio į taikinį                                                                  |
+| `fill-first`        | Pirmiausia išnaudojama kvota, tik tada pereinama prie kito                                                    |
+| `p2c`               | Dviejų pasirinkimų galios metodas                                                                             |
+| `random`            | Tolygus atsitiktinis pasirinkimas                                                                             |
+| `least-used`        | Parenkamas tas, kuris neseniai buvo naudotas rečiausiai                                                       |
+| `cost-optimized`    | Pirmiausia pigiausias sveikas taikinys                                                                        |
+| `reset-aware`       | Atsižvelgia į teikėjų atstatymo langus                                                                        |
+| `reset-window`      | Maršrutizavimas pagal atstatymo langus                                                                        |
+| `headroom`          | Pirmiausia didžiausia likusi kvotos atsarga                                                                   |
+| `quota-weighted`    | Praleidžiamos išnaudotos paskyros, tada traukiama pagal likusią kvotą ÷ vykdomą apkrovą                       |
+| `strict-random`     | Tikrai tolygus (be kokybės svėrimo)                                                                           |
+| `auto`              | Naudojamas 16 veiksnių vertinimas (`autoCombo/`)                                                              |
+| `lkgp`              | Pirmiausia paskutinis žinomas veikiantis teikėjas                                                             |
+| `context-optimized` | Geriausiai tinka ilgo konteksto užklausoms                                                                    |
+| `cache-optimized`   | Kiekvieną pakartotinai naudojamą prompt prefiksą prisega prie tos pačios paskyros (prompt podėlio pataikymai) |
+| `fusion`            | Lygiagrečiai išsiunčia užklausą komisijai, tada sintezuoja per vertintoją (`fusion.ts`)                       |
+| `pipeline`          | Grandininiai žingsniai — kiekvieno taikinio išvestis paduodama kitam                                          |
 
-### base.ts (1170 kodo eilučių)
+### base.ts (1170 eilučių)
 
-**Abstraktus vykdiklis**, kurį išplečia visi 107 vykdikliai. Jame yra:
+**Abstraktus vykdytojas**, kurį plečia kiekviena vykdytojo klasė (tiesiogiai arba per `DefaultExecutor` ir kitas subklases). Jame yra:
 
-- `buildUrl()` — numatytasis URL sudarymas (poklasiai gali jį pakeisti pasirinktiniu)
-- `buildHeaders()` — numatytosios antraštės (autentifikavimas, turinio tipas)
-- `transformRequest()` — pagal numatytąją nuostatą perduoda nepakeistą užklausą
-- `execute()` — pagrindinis HTTP ciklas su pakartotiniais bandymais, delsos didinimu ir grandinės pertraukikliu
+- `buildUrl()` — numatytoji URL konstrukcija (subklasės perrašo, jei reikia nestandartinės)
+- `buildHeaders()` — numatytosios antraštės (autentifikavimas, content-type)
+- `transformRequest()` — pagal numatymą perduoda be pakeitimų
+- `execute()` — pagrindinis HTTP ciklas su pakartojimais, atidėjimais ir grandinės pertraukikliu
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Tvarko visus su OpenAI/Anthropic suderinamus paslaugų teikėjus
-  // Paslaugų teikėjai registruoja konfigūracijas (URL, autentifikavimą, antraštes), tačiau naudoja bendrą vykdiklio logiką
+  // Apdoroja visus su OpenAI/Anthropic suderinamus teikėjus
+  // Teikėjai registruoja konfigūracijas (URL, autentifikavimą, antraštes), bet naudoja bendrą vykdytojo logiką
 }
 ```
 
-Konkrečiam paslaugų teikėjui būdinga elgsena (autentifikavimo antraštės, bazinis URL, versijos antraštės) konfigūruojama paslaugų teikėjų registre, o ne atskirose vykdiklių klasėse.
+Konkrečiam teikėjui būdinga elgsena (autentifikavimo antraštės, bazinis URL, versijos antraštės) konfigūruojama per teikėjų registrą, o ne per atskiras vykdytojo klases.
 
 ````
 
 ---
 
-## Paslaugos (117 modulių)
+## Servisai (117 modulių)
 
-Paslaugos yra **specializuoti, vienos paskirties moduliai**, kuriuos komponuoja tvarkyklės. Pagrindinės kategorijos:
+Servisai yra **sufokusuoti, vienos paskirties moduliai**, kuriuos komponuoja handleriai. Pagrindinės kategorijos:
 
-### Maršruto parinkimas ir kombinavimas
+### Maršrutizavimas ir Combo
 
-- `combo.ts` — kombinuotai maršrutizuojamų užklausų pradinis taškas
-- `services/autoCombo/` — 16 veiksnių vertinimas, 8 automatinio maršruto parinkimo strategijos
-- `wildcardRouter.ts` — atitinka maršrutus su pakaitos simboliais (`gpt-*`)
-- `modelFamilyFallback.ts` — T5 atsarginis perjungimas modelių šeimos viduje
+- `combo.ts` — įėjimo taškas kombinuotai nukreiptoms užklausoms
+- `services/autoCombo/` — 16 faktorių vertinimas balais, 8 automatinio maršrutizavimo strategijos
+- `wildcardRouter.ts` — atitinka pakaitos simbolių maršrutus (`gpt-*`)
+- `modelFamilyFallback.ts` — T5 atsarginis perjungimas šeimos viduje
 
-### Užklausų dažnio ribojimas ir kvota
+### Užklausų ribojimas ir kvotos
 
-- `rateLimitManager.ts` — kiekvieno rakto ir teikėjo žetonų kibiras
-- `usage.ts` — naudojimo registravimas
-- `quotaCache.ts` — atmintyje saugomos kvotos momentinės kopijos
+- `rateLimitManager.ts` — žetonų kibiras (token bucket) kiekvienam raktui + tiekėjui
+- `usage.ts` — naudojimo fiksavimas
+- `quotaCache.ts` — kvotų momentinės kopijos atmintyje
 
 ### Paskyra ir žetonas
 
 - `tokenRefresh.ts` — OAuth atnaujinimas gavus 401
 - `accountFallback.ts` — perjungimas į alternatyvią paskyrą
-- `sessionManager.ts` — kelių sąveikos etapų seanso būsena
+- `sessionManager.ts` — daugiaetapės sesijos būsena
 
 ### Intelektas
 
-- `intentClassifier.ts` — užklausos tikslo klasifikavimas
-- `taskAwareRouter.ts` — maršruto parinkimas pagal užduoties tipą
-- `thinkingBudget.ts` — mąstymo žetonų paskirstymas
-- `contextManager.ts` — maršruto parinkimo konteksto įterpimas
+- `intentClassifier.ts` — užklausos intencijos klasifikavimas
+- `taskAwareRouter.ts` — maršrutizavimas pagal užduoties tipą
+- `thinkingBudget.ts` — „mąstymo" žetonų paskirstymas
+- `contextManager.ts` — maršrutizavimo konteksto įterpimas
 
 ### Atsparumas
 
-- `resilience.ts` — pakartotinių bandymų, delsos didinimo ir grandinės pertraukiklio koordinavimas
-- `emergencyFallback.ts` — paskutinės išeities atsarginis perjungimas
-- `modelDeprecation.ts` — automatinis maršruto nukreipimas į modelius-įpėdinius
+- `resilience.ts` — pakartotinių bandymų, atidėjimo (backoff) ir grandinės pertraukiklio (breaker) orkestravimas
+- `emergencyFallback.ts` — paskutinės instancijos atsarginis variantas
+- `modelDeprecation.ts` — automatinis nukreipimas į modelių įpėdinius
 
 ### Būsena
 
-- `signatureCache.ts` — dublių šalinimas pagal užklausos parašą
-- `volumeDetector.ts` — apkrovos mažinimas
-- `contextHandoff.ts` — seanso serializavimas
+- `signatureCache.ts` — dublikatų šalinimas pagal užklausos parašą
+- `volumeDetector.ts` — apkrovos numetimas (load shedding)
+- `contextHandoff.ts` — sesijos serializavimas
 
 ### Glaudinimas
 
-- `compression/` (pakatalogis) — visa glaudinimo apdorojimo seka
-- 39 failai, apimantys variklius, taisyklių rinkinius ir adapterius
+- `compression/` (pakatalogis) — pilnas glaudinimo konvejeris (pipeline)
+- 39 failai, apimantys variklius, taisyklių paketus ir adapterius
 
 ### Įgūdžiai
 
-- (aprašyta [SKILLS.md](./SKILLS.md))
+- (aprašyta faile [SKILLS.md](./SKILLS.md))
 
 ### Atmintis
 
-- (aprašyta [MEMORY.md](./MEMORY.md))
+- (aprašyta faile [MEMORY.md](./MEMORY.md))
 
 ---
 
-## Vykdytojai (75+ failų)
+## Vykdytojai (150 modulių)
 
-Po vieną failą kiekvienam teikėjui. Jie visi išplečia `BaseExecutor` ir perrašo tik tai, kas skiriasi.
+Daugiausia po vieną failą kiekvienam tiekėjui. Visos vykdytojų klasės išplečia `BaseExecutor` ir perrašo tik tai, kas skiriasi; kiti moduliai yra konkrečių tiekėjų pagalbiniai įrankiai (įrankių schemos, fetch/TTS adapteriai, ypatumų apdorotojai).
 
 ### Bendrieji šablonai
 
-Teikėjai parenkami naudojant `getExecutor(providerId)`, kuri grąžina sukonfigūruotą vykdytoją. Su OpenAI / Anthropic suderinami teikėjai naudoja `DefaultExecutor` (`executors/default.ts`). Konkrečiam teikėjui būdinga elgsena (bazinis URL, autentifikavimo antraštės, API versija) konfigūruojama kataloge `open-sse/config/providers/`, o užklausos turinio transformacijos atliekamos kataloge `open-sse/translator/`.
+Tiekėjai nustatomi per `getExecutor(providerId)`, kuris grąžina sukonfigūruotą vykdytoją. Su OpenAI/Anthropic suderinami tiekėjai naudoja `DefaultExecutor` (`executors/default.ts`). Konkrečiam tiekėjui būdinga elgsena (bazinis URL, autentifikavimo antraštės, API versija) konfigūruojama kataloge `open-sse/config/providers/`, o užklausų turinio transformacijos apdorojamos kataloge `open-sse/translator/`.
 
-**Pasirinktinis URL** nustatomas teikėjo konfigūracijoje:
+**Pasirinktinis URL** nustatomas per tiekėjo konfigūraciją:
 
 ```ts
-// Teikėjo konfigūracija kataloge open-sse/config/providers/
+// Tiekėjo konfigūracija kataloge open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Pasirinktinis autentifikavimas** tvarkomas naudojant teikėjų registro autentifikavimo konfigūraciją (API raktą, OAuth, antraščių profilius).
+**Pasirinktinis autentifikavimas** valdomas per tiekėjų registro autentifikavimo konfigūraciją (API raktas, OAuth, antraščių profiliai).
 
-**Pasirinktinės užklausos turinio** transformacijos (pvz., kai Anthropic atskiria `system` nuo `messages`) registruojamos kiekvienam teikėjui kataloge `open-sse/translator/`.
+**Pasirinktinės užklausos turinio** transformacijos (pvz., Anthropic skiria `system` nuo `messages`) registruojamos kiekvienam tiekėjui kataloge `open-sse/translator/`.
 
 ````
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-Parinkimas vykdomas per `ExecutorRegistry` (`executors/registry.ts`): kiekvienas specializuotas vykdytojas deklaruojamas integruotoje `executors/index.ts` lentelėje ir įkeliant modulį užregistruojamas naudojant `registerExecutor(alias, instance)`; `getExecutor()` tikrina registrą ir, jei teikėjas neturi specializuoto įrašo, naudoja įsimenamą `DefaultExecutor`. Visas pseudonimų → vykdytojų susiejimas apibrėžtas etaloniniame teste `tests/unit/executor-map-golden.test.ts`.
+Nustatymas vyksta per `ExecutorRegistry` (`executors/registry.ts`): kiekvienas specializuotas vykdytojas deklaruojamas integruotoje `executors/index.ts` lentelėje ir registruojamas per `registerExecutor(alias, instance)` modulio įkėlimo metu; `getExecutor()` tikrina registrą ir, jei tiekėjas neturi specializuoto įrašo, grįžta prie memoizuoto `DefaultExecutor`. Pilną pseudonimas → vykdytojas atvaizdį apibūdina etaloninis testas `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -481,17 +484,17 @@ Jis apdoroja:
 
 ## Konfigūracija
 
-`open-sse/config/` saugomas konfigūracijos sluoksnis:
+`open-sse/config/` kataloge yra konfigūracijos sluoksnis:
 
-| Failas                        | Paskirtis                                                  |
-| ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Pokalbių modelių registras, apimantis 352 teikėjų katalogą |
-| `providerModels.ts`           | Modelių alternatyvūs pavadinimai, formatų susiejimas       |
-| `constants.ts`                | Skirtieji laikai, ribos, būsenos kodai                     |
-| `defaultThinkingSignature.ts` | Numatytasis Claude mąstymo parašas                         |
-| `modelStrip.ts` (tarnybose)   | Kiekvienam teikėjui pritaikytas laukų pašalinimas          |
+| Failas                              | Paskirtis                                                 |
+| ----------------------------------- | --------------------------------------------------------- |
+| `providerRegistry.ts`               | Pokalbių modelių registras, paremtas 375 tiekėjų katalogu |
+| `providerModels.ts`                 | Modelių slapyvardžiai, formatų susiejimas                 |
+| `constants.ts`                      | Laiko limitai, apribojimai, būsenos kodai                 |
+| `defaultThinkingSignature.ts`       | Numatytasis Claude mąstymo parašas                        |
+| `modelStrip.ts` (services kataloge) | Laukų pašalinimas pagal tiekėją                           |
 
-### Teikėjų registro schema
+### Tiekėjų registro schema
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Zod patikra modulio įkėlimo metu užtikrina, kad visos teikėjų konfigūracijos būtų tinkamos.
+Zod validacija modulio įkrovos metu užtikrina, kad visos tiekėjų konfigūracijos yra tinkamos.
 
 ---
 

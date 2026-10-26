@@ -4,93 +4,166 @@
 
 ---
 
-Pašmitinātais pūls (`self-hosted, omni-release` visos astoņos izpildītājos; `omni-build` divos) darbojas **.113** serverī.
-Mērīts 2026-08-28 (v3.8.50 pēcanalīze, III daļa):
+Pašu mitinātais pūls darbojas **.113** serverī (`tomni-proxmox-113`). Kopš 2026-10-18 katram
+OmniRoute izpildītājam ir **viena loma**, viena etiķete un atmiņas/CPU budžets, kas pielāgots tā izmērītajai
+darba slodzei. Turbopack slots saņem būvējumam nepieciešamos resursus; pārējie sloti ir pielāgoti to
+izmērītajām maksimālajām slodzēm. Servera resursi tiek pārdalīti virs to faktiskās kapacitātes tikai tad, ja Turbopack būvējums sakrīt ar Release-Green
+webpack būvējumu un lint darbu; servera mijmaiņas apgabals (16 GB) to absorbē, un, tā kā izvilkšanas pieprasījumu būvējumi darbojas
+mitinātā vidē, Turbopack slots lielāko daļu laika ir dīkstāvē:
 
-| resurss     | vērtība                                                                                                          | nozīme darbu plānošanai                                                                                                                                                        |
-| ----------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| RAM / CPU   | **31 GB / 32 kodoli** (bija 16 GB, kad šis dokuments tika uzrakstīts pirmoreiz)                                  | viens `next-build` maksimumā izmanto **~14 GB** → 2 vienlaicīgi smagi būvējumi noslogo serveri līdz robežai, bet 3 to aptur (2026-08-28 06:42Z: slodze 56, zaudēti divi darbi) |
-| mijmaiņa    | 15 GB                                                                                                            | v3.8.50 publicēšanu tas pabeidza, intensīvi izmantojot mijmaiņas apgabalu; noslodze ir redzama `/proc/pressure/memory`                                                         |
-| `/tmp`      | **12 GB tmpfs = RAM**                                                                                            | viss, kas tur tiek atstāts, aizņem atmiņu; atlikumi tiek notīrīti pēc 3 h                                                                                                      |
-| disks       | 188 GB                                                                                                           | 8 izpildītāju `_work` darba kopijas bez ierobežojuma sasniedz ~70 GB                                                                                                           |
-| izpildītāji | **6 klausītāji**: 4 OmniRoute (1 `omni-build` + 1 tikai `omni-release` + 2 `omni-light`) + OmniHeuris + OmniMind | visi koplieto iepriekš norādīto atmiņu; `omniroute-113-3/-4/-7/-8` ir atspējoti (`systemctl enable --now` atkal aktivizē vienu no tiem)                                        |
+| izpildītājs          | etiķete           | loma                                                                                                                                                 | `MemoryHigh` / `MemoryMax`    | `CPUQuota`   |
+| -------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------ |
+| `omniroute-113-5`    | `omni-build`      | Turbopack būvējumi: `ci.yml` `Build` (tikai push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nakts a11y būvējums | 56 GB / 60 GB (mijmaiņa 0)    | 1600 %       |
+| `omniroute-113-6`    | `omni-release`    | Release-Green (`release-green` + `main-green`), webpack būvējums                                                                                     | 20 GB / 24 GB (mijmaiņa 4 GB) | 800 %        |
+| `omniroute-113-2`    | `omni-light`      | nakts darbi (Schemathesis, promptfoo, garak, k6) un `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (mijmaiņa 4 GB) | 600 %        |
+| `omniroute-113`      | `omni-light`      | tas pats pūls, kas norādīts iepriekš                                                                                                                 | 8 GB / 12 GB                  | 400 %        |
+| OmniHeuris, OmniMind | (to repozitoriji) | tikai Dependabot (maksimums 155 MB katram, 2026-10-18)                                                                                               | 4 GB / 6 GB                   | 200 % katram |
 
-## Uzkopšanas skripta instalēšana (vienreiz, serverī)
+Mērīts 2026-10-18:
+
+| resurss     | vērtība                           | nozīme plānošanai                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU   | **78 GB / 32 kodoli**             | Turbopack produkcijas būvējums bez ierobežojumiem sasniedza 49 GB maksimumu (`tests/unit/ci-build-bundler-webpack.test.ts`); Next 16.3.8 versijā kompilēšanas fāze vien aizņem ~40 GB (36 GB RSS procesā `next-build` un 17 ielādētāja darbinātājprocesi ar 3 GB, mērīts 2026-10-18); webpack būvējums aizņem ~14–16 GB. Viens Turbopack un viens webpack būvējums var darboties vienlaikus; divi Turbopack būvējumi nevar |
+| mijmaiņa    | 16 GB                             | `omniroute-113-5` darbojas ar izslēgtu mijmaiņu (`MemorySwapMax=0`), tāpēc nekontrolēts būvējums tiek apturēts pie noteiktā ierobežojuma, nevis liek serverim izmantot mijmaiņu                                                                                                                                                                                                                                            |
+| `/tmp`      | **12 GB tmpfs = RAM**             | viss, kas tur tiek novietots, aizņem atmiņu; atlikumi tiek iztīrīti pēc 3 h                                                                                                                                                                                                                                                                                                                                                |
+| CPU         | novērota slodze 60 uz 32 kodoliem | pirms kvotu ieviešanas viens Turbopack būvējums (~1166 % CPU) kopā ar pārklājuma testu komplektu tajā pašā serverī atņēma resursus pārējo klausītāju sirdspukstiem (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                   |
+| izpildītāji | **6 klausītāji**                  | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` ir atspējoti (`systemctl enable --now` atkal iespējo vienu no tiem)                                                                                                                                                                                                                                                                                        |
+
+Ierobežojumi atrodas katras vienības failā `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
+(iepriekšējās vērtības saglabātas kā `override.conf.bak-20261018`) un tika lietoti darbības laikā ar
+`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bez restartēšanas, tāpēc neviens
+aktīvais darbs netika ietekmēts. Etiķetes tiek mainītas, izmantojot izpildītāju API
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), arī darbības laikā.
+
+## Instalējiet tīrītāju (vienreiz serverī)
 
 ```bash
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
-# cron (root): ik pēc 30 minūtēm, žurnāls tiek rakstīts /var/log/runner-janitor.log
+# cron (root): ik pēc 30 minūtēm, žurnāls failā /var/log/runner-janitor.log
 */30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
-`lsof` ir obligāts: pirms ceļa noņemšanas uzkopšanas skripts ar vienu atvērto
-failu momentuzņēmumu pārliecinās, ka ceļš netiek izmantots; bez šī rīka tas neko
-nenoņem, par to paziņo un beidz darbu (izejas kods 1). Vispirms izmēģiniet visas
-izmaiņas ar `--dry-run` — tas precīzi izvada paredzētās darbības, neko nemainot.
+`lsof` ir obligāts: pirms ceļa dzēšanas tīrītājs ar vienu atvērto failu momentuzņēmumu
+pārliecinās, ka tas netiek izmantots; bez šī rīka tas neko nedzēš un par to paziņo
+(izejas kods 1). Vispirms izmēģiniet visas izmaiņas ar `--dry-run` — tas precīzi parāda,
+ko darītu, taču neko nemaina.
 
-Katrā palaišanas reizē tas veic šādas darbības: notīra mūsu pašu atlikumus
-(`runner-*`, `omniroute-*`, `next-build*`, `e2e-build.tar.gz`) pēc **3 h tmpfs**
-un pēc 24 h diska direktorijā `_work/_temp`; aptur `next-build`, kas darbojas
-ilgāk par 75 minūtēm (neviens darbs nedarbojas tik ilgi — 2026-08-27 viens
-turpināja darboties 70 minūtes pēc tam, kad GitHub bija pasludinājis tā darbu par
-zaudētu); iztīra pirms vairāk nekā 48 h izveidotās darba kopijas tiem
-izpildītājiem, kuru serviss ir **apturēts**; brīdina, ja diska izmantojums ir
-≥ 85 %, atmiņas PSI `full/avg60` ir ≥ 10 % vai klausītāju skaits pārsniedz
-`MAX_ACTIVE_RUNNERS` (atsevišķi norādot omniroute/citu sadalījumu). Izejas kods
-1 = nepieciešama uzmanība; izlasiet žurnālu.
+Katrā palaišanas reizē tas veic šādas darbības: iztīra mūsu pašu atlikumus (`runner-*`, `omniroute-*`,
+`next-build*`, `e2e-build.tar.gz`) pēc **3 stundām tmpfs** un pēc 24 stundām diska
+`_work/_temp` direktorijā; aptur `next-build`, kas darbojas ilgāk par 75 minūtēm (neviens darbs
+nedarbojas tik ilgi — 2026-08-27 viens darbojās 70 minūtes pēc tam, kad GitHub tā darbu bija
+atzīmējis kā pazudušu); iztīra pirms 48 stundām izveidotās izpildītāju darba kopijas, kuru vienības
+ir **apturētas**; brīdina, ja diska aizpildījums ir ≥ 85 %, atmiņas PSI
+`full/avg60` ir ≥ 10 % vai klausītāju ir vairāk nekā `MAX_ACTIVE_RUNNERS` (atsevišķi norādot
+omniroute un pārējos). Izejas kods 1 = nepieciešama uzmanība; izlasiet žurnālu.
 
-## Runner vienības: KillMode
+75 minūšu noteikums neaptver būvējumu, kura darbu GitHub jau ir pārtraucis. Ja
+`Runner.Listener` nevar atjaunot savu darbu, `_diag/Runner_*.log` ir redzams
+`POST request to …/renewjob timed out after 100 seconds`, API aptuveni desmit minūtes
+pēc pēdējās veiksmīgās atjaunošanas ziņo, ka darbs ir `completed` (kļūme), bet `next-build`
+turpina darboties bez piesaistīta darba (2026-10-18: #17066 būvējums tika atzīmēts kā
+neizdevies plkst. 19:43, un piecas minūtes vēlāk tā būvēšanas process joprojām aizņēma
+40 GB). Pārbaudiet atsauci jaunākajā `_diag/Worker_*.log`, pēc tam ar SIGTERM apturiet
+tikai būvēšanas procesu koku pēc PID — `next-build`, `npm run build`, `build-next-isolated.mjs`
+un `_work` darbiniekus. Nekad neaiztieciet `Runner.Listener`, `RunnerService.js` vai
+`Runner.Worker`: darbinieks ziņo, ka darbs ir atcelts, un klausītājs pats atkal pāriet
+tiešsaistē.
 
-Runner noklusējuma `KillMode=process` pēc vienības apturēšanas vai restartēšanas atstāj
-`Runner.Worker → npm → next-build` procesus dzīvus — bāreņbūvējums turpina patērēt RAM un
-CPU, lai gan tam vairs nav piesaistīts neviens uzdevums. Katrai OmniRoute vienībai ir papildkonfigurācija
+## Izpildītāju vienības: KillMode
+
+Izpildītāja noklusējuma `KillMode=process` pēc vienības apturēšanas vai restartēšanas
+atstāj `Runner.Worker → npm → next-build` darbībā — bezsaimnieka būvējums turpina patērēt
+RAM un CPU, lai gan tam nav piesaistīts neviens darbs. Katrai OmniRoute vienībai ir
+papildkonfigurācijas fails
 (`/etc/systemd/system/actions.runner.diegosouzapw-OmniRoute.<name>.service.d/10-killmode.conf`)
-ar `KillMode=mixed`: vispirms SIGTERM klausītājam, pēc tam SIGKILL visai cgroup, sasniedzot
-`TimeoutStop`. Tā stājas spēkā pēc vienības nākamās restartēšanas — restartējiet **pa vienam runner
-vienlaikus un tikai tad, kad tas ir dīkstāvē**, dīkstāves pārbaudi un restartēšanu veicot vienā komandā.
+ar `KillMode=mixed`: vispirms klausītājam tiek nosūtīts SIGTERM, bet `TimeoutStop` brīdī
+visai cgroup — SIGKILL. Tas stājas spēkā pēc nākamās vienības restartēšanas — restartējiet
+**pa vienam izpildītājam, tikai tad, kad tas ir dīkstāvē**, dīkstāves pārbaudi un
+restartēšanu izpildot vienā komandā.
 
-## Ekspluatācijas noteikumi
+## Darbības noteikumi
 
-- **Smago būvējumu ierobežojums: VIENS vienlaikus — nodrošināts ar etiķeti (kopš 2026-08-29).** Katrs uzdevums,
-  kas izpilda pilnu `next build`, izmanto `[self-hosted, omni-build]`, un tikai
-  **`omniroute-113-5`** ir piešķirta šī etiķete (pievienota, izmantojot runners API — bez
-  atkārtotas reģistrācijas): `ci.yml` `Build`, `npm-publish.yml` `publish`, abas
-  `nightly-release-green` validācijas un `docker-publish.yml` **amd64** (mitinātajā
-  7 GB vidē šim kokam radās ResourceExhausted — #11976). Docker arm64 posms joprojām darbojas
-  `ubuntu-24.04-arm` vidē (nav ARM mašīnas), izmantojot webpack. Arī Docker amd64 izmanto webpack:
-  Turbopack šim kokam avarēja BuildKit iekšienē (`TurbopackInternalError:
-there must be a path to a root`, izpilde 33253576569) pat ar 31 GB; tā paša
-  koka arm64 webpack būvējums mitinātajā ARM vidē bija sekmīgs. `docker-publish` amd64
-  koplieto `heavy-build-main` paralelitātes grupu ar `ci.yml` `Build`
-  (`cancel-in-progress: false`), tāpēc tas gaida rindā uz vienīgo vietu. Docker Engine
-  jādarbojas uz `omniroute-113-5` (`docker info` ir publicēšanas
-  uzdevuma pirmais solis). Iepriekšējais ierobežojums bija divi, un 31 GB gadījumā tas bija nepareizs:
-  2026-08-29 17:26 UTC divi vienlaicīgi `next-build` procesi (15.4 GB + 17.2 GB RSS) samazināja
-  brīvo atmiņu līdz 5 GB, izmantojot 4 GB mijmaiņas atmiņas, un kodola OOM mehānisms apturēja vienu no tiem — systemd
-  reģistrēja apturēšanu _otra_ runner vienībā, `runsvc.sh` ar SIGKILL apturēja šo klausītāju, un
-  tajā izpildītais uzdevums beidzās ar ziņojumu „Runner ir saņēmis izslēgšanas signālu” (tāds pats teksts kā
-  mitināta runner OOM gadījumā). `omniroute-113-6` saglabā tikai `omni-release`. Smagie būvējumi no
-  `main` sapludināšanas darbībām, PR un nakts izpildes tagad tiek veikti secīgi vienā vietā; rinda ir cena par to.
-  Otrā vieta būs pieejama dienā, kad Proxmox VM iegūs vairāk RAM (48–64 GB):
-  `gh api -X POST repos/<repo>/actions/runners/<id of omniroute-113-6>/labels -f 'labels[]=omni-build'`.
-- **Vieglo uzdevumu pūls: `omni-light` (2026-08-29, #11965).** `omniroute-113` un `omniroute-113-2` ir
-  piešķirta `omni-light` etiķete uzdevumiem, kuriem nepieciešams tikai aizmugursistēmas `next build` (~5–6 GB), nevis pilns būvējums:
-  nakts Schemathesis, promptfoo, garak un axe-a11y uzdevumiem. Tie darbojās mitinātajā 7 GB runner vidē un
-  pārstāja darboties zarā `release/v3.8.51`, nevienam to nepamanot. Sliktākajā gadījumā šajā mašīnā ir 2 smagie + 2 vieglie ≈
-  30 + 12 GB — vairāk par 31 GB RAM, bet 16 GB mijmaiņas atmiņas robežās; īstais risinājums rezerves palielināšanai ir vairāk RAM
-  Proxmox VM (`tomni-proxmox-113`), kas ļauj etiķešu ierobežojumus palielināt līdz 3 smagajiem + 2 vieglajiem.
-- **Apzināti mazāk klausītāju.** Četras OmniRoute vienības tika atspējotas 2026-08-29 — tā kā šo mašīnu izmanto tikai
-  `ci.yml` `Build` un nakts izpildes, 8 klausītāji bija dīkstāvē, un katrs papildu klausītājs ir
-  potenciāls 14 GB patērētājs. Tīrītāja ierobežojums ir 6 (`MAX_ACTIVE_RUNNERS=6` cron konfigurācijā): tas uzskaita
-  katru `Runner.Listener` šajā mašīnā, un OmniHeuris + OmniMind mūsu četriem pievieno vēl divus.
-- **Nekad manuāli netīriet `/tmp` vai `_work`, kamēr kāds runner ir aizņemts.** Pārbaude un tai sekojoša dzēšana
-  ar laika intervālu starp abām darbībām izraisīja aktīva Build uzdevuma `_work` zaudēšanu
-  2026-08-27. Tīrītājs pārbaudi un dzēšanu veic vienā solī;
-  ļaujiet tam to izdarīt.
-- Runner apturēšana uzdevuma izpildes laikā atceļ uzdevumu (novērots darbībā): izmantojiet `systemctl stop` tikai
-  tad, ja tā klausītājam nav `Runner.Worker` bērnprocesa, — un dariet to vienā komandā.
-- Darbplūsmas nedrīkst glabāt artefaktus `/tmp` (tā ir RAM). Lejupielādējiet tos
-  `$RUNNER_TEMP` (diskā, katram runner atsevišķi) — 1.3 GB `next-build` artefakta saglabāšana tmpfs aizņēma 27–32
+- **Vienlaikus tikai viens Turbopack būvējums — to nodrošina etiķete.** Katrs darbs, kas izpilda pilnu Turbopack
+  `next build`, izmanto `[self-hosted, omni-build]`, un tikai **`omniroute-113-5`** ir piešķirta šī
+  etiķete: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
+  nakts a11y būvējums (#16853) un `docker-publish.yml` **amd64** (webpack BuildKit iekšienē —
+  Turbopack tur avarēja, izpilde 33253576569). arm64 Docker posms joprojām darbojas uz `ubuntu-24.04-arm`.
+  `docker-publish` amd64 koplieto `heavy-build-main` vienlaicīguma grupu ar `ci.yml` `Build`
+  (`cancel-in-progress: false`). Docker Engine jāatrodas uz `omniroute-113-5`. Otra Turbopack
+  vieta neietilpst 78 GB apjomā (2 × 33–37 GB un pārējā sistēma); otra vieta ir droša tikai
+  webpack būvējumiem.
+- **Izvilkšanas pieprasījumu Build darbi darbojas mitinātajā infrastruktūrā (2026-10-18).** `ci.yml` `Build` sasniedz `omni-build` tikai
+  `push` un `workflow_dispatch` gadījumā; katrs `pull_request` (no paša repozitorija vai atzarojuma) un `merge_group` Build
+  darbojas uz `ubuntu-latest` ar webpack. Kad katrs paša repozitorija PR tika novirzīts uz šo vietu, Turbopack
+  Build to aizņēma 29–58 minūtes, 18 Build darbi gaidīja rindā līdz pat 18 stundām, un laidiena līnijas paša push Build
+  ieguva šo vietu vienā no 40 darbiem. Mitinātajā infrastruktūrā tas pats PR Build aizņem 8–12 minūtes līdztekus citiem PR
+  darbiem. Turbopack — komplektētājs, ko piegādā `npm-publish`, — laidiena līnijā joprojām tiek pārbaudīts ar
+  noklusējuma zara nakts a11y būvējumu (04:41 UTC), ar katru push vai manuāli palaistu Build, kas
+  sasniedz šo vietu, un ar pašu `npm-publish`. `tests/unit/build/heavy-build-queue.test.ts`
+  nostiprina četru nosacījumu vārteju.
+- **Nekad nepiešķiriet Turbopack vietai mazāk resursu par izmērīto nepieciešamo apjomu.** 2026-10-18 plkst. 18:06 vietas
+  ierobežojumi tika samazināti no 56G/60G līdz 40G/44G, lai atbrīvotu vietu `omni-release`. Kompilēšanas fāze visu
+  izpildes laiku atradās pie `MemoryHigh` robežas (atmiņas PSI `full` 30–43 %), un `Runner.Listener`, kas
+  koplieto cgroup, nespēja atjaunot sava darba nomu. Īpašnieka 2026-10-17 iestatītie 56G/60G tika atjaunoti
+  tajā pašā dienā. Zem šīs vērtības būvējums nebeidzas ar kļūdu; tas pastāvīgi pārlapo atmiņu, un darbs tiek zaudēts.
+- **Release-Green ir sava vieta (2026-10-18).** Līdz tam abas Release-Green validācijas darbojās
+  uz `omni-build`: pie katra push (~10 stundā; vienā dienā darba gaitā tika atceltas 97 no 100 push izpildēm)
+  un trīs pilnas ~2 stundu pārbaudes dienā (05:29 pārbaude uz vietu gaidīja 6 stundas) — vienīgā būvēšanas
+  vieta bija vairākkārt pārslogota, un paša repozitorija PR Build darbi gaidīja stundām.
+  `release-green` un `main-green` tagad izmanto `omni-release` (tikai `omniroute-113-6`) ar
+  `OMNIROUTE_USE_TURBOPACK=0`, un iesākta izpilde vairs netiek atcelta jaunāka push dēļ (gaidošā
+  vieta joprojām samazina darbu vētru līdz vienam darbam). `tests/unit/build/runner-capacity-routing.test.ts`
+  nostiprina maršrutēšanu, webpack pārslēgu un to, ka nekas uz `omni-release` netiek būvēts ar Turbopack.
+- **Vieglo darbu pūls: `omni-light`.** `omniroute-113` un `omniroute-113-2` izpilda nakts darbus, kuriem nepieciešams
+  tikai aizmugursistēmai paredzēts `next build` (~5–6 GB; webpack), un `quality.yml` `lint-guard`. `omniroute-113`
+  līdz 2026-10-18 bija `MemoryHigh=4G` — promptfoo būvējums tur 54 minūtes centās atbrīvot sev atmiņu;
+  8 GB novērš ierobežošanu.
+- **Apzināti mazāk klausītāju.** Četras OmniRoute vienības tika atspējotas 2026-08-29 — katrs papildu
+  klausītājs ir vēl viens iepriekš minētā atmiņas budžeta patērētājs. Uzkopšanas procesa maksimālā robeža ir 6 (`MAX_ACTIVE_RUNNERS=6` cron konfigurācijā): tas saskaita
+  katru `Runner.Listener` šajā serverī, un OmniHeuris + OmniMind mūsu četriem pievieno vēl divus.
+- **Nekad netīriet `/tmp` vai `_work` manuāli, kamēr kaut viens izpildītājs ir aizņemts.**
+  Pārbaude, kam seko dzēšana ar pauzi starp abām darbībām, izraisīja to, ka aktīvs Build darbs 2026-08-27 zaudēja savu
+  `_work`. Uzkopšanas process pārbaudi un dzēšanu veic vienā darbībā;
+  ļaujiet to izdarīt tam.
+- Izpildītāja apturēšana darba laikā atceļ darbu (novērots darbībā): `systemctl stop` izmantojiet tikai
+  tad, kad tā klausītājam nav `Runner.Worker` bērnprocesa, — un izdariet to ar vienu komandu.
+- Darbplūsmas nedrīkst glabāt artefaktus mapē `/tmp` (tā atrodas RAM). Lejupielādējiet tos uz
+  `$RUNNER_TEMP` (diskā, katram izpildītājam atsevišķi) — 1,3 GB `next-build` artefakta nonākšana tmpfs aizņēma 27–32
   minūtes, bet augšupielāde no diska — 2 minūtes.
-- `.15` VPS ir paredzēts tikai homologācijai — tajā nekad netiek darbināti CI runners.
+- `.15` VPS ir paredzēts tikai homologācijai — tajā nekad nedarbojas CI izpildītāji.
+
+## Mitinātā josla (GitHub mitinātie izpildītāji)
+
+Kontam ir **Pro** plāns: **40 vienlaicīgi mitināti darbi**, ko kopīgi izmanto visas PR pārbaudes,
+visas pēc `push` aktivizētās darbplūsmas un CodeQL noklusējuma konfigurācija. Mērīts 2026-10-18
+sapludināšanas kampaņas laikā (~10 sapludināšanas stundā zarā `release/v3.8.52`): 24 stundu
+laikā izveidotas **2,500 darbplūsmu izpildes**, 6 stundu laikā zarā veikti 44 `push`, rindā bija
+**106 mitināti darbi**, kamēr PR pārbaudes gaidīja vairākas stundas un PR tika sapludināti bez tām.
+Katrā `push` uz šo zaru tika aktivizētas deviņas darbplūsmas:
+
+| katram `push` uz `release/v*`                | mitinātie darbi | iznākums pārslodzes laikā                                           | kopš 2026-10-18                                                                    |
+| -------------------------------------------- | --------------: | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `ci.yml` (pilna matrica)                     |         līdz 30 | atcelta nākamā `push` dēļ, 24 no 24 vienā dienā                     | netiek sākta `release/**` `push` gadījumā (PR izpilde + Release-Green)             |
+| `quality.yml`                                |              ~6 | atcelta, 23 no 23                                                   | netiek sākta `release/**` `push` gadījumā                                          |
+| `Release-Green` `--quick`                    |               0 | darbojās uz `omni-build`, atcelta 97 no 100                         | `omni-release` vieta, nekad netiek atcelta, gaidošās izpildes tiek apvienotas      |
+| `Lock released branch`, `OpenSSF Scorecard`  |               2 | viena rindā gaidoša izpilde katram `push`                           | viena izpilde katrai atsaucei (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
+| `Release acceptance` (ēnas pārskats)         |               1 | viens mitināts `npm ci` katram `push`, nekad netiek atcelts         | bez izmaiņām — kandidāts `paths:` filtram                                          |
+| `Publish to Docker Hub` → `Deploy to VPS`    |               2 | atcelta katram `push`; amd64 posms konkurē uz `omni-build`          | bez izmaiņām — īpašnieka izvietošanas kanāls                                       |
+| CodeQL noklusējuma konfigurācija (`dynamic`) |               4 | `javascript-typescript`, `actions`, `c-cpp`, `python` katram `push` | bez izmaiņām — Settings → Code security; `c-cpp`/`python` šeit neko neskenē        |
+
+`tests/unit/build/push-storm-diet.test.ts` fiksē `ci.yml` un `quality.yml` `push` aktivizētāju tikai
+zarā `main`. Blakusefekts: Codecov vairs nesaņem bāzes augšupielādi katram `release` `push`
+(solis ir informatīvs un izmanto `continue-on-error`); repozitorijā esošā pārklājuma kontrole un
+PR komentārs netiek ietekmēti.
+
+**Papildu pašmitināta jauda neatrisina mitināto darbu rindu.** Izstrādes mašīna
+(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) varētu mitināt izpildītāju, taču aģentu sesijas jau
+uztur tās noslodzi 20–26 līmenī, aģenta konteineram nav Docker dēmona, un piesātināta ir tieši
+mitinātā josla. Tajā pašā brīdī `.113` mašīnā bija brīvi 71 GB un noslodze 5–8; tās ierobežojums
+ir iepriekš minētais atmiņas budžets katram klausītājam (maksimums 6 klausītāji), nevis CPU.
+Atlikušie risinājumi ir procesuāli: sapludināt kampaņas PR, izmantojot Mergify rindu
+(`label=queue`; paketes koplieto vienu `merge_group` CI izpildi, nevis pa vienai izpildei katram
+PR un vēl pa vienai katram `push`), samazināt CodeQL noklusējuma konfigurācijas valodu skaitu
+un filtrēt `release-acceptance.yml` pēc failiem, kurus tas nolasa.

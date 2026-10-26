@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { mapNvidiaGlm52ReasoningParams } from "./base/reasoningEffort.ts";
+import { mapBasetenReasoningParams } from "./base/basetenReasoning.ts";
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../config/constants.ts";
-import { getAccessToken } from "../services/tokenRefresh.ts";
+import { getAccessToken, NO_REFRESH_NEEDED } from "../services/tokenRefresh.ts";
 
 import {
   buildClaudeCodeCompatibleHeaders,
@@ -20,7 +21,7 @@ import {
 import { isOfficialAnthropicBaseUrl } from "../utils/anthropicHost.ts";
 import { applyProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { stripUnsupportedParams } from "../translator/paramSupport.ts";
-import { normalizeOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts";
+import { applyRegistryToolNameLengthAliases } from "./toolNameLengthAlias.ts";
 import {
   injectReasoningContentForThinkingModel,
   shouldInjectReasoningContentPlaceholder,
@@ -62,10 +63,12 @@ import { forwardOpencodeClientHeaders } from "../utils/opencodeHeaders.ts";
 import { resolveZaiUrl } from "./default/zaiFormatOverride.ts";
 import { normalizePoolConfig, rejectStrictPool } from "./default/poolConfig.ts";
 import { acquireNvidiaConcurrencySlot } from "./default/nvidiaConcurrencyGate.ts";
+import { normalizeOpenAIToolCallIds } from "./default/openaiToolCallIds.ts";
 import { resolveAlibabaProviderBaseUrl } from "@/shared/constants/alibabaProviderRegions";
 import { xiaomiAlternateUrl, xiaomiMimoChatUrl } from "./default/xiaomiTokenPlan.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
 import { applyRegistryBodyRepairs } from "../utils/strictChatHistory.ts";
+import { withWorkbuddyHeaders, sanitizeWorkbuddyBody } from "../utils/workbuddyGateway.ts";
 
 const NVIDIA_TOOL_CALL_ID_PATTERN = /^[A-Za-z0-9]{9}$/;
 const PERPLEXITY_AGENT_DEFAULT_MAX_OUTPUT_TOKENS = 4096;
@@ -586,23 +589,15 @@ export class DefaultExecutor extends BaseExecutor {
         headers["x-api-key"] = effectiveKey || credentials.accessToken;
         break;
       case "clinepass": // dual-auth (OAuth or BYOK) — see applyClineAuthHeaders()
+      case "cline":
         // buildClinepassHeaders() (called below via isClinepass=true) is the single
         // source of truth for the OAuth-vs-BYOK decision, keyed off
         // credentials.accessToken — do not re-decide it here off credentials.authType,
         // which can diverge from the real credential shape (#11828 review).
-        if (credentials?.accessToken) {
-          console.debug("[Auth] Using OAuth token for Cline/Kilo Code request.");
-        } else {
-          console.debug("[Auth] Using direct API key for Cline/Kilo Code request.");
-        }
+        // OAuth token vs BYOK API key handled inside applyClineAuthHeaders
+        // (keyed off credentials.accessToken); no duplicate decision needed here.
         applyClineAuthHeaders(headers, credentials, effectiveKey, clientHeaders, true);
         break;
-      case "cline": {
-        // OAuth: `workos:`-prefixed bearer + Cline client headers. BYOK API key: plain Bearer.
-        const byok = credentials?.authType === "apikey" || credentials?.authType === "api_key";
-        applyClineAuthHeaders(headers, credentials, effectiveKey, clientHeaders, byok);
-        break;
-      }
       default:
         if (this.usesClaudeCodeProtocol(credentials)) {
           const ccRequestDefaults = getClaudeCodeCompatibleRequestDefaults(
@@ -675,6 +670,10 @@ export class DefaultExecutor extends BaseExecutor {
 
     headers["Accept"] = stream ? "text/event-stream" : "application/json";
 
+    // Client attribution first; operator custom headers below still win.
+    if (clientHeaders) {
+      forwardOpencodeClientHeaders(headers, clientHeaders, { forwardUserAgent: false });
+    }
     const isCompatibleProvider =
       this.provider?.startsWith?.("openai-compatible-") ||
       this.provider?.startsWith?.("anthropic-compatible-");
@@ -683,11 +682,7 @@ export class DefaultExecutor extends BaseExecutor {
       applyCustomHeaders(headers, credentials.providerSpecificData?.customHeaders);
     }
 
-    // Forward client request metadata headers (from OpenCode or similar clients)
-    // Allowlist-based: x-opencode-* headers only; the caller's User-Agent is NOT forwarded (#15632)
     if (clientHeaders) {
-      forwardOpencodeClientHeaders(headers, clientHeaders, { forwardUserAgent: false });
-
       // #3974: merge the client's negotiated anthropic-beta (allowlisted) into the
       // outbound set. The registry's static ANTHROPIC_BETA_CLAUDE_OAUTH lacks
       // tool-search-tool-2025-10-19, so deferred-tool requests were rejected with
@@ -708,6 +703,10 @@ export class DefaultExecutor extends BaseExecutor {
     maybeAppendSkillsBeta(headers, this.provider, body, this.usesClaudeCodeProtocol(credentials));
 
     normalizeAnthropicHeaderVariants(headers);
+
+    if (this.provider === "workbuddy") {
+      withWorkbuddyHeaders(headers, body);
+    }
 
     return headers;
   }
@@ -746,8 +745,8 @@ export class DefaultExecutor extends BaseExecutor {
     const schemaJson = schema ? JSON.stringify(schema, null, 2) : null;
     const prompt =
       schemaJson !== null
-        ? `You must respond with valid JSON that strictly follows this JSON schema:\n\`\`\`json\n${schemaJson}\n\`\`\`\nRespond ONLY with the JSON object, no other text.`
-        : "You must respond with valid JSON only (a single JSON object), no other text.";
+        ? `You must respond with valid JSON that strictly follows this JSON schema:\n\`\`\`json\n${schemaJson}\n\`\`\`\nRespond ONLY with the JSON object, no other text and no markdown code fences.`
+        : "You must respond with valid JSON only (a single JSON object), no other text and no markdown code fences.";
 
     const messages: Array<Record<string, unknown>> = Array.isArray(record.messages)
       ? (record.messages as Array<Record<string, unknown>>).map((m) => ({ ...m }))
@@ -778,9 +777,16 @@ export class DefaultExecutor extends BaseExecutor {
   // `text` is an object missing `text.format` with a 400 missing_required_parameter.
   // The Responses API default for that field is { type: "text" }, so default it
   // for openai-compatible "responses" providers before forwarding upstream.
-  defaultResponsesTextFormat<T>(body: T): T {
+  // The type is resolved with the same anchored helper buildUrl uses, never a
+  // substring match: node IDs can carry an operator-chosen suffix (a chat node
+  // `openai-compatible-chat-my-responses` must stay chat).
+  defaultResponsesTextFormat<T>(
+    body: T,
+    credentials?: { providerSpecificData?: Record<string, unknown> | null } | null
+  ): T {
     if (!this.provider?.startsWith?.("openai-compatible-")) return body;
-    if (!this.provider.includes("responses")) return body;
+    const psd = credentials?.providerSpecificData ?? null;
+    if (getOpenAICompatibleType(this.provider, psd) !== "responses") return body;
     if (!body || typeof body !== "object" || Array.isArray(body)) return body;
     const record = body as Record<string, unknown>;
     const text = record.text;
@@ -816,14 +822,13 @@ export class DefaultExecutor extends BaseExecutor {
     }
 
     withDefaults = this.applyJsonSchemaFallback(withDefaults);
-    withDefaults = this.defaultResponsesTextFormat(withDefaults);
+    withDefaults = this.defaultResponsesTextFormat(withDefaults, credentials);
     if (this.provider === "perplexity-agent") {
       withDefaults = defaultPerplexityAgentMaxOutputTokens(withDefaults);
     }
 
-    if (this.provider === "nvidia") {
-      normalizeNvidiaToolCallIds(withDefaults);
-    }
+    if (this.provider === "nvidia") normalizeNvidiaToolCallIds(withDefaults);
+    if (this.provider === "openai") withDefaults = normalizeOpenAIToolCallIds(withDefaults);
 
     // Port of decolua/9router commit d652300e:
     // Cerebras returns 400 (wrong_api_format), Mistral returns 422
@@ -1001,6 +1006,7 @@ export class DefaultExecutor extends BaseExecutor {
       const bodyRecord = withDefaults as Record<string, unknown>;
       const outboundModel = typeof bodyRecord.model === "string" ? bodyRecord.model : model;
       withDefaults = mapNvidiaGlm52ReasoningParams(bodyRecord, this.provider, outboundModel);
+      withDefaults = mapBasetenReasoningParams(withDefaults, this.provider, outboundModel);
       stripUnsupportedParams(this.provider, outboundModel, withDefaults as Record<string, unknown>);
     }
 
@@ -1047,32 +1053,10 @@ export class DefaultExecutor extends BaseExecutor {
       }
     }
 
-    const toolNameMaxLength = getRegistryEntry(this.provider)?.toolNameMaxLength;
-    if (
-      toolNameMaxLength &&
-      withDefaults &&
-      typeof withDefaults === "object" &&
-      !Array.isArray(withDefaults)
-    ) {
-      const toolNameMap = normalizeOpenAIToolNames(withDefaults, toolNameMaxLength);
-      if (toolNameMap.size > 0) {
-        const existingToolNameMap =
-          (withDefaults as Record<string, unknown>)._toolNameMap instanceof Map
-            ? ((withDefaults as Record<string, unknown>)._toolNameMap as Map<string, string>)
-            : null;
-        const responseToolNameMap = existingToolNameMap
-          ? new Map(existingToolNameMap)
-          : new Map<string, string>();
-        for (const [alias, original] of toolNameMap) {
-          responseToolNameMap.set(alias, original);
-        }
-        Object.defineProperty(withDefaults, "_toolNameMap", {
-          value: responseToolNameMap,
-          enumerable: false,
-          configurable: true,
-          writable: true,
-        });
-      }
+    applyRegistryToolNameLengthAliases(this.provider, withDefaults);
+
+    if (this.provider === "workbuddy") {
+      withDefaults = sanitizeWorkbuddyBody(withDefaults);
     }
 
     return applyRegistryBodyRepairs(this.provider, withDefaults);
@@ -1099,11 +1083,11 @@ export class DefaultExecutor extends BaseExecutor {
     if (!reasoningEnabled) return body;
 
     const MIN_TOKENS = 4096;
-    const maxOutput =
-      typeof modelEntry.maxOutputTokens === "number" && modelEntry.maxOutputTokens > 0
-        ? modelEntry.maxOutputTokens
-        : MIN_TOKENS;
-    const target = Math.min(MIN_TOKENS, maxOutput);
+    // #14888: unknown real limit (no maxOutputTokens) -> don't fabricate a 4096 ceiling.
+    if (typeof modelEntry.maxOutputTokens !== "number" || modelEntry.maxOutputTokens <= 0) {
+      return body;
+    }
+    const target = Math.min(MIN_TOKENS, modelEntry.maxOutputTokens);
     const current = body.max_tokens ?? body.max_completion_tokens;
 
     // #6912: keep whichever token key transformRequest already set (o1/o3/o4/gpt-5 use
@@ -1136,7 +1120,7 @@ export class DefaultExecutor extends BaseExecutor {
         return null;
       }
     }
-    if (!credentials.refreshToken) return null;
+    if (!credentials.refreshToken) return NO_REFRESH_NEEDED;
     try {
       return await getAccessToken(this.provider, credentials, log);
     } catch (error) {

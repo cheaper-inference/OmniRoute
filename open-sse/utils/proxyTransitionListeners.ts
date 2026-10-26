@@ -8,7 +8,7 @@
  */
 
 export type ProxyTransitionKind =
-  "ip_quota_429" | "proxy_unreachable" | "transport" | "slow" | "geo_blocked";
+  "ip_quota_429" | "proxy_unreachable" | "transport" | "slow" | "geo_blocked" | "operator_reported";
 
 export interface ProxyTransition {
   key: string;
@@ -25,6 +25,7 @@ export interface SharedRefusalStore {
   transportFailures: TransportFailure[];
   transportSuccesses: TransportSuccess[];
   slowOverruns: SlowOverrun[];
+  slowServes: SlowServe[];
   listeners: Set<ProxyTransitionListener>;
   listenerKeys: Map<string, ProxyTransitionListener>;
 }
@@ -33,6 +34,7 @@ export type RefusalState = { streak: number; until: number; seq: number };
 export type TransportFailure = { key: string; destination: string; at: number };
 export type TransportSuccess = { destination: string; key: string; at: number };
 export type SlowOverrun = { key: string; at: number };
+export type SlowServe = { key: string; destination: string; at: number };
 
 const SHARED_STORE_KEY = Symbol.for("omniroute.proxyRefusalMemory");
 
@@ -51,6 +53,7 @@ export function getSharedRefusalStore(): SharedRefusalStore {
       transportFailures: [],
       transportSuccesses: [],
       slowOverruns: [],
+      slowServes: [],
       listeners: new Set<ProxyTransitionListener>(),
       listenerKeys: new Map<string, ProxyTransitionListener>(),
     };

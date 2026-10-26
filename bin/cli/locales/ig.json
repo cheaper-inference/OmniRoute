@@ -123,7 +123,9 @@
       "maxCostOpt": "Ọnụ ahịa kachasị kwa ụbọchị (USD)",
       "allowedModelsOpt": "Ndepụta ụdịdị e kwere ekwe nke rikoma kewara",
       "nothingToSet": "Enweghị mpaghara iwu e nyere. Jiri --rate-limit, --max-cost, ma ọ bụ --allowed-models.",
-      "updated": "Emelitela iwu."
+      "updated": "Emelitela iwu.",
+      "modelAccessModeOpt": "Ụdị ohere ịnweta ụdị (all | restricted)",
+      "unrestrictedOpt": "Kwe ka ụdị niile (--model-access-mode all)"
     },
     "expiration": {
       "title": "Mmebi Oge Igodo",
@@ -254,6 +256,7 @@
     "log": "Gosi ndekọ sava ozugbo",
     "no_recovery": "Gbanyụọ mmalitegharị akpaka mgbe ọ dara (ọnọdụ debugging)",
     "max_restarts": "Ọnụọgụ mmalitegharị kachasị elu mgbe ọ dara n'ime 30s tupu ịkwụsị mbọ (ndabara: 2)",
+    "headless": "Na-agba naanị injin proxy: agbanyụrụ dashboard (404), a na-awụfe sistemu nta nhọrọ (na-esetịpụ OMNIROUTE_HEADLESS=1)",
     "tray": "Malite na tray sistemụ (naanị na desktọpụ, ma ọ bụrụ na ahọrọ ya)",
     "no_tray": "Gbanyụọ akara ngosi tray sistemụ",
     "ready_timeout": "Oge njedebe nyocha ịdị njikere na ms (yana OMNIROUTE_READY_TIMEOUT_MS, ndabara bụ 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Mekọrịta nhazi n'etiti instance OmniRoute",
     "push": {
-      "description": "Ziga nhazi na cloud ma ọ bụ instance dị anya",
-      "target": "Ebe a na-eziga (cloud ma ọ bụ context:name)",
-      "bundle": "Akụkụ bundle a ga-emekọrịta",
-      "dryRun": "Lee ihe ga-eme n'etinyeghị ya n'ọrụ"
+      "description": "Ziga nhazi na cloud ma ọ bụ instance dị anya"
     },
     "pull": {
-      "description": "Weta nhazi site na cloud ma ọ bụ ebe dị anya",
-      "source": "Isi mmalite (cloud ma ọ bụ context:name)",
-      "merge": "Jikọta ya na nhazi dị adị",
-      "replace": "Dochie nhazi dị adị",
-      "dryRun": "Lelee tupu itinye ya n'ọrụ"
-    },
-    "diff": {
-      "source": "Ọnọdụ isi mmalite",
-      "target": "Ọnọdụ ebe a na-eziga"
+      "description": "Weta nhazi site na cloud ma ọ bụ ebe dị anya"
     },
     "bundle": {
       "description": "Bupụ nhazi dịka faịlụ ngwugwu",
-      "include": "Akụkụ ndị a ga-etinye (jiri rikọm kewaa ha)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Bubata faịlụ ngwugwu",
       "dryRun": "Nyochaa tupu itinye ya n'ọrụ"
-    },
-    "initialize": {
-      "fromCloud": "Malite site na nkwado ndabere igwe ojii"
     },
     "tokens": {
       "description": "Jikwaa token mmekọrịta",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Mafere nkwenye"
       }
-    },
-    "resolve": {
-      "description": "Dozie esemokwu mmekọrịta n'ụzọ mkparịta ụka"
     }
   },
   "config": {

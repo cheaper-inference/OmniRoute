@@ -304,7 +304,9 @@ export default function ProviderModalsPanel({
           }}
         />
       )}
-      {!isUpstreamProxyProvider && (
+      {/* Mount only while open: closing drops the whole form, so a reopened
+          modal never shows the previous credentials. */}
+      {!isUpstreamProxyProvider && showAddApiKeyModal && (
         <AddApiKeyModal
           isOpen={showAddApiKeyModal}
           provider={providerId}

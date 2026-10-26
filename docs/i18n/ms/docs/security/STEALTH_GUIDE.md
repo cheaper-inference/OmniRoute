@@ -20,57 +20,57 @@ Ciri penyamaran diwujudkan supaya OmniRoute boleh bertindak sebagai lapisan kese
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Sesi `wreq-js` berterusan dicipta secara malas bagi setiap skop akaun dan proksi yang telah diselesaikan. Kumpulan `TlsClient` seluruh proses mengendalikan paling banyak 128 sesi yang menyamar sebagai **Chrome 124 pada macOS** untuk pihak huluan di sebalik Cloudflare. `TlsClient.fetch()` gagal secara tertutup apabila masa jalan natif tidak tersedia; pemanggil boleh memilih sandaran di luar pembalut ini secara eksplisit.
+Sesi `wreq-js` berterusan dicipta secara malas bagi setiap skop akaun dan proksi yang telah diselesaikan. Kumpulan `TlsClient` seluruh proses mengandungi paling banyak 128 sesi yang menyamar sebagai **Chrome 124 pada macOS** untuk huluan di belakang Cloudflare. `TlsClient.fetch()` gagal secara tertutup apabila persekitaran jalanan natif tidak tersedia; pemanggil boleh memilih sandaran di luar pembalut ini secara eksplisit.
 
 - Profil sesi: `browser: "chrome_124", os: "macos"`
-- Penyelesaian proksi (keutamaan): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (termasuk huruf kecil)
-- Tamat masa: `TLS_CLIENT_TIMEOUT_MS` (mewarisi daripada `FETCH_TIMEOUT_MS`, lalai 600000)
+- Penyelesaian proksi (keutamaan): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (juga huruf kecil)
+- Tamat masa: `TLS_CLIENT_TIMEOUT_MS` (diwarisi daripada `FETCH_TIMEOUT_MS`, lalai 600000)
 - Response `wreq-js` serasi dengan fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Pemantau bait pertama (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  diselesaikan sebaik sahaja pengepala pihak huluan tiba, maka `TLS_CLIENT_TIMEOUT_MS` sahaja tidak dapat mengehadkan
-  badan yang tidak pernah menghasilkan bait pertama. `guardTlsFirstByte()` melumbakan `read()` pertama badan
-  dengan `TLS_FIRST_BYTE_WATCHDOG_MS` (lalai `10000`, `0` menyahdayakannya); badan yang sihat
-  tidak terjejas, manakala badan yang tersekat membatalkan pembaca wreq dan membolehkan logik
-  sandaran TLS sedia ada `proxyFetch` diteruskan ke penghantar langsung/proksi (permintaan yang tidak selamat untuk dimainkan semula, contohnya
-  POST dengan badan, masih melontarkan ralat dan bukannya dicuba semula secara senyap).
+  diselesaikan sebaik sahaja pengepala huluan tiba, maka `TLS_CLIENT_TIMEOUT_MS` sahaja tidak dapat mengehadkan
+  isi yang tidak pernah menghasilkan bait pertama. `guardTlsFirstByte()` melumbakan `read()` pertama isi
+  dengan `TLS_FIRST_BYTE_WATCHDOG_MS` (lalai `10000`, `0` menyahdayakannya); isi yang sihat
+  tidak terjejas, manakala isi yang tersekat membatalkan pembaca wreq dan membolehkan logik
+  sandaran TLS sedia ada `proxyFetch` diteruskan kepada penghantar langsung/proksi (permintaan yang tidak
+  selamat untuk dimainkan semula, misalnya POST dengan isi, masih melontarkan ralat dan bukannya dicuba semula secara senyap).
 
 ### Pengangkutan penyedia kuki web — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` ialah penyesuai dikongsi untuk lima pengangkutan khusus
-kuki web di bawah. Setiap pembalut penyedia yang nipis memilih profil pelayar/OS. Penyesuai
-menggunakan pemuat masa jalan wreq tunggal dan kumpulan pengangkutan dalam `open-sse/utils/tlsClient.ts`, yang dikunci berdasarkan
+`open-sse/services/tlsClientBase.ts` ialah penyesuai dikongsi untuk lima pengangkutan
+kuki web khusus di bawah. Setiap pembalut penyedia ringkas memilih profil pelayar/OS. Penyesuai
+menggunakan pemuat persekitaran jalanan wreq tunggal dan kumpulan pengangkutan dalam `open-sse/utils/tlsClient.ts`, yang dikunci mengikut
 profil + OS + proksi yang telah diselesaikan, manakala setiap permintaan menggunakan `cookieMode: "ephemeral"`. Oleh itu, akaun dan
-permintaan berkongsi sambungan pada peringkat pengangkutan, tetapi tidak pernah berkongsi sesi wreq atau balang kuki.
+permintaan berkongsi sambungan peringkat pengangkutan, tetapi tidak pernah berkongsi sesi wreq atau balang kuki.
 
-| Penyedia   | Profil        | OS Dicontohi | Dasar EOF Strim                     |
-| ---------- | ------------- | ------------ | ----------------------------------- |
-| Claude     | `chrome_146`  | Linux        | sertakan `[DONE]`                   |
-| Perplexity | `firefox_148` | macOS        | sertakan `event: end_of_stream`     |
-| Grok       | `chrome_146`  | Linux        | kecualikan `[DONE]`                 |
-| Notion     | `chrome_146`  | Windows      | sertakan `[DONE]`                   |
-| LMArena    | `chrome_146`  | Windows      | tiada penanda; tutup pada EOF natif |
+| Penyedia   | Profil        | OS Dicontohi | Dasar EOF Strim                      |
+| ---------- | ------------- | ------------ | ------------------------------------ |
+| Claude     | `chrome_146`  | Linux        | sertakan `[DONE]`                    |
+| Perplexity | `firefox_151` | macOS        | sertakan `event: end_of_stream`      |
+| Grok       | `chrome_146`  | Linux        | kecualikan `[DONE]`                  |
+| Notion     | `chrome_146`  | Windows      | sertakan `[DONE]`                    |
+| LMArena    | `chrome_146`  | Windows      | tiada sentinel; tutup pada EOF natif |
 
-- Penstriman menggunakan `ReadableStream` respons natif secara langsung; tiada fail sementara atau proses sampingan
+- Penstriman menggunakan `ReadableStream` respons natif secara langsung; tiada fail sementara atau sidecar
   dicipta.
 - Sehingga 256 bait awal diperiksa sebelum strim didedahkan. Penyedia SSE menimbal ralat bukan SSE;
   Grok/LMArena memetakan cabaran Cloudflare kepada `403` dan halaman perantara HTML kepada `502`.
-- Tamat masa permintaan natif kekal dibalut oleh tarikh akhir mutlak JS. Gantung menyebabkan
-  hanya pengangkutan profil/OS/proksi yang terjejas dibatalkan dan ditutup sebelum permintaan seterusnya menciptanya semula.
-- Keutamaan penyelesaian proksi ialah `proxyUrl` bagi setiap panggilan → konteks akaun/papan pemuka yang berskop permintaan →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (termasuk varian huruf kecil). Ralat penyelesaian menyebabkan
-  kegagalan tertutup dan bukannya membocorkan sambungan langsung. LMArena sengaja membuat penyelesaian terhadap `arena.ai`.
-- `byteResponse` mengembalikan URL `data:` dengan jenis kandungan tanpa kerosakan UTF-8.
-- Ralat ialah `TlsClientUnavailableError` (pakej/tambahan tidak tersedia), `TlsClientHangError`
+- Tamat masa permintaan natif kekal dibalut oleh tarikh akhir mutlak JS. Keadaan tergantung membatalkan
+  dan menutup hanya pengangkutan profil/OS/proksi yang terjejas sebelum permintaan seterusnya menciptanya semula.
+- Keutamaan penyelesaian proksi ialah `proxyUrl` setiap panggilan → konteks akaun/papan pemuka berskop permintaan →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (termasuk varian huruf kecil). Ralat penyelesaian gagal
+  secara tertutup dan bukannya membocorkan sambungan langsung. LMArena sengaja membuat penyelesaian terhadap `arena.ai`.
+- `byteResponse` mengembalikan URL `data:` yang ditaip mengikut kandungan tanpa kerosakan UTF-8.
+- Ralat terdiri daripada `TlsClientUnavailableError` (pakej/tambahan tidak tersedia), `TlsClientHangError`
   (tarikh akhir dilampaui), dan `WreqTransportCapacityError` (kod ralat kapasiti sesi dikongsi)
-  apabila kesemua 128 slot profil/OS/proksi terhad sedang aktif atau ditutup.
+  apabila kesemua 128 slot profil/OS/proksi terbatas sedang aktif atau ditutup.
 
-Sesi generik `TlsClient` di atas kekal dikhususkan untuk keadaan kuki berterusan yang disokong
-pelayar. Kedua-dua laluan menggunakan semula satu pemuat modul wreq tercache dan cangkuk kitar hayat proses; kumpulan masing-masing kekal
-berasingan kerana jangka hayat kuki mereka memang sengaja dibezakan.
+Sesi generik `TlsClient` di atas kekal dikhususkan untuk keadaan kuki berterusan yang disokong pelayar.
+Kedua-dua laluan menggunakan semula satu pemuat modul wreq bercache dan cangkuk kitaran hayat proses; kumpulannya kekal
+berasingan kerana jangka hayat kukinya sengaja dibezakan.
 
 Profil tersebut disokong oleh pakej yang dipinkan, tetapi penerimaan WAF sebenar boleh berubah secara bebas
 daripada ujian kontrak setempat. Sahkan perubahan cap jari menggunakan akaun langsung yang dibenarkan secara eksplisit
-sebelum mendakwa kesetaraan dengan pelayar pihak huluan.
+sebelum mendakwa kesetaraan dengan pelayar huluan.
 
 ---
 

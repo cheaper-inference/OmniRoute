@@ -70,6 +70,29 @@ export const GEMINI_3_7_FLASH_PROMO_PRICING = {
   cache_creation: 0.75,
 };
 
+// Gemini 4 Argon introductory paid-tier pricing through 2026-11-30; standard
+// becomes $4/$20/$0.20 (input/output/cached input) on 2026-12-01.
+// https://ai.google.dev/gemini-api/docs/pricing
+export const GEMINI_4_ARGON_PROMO_PRICING = {
+  input: 2.0,
+  output: 10.0,
+  cached: 0.1,
+  reasoning: 10.0,
+  cache_creation: 2.0,
+};
+
+// Gemini 3.8 Flash paid-tier pricing through 2026-12-31; standard becomes
+// $1.50/$7.50/$0.15 (input/output/cached input) on 2027-01-01. Keep separate
+// from 3.7 so their rates can diverge.
+// https://ai.google.dev/gemini-api/docs/pricing
+export const GEMINI_3_8_FLASH_PROMO_PRICING = {
+  input: 0.75,
+  output: 3.75,
+  cached: 0.075,
+  reasoning: 3.75,
+  cache_creation: 0.75,
+};
+
 export const CLAUDE_FABLE_5_PRICING = {
   input: 15.0,
   output: 75.0,
@@ -299,3 +322,41 @@ export const GLM_PRICING = {
     cache_creation: 0.2,
   },
 };
+
+type TokenPricingRow = {
+  input: number;
+  output: number;
+  cached: number;
+  reasoning: number;
+  cache_creation: number;
+};
+
+/**
+ * Optional long-context override on a pricing row, applied by the cost calculator when the
+ * (cache-inclusive) prompt exceeds `threshold` — or reaches it when `inclusive` is true.
+ */
+export type LongContextPricingTier = Partial<TokenPricingRow> & {
+  threshold: number;
+  inclusive?: boolean;
+};
+
+/**
+ * OpenAI: prompts with more than 272K input tokens are priced at 2x input and cache rates and
+ * 1.5x output for the full request (https://developers.openai.com/api/docs/models/gpt-5.5,
+ * https://developers.openai.com/api/docs/models/gpt-6-sol).
+ */
+export function withOpenAiLongContextTier<T extends TokenPricingRow>(
+  row: T
+): T & { long_context: LongContextPricingTier } {
+  return {
+    ...row,
+    long_context: {
+      threshold: 272_000,
+      input: row.input * 2,
+      cached: row.cached * 2,
+      cache_creation: row.cache_creation * 2,
+      output: row.output * 1.5,
+      reasoning: row.reasoning * 1.5,
+    },
+  };
+}

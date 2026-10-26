@@ -4,6 +4,10 @@
 // to the original inline defs. The host dispatcher still owns the SPECIALTY_VALIDATORS map
 // construction + dispatch — these are just the leaf validator bodies.
 import { validateQoderCliPat } from "@omniroute/open-sse/services/qoderCli.ts";
+import {
+  resolveKiroApiKeyRegion,
+  resolveKiroRuntimeRegion,
+} from "@omniroute/open-sse/services/kiroRegion.ts";
 import { KiroService } from "@/lib/oauth/services/kiro";
 import { resolveNvidiaValidationModel } from "@/lib/providers/nvidiaValidationModel";
 import { normalizeBaseUrl } from "./urlHelpers";
@@ -123,7 +127,8 @@ export async function validateQoderProvider({ apiKey, providerSpecificData }: an
 
 export async function validateKiroProvider({ apiKey, providerSpecificData }: any) {
   try {
-    const region = providerSpecificData?.region || "us-east-1";
+    // Validate in the exact region the executor will route this connection to.
+    const region = resolveKiroApiKeyRegion(resolveKiroRuntimeRegion(providerSpecificData));
     const credential = await new KiroService().validateApiKey(apiKey, region);
     if (!credential.profileArn) {
       return await validateKiroApiKeyRuntimeProbe({
