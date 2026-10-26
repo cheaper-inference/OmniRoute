@@ -24,12 +24,11 @@ export type NamedCombos = Record<string, CompressionPipelineStep[]>;
  *      via resolveCompressionPlan, otherwise the legacy defaultMode — so the preview
  *      cannot disagree with a live request about the plain default either)
  *
- * The result then passes through downgradeUnrequestedLossy — resolveBasePlan ends with
- * applyLossyRequestPolicy(plan, header) and an at-rest preview has no request header,
- * so a header-less live call downgrades lossy steps to the safe dedup+whitespace
- * pipeline. Without this the Settings preview claims an active rtk/caveman profile is
- * what runs, while every header-less request actually runs the safe pipeline (the
- * preview-vs-runtime mismatch #12063 was about).
+ * The result then passes through downgradeUnrequestedLossy — resolveBasePlan applies the same
+ * policy to header-less requests. A stacked profile filters its own pipeline; a lossy single mode
+ * retains the configured lossless steps and falls back to session-dedup + lite only when none
+ * survive. Without this the Settings preview can advertise a pipeline different from the one the
+ * runtime resolves (the preview-vs-runtime mismatch #12063 was about).
  */
 export function deriveEffectivePreviewPlan(
   config: DefaultPlanConfig,
