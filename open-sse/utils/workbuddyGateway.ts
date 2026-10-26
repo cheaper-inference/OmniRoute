@@ -1,5 +1,13 @@
 import { createHash, randomBytes } from "node:crypto";
 
+import {
+  getWorkbuddyChatHeaders,
+  WORKBUDDY_UA_VERSION,
+  WORKBUDDY_USER_AGENT,
+} from "../config/providerHeaderProfiles.ts";
+
+export { WORKBUDDY_UA_VERSION, WORKBUDDY_USER_AGENT };
+
 /**
  * WorkBuddy gateway compliance utilities (Issue #16978).
  *
@@ -8,20 +16,7 @@ import { createHash, randomBytes } from "node:crypto";
  * and competitor prompt anti-ban sanitization (preventing 11128 errors).
  */
 
-export const WORKBUDDY_UA_VERSION = "5.5.6";
-export const WORKBUDDY_USER_AGENT = `WorkBuddy/${WORKBUDDY_UA_VERSION}`;
-
-export const WORKBUDDY_DEFAULT_HEADERS: Record<string, string> = {
-  "User-Agent": WORKBUDDY_USER_AGENT,
-  "X-Product": "SaaS",
-  "X-IDE-Type": "WorkBuddy",
-  "X-IDE-Name": "WorkBuddy",
-  "X-IDE-Version": WORKBUDDY_UA_VERSION,
-  "X-Requested-With": "XMLHttpRequest",
-  "X-Agent-Intent": "craft",
-  "X-Agent-Purpose": "conversation",
-  "X-Agent-Type": "main",
-};
+export const WORKBUDDY_DEFAULT_HEADERS: Record<string, string> = getWorkbuddyChatHeaders();
 
 const SALT = randomBytes(16).toString("hex");
 

@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "{count, plural, one {# బ్యాచ్} other {# బ్యాచ్లు}}",
     "batchFilePreview": "పరిశీలన",
     "batchFilePreviewTruncated": "మొదటి {shown} పంక్తులు చూపిస్తున్నాయి ({total} మొత్తం పంక్తులు)",
-    "batchFileDownloadFull": "పూర్తి ఫైల్ డౌన్‌లోడ్ చేయండి"
+    "batchFileDownloadFull": "పూర్తి ఫైల్ డౌన్‌లోడ్ చేయండి",
+    "dialogTitleFallback": "డైలాగ్",
+    "pagination": "పేజినేషన్",
+    "clearFilters": "ఫిల్టర్లను క్లియర్ చేయండి",
+    "tokensPageTitle": "టోకెన్లు",
+    "tokensPageDescription": "API కీల మధ్య టోకెన్లను పంపండి, ఆహ్వాన కోడ్లను పంచుకోండి మరియు కమ్యూనిటీ సర్వర్లను కనెక్ట్ చేయండి.",
+    "tokensServerUrlLabel": "సర్వర్ URL"
   },
   "disabled": "నిలిపివేయబడింది",
   "featureFlagOmnirouteEmergencyFallbackDescription": "బడ్జెట్ ముగిసిపోయిన అభ్యర్థనలను అత్యవసర ఉచిత ఫాల్‌బ్యాక్ ప్రొవైడర్/మోడల్‌కు రూట్ చేయండి.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 లేదా @channelname",
       "chatIdHint": "చాట్/ఛానెల్ యొక్క ప్రత్యేక సంఖ్యా ఐడెంటిఫైయర్ లేదా పబ్లిక్ యూజర్‌నేమ్.",
       "tutorial": "Telegram వెబ్‌హుక్‌ను ఎలా కాన్ఫిగర్ చేయాలి:"
-    }
+    },
+    "copy": "కాపీ చేయండి",
+    "copied": "కాపీ చేయబడింది!",
+    "expandDetails": "వివరాలను చూపించండి",
+    "collapseDetails": "వివరాలను దాచండి"
   },
   "compliance": {
     "auditTitle": "ఆడిట్",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "కాల్‌లు (24గంటలు)",
     "mcpMetricSuccessRate": "విజయ రేటు",
     "mcpMetricAvgDuration": "సగటు వ్యవధి",
-    "mcpMetricTopTool": "టాప్ టూల్"
+    "mcpMetricTopTool": "టాప్ టూల్",
+    "dismissError": "లోపాన్ని తీసివేయండి"
   },
   "themesPage": {
     "title": "థీమ్లు",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "అధునాతన పేలోడ్ నియమాలు, అభ్యర్థన పరిమితులు మరియు ప్రాక్సీ API సెట్టింగ్లు",
     "mitmProxyDescription": "ట్రాఫిక్ తనిఖీ మరియు డీబగ్గింగ్ కోసం MITM ప్రాక్సీ సెట్టింగ్లను కాన్ఫిగర్ చేయండి",
     "oneProxyDescription": "అధునాతన ప్రాక్సీ చైనింగ్ కోసం 1Proxy సెట్టింగ్లను కాన్ఫిగర్ చేయండి",
-    "omniSkillsDescription": "ఆటోమేటెడ్ ప్రాంప్ట్ మరియు టూల్ ఎగ్జిక్యూషన్ కోసం శాండ్‌బాక్స్ స్కిల్స్‌ను ఇన్‌స్టాల్ చేయండి మరియు నిర్వహించండి"
+    "omniSkillsDescription": "ఆటోమేటెడ్ ప్రాంప్ట్ మరియు టూల్ ఎగ్జిక్యూషన్ కోసం శాండ్‌బాక్స్ స్కిల్స్‌ను ఇన్‌స్టాల్ చేయండి మరియు నిర్వహించండి",
+    "openMenu": "మెనూను తెరవండి",
+    "products": "Keak ఉత్పత్తులు"
   },
   "cloudSyncStatus": {
     "synced": "సింక్ చేయబడింది",
@@ -2495,7 +2508,12 @@
     "onlySelectedConnections": "ఎంచుకున్న కనెక్షన్లు మాత్రమే",
     "selectAtLeastOneConnection": "కనీసం ఒక కనెక్షన్ను ఎంచుకోండి లేదా అన్ని కనెక్షన్లను ఎంచుకోండి.",
     "allConnectionsDesc": "ఈ కీ ఏ క్రియాశీల కనెక్షన్నైనా ఉపయోగించగలదు.",
-    "restrictedToConnections": "{count, plural, one {# కనెక్షన్కు} other {# కనెక్షన్లకు}} పరిమితం చేయబడింది."
+    "restrictedToConnections": "{count, plural, one {# కనెక్షన్కు} other {# కనెక్షన్లకు}} పరిమితం చేయబడింది.",
+    "preferredConnections": "ప్రాధాన్య కనెక్షన్‌లు",
+    "preferredConnectionsDesc": "ప్రతి కీకి ప్రాధాన్య క్రమం. ప్రాధాన్య కనెక్షన్ అందుబాటులో లేకపోతే, రూటింగ్ తదుపరి అర్హత ఉన్న కనెక్షన్‌కు మారుతుంది.",
+    "preferredConnectionsNone": "ఏ ప్రాధాన్యతా సెట్ చేయలేదు — డిఫాల్ట్ రూటింగ్ వ్యూహం ఉపయోగించబడుతుంది.",
+    "preferredConnectionsClear": "క్లియర్ చేయి",
+    "removeSelection": "{name}ను తీసివేయండి"
   },
   "auditLog": {
     "title": "ఆడిట్ లాగ్",
@@ -2607,7 +2625,9 @@
     "imageToTextBridgeCta": "Modality Bridge సెట్టింగ్స్‌లో Image→Text బ్రిడ్జ్‌ను కాన్ఫిగర్ చేయండి",
     "sttBridgeCta": "Modality Bridge సెట్టింగ్స్‌లో Speech→Text బ్రిడ్జ్‌ను కాన్ఫిగర్ చేయండి",
     "existingConnection": "ఉన్న కనెక్షన్",
-    "openrouterSttDescription": "OpenRouter స్పీచ్-టు-టెక్స్ట్ మోడల్స్ మీ కాన్ఫిగర్ చేసిన OpenRouter కనెక్షన్‌ను ఉపయోగిస్తాయి. ప్రత్యేకమైన క్రెడెన్షియల్ అవసరం లేదు."
+    "openrouterSttDescription": "OpenRouter స్పీచ్-టు-టెక్స్ట్ మోడల్స్ మీ కాన్ఫిగర్ చేసిన OpenRouter కనెక్షన్‌ను ఉపయోగిస్తాయి. ప్రత్యేకమైన క్రెడెన్షియల్ అవసరం లేదు.",
+    "modalityTabsAria": "మీడియా రకం",
+    "serviceKindsAria": "సేవ రకం"
   },
   "search": {
     "searchQuery": "శోధన ప్రశ్న",
@@ -3278,7 +3298,8 @@
     "cliproxyapiUnknown": "తెలియదు",
     "cliproxyapiUpdate": "అప్‌డేట్",
     "cliproxyapiUpdateAvailable": "అప్‌డేట్ అందుబాటులో ఉంది: v{current} → v{latest}",
-    "cliproxyapiVersion": "సంవత్సరం"
+    "cliproxyapiVersion": "సంవత్సరం",
+    "removeMapping": "మ్యాపింగ్ను తీసివేయండి"
   },
   "modelCatalog": {
     "title": "మోడల్స్ & కాంబోలు",
@@ -3936,6 +3957,7 @@
     "builderComboRefStep": "కాంబో సూచనను జోడించండి",
     "builderPinnedAccount": "పిన్ చేసిన ఖాతా",
     "builderLegacyEntry": "లెగసీ ఎంట్రీ",
+    "builderStaleModel": "లైవ్ కేటలాగ్‌లో లేదు",
     "reviewName": "పేరు",
     "reviewStrategy": "వ్యూహం",
     "reviewSteps": "దశలు",
@@ -4014,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "ఈ టెంప్లేట్‌తో సరిపోయే ప్రస్తుత కనెక్ట్ చేసిన ప్రొవైడర్లు/మోడల్‌లను ఎడిటబుల్ కంబోలో స్నాప్‌షాట్ తీసుకుంటుంది.",
     "duplicateAutoComboFailedPrefix": "ఆటోకంబో డూప్లికేట్ చేయడంలో విఫలమైంది:",
     "duplicateAutoComboUnknownError": "తెలియని దోషం",
-    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి"
+    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి",
+    "weightPercent": "బరువు (%)",
+    "clearSearch": "శోధనను క్లియర్ చేయండి",
+    "responseValidationRemoveCheck": "తనిఖీని తీసివేయండి",
+    "responseValidationPath": "JSON పాత్",
+    "responseValidationCondition": "షరతు",
+    "responseValidationValue": "ఆశించిన విలువ"
   },
   "costs": {
     "title": "ఖర్చులు",
@@ -5288,7 +5316,8 @@
         "skipped": "ఇప్పటికే కాన్ఫిగర్ చేయబడింది",
         "failed": "ఫెయిల్డ్"
       }
-    }
+    },
+    "stepProgress": "సెటప్ పురోగతి"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ఈ ప్రొవైడర్ డిఫాల్ట్‌గా auto నుండి మినహాయించబడింది",
@@ -7255,7 +7284,7 @@
       "nextSwitchNow": "ఇప్పుడు",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -8951,7 +8980,8 @@
       "statsTitle": "పునఃప్రారంభం నుండి గుర్తింపులు",
       "statsEmpty": "ఇంకా గుర్తింపులు లేవు.",
       "statsRequest": "అభ్యర్థనలు"
-    }
+    },
+    "modelOverrideKey": "ఓవర్రైడ్ కీ"
   },
   "contextRtk": {
     "title": "RTK ఇంజిన్",
@@ -9035,7 +9065,8 @@
     "tomlTestPassed": "విజయవంతమైంది",
     "tomlTestFailed": "విఫలమైంది",
     "tomlImportError": "RTK TOML ఫైల్‌ను ప్రాసెస్ చేయడం సాధ్యపడలేదు.",
-    "tomlFileReadError": "ఎంచుకున్న TOML ఫైల్‌ను చదవడం సాధ్యపడలేదు."
+    "tomlFileReadError": "ఎంచుకున్న TOML ఫైల్‌ను చదవడం సాధ్యపడలేదు.",
+    "viewMode": "వీక్షణ మోడ్"
   },
   "compressionEngineConfig": {
     "loading": "లోడ్ అవుతోంది…",
@@ -9257,7 +9288,8 @@
     "languagePacksList": "భాషా ప్యాక్‌లు: {packs}",
     "dragToReorder": "దశను క్రమబద్ధీకరించడానికి డ్రాగ్ చేయండి",
     "engine": "ఇంజిన్",
-    "intensity": "తీవ్రత"
+    "intensity": "తీవ్రత",
+    "compressionOverride": "కంప్రెషన్ ఓవర్రైడ్"
   },
   "compressionStudio": {
     "noRun": "ఎటువంటి కంప్రెషన్ రన్ అందుబాటులో లేదు.",
@@ -9317,7 +9349,8 @@
     "encoderWinner": "విజేత: {winner}",
     "encoder": "ఎన్‌కోడర్",
     "bytes": "బైట్‌లు",
-    "tokensCl100k": "టోకెన్‌లు (cl100k)"
+    "tokensCl100k": "టోకెన్‌లు (cl100k)",
+    "studioViews": "Studio వీక్షణలు"
   },
   "omniglyph": {
     "preview": "ప్రివ్యూ",
@@ -9523,7 +9556,9 @@
     "tooltipMinLength": "దీని కంటే చిన్న సందేశాలు కుదించబడవు. దిగువ = మరింత కుదింపు.",
     "tooltipMinSavings": "ఇది కనీసం ఇన్ని టోకెన్లను ఆదా చేస్తే మాత్రమే కుదించండి.",
     "ultraSettings": "అల్ట్రా సెట్టింగ్‌లు",
-    "ultraSettingsDesc": "SLM-శక్తితో కూడిన సెమాంటిక్ కంప్రెషన్"
+    "ultraSettingsDesc": "SLM-శక్తితో కూడిన సెమాంటిక్ కంప్రెషన్",
+    "defaultLanguage": "డిఫాల్ట్ భాష",
+    "viewMode": "వీక్షణ మోడ్"
   },
   "translator": {
     "title": "అనువాదకం",
@@ -10291,7 +10326,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Claude పరిమితి రీసెట్",
+    "confirmRedeemClaudeResetCredit": "రీడీమ్ చేయడం వలన అర్హత ఉన్న Claude వినియోగ పరిమితులు తక్షణమే రీసెట్ చేయబడతాయి మరియు ఈ క్రెడిట్ శాశ్వతంగా వినియోగించబడుతుంది.",
+    "claudeResetCreditsModalTitle": "Claude రీసెట్ క్రెడిట్‌లు",
+    "claudeResetCreditsModalExplainer": "ఈ ఖాతా కోసం అందుబాటులో ఉన్న Claude రీసెట్ క్రెడిట్‌లు మరియు వారపు సెషన్ రీసెట్‌లు."
   },
   "modals": {
     "waitingAuth": "అనుమతి కోసం వేచి ఉంది",
@@ -11078,7 +11117,8 @@
       "message": "సందేశం",
       "error": "లోపం",
       "completion": "పూర్తి కావడం"
-    }
+    },
+    "statusFilter": "స్థితి"
   },
   "templateNames": {
     "simple-chat": "సరళమైన చాట్",
@@ -11259,7 +11299,8 @@
     "minutesAgo": "{minutes}నిమి. క్రితం",
     "hoursAgo": "{hours}గం. క్రితం",
     "daysAgo": "{days}రోజుల క్రితం",
-    "entries": "ఎంట్రీలు"
+    "entries": "ఎంట్రీలు",
+    "viewSwitcherAria": "క్యాష్ వీక్షణ"
   },
   "proxyConfigModal": {
     "levelGlobal": "గ్లోబల్",
@@ -11526,7 +11567,7 @@
     "bulkImportNoValidEntries": "చెల్లుబాటు అయ్యే నమోదులు ఏవీ కనుగొనబడలేదు. ఆకృతిని తనిఖీ చేసి, మళ్లీ ప్రయత్నించండి.",
     "bulkImportSuccess": "దిగుమతి పూర్తయింది: {created} సృష్టించబడింది, {updated} నవీకరించబడింది, {failed} విఫలమైంది",
     "bulkImportErrorLine": "లైన్ {line}: {reason}",
-    "bulkImportMaxExceeded": "దిగుమతికి గరిష్టంగా 100 ప్రాక్సీలు",
+    "bulkImportMaxExceeded": "దిగుమతికి గరిష్టంగా {max} ప్రాక్సీలు",
     "bulkImportPreview": "ప్రివ్యూ",
     "clearAssignment": "(స్పష్టమైన కేటాయింపు)",
     "bulkProxyAssignment": "బల్క్ ప్రాక్సీ అసైన్‌మెంట్",
@@ -11587,6 +11628,7 @@
     "poolSetAsideKindIpQuota429": "IP రేట్ పరిమితి (429)",
     "poolSetAsideKindSlow": "నెమ్మదిగా స్పందనలు",
     "poolSetAsideKindGeoBlocked": "ప్రాంతం-నిరోధించబడింది (403/451)",
+    "poolSetAsideKindOperatorReported": "ఆపరేటర్ నివేదించిన సేవా నిలిపివేత",
     "poolSetAsideUntil": "రొటేషన్‌లోకి తిరిగి {endsAt}",
     "poolSetAsideRepeat": "పక్కన పెట్టబడింది {count, plural, one {# సారి} other {# సార్లు}}",
     "poolUnknownAddress": "తెలియని చిరునామా",
@@ -11603,7 +11645,8 @@
     "notMeasured": "కొలవబడలేదు",
     "upstream4xx": "{count} అప్స్ట్రీమ్ క్లయింట్ పొరపాట్లు",
     "upstream5xx": "{count} అప్స్ట్రీమ్ సర్వర్ పొరపాట్లు",
-    "uniformEgressLine": "{provider}లో {exits} ఎగ్జిట్లలో {affected} కలిసి విఫలమవుతున్నాయి (గత {hours} గంటల్లో) — ఎగ్జిట్ సమస్య కాదు"
+    "uniformEgressLine": "{provider}లో {exits} ఎగ్జిట్లలో {affected} కలిసి విఫలమవుతున్నాయి (గత {hours} గంటల్లో) — ఎగ్జిట్ సమస్య కాదు",
+    "moreActions": "మరిన్ని చర్యలు"
   },
   "playground": {
     "title": "మోడల్ ప్లేగ్రౌండ్",
@@ -11809,7 +11852,8 @@
       "nextButton": "తదుపరి",
       "runButton": "రన్ చేయండి",
       "promptPlaceholder": "మీ సందేశాన్ని నమోదు చేయండి… (పంపడానికి Enter, కొత్త లైన్ కోసం Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground మోడ్లు"
   },
   "miniPlayground": {
     "endpoint": "ఎండ్‌పాయింట్",
@@ -11880,7 +11924,8 @@
     "assistant": "అసిస్టెంట్",
     "errorLabel": "లోపం",
     "requestFailed": "అభ్యర్థన విఫలమైంది",
-    "stop": "ఆపు"
+    "stop": "ఆపు",
+    "messageInputAria": "సందేశం"
   },
   "requestLogger": {
     "recording": "రికార్డింగ్",
@@ -12067,8 +12112,18 @@
       "resilienceRotations": "{count} ఖాతా రొటేషన్లు",
       "resilienceRetried": "ఖాళీ టర్న్ మళ్లీ ప్రయత్నించబడింది",
       "resilienceContinued": "స్ట్రీమ్ మధ్యలో నుండి కొనసాగించబడింది",
-      "resilienceRecovered": "రెసిలియెన్స్ చర్య ద్వారా పునరుద్ధరించబడింది"
-    }
+      "resilienceRecovered": "రెసిలియెన్స్ చర్య ద్వారా పునరుద్ధరించబడింది",
+      "conversationContext": "సంభాషణ సందర్భం",
+      "goToBottom": "దిగువకు వెళ్లండి",
+      "liveRefreshOn": "లైవ్ రిఫ్రెష్: ఆన్",
+      "liveRefreshOff": "లైవ్ రిఫ్రెష్: ఆఫ్",
+      "liveRefresh": "లైవ్ రిఫ్రెష్",
+      "continuesFromParent": "పేరెంట్ నుండి కొనసాగుతుంది",
+      "continuesFrom": "{id} నుండి కొనసాగుతుంది",
+      "viewConversation": "సంభాషణను వీక్షించండి",
+      "openConversation": "{id} సంభాషణను తెరవండి"
+    },
+    "tableLabel": "అభ్యర్థన లాగ్లు"
   },
   "proxyLogger": {
     "filterAll": "అన్నీ",
@@ -12113,7 +12168,9 @@
     "colServedBy": "సేవ అందించినది",
     "filterTraffic": "ట్రాఫిక్",
     "filterTests": "పరీక్షలు",
-    "filterSource": "మూలం"
+    "filterSource": "మూలం",
+    "tableLabel": "ప్రాక్సీ లాగ్లు",
+    "sortLogs": "లాగ్లను క్రమబద్ధీకరించండి"
   },
   "endpointOptions": {
     "speech": "స్పీచ్",
@@ -12198,7 +12255,8 @@
     "statusExhausted": "పూర్తిగా వినియోగించబడింది",
     "statusAlerting": "హెచ్చరిస్తోంది",
     "statusError": "లోపం",
-    "moreSuffix": "+మరో {count}"
+    "moreSuffix": "+మరో {count}",
+    "feedFilterLabel": "ఈవెంట్లను ఫిల్టర్ చేయండి"
   },
   "quotaShare": {
     "weightPercent": "వెయిట్ %",
@@ -12365,7 +12423,10 @@
     "ungroupedTitle": "గ్రూప్ చేయనివి",
     "ungroupedHint": "ఈ పూల్స్ ఏ తెలిసిన గ్రూప్‌కు కేటాయించబడలేదు. పూల్‌ను నిజమైన గ్రూప్‌లోకి తరలించడానికి దాన్ని ఎడిట్ చేయండి.",
     "removeFailed": "ఈ పూల్ను తొలగించడం సాధ్యం కాలేదు.",
-    "dismiss": "మూసివేయి"
+    "dismiss": "మూసివేయి",
+    "allocationsHeading": "కేటాయింపులు",
+    "wizardRemoveDimension": "డైమెన్షన్ను తీసివేయండి",
+    "wizardRemoveKey": "కీని తీసివేయండి"
   },
   "plugins": {
     "title": "ప్లగిన్లు",
@@ -12523,7 +12584,8 @@
       "settingsUpdateFailed": "సెట్టింగ్‌ల అప్‌డేట్ విఫలమైంది",
       "serviceRevealApiKey": "{actor} {target} కోసం API keyని బహిర్గతం చేశారు",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "లోపాన్ని విస్మరించండి"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12718,21 @@
       "goNow": "ఇప్పుడే వెళ్ళండి",
       "message": "MITM Proxy ఇప్పుడు AgentBridge కింద ఉంది.",
       "title": "ఈ పేజీ తరలించబడింది"
-    }
+    },
+    "dnsOn": "DNS ఆన్లో ఉంది",
+    "dnsOff": "DNS ఆఫ్లో ఉంది",
+    "showServerSettings": "సర్వర్ సెట్టింగ్లను చూపండి",
+    "hideServerSettings": "సర్వర్ సెట్టింగ్లను దాచండి",
+    "upstreamCaTesting": "పరీక్షిస్తోంది…",
+    "removeMapping": "మ్యాపింగ్ను తీసివేయండి",
+    "mappingSourcePlaceholder": "ఉదా., gemini-3.6-flash-medium, లేదా మ్యాప్ చేయని అన్నింటికీ *",
+    "mappingWildcardHint": "స్పష్టమైన మ్యాపింగ్ లేని ప్రతి మోడల్ను OmniRoute ద్వారా ఎంచుకున్న లక్ష్యానికి రూట్ చేయడానికి మూలంగా *ను ఉపయోగించండి. ఖచ్చితంగా సరిపోలే మూలాలకు ఎల్లప్పుడూ * కంటే ప్రాధాన్యత ఉంటుంది.",
+    "wizardDetectingModels": "ఇంటర్సెప్ట్ చేసిన ట్రాఫిక్ నుండి మోడల్లను గుర్తిస్తోంది...",
+    "wizardDetectedModels": "ఇంటర్సెప్ట్ చేసిన ట్రాఫిక్లో {count, plural, one {# మోడల్} other {# మోడల్లు}} కనుగొనబడ్డాయి. మీరు జోడించాలనుకునే వాటిని ఎంచుకోండి:",
+    "wizardSelectedModels": "{count, plural, one {# మోడల్} other {# మోడల్లు}} ఎంచుకోబడ్డాయి. తదుపరి స్క్రీన్లో మీరు వాటిని OmniRoute మోడల్లకు మ్యాప్ చేస్తారు.",
+    "wizardAddModels": "{count, plural, one {# మోడల్ను} other {# మోడల్లను}} జోడించండి",
+    "wizardNoModelsDetected": "ఇంకా మోడల్లు ఏవీ గుర్తించబడలేదు. అభ్యర్థన చేయడానికి {agent}ను ఉపయోగించి, ఆపై ట్రాఫిక్ నుండి మోడల్లను స్వయంచాలకంగా గుర్తించడానికి ఈ విజార్డ్ను మళ్లీ అమలు చేయండి.",
+    "wizardNoModelsHint": "లేదా ఈ విజార్డ్ను మూసివేసి, ఏజెంట్ కార్డ్లో మ్యాపింగ్లను మాన్యువల్గా జోడించండి."
   },
   "providerStats": {
     "unknownError": "తెలియని లోపం",
@@ -12686,7 +12762,11 @@
     "avgTtft": "సగటు TTFT",
     "avgTotal": "సగటు మొత్తం",
     "requestTelemetry": "అభ్యర్థన టెలిమెట్రీ",
-    "requestTelemetryDescription": "7-దశల పైప్‌లైన్ విభజన (చివరి 5 నిమిషాలు)"
+    "requestTelemetryDescription": "7-దశల పైప్‌లైన్ విభజన (చివరి 5 నిమిషాలు)",
+    "title": "ప్రొవైడర్ గణాంకాలు",
+    "description": "ప్రతి ప్రొవైడర్ మరియు ప్రతి మోడల్కు సంబంధించిన ట్రాఫిక్, లేటెన్సీ మరియు విజయ రేట్లు",
+    "combo": "కాంబో",
+    "toggleModels": "{provider} కోసం మోడల్లను చూపండి"
   },
   "relay": {
     "title": "సర్వర్‌లెస్ రిలే ప్రాక్సీలు",
@@ -12847,7 +12927,18 @@
     "noRequestBody": "రిక్వెస్ట్ బాడీ లేదు.",
     "noResponseBody": "రెస్పాన్స్ బాడీ లేదు.",
     "formatted": "ఫార్మాట్ చేయబడింది",
-    "raw": "రా"
+    "raw": "రా",
+    "requestCount": "{count, plural, one {# అభ్యర్థన} other {# అభ్యర్థనలు}}",
+    "expandList": "జాబితాను విస్తరించండి",
+    "collapseList": "జాబితాను కుదించండి",
+    "snippetLanguage": "స్నిపెట్ భాష",
+    "headersTable": "హెడర్లు",
+    "showSecrets": "రహస్యాలను చూపండి",
+    "maskSecrets": "రహస్యాలను మాస్క్ చేయండి",
+    "llmNotAvailable": "ఈ అభ్యర్థనకు LLM మెటాడేటా అందుబాటులో లేదు.",
+    "llmStreamYes": "అవును (SSE)",
+    "llmStreamNo": "కాదు",
+    "llmTotalTokens": "మొత్తం: {count} టోకెన్లు"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13397,8 @@
     "colReliabilityHelp": "గత 24 గంటల్లో ఈ ప్రొవైడర్ వాస్తవంగా సమాధానమిచ్చిన కాల్ల వాటా. డ్యాష్ ఉంటే, రేటును నిర్ధారించడానికి ఇది చాలా తక్కువ ట్రాఫిక్ను నిర్వహించిందని అర్థం.",
     "reliabilitySample": "గత {hours} గంటల్లో {requests} కాల్లలో {successes} విజయవంతమయ్యాయి",
     "reliabilityTooFew": "గత {hours} గంటల్లో కేవలం {requests} కాల్లు మాత్రమే — రేటును నిర్ధారించడానికి ఇవి సరిపోవు",
-    "reliabilityNoTraffic": "గత 24 గంటల్లో కాల్లేవీ నమోదు కాలేదు"
+    "reliabilityNoTraffic": "గత 24 గంటల్లో కాల్లేవీ నమోదు కాలేదు",
+    "categoryFilter": "టాస్క్ వర్గం"
   },
   "discovery": {
     "title": "ప్రొవైడర్ డిస్కవరీ",
@@ -13331,7 +13423,11 @@
     "method": "పద్ధతి",
     "auth": "ఆథ్",
     "feasibility": "సాధ్యత",
-    "models": "మోడల్స్"
+    "models": "మోడల్స్",
+    "provider": "ప్రొవైడర్",
+    "status": "స్థితి",
+    "endpoint": "ఎండ్పాయింట్",
+    "actions": "చర్యలు"
   },
   "noAuthProvider": {
     "title": "ఎటువంటి ప్రామాణీకరణ అవసరం లేదు",
@@ -13380,7 +13476,8 @@
     "ownProxy": "సొంత ప్రాక్సీ",
     "freeTierPause": "మోడల్ {model} నిలిపివేయబడింది (429), {time} న తిరిగి వస్తుంది",
     "freeTierPauseProvider": "నిలిపివేయబడింది (429), {time} న తిరిగి వస్తుంది",
-    "freeTierPauseNote": "ఈ ఇన్‌స్టన్స్‌లో ప్రక్రియలోపు పాజ్"
+    "freeTierPauseNote": "ఈ ఇన్‌స్టన్స్‌లో ప్రక్రియలోపు పాజ్",
+    "proxyType": "ప్రాక్సీ రకం"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13650,10 @@
         "description": "ఒక దాచిన విజయం వేచి ఉంది...",
         "criteria": "ఈ బ్యాడ్జ్‌ను బహిర్గతం చేయడానికి దాచిన విజయాన్ని పూర్తి చేయండి."
       }
-    }
+    },
+    "leaderboardTitle": "లీడర్బోర్డ్",
+    "leaderboardDescription": "మీ API కీలలో ర్యాంకింగ్లు మరియు విజయాలు",
+    "badgeLocked": "లాక్ చేయబడింది"
   },
   "featureFlags": {
     "title": "ఫీచర్ ఫ్లాగ్‌లు",
@@ -13848,7 +13948,8 @@
     "unknown": "తెలియదు",
     "unknownProvider": "తెలియని ప్రొవైడర్",
     "unknownModel": "తెలియని మోడల్",
-    "resolvedTargetMetrics": "{requests} req · {success} విజయం · {latency} · కోటా {quota}"
+    "resolvedTargetMetrics": "{requests} req · {success} విజయం · {latency} · కోటా {quota}",
+    "timeRange": "సమయ పరిధి"
   },
   "usageLimits": {
     "usdUsageQuota": "USD వినియోగ కోటా",
@@ -13995,7 +14096,11 @@
     "learnMore": "మరింత తెలుసుకోండి",
     "changelogLoadFailed": "చేంజ్‌లాగ్‌ను లోడ్ చేయడం సాధ్యపడలేదు. దయచేసి కాసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.",
     "retry": "మళ్లీ ప్రయత్నించండి",
-    "viewFullHistory": "GitHubలో పూర్తి చరిత్రను చూడండి"
+    "viewFullHistory": "GitHubలో పూర్తి చరిత్రను చూడండి",
+    "title": "వార్తలు & మార్పుల చిట్టా",
+    "description": "OmniRoute బృందం నుండి ప్రకటనలు మరియు తాజా విడుదల గమనికలు",
+    "viewLabel": "వీక్షించండి",
+    "loadingNews": "ప్రకటనలు లోడ్ అవుతున్నాయి..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14651,9 @@
       "circuitBreakerState": "ప్రొవైడర్ సర్క్యూట్ బ్రేకర్ స్థితి",
       "lastUpdate": "చివరి నవీకరణ: {timestamp}",
       "uptimeMinutes": "{minutes}మ",
-      "uptimeHoursMinutes": "{hours}గం {minutes}నిమి"
+      "uptimeHoursMinutes": "{hours}గం {minutes}నిమి",
+      "breakerClosed": "మూసివేయబడింది",
+      "breakerNotClosed": "తెరిచి ఉంది లేదా సగం తెరిచి ఉంది"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14728,9 @@
         "primaryAction": "నిర్వహణ వివరాలు",
         "secondaryAction": "సిస్టమ్ స్థితి"
       }
+    },
+    "miniapp": {
+      "askAnything": "ఏదైనా అడగండి…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} కనిపిస్తున్నవి / మొత్తం {total}",
+    "modeLabel": "వీక్షణ మోడ్",
+    "jumpToNow": "ప్రస్తుత సమయానికి వెళ్లండి, NOW రేఖ {position}% స్థానానికి రీసెట్ అవుతుంది",
+    "laneReuse": "లేన్ పునర్వినియోగం",
+    "laneReuseLabel": "లేన్ పునర్వినియోగ వ్యవధి (నిమిషాలు)",
+    "laneReuseHint": "ఒకే సంభాషణ idని పంచుకునే అభ్యర్థనల మధ్య విరామం ఇన్ని నిమిషాల కంటే తక్కువగా ఉన్నంత వరకు అవి ఒకే టైమ్లైన్ వరుసలో ఉంటాయి.",
+    "laneReuseUnit": "నిమి",
+    "autoRefresh": "స్వయంచాలక రిఫ్రెష్",
+    "autoRefreshLabel": "స్వయంచాలక రిఫ్రెష్ విరామం (సెకన్లు)",
+    "autoRefreshHint": "టైమ్లైన్ సర్వర్ నుండి అభ్యర్థనల జాబితాను ఎంత తరచుగా మళ్లీ పొందుతుందో.",
+    "autoRefreshUnit": "సె",
+    "zoomOut": "జూమ్ అవుట్",
+    "zoomIn": "జూమ్ ఇన్"
   },
   "metadata": {
     "compressionTitle": "సంకోచనం",

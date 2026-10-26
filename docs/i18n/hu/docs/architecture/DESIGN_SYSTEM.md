@@ -4,229 +4,139 @@
 
 ---
 
-> **Állapot:** referencia — az itt leírt szabványosítás **megvalósult** (1–6. fázis: rácsos háttér, primitívek, állapotszínek központosítása, monospace token, DataTable-tokenek migrációja, fókuszgyűrű → kiemelőszín, Checkbox/Textarea primitívek, `cn()` → tailwind-merge, rács minden önálló képernyőn, folyékony 4K-s tartalmi keret, átlátszatlan adattábla-felületek). Ez a dokumentum az irányítópult tervezési tokenjeinek, komponenseinek és konvencióinak hivatalos leírása; az alábbi fázisokra bontás az egyes döntések indoklásaként maradt meg.
-> **Hatókör:** az OmniRoute irányítópult (`src/`) és a marketingwebhely (`_mono_repo/omnirouteSite/`) **egységes vizuális arculatot** használ — ugyanaz a milliméterpapír-szerű rácsháttér (32px), ugyanazok a színtokenek és szabványosított komponensek.
->
-> Gyakorlati megjegyzések a karbantartók számára:
->
-> - A még meglévő, közvetlenül megadott hexadecimális értékek közül több **szándékos** (a mindig sötét konzolterminál, ReactFlow SVG-körvonalak), ezért ezeket **NEM** szabad tokenekre cserélni.
-> - Ha egy futó példányban „nagyobb” rács látható, azt egy elavult build okozza, nem a kód — a rácsméret 32px, ugyanúgy, mint a webhelyen.
-> - A sötét téma `--table-*` értékei bájtról bájtra megegyeznek a migráció előtti, közvetlenül megadott rgba-értékekkel; a világos témát javítottuk (a működésképtelen `var()` tartalékértékek miatt hibásan mindig sötét volt).
+> **Állapot:** az irányítópult a **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) alapjaira épül, és
+> a `packages/ui-kit` munkaterületként (`@omniroute/ui-kit`) van beemelve; az upstream pillanatkép a
+> `packages/ui-kit/UPSTREAM.md` fájlban van rögzítve, és az `npm run check:ui-kit-snapshot` ellenőrzi. A világos
+> téma a kanonikus; az alapértelmezett beállítás a `system`. A kiemelőszín a Keak lime (`--ci-color-accent`). Az Inter
+> (betűköz 0, `--ci-letter-spacing-ui`) a felhasználói felület betűcsaládja, az Instrument Serif kizárólag a nagy méretű, ritkás
+> megjelenítési szövegekhez használatos (`.ci-dashboard-display`), az IBM Plex Mono pedig a kódhoz — mindegyik saját kiszolgálásban,
+> a `src/app/globals.css` elején található `@fontsource/*` importokon keresztül. Minden ikon Lucide-karakterjel.
 
----
+## 1. Hol találhatók a dolgok
 
-## 1. Cél
+- **Készlet.** A `packages/ui-kit/src` bájtról bájtra megegyező másolata a felsőbb szintű `src/`
+  könyvtárnak a `packages/ui-kit/UPSTREAM.md` fájlban rögzített commitnál (amely a licencengedélyt is
+  dokumentálja); a `PATCHES.md` sorolja fel a helyi javításokat (nincsenek). Forrásként, build nélkül kerül
+  felhasználásra: a `next.config.mjs` transzpilálja, a `tsconfig.json` pedig az `@omniroute/ui-kit` nevet a
+  `packages/ui-kit/src`, az `@omniroute/ui-kit/*` nevet pedig a `packages/ui-kit/src/*` útvonalra képezi le
+  (a `vitest.config.ts` és a `vitest.mcp.config.ts` ugyanezt az aliast tartalmazza). A készlet komponenseit
+  az alútvonalukon keresztül importáld (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), soha
+  ne az `@omniroute/ui-kit` gyűjtőmodulon keresztül: a gyűjtőmodul minden komponenst (köztük a
+  dátumválasztót is) behúz minden importálóba. A készlet stíluslapja az `src/app/globals.css` fájlon
+  keresztül kerül be (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokenek.** A `packages/ui-kit/src/ci-tokens.css` deklarálja a `--ci-*` tokeneket; az
+  `src/app/globals.css` összeköti őket a régi OmniRoute-nevekkel (`--color-*`, `--radius-*`,
+  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), így a meglévő
+  `var(--color-*)` hivatkozások és Tailwind-segédosztályok továbbra is működnek. Az új kód a
+  Tailwind-segédosztályokat (`bg-surface`, `text-text-muted`, `border-border`, `text-success`,
+  `bg-success-bg`, `bg-chart-1`…) vagy a készlet osztályait használja — hexadecimális értéket soha
+  (ezt a hidat a `tests/unit/design-kit-bridge.test.ts` kényszeríti ki). A `text-primary` a
+  `--text-color-primary` változón keresztül a `--color-primary-ink` értékre oldódik fel (világos témában
+  lime-800, sötét témában a lime kiemelőszín), így az elsődleges szöveg olvasható marad, miközben a
+  `bg-primary`/`border-primary` megtartja a lime felületet. A diagramsorozatok a `--color-chart-1` …
+  `--color-chart-5` változókat használják.
+- **Témák.** A `<html className="ci-theme">` (`src/app/layout.tsx`) aktiválja a készlet témáját a
+  dokumentumon. A beállítás `light`, `dark` vagy `system` lehet (`THEME_CONFIG.defaultTheme = "system"` az
+  `src/shared/constants/appConfig.ts` fájlban; a `system` a `prefers-color-scheme` beállítást követi). Az
+  `src/store/themeStore.ts` fájlban található `applyTheme()` — amelyet a hidratálás előtt lefutó,
+  `src/app/layout.tsx` fájlban lévő beágyazott inicializáló szkript is tükröz — egyszerre állítja be a
+  `data-theme="dark"|"light"` attribútumot és kapcsolja a `.dark` osztályt a `<html>` elemen. A készlet
+  sötét tokenkészletének kulcsa a `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); az OmniRoute
+  saját sötét felülírásai (a `globals.css` `.dark` blokkja) és a régi Tailwind `dark:` segédosztályok a
+  `.dark` osztályhoz kötődnek. Nincsenek kiemelőszín-készletek: a kiemelőszín mindig a készletből
+  származik, és egy régebbi buildből megőrzött készletet a tároló betöltéskor eldob.
+- **Komponensek (adapterek).** Az `src/shared/components/index.tsx` megtartja az OmniRoute komponens-API-ját
+  (azonos nevek, alapértelmezett exportok és propok), a mögötte lévő primitívek pedig a készlet fölötti
+  adapterek: űrlapok (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
+  átfedések és visszajelzések (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`,
+  `EmptyState`, `Loading`), struktúra (`Collapsible`, `CollapsibleSection`, `SegmentedControl`,
+  `Breadcrumbs`, `Avatar`) és táblázatok (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`,
+  `PresetSlider`). Az adapter az alútvonalán keresztül importálja a készlet komponensét, és leképezi rá a
+  régi propokat — például a `Button variant="primary"` a készlet `default` gombja
+  (`--ci-button-primary-*`: világos témában az invertált felület, sötét témában a kiemelőszín a hozzá
+  tartozó `--ci-color-accent-foreground` szövegszínnel), a `danger` a `destructive`, a `warning` pedig az
+  `outline` és a `.ci-button--warning` bővítmény együttese. A `globals.css` végén (`@layer components`)
+  található `.ci-button--warning` és `.ci-badge[data-tone]` szabályok OmniRoute-bővítmények a készlet
+  osztályai fölött. A `tests/unit/ui/adapters/*.test.tsx` tesztek rögzítik az egyes adapterek viselkedését.
+- **Alkalmazáskeret.** Az `src/app/(dashboard)/layout.tsx` a `DashboardLayout` komponenst rendereli, amely
+  az `src/shared/components/layouts/DashboardShell.tsx` komponenst rendereli: a készlet `SidebarProvider` /
+  `Sidebar` / `SidebarInset` elemeit (`packages/ui-kit/src/sidebar.tsx`), az OmniRoute navigációs
+  logikájával az `src/shared/components/Sidebar.tsx` fájlban. A `#main-content` elemre mutató „ugrás a
+  tartalomhoz” hivatkozás az első fókuszálható elem. Az `src/shared/components/Header.tsx` tartalmazza a
+  készlet `SidebarTrigger` elemét (az alkalmazáskeret egyetlen oldalsávkapcsolóját), a Keak
+  `ProductSwitcher` elemét és a parancspaletta megnyitóját; az útvonal címét csak addig jeleníti meg, amíg
+  nincs a készletből származó `PageHeader` (`.ci-page-header`) a `#main-content` elemen belül, így a saját
+  `PageHeader` elemmel rendelkező oldalon csak egyetlen `h1` található. Az
+  `src/shared/components/CommandPalette.tsx` a készlet egy `Dialog` komponense.
+- **Ikonok.** Az `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) az `ICON_MAP`
+  (`src/shared/constants/iconMap.ts`) segítségével egy Lucide-karakterjelre oldja fel a nevet (a képernyők
+  által használt Material Symbols szókészletből). A Material Symbols betűkészlet és csomag már nincs
+  jelen: a leképezésből hiányzó név semleges helyőrző karakterjelet renderel
+  (`data-icon-missing="true"`), és éles környezeten kívül figyelmeztetést ír a konzolra. Az
+  `npm run gen:icon-map` kiírja a használatban lévő, de a leképezésből hiányzó neveket
+  (a `tests/unit/icon-map-coverage.test.ts` meghiúsul minden olyan névnél, amelyhez nincs Lucide-ikon; a
+  `tests/unit/icon-map-object-values.test.ts` a keresési objektumokban tárolt neveket fedi le); a
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` a literális
+  `<span className="material-symbols-outlined">` elemeket `<Icon>` elemekre írja át.
+- **Márka.** Az `src/shared/components/OmniRouteLogo.tsx` a készletet burkolja: az alapértelmezett
+  `OmniRouteLogo` export a `ProductIcon product="omniroute" variant="glyph"` elemet rendereli (beágyazott
+  SVG, `basePath`-kompatibilis), az `OmniRouteLockup` pedig a `ProductLockup product="omniroute"` elemet
+  rendereli („Keak OmniRoute” akadálymentes névvel), white-label üzemeltetők esetén pedig azok saját
+  `name`/`logoSrc` értékeit. A termékváltó célhelyei az `src/shared/constants/keakProducts.ts` fájlban
+  találhatók (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Az önálló képernyők —
+  `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` és `src/shared/components/ErrorPageScaffold.tsx`
+  — megjelenítik a lockupot; ezt a `tests/unit/brand-pages-static.test.ts` felügyeli.
 
-A marketingwebhelynek (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) és a termék irányítópultjának úgy kell kinéznie, mintha **ugyanannak a terméknek** a részei lennének. A webhely már átvette a színpalettáját az irányítópulttól — a `css/tokens.css` fájlban még ez is szerepel: _„A paletta az OmniRoute irányítópultját tükrözi (src/app/globals.css)”_. Így a kettő színszinten már körülbelül 80%-ban egységes. Ami még hiányzik az irányítópultból:
+## 2. Szabályok
 
-1. A **milliméterpapír-szerű rácsháttér**, amelyet a webhely minden oldalon használ.
-2. Néhány, a webhelyen már meglévő, de az irányítópultból hiányzó **megosztott tervezési token** (lekerekítési skála, márkagradiens, `surface-2`, monospace betűtípus).
-3. **Komponensszintű következetesség** — az irányítópult több komponense közvetlenül megadott hex/rgba-értékekkel megkerüli a tématokeneket.
+1. Tokeneket használj, soha ne literálokat. Szándékosan megtartott kivételek: a mindig sötét konzolterminál, a ReactFlow SVG-körvonalai a `STATUS_HEX` használatával (`src/shared/constants/statusColors.ts`), valamint a kategorikus `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) és `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) paletták.
+2. Soha ne módosítsd kézzel a `packages/ui-kit/src` tartalmát: szinkronizáld a `scripts/dev/sync-ui-kit.sh <commit>` használatával; a pre-commit ellenőrzés, az `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) meghiúsul, ha bármely bájt eltér a rögzített upstream committól (figyelmeztetéssel kihagyja az ellenőrzést, ha az upstream klón, az `UI_KIT_CLONE` vagy az `_references/cheaper-inference-ui-kit` hiányzik). Ha valami hiányzik a készletből, kerüld meg az adapterben vagy a képernyőn, és kérd annak hozzáadását az upstream projektben.
+3. A készlet alapértelmezett szövegei angol nyelvűek (`label = "Loading"`, `loadingLabel = "Loading table"`…) — amikor egy készletkomponens szöveget jelenít meg, mindig a `useTranslations(...)` által biztosított lefordított karakterláncokat add át.
+4. A Tailwind segédosztályai elsőbbséget élveznek a készlet komponensosztályaival szemben (a készlet deklarációja `@layer theme, base, components, utilities`, a szabályai pedig a `components` rétegben találhatók) — a segédosztályokat térközökhöz és elrendezéshez használd, ne a készletkomponensek átszínezéséhez.
+5. Címsorok: `.ci-heading` (Inter, betűköz nélkül) az oldalak és szakaszok címeihez; `.ci-dashboard-display` (Instrument Serif) csak nagy méretű, ritkán használt kiemelt szövegekhez, például a hibaoldal állapotkódjához.
+6. A `tests/unit/dashboard-kit-sweep.test.ts` felügyeli a készlet használatát: nem lehet Material-ligatúrát tartalmazó span a `src/app` vagy a `src/shared/components` alatt; a dashboard könyvtárfájában (`src/app/(dashboard)` és `src/shared/components`) nem lehet nyers `<select>`, `<textarea>` vagy `<table>`, illetve kézzel készített `role="dialog"` a felsorolt kivételeken kívül (a `Select` adapter natív ága, `RequestLoggerDetail`); minden nyers `<button>` vagy `<input>` előtt legfeljebb 3 sorral egy, az indoklást is tartalmazó `kit-exception:` megjegyzésnek kell szerepelnie; a palettaárnyalatok és a `dark:` változatok csak a teszt által felsorolt fájlokban használhatók.
+7. PR létrehozása előtt ellenőrizd mindkét témát és a 390 px széles nézetet (képernyőképekkel); a `tests/e2e/a11y.spec.ts` az axe-ot futtatja.
 
-Ez a dokumentum tartalmazza az elemzést és a tervet.
+## 3. Képernyő hozzáadása
 
----
+1. Az oldalt a készlet `PageHeader` komponensével (`@omniroute/ui-kit/page-header`, a dashboardon belül `compact` módban) kezdd — címmel, leírással és `actions` elemekkel. Ezután a keretrendszer fejléce elhagyja a saját címét.
+2. A vezérlőket az `@/shared/components` elemeiből (az adapterekből) építsd fel, és ahol nincs adapter, ott alútvonalon keresztül használd a készlet komponenseit (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. Ikonok: `<Icon name="…" />`. Az új neveket add hozzá az `ICON_MAP` objektumhoz a szemantikailag megfelelő Lucide komponenssel; az `npm run gen:icon-map` felsorolja a még hiányzó neveket.
+4. Színek: szemantikus segédosztályokat (`text-success`, `bg-warning-bg`, `border-border`…) és a diagramsorozatokhoz `var(--color-chart-N)` értékeket használj; ne használj hexadecimális értékeket, sem olyan `dark:` változatokat, amelyek csak megismételnek egy színt.
+5. Szöveg: minden karakterláncnak, beleértve a készletkomponenseknek átadott címkéket is, a `useTranslations` függvényből kell származnia. Az új kulcsokat add hozzá a `src/i18n/messages/en.json`, `pt-BR.json` és `vi.json` fájlokhoz (a vietnámi paritásteszt minden angol kulcsot rögzít); a többi területi beállítást az i18n-szinkronizálás tölti ki.
+6. A PR előtt futtasd az ellenőrzéseket: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck` (ez az egyetlen ellenőrzés, amely észleli a duplikált importot az `iconMap.ts` fájlban), `npm run check:ui-icu`, valamint a képernyő saját tesztjeit.
 
-## 2. Alapelvek
+## 4. Adapter hozzáadása vagy módosítása
 
-- **Az egyetlen hiteles forrás a `src/app/globals.css`.** A webhely az irányítópultot követi, soha nem fordítva. Az új tokenek először a `globals.css` fájlba kerülnek.
-- **Tokenek, soha nem literálok.** A komponensek szemantikus tokeneket (`bg-surface`, `text-primary`, `border-border`) használnak, nem nyers `#hex` értékeket.
-- **Visszafogott, nem hivalkodó.** A rács halvány háttérmintaként a tartalom mögött helyezkedik el — soha nem ronthatja a szöveg kontrasztját, és nem vonhatja el a figyelmet a felhasználói felületről.
-- **Témaérzékeny.** Mindennek működnie kell `.dark` módban (a termék jellegzetes megjelenése) és világos témában is.
-- **Célzott bevezetés.** Először a rácsot és a tokeneket vezetjük be (alacsony kockázat, nagy láthatóság), majd több hullámban megtisztítjuk a komponenseket.
+1. Tartsa változatlanul a `src/shared/components/index.tsx` nyilvános API-ját: az exportnevek, az alapértelmezett exportok és az
+   elfogadott propok maradjanak azonosak. A régi propokat az adapteren belül képezze le a kit megfelelő elemeire (lásd: `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. A kitet alútvonalon keresztül importálja (`@omniroute/ui-kit/<component>`).
+3. A kit hiányosságait áthidaló megoldások az adapterbe kerüljenek (vagy a `globals.css` `@layer components` rétegébe, ha a javítás
+   stílusjellegű), soha ne a `packages/ui-kit/src` könyvtárba.
+4. Adja hozzá vagy frissítse a `tests/unit/ui/adapters/<name>.test.tsx` fájlt. Sok hívóval rendelkező adapter esetén hasonlítsa össze a
+   renderelt jelölést a módosítás előtt és után — a térköz vagy a burkolóelem módosításai minden képernyőre kihatnak.
 
----
+## 5. A kit frissítése
 
-## 3. Jelenlegi állapot — mi egységes már, és mi nem
+A `scripts/dev/sync-ui-kit.sh <commit> [clone]` az adott commithoz tartozó upstream `src/` tartalmát a
+`packages/ui-kit/src` könyvtárba másolja, és alkalmazza az egyetlen engedélyezett átalakítást (eltávolítja a `.js` utótagot a
+relatív importokból). Ezután: ellenőrizze a `git diff packages/ui-kit` kimenetét, végezzen vizuális ellenőrzést a szolgáltatók, beállítások, kombinációk,
+használat és végpont képernyőin mindkét témával, futtassa az `npm run check:ui-kit-snapshot` és az `npm run test:vitest:ui` parancsot, majd
+nyissa meg a PR-t az upstream változásnaplóval együtt.
 
-### 3.1 Színek — már egységesek ✅
+## 6. Hivatkozási jegyzék
 
-Minden márkaszín és felület **érték szerint** már megegyezik a webhelyen használt megfelelőjével (csak a nevek térnek el — az irányítópult a `--color-` előtagot használja). Ellenőrizve itt: `src/app/globals.css:30-128`:
-
-| Fogalom                           | Webhelytoken (`tokens.css`)                 | Irányítópult-token (`globals.css`) | Egyezés        |
-| --------------------------------- | ------------------------------------------- | ---------------------------------- | -------------- |
-| elsődleges                        | `--primary #e54d5e`                         | `--color-primary #e54d5e`          | ✅             |
-| elsődleges-rámutatás              | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`    | ✅             |
-| kiemelőszín                       | `--accent #6366f1`                          | `--color-accent #6366f1`           | ✅             |
-| kiemelőszín-2                     | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`     | ✅ (átnevezve) |
-| kiemelőszín-3                     | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`     | ✅ (átnevezve) |
-| siker / figyelmeztetés / hiba     | `#22c55e / #f59e0b / #ef4444`               | azonos                             | ✅             |
-| jelzőlámpák                       | `#ff5f56 / #ffbd2e / #27c93f`               | azonos                             | ✅             |
-| sötét háttér / felület / szegély  | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | azonos                             | ✅             |
-| világos háttér / felület / szöveg | `#f9f9fb / #fff / #1a1a2e`                  | azonos                             | ✅             |
-
-**Következtetés:** nincs szükség színmigrációra. Az arculat már közös; most _befejezzük_, nem pedig újraépítjük.
-
-### 3.2 Hiányosságok — ami még hiányzik az irányítópultból
-
-| Hiányosság               | A webhelyen megtalálható                                                           | Irányítópult                                                       | Teendő                     |
-| ------------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ | -------------------------- |
-| **Rácsos háttérkép**     | `body::before` milliméterpapír, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ hozzáadva (1. fázis)**                                        | **A rész**                 |
-| **Lekerekítési skála**   | `--radius 14px`, `--radius-sm 9px`                                                 | `--radius 14px` hozzáadva; `-sm` + komponensek átállítása függőben | **B rész / 2. fázis**      |
-| **Márkagradiens**        | `--grad-brand 135deg primary→accent-3`                                             | **✅ token hozzáadva (1. fázis)**; használatba vétel a 2. fázisban | **B rész**                 |
-| **Beágyazott felület**   | `--surface-2 #1c2230`                                                              | **✅ hozzáadva (1. fázis)**                                        | **B rész**                 |
-| **Monospace betűtípus**  | `--font-mono` (ui-monospace betűtípus-verem)                                       | függőben (4. fázis, a felhasználó komponensekkel együtt)           | **B rész**                 |
-| **`text-muted` (sötét)** | `#8b8b9e`                                                                          | `#a1a1aa` (zinc-400)                                               | összehangolás — **B rész** |
-
-### 3.3 Témakezelési mechanizmusok (hogy semmit se törjünk el)
-
-- **Tailwind v4, CSS-központú** (nincs `tailwind.config.*`). A tokenek a `:root`/`.dark` blokkokban vannak definiálva, és az `@theme inline` teszi őket elérhetővé a segédosztályok számára (`globals.css:130-179`).
-- **Sötét mód a `.dark` osztállyal** a `<html>` elemen (`@custom-variant dark` a `globals.css:22` helyen), amelyet egy egyéni Zustand-tároló (`src/store/themeStore.ts`) kapcsol át; az alapértelmezett téma = `system` (`src/shared/constants/appConfig.ts:11`). A webhely ehelyett a `html[data-theme="light"]` megoldást használja — **a mechanizmusok eltérnek, de soha nem találkoznak** (különböző források), így nincs ütközés. Megtartjuk az irányítópult `.dark` mechanizmusát.
-- **Létezik futásidejű elsődlegesszín-felülírás** (`themeStore.ts:85-97`, előbeállítások a `COLOR_THEMES` változóban) — a felhasználók lecserélhetik a `--color-primary` értékét. Minden új token (gradiens stb.), amely a `--color-primary` értékre hivatkozik, automatikusan örökli ezeket a felülírásokat. ✅
-- **A Tailwind v4 fenntartott lekerekítésnevei:** a `--radius-sm/md/lg/...` változók adják a `rounded-*` segédosztályok alapját. Újradefiniálásuk visszamenőleg megváltoztat minden meglévő `rounded-*` használatot (például a `rounded-sm` 12 fájlban szerepel). Ezért a kis lekerekítési érték és a komponensek átállítása szándékosan a 2. fázisra marad, ahol a felhasználó komponensek együtt változnak.
-
----
-
-## 4. A rész — A milliméterpapír-rácsos háttér (kiemelt kérés) — MEGVALÓSÍTVA (1. fázis)
-
-### 4.1 Mi ez?
-
-A webhelyen (`_mono_repo/omnirouteSite/css/base.css`) használt pontos megoldás: egy **rögzített, a teljes nézetablakot lefedő pszeudoelem**, amely két 1px-es vonalas színátmenetet rajzol ki, és `z-index:-1` értékkel az összes tartalom mögött helyezkedik el.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Miért működik ez annak ellenére, hogy a `body` átlátszatlan `background-color` értékkel rendelkezik?** A `z-index:-1` értékű `::before` az elem saját háttere _fölött_, de a normál elrendezési folyamban lévő tartalma _alatt_ rajzolódik ki. Így a `--color-bg` adja az alapkitöltést, erre kerül rá rétegként a rács, az alkalmazás pedig a rács fölött jelenik meg.
-
-### 4.2 A kódbázisban már meglévő példa
-
-A `src/app/landing/page.tsx:16-26` **már oldalanként megvalósítja ugyanezt a rácsot** — azonban **piros** vonalakkal (`#E54D5E`, `0.06` átlátszatlanság) **50px** méretben, animált gömbökkel kiegészítve. A minta tehát már bevált a termékben; ez a munka egy **globális, témához igazodó** háttérképpé emeli.
-
-### 4.3 Hozzáadott tokenek (a `globals.css` fájlban)
-
-```css
-:root {
-  /* világos — a rács átlátszatlansága a webhely 0.045 értékéhez képest növelve,
-     hogy a háttér valóban látható legyen a sűrű irányítópulton (a kártyák és a keret
-     a nézetablak nagy részét elfedik) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* sötét — ugyanezen okból a 0.035 értékhez képest növelve */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Az egyetlen akadály — eltávolítva
-
-A rács kialakításából adódóan globális (egyszerre lefedi a panelt, az `auth`/`login` oldalakat, a hibaoldalakat — minden útvonalat). Pontosan **egy** elem takarta el a panelen belül:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — a külső burkoló átlátszatlan `bg-bg` hátteret rajzolt. Alatta már minden átlátszó (`<main>`, a görgethető tároló és a belső `max-w-7xl` elem), ezért a **`bg-bg` eltávolításával** a body rácsa láthatóvá válik a tartalmi területen (a body `--color-bg` értéke továbbra is az alapkitöltést adja).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Interakció a kerettel (oldalsáv / fejléc)
-
-- A `Header` (`Header.tsx:207`, `bg-bg`) és a `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) **átlátszatlan** marad → a rács **csak a tartalmi területen** jelenik meg, amelyet egyszínű keret fog közre. Visszafogott alapértelmezés, és megfelel annak, ahogyan a webhely elválasztja a keretet a vászontól (D3 döntés = egyszínű).
-
-### 4.6 Bejelentkezési / hitelesítési / hibaoldalak
-
-Ezek közvetlenül a `<body>` alatt jelennek meg (panelkeret nélkül), így a globális rácsnak automatikusan meg kell jelennie mögöttük. **5. fázis — KÉSZ:** az önálló, teljes képernyős burkolók valójában átlátszatlanok voltak (`min-h-screen … bg-bg`, ahol a `bg-bg` ugyanaz az egyszínű kitöltés, mint a `<body>` esetében), ami minden, nem az irányítópulthoz tartozó képernyőn elrejtette a rácsot — nem csak a bejelentkezési oldalon. Most már mindegyik átlátszó, így a megosztott háttér látható rajtuk keresztül: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` és `ErrorPageScaffold` (a `400`/`401` oldalakat fedi le). Ezzel lezárult a **D4** (a csak bejelentkezésre vonatkozó hatókör minden önálló képernyőre kibővítve). A működést a `tests/unit/design-grid-background.test.ts` teszt biztosítja.
-
-### 4.7 Nyitóoldal
-
-A `landing/page.tsx` megtartja a gazdagabb animált hátterét (gömbök + vignetta) — ez a saját marketingcélú nyitóképe (D5 döntés = marad változatlanul).
-
----
-
-## 5. B rész — Tokenek egységesítése
-
-Az 1. fázis hozzáadja az inaktív, ütközésmentes identitástokeneket (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). A 2. fázis beköti a sugárskálát a Tailwindbe, és átállítja rá a komponenseket; a 4. fázis hozzáadja a `--font-mono` tokent és annak használóit.
-
-| Token                      | Indoklás                                                                    | Fázis                             |
-| -------------------------- | --------------------------------------------------------------------------- | --------------------------------- |
-| `--radius` / `--radius-sm` | Egyetlen sugárskála (14/9) az ad hoc 6/8/12 helyett                         | 1 (érték) / 2 (bekötés + átállás) |
-| `--grad-brand`             | Márkagradiens az elsődleges CTA-khoz (piros→ibolya), az oldalhoz igazítva   | 1 (token) / 2 (Button)            |
-| `--surface-2`              | Beágyazott panelek / táblázatfejlécek / beljebb húzott sorok                | 1                                 |
-| `--font-mono`              | Kódblokkok, terminál, azonosítók, végpontok                                 | 4                                 |
-| `--text-muted` egyeztetése | Egyetlen érték kiválasztása az oldal és a panel között (`#a1a1aa` ajánlott) | 2                                 |
-
-**D2 (text-muted):** az oldal `#8b8b9e`, míg az irányítópult `#a1a1aa` értéket használ. Javasolt megtartani az **irányítópult `#a1a1aa`** értékét, és az _oldalt_ ehhez igazítani. Kozmetikai módosítás.
-
----
-
-## 6. C rész — Komponensek szabványosítása (2–4. fázis)
-
-Egyedi komponensek (shadcn/Radix nélkül), Tailwind v4, a szemantikus tokenek **nagyrészt** bevezetve (195 fájl importálja a közös barrel fájlt). A feladat a **megkerülések** eltávolítása. Helye: `src/shared/components/`.
-
-| #   | Tétel                                  | Fájl(ok)                                                                                                                       | Probléma → Cél                                                                                                                                             | Fázis |
-| --- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| C1  | **Sugárértékek összehangolása**        | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                      | vegyes 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                          | 2     |
-| C2  | **Button gradiens + `accent` variáns** | `Button.tsx:5-12`                                                                                                              | az elsődleges gomb egyszínű piros→piros; igazítás a `--grad-brand` tokenhez; a hiányzó `accent` variáns hozzáadása. ~195 importáló — legnagyobb láthatóság | 2     |
-| C3  | **Táblázatok**                         | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                            | 100%-ban beágyazott, beégetett rgba-értékek + nem létező változók; migrálás tokenekre, az eltérő stílusok kivezetése                                       | 3     |
-| C4  | **Állapotszínek központosítása**       | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 segédfüggvény | ugyanazon hexérték több mint 6 másolata → egyetlen, a `--color-success/warning/error` tokenekre épülő modul                                                | 3     |
-| C5  | **Card kerete**                        | `Card.tsx:39`                                                                                                                  | `border-white/5` → márkaszín `/8`                                                                                                                          | 2     |
-| C6  | **Fókuszgyűrű egyeztetése** ✅ KÉSZ    | `globals.css` `--focus-ring` (accent) vs az űrlapvezérlők `ring-primary/30` értéke                                             | egységesítve az **accent (ibolya)** színre, hogy illeszkedjen a globális gyűrűhöz, és megkülönböztethető legyen a piros hibagyűrűtől; a hiba piros marad   | 4     |
-| C7  | **`Checkbox` + `Textarea` hozzáadása** | nyers `<input>`/`<textarea>` elemek beágyazott `accentColor:#6366f1` értékkel                                                  | tokenalapú primitívek                                                                                                                                      | 4     |
-| C8  | **Beégetett hexértékek eltávolítása**  | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, Modal pontok, ~14 diagramfájl                                           | literálok → tokenek                                                                                                                                        | 4     |
-| C9  | **`cn()` → clsx + tailwind-merge**     | `src/shared/utils/cn.ts`                                                                                                       | az ütköző osztályok egymásra halmozódnak; szükséges a C1 felülírásaihoz                                                                                    | 2     |
-
-**Már megfelelnek a márkaarculatnak (tokenalapúak, csak a sugárértéket kell módosítani):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Bevezetési terv
-
-- **1. fázis — Rács + identitástokenek (EZ A PR).** `globals.css`-rács + `--surface-2`/`--grad-brand`/`--radius` tokenek; `body::before` háttérkép; a `bg-bg` blokkoló eltávolítása; statikus védőteszt. Alacsony kockázatú, egyetlen commitban visszaállítható.
-- **2. fázis — Alapelemek (C1, C2, C5) — KÉSZ ebben a PR-ben.** Szemantikus lekerekítési segédosztályok hozzáadva az `@theme` használatával: `rounded-card` (14px) / `rounded-control` (9px) (egyedi nevek, így az alapértelmezett `rounded-sm/md/lg/xl` érintetlen marad — nincs 400 fájlt érintő változtatás); Card/Modal → 14px, Button/Input/Select → 9px; elsődleges Button → `--grad-brand` (piros→ibolya) + új `accent` változat; Card-szegélyek → a `border-border` token (0.08). **Elhalasztva:** a `cn()`→tailwind-merge (C9) új függőségeket igényel; az ad hoc `rounded-lg` átfogó cseréje (326 fájl) változatlanul marad, mivel a felületek túlnyomó részét az alapelemek biztosítják.
-- **3. fázis — Állapotszínek + táblázatok (C3, C4) — KÉSZ ebben a PR-ben.** ✅ **C4** (`src/shared/constants/statusColors.ts` — egyetlen `STATUS_HEX` forrás; `flow/edgeStyles.ts` + `TokenHealthBadge` átirányítva, változatlan/azonos hexértékekkel). ✅ **`--font-mono`** token. ✅ **C3 (DataTable)** — minden soron belüli rgba-érték, valamint a használaton kívüli `var(--bg-table-header)` / `var(--text-secondary)` tartalékérték lecserélve egy `--table-*` tokenkészletre (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), amelynek **sötét értékei pontosan megegyeznek a régi, beégetett rgba-értékekkel** (sötét módban bájtszinten azonos), a világos értékei pedig javítják a korábban mindig sötét világos témát. Fejlécszegély → `--color-border`, másodlagos szöveg → `--color-text-muted`. **Összevonás előtt vizuális ellenőrzést igényel.** (Nem módosítottuk: `logTableStyles.ts` és a régi Ant `.ant-table` szabályok — különálló, alacsonyabb prioritású feladatok.)
-- **4. fázis — Tisztítás (C6, C7, C9 kész; C8 függőben).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (a clsx + tailwind-merge függőségként hozzáadva) — a hívó `className` értéke most már megfelelően _lecseréli_ az alapelem ütköző osztályát ahelyett, hogy halmozná őket. ✅ **C7** új `Checkbox` + `Textarea` alapelemek (tokenvezéreltek, exportálva a gyűjtőmodulból; additív módosítás — a 32 nyers jelölőnégyzet / 41 nyers szövegterület átállítása fokozatosan következhet). ✅ **C6** fókuszgyűrűk egységesítése — az űrlapvezérlők (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) most a **kiemelőszínű (ibolya)** gyűrűt használják fókuszban, hogy illeszkedjenek a globális `--focus-ring` értékhez, és ne ütközzenek a piros hibagyűrűvel; a piros hibaállapot változatlan. ⏳ **A C8 hex-átvizsgálás NEM vak keresés/csere** — megerősítettük azokat az előfordulásokat, amelyek _szándékosak_, és meg kell maradniuk: `ConsoleLogViewer.tsx:240` (mindig sötét terminál), `TokenHealthBadge` felugró ablak, ReactFlow SVG-vonalak. Csak a valóban témafüggőnek szánt hexértékeket kell átállítani.
-
-Minden fázisban: `npm run lint` + `npm run typecheck:core` + vizuális ellenőrzés.
-
----
-
-## 8. Nyitott döntések (ajánlások)
-
-- **D1 — Elsődleges Button:** maradjon piros→piros, vagy váltson **piros→ibolya `--grad-brand`** értékre? Ajánlás: **piros→ibolya** (2. fázis).
-- **D2 — Rácsvonal színe:** **semleges** (webhelystílus) — kiválasztva — vagy márkapiros. Méret: **32px** (a tulajdonosi visszajelzés alapján ~30%-kal csökkentve az eredeti 46px értékről — a 46px-es cellák túl nagynak tűntek az irányítópult elrendezésében).
-- **D3 — Keretfelület élénksége:** oldalsáv/fejléc **egyszínű** — kiválasztva.
-- **D4 — Hitelesítési/bejelentkezési rács:** ✅ **KÉSZ (5. fázis)** — az átlátszatlan `bg-bg` minden önálló teljes képernyős burkolóból eltávolítva (nem csak a bejelentkezésiből), így a rács minden képernyőn látható. Lásd: §4.6.
-- **D5 — Nyitóoldal:** az animált nyitóképernyő maradjon változatlan. Kiválasztva.
-- **D6 — 14/9 lekerekítés a teljes termékben:** Ajánlás: igen (2. fázis).
-- **D7 — Az 1. fázis kerül ki először:** Kiválasztva.
-- **D8 — Elrendezés szélessége (5. fázis):** az irányítópult tartalmi burkolója `max-w-7xl` (1280px) értékre volt korlátozva, ami nagy monitorokon széles, üres oldalsó margókkal középre igazította. ✅ **KÉSZ** — folyékony `max-w-[3840px]` értékre emelve (valódi 4K): a tartalom most körülbelül 4K-ig követi a nézetablakot, és csak azon túl igazodik középre (`DashboardLayout.tsx`). A szándékosan keskeny oldalak tervezetten keskenyek maradnak (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Átlátszatlan adattáblázatok (6. fázis):** mivel az irányítópult tartalmi területe most átlátszó (így látható rajta keresztül a rácsos háttérkép, 5. fázis), azoknál az adattáblázatoknál, amelyek tárolója _nem_ volt átlátszatlan felület, a rács áttűnt az átlátszó páros sorokon / alacsony alfaértékű sávozáson. ✅ **KÉSZ** — mostantól minden kártyán kívüli táblázat `bg-surface` hátteret rajzol (illetve a `<DataTable>` alapelem esetén `background: var(--color-surface)` értéket használ a görgetési tárolóján). Javítva: `DataTable` (alapelem), `ProxyLogger`/`RequestLoggerV2` (a `<Card>` elemeik `bg-black/5 dark:bg-black/20` árnyalata a tailwind-merge miatt felülírta a Card `bg-surface` értékét → ~95%-ban átlátszó), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, valamint a gyorsítótárnézetek két CSS-rácsos „táblázata” (`bg-surface/35` → `bg-surface`). A már `<Card>`/Modal elemen belüli táblázatokról ellenőriztük, hogy átlátszatlanok, és szándékosan változatlanul hagytuk őket (a bg-surface ott redundáns, hatás nélküli beállítás lenne). Maga a rács **nem igényelt módosítást** — az irányítópult `body::before` eleme bájtszinten azonos a webhelyével (`--grid-size: 32px`); egy futó példányon látható bármilyen „nagyobb rács” egy elavult, `#4143` előtti buildből származik, nem a kódból. A `tests/unit/design-grid-background.test.ts` védi (6. fázis blokk).
-
----
-
-## 9. Hatókörön kívüli elemek / kockázatok
-
-- **Nincs palettamódosítás** — a színek már megfelelnek; csak a hiányzó tokeneket adjuk hozzá. A termék átszínezésének kockázata nulla.
-- **Nincs témamotor-módosítás** — megtartjuk a `.dark` osztályt és a Zustand tárolót.
-- **A lekerekítési sugár módosítása (2. fázis) széles körű** — minden kártyát/gombot/beviteli mezőt érint; egyesítés előtt vizuálisan ellenőrizni kell a zsúfolt képernyőket (táblázatok, modális ablakok).
-- **A táblázatok (C3)** tartalmazzák a legtöbb hardkódolt stílust, és ezeknél a legnagyobb a regressziós felület — külön PR-ban kell kezelni őket.
-
----
-
-## 10. Hivatkozási jegyzék
-
-| Terület                               | Elérési út                                                                                                           |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Irányítópult-tokenek                  | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Tématároló                            | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Panelhéj (a rács itt nincs blokkolva) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Felületi keret                        | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Rács-előzmény                         | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Alapkomponensek                       | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Állapotszínek forrásai                | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` segédfüggvény                    | `src/shared/utils/cn.ts`                                                                                             |
-| 1. fázis védőtesztje                  | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Webhelyreferencia                     | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — tokenhíd, `.dark` felülírások, OmniRoute `@layer components`-bővítmények
+- `packages/ui-kit/UPSTREAM.md` — rögzített upstream commit és licencengedély; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` és a mellette található adapterek; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
