@@ -1,3 +1,4 @@
+import { pluginRegistration } from "./pluginRegistration";
 /**
  * Plugin manager — lifecycle management for plugins.
  *
@@ -204,32 +205,7 @@ class PluginManager {
     }
 
     // Register in DB (destDir is now in place)
-    const row = insertPlugin({
-      id: randomUUID(),
-      name,
-      version: manifest.version,
-      description: manifest.description,
-      author: manifest.author,
-      license: manifest.license,
-      main: manifest.main,
-      source: manifest.source,
-      tags: manifest.tags,
-      manifest: manifest as unknown as Record<string, unknown>,
-      configSchema: manifest.configSchema as unknown as Record<string, unknown>,
-      hooks: [
-        manifest.hooks.onRequest && "onRequest",
-        manifest.hooks.onResponse && "onResponse",
-        manifest.hooks.onError && "onError",
-        manifest.hooks.onInstall && "onInstall",
-        manifest.hooks.onActivate && "onActivate",
-        manifest.hooks.onDeactivate && "onDeactivate",
-        manifest.hooks.onUninstall && "onUninstall",
-        manifest.hooks.onStreamComplete && "onStreamComplete",
-      ].filter(Boolean) as string[],
-      permissions: manifest.requires.permissions,
-      pluginDir: destDir,
-      enabled: manifest.enabledByDefault,
-    });
+    const row = insertPlugin(pluginRegistration(manifest, name, destDir, randomUUID()));
 
     log.info("manager.installed", { name, version: manifest.version });
 
@@ -335,32 +311,7 @@ class PluginManager {
       throw err;
     }
 
-    const row = insertPlugin({
-      id: randomUUID(),
-      name,
-      version: manifest.version,
-      description: manifest.description,
-      author: manifest.author,
-      license: manifest.license,
-      main: manifest.main,
-      source: manifest.source,
-      tags: manifest.tags,
-      manifest: manifest as unknown as Record<string, unknown>,
-      configSchema: manifest.configSchema as unknown as Record<string, unknown>,
-      hooks: [
-        manifest.hooks.onRequest && "onRequest",
-        manifest.hooks.onResponse && "onResponse",
-        manifest.hooks.onError && "onError",
-        manifest.hooks.onInstall && "onInstall",
-        manifest.hooks.onActivate && "onActivate",
-        manifest.hooks.onDeactivate && "onDeactivate",
-        manifest.hooks.onUninstall && "onUninstall",
-        manifest.hooks.onStreamComplete && "onStreamComplete",
-      ].filter(Boolean) as string[],
-      permissions: manifest.requires.permissions,
-      pluginDir: destDir,
-      enabled: manifest.enabledByDefault,
-    });
+    const row = insertPlugin(pluginRegistration(manifest, name, destDir, randomUUID()));
 
     log.info("manager.upgraded", { name, version: manifest.version });
 

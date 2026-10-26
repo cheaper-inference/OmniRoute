@@ -4,11 +4,11 @@
 
 ---
 
-> **ઓટો-જનરેટેડ** `src/shared/constants/providers.ts` માંથી — જાતે સંપાદિત કરશો નહીં.
-> આનાથી ફરી જનરેટ કરો: `npm run gen:provider-reference`
-> **છેલ્લે જનરેટ કર્યું:** 2026-10-18
+> `src/shared/constants/providers.ts`માંથી **સ્વતઃ જનરેટ કરેલું** — હાથથી સંપાદિત કરશો નહીં.
+> આના દ્વારા ફરીથી જનરેટ કરો: `npm run gen:provider-reference`
+> **છેલ્લે જનરેટ કરેલું:** 2026-10-20
 
-કુલ પ્રોવાઇડર્સ: **375**. નીચે કેટેગરી વિભાજન જુઓ.
+કુલ પ્રદાતાઓ: **375**. નીચે શ્રેણીવાર વિભાજન જુઓ.
 
 ## શ્રેણીઓ
 
@@ -457,11 +457,11 @@
 | ------ | ------ | ----------------------- | ------ | ------- | ----- |
 | `auto` | `auto` | Auto (શૂન્ય-રૂપરેખાંકન) | સિસ્ટમ | —       | —     |
 
-## સત્યના સ્ત્રોતો
+## સત્યના સ્રોતો
 
 - કેટલોગ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- રજિસ્ટ્રી (દરેક મોડલની વિગતો): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- એક્ઝિક્યુટર્સ: [`open-sse/executors/`](../../open-sse/executors/) (154 અમલીકરણો)
+- રજિસ્ટ્રી (દરેક મોડેલની વિગતો): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- એક્ઝિક્યુટર્સ: [`open-sse/executors/`](../../open-sse/executors/) (156 અમલીકરણો)
 - ટ્રાન્સલેટર્સ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## આ પણ જુઓ

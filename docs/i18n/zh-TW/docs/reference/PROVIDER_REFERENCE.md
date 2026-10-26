@@ -4,11 +4,11 @@
 
 ---
 
-> 由 `src/shared/constants/providers.ts` **自動產生** — 請勿手動編輯。
-> 重新產生指令：`npm run gen:provider-reference`
-> **最後產生時間：** 2026-10-18
+> **自動產生**自 `src/shared/constants/providers.ts` — 請勿手動編輯。
+> 使用以下指令重新產生：`npm run gen:provider-reference`
+> **上次產生日期：** 2026-10-20
 
-提供者總數：**375**。請參閱下方的分類明細。
+提供者總數：**375**。請參閱下方的類別細分。
 
 ## 類別
 
@@ -457,12 +457,12 @@
 | ------ | ------ | -------------- | ---- | ---- | ---- |
 | `auto` | `auto` | 自動（零設定） | 系統 | —    | —    |
 
-## 真相來源
+## 真實來源
 
-- 目錄(Catalog):[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- 註冊表(各模型詳細資訊):[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- 執行器(Executors):[`open-sse/executors/`](../../open-sse/executors/)(154 個實作)
-- 轉譯器(Translators):[`open-sse/translator/`](../../open-sse/translator/)
+- 目錄：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- 登錄檔（各模型詳細資訊）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- 執行器：[`open-sse/executors/`](../../open-sse/executors/)（156 個實作）
+- 轉譯器：[`open-sse/translator/`](../../open-sse/translator/)
 
 ## 另請參閱
 

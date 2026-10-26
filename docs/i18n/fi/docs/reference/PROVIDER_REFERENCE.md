@@ -4,11 +4,11 @@
 
 ---
 
-> **Automaattisesti luotu** tiedostosta `src/shared/constants/providers.ts` — älä muokkaa käsin.
+> **Luotu automaattisesti** tiedostosta `src/shared/constants/providers.ts` — älä muokkaa käsin.
 > Luo uudelleen komennolla: `npm run gen:provider-reference`
-> **Viimeksi luotu:** 2026-10-18
+> **Luotu viimeksi:** 2026-10-20
 
-Palveluntarjoajia yhteensä: **375**. Katso kategoriakohtainen erittely alla.
+Palveluntarjoajia yhteensä: **375**. Katso alla oleva luokkakohtainen erittely.
 
 ## Luokat
 
@@ -459,10 +459,10 @@ Käytä hallintapaneelia osoitteessa `/dashboard/providers` ottaaksesi käyttö�
 
 ## Totuuden lähteet
 
-- Katalogi: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- Luettelo: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Rekisteri (mallikohtaiset tiedot): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Suorittajat: [`open-sse/executors/`](../../open-sse/executors/) (154 toteutusta)
-- Muuntajat: [`open-sse/translator/`](../../open-sse/translator/)
+- Suorittimet: [`open-sse/executors/`](../../open-sse/executors/) (156 toteutusta)
+- Muuntimet: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Katso myös
 

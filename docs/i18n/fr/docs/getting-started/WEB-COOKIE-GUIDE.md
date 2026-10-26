@@ -4,9 +4,9 @@
 
 ---
 
-Les fournisseurs Web Cookie permettent à OmniRoute d’utiliser un service d’IA via votre session de navigateur existante plutôt qu’avec une clé API. Ils sont utiles lorsque vous avez déjà accès à un service par l’intermédiaire de son site web et que vous souhaitez qu’OmniRoute utilise la même session authentifiée.
+Les fournisseurs Web Cookie permettent à OmniRoute d’utiliser un service d’IA par l’intermédiaire de votre session de navigateur existante, plutôt qu’avec une clé API. Ils sont utiles lorsque vous avez déjà accès à un service via son site Web et que vous souhaitez qu’OmniRoute utilise la même session authentifiée.
 
-Contrairement aux fournisseurs utilisant une clé API, les fournisseurs Web Cookie s’authentifient à l’aide des identifiants que votre navigateur envoie au site web.
+Contrairement aux fournisseurs utilisant une clé API, les fournisseurs Web Cookie s’authentifient à l’aide des identifiants que votre navigateur envoie au site Web.
 
 ---
 
@@ -14,11 +14,11 @@ Contrairement aux fournisseurs utilisant une clé API, les fournisseurs Web Cook
 
 > **Important :** Copiez toujours les identifiants depuis une **requête réseau active**, et **non** depuis le stockage des cookies de votre navigateur.
 
-De nombreux problèmes d’authentification sont causés par la copie de cookies depuis le mauvais emplacement.
+De nombreux problèmes d’authentification sont dus à la copie de cookies depuis le mauvais emplacement.
 
-## Ne copiez PAS depuis le stockage des cookies
+## Ne copiez PAS les données depuis le stockage des cookies
 
-La plupart des navigateurs permettent d’accéder aux cookies stockés via :
+La plupart des navigateurs permettent d’accéder aux cookies enregistrés via :
 
 ```
 Outils de développement
@@ -26,7 +26,7 @@ Outils de développement
 → Cookies
 ```
 
-Bien que ces cookies puissent sembler corrects, ils peuvent être :
+Bien que ces cookies semblent corrects, ils peuvent être :
 
 - obsolètes
 - incomplets
@@ -34,16 +34,16 @@ Bien que ces cookies puissent sembler corrects, ils peuvent être :
 
 L’utilisation de ces valeurs peut entraîner des échecs d’authentification, même si elles semblent valides.
 
-## Copiez depuis une requête active
+## Copiez les données depuis une requête active
 
-Utilisez plutôt les cookies d’une requête ayant abouti :
+Utilisez plutôt les cookies provenant d’une requête réussie :
 
 ```
 Outils de développement
 → Réseau
 → Actualiser la page
 → Ouvrir une requête de chat ou de conversation
-→ En-têtes de la requête
+→ En-têtes de requête
 → Cookie
 ```
 
@@ -57,11 +57,11 @@ Pour la plupart des fournisseurs Web Cookie, il s’agit de la valeur à coller 
 
 Le processus de configuration est identique pour la plupart des fournisseurs Web Cookie.
 
-1. Connectez-vous au site web du fournisseur.
+1. Connectez-vous au site Web du fournisseur.
 2. Ouvrez les outils de développement du navigateur.
 3. Ouvrez l’onglet **Réseau**.
 4. Actualisez la page.
-5. Ouvrez une requête authentifiée de chat ou de conversation.
+5. Ouvrez une requête de chat ou de conversation authentifiée.
 6. Copiez les identifiants d’authentification requis.
 7. Ouvrez OmniRoute.
 8. Accédez à **Fournisseurs → Ajouter un fournisseur**.
@@ -76,42 +76,42 @@ Les identifiants exacts requis dépendent du fournisseur.
 
 # Formats des identifiants des fournisseurs
 
-Les différents sites web stockent les informations d’authentification de différentes manières. Certains nécessitent uniquement des cookies, tandis que d’autres peuvent exiger des en-têtes ou des jetons supplémentaires.
+Les différents sites Web stockent les informations d’authentification de différentes manières. Certains nécessitent uniquement des cookies, tandis que d’autres peuvent exiger des en-têtes ou des jetons supplémentaires.
 
-| Fournisseur                     | Format des identifiants              | Guide du fournisseur             |
-| ------------------------------- | ------------------------------------ | -------------------------------- |
-| Claude Web                      | En-tête complet de la requête Cookie | `docs/providers/CLAUDE_WEB.md`   |
-| ChatGPT Web (Codex)             | En-tête Cookie complet               | `docs/providers/CHATGPT_WEB.md`  |
-| Gemini Web                      | _(à vérifier)_                       |                                  |
-| Copilot Web                     | _(à vérifier)_                       | `docs/providers/COPILOT-M365.md` |
-| Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath        | `docs/providers/COPILOT-M365.md` |
-| Grok Web                        | _(à vérifier)_                       |                                  |
-| ...                             | ...                                  | ...                              |
+| Fournisseur                     | Format des identifiants           | Guide du fournisseur             |
+| ------------------------------- | --------------------------------- | -------------------------------- |
+| Claude Web                      | En-tête de requête Cookie complet | `docs/providers/CLAUDE_WEB.md`   |
+| ChatGPT Web (Codex)             | En-tête Cookie complet            | `docs/providers/CHATGPT_WEB.md`  |
+| Gemini Web                      | _(à vérifier)_                    |                                  |
+| Copilot Web                     | _(à vérifier)_                    | `docs/providers/COPILOT-M365.md` |
+| Microsoft 365 Copilot (BizChat) | access_token WS + chathubPath     | `docs/providers/COPILOT-M365.md` |
+| Grok Web                        | _(à vérifier)_                    |                                  |
+| ...                             | ...                               | ...                              |
 
-> Mettez ce tableau à jour lorsque de nouveaux fournisseurs Web Cookie sont ajoutés ou lorsque les exigences d’authentification des fournisseurs existants changent.
+> Mettez à jour ce tableau à mesure que de nouveaux fournisseurs Web Cookie sont ajoutés ou que les exigences d’authentification des fournisseurs existants évoluent.
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) est une plateforme gratuite de chat grand public ne nécessitant aucune inscription — la session est créée anonymement lors de la première visite et persiste grâce à trois cookies : `uid`, `si_usr_id` et `si_ses_id`. OmniRoute transmet le même point de terminaison `/api/dispatch` via un identifiant de modèle unique (`notrack-c`, alias `ntw`).
+NoTrack ([notrack.ai](https://notrack.ai)) est une plateforme de chat grand public gratuite ne nécessitant aucune inscription — la session est créée anonymement lors de la première visite et persiste grâce à trois cookies : `uid`, `si_usr_id` et `si_ses_id`. OmniRoute fait transiter le même point de terminaison `/api/dispatch` par l’intermédiaire d’un seul identifiant de modèle (`notrack-c`, alias `ntw`).
 
 ### Étapes de connexion
 
 1. Ouvrez [notrack.ai](https://notrack.ai) dans votre navigateur et laissez le cookie de session anonyme être défini.
-2. Ouvrez les **Outils de développement → Réseau**, actualisez la page et cliquez sur n’importe quelle requête `/api`.
+2. Ouvrez les **Outils de développement → Réseau**, actualisez la page, puis cliquez sur n’importe quelle requête `/api`.
 3. Dans les **En-têtes de requête**, copiez la valeur complète de l’en-tête `Cookie`.
 4. Dans OmniRoute, accédez à **Fournisseurs → Ajouter un fournisseur → NoTrack Web (gratuit)**.
 5. Collez la chaîne de cookies dans le champ `apiKey`, puis cliquez sur **Enregistrer**.
 
-OmniRoute extrait `uid`, `si_usr_id` et `si_ses_id` de la chaîne collée, puis reconstruit un en-tête `Cookie` propre contenant uniquement ces paires — ainsi que `nt_session` (le jeton `ntk_…` défini pour les comptes connectés), le cas échéant. Si l’un des trois est manquant, la chaîne brute collée est transmise sans modification afin que les opérateurs puissent tester d’autres formats.
+OmniRoute extrait `uid`, `si_usr_id` et `si_ses_id` de la chaîne collée, puis reconstruit un en-tête `Cookie` propre contenant uniquement ces paires — ainsi que `nt_session` (le jeton `ntk_…` défini pour les comptes connectés), lorsqu’il est présent. Si l’une de ces trois valeurs est absente, la chaîne brute collée est transmise sans modification afin que les opérateurs puissent tester d’autres formats.
 
 ### Identifiants de modèle
 
-| Identifiant de modèle | Nom d’affichage | Remarques                                                 |
-| --------------------- | --------------- | --------------------------------------------------------- |
-| `notrack-c`           | NoTrack C       | Modèle par défaut — modèle de répartition en amont `C`.   |
-| `C`                   | NoTrack C       | Alias de `notrack-c` (code brut de répartition en amont). |
-| `notrack`             | NoTrack C       | Alias de `notrack-c`.                                     |
-| `ntw`                 | NoTrack C       | Alias court de `notrack-c`.                               |
+| Identifiant de modèle | Nom affiché | Remarques                                                  |
+| --------------------- | ----------- | ---------------------------------------------------------- |
+| `notrack-c`           | NoTrack C   | Valeur par défaut — le modèle de répartition en amont `C`. |
+| `C`                   | NoTrack C   | Alias de `notrack-c` (code brut de répartition en amont).  |
+| `notrack`             | NoTrack C   | Alias de `notrack-c`.                                      |
+| `ntw`                 | NoTrack C   | Alias court de `notrack-c`.                                |
 
 Les quatre identifiants de modèle correspondent au même modèle de répartition en amont (`C`).
 
@@ -119,38 +119,38 @@ Les quatre identifiants de modèle correspondent au même modèle de répartitio
 
 L’exécuteur accepte les champs facultatifs suivants dans le corps de la requête :
 
-| Champ du corps        | Valeur par défaut | Fonction                                                                           |
-| --------------------- | ----------------- | ---------------------------------------------------------------------------------- |
-| `notrack_mode`        | `usual`           | Mode de répartition (chaîne libre ; le service en amont accepte `usual`, …)        |
-| `notrack_max_turns`   | `6`               | Nombre de tours internes que le service en amont peut effectuer avant de répondre. |
-| `notrack_chat_id`     | `null`            | Reprendre un chat existant en amont (omettre pour un nouveau chat).                |
-| `notrack_attachments` | `[]`              | Tableau transmis tel quel contenant les descripteurs de pièces jointes en amont.   |
-| `notrack_regenerate`  | `false`           | Définir sur `true` pour demander une réponse régénérée pour le tour précédent.     |
+| Champ du corps        | Valeur par défaut | Objectif                                                                                                  |
+| --------------------- | ----------------- | --------------------------------------------------------------------------------------------------------- |
+| `notrack_mode`        | `usual`           | Mode de répartition (chaîne libre ; le service en amont accepte `usual`, …)                               |
+| `notrack_max_turns`   | `6`               | Nombre de tours internes que le service en amont peut effectuer avant de répondre.                        |
+| `notrack_chat_id`     | `null`            | Reprendre un chat existant en amont (à omettre pour un nouveau chat).                                     |
+| `notrack_attachments` | `[]`              | Tableau transmis tel quel contenant les descripteurs de pièces jointes du service en amont.               |
+| `notrack_regenerate`  | `false`           | Définissez cette valeur sur `true` pour demander une nouvelle génération de la réponse du tour précédent. |
 
 ### Fonctionnalités
 
-- Complétions de chat **avec et sans diffusion en continu**.
-- **Appel d’outils** — définissez `tools: [...]` dans la requête ; l’exécuteur les sérialise dans un contrat d’enveloppe d’appel d’outil et reconvertit les réponses du modèle en `tool_calls` OpenAI.
-- **`response_format`** — `json_object` et `json_schema` sont pris en charge. L’exécuteur extrait le premier objet JSON de la réponse du modèle et le convertit en chaîne avant de le renvoyer.
+- Complétions de chat **en streaming et sans streaming**.
+- **Appels d’outils** — définissez `tools: [...]` dans la requête ; l’exécuteur les sérialise dans un contrat d’enveloppe d’appel d’outil et reconvertit les réponses du modèle au format OpenAI `tool_calls`.
+- **`response_format`** — `json_object` et `json_schema` sont pris en charge. L’exécuteur extrait le premier objet JSON de la réponse du modèle et le sérialise sous forme de chaîne avant de le renvoyer.
 - **Indication de raisonnement** — l’exécuteur émet un delta `reasoning` lorsque le service en amont envoie un événement `thinking`.
 
-### Limitations
+### Limites
 
-- Le service en amont impose des quotas d’utilisation anonyme — lorsqu’ils sont atteints, l’exécuteur renvoie une erreur 429 accompagnée d’un message explicite.
-- Tous les identifiants de modèle correspondent au même modèle de répartition en amont ; il n’existe aucun changement possible selon le modèle.
+- Le service en amont impose des quotas d’utilisation anonyme — lorsqu’ils sont dépassés, l’exécuteur renvoie une erreur 429 accompagnée d’un message explicite.
+- Tous les identifiants de modèle correspondent au même modèle de répartition en amont ; aucune sélection par modèle n’est possible.
 - L’exécuteur n’appelle pas le point de terminaison `/api/chats` du service en amont ; l’historique des chats et les sessions ne sont donc pas gérés automatiquement. Utilisez `notrack_chat_id` pour reprendre un chat existant en amont.
 
 ---
 
-# Ce que les fournisseurs utilisant des cookies web peuvent et ne peuvent pas faire
+# Ce que les fournisseurs utilisant des cookies Web peuvent et ne peuvent pas faire
 
-Les fournisseurs utilisant des cookies web réutilisent l’interface de chat d’un site web. Ils n’offrent **pas** les mêmes fonctionnalités que les API officielles.
+Les fournisseurs utilisant des cookies Web réutilisent l’interface de chat d’un site Web. Ils n’offrent **pas** les mêmes fonctionnalités que les API officielles.
 
 ## Pris en charge
 
 - Authentification à l’aide de votre session de navigateur existante
 - Accès aux modèles disponibles via votre compte
-- Diffusion en continu des réponses de chat
+- Diffusion en continu des réponses de conversation
 - Aucune clé API requise
 
 ## Non pris en charge
@@ -161,17 +161,17 @@ Les fournisseurs utilisant des cookies web réutilisent l’interface de chat d�
 - Flux de travail d’IDE agentiques
 - Fonctionnalités réservées à l’API
 
-Ce comportement est attendu et ne constitue **pas** un bogue.
+Ce comportement est attendu et **ne constitue pas** un bug.
 
-Si vous avez besoin d’exécuter des outils, de modifier automatiquement des fichiers ou d’utiliser d’autres flux de travail agentiques, utilisez un **fournisseur avec clé API** plutôt qu’un fournisseur Web Cookie.
+Si vous avez besoin de l’exécution d’outils, de la modification automatique de fichiers ou d’autres flux de travail agentiques, utilisez un **fournisseur avec clé API** plutôt qu’un fournisseur Web Cookie.
 
 ---
 
-# Limite de la validation
+# Réserve concernant la validation
 
-La réussite du **Test Connection** ou de la validation des cookies vérifie uniquement que les identifiants fournis semblent respecter le format attendu.
+La réussite de **Test Connection** ou de la validation des cookies vérifie uniquement que les identifiants fournis semblent être au format attendu.
 
-Tant que l’Issue #7857 n’est pas résolue, une validation réussie **ne garantit pas** que le fournisseur parviendra à s’authentifier.
+Tant que le problème nº 7857 n’est pas résolu, une validation réussie **ne garantit pas** que le fournisseur pourra s’authentifier correctement.
 
 Si l’authentification échoue toujours, vérifiez que vous avez copié les identifiants depuis une requête réseau active plutôt que depuis le stockage des cookies du navigateur.
 
@@ -185,7 +185,7 @@ Vérifiez que les identifiants ont été copiés depuis :
 
 ```
 Réseau
-→ En-têtes de la requête
+→ En-têtes de requête
 → Cookie
 ```
 
@@ -200,9 +200,9 @@ Application
 
 ## Le cookie fonctionne dans le navigateur, mais pas dans OmniRoute
 
-Certains fournisseurs incluent des cookies qui ne sont envoyés que lors des requêtes authentifiées.
+Certains fournisseurs incluent des cookies qui ne sont envoyés que lors de requêtes authentifiées.
 
-Copiez à nouveau les identifiants depuis une nouvelle requête réseau après avoir ouvert avec succès une conversation.
+Copiez à nouveau les identifiants depuis une nouvelle requête réseau après avoir ouvert une conversation avec succès.
 
 ---
 
@@ -210,25 +210,38 @@ Copiez à nouveau les identifiants depuis une nouvelle requête réseau après a
 
 Les fournisseurs Web Cookie utilisent votre session de navigateur existante.
 
-Si votre session de navigateur expire ou si vous vous déconnectez, vous devez copier un nouvel ensemble d’identifiants. Pour automatiser le renouvellement des cookies pour les fournisseurs Web pris en charge, consultez l’outil complémentaire [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md).
+Si votre session de navigateur expire ou si vous vous déconnectez, vous devez copier un nouvel ensemble d’identifiants. Pour automatiser le renouvellement des cookies pour les fournisseurs web pris en charge, consultez l’outil complémentaire [Extension de synchronisation de session du navigateur](../guides/SESSION-SYNC-EXTENSION.md).
 
 ---
 
 ## Le test de connexion réussit, mais les requêtes échouent
 
-Tant que l’Issue #7857 n’est pas résolue, la réussite de la validation ne garantit pas que la requête d’authentification aboutira.
+Tant que le problème nº 7857 n’est pas résolu, la réussite de la validation ne garantit pas que la requête d’authentification aboutira.
 
 Copiez à nouveau vos identifiants depuis une nouvelle requête authentifiée avant de poursuivre le dépannage.
 
 ---
 
+## ChatGPT Web échoue avec « Unsupported ChatGPT integrity dependency »
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Les identifiants sont valides — cette erreur provient du pont, et non de la session. chatgpt.com attribue les identifiants de ses modules à chaque déploiement, et le pont fixait auparavant l’identifiant de l’assistant Sentinel qu’il instancie. Par conséquent, une reconstruction de chatgpt.com ayant renommé cet assistant interrompait chaque échange alors que le cookie restait valide. Réautoriser la connexion ne peut pas résoudre ce problème.
+
+Les versions qui résolvent le module au moyen du propre environnement d’exécution de la page ne fixent aucun identifiant et ne rencontrent pas ce problème. Si cette erreur apparaît, mettez OmniRoute à niveau et relancez la vérification de la connexion.
+
+---
+
 # Exemple de fournisseur
 
-Pour obtenir une procédure pas à pas complète et spécifique à un fournisseur, consultez :
+Pour une procédure pas à pas complète propre à un fournisseur, consultez :
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Le guide Claude Web présente le processus complet de configuration d’un fournisseur Web Cookie et sert d’implémentation de référence.
+Le guide Claude Web présente le processus de configuration complet d’un fournisseur Web Cookie et sert d’implémentation de référence.
 
 ---
 
@@ -238,4 +251,4 @@ Le guide Claude Web présente le processus complet de configuration d’un fourn
 - Évitez de réutiliser d’anciens cookies.
 - Maintenez votre session de navigateur active lorsque vous utilisez des fournisseurs Web Cookie.
 - Traitez les cookies copiés comme des identifiants sensibles.
-- Utilisez des fournisseurs avec clé API lorsque vous avez besoin d’appels de fonctions ou de flux de travail agentiques.
+- Utilisez des fournisseurs avec clé API lorsque vous avez besoin de l’appel de fonctions ou de flux de travail agentiques.

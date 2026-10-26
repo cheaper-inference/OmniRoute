@@ -1,0 +1,1 @@
+- **fix(guardrails):** streaming credential redaction no longer re-sends the last forwarded delta in its end-of-stream flush — `tool_calls` headers reached OpenAI Chat Completions clients twice and the accumulated arguments were invalid JSON; the `finish_reason` chunk also drains its own held-back tail so it is no longer emitted out of order (#18027) — thanks @Szqub

@@ -1,0 +1,1 @@
+- **fix(audio):** `/v1/audio/translations` no longer echoes an upstream provider's raw non-JSON error body (HTML pages, stack traces, echoed credentials) to the client and now carries CORS on upstream errors, using the shared `upstreamErrorResponse` that speech and transcription adopted in #15159 ([#17844](https://github.com/diegosouzapw/OmniRoute/pull/17844))

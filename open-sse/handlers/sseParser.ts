@@ -689,13 +689,17 @@ function findBareStreamError(events: Array<Record<string, unknown>>): unknown {
  * Choose the snapshot a buffered Responses stream is reported from. A bare error frame only
  * decides the outcome when the stream never settled: it must not override a terminal
  * snapshot, nor a latest snapshot that itself reports `completed`. An in-progress snapshot
- * (e.g. `response.created`) or no snapshot at all, followed by an error frame, is a failure.
+ * (e.g. `response.created`) followed by an error frame is a failure. Without any Responses
+ * snapshot the payload is not a Responses stream at all (an error-only `data: {"error":…}`
+ * chunk from a CLI executor, #3324): return null so the caller keeps trying the other formats
+ * and the generic invalid-SSE path surfaces the upstream message as a 502.
  */
 function pickResponsesSnapshot(terminalResponse, latestResponse, events) {
   const snapshot = terminalResponse || latestResponse;
+  if (!snapshot) return null;
   const streamError = terminalResponse ? null : findBareStreamError(events);
-  if (!streamError || terminalResponse || latestResponse?.status === "completed") return snapshot;
-  return { ...(snapshot || {}), status: "failed", error: streamError };
+  if (!streamError || terminalResponse || latestResponse.status === "completed") return snapshot;
+  return { ...snapshot, status: "failed", error: streamError };
 }
 
 export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {

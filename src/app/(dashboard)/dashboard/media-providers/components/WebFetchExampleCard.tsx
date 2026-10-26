@@ -2,9 +2,14 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import { useApiKey } from "../../providers/hooks/useApiKey";
 import { buildCurl } from "../../providers/utils/buildCurl";
-import { PLAYGROUND_KEY_ID_HEADER, resolvePlaygroundKeyId } from "../../providers/utils/playgroundAuth";
+import {
+  PLAYGROUND_KEY_ID_HEADER,
+  resolvePlaygroundKeyId,
+} from "../../providers/utils/playgroundAuth";
 import { PlaygroundCard } from "./PlaygroundCard";
 
 interface Props {
@@ -103,46 +108,27 @@ export function WebFetchExampleCard({ providerId }: Props) {
       error={error}
     >
       {/* URL */}
-      <div>
-        <label className="block text-xs text-text-muted mb-1">{t("url")}</label>
-        <input
-          type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://example.com/article"
-          className="w-full rounded-md border border-border bg-bg-subtle text-sm px-2 py-1.5 text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </div>
+      <Input
+        label={t("url")}
+        type="url"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder="https://example.com/article"
+      />
       {/* Format + Depth row */}
       <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block text-xs text-text-muted mb-1">{t("format")}</label>
-          <select
-            value={format}
-            onChange={(e) => setFormat(e.target.value as FetchFormat)}
-            className="w-full rounded-md border border-border bg-bg-subtle text-sm px-2 py-1.5 text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            {FORMAT_OPTIONS.map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs text-text-muted mb-1">{t("depth")}</label>
-          <select
-            value={depth}
-            onChange={(e) => setDepth(Number(e.target.value))}
-            className="w-full rounded-md border border-border bg-bg-subtle text-sm px-2 py-1.5 text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            {DEPTH_OPTIONS.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label={t("format")}
+          value={format}
+          onChange={(e) => setFormat(e.target.value as FetchFormat)}
+          options={FORMAT_OPTIONS.map((f) => ({ value: f, label: f }))}
+        />
+        <Select
+          label={t("depth")}
+          value={depth}
+          onChange={(e) => setDepth(Number(e.target.value))}
+          options={DEPTH_OPTIONS.map((d) => ({ value: String(d), label: String(d) }))}
+        />
       </div>
     </PlaygroundCard>
   );

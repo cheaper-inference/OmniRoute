@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { Card, Button } from "@/shared/components";
+import { Card, Button, Skeleton } from "@/shared/components";
 import { useTranslations } from "next-intl";
 
 interface SessionInfo {
@@ -95,28 +95,19 @@ export default function SessionInfoCard() {
   if (loading) {
     return (
       <Card>
-        <div className="animate-pulse h-32 bg-black/5 dark:bg-white/5 rounded-lg" />
+        <Skeleton className="h-32 w-full" />
       </Card>
     );
   }
 
   return (
-    <Card>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            person
-          </span>
-        </div>
-        <h3 className="text-lg font-semibold">{t("session")}</h3>
-      </div>
-
+    <Card title={t("session")} icon="person">
       <div className="flex flex-col gap-3" role="list" aria-label={t("sessionDetailsAria")}>
         <div className="flex justify-between items-center text-sm" role="listitem">
           <span className="text-text-muted">{t("status")}</span>
           <span className="flex items-center gap-1.5">
             <span
-              className={`w-2 h-2 rounded-full ${session?.authenticated ? "bg-green-500" : "bg-yellow-500"}`}
+              className={`w-2 h-2 rounded-full ${session?.authenticated ? "bg-success" : "bg-warning"}`}
               aria-hidden="true"
             />
             {session?.authenticated ? t("authenticated") : t("guest")}
@@ -141,7 +132,7 @@ export default function SessionInfoCard() {
         </div>
       </div>
 
-      <div className="flex gap-3 mt-4 pt-4 border-t border-border/50">
+      <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-border">
         <Button variant="secondary" onClick={handleClearStorage}>
           {t("clearLocalData")}
         </Button>
