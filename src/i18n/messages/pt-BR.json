@@ -14852,6 +14852,7 @@
     "upstreamStatus": "Status ascendente",
     "noResponse": "Sem resposta",
     "egressIp": "IP de Egressão",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Cabeçalhos após",
     "firstChunkAfter": "Primeiro bloco após",
     "servedBy": "Atendido por",

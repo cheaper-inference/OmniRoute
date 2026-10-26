@@ -14852,6 +14852,7 @@
     "upstreamStatus": "ზედა ნაკადის სტატუსი",
     "noResponse": "პასუხი არ არის",
     "egressIp": "გამავალი IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "თავსართები შემდეგ",
     "firstChunkAfter": "პირველი ბლოკი შემდეგ",
     "servedBy": "მომსახურებულია",

@@ -7,6 +7,10 @@ import {
   maskAccount,
   maskSegment,
 } from "@/shared/utils/formatting";
+import {
+  EGRESS_FAMILY_LABEL_ARGUMENT,
+  observedEgressAddresses,
+} from "@/shared/network/egressAddress";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import Badge from "./Badge";
 import Modal, { TALL_MODAL_PROPS } from "./Modal";
@@ -38,6 +42,34 @@ function ObservedField({ label, children }) {
       <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">{label}</div>
       <div className="text-sm font-medium font-mono">{children}</div>
     </div>
+  );
+}
+
+/**
+ * The egress addresses of a log line: the reported one first, then the other
+ * address observed for a family, each with the family it was observed in. No
+ * address at all renders the dash alone — a missing address is not a family.
+ */
+function ObservedEgressAddresses({ log, t }) {
+  const addresses = observedEgressAddresses({
+    primary: log.egressIp ?? null,
+    ipv4: log.egressIpv4 ?? null,
+    ipv6: log.egressIpv6 ?? null,
+  });
+  if (addresses.length === 0) return <span className="text-success">—</span>;
+  return (
+    <>
+      {addresses.map((entry) => (
+        <div key={entry.address}>
+          <span className="text-success">{maskSegment(entry.address)}</span>
+          {entry.family ? (
+            <span className="ml-1 text-text-muted">
+              {t("egressIpFamily", { version: EGRESS_FAMILY_LABEL_ARGUMENT[entry.family] })}
+            </span>
+          ) : null}
+        </div>
+      ))}
+    </>
   );
 }
 
@@ -167,7 +199,7 @@ function ObservedMetadataGrid({ log, t, emailsVisible }) {
         {formatAttemptTiming(log.firstChunkMs)}
       </ObservedField>
       <ObservedField label={t("egressIp")}>
-        <span className="text-success">{maskSegment(log.egressIp) || "—"}</span>
+        <ObservedEgressAddresses log={log} t={t} />
       </ObservedField>
       <ObservedLinkField
         label={t("correlationId")}

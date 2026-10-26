@@ -14852,6 +14852,7 @@
     "upstreamStatus": "Status nihala",
     "noResponse": "Brez odgovora",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Glave po",
     "firstChunkAfter": "Prvi del po",
     "servedBy": "Servira",

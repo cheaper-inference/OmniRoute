@@ -14852,6 +14852,7 @@
     "upstreamStatus": "Upstream status",
     "noResponse": "No response",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Headers after",
     "firstChunkAfter": "First chunk after",
     "servedBy": "Served by",

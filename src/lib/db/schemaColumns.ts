@@ -345,6 +345,14 @@ export function ensureProxyLogsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip TEXT");
       console.log("[DB] Added proxy_logs.egress_ip column");
     }
+    if (!columnNames.has("egress_ip_v4")) {
+      db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip_v4 TEXT");
+      console.log("[DB] Added proxy_logs.egress_ip_v4 column");
+    }
+    if (!columnNames.has("egress_ip_v6")) {
+      db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip_v6 TEXT");
+      console.log("[DB] Added proxy_logs.egress_ip_v6 column");
+    }
     if (!columnNames.has("upstream_status")) {
       db.exec("ALTER TABLE proxy_logs ADD COLUMN upstream_status INTEGER");
       console.log("[DB] Added proxy_logs.upstream_status column");
