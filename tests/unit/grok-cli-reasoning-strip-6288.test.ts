@@ -204,3 +204,27 @@ test("grok-4.5 keeps an explicit none/off as a real off-switch (no default resto
 
   assert.equal("reasoning" in transformed, false);
 });
+
+test("grok-cli strips the camel-case reasoningEffort alias before the base sanitizer can fold it", async () => {
+  const { sanitizeReasoningEffortForProvider } =
+    await import("../../open-sse/executors/base/reasoningEffort.ts");
+  const executor = new GrokCliExecutor();
+  const body = {
+    model: "grok-4.5",
+    input: [],
+    reasoningEffort: "high",
+  };
+
+  const transformed = executor.transformRequest("grok-4.5", body, false, {} as never) as Record<
+    string,
+    unknown
+  >;
+  assert.equal("reasoningEffort" in transformed, false);
+
+  const out = sanitizeReasoningEffortForProvider(transformed, "grok-cli", "grok-4.5") as Record<
+    string,
+    unknown
+  >;
+  assert.equal("reasoningEffort" in out, false);
+  assert.equal("reasoning_effort" in out, false);
+});
