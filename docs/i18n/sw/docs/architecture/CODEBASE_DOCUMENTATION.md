@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Sajili za watoa huduma, wasifu wa vichwa, utambulisho, …
 ├── handlers/               Vishughulikiaji vya maombi (gumzo, embeddings, sauti, picha, …)
-├── executors/              Moduli 150 za vitekelezaji vya watoa huduma (madarasa ya vitekelezaji + visaidizi vya kila mtoa huduma)
+├── executors/              Moduli 156 za vitekelezaji vya watoa huduma (madarasa ya vitekelezaji + visaidizi vya kila mtoa huduma)
 ├── translator/             Ubadilishaji wa umbizo (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Kigeuzi cha mtiririko cha Responses API ↔ Chat Completions
 ├── services/               Moduli 80+ za huduma (michanganyiko, mbadala, viwango, utambulisho, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-Moduli 150 za vitekelezaji vya kiwango cha juu (`*.ts` ukiondoa `base.ts`, `index.ts` na majaribio — idadi inayopimwa na
+Moduli 156 za vitekelezaji vya kiwango cha juu (`*.ts` ukiondoa `base.ts`, `index.ts` na majaribio — idadi inayopimwa na
 `npm run check:docs-counts`). Kila darasa la kitekelezaji hupanua `BaseExecutor` (`base.ts`),
 moja kwa moja au kupitia `DefaultExecutor` au kitekelezaji kingine; moduli zilizosalia ni visaidizi vya kila mtoa huduma
 (skima za zana, adapta za uchotaji/TTS, vishughulikiaji vya hali zisizo za kawaida). Vitekelezaji vinajumuisha:

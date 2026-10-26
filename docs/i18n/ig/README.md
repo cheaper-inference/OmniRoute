@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                                  |         v3.8.50          | **v3.8.51** |      `v3.8.52+`       |
+|                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Ndị na-enye ọrụ               |           352            |   **358**   |          375          |
 | 🧠 ID ụdị nkata pụrụ iche        |           1320           |  **1374**   |         1475          |
@@ -578,7 +578,7 @@ A na-ahọrọ iji Radar n'onwe gị, ọ na-ejikwa naanị GET. Klayentị Omni
 
 </div>
 
-> Isi ihe ọhụrụ sitere na **v3.8.20 → v3.8.52**. Akụkọ zuru ezu dị na [`CHANGELOG.md`](CHANGELOG.md).
+> Isi ihe ọhụrụ sitere na **v3.8.20 → v3.8.53**. Akụkọ zuru ezu dị na [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Nduzi `quota-weighted`** — atụmatụ combo nke 20 na-amafe akaụntụ ndị quota ha gwụrụ, wee họrọ n'etiti ndị fọdụrụ dịka oke quota fọdụrụ ÷ ibu arịrịọ ndị a ka na-ahazi, ma na-edobe mkparịta ụka ndị dị ugbu a n'otu ebe. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Ọnọdụ na-enweghị interface** — `omniroute serve --headless` (ma ọ bụ `OMNIROUTE_HEADLESS=1`) na-eme naanị injin proxy `/v1/*`, ebe dashboard na subsystem ndị bụ naanị maka dashboard na-anọghị n'ọrụ. → [Ọnọdụ Headless](docs/guides/HEADLESS.md)
@@ -1811,7 +1811,7 @@ Ikikere MIT - lee [LICENSE](LICENSE) maka nkọwa ndị ọzọ.
 
 **[⬆ Laghachi n'elu](#-omniroute)** · E ji ❤️ wuo ya maka obodo AI nke sọftụwia oghe.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · Ikikere MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Ikikere MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Agbanyere Mkparịta ụka GitHub maka ajụjụ na azịza nke obodo -->

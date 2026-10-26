@@ -454,7 +454,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Rejestry dostawców, profile nagłówków, tożsamość, …
 ├── handlers/               Procedury obsługi żądań (czat, osadzanie, audio, obrazy, …)
-├── executors/              150 modułów wykonawczych dostawców (klasy wykonawcze + narzędzia pomocnicze dla poszczególnych dostawców)
+├── executors/              156 modułów wykonawczych dostawców (klasy wykonawcze + narzędzia pomocnicze dla poszczególnych dostawców)
 ├── translator/             Konwersja formatów (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformator strumienia Responses API ↔ Chat Completions
 ├── services/               Ponad 80 modułów usług (kombinacje, mechanizm zapasowy, limity, tożsamość, …)
@@ -484,7 +484,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 modułów wykonawczych najwyższego poziomu (`*.ts` z wyłączeniem `base.ts`, `index.ts` i testów — tę liczbę
+156 modułów wykonawczych najwyższego poziomu (`*.ts` z wyłączeniem `base.ts`, `index.ts` i testów — tę liczbę
 mierzy `npm run check:docs-counts`). Każda klasa wykonawcza rozszerza `BaseExecutor` (`base.ts`),
 bezpośrednio albo za pośrednictwem `DefaultExecutor` lub innego modułu wykonawczego; pozostałe moduły to
 narzędzia pomocnicze dla poszczególnych dostawców (schematy narzędzi, adaptery pobierania/TTS, procedury obsługi niestandardowych zachowań). Moduły wykonawcze obejmują:

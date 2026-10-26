@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                                    |         v3.8.50          | **v3.8.51** |       `v3.8.52+`       |
+|                                    |         v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
 | ---------------------------------- | :----------------------: | :---------: | :--------------------: |
 | 🌐 Àwọn olùpèsè                    |           352            |   **358**   |          375           |
 | 🧠 Àwọn ID àwòṣe ìfọ̀rọ̀wérọ̀ àrà ọ̀tọ̀ |           1320           |  **1374**   |          1475          |
@@ -587,7 +587,7 @@ tẹlifíṣọ̀nù lílò, tàbí ipò ìkọ̀sílẹ̀ ìkéde abẹ́lẹ̀
 
 </div>
 
-> Àwọn àfihàn tuntun láti **v3.8.20 → v3.8.52**. Ìtàn kíkún wà nínú [`CHANGELOG.md`](CHANGELOG.md).
+> Àwọn àfihàn tuntun láti **v3.8.20 → v3.8.53**. Ìtàn kíkún wà nínú [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Ìdarí `quota-weighted`** — ọgbọ́n àpapọ̀ ogún yìí máa ń fo àwọn àkọọ́lẹ̀ tí ìpín wọn ti tán, lẹ́yìn náà ó máa ń yan láàárín àwọn tó kù ní ìbámu pẹ̀lú ìpín tó ṣẹ́kù ÷ ẹrù tó ń ṣiṣẹ́ lọ́wọ́, nígbà tó ń jẹ́ kí àwọn ìjíròrò tó ti wà tẹ́lẹ̀ dúró lórí ibi tí a so wọ́n mọ́. → [Àpapọ̀ Aládàáṣiṣẹ́](docs/routing/AUTO-COMBO.md)
 - **🧰 Ipò aláìní ojú-iṣẹ́** — `omniroute serve --headless` (tàbí `OMNIROUTE_HEADLESS=1`) máa ń ṣiṣẹ́ ẹ́ńjìnnì aṣojú `/v1/*` nìkan, pẹ̀lú pánẹ́ẹ̀lì ìṣàkóso àti àwọn ẹ̀ka tó jẹ́ ti pánẹ́ẹ̀lì nìkan ní pípa. → [Ipò Aláìní Ojú-iṣẹ́](docs/guides/HEADLESS.md)
@@ -1819,7 +1819,7 @@ OmniRoute dúró lórí èjìká àwọn òmìrán. Ó bẹ̀rẹ̀ gẹ́gẹ́
 
 **[⬆ Padà sí òkè](#-omniroute)** · A kọ́ ọ pẹ̀lú ❤️ fún àwùjọ AI orísun-ṣíṣí.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · Ìwé-àṣẹ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Ìwé-àṣẹ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- A ti mú GitHub Discussions ṣiṣẹ́ fún ìbéèrè àti ìdáhùn àwùjọ -->

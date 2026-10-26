@@ -15,7 +15,7 @@ Acesta oferă un singur endpoint compatibil cu OpenAI (`/v1/*`) și direcționea
 
 Capabilități principale:
 
-- Interfață API compatibilă cu OpenAI pentru CLI/instrumente (375 de furnizori, 154 de module de execuție)
+- Interfață API compatibilă cu OpenAI pentru CLI/instrumente (375 de furnizori, 156 de module de execuție)
 - Traducerea cererilor/răspunsurilor între formatele furnizorilor
 - Mecanism de rezervă pentru combinații de modele (secvență cu mai multe modele)
 - Pași structurați pentru combinații (`provider + model + connection`), cu ordonare la execuție prin `compositeTiers`

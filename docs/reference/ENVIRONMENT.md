@@ -1686,6 +1686,7 @@ that should be able to run the docs translator.
 | `OMNIROUTE_TRANSLATION_API_URL`     | _(unset)_ | `scripts/i18n/run-translation.mjs` | OpenAI-compatible base URL for the translation backend.                   |
 | `OMNIROUTE_TRANSLATION_API_KEY`     | _(unset)_ | `scripts/i18n/run-translation.mjs` | Bearer token for the translation backend (never logged).                  |
 | `OMNIROUTE_TRANSLATION_MODEL`       | _(unset)_ | `scripts/i18n/run-translation.mjs` | Model id, e.g. `gpt-4o-mini` or `cx/gpt-5.4-mini`.                        |
+| `OMNIROUTE_TRANSLATION_FALLBACK_MODELS` | _(unset)_ | `scripts/i18n/lib/translate-backend.mjs` | Optional comma-separated model chain tried in order when the primary model fails (429 quota, 401/402, 5xx, timeout, network); a malformed request (400/413/422) is not retried elsewhere. |
 | `OMNIROUTE_TRANSLATION_TIMEOUT_MS`  | `60000`   | `scripts/i18n/run-translation.mjs` | Per-request timeout in milliseconds.                                      |
 | `OMNIROUTE_TRANSLATION_REASONING_EFFORT` | _(unset)_ | `scripts/i18n/lib/translate-backend.mjs` | Optional reasoning control, sent as-is to the backend when set.  |
 | `OMNIROUTE_TRANSLATION_CONCURRENCY` | `4`       | `scripts/i18n/run-translation.mjs` | Parallel translation requests when running over multiple files / locales. |

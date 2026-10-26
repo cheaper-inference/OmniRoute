@@ -445,7 +445,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provayder registrlari, sarlavha profillari, identifikatsiya, …
 ├── handlers/               Soʻrov ishlovchilari (chat, embeddinglar, audio, tasvir, …)
-├── executors/              150 ta provayder ijrochisi moduli (ijrochi sinflari + har bir provayder uchun yordamchilar)
+├── executors/              156 ta provayder ijrochisi moduli (ijrochi sinflari + har bir provayder uchun yordamchilar)
 ├── translator/             Formatlarni oʻzgartirish (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions oqim transformatori
 ├── services/               80+ xizmat moduli (kombinatsiyalar, zaxira, kvotalar, identifikatsiya, …)
@@ -475,7 +475,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 ta yuqori darajadagi ijrochi moduli (`*.ts`, `base.ts`, `index.ts` va testlardan tashqari — bu sonni
+156 ta yuqori darajadagi ijrochi moduli (`*.ts`, `base.ts`, `index.ts` va testlardan tashqari — bu sonni
 `npm run check:docs-counts` oʻlchaydi). Har bir ijrochi sinfi `BaseExecutor` (`base.ts`) sinfini
 bevosita yoki `DefaultExecutor` yoxud boshqa ijrochi orqali kengaytiradi; qolgan modullar har bir provayder
 uchun yordamchilardir (vosita sxemalari, fetch/TTS adapterlari, oʻziga xoslik ishlovchilari). Ijrochilar quyidagilarni oʻz ichiga oladi:

@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                                    |          v3.8.50           | **v3.8.51** |      `v3.8.52+`       |
+|                                    |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Fornituri                       |            352             |   **358**   |          375          |
 | 🧠 IDs uniċi ta' mudelli taċ-chat  |            1320            |  **1374**   |         1475          |
@@ -578,7 +578,7 @@ Radar huwa fakultattiv u juża GET biss. Il-klijent OmniRoute ma jtellax prompts
 
 </div>
 
-> L-aktar punti ewlenin reċenti minn **v3.8.20 → v3.8.52**. L-istorja sħiħa tinsab f’[`CHANGELOG.md`](CHANGELOG.md).
+> L-aktar punti ewlenin reċenti minn **v3.8.20 → v3.8.53**. L-istorja sħiħa tinsab f’[`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Rotot `quota-weighted`** — l-20 strateġija ta’ kombinazzjoni taqbeż il-kontijiet li eżawrew il-kwota tagħhom, imbagħad tagħżel fost il-bqija fi proporzjon mal-kwota li fadal ÷ it-tagħbija attiva, filwaqt li żżomm il-konverżazzjonijiet eżistenti marbuta. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Modalità headless** — `omniroute serve --headless` (jew `OMNIROUTE_HEADLESS=1`) iħaddem biss il-magna proxy `/v1/*`, bid-dashboard u s-sottosistemi esklussivi għad-dashboard mitfija. → [Modalità Headless](docs/guides/HEADLESS.md)
@@ -1811,7 +1811,7 @@ Liċenzja MIT - ara [LICENSE](LICENSE) għad-dettalji.
 
 **[⬆ Lura fil-bidu](#-omniroute)** · Mibni b’❤️ għall-komunità tal-IA b’sors miftuħ.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions attivat għal mistoqsijiet u tweġibiet mill-komunità -->

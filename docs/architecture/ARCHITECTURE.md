@@ -17,7 +17,7 @@ It provides a single OpenAI-compatible endpoint (`/v1/*`) and routes traffic acr
 
 Core capabilities:
 
-- OpenAI-compatible API surface for CLI/tools (375 providers, 154 executor modules)
+- OpenAI-compatible API surface for CLI/tools (375 providers, 156 executor modules)
 - Request/response translation across provider formats
 - Model combo fallback (multi-model sequence)
 - Structured combo steps (`provider + model + connection`) with runtime ordering by `compositeTiers`

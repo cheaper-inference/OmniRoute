@@ -37,9 +37,16 @@ on:
 # The nightly `schedule` run (runner-alert only) gets its own group: it runs on the
 # default branch ref, so sharing the publish group would let cancel-in-progress kill
 # an in-flight release-branch publish every night (#14560 follow-up).
+# A push to release/v* must NOT cancel the build already running for that branch (#17230):
+# the amd64 image takes ~2 h on the single omni-build runner and the branch merges faster than
+# that, so with cancel-in-progress the next/next-web channel went 13 days without an image
+# (24 cancelled publishes on 2026-10-19 alone). Without it GitHub still keeps at most one
+# running and one pending run per group — an older pending run is replaced by the newest push,
+# the in-flight build completes, the latest tip follows. Tags, releases, dispatches and the
+# scheduled alert keep cancelling.
 concurrency:
   group: docker-publish-${{ github.event_name == 'schedule' && 'runner-alert' || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')) }}
 
 # Least-privilege default: read-only at the top level; the build and merge jobs that
 # push to GHCR grant packages: write themselves (Scorecard TokenPermissions).

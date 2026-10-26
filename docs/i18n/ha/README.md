@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                                                |         v3.8.50          | **v3.8.51** |      `v3.8.52+`       |
+|                                                |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Masu samarwa                                |           352            |   **358**   |          375          |
 | 🧠 ID na musamman na samfurin tattaunawa       |           1320           |  **1374**   |         1475          |
@@ -578,7 +578,7 @@ Radar na zaɓi ne kuma GET-only. Abokin hulɗar OmniRoute ba ya loda prompts, zi
 
 </div>
 
-> Muhimman sabbin abubuwa daga **v3.8.20 → v3.8.52**. Cikakken tarihin yana cikin [`CHANGELOG.md`](CHANGELOG.md).
+> Muhimman sabbin abubuwa daga **v3.8.20 → v3.8.53**. Cikakken tarihin yana cikin [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Sarrafawar hanya ta `quota-weighted`** — dabarar combo ta 20 tana tsallake asusun da kasonsu ya ƙare, sannan ta zaɓa daga sauran gwargwadon ragowar kaso ÷ nauyin buƙatun da ke gudana, tare da riƙe tattaunawar da ake da ita a kan hanyar da aka ɗaure su. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Yanayin Headless** — `omniroute serve --headless` (ko `OMNIROUTE_HEADLESS=1`) yana gudanar da injin wakili na `/v1/*` kawai, ba tare da dashboard da ƙananan tsarukan da suka keɓanta da dashboard ba. → [Yanayin Headless](docs/guides/HEADLESS.md)
@@ -1811,7 +1811,7 @@ Lasisin MIT - duba [LICENSE](LICENSE) don ƙarin bayani.
 
 **[⬆ Koma sama](#-omniroute)** · An gina shi da ❤️ domin al'ummar AI ta buɗaɗɗen tushe.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · Lasisin MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Lasisin MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- An kunna Tattaunawar GitHub don tambayoyi da amsoshi na al'umma -->

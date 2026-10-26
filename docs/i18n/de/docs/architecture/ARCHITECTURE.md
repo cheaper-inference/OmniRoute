@@ -15,7 +15,7 @@ Es stellt einen einzigen OpenAI-kompatiblen Endpunkt (`/v1/*`) bereit und leitet
 
 Kernfunktionen:
 
-- OpenAI-kompatible API-Oberfläche für CLI/Tools (375 Anbieter, 154 Ausführungsmodule)
+- OpenAI-kompatible API-Oberfläche für CLI/Tools (375 Anbieter, 156 Ausführungsmodule)
 - Übersetzung von Anfragen/Antworten zwischen Anbieterformaten
 - Modellkombinations-Fallback (Sequenz mehrerer Modelle)
 - Strukturierte Kombinationsschritte (`provider + model + connection`) mit Laufzeitsortierung nach `compositeTiers`

@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 공급자 레지스트리, 헤더 프로필, ID, …
 ├── handlers/               요청 핸들러(채팅, 임베딩, 오디오, 이미지, …)
-├── executors/              150개의 공급자 실행기 모듈(실행기 클래스 + 공급자별 헬퍼)
+├── executors/              156개의 공급자 실행기 모듈(실행기 클래스 + 공급자별 헬퍼)
 ├── translator/             형식 변환(OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions 스트림 트랜스포머
 ├── services/               80개 이상의 서비스 모듈(콤보, 폴백, 할당량, ID, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-최상위 실행기 모듈은 150개입니다(`*.ts`에서 `base.ts`, `index.ts` 및 테스트 제외 — 이 수치는
+최상위 실행기 모듈은 156개입니다(`*.ts`에서 `base.ts`, `index.ts` 및 테스트 제외 — 이 수치는
 `npm run check:docs-counts`로 측정). 모든 실행기 클래스는 `BaseExecutor`(`base.ts`)를
 직접 상속하거나 `DefaultExecutor` 또는 다른 실행기를 통해 상속하며, 나머지 모듈은 공급자별
 헬퍼(도구 스키마, 페치/TTS 어댑터, 예외 동작 핸들러)입니다. 실행기는 다음과 같습니다.

@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                                         |         v3.8.50         | **v3.8.51** |      `v3.8.52+`       |
+|                                         |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Soláthraithe                         |           352           |   **358**   |          375          |
 | 🧠 Aitheantais uathúla samhlacha comhrá |          1320           |  **1374**   |         1475          |
@@ -587,7 +587,7 @@ faoin gcatalóg reatha ag **[radar.omniroute.online/planos](https://radar.omniro
 
 </div>
 
-> Buaicphointí le déanaí ó **v3.8.20 → v3.8.52**. Tá an stair iomlán in [`CHANGELOG.md`](CHANGELOG.md).
+> Buaicphointí le déanaí ó **v3.8.20 → v3.8.53**. Tá an stair iomlán in [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Ródú `quota-weighted`** — seachnaíonn an 20ú straitéis teaglama cuntais a bhfuil a gcuóta ídithe, ansin roghnaíonn sí as na cinn eile i gcomhréir leis an gcuóta atá fágtha ÷ an t-ualach reatha, agus coinníonn sí comhráite atá ann cheana pionnáilte. → [Teaglama Uathoibríoch](docs/routing/AUTO-COMBO.md)
 - **🧰 Mód gan chomhéadan** — ritheann `omniroute serve --headless` (nó `OMNIROUTE_HEADLESS=1`) inneall seachfhreastalaí `/v1/*` amháin, agus bíonn an deais agus na fochórais deais amháin múchta. → [Mód Gan Chomhéadan](docs/guides/HEADLESS.md)
@@ -1822,7 +1822,7 @@ Ceadúnas MIT - féach [LICENSE](LICENSE) le haghaidh sonraí.
 
 **[⬆ Ar ais go barr](#-omniroute)** · Tógtha le ❤️ don phobal AI foinse oscailte.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions cumasaithe le haghaidh ceisteanna agus freagraí ón bpobal -->

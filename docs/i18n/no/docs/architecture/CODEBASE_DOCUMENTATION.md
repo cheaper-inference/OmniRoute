@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Leverandørregistre, headerprofiler, identitet, …
 ├── handlers/               Forespørselshåndterere (chat, embedding, lyd, bilde, …)
-├── executors/              150 eksekutørmoduler for leverandører (eksekutørklasser + leverandørspesifikke hjelpere)
+├── executors/              156 eksekutørmoduler for leverandører (eksekutørklasser + leverandørspesifikke hjelpere)
 ├── translator/             Formatkonvertering (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Strømtransformator for Responses API ↔ Chat Completions
 ├── services/               Mer enn 80 tjenestemoduler (kombinasjoner, reservevalg, kvoter, identitet, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 eksekutørmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` og tester — antallet måles av
+156 eksekutørmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` og tester — antallet måles av
 `npm run check:docs-counts`). Hver eksekutørklasse utvider `BaseExecutor` (`base.ts`),
 direkte eller gjennom `DefaultExecutor` eller en annen eksekutør. De gjenværende modulene er
 leverandørspesifikke hjelpere (verktøyskjemaer, hentings-/TTS-adaptere og håndterere for særegenheter).

@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                                   |          v3.8.50           | **v3.8.51** |       `v3.8.52+`       |
+|                                   |          v3.8.50           | **v3.8.51** |       `v3.8.53+`       |
 | --------------------------------- | :------------------------: | :---------: | :--------------------: |
 | 🌐 Provayderlər                   |            352             |   **358**   |          375           |
 | 🧠 Unikal çat modeli ID-ləri      |            1320            |  **1374**   |          1475          |
@@ -578,7 +578,7 @@ Radar-a qoşulmaq ixtiyaridir və o, yalnız GET sorğularından istifadə edir.
 
 </div>
 
-> **v3.8.20 → v3.8.52** versiyalarındakı son əsas yeniliklər. Tam tarixçə [`CHANGELOG.md`](CHANGELOG.md) faylındadır.
+> **v3.8.20 → v3.8.53** versiyalarındakı son əsas yeniliklər. Tam tarixçə [`CHANGELOG.md`](CHANGELOG.md) faylındadır.
 
 - **⚖️ `quota-weighted` marşrutlaşdırma** — 20-ci kombinasiya strategiyası kvotası tükənmiş hesabları ötürür, sonra mövcud söhbətləri sabit saxlayaraq qalanlar arasından qalıq kvota ÷ icrada olan yük nisbətinə uyğun seçim edir. → [Avtomatik kombinasiya](docs/routing/AUTO-COMBO.md)
 - **🧰 Başsız rejim** — `omniroute serve --headless` (və ya `OMNIROUTE_HEADLESS=1`) idarə panelini və yalnız idarə panelinə aid alt sistemləri söndürərək yalnız `/v1/*` proksi mühərrikini işə salır. → [Başsız rejim](docs/guides/HEADLESS.md)
@@ -1811,7 +1811,7 @@ MIT Lisenziyası — ətraflı məlumat üçün [LICENSE](LICENSE) faylına bax�
 
 **[⬆ Yuxarı qayıt](#-omniroute)** · Açıq mənbəli süni intellekt icması üçün ❤️ ilə hazırlanıb.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · MIT Lisenziyası · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Lisenziyası · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- İcma sual-cavabları üçün GitHub Discussions aktivləşdirilib -->

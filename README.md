@@ -63,7 +63,7 @@
 
 <div align="center">
 
-|                           |          v3.8.50          | **v3.8.51** |      `v3.8.52+`       |
+|                           |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Providers              |            352            |   **358**   |          375          |
 | 🧠 Unique chat model IDs  |           1320            |  **1374**   |         1475          |
@@ -581,7 +581,7 @@ the current catalog at **[radar.omniroute.online/planos](https://radar.omniroute
 
 </div>
 
-> Recent highlights from **v3.8.20 → v3.8.52**. Full history in [`CHANGELOG.md`](CHANGELOG.md).
+> Recent highlights from **v3.8.20 → v3.8.53**. Full history in [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` routing** — the 20th combo strategy skips exhausted accounts, then draws among the rest in proportion to leftover quota ÷ in-flight load, keeping existing conversations pinned. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless mode** — `omniroute serve --headless` (or `OMNIROUTE_HEADLESS=1`) runs only the `/v1/*` proxy engine, with the dashboard and dashboard-only subsystems off. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1028,7 +1028,7 @@ omniroute
 ```
 
 > 💡 See `npm warn ERESOLVE` or peer-dep warnings? [They're harmless](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Using npm 11 or later?** npm may block package lifecycle scripts unless they are allowed. OmniRoute's `postinstall` (`node scripts/build/postinstall.mjs`) is required to prepare its native runtime files. Allow the packages named in npm's warning when installing globally. For the package set reported by OmniRoute 3.8.52:
+> **Using npm 11 or later?** npm may block package lifecycle scripts unless they are allowed. OmniRoute's `postinstall` (`node scripts/build/postinstall.mjs`) is required to prepare its native runtime files. Allow the packages named in npm's warning when installing globally. For the package set reported by OmniRoute 3.8.53:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1816,7 +1816,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 **[⬆ Back to top](#-omniroute)** · Built with ❤️ for the open-source AI community.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions enabled for community Q&A -->

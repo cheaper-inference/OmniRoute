@@ -526,7 +526,27 @@ jobs:
       # Blocking since the 2026-09 docs re-sync: a core doc edited without `npm run i18n:run
       # --files=<doc>` (or `--adopt` for a mechanical edit) leaves 65 stale mirrors behind;
       # the run only retranslates the `## ` sections whose text changed, so it is cheap.
+      #
+      # PR-scoped since 2026-10-20: on a pull request the gate compares against the BASE
+      # checkout and fails only on drift this PR introduces. Drift the base already carried
+      # (release/v3.8.53 inherited 14 drifted sources while the translation backend was down)
+      # is printed as inherited — the branch's own push run and the nightly Release-Green keep
+      # the full strict verdict, so the debt stays visible without painting every PR red.
+      - name: Base checkout for the i18n drift baseline (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .i18n-base
+          persist-credentials: false
+      - name: i18n docs drift (PR — only drift introduced by this PR blocks)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          set -euo pipefail
+          node scripts/i18n/check-translation-drift.mjs --root .i18n-base --json --warn > /tmp/i18n-base-drift.json
+          node scripts/i18n/check-translation-drift.mjs --base-report /tmp/i18n-base-drift.json
       - name: i18n docs drift (sources changed since their translation)
+        if: ${{ github.event_name != 'pull_request' }}
         run: node scripts/i18n/check-translation-drift.mjs
 
   docs-lint:
@@ -1137,7 +1157,11 @@ jobs:
     # the budget on two consecutive main runs (33207760653, 33215115341); the job ended
     # `cancelled` and dragged the whole run's conclusion to `cancelled` although every
     # blocking job was green. The upload step now has its own ceiling; this is headroom.
-    timeout-minutes: 30
+    # 45, not 30 (2026-10-20): the budget was eaten by growth — on six PRs the job took
+    # 28–31 min (download 4 min, merge+report+gate 18 min, Codecov ≤5 min) and two of six
+    # died at exactly 30 min as job-timeout `cancelled` (jobs 118735970655, 118737111780),
+    # failing Quality Ratchet / PR Coverage Comment / Gate / CI until a re-run.
+    timeout-minutes: 45
     needs: test-unit
     if: ${{ !cancelled() && needs.test-unit.result == 'success' }}
     env:

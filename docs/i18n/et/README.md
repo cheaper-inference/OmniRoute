@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                                  |          v3.8.50           | **v3.8.51** |      `v3.8.52+`       |
+|                                  |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Pakkujad                      |            352             |   **358**   |          375          |
 | 🧠 Unikaalsed vestlusmudeli ID-d |            1320            |  **1374**   |         1475          |
@@ -587,7 +587,7 @@ praeguse kataloogi kohta leiate teavet aadressilt **[radar.omniroute.online/plan
 
 </div>
 
-> Hiljutised olulisemad muudatused versioonides **v3.8.20 → v3.8.52**. Täielik ajalugu on failis [`CHANGELOG.md`](CHANGELOG.md).
+> Hiljutised olulisemad muudatused versioonides **v3.8.20 → v3.8.53**. Täielik ajalugu on failis [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` marsruutimine** — 20. kombostrateegia jätab ammendatud kontod vahele ja valib seejärel ülejäänute seast proportsionaalselt järelejäänud kvoodi ning poolelioleva koormuse suhtega, hoides olemasolevad vestlused kinnistatuna. → [Automaatne kombineerimine](docs/routing/AUTO-COMBO.md)
 - **🧰 Peata režiim** — `omniroute serve --headless` (või `OMNIROUTE_HEADLESS=1`) käitab ainult `/v1/*` puhverserveri mootorit, jättes juhtpaneeli ja ainult juhtpaneelile mõeldud alamsüsteemid välja. → [Peata režiim](docs/guides/HEADLESS.md)
@@ -1822,7 +1822,7 @@ MIT-litsents – üksikasju vaadake failist [LICENSE](LICENSE).
 
 **[⬆ Tagasi üles](#-omniroute)** · Loodud ❤️-ga avatud lähtekoodiga tehisintellekti kogukonnale.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · MIT-litsents · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-litsents · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions on kogukonna küsimuste ja vastuste jaoks lubatud -->

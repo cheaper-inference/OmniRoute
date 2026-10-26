@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                                       |               v3.8.50               | **v3.8.51** |      `v3.8.52+`       |
+|                                       |               v3.8.50               | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------- | :---------------------------------: | :---------: | :-------------------: |
 | 🌐 Teikėjai                           |                 352                 |   **358**   |          375          |
 | 🧠 Unikalūs pokalbių modelių ID       |                1320                 |  **1374**   |         1475          |
@@ -586,7 +586,7 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 
 </div>
 
-> Naujausi svarbiausi pakeitimai nuo **v3.8.20 → v3.8.52**. Visa istorija pateikta faile [`CHANGELOG.md`](CHANGELOG.md).
+> Naujausi svarbiausi pakeitimai nuo **v3.8.20 → v3.8.53**. Visa istorija pateikta faile [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` maršruto parinkimas** — 20-oji kombinuotoji strategija praleidžia paskyras, kurių kvota išnaudota, tada iš likusių renkasi proporcingai pagal likusią kvotą ÷ vykdomą apkrovą, o esami pokalbiai lieka susieti su tuo pačiu maršrutu. → [Automatiniai deriniai](docs/routing/AUTO-COMBO.md)
 - **🧰 Begalvė veiksena** — `omniroute serve --headless` (arba `OMNIROUTE_HEADLESS=1`) paleidžia tik `/v1/*` tarpinio serverio modulį, išjungdamas valdymo skydelį ir tik jam skirtas posistemes. → [Begalvė veiksena](docs/guides/HEADLESS.md)
@@ -1822,7 +1822,7 @@ MIT licencija – išsamesnę informaciją rasite faile [LICENSE](LICENSE).
 
 **[⬆ Atgal į viršų](#-omniroute)** · Sukurta su ❤️ atvirojo kodo DI bendruomenei.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · MIT licencija · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licencija · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions įjungta bendruomenės klausimams ir atsakymams -->

@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Providerregisters, headerprofielen, identiteit, …
 ├── handlers/               Aanvraaghandlers (chat, embeddings, audio, afbeeldingen, …)
-├── executors/              150 provider-executormodules (executorklassen + helpers per provider)
+├── executors/              156 provider-executormodules (executorklassen + helpers per provider)
 ├── translator/             Formaatconversie (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions-streamtransformer
 ├── services/               Meer dan 80 servicemodules (combinaties, fallback, quota's, identiteit, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 executormodules op het hoogste niveau (`*.ts` met uitzondering van `base.ts`, `index.ts` en tests — het aantal dat
+156 executormodules op het hoogste niveau (`*.ts` met uitzondering van `base.ts`, `index.ts` en tests — het aantal dat
 `npm run check:docs-counts` meet). Elke executorklasse breidt `BaseExecutor` (`base.ts`) uit,
 rechtstreeks of via `DefaultExecutor` of een andere executor; de overige modules zijn helpers per provider
 (toolschema's, fetch/TTS-adapters, handlers voor eigenaardigheden). Executors omvatten:

@@ -15,7 +15,7 @@ Hutoa endpoint moja inayooana na OpenAI (`/v1/*`) na kuelekeza trafiki kupitia w
 
 Uwezo mkuu:
 
-- Kiolesura cha API kinachooana na OpenAI kwa CLI/zana (watoa huduma 375, moduli 154 za utekelezaji)
+- Kiolesura cha API kinachooana na OpenAI kwa CLI/zana (watoa huduma 375, moduli 156 za utekelezaji)
 - Utafsiri wa maombi/majibu kati ya miundo ya watoa huduma
 - Fallback ya mchanganyiko wa modeli (mfuatano wa modeli nyingi)
 - Hatua zilizopangiliwa za mchanganyiko (`provider + model + connection`) zenye upangaji wakati wa utekelezaji kwa kutumia `compositeTiers`

@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registri penyedia, profil header, identitas, …
 ├── handlers/               Handler permintaan (chat, embedding, audio, gambar, …)
-├── executors/              150 modul executor penyedia (kelas executor + helper per penyedia)
+├── executors/              156 modul executor penyedia (kelas executor + helper per penyedia)
 ├── translator/             Konversi format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer stream Responses API ↔ Chat Completions
 ├── services/               80+ modul layanan (kombinasi, fallback, kuota, identitas, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 modul executor tingkat atas (`*.ts` tanpa `base.ts`, `index.ts`, dan pengujian — jumlah ini
+156 modul executor tingkat atas (`*.ts` tanpa `base.ts`, `index.ts`, dan pengujian — jumlah ini
 diukur oleh `npm run check:docs-counts`). Setiap kelas executor memperluas `BaseExecutor` (`base.ts`),
 baik secara langsung maupun melalui `DefaultExecutor` atau executor lain; modul sisanya adalah
 helper per penyedia (skema alat, adaptor fetch/TTS, handler keunikan). Executor mencakup:

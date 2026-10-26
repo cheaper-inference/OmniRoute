@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                          |      v3.8.50       | **v3.8.51** |      `v3.8.52+`       |
+|                          |      v3.8.50       | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------ | :----------------: | :---------: | :-------------------: |
 | 🌐 አቅራቢዎች                |        352         |   **358**   |          375          |
 | 🧠 ልዩ የውይይት ሞዴል IDs      |        1320        |  **1374**   |         1475          |
@@ -578,7 +578,7 @@ Radar በምርጫ የሚነቃ ሲሆን GET ጥያቄዎችን ብቻ ይጠ�
 
 </div>
 
-> ከ**v3.8.20 → v3.8.52** የቅርብ ጊዜ ዋና ዋና ለውጦች። ሙሉ ታሪኩን በ[`CHANGELOG.md`](CHANGELOG.md) ይመልከቱ።
+> ከ**v3.8.20 → v3.8.53** የቅርብ ጊዜ ዋና ዋና ለውጦች። ሙሉ ታሪኩን በ[`CHANGELOG.md`](CHANGELOG.md) ይመልከቱ።
 
 - **⚖️ `quota-weighted` ማዘዋወር** — 20ኛው የኮምቦ ስልት ኮታቸውን የጨረሱ መለያዎችን ይዘላል፤ ከዚያም በቀሪ ኮታ ÷ በሂደት ላይ ባለ ጭነት መጠን ከሌሎቹ መካከል ይመርጣል፣ ነባር ውይይቶችንም በቦታቸው ያቆያል። → [ራስ-ሰር ኮምቦ](docs/routing/AUTO-COMBO.md)
 - **🧰 ማሳያ-አልባ ሁነታ** — `omniroute serve --headless` (ወይም `OMNIROUTE_HEADLESS=1`) ዳሽቦርዱንና ለዳሽቦርድ ብቻ የሚያገለግሉ ንዑስ ስርዓቶችን በማጥፋት የ`/v1/*` ፕሮክሲ ሞተርን ብቻ ያስኬዳል። → [ማሳያ-አልባ ሁነታ](docs/guides/HEADLESS.md)
@@ -1811,7 +1811,7 @@ MIT ፈቃድ - ለዝርዝሮች [LICENSE](LICENSE)ን ይመልከቱ።
 
 **[⬆ ወደ ላይ ተመለስ](#-omniroute)** · ለክፍት ምንጭ AI ማህበረሰብ በ❤️ የተገነባ።
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · MIT ፈቃድ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ፈቃድ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions ለማህበረሰብ ጥያቄና መልስ ነቅቷል -->

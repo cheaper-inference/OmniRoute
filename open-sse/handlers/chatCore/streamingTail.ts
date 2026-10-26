@@ -34,7 +34,7 @@ import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import { resolveStreamReadinessTimeout } from "../../utils/streamReadinessPolicy.ts";
 import { maybeFallbackAfterReadiness } from "./streamReadinessFallback.ts";
 import { captureStreamReasoningForReplay } from "./streamReasoningCapture.ts";
-import { meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
+import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { resolveSuppressThinkClose } from "../../utils/thinkCloseMarker.ts";
 import { hasActiveClaudeThinking } from "../../utils/thinkingBudget.ts";
 import { buildCacheUsageLogMeta } from "./cacheUsageMeta.ts";
@@ -56,9 +56,9 @@ import { recordFinalInputCalibration } from "./contextEstimation.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
 import { getExecutorTimeoutMs, resolveConnectionTimeoutMs } from "./upstreamTimeouts.ts";
-import { recordCost } from "@/domain/costRules";
+import { recordCost, recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { extractFacts } from "@/lib/memory/extraction";
-import { calculateCost } from "@/lib/usage/costCalculator";
+import { calculateCost, calculateCostDetailed } from "@/lib/usage/costCalculator";
 import { appendRequestLog, trackPendingRequest } from "@/lib/usageDb";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../../services/streamRecovery.ts";
@@ -544,11 +544,17 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       model,
       streamUsage,
       serviceTier: effectiveServiceTier,
-      calculateCost,
+      calculateCost: calculateCostDetailed,
       // Only the budget-consumable share may draw down the allowance.
       recordCost: (apiKeyId, cost, details) => {
         const budgetCost = meteredBudgetCost(provider, cost);
         if (budgetCost > 0) recordCost(apiKeyId, budgetCost, details);
+      },
+      // A metered model with no price must not pass the dollar budget as $0.
+      recordUnpricedCost: (apiKeyId, cost) => {
+        if (isUnpricedMeteredCost(provider, cost)) {
+          recordUnpricedBudgetUsage(apiKeyId, { provider, model });
+        }
       },
       ledger: buildStreamLedgerDetails(effectiveServiceTier, normalizedStreamStatus < 400, traceId),
     });
@@ -641,6 +647,9 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
         type: "client_disconnected",
       }),
   });
+
+  // The pipeline can fail before the awaited response hooks return to chatCore.
+  deps.registerStreamFinalizers?.(onPipelineStreamError, onClientDisconnectFinalize);
 
   // For providers using Responses API format, translate stream back to openai (Chat Completions) format
   // UNLESS client is Droid CLI which expects openai-responses format back

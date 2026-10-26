@@ -69,7 +69,7 @@
 
 <div align="center">
 
-|                                 |         v3.8.50          | **v3.8.51** |      `v3.8.52+`       |
+|                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Pakalpojumu sniedzēji        |           352            |   **358**   |          375          |
 | 🧠 Unikāli tērzēšanas modeļu ID |           1320           |  **1374**   |         1475          |
@@ -578,7 +578,7 @@ Radar ir jāiespējo brīvprātīgi, un tas izmanto tikai GET pieprasījumus. Om
 
 </div>
 
-> Jaunākie svarīgākie uzlabojumi no **v3.8.20 → v3.8.52**. Pilna izmaiņu vēsture pieejama failā [`CHANGELOG.md`](CHANGELOG.md).
+> Jaunākie svarīgākie uzlabojumi no **v3.8.20 → v3.8.53**. Pilna izmaiņu vēsture pieejama failā [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` maršrutēšana** — 20. kombinētā stratēģija izlaiž kontus ar izsmeltu kvotu un pēc tam izvēlas starp pārējiem proporcionāli atlikušajai kvotai ÷ izpildē esošajai slodzei, saglabājot esošās sarunas piesaistītas. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Bezinterfeisa režīms** — `omniroute serve --headless` (vai `OMNIROUTE_HEADLESS=1`) darbina tikai `/v1/*` starpniekservera dzini, izslēdzot informācijas paneli un tikai tam paredzētās apakšsistēmas. → [Bezinterfeisa režīms](docs/guides/HEADLESS.md)
@@ -1810,7 +1810,7 @@ MIT licence — detalizētu informāciju skatiet failā [LICENSE](LICENSE).
 
 **[⬆ Atpakaļ uz sākumu](#-omniroute)** · Radīts ar ❤️ atvērtā pirmkoda MI kopienai.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions ir iespējotas kopienas jautājumiem un atbildēm -->

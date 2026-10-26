@@ -15,7 +15,7 @@ Jipprovdi endpoint wieħed kompatibbli ma’ OpenAI (`/v1/*`) u jidderieġi t-tr
 
 Kapaċitajiet ewlenin:
 
-- Wiċċ API kompatibbli ma’ OpenAI għal CLI/għodod (375 fornitur, 154 modulu ta’ eżekuzzjoni)
+- Wiċċ API kompatibbli ma’ OpenAI għal CLI/għodod (375 fornitur, 156 modulu ta’ eżekuzzjoni)
 - Traduzzjoni tat-talbiet/tweġibiet bejn il-formati tal-fornituri
 - Fallback ta’ kombinazzjonijiet ta’ mudelli (sekwenza b’diversi mudelli)
 - Passi strutturati tal-kombinazzjonijiet (`provider + model + connection`) b’ordni waqt l-eżekuzzjoni skont `compositeTiers`

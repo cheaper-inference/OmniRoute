@@ -118,7 +118,6 @@ RUN apt-get update \
      chromium-driver \
      fonts-liberation \
      libasound2t64 \
-     gconf-service \
      libatk-bridge2.0-0 \
      libatk1.0-0 \
      libc6 \
@@ -134,8 +133,8 @@ RUN apt-get update \
      libnspr4 \
      libnss3 \
      libpango-1.0-0 \
-     pangocairo-1.0-0 \
-     stdc++6 \
+     libpangocairo-1.0-0 \
+     libstdc++6 \
      libx11-6 \
      libx11-xcb1 \
      libxcb1 \
@@ -152,7 +151,6 @@ RUN apt-get update \
      ca-certificates \
      fonts-gargi \
      fonts-ipafont-gothic \
-     fonts-kacst \
      fonts-thai-tlwg \
      fonts-wqy-zenhei \
   && rm -rf /var/lib/apt/lists/*

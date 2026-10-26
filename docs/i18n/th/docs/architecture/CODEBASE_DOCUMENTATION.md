@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 รีจิสทรีผู้ให้บริการ, โปรไฟล์ส่วนหัว, ข้อมูลระบุตัวตน, …
 ├── handlers/               ตัวจัดการคำขอ (แชต, embedding, เสียง, รูปภาพ, …)
-├── executors/              โมดูล executor สำหรับผู้ให้บริการ 150 โมดูล (คลาส executor + ตัวช่วยเฉพาะผู้ให้บริการ)
+├── executors/              โมดูล executor สำหรับผู้ให้บริการ 156 โมดูล (คลาส executor + ตัวช่วยเฉพาะผู้ให้บริการ)
 ├── translator/             การแปลงรูปแบบ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            transformer สำหรับสตรีม Responses API ↔ Chat Completions
 ├── services/               โมดูล service มากกว่า 80 โมดูล (คอมโบ, fallback, โควตา, ข้อมูลระบุตัวตน, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-มีโมดูล executor ระดับบนสุด 150 โมดูล (`*.ts` โดยไม่นับ `base.ts`, `index.ts` และการทดสอบ — จำนวนนี้
+มีโมดูล executor ระดับบนสุด 156 โมดูล (`*.ts` โดยไม่นับ `base.ts`, `index.ts` และการทดสอบ — จำนวนนี้
 วัดโดย `npm run check:docs-counts`) คลาส executor ทุกคลาสสืบทอดจาก `BaseExecutor` (`base.ts`)
 โดยตรงหรือผ่าน `DefaultExecutor` หรือ executor อื่น ส่วนโมดูลที่เหลือเป็นตัวช่วยเฉพาะผู้ให้บริการ
 (สคีมาของเครื่องมือ, อะแดปเตอร์ fetch/TTS, ตัวจัดการลักษณะเฉพาะ) executor ประกอบด้วย:
