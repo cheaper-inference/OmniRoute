@@ -81,6 +81,8 @@ interface HandleEmbeddingParams {
   apiKeyId?: string | null;
   apiKeyName?: string | null;
   connectionId?: string | null;
+  requestedModel?: string | null;
+  comboName?: string | null;
 }
 
 interface EmbeddingFailure {
@@ -159,6 +161,18 @@ function flattenSingleRowEmbedding(item: unknown): void {
     typeof embedding[0][0] === "number"
   ) {
     record.embedding = embedding[0];
+  }
+}
+
+/**
+ * Restore an `index` the upstream left out. Google's OpenAI-compatible endpoint omits the
+ * field when it is 0 (proto3 default), and OpenAI SDK consumers sort the batch by it.
+ */
+function fillMissingEmbeddingIndex(item: unknown, position: number): void {
+  if (!item || typeof item !== "object" || !("embedding" in item)) return;
+  const record = item as { index?: unknown };
+  if (typeof record.index !== "number" || !Number.isFinite(record.index)) {
+    record.index = position;
   }
 }
 
@@ -818,6 +832,8 @@ async function handleUpstreamFailure(
     apiKeyId: runtime.apiKeyId,
     apiKeyName: runtime.apiKeyName,
     connectionId: runtime.connectionId,
+    requestedModel: runtime.requestedModel,
+    comboName: runtime.comboName,
   }).catch(() => {});
   if (runtime.connectionId) {
     try {
@@ -844,7 +860,10 @@ function normalizeEmbeddingData(
   const data = (normalizer ? normalizer(rawData) : rawData) as ParsedEmbeddingResponse;
   runtime.reqLogger.logProviderResponse(response.status, "", response.headers, data);
   const responseItems = data.data || data;
-  if (Array.isArray(responseItems)) responseItems.forEach(flattenSingleRowEmbedding);
+  if (Array.isArray(responseItems)) {
+    responseItems.forEach(flattenSingleRowEmbedding);
+    responseItems.forEach(fillMissingEmbeddingIndex);
+  }
   return {
     data,
     normalizedResponse: {
@@ -886,6 +905,8 @@ function recordEmbeddingSuccess(
     apiKeyId: runtime.apiKeyId,
     apiKeyName: runtime.apiKeyName,
     connectionId: runtime.connectionId,
+    requestedModel: runtime.requestedModel,
+    comboName: runtime.comboName,
   }).catch(() => {});
 }
 
@@ -961,6 +982,8 @@ function handleEmbeddingException(
     apiKeyId: runtime.apiKeyId,
     apiKeyName: runtime.apiKeyName,
     connectionId: runtime.connectionId,
+    requestedModel: runtime.requestedModel,
+    comboName: runtime.comboName,
   }).catch(() => {});
   return failure(status, `Embedding provider error: ${sanitizeErrorMessage(message)}`);
 }
