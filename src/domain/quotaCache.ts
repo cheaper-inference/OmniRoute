@@ -48,6 +48,10 @@ import {
   isClaudeQuotaMetadata,
 } from "@omniroute/open-sse/services/usage/claudeQuota.ts";
 import { readClaudeUsageLimitConfig } from "@omniroute/open-sse/services/claudeLowPriority.ts";
+import {
+  isClaudeModelCreditEntitlementText,
+  SUBSCRIPTION_QUOTA_COOLDOWN_MS,
+} from "@omniroute/open-sse/services/quotaTextCooldowns.ts";
 import type { ClaudeQuotaMetadata } from "@omniroute/open-sse/services/usage/quota.ts";
 import {
   EXHAUSTED_MAX_PARK_MS,
@@ -559,6 +563,15 @@ const BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA: ClaudeQuotaScopeDecision = {
   cooldownMs: null,
 };
 
+// An explicit Claude model-credit entitlement failure is scoped to that model
+// even without a usable quota snapshot. Avoid parking sibling models/connection.
+const MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT: ClaudeQuotaScopeDecision = {
+  scope: "model",
+  evidence: "blocking",
+  resetAt: null,
+  cooldownMs: SUBSCRIPTION_QUOTA_COOLDOWN_MS,
+};
+
 function decisionForLatestClaudeReset(
   quotas: QuotaInfo[],
   scope: ClaudeQuotaScopeDecision["scope"],
@@ -602,6 +615,7 @@ export function getCachedClaudeQuotaScopeDecision(input: {
   }
 
   const requestedModel = input.model;
+  const modelCreditEntitlement = isClaudeModelCreditEntitlementText(input.errorText);
   const now = input.nowMs ?? Date.now();
   const entry = getState().cache.get(input.connectionId);
   if (
@@ -609,7 +623,9 @@ export function getCachedClaudeQuotaScopeDecision(input: {
     resolveProviderId(entry.provider) !== canonicalProvider ||
     now - entry.fetchedAt >= ACTIVE_TTL_MS
   ) {
-    return CONNECTION_SCOPED_CLAUDE_QUOTA;
+    return modelCreditEntitlement
+      ? MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT
+      : CONNECTION_SCOPED_CLAUDE_QUOTA;
   }
 
   const globalWindows = Object.values(entry.quotas).filter(
@@ -637,6 +653,11 @@ export function getCachedClaudeQuotaScopeDecision(input: {
       BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA
     );
   }
+
+  // The explicit upstream model entitlement is stronger scope evidence
+  // than a different model's cached quota. Keep the global blocker above
+  // authoritative and preserve matching model reset evidence above.
+  if (modelCreditEntitlement) return MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT;
 
   if (scopedWindows.length > 0) {
     return (
