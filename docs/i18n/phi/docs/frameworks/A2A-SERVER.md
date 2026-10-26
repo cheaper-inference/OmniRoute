@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Para sa `smart-routing`, ang `metadata.combo` ay isang tahasang pag-override sa
+`metadata.model` para sa kahilingan sa gateway; ipinapadala ito bilang tunay na `model`,
+hindi bilang isang binabalewalang `x-combo` JSON field. Nalalapat pa rin ang karaniwang API-key at
+awtorisasyon ng gateway para sa bawat target. Tinatanggihan ang isang hindi wasto o walang-lamang combo.
+
+Inilalantad ng resulta ang `requested_combo` (layunin ng tumatawag), `dispatched_model`
+(ang aktuwal na kahilingan sa gateway), `response_model` (tugon ng gateway), at
+`confirmed_combo`. Ang huling field ay `null` maliban kung tahasang
+tinutukoy ng gateway ang isang combo. Iniuugnay lamang ng mga log ng desisyon ng A2A ang pagpapatupad sa isang
+nakumpirmang combo, habang pinananatili ang isang hindi nakumpirmang kahilingan bilang `requestedCombo`.
+
 **Tugon:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE Streaming
+### `message/stream` — Pag-stream gamit ang SSE
 
-Kapareho ito ng `message/send`, ngunit nagbabalik ng Server-Sent Events para sa real-time streaming.
+Kapareho ng `message/send` ngunit nagbabalik ng mga Server-Sent Event para sa real-time na pag-stream.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Mga SSE Event:**
+**Mga Event ng SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Suriin ang Status ng Gawain
+### `tasks/get` — Alamin ang Katayuan ng Gawain
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Pre `smart-routing` predstavuje `metadata.combo` explicitné prepísanie hodnoty
+`metadata.model` v požiadavke na bránu; odosiela sa ako skutočný `model`,
+nie ako ignorované pole JSON `x-combo`. Naďalej sa uplatňuje bežný kľúč API brány a
+autorizácia pre jednotlivé ciele. Neplatná alebo prázdna kombinácia je odmietnutá.
+
+Výsledok sprístupňuje `requested_combo` (zámer volajúceho), `dispatched_model`
+(skutočná požiadavka na bránu), `response_model` (odpoveď brány) a
+`confirmed_combo`. Posledné pole má hodnotu `null`, pokiaľ brána explicitne
+neidentifikuje kombináciu. Protokoly rozhodnutí A2A pripisujú vykonanie iba
+potvrdenej kombinácii, pričom nepotvrdenú požiadavku uchovávajú ako `requestedCombo`.
+
 **Odpoveď:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }

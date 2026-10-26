@@ -45,7 +45,9 @@ function mountModal(initial: Partial<ModalProps>) {
     act(() => root.unmount());
     container.remove();
   });
-  return { container, render };
+  // The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+  // document.body, so queries start there (the container is a child of body).
+  return { container: document.body, render };
 }
 
 function setFieldValue(field: HTMLInputElement | HTMLTextAreaElement, value: string) {

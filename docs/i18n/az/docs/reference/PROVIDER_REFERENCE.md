@@ -6,9 +6,9 @@
 
 > `src/shared/constants/providers.ts` faylından **avtomatik yaradılıb** — əl ilə redaktə etməyin.
 > Yenidən yaratmaq üçün: `npm run gen:provider-reference`
-> **Son yaradılma:** 2026-10-18
+> **Son yaradılma tarixi:** 2026-10-20
 
-Ümumi provayderlər: **375**. Aşağıda kateqoriyalar üzrə bölgüyə baxın.
+Ümumi provayder sayı: **375**. Aşağıdakı kateqoriyalar üzrə bölgüyə baxın.
 
 ## Kateqoriyalar
 
@@ -460,8 +460,8 @@ Hər bir provayderi aktivləşdirmək, konfiqurasiya etmək və sınaqdan keçir
 ## Həqiqət mənbələri
 
 - Kataloq: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Reyestr (model üzrə təfərrüatlar): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- İcraçılar: [`open-sse/executors/`](../../open-sse/executors/) (154 implementasiya)
+- Reyestr (hər model üzrə təfərrüatlar): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- İcraçılar: [`open-sse/executors/`](../../open-sse/executors/) (156 reallaşdırma)
 - Tərcüməçilər: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Həmçinin baxın

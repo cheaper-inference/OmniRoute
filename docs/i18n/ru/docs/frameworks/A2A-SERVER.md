@@ -47,7 +47,7 @@ A2A управляется переключателем **Endpoints → A2A** и
 
 ### `message/send` — Синхронное выполнение
 
-Отправляет сообщение навыку и ожидает полного ответа.
+Отправляет сообщение навыку и ожидает полный ответ.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Для `smart-routing` значение `metadata.combo` явно переопределяет
+`metadata.model` в запросе к шлюзу; оно отправляется как фактическое значение `model`,
+а не как игнорируемое JSON-поле `x-combo`. Стандартная проверка API-ключа шлюза и
+авторизация для каждой целевой системы по-прежнему применяются. Недопустимое или пустое комбо отклоняется.
+
+Результат содержит `requested_combo` (намерение вызывающей стороны), `dispatched_model`
+(фактический запрос к шлюзу), `response_model` (ответ шлюза) и
+`confirmed_combo`. Последнее поле имеет значение `null`, если шлюз явно
+не идентифицирует комбо. Журналы решений A2A связывают выполнение только с
+подтверждённым комбо, сохраняя неподтверждённый запрос как `requestedCombo`.
+
 **Ответ:**
 
 ```json
@@ -76,28 +87,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Потоковая передача через SSE
+### `message/stream` — Потоковая передача SSE
 
 Аналогичен `message/send`, но возвращает события Server-Sent Events для потоковой передачи в реальном времени.
 
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Запрос состояния задачи
+### `tasks/get` — Запрос статуса задачи
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

@@ -45,7 +45,7 @@ A2A se ovládá přepínačem **Endpoints → A2A** a ve výchozím nastavení j
 
 ## Metody JSON-RPC 2.0
 
-### `message/send` — Synchronní provedení
+### `message/send` — Synchronní provádění
 
 Odešle zprávu dovednosti a počká na úplnou odpověď.
 
@@ -59,11 +59,22 @@ curl -X POST http://localhost:20128/a2a \
     "method": "message/send",
     "params": {
       "skill": "smart-routing",
-      "messages": [{"role": "user", "content": "Napiš Hello World v Pythonu"}],
+      "messages": [{"role": "user", "content": "Write a hello world in Python"}],
       "metadata": {"model": "auto", "combo": "fast-coding"}
     }
   }'
 ```
+
+Pro `smart-routing` představuje `metadata.combo` explicitní přepsání hodnoty
+`metadata.model` pro požadavek brány; odesílá se jako skutečný `model`,
+nikoli jako ignorované pole JSON `x-combo`. Nadále se uplatňuje běžný klíč API brány
+a autorizace pro jednotlivé cíle. Neplatná nebo prázdná kombinace je odmítnuta.
+
+Výsledek obsahuje `requested_combo` (záměr volajícího), `dispatched_model`
+(skutečný požadavek brány), `response_model` (odpověď brány) a
+`confirmed_combo`. Poslední pole má hodnotu `null`, pokud brána kombinaci
+výslovně neidentifikuje. Protokoly rozhodování A2A přiřazují spuštění pouze
+potvrzené kombinaci a nepotvrzený požadavek uchovávají jako `requestedCombo`.
 
 **Odpověď:**
 
@@ -75,23 +86,16 @@ curl -X POST http://localhost:20128/a2a \
     "task": { "id": "uuid", "state": "completed" },
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
-      "routing_explanation": "Vybrán claude-sonnet prostřednictvím poskytovatele \"anthropic\" (latence: 1200ms, cena: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "v rámci limitů rozpočtu a kvóty"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Streamování SSE
 
-Stejné jako `message/send`, ale vrací události Server-Sent Events pro streamování v reálném čase.
+Funguje stejně jako `message/send`, ale vrací události Server-Sent Events pro streamování v reálném čase.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -111,7 +115,7 @@ curl -N -X POST http://localhost:20128/a2a \
     "method": "message/stream",
     "params": {
       "skill": "smart-routing",
-      "messages": [{"role": "user", "content": "Vysvětli kvantové výpočty"}]
+      "messages": [{"role": "user", "content": "Explain quantum computing"}]
     }
   }'
 ```
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Zjištění stavu úlohy
+### `tasks/get` — Dotaz na stav úlohy
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

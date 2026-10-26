@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Za `smart-routing` je `metadata.combo` izrecna preglasitev vrednosti
+`metadata.model` za zahtevo prehodu; poslana je kot dejanski `model`,
+ne kot prezrto polje JSON `x-combo`. Še vedno veljajo običajni ključ API prehoda in
+pooblastila za posamezen cilj. Neveljavna ali prazna kombinacija je zavrnjena.
+
+Rezultat vsebuje `requested_combo` (namen klicatelja), `dispatched_model`
+(dejansko zahtevo prehodu), `response_model` (odgovor prehoda) in
+`confirmed_combo`. Zadnje polje je `null`, razen če prehod izrecno
+identificira kombinacijo. Dnevniki odločitev A2A pripišejo izvajanje samo
+potrjeni kombinaciji, nepotrjeno zahtevo pa ohranijo kot `requestedCombo`.
+
 **Odgovor:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Pretočno pošiljanje SSE
+### `message/stream` — Pretakanje SSE
 
-Enako kot `message/send`, vendar vrne dogodke, ki jih pošilja strežnik, za pretočno pošiljanje v realnem času.
+Enako kot `message/send`, vendar vrača dogodke, ki jih pošilja strežnik, za pretakanje v realnem času.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \

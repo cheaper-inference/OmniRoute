@@ -229,3 +229,18 @@ test("findAiAttribution: exempts only GitHub's own dependabot[bot] co-author tra
     assert.deepEqual(findAiAttribution(`subject\n\n${c}\n`), [c], c);
   }
 });
+
+test("findAiAttribution: exempts the Signed-off-by Dependabot writes on its own bump commits", () => {
+  // Since 2026-10 every Dependabot bump commit carries this sign-off (#17314, #17316, #17352), so the
+  // Lint job failed on every Dependabot PR.
+  const signoff = "Signed-off-by: dependabot[bot] <support@github.com>";
+  assert.deepEqual(findAiAttribution(`deps: bump x from 1.0.0 to 1.0.1\n\n${signoff}\n`), []);
+  // The address is exempt only together with the exact dependabot[bot] name.
+  for (const c of [
+    "Signed-off-by: renovate[bot] <support@github.com>",
+    "Signed-off-by: dependabot-preview[bot] <support@github.com>",
+    "Co-authored-by: Claude <support@github.com>",
+  ]) {
+    assert.deepEqual(findAiAttribution(`subject\n\n${c}\n`), [c], c);
+  }
+});

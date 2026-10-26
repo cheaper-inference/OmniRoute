@@ -7,6 +7,10 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so each render hands back the dialog it just opened (the newest one)
+// as the query root.
+
 vi.mock("next-intl", () => ({
   useTranslations: () => {
     const t = (key: string) => key;
@@ -54,7 +58,8 @@ async function renderModal(props: Partial<React.ComponentProps<typeof ModelSelec
   });
 
   await act(async () => {});
-  return { container, root };
+  const dialogs = document.body.querySelectorAll<HTMLElement>('[role="dialog"]');
+  return { container: dialogs[dialogs.length - 1], root };
 }
 
 beforeEach(() => {
@@ -201,15 +206,17 @@ describe("ModelSelectModal — Test Selected Providers", () => {
       onDeselectMany,
     };
 
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    containers.push(container);
-    const root = createRoot(container);
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    containers.push(host);
+    const root = createRoot(host);
 
     await act(async () => {
       root.render(<ModelSelectModal {...baseProps} addedModelValues={[]} />);
     });
     await act(async () => {});
+    // The dialog is portaled to document.body (KEA-7886): query it, not the host div.
+    const container = document.body.querySelector<HTMLElement>('[role="dialog"]')!;
 
     expect(
       container.querySelector('[data-testid="model-select-provider-test-panel"]')
@@ -254,7 +261,7 @@ describe("ModelSelectModal — Test Selected Providers", () => {
     ) as HTMLButtonElement | null;
     expect(selectWorking, "expected Unselect working after add").not.toBeNull();
     expect(selectWorking!.textContent).toMatch(/Unselect working/i);
-    expect(selectWorking!.className).toMatch(/emerald/);
+    expect(selectWorking!.className).toMatch(/\btext-success\b/);
 
     await act(async () => {
       selectWorking!.click();
@@ -287,9 +294,9 @@ describe("ModelSelectModal — Test Selected Providers", () => {
   });
 
   it("uses a wider modal shell for the combo catalog", async () => {
-    const { container } = await renderModal();
-    const dialog = container.querySelector('[role="dialog"]') as HTMLElement | null;
+    // renderModal hands back the dialog element itself (KEA-7886).
+    const { container: dialog } = await renderModal();
     expect(dialog, "expected dialog").not.toBeNull();
-    expect(dialog!.className).toMatch(/max-w-2xl/);
+    expect(dialog.className).toMatch(/max-w-2xl/);
   });
 });

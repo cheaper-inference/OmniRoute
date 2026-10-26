@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Para `smart-routing`, `metadata.combo` es una anulación explícita de
+`metadata.model` para la solicitud al gateway; se envía como el `model` real,
+no como un campo JSON `x-combo` ignorado. Se siguen aplicando la clave de API normal del gateway y
+la autorización por destino. Un combo no válido o vacío se rechaza.
+
+El resultado expone `requested_combo` (intención del solicitante), `dispatched_model`
+(la solicitud real al gateway), `response_model` (respuesta del gateway) y
+`confirmed_combo`. El último campo es `null` a menos que el gateway identifique
+explícitamente un combo. Los registros de decisiones de A2A atribuyen la ejecución solo a un
+combo confirmado y conservan una solicitud no confirmada como `requestedCombo`.
+
 **Respuesta:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }

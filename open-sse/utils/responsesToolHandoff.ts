@@ -28,6 +28,29 @@ function getResponsesEventKeys(
   return [...keys];
 }
 
+function isNonEmptyString(value: unknown): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function getCompletedToolItem(payload: Record<string, unknown>): CompletedToolItem | null {
+  const item =
+    payload.item && typeof payload.item === "object" && !Array.isArray(payload.item)
+      ? (payload.item as Record<string, unknown>)
+      : null;
+  if (!item) return null;
+  if (item.type !== "function_call" && item.type !== "custom_tool_call") return null;
+  if (!isNonEmptyString(item.call_id)) return null;
+  if (!isNonEmptyString(item.name)) return null;
+  if (item.status !== undefined && item.status !== "completed") return null;
+
+  const valueKey = item.type === "function_call" ? "arguments" : "input";
+  const value = item[valueKey];
+  if (typeof value !== "string") return null;
+  const keys = getResponsesEventKeys(payload, item);
+  if (keys.length === 0) return null;
+  return { keys, type: item.type, value };
+}
+
 /**
  * Codex can start its next turn as soon as it receives a complete client-side
  * tool call, closing the current HTTP response before response.completed. This
@@ -71,23 +94,9 @@ export function createCompletedResponsesToolHandoffWatcher() {
     }
 
     if (eventType !== "response.output_item.done") return;
-    const item =
-      payload.item && typeof payload.item === "object" && !Array.isArray(payload.item)
-        ? (payload.item as Record<string, unknown>)
-        : null;
+    const item = getCompletedToolItem(payload);
     if (!item) return;
-    if (item.type !== "function_call" && item.type !== "custom_tool_call") return;
-    if (typeof item.call_id !== "string" || !item.call_id.trim()) return;
-    if (typeof item.name !== "string" || !item.name.trim()) return;
-    if (item.status !== undefined && item.status !== "completed") return;
-
-    const valueKey = item.type === "function_call" ? "arguments" : "input";
-    const value = item[valueKey];
-    if (typeof value !== "string") return;
-    const keys = getResponsesEventKeys(payload, item);
-    if (keys.length === 0) return;
-
-    completedToolItems.push({ keys, type: item.type, value });
+    completedToolItems.push(item);
     if (completedToolItems.length > 32) completedToolItems.shift();
     evaluate();
   };

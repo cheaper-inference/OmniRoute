@@ -1,16 +1,19 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { EmptyState as KitEmptyState } from "@omniroute/ui-kit/empty-state";
+import Button from "./Button";
+import Icon from "./Icon";
 
 /**
- * EmptyState — FASE-07 UX
+ * EmptyState — adapter over the kit `EmptyState` (KEA-7886).
  *
- * Reusable empty state component for dashboard sections when no data
- * is available. Provides visual feedback and optional action button.
+ * `icon` is either a Material Symbols name (rendered through `<Icon>`, i.e. Lucide) or an
+ * emoji/glyph rendered as text. The action goes through the `Button` adapter.
  *
  * Usage:
  *   <EmptyState
- *     icon="📡"
+ *     icon="inbox"
  *     title="No providers yet"
  *     description="Add your first API provider to get started."
  *     actionLabel="Add Provider"
@@ -24,105 +27,41 @@ interface EmptyStateProps {
   description?: string;
   actionLabel?: string;
   onAction?: (() => void) | null;
+  className?: string;
 }
 
 export default function EmptyState({
-  icon = "📭",
+  icon = "inbox",
   title,
   description = "",
   actionLabel = "",
   onAction = null,
+  className,
 }: EmptyStateProps) {
   const t = useTranslations("common");
   const resolvedTitle = title ?? t("nothingHere");
   const usesMaterialSymbol = /^[a-z][a-z0-9_]*$/.test(icon);
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "48px 24px",
-        textAlign: "center",
-        minHeight: "200px",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "48px",
-          marginBottom: "16px",
-          opacity: 0.8,
-          animation: "emptyBounce 2s ease-in-out infinite",
-        }}
-        role="img"
-        aria-hidden="true"
-      >
-        {usesMaterialSymbol ? (
-          <span className="material-symbols-outlined" style={{ fontSize: "inherit" }}>
+    <KitEmptyState
+      className={className}
+      icon={
+        usesMaterialSymbol ? (
+          <Icon name={icon} size={40} />
+        ) : (
+          <span aria-hidden="true" className="text-2xl leading-none">
             {icon}
           </span>
-        ) : (
-          icon
-        )}
-      </div>
-      <h3
-        style={{
-          fontSize: "18px",
-          fontWeight: 600,
-          color: "var(--text-primary, #e0e0e0)",
-          marginBottom: "8px",
-          margin: 0,
-        }}
-      >
-        {resolvedTitle}
-      </h3>
-      {description && (
-        <p
-          style={{
-            fontSize: "14px",
-            color: "var(--text-secondary, #888)",
-            maxWidth: "320px",
-            lineHeight: 1.5,
-            marginTop: "8px",
-          }}
-        >
-          {description}
-        </p>
-      )}
-      {actionLabel && onAction && (
-        <button
-          onClick={onAction}
-          style={{
-            marginTop: "20px",
-            padding: "10px 24px",
-            borderRadius: "8px",
-            border: "1px solid rgba(99, 102, 241, 0.4)",
-            background: "rgba(99, 102, 241, 0.15)",
-            color: "#818cf8",
-            fontSize: "14px",
-            fontWeight: 500,
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(99, 102, 241, 0.25)";
-            (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(99, 102, 241, 0.15)";
-            (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-          }}
-        >
-          {actionLabel}
-        </button>
-      )}
-      <style>{`
-        @keyframes emptyBounce {
-          0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-8px); }
-        }
-      `}</style>
-    </div>
+        )
+      }
+      title={resolvedTitle}
+      description={description || undefined}
+      actions={
+        actionLabel && onAction ? (
+          <Button variant="primary" onClick={onAction}>
+            {actionLabel}
+          </Button>
+        ) : undefined
+      }
+    />
   );
 }

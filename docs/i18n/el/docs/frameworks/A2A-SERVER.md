@@ -45,9 +45,9 @@ Authorization: Bearer YOUR_OMNIROUTE_API_KEY
 
 ## Μέθοδοι JSON-RPC 2.0
 
-### `message/send` — Σύγχρονη Εκτέλεση
+### `message/send` — Σύγχρονη εκτέλεση
 
-Αποστέλλει ένα μήνυμα σε μια δεξιότητα και αναμένει την πλήρη απόκριση.
+Στέλνει ένα μήνυμα σε μια δεξιότητα και περιμένει την πλήρη απόκριση.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Για το `smart-routing`, το `metadata.combo` αποτελεί ρητή παράκαμψη του
+`metadata.model` για το αίτημα προς την πύλη· αποστέλλεται ως το πραγματικό `model`
+και όχι ως ένα αγνοούμενο πεδίο JSON `x-combo`. Εξακολουθούν να ισχύουν το κανονικό κλειδί API της πύλης και
+η εξουσιοδότηση ανά προορισμό. Ένα μη έγκυρο ή κενό combo απορρίπτεται.
+
+Το αποτέλεσμα εκθέτει τα `requested_combo` (πρόθεση καλούντος), `dispatched_model`
+(το πραγματικό αίτημα προς την πύλη), `response_model` (απόκριση πύλης) και
+`confirmed_combo`. Το τελευταίο πεδίο είναι `null`, εκτός εάν η πύλη
+προσδιορίσει ρητά ένα combo. Τα αρχεία καταγραφής αποφάσεων A2A αποδίδουν την εκτέλεση μόνο σε ένα
+επιβεβαιωμένο combo, διατηρώντας ένα μη επιβεβαιωμένο αίτημα ως `requestedCombo`.
+
 **Απόκριση:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Ροή SSE
 
-Ίδιο με το `message/send` αλλά επιστρέφει Server-Sent Events για ροή σε πραγματικό χρόνο.
+Όπως το `message/send`, αλλά επιστρέφει Server-Sent Events για ροή σε πραγματικό χρόνο.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Ερώτημα Κατάστασης Εργασίας
+### `tasks/get` — Έλεγχος κατάστασης εργασίας
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Ακύρωση Εργασίας
+### `tasks/cancel` — Ακύρωση εργασίας
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ submitted → working → completed
 
 ---
 
-## Παραδείγματα Ενσωμάτωσης
+## Παραδείγματα ενσωμάτωσης
 
 ### Python (requests)
 

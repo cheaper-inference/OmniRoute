@@ -3,7 +3,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { PageHeader, SectionHeader as KitSectionHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import Select from "@/shared/components/Select";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import ModelCooldownsCard from "./components/ModelCooldownsCard";
 import {
@@ -120,56 +132,56 @@ type BreakerTone = { dot: string; bg: string; ring: string; label: string; icon:
 
 const BREAKER_TONE: Record<string, BreakerTone> = {
   CLOSED: {
-    dot: "#22c55e",
-    bg: "rgba(34,197,94,0.10)",
-    ring: "rgba(34,197,94,0.30)",
+    dot: "var(--color-success)",
+    bg: "color-mix(in srgb, var(--color-success) 10%, transparent)",
+    ring: "color-mix(in srgb, var(--color-success) 30%, transparent)",
     label: "OK",
     icon: "check_circle",
   },
   HALF_OPEN: {
-    dot: "#eab308",
-    bg: "rgba(234,179,8,0.10)",
-    ring: "rgba(234,179,8,0.30)",
+    dot: "var(--color-warning)",
+    bg: "color-mix(in srgb, var(--color-warning) 10%, transparent)",
+    ring: "color-mix(in srgb, var(--color-warning) 30%, transparent)",
     label: "RECOV",
     icon: "sync",
   },
   DEGRADED: {
-    dot: "#f97316",
-    bg: "rgba(249,115,22,0.10)",
-    ring: "rgba(249,115,22,0.30)",
+    dot: "var(--color-warning)",
+    bg: "color-mix(in srgb, var(--color-warning) 10%, transparent)",
+    ring: "color-mix(in srgb, var(--color-warning) 30%, transparent)",
     label: "DEG",
     icon: "warning",
   },
   OPEN: {
-    dot: "#ef4444",
-    bg: "rgba(239,68,68,0.10)",
-    ring: "rgba(239,68,68,0.30)",
+    dot: "var(--color-error)",
+    bg: "color-mix(in srgb, var(--color-error) 10%, transparent)",
+    ring: "color-mix(in srgb, var(--color-error) 30%, transparent)",
     label: "OPEN",
     icon: "block",
   },
 };
 
 const FALLBACK_BREAKER_TONE: BreakerTone = {
-  dot: "#64748b",
-  bg: "rgba(100,116,139,0.10)",
-  ring: "rgba(100,116,139,0.30)",
+  dot: "var(--color-text-muted)",
+  bg: "color-mix(in srgb, var(--color-text-muted) 10%, transparent)",
+  ring: "color-mix(in srgb, var(--color-text-muted) 30%, transparent)",
   label: "UNK",
   icon: "help",
 };
 
 const FEED_KIND_META: Record<FeedEventKind, { icon: string; color: string; group: FeedFilter }> = {
-  "circuit-opened": { icon: "block", color: "#ef4444", group: "circuits" },
-  "circuit-degraded": { icon: "warning", color: "#f97316", group: "circuits" },
-  "circuit-recovered": { icon: "sync", color: "#eab308", group: "circuits" },
-  "circuit-closed": { icon: "check_circle", color: "#22c55e", group: "circuits" },
-  "cooldown-added": { icon: "ac_unit", color: "#3b82f6", group: "cooldowns" },
-  "cooldown-cleared": { icon: "lock_open", color: "#22c55e", group: "cooldowns" },
-  "lockout-added": { icon: "lock", color: "#f97316", group: "lockouts" },
-  "lockout-cleared": { icon: "lock_open", color: "#22c55e", group: "lockouts" },
-  "session-new": { icon: "fingerprint", color: "#06b6d4", group: "sessions" },
-  "quota-alert": { icon: "warning", color: "#eab308", group: "quotas" },
-  "quota-exhausted": { icon: "error", color: "#ef4444", group: "quotas" },
-  "quota-recovered": { icon: "check_circle", color: "#22c55e", group: "quotas" },
+  "circuit-opened": { icon: "block", color: "var(--color-error)", group: "circuits" },
+  "circuit-degraded": { icon: "warning", color: "var(--color-warning)", group: "circuits" },
+  "circuit-recovered": { icon: "sync", color: "var(--color-warning)", group: "circuits" },
+  "circuit-closed": { icon: "check_circle", color: "var(--color-success)", group: "circuits" },
+  "cooldown-added": { icon: "ac_unit", color: "var(--color-info)", group: "cooldowns" },
+  "cooldown-cleared": { icon: "lock_open", color: "var(--color-success)", group: "cooldowns" },
+  "lockout-added": { icon: "lock", color: "var(--color-warning)", group: "lockouts" },
+  "lockout-cleared": { icon: "lock_open", color: "var(--color-success)", group: "lockouts" },
+  "session-new": { icon: "fingerprint", color: "var(--color-chart-2)", group: "sessions" },
+  "quota-alert": { icon: "warning", color: "var(--color-warning)", group: "quotas" },
+  "quota-exhausted": { icon: "error", color: "var(--color-error)", group: "quotas" },
+  "quota-recovered": { icon: "check_circle", color: "var(--color-success)", group: "quotas" },
 };
 
 function fmtMs(ms: number | undefined | null): string {
@@ -526,43 +538,41 @@ export default function RuntimePageClient() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-text-main flex items-center gap-2">
-            <span className="material-symbols-outlined text-[24px] text-primary">bolt</span>
+      <PageHeader
+        compact
+        title={
+          <span className="inline-flex items-center gap-2">
+            <Icon name="bolt" size={24} className="text-primary" />
             {t("title")}
-          </h1>
-          <p className="text-sm text-text-muted mt-0.5">{t("description")}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-text-muted tabular-nums">
-            {lastUpdated ? `↻ ${fmtClock(lastUpdated)}` : "—"}
           </span>
-          <button
-            type="button"
-            onClick={() => setPaused((p) => !p)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-subtle border border-border text-text-main text-[12px] cursor-pointer hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
-          >
-            <span className="material-symbols-outlined text-[16px]">
-              {paused ? "play_arrow" : "pause"}
+        }
+        description={t("description")}
+        actions={
+          <>
+            <span className="text-[11px] text-text-muted tabular-nums">
+              {lastUpdated ? `↻ ${fmtClock(lastUpdated)}` : "—"}
             </span>
-            {paused ? t("resume") : t("pause")}
-          </button>
-          <button
-            type="button"
-            onClick={() => fetchAll()}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-subtle border border-border text-text-main text-[12px] cursor-pointer hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-50"
-            title={t("refreshNow")}
-          >
-            <span
-              className={`material-symbols-outlined text-[16px] ${loading ? "animate-spin" : ""}`}
+            <Button
+              variant="outline"
+              size="sm"
+              icon={paused ? "play_arrow" : "pause"}
+              onClick={() => setPaused((p) => !p)}
             >
-              refresh
-            </span>
-          </button>
-        </div>
-      </div>
+              {paused ? t("resume") : t("pause")}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => fetchAll()}
+              disabled={loading}
+              title={t("refreshNow")}
+              aria-label={t("refreshNow")}
+            >
+              <Icon name="refresh" size={16} className={loading ? "animate-spin" : undefined} />
+            </Button>
+          </>
+        }
+      />
 
       {/* Row 1 — KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -571,7 +581,7 @@ export default function RuntimePageClient() {
           label={t("kpiSessions")}
           value={counts.sessions}
           hint={t("hintStickyBound", { count: counts.stickyBound })}
-          tone="#06b6d4"
+          tone="var(--color-chart-2)"
           onClick={() => setFeedFilter("sessions")}
           active={feedFilter === "sessions"}
         />
@@ -590,10 +600,10 @@ export default function RuntimePageClient() {
           }
           tone={
             counts.openCircuits > 0
-              ? "#ef4444"
+              ? "var(--color-error)"
               : counts.halfCircuits + counts.degradedCircuits + counts.unknownCircuits > 0
-                ? "#eab308"
-                : "#22c55e"
+                ? "var(--color-warning)"
+                : "var(--color-success)"
           }
           onClick={() => setFeedFilter("circuits")}
           active={feedFilter === "circuits"}
@@ -603,7 +613,7 @@ export default function RuntimePageClient() {
           label={t("kpiCooldowns")}
           value={counts.cooldowns}
           hint={t("hintConnsCooling")}
-          tone={counts.cooldowns > 0 ? "#3b82f6" : "#22c55e"}
+          tone={counts.cooldowns > 0 ? "var(--color-info)" : "var(--color-success)"}
           onClick={() => setFeedFilter("cooldowns")}
           active={feedFilter === "cooldowns"}
         />
@@ -612,7 +622,7 @@ export default function RuntimePageClient() {
           label={t("kpiLockouts")}
           value={counts.lockouts}
           hint={t("hintModelsBlocked")}
-          tone={counts.lockouts > 0 ? "#f97316" : "#22c55e"}
+          tone={counts.lockouts > 0 ? "var(--color-warning)" : "var(--color-success)"}
           onClick={() => setFeedFilter("lockouts")}
           active={feedFilter === "lockouts"}
         />
@@ -629,19 +639,19 @@ export default function RuntimePageClient() {
             subtitle={t("resilienceSubtitle")}
             trailing={
               <div className="flex items-center gap-3 text-[11px]">
-                <span className="text-green-500">✓ {overallHealthy}</span>
-                <span className="text-amber-500">
+                <span className="text-success">✓ {overallHealthy}</span>
+                <span className="text-warning">
                   ⚠ {counts.halfCircuits + counts.degradedCircuits + counts.unknownCircuits}
                 </span>
-                <span className="text-red-500">⛔ {counts.openCircuits}</span>
+                <span className="text-error">⛔ {counts.openCircuits}</span>
               </div>
             }
           />
 
           <div className="mb-4 mt-2">
-            <div className="h-2 rounded-sm bg-black/[0.06] dark:bg-white/[0.06] overflow-hidden">
+            <div className="h-2 rounded-sm bg-border/60 overflow-hidden">
               <div
-                className="h-full rounded-sm bg-gradient-to-r from-green-500 via-amber-500 to-red-500/40"
+                className="h-full rounded-sm bg-gradient-to-r from-success via-warning to-error/40"
                 style={{ width: `${overallPercent}%` }}
               />
             </div>
@@ -738,9 +748,7 @@ export default function RuntimePageClient() {
                           )}
                         </div>
                       </div>
-                      <div className="text-[11px] tabular-nums text-blue-400">
-                        {fmtMs(remaining)}
-                      </div>
+                      <div className="text-[11px] tabular-nums text-info">{fmtMs(remaining)}</div>
                       <div className="text-[10px] text-text-muted truncate">
                         {c.lastError || "—"}
                       </div>
@@ -784,9 +792,7 @@ export default function RuntimePageClient() {
                       style={{ gridTemplateColumns: "minmax(0,1.5fr) minmax(0,1fr) 70px" }}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="material-symbols-outlined text-[14px] text-orange-400 shrink-0">
-                          lock
-                        </span>
+                        <Icon name="lock" size={14} className="text-warning" />
                         <span className="text-[12px] text-text-main truncate font-medium">
                           {key}
                         </span>
@@ -794,7 +800,7 @@ export default function RuntimePageClient() {
                       <div className="text-[10px] text-text-muted truncate">
                         {lk.reason || "rate limit"}
                       </div>
-                      <div className="text-[11px] tabular-nums text-orange-400 text-right">
+                      <div className="text-[11px] tabular-nums text-warning text-right">
                         {remaining > 0 ? fmtMs(remaining) : "—"}
                       </div>
                     </div>
@@ -818,26 +824,23 @@ export default function RuntimePageClient() {
             subtitle={t("feedSubtitle", { count: filteredFeed.length })}
             trailing={
               <div className="flex items-center gap-1.5">
-                <select
+                <Select
+                  compact
+                  aria-label={t("feedFilterLabel")}
                   value={feedFilter}
                   onChange={(e) => setFeedFilter(e.target.value as FeedFilter)}
-                  className="text-[10px] bg-bg-subtle border border-border rounded px-1.5 py-1 cursor-pointer text-text-main"
-                >
-                  <option value="all">{t("feedFilterAll")}</option>
-                  <option value="circuits">{t("feedFilterCircuits")}</option>
-                  <option value="cooldowns">{t("feedFilterCooldowns")}</option>
-                  <option value="lockouts">{t("feedFilterLockouts")}</option>
-                  <option value="sessions">{t("feedFilterSessions")}</option>
-                  <option value="quotas">{t("feedFilterQuotas")}</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={() => setFeed([])}
-                  className="text-[10px] px-1.5 py-1 rounded border border-border text-text-muted hover:text-text-main hover:bg-black/[0.04] dark:hover:bg-white/[0.04] cursor-pointer"
-                  title={t("feedClear")}
-                >
+                  options={[
+                    { value: "all", label: t("feedFilterAll") },
+                    { value: "circuits", label: t("feedFilterCircuits") },
+                    { value: "cooldowns", label: t("feedFilterCooldowns") },
+                    { value: "lockouts", label: t("feedFilterLockouts") },
+                    { value: "sessions", label: t("feedFilterSessions") },
+                    { value: "quotas", label: t("feedFilterQuotas") },
+                  ]}
+                />
+                <Button variant="ghost" size="sm" onClick={() => setFeed([])}>
                   {t("feedClear")}
-                </button>
+                </Button>
               </div>
             }
           />
@@ -845,9 +848,7 @@ export default function RuntimePageClient() {
           <div className="mt-2 flex flex-col gap-1.5 max-h-[640px] overflow-auto pr-1">
             {filteredFeed.length === 0 ? (
               <div className="text-center py-12 text-text-muted">
-                <span className="material-symbols-outlined text-[40px] opacity-30 block mb-2">
-                  hourglass_empty
-                </span>
+                <Icon name="hourglass_empty" size={40} className="opacity-30 block mb-2" />
                 <p className="text-xs">
                   {feed.length === 0 ? t("feedEmptyWaiting") : t("feedEmptyFiltered")}
                 </p>
@@ -858,13 +859,10 @@ export default function RuntimePageClient() {
                 return (
                   <div
                     key={ev.id}
-                    className="flex items-start gap-2 px-2 py-1.5 rounded hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
+                    className="flex items-start gap-2 px-2 py-1.5 rounded hover:bg-bg-subtle"
                   >
-                    <span
-                      className="material-symbols-outlined text-[14px] mt-0.5"
-                      style={{ color: meta.color }}
-                    >
-                      {meta.icon}
+                    <span className="mt-0.5" style={{ color: meta.color }}>
+                      <Icon name={meta.icon} size={14} />
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
@@ -901,66 +899,54 @@ export default function RuntimePageClient() {
 
           {(health?.sessions?.top ?? []).length === 0 ? (
             <div className="text-center py-8 text-text-muted">
-              <span className="material-symbols-outlined text-[40px] opacity-30 block mb-2">
-                fingerprint
-              </span>
+              <Icon name="fingerprint" size={40} className="opacity-30 block mb-2" />
               <p className="text-sm">{t("sessionsEmptyTitle")}</p>
               <p className="text-xs mt-1">{t("sessionsEmptyHint")}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto mt-2">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border/40">
-                    <th className="text-left py-2 px-2 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-                      {t("tblSession")}
-                    </th>
-                    <th className="text-right py-2 px-2 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-                      {t("tblAge")}
-                    </th>
-                    <th className="text-right py-2 px-2 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-                      {t("tblIdle")}
-                    </th>
-                    <th className="text-right py-2 px-2 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-                      {t("tblReqs")}
-                    </th>
-                    <th className="text-left py-2 px-2 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-                      {t("tblBoundTo")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className="mt-2">
+              <Table className="text-sm" scrollbarLabel={t("sessionsTitle")}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("tblSession")}</TableHead>
+                    <TableHead className="text-right">{t("tblAge")}</TableHead>
+                    <TableHead className="text-right">{t("tblIdle")}</TableHead>
+                    <TableHead className="text-right">{t("tblReqs")}</TableHead>
+                    <TableHead>{t("tblBoundTo")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {(health?.sessions?.top ?? []).map((s) => (
-                    <tr key={s.sessionId} className="border-b border-border/10 hover:bg-surface/20">
-                      <td className="py-2 px-2">
+                    <TableRow key={s.sessionId}>
+                      <TableCell>
                         <span className="font-mono text-[11px] text-text-muted">
                           {shortId(s.sessionId, 14)}
                         </span>
-                      </td>
-                      <td className="py-2 px-2 text-right text-[11px] text-text-muted tabular-nums">
+                      </TableCell>
+                      <TableCell className="text-right text-[11px] text-text-muted tabular-nums">
                         {fmtMs(s.ageMs)}
-                      </td>
-                      <td className="py-2 px-2 text-right text-[11px] text-text-muted tabular-nums">
+                      </TableCell>
+                      <TableCell className="text-right text-[11px] text-text-muted tabular-nums">
                         {fmtMs(s.idleMs)}
-                      </td>
-                      <td className="py-2 px-2 text-right">
+                      </TableCell>
+                      <TableCell className="text-right">
                         <span className="text-[11px] font-semibold tabular-nums">
                           {s.requestCount}
                         </span>
-                      </td>
-                      <td className="py-2 px-2">
+                      </TableCell>
+                      <TableCell>
                         {s.connectionId ? (
-                          <span className="font-mono text-[10px] text-cyan-400">
+                          <span className="font-mono text-[10px] text-chart-2">
                             {shortId(s.connectionId, 12)}
                           </span>
                         ) : (
                           <span className="text-text-muted/40">—</span>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
               {Object.keys(health?.sessions?.byApiKey ?? {}).length > 0 && (
                 <div className="mt-2 pt-2 border-t border-border/40 text-[10px] text-text-muted">
                   {t("topApiKeys")}:{" "}
@@ -996,9 +982,7 @@ export default function RuntimePageClient() {
             if (total === 0) {
               return (
                 <div className="text-center py-8 text-text-muted">
-                  <span className="material-symbols-outlined text-[40px] opacity-30 block mb-2">
-                    radar
-                  </span>
+                  <Icon name="radar" size={40} className="opacity-30 block mb-2" />
                   <p className="text-sm">{t("allQuotasHealthy")}</p>
                 </div>
               );
@@ -1059,22 +1043,25 @@ function KpiCard({
   onClick: () => void;
   active: boolean;
 }) {
+  // kit-exception: Multi-line KPI tile that also filters the feed: the kit Button is a single-line pill, so
+  // this stays a native <button> on kit tokens (state exposed through aria-pressed).
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className="text-left rounded-xl border px-4 py-3 transition-colors cursor-pointer bg-surface"
       style={{
         borderColor: active ? tone : "var(--color-border)",
-        boxShadow: active ? `0 0 0 2px ${tone}22` : undefined,
+        boxShadow: active ? `0 0 0 2px color-mix(in srgb, ${tone} 14%, transparent)` : undefined,
       }}
     >
       <div className="flex items-center justify-between">
         <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
           {label}
         </span>
-        <span className="material-symbols-outlined text-[16px]" style={{ color: tone }}>
-          {icon}
+        <span style={{ color: tone }}>
+          <Icon name={icon} size={16} />
         </span>
       </div>
       <div className="mt-1 text-2xl font-bold tabular-nums" style={{ color: tone }}>
@@ -1097,16 +1084,16 @@ function SectionHeader({
   trailing?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-3">
-      <div className="flex items-start gap-2">
-        <span className="material-symbols-outlined text-[20px] text-primary mt-0.5">{icon}</span>
-        <div>
-          <h2 className="text-base font-semibold text-text-main leading-tight">{title}</h2>
-          {subtitle && <p className="text-[11px] text-text-muted mt-0.5">{subtitle}</p>}
-        </div>
-      </div>
-      {trailing && <div className="shrink-0">{trailing}</div>}
-    </div>
+    <KitSectionHeader
+      title={
+        <span className="inline-flex items-center gap-2">
+          <Icon name={icon} size={20} className="text-primary" />
+          {title}
+        </span>
+      }
+      description={subtitle}
+      actions={trailing}
+    />
   );
 }
 
@@ -1126,11 +1113,26 @@ function LayerSection({
   children: React.ReactNode;
 }) {
   const toneMap = {
-    red: { bg: "rgba(239,68,68,0.10)", text: "#ef4444" },
-    amber: { bg: "rgba(234,179,8,0.10)", text: "#eab308" },
-    green: { bg: "rgba(34,197,94,0.10)", text: "#22c55e" },
-    blue: { bg: "rgba(59,130,246,0.10)", text: "#3b82f6" },
-    orange: { bg: "rgba(249,115,22,0.10)", text: "#f97316" },
+    red: {
+      bg: "color-mix(in srgb, var(--color-error) 10%, transparent)",
+      text: "var(--color-error)",
+    },
+    amber: {
+      bg: "color-mix(in srgb, var(--color-warning) 10%, transparent)",
+      text: "var(--color-warning)",
+    },
+    green: {
+      bg: "color-mix(in srgb, var(--color-success) 10%, transparent)",
+      text: "var(--color-success)",
+    },
+    blue: {
+      bg: "color-mix(in srgb, var(--color-info) 10%, transparent)",
+      text: "var(--color-info)",
+    },
+    orange: {
+      bg: "color-mix(in srgb, var(--color-warning) 10%, transparent)",
+      text: "var(--color-warning)",
+    },
   } as const;
   const tone = toneMap[badgeTone];
   return (
@@ -1176,9 +1178,21 @@ function QuotaGroup({
 }) {
   const t = useTranslations("runtime");
   const toneMap = {
-    red: { text: "#ef4444", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.20)" },
-    amber: { text: "#eab308", bg: "rgba(234,179,8,0.08)", border: "rgba(234,179,8,0.20)" },
-    orange: { text: "#f97316", bg: "rgba(249,115,22,0.08)", border: "rgba(249,115,22,0.20)" },
+    red: {
+      text: "var(--color-error)",
+      bg: "color-mix(in srgb, var(--color-error) 8%, transparent)",
+      border: "color-mix(in srgb, var(--color-error) 20%, transparent)",
+    },
+    amber: {
+      text: "var(--color-warning)",
+      bg: "color-mix(in srgb, var(--color-warning) 8%, transparent)",
+      border: "color-mix(in srgb, var(--color-warning) 20%, transparent)",
+    },
+    orange: {
+      text: "var(--color-warning)",
+      bg: "color-mix(in srgb, var(--color-warning) 8%, transparent)",
+      border: "color-mix(in srgb, var(--color-warning) 20%, transparent)",
+    },
   } as const;
   const tc = toneMap[tone];
   return (

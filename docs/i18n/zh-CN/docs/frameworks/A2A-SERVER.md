@@ -47,7 +47,7 @@ A2A 由 **Endpoints → A2A** 开关控制，默认处于禁用状态。禁用�
 
 ### `message/send` — 同步执行
 
-向技能发送消息并等待完整响应。
+向技能发送消息，并等待完整响应。
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+对于 `smart-routing`，`metadata.combo` 是网关请求中对
+`metadata.model` 的显式覆盖；它会作为真正的 `model` 发送，
+而不是作为被忽略的 `x-combo` JSON 字段。网关常规的 API 密钥和
+每目标授权仍然适用。无效或空的组合会被拒绝。
+
+结果会公开 `requested_combo`（调用方意图）、`dispatched_model`
+（实际网关请求）、`response_model`（网关响应）和
+`confirmed_combo`。除非网关明确标识某个组合，否则最后一个字段为 `null`。
+A2A 决策日志仅将执行归因于已确认的组合，并将未确认的请求保留为 `requestedCombo`。
+
 **响应：**
 
 ```json
@@ -76,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +102,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE 流式传输
 
-与 `message/send` 相同，但返回服务器发送事件，以进行实时流式传输。
+与 `message/send` 相同，但返回服务器发送事件以进行实时流式传输。
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \

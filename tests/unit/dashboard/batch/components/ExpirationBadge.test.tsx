@@ -11,9 +11,8 @@ vi.mock("next-intl", () => ({
 
 // ── Import component after mocks ─────────────────────────────────────────────
 
-const { default: ExpirationBadge } = await import(
-  "../../../../../src/app/(dashboard)/dashboard/batch/components/ExpirationBadge"
-);
+const { default: ExpirationBadge } =
+  await import("../../../../../src/app/(dashboard)/dashboard/batch/components/ExpirationBadge");
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -66,7 +65,7 @@ describe("ExpirationBadge", () => {
     // should display the i18n key for expired
     expect(span!.textContent).toContain("expirationBadgeExpired");
     // gray color class
-    expect(span!.className).toContain("gray");
+    expect(span!.className).toContain("text-text-muted");
   });
 
   it("shows critical badge (red) when expiresAt is within 1 hour", () => {
@@ -75,11 +74,11 @@ describe("ExpirationBadge", () => {
     const span = el.querySelector("span");
     expect(span).not.toBeNull();
     // The outer span should have red classes
-    expect(span!.className).toContain("red");
+    expect(span!.className).toContain("text-error");
     // Icon should be present in default variant
-    const iconSpan = el.querySelector(".material-symbols-outlined");
+    const iconSpan = el.querySelector("svg.oi-icon");
     expect(iconSpan).not.toBeNull();
-    expect(iconSpan!.textContent).toBe("schedule");
+    expect(iconSpan!.getAttribute("data-icon")).toBe("schedule");
   });
 
   it("shows warning badge (yellow) when expiresAt is between 1h and 6h", () => {
@@ -87,7 +86,7 @@ describe("ExpirationBadge", () => {
     const el = renderBadge({ expiresAt: nowPlusSec(4 * 3600) });
     const span = el.querySelector("span");
     expect(span).not.toBeNull();
-    expect(span!.className).toContain("yellow");
+    expect(span!.className).toContain("text-warning");
   });
 
   it("shows normal badge (emerald) when expiresAt is between 6h and 24h", () => {
@@ -95,12 +94,12 @@ describe("ExpirationBadge", () => {
     const el = renderBadge({ expiresAt: nowPlusSec(12 * 3600) });
     const span = el.querySelector("span");
     expect(span).not.toBeNull();
-    expect(span!.className).toContain("emerald");
+    expect(span!.className).toContain("text-success");
   });
 
   it("variant=compact renders without icon", () => {
     const el = renderBadge({ expiresAt: nowPlusSec(30 * 60), variant: "compact" });
-    const iconSpan = el.querySelector(".material-symbols-outlined");
+    const iconSpan = el.querySelector("svg.oi-icon");
     // compact variant should NOT have the schedule icon
     expect(iconSpan).toBeNull();
     // but it should still render a span with time info
@@ -121,7 +120,7 @@ describe("ExpirationBadge", () => {
     const expiresAt = nowPlusSec(3601);
     const el = renderBadge({ expiresAt });
     const spanBefore = el.querySelector("span");
-    expect(spanBefore!.className).toContain("yellow"); // warning tier
+    expect(spanBefore!.className).toContain("text-warning"); // warning tier
 
     // Advance fake timers by 60s so setInterval fires
     act(() => {

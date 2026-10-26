@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+بالنسبة إلى `smart-routing`، تُعدّ `metadata.combo` تجاوزًا صريحًا لـ
+`metadata.model` في طلب البوابة؛ إذ تُرسل بوصفها `model` الفعلي،
+وليس بوصفها حقل JSON باسم `x-combo` يتم تجاهله. تظل مصادقة البوابة المعتادة باستخدام مفتاح API
+والتخويل الخاص بكل وجهة ساريين. وتُرفض أي توليفة غير صالحة أو فارغة.
+
+تعرض النتيجة `requested_combo` (قصد المستدعي)، و`dispatched_model`
+(طلب البوابة الفعلي)، و`response_model` (استجابة البوابة)، و
+`confirmed_combo`. يكون الحقل الأخير `null` ما لم تحدد البوابة
+توليفة بشكل صريح. تنسب سجلات قرارات A2A التنفيذ فقط إلى
+توليفة مؤكدة، مع الاحتفاظ بالطلب غير المؤكد باسم `requestedCombo`.
+
 **الاستجابة:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — البث عبر SSE
 
-يماثل `message/send`، لكنه يعيد أحداثًا يرسلها الخادم للبث في الوقت الفعلي.
+مماثل لـ `message/send`، لكنه يعيد أحداثًا مرسلة من الخادم للبث في الوقت الفعلي.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -264,7 +268,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ## أمثلة التكامل
 
-### Python (requests)
+### Python ‏(requests)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript ‏(fetch)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {
