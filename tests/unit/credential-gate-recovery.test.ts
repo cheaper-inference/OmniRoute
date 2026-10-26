@@ -25,8 +25,7 @@ const TRANSPORT_FAILURES = [
   "upstream_unavailable",
   "upstream_rate_limited",
 ];
-const INCONCLUSIVE_FAILURES = [
-  ...TRANSPORT_FAILURES,
+const OTHER_INCONCLUSIVE_FAILURES = [
   "upstream_ambiguous_auth_or_quota",
   "provider_error",
   "runtime_error",
@@ -36,6 +35,7 @@ const INCONCLUSIVE_FAILURES = [
   "",
   undefined,
 ];
+const INCONCLUSIVE_FAILURES = [...TRANSPORT_FAILURES, ...OTHER_INCONCLUSIVE_FAILURES];
 
 const originalFlag = process.env[FLAG];
 const restoreFlag = () => {
@@ -61,7 +61,7 @@ test(
     }
     for (const type of [
       ...AUTH_FAILURES,
-      ...INCONCLUSIVE_FAILURES.filter((type) => !TRANSPORT_FAILURES.includes(type as string)),
+      ...OTHER_INCONCLUSIVE_FAILURES,
     ]) {
       setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
       assert.equal(isCredentialHealthy("synthetic"), false, String(type));
@@ -197,6 +197,7 @@ test("blocked credential-gate messages distinguish auth failures from ambiguous 
   assert.doesNotMatch(ambiguous.reason ?? "", /known-bad credentials/);
   setCredentialHealth("unsafe", "codex", "error", "Sensitive content", "untrusted\\nsecret");
   assert.equal(checkCredentialGate("unsafe", "codex", "codex/model").allowed, false);
-  assert.match(checkCredentialGate("unsafe", "codex", "codex/model").reason ?? "", /diagnosis: unknown/);
-  assert.doesNotMatch(checkCredentialGate("unsafe", "codex", "codex/model").reason ?? "", /secret/);
+  const sanitized = checkCredentialGate("unsafe", "codex", "codex/model").reason ?? "";
+  assert.match(sanitized, /diagnosis: unknown/);
+  assert.doesNotMatch(sanitized, /secret/);
 });
