@@ -66,6 +66,8 @@ import {
   noteFreeTierOutcome,
   prepareFreeTierRequest,
   rebuildJsonFromForcedStream,
+  resolveFreeTierCredential,
+  resolveGatedCredential,
   surfaceFromBaseUrl,
 } from "./opencodeFreeTierContract.ts";
 import {
@@ -294,12 +296,50 @@ export class OpencodeExecutor extends BaseExecutor {
   // Member health shared across requests on this alias, keyed by member id.
   // Each request still walks its own list (see `opencodeAccountScope.ts`).
   accountHealth = new Map<string, ScopedAccountHealth>();
+  // Explicit invalidation for view setters and request writeback.
+  #accountsVersion = 0;
+  // Cached live view of accounts getter. Invalidate when version changes.
+  #accountsCache: ScopedAccount[] | null = null;
+  // Cached version when #accountsCache was built.
+  #accountsCacheVersion = 0;
+  #accountsCacheStore: Map<string, ScopedAccountHealth> | null = null;
+  #accountsCacheSize = 0;
+  // Invalidate the accounts cache (call after any accountHealth mutation).
+  #invalidateAccountsCache(): void {
+    this.#accountsVersion++;
+    this.#accountsCache = null;
+    this.#accountsCacheVersion = 0;
+  }
   get accounts(): ScopedAccount[] {
     const store = this.accountHealth;
+    if (
+      this.#accountsCache &&
+      this.#accountsCacheVersion === this.#accountsVersion &&
+      this.#accountsCacheStore === store &&
+      this.#accountsCacheSize === store.size
+    ) {
+      // The public Map can be changed through retained references or replaced.
+      // Compare ordered membership in O(n), without rebuilding the live objects.
+      let index = 0;
+      let sameMembers = true;
+      for (const fingerprint of store.keys()) {
+        if (this.#accountsCache[index++]?.fingerprint !== fingerprint) {
+          sameMembers = false;
+          break;
+        }
+      }
+      if (sameMembers) return this.#accountsCache;
+    }
+    this.#accountsCacheStore = store;
+    this.#accountsCacheSize = store.size;
     // Cold parity with the historical default direct member (read-only).
     if (store.size === 0) {
-      return [{ fingerprint: "", cooldownUntil: 0, consecutiveFails: 0, proxy: null }];
+      const empty = [{ fingerprint: "", cooldownUntil: 0, consecutiveFails: 0, proxy: null }];
+      this.#accountsCache = empty;
+      this.#accountsCacheVersion = this.#accountsVersion;
+      return empty;
     }
+    const invalidate = () => this.#invalidateAccountsCache();
     const live = [...store.entries()].map(([fingerprint]) => ({
       fingerprint,
       get cooldownUntil() {
@@ -308,6 +348,7 @@ export class OpencodeExecutor extends BaseExecutor {
       set cooldownUntil(value: number) {
         const current = store.get(fingerprint) ?? { cooldownUntil: 0, consecutiveFails: 0 };
         store.set(fingerprint, { ...current, cooldownUntil: value });
+        invalidate();
       },
       get consecutiveFails() {
         return store.get(fingerprint)?.consecutiveFails ?? 0;
@@ -315,9 +356,12 @@ export class OpencodeExecutor extends BaseExecutor {
       set consecutiveFails(value: number) {
         const current = store.get(fingerprint) ?? { cooldownUntil: 0, consecutiveFails: 0 };
         store.set(fingerprint, { ...current, consecutiveFails: value });
+        invalidate();
       },
       proxy: null as ScopedAccount["proxy"],
     }));
+    this.#accountsCache = live;
+    this.#accountsCacheVersion = this.#accountsVersion;
     return live;
   }
   // Sleep used by the opt-in transient failover pause (#13615). Not `private`:
@@ -543,7 +587,7 @@ export class OpencodeExecutor extends BaseExecutor {
         return withRequestShapeRetry(input, (i) => this.executeOnce(i));
       });
     } finally {
-      releaseRequestList(input.body, this.accountHealth);
+      releaseRequestList(input.body, this.accountHealth, () => this.#invalidateAccountsCache());
     }
   }
 
@@ -1337,19 +1381,18 @@ export class OpencodeExecutor extends BaseExecutor {
     body?: unknown
   ) {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    // #8467: honor Extra API Keys rotation via BaseExecutor.resolveEffectiveKey.
-    // Fall back to accessToken only when no apiKey/extras resolve to a key.
-    const key = credentials
-      ? this.resolveEffectiveKey(credentials) || credentials.accessToken
-      : undefined;
 
-    // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
-    // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and
-    // rebuilding the JSON body from the event stream — the path chatCore already takes for
-    // any buffered event-stream response. Announcing the stream here keeps that buffering an
-    // expected outcome rather than a warning.
+    // A gated request rides buildUrl() to the anonymous /inference lane, which since
+    // 2026-10-21 answers 403 "Model access is disabled" to a real API key while serving
+    // `Bearer public` — the credential flips with the lane; see opencodeFreeTierContract.ts.
     const gatedScope =
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
+    const freeTier = gatedScope ? resolveFreeTierCredential() : null;
+    // #8467: honor Extra API Keys rotation via BaseExecutor.resolveEffectiveKey.
+    // Fall back to accessToken only when no apiKey/extras resolve to a key.
+    const key = resolveGatedCredential(freeTier, () =>
+      credentials ? this.resolveEffectiveKey(credentials) || credentials.accessToken : undefined
+    );
 
     if (key) {
       if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
@@ -1362,6 +1405,11 @@ export class OpencodeExecutor extends BaseExecutor {
     if (this._requestFormat === "claude") {
       headers["anthropic-version"] = "2023-06-01";
     }
+    // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
+    // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and
+    // rebuilding the JSON body from the event stream — the path chatCore already takes for
+    // any buffered event-stream response. Announcing the stream here keeps that buffering an
+    // expected outcome rather than a warning.
     if (stream || gatedScope) {
       headers["Accept"] = "text/event-stream";
     }

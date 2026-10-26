@@ -1,0 +1,1 @@
+- Let image and speech combos continue past target-local 400, 401, and 403 failures only when a later target uses a distinct provider or explicitly different account, while preserving API-key connection scoping.
