@@ -544,6 +544,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
   {
+    key: "ENFORCE_HIDDEN_MODELS",
+    label: "Enforce Hidden Models",
+    description:
+      "Remove models hidden under Any Provider > Models from integration model discovery (GET /api/providers/[id]/models) even when the provider is not listed under Blocked Providers. Off by default: without it, discovery drops a hidden model only when the caller sends ?excludeHidden=true or the provider is blocked. Turn it on to make hiding a model-level policy for every caller.",
+    descriptionI18nKey: "featureFlagEnforceHiddenModelsDescription",
+    category: "policies",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "DISABLE_CONTEXT_WINDOW_CHECKS",
     label: "Disable Context Window Checks",
     description:

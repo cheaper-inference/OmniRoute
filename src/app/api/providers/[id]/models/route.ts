@@ -107,7 +107,10 @@ import {
 } from "@/lib/providerModels/modelDiscovery";
 import { buildProviderModelsUrl, getDiscoveryClientVersionOptions } from "./discoveryClientVersion";
 import { getAdobeModels } from "./adobeFireflyDiscovery";
-import { getSyncedAvailableModels, getCustomModels, getModelIsHidden } from "@/lib/db/models";
+import { getSyncedAvailableModels, getCustomModels } from "@/lib/db/models";
+import { getHiddenChatModels } from "@/lib/hiddenChatModels";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { createHiddenModelLookup } from "@/lib/hiddenModelLookup";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
 import { isModelSyncLocalSpawnDenied } from "@/shared/services/modelSyncScheduler";
@@ -177,9 +180,17 @@ export async function GET(
     const params = await context.params;
     const { id } = params;
 
-    // Check if we should exclude hidden models (used by MCP tools to prevent hidden model leaks)
+    // Hidden models are dropped when enforcement is on for this deployment
+    // (`ENFORCE_HIDDEN_MODELS`, off by default) or the caller opts in with
+    // `?excludeHidden=true` — the pre-existing opt-in used by the model picker and the MCP
+    // catalog. Visibility never depends on the provider being listed under Blocked Providers.
+    // `includeHidden=true` wins over both for config surfaces that must render hidden rows.
     const { searchParams } = new URL(request.url);
-    const excludeHidden = searchParams.get("excludeHidden") === "true";
+    const includeHidden = searchParams.get("includeHidden") === "true";
+    const excludeHidden =
+      !includeHidden &&
+      (searchParams.get("excludeHidden") === "true" ||
+        isFeatureFlagEnabled("ENFORCE_HIDDEN_MODELS"));
     const excludeCustom = searchParams.get("excludeCustom") === "true";
     const refresh = searchParams.get("refresh") === "true";
     const includeCandidates = searchParams.get("includeCandidates") === "true";
@@ -275,15 +286,25 @@ export async function GET(
       return mergeModelsWithCustomPrecedence(base, customRows);
     };
 
+    // Model hiding is a visibility policy, not a provider-level one: it must not depend on
+    // the provider being listed under Security > Blocked Providers. Keyed through the shared
+    // lookup so alias / canonical id / provider-node prefix forms all match.
+    const connectionId = typeof connection?.id === "string" ? connection.id : id;
+    const hiddenLookup = excludeHidden
+      ? createHiddenModelLookup(await getHiddenChatModels())
+      : null;
+    const isModelHidden = (modelId: string) =>
+      Boolean(hiddenLookup?.(provider, modelId) || hiddenLookup?.(connectionId, modelId));
+
     const buildResponse = (payload: any, statusConfig?: ResponseInit) => {
       if (payload.models && Array.isArray(payload.models)) {
         payload.models = mergeCustomModels(payload.models);
         payload.models = filterModelsForRoute(provider, payload.models, chatOnly);
-      }
-      if (excludeHidden && payload.models && Array.isArray(payload.models)) {
-        payload.models = payload.models.filter(
-          (m: any) => m.visibility !== "hide" && !getModelIsHidden(provider, m.id)
-        );
+        if (excludeHidden) {
+          payload.models = payload.models.filter(
+            (m: any) => m.visibility !== "hide" && !isModelHidden(m.id)
+          );
+        }
       }
       // The single place where a discovery response gets its public shape: the
       // internal reason is dropped and the response is flagged as degraded only
@@ -296,7 +317,6 @@ export async function GET(
       return NextResponse.json(publicPayload, statusConfig);
     };
 
-    const connectionId = typeof connection.id === "string" ? connection.id : id;
     const apiKey = typeof connection.apiKey === "string" ? connection.apiKey : "";
     const accessToken = typeof connection.accessToken === "string" ? connection.accessToken : "";
     const codexDiscoveryMode =
