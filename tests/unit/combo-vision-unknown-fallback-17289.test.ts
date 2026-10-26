@@ -201,11 +201,15 @@ test("#17289 rotateWithinVisionTiers rotates the confirmed prefix, then the unkn
   assert.deepEqual(order(1, 2, 1), [0, 1], "one confirmed target is always first");
 });
 
-
 test("#17289: unknown-vision fallback reports actionable upstream attachment rejection", async () => {
   for (const strategy of ["priority", "round-robin"] as const) {
     const attempted: string[] = [];
-    const model = "workbuddy/unknown-vision-upstream-17289";
+    const model = "workbuddy/unconfirmed-upstream-17289";
+    assert.equal(
+      getResolvedModelCapabilities(model).supportsVision,
+      null,
+      "fixture must have an unknown-vision model"
+    );
     const response = await handleComboChat({
       body: request,
       combo: {
@@ -234,17 +238,31 @@ test("#17289: unknown-vision fallback reports actionable upstream attachment rej
     });
     assert.deepEqual(attempted, [model], strategy + " must dispatch unknown vision before failing");
     assert.equal(response.status, 400);
-    const json = await response.json() as { error: { message: string; code?: string } };
-    assert.match(json.error.message, /attachment handler/i,
-      "upstream explanation must survive the combo error boundary");
-    assert.match(json.error.message, /无法处理图片/,
-      "non-English upstream explanation must not collapse to a generic 400");
-    assert.doesNotMatch(json.error.message, /No target.*confirmed vision support|capability_mismatch/i);
+    const json = (await response.json()) as { error: { message: string; code?: string } };
+    assert.match(
+      json.error.message,
+      /attachment handler/i,
+      "upstream explanation must survive the combo error boundary"
+    );
+    assert.match(
+      json.error.message,
+      /无法处理图片/,
+      "non-English upstream explanation must not collapse to a generic 400"
+    );
+    assert.doesNotMatch(
+      json.error.message,
+      /No target.*confirmed vision support|capability_mismatch/i
+    );
   }
 });
 
 test("#17289: an empty upstream 404 identifies the attempted model in combo diagnostics", async () => {
-  const model = "workbuddy/unknown-vision-404-17289";
+  const model = "workbuddy/unconfirmed-404-17289";
+  assert.equal(
+    getResolvedModelCapabilities(model).supportsVision,
+    null,
+    "fixture must have an unknown-vision model"
+  );
   const response = await handleComboChat({
     body: request,
     combo: {
@@ -264,18 +282,26 @@ test("#17289: an empty upstream 404 identifies the attempted model in combo diag
   const bodyText = await response.text();
   assert.ok(bodyText.trim(), "combo must synthesize a nonempty JSON error for blank upstream 404");
   const json = JSON.parse(bodyText) as { error: { message: string } };
-  assert.match(json.error.message, /unknown-vision-404-17289/,
-    "404 diagnostic must identify which upstream target was attempted");
+  assert.match(
+    json.error.message,
+    /unconfirmed-404-17289/,
+    "404 diagnostic must identify which upstream target was attempted"
+  );
 });
-
 
 test("#17289: mixed multi-model vision fallback preserves both upstream failure reasons", async () => {
   const confirmed = "mistral/pixtral-12b-latest";
-  const unknown = "workbuddy/unknown-vision-mixed-errors-17289";
-  assert.equal(getResolvedModelCapabilities(confirmed).supportsVision, true,
-    "fixture must have a confirmed vision model");
-  assert.equal(getResolvedModelCapabilities(unknown).supportsVision, null,
-    "fixture must have an unknown-vision model");
+  const unknown = "workbuddy/unconfirmed-mixed-errors-17289";
+  assert.equal(
+    getResolvedModelCapabilities(confirmed).supportsVision,
+    true,
+    "fixture must have a confirmed vision model"
+  );
+  assert.equal(
+    getResolvedModelCapabilities(unknown).supportsVision,
+    null,
+    "fixture must have an unknown-vision model"
+  );
   for (const strategy of ["priority", "round-robin"] as const) {
     const calls: string[] = [];
     const response = await handleComboChat({
@@ -290,10 +316,13 @@ test("#17289: mixed multi-model vision fallback preserves both upstream failure 
       handleSingleModel: async (_body, modelStr) => {
         calls.push(modelStr);
         return modelStr === confirmed
-          ? new Response(JSON.stringify({ error: { message: "temporary confirmed-model outage" } }), {
-              status: 503,
-              headers: { "content-type": "application/json" },
-            })
+          ? new Response(
+              JSON.stringify({ error: { message: "temporary confirmed-model outage" } }),
+              {
+                status: 503,
+                headers: { "content-type": "application/json" },
+              }
+            )
           : new Response(JSON.stringify({ error: { message: "missing attachment handler" } }), {
               status: 400,
               headers: { "content-type": "application/json" },
@@ -305,19 +334,32 @@ test("#17289: mixed multi-model vision fallback preserves both upstream failure 
       relayOptions: null,
       allCombos: null,
     });
-    assert.deepEqual(calls, [confirmed, unknown],
-      strategy + " must try confirmed vision first and unknown last");
-    assert.equal(response.status, 502, "heterogeneous upstream errors must aggregate as gateway failure");
+    assert.deepEqual(
+      calls,
+      [confirmed, unknown],
+      strategy + " must try confirmed vision first and unknown last"
+    );
+    assert.equal(
+      response.status,
+      502,
+      "heterogeneous upstream errors must aggregate as gateway failure"
+    );
     assert.match(response.headers.get("content-type") || "", /application\/json/i);
-    const payload = await response.json() as {
+    const payload = (await response.json()) as {
       error?: { message?: unknown; code?: unknown; type?: unknown };
     };
-    assert.equal(typeof payload.error?.message, "string",
-      "combo terminal failure must have a structured client-visible error message");
+    assert.equal(
+      typeof payload.error?.message,
+      "string",
+      "combo terminal failure must have a structured client-visible error message"
+    );
     const message = payload.error.message as string;
     assert.match(message, /temporary confirmed-model outage/);
     assert.match(message, /missing attachment handler/);
-    assert.doesNotMatch(JSON.stringify(payload), /capability_mismatch|No target in combo .*confirmed vision/i,
-      "a dispatched upstream failure must never be misclassified as pre-dispatch capability rejection");
+    assert.doesNotMatch(
+      JSON.stringify(payload),
+      /capability_mismatch|No target in combo .*confirmed vision/i,
+      "a dispatched upstream failure must never be misclassified as pre-dispatch capability rejection"
+    );
   }
 });
