@@ -1,8 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
+import { createRequire } from "node:module";
 
 const { createResponsesWsProxy } = await import("../../scripts/dev/responses-ws-proxy.mjs");
+
+const WREQ_PROFILES = createRequire(import.meta.url)("wreq-js").getProfiles();
+const NEWEST_CHROME_PROFILE = WREQ_PROFILES.filter((profile) => /^chrome_\d+$/.test(profile)).sort(
+  (a, b) => Number(b.slice("chrome_".length)) - Number(a.slice("chrome_".length))
+)[0];
 
 function listen(server) {
   return new Promise((resolve) => {
@@ -136,9 +142,14 @@ test("responses ws proxy prepares and forwards OpenAI Responses websocket events
     wsFactory: async (url, options) => {
       assert.equal(url, "wss://chatgpt.com/backend-api/codex/responses");
       assert.equal(options.headers.Authorization, "Bearer upstream-token");
-      // #5591: prepare omits `browser`, so the fallback must be the supported
-      // chrome_142 (not the non-existent chrome_149).
-      assert.equal(options.browser, "chrome_142");
+      // #5591: prepare omits `browser`, so the fallback must be a profile the
+      // installed wreq-js ships: its newest chrome_* (as the prepare route
+      // resolves it), never a literal frozen in the proxy.
+      assert.equal(options.browser, NEWEST_CHROME_PROFILE);
+      assert.ok(
+        WREQ_PROFILES.includes(options.browser),
+        `${options.browser} is not a wreq-js profile`
+      );
       // #5611: the configured proxy from prepare must reach the upstream connect.
       assert.equal(options.proxy, "http://test-proxy:8888");
       return fakeUpstream;
