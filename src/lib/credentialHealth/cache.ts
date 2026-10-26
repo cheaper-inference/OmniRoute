@@ -140,7 +140,10 @@ export function isCredentialHealthy(connectionId: string): boolean | undefined {
   if (status.status === "error") {
     // Network failures, outages and upstream throttling cannot establish that a
     // credential is invalid, irrespective of the legacy gate flag (#18037).
-    if (status.lastErrorType && NON_CREDENTIAL_PROBE_DIAGNOSES.has(status.lastErrorType)) {
+    if (
+      typeof status.lastErrorType === "string" &&
+      NON_CREDENTIAL_PROBE_DIAGNOSES.has(status.lastErrorType)
+    ) {
       return undefined;
     }
     if (!isAuthDiagnosesOnlyGateEnabled()) return false;
