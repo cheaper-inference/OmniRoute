@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+برای `smart-routing`، مقدار `metadata.combo` یک بازنویسی صریح برای
+`metadata.model` در درخواست درگاه است؛ این مقدار بهعنوان `model` واقعی ارسال میشود،
+نه بهعنوان یک فیلد JSON نادیدهگرفتهشدهی `x-combo`. احراز هویت معمول درگاه بر اساس کلید API و
+مجوزدهی بهازای هر مقصد همچنان اعمال میشود. یک combo نامعتبر یا خالی رد میشود.
+
+نتیجه شامل `requested_combo` (قصد فراخواننده)، `dispatched_model`
+(درخواست واقعی درگاه)، `response_model` (پاسخ درگاه) و
+`confirmed_combo` است. فیلد آخر `null` خواهد بود، مگر اینکه درگاه صراحتاً
+یک combo را مشخص کند. گزارشهای تصمیمگیری A2A اجرا را فقط به یک
+combo تأییدشده نسبت میدهند و درخواست تأییدنشده را بهصورت `requestedCombo` نگه میدارند.
+
 **پاسخ:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — استریم SSE
 
-مانند `message/send` عمل میکند، اما برای استریم بلادرنگ، رویدادهای ارسالشده از سوی سرور را برمیگرداند.
+مانند `message/send` است، اما برای استریم بلادرنگ، رویدادهای ارسالشده از سرور را برمیگرداند.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \

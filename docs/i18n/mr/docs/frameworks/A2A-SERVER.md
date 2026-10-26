@@ -65,6 +65,15 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` साठी, गेटवे विनंतीकरिता `metadata.combo` हे
+`metadata.model` चे स्पष्ट अधिलिखित मूल्य आहे; दुर्लक्षित `x-combo` JSON फील्ड म्हणून नव्हे, तर प्रत्यक्ष `model` म्हणून ते पाठवले जाते.
+गेटवेची नेहमीची API-की आणि प्रत्येक लक्ष्यावरील अधिकृतता तरीही लागू होते. अवैध किंवा रिक्त कॉम्बो नाकारला जातो.
+
+निकालामध्ये `requested_combo` (कॉलरचा उद्देश), `dispatched_model`
+(प्रत्यक्ष गेटवे विनंती), `response_model` (गेटवे प्रतिसाद) आणि
+`confirmed_combo` उपलब्ध होतात. गेटवेने कॉम्बो स्पष्टपणे ओळखल्याशिवाय शेवटचे फील्ड `null` असते.
+A2A निर्णय लॉग अंमलबजावणीचे श्रेय केवळ पुष्टी केलेल्या कॉम्बोलाच देतात आणि पुष्टी न केलेली विनंती `requestedCombo` म्हणून जतन करतात.
+
 **प्रतिसाद:**
 
 ```json
@@ -76,22 +85,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -262,7 +264,7 @@ JSON-RPC एंडपॉइंट `/a2a` हा अधिकृत A2A प्र
 
 ---
 
-## एकीकरण उदाहरणे
+## एकत्रीकरणाची उदाहरणे
 
 ### Python (requests)
 

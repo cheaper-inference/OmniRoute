@@ -34,13 +34,15 @@ without inventing new modules.
 | Build         | Next.js standalone via `scripts/build/build-next-isolated.mjs`                                                           |
 | Lint/format   | ESLint flat config + Prettier (`lint-staged` via Husky pre-commit)                                                       |
 | Module system | ESM everywhere (`"type": "module"`)                                                                                      |
-| Workspaces    | npm workspace — `open-sse` is the only sub-workspace                                                                     |
+| Dashboard UI  | **Tailwind CSS 4** + the vendored **Keak CI UI Kit** (`packages/ui-kit`), Lucide icons — see `DESIGN_SYSTEM.md`          |
+| Workspaces    | npm workspaces — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                  |
 
 Path aliases (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
 Default HTTP port: **`20128`** (API and dashboard share the same process). Data
 directory is `DATA_DIR` env var, defaulting to `~/.omniroute/`.
@@ -53,6 +55,7 @@ directory is `DATA_DIR` env var, defaulting to `~/.omniroute/`.
 OmniRoute/
 ├── src/                  Next.js application (App Router, libs, domain, server, shared)
 ├── open-sse/             Streaming engine workspace (@omniroute/open-sse)
+├── packages/             Workspaces: ui-kit (vendored Keak CI UI Kit), browser-pool
 ├── electron/             Desktop wrapper (Electron 41 main + preload)
 ├── bin/                  CLI entry points (omniroute, reset-password)
 ├── tests/                Unit, integration, e2e, protocols-e2e, translator, security, fixtures
@@ -433,6 +436,13 @@ Split into focused subdirectories:
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
   `a11yAudit.ts`, plus dashboard hooks/components under `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/`.
+- `components/` — the dashboard component API (`index.tsx` barrel: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). The primitives are adapters over the
+  vendored kit (`packages/ui-kit`, imported by component subpath such as
+  `@omniroute/ui-kit/button`), so screens keep their imports while the markup is the
+  kit's. The shell is `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (kit `SidebarProvider`/`SidebarInset`) with `Sidebar.tsx` and `Header.tsx`; icons go
+  through `Icon.tsx` and `constants/iconMap.ts`. See `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 

@@ -1,5 +1,8 @@
 "use client";
 
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card } from "@/shared/components";
@@ -25,12 +28,7 @@ export default function TranslatorConceptCard() {
     <Card className="border-primary/10 bg-primary/5">
       <div className="p-4 space-y-3">
         <div className="flex items-start gap-3">
-          <span
-            className="material-symbols-outlined text-primary text-[22px] mt-0.5 shrink-0"
-            aria-hidden="true"
-          >
-            info
-          </span>
+          <Icon name="info" size={22} className="text-primary mt-0.5" />
           <div className="flex-1 min-w-0">
             <h2 className="text-sm font-semibold text-text-main mb-1">
               {tr(
@@ -49,18 +47,17 @@ export default function TranslatorConceptCard() {
 
         <TranslateFlowDiagram />
 
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="translator-concept-how-it-works"
-          className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors w-full justify-start py-1 rounded"
+          className="w-full justify-start text-xs font-medium text-primary"
         >
           <span>{tr("conceptHowItWorksToggle", "How it works")}</span>
-          <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-            {open ? "expand_less" : "expand_more"}
-          </span>
-        </button>
+          <Icon name={open ? "expand_less" : "expand_more"} size={16} />
+        </Button>
 
         {open && (
           <div

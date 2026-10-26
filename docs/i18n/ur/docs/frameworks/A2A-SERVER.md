@@ -43,9 +43,9 @@ A2A کو **Endpoints → A2A** ٹوگل کے ذریعے کنٹرول کیا جا
 
 ---
 
-## JSON-RPC 2.0 میتھڈز
+## JSON-RPC 2.0 طریقے
 
-### `message/send` — ہم وقت عمل درآمد
+### `message/send` — ہم وقت اجرا
 
 کسی اسکل کو پیغام بھیجتا ہے اور مکمل جواب کا انتظار کرتا ہے۔
 
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` کے لیے، `metadata.combo` گیٹ وے کی درخواست میں
+`metadata.model` کو واضح طور پر اوور رائیڈ کرتا ہے؛ اسے نظر انداز کردہ `x-combo`
+JSON فیلڈ کے بجائے حقیقی `model` کے طور پر بھیجا جاتا ہے۔ گیٹ وے کی معمول کی API کلید اور
+فی ہدف اجازت بدستور لاگو ہوتی ہے۔ نامعتبر یا خالی combo مسترد کر دیا جاتا ہے۔
+
+نتیجہ `requested_combo` (کالر کا ارادہ)، `dispatched_model`
+(گیٹ وے کی اصل درخواست)، `response_model` (گیٹ وے کا جواب) اور
+`confirmed_combo` ظاہر کرتا ہے۔ آخری فیلڈ اس وقت تک `null` رہتی ہے جب تک گیٹ وے واضح طور پر
+کسی combo کی شناخت نہ کرے۔ A2A فیصلے کے لاگز اجرا کو صرف تصدیق شدہ
+combo سے منسوب کرتے ہیں، جبکہ غیر تصدیق شدہ درخواست کو `requestedCombo` کے طور پر برقرار رکھتے ہیں۔
+
 **جواب:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE اسٹریمنگ
 
-یہ `message/send` جیسا ہی ہے، لیکن حقیقی وقت کی اسٹریمنگ کے لیے Server-Sent Events واپس کرتا ہے۔
+`message/send` جیسا ہی ہے، لیکن حقیقی وقت کی اسٹریمنگ کے لیے Server-Sent Events واپس کرتا ہے۔
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — ٹاسک کی حالت دریافت کریں
+### `tasks/get` — ٹاسک کی حیثیت دریافت کریں
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

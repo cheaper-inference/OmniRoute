@@ -184,6 +184,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     targetFormat,
     triedModels,
     trustedEffortContext,
+    toolDisclosure,
     upstreamStream,
     reportSignatureFailure,
   } = deps;
@@ -705,6 +706,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           isOpencodeClient,
           rawBody: body,
           clientRawRequest,
+          toolDisclosure,
         });
         assertManagedLeaseFence(getExecutionConnectionId(getExecutionCredentials()));
         const retryResult = normalizeExecutorResult(

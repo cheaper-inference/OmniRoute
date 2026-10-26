@@ -24,7 +24,7 @@ import { isCoreBinaryPathAllowed } from "./pathGuard";
 import {
   DEFAULT_CORE,
   OFFENDING_RESOLVERS,
-  RENDERERS,
+  rendererFor,
   type RenderOk,
   type RenderRefused,
 } from "./renderers";
@@ -137,19 +137,21 @@ function renderAndLog(
   | null
   | {
       text: string;
+      core: string;
       digest?: string;
       ownedIndex?: Array<string | null>;
       skippedSummary: SkippedSummary | null;
       resultSkipped: Array<{ reason: string }>;
     } {
   const target = (sub.coreConfigPath ?? "").trim();
-  const renderer = RENDERERS[DEFAULT_CORE];
+  const { core, renderer } = rendererFor(target);
   const result = renderer(model, existingText);
   if (!result.ok) return warn((result as RenderRefused).reason);
   if (result.unchanged) return null;
   logSkippedCounts(model, result, (sub as { id?: string }).id ?? target, perSource);
   return {
     text: result.text,
+    core,
     ...(result.membersDigest ? { digest: result.membersDigest } : {}),
     ...(result.ownedIndex ? { ownedIndex: result.ownedIndex } : {}),
     skippedSummary: summarizeSkipped(model, result, 0),
@@ -412,6 +414,7 @@ async function finishVerifiedPrune(
   model: CoreModel,
   existingText: string | null,
   rendered: {
+    core: string;
     text: string;
     digest?: string;
     ownedIndex?: Array<string | null>;
@@ -420,7 +423,7 @@ async function finishVerifiedPrune(
   initialSkipped: Array<{ reason: string }>,
   opts?: GenerateOptions
 ): Promise<CoreConfigIntention> {
-  const fresh = RENDERERS[DEFAULT_CORE](model, existingText);
+  const fresh = rendererFor(target).renderer(model, existingText);
   if (!fresh.ok || fresh.unchanged)
     return {
       status: "none",
@@ -560,7 +563,7 @@ async function applyVerified(
       beside: ApplyBesideReason | undefined;
     };
     if (round >= limit) return warn(applyReason(failed.beside));
-    const next = advancePruneRound(model, existingText, failed.tag, failed.detail, pruned);
+    const next = advancePruneRound(target, model, existingText, failed.tag, failed.detail, pruned);
     if (next === null) {
       // Drained model: never serve an empty replacement — previous behaviour.
       if (model.nodes.length === 0) return warn("check_failed");
@@ -605,7 +608,7 @@ async function runVerifiedRound(
       renderedText: current.text,
       subscriptionId: sub.id ?? "",
       ...(opts?.runCheck ? { runCheck: opts.runCheck } : {}),
-      ...resolveHook(current),
+      ...resolveHook(target, current),
     });
   } catch {
     return { done: true, warning: warn("write_failed") };
@@ -622,6 +625,7 @@ async function runVerifiedRound(
  * refused or unchanged re-render).
  */
 function advancePruneRound(
+  target: string,
   model: CoreModel,
   existingText: string | null,
   tag: string,
@@ -630,7 +634,7 @@ function advancePruneRound(
 ): RenderOk | null {
   if (!pruneModel(model, tag, detail, pruned)) return null;
   if (model.nodes.length === 0) return null;
-  const next = RENDERERS[DEFAULT_CORE](model, existingText);
+  const next = rendererFor(target).renderer(model, existingText);
   if (!next.ok) return null;
   if (next.unchanged) return null;
   return next;
@@ -638,10 +642,13 @@ function advancePruneRound(
 
 /**
  * Resolve the offending-node hook for one rendered candidate: the resolver
- * registered for the default core plus this render's owned-position table.
+ * registered for the target's core plus this render's owned-position table.
  * Absent either, the check reports `check_failed` as before.
  */
-function resolveHook(rendered: RenderOk):
+function resolveHook(
+  target: string,
+  rendered: RenderOk
+):
   | {
       offending: {
         resolve: (
@@ -652,7 +659,8 @@ function resolveHook(rendered: RenderOk):
       };
     }
   | Record<string, never> {
-  const resolve = OFFENDING_RESOLVERS[DEFAULT_CORE];
+  const resolve =
+    OFFENDING_RESOLVERS[rendererFor(target).core] ?? OFFENDING_RESOLVERS[DEFAULT_CORE];
   const table = rendered.ownedIndex;
   if (!resolve || !table) return {};
   return { offending: { resolve, table } };

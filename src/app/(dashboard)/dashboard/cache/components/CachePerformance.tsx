@@ -2,7 +2,9 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import { Skeleton as KitSkeleton } from "@/shared/components/Loading";
 
 interface CachePerformanceProps {
   hits?: number;
@@ -17,9 +19,8 @@ interface CachePerformanceProps {
 }
 
 function HitRateBar({ hitRate, label }: { hitRate: number; label: string }) {
-  const colorClass = hitRate >= 70 ? "bg-green-500" : hitRate >= 40 ? "bg-amber-400" : "bg-red-500";
-  const textClass =
-    hitRate >= 70 ? "text-green-500" : hitRate >= 40 ? "text-amber-400" : "text-red-500";
+  const colorClass = hitRate >= 70 ? "bg-success" : hitRate >= 40 ? "bg-warning" : "bg-error";
+  const textClass = hitRate >= 70 ? "text-success" : hitRate >= 40 ? "text-warning" : "text-error";
 
   return (
     <div
@@ -34,7 +35,7 @@ function HitRateBar({ hitRate, label }: { hitRate: number; label: string }) {
         <span className="text-text-muted">{label}</span>
         <span className={`font-semibold tabular-nums ${textClass}`}>{hitRate.toFixed(1)}%</span>
       </div>
-      <div className="w-full h-2 rounded-full bg-surface/50 overflow-hidden">
+      <div className="w-full h-2 rounded-full bg-border/60 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${colorClass}`}
           style={{ width: `${Math.min(hitRate, 100)}%` }}
@@ -47,12 +48,7 @@ function HitRateBar({ hitRate, label }: { hitRate: number; label: string }) {
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Skeleton({ className }: { className?: string }) {
-  return (
-    <div
-      data-testid="skeleton"
-      className={`animate-pulse rounded bg-surface/50 ${className ?? ""}`}
-    />
-  );
+  return <KitSkeleton data-testid="skeleton" className={className} />;
 }
 
 // ─── CachePerformance ─────────────────────────────────────────────────────────
@@ -84,15 +80,17 @@ export default function CachePerformance({
         {/* Error state */}
         {error && (
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-red-400">{error}</p>
+            <p className="text-sm text-error">{error}</p>
             {onRetry && (
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={onRetry}
-                className="self-start text-xs px-3 py-1.5 rounded bg-surface border border-border/50 hover:bg-surface/80 transition-colors"
+                className="self-start"
                 aria-label={t("cachePerformanceRetry")}
               >
                 {t("retry")}
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -126,11 +124,11 @@ export default function CachePerformance({
             {/* Hit / Miss / Total breakdown */}
             <div className="grid grid-cols-3 gap-4 pt-3 border-t border-border/30 text-center">
               <div>
-                <div className="text-lg font-semibold tabular-nums text-green-500">{hits}</div>
+                <div className="text-lg font-semibold tabular-nums text-success">{hits}</div>
                 <div className="text-xs text-text-muted mt-0.5">{t("hits")}</div>
               </div>
               <div>
-                <div className="text-lg font-semibold tabular-nums text-red-400">{misses}</div>
+                <div className="text-lg font-semibold tabular-nums text-error">{misses}</div>
                 <div className="text-xs text-text-muted mt-0.5">{t("misses")}</div>
               </div>
               <div>

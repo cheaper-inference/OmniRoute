@@ -12,7 +12,7 @@ const FIXED_TEXT = {
   supportsVision: true,
 } as const;
 
-/** Routes observed from first-party ChatGPT Pro and Free UIs through 2026-08-31. */
+/** Routes observed from first-party ChatGPT Pro and Free UIs through 2026-10-22. */
 export const chatgpt_webProvider: RegistryEntry = {
   id: "chatgpt-web",
   format: "openai",
@@ -22,6 +22,14 @@ export const chatgpt_webProvider: RegistryEntry = {
   authType: "apikey",
   authHeader: "cookie",
   models: [
+    { id: "gpt-6", name: "GPT-6 Sol — Instant", ...FIXED_TEXT },
+    {
+      id: "gpt-6-thinking",
+      name: "GPT-6 Sol — Thinking",
+      aliases: ["gpt-6-sol"],
+      ...ADJUSTABLE_REASONING,
+    },
+    { id: "gpt-6-pro", name: "GPT-6 Astra — Pro", ...FIXED_TEXT, supportsReasoning: true },
     { id: "gpt-5-6", name: "GPT-5.6 Sol — Instant", ...FIXED_TEXT },
     {
       id: "gpt-5-6-thinking",

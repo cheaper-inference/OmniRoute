@@ -47,7 +47,7 @@ JSON-RPC 호출은 JSON-RPC 오류 코드 `-32000`과 함께 HTTP 503을 반환�
 
 ### `message/send` — 동기 실행
 
-스킬에 메시지를 전송하고 전체 응답이 완료될 때까지 기다립니다.
+스킬에 메시지를 전송하고 전체 응답을 기다립니다.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,15 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`에서 `metadata.combo`는 게이트웨이 요청의
+`metadata.model`을 명시적으로 재정의하며, 무시되는 `x-combo` JSON 필드가 아니라 실제 `model`로 전송됩니다.
+게이트웨이의 일반적인 API 키 및 대상별 인증은 계속 적용됩니다. 유효하지 않거나 비어 있는 콤보는 거부됩니다.
+
+결과에는 `requested_combo`(호출자 의도), `dispatched_model`
+(실제 게이트웨이 요청), `response_model`(게이트웨이 응답) 및
+`confirmed_combo`가 표시됩니다. 마지막 필드는 게이트웨이가 콤보를 명시적으로 식별하지 않는 한 `null`입니다.
+A2A 결정 로그는 확인된 콤보에만 실행을 귀속하며, 확인되지 않은 요청은 `requestedCombo`로 유지합니다.
+
 **응답:**
 
 ```json
@@ -76,22 +85,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +101,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE 스트리밍
 
-`message/send`와 동일하지만 실시간 스트리밍을 위해 서버 전송 이벤트(Server-Sent Events)를 반환합니다.
+`message/send`와 동일하지만 실시간 스트리밍을 위해 Server-Sent Events를 반환합니다.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \

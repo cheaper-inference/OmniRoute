@@ -4,11 +4,11 @@
 
 ---
 
-> **สร้างอัตโนมัติ** จาก `src/shared/constants/providers.ts` — ห้ามแก้ไขด้วยตนเอง
+> **สร้างโดยอัตโนมัติ** จาก `src/shared/constants/providers.ts` — ห้ามแก้ไขด้วยตนเอง
 > สร้างใหม่ด้วย: `npm run gen:provider-reference`
-> **สร้างล่าสุดเมื่อ:** 2026-10-18
+> **สร้างล่าสุด:** 2026-10-20
 
-จำนวนผู้ให้บริการทั้งหมด: **375** ราย ดูรายละเอียดแยกตามหมวดหมู่ด้านล่าง
+ผู้ให้บริการทั้งหมด: **375** ราย ดูรายละเอียดแยกตามหมวดหมู่ด้านล่าง
 
 ## หมวดหมู่
 
@@ -457,12 +457,12 @@
 | ------ | ------ | --------------------------- | ---- | -------- | -------- |
 | `auto` | `auto` | อัตโนมัติ (ไม่ต้องกำหนดค่า) | ระบบ | —        | —        |
 
-## แหล่งข้อมูลอ้างอิงหลัก
+## แหล่งข้อมูลที่เชื่อถือได้
 
-- แคตตาล็อก: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- แค็ตตาล็อก: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - รีจิสทรี (รายละเอียดของแต่ละโมเดล): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ตัวดำเนินการ (Executors): [`open-sse/executors/`](../../open-sse/executors/) (154 อิมพลีเมนเทชัน)
-- ตัวแปล (Translators): [`open-sse/translator/`](../../open-sse/translator/)
+- ตัวดำเนินการ: [`open-sse/executors/`](../../open-sse/executors/) (การใช้งาน 156 รายการ)
+- ตัวแปล: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ดูเพิ่มเติม
 

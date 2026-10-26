@@ -393,7 +393,18 @@ function flushOpenAiChoices(
   store: ChoiceBufferStore,
   lastJson: Record<string, unknown>
 ): Record<string, unknown> {
-  const finalJson = JSON.parse(JSON.stringify(lastJson)) as { choices: OpenAiChoice[] };
+  // `lastJson` was already forwarded to the client. Keep only its envelope
+  // (id/model/created) and per-choice index; the flush event carries the held-back
+  // tails alone. Re-sending its delta duplicated tool_calls headers (id/name/
+  // arguments) and corrupted the client-side accumulated arguments.
+  const finalJson = JSON.parse(JSON.stringify(lastJson)) as {
+    choices: OpenAiChoice[];
+    usage?: unknown;
+  };
+  delete finalJson.usage;
+  finalJson.choices = finalJson.choices.map((c) =>
+    typeof c.index === "number" ? { index: c.index, delta: {} } : { delta: {} }
+  );
   const presentIndexes = new Set(
     finalJson.choices.map((c) => c.index).filter((idx): idx is number => typeof idx === "number")
   );
@@ -622,18 +633,21 @@ function drainWindow(
   isStopSignal: boolean
 ): string {
   const sanitized = redactOutsideDataUrls(buffers[field]);
-  let emitLength = isStopSignal
-    ? sanitized.length
-    : Math.max(0, sanitized.length - state.windowSize);
-  if (!isStopSignal) {
-    const partial = findCredentialPartialTailIndex(sanitized);
-    if (partial !== undefined && emitLength > partial) emitLength = partial;
-    // A key header without a closing marker anywhere after it is never
-    // emitted in clear, however far past the tail probe it already sits.
-    const unclosedBegin = findUnclosedBeginIndex(sanitized);
-    if (unclosedBegin !== undefined && emitLength > unclosedBegin) emitLength = unclosedBegin;
-    emitLength = backOffSurrogate(sanitized, emitLength);
+  if (isStopSignal) {
+    // The flush event is emitted before the chunk carrying finish_reason, so a
+    // tail held back from that chunk would reach the client out of order. Drain
+    // it whole here; key headers are stamped as in onFlush.
+    state.replace(buffers, field, "");
+    return markUnclosedBeginHead(sanitized);
   }
+  let emitLength = Math.max(0, sanitized.length - state.windowSize);
+  const partial = findCredentialPartialTailIndex(sanitized);
+  if (partial !== undefined && emitLength > partial) emitLength = partial;
+  // A key header without a closing marker anywhere after it is never
+  // emitted in clear, however far past the tail probe it already sits.
+  const unclosedBegin = findUnclosedBeginIndex(sanitized);
+  if (unclosedBegin !== undefined && emitLength > unclosedBegin) emitLength = unclosedBegin;
+  emitLength = backOffSurrogate(sanitized, emitLength);
   const toEmit = sanitized.slice(0, emitLength);
   state.replace(buffers, field, sanitized.slice(emitLength));
   return toEmit;
@@ -649,7 +663,8 @@ function appendAndDrain(
 ): string {
   const buffers = store.get(index);
   state.append(buffers, field, ownText);
-  if (state.bufferedBytes() > state.maxBufferedBytes) return drainOverflow(state, buffers, field);
+  if (!isStopSignal && state.bufferedBytes() > state.maxBufferedBytes)
+    return drainOverflow(state, buffers, field);
   return drainWindow(state, buffers, field, isStopSignal);
 }
 
@@ -734,12 +749,12 @@ export function createCredentialSseTransform(
   const processor = (
     text: string,
     field: FieldCategory,
-    _isStopSignal = false,
+    isStopSignal = false,
     index: string | number = "0_0",
     isSnapshot = false
   ): string => {
     if (isSnapshot) return redactOutsideDataUrls(text);
-    return appendAndDrain(state, store, field, index, redactOutsideDataUrls(text), false);
+    return appendAndDrain(state, store, field, index, redactOutsideDataUrls(text), isStopSignal);
   };
 
   return createSseTextTransform(processor, onFlush, undefined, { processToolArgs: true });

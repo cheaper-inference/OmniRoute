@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+För `smart-routing` är `metadata.combo` en uttrycklig åsidosättning av
+`metadata.model` för gateway-begäran. Den skickas som den faktiska `model`,
+inte som ett ignorerat `x-combo`-JSON-fält. Gatewayens normala API-nyckel och
+behörighetskontroll per mål gäller fortfarande. En ogiltig eller tom kombination avvisas.
+
+Resultatet visar `requested_combo` (anroparens avsikt), `dispatched_model`
+(den faktiska gateway-begäran), `response_model` (gateway-svaret) och
+`confirmed_combo`. Det sista fältet är `null` om inte gatewayen uttryckligen
+identifierar en kombination. A2A-beslutsloggar tillskriver endast körningen till en
+bekräftad kombination och behåller en obekräftad begäran som `requestedCombo`.
+
 **Svar:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Hämta uppgiftsstatus
+### `tasks/get` — Fråga efter uppgiftsstatus
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ inskickad → pågående → slutförd
 
 ---
 
-## Integreringsexempel
+## Integrationsexempel
 
 ### Python (requests)
 

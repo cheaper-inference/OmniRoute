@@ -47,7 +47,7 @@ A2A се управлява чрез превключвателя **Крайни
 
 ### `message/send` — Синхронно изпълнение
 
-Изпраща съобщение към умение и изчаква пълния отговор.
+Изпраща съобщение до умение и изчаква пълния отговор.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+За `smart-routing`, `metadata.combo` изрично замества
+`metadata.model` за заявката към шлюза; то се изпраща като действителния `model`,
+а не като игнорирано JSON поле `x-combo`. Обичайното удостоверяване чрез API ключ на шлюза и
+упълномощаването за всяка цел продължават да се прилагат. Невалидна или празна комбинация се отхвърля.
+
+Резултатът предоставя `requested_combo` (намерението на извикващия), `dispatched_model`
+(действителната заявка към шлюза), `response_model` (отговорът на шлюза) и
+`confirmed_combo`. Последното поле е `null`, освен ако шлюзът изрично не
+идентифицира комбинация. Дневниците с решения на A2A приписват изпълнението само на
+потвърдена комбинация, като запазват непотвърдената заявка като `requestedCombo`.
+
 **Отговор:**
 
 ```json
@@ -76,28 +87,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE поточно предаване
+### `message/stream` — Поточно предаване чрез SSE
 
 Същото като `message/send`, но връща Server-Sent Events за поточно предаване в реално време.
 
