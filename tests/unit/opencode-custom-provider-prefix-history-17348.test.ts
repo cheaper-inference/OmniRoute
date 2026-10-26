@@ -498,3 +498,27 @@ test("#17348: canonical pricing precedence is stable for prefixed and literal-sl
     }
   }
 });
+
+test("#17348: drop stale bare cache keys but preserve active bare and nested model IDs", () => {
+  const stale: OmniRouteEnrichmentMap = new Map([
+    ["gone", { providerAlias: "ih", providerCanonical: NODE, pricing: { input: 88 } }],
+    ["nested/old", { providerAlias: "ih", providerCanonical: NODE, pricing: { input: 77 } }],
+    ["org/nested", { providerAlias: "ih", providerCanonical: NODE, name: "Nested" }],
+    ["ag/foo", { providerAlias: "ih", providerCanonical: NODE, name: "Literal" }],
+    ["ih/foo", { providerAlias: "ih", providerCanonical: NODE, pricing: { input: 99 } }],
+    ["current-bare", { providerAlias: "ih", providerCanonical: NODE, pricing: { input: 3 } }],
+  ]);
+  const applied = reconcileHistoricalEnrichment(stale, [
+    { id: "ih/org/nested" },
+    { id: "ih/ag/foo" },
+    { id: "ih/ih/foo" },
+    { id: "current-bare" },
+  ]);
+  assert.equal(applied.has("gone"), false, "old bare ID must not survive");
+  assert.equal(applied.has("nested/old"), false, "old nested bare ID must not survive");
+  assert.equal(applied.get("org/nested")?.name, "Nested");
+  assert.equal(applied.get("ag/foo")?.name, "Literal");
+  assert.equal(applied.has("ih/foo"), false, "do not confuse namespaced and literal ID");
+  assert.equal(applied.get("current-bare")?.pricing?.input, 3);
+  assert.equal(stale.has("gone"), true, "source overlay remains untouched");
+});
