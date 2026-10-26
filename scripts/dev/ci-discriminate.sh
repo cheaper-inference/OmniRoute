@@ -21,6 +21,8 @@
 # calls are `pr checks`, `pr diff`, `issue view` and `api .../jobs/<id>/logs`. GH_BIN overrides
 # the `gh` binary (tests point it at a stub).
 set -euo pipefail
+# Signature files must compare byte-for-byte across developer and CI locales (#17267).
+export LC_ALL=C
 
 usage() {
   cat >&2 <<'EOF'
