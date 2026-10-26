@@ -197,11 +197,7 @@ function hasNonPingStructuredPayload(payload: unknown, eventType = ""): boolean 
 }
 
 export function hasUsefulStreamContent(text: string, options: UsefulContentOptions = {}): boolean {
-  // A chunk split without its newline rejoins two frames on one line
-  // (`...}}data: {...}`). Restore the boundary so a valid payload is not
-  // hidden by its framing; pure garbage has no such boundary and stays refused.
-  // Only split after `}`/`]` before JSON, never inside a word like `somedata:`.
-  const lines = text.replace(/([}\]])data:(?=\s*[[{"])/g, "$1\n data:").split(/\r?\n/);
+  const lines = text.split(/\r?\n/);
 
   for (const line of lines) {
     const trimmed = line.trim();
