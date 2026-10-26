@@ -1101,7 +1101,7 @@ jobs:
       - run: npm run test:bun:db
 
   test-vitest:
-    name: Vitest (MCP / autoCombo / UI components)
+    name: Vitest (MCP / UI ${{ matrix.shard }}/4)
     # Same dynamic-runner rule as Build (own-origin only; fallback ubuntu-latest).
     # PINNED to hosted, deliberately not on the USE_VPS_RUNNER switch (gap 19). One variable
     # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
@@ -1111,6 +1111,10 @@ jobs:
     # self-hosted is strictly worse here and there is nothing to configure.
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     # needs: changes (not build) — no artifact consumed; see test-unit note.
     needs: changes
     if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
@@ -1134,11 +1138,15 @@ jobs:
       # wired into CI until the 2026-06-09 quality audit (Fase 6A.2).
       # WS5.2/5.3 (v3.8.49 plan): JUnit output feeds Trunk Flaky Tests (advisory upload
       # below). node:test stays OUT of the first wave (fd1-sensitive reporter stream).
-      - run: npm run test:vitest -- --reporter=default --reporter=junit --outputFile.junit=trunk-junit/vitest-mcp.xml
+      - if: ${{ matrix.shard == 1 }}
+        run: npm run test:vitest -- --reporter=default --reporter=junit --outputFile.junit=trunk-junit/vitest-mcp.xml
       # vitest:ui went back to 870/870 green in the v3.8.49 quality plan (WS6.1,
       # PR #7127 — 69 fails triaged: matchMedia polyfill, node:test→vitest migration,
       # CompareTab D22 cap). Promoted to BLOCKING per the plan's post-merge step.
-      - run: npm run test:vitest:ui -- --reporter=default --reporter=junit --outputFile.junit=trunk-junit/vitest-ui.xml
+      - name: Run the complete UI shard
+        env:
+          TEST_SHARD: "${{ matrix.shard }}/4"
+        run: npm run test:vitest:ui -- --shard="$TEST_SHARD" --reporter=default --reporter=junit --outputFile.junit=trunk-junit/vitest-ui.xml
       # Trunk Flaky Tests upload — advisory (never blocks), own-origin only (fork PRs
       # have no TRUNK_TOKEN). Pinned by SHA (tag v2.1.2).
       - name: Upload test results to Trunk (advisory)

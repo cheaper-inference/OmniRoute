@@ -129,7 +129,10 @@ jobs:
           - { name: unit-8, script: "test:unit:ci:shard", shard: "8/8" }
           - { name: integration-1, script: "test:integration:ci", shard: "1/2" }
           - { name: integration-2, script: "test:integration:ci", shard: "2/2" }
-          - { name: vitest, script: "test:vitest", shard: "" }
+          - { name: vitest-1, script: "test:vitest:ui", shard: "1/4" }
+          - { name: vitest-2, script: "test:vitest:ui", shard: "2/4" }
+          - { name: vitest-3, script: "test:vitest:ui", shard: "3/4" }
+          - { name: vitest-4, script: "test:vitest:ui", shard: "4/4" }
     env:
       JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-nightly-api-key-secret-long
@@ -158,8 +161,11 @@ jobs:
             export INITIAL_PASSWORD=ci-test-password-for-integration
           fi
           (
-            if [ "$NAME" = "vitest" ]; then
-              npm run test:vitest && npm run test:vitest:ui
+            if [[ "$NAME" == vitest-* ]]; then
+              if [ "$NAME" = "vitest-1" ]; then
+                npm run test:vitest || exit "$?"
+              fi
+              npm run "$SUITE" -- --shard="$TEST_SHARD"
             else
               npm run "$SUITE"
             fi

@@ -40,6 +40,18 @@ The receipts cover their own workflow, not publication, deployment, or the inter
 of an existing advisory scanner. Activating both check names in branch rules is a
 separate administrative change; adding these jobs does not itself protect a branch.
 
+### UI execution capacity
+
+CI runs the full UI inventory as four `test-vitest` matrix shards, each with at most
+two workers per shard and the existing 15-minute job deadline. The first shard also runs the
+MCP/autoCombo Vitest suite. The required job result covers every matrix leg; failure
+or cancellation of one shard cannot establish candidate admission.
+
+The nightly observer retains a separate exact-candidate receipt for each UI shard,
+including the MCP execution in the first receipt. All four receipts, logs and matching
+execution identities are required. Local `npm run test:vitest:ui` still selects the
+complete suite; one `--shard` run is only partial evidence.
+
 ### Static scan inventory
 
 The versioned npm-alias inventory and static-scan membership live in

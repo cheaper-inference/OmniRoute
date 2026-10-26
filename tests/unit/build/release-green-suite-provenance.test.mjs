@@ -12,19 +12,30 @@ const root = fileURLToPath(new URL("../../../", import.meta.url));
 const sha = "1".repeat(40);
 const workflowSha = "3".repeat(40);
 const hash = (value) => createHash("sha256").update(value).digest("hex");
-const names = ["unit-1", "unit-2", "integration-1", "integration-2", "vitest"];
+const names = [
+  "unit-1",
+  "unit-2",
+  "integration-1",
+  "integration-2",
+  "vitest-1",
+  "vitest-2",
+  "vitest-3",
+  "vitest-4",
+];
 const log = "Tests 5 passed\n";
 const command = (name) => ({
   script: name.startsWith("unit-")
     ? "test:unit:ci:shard"
     : name.startsWith("integration-")
       ? "test:integration:ci"
-      : "test:vitest+test:vitest:ui",
-  shard: name === "vitest" ? "" : `${name.split("-")[1]}/2`,
+      : name === "vitest-1"
+        ? "test:vitest+test:vitest:ui"
+        : "test:vitest:ui",
+  shard: `${name.split("-")[1]}/${name.startsWith("vitest-") ? 4 : 2}`,
 });
 
 // Public observer JSON + exit, with only unrelated external commands substituted.
-function observe(mutate = () => {}, { extra = false, workflow = workflowSha } = {}) {
+function observe(mutate = () => {}, { extra = false, workflow = workflowSha, omit = [] } = {}) {
   mkdirSync(join(root, "_artifacts"), { recursive: true });
   const dir = mkdtempSync(join(root, "_artifacts/suite-provenance-"));
   try {
@@ -58,6 +69,10 @@ function observe(mutate = () => {}, { extra = false, workflow = workflowSha } = 
     strategy: {matrix: {shard: [1, 2]}}
     steps:
       - env: {TEST_SHARD: "\${{ matrix.shard }}/2"}
+  test-vitest:
+    strategy: {matrix: {shard: [1, 2, 3, 4]}}
+    steps:
+      - env: {TEST_SHARD: "\${{ matrix.shard }}/4"}
 `
     );
     const executable = (name, body) =>
@@ -72,6 +87,7 @@ function observe(mutate = () => {}, { extra = false, workflow = workflowSha } = 
     `
     );
     for (const name of names) {
+      if (omit.includes(name)) continue;
       const receipt = {
         schemaVersion: 1,
         name,
@@ -362,3 +378,74 @@ test(
     assert.equal(result.receipt, undefined);
   }
 );
+
+for (const missing of ["vitest-1", "vitest-4"]) {
+  test(
+    `the public observer rejects missing hosted UI shard ${missing}`,
+    { skip: process.platform === "win32" },
+    () => {
+      const result = observe(() => {}, { omit: [missing] });
+      assert.equal(result.status, 1);
+      assert.equal(result.report.releaseGreen, false);
+      assert.match(
+        result.report.hardFailures.find((entry) => entry.id === "vitest")?.detail ?? "",
+        new RegExp(`${missing} no result`)
+      );
+    }
+  );
+}
+
+for (const [name, mcpExit, expected] of [
+  ["vitest-1", 0, ["test:vitest", "test:vitest:ui"]],
+  ["vitest-3", 0, ["test:vitest:ui"]],
+  ["vitest-1", 17, ["test:vitest"]],
+]) {
+  test(`hosted ${name} executes the complete assigned runner set (MCP exit ${mcpExit})`, () => {
+    const dir = mkdtempSync(join(tmpdir(), "hosted-vitest-shard-"));
+    try {
+      const calls = join(dir, "calls.jsonl");
+      writeFileSync(
+        join(dir, "npm"),
+        `#!${process.execPath}\nconst fs = require("node:fs"); fs.appendFileSync(process.env.CALLS, JSON.stringify(process.argv.slice(2)) + "\\n"); process.exit(process.argv[3] === "test:vitest" ? Number(process.env.MCP_EXIT) : 0);`,
+        { mode: 0o755 }
+      );
+      writeFileSync(join(dir, "node"), `#!${process.execPath}\nprocess.exit(0);`, { mode: 0o755 });
+      const workflow = parseYaml(
+        readFileSync(join(root, ".github/workflows/nightly-release-green.yml"), "utf8")
+      );
+      const step = workflow.jobs.suites.steps.find((entry) =>
+        entry.run?.includes("scripts/ci/release-green-suite.mjs")
+      );
+      const shard = `${name.split("-")[1]}/4`;
+      const result = spawnSync("bash", ["-c", step.run], {
+        cwd: dir,
+        encoding: "utf8",
+        timeout: 10000,
+        env: {
+          ...process.env,
+          PATH: `${dir}:${process.env.PATH}`,
+          CALLS: calls,
+          MCP_EXIT: String(mcpExit),
+          NAME: name,
+          SUITE: "test:vitest:ui",
+          TEST_SHARD: shard,
+          GITHUB_WORKFLOW_SHA: workflowSha,
+        },
+      });
+      assert.equal(result.error, undefined);
+      assert.equal(result.status, mcpExit, result.stderr);
+      const commands = readFileSync(calls, "utf8")
+        .trim()
+        .split("\n")
+        .map((line) => JSON.parse(line));
+      assert.deepEqual(
+        commands.map((args) => args[1]),
+        expected
+      );
+      if (mcpExit === 0)
+        assert.deepEqual(commands.at(-1), ["run", "test:vitest:ui", "--", `--shard=${shard}`]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+}

@@ -420,6 +420,7 @@ describe("ApiKeyAccessEditorClient", () => {
       blockedModels: [],
       allowedCombos: [],
       allowedConnections: [],
+      preferredConnections: [],
       noLog: false,
       autoResolve: false,
       isActive: true,

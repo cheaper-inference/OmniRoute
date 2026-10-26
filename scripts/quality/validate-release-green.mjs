@@ -529,9 +529,13 @@ export function mergeUnitShardResults(shardResults) {
  * shards, its integration shards, then vitest (MCP + UI). The workflow's `suites` matrix writes
  * one `<name>.json` per job; a name with no file is a job that never reported.
  */
-export function hostedSuiteNames(unitShards, integrationShards) {
+export function hostedSuiteNames(unitShards, integrationShards, vitestShards = 1) {
   const range = (n, prefix) => Array.from({ length: n }, (_, i) => `${prefix}-${i + 1}`);
-  return [...range(unitShards, "unit"), ...range(integrationShards, "integration"), "vitest"];
+  return [
+    ...range(unitShards, "unit"),
+    ...range(integrationShards, "integration"),
+    ...(vitestShards === 1 ? ["vitest"] : range(vitestShards, "vitest")),
+  ];
 }
 
 /** Exact execution identity shared by hosted writers and their consuming observer. */
@@ -584,7 +588,10 @@ export function parseHostedSuiteResult(text, expected) {
  * release-green.json keep the same ids. A lane passes only when every expected job reported
  * exit 0; a job that never reported (cancelled, timed out, upload lost) fails it.
  */
-export function foldHostedSuiteResults(results, { unitShards, integrationShards }) {
+export function foldHostedSuiteResults(
+  results,
+  { unitShards, integrationShards, vitestShards = 1 }
+) {
   const byName = new Map(results.filter(Boolean).map((r) => [r.name, r]));
   const lane = (id, label, names) => {
     const parts = [];
@@ -607,7 +614,7 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
       detail: parts.length === 0 ? "pass" : `${parts.join(", ")}${line ? ` — ${line}` : ""}`,
     };
   };
-  const names = hostedSuiteNames(unitShards, integrationShards);
+  const names = hostedSuiteNames(unitShards, integrationShards, vitestShards);
   return [
     ...(results.some((r) => !r || !names.includes(r.name)) || byName.size !== results.length
       ? [
@@ -630,7 +637,11 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
       `Integration tests (ci.yml's ${integrationShards} shards on hosted runners)`,
       names.filter((n) => n.startsWith("integration-"))
     ),
-    lane("vitest", "Vitest (MCP + UI, hosted runner)", ["vitest"]),
+    lane(
+      "vitest",
+      "Vitest (MCP + all UI shards, hosted runners)",
+      names.filter((n) => n.startsWith("vitest"))
+    ),
   ];
 }
 
@@ -996,18 +1007,23 @@ async function main() {
       // starvation such as the catalog's 8 s build bound). The suites now run on hosted
       // runners exactly like a PR's CI; this slot keeps the static gates and the build.
       let integrationShards = null;
+      let vitestShards = null;
       try {
         integrationShards = shardCountFromCi(
           readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"),
           "test-integration"
         );
+        vitestShards = shardCountFromCi(
+          readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"),
+          "test-vitest"
+        );
       } catch {
         integrationShards = null;
       }
-      if (!unitShards || !integrationShards) {
+      if (!unitShards || !integrationShards || !vitestShards) {
         record({
           id: "hosted-suites",
-          label: "Hosted suites: read ci.yml's unit and integration matrices",
+          label: "Hosted suites: read ci.yml's unit, integration and UI matrices",
           kind: "hard",
           ok: false,
           detail: "could not read the shard counts from .github/workflows/ci.yml",
@@ -1020,7 +1036,7 @@ async function main() {
           files = [];
         }
         const expected = hostedSuiteIdentity(ROOT, SUITES_WORKFLOW_SHA);
-        const names = hostedSuiteNames(unitShards, integrationShards);
+        const names = hostedSuiteNames(unitShards, integrationShards, vitestShards);
         const results = files.map((f) => {
           try {
             const name = f.slice(0, -5);
@@ -1028,16 +1044,16 @@ async function main() {
             const log = readFileSync(join(SUITES_FROM, `${name}.log`));
             if (log.length === 0) return null;
             const isUnit = name.startsWith("unit-");
+            const isVitest = name.startsWith("vitest-");
             const script =
-              name === "vitest"
+              name === "vitest-1"
                 ? "test:vitest+test:vitest:ui"
-                : isUnit
-                  ? "test:unit:ci:shard"
-                  : "test:integration:ci";
-            const shard =
-              name === "vitest"
-                ? ""
-                : `${name.split("-")[1]}/${isUnit ? unitShards : integrationShards}`;
+                : isVitest
+                  ? "test:vitest:ui"
+                  : isUnit
+                    ? "test:unit:ci:shard"
+                    : "test:integration:ci";
+            const shard = `${name.split("-")[1]}/${isVitest ? vitestShards : isUnit ? unitShards : integrationShards}`;
             return parseHostedSuiteResult(
               readFileSync(join(SUITES_FROM, f), "utf8"),
               expected && {
@@ -1052,7 +1068,11 @@ async function main() {
             return null;
           }
         });
-        for (const r of foldHostedSuiteResults(results, { unitShards, integrationShards })) {
+        for (const r of foldHostedSuiteResults(results, {
+          unitShards,
+          integrationShards,
+          vitestShards,
+        })) {
           announce(r.label);
           record(r);
         }

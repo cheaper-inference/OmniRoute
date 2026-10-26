@@ -751,6 +751,24 @@ test("hosted suites: a malformed result file is no result", () => {
   assert.equal(parseHostedSuiteResult('{"code":0}'), null);
 });
 
+test("every UI shard is required for the hosted vitest verdict", () => {
+  const options = { unitShards: 1, integrationShards: 1, vitestShards: 4 };
+  const names = ["unit-1", "integration-1", "vitest-1", "vitest-2", "vitest-3", "vitest-4"];
+  assert.deepEqual(hostedSuiteNames(1, 1, 4), names);
+  const receipts = names.map((name) => ({ name, code: 0, detail: "pass" }));
+  assert.ok(foldHostedSuiteResults(receipts, options).every((gate) => gate.ok));
+  const missing = foldHostedSuiteResults(receipts.slice(0, -1), options);
+  assert.equal(missing.find((gate) => gate.id === "vitest")?.ok, false);
+  assert.match(missing.find((gate) => gate.id === "vitest")?.detail ?? "", /vitest-4 no result/);
+  const failed = receipts.map((entry) =>
+    entry.name === "vitest-2" ? { ...entry, code: 124 } : entry
+  );
+  assert.equal(
+    foldHostedSuiteResults(failed, options).find((gate) => gate.id === "vitest")?.ok,
+    false
+  );
+});
+
 test("hosted suites fold into the unit/integration/vitest gates the verdict already reads", () => {
   const green = foldHostedSuiteResults(
     [
@@ -802,7 +820,10 @@ test("--suites-from replaces the local suite lanes and keeps only the build on t
     src,
     /const lanes = SUITES_FROM \? slow\.filter\(\(g\) => g\.id === "pack-artifact"\) : slow;/
   );
-  assert.match(src, /foldHostedSuiteResults\(results, \{ unitShards, integrationShards \}\)/);
+  assert.match(
+    src,
+    /foldHostedSuiteResults\(results,\s*\{\s*unitShards,\s*integrationShards,\s*vitestShards,?\s*\}\)/
+  );
   // the webpack build gets the docker-publish heap instead of build-next-isolated's 8192 MB
   assert.match(src, /const BUILD_GATE_ENV = \{ OMNIROUTE_BUILD_MEMORY_MB: "12288" \};/);
   assert.match(src, /args: \["run", "build:cli"\], env: BUILD_GATE_ENV/);

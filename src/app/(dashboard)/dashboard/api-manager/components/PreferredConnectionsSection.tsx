@@ -2,6 +2,7 @@
 
 import { memo, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 import { compareTr } from "@/shared/utils/turkishText";
 import type { ProviderConnection } from "./ProviderConnectionPermissionList";
 
@@ -53,13 +54,15 @@ export const PreferredConnectionsSection = memo(function PreferredConnectionsSec
           <p className="text-xs text-text-muted">{t("preferredConnectionsDesc")}</p>
         </div>
         {preferredConnections.length > 0 && (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             type="button"
             onClick={onClearPreferred}
-            className="px-2 py-1 rounded text-xs font-medium text-text-muted hover:bg-black/5 dark:hover:bg-white/5 shrink-0"
+            className="h-auto shrink-0 px-2 py-1 text-xs text-text-muted"
           >
             {t("preferredConnectionsClear")}
-          </button>
+          </Button>
         )}
       </div>
       {preferredConnections.length === 0 && (
@@ -84,48 +87,52 @@ export const PreferredConnectionsSection = memo(function PreferredConnectionsSec
                       : "text-text-muted hover:bg-surface/50 hover:text-text-main"
                   }`}
                 >
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     type="button"
                     aria-pressed={isPreferred}
                     onClick={() => onTogglePreferred(conn.id)}
-                    className="flex items-center gap-2 min-w-0 flex-1 text-left"
+                    className="h-auto min-w-0 flex-1 justify-start gap-2 p-0 text-left text-xs text-inherit hover:bg-transparent"
                   >
                     <span
                       className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 text-[10px] font-semibold ${
-                        isPreferred ? "bg-primary border-primary text-white" : "border-border"
+                        isPreferred
+                          ? "bg-primary border-primary text-accent-foreground"
+                          : "border-border"
                       }`}
                     >
                       {isPreferred ? rank + 1 : "+"}
                     </span>
                     <span className="truncate flex-1">{conn.name || conn.id.slice(0, 8)}</span>
                     {!conn.isActive && (
-                      <span className="text-[9px] text-red-400 shrink-0">{tc("inactive")}</span>
+                      <span className="text-[9px] text-error shrink-0">{tc("inactive")}</span>
                     )}
-                  </button>
+                  </Button>
                   {isPreferred && (
                     <div className="flex items-center gap-0.5 shrink-0">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        icon="arrow_upward"
                         type="button"
                         aria-label={tc("moveUp")}
                         title={tc("moveUp")}
                         disabled={rank === 0}
                         onClick={() => onMovePreferred(conn.id, -1)}
-                        className="w-6 h-6 rounded flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">arrow_upward</span>
-                      </button>
-                      <button
+                        className="size-6 disabled:opacity-30"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        icon="arrow_downward"
                         type="button"
                         aria-label={tc("moveDown")}
                         title={tc("moveDown")}
                         disabled={rank === preferredConnections.length - 1}
                         onClick={() => onMovePreferred(conn.id, 1)}
-                        className="w-6 h-6 rounded flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">
-                          arrow_downward
-                        </span>
-                      </button>
+                        className="size-6 disabled:opacity-30"
+                      />
                     </div>
                   )}
                 </div>

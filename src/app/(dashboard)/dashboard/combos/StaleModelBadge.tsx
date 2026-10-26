@@ -1,6 +1,7 @@
 "use client";
 
 import { getComboModelString } from "@/lib/combos/steps";
+import Badge from "@/shared/components/Badge";
 
 /**
  * #13505: combo steps pinned to a model the provider's live catalog no longer
@@ -27,14 +28,14 @@ export function isStaleComboStep(entry: unknown, staleModels: Set<string>): bool
 
 export function StaleModelBadge({ label }: { label: string }) {
   return (
-    <span
+    <Badge
       title={label}
-      className="inline-flex shrink-0 items-center gap-0.5 rounded border border-amber-500/20 bg-amber-500/10 px-1 text-[10px] text-amber-700 dark:text-amber-300"
+      variant="warning"
+      size="sm"
+      icon="warning"
+      className="shrink-0 gap-0.5 rounded px-1 py-0"
     >
-      <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
-        warning
-      </span>
       {label}
-    </span>
+    </Badge>
   );
 }

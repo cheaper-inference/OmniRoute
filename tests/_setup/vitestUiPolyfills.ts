@@ -22,6 +22,17 @@ if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
   };
 }
 
+// jsdom has no layout engine or ResizeObserver. The shared UI-kit table subscribes
+// to resize notifications on mount; browser-independent tests must still be able
+// to mount it. Geometry/resize tests can install their own observable implementation.
+if (typeof window !== "undefined" && typeof globalThis.ResizeObserver !== "function") {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
 // #7935 wired `useTranslations`/`useLocale` (next-intl) into ~180 dashboard/shared
 // components (Button, Modal, Select, EmptyState, ProviderIcon, ...). Any UI test that
 // mounts a component depending on one of those — directly or transitively — without its
@@ -39,6 +50,10 @@ import type { ReactNode } from "react";
 import { vi } from "vitest";
 import { createTranslator } from "use-intl/core";
 import en from "../../src/i18n/messages/en.json";
+
+// Manual createRoot tests also use act(); RTL sets this only for its own imports.
+// Keep React's checks for genuinely unwrapped updates enabled across both styles.
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 type Messages = Record<string, unknown>;
 
