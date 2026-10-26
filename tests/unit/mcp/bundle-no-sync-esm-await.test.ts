@@ -16,7 +16,7 @@ import {
 const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const PREPUBLISH = join(ROOT, "scripts", "build", "prepublish.ts");
 
-function readMcpBundleArgs(): string[] {
+function readMcpBundleArgs(outputFile: string): string[] {
   const sourceText = readFileSync(PREPUBLISH, "utf8");
   const sourceFile = ts.createSourceFile(
     PREPUBLISH,
@@ -42,8 +42,17 @@ function readMcpBundleArgs(): string[] {
       )
     ) {
       args = node.arguments[2].elements.map((element) => {
-        assert.ok(ts.isStringLiteral(element), "MCP esbuild args must stay static string literals");
-        return element.text;
+        if (ts.isStringLiteral(element)) return element.text;
+        assert.ok(
+          ts.isTemplateExpression(element) &&
+            element.head.text === "--outfile=" &&
+            element.templateSpans.length === 1 &&
+            ts.isIdentifier(element.templateSpans[0].expression) &&
+            element.templateSpans[0].expression.text === "mcpDestFile" &&
+            element.templateSpans[0].literal.text === "",
+          "only the MCP output path may be dynamic"
+        );
+        return `--outfile=${outputFile}`;
       });
     }
     ts.forEachChild(node, visit);
@@ -149,9 +158,7 @@ test("MCP bundle never emits await inside a synchronous __esm initializer", () =
   const outputFile = join(outputDir, "server.mjs");
 
   try {
-    const bundleArgs = readMcpBundleArgs().map((arg) =>
-      arg.startsWith("--outfile=") ? `--outfile=${outputFile}` : arg
-    );
+    const bundleArgs = readMcpBundleArgs(outputFile);
     runEsbuild(bundleArgs, ROOT);
     assertNoSyncEsmAwait(outputFile);
   } finally {

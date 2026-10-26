@@ -32,6 +32,7 @@ import {
 import { isComboModelVisible } from "./comboVisibility.ts";
 import { buildFusionHandleSingleModel, extractFusionPanelSpec } from "./fusionPanel.ts";
 import { expandTargetsForAllStrategies } from "./connectionAwareExpansion.ts";
+import { buildAllTargetsCoolingDownResponse, type PreDispatchExclusion } from "./pinRecovery.ts";
 import {
   expandComboSystemPromptIfPresent,
   resolveTargetFingerprint,
@@ -455,6 +456,7 @@ export async function tryFusionDispatch(args: {
   // keyed by model string below (`resolvedByModelStr` keeps ONE target per
   // modelStr -- the first healthy connection), so the panel size is unchanged;
   // only each member's connectionId becomes a vetted, non-exhausted account.
+  const expansionExclusions: PreDispatchExclusion[] = [];
   allResolvedFusionTargets = await expandTargetsForAllStrategies({
     strategy,
     targets: allResolvedFusionTargets,
@@ -463,7 +465,13 @@ export async function tryFusionDispatch(args: {
     settings: args.settings as Record<string, unknown> | null | undefined,
     log,
     apiKeyAllowedConnectionIds: args.apiKeyAllowedConnections ?? null,
+    exclusions: expansionExclusions,
   });
+  // Preserve transient expansion failures before the empty-panel validation.
+  if (allResolvedFusionTargets.length === 0) {
+    const coolingDown = buildAllTargetsCoolingDownResponse(expansionExclusions);
+    if (coolingDown) return coolingDown;
+  }
   // #3378 (ported from upstream decolua/9router): every non-fusion combo
   // strategy runs candidates through filterTargetsByRequestCompatibility before
   // dispatch, which excludes a target whose vision support cannot be *confirmed*
@@ -596,6 +604,7 @@ export async function tryPipelineDispatch(args: {
     clampComboDepth(config.maxComboDepth),
     hiddenModelsByProvider
   );
+  const expansionExclusions: PreDispatchExclusion[] = [];
   const expanded = await expandTargetsForAllStrategies({
     strategy,
     targets: resolvedTargets,
@@ -604,7 +613,14 @@ export async function tryPipelineDispatch(args: {
     settings: settings as Record<string, unknown> | null | undefined,
     log,
     apiKeyAllowedConnectionIds: apiKeyAllowedConnections ?? null,
+    exclusions: expansionExclusions,
   });
+  // An empty configured chain keeps its existing validation error; a chain
+  // emptied by cooldowns carries the same recovery contract as other combos.
+  if (expanded.length === 0) {
+    const coolingDown = buildAllTargetsCoolingDownResponse(expansionExclusions);
+    if (coolingDown) return coolingDown;
+  }
   // Pipeline: each stage is one step. If a step expanded to multiple connections,
   // keep the first healthy connection for that stage.
   const seenSteps = new Set<string>();

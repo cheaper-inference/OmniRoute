@@ -5,6 +5,7 @@ import {
   GROK_BUILD_SUPPORTED_REASONING_EFFORTS,
 } from "@omniroute/open-sse/config/grokBuild.ts";
 import { grok_cliProvider } from "@omniroute/open-sse/config/providers/registry/grok-cli/index.ts";
+import { getWorkbuddyClientHeaders } from "@omniroute/open-sse/config/providerHeaderProfiles.ts";
 import { getAntigravityContentHeaders } from "@omniroute/open-sse/services/antigravityHeaders.ts";
 import { parseGeminiModelsList } from "@/lib/providerModels/geminiModelsParser";
 import { buildClaudeModelsHeaders } from "@/lib/providerModels/claudeModelsHeaders";
@@ -251,6 +252,32 @@ function grokBuildPositiveNumber(...values: unknown[]): number | undefined {
   );
 }
 
+/**
+ * Ceiling the Grok Build backend actually serves. Requests above it are rejected
+ * upstream, so the discovery layer never advertises more than this.
+ */
+const GROK_BUILD_MAX_CONTEXT_WINDOW = 500000;
+
+/**
+ * Largest tier in an advertised `context_windows` list.
+ *
+ * Grok Build reports every model with `context_window: 256000` plus a tier list
+ * such as `[256000, 500000]`; the top tier is the window the backend actually
+ * serves. Reading only the scalar pinned every model the registry does not know
+ * (grok-4.7-build-fast) to half its capacity.
+ */
+function grokBuildLargestContextWindow(...values: unknown[]): number | undefined {
+  let largest: number | undefined;
+  for (const value of values) {
+    if (!Array.isArray(value)) continue;
+    for (const entry of value) {
+      if (typeof entry !== "number" || !Number.isFinite(entry) || entry <= 0) continue;
+      largest = largest === undefined ? entry : Math.max(largest, entry);
+    }
+  }
+  return largest;
+}
+
 const GROK_CLI_REGISTRY_CONTEXT_BY_ID = new Map<string, number>(
   grok_cliProvider.models.flatMap((model) => {
     const window = model.contextLength;
@@ -269,16 +296,25 @@ function resolveGrokBuildInputTokenLimit(
   // model, yet the backend serves grok-4.6 up to 500k (prod: 88 successful requests
   // with 256k-485k input; upstream rejects at "> 500000 tokens"). Trusting the
   // advertised number pinned 256k auto:discovery overrides over the verified window.
-  // Models the registry does not know keep the upstream number — under-advertising
-  // only makes clients compact early — and never get an invented default.
+  // Models the registry does not know take the larger of the advertised scalar and
+  // the advertised tier list: upstream reports `context_window: 256000` next to
+  // `context_windows: [256000, 500000]` for all four models (live 2026-10-23), so
+  // reading only one of the two halves their capacity. The ceiling is the measured
+  // upstream limit — requests above it are rejected — so a bogus tier list cannot
+  // promise a window the backend will not serve.
+  const advertisedScalar = grokBuildPositiveNumber(
+    model.contextWindow,
+    model.context_window,
+    metadata.contextWindow,
+    metadata.totalContextTokens
+  );
+  const advertisedBest = Math.max(
+    advertisedScalar ?? 0,
+    grokBuildLargestContextWindow(model.context_windows, metadata.context_windows) ?? 0
+  );
   return (
     GROK_CLI_REGISTRY_CONTEXT_BY_ID.get(id) ??
-    grokBuildPositiveNumber(
-      model.contextWindow,
-      model.context_window,
-      metadata.contextWindow,
-      metadata.totalContextTokens
-    )
+    (advertisedBest > 0 ? Math.min(advertisedBest, GROK_BUILD_MAX_CONTEXT_WINDOW) : undefined)
   );
 }
 
@@ -466,6 +502,16 @@ function readOpencodeBackgroundSeed(connection?: ProviderModelsHeaderContext): s
  * header is announced from 2026-09-06. The session id is a stable
  * per-workspace/connection fingerprint so background discovery groups under
  * one identity upstream instead of a fresh anonymous client per call.
+ *
+ * The catalog endpoint authenticates with `x-api-key`. Live probes on
+ * 2026-10-23 (three accounts, zen and go) answered a bearer with
+ * 401 {"code":"api_key_expired"} while the same key returned the full catalog
+ * under `x-api-key` (85 zen models, 36 go models). Sending both headers still
+ * 401s — the bearer branch wins — so the bearer must not be present here.
+ * Inference keeps its own headers in `open-sse/executors/opencode.ts`, which
+ * authenticates the Zen responses endpoint with `x-api-key` and the chat and
+ * opencode-go responses endpoints with a bearer; that split is the executor's
+ * concern and is left untouched here.
  */
 function buildOpencodeModelsDiscoveryEntry(url: string): ProviderModelsConfigEntry {
   return {
@@ -474,7 +520,7 @@ function buildOpencodeModelsDiscoveryEntry(url: string): ProviderModelsConfigEnt
     headers: { Accept: "application/json" },
     buildHeaders: (token, connection) => ({
       Accept: "application/json",
-      Authorization: `Bearer ${token}`,
+      "x-api-key": token,
       ...buildOpencodeBackgroundHeaders({ seed: readOpencodeBackgroundSeed(connection) }),
     }),
     parseResponse: OPENCODE_DISCOVERY_PARSE,
@@ -961,7 +1007,7 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
   workbuddy: {
     url: "https://www.workbuddy.ai/v3/config",
     method: "GET",
-    headers: { "Content-Type": "application/json", "X-Product": "SaaS" },
+    headers: { "Content-Type": "application/json", ...getWorkbuddyClientHeaders() },
     authHeader: "Authorization",
     authPrefix: "Bearer ",
     parseResponse: (data) => normalizeWorkbuddyModelsResponse(data),
