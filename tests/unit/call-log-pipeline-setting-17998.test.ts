@@ -8,6 +8,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-17998-"));
@@ -218,4 +220,95 @@ test("panel save and request path stay in sync", async () => {
   assert.deepEqual(await views(), { panel: true, logger: true, requestPath: true });
   updateDatabaseSettings({ logs: { ...current.logs, callLogPipelineEnabled: false } });
   assert.deepEqual(await views(), { panel: false, logger: false, requestPath: false });
+});
+
+// A noLog API key must win over ENABLE_REQUEST_LOGS=true. saveCallLog strips payloads for noLog
+// keys on its own, so the persisted row cannot show whether chatCore's gate held. The child
+// process wraps the real createRequestLogger (module mocks need
+// --experimental-test-module-mocks) and records the `enabled` flag chatCore passes it on real
+// handleChatCore calls: one with a noLog key, one with a normal key as the control.
+const NO_LOG_CHILD = `
+import { mock } from "node:test";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+const root = process.env.REPO_ROOT_17998;
+const url = (rel) => new URL(rel, "file://" + root + "/").href;
+process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-17998-nolog-"));
+process.env.ENABLE_REQUEST_LOGS = "true";
+const loggerUrl = url("open-sse/utils/requestLogger.ts");
+const real = await import(loggerUrl);
+const seen = [];
+mock.module(loggerUrl, {
+  namedExports: {
+    ...real,
+    createRequestLogger: (...args) => {
+      seen.push(args[3]?.enabled);
+      return real.createRequestLogger(...args);
+    },
+  },
+});
+const core = await import(url("src/lib/db/core.ts"));
+const settingsDb = await import(url("src/lib/db/settings.ts"));
+const { waitForCallLogSaves } = await import(url("src/lib/usage/callLogs.ts"));
+const { handleChatCore } = await import(url("open-sse/handlers/chatCore.ts"));
+core.getDbInstance();
+await settingsDb.updateSettings({ call_log_pipeline_enabled: true });
+globalThis.fetch = async () => { throw new Error("Connection refused"); };
+const result = {};
+for (const [label, apiKeyInfo] of [
+  ["noLog", { id: "key-17998-nolog", noLog: true }],
+  ["control", { id: "key-17998-control", noLog: false }],
+]) {
+  seen.length = 0;
+  const body = { model: "gpt-4o-mini", stream: false, messages: [{ role: "user", content: "hi" }] };
+  await handleChatCore({
+    body: structuredClone(body),
+    modelInfo: { provider: "openai", model: "gpt-4o-mini", extendedContext: false },
+    credentials: { apiKey: "sk-test", providerSpecificData: {} },
+    log: { debug() {}, info() {}, warn() {}, error() {} },
+    clientRawRequest: { endpoint: "/v1/chat/completions", body: structuredClone(body), headers: new Headers() },
+    userAgent: "unit-test",
+    apiKeyInfo,
+  });
+  result[label] = [...seen];
+}
+await waitForCallLogSaves(60000);
+core.resetDbInstance();
+fs.rmSync(process.env.DATA_DIR, { recursive: true, force: true });
+process.stdout.write("RESULT17998:" + JSON.stringify(result) + "\\n");
+process.exit(0);
+`;
+
+test("ENABLE_REQUEST_LOGS=true does not turn capture on for a noLog API key", () => {
+  const repoRoot = fileURLToPath(new URL("../../", import.meta.url)).replace(/\/$/, "");
+  const env = { ...process.env, REPO_ROOT_17998: repoRoot, DISABLE_SQLITE_AUTO_BACKUP: "true" };
+  delete env.NODE_TEST_CONTEXT;
+  const child = spawnSync(
+    process.execPath,
+    [
+      "--experimental-test-module-mocks",
+      "--import",
+      "tsx/esm",
+      "--import",
+      pathToFileURL(path.join(repoRoot, "open-sse/utils/setupPolyfill.ts")).href,
+      "--input-type=module",
+      "-e",
+      NO_LOG_CHILD,
+    ],
+    { cwd: repoRoot, env, encoding: "utf8", timeout: 180_000, maxBuffer: 16 * 1024 * 1024 }
+  );
+  const line = (child.stdout || "").split("\n").find((l) => l.startsWith("RESULT17998:"));
+  assert.ok(line, `child produced no result: ${child.error || ""}\n${child.stderr}`);
+  const result = JSON.parse(line.slice("RESULT17998:".length));
+  assert.ok(result.control.length > 0, "control call did not create a request logger");
+  assert.ok(result.noLog.length > 0, "noLog call did not create a request logger");
+  assert.ok(
+    result.control.every((enabled) => enabled === true),
+    `control key should capture under ENABLE_REQUEST_LOGS=true: ${JSON.stringify(result)}`
+  );
+  assert.ok(
+    result.noLog.every((enabled) => enabled === false),
+    `noLog key must not capture under ENABLE_REQUEST_LOGS=true: ${JSON.stringify(result)}`
+  );
 });
