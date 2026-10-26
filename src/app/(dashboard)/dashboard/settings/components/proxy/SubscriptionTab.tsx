@@ -182,6 +182,28 @@ async function fetchSubscriptionsResult(
   }
 }
 
+type SubscriptionFieldErrors = { name?: string; url?: string; ruleProviders?: string };
+
+/**
+ * Client-side form validation. Mirror of requireNameUrl (server): the feed URL
+ * may be empty only for a feedless (selector-only) subscription, which is
+ * accepted when a control URL is set. Pure.
+ */
+function validateSubscriptionForm(
+  form: FormState,
+  t: (key: string) => string
+): SubscriptionFieldErrors {
+  const errors: SubscriptionFieldErrors = {};
+  if (!form.name.trim()) errors.name = t("proxySubscription.nameRequired");
+  if (!form.url.trim() && !form.controlUrl.trim()) {
+    errors.url = t("proxySubscription.urlRequired");
+  }
+  if (form.mode === "rule" && form.ruleProviders.length === 0) {
+    errors.ruleProviders = t("proxySubscription.ruleModeProviderRequired");
+  }
+  return errors;
+}
+
 /** Subscription creation/update payload from the edited form. Pure. */
 function buildSubscriptionPayload(form: FormState): Record<string, unknown> {
   const payload: Record<string, unknown> = {
@@ -365,24 +387,11 @@ export default function SubscriptionTab() {
 
   const save = async () => {
     setFormError(null);
-    const nextFieldErrors: { name?: string; url?: string; ruleProviders?: string } = {};
-    if (!form.name.trim()) nextFieldErrors.name = t("proxySubscription.nameRequired");
-    if (!form.url.trim()) nextFieldErrors.url = t("proxySubscription.urlRequired");
-    if (form.mode === "rule" && form.ruleProviders.length === 0) {
-      nextFieldErrors.ruleProviders = t("proxySubscription.ruleModeProviderRequired");
-    }
+    const nextFieldErrors = validateSubscriptionForm(form, t);
     setFieldErrors(nextFieldErrors);
     if (Object.keys(nextFieldErrors).length > 0) return;
     setSaving(true);
     try {
-      if (!form.name.trim()) throw new Error(t("proxySubscription.nameRequired"));
-      // Mirror of requireNameUrl (server): a feedless subscription carries no
-      // URL and is accepted only with a control URL.
-      if (!form.url.trim() && !form.controlUrl.trim())
-        throw new Error(t("proxySubscription.urlRequired"));
-      if (form.mode === "rule" && form.ruleProviders.length === 0) {
-        throw new Error(t("proxySubscription.ruleModeProviderRequired"));
-      }
       const payload = buildSubscriptionPayload(form);
       const res = editingId
         ? await fetch(`/api/v1/management/proxy-subscriptions/${editingId}`, {
