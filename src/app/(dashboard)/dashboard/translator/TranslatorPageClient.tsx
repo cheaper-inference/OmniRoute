@@ -1,8 +1,12 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Badge, Card, SegmentedControl } from "@/shared/components";
+// Imported from its module (not the barrel) so the page's barrel stubs in tests stay as they were.
+import KitButton from "@/shared/components/Button";
 import TranslatorConceptCard from "./components/TranslatorConceptCard";
 import TranslateTab from "./components/TranslateTab";
 import MonitorTab from "./components/MonitorTab";
@@ -198,24 +202,26 @@ function AutoFeaturesCard() {
 
   return (
     <Card className="border-primary/10 bg-primary/5">
-      <button
-        type="button"
+      <KitButton
+        variant="ghost"
         onClick={() => setShowFeatures((prev) => !prev)}
         aria-expanded={showFeatures}
         aria-controls="auto-features-grid"
-        className="flex w-full items-center justify-between p-4 text-left"
+        className="h-auto w-full justify-between p-4 text-left"
       >
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[20px] text-primary">auto_fix_high</span>
+          <Icon name="auto_fix_high" size={20} className="text-primary" />
           <h3 className="text-sm font-semibold text-text-main">{t("autoFeaturesTitle")}</h3>
           <Badge variant="primary" size="sm">
             {t("autoFeaturesCount")}
           </Badge>
         </div>
-        <span className="material-symbols-outlined text-[18px] text-text-muted">
-          {showFeatures ? "expand_less" : "expand_more"}
-        </span>
-      </button>
+        <Icon
+          name={showFeatures ? "expand_less" : "expand_more"}
+          size={18}
+          className="text-text-muted"
+        />
+      </KitButton>
 
       {showFeatures && (
         <div
@@ -288,45 +294,22 @@ function FeatureChip({
   description: string;
   color: "purple" | "blue" | "amber" | "emerald" | "cyan" | "orange" | "pink" | "indigo";
 }) {
+  // Categorical chip accents on the kit chart/status tokens (theme-aware).
   const colorMap = {
-    purple: {
-      shell: "border-purple-500/20 bg-purple-500/5",
-      icon: "text-purple-500",
-    },
-    blue: {
-      shell: "border-blue-500/20 bg-blue-500/5",
-      icon: "text-blue-500",
-    },
-    amber: {
-      shell: "border-amber-500/20 bg-amber-500/5",
-      icon: "text-amber-500",
-    },
-    emerald: {
-      shell: "border-emerald-500/20 bg-emerald-500/5",
-      icon: "text-emerald-500",
-    },
-    cyan: {
-      shell: "border-cyan-500/20 bg-cyan-500/5",
-      icon: "text-cyan-500",
-    },
-    orange: {
-      shell: "border-orange-500/20 bg-orange-500/5",
-      icon: "text-orange-500",
-    },
-    pink: {
-      shell: "border-pink-500/20 bg-pink-500/5",
-      icon: "text-pink-500",
-    },
-    indigo: {
-      shell: "border-indigo-500/20 bg-indigo-500/5",
-      icon: "text-indigo-500",
-    },
+    purple: { shell: "border-chart-3/20 bg-chart-3/5", icon: "text-chart-3" },
+    blue: { shell: "border-chart-2/20 bg-chart-2/5", icon: "text-chart-2" },
+    amber: { shell: "border-warning/20 bg-warning/5", icon: "text-warning" },
+    emerald: { shell: "border-chart-4/20 bg-chart-4/5", icon: "text-chart-4" },
+    cyan: { shell: "border-info/20 bg-info/5", icon: "text-info" },
+    orange: { shell: "border-chart-5/20 bg-chart-5/5", icon: "text-chart-5" },
+    pink: { shell: "border-chart-5/20 bg-chart-5/5", icon: "text-chart-5" },
+    indigo: { shell: "border-chart-3/20 bg-chart-3/5", icon: "text-chart-3" },
   }[color];
 
   return (
     <div className={`rounded-lg border p-3 ${colorMap.shell}`} data-testid="feature-chip">
       <div className="mb-1 flex items-center gap-2">
-        <span className={`material-symbols-outlined text-[16px] ${colorMap.icon}`}>{icon}</span>
+        <Icon name={icon} size={16} className={colorMap.icon} />
         <p className="text-xs font-semibold text-text-main">{title}</p>
       </div>
       <p className="text-[10px] leading-relaxed text-text-muted">{description}</p>

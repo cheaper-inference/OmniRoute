@@ -242,7 +242,8 @@ async function postHandler(request: Request) {
     }
   }
 
-  const runUpscale = () => handleImageUpscale({ body, credentials: upscaleCredentials, log });
+  const runUpscale = () =>
+    handleImageUpscale({ body, credentials: upscaleCredentials, log, signal: request.signal });
 
   const result = await (creds.connectionId
     ? runWithProxyContext((proxyInfo?.proxy as never) || null, runUpscale).catch(

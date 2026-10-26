@@ -11,33 +11,29 @@
 
 ---
 
-## ၎င်းသည် ဘာလဲ
+## အကျဉ်းချုပ်
 
-OmniRoute သည် provider 374 ခုကို မှတ်ပုံတင်ထားပြီး၊ ၎င်းတို့အနက် catalog entry 155 ခုကို **အခမဲ့/auth မလိုအပ်** ဟု သတ်မှတ်ထားသည်
-(auth မလိုအပ်ခြင်း၊
-အခမဲ့အဆင့် OAuth သို့မဟုတ် အခမဲ့အဆင့် API key —
-[အခမဲ့အဆင့်များ လမ်းညွှန်](../getting-started/FREE-TIERS-GUIDE.md) နှင့် အပြည့်အစုံဖြစ်သော
-[အခမဲ့အဆင့်များ directory](../reference/FREE_TIERS.md) ကို ကြည့်ပါ)။ သို့သော် အခမဲ့ provider များ၏
-model အရည်အသွေးသည် အလွန်ကွာခြားသည်။ Frontier model တစ်ခုကို ပံ့ပိုးပေးသော auth မလိုအပ်သည့် provider သည်
-legacy model အသေးစားတစ်ခုကို ပံ့ပိုးပေးသော provider ထက် များစွာပိုမိုအသုံးဝင်သည်။
+OmniRoute သည် provider 375 ခုကို မှတ်ပုံတင်ထားပြီး၊ ၎င်းတို့အနက် catalog entry 155 ခုကို **free/no-auth** ဟု မှတ်သားထားသည်
+(no-auth၊
+free-tier OAuth၊ သို့မဟုတ် free-tier API key —
+[Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) နှင့် အပြည့်အစုံ
+[Free Tiers directory](../reference/FREE_TIERS.md) ကို ကြည့်ပါ)။ အခက်ကတော့ free provider များသည် model quality အားဖြင့် အလွန်ကွာခြားကြသည်။ frontier model ကို ပံ့ပိုးပေးနေသော no-auth provider တစ်ခုက small legacy model ကို ပံ့ပိုးနေသော provider တစ်ခုထက် အများကြီး ပို၍အသုံးဝင်သည်။
 
-**အခမဲ့ Provider အဆင့်သတ်မှတ်ချက်များ** သည် "**ဘယ်အခမဲ့ provider က အကောင်းဆုံး model ကို ပေးသလဲ။**" ဆိုသည့် မေးခွန်းကို
-အခမဲ့ provider တစ်ခုစီ၏ catalog နှင့် **Arena AI leaderboard** မှ
-**လူအများပူးပေါင်းပေးထားသော အရည်အသွေးရမှတ်များ** (လူသားများ၏ နှစ်သက်မှုအပေါ် အခြေခံသည့် ELO၊ LMArena
-chatbot arena နောက်ကွယ်ရှိ သဘောတရားနှင့် တူညီသည်) ကို ချိတ်ဆက်ခြင်းဖြင့် ဖြေဆိုပေးသည်။ ထို့နောက် provider များကို ၎င်းတို့၏
-**အကောင်းဆုံး အခမဲ့ model** ၏ စွမ်းဆောင်ရည်အလိုက် အဆင့်သတ်မှတ်သည်။
+**Free Provider Rankings** သည် "**free provider မည်သည့်ခုက အကောင်းဆုံး model ကို ပေးနိုင်သနည်း?**" ဟူသော မေးခွန်းကို ဖြေပေးရန်အတွက် free provider တစ်ခုချင်းစီ၏ catalog ကို
+**Arena AI leaderboard** (human-preference ELO — LMArena chatbot arena နောက်ကွယ်က အယူအဆနှင့်အတူတူဖြစ်သော) မှ
+**crowd-sourced အရည်အသွေးအမှတ်များ** နှင့် ချိတ်ဆက်ပေါင်းစပ်သည်။ ထို့နောက် provider များကို ၎င်းတို့၏ **အကောင်းဆုံး free model** ၏ စွမ်းဆောင်ရည်အလိုက် အဆင့်သတ်မှတ်သည်။
 
-အဆင့်သတ်မှတ်ချက်ကို အောက်ပါ တကယ့်ရင်းမြစ်သုံးခုမှ တွက်ချက်ထားသည်-
+ဤအဆင့်သတ်မှတ်ချက်ကို အရင်းအမြစ် သုံးခုမှ တွက်ချက်ထားသည် —
 
-1. အခမဲ့ provider စာရင်းများ — `NOAUTH_PROVIDERS` နှင့် `hasFree` ဟု အမှတ်အသားပြုထားသော `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` entry များ
+1. free-provider စာရင်းများ — `NOAUTH_PROVIDERS`၊ နှင့် `hasFree` ဟု မှတ်သားထားသော
+   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` entry များ
    (`src/shared/constants/providers.ts`)။
-2. Provider registry မှ provider တစ်ခုစီ၏ model catalog
-   (`open-sse/config/providerRegistry.ts`)။
-3. Arena ELO sync engine (`src/lib/arenaEloSync.ts`) က `model_intelligence` DB table ထဲတွင် သိမ်းဆည်းထားသော
-   ELO မှ ဆင်းသက်လာသည့် လုပ်ငန်းနှင့်ကိုက်ညီမှုရမှတ်များ။
+2. provider registry (`open-sse/config/providerRegistry.ts`) မှ provider တစ်ခုချင်းစီ၏
+   model catalog။
+3. Arena ELO sync engine (`src/lib/arenaEloSync.ts`) မှ `model_intelligence` DB table
+   ထဲတွင် သိမ်းဆည်းထားသည့် ELO-အခြေခံ task-fit အမှတ်များ။
 
-ချိတ်ဆက်မှု logic သည် `src/lib/freeProviderRankings.ts` တွင် ရှိသည်။
+join logic ကို `src/lib/freeProviderRankings.ts` တွင် ရေးထားသည်။
 
 ---
 

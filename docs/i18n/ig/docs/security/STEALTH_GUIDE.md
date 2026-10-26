@@ -16,64 +16,64 @@ Njirimara nzuzo dị ka OmniRoute wee nwee ike ịrụ ọrụ dịka oyi akwa n
 
 ---
 
-## Oyi akwa Nchọpụta Njirimara TLS
+## Oyi akwa Nchọpụta Akara TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-A na-emepụta nnọkọ `wreq-js` na-adịgide adịgide nwayọọ nwayọọ maka mpaghara akaụntụ ọ bụla na proxy edoziri. Ọdọ
-`TlsClient` nke usoro niile na-edobe nnọkọ ruru 128 kachasị, ndị na-eme ka hà bụ **Chrome 124 na macOS** maka
-ọrụ dị n’elu nọ n’azụ Cloudflare. `TlsClient.fetch()` na-akwụsị n’enweghị mgbagha mgbe gburugburu oge-arụ ọrụ nke sistemụ
-adịghị; onye na-akpọ ya nwere ike ịhọrọ ụzọ ndabere n’èzí ihe mkpuchi a n'ụzọ doro anya.
+A na-emepụta nnọkọ `wreq-js` na-adịgide adịgide n'ụzọ umengwụ maka oke akaụntụ ọ bụla na proxy a kpebiri. Ọdọ nnọkọ `TlsClient` nke usoro niile nwere nnọkọ kachasị 128, ndị na-eme onwe ha ka **Chrome 124 na macOS** maka upstream ndị dị n’azụ Cloudflare. `TlsClient.fetch()` na-akwụsị n’enweghị njikọ mgbe native runtime adịghị; onye na-akpọ ya nwere ike ịhọrọ fallback n’ụzọ doro anya n’èzí wrapper a.
 
 - Profaịlụ nnọkọ: `browser: "chrome_124", os: "macos"`
-- Nhazi proxy (usoro mkpa): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (gụnyekwara mkpụrụedemede nta)
-- Oge nchere: `TLS_CLIENT_TIMEOUT_MS` (na-eketa site na `FETCH_TIMEOUT_MS`, ndabara bụ 600000)
+- Mkpebi proxy (usoro mkpa): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (gụnyere ndị e dere na mkpụrụedemede nta)
+- Oge nkwụsị: `TLS_CLIENT_TIMEOUT_MS` (na-eketa site na `FETCH_TIMEOUT_MS`, ndabara bụ 600000)
 - Response nke `wreq-js` dakọtara na fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Onye nche baịtị mbụ (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  na-edozi ozugbo nkụnye ndị isi nke ọrụ dị n’elu rutere, ya mere naanị `TLS_CLIENT_TIMEOUT_MS` enweghị ike ịkpa oke
-  ahụ nke na-adịghị ewepụta baịtị mbụ. `guardTlsFirstByte()` na-eme ka `read()` mbụ nke ahụ na
-  `TLS_FIRST_BYTE_WATCHDOG_MS` (ndabara bụ `10000`, `0` na-agbanyụ ya) gbaa ọsọ; ọ dịghị emetụta ahụ dị mma,
-  ebe ahụ kwụsịrị akwụsị na-akagbu onye na-agụ wreq ma kwe ka mgbagha ndabere TLS dị ugbu a nke `proxyFetch`
-  gafere gaa na onye na-ekesa direct/proxy (arịrịọ na-adịghị mma maka ịkpọgharịa, dịka ọmụmaatụ,
-  POST nwere ahụ, ka ga-atụpụ njehie kama ịnwale ya ọzọ na nzuzo).
+- Onye nche byte mbụ (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  na-emecha ozugbo headers upstream rutere, ya mere naanị `TLS_CLIENT_TIMEOUT_MS` enweghị ike ịkpa oke
+  na body nke na-adịghị ewepụta byte mbụ ma ọlị. `guardTlsFirstByte()` na-eme ka `read()` mbụ nke body
+  na `TLS_FIRST_BYTE_WATCHDOG_MS` (ndabara `10000`, `0` na-agbanyụ ya) gbaa ọsọ megide ibe ha; body
+  dị mma anaghị emetụta, ebe body kwụsịrị akwụsị na-akagbu onye na-agụ wreq ma kwe ka mgbagha
+  TLS-fallback dị ugbu a nke `proxyFetch` gafere gaa na onye na-ekesa direct/proxy (arịrịọ na-adịghị
+  mma maka ịkpọgharị, dịka POST nwere body, ka ga-atụpụ njehie kama ịnwale ya ọzọ na nzuzo).
 
-### Ụgbọ njem onye na-eweta kuki webụ — wreq-js 3.2.0
+### Mbupu onye na-eweta web-cookie — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` bụ ihe nkwụnye a na-ekekọrịta maka ụgbọ njem kuki webụ ise pụrụ iche
-dị n’okpuru. Ihe mkpuchi dị mfe nke onye na-eweta ọrụ ọ bụla na-ahọrọ profaịlụ ihe nchọgharị/OS. Ihe nkwụnye ahụ
-na-eji otu onye na-ebunye oge-arụ ọrụ wreq na ọdọ ụgbọ njem dị na `open-sse/utils/tlsClient.ts`, nke
-profaịlụ + OS + proxy edoziri na-eji dị ka igodo, ebe arịrịọ ọ bụla na-eji `cookieMode: "ephemeral"`. N’ihi ya, akaụntụ na
-arịrịọ na-ekekọrịta njikọ n’ogo ụgbọ njem, mana ha anaghị ekekọrịta nnọkọ wreq ma ọ bụ ite kuki.
+`open-sse/services/tlsClientBase.ts` bụ adapter a na-ekekọrịta maka mbupu web-cookie pụrụ iche ise
+dị n’okpuru. Wrapper dị gịrịgịrị nke onye na-eweta ọ bụla na-ahọrọ profaịlụ browser/OS. Adapter ahụ
+na-eji otu loader runtime wreq na ọdọ mbupu dị na `open-sse/utils/tlsClient.ts`, nke profaịlụ + OS +
+proxy a kpebiri ji bụrụ key, ebe arịrịọ ọ bụla na-eji `cookieMode: "ephemeral"`. N’ihi ya, akaụntụ
+na arịrịọ na-ekekọrịta njikọ ndị dị n’ọkwa mbupu, mana ha anaghị ekekọrịta nnọkọ wreq ma ọ bụ ebe
+nchekwa cookie.
 
-| Onye na-eweta ọrụ | Profaịlụ      | OS e ṅomiri | Iwu EOF nke iyi                                  |
-| ----------------- | ------------- | ----------- | ------------------------------------------------ |
-| Claude            | `chrome_146`  | Linux       | tinye `[DONE]`                                   |
-| Perplexity        | `firefox_148` | macOS       | tinye `event: end_of_stream`                     |
-| Grok              | `chrome_146`  | Linux       | ewepụ `[DONE]`                                   |
-| Notion            | `chrome_146`  | Windows     | tinye `[DONE]`                                   |
-| LMArena           | `chrome_146`  | Windows     | enweghị akara njedebe; mechie na EOF nke sistemụ |
+| Onye na-eweta | Profaịlụ      | OS e ṅomiri | Iwu Stream EOF                         |
+| ------------- | ------------- | ----------- | -------------------------------------- |
+| Claude        | `chrome_146`  | Linux       | tinye `[DONE]`                         |
+| Perplexity    | `firefox_151` | macOS       | tinye `event: end_of_stream`           |
+| Grok          | `chrome_146`  | Linux       | ewepụ `[DONE]`                         |
+| Notion        | `chrome_146`  | Windows     | tinye `[DONE]`                         |
+| LMArena       | `chrome_146`  | Windows     | enweghị sentinel; mechie na native EOF |
 
-- Mgbasa iyi na-eji `ReadableStream` nke nzaghachi sistemụ ozugbo; a naghị emepụta faịlụ nwa oge ma ọ bụ ọrụ
-  enyemaka.
-- A na-enyocha ihe ruru baịtị mbụ 256 tupu e gosi iyi. Ndị na-eweta SSE na-edobe njehie na-abụghị SSE
-  na nchekwa; Grok/LMArena na-atụgharị ihe ịma aka Cloudflare gaa na `403` na ibe HTML etiti gaa na `502`.
-- Oge nchere arịrịọ nke sistemụ ka nọ n’okpuru njedebe siri ike zuru oke nke JS. Ịkwụsị ọrụ na-eme ka
-  naanị ụgbọ njem profaịlụ/OS/proxy metụtara ghara ịdị irè ma mechie tupu arịrịọ na-esote emepụta ya ọzọ.
-- Usoro mkpa nhazi proxy bụ `proxyUrl` nke oku ọ bụla → ọnọdụ akaụntụ/dashboard metụtara arịrịọ →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (gụnyere ụdị mkpụrụedemede nta). Njehie nhazi na-akwụsị n’enweghị mgbagha
-  kama ikwe ka njikọ kpọmkwem zoro ezo pụọ. LMArena kpachapụrụ anya na-edozi megide `arena.ai`.
-- `byteResponse` na-eweghachi URL `data:` nwere ụdị ọdịnaya ziri ezi na-enweghị mmebi UTF-8.
-- Njehie ndị ahụ bụ `TlsClientUnavailableError` (ngwugwu/mgbakwunye adịghị), `TlsClientHangError`
-  (agafela njedebe oge), na `WreqTransportCapacityError` (koodu njehie ikike nnọkọ a na-ekekọrịta)
+- Streaming na-eji native response `ReadableStream` ozugbo; anaghị emepụta faịlụ nwa oge ma ọ bụ
+  sidecar.
+- A na-enyocha ihe ruru byte mbụ 256 tupu e kpughee stream. Ndị na-eweta SSE na-echekwa njehie
+  na-abụghị SSE na buffer; Grok/LMArena na-atụgharị ihe ịma aka Cloudflare ka ọ bụrụ `403` na
+  ibe HTML etiti ka ọ bụrụ `502`.
+- Oke oge native request ka absolute JS hard deadline kpuchiri. Ịkwụsị ọrụ na-emebi ma mechie
+  naanị mbupu profaịlụ/OS/proxy emetụtara tupu arịrịọ na-esote emepụta ya ọzọ.
+- Usoro mkpa mkpebi proxy bụ `proxyUrl` nke oku ọ bụla → ọnọdụ akaụntụ/dashboard nke arịrịọ ahụ →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (gụnyere ụdị ndị e dere na mkpụrụedemede nta). Njehie
+  mkpebi na-eme ka usoro kwụsị n’enweghị njikọ kama ikwe ka njikọ kpọmkwem gbapụ. LMArena
+  na-ama ụma eme mkpebi megide `arena.ai`.
+- `byteResponse` na-eweghachi URL `data:` nwere content type ziri ezi n’enweghị mmebi UTF-8.
+- Njehie ndị ahụ bụ `TlsClientUnavailableError` (package/addon adịghị), `TlsClientHangError`
+  (agafere deadline), na `WreqTransportCapacityError` (koodu njehie ike nnọkọ a na-ekekọrịta)
   mgbe oghere profaịlụ/OS/proxy niile 128 nwere oke nọ n’ọrụ ma ọ bụ na-emechi.
 
-Nnọkọ `TlsClient` izugbe dị n’elu ka bụ nke ahaziri maka ọnọdụ kuki na-adịgide adịgide nke ihe nchọgharị
-na-akwado. Ụzọ abụọ ahụ na-eji otu onye na-ebunye modul wreq echekwara na ihe njikọ okirikiri ndụ usoro; ọdọ ha ka dị
-iche n’ihi na e kpachapụrụ anya mee ka oge ndụ kuki ha dị iche.
+Nnọkọ `TlsClient` izugbe dị n’elu ka bụ nke a haziri kpọmkwem maka ọnọdụ cookie na-adịgide adịgide
+nke browser na-akwado. Ụzọ abụọ ahụ na-eji otu loader modul wreq echekwara na cache na lifecycle
+hook nke usoro ahụ; ọdọ ha ka dị iche n’ihi na a kpachapụrụ anya mee ka oge ndụ cookie ha dị iche.
 
-Ngwugwu etinyere n’otu ụdị na-akwado profaịlụ ndị ahụ, mana nnabata WAF n’ezie nwere ike ịgbanwe n’adabereghị
-na ule nkwekọrịta mpaghara. Nyochaa mgbanwe njirimara megide akaụntụ dị ndụ e nyere ikike n'ụzọ doro anya
-tupu ikwu na ọ dakọtara na ihe nchọgharị nke ọrụ dị n’elu.
+Package a kpọgidere na-akwado profaịlụ ndị ahụ, mana nnabata WAF n’ezi ọnọdụ nwere ike ịgbanwe
+n’adabereghị na ule nkwekọrịta mpaghara. Nyochaa mgbanwe fingerprint site na akaụntụ live e nyere
+ikike n’ụzọ doro anya tupu ikwu na ọ dakọtara na browser upstream.
 
 ---
 

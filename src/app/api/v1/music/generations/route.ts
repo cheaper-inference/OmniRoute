@@ -102,7 +102,7 @@ async function postHandler(request, context) {
     credentials = local.credentials;
   }
 
-  const result = await handleMusicGeneration({ body, credentials, log });
+  const result = await handleMusicGeneration({ body, credentials, log, signal: request.signal });
 
   if (result.success) {
     await clearRecoveredProviderState(credentials);

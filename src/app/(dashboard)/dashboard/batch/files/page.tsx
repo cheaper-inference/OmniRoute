@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 import FilesListTab from "../FilesListTab";
 import FilesConceptCard from "../components/FilesConceptCard";
 import UploadFileModal from "../components/UploadFileModal";
@@ -50,13 +51,9 @@ export default function BatchFilesPage() {
     <div className="flex flex-col gap-6">
       <FilesConceptCard />
       <div className="flex justify-end">
-        <button
-          onClick={() => setShowUpload(true)}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
-        >
-          <span className="material-symbols-outlined text-[16px]">upload</span>
+        <Button icon="upload" onClick={() => setShowUpload(true)}>
           {t("filesListUploadButton")}
-        </button>
+        </Button>
       </div>
       <FilesListTab
         files={files}

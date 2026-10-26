@@ -38,6 +38,17 @@ curl -X POST http://localhost:20128/api/v1/models/query \
   -d '{}'
 ```
 
+### GET /api/v1/models/health
+
+Per-model pause state for the caller's key
+
+Read-only liveness view over the in-memory model lockout store. `ok` means no pause observed by this instance (not a health verdict); connection-level pauses live outside the store read here. Additive: leaves GET /v1/models and its cache untouched. `retry_after` carries the shortest remaining lockout in seconds, rounded up, only when `state` is `cooling`. One documented difference from the dispatch 429 `model_cooldown` rule: a model with one lockout-covered connection and one connection-level cooldown still reads `cooling` here, while the 429 requires every connection to carry a model cooldown.
+
+```bash
+curl http://localhost:20128/api/v1/models/health \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
 ### GET /api/models
 
 List models (management)

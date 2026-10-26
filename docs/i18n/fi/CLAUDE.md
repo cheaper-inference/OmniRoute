@@ -12,17 +12,18 @@ tekoälyavustajien ainoa totuuden lähde (arkkitehtuuri, käytännöt, testaus, 
 uudelleen tähän. Kaikki alla oleva koskee VAIN Claude Codea — kyse on tiedostossa `AGENTS.md` jo
 määriteltyjen sääntöjen toiminnallisista tarkennuksista.
 
-## Worktree-eristys — Claude Codea koskevat erityisohjeet
+## Worktree-eristys — Claude Code -kohtaiset seikat
 
-Täydellinen pakollinen worktree-protokolla (pohjahaaran vahvistaminen, kanoninen
-`.claude/worktrees/`-polku, `cp -al` node_modules, purkusäännöt) on kohdassa `AGENTS.md` → Git
-Workflow → "Worktree isolation". Claude Codea koskevat erityiskohdat:
+Pakollinen worktree-protokolla kokonaisuudessaan (kantahaaran vahvistus, kanoninen
+`.claude/worktrees/`-polku, `cp -al` node_modules, purkusäännöt) on tiedostossa
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (yhteenveto `AGENTS.md`-tiedostossa →
+Git-työnkulku → "Worktree-eristys"). Claude Code -kohtaiset huomiot:
 
-- Vahvista pohjahaara operaattorilta `AskUserQuestion`-toiminnolla (ehdoton sääntö #19), ellei hän
-  ole jo kertonut sitä.
-- Suosi natiivia `EnterWorktree`-työkalua — se luo worktreet valmiiksi kanonisen
-  `.claude/worktrees/`-polun alle. Luo worktree dokumentoidulla `git worktree add` -komennolla ja
-  kutsu sitten `EnterWorktree`-työkalua sen `path`-arvolla.
+- Vahvista kantahaara operaattorin kanssa `AskUserQuestion`-työkalulla (Ehdoton sääntö #19), ellei hän
+  ole jo kertonut sitä sinulle.
+- Suosi natiivia `EnterWorktree`-työkalua — se luo worktree:t jo valmiiksi
+  `.claude/worktrees/`-hakemiston alle (kanoninen polku). Luo worktree dokumentoidulla `git
+worktree add` -komennolla ja kutsu sitten `EnterWorktree`-työkalua sen `path`-arvolla.
 
 ## Istuntojen välinen turvallisuus — Claude Codea koskevat erityisohjeet
 

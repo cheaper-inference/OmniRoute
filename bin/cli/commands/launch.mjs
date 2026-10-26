@@ -3,7 +3,7 @@ import { join } from "node:path";
 import os from "node:os";
 import { t } from "../i18n.mjs";
 import { resolveActiveContext } from "../contexts.mjs";
-import { quoteShellArgs } from "../utils/winShellArgs.mjs";
+import { quoteShellArgs, quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
 
 function stripTrailingSlash(value) {
@@ -200,7 +200,7 @@ export async function runLaunchCommand(opts = {}, claudeArgs = []) {
   const { command, shell } = await resolveClaudeSpawn(process.platform);
 
   return await new Promise((resolve) => {
-    const child = spawn(command, quoteClaudeArgs(claudeArgs, process.platform), {
+    const child = spawn(command, quoteShellArgsForSpawn(claudeArgs, process.platform, shell), {
       env,
       stdio: "inherit",
       shell,

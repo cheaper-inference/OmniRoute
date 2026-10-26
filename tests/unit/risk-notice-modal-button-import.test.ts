@@ -28,29 +28,32 @@ const buttonSrc = readFileSync(BUTTON, "utf-8");
 
 describe("RiskNoticeModal Button import (R4 fix #1, prod crash regression guard)", () => {
   it("Button.tsx exposes a default export", () => {
+    // Either form keeps the default-export contract: the legacy
+    // `export default function Button` or the kit adapter's
+    // `const Button = forwardRef(...)` + `export default Button` (KEA-7886).
     assert.ok(
-      /export\s+default\s+function\s+Button/.test(buttonSrc),
-      "Button.tsx must keep its default export",
+      /export\s+default\s+(function\s+)?Button\b/.test(buttonSrc),
+      "Button.tsx must keep its default export"
     );
   });
 
   it("Button.tsx does NOT have a named `export { Button }` or `export function Button`", () => {
     assert.ok(
       !/export\s+(\{[^}]*\bButton\b[^}]*\}|function\s+Button|const\s+Button)/.test(
-        buttonSrc.replace(/export\s+default\s+function\s+Button/g, ""),
+        buttonSrc.replace(/export\s+default\s+(function\s+)?Button\b/g, "")
       ),
-      "Button.tsx is default-only — if you add a named export, also fix any default consumers",
+      "Button.tsx is default-only — if you add a named export, also fix any default consumers"
     );
   });
 
   it("RiskNoticeModal imports Button as default (not named)", () => {
     assert.ok(
       /import\s+Button\s+from\s+["']@\/shared\/components\/Button["']/.test(modalSrc),
-      "RiskNoticeModal must use `import Button from ...` (default), not `import { Button }`",
+      "RiskNoticeModal must use `import Button from ...` (default), not `import { Button }`"
     );
     assert.ok(
       !/import\s+\{\s*Button\s*\}\s+from\s+["']@\/shared\/components\/Button["']/.test(modalSrc),
-      "Named import of Button from the .tsx file is broken (Button.tsx has no named export)",
+      "Named import of Button from the .tsx file is broken (Button.tsx has no named export)"
     );
   });
 });
