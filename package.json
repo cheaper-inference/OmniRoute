@@ -258,7 +258,7 @@
     "check:quality-skill-contract": "node scripts/quality/check-skill-contract.mjs",
     "quality:scan": "node scripts/quality/run-all-gates.mjs",
     "quality:scan:fast": "node scripts/quality/run-all-gates.mjs --fast",
-    "audit:deps": "npm audit --audit-level=critical && (npm audit --audit-level=high || echo '::warning::high-severity advisories present (non-blocking)') && npm run audit:electron",
+    "audit:deps": "node scripts/quality/audit-dependencies.mjs",
     "audit:electron": "npm --prefix electron audit --audit-level=critical && (npm --prefix electron audit --audit-level=high || echo '::warning::electron high-severity advisories present (non-blocking)')",
     "typecheck:core": "tsc --pretty false -p tsconfig.typecheck-core.json",
     "typecheck:noimplicit:core": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
@@ -315,7 +315,8 @@
     "i18n:translate-new-keys": "bash scripts/i18n/translate-new-keys.sh",
     "i18n:check-keys": "node scripts/i18n/check-key-completeness.mjs",
     "i18n:check-keys:cli": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",
-    "check:free-catalog-evidence": "node scripts/check/check-free-catalog-evidence.mjs"
+    "check:free-catalog-evidence": "node scripts/check/check-free-catalog-evidence.mjs",
+    "check:test-tla-order": "node scripts/check/check-test-tla-order.mjs"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "1.4.0",

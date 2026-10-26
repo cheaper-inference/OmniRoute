@@ -10,12 +10,9 @@
 //   secretFindings=N      — número de findings do gitleaks
 //   secretFindings=SKIP reason=binary-absent   — gitleaks não está no PATH
 //
-// Por default é ADVISORY (sai 0 sempre). Passe --ratchet para tornar BLOQUEANTE:
-// lê metrics.secretFindings.value de config/quality/quality-baseline.json, compara
-// a contagem MEDIDA e SAI 1 SE — E SOMENTE SE — a medida for MAIOR que o baseline
-// (regressão real, direction:down). Qualquer SKIP gracioso (binário ausente, nenhum
-// dir de fonte) SAI 0 mesmo com --ratchet — falta de infraestrutura nunca bloqueia,
-// só uma regressão medida bloqueia.
+// Findings are advisory by default. With --ratchet, exit 1 is a measured
+// regression and exit 2 is INCOMPLETE (missing tool, source, report or baseline).
+// Invalid scanner output never becomes a measured zero, including in JSON mode.
 //
 // Uso:
 //   node scripts/check/check-secrets.mjs
@@ -134,7 +131,7 @@ export function evaluateSecretsRatchet(current, baseline) {
 /**
  * Lê metrics.secretFindings.value do quality-baseline.json.
  * Retorna null se o arquivo ou a métrica estiverem ausentes (sem baseline não há
- * ratchet possível — o caller trata como SKIP gracioso, exit 0).
+ * ratchet possível — o caller obrigatório trata como INCOMPLETE, exit 2).
  *
  * @param {string} baselinePath
  * @returns {number|null}
@@ -148,7 +145,7 @@ export function readBaselineSecretsValue(baselinePath = BASELINE_PATH) {
     return null;
   }
   const metric = baselineJson?.metrics?.secretFindings;
-  if (!metric || typeof metric.value !== "number") return null;
+  if (!metric || !Number.isSafeInteger(metric.value) || metric.value < 0) return null;
   return metric.value;
 }
 
@@ -194,33 +191,26 @@ export function findGitleaks() {
 // Main
 // ---------------------------------------------------------------------------
 
+function incomplete(reason, required = RATCHET) {
+  console.log(`secretFindings=${required ? "INCOMPLETE" : "SKIP"} reason=${reason}`);
+  if (!QUIET) process.stderr.write(`[check-secrets] Measurement unavailable: ${reason}.\n`);
+  process.exitCode = required ? 2 : 0;
+}
+
 function main() {
+  const baselineValue = RATCHET ? readBaselineSecretsValue(BASELINE_PATH) : null;
+  if (RATCHET && baselineValue === null) return incomplete("baseline-invalid");
   const gitleaksBin = findGitleaks();
 
   if (!gitleaksBin) {
-    console.log("secretFindings=SKIP reason=binary-absent");
-    if (!QUIET) {
-      process.stderr.write(
-        "[check-secrets] SKIP — gitleaks não encontrado no PATH.\n" +
-          "[check-secrets] Instale via: https://github.com/gitleaks/gitleaks\n" +
-          "[check-secrets] SKIP gracioso — sai 0 mesmo com --ratchet (binário ausente nunca bloqueia).\n"
-      );
-    }
-    process.exitCode = 0;
-    return;
+    return incomplete("binary-absent");
   }
 
   // Resolver os diretórios de fonte que realmente existem (robusto se um sumir).
   const scanDirs = SECRET_SCAN_DIRS.filter((d) => fs.existsSync(path.join(ROOT, d)));
 
   if (scanDirs.length === 0) {
-    // Nenhum dir de fonte encontrado — nada a escanear (advisory, sai 0).
-    console.log("secretFindings=0");
-    if (!QUIET) {
-      process.stderr.write("[check-secrets] Nenhum diretório de fonte encontrado para escanear.\n");
-    }
-    process.exitCode = 0;
-    return;
+    return incomplete("source-absent");
   }
 
   if (!QUIET) {
@@ -250,55 +240,59 @@ function main() {
     }
 
     let stdout = "";
+    let scannerStatus = 0;
     try {
       stdout = execFileSync(gitleaksBin, args, {
         cwd: ROOT,
         encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
         maxBuffer: 32 * 1024 * 1024,
         timeout: 90_000, // 90s por dir — o scan escopado completa em ~10s; folga ampla
       });
     } catch (err) {
-      // exit 1 com stdout = findings encontrados (comportamento esperado do gitleaks)
+      // Only gitleaks' documented findings exit can carry a usable report.
       stdout = err.stdout ? String(err.stdout) : "";
-      const stderr = err.stderr ? String(err.stderr) : "";
-
-      if (err.status === 1 && stdout.trim()) {
-        // Normal: gitleaks achou findings neste dir e saiu com exit 1
-      } else if (!stdout.trim()) {
-        process.stderr.write(
-          `[check-secrets] ERRO ao executar gitleaks em '${dir}': ${err.message}\n`
-        );
-        if (stderr) process.stderr.write(`[check-secrets] stderr: ${stderr.slice(0, 500)}\n`);
-        process.exit(2);
+      scannerStatus = err.status;
+      if (scannerStatus !== 1 || err.signal || err.code) {
+        return incomplete("scanner-failed", true);
       }
     }
 
-    if (!stdout.trim() || stdout.trim() === "null") {
-      continue; // sem findings neste dir
-    }
+    if (!stdout.trim()) return incomplete("report-empty", true);
     let parsed;
     try {
       parsed = JSON.parse(stdout.trim());
-    } catch (parseErr) {
-      process.stderr.write(
-        `[check-secrets] ERRO ao parsear JSON do gitleaks em '${dir}': ${parseErr.message}\n`
-      );
-      process.stderr.write(
-        `[check-secrets] stdout (primeiros 500 chars): ${stdout.slice(0, 500)}\n`
-      );
-      process.exit(2);
+    } catch {
+      // The report and child stderr may contain credentials; never echo either.
+      return incomplete("report-json-invalid", true);
     }
-    if (Array.isArray(parsed)) {
-      gitleaksJson.push(...parsed);
+    if (parsed === null) parsed = [];
+    if (
+      !Array.isArray(parsed) ||
+      parsed.some(
+        (finding) =>
+          !finding ||
+          Array.isArray(finding) ||
+          typeof finding !== "object" ||
+          typeof (finding.RuleID ?? finding.ruleId) !== "string" ||
+          !(finding.RuleID ?? finding.ruleId).trim() ||
+          typeof (finding.File ?? finding.file) !== "string" ||
+          !(finding.File ?? finding.file).trim()
+      )
+    ) {
+      return incomplete("report-schema-invalid", true);
     }
+    if (scannerStatus === 1 && parsed.length === 0) return incomplete("report-inconsistent", true);
+    gitleaksJson.push(...parsed);
   }
 
   if (PRINT_JSON) {
     process.stdout.write(JSON.stringify(gitleaksJson, null, 2) + "\n");
+    applyRatchet(gitleaksJson.length, baselineValue);
     return;
   }
 
-  const { findingCount, byRule, byFile } = parseGitleaksJson(gitleaksJson);
+  const { findingCount, byRule } = parseGitleaksJson(gitleaksJson);
 
   // Emitir em formato KEY=VALUE para o coletor de métricas (collect-metrics.mjs)
   console.log(`secretFindings=${findingCount}`);
@@ -321,32 +315,22 @@ function main() {
   }
 
   // Medição bem-sucedida → aplica o ratchet (bloqueante só com --ratchet).
-  applyRatchet(findingCount);
+  applyRatchet(findingCount, baselineValue);
 }
 
 /**
  * Aplica o ratchet (direction:down) sobre a contagem medida vs o baseline.
  * Sem --ratchet: advisory (exit 0). Com --ratchet: exit 1 numa regressão real
- * (medida > baseline). Baseline ausente → SKIP gracioso (exit 0).
+ * (medida > baseline). The required baseline is validated before scanning.
  *
  * @param {number} findingCount - Contagem MEDIDA (medição bem-sucedida).
+ * @param {number|null} baselineValue - Validated baseline, null in advisory mode.
  */
-function applyRatchet(findingCount) {
+function applyRatchet(findingCount, baselineValue) {
   if (!RATCHET) {
     if (!QUIET) {
       process.stderr.write(
         "[check-secrets] ADVISORY — não falha pela contagem (passe --ratchet para bloquear regressão).\n"
-      );
-    }
-    process.exitCode = 0;
-    return;
-  }
-
-  const baselineValue = readBaselineSecretsValue(BASELINE_PATH);
-  if (baselineValue === null) {
-    if (!QUIET) {
-      process.stderr.write(
-        "[check-secrets] baseline ausente (metrics.secretFindings) — SKIP gracioso, sai 0.\n"
       );
     }
     process.exitCode = 0;

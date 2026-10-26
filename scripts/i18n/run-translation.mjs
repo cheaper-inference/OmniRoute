@@ -45,6 +45,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
+import { applyNumericSectionDelta } from "./lib/numeric-section-delta.mjs";
 
 // ----- .env loader --------------------------------------------------------
 // Loads variables from a local `.env` (gitignored) into process.env without
@@ -721,12 +722,21 @@ export function sectionHashes(sections) {
 // `null` means "no reuse possible — translate the whole body": no recorded
 // hashes, or the mirror on disk does not have the section count the hashes
 // were recorded for (a hand edit, or a mirror written by an older pipeline).
-export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
+export function planSectionReuse({
+  previousHashes,
+  previousSections = null,
+  sections,
+  mirrorSections,
+}) {
   if (!Array.isArray(previousHashes) || previousHashes.length !== mirrorSections.length) {
     return null;
   }
   if (previousHashes.length !== sections.length) return null;
   const now = sectionHashes(sections);
+  const verifiedPrevious =
+    Array.isArray(previousSections) && previousSections.length === sections.length
+      ? sectionHashes(previousSections)
+      : [];
   const reuse = new Map();
   const translate = [];
   now.forEach((h, i) => {
@@ -734,10 +744,25 @@ export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
     // of the 36 pre-expansion locales were adopted as English, 2026-09-16 audit) — never reuse it.
     // Section 0 of a mirror that starts with a YAML block is the old extractor's leaked
     // frontmatter (24 newer locales, 2026-09-16) — always rebuild it.
-    const leakedFrontmatter = i === 0 && /^---\s*\n/.test(mirrorSections[i]);
-    const untranslated = looksUntranslated(mirrorSections[i], sections[i]);
-    if (h === previousHashes[i] && !untranslated && !leakedFrontmatter)
-      reuse.set(i, mirrorSections[i]);
+    const numericUpdate =
+      h !== previousHashes[i] &&
+      typeof verifiedPrevious[i] === "string" &&
+      verifiedPrevious[i] === previousHashes[i]
+        ? applyNumericSectionDelta(previousSections[i], sections[i], mirrorSections[i])
+        : null;
+    const candidate = numericUpdate ?? mirrorSections[i];
+    const leakedFrontmatter = i === 0 && /^---\s*\n/.test(candidate);
+    const untranslated = looksUntranslated(candidate, sections[i]);
+    // A matching source hash only describes what was requested. Older adopted
+    // mirrors may still omit rows or code literals; validate reused bytes too.
+    const checked = validateTranslatedChunk(sections[i], candidate);
+    if (
+      (h === previousHashes[i] || numericUpdate !== null) &&
+      !untranslated &&
+      !leakedFrontmatter &&
+      checked.problems.length === 0
+    )
+      reuse.set(i, checked.text);
     else translate.push(i);
   });
   return { reuse, translate };
@@ -777,7 +802,12 @@ export function mirrorNeedsRebuild(mirrorText, sourceText) {
   const body = extractMirrorBody(mirrorText);
   if (/^---\s*\n[\s\S]{0,600}?\n---\s*\n/.test(body)) return true; // leaked frontmatter
   const sourceBody = stripTopHeading(sourceText.replace(/^---\n[\s\S]*?\n---\n+/, ""));
-  return looksUntranslated(body, sourceBody); // still English
+  const checked = validateTranslatedChunk(sourceBody, body);
+  return (
+    looksUntranslated(body, sourceBody) ||
+    checked.problems.length > 0 ||
+    checked.text !== body.trim()
+  );
 }
 
 export function extractMirrorBody(mirrorText) {
@@ -862,12 +892,22 @@ export function mirrorLastCommitDate(mirrorRel, { cwd = ROOT } = {}) {
   }
 }
 
+const exactSourceSnapshots = new Map();
+
 async function resolveSectionPlan({ task, state, opts, sections }) {
   if (task.missingTarget || opts.force) return null;
   const recorded = state.sources[task.rel]?.locales?.[task.locale];
   let previousHashes = recorded?.section_hashes;
+  let exactOldText = null;
+  if (recorded?.source_hash) {
+    const key = `${task.rel}:${recorded.source_hash}`;
+    if (!exactSourceSnapshots.has(key)) {
+      exactSourceSnapshots.set(key, findSourceTextByHash(task.rel, recorded.source_hash));
+    }
+    exactOldText = await exactSourceSnapshots.get(key);
+  }
   if (!previousHashes && recorded?.source_hash) {
-    let oldText = await findSourceTextByHash(task.rel, recorded.source_hash);
+    let oldText = exactOldText;
     if (!oldText) {
       // `updated_at` is bumped by `--adopt`, so prefer the date of the last commit that
       // actually wrote the mirror (mirrors are only written by translation runs).
@@ -880,10 +920,16 @@ async function resolveSectionPlan({ task, state, opts, sections }) {
   if (!previousHashes) return null;
   const mirrorText = await fs.readFile(task.targetAbs, "utf8");
   const mirrorSections = splitSections(extractMirrorBody(mirrorText));
-  return planSectionReuse({ previousHashes, sections, mirrorSections });
+  // A timestamp fallback is not proof of the previous source. Numeric edits
+  // require both the exact source snapshot and the recorded mirror bytes.
+  const previousSections =
+    exactOldText && recorded?.target_hash === sha256(Buffer.from(mirrorText, "utf8"))
+      ? splitSections(stripTopHeading(exactOldText))
+      : undefined;
+  return planSectionReuse({ previousHashes, previousSections, sections, mirrorSections });
 }
 
-async function translateBody(body, localeEntry, backend) {
+export async function translateBody(body, localeEntry, backend) {
   const englishName = localeEntry.english ?? localeEntry.name;
   const native = localeEntry.native ?? localeEntry.name;
   const system = SYSTEM_PROMPT(englishName, native);
@@ -901,6 +947,18 @@ async function translateBody(body, localeEntry, backend) {
       logWarn(
         `  chunk ${i + 1}/${chunks.length} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
       );
+      if (attempt < CHUNK_ATTEMPTS) {
+        messages.push(
+          { role: "assistant", content: checked.text },
+          {
+            role: "user",
+            content:
+              `The previous translation failed validation: ${checked.problems.join("; ")}. ` +
+              "Return a complete corrected translation of the original source. " +
+              "Preserve every inline code literal exactly and return only the translated markdown.",
+          }
+        );
+      }
     }
     if (checked.problems.length > 0) {
       throw new Error(
