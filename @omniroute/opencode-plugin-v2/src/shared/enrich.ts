@@ -100,6 +100,20 @@ export function reconcileHistoricalEnrichment(
   return result;
 }
 
+/**
+ * True when the bare (unnamespaced) lookup key of a compatible-node model would
+ * equal a namespaced key `<publicPrefix>/<id>`: a literal upstream id that
+ * already starts with the public prefix. Such a key belongs to the model whose
+ * served id it is, so the literal model is only reachable through its own
+ * namespaced key (`<publicPrefix>/<publicPrefix>/...`).
+ */
+function bareKeyIsNamespacedId(
+  publicPrefix: string,
+  providerAlias: string,
+  modelId: string
+): boolean {
+  return publicPrefix.length > 0 && modelId.startsWith(`${providerAlias}/`);
+}
 
 /**
  * Free-tier match between the enrichment overlay and the served catalog:
@@ -468,7 +482,9 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
             // A public prefix re-used after node deletion cannot prove the
             // existing price belongs to the new owner. Only direct node-ID
             // pricing is eligible; the old namespace stays management-only.
-            if ((slot as { pricingUnsafePublicPrefix?: unknown }).pricingUnsafePublicPrefix === true) {
+            if (
+              (slot as { pricingUnsafePublicPrefix?: unknown }).pricingUnsafePublicPrefix === true
+            ) {
               unsafeReusedPrefixPriceKeys.add(publicPrefix);
             }
           }
@@ -495,24 +511,32 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
           catalogAliasByKey.set(providerCanonical, providerAlias);
           const storedPricingKey = (slot as { pricingKey?: unknown }).pricingKey;
           if (typeof storedPricingKey === "string" && storedPricingKey.trim()) {
-            pendingPricingClaims.push({ pricingKey: storedPricingKey.trim(), alias: providerAlias });
+            pendingPricingClaims.push({
+              pricingKey: storedPricingKey.trim(),
+              alias: providerAlias,
+            });
           }
           if (publicPrefix) {
             canonicalByPublicPrefix.set(publicPrefix, providerCanonical);
             const snapshots = (slot as { historicalPrefixes?: unknown }).historicalPrefixes;
             if (Array.isArray(snapshots)) {
-              const byOldId = historyCandidatesByAlias.get(publicPrefix) ?? new Map<string, string>();
+              const byOldId =
+                historyCandidatesByAlias.get(publicPrefix) ?? new Map<string, string>();
               for (const snapshot of snapshots) {
                 if (!snapshot || typeof snapshot !== "object") continue;
                 const oldPrefix = (snapshot as { prefix?: unknown }).prefix;
                 const oldIds = (snapshot as { modelIds?: unknown }).modelIds;
                 if (
-                  typeof oldPrefix !== "string" || !oldPrefix || oldPrefix.includes("/") ||
-                  oldPrefix === publicPrefix || !Array.isArray(oldIds)
-                ) continue;
-                const knownIds = new Set(oldIds.filter(
-                  (id): id is string => typeof id === "string" && id.length > 0
-                ));
+                  typeof oldPrefix !== "string" ||
+                  !oldPrefix ||
+                  oldPrefix.includes("/") ||
+                  oldPrefix === publicPrefix ||
+                  !Array.isArray(oldIds)
+                )
+                  continue;
+                const knownIds = new Set(
+                  oldIds.filter((id): id is string => typeof id === "string" && id.length > 0)
+                );
                 // If the raw upstream itself included "ag/foo", then "ag/foo"
                 // could name TWO different objects. Such rows cannot migrate.
                 for (const bare of knownIds) {
@@ -544,7 +568,8 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
             // Canonical providers keep their upstream IDs intact.
             // Never strip an arbitrary segment: upstream model IDs may contain /.
             const modelId =
-              publicPrefix && id.startsWith(`${providerAlias}/`) &&
+              publicPrefix &&
+              id.startsWith(`${providerAlias}/`) &&
               !upstreamModelIdsByAlias.get(providerAlias)?.has(id)
                 ? id.slice(providerAlias.length + 1)
                 : id;
@@ -554,7 +579,11 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
             // gets its OWN copy: sharing the object would let a later write
             // for one provider — a price, typically — land on another
             // provider's entry that happens to sell the same model id.
-            if (!out.has(modelId)) out.set(modelId, { ...entry });
+            // A literal upstream "ih/foo" must not take the bare key "ih/foo": that key
+            // is the NAMESPACED entry of the model "foo" (#17348).
+            if (!bareKeyIsNamespacedId(publicPrefix, providerAlias, modelId) && !out.has(modelId)) {
+              out.set(modelId, { ...entry });
+            }
           }
         }
       }
@@ -635,8 +664,12 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
           for (const [rawId, value] of Object.entries(nodeSlot)) {
             if (!value || typeof value !== "object" || Array.isArray(value)) continue;
             const fields = value as Record<string, unknown>;
-            if (!["input", "output", "cached", "cacheRead", "cache_creation", "cacheWrite"]
-              .some((field) => typeof fields[field] === "number")) continue;
+            if (
+              !["input", "output", "cached", "cacheRead", "cache_creation", "cacheWrite"].some(
+                (field) => typeof fields[field] === "number"
+              )
+            )
+              continue;
             const normalized =
               rawId.startsWith(`${publicAlias}/`) &&
               !upstreamModelIdsByAlias.get(publicAlias)?.has(rawId)
@@ -650,8 +683,11 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
           if (!slot || typeof slot !== "object" || Array.isArray(slot)) continue;
           // Never leak a disputed historical pricing namespace into either
           // provider, not even through the bare-key fallback.
-          if (ambiguousPricingNamespaces.has(pricingProviderKey) ||
-              unsafeReusedPrefixPriceKeys.has(pricingProviderKey)) continue;
+          if (
+            ambiguousPricingNamespaces.has(pricingProviderKey) ||
+            unsafeReusedPrefixPriceKeys.has(pricingProviderKey)
+          )
+            continue;
           const providerAlias = catalogAliasByKey.get(pricingProviderKey) ?? pricingProviderKey;
           for (const [rawModelId, raw] of Object.entries(slot as Record<string, unknown>)) {
             const modelId =
@@ -665,7 +701,8 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
               // price index, not an alias remapped from another catalog key.
               canonicalByPublicPrefix.has(pricingProviderKey) &&
               canonicalPricedModels.get(pricingProviderKey)?.has(modelId)
-            ) continue;
+            )
+              continue;
             if (!raw || typeof raw !== "object") continue;
             const p = raw as Record<string, unknown>;
             const parsed: NonNullable<OmniRouteEnrichmentEntry["pricing"]> = {};
@@ -689,9 +726,10 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
             const candidates = historyCandidatesByAlias.get(providerAlias);
             const fromHistoricalNamespace =
               historyAliasClaims.get(pricingProviderKey) === providerAlias;
-            const historicalId = fromHistoricalNamespace &&
-              !rawModelId.startsWith(`${pricingProviderKey}/`)
-              ? `${pricingProviderKey}/${rawModelId}` : rawModelId;
+            const historicalId =
+              fromHistoricalNamespace && !rawModelId.startsWith(`${pricingProviderKey}/`)
+                ? `${pricingProviderKey}/${rawModelId}`
+                : rawModelId;
             const currentBareId = candidates?.get(historicalId);
             if (currentBareId) {
               const target = `${providerAlias}/${currentBareId}`;
@@ -703,12 +741,15 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
               // Keep contradictory quotes as separate candidates. The served-ID
               // reconciler only promotes a single unambiguous quote; silently
               // keeping the first price would make JSON key order decide cost.
-              if (!pending.some((candidate) =>
-                candidate.previousPublicId === historicalId &&
-                (["input", "output", "cacheRead", "cacheWrite"] as const).every(
-                  (field) => candidate.pricing[field] === parsed[field]
+              if (
+                !pending.some(
+                  (candidate) =>
+                    candidate.previousPublicId === historicalId &&
+                    (["input", "output", "cacheRead", "cacheWrite"] as const).every(
+                      (field) => candidate.pricing[field] === parsed[field]
+                    )
                 )
-              )) {
+              ) {
                 pending.push({ previousPublicId: historicalId, pricing: parsed });
               }
               existing.historicalPricingCandidates = pending;
@@ -730,9 +771,14 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
             // overwrites the first one's price, and the picker shows a cost
             // that belongs to a different connection.
             const bareBelongsHere =
-              existingBare === undefined || existingBare.providerAlias === undefined
+              !bareKeyIsNamespacedId(
+                compatiblePublicPrefixes.has(providerAlias) ? providerAlias : "",
+                providerAlias,
+                modelId
+              ) &&
+              (existingBare === undefined || existingBare.providerAlias === undefined
                 ? true
-                : existingBare.providerAlias === providerAlias;
+                : existingBare.providerAlias === providerAlias);
             if (bareBelongsHere) {
               if (existingBare) {
                 existingBare.pricing = { ...(existingBare.pricing ?? {}), ...parsed };

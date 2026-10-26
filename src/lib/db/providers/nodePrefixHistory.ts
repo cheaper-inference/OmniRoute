@@ -67,26 +67,25 @@ export function parseNodePrefixHistory(value: unknown): HistoricalNodePrefix[] {
 }
 
 export function getNodePrefixHistory(db: PrefixHistoryDb, nodeId: string): HistoricalNodePrefix[] {
-  const row = db.prepare(
-    `SELECT value FROM key_value WHERE namespace = '${NAMESPACE}' AND key = ?`
-  ).get(nodeId) as { value?: unknown } | undefined;
+  const row = db
+    .prepare(`SELECT value FROM key_value WHERE namespace = '${NAMESPACE}' AND key = ?`)
+    .get(nodeId) as { value?: unknown } | undefined;
   return parseNodePrefixHistory(row?.value);
 }
 
 /** A pricing-only row never proves a model's upstream identity. */
-export function getNodeSyncedAndCustomModelIds(
-  db: PrefixHistoryDb,
-  nodeId: string
-): string[] {
+export function getNodeSyncedAndCustomModelIds(db: PrefixHistoryDb, nodeId: string): string[] {
   const out = new Set<string>();
   const syncedPrefix = `${nodeId}:`;
   // substr equality avoids LIKE metacharacter collisions in operator IDs.
-  const rows = db.prepare(
-    "SELECT value FROM key_value WHERE namespace = 'syncedAvailableModels' AND substr(key, 1, ?) = ?"
-  ).all([...syncedPrefix].length, syncedPrefix) as { value?: unknown }[];
-  const custom = db.prepare(
-    "SELECT value FROM key_value WHERE namespace = 'customModels' AND key = ?"
-  ).get(nodeId) as { value?: unknown } | undefined;
+  const rows = db
+    .prepare(
+      "SELECT value FROM key_value WHERE namespace = 'syncedAvailableModels' AND substr(key, 1, ?) = ?"
+    )
+    .all([...syncedPrefix].length, syncedPrefix) as { value?: unknown }[];
+  const custom = db
+    .prepare("SELECT value FROM key_value WHERE namespace = 'customModels' AND key = ?")
+    .get(nodeId) as { value?: unknown } | undefined;
   for (const row of [...rows, custom]) {
     if (!row || typeof row.value !== "string") continue;
     try {
@@ -118,10 +117,12 @@ export function recordNodePrefixChange(
     prefix: previous,
     modelIds: getNodeSyncedAndCustomModelIds(db, nodeId),
   });
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO key_value (namespace, key, value) VALUES (?, ?, ?)
     ON CONFLICT(namespace, key) DO UPDATE SET value = excluded.value
-  `).run(NAMESPACE, nodeId, JSON.stringify(history.slice(-MAX_HISTORY)));
+  `
+  ).run(NAMESPACE, nodeId, JSON.stringify(history.slice(-MAX_HISTORY)));
   return true;
 }
 
@@ -148,9 +149,10 @@ function parseArchivedPrefixClaim(raw: unknown): ArchivedPrefixClaim {
       return { prefixes: [], history: [] };
     }
   }
-  const record = value && typeof value === "object" && !Array.isArray(value)
-    ? value as { prefixes?: unknown; history?: unknown }
-    : null;
+  const record =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as { prefixes?: unknown; history?: unknown })
+      : null;
   // Read older array-only tombstones without discarding existing vetoes.
   const candidates = Array.isArray(value) ? value : record?.prefixes;
   const prefixes = new Set<string>();
@@ -171,14 +173,14 @@ export function getArchivedDeletedNodePrefixHistory(
   db: PrefixHistoryDb,
   nodeId: string
 ): HistoricalNodePrefix[] {
-  const archive = db.prepare(
-    "SELECT value FROM key_value WHERE namespace = ? AND key = ?"
-  ).get(ARCHIVE_NAMESPACE, nodeId) as { value?: unknown } | undefined;
+  const archive = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(ARCHIVE_NAMESPACE, nodeId) as { value?: unknown } | undefined;
   if (archive?.value != null) return parseNodePrefixHistory(archive.value);
   // One-version transition: support tombstones that embedded historic IDs.
-  const oldRecord = db.prepare(
-    "SELECT value FROM key_value WHERE namespace = ? AND key = ?"
-  ).get(TOMBSTONE_NAMESPACE, nodeId) as { value?: unknown } | undefined;
+  const oldRecord = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(TOMBSTONE_NAMESPACE, nodeId) as { value?: unknown } | undefined;
   return parseArchivedPrefixClaim(oldRecord?.value).history;
 }
 
@@ -187,16 +189,13 @@ export function recordDeletedNodePrefixTombstone(
   nodeId: string,
   currentPrefix: string | null | undefined
 ): void {
-  const previousRow = db.prepare(
-    "SELECT value FROM key_value WHERE namespace = ? AND key = ?"
-  ).get(TOMBSTONE_NAMESPACE, nodeId) as { value?: unknown } | undefined;
+  const previousRow = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(TOMBSTONE_NAMESPACE, nodeId) as { value?: unknown } | undefined;
   const previous = parseArchivedPrefixClaim(previousRow?.value);
   const archived = getArchivedDeletedNodePrefixHistory(db, nodeId);
   const presentHistory = getNodePrefixHistory(db, nodeId);
-  const prefixes = new Set([
-    ...previous.prefixes,
-    ...presentHistory.map((entry) => entry.prefix),
-  ]);
+  const prefixes = new Set([...previous.prefixes, ...presentHistory.map((entry) => entry.prefix)]);
   const current = currentPrefix?.trim();
   if (current && current.length <= 128 && !current.includes("/")) prefixes.add(current);
   if (prefixes.size === 0) return;
@@ -212,9 +211,9 @@ export function recordDeletedNodePrefixTombstone(
 }
 
 export function getDeletedNodePrefixTombstones(db: PrefixHistoryDb): Set<string> {
-  const rows = db.prepare(
-    "SELECT value FROM key_value WHERE namespace = ?"
-  ).all(TOMBSTONE_NAMESPACE) as { value?: unknown }[];
+  const rows = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ?")
+    .all(TOMBSTONE_NAMESPACE) as { value?: unknown }[];
   const prefixes = new Set<string>();
   for (const row of rows) {
     for (const prefix of parseArchivedPrefixClaim(row.value).prefixes) {

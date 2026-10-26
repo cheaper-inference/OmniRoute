@@ -41,14 +41,20 @@ async function create(nodeId: string, prefix: string): Promise<void> {
   });
 }
 function persistPrice(namespace: string, models: Record<string, unknown>): void {
-  core.getDbInstance().prepare(
-    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('pricing', ?, ?)"
-  ).run(namespace, JSON.stringify(models));
+  core
+    .getDbInstance()
+    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('pricing', ?, ?)")
+    .run(namespace, JSON.stringify(models));
 }
-async function catalog(): Promise<Record<string, any>> {
+type CatalogEntry = {
+  models: Array<{ id: string; name: string; custom?: boolean; upstreamId?: boolean }>;
+  [key: string]: unknown;
+};
+
+async function catalog(): Promise<Record<string, CatalogEntry>> {
   const response = await prices.GET();
   assert.equal(response.status, 200);
-  return (await response.json()) as Record<string, any>;
+  return (await response.json()) as Record<string, CatalogEntry>;
 }
 
 test("#17348: explicit compatible prefix rename stores real upstream model identities atomically", async () => {
@@ -64,10 +70,12 @@ test("#17348: explicit compatible prefix rename stores real upstream model ident
   assert.ok(cache.getModelCatalogCacheVersion() > version, "/v1/models cache invalidated");
 
   const rows = history.getNodePrefixHistory(core.getDbInstance(), A);
-  assert.deepEqual(rows, [{
-    prefix: prefixA,
-    modelIds: ["foo", "org/nested", "syntheticold/foo"],
-  }]);
+  assert.deepEqual(rows, [
+    {
+      prefix: prefixA,
+      modelIds: ["foo", "org/nested", "syntheticold/foo"],
+    },
+  ]);
 
   const published = await catalog();
   const slot = published[A];
@@ -78,9 +86,14 @@ test("#17348: explicit compatible prefix rename stores real upstream model ident
   assert.ok(slot.models.some((m: { id: string }) => m.id === "org/nested"));
   assert.ok(slot.models.some((m: { id: string }) => m.id === "syntheticold/foo"));
   assert.deepEqual(
-    JSON.parse((core.getDbInstance().prepare(
-      "SELECT value FROM key_value WHERE namespace = 'pricing' AND key = ?"
-    ).get(A) as { value: string }).value),
+    JSON.parse(
+      (
+        core
+          .getDbInstance()
+          .prepare("SELECT value FROM key_value WHERE namespace = 'pricing' AND key = ?")
+          .get(A) as { value: string }
+      ).value
+    ),
     { "syntheticold/foo": { input: 6 } },
     "persisted historical price remains untouched"
   );
@@ -102,13 +115,21 @@ test("#17348: pricing for deleted compatible nodes stays in DB but never appears
   persistPrice(A, { "legacy/orphan": { input: 99 } });
   await nodes.deleteProviderNode(A);
   const published = await catalog();
-  assert.equal(published[A]?.orphaned, true, "deleted compatible node must be labelled, not routable");
+  assert.equal(
+    published[A]?.orphaned,
+    true,
+    "deleted compatible node must be labelled, not routable"
+  );
   assert.equal(published[A]?.pricingOnly, true);
   assert.equal(published[A]?.modelOverrideEligible, false);
-  assert.deepEqual(published[A]?.models.map((m: { id: string }) => m.id), ["legacy/orphan"]);
-  const row = core.getDbInstance().prepare(
-    "SELECT value FROM key_value WHERE namespace = 'pricing' AND key = ?"
-  ).get(A) as { value: string };
+  assert.deepEqual(
+    published[A]?.models.map((m: { id: string }) => m.id),
+    ["legacy/orphan"]
+  );
+  const row = core
+    .getDbInstance()
+    .prepare("SELECT value FROM key_value WHERE namespace = 'pricing' AND key = ?")
+    .get(A) as { value: string };
   assert.ok(row, "orphan remains available for a manual decision");
 });
 
@@ -142,8 +163,11 @@ test("#17348: previous prefix reused by a live node cannot redirect its prices t
   assert.equal(published[B].displayPrefix, prefixA);
   assert.ok(published[B].models.some((m: { id: string }) => m.id === "foo"));
   assert.equal(published[B].pricingUnsafePublicPrefix, true);
-  assert.equal(published[B].pricingKey, undefined,
-    "new owner may not inherit old public-prefix pricing");
+  assert.equal(
+    published[B].pricingKey,
+    undefined,
+    "new owner may not inherit old public-prefix pricing"
+  );
   assert.equal(published[prefixA].pricingOnly, true);
   assert.equal(published[prefixA].historicalPricingNamespace, true);
   assert.equal(published[A].historicalPrefixes, undefined);
@@ -153,11 +177,13 @@ test("#17348: previous prefix reused by a live node cannot redirect its prices t
 test("#17348: missing and malformed prefix histories never authorize speculative mapping", async () => {
   assert.deepEqual(history.parseNodePrefixHistory("{broken"), []);
   assert.deepEqual(history.parseNodePrefixHistory([{ prefix: "old/a", modelIds: ["foo"] }]), []);
-  assert.deepEqual(history.parseNodePrefixHistory([
-    { prefix: "old", modelIds: [{ id: "foo" }, { id: "foo" }, { id: "a/b" }] },
-  ]), [{ prefix: "old", modelIds: ["foo", "a/b"] }]);
+  assert.deepEqual(
+    history.parseNodePrefixHistory([
+      { prefix: "old", modelIds: [{ id: "foo" }, { id: "foo" }, { id: "a/b" }] },
+    ]),
+    [{ prefix: "old", modelIds: ["foo", "a/b"] }]
+  );
 });
-
 
 test("#17348: historical pricing rows are display-only, never inherited wholesale", async () => {
   await create(A, prefixA);
@@ -169,10 +195,12 @@ test("#17348: historical pricing rows are display-only, never inherited wholesal
   });
   const published = await catalog();
   assert.equal(published[A].displayPrefix, prefixB);
-  assert.deepEqual(published[A].historicalPrefixes, [{
-    prefix: prefixA,
-    modelIds: ["foo"],
-  }]);
+  assert.deepEqual(published[A].historicalPrefixes, [
+    {
+      prefix: prefixA,
+      modelIds: ["foo"],
+    },
+  ]);
   assert.equal(published[A].pricingKey, undefined, "old price namespace is not a live pricingKey");
   assert.equal(
     published[A].models.some((m: { id: string }) => m.id === "unproven-model"),
@@ -182,10 +210,10 @@ test("#17348: historical pricing rows are display-only, never inherited wholesal
   assert.equal(published[prefixA].historicalPricingNamespace, true);
   assert.equal(published[prefixA].pricingOnly, true);
   assert.equal(published[prefixA].modelOverrideEligible, false);
-  assert.deepEqual(
-    published[prefixA].models.map((m: { id: string }) => m.id).sort(),
-    ["foo", "unproven-model"]
-  );
+  assert.deepEqual(published[prefixA].models.map((m: { id: string }) => m.id).sort(), [
+    "foo",
+    "unproven-model",
+  ]);
 });
 
 test("#17348: conflicting old prefix claims from two historical nodes stay isolated", async () => {
@@ -205,7 +233,6 @@ test("#17348: conflicting old prefix claims from two historical nodes stay isola
   assert.equal(published[B].pricingKey, undefined);
 });
 
-
 test("#17348: stale custom-model rows cannot prevent display-only classification", async () => {
   await create(A, prefixA);
   await models.replaceSyncedAvailableModelsForConnection(A, A, [{ id: "foo", name: "Live Foo" }]);
@@ -221,7 +248,6 @@ test("#17348: stale custom-model rows cannot prevent display-only classification
   assert.equal(published[A].pricingKey, undefined);
 });
 
-
 test("#17348: deleting a node that reused a retired prefix leaves an ambiguity tombstone", async () => {
   await create(A, prefixA);
   await models.replaceSyncedAvailableModelsForConnection(A, A, [{ id: "foo", name: "Foo A" }]);
@@ -236,8 +262,11 @@ test("#17348: deleting a node that reused a retired prefix leaves an ambiguity t
   );
   persistPrice(prefixA, { foo: { input: 51 } });
   const published = await catalog();
-  assert.equal(published[A].historicalPrefixes, undefined,
-    "A must never inherit B's later prices for the same prefix and model");
+  assert.equal(
+    published[A].historicalPrefixes,
+    undefined,
+    "A must never inherit B's later prices for the same prefix and model"
+  );
   assert.equal(published[A].pricingKey, undefined);
   assert.equal(published[prefixA].historicalPricingNamespace, true);
   assert.equal(published[prefixA].modelOverrideEligible, false);
@@ -253,11 +282,13 @@ test("#17348: deletion archives all historic node prefixes as non-routable vetoe
     [{ prefix: prefixA, modelIds: ["foo"] }],
     "deleted node keeps its old raw-ID provenance for manual recovery"
   );
-  const compactRow = core.getDbInstance().prepare(
-    "SELECT value FROM key_value WHERE namespace = ? AND key = ?"
-  ).get("providerNodePrefixTombstones", A) as { value: string };
+  const compactRow = core
+    .getDbInstance()
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get("providerNodePrefixTombstones", A) as { value: string };
   assert.deepEqual(
-    JSON.parse(compactRow.value), [prefixA, prefixB],
+    JSON.parse(compactRow.value),
+    [prefixA, prefixB],
     "hot catalog guard keeps a small prefix-only tombstone"
   );
   assert.deepEqual(
@@ -266,7 +297,6 @@ test("#17348: deletion archives all historic node prefixes as non-routable vetoe
   );
   assert.deepEqual(history.getNodePrefixHistory(core.getDbInstance(), A), []);
 });
-
 
 test("#17348: recreated provider IDs must not erase archived prefix ownership", async () => {
   await create(A, prefixA);
@@ -281,12 +311,15 @@ test("#17348: recreated provider IDs must not erase archived prefix ownership", 
 });
 
 test("#17348: older array-form tombstones still prevent historical reassignment", () => {
-  core.getDbInstance().prepare(
-    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)"
-  ).run("providerNodePrefixTombstones", "old-format", JSON.stringify(["legacy-prefix"]));
-  assert.equal(history.getDeletedNodePrefixTombstones(core.getDbInstance()).has("legacy-prefix"), true);
+  core
+    .getDbInstance()
+    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run("providerNodePrefixTombstones", "old-format", JSON.stringify(["legacy-prefix"]));
+  assert.equal(
+    history.getDeletedNodePrefixTombstones(core.getDbInstance()).has("legacy-prefix"),
+    true
+  );
 });
-
 
 test("#17348: reused live prefix cannot inherit the deleted node's unverified pricing", async () => {
   await create(A, prefixA);
@@ -301,14 +334,19 @@ test("#17348: reused live prefix cannot inherit the deleted node's unverified pr
   const published = await catalog();
   assert.equal(published[B].displayPrefix, prefixA);
   assert.equal(published[B].pricingUnsafePublicPrefix, true);
-  assert.equal(published[B].pricingKey, undefined,
-    "pricing at a retired public alias must not be attached to the new owner");
+  assert.equal(
+    published[B].pricingKey,
+    undefined,
+    "pricing at a retired public alias must not be attached to the new owner"
+  );
   assert.equal(published[prefixA].pricingOnly, true);
   assert.equal(published[prefixA].historicalPricingNamespace, true);
-  assert.deepEqual(published[prefixA].models.map((m: { id: string }) => m.id), ["foo"]);
+  assert.deepEqual(
+    published[prefixA].models.map((m: { id: string }) => m.id),
+    ["foo"]
+  );
   assert.equal(published[A].historicalPrefixes, undefined);
 });
-
 
 test("#17348: node and current public pricing namespaces remain separate in either insert order", async () => {
   for (const [id, prefix, reverse] of [
@@ -350,12 +388,14 @@ test("#17348: pricing provider/model names cannot mutate object prototypes or va
   persistPrice("safe-provider", rawModelPrices);
   const priced = await pricingDb.getPricing();
   assert.equal(Object.hasOwn(priced, "__proto__"), true);
-  assert.equal((priced as any)["__proto__"].ordinary.input, 9);
+  assert.equal(
+    (priced["__proto__"] as unknown as { ordinary: { input: number } }).ordinary.input,
+    9
+  );
   assert.equal(Object.hasOwn(priced["safe-provider"], "__proto__"), true);
   assert.equal(priced["safe-provider"]["__proto__"].input, 11);
-  const constructorPrice = Object.getOwnPropertyDescriptor(
-    priced["safe-provider"], "constructor"
-  )?.value as { output?: unknown } | undefined;
+  const constructorPrice = Object.getOwnPropertyDescriptor(priced["safe-provider"], "constructor")
+    ?.value as { output?: unknown } | undefined;
   assert.equal(constructorPrice?.output, 22);
   assert.equal(({} as Record<string, unknown>).ordinary, undefined);
   const bundle = await pricingDb.getPricingWithSources();

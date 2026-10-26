@@ -9,7 +9,11 @@ import { backupDbFile } from "../backup";
 import { invalidateDbCache } from "../readCache";
 import { toRecord, type JsonRecord } from "./columns";
 import { resetProviderNodePrefixCache } from "./nodePrefix";
-import { recordNodePrefixChange, deleteNodePrefixHistory, recordDeletedNodePrefixTombstone } from "./nodePrefixHistory";
+import {
+  recordNodePrefixChange,
+  deleteNodePrefixHistory,
+  recordDeletedNodePrefixTombstone,
+} from "./nodePrefixHistory";
 
 function normalizeDailyQuotaResetHour(value: unknown): number | null {
   return value === 0 || value ? Number(value) : null;
@@ -198,30 +202,30 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
     updated_at = @updatedAt
     WHERE id = @id
   `
-  ).run({
-    id,
-    type: merged["type"],
-    name: merged["name"],
-    prefix: merged["prefix"] || null,
-    apiType: merged["apiType"] || null,
-    baseUrl: merged["baseUrl"] || null,
-    chatPath: merged["chatPath"] || null,
-    modelsPath: merged["modelsPath"] || null,
-    // #2166: iconUrl is nullable — explicit `null` (not omission) clears a previously
-    // stored custom icon when the caller submits an empty value.
-    iconUrl: merged["iconUrl"] || null,
-    customHeadersJson: merged["customHeadersJson"] || null,
-    dailyQuotaResetTimezone: merged["dailyQuotaResetTimezone"] || null,
-    dailyQuotaResetHour: normalizeDailyQuotaResetHour(merged["dailyQuotaResetHour"]),
-    updatedAt: merged["updatedAt"],
+    ).run({
+      id,
+      type: merged["type"],
+      name: merged["name"],
+      prefix: merged["prefix"] || null,
+      apiType: merged["apiType"] || null,
+      baseUrl: merged["baseUrl"] || null,
+      chatPath: merged["chatPath"] || null,
+      modelsPath: merged["modelsPath"] || null,
+      // #2166: iconUrl is nullable — explicit `null` (not omission) clears a previously
+      // stored custom icon when the caller submits an empty value.
+      iconUrl: merged["iconUrl"] || null,
+      customHeadersJson: merged["customHeadersJson"] || null,
+      dailyQuotaResetTimezone: merged["dailyQuotaResetTimezone"] || null,
+      dailyQuotaResetHour: normalizeDailyQuotaResetHour(merged["dailyQuotaResetHour"]),
+      updatedAt: merged["updatedAt"],
     });
     // Persist evidence from the SAME pre-change node and its known upstream
     // model IDs atomically with the routing-prefix update (#17348). A value
     // such as "ag/model" may be a legitimate upstream ID; the history never
     // guesses that removing "ag/" is safe.
     const original = existing as JsonRecord;
-    const compatible = original.type === "openai-compatible" ||
-      original.type === "anthropic-compatible";
+    const compatible =
+      original.type === "openai-compatible" || original.type === "anthropic-compatible";
     if (compatible) {
       recordNodePrefixChange(
         db,

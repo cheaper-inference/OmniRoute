@@ -60,26 +60,21 @@ function readPricingNamespace(
   return pricing;
 }
 
+function mergeProviderModels(target: PricingModels, models: PricingModels): void {
+  for (const [model, pricing] of Object.entries(models)) {
+    const previous = Object.hasOwn(target, model) ? target[model] : null;
+    setOwnKey(target, model, previous ? { ...previous, ...toRecord(pricing) } : pricing);
+  }
+}
+
 function mergePricingLayers(layers: PricingByProvider[]): PricingByProvider {
   const mergedPricing: PricingByProvider = {};
 
   for (const layer of layers) {
     for (const [provider, models] of Object.entries(layer)) {
-      if (!Object.hasOwn(mergedPricing, provider)) {
-        setOwnKey(mergedPricing, provider, { ...models });
-        continue;
-      }
-
-      for (const [model, pricing] of Object.entries(models)) {
-        const previous = Object.hasOwn(mergedPricing[provider], model)
-          ? mergedPricing[provider][model]
-          : null;
-        setOwnKey(
-          mergedPricing[provider],
-          model,
-          previous ? { ...previous, ...toRecord(pricing) } : pricing
-        );
-      }
+      if (Object.hasOwn(mergedPricing, provider))
+        mergeProviderModels(mergedPricing[provider], models);
+      else setOwnKey(mergedPricing, provider, { ...models });
     }
   }
 
