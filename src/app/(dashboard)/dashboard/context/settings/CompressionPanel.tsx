@@ -30,9 +30,14 @@ import {
   outputStyleMeta,
 } from "../../../../../../open-sse/services/compression/outputStyles/catalog.ts";
 import {
+  deriveEffectiveAutoTriggerPreviewPlan,
   deriveEffectivePreviewPlan,
   type NamedCombos,
 } from "../../../../../../open-sse/services/compression/deriveEffectivePreviewPlan.ts";
+import {
+  DEFAULT_COMPRESSION_CONFIG,
+  type CompressionConfig as RuntimeCompressionConfig,
+} from "../../../../../../open-sse/services/compression/types.ts";
 import EngineGuidanceDetail from "./EngineGuidanceDetail";
 import {
   DEFAULT_CONTEXT_BUDGET,
@@ -55,7 +60,12 @@ interface CavemanOutputModeConfig {
 
 interface CompressionConfig {
   enabled: boolean;
+  defaultMode?: RuntimeCompressionConfig["defaultMode"];
+  autoTriggerMode?: RuntimeCompressionConfig["autoTriggerMode"];
   autoTriggerTokens: number;
+  comboOverrides?: RuntimeCompressionConfig["comboOverrides"];
+  stackedPipeline?: RuntimeCompressionConfig["stackedPipeline"];
+  enginesExplicit?: boolean;
   preserveSystemPrompt: boolean;
   preserveSystemPromptMode?: "always" | "whenNoCache" | "never";
   engines: Record<string, EngineToggle>;
@@ -546,7 +556,23 @@ export default function CompressionPanel() {
     }
   };
 
-  const derived = deriveEffectivePreviewPlan(config, namedCombos);
+  const previewConfig: RuntimeCompressionConfig = {
+    ...DEFAULT_COMPRESSION_CONFIG,
+    enabled: config.enabled,
+    defaultMode: config.defaultMode ?? DEFAULT_COMPRESSION_CONFIG.defaultMode,
+    autoTriggerMode: config.autoTriggerMode,
+    autoTriggerTokens: config.autoTriggerTokens,
+    preserveSystemPrompt: config.preserveSystemPrompt,
+    preserveSystemPromptMode: config.preserveSystemPromptMode,
+    comboOverrides: config.comboOverrides ?? {},
+    stackedPipeline: config.stackedPipeline,
+    engines: config.engines,
+    enginesExplicit: config.enginesExplicit,
+    activeComboId: config.activeComboId,
+    contextBudget: config.contextBudget,
+  };
+  const derived = deriveEffectivePreviewPlan(previewConfig, namedCombos);
+  const autoTriggerDerived = deriveEffectiveAutoTriggerPreviewPlan(previewConfig, namedCombos);
   const derivedText = derivedPreviewText(derived, t);
   if (loading) {
     return (
@@ -626,10 +652,20 @@ export default function CompressionPanel() {
       {/* Derived pipeline preview */}
       <div
         data-testid="derived-pipeline-preview"
-        className="mb-4 rounded-md border border-border bg-bg-subtle px-3 py-2 text-xs text-text-muted"
+        className="mb-4 space-y-1 rounded-md border border-border bg-bg-subtle px-3 py-2 text-xs text-text-muted"
       >
-        <span className="font-medium text-text-main">{t("compressionEffectivePipeline")}</span>{" "}
-        {derivedText}
+        <div>
+          <span className="font-medium text-text-main">{t("compressionEffectivePipeline")}</span>{" "}
+          {derivedText}
+        </div>
+        {autoTriggerDerived && (
+          <div data-testid="auto-trigger-pipeline-preview">
+            <span className="font-medium text-text-main">
+              {t("compressionSettingsAutoTriggerMode")}
+            </span>{" "}
+            {derivedPreviewText(autoTriggerDerived, t)}
+          </div>
+        )}
       </div>
 
       {/* Adaptive context-budget dial — mode/policy persist via PUT contextBudget */}

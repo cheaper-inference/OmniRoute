@@ -1,4 +1,4 @@
-import type { CompressionPipelineStep } from "./types.ts";
+import type { CompressionConfig, CompressionPipelineStep } from "./types.ts";
 import type { DerivedPlan } from "./deriveDefaultPlan.ts";
 import { downgradeUnrequestedLossy } from "./lossyRequestPolicy.ts";
 import { deriveDefaultPlanFromConfig, type DefaultPlanConfig } from "./planResolution.ts";
@@ -44,5 +44,28 @@ export function deriveEffectivePreviewPlan(
     });
   }
 
-  return downgradeUnrequestedLossy(deriveDefaultPlanFromConfig(config, /* comboId */ null, combos));
+  return downgradeUnrequestedLossy(
+    deriveDefaultPlanFromConfig(config, /* comboId */ null, combos),
+    config.stackedPipeline ?? []
+  );
+}
+
+/** Derives the conditional auto-trigger plan shown by static dashboard previews. */
+export function deriveEffectiveAutoTriggerPreviewPlan(
+  config: CompressionConfig,
+  combos: NamedCombos = {}
+): DerivedPlan | null {
+  if (!config.enabled || config.autoTriggerTokens <= 0) return null;
+  if (config.activeComboId && combos[config.activeComboId]) return null;
+
+  const adaptiveMode = config.contextBudget?.mode;
+  if (adaptiveMode === "floor" || adaptiveMode === "replace-autotrigger") return null;
+
+  const mode = config.autoTriggerMode ?? "lite";
+  const plan: DerivedPlan = {
+    mode,
+    stackedPipeline: mode === "stacked" ? (config.stackedPipeline ?? []) : [],
+    source: "auto-trigger",
+  };
+  return downgradeUnrequestedLossy(plan, config.stackedPipeline ?? []);
 }
