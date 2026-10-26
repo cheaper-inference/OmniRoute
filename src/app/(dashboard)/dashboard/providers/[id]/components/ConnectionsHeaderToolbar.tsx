@@ -49,6 +49,7 @@ type ConnectionsHeaderToolbarProps = {
   onOpenCodexCliGuide: () => void;
   onOpenImportCodex: () => void;
   onOpenImportClaude: () => void;
+  onOpenImportAgy?: () => void;
   onOpenImportGemini: () => void;
   onOpenImportGrokCli: () => void;
   t: ProviderMessageTranslator;
@@ -97,6 +98,7 @@ export default function ConnectionsHeaderToolbar({
   onOpenCodexCliGuide,
   onOpenImportCodex,
   onOpenImportClaude,
+  onOpenImportAgy,
   onOpenImportGemini,
   onOpenImportGrokCli,
   t,
@@ -377,6 +379,16 @@ export default function ConnectionsHeaderToolbar({
                     onClick={() => gateConnectionFlow(onOpenImportGrokCli)}
                   >
                     {providerText(t, "importGrokAuth", "Import auth")}
+                  </Button>
+                )}
+                {(providerId === "antigravity" || providerId === "agy") && onOpenImportAgy && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    icon="upload_file"
+                    onClick={() => gateConnectionFlow(onOpenImportAgy)}
+                  >
+                    {providerText(t, "importAgyAuth", "Import auth")}
                   </Button>
                 )}
               </>

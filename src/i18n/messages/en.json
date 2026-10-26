@@ -5578,6 +5578,7 @@
     "applyClaudeAuthLocal": "Apply auth",
     "exportClaudeAuthFile": "Export auth",
     "importClaudeAuth": "Import auth",
+    "importAgyAuth": "Import auth",
     "claudeApplyModalTitle": "Apply to Local Claude Code",
     "claudeApplyTargetLabel": "Target path",
     "claudeApplyBackupLabel": "Backups",

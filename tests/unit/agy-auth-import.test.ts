@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   parseAndValidateAgyToken,
+  detectLocalAgyTokenRaw,
   AgyAuthFileError,
 } from "../../src/lib/oauth/utils/agyAuthImport.ts";
 
@@ -69,4 +70,32 @@ test("invalid/garbage expiry becomes null rather than throwing", () => {
     token: { access_token: ACCESS, refresh_token: REFRESH, expiry: "not-a-date" },
   });
   assert.equal(parsed.expiresAt, null);
+});
+
+test("detectLocalAgyTokenRaw honors AGY_TOKEN_FILE environment override", async () => {
+  const fs = await import("fs/promises");
+  const os = await import("os");
+  const path = await import("path");
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "agy-test-"));
+  const tmpFile = path.join(tmpDir, "token.json");
+  await fs.writeFile(
+    tmpFile,
+    JSON.stringify({
+      token: { access_token: ACCESS, refresh_token: REFRESH },
+      id_token_email: "test@example.com",
+    })
+  );
+
+  const prevEnv = process.env.AGY_TOKEN_FILE;
+  try {
+    process.env.AGY_TOKEN_FILE = tmpFile;
+    const detected = await detectLocalAgyTokenRaw();
+    assert.equal(detected.source, "env:AGY_TOKEN_FILE");
+    const parsed = parseAndValidateAgyToken(detected.raw);
+    assert.equal(parsed.accessToken, ACCESS);
+    assert.equal(parsed.refreshToken, REFRESH);
+  } finally {
+    process.env.AGY_TOKEN_FILE = prevEnv;
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  }
 });

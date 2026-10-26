@@ -1,8 +1,16 @@
+import { execFile } from "child_process";
+import { promisify } from "util";
+import fs from "fs/promises";
+import path from "path";
+import os from "os";
+
 import {
   getProviderConnections,
   createProviderConnection,
   updateProviderConnection,
 } from "@/lib/localDb";
+
+const execFileAsync = promisify(execFile);
 import { AGY_CONFIG } from "@/lib/oauth/constants/oauth";
 import {
   getAntigravityContentHeaders,
@@ -259,4 +267,112 @@ export async function createConnectionFromAgyToken(
   });
 
   return { connection, created: true };
+}
+
+/**
+ * Detect locally stored Antigravity credentials from:
+ * 1. Linux Secret Service keyring (secret-tool)
+ * 2. AGY_TOKEN_FILE environment variable override
+ * 3. Default CLI token files (~/.gemini/antigravity-cli/antigravity-oauth-token)
+ * 4. Multi-profile token files (~/.config/agentcontrol/profiles/...)
+ * 5. Antigravity IDE SQLite DB (~/.config/Antigravity/User/globalStorage/state.vscdb)
+ */
+export async function detectLocalAgyTokenRaw(): Promise<{ raw: unknown; source: string }> {
+  const home = os.homedir();
+
+  // 1. Explicit env override
+  if (process.env.AGY_TOKEN_FILE && process.env.AGY_TOKEN_FILE.trim()) {
+    try {
+      const content = await fs.readFile(process.env.AGY_TOKEN_FILE.trim(), "utf8");
+      return { raw: JSON.parse(content), source: "env:AGY_TOKEN_FILE" };
+    } catch {}
+  }
+
+  // 2. Linux Secret Service / Keyring (secret-tool)
+  if (process.platform === "linux") {
+    try {
+      const { stdout } = await execFileAsync(
+        "secret-tool",
+        ["lookup", "service", "gemini", "username", "antigravity"],
+        { timeout: 3000 }
+      );
+      if (stdout && stdout.trim()) {
+        const parsed = JSON.parse(stdout.trim());
+        if (parsed.token?.refresh_token || parsed.refresh_token) {
+          return { raw: parsed, source: "secret-service" };
+        }
+      }
+    } catch {}
+  }
+
+  // 3. Default and legacy CLI token file locations
+  const fileCandidates = [
+    path.join(home, ".gemini", "antigravity-cli", "antigravity-oauth-token"),
+    path.join(home, ".gemini", "antigravity", "antigravity-oauth-token"),
+  ];
+
+  for (const candidate of fileCandidates) {
+    try {
+      const content = await fs.readFile(candidate, "utf8");
+      return { raw: JSON.parse(content), source: candidate };
+    } catch {}
+  }
+
+  // 4. AgentControl profile directories
+  const agentControlProfiles = path.join(home, ".config", "agentcontrol", "profiles");
+  try {
+    const entries = await fs.readdir(agentControlProfiles, { withFileTypes: true });
+    for (const ent of entries) {
+      if (ent.isDirectory()) {
+        const p = path.join(
+          agentControlProfiles,
+          ent.name,
+          ".gemini",
+          "antigravity-cli",
+          "antigravity-oauth-token"
+        );
+        try {
+          const content = await fs.readFile(p, "utf8");
+          return { raw: JSON.parse(content), source: p };
+        } catch {}
+      }
+    }
+  } catch {}
+
+  // 5. Antigravity IDE SQLite DB
+  const ideDbs = [
+    path.join(home, ".config", "Antigravity", "User", "globalStorage", "state.vscdb"),
+    path.join(home, ".config", "Antigravity IDE", "User", "globalStorage", "state.vscdb"),
+  ];
+  for (const dbPath of ideDbs) {
+    try {
+      await fs.access(dbPath);
+      const { stdout } = await execFileAsync(
+        "sqlite3",
+        [dbPath, "SELECT value FROM ItemTable WHERE key = 'antigravityAuthStatus';"],
+        { timeout: 3000 }
+      );
+      if (stdout && stdout.trim()) {
+        const parsed = JSON.parse(stdout.trim());
+        if (parsed.apiKey) {
+          return {
+            raw: {
+              token: {
+                access_token: parsed.apiKey,
+                refresh_token: parsed.apiKey,
+              },
+              id_token_email: parsed.email,
+            },
+            source: dbPath,
+          };
+        }
+      }
+    } catch {}
+  }
+
+  throw new AgyAuthFileError(
+    "No local Antigravity CLI or IDE login found. Run `agy`, sign in with Google, then try again.",
+    404,
+    "no_local_login"
+  );
 }
