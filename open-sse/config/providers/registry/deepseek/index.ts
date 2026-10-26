@@ -8,7 +8,6 @@ export const deepseekProvider: RegistryEntry = {
   baseUrl: "https://api.deepseek.com/chat/completions",
   authType: "apikey",
   defaultContextLength: 1_000_000,
-  requiresReasoningContentEcho: true,
   authHeader: "bearer",
   alternateFormats: [
     {
