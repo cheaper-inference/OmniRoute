@@ -1,0 +1,1 @@
+- **fix(resilience):** A transient credential-health probe network error, upstream outage, or upstream rate limit no longer blocks a valid connection's combo dispatch. Genuine credential failures and the opt-in handling of ambiguous probes retain their existing safeguards, while skip logs distinguish confirmed credential errors from failed probes (#18037).
