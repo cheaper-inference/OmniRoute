@@ -286,6 +286,25 @@ test("Codex capacity classifier requires explicit transient evidence and preserv
     true,
     "empty/non-numeric rate-limit metadata is not proof of exhaustion"
   );
+
+  assert.equal(
+    isTransientCodexCapacity429(429, capacity, { get: () => 0 }),
+    true,
+    "malformed header getter values must not throw"
+  );
+  assert.equal(
+    isTransientCodexCapacity429(
+      429,
+      capacity,
+      Object.defineProperty({}, "get", {
+        get() {
+          throw new Error("invalid header accessor");
+        },
+      })
+    ),
+    true,
+    "a malformed header object must not crash the error handling path"
+  );
 });
 
 test("transient Codex capacity cannot clear an earlier genuine scoped quota cooldown", async () => {
