@@ -1,0 +1,1 @@
+- **fix(api):** stream text transform classifies inference_geo, speed, signature, and request_id as metadata, preventing them from being buffered and leaked into text content (#18006).

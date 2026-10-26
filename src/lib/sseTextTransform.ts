@@ -52,6 +52,12 @@ export const METADATA_KEYS = new Set([
   "response_id",
   "previous_response_id",
   "status",
+  // Anthropic / Claude protocol fields (#18006, #16578):
+  "inference_geo",
+  "speed",
+  "signature",
+  // OpenAI / compatible protocol identifiers (#18006):
+  "request_id",
 ]);
 
 // Responses API events whose `delta` carries tool-call arguments (JSON), not answer text.

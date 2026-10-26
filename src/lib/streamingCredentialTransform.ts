@@ -305,6 +305,9 @@ function flushClaudeFormat(
     hasDelta = true;
   }
   if (!hasDelta) return null;
+  if (delta.partial_json && !delta.text && !delta.thinking) {
+    delta.type = "input_json_delta";
+  }
   return {
     type: "content_block_delta",
     index: typeof lastJson.index === "number" ? lastJson.index : 0,

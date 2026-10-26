@@ -434,3 +434,13 @@ test("unclosed private key header in the finish_reason chunk is still stamped", 
   assert.ok(!output.includes(header), "key header must not leak in clear");
   assert.match(output, /\[REDACTED:private_key\]/);
 });
+
+test("Claude format partialJson flush emits content_block_delta with input_json_delta (#18006)", async () => {
+  const output = await runTransform(createCredentialSseTransform(), [
+    'data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"call_1","name":"test","input":{}}}\n\n',
+    'data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\\"query\\":\\"search\\"}"}}\n\n',
+    "data: [DONE]\n\n",
+  ]);
+  assert.ok(output.includes("input_json_delta"));
+  assert.ok(output.includes("search"));
+});

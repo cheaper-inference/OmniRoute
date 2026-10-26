@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createSseTextTransform } from "../../src/lib/sseTextTransform.ts";
+import { createSseTextTransform, classifyField } from "../../src/lib/sseTextTransform.ts";
 import type { FieldCategory } from "../../src/lib/sseTextTransform.ts";
 
 async function testTransform(transform: TransformStream, inputChunks: string[]): Promise<string> {
@@ -297,4 +297,66 @@ test("processToolArgs routes tool call arguments to the processor when enabled",
 
   assert.equal(received.length, 1, "tool call arguments must reach the processor when opted in");
   assert.ok(output.includes("MUTATED"), "processor output must replace tool JSON when opted in");
+});
+
+test("classifyField treats inference_geo, speed, signature, and request_id as metadata (#18006)", () => {
+  assert.equal(classifyField("inference_geo", "usage"), null);
+  assert.equal(classifyField("speed", "usage"), null);
+  assert.equal(classifyField("signature", "delta"), null);
+  assert.equal(classifyField("request_id"), null);
+});
+
+test("createSseTextTransform preserves Anthropic usage fields and signature_delta without classifying as content (#18006)", async () => {
+  const received: string[] = [];
+  const transform = createSseTextTransform((text) => {
+    received.push(text);
+    return text.toUpperCase();
+  });
+
+  const payload = {
+    type: "message_delta",
+    delta: { stop_reason: "end_turn" },
+    usage: {
+      output_tokens: 10,
+      inference_geo: "global",
+      speed: "standard",
+    },
+  };
+
+  const output = await testTransform(transform, [`data: ${JSON.stringify(payload)}\n\n`]);
+
+  assert.equal(received.length, 0, "usage metadata must not be treated as content");
+  assert.ok(output.includes('"inference_geo":"global"'));
+  assert.ok(output.includes('"speed":"standard"'));
+});
+
+test("createSseTextTransform preserves signature_delta and top-level request_id (#18006)", async () => {
+  const received: string[] = [];
+  const transform = createSseTextTransform((text) => {
+    received.push(text);
+    return text.toUpperCase();
+  });
+
+  const sigPayload = {
+    type: "content_block_delta",
+    index: 0,
+    delta: {
+      type: "signature_delta",
+      signature: "SIG_DATA_BASE64",
+    },
+  };
+  const reqIdPayload = {
+    id: "chatcmpl-1",
+    request_id: "req_abc123",
+    choices: [{ delta: { content: "hello" } }],
+  };
+
+  const output = await testTransform(transform, [
+    `data: ${JSON.stringify(sigPayload)}\n\n`,
+    `data: ${JSON.stringify(reqIdPayload)}\n\n`,
+  ]);
+
+  assert.deepEqual(received, ["hello"], "only actual content should reach the text processor");
+  assert.ok(output.includes('"signature":"SIG_DATA_BASE64"'));
+  assert.ok(output.includes('"request_id":"req_abc123"'));
 });
