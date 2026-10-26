@@ -7,7 +7,8 @@
 // while their same-effect siblings were listed.
 //
 // This test classifies routes by what their handler can do, read from the source:
-//   - writes the operator's host CLI config (guardCliConfigWrite / ensureCliConfigWriteAllowed)
+//   - writes the operator's host CLI config (guardCliConfigWrite / ensureCliConfigWriteAllowed,
+//     or createMultiBackup, which snapshots the config files a handler is about to overwrite)
 //   - signals or exits the server process (process.kill / process.exit)
 //   - exports stored data out of the instance (runSingleLogExport / exportAll)
 // Every such route must be LOCAL_ONLY or ALWAYS_PROTECTED. A new route with one of these
@@ -34,7 +35,7 @@ const API_DIR = path.join(process.cwd(), "src", "app", "api");
 const CAPABILITIES: ReadonlyArray<{ name: string; pattern: RegExp }> = [
   {
     name: "writes host CLI config",
-    pattern: /\b(guardCliConfigWrite|ensureCliConfigWriteAllowed)\(/,
+    pattern: /\b(guardCliConfigWrite|ensureCliConfigWriteAllowed|createMultiBackup)\(/,
   },
   { name: "signals or exits the process", pattern: /\bprocess\.(kill|exit)\(/ },
   { name: "exports stored data", pattern: /\b(runSingleLogExport|exportAll)\b/ },
@@ -82,6 +83,7 @@ test("the capability scan finds the routes it is meant to police", () => {
   for (const known of [
     "/api/shutdown",
     "/api/cli-tools/codex-profiles",
+    "/api/cli-tools/letta-settings",
     "/api/db-backups/exportAll",
   ]) {
     assert.ok(routes.has(known), `capability scan no longer detects ${known}`);
