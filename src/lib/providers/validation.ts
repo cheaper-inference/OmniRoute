@@ -355,6 +355,8 @@ export async function validateProviderApiKey({
     "claude-web": validateClaudeWebProvider,
     "gemini-web": validateGeminiWebProvider,
     "googleflow-web": validateGoogleFlowWebProvider,
+    googleflow: validateGoogleFlowWebProvider,
+    gflow: validateGoogleFlowWebProvider,
     "notion-web": validateNotionWebProvider,
     "copilot-m365-web": validateCopilotM365WebProvider,
     "copilot-web": validateCopilotWebProvider,

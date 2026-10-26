@@ -22,6 +22,8 @@ export const PROVIDER_LABEL: Record<string, string> = {
   llmgateway: "LLM Gateway",
   lyceum: "Lyceum",
   clinepass: "ClinePass",
+  "googleflow-web": "Google Flow",
+  googleflow: "Google Flow",
 };
 
 export const PROVIDER_ORDER: Record<string, number> = {

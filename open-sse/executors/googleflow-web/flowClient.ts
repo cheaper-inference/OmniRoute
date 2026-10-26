@@ -144,29 +144,42 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     });
     await page.waitForTimeout(3_000);
 
+    console.log("[FLOW_DEBUG] Navigated to:", page.url());
     if (page.url().includes("accounts.google.com")) {
       throw new Error("Google Flow session is expired or requires re-authentication");
     }
 
-    if (!page.url().includes("/project/")) {
-      const newProjBtn = page
-        .locator("button")
-        .filter({ hasText: /новый проект|new project|start creating/i })
-        .first();
+    // Ensure we start a fresh project or session
+    const newProjBtn = page
+      .locator("button.new-project-button, button:has-text('Новый проект'), button:has-text('New project'), button:has-text('Start Creating')")
+      .first();
+    if (await newProjBtn.isVisible({ timeout: 6_000 }).catch(() => false)) {
       try {
-        await newProjBtn.waitFor({ state: "visible", timeout: 15_000 });
         await newProjBtn.click();
         await page.waitForURL(/.*\/project\/.*/, { timeout: 20_000 });
-      } catch {
-        const addBtn = page.locator("button:has-text('add')").first();
-        if (await addBtn.isVisible().catch(() => false)) {
-          await addBtn.click();
-          await page.waitForURL(/.*\/project\/.*/, { timeout: 15_000 }).catch(() => {});
-        }
+      } catch {}
+    } else if (page.url().includes("/project/")) {
+      const newChatBtn = page.locator("button[aria-label='Начать новый сеанс'], button:has-text('edit_square')").first();
+      if (await newChatBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await newChatBtn.click().catch(() => {});
+        await page.waitForTimeout(1_500);
       }
     }
+    console.log("[FLOW_DEBUG] Active project URL:", page.url());
 
+    // Collect existing videos already on the page/project canvas
+    const existingVideoUrls = new Set<string>();
+    try {
+      const existing = await page.$$eval("video", (els: any[]) =>
+        els.map((e: any) => e.src || e.currentSrc).filter((s: string) => s && s.startsWith("http"))
+      );
+      for (const u of existing) existingVideoUrls.add(u);
+    } catch {}
+    console.log("[FLOW_DEBUG] Existing video URLs count:", existingVideoUrls.size);
+
+    let promptSentAt = 0;
     let videoUrl = "";
+
     const videoPromise = new Promise<string>((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new Error("Timed out waiting for Veo video generation to complete (180s limit)"));
@@ -174,25 +187,40 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
       page.on("response", async (response: any) => {
         const url = response.url();
-        if (
-          (url.includes("flow-content.google/video") && url.includes("Signature=")) ||
-          url.includes("ai-sandbox-videofx") ||
-          (url.includes(".mp4") && !url.includes("Expires"))
-        ) {
-          clearTimeout(timeout);
-          resolve(url);
+        const now = Date.now();
+
+        // Veo takes at least 15s to render; anything earlier is existing canvas asset
+        if (!promptSentAt || now - promptSentAt < 15_000) {
+          if (url.includes("flow-content.google/video")) {
+            existingVideoUrls.add(url);
+          }
           return;
         }
-        if (url.includes("batchexecute")) {
+
+        if (url.includes("flow-content.google/video") && url.includes("Signature=")) {
+          if (!existingVideoUrls.has(url)) {
+            console.log("[FLOW_DEBUG] RESOLVED videoPromise with direct URL:", url);
+            clearTimeout(timeout);
+            resolve(url);
+            return;
+          }
+        }
+
+        if (url.includes("batchexecute") && (url.includes("rpcids=as29s") || url.includes("rpcids=GN0Bre") || url.includes("rpcids=ngNC2"))) {
           try {
             const body = await response.text();
-            if ((body.includes("flow-content.google/video") && body.includes("Signature=")) || body.includes(".mp4")) {
-              const match =
-                /(https:\/\/flow-content\.google\/video\/[^\s"\\]+Signature=[^\s"\\]+)/.exec(body) ||
-                /(https:\/\/[^"\s\\]+\.mp4[^"\s\\]*)/.exec(body);
+            if (body.includes("flow-content.google/video")) {
+              const match = /(https:\/\/flow-content\.google\/video\/[^"\s\\]+)/.exec(body);
               if (match && match[1]) {
-                clearTimeout(timeout);
-                resolve(match[1]);
+                const cleanUrl = match[1]
+                  .replace(/\\\\u003d|\\u003d/g, "=")
+                  .replace(/\\\\u0026|\\u0026/g, "&");
+                if (!existingVideoUrls.has(cleanUrl) && cleanUrl.includes("Signature=")) {
+                  console.log("[FLOW_DEBUG] RESOLVED batchexecute with clean URL:", cleanUrl);
+                  clearTimeout(timeout);
+                  resolve(cleanUrl);
+                  return;
+                }
               }
             }
           } catch {}
@@ -205,32 +233,46 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         ? opts.prompt
         : `Create a video: ${opts.prompt}`;
 
+    console.log("[FLOW_DEBUG] Typing prompt:", videoPrompt.slice(0, 50));
     const editor = page.locator(".ProseMirror").first();
     await editor.waitFor({ timeout: 15_000 });
     await editor.click();
     await page.keyboard.type(videoPrompt);
     await page.waitForTimeout(1_000);
 
-    const sendBtn = page.locator("button[aria-label='Начать генерацию'], button:has-text('arrow_forward')").first();
+    promptSentAt = Date.now();
+    console.log("[FLOW_DEBUG] Clicking send button...");
+
+    const sendBtn = page.locator("button.generate-icon-button, button[aria-label='Начать генерацию'], button:has-text('arrow_forward')").first();
     if (await sendBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
       await sendBtn.click();
     } else {
       await page.keyboard.press("Enter");
     }
+    console.log("[FLOW_DEBUG] Send triggered!");
 
+    // Check for approval card ("Всегда одобрять" / "Одобрить")
     const approveBtn = page
       .locator(
         ".option-row:has-text('Всегда одобрять'), .option-row:has-text('Одобрить'), .option-label:has-text('Всегда одобрять'), .option-label:has-text('Одобрить'), button:has-text('Всегда одобрять'), button:has-text('Одобрить')"
       )
       .first();
     try {
-      await approveBtn.waitFor({ state: "visible", timeout: 25_000 });
+      await approveBtn.waitFor({ state: "visible", timeout: 8_000 });
       await approveBtn.click();
+      console.log("[FLOW_DEBUG] Clicked approval button!");
     } catch {}
 
     const pollPromise = (async () => {
-      for (let i = 0; i < 36; i++) {
-        await page.waitForTimeout(5_000);
+      for (let i = 0; i < 40; i++) {
+        await page.waitForTimeout(4_000);
+        if (Date.now() - promptSentAt < 15_000) continue;
+
+        const approveBtnLater = page.locator(".option-row:has-text('Всегда одобрять'), .option-row:has-text('Одобрить')").first();
+        if (await approveBtnLater.isVisible({ timeout: 500 }).catch(() => false)) {
+          await approveBtnLater.click().catch(() => {});
+        }
+
         const vidContainer = page.locator(".video-container").first();
         if (await vidContainer.isVisible({ timeout: 1_000 }).catch(() => false)) {
           const containerText = await vidContainer.innerText().catch(() => "");
@@ -242,8 +284,9 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         const videos = await page.$$eval("video", (els: any[]) =>
           els.map((e: any) => e.src || e.currentSrc).filter((s: string) => s && s.startsWith("http"))
         );
-        if (videos.length > 0) {
-          return videos[0];
+        const newVideos = videos.filter((v: string) => !existingVideoUrls.has(v) && v.includes("flow-content.google"));
+        if (newVideos.length > 0) {
+          return newVideos[0];
         }
       }
       throw new Error("Timeout polling video element");

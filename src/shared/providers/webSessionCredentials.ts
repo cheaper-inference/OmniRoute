@@ -105,6 +105,15 @@ export const WEB_SESSION_CREDENTIAL_REQUIREMENTS = {
     acceptsFullCookieHeader: true,
     storageKeys: ["cookie", "__Secure-1PSID", "__Secure-1PSIDTS", "OSID"],
   },
+  googleflow: {
+    kind: "cookie",
+    credentialName: "__Secure-1PSID (optional: __Secure-1PSIDTS, OSID)",
+    placeholder: "__Secure-1PSID=...; __Secure-1PSIDTS=...; OSID=...",
+    hintFallback:
+      'Accepted formats: full Cookie header from flow.google.com, or browser-export JSON.',
+    acceptsFullCookieHeader: true,
+    storageKeys: ["cookie", "__Secure-1PSID", "__Secure-1PSIDTS", "OSID"],
+  },
   "notion-web": {
     kind: "cookie",
     credentialName: "token_v2 (optional: space_id, notion_browser_id)",

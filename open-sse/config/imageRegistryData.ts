@@ -518,6 +518,21 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     supportedSizes: ["1024x1024", "1024x1792", "1792x1024"],
   },
   magnific: MAGNIFIC_IMAGE_PROVIDER,
+  "googleflow-web": {
+    id: "googleflow-web",
+    alias: "gflow",
+    baseUrl: "https://flow.google.com",
+    authType: "apikey",
+    authHeader: "cookie",
+    format: "googleflow-web",
+    models: [
+      { id: "nano-banana-pro", name: "Nano Banana Pro" },
+      { id: "nano-banana-2.1", name: "Nano Banana 2.1" },
+      { id: "nano-banana-2-lite", name: "Nano Banana 2 Lite" },
+      { id: "omni-1.1-flash", name: "Omni 1.1 Flash" },
+    ],
+    supportedSizes: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+  },
   sdwebui: {
     id: "sdwebui",
     baseUrl: "http://localhost:7860/sdapi/v1/txt2img",

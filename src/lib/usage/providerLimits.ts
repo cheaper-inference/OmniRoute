@@ -86,6 +86,10 @@ const PROVIDER_LIMITS_APIKEY_PROVIDERS = new Set([
   // Tavily API key → /usage account & plan credits
   "tavily-search",
   "tavily",
+  // Google Flow web-session / cookie → Veo / Imagen credits
+  "googleflow-web",
+  "googleflow",
+  "gflow",
   // Jina wallet balance (GET https://dash.jina.ai/api/v1/api_key/fe_user)
   "jina-search",
   "jina",
@@ -146,7 +150,16 @@ export function notifyProviderUsageRecorded(
   provider: string | null | undefined,
   connectionId: string | null | undefined
 ): void {
-  if ((provider !== "antigravity" && provider !== "agy") || !connectionId) return;
+  if (
+    provider !== "antigravity" &&
+    provider !== "agy" &&
+    provider !== "googleflow-web" &&
+    provider !== "googleflow" &&
+    provider !== "gflow"
+  ) {
+    return;
+  }
+  if (!connectionId) return;
   scheduleProviderLimitsPostUsageRefresh(connectionId);
 }
 
@@ -207,6 +220,18 @@ export function isSupportedUsageConnection(connection: ProviderConnectionLike | 
 
   if (connection.authType === "oauth") {
     return supportsProviderQuota(connection.provider, connection);
+  }
+  if (
+    connection.authType === "web-session" ||
+    connection.authType === "cookie"
+  ) {
+    if (
+      connection.provider === "googleflow-web" ||
+      connection.provider === "googleflow" ||
+      connection.provider === "gflow"
+    ) {
+      return true;
+    }
   }
   if (connection.authType !== "apikey" && connection.authType !== "api_key") return false;
   if (PROVIDER_LIMITS_APIKEY_PROVIDERS.has(connection.provider)) return true;

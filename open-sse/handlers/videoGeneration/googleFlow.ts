@@ -29,6 +29,7 @@ export const GOOGLE_FLOW_CREDENTIAL_PROVIDER = "antigravity";
 
 /** Map a video provider id to the provider id whose stored credentials it uses. */
 export function resolveVideoCredentialProvider(provider: string): string {
+  if (provider === "googleflow-web") return "googleflow-web";
   return provider === "googleflow" ? GOOGLE_FLOW_CREDENTIAL_PROVIDER : provider;
 }
 
