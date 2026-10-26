@@ -7879,6 +7879,8 @@
     "compressionDesc": "فراہم کنندگان کو بھیجنے سے پہلے پرامپٹس کو کمپریس کر کے ٹوکن کا استعمال کم کریں",
     "autoCombosTitle": "خودکار کومبوز",
     "autoCombosDesc": "اس کلید کو پہلے سے موجود auto/* کومبوز استعمال کرنے کی اجازت دیں، جو ہر ترتیب شدہ فراہم کنندہ سے خودکار طور پر ایک ماڈل منتخب کرتے ہیں",
+    "ccDiscoveryAliasesTitle": "Claude Code دریافت کے عرفی نام",
+    "ccDiscoveryAliasesDesc": "ان ماڈلز اور کمبوز کے لیے claude/... مطابقت مررز کی تشہیر کریں جن تک یہ کلید پہلے ہی رسائی رکھتی ہے",
     "compressionGuidanceFullGuideLink": "مکمل کمپریشن گائیڈ",
     "compressionGuidanceShow": "تفصیلات",
     "compressionGuidanceHide": "تفصیلات چھپائیں",

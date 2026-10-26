@@ -7879,6 +7879,8 @@
     "compressionDesc": "ลดการใช้โทเค็นด้วยการบีบอัดพรอมต์ก่อนส่งไปยังผู้ให้บริการ",
     "autoCombosTitle": "คอมโบอัตโนมัติ",
     "autoCombosDesc": "อนุญาตให้คีย์นี้ใช้คอมโบ auto/* ที่มีมาให้ ซึ่งจะเลือกโมเดลโดยอัตโนมัติจากผู้ให้บริการทุกรายที่กำหนดค่าไว้",
+    "ccDiscoveryAliasesTitle": "นามแฝงสำหรับการค้นพบของ Claude Code",
+    "ccDiscoveryAliasesDesc": "ประกาศมิร์เรอร์ความเข้ากันได้ claude/... สำหรับโมเดลและคอมโบที่คีย์นี้เข้าถึงได้อยู่แล้ว",
     "compressionGuidanceFullGuideLink": "คู่มือการบีบอัดฉบับเต็ม",
     "compressionGuidanceShow": "รายละเอียด",
     "compressionGuidanceHide": "ซ่อนรายละเอียด",

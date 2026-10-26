@@ -7879,6 +7879,8 @@
     "compressionDesc": "প্রোভাইডারদের কাছে পাঠানোর আগে প্রম্পট কম্প্রেস করে টোকেনের ব্যবহার কমান",
     "autoCombosTitle": "স্বয়ংক্রিয় কম্বো",
     "autoCombosDesc": "এই কী-কে বিল্ট-ইন auto/* কম্বোগুলো ব্যবহার করার অনুমতি দিন, যেগুলো কনফিগার করা প্রতিটি প্রোভাইডার থেকে স্বয়ংক্রিয়ভাবে একটি মডেল বেছে নেয়",
+    "ccDiscoveryAliasesTitle": "Claude Code ডিসকভারি অ্যালিয়াস",
+    "ccDiscoveryAliasesDesc": "এই কী যে মডেল এবং কম্বোগুলি ইতিমধ্যেই অ্যাক্সেস করতে পারে সেগুলির জন্য claude/... সামঞ্জস্যপূর্ণ মিররগুলি প্রচার করুন",
     "compressionGuidanceFullGuideLink": "সম্পূর্ণ কম্প্রেশন গাইড",
     "compressionGuidanceShow": "বিস্তারিত",
     "compressionGuidanceHide": "বিস্তারিত লুকান",

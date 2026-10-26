@@ -7879,6 +7879,8 @@
     "compressionDesc": "Rage amfani da token ta hanyar matse prompts kafin aika su ga masu samarwa",
     "autoCombosTitle": "Haɗe-haɗe na atomatik",
     "autoCombosDesc": "Ba wa wannan maɓalli damar amfani da haɗe-haɗen auto/* da aka tanada, waɗanda ke zaɓar samfuri ta atomatik daga kowane mai samarwa da aka saita",
+    "ccDiscoveryAliasesTitle": "Laƙabban gano na Claude Code",
+    "ccDiscoveryAliasesDesc": "Sanar da madubin jituwa na claude/... ga samfura da haɗe-haɗe da wannan maɓallin riga ya iya samun dama gare su",
     "compressionGuidanceFullGuideLink": "Cikakken jagora kan matsewa",
     "compressionGuidanceShow": "Cikakkun bayanai",
     "compressionGuidanceHide": "Ɓoye cikakkun bayanai",

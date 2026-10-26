@@ -7879,6 +7879,8 @@
     "compressionDesc": "يمكنك تقليل استخدام الرمز المميز عن طريق ضغط المطالبات قبل إرسالها إلى مقدمي الخدمة",
     "autoCombosTitle": "التركيبات التلقائية",
     "autoCombosDesc": "السماح لهذا المفتاح باستخدام تركيبات auto/* المضمّنة، والتي تختار نموذجًا تلقائيًا من كل موفّر تم إعداده",
+    "ccDiscoveryAliasesTitle": "الأسماء المستعارة لاكتشاف Claude Code",
+    "ccDiscoveryAliasesDesc": "الإعلان عن مرايا توافق claude/... للنماذج والتوليفات التي يمكن لهذا المفتاح الوصول إليها بالفعل",
     "compressionGuidanceFullGuideLink": "دليل الضغط الكامل",
     "compressionGuidanceShow": "التفاصيل",
     "compressionGuidanceHide": "إخفاء التفاصيل",

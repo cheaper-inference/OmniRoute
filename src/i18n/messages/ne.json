@@ -7879,6 +7879,8 @@
     "compressionDesc": "प्रदायकहरूलाई पठाउनुअघि प्रम्प्टहरू सङ्कुचित गरेर टोकन प्रयोग घटाउनुहोस्",
     "autoCombosTitle": "स्वचालित कम्बोहरू",
     "autoCombosDesc": "यस कुञ्जीलाई अन्तर्निर्मित auto/* कम्बोहरू प्रयोग गर्न अनुमति दिनुहोस्, जसले कन्फिगर गरिएका प्रत्येक प्रदायकबाट स्वचालित रूपमा एउटा मोडेल चयन गर्छन्",
+    "ccDiscoveryAliasesTitle": "Claude Code खोज उपनामहरू",
+    "ccDiscoveryAliasesDesc": "यस कुञ्जीले पहिले नै पहुँच गर्न सक्ने मोडेलहरू र कम्बोहरूका लागि claude/... अनुकूलता मिररहरू घोषणा गर्नुहोस्",
     "compressionGuidanceFullGuideLink": "सम्पूर्ण सङ्कुचन मार्गदर्शिका",
     "compressionGuidanceShow": "विवरण",
     "compressionGuidanceHide": "विवरण लुकाउनुहोस्",

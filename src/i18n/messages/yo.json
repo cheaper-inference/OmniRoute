@@ -7879,6 +7879,8 @@
     "compressionDesc": "Dín lílo token kù nípa fífúnpọ̀ àwọn ọ̀rọ̀ ìtọ́sọ́nà kí a tó fi wọ́n ránṣẹ́ sí àwọn olùpèsè",
     "autoCombosTitle": "Àwọn Àkópọ̀ Aládàáṣe",
     "autoCombosDesc": "Gba kọ́kọ́rọ́ yìí láàyè láti lo àwọn àkópọ̀ auto/* tí a kọ́ sínú ẹ̀rọ, tí ń yan àwòṣe kan láìfọwọ́yí láti ọ̀dọ̀ gbogbo olùpèsè tí a ti ṣètò",
+    "ccDiscoveryAliasesTitle": "Àwọn orúkọ mìíràn ìṣàwárí Claude Code",
+    "ccDiscoveryAliasesDesc": "Kéde àwọn dígí ìbáṣepọ̀ claude/... fún àwọn àpẹẹrẹ àti àwọn ìdàpọ̀ tí kọ́kọ́rọ́ yìí ti lè wọlé sí tẹ́lẹ̀",
     "compressionGuidanceFullGuideLink": "Itọ́sọ́nà ìfúnpọ̀ ní kíkún",
     "compressionGuidanceShow": "Àwọn àlàyé",
     "compressionGuidanceHide": "Fi àwọn àlàyé pamọ́",

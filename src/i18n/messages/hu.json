@@ -7879,6 +7879,8 @@
     "compressionDesc": "Csökkentse a tokenhasználatot a promptok tömörítésével, mielőtt elküldi őket a szolgáltatóknak",
     "autoCombosTitle": "Automatikus kombinációk",
     "autoCombosDesc": "Engedélyezi, hogy ez a kulcs a beépített auto/* kombinációkat használja, amelyek automatikusan választanak modellt minden konfigurált szolgáltatótól",
+    "ccDiscoveryAliasesTitle": "Claude Code-felderítési aliaszok",
+    "ccDiscoveryAliasesDesc": "A claude/... kompatibilitási tükrözések hirdetése azokhoz a modellekhez és kombinációkhoz, amelyekhez ez a kulcs már hozzáfér",
     "compressionGuidanceFullGuideLink": "Teljes tömörítési útmutató",
     "compressionGuidanceShow": "Részletek",
     "compressionGuidanceHide": "Részletek elrejtése",

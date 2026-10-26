@@ -7879,6 +7879,8 @@
     "compressionDesc": "Bawasan ang paggamit ng token sa pamamagitan ng pag-compress ng mga prompt bago ipadala ang mga ito sa mga provider",
     "autoCombosTitle": "Mga Auto Combo",
     "autoCombosDesc": "Payagan ang key na ito na gamitin ang mga built-in na auto/* combo, na awtomatikong pumipili ng modelo mula sa bawat naka-configure na provider",
+    "ccDiscoveryAliasesTitle": "Mga alias ng pagtuklas ng Claude Code",
+    "ccDiscoveryAliasesDesc": "I-advertise ang mga claude/... compatibility mirror para sa mga modelo at combo na maaari nang ma-access ng key na ito",
     "compressionGuidanceFullGuideLink": "Buong gabay sa compression",
     "compressionGuidanceShow": "Mga Detalye",
     "compressionGuidanceHide": "Itago ang mga detalye",

@@ -7879,6 +7879,8 @@
     "compressionDesc": "प्रदाताओं को भेजने से पहले प्रॉम्प्ट संपीड़ित करके टोकन उपयोग कम करें",
     "autoCombosTitle": "ऑटो कॉम्बो",
     "autoCombosDesc": "इस कुंजी को बिल्ट-इन auto/* कॉम्बो इस्तेमाल करने दें, जो प्रत्येक कॉन्फ़िगर किए गए प्रदाता से स्वचालित रूप से एक मॉडल चुनते हैं",
+    "ccDiscoveryAliasesTitle": "Claude Code खोज उपनाम",
+    "ccDiscoveryAliasesDesc": "उन मॉडलों और कॉम्बो के लिए claude/... संगतता मिरर विज्ञापित करें जिन तक यह कुंजी पहले से ही पहुँच सकती है",
     "compressionGuidanceFullGuideLink": "पूर्ण कम्प्रेशन गाइड",
     "compressionGuidanceShow": "विवरण",
     "compressionGuidanceHide": "विवरण छिपाएं",

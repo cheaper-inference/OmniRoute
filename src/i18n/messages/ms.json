@@ -7879,6 +7879,8 @@
     "compressionDesc": "Kurangkan penggunaan token dengan memampatkan prom sebelum dihantar kepada penyedia",
     "autoCombosTitle": "Kombo Auto",
     "autoCombosDesc": "Benarkan kunci ini menggunakan kombo auto/* terbina dalam, yang memilih model secara automatik daripada setiap penyedia yang dikonfigurasikan",
+    "ccDiscoveryAliasesTitle": "Alias penemuan Claude Code",
+    "ccDiscoveryAliasesDesc": "Umumkan cermin keserasian claude/... untuk model dan kombo yang sudah boleh diakses oleh kunci ini",
     "compressionGuidanceFullGuideLink": "Panduan pemampatan penuh",
     "compressionGuidanceShow": "Butiran",
     "compressionGuidanceHide": "Sembunyikan butiran",

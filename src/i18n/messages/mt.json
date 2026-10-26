@@ -7879,6 +7879,8 @@
     "compressionDesc": "Naqqas l-użu tat-tokens billi tikkompressa l-prompts qabel ma tibgħathom lill-fornituri",
     "autoCombosTitle": "Kombinazzjonijiet Awtomatiċi",
     "autoCombosDesc": "Ippermetti lil din iċ-ċavetta tuża l-kombinazzjonijiet auto/* inkorporati, li jagħżlu mudell awtomatikament minn kull fornitur ikkonfigurat",
+    "ccDiscoveryAliasesTitle": "Alias ta' skoperta għal Claude Code",
+    "ccDiscoveryAliasesDesc": "Irreklama mirrors ta' kompatibilità claude/... għal mudelli u combos li din iċ-ċavetta tista' diġà taċċessa",
     "compressionGuidanceFullGuideLink": "Gwida sħiħa għall-kompressjoni",
     "compressionGuidanceShow": "Dettalji",
     "compressionGuidanceHide": "Aħbi d-dettalji",

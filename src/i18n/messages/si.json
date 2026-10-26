@@ -7879,6 +7879,8 @@
     "compressionDesc": "සපයන්නන් වෙත යැවීමට පෙර ප්රේරක සම්පීඩනය කිරීමෙන් ටෝකන් භාවිතය අඩු කරන්න",
     "autoCombosTitle": "ස්වයංක්රීය සංයෝජන",
     "autoCombosDesc": "වින්යාස කර ඇති සෑම සැපයුම්කරුවෙකුගෙන්ම ආකෘතියක් ස්වයංක්රීයව තෝරන, ගොඩනඟා ඇති auto/* සංයෝජන භාවිත කිරීමට මෙම යතුරට ඉඩ දෙන්න",
+    "ccDiscoveryAliasesTitle": "Claude Code සොයාගැනීමේ අන්වර්ථ නම්",
+    "ccDiscoveryAliasesDesc": "මෙම යතුරට දැනටමත් ප්රවේශ විය හැකි ආකෘති සහ සංයෝජන සඳහා claude/... අනුකූලතා කැඩපත් ප්රචාරණය කරන්න",
     "compressionGuidanceFullGuideLink": "සම්පීඩනය පිළිබඳ සම්පූර්ණ මාර්ගෝපදේශය",
     "compressionGuidanceShow": "විස්තර",
     "compressionGuidanceHide": "විස්තර සඟවන්න",

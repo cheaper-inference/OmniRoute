@@ -7879,6 +7879,8 @@
     "compressionDesc": "ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ ਪ੍ਰੌਂਪਟਾਂ ਨੂੰ ਕੰਪ੍ਰੈੱਸ ਕਰਕੇ ਟੋਕਨਾਂ ਦੀ ਵਰਤੋਂ ਘਟਾਓ",
     "autoCombosTitle": "ਆਟੋ ਕੌਂਬੋ",
     "autoCombosDesc": "ਇਸ ਕੁੰਜੀ ਨੂੰ ਬਿਲਟ-ਇਨ auto/* ਕੌਂਬੋ ਵਰਤਣ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ, ਜੋ ਹਰ ਸੰਰਚਿਤ ਪ੍ਰਦਾਤਾ ਵਿੱਚੋਂ ਆਪਣੇ ਆਪ ਇੱਕ ਮਾਡਲ ਚੁਣਦੇ ਹਨ",
+    "ccDiscoveryAliasesTitle": "Claude Code ਡਿਸਕਵਰੀ ਉਪਨਾਮ",
+    "ccDiscoveryAliasesDesc": "ਉਹਨਾਂ ਮਾਡਲਾਂ ਅਤੇ ਕੰਬੋਆਂ ਲਈ claude/... ਅਨੁਕੂਲਤਾ ਮਿਰਰਾਂ ਦਾ ਪ੍ਰਚਾਰ ਕਰੋ ਜਿੰਨ੍ਹਾਂ ਤੱਕ ਇਹ ਕੁੰਜੀ ਪਹਿਲਾਂ ਹੀ ਪਹੁੰਚ ਸਕਦੀ ਹੈ",
     "compressionGuidanceFullGuideLink": "ਪੂਰੀ ਕੰਪ੍ਰੈਸ਼ਨ ਗਾਈਡ",
     "compressionGuidanceShow": "ਵੇਰਵੇ",
     "compressionGuidanceHide": "ਵੇਰਵੇ ਲੁਕਾਓ",

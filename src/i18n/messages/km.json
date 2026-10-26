@@ -7879,6 +7879,8 @@
     "compressionDesc": "កាត់បន្ថយការប្រើប្រាស់ថូខិនដោយបង្ហាប់ប្រូម មុនពេលផ្ញើទៅអ្នកផ្តល់សេវា",
     "autoCombosTitle": "បន្សំស្វ័យប្រវត្តិ",
     "autoCombosDesc": "អនុញ្ញាតឱ្យសោនេះប្រើបន្សំ auto/* ដែលមានស្រាប់ ដើម្បីជ្រើសរើសម៉ូដែលដោយស្វ័យប្រវត្តិពីគ្រប់អ្នកផ្តល់សេវាដែលបានកំណត់រចនាសម្ព័ន្ធ",
+    "ccDiscoveryAliasesTitle": "ឈ្មោះហៅកាត់សម្រាប់ការរកឃើញរបស់ Claude Code",
+    "ccDiscoveryAliasesDesc": "ប្រកាស mirrors ភាពឆបគ្នា claude/... សម្រាប់ម៉ូដែល និង combos ដែល key នេះអាចចូលប្រើបានរួចហើយ",
     "compressionGuidanceFullGuideLink": "មគ្គុទ្ទេសក៍ពេញលេញអំពីការបង្ហាប់",
     "compressionGuidanceShow": "ព័ត៌មានលម្អិត",
     "compressionGuidanceHide": "លាក់ព័ត៌មានលម្អិត",

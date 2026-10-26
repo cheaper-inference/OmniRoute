@@ -7879,6 +7879,8 @@
     "compressionDesc": "Смањите потрошњу токена компресијом упита пре слања провајдерима",
     "autoCombosTitle": "Аутоматске комбинације",
     "autoCombosDesc": "Дозволи овом кључу да користи уграђене auto/* комбинације, које аутоматски бирају модел међу свим конфигурисаним провајдерима",
+    "ccDiscoveryAliasesTitle": "Claude Code алијаси за откривање",
+    "ccDiscoveryAliasesDesc": "Огласи claude/... mirror-е компатибилности за моделе и комбинације којима овај кључ већ може да приступи",
     "compressionGuidanceFullGuideLink": "Комплетан водич за компресију",
     "compressionGuidanceShow": "Детаљи",
     "compressionGuidanceHide": "Сакриј детаље",

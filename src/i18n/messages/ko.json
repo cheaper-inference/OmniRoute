@@ -7879,6 +7879,8 @@
     "compressionDesc": "제공업체에 보내기 전에 프롬프트를 압축하여 토큰 사용량을 줄입니다",
     "autoCombosTitle": "자동 콤보",
     "autoCombosDesc": "이 키가 구성된 모든 제공업체에서 모델을 자동으로 선택하는 기본 제공 auto/* 콤보를 사용하도록 허용합니다",
+    "ccDiscoveryAliasesTitle": "Claude Code 검색 별칭",
+    "ccDiscoveryAliasesDesc": "이 키로 이미 액세스할 수 있는 모델과 조합에 대해 claude/... 호환성 미러를 알립니다",
     "compressionGuidanceFullGuideLink": "전체 압축 가이드",
     "compressionGuidanceShow": "상세 정보",
     "compressionGuidanceHide": "상세 정보 숨기기",

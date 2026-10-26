@@ -7879,6 +7879,8 @@
     "compressionDesc": "Kurangi penggunaan token dengan mengompresi prompt sebelum mengirimkannya ke penyedia",
     "autoCombosTitle": "Kombinasi Otomatis",
     "autoCombosDesc": "Izinkan kunci ini menggunakan kombinasi auto/* bawaan, yang secara otomatis memilih model dari setiap penyedia yang dikonfigurasi",
+    "ccDiscoveryAliasesTitle": "Alias discovery Claude Code",
+    "ccDiscoveryAliasesDesc": "Umumkan mirror kompatibilitas claude/... untuk model dan kombo yang sudah dapat diakses kunci ini",
     "compressionGuidanceFullGuideLink": "Panduan kompresi lengkap",
     "compressionGuidanceShow": "Detail",
     "compressionGuidanceHide": "Sembunyikan detail",

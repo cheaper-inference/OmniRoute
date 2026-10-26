@@ -7879,6 +7879,8 @@
     "compressionDesc": "ప్రొవైడర్లకు పంపే ముందు ప్రాంప్ట్లను కుదించడం ద్వారా టోకెన్ వినియోగాన్ని తగ్గించండి",
     "autoCombosTitle": "ఆటో కాంబోలు",
     "autoCombosDesc": "కాన్ఫిగర్ చేసిన ప్రతి ప్రొవైడర్ నుండి ఒక మోడల్ను స్వయంచాలకంగా ఎంచుకునే అంతర్నిర్మిత auto/* కాంబోలను ఉపయోగించడానికి ఈ కీని అనుమతించండి",
+    "ccDiscoveryAliasesTitle": "Claude Code డిస్కవరీ అలియాస్లు",
+    "ccDiscoveryAliasesDesc": "ఈ కీ ఇప్పటికే యాక్సెస్ చేయగల మోడళ్లు మరియు కాంబోల కోసం claude/... అనుకూలత మిర్రర్లను ప్రకటించండి",
     "compressionGuidanceFullGuideLink": "పూర్తి కంప్రెషన్ గైడ్",
     "compressionGuidanceShow": "వివరాలు",
     "compressionGuidanceHide": "వివరాలను దాచండి",

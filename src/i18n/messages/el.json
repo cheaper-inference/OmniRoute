@@ -7879,6 +7879,8 @@
     "compressionDesc": "Μείωση χρήσης token με συμπίεση προτροπών πριν την αποστολή στους παρόχους",
     "autoCombosTitle": "Αυτόματοι συνδυασμοί",
     "autoCombosDesc": "Επιτρέψτε σε αυτό το κλειδί να χρησιμοποιεί τους ενσωματωμένους συνδυασμούς auto/*, οι οποίοι επιλέγουν αυτόματα ένα μοντέλο από κάθε διαμορφωμένο πάροχο",
+    "ccDiscoveryAliasesTitle": "Ψευδώνυμα ανακάλυψης Claude Code",
+    "ccDiscoveryAliasesDesc": "Κοινοποίηση καθρεπτών συμβατότητας claude/... για μοντέλα και συνδυασμούς στους οποίους αυτό το κλειδί έχει ήδη πρόσβαση",
     "compressionGuidanceFullGuideLink": "Πλήρης οδηγός συμπίεσης",
     "compressionGuidanceShow": "Λεπτομέρειες",
     "compressionGuidanceHide": "Απόκρυψη λεπτομερειών",

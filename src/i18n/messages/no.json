@@ -7879,6 +7879,8 @@
     "compressionDesc": "Reduser tokenbruken ved å komprimere ledetekster før de sendes til leverandører",
     "autoCombosTitle": "Automatiske kombinasjoner",
     "autoCombosDesc": "Tillat at denne nøkkelen bruker de innebygde auto/*-kombinasjonene, som automatisk velger en modell fra hver konfigurerte leverandør",
+    "ccDiscoveryAliasesTitle": "Claude Code-oppdagelsesaliaser",
+    "ccDiscoveryAliasesDesc": "Annonser claude/...-kompatibilitetsspeilinger for modeller og kombinasjoner som denne nøkkelen allerede har tilgang til",
     "compressionGuidanceFullGuideLink": "Fullstendig komprimeringsveiledning",
     "compressionGuidanceShow": "Detaljer",
     "compressionGuidanceHide": "Skjul detaljer",

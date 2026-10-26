@@ -7879,6 +7879,8 @@
     "compressionDesc": "צמצום השימוש בטוקנים באמצעות דחיסת הנחיות לפני שליחתן לספקים",
     "autoCombosTitle": "שילובים אוטומטיים",
     "autoCombosDesc": "אפשר למפתח הזה להשתמש בשילובי auto/* המובנים, שבוחרים מודל באופן אוטומטי מכל ספק מוגדר",
+    "ccDiscoveryAliasesTitle": "כינויי הגילוי של Claude Code",
+    "ccDiscoveryAliasesDesc": "פרסם שיקופי תאימות מסוג claude/... עבור מודלים ושילובים שלמפתח זה כבר יש גישה אליהם",
     "compressionGuidanceFullGuideLink": "מדריך דחיסה מלא",
     "compressionGuidanceShow": "פרטים",
     "compressionGuidanceHide": "הסתר פרטים",

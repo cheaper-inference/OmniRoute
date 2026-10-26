@@ -7879,6 +7879,8 @@
     "compressionDesc": "Sorğuları provayderlərə göndərməzdən əvvəl sıxışdıraraq token istifadəsini azaldın",
     "autoCombosTitle": "Avtomatik kombinasiyalar",
     "autoCombosDesc": "Bu açarın hər bir konfiqurasiya edilmiş provayderdən avtomatik olaraq model seçən daxili auto/* kombinasiyalarından istifadə etməsinə icazə verin",
+    "ccDiscoveryAliasesTitle": "Claude Code kəşf ləqəbləri",
+    "ccDiscoveryAliasesDesc": "Bu açarın artıq daxil ola bildiyi modellər və kombinasiyalar üçün claude/... uyğunluq güzgülərini elan et",
     "compressionGuidanceFullGuideLink": "Tam sıxılma bələdçisi",
     "compressionGuidanceShow": "Təfərrüatlar",
     "compressionGuidanceHide": "Təfərrüatları gizlət",

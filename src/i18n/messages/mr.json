@@ -7879,6 +7879,8 @@
     "compressionDesc": "प्रदात्यांना पाठवण्यापूर्वी प्रॉम्प्ट संक्षिप्त करून टोकनचा वापर कमी करा",
     "autoCombosTitle": "स्वयंचलित कॉम्बो",
     "autoCombosDesc": "या कीला अंगभूत auto/* कॉम्बो वापरण्याची परवानगी द्या, जे कॉन्फिगर केलेल्या प्रत्येक प्रदात्यामधून स्वयंचलितपणे मॉडेल निवडतात",
+    "ccDiscoveryAliasesTitle": "Claude Code डिस्कव्हरी उपनामे",
+    "ccDiscoveryAliasesDesc": "ही की आधीच वापरू शकते अशा मॉडेल्स आणि कॉम्बोंसाठी claude/... सुसंगतता मिरर जाहीर करा",
     "compressionGuidanceFullGuideLink": "संपूर्ण कॉम्प्रेशन मार्गदर्शिका",
     "compressionGuidanceShow": "तपशील",
     "compressionGuidanceHide": "तपशील लपवा",

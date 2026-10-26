@@ -7879,6 +7879,8 @@
     "compressionDesc": "Verminder het tokengebruik door prompts te comprimeren voordat ze naar providers worden verzonden",
     "autoCombosTitle": "Automatische combo's",
     "autoCombosDesc": "Sta toe dat deze sleutel de ingebouwde auto/*-combo's gebruikt, die automatisch een model kiezen uit elke geconfigureerde provider",
+    "ccDiscoveryAliasesTitle": "Claude Code-detectiealiassen",
+    "ccDiscoveryAliasesDesc": "Adverteer claude/...-compatibiliteitsmirrors voor modellen en combo's waartoe deze sleutel al toegang heeft",
     "compressionGuidanceFullGuideLink": "Volledige compressiegids",
     "compressionGuidanceShow": "Details",
     "compressionGuidanceHide": "Details verbergen",

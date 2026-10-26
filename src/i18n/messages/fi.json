@@ -7879,6 +7879,8 @@
     "compressionDesc": "Vähennä tokenien käyttöä pakkaamalla kehotteet ennen niiden lähettämistä palveluntarjoajille",
     "autoCombosTitle": "Automaattiset yhdistelmät",
     "autoCombosDesc": "Salli tämän avaimen käyttää sisäänrakennettuja auto/*-yhdistelmiä, jotka valitsevat mallin automaattisesti kaikista määritetyistä palveluntarjoajista",
+    "ccDiscoveryAliasesTitle": "Claude Code -tunnistusaliakset",
+    "ccDiscoveryAliasesDesc": "Mainosta claude/...-yhteensopivuuspeilit malleille ja yhdistelmille, joihin tällä avaimella on jo pääsy",
     "compressionGuidanceFullGuideLink": "Kattava pakkausopas",
     "compressionGuidanceShow": "Tiedot",
     "compressionGuidanceHide": "Piilota tiedot",

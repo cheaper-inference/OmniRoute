@@ -7879,6 +7879,8 @@
     "compressionDesc": "Сокращайте расход токенов, сжимая промпты перед отправкой провайдерам",
     "autoCombosTitle": "Автокомбо",
     "autoCombosDesc": "Разрешить этому ключу использовать встроенные комбо auto/*, которые автоматически выбирают модель среди всех настроенных провайдеров",
+    "ccDiscoveryAliasesTitle": "Алиасы обнаружения Claude Code",
+    "ccDiscoveryAliasesDesc": "Анонсировать зеркала совместимости claude/... для моделей и комбо, к которым у этого ключа уже есть доступ",
     "compressionGuidanceFullGuideLink": "Полное руководство по сжатию",
     "compressionGuidanceShow": "Подробнее",
     "compressionGuidanceHide": "Скрыть подробности",

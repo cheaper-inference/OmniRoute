@@ -7879,6 +7879,8 @@
     "compressionDesc": "在发送给提供者之前压缩提示词，以减少 token 使用量",
     "autoCombosTitle": "自动组合",
     "autoCombosDesc": "允许此密钥使用内置的 auto/* 组合，这些组合会从所有已配置的提供者中自动选择模型",
+    "ccDiscoveryAliasesTitle": "Claude Code 发现别名",
+    "ccDiscoveryAliasesDesc": "为此密钥已可访问的模型和组合通告 claude/... 兼容性镜像",
     "compressionGuidanceFullGuideLink": "完整压缩指南",
     "compressionGuidanceShow": "详情",
     "compressionGuidanceHide": "隐藏详情",

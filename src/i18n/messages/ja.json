@@ -7879,6 +7879,8 @@
     "compressionDesc": "プロバイダーに送信する前にプロンプトを圧縮して、トークン使用量を削減します",
     "autoCombosTitle": "自動コンボ",
     "autoCombosDesc": "このキーで組み込みの auto/* コンボを使用できるようにします。これにより、設定済みの各プロバイダーからモデルが自動的に選択されます",
+    "ccDiscoveryAliasesTitle": "Claude Code 検出エイリアス",
+    "ccDiscoveryAliasesDesc": "このキーがすでにアクセスできるモデルとコンボに対して claude/... 互換ミラーを公開する",
     "compressionGuidanceFullGuideLink": "圧縮の完全ガイド",
     "compressionGuidanceShow": "詳細",
     "compressionGuidanceHide": "詳細を非表示",

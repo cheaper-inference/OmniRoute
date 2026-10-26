@@ -7879,6 +7879,8 @@
     "compressionDesc": "Belata ojiji token site na ịmkpakọ ntuziaka tupu iziga ha na ndị na-enye ọrụ",
     "autoCombosTitle": "Ngwakọta Akpaaka",
     "autoCombosDesc": "Kwe ka igodo a jiri ngwakọta auto/* arụnyere n'ime sistemụ, nke na-ahọrọ ụdịdị na-akpaghị aka site n'aka onye na-eweta ọrụ ọ bụla ahaziri",
+    "ccDiscoveryAliasesTitle": "Aha mkpirisi nchọpụta Claude Code",
+    "ccDiscoveryAliasesDesc": "Kwalite ntụgharị nkwekọrịta claude/... maka ụdị na ngwakọta nke igodo a enwetala",
     "compressionGuidanceFullGuideLink": "Ntuziaka mkpakọ zuru ezu",
     "compressionGuidanceShow": "Nkọwa",
     "compressionGuidanceHide": "Zoo nkọwa",

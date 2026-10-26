@@ -7879,6 +7879,8 @@
     "compressionDesc": "با فشردهسازی پرامپتها پیش از ارسال به ارائهدهندگان، مصرف توکن را کاهش دهید",
     "autoCombosTitle": "ترکیبهای خودکار",
     "autoCombosDesc": "به این کلید اجازه دهید از ترکیبهای داخلی auto/* استفاده کند که بهطور خودکار یک مدل را از میان همه ارائهدهندگان پیکربندیشده انتخاب میکنند",
+    "ccDiscoveryAliasesTitle": "نامهای مستعار کشف Claude Code",
+    "ccDiscoveryAliasesDesc": "اعلام آینههای سازگاری claude/... برای مدلها و ترکیبهایی که این کلید از قبل به آنها دسترسی دارد",
     "compressionGuidanceFullGuideLink": "راهنمای کامل فشرده‌سازی",
     "compressionGuidanceShow": "جزئیات",
     "compressionGuidanceHide": "پنهان کردن جزئیات",

@@ -7879,6 +7879,8 @@
     "compressionDesc": "પ્રદાતાઓને મોકલતા પહેલાં પ્રોમ્પ્ટ્સને સંકોચીને ટોકનનો ઉપયોગ ઘટાડો",
     "autoCombosTitle": "ઑટો કોમ્બોઝ",
     "autoCombosDesc": "આ કીને બિલ્ટ-ઇન auto/* કોમ્બોઝનો ઉપયોગ કરવાની મંજૂરી આપો, જે દરેક કૉન્ફિગર કરેલા પ્રોવાઇડરમાંથી આપમેળે એક મોડલ પસંદ કરે છે",
+    "ccDiscoveryAliasesTitle": "Claude Code ડિસ્કવરી ઉપનામો",
+    "ccDiscoveryAliasesDesc": "આ કી પહેલેથી જ ઍક્સેસ કરી શકે છે એવા મોડલ્સ અને કોમ્બોઝ માટે claude/... સુસંગતતા મિરર્સની જાહેરાત કરો",
     "compressionGuidanceFullGuideLink": "સંપૂર્ણ કમ્પ્રેશન માર્ગદર્શિકા",
     "compressionGuidanceShow": "વિગતો",
     "compressionGuidanceHide": "વિગતો છુપાવો",

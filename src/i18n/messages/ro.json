@@ -7879,6 +7879,8 @@
     "compressionDesc": "Reduce utilizarea tokenurilor prin comprimarea prompturilor înainte de a le trimite furnizorilor",
     "autoCombosTitle": "Combinații automate",
     "autoCombosDesc": "Permite acestei chei să utilizeze combinațiile auto/* încorporate, care aleg automat un model dintre toți furnizorii configurați",
+    "ccDiscoveryAliasesTitle": "Aliasuri de descoperire Claude Code",
+    "ccDiscoveryAliasesDesc": "Anunță oglinzile de compatibilitate claude/... pentru modelele și combinațiile la care această cheie are deja acces",
     "compressionGuidanceFullGuideLink": "Ghid complet de compresie",
     "compressionGuidanceShow": "Detalii",
     "compressionGuidanceHide": "Ascunde detaliile",

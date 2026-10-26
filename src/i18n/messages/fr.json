@@ -7879,6 +7879,8 @@
     "compressionDesc": "Réduisez l’utilisation des jetons en compressant les invites avant de les envoyer aux fournisseurs",
     "autoCombosTitle": "Combos automatiques",
     "autoCombosDesc": "Autoriser cette clé à utiliser les combos auto/* intégrés, qui sélectionnent automatiquement un modèle parmi tous les fournisseurs configurés",
+    "ccDiscoveryAliasesTitle": "Alias de découverte Claude Code",
+    "ccDiscoveryAliasesDesc": "Annoncer les miroirs de compatibilité claude/... pour les modèles et combos auxquels cette clé a déjà accès",
     "compressionGuidanceFullGuideLink": "Guide complet de compression",
     "compressionGuidanceShow": "Détails",
     "compressionGuidanceHide": "Masquer les détails",

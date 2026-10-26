@@ -7879,6 +7879,8 @@
     "compressionDesc": "Sumažinkite tokenų naudojimą suglaudindami raginimus prieš siųsdami juos paslaugų teikėjams",
     "autoCombosTitle": "Automatiniai deriniai",
     "autoCombosDesc": "Leisti šiam raktui naudoti integruotus auto/* derinius, kurie automatiškai parenka modelį iš visų sukonfigūruotų paslaugų teikėjų",
+    "ccDiscoveryAliasesTitle": "Claude Code aptikimo pseudonimai",
+    "ccDiscoveryAliasesDesc": "Skelbti claude/... suderinamumo veidrodžius modeliams ir deriniams, kuriuos šis raktas jau gali pasiekti",
     "compressionGuidanceFullGuideLink": "Išsamus glaudinimo vadovas",
     "compressionGuidanceShow": "Išsami informacija",
     "compressionGuidanceHide": "Slėpti išsamią informaciją",

@@ -7879,6 +7879,8 @@
     "compressionDesc": "Sağlayıcılara göndermeden önce istemleri sıkıştırarak token kullanımını azaltın",
     "autoCombosTitle": "Otomatik Kombinasyonlar",
     "autoCombosDesc": "Bu anahtarın, yapılandırılmış tüm sağlayıcılar arasından otomatik olarak bir model seçen yerleşik auto/* kombinasyonlarını kullanmasına izin ver",
+    "ccDiscoveryAliasesTitle": "Claude Code keşif takma adları",
+    "ccDiscoveryAliasesDesc": "Bu anahtarın zaten erişebildiği modeller ve kombinasyonlar için claude/... uyumluluk aynalarını duyur",
     "compressionGuidanceFullGuideLink": "Tam sıkıştırma kılavuzu",
     "compressionGuidanceShow": "Ayrıntılar",
     "compressionGuidanceHide": "Ayrıntıları gizle",

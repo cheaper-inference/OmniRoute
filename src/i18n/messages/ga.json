@@ -7879,6 +7879,8 @@
     "compressionDesc": "Laghdaigh úsáid comharthaí trí leideanna a chomhbhrú sula seoltar chuig soláthraithe iad",
     "autoCombosTitle": "Teaglamaí Uathoibríocha",
     "autoCombosDesc": "Lig don eochair seo na teaglamaí ionsuite auto/* a úsáid, a roghnaíonn samhail go huathoibríoch ó gach soláthraí cumraithe",
+    "ccDiscoveryAliasesTitle": "Ailiasanna fionnachtana Claude Code",
+    "ccDiscoveryAliasesDesc": "Fógair scátháin chomhoiriúnachta claude/... do shamhlacha agus do theaglama ar féidir leis an eochair seo rochtain a fháil orthu cheana féin",
     "compressionGuidanceFullGuideLink": "Treoir iomlán maidir le comhbhrú",
     "compressionGuidanceShow": "Sonraí",
     "compressionGuidanceHide": "Folaigh sonraí",

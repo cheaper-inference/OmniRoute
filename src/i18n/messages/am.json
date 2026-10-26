@@ -7879,6 +7879,8 @@
     "compressionDesc": "ፕሮምፕቶችን ወደ አቅራቢዎች ከመላክዎ በፊት በማመቅ የቶከን አጠቃቀምን ይቀንሱ",
     "autoCombosTitle": "ራስ-ሰር ጥምረቶች",
     "autoCombosDesc": "ይህ ቁልፍ አብሮገነብ auto/* ጥምረቶችን እንዲጠቀም ፍቀድ፤ እነዚህም ከእያንዳንዱ ከተዋቀረ አቅራቢ ሞዴልን በራስ-ሰር ይመርጣሉ",
+    "ccDiscoveryAliasesTitle": "የClaude Code ማግኘት ምትክ ስሞች",
+    "ccDiscoveryAliasesDesc": "ይህ ቁልፍ አስቀድሞ መድረስ የሚችልባቸው ሞዴሎች እና ጥምረቶች የclaude/... ተኳሃኝነት መስታወቶችን አስታውቅ",
     "compressionGuidanceFullGuideLink": "ሙሉ የማመቅ መመሪያ",
     "compressionGuidanceShow": "ዝርዝሮች",
     "compressionGuidanceHide": "ዝርዝሮችን ደብቅ",

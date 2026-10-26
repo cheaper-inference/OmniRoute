@@ -7879,6 +7879,8 @@
     "compressionDesc": "在傳送給提供者之前壓縮提示詞，以減少 token 使用量",
     "autoCombosTitle": "自動組合",
     "autoCombosDesc": "允許此金鑰使用內建的 auto/* 組合，這些組合會自動從每個已設定的提供者中選擇模型",
+    "ccDiscoveryAliasesTitle": "Claude Code 探索別名",
+    "ccDiscoveryAliasesDesc": "針對此金鑰已可存取的模型與組合，公告 claude/... 相容性鏡像",
     "compressionGuidanceFullGuideLink": "完整壓縮指南",
     "compressionGuidanceShow": "詳細資訊",
     "compressionGuidanceHide": "隱藏詳細資訊",

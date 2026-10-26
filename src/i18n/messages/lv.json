@@ -7879,6 +7879,8 @@
     "compressionDesc": "Samaziniet tokenu izlietojumu, saspiežot uzvednes pirms nosūtīšanas nodrošinātājiem",
     "autoCombosTitle": "Automātiskās kombinācijas",
     "autoCombosDesc": "Atļaut šai atslēgai izmantot iebūvētās auto/* kombinācijas, kas automātiski izvēlas modeli no visiem konfigurētajiem pakalpojumu sniedzējiem",
+    "ccDiscoveryAliasesTitle": "Claude Code atklāšanas aizstājvārdi",
+    "ccDiscoveryAliasesDesc": "Paziņot claude/... saderības spoguļus modeļiem un kombinācijām, kuriem šī atslēga jau var piekļūt",
     "compressionGuidanceFullGuideLink": "Pilna saspiešanas rokasgrāmata",
     "compressionGuidanceShow": "Detaļas",
     "compressionGuidanceHide": "Slēpt detaļas",

@@ -7879,6 +7879,8 @@
     "compressionDesc": "Snižte využití tokenů kompresí promptů před jejich odesláním poskytovatelům",
     "autoCombosTitle": "Automatická komba",
     "autoCombosDesc": "Povolit tomuto klíči používat vestavěná komba auto/*, která automaticky vybírají model ze všech nakonfigurovaných poskytovatelů",
+    "ccDiscoveryAliasesTitle": "Aliasy pro detekci Claude Code",
+    "ccDiscoveryAliasesDesc": "Zveřejňovat kompatibilní zrcadla claude/... pro modely a kombinace, ke kterým má tento klíč již přístup",
     "compressionGuidanceFullGuideLink": "Kompletní průvodce kompresí",
     "compressionGuidanceShow": "Podrobnosti",
     "compressionGuidanceHide": "Skrýt podrobnosti",

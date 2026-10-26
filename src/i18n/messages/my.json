@@ -7879,6 +7879,8 @@
     "compressionDesc": "ဝန်ဆောင်မှုပေးသူများထံ မပို့မီ ပရောမ့်များကို ချုံ့ခြင်းဖြင့် တိုကင်အသုံးပြုမှုကို လျှော့ချပါ",
     "autoCombosTitle": "အလိုအလျောက် ပေါင်းစပ်မှုများ",
     "autoCombosDesc": "စီစဉ်သတ်မှတ်ထားသော provider တစ်ခုစီမှ model တစ်ခုကို အလိုအလျောက်ရွေးချယ်ပေးသည့် built-in auto/* ပေါင်းစပ်မှုများကို ဤ key အား အသုံးပြုခွင့်ပြုပါ",
+    "ccDiscoveryAliasesTitle": "Claude Code ရှာဖွေတွေ့ရှိမှုအတွက် alias များ",
+    "ccDiscoveryAliasesDesc": "ဤ key ဖြင့် ဝင်ရောက်အသုံးပြုနိုင်ပြီးဖြစ်သော မော်ဒယ်များနှင့် ကွန်ဘိုများအတွက် claude/... compatibility mirror များကို ကြေငြာပါ",
     "compressionGuidanceFullGuideLink": "ချုံ့ခြင်းဆိုင်ရာ လမ်းညွှန်အပြည့်အစုံ",
     "compressionGuidanceShow": "အသေးစိတ်",
     "compressionGuidanceHide": "အသေးစိတ်ကို ဖျောက်ရန်",

@@ -7879,6 +7879,8 @@
     "compressionDesc": "Vähenda tokenite kasutust, tihendades viibad enne nende saatmist teenusepakkujatele",
     "autoCombosTitle": "Automaatsed kombinatsioonid",
     "autoCombosDesc": "Luba sellel võtmel kasutada sisseehitatud auto/* kombinatsioone, mis valivad mudeli automaatselt kõigi seadistatud teenusepakkujate seast",
+    "ccDiscoveryAliasesTitle": "Claude Code'i avastusaliased",
+    "ccDiscoveryAliasesDesc": "Avalda claude/... ühilduvuspeeglid mudelitele ja kombodele, millele see võti juba ligi pääseb",
     "compressionGuidanceFullGuideLink": "Põhjalik tihendamisjuhend",
     "compressionGuidanceShow": "Üksikasjad",
     "compressionGuidanceHide": "Peida üksikasjad",

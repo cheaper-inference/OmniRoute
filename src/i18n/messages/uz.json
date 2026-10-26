@@ -7879,6 +7879,8 @@
     "compressionDesc": "Provayderlarga yuborishdan oldin promptlarni siqib, token sarfini kamaytiring",
     "autoCombosTitle": "Avtomatik kombinatsiyalar",
     "autoCombosDesc": "Bu kalitga har bir sozlangan provayderdan modelni avtomatik tanlaydigan ichki auto/* kombinatsiyalaridan foydalanishga ruxsat berish",
+    "ccDiscoveryAliasesTitle": "Claude Code aniqlash taxalluslari",
+    "ccDiscoveryAliasesDesc": "Ushbu kalit allaqachon kirish imkoniga ega bo'lgan modellar va kombolar uchun claude/... moslik oynalarini e'lon qiladi",
     "compressionGuidanceFullGuideLink": "Siqish bo‘yicha to‘liq qo‘llanma",
     "compressionGuidanceShow": "Tafsilotlar",
     "compressionGuidanceHide": "Tafsilotlarni yashirish",

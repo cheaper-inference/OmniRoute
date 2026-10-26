@@ -7879,6 +7879,8 @@
     "compressionDesc": "Smanjite korištenje tokena komprimiranjem upita prije slanja pružateljima",
     "autoCombosTitle": "Automatske kombinacije",
     "autoCombosDesc": "Dopusti ovom ključu upotrebu ugrađenih kombinacija auto/*, koje automatski odabiru model među svim konfiguriranim pružateljima usluga",
+    "ccDiscoveryAliasesTitle": "Claude Code aliasi za otkrivanje",
+    "ccDiscoveryAliasesDesc": "Objavljuj zrcala kompatibilnosti claude/... za modele i kombinacije kojima ovaj ključ već može pristupiti",
     "compressionGuidanceFullGuideLink": "Potpuni vodič za kompresiju",
     "compressionGuidanceShow": "Detalji",
     "compressionGuidanceHide": "Sakrij detalje",

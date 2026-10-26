@@ -7879,6 +7879,8 @@
     "compressionDesc": "Zmanjšajte porabo žetonov tako, da pozive stisnete, preden jih pošljete ponudnikom",
     "autoCombosTitle": "Samodejne kombinacije",
     "autoCombosDesc": "Dovoli temu ključu uporabo vgrajenih kombinacij auto/*, ki samodejno izberejo model med vsemi konfiguriranimi ponudniki",
+    "ccDiscoveryAliasesTitle": "Vzdevki za odkrivanje Claude Code",
+    "ccDiscoveryAliasesDesc": "Razglašanje zrcal združljivosti claude/... za modele in kombinacije, do katerih ta ključ že lahko dostopa",
     "compressionGuidanceFullGuideLink": "Celoten vodnik za stiskanje",
     "compressionGuidanceShow": "Podrobnosti",
     "compressionGuidanceHide": "Skrij podrobnosti",
