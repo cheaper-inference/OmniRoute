@@ -10,7 +10,8 @@ import assert from "node:assert/strict";
 
 const { classifyErrorText, parseRetryFromErrorText, checkFallbackError, getProviderProfile } =
   await import("../../open-sse/services/accountFallback.ts");
-const { isSubscriptionQuotaText } = await import("../../open-sse/services/quotaTextCooldowns.ts");
+const { isSubscriptionQuotaText, isClaudeModelCreditEntitlementText } =
+  await import("../../open-sse/services/quotaTextCooldowns.ts");
 const { RateLimitReason } = await import("../../open-sse/config/constants.ts");
 
 test("#2321 classifyErrorText flags 'Usage Limit Reached' as QUOTA_EXHAUSTED", () => {
@@ -175,6 +176,9 @@ test("#18058: model-credit entitlement is a Claude-only long-window quota", () =
       String(provider)
     );
   }
+  assert.equal(isClaudeModelCreditEntitlementText(MODEL_CREDIT_ENTITLEMENT_TEXT), true);
+  assert.equal(isClaudeModelCreditEntitlementText(null), false);
+  assert.equal(isClaudeModelCreditEntitlementText(undefined), false);
   assert.equal(isSubscriptionQuotaText("requests per minute limit reached", "claude"), false);
 });
 
