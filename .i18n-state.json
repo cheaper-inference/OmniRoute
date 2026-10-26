@@ -4,31 +4,8 @@
       "source_hash": "60c36ac5e41427183bd2762e9bae9474786c732840a5368e62b8699e95570a9e",
       "locales": {
         "bs": {
-          "source_hash": "60c36ac5e41427183bd2762e9bae9474786c732840a5368e62b8699e95570a9e",
+          "source_hash": "0ff30bcc4c3776defcc11ea583cad09f0c54d0b05070d327dbe320387def5dc1",
           "target_hash": "0f3f345229c35595c54d86900adb675fef2e9e3c31119dee7edb0c314c13a7b2",
-          "section_hashes": [
-            "fe5597d25ab9",
-            "cf0e5f5da9bf",
-            "1e0f583a2e64",
-            "944786907b1f",
-            "075d56b43b88",
-            "3095249bde83",
-            "63eb9f8494a9",
-            "e176a4cab67e",
-            "50974cb9b793",
-            "6dec0e0461c8",
-            "f3b2d5d9bbf7",
-            "9868ea88f01e",
-            "685657476062",
-            "35ebebfb3e43",
-            "608b8eda922d",
-            "cc8aa3bfb02a",
-            "25353899c9ed",
-            "5d6cd26b7d0f",
-            "639f656fb176",
-            "f6624f38d27c",
-            "4aa7fcfc8a7c"
-          ],
           "updated_at": "2026-10-17T14:56:46.694Z"
         }
       }
