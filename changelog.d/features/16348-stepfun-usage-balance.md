@@ -1,0 +1,1 @@
+- **feat(usage):** StepFun account balance is shown as a credits-style quota in Provider Limits, with the China (CNY) or international (USD) platform picked from the connection base URL ([#16348](https://github.com/cheaper-inference/OmniRoute/pull/16348) - thanks @Neuron-Mr-White)
