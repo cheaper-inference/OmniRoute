@@ -54,9 +54,11 @@ export function checkCredentialGate(
     const diagnosis =
       typeof rawType === "string" && /^[a-z_]{1,64}$/.test(rawType) ? rawType : "unknown";
     const knownBad = INVALID_CREDENTIAL_DIAGNOSES.has(diagnosis);
+    const verdict = knownBad ? "has known-bad credentials" : "has a failed health probe";
+    const prefix = `Credential gate: ${modelStr} — connection ${connectionId}`;
     return {
       allowed: false,
-      reason: `Credential gate: ${modelStr} — connection ${connectionId} ${knownBad ? "has known-bad credentials" : "has a failed health probe"} (diagnosis: ${diagnosis}; skipping)`,
+      reason: `${prefix} ${verdict} (diagnosis: ${diagnosis}; skipping)`,
     };
   }
 
