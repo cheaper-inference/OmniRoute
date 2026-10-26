@@ -498,12 +498,29 @@ test("flag on: the schema memory stays bounded and a refused request stores noth
   assert.equal(recordedToolParameters("opencode", FREE_MODEL, SESSION_A, "edit"), undefined);
 });
 
-// 13. No public bearer: a keyless gated request carries no Authorization at all.
-test("flag on: a gated request without a key sends no Authorization header", () => {
-  process.env[FLAG] = "true";
-  configurePublishedCatalogForTests(publishedCatalog());
-  const headers = new OpencodeExecutor("opencode-zen").buildHeaders(null, true, null, FREE_MODEL);
-  assert.equal(headers.Authorization, undefined);
-  assert.equal(headers["x-api-key"], undefined);
-  assert.equal(JSON.stringify(headers).includes("Bearer public"), false);
+// 13. The flag adds no credential of its own to a keyless gated request: the gated lane's
+// credential stays owned by OPENCODE_FREE_TIER_CREDENTIAL (#17848), the same with the flag
+// on or off, and `none` still sends no Authorization at all.
+test("flag on: a gated request without a key gets the same credential as with the flag off", () => {
+  const previous = process.env.OPENCODE_FREE_TIER_CREDENTIAL;
+  try {
+    configurePublishedCatalogForTests(publishedCatalog());
+    for (const credential of [undefined, "none"]) {
+      if (credential === undefined) delete process.env.OPENCODE_FREE_TIER_CREDENTIAL;
+      else process.env.OPENCODE_FREE_TIER_CREDENTIAL = credential;
+      delete process.env[FLAG];
+      const off = new OpencodeExecutor("opencode-zen").buildHeaders(null, true, null, FREE_MODEL);
+      process.env[FLAG] = "true";
+      const on = new OpencodeExecutor("opencode-zen").buildHeaders(null, true, null, FREE_MODEL);
+      assert.equal(on.Authorization, off.Authorization);
+      assert.equal(on["x-api-key"], off["x-api-key"]);
+      if (credential === "none") {
+        assert.equal(on.Authorization, undefined);
+        assert.equal(on["x-api-key"], undefined);
+      }
+    }
+  } finally {
+    if (previous === undefined) delete process.env.OPENCODE_FREE_TIER_CREDENTIAL;
+    else process.env.OPENCODE_FREE_TIER_CREDENTIAL = previous;
+  }
 });
