@@ -569,6 +569,14 @@ function shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
   const type = getClaudeEventType(payload);
   if (!type || lifecycle.hasError || lifecycle.hasContentBlock) return false;
   if (!hasClaudeAssistantLifecycle(lifecycle)) return false;
+  const delta = (payload as JsonRecord).delta;
+  // A bare `event: message_delta` line: its data line carries the stop_reason and decides.
+  if (type === "message_delta" && !delta) return false;
+  // A refusal has no content by design; forward it so the client sees why.
+  const stopReason =
+    (delta && typeof delta === "object" ? (delta as JsonRecord).stop_reason : null) ??
+    lifecycle.stopReason;
+  if (stopReason === "refusal") return false;
   return type === "message_delta" || type === "message_stop";
 }
 
