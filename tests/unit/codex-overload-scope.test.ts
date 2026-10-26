@@ -247,3 +247,43 @@ test("mixed capacity wording and exhausted Codex quota headers still enforce sco
   );
 });
 
+test("Codex capacity classifier requires explicit transient evidence and preserves quota protections", async () => {
+  const { isTransientCodexCapacity429 } =
+    await import("../../open-sse/services/codexAccount/capacity429.ts");
+  const capacity = JSON.stringify({
+    error: { message: "Codex is at capacity, please try again later" },
+  });
+  assert.equal(isTransientCodexCapacity429(429, capacity), true);
+  assert.equal(isTransientCodexCapacity429(503, capacity), false);
+  assert.equal(isTransientCodexCapacity429(429, "Rate limit exceeded"), false);
+  assert.equal(
+    isTransientCodexCapacity429(429, "Codex is at capacity: weekly quota exhausted"),
+    false
+  );
+  assert.equal(
+    isTransientCodexCapacity429(429, capacity, {
+      "x-codex-5h-usage": "95",
+      "x-codex-5h-limit": "100",
+    }),
+    true,
+    "remaining quota is not exhausted evidence"
+  );
+  assert.equal(
+    isTransientCodexCapacity429(
+      429,
+      capacity,
+      new Headers({ "x-codex-5h-usage": "100", "x-codex-5h-limit": "100" })
+    ),
+    false,
+    "real exhausted quota headers supersede capacity wording"
+  );
+  assert.equal(
+    isTransientCodexCapacity429(429, capacity, { "x-ratelimit-remaining-requests": "0" }),
+    false
+  );
+  assert.equal(
+    isTransientCodexCapacity429(429, capacity, { "x-ratelimit-remaining-requests": "" }),
+    true,
+    "empty/non-numeric rate-limit metadata is not proof of exhaustion"
+  );
+});
