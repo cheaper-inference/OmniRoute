@@ -215,6 +215,8 @@ import {
   type ConnectionRestrictionSource,
 } from "./credentialSelectionDiagnostics.ts";
 
+import { pickPreferredConnection } from "./connectionPreference";
+
 type JsonRecord = Record<string, unknown>;
 interface RecoverableConnectionState {
   connectionId: string;
@@ -1836,6 +1838,15 @@ export async function getProviderCredentials(
           (candidate) => candidate.id === leasePolicy.activeLease?.connectionId
         )
       : undefined;
+    let selectedByApiKeyPreference = false;
+    if (!connection && options.preferredConnectionIds?.length) {
+      const preferred = pickPreferredConnection(orderedConnections, options.preferredConnectionIds);
+      if (preferred) {
+        connection = preferred;
+        selectedByApiKeyPreference = true;
+        log.debug("AUTH", `${provider} api-key preference selected ${preferred.id.slice(0, 8)}...`);
+      }
+    }
     const affinityPlan =
       options.lease && !connection
         ? planSessionAffinityConnection(
@@ -1867,7 +1878,7 @@ export async function getProviderCredentials(
     }
 
     if (connection) {
-      // Session affinity selected a connection before global sticky routing.
+      // Active lease, API-key preference, or session affinity selected before global routing.
     } else if (strategy === "round-robin") {
       const stickyLimit = toNumber(
         providerOverride.stickyRoundRobinLimit ??
@@ -2030,7 +2041,11 @@ export async function getProviderCredentials(
       connection = orderedConnections[0];
     }
 
-    if (options.reserveOAuthSession === true && connection?.authType === "oauth") {
+    if (
+      options.reserveOAuthSession === true &&
+      connection?.authType === "oauth" &&
+      !selectedByApiKeyPreference
+    ) {
       const selectedPriority = connection.priority || 999;
       const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
       const moreAvailablePeer = [...orderedConnections]
@@ -2298,15 +2313,15 @@ export async function getProviderCredentialsWithQuotaPreflight(
     // Returns the minimum-remaining cutoff for a window — matches the
     // dashboard's quota bars so the number the user types in the modal
     // means the same thing as the percentage rendered on the bar.
+    const lookupWindowNames = (windowName: string): string[] =>
+      provider === "codex"
+        ? uniqueWindows(
+            [windowName, toCodexBaseQuotaWindowName(windowName)].filter(Boolean) as string[]
+          )
+        : [windowName];
     const resolveMinRemainingPercent = (windowName: string | null): number => {
       if (windowName !== null) {
-        const lookupWindowNames =
-          provider === "codex"
-            ? uniqueWindows(
-                [windowName, toCodexBaseQuotaWindowName(windowName)].filter(Boolean) as string[]
-              )
-            : [windowName];
-        for (const lookupWindowName of lookupWindowNames) {
+        for (const lookupWindowName of lookupWindowNames(windowName)) {
           const override = perConnectionWindowOverrides[lookupWindowName];
           if (typeof override === "number") return override;
           const providerDefault = providerWindowMap[lookupWindowName];
@@ -2330,6 +2345,19 @@ export async function getProviderCredentialsWithQuotaPreflight(
         {
           resolveMinRemainingPercent,
           resolveWarnRemainingPercent: () => warnThresholdPercent,
+          isConfiguredCutoff: (windowName) => {
+            if (windowName !== null) {
+              for (const name of lookupWindowNames(windowName)) {
+                if (
+                  Object.hasOwn(perConnectionWindowOverrides, name) ||
+                  Object.hasOwn(providerWindowMap, name)
+                ) {
+                  return true;
+                }
+              }
+            }
+            return globalCutoffEnabled || globalDefaultIsRestrictive || legacyForceEnable;
+          },
         }
       );
     } catch (error) {

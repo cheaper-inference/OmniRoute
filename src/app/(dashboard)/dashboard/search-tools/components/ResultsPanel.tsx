@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Badge } from "@/shared/components";
+import { Badge, Button } from "@/shared/components";
 import Editor from "@/shared/components/MonacoEditor";
+import Icon from "@/shared/components/Icon";
 
 interface SearchResult {
   title: string;
@@ -67,9 +68,9 @@ export default function ResultsPanel({
   };
 
   const getScoreBg = (score: number) => {
-    if (score >= 0.9) return "bg-green-500/10";
-    if (score >= 0.7) return "bg-yellow-500/10";
-    return "bg-red-500/10";
+    if (score >= 0.9) return "bg-success-bg";
+    if (score >= 0.7) return "bg-warning-bg";
+    return "bg-error-bg";
   };
 
   const editorTheme =
@@ -96,26 +97,22 @@ export default function ResultsPanel({
         </div>
         {response && (
           <div className="flex gap-1">
-            <button
-              className={`text-xs px-3 py-1 rounded-md ${
-                !showJson
-                  ? "bg-primary/15 text-primary font-medium"
-                  : "bg-black/5 dark:bg-white/5 text-text-muted"
-              }`}
+            <Button
+              size="sm"
+              variant={!showJson ? "secondary" : "ghost"}
+              aria-pressed={!showJson}
               onClick={() => setShowJson(false)}
             >
               {t("formatted")}
-            </button>
-            <button
-              className={`text-xs px-3 py-1 rounded-md ${
-                showJson
-                  ? "bg-primary/15 text-primary font-medium"
-                  : "bg-black/5 dark:bg-white/5 text-text-muted"
-              }`}
+            </Button>
+            <Button
+              size="sm"
+              variant={showJson ? "secondary" : "ghost"}
+              aria-pressed={showJson}
               onClick={() => setShowJson(true)}
             >
               {t("rawJson")}
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -123,9 +120,7 @@ export default function ResultsPanel({
       {/* Content */}
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <span className="material-symbols-outlined text-[24px] text-primary animate-spin">
-            progress_activity
-          </span>
+          <Icon name="progress_activity" size={24} className="text-primary animate-spin" />
         </div>
       )}
 

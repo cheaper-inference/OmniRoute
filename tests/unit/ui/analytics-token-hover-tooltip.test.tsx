@@ -2,7 +2,7 @@
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   StatCard,
   CompactStatGrid,
@@ -13,6 +13,22 @@ import {
 import { ModelTable } from "@/shared/components/analytics/ModelTable";
 import RequestCountTable from "@/shared/components/analytics/RequestCountTable";
 import { fmtFull } from "@/shared/utils/formatting";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
+
+// The shared Tooltip is a kit Tooltip (Radix) since KEA-7886: it opens on `pointermove`
+// over the trigger element (the Tooltip's child), after `delayMs`, and portals its
+// content to document.body with a `role="tooltip"` node that mirrors the content.
+const hover = (el: Element | null | undefined) =>
+  el?.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerType: "mouse" }));
 
 vi.mock("next-intl", () => ({
   useLocale: () => "en",
@@ -28,6 +44,15 @@ vi.mock("next-intl", () => ({
 
 describe("Analytics Token Hover Tooltips", () => {
   let container: HTMLElement;
+  // Every root is unmounted before the DOM is wiped: a still-mounted root keeps its open
+  // Radix tooltip, which closes (and removes its already-wiped portal node) when the next
+  // test opens one — Radix closes other open tooltips on a document-level event.
+  let roots: Array<ReturnType<typeof createRoot>> = [];
+  const mountRoot = () => {
+    const root = createRoot(container);
+    roots.push(root);
+    return root;
+  };
 
   beforeEach(() => {
     (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
@@ -36,13 +61,15 @@ describe("Analytics Token Hover Tooltips", () => {
   });
 
   afterEach(() => {
+    act(() => roots.forEach((root) => root.unmount()));
+    roots = [];
     container.remove();
     document.body.innerHTML = "";
   });
 
   it("StatCard renders rich custom tooltip when provided, else falls back to value title", async () => {
     vi.useFakeTimers();
-    const root = createRoot(container);
+    const root = mountRoot();
     await act(async () => {
       root.render(
         <div>
@@ -64,12 +91,12 @@ describe("Analytics Token Hover Tooltips", () => {
     expect(values[1]?.getAttribute("title")).toBe("$1180.27");
     expect(values[1]?.textContent).toBe("$1180.27");
 
-    // Trigger hover on the first StatCard value
-    const trigger = container.querySelector(".w-fit.max-w-full");
-    expect(trigger).toBeDefined();
+    // Trigger hover on the first StatCard value (the Tooltip wraps it in `.ci-tooltip`)
+    const trigger = container.querySelector(".ci-tooltip.w-fit.max-w-full");
+    expect(trigger).not.toBeNull();
 
     await act(async () => {
-      trigger?.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+      hover(values[0]);
       await vi.advanceTimersByTimeAsync(250);
     });
 
@@ -83,7 +110,7 @@ describe("Analytics Token Hover Tooltips", () => {
 
   it("CompactStatGrid renders rich custom tooltip when provided", async () => {
     vi.useFakeTimers();
-    const root = createRoot(container);
+    const root = mountRoot();
     await act(async () => {
       root.render(
         <CompactStatGrid
@@ -117,11 +144,11 @@ describe("Analytics Token Hover Tooltips", () => {
     expect(statElements[1]?.getAttribute("title")).toBe("0");
 
     // Trigger hover on the first stat item
-    const trigger = statElements[0]?.closest(".relative.inline-flex");
-    expect(trigger).toBeDefined();
+    const trigger = statElements[0]?.closest(".ci-tooltip");
+    expect(trigger).not.toBeNull();
 
     await act(async () => {
-      trigger?.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+      hover(statElements[0]);
       await vi.advanceTimersByTimeAsync(250);
     });
 
@@ -133,7 +160,7 @@ describe("Analytics Token Hover Tooltips", () => {
   });
 
   it("ApiKeyTable renders full token counts as title hover tooltips", async () => {
-    const root = createRoot(container);
+    const root = mountRoot();
     const mockData = [
       {
         apiKeyId: "key-12345678",
@@ -166,7 +193,7 @@ describe("Analytics Token Hover Tooltips", () => {
   });
 
   it("ProviderTable renders full token counts as title hover tooltips", async () => {
-    const root = createRoot(container);
+    const root = mountRoot();
     const mockData = [
       {
         provider: "anthropic",
@@ -198,7 +225,7 @@ describe("Analytics Token Hover Tooltips", () => {
   });
 
   it("ModelTable renders full token counts as title hover tooltips", async () => {
-    const root = createRoot(container);
+    const root = mountRoot();
     const mockData = [
       {
         model: "claude-3-7-sonnet",
@@ -230,7 +257,7 @@ describe("Analytics Token Hover Tooltips", () => {
   });
 
   it("RequestCountTable renders full totalTokens count as title hover tooltip", async () => {
-    const root = createRoot(container);
+    const root = mountRoot();
     const mockData = [
       {
         date: "2026-09-03",
@@ -268,7 +295,7 @@ describe("Analytics Token Hover Tooltips", () => {
 
   it("MostActiveDay7d renders rich custom tooltip on hover", async () => {
     vi.useFakeTimers();
-    const root = createRoot(container);
+    const root = mountRoot();
     // Use today's date formatted as YYYY-MM-DD
     const today = new Date();
     const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
@@ -280,11 +307,11 @@ describe("Analytics Token Hover Tooltips", () => {
       root.render(<MostActiveDay7d activityMap={mockActivityMap} />);
     });
 
-    const trigger = container.querySelector(".relative.inline-flex.w-fit");
-    expect(trigger).toBeDefined();
+    const trigger = container.querySelector(".ci-tooltip.w-fit");
+    expect(trigger).not.toBeNull();
 
     await act(async () => {
-      trigger?.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+      hover(trigger?.querySelector("[data-tooltip]"));
       await vi.advanceTimersByTimeAsync(250);
     });
 

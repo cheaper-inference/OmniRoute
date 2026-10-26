@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="<material name>"> via <Icon>.
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
@@ -9,10 +10,7 @@ import type { TranslateNarratedResult } from "@/app/(dashboard)/dashboard/transl
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string, params?: Record<string, string | number>) => {
     if (!params) return key;
-    return Object.entries(params).reduce(
-      (acc, [k, v]) => acc.replace(`{${k}}`, String(v)),
-      key
-    );
+    return Object.entries(params).reduce((acc, [k, v]) => acc.replace(`{${k}}`, String(v)), key);
   },
 }));
 
@@ -23,13 +21,7 @@ vi.mock("@/shared/components", () => ({
       {children}
     </div>
   ),
-  Badge: ({
-    children,
-    variant,
-  }: {
-    children: React.ReactNode;
-    variant?: string;
-  }) => (
+  Badge: ({ children, variant }: { children: React.ReactNode; variant?: string }) => (
     <span data-testid="badge" data-variant={variant}>
       {children}
     </span>
@@ -50,18 +42,15 @@ vi.mock("@/shared/components", () => ({
 }));
 
 // --- Mock exampleTemplates (FORMAT_META) ---
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/exampleTemplates",
-  () => ({
-    FORMAT_META: {
-      openai: { label: "OpenAI", color: "emerald", icon: "smart_toy" },
-      claude: { label: "Claude", color: "orange", icon: "psychology" },
-      gemini: { label: "Gemini", color: "blue", icon: "auto_awesome" },
-    },
-    FORMAT_OPTIONS: [],
-    getExampleTemplates: () => [],
-  })
-);
+vi.mock("@/app/(dashboard)/dashboard/translator/exampleTemplates", () => ({
+  FORMAT_META: {
+    openai: { label: "OpenAI", color: "emerald", icon: "smart_toy" },
+    claude: { label: "Claude", color: "orange", icon: "psychology" },
+    gemini: { label: "Gemini", color: "blue", icon: "auto_awesome" },
+  },
+  FORMAT_OPTIONS: [],
+  getExampleTemplates: () => [],
+}));
 
 // --- Setup ---
 const cleanupCallbacks: Array<() => void> = [];
@@ -89,7 +78,9 @@ function idleResult(): TranslateNarratedResult {
 
 describe("ResultNarrated", () => {
   beforeEach(() => {
-    (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+    (
+      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+    ).IS_REACT_ACT_ENVIRONMENT = true;
   });
 
   afterEach(() => {
@@ -99,16 +90,13 @@ describe("ResultNarrated", () => {
   });
 
   it("exports a default function component", async () => {
-    const mod = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const mod = await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     expect(typeof mod.default).toBe("function");
   });
 
   it("renders idle state without throwing", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -124,9 +112,8 @@ describe("ResultNarrated", () => {
   });
 
   it("idle state shows info icon", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -138,26 +125,29 @@ describe("ResultNarrated", () => {
         />
       );
     });
-    const icons = Array.from(container.querySelectorAll(".material-symbols-outlined")).map(
-      (el) => el.textContent?.trim()
+    const icons = Array.from(container.querySelectorAll("svg.oi-icon")).map((el) =>
+      el.getAttribute("data-icon")
     );
     expect(icons).toContain("info");
   });
 
   it("translating state shows spinner and translating text", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
-    const result: TranslateNarratedResult = { ...idleResult(), status: "translating", target: "gemini" };
+    const result: TranslateNarratedResult = {
+      ...idleResult(),
+      status: "translating",
+      target: "gemini",
+    };
     await act(async () => {
       root.render(
         <ResultNarrated result={result} onSeeTranslatedJson={vi.fn()} onSeePipeline={vi.fn()} />
       );
     });
-    const icons = Array.from(container.querySelectorAll(".material-symbols-outlined")).map(
-      (el) => el.textContent?.trim()
+    const icons = Array.from(container.querySelectorAll("svg.oi-icon")).map((el) =>
+      el.getAttribute("data-icon")
     );
     expect(icons).toContain("progress_activity");
     // Text should contain the i18n key with Gemini substituted
@@ -165,28 +155,30 @@ describe("ResultNarrated", () => {
   });
 
   it("sending state shows spinner and sending text", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
-    const result: TranslateNarratedResult = { ...idleResult(), status: "sending", target: "openai" };
+    const result: TranslateNarratedResult = {
+      ...idleResult(),
+      status: "sending",
+      target: "openai",
+    };
     await act(async () => {
       root.render(
         <ResultNarrated result={result} onSeeTranslatedJson={vi.fn()} onSeePipeline={vi.fn()} />
       );
     });
-    const icons = Array.from(container.querySelectorAll(".material-symbols-outlined")).map(
-      (el) => el.textContent?.trim()
+    const icons = Array.from(container.querySelectorAll("svg.oi-icon")).map((el) =>
+      el.getAttribute("data-icon")
     );
     expect(icons).toContain("progress_activity");
     expect(container.textContent).toContain("OpenAI");
   });
 
   it("ok state shows success badge + narrated text + see pipeline button", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
     const result: TranslateNarratedResult = {
@@ -214,9 +206,8 @@ describe("ResultNarrated", () => {
   });
 
   it("ok state: 'see translated JSON' button calls onSeeTranslatedJson", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
     const onSeeTranslatedJson = vi.fn();
@@ -249,9 +240,8 @@ describe("ResultNarrated", () => {
   });
 
   it("ok state: 'see pipeline' button calls onSeePipeline", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
     const onSeePipeline = vi.fn();
@@ -284,9 +274,8 @@ describe("ResultNarrated", () => {
   });
 
   it("error state shows error badge", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
     const result: TranslateNarratedResult = {
@@ -304,9 +293,8 @@ describe("ResultNarrated", () => {
   });
 
   it("SECURITY: error state with fake stack trace does NOT expose 'at /' in rendered text", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
     // Simulate a message that already has trace-like content (belt-and-suspenders test)
@@ -326,9 +314,8 @@ describe("ResultNarrated", () => {
   });
 
   it("SECURITY: error state does NOT leak Bearer tokens", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
     const result: TranslateNarratedResult = {
@@ -347,9 +334,8 @@ describe("ResultNarrated", () => {
   });
 
   it("aria-live='polite' container is present for screen-reader announcements (D20)", async () => {
-    const { default: ResultNarrated } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/ResultNarrated"
-    );
+    const { default: ResultNarrated } =
+      await import("@/app/(dashboard)/dashboard/translator/components/ResultNarrated");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {

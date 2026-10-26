@@ -48,15 +48,11 @@ yóò kàn ṣiṣẹ́), ó máa ń yẹ ìlera server wò, ó sì máa ń ṣi
 
 ---
 
-## Àwọn alias ìṣàwárí — mú àwọn awoṣe tí kì í ṣe Claude hàn nínú olùyan `/model`
+## Àwọn orúkọ àkóbí ìwárí — fi àwọn àwọṣe tí kì í ṣe Claude hàn nínú yíyan `/model`
 
-Ìṣàwárí awoṣe gateway ti Claude Code máa ń ṣàkójọ àwọn id tó bẹ̀rẹ̀ pẹ̀lú `claude`
-tàbí `anthropic` nìkan, nítorí náà pẹ̀lú `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, olùyan
-`/model` àbínibí sábà máa ń fi àwọn awoṣe Claude/Anthropic ti OmniRoute **nìkan** hàn — awoṣe
-`kimi/kimi-k2.6` tàbí `glm/glm-5.2` kì í farahàn rárá, bó tilẹ̀ jẹ́ pé routing rẹ̀ ń ṣiṣẹ́ dáadáa.
+Ìwárí àwọṣe ẹnubode Claude Code máa ń ṣe àkójọ àwọn id tí ó bẹ̀rẹ̀ pẹ̀lú `claude` tàbí `anthropic` nìkan, nítorí náà pẹ̀lú `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` yíyan `/model` abínibí sábà máa ń fi **àwọn** àwọṣe Claude/Anthropic OmniRoute nìkan hàn — `kimi/kimi-k2.6` tàbí `glm/glm-5.2` kì í farahàn rárá, bí ó tilẹ̀ jẹ́ pé ó ń ṣiṣẹ́ dáadáa.
 
-OmniRoute lè ṣe àfarawé awoṣe èyíkéyìí tó ti ṣiṣẹ́ (àti combo) lábẹ́ id `claude/…` kí ó lè
-kọjá filter yẹn kí ó sì farahàn nínú olùyan náà:
+OmniRoute lè ṣe àwòrán àwọṣe èyíkéyìí tí ó ṣíṣẹ́ (àti àkópọ̀) lábẹ́ id `claude/…` kí ó lè kọjá àlẹmọ́ yẹn kí ó sì farahàn nínú yíyan:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,32 +60,21 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Nígbà tí o bá yan ọ̀kan lára wọ̀nyí nínú Claude Code, OmniRoute máa ń yọ wrapper `claude/`
-kúrò, yóò sì dá a padà sí id gidi kí ó tó ṣe routing — id `claude/<real-claude-model>` gidi kan
-(olùpèsè Claude OAuth gangan) ni a máa ń fi sílẹ̀ láìfọwọ́kàn ní gbogbo ìgbà.
+Nígbà tí o bá yan ọ̀kan nínú àwọn wọ̀nyí nínú Claude Code, OmniRoute máa ń yọ ìbòrí `claude/` kúrò, ó sì padà sí id gidi kí ó tó ṣe ìtọ́sọ́nà — id `claude/<real-claude-model>` gidi (olùpèsè OAuth Claude gan-an) ni a kì í fọwọ́ kàn rárá.
 
-**Èyí wà ní pípa ní àkọ́kọ́** a sì ń darí rẹ̀ pẹ̀lú ẹnu-ọ̀nà ipele mẹ́ta (èyí tó
-pàtó jù ni ó máa ń borí), kí OmniRoute lásán má bàa ṣe àdàkọ katalogi rẹ̀ fún àwọn client tí kì í lo
-Claude Code:
+Ní àkọ́kọ́, àwọn id ìpìlẹ̀ nìkan ni a ṣe àwòrán wọn. Pẹ̀lú fíláàgì ẹ̀yà `CATALOG_MIRROR_REFINEMENTS_ENABLED` tí a yàn láti mú ṣiṣẹ́, àwọn oríṣiríṣi ìsapá ìrònú tí àkójọ ti ṣe àkọsílẹ̀ wọn tẹ́lẹ̀ (bí àpẹẹrẹ `codex/gpt-6-sol-high`) ni a ṣe àwòrán wọn gẹ́gẹ́ bí id mìíràn, kí Claude Code lè yan ìpele ìsapá kan pàtó, àwọn id `auto/*` tí a kọ́ sínú tí ipa ìbéèrè kò lè mú wá ni a kò sì ṣe àwòrán wọn. Bóyá a ṣe àkọsílẹ̀ àwọn oríṣiríṣi ìsapá rárá ṣì wà lábẹ́ ìṣàkóso `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — àwòrán kì í fi oríṣi kan kún àkójọ ìpìlẹ̀ tí kò ní.
 
-| Ipele   | Ibi                                                                              |
-| ------- | -------------------------------------------------------------------------------- |
-| Awoṣe   | Ojú-ìwé àlàyé olùpèsè → toggle "Ṣí i hàn nínú Claude Code" fún awoṣe kọ̀ọ̀kan      |
-| Olùpèsè | Ojú-ìwé àlàyé olùpèsè → toggle ipele olùpèsè (ó kan gbogbo àwọn awoṣe rẹ̀)        |
-| Àgbáyé  | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (ó wà ní pípa ní àkọ́kọ́) |
+**Èyí kò ṣiṣẹ́ ní àkọ́kọ́** a sì ń ṣàkóso rẹ̀ pẹ̀lú ẹnubode ìpele mẹ́ta (èyí tí ó pàtó jù ni ó máa ń borí), nítorí náà OmniRoute lasan kì í ní í ṣe ìlọ́po àkójọ rẹ̀ fún àwọn aṣàmúlò tí kò lò Claude Code:
 
-Environment variable `EXPOSE_CC_DISCOVERY_ALIASES` máa ń fipá mú kí ipele àgbáyé ṣiṣẹ́,
-ó sì máa ń borí àtúnṣe dashboard (ojú Feature Flags máa ń fi àkíyèsí
-"ń ṣiṣẹ́ nípasẹ̀ environment variable" hàn nígbà tó bá rí bẹ́ẹ̀). Àwọn toggle fún olùpèsè
-kọ̀ọ̀kan àti awoṣe kọ̀ọ̀kan máa ń tún un ṣe láti ibẹ̀ — fún àpẹẹrẹ, tí àgbáyé bá wà ní pípa + tí olùpèsè Kimi bá wà ní ṣíṣí,
-àwọn awoṣe Kimi nìkan ni yóò farahàn.
+| Ìpele   | Ibí                                                                                 |
+| ------- | ----------------------------------------------------------------------------------- |
+| Àwọṣe   | Ojú-ìwé àlàyé olùpèsè → tógùlù "Expose in Claude Code" fún àwọṣe kọ̀ọ̀kan             |
+| Olùpèsè | Ojú-ìwé àlàyé olùpèsè → tógùlù ìpele olùpèsè (ó bo gbogbo àwọn àwọṣe rẹ̀)            |
+| Àgbáyé  | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (ó wà ní òkùnkùn ní àkọ́kọ́) |
 
-> ⚠️ **Àìbáramu window lórí àwọn awoṣe tí kì í ṣe Claude.** Claude Code gbà pé context
-> window 200K ni ó wà fún id èyíkéyìí tí kò mọ̀ (kò lè ka window gidi láti
-> `/v1/models`). Fún awoṣe tó ní window tó tóbi jù (fún àpẹẹrẹ 256K ti Kimi K2), ṣètò
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sí iye tó kéré ju window gidi awoṣe náà lọ kí
-> ìkójọpọ̀ aládàáṣe má bàa bẹ̀rẹ̀ ṣáájú àkókò. Àwọn prófáìlì tí a ṣẹ̀dá lókè ti ṣe
-> èyí fún awoṣe kọ̀ọ̀kan tẹ́lẹ̀.
+Ètò àyíká `EXPOSE_CC_DISCOVERY_ALIASES` máa ń fipá mú ìpele àgbáyé ṣiṣẹ́, ó sì borí àyípadà ojú-ìwé ìṣàkóso (ojú-ìwé Feature Flags máa ń fi àkọsílẹ̀ "active via environment variable" hàn nígbà tí ó bá ṣe bẹ́ẹ̀). Àwọn tógùlù ìpele olùpèsè àti àwọṣe kọ̀ọ̀kan máa ń tún un ṣe láti ibẹ̀ — bí àpẹẹrẹ àgbáyé ní òkùnkùn + olùpèsè Kimi ní ṣíṣí máa ń fi àwọn àwọṣe Kimi nìkan hàn.
+
+> ⚠️ **Àìbáramu fèrèsé lórí àwọn àwọṣe tí kì í ṣe Claude.** Claude Code máa ń gbà pé fèrèsé ọ̀rọ̀-ìtumọ̀ 200K ni fún id èyíkéyìí tí kò mọ̀ (kò lè ka fèrèsé gidi láti `/v1/models`). Fún àwọṣe tí ó ní fèrèsé ńlá (bí àpẹẹrẹ 256K ti Kimi K2), ṣètò `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sí iye tí ó kéré ju fèrèsé gidi àwọṣe náà kí ìṣùpọ̀ aládáwà má baà ṣẹlẹ̀ kíákíá. Àwọn prófáìlì tí a ṣẹ̀dá lókè ti ṣe èyí tẹ́lẹ̀ fún àwọṣe kọ̀ọ̀kan.
 
 ---
 

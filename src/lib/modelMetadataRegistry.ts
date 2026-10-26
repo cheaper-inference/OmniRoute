@@ -375,6 +375,39 @@ function resolveCatalogPricing(
   return user ? { ...(base || {}), ...user } : base;
 }
 
+function lookupCatalogPricing(
+  source: Record<string, Record<string, Record<string, number>>>,
+  provider: string,
+  model: string
+): Record<string, number> | null {
+  const providerPricing =
+    findInsensitive(source, provider) || findInsensitive(source, provider.replace(/-cn$/, ""));
+  if (providerPricing) {
+    const modelPricing =
+      findInsensitive(providerPricing, model) ||
+      findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
+      findInsensitive(
+        providerPricing,
+        model.includes("/") ? model.split("/").pop() || model : model
+      );
+    if (modelPricing && typeof modelPricing === "object") {
+      const input = modelPricing.input;
+      const output = modelPricing.output;
+      if (typeof input === "number" || typeof output === "number") {
+        const pricing: Record<string, number> = {};
+        if (typeof input === "number") pricing.input = input;
+        if (typeof output === "number") pricing.output = output;
+        if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
+        if (typeof modelPricing.cache_creation === "number") {
+          pricing.cache_creation = modelPricing.cache_creation;
+        }
+        return pricing;
+      }
+    }
+  }
+  return null;
+}
+
 function resolveBaseCatalogPricing(
   provider: string,
   model: string,
@@ -385,32 +418,8 @@ function resolveBaseCatalogPricing(
     const modelsDev = (
       snapshot ? snapshot.modelsDevPricing || {} : getModelsDevPricing()
     ) as Record<string, Record<string, Record<string, number>>>;
-    const providerPricing =
-      findInsensitive(modelsDev, provider) ||
-      findInsensitive(modelsDev, provider.replace(/-cn$/, ""));
-    if (providerPricing) {
-      const modelPricing =
-        findInsensitive(providerPricing, model) ||
-        findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
-        findInsensitive(
-          providerPricing,
-          model.includes("/") ? model.split("/").pop() || model : model
-        );
-      if (modelPricing && typeof modelPricing === "object") {
-        const input = modelPricing.input;
-        const output = modelPricing.output;
-        if (typeof input === "number" || typeof output === "number") {
-          const pricing: Record<string, number> = {};
-          if (typeof input === "number") pricing.input = input;
-          if (typeof output === "number") pricing.output = output;
-          if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
-          if (typeof modelPricing.cache_creation === "number") {
-            pricing.cache_creation = modelPricing.cache_creation;
-          }
-          return pricing;
-        }
-      }
-    }
+    const pricing = lookupCatalogPricing(modelsDev, provider, model);
+    if (pricing) return pricing;
   } catch {
     // pricing lookup must never break catalog assembly
   }
@@ -424,31 +433,8 @@ function resolveBaseCatalogPricing(
       string,
       Record<string, Record<string, number>>
     >;
-    const providerPricing =
-      findInsensitive(litellm, provider) || findInsensitive(litellm, provider.replace(/-cn$/, ""));
-    if (providerPricing) {
-      const modelPricing =
-        findInsensitive(providerPricing, model) ||
-        findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
-        findInsensitive(
-          providerPricing,
-          model.includes("/") ? model.split("/").pop() || model : model
-        );
-      if (modelPricing && typeof modelPricing === "object") {
-        const input = modelPricing.input;
-        const output = modelPricing.output;
-        if (typeof input === "number" || typeof output === "number") {
-          const pricing: Record<string, number> = {};
-          if (typeof input === "number") pricing.input = input;
-          if (typeof output === "number") pricing.output = output;
-          if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
-          if (typeof modelPricing.cache_creation === "number") {
-            pricing.cache_creation = modelPricing.cache_creation;
-          }
-          return pricing;
-        }
-      }
-    }
+    const pricing = lookupCatalogPricing(litellm, provider, model);
+    if (pricing) return pricing;
   } catch {
     // pricing lookup must never break catalog assembly
   }

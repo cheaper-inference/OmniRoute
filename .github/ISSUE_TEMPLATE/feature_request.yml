@@ -8,7 +8,7 @@ body:
       value: |
         Thanks for suggesting a feature! Please describe the problem you're trying to solve and how you'd like it to work.
 
-        The title is prefilled as `feat(): ` to match the [Conventional Commits](https://github.com/diegosouzapw/OmniRoute/blob/main/CONTRIBUTING.md#commit-messages) convention — pick a scope from the list documented there (e.g. `providers`, `resilience`, `dashboard`, `api`).
+        The title is prefilled as `feat(): ` to match the [Conventional Commits](https://github.com/cheaper-inference/OmniRoute/blob/main/CONTRIBUTING.md#commit-messages) convention — pick a scope from the list documented there (e.g. `providers`, `resilience`, `dashboard`, `api`).
 
   - type: textarea
     id: problem

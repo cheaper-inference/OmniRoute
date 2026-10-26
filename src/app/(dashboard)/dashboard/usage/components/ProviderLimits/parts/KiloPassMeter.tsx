@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { getBarColor } from "../utils";
 import { translateUsageOrFallback } from "../i18nFallback";
+import Icon from "@/shared/components/Icon";
 
 interface KiloPassMeterProps {
   base: number;
@@ -137,14 +138,14 @@ export default function KiloPassMeter({
             <div
               data-kilo-pass-segment="paid"
               data-kilo-pass-boundary={model.hasBonusSegment ? "true" : undefined}
-              className={`relative min-w-0 bg-emerald-500/15 ${
+              className={`relative min-w-0 bg-success/15 ${
                 model.hasBonusSegment ? "border-r-2 border-text-muted" : ""
               }`}
               style={{ width: `${model.paidPercent}%` }}
               aria-hidden="true"
             >
               <div
-                className="absolute inset-y-0 left-0 bg-emerald-500 transition-[width] duration-300 ease-out"
+                className="absolute inset-y-0 left-0 bg-success transition-[width] duration-300 ease-out"
                 style={{ width: `${model.paidUsedPercent}%` }}
               />
             </div>
@@ -152,12 +153,12 @@ export default function KiloPassMeter({
           {model.hasBonusSegment && (
             <div
               data-kilo-pass-segment="bonus"
-              className="relative min-w-0 bg-sky-500/15"
+              className="relative min-w-0 bg-info/15"
               style={{ width: `${model.bonusPercent}%` }}
               aria-hidden="true"
             >
               <div
-                className="absolute inset-y-0 left-0 bg-sky-500 transition-[width] duration-300 ease-out"
+                className="absolute inset-y-0 left-0 bg-info transition-[width] duration-300 ease-out"
                 style={{ width: `${model.bonusUsedPercent}%` }}
               />
             </div>
@@ -169,7 +170,7 @@ export default function KiloPassMeter({
             <div className="min-w-0" style={{ width: `${model.paidPercent}%` }}>
               <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 leading-4">
                 <span
-                  className="inline-block size-2 shrink-0 rounded-full bg-emerald-500"
+                  className="inline-block size-2 shrink-0 rounded-full bg-success"
                   aria-hidden="true"
                 />
                 <span>{translateUsageOrFallback(t, "kiloPassPaid", "Paid")}</span>
@@ -183,7 +184,7 @@ export default function KiloPassMeter({
             <div className="min-w-0" style={{ width: `${model.bonusPercent}%` }}>
               <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 leading-4">
                 <span
-                  className="inline-block size-2 shrink-0 rounded-full bg-sky-500"
+                  className="inline-block size-2 shrink-0 rounded-full bg-info"
                   aria-hidden="true"
                 />
                 <span>{translateUsageOrFallback(t, "kiloPassBonus", "Available bonus")}</span>
@@ -198,12 +199,7 @@ export default function KiloPassMeter({
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-text-main">
         <div className="flex items-center gap-1.5">
-          <span
-            className="material-symbols-outlined text-[13px] text-text-muted"
-            aria-hidden="true"
-          >
-            account_balance_wallet
-          </span>
+          <Icon name="account_balance_wallet" size={13} className="text-text-muted" />
           <span>{translateUsageOrFallback(t, "kiloPassRemaining", "Remaining")}</span>
           <span className="font-semibold tabular-nums">{formatCurrency(model.remaining)}</span>
         </div>
@@ -212,9 +208,7 @@ export default function KiloPassMeter({
       {/* Renewal info */}
       {daysUntilRenewal !== null && renewalDate && (
         <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
-          <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
-            schedule
-          </span>
+          <Icon name="schedule" size={13} />
           <span>
             {translateUsageOrFallback(t, "kiloPassRenews", "Renews in {count} days", {
               count: daysUntilRenewal,
@@ -228,12 +222,7 @@ export default function KiloPassMeter({
       {balance !== null && balance !== undefined && (
         <div className="flex items-center justify-between gap-2 border-t border-border/40 pt-2 text-[11px]">
           <div className="flex items-center gap-1.5">
-            <span
-              className="material-symbols-outlined text-[13px] text-text-muted"
-              aria-hidden="true"
-            >
-              payments
-            </span>
+            <Icon name="payments" size={13} className="text-text-muted" />
             <span className="text-text-main">
               {translateUsageOrFallback(t, "kiloAccountBalance", "Account Balance")}
             </span>

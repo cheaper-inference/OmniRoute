@@ -11,16 +11,17 @@ asisten AI (arsitektur, konvensi, pengujian, gerbang kualitas, alur kerja git, 2
 pembelajaran PII). Baca seluruhnya; jangan tambahkan kembali aturan proyek di sini. Semua hal di bawah ini berlaku HANYA
 untuk Claude Code — penyempurnaan operasional dari aturan yang sudah ditetapkan dalam `AGENTS.md`.
 
-## Isolasi worktree — khusus Claude Code
+## Isolasi worktree — Hal spesifik Claude Code
 
-Protokol worktree wajib secara lengkap (konfirmasi branch dasar, path kanonis `.claude/worktrees/`,
-`cp -al` node_modules, aturan pembongkaran) terdapat dalam `AGENTS.md` → Alur Kerja Git → "Isolasi
-worktree". Poin-poin khusus Claude Code:
+Protokol worktree wajib yang lengkap (konfirmasi branch dasar, path kanonik
+`.claude/worktrees/`, `cp -al` node_modules, aturan teardown) ada di
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (dirangkum di `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Poin-poin spesifik Claude Code:
 
-- Konfirmasikan branch dasar dengan operator melalui `AskUserQuestion` (Aturan Keras #19), kecuali mereka
-  sudah memberitahukannya.
+- Konfirmasi branch dasar dengan operator melalui `AskUserQuestion` (Aturan Keras #19) kecuali
+  mereka sudah memberitahumu.
 - Utamakan tool native `EnterWorktree` — tool ini sudah membuat worktree di bawah
-  `.claude/worktrees/` (path kanonis). Buat worktree dengan perintah `git
+  `.claude/worktrees/` (path kanonik). Buat worktree dengan perintah `git
 worktree add` yang terdokumentasi, lalu panggil `EnterWorktree` dengan `path`-nya.
 
 ## Keamanan lintas sesi — khusus Claude Code

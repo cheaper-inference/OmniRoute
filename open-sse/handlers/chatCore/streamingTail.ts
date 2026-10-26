@@ -264,10 +264,15 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // cooldown and no forced exclusion: the round-robin picker may rotate
   // fingerprint slots opportunistically, a single slot simply replays the same
   // account. Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
-  // back to the current behavior. Translate-path streams only (mirror of the
-  // empty-stream guard); flag off = byte-for-byte unchanged. Bounded reader
-  // (abandon past the cap, never a full `text()` read); the original
+  // back to the current behavior. Flag off = byte-for-byte unchanged. Bounded
+  // reader (abandon past the cap, never a full `text()` read); the original
   // reconstructed response is piped, only the bounded copy is classified.
+  // #17461: armed for EVERY path, not only translated ones. The condition this
+  // loop recovers from is detected by the empty-stream guard on every path
+  // (`rejectEmptyChoicesStream` lives in the shared SSE transform), so a direct
+  // openai→openai turn — the shape most degenerate turns arrive in — was
+  // exactly the case the loop never saw. The judge stays conservative: a turn
+  // it cannot summarize passes through unchanged.
   // Known TTFT cost when armed: a small valid turn under the cap is fully
   // buffered before the first client byte (flag off by default, so the
   // streaming path is untouched unless opted in).
@@ -278,10 +283,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     } catch {
       flushEmptyRetryArmed = false;
     }
-    const isTranslatePath =
-      targetFormat === FORMATS.OPENAI_RESPONSES ||
-      needsTranslation(targetFormat, clientResponseFormat);
-    if (flushEmptyRetryArmed && isTranslatePath) {
+    if (flushEmptyRetryArmed) {
       const retried = await runEmptyTurnRetryLoop({
         providerResponse,
         credentials,
@@ -648,6 +650,9 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       }),
   });
 
+  // The pipeline can fail before the awaited response hooks return to chatCore.
+  deps.registerStreamFinalizers?.(onPipelineStreamError, onClientDisconnectFinalize);
+
   // For providers using Responses API format, translate stream back to openai (Chat Completions) format
   // UNLESS client is Droid CLI which expects openai-responses format back
   const needsResponsesTranslation =
@@ -655,7 +660,11 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     clientResponseFormat === FORMATS.OPENAI &&
     !isResponsesEndpoint &&
     !isDroidCLI;
-  const streamStateBody = finalBody || body;
+  // Response arguments belong to the client's schema, before provider cloaking.
+  const streamStateBody =
+    clientResponseFormat === FORMATS.CLAUDE && Array.isArray(body?.tools)
+      ? { ...(finalBody || body), tools: body.tools }
+      : finalBody || body;
 
   // Client's explicit thinking intent (Anthropic Messages shape). Claude Code
   // sends `{type:"enabled"}` or `{type:"adaptive"}` to opt into relaying
@@ -724,7 +733,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       }),
       requestedThinking,
       customToolNames,
-      requestToolIdentityMap
+      requestToolIdentityMap,
+      // The CLIENT's declared tools[]: an Anthropic-format client gets its own
+      // tool-name casing back from any provider (OpenCode `read`, Claude Code `Read`).
+      (body as Record<string, unknown> | null | undefined)?.tools ?? null
     );
   } else {
     log?.debug?.("STREAM", `Standard passthrough mode`);
@@ -739,7 +751,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       apiKeyInfo,
       handleStreamFailure,
       clientResponseFormat,
-      requestToolIdentityMap
+      requestToolIdentityMap,
+      (body as Record<string, unknown> | null | undefined)?.tools ?? null
     );
   }
 

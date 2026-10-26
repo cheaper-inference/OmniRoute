@@ -18,6 +18,10 @@ import {
 import { resolveDynamicAudioProviders } from "@/app/api/v1/_shared/audioProviderNodes";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
+import { getCombinedModelAliases } from "@/sse/services/model";
+import { resolveModel } from "@omniroute/open-sse/services/wildcardRouter.ts";
+import { resolveModelAliasFromMap } from "@omniroute/open-sse/services/model.ts";
+import { isModelAllowedForKey } from "@/lib/db/apiKeys";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
   createComboTargetKeyGate,
@@ -254,6 +258,46 @@ async function transcribeWithModel(
   return response;
 }
 
+/** Resolve native exact/wildcard aliases without changing unknown audio model ids. */
+async function resolveTranscriptionAlias(modelStr: string): Promise<string> {
+  // Reuse the same DB/settings exact and wildcard alias stores as chat. Stored
+  // combos above retain precedence, and unknown ids keep audio's own parser.
+  const aliases = await getCombinedModelAliases();
+  const wildcardAliases = Object.entries(aliases)
+    .filter(([pattern, target]) => /[*?]/.test(pattern) && typeof target === "string")
+    .map(([pattern, target]) => ({ pattern, target: target as string }));
+  const exact = resolveModelAliasFromMap(modelStr, aliases);
+  return exact ? `${exact.provider}/${exact.model}` : resolveModel(modelStr, {}, wildcardAliases);
+}
+
+async function transcribeWithAlias(
+  formData: FormData,
+  modelStr: string,
+  startTime: number,
+  apiKeyId: string | null,
+  apiKeyName: string | null,
+  apiKey: string | null,
+  allowedConnections: string[] | null
+) {
+  const resolvedModel = await resolveTranscriptionAlias(modelStr);
+  if (
+    resolvedModel !== modelStr &&
+    apiKey &&
+    !(await isModelAllowedForKey(apiKey, modelStr, resolvedModel))
+  ) {
+    return errorResponse(HTTP_STATUS.FORBIDDEN, "API key is not allowed to use the resolved model");
+  }
+
+  return transcribeWithModel(
+    resolvedModel === modelStr ? formData : withModel(formData, resolvedModel),
+    resolvedModel,
+    startTime,
+    apiKeyId,
+    apiKeyName,
+    allowedConnections
+  );
+}
+
 /**
  * POST /v1/audio/transcriptions — transcribe audio files
  * OpenAI Whisper API compatible (multipart/form-data)
@@ -332,12 +376,13 @@ export async function POST(request) {
     }
   }
 
-  return transcribeWithModel(
+  return transcribeWithAlias(
     formData,
     modelStr,
     startTime,
     apiKeyId,
     apiKeyName,
+    policy.apiKey,
     allowedConnections
   );
 }

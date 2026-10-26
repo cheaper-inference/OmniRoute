@@ -169,16 +169,16 @@ needsTranslation(source, target): boolean
 
 ### chatCore.ts（5977 行）
 
-**主请求处理器**。尽管体量庞大，但结构清晰：
+**主请求处理器**。尽管体积庞大，但结构清晰：
 
 ```ts
 // chatCore.ts 的伪结构
 export async function handleChat(request: NextRequest) {
-  // 1. 身份验证 + CORS
+  // 1. 认证 + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. 请求体校验
+  // 2. 请求体验证
   const body = await parseRequestBody(request);
 
   // 3. 格式检测 + 转换
@@ -188,7 +188,7 @@ export async function handleChat(request: NextRequest) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. 组合路由
+  // 4. Combo 路由
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -205,11 +205,11 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-尽管它是一个庞大的函数，但内部划分成了多个**带注释的区段**，分别对应五阶段流水线。
+尽管是一个巨型函数，但它被组织为多个**带注释的分区**，与 5 阶段流水线一一对应。
 
-### combo.ts（4456 行代码）
+### combo.ts（4456 行）
 
-将组合解析为有序目标列表的**路由引擎**。
+**路由引擎**，负责将 combo 解析为有序的目标列表。
 
 ```ts
 // services/combo.ts
@@ -226,46 +226,49 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-支持 **19 种路由策略**（参见 `src/shared/constants/routingStrategies.ts`）：
+支持 **20 种路由策略**（参见 `src/shared/constants/routingStrategies.ts`）：
 
-| 策略                | 行为                                                      |
-| ------------------- | --------------------------------------------------------- |
-| `priority`          | 按目标优先顺序排列，优先使用第一个目标                    |
-| `weighted`          | 根据每个目标的权重进行概率选择                            |
-| `round-robin`       | 按顺序循环使用各个目标                                    |
-| `context-relay`     | 在目标之间传递上下文                                      |
-| `fill-first`        | 先用满当前目标的配额，再切换到下一个目标                  |
-| `p2c`               | 二选一负载均衡                                            |
-| `random`            | 均匀随机选择                                              |
-| `least-used`        | 选择近期使用次数最少的目标                                |
-| `cost-optimized`    | 优先选择成本最低且健康的目标                              |
-| `reset-aware`       | 感知提供者的重置时间窗口                                  |
-| `reset-window`      | 基于重置时间窗口进行路由                                  |
-| `headroom`          | 优先选择剩余配额空间最大的目标                            |
-| `strict-random`     | 真正的均匀随机选择（不进行质量加权）                      |
-| `auto`              | 使用 16 因子评分（`autoCombo/`）                          |
-| `lkgp`              | 优先使用最近一次确认可用的提供者                          |
-| `context-optimized` | 最适合长上下文请求的目标                                  |
-| `fusion`            | 并行分发给一组目标，再通过评判模型进行综合（`fusion.ts`） |
+| 策略                | 行为                                                        |
+| ------------------- | ----------------------------------------------------------- |
+| `priority`          | 按优先级排序的目标列表，第一个目标优先                      |
+| `weighted`          | 按各目标权重进行概率选择                                    |
+| `round-robin`       | 按顺序循环遍历目标                                          |
+| `context-relay`     | 在目标之间接力传递上下文                                    |
+| `fill-first`        | 先填满当前目标的配额，再切换到下一个                        |
+| `p2c`               | “二选一”算法（Power of Two Choices）                        |
+| `random`            | 均匀随机                                                    |
+| `least-used`        | 选择最近使用次数最少的目标                                  |
+| `cost-optimized`    | 优先选择成本最低的健康目标                                  |
+| `reset-aware`       | 感知提供者的配额重置窗口                                    |
+| `reset-window`      | 基于重置窗口的路由                                          |
+| `headroom`          | 优先选择剩余配额余量最多的目标                              |
+| `quota-weighted`    | 跳过已耗尽的账户，然后按“剩余配额 ÷ 在途负载”加权抽取       |
+| `strict-random`     | 真正的均匀随机（无质量加权）                                |
+| `auto`              | 使用 16 因子评分（`autoCombo/`）                            |
+| `lkgp`              | 优先使用最近已知可用的提供者                                |
+| `context-optimized` | 最适合长上下文请求                                          |
+| `cache-optimized`   | 将每个可复用的提示词前缀固定到同一账户（命中提示词缓存）    |
+| `fusion`            | 并行扇出到一个模型面板，再通过评判器合成结果（`fusion.ts`） |
+| `pipeline`          | 链式步骤——每个目标的输出作为下一个目标的输入                |
 
-### base.ts（1170 行代码）
+### base.ts（1170 行）
 
-每个执行器类都要扩展的**抽象执行器**（直接扩展，或通过 `DefaultExecutor` 及其他子类间接扩展）。它包含：
+**抽象执行器**，所有执行器类都继承自它（直接继承，或通过 `DefaultExecutor` 等子类间接继承）。它包含：
 
-- `buildUrl()` — 默认 URL 构造逻辑（子类可针对自定义需求进行覆盖）
-- `buildHeaders()` — 默认请求头（身份验证、content-type）
-- `transformRequest()` — 默认直接透传
-- `execute()` — 包含重试、退避和断路器机制的主 HTTP 循环
+- `buildUrl()` —— 默认的 URL 构造（子类可覆写以自定义）
+- `buildHeaders()` —— 默认请求头（认证、content-type）
+- `transformRequest()` —— 默认直通（不做转换）
+- `execute()` —— 主 HTTP 循环，包含重试/退避/熔断
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
   // 处理所有与 OpenAI/Anthropic 兼容的提供者
-  // 提供者注册各自的配置（URL、身份验证、请求头），但共享执行器逻辑
+  // 各提供者注册各自的配置（URL、认证、请求头），但共享执行器逻辑
 }
 ```
 
-提供者特定行为（身份验证请求头、基础 URL、版本请求头）通过提供者注册表进行配置，而不是通过单独的执行器类实现。
+提供者特定的行为（认证头、基础 URL、版本头）通过提供者注册表进行配置，而不是通过单独的执行器类实现。
 
 ````
 
@@ -273,56 +276,56 @@ export class DefaultExecutor extends BaseExecutor {
 
 ## 服务（117 个模块）
 
-服务是处理程序组合使用的**专注于单一用途的模块**。主要类别如下：
+服务是**专注的单一职责模块**，由 handler 组合使用。主要类别包括：
 
-### 路由与组合
+### 路由与 Combo
 
-- `combo.ts` — 组合路由请求的入口点
-- `services/autoCombo/` — 16 因子评分、8 种自动路由策略
-- `wildcardRouter.ts` — 匹配通配符路由（`gpt-*`）
-- `modelFamilyFallback.ts` — T5 系列内回退
+- `combo.ts` —— combo 路由请求的入口点
+- `services/autoCombo/` —— 16 因子评分，8 种自动路由策略
+- `wildcardRouter.ts` —— 匹配通配符路由（`gpt-*`）
+- `modelFamilyFallback.ts` —— T5 家族内回退
 
-### 速率限制与配额
+### 限流与配额
 
-- `rateLimitManager.ts` — 每个密钥与提供者组合对应一个令牌桶
-- `usage.ts` — 使用量记录
-- `quotaCache.ts` — 内存中的配额快照
+- `rateLimitManager.ts` —— 按 key+provider 的令牌桶
+- `usage.ts` —— 用量记录
+- `quotaCache.ts` —— 内存中的配额快照
 
 ### 账户与令牌
 
-- `tokenRefresh.ts` — 出现 401 时刷新 OAuth
-- `accountFallback.ts` — 切换到备用账户
-- `sessionManager.ts` — 多轮会话状态
+- `tokenRefresh.ts` —— 在 401 时刷新 OAuth
+- `accountFallback.ts` —— 切换到备用账户
+- `sessionManager.ts` —— 多轮会话状态
 
-### 智能处理
+### 智能
 
-- `intentClassifier.ts` — 对请求意图进行分类
-- `taskAwareRouter.ts` — 按任务类型进行路由
-- `thinkingBudget.ts` — 分配思考令牌
-- `contextManager.ts` — 注入路由上下文
+- `intentClassifier.ts` —— 分类请求意图
+- `taskAwareRouter.ts` —— 按任务类型路由
+- `thinkingBudget.ts` —— 分配 thinking token
+- `contextManager.ts` —— 注入路由上下文
 
-### 弹性与容错
+### 韧性
 
-- `resilience.ts` — 重试、退避和断路器编排
-- `emergencyFallback.ts` — 最终兜底回退
-- `modelDeprecation.ts` — 自动路由至后继模型
+- `resilience.ts` —— 重试、退避、熔断器编排
+- `emergencyFallback.ts` —— 最后手段的回退
+- `modelDeprecation.ts` —— 自动路由到后继模型
 
 ### 状态
 
-- `signatureCache.ts` — 按请求签名去重
-- `volumeDetector.ts` — 负载削减
-- `contextHandoff.ts` — 会话序列化
+- `signatureCache.ts` —— 按请求签名去重
+- `volumeDetector.ts` —— 负载削减
+- `contextHandoff.ts` —— 会话序列化
 
 ### 压缩
 
-- `compression/`（子目录）— 完整的压缩流水线
-- 39 个文件，涵盖引擎、规则包和适配器
+- `compression/`（子目录）—— 完整的压缩流水线
+- 39 个文件，涵盖引擎、规则包、适配器
 
-### 技能
+### Skills
 
 - （详见 [SKILLS.md](./SKILLS.md)）
 
-### 内存
+### Memory
 
 - （详见 [MEMORY.md](./MEMORY.md)）
 
@@ -330,29 +333,29 @@ export class DefaultExecutor extends BaseExecutor {
 
 ## 执行器（150 个模块）
 
-大多数提供者各自对应一个文件。所有执行器类都扩展 `BaseExecutor` 并覆写差异部分；其他模块则是针对各提供者的辅助组件（工具架构、fetch/TTS 适配器、特殊行为处理程序）。
+大致上每个 provider 一个文件。executor 类都继承自 `BaseExecutor`，只重写存在差异的部分；其余模块是各 provider 的辅助模块（工具 schema、fetch/TTS 适配器、特殊行为处理器）。
 
 ### 通用模式
 
-通过 `getExecutor(providerId)` 解析提供者，该函数会返回已配置的执行器。与 OpenAI/Anthropic 兼容的提供者使用 `DefaultExecutor`（`executors/default.ts`）。提供者特定行为（基础 URL、认证标头、API 版本）在 `open-sse/config/providers/` 中配置，而请求体转换则在 `open-sse/translator/` 中处理。
+Provider 通过 `getExecutor(providerId)` 解析，该方法返回已配置的 executor。与 OpenAI/Anthropic 兼容的 provider 使用 `DefaultExecutor`（`executors/default.ts`）。provider 特定的行为（基础 URL、认证头、API 版本）在 `open-sse/config/providers/` 中配置，而请求体转换则在 `open-sse/translator/` 中处理。
 
-**自定义 URL**通过提供者配置进行设置：
+**自定义 URL** 通过 provider 配置设置：
 
 ```ts
-// open-sse/config/providers/ 中的提供者配置
+// open-sse/config/providers/ 中的 Provider 配置
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**自定义认证**通过提供者注册表的认证配置（API 密钥、OAuth、标头配置文件）进行处理。
+**自定义认证**通过 provider 注册表的认证配置处理（API key、OAuth、请求头配置方案）。
 
-**自定义请求体**转换（例如 Anthropic 将 `system` 与 `messages` 分离）按提供者注册在 `open-sse/translator/` 中。
+**自定义请求体**转换（例如 Anthropic 将 `system` 从 `messages` 中分离出来）按 provider 在 `open-sse/translator/` 中注册。
 
 ````
 
-### 执行器工厂
+### Executor 工厂
 
 `executors/index.ts` 导出 `getExecutor(providerId)`：
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-解析过程通过 `ExecutorRegistry`（`executors/registry.ts`）完成：每个专用执行器都在 `executors/index.ts` 的内置表中声明，并在模块加载时通过 `registerExecutor(alias, instance)` 注册；`getExecutor()` 会查询注册表，并对任何没有专用条目的提供者回退到经记忆化处理的 `DefaultExecutor`。完整的别名 → 执行器映射由黄金测试 `tests/unit/executor-map-golden.test.ts` 描述。
+解析过程经由 `ExecutorRegistry`（`executors/registry.ts`）：每个专用 executor 都在 `executors/index.ts` 的内置表中声明，并在模块加载时通过 `registerExecutor(alias, instance)` 注册；`getExecutor()` 查询注册表，对于没有专用条目的 provider，则回退到一个记忆化的 `DefaultExecutor`。完整的别名 → executor 映射由黄金测试 `tests/unit/executor-map-golden.test.ts` 刻画。
 
 ---
 
@@ -481,17 +484,17 @@ createResponsesApiTransformStream(): TransformStream
 
 ## 配置
 
-`open-sse/config/` 包含配置层：
+`open-sse/config/` 存放配置层：
 
 | 文件                                | 用途                                  |
 | ----------------------------------- | ------------------------------------- |
-| `providerRegistry.ts`               | 基于 374 个提供者目录的聊天模型注册表 |
+| `providerRegistry.ts`               | 基于 375 个提供者目录的聊天模型注册表 |
 | `providerModels.ts`                 | 模型别名、格式映射                    |
 | `constants.ts`                      | 超时、限制、状态码                    |
 | `defaultThinkingSignature.ts`       | 默认 Claude 思考签名                  |
-| `modelStrip.ts`（位于 services 中） | 按提供者剥离字段                      |
+| `modelStrip.ts`（位于 services 中） | 按提供者进行字段剔除                  |
 
-### 提供者注册表模式
+### 提供者注册表结构
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-模块加载时执行 Zod 验证，以确保所有提供者配置均有效。
+模块加载时通过 Zod 校验，确保所有提供者配置均有效。
 
 ---
 

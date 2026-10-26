@@ -1,6 +1,12 @@
 "use client";
 
+import { useId } from "react";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import { Switch } from "@omniroute/ui-kit/switch";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import type { MemorySettingsExtended } from "@/shared/schemas/memory";
 import type { EmbeddingProviderListing } from "@/lib/memory/embedding/types";
 
@@ -13,6 +19,7 @@ interface Props {
 
 export default function RerankConfigCard({ settings, providers, onSave, saving }: Props) {
   const t = useTranslations("memory");
+  const rerankModelId = useId();
 
   const rerankEnabled = settings.rerankEnabled ?? false;
   const rerankProviderModel = settings.rerankProviderModel ?? "";
@@ -27,15 +34,16 @@ export default function RerankConfigCard({ settings, providers, onSave, saving }
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between p-3 rounded-lg bg-surface/30 border border-border/60">
+      <div className="flex items-center justify-between p-3 rounded-lg bg-bg-subtle border border-border/60">
         <div>
           <p className="text-sm font-medium text-text-main">{t("rerank.enableLabel")}</p>
           <p className="text-xs text-text-muted mt-0.5">{t("rerank.enableDesc")}</p>
         </div>
-        <button
-          type="button"
+        <Switch
           data-testid="rerank-enabled-switch"
-          onClick={() => {
+          aria-label={t("rerank.enableLabel")}
+          checked={rerankEnabled}
+          onCheckedChange={() => {
             // Plan 21 D13 fix: block enabling rerank when no provider has a key.
             // Allow disabling (turning OFF) always, even if no provider exists.
             if (!rerankEnabled && !hasProvider) return;
@@ -44,43 +52,35 @@ export default function RerankConfigCard({ settings, providers, onSave, saving }
           disabled={saving || (!rerankEnabled && !hasProvider)}
           aria-disabled={saving || (!rerankEnabled && !hasProvider)}
           title={!rerankEnabled && !hasProvider ? t("rerank.noProviderWithKey") : undefined}
-          role="switch"
-          aria-checked={rerankEnabled}
-          className={`relative w-11 h-6 rounded-full transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed ${
-            rerankEnabled ? "bg-violet-500" : "bg-border"
-          }`}
-        >
-          <span
-            className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-              rerankEnabled ? "translate-x-5" : "translate-x-0"
-            }`}
-          />
-        </button>
+          className="shrink-0"
+        />
       </div>
 
       {rerankEnabled && (
         <>
           {/* Latency / cost warning */}
-          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 flex items-start gap-2">
-            <span className="material-symbols-outlined text-[14px] mt-0.5 shrink-0">warning</span>
+          <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning flex items-start gap-2">
+            <Icon name="warning" size={14} className="mt-0.5" />
             <span>{t("rerank.warning")}</span>
           </div>
 
-          <div className="p-3 rounded-lg bg-surface/30 border border-border/60">
-            <label className="block text-sm font-medium text-text-main mb-2">
-              {t("rerank.providerModelLabel")}
-            </label>
+          <Field
+            label={t("rerank.providerModelLabel")}
+            htmlFor={rerankModelId}
+            className="p-3 rounded-lg bg-bg-subtle border border-border/60"
+          >
             {!hasProvider ? (
               <p
                 data-testid="rerank-no-provider-warning"
-                className="text-xs text-amber-400 flex items-center gap-1"
+                className="text-xs text-warning flex items-center gap-1"
               >
-                <span className="material-symbols-outlined text-[12px]">warning</span>
+                <Icon name="warning" size={12} />
                 {t("rerank.noProviderWithKey")}
               </p>
             ) : (
               <>
-                <select
+                <Select
+                  id={rerankModelId}
                   value={
                     rerankProviders.some((p) => p.models.some((m) => m.id === rerankProviderModel))
                       ? rerankProviderModel
@@ -89,7 +89,6 @@ export default function RerankConfigCard({ settings, providers, onSave, saving }
                   onChange={(e) => handleProviderModelChange(e.target.value)}
                   disabled={saving}
                   data-testid="rerank-provider-model-select"
-                  className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-violet-500"
                 >
                   <option value="">{t("rerank.selectProviderModel")}</option>
                   {rerankProviders.map((p) =>
@@ -105,21 +104,23 @@ export default function RerankConfigCard({ settings, providers, onSave, saving }
                       </optgroup>
                     )
                   )}
-                </select>
+                </Select>
                 {/* Free-text override: any configured provider's Cohere-compatible
                   model id is accepted by the runtime even without a curated entry. */}
-                <input
+                <Input
                   type="text"
                   value={rerankProviderModel}
                   onChange={(e) => handleProviderModelChange(e.target.value)}
                   disabled={saving}
                   placeholder="provider/model — e.g. groq/my-reranker"
+                  aria-label={t("rerank.providerModelLabel")}
                   data-testid="rerank-provider-model-input"
-                  className="w-full mt-2 px-3 py-2 rounded-lg bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="mt-2"
+                  inputClassName="font-mono"
                 />
               </>
             )}
-          </div>
+          </Field>
         </>
       )}
     </div>

@@ -14,18 +14,18 @@ AgentBridge 是 OmniRoute 的 MITM（中間人）代理，可攔截來自 IDE AI
 
 ## §1 概覽
 
-### 什麼是 AgentBridge？
+### 什麼是 AgentBridge?
 
-當 IDE 代理程式（例如 GitHub Copilot、Cursor、Claude Code）發出 API 呼叫時，它會直接連線至上游 AI 提供者（OpenAI、Anthropic 等）。AgentBridge 會在 TLS 層級透明地攔截該連線——無需變更任何代理程式設定——並透過 OmniRoute 重寫請求。
+當 IDE 代理(例如 GitHub Copilot、Cursor、Claude Code)發出 API 呼叫時,它會直接連線到上游 AI 提供者(OpenAI、Anthropic 等)。AgentBridge 會在 TLS 層級透明地攔截該連線——無需變更任何代理設定——並透過 OmniRoute 重寫請求。
 
-這表示您可以：
+這代表您可以:
 
-- **將任何代理程式重新路由至任何提供者**：Copilot 正在與 OpenAI 通訊？可將其重新導向 Anthropic Claude、Gemini，或 OmniRoute 的 374 個提供者之一。
-- **套用模型對應**：在處理常式層級透明地將 `gemini-3-flash` → `claude-sonnet-4.7`。
-- **觀察所有代理程式流量**：每個遭攔截的請求都會發佈至[流量檢查器](./TRAFFIC_INSPECTOR.md)。
-- **套用 OmniRoute 的韌性機制**：組合路由、斷路器、備援及成本追蹤也適用於 IDE 代理程式流量。
+- **將任何代理重新導向至任何提供者**:Copilot 正在與 OpenAI 通訊?將它重新導向至 Anthropic Claude、Gemini,或 OmniRoute 的 375 家提供者中的任何一家。
+- **套用模型對應**:`gemini-3-flash` → `claude-sonnet-4.7`,在處理器層級透明地進行。
+- **觀察所有代理流量**:每個被攔截的請求都會發布到[流量檢查器](./TRAFFIC_INSPECTOR.md)。
+- **套用 OmniRoute 的韌性功能**:組合路由、斷路器、備援與成本追蹤同樣適用於 IDE 代理流量。
 
-### 與市場產品的定位比較
+### 市場定位比較
 
 | 功能           | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
 | -------------- | :-----: | :------: | :-------------: | :-----------------------: |
