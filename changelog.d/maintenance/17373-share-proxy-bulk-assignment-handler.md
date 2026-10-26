@@ -1,0 +1,1 @@
+- **refactor(api):** the dashboard and management proxy bulk-assign routes share one `handleBulkProxyAssignment()` handler (auth still runs before JSON parsing; schema validation, key-to-account normalization, assignment and dispatcher-cache invalidation are unchanged) ([#17373](https://github.com/diegosouzapw/OmniRoute/pull/17373)) — thanks @JxnLexn

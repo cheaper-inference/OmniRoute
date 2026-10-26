@@ -4,11 +4,11 @@
 
 ---
 
-> **Gerado automaticamente** a partir de `src/shared/constants/providers.ts` — não editar manualmente.
-> Regenerar com: `npm run gen:provider-reference`
-> **Última geração:** 2026-10-18
+> **Gerado automaticamente** a partir de `src/shared/constants/providers.ts` — não edite manualmente.
+> Volte a gerar com: `npm run gen:provider-reference`
+> **Última geração:** 2026-10-20
 
-Total de fornecedores: **375**. Consulte a distribuição por categoria abaixo.
+Total de fornecedores: **375**. Consulte abaixo a distribuição por categoria.
 
 ## Categorias
 
@@ -457,11 +457,11 @@ Utilize o painel em `/dashboard/providers` para ativar, configurar e testar cada
 | ------ | ------ | ------------------------------ | --------- | ---- | ----- |
 | `auto` | `auto` | Automático (configuração zero) | Sistema   | —    | —     |
 
-## Fontes de verdade
+## Fontes fidedignas
 
 - Catálogo: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registo (detalhes por modelo): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executores: [`open-sse/executors/`](../../open-sse/executors/) (154 implementações)
+- Executores: [`open-sse/executors/`](../../open-sse/executors/) (156 implementações)
 - Tradutores: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Consulte também

@@ -105,7 +105,7 @@ export function createDirectivePreambleStripper(directive: string): PreambleStri
 // short — a few hundred chars at most. A block carrying >= this many chars of
 // content is the model's real response (e.g. a Claude Code autocompact summary),
 // not an echo: preserve it instead of suppressing it as a preamble.
-const SYSTEM_ECHO_THRESHOLD = 1000;
+export const SYSTEM_ECHO_THRESHOLD = 1000;
 
 export function createSystemPreambleStripper(): PreambleStripper {
   const tagNames = ["analysis", "system-reminder", "summary"] as const;

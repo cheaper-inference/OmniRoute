@@ -4,11 +4,11 @@
 
 ---
 
-> **ස්වයංක්රීයව ජනනය කරන ලද** `src/shared/constants/providers.ts` වෙතින් — අතින් සංස්කරණය නොකරන්න.
-> නැවත ජනනය කරන්න: `npm run gen:provider-reference`
-> **අවසන් වරට ජනනය කළේ:** 2026-10-18
+> `src/shared/constants/providers.ts` වෙතින් **ස්වයංක්රීයව ජනනය කරන ලදී** — අතින් සංස්කරණය නොකරන්න.
+> මෙය භාවිතයෙන් නැවත ජනනය කරන්න: `npm run gen:provider-reference`
+> **අවසන් වරට ජනනය කළේ:** 2026-10-20
 
-මුළු සපයන්නන්: **375**. ප්රවර්ග බෙදීම පහත බලන්න.
+මුළු සපයන්නන් ගණන: **375**. පහත ප්රවර්ග අනුව විස්තරය බලන්න.
 
 ## ප්රවර්ග
 
@@ -457,11 +457,11 @@
 | ------ | ------------ | ------------------------- | ------- | ---------- | ----- |
 | `auto` | `auto`       | ස්වයංක්රීය (වින්යාස රහිත) | පද්ධතිය | —          | —     |
 
-## සත්ය මූලාශ්ර
+## සත්යයේ මූලාශ්ර
 
 - නාමාවලිය: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- ලේඛනය (ආකෘති-අනුව විස්තර): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ක්රියාත්මකකරුවන්: [`open-sse/executors/`](../../open-sse/executors/) (ක්රියාත්මක කිරීම් 154)
+- රෙජිස්ට්රිය (එක් එක් මොඩලයට අදාළ විස්තර): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- ක්රියාත්මක කරන්නන්: [`open-sse/executors/`](../../open-sse/executors/) (ක්රියාත්මක කිරීම් 156ක්)
 - පරිවර්තකයන්: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## මෙයද බලන්න

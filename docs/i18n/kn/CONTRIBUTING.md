@@ -177,15 +177,15 @@ refactor(db): consolidate rate limit tables
 # ಎಲ್ಲಾ ಪರೀಕ್ಷೆಗಳು (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# ಒಂದೇ ಪರೀಕ್ಷಾ ಫೈಲ್ (Node.js ಸ್ಥಳೀಯ test runner — ಹೆಚ್ಚಿನ ಪರೀಕ್ಷೆಗಳು ಇದನ್ನು ಬಳಸುತ್ತವೆ)
+# ಒಂದೇ ಪರೀಕ್ಷಾ ಫೈಲ್ (Node.js ಸ್ಥಳೀಯ ಪರೀಕ್ಷಾ ರನ್ನರ್ — ಹೆಚ್ಚಿನ ಪರೀಕ್ಷೆಗಳು ಇದನ್ನೇ ಬಳಸುತ್ತವೆ)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# ನಿಮ್ಮ ಬದಲಾವಣೆಯಿಂದ ಪ್ರಭಾವಿತವಾದ unit ಪರೀಕ್ಷೆಗಳು ಮಾತ್ರ (CI gate ನಂತೆಯೇ ಅದೇ TIA selector, #8084)
+# ನಿಮ್ಮ ಬದಲಾವಣೆಯಿಂದ ಪ್ರಭಾವಿತವಾದ unit ಪರೀಕ್ಷೆಗಳು ಮಾತ್ರ (CI gate, #8084 ನಲ್ಲಿರುವ ಅದೇ TIA selector)
 npm run test:scoped            # ಕೊನೆಯ commit ನಲ್ಲಿನ ಬದಲಾವಣೆಗಳು (ಅಥವಾ working tree)
-npm run test:scoped:staged     # staged ಬದಲಾವಣೆಗಳು ಮಾತ್ರ — pre-commit ಚಾಲನೆಯೊಂದಿಗೆ ಚೆನ್ನಾಗಿ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ
-npm run test:scoped:full       # ಮೊದಲು import-graph map ಅನ್ನು ಮರುನಿರ್ಮಿಸಿ (ಫೈಲ್ಗಳನ್ನು ಸೇರಿಸಿದ/ಸರಿಸಿದ ನಂತರ)
-# Exit 1 + "run the full suite" ಎಂದರೆ hub ಫೈಲ್ (tsconfig, package.json, …) ಅಥವಾ map ಮಾಡದ
-# source ಬದಲಾಗಿದೆ — selector ಸುರಕ್ಷಿತವಾಗಿ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ, ಅದು ಎಂದಿಗೂ ಸದ್ದಿಲ್ಲದೆ ಬಿಟ್ಟುಬಿಡುವುದಿಲ್ಲ.
+npm run test:scoped:staged     # staged ಬದಲಾವಣೆಗಳು ಮಾತ್ರ — pre-commit run ಜೊತೆಗೆ ಉತ್ತಮವಾಗಿ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ
+npm run test:scoped:full       # ಮೊದಲು import-graph map ಅನ್ನು ಮರುನಿರ್ಮಿಸುತ್ತದೆ (ಫೈಲ್ಗಳನ್ನು ಸೇರಿಸಿದ/ಸ್ಥಳಾಂತರಿಸಿದ ನಂತರ)
+# Exit 1 + "ಸಂಪೂರ್ಣ suite ಅನ್ನು ಚಲಾಯಿಸಿ" ಎಂದರೆ hub ಫೈಲ್ (tsconfig, package.json, …) ಅಥವಾ
+# map ಮಾಡದ source ಬದಲಾಗಿದೆ — selector ಸುರಕ್ಷಿತವಾಗಿ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ, ಅದು ಎಂದಿಗೂ ಮೌನವಾಗಿ ಬಿಟ್ಟುಬಿಡುವುದಿಲ್ಲ.
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
@@ -208,14 +208,14 @@ npm run lint
 npm run check
 
 # Gate ಮಾಡಲಾದ ನೈಜ-upstream combo smoke (VPS ಪ್ರವೇಶ + ನೈಜ provider credits ಅಗತ್ಯವಿದೆ)
-# ನೈಜ providers ಅನ್ನು ಬಳಸುತ್ತದೆ — ಸ್ವಲ್ಪ ವೆಚ್ಚವಾಗುತ್ತದೆ. CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ. Gate ಇಲ್ಲದಿದ್ದರೆ ಸ್ವಚ್ಛವಾಗಿ ಬಿಟ್ಟುಬಿಡುತ್ತದೆ.
-# ಅಗತ್ಯವಿರುವುದು: ssh root@192.168.0.15 ಪ್ರವೇಶ (VPS ನಿಂದ read-only DB snapshot ಅನ್ನು source ಮಾಡುತ್ತದೆ).
+# ನೈಜ providers ಅನ್ನು ಬಳಸುತ್ತದೆ — ಸ್ವಲ್ಪ ವೆಚ್ಚವಾಗುತ್ತದೆ. CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ. Gate ಇಲ್ಲದಿದ್ದರೆ ಸರಿಯಾಗಿ ಬಿಟ್ಟುಬಿಡುತ್ತದೆ.
+# ಅಗತ್ಯ: ssh root@192.168.0.15 ಪ್ರವೇಶ (VPS ನಿಂದ read-only DB snapshot ಅನ್ನು source ಮಾಡುತ್ತದೆ).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — ಸರಳ Node ESM scripts, live .15 server ಅನ್ನು ನೇರವಾಗಿ ಬಳಸುತ್ತವೆ.
-# ಅಗತ್ಯವಿರುವುದು: ssh root@192.168.0.15 ಪ್ರವೇಶ (SSH sqlite ಮೂಲಕ combos ರಚಿಸಲಾಗುತ್ತದೆ/ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ).
-# ನೈಜ providers ಅನ್ನು ಬಳಸುತ್ತದೆ (ಸಣ್ಣ ವೆಚ್ಚ). ಕೇವಲ __live_test__* combos ಅನ್ನು ರಚಿಸುತ್ತದೆ/ಅಳಿಸುತ್ತದೆ. CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ.
-# .15 ನಲ್ಲಿ REQUIRE_API_KEY=false ಆದ್ದರಿಂದ API key ಅಗತ್ಯವಿಲ್ಲ, ಆದರೆ ಹೊಂದಿಸಿದ್ದರೆ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ಅನ್ನು ಗೌರವಿಸುತ್ತದೆ.
+# Phase-3 VPS live smoke — ಸರಳ Node ESM scripts, ನೇರವಾಗಿ live .15 server ಅನ್ನು ಬಳಸುತ್ತವೆ.
+# ಅಗತ್ಯ: ssh root@192.168.0.15 ಪ್ರವೇಶ (SSH sqlite ಮೂಲಕ combos ರಚಿಸಲಾಗುತ್ತದೆ/ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ).
+# ನೈಜ providers ಅನ್ನು ಬಳಸುತ್ತದೆ (ಸ್ವಲ್ಪ ವೆಚ್ಚ). __live_test__* combos ಅನ್ನು ಮಾತ್ರ ರಚಿಸುತ್ತದೆ/ಅಳಿಸುತ್ತದೆ. CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ.
+# .15 ನಲ್ಲಿ REQUIRE_API_KEY=false ಇರುವುದರಿಂದ API key ಅಗತ್ಯವಿಲ್ಲ, ಆದರೆ ಹೊಂದಿಸಿದ್ದರೆ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ಅನ್ನು ಗೌರವಿಸುತ್ತದೆ.
 npm run test:combo:live:vps              # 7 HTTP ಸನ್ನಿವೇಶಗಳು (priority/round-robin/weighted/cost/fusion/auto + health)
 npm run test:combo:live:vps:failover     # ನೈಜ cross-provider failover ಸನ್ನಿವೇಶವನ್ನು ಸೇರಿಸುತ್ತದೆ (ಒಟ್ಟು 8)
 ```
@@ -223,9 +223,9 @@ npm run test:combo:live:vps:failover     # ನೈಜ cross-provider failover ಸ
 Coverage ಟಿಪ್ಪಣಿಗಳು:
 
 - `npm run test:coverage` ಮುಖ್ಯ unit test suite ಗಾಗಿ source coverage ಅನ್ನು ಅಳೆಯುತ್ತದೆ, `tests/**` ಅನ್ನು ಹೊರತುಪಡಿಸುತ್ತದೆ ಮತ್ತು `open-sse/**` ಅನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ
-- Pull requests ಗಳು statements/lines/functions/branches ಗಾಗಿ coverage gate ಅನ್ನು **60%+** ನಲ್ಲಿ ಉಳಿಸಬೇಕು
+- Pull requests ಗಳು statements/lines/functions/branches ಗಳ coverage gate ಅನ್ನು **60%+** ನಲ್ಲಿ ಉಳಿಸಬೇಕು
 - PR ಒಂದು `src/`, `open-sse/`, `electron/`, ಅಥವಾ `bin/` ನಲ್ಲಿನ production code ಅನ್ನು ಬದಲಾಯಿಸಿದರೆ, ಅದೇ PR ನಲ್ಲಿ automated tests ಅನ್ನು ಸೇರಿಸಬೇಕು ಅಥವಾ ನವೀಕರಿಸಬೇಕು
-- `npm run coverage:report` ಇತ್ತೀಚಿನ coverage run ನಿಂದ ವಿವರವಾದ file-by-file ವರದಿಯನ್ನು ಮುದ್ರಿಸುತ್ತದೆ
+- `npm run coverage:report` ಇತ್ತೀಚಿನ coverage run ನ ವಿವರವಾದ file-by-file report ಅನ್ನು ಮುದ್ರಿಸುತ್ತದೆ
 - `npm run test:coverage:legacy` ಐತಿಹಾಸಿಕ ಹೋಲಿಕೆಗಾಗಿ ಹಳೆಯ metric ಅನ್ನು ಉಳಿಸುತ್ತದೆ
 - ಹಂತ ಹಂತದ coverage ಸುಧಾರಣಾ roadmap ಗಾಗಿ `docs/ops/COVERAGE_PLAN.md` ನೋಡಿ
 
@@ -233,20 +233,21 @@ Coverage ಟಿಪ್ಪಣಿಗಳು:
 
 PR ತೆರೆಯುವ ಮೊದಲು, ನೀವು ಬದಲಾಯಿಸಿದ ವಿಷಯಕ್ಕಾಗಿ ಕೇಂದ್ರೀಕೃತ loop ಅನ್ನು ಚಲಾಯಿಸಲು
 [Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ಬಳಸಿ. ಸಂಪೂರ್ಣ unit suite (4 CI shards), Vitest, **60%+** coverage gate ಮತ್ತು
-production build ಇವು CI ಯ ಜವಾಬ್ದಾರಿ — ಅವುಗಳನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಚಲಾಯಿಸುವುದರಿಂದ PR
-ಪರಿಶೀಲನೆಗಳು ಈಗಾಗಲೇ ನಿಮಗೆ ನೀಡದ ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಸಂಕೇತ ದೊರೆಯುವುದಿಲ್ಲ ಮತ್ತು ಸಣ್ಣ ಯಂತ್ರಗಳಲ್ಲಿ ಅದು host ಅನ್ನು ಪೂರ್ತಿಯಾಗಿ ಬಳಸಬಹುದು (#8084):
+production build ಇವು CI ಯ ಜವಾಬ್ದಾರಿಯಾಗಿವೆ — ಅವುಗಳನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಚಲಾಯಿಸುವುದರಿಂದ PR
+ಪರಿಶೀಲನೆಗಳು ಈಗಾಗಲೇ ನೀಡದ ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಸೂಚನೆ ಸಿಗುವುದಿಲ್ಲ ಮತ್ತು ಸಣ್ಣ ಯಂತ್ರಗಳಲ್ಲಿ ಅದು host ಅನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ಬಳಸಿಕೊಳ್ಳಬಹುದು (#8084):
 
 - ನಿಮ್ಮ ಬದಲಾವಣೆಯನ್ನು ಒಳಗೊಳ್ಳುವ test files ಅನ್ನು ಚಲಾಯಿಸಿ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ಚಲಾಯಿಸಿ
 - production code ಬದಲಾದಾಗಲೆಲ್ಲ ಅದೇ PR ನಲ್ಲಿ automated tests ಅನ್ನು ಸೇರಿಸಿ ಅಥವಾ ನವೀಕರಿಸಿ
+- `node:test` files ನಲ್ಲಿ, ಪ್ರತಿಯೊಂದು top-level `await` ಅನ್ನು (ಉದಾಹರಣೆಗೆ `await import(...)`) ಮೊದಲ `test()` / `describe()` ಗಿಂತ ಮೊದಲು ಇರಿಸಿ: `--test-force-exit` ಅಡಿಯಲ್ಲಿ, ಅದರ ನಂತರ ನೋಂದಾಯಿಸಿದ tests ಮೌನವಾಗಿ ಎಂದಿಗೂ ಚಲಿಸದೆ ಇರಬಹುದು (#18045; ಇದನ್ನು `npm run check:test-tla-order` ಜಾರಿಗೊಳಿಸುತ್ತದೆ)
 - production code ಬದಲಾದಾಗ ಬದಲಾಯಿಸಿದ ಅಥವಾ ಸೇರಿಸಿದ test files ಅನ್ನು PR ವಿವರಣೆಯಲ್ಲಿ ಸೇರಿಸಿ
-- project secrets ಅನ್ನು CI ನಲ್ಲಿ configure ಮಾಡಿದ್ದರೆ PR ನಲ್ಲಿನ SonarQube ಫಲಿತಾಂಶವನ್ನು ಪರಿಶೀಲಿಸಿ
+- CI ನಲ್ಲಿ project secrets configure ಮಾಡಿರುವಾಗ PR ನಲ್ಲಿನ SonarQube ಫಲಿತಾಂಶವನ್ನು ಪರಿಶೀಲಿಸಿ
 
-ಪ್ರಸ್ತುತ test ಸ್ಥಿತಿ: ಇವುಗಳನ್ನು ಒಳಗೊಂಡ **122 unit test files**:
+ಪ್ರಸ್ತುತ ಪರೀಕ್ಷಾ ಸ್ಥಿತಿ: ಇವುಗಳನ್ನು ಒಳಗೊಂಡಿರುವ **122 unit test files**:
 
 - Provider translators ಮತ್ತು format conversion
 - Rate limiting, circuit breaker ಮತ್ತು resilience
-- Semantic cache, idempotency, progress tracking
+- Semantic cache, idempotency ಮತ್ತು progress tracking
 - Database operations ಮತ್ತು schema (21 DB modules)
 - OAuth flows ಮತ್ತು authentication
 - API endpoint validation (Zod v4)

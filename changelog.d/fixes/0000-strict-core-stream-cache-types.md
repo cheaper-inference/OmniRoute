@@ -1,0 +1,1 @@
+- Restore the strict core TypeScript check by typing Responses completion state, dispatcher cache keys, and database settings updates without changing their runtime behavior.

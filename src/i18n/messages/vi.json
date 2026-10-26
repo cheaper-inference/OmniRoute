@@ -2509,6 +2509,10 @@
     "selectAtLeastOneConnection": "Chọn ít nhất một kết nối hoặc chọn Tất cả kết nối.",
     "allConnectionsDesc": "Khóa này có thể dùng bất kỳ kết nối đang hoạt động nào.",
     "restrictedToConnections": "Giới hạn ở {count, plural, one {# kết nối} other {# kết nối}}.",
+    "preferredConnections": "Kết nối ưu tiên",
+    "preferredConnectionsDesc": "Thứ tự ưu tiên theo từng khóa. Nếu một kết nối ưu tiên không khả dụng, định tuyến sẽ chuyển sang kết nối đủ điều kiện tiếp theo.",
+    "preferredConnectionsNone": "Chưa đặt ưu tiên — chiến lược định tuyến mặc định được sử dụng.",
+    "preferredConnectionsClear": "Xóa",
     "removeSelection": "Xóa {name}"
   },
   "auditLog": {
@@ -3955,6 +3959,7 @@
     "builderComboRefStep": "Thêm tham chiếu combo",
     "builderPinnedAccount": "Tài khoản được ghim",
     "builderLegacyEntry": "Mục nhập cũ",
+    "builderStaleModel": "Không có trong danh mục trực tiếp",
     "reviewName": "Tên",
     "reviewStrategy": "Chiến lược",
     "reviewSteps": "Các bước",
@@ -7279,7 +7284,7 @@
       "nextSwitchNow": "Ngay bây giờ",
       "coreConfigPath": "Tệp cấu hình lõi",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Đường dẫn tuyệt đối đến tệp .json (phần mở rộng viết thường). Để trống = không tạo. Mỗi lần đồng bộ ghi '<path>'.generated bên cạnh tệp đã áp dụng, không bao giờ ghi vào chính tệp đó.",
+      "coreConfigPathDesc": "Đường dẫn tuyệt đối đến tệp .json/.yaml/.yml (phần mở rộng viết thường). Để trống = không tạo. Mỗi lần đồng bộ ghi '<path>'.generated bên cạnh tệp đã áp dụng, không bao giờ ghi vào chính tệp đó.",
       "lastSwitchKind": "Lý do chuyển",
       "switchKind": {
         "ip_quota_429": "hạn mức",
@@ -10321,7 +10326,11 @@
     "codexPaidCreditsLabel": "Tín dụng trả phí Codex",
     "codexPaidCreditsAvailable": "Khả dụng (không báo cáo số dư)",
     "codexPaidCreditsUnavailable": "Không khả dụng hoặc đã đạt giới hạn chi tiêu",
-    "codexPaidCreditsUnlimited": "Không giới hạn"
+    "codexPaidCreditsUnlimited": "Không giới hạn",
+    "claudeResetCreditDefaultTitle": "Đặt lại giới hạn Claude",
+    "confirmRedeemClaudeResetCredit": "Việc quy đổi sẽ ngay lập tức đặt lại các giới hạn sử dụng Claude đủ điều kiện và tiêu hao vĩnh viễn khoản tín dụng này.",
+    "claudeResetCreditsModalTitle": "Tín dụng đặt lại Claude",
+    "claudeResetCreditsModalExplainer": "Tín dụng đặt lại Claude khả dụng và lượt đặt lại phiên hàng tuần cho tài khoản này."
   },
   "modals": {
     "waitingAuth": "Đang chờ ủy quyền",
@@ -11559,7 +11568,7 @@
     "bulkImportNoValidEntries": "Không tìm thấy mục hợp lệ nào. Hãy kiểm tra định dạng và thử lại.",
     "bulkImportSuccess": "Nhập hoàn tất: {created} đã tạo, {updated} đã cập nhật, {failed} thất bại",
     "bulkImportErrorLine": "Dòng {line}: {reason}",
-    "bulkImportMaxExceeded": "Tối đa 100 proxy cho mỗi lần nhập",
+    "bulkImportMaxExceeded": "Tối đa {max} proxy cho mỗi lần nhập",
     "bulkImportPreview": "Xem trước",
     "clearAssignment": "(xóa gán)",
     "bulkProxyAssignment": "Gán proxy hàng loạt",
@@ -11620,6 +11629,7 @@
     "poolSetAsideKindIpQuota429": "giới hạn tốc độ theo IP (429)",
     "poolSetAsideKindSlow": "phản hồi chậm",
     "poolSetAsideKindGeoBlocked": "bị chặn theo khu vực (403/451)",
+    "poolSetAsideKindOperatorReported": "sự cố do nhà vận hành báo cáo",
     "poolSetAsideUntil": "Trở lại {endsAt}",
     "poolSetAsideRepeat": "Đã tạm ngưng {count} lần",
     "poolUnknownAddress": "Địa chỉ không xác định",

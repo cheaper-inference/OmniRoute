@@ -223,8 +223,8 @@ test("flow surfaces still express state with --orch-status-* tokens, not fixed h
   for (const tone of ["text-success", "text-warning", "text-error"]) {
     assert.ok(badge.includes(`"${tone}"`), `badge reads the ${tone} status token`);
   }
-  // EngineNode keeps the categorical LAYER_COLORS palette (hex by design); its state colors
-  // are the tokens above, so the forbidden literal there is the old warning hex.
+  // EngineNode's categorical layer pills ride the chart tokens (P8, asserted below); its state
+  // colors are the tokens above, so the forbidden literal there is the old warning hex.
   for (const [name, src] of Object.entries({ combo, edges, badge })) {
     assert.ok(!src.includes('"#22c55e"'), `${name} hardcodes no success hex`);
   }
@@ -303,12 +303,19 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   assert.ok(!cockpit.includes('"#22c55e"'), "cockpit hardcodes no success hex");
   assert.ok(io.includes('"var(--orch-status-success)"'), "IoNode savings = success token");
 
-  // Deliberately NOT migrated — categorical/brand palettes, not state.
-  assert.ok(strategy.includes("STRATEGY_COLORS"), "strategy hues stay a categorical palette");
-  assert.ok(engine.includes("LAYER_COLORS"), "layer pills stay a categorical palette");
+  // Categorical palettes (not state) ride the kit chart tokens, never hex (KEA-7886, P8).
   assert.ok(
-    io.includes('isInput ? "#6366f1" : "#22c55e"'),
-    "IoNode keeps its indigo/green input-output identity pair"
+    strategy.includes("strategyColorVar(") && !/#[0-9a-fA-F]{6}/.test(strategy),
+    "strategy hues come from the shared chart-token strategy palette"
+  );
+  assert.ok(
+    engine.includes("categoricalSlotFor(LAYER_ORDER, layer)") &&
+      !/LAYER_COLORS|"#[0-9a-fA-F]{6}/.test(engine),
+    "layer pills stay a categorical palette, on the chart tokens"
+  );
+  assert.ok(
+    io.includes('isInput ? "var(--color-chart-2)" : "var(--color-chart-4)"'),
+    "IoNode keeps an input/output identity pair, on the chart tokens"
   );
 });
 
