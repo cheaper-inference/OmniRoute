@@ -134,7 +134,7 @@ function backend(t: TestContext, key: string, respond: () => Response) {
     );
     const request = JSON.parse(String(options.body));
     assert.equal(request.model, "GLM-5.3-Flash");
-    assert.deepEqual(request.output_config, { effort: "high" });
+    assert.deepEqual(request.output_config, { effort: "low" });
     return respond();
   });
   return {
@@ -152,9 +152,25 @@ test("native request maps model, budget and reasoning effort", () => {
     metadata: {},
     messages: [{ role: "user", content: [{ type: "text", text: "hello" }] }],
     thinking: { type: "enabled" },
-    output_config: { effort: "high" },
+    output_config: { effort: "low" },
     stream: true,
   });
+});
+
+test("native request defaults omitted effort to low and preserves explicit levels", () => {
+  for (const effort of ["low", "high", "max"]) {
+    const requestBody = effort === "low" ? body : { ...body, output_config: { effort } },
+      requestInput = { ...input, body: requestBody };
+    assert.equal(
+      (
+        nativeZcodeBody(requestInput, buildZcodeModelRequest(requestBody)).output_config as Record<
+          string,
+          unknown
+        >
+      ).effort,
+      effort
+    );
+  }
 });
 
 test(
