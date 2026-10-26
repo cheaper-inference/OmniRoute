@@ -91,7 +91,10 @@ async function postHandler(request, context) {
   // chat/responses gateways. Remote hosts are opt-in (default OFF).
   const dynamicProviders = await resolveDynamicAudioProviders("/audio/speech", "audio-speech");
 
-  const { provider, model: resolvedModel } = parseSpeechModel(body.model, dynamicProviders);
+  let { provider, model: resolvedModel } = parseSpeechModel(body.model, dynamicProviders);
+  if (provider === "gemini" && !getSpeechProvider("gemini")) {
+    provider = "google";
+  }
   if (!provider) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,
@@ -103,41 +106,84 @@ async function postHandler(request, context) {
   const providerConfig =
     getSpeechProvider(provider) || dynamicProviders.find((dp) => dp.id === provider) || null;
 
-  // Get credentials — skip for local providers (authType: "none")
-  let credentials = null;
-  if (providerConfig && providerConfig.authType !== "none") {
-    const credentialKey = providerConfig.credentialProviderId || provider;
-    credentials = await getProviderCredentialsWithQuotaPreflight(
-      credentialKey,
-      null,
-      allowedConnections
-    );
-    if (!credentials) {
-      return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`);
-    }
-    if (isKeyScopeBlockedCredentials(credentials)) {
-      return keyScopeBlockedResponse(provider, credentials);
-    }
-    if (isAllRateLimitedCredentials(credentials)) {
-      return rateLimitedProviderResponse(provider, credentials);
-    }
-  } else if (providerConfig) {
-    // GHSA-3w2r: a keyless provider (local default or a keyless remote) is
-    // reachable by a connection-scoped key only when its allowlist admits
-    // keyless providers or an in-scope connection serves it (chat's #9057).
-    const keylessCredentialKey = providerConfig.credentialProviderId || provider;
-    const keylessRejection = await keylessProviderRejection(provider, allowedConnections, () =>
-      getProviderCredentialsWithQuotaPreflight(keylessCredentialKey, null, allowedConnections)
-    );
-    if (keylessRejection) return keylessRejection;
-  }
+  const credentialKey = providerConfig?.credentialProviderId || provider;
+  const isKeyed = providerConfig && providerConfig.authType !== "none";
+  const excludedConnectionIds = new Set<string>();
 
-  let response = await handleAudioSpeech({
-    body,
-    credentials,
-    resolvedProvider: providerConfig,
-    resolvedModel,
-  });
+  let response: any = null;
+  let credentials: any = null;
+
+  while (true) {
+    if (isKeyed) {
+      credentials = await getProviderCredentialsWithQuotaPreflight(
+        credentialKey,
+        null,
+        allowedConnections,
+        resolvedModel || body.model,
+        {
+          excludeConnectionIds: Array.from(excludedConnectionIds),
+        }
+      );
+      if (!credentials) {
+        if (!response) {
+          return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`);
+        }
+        break;
+      }
+      if (isKeyScopeBlockedCredentials(credentials)) {
+        if (!response) return keyScopeBlockedResponse(provider, credentials);
+        break;
+      }
+      if (isAllRateLimitedCredentials(credentials)) {
+        if (!response) return rateLimitedProviderResponse(provider, credentials);
+        break;
+      }
+    } else if (providerConfig) {
+      const keylessCredentialKey = providerConfig.credentialProviderId || provider;
+      const keylessRejection = await keylessProviderRejection(provider, allowedConnections, () =>
+        getProviderCredentialsWithQuotaPreflight(keylessCredentialKey, null, allowedConnections, resolvedModel || body.model)
+      );
+      if (keylessRejection) return keylessRejection;
+    }
+
+    const connectionId = (credentials as { connectionId?: string; id?: string } | null)?.connectionId || credentials?.id;
+    if (connectionId) {
+      excludedConnectionIds.add(connectionId);
+    }
+
+    response = await handleAudioSpeech({
+      body,
+      credentials,
+      resolvedProvider: providerConfig,
+      resolvedModel,
+    });
+
+    if (response?.ok) {
+      break;
+    }
+
+    const status = response?.status || 500;
+    const shouldFailover = isKeyed && Boolean(connectionId) && (status === 429 || status === 401 || status === 403 || status >= 500);
+    if (!shouldFailover) {
+      break;
+    }
+
+    if (response) {
+      const errorText = await response.clone().text().catch(() => "");
+      saveCallLog({
+        method: "POST",
+        path: "/v1/audio/speech",
+        status: response.status,
+        model: `${provider}/${resolvedModel || body.model}`,
+        provider,
+        connectionId,
+        duration: Date.now() - startTime,
+        error: errorText.slice(0, 500),
+        apiKeyId: policy.apiKeyInfo?.id || undefined,
+        apiKeyName: policy.apiKeyInfo?.name || undefined,
+      }).catch(() => {});
+    }
+  }
 
   const connectionId = (credentials as { connectionId?: string } | null)?.connectionId || undefined;
   const logModel = `${provider}/${resolvedModel || body.model}`;

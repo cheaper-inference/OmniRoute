@@ -111,27 +111,42 @@ export async function fetchFlowCredits(
     throw new Error("Missing Google Flow cookies (__Secure-1PSID)");
   }
 
-  const endpoint = "https://flow.google.com/_/FlowUi/data/batchexecute?rpcids=nzlxg";
-  const bodyPayload = 'f.req=[[["nzlxg","[]",null,"generic"]]]';
+  const endpoint = "https://flow.google.com/_/AiSandboxAngularFrontend/data/batchexecute?rpcids=nzlxg";
+  const headers: Record<string, string> = {
+    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+    Cookie: cookieHeader,
+    Origin: "https://flow.google.com",
+    Referer: "https://flow.google.com/",
+    "User-Agent":
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  };
 
-  const response = await fetchImpl(endpoint, {
+  const reqData = "f.req=" + encodeURIComponent(JSON.stringify([[["nzlxg", "[]", null, "generic"]]]));
+  let response = await fetchImpl(endpoint, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-      Cookie: cookieHeader,
-      Origin: "https://flow.google.com",
-      Referer: "https://flow.google.com/",
-      "User-Agent":
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
-    },
-    body: bodyPayload,
+    headers,
+    body: reqData,
   });
+
+  let text = await response.text();
+
+  // If Google returns 400 with XSRF token, extract token and retry once
+  if (response.status === 400 && text.includes('"xsrf"')) {
+    const xsrfMatch = /"xsrf"\s*,\s*"([^"]+)"/.exec(text);
+    if (xsrfMatch && xsrfMatch[1]) {
+      response = await fetchImpl(endpoint, {
+        method: "POST",
+        headers,
+        body: `${reqData}&at=${encodeURIComponent(xsrfMatch[1])}`,
+      });
+      text = await response.text();
+    }
+  }
 
   if (!response.ok) {
     throw new Error(`Google Flow RPC failed with HTTP ${response.status}`);
   }
 
-  const text = await response.text();
   if (text.includes("ServiceLogin") || text.includes('flowRedirect="public"')) {
     throw new Error("Google Flow session expired or unauthenticated");
   }
