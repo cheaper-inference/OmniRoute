@@ -4,228 +4,153 @@
 
 ---
 
-> **حیثیت:** حوالہ — یہاں بیان کردہ معیار بندی **نافذ کی جا چکی ہے** (مراحل 1–6: گرڈ وال پیپر، بنیادی اجزا، اسٹیٹس رنگوں کی مرکزیت، mono ٹوکن، DataTable ٹوکن منتقلی، focus-ring → accent، Checkbox/Textarea بنیادی اجزا، `cn()` → tailwind-merge، ہر علیحدہ اسکرین پر گرڈ، سیال 4K مواد شیل، غیر شفاف ڈیٹا ٹیبل سطحیں)۔ یہ دستاویز ڈیش بورڈ کے ڈیزائن ٹوکنز، اجزا، اور رواجوں کی مستند وضاحت ہے؛ ذیل میں مراحل کی تقسیم ہر فیصلے کی وجہ واضح کرنے کے لیے برقرار رکھی گئی ہے۔
-> **دائرۂ کار:** OmniRoute ڈیش بورڈ (`src/`) اور مارکیٹنگ سائٹ (`_mono_repo/omnirouteSite/`) کی **ایک ہی بصری شناخت** ہے — ایک ہی گراف پیپر گرڈ پس منظر (32px)، ایک ہی رنگوں کے ٹوکنز، اور معیاری اجزا۔
->
-> نگہداشت کاروں کے لیے عملی نکات:
->
-> - باقی ماندہ کئی ہارڈ کوڈ شدہ hex قدریں **دانستہ** ہیں (ہمیشہ تاریک کنسول ٹرمینل، ReactFlow SVG اسٹروکس) اور انہیں ٹوکنز میں **ہرگز** منتقل نہیں کیا جانا چاہیے۔
-> - کسی فعال انسٹینس پر "بڑا" گرڈ پرانی بلڈ کی علامت ہے، کوڈ کی نہیں — گرڈ کا حجم 32px ہے، بالکل سائٹ جیسا۔
-> - ڈارک تھیم کی `--table-*` قدریں منتقلی سے پہلے کی ہارڈ کوڈ شدہ rgba قدروں سے بائٹ بہ بائٹ یکساں ہیں؛ لائٹ تھیم درست کر دی گئی ہے (غیر مؤثر `var()` فال بیکس کی وجہ سے یہ خرابی کے باعث ہمیشہ تاریک رہتی تھی)۔
+> **حیثیت:** ڈیش بورڈ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) پر بنایا گیا ہے، جسے
+> workspace `packages/ui-kit` (`@omniroute/ui-kit`) کے طور پر وینڈر کیا گیا ہے؛ upstream اسنیپ شاٹ کو
+> `packages/ui-kit/UPSTREAM.md` میں پن کیا گیا ہے اور `npm run check:ui-kit-snapshot` کے ذریعے محفوظ رکھا گیا ہے۔ لائٹ کینونیکل
+> تھیم ہے؛ ڈیفالٹ ترجیح `system` ہے۔ ایکسنٹ Keak لائم (`--ci-color-accent`) ہے۔ Inter
+> (حروف کے درمیان فاصلہ 0، `--ci-letter-spacing-ui`) UI فونٹ فیملی ہے، جبکہ Instrument Serif صرف بڑے اور کم متن والے
+> ڈسپلے ٹیکسٹ (`.ci-dashboard-display`) کے لیے، اور IBM Plex Mono کوڈ کے لیے ہے — یہ سب
+> `src/app/globals.css` کے آغاز میں موجود `@fontsource/*` imports کے ذریعے سیلف ہوسٹ کیے گئے ہیں۔ ہر آئیکن Lucide glyph ہے۔
 
----
+## 1. چیزیں کہاں موجود ہیں
 
-## 1. مقصد
+- **کٹ۔** `packages/ui-kit/src`، `packages/ui-kit/UPSTREAM.md` میں پن کیے گئے کمٹ پر اپ اسٹریم `src/` کی بائٹ بہ بائٹ نقل ہے (یہ فائل لائسنس کی اجازت بھی ریکارڈ کرتی ہے)؛ `PATCHES.md` مقامی پیچز کی فہرست دیتی ہے (کوئی نہیں)۔ اسے بغیر کسی بلڈ کے بطور سورس استعمال کیا جاتا ہے: `next.config.mjs` اسے ٹرانسپائل کرتی ہے، جبکہ
+  `tsconfig.json`، `@omniroute/ui-kit` → `packages/ui-kit/src` اور `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` میپ کرتی ہے (`vitest.config.ts` اور `vitest.mcp.config.ts` میں بھی یہی عرف موجود ہے)۔ کٹ کمپوننٹ کو اس کے سب پاتھ کے ذریعے امپورٹ کریں (`@omniroute/ui-kit/table`، `@omniroute/ui-kit/page-header`…)،
+  `@omniroute/ui-kit` بیرل کے ذریعے کبھی نہیں: بیرل ہر کمپوننٹ (بشمول تاریخ منتخب کرنے والے) کو
+  ہر امپورٹر میں شامل کر دیتا ہے۔ کٹ کی اسٹائل شیٹ `src/app/globals.css` کے ذریعے شامل ہوتی ہے
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`)۔
+- **ٹوکنز۔** `packages/ui-kit/src/ci-tokens.css`، `--ci-*` ٹوکنز کا اعلان کرتی ہے؛ `src/app/globals.css`
+  انہیں OmniRoute کے سابقہ ناموں (`--color-*`، `--radius-*`، `--font-sans`/`--font-mono`،
+  `--table-*`، `--orch-status-*`، `--color-fd-*`) سے جوڑتی ہے، تاکہ موجودہ `var(--color-*)` ریڈز اور Tailwind
+  یوٹیلیٹیز کام کرتی رہیں۔ نیا کوڈ Tailwind یوٹیلیٹیز (`bg-surface`، `text-text-muted`،
+  `border-border`، `text-success`، `bg-success-bg`، `bg-chart-1`…) یا کٹ کلاسز استعمال کرتا ہے—کبھی بھی ہیکس ویلیو نہیں
+  (`tests/unit/design-kit-bridge.test.ts` اس برج کو نافذ کرتی ہے)۔ `text-primary`،
+  `--text-color-primary` کے ذریعے `--color-primary-ink` میں ریزولو ہوتا ہے (لائٹ تھیم میں lime-800 اور ڈارک تھیم میں لائم ایکسنٹ)، اس لیے
+  پرائمری متن قابلِ مطالعہ رہتا ہے، جبکہ `bg-primary`/`border-primary` لائم سرفیس برقرار رکھتے ہیں۔ چارٹ سیریز
+  `--color-chart-1` … `--color-chart-5` استعمال کرتی ہیں۔
+- **تھیمز۔** `<html className="ci-theme">` (`src/app/layout.tsx`) دستاویز کے لیے کٹ تھیم فعال کرتا ہے۔
+  ترجیح `light`، `dark` یا `system` ہے (`THEME_CONFIG.defaultTheme = "system"`،
+  `src/shared/constants/appConfig.ts` میں؛ `system`، `prefers-color-scheme` کی پیروی کرتا ہے)۔ `src/store/themeStore.ts` میں
+  `applyTheme()` (جس کی عکاسی `src/app/layout.tsx` کے اِن لائن بوٹسٹریپ اسکرپٹ میں بھی ہوتی ہے، جو
+  ہائیڈریشن سے پہلے چلتا ہے) `data-theme="dark"|"light"` سیٹ کرتا ہے اور اسی وقت `<html>` پر `.dark` کلاس ٹوگل کرتا ہے۔
+  کٹ کا ڈارک ٹوکن سیٹ `data-theme="dark"` پر منحصر ہے (`packages/ui-kit/src/ci-tokens.css`)؛
+  OmniRoute کے اپنے ڈارک اووررائیڈز (`globals.css` میں `.dark` بلاک) اور سابقہ Tailwind `dark:`
+  یوٹیلیٹیز، `.dark` کلاس پر منحصر ہیں۔ ایکسنٹ رنگ کے کوئی پری سیٹس نہیں ہیں: ایکسنٹ ہمیشہ
+  کٹ سے آتا ہے، اور کسی پرانی بلڈ سے محفوظ شدہ پری سیٹ کو اسٹور لوڈ ہوتے وقت حذف کر دیا جاتا ہے۔
+- **کمپوننٹس (اڈاپٹرز)۔** `src/shared/components/index.tsx`، OmniRoute کمپوننٹ API (وہی
+  نام، ڈیفالٹ ایکسپورٹس اور پراپس) برقرار رکھتی ہے، جبکہ اس کے پسِ پشت موجود پرِمِٹِوز کٹ پر بنے اڈاپٹرز ہیں: فارمز
+  (`Button`، `Input`، `Textarea`، `Checkbox`، `Select`، `Toggle`، `Badge`، `Card`)، اوورلیز اور فیڈبیک
+  (`Modal`/`ConfirmModal`، `Tooltip`/`InfoTooltip`، `NotificationToast`، `EmptyState`، `Loading`)،
+  ساخت (`Collapsible`، `CollapsibleSection`، `SegmentedControl`، `Breadcrumbs`، `Avatar`) اور ٹیبلز
+  (`DataTable`، `FilterBar`، `ColumnToggle`، `FilterPills`، `PresetSlider`)۔ ہر اڈاپٹر کٹ
+  کمپوننٹ کو سب پاتھ کے ذریعے امپورٹ کرتا ہے اور سابقہ پراپس کو اس پر میپ کرتا ہے—مثلاً `Button variant="primary"`، کٹ کا
+  `default` بٹن ہے (`--ci-button-primary-*`: لائٹ تھیم میں معکوس سرفیس، جبکہ ڈارک تھیم میں اپنے
+  `--ci-color-accent-foreground` اِنک کے ساتھ ایکسنٹ)، `danger`، `destructive` ہے، اور `warning`، `outline` کے ساتھ
+  `.ci-button--warning` ایکسٹینشن ہے۔ `globals.css` کے آخر میں (`@layer components`) موجود
+  `.ci-button--warning` اور `.ci-badge[data-tone]` قواعد، کٹ کلاسز کے اوپر OmniRoute ایکسٹینشنز ہیں۔
+  `tests/unit/ui/adapters/*.test.tsx` ہر اڈاپٹر کو پن کرتی ہیں۔
+- **شیل۔** `src/app/(dashboard)/layout.tsx`، `DashboardLayout` رینڈر کرتی ہے، جو
+  `src/shared/components/layouts/DashboardShell.tsx` رینڈر کرتا ہے: کٹ کے `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)، جن میں OmniRoute کی نیویگیشن منطق
+  `src/shared/components/Sidebar.tsx` میں موجود ہے۔ `#main-content` کی جانب "مواد پر جائیں" لنک پہلا فوکس کیے جانے کے قابل
+  عنصر ہے۔ `src/shared/components/Header.tsx` میں کٹ کا `SidebarTrigger` (شیل کا واحد سائیڈ بار
+  ٹوگل)، Keak کا `ProductSwitcher` اور کمانڈ پیلیٹ کھولنے والا کنٹرول موجود ہے؛ یہ روٹ کا عنوان صرف اس وقت دکھاتا ہے
+  جب `#main-content` کے اندر کٹ کا کوئی `PageHeader` (`.ci-page-header`) ماؤنٹ نہ ہو، تاکہ اپنے
+  `PageHeader` والے صفحے میں صرف ایک `h1` ہو۔ `src/shared/components/CommandPalette.tsx` کٹ کا `Dialog` ہے۔
+- **آئیکنز۔** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) نام (اسکرینز میں استعمال ہونے والی
+  Material Symbols لغت) کو `ICON_MAP` (`src/shared/constants/iconMap.ts`) کے ذریعے Lucide گلف میں
+  ریزولو کرتا ہے۔ Material Symbols فونٹ اور پیکیج ہٹا دیے گئے ہیں: میپ میں موجود نہ ہونے والا نام ایک
+  غیر جانب دار پلیس ہولڈر گلف (`data-icon-missing="true"`) رینڈر کرتا ہے اور پروڈکشن سے باہر کنسول وارننگ لاگ کرتا ہے۔
+  `npm run gen:icon-map` استعمال ہونے والے وہ نام پرنٹ کرتا ہے جو میپ میں موجود نہیں ہیں
+  (`tests/unit/icon-map-coverage.test.ts` ایسے ہر نام پر ناکام ہوتی ہے جس کے لیے Lucide آئیکن موجود نہ ہو؛
+  `tests/unit/icon-map-object-values.test.ts` لُک اپ آبجیکٹس میں محفوظ ناموں کا احاطہ کرتی ہے)؛
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` لفظی
+  `<span className="material-symbols-outlined">` اسپینز کو `<Icon>` میں دوبارہ لکھتی ہے۔
+- **برانڈ۔** `src/shared/components/OmniRouteLogo.tsx` کٹ کو ریپ کرتی ہے: ڈیفالٹ ایکسپورٹ `OmniRouteLogo`،
+  `ProductIcon product="omniroute" variant="glyph"` (اِن لائن SVG، `basePath`-محفوظ) رینڈر کرتی ہے، اور
+  `OmniRouteLockup`، `ProductLockup product="omniroute"` (قابلِ رسائی نام "Keak OmniRoute") یا وائٹ لیبل
+  آپریٹرز کے لیے ان کا اپنا `name`/`logoSrc` رینڈر کرتی ہے۔ پروڈکٹ سوئچر کی منزلیں
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`، `KEAK_ACTIVE_PRODUCT`) میں موجود ہیں۔ اسٹینڈ الون
+  اسکرینز—`src/app/login/page.tsx`، `src/app/status/page.tsx`، `src/app/maintenance/page.tsx`،
+  `src/app/offline/page.tsx`، `src/app/not-found.tsx` اور `src/shared/components/ErrorPageScaffold.tsx`
+  —لاک اپ دکھاتی ہیں؛ `tests/unit/brand-pages-static.test.ts` اس کی حفاظت کرتی ہے۔
 
-مارکیٹنگ سائٹ (`viral.omniroute.online`، `why.omniroute.online`، `omniroute.online`) اور پروڈکٹ ڈیش بورڈ کو **ایک ہی پروڈکٹ** کی طرح نظر آنا چاہیے۔ سائٹ پہلے ہی ڈیش بورڈ سے اپنا رنگ پیلیٹ مستعار لے چکی ہے — اس کی `css/tokens.css` میں یہاں تک لکھا ہے کہ _"پیلیٹ OmniRoute ڈیش بورڈ (`src/app/globals.css`) کی عکاسی کرتا ہے"۔_ لہٰذا رنگوں کی سطح پر دونوں پہلے ہی تقریباً 80% ہم آہنگ ہیں۔ ڈیش بورڈ میں درج ذیل چیزیں موجود نہیں:
+## 2. قواعد
 
-1. **گراف پیپر گرڈ وال پیپر** جسے سائٹ ہر صفحے پر استعمال کرتی ہے۔
-2. چند **مشترکہ ڈیزائن ٹوکنز** جو سائٹ میں موجود ہیں لیکن ڈیش بورڈ میں نہیں (ریڈیئس اسکیل، برانڈ گریڈیئنٹ، `surface-2`، mono فونٹ)۔
-3. **اجزا کی سطح پر یکسانیت** — ڈیش بورڈ کے متعدد اجزا ہارڈ کوڈ شدہ hex/rgba استعمال کرکے تھیم ٹوکنز کو نظرانداز کرتے ہیں۔
+1. ٹوکنز استعمال کریں، لِٹرلز کبھی نہیں۔ دانستہ طور پر برقرار رکھی گئی مستثنیات: ہمیشہ تاریک رہنے والا کنسول ٹرمینل، ReactFlow SVG
+   اسٹروکس بذریعہ `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، اور زمرہ جاتی پیلیٹس
+   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) اور
+   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`)۔
+2. `packages/ui-kit/src` کو کبھی بھی دستی طور پر پیچ نہ کریں: `scripts/dev/sync-ui-kit.sh <commit>` کے ذریعے ہم وقت کریں؛
+   پری کمیٹ گیٹ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) کسی بھی ایسے بائٹ پر ناکام ہو جاتا ہے
+   جو پن شدہ upstream commit سے مختلف ہو (جب upstream clone،
+   `UI_KIT_CLONE` یا `_references/cheaper-inference-ui-kit`، موجود نہ ہو تو یہ انتباہ کے ساتھ چھوڑ دیتا ہے)۔ جب کِٹ میں کوئی چیز موجود نہ ہو،
+   تو adapter یا اسکرین میں اس کا متبادل حل استعمال کریں اور upstream سے اس کی درخواست کریں۔
+3. کِٹ کے متن کی طے شدہ زبان انگریزی ہے (`label = "Loading"`, `loadingLabel = "Loading table"`…) — جب بھی کِٹ کا کوئی component متن رینڈر کرے،
+   `useTranslations(...)` سے ترجمہ شدہ اسٹرنگز فراہم کریں۔
+4. Tailwind utilities کو کِٹ component classes پر فوقیت حاصل ہے (کِٹ
+   `@layer theme, base, components, utilities` کا اعلان کرتی ہے اور اس کے قواعد `components` میں ہوتے ہیں) — utilities کو
+   spacing اور layout کے لیے استعمال کریں، کِٹ components کو دوبارہ رنگ دینے کے لیے نہیں۔
+5. سرخیاں: صفحے اور سیکشن کے عنوانات کے لیے `.ci-heading` (Inter، بغیر tracking)؛ `.ci-dashboard-display`
+   (Instrument Serif) صرف بڑے اور کم کثافت والے نمایاں متن کے لیے، جیسے error page کا status code۔
+6. `tests/unit/dashboard-kit-sweep.test.ts` کِٹ کو اپنانے کی نگرانی کرتا ہے: `src/app` یا
+   `src/shared/components` کے تحت کوئی Material ligature span نہیں؛ dashboard tree (`src/app/(dashboard)` اور
+   `src/shared/components`) میں کوئی خام `<select>`، `<textarea>` یا `<table>` نہیں اور فہرست شدہ مستثنیات (`Select` adapter کی native branch،
+   `RequestLoggerDetail`) کے علاوہ کوئی دستی طور پر بنایا گیا
+   `role="dialog"` نہیں؛ وہاں ہر خام `<button>` یا `<input>` کے لیے ایک ایسا تبصرہ درکار ہے جس میں
+   `kit-exception:` (وجہ سمیت) شامل ہو اور جو اس سے زیادہ سے زیادہ 3 سطریں اوپر ختم ہو؛ palette hues اور `dark:` variants
+   صرف ان فائلوں میں ہوں جو test میں درج ہیں۔
+7. PR سے پہلے دونوں themes اور 390 px viewport کی تصدیق کریں (screenshots)؛ `tests/e2e/a11y.spec.ts`
+   axe چلاتا ہے۔
 
-یہ دستاویز تجزیہ اور منصوبہ پیش کرتی ہے۔
+## 3. اسکرین شامل کرنا
 
----
+1. صفحہ کِٹ کے `PageHeader` (`@omniroute/ui-kit/page-header`، dashboard کے اندر `compact`) کے ساتھ کھولیں — title، description اور `actions`۔ اس کے بعد shell header اپنا title ہٹا دیتا ہے۔
+2. controls کو `@/shared/components` (adapters) سے بنائیں اور جہاں کوئی adapter موجود نہ ہو وہاں کِٹ components کو subpath کے ذریعے استعمال کریں (`Table`/`TableScrollArea`/`DataTableShell`، `Field`، `Alert`، `Tabs`، `RadioGroup`،
+   `Slider`…)۔
+3. آئیکنز: `<Icon name="…" />`۔ نیا نام معنوی طور پر مماثل Lucide component کے ساتھ `ICON_MAP` میں شامل کیا جاتا ہے؛
+   `npm run gen:icon-map` اب بھی غیر موجود ناموں کی فہرست دکھاتا ہے۔
+4. رنگ: semantic utilities (`text-success`، `bg-warning-bg`، `border-border`…) اور
+   chart series کے لیے `var(--color-chart-N)`؛ کوئی hex value نہیں اور کوئی ایسا `dark:` variant نہیں جو صرف کسی رنگ کو دہراتا ہو۔
+5. متن: ہر اسٹرنگ، بشمول وہ labels جو آپ کِٹ components کو دیتے ہیں، `useTranslations` سے آتی ہے۔ نئی
+   keys کو `src/i18n/messages/en.json`، `pt-BR.json` اور `vi.json` میں شامل کریں (Vietnamese parity test
+   ہر English key کو پن کرتا ہے)؛ دیگر locales کو i18n sync کے ذریعے پُر کیا جاتا ہے۔
+6. PR سے پہلے حفاظتی checks چلائیں: `tests/unit/dashboard-kit-sweep.test.ts`،
+   `tests/unit/icon-map-coverage.test.ts`، `tests/unit/icon-map-object-values.test.ts`،
+   `npm run check:dashboard-typecheck` (یہ واحد check ہے جو `iconMap.ts` میں duplicated import پکڑتا ہے)،
+   `npm run check:ui-icu`، اور اسکرین کے اپنے tests۔
 
-## 2. اصول
+## 4. اڈاپٹر شامل کرنا یا تبدیل کرنا
 
-- **حقیقت کا واحد ماخذ = `src/app/globals.css`۔** سائٹ ڈیش بورڈ کی عکاسی کرتی ہے، اس کے برعکس کبھی نہیں۔ نئے ٹوکنز پہلے `globals.css` میں شامل کیے جاتے ہیں۔
-- **ٹوکنز، کبھی بھی لفظی قدریں نہیں۔** اجزا خام `#hex` کے بجائے معنوی ٹوکنز (`bg-surface`، `text-primary`، `border-border`) استعمال کرتے ہیں۔
-- **لطیف، نمایاں نہیں۔** گرڈ ایک مدھم وال پیپر ہے جو مواد کے پیچھے رہتا ہے — اسے کبھی بھی متن کا کنٹراسٹ کم نہیں کرنا چاہیے یا UI سے بصری مقابلہ نہیں کرنا چاہیے۔
-- **تھیم سے ہم آہنگ۔** ہر چیز `.dark` (پروڈکٹ کی امتیازی شکل) اور لائٹ، دونوں میں کام کرتی ہے۔
-- **محتاط مرحلہ وار نفاذ۔** پہلے گرڈ + ٹوکنز جاری کریں (کم خطرہ، زیادہ نمایاں)، پھر اجزا کی صفائی مرحلہ وار کریں۔
+1. `src/shared/components/index.tsx` کا عوامی API برقرار رکھیں: وہی export نام، default exports اور
+   قبول شدہ props۔ اڈاپٹر کے اندر legacy props کو kit پر map کریں (`Button.tsx` دیکھیں: `VARIANT_TO_KIT`،
+   `SIZE_TO_KIT`)۔
+2. kit کو subpath کے ذریعے import کریں (`@omniroute/ui-kit/<component>`)۔
+3. kit کی خامیوں کے لیے workarounds اڈاپٹر میں رکھیں (یا جب اصلاح style ہو تو `globals.css` کے `@layer components` میں)،
+   کبھی بھی `packages/ui-kit/src` میں نہیں۔
+4. `tests/unit/ui/adapters/<name>.test.tsx` شامل یا اپ ڈیٹ کریں۔ ایسے اڈاپٹر کے لیے جس کے بہت سے callers ہوں،
+   تبدیلی سے پہلے اور بعد کے rendered markup کا موازنہ کریں — padding یا wrapper کی تبدیلیاں ہر screen تک پھیلتی ہیں۔
 
----
+## 5. kit کو اپ ڈیٹ کرنا
 
-## 3. موجودہ حالت — کیا پہلے ہی ہم آہنگ ہے اور کیا نہیں
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` اس commit پر موجود upstream `src/` کو
+`packages/ui-kit/src` میں copy کرتا ہے اور واحد مجاز transformation لاگو کرتا ہے (یہ relative imports سے
+`.js` suffix ہٹا دیتا ہے)۔ پھر: `git diff packages/ui-kit` کا جائزہ لیں، دونوں themes میں providers، settings، combos،
+usage اور endpoint کا بصری معائنہ کریں، `npm run check:ui-kit-snapshot` اور `npm run test:vitest:ui` چلائیں، اور
+upstream changelog کے ساتھ PR کھولیں۔
 
-### 3.1 رنگ — پہلے ہی یکساں ✅
+## 6. حوالہ جاتی اشاریہ
 
-ہر برانڈ رنگ اور سطح پہلے ہی سائٹ سے **قدر کے لحاظ سے** مطابقت رکھتی ہے (صرف نام مختلف ہیں — ڈیش بورڈ میں `--color-` سابقہ استعمال ہوتا ہے)۔ `src/app/globals.css:30-128` میں تصدیق شدہ:
-
-| تصور                        | سائٹ ٹوکن (`tokens.css`)                    | ڈیش بورڈ ٹوکن (`globals.css`)   | مطابقت                 |
-| --------------------------- | ------------------------------------------- | ------------------------------- | ---------------------- |
-| primary                     | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅                     |
-| primary-hover               | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅                     |
-| accent                      | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅                     |
-| accent-2                    | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (نام تبدیل کیا گیا) |
-| accent-3                    | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (نام تبدیل کیا گیا) |
-| کامیابی / انتباہ / خرابی    | `#22c55e / #f59e0b / #ef4444`               | یکساں                           | ✅                     |
-| ٹریفک لائٹس                 | `#ff5f56 / #ffbd2e / #27c93f`               | یکساں                           | ✅                     |
-| تاریک پس منظر / سطح / بارڈر | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | یکساں                           | ✅                     |
-| روشن پس منظر / سطح / متن    | `#f9f9fb / #fff / #1a1a2e`                  | یکساں                           | ✅                     |
-
-**نتیجہ:** رنگوں کی کسی منتقلی کی ضرورت نہیں۔ شناخت پہلے ہی مشترک ہے؛ ہم اسے ازسرِنو تعمیر نہیں کر رہے بلکہ اسے _مکمل_ کر رہے ہیں۔
-
-### 3.2 خلا — ڈیش بورڈ میں کیا موجود نہیں
-
-| فرق                     | سائٹ میں موجود ہے                                                            | ڈیش بورڈ                                                                      | کارروائی                 |
-| ----------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------ |
-| **گرڈ وال پیپر**        | `body::before` گراف پیپر، `--grid-line`، `--grid-size 32px`، `--section-alt` | **✅ شامل کر دیا گیا (مرحلہ 1)**                                              | **حصہ A**                |
-| **ریڈیئس اسکیل**        | `--radius 14px`، `--radius-sm 9px`                                           | `--radius 14px` شامل کر دیا گیا؛ `-sm` + کمپوننٹ کی دوبارہ نشان دہی زیر التوا | **حصہ B / مرحلہ 2**      |
-| **برانڈ گریڈینٹ**       | `--grad-brand 135deg primary→accent-3`                                       | **✅ ٹوکن شامل کر دیا گیا (مرحلہ 1)**؛ مرحلہ 2 میں استعمال ہوگا               | **حصہ B**                |
-| **نیسٹڈ سطح**           | `--surface-2 #1c2230`                                                        | **✅ شامل کر دیا گیا (مرحلہ 1)**                                              | **حصہ B**                |
-| **مونو فونٹ**           | `--font-mono` (ui-monospace اسٹیک)                                           | زیر التوا (مرحلہ 4، استعمال کنندگان کے ساتھ)                                  | **حصہ B**                |
-| **`text-muted` (ڈارک)** | `#8b8b9e`                                                                    | `#a1a1aa` (zinc-400)                                                          | ہم آہنگ کریں — **حصہ B** |
-
-### 3.3 تھیم کے طریقۂ کار (تاکہ ہم کچھ خراب نہ کریں)
-
-- **Tailwind v4، CSS-first** (کوئی `tailwind.config.*` نہیں)۔ ٹوکنز `:root`/`.dark` میں متعین کیے گئے ہیں اور `@theme inline` کے ذریعے یوٹیلیٹیز کے لیے دستیاب کیے گئے ہیں (`globals.css:130-179`)۔
-- **`<html>` پر `.dark` کلاس کے ذریعے ڈارک موڈ** (`globals.css:22` پر `@custom-variant dark`)، جسے ایک حسب ضرورت Zustand اسٹور (`src/store/themeStore.ts`) کے ذریعے ٹوگل کیا جاتا ہے، ڈیفالٹ تھیم = `system` (`src/shared/constants/appConfig.ts:11`)۔ اس کے بجائے سائٹ `html[data-theme="light"]` استعمال کرتی ہے — **طریقۂ کار مختلف ہیں مگر کبھی باہم نہیں ملتے** (الگ origins)، اس لیے کوئی ٹکراؤ نہیں۔ ہم ڈیش بورڈ کا `.dark` طریقۂ کار برقرار رکھیں گے۔
-- **رن ٹائم پرائمری اوور رائیڈ** موجود ہے (`themeStore.ts:85-97`، پری سیٹس `COLOR_THEMES` میں) — صارفین `--color-primary` تبدیل کر سکتے ہیں۔ کوئی بھی نیا ٹوکن (گریڈینٹ وغیرہ) جو `--color-primary` کا حوالہ دیتا ہے، ان اوور رائیڈز کو خودکار طور پر وراثت میں حاصل کرتا ہے۔ ✅
-- **Tailwind v4 کے محفوظ ریڈیئس نام:** `--radius-sm/md/lg/...`، `rounded-*` یوٹیلیٹیز کی بنیاد ہیں۔ انہیں دوبارہ متعین کرنے سے ہر موجودہ `rounded-*` سابقہ طور پر تبدیل ہو جاتا ہے (مثلاً `rounded-sm` 12 فائلوں میں استعمال ہوتا ہے)۔ اسی لیے چھوٹے ریڈیئس کی قدر اور کمپوننٹ کی دوبارہ نشان دہی کو دانستہ طور پر مرحلہ 2 تک مؤخر کیا گیا ہے، جہاں استعمال کنندگان بھی ساتھ ہی تبدیل ہوں گے۔
-
----
-
-## 4. حصہ A — گراف پیپر گرڈ پس منظر (بنیادی مطالبہ) — نافذ شدہ (مرحلہ 1)
-
-### 4.1 یہ کیا ہے
-
-سائٹ (`_mono_repo/omnirouteSite/css/base.css`) سے عین وہی ترکیب: ایک **فکسڈ، پورے ویوپورٹ پر محیط سیوڈو ایلیمنٹ** جو دو 1px لائن گریڈینٹس بناتا ہے، اور تمام مواد کے پیچھے `z-index:-1` پر موجود ہوتا ہے۔
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**یہ اس کے باوجود کیوں کام کرتا ہے کہ `body` کا `background-color` غیر شفاف ہے:** `z-index:-1` والا `::before` ایلیمنٹ کے اپنے پس منظر کے _اوپر_، مگر اس کے ان فلو مواد کے _نیچے_ رینڈر ہوتا ہے۔ لہٰذا `--color-bg` بنیادی بھراؤ ہے، گرڈ اس کے اوپر تہہ کی صورت میں آتا ہے، اور ایپ گرڈ کے اوپر رینڈر ہوتی ہے۔
-
-### 4.2 کوڈ بیس میں پہلے سے موجود مثال
-
-`src/app/landing/page.tsx:16-26` **پہلے ہی اسی گرڈ کو فی صفحہ نافذ کرتا ہے** — مگر **سرخ** لائنوں (`#E54D5E`، شفافیت `0.06`) کے ساتھ، **50px** پر، نیز متحرک دائروں کے ساتھ۔ لہٰذا یہ طرز پروڈکٹ میں آزمودہ ہے؛ یہ کام اسے ایک **عالمی، تھیم سے ہم آہنگ** وال پیپر میں تبدیل کرتا ہے۔
-
-### 4.3 شامل کردہ ٹوکنز (`globals.css` میں)
-
-```css
-:root {
-  /* روشن — گرڈ کی شفافیت کو سائٹ کی 0.045 سے بڑھایا گیا ہے تاکہ وال پیپر
-     گھنے ڈیش بورڈ پر حقیقتاً نظر آئے (کارڈز/کروم ویوپورٹ کا زیادہ تر حصہ ڈھانپتے ہیں) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* تاریک — اسی وجہ سے 0.035 سے بڑھایا گیا */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 واحد رکاوٹ — ہٹا دی گئی
-
-گرڈ اپنی ساخت کے لحاظ سے عالمی ہے (یہ پینل، `auth`/`login`، خرابی کے صفحات — تمام روٹس — کو ایک ساتھ کور کرتا ہے)۔ پینل کے اندر صرف **ایک** ایلیمنٹ اسے چھپا رہا تھا:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — بیرونی ریپر ایک غیر شفاف `bg-bg` بناتا تھا۔ اس کے نیچے موجود ہر چیز پہلے ہی شفاف ہے (`<main>`، اسکرول کنٹینر، اندرونی `max-w-7xl`)، اس لیے **`bg-bg` ہٹانے** سے body گرڈ مواد کے حصے میں نظر آتا ہے (body کا `--color-bg` بنیادی بھراؤ برقرار رہتا ہے)۔
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 کروم کے ساتھ تعامل (سائیڈ بار / ہیڈر)
-
-- `Header` (`Header.tsx:207`، `bg-bg`) اور `Sidebar` (`Sidebar.tsx:430`، `bg-sidebar`) **غیر شفاف** رہتے ہیں → گرڈ صرف **مواد کے حصے** میں دکھائی دیتا ہے، جبکہ ٹھوس کروم اس کے گرد فریم بناتا ہے۔ یہ پُرسکون ڈیفالٹ ہے اور اس طریقے سے مطابقت رکھتا ہے جس طرح سائٹ کروم کو کینوس سے الگ کرتی ہے (فیصلہ D3 = ٹھوس)۔
-
-### 4.6 لاگ اِن / تصدیق / خرابی کے صفحات
-
-یہ براہ راست `<body>` کے تحت رینڈر ہوتے ہیں (کوئی پینل کروم نہیں)، اس لیے عالمی گرڈ کو خودکار طور پر ان کے پیچھے ظاہر ہونا چاہیے۔ **مرحلہ 5 — مکمل:** الگ مکمل اسکرین ریپرز درحقیقت غیر شفاف تھے (`min-h-screen … bg-bg`، جہاں `bg-bg` وہی ٹھوس بھراؤ ہے جو `<body>` کا ہے)، جس سے گرڈ ہر غیر ڈیش بورڈ اسکرین پر چھپ جاتا تھا — صرف لاگ اِن پر نہیں۔ اب یہ سب شفاف ہیں تاکہ مشترکہ وال پیپر ان کے پیچھے سے دکھائی دے: `login`، `forgot-password`، `callback`، `maintenance`، `offline`، `status`، `terms`، `privacy`، `onboarding`، اور `ErrorPageScaffold` (`400`/`401` کو کور کرتا ہے)۔ اس سے **D4** مکمل ہوتا ہے (صرف لاگ اِن سے بڑھا کر ہر الگ اسکرین تک)۔ `tests/unit/design-grid-background.test.ts` کے ذریعے محفوظ کیا گیا ہے۔
-
-### 4.7 لینڈنگ صفحہ
-
-`landing/page.tsx` اپنا زیادہ بھرپور متحرک پس منظر (دائرے + ونیٹ) برقرار رکھتا ہے — اس کی اپنی مارکیٹنگ جھلک (فیصلہ D5 = جوں کا توں چھوڑیں)۔
-
----
-
-## 5. حصہ B — ٹوکن یکجائی
-
-مرحلہ 1 غیر فعال، تصادم سے پاک شناختی ٹوکنز (`--surface-2`/`--color-surface-2`، `--grad-brand`، `--radius`) شامل کرتا ہے۔ مرحلہ 2 ریڈیئس اسکیل کو Tailwind سے منسلک کرتا اور کمپوننٹس کے حوالے تبدیل کرتا ہے؛ مرحلہ 4 اپنے استعمال کنندگان کے ساتھ `--font-mono` شامل کرتا ہے۔
-
-| ٹوکن                       | وجہ                                                                | مرحلہ                                       |
-| -------------------------- | ------------------------------------------------------------------ | ------------------------------------------- |
-| `--radius` / `--radius-sm` | بے قاعدہ 6/8/12 کے بجائے ایک ریڈیئس اسکیل (14/9)                   | 1 (قدر) / 2 (منسلک کرنا + حوالے تبدیل کرنا) |
-| `--grad-brand`             | بنیادی CTAs کے لیے برانڈ گریڈیئنٹ (سرخ→بنفشی)، سائٹ سے مطابقت پذیر | 1 (ٹوکن) / 2 (Button)                       |
-| `--surface-2`              | اندرونی پینلز / ٹیبل ہیڈرز / اندر کی جانب موجود قطاریں             | 1                                           |
-| `--font-mono`              | کوڈ بلاکس، ٹرمینل، IDs، اینڈ پوائنٹس                               | 4                                           |
-| `--text-muted` کی تطبیق    | سائٹ↔پینل کے لیے ایک قدر منتخب کریں (`#a1a1aa` تجویز کردہ)         | 2                                           |
-
-**D2 (text-muted):** سائٹ کا `#8b8b9e` بمقابلہ ڈیش بورڈ کا `#a1a1aa`۔ **ڈیش بورڈ کا `#a1a1aa`** برقرار رکھنے اور مطابقت کے لیے _سائٹ_ کو اپ ڈیٹ کرنے کی تجویز ہے۔ یہ ظاہری نوعیت کی تبدیلی ہے۔
-
----
-
-## 6. حصہ C — کمپوننٹ معیاری کاری (مراحل 2–4)
-
-حسبِ ضرورت کمپوننٹس (shadcn/Radix کے بغیر)، Tailwind v4، معنوی ٹوکنز **زیادہ تر** اپنائے جا چکے ہیں (195 فائلیں مشترکہ بیرل کو امپورٹ کرتی ہیں)۔ کام ان **بائی پاسز** کو ختم کرنا ہے۔ مرکزی مقام: `src/shared/components/`۔
-
-| #   | آئٹم                                   | فائل(یں)                                                                                                                 | مسئلہ → ہدف                                                                                                                         | مرحلہ |
-| --- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| C1  | **ریڈیئس کی مطابقت**                   | `Button.tsx:14-18`، `Card.tsx:39`، `Modal.tsx`، `Input.tsx`، `Select.tsx`                                                | ملے جلے 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                  | 2     |
-| C2  | **Button گریڈیئنٹ + `accent` ویریئنٹ** | `Button.tsx:5-12`                                                                                                        | پرائمری سادہ سرخ→سرخ ہے؛ `--grad-brand` سے ہم آہنگ کریں؛ غائب `accent` ویریئنٹ شامل کریں۔ تقریباً 195 امپورٹرز — سب سے زیادہ نمایاں | 2     |
-| C3  | **ٹیبلز**                              | `DataTable.tsx:122-176`، `logTableStyles.ts`، `globals.css:405-414`                                                      | 100% اِن لائن ہارڈ کوڈ شدہ rgba + غیر موجود ویری ایبلز؛ ٹوکنز پر منتقل کریں، مختلف طرزیں متروک کریں                                 | 3     |
-| C4  | **اسٹیٹس رنگوں کو مرکزی بنانا**        | `flow/edgeStyles.ts`، `TokenHealthBadge.tsx`، `DegradationBadge.tsx`، `ProviderCascadeNode.tsx`، `Badge.tsx` + 5 معاونین | ایک ہی hex کی 6+ نقول → `--color-success/warning/error` پر مبنی ایک ماڈیول                                                          | 3     |
-| C5  | **Card بارڈر**                         | `Card.tsx:39`                                                                                                            | `border-white/5` → برانڈ `/8`                                                                                                       | 2     |
-| C6  | **فوکس رِنگ کی تطبیق** ✅ مکمل         | `globals.css` کا `--focus-ring` (accent) بمقابلہ فارم کنٹرولز کا `ring-primary/30`                                       | عالمی رِنگ سے مطابقت اور سرخ ایرر رِنگ سے امتیاز کے لیے **accent (بنفشی)** پر یکساں کر دیا گیا؛ ایرر سرخ ہی رہے گا                  | 4     |
-| C7  | **`Checkbox` + `Textarea` شامل کرنا**  | اِن لائن `accentColor:#6366f1` کے ساتھ خام `<input>`/`<textarea>`                                                        | ٹوکن سے چلنے والے بنیادی کمپوننٹس                                                                                                   | 4     |
-| C8  | **ہارڈ کوڈ شدہ hex کی جامع صفائی**     | `ConsoleLogViewer.tsx:240`، `ComboLiveStudio.tsx:306`، Modal ڈاٹس، تقریباً 14 چارٹ فائلیں                                | لِٹرلز → ٹوکنز                                                                                                                      | 4     |
-| C9  | **`cn()` → clsx + tailwind-merge**     | `src/shared/utils/cn.ts`                                                                                                 | متصادم کلاسز جمع ہوتی رہتی ہیں؛ C1 اوور رائیڈز کے لیے ضروری                                                                         | 2     |
-
-**پہلے ہی برانڈ سے ہم آہنگ (ٹوکن سے چلنے والے، صرف ریڈیئس درکار ہے):** `Badge`، `Toggle`، `SegmentedControl`، `Input`، `Select`۔
-
----
-
-## 7. رول آؤٹ منصوبہ
-
-- **مرحلہ 1 — گرڈ + شناختی ٹوکنز (یہ PR)۔** `globals.css` گرڈ + `--surface-2`/`--grad-brand`/`--radius` ٹوکنز؛ `body::before` وال پیپر؛ `bg-bg` رکاوٹ ہٹانا؛ جامد گارڈ ٹیسٹ۔ کم خطرہ، ایک commit میں قابلِ واپسی۔
-- **مرحلہ 2 — بنیادی اجزا (C1, C2, C5) — اس PR میں مکمل۔** معنوی radius utilities `rounded-card` (14px) / `rounded-control` (9px)، `@theme` کے ذریعے شامل کی گئیں (حسبِ ضرورت نام، لہٰذا پہلے سے طے شدہ `rounded-sm/md/lg/xl` غیر متاثر رہتے ہیں — 400 فائلوں پر وسیع اثر نہیں پڑتا)؛ Card/Modal → 14px، Button/Input/Select → 9px؛ Button primary → `--grad-brand` (سرخ→بنفشی) + نیا `accent` variant؛ Card borders → `border-border` ٹوکن (0.08)۔ **ملتوی:** `cn()`→tailwind-merge (C9) کو نئی deps درکار ہیں؛ غیر منظم `rounded-lg` جائزہ (326 فائلیں) جوں کا توں چھوڑ دیا گیا ہے، کیونکہ بنیادی اجزا سطح کے زیادہ تر حصے کا احاطہ کرتے ہیں۔
-- **مرحلہ 3 — اسٹیٹس رنگ + ٹیبلز (C3, C4) — اس PR میں مکمل۔** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` واحد ماخذ؛ `flow/edgeStyles.ts` + `TokenHealthBadge` کو اس کی طرف منتقل کیا گیا، بصری مطابقت/وہی hex)۔ ✅ **`--font-mono`** ٹوکن۔ ✅ **C3 (DataTable)** — ہر inline rgba اور غیر مؤثر `var(--bg-table-header)` / `var(--text-secondary)` fallbacks کو `--table-*` ٹوکن سیٹ (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) سے تبدیل کیا گیا، جس کی **dark values پرانے hardcoded rgba کے عین برابر ہیں** (dark بائٹ بہ بائٹ یکساں)، جبکہ light values نے پہلے ہمیشہ dark رہنے والی light theme درست کر دی۔ Header border → `--color-border`، secondary text → `--color-text-muted`۔ **merge سے پہلے بصری جائزہ مطلوب ہے۔** (غیر تبدیل شدہ: `logTableStyles.ts` اور پرانے Ant `.ant-table` قواعد — الگ اور کم ترجیحی۔)
-- **مرحلہ 4 — صفائی (C6, C7, C9 مکمل؛ C8 زیرِ التوا)۔** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge بطور deps شامل کیے گئے) — اب caller کا `className`، conflicting class کو جمع کرنے کے بجائے primitive کی متعلقہ class کو درست طور پر _تبدیل_ کرتا ہے۔ ✅ **C7** نئے `Checkbox` + `Textarea` primitives (ٹوکن پر مبنی، barrel سے export شدہ؛ اضافی — 32 raw checkboxes / 41 raw textareas کو بتدریج اپنایا جا سکتا ہے)۔ ✅ **C6** focus-ring مطابقت — form controls (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) اب global `--focus-ring` سے مطابقت اور سرخ error ring کے ساتھ ٹکراؤ روکنے کے لیے **accent (بنفشی)** ring پر focus کرتے ہیں؛ سرخ error state غیر تبدیل شدہ ہے۔ ⏳ **C8 hex-sweep اندھا دھند find/replace نہیں ہے** — تصدیق شدہ مقامات جو _دانستہ_ ہیں اور لازماً برقرار رہنے چاہییں: `ConsoleLogViewer.tsx:240` (ہمیشہ-dark terminal)، `TokenHealthBadge` popover، ReactFlow SVG strokes۔ صرف وہ hex منتقل کریں جو حقیقتاً theme-aware ہونے چاہییں۔
-
-ہر مرحلے میں: `npm run lint` + `npm run typecheck:core` + بصری جائزہ۔
-
----
-
-## 8. زیرِ غور فیصلے (سفارشات)
-
-- **D1 — Button primary:** سرخ→سرخ برقرار رکھا جائے یا **سرخ→بنفشی `--grad-brand`** پر منتقل کیا جائے؟ سفارش: **سرخ→بنفشی** (مرحلہ 2)۔
-- **D2 — گرڈ لائن کا رنگ:** **neutral** (سائٹ کا انداز) — منتخب شدہ — بمقابلہ brand-red۔ سائز **32px** (مالک کی رائے پر اصل 46px سے تقریباً 30% کم کیا گیا — dashboard layout میں 46px خانے بہت بڑے نظر آتے تھے)۔
-- **D3 — Chrome vibrancy:** sidebar/header **solid** — منتخب شدہ۔
-- **D4 — Auth/login گرڈ:** ✅ **مکمل (مرحلہ 5)** — opaque `bg-bg` ہر standalone full-screen wrapper سے ہٹا دیا گیا ہے (صرف login سے نہیں)، لہٰذا گرڈ تمام screens پر دکھائی دیتا ہے۔ §4.6 دیکھیں۔
-- **D5 — Landing page:** متحرک splash کو جوں کا توں چھوڑیں۔ منتخب شدہ۔
-- **D6 — Radius 14/9 پورے پروڈکٹ میں:** سفارش: ہاں (مرحلہ 2)۔
-- **D7 — مرحلہ 1 پہلے جاری ہوگا:** منتخب شدہ۔
-- **D8 — Layout کی چوڑائی (مرحلہ 5):** dashboard content shell کو `max-w-7xl` (1280px) تک محدود کیا گیا تھا، جس سے بڑے monitors پر درمیان میں مواد اور دونوں جانب وسیع خالی gutters بن رہے تھے۔ ✅ **مکمل** — اسے fluid `max-w-[3840px]` (حقیقی 4K) تک بڑھا دیا گیا: اب content تقریباً 4K تک viewport کی پیروی کرتا ہے اور صرف اس سے آگے center ہوتا ہے (`DashboardLayout.tsx`)۔ دانستہ طور پر تنگ صفحات ڈیزائن کے مطابق تنگ ہی رہتے ہیں (`ProviderOnboardingWizard` max-w-5xl، `Rtk`/`CavemanContextPageClient` max-w-6xl)۔
-- **D9 — Opaque data tables (مرحلہ 6):** اب جبکہ dashboard content area شفاف ہے (تاکہ grid wallpaper آر پار دکھائی دے، مرحلہ 5)، ایسی data tables جن کا container opaque surface نہیں تھا، ان کی شفاف even-rows / کم-alpha zebra سے گرڈ نظر آنے لگتا تھا۔ ✅ **مکمل** — اب ہر card-less table `bg-surface` لگاتی ہے (یا `<DataTable>` primitive کے لیے اس کے scroll container پر `background: var(--color-surface)`)۔ درست کیے گئے: `DataTable` (primitive)، `ProxyLogger`/`RequestLoggerV2` (ان کے `<Card>` کا `bg-black/5 dark:bg-black/20` tint، tailwind-merge کے ذریعے Card کے `bg-surface` پر غالب آ رہا تھا → تقریباً 95% شفاف)، `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`، نیز cache views میں موجود دو CSS-grid "tables" (`bg-surface/35` → `bg-surface`)۔ پہلے سے کسی `<Card>`/Modal کے اندر موجود tables کی opacity کی تصدیق کی گئی اور انہیں دانستہ طور پر غیر تبدیل شدہ چھوڑا گیا (`bg-surface` وہاں ایک غیر ضروری no-op ہے)۔ خود گرڈ میں **کسی تبدیلی کی ضرورت نہیں تھی** — dashboard کا `body::before` سائٹ سے بائٹ بہ بائٹ یکساں ہے (`--grid-size: 32px`)؛ چلتی ہوئی instance پر نظر آنے والا کوئی بھی "بڑا گرڈ" پرانی pre-`#4143` build ہے، code نہیں۔ `tests/unit/design-grid-background.test.ts` (مرحلہ 6 block) کے ذریعے محفوظ کیا گیا۔
-
----
-
-## 9. دائرۂ کار سے باہر / خطرات
-
-- **پیلیٹ میں کوئی تبدیلی نہیں** — رنگ پہلے ہی مطابقت رکھتے ہیں؛ ہم صرف غائب ٹوکنز شامل کریں گے۔ پروڈکٹ کے رنگ تبدیل ہونے کا کوئی خطرہ نہیں۔
-- **تھیم انجن میں کوئی تبدیلی نہیں** — `.dark` + Zustand اسٹور برقرار رکھیں۔
-- **ریڈیئس کی تبدیلی (مرحلہ 2) وسیع ہے** — یہ ہر کارڈ/بٹن/ان پٹ کو متاثر کرتی ہے؛ مرج کرنے سے پہلے مصروف اسکرینز (ٹیبلز، موڈلز) کا بصری جائزہ لیں۔
-- **ٹیبلز (C3)** میں سب سے زیادہ ہارڈ کوڈڈ اسٹائلنگ اور ریگریشن کا سب سے وسیع امکان ہے — انہیں ان کی اپنی PR میں الگ رکھیں۔
-
----
-
-## 10. حوالہ جاتی اشاریہ
-
-| حصہ                             | پاتھ                                                                                                                 |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| ڈیش بورڈ ٹوکنز                  | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| تھیم اسٹور                      | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| پینل شیل (گرڈ یہاں اَن بلاک ہے) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| کروم                            | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| گرڈ کی نظیر                     | `src/app/landing/page.tsx:16-26`                                                                                     |
-| بنیادی اجزا                     | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| اسٹیٹس رنگ کے ذرائع             | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` یوٹیلٹی                    | `src/shared/utils/cn.ts`                                                                                             |
-| مرحلہ 1 گارڈ ٹیسٹ               | `tests/unit/design-grid-background.test.ts`                                                                          |
-| سائٹ کا حوالہ                   | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — token bridge، `.dark` overrides، OmniRoute کی `@layer components` extensions
+- `packages/ui-kit/UPSTREAM.md` — pin شدہ upstream commit اور license authorization؛ `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`، `packages/ui-kit/src/ci-ui.css`، `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` اور اس کے ساتھ موجود adapters؛ `src/shared/components/layouts/DashboardShell.tsx`،
+  `src/shared/components/Sidebar.tsx`، `src/shared/components/Header.tsx`، `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`، `src/shared/constants/iconMap.ts`، `scripts/dev/gen-icon-map.mjs`،
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`، `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`، `src/shared/constants/appConfig.ts`، `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`، `tests/unit/dashboard-kit-sweep.test.ts`،
+  `tests/unit/icon-map-coverage.test.ts`، `tests/unit/icon-map-object-values.test.ts`،
+  `tests/unit/brand-pages-static.test.ts`، `tests/unit/ui/adapters/*.test.tsx`

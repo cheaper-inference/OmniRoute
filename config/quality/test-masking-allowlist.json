@@ -268,6 +268,10 @@
     "@omniroute/opencode-plugin/tests/auto-combo-context.test.ts": {
       "replacement": "@omniroute/opencode-plugin/tests/no-auto-combos-fetch.test.ts",
       "reason": "the v1 plugin no longer fetches /api/combos/auto on refresh; the retired mapper under test is removed with its source, and the replacement pins no-fetch plus as-served auto entries."
+    },
+    "tests/unit/dashboard/material-icons-self-hosted.test.ts": {
+      "replacement": "tests/unit/material-symbols-removed.test.ts",
+      "reason": "KEA-7886 F4 (commit 2fc4c91e, Keak CI UI Kit migration): the Material Symbols icon font and its npm package were dropped from the dashboard, so the #3695 guard that pinned the self-hosted font import no longer has a subject. The same commit added tests/unit/material-symbols-removed.test.ts, which pins the inverse contract (no material-symbols import, no Google Fonts CDN preconnect) and is the replacement for this guard."
     }
   },
   "tests/unit/catalog-updates-v3x.test.ts": "v3.8.45 #6248: fix(providers) remove deprecated MiMo V2 entries — os 5 asserts removidos pinavam specs de modelos mimo-v2-* que deixaram de existir no catálogo (54→49). Asserts seguem a remoção dos modelos, não enfraquecimento. Verificado legítimo. Prune após v3.8.45 mergear para main.",

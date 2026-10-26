@@ -2509,6 +2509,10 @@
     "selectAtLeastOneConnection": "Select at least one connection or choose All connections.",
     "allConnectionsDesc": "This key can use any active connection.",
     "restrictedToConnections": "Restricted to {count, plural, one {# connection} other {# connections}}.",
+    "preferredConnections": "Preferred connections",
+    "preferredConnectionsDesc": "Per-key priority order. If a preferred connection is unavailable, routing falls back to the next eligible one.",
+    "preferredConnectionsNone": "No preference set — the default routing strategy is used.",
+    "preferredConnectionsClear": "Clear",
     "removeSelection": "Remove {name}"
   },
   "auditLog": {
@@ -3955,6 +3959,7 @@
     "builderComboRefStep": "Add combo reference",
     "builderPinnedAccount": "Pinned Account",
     "builderLegacyEntry": "Legacy entry",
+    "builderStaleModel": "Not in live catalog",
     "reviewName": "Name",
     "reviewStrategy": "Strategy",
     "reviewSteps": "Steps",
@@ -7279,7 +7284,7 @@
       "nextSwitchNow": "Now",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -10321,7 +10326,11 @@
     "updatedShort": "Updated",
     "lastRefreshed": "Last refreshed",
     "providerQuota": "Provider Quota",
-    "providerQuotaHomeHint": "Live status across connected accounts"
+    "providerQuotaHomeHint": "Live status across connected accounts",
+    "claudeResetCreditDefaultTitle": "Claude limit reset",
+    "confirmRedeemClaudeResetCredit": "Redeeming immediately resets the eligible Claude usage limits and permanently consumes this credit.",
+    "claudeResetCreditsModalTitle": "Claude reset credits",
+    "claudeResetCreditsModalExplainer": "Available Claude reset credits and weekly session resets for this account."
   },
   "modals": {
     "waitingAuth": "Waiting for Authorization",
@@ -11559,7 +11568,7 @@
     "bulkImportNoValidEntries": "No valid entries found. Check the format and try again.",
     "bulkImportSuccess": "Import complete: {created} created, {updated} updated, {failed} failed",
     "bulkImportErrorLine": "Line {line}: {reason}",
-    "bulkImportMaxExceeded": "Maximum 100 proxies per import",
+    "bulkImportMaxExceeded": "Maximum {max} proxies per import",
     "bulkImportPreview": "Preview",
     "clearAssignment": "(clear assignment)",
     "bulkProxyAssignment": "Bulk Proxy Assignment",
@@ -11620,6 +11629,7 @@
     "poolSetAsideKindIpQuota429": "IP rate-limited (429)",
     "poolSetAsideKindSlow": "slow responses",
     "poolSetAsideKindGeoBlocked": "region-blocked (403/451)",
+    "poolSetAsideKindOperatorReported": "outage reported by operator",
     "poolSetAsideUntil": "Back in rotation {endsAt}",
     "poolSetAsideRepeat": "Set aside {count, plural, one {# time} other {# times}}",
     "poolUnknownAddress": "Unknown address",

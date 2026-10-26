@@ -482,56 +482,56 @@ Lẹ́yìn náà, pè é bí combo èyíkéyìí: `{"model":"fusion-panel","mess
 
 ## API
 
-**Kò sí endpoint `POST /api/combos/auto` tí a yà sọ́tọ̀** — ọ̀nà méjì ni a fi ń lo Auto-Combo:
+Kò sí **endpoint `POST /api/combos/auto` tí a yà sọ́tọ̀** — ọ̀nà méjì ni a fi ń lo Auto-Combo:
 
-1. **Àìsí-àtòjọ-ẹ̀rọ (a dámọ̀ràn rẹ̀):** Fi ìbéèrè ìparí ìfọ̀rọ̀wérọ̀ èyíkéyìí ránṣẹ́ pẹ̀lú `model: "auto"` tàbí `model: "auto/<variant>"`. Ilé-iṣẹ́ aláfojúṣe náà ń kọ combo náà fún ìbéèrè kọ̀ọ̀kan — kò nílò ìfipamọ́, kò sì nílò àwọn ìpè API.
+1. **Àìní-àtòpọ̀ (a dámọ̀ràn):** Fi ìbéèrè ìparí ìjíròrò èyíkéyìí ránṣẹ́ pẹ̀lú `model: "auto"` tàbí `model: "auto/<variant>"`. Factory aláfojúdi náà máa ń kọ combo náà fún ìbéèrè kọ̀ọ̀kan — kò nílò ìfipamọ́, bẹ́ẹ̀ ni kò nílò ìpè API.
 
-2. **Combo tí a fi pamọ́ pẹ̀lú `strategy: "auto"`:** Ṣẹ̀dá combo déédé kan nípasẹ̀ `POST /api/combos`, kí o sì ṣètò `strategy: "auto"` pẹ̀lú `config.auto.weights` / `config.auto.candidatePool`. Ẹ́ńjìnnì ìṣírò àmì kan náà ni a ń lò; a fi combo náà pamọ́ sínú `combos`, a sì lè tún un lò nípasẹ̀ ID.
+2. **Combo tí a fi pamọ́ pẹ̀lú `strategy: "auto"`:** Ṣẹ̀dá combo déédé kan nípasẹ̀ `POST /api/combos`, kí o sì ṣètò `strategy: "auto"` pẹ̀lú `config.auto.weights` / `config.auto.candidatePool`. Ẹ̀rọ ìṣírò àmì kan náà ni a máa ń lò; a máa fi combo náà pamọ́ sínú `combos`, a sì lè tún lò ó nípasẹ̀ ID.
 
-Fún ìṣàwárí, `GET /api/combos/auto` ń ṣàtòjọ gbogbo variant pẹ̀lú candidate pool tí a ti yanjú rẹ̀ àti `context_length` / `max_output_tokens` — iye MAX láàárín àwọn window candidate pool náà. Àwọn client (fún àpẹẹrẹ, plugin opencode) gbọ́dọ̀ kéde àwọn iye wọ̀nyí dípò `0`: context odo máa pa auto-compaction opencode patapata, èyí sì ń jẹ́ kí àwọn session máa tóbi títí di pé ìparẹ́ history ti gateway bá context jẹ́. Ó bófin mu láti kéde MAX nítorí pé àlẹ̀mọ́ context ti auto-combo ṣáájú ìdarí ń darí àwọn ìbéèrè tí ó tóbi jù lọ sí àwọn candidate tí window wọn tóbi.
+Fún ìṣàwárí, `GET /api/combos/auto` máa ń ṣe àtòjọ gbogbo variant pẹ̀lú àkójọpọ̀ olùdíje rẹ̀ tí a ti yanjú, àti `context_length` / `max_output_tokens` — iye MAX láàrín àwọn window àkójọpọ̀ olùdíje náà. Àwọn client (fún àpẹẹrẹ, plugin opencode) gbọ́dọ̀ polówó àwọn iye wọ̀nyí dípò `0`: context òdo máa ń pa ìṣopọ̀-àdáṣe opencode pátápátá, èyí á jẹ́ kí àwọn session máa dàgbà títí ìparẹ́ ìtàn gateway yóò fi ba context jẹ́. Ó láìléwu láti polówó MAX nítorí pé àlẹ̀mọ́-àkọ́kọ́ context auto-combo máa ń darí àwọn ìbéèrè tí ó tóbi jù lọ sí àwọn olùdíje tí wọ́n ní window ńlá.
 
 ```bash
-# Lílo àìsí-àtòjọ-ẹ̀rọ (láì ṣẹ̀dá combo)
+# Lílò àìní-àtòpọ̀ (kò sí ṣíṣẹ̀dá combo)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Combo auto tí a fi pamọ́ nípasẹ̀ endpoint combos déédé
+# Combo àdáṣe tí a fi pamọ́ nípasẹ̀ endpoint combo déédé
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Àwọn strategy router auto
+### Àwọn ọ̀nà router àdáṣe
 
 Àwọn combo `strategy: "auto"` tí a fi pamọ́ lè ṣètò `config.routerStrategy` (tàbí ti àtijọ́
 `config.auto.routerStrategy`) sí ọ̀kan lára àwọn wọ̀nyí:
 
-- `rules` — ìṣírò àmì tí a fi ìwọ̀n sí ní àìyẹsẹ̀
-- `score` — ń yan ìṣírò àmì oníwọ̀n tí a ṣètò tí ó ga jù lọ. Bí àmì bá dọ́gba pátápátá, ó ń pa
-  ètò candidate tí a ṣètò mọ́; `explorationRate` tó ti wà ń mú àpẹẹrẹ láti inú gbogbo pool tí a ṣe ní ipò.
-- `cost` / `eco` — provider tí ó ní ìlera tí ó sì din owó jù lọ
-- `latency` / `fast` — latency p95 tí ó kéré jù lọ pẹ̀lú ìjìyà fún àìgbẹ́kẹ̀lé
-- `sla-aware` / `sla` — fẹ́ràn àwọn candidate tí ó bá latency p95, ìwọ̀n àṣìṣe, àti àwọn
-  SLO iye owó àṣàyàn mu
+- `rules` — ìṣírò àmì olùwọ̀n àìyípadà
+- `score` — yan àmì olùwọ̀n tí a ti ṣètò tí ó ga jù lọ. Nígbà tí àmì bá dọ́gba pátápátá, a máa pa
+  ìtòlẹ́sẹẹsẹ olùdíje tí a ti ṣètò mọ́; `explorationRate` tó ti wà máa ń ṣe àyẹ̀wò láti inú gbogbo àkójọpọ̀ tí a ti tò.
+- `cost` / `eco` — provider tó dára jù lọ ní owó pẹ̀lú ìlera tó dára
+- `latency` / `fast` — latency p95 tó kéré jù lọ pẹ̀lú ìjìyà fún àìṣeégbẹ́kẹ̀lé
+- `sla-aware` / `sla` — fi àwọn olùdíje tí ó bá latency p95, ìwọ̀n àṣìṣe, àti àwọn
+  SLO iye owó àṣàyàn mu ṣáájú
 - `lkgp` — provider rere tí a mọ̀ gbẹ̀yìn ni àkọ́kọ́
-- `nadir` — béèrè lọ́wọ́ API ìpinnu ti [Nadir](https://getnadir.com) irú model inú pool tí
-  prompt náà nílò; ó nílò yíyan-láti-lò, ó sì máa ṣí sí `rules` bí ó bá kùnà
+- `nadir` — béèrè lọ́wọ́ API ìpinnu [Nadir](https://getnadir.com) irú model inú àkójọpọ̀ tí
+  prompt náà nílò; a gbọ́dọ̀ kọ́kọ́ yàn án, ó sì máa padà sí `rules` bí ó bá kùnà
 
-### Àwọn strategy router ní ẹ̀kúnrẹ́rẹ́
+### Àlàyé kíkún nípa àwọn ọ̀nà router
 
-Ẹ́ńjìnnì auto-combo ń pèsè àwọn ìmúṣẹ **RouterStrategy** 7 tí a lè so mọ́ ọn, tí
+Ẹ̀rọ auto-combo ń pèsè àwọn ìmúṣẹ **RouterStrategy** méje tí a lè so mọ́ ọn, tí
 o lè pààrọ̀ nípasẹ̀ `config.routerStrategy` (tàbí `config.auto.routerStrategy` ti àtijọ́).
-Strategy kọ̀ọ̀kan ń yan provider kan láti inú candidate pool, nípa lílo `RoutingContext`
-(irú iṣẹ́, àwọn àmì ìtọ́ka tool/vision, àfojúsùn token, policy SLA àṣàyàn, àti provider rere
-tí a mọ̀ gbẹ̀yìn tí ó jẹ́ àṣàyàn).
+Ọ̀nà kọ̀ọ̀kan máa ń yan provider kan láti inú àkójọpọ̀ olùdíje, nígbà tí a bá fún un ní `RoutingContext`
+(irú iṣẹ́, àwọn àmì-ìtọ́kasí tool/vision, ìṣírò token, ìlànà SLA àṣàyàn, àti
+provider rere tí a mọ̀ gbẹ̀yìn tí ó jẹ́ àṣàyàn).
 
-#### 1. `rules` (àìyẹsẹ̀) — ìṣírò àmì oníwọ̀n onífákítọ̀ 16
+#### 1. `rules` (àìyípadà) — ìṣírò àmì olùwọ̀n onífọ́kítà mẹ́rìndínlógún
 
-Ó yí ẹ́ńjìnnì ìṣírò àmì tó ti wà ká. Ó kọ́kọ́ yọ àwọn candidate circuit-breaker
-`OPEN` kúrò, lẹ́yìn náà ó ṣiṣẹ́ `scorePool()` pẹ̀lú irú iṣẹ́ lọ́wọ́lọ́wọ́ àti `getTaskFitness()`,
-ó sì yan provider tí àmì rẹ̀ ga jù lọ.
+Ó yí ẹ̀rọ ìṣírò àmì tó ti wà ká. Ó máa yọ àwọn olùdíje circuit-breaker
+`OPEN` kúrò, lẹ́yìn náà ó máa ṣiṣẹ́ `scorePool()` pẹ̀lú irú iṣẹ́ lọ́wọ́lọ́wọ́ àti `getTaskFitness()`,
+nípa yíyan provider tó ní àmì tó ga jù lọ.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -551,16 +551,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Àkókò láti lò ó**: Àìyẹsẹ̀. Lò ó nígbà tí o bá fẹ́ ìwọ̀ntúnwọ̀nsì tó dára láàárín gbogbo àwọn àmì.
+**Ìgbà láti lò ó**: Àìyípadà. Lò ó nígbà tí o bá fẹ́ ìwọ̀ntúnwọ̀nsì tó bójú mu láàrín gbogbo àwọn signal.
 
 **Orúkọ mìíràn**: `rules` (kò ní orúkọ mìíràn)
 
 ---
 
-#### 2. `cost` / `eco` — provider tí ó ní ìlera tí ó sì din owó jù lọ
+#### 2. `cost` / `eco` — provider tó dára jù lọ ní owó pẹ̀lú ìlera tó dára
 
-Ó ṣètò candidate pool nípasẹ̀ `costPer1MTokens` (láti kékeré sí ńlá), ó sì yan èyí tí ó din owó jù lọ.
-Ó kọ́kọ́ yọ àwọn candidate `OPEN` kúrò.
+Ó máa ń to àkójọpọ̀ olùdíje gẹ́gẹ́ bí `costPer1MTokens` (láti kékeré sí ńlá), ó sì yan èyí tó din owó jù lọ.
+Ó kọ́kọ́ yọ àwọn olùdíje `OPEN` kúrò.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -575,16 +575,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Àkókò láti lò ó**: Àwọn workload tí iye owó ṣe pàtàkì fún, batch processing, tàbí àwọn iṣẹ́ abẹ́lẹ̀.
+**Ìgbà láti lò ó**: Àwọn workload tó ṣọ́ra nípa iye owó, ìṣiṣẹ́ batch, tàbí àwọn iṣẹ́ abẹ́lẹ̀.
 
 **Àwọn orúkọ mìíràn**: `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — latency p95 tí ó kéré jù lọ pẹ̀lú ìjìyà fún àìgbẹ́kẹ̀lé
+#### 3. `latency` / `fast` — latency p95 tó kéré jù lọ pẹ̀lú ìjìyà fún àìṣeégbẹ́kẹ̀lé
 
-Ó ṣètò nípasẹ̀ `p95LatencyMs + (errorRate * 1000)`. Ìjìyà ìwọ̀n àṣìṣe náà ń rí i dájú pé
-a fi àwọn provider tí kò ṣeé gbẹ́kẹ̀lé sí ipò ìsàlẹ̀, kódà bí latency tí a yàn fún wọn bá kéré.
+Ó máa ń to wọ́n gẹ́gẹ́ bí `p95LatencyMs + (errorRate * 1000)`. Ìjìyà fún ìwọ̀n àṣìṣe máa ń rí i dájú pé
+a to àwọn provider tí kò ṣeé gbẹ́kẹ̀lé sí ìsàlẹ̀, bó tilẹ̀ jẹ́ pé latency tí wọ́n sọ pé wọ́n ní kéré.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -601,28 +601,28 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Àkókò láti lò ó**: Àwọn workload tí latency ṣe pàtàkì fún, bí ìfọ̀rọ̀wérọ̀ àkókò-gidi, autocomplete, tàbí
-àwọn olùrànlọ́wọ́ coding alábáṣepọ̀.
+**Ìgbà láti lò ó**: Àwọn workload tó ṣọ́ra nípa latency, bí ìjíròrò àkókò-gidi, autocomplete, tàbí
+àwọn olùrànlọ́wọ́ coding ìbánisọ̀rọ̀.
 
 **Àwọn orúkọ mìíràn**: `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — ìbámu SLO fún latency/àṣìṣe/iye owó
+#### 4. `sla-aware` / `sla` — ìbámu pẹ̀lú SLO latency/àṣìṣe/iye owó
 
-Ó ń fún candidate kọ̀ọ̀kan ní àmì ní ìbámu pẹ̀lú bí ó ṣe bá policy SLO tí a ṣètò mu tó:
+Ó máa ń fún olùdíje kọ̀ọ̀kan ní àmì gẹ́gẹ́ bí bí ó ṣe bá ìlànà SLO tí a ti ṣètò mu tó:
 
-| Ìfosiwewe       | Ìwọ̀n | Fọ́ọ̀mùlà                                           |
-| --------------- | ---- | ------------------------------------------------- |
-| Iye ìdádúró     | 35%  | `threshold / max(value, ε)`                       |
-| Iye àṣìṣe       | 35%  | `threshold / max(value, ε)`                       |
-| Iye ìlera       | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| Iye owó         | 10%  | `threshold / max(value, ε)` tàbí ìṣètò sí òdi     |
-| Iye ìdúróṣinṣin | 5%   | stddev ìdádúró tí a ṣètò sí òdi                   |
+| Ìfosiwewe           | Ìwọ̀n | Àgbékalẹ̀                                            |
+| ------------------- | ---- | --------------------------------------------------- |
+| Iye àmì ìdádúró     | 35%  | `threshold / max(value, ε)`                         |
+| Iye àmì àṣìṣe       | 35%  | `threshold / max(value, ε)`                         |
+| Iye àmì ìlera       | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)   |
+| Iye àmì iye owó     | 10%  | `threshold / max(value, ε)` tàbí ìṣe àṣewọn òdìkejì |
+| Iye àmì ìdúróṣinṣin | 5%   | ìyapa boṣewa ìdádúró tí a ṣe àṣewọn òdìkejì         |
 
-Nígbà tí `hardConstraints: true`, a máa to àwọn olùdíje ní pàtàkì gẹ́gẹ́ bí **iye ìrúfin**
-(bí wọ́n ṣe kọjá SLO èyíkéyìí tó), lẹ́yìn náà nípasẹ̀ àpapọ̀ iye. Bí bẹ́ẹ̀ kọ́, àpapọ̀
-iye nìkan ni a ó lò.
+Nígbà tí `hardConstraints: true`, a máa to àwọn olùdíje ní pàtàkì gẹ́gẹ́ bí **iye àmì ìrúfin**
+(bí wọ́n ṣe kọjá SLO èyíkéyìí tó), lẹ́yìn náà gẹ́gẹ́ bí iye àmì àpapọ̀. Bí bẹ́ẹ̀ kọ́, iye
+àmì àpapọ̀ nìkan ni.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -631,12 +631,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... ṣe iṣírò iye olùdíje kọ̀ọ̀kan ní ìbámu pẹ̀lú ìlànà: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... ṣe iṣírò iye àmì olùdíje kọ̀ọ̀kan sí ìlànà: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Àwọn ààyè SLA** (tí a ṣètò lórí àtòpọ̀ ìṣètò):
+**Àwọn ààyè SLA** (tí a ṣètò lórí àtúnṣe combo):
 
 ```json
 {
@@ -651,17 +651,17 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Ìgbà láti lò ó**: Àwọn ẹrù iṣẹ́ iṣelọpọ tó ní àwọn ààlà tó muna fún ìdádúró, ìwọ̀n àṣìṣe, tàbí ìnáwó.
+**Ìgbà tí o yẹ kí o lò ó**: Àwọn ẹrù iṣẹ́ production tó ní ìdádúró, ìwọ̀n àṣìṣe, tàbí ìṣúná iye owó tó muna.
 
-**Àwọn orúkọ àfirọ́pò**: `sla-aware`, `sla`
+**Àwọn orúkọ mìíràn**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — olùpèsè rere tí a mọ̀ gbẹ̀yìn ni àkọ́kọ́
+#### 5. `lkgp` — olupèsè rere tí a mọ̀ kẹ́yìn lákọ̀ọ́kọ́
 
-Ó kọ́kọ́ gbìyànjú **olùpèsè rere tí a mọ̀ gbẹ̀yìn** (tí a bá ṣètò rẹ̀), lẹ́yìn náà ó padà
-sí ọ̀nà `rules`. Ó wúlò fún dídúró mọ́ ìjókòó — olùpèsè kan náà ni yóò bójú tó
-àwọn ìbéèrè tó tẹ̀ lé e nínú ìjíròrò.
+Ó kọ́kọ́ gbìyànjú **olùpèsè rere tí a mọ̀ kẹ́yìn** (bí a bá ti ṣètò rẹ̀), lẹ́yìn náà ó yí padà sí
+ọgbọ́n `rules`. Ó wúlò fún dídì mọ́ session — olupèsè kan náà ló ń bójú tó
+àwọn ìbéèrè àfikún nínú ìjíròrò kan.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -682,27 +682,27 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Padà sí ọ̀nà rules
+    // Yí padà sí ọgbọ́n rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Ìgbà láti lò ó**: Àwọn ìjíròrò alápá-púpọ̀ níbi tí o ti fẹ́ kí olùpèsè kan náà bójú tó
-àwọn ìbéèrè tó tẹ̀ lé e (fún àpẹẹrẹ, fún ìpamọ́ àkókò, ìtẹ̀síwájú àyíká-ọ̀rọ̀, tàbí ìdúróṣinṣin iye owó).
+**Ìgbà tí o yẹ kí o lò ó**: Àwọn ìjíròrò ọlọ́pọ̀ ìpele níbi tí o ti fẹ́ kí olupèsè kan náà bójú tó
+àwọn ìbéèrè àfikún (fún àpẹẹrẹ, fún caching, ìtẹ̀síwájú àyíká ọ̀rọ̀, tàbí ìbáramu iye owó).
 
-**Orúkọ àfirọ́pò**: `lkgp` (kò ní orúkọ àfirọ́pò)
+**Orúkọ mìíràn**: `lkgp` (kò ní orúkọ mìíràn)
 
 ---
 
 #### 6. `nadir` — yíyan model tó mọ prompt nípasẹ̀ Nadir
 
-Gbogbo ọ̀nà tó wà lókè máa ń ṣe ìpele àwọn olùdíje nípasẹ̀ telemetry tiwọn; kò sí èyíkéyìí nínú wọn tó máa ń ka
-ìbéèrè náà. `nadir` máa ń fi ìfiranṣẹ́ oníṣe tó gbẹ̀yìn àti àwọn model ids inú pool ránṣẹ́ sí
-API ìpinnu [Nadir](https://getnadir.com) (`POST /v1/bucket`), ó sì máa ń darí sí model
-tí Nadir yàn láti inú àkójọ yẹn (`simple` → model tó lágbára tó sì din owó jù, `complex` → èyí
-tó jẹ́ frontier). `rules` ṣì ni yóò yan àsopọ̀ tó ń pèsè model náà, kí quota,
-ìlera àti owó lè máa pinnu account tí a ó lò.
+Gbogbo ọgbọ́n tó wà lókè ń ṣe àgbékalẹ̀ àwọn olùdíje pẹ̀lú telemetry tiwọn; kò sí èyíkéyìí nínú wọn tó ń ka
+ìbéèrè náà. `nadir` ń fi ọ̀rọ̀ olumulo tó ṣẹ̀ṣẹ̀ parí àti àwọn ID model inú pool ránṣẹ́ sí
+API ìpinnu [Nadir](https://getnadir.com) (`POST /v1/bucket`), ó sì ń darí sí model
+tí Nadir yàn láti inú àkójọ yẹn (`simple` → model tó din owó jù tó sì lágbára tó, `complex` → model
+frontier náà). `rules` ṣì ni yóò yan ìsopọ̀ tó ń pèsè model yẹn, nítorí náà quota,
+ìlera àti iye owó ṣì ń pinnu account tí a ó lò.
 
 ```json
 {
@@ -718,31 +718,34 @@ tó jẹ́ frontier). `rules` ṣì ni yóò yan àsopọ̀ tó ń pèsè model 
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` àti `OMNIROUTE_NADIR_BASE_URL` jẹ́ àwọn àṣàyàn ìpadà env fún àwọn
-string méjèèjì. `baseUrl` kàn nílò fún Nadir tí a gbàlejò fúnra ẹni (`/v1` ní ìparí jẹ́ ìtẹ́wọ́gbà).
-Àwọn ìpè tí kò ní key máa ń lọ sí ìpele aláìlórúkọ Nadir, èyí tí a fi òpin ìwọ̀n sí fún IP kọ̀ọ̀kan.
+`OMNIROUTE_NADIR_API_KEY` àti `OMNIROUTE_NADIR_BASE_URL` jẹ́ àwọn àṣàyàn env àfidípò fún àwọn
+string méjèèjì. `baseUrl` nílò fún Nadir tí a gbàlejò fúnra ẹni nìkan (a gba `/v1` tó wà ní ìparí).
+Àwọn ìpè tí kò ní key máa ń lọ sí ipele aláìlórúkọ ti Nadir, èyí tí a fi ààlà ìwọ̀n sí fún IP kọ̀ọ̀kan. Pẹ̀lú key kan
+([ṣẹ̀dá ọ̀kan](https://app.getnadir.com/dashboard/api-keys)), a máa ń kọ ìpinnu kọ̀ọ̀kan sínú
+dashboard Nadir rẹ. Fún ìṣètò àti ìjẹ́rìísí ní kíkún:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Ohun tó ń jáde kúrò nínú àpótí: ọ̀rọ̀ inú ìfiranṣẹ́ oníṣe tó gbẹ̀yìn (àwọn lẹ́tà 16k àkọ́kọ́), àwọn
-model ids olùdíje àti àmì channel `source: "omniroute"`. Kò sí system prompt, ìtàn, tools tàbí
+Ohun tí ó jáde kúrò nínú àpótí: ọ̀rọ̀ inú ìfiranṣẹ́ olumulo tó kẹ́yìn (àwọn àmì lẹ́tà 16k àkọ́kọ́), àwọn ID
+model olùdíje àti àmì channel `source: "omniroute"`. Kò sí system prompt, ìtàn, tools tàbí
 headers.
 
-Ìhùwàsí nígbà ìkùnà jẹ́ fail-open: timeout (àìyẹsẹ̀ 2000 ms), non-2xx, host tí kò ṣeé dé,
-ìdáhùn tí ìrísí rẹ̀ kò tọ́ tàbí yíyan tí kò sí nínú pool máa ń yọrí sí ìpinnu `rules`,
-a ó sì fi `NadirStrategy: fallback (…)` sí ìbẹ̀rẹ̀ ìdí náà. Lẹ́yìn ìpè tó kùnà,
-ọ̀nà náà máa fo nẹ́tíwọ́ọ̀kì fún 30 s, nítorí náà ìjáwọ́ máa ná timeout kan ní gbogbo 30 s dípò
-ọ̀kan fún ìbéèrè kọ̀ọ̀kan. Àwọn ìṣẹ̀lẹ̀ ìdarí máa ń jabo `strategy: "nadir"` nígbà tí Nadir bá ṣe
-àyàn náà ní tòótọ́ nìkan.
+Ìhùwàsí nígbà ìkùnà jẹ́ fail-open: timeout kan (àìyípadà jẹ́ 2000 ms), non-2xx kan, host tí a kò lè dé,
+ìdáhùn tí kò bófin mu tàbí yíyan tí kò sí nínú pool yóò yí padà sí ìpinnu `rules`,
+a ó sì fi `NadirStrategy: fallback (…)` sí ìbẹ̀rẹ̀ ìdí náà. Lẹ́yìn ìpè tó kùnà, ọgbọ́n náà
+kò ní lo network fún 30 s, nítorí náà ìdádúró iṣẹ́ yóò ná timeout kan ní gbogbo 30 s dípò
+ọ̀kan fún ìbéèrè kọ̀ọ̀kan. Àwọn ìṣẹ̀lẹ̀ routing máa ń jabo `strategy: "nadir"` nígbà tí Nadir bá ṣe
+ìyàn náà ní ti gidi nìkan.
 
-**Ìgbà láti lò ó**: ìrìnàjò olóríṣìíríṣìí ìpele ìṣòro lórí pool tó ní ọ̀pọ̀ ìpele model (model kékeré kan, ti àárín
-kan àti frontier kan), níbi tí lílo frontier ní gbogbo ìgbà jẹ́ ìnáwó tí o fẹ́ dín kù.
+**Ìgbà tí o yẹ kí o lò ó**: traffic tó ní onírúurú ìpele ìṣòro lórí pool tó ní onírúurú ipele model (model kékeré kan, ti àárín
+kan àti model frontier kan), níbi tí lílo frontier ní gbogbo ìgbà ti jẹ́ iye owó tí o fẹ́ dín kù.
 
-**Orúkọ àfirọ́pò**: `nadir` (kò ní orúkọ àfirọ́pò)
+**Orúkọ mìíràn**: `nadir` (kò ní orúkọ mìíràn)
 
 ---
 
-### Àwọn ọ̀nà router àdáni
+### Àwọn ọgbọ́n router àdáni
 
-O lè forúkọsílẹ̀ ìmúṣẹ `RouterStrategy` tirẹ nípasẹ̀ API gbogbogbò:
+O lè forúkọsílẹ̀ ìmúṣẹ `RouterStrategy` tirẹ nípasẹ̀ API gbogbo ènìyàn:
 
 ```ts
 import {
@@ -755,7 +758,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Lọ́gíìkì ìdarí rẹ wà níbí
+    // Àgbọ́wọlé routing rẹ wà níbí
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -783,18 +786,18 @@ Lẹ́yìn náà, lò ó:
 
 ---
 
-### Ìtọ́sọ́nà yíyan ọ̀nà router
+### Ìtọ́sọ́nà yíyan ọgbọ́n router
 
-| Ìlò                | Ọ̀nà         | Ìdí                                          |
-| ------------------ | ----------- | -------------------------------------------- |
-| Ẹrù iṣẹ́ tó dọ́gba   | `rules`     | Àìyẹsẹ̀ — ó ṣe àgbéyẹ̀wò gbogbo ìfosiwewe      |
-| Dín owó kù         | `cost`      | Ó máa ń yan èyí tó din owó jù ní gbogbo ìgbà |
-| Dín ìdádúró kù     | `latency`   | Ó yan olùpèsè tó yára jù tó sì ṣeé gbẹ́kẹ̀lé   |
-| Àwọn SLO tó muna   | `sla-aware` | Ó ṣe àlẹ̀mọ́ nípasẹ̀ àwọn ààlà p95/àṣìṣe/owó    |
-| Ìjíròrò alápá-púpọ̀ | `lkgp`      | Dídúró mọ́ ìjókòó                             |
-| Ìṣòro adalu        | `nadir`     | Ó yan ìpele model fún prompt kọ̀ọ̀kan          |
+| Ọ̀ràn ìlò              | Ìlànà       | Ìdí                                           |
+| --------------------- | ----------- | --------------------------------------------- |
+| Ẹrù iṣẹ́ tó dọ́gba      | `rules`     | Àìyípadà — ó gbé gbogbo kókó yẹ̀ wò            |
+| Dín ìnáwó kù          | `cost`      | Ó máa ń yan èyí tó din owó jù nígbà gbogbo    |
+| Dín àkókò ìdádúró kù  | `latency`   | Ó yan olùpèsè tó yára jù tí ó sì ṣeé gbẹ́kẹ̀ lé |
+| Àwọn SLO tó muna      | `sla-aware` | Ó ń ṣe àlẹ̀mọ́ nípasẹ̀ àwọn ààlà p95/àṣìṣe/ìnáwó |
+| Ìfọ̀rọ̀wérọ̀ ọlọ́pọ̀-ìpele | `lkgp`      | Dídúró mọ́ olùpèsè kan jálẹ̀ sáà                |
+| Ìṣòro onírúurú        | `nadir`     | Ó yan ìpele awoṣe fún ìbéèrè kọ̀ọ̀kan           |
 
-Àwọn ààyè SLA:
+Àwọn ààyè tó mọ SLA sí:
 
 ```json
 {
