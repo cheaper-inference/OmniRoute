@@ -650,7 +650,9 @@ export function getCachedClaudeQuotaScopeDecision(input: {
   if (matchingWindows.length > 0) {
     return (
       decisionForLatestClaudeReset(matchingWindows, "model", now) ??
-      BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA
+      (modelCreditEntitlement
+        ? MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT
+        : BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA)
     );
   }
 
