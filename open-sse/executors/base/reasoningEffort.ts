@@ -65,6 +65,7 @@ export const O1_O3_REASONING_MODELS_PATTERN = /(?:^|\/|\b)(?:o1-mini|o1|o3-mini|
 export const O1_PREVIEW_PATTERN = /(?:^|\/|\b)o1-preview(?:$|-)/i;
 export const MUSE_SPARK_PATTERN = /(?:^|\/|\b)muse-spark/i;
 export const MINIMAX_REASONING_PATTERN = /(?:^|\/|\b)minimax(?:-m3|-m2)/i;
+export const MINIMAX_M31_PATTERN = /(?:^|\/|\b)minimax-m3\.1(?:-|\b)/i;
 export const GROK_45_PATTERN = /(?:^|\/|\b)grok-4\.5/i;
 export const GROK_46_PATTERN = /(?:^|\/|\b)grok-4\.6/i;
 export const GLM_53_FAMILY_PATTERN = /(?:^|\/|\b)glm-5\.3(?:$|-)/i;
@@ -451,9 +452,19 @@ export function sanitizeReasoningEffortForProvider(
   // ── MiniMax models ───────────────────────────────────────────────────────
   // Accepts none|minimal|low|medium|high. Clamp xhigh/max/ultra → high.
   if (MINIMAX_REASONING_PATTERN.test(modelStr)) {
-    // MiniMax M3.1 Flash explicitly supports the full graduated effort
-    // vocabulary, including xhigh and max.
-    if (/(?:^|\/|\b)minimax-m3\.1(?:-|\b)/i.test(modelStr)) return body;
+    // MiniMax M3.1 Flash accepts the full graduated vocabulary up to max
+    // (registry: low..max + supportsXHighEffort), so xhigh/max pass through.
+    // Only ultra, which it does not declare, is clamped to its max ceiling.
+    if (MINIMAX_M31_PATTERN.test(modelStr)) {
+      if (effortStr === "ultra") {
+        log?.info?.(
+          "REASONING_SANITIZE",
+          `${provider}/${modelStr}: clamped reasoning_effort ultra → max (MiniMax M3.1 ceiling)`
+        );
+        return writeEffortValue(b, "max", c);
+      }
+      return body;
+    }
     if (effortStr === "xhigh" || effortStr === "max" || effortStr === "ultra") {
       log?.info?.(
         "REASONING_SANITIZE",

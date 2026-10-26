@@ -10,6 +10,12 @@ export const minimax_cnProvider: RegistryEntry = {
   authType: "apikey",
   authHeader: "bearer",
   models: [
+    // Keep parity with minimax to ensure model discovery works for minimax-cn connections.
+    // #3110: MiniMax M3 — frontier coding model with 1M context
+    { id: "MiniMax-M3", name: "MiniMax M3", contextLength: 1048576, supportsVision: true },
+    // MiniMax M3.1 Flash (2026-10-19): 1M context, tunable thinking depth
+    // (https://platform.minimax.io/docs/guides/models-intro). Kept after M3 on purpose:
+    // the first entry is the provider default.
     {
       id: "MiniMax-M3.1-Flash",
       name: "MiniMax M3.1 Flash",
@@ -20,16 +26,6 @@ export const minimax_cnProvider: RegistryEntry = {
       supportsXHighEffort: true,
       supportsVision: true,
       supportsVideo: true,
-    },
-    // Keep parity with minimax to ensure model discovery works for minimax-cn connections.
-    // #3110: MiniMax M3 — frontier coding model with 1M context
-    {
-      id: "MiniMax-M3",
-      name: "MiniMax M3",
-      contextLength: 1_000_000,
-      supportsVision: true,
-      supportsVideo: true,
-      supportedThinkingEfforts: ["adaptive", "disabled"],
     },
     { id: "MiniMax-M2.7", name: "MiniMax M2.7" },
     { id: "MiniMax-M2.7-highspeed", name: "MiniMax M2.7 Highspeed" },

@@ -2,9 +2,7 @@
  * Pricing data — regional family (China + other regional providers (incl. GLM/Zhipu)).
  * Pure data; merged by default-pricing.ts via spread (god-file decomposition; semantic split).
  */
-import {
-  GLM_PRICING,
-} from "./shared-tiers";
+import { GLM_PRICING } from "./shared-tiers";
 
 export const DEFAULT_PRICING_REGIONAL = {
   glm: GLM_PRICING,
@@ -71,6 +69,10 @@ export const DEFAULT_PRICING_REGIONAL = {
     "kimi-latest": { input: 1.0, output: 4.0, cached: 0.5, reasoning: 6.0, cache_creation: 1.0 },
   },
   minimax: {
+    // Source for the M3.1 Flash and M3 rows (USD per 1M tokens, pay-as-you-go):
+    // https://platform.minimax.io/docs/guides/pricing — M3.1 Flash is flat 0.15 / 0.60 /
+    // cache read 0.015; M3 is 0.30 / 1.20 / 0.06 up to 512k input tokens (0.60 / 2.40 / 0.12
+    // above it; this table keeps the base tier).
     "minimax-m3.1-flash": {
       input: 0.15,
       output: 0.6,
@@ -81,8 +83,7 @@ export const DEFAULT_PRICING_REGIONAL = {
       output: 0.6,
       cached: 0.015,
     },
-    // MiniMax M3 — new default model (upstream upgrade from M2.7).
-    // Same api.minimax.io endpoint; pricing mirrors the M2.x base tier.
+    // MiniMax M3 — default model (upstream upgrade from M2.7), base tier (<= 512k input).
     "minimax-m3": {
       input: 0.3,
       output: 1.2,
