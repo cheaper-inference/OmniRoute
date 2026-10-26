@@ -420,6 +420,53 @@ function bodyHasAnyCacheControl(body: ClaudeRequestBody): boolean {
   return false;
 }
 
+/** Prompt-cache rescue for the pure claude→claude passthrough branch
+ * (chatCore passthrough-trust): marker-less Anthropic-format clients (e.g.
+ * Cursor) ship zero cache breakpoints through passthrough, re-billing the full
+ * prefix every turn. Injects breakpoints ONLY when the body carries none
+ * anywhere — a client that manages its own markers (Claude Code) is returned
+ * byte-untouched. Placement mirrors the standard heuristic:
+ *   - system tail: 1h breakpoint (system prompt changes rarely)
+ *   - second-to-last user turn + last assistant turn: plain ephemeral
+ *     breakpoints on the stable rolling prefix (the last user turn stays
+ *     unmarked — it is the working set and would invalidate on every turn).
+ * Mutates in place and returns the same body reference. */
+export function ensurePassthroughCacheBreakpoints(body: ClaudeRequestBody): ClaudeRequestBody {
+  // Client already manages its cache markers — must stay byte-untouched.
+  if (bodyHasAnyCacheControl(body)) return body;
+
+  // Normalize string content to block arrays up front so markers attach to
+  // blocks and the passthrough body keeps one consistent shape.
+  const messages = Array.isArray(body.messages) ? body.messages : [];
+  for (const msg of messages) {
+    ensureMessageContentArray(msg);
+  }
+
+  if (Array.isArray(body.system) && body.system.length > 0) {
+    const tail = body.system[body.system.length - 1];
+    if (tail && typeof tail === "object") {
+      tail.cache_control = { type: "ephemeral", ttl: "1h" };
+    }
+  }
+
+  const userTurnIndices: number[] = [];
+  let lastAssistantIndex = -1;
+  for (let i = 0; i < messages.length; i++) {
+    const role = messages[i]?.role;
+    if (role === "user") userTurnIndices.push(i);
+    else if (role === "assistant") lastAssistantIndex = i;
+  }
+
+  if (userTurnIndices.length >= 2) {
+    markMessageCacheControl(messages[userTurnIndices[userTurnIndices.length - 2]]);
+  }
+  if (lastAssistantIndex >= 0) {
+    markMessageCacheControl(messages[lastAssistantIndex]);
+  }
+
+  return body;
+}
+
 // Prepare request for Claude format endpoints
 // - Cleanup cache_control (unless preserveCacheControl=true for passthrough)
 // - Filter empty messages

@@ -14,7 +14,7 @@
 import { shouldUseMidConversationSystem } from "../../executors/claudeIdentity.ts";
 import { ensureCacheControlOnLastUserMessage } from "../../services/claudeCodeConstraints.ts";
 import { hoistDeferredToolsForTarget } from "../../translator/helpers/claudeDeferredTools.ts";
-import { splitMisplacedToolResults } from "../../translator/helpers/claudeHelper.ts";
+import { splitMisplacedToolResults, ensurePassthroughCacheBreakpoints } from "../../translator/helpers/claudeHelper.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { sanitizeAnthropicPassthroughHistory } from "./anthropicPassthroughHistory.ts";
 import {
@@ -112,6 +112,18 @@ export function buildClaudePassthroughBody({
     normalizeClaudeUpstreamMessages(translatedBody, {
       preserveToolResultBlocks: targetFormat === FORMATS.CLAUDE,
     });
+    // Marker-less Anthropic clients (e.g. Cursor) ship zero cache
+    // breakpoints through pure passthrough, re-billing the full prefix
+    // every turn (678M uncached prompt tokens/week observed). Inject the
+    // standard breakpoints ONLY when the body carries none anywhere —
+    // a client that manages its own markers stays byte-untouched.
+    // Anthropic-native upstreams only: third-party Claude-shape providers
+    // have their own (or no) caching semantics.
+    const providerSupportsCaching =
+      provider === "claude" || provider.startsWith("anthropic-compatible-");
+    if (providerSupportsCaching) {
+      ensurePassthroughCacheBreakpoints(translatedBody);
+    }
   }
 
   log?.debug?.("FORMAT", `claude passthrough (preserveCache=${preserveCacheControl})`);
