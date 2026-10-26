@@ -1,0 +1,1 @@
+- **feat(providers):** add 1-click local CLI/IDE import modal for Antigravity ([#18181](https://github.com/cheaper-inference/OmniRoute/pull/18181)) — thanks @ziuus

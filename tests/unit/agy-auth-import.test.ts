@@ -4,6 +4,8 @@ import assert from "node:assert/strict";
 import {
   parseAndValidateAgyToken,
   detectLocalAgyTokenRaw,
+  getAntigravityIdeDbCandidates,
+  readAntigravityAuthStatusFromDb,
   AgyAuthFileError,
 } from "../../src/lib/oauth/utils/agyAuthImport.ts";
 
@@ -96,6 +98,80 @@ test("detectLocalAgyTokenRaw honors AGY_TOKEN_FILE environment override", async 
     assert.equal(parsed.refreshToken, REFRESH);
   } finally {
     process.env.AGY_TOKEN_FILE = prevEnv;
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test("getAntigravityIdeDbCandidates returns cross-platform paths", () => {
+  const darwinPaths = getAntigravityIdeDbCandidates("darwin", {}, "/Users/testuser");
+  assert.equal(darwinPaths.length, 2);
+  assert.ok(
+    darwinPaths[0].includes("Library/Application Support/Antigravity/User/globalStorage/state.vscdb")
+  );
+  assert.ok(
+    darwinPaths[1].includes("Library/Application Support/Antigravity IDE/User/globalStorage/state.vscdb")
+  );
+
+  const winPaths = getAntigravityIdeDbCandidates(
+    "win32",
+    { APPDATA: "C:\\Users\\testuser\\AppData\\Roaming" },
+    "C:\\Users\\testuser"
+  );
+  assert.equal(winPaths.length, 2);
+  assert.ok(winPaths[0].includes("AppData\\Roaming\\Antigravity\\User\\globalStorage\\state.vscdb"));
+
+  const linuxPaths = getAntigravityIdeDbCandidates("linux", {}, "/home/testuser");
+  assert.equal(linuxPaths.length, 2);
+  assert.ok(linuxPaths[0].includes(".config/Antigravity/User/globalStorage/state.vscdb"));
+  assert.ok(linuxPaths[1].includes(".config/Antigravity IDE/User/globalStorage/state.vscdb"));
+});
+
+test("readAntigravityAuthStatusFromDb extracts auth status from SQLite DB", async () => {
+  const fs = await import("fs/promises");
+  const os = await import("os");
+  const path = await import("path");
+  const Database = (await import("better-sqlite3")).default;
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "agy-db-test-"));
+  const dbPath = path.join(tmpDir, "state.vscdb");
+  const db = new Database(dbPath);
+  db.exec("CREATE TABLE ItemTable (key TEXT PRIMARY KEY, value TEXT)");
+  db.prepare("INSERT INTO ItemTable VALUES (?, ?)").run(
+    "antigravityAuthStatus",
+    JSON.stringify({ apiKey: "db-secret-key-123", email: "ide@example.com" })
+  );
+  db.close();
+
+  try {
+    const rawStatus = await readAntigravityAuthStatusFromDb(dbPath);
+    assert.ok(rawStatus);
+    const parsed = JSON.parse(rawStatus);
+    assert.equal(parsed.apiKey, "db-secret-key-123");
+    assert.equal(parsed.email, "ide@example.com");
+  } finally {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test("readAntigravityAuthStatusFromDb returns null on missing DB or missing key", async () => {
+  const fs = await import("fs/promises");
+  const os = await import("os");
+  const path = await import("path");
+  const Database = (await import("better-sqlite3")).default;
+
+  const nonExistent = await readAntigravityAuthStatusFromDb("/no/such/state.vscdb");
+  assert.equal(nonExistent, null);
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "agy-db-empty-"));
+  const dbPath = path.join(tmpDir, "state.vscdb");
+  const db = new Database(dbPath);
+  db.exec("CREATE TABLE ItemTable (key TEXT PRIMARY KEY, value TEXT)");
+  db.close();
+
+  try {
+    const missingKey = await readAntigravityAuthStatusFromDb(dbPath);
+    assert.equal(missingKey, null);
+  } finally {
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
 });
