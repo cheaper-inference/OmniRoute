@@ -137,6 +137,13 @@ test("PATCH route and API Manager wire the key policy end to end", () => {
     "src/app/(dashboard)/dashboard/api-manager/[id]/access/tabs/CombosTab.tsx"
   );
   assert.ok(combosTab.includes("ApiKeyCcDiscoveryAliasesToggle"));
+  // Same shared kit Toggle as ApiKeyAutoCombosToggle, not a hand-rolled switch.
+  const toggle = read(
+    "src/app/(dashboard)/dashboard/api-manager/components/ApiKeyCcDiscoveryAliasesToggle.tsx"
+  );
+  assert.match(toggle, /import Toggle from "@\/shared\/components\/Toggle"/);
+  assert.match(toggle, /<Toggle[\s\S]*?checked=\{enabled\}/);
+  assert.doesNotMatch(toggle, /material-symbols-outlined|role="switch"/);
   assert.ok(form.includes("apiKey?.allowCcDiscoveryAliases !== false"));
   assert.match(form, /allowCcDiscoveryAliases: formState\.allowCcDiscoveryAliases/);
 
