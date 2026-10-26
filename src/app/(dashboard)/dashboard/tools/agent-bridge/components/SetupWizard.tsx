@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Checkbox from "@/shared/components/Checkbox";
+import Icon from "@/shared/components/Icon";
+import Modal from "@/shared/components/Modal";
 import type { AgentStateEntry, AgentBridgeServerState } from "../AgentBridgePageClient";
 import type { MitmTargetView } from "@/mitm/types";
 
@@ -44,20 +48,11 @@ export function SetupWizard({
   onMappingsSave,
 }: SetupWizardProps) {
   const t = useTranslations("agentBridge");
-  const tc = useTranslations("common");
   const [step, setStep] = useState<Step>("verify");
   const [enablingDns, setEnablingDns] = useState(false);
   const [detectedModels, setDetectedModels] = useState<string[]>([]);
   const [loadingModels, setLoadingModels] = useState(false);
   const [selectedModels, setSelectedModels] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [onClose]);
 
   // Fetch detected models when we reach the mappings step
   useEffect(() => {
@@ -140,261 +135,211 @@ export function SetupWizard({
 
   const stepIndex = steps.findIndex((s) => s.id === step);
 
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="w-full max-w-lg rounded-xl border border-border/60 bg-card shadow-xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/30">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[20px]" style={{ color: target.color }}>
-              {target.icon}
-            </span>
-            <div>
-              <h3 className="text-sm font-semibold text-text-main">
-                {t("wizardTitle")} — {target.name}
-              </h3>
-              <p className="text-xs text-text-muted">{t("wizardSubtitle")}</p>
-            </div>
-          </div>
-          <button type="button" onClick={onClose} aria-label={tc("close")}>
-            <span className="material-symbols-outlined text-[18px] text-text-muted hover:text-text-main">
-              close
-            </span>
-          </button>
-        </div>
+  const footer = (
+    <div className="flex w-full items-center justify-between gap-2">
+      <Button
+        variant="outline"
+        onClick={() => {
+          if (step === "dns") setStep("verify");
+          else if (step === "mappings") setStep("dns");
+          else onClose();
+        }}
+      >
+        {step === "verify" ? t("cancel") : t("back")}
+      </Button>
 
-        {/* Step indicator */}
-        <div className="flex px-5 pt-4 gap-2">
-          {steps.map((s, i) => (
-            <div key={s.id} className="flex items-center gap-1.5 flex-1">
-              <div
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium shrink-0 ${
-                  i < stepIndex
-                    ? "bg-emerald-500 text-white"
-                    : i === stepIndex
-                      ? "bg-primary text-white"
-                      : "bg-surface text-text-muted border border-border/50"
-                }`}
-              >
-                {i < stepIndex ? (
-                  <span className="material-symbols-outlined text-[12px]">check</span>
-                ) : (
-                  i + 1
-                )}
-              </div>
-              <span
-                className={`text-xs ${i === stepIndex ? "text-text-main font-medium" : "text-text-muted"}`}
-              >
-                {s.label}
-              </span>
-              {i < steps.length - 1 && <div className="flex-1 h-px bg-border/30 ml-1" />}
-            </div>
+      <div className="flex gap-2">
+        {step === "verify" && (
+          <Button variant="primary" iconRight="arrow_forward" onClick={() => setStep("dns")}>
+            {t("next")}
+          </Button>
+        )}
+
+        {step === "dns" &&
+          (dnsEnabled ? (
+            <Button variant="primary" onClick={() => setStep("mappings")}>
+              {t("next")}
+            </Button>
+          ) : (
+            <Button variant="primary" onClick={handleEnableDns} disabled={enablingDns}>
+              {enablingDns ? t("enablingDns") : t("wizardEnableDns")}
+            </Button>
           ))}
-        </div>
 
-        {/* Step content */}
-        <div className="px-5 py-5 flex flex-col gap-4 min-h-[180px]">
-          {step === "verify" && (
-            <div className="flex flex-col gap-3">
-              <p className="text-sm text-text-muted">{t("wizardStep1Desc")}</p>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <span
-                    className={`material-symbols-outlined text-[16px] ${serverRunning ? "text-emerald-500" : "text-red-500"}`}
-                  >
-                    {serverRunning ? "check_circle" : "cancel"}
-                  </span>
-                  <span>
-                    {t("wizardServerCheck")}{" "}
-                    {serverRunning ? t("wizardRunning") : t("wizardNotRunning")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <span
-                    className={`material-symbols-outlined text-[16px] ${certTrusted ? "text-emerald-500" : "text-amber-500"}`}
-                  >
-                    {certTrusted ? "verified_user" : "warning"}
-                  </span>
-                  <span>
-                    {t("wizardCertCheck")}{" "}
-                    {certTrusted ? t("wizardTrusted") : t("wizardNotTrusted")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Tutorial steps */}
-              {target.setupTutorial.steps.length > 0 && (
-                <div className="mt-2 p-3 rounded-lg bg-surface/50 border border-border/30">
-                  <p className="text-xs font-medium text-text-muted mb-2">
-                    {t("wizardTutorialTitle")}
-                  </p>
-                  <ol className="flex flex-col gap-1">
-                    {target.setupTutorial.steps.map((step, i) => (
-                      <li key={i} className="text-xs text-text-muted flex items-start gap-1.5">
-                        <span className="shrink-0 text-primary font-medium">{i + 1}.</span>
-                        {step}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-            </div>
-          )}
-
-          {step === "dns" && (
-            <div className="flex flex-col gap-3">
-              <p className="text-sm text-text-muted">{t("wizardStep2Desc")}</p>
-              <div className="rounded-lg bg-surface/50 border border-border/30 p-3 font-mono text-xs flex flex-col gap-1">
-                {target.hosts.map((host) => (
-                  <div key={host} className="text-text-muted">
-                    <span className="text-primary">127.0.0.1</span> {host}
-                  </div>
-                ))}
-              </div>
-              {dnsEnabled && (
-                <div className="flex items-center gap-2 text-sm text-emerald-500">
-                  <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                  {t("wizardDnsAlreadyEnabled")}
-                </div>
-              )}
-            </div>
-          )}
-
-          {step === "mappings" && (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2 text-emerald-500">
-                <span className="material-symbols-outlined text-[20px]">check_circle</span>
-                <p className="text-sm font-medium">{t("wizardStep3Success")}</p>
-              </div>
-
-              {loadingModels ? (
-                <div className="flex items-center gap-2 text-sm text-text-muted">
-                  <span className="material-symbols-outlined text-[16px] animate-spin">
-                    progress_activity
-                  </span>
-                  Detecting models from intercepted traffic...
-                </div>
-              ) : detectedModels.length > 0 ? (
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm text-text-muted">
-                    Found {detectedModels.length} model{detectedModels.length !== 1 ? "s" : ""} in
-                    intercepted traffic. Select the ones you want to add:
-                  </p>
-                  <div className="rounded-lg border border-border/40 bg-surface p-3 flex flex-col gap-2 max-h-[200px] overflow-y-auto">
-                    {detectedModels.map((model) => (
-                      <label
-                        key={model}
-                        className="flex items-center gap-2 cursor-pointer hover:bg-surface/50 p-2 rounded transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedModels.has(model)}
-                          onChange={() => toggleModelSelection(model)}
-                          className="rounded border-border/50 text-primary focus:ring-2 focus:ring-primary/50"
-                        />
-                        <span className="font-mono text-xs text-text-main">{model}</span>
-                      </label>
-                    ))}
-                  </div>
-                  {selectedModels.size > 0 && (
-                    <p className="text-xs text-text-muted">
-                      {selectedModels.size} model{selectedModels.size !== 1 ? "s" : ""} selected.
-                      You&apos;ll map them to OmniRoute models in the next screen.
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="rounded-lg border border-border/40 bg-surface/30 p-3">
-                  <p className="text-sm text-text-muted">
-                    No models detected yet. Use {target.name} to make a request, then run this
-                    wizard again to auto-detect models from traffic.
-                  </p>
-                  <p className="text-xs text-text-muted mt-2">
-                    Or close this wizard and add mappings manually in the agent card.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-5 pb-5 pt-0 border-t border-border/30 mt-0 pt-4">
-          <button
-            type="button"
-            onClick={() => {
-              if (step === "dns") setStep("verify");
-              else if (step === "mappings") setStep("dns");
-              else onClose();
-            }}
-            className="rounded-lg border border-border/50 bg-card px-4 py-2 text-sm text-text-muted hover:bg-surface transition-colors"
-          >
-            {step === "verify" ? t("cancel") : t("back")}
-          </button>
-
-          <div className="flex gap-2">
-            {step === "verify" && (
-              <button
-                type="button"
-                onClick={() => setStep("dns")}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
-              >
-                {t("next")}{" "}
-                <span className="material-symbols-outlined text-[14px] ml-1">arrow_forward</span>
-              </button>
-            )}
-
-            {step === "dns" && (
-              <>
-                {dnsEnabled ? (
-                  <button
-                    type="button"
-                    onClick={() => setStep("mappings")}
-                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
-                  >
-                    {t("next")}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleEnableDns}
-                    disabled={enablingDns}
-                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
-                  >
-                    {enablingDns ? t("enablingDns") : t("wizardEnableDns")}
-                  </button>
-                )}
-              </>
-            )}
-
-            {step === "mappings" && (
-              <>
-                {detectedModels.length > 0 && selectedModels.size > 0 ? (
-                  <button
-                    type="button"
-                    onClick={handleAddSelectedModels}
-                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
-                  >
-                    Add {selectedModels.size} model{selectedModels.size !== 1 ? "s" : ""}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-400 transition-colors"
-                  >
-                    {t("done")}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        </div>
+        {step === "mappings" &&
+          (detectedModels.length > 0 && selectedModels.size > 0 ? (
+            <Button variant="primary" icon="add" onClick={handleAddSelectedModels}>
+              {t("wizardAddModels", { count: selectedModels.size })}
+            </Button>
+          ) : (
+            <Button variant="primary" icon="check" onClick={onClose}>
+              {t("done")}
+            </Button>
+          ))}
       </div>
     </div>
+  );
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      size="lg"
+      footer={footer}
+      title={
+        <span className="flex items-center gap-3">
+          <span style={{ color: target.color }}>
+            <Icon name={target.icon} size={20} />
+          </span>
+          <span className="flex flex-col">
+            <span>
+              {t("wizardTitle")} — {target.name}
+            </span>
+            <span className="text-xs font-normal text-text-muted">{t("wizardSubtitle")}</span>
+          </span>
+        </span>
+      }
+    >
+      {/* Step indicator */}
+      <ol className="mb-5 flex gap-2" aria-label={t("wizardTitle")}>
+        {steps.map((s, i) => (
+          <li
+            key={s.id}
+            aria-current={i === stepIndex ? "step" : undefined}
+            className="flex flex-1 items-center gap-1.5"
+          >
+            <span
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
+                i < stepIndex
+                  ? "border border-success/40 bg-success-bg text-success"
+                  : i === stepIndex
+                    ? "bg-primary text-accent-foreground"
+                    : "border border-border bg-bg-subtle text-text-muted"
+              }`}
+            >
+              {i < stepIndex ? <Icon name="check" size={12} /> : i + 1}
+            </span>
+            <span
+              className={`text-xs ${i === stepIndex ? "font-medium text-text-main" : "text-text-muted"}`}
+            >
+              {s.label}
+            </span>
+            {i < steps.length - 1 && <span className="ml-1 h-px flex-1 bg-border" />}
+          </li>
+        ))}
+      </ol>
+
+      {/* Step content */}
+      <div className="flex min-h-[180px] flex-col gap-4">
+        {step === "verify" && (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-text-muted">{t("wizardStep1Desc")}</p>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-sm">
+                <Icon
+                  name={serverRunning ? "check_circle" : "cancel"}
+                  size={16}
+                  className={serverRunning ? "text-success" : "text-error"}
+                />
+                <span>
+                  {t("wizardServerCheck")}{" "}
+                  {serverRunning ? t("wizardRunning") : t("wizardNotRunning")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Icon
+                  name={certTrusted ? "verified_user" : "warning"}
+                  size={16}
+                  className={certTrusted ? "text-success" : "text-warning"}
+                />
+                <span>
+                  {t("wizardCertCheck")} {certTrusted ? t("wizardTrusted") : t("wizardNotTrusted")}
+                </span>
+              </div>
+            </div>
+
+            {/* Tutorial steps */}
+            {target.setupTutorial.steps.length > 0 && (
+              <div className="mt-2 rounded-control border border-border bg-bg-subtle p-3">
+                <p className="mb-2 text-xs font-medium text-text-muted">
+                  {t("wizardTutorialTitle")}
+                </p>
+                <ol className="flex flex-col gap-1">
+                  {target.setupTutorial.steps.map((step, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-xs text-text-muted">
+                      <span className="shrink-0 font-medium text-text-main">{i + 1}.</span>
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === "dns" && (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-text-muted">{t("wizardStep2Desc")}</p>
+            <div className="flex flex-col gap-1 rounded-control border border-border bg-bg-subtle p-3 font-mono text-xs">
+              {target.hosts.map((host) => (
+                <div key={host} className="text-text-muted">
+                  <span className="text-primary">127.0.0.1</span> {host}
+                </div>
+              ))}
+            </div>
+            {dnsEnabled && (
+              <div className="flex items-center gap-2 text-sm text-success">
+                <Icon name="check_circle" size={16} />
+                {t("wizardDnsAlreadyEnabled")}
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === "mappings" && (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-success">
+              <Icon name="check_circle" size={20} />
+              <p className="text-sm font-medium">{t("wizardStep3Success")}</p>
+            </div>
+
+            {loadingModels ? (
+              <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
+                <Icon name="progress_activity" size={16} className="animate-spin" />
+                {t("wizardDetectingModels")}
+              </div>
+            ) : detectedModels.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm text-text-muted">
+                  {t("wizardDetectedModels", { count: detectedModels.length })}
+                </p>
+                <div className="flex max-h-[200px] flex-col gap-1 overflow-y-auto rounded-control border border-border bg-bg-subtle p-3">
+                  {detectedModels.map((model) => (
+                    <Checkbox
+                      key={model}
+                      checked={selectedModels.has(model)}
+                      onChange={() => toggleModelSelection(model)}
+                      label={<span className="font-mono text-xs text-text-main">{model}</span>}
+                    />
+                  ))}
+                </div>
+                {selectedModels.size > 0 && (
+                  <p className="text-xs text-text-muted">
+                    {t("wizardSelectedModels", { count: selectedModels.size })}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-control border border-border bg-bg-subtle p-3">
+                <p className="text-sm text-text-muted">
+                  {t("wizardNoModelsDetected", { agent: target.name })}
+                </p>
+                <p className="mt-2 text-xs text-text-muted">{t("wizardNoModelsHint")}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Modal>
   );
 }

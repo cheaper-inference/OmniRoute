@@ -191,9 +191,20 @@ Routes prompts through OmniRoute's intelligent pipeline with full observability.
 | Parameter | Type     | Default      | Description                                                                              |
 | --------- | -------- | ------------ | ---------------------------------------------------------------------------------------- |
 | `model`   | `string` | `"auto"`     | Target model (e.g., `claude-sonnet-4`, `gpt-4o`, `auto`)                                 |
-| `combo`   | `string` | active combo | Specific combo to route through                                                          |
+| `combo`   | `string` | none         | Optional combo name or ID; overrides `model` for dispatch                                 |
 | `budget`  | `number` | none         | Maximum cost in USD for this request                                                     |
 | `role`    | `string` | none         | Task role hint: `coding`, `review`, `planning`, `analysis`, `debugging`, `documentation` |
+
+When `metadata.combo` is supplied, Smart Routing sends it as the gateway
+`model` (not as an ignored `x-combo` body field). The gateway still enforces
+normal API-key and per-target routing policies. An empty or non-string combo
+is rejected instead of silently falling back to the original model.
+
+The returned metadata distinguishes `requested_combo` (caller intent) from
+`confirmed_combo` (only set when the gateway explicitly reports the
+executed combo); `dispatched_model` records the gateway input and
+`response_model` records the returned model. Routing-decision telemetry
+never attributes an unconfirmed request to an executed combo.
 
 **Returns:**
 

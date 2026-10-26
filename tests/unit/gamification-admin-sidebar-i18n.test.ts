@@ -5,8 +5,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const { SIDEBAR_SECTIONS, HIDEABLE_SIDEBAR_ITEM_IDS, SIDEBAR_ICON_ACCENTS, getSectionItems } =
+const { SIDEBAR_SECTIONS, HIDEABLE_SIDEBAR_ITEM_IDS, getSectionItems } =
   await import("../../src/shared/constants/sidebarVisibility.ts");
+const { resolveIcon } = await import("../../src/shared/constants/iconMap.ts");
 
 type Messages = Record<string, unknown>;
 
@@ -46,7 +47,9 @@ test("gamification anomalies page is reachable from the Gamification sidebar gro
     true
   );
   assert.equal(HIDEABLE_SIDEBAR_ITEM_IDS.includes("gamification-admin"), true);
-  assert.match(SIDEBAR_ICON_ACCENTS["gamification-admin"] ?? "", /^#[0-9A-Fa-f]{6}$/);
+  // Per-item accent colours were retired with the kit sidebar (one nav ink, spec §3.5); the item's
+  // visual contract is now that its icon renders as a Lucide glyph, not a Material fallback.
+  assert.ok(resolveIcon(item.icon), `sidebar icon "${item.icon}" must be mapped in ICON_MAP`);
 });
 
 test("every translation key the anomalies page uses resolves in en.json common", () => {

@@ -19,19 +19,19 @@
 
 <div align="center">
 
-## 💰 තෙවන පාර්ශ්ව නොමිලේ ස්ථර හරහා මාසිකව ටෝකන ~1.62B ක්
+## 💰 තෙවන පාර්ශ්ව නොමිලේ මට්ටම් හරහා මසකට ~1.62B Tokens
 
 </div>
 
-> **ඔබේම සැපයුම්කරු ගිණුම් ගෙන එන්න.** මෙය OmniRoute වෙතින් ලැබෙන ටෝකන ප්රදානයක් නොව, වෙන වෙනම සුදුසුකම් ලැබූ තෙවන පාර්ශ්ව නොමිලේ ස්ථර හරහා ඇස්තමේන්තුගත එකතුවකි. ලියාපදිංචි වී, අවශ්ය තැන්වල අක්තපත්ර ලබාගෙන, ඔබට භාවිතා කළ හැකි සැපයුම්කරුවන් සම්බන්ධ කරන්න; සෑම සැපයුම්කරුවෙකුම තම සීමා, ලබාගත හැකිභාවය සහ කොන්දේසි පාලනය කරයි.
+> **ඔබේම සපයන්නන්ගේ ගිණුම් රැගෙන එන්න.** මෙය OmniRoute වෙතින් ලබාදෙන token ප්රදානයක් නොව, වෙන වෙනම සුදුසුකම් ලැබිය හැකි තෙවන පාර්ශ්ව නොමිලේ මට්ටම්වල ඇස්තමේන්තුගත සමස්තයකි. ලියාපදිංචි වී, අවශ්ය තැන්වල අක්තපත්ර ලබාගෙන, ඔබට භාවිත කළ හැකි සපයන්නන් සම්බන්ධ කරන්න; එක් එක් සපයන්නා තම සීමා, ලබාගත හැකි බව සහ කොන්දේසි පාලනය කරයි.
 >
-> නොමිලේ ස්ථර අතින් එකතු කිරීම වේදනාකාරී ය — SDKs දුසිම් ගණනක්, rate limits දුසිම් ගණනක්, සහ ඔබට සැබවින්ම කොපමණ තිබේද යන අදහසක් නැත. OmniRoute විසින් **පුනරාවර්තන pool keys 34 ක් හරහා නොමිලේ ස්ථර ඇතුළත් කිරීම් 467 ක්** catalog කරන අතර, බෙදාගත් pool අනුව අනුපිටපත් ඉවත් කරමින්, **ප්රකාශිත ධන මාසික අයවැයක් සහිත pools 17 ක් සහ ආකෘති අනුව Groq caps පහක්** මත පදනම්ව ටෝකන ප්රධාන සංඛ්යාව ගණනය කරයි. ප්රාදේශීය අනන්යතා පරීක්ෂණයකට පසුව පමණක් විවෘත වන quotas (අද: ModelScope) වෙනම පෙන්වා ඇත — ප්රාදේශීය අනන්යතා සත්යාපනය පිටුපස +~6M ක් ලෙස — සහ කිසිවිටෙක ප්රධාන සංඛ්යාවට එකතු නොකෙරේ. ප්රතිඵලය dashboard එකේ (`/dashboard/free-tiers`) දෘශ්යමානව රැඳී සිටියි.
+> නොමිලේ මට්ටම් අතින් එකතු කිරීම දුෂ්කරයි — SDK දුසිම් ගණනක්, අනුපාත සීමා දුසිම් ගණනක්, සහ ඔබට සැබවින්ම කොපමණ තිබේදැයි කිසිදු අදහසක් නැත. OmniRoute විසින් **නැවත නැවත ලැබෙන pool keys 34ක් හරහා නොමිලේ මට්ටමේ ඇතුළත් කිරීම් 471ක්** නාමාවලිගත කරන අතර, හවුල් pool අනුව අනුපිටපත් ඉවත් කර, **ප්රකාශිත ධනාත්මක මාසික අයවැයක් සහිත pools 17 සහ එක් එක් model සඳහා Groq සීමා පහ** මත පදනම්ව token ශීර්ෂ අගය ගණනය කරයි. කලාපීය අනන්යතා පරීක්ෂාවකින් පසුව පමණක් විවෘත වන quotas (අද වන විට: ModelScope) වෙනම පෙන්වනු ලබන අතර, කලාපීය අනන්යතා සත්යාපනය පිටුපස +~6M ලෙස දක්වා, කිසිවිටෙකත් ශීර්ෂ අගයට එකතු නොකෙරේ. ප්රතිඵලය dashboard එකෙහි (`/dashboard/free-tiers`) දිගටම දෘශ්යමාන වේ.
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute නොමිලේ ස්ථර අයවැය කාඩ්පත: මාසිකව ස්ථිරවම නොමිලේ ටෝකන ~1.62B ක්, ලියාපදිංචි ක්රෙඩිට් සමඟ පළමු මාසයේදී ~2.22B ක් දක්වා, එක් endpoint එකක් පිටුපස catalog කරන ලද නොමිලේ ස්ථර ඇතුළත් කිරීම් 467 ක් ආවරණය කරන ලේඛනගත පුනරාවර්තන pool keys 34 කින්. අවංක pool-deduped ගණිතය — සෑම බෙදාගත් pool එකක්ම එක් වරක් ගණනය කෙරේ, ප්රකාශිත ධන මාසික ටෝකන අයවැයක් සහිත පුනරාවර්තන pools 17 ක් සහ ආකෘති අනුව Groq caps පහක් ඇතුළුව; කොන්දේසි-අවදානම් catalog එකේ සැපයුම්කරුවන් 12 දෙනෙකු avoid ලෙස සලකුණු කර ඇති නිසා තීරණය ඔබ සතුය. අයවැය තීරුවේ Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ආකෘති අනුව caps පහක්) සහ කුඩා pools ඇතුළත් වන අතර, ඊට අමතරව පළමු මාස ලියාපදිංචි ක්රෙඩිට් සහ ස්ථිරවම නොමිලේ වන ටෝකන සීමාවක් නැති සැපයුම්කරුවන් වෙනම පෙන්වා ඇති බැවින් ඔවුන් කිසිවිටෙක ප්රධාන සංඛ්යාව අධික නොකරයි. සජීවී භාවිතය/ඉතිරි ප්රමාණය /dashboard/free-tiers හි."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute නොමිලේ මට්ටමේ අයවැය කාඩ්පත: ස්ථාවරව මසකට ~1.62B නොමිලේ tokens, ලියාපදිංචි වීමේ credits සමඟ පළමු මාසයේදී ~2.22B දක්වා, එක් endpoint එකක් පිටුපස නාමාවලිගත නොමිලේ මට්ටමේ ඇතුළත් කිරීම් 471ක් ආවරණය කරන ලේඛනගත නැවත නැවත ලැබෙන pool keys 34කින්. අවංක, pool-අනුපිටපත් ඉවත් කළ ගණනය — ප්රකාශිත ධනාත්මක මාසික token අයවැයක් සහිත නැවත නැවත ලැබෙන pools 17ක් සහ එක් එක් model සඳහා Groq සීමා පහ ඇතුළුව, එක් එක් හවුල් pool එක ගණන් කරන්නේ එක් වරක් පමණි; ඔබට තීරණය කළ හැකි වන පරිදි සපයන්නන් 12ක් කොන්දේසි-අවදානම් නාමාවලියේ වළක්වා ගත යුතු ලෙස සලකුණු කර ඇත. අයවැය තීරුවට Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (එක් එක් model සඳහා සීමා පහක්) සහ කුඩා pools ඇතුළත් වන අතර, පළමු මාසයේ ලියාපදිංචි වීමේ credits සහ ස්ථිරවම නොමිලේ, token සීමාවක් නොමැති සපයන්නන් වෙන වෙනම පෙන්වනු ලබන බැවින් ඒවා කිසිවිටෙකත් ශීර්ෂ අගය කෘත්රිමව වැඩි නොකරයි. /dashboard/free-tiers හි සජීවීව භාවිත කළ/ඉතිරි ප්රමාණය."/>
 
-> සජීවී `/dashboard/free-tiers` පිටුවේ සජීවිකරණ සාරාංශයක්. සම්පූර්ණ ක්රමවේදය (pool dedupe, ක්රෙඩිට් ස්ථර, සැපයුම්කරු කොන්දේසි): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> සජීවී `/dashboard/free-tiers` පිටුවේ සජීවිකරණ සාරාංශය. සම්පූර්ණ ක්රමවේදය (pool අනුපිටපත් ඉවත් කිරීම, credit මට්ටම්, සපයන්නන්ගේ කොන්දේසි): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>මෙම සංඛ්යා සජීවී catalog එකට සාපේක්ෂව සති දෙකකට වරක් නැවත විගණනය කරන අතර **දෙපැත්තටම චලනය වේ** — සැපයුම්කරුවෙකු නොමිලේ ස්ථරයක් අවසන් කළ විට සංඛ්යාව අඩු වේ; අලුත් එකක් එකතු වූ විට එය ඉහළ යයි. අපි ප්රකාශයට පත් කරන්නේ catalog එක සැබවින්ම ගණනය කරන දේ මිස, ඉහළට වටයා ගත් හොඳම අවස්ථාවක් නොවේ.</sub>
+> <sub>මෙම සංඛ්යා සජීවී නාමාවලියට සාපේක්ෂව සෑම සති දෙකකට වරක් නැවත විගණනය කරන අතර ඒවා **දෙදිශාවටම වෙනස් වේ** — සපයන්නෙකු නොමිලේ මට්ටමක් අවසන් කළ විට සංඛ්යාව පහත වැටේ; අලුත් එකක් එක් වූ විට එය ඉහළ යයි. අපි ප්රකාශයට පත් කරන්නේ නාමාවලිය සැබවින්ම ගණනය කරන අගය මිස, ඉහළට වට කළ හොඳම අවස්ථාවක් නොවේ.</sub>
 
 <br/>
 
@@ -39,18 +39,18 @@
 
 <h3>
 
-⭐ OMNIROUTE ඔබට මුදල් ඉතිරි කරගැනීමට සහ ඔබේ වැඩ පහසු කිරීමට උදව් වූයේ නම් repo එකට star එකක් දෙන්න.
+⭐ OMNIROUTE ඔබට මුදල් ඉතිරි කර ඔබේ කාර්යය පහසු කර ගැනීමට උදව් වූයේ නම් repo එකට star එකක් දෙන්න.
 
 </h3>
 
-[![තරු](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History ශ්රේණිය](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Star ඉතිහාස ශ්රේණිය](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 ප්රජාවට එක්වන්න
 
-**👋 නඩත්තුකරු අනුගමනය කරන්න — නව සැපයුම්කරුවන්, නිකුතු සහ ඉඟි වහාම ලබාගන්න:**
+**👋 නඩත්තුකරු අනුගමනය කරන්න — නව සපයන්නන්, නිකුතු සහ ඉඟි මුලින්ම ලබාගන්න:**
 
 [![LinkedIn හි Diego අනුගමනය කරන්න](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![GitHub හි @diegosouzapw අනුගමනය කරන්න](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
@@ -58,10 +58,10 @@
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
 [![WhatsApp ගෝලීය](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![WhatsApp බ්රසීලය](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![වෙබ් අඩවිය](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**ප්රශ්න, සැපයුම්කරු ඉඟි, සැලසුම් මාර්ගය සහ සහාය → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 ගෝලීය](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**ප්රශ්න, සපයන්නන් පිළිබඳ ඉඟි, මාර්ග සිතියම සහ සහාය → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 ගෝලීය](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 බ්රසීලය](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [ද්වාරය](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -687,69 +687,69 @@ omniroute configure codex          # මේවාද ඇත: claude opencode qwe
 
 <div align="center">
 
-## 🌐 AI සැපයුම්කරුවන් 375 — නාමාවලියේ නොමිලේ ලෙස සලකුණු කළ 153
+## 🌐 AI සපයන්නන් 375ක් — නාමාවලියේ නොමිලේ ලෙස සලකුණු කළ 153ක්
 
 </div>
 
-> **ලියාපදිංචි කරන ලද සැපයුම්කරුවන් 375ක්** canonical chat, media, search, local, cloud-agent සහ system එකතුවන් හරහා පැතිර ඇති අතර, ඉන් **153ක් `hasFree: true` සොයාගැනීමේ පාර-දත්ත (discovery metadata) දරයි**. චැට් ආකෘති ලේඛනය (registry) **සැපයුම්කරුවන් 239 / වෙනස් සැපයුම්කරු–ආකෘති යුගල 3,059 / අමු ආකෘති ID 1,475** ආවරණය කරයි; වෙනම නොමිලේ-අයවැය නාමාවලියේ (free-budget catalog) **ආකෘතියක් වෙනුවෙන් පේළි 467**, **පුනරාවර්තන තටාක (recurring pools) 34** සහ **පුනරාවර්තන/යතුරු-රහිත සදාකාලික-නොමිලේ සැපයුම්කරුවන් 51ක්** ඇත. මේවා හිතාමතාම වෙනස් හරයන් (denominators) වේ; නිර්වචන සහ තටාක-අනුපිටපත් ඉවත්කළ (pool-deduped) ගණනය කිරීම් [සැපයුම්කරු යොමුව](docs/reference/PROVIDER_REFERENCE.md) සහ [නොමිලේ මට්ටම්](docs/reference/FREE_TIERS.md) හි දැක්වේ.
+> කැනොනිකල් කතාබස්, මාධ්ය, සෙවුම්, දේශීය, ක්ලවුඩ් නියෝජිත සහ පද්ධති එකතු පුරා **ලියාපදිංචි සපයන්නන් 375ක්** සිටින අතර, ඒවායින් **153ක් `hasFree: true` සොයාගැනීමේ පාරදත්ත දරයි**. කතාබස් ආකෘති රෙජිස්ට්රිය **සපයන්නන් 239ක් / එකිනෙකට වෙනස් සපයන්නා-ආකෘති යුගල 3,059ක් / අමු ආකෘති ID 1,475ක්** ආවරණය කරයි; වෙනම නොමිලේ-අයවැය නාමාවලියෙහි **එක් එක් ආකෘතිය සඳහා පේළි 471ක්**, **පුනරාවර්තන සංචිත 34ක්** සහ **පුනරාවර්තන/යතුරු රහිත සදාකාලික නොමිලේ සපයන්නන් 51ක්** ඇත. සැලසුම අනුව මේවා වෙනස් හරයන් වේ; අර්ථදැක්වීම් සහ සංචිත-අනුපිටපත් ඉවත් කළ ගණනය කිරීම් [සපයන්නන් පිළිබඳ යොමුව](docs/reference/PROVIDER_REFERENCE.md) සහ [නොමිලේ මට්ටම්](docs/reference/FREE_TIERS.md) තුළ ඇත.
 
 <div align="center">
 
-### 🏢 සෑම ප්රධාන ආයතනයක්ම — එක් endpoint එකක් හරහා
+### 🏢 සෑම ප්රධාන පර්යේෂණාගාරයක්ම — එක් අන්ත ලක්ෂ්යයක් හරහා
 
 <table>
   <tr>
-    <td align="center" width="80"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/openai.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/openai.svg" width="40" alt="OpenAI"/></picture><br/><sub>OpenAI</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/claude-color.svg" width="40" alt="Anthropic"/><br/><sub>Anthropic</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/gemini-color.svg" width="40" alt="Gemini"/><br/><sub>Gemini</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/grok.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/grok.svg" width="40" alt="xAI Grok"/></picture><br/><sub>xAI Grok</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/deepseek-color.svg" width="40" alt="DeepSeek"/><br/><sub>DeepSeek</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/mistral-color.svg" width="40" alt="Mistral"/><br/><sub>Mistral</sub><br/><sub>                       </sub></td>
+    <td align="center" width="80"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/openai.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/openai.svg" width="40" alt="OpenAI"/></picture><br/><sub>OpenAI</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/claude-color.svg" width="40" alt="Anthropic"/><br/><sub>Anthropic</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/gemini-color.svg" width="40" alt="Gemini"/><br/><sub>Gemini</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/grok.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/grok.svg" width="40" alt="xAI Grok"/></picture><br/><sub>xAI Grok</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/deepseek-color.svg" width="40" alt="DeepSeek"/><br/><sub>DeepSeek</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/mistral-color.svg" width="40" alt="Mistral"/><br/><sub>Mistral</sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qwen-color.svg" width="40" alt="Qwen"/><br/><sub>Qwen</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/meta-color.svg" width="40" alt="Meta Llama"/><br/><sub>Meta Llama</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/groq.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/groq.svg" width="40" alt="Groq"/></picture><br/><sub>Groq</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nvidia-color.svg" width="40" alt="NVIDIA"/><br/><sub>NVIDIA</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/minimax-color.svg" width="40" alt="MiniMax"/><br/><sub>MiniMax</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cohere-color.svg" width="40" alt="Cohere"/><br/><sub>Cohere</sub><br/><sub>                       </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qwen-color.svg" width="40" alt="Qwen"/><br/><sub>Qwen</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/meta-color.svg" width="40" alt="Meta Llama"/><br/><sub>Meta Llama</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/groq.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/groq.svg" width="40" alt="Groq"/></picture><br/><sub>Groq</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nvidia-color.svg" width="40" alt="NVIDIA"/><br/><sub>NVIDIA</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/minimax-color.svg" width="40" alt="MiniMax"/><br/><sub>MiniMax</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cohere-color.svg" width="40" alt="Cohere"/><br/><sub>Cohere</sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/perplexity-color.svg" width="40" alt="Perplexity"/><br/><sub>Perplexity</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/huggingface-color.svg" width="40" alt="Hugging Face"/><br/><sub>HuggingFace</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/together-color.svg" width="40" alt="Together"/><br/><sub>Together</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/fireworks-color.svg" width="40" alt="Fireworks"/><br/><sub>Fireworks</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cloudflare-color.svg" width="40" alt="Cloudflare"/><br/><sub>Cloudflare</sub><br/><sub>                       </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/baidu-color.svg" width="40" alt="Baidu"/><br/><sub>Baidu</sub><br/><sub>                       </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/perplexity-color.svg" width="40" alt="Perplexity"/><br/><sub>Perplexity</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/huggingface-color.svg" width="40" alt="Hugging Face"/><br/><sub>HuggingFace</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/together-color.svg" width="40" alt="Together"/><br/><sub>Together</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/fireworks-color.svg" width="40" alt="Fireworks"/><br/><sub>Fireworks</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cloudflare-color.svg" width="40" alt="Cloudflare"/><br/><sub>Cloudflare</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/baidu-color.svg" width="40" alt="Baidu"/><br/><sub>Baidu</sub><br/><sub>                           </sub></td>
   </tr>
 </table>
 
-<sub>…සහ තවත් 350කට වැඩි — සෑම අයිකනයක්ම ඩැෂ්බෝර්ඩයේ සැපයුම්කරු නාමාවලියෙන් සජීවීව ලබාගනී. 📖 [සැපයුම්කරු යොමුව](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…සහ තවත් 350කට අධික සංඛ්යාවක් — සෑම නිරූපකයක්ම උපකරණ පුවරුවේ සපයන්නන්ගේ නාමාවලියෙන් සජීවීව ලබාගැනේ. 📖 [සපයන්නන් පිළිබඳ යොමුව](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 සදාකාලිකවම නොමිලේ — $0, කාඩ්පතක් අවශ්ය නැත
+### 🆓 සදාකාලිකව නොමිලේ — $0, කාඩ්පතක් අවශ්ය නැත
 
 <table>
   <tr>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>ටෝකන සීමාවක් නැත</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>ස්වයං-රවුටරය, Tencent Hy3<br/>සදහටම නොමිලේ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>සදහටම නොමිලේ</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>නොමිලේ මට්ටම</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>සදහටම නොමිලේ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>සදහටම නොමිලේ</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>ස්වයංක්රීය රවුටරය, Tencent Hy3<br/>සැමදා නොමිලේ</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>සැමදා නොමිලේ</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>නොමිලේ ස්ථරය</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>සැමදා නොමිලේ</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>සැමදා නොමිලේ</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>අසීමිත නොමිලේ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>යතුරක් අවශ්ය නැත</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>ආකෘති 50+<br/>දිනකට නියුරෝන 10K</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>අසීමිතව නොමිලේ</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>යතුරක් අවශ්ය නොවේ</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>මාදිලි 50කට වැඩි ප්රමාණයක්<br/>දිනකට නියුරෝන 10K</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>නොමිලේ ~40 RPM</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>එක්-වර $5 ක්රෙඩිට්; කාඩ්පතක් අවශ්යයි</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free ආකෘති<br/>+$10 → වැඩි RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>එක් වරක් පමණක් ලැබෙන $5 ණය; කාඩ්පතක් අවශ්යයි</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free මාදිලි<br/>+$10 → වැඩි RPM</sub></td>
   </tr>
 </table>
 
-📖 සම්පූර්ණ යන්ත්ර-කියවිය හැකි නාමාවලිය → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 සම්පූර්ණ යන්ත්රයෙන් කියවිය හැකි නාමාවලිය → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
@@ -1332,83 +1332,83 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
 
 <table>
   <tr><th align="left">ලේඛනය</th><th align="left">විස්තරය</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">පරිශීලක මාර්ගෝපදේශය</a></b></td><td>සැපයුම්කරුවන්, combos, CLI ඒකාබද්ධ කිරීම, යෙදවීම</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">සැකසුම් මාර්ගෝපදේශය</a></b></td><td>සම්පූර්ණ ස්ථාපන ක්රම, CLI මෙවලම් වින්යාසයන්, ප්රොටොකෝල සැකසුම, timeout ටියුනිං</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI මෙවලම් මාර්ගෝපදේශය</a></b></td><td>Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot සඳහා මෙවලම අනුව සැකසුම</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">දුරස්ථ ප්රකාරය</a></b></td><td>scoped access tokens හරහා ඔබේ laptop CLI වෙතින් දුරස්ථ OmniRoute (VPS) එකක් පාලනය කරන්න</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code වින්යාසය</a></b></td><td><code>launch</code> + ආකෘතිය අනුව profiles සමඟ Claude Code OmniRoute වෙත (දේශීය/දුරස්ථ) යොමු කරන්න</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">ඉක්මන් ආරම්භය</a></b></td><td>පියවර 3ක ස්ථාපනය → සම්බන්ධ වීම → වින්යාස කිරීම</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">පරිශීලක මාර්ගෝපදේශය</a></b></td><td>සපයන්නන්, සංයෝජන, CLI ඒකාබද්ධ කිරීම, යෙදවීම</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">සැකසුම් මාර්ගෝපදේශය</a></b></td><td>සම්පූර්ණ ස්ථාපන ක්රම, CLI මෙවලම් වින්යාස, ප්රොටෝකෝල සැකසුම, කල් ඉකුත්වීම් සුසර කිරීම</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI මෙවලම් මාර්ගෝපදේශය</a></b></td><td>Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot සඳහා මෙවලමකට වෙන් වූ සැකසුම</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">දුරස්ථ ප්රකාරය</a></b></td><td>විෂය පථයට සීමා කළ ප්රවේශ ටෝකන හරහා ඔබේ ලැප්ටොප් පරිගණකයේ CLI වෙතින් දුරස්ථ OmniRoute (VPS) එකක් පාලනය කරන්න</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code වින්යාසය</a></b></td><td><code>launch</code> සහ එක් එක් මොඩලයට වෙන් වූ පැතිකඩ සමඟ Claude Code, OmniRoute (දේශීය/දුරස්ථ) වෙත යොමු කරන්න</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">ඉක්මන් ආරම්භය</a></b></td><td>පියවර 3කින් ස්ථාපනය → සම්බන්ධ කිරීම → වින්යාස කිරීම</td></tr>
 </table>
 
 ### 🔧 මෙහෙයුම් සහ යෙදවීම
 
 <table>
   <tr><th align="left">ලේඛනය</th><th align="left">විස්තරය</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker මාර්ගෝපදේශය</a></b></td><td>Docker run, Compose profiles, Caddy HTTPS, උමං මාර්ග, image tags</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker මාර්ගෝපදේශය</a></b></td><td>Docker ධාවනය, Compose පැතිකඩ, Caddy HTTPS, උමං, රූප ටැග්</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman මාර්ගෝපදේශය</a></b></td><td>Quadlet systemd ඒකාබද්ධ කිරීම, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM යෙදවීම</a></b></td><td>සම්පූර්ණ මාර්ගෝපදේශය: VM + nginx + Cloudflare සැකසුම</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io යෙදවීම</a></b></td><td>persistent storage සමඟ Fly.io වෙත යොදවන්න</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io යෙදවීම</a></b></td><td>ස්ථිර ආචයනය සමඟ Fly.io වෙත යොදවන්න</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux මාර්ගෝපදේශය</a></b></td><td>Termux හරහා Android මත OmniRoute ධාවනය කරන්න</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA මාර්ගෝපදේශය</a></b></td><td>Progressive Web App ස්ථාපනය, caching, ගෘහ නිර්මාණ ශිල්පය</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">අස්ථාපන මාර්ගෝපදේශය</a></b></td><td>සියලුම ස්ථාපන ක්රම සඳහා පිරිසිදු ඉවත් කිරීම</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">පරිසර වින්යාසය</a></b></td><td>සම්පූර්ණ <code>.env</code> විචල්යයන් සහ යොමුවීම්</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA මාර්ගෝපදේශය</a></b></td><td>ප්රගතිශීලී වෙබ් යෙදුම් ස්ථාපනය, හැඹිලිගත කිරීම, ගෘහනිර්මාණය</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">අස්ථාපන මාර්ගෝපදේශය</a></b></td><td>සියලු ස්ථාපන ක්රම සඳහා පිරිසිදු ඉවත් කිරීම</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">පරිසර වින්යාසය</a></b></td><td>සම්පූර්ණ <code>.env</code> විචල්ය සහ යොමු</td></tr>
 </table>
 
-### 🧠 විශේෂාංග සහ ගෘහ නිර්මාණ ශිල්පය
+### 🧠 විශේෂාංග සහ ගෘහනිර්මාණය
 
 <table>
   <tr><th align="left">ලේඛනය</th><th align="left">විස්තරය</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">ගෘහ නිර්මාණ ශිල්පය</a></b></td><td>පද්ධති ගෘහ නිර්මාණ ශිල්පය, දත්ත ගලායීම, සහ අභ්යන්තර කරුණු</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">සම්පීඩන මාර්ගෝපදේශය</a></b></td><td>විකල්ප 7ක pipeline එකක්: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK සම්පීඩනය</a></b></td><td>විධාන-ප්රතිදාන සම්පීඩනය, පෙරහන්, විශ්වාසය, සත්යාපනය, අමු-ප්රතිදාන ප්රතිසාධනය</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">සම්පීඩන එන්ජින්</a></b></td><td>Caveman, RTK, stacked pipelines, dashboard/API/MCP මතුපිට</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">සම්පීඩන නීති ආකෘතිය</a></b></td><td>Caveman සහ RTK පෙරහන් සඳහා JSON rule-pack schemas</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">සම්පීඩන භාෂා පැකේජ</a></b></td><td>භාෂා හඳුනාගැනීම සහ Caveman rule-pack නිර්මාණය</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">ඔරොත්තු දීමේ මාර්ගෝපදේශය</a></b></td><td>Circuit breakers, cooldowns, පෝලිම, anti-thundering herd, TLS spoofing</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo එන්ජිම</a></b></td><td>සාධක 16ක ලකුණු කිරීම, mode packs, self-healing</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy මාර්ගෝපදේශය</a></b></td><td>මට්ටම් 3ක proxy පද්ධතිය, 1proxy marketplace, registry CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">නොමිලේ මට්ටම්</a></b></td><td>ඒකාබද්ධ නාමාවලිය: ලේඛනගත පුනරාවර්තන pool 34ක් / catalog කරන ලද free-tier entries 467ක්</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">විශේෂාංග ගැලරිය</a></b></td><td>තිර රුව සමඟ දෘශ්ය dashboard සංචාරය</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Codebase ප්රලේඛනය</a></b></td><td>ආරම්භකයන්ට සුදුසු codebase ගවේෂණය</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">ගෘහනිර්මාණය</a></b></td><td>පද්ධති ගෘහනිර්මාණය, දත්ත ප්රවාහය සහ අභ්යන්තර ක්රියාකාරීත්වය</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">සම්පීඩන මාර්ගෝපදේශය</a></b></td><td>විකල්ප 7ක නල මාර්ගය: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK සම්පීඩනය</a></b></td><td>විධාන ප්රතිදාන සම්පීඩනය, පෙරහන්, විශ්වාසය, සත්යාපනය, අමු ප්රතිදාන ප්රතිසාධනය</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">සම්පීඩන එන්ජින්</a></b></td><td>Caveman, RTK, අට්ටිගත නල මාර්ග, උපකරණ පුවරු/API/MCP අතුරුමුහුණත්</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">සම්පීඩන රීති ආකෘතිය</a></b></td><td>Caveman සහ RTK පෙරහන් සඳහා JSON රීති පැකේජ යෝජනා ක්රම</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">සම්පීඩන භාෂා පැකේජ</a></b></td><td>භාෂා හඳුනාගැනීම සහ Caveman රීති පැකේජ රචනය</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">ප්රත්යස්ථතා මාර්ගෝපදේශය</a></b></td><td>පරිපථ විසන්ධිකාරක, සිසිලන කාල, පෝලිම, එකවර ඉල්ලීම් ගලා ඒම වැළැක්වීම, TLS ව්යාජකරණය</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">ස්වයංක්රීය සංයෝජන එන්ජිම</a></b></td><td>සාධක 16ක ලකුණුකරණය, ප්රකාර පැකේජ, ස්වයං-ප්රතිසාධනය</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">ප්රොක්සි මාර්ගෝපදේශය</a></b></td><td>මට්ටම් 3ක ප්රොක්සි පද්ධතිය, 1proxy වෙළඳපොළ, ලේඛනාගාර CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">නොමිලේ ස්තර</a></b></td><td>ඒකාබද්ධ නාමාවලිය: ලේඛනගත පුනරාවර්තන සංචිත 34ක් / නාමාවලිගත නොමිලේ-ස්තර ඇතුළත් කිරීම් 471ක්</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">විශේෂාංග ගැලරිය</a></b></td><td>තිර රූ සමඟ දෘශ්ය උපකරණ පුවරු සංචාරය</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">කේත පදනම් ප්රලේඛනය</a></b></td><td>ආරම්භකයන්ට හිතකර කේත පදනම් විස්තරාත්මක සංචාරය</td></tr>
 </table>
 
-### 🤖 ප්රොටොකෝල සහ API
+### 🤖 ප්රොටෝකෝල සහ API
 
 <table>
   <tr><th align="left">ලේඛනය</th><th align="left">විස්තරය</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API යොමුව</a></b></td><td>උදාහරණ සමඟ සියලුම endpoints</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI පිරිවිතරය</a></b></td><td>OpenAPI 3.0 පිරිවිතරය</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP සේවාදායකය</a></b></td><td>MCP මෙවලම් 110ක්, IDE වින්යාසයන්, Python/TS/Go clients</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP සේවාදායක මාර්ගෝපදේශය</a></b></td><td>MCP ස්ථාපනය, transports, සහ මෙවලම් යොමුව</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A සේවාදායකය</a></b></td><td>JSON-RPC 2.0 ප්රොටොකෝලය, කුසලතා, streaming, task කළමනාකරණය</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A සේවාදායක මාර්ගෝපදේශය</a></b></td><td>A2A agent card, tasks, කුසලතා, සහ streaming</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API යොමුව</a></b></td><td>උදාහරණ සහිත සියලු අන්ත ලක්ෂ්ය</td></tr>
+  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI පිරිවිතර</a></b></td><td>OpenAPI 3.0 පිරිවිතර</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP සේවාදායකය</a></b></td><td>MCP මෙවලම් 110ක්, IDE වින්යාස, Python/TS/Go සේවාලාභීන්</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP සේවාදායක මාර්ගෝපදේශය</a></b></td><td>MCP ස්ථාපනය, ප්රවාහන සහ මෙවලම් යොමුව</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A සේවාදායකය</a></b></td><td>JSON-RPC 2.0 ප්රොටෝකෝලය, කුසලතා, ප්රවාහනය, කාර්ය කළමනාකරණය</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A සේවාදායක මාර්ගෝපදේශය</a></b></td><td>A2A නියෝජිත කාඩ්පත, කාර්ය, කුසලතා සහ ප්රවාහනය</td></tr>
 </table>
 
-### 📋 ව්යාපෘතිය සහ තත්ත්වය
+### 📋 ව්යාපෘතිය සහ ගුණාත්මකභාවය
 
 <table>
   <tr><th align="left">ලේඛනය</th><th align="left">විස්තරය</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">දායක වීම</a></b></td><td>සංවර්ධන සැකසීම සහ මාර්ගෝපදේශ</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ශාඛාකරණ සහ නිකුතු ආකෘතිය</a></b></td><td>PR ඉලක්ක කරන ස්ථානය (<code>release/*</code>), <code>main</code> සහ tags යනුවෙන් අදහස් වන දේ</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">වෙනස්කම් සටහන</a></b></td><td>අනුවාදය අනුව සම්පූර්ණ නිකුතු ඉතිහාසය</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">ආරක්ෂක ප්රතිපත්තිය</a></b></td><td>දුර්වලතා වාර්තාකරණය සහ ආරක්ෂක භාවිත</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n මාර්ගෝපදේශය</a></b></td><td>භාෂා 67 ක සහාය, පරිවර්තන ක්රියාප්රවාහය, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">නිකුතු පරීක්ෂණ ලැයිස්තුව</a></b></td><td>නිකුතුවට පෙර වලංගු කිරීමේ පියවර</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">ආවරණ සැලැස්ම</a></b></td><td>නිරීක්ෂණය කරන ලද පරීක්ෂණ ගොනු 7,800+ පුරා ස්ථාවර පරීක්ෂණ ප්රකාශන 56,000+ සඳහා පරීක්ෂණ ආවරණ උපාය මාර්ගය</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">දායක වීම</a></b></td><td>සංවර්ධන සැකසුම සහ මාර්ගෝපදේශ</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ශාඛාකරණ සහ නිකුතු ආකෘතිය</a></b></td><td>PR ඉලක්ක කරන ස්ථානය (<code>release/*</code>), <code>main</code> සහ ටැගවල අර්ථය</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">වෙනස්කම් සටහන</a></b></td><td>එක් එක් අනුවාදයට අදාළ සම්පූර්ණ නිකුතු ඉතිහාසය</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">ආරක්ෂක ප්රතිපත්තිය</a></b></td><td>අවදානම් වාර්තාකරණය සහ ආරක්ෂක භාවිතයන්</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n මාර්ගෝපදේශය</a></b></td><td>භාෂා 67ක් සඳහා සහාය, පරිවර්තන කාර්ය ප්රවාහය, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">නිකුතු පිරික්සුම් ලැයිස්තුව</a></b></td><td>නිකුතුවට පෙර වලංගුකරණ පියවර</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">ආවරණ සැලැස්ම</a></b></td><td>හඹා යන පරීක්ෂණ ගොනු 7,800කට වැඩි සංඛ්යාවක් පුරා ඇති ස්ථිතික පරීක්ෂණ ප්රකාශන 56,000කට වැඩි සංඛ්යාවක් සඳහා පරීක්ෂණ ආවරණ උපායමාර්ගය</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ ප්රමුඛ දායකයන්
+# ⭐ ඉහළම දායකයින්
 
-> OmniRoute හැඩගස්වා ඇත්තේ උද්යෝගිමත් විවෘත මූලාශ්ර ප්රජාවකිනි. ව්යාපෘතියේ ගුණාත්මකභාවය, ස්ථාවරත්වය සහ පැතිරීම කෙලින්ම බලපාන සුවිශේෂී දායකත්වයන් මෙම පුද්ගලයන් ලබා දී ඇත. **ඔබට ස්තූතියි.**
+> OmniRoute හැඩගැසෙන්නේ උද්යෝගිමත් විවෘත-මූලාශ්ර ප්රජාවක් මඟිනි. මෙම පුද්ගලයින් ව්යාපෘතියේ ගුණාත්මකභාවය, ස්ථාවරත්වය සහ ව්යාප්තියට සෘජුවම බලපාන සුවිශේෂී දායකත්වයන් ලබා දී ඇත. **ඔබට ස්තුතියි.**
 
-### ඒකාබද්ධ කරන ලද pull requests අනුව බාහිර දායකයන්
+### ඒකාබද්ධ කළ pull request අනුව බාහිර දායකයින්
 
 <table>
-  <tr><th align="center">ස්ථානය</th><th align="left">දායකයා</th><th align="center">ඒකාබද්ධ PR</th><th align="right">~වෙනස් කළ පේළි</th></tr>
+  <tr><th align="center">ස්ථානය</th><th align="left">දායකයා</th><th align="center">ඒකාබද්ධ කළ PR</th><th align="right">~වෙනස් කළ පේළි</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
@@ -1431,9 +1431,9 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>සජීවී <code>release/v3.8.52</code> tip <code>656f01cb43</code> සමඟ 2026-10-18 15:09:09 UTC වන විට ජනසංගණනය ගනු ලැබිණි. පිටුගත කළ GitHub GraphQL ජනසංගණනයේ ඒකාබද්ධ PR 9,191 ක් අඩංගු වේ: ගබඩා හිමිකරු විසින් 3,834 ක්, Dependabot විසින් 229 ක්, වෙනත් bots/apps විසින් 6 ක්, සහ <b>විවිධ දායකයන් 835 කගෙන් බාහිර PR 5,122 ක්</b>. “වෙනස් කළ පේළි” යනු GitHub එකතු කිරීම් + ඉවත් කිරීම් වන අතර එය උත්පාදනය කළ ගොනු, lockfiles, නාමාවලි, පරිවර්තන සහ ලේඛන ඇතුළත් වේ; එය ලියන ලද LOC නොව ප්රවාහනයකි (churn). PR 49 ක් පේළි 500,000 ඉක්මවූ GitHub diffs වාර්තා කරයි (උදාහරණයක් ලෙස, තනි සැපයුම්කරු එකතු කිරීමක් වන #13399, වෙනස් කළ ගොනු 2,347 ක් ලැයිස්තුගත කරයි), එය ඉහත සමස්ත කිහිපයක් අධික ලෙස ඉහළ නංවයි. සම-ස්ථාන එකට ශ්රේණිගත කර ඇත.</sub>
+<sub>සජීවී <code>release/v3.8.52</code> අග්රය <code>656f01cb43</code> භාවිතයෙන් 2026-10-18 15:09:09 UTC දින සංගණනය සිදු කරන ලදී. පිටුගත කළ GitHub GraphQL සංගණනයේ ඒකාබද්ධ කළ PR 9,191ක් අඩංගු වේ: ගබඩා හිමිකරුගෙන් 3,834ක්, Dependabot වෙතින් 229ක්, වෙනත් bots/apps වෙතින් 6ක් සහ <b>වෙන්වූ දායකයින් 835 දෙනෙකුගෙන් බාහිර PR 5,122ක්</b>. “වෙනස් කළ පේළි” යනු GitHub එකතු කිරීම් + මකා දැමීම් වන අතර ජනනය කළ ගොනු, lockfiles, නාමාවලි, පරිවර්තන සහ ලේඛන ඇතුළත් වේ; එය වෙනස්වීම් ප්රමාණය මිස කර්තෘ විසින් ලියූ LOC නොවේ. PR 49ක GitHub diff පේළි 500,000 ඉක්මවන බව වාර්තා වේ (උදාහරණයක් ලෙස, තනි provider එකක් එක් කරන #13399 හි වෙනස් කළ ගොනු 2,347ක් ලැයිස්තුගත වේ), එමඟින් ඉහත එකතුවලින් කිහිපයක් අතිශය වැඩි වේ. සම ලකුණු ලැබූවන් එකම ස්ථානයේ ශ්රේණිගත කර ඇත.</sub>
 
-### GitHub වෙත පැවරෙන commits
+### GitHub වෙත ආරෝපණය කළ commit
 
 <table>
   <tr>
@@ -1442,42 +1442,42 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub-ආරෝපිත කොමිට් 367</sub>
+      <sub>🥇 GitHub වෙත ආරෝපිත commits 367ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub-ආරෝපිත කොමිට් 269</sub>
+      <sub>🥈 GitHub වෙත ආරෝපිත commits 269ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 GitHub-ආරෝපිත කොමිට් 229</sub>
+      <sub>🥉 GitHub වෙත ආරෝපිත commits 229ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 GitHub-ආරෝපිත කොමිට් 202</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 202ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 GitHub-ආරෝපිත කොමිට් 174</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 174ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 GitHub-ආරෝපිත කොමිට් 126</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 126ක්</sub>
     </td>
   </tr>
   <tr>
@@ -1486,42 +1486,42 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub-ආරෝපිත කොමිට් 114</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 114ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 GitHub-ආරෝපිත කොමිට් 108</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 108ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub-ආරෝපිත කොමිට් 87</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 87ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 GitHub-ආරෝපිත කොමිට් 70</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 70ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 GitHub-ආරෝපිත කොමිට් 68</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 68ක්</sub>
     </td>
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC වේලාවට නැවත පරීක්ෂා කරන ලදී: <code>release/v3.8.52</code> පෙරනිමි ශාඛාව සඳහා ගබඩාවේ Contributors API මගින් වාර්තා කරන ලද GitHub-ආරෝපිත කොමිට්. API මගින් අනන්යතා 849ක් ආපසු ලබා දෙන ලදී (පරිශීලකයින් 429ක්, බොට් 2ක්, නිර්නාමික 418ක්); මෙම වගුවෙන් නඩත්තුකරු, බොට් සහ නිර්නාමික අනන්යතා බැහැර කර ඇති අතර තරඟයේ සමාන තත්ත්වයන් රඳවා තබා ඇත. එය ඉහත දක්වා ඇති merged-PR ශ්රේණිගත කිරීමෙන්ද පහත දක්වා ඇති Git-metadata සංගණනයෙන්ද වෙනස් වේ.</sub>
+<sub>2026-10-18 14:44:45 UTC දී නැවත පරීක්ෂා කරන ලදී: පෙරනිමි <code>release/v3.8.52</code> ශාඛාව සඳහා repository Contributors API මඟින් වාර්තා කළ GitHub වෙත ආරෝපිත commits. API එක අනන්යතා 849ක් (පරිශීලකයන් 429ක්, bots 2ක්, නිර්නාමික අනන්යතා 418ක්) ලබා දුන්නේය; මෙම වගුවෙන් නඩත්තුකරු, bots සහ නිර්නාමික අනන්යතා ඉවත් කර ඇති අතර සම තරග ස්ථාන රඳවා ඇත. මෙය ඉහත ඇති ඒකාබද්ධ කළ PR ශ්රේණිගත කිරීමෙන් සහ පහත ඇති Git-metadata සංගණනයෙන් යන දෙකෙන්ම වෙනස් වේ.</sub>
 
-> 🙏 මෙම දායකයින්ගේ විශේෂාංග, දෝෂ නිවැරදි කිරීම් සහ යටිතල ව්යුහ වැඩිදුරු කිරීම් OmniRoute විශ්වාසදායක සහ විශේෂාංග-පූර්ණ බවට පත් කරන දේවල්වල **මූලික කොටසකි**. සෑම pull request එකක්ම, සෑම පරීක්ෂණ අවස්ථාවක්ම සහ සෑම i18n පරිවර්තන ගොනුවක්ම වැදගත් වේ. විවෘත මූලාශ්ර ගොඩනඟා ඇත්තේ ඔවුන් වැනි අය විසිනි.
+> 🙏 මෙම දායකයන්ගේ විශේෂාංග, දෝෂ නිවැරදි කිරීම් සහ යටිතල පහසුකම් වැඩිදියුණු කිරීම් OmniRoute විශ්වාසදායක සහ විශේෂාංගවලින් පොහොසත් කරන දෙයෙහි **මූලික කොටසකි**. සෑම pull request එකක්ම, සෑම test case එකක්ම සහ සෑම i18n පරිවර්තන ගොනුවක්ම වැදගත් වේ. විවෘත මූලාශ්ර ගොඩනඟන්නේ ඔවුන් වැනි පුද්ගලයන් විසිනි.
 
 </div>
 

@@ -1,11 +1,9 @@
-import { assignProxyToScope, getProxyAssignments } from "@/lib/db/proxies";
+import { handleProxyAssignmentPut } from "@/lib/api/proxyAssignmentWrite";
+import { getProxyAssignments } from "@/lib/db/proxies";
 import { parseIntegerQueryParam } from "@/lib/api/queryIntegerParam";
 import { resolveProxyForConnection } from "@/lib/db/settings";
-import { proxyAssignmentSchema } from "@/shared/validation/schemas";
-import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
-import { createErrorResponse, createErrorResponseFromUnknown } from "@/lib/api/errorResponse";
+import { createErrorResponseFromUnknown } from "@/lib/api/errorResponse";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
-import { clearDispatcherCache } from "@omniroute/open-sse/utils/proxyDispatcher";
 
 function toPagination(searchParams: URLSearchParams): { limit: number; offset: number } | Response {
   const parsedLimit = parseIntegerQueryParam(searchParams, "limit", 100);
@@ -55,37 +53,5 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const authError = await requireManagementAuth(request);
-  if (authError) return authError;
-
-  let rawBody: unknown;
-  try {
-    rawBody = await request.json();
-  } catch {
-    return createErrorResponse({
-      status: 400,
-      message: "Invalid JSON body",
-      type: "invalid_request",
-    });
-  }
-
-  try {
-    const validation = validateBody(proxyAssignmentSchema, rawBody);
-    if (isValidationFailure(validation)) {
-      return createErrorResponse({
-        status: 400,
-        message: validation.error.message,
-        details: validation.error.details,
-        type: "invalid_request",
-      });
-    }
-
-    const { scope, scopeId, proxyId } = validation.data;
-    const assignment = await assignProxyToScope(scope, scopeId || null, proxyId || null);
-    clearDispatcherCache();
-
-    return Response.json({ success: true, assignment });
-  } catch (error) {
-    return createErrorResponseFromUnknown(error, "Failed to update proxy assignment");
-  }
+  return handleProxyAssignmentPut(request, "Failed to update proxy assignment");
 }

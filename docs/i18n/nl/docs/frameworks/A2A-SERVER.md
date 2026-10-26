@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Voor `smart-routing` is `metadata.combo` een expliciete overschrijving van
+`metadata.model` voor de gatewayaanvraag; deze wordt verzonden als het daadwerkelijke `model`,
+niet als een genegeerd JSON-veld `x-combo`. De normale API-sleutel- en
+autorisatiecontroles per doel van de gateway blijven van toepassing. Een ongeldige of lege combo wordt geweigerd.
+
+Het resultaat bevat `requested_combo` (intentie van de aanroeper), `dispatched_model`
+(de daadwerkelijke gatewayaanvraag), `response_model` (gatewayantwoord) en
+`confirmed_combo`. Het laatste veld is `null`, tenzij de gateway expliciet
+een combo identificeert. A2A-beslissingslogboeken schrijven uitvoering alleen toe aan een
+bevestigde combo en behouden een onbevestigde aanvraag als `requestedCombo`.
+
 **Antwoord:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE-events:**
+**SSE-gebeurtenissen:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}

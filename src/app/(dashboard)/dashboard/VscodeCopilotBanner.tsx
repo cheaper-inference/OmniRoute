@@ -2,6 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 
 // Marketplace listing is the primary CTA; Open VSX (Cursor/Windsurf/VSCodium/etc.)
 // is called out via secondaryNote instead of a second button, to keep this banner
@@ -58,17 +60,16 @@ export default function VscodeCopilotBanner() {
     window.dispatchEvent(new Event(DISMISS_EVENT));
   };
 
+  // Partner identity colour (#007ACC) — brand, not a semantic status tone; kept as-is.
   return (
     <div
       role="complementary"
       aria-label={t("title")}
-      className="mb-4 flex flex-col gap-3 rounded-lg border border-[#007ACC]/30 bg-[#007ACC]/5 px-4 py-3 dark:bg-[#007ACC]/10 sm:flex-row sm:items-center sm:justify-between"
+      className="mb-4 flex flex-col gap-3 rounded-lg border border-[#007ACC]/30 bg-[#007ACC]/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex min-w-0 items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#007ACC]/10">
-          <span className="material-symbols-outlined text-[22px] text-[#007ACC]" aria-hidden="true">
-            extension
-          </span>
+          <Icon name="extension" size={22} className="text-[#007ACC]" />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-semibold text-text-main">{t("title")}</p>
@@ -85,20 +86,18 @@ export default function VscodeCopilotBanner() {
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#007ACC] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:brightness-110"
           >
             {t("cta")}
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              open_in_new
-            </span>
+            <Icon name="open_in_new" size={14} />
           </a>
           <span className="text-[9px] text-text-muted/70">{t("secondaryNote")}</span>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          icon="close"
           onClick={dismiss}
           aria-label={t("dismissAriaLabel")}
-          className="text-text-muted transition-colors hover:text-text-main"
-        >
-          <span className="material-symbols-outlined text-[18px]">close</span>
-        </button>
+          className="text-text-muted hover:text-text-main"
+        />
       </div>
     </div>
   );

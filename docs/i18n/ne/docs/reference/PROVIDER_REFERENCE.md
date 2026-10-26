@@ -4,11 +4,11 @@
 
 ---
 
-> **स्वतः-उत्पन्न** `src/shared/constants/providers.ts` बाट — हातले सम्पादन नगर्नुहोस्।
-> पुनः उत्पन्न गर्न: `npm run gen:provider-reference`
-> **अन्तिम पटक उत्पन्न गरिएको:** 2026-10-18
+> `src/shared/constants/providers.ts` बाट **स्वतः उत्पन्न गरिएको** — हातैले सम्पादन नगर्नुहोस्।
+> यसद्वारा पुनः उत्पन्न गर्नुहोस्: `npm run gen:provider-reference`
+> **पछिल्लो पटक उत्पन्न गरिएको:** 2026-10-20
 
-जम्मा प्रदायकहरू: **375**। तल श्रेणी विभाजन हेर्नुहोस्।
+कुल प्रदायकहरू: **375**। तल श्रेणीगत विवरण हेर्नुहोस्।
 
 ## श्रेणीहरू
 
@@ -460,9 +460,9 @@
 ## सत्यका स्रोतहरू
 
 - क्याटलग: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- रजिस्ट्री (प्रति-मोडेल विवरणहरू): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- एक्जिक्युटरहरू: [`open-sse/executors/`](../../open-sse/executors/) (154 कार्यान्वयनहरू)
-- अनुवादकहरू: [`open-sse/translator/`](../../open-sse/translator/)
+- रजिस्ट्री (प्रत्येक मोडेलका विवरणहरू): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- एक्जिक्युटरहरू: [`open-sse/executors/`](../../open-sse/executors/) (156 कार्यान्वयनहरू)
+- ट्रान्सलेटरहरू: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## यो पनि हेर्नुहोस्
 

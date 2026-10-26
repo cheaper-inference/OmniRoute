@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button, Input, Select, Toggle } from "@/shared/components";
+import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import { Field } from "@omniroute/ui-kit/field";
+import { Card, Button, Input, Select, Toggle, Textarea, Badge } from "@/shared/components";
 import {
   PII_BUILTIN_TYPES,
   PII_CUSTOM_PATTERN_LIMITS,
@@ -53,6 +55,7 @@ export default function PiiMaskingCard() {
   const [testResult, setTestResult] = useState<{ count: number; preview: string } | null>(null);
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const sampleId = useId();
 
   const apply = (payload: PiiSettingsPayload) => {
     setData(payload);
@@ -147,17 +150,11 @@ export default function PiiMaskingCard() {
     : [];
 
   return (
-    <Card>
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 rounded-lg bg-primary/10 text-primary">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            visibility_off
-          </span>
-        </div>
-        <h3 className="text-lg font-semibold">{t("piiMasking.title")}</h3>
-      </div>
-      <p className="text-sm text-text-muted mb-3">{t("piiMasking.description")}</p>
-
+    <Card
+      title={t("piiMasking.title")}
+      subtitle={t("piiMasking.description")}
+      icon="visibility_off"
+    >
       <div className="flex flex-wrap gap-3 text-xs mb-4">
         {[
           ["piiMasking.requestFlag", "PII_REDACTION_ENABLED", data?.requestMaskingEnabled],
@@ -167,10 +164,17 @@ export default function PiiMaskingCard() {
             data?.responseSanitizationEnabled,
           ],
         ].map(([labelKey, flag, on]) => (
-          <span key={String(flag)} className="rounded border border-border/50 px-2 py-1">
-            {t(String(labelKey))}: <code>{String(flag)}</code>{" "}
-            <strong>{on ? tc("enabled") : tc("disabled")}</strong>
-          </span>
+          <Badge
+            key={String(flag)}
+            variant={on ? "success" : "default"}
+            className="h-auto whitespace-normal break-all"
+          >
+            {/* One inline run so the label, flag and state wrap as text at phone width. */}
+            <span>
+              {t(String(labelKey))}: <code>{String(flag)}</code>{" "}
+              <strong>{on ? tc("enabled") : tc("disabled")}</strong>
+            </span>
+          </Badge>
         ))}
       </div>
 
@@ -188,19 +192,18 @@ export default function PiiMaskingCard() {
         ))}
       </div>
 
-      <p className="font-medium mb-2">{t("piiMasking.builtinTypes")}</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
-        {PII_BUILTIN_TYPES.map((type) => (
-          <label key={type} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
+      <CheckboxGroup label={t("piiMasking.builtinTypes")} className="mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {PII_BUILTIN_TYPES.map((type) => (
+            <Checkbox
+              key={type}
               checked={selected.includes(type)}
               onChange={() => toggleType(type)}
+              label={t(`piiMasking.types.${type}`)}
             />
-            {t(`piiMasking.types.${type}`)}
-          </label>
-        ))}
-      </div>
+          ))}
+        </div>
+      </CheckboxGroup>
 
       <p className="font-medium">{t("piiMasking.customPatterns")}</p>
       <p className="text-sm text-text-muted mb-2">
@@ -211,6 +214,7 @@ export default function PiiMaskingCard() {
           <div key={p.id} className="flex items-center gap-2 text-sm">
             <Toggle
               size="sm"
+              ariaLabel={p.name}
               checked={p.enabled}
               onChange={() =>
                 setPatterns((prev) =>
@@ -234,11 +238,13 @@ export default function PiiMaskingCard() {
       {patterns.length < PII_CUSTOM_PATTERN_LIMITS.maxPatterns && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-2">
           <Input
+            label={tc("name")}
             placeholder={tc("name")}
             value={draft.name}
             onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
           />
           <Select
+            label={tc("type")}
             value={draft.type}
             onChange={(e) => setDraft((d) => ({ ...d, type: e.target.value as PatternType }))}
             options={[
@@ -247,12 +253,14 @@ export default function PiiMaskingCard() {
             ]}
           />
           <Input
+            label={t("piiMasking.pattern")}
             placeholder={t("piiMasking.pattern")}
             value={draft.pattern}
             maxLength={PII_CUSTOM_PATTERN_LIMITS.maxPatternLength}
             onChange={(e) => setDraft((d) => ({ ...d, pattern: e.target.value }))}
           />
           <Input
+            label={t("piiMasking.flags")}
             placeholder={t("piiMasking.flags")}
             value={draft.flags}
             disabled={draft.type === "wildcard"}
@@ -260,14 +268,16 @@ export default function PiiMaskingCard() {
           />
         </div>
       )}
-      <textarea
-        className="w-full rounded-control border border-border/50 bg-transparent p-2 text-sm mb-2"
-        rows={2}
-        placeholder={t("piiMasking.sampleText")}
-        value={sample}
-        maxLength={PII_CUSTOM_PATTERN_LIMITS.maxSampleBytes}
-        onChange={(e) => setSample(e.target.value)}
-      />
+      <Field label={t("piiMasking.sampleText")} htmlFor={sampleId} className="mb-2">
+        <Textarea
+          id={sampleId}
+          rows={2}
+          placeholder={t("piiMasking.sampleText")}
+          value={sample}
+          maxLength={PII_CUSTOM_PATTERN_LIMITS.maxSampleBytes}
+          onChange={(e) => setSample(e.target.value)}
+        />
+      </Field>
       <div className="flex flex-wrap gap-2 mb-2">
         <Button size="sm" variant="secondary" onClick={testDraft} disabled={!draft.pattern}>
           {t("piiMasking.test")}
@@ -288,7 +298,10 @@ export default function PiiMaskingCard() {
           {tc("save")}
         </Button>
         {status && (
-          <span className={status.ok ? "text-sm text-green-600" : "text-sm text-red-500"}>
+          <span
+            role={status.ok ? "status" : "alert"}
+            className={status.ok ? "text-sm text-success" : "text-sm text-error"}
+          >
             {status.message}
           </span>
         )}

@@ -73,6 +73,21 @@ export function buildAutoQuotaThresholds(
       return defaultThresholdPercent;
     },
     resolveWarnRemainingPercent: () => warnThresholdPercent,
+    // Note: inert until a combo caller passes scope.connectionId — combo calls
+    // evaluateQuotaCutoff without it, so the healthy-override branch never runs here.
+    isConfiguredCutoff: (windowName: string | null): boolean => {
+      if (windowName !== null) {
+        for (const name of quotaWindowLookupNames(provider, windowName)) {
+          if (
+            Object.hasOwn(perConnectionWindowOverrides, name) ||
+            Object.hasOwn(providerWindowMap, name)
+          ) {
+            return true;
+          }
+        }
+      }
+      return quotaPreflight?.enabled === true || defaultThresholdPercent > 2;
+    },
   };
 }
 
