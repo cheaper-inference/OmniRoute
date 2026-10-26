@@ -1,0 +1,1 @@
+- **fix(docker):** add a Docker-client-free `runner-cli-no-docker` target built from a shared `runner-cli-core`, keep the default `runner-cli` target backward compatible with the Docker and Compose clients, and remove Next.js trace manifests from standalone artifacts ([#17972](https://github.com/cheaper-inference/OmniRoute/pull/17972)) — thanks @seanford
