@@ -1527,7 +1527,6 @@
       "health",
       "kiroAuthModal",
       "kiroSocialOAuthModal",
-      "mitm",
       "noAuthProvider",
       "oauthModal",
       "providerStats",
