@@ -178,10 +178,10 @@ node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Chỉ các kiểm thử đơn vị bị ảnh hưởng bởi thay đổi của bạn (cùng bộ chọn TIA như cổng CI, #8084)
 npm run test:scoped            # các thay đổi trong commit gần nhất (hoặc cây làm việc)
-npm run test:scoped:staged     # chỉ các thay đổi đã staged — phù hợp để chạy cùng pre-commit
-npm run test:scoped:full       # xây dựng lại ánh xạ đồ thị nhập trước (sau khi thêm/di chuyển tệp)
-# Mã thoát 1 + "run the full suite" có nghĩa là một tệp trung tâm (tsconfig, package.json, …) hoặc
-# nguồn chưa được ánh xạ đã thay đổi — bộ chọn chuyển sang chế độ an toàn, không bao giờ âm thầm bỏ qua.
+npm run test:scoped:staged     # chỉ các thay đổi đã được staged — phù hợp để chạy trước khi commit
+npm run test:scoped:full       # trước tiên dựng lại bản đồ đồ thị nhập (sau khi thêm/di chuyển tệp)
+# Mã thoát 1 + "chạy toàn bộ bộ kiểm thử" nghĩa là một tệp trung tâm (tsconfig, package.json, …) hoặc
+# nguồn chưa được ánh xạ đã thay đổi — bộ chọn sẽ chuyển sang trạng thái an toàn, không bao giờ âm thầm bỏ qua.
 
 # Vitest (máy chủ MCP, autoCombo, bộ nhớ đệm)
 npm run test:vitest
@@ -189,7 +189,7 @@ npm run test:vitest
 # Kiểm thử E2E (yêu cầu Playwright)
 npm run test:e2e
 
-# E2E cho các máy khách giao thức (phương thức truyền tải MCP, A2A)
+# E2E cho các máy khách giao thức (các phương thức truyền tải MCP, A2A)
 npm run test:protocols:e2e
 
 # Kiểm thử khả năng tương thích hệ sinh thái
@@ -203,16 +203,16 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Kiểm thử nhanh tổ hợp thực tế có kiểm soát với upstream (yêu cầu quyền truy cập VPS + tín dụng nhà cung cấp thực)
-# Gọi các nhà cung cấp THỰC — tốn một ít chi phí. KHÔNG BAO GIỜ chạy trong CI. Bỏ qua an toàn nếu không có cổng kiểm soát.
+# Kiểm thử nhanh tổ hợp với upstream thực có kiểm soát (yêu cầu quyền truy cập VPS + tín dụng từ nhà cung cấp thực)
+# Gọi các nhà cung cấp THỰC — tốn một khoản nhỏ. KHÔNG BAO GIỜ chạy trong CI. Bỏ qua an toàn nếu không có cổng kiểm soát.
 # Yêu cầu: quyền truy cập ssh root@192.168.0.15 (nạp ảnh chụp nhanh DB chỉ đọc từ VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Kiểm thử nhanh trực tiếp VPS giai đoạn 3 — các tập lệnh Node ESM thuần túy, gọi trực tiếp máy chủ .15 đang hoạt động.
-# Yêu cầu: quyền truy cập ssh root@192.168.0.15 (các tổ hợp được tạo/xóa qua SSH sqlite).
+# Kiểm thử nhanh trực tiếp trên VPS giai đoạn 3 — các tập lệnh Node ESM thuần, gọi trực tiếp máy chủ .15 đang hoạt động.
+# Yêu cầu: quyền truy cập ssh root@192.168.0.15 (các tổ hợp được tạo/gỡ bỏ qua SSH sqlite).
 # Gọi các nhà cung cấp THỰC (chi phí nhỏ). Chỉ tạo/xóa các tổ hợp __live_test__*. KHÔNG BAO GIỜ chạy trong CI.
 # REQUIRE_API_KEY=false trên .15 nên không cần khóa API, nhưng vẫn tuân theo COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY nếu được đặt.
-npm run test:combo:live:vps              # 7 kịch bản HTTP (ưu tiên/luân phiên/có trọng số/chi phí/hợp nhất/tự động + trạng thái)
+npm run test:combo:live:vps              # 7 kịch bản HTTP (ưu tiên/luân phiên/có trọng số/chi phí/hợp nhất/tự động + tình trạng)
 npm run test:combo:live:vps:failover     # thêm một kịch bản chuyển đổi dự phòng thực giữa các nhà cung cấp (tổng cộng 8)
 ```
 
@@ -220,34 +220,35 @@ Ghi chú về độ bao phủ:
 
 - `npm run test:coverage` đo độ bao phủ mã nguồn cho bộ kiểm thử đơn vị chính, loại trừ `tests/**` và bao gồm `open-sse/**`
 - Các pull request phải duy trì ngưỡng độ bao phủ ở mức **60%+** đối với câu lệnh/dòng/hàm/nhánh
-- Nếu một PR thay đổi mã production trong `src/`, `open-sse/`, `electron/` hoặc `bin/`, PR đó phải thêm hoặc cập nhật các kiểm thử tự động trong cùng PR
+- Nếu một PR thay đổi mã nguồn production trong `src/`, `open-sse/`, `electron/` hoặc `bin/`, PR đó phải thêm hoặc cập nhật các kiểm thử tự động
 - `npm run coverage:report` in báo cáo chi tiết theo từng tệp từ lần chạy độ bao phủ gần nhất
-- `npm run test:coverage:legacy` giữ lại chỉ số cũ để so sánh theo lịch sử
+- `npm run test:coverage:legacy` giữ lại chỉ số cũ để so sánh lịch sử
 - Xem `docs/ops/COVERAGE_PLAN.md` để biết lộ trình cải thiện độ bao phủ theo từng giai đoạn
 
 ### Yêu cầu đối với Pull Request
 
-Trước khi mở một PR, hãy sử dụng
-[Quy trình chuẩn để đóng góp](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) để chạy vòng lặp tập trung cho
+Trước khi mở PR, hãy sử dụng
+[Lộ trình chuẩn để đóng góp](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) để chạy vòng lặp tập trung cho
 những gì bạn đã thay đổi. Toàn bộ bộ kiểm thử đơn vị (4 phân đoạn CI), Vitest, ngưỡng độ bao phủ **60%+** và
-bản dựng production thuộc trách nhiệm của CI — việc chạy chúng cục bộ không cung cấp thêm tín hiệu nào ngoài
-những gì các bước kiểm tra PR đã cung cấp, đồng thời trên các máy cấu hình thấp hơn, việc này có thể làm quá tải máy chủ (#8084):
+bản dựng production thuộc trách nhiệm của CI — chạy chúng cục bộ không cung cấp thêm tín hiệu nào ngoài những gì
+các bước kiểm tra PR đã cung cấp, đồng thời trên các máy cấu hình thấp hơn, việc này có thể làm hệ thống quá tải (#8084):
 
 - Chạy các tệp kiểm thử bao phủ thay đổi của bạn: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Chạy `npm run lint`
 - Thêm hoặc cập nhật các kiểm thử tự động trong cùng PR bất cứ khi nào mã production thay đổi
-- Liệt kê các tệp kiểm thử đã thay đổi hoặc được thêm vào trong phần mô tả PR khi mã production thay đổi
+- Trong các tệp `node:test`, hãy đặt mọi `await` ở cấp cao nhất (chẳng hạn như `await import(...)`) trước `test()` / `describe()` đầu tiên: khi dùng `--test-force-exit`, các kiểm thử được đăng ký sau đó có thể âm thầm không bao giờ chạy (#18045; được thực thi bởi `npm run check:test-tla-order`)
+- Khi mã production thay đổi, hãy liệt kê các tệp kiểm thử đã thay đổi hoặc được thêm vào trong phần mô tả PR
 - Kiểm tra kết quả SonarQube trên PR khi các secret của dự án được cấu hình trong CI
 
 Trạng thái kiểm thử hiện tại: **122 tệp kiểm thử đơn vị** bao phủ:
 
 - Các trình chuyển đổi nhà cung cấp và chuyển đổi định dạng
 - Giới hạn tốc độ, bộ ngắt mạch và khả năng phục hồi
-- Bộ nhớ đệm ngữ nghĩa, tính lũy đẳng, theo dõi tiến độ
+- Bộ nhớ đệm ngữ nghĩa, tính lũy đẳng và theo dõi tiến trình
 - Các thao tác cơ sở dữ liệu và schema (21 mô-đun DB)
 - Các luồng OAuth và xác thực
 - Xác thực endpoint API (Zod v4)
-- Các công cụ máy chủ MCP và thực thi phạm vi
+- Các công cụ máy chủ MCP và việc thực thi phạm vi
 - Các hệ thống Memory và Skills
 
 ---

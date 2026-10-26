@@ -4,11 +4,11 @@
 
 ---
 
-> **স্বয়ংক্রিয়ভাবে তৈরি** — `src/shared/constants/providers.ts` থেকে — ম্যানুয়ালি সম্পাদনা করবেন না।
-> পুনরায় তৈরি করতে চালান: `npm run gen:provider-reference`
-> **সর্বশেষ তৈরি:** 2026-10-18
+> `src/shared/constants/providers.ts` থেকে **স্বয়ংক্রিয়ভাবে তৈরি** — হাতে সম্পাদনা করবেন না।
+> পুনরায় তৈরি করুন: `npm run gen:provider-reference`
+> **সর্বশেষ তৈরি:** 2026-10-20
 
-মোট প্রোভাইডার: **375**। নিচে বিভাগ অনুযায়ী বিভাজন দেখুন।
+মোট প্রদানকারী: **375**। নিচে বিভাগভিত্তিক বিবরণ দেখুন।
 
 ## বিভাগসমূহ
 
@@ -460,8 +460,8 @@
 ## সত্যের উৎসসমূহ
 
 - ক্যাটালগ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- রেজিস্ট্রি (প্রতি-মডেল বিবরণ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- এক্সিকিউটরসমূহ: [`open-sse/executors/`](../../open-sse/executors/) (১৫৪টি বাস্তবায়ন)
+- রেজিস্ট্রি (প্রতি-মডেলের বিস্তারিত): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- এক্সিকিউটরসমূহ: [`open-sse/executors/`](../../open-sse/executors/) (156টি বাস্তবায়ন)
 - ট্রান্সলেটরসমূহ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## আরও দেখুন

@@ -6,9 +6,9 @@
 
 > `src/shared/constants/providers.ts` dosyasından **otomatik olarak oluşturulmuştur** — elle düzenlemeyin.
 > Yeniden oluşturmak için: `npm run gen:provider-reference`
-> **Son oluşturulma:** 2026-10-18
+> **Son oluşturulma:** 2026-10-20
 
-Toplam sağlayıcı sayısı: **375**. Kategori dağılımı için aşağıya bakın.
+Toplam sağlayıcı: **375**. Aşağıdaki kategori dağılımına bakın.
 
 ## Kategoriler
 
@@ -461,8 +461,8 @@ Her sağlayıcıyı etkinleştirmek, yapılandırmak ve test etmek için `/dashb
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Kayıt defteri (model bazında ayrıntılar): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Yürütücüler: [`open-sse/executors/`](../../open-sse/executors/) (154 implementasyon)
-- Çeviriciler: [`open-sse/translator/`](../../open-sse/translator/)
+- Yürütücüler: [`open-sse/executors/`](../../open-sse/executors/) (156 uygulama)
+- Dönüştürücüler: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Ayrıca Bakınız
 

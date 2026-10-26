@@ -15,6 +15,9 @@ import {
 } from "../../src/shared/constants/chatgptWebRetirement.ts";
 
 const MODEL_IDS = [
+  "gpt-6",
+  "gpt-6-thinking",
+  "gpt-6-pro",
   "gpt-5-6",
   "gpt-5-6-thinking",
   "gpt-5-6-pro",

@@ -145,7 +145,7 @@ describe("CompressionHub — PUT sends patch only, not full settings", () => {
     });
 
     // Find the context editing toggle button
-    const toggleButtons = container.querySelectorAll("button[role='switch']");
+    const toggleButtons = container.querySelectorAll("[role='switch']");
     expect(toggleButtons.length).toBeGreaterThan(0);
 
     await act(async () => {

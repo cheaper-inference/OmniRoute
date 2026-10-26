@@ -5,10 +5,10 @@
 ---
 
 > `src/shared/constants/providers.ts` నుండి **స్వయంచాలకంగా రూపొందించబడింది** — చేతితో సవరించవద్దు.
-> మళ్లీ రూపొందించడానికి: `npm run gen:provider-reference`
-> **చివరిగా రూపొందించబడింది:** 2026-10-18
+> దీనితో మళ్లీ రూపొందించండి: `npm run gen:provider-reference`
+> **చివరిగా రూపొందించబడింది:** 2026-10-20
 
-మొత్తం ప్రొవైడర్లు: **375**. క్రింద వర్గం వారీగా విభజనను చూడండి.
+మొత్తం ప్రొవైడర్లు: **375**. దిగువన ఉన్న వర్గాల విభజనను చూడండి.
 
 ## వర్గాలు
 
@@ -457,12 +457,12 @@
 | ------ | ------- | ------------------- | -------- | -------- | ------- |
 | `auto` | `auto`  | ఆటో (జీరో-కాన్ఫిగ్) | సిస్టమ్  | —        | —       |
 
-## సత్య మూలాలు
+## ప్రామాణిక మూలాలు
 
 - కాటలాగ్: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- రిజిస్ట్రీ (మోడల్ వారీ వివరాలు): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ఎగ్జిక్యూటర్లు: [`open-sse/executors/`](../../open-sse/executors/) (154 అమలులు)
-- ట్రాన్స్లేటర్లు: [`open-sse/translator/`](../../open-sse/translator/)
+- రిజిస్ట్రీ (ప్రతి మోడల్ వివరాలు): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- ఎగ్జిక్యూటర్లు: [`open-sse/executors/`](../../open-sse/executors/) (156 అమలులు)
+- అనువాదకాలు: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ఇవి కూడా చూడండి
 
