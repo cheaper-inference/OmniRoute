@@ -775,6 +775,72 @@ test("Grep count mode bridges content search so results can be counted", () => {
   assert.deepEqual(result, { toolName: "grep", arguments: { pattern: "snake" } });
 });
 
+/**
+ * The declared grep tool in a real MCP client carries length constraints on
+ * `pattern` (`minLength: 1` is the common one). Requiring the property to be a
+ * bare `{ type: "string" }` discarded every such tool, so Cursor's Grep ended in
+ * the fail-closed rejection even though the pattern Cursor sent was valid.
+ */
+test("Grep bridges a pattern property constrained by minLength", () => {
+  const result = bridgeCursorBuiltinTool(
+    grepEvent(),
+    defs([
+      tool(
+        "grep",
+        {
+          pattern: { type: "string", minLength: 1 },
+          path: { type: "string" },
+          include: { type: "string" },
+        },
+        ["pattern"]
+      ),
+    ]),
+    "posix"
+  );
+  assert.deepEqual(result, {
+    toolName: "grep",
+    arguments: { pattern: "snake", path: "/tmp/12", include: "*.cpp" },
+  });
+});
+
+test("Grep bridges a pattern property constrained by maxLength", () => {
+  const result = bridgeCursorBuiltinTool(
+    grepEvent({ pattern: "abc" }),
+    defs([tool("grep", { pattern: { type: "string", maxLength: 8 } }, ["pattern"])]),
+    "posix"
+  );
+  assert.deepEqual(result, { toolName: "grep", arguments: { pattern: "abc" } });
+});
+
+test("Grep fails closed when the pattern violates maxLength", () => {
+  const result = bridgeCursorBuiltinTool(
+    grepEvent({ pattern: "snake" }),
+    defs([tool("grep", { pattern: { type: "string", maxLength: 3 } }, ["pattern"])]),
+    "posix"
+  );
+  assert.equal(result, null);
+});
+
+test("Grep fails closed when the pattern violates minLength", () => {
+  const result = bridgeCursorBuiltinTool(
+    grepEvent({ pattern: "ab" }),
+    defs([tool("grep", { pattern: { type: "string", minLength: 5 } }, ["pattern"])]),
+    "posix"
+  );
+  assert.equal(result, null);
+});
+
+test("Grep still fails closed on validation keywords the bridge does not implement", () => {
+  for (const extra of [{ pattern: "^sn" }, { format: "regex" }, { multipleOf: 2 }]) {
+    const result = bridgeCursorBuiltinTool(
+      grepEvent(),
+      defs([tool("grep", { pattern: { type: "string", ...extra } }, ["pattern"])]),
+      "posix"
+    );
+    assert.equal(result, null, `unsupported keyword must fail closed: ${JSON.stringify(extra)}`);
+  }
+});
+
 test("bridges Cursor Ls onto a glob tool, supplying the required pattern", () => {
   const event = { kind: "exec_ls", execMsgId: 1, execId: "e", path: "/tmp/12" } as ExecServerEvent;
   const result = bridgeCursorBuiltinTool(

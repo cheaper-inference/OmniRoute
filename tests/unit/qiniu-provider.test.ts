@@ -9,6 +9,13 @@ const { PROVIDER_ENDPOINTS } = await import("../../src/shared/constants/config.t
 const { REGISTRY: providerRegistry } = await import("../../open-sse/config/providerRegistry.ts");
 const { isValidModel } = await import("../../src/shared/constants/models.ts");
 
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-qiniu-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+
+const core = await import("../../src/lib/db/core.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
+const modelsRoute = await import("../../src/app/api/providers/[id]/models/route.ts");
+
 const QINIU_CHAT_URL = "https://api.qnaigc.com/v1/chat/completions";
 const QINIU_MODELS_URL = "https://api.qnaigc.com/v1/models";
 
@@ -51,13 +58,6 @@ test("Qiniu accepts any model id via passthrough models (DeepSeek/Claude/Kimi be
   assert.equal(isValidModel("qiniu", "claude-sonnet-4-5"), true);
   assert.equal(isValidModel("qiniu", "kimi-k2"), true);
 });
-
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-qiniu-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
-
-const core = await import("../../src/lib/db/core.ts");
-const providersDb = await import("../../src/lib/db/providers.ts");
-const modelsRoute = await import("../../src/app/api/providers/[id]/models/route.ts");
 
 async function resetStorage() {
   core.resetDbInstance();

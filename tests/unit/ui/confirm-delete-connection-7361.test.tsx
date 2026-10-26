@@ -42,6 +42,9 @@ import { ConfirmModal } from "@/shared/components";
 import { useConnectionDeleteConfirm } from "@/app/(dashboard)/dashboard/providers/[id]/hooks/useConnectionDeleteConfirm";
 import { useNotificationStore } from "@/store/notificationStore";
 
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so queries start there (the container is a child of body).
+
 const cleanupCallbacks: Array<() => void> = [];
 
 function makeContainer(): HTMLElement {
@@ -127,7 +130,7 @@ describe("confirm before removing a single connection (#7361)", () => {
   });
 
   function clickDeleteButton() {
-    const deleteButton = container.querySelector<HTMLButtonElement>("button[title='delete']");
+    const deleteButton = document.body.querySelector<HTMLButtonElement>("button[title='delete']");
     expect(deleteButton).toBeTruthy();
     act(() => {
       deleteButton!.click();
@@ -135,7 +138,7 @@ describe("confirm before removing a single connection (#7361)", () => {
   }
 
   function clickConfirmButton() {
-    const dialog = container.querySelector("[role='dialog']");
+    const dialog = document.body.querySelector("[role='dialog']");
     expect(dialog).toBeTruthy();
     const buttons = Array.from(dialog!.querySelectorAll("button"));
     const confirmButton = buttons.find((b) => b.textContent?.trim() === "Delete");
@@ -148,12 +151,12 @@ describe("confirm before removing a single connection (#7361)", () => {
       root.render(<Harness />);
     });
 
-    expect(container.querySelector("[role='dialog']")).toBeNull();
+    expect(document.body.querySelector("[role='dialog']")).toBeNull();
 
     clickDeleteButton();
 
     expect(fetchStub).not.toHaveBeenCalled();
-    expect(container.querySelector("[role='dialog']")).toBeTruthy();
+    expect(document.body.querySelector("[role='dialog']")).toBeTruthy();
   });
 
   it("includes the account name in the confirm dialog copy", async () => {
@@ -163,7 +166,7 @@ describe("confirm before removing a single connection (#7361)", () => {
 
     clickDeleteButton();
 
-    const dialog = container.querySelector("[role='dialog']");
+    const dialog = document.body.querySelector("[role='dialog']");
     expect(dialog?.textContent).toContain("Production Key");
   });
 

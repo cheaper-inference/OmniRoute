@@ -1,7 +1,10 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 // Phase 1t.7 extraction — Issue #3501
 import Link from "next/link";
+import { buttonVariants } from "@omniroute/ui-kit/button";
 import { Card } from "@/shared/components";
 import { providerText } from "../providerPageHelpers";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
@@ -27,18 +30,12 @@ export default function UpstreamProxyCard({ t }: UpstreamProxyCardProps) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/dashboard/cli-code"
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-text-main hover:border-primary/40 hover:text-text-primary transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">terminal</span>
+          <Link href="/dashboard/cli-code" className={buttonVariants({ variant: "outline" })}>
+            <Icon name="terminal" size={16} />
             {t("openCliTools")}
           </Link>
-          <Link
-            href="/dashboard/settings"
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-text-main hover:border-primary/40 hover:text-text-primary transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">settings</span>
+          <Link href="/dashboard/settings" className={buttonVariants({ variant: "outline" })}>
+            <Icon name="settings" size={16} />
             {t("openSettings")}
           </Link>
         </div>

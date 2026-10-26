@@ -1,0 +1,1 @@
+- **ci(electron):** the shared Next standalone job reuses the `next-build` artifact the CI produced for the same commit (hosted build only as fallback), so the four desktop legs stop rebuilding Next themselves — the macOS arm64 leg alone took 4h41 on v3.8.52 ([#17275](https://github.com/diegosouzapw/OmniRoute/pull/17275))

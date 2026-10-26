@@ -16,65 +16,53 @@ Varjatud toimimise funktsioonid võimaldavad OmniRoute'il olla ühilduvuskiht ka
 
 ---
 
-## TLS-sõrmejäljestuse kiht
+## TLS-sõrmejäljestamise kiht
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Püsivad `wreq-js`-seansid luuakse laisalt iga kontoskoobi ja lahendatud puhverserveri kohta. Protsessiülene `TlsClient` koondab kuni 128 seanssi, mis matkivad Cloudflare'i taga olevate lähteteenuste jaoks **Chrome 124 brauserit macOS-is**. `TlsClient.fetch()` katkestab vea korral töö, kui natiivne käituskeskkond pole saadaval; kutsuja võib väljaspool seda ümbrist sõnaselgelt valida varuvariandi.
+Püsivad `wreq-js`-seansid luuakse laisalt konto ulatuse ja lahendatud puhverserveri kohta. Protsessiülene `TlsClient` hoiab kogumis kuni 128 seanssi, mis jäljendavad Cloudflare'i taga olevate ülesvooluteenuste jaoks **Chrome 124 brauserit macOS-is**. Kui omamaine käituskeskkond pole saadaval, lõpetab `TlsClient.fetch()` turvaliselt veaga; kutsuja võib väljaspool seda ümbrist selgesõnaliselt valida varuvariandi.
 
 - Seansiprofiil: `browser: "chrome_124", os: "macos"`
-- Puhverserveri lahendamine (prioriteedi järjekorras): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (ka väiketähtedega variandid)
-- Ajalõpp: `TLS_CLIENT_TIMEOUT_MS` (pärineb muutujast `FETCH_TIMEOUT_MS`, vaikeväärtus 600000)
-- `wreq-js` Response ühildub fetchiga (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Puhverserveri lahendamine (prioriteedi järjekorras): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (ka väiketähelised variandid)
+- Ajalõpp: `TLS_CLIENT_TIMEOUT_MS` (pärib väärtuse muutujalt `FETCH_TIMEOUT_MS`, vaikeväärtus 600000)
+- `wreq-js`-i vastus ühildub Fetch API-ga (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Esimese baidi valve (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  lõpetab kohe, kui lähteteenuse päised saabuvad, mistõttu `TLS_CLIENT_TIMEOUT_MS` üksi ei saa piirata
-  keha, mis ei väljasta kunagi esimest baiti. `guardTlsFirstByte()` paneb keha esimese `read()`-i
-  võistlema ajalõpuga `TLS_FIRST_BYTE_WATCHDOG_MS` (vaikimisi `10000`, väärtus `0` keelab selle);
-  terve keha tööd see ei mõjuta, kuid seiskunud keha korral tühistatakse wreq-lugeja ja lastakse
-  `proxyFetch`-i olemasoleval TLS-i varuloogikal jätkata otseühenduse/puhverserveri-dispetšeriga
-  (taasesituseks ebaturvaline päring, nt kehaga POST, põhjustab siiski vea ega käivitata vaikselt
-  uuesti).
+  laheneb kohe, kui ülesvooluteenuse päised saabuvad, seega ei saa `TLS_CLIENT_TIMEOUT_MS` üksi piirata
+  vastust, mille keha ei väljasta kunagi esimest baiti. `guardTlsFirstByte()` paneb keha esimese `read()`
+  kutse võistlema ajalõpuga `TLS_FIRST_BYTE_WATCHDOG_MS` (vaikeväärtus `10000`, `0` keelab selle); korras
+  keha ei mõjutata, kuid takerdunud keha korral tühistatakse wreq-lugeja ja `proxyFetch`-i olemasoleval
+  TLS-i varuloogikal lastakse jätkata otseühenduse/puhverserveri dispetšeriga (taasesitamiseks ebaturvaline
+  päring, nt kehaga POST-päring, annab endiselt vea, selle asemel et seda vaikimisi uuesti proovida).
 
-### Veebiküpsiseid kasutava teenusepakkuja transport — wreq-js 3.2.0
+### Veebiküpsiste teenusepakkuja transport — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` on alltoodud viie spetsiaalse veebiküpsiste transpordi ühine
-adapter. Iga õhuke teenusepakkujapõhine ümbris valib brauseri/OS-i profiili. Adapter kasutab
-failis `open-sse/utils/tlsClient.ts` olevat ühtset wreq käituskeskkonna laadijat ja transpordikogumit,
-mille võtmeks on profiil + OS + lahendatud puhverserver, samas kui iga päring kasutab sätet
-`cookieMode: "ephemeral"`. Seega jagavad kontod ja päringud transporditaseme ühendusi, kuid mitte
-kunagi wreq-seanssi ega küpsisehoidlat.
+`open-sse/services/tlsClientBase.ts` on alltoodud viie spetsialiseeritud veebiküpsiste transpordi ühine adapter. Iga õhuke teenusepakkujapõhine ümbris valib brauseri/OS-i profiili. Adapter kasutab faili `open-sse/utils/tlsClient.ts` ühtset wreq käituskeskkonna laadijat ja transpordikogumit, mille võtme moodustavad profiil + OS + lahendatud puhverserver, samas kui iga päring kasutab seadet `cookieMode: "ephemeral"`. Seega jagavad kontod ja päringud transporditaseme ühendusi, kuid mitte kunagi wreq-seanssi ega küpsisehoidlat.
 
-| Teenusepakkuja | Profiil       | Matkitav OS | Voo EOF-poliitika                            |
-| -------------- | ------------- | ----------- | -------------------------------------------- |
-| Claude         | `chrome_146`  | Linux       | lisa `[DONE]`                                |
-| Perplexity     | `firefox_148` | macOS       | lisa `event: end_of_stream`                  |
-| Grok           | `chrome_146`  | Linux       | jäta `[DONE]` välja                          |
-| Notion         | `chrome_146`  | Windows     | lisa `[DONE]`                                |
-| LMArena        | `chrome_146`  | Windows     | sentinel puudub; sulge natiivse EOF-i korral |
+| Teenusepakkuja | Profiil       | Emuleeritud OS | Voo EOF-i reegel                            |
+| -------------- | ------------- | -------------- | ------------------------------------------- |
+| Claude         | `chrome_146`  | Linux          | kaasa arvatud `[DONE]`                      |
+| Perplexity     | `firefox_151` | macOS          | kaasa arvatud `event: end_of_stream`        |
+| Grok           | `chrome_146`  | Linux          | välja arvatud `[DONE]`                      |
+| Notion         | `chrome_146`  | Windows        | kaasa arvatud `[DONE]`                      |
+| LMArena        | `chrome_146`  | Windows        | sentinel puudub; sulgemine omamaisel EOF-il |
 
-- Voogedastus tarbib natiivse vastuse `ReadableStream`-i otse; ajutist faili ega kõrvalprotsessi ei
+- Voogedastus tarbib omamaise vastuse `ReadableStream`-i otse; ajutist faili ega kõrvalprotsessi ei
   looda.
-- Enne voo avaldamist kontrollitakse kuni 256 algset baiti. SSE-teenusepakkujad puhverdavad mitte-SSE
-  vead; Grok/LMArena vastendavad Cloudflare'i kontrollpäringud olekule `403` ja HTML-vahelehed olekule `502`.
-- Natiivse päringu ajalõppu piirab endiselt absoluutne JS-i jäik tähtaeg. Hangumine muudab kehtetuks
-  ja sulgeb ainult mõjutatud profiili/OS-i/puhverserveri transpordi, enne kui järgmine päring selle
-  uuesti loob.
-- Puhverserveri lahendamise prioriteet on iga kutse puhul `proxyUrl` → päringupõhine konto-/töölauakontekst →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (sealhulgas väiketähtedega variandid). Lahendusvead
-  katkestavad töö selle asemel, et otsese ühenduse kaudu andmeid lekitada. LMArena kasutab
-  lahendamisel teadlikult domeeni `arena.ai`.
-- `byteResponse` tagastab sisutüübiga `data:` URL-i ilma UTF-8 kodeeringut rikkumata.
+- Enne voo avaldamist kontrollitakse kuni 256 esimest baiti. SSE-teenusepakkujad puhverdavad mitte-SSE
+  vead; Grok/LMArena teisendavad Cloudflare'i kontrollpäringud olekuks `403` ja HTML-i vahelehed olekuks `502`.
+- Omamaise päringu ajalõpp jääb absoluutse JS-i tähtaja ümbrisesse. Hangumine muudab kehtetuks ja
+  sulgeb ainult mõjutatud profiili/OS-i/puhverserveri transpordi, enne kui järgmine päring selle uuesti loob.
+- Puhverserveri lahendamise prioriteet on iga kutse puhul `proxyUrl` → päringupõhine konto-/juhtpaneelikontekst →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (sealhulgas väiketähelised variandid). Lahendamise vead blokeerivad
+  ühenduse turvaliselt, selle asemel et lubada otsese ühenduse leket. LMArena lahendab teadlikult domeeni `arena.ai` suhtes.
+- `byteResponse` tagastab sisutüübiga `data:` URL-i ilma UTF-8 andmeid rikkumata.
 - Vead on `TlsClientUnavailableError` (pakett/lisamoodul pole saadaval), `TlsClientHangError`
-  (tähtaeg ületatud) ja `WreqTransportCapacityError` (jagatud seansimahu veakood), kui kõik 128
-  piiratud profiili/OS-i/puhverserveri pesa on aktiivsed või sulgumas.
+  (tähtaeg ületatud) ja `WreqTransportCapacityError` (jagatud seansimahu veakood), kui kõik 128 piiratud
+  profiili/OS-i/puhverserveri pesa on aktiivsed või sulgemisel.
 
-Ülaltoodud üldine `TlsClient`-seanss jääb spetsialiseerituks püsiva brauseripõhise küpsiseoleku
-jaoks. Mõlemad teed taaskasutavad üht puhverdatud wreq-mooduli laadijat ja protsessi elutsükli
-konksu; nende kogumid jäävad eraldi, sest nende küpsiste eluead on tahtlikult erinevad.
+Ülaltoodud üldine `TlsClient`-i seanss jääb spetsialiseerituks brauseritoega küpsiste püsioleku jaoks. Mõlemad teed kasutavad uuesti üht puhverdatud wreq-mooduli laadijat ja protsessi elutsükli konksu; nende kogumid jäävad eraldi, sest nende küpsiste eluead on tahtlikult erinevad.
 
-Kinnitatud versiooniga pakett toetab neid profiile, kuid tegelik WAF-i aktsepteerimine võib
-kohalikest lepingutestidest sõltumatult muutuda. Enne lähteteenuse brauseriga võrdsuse väitmist
-kontrollige sõrmejäljemuudatusi sõnaselgelt volitatud reaalse kontoga.
+Kinnitatud pakett toetab neid profiile, kuid tegelik WAF-i aktsepteerimine võib muutuda kohalikest lepingutestidest sõltumatult. Enne ülesvoolubrauseriga võrdsuse väitmist valideerige sõrmejälje muudatused selgesõnaliselt volitatud päriskontoga.
 
 ---
 

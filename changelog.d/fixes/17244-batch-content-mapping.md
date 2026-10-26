@@ -1,0 +1,1 @@
+- **fix(batch):** Require a content mapping before applying CSV batch mappings; a message role alone no longer satisfies the content requirement. ([#17244](https://github.com/diegosouzapw/OmniRoute/pull/17244)) — thanks @pacocartones

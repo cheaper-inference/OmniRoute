@@ -93,7 +93,7 @@ test("schema_invalid does not throw when required_gates is missing", async () =>
     join(dir, "plan.json"),
     JSON.stringify({
       identity: {
-        repository: "diegosouzapw/OmniRoute",
+        repository: "cheaper-inference/OmniRoute",
         run_id: "1",
         run_attempt: 1,
         workflow: "release-acceptance.yml",
@@ -137,7 +137,7 @@ test("schema_invalid keeps FAILED when reduce already failed", async () => {
   const plan = {
     required_gates: [key("a")],
     identity: {
-      repository: "diegosouzapw/OmniRoute",
+      repository: "cheaper-inference/OmniRoute",
       run_id: "1",
       run_attempt: 1,
       workflow: "release-acceptance.yml",

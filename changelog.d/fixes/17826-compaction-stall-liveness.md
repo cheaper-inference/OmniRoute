@@ -1,0 +1,1 @@
+- **fix(sse):** Codex remote compaction no longer trips the content-stall watchdog mid-compaction — `response.compaction.compacting` progress frames now restart the stall budget like reasoning frames, while keepalive-only streams are still aborted (#17826)

@@ -16,60 +16,60 @@ OmniRoute ń ṣọ̀kan pẹ̀lú àwọn olùpèsè tí àwọn ẹ̀rọ etí
 
 ---
 
-## Ipele Ìdánimọ̀ Ìtẹ̀sí-ọwọ́ TLS
+## Ìpele Ìdánimọ̀ Ìtẹ́wọ́gbà TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Àwọn session `wreq-js` aláìsọ̀rọ̀dájú ni a ń ṣẹ̀dá ní ọ̀lẹ̀ọ̀lẹ̀ fún scope account kọ̀ọ̀kan àti proxy tí a ti yanjú. Àwọn pool `TlsClient` jákèjádò process náà ń gba session tó pọ̀ jù 128 lọ, tí wọ́n ń ṣe àfarawé **Chrome 124 lórí macOS** fún àwọn upstream lẹ́yìn Cloudflare. `TlsClient.fetch()` máa ń dá iṣẹ́ dúró pátápátá nígbà tí native runtime kò sí; ẹni tó pè é lè yan fallback ní kedere níta wrapper yìí.
+Àwọn session `wreq-js` tí ó wà pẹ́ títí ni a ń ṣẹ̀dá ní ọ̀nà ọ̀lẹ fún ìwọ̀n account kọ̀ọ̀kan àti proxy tí a ti yanjú. `TlsClient` tó kan gbogbo process náà kó session tí ó pọ̀ jù 128 jọ, tí wọ́n ń ṣe bíi **Chrome 124 lórí macOS** fún àwọn upstream tó wà lẹ́yìn Cloudflare. `TlsClient.fetch()` máa ń kọ̀ láìṣí ọ̀nà mìíràn nígbà tí native runtime kò bá sí; olùpè kan lè yan fallback ní kedere níta wrapper yìí.
 
-- Profile session: `browser: "chrome_124", os: "macos"`
-- Ìtòsíṣáájú ìyànjú proxy: `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (pẹ̀lú àwọn ẹ̀yà lẹ́tà kékeré náà)
-- Àkókò ìdádúró: `TLS_CLIENT_TIMEOUT_MS` (ń jogún láti `FETCH_TIMEOUT_MS`, àìyípadà 600000)
+- Àwòrán session: `browser: "chrome_124", os: "macos"`
+- Ìṣètò proxy (gẹ́gẹ́ bí ààyò): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (àwọn ẹ̀dà lower-case pẹ̀lú)
+- Àkókò ìdádúró: `TLS_CLIENT_TIMEOUT_MS` (jogún láti `FETCH_TIMEOUT_MS`, àìyípadà 600000)
 - Response `wreq-js` bá fetch mu (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Aṣọ́nà byte àkọ́kọ́ (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  máa ń yanjú ní kété tí àwọn header upstream bá dé, nítorí náà `TLS_CLIENT_TIMEOUT_MS` nìkan kò lè fi ààlà sí
-  body tí kò mú byte àkọ́kọ́ jáde láéláé. `guardTlsFirstByte()` ń fi `read()` àkọ́kọ́ ti body ṣe ìdíje
-  pẹ̀lú `TLS_FIRST_BYTE_WATCHDOG_MS` (àìyípadà `10000`, `0` máa ń pa á); body tó dára kò ní
-  fojú kan, nígbà tí body tó dúró máa ń fagilé reader wreq, yóò sì jẹ́ kí ọgbọ́n fallback TLS tó wà tẹ́lẹ̀
-  nínú `proxyFetch` tẹ̀ síwájú sí dispatcher direct/proxy (ìbéèrè tí kò léwu láti tún ṣeré, fún àpẹẹrẹ
-  POST tó ní body, ṣì máa ju àṣìṣe síta dípò kí a tún un gbìyànjú láìjẹ́kí ẹnikẹ́ni mọ̀).
+- Ẹ̀rọ ìṣọ́ byte àkọ́kọ́ (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  máa ń yanjú lẹ́sẹ̀kẹsẹ̀ tí àwọn header upstream bá dé, nítorí náà `TLS_CLIENT_TIMEOUT_MS` nìkan kò lè fi ààlà sí
+  body tí kò fi byte àkọ́kọ́ jáde láéláé. `guardTlsFirstByte()` ń mú kí `read()` àkọ́kọ́ body náà dije
+  pẹ̀lú `TLS_FIRST_BYTE_WATCHDOG_MS` (àìyípadà `10000`, `0` máa pa á); kò ní ipa lórí body tó ń ṣiṣẹ́ dáadáa,
+  ṣùgbọ́n body tó dúró máa fagilé reader wreq, yóò sì jẹ́ kí ìlànà fallback TLS tó ti wà nínú `proxyFetch`
+  tẹ̀ síwájú sí dispatcher direct/proxy (ìbéèrè tí kò léwu láti tún ṣe, bí àpẹẹrẹ
+  POST tó ní body, ṣì máa ju error dípò kí a tún gbìyànjú rẹ̀ láìsọ).
 
-### Transport olùpèsè web-cookie — wreq-js 3.2.0
+### Ọ̀nà ìgbérawọlé olùpèsè web-cookie — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` ni adapter àjọpín fún àwọn transport web-cookie àkànṣe márùn-ún
-ní ìsàlẹ̀. Wrapper olùpèsè kékeré kọ̀ọ̀kan ń yan profile browser/OS kan. Adapter náà
-ń lo loader runtime wreq kan ṣoṣo àti pool transport nínú `open-sse/utils/tlsClient.ts`, tí a fi
+`open-sse/services/tlsClientBase.ts` ni adapter tí àwọn ọ̀nà ìgbérawọlé web-cookie àkànṣe márùn-ún
+tó wà ní ìsàlẹ̀ ń lò pọ̀. Wrapper kékeré olùpèsè kọ̀ọ̀kan máa ń yan àwòrán browser/OS. Adapter náà
+ń lo loader runtime wreq kan ṣoṣo àti pool ìgbérawọlé tó wà nínú `open-sse/utils/tlsClient.ts`, tí a fi
 profile + OS + proxy tí a yanjú ṣe key, nígbà tí gbogbo ìbéèrè ń lo `cookieMode: "ephemeral"`. Nítorí náà,
-àwọn account àti ìbéèrè ń ṣàjọpín àwọn connection ipele-transport, ṣùgbọ́n wọn kì í ṣàjọpín session wreq tàbí cookie jar láéláé.
+àwọn account àti ìbéèrè ń pín àwọn connection ìpele ìgbérawọlé, ṣùgbọ́n wọn kì í pín session wreq tàbí cookie jar láéláé.
 
-| Olùpèsè    | Profile       | OS tí a ń ṣe àfarawé | Ìlànà EOF stream                   |
-| ---------- | ------------- | -------------------- | ---------------------------------- |
-| Claude     | `chrome_146`  | Linux                | fi `[DONE]` kún un                 |
-| Perplexity | `firefox_148` | macOS                | fi `event: end_of_stream` kún un   |
-| Grok       | `chrome_146`  | Linux                | yọ `[DONE]` kúrò                   |
-| Notion     | `chrome_146`  | Windows              | fi `[DONE]` kún un                 |
-| LMArena    | `chrome_146`  | Windows              | kò sí sentinel; pa á ní native EOF |
+| Olùpèsè    | Àwòrán        | OS tí a fara wé | Ìlànà EOF fún stream               |
+| ---------- | ------------- | --------------- | ---------------------------------- |
+| Claude     | `chrome_146`  | Linux           | fi `[DONE]` kún un                 |
+| Perplexity | `firefox_151` | macOS           | fi `event: end_of_stream` kún un   |
+| Grok       | `chrome_146`  | Linux           | yọ `[DONE]` kúrò                   |
+| Notion     | `chrome_146`  | Windows         | fi `[DONE]` kún un                 |
+| LMArena    | `chrome_146`  | Windows         | kò sí sentinel; pa á ní native EOF |
 
-- Streaming ń lo `ReadableStream` response native náà tààrà; a kò ṣẹ̀dá fáìlì ìgbà díẹ̀ tàbí sidecar.
-- A máa ń ṣàyẹ̀wò tó byte àkọ́kọ́ 256 kí a tó fi stream hàn. Àwọn olùpèsè SSE máa ń fi àwọn àṣìṣe
-  tí kì í ṣe SSE pamọ́ sínú buffer; Grok/LMArena máa ń yí àwọn ìpèníjà Cloudflare sí `403` àti àwọn interstitial HTML sí `502`.
-- Ìdádúró ìbéèrè native ṣì wà lábẹ́ deadline líle JS tó péye. Dídì iṣẹ́ máa ń sọ
-  transport profile/OS/proxy tó kan nìkan di asán, yóò sì pa á kí ìbéèrè tó kàn tó tún un ṣẹ̀dá.
-- Ìtòsíṣáájú ìyànjú proxy jẹ́ `proxyUrl` ti ìpè kọ̀ọ̀kan → context account/dashboard tó jẹ́ ti ìbéèrè →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (pẹ̀lú àwọn ẹ̀yà lẹ́tà kékeré). Àwọn àṣìṣe ìyànjú máa ń
-  dá iṣẹ́ dúró pátápátá dípò jíjẹ́ kí connection direct tú jáde. LMArena mọ̀ọ́mọ̀ ń ṣe ìyànjú sí `arena.ai`.
-- `byteResponse` ń dá URL `data:` tó ní content type padà láìba UTF-8 jẹ́.
-- Àwọn àṣìṣe ni `TlsClientUnavailableError` (package/addon kò sí), `TlsClientHangError`
-  (deadline ti kọjá), àti `WreqTransportCapacityError` (kóòdù àṣìṣe agbára session àjọpín)
-  nígbà tí gbogbo slot profile/OS/proxy oníwọ̀n 128 bá ń ṣiṣẹ́ tàbí tí wọ́n ń pa.
+- Streaming ń gba `ReadableStream` native response náà tààrà; a kò ṣẹ̀dá temp file tàbí sidecar.
+- A máa ṣàyẹ̀wò tó byte àkọ́kọ́ 256 kí a tó fi stream hàn. Àwọn olùpèsè SSE máa ń fi àwọn error tí kì í ṣe SSE
+  pamọ́ sínú buffer; Grok/LMArena máa ń sọ àwọn ìpèníjà Cloudflare di `403` àti àwọn HTML interstitial di `502`.
+- Absolute JS hard deadline ṣì yí timeout ìbéèrè native ká. Hang máa sọ
+  ìgbérawọlé profile/OS/proxy tí ọ̀ràn náà kàn nìkan di aláìṣe, yóò sì pa á kí ìbéèrè tó tẹ̀ lé e tó tún ṣẹ̀dá rẹ̀.
+- Ààyò ìṣètò proxy jẹ́ `proxyUrl` ti ìpè kọ̀ọ̀kan → àyíká account/dashboard tó jẹ́ ti ìbéèrè →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (pẹ̀lú àwọn ẹ̀dà lowercase). Àwọn error ìṣètò máa ń kọ̀ láìṣí ọ̀nà mìíràn
+  dípò jíjẹ́ kí direct connection yọ jáde. LMArena mọ̀ọ́mọ̀ ń ṣe ìṣètò lòdì sí `arena.ai`.
+- `byteResponse` máa ń dá URL `data:` tó ní content type padà láìba UTF-8 jẹ́.
+- Àwọn error ni `TlsClientUnavailableError` (package/addon kò sí), `TlsClientHangError`
+  (deadline ti kọjá), àti `WreqTransportCapacityError` (kóòdù error agbára session tí a pín)
+  nígbà tí gbogbo slot profile/OS/proxy 128 tí a ní ààlà sí bá ń ṣiṣẹ́ tàbí ń pa.
 
-Session `TlsClient` gbogbogbò lókè ṣì jẹ́ àkànṣe fún ipò cookie aláìsọ̀rọ̀dájú tó dá lórí browser.
-Ọ̀nà méjèèjì ń tún loader module wreq tí a cache kan náà àti hook ìgbésí-ayé process lò; àwọn pool wọn ṣì
-yàtọ̀ nítorí pé ìgbà ìyè cookie wọn yàtọ̀ ní ìmọ̀ọ́mọ̀.
+Session `TlsClient` gbogbogbò tó wà lókè ṣì jẹ́ àkànṣe fún ipò cookie tí browser ń gbé lẹ́yìn, tí ó sì wà pẹ́ títí.
+Ọ̀nà méjèèjì tún ń lo loader module wreq kan ṣoṣo tí a ti fi sínú cache àti hook lifecycle process; àwọn pool wọn
+ṣì yàtọ̀ nítorí pé a mọ̀ọ́mọ̀ ṣe àwọn àkókò ìwàláàyè cookie wọn ní ọ̀nà tó yàtọ̀.
 
-Package tí a pin mọ́ ẹya pàtó ń ṣe àtìlẹ́yìn fún àwọn profile náà, ṣùgbọ́n ìtẹ́wọ́gbà WAF gidi lè yí padà láìdá
-lórí àwọn ìdánwò contract abẹ́nú. Ṣàyẹ̀wò àwọn àyípadà fingerprint lórí account gidi tí a fún ní àṣẹ ní kedere
-kí o tó sọ pé ó bá browser upstream dọ́gba.
+Package tí a pin mọ́ version kan náà ṣe àtìlẹ́yìn fún àwọn profile wọ̀nyí, ṣùgbọ́n ìtẹ́wọ́gbà WAF gidi lè yí padà láìdá
+lórí àwọn contract test abẹ́lé. Ṣàyẹ̀wò àwọn ìyípadà fingerprint pẹ̀lú live account tí a fún ní àṣẹ ní kedere
+kí o tó sọ pé ó bá upstream browser dọ́gba.
 
 ---
 

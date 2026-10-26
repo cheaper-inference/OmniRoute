@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Toggle from "@/shared/components/Toggle";
 
@@ -82,12 +83,13 @@ export default function CatalogVisibilityCard() {
           />
         ))}
         {error && (
-          <p role="alert" className="text-sm text-rose-500">
+          <p role="alert" className="text-sm text-error">
             {error === "load" ? common("failedToLoad") : t("settingSaveFailed")}
             {error === "load" && (
-              <button
-                type="button"
-                className="ml-3 underline"
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-3"
                 onClick={() => {
                   setLoading(true);
                   setError(null);
@@ -95,7 +97,7 @@ export default function CatalogVisibilityCard() {
                 }}
               >
                 {common("retry")}
-              </button>
+              </Button>
             )}
           </p>
         )}

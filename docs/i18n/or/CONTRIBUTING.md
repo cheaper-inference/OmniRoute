@@ -171,35 +171,35 @@ Scopeଗୁଡ଼ିକ (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`,
 
 ---
 
-## Test ଚଲାଇବା
+## ପରୀକ୍ଷାଗୁଡ଼ିକ ଚଲାଇବା
 
 ```bash
-# ସମସ୍ତ test (unit + vitest + ecosystem + e2e)
+# ସମସ୍ତ ପରୀକ୍ଷା (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# ଗୋଟିଏ test file (Node.js native test runner — ଅଧିକାଂଶ test ଏହାକୁ ବ୍ୟବହାର କରେ)
+# ଏକକ ପରୀକ୍ଷା ଫାଇଲ୍ (Node.js ନେଟିଭ୍ ପରୀକ୍ଷା ରନର୍ — ଅଧିକାଂଶ ପରୀକ୍ଷା ଏହାକୁ ବ୍ୟବହାର କରେ)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# କେବଳ ଆପଣଙ୍କ ପରିବର୍ତ୍ତନରେ ପ୍ରଭାବିତ unit testଗୁଡ଼ିକ (CI gate ପରି ସମାନ TIA selector, #8084)
+# କେବଳ ଆପଣଙ୍କ ପରିବର୍ତ୍ତନ ଦ୍ୱାରା ପ୍ରଭାବିତ unit ପରୀକ୍ଷାଗୁଡ଼ିକ (CI ଗେଟ୍ ସହିତ ସମାନ TIA ସିଲେକ୍ଟର୍, #8084)
 npm run test:scoped            # ଶେଷ commitରେ (କିମ୍ବା working treeରେ) ହୋଇଥିବା ପରିବର୍ତ୍ତନ
-npm run test:scoped:staged     # କେବଳ staged ପରିବର୍ତ୍ତନ — pre-commit run ସହିତ ଭଲ ଭାବରେ କାମ କରେ
-npm run test:scoped:full       # ପ୍ରଥମେ import-graph map ପୁନଃନିର୍ମାଣ କରନ୍ତୁ (file ଯୋଗ/ସ୍ଥାନାନ୍ତର କରିବା ପରେ)
-# Exit 1 + "ସମ୍ପୂର୍ଣ୍ଣ suite ଚଲାନ୍ତୁ"ର ଅର୍ଥ ହେଉଛି ଏକ hub file (tsconfig, package.json, …) କିମ୍ବା ଏକ
-# map ହୋଇନଥିବା source ପରିବର୍ତ୍ତିତ ହୋଇଛି — selector ସୁରକ୍ଷିତ ଭାବେ ବିଫଳ ହୁଏ, ଏହା କେବେବି ନିରବରେ ଛାଡ଼ିଯାଏ ନାହିଁ।
+npm run test:scoped:staged     # କେବଳ staged ପରିବର୍ତ୍ତନଗୁଡ଼ିକ — pre-commit ରନ୍ ସହିତ ଭଲ ଭାବେ କାମ କରେ
+npm run test:scoped:full       # ପ୍ରଥମେ import-graph ମ୍ୟାପ୍ ପୁନଃନିର୍ମାଣ କରେ (ଫାଇଲ୍ ଯୋଡ଼ିବା/ସ୍ଥାନାନ୍ତର କରିବା ପରେ)
+# Exit 1 + "ସମ୍ପୂର୍ଣ୍ଣ suite ଚଲାନ୍ତୁ"ର ଅର୍ଥ ହେଉଛି ଗୋଟିଏ hub ଫାଇଲ୍ (tsconfig, package.json, …) କିମ୍ବା
+# ମ୍ୟାପ୍ ହୋଇନଥିବା source ପରିବର୍ତ୍ତିତ ହୋଇଛି — ସିଲେକ୍ଟର୍ ନିରାପଦ ଭାବେ ବିଫଳ ହୁଏ, ଏହା କେବେ ମଧ୍ୟ ନିରବରେ ଛାଡ଼ି ଦିଏ ନାହିଁ।
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E test (Playwright ଆବଶ୍ୟକ)
+# E2E ପରୀକ୍ଷାଗୁଡ଼ିକ (Playwright ଆବଶ୍ୟକ)
 npm run test:e2e
 
-# Protocol client E2E (MCP transport, A2A)
+# Protocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem compatibility test
+# Ecosystem ସୁସଙ୍ଗତତା ପରୀକ୍ଷାଗୁଡ଼ିକ
 npm run test:ecosystem
 
-# Coverage gate: statement/line/function/branch ପାଇଁ 60%
+# Coverage ଗେଟ୍: statements/lines/functions/branches ପାଇଁ 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -207,51 +207,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Gate ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ real-upstream combo smoke (VPS access + ପ୍ରକୃତ provider credit ଆବଶ୍ୟକ)
-# ପ୍ରକୃତ providerଗୁଡ଼ିକୁ hit କରେ — ଅଳ୍ପ ଖର୍ଚ୍ଚ ହୁଏ। CIରେ କେବେବି ଚାଲେ ନାହିଁ। Gate ନଥିଲେ ସ୍ୱଚ୍ଛ ଭାବରେ skip କରେ।
-# ଆବଶ୍ୟକ: ssh root@192.168.0.15 access (VPSରୁ ଏକ read-only DB snapshot source କରେ)।
+# ଗେଟ୍ କରାଯାଇଥିବା ପ୍ରକୃତ-upstream combo smoke (VPS ପ୍ରବେଶ + ପ୍ରକୃତ provider credits ଆବଶ୍ୟକ)
+# ପ୍ରକୃତ providersକୁ ଅନୁରୋଧ ପଠାଏ — ଅଳ୍ପ ଖର୍ଚ୍ଚ ହୁଏ। CIରେ କେବେ ମଧ୍ୟ ଚାଲେ ନାହିଁ। ଗେଟ୍ ନଥିଲେ ସ୍ୱଚ୍ଛ ଭାବେ ଛାଡ଼ିଦିଏ।
+# ଆବଶ୍ୟକ: ssh root@192.168.0.15 ପ୍ରବେଶ (VPSରୁ ଗୋଟିଏ read-only DB snapshot source କରେ)।
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — ସରଳ Node ESM script, live .15 serverକୁ ସିଧାସଳଖ hit କରେ।
-# ଆବଶ୍ୟକ: ssh root@192.168.0.15 access (SSH sqlite ମାଧ୍ୟମରେ combo ତିଆରି/ଅପସାରଣ କରାଯାଏ)।
-# ପ୍ରକୃତ providerଗୁଡ଼ିକୁ hit କରେ (ଅଳ୍ପ ଖର୍ଚ୍ଚ)। କେବଳ __live_test__* combo ତିଆରି/ବିଲୋପ କରେ। CIରେ କେବେବି ଚାଲେ ନାହିଁ।
-# .15ରେ REQUIRE_API_KEY=false ଥିବାରୁ API key ଆବଶ୍ୟକ ନୁହେଁ, କିନ୍ତୁ ସେଟ୍ ହୋଇଥିଲେ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYକୁ ସମ୍ମାନ କରେ।
-npm run test:combo:live:vps              # 7ଟି HTTP scenario (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # ଏକ ପ୍ରକୃତ cross-provider failover scenario ଯୋଗ କରେ (ମୋଟ 8ଟି)
+# Phase-3 VPS live smoke — ସାଧାରଣ Node ESM scripts, live .15 serverକୁ ସିଧାସଳଖ ଅନୁରୋଧ ପଠାଏ।
+# ଆବଶ୍ୟକ: ssh root@192.168.0.15 ପ୍ରବେଶ (SSH sqlite ମାଧ୍ୟମରେ combos ସୃଷ୍ଟି/ବିଲୋପ କରାଯାଏ)।
+# ପ୍ରକୃତ providersକୁ ଅନୁରୋଧ ପଠାଏ (ଅଳ୍ପ ଖର୍ଚ୍ଚ)। କେବଳ __live_test__* combos ସୃଷ୍ଟି/ବିଲୋପ କରେ। CIରେ କେବେ ମଧ୍ୟ ଚାଲେ ନାହିଁ।
+# .15ରେ REQUIRE_API_KEY=false, ତେଣୁ API key ଆବଶ୍ୟକ ନାହିଁ, କିନ୍ତୁ ସେଟ୍ ହୋଇଥିଲେ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYକୁ ସମ୍ମାନ କରେ।
+npm run test:combo:live:vps              # 7ଟି HTTP ପରିଦୃଶ୍ୟ (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # ଏକ ପ୍ରକୃତ cross-provider failover ପରିଦୃଶ୍ୟ ଯୋଡ଼େ (ମୋଟ 8ଟି)
 ```
 
-Coverage ଟିପ୍ପଣୀ:
+Coverage ସମ୍ବନ୍ଧୀୟ ଟିପ୍ପଣୀ:
 
-- `npm run test:coverage` ମୁଖ୍ୟ unit test suite ପାଇଁ source coverage ମାପେ, `tests/**`କୁ ବାଦ ଦିଏ ଏବଂ `open-sse/**`କୁ ସାମିଲ କରେ
-- Pull requestଗୁଡ଼ିକରେ statement/line/function/branch ପାଇଁ coverage gate **60%+** ରହିବା ଆବଶ୍ୟକ
-- ଯଦି ଏକ PR `src/`, `open-sse/`, `electron/`, କିମ୍ବା `bin/`ର production code ପରିବର୍ତ୍ତନ କରେ, ତେବେ ସେହି PRରେ automated test ଯୋଗ କିମ୍ବା ଅଦ୍ୟତନ କରିବା ଆବଶ୍ୟକ
-- `npm run coverage:report` ସର୍ବଶେଷ coverage runରୁ ବିସ୍ତୃତ file-by-file report print କରେ
+- `npm run test:coverage` ମୁଖ୍ୟ unit test suite ପାଇଁ source coverage ମାପେ, `tests/**`କୁ ବାଦ ଦିଏ ଏବଂ `open-sse/**`କୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ
+- Pull requestsଗୁଡ଼ିକୁ statements/lines/functions/branches ପାଇଁ coverage ଗେଟ୍ **60%+**ରେ ରଖିବାକୁ ହେବ
+- ଯଦି କୌଣସି PR `src/`, `open-sse/`, `electron/`, କିମ୍ବା `bin/`ରେ production code ପରିବର୍ତ୍ତନ କରେ, ତେବେ ସେହି PRରେ automated tests ଯୋଡ଼ିବା କିମ୍ବା ଅଦ୍ୟତନ କରିବା ଆବଶ୍ୟକ
+- `npm run coverage:report` ସର୍ବଶେଷ coverage runରୁ ବିସ୍ତୃତ file-by-file report ପ୍ରିଣ୍ଟ କରେ
 - `npm run test:coverage:legacy` ଐତିହାସିକ ତୁଳନା ପାଇଁ ପୁରୁଣା metricକୁ ସଂରକ୍ଷିତ ରଖେ
-- ପର୍ଯ୍ୟାୟଭିତ୍ତିକ coverage ଉନ୍ନତି roadmap ପାଇଁ `docs/ops/COVERAGE_PLAN.md` ଦେଖନ୍ତୁ
+- ପର୍ଯ୍ୟାୟକ୍ରମିକ coverage ଉନ୍ନତି roadmap ପାଇଁ `docs/ops/COVERAGE_PLAN.md` ଦେଖନ୍ତୁ
 
-### Pull Request ଆବଶ୍ୟକତା
+### Pull Request ଆବଶ୍ୟକତାଗୁଡ଼ିକ
 
-ଏକ PR ଖୋଲିବା ପୂର୍ବରୁ, ଆପଣ ଯାହା ପରିବର୍ତ୍ତନ କରିଛନ୍ତି ତାହା ପାଇଁ focused loop ଚଲାଇବାକୁ
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ବ୍ୟବହାର କରନ୍ତୁ। ସମ୍ପୂର୍ଣ୍ଣ unit suite (4ଟି CI shard), Vitest, **60%+** coverage gate ଏବଂ
+ଗୋଟିଏ PR ଖୋଲିବା ପୂର୍ବରୁ, ଆପଣ ଯାହା ପରିବର୍ତ୍ତନ କରିଛନ୍ତି ତାହା ପାଇଁ କେନ୍ଦ୍ରିତ loop ଚଲାଇବାକୁ
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ବ୍ୟବହାର କରନ୍ତୁ। ସମ୍ପୂର୍ଣ୍ଣ unit suite (4ଟି CI shards), Vitest, **60%+** coverage ଗେଟ୍, ଏବଂ
 production build ହେଉଛି CIର ଦାୟିତ୍ୱ — ସେଗୁଡ଼ିକୁ ସ୍ଥାନୀୟ ଭାବେ ଚଲାଇଲେ PR
-ଯାଞ୍ଚରୁ ପୂର୍ବରୁ ନ ମିଳିବା ଭଳି କୌଣସି ଅତିରିକ୍ତ ସଙ୍କେତ ମିଳେ ନାହିଁ, ଏବଂ ଛୋଟ machineରେ ଏହା hostକୁ ଅତ୍ୟଧିକ ବ୍ୟସ୍ତ କରିପାରେ (#8084):
+ଯାଞ୍ଚଗୁଡ଼ିକ ପୂର୍ବରୁ ଦେଉନଥିବା କୌଣସି ଅତିରିକ୍ତ ସଙ୍କେତ ମିଳେ ନାହିଁ, ଏବଂ ଛୋଟ machineଗୁଡ଼ିକରେ ଏହା hostକୁ ସନ୍ତୃପ୍ତ କରିପାରେ (#8084):
 
-- ଆପଣଙ୍କ ପରିବର୍ତ୍ତନକୁ cover କରୁଥିବା test fileଗୁଡ଼ିକ ଚଲାନ୍ତୁ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- ଆପଣଙ୍କ ପରିବର୍ତ୍ତନକୁ cover କରୁଥିବା test files ଚଲାନ୍ତୁ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ଚଲାନ୍ତୁ
-- Production code ପରିବର୍ତ୍ତିତ ହେଲେ ସେହି PRରେ automated test ଯୋଗ କିମ୍ବା ଅଦ୍ୟତନ କରନ୍ତୁ
-- Production code ପରିବର୍ତ୍ତିତ ହେଲେ PR descriptionରେ ପରିବର୍ତ୍ତିତ କିମ୍ବା ଯୋଗ କରାଯାଇଥିବା test fileଗୁଡ଼ିକ ସାମିଲ କରନ୍ତୁ
-- CIରେ project secretଗୁଡ଼ିକ configure ହୋଇଥିଲେ PRରେ SonarQube result ଯାଞ୍ଚ କରନ୍ତୁ
+- production code ପରିବର୍ତ୍ତିତ ହେଲେ ସେହି PRରେ automated tests ଅନ୍ତର୍ଭୁକ୍ତ କିମ୍ବା ଅଦ୍ୟତନ କରନ୍ତୁ
+- `node:test` ଫାଇଲ୍ଗୁଡ଼ିକରେ, ପ୍ରତ୍ୟେକ top-level `await` (ଯେପରିକି `await import(...)`)କୁ ପ୍ରଥମ `test()` / `describe()` ପୂର୍ବରୁ ରଖନ୍ତୁ: `--test-force-exit` ଅଧୀନରେ, ଏହା ପରେ register ହୋଇଥିବା tests କେବେ ମଧ୍ୟ ନିରବରେ ଚାଲିନପାରେ (#18045; `npm run check:test-tla-order` ଦ୍ୱାରା ବାଧ୍ୟତାମୂଳକ)
+- production code ପରିବର୍ତ୍ତିତ ହେଲେ PR ବର୍ଣ୍ଣନାରେ ପରିବର୍ତ୍ତିତ କିମ୍ବା ଯୋଡ଼ାଯାଇଥିବା test files ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ
+- CIରେ project secrets configure ହୋଇଥିଲେ PRରେ SonarQube ଫଳାଫଳ ଯାଞ୍ଚ କରନ୍ତୁ
 
-ବର୍ତ୍ତମାନର test ସ୍ଥିତି: **122ଟି unit test file**, ଯେଉଁଗୁଡ଼ିକ ଏସବୁକୁ cover କରେ:
+ବର୍ତ୍ତମାନର test ସ୍ଥିତି: **122ଟି unit test files**, ଯାହା ନିମ୍ନଲିଖିତକୁ cover କରେ:
 
-- Provider translator ଏବଂ format conversion
-- Rate limiting, circuit breaker ଏବଂ resilience
-- Semantic cache, idempotency ଏବଂ progress tracking
-- Database operation ଏବଂ schema (21ଟି DB module)
-- OAuth flow ଏବଂ authentication
+- Provider translators ଏବଂ format conversion
+- Rate limiting, circuit breaker, ଏବଂ resilience
+- Semantic cache, idempotency, progress tracking
+- Database operations ଏବଂ schema (21ଟି DB modules)
+- OAuth flows ଏବଂ authentication
 - API endpoint validation (Zod v4)
-- MCP server tool ଏବଂ scope enforcement
-- Memory ଏବଂ Skills system
+- MCP server tools ଏବଂ scope enforcement
+- Memory ଏବଂ Skills systems
 
 ---
 

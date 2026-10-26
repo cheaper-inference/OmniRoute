@@ -46,15 +46,15 @@
 
 ## Ìmúdójúìwọ̀n 2026-06-17 — ohun tó yí padà láti 2026-06-05
 
-Àyẹ̀wò ìwádìí orí wẹ́ẹ̀bù pẹ̀lú aṣojú 50 (àwọn ìwé àṣẹ́fẹ̀ẹ́ + ìròyìn ọjọ́ méje tó kọjá, tí a sì fìdí rẹ̀ múlẹ̀ ní ọ̀nà àtakò) ṣe ìmúdójúìwọ̀n gbogbo àkójọ náà. Àwọn kókó pàtàkì:
+Ìwádìí orí wẹ́ẹ̀bù pẹ̀lú aṣojú 50 (àwọn ìwé àṣẹ òfíṣialì + ìròyìn ọjọ́ méje tó kọjá, tí a sì ṣàyẹ̀wò lọ́nà àtakò) mú gbogbo àkójọ náà dójú ìwọ̀n. Àwọn kókó pàtàkì:
 
-- **Tí a yọ kúrò / kò ní ìpele ọ̀fẹ́ (2026):** `chutes` (ìpele ọ̀fẹ́ parí ní 2026-03), `phind` (ilé-iṣẹ́ náà ti dópin ní 2026-01), `kluster` (dópin ní 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (a fagilé ọ̀fẹ́ MiMo ní 2026-05-24, ìpolówó Nemotron parí ní 2026-06 — a tún fìdí rẹ̀ múlẹ̀ ní 2026-06-18), `aimlapi` (a dá ìpele ọ̀fẹ́ dúró fún ìgbà díẹ̀ — a tún fìdí rẹ̀ múlẹ̀ ní 2026-06-18), `yi` (a fẹ̀yìntì Yi-Light, ó di sísan-gẹ́gẹ́-bí-o-ṣe-lò — a tún fìdí rẹ̀ múlẹ̀ ní 2026-06-18), `featherless-ai` (kò ní ìpele ọ̀fẹ́ lọ́wọ́lọ́wọ́), `chipotle` ("Pepper AI" ti Chipotle — wíjẹ́ẹ̀tì ìfọ̀rọ̀wérọ̀ Amelia `amelia.chipotle.com` tí a ṣe ìtúpalẹ̀-padà rẹ̀, èyí tí olùpèsè náà ń bá sọ̀rọ̀, ń dá 404 padà lórí gbogbo ipa báyìí, títí kan root; a ti yọ ẹ̀yìn-ọ̀nà náà kúrò níṣẹ́/tàbí a ti gbé e, a fìdí rẹ̀ múlẹ̀ ní 2026-09-15 — a yọ ọ́ kúrò pátápátá nínú àkójọ náà, #13131/#4037). `iflytek` / `sparkdesk` ṣì wà nínú àkójọ ṣùgbọ́n wọ́n ní àkíyèsí ìṣọ́ra ToS (Spark Lite jẹ́ ọ̀fẹ́; ToS náà fi ààlà sí lílo proxy/relay).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` dópin ní 2026-06-01, `2.5 Pro` sì kúrò ní ìpele ọ̀fẹ́ (2026-04); ìpele ọ̀fẹ́ jẹ́ ti **ẹbí Flash nìkan** báyìí (2.5/3/3.1/3.5 Flash + Gemma). Àkójọ náà ti **ṣàkójọpọ̀** ẹbí Flash báyìí (tẹ́lẹ̀, iye náà ga ju bó ṣe yẹ lọ nítorí kíkà ẹ̀dà kọ̀ọ̀kan lọ́tọ̀ọ̀tọ̀: 462M → 60M).
-- **Àwọn iye tí a ṣàtúnṣe:** `cloudflare-ai` 122M → **30M** (10k-Neurons/ọjọ́ gidi), a tún pín `doubao` sí kirẹditi ìforúkọsílẹ̀ ẹ̀ẹ̀kan ṣoṣo (kì í ṣe ohun tó ń tún ṣẹlẹ̀), `llm7` 4M → **150M** (5M token/ọjọ́ tí a ṣàkọsílẹ̀), àwọn endpoint "-Free" ti `together` ti dópin → a tún yọ kirẹditi ìforúkọsílẹ̀ $25 kúrò (ó nílò rírà tó kéré jù lọ ti $5, kò sí àdánwò ọ̀fẹ́), Àkókò Preview ti `longcat` parí + a fẹ̀yìntì àwọn model Flash → **LongCat-2.0** nìkan, a tún pín un sí kirẹditi ìforúkọsílẹ̀ token **10M** ẹ̀ẹ̀kan ṣoṣo (KYC ló ń ṣí i sílẹ̀, kì í tún ṣẹlẹ̀).
-- **Àwọn olùpèsè ọ̀fẹ́ tuntun tí a ṣàwárí:** ⭐ **Kilo Code** (`kilo-gateway` — àkójọpọ̀ "Auto Free" tó ń yí padà: ẹbí NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — model ìkọ̀ọ́dù ọ̀fẹ́ mẹ́fà tó ń yí padà), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash jẹ́ ọ̀fẹ́ títí láé + ẹ̀bùn ìforúkọsílẹ̀ 20M), àti Trinity Large Preview ti `arcee-ai`.
-- **Àwọn ìpele tuntun tó sọ òtítọ́** (wo Ìlànà Ìwádìí): ẹ̀ka _ọ̀fẹ́-títí-láé-ṣùgbọ́n-láìsí-ààlà_ (ìráyè tó ń tún ṣẹlẹ̀ ní tòótọ́, láìsí òpin token láti kà) àti _ìgbéga tí ìdépamọ́ ń ṣí sílẹ̀_ (OpenRouter $10 → +24M/mo), a fi àwọn méjèèjì hàn **lọ́tọ̀ọ̀tọ̀** kí wọ́n má bàa mú iye àkọ́kọ́ ga ju bó ṣe yẹ lọ láé.
+- **Ti yọ kúrò / kò ní ìpele ọ̀fẹ́ (2026):** `chutes` (ìpele ọ̀fẹ́ parí ní 2026-03), `phind` (ilé-iṣẹ́ náà ti dá iṣẹ́ dúró ní 2026-01), `kluster` (fòpin sí ní 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (a fagilé ọ̀fẹ́ MiMo ní 2026-05-24, ìpolówó Nemotron parí ní 2026-06 — a tún ṣàyẹ̀wò ní 2026-06-18), `aimlapi` (a dá ìpele ọ̀fẹ́ dúró fún ìgbà díẹ̀ — a tún ṣàyẹ̀wò ní 2026-06-18), `yi` (a fẹ̀yìntì Yi-Light, ó di sísan-gẹ́gẹ́-bí-o-ṣe-lò — a tún ṣàyẹ̀wò ní 2026-06-18), `featherless-ai` (kò ní ìpele ọ̀fẹ́ lọ́wọ́lọ́wọ́), `chipotle` ("Pepper AI" ti Chipotle — ẹrọ ìfọ̀rọ̀wérọ̀ Amelia `amelia.chipotle.com` tí a ṣàyẹ̀wò ìkọ́-ẹ̀rọ rẹ̀ padà, èyí tí olùpèsè náà ń bá sọ̀rọ̀, ń dá 404 padà báyìí ní gbogbo ipa ọ̀nà, títí kan gbòǹgbò; a ti yọ backend náà kúrò/tàbí a ti gbé e, a sì fìdí rẹ̀ múlẹ̀ ní 2026-09-15 — a yọ ọ́ kúrò pátápátá nínú àkójọ náà, #13131/#4037). `iflytek` / `sparkdesk` ṣì wà nínú àkójọ ṣùgbọ́n wọ́n ní àkọsílẹ̀ ìkìlọ̀ ToS (Spark Lite jẹ́ ọ̀fẹ́; ToS náà fi òfin de lílo proxy/relay).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` dá iṣẹ́ dúró ní 2026-06-01, `2.5 Pro` sì kúrò ní ìpele ọ̀fẹ́ (2026-04); ìpele ọ̀fẹ́ jẹ́ ti **ẹbí Flash nìkan** báyìí (2.5/3/3.1/3.5 Flash + Gemma). Àkójọ náà ti ń **ṣàkójọpọ̀** ẹbí Flash báyìí (tẹ́lẹ̀, iye náà pọ̀ jù nítorí kíka ọ̀kọ̀ọ̀kan àyípadà lọ́tọ̀: 462M → 60M).
+- **Àwọn iye tí a ṣàtúnṣe:** `cloudflare-ai` 122M → **30M** (10k-Neurons/ọjọ́ gidi), a tún pín `doubao` sí kirẹditi ìforúkọsílẹ̀ ìgbà-kan (kì í ṣe ohun tó ń tún wá), `llm7` 4M → **150M** (tokens 5M/ọjọ́ gẹ́gẹ́ bí ìwé àṣẹ), a fòpin sí àwọn endpoint `together` "-Free" → a tún yọ kirẹditi ìforúkọsílẹ̀ $25 kúrò (ó nílò rírà tó kéré tán $5, kò sí ìdánwò ọ̀fẹ́), Àkókò Preview `longcat` parí + a fẹ̀yìntì àwọn model Flash → **LongCat-2.0** nìkan, a tún pín in sí kirẹditi ìforúkọsílẹ̀ tokens **10M** ìgbà-kan (KYC ló ṣí i sílẹ̀, kì í ṣe ohun tó ń tún wá).
+- **Àwọn olùpèsè ọ̀fẹ́ tuntun tí a ṣàwárí:** ⭐ **Kilo Code** (`kilo-gateway` — àkójọpọ̀ "Auto Free" tó ń yípo: ẹbí NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — àwọn model coding ọ̀fẹ́ 10 tó ń yípo, tí a mú dójú ìwọ̀n ní 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash jẹ́ ọ̀fẹ́ títí láé + ẹ̀bùn ìforúkọsílẹ̀ 20M), àti Trinity Large Preview ti `arcee-ai`.
+- **Àwọn ìpele tuntun tó ṣe kedere** (wo Ilànà Ìṣe): ẹ̀ka _ọ̀fẹ́-títí-láé-ṣùgbọ́n-láìsí-ààlà_ (ìráyè gidi tó ń tún wá, láìsí ààlà token láti kà) àti _àfikún-tí-ìdépamọ́-ṣí-sílẹ̀_ (OpenRouter $10 → +24M/oṣù), a sì ṣàfihàn àwọn méjèèjì **lọ́tọ̀** kí wọ́n má bàa mú iye àkọlé pọ̀ ju òtítọ́ lọ.
 
-> Tábìlì ẹ̀kúnrẹ́rẹ́ fún olùpèsè kọ̀ọ̀kan tó wà ní ìsàlẹ̀ jẹ́ **àwòrán-ipò 2026-06-05**; àwọn ìyípadà tó wà lókè rọ́pò rẹ̀. Orísun àṣẹ́fẹ̀ẹ́ tó ń ṣiṣẹ́ lọ́wọ́lọ́wọ́ ni àkójọ model-kọ̀ọ̀kan `open-sse/config/freeModelCatalog.ts`.
+> Tábìlì alálàyé fún olùpèsè kọ̀ọ̀kan tó wà ní ìsàlẹ̀ ni **àwòrán-ìgbà 2026-06-05**; àwọn ìyàtọ̀ tó wà lókè rọ́pò rẹ̀. Orísun alààyè tó jẹ́ àṣẹ ni àkójọ fún model kọ̀ọ̀kan `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -224,75 +224,75 @@ tí kò bá ohun tí ó ṣẹlẹ̀ nígbà títẹ̀ mu jáde — a mọ̀ọ�
 
 ---
 
-## Ìpele ọ̀fẹ́ fún olùpèsè kọ̀ọ̀kan (a yẹ Bytez/Nous wò ní 2026-10-15; a tún ṣàyẹ̀wò àwọn ìlà ní 2026-09-02; àwọn yòókù ní 2026-06-17)
+## Ìpele ọ̀fẹ́ fún olùpèsè kọ̀ọ̀kan (a ṣàyẹ̀wò Bytez/Nous ní 2026-10-15; a tún ṣàyẹ̀wò àwọn ìlà ní 2026-09-02; àwọn yòókù ní 2026-06-17)
 
-> A tún ṣe é láti inú àkójọ fún awoṣe kọ̀ọ̀kan (`open-sse/config/freeModelCatalog.ts`), a sì yọ àwọn àdáwòkọ inú àkójọpọ̀ kúrò. A tò ó ní ìbámu pẹ̀lú iye token/mo tó ń tún wá déédéé. `uncapped*` = ọ̀fẹ́ títí láé ṣùgbọ́n kò sí òpin token tí a tẹ̀ jáde (oṣùwọ̀n/ìṣiṣẹ́-pọ̀ ní ààlà) — ìráyè gidi, **a kò** sì kà á pọ̀ mọ́ àpapọ̀ tó wà nínú àkọlé. `—` = kírẹ́díìtì-nìkan / láìní kọ́kọ́rọ́ / kò ṣeé díwọ̀n ní token.
+> A tún ṣe é láti inú àkójọ fún awoṣe kọ̀ọ̀kan (`open-sse/config/freeModelCatalog.ts`), a sì yọ àwọn àdáwòkọ inú pool kúrò. A tò ó ní ìbámu pẹ̀lú iye token/mo tó máa ń wà déédéé. `uncapped*` = ó jẹ́ ọ̀fẹ́ títí láé ṣùgbọ́n kò sí òpin token tí a tẹ̀ jáde (oṣùwọ̀n/ìṣiṣẹ́-pọ̀-lẹ́ẹ̀kan ló ní ààlà) — ìráyè gidi ni, **a kò** sì ṣàkójọpọ̀ rẹ̀ sínú àkòrí. `—` = kirẹditi-nìkan / láìsí kọ́kọ́rọ́ / kò ṣeé díwọ̀n ní token.
 
-| Olùpèsè          | Irú ọ̀fẹ́              | Tókìnì déédéé/oṣù | Kirẹditi oṣù àkọ́kọ́ | ToS          | Àwòṣe |
-| ---------------- | -------------------- | ----------------- | ------------------ | ------------ | ----- |
-| `mistral`        | àtúnwá               | ~1.00B            | —                  | ìṣọ́ra        | 5     |
-| `nara`           | àtúnwá               | ~210M             | —                  | ìṣọ́ra        | 8     |
-| `llm7`           | àtúnwá               | ~150M             | —                  | ìṣọ́ra        | 4     |
-| `xkiro`          | àtúnwá               | ~150M             | —                  | ìṣọ́ra        | 39    |
-| `longcat`        | ìgbà kan             | —                 | 10M                | ìṣọ́ra        | 1     |
-| `cerebras`       | ìgbà kan             | —                 | kirẹditi $5        | ìṣọ́ra        | 2     |
-| `cloudflare-ai`  | àtúnwá               | ~30M              | —                  | ìṣọ́ra        | 9     |
-| `groq`           | àtúnwá               | ~30M              | —                  | ìṣọ́ra        | 5     |
-| `api-airforce`   | àtúnwá               | ~24M              | —                  | ìṣọ́ra        | 7     |
-| `bluesminds`     | àtúnwá               | ~7M               | —                  | kò ṣe kedere | 22    |
-| `sambanova`      | àtúnwá               | ~6M               | —                  | ìṣọ́ra        | 5     |
-| `arcee-ai`       | àtúnwá               | ~5M               | —                  | ìṣọ́ra        | 1     |
-| `bazaarlink`     | àtúnwá               | ~4M               | —                  | ìṣọ́ra        | 32    |
-| `openrouter`     | àtúnwá               | ~1M               | —                  | ìṣọ́ra        | 1     |
-| `cohere`         | àtúnwá               | ~800K             | —                  | ìṣọ́ra        | 6     |
-| `huggingchat`    | àtúnwá               | ~500K             | —                  | ìṣọ́ra        | 4     |
-| `morph`          | àtúnwá               | ~400K             | —                  | ó dára       | 2     |
-| `huggingface`    | àtúnwá               | ~200K             | —                  | ìṣọ́ra        | 6     |
-| `kiro`           | àtúnwá               | ~25K              | —                  | yẹra         | 12    |
-| `glm-cn`         | láìsí òpin           | láìsí òpin\*      | ~20M               | ó dára       | 4     |
-| `baidu`          | láìsí òpin           | láìsí òpin\*      | —                  | ìṣọ́ra        | 1     |
-| `gemini`         | láìsí òpin           | láìsí òpin\*      | —                  | ìṣọ́ra        | 4     |
-| `kilo-gateway`   | láìsí òpin           | láìsí òpin\*      | —                  | ìṣọ́ra        | 7     |
-| `ollama-cloud`   | láìsí òpin           | láìsí òpin\*      | —                  | kò ṣe kedere | 8     |
-| `opencode-zen`   | láìsí òpin           | láìsí òpin\*      | —                  | ìṣọ́ra        | 6     |
-| `tencent`        | láìsí òpin           | láìsí òpin\*      | —                  | ìṣọ́ra        | 1     |
-| `vertex`         | kirẹditi ìforúkọsílẹ̀ | —                 | ~300M              | ìṣọ́ra        | 10    |
-| `agentrouter`    | kirẹditi ìforúkọsílẹ̀ | —                 | ~200M              | ìṣọ́ra        | 4     |
-| `predibase`      | kirẹditi ìforúkọsílẹ̀ | —                 | ~25M               | ìṣọ́ra        | 1     |
-| `doubao`         | kirẹditi ìforúkọsílẹ̀ | —                 | ~15M               | kò ṣe kedere | 1     |
-| `ai21`           | kirẹditi ìforúkọsílẹ̀ | —                 | ~10M               | yẹra         | 2     |
-| `deepseek`       | kirẹditi ìforúkọsílẹ̀ | —                 | ~5M                | ó dára       | 2     |
-| `hyperbolic`     | kirẹditi ìforúkọsílẹ̀ | —                 | ~5M                | ó dára       | 8     |
-| `nscale`         | kirẹditi ìforúkọsílẹ̀ | —                 | ~5M                | ìṣọ́ra        | 6     |
-| `bytez`          | kirẹditi (àtúnwá)    | —                 | àìmọ̀               | kò ṣe kedere | 1     |
-| `deepinfra`      | kirẹditi ìforúkọsílẹ̀ | —                 | ~1M                | ìṣọ́ra        | 22    |
-| `fireworks`      | kirẹditi ìforúkọsílẹ̀ | —                 | ~1M                | yẹra         | 10    |
-| `nebius`         | kirẹditi ìforúkọsílẹ̀ | —                 | ~1M                | ìṣọ́ra        | 1     |
-| `qoder`          | kirẹditi ìforúkọsílẹ̀ | —                 | ~1M                | ìṣọ́ra        | 14    |
-| `scaleway`       | kirẹditi ìforúkọsílẹ̀ | —                 | ~1M                | ó dára       | 6     |
-| `novita`         | kirẹditi ìforúkọsílẹ̀ | —                 | ~500K              | ìṣọ́ra        | 1     |
-| `agy`            | láìsí kọ́kọ́rọ́         | —                 | —                  | yẹra         | 16    |
-| `baichuan`       | láìsí kọ́kọ́rọ́         | —                 | —                  | kò ṣe kedere | 1     |
-| `blackbox`       | láìsí kọ́kọ́rọ́         | —                 | —                  | yẹra         | 6     |
-| `coze`           | láìsí kọ́kọ́rọ́         | —                 | —                  | yẹra         | 1     |
-| `duckduckgo-web` | láìsí kọ́kọ́rọ́         | —                 | —                  | yẹra         | 6     |
-| `freemodel-dev`  | láìsí kọ́kọ́rọ́         | —                 | —                  | àìmọ̀         | 4     |
-| `friendliai`     | láìsí kọ́kọ́rọ́         | —                 | —                  | yẹra         | 2     |
-| `iflytek`        | láìsí kọ́kọ́rọ́         | —                 | —                  | yẹra         | 1     |
-| `inference-net`  | láìsí kọ́kọ́rọ́         | —                 | —                  | ìṣọ́ra        | 3     |
-| `liquid`         | láìsí kọ́kọ́rọ́         | —                 | —                  | àìmọ̀         | 1     |
-| `monsterapi`     | láìsí kọ́kọ́rọ́         | —                 | —                  | kò ṣe kedere | 1     |
-| `muse-spark-web` | láìsí kọ́kọ́rọ́         | —                 | —                  | yẹra         | 3     |
-| `nlpcloud`       | láìsí kọ́kọ́rọ́         | —                 | —                  | yẹra         | 1     |
-| `nvidia`         | láìsí kọ́kọ́rọ́         | —                 | —                  | ìṣọ́ra        | 13    |
-| `pollinations`   | láìsí kọ́kọ́rọ́         | —                 | —                  | ìṣọ́ra        | 31    |
-| `publicai`       | láìsí kọ́kọ́rọ́         | —                 | —                  | ìṣọ́ra        | 3     |
-| `reka`           | láìsí kọ́kọ́rọ́         | —                 | —                  | ìṣọ́ra        | 2     |
-| `sensenova`      | láìsí kọ́kọ́rọ́         | —                 | —                  | ìṣọ́ra        | 1     |
-| `sparkdesk`      | láìsí kọ́kọ́rọ́         | —                 | —                  | ìṣọ́ra        | 1     |
-| `stepfun`        | láìsí kọ́kọ́rọ́         | —                 | —                  | ó dára       | 1     |
-| `t3-web`         | láìsí kọ́kọ́rọ́         | —                 | —                  | yẹra fún     | 23    |
-| `uncloseai`      | láìsí kọ́kọ́rọ́         | —                 | —                  | ìṣọ́ra        | 3     |
+| Olùpèsè          | Irú ọ̀fẹ́                | Tókìnì déédéé/oṣù | Kirẹditi oṣù àkọ́kọ́ | Àwọn òfin iṣẹ́ | Àwọn àwòṣe |
+| ---------------- | ---------------------- | ----------------- | ------------------ | ------------- | ---------- |
+| `mistral`        | tí ń tún wá            | ~1.00B            | —                  | ìṣọ́ra         | 5          |
+| `nara`           | tí ń tún wá            | ~210M             | —                  | ìṣọ́ra         | 8          |
+| `llm7`           | tí ń tún wá            | ~150M             | —                  | ìṣọ́ra         | 4          |
+| `xkiro`          | tí ń tún wá            | ~150M             | —                  | ìṣọ́ra         | 39         |
+| `longcat`        | ẹ̀ẹ̀kan ṣoṣo             | —                 | 10M                | ìṣọ́ra         | 1          |
+| `cerebras`       | ẹ̀ẹ̀kan ṣoṣo             | —                 | Kirẹditi $5        | ìṣọ́ra         | 2          |
+| `cloudflare-ai`  | tí ń tún wá            | ~30M              | —                  | ìṣọ́ra         | 9          |
+| `groq`           | tí ń tún wá            | ~30M              | —                  | ìṣọ́ra         | 5          |
+| `api-airforce`   | tí ń tún wá            | ~24M              | —                  | ìṣọ́ra         | 7          |
+| `bluesminds`     | tí ń tún wá            | ~7M               | —                  | kò ṣe kedere  | 22         |
+| `sambanova`      | tí ń tún wá            | ~6M               | —                  | ìṣọ́ra         | 5          |
+| `arcee-ai`       | tí ń tún wá            | ~5M               | —                  | ìṣọ́ra         | 1          |
+| `bazaarlink`     | tí ń tún wá            | ~4M               | —                  | ìṣọ́ra         | 32         |
+| `openrouter`     | tí ń tún wá            | ~1M               | —                  | ìṣọ́ra         | 1          |
+| `cohere`         | tí ń tún wá            | ~800K             | —                  | ìṣọ́ra         | 6          |
+| `huggingchat`    | tí ń tún wá            | ~500K             | —                  | ìṣọ́ra         | 4          |
+| `morph`          | tí ń tún wá            | ~400K             | —                  | ó dára        | 2          |
+| `huggingface`    | tí ń tún wá            | ~200K             | —                  | ìṣọ́ra         | 6          |
+| `kiro`           | tí ń tún wá            | ~25K              | —                  | yẹra fún      | 12         |
+| `glm-cn`         | àìlópin                | àìlópin\*         | ~20M               | ó dára        | 4          |
+| `baidu`          | àìlópin                | àìlópin\*         | —                  | ìṣọ́ra         | 1          |
+| `gemini`         | àìlópin                | àìlópin\*         | —                  | ìṣọ́ra         | 4          |
+| `kilo-gateway`   | àìlópin                | àìlópin\*         | —                  | ìṣọ́ra         | 7          |
+| `ollama-cloud`   | àìlópin                | àìlópin\*         | —                  | kò ṣe kedere  | 8          |
+| `opencode-zen`   | àìlópin                | àìlópin\*         | —                  | ìṣọ́ra         | 10         |
+| `tencent`        | àìlópin                | àìlópin\*         | —                  | ìṣọ́ra         | 1          |
+| `vertex`         | kirẹditi ìforúkọsílẹ̀   | —                 | ~300M              | ìṣọ́ra         | 10         |
+| `agentrouter`    | kirẹditi ìforúkọsílẹ̀   | —                 | ~200M              | ìṣọ́ra         | 4          |
+| `predibase`      | kirẹditi ìforúkọsílẹ̀   | —                 | ~25M               | ìṣọ́ra         | 1          |
+| `doubao`         | kirẹditi ìforúkọsílẹ̀   | —                 | ~15M               | kò ṣe kedere  | 1          |
+| `ai21`           | kirẹditi ìforúkọsílẹ̀   | —                 | ~10M               | yẹra fún      | 2          |
+| `deepseek`       | kirẹditi ìforúkọsílẹ̀   | —                 | ~5M                | ó dára        | 2          |
+| `hyperbolic`     | kirẹditi ìforúkọsílẹ̀   | —                 | ~5M                | ó dára        | 8          |
+| `nscale`         | kirẹditi ìforúkọsílẹ̀   | —                 | ~5M                | ìṣọ́ra         | 6          |
+| `bytez`          | kirẹditi (tí ń tún wá) | —                 | àìmọ̀               | kò ṣe kedere  | 1          |
+| `deepinfra`      | kirẹditi ìforúkọsílẹ̀   | —                 | ~1M                | ìṣọ́ra         | 22         |
+| `fireworks`      | kirẹditi ìforúkọsílẹ̀   | —                 | ~1M                | yẹra fún      | 10         |
+| `nebius`         | kirẹditi ìforúkọsílẹ̀   | —                 | ~1M                | ìṣọ́ra         | 1          |
+| `qoder`          | kirẹditi ìforúkọsílẹ̀   | —                 | ~1M                | ìṣọ́ra         | 14         |
+| `scaleway`       | kirẹditi ìforúkọsílẹ̀   | —                 | ~1M                | ó dára        | 6          |
+| `novita`         | kirẹditi ìforúkọsílẹ̀   | —                 | ~500K              | ìṣọ́ra         | 1          |
+| `agy`            | láìsí kọ́kọ́rọ́           | —                 | —                  | yẹra fún      | 16         |
+| `baichuan`       | láìsí kọ́kọ́rọ́           | —                 | —                  | kò ṣe kedere  | 1          |
+| `blackbox`       | láìsí kọ́kọ́rọ́           | —                 | —                  | yẹra fún      | 6          |
+| `coze`           | láìsí kọ́kọ́rọ́           | —                 | —                  | yẹra fún      | 1          |
+| `duckduckgo-web` | láìsí kọ́kọ́rọ́           | —                 | —                  | yẹra fún      | 6          |
+| `freemodel-dev`  | láìsí kọ́kọ́rọ́           | —                 | —                  | àìmọ̀          | 4          |
+| `friendliai`     | láìsí kọ́kọ́rọ́           | —                 | —                  | yẹra fún      | 2          |
+| `iflytek`        | láìsí kọ́kọ́rọ́           | —                 | —                  | yẹra fún      | 1          |
+| `inference-net`  | láìsí kọ́kọ́rọ́           | —                 | —                  | ìṣọ́ra         | 3          |
+| `liquid`         | láìsí kọ́kọ́rọ́           | —                 | —                  | àìmọ̀          | 1          |
+| `monsterapi`     | láìsí kọ́kọ́rọ́           | —                 | —                  | kò ṣe kedere  | 1          |
+| `muse-spark-web` | láìsí kọ́kọ́rọ́           | —                 | —                  | yẹra fún      | 3          |
+| `nlpcloud`       | láìsí kọ́kọ́rọ́           | —                 | —                  | yẹra fún      | 1          |
+| `nvidia`         | láìsí kọ́kọ́rọ́           | —                 | —                  | ìṣọ́ra         | 13         |
+| `pollinations`   | láìsí kọ́kọ́rọ́           | —                 | —                  | ìṣọ́ra         | 31         |
+| `publicai`       | láìsí kọ́kọ́rọ́           | —                 | —                  | ìṣọ́ra         | 3          |
+| `reka`           | láìsí kọ́kọ́rọ́           | —                 | —                  | ìṣọ́ra         | 2          |
+| `sensenova`      | láìsí kọ́kọ́rọ́           | —                 | —                  | ìṣọ́ra         | 1          |
+| `sparkdesk`      | keyless                | —                 | —                  | ìṣọ́ra         | 1          |
+| `stepfun`        | keyless                | —                 | —                  | ó dára        | 1          |
+| `t3-web`         | keyless                | —                 | —                  | yẹra fún      | 23         |
+| `uncloseai`      | keyless                | —                 | —                  | ìṣọ́ra         | 3          |
 
 ---
 

@@ -1,3 +1,4 @@
+import { resolveStreamIndices } from "./streamIndices";
 import { createSseTextTransform, FieldCategory, classifyField } from "./sseTextTransform";
 import { sanitizePII, getPiiResponseMode } from "./piiSanitizer";
 
@@ -304,18 +305,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     ) => {
       if (!obj || typeof obj !== "object") return;
 
-      let choiceIdx = currentChoiceIdx;
-      let toolIdx = currentToolIdx;
-
-      if (typeof obj.index === "number") {
-        if (obj.delta || obj.message || obj.finish_reason) {
-          choiceIdx = obj.index;
-        } else if (obj.function || obj.id || obj.type === "function") {
-          toolIdx = obj.index;
-        } else {
-          choiceIdx = obj.index;
-        }
-      }
+      const { choiceIdx, toolIdx } = resolveStreamIndices(obj, currentChoiceIdx, currentToolIdx);
 
       const compositeKey = `${choiceIdx}_${toolIdx}`;
       const isArray = Array.isArray(obj);

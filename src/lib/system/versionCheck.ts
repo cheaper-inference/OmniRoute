@@ -33,7 +33,7 @@ const NPM_REGISTRY_LATEST_URL = "https://registry.npmjs.org/omniroute/latest";
  * surviving cause of "#4100 still not fixed" after the registry fallback shipped in v3.8.28.
  */
 const GITHUB_RELEASES_LATEST_URL =
-  "https://api.github.com/repos/diegosouzapw/OmniRoute/releases/latest";
+  "https://api.github.com/repos/cheaper-inference/OmniRoute/releases/latest";
 
 const LOOKUP_TIMEOUT_MS = 10_000;
 // Bound on the version-metadata responses, so a misdirected or hostile URL

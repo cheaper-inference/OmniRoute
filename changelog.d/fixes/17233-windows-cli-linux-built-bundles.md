@@ -1,0 +1,1 @@
+- **fix(cli):** Preserve Windows CLI executable discovery and `where.exe` probing in Linux-built server bundles by reading the runtime OS instead of a build-time-foldable platform constant ([#17233](https://github.com/diegosouzapw/OmniRoute/pull/17233)) — thanks @fabioKoruja00

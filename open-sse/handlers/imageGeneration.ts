@@ -66,7 +66,10 @@ import { buildXaiImageRequest } from "./imageGeneration/providers/xaiImage.ts";
 import { handleMaxaiImageGeneration } from "./imageGeneration/providers/maxaiImage.ts";
 import { handleAdobeFireflyImageGeneration } from "./imageGeneration/providers/adobeFirefly.ts";
 import { handleSyntxImageGeneration } from "./imageGeneration/providers/syntx.ts";
-import { geminiInlineImagePart } from "./imageGeneration/providers/geminiInline.ts";
+import {
+  geminiInlineImagePart,
+  geminiReferenceImageError,
+} from "./imageGeneration/providers/geminiInline.ts";
 import { handleAlibabaImageGeneration } from "./imageGeneration/providers/alibabaImage.ts";
 import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihorde.ts";
 import * as codexImages from "./imageGeneration/providers/codexImages.ts";
@@ -749,7 +752,15 @@ export async function handleImageGeneration({
   }
 
   if (providerConfig.format === "syntx-image") {
-    return handleSyntxImageGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleSyntxImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "nanobanana") {
@@ -1181,6 +1192,18 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
       startTime,
       error:
         "Missing Google projectId for Antigravity account. Please reconnect OAuth in Providers so OmniRoute can fetch your Cloud Code project.",
+      requestBody: logRequestBody,
+    });
+  }
+
+  const referenceError = geminiReferenceImageError(body);
+  if (referenceError) {
+    return saveImageErrorResult({
+      provider,
+      model,
+      status: 400,
+      startTime,
+      error: referenceError,
       requestBody: logRequestBody,
     });
   }

@@ -176,32 +176,32 @@ Ulatused (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`
 ## Testide käitamine
 
 ```bash
-# Kõik testid (ühiktestid + vitest + ökosüsteem + e2e)
+# Kõik testid (üksustestid + Vitest + ökosüsteem + E2E)
 npm run test:all
 
 # Üks testifail (Node.js-i sisseehitatud testikäitaja — enamik teste kasutab seda)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Ainult sinu muudatusest mõjutatud ühiktestid (sama TIA valija nagu CI kontrollis, #8084)
-npm run test:scoped            # viimase commiti muudatused (või tööpuu muudatused)
-npm run test:scoped:staged     # ainult etapistatud muudatused — sobib hästi commiti-eelse käitusega
-npm run test:scoped:full       # loo esmalt uuesti impordigraafi kaart (pärast failide lisamist/teisaldamist)
-# Väljumiskood 1 + „käita kogu komplekt“ tähendab, et muutus keskne fail (tsconfig, package.json, …) või
-# kaardistamata lähtekood — valija rakendab turvalist tõrget ega jäta kunagi midagi märkamatult vahele.
+# Ainult sinu muudatusest mõjutatud üksustestid (sama TIA valikumehhanism nagu CI kontrollis, #8084)
+npm run test:scoped            # viimase commiti (või tööpuu) muudatused
+npm run test:scoped:staged     # ainult stage’itud muudatused — sobib hästi commitieelse käitamisega
+npm run test:scoped:full       # esmalt koosta impordigraafi kaart uuesti (pärast failide lisamist/teisaldamist)
+# Väljumiskood 1 + „käita kogu komplekt” tähendab, et keskne fail (tsconfig, package.json, …) või
+# kaardistamata lähtekood muutus — valikumehhanism lõpetab turvaliselt ega jäta teste kunagi märkamatult vahele.
 
-# Vitest (MCP server, autoCombo, vahemälu)
+# Vitest (MCP-server, autoCombo, vahemälu)
 npm run test:vitest
 
 # E2E-testid (nõuab Playwrighti)
 npm run test:e2e
 
-# Protokolliklientide E2E (MCP transpordid, A2A)
+# Protokolliklientide E2E-testid (MCP-transpordid, A2A)
 npm run test:protocols:e2e
 
 # Ökosüsteemi ühilduvustestid
 npm run test:ecosystem
 
-# Katvuse kontroll: 60% lausetest/ridadest/funktsioonidest/harudest
+# Katvuse lävend: 60% lausete/ridade/funktsioonide/harude katvus
 npm run test:coverage
 npm run coverage:report
 
@@ -209,51 +209,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Kontrollitud päris ülesvoolu kombinatsiooni suitsutest (nõuab VPS-i juurdepääsu + päris teenusepakkuja krediiti)
-# Pöördub PÄRIS teenusepakkujate poole — maksab veidi. Seda EI käitata KUNAGI CI-s. Ilma kontrollmuutujata jäetakse test korrektselt vahele.
-# Nõuab: ssh root@192.168.0.15 juurdepääsu (laadib VPS-ist kirjutuskaitstud DB hetktõmmise).
+# Kontrollitav päris ülesvoolu kombinatsiooni suitsutest (nõuab VPS-ile juurdepääsu + päris teenusepakkujate krediiti)
+# Kasutab PÄRIS teenusepakkujaid — maksab veidi. EI tööta KUNAGI CI-s. Jäetakse ilma kontrollmuutujata puhtalt vahele.
+# Vajab juurdepääsu: ssh root@192.168.0.15 (laadib VPS-ist kirjutuskaitstud andmebaasitõmmise).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# 3. etapi VPS-i reaalne suitsutest — tavalised Node ESM-i skriptid, mis pöörduvad otse töötava .15 serveri poole.
-# Nõuab: ssh root@192.168.0.15 juurdepääsu (kombinatsioonid luuakse/eemaldatakse SSH kaudu sqlite'is).
-# Pöördub PÄRIS teenusepakkujate poole (väike kulu). Loob/kustutab ainult __live_test__* kombinatsioone. Seda EI käitata KUNAGI CI-s.
-# REQUIRE_API_KEY=false serveris .15, seega API-võtit pole vaja, kuid kasutab määramise korral väärtusi COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY.
-npm run test:combo:live:vps              # 7 HTTP-stsenaariumi (prioriteet/tsükliline/kaalutud/kulu/fusioon/automaatne + seisund)
-npm run test:combo:live:vps:failover     # lisab päris teenusepakkujatevahelise tõrkesiirde stsenaariumi (kokku 8)
+# 3. etapi VPS-i reaalne suitsutest — lihtsad Node ESM-i skriptid, mis kasutavad otse töötavat .15 serverit.
+# Vajab juurdepääsu: ssh root@192.168.0.15 (kombinatsioonid luuakse/eemaldatakse SSH kaudu SQLite’is).
+# Kasutab PÄRIS teenusepakkujaid (väike kulu). Loob/kustutab ainult __live_test__* kombinatsioone. EI tööta KUNAGI CI-s.
+# .15 serveris on REQUIRE_API_KEY=false, seega API-võtit pole vaja, kuid kasutab COMBO_LIVE_BASE_URL-i / COMBO_LIVE_API_KEY-d, kui need on määratud.
+npm run test:combo:live:vps              # 7 HTTP-stsenaariumi (prioriteet/tsükliline/kaalutud/kulu/fusioon/automaatne + tervisekontroll)
+npm run test:combo:live:vps:failover     # lisab päris teenusepakkujatevahelise tõrkesiirdestsenaariumi (kokku 8)
 ```
 
 Märkused katvuse kohta:
 
-- `npm run test:coverage` mõõdab peamise ühiktestide komplekti lähtekoodi katvust, välistab `tests/**` ja hõlmab `open-sse/**`
-- Pull Requestid peavad säilitama katvuse kontrollis lausete/ridade/funktsioonide/harude katvuse tasemel **60%+**
-- Kui PR muudab tootmiskoodi kataloogis `src/`, `open-sse/`, `electron/` või `bin/`, tuleb samas PR-is lisada või värskendada automatiseeritud teste
+- `npm run test:coverage` mõõdab peamise üksustestide komplekti lähtekoodi katvust, välistab `tests/**` ja hõlmab `open-sse/**`
+- Pull request’id peavad säilitama lausete/ridade/funktsioonide/harude katvuse lävendi **60%+**
+- Kui PR muudab tootmiskoodi kataloogides `src/`, `open-sse/`, `electron/` või `bin/`, peab sama PR lisama või uuendama automatiseeritud teste
 - `npm run coverage:report` väljastab viimase katvuskäituse üksikasjaliku failipõhise aruande
-- `npm run test:coverage:legacy` säilitab ajalooliseks võrdluseks vanema mõõdiku
-- Katvuse parandamise etapiviisilist tegevuskava kirjeldab `docs/ops/COVERAGE_PLAN.md`
+- `npm run test:coverage:legacy` säilitab vanema mõõdiku ajalooliseks võrdluseks
+- Katvuse järkjärgulise parandamise tegevuskava leiad failist `docs/ops/COVERAGE_PLAN.md`
 
-### Pull Requesti nõuded
+### Pull request’i nõuded
 
-Enne PR-i avamist kasuta juhendit
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), et käitada tehtud
-muudatustele keskenduv tsükkel. Täielik ühiktestide komplekt (4 CI jaotist), Vitest, **60%+**
-katvuse kontroll ja tootmisjärk on CI vastutusel — nende kohalik käitamine ei anna lisateavet,
-mida PR-i kontrollid juba ei annaks, ning väiksemates masinates võib see süsteemi üle koormata (#8084):
+Enne PR-i avamist kasuta
+[panustamise kuldteed](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), et käitada oma
+muudatusele keskendunud töövoog. Täielik üksustestide komplekt (4 CI-kildu), Vitest, **60%+**
+katvuse lävend ja tootmisversiooni kooste on CI vastutusel — nende kohalik käitamine ei anna
+lisateavet, mida PR-i kontrollid juba ei annaks, ning võib väiksemates masinates süsteemi üle koormata (#8084):
 
-- Käita oma muudatust katvaid testifaile: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Käita oma muudatust katvad testifailid: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Käita `npm run lint`
-- Tootmiskoodi muutmisel lisa või värskenda samas PR-is automatiseeritud teste
+- Tootmiskoodi muutmisel lisa või uuenda samas PR-is automatiseeritud teste
+- Paiguta `node:test` failides iga tipptaseme `await` (näiteks `await import(...)`) enne esimest `test()` / `describe()` kutset: suvandi `--test-force-exit` kasutamisel võivad pärast seda registreeritud testid märkamatult käitamata jääda (#18045; kontrollib `npm run check:test-tla-order`)
 - Kui tootmiskood muutus, lisa muudetud või lisatud testifailid PR-i kirjeldusse
-- Kontrolli PR-is SonarQube'i tulemust, kui projekti saladused on CI-s seadistatud
+- Kui projekti saladused on CI-s seadistatud, kontrolli PR-is SonarQube’i tulemust
 
-Testide praegune olek: **122 ühiktestifaili**, mis hõlmavad järgmist:
+Testide praegune olek: **122 üksustestifaili**, mis hõlmavad järgmist:
 
 - Teenusepakkujate tõlkijad ja vormingute teisendamine
-- Kiiruse piiramine, kaitselüliti ja tõrkekindlus
+- Päringusageduse piiramine, kaitselüliti ja tõrkekindlus
 - Semantiline vahemälu, idempotentsus ja edenemise jälgimine
-- Andmebaasitoimingud ja skeem (21 DB moodulit)
+- Andmebaasitoimingud ja skeem (21 andmebaasimoodulit)
 - OAuthi vood ja autentimine
-- API otspunktide valideerimine (Zod v4)
-- MCP serveri tööriistad ja ulatuse jõustamine
+- API lõpp-punktide valideerimine (Zod v4)
+- MCP-serveri tööriistad ja ulatuse jõustamine
 - Mälu- ja oskustesüsteemid
 
 ---

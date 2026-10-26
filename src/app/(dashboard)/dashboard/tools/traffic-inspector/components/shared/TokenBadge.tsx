@@ -1,5 +1,8 @@
 "use client";
 
+import Badge from "@/shared/components/Badge";
+import Icon from "@/shared/components/Icon";
+
 interface TokenBadgeProps {
   tokensIn?: number | null;
   tokensOut?: number | null;
@@ -9,12 +12,9 @@ export function TokenBadge({ tokensIn, tokensOut }: TokenBadgeProps) {
   if (!tokensIn && !tokensOut) return null;
 
   return (
-    <span className="inline-flex items-center gap-1 rounded bg-purple-900/40 px-2 py-0.5 text-xs text-purple-300 font-mono">
-      <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
-        token
-      </span>
+    <Badge variant="info" size="sm" className="font-mono" icon={<Icon name="token" size={12} />}>
       {tokensIn != null && <span>{tokensIn}↑</span>}
       {tokensOut != null && <span>{tokensOut}↓</span>}
-    </span>
+    </Badge>
   );
 }

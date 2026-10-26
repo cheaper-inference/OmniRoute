@@ -11,17 +11,18 @@ assistent (architectuur, conventies, tests, kwaliteitscontroles, git-workflow, d
 PII-lessen). Lees het bestand volledig; voeg hier geen projectregels opnieuw toe. Alles hieronder is ALLEEN
 van toepassing op Claude Code — operationele verfijningen van regels die al in `AGENTS.md` zijn vastgelegd.
 
-## Worktree-isolatie — specifieke aandachtspunten voor Claude Code
+## Worktree-isolatie — specifieke punten voor Claude Code
 
 Het volledige verplichte worktree-protocol (bevestiging van de basisbranch, het canonieke pad
-`.claude/worktrees/`, `cp -al` voor node_modules, opruimregels) staat in `AGENTS.md` → Git Workflow → "Worktree
-isolation". Specifieke aandachtspunten voor Claude Code:
+`.claude/worktrees/`, `cp -al` voor node_modules, afbreekregels) staat in
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (samengevat in `AGENTS.md` →
+Git-workflow → "Worktree-isolatie"). Punten die specifiek zijn voor Claude Code:
 
-- Bevestig de basisbranch met de operator via `AskUserQuestion` (Harde Regel #19), tenzij die
-  dit al heeft aangegeven.
-- Geef de voorkeur aan de ingebouwde tool `EnterWorktree` — deze maakt worktrees al aan onder
+- Bevestig de basisbranch met de operator via `AskUserQuestion` (Harde regel #19), tenzij die
+  het je al heeft verteld.
+- Gebruik bij voorkeur de ingebouwde `EnterWorktree`-tool — die maakt worktrees al aan onder
   `.claude/worktrees/` (het canonieke pad). Maak de worktree aan met het gedocumenteerde `git
-worktree add`-commando en roep vervolgens `EnterWorktree` aan met het bijbehorende `path`.
+worktree add`-commando en roep daarna `EnterWorktree` aan met het bijbehorende `path`.
 
 ## Veiligheid tussen sessies — specifieke aandachtspunten voor Claude Code
 
