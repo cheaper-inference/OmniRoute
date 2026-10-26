@@ -11,6 +11,7 @@ import { resolveSuppressThinkClose, THINKING_MARKER_HEADER } from "../../utils/t
 import { fetchNativeZcode } from "./nativeProtocol.ts";
 
 type RecordValue = Record<string, unknown>;
+const ZCODE_STREAM_BUFFER_BYTES = 1024;
 export type ZcodeRequestAuth = { apiKey: string; headers?: Record<string, string> };
 function record(value: unknown): RecordValue {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as RecordValue) : {};
@@ -176,7 +177,13 @@ export async function executeZcodeGateway(
         clientResponseFormat: input.clientResponseFormat ?? null,
       });
       response = ready.response.ok
-        ? translateSseResponse(ready.response, "zcode", input.model, suppressThinkClose)
+        ? translateSseResponse(
+            ready.response,
+            "zcode",
+            input.model,
+            suppressThinkClose,
+            ZCODE_STREAM_BUFFER_BYTES
+          )
         : ready.response;
       response.headers.set("cache-control", "no-cache");
       response.headers.set("x-accel-buffering", "no");

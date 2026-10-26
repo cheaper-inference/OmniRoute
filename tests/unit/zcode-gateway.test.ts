@@ -228,6 +228,53 @@ test(
   }
 );
 
+test(
+  "native gateway bounds stream read-ahead before the client attaches",
+  { timeout: 10000 },
+  async (t) => {
+    const f = fixture();
+    const totalFrames = 200;
+    let produced = 0;
+    const source = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(encoder.encode(start + delta("first ")));
+        produced++;
+      },
+      pull(controller) {
+        if (produced >= totalFrames) {
+          controller.enqueue(encoder.encode(end));
+          controller.close();
+          return;
+        }
+        controller.enqueue(encoder.encode(delta("x".repeat(80))));
+        produced++;
+      },
+    });
+    backend(
+      t,
+      f.key,
+      () => new Response(source, { headers: { "content-type": "text/event-stream" } })
+    );
+
+    const result = await executeZcodeGateway(input, native, { apiKey: f.key });
+    assert.ok(!(result instanceof Response));
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    assert.ok(
+      produced < totalFrames,
+      `the native transform must backpressure before the client attaches; produced ${produced}/${totalFrames} frames`
+    );
+
+    const reader = result.response.body!.getReader();
+    let responseText = "";
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      responseText += new TextDecoder().decode(chunk.value);
+    }
+    assert.ok(responseText.includes("[DONE]"));
+  }
+);
+
 test("tool output and usage translate; upstream refusal is returned without replay", async (t) => {
   const f = fixture();
   let status = 200;
