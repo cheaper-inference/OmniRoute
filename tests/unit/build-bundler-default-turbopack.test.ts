@@ -8,6 +8,7 @@ const buildIsolated = await import("../../scripts/build/build-next-isolated.mjs"
 const GiB = 1024 ** 3;
 
 test("default bundler is Turbopack when the effective RAM limit exceeds 16 GiB", () => {
+  assert.equal(buildIsolated.resolveNextBuildBundlerFlag({}, 16 * GiB + 1), "--turbopack");
   assert.equal(buildIsolated.resolveNextBuildBundlerFlag({}, 32 * GiB), "--turbopack");
 });
 
@@ -35,4 +36,13 @@ test("legacy nonzero env values preserve their prior explicit Turbopack behavior
     buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "yes" }, 8 * GiB),
     "--turbopack"
   );
+});
+
+test("explicit empty and false strings keep prior Turbopack semantics", () => {
+  for (const value of ["", "false"]) {
+    assert.equal(
+      buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: value }, 8 * GiB),
+      "--turbopack"
+    );
+  }
 });
