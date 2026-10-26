@@ -321,6 +321,60 @@ test("repeat touches inside the refresh window do not write; older ones refresh 
   );
 });
 
+test("a remembered fresh touch does no SQLite work and the schema is ensured once", async () => {
+  const created = await apiKeysDb.createApiKey("hot-path", "machine-hot-path");
+  const base = Date.parse("2026-09-21T12:00:00.000Z");
+  const touch = (offsetMs: number) =>
+    compliance.recordApiKeyAuthTouch({
+      apiKeyId: created.id,
+      method: "GET",
+      normalizedPath: "/api/v1/models",
+      ipAddress: "127.0.0.1",
+      userAgent: "polling-client",
+      requestId: `req_hot_${offsetMs}`,
+      createdAt: new Date(base + offsetMs).toISOString(),
+    });
+
+  touch(0);
+  assert.equal(authTouchRows().length, 1);
+
+  type CountedDb = {
+    prepare: (...args: unknown[]) => unknown;
+    exec: (...args: unknown[]) => unknown;
+  };
+  const db = core.getDbInstance() as unknown as CountedDb;
+  const originalPrepare = db.prepare;
+  const originalExec = db.exec;
+  let prepares = 0;
+  let execs = 0;
+  db.prepare = (...args: unknown[]) => {
+    prepares += 1;
+    return originalPrepare.apply(db, args);
+  };
+  db.exec = (...args: unknown[]) => {
+    execs += 1;
+    return originalExec.apply(db, args);
+  };
+  try {
+    // A hot /v1/models poll inside the refresh window never reaches SQLite.
+    touch(15_000);
+    touch(45_000);
+    assert.equal(prepares, 0, "a remembered fresh hit must not prepare any statement");
+    assert.equal(execs, 0, "a remembered fresh hit must not run DDL");
+
+    // Past the refresh window the row is re-stamped, still without re-running the schema DDL.
+    touch(120_000);
+    assert.ok(prepares > 0, "a touch past the refresh window refreshes the row");
+    assert.equal(execs, 0, "audit_log schema is ensured once per DB instance, not per touch");
+  } finally {
+    db.prepare = originalPrepare;
+    db.exec = originalExec;
+  }
+  const rows = authTouchRows();
+  assert.equal(rows.length, 1);
+  assert.equal(new Date(rows[0].timestamp).toISOString(), new Date(base + 120_000).toISOString());
+});
+
 test("auth-touch rows follow existing application-log retention", async () => {
   const created = await apiKeysDb.createApiKey("retention", "machine-retention");
   compliance.recordApiKeyAuthTouch({

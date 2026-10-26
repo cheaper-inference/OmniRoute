@@ -415,6 +415,41 @@ export function logAuditEvent(entry: {
   }
 }
 
+/**
+ * Per-DB-instance state for the auth-touch hot path (keyed by the adapter so a
+ * reset/reopened database starts clean): the audit_log schema is ensured once
+ * instead of on every request, and `lastStampMs` remembers when each identical
+ * touch (key + ip + method/path/UA) last stamped its row, so a repeat inside the
+ * refresh window returns before touching SQLite at all. Bounded LRU; if a
+ * remembered row is pruned meanwhile (cap or retention) it is re-inserted on the
+ * first touch after the refresh window.
+ */
+type ApiKeyAuthTouchDbState = { schemaReady: boolean; lastStampMs: Map<string, number> };
+const API_KEY_AUTH_TOUCH_MEMO_MAX_ENTRIES = 1_000;
+const apiKeyAuthTouchDbState = new WeakMap<SqliteAdapter, ApiKeyAuthTouchDbState>();
+
+function getApiKeyAuthTouchDbState(db: SqliteAdapter): ApiKeyAuthTouchDbState {
+  let state = apiKeyAuthTouchDbState.get(db);
+  if (!state) {
+    state = { schemaReady: false, lastStampMs: new Map() };
+    apiKeyAuthTouchDbState.set(db, state);
+  }
+  return state;
+}
+
+function rememberApiKeyAuthTouchStamp(
+  state: ApiKeyAuthTouchDbState,
+  memoKey: string,
+  stampMs: number
+): void {
+  state.lastStampMs.delete(memoKey);
+  state.lastStampMs.set(memoKey, stampMs);
+  if (state.lastStampMs.size > API_KEY_AUTH_TOUCH_MEMO_MAX_ENTRIES) {
+    const oldest = state.lastStampMs.keys().next().value;
+    if (oldest !== undefined) state.lastStampMs.delete(oldest);
+  }
+}
+
 type ApiKeyAuthTouch = {
   apiKeyId: string;
   timestamp: string;
@@ -425,10 +460,11 @@ type ApiKeyAuthTouch = {
 };
 
 /**
- * Coalesce into the newest identical touch row when one exists. Returns true when
- * the touch was absorbed (re-stamped, or left alone while still fresh).
+ * Coalesce into the newest identical touch row when one exists. Returns the row's
+ * stamp (ms) when the touch was absorbed (re-stamped, or left alone while still
+ * fresh), or null when there is no row to coalesce into.
  */
-function coalesceApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): boolean {
+function coalesceApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): number | null {
   const cutoff = new Date(touch.timestampMs - API_KEY_AUTH_TOUCH_COALESCE_MS).toISOString();
   const recent = db
     .prepare(
@@ -446,7 +482,7 @@ function coalesceApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): boo
       touch.serializedMetadata,
       cutoff
     ) as { id?: number; timestamp?: string } | undefined;
-  if (!recent?.id) return false;
+  if (!recent?.id) return null;
 
   // Fresh enough: skip the write entirely (no per-request write amplification).
   const lastStampMs = Date.parse(recent.timestamp ?? "");
@@ -454,14 +490,14 @@ function coalesceApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): boo
     Number.isFinite(lastStampMs) &&
     touch.timestampMs - lastStampMs < API_KEY_AUTH_TOUCH_REFRESH_MS
   ) {
-    return true;
+    return lastStampMs;
   }
   db.prepare(`UPDATE audit_log SET timestamp = ?, request_id = ? WHERE id = ?`).run(
     touch.timestamp,
     touch.requestId,
     recent.id
   );
-  return true;
+  return touch.timestampMs;
 }
 
 function insertApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): void {
@@ -492,6 +528,30 @@ function insertApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): void 
   ).run(API_KEY_AUTH_TOUCH_ACTION, API_KEY_AUTH_TOUCH_MAX_ROWS);
 }
 
+/** Write (or coalesce) one touch, skipping SQLite entirely for a remembered fresh hit. */
+function persistApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): void {
+  const state = getApiKeyAuthTouchDbState(db);
+  const memoKey = [touch.apiKeyId, touch.ipAddress ?? "", touch.serializedMetadata ?? ""].join(
+    "\u0000"
+  );
+  const rememberedMs = state.lastStampMs.get(memoKey);
+  if (rememberedMs !== undefined) {
+    const sinceStampMs = touch.timestampMs - rememberedMs;
+    // Coalesced hit inside the refresh window: no SQLite read, write or DDL.
+    if (sinceStampMs >= 0 && sinceStampMs < API_KEY_AUTH_TOUCH_REFRESH_MS) return;
+  }
+  if (!state.schemaReady) {
+    ensureAuditLogSchema(db);
+    state.schemaReady = true;
+  }
+  let stampMs = coalesceApiKeyAuthTouch(db, touch);
+  if (stampMs === null) {
+    insertApiKeyAuthTouch(db, touch);
+    stampMs = touch.timestampMs;
+  }
+  rememberApiKeyAuthTouchStamp(state, memoKey, stampMs);
+}
+
 /**
  * Record a successful metadata/discovery API-key authentication without
  * creating an inference call-log row. Identical touches are coalesced for a
@@ -517,7 +577,6 @@ export function recordApiKeyAuthTouch(entry: {
   if (!db) return;
 
   try {
-    ensureAuditLogSchema(db);
     const createdAtMs = Date.parse(entry.createdAt || "");
     const validCreatedAt = Number.isFinite(createdAtMs);
     const timestampMs = validCreatedAt ? createdAtMs : Date.now();
@@ -537,7 +596,7 @@ export function recordApiKeyAuthTouch(entry: {
       requestId: sanitizeBoundedAuditText(entry.requestId, 128),
       serializedMetadata,
     };
-    if (!coalesceApiKeyAuthTouch(db, touch)) insertApiKeyAuthTouch(db, touch);
+    persistApiKeyAuthTouch(db, touch);
   } catch {
     // Authentication observability is best effort and must never block a request.
   }
