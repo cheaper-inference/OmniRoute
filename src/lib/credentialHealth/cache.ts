@@ -98,10 +98,22 @@ export const INVALID_CREDENTIAL_DIAGNOSES: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * Transport failures do not provide evidence about credential validity.
+ * Even the legacy gate must never reject a connection based on these statuses.
+ * Other inconclusive diagnoses still follow the operator's feature flag.
+ */
+export const NON_CREDENTIAL_PROBE_DIAGNOSES: ReadonlySet<string> = new Set([
+  "network_error",
+  "upstream_unavailable",
+  "upstream_rate_limited",
+]);
+
+/**
  * Default-off flag: when on, only a cached `error` carrying one of the
  * INVALID_CREDENTIAL_DIAGNOSES blocks dispatch; inconclusive failures (timeouts, quota,
  * outages, and the scheduler's untyped catch-path errors) fall through as "unknown".
- * Off (default): any cached `error` blocks, exactly as before #16599.
+ * Off (default): other cached `error` diagnoses block, except known transport
+ * failures which never prove bad credentials (#18037).
  */
 export const CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG = "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY";
 
@@ -126,8 +138,13 @@ export function isCredentialHealthy(connectionId: string): boolean | undefined {
 
   if (status.status === "active") return true;
   if (status.status === "error") {
+    // Network failures, outages and upstream throttling cannot establish that a
+    // credential is invalid, irrespective of the legacy gate flag (#18037).
+    if (status.lastErrorType && NON_CREDENTIAL_PROBE_DIAGNOSES.has(status.lastErrorType)) {
+      return undefined;
+    }
     if (!isAuthDiagnosesOnlyGateEnabled()) return false;
-    // A failed probe is not proof of bad credentials: timeouts, quota and outages are inconclusive.
+    // All remaining inconclusive diagnoses are controlled by the feature flag.
     if (
       typeof status.lastErrorType === "string" &&
       INVALID_CREDENTIAL_DIAGNOSES.has(status.lastErrorType)
