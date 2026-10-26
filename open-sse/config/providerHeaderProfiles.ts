@@ -194,6 +194,32 @@ export const CODEBUDDY_CN_USER_AGENT = "CLI/2.108.1 CodeBuddy/2.108.1";
 // CodeBuddy International (codebuddy.ai) - single source of truth for intl profile.
 export const CODEBUDDY_INTL_USER_AGENT = "IDE/2.108.1 CodeBuddy/2.108.1";
 
+// WorkBuddy gateway identity shared by chat and authenticated model discovery.
+// Discovery intentionally omits the chat-only X-Agent-* intent headers.
+export const WORKBUDDY_UA_VERSION = "5.5.6";
+export const WORKBUDDY_USER_AGENT = `WorkBuddy/${WORKBUDDY_UA_VERSION}`;
+
+export function getWorkbuddyClientHeaders(): Record<string, string> {
+  return {
+    "User-Agent": WORKBUDDY_USER_AGENT,
+    "X-Product": "SaaS",
+    "X-IDE-Type": "WorkBuddy",
+    "X-IDE-Name": "WorkBuddy",
+    "X-IDE-Version": WORKBUDDY_UA_VERSION,
+    "X-Requested-With": "XMLHttpRequest",
+    "X-Domain": "www.workbuddy.ai",
+  };
+}
+
+export function getWorkbuddyChatHeaders(): Record<string, string> {
+  return {
+    ...getWorkbuddyClientHeaders(),
+    "X-Agent-Intent": "craft",
+    "X-Agent-Purpose": "conversation",
+    "X-Agent-Type": "main",
+  };
+}
+
 const QWEN_DOTTED_TRIPLE_PATTERN = /^\d+\.\d+\.\d+$/;
 const NPM_QWEN_CODE_LATEST_URL = "https://registry.npmjs.org/@qwen-code/qwen-code/latest";
 const NPM_CODEBUDDY_LATEST_URL = "https://registry.npmjs.org/@tencent-ai/codebuddy-code/latest";
