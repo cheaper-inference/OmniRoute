@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "ব্যবহৃত হয়েছে {count, plural, one {# ব্যাচ} other {# ব্যাচ}}",
     "batchFilePreview": "পূর্বদর্শন",
     "batchFilePreviewTruncated": "প্রথম {shown} লাইন দেখানো হচ্ছে ({total} মোট লাইন)",
-    "batchFileDownloadFull": "পূর্ণ ফাইল ডাউনলোড করুন"
+    "batchFileDownloadFull": "পূর্ণ ফাইল ডাউনলোড করুন",
+    "dialogTitleFallback": "ডায়ালগ",
+    "pagination": "পৃষ্ঠা বিন্যাস",
+    "clearFilters": "ফিল্টার মুছুন",
+    "tokensPageTitle": "টোকেন",
+    "tokensPageDescription": "API কী-গুলোর মধ্যে টোকেন পাঠান, আমন্ত্রণ কোড শেয়ার করুন এবং কমিউনিটি সার্ভার সংযুক্ত করুন।",
+    "tokensServerUrlLabel": "সার্ভার URL"
   },
   "disabled": "নিষ্ক্রিয়",
   "featureFlagOmnirouteEmergencyFallbackDescription": "বাজেট শেষ হয়ে যাওয়া অনুরোধগুলো জরুরি ফ্রি ফলব্যাক প্রোভাইডার/মডেলে রুট করুন।",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 বা @channelname",
       "chatIdHint": "চ্যাট/চ্যানেলের অনন্য সংখ্যাসূচক শনাক্তকারী বা পাবলিক ব্যবহারকারীর নাম।",
       "tutorial": "কীভাবে Telegram ওয়েবহুক কনফিগার করবেন:"
-    }
+    },
+    "copy": "কপি করুন",
+    "copied": "কপি করা হয়েছে!",
+    "expandDetails": "বিস্তারিত দেখান",
+    "collapseDetails": "বিস্তারিত লুকান"
   },
   "compliance": {
     "auditTitle": "নিরীক্ষা",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "কল (২৪ ঘণ্টা)",
     "mcpMetricSuccessRate": "সফলতার হার",
     "mcpMetricAvgDuration": "গড় স্থায়িত্ব",
-    "mcpMetricTopTool": "শ্রেষ্ঠ টুল"
+    "mcpMetricTopTool": "শ্রেষ্ঠ টুল",
+    "dismissError": "ত্রুটি বাতিল করুন"
   },
   "themesPage": {
     "title": "থিম",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "উন্নত পেলোড নিয়ম, অনুরোধ সীমা এবং প্রক্সি API সেটিংস",
     "mitmProxyDescription": "ট্রাফিক পরিদর্শন ও ডিবাগিংয়ের জন্য MITM প্রক্সি সেটিংস কনফিগার করুন",
     "oneProxyDescription": "উন্নত প্রক্সি চেইনিংয়ের জন্য 1Proxy সেটিংস কনফিগার করুন",
-    "omniSkillsDescription": "স্বয়ংক্রিয় প্রম্পট ও টুল এক্সিকিউশনের জন্য স্যান্ডবক্স স্কিল ইনস্টল ও পরিচালনা করুন"
+    "omniSkillsDescription": "স্বয়ংক্রিয় প্রম্পট ও টুল এক্সিকিউশনের জন্য স্যান্ডবক্স স্কিল ইনস্টল ও পরিচালনা করুন",
+    "openMenu": "মেনু খুলুন",
+    "products": "Keak পণ্যসমূহ"
   },
   "cloudSyncStatus": {
     "synced": "সিঙ্ক হয়েছে",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "পছন্দের সংযোগ",
     "preferredConnectionsDesc": "প্রতিটি কী-এর জন্য অগ্রাধিকার ক্রম। কোনো পছন্দের সংযোগ উপলব্ধ না থাকলে রাউটিং পরবর্তী যোগ্য সংযোগে চলে যায়।",
     "preferredConnectionsNone": "কোনো পছন্দ নির্ধারণ করা হয়নি — ডিফল্ট রাউটিং কৌশল ব্যবহার করা হয়।",
-    "preferredConnectionsClear": "মুছুন"
+    "preferredConnectionsClear": "মুছুন",
+    "removeSelection": "{name} সরান"
   },
   "auditLog": {
     "title": "অডিট লগ",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Modality Bridge সেটিংসে Image→Text ব্রিজ কনফিগার করুন",
     "sttBridgeCta": "Modality Bridge সেটিংসে Speech→Text ব্রিজ কনফিগার করুন",
     "existingConnection": "বিদ্যমান সংযোগ",
-    "openrouterSttDescription": "OpenRouter স্পিচ-টু-টেক্সট মডেলগুলি আপনার কনফিগার করা OpenRouter সংযোগ ব্যবহার করে। আলাদা কোনো শংসাপত্রের প্রয়োজন নেই।"
+    "openrouterSttDescription": "OpenRouter স্পিচ-টু-টেক্সট মডেলগুলি আপনার কনফিগার করা OpenRouter সংযোগ ব্যবহার করে। আলাদা কোনো শংসাপত্রের প্রয়োজন নেই।",
+    "modalityTabsAria": "মিডিয়ার ধরন",
+    "serviceKindsAria": "পরিষেবার ধরন"
   },
   "search": {
     "searchQuery": "সার্চ কোয়েরি",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "অজানা",
     "cliproxyapiUpdate": "আপডেট",
     "cliproxyapiUpdateAvailable": "আপডেট উপলব্ধ: v{current} → v{latest}",
-    "cliproxyapiVersion": "সংস্করণ"
+    "cliproxyapiVersion": "সংস্করণ",
+    "removeMapping": "ম্যাপিং সরান"
   },
   "modelCatalog": {
     "title": "মডেল ও কম্বো",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "এটি এই টেমপ্লেটের সাথে মিলে যায় এমন বর্তমান সংযুক্ত প্রদানকারী/মডেলগুলিকে একটি সম্পাদনযোগ্য কম্বোতে স্ন্যাপশট নেবে।",
     "duplicateAutoComboFailedPrefix": "অটোকম্বো ডুপ্লিকেশন ব্যর্থ:",
     "duplicateAutoComboUnknownError": "অজানা ত্রুটি",
-    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন"
+    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন",
+    "weightPercent": "ওজন (%)",
+    "clearSearch": "অনুসন্ধান মুছুন",
+    "responseValidationRemoveCheck": "চেক সরান",
+    "responseValidationPath": "JSON পাথ",
+    "responseValidationCondition": "শর্ত",
+    "responseValidationValue": "প্রত্যাশিত মান"
   },
   "costs": {
     "title": "খরচ",
@@ -5293,7 +5316,8 @@
         "skipped": "আগে থেকেই কনফিগার করা আছে",
         "failed": "ব্যর্থ"
       }
-    }
+    },
+    "stepProgress": "সেটআপের অগ্রগতি"
   },
   "providers": {
     "tosAvoidNoticeTitle": "এই প্রদানকারী ডিফল্টভাবে auto থেকে বাদ থাকে",
@@ -8956,7 +8980,8 @@
       "statsTitle": "পুনরায় চালুর পর থেকে শনাক্তকরণ",
       "statsEmpty": "এখনও কোনো শনাক্তকরণ নেই।",
       "statsRequest": "অনুরোধ"
-    }
+    },
+    "modelOverrideKey": "ওভাররাইড কী"
   },
   "contextRtk": {
     "title": "RTK ইঞ্জিন",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "উত্তীর্ণ",
     "tomlTestFailed": "ব্যর্থ",
     "tomlImportError": "RTK TOML ফাইলটি প্রসেস করা যায়নি.",
-    "tomlFileReadError": "নির্বাচিত TOML ফাইলটি পড়া যায়নি."
+    "tomlFileReadError": "নির্বাচিত TOML ফাইলটি পড়া যায়নি.",
+    "viewMode": "ভিউ মোড"
   },
   "compressionEngineConfig": {
     "loading": "লোড হচ্ছে…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "ভাষা প্যাক: {packs}",
     "dragToReorder": "ধাপের ক্রম পরিবর্তন করতে টেনে আনুন",
     "engine": "ইঞ্জিন",
-    "intensity": "তীব্রতা"
+    "intensity": "তীব্রতা",
+    "compressionOverride": "কম্প্রেশন ওভাররাইড"
   },
   "compressionStudio": {
     "noRun": "কোনো কম্প্রেশন রান উপলব্ধ নেই।",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "বিজয়ী: {winner}",
     "encoder": "এনকোডার",
     "bytes": "বাইট",
-    "tokensCl100k": "টোকেন (cl100k)"
+    "tokensCl100k": "টোকেন (cl100k)",
+    "studioViews": "Studio ভিউসমূহ"
   },
   "omniglyph": {
     "preview": "প্রিভিউ",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "এর চেয়ে ছোট বার্তাগুলি সংকুচিত হয় না। নিম্ন = আরও সংকোচন।",
     "tooltipMinSavings": "শুধুমাত্র সংকুচিত করুন যদি এটি অন্তত এতগুলো টোকেন সংরক্ষণ করে।",
     "ultraSettings": "আল্ট্রা সেটিংস",
-    "ultraSettingsDesc": "SLM-চালিত শব্দার্থিক কম্প্রেশন"
+    "ultraSettingsDesc": "SLM-চালিত শব্দার্থিক কম্প্রেশন",
+    "defaultLanguage": "ডিফল্ট ভাষা",
+    "viewMode": "ভিউ মোড"
   },
   "translator": {
     "title": "অনুবাদক",
@@ -11087,7 +11117,8 @@
       "message": "বার্তা",
       "error": "ত্রুটি",
       "completion": "সমাপ্তি"
-    }
+    },
+    "statusFilter": "স্ট্যাটাস"
   },
   "templateNames": {
     "simple-chat": "সাধারণ চ্যাট",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes}মি আগে",
     "hoursAgo": "{hours}ঘণ্টা আগে",
     "daysAgo": "{days}দিন আগে",
-    "entries": "এন্ট্রিসমূহ"
+    "entries": "এন্ট্রিসমূহ",
+    "viewSwitcherAria": "ক্যাশ ভিউ"
   },
   "proxyConfigModal": {
     "levelGlobal": "গ্লোবাল",
@@ -11613,7 +11645,8 @@
     "notMeasured": "পরিমাপ করা হয়নি",
     "upstream4xx": "{count} উপস্ট্রিম ক্লায়েন্ট ত্রুটি",
     "upstream5xx": "{count} উপস্ট্রিম সার্ভার ত্রুটি",
-    "uniformEgressLine": "{affected} টি {exits} এক্সিট একসাথে ব্যর্থ হয়েছে {provider} এ (শেষ {hours} ঘন্টা) — এটি এক্সিট সমস্যা নয়"
+    "uniformEgressLine": "{affected} টি {exits} এক্সিট একসাথে ব্যর্থ হয়েছে {provider} এ (শেষ {hours} ঘন্টা) — এটি এক্সিট সমস্যা নয়",
+    "moreActions": "আরও অ্যাকশন"
   },
   "playground": {
     "title": "মডেল প্লেগ্রাউন্ড",
@@ -11819,7 +11852,8 @@
       "nextButton": "পরবর্তী",
       "runButton": "চালান",
       "promptPlaceholder": "আপনার বার্তা লিখুন… (পাঠাতে Enter, নতুন লাইনের জন্য Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground মোডসমূহ"
   },
   "miniPlayground": {
     "endpoint": "এন্ডপয়েন্ট",
@@ -11890,7 +11924,8 @@
     "assistant": "সহকারী",
     "errorLabel": "ত্রুটি",
     "requestFailed": "অনুরোধ ব্যর্থ হয়েছে",
-    "stop": "থামান"
+    "stop": "থামান",
+    "messageInputAria": "বার্তা"
   },
   "requestLogger": {
     "recording": "রেকর্ড হচ্ছে",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count}টি অ্যাকাউন্ট রোটেশন",
       "resilienceRetried": "খালি টার্ন পুনরায় চেষ্টা করা হয়েছে",
       "resilienceContinued": "স্ট্রিমের মাঝখান থেকে পুনরায় শুরু হয়েছে",
-      "resilienceRecovered": "রেজিলিয়েন্স পদক্ষেপের মাধ্যমে পুনরুদ্ধার হয়েছে"
-    }
+      "resilienceRecovered": "রেজিলিয়েন্স পদক্ষেপের মাধ্যমে পুনরুদ্ধার হয়েছে",
+      "conversationContext": "কথোপকথনের প্রসঙ্গ",
+      "goToBottom": "নিচে যান",
+      "liveRefreshOn": "লাইভ রিফ্রেশ: চালু",
+      "liveRefreshOff": "লাইভ রিফ্রেশ: বন্ধ",
+      "liveRefresh": "লাইভ রিফ্রেশ",
+      "continuesFromParent": "মূল আইটেম থেকে অব্যাহত",
+      "continuesFrom": "{id} থেকে অব্যাহত",
+      "viewConversation": "কথোপকথন দেখুন",
+      "openConversation": "কথোপকথন {id} খুলুন"
+    },
+    "tableLabel": "অনুরোধের লগ"
   },
   "proxyLogger": {
     "filterAll": "সব",
@@ -12123,7 +12168,9 @@
     "colServedBy": "দ্বারা পরিবেশন করা হয়েছে",
     "filterTraffic": "ট্রাফিক",
     "filterTests": "পরীক্ষা",
-    "filterSource": "সূত্র"
+    "filterSource": "সূত্র",
+    "tableLabel": "প্রক্সি লগ",
+    "sortLogs": "লগ সাজান"
   },
   "endpointOptions": {
     "speech": "স্পিচ",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "নিঃশেষিত",
     "statusAlerting": "সতর্কতা চলছে",
     "statusError": "ত্রুটি",
-    "moreSuffix": "+আরও {count}টি"
+    "moreSuffix": "+আরও {count}টি",
+    "feedFilterLabel": "ইভেন্ট ফিল্টার করুন"
   },
   "quotaShare": {
     "weightPercent": "ওয়েট %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "গ্রুপবিহীন",
     "ungroupedHint": "এই পুলগুলো কোনো পরিচিত গ্রুপে বরাদ্দ করা নেই। একটি পুলকে কোনো বাস্তব গ্রুপে স্থানান্তর করতে সেটি সম্পাদনা করুন।",
     "removeFailed": "এই পুলটি সরানো যায়নি।",
-    "dismiss": "বন্ধ করুন"
+    "dismiss": "বন্ধ করুন",
+    "allocationsHeading": "বরাদ্দসমূহ",
+    "wizardRemoveDimension": "মাত্রা সরান",
+    "wizardRemoveKey": "কী সরান"
   },
   "plugins": {
     "title": "প্লাগইন",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "সেটিংস আপডেট ব্যর্থ হয়েছে",
       "serviceRevealApiKey": "{actor} {target}-এর API কী উন্মোচন করেছেন",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "ত্রুটি খারিজ করুন"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "এখনই যান",
       "message": "MITM Proxy এখন AgentBridge-এর অধীনে রয়েছে।",
       "title": "এই পৃষ্ঠাটি স্থানান্তরিত হয়েছে"
-    }
+    },
+    "dnsOn": "DNS চালু",
+    "dnsOff": "DNS বন্ধ",
+    "showServerSettings": "সার্ভার সেটিংস দেখান",
+    "hideServerSettings": "সার্ভার সেটিংস লুকান",
+    "upstreamCaTesting": "পরীক্ষা করা হচ্ছে…",
+    "removeMapping": "ম্যাপিং সরান",
+    "mappingSourcePlaceholder": "যেমন, gemini-3.6-flash-medium, অথবা ম্যাপ না করা সবগুলোর জন্য *",
+    "mappingWildcardHint": "স্পষ্ট ম্যাপিং নেই এমন প্রতিটি মডেলকে OmniRoute-এর মাধ্যমে নির্বাচিত টার্গেটে রাউট করতে সোর্স হিসেবে * ব্যবহার করুন। হুবহু মিলে যাওয়া সোর্স সবসময় *-এর চেয়ে অগ্রাধিকার পাবে।",
+    "wizardDetectingModels": "ইন্টারসেপ্ট করা ট্র্যাফিক থেকে মডেল শনাক্ত করা হচ্ছে...",
+    "wizardDetectedModels": "ইন্টারসেপ্ট করা ট্র্যাফিকে {count, plural, one {#টি মডেল} other {#টি মডেল}} পাওয়া গেছে। যেগুলো যোগ করতে চান সেগুলো নির্বাচন করুন:",
+    "wizardSelectedModels": "{count, plural, one {#টি মডেল} other {#টি মডেল}} নির্বাচিত। পরবর্তী স্ক্রিনে এগুলোকে OmniRoute মডেলের সঙ্গে ম্যাপ করবেন।",
+    "wizardAddModels": "{count, plural, one {#টি মডেল} other {#টি মডেল}} যোগ করুন",
+    "wizardNoModelsDetected": "এখনও কোনো মডেল শনাক্ত হয়নি। একটি অনুরোধ করতে {agent} ব্যবহার করুন, তারপর ট্র্যাফিক থেকে মডেল স্বয়ংক্রিয়ভাবে শনাক্ত করতে এই উইজার্ডটি আবার চালান।",
+    "wizardNoModelsHint": "অথবা এই উইজার্ডটি বন্ধ করে এজেন্ট কার্ডে ম্যানুয়ালি ম্যাপিং যোগ করুন।"
   },
   "providerStats": {
     "unknownError": "অজানা ত্রুটি",
@@ -12696,7 +12762,11 @@
     "avgTtft": "গড় TTFT",
     "avgTotal": "গড় মোট",
     "requestTelemetry": "অনুরোধ টেলিমেট্রি",
-    "requestTelemetryDescription": "৭-ধাপের পাইপলাইন ব্রেকডাউন (শেষ ৫ মিনিট)"
+    "requestTelemetryDescription": "৭-ধাপের পাইপলাইন ব্রেকডাউন (শেষ ৫ মিনিট)",
+    "title": "প্রোভাইডারের পরিসংখ্যান",
+    "description": "প্রোভাইডার ও মডেলভিত্তিক ট্র্যাফিক, লেটেন্সি এবং সাফল্যের হার",
+    "combo": "কম্বো",
+    "toggleModels": "{provider}-এর মডেলগুলো দেখান"
   },
   "relay": {
     "title": "সার্ভারলেস রিলে প্রক্সি",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "কোনো রিকোয়েস্ট বডি নেই।",
     "noResponseBody": "কোনো রেসপন্স বডি নেই।",
     "formatted": "ফরম্যাট করা",
-    "raw": "র"
+    "raw": "র",
+    "requestCount": "{count, plural, one {#টি অনুরোধ} other {#টি অনুরোধ}}",
+    "expandList": "তালিকা প্রসারিত করুন",
+    "collapseList": "তালিকা সংকুচিত করুন",
+    "snippetLanguage": "স্নিপেটের ভাষা",
+    "headersTable": "হেডারসমূহ",
+    "showSecrets": "সিক্রেট দেখান",
+    "maskSecrets": "সিক্রেট মাস্ক করুন",
+    "llmNotAvailable": "এই অনুরোধের জন্য LLM মেটাডেটা উপলভ্য নয়।",
+    "llmStreamYes": "হ্যাঁ (SSE)",
+    "llmStreamNo": "না",
+    "llmTotalTokens": "মোট: {count} টোকেন"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "গত ২৪ ঘণ্টায় এই প্রোভাইডার প্রকৃতপক্ষে যত শতাংশ কলের উত্তর দিয়েছে। ড্যাশের অর্থ হলো, হার নির্ধারণের জন্য এটি খুব কম ট্রাফিক পরিচালনা করেছে।",
     "reliabilitySample": "গত {hours} ঘণ্টায় {requests}টি কলের মধ্যে {successes}টি সফল হয়েছে",
     "reliabilityTooFew": "গত {hours} ঘণ্টায় মাত্র {requests}টি কল — হার নির্ধারণের জন্য খুব কম",
-    "reliabilityNoTraffic": "গত ২৪ ঘণ্টায় কোনো কল রেকর্ড করা হয়নি"
+    "reliabilityNoTraffic": "গত ২৪ ঘণ্টায় কোনো কল রেকর্ড করা হয়নি",
+    "categoryFilter": "টাস্কের বিভাগ"
   },
   "discovery": {
     "title": "প্রোভাইডার ডিসকভারি",
@@ -13341,7 +13423,11 @@
     "method": "পদ্ধতি",
     "auth": "প্রমাণীকরণ",
     "feasibility": "সম্ভাব্যতা",
-    "models": "মডেল"
+    "models": "মডেল",
+    "provider": "প্রোভাইডার",
+    "status": "স্থিতি",
+    "endpoint": "এন্ডপয়েন্ট",
+    "actions": "অ্যাকশন"
   },
   "noAuthProvider": {
     "title": "কোনো প্রমাণীকরণের প্রয়োজন নেই",
@@ -13390,7 +13476,8 @@
     "ownProxy": "নিজস্ব প্রক্সি",
     "freeTierPause": "মডেল {model} বিরতিতে (429), {time} ফিরে আসবে",
     "freeTierPauseProvider": "বিরতিতে (429), {time} ফিরে আসবে",
-    "freeTierPauseNote": "এই ইনস্ট্যান্সে ইন-প্রসেস পজ"
+    "freeTierPauseNote": "এই ইনস্ট্যান্সে ইন-প্রসেস পজ",
+    "proxyType": "প্রক্সির ধরন"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "একটি লুকানো অর্জন অপেক্ষা করছে...",
         "criteria": "এই ব্যাজটি প্রকাশ করতে লুকানো অর্জনটি সম্পূর্ণ করুন।"
       }
-    }
+    },
+    "leaderboardTitle": "লিডারবোর্ড",
+    "leaderboardDescription": "আপনার API কীগুলোর র্যাঙ্কিং ও অর্জন",
+    "badgeLocked": "লক করা"
   },
   "featureFlags": {
     "title": "ফিচার ফ্ল্যাগ",
@@ -13858,7 +13948,8 @@
     "unknown": "অজানা",
     "unknownProvider": "অজানা প্রোভাইডার",
     "unknownModel": "অজানা মডেল",
-    "resolvedTargetMetrics": "{requests} req · {success} সফল · {latency} · কোটা {quota}"
+    "resolvedTargetMetrics": "{requests} req · {success} সফল · {latency} · কোটা {quota}",
+    "timeRange": "সময়সীমা"
   },
   "usageLimits": {
     "usdUsageQuota": "USD ব্যবহারের কোটা",
@@ -14005,7 +14096,11 @@
     "learnMore": "আরও জানুন",
     "changelogLoadFailed": "চেঞ্জলগ লোড করা যায়নি। অনুগ্রহ করে পরে আবার চেষ্টা করুন।",
     "retry": "পুনরায় চেষ্টা করুন",
-    "viewFullHistory": "GitHub-এ সম্পূর্ণ ইতিহাস দেখুন"
+    "viewFullHistory": "GitHub-এ সম্পূর্ণ ইতিহাস দেখুন",
+    "title": "সংবাদ ও পরিবর্তনের তালিকা",
+    "description": "OmniRoute টিমের ঘোষণা ও সর্বশেষ রিলিজ নোট",
+    "viewLabel": "দেখুন",
+    "loadingNews": "ঘোষণাগুলো লোড হচ্ছে..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "প্রোভাইডার সার্কিট ব্রেকার অবস্থান",
       "lastUpdate": "শেষ আপডেট: {timestamp}",
       "uptimeMinutes": "{minutes}ম",
-      "uptimeHoursMinutes": "{hours}ঘণ্টা {minutes}মিনিট"
+      "uptimeHoursMinutes": "{hours}ঘণ্টা {minutes}মিনিট",
+      "breakerClosed": "বন্ধ",
+      "breakerNotClosed": "খোলা বা অর্ধ-খোলা"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "রক্ষণাবেক্ষণ বিবরণ",
         "secondaryAction": "সিস্টেম স্ট্যাটাস"
       }
+    },
+    "miniapp": {
+      "askAnything": "যেকোনো কিছু জিজ্ঞাসা করুন…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible}টি দৃশ্যমান / মোট {total}টি",
+    "modeLabel": "ভিউ মোড",
+    "jumpToNow": "বর্তমান সময়ে যান, NOW লাইনটি {position}% অবস্থানে রিসেট হবে",
+    "laneReuse": "লেন পুনঃব্যবহার",
+    "laneReuseLabel": "লেন পুনঃব্যবহারের সময়সীমা (মিনিট)",
+    "laneReuseHint": "একই conversation id-সহ অনুরোধগুলোর মধ্যকার ব্যবধান এত মিনিটের কম হলে সেগুলো একই টাইমলাইন সারিতে থাকে।",
+    "laneReuseUnit": "মিনিট",
+    "autoRefresh": "স্বয়ংক্রিয় রিফ্রেশ",
+    "autoRefreshLabel": "স্বয়ংক্রিয় রিফ্রেশের ব্যবধান (সেকেন্ড)",
+    "autoRefreshHint": "টাইমলাইন সার্ভার থেকে কত ঘন ঘন অনুরোধের তালিকা পুনরায় আনে।",
+    "autoRefreshUnit": "সে.",
+    "zoomOut": "জুম আউট",
+    "zoomIn": "জুম ইন"
   },
   "metadata": {
     "compressionTitle": "সংকোচন",

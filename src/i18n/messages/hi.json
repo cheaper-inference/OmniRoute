@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "{count, plural, one {# बैच} other {# बैचों}}",
     "batchFilePreview": "पूर्वावलोकन",
     "batchFilePreviewTruncated": "पहले {shown} पंक्तियाँ दिखा रहे हैं ({total} कुल पंक्तियाँ)",
-    "batchFileDownloadFull": "पूर्ण फ़ाइल डाउनलोड करें"
+    "batchFileDownloadFull": "पूर्ण फ़ाइल डाउनलोड करें",
+    "dialogTitleFallback": "संवाद",
+    "pagination": "पृष्ठांकन",
+    "clearFilters": "फ़िल्टर साफ़ करें",
+    "tokensPageTitle": "टोकन",
+    "tokensPageDescription": "API कुंजियों के बीच टोकन भेजें, आमंत्रण कोड साझा करें और समुदाय सर्वर कनेक्ट करें।",
+    "tokensServerUrlLabel": "सर्वर URL"
   },
   "disabled": "अक्षम",
   "featureFlagOmnirouteEmergencyFallbackDescription": "बजट समाप्त हो चुके अनुरोधों को आपातकालीन निःशुल्क फ़ॉलबैक प्रदाता/मॉडल पर रूट करें।",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 या @channelname",
       "chatIdHint": "चैट/चैनल का यूनीक संख्यात्मक पहचानकर्ता या सार्वजनिक यूज़रनेम।",
       "tutorial": "Telegram वेबहुक कैसे कॉन्फ़िगर करें:"
-    }
+    },
+    "copy": "कॉपी करें",
+    "copied": "कॉपी हो गया!",
+    "expandDetails": "विवरण दिखाएँ",
+    "collapseDetails": "विवरण छिपाएँ"
   },
   "compliance": {
     "auditTitle": "लेखापरीक्षा",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "कॉल (24घंटे)",
     "mcpMetricSuccessRate": "सफलता दर",
     "mcpMetricAvgDuration": "औसत अवधि",
-    "mcpMetricTopTool": "शीर्ष उपकरण"
+    "mcpMetricTopTool": "शीर्ष उपकरण",
+    "dismissError": "त्रुटि हटाएँ"
   },
   "themesPage": {
     "title": "थीम",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "उन्नत पेलोड नियम, अनुरोध सीमाएँ और प्रॉक्सी API सेटिंग्स",
     "mitmProxyDescription": "ट्रैफ़िक निरीक्षण और डीबगिंग के लिए MITM प्रॉक्सी सेटिंग्स कॉन्फ़िगर करें",
     "oneProxyDescription": "उन्नत प्रॉक्सी चेनिंग के लिए 1Proxy सेटिंग्स कॉन्फ़िगर करें",
-    "omniSkillsDescription": "स्वचालित प्रॉम्प्ट और टूल निष्पादन के लिए सैंडबॉक्स स्किल्स इंस्टॉल और प्रबंधित करें"
+    "omniSkillsDescription": "स्वचालित प्रॉम्प्ट और टूल निष्पादन के लिए सैंडबॉक्स स्किल्स इंस्टॉल और प्रबंधित करें",
+    "openMenu": "मेनू खोलें",
+    "products": "Keak उत्पाद"
   },
   "cloudSyncStatus": {
     "synced": "सिंक किया गया",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "पसंदीदा कनेक्शन",
     "preferredConnectionsDesc": "प्रत्येक कुंजी के लिए प्राथमिकता क्रम। यदि कोई पसंदीदा कनेक्शन उपलब्ध नहीं है, तो रूटिंग अगले योग्य कनेक्शन पर चली जाती है।",
     "preferredConnectionsNone": "कोई प्राथमिकता सेट नहीं है — डिफ़ॉल्ट रूटिंग रणनीति का उपयोग किया जाता है।",
-    "preferredConnectionsClear": "साफ़ करें"
+    "preferredConnectionsClear": "साफ़ करें",
+    "removeSelection": "{name} हटाएँ"
   },
   "auditLog": {
     "title": "ऑडिट लॉग",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Modality Bridge सेटिंग्स में Image→Text ब्रिज़ कॉन्फ़िगर करें",
     "sttBridgeCta": "Modality Bridge सेटिंग्स में Speech→Text ब्रिज कॉन्फ़िगर करें",
     "existingConnection": "मौजूदा कनेक्शन",
-    "openrouterSttDescription": "OpenRouter स्पीच-टू-टेक्स्ट मॉडल आपके कॉन्फ़िगर किए गए OpenRouter कनेक्शन का उपयोग करते हैं। कोई अलग क्रेडेंशियल की आवश्यकता नहीं है।"
+    "openrouterSttDescription": "OpenRouter स्पीच-टू-टेक्स्ट मॉडल आपके कॉन्फ़िगर किए गए OpenRouter कनेक्शन का उपयोग करते हैं। कोई अलग क्रेडेंशियल की आवश्यकता नहीं है।",
+    "modalityTabsAria": "मीडिया प्रकार",
+    "serviceKindsAria": "सेवा प्रकार"
   },
   "search": {
     "searchQuery": "खोज क्वेरी",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "अज्ञात",
     "cliproxyapiUpdate": "अपडेट करें",
     "cliproxyapiUpdateAvailable": "अपडेट उपलब्ध: v{current} → v{latest}",
-    "cliproxyapiVersion": "संस्करण"
+    "cliproxyapiVersion": "संस्करण",
+    "removeMapping": "मैपिंग हटाएँ"
   },
   "modelCatalog": {
     "title": "मॉडल और कॉम्बो",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "यह इस टेम्पलेट से मेल खाने वाले वर्तमान जुड़े प्रदाताओं/मॉडल को संपादन योग्य कॉम्बो में स्नैपशॉट लेगा।",
     "duplicateAutoComboFailedPrefix": "ऑटोकॉम्बो डुप्लिकेट करने में विफल:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटि",
-    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं"
+    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं",
+    "weightPercent": "भार (%)",
+    "clearSearch": "खोज साफ़ करें",
+    "responseValidationRemoveCheck": "जाँच हटाएँ",
+    "responseValidationPath": "JSON पथ",
+    "responseValidationCondition": "शर्त",
+    "responseValidationValue": "अपेक्षित मान"
   },
   "costs": {
     "title": "लागत",
@@ -5293,7 +5316,8 @@
         "skipped": "पहले से कॉन्फ़िगर किया गया",
         "failed": "असफल"
       }
-    }
+    },
+    "stepProgress": "सेटअप की प्रगति"
   },
   "providers": {
     "tosAvoidNoticeTitle": "यह प्रदाता डिफ़ॉल्ट रूप से auto से बाहर है",
@@ -8956,7 +8980,8 @@
       "statsTitle": "पुनरारंभ के बाद से पहचान",
       "statsEmpty": "अभी तक कोई पहचान नहीं।",
       "statsRequest": "अनुरोध"
-    }
+    },
+    "modelOverrideKey": "ओवरराइड कुंजी"
   },
   "contextRtk": {
     "title": "RTK इंजन",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "सफल",
     "tomlTestFailed": "असफल",
     "tomlImportError": "RTK TOML फ़ाइल को प्रोसेस नहीं किया जा सका।",
-    "tomlFileReadError": "चयनित TOML फ़ाइल को पढ़ा नहीं जा सका।"
+    "tomlFileReadError": "चयनित TOML फ़ाइल को पढ़ा नहीं जा सका।",
+    "viewMode": "दृश्य मोड"
   },
   "compressionEngineConfig": {
     "loading": "लोड हो रहा है…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "भाषा पैक: {packs}",
     "dragToReorder": "चरण का क्रम बदलने के लिए खींचें",
     "engine": "इंजन",
-    "intensity": "तीव्रता"
+    "intensity": "तीव्रता",
+    "compressionOverride": "संपीड़न ओवरराइड"
   },
   "compressionStudio": {
     "noRun": "कोई कंप्रेशन रन उपलब्ध नहीं है।",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "विजेता: {winner}",
     "encoder": "एन्कोडर",
     "bytes": "बाइट्स",
-    "tokensCl100k": "टोकन (cl100k)"
+    "tokensCl100k": "टोकन (cl100k)",
+    "studioViews": "Studio दृश्य"
   },
   "omniglyph": {
     "preview": "पूर्वावलोकन",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "इससे छोटे संदेश संपीड़ित नहीं होते. कम = अधिक संपीड़न।",
     "tooltipMinSavings": "केवल तभी संपीड़ित करें यदि यह कम से कम इतने टोकन बचाता है।",
     "ultraSettings": "अल्ट्रा सेटिंग्स",
-    "ultraSettingsDesc": "एसएलएम-संचालित सिमेंटिक संपीड़न"
+    "ultraSettingsDesc": "एसएलएम-संचालित सिमेंटिक संपीड़न",
+    "defaultLanguage": "डिफ़ॉल्ट भाषा",
+    "viewMode": "दृश्य मोड"
   },
   "translator": {
     "title": "अनुवादक",
@@ -11087,7 +11117,8 @@
       "message": "संदेश",
       "error": "त्रुटि",
       "completion": "पूर्णता"
-    }
+    },
+    "statusFilter": "स्थिति"
   },
   "templateNames": {
     "simple-chat": "सरल चैट",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes}m पहले",
     "hoursAgo": "{hours}h पहले",
     "daysAgo": "{days}d पहले",
-    "entries": "प्रविष्टियाँ"
+    "entries": "प्रविष्टियाँ",
+    "viewSwitcherAria": "कैश दृश्य"
   },
   "proxyConfigModal": {
     "levelGlobal": "वैश्विक",
@@ -11613,7 +11645,8 @@
     "notMeasured": "मापा नहीं गया",
     "upstream4xx": "{count} उपरी क्लाइंट त्रुटियाँ",
     "upstream5xx": "{count} उपरी सर्वर त्रुटियाँ",
-    "uniformEgressLine": "{exits} में से {affected} एग्ज़िट {provider} पर एक साथ विफल हो रहे हैं (पिछले {hours} घंटों में) — यह एग्ज़िट की समस्या नहीं है"
+    "uniformEgressLine": "{exits} में से {affected} एग्ज़िट {provider} पर एक साथ विफल हो रहे हैं (पिछले {hours} घंटों में) — यह एग्ज़िट की समस्या नहीं है",
+    "moreActions": "और कार्रवाइयाँ"
   },
   "playground": {
     "title": "Title",
@@ -11819,7 +11852,8 @@
       "nextButton": "आगे",
       "runButton": "चलाएं",
       "promptPlaceholder": "अपना संदेश दर्ज करें… (भेजने के लिए Enter, नई पंक्ति के लिए Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground मोड"
   },
   "miniPlayground": {
     "endpoint": "एंडपॉइंट",
@@ -11890,7 +11924,8 @@
     "assistant": "सहायक",
     "errorLabel": "त्रुटि",
     "requestFailed": "अनुरोध विफल रहा",
-    "stop": "रोकें"
+    "stop": "रोकें",
+    "messageInputAria": "संदेश"
   },
   "requestLogger": {
     "recording": "रिकॉर्डिंग जारी है",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} खाता रोटेशन",
       "resilienceRetried": "खाली बारी पुनः प्रयास",
       "resilienceContinued": "स्ट्रीम के बीच में जारी",
-      "resilienceRecovered": "लचीलापन कार्रवाई द्वारा पुनर्प्राप्त"
-    }
+      "resilienceRecovered": "लचीलापन कार्रवाई द्वारा पुनर्प्राप्त",
+      "conversationContext": "वार्तालाप संदर्भ",
+      "goToBottom": "नीचे जाएँ",
+      "liveRefreshOn": "लाइव रीफ़्रेश: चालू",
+      "liveRefreshOff": "लाइव रीफ़्रेश: बंद",
+      "liveRefresh": "लाइव रीफ़्रेश",
+      "continuesFromParent": "पैरेंट से जारी है",
+      "continuesFrom": "{id} से जारी है",
+      "viewConversation": "बातचीत देखें",
+      "openConversation": "बातचीत {id} खोलें"
+    },
+    "tableLabel": "अनुरोध लॉग"
   },
   "proxyLogger": {
     "filterAll": "सभी",
@@ -12123,7 +12168,9 @@
     "colServedBy": "द्वारा सेवा की गई",
     "filterTraffic": "ट्रैफ़िक",
     "filterTests": "परीक्षण",
-    "filterSource": "स्रोत"
+    "filterSource": "स्रोत",
+    "tableLabel": "प्रॉक्सी लॉग",
+    "sortLogs": "लॉग क्रमबद्ध करें"
   },
   "endpointOptions": {
     "speech": "वाक्",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "समाप्त",
     "statusAlerting": "चेतावनी जारी",
     "statusError": "त्रुटि",
-    "moreSuffix": "और {count}"
+    "moreSuffix": "और {count}",
+    "feedFilterLabel": "इवेंट फ़िल्टर करें"
   },
   "quotaShare": {
     "weightPercent": "भार %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "बिना समूह वाले",
     "ungroupedHint": "ये पूल किसी ज्ञात समूह को असाइन नहीं किए गए हैं। किसी पूल को वास्तविक समूह में ले जाने के लिए उसे संपादित करें।",
     "removeFailed": "इस पूल को हटाया नहीं जा सका।",
-    "dismiss": "खारिज करें"
+    "dismiss": "खारिज करें",
+    "allocationsHeading": "आवंटन",
+    "wizardRemoveDimension": "आयाम हटाएँ",
+    "wizardRemoveKey": "कुंजी हटाएँ"
   },
   "plugins": {
     "title": "प्लगइन",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "सेटिंग्स अपडेट विफल रहा",
       "serviceRevealApiKey": "{actor} ने {target} के लिए API कुंजी दिखाई",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "त्रुटि खारिज करें"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "अभी जाएं",
       "message": "MITM Proxy अब AgentBridge के अंतर्गत है।",
       "title": "यह पृष्ठ स्थानांतरित हो गया है"
-    }
+    },
+    "dnsOn": "DNS चालू",
+    "dnsOff": "DNS बंद",
+    "showServerSettings": "सर्वर सेटिंग दिखाएँ",
+    "hideServerSettings": "सर्वर सेटिंग छिपाएँ",
+    "upstreamCaTesting": "परीक्षण जारी है…",
+    "removeMapping": "मैपिंग हटाएँ",
+    "mappingSourcePlaceholder": "जैसे, gemini-3.6-flash-medium, या सभी बिना मैप किए गए मॉडल के लिए *",
+    "mappingWildcardHint": "बिना स्पष्ट मैपिंग वाले प्रत्येक मॉडल को OmniRoute के माध्यम से चयनित लक्ष्य तक रूट करने के लिए स्रोत के रूप में * का उपयोग करें। स्रोत का सटीक मिलान हमेशा * से अधिक प्राथमिकता पाता है।",
+    "wizardDetectingModels": "इंटरसेप्ट किए गए ट्रैफ़िक से मॉडल का पता लगाया जा रहा है...",
+    "wizardDetectedModels": "इंटरसेप्ट किए गए ट्रैफ़िक में {count, plural, one {# मॉडल मिला} other {# मॉडल मिले}}। जिन्हें आप जोड़ना चाहते हैं, उन्हें चुनें:",
+    "wizardSelectedModels": "{count, plural, one {# मॉडल चुना गया है} other {# मॉडल चुने गए हैं}}। अगली स्क्रीन पर आप उन्हें OmniRoute मॉडल से मैप करेंगे।",
+    "wizardAddModels": "{count, plural, one {# मॉडल} other {# मॉडल}} जोड़ें",
+    "wizardNoModelsDetected": "अभी तक किसी मॉडल का पता नहीं चला है। अनुरोध करने के लिए {agent} का उपयोग करें, फिर ट्रैफ़िक से मॉडल का स्वतः पता लगाने हेतु इस विज़ार्ड को दोबारा चलाएँ।",
+    "wizardNoModelsHint": "या इस विज़ार्ड को बंद करें और एजेंट कार्ड में मैन्युअल रूप से मैपिंग जोड़ें।"
   },
   "providerStats": {
     "unknownError": "अज्ञात त्रुटि",
@@ -12696,7 +12762,11 @@
     "avgTtft": "औसत TTFT",
     "avgTotal": "औसत कुल",
     "requestTelemetry": "अनुरोध टेलीमेट्री",
-    "requestTelemetryDescription": "7-चरण पाइपलाइन ब्रेकडाउन (पिछले 5 मिनट)"
+    "requestTelemetryDescription": "7-चरण पाइपलाइन ब्रेकडाउन (पिछले 5 मिनट)",
+    "title": "प्रदाता के आँकड़े",
+    "description": "प्रत्येक प्रदाता और प्रत्येक मॉडल का ट्रैफ़िक, विलंबता और सफलता दर",
+    "combo": "संयोजन",
+    "toggleModels": "{provider} के मॉडल दिखाएँ"
   },
   "relay": {
     "title": "सर्वरलेस रिले प्रॉक्सी",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "कोई अनुरोध बॉडी नहीं।",
     "noResponseBody": "कोई प्रतिक्रिया बॉडी नहीं।",
     "formatted": "फ़ॉर्मैट किया गया",
-    "raw": "रॉ"
+    "raw": "रॉ",
+    "requestCount": "{count, plural, one {# अनुरोध} other {# अनुरोध}}",
+    "expandList": "सूची विस्तृत करें",
+    "collapseList": "सूची संक्षिप्त करें",
+    "snippetLanguage": "स्निपेट की भाषा",
+    "headersTable": "हेडर",
+    "showSecrets": "गोपनीय मान दिखाएँ",
+    "maskSecrets": "गोपनीय मान मास्क करें",
+    "llmNotAvailable": "इस अनुरोध के लिए LLM मेटाडेटा उपलब्ध नहीं है।",
+    "llmStreamYes": "हाँ (SSE)",
+    "llmStreamNo": "नहीं",
+    "llmTotalTokens": "कुल: {count} टोकन"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "पिछले 24 घंटों में इस प्रदाता द्वारा वास्तव में उत्तर दी गई कॉल का अनुपात। डैश का अर्थ है कि दर बताने के लिए इसने बहुत कम ट्रैफ़िक संभाला।",
     "reliabilitySample": "पिछले {hours}h में {requests} में से {successes} कॉल सफल रहीं",
     "reliabilityTooFew": "पिछले {hours}h में केवल {requests} कॉल — दर बताने के लिए बहुत कम",
-    "reliabilityNoTraffic": "पिछले 24h में कोई कॉल दर्ज नहीं हुई"
+    "reliabilityNoTraffic": "पिछले 24h में कोई कॉल दर्ज नहीं हुई",
+    "categoryFilter": "कार्य श्रेणी"
   },
   "discovery": {
     "title": "प्रदाता खोज",
@@ -13341,7 +13423,11 @@
     "method": "विधि",
     "auth": "प्रमाणीकरण",
     "feasibility": "व्यवहार्यता",
-    "models": "मॉडल"
+    "models": "मॉडल",
+    "provider": "प्रदाता",
+    "status": "स्थिति",
+    "endpoint": "एंडपॉइंट",
+    "actions": "कार्रवाइयाँ"
   },
   "noAuthProvider": {
     "title": "किसी प्रमाणीकरण की आवश्यकता नहीं है",
@@ -13390,7 +13476,8 @@
     "ownProxy": "अपना प्रॉक्सी",
     "freeTierPause": "मॉडल {model} रोका गया (429), {time} पर वापस",
     "freeTierPauseProvider": "रोका गया (429), {time} पर वापस",
-    "freeTierPauseNote": "इस इंस्टेंस पर इन-प्रोसेस पॉज़"
+    "freeTierPauseNote": "इस इंस्टेंस पर इन-प्रोसेस पॉज़",
+    "proxyType": "प्रॉक्सी प्रकार"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "एक छिपी हुई उपलब्धि आपका इंतज़ार कर रही है...",
         "criteria": "इस बैज को प्रकट करने के लिए छिपी हुई उपलब्धि को पूरा करें।"
       }
-    }
+    },
+    "leaderboardTitle": "लीडरबोर्ड",
+    "leaderboardDescription": "आपकी API कुंजियों की रैंकिंग और उपलब्धियाँ",
+    "badgeLocked": "लॉक किया गया"
   },
   "featureFlags": {
     "title": "फ़ीचर फ़्लैग",
@@ -13858,7 +13948,8 @@
     "unknown": "अज्ञात",
     "unknownProvider": "अज्ञात प्रदाता",
     "unknownModel": "अज्ञात मॉडल",
-    "resolvedTargetMetrics": "{requests} req · {success} सफल · {latency} · कोटा {quota}"
+    "resolvedTargetMetrics": "{requests} req · {success} सफल · {latency} · कोटा {quota}",
+    "timeRange": "समय-सीमा"
   },
   "usageLimits": {
     "usdUsageQuota": "USD उपयोग कोटा",
@@ -14005,7 +14096,11 @@
     "learnMore": "और जानें",
     "changelogLoadFailed": "चेंजलॉग लोड नहीं किया जा सका। कृपया बाद में पुनः प्रयास करें।",
     "retry": "पुनः प्रयास करें",
-    "viewFullHistory": "GitHub पर पूरा इतिहास देखें"
+    "viewFullHistory": "GitHub पर पूरा इतिहास देखें",
+    "title": "समाचार और बदलावों का विवरण",
+    "description": "OmniRoute टीम की घोषणाएँ और नवीनतम रिलीज़ नोट्स",
+    "viewLabel": "देखें",
+    "loadingNews": "घोषणाएँ लोड हो रही हैं..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "प्रदाता सर्किट ब्रेकर स्थिति",
       "lastUpdate": "अंतिम अपडेट: {timestamp}",
       "uptimeMinutes": "{minutes}म",
-      "uptimeHoursMinutes": "{hours}घंटे {minutes}मिनट"
+      "uptimeHoursMinutes": "{hours}घंटे {minutes}मिनट",
+      "breakerClosed": "बंद",
+      "breakerNotClosed": "खुला या आधा खुला"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "रखरखाव विवरण",
         "secondaryAction": "सिस्टम स्थिति"
       }
+    },
+    "miniapp": {
+      "askAnything": "कुछ भी पूछें…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP टूल",
     "scope": "दायरा",
-    "apiKey": "API कुंजी"
+    "apiKey": "API कुंजी",
+    "visibleCount": "{visible} दृश्यमान / कुल {total}",
+    "modeLabel": "दृश्य मोड",
+    "jumpToNow": "वर्तमान समय पर जाएँ, NOW रेखा {position}% स्थिति पर रीसेट हो जाती है",
+    "laneReuse": "लेन का पुनः उपयोग",
+    "laneReuseLabel": "लेन पुनः उपयोग अवधि (मिनट)",
+    "laneReuseHint": "एक ही वार्तालाप ID साझा करने वाले अनुरोध तब तक उसी टाइमलाइन पंक्ति में रहते हैं, जब तक उनके बीच का अंतर इतने मिनटों से कम हो।",
+    "laneReuseUnit": "मिनट",
+    "autoRefresh": "स्वतः रीफ़्रेश",
+    "autoRefreshLabel": "स्वतः रीफ़्रेश अंतराल (सेकंड)",
+    "autoRefreshHint": "टाइमलाइन सर्वर से अनुरोध सूची कितनी बार फिर से प्राप्त करती है।",
+    "autoRefreshUnit": "से.",
+    "zoomOut": "ज़ूम आउट",
+    "zoomIn": "ज़ूम इन"
   },
   "metadata": {
     "compressionTitle": "संपीड़न",

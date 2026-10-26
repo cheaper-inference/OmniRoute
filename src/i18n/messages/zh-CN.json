@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "被 {count, plural, one {# 批次} other {# 批次}} 使用",
     "batchFilePreview": "预览",
     "batchFilePreviewTruncated": "显示前 {shown} 行（共 {total} 行）",
-    "batchFileDownloadFull": "下载完整文件"
+    "batchFileDownloadFull": "下载完整文件",
+    "dialogTitleFallback": "对话框",
+    "pagination": "分页",
+    "clearFilters": "清除筛选条件",
+    "tokensPageTitle": "令牌",
+    "tokensPageDescription": "在 API 密钥之间发送令牌、共享邀请码并连接社区服务器。",
+    "tokensServerUrlLabel": "服务器 URL"
   },
   "disabled": "已禁用",
   "featureFlagOmnirouteEmergencyFallbackDescription": "将预算耗尽的请求路由到紧急免费备用提供者/模型。",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 或 @channelname",
       "chatIdHint": "聊天/频道的唯一数字标识符或公开用户名。",
       "tutorial": "如何配置 Telegram Webhook："
-    }
+    },
+    "copy": "复制",
+    "copied": "已复制！",
+    "expandDetails": "显示详细信息",
+    "collapseDetails": "隐藏详细信息"
   },
   "compliance": {
     "auditTitle": "审计",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "通话 (24小时)",
     "mcpMetricSuccessRate": "成功率",
     "mcpMetricAvgDuration": "平均持续时间",
-    "mcpMetricTopTool": "顶级工具"
+    "mcpMetricTopTool": "顶级工具",
+    "dismissError": "关闭错误提示"
   },
   "themesPage": {
     "title": "主题",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "高级负载规则、请求限制和代理 API 设置",
     "mitmProxyDescription": "配置 MITM 代理设置以进行流量检查和调试",
     "oneProxyDescription": "配置 1Proxy 设置以实现高级代理链",
-    "omniSkillsDescription": "安装和管理用于自动提示和工具执行的沙箱技能"
+    "omniSkillsDescription": "安装和管理用于自动提示和工具执行的沙箱技能",
+    "openMenu": "打开菜单",
+    "products": "Keak 产品"
   },
   "cloudSyncStatus": {
     "synced": "已同步",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "首选连接",
     "preferredConnectionsDesc": "按密钥设置的优先顺序。如果首选连接不可用，路由会回退到下一个符合条件的连接。",
     "preferredConnectionsNone": "未设置偏好 — 使用默认路由策略。",
-    "preferredConnectionsClear": "清除"
+    "preferredConnectionsClear": "清除",
+    "removeSelection": "移除 {name}"
   },
   "auditLog": {
     "title": "审核日志",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "在模态桥设置中配置图像→文本桥接",
     "sttBridgeCta": "在模态桥设置中配置语音→文本桥接器",
     "existingConnection": "现有连接",
-    "openrouterSttDescription": "OpenRouter 语音转文本模型使用您配置的 OpenRouter 连接。无需单独的凭据。"
+    "openrouterSttDescription": "OpenRouter 语音转文本模型使用您配置的 OpenRouter 连接。无需单独的凭据。",
+    "modalityTabsAria": "媒体类型",
+    "serviceKindsAria": "服务类型"
   },
   "search": {
     "searchQuery": "搜索词",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "未知",
     "cliproxyapiUpdate": "更新",
     "cliproxyapiUpdateAvailable": "可用更新：v{current} → v{latest}",
-    "cliproxyapiVersion": "版本"
+    "cliproxyapiVersion": "版本",
+    "removeMapping": "移除映射"
   },
   "modelCatalog": {
     "title": "模型与组合",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "这将把与此模板匹配的当前连接提供者/模型快照到可编辑的组合中。",
     "duplicateAutoComboFailedPrefix": "复制自动组合失败：",
     "duplicateAutoComboUnknownError": "未知错误",
-    "duplicateAutoComboTitle": "从{name}创建静态组合"
+    "duplicateAutoComboTitle": "从{name}创建静态组合",
+    "weightPercent": "权重（%）",
+    "clearSearch": "清除搜索",
+    "responseValidationRemoveCheck": "移除检查",
+    "responseValidationPath": "JSON 路径",
+    "responseValidationCondition": "条件",
+    "responseValidationValue": "预期值"
   },
   "costs": {
     "title": "成本",
@@ -5293,7 +5316,8 @@
         "skipped": "已配置",
         "failed": "失败"
       }
-    }
+    },
+    "stepProgress": "设置进度"
   },
   "providers": {
     "tosAvoidNoticeTitle": "此提供者默认被排除在 auto 之外",
@@ -8956,7 +8980,8 @@
       "statsTitle": "自重启以来的检测",
       "statsEmpty": "暂无检测。",
       "statsRequest": "请求"
-    }
+    },
+    "modelOverrideKey": "覆盖键"
   },
   "contextRtk": {
     "title": "命令输出过滤引擎",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "已通过",
     "tomlTestFailed": "已失败",
     "tomlImportError": "无法处理 RTK TOML 文件。",
-    "tomlFileReadError": "无法读取选定的 TOML 文件。"
+    "tomlFileReadError": "无法读取选定的 TOML 文件。",
+    "viewMode": "视图模式"
   },
   "compressionEngineConfig": {
     "loading": "正在加载…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "语言包：{packs}",
     "dragToReorder": "拖动以重新排序步骤",
     "engine": "引擎",
-    "intensity": "强度"
+    "intensity": "强度",
+    "compressionOverride": "压缩覆盖"
   },
   "compressionStudio": {
     "noRun": "没有可用的压缩运行记录。",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "胜出者：{winner}",
     "encoder": "编码器",
     "bytes": "字节",
-    "tokensCl100k": "Token (cl100k)"
+    "tokensCl100k": "Token (cl100k)",
+    "studioViews": "Studio 视图"
   },
   "omniglyph": {
     "preview": "预览",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "比这短的消息不会被压缩。更低=更多压缩。",
     "tooltipMinSavings": "仅当至少保存这么多令牌时才进行压缩。",
     "ultraSettings": "超级设置",
-    "ultraSettingsDesc": "SLM 支持的语义压缩"
+    "ultraSettingsDesc": "SLM 支持的语义压缩",
+    "defaultLanguage": "默认语言",
+    "viewMode": "视图模式"
   },
   "translator": {
     "title": "翻译器",
@@ -11087,7 +11117,8 @@
       "message": "消息",
       "error": "错误",
       "completion": "补全"
-    }
+    },
+    "statusFilter": "状态"
   },
   "templateNames": {
     "simple-chat": "简单对话",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes} 分钟前",
     "hoursAgo": "{hours} 小时前",
     "daysAgo": "{days} 天前",
-    "entries": "条目"
+    "entries": "条目",
+    "viewSwitcherAria": "缓存视图"
   },
   "proxyConfigModal": {
     "levelGlobal": "全局",
@@ -11613,7 +11645,8 @@
     "notMeasured": "未测量",
     "upstream4xx": "{count} 上游客户端错误",
     "upstream5xx": "{count} 上游服务器错误",
-    "uniformEgressLine": "{affected}/{exits} 个出口在 {provider} 上同时失败（最近 {hours} 小时）—— 不是出口问题"
+    "uniformEgressLine": "{affected}/{exits} 个出口在 {provider} 上同时失败（最近 {hours} 小时）—— 不是出口问题",
+    "moreActions": "更多操作"
   },
   "playground": {
     "title": "模型演练场",
@@ -11819,7 +11852,8 @@
       "nextButton": "下一步",
       "runButton": "运行",
       "promptPlaceholder": "输入您的消息…（按 Enter 发送，Shift+Enter 换行）"
-    }
+    },
+    "playgroundTabs": "Playground 模式"
   },
   "miniPlayground": {
     "endpoint": "端点",
@@ -11890,7 +11924,8 @@
     "assistant": "助手",
     "errorLabel": "错误",
     "requestFailed": "请求失败",
-    "stop": "停止"
+    "stop": "停止",
+    "messageInputAria": "消息"
   },
   "requestLogger": {
     "recording": "正在录制",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "轮换帐户{count}次",
       "resilienceRetried": "重试空轮次",
       "resilienceContinued": "在流中途恢复",
-      "resilienceRecovered": "通过弹性操作恢复"
-    }
+      "resilienceRecovered": "通过弹性操作恢复",
+      "conversationContext": "对话上下文",
+      "goToBottom": "转到底部",
+      "liveRefreshOn": "实时刷新：开启",
+      "liveRefreshOff": "实时刷新：关闭",
+      "liveRefresh": "实时刷新",
+      "continuesFromParent": "从父项继续",
+      "continuesFrom": "从 {id} 继续",
+      "viewConversation": "查看对话",
+      "openConversation": "打开对话 {id}"
+    },
+    "tableLabel": "请求日志"
   },
   "proxyLogger": {
     "filterAll": "全部",
@@ -12123,7 +12168,9 @@
     "colServedBy": "由...提供",
     "filterTraffic": "流量",
     "filterTests": "测试",
-    "filterSource": "来源"
+    "filterSource": "来源",
+    "tableLabel": "代理日志",
+    "sortLogs": "排序日志"
   },
   "endpointOptions": {
     "speech": "语音",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "已耗尽",
     "statusAlerting": "告警中",
     "statusError": "错误",
-    "moreSuffix": "+{count} 更多"
+    "moreSuffix": "+{count} 更多",
+    "feedFilterLabel": "筛选事件"
   },
   "quotaShare": {
     "weightPercent": "权重 %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "未分组",
     "ungroupedHint": "这些池未分配给已知组。编辑一个池以将其移动到真实组中。",
     "removeFailed": "无法移除此池。",
-    "dismiss": "关闭"
+    "dismiss": "关闭",
+    "allocationsHeading": "分配",
+    "wizardRemoveDimension": "移除维度",
+    "wizardRemoveKey": "移除键"
   },
   "plugins": {
     "title": "插件",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "设置更新失败",
       "serviceRevealApiKey": "{actor} 揭露了 {target} 的 API 密钥",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "关闭错误提示"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "现在去",
       "message": "MITM Proxy 现在归 AgentBridge 所有。",
       "title": "此页面已移动"
-    }
+    },
+    "dnsOn": "DNS 已开启",
+    "dnsOff": "DNS 已关闭",
+    "showServerSettings": "显示服务器设置",
+    "hideServerSettings": "隐藏服务器设置",
+    "upstreamCaTesting": "正在测试…",
+    "removeMapping": "移除映射",
+    "mappingSourcePlaceholder": "例如 gemini-3.6-flash-medium，或使用 * 表示所有未映射的模型",
+    "mappingWildcardHint": "使用 * 作为源，将所有未显式映射的模型通过 OmniRoute 路由到所选目标。精确的源匹配始终优先于 *。",
+    "wizardDetectingModels": "正在从截获的流量中检测模型...",
+    "wizardDetectedModels": "在截获的流量中发现了 {count, plural, one {# 个模型} other {# 个模型}}。请选择要添加的模型：",
+    "wizardSelectedModels": "已选择 {count, plural, one {# 个模型} other {# 个模型}}。你将在下一个页面中将它们映射到 OmniRoute 模型。",
+    "wizardAddModels": "添加 {count, plural, one {# 个模型} other {# 个模型}}",
+    "wizardNoModelsDetected": "尚未检测到模型。请使用 {agent} 发起请求，然后再次运行此向导，以从流量中自动检测模型。",
+    "wizardNoModelsHint": "或者关闭此向导，并在智能体卡片中手动添加映射。"
   },
   "providerStats": {
     "unknownError": "未知错误",
@@ -12696,7 +12762,11 @@
     "avgTtft": "平均 TTFT",
     "avgTotal": "平均总计",
     "requestTelemetry": "请求遥测",
-    "requestTelemetryDescription": "7 阶段流水线明细（最近 5 分钟）"
+    "requestTelemetryDescription": "7 阶段流水线明细（最近 5 分钟）",
+    "title": "提供商统计信息",
+    "description": "按提供商和模型统计的流量、延迟和成功率",
+    "combo": "组合",
+    "toggleModels": "显示 {provider} 的模型"
   },
   "relay": {
     "title": "Serverless 中继代理",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "无请求体。",
     "noResponseBody": "无响应体。",
     "formatted": "格式化",
-    "raw": "原始"
+    "raw": "原始",
+    "requestCount": "{count, plural, one {# 个请求} other {# 个请求}}",
+    "expandList": "展开列表",
+    "collapseList": "折叠列表",
+    "snippetLanguage": "代码片段语言",
+    "headersTable": "请求头",
+    "showSecrets": "显示密钥",
+    "maskSecrets": "隐藏密钥",
+    "llmNotAvailable": "此请求没有可用的 LLM 元数据。",
+    "llmStreamYes": "是（SSE）",
+    "llmStreamNo": "否",
+    "llmTotalTokens": "总计：{count} 个令牌"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "过去 24 小时内此提供者实际响应的调用占比。破折号表示其处理的流量过少，无法确定比率。",
     "reliabilitySample": "过去 {hours} 小时内，{requests} 次调用中有 {successes} 次成功",
     "reliabilityTooFew": "过去 {hours} 小时内仅有 {requests} 次调用——调用次数太少，无法给出成功率",
-    "reliabilityNoTraffic": "过去 24 小时内未记录任何调用"
+    "reliabilityNoTraffic": "过去 24 小时内未记录任何调用",
+    "categoryFilter": "任务类别"
   },
   "discovery": {
     "title": "服务商探索",
@@ -13341,7 +13423,11 @@
     "method": "方式",
     "auth": "认证",
     "feasibility": "可行性",
-    "models": "模型"
+    "models": "模型",
+    "provider": "提供商",
+    "status": "状态",
+    "endpoint": "端点",
+    "actions": "操作"
   },
   "noAuthProvider": {
     "title": "无需身份验证",
@@ -13390,7 +13476,8 @@
     "ownProxy": "自有代理",
     "freeTierPause": "模型 {model} 已暂停 (429)，将于 {time} 恢复",
     "freeTierPauseProvider": "已暂停 (429)，将于 {time} 恢复",
-    "freeTierPauseNote": "该实例上的进程内暂停"
+    "freeTierPauseNote": "该实例上的进程内暂停",
+    "proxyType": "代理类型"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "一个隐藏成就等待解锁...",
         "criteria": "完成隐藏成就以揭晓此徽章。"
       }
-    }
+    },
+    "leaderboardTitle": "排行榜",
+    "leaderboardDescription": "您的各个 API 密钥的排名和成就",
+    "badgeLocked": "已锁定"
   },
   "featureFlags": {
     "title": "功能标志",
@@ -13858,7 +13948,8 @@
     "unknown": "未知",
     "unknownProvider": "未知提供者",
     "unknownModel": "未知模型",
-    "resolvedTargetMetrics": "{requests} 请求 · {success} 成功 · {latency} · 配额 {quota}"
+    "resolvedTargetMetrics": "{requests} 请求 · {success} 成功 · {latency} · 配额 {quota}",
+    "timeRange": "时间范围"
   },
   "usageLimits": {
     "usdUsageQuota": "美元使用配额",
@@ -14005,7 +14096,11 @@
     "learnMore": "了解更多",
     "changelogLoadFailed": "无法加载更新日志。请稍后重试。",
     "retry": "重试",
-    "viewFullHistory": "在 GitHub 上查看完整历史记录"
+    "viewFullHistory": "在 GitHub 上查看完整历史记录",
+    "title": "新闻与更新日志",
+    "description": "来自 OmniRoute 团队的公告和最新版本说明",
+    "viewLabel": "查看",
+    "loadingNews": "正在加载公告..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "提供者电路断路器状态",
       "lastUpdate": "最后更新：{timestamp}",
       "uptimeMinutes": "{minutes}分钟",
-      "uptimeHoursMinutes": "{hours}小时 {minutes}分钟"
+      "uptimeHoursMinutes": "{hours}小时 {minutes}分钟",
+      "breakerClosed": "已关闭",
+      "breakerNotClosed": "打开或半打开"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "维护详情",
         "secondaryAction": "系统状态"
       }
+    },
+    "miniapp": {
+      "askAnything": "您可以问任何问题…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "显示 {visible} 个 / 共 {total} 个",
+    "modeLabel": "视图模式",
+    "jumpToNow": "跳转到当前时间，NOW 线将重置到 {position}% 的位置",
+    "laneReuse": "时间行复用",
+    "laneReuseLabel": "时间行复用窗口（分钟）",
+    "laneReuseHint": "只要请求之间的间隔小于此处设置的分钟数，共享同一会话 ID 的请求就会保留在同一时间轴行中。",
+    "laneReuseUnit": "分钟",
+    "autoRefresh": "自动刷新",
+    "autoRefreshLabel": "自动刷新间隔（秒）",
+    "autoRefreshHint": "时间轴从服务器重新获取请求列表的频率。",
+    "autoRefreshUnit": "秒",
+    "zoomOut": "缩小",
+    "zoomIn": "放大"
   },
   "metadata": {
     "compressionTitle": "压缩",

@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "مستخدم بواسطة {count, plural, one {دفعة واحدة} other {# دفعات}}",
     "batchFilePreview": "معاينة",
     "batchFilePreviewTruncated": "عرض {shown} سطرًا أوليًا ({total} سطرًا إجماليًا)",
-    "batchFileDownloadFull": "تحميل الملف الكامل"
+    "batchFileDownloadFull": "تحميل الملف الكامل",
+    "dialogTitleFallback": "مربع حوار",
+    "pagination": "ترقيم الصفحات",
+    "clearFilters": "مسح عوامل التصفية",
+    "tokensPageTitle": "الرموز المميزة",
+    "tokensPageDescription": "أرسل الرموز المميزة بين مفاتيح API، وشارك رموز الدعوة، واربط خوادم المجتمع.",
+    "tokensServerUrlLabel": "عنوان URL للخادم"
   },
   "disabled": "معطل",
   "featureFlagOmnirouteEmergencyFallbackDescription": "توجيه الطلبات التي استنفدت الميزانية إلى موفر/نموذج الاحتياط المجاني للطوارئ.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 أو @channelname",
       "chatIdHint": "المعرّف الرقمي الفريد أو اسم المستخدم العام للدردشة أو القناة.",
       "tutorial": "كيفية تكوين خطاف ويب Telegram:"
-    }
+    },
+    "copy": "نسخ",
+    "copied": "تم النسخ!",
+    "expandDetails": "إظهار التفاصيل",
+    "collapseDetails": "إخفاء التفاصيل"
   },
   "compliance": {
     "auditTitle": "التدقيق",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "المكالمات (24 ساعة)",
     "mcpMetricSuccessRate": "معدل النجاح",
     "mcpMetricAvgDuration": "متوسط المدة",
-    "mcpMetricTopTool": "أفضل أداة"
+    "mcpMetricTopTool": "أفضل أداة",
+    "dismissError": "تجاهل الخطأ"
   },
   "themesPage": {
     "title": "المواضيع",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "قواعد الحمولة المتقدمة وحدود الطلب وإعدادات واجهة برمجة تطبيقات الوكيل",
     "mitmProxyDescription": "قم بتكوين إعدادات بروكسي MITM لفحص حركة المرور وتصحيح الأخطاء",
     "oneProxyDescription": "قم بتكوين إعدادات 1Proxy لتسلسل البروكسي المتقدم",
-    "omniSkillsDescription": "تثبيت وإدارة مهارات بيئة التطوير المعزولة (sandbox) لتنفيذ المطالبات والأدوات تلقائيًا"
+    "omniSkillsDescription": "تثبيت وإدارة مهارات بيئة التطوير المعزولة (sandbox) لتنفيذ المطالبات والأدوات تلقائيًا",
+    "openMenu": "فتح القائمة",
+    "products": "منتجات Keak"
   },
   "cloudSyncStatus": {
     "synced": "تمت المزامنة",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "الاتصالات المفضلة",
     "preferredConnectionsDesc": "ترتيب أولوية خاص بكل مفتاح. إذا لم يكن الاتصال المفضل متاحًا، ينتقل التوجيه إلى الاتصال المؤهل التالي.",
     "preferredConnectionsNone": "لم يتم تعيين تفضيل — تُستخدم استراتيجية التوجيه الافتراضية.",
-    "preferredConnectionsClear": "مسح"
+    "preferredConnectionsClear": "مسح",
+    "removeSelection": "إزالة {name}"
   },
   "auditLog": {
     "title": "سجل التدقيق",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "قم بتكوين جسر الصورة→النص في إعدادات جسر الوضعية",
     "sttBridgeCta": "قم بتكوين جسر الكلام→النص في إعدادات جسر الوضعية",
     "existingConnection": "الاتصال الحالي",
-    "openrouterSttDescription": "تستخدم نماذج تحويل الكلام إلى نص في OpenRouter اتصال OpenRouter الذي قمت بتكوينه. لا حاجة لمصادقة منفصلة."
+    "openrouterSttDescription": "تستخدم نماذج تحويل الكلام إلى نص في OpenRouter اتصال OpenRouter الذي قمت بتكوينه. لا حاجة لمصادقة منفصلة.",
+    "modalityTabsAria": "نوع الوسائط",
+    "serviceKindsAria": "نوع الخدمة"
   },
   "search": {
     "searchQuery": "استعلام البحث",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "غير معروف",
     "cliproxyapiUpdate": "تحديث",
     "cliproxyapiUpdateAvailable": "تحديث متاح: v{current} → v{latest}",
-    "cliproxyapiVersion": "الإصدار"
+    "cliproxyapiVersion": "الإصدار",
+    "removeMapping": "إزالة التعيين"
   },
   "modelCatalog": {
     "title": "النماذج والمجموعات",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "سيؤدي هذا إلى التقاط المزودين/النماذج المتصلة حاليًا التي تطابق هذا القالب في مجموعة قابلة للتحرير.",
     "duplicateAutoComboFailedPrefix": "فشل تكرار المجموعة التلقائية:",
     "duplicateAutoComboUnknownError": "خطأ غير معروف",
-    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}"
+    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}",
+    "weightPercent": "الوزن (%)",
+    "clearSearch": "مسح البحث",
+    "responseValidationRemoveCheck": "إزالة الفحص",
+    "responseValidationPath": "مسار JSON",
+    "responseValidationCondition": "الشرط",
+    "responseValidationValue": "القيمة المتوقعة"
   },
   "costs": {
     "title": "التكاليف",
@@ -5293,7 +5316,8 @@
         "skipped": "تم التكوين بالفعل",
         "failed": "فشل"
       }
-    }
+    },
+    "stepProgress": "تقدم الإعداد"
   },
   "providers": {
     "tosAvoidNoticeTitle": "مقدم الخدمة هذا مستبعد من auto افتراضيًا",
@@ -8956,7 +8980,8 @@
       "statsTitle": "الاكتشافات منذ إعادة التشغيل",
       "statsEmpty": "لا توجد اكتشافات بعد.",
       "statsRequest": "الطلبات"
-    }
+    },
+    "modelOverrideKey": "مفتاح التجاوز"
   },
   "contextRtk": {
     "title": "محرك آر تي كيه",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "ناجح",
     "tomlTestFailed": "فاشل",
     "tomlImportError": "تعذر معالجة ملف RTK TOML.",
-    "tomlFileReadError": "تعذر قراءة ملف TOML المحدد."
+    "tomlFileReadError": "تعذر قراءة ملف TOML المحدد.",
+    "viewMode": "وضع العرض"
   },
   "compressionEngineConfig": {
     "loading": "جاري التحميل…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "حزم اللغات: {packs}",
     "dragToReorder": "اسحب لإعادة ترتيب الخطوة",
     "engine": "المحرك",
-    "intensity": "الشدة"
+    "intensity": "الشدة",
+    "compressionOverride": "تجاوز الضغط"
   },
   "compressionStudio": {
     "noRun": "لا يوجد تشغيل ضغط متاح.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "الفائز: {winner}",
     "encoder": "المشفر",
     "bytes": "بايتات",
-    "tokensCl100k": "رموز (cl100k)"
+    "tokensCl100k": "رموز (cl100k)",
+    "studioViews": "عروض Studio"
   },
   "omniglyph": {
     "preview": "معاينة",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "لا يتم ضغط الرسائل الأقصر من ذلك. أقل = المزيد من الضغط.",
     "tooltipMinSavings": "قم بالضغط فقط إذا كان يحفظ هذا العدد من الرموز المميزة على الأقل.",
     "ultraSettings": "إعدادات الترا",
-    "ultraSettingsDesc": "الضغط الدلالي الذي يعمل بنظام SLM"
+    "ultraSettingsDesc": "الضغط الدلالي الذي يعمل بنظام SLM",
+    "defaultLanguage": "اللغة الافتراضية",
+    "viewMode": "وضع العرض"
   },
   "translator": {
     "title": "مترجم",
@@ -11087,7 +11117,8 @@
       "message": "رسالة",
       "error": "خطأ",
       "completion": "الإكمال"
-    }
+    },
+    "statusFilter": "الحالة"
   },
   "templateNames": {
     "simple-chat": "دردشة بسيطة",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "منذ {minutes}m",
     "hoursAgo": "منذ {hours}h",
     "daysAgo": "منذ {days}d",
-    "entries": "إدخالات"
+    "entries": "إدخالات",
+    "viewSwitcherAria": "عرض ذاكرة التخزين المؤقت"
   },
   "proxyConfigModal": {
     "levelGlobal": "عالمي",
@@ -11613,7 +11645,8 @@
     "notMeasured": "غير مقاس",
     "upstream4xx": "{count} أخطاء عميل من المصدر العلوي",
     "upstream5xx": "{count} أخطاء الخادم العلوي",
-    "uniformEgressLine": "فشل {affected} من {exits} مخرجًا معًا على {provider} (آخر {hours}h) — ليس مشكلة خروج"
+    "uniformEgressLine": "فشل {affected} من {exits} مخرجًا معًا على {provider} (آخر {hours}h) — ليس مشكلة خروج",
+    "moreActions": "إجراءات إضافية"
   },
   "playground": {
     "title": "العنوان",
@@ -11819,7 +11852,8 @@
       "nextButton": "التالي",
       "runButton": "تشغيل",
       "promptPlaceholder": "أدخل رسالتك… (اضغط Enter للإرسال، وShift+Enter لسطر جديد)"
-    }
+    },
+    "playgroundTabs": "أوضاع ساحة التجربة"
   },
   "miniPlayground": {
     "endpoint": "نقطة النهاية",
@@ -11890,7 +11924,8 @@
     "assistant": "المساعد",
     "errorLabel": "خطأ",
     "requestFailed": "فشل الطلب",
-    "stop": "إيقاف"
+    "stop": "إيقاف",
+    "messageInputAria": "الرسالة"
   },
   "requestLogger": {
     "recording": "التسجيل",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} تبديلات للحساب",
       "resilienceRetried": "إعادة المحاولة لدور فارغ",
       "resilienceContinued": "استئناف في منتصف التدفق",
-      "resilienceRecovered": "تم الاسترداد عبر إجراء المرونة"
-    }
+      "resilienceRecovered": "تم الاسترداد عبر إجراء المرونة",
+      "conversationContext": "سياق المحادثة",
+      "goToBottom": "الانتقال إلى الأسفل",
+      "liveRefreshOn": "التحديث المباشر: مفعّل",
+      "liveRefreshOff": "التحديث المباشر: متوقف",
+      "liveRefresh": "التحديث المباشر",
+      "continuesFromParent": "يتابع من الأصل",
+      "continuesFrom": "يتابع من {id}",
+      "viewConversation": "عرض المحادثة",
+      "openConversation": "فتح المحادثة {id}"
+    },
+    "tableLabel": "سجلات الطلبات"
   },
   "proxyLogger": {
     "filterAll": "الكل",
@@ -12123,7 +12168,9 @@
     "colServedBy": "مقدم بواسطة",
     "filterTraffic": "حركة المرور",
     "filterTests": "اختبارات",
-    "filterSource": "المصدر"
+    "filterSource": "المصدر",
+    "tableLabel": "سجلات الوكيل",
+    "sortLogs": "ترتيب السجلات"
   },
   "endpointOptions": {
     "speech": "تحويل النص إلى كلام",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "منهك",
     "statusAlerting": "تنبيه",
     "statusError": "خطأ",
-    "moreSuffix": "+{count} المزيد"
+    "moreSuffix": "+{count} المزيد",
+    "feedFilterLabel": "تصفية الأحداث"
   },
   "quotaShare": {
     "weightPercent": "الوزن %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "غير مجمع",
     "ungroupedHint": "هذه المجمعات غير مخصصة لمجموعة معروفة. قم بتحرير مجمع لنقله إلى مجموعة حقيقية.",
     "removeFailed": "تعذّرت إزالة هذا المجمّع.",
-    "dismiss": "تجاهل"
+    "dismiss": "تجاهل",
+    "allocationsHeading": "التخصيصات",
+    "wizardRemoveDimension": "إزالة البُعد",
+    "wizardRemoveKey": "إزالة المفتاح"
   },
   "plugins": {
     "title": "الإضافات",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "فشل تحديث الإعدادات",
       "serviceRevealApiKey": "قام {actor} بكشف مفتاح API لـ {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "تجاهل الخطأ"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "الانتقال الآن",
       "message": "أصبح MITM Proxy موجودًا الآن ضمن AgentBridge.",
       "title": "تم نقل هذه الصفحة"
-    }
+    },
+    "dnsOn": "DNS مفعّل",
+    "dnsOff": "DNS معطّل",
+    "showServerSettings": "إظهار إعدادات الخادم",
+    "hideServerSettings": "إخفاء إعدادات الخادم",
+    "upstreamCaTesting": "جارٍ الاختبار…",
+    "removeMapping": "إزالة التعيين",
+    "mappingSourcePlaceholder": "مثلاً، gemini-3.6-flash-medium، أو * لجميع النماذج غير المعيّنة",
+    "mappingWildcardHint": "استخدم * كمصدر لتوجيه كل نموذج لا يملك تعيينًا صريحًا عبر OmniRoute إلى الهدف المحدد. تتفوق دائمًا مطابقات المصدر التامة على *.",
+    "wizardDetectingModels": "جارٍ اكتشاف النماذج من حركة المرور المعترضة...",
+    "wizardDetectedModels": "عُثر على {count, plural, one {نموذج واحد} other {# نماذج}} في حركة المرور المعترضة. حدد النماذج التي تريد إضافتها:",
+    "wizardSelectedModels": "تم تحديد {count, plural, one {نموذج واحد} other {# نماذج}}. ستعيّنها إلى نماذج OmniRoute في الشاشة التالية.",
+    "wizardAddModels": "إضافة {count, plural, one {نموذج واحد} other {# نماذج}}",
+    "wizardNoModelsDetected": "لم يتم اكتشاف أي نماذج بعد. استخدم {agent} لإجراء طلب، ثم شغّل هذا المعالج مجددًا لاكتشاف النماذج تلقائيًا من حركة المرور.",
+    "wizardNoModelsHint": "أو أغلق هذا المعالج وأضف التعيينات يدويًا في بطاقة الوكيل."
   },
   "providerStats": {
     "unknownError": "خطأ غير معروف",
@@ -12696,7 +12762,11 @@
     "avgTtft": "متوسط TTFT",
     "avgTotal": "المتوسط الإجمالي",
     "requestTelemetry": "بيانات تتبع الطلب",
-    "requestTelemetryDescription": "تفصيل مسار المعالجة المكون من 7 مراحل (آخر 5 دقائق)"
+    "requestTelemetryDescription": "تفصيل مسار المعالجة المكون من 7 مراحل (آخر 5 دقائق)",
+    "title": "إحصاءات مزوّدي الخدمة",
+    "description": "حركة المرور وزمن الاستجابة ومعدلات النجاح لكل مزوّد خدمة ولكل نموذج",
+    "combo": "مركّب",
+    "toggleModels": "إظهار نماذج {provider}"
   },
   "relay": {
     "title": "وكلاء الترحيل بلا خادم",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "لا يوجد جسم طلب.",
     "noResponseBody": "لا يوجد جسم استجابة.",
     "formatted": "منسق",
-    "raw": "خام"
+    "raw": "خام",
+    "requestCount": "{count, plural, one {طلب واحد} other {# طلبات}}",
+    "expandList": "توسيع القائمة",
+    "collapseList": "طي القائمة",
+    "snippetLanguage": "لغة المقتطف",
+    "headersTable": "الترويسات",
+    "showSecrets": "إظهار القيم السرية",
+    "maskSecrets": "إخفاء القيم السرية",
+    "llmNotAvailable": "البيانات الوصفية لـ LLM غير متاحة لهذا الطلب.",
+    "llmStreamYes": "نعم (SSE)",
+    "llmStreamNo": "لا",
+    "llmTotalTokens": "الإجمالي: {count} من الرموز"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "نسبة الاستدعاءات التي استجاب لها هذا المزوّد فعليًا خلال آخر 24 ساعة. تعني الشرطة أنه تعامل مع حركة مرور أقل من أن تكفي لتحديد معدل.",
     "reliabilitySample": "نجح {successes} من أصل {requests} استدعاء خلال آخر {hours} ساعة",
     "reliabilityTooFew": "فقط {requests} استدعاء خلال آخر {hours} ساعة — عدد لا يكفي لتحديد معدل",
-    "reliabilityNoTraffic": "لم تُسجّل أي استدعاءات خلال آخر 24 ساعة"
+    "reliabilityNoTraffic": "لم تُسجّل أي استدعاءات خلال آخر 24 ساعة",
+    "categoryFilter": "فئة المهمة"
   },
   "discovery": {
     "title": "اكتشاف موفري الخدمة",
@@ -13341,7 +13423,11 @@
     "method": "الطريقة",
     "auth": "المصادقة",
     "feasibility": "الجدوى",
-    "models": "النماذج"
+    "models": "النماذج",
+    "provider": "المزوّد",
+    "status": "الحالة",
+    "endpoint": "نقطة النهاية",
+    "actions": "الإجراءات"
   },
   "noAuthProvider": {
     "title": "لا تتطلب مصادقة",
@@ -13390,7 +13476,8 @@
     "ownProxy": "وكيل خاص",
     "freeTierPause": "تم إيقاف النموذج {model} مؤقتًا (429)، وسيعود في {time}",
     "freeTierPauseProvider": "تم الإيقاف مؤقتًا (429)، وسيعود في {time}",
-    "freeTierPauseNote": "إيقاف مؤقت داخل العملية على هذه النسخة"
+    "freeTierPauseNote": "إيقاف مؤقت داخل العملية على هذه النسخة",
+    "proxyType": "نوع الوكيل"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "إنجاز مخفي في انتظارك...",
         "criteria": "أكمل الإنجاز المخفي للكشف عن هذه الشارة."
       }
-    }
+    },
+    "leaderboardTitle": "لوحة المتصدرين",
+    "leaderboardDescription": "التصنيفات والإنجازات عبر مفاتيح API الخاصة بك",
+    "badgeLocked": "مقفل"
   },
   "featureFlags": {
     "title": "علامات الميزات",
@@ -13858,7 +13948,8 @@
     "unknown": "غير معروف",
     "unknownProvider": "مزود غير معروف",
     "unknownModel": "نموذج غير معروف",
-    "resolvedTargetMetrics": "{requests} طلب · {success} نجاح · {latency} · حصة {quota}"
+    "resolvedTargetMetrics": "{requests} طلب · {success} نجاح · {latency} · حصة {quota}",
+    "timeRange": "النطاق الزمني"
   },
   "usageLimits": {
     "usdUsageQuota": "حصة استخدام بالدولار الأمريكي",
@@ -14005,7 +14096,11 @@
     "learnMore": "معرفة المزيد",
     "changelogLoadFailed": "تعذر تحميل سجل التغييرات. يرجى المحاولة مرة أخرى لاحقًا.",
     "retry": "إعادة المحاولة",
-    "viewFullHistory": "عرض السجل الكامل على GitHub"
+    "viewFullHistory": "عرض السجل الكامل على GitHub",
+    "title": "الأخبار وسجل التغييرات",
+    "description": "إعلانات فريق OmniRoute وأحدث ملاحظات الإصدار",
+    "viewLabel": "عرض",
+    "loadingNews": "جارٍ تحميل الإعلانات..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "حالة قاطع الدائرة لمزود الخدمة",
       "lastUpdate": "آخر تحديث: {timestamp}",
       "uptimeMinutes": "{minutes}د",
-      "uptimeHoursMinutes": "{hours}س {minutes}د"
+      "uptimeHoursMinutes": "{hours}س {minutes}د",
+      "breakerClosed": "مغلق",
+      "breakerNotClosed": "مفتوح أو نصف مفتوح"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "تفاصيل الصيانة",
         "secondaryAction": "حالة النظام"
       }
+    },
+    "miniapp": {
+      "askAnything": "اسأل عن أي شيء…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "أداة MCP",
     "scope": "النطاق",
-    "apiKey": "مفتاح API"
+    "apiKey": "مفتاح API",
+    "visibleCount": "{visible} ظاهر / {total} إجمالي",
+    "modeLabel": "وضع العرض",
+    "jumpToNow": "الانتقال إلى الوقت الحالي، يُعاد تعيين خط NOW إلى الموضع {position}%",
+    "laneReuse": "إعادة استخدام المسار",
+    "laneReuseLabel": "نافذة إعادة استخدام المسار (بالدقائق)",
+    "laneReuseHint": "تظل الطلبات التي تشترك في معرّف محادثة واحد في الصف نفسه من المخطط الزمني ما دامت الفجوة بينها أقل من هذا العدد من الدقائق.",
+    "laneReuseUnit": "د",
+    "autoRefresh": "التحديث التلقائي",
+    "autoRefreshLabel": "الفاصل الزمني للتحديث التلقائي (بالثواني)",
+    "autoRefreshHint": "مدى تكرار إعادة جلب المخطط الزمني لقائمة الطلبات من الخادم.",
+    "autoRefreshUnit": "ث",
+    "zoomOut": "تصغير",
+    "zoomIn": "تكبير"
   },
   "metadata": {
     "compressionTitle": "ضغط",

@@ -126,7 +126,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/services/quotaAutoPing.ts": 1,
   },
   connection: {
-    "open-sse/handlers/autoComboCandidates.ts": 1,
+    // The read-only auto-candidate inspector no longer re-resolves connections one by one
+    // (getProviderConnectionById, 1->0): it reads one narrow, credential-free state projection
+    // (id, rate_limited_until, test_status) through getRawProviderConnections for the whole
+    // request. Transparency only, no credential selection and no dispatch.
     // Two of the three connection re-resolution sites moved into the streaming
     // leg with the decomposition (same sites, new home).
     "open-sse/handlers/chatCore.ts": 1,
@@ -217,8 +220,6 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/usage/codex-reset-credit/route.ts": 1,
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
-    "src/app/api/v1/vscode/[token]/api/tags/route.ts": 1,
-    "src/app/api/v1/vscode/raw/[token]/api/tags/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
     "src/instrumentation-node.ts": 1,
     "src/lib/a2a/skills/providerDiscovery.ts": 1,
@@ -287,6 +288,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // exclusive lease defers list/redeem (409 exclusive_lease_active).
     "src/lib/usage/claudeResetCredits.ts": 1,
     "src/lib/usage/codexResetCredits.ts": 1,
+    // #17974: the combo health report reads the active connections once to decide which
+    // targets still have an eligible, model-advertising account — a read-only monitoring
+    // lookup behind the health endpoint, never connection selection or dispatch (class C).
+    "src/lib/usage/comboHealth.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
     // v3.8.51 #12805 (c042a5188): grok-cli sibling of codexResetCredits.ts, same
@@ -302,6 +307,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/usage/resilienceExplain.ts": 1,
     "src/lib/usage/usageStats.ts": 1,
     "src/lib/vncSession/service.ts": 2,
+    // #17360 moved the two VS Code tag routes' connection read here (same read-only listing).
+    "src/lib/vscode/tagModels.ts": 1,
     "src/lib/warmupScheduler.ts": 1,
     "src/shared/services/codexCatalogRevalidation.ts": 2,
     "src/shared/services/modelSyncScheduler.ts": 1,
@@ -336,7 +343,6 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
     Object.keys(EXPECTED.connection).map((file) => [
       file,
       [
-        "open-sse/handlers/autoComboCandidates.ts",
         "open-sse/handlers/chatCore.ts",
         "open-sse/handlers/chatCore/streamingResponse.ts",
         "open-sse/services/alibabaFreeTier.ts",

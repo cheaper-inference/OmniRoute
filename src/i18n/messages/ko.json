@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "{count, plural, one {# 배치} other {# 배치들}}",
     "batchFilePreview": "미리보기",
     "batchFilePreviewTruncated": "첫 번째 {shown} 줄 표시 ({total} 총 줄)",
-    "batchFileDownloadFull": "전체 파일 다운로드"
+    "batchFileDownloadFull": "전체 파일 다운로드",
+    "dialogTitleFallback": "대화 상자",
+    "pagination": "페이지네이션",
+    "clearFilters": "필터 지우기",
+    "tokensPageTitle": "토큰",
+    "tokensPageDescription": "API 키 간에 토큰을 전송하고, 초대 코드를 공유하고, 커뮤니티 서버를 연결하세요.",
+    "tokensServerUrlLabel": "서버 URL"
   },
   "disabled": "비활성화됨",
   "featureFlagOmnirouteEmergencyFallbackDescription": "예산이 소진된 요청을 긴급 무료 폴백 제공자/모델로 라우팅합니다.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 또는 @channelname",
       "chatIdHint": "채팅/채널의 고유한 숫자 식별자 또는 공개 사용자 이름입니다.",
       "tutorial": "Telegram 웹훅 구성 방법:"
-    }
+    },
+    "copy": "복사",
+    "copied": "복사됨!",
+    "expandDetails": "세부 정보 표시",
+    "collapseDetails": "세부 정보 숨기기"
   },
   "compliance": {
     "auditTitle": "감사",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "통화 (24시간)",
     "mcpMetricSuccessRate": "성공률",
     "mcpMetricAvgDuration": "평균 지속 시간",
-    "mcpMetricTopTool": "최고의 도구"
+    "mcpMetricTopTool": "최고의 도구",
+    "dismissError": "오류 닫기"
   },
   "themesPage": {
     "title": "테마",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "고급 페이로드 규칙, 요청 제한 및 프록시 API 설정",
     "mitmProxyDescription": "트래픽 검사 및 디버깅을 위한 MITM 프록시 설정을 구성합니다",
     "oneProxyDescription": "고급 프록시 체이닝을 위한 1Proxy 설정을 구성합니다",
-    "omniSkillsDescription": "자동화된 프롬프트 및 도구 실행을 위한 샌드박스 스킬 설치 및 관리"
+    "omniSkillsDescription": "자동화된 프롬프트 및 도구 실행을 위한 샌드박스 스킬 설치 및 관리",
+    "openMenu": "메뉴 열기",
+    "products": "Keak 제품"
   },
   "cloudSyncStatus": {
     "synced": "동기화됨",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "선호 연결",
     "preferredConnectionsDesc": "키별 우선순위입니다. 선호 연결을 사용할 수 없으면 다음으로 적합한 연결로 라우팅이 넘어갑니다.",
     "preferredConnectionsNone": "설정된 선호 항목이 없습니다 — 기본 라우팅 전략이 사용됩니다.",
-    "preferredConnectionsClear": "지우기"
+    "preferredConnectionsClear": "지우기",
+    "removeSelection": "{name} 제거"
   },
   "auditLog": {
     "title": "감사 로그",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Modality Bridge 설정에서 Image→Text 브리지를 구성하십시오.",
     "sttBridgeCta": "Modality Bridge 설정에서 Speech→Text 브리지를 구성합니다.",
     "existingConnection": "기존 연결",
-    "openrouterSttDescription": "OpenRouter 음성 인식 모델은 구성된 OpenRouter 연결을 사용합니다. 별도의 자격 증명이 필요하지 않습니다."
+    "openrouterSttDescription": "OpenRouter 음성 인식 모델은 구성된 OpenRouter 연결을 사용합니다. 별도의 자격 증명이 필요하지 않습니다.",
+    "modalityTabsAria": "미디어 유형",
+    "serviceKindsAria": "서비스 유형"
   },
   "search": {
     "searchQuery": "검색어",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "알 수 없음",
     "cliproxyapiUpdate": "업데이트",
     "cliproxyapiUpdateAvailable": "업데이트 가능: v{current} → v{latest}",
-    "cliproxyapiVersion": "버전"
+    "cliproxyapiVersion": "버전",
+    "removeMapping": "매핑 제거"
   },
   "modelCatalog": {
     "title": "모델 및 콤보",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "이 템플릿과 일치하는 현재 연결된 제공자/모델을 편집 가능한 콤보로 스냅샷합니다.",
     "duplicateAutoComboFailedPrefix": "자동 콤보 복제 실패:",
     "duplicateAutoComboUnknownError": "알 수 없는 오류",
-    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기"
+    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기",
+    "weightPercent": "가중치(%)",
+    "clearSearch": "검색어 지우기",
+    "responseValidationRemoveCheck": "검사 제거",
+    "responseValidationPath": "JSON 경로",
+    "responseValidationCondition": "조건",
+    "responseValidationValue": "예상 값"
   },
   "costs": {
     "title": "비용",
@@ -5293,7 +5316,8 @@
         "skipped": "이미 구성됨",
         "failed": "실패했습니다"
       }
-    }
+    },
+    "stepProgress": "설정 진행률"
   },
   "providers": {
     "tosAvoidNoticeTitle": "이 제공자는 기본적으로 auto에서 제외됩니다",
@@ -8956,7 +8980,8 @@
       "statsTitle": "재시작 이후 감지",
       "statsEmpty": "아직 감지된 항목이 없습니다.",
       "statsRequest": "요청"
-    }
+    },
+    "modelOverrideKey": "키 재정의"
   },
   "contextRtk": {
     "title": "RTK 엔진",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "통과",
     "tomlTestFailed": "실패",
     "tomlImportError": "RTK TOML 파일을 처리할 수 없습니다.",
-    "tomlFileReadError": "선택한 TOML 파일을 읽을 수 없습니다."
+    "tomlFileReadError": "선택한 TOML 파일을 읽을 수 없습니다.",
+    "viewMode": "보기 모드"
   },
   "compressionEngineConfig": {
     "loading": "로드 중…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "언어 팩: {packs}",
     "dragToReorder": "드래그하여 단계 순서 변경",
     "engine": "엔진",
-    "intensity": "강도"
+    "intensity": "강도",
+    "compressionOverride": "압축 재정의"
   },
   "compressionStudio": {
     "noRun": "사용 가능한 압축 실행이 없습니다.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "우승자: {winner}",
     "encoder": "인코더",
     "bytes": "바이트",
-    "tokensCl100k": "토큰 (cl100k)"
+    "tokensCl100k": "토큰 (cl100k)",
+    "studioViews": "Studio 보기"
   },
   "omniglyph": {
     "preview": "미리보기",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "이보다 짧은 메시지는 압축되지 않습니다. 낮음 = 더 많은 압축.",
     "tooltipMinSavings": "최소한 이만큼의 토큰을 절약할 수 있는 경우에만 압축합니다.",
     "ultraSettings": "울트라 설정",
-    "ultraSettingsDesc": "SLM 기반 의미 압축"
+    "ultraSettingsDesc": "SLM 기반 의미 압축",
+    "defaultLanguage": "기본 언어",
+    "viewMode": "보기 모드"
   },
   "translator": {
     "title": "번역기",
@@ -11087,7 +11117,8 @@
       "message": "메시지",
       "error": "오류",
       "completion": "완료"
-    }
+    },
+    "statusFilter": "상태"
   },
   "templateNames": {
     "simple-chat": "간단한 채팅",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes}분 전",
     "hoursAgo": "{hours}시간 전",
     "daysAgo": "{days}일 전",
-    "entries": "항목"
+    "entries": "항목",
+    "viewSwitcherAria": "캐시 보기"
   },
   "proxyConfigModal": {
     "levelGlobal": "글로벌",
@@ -11613,7 +11645,8 @@
     "notMeasured": "측정되지 않음",
     "upstream4xx": "{count} 상류 클라이언트 오류",
     "upstream5xx": "{count}개의 업스트림 서버 오류",
-    "uniformEgressLine": "{provider}에서 {exits}개 exit 중 {affected}개가 함께 실패함 (최근 {hours}시간) — exit 문제가 아님"
+    "uniformEgressLine": "{provider}에서 {exits}개 exit 중 {affected}개가 함께 실패함 (최근 {hours}시간) — exit 문제가 아님",
+    "moreActions": "추가 작업"
   },
   "playground": {
     "title": "모델 플레이그라운드",
@@ -11819,7 +11852,8 @@
       "nextButton": "다음",
       "runButton": "실행",
       "promptPlaceholder": "메시지를 입력하세요… (전송하려면 Enter, 줄바꿈은 Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground 모드"
   },
   "miniPlayground": {
     "endpoint": "엔드포인트",
@@ -11890,7 +11924,8 @@
     "assistant": "어시스턴트",
     "errorLabel": "오류",
     "requestFailed": "요청 실패",
-    "stop": "중지"
+    "stop": "중지",
+    "messageInputAria": "메시지"
   },
   "requestLogger": {
     "recording": "기록 중",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "계정 전환 {count}회",
       "resilienceRetried": "빈 턴 재시도",
       "resilienceContinued": "스트림 중간에 재개",
-      "resilienceRecovered": "복원력 조치로 복구"
-    }
+      "resilienceRecovered": "복원력 조치로 복구",
+      "conversationContext": "대화 컨텍스트",
+      "goToBottom": "맨 아래로 이동",
+      "liveRefreshOn": "실시간 새로 고침: 켜짐",
+      "liveRefreshOff": "실시간 새로 고침: 꺼짐",
+      "liveRefresh": "실시간 새로 고침",
+      "continuesFromParent": "상위 항목에서 계속됨",
+      "continuesFrom": "{id}에서 계속됨",
+      "viewConversation": "대화 보기",
+      "openConversation": "대화 {id} 열기"
+    },
+    "tableLabel": "요청 로그"
   },
   "proxyLogger": {
     "filterAll": "전체",
@@ -12123,7 +12168,9 @@
     "colServedBy": "제공자",
     "filterTraffic": "트래픽",
     "filterTests": "테스트",
-    "filterSource": "소스"
+    "filterSource": "소스",
+    "tableLabel": "프록시 로그",
+    "sortLogs": "로그 정렬"
   },
   "endpointOptions": {
     "speech": "음성",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "소진됨",
     "statusAlerting": "경고 중",
     "statusError": "오류",
-    "moreSuffix": "외 {count}개"
+    "moreSuffix": "외 {count}개",
+    "feedFilterLabel": "이벤트 필터링"
   },
   "quotaShare": {
     "weightPercent": "가중치 %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "그룹 없음",
     "ungroupedHint": "이 풀들은 알려진 그룹에 할당되지 않았습니다. 풀을 편집하여 실제 그룹으로 이동하세요.",
     "removeFailed": "이 풀을 제거할 수 없습니다.",
-    "dismiss": "닫기"
+    "dismiss": "닫기",
+    "allocationsHeading": "할당",
+    "wizardRemoveDimension": "차원 제거",
+    "wizardRemoveKey": "키 제거"
   },
   "plugins": {
     "title": "플러그인",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "설정 업데이트 실패",
       "serviceRevealApiKey": "{actor}이(가) {target}의 API 키를 표시했습니다",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "오류 닫기"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "지금 이동",
       "message": "이제 MITM Proxy는 AgentBridge에 위치합니다.",
       "title": "이 페이지는 이동되었습니다"
-    }
+    },
+    "dnsOn": "DNS 켜짐",
+    "dnsOff": "DNS 꺼짐",
+    "showServerSettings": "서버 설정 표시",
+    "hideServerSettings": "서버 설정 숨기기",
+    "upstreamCaTesting": "테스트 중…",
+    "removeMapping": "매핑 제거",
+    "mappingSourcePlaceholder": "예: gemini-3.6-flash-medium 또는 매핑되지 않은 모든 모델을 나타내는 *",
+    "mappingWildcardHint": "명시적 매핑이 없는 모든 모델을 OmniRoute를 통해 선택한 대상으로 라우팅하려면 소스로 *를 사용하세요. 소스가 정확히 일치하는 매핑은 항상 *보다 우선합니다.",
+    "wizardDetectingModels": "가로챈 트래픽에서 모델을 감지하는 중...",
+    "wizardDetectedModels": "가로챈 트래픽에서 {count, plural, one {#개 모델} other {#개 모델}}을 찾았습니다. 추가할 모델을 선택하세요:",
+    "wizardSelectedModels": "{count, plural, one {#개 모델} other {#개 모델}}을 선택했습니다. 다음 화면에서 OmniRoute 모델에 매핑합니다.",
+    "wizardAddModels": "{count, plural, one {#개 모델} other {#개 모델}} 추가",
+    "wizardNoModelsDetected": "아직 감지된 모델이 없습니다. {agent}을 사용하여 요청한 후 이 마법사를 다시 실행하면 트래픽에서 모델을 자동으로 감지할 수 있습니다.",
+    "wizardNoModelsHint": "또는 이 마법사를 닫고 에이전트 카드에서 매핑을 수동으로 추가하세요."
   },
   "providerStats": {
     "unknownError": "알 수 없는 오류",
@@ -12696,7 +12762,11 @@
     "avgTtft": "평균 TTFT",
     "avgTotal": "평균 총계",
     "requestTelemetry": "요청 텔레메트리",
-    "requestTelemetryDescription": "7단계 파이프라인 분석 (최근 5분)"
+    "requestTelemetryDescription": "7단계 파이프라인 분석 (최근 5분)",
+    "title": "제공업체 통계",
+    "description": "제공업체별 및 모델별 트래픽, 지연 시간, 성공률",
+    "combo": "조합",
+    "toggleModels": "{provider}의 모델 표시"
   },
   "relay": {
     "title": "서버리스 릴레이 프록시",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "요청 본문이 없습니다.",
     "noResponseBody": "응답 본문이 없습니다.",
     "formatted": "포맷됨",
-    "raw": "원시 데이터"
+    "raw": "원시 데이터",
+    "requestCount": "{count, plural, one {#개 요청} other {#개 요청}}",
+    "expandList": "목록 펼치기",
+    "collapseList": "목록 접기",
+    "snippetLanguage": "코드 조각 언어",
+    "headersTable": "헤더",
+    "showSecrets": "비밀 정보 표시",
+    "maskSecrets": "비밀 정보 마스킹",
+    "llmNotAvailable": "이 요청에 사용할 수 있는 LLM 메타데이터가 없습니다.",
+    "llmStreamYes": "예(SSE)",
+    "llmStreamNo": "아니요",
+    "llmTotalTokens": "총 {count}개 토큰"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "지난 24시간 동안 이 제공업체가 실제로 응답한 호출의 비율입니다. 대시가 표시되면 처리한 트래픽이 너무 적어 성공률을 산정할 수 없다는 의미입니다.",
     "reliabilitySample": "지난 {hours}시간 동안 {requests}건의 호출 중 {successes}건 성공",
     "reliabilityTooFew": "지난 {hours}시간 동안 호출이 {requests}건뿐이어서 성공률을 산정하기에 너무 적습니다",
-    "reliabilityNoTraffic": "지난 24시간 동안 기록된 호출이 없습니다"
+    "reliabilityNoTraffic": "지난 24시간 동안 기록된 호출이 없습니다",
+    "categoryFilter": "작업 카테고리"
   },
   "discovery": {
     "title": "제공업체 탐색",
@@ -13341,7 +13423,11 @@
     "method": "방법",
     "auth": "인증",
     "feasibility": "실현 가능성",
-    "models": "모델"
+    "models": "모델",
+    "provider": "제공업체",
+    "status": "상태",
+    "endpoint": "엔드포인트",
+    "actions": "작업"
   },
   "noAuthProvider": {
     "title": "인증 필요 없음",
@@ -13390,7 +13476,8 @@
     "ownProxy": "자체 프록시",
     "freeTierPause": "모델 {model} 일시 중지됨 (429), {time}에 복귀",
     "freeTierPauseProvider": "일시 중지됨 (429), {time}에 복귀",
-    "freeTierPauseNote": "이 인스턴스에서 인프로세스 일시 중지"
+    "freeTierPauseNote": "이 인스턴스에서 인프로세스 일시 중지",
+    "proxyType": "프록시 유형"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "숨겨진 업적이 기다리고 있습니다...",
         "criteria": "이 배지를 공개하려면 숨겨진 업적을 완료하세요."
       }
-    }
+    },
+    "leaderboardTitle": "리더보드",
+    "leaderboardDescription": "API 키 전반의 순위와 업적",
+    "badgeLocked": "잠김"
   },
   "featureFlags": {
     "title": "기능 플래그",
@@ -13858,7 +13948,8 @@
     "unknown": "알 수 없음",
     "unknownProvider": "알 수 없는 제공업체",
     "unknownModel": "알 수 없는 모델",
-    "resolvedTargetMetrics": "{requests} 요청 · {success} 성공 · {latency} · 할당량 {quota}"
+    "resolvedTargetMetrics": "{requests} 요청 · {success} 성공 · {latency} · 할당량 {quota}",
+    "timeRange": "기간"
   },
   "usageLimits": {
     "usdUsageQuota": "USD 사용량 할당량",
@@ -14005,7 +14096,11 @@
     "learnMore": "자세히 알아보기",
     "changelogLoadFailed": "변경 로그를 불러올 수 없습니다. 나중에 다시 시도해 주세요.",
     "retry": "재시도",
-    "viewFullHistory": "GitHub에서 전체 기록 보기"
+    "viewFullHistory": "GitHub에서 전체 기록 보기",
+    "title": "뉴스 및 변경 로그",
+    "description": "OmniRoute 팀의 공지 및 최신 릴리스 노트",
+    "viewLabel": "보기",
+    "loadingNews": "공지 불러오는 중..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "제공자 회로 차단기 상태",
       "lastUpdate": "마지막 업데이트: {timestamp}",
       "uptimeMinutes": "{minutes}분",
-      "uptimeHoursMinutes": "{hours}시간 {minutes}분"
+      "uptimeHoursMinutes": "{hours}시간 {minutes}분",
+      "breakerClosed": "닫힘",
+      "breakerNotClosed": "열림 또는 반열림"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "유지보수 세부정보",
         "secondaryAction": "시스템 상태"
       }
+    },
+    "miniapp": {
+      "askAnything": "무엇이든 물어보세요…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP 도구",
     "scope": "범위",
-    "apiKey": "API 키"
+    "apiKey": "API 키",
+    "visibleCount": "표시 {visible}개 / 전체 {total}개",
+    "modeLabel": "보기 모드",
+    "jumpToNow": "현재 시간으로 이동하면 NOW 선의 위치가 {position}%로 재설정됩니다",
+    "laneReuse": "행 재사용",
+    "laneReuseLabel": "행 재사용 시간 범위(분)",
+    "laneReuseHint": "동일한 대화 ID를 공유하는 요청은 요청 간 간격이 설정된 시간(분) 미만인 경우 같은 타임라인 행에 유지됩니다.",
+    "laneReuseUnit": "분",
+    "autoRefresh": "자동 새로 고침",
+    "autoRefreshLabel": "자동 새로 고침 간격(초)",
+    "autoRefreshHint": "타임라인이 서버에서 요청 목록을 다시 가져오는 빈도입니다.",
+    "autoRefreshUnit": "초",
+    "zoomOut": "축소",
+    "zoomIn": "확대"
   },
   "metadata": {
     "compressionTitle": "압축",

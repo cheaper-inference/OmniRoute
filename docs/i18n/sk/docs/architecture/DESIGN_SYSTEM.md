@@ -4,228 +4,135 @@
 
 ---
 
-> **Stav:** referenčný dokument — štandardizácia opísaná v tomto dokumente je **implementovaná** (fázy 1–6: mriežkové pozadie, primitíva, centralizácia stavových farieb, token monospace písma, migrácia tokenov DataTable, focus-ring → accent, primitíva Checkbox/Textarea, `cn()` → tailwind-merge, mriežka na každej samostatnej obrazovke, flexibilný obsahový kontajner pre 4K, nepriehľadné povrchy dátových tabuliek). Tento dokument je kanonickým opisom dizajnových tokenov, komponentov a konvencií dashboardu; nižšie uvedené členenie na fázy zostáva zachované ako odôvodnenie jednotlivých rozhodnutí.
-> **Rozsah:** dashboard OmniRoute (`src/`) a marketingová stránka (`_mono_repo/omnirouteSite/`) zdieľajú **jednu vizuálnu identitu** — rovnaké pozadie s mriežkou milimetrového papiera (32px), rovnaké farebné tokeny a štandardizované komponenty.
->
-> Praktické poznámky pre správcov:
->
-> - Niekoľko zostávajúcich natvrdo zadaných hexadecimálnych hodnôt je **zámerných** (konzolový terminál, ktorý je vždy tmavý, ťahy SVG v ReactFlow) a **NESMÚ** sa hromadne nahradiť tokenmi.
-> - „Väčšia“ mriežka v spustenej inštancii znamená zastarané zostavenie, nie chybu v kóde — veľkosť mriežky je 32px, rovnako ako na stránke.
-> - Hodnoty `--table-*` tmavej témy sú bajtovo identické s hodnotami rgba zadanými natvrdo pred migráciou; svetlá téma bola opravená (pre chybné nefunkčné záložné hodnoty `var()` bola vždy tmavá).
+> **Stav:** ovládací panel je vytvorený pomocou **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ktorý je
+> zahrnutý priamo v pracovnom priestore ako `packages/ui-kit` (`@omniroute/ui-kit`; snímka upstream verzie je pripnutá v
+> `packages/ui-kit/UPSTREAM.md` a kontrolovaná pomocou `npm run check:ui-kit-snapshot`). Svetlá téma je kanonická
+> a predvolená preferencia je `system`. Akcentom je limetková farba Keak (`--ci-color-accent`). Inter
+> (rozostupy medzi písmenami 0, `--ci-letter-spacing-ui`) je písmom používateľského rozhrania, Instrument Serif sa používa iba pre veľký, vzdušný
+> text nadpisov (`.ci-dashboard-display`) a IBM Plex Mono pre kód — všetky písma sú hosťované lokálne prostredníctvom
+> importov `@fontsource/*` v hornej časti súboru `src/app/globals.css`. Každá ikona je glyf Lucide.
 
----
+## 1. Kde sa čo nachádza
 
-## 1. Účel
+- **Súprava.** `packages/ui-kit/src` je bajtovo identická kópia upstreamového priečinka `src/` v commite pripnutom v
+  `packages/ui-kit/UPSTREAM.md` (ktorý zaznamenáva aj licenčné oprávnenie); `PATCHES.md` uvádza lokálne
+  záplaty (žiadne). Používa sa priamo ako zdrojový kód bez zostavenia: `next.config.mjs` ho transpiluje a
+  `tsconfig.json` mapuje `@omniroute/ui-kit` → `packages/ui-kit/src` a `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` a `vitest.mcp.config.ts` obsahujú rovnaký alias). Komponent
+  súpravy importujte cez jeho podcestu (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nikdy
+  nie cez súhrnný export `@omniroute/ui-kit`: súhrnný export načíta do každého importujúceho modulu všetky
+  komponenty (vrátane výberu dátumu). Štýly súpravy sa načítavajú cez `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokeny.** `packages/ui-kit/src/ci-tokens.css` deklaruje tokeny `--ci-*`; `src/app/globals.css`
+  ich prepája so staršími názvami OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), takže existujúce použitia `var(--color-*)` a utility
+  Tailwind naďalej fungujú. Nový kód používa utility Tailwind (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) alebo triedy súpravy — nikdy nie
+  hexadecimálnu hodnotu (`tests/unit/design-kit-bridge.test.ts` toto prepojenie vynucuje). `text-primary`
+  sa prekladá na `--color-primary-ink` cez `--text-color-primary` (lime-800 vo svetlom režime, limetkový
+  akcent v tmavom), takže primárny text zostáva čitateľný, zatiaľ čo `bg-primary`/`border-primary`
+  zachovávajú limetkový povrch. Dátové série grafov používajú
+  `--color-chart-1` … `--color-chart-5`.
+- **Témy.** `<html className="ci-theme">` (`src/app/layout.tsx`) zapája dokument do témy súpravy.
+  Preferencia je `light`, `dark` alebo `system` (`THEME_CONFIG.defaultTheme = "system"` v
+  `src/shared/constants/appConfig.ts`; `system` sa riadi nastavením `prefers-color-scheme`). Funkcia
+  `applyTheme()` v `src/store/themeStore.ts` (zrkadlená vloženým inicializačným skriptom v
+  `src/app/layout.tsx`, ktorý sa spúšťa pred hydratáciou) nastavuje `data-theme="dark"|"light"` a zároveň
+  prepína triedu `.dark` na `<html>`. Tmavá sada tokenov súpravy je naviazaná na `data-theme="dark"`
+  (`packages/ui-kit/src/ci-tokens.css`); vlastné tmavé prepisy OmniRoute (blok `.dark` v `globals.css`) aj
+  staršie utility Tailwind `dark:` sú naviazané na triedu `.dark`. Neexistujú žiadne predvoľby farby
+  akcentu: akcent vždy pochádza zo súpravy a uložená predvoľba zo staršieho zostavenia sa pri načítaní
+  úložiska zahodí.
+- **Komponenty (adaptéry).** `src/shared/components/index.tsx` zachováva API komponentov OmniRoute (rovnaké
+  názvy, predvolené exporty a props) a primitíva za ním sú adaptérmi nad súpravou: formuláre
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), prekrytia a spätná väzba
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  štruktúra (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) a tabuľky
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adaptér importuje komponent
+  súpravy cez podcestu a mapuje naň staršie props — napríklad `Button variant="primary"` je tlačidlo súpravy
+  `default` (`--ci-button-primary-*`: inverzný povrch vo svetlom režime, akcent s farbou textu
+  `--ci-color-accent-foreground` v tmavom režime), `danger` je `destructive` a `warning` je `outline`
+  spolu s rozšírením `.ci-button--warning`. Pravidlá `.ci-button--warning` a `.ci-badge[data-tone]` na
+  konci `globals.css` (`@layer components`) sú rozšírenia OmniRoute nad triedami súpravy.
+  `tests/unit/ui/adapters/*.test.tsx` zaisťujú správanie každého adaptéra.
+- **Aplikačný rámec.** `src/app/(dashboard)/layout.tsx` vykresľuje `DashboardLayout`, ktorý vykresľuje
+  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
+  `SidebarInset` zo súpravy (`packages/ui-kit/src/sidebar.tsx`) s navigačnou logikou OmniRoute v
+  `src/shared/components/Sidebar.tsx`. Odkaz „preskočiť na obsah“ smerujúci na `#main-content` je prvým
+  prvkom, na ktorý možno presunúť zameranie. `src/shared/components/Header.tsx` obsahuje
+  `SidebarTrigger` zo súpravy (jediný prepínač bočného panela v aplikačnom rámci), Keak
+  `ProductSwitcher` a tlačidlo na otvorenie palety príkazov; názov trasy zobrazuje iba vtedy, keď v rámci
+  `#main-content` nie je pripojený žiadny `PageHeader` zo súpravy (`.ci-page-header`), takže stránka s
+  vlastným `PageHeader` má jediný nadpis `h1`. `src/shared/components/CommandPalette.tsx` je `Dialog`
+  zo súpravy.
+- **Ikony.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) prekladá názov (zo slovníka
+  Material Symbols používaného obrazovkami) prostredníctvom `ICON_MAP`
+  (`src/shared/constants/iconMap.ts`) na glyf Lucide. Písmo aj balík Material Symbols boli odstránené:
+  názov, ktorý v mape chýba, vykreslí neutrálny zástupný glyf (`data-icon-missing="true"`) a mimo
+  produkčného prostredia zapíše upozornenie do konzoly. `npm run gen:icon-map` vypíše používané názvy,
+  ktoré v mape chýbajú (`tests/unit/icon-map-coverage.test.ts` zlyhá pri každom názve bez ikony Lucide;
+  `tests/unit/icon-map-object-values.test.ts` pokrýva názvy uložené vo vyhľadávacích objektoch);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` prepisuje literálne elementy
+  `<span className="material-symbols-outlined">` na `<Icon>`.
+- **Značka.** `src/shared/components/OmniRouteLogo.tsx` obaľuje súpravu: predvolený export `OmniRouteLogo`
+  vykresľuje `ProductIcon product="omniroute" variant="glyph"` (vložené SVG, bezpečné pre `basePath`) a
+  `OmniRouteLockup` vykresľuje `ProductLockup product="omniroute"` (prístupný názov „Keak OmniRoute“)
+  alebo v prípade operátorov s vlastnou značkou ich vlastné `name`/`logoSrc`. Ciele prepínača produktov
+  sa nachádzajú v `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`).
+  Samostatné obrazovky — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
+  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` a
+  `src/shared/components/ErrorPageScaffold.tsx` — zobrazujú uzamknutú verziu loga;
+  `tests/unit/brand-pages-static.test.ts` to kontroluje.
 
-Marketingová stránka (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) a produktový dashboard by mali pôsobiť ako **jeden produkt**. Stránka už prevzala svoju paletu z dashboardu — jej súbor `css/tokens.css` dokonca uvádza _„Paleta zodpovedá dashboardu OmniRoute (src/app/globals.css)“_. Z hľadiska farieb sú teda už približne na 80 % zladené. Dashboardu chýba:
+## 2. Pravidlá
 
-1. **Pozadie s mriežkou milimetrového papiera**, ktoré stránka používa na každej podstránke.
-2. Niekoľko **zdieľaných dizajnových tokenov**, ktoré stránka má, ale dashboardu chýbajú (stupnica polomerov, gradient značky, `surface-2`, monospace písmo).
-3. **Konzistentnosť na úrovni komponentov** — viaceré komponenty dashboardu obchádzajú tokeny témy pomocou natvrdo zadaných hodnôt hex/rgba.
+1. Tokeny, nikdy nie literály. Zámerne zachované výnimky: konzolový terminál, ktorý je vždy tmavý, ťahy SVG v ReactFlow cez `STATUS_HEX` (`src/shared/constants/statusColors.ts`) a kategoriálne palety `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) a `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
+2. Nikdy neupravujte `packages/ui-kit/src` ručne: synchronizujte ho pomocou `scripts/dev/sync-ui-kit.sh <commit>`; kontrola pred commitom `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) zlyhá pri každom bajte, ktorý sa líši od pripnutého upstream commitu (ak upstream klon, `UI_KIT_CLONE` alebo `_references/cheaper-inference-ui-kit`, chýba, kontrola sa preskočí s upozornením). Ak v kite niečo chýba, obíďte to v adaptéri alebo na obrazovke a požiadajte upstream o doplnenie.
+3. Predvolené texty kitu sú v angličtine (`label = "Loading"`, `loadingLabel = "Loading table"`…) — vždy, keď komponent kitu vykresľuje text, odovzdajte mu preložené reťazce z `useTranslations(...)`.
+4. Utility Tailwindu majú prednosť pred triedami komponentov kitu (kit deklaruje `@layer theme, base, components, utilities` a jeho pravidlá sa nachádzajú vo vrstve `components`) — utility používajte na rozostupy a rozloženie, nie na prefarbovanie komponentov kitu.
+5. Nadpisy: `.ci-heading` (Inter, bez prestrkávania) pre názvy stránok a sekcií; `.ci-dashboard-display` (Instrument Serif) iba pre veľký, úsporne použitý zobrazovaný text, napríklad stavový kód na chybovej stránke.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kontroluje používanie kitu: žiadny span s ligatúrou Material pod `src/app` alebo `src/shared/components`; v stromovej štruktúre dashboardu (`src/app/(dashboard)` a `src/shared/components`) žiadne surové `<select>`, `<textarea>` ani `<table>` a žiadny ručne vytvorený `role="dialog"` mimo uvedených výnimiek (natívna vetva adaptéra `Select`, `RequestLoggerDetail`); každé surové `<button>` alebo `<input>` v tejto oblasti musí mať komentár obsahujúci `kit-exception:` (s dôvodom), ktorý končí najviac 3 riadky nad ním; odtiene palety a varianty `dark:` sú povolené iba v súboroch uvedených v teste.
+7. Pred PR overte obe témy aj zobrazenie so šírkou 390 px (pomocou snímok obrazovky); `tests/e2e/a11y.spec.ts` spúšťa axe.
 
-Tento dokument obsahuje analýzu a plán.
+## 3. Pridanie obrazovky
 
----
+1. Stránku začnite komponentom kitu `PageHeader` (`@omniroute/ui-kit/page-header`, s `compact` v rámci dashboardu) — názov, opis a `actions`. Hlavička shellu potom nezobrazí vlastný názov.
+2. Ovládacie prvky zostavujte z `@/shared/components` (adaptéry) a tam, kde adaptér neexistuje, používajte komponenty kitu cez podcestu (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. Ikony: `<Icon name="…" />`. Nový názov pridajte do `ICON_MAP` so sémanticky zodpovedajúcim komponentom Lucide; `npm run gen:icon-map` vypíše názvy, ktoré stále chýbajú.
+4. Farby: sémantické utility (`text-success`, `bg-warning-bg`, `border-border`…) a `var(--color-chart-N)` pre dátové série grafov; žiadne hexadecimálne hodnoty ani varianty `dark:`, ktoré iba opakujú farbu.
+5. Text: každý reťazec vrátane popisov odovzdávaných komponentom kitu pochádza z `useTranslations`. Nové kľúče pridajte do `src/i18n/messages/en.json`, `pt-BR.json` a `vi.json` (test zhody vietnamčiny vyžaduje každý anglický kľúč); ostatné lokalizácie doplní synchronizácia i18n.
+6. Pred PR spustite kontroly: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck` (jediná kontrola, ktorá zachytí duplicitný import v `iconMap.ts`), `npm run check:ui-icu` a vlastné testy obrazovky.
 
-## 2. Princípy
+## 4. Pridanie alebo zmena adaptéra
 
-- **Jediný zdroj pravdy = `src/app/globals.css`.** Stránka kopíruje dashboard, nikdy nie naopak. Nové tokeny sa najprv pridávajú do `globals.css`.
-- **Tokeny, nikdy nie literály.** Komponenty používajú sémantické tokeny (`bg-surface`, `text-primary`, `border-border`), nikdy nie priamo zadané hodnoty `#hex`.
-- **Jemné, nie výrazné.** Mriežka je nenápadné pozadie umiestnené za obsahom — nikdy nesmie znižovať kontrast textu ani vizuálne súperiť s používateľským rozhraním.
-- **S podporou tém.** Všetko funguje v tmavej `.dark` (charakteristický vzhľad produktu) aj svetlej téme.
-- **Cielené nasadzovanie.** Najprv nasadiť mriežku a tokeny (nízke riziko, vysoká viditeľnosť), potom vo vlnách upravovať komponenty.
+1. Zachovajte verejné API súboru `src/shared/components/index.tsx`: rovnaké názvy exportov, predvolené exporty a
+   akceptované props. Staršie props mapujte na kit vnútri adaptéra (pozrite si `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Importujte kit cez podcestu (`@omniroute/ui-kit/<component>`).
+3. Riešenia nedostatkov kitu patria do adaptéra (alebo do `globals.css` `@layer components`, ak ide o opravu
+   štýlu), nikdy nie do `packages/ui-kit/src`.
+4. Pridajte alebo aktualizujte `tests/unit/ui/adapters/<name>.test.tsx`. Pri adaptéri s mnohými volajúcimi porovnajte
+   vykreslený markup pred zmenou a po nej — zmeny odsadenia alebo wrapperov sa prejavia na každej obrazovke.
 
----
+## 5. Aktualizácia kitu
 
-## 3. Aktuálny stav — čo už je zladené a čo nie
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` skopíruje upstream `src/` z daného commitu do
+`packages/ui-kit/src` a aplikuje jedinú povolenú transformáciu (odstráni príponu `.js` z
+relatívnych importov). Potom: skontrolujte `git diff packages/ui-kit`, vykonajte vizuálnu kontrolu providerov, nastavení, kombinácií,
+použitia a endpointu v oboch témach, spustite `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a
+otvorte PR s upstream changelogom.
 
-### 3.1 Farby — už zjednotené ✅
+## 6. Register referencií
 
-Každá farba značky a povrchu už **hodnotou** zodpovedá stránke (líšia sa iba názvy — dashboard používa predponu `--color-`). Overené v `src/app/globals.css:30-128`:
-
-| Koncept                         | Token stránky (`tokens.css`)                | Token dashboardu (`globals.css`) | Zhoda            |
-| ------------------------------- | ------------------------------------------- | -------------------------------- | ---------------- |
-| primary                         | `--primary #e54d5e`                         | `--color-primary #e54d5e`        | ✅               |
-| primary-hover                   | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`  | ✅               |
-| accent                          | `--accent #6366f1`                          | `--color-accent #6366f1`         | ✅               |
-| accent-2                        | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`   | ✅ (premenované) |
-| accent-3                        | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`   | ✅ (premenované) |
-| success / warning / error       | `#22c55e / #f59e0b / #ef4444`               | identické                        | ✅               |
-| svetlá semafora                 | `#ff5f56 / #ffbd2e / #27c93f`               | identické                        | ✅               |
-| tmavé pozadie/povrch/orámovanie | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identické                        | ✅               |
-| svetlé pozadie/povrch/text      | `#f9f9fb / #fff / #1a1a2e`                  | identické                        | ✅               |
-
-**Záver:** nie je potrebné vykonať žiadnu migráciu farieb. Vizuálna identita je už zdieľaná; iba ju _dokončujeme_, nebudujeme ju nanovo.
-
-### 3.2 Nedostatky — čo dashboardu chýba
-
-| Nedostatok                     | Web obsahuje                                                                          | Dashboard                                                    | Akcia                  |
-| ------------------------------ | ------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------- |
-| **Mriežkovaná tapeta**         | milimetrový papier `body::before`, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ pridané (Fáza 1)**                                      | **Časť A**             |
-| **Škála polomerov**            | `--radius 14px`, `--radius-sm 9px`                                                    | `--radius 14px` pridané; `-sm` + prepojenie komponentov čaká | **Časť B / Fáza 2**    |
-| **Gradient značky**            | `--grad-brand 135deg primary→accent-3`                                                | **✅ token pridaný (Fáza 1)**; použije sa vo Fáze 2          | **Časť B**             |
-| **Vnorený povrch**             | `--surface-2 #1c2230`                                                                 | **✅ pridané (Fáza 1)**                                      | **Časť B**             |
-| **Neproporcionálne písmo**     | `--font-mono` (zásobník ui-monospace)                                                 | čaká (Fáza 4, spolu s miestami použitia)                     | **Časť B**             |
-| **`text-muted` (tmavý režim)** | `#8b8b9e`                                                                             | `#a1a1aa` (zinc-400)                                         | zosúladiť — **Časť B** |
-
-### 3.3 Mechanizmy motívov (aby sme nič nenarušili)
-
-- **Tailwind v4, prístup CSS-first** (bez `tailwind.config.*`). Tokeny sú definované v `:root`/`.dark` a sprístupnené pomocným triedam prostredníctvom `@theme inline` (`globals.css:130-179`).
-- **Tmavý režim prostredníctvom triedy `.dark`** na `<html>` (`@custom-variant dark` v `globals.css:22`), prepínaný vlastným úložiskom Zustand (`src/store/themeStore.ts`), predvolený motív = `system` (`src/shared/constants/appConfig.ts:11`). Web namiesto toho používa `html[data-theme="light"]` — **mechanizmy sa líšia, ale nikdy sa nestretnú** (samostatné zdroje), takže nevzniká konflikt. Zachováme mechanizmus `.dark` dashboardu.
-- **Prepísanie primárnej farby za behu** už existuje (`themeStore.ts:85-97`, predvoľby v `COLOR_THEMES`) — používatelia môžu zmeniť `--color-primary`. Každý nový token (gradient atď.), ktorý odkazuje na `--color-primary`, tieto prepísania automaticky zdedí. ✅
-- **Vyhradené názvy polomerov v Tailwind v4:** `--radius-sm/md/lg/...` tvoria základ pomocných tried `rounded-*`. Ich predefinovanie spätne zmení všetky existujúce použitia `rounded-*` (napr. `rounded-sm` sa používa v 12 súboroch). Preto sú hodnota malého polomeru a prepojenie komponentov zámerne odložené do Fázy 2, v ktorej sa miesta použitia zmenia spoločne.
-
----
-
-## 4. Časť A — Pozadie s mriežkou ako na milimetrovom papieri (hlavná požiadavka) — IMPLEMENTOVANÉ (Fáza 1)
-
-### 4.1 Čo to je
-
-Presný postup zo stránky (`_mono_repo/omnirouteSite/css/base.css`): **fixný pseudoelement pokrývajúci celú plochu zobrazenia**, ktorý vykresľuje dva 1px čiarové gradienty a nachádza sa na `z-index:-1` za celým obsahom.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Prečo to funguje, aj keď má `body` nepriehľadnú vlastnosť `background-color`:** `::before` s `z-index:-1` sa vykresľuje _nad_ vlastným pozadím prvku, ale _pod_ jeho obsahom v bežnom toku. `--color-bg` je teda základná výplň, mriežka je navrstvená nad ňou a aplikácia sa vykresľuje nad mriežkou.
-
-### 4.2 Existujúci precedens v kódovej základni
-
-`src/app/landing/page.tsx:16-26` **už implementuje rovnakú mriežku pre konkrétnu stránku** — ale s **červenými** čiarami (`#E54D5E`, krytie `0.06`) vo vzdialenosti **50px** a navyše s animovanými guľami. Tento vzor je teda v produkte overený; táto úprava z neho robí **globálne pozadie zohľadňujúce tému**.
-
-### 4.3 Pridané tokeny (v `globals.css`)
-
-```css
-:root {
-  /* svetlá téma — krytie mriežky bolo zvýšené z hodnoty 0.045 použitej na stránke,
-     aby bolo pozadie skutočne viditeľné na hustom ovládacom paneli (karty a rámovanie pokrývajú väčšinu plochy zobrazenia) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* tmavá téma — z rovnakého dôvodu zvýšené z hodnoty 0.035 */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Jediná prekážka — odstránená
-
-Mriežka je globálna už svojou konštrukciou (naraz pokrýva panel, `auth`/`login`, chybové stránky — každú trasu). V rámci panela ju skrýval presne **jeden** prvok:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — vonkajší obal vykresľoval nepriehľadné `bg-bg`. Všetko pod ním je už priehľadné (`<main>`, rolovací kontajner, vnútorný prvok `max-w-7xl`), takže **odstránenie `bg-bg`** umožní, aby bola mriežka prvku body viditeľná cez oblasť obsahu (hodnota `--color-bg` prvku body zostáva základnou výplňou).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Interakcia s rámovaním (bočný panel / hlavička)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) a `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) zostávajú **nepriehľadné** → mriežka sa zobrazuje **iba v oblasti obsahu**, ktorú ohraničuje jednoliate rámovanie. Pokojný predvolený vzhľad, ktorý zodpovedá spôsobu, akým stránka oddeľuje rámovanie od plátna (rozhodnutie D3 = jednoliate).
-
-### 4.6 Prihlasovacie / autentifikačné / chybové stránky
-
-Tie sa vykresľujú priamo pod `<body>` (bez rámovania panela), takže globálna mriežka by sa za nimi mala zobrazovať automaticky. **Fáza 5 — HOTOVO:** samostatné obaly na celú obrazovku boli v skutočnosti nepriehľadné (`min-h-screen … bg-bg`, pričom `bg-bg` je rovnaká jednoliata výplň ako pri `<body>`), čo skrývalo mriežku na každej obrazovke mimo ovládacieho panela — nielen pri prihlásení. Všetky sú teraz priehľadné, takže cez ne presvitá spoločné pozadie: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` a `ErrorPageScaffold` (pokrýva `400`/`401`). Tým sa uzatvára **D4** (rozšírené zo samotného prihlásenia na každú samostatnú obrazovku). Kontrolované testom `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Vstupná stránka
-
-`landing/page.tsx` si zachováva svoje bohatšie animované pozadie (gule + vinetácia) — vlastnú marketingovú úvodnú obrazovku (rozhodnutie D5 = ponechať bez zmien).
-
----
-
-## 5. Časť B — Zjednotenie tokenov
-
-Fáza 1 pridáva inertné identitné tokeny bez kolízií (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Fáza 2 prepája škálu polomerov s Tailwindom a presmerúva komponenty; fáza 4 pridáva `--font-mono` spolu s jeho konzumentmi.
-
-| Token                      | Dôvod                                                              | Fáza                                 |
-| -------------------------- | ------------------------------------------------------------------ | ------------------------------------ |
-| `--radius` / `--radius-sm` | Jedna škála polomerov (14/9) namiesto ad hoc hodnôt 6/8/12         | 1 (hodnota) / 2 (prepojenie + zmena) |
-| `--grad-brand`             | Gradient značky pre primárne CTA (červená→fialová), zhodný s webom | 1 (token) / 2 (Button)               |
-| `--surface-2`              | Vnorené panely / hlavičky tabuliek / odsadené riadky               | 1                                    |
-| `--font-mono`              | Bloky kódu, terminál, ID, koncové body                             | 4                                    |
-| Zjednotenie `--text-muted` | Vybrať jednu hodnotu pre web↔panel (odporúča sa `#a1a1aa`)         | 2                                    |
-
-**D2 (text-muted):** web `#8b8b9e` vs. ovládací panel `#a1a1aa`. Odporúčame ponechať **hodnotu ovládacieho panela `#a1a1aa`** a aktualizovať _web_, aby sa s ňou zhodoval. Kozmetická zmena.
-
----
-
-## 6. Časť C — Štandardizácia komponentov (fázy 2–4)
-
-Vlastné komponenty (bez shadcn/Radix), Tailwind v4, sémantické tokeny sú **z väčšej časti** zavedené (195 súborov importuje zdieľaný barrel). Úlohou je odstrániť **obchádzania**. Domovský adresár: `src/shared/components/`.
-
-| #   | Položka                                              | Súbor(y)                                                                                                                           | Problém → Cieľ                                                                                                                                                      | Fáza |
-| --- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **Zjednotenie polomerov**                            | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                          | zmiešané hodnoty 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                         | 2    |
-| C2  | **Gradient tlačidla + variant `accent`**             | `Button.tsx:5-12`                                                                                                                  | primárny variant je jednofarebný červený→červený; zosúladiť s `--grad-brand`; pridať chýbajúci variant `accent`. ~195 importujúcich modulov — najvyššia viditeľnosť | 2    |
-| C3  | **Tabuľky**                                          | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                                | 100 % inline napevno zadané hodnoty rgba + neexistujúce premenné; migrovať na tokeny, vyradiť odlišné štýly                                                         | 3    |
-| C4  | **Centralizácia stavových farieb**                   | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 pomocných modulov | 6+ kópií rovnakých hexadecimálnych hodnôt → jeden modul založený na `--color-success/warning/error`                                                                 | 3    |
-| C5  | **Orámovanie karty**                                 | `Card.tsx:39`                                                                                                                      | `border-white/5` → farba značky `/8`                                                                                                                                | 2    |
-| C6  | **Zjednotenie zvýraznenia fokusu** ✅ HOTOVO         | `globals.css` `--focus-ring` (akcent) vs. `ring-primary/30` ovládacích prvkov formulára                                            | zjednotené na **akcente (fialová)**, aby zodpovedalo globálnemu zvýrazneniu a odlíšilo sa od červeného zvýraznenia chyby; chyba zostáva červená                     | 4    |
-| C7  | **Pridanie `Checkbox` + `Textarea`**                 | nespracované `<input>`/`<textarea>` s inline `accentColor:#6366f1`                                                                 | primitíva riadené tokenmi                                                                                                                                           | 4    |
-| C8  | **Kontrola napevno zadaných hexadecimálnych hodnôt** | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, bodky modálneho okna, ~14 súborov grafov                                    | literály → tokeny                                                                                                                                                   | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**                   | `src/shared/utils/cn.ts`                                                                                                           | konfliktné triedy sa vrstva na seba; potrebné pre prepísania v C1                                                                                                   | 2    |
-
-**Už zodpovedajú značke (riadené tokenmi, potrebujú iba polomer):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Plán nasadenia
-
-- **Fáza 1 — Mriežka + tokeny identity (TENTO PR).** Mriežka v `globals.css` + tokeny `--surface-2`/`--grad-brand`/`--radius`; tapeta `body::before`; odstránenie blokujúcej triedy `bg-bg`; statický ochranný test. Nízke riziko, vratné jediným commitom.
-- **Fáza 2 — Základné komponenty (C1, C2, C5) — HOTOVÉ v tomto PR.** Sémantické utility polomeru `rounded-card` (14px) / `rounded-control` (9px) pridané prostredníctvom `@theme` (vlastné názvy, takže predvolené `rounded-sm/md/lg/xl` zostávajú nedotknuté — žiadna hromadná zmena v 400 súboroch); Card/Modal → 14px, Button/Input/Select → 9px; primárny Button → `--grad-brand` (červená→fialová) + nový variant `accent`; okraje Card → token `border-border` (0.08). **Odložené:** `cn()`→tailwind-merge (C9) vyžaduje nové závislosti; hromadná úprava ad hoc `rounded-lg` (326 súborov) zostáva bez zmeny, pretože základné komponenty pokrývajú väčšinu povrchu.
-- **Fáza 3 — Stavové farby + tabuľky (C3, C4) — HOTOVÉ v tomto PR.** ✅ **C4** (`src/shared/constants/statusColors.ts` — jediný zdroj `STATUS_HEX`; `flow/edgeStyles.ts` + `TokenHealthBadge` boli presmerované, verne/rovnaký hex). ✅ Token **`--font-mono`**. ✅ **C3 (DataTable)** — každý vložený rgba a nefunkčné záložné hodnoty `var(--bg-table-header)` / `var(--text-secondary)` boli nahradené súpravou tokenov `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), ktorej **tmavé hodnoty sa presne rovnajú starým pevne zadaným rgba** (tmavý motív je bajtovo identický) a ktorej svetlé hodnoty opravujú predtým vždy tmavý svetlý motív. Okraj hlavičky → `--color-border`, sekundárny text → `--color-text-muted`. **Pred zlúčením sa vyžaduje vizuálna kontrola.** (Bez úprav: `logTableStyles.ts` a staršie pravidlá Ant `.ant-table` — samostatné, s nižšou prioritou.)
-- **Fáza 4 — Vyčistenie (C6, C7, C9 hotové; C8 čaká).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge pridané ako závislosti) — `className` volajúceho teraz správne _nahrádza_ konfliktnú triedu základného komponentu namiesto ich vrstvenia. ✅ **C7** nové základné komponenty `Checkbox` + `Textarea` (riadené tokenmi, exportované zo spoločného exportného súboru; aditívne — používanie 32 nespracovaných checkboxov / 41 nespracovaných textových polí môže nasledovať postupne). ✅ **C6** zjednotenie prstenca fokusu — formulárové ovládacie prvky (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) teraz pri fokuse používajú prstenec vo farbe **accent (fialová)**, aby zodpovedal globálnemu `--focus-ring` a prestal kolidovať s červeným prstencom chyby; červený chybový stav zostáva nezmenený. ⏳ **C8 prehľadávanie hex hodnôt NIE JE slepé hľadanie/nahrádzanie** — potvrdené prípady, ktoré sú _zámerné_ a musia zostať: `ConsoleLogViewer.tsx:240` (terminál vždy v tmavom motíve), vyskakovacie okno `TokenHealthBadge`, ťahy SVG v ReactFlow. Migrovať sa majú iba hex hodnoty, ktoré majú skutočne reagovať na motív.
-
-Každá fáza: `npm run lint` + `npm run typecheck:core` + vizuálna kontrola.
-
----
-
-## 8. Otvorené rozhodnutia (odporúčania)
-
-- **D1 — Primárny Button:** ponechať červená→červená alebo prepnúť na **červená→fialová `--grad-brand`**? Odporúčanie: **červená→fialová** (Fáza 2).
-- **D2 — Farba čiar mriežky:** **neutrálna** (štýl lokality) — zvolené — oproti značkovej červenej. Veľkosť **32px** (zmenšené približne o 30 % z pôvodných 46px na základe spätnej väzby vlastníka — bunky s veľkosťou 46px pôsobili v rozložení ovládacieho panela príliš veľké).
-- **D3 — Sýtosť chrómu:** bočný panel/hlavička **plné** — zvolené.
-- **D4 — Mriežka overenia/prihlásenia:** ✅ **HOTOVÉ (Fáza 5)** — nepriehľadné `bg-bg` bolo odstránené zo všetkých samostatných celoobrazovkových obalov (nielen z prihlásenia), takže sa mriežka zobrazuje na všetkých obrazovkách. Pozrite §4.6.
-- **D5 — Vstupná stránka:** ponechať animovanú úvodnú obrazovku bez zmeny. Zvolené.
-- **D6 — Polomer 14/9 v celom produkte:** Odporúčanie: áno (Fáza 2).
-- **D7 — Fáza 1 sa nasadí ako prvá:** Zvolené.
-- **D8 — Šírka rozloženia (Fáza 5):** obal obsahu ovládacieho panela bol obmedzený na `max-w-7xl` (1280px), čo na veľkých monitoroch centrovalo obsah so širokými prázdnymi okrajmi po stranách. ✅ **HOTOVÉ** — zvýšené na plynulé `max-w-[3840px]` (skutočné 4K): obsah teraz sleduje šírku zobrazovanej oblasti približne až do 4K a centruje sa až za touto hranicou (`DashboardLayout.tsx`). Zámerne úzke stránky zostávajú podľa návrhu úzke (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Nepriehľadné dátové tabuľky (Fáza 6):** keďže je teraz oblasť obsahu ovládacieho panela priehľadná (aby cez ňu presvitala tapeta s mriežkou, Fáza 5), pri dátových tabuľkách, ktorých kontajner _nebol_ nepriehľadným povrchom, mriežka presvitala cez ich priehľadné párne riadky / slabo krycie striedavé pozadie. ✅ **HOTOVÉ** — každá tabuľka bez Card teraz vykresľuje `bg-surface` (alebo v prípade základného komponentu `<DataTable>` používa `background: var(--color-surface)` vo svojom rolovacom kontajneri). Opravené: `DataTable` (základný komponent), `ProxyLogger`/`RequestLoggerV2` (ich odtieň `<Card>` s `bg-black/5 dark:bg-black/20` mal prostredníctvom tailwind-merge prednosť pred `bg-surface` komponentu Card → približne 95 % priehľadnosť), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable` a tiež dve „tabuľky“ s CSS gridom v zobrazeniach vyrovnávacej pamäte (`bg-surface/35` → `bg-surface`). Tabuľky, ktoré už boli vnútri komponentu `<Card>`/Modal, boli overené ako nepriehľadné a zámerne ponechané bez zmeny (`bg-surface` by tam bola redundantná operácia bez účinku). Samotná mriežka **nepotrebovala žiadnu zmenu** — `body::before` ovládacieho panela je bajtovo identické s lokalitou (`--grid-size: 32px`); akákoľvek „väčšia mriežka“ viditeľná v spustenej inštancii pochádza zo zastaranej zostavy spred `#4143`, nie z kódu. Chránené testom `tests/unit/design-grid-background.test.ts` (blok Fázy 6).
-
----
-
-## 9. Mimo rozsahu / riziká
-
-- **Bez zmeny palety** — farby už zodpovedajú; pridáme iba chýbajúce tokeny. Nulové riziko prefarbenia produktu.
-- **Bez zmeny mechanizmu tém** — zachovať `.dark` + úložisko Zustand.
-- **Zmena polomerov (2. fáza) má široký dosah** — ovplyvňuje každú kartu/tlačidlo/vstup; pred zlúčením vizuálne skontrolovať komplexné obrazovky (tabuľky, modálne okná).
-- **Tabuľky (C3)** obsahujú najviac štýlov s pevne zadanými hodnotami a predstavujú najväčší priestor na regresie — oddeliť ich do samostatného PR.
-
----
-
-## 10. Register odkazov
-
-| Oblasť                                     | Cesta                                                                                                                |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| Tokeny ovládacieho panela                  | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Úložisko témy                              | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Kontajner panela (mriežka sa odblokuje tu) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chróm                                      | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Vzor pre mriežku                           | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Základné komponenty                        | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Zdroje stavových farieb                    | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Utilita `cn`                               | `src/shared/utils/cn.ts`                                                                                             |
-| Kontrolný test 1. fázy                     | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Referenčný web                             | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — premostenie tokenov, prepísania `.dark`, rozšírenia OmniRoute v `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — pripnutý upstream commit a licenčné oprávnenie; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` a adaptéry vedľa neho; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

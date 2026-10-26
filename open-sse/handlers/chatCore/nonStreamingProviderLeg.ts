@@ -25,6 +25,7 @@ import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { createErrorResult, formatProviderError } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
+import { ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../config/constants.ts";
 import { unwrapClinepassEnvelope } from "../../utils/clinepassEnvelope.ts";
 import { unwrapClineNonStreamingEnvelope } from "./clineResponseEnvelope.ts";
 import {
@@ -511,9 +512,18 @@ export async function runNonStreamingProviderLeg(
       : error instanceof Error
         ? formatProviderError(error, provider, currentModel, failureStatus)
         : "Provider request failed";
+    // The old non-streaming path reduced every TimeoutError to a bare 504.
+    // Preserve only the explicit Antigravity pre-response marker, not arbitrary
+    // upstream 504s: the outer account router needs the original failure type.
+    const preResponseTimeout =
+      provider === "antigravity" &&
+      failureStatus === 504 &&
+      !!error &&
+      typeof error === "object" &&
+      (error as { code?: unknown }).code === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
     const receipt = buildReceipt(input, {
       httpStatus: failureStatus,
-      errorType: null,
+      errorType: preResponseTimeout ? "upstream_timeout" : null,
       usage: null,
       termination: "provider_error",
       latencyMs: Date.now() - startMs,
@@ -522,7 +532,14 @@ export async function runNonStreamingProviderLeg(
       connectionId,
       model: currentModel,
     });
-    const errorResult = legError(failureStatus, failureMessage, error);
+    const errorResult = legError(
+      failureStatus,
+      failureMessage,
+      error,
+      null,
+      preResponseTimeout ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE : undefined,
+      preResponseTimeout ? "upstream_timeout" : undefined
+    );
     return {
       kind: "error",
       result: errorResult as ChatCoreErrorResult,

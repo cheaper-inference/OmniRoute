@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "{count, plural, one {# ബാച്ച്} other {# ബാച്ചുകൾ}} ഉപയോഗിക്കുന്നു",
     "batchFilePreview": "പ്രിവ്യൂ",
     "batchFilePreviewTruncated": "ആദ്യത്തെ {shown} വരികൾ കാണിക്കുന്നു (ആകെ {total} വരികൾ)",
-    "batchFileDownloadFull": "പൂർണ്ണ ഫയൽ ഡൗൺലോഡ് ചെയ്യുക"
+    "batchFileDownloadFull": "പൂർണ്ണ ഫയൽ ഡൗൺലോഡ് ചെയ്യുക",
+    "dialogTitleFallback": "ഡയലോഗ്",
+    "pagination": "പേജിനേഷൻ",
+    "clearFilters": "ഫിൽട്ടറുകൾ മായ്ക്കുക",
+    "tokensPageTitle": "ടോക്കണുകൾ",
+    "tokensPageDescription": "API കീകൾക്കിടയിൽ ടോക്കണുകൾ അയയ്ക്കുക, ക്ഷണക്കോഡുകൾ പങ്കിടുക, കമ്മ്യൂണിറ്റി സെർവറുകൾ ബന്ധിപ്പിക്കുക.",
+    "tokensServerUrlLabel": "സെർവർ URL"
   },
   "disabled": "പ്രവർത്തനരഹിതമാക്കി",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ബജറ്റ് തീർന്ന അഭ്യർത്ഥനകൾ അടിയന്തര സൗജന്യ ഫാൾബാക്ക് പ്രൊവൈഡർ/മോഡലിലേക്ക് റൂട്ട് ചെയ്യുക.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 അല്ലെങ്കിൽ @channelname",
       "chatIdHint": "ചാറ്റിന്റെ/ചാനലിന്റെ തനതായ സംഖ്യാ ഐഡന്റിഫയർ അല്ലെങ്കിൽ പൊതു ഉപയോക്തൃനാമം.",
       "tutorial": "Telegram വെബ്ഹുക്ക് കോൺഫിഗർ ചെയ്യുന്ന വിധം:"
-    }
+    },
+    "copy": "പകർത്തുക",
+    "copied": "പകർത്തി!",
+    "expandDetails": "വിശദാംശങ്ങൾ കാണിക്കുക",
+    "collapseDetails": "വിശദാംശങ്ങൾ മറയ്ക്കുക"
   },
   "compliance": {
     "auditTitle": "ഓഡിറ്റ്",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "കോളുകൾ (24 മണിക്കൂർ)",
     "mcpMetricSuccessRate": "വിജയ നിരക്ക്",
     "mcpMetricAvgDuration": "ശരാശരി ദൈർഘ്യം",
-    "mcpMetricTopTool": "മുൻനിര ടൂൾ"
+    "mcpMetricTopTool": "മുൻനിര ടൂൾ",
+    "dismissError": "പിശക് ഒഴിവാക്കുക"
   },
   "themesPage": {
     "title": "തീമുകൾ",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "വിപുലമായ പേലോഡ് നിയമങ്ങൾ, അഭ്യർത്ഥനാ പരിധികൾ, പ്രോക്സി API ക്രമീകരണങ്ങൾ",
     "mitmProxyDescription": "ട്രാഫിക് പരിശോധനയ്ക്കും ഡീബഗ്ഗിംഗിനുമായി MITM പ്രോക്സി ക്രമീകരണങ്ങൾ കോൺഫിഗർ ചെയ്യുക",
     "oneProxyDescription": "വിപുലമായ പ്രോക്സി ചെയിനിംഗിനായി 1Proxy ക്രമീകരണങ്ങൾ കോൺഫിഗർ ചെയ്യുക",
-    "omniSkillsDescription": "പ്രോംപ്റ്റുകളുടെയും ടൂളുകളുടെയും സ്വയമേവയുള്ള നിർവഹണത്തിനായി സാൻഡ്ബോക്സ് സ്കില്ലുകൾ ഇൻസ്റ്റാൾ ചെയ്ത് നിയന്ത്രിക്കുക"
+    "omniSkillsDescription": "പ്രോംപ്റ്റുകളുടെയും ടൂളുകളുടെയും സ്വയമേവയുള്ള നിർവഹണത്തിനായി സാൻഡ്ബോക്സ് സ്കില്ലുകൾ ഇൻസ്റ്റാൾ ചെയ്ത് നിയന്ത്രിക്കുക",
+    "openMenu": "മെനു തുറക്കുക",
+    "products": "Keak ഉൽപ്പന്നങ്ങൾ"
   },
   "cloudSyncStatus": {
     "synced": "സമന്വയിപ്പിച്ചിരിക്കുന്നു",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "മുൻഗണനയുള്ള കണക്ഷനുകൾ",
     "preferredConnectionsDesc": "ഓരോ കീയ്ക്കുമുള്ള മുൻഗണനാ ക്രമം. മുൻഗണനയുള്ള കണക്ഷൻ ലഭ്യമല്ലെങ്കിൽ, റൂട്ടിംഗ് അടുത്ത യോഗ്യമായ കണക്ഷനിലേക്ക് മാറും.",
     "preferredConnectionsNone": "മുൻഗണനയൊന്നും സജ്ജമാക്കിയിട്ടില്ല — ഡിഫോൾട്ട് റൂട്ടിംഗ് തന്ത്രം ഉപയോഗിക്കുന്നു.",
-    "preferredConnectionsClear": "മായ്ക്കുക"
+    "preferredConnectionsClear": "മായ്ക്കുക",
+    "removeSelection": "{name} നീക്കംചെയ്യുക"
   },
   "auditLog": {
     "title": "ഓഡിറ്റ് ലോഗ്",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Modality Bridge ക്രമീകരണങ്ങളിൽ Image→Text ബ്രിഡ്ജ് കോൺഫിഗർ ചെയ്യുക",
     "sttBridgeCta": "Modality Bridge ക്രമീകരണങ്ങളിൽ Speech→Text ബ്രിഡ്ജ് കോൺഫിഗർ ചെയ്യുക",
     "existingConnection": "നിലവിലുള്ള കണക്ഷൻ",
-    "openrouterSttDescription": "OpenRouter സ്പീച്ച്-ടു-ടെക്സ്റ്റ് മോഡലുകൾ നിങ്ങൾ കോൺഫിഗർ ചെയ്ത OpenRouter കണക്ഷൻ ഉപയോഗിക്കുന്നു. പ്രത്യേക ക്രെഡൻഷ്യൽ ആവശ്യമില്ല."
+    "openrouterSttDescription": "OpenRouter സ്പീച്ച്-ടു-ടെക്സ്റ്റ് മോഡലുകൾ നിങ്ങൾ കോൺഫിഗർ ചെയ്ത OpenRouter കണക്ഷൻ ഉപയോഗിക്കുന്നു. പ്രത്യേക ക്രെഡൻഷ്യൽ ആവശ്യമില്ല.",
+    "modalityTabsAria": "മീഡിയ തരം",
+    "serviceKindsAria": "സേവന തരം"
   },
   "search": {
     "searchQuery": "തിരയൽ ക്വറി",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "അജ്ഞാതം",
     "cliproxyapiUpdate": "അപ്ഡേറ്റ് ചെയ്യുക",
     "cliproxyapiUpdateAvailable": "അപ്ഡേറ്റ് ലഭ്യമാണ്: v{current} → v{latest}",
-    "cliproxyapiVersion": "പതിപ്പ്"
+    "cliproxyapiVersion": "പതിപ്പ്",
+    "removeMapping": "മാപ്പിംഗ് നീക്കംചെയ്യുക"
   },
   "modelCatalog": {
     "title": "മോഡലുകളും കോംബോകളും",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "ഈ ടെംപ്ലേറ്റുമായി പൊരുത്തപ്പെടുന്ന, നിലവിൽ കണക്റ്റ് ചെയ്തിരിക്കുന്ന പ്രൊവൈഡർമാരുടെയും മോഡലുകളുടെയും ഒരു സ്നാപ്പ്ഷോട്ട് എഡിറ്റ് ചെയ്യാവുന്ന കോംബോയാക്കി മാറ്റും.",
     "duplicateAutoComboFailedPrefix": "ഓട്ടോ-കോംബോ പകർത്തുന്നതിൽ പരാജയപ്പെട്ടു:",
     "duplicateAutoComboUnknownError": "അജ്ഞാത പിശക്",
-    "duplicateAutoComboTitle": "{name}-ൽ നിന്ന് ഒരു സ്റ്റാറ്റിക് കോംബോ സൃഷ്ടിക്കുക"
+    "duplicateAutoComboTitle": "{name}-ൽ നിന്ന് ഒരു സ്റ്റാറ്റിക് കോംബോ സൃഷ്ടിക്കുക",
+    "weightPercent": "വെയ്റ്റ് (%)",
+    "clearSearch": "തിരയൽ മായ്ക്കുക",
+    "responseValidationRemoveCheck": "പരിശോധന നീക്കംചെയ്യുക",
+    "responseValidationPath": "JSON പാത",
+    "responseValidationCondition": "വ്യവസ്ഥ",
+    "responseValidationValue": "പ്രതീക്ഷിക്കുന്ന മൂല്യം"
   },
   "costs": {
     "title": "ചെലവുകൾ",
@@ -5293,7 +5316,8 @@
         "skipped": "ഇതിനകം കോൺഫിഗർ ചെയ്തിട്ടുണ്ട്",
         "failed": "പരാജയപ്പെട്ടു"
       }
-    }
+    },
+    "stepProgress": "സജ്ജീകരണ പുരോഗതി"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ഈ ദാതാവിനെ സ്വതവേ auto-യിൽ നിന്ന് ഒഴിവാക്കിയിരിക്കുന്നു",
@@ -8956,7 +8980,8 @@
       "statsTitle": "പുനരാരംഭിച്ചതിന് ശേഷമുള്ള കണ്ടെത്തലുകൾ",
       "statsEmpty": "ഇതുവരെ കണ്ടെത്തലുകളൊന്നുമില്ല.",
       "statsRequest": "അഭ്യർത്ഥനകൾ"
-    }
+    },
+    "modelOverrideKey": "ഓവർറൈഡ് കീ"
   },
   "contextRtk": {
     "title": "RTK എഞ്ചിൻ",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "വിജയിച്ചു",
     "tomlTestFailed": "പരാജയപ്പെട്ടു",
     "tomlImportError": "RTK TOML ഫയൽ പ്രോസസ്സ് ചെയ്യാനായില്ല.",
-    "tomlFileReadError": "തിരഞ്ഞെടുത്ത TOML ഫയൽ വായിക്കാനായില്ല."
+    "tomlFileReadError": "തിരഞ്ഞെടുത്ത TOML ഫയൽ വായിക്കാനായില്ല.",
+    "viewMode": "കാഴ്ചാ മോഡ്"
   },
   "compressionEngineConfig": {
     "loading": "ലോഡ് ചെയ്യുന്നു…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "ഭാഷാ പാക്കുകൾ: {packs}",
     "dragToReorder": "ഘട്ടത്തിന്റെ ക്രമം മാറ്റാൻ വലിച്ചിടുക",
     "engine": "എഞ്ചിൻ",
-    "intensity": "തീവ്രത"
+    "intensity": "തീവ്രത",
+    "compressionOverride": "കംപ്രഷൻ ഓവർറൈഡ്"
   },
   "compressionStudio": {
     "noRun": "കംപ്രഷൻ റൺ ലഭ്യമല്ല.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "വിജയി: {winner}",
     "encoder": "എൻകോഡർ",
     "bytes": "ബൈറ്റുകൾ",
-    "tokensCl100k": "ടോക്കണുകൾ (cl100k)"
+    "tokensCl100k": "ടോക്കണുകൾ (cl100k)",
+    "studioViews": "സ്റ്റുഡിയോ കാഴ്ചകൾ"
   },
   "omniglyph": {
     "preview": "പ്രിവ്യൂ",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "ഇതിലും ചെറുതായ സന്ദേശങ്ങൾ കംപ്രസ് ചെയ്യില്ല. കുറഞ്ഞ മൂല്യം = കൂടുതൽ കംപ്രഷൻ.",
     "tooltipMinSavings": "കുറഞ്ഞത് ഇത്രയും ടോക്കണുകൾ ലാഭിക്കുമെങ്കിൽ മാത്രം കംപ്രസ് ചെയ്യുക.",
     "ultraSettings": "അൾട്രാ ക്രമീകരണങ്ങൾ",
-    "ultraSettingsDesc": "SLM അധിഷ്ഠിത സെമാന്റിക് കംപ്രഷൻ"
+    "ultraSettingsDesc": "SLM അധിഷ്ഠിത സെമാന്റിക് കംപ്രഷൻ",
+    "defaultLanguage": "സ്വതവേയുള്ള ഭാഷ",
+    "viewMode": "കാഴ്ചാ മോഡ്"
   },
   "translator": {
     "title": "പരിഭാഷകൻ",
@@ -11087,7 +11117,8 @@
       "message": "സന്ദേശം",
       "error": "പിശക്",
       "completion": "പൂർത്തീകരണം"
-    }
+    },
+    "statusFilter": "നില"
   },
   "templateNames": {
     "simple-chat": "ലളിതമായ ചാറ്റ്",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes} മിനിറ്റ് മുമ്പ്",
     "hoursAgo": "{hours} മണിക്കൂർ മുമ്പ്",
     "daysAgo": "{days} ദിവസം മുമ്പ്",
-    "entries": "എൻട്രികൾ"
+    "entries": "എൻട്രികൾ",
+    "viewSwitcherAria": "കാഷ് കാഴ്ച"
   },
   "proxyConfigModal": {
     "levelGlobal": "ആഗോളം",
@@ -11613,7 +11645,8 @@
     "notMeasured": "അളന്നിട്ടില്ല",
     "upstream4xx": "{count} ഉപ്‌സ്‌ട്രീം ക്ലയന്റ് പിശകുകൾ",
     "upstream5xx": "{count} ഉപ്‌സ്‌ട്രീം സെർവർ പിശകുകൾ",
-    "uniformEgressLine": "{provider}-ൽ {exits} എക്സിറ്റുകളിൽ {affected} എണ്ണം ഒരുമിച്ച് പരാജയപ്പെടുന്നു (കഴിഞ്ഞ {hours} മണിക്കൂറിൽ) — ഇത് എക്സിറ്റ് പ്രശ്നമല്ല"
+    "uniformEgressLine": "{provider}-ൽ {exits} എക്സിറ്റുകളിൽ {affected} എണ്ണം ഒരുമിച്ച് പരാജയപ്പെടുന്നു (കഴിഞ്ഞ {hours} മണിക്കൂറിൽ) — ഇത് എക്സിറ്റ് പ്രശ്നമല്ല",
+    "moreActions": "കൂടുതൽ പ്രവർത്തനങ്ങൾ"
   },
   "playground": {
     "title": "മോഡൽ പ്ലേഗ്രൗണ്ട്",
@@ -11819,7 +11852,8 @@
       "nextButton": "അടുത്തത്",
       "runButton": "പ്രവർത്തിപ്പിക്കുക",
       "promptPlaceholder": "നിങ്ങളുടെ സന്ദേശം നൽകുക… (അയയ്ക്കാൻ Enter, പുതിയ വരിക്ക് Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground മോഡുകൾ"
   },
   "miniPlayground": {
     "endpoint": "എൻഡ്പോയിന്റ്",
@@ -11890,7 +11924,8 @@
     "assistant": "അസിസ്റ്റന്റ്",
     "errorLabel": "പിശക്",
     "requestFailed": "അഭ്യർത്ഥന പരാജയപ്പെട്ടു",
-    "stop": "നിർത്തുക"
+    "stop": "നിർത്തുക",
+    "messageInputAria": "സന്ദേശം"
   },
   "requestLogger": {
     "recording": "റെക്കോർഡ് ചെയ്യുന്നു",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} അക്കൗണ്ട് റൊട്ടേഷനുകൾ",
       "resilienceRetried": "ശൂന്യമായ ടേൺ വീണ്ടും ശ്രമിച്ചു",
       "resilienceContinued": "സ്ട്രീമിന്റെ മധ്യത്തിൽ നിന്ന് തുടർന്നു",
-      "resilienceRecovered": "റെസിലിയൻസ് നടപടിയിലൂടെ വീണ്ടെടുത്തു"
-    }
+      "resilienceRecovered": "റെസിലിയൻസ് നടപടിയിലൂടെ വീണ്ടെടുത്തു",
+      "conversationContext": "സംഭാഷണ സന്ദർഭം",
+      "goToBottom": "ഏറ്റവും താഴേക്ക് പോകുക",
+      "liveRefreshOn": "തത്സമയ പുതുക്കൽ: ഓൺ",
+      "liveRefreshOff": "തത്സമയ പുതുക്കൽ: ഓഫ്",
+      "liveRefresh": "തത്സമയ പുതുക്കൽ",
+      "continuesFromParent": "പാരന്റിൽ നിന്ന് തുടരുന്നു",
+      "continuesFrom": "{id}-ൽ നിന്ന് തുടരുന്നു",
+      "viewConversation": "സംഭാഷണം കാണുക",
+      "openConversation": "{id} സംഭാഷണം തുറക്കുക"
+    },
+    "tableLabel": "അഭ്യർത്ഥന ലോഗുകൾ"
   },
   "proxyLogger": {
     "filterAll": "എല്ലാം",
@@ -12123,7 +12168,9 @@
     "colServedBy": "സർവുഡ് ബൈ",
     "filterTraffic": "ട്രാഫിക്",
     "filterTests": "ടെസ്റ്റുകൾ",
-    "filterSource": "ഉറവിടം"
+    "filterSource": "ഉറവിടം",
+    "tableLabel": "പ്രോക്സി ലോഗുകൾ",
+    "sortLogs": "ലോഗുകൾ ക്രമീകരിക്കുക"
   },
   "endpointOptions": {
     "speech": "സംസാരം",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "തീർന്നു",
     "statusAlerting": "മുന്നറിയിപ്പ് നൽകുന്നു",
     "statusError": "പിശക്",
-    "moreSuffix": "+{count} എണ്ണം കൂടി"
+    "moreSuffix": "+{count} എണ്ണം കൂടി",
+    "feedFilterLabel": "ഇവന്റുകൾ ഫിൽട്ടർ ചെയ്യുക"
   },
   "quotaShare": {
     "weightPercent": "വെയ്റ്റ് %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "ഗ്രൂപ്പിലില്ലാത്തവ",
     "ungroupedHint": "ഈ പൂളുകൾ അറിയപ്പെടുന്ന ഒരു ഗ്രൂപ്പിലേക്കും നിയോഗിച്ചിട്ടില്ല. ഒരു യഥാർത്ഥ ഗ്രൂപ്പിലേക്ക് മാറ്റാൻ പൂൾ എഡിറ്റ് ചെയ്യുക.",
     "removeFailed": "ഈ പൂൾ നീക്കം ചെയ്യാനായില്ല.",
-    "dismiss": "അടയ്ക്കുക"
+    "dismiss": "അടയ്ക്കുക",
+    "allocationsHeading": "വിഹിതങ്ങൾ",
+    "wizardRemoveDimension": "ഡൈമെൻഷൻ നീക്കംചെയ്യുക",
+    "wizardRemoveKey": "കീ നീക്കംചെയ്യുക"
   },
   "plugins": {
     "title": "പ്ലഗിനുകൾ",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "ക്രമീകരണങ്ങൾ അപ്ഡേറ്റ് ചെയ്യാനായില്ല",
       "serviceRevealApiKey": "{actor} {target}-നുള്ള API കീ വെളിപ്പെടുത്തി",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "പിശക് നിരസിക്കുക"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "ഇപ്പോൾ പോകുക",
       "message": "MITM Proxy ഇപ്പോൾ AgentBridge-ന് കീഴിലാണ്.",
       "title": "ഈ പേജ് മറ്റൊരിടത്തേക്ക് മാറ്റിയിരിക്കുന്നു"
-    }
+    },
+    "dnsOn": "DNS ഓൺ",
+    "dnsOff": "DNS ഓഫ്",
+    "showServerSettings": "സെർവർ ക്രമീകരണങ്ങൾ കാണിക്കുക",
+    "hideServerSettings": "സെർവർ ക്രമീകരണങ്ങൾ മറയ്ക്കുക",
+    "upstreamCaTesting": "പരിശോധിക്കുന്നു…",
+    "removeMapping": "മാപ്പിംഗ് നീക്കംചെയ്യുക",
+    "mappingSourcePlaceholder": "ഉദാ., gemini-3.6-flash-medium, അല്ലെങ്കിൽ മാപ്പ് ചെയ്യാത്തവയ്ക്കെല്ലാം *",
+    "mappingWildcardHint": "വ്യക്തമായ മാപ്പിംഗ് ഇല്ലാത്ത എല്ലാ മോഡലുകളെയും OmniRoute വഴി തിരഞ്ഞെടുത്ത ലക്ഷ്യത്തിലേക്ക് റൂട്ട് ചെയ്യാൻ സോഴ്സായി * ഉപയോഗിക്കുക. കൃത്യമായ സോഴ്സ് പൊരുത്തങ്ങൾക്ക് എപ്പോഴും *-നേക്കാൾ മുൻഗണന ലഭിക്കും.",
+    "wizardDetectingModels": "ഇന്റർസെപ്റ്റ് ചെയ്ത ട്രാഫിക്കിൽ നിന്ന് മോഡലുകൾ കണ്ടെത്തുന്നു...",
+    "wizardDetectedModels": "ഇന്റർസെപ്റ്റ് ചെയ്ത ട്രാഫിക്കിൽ {count, plural, one {# മോഡൽ} other {# മോഡലുകൾ}} കണ്ടെത്തി. ചേർക്കേണ്ടവ തിരഞ്ഞെടുക്കുക:",
+    "wizardSelectedModels": "{count, plural, one {# മോഡൽ} other {# മോഡലുകൾ}} തിരഞ്ഞെടുത്തു. അടുത്ത സ്ക്രീനിൽ അവയെ OmniRoute മോഡലുകളിലേക്ക് മാപ്പ് ചെയ്യാം.",
+    "wizardAddModels": "{count, plural, one {# മോഡൽ} other {# മോഡലുകൾ}} ചേർക്കുക",
+    "wizardNoModelsDetected": "ഇതുവരെ മോഡലുകളൊന്നും കണ്ടെത്തിയിട്ടില്ല. ഒരു അഭ്യർത്ഥന നടത്താൻ {agent} ഉപയോഗിക്കുക, തുടർന്ന് ട്രാഫിക്കിൽ നിന്ന് മോഡലുകൾ സ്വയമേവ കണ്ടെത്താൻ ഈ വിസാർഡ് വീണ്ടും പ്രവർത്തിപ്പിക്കുക.",
+    "wizardNoModelsHint": "അല്ലെങ്കിൽ ഈ വിസാർഡ് അടച്ച് ഏജന്റ് കാർഡിൽ മാപ്പിംഗുകൾ നേരിട്ട് ചേർക്കുക."
   },
   "providerStats": {
     "unknownError": "അജ്ഞാത പിശക്",
@@ -12696,7 +12762,11 @@
     "avgTtft": "ശരാശരി TTFT",
     "avgTotal": "ശരാശരി ആകെ സമയം",
     "requestTelemetry": "അഭ്യർത്ഥന ടെലിമെട്രി",
-    "requestTelemetryDescription": "7-ഘട്ട പൈപ്പ്ലൈൻ വിഭജനം (കഴിഞ്ഞ 5 മിനിറ്റ്)"
+    "requestTelemetryDescription": "7-ഘട്ട പൈപ്പ്ലൈൻ വിഭജനം (കഴിഞ്ഞ 5 മിനിറ്റ്)",
+    "title": "പ്രൊവൈഡർ സ്ഥിതിവിവരക്കണക്കുകൾ",
+    "description": "ഓരോ പ്രൊവൈഡറിലെയും ഓരോ മോഡലിലെയും ട്രാഫിക്, ലേറ്റൻസി, വിജയനിരക്കുകൾ",
+    "combo": "സംയോജനം",
+    "toggleModels": "{provider}-നുള്ള മോഡലുകൾ കാണിക്കുക"
   },
   "relay": {
     "title": "സർവർലെസ് റിലേ പ്രോക്സികൾ",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "അഭ്യർത്ഥന ബോഡി ഇല്ല.",
     "noResponseBody": "പ്രതികരണ ബോഡി ഇല്ല.",
     "formatted": "ഫോർമാറ്റ് ചെയ്തത്",
-    "raw": "അസംസ്കൃതം"
+    "raw": "അസംസ്കൃതം",
+    "requestCount": "{count, plural, one {# അഭ്യർത്ഥന} other {# അഭ്യർത്ഥനകൾ}}",
+    "expandList": "പട്ടിക വികസിപ്പിക്കുക",
+    "collapseList": "പട്ടിക ചുരുക്കുക",
+    "snippetLanguage": "സ്നിപ്പറ്റ് ഭാഷ",
+    "headersTable": "ഹെഡറുകൾ",
+    "showSecrets": "രഹസ്യങ്ങൾ കാണിക്കുക",
+    "maskSecrets": "രഹസ്യങ്ങൾ മറയ്ക്കുക",
+    "llmNotAvailable": "ഈ അഭ്യർത്ഥനയ്ക്കുള്ള LLM മെറ്റാഡാറ്റ ലഭ്യമല്ല.",
+    "llmStreamYes": "അതെ (SSE)",
+    "llmStreamNo": "ഇല്ല",
+    "llmTotalTokens": "ആകെ: {count} ടോക്കണുകൾ"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "കഴിഞ്ഞ 24 മണിക്കൂറിൽ ഈ ദാതാവ് യഥാർത്ഥത്തിൽ മറുപടി നൽകിയ കോളുകളുടെ അനുപാതം. ഒരു ഡാഷ് കാണിക്കുന്നത് നിരക്ക് നിർണ്ണയിക്കാൻ ആവശ്യമായത്ര ട്രാഫിക് കൈകാര്യം ചെയ്തിട്ടില്ലെന്നാണ്.",
     "reliabilitySample": "കഴിഞ്ഞ {hours} മണിക്കൂറിൽ {requests} കോളുകളിൽ {successes} എണ്ണം വിജയിച്ചു",
     "reliabilityTooFew": "കഴിഞ്ഞ {hours} മണിക്കൂറിൽ {requests} കോളുകൾ മാത്രം — നിരക്ക് നിർണ്ണയിക്കാൻ പര്യാപ്തമല്ല",
-    "reliabilityNoTraffic": "കഴിഞ്ഞ 24 മണിക്കൂറിൽ കോളുകളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല"
+    "reliabilityNoTraffic": "കഴിഞ്ഞ 24 മണിക്കൂറിൽ കോളുകളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല",
+    "categoryFilter": "ടാസ്ക് വിഭാഗം"
   },
   "discovery": {
     "title": "ദാതാക്കളെ കണ്ടെത്തൽ",
@@ -13341,7 +13423,11 @@
     "method": "രീതി",
     "auth": "പ്രാമാണീകരണം",
     "feasibility": "പ്രായോഗികത",
-    "models": "മോഡലുകൾ"
+    "models": "മോഡലുകൾ",
+    "provider": "സേവനദാതാവ്",
+    "status": "നില",
+    "endpoint": "എൻഡ്പോയിന്റ്",
+    "actions": "പ്രവർത്തനങ്ങൾ"
   },
   "noAuthProvider": {
     "title": "പ്രാമാണീകരണം ആവശ്യമില്ല",
@@ -13390,7 +13476,8 @@
     "ownProxy": "സ്വന്തം പ്രോക്സി",
     "freeTierPause": "മോഡൽ {model} തൽക്കാലം നിർത്തി (429), {time}-യിൽ തിരിച്ചെത്തും",
     "freeTierPauseProvider": "തടഞ്ഞു (429), {time}-ൽ തിരിച்சെത്തും",
-    "freeTierPauseNote": "ഈ ഇൻസ്റ്റൻസിൽ പ്രോസസ്സ് ഇൻ-പ്രോസസ്സ് പോസ്"
+    "freeTierPauseNote": "ഈ ഇൻസ്റ്റൻസിൽ പ്രോസസ്സ് ഇൻ-പ്രോസസ്സ് പോസ്",
+    "proxyType": "പ്രോക്സി തരം"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "ഒരു രഹസ്യ നേട്ടം കാത്തിരിക്കുന്നു...",
         "criteria": "ഈ ബാഡ്ജ് വെളിപ്പെടുത്താൻ രഹസ്യ നേട്ടം പൂർത്തിയാക്കുക."
       }
-    }
+    },
+    "leaderboardTitle": "ലീഡർബോർഡ്",
+    "leaderboardDescription": "നിങ്ങളുടെ API കീകളിലുടനീളമുള്ള റാങ്കിംഗുകളും നേട്ടങ്ങളും",
+    "badgeLocked": "ലോക്ക് ചെയ്തത്"
   },
   "featureFlags": {
     "title": "ഫീച്ചർ ഫ്ലാഗുകൾ",
@@ -13858,7 +13948,8 @@
     "unknown": "അജ്ഞാതം",
     "unknownProvider": "അജ്ഞാത പ്രൊവൈഡർ",
     "unknownModel": "അജ്ഞാത മോഡൽ",
-    "resolvedTargetMetrics": "{requests} അഭ്യർത്ഥനകൾ · {success} വിജയം · {latency} · ക്വാട്ട {quota}"
+    "resolvedTargetMetrics": "{requests} അഭ്യർത്ഥനകൾ · {success} വിജയം · {latency} · ക്വാട്ട {quota}",
+    "timeRange": "സമയപരിധി"
   },
   "usageLimits": {
     "usdUsageQuota": "USD ഉപയോഗ ക്വാട്ട",
@@ -14005,7 +14096,11 @@
     "learnMore": "കൂടുതലറിയുക",
     "changelogLoadFailed": "മാറ്റങ്ങളുടെ രേഖ ലോഡ് ചെയ്യാനായില്ല. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
     "retry": "വീണ്ടും ശ്രമിക്കുക",
-    "viewFullHistory": "പൂർണ്ണ ചരിത്രം GitHub-ൽ കാണുക"
+    "viewFullHistory": "പൂർണ്ണ ചരിത്രം GitHub-ൽ കാണുക",
+    "title": "വാർത്തകളും മാറ്റങ്ങളുടെ രേഖയും",
+    "description": "OmniRoute ടീമിൽ നിന്നുള്ള അറിയിപ്പുകളും ഏറ്റവും പുതിയ റിലീസ് കുറിപ്പുകളും",
+    "viewLabel": "കാണുക",
+    "loadingNews": "അറിയിപ്പുകൾ ലോഡ് ചെയ്യുന്നു..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കർ നില",
       "lastUpdate": "അവസാന അപ്ഡേറ്റ്: {timestamp}",
       "uptimeMinutes": "{minutes}മി",
-      "uptimeHoursMinutes": "{hours}മ {minutes}മി"
+      "uptimeHoursMinutes": "{hours}മ {minutes}മി",
+      "breakerClosed": "അടഞ്ഞത്",
+      "breakerNotClosed": "തുറന്നത് അല്ലെങ്കിൽ പകുതി തുറന്നത്"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "അറ്റകുറ്റപ്പണി വിശദാംശങ്ങൾ",
         "secondaryAction": "സിസ്റ്റം നില"
       }
+    },
+    "miniapp": {
+      "askAnything": "എന്തും ചോദിക്കൂ…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ദൃശ്യം / ആകെ {total}",
+    "modeLabel": "ദൃശ്യ മോഡ്",
+    "jumpToNow": "നിലവിലെ സമയത്തിലേക്ക് പോകുക, NOW രേഖ {position}% സ്ഥാനത്തേക്ക് പുനഃക്രമീകരിക്കും",
+    "laneReuse": "ലെയിൻ പുനരുപയോഗം",
+    "laneReuseLabel": "ലെയിൻ പുനരുപയോഗ സമയപരിധി (മിനിറ്റ്)",
+    "laneReuseHint": "ഒരേ സംഭാഷണ ഐഡി പങ്കിടുന്ന അഭ്യർത്ഥനകൾക്കിടയിലെ ഇടവേള ഇത്രയും മിനിറ്റിൽ താഴെയായിരിക്കുന്നിടത്തോളം അവ ഒരേ ടൈംലൈൻ വരിയിൽ തുടരും.",
+    "laneReuseUnit": "മിനിറ്റ്",
+    "autoRefresh": "സ്വയമേവ പുതുക്കൽ",
+    "autoRefreshLabel": "സ്വയമേവ പുതുക്കുന്നതിനുള്ള ഇടവേള (സെക്കൻഡ്)",
+    "autoRefreshHint": "സെർവറിൽ നിന്ന് അഭ്യർത്ഥനകളുടെ പട്ടിക ടൈംലൈൻ എത്ര ഇടവേളയിൽ വീണ്ടും ലഭ്യമാക്കണം.",
+    "autoRefreshUnit": "സെ.",
+    "zoomOut": "സൂം ഔട്ട്",
+    "zoomIn": "സൂം ഇൻ"
   },
   "metadata": {
     "compressionTitle": "കംപ്രഷൻ",

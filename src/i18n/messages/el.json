@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Χρησιμοποιείται από {count, plural, one {# παρτίδα} other {# παρτίδες}}",
     "batchFilePreview": "Προεπισκόπηση",
     "batchFilePreviewTruncated": "Εμφάνιση των πρώτων {shown} γραμμών (σύνολο γραμμών: {total})",
-    "batchFileDownloadFull": "Λήψη Πλήρους Αρχείου"
+    "batchFileDownloadFull": "Λήψη Πλήρους Αρχείου",
+    "dialogTitleFallback": "Παράθυρο διαλόγου",
+    "pagination": "Σελιδοποίηση",
+    "clearFilters": "Εκκαθάριση φίλτρων",
+    "tokensPageTitle": "Token",
+    "tokensPageDescription": "Στείλτε token μεταξύ κλειδιών API, κοινοποιήστε κωδικούς πρόσκλησης και συνδέστε διακομιστές κοινότητας.",
+    "tokensServerUrlLabel": "URL διακομιστή"
   },
   "disabled": "Απενεργοποιημένο",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Δρομολόγηση αιτημάτων των οποίων ο προϋπολογισμός έχει εξαντληθεί στον δωρεάν εφεδρικό πάροχο/μοντέλο έκτακτης ανάγκης.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 ή @channelname",
       "chatIdHint": "Το μοναδικό αριθμητικό αναγνωριστικό ή το δημόσιο όνομα χρήστη της συνομιλίας/του καναλιού.",
       "tutorial": "Πώς να ρυθμίσετε το webhook Telegram:"
-    }
+    },
+    "copy": "Αντιγραφή",
+    "copied": "Αντιγράφηκε!",
+    "expandDetails": "Εμφάνιση λεπτομερειών",
+    "collapseDetails": "Απόκρυψη λεπτομερειών"
   },
   "compliance": {
     "auditTitle": "Έλεγχος",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Κλήσεις (24ω)",
     "mcpMetricSuccessRate": "Ποσοστό επιτυχίας",
     "mcpMetricAvgDuration": "Μέση διάρκεια",
-    "mcpMetricTopTool": "Κορυφαίο εργαλείο"
+    "mcpMetricTopTool": "Κορυφαίο εργαλείο",
+    "dismissError": "Κλείσιμο σφάλματος"
   },
   "themesPage": {
     "title": "Θέματα",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Σύνθετοι κανόνες ωφέλιμου φορτίου, όρια αιτημάτων και ρυθμίσεις API διακομιστή μεσολάβησης",
     "mitmProxyDescription": "Διαμόρφωση ρυθμίσεων διακομιστή μεσολάβησης MITM για επιθεώρηση κυκλοφορίας και αποσφαλμάτωση",
     "oneProxyDescription": "Διαμόρφωση ρυθμίσεων 1Proxy για προηγμένη αλυσίδα διακομιστών μεσολάβησης",
-    "omniSkillsDescription": "Εγκατάσταση και διαχείριση δεξιοτήτων sandbox για αυτοματοποιημένη εκτέλεση προτροπών και εργαλείων"
+    "omniSkillsDescription": "Εγκατάσταση και διαχείριση δεξιοτήτων sandbox για αυτοματοποιημένη εκτέλεση προτροπών και εργαλείων",
+    "openMenu": "Άνοιγμα μενού",
+    "products": "Προϊόντα Keak"
   },
   "cloudSyncStatus": {
     "synced": "Συγχρονίστηκε",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "Προτιμώμενες συνδέσεις",
     "preferredConnectionsDesc": "Σειρά προτεραιότητας ανά κλειδί. Αν μια προτιμώμενη σύνδεση δεν είναι διαθέσιμη, η δρομολόγηση μεταβαίνει στην επόμενη επιλέξιμη.",
     "preferredConnectionsNone": "Δεν έχει οριστεί προτίμηση — χρησιμοποιείται η προεπιλεγμένη στρατηγική δρομολόγησης.",
-    "preferredConnectionsClear": "Εκκαθάριση"
+    "preferredConnectionsClear": "Εκκαθάριση",
+    "removeSelection": "Κατάργηση του {name}"
   },
   "auditLog": {
     "title": "Αρχείο καταγραφής ελέγχου",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Ρυθμίστε τη γέφυρα Εικόνα→Κείμενο στις ρυθμίσεις του Modality Bridge",
     "sttBridgeCta": "Ρυθμίστε τη γέφυρα Ομιλία→Κείμενο στις ρυθμίσεις του Modality Bridge",
     "existingConnection": "Υπάρχουσα σύνδεση",
-    "openrouterSttDescription": "Τα μοντέλα ομιλίας-σε-κείμενο του OpenRouter χρησιμοποιούν τη σύνδεση OpenRouter που έχετε ρυθμίσει. Δεν απαιτείται ξεχωριστό διαπιστευτήριο."
+    "openrouterSttDescription": "Τα μοντέλα ομιλίας-σε-κείμενο του OpenRouter χρησιμοποιούν τη σύνδεση OpenRouter που έχετε ρυθμίσει. Δεν απαιτείται ξεχωριστό διαπιστευτήριο.",
+    "modalityTabsAria": "Τύπος πολυμέσων",
+    "serviceKindsAria": "Τύπος υπηρεσίας"
   },
   "search": {
     "searchQuery": "Ερώτημα Αναζήτησης",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "Άγνωστο",
     "cliproxyapiUpdate": "Ενημέρωση",
     "cliproxyapiUpdateAvailable": "Διαθέσιμη ενημέρωση: v{current} → v{latest}",
-    "cliproxyapiVersion": "Έκδοση"
+    "cliproxyapiVersion": "Έκδοση",
+    "removeMapping": "Κατάργηση αντιστοίχισης"
   },
   "modelCatalog": {
     "title": "Μοντέλα & Συνδυασμοί",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Αυτό θα αποτυπώσει τους παρόχους/τα μοντέλα που είναι συνδεδεμένα αυτή τη στιγμή και ταιριάζουν σε αυτό το πρότυπο, δημιουργώντας έναν επεξεργάσιμο συνδυασμό.",
     "duplicateAutoComboFailedPrefix": "Αποτυχία αντιγραφής αυτόματου συνδυασμού:",
     "duplicateAutoComboUnknownError": "Άγνωστο σφάλμα",
-    "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}"
+    "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}",
+    "weightPercent": "Βαρύτητα (%)",
+    "clearSearch": "Εκκαθάριση αναζήτησης",
+    "responseValidationRemoveCheck": "Κατάργηση ελέγχου",
+    "responseValidationPath": "Διαδρομή JSON",
+    "responseValidationCondition": "Συνθήκη",
+    "responseValidationValue": "Αναμενόμενη τιμή"
   },
   "costs": {
     "title": "Κόστη",
@@ -5293,7 +5316,8 @@
         "skipped": "έχει ήδη ρυθμιστεί",
         "failed": "απέτυχε"
       }
-    }
+    },
+    "stepProgress": "Πρόοδος ρύθμισης"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Αυτός ο πάροχος εξαιρείται από το auto από προεπιλογή",
@@ -8956,7 +8980,8 @@
       "statsTitle": "Εντοπισμοί από την επανεκκίνηση",
       "statsEmpty": "Δεν υπάρχουν ακόμη εντοπισμοί.",
       "statsRequest": "Αιτήματα"
-    }
+    },
+    "modelOverrideKey": "Κλειδί παράκαμψης"
   },
   "contextRtk": {
     "title": "Μηχανή RTK",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "Επιτυχία",
     "tomlTestFailed": "Αποτυχία",
     "tomlImportError": "Δεν ήταν δυνατή η επεξεργασία του αρχείου RTK TOML.",
-    "tomlFileReadError": "Δεν ήταν δυνατή η ανάγνωση του επιλεγμένου αρχείου TOML."
+    "tomlFileReadError": "Δεν ήταν δυνατή η ανάγνωση του επιλεγμένου αρχείου TOML.",
+    "viewMode": "Λειτουργία προβολής"
   },
   "compressionEngineConfig": {
     "loading": "Φόρτωση…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "Πακέτα γλώσσας: {packs}",
     "dragToReorder": "Σύρετε για να αναδιατάξετε το βήμα",
     "engine": "Μηχανισμός",
-    "intensity": "Ένταση"
+    "intensity": "Ένταση",
+    "compressionOverride": "Παράκαμψη συμπίεσης"
   },
   "compressionStudio": {
     "noRun": "Δεν υπάρχει διαθέσιμη εκτέλεση συμπίεσης.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "νικητής: {winner}",
     "encoder": "κωδικοποιητής",
     "bytes": "byte",
-    "tokensCl100k": "token (cl100k)"
+    "tokensCl100k": "token (cl100k)",
+    "studioViews": "Προβολές Studio"
   },
   "omniglyph": {
     "preview": "Προεπισκόπηση",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "Τα μηνύματα που είναι μικρότερα από αυτό το μήκος δεν συμπιέζονται. Χαμηλότερο = περισσότερη συμπίεση.",
     "tooltipMinSavings": "Συμπίεση μόνο αν εξοικονομείται τουλάχιστον αυτός ο αριθμός tokens.",
     "ultraSettings": "Ultra ρυθμίσεις",
-    "ultraSettingsDesc": "Σημασιολογική συμπίεση με τεχνολογία SLM"
+    "ultraSettingsDesc": "Σημασιολογική συμπίεση με τεχνολογία SLM",
+    "defaultLanguage": "Προεπιλεγμένη γλώσσα",
+    "viewMode": "Λειτουργία προβολής"
   },
   "translator": {
     "title": "Μεταφραστής",
@@ -11087,7 +11117,8 @@
       "message": "Μήνυμα",
       "error": "Σφάλμα",
       "completion": "Ολοκλήρωση"
-    }
+    },
+    "statusFilter": "Κατάσταση"
   },
   "templateNames": {
     "simple-chat": "Απλή συνομιλία",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "πριν από {minutes} λ.",
     "hoursAgo": "πριν από {hours} ώ.",
     "daysAgo": "πριν από {days} ημ.",
-    "entries": "Εγγραφές"
+    "entries": "Εγγραφές",
+    "viewSwitcherAria": "Προβολή κρυφής μνήμης"
   },
   "proxyConfigModal": {
     "levelGlobal": "Καθολικό",
@@ -11613,7 +11645,8 @@
     "notMeasured": "Δεν μετρήθηκε",
     "upstream4xx": "{count} σφάλματα πελάτη πάνω από",
     "upstream5xx": "{count} σφάλματα διακομιστή πάνω από",
-    "uniformEgressLine": "{affected} από {exits} εξόδους αποτυγχάνουν μαζί στο {provider} (τις τελευταίες {hours} ώρες) — όχι πρόβλημα εξόδου"
+    "uniformEgressLine": "{affected} από {exits} εξόδους αποτυγχάνουν μαζί στο {provider} (τις τελευταίες {hours} ώρες) — όχι πρόβλημα εξόδου",
+    "moreActions": "Περισσότερες ενέργειες"
   },
   "playground": {
     "title": "Περιβάλλον δοκιμών μοντέλων",
@@ -11819,7 +11852,8 @@
       "nextButton": "Επόμενο",
       "runButton": "Εκτέλεση",
       "promptPlaceholder": "Εισάγετε το μήνυμά σας… (Enter για αποστολή, Shift+Enter για νέα γραμμή)"
-    }
+    },
+    "playgroundTabs": "Λειτουργίες Playground"
   },
   "miniPlayground": {
     "endpoint": "Τελικό σημείο",
@@ -11890,7 +11924,8 @@
     "assistant": "Βοηθός",
     "errorLabel": "Σφάλμα",
     "requestFailed": "Το αίτημα απέτυχε",
-    "stop": "Διακοπή"
+    "stop": "Διακοπή",
+    "messageInputAria": "Μήνυμα"
   },
   "requestLogger": {
     "recording": "Εγγραφή",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} εναλλαγές λογαριασμών",
       "resilienceRetried": "Επανάληψη κενού γύρου",
       "resilienceContinued": "Συνέχιση στη μέση της ροής",
-      "resilienceRecovered": "Ανακτήθηκε με ενέργεια ανθεκτικότητας"
-    }
+      "resilienceRecovered": "Ανακτήθηκε με ενέργεια ανθεκτικότητας",
+      "conversationContext": "Πλαίσιο συνομιλίας",
+      "goToBottom": "Μετάβαση στο τέλος",
+      "liveRefreshOn": "Ζωντανή ανανέωση: ενεργή",
+      "liveRefreshOff": "Ζωντανή ανανέωση: ανενεργή",
+      "liveRefresh": "Ζωντανή ανανέωση",
+      "continuesFromParent": "συνεχίζει από το γονικό στοιχείο",
+      "continuesFrom": "Συνεχίζει από {id}",
+      "viewConversation": "προβολή συνομιλίας",
+      "openConversation": "Άνοιγμα συνομιλίας {id}"
+    },
+    "tableLabel": "Αρχεία καταγραφής αιτημάτων"
   },
   "proxyLogger": {
     "filterAll": "Όλα",
@@ -12123,7 +12168,9 @@
     "colServedBy": "Παρέχεται από",
     "filterTraffic": "Κίνηση",
     "filterTests": "Δοκιμές",
-    "filterSource": "Πηγή"
+    "filterSource": "Πηγή",
+    "tableLabel": "Αρχεία καταγραφής διακομιστή μεσολάβησης",
+    "sortLogs": "Ταξινόμηση αρχείων καταγραφής"
   },
   "endpointOptions": {
     "speech": "Ομιλία",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "ΕΞΑΝΤΛΗΜΕΝΗ",
     "statusAlerting": "ΣΕ ΣΥΝΑΓΕΡΜΟ",
     "statusError": "ΣΦΑΛΜΑ",
-    "moreSuffix": "+{count} ακόμη"
+    "moreSuffix": "+{count} ακόμη",
+    "feedFilterLabel": "Φιλτράρισμα συμβάντων"
   },
   "quotaShare": {
     "weightPercent": "Βάρος %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "Χωρίς ομάδα",
     "ungroupedHint": "Αυτά τα σύνολα δεν έχουν αντιστοιχιστεί σε γνωστή ομάδα. Επεξεργαστείτε ένα σύνολο για να το μετακινήσετε σε μια πραγματική ομάδα.",
     "removeFailed": "Δεν ήταν δυνατή η αφαίρεση αυτού του συνόλου.",
-    "dismiss": "Κλείσιμο"
+    "dismiss": "Κλείσιμο",
+    "allocationsHeading": "Κατανομές",
+    "wizardRemoveDimension": "Κατάργηση διάστασης",
+    "wizardRemoveKey": "Κατάργηση κλειδιού"
   },
   "plugins": {
     "title": "Πρόσθετα",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "Η ενημέρωση ρυθμίσεων απέτυχε",
       "serviceRevealApiKey": "{actor} αποκάλυψε το κλειδί API για {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Απόρριψη σφάλματος"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "Μετάβαση τώρα",
       "message": "Ο MITM Proxy βρίσκεται πλέον στην ενότητα AgentBridge.",
       "title": "Αυτή η σελίδα μεταφέρθηκε"
-    }
+    },
+    "dnsOn": "DNS ενεργό",
+    "dnsOff": "DNS ανενεργό",
+    "showServerSettings": "Εμφάνιση ρυθμίσεων διακομιστή",
+    "hideServerSettings": "Απόκρυψη ρυθμίσεων διακομιστή",
+    "upstreamCaTesting": "Δοκιμή…",
+    "removeMapping": "Κατάργηση αντιστοίχισης",
+    "mappingSourcePlaceholder": "π.χ., gemini-3.6-flash-medium ή * για όλα τα μη αντιστοιχισμένα μοντέλα",
+    "mappingWildcardHint": "Χρησιμοποιήστε το * ως πηγή για να δρομολογήσετε κάθε μοντέλο χωρίς ρητή αντιστοίχιση μέσω του OmniRoute στον επιλεγμένο προορισμό. Οι ακριβείς αντιστοιχίσεις πηγής υπερισχύουν πάντα του *.",
+    "wizardDetectingModels": "Εντοπισμός μοντέλων από την υποκλαπείσα κίνηση...",
+    "wizardDetectedModels": "Βρέθηκαν {count, plural, one {# μοντέλο} other {# μοντέλα}} στην υποκλαπείσα κίνηση. Επιλέξτε όσα θέλετε να προσθέσετε:",
+    "wizardSelectedModels": "Επιλέχθηκαν {count, plural, one {# μοντέλο} other {# μοντέλα}}. Θα τα αντιστοιχίσετε σε μοντέλα του OmniRoute στην επόμενη οθόνη.",
+    "wizardAddModels": "Προσθήκη {count, plural, one {# μοντέλου} other {# μοντέλων}}",
+    "wizardNoModelsDetected": "Δεν έχουν εντοπιστεί ακόμη μοντέλα. Χρησιμοποιήστε το {agent} για να υποβάλετε ένα αίτημα και, στη συνέχεια, εκτελέστε ξανά αυτόν τον οδηγό για αυτόματο εντοπισμό μοντέλων από την κίνηση.",
+    "wizardNoModelsHint": "Εναλλακτικά, κλείστε αυτόν τον οδηγό και προσθέστε αντιστοιχίσεις χειροκίνητα στην κάρτα του agent."
   },
   "providerStats": {
     "unknownError": "Άγνωστο σφάλμα",
@@ -12696,7 +12762,11 @@
     "avgTtft": "Μέσος TTFT",
     "avgTotal": "Μέσος συνολικός χρόνος",
     "requestTelemetry": "Τηλεμετρία αιτημάτων",
-    "requestTelemetryDescription": "Ανάλυση του pipeline 7 φάσεων (τελευταία 5 λεπτά)"
+    "requestTelemetryDescription": "Ανάλυση του pipeline 7 φάσεων (τελευταία 5 λεπτά)",
+    "title": "Στατιστικά παρόχων",
+    "description": "Κίνηση, καθυστέρηση και ποσοστά επιτυχίας ανά πάροχο και ανά μοντέλο",
+    "combo": "Συνδυασμός",
+    "toggleModels": "Εμφάνιση μοντέλων για {provider}"
   },
   "relay": {
     "title": "Serverless proxy αναμετάδοσης",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "Δεν υπάρχει σώμα αιτήματος.",
     "noResponseBody": "Δεν υπάρχει σώμα απόκρισης.",
     "formatted": "Μορφοποιημένο",
-    "raw": "Ακατέργαστο"
+    "raw": "Ακατέργαστο",
+    "requestCount": "{count, plural, one {# αίτημα} other {# αιτήματα}}",
+    "expandList": "Ανάπτυξη λίστας",
+    "collapseList": "Σύμπτυξη λίστας",
+    "snippetLanguage": "Γλώσσα αποσπάσματος",
+    "headersTable": "Κεφαλίδες",
+    "showSecrets": "Εμφάνιση μυστικών",
+    "maskSecrets": "Απόκρυψη μυστικών",
+    "llmNotAvailable": "Τα μεταδεδομένα LLM δεν είναι διαθέσιμα για αυτό το αίτημα.",
+    "llmStreamYes": "ναι (SSE)",
+    "llmStreamNo": "όχι",
+    "llmTotalTokens": "Σύνολο: {count} διακριτικά"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "Ποσοστό κλήσεων στις οποίες ανταποκρίθηκε πραγματικά αυτός ο πάροχος κατά τις τελευταίες 24 ώρες. Μια παύλα σημαίνει ότι εξυπηρέτησε πολύ λίγη κίνηση για να υπολογιστεί ποσοστό.",
     "reliabilitySample": "{successes} από {requests} κλήσεις ολοκληρώθηκαν επιτυχώς τις τελευταίες {hours}ω",
     "reliabilityTooFew": "Μόνο {requests} κλήσεις τις τελευταίες {hours}ω — πολύ λίγες για να υπολογιστεί ποσοστό",
-    "reliabilityNoTraffic": "Δεν καταγράφηκαν κλήσεις τις τελευταίες 24 ώρες"
+    "reliabilityNoTraffic": "Δεν καταγράφηκαν κλήσεις τις τελευταίες 24 ώρες",
+    "categoryFilter": "Κατηγορία εργασίας"
   },
   "discovery": {
     "title": "Ανακάλυψη παρόχων",
@@ -13341,7 +13423,11 @@
     "method": "Μέθοδος",
     "auth": "Αυθεντικοποίηση",
     "feasibility": "Εφικτότητα",
-    "models": "Μοντέλα"
+    "models": "Μοντέλα",
+    "provider": "Πάροχος",
+    "status": "Κατάσταση",
+    "endpoint": "Τελικό σημείο",
+    "actions": "Ενέργειες"
   },
   "noAuthProvider": {
     "title": "Δεν απαιτείται αυθεντικοποίηση",
@@ -13390,7 +13476,8 @@
     "ownProxy": "Δικός σας διακομιστής μεσολάβησης",
     "freeTierPause": "Το μοντέλο {model} σταμάτησε (429), θα επιστρέψει στις {time}",
     "freeTierPauseProvider": "Σταμάτησε (429), θα επιστρέψει στις {time}",
-    "freeTierPauseNote": "Παύση εντός διεργασίας σε αυτό το στοιχείο"
+    "freeTierPauseNote": "Παύση εντός διεργασίας σε αυτό το στοιχείο",
+    "proxyType": "Τύπος διακομιστή μεσολάβησης"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "Ένα κρυφό επίτευγμα σας περιμένει...",
         "criteria": "Ολοκληρώστε το κρυφό επίτευγμα για να αποκαλύψετε αυτό το σήμα."
       }
-    }
+    },
+    "leaderboardTitle": "Πίνακας κατάταξης",
+    "leaderboardDescription": "Κατατάξεις και επιτεύγματα για τα κλειδιά API σας",
+    "badgeLocked": "Κλειδωμένο"
   },
   "featureFlags": {
     "title": "Σημαίες λειτουργιών",
@@ -13858,7 +13948,8 @@
     "unknown": "άγνωστο",
     "unknownProvider": "άγνωστος πάροχος",
     "unknownModel": "άγνωστο μοντέλο",
-    "resolvedTargetMetrics": "{requests} αιτ. · {success} επιτυχείς · {latency} · ποσόστωση {quota}"
+    "resolvedTargetMetrics": "{requests} αιτ. · {success} επιτυχείς · {latency} · ποσόστωση {quota}",
+    "timeRange": "Χρονικό εύρος"
   },
   "usageLimits": {
     "usdUsageQuota": "Ποσόστωση χρήσης USD",
@@ -14005,7 +14096,11 @@
     "learnMore": "Μάθετε περισσότερα",
     "changelogLoadFailed": "Δεν ήταν δυνατή η φόρτωση του αρχείου αλλαγών. Δοκιμάστε ξανά αργότερα.",
     "retry": "Επανάληψη",
-    "viewFullHistory": "Δείτε το πλήρες ιστορικό στο GitHub"
+    "viewFullHistory": "Δείτε το πλήρες ιστορικό στο GitHub",
+    "title": "Νέα και αρχείο αλλαγών",
+    "description": "Ανακοινώσεις από την ομάδα του OmniRoute και οι πιο πρόσφατες σημειώσεις έκδοσης",
+    "viewLabel": "Προβολή",
+    "loadingNews": "Φόρτωση ανακοινώσεων..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "Κατάσταση circuit breaker παρόχου",
       "lastUpdate": "Τελευταία ενημέρωση: {timestamp}",
       "uptimeMinutes": "{minutes}λ",
-      "uptimeHoursMinutes": "{hours}ω {minutes}λ"
+      "uptimeHoursMinutes": "{hours}ω {minutes}λ",
+      "breakerClosed": "Κλειστό",
+      "breakerNotClosed": "Ανοιχτό ή ημιανοιχτό"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "Λεπτομέρειες συντήρησης",
         "secondaryAction": "Κατάσταση Συστήματος"
       }
+    },
+    "miniapp": {
+      "askAnything": "Ρωτήστε οτιδήποτε…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ορατά / {total} συνολικά",
+    "modeLabel": "Λειτουργία προβολής",
+    "jumpToNow": "Μετάβαση στην τρέχουσα ώρα, η γραμμή NOW επαναφέρεται στη θέση {position}%",
+    "laneReuse": "Επαναχρησιμοποίηση λωρίδας",
+    "laneReuseLabel": "Παράθυρο επαναχρησιμοποίησης λωρίδας (λεπτά)",
+    "laneReuseHint": "Τα αιτήματα που μοιράζονται το ίδιο αναγνωριστικό συνομιλίας παραμένουν στην ίδια σειρά της λωρίδας χρόνου, εφόσον το μεταξύ τους διάστημα είναι μικρότερο από αυτόν τον αριθμό λεπτών.",
+    "laneReuseUnit": "λεπ.",
+    "autoRefresh": "Αυτόματη ανανέωση",
+    "autoRefreshLabel": "Διάστημα αυτόματης ανανέωσης (δευτερόλεπτα)",
+    "autoRefreshHint": "Πόσο συχνά η λωρίδα χρόνου ανακτά εκ νέου τη λίστα αιτημάτων από τον διακομιστή.",
+    "autoRefreshUnit": "δευτ.",
+    "zoomOut": "Σμίκρυνση",
+    "zoomIn": "Μεγέθυνση"
   },
   "metadata": {
     "compressionTitle": "Συμπίεση",

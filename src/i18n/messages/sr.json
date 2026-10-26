@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Коришћено у {count, plural, one {# батчу} other {# батчева}}",
     "batchFilePreview": "Преглед",
     "batchFilePreviewTruncated": "Приказано првих {shown} линија (укупно {total} линија)",
-    "batchFileDownloadFull": "Преузми цео фајл"
+    "batchFileDownloadFull": "Преузми цео фајл",
+    "dialogTitleFallback": "Дијалог",
+    "pagination": "Пагинација",
+    "clearFilters": "Обриши филтере",
+    "tokensPageTitle": "Токени",
+    "tokensPageDescription": "Шаљите токене између API кључева, делите позивне кодове и повезујте сервере заједнице.",
+    "tokensServerUrlLabel": "URL сервера"
   },
   "disabled": "Онемогућено",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Усмери захтеве са потрошеним буџетом на резервног бесплатног провајдера/модел у случају хитности.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 или @channelname",
       "chatIdHint": "Јединствени нумерички идентификатор или јавно корисничко име разговора/канала.",
       "tutorial": "Како да подесите Telegram веб-хук:"
-    }
+    },
+    "copy": "Копирај",
+    "copied": "Копирано!",
+    "expandDetails": "Прикажи детаље",
+    "collapseDetails": "Сакриј детаље"
   },
   "compliance": {
     "auditTitle": "Ревизија",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Позиви (24ч)",
     "mcpMetricSuccessRate": "Стопа успешности",
     "mcpMetricAvgDuration": "Просечно трајање",
-    "mcpMetricTopTool": "Најкоришћенији алат"
+    "mcpMetricTopTool": "Најкоришћенији алат",
+    "dismissError": "Одбаци грешку"
   },
   "themesPage": {
     "title": "Теме",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Napredna pravila za payload, ograničenja zahteva i podešavanja proxy API-ja",
     "mitmProxyDescription": "Konfigurišite podešavanja MITM proxy-ja za inspekciju saobraćaja i debagovanje",
     "oneProxyDescription": "Konfigurišite podešavanja 1Proxy za napredno povezivanje proxy servera u lanac",
-    "omniSkillsDescription": "Instalirajte sandbox veštine i upravljajte njima radi automatizovanog izvršavanja promptova i alata"
+    "omniSkillsDescription": "Instalirajte sandbox veštine i upravljajte njima radi automatizovanog izvršavanja promptova i alata",
+    "openMenu": "Отвори мени",
+    "products": "Keak производи"
   },
   "cloudSyncStatus": {
     "synced": "Sinhronizovano",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "Пожељне везе",
     "preferredConnectionsDesc": "Редослед приоритета по кључу. Ако пожељна веза није доступна, рутирање прелази на следећу прихватљиву.",
     "preferredConnectionsNone": "Није постављена жеља — користи се подразумевана стратегија рутирања.",
-    "preferredConnectionsClear": "Очисти"
+    "preferredConnectionsClear": "Очисти",
+    "removeSelection": "Уклони {name}"
   },
   "auditLog": {
     "title": "Дневник ревизије",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Подесите мост Слика→Текст у подешавањима Modality Bridge",
     "sttBridgeCta": "Подесите мост Говор→Текст у подешавањима Modality Bridge",
     "existingConnection": "Постојећа веза",
-    "openrouterSttDescription": "OpenRouter модели за претварање говора у текст користе вашу подешену OpenRouter везу. Није потребан посебан акредитив."
+    "openrouterSttDescription": "OpenRouter модели за претварање говора у текст користе вашу подешену OpenRouter везу. Није потребан посебан акредитив.",
+    "modalityTabsAria": "Тип медија",
+    "serviceKindsAria": "Тип услуге"
   },
   "search": {
     "searchQuery": "Упит за претрагу",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "Непознато",
     "cliproxyapiUpdate": "Ажурирај",
     "cliproxyapiUpdateAvailable": "Доступно ажурирање: v{current} → v{latest}",
-    "cliproxyapiVersion": "Верзија"
+    "cliproxyapiVersion": "Верзија",
+    "removeMapping": "Уклони мапирање"
   },
   "modelCatalog": {
     "title": "Модели и комбинације",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Овим ће тренутно повезани провајдери/модели који одговарају овом шаблону бити снимљени у комбинацију која се може уређивати.",
     "duplicateAutoComboFailedPrefix": "Neuspešno dupliranje auto-kombinacije:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}"
+    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}",
+    "weightPercent": "Тежина (%)",
+    "clearSearch": "Обриши претрагу",
+    "responseValidationRemoveCheck": "Уклони проверу",
+    "responseValidationPath": "JSON путања",
+    "responseValidationCondition": "Услов",
+    "responseValidationValue": "Очекивана вредност"
   },
   "costs": {
     "title": "Troškovi",
@@ -5293,7 +5316,8 @@
         "skipped": "већ подешено",
         "failed": "неуспешно"
       }
-    }
+    },
+    "stepProgress": "Напредак подешавања"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Овај добављач је подразумевано искључен из auto",
@@ -8956,7 +8980,8 @@
       "statsTitle": "Откривања од поновног покретања",
       "statsEmpty": "Још нема откривања.",
       "statsRequest": "Захтеви"
-    }
+    },
+    "modelOverrideKey": "Кључ за замену"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "Прошло",
     "tomlTestFailed": "Није прошло",
     "tomlImportError": "Није могуће обрадити RTK TOML датотеку.",
-    "tomlFileReadError": "Није могуће прочитати изабрану TOML датотеку."
+    "tomlFileReadError": "Није могуће прочитати изабрану TOML датотеку.",
+    "viewMode": "Режим приказа"
   },
   "compressionEngineConfig": {
     "loading": "Учитавање…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "Језички пакети: {packs}",
     "dragToReorder": "Превуците да промените редослед корака",
     "engine": "Механизам",
-    "intensity": "Интензитет"
+    "intensity": "Интензитет",
+    "compressionOverride": "Замена компресије"
   },
   "compressionStudio": {
     "noRun": "Ниједно извршавање компресије није доступно.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "победник: {winner}",
     "encoder": "енкодер",
     "bytes": "бајтови",
-    "tokensCl100k": "токени (cl100k)"
+    "tokensCl100k": "токени (cl100k)",
+    "studioViews": "Прикази студија"
   },
   "omniglyph": {
     "preview": "Преглед",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "Поруке краће од овога се не компримују. Мање = више компресије.",
     "tooltipMinSavings": "Компримуј само ако се уштеди бар оволико токена.",
     "ultraSettings": "Ултра подешавања",
-    "ultraSettingsDesc": "Семантичка компресија коју покреће SLM"
+    "ultraSettingsDesc": "Семантичка компресија коју покреће SLM",
+    "defaultLanguage": "Подразумевани језик",
+    "viewMode": "Режим приказа"
   },
   "translator": {
     "title": "Преводилац",
@@ -11087,7 +11117,8 @@
       "message": "Порука",
       "error": "Грешка",
       "completion": "Завршетак"
-    }
+    },
+    "statusFilter": "Статус"
   },
   "templateNames": {
     "simple-chat": "Једноставно ћаскање",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "пре {minutes}м",
     "hoursAgo": "пре {hours}ч",
     "daysAgo": "пре {days}д",
-    "entries": "Уноси"
+    "entries": "Уноси",
+    "viewSwitcherAria": "Приказ кеша"
   },
   "proxyConfigModal": {
     "levelGlobal": "Глобално",
@@ -11613,7 +11645,8 @@
     "notMeasured": "Није мерено",
     "upstream4xx": "{count} grešaka klijenta na upstream-u",
     "upstream5xx": "{count} grešaka servera na upstream-u",
-    "uniformEgressLine": "{affected} od {exits} izlaza padaju zajedno na {provider} (poslednjih {hours} сати) — nije problem izlaza"
+    "uniformEgressLine": "{affected} od {exits} izlaza padaju zajedno na {provider} (poslednjih {hours} сати) — nije problem izlaza",
+    "moreActions": "Још радњи"
   },
   "playground": {
     "title": "Окружење за тестирање модела",
@@ -11819,7 +11852,8 @@
       "nextButton": "Даље",
       "runButton": "Покрени",
       "promptPlaceholder": "Унесите поруку… (Enter за слање, Shift+Enter за нови ред)"
-    }
+    },
+    "playgroundTabs": "Режими игралишта"
   },
   "miniPlayground": {
     "endpoint": "Крајња тачка",
@@ -11890,7 +11924,8 @@
     "assistant": "Асистент",
     "errorLabel": "Грешка",
     "requestFailed": "Захтев није успео",
-    "stop": "Заустави"
+    "stop": "Заустави",
+    "messageInputAria": "Порука"
   },
   "requestLogger": {
     "recording": "Снимање",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} ротација налога",
       "resilienceRetried": "Празан потез поновљен",
       "resilienceContinued": "Настављено усред стрима",
-      "resilienceRecovered": "Опорављено акцијом отпорности"
-    }
+      "resilienceRecovered": "Опорављено акцијом отпорности",
+      "conversationContext": "Контекст разговора",
+      "goToBottom": "Иди на дно",
+      "liveRefreshOn": "Освежавање уживо: укључено",
+      "liveRefreshOff": "Освежавање уживо: искључено",
+      "liveRefresh": "Освежавање уживо",
+      "continuesFromParent": "наставља се од надређеног",
+      "continuesFrom": "Наставља се од {id}",
+      "viewConversation": "прикажи разговор",
+      "openConversation": "Отвори разговор {id}"
+    },
+    "tableLabel": "Евиденција захтева"
   },
   "proxyLogger": {
     "filterAll": "Све",
@@ -12123,7 +12168,9 @@
     "colServedBy": "Poslužuje",
     "filterTraffic": "Saobraćaj",
     "filterTests": "Testovi",
-    "filterSource": "Izvor"
+    "filterSource": "Izvor",
+    "tableLabel": "Евиденција проксија",
+    "sortLogs": "Сортирај евиденцију"
   },
   "endpointOptions": {
     "speech": "Говор",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "ИСЦРПЉЕНО",
     "statusAlerting": "УПОЗОРЕЊЕ",
     "statusError": "ГРЕШКА",
-    "moreSuffix": "+{count} више"
+    "moreSuffix": "+{count} више",
+    "feedFilterLabel": "Филтрирај догађаје"
   },
   "quotaShare": {
     "weightPercent": "Тежина %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "Без групе",
     "ungroupedHint": "Ови пулови нису додељени познатој групи. Уредите пул да бисте га преместили у стварну групу.",
     "removeFailed": "Није могуће уклонити овај пул.",
-    "dismiss": "Одбаци"
+    "dismiss": "Одбаци",
+    "allocationsHeading": "Алокације",
+    "wizardRemoveDimension": "Уклони димензију",
+    "wizardRemoveKey": "Уклони кључ"
   },
   "plugins": {
     "title": "Додаци",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "Ажурирање подешавања није успело",
       "serviceRevealApiKey": "{actor} је открио API кључ за {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Одбаци грешку"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "Пређи сада",
       "message": "MITM Proxy се сада налази у оквиру AgentBridge.",
       "title": "Ова страница је премештена"
-    }
+    },
+    "dnsOn": "DNS укључен",
+    "dnsOff": "DNS искључен",
+    "showServerSettings": "Прикажи подешавања сервера",
+    "hideServerSettings": "Сакриј подешавања сервера",
+    "upstreamCaTesting": "Тестирање…",
+    "removeMapping": "Уклони мапирање",
+    "mappingSourcePlaceholder": "нпр. gemini-3.6-flash-medium или * за све без мапирања",
+    "mappingWildcardHint": "Користите * као извор да бисте сваки модел без изричитог мапирања усмерили кроз OmniRoute ка изабраном циљу. Тачна подударања извора увек имају предност над *.",
+    "wizardDetectingModels": "Откривање модела из пресретнутог саобраћаја...",
+    "wizardDetectedModels": "У пресретнутом саобраћају {count, plural, one {пронађен је # модел} few {пронађена су # модела} other {пронађено је # модела}}. Изаберите оне које желите да додате:",
+    "wizardSelectedModels": "{count, plural, one {Изабран је # модел} few {Изабрана су # модела} other {Изабрано је # модела}}. Мапираћете их на OmniRoute моделе на следећем екрану.",
+    "wizardAddModels": "Додај {count, plural, one {# модел} few {# модела} other {# модела}}",
+    "wizardNoModelsDetected": "Још није откривен ниједан модел. Користите {agent} да упутите захтев, а затим поново покрените овај чаробњак да бисте аутоматски открили моделе из саобраћаја.",
+    "wizardNoModelsHint": "Или затворите овај чаробњак и ручно додајте мапирања на картици агента."
   },
   "providerStats": {
     "unknownError": "Непозната грешка",
@@ -12696,7 +12762,11 @@
     "avgTtft": "Просечан TTFT",
     "avgTotal": "Просечно укупно време",
     "requestTelemetry": "Телеметрија захтева",
-    "requestTelemetryDescription": "Разлагање процеса на 7 фаза (последњих 5 минута)"
+    "requestTelemetryDescription": "Разлагање процеса на 7 фаза (последњих 5 минута)",
+    "title": "Статистика провајдера",
+    "description": "Саобраћај, кашњење и стопе успешности по провајдеру и моделу",
+    "combo": "Комбиновано",
+    "toggleModels": "Прикажи моделе за {provider}"
   },
   "relay": {
     "title": "Проксији за прослеђивање без сервера",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "Нема тела захтева.",
     "noResponseBody": "Нема тела одговора.",
     "formatted": "Форматирано",
-    "raw": "Необрађено"
+    "raw": "Необрађено",
+    "requestCount": "{count, plural, one {# захтев} few {# захтева} other {# захтева}}",
+    "expandList": "Прошири листу",
+    "collapseList": "Скупи листу",
+    "snippetLanguage": "Језик исечка кода",
+    "headersTable": "Заглавља",
+    "showSecrets": "Прикажи тајне податке",
+    "maskSecrets": "Маскирај тајне податке",
+    "llmNotAvailable": "LLM метаподаци нису доступни за овај захтев.",
+    "llmStreamYes": "да (SSE)",
+    "llmStreamNo": "не",
+    "llmTotalTokens": "Укупно: {count} токена"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "Удео позива на које је овај провајдер заиста одговорио у последња 24 сата. Црта значи да је опслужио премало саобраћаја да би се утврдила стопа.",
     "reliabilitySample": "Успешно: {successes} од {requests} позива у последњих {hours}ч",
     "reliabilityTooFew": "Само {requests} позива у последњих {hours}ч — премало за утврђивање стопе",
-    "reliabilityNoTraffic": "Нема забележених позива у последња 24 сата"
+    "reliabilityNoTraffic": "Нема забележених позива у последња 24 сата",
+    "categoryFilter": "Категорија задатка"
   },
   "discovery": {
     "title": "Откривање провајдера",
@@ -13341,7 +13423,11 @@
     "method": "Метод",
     "auth": "Аутентификација",
     "feasibility": "Изводљивост",
-    "models": "Модели"
+    "models": "Модели",
+    "provider": "Провајдер",
+    "status": "Статус",
+    "endpoint": "Крајња тачка",
+    "actions": "Радње"
   },
   "noAuthProvider": {
     "title": "Аутентификација није потребна",
@@ -13390,7 +13476,8 @@
     "ownProxy": "Сопствени прокси",
     "freeTierPause": "Модел {model} паузиран (429), назад у {time}",
     "freeTierPauseProvider": "Паузирано (429), назад у {time}",
-    "freeTierPauseNote": "Пауза у процесу на овој инстанци"
+    "freeTierPauseNote": "Пауза у процесу на овој инстанци",
+    "proxyType": "Тип проксија"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "Очекује вас скривено достигнуће...",
         "criteria": "Остварите скривено достигнуће да бисте открили ову значку."
       }
-    }
+    },
+    "leaderboardTitle": "Табела лидера",
+    "leaderboardDescription": "Рангирања и достигнућа за ваше API кључеве",
+    "badgeLocked": "Закључано"
   },
   "featureFlags": {
     "title": "Функционалне ознаке",
@@ -13858,7 +13948,8 @@
     "unknown": "непознато",
     "unknownProvider": "непознат провајдер",
     "unknownModel": "непознат модел",
-    "resolvedTargetMetrics": "{requests} захт. · {success} успешно · {latency} · квота {quota}"
+    "resolvedTargetMetrics": "{requests} захт. · {success} успешно · {latency} · квота {quota}",
+    "timeRange": "Временски опсег"
   },
   "usageLimits": {
     "usdUsageQuota": "USD квота коришћења",
@@ -14005,7 +14096,11 @@
     "learnMore": "Сазнајте више",
     "changelogLoadFailed": "Није могуће учитати дневник измена. Покушајте поново касније.",
     "retry": "Покушајте поново",
-    "viewFullHistory": "Погледајте потпуну историју на GitHub-у"
+    "viewFullHistory": "Погледајте потпуну историју на GitHub-у",
+    "title": "Новости и дневник измена",
+    "description": "Обавештења OmniRoute тима и белешке о најновијем издању",
+    "viewLabel": "Прикажи",
+    "loadingNews": "Учитавање обавештења..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "Стање механизма Circuit Breaker провајдера",
       "lastUpdate": "Последње ажурирање: {timestamp}",
       "uptimeMinutes": "{minutes}м",
-      "uptimeHoursMinutes": "{hours}ч {minutes}м"
+      "uptimeHoursMinutes": "{hours}ч {minutes}м",
+      "breakerClosed": "Затворено",
+      "breakerNotClosed": "Отворено или полуотворено"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "Детаљи о одржавању",
         "secondaryAction": "Статус система"
       }
+    },
+    "miniapp": {
+      "askAnything": "Питајте било шта…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} видљиво / {total} укупно",
+    "modeLabel": "Режим приказа",
+    "jumpToNow": "Пређи на тренутно време; линија САДА се враћа на позицију {position}%",
+    "laneReuse": "Поновна употреба траке",
+    "laneReuseLabel": "Период поновне употребе траке (у минутима)",
+    "laneReuseHint": "Захтеви који деле исти ID разговора остају у истом реду временске линије све док је размак између њих мањи од оволико минута.",
+    "laneReuseUnit": "мин",
+    "autoRefresh": "Аутоматско освежавање",
+    "autoRefreshLabel": "Интервал аутоматског освежавања (у секундама)",
+    "autoRefreshHint": "Колико често временска линија поново преузима листу захтева са сервера.",
+    "autoRefreshUnit": "с",
+    "zoomOut": "Умањи",
+    "zoomIn": "Увећај"
   },
   "metadata": {
     "compressionTitle": "Kompresija",

@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Используется {count, plural, one {# партия} other {# партий}}",
     "batchFilePreview": "Предварительный просмотр",
     "batchFilePreviewTruncated": "Показаны первые {shown} строки ({total} всего строк)",
-    "batchFileDownloadFull": "Скачать полный файл"
+    "batchFileDownloadFull": "Скачать полный файл",
+    "dialogTitleFallback": "Диалоговое окно",
+    "pagination": "Пагинация",
+    "clearFilters": "Очистить фильтры",
+    "tokensPageTitle": "Токены",
+    "tokensPageDescription": "Передавайте токены между API-ключами, делитесь кодами приглашений и подключайте серверы сообщества.",
+    "tokensServerUrlLabel": "URL сервера"
   },
   "disabled": "Отключено",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Перенаправлять запросы при исчерпании бюджета на резервный бесплатный провайдер/модель.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 или @channelname",
       "chatIdHint": "Уникальный числовой идентификатор или публичное имя пользователя чата/канала.",
       "tutorial": "Как настроить вебхук Telegram:"
-    }
+    },
+    "copy": "Копировать",
+    "copied": "Скопировано!",
+    "expandDetails": "Показать подробности",
+    "collapseDetails": "Скрыть подробности"
   },
   "compliance": {
     "auditTitle": "Аудит",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Звонки (24 ч)",
     "mcpMetricSuccessRate": "Уровень успеха",
     "mcpMetricAvgDuration": "Средняя продолжительность",
-    "mcpMetricTopTool": "Лучший инструмент"
+    "mcpMetricTopTool": "Лучший инструмент",
+    "dismissError": "Закрыть сообщение об ошибке"
   },
   "themesPage": {
     "title": "Темы",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Расширенные правила обработки полезной нагрузки, ограничения запросов и настройки API прокси-сервера",
     "mitmProxyDescription": "Настройка MITM-прокси для анализа трафика и отладки",
     "oneProxyDescription": "Настройка 1Proxy для расширенного построения цепочек прокси-серверов",
-    "omniSkillsDescription": "Установите и управляйте песочными навыками для автоматизированного выполнения запросов и инструментов"
+    "omniSkillsDescription": "Установите и управляйте песочными навыками для автоматизированного выполнения запросов и инструментов",
+    "openMenu": "Открыть меню",
+    "products": "Продукты Keak"
   },
   "cloudSyncStatus": {
     "synced": "Синхронизировано",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "Предпочтительные подключения",
     "preferredConnectionsDesc": "Порядок приоритета для каждого ключа. Если предпочтительное подключение недоступно, маршрутизация переходит к следующему подходящему.",
     "preferredConnectionsNone": "Предпочтение не задано — используется стратегия маршрутизации по умолчанию.",
-    "preferredConnectionsClear": "Очистить"
+    "preferredConnectionsClear": "Очистить",
+    "removeSelection": "Удалить {name}"
   },
   "auditLog": {
     "title": "Журнал аудита",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Настройте мост Изображение→Текст в настройках Моста Модальности",
     "sttBridgeCta": "Настройте мост Speech→Text в настройках Modality Bridge",
     "existingConnection": "Существующее соединение",
-    "openrouterSttDescription": "Модели распознавания речи OpenRouter используют ваше настроенное соединение OpenRouter. Отдельные учетные данные не требуются."
+    "openrouterSttDescription": "Модели распознавания речи OpenRouter используют ваше настроенное соединение OpenRouter. Отдельные учетные данные не требуются.",
+    "modalityTabsAria": "Тип медиа",
+    "serviceKindsAria": "Тип сервиса"
   },
   "search": {
     "searchQuery": "Поисковый запрос",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "Неизвестно",
     "cliproxyapiUpdate": "Обновить",
     "cliproxyapiUpdateAvailable": "Доступно обновление: v{current} → v{latest}",
-    "cliproxyapiVersion": "Версия"
+    "cliproxyapiVersion": "Версия",
+    "removeMapping": "Удалить сопоставление"
   },
   "modelCatalog": {
     "title": "Модели и комбо",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Это создаст снимок текущих подключенных провайдеров/моделей, соответствующих этому шаблону, в редактируемом комбо.",
     "duplicateAutoComboFailedPrefix": "Не удалось дублировать автоматическое комбо:",
     "duplicateAutoComboUnknownError": "Неизвестная ошибка",
-    "duplicateAutoComboTitle": "Создать статическое комбо из {name}"
+    "duplicateAutoComboTitle": "Создать статическое комбо из {name}",
+    "weightPercent": "Вес (%)",
+    "clearSearch": "Очистить поиск",
+    "responseValidationRemoveCheck": "Удалить проверку",
+    "responseValidationPath": "Путь JSON",
+    "responseValidationCondition": "Условие",
+    "responseValidationValue": "Ожидаемое значение"
   },
   "costs": {
     "title": "Затраты",
@@ -5293,7 +5316,8 @@
         "skipped": "уже настроено",
         "failed": "не удалось"
       }
-    }
+    },
+    "stepProgress": "Ход настройки"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Этот провайдер по умолчанию исключён из auto",
@@ -8956,7 +8980,8 @@
       "statsTitle": "Обнаружения с момента перезапуска",
       "statsEmpty": "Пока нет обнаружений.",
       "statsRequest": "Запросы"
-    }
+    },
+    "modelOverrideKey": "Ключ переопределения"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "Пройдено",
     "tomlTestFailed": "Не пройдено",
     "tomlImportError": "Не удалось обработать файл RTK TOML.",
-    "tomlFileReadError": "Не удалось прочитать выбранный файл TOML."
+    "tomlFileReadError": "Не удалось прочитать выбранный файл TOML.",
+    "viewMode": "Режим просмотра"
   },
   "compressionEngineConfig": {
     "loading": "Загрузка…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "Языковые пакеты: {packs}",
     "dragToReorder": "Перетащите для изменения порядка шагов",
     "engine": "Движок",
-    "intensity": "Интенсивность"
+    "intensity": "Интенсивность",
+    "compressionOverride": "Переопределение сжатия"
   },
   "compressionStudio": {
     "noRun": "Нет доступных запусков сжатия.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "победитель: {winner}",
     "encoder": "кодировщик",
     "bytes": "байты",
-    "tokensCl100k": "токены (cl100k)"
+    "tokensCl100k": "токены (cl100k)",
+    "studioViews": "Представления Studio"
   },
   "omniglyph": {
     "preview": "Предпросмотр",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "Сообщения короче этого значения не сжимаются. Ниже = больше сжатия.",
     "tooltipMinSavings": "Сжимайте только в том случае, если при этом сохраняется хотя бы столько же токенов.",
     "ultraSettings": "Ультра настройки",
-    "ultraSettingsDesc": "Семантическое сжатие на основе SLM"
+    "ultraSettingsDesc": "Семантическое сжатие на основе SLM",
+    "defaultLanguage": "Язык по умолчанию",
+    "viewMode": "Режим просмотра"
   },
   "translator": {
     "title": "Переводчик",
@@ -11087,7 +11117,8 @@
       "message": "Сообщение",
       "error": "Ошибка",
       "completion": "Завершение"
-    }
+    },
+    "statusFilter": "Статус"
   },
   "templateNames": {
     "simple-chat": "Простой чат",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes}м назад",
     "hoursAgo": "{hours}ч назад",
     "daysAgo": "{days}д назад",
-    "entries": "Записи"
+    "entries": "Записи",
+    "viewSwitcherAria": "Просмотр кеша"
   },
   "proxyConfigModal": {
     "levelGlobal": "Глобальный",
@@ -11613,7 +11645,8 @@
     "notMeasured": "Не измерено",
     "upstream4xx": "{count} ошибки клиента вверху",
     "upstream5xx": "{count} ошибки сервера вверху",
-    "uniformEgressLine": "{affected} из {exits} выходов одновременно дают сбой у {provider} (за последние {hours} ч) — проблема не в выходе"
+    "uniformEgressLine": "{affected} из {exits} выходов одновременно дают сбой у {provider} (за последние {hours} ч) — проблема не в выходе",
+    "moreActions": "Дополнительные действия"
   },
   "playground": {
     "title": "Title",
@@ -11819,7 +11852,8 @@
       "nextButton": "Далее",
       "runButton": "Запустить",
       "promptPlaceholder": "Введите ваше сообщение… (Enter для отправки, Shift+Enter для новой строки)"
-    }
+    },
+    "playgroundTabs": "Режимы Playground"
   },
   "miniPlayground": {
     "endpoint": "Конечная точка",
@@ -11890,7 +11924,8 @@
     "assistant": "Ассистент",
     "errorLabel": "Ошибка",
     "requestFailed": "Запрос не удался",
-    "stop": "Остановить"
+    "stop": "Остановить",
+    "messageInputAria": "Сообщение"
   },
   "requestLogger": {
     "recording": "Запись",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} ротаций аккаунта",
       "resilienceRetried": "Пустой ход повторён",
       "resilienceContinued": "Возобновлено в середине потока",
-      "resilienceRecovered": "Восстановлено действием устойчивости"
-    }
+      "resilienceRecovered": "Восстановлено действием устойчивости",
+      "conversationContext": "Контекст диалога",
+      "goToBottom": "Перейти вниз",
+      "liveRefreshOn": "Автообновление: включено",
+      "liveRefreshOff": "Автообновление: выключено",
+      "liveRefresh": "Автообновление",
+      "continuesFromParent": "продолжается от родительского элемента",
+      "continuesFrom": "Продолжается от {id}",
+      "viewConversation": "просмотреть диалог",
+      "openConversation": "Открыть диалог {id}"
+    },
+    "tableLabel": "Журналы запросов"
   },
   "proxyLogger": {
     "filterAll": "Все",
@@ -12123,7 +12168,9 @@
     "colServedBy": "Обслуживается",
     "filterTraffic": "Трафик",
     "filterTests": "Тесты",
-    "filterSource": "Источник"
+    "filterSource": "Источник",
+    "tableLabel": "Журналы прокси-сервера",
+    "sortLogs": "Сортировать журналы"
   },
   "endpointOptions": {
     "speech": "Речь",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "ИСЧЕРПАНА",
     "statusAlerting": "ТРЕБУЕТ ВНИМАНИЯ",
     "statusError": "ОШИБКА",
-    "moreSuffix": "+ещё {count}"
+    "moreSuffix": "+ещё {count}",
+    "feedFilterLabel": "Фильтровать события"
   },
   "quotaShare": {
     "weightPercent": "Вес %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "Не сгруппировано",
     "ungroupedHint": "Эти пулы не назначены известной группе. Отредактируйте пул, чтобы переместить его в реальную группу.",
     "removeFailed": "Не удалось удалить этот пул.",
-    "dismiss": "Закрыть"
+    "dismiss": "Закрыть",
+    "allocationsHeading": "Распределения",
+    "wizardRemoveDimension": "Удалить измерение",
+    "wizardRemoveKey": "Удалить ключ"
   },
   "plugins": {
     "title": "Плагины",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "Не удалось обновить настройки",
       "serviceRevealApiKey": "{actor} раскрыл API-ключ для {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Закрыть сообщение об ошибке"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "Иди сейчас",
       "message": "MITM Proxy теперь находится под AgentBridge.",
       "title": "Эта страница была перемещена"
-    }
+    },
+    "dnsOn": "DNS включён",
+    "dnsOff": "DNS выключен",
+    "showServerSettings": "Показать настройки сервера",
+    "hideServerSettings": "Скрыть настройки сервера",
+    "upstreamCaTesting": "Тестирование…",
+    "removeMapping": "Удалить сопоставление",
+    "mappingSourcePlaceholder": "например, gemini-3.6-flash-medium или * для всех моделей без сопоставления",
+    "mappingWildcardHint": "Используйте * в качестве источника, чтобы направлять через OmniRoute к выбранной целевой модели все модели без явного сопоставления. Точное совпадение источника всегда имеет приоритет над *.",
+    "wizardDetectingModels": "Обнаружение моделей в перехваченном трафике...",
+    "wizardDetectedModels": "В перехваченном трафике найдена {count, plural, one {# модель} few {# модели} many {# моделей} other {# модели}}. Выберите модели, которые хотите добавить:",
+    "wizardSelectedModels": "Выбрана {count, plural, one {# модель} few {# модели} many {# моделей} other {# модели}}. На следующем экране вы сопоставите их с моделями OmniRoute.",
+    "wizardAddModels": "Добавить {count, plural, one {# модель} few {# модели} many {# моделей} other {# модели}}",
+    "wizardNoModelsDetected": "Модели пока не обнаружены. Выполните запрос с помощью {agent}, а затем снова запустите этот мастер, чтобы автоматически обнаружить модели в трафике.",
+    "wizardNoModelsHint": "Или закройте этот мастер и добавьте сопоставления вручную в карточке агента."
   },
   "providerStats": {
     "unknownError": "Неизвестная ошибка",
@@ -12696,7 +12762,11 @@
     "avgTtft": "Среднее TTFT",
     "avgTotal": "Среднее общее",
     "requestTelemetry": "Телеметрия запросов",
-    "requestTelemetryDescription": "Детализация 7-фазного конвейера (за последние 5 минут)"
+    "requestTelemetryDescription": "Детализация 7-фазного конвейера (за последние 5 минут)",
+    "title": "Статистика провайдеров",
+    "description": "Трафик, задержка и доля успешных запросов по каждому провайдеру и каждой модели",
+    "combo": "Комбинация",
+    "toggleModels": "Показать модели для {provider}"
   },
   "relay": {
     "title": "Бессерверные прокси-ретрансляторы",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "Тело запроса отсутствует.",
     "noResponseBody": "Тело ответа отсутствует.",
     "formatted": "Форматированный",
-    "raw": "Необработанный"
+    "raw": "Необработанный",
+    "requestCount": "{count, plural, one {# запрос} few {# запроса} many {# запросов} other {# запроса}}",
+    "expandList": "Развернуть список",
+    "collapseList": "Свернуть список",
+    "snippetLanguage": "Язык фрагмента кода",
+    "headersTable": "Заголовки",
+    "showSecrets": "Показать секреты",
+    "maskSecrets": "Скрыть секреты",
+    "llmNotAvailable": "Метаданные LLM недоступны для этого запроса.",
+    "llmStreamYes": "да (SSE)",
+    "llmStreamNo": "нет",
+    "llmTotalTokens": "Всего: {count} токенов"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "Доля вызовов, на которые этот провайдер фактически ответил за последние 24 часа. Прочерк означает, что он обработал слишком мало трафика для определения показателя.",
     "reliabilitySample": "Успешно выполнено вызовов: {successes} из {requests} за последние {hours} ч",
     "reliabilityTooFew": "Всего {requests} вызовов за последние {hours} ч — слишком мало для определения показателя",
-    "reliabilityNoTraffic": "За последние 24 ч вызовов не зарегистрировано"
+    "reliabilityNoTraffic": "За последние 24 ч вызовов не зарегистрировано",
+    "categoryFilter": "Категория задачи"
   },
   "discovery": {
     "title": "Поиск провайдеров",
@@ -13341,7 +13423,11 @@
     "method": "Метод",
     "auth": "Аутентификация",
     "feasibility": "Реализуемость",
-    "models": "Модели"
+    "models": "Модели",
+    "provider": "Провайдер",
+    "status": "Статус",
+    "endpoint": "Конечная точка",
+    "actions": "Действия"
   },
   "noAuthProvider": {
     "title": "Аутентификация не требуется",
@@ -13390,7 +13476,8 @@
     "ownProxy": "Собственный прокси",
     "freeTierPause": "Модель {model} приостановлена (429), возврат в {time}",
     "freeTierPauseProvider": "Приостановлено (429), возврат в {time}",
-    "freeTierPauseNote": "Пауза в процессе на этом экземпляре"
+    "freeTierPauseNote": "Пауза в процессе на этом экземпляре",
+    "proxyType": "Тип прокси"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "Вас ждет скрытое достижение...",
         "criteria": "Выполните скрытое достижение, чтобы открыть этот значок."
       }
-    }
+    },
+    "leaderboardTitle": "Таблица лидеров",
+    "leaderboardDescription": "Рейтинги и достижения по вашим API-ключам",
+    "badgeLocked": "Заблокировано"
   },
   "featureFlags": {
     "title": "Флаги функций",
@@ -13858,7 +13948,8 @@
     "unknown": "неизвестно",
     "unknownProvider": "неизвестный провайдер",
     "unknownModel": "неизвестная модель",
-    "resolvedTargetMetrics": "{requests} запр. · {success} усп. · {latency} · квота {quota}"
+    "resolvedTargetMetrics": "{requests} запр. · {success} усп. · {latency} · квота {quota}",
+    "timeRange": "Диапазон времени"
   },
   "usageLimits": {
     "usdUsageQuota": "Квота использования в USD",
@@ -14005,7 +14096,11 @@
     "learnMore": "Подробнее",
     "changelogLoadFailed": "Не удалось загрузить список изменений. Пожалуйста, попробуйте позже.",
     "retry": "Повторить",
-    "viewFullHistory": "Посмотреть полную историю на GitHub"
+    "viewFullHistory": "Посмотреть полную историю на GitHub",
+    "title": "Новости и журнал изменений",
+    "description": "Объявления команды OmniRoute и последние примечания к выпуску",
+    "viewLabel": "Просмотреть",
+    "loadingNews": "Загрузка объявлений..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "Состояние автоматического выключателя провайдера",
       "lastUpdate": "Последнее обновление: {timestamp}",
       "uptimeMinutes": "{minutes}м",
-      "uptimeHoursMinutes": "{hours}ч {minutes}м"
+      "uptimeHoursMinutes": "{hours}ч {minutes}м",
+      "breakerClosed": "Закрыто",
+      "breakerNotClosed": "Открыто или полуоткрыто"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "Детали обслуживания",
         "secondaryAction": "Статус системы"
       }
+    },
+    "miniapp": {
+      "askAnything": "Спросите что угодно…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "Инструмент MCP",
     "scope": "Область",
-    "apiKey": "API-ключ"
+    "apiKey": "API-ключ",
+    "visibleCount": "Отображается: {visible} / всего: {total}",
+    "modeLabel": "Режим просмотра",
+    "jumpToNow": "Перейти к текущему времени; линия «СЕЙЧАС» вернётся в позицию {position}%",
+    "laneReuse": "Повторное использование дорожки",
+    "laneReuseLabel": "Окно повторного использования дорожки (в минутах)",
+    "laneReuseHint": "Запросы с одинаковым идентификатором диалога остаются в одной строке временной шкалы, если интервал между ними не превышает указанного количества минут.",
+    "laneReuseUnit": "мин",
+    "autoRefresh": "Автообновление",
+    "autoRefreshLabel": "Интервал автообновления (в секундах)",
+    "autoRefreshHint": "Частота повторного получения списка запросов с сервера для временной шкалы.",
+    "autoRefreshUnit": "с",
+    "zoomOut": "Уменьшить масштаб",
+    "zoomIn": "Увеличить масштаб"
   },
   "metadata": {
     "compressionTitle": "Сжатие",

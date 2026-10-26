@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "{count, plural, one {# தொகுப்பு} other {# தொகுப்புகள்}}",
     "batchFilePreview": "முன்காட்சி",
     "batchFilePreviewTruncated": "முதல் {shown} வரிகளை காட்டு ({total} மொத்த வரிகள்)",
-    "batchFileDownloadFull": "முழு கோப்பை பதிவிறக்கம் செய்க"
+    "batchFileDownloadFull": "முழு கோப்பை பதிவிறக்கம் செய்க",
+    "dialogTitleFallback": "உரையாடல் பெட்டி",
+    "pagination": "பக்கப் பிரிப்பு",
+    "clearFilters": "வடிப்பான்களை அழி",
+    "tokensPageTitle": "டோக்கன்கள்",
+    "tokensPageDescription": "API விசைகளுக்கு இடையே டோக்கன்களை அனுப்பவும், அழைப்புக் குறியீடுகளைப் பகிரவும், சமூக சேவையகங்களை இணைக்கவும்.",
+    "tokensServerUrlLabel": "சேவையக URL"
   },
   "disabled": "முடக்கப்பட்டது",
   "featureFlagOmnirouteEmergencyFallbackDescription": "பட்ஜெட் தீர்ந்த கோரிக்கைகளை அவசரகால இலவச ஃபால்பேக் வழங்குநர்/மாடலுக்கு வழிசெலுத்துங்கள்.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 அல்லது @channelname",
       "chatIdHint": "சாட்/சேனலின் தனித்துவமான எண் அடையாளங்காட்டி அல்லது பொதுப் பயனர் பெயர்.",
       "tutorial": "Telegram வெப்ஹூக்கை எவ்வாறு கட்டமைப்பது:"
-    }
+    },
+    "copy": "நகலெடு",
+    "copied": "நகலெடுக்கப்பட்டது!",
+    "expandDetails": "விவரங்களைக் காட்டு",
+    "collapseDetails": "விவரங்களை மறை"
   },
   "compliance": {
     "auditTitle": "தணிக்கை",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "அழைப்புகள் (24மா)",
     "mcpMetricSuccessRate": "வெற்றி வீதம்",
     "mcpMetricAvgDuration": "சராசரி காலம்",
-    "mcpMetricTopTool": "மேலான கருவி"
+    "mcpMetricTopTool": "மேலான கருவி",
+    "dismissError": "பிழையை நிராகரி"
   },
   "themesPage": {
     "title": "தீம்கள்",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "மேம்பட்ட பேலோடு விதிகள், கோரிக்கை வரம்புகள் மற்றும் ப்ராக்ஸி API அமைப்புகள்",
     "mitmProxyDescription": "போக்குவரத்து ஆய்வு மற்றும் பிழைத்திருத்தத்திற்கான MITM ப்ராக்ஸி அமைப்புகளை உள்ளமைக்கவும்",
     "oneProxyDescription": "மேம்பட்ட ப்ராக்ஸி சங்கிலியிடலுக்கான 1Proxy அமைப்புகளை உள்ளமைக்கவும்",
-    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்"
+    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்",
+    "openMenu": "பட்டியைத் திற",
+    "products": "Keak தயாரிப்புகள்"
   },
   "cloudSyncStatus": {
     "synced": "ஒத்திசைக்கப்பட்டது",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "விருப்ப இணைப்புகள்",
     "preferredConnectionsDesc": "ஒவ்வொரு விசைக்குமான முன்னுரிமை வரிசை. விருப்ப இணைப்பு கிடைக்கவில்லை என்றால், ரூட்டிங் அடுத்த தகுதியான இணைப்புக்கு மாறும்.",
     "preferredConnectionsNone": "எந்த விருப்பமும் அமைக்கப்படவில்லை — இயல்புநிலை ரூட்டிங் உத்தி பயன்படுத்தப்படுகிறது.",
-    "preferredConnectionsClear": "அழி"
+    "preferredConnectionsClear": "அழி",
+    "removeSelection": "{name} என்பதை அகற்று"
   },
   "auditLog": {
     "title": "தணிக்கைப் பதிவு",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Modality Bridge அமைப்புகளில் Image→Text பாலத்தை கட்டமைக்கவும்",
     "sttBridgeCta": "Modality Bridge அமைப்புகளில் Speech→Text பாலத்தை அமைக்கவும்",
     "existingConnection": "இருக்கிற இணைப்பு",
-    "openrouterSttDescription": "OpenRouter பேச்சு-இலக்கணம் மாதிரிகள் உங்கள் கட்டமைக்கப்பட்ட OpenRouter இணைப்பைப் பயன்படுத்துகின்றன. தனித்துவமான அங்கீகாரம் தேவை இல்லை."
+    "openrouterSttDescription": "OpenRouter பேச்சு-இலக்கணம் மாதிரிகள் உங்கள் கட்டமைக்கப்பட்ட OpenRouter இணைப்பைப் பயன்படுத்துகின்றன. தனித்துவமான அங்கீகாரம் தேவை இல்லை.",
+    "modalityTabsAria": "ஊடக வகை",
+    "serviceKindsAria": "சேவை வகை"
   },
   "search": {
     "searchQuery": "தேடல் வினவல்",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "அறியப்படாதது",
     "cliproxyapiUpdate": "புதுப்பிக்கவும்",
     "cliproxyapiUpdateAvailable": "புதுப்பிப்பு கிடைக்கிறது: v{current} → v{latest}",
-    "cliproxyapiVersion": "பதிப்பு"
+    "cliproxyapiVersion": "பதிப்பு",
+    "removeMapping": "மேப்பிங்கை அகற்று"
   },
   "modelCatalog": {
     "title": "மாடல்கள் & காம்போக்கள்",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "இந்த டெம்ப்ளேட்டுடன் பொருந்தும் தற்போதைய இணைக்கப்பட்ட வழங்குநர்கள்/மாதிரிகளை திருத்தக்கூடிய கம்போவில் எடுக்கும்.",
     "duplicateAutoComboFailedPrefix": "ஆட்டோகம்போ நகலெடுத்தல் தோல்வியடைந்தது:",
     "duplicateAutoComboUnknownError": "அறியப்படாத பிழை",
-    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்"
+    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்",
+    "weightPercent": "எடை (%)",
+    "clearSearch": "தேடலை அழி",
+    "responseValidationRemoveCheck": "சரிபார்ப்பை அகற்று",
+    "responseValidationPath": "JSON பாதை",
+    "responseValidationCondition": "நிபந்தனை",
+    "responseValidationValue": "எதிர்பார்க்கப்படும் மதிப்பு"
   },
   "costs": {
     "title": "செலவுகள்",
@@ -5293,7 +5316,8 @@
         "skipped": "முன்னதாக கட்டமைக்கப்பட்டுள்ளது",
         "failed": "தோல்வி"
       }
-    }
+    },
+    "stepProgress": "அமைவு முன்னேற்றம்"
   },
   "providers": {
     "tosAvoidNoticeTitle": "இந்த வழங்குநர் இயல்பாக auto-விலிருந்து விலக்கப்பட்டுள்ளார்",
@@ -8956,7 +8980,8 @@
       "statsTitle": "மறுதொடக்கத்திற்குப் பின் கண்டறிதல்கள்",
       "statsEmpty": "இதுவரை கண்டறிதல்கள் இல்லை.",
       "statsRequest": "கோரிக்கைகள்"
-    }
+    },
+    "modelOverrideKey": "மேலெழுதும் விசை"
   },
   "contextRtk": {
     "title": "RTK எஞ்சின்",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "வெற்றிபெற்றது",
     "tomlTestFailed": "தோல்வியடைந்தது",
     "tomlImportError": "RTK TOML கோப்பை செயலாக்க முடியவில்லை.",
-    "tomlFileReadError": "தேர்ந்தெடுக்கப்பட்ட TOML கோப்பைப் படிக்க முடியவில்லை."
+    "tomlFileReadError": "தேர்ந்தெடுக்கப்பட்ட TOML கோப்பைப் படிக்க முடியவில்லை.",
+    "viewMode": "காட்சி முறை"
   },
   "compressionEngineConfig": {
     "loading": "ஏற்றுகிறது…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "மொழிப் பொதிகள்: {packs}",
     "dragToReorder": "படியை மறுவரிசைப்படுத்த இழுக்கவும்",
     "engine": "எஞ்சின்",
-    "intensity": "தீவிரம்"
+    "intensity": "தீவிரம்",
+    "compressionOverride": "சுருக்க மேலெழுதல்"
   },
   "compressionStudio": {
     "noRun": "சுருக்க இயக்கம் எதுவும் கிடைக்கவில்லை.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "வெற்றியாளர்: {winner}",
     "encoder": "என்கோடர்",
     "bytes": "பைட்டுகள்",
-    "tokensCl100k": "டோக்கன்கள் (cl100k)"
+    "tokensCl100k": "டோக்கன்கள் (cl100k)",
+    "studioViews": "Studio காட்சிகள்"
   },
   "omniglyph": {
     "preview": "முன்னோட்டம்",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "இதை விட குறைவான செய்திகள் சுருக்கப்படாது. கீழ் = அதிக சுருக்கம்.",
     "tooltipMinSavings": "குறைந்தபட்சம் இத்தனை டோக்கன்களைச் சேமித்தால் மட்டுமே சுருக்கவும்.",
     "ultraSettings": "அல்ட்ரா அமைப்புகள்",
-    "ultraSettingsDesc": "SLM-இயங்கும் சொற்பொருள் சுருக்கம்"
+    "ultraSettingsDesc": "SLM-இயங்கும் சொற்பொருள் சுருக்கம்",
+    "defaultLanguage": "இயல்புநிலை மொழி",
+    "viewMode": "காட்சி முறை"
   },
   "translator": {
     "title": "மொழிபெயர்ப்பி",
@@ -11087,7 +11117,8 @@
       "message": "செய்தி",
       "error": "பிழை",
       "completion": "நிறைவு"
-    }
+    },
+    "statusFilter": "நிலை"
   },
   "templateNames": {
     "simple-chat": "எளிய அரட்டை",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes}m முன்",
     "hoursAgo": "{hours}h முன்",
     "daysAgo": "{days}d முன்",
-    "entries": "பதிவுகள்"
+    "entries": "பதிவுகள்",
+    "viewSwitcherAria": "தற்காலிகச் சேமிப்பகக் காட்சி"
   },
   "proxyConfigModal": {
     "levelGlobal": "உலகளாவிய",
@@ -11613,7 +11645,8 @@
     "notMeasured": "அளவிடப்படவில்லை",
     "upstream4xx": "{count} மேல்நிலை கிளையண்ட் பிழைகள்",
     "upstream5xx": "{count} மேல்நிலை சர்வர் பிழைகள்",
-    "uniformEgressLine": "{provider} இல் {exits} வெளியேற்றங்களில் {affected} ஒன்றாகத் தோல்வியடைகின்றன (கடந்த {hours} மணிநேரம்) — வெளியேற்றப் பிரச்சினை அல்ல"
+    "uniformEgressLine": "{provider} இல் {exits} வெளியேற்றங்களில் {affected} ஒன்றாகத் தோல்வியடைகின்றன (கடந்த {hours} மணிநேரம்) — வெளியேற்றப் பிரச்சினை அல்ல",
+    "moreActions": "மேலும் செயல்கள்"
   },
   "playground": {
     "title": "மாதிரி சோதனைக்களம்",
@@ -11819,7 +11852,8 @@
       "nextButton": "அடுத்து",
       "runButton": "இயக்கு",
       "promptPlaceholder": "உங்கள் செய்தியை உள்ளிடவும்… (அனுப்ப Enter, புதிய வரிக்காக Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground முறைகள்"
   },
   "miniPlayground": {
     "endpoint": "இறுதிப்புள்ளி",
@@ -11890,7 +11924,8 @@
     "assistant": "உதவியாளர்",
     "errorLabel": "பிழை",
     "requestFailed": "கோரிக்கை தோல்வியடைந்தது",
-    "stop": "நிறுத்து"
+    "stop": "நிறுத்து",
+    "messageInputAria": "செய்தி"
   },
   "requestLogger": {
     "recording": "பதிவுசெய்கிறது",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} கணக்கு சுழற்சிகள்",
       "resilienceRetried": "வெற்று முறை மீண்டும் முயற்சிக்கப்பட்டது",
       "resilienceContinued": "ஸ்ட்ரீமின் நடுவில் தொடரப்பட்டது",
-      "resilienceRecovered": "மீள்தன்மை செயலால் மீட்கப்பட்டது"
-    }
+      "resilienceRecovered": "மீள்தன்மை செயலால் மீட்கப்பட்டது",
+      "conversationContext": "உரையாடல் சூழல்",
+      "goToBottom": "கீழே செல்",
+      "liveRefreshOn": "நேரடிப் புதுப்பிப்பு: இயக்கத்தில்",
+      "liveRefreshOff": "நேரடிப் புதுப்பிப்பு: முடக்கப்பட்டுள்ளது",
+      "liveRefresh": "நேரடிப் புதுப்பிப்பு",
+      "continuesFromParent": "பெற்றோரிலிருந்து தொடர்கிறது",
+      "continuesFrom": "{id} இலிருந்து தொடர்கிறது",
+      "viewConversation": "உரையாடலைக் காண்க",
+      "openConversation": "{id} உரையாடலைத் திறக்கவும்"
+    },
+    "tableLabel": "கோரிக்கைப் பதிவுகள்"
   },
   "proxyLogger": {
     "filterAll": "அனைத்தும்",
@@ -12123,7 +12168,9 @@
     "colServedBy": "சேவையளிக்கப்படுகிறது",
     "filterTraffic": "போக்குவரத்து",
     "filterTests": "சோதனைகள்",
-    "filterSource": "மூலம்"
+    "filterSource": "மூலம்",
+    "tableLabel": "பதிலாள் பதிவுகள்",
+    "sortLogs": "பதிவுகளை வரிசைப்படுத்துக"
   },
   "endpointOptions": {
     "speech": "பேச்சு",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "தீர்ந்துவிட்டது",
     "statusAlerting": "எச்சரிக்கை நிலையில்",
     "statusError": "பிழை",
-    "moreSuffix": "+{count} கூடுதல்"
+    "moreSuffix": "+{count} கூடுதல்",
+    "feedFilterLabel": "நிகழ்வுகளை வடிகட்டுக"
   },
   "quotaShare": {
     "weightPercent": "எடை %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "குழுப்படுத்தப்படாதவை",
     "ungroupedHint": "இந்தப் பூல்கள் அறியப்பட்ட எந்தக் குழுவிலும் ஒதுக்கப்படவில்லை. ஒரு பூலை உண்மையான குழுவிற்கு நகர்த்த அதைத் திருத்தவும்.",
     "removeFailed": "இந்தத் தொகுப்பை அகற்ற முடியவில்லை.",
-    "dismiss": "மூடு"
+    "dismiss": "மூடு",
+    "allocationsHeading": "ஒதுக்கீடுகள்",
+    "wizardRemoveDimension": "பரிமாணத்தை அகற்றுக",
+    "wizardRemoveKey": "விசையை அகற்றுக"
   },
   "plugins": {
     "title": "செருகுநிரல்கள்",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "அமைப்புகள் புதுப்பிப்பு தோல்வியடைந்தது",
       "serviceRevealApiKey": "{actor} {target}-க்கான API விசையை வெளிப்படுத்தினார்",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "பிழையை நிராகரிக்கவும்"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "இப்போது செல்",
       "message": "MITM Proxy இப்போது AgentBridge-இன் கீழ் உள்ளது.",
       "title": "இந்தப் பக்கம் மாற்றப்பட்டுள்ளது"
-    }
+    },
+    "dnsOn": "DNS இயக்கத்தில் உள்ளது",
+    "dnsOff": "DNS முடக்கப்பட்டுள்ளது",
+    "showServerSettings": "சேவையக அமைப்புகளைக் காட்டுக",
+    "hideServerSettings": "சேவையக அமைப்புகளை மறைக்கவும்",
+    "upstreamCaTesting": "சோதிக்கப்படுகிறது…",
+    "removeMapping": "மேப்பிங்கை அகற்றுக",
+    "mappingSourcePlaceholder": "எ.கா., gemini-3.6-flash-medium, அல்லது மேப்பிங் செய்யப்படாத அனைத்திற்கும் *",
+    "mappingWildcardHint": "வெளிப்படையான மேப்பிங் இல்லாத ஒவ்வொரு மாடலையும் OmniRoute வழியாகத் தேர்ந்தெடுக்கப்பட்ட இலக்கிற்கு அனுப்ப, மூலமாக *-ஐப் பயன்படுத்தவும். துல்லியமான மூலப் பொருத்தங்கள் எப்போதும் *-ஐ விட முன்னுரிமை பெறும்.",
+    "wizardDetectingModels": "இடைமறிக்கப்பட்ட போக்குவரத்திலிருந்து மாடல்கள் கண்டறியப்படுகின்றன...",
+    "wizardDetectedModels": "இடைமறிக்கப்பட்ட போக்குவரத்தில் {count, plural, one {# மாடல்} other {# மாடல்கள்}} கண்டறியப்பட்டன. நீங்கள் சேர்க்க விரும்புவனவற்றைத் தேர்ந்தெடுக்கவும்:",
+    "wizardSelectedModels": "{count, plural, one {# மாடல்} other {# மாடல்கள்}} தேர்ந்தெடுக்கப்பட்டன. அடுத்த திரையில் அவற்றை OmniRoute மாடல்களுடன் மேப்பிங் செய்வீர்கள்.",
+    "wizardAddModels": "{count, plural, one {# மாடலை} other {# மாடல்களை}} சேர்க்கவும்",
+    "wizardNoModelsDetected": "இதுவரை எந்த மாடலும் கண்டறியப்படவில்லை. ஒரு கோரிக்கையைச் செய்ய {agent}-ஐப் பயன்படுத்தி, பின்னர் போக்குவரத்திலிருந்து மாடல்களைத் தானாகக் கண்டறிய இந்த வழிகாட்டியை மீண்டும் இயக்கவும்.",
+    "wizardNoModelsHint": "அல்லது இந்த வழிகாட்டியை மூடிவிட்டு, முகவர் அட்டையில் மேப்பிங்குகளை கைமுறையாகச் சேர்க்கவும்."
   },
   "providerStats": {
     "unknownError": "தெரியாத பிழை",
@@ -12696,7 +12762,11 @@
     "avgTtft": "சராசரி TTFT",
     "avgTotal": "சராசரி மொத்தம்",
     "requestTelemetry": "கோரிக்கை டெலிமெட்ரி",
-    "requestTelemetryDescription": "7-கட்ட பைப்லைன் விவரப்பிரிப்பு (கடைசி 5 நிமிடங்கள்)"
+    "requestTelemetryDescription": "7-கட்ட பைப்லைன் விவரப்பிரிப்பு (கடைசி 5 நிமிடங்கள்)",
+    "title": "வழங்குநர் புள்ளிவிவரங்கள்",
+    "description": "ஒவ்வொரு வழங்குநர் மற்றும் மாடலுக்குமான போக்குவரத்து, தாமதம் மற்றும் வெற்றி விகிதங்கள்",
+    "combo": "சேர்க்கை",
+    "toggleModels": "{provider} மாடல்களைக் காட்டுக"
   },
   "relay": {
     "title": "சர்வர்லெஸ் ரிலே ப்ராக்ஸிகள்",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "கோரிக்கை உடல் இல்லை.",
     "noResponseBody": "பதில் உடல் இல்லை.",
     "formatted": "வடிவமைக்கப்பட்டது",
-    "raw": "மூல"
+    "raw": "மூல",
+    "requestCount": "{count, plural, one {# கோரிக்கை} other {# கோரிக்கைகள்}}",
+    "expandList": "பட்டியலை விரிவாக்குக",
+    "collapseList": "பட்டியலைச் சுருக்குக",
+    "snippetLanguage": "குறியீட்டுத் துணுக்கின் மொழி",
+    "headersTable": "தலைப்புகள்",
+    "showSecrets": "இரகசியங்களைக் காட்டுக",
+    "maskSecrets": "இரகசியங்களை மறைக்கவும்",
+    "llmNotAvailable": "இந்தக் கோரிக்கைக்கான LLM மெட்டாடேட்டா கிடைக்கவில்லை.",
+    "llmStreamYes": "ஆம் (SSE)",
+    "llmStreamNo": "இல்லை",
+    "llmTotalTokens": "மொத்தம்: {count} டோக்கன்கள்"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "கடந்த 24 மணிநேரத்தில் இந்த வழங்குநர் உண்மையில் பதிலளித்த அழைப்புகளின் விகிதம். கோடு காட்டப்பட்டால், விகிதத்தைக் குறிப்பிட முடியாத அளவிற்கு மிகக் குறைந்த போக்குவரத்தையே அது கையாண்டது என்று பொருள்.",
     "reliabilitySample": "கடந்த {hours} மணிநேரத்தில் {requests} அழைப்புகளில் {successes} வெற்றிபெற்றன",
     "reliabilityTooFew": "கடந்த {hours} மணிநேரத்தில் {requests} அழைப்புகள் மட்டுமே — விகிதத்தைக் குறிப்பிடப் போதுமானவை அல்ல",
-    "reliabilityNoTraffic": "கடந்த 24 மணிநேரத்தில் அழைப்புகள் எதுவும் பதிவாகவில்லை"
+    "reliabilityNoTraffic": "கடந்த 24 மணிநேரத்தில் அழைப்புகள் எதுவும் பதிவாகவில்லை",
+    "categoryFilter": "பணி வகை"
   },
   "discovery": {
     "title": "வழங்குநர் கண்டறிதல்",
@@ -13341,7 +13423,11 @@
     "method": "முறை",
     "auth": "அங்கீகாரம்",
     "feasibility": "சாத்தியக்கூறு",
-    "models": "மாதிரிகள்"
+    "models": "மாதிரிகள்",
+    "provider": "வழங்குநர்",
+    "status": "நிலை",
+    "endpoint": "முனைப்புள்ளி",
+    "actions": "செயல்கள்"
   },
   "noAuthProvider": {
     "title": "அங்கீகாரம் தேவையில்லை",
@@ -13390,7 +13476,8 @@
     "ownProxy": "சொந்த ப்ராக்ஸி",
     "freeTierPause": "மாதிரி {model} இடைநிறுத்தப்பட்டது (429), {time} அன்று மீண்டும்",
     "freeTierPauseProvider": "இடைநிறுத்தப்பட்டது (429), {time} அன்று மீண்டும்",
-    "freeTierPauseNote": "இந்த நிகழ்வில் செயல்முறை இடையே இடைநிறுத்தம்"
+    "freeTierPauseNote": "இந்த நிகழ்வில் செயல்முறை இடையே இடைநிறுத்தம்",
+    "proxyType": "பதிலாள் வகை"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "ஒரு மறைக்கப்பட்ட சாதனை காத்திருக்கிறது...",
         "criteria": "இந்த பேட்ஜை வெளிப்படுத்த மறைக்கப்பட்ட சாதனையை முடிக்கவும்."
       }
-    }
+    },
+    "leaderboardTitle": "தரவரிசைப் பட்டியல்",
+    "leaderboardDescription": "உங்கள் API விசைகள் அனைத்திற்குமான தரவரிசைகள் மற்றும் சாதனைகள்",
+    "badgeLocked": "பூட்டப்பட்டது"
   },
   "featureFlags": {
     "title": "அம்சக் கொடிகள்",
@@ -13858,7 +13948,8 @@
     "unknown": "தெரியாதது",
     "unknownProvider": "தெரியாத வழங்குநர்",
     "unknownModel": "தெரியாத மாதிரி",
-    "resolvedTargetMetrics": "{requests} req · {success} வெற்றி · {latency} · ஒதுக்கீடு {quota}"
+    "resolvedTargetMetrics": "{requests} req · {success} வெற்றி · {latency} · ஒதுக்கீடு {quota}",
+    "timeRange": "கால வரம்பு"
   },
   "usageLimits": {
     "usdUsageQuota": "USD பயன்பாட்டு ஒதுக்கீடு",
@@ -14005,7 +14096,11 @@
     "learnMore": "மேலும் அறிய",
     "changelogLoadFailed": "மாற்றங்களின் பதிவை ஏற்ற முடியவில்லை. பின்னர் மீண்டும் முயற்சிக்கவும்.",
     "retry": "மீண்டும் முயற்சி செய்",
-    "viewFullHistory": "GitHub இல் முழு வரலாற்றையும் காண்க"
+    "viewFullHistory": "GitHub இல் முழு வரலாற்றையும் காண்க",
+    "title": "செய்திகள் & மாற்றப் பதிவு",
+    "description": "OmniRoute குழுவின் அறிவிப்புகள் மற்றும் சமீபத்திய வெளியீட்டுக் குறிப்புகள்",
+    "viewLabel": "காண்க",
+    "loadingNews": "அறிவிப்புகள் ஏற்றப்படுகின்றன..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "சேவையாளர் சுற்று முறிவு மாநிலம்",
       "lastUpdate": "கடைசி புதுப்பிப்பு: {timestamp}",
       "uptimeMinutes": "{minutes}மி",
-      "uptimeHoursMinutes": "{hours}மணி {minutes}நிமிடம்"
+      "uptimeHoursMinutes": "{hours}மணி {minutes}நிமிடம்",
+      "breakerClosed": "மூடப்பட்டது",
+      "breakerNotClosed": "திறந்துள்ளது அல்லது பகுதியளவு திறந்துள்ளது"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "பராமரிப்பு விவரங்கள்",
         "secondaryAction": "அமைப்பு நிலை"
       }
+    },
+    "miniapp": {
+      "askAnything": "எதையும் கேளுங்கள்…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} காணக்கூடியவை / மொத்தம் {total}",
+    "modeLabel": "காட்சி முறை",
+    "jumpToNow": "தற்போதைய நேரத்திற்குச் செல்லவும்; NOW கோடு {position}% நிலைக்கு மீட்டமைக்கப்படும்",
+    "laneReuse": "வரிசை மறுபயன்பாடு",
+    "laneReuseLabel": "வரிசை மறுபயன்பாட்டுச் சாளரம் (நிமிடங்கள்)",
+    "laneReuseHint": "ஒரே உரையாடல் id-ஐப் பகிரும் கோரிக்கைகளுக்கு இடையிலான இடைவெளி இத்தனை நிமிடங்களுக்குள் இருந்தால், அவை ஒரே காலவரிசை வரிசையில் இருக்கும்.",
+    "laneReuseUnit": "நிமி",
+    "autoRefresh": "தானாகப் புதுப்பித்தல்",
+    "autoRefreshLabel": "தானாகப் புதுப்பிக்கும் இடைவெளி (விநாடிகள்)",
+    "autoRefreshHint": "சேவையகத்திலிருந்து கோரிக்கைப் பட்டியலைக் காலவரிசை எவ்வளவு அடிக்கடி மீண்டும் பெறும்.",
+    "autoRefreshUnit": "வி",
+    "zoomOut": "சிறிதாக்கு",
+    "zoomIn": "பெரிதாக்கு"
   },
   "metadata": {
     "compressionTitle": "சுருக்கம்",

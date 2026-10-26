@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "{count, plural, one {#ଟି ବ୍ୟାଚ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ} other {#ଟି ବ୍ୟାଚ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ}}",
     "batchFilePreview": "ପୂର୍ବାବଲୋକନ",
     "batchFilePreviewTruncated": "ପ୍ରଥମ {shown}ଟି ଧାଡ଼ି ଦେଖାଯାଉଛି (ମୋଟ {total}ଟି ଧାଡ଼ି)",
-    "batchFileDownloadFull": "ସମ୍ପୂର୍ଣ୍ଣ ଫାଇଲ୍ ଡାଉନଲୋଡ୍ କରନ୍ତୁ"
+    "batchFileDownloadFull": "ସମ୍ପୂର୍ଣ୍ଣ ଫାଇଲ୍ ଡାଉନଲୋଡ୍ କରନ୍ତୁ",
+    "dialogTitleFallback": "ଡାଏଲଗ୍",
+    "pagination": "ପୃଷ୍ଠାଙ୍କନ",
+    "clearFilters": "ଫିଲ୍ଟରଗୁଡ଼ିକ ସଫା କରନ୍ତୁ",
+    "tokensPageTitle": "ଟୋକେନ୍ଗୁଡ଼ିକ",
+    "tokensPageDescription": "API କୀଗୁଡ଼ିକ ମଧ୍ୟରେ ଟୋକେନ୍ ପଠାନ୍ତୁ, ଆମନ୍ତ୍ରଣ କୋଡ୍ଗୁଡ଼ିକ ସେୟାର୍ କରନ୍ତୁ ଏବଂ କମ୍ୟୁନିଟି ସର୍ଭରଗୁଡ଼ିକୁ ସଂଯୋଗ କରନ୍ତୁ।",
+    "tokensServerUrlLabel": "ସର୍ଭର URL"
   },
   "disabled": "ଅକ୍ଷମ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ବଜେଟ୍ ଶେଷ ହୋଇଥିବା ଅନୁରୋଧଗୁଡ଼ିକୁ ଜରୁରୀକାଳୀନ ମାଗଣା ଫଲ୍ବ୍ୟାକ୍ ପ୍ରଦାତା/ମଡେଲ୍କୁ ରୁଟ୍ କରନ୍ତୁ।",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 କିମ୍ବା @channelname",
       "chatIdHint": "ଚାଟ୍/ଚ୍ୟାନେଲ୍ର ଅନନ୍ୟ ସାଂଖ୍ୟିକ ପରିଚୟକ କିମ୍ବା ସାର୍ବଜନୀନ ବ୍ୟବହାରକାରୀ ନାମ।",
       "tutorial": "Telegram ୱେବହୁକ୍ କିପରି ବିନ୍ୟାସ କରିବେ:"
-    }
+    },
+    "copy": "କପି କରନ୍ତୁ",
+    "copied": "କପି ହୋଇଛି!",
+    "expandDetails": "ବିବରଣୀ ଦେଖାନ୍ତୁ",
+    "collapseDetails": "ବିବରଣୀ ଲୁଚାନ୍ତୁ"
   },
   "compliance": {
     "auditTitle": "ଅଡିଟ୍",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "କଲ୍ (24h)",
     "mcpMetricSuccessRate": "ସଫଳତା ହାର",
     "mcpMetricAvgDuration": "ହାରାହାରି ଅବଧି",
-    "mcpMetricTopTool": "ଶୀର୍ଷ ଟୁଲ୍"
+    "mcpMetricTopTool": "ଶୀର୍ଷ ଟୁଲ୍",
+    "dismissError": "ତ୍ରୁଟି ଖାରଜ କରନ୍ତୁ"
   },
   "themesPage": {
     "title": "ଥିମ୍ଗୁଡ଼ିକ",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "ଉନ୍ନତ ପେଲୋଡ୍ ନିୟମ, ଅନୁରୋଧ ସୀମା ଏବଂ ପ୍ରକ୍ସି API ସେଟିଂସ୍",
     "mitmProxyDescription": "ଟ୍ରାଫିକ୍ ଯାଞ୍ଚ ଏବଂ ଡିବଗିଂ ପାଇଁ MITM ପ୍ରକ୍ସି ସେଟିଂସ୍ ବିନ୍ୟାସ କରନ୍ତୁ",
     "oneProxyDescription": "ଉନ୍ନତ ପ୍ରକ୍ସି ଚେନିଂ ପାଇଁ 1Proxy ସେଟିଂସ୍ ବିନ୍ୟାସ କରନ୍ତୁ",
-    "omniSkillsDescription": "ସ୍ୱୟଂଚାଳିତ ପ୍ରମ୍ପ୍ଟ ଏବଂ ଟୁଲ୍ ନିଷ୍ପାଦନ ପାଇଁ ସ୍ୟାଣ୍ଡବକ୍ସ ଦକ୍ଷତାଗୁଡ଼ିକ ଇନ୍ଷ୍ଟଲ୍ ଏବଂ ପରିଚାଳନା କରନ୍ତୁ"
+    "omniSkillsDescription": "ସ୍ୱୟଂଚାଳିତ ପ୍ରମ୍ପ୍ଟ ଏବଂ ଟୁଲ୍ ନିଷ୍ପାଦନ ପାଇଁ ସ୍ୟାଣ୍ଡବକ୍ସ ଦକ୍ଷତାଗୁଡ଼ିକ ଇନ୍ଷ୍ଟଲ୍ ଏବଂ ପରିଚାଳନା କରନ୍ତୁ",
+    "openMenu": "ମେନୁ ଖୋଲନ୍ତୁ",
+    "products": "Keak ଉତ୍ପାଦଗୁଡ଼ିକ"
   },
   "cloudSyncStatus": {
     "synced": "ସିଙ୍କ୍ ହୋଇଛି",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "ପସନ୍ଦର ସଂଯୋଗଗୁଡ଼ିକ",
     "preferredConnectionsDesc": "ପ୍ରତ୍ୟେକ କି ପାଇଁ ପ୍ରାଥମିକତା କ୍ରମ। ଯଦି ପସନ୍ଦର ସଂଯୋଗ ଉପଲବ୍ଧ ନଥାଏ, ରାଉଟିଂ ପରବର୍ତ୍ତୀ ଯୋଗ୍ୟ ସଂଯୋଗକୁ ଯାଏ।",
     "preferredConnectionsNone": "କୌଣସି ପସନ୍ଦ ସେଟ୍ କରାଯାଇନାହିଁ — ଡିଫଲ୍ଟ ରାଉଟିଂ କୌଶଳ ବ୍ୟବହୃତ ହୁଏ।",
-    "preferredConnectionsClear": "ସଫା କରନ୍ତୁ"
+    "preferredConnectionsClear": "ସଫା କରନ୍ତୁ",
+    "removeSelection": "{name} ହଟାନ୍ତୁ"
   },
   "auditLog": {
     "title": "ଅଡିଟ୍ ଲଗ୍",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Modality Bridge ସେଟିଂସ୍ରେ ଛବି→ଟେକ୍ସଟ୍ ବ୍ରିଜ୍ ବିନ୍ୟାସ କରନ୍ତୁ",
     "sttBridgeCta": "Modality Bridge ସେଟିଂସ୍ରେ ସ୍ପିଚ୍→ଟେକ୍ସଟ୍ ବ୍ରିଜ୍ ବିନ୍ୟାସ କରନ୍ତୁ",
     "existingConnection": "ବିଦ୍ୟମାନ ସଂଯୋଗ",
-    "openrouterSttDescription": "OpenRouter ସ୍ପିଚ୍-ଟୁ-ଟେକ୍ସଟ୍ ମଡେଲ୍ଗୁଡ଼ିକ ଆପଣଙ୍କ ବିନ୍ୟାସିତ OpenRouter ସଂଯୋଗ ବ୍ୟବହାର କରନ୍ତି। କୌଣସି ପୃଥକ ପ୍ରମାଣପତ୍ର ଆବଶ୍ୟକ ନୁହେଁ।"
+    "openrouterSttDescription": "OpenRouter ସ୍ପିଚ୍-ଟୁ-ଟେକ୍ସଟ୍ ମଡେଲ୍ଗୁଡ଼ିକ ଆପଣଙ୍କ ବିନ୍ୟାସିତ OpenRouter ସଂଯୋଗ ବ୍ୟବହାର କରନ୍ତି। କୌଣସି ପୃଥକ ପ୍ରମାଣପତ୍ର ଆବଶ୍ୟକ ନୁହେଁ।",
+    "modalityTabsAria": "ମିଡିଆ ପ୍ରକାର",
+    "serviceKindsAria": "ସେବା ପ୍ରକାର"
   },
   "search": {
     "searchQuery": "ସନ୍ଧାନ କ୍ୱେରୀ",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "ଅଜଣା",
     "cliproxyapiUpdate": "ଅପଡେଟ୍ କରନ୍ତୁ",
     "cliproxyapiUpdateAvailable": "ଅପଡେଟ୍ ଉପଲବ୍ଧ: v{current} → v{latest}",
-    "cliproxyapiVersion": "ସଂସ୍କରଣ"
+    "cliproxyapiVersion": "ସଂସ୍କରଣ",
+    "removeMapping": "ମ୍ୟାପିଂ ହଟାନ୍ତୁ"
   },
   "modelCatalog": {
     "title": "ମଡେଲ୍ ଏବଂ କମ୍ବୋ",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "ଏହା ଏହି ଟେମ୍ପ୍ଲେଟ୍ ସହ ମେଳ ଖାଉଥିବା ବର୍ତ୍ତମାନ ସଂଯୁକ୍ତ ପ୍ରଦାନକାରୀ/ମଡେଲ୍ଗୁଡ଼ିକର ଏକ ସ୍ନାପ୍ସଟ୍ ନେଇ ତାହାକୁ ଏକ ସମ୍ପାଦନଯୋଗ୍ୟ କମ୍ବୋରେ ପରିଣତ କରିବ।",
     "duplicateAutoComboFailedPrefix": "ସ୍ୱୟଂଚାଳିତ କମ୍ବୋର ନକଲ କରିବାରେ ବିଫଳ:",
     "duplicateAutoComboUnknownError": "ଅଜଣା ତ୍ରୁଟି",
-    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ"
+    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ",
+    "weightPercent": "ଓଜନ (%)",
+    "clearSearch": "ସନ୍ଧାନ ସଫା କରନ୍ତୁ",
+    "responseValidationRemoveCheck": "ଯାଞ୍ଚ ହଟାନ୍ତୁ",
+    "responseValidationPath": "JSON ପଥ",
+    "responseValidationCondition": "ସର୍ତ୍ତ",
+    "responseValidationValue": "ଆଶାକରା ମୂଲ୍ୟ"
   },
   "costs": {
     "title": "ଖର୍ଚ୍ଚ",
@@ -5293,7 +5316,8 @@
         "skipped": "ପୂର୍ବରୁ କନ୍ଫିଗର୍ ହୋଇଛି",
         "failed": "ବିଫଳ"
       }
-    }
+    },
+    "stepProgress": "ସେଟଅପ୍ର ଅଗ୍ରଗତି"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ଏହି ପ୍ରଦାନକାରୀଙ୍କୁ ଡିଫଲ୍ଟ ଭାବେ auto ରୁ ବାଦ୍ ଦିଆଯାଇଛି",
@@ -8956,7 +8980,8 @@
       "statsTitle": "ପୁନଃଆରମ୍ଭ ପରଠାରୁ ଚିହ୍ନଟ",
       "statsEmpty": "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ଚିହ୍ନଟ ନାହିଁ।",
       "statsRequest": "ଅନୁରୋଧ"
-    }
+    },
+    "modelOverrideKey": "ଓଭରରାଇଡ୍ କୀ"
   },
   "contextRtk": {
     "title": "RTK ଇଞ୍ଜିନ୍",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "ସଫଳ",
     "tomlTestFailed": "ବିଫଳ",
     "tomlImportError": "RTK TOML ଫାଇଲ୍କୁ ପ୍ରକ୍ରିୟାକରଣ କରାଯାଇପାରିଲା ନାହିଁ।",
-    "tomlFileReadError": "ଚୟନିତ TOML ଫାଇଲ୍ଟି ପଢ଼ାଯାଇପାରିଲା ନାହିଁ।"
+    "tomlFileReadError": "ଚୟନିତ TOML ଫାଇଲ୍ଟି ପଢ଼ାଯାଇପାରିଲା ନାହିଁ।",
+    "viewMode": "ଦୃଶ୍ୟ ମୋଡ୍"
   },
   "compressionEngineConfig": {
     "loading": "ଲୋଡ୍ ହେଉଛି…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "ଭାଷା ପ୍ୟାକ୍ଗୁଡ଼ିକ: {packs}",
     "dragToReorder": "ପଦକ୍ଷେପର କ୍ରମ ପରିବର୍ତ୍ତନ କରିବାକୁ ଟାଣନ୍ତୁ",
     "engine": "ଇଞ୍ଜିନ୍",
-    "intensity": "ତୀବ୍ରତା"
+    "intensity": "ତୀବ୍ରତା",
+    "compressionOverride": "କମ୍ପ୍ରେସନ୍ ଓଭରରାଇଡ୍"
   },
   "compressionStudio": {
     "noRun": "କୌଣସି ସଂକୋଚନ ରନ୍ ଉପଲବ୍ଧ ନାହିଁ।",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "ବିଜେତା: {winner}",
     "encoder": "ଏନକୋଡର୍",
     "bytes": "ବାଇଟ୍",
-    "tokensCl100k": "ଟୋକନ୍ (cl100k)"
+    "tokensCl100k": "ଟୋକନ୍ (cl100k)",
+    "studioViews": "ଷ୍ଟୁଡିଓ ଦୃଶ୍ୟଗୁଡ଼ିକ"
   },
   "omniglyph": {
     "preview": "ପୂର୍ବାବଲୋକନ",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "ଏହାଠାରୁ ଛୋଟ ସନ୍ଦେଶଗୁଡ଼ିକ ସଙ୍କୁଚିତ ହୁଏ ନାହିଁ। କମ୍ = ଅଧିକ ସଙ୍କୋଚନ।",
     "tooltipMinSavings": "ଅତି କମ୍ରେ ଏତିକି ଟୋକେନ୍ ସଞ୍ଚୟ ହେଲେ ମାତ୍ର ସଙ୍କୁଚିତ କରନ୍ତୁ।",
     "ultraSettings": "ଅଲ୍ଟ୍ରା ସେଟିଂସ୍",
-    "ultraSettingsDesc": "SLM-ଚାଳିତ ଅର୍ଥଗତ ସଙ୍କୋଚନ"
+    "ultraSettingsDesc": "SLM-ଚାଳିତ ଅର୍ଥଗତ ସଙ୍କୋଚନ",
+    "defaultLanguage": "ଡିଫଲ୍ଟ ଭାଷା",
+    "viewMode": "ଦୃଶ୍ୟ ମୋଡ୍"
   },
   "translator": {
     "title": "ଅନୁବାଦକ",
@@ -11087,7 +11117,8 @@
       "message": "ସନ୍ଦେଶ",
       "error": "ତ୍ରୁଟି",
       "completion": "ସମାପ୍ତି"
-    }
+    },
+    "statusFilter": "ସ୍ଥିତି"
   },
   "templateNames": {
     "simple-chat": "ସରଳ ଚାଟ୍",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes} ମିନିଟ୍ ପୂର୍ବେ",
     "hoursAgo": "{hours} ଘଣ୍ଟା ପୂର୍ବେ",
     "daysAgo": "{days} ଦିନ ପୂର୍ବେ",
-    "entries": "ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ"
+    "entries": "ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ",
+    "viewSwitcherAria": "କ୍ୟାଶ୍ ଦୃଶ୍ୟ"
   },
   "proxyConfigModal": {
     "levelGlobal": "ଗ୍ଲୋବାଲ୍",
@@ -11613,7 +11645,8 @@
     "notMeasured": "ମାପ କରାଯାଇନାହିଁ",
     "upstream4xx": "{count} ଉପରି ଗ୍ରାହକ ତ୍ରୁଟିଗୁଡ଼ିକ",
     "upstream5xx": "{count} ଉପରି ସର୍ଭର ତ୍ରୁଟିଗୁଡ଼ିକ",
-    "uniformEgressLine": "{provider}ରେ {exits}ଟି ଏକ୍ଜିଟ୍ ମଧ୍ୟରୁ {affected}ଟି ଏକାଠି ବିଫଳ ହେଉଛି (ଗତ {hours}ଘଣ୍ଟା) — ଏହା ଏକ୍ଜିଟ୍ ସମସ୍ୟା ନୁହେଁ"
+    "uniformEgressLine": "{provider}ରେ {exits}ଟି ଏକ୍ଜିଟ୍ ମଧ୍ୟରୁ {affected}ଟି ଏକାଠି ବିଫଳ ହେଉଛି (ଗତ {hours}ଘଣ୍ଟା) — ଏହା ଏକ୍ଜିଟ୍ ସମସ୍ୟା ନୁହେଁ",
+    "moreActions": "ଅଧିକ କାର୍ଯ୍ୟ"
   },
   "playground": {
     "title": "ମଡେଲ୍ ପ୍ଲେଗ୍ରାଉଣ୍ଡ",
@@ -11819,7 +11852,8 @@
       "nextButton": "ପରବର୍ତ୍ତୀ",
       "runButton": "ଚଲାନ୍ତୁ",
       "promptPlaceholder": "ଆପଣଙ୍କ ସନ୍ଦେଶ ଲେଖନ୍ତୁ… (ପଠାଇବାକୁ Enter, ନୂଆ ଧାଡ଼ି ପାଇଁ Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "ପ୍ଲେଗ୍ରାଉଣ୍ଡ ମୋଡ୍ଗୁଡ଼ିକ"
   },
   "miniPlayground": {
     "endpoint": "ଏଣ୍ଡପଏଣ୍ଟ",
@@ -11890,7 +11924,8 @@
     "assistant": "ସହାୟକ",
     "errorLabel": "ତ୍ରୁଟି",
     "requestFailed": "ଅନୁରୋଧ ବିଫଳ ହେଲା",
-    "stop": "ବନ୍ଦ କରନ୍ତୁ"
+    "stop": "ବନ୍ଦ କରନ୍ତୁ",
+    "messageInputAria": "ସନ୍ଦେଶ"
   },
   "requestLogger": {
     "recording": "ରେକର୍ଡିଂ ଚାଲିଛି",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} ଆକାଉଣ୍ଟ ରୋଟେସନ୍",
       "resilienceRetried": "ଖାଲି ପାଳି ପୁନଃ ଚେଷ୍ଟା କରାଗଲା",
       "resilienceContinued": "ଷ୍ଟ୍ରିମ୍ ମଝିରୁ ପୁନଃ ଆରମ୍ଭ",
-      "resilienceRecovered": "ସ୍ଥିତିସ୍ଥାପକତା କାର୍ଯ୍ୟ ଦ୍ୱାରା ପୁନରୁଦ୍ଧାର"
-    }
+      "resilienceRecovered": "ସ୍ଥିତିସ୍ଥାପକତା କାର୍ଯ୍ୟ ଦ୍ୱାରା ପୁନରୁଦ୍ଧାର",
+      "conversationContext": "ବାର୍ତ୍ତାଳାପ ପ୍ରସଙ୍ଗ",
+      "goToBottom": "ତଳକୁ ଯାଆନ୍ତୁ",
+      "liveRefreshOn": "ଲାଇଭ୍ ରିଫ୍ରେଶ୍: ଚାଲୁ",
+      "liveRefreshOff": "ଲାଇଭ୍ ରିଫ୍ରେଶ୍: ବନ୍ଦ",
+      "liveRefresh": "ଲାଇଭ୍ ରିଫ୍ରେଶ୍",
+      "continuesFromParent": "ପ୍ୟାରେଣ୍ଟରୁ ଜାରି ରହିଛି",
+      "continuesFrom": "{id}ରୁ ଜାରି ରହିଛି",
+      "viewConversation": "ବାର୍ତ୍ତାଳାପ ଦେଖନ୍ତୁ",
+      "openConversation": "ବାର୍ତ୍ତାଳାପ {id} ଖୋଲନ୍ତୁ"
+    },
+    "tableLabel": "ଅନୁରୋଧ ଲଗ୍ଗୁଡ଼ିକ"
   },
   "proxyLogger": {
     "filterAll": "ସବୁ",
@@ -12123,7 +12168,9 @@
     "colServedBy": "ଦ୍ୱାରା ସେବିତ",
     "filterTraffic": "ଟ୍ରାଫିକ୍",
     "filterTests": "ପରୀକ୍ଷା",
-    "filterSource": "ସ୍ରୋତ"
+    "filterSource": "ସ୍ରୋତ",
+    "tableLabel": "ପ୍ରକ୍ସି ଲଗ୍ଗୁଡ଼ିକ",
+    "sortLogs": "ଲଗ୍ଗୁଡ଼ିକ ସଜାନ୍ତୁ"
   },
   "endpointOptions": {
     "speech": "ବାଣୀ",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "ନିଃଶେଷ",
     "statusAlerting": "ସତର୍କତା ଜାରି",
     "statusError": "ତ୍ରୁଟି",
-    "moreSuffix": "+ଆହୁରି {count}ଟି"
+    "moreSuffix": "+ଆହୁରି {count}ଟି",
+    "feedFilterLabel": "ଇଭେଣ୍ଟଗୁଡ଼ିକ ଫିଲ୍ଟର୍ କରନ୍ତୁ"
   },
   "quotaShare": {
     "weightPercent": "ଭାର %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "ଗୋଷ୍ଠୀବିହୀନ",
     "ungroupedHint": "ଏହି ପୁଲ୍ଗୁଡ଼ିକ କୌଣସି ଜଣାଶୁଣା ଗୋଷ୍ଠୀକୁ ନ୍ୟସ୍ତ ହୋଇନାହିଁ। ଏକ ପୁଲ୍କୁ ପ୍ରକୃତ ଗୋଷ୍ଠୀକୁ ସ୍ଥାନାନ୍ତର କରିବା ପାଇଁ ତାହାକୁ ସମ୍ପାଦନା କରନ୍ତୁ।",
     "removeFailed": "ଏହି ପୁଲ୍କୁ ଅପସାରଣ କରାଯାଇପାରିଲା ନାହିଁ।",
-    "dismiss": "ଖାରଜ କରନ୍ତୁ"
+    "dismiss": "ଖାରଜ କରନ୍ତୁ",
+    "allocationsHeading": "ଆବଣ୍ଟନଗୁଡ଼ିକ",
+    "wizardRemoveDimension": "ଆୟାମ ହଟାନ୍ତୁ",
+    "wizardRemoveKey": "କୀ ହଟାନ୍ତୁ"
   },
   "plugins": {
     "title": "ପ୍ଲଗଇନ୍ଗୁଡ଼ିକ",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "ସେଟିଂସ୍ ଅପଡେଟ୍ ବିଫଳ ହେଲା",
       "serviceRevealApiKey": "{actor} {target} ପାଇଁ API କୀ ପ୍ରକାଶ କରିଛନ୍ତି",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "ତ୍ରୁଟି ଖାରଜ କରନ୍ତୁ"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "ଏବେ ଯାଆନ୍ତୁ",
       "message": "MITM Proxy ଏବେ AgentBridge ଅଧୀନରେ ଅଛି।",
       "title": "ଏହି ପୃଷ୍ଠାଟି ସ୍ଥାନାନ୍ତରିତ ହୋଇଛି"
-    }
+    },
+    "dnsOn": "DNS ଚାଲୁ",
+    "dnsOff": "DNS ବନ୍ଦ",
+    "showServerSettings": "ସର୍ଭର୍ ସେଟିଂସ୍ ଦେଖାନ୍ତୁ",
+    "hideServerSettings": "ସର୍ଭର୍ ସେଟିଂସ୍ ଲୁଚାନ୍ତୁ",
+    "upstreamCaTesting": "ପରୀକ୍ଷା କରାଯାଉଛି…",
+    "removeMapping": "ମ୍ୟାପିଂ ହଟାନ୍ତୁ",
+    "mappingSourcePlaceholder": "ଉଦାହରଣସ୍ୱରୂପ, gemini-3.6-flash-medium, କିମ୍ବା ମ୍ୟାପ୍ ହୋଇନଥିବା ସମସ୍ତ ପାଇଁ *",
+    "mappingWildcardHint": "କୌଣସି ସ୍ପଷ୍ଟ ମ୍ୟାପିଂ ନଥିବା ପ୍ରତ୍ୟେକ ମଡେଲ୍କୁ OmniRoute ମାଧ୍ୟମରେ ଚୟନିତ ଲକ୍ଷ୍ୟକୁ ରାଉଟ୍ କରିବା ପାଇଁ ଉତ୍ସ ଭାବେ * ବ୍ୟବହାର କରନ୍ତୁ। ସଠିକ୍ ଉତ୍ସ ମେଳ ସର୍ବଦା * ଠାରୁ ପ୍ରାଥମିକତା ପାଏ।",
+    "wizardDetectingModels": "ଇଣ୍ଟରସେପ୍ଟ କରାଯାଇଥିବା ଟ୍ରାଫିକ୍ରୁ ମଡେଲ୍ଗୁଡ଼ିକ ଚିହ୍ନଟ କରାଯାଉଛି...",
+    "wizardDetectedModels": "ଇଣ୍ଟରସେପ୍ଟ କରାଯାଇଥିବା ଟ୍ରାଫିକ୍ରେ {count, plural, one {#ଟି ମଡେଲ୍} other {#ଟି ମଡେଲ୍}} ମିଳିଛି। ଆପଣ ଯେଉଁଗୁଡ଼ିକ ଯୋଡ଼ିବାକୁ ଚାହାନ୍ତି, ସେଗୁଡ଼ିକ ବାଛନ୍ତୁ:",
+    "wizardSelectedModels": "{count, plural, one {#ଟି ମଡେଲ୍} other {#ଟି ମଡେଲ୍}} ଚୟନ କରାଯାଇଛି। ପରବର୍ତ୍ତୀ ସ୍କ୍ରିନ୍ରେ ଆପଣ ସେଗୁଡ଼ିକୁ OmniRoute ମଡେଲ୍ଗୁଡ଼ିକ ସହିତ ମ୍ୟାପ୍ କରିବେ।",
+    "wizardAddModels": "{count, plural, one {#ଟି ମଡେଲ୍} other {#ଟି ମଡେଲ୍}} ଯୋଡ଼ନ୍ତୁ",
+    "wizardNoModelsDetected": "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ମଡେଲ୍ ଚିହ୍ନଟ ହୋଇନାହିଁ। ଏକ ଅନୁରୋଧ କରିବା ପାଇଁ {agent} ବ୍ୟବହାର କରନ୍ତୁ, ତାପରେ ଟ୍ରାଫିକ୍ରୁ ମଡେଲ୍ଗୁଡ଼ିକୁ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଚିହ୍ନଟ କରିବା ପାଇଁ ଏହି ୱିଜାର୍ଡକୁ ପୁଣି ଚଲାନ୍ତୁ।",
+    "wizardNoModelsHint": "କିମ୍ବା ଏହି ୱିଜାର୍ଡକୁ ବନ୍ଦ କରି ଏଜେଣ୍ଟ କାର୍ଡରେ ମ୍ୟାପିଂଗୁଡ଼ିକ ହସ୍ତଚାଳିତ ଭାବେ ଯୋଡ଼ନ୍ତୁ।"
   },
   "providerStats": {
     "unknownError": "ଅଜଣା ତ୍ରୁଟି",
@@ -12696,7 +12762,11 @@
     "avgTtft": "ହାରାହାରି TTFT",
     "avgTotal": "ହାରାହାରି ମୋଟ",
     "requestTelemetry": "ଅନୁରୋଧ ଟେଲିମେଟ୍ରି",
-    "requestTelemetryDescription": "୭-ପର୍ଯ୍ୟାୟ ପାଇପଲାଇନ୍ ବିଶ୍ଳେଷଣ (ଗତ ୫ ମିନିଟ୍)"
+    "requestTelemetryDescription": "୭-ପର୍ଯ୍ୟାୟ ପାଇପଲାଇନ୍ ବିଶ୍ଳେଷଣ (ଗତ ୫ ମିନିଟ୍)",
+    "title": "ପ୍ରଦାତା ପରିସଂଖ୍ୟାନ",
+    "description": "ପ୍ରତି ପ୍ରଦାତା ଏବଂ ପ୍ରତି ମଡେଲ୍ର ଟ୍ରାଫିକ୍, ବିଳମ୍ବତା ଏବଂ ସଫଳତା ହାର",
+    "combo": "ସଂଯୁକ୍ତ",
+    "toggleModels": "{provider} ପାଇଁ ମଡେଲ୍ଗୁଡ଼ିକ ଦେଖାନ୍ତୁ"
   },
   "relay": {
     "title": "ସର୍ଭରଲେସ୍ ରିଲେ ପ୍ରକ୍ସିଗୁଡ଼ିକ",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "କୌଣସି ଅନୁରୋଧ ବଡି ନାହିଁ।",
     "noResponseBody": "କୌଣସି ପ୍ରତିକ୍ରିୟା ବଡି ନାହିଁ।",
     "formatted": "ଫର୍ମାଟ୍ କରାଯାଇଛି",
-    "raw": "ମୂଳ"
+    "raw": "ମୂଳ",
+    "requestCount": "{count, plural, one {#ଟି ଅନୁରୋଧ} other {#ଟି ଅନୁରୋଧ}}",
+    "expandList": "ତାଲିକା ବିସ୍ତାର କରନ୍ତୁ",
+    "collapseList": "ତାଲିକା ସଂକୁଚିତ କରନ୍ତୁ",
+    "snippetLanguage": "ସ୍ନିପେଟ୍ ଭାଷା",
+    "headersTable": "ହେଡର୍ଗୁଡ଼ିକ",
+    "showSecrets": "ଗୋପନୀୟ ତଥ୍ୟ ଦେଖାନ୍ତୁ",
+    "maskSecrets": "ଗୋପନୀୟ ତଥ୍ୟ ମାସ୍କ କରନ୍ତୁ",
+    "llmNotAvailable": "ଏହି ଅନୁରୋଧ ପାଇଁ LLM ମେଟାଡାଟା ଉପଲବ୍ଧ ନାହିଁ।",
+    "llmStreamYes": "ହଁ (SSE)",
+    "llmStreamNo": "ନା",
+    "llmTotalTokens": "ମୋଟ: {count} ଟୋକନ୍"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "ଗତ 24 ଘଣ୍ଟାରେ ଏହି ପ୍ରଦାତା ପ୍ରକୃତରେ ଉତ୍ତର ଦେଇଥିବା କଲ୍ଗୁଡ଼ିକର ଅନୁପାତ। ଡ୍ୟାସ୍ର ଅର୍ଥ ହେଉଛି ହାର ନିର୍ଦ୍ଧାରଣ ପାଇଁ ଏହା ଅତି କମ୍ ଟ୍ରାଫିକ୍ ପରିଚାଳନା କରିଛି।",
     "reliabilitySample": "ଗତ {hours} ଘଣ୍ଟାରେ {requests}ଟି କଲ୍ରୁ {successes}ଟି ସଫଳ ହୋଇଛି",
     "reliabilityTooFew": "ଗତ {hours} ଘଣ୍ଟାରେ କେବଳ {requests}ଟି କଲ୍ — ହାର ନିର୍ଦ୍ଧାରଣ ପାଇଁ ଅତି କମ୍",
-    "reliabilityNoTraffic": "ଗତ 24 ଘଣ୍ଟାରେ କୌଣସି କଲ୍ ରେକର୍ଡ ହୋଇନାହିଁ"
+    "reliabilityNoTraffic": "ଗତ 24 ଘଣ୍ଟାରେ କୌଣସି କଲ୍ ରେକର୍ଡ ହୋଇନାହିଁ",
+    "categoryFilter": "ଟାସ୍କ ବର୍ଗ"
   },
   "discovery": {
     "title": "ପ୍ରଦାତା ଅନ୍ୱେଷଣ",
@@ -13341,7 +13423,11 @@
     "method": "ପଦ୍ଧତି",
     "auth": "ପ୍ରମାଣୀକରଣ",
     "feasibility": "ସାଧ୍ୟତା",
-    "models": "ମଡେଲ୍ଗୁଡ଼ିକ"
+    "models": "ମଡେଲ୍ଗୁଡ଼ିକ",
+    "provider": "ପ୍ରଦାନକାରୀ",
+    "status": "ସ୍ଥିତି",
+    "endpoint": "ଏଣ୍ଡପଏଣ୍ଟ",
+    "actions": "କାର୍ଯ୍ୟଗୁଡ଼ିକ"
   },
   "noAuthProvider": {
     "title": "କୌଣସି ପ୍ରମାଣୀକରଣ ଆବଶ୍ୟକ ନାହିଁ",
@@ -13390,7 +13476,8 @@
     "ownProxy": "ନିଜସ୍ୱ ପ୍ରକ୍ସି",
     "freeTierPause": "ମଡେଲ {model} ବିରତି (429), {time} ରେ ଫେରିବ",
     "freeTierPauseProvider": "ବିରତି (429), {time} ରେ ଫେରିବ",
-    "freeTierPauseNote": "ଏହି ଇନଷ୍ଟାନ୍ସରେ ଇନ୍-ପ୍ରୋସେସ୍ ବିରତି"
+    "freeTierPauseNote": "ଏହି ଇନଷ୍ଟାନ୍ସରେ ଇନ୍-ପ୍ରୋସେସ୍ ବିରତି",
+    "proxyType": "ପ୍ରକ୍ସି ପ୍ରକାର"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "ଏକ ଗୁପ୍ତ ସଫଳତା ଅପେକ୍ଷା କରିଛି...",
         "criteria": "ଏହି ବ୍ୟାଜ୍କୁ ପ୍ରକାଶ କରିବା ପାଇଁ ଗୁପ୍ତ ସଫଳତାଟି ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ।"
       }
-    }
+    },
+    "leaderboardTitle": "ଲିଡରବୋର୍ଡ",
+    "leaderboardDescription": "ଆପଣଙ୍କ API କୀଗୁଡ଼ିକର ର୍ୟାଙ୍କିଂ ଏବଂ ସଫଳତାଗୁଡ଼ିକ",
+    "badgeLocked": "ଲକ୍ ହୋଇଛି"
   },
   "featureFlags": {
     "title": "ଫିଚର୍ ଫ୍ଲାଗ୍ଗୁଡ଼ିକ",
@@ -13858,7 +13948,8 @@
     "unknown": "ଅଜ୍ଞାତ",
     "unknownProvider": "ଅଜ୍ଞାତ ପ୍ରଦାନକାରୀ",
     "unknownModel": "ଅଜ୍ଞାତ ମଡେଲ୍",
-    "resolvedTargetMetrics": "{requests} ଅନୁରୋଧ · {success} ସଫଳ · {latency} · କୋଟା {quota}"
+    "resolvedTargetMetrics": "{requests} ଅନୁରୋଧ · {success} ସଫଳ · {latency} · କୋଟା {quota}",
+    "timeRange": "ସମୟ ସୀମା"
   },
   "usageLimits": {
     "usdUsageQuota": "USD ବ୍ୟବହାର କୋଟା",
@@ -14005,7 +14096,11 @@
     "learnMore": "ଅଧିକ ଜାଣନ୍ତୁ",
     "changelogLoadFailed": "ପରିବର୍ତ୍ତନ ତାଲିକା ଲୋଡ୍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
     "retry": "ପୁନଃଚେଷ୍ଟା କରନ୍ତୁ",
-    "viewFullHistory": "GitHubରେ ସମ୍ପୂର୍ଣ୍ଣ ଇତିହାସ ଦେଖନ୍ତୁ"
+    "viewFullHistory": "GitHubରେ ସମ୍ପୂର୍ଣ୍ଣ ଇତିହାସ ଦେଖନ୍ତୁ",
+    "title": "ସମ୍ବାଦ ଏବଂ ପରିବର୍ତ୍ତନ ତାଲିକା",
+    "description": "OmniRoute ଟିମ୍ର ଘୋଷଣା ଏବଂ ସର୍ବଶେଷ ରିଲିଜ୍ ଟିପ୍ପଣୀ",
+    "viewLabel": "ଦେଖନ୍ତୁ",
+    "loadingNews": "ଘୋଷଣାଗୁଡ଼ିକ ଲୋଡ୍ ହେଉଛି..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "ପ୍ରଦାନକାରୀ ସର୍କିଟ୍ ବ୍ରେକର୍ ସ୍ଥିତି",
       "lastUpdate": "ଶେଷ ଅପଡେଟ୍: {timestamp}",
       "uptimeMinutes": "{minutes}ମି",
-      "uptimeHoursMinutes": "{hours}ଘ {minutes}ମି"
+      "uptimeHoursMinutes": "{hours}ଘ {minutes}ମି",
+      "breakerClosed": "ବନ୍ଦ",
+      "breakerNotClosed": "ଖୋଲା କିମ୍ବା ଅର୍ଦ୍ଧ-ଖୋଲା"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "ରକ୍ଷଣାବେକ୍ଷଣ ବିବରଣୀ",
         "secondaryAction": "ସିଷ୍ଟମ୍ ସ୍ଥିତି"
       }
+    },
+    "miniapp": {
+      "askAnything": "ଯାହା କିଛି ପଚାରନ୍ତୁ…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ଦୃଶ୍ୟମାନ / ମୋଟ {total}",
+    "modeLabel": "ଦୃଶ୍ୟ ମୋଡ୍",
+    "jumpToNow": "ବର୍ତ୍ତମାନ ସମୟକୁ ଯାଆନ୍ତୁ, NOW ରେଖାର ସ୍ଥିତି {position}%କୁ ପୁନଃସେଟ୍ ହେବ",
+    "laneReuse": "ଲେନ୍ ପୁନଃବ୍ୟବହାର",
+    "laneReuseLabel": "ଲେନ୍ ପୁନଃବ୍ୟବହାର ସମୟସୀମା (ମିନିଟ୍)",
+    "laneReuseHint": "ସମାନ conversation id ଥିବା ଅନୁରୋଧଗୁଡ଼ିକ ମଧ୍ୟରେ ବ୍ୟବଧାନ ଏତେ ମିନିଟ୍ରୁ କମ୍ ଥିବା ପର୍ଯ୍ୟନ୍ତ ସେଗୁଡ଼ିକ ସମାନ ଟାଇମଲାଇନ୍ ଧାଡ଼ିରେ ରହିବ।",
+    "laneReuseUnit": "ମିନିଟ୍",
+    "autoRefresh": "ସ୍ୱୟଂଚାଳିତ ରିଫ୍ରେଶ୍",
+    "autoRefreshLabel": "ସ୍ୱୟଂଚାଳିତ ରିଫ୍ରେଶ୍ ବ୍ୟବଧାନ (ସେକେଣ୍ଡ)",
+    "autoRefreshHint": "ଟାଇମଲାଇନ୍ ସର୍ଭରରୁ ଅନୁରୋଧ ତାଲିକାକୁ କେତେ ବାର ପୁନଃପ୍ରାପ୍ତ କରେ।",
+    "autoRefreshUnit": "ସେକେଣ୍ଡ",
+    "zoomOut": "ଜୁମ୍ ଆଉଟ୍",
+    "zoomIn": "ଜୁମ୍ ଇନ୍"
   },
   "metadata": {
     "compressionTitle": "ସଂକୋଚନ",

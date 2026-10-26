@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Gebruikt door {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Voorbeeld",
     "batchFilePreviewTruncated": "Eerste {shown} regels weergeven ({total} totaal regels)",
-    "batchFileDownloadFull": "Download Volledig Bestand"
+    "batchFileDownloadFull": "Download Volledig Bestand",
+    "dialogTitleFallback": "Dialoogvenster",
+    "pagination": "Paginering",
+    "clearFilters": "Filters wissen",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Stuur tokens tussen API-sleutels, deel uitnodigingscodes en verbind communityservers.",
+    "tokensServerUrlLabel": "Server-URL"
   },
   "disabled": "Uitgeschakeld",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Routeer verzoeken met uitgeput budget naar de gratis nood-fallbackprovider/-model.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 of @channelname",
       "chatIdHint": "De unieke numerieke identificatie of openbare gebruikersnaam van de chat/het kanaal.",
       "tutorial": "Hoe configureer je een Telegram-webhook:"
-    }
+    },
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd!",
+    "expandDetails": "Details tonen",
+    "collapseDetails": "Details verbergen"
   },
   "compliance": {
     "auditTitle": "Controle",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Oproepen (24u)",
     "mcpMetricSuccessRate": "Succespercentage",
     "mcpMetricAvgDuration": "Gem. duur",
-    "mcpMetricTopTool": "Meestgebruikte tool"
+    "mcpMetricTopTool": "Meestgebruikte tool",
+    "dismissError": "Foutmelding sluiten"
   },
   "themesPage": {
     "title": "Thema's",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Geavanceerde payloadregels, aanvraaglimieten en proxy-API-instellingen",
     "mitmProxyDescription": "Configureer MITM-proxy-instellingen voor verkeersinspectie en foutopsporing",
     "oneProxyDescription": "Configureer 1Proxy-instellingen voor geavanceerde proxyketens",
-    "omniSkillsDescription": "Installeer en beheer sandbox-skills voor geautomatiseerde prompt- en tooluitvoering"
+    "omniSkillsDescription": "Installeer en beheer sandbox-skills voor geautomatiseerde prompt- en tooluitvoering",
+    "openMenu": "Menu openen",
+    "products": "Keak-producten"
   },
   "cloudSyncStatus": {
     "synced": "Gesynchroniseerd",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "Voorkeursverbindingen",
     "preferredConnectionsDesc": "Prioriteitsvolgorde per sleutel. Als een voorkeursverbinding niet beschikbaar is, valt de routering terug op de volgende geschikte.",
     "preferredConnectionsNone": "Geen voorkeur ingesteld — de standaard routeringsstrategie wordt gebruikt.",
-    "preferredConnectionsClear": "Wissen"
+    "preferredConnectionsClear": "Wissen",
+    "removeSelection": "{name} verwijderen"
   },
   "auditLog": {
     "title": "Auditlogboek",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Configureer de Image→Text-brug in de Modality Bridge-instellingen",
     "sttBridgeCta": "Configureer de Spraak→Tekst brug in de Modality Bridge-instellingen",
     "existingConnection": "Bestaande verbinding",
-    "openrouterSttDescription": "OpenRouter spraak-naar-tekstmodellen gebruiken uw geconfigureerde OpenRouter-verbinding. Er zijn geen aparte inloggegevens vereist."
+    "openrouterSttDescription": "OpenRouter spraak-naar-tekstmodellen gebruiken uw geconfigureerde OpenRouter-verbinding. Er zijn geen aparte inloggegevens vereist.",
+    "modalityTabsAria": "Mediatype",
+    "serviceKindsAria": "Servicetype"
   },
   "search": {
     "searchQuery": "Zoekopdracht",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "Onbekend",
     "cliproxyapiUpdate": "Bijwerken",
     "cliproxyapiUpdateAvailable": "Update beschikbaar: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versie"
+    "cliproxyapiVersion": "Versie",
+    "removeMapping": "Toewijzing verwijderen"
   },
   "modelCatalog": {
     "title": "Modellen & combo's",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Dit maakt een momentopname van de momenteel verbonden providers/modellen die overeenkomen met dit sjabloon in een bewerkbare combinatie.",
     "duplicateAutoComboFailedPrefix": "Automatische combinatie dupliceren mislukt:",
     "duplicateAutoComboUnknownError": "Onbekende fout",
-    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}"
+    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}",
+    "weightPercent": "Gewicht (%)",
+    "clearSearch": "Zoekopdracht wissen",
+    "responseValidationRemoveCheck": "Controle verwijderen",
+    "responseValidationPath": "JSON-pad",
+    "responseValidationCondition": "Voorwaarde",
+    "responseValidationValue": "Verwachte waarde"
   },
   "costs": {
     "title": "Kosten",
@@ -5293,7 +5316,8 @@
         "skipped": "al reeds geconfigureerd",
         "failed": "mislukt"
       }
-    }
+    },
+    "stepProgress": "Voortgang van de configuratie"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Deze provider is standaard uitgesloten van auto",
@@ -8956,7 +8980,8 @@
       "statsTitle": "Detecties sinds herstart",
       "statsEmpty": "Nog geen detecties.",
       "statsRequest": "Verzoeken"
-    }
+    },
+    "modelOverrideKey": "Overschrijvingssleutel"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "Geslaagd",
     "tomlTestFailed": "Mislukt",
     "tomlImportError": "Kon het RTK TOML-bestand niet verwerken.",
-    "tomlFileReadError": "Kon het geselecteerde TOML-bestand niet lezen."
+    "tomlFileReadError": "Kon het geselecteerde TOML-bestand niet lezen.",
+    "viewMode": "Weergavemodus"
   },
   "compressionEngineConfig": {
     "loading": "Laden…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "Taalpakketten: {packs}",
     "dragToReorder": "Sleep om stap opnieuw te ordenen",
     "engine": "Engine",
-    "intensity": "Intensiteit"
+    "intensity": "Intensiteit",
+    "compressionOverride": "Compressie overschrijven"
   },
   "compressionStudio": {
     "noRun": "Geen compressierun beschikbaar.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "winnaar: {winner}",
     "encoder": "encoder",
     "bytes": "bytes",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Studio-weergaven"
   },
   "omniglyph": {
     "preview": "Voorbeeld",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "Berichten die korter zijn dan dit, worden niet gecomprimeerd. Lager = meer compressie.",
     "tooltipMinSavings": "Alleen comprimeren als het minstens zoveel tokens bespaart.",
     "ultraSettings": "Ultra-instellingen",
-    "ultraSettingsDesc": "SLM-aangedreven semantische compressie"
+    "ultraSettingsDesc": "SLM-aangedreven semantische compressie",
+    "defaultLanguage": "Standaardtaal",
+    "viewMode": "Weergavemodus"
   },
   "translator": {
     "title": "Vertaler",
@@ -11087,7 +11117,8 @@
       "message": "Bericht",
       "error": "Fout",
       "completion": "Voltooiing"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Eenvoudig chatten",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes}m geleden",
     "hoursAgo": "{hours}u geleden",
     "daysAgo": "{days}d geleden",
-    "entries": "Items"
+    "entries": "Items",
+    "viewSwitcherAria": "Cacheweergave"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globaal",
@@ -11613,7 +11645,8 @@
     "notMeasured": "Niet gemeten",
     "upstream4xx": "{count} upstream clientfouten",
     "upstream5xx": "{count} upstream serverfouten",
-    "uniformEgressLine": "{affected} van {exits} exits falen tegelijk op {provider} (laatste {hours}u) — geen exit-probleem"
+    "uniformEgressLine": "{affected} van {exits} exits falen tegelijk op {provider} (laatste {hours}u) — geen exit-probleem",
+    "moreActions": "Meer acties"
   },
   "playground": {
     "title": "Title",
@@ -11819,7 +11852,8 @@
       "nextButton": "Volgende",
       "runButton": "Uitvoeren",
       "promptPlaceholder": "Voer je bericht in… (Enter om te verzenden, Shift+Enter voor nieuwe regel)"
-    }
+    },
+    "playgroundTabs": "Playground-modi"
   },
   "miniPlayground": {
     "endpoint": "Eindpunt",
@@ -11890,7 +11924,8 @@
     "assistant": "Assistent",
     "errorLabel": "Fout",
     "requestFailed": "Verzoek mislukt",
-    "stop": "Stoppen"
+    "stop": "Stoppen",
+    "messageInputAria": "Bericht"
   },
   "requestLogger": {
     "recording": "Bezig met opnemen",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} accountrotaties",
       "resilienceRetried": "Lege beurt opnieuw geprobeerd",
       "resilienceContinued": "Midden in stream hervat",
-      "resilienceRecovered": "Hersteld door een veerkrachtactie"
-    }
+      "resilienceRecovered": "Hersteld door een veerkrachtactie",
+      "conversationContext": "Gesprekscontext",
+      "goToBottom": "Naar beneden gaan",
+      "liveRefreshOn": "Live vernieuwen: aan",
+      "liveRefreshOff": "Live vernieuwen: uit",
+      "liveRefresh": "Live vernieuwen",
+      "continuesFromParent": "gaat verder vanaf bovenliggend item",
+      "continuesFrom": "Gaat verder vanaf {id}",
+      "viewConversation": "gesprek bekijken",
+      "openConversation": "Gesprek {id} openen"
+    },
+    "tableLabel": "Aanvraaglogboeken"
   },
   "proxyLogger": {
     "filterAll": "Alles",
@@ -12123,7 +12168,9 @@
     "colServedBy": "Gediend door",
     "filterTraffic": "Verkeer",
     "filterTests": "Tests",
-    "filterSource": "Bron"
+    "filterSource": "Bron",
+    "tableLabel": "Proxylogboeken",
+    "sortLogs": "Logboeken sorteren"
   },
   "endpointOptions": {
     "speech": "Spraak",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "UITGEPUT",
     "statusAlerting": "WAARSCHUWING",
     "statusError": "FOUT",
-    "moreSuffix": "+{count} meer"
+    "moreSuffix": "+{count} meer",
+    "feedFilterLabel": "Gebeurtenissen filteren"
   },
   "quotaShare": {
     "weightPercent": "Gewicht %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "Niet gegroepeerd",
     "ungroupedHint": "Deze pools zijn niet toegewezen aan een bekende groep. Bewerk een pool om deze naar een echte groep te verplaatsen.",
     "removeFailed": "Deze pool kon niet worden verwijderd.",
-    "dismiss": "Sluiten"
+    "dismiss": "Sluiten",
+    "allocationsHeading": "Toewijzingen",
+    "wizardRemoveDimension": "Dimensie verwijderen",
+    "wizardRemoveKey": "Sleutel verwijderen"
   },
   "plugins": {
     "title": "Plug-ins",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "Bijwerken van instellingen mislukt",
       "serviceRevealApiKey": "{actor} heeft API-sleutel voor {target} onthuld",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Foutmelding sluiten"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "Ga nu",
       "message": "De MITM-proxy bevindt zich nu onder AgentBridge.",
       "title": "Deze pagina is verplaatst"
-    }
+    },
+    "dnsOn": "DNS aan",
+    "dnsOff": "DNS uit",
+    "showServerSettings": "Serverinstellingen tonen",
+    "hideServerSettings": "Serverinstellingen verbergen",
+    "upstreamCaTesting": "Testen…",
+    "removeMapping": "Toewijzing verwijderen",
+    "mappingSourcePlaceholder": "bijv. gemini-3.6-flash-medium, of * voor alle niet-toegewezen modellen",
+    "mappingWildcardHint": "Gebruik * als bron om elk model zonder expliciete toewijzing via OmniRoute naar het geselecteerde doel te routeren. Exacte bronovereenkomsten hebben altijd voorrang op *.",
+    "wizardDetectingModels": "Modellen detecteren in onderschept verkeer...",
+    "wizardDetectedModels": "{count, plural, one {# model} other {# modellen}} gevonden in onderschept verkeer. Selecteer de modellen die je wilt toevoegen:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# modellen}} geselecteerd. In het volgende scherm wijs je ze toe aan OmniRoute-modellen.",
+    "wizardAddModels": "{count, plural, one {# model} other {# modellen}} toevoegen",
+    "wizardNoModelsDetected": "Er zijn nog geen modellen gedetecteerd. Gebruik {agent} om een aanvraag te doen en voer deze wizard daarna opnieuw uit om modellen automatisch in het verkeer te detecteren.",
+    "wizardNoModelsHint": "Of sluit deze wizard en voeg handmatig toewijzingen toe in de agentkaart."
   },
   "providerStats": {
     "unknownError": "Onbekende fout",
@@ -12696,7 +12762,11 @@
     "avgTtft": "Gem. TTFT",
     "avgTotal": "Gem. totaal",
     "requestTelemetry": "Verzoektelemetrie",
-    "requestTelemetryDescription": "Uitsplitsing van 7-fasenpipeline (laatste 5 minuten)"
+    "requestTelemetryDescription": "Uitsplitsing van 7-fasenpipeline (laatste 5 minuten)",
+    "title": "Providerstatistieken",
+    "description": "Verkeer, latentie en succespercentages per provider en per model",
+    "combo": "Combinatie",
+    "toggleModels": "Modellen voor {provider} tonen"
   },
   "relay": {
     "title": "Serverless relay-proxy's",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "Geen request-body.",
     "noResponseBody": "Geen response-body.",
     "formatted": "Geformatteerd",
-    "raw": "Ruw"
+    "raw": "Ruw",
+    "requestCount": "{count, plural, one {# aanvraag} other {# aanvragen}}",
+    "expandList": "Lijst uitvouwen",
+    "collapseList": "Lijst samenvouwen",
+    "snippetLanguage": "Taal van codefragment",
+    "headersTable": "Headers",
+    "showSecrets": "Geheime waarden tonen",
+    "maskSecrets": "Geheime waarden maskeren",
+    "llmNotAvailable": "LLM-metadata is niet beschikbaar voor deze aanvraag.",
+    "llmStreamYes": "ja (SSE)",
+    "llmStreamNo": "nee",
+    "llmTotalTokens": "Totaal: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "Het aandeel aanroepen dat deze provider de afgelopen 24 uur daadwerkelijk heeft beantwoord. Een streepje betekent dat de provider te weinig verkeer heeft verwerkt om een percentage te kunnen geven.",
     "reliabilitySample": "{successes} van {requests} aanroepen zijn in de afgelopen {hours}u geslaagd",
     "reliabilityTooFew": "Slechts {requests} aanroepen in de afgelopen {hours}u — te weinig om een percentage te kunnen geven",
-    "reliabilityNoTraffic": "Geen aanroepen geregistreerd in de afgelopen 24u"
+    "reliabilityNoTraffic": "Geen aanroepen geregistreerd in de afgelopen 24u",
+    "categoryFilter": "Taakcategorie"
   },
   "discovery": {
     "title": "Provider-ontdekking",
@@ -13341,7 +13423,11 @@
     "method": "Methode",
     "auth": "Authenticatie",
     "feasibility": "Haalbaarheid",
-    "models": "Modellen"
+    "models": "Modellen",
+    "provider": "Aanbieder",
+    "status": "Status",
+    "endpoint": "Endpoint",
+    "actions": "Acties"
   },
   "noAuthProvider": {
     "title": "Geen authenticatie vereist",
@@ -13390,7 +13476,8 @@
     "ownProxy": "Eigen proxy",
     "freeTierPause": "Model {model} gepauzeerd (429), terug om {time}",
     "freeTierPauseProvider": "Gepauzeerd (429), terug om {time}",
-    "freeTierPauseNote": "Pauze in proces op deze instantie"
+    "freeTierPauseNote": "Pauze in proces op deze instantie",
+    "proxyType": "Proxytype"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "Een verborgen prestatie wacht...",
         "criteria": "Voltooi de verborgen prestatie om deze badge te onthullen."
       }
-    }
+    },
+    "leaderboardTitle": "Ranglijst",
+    "leaderboardDescription": "Ranglijsten en prestaties voor al je API-sleutels",
+    "badgeLocked": "Vergrendeld"
   },
   "featureFlags": {
     "title": "Featureflags",
@@ -13858,7 +13948,8 @@
     "unknown": "onbekend",
     "unknownProvider": "onbekende provider",
     "unknownModel": "onbekend model",
-    "resolvedTargetMetrics": "{requests} req · {success} geslaagd · {latency} · quotum {quota}"
+    "resolvedTargetMetrics": "{requests} req · {success} geslaagd · {latency} · quotum {quota}",
+    "timeRange": "Tijdsbereik"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-gebruiksquotum",
@@ -14005,7 +14096,11 @@
     "learnMore": "Meer informatie",
     "changelogLoadFailed": "Kan de changelog niet laden. Probeer het later opnieuw.",
     "retry": "Opnieuw proberen",
-    "viewFullHistory": "Bekijk de volledige geschiedenis op GitHub"
+    "viewFullHistory": "Bekijk de volledige geschiedenis op GitHub",
+    "title": "Nieuws en changelog",
+    "description": "Aankondigingen van het OmniRoute-team en de nieuwste releaseopmerkingen",
+    "viewLabel": "Bekijken",
+    "loadingNews": "Aankondigingen laden..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "Provider Circuit Breaker Status",
       "lastUpdate": "Laatste update: {timestamp}",
       "uptimeMinutes": "{minutes} min.",
-      "uptimeHoursMinutes": "{hours}u {minutes}m"
+      "uptimeHoursMinutes": "{hours}u {minutes}m",
+      "breakerClosed": "Gesloten",
+      "breakerNotClosed": "Open of halfopen"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "Onderhoudsdetails",
         "secondaryAction": "Systeemstatus"
       }
+    },
+    "miniapp": {
+      "askAnything": "Vraag wat je wilt…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP-tool",
     "scope": "Reikwijdte",
-    "apiKey": "API-sleutel"
+    "apiKey": "API-sleutel",
+    "visibleCount": "{visible} zichtbaar / {total} totaal",
+    "modeLabel": "Weergavemodus",
+    "jumpToNow": "Naar de huidige tijd springen; de NU-lijn wordt teruggezet naar positie {position}%",
+    "laneReuse": "Rijhergebruik",
+    "laneReuseLabel": "Tijdsvenster voor rijhergebruik (minuten)",
+    "laneReuseHint": "Verzoeken met dezelfde gespreks-ID blijven op dezelfde tijdlijnrij zolang de tijd ertussen minder dan dit aantal minuten bedraagt.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automatisch vernieuwen",
+    "autoRefreshLabel": "Interval voor automatisch vernieuwen (seconden)",
+    "autoRefreshHint": "Hoe vaak de tijdlijn de verzoekenlijst opnieuw van de server ophaalt.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Uitzoomen",
+    "zoomIn": "Inzoomen"
   },
   "metadata": {
     "compressionTitle": "Compressie",

@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Digunakan oleh {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Pratonton",
     "batchFilePreviewTruncated": "Menunjukkan {shown} baris pertama ({total} jumlah baris)",
-    "batchFileDownloadFull": "Muat Turun Fail Penuh"
+    "batchFileDownloadFull": "Muat Turun Fail Penuh",
+    "dialogTitleFallback": "Dialog",
+    "pagination": "Penomboran halaman",
+    "clearFilters": "Kosongkan penapis",
+    "tokensPageTitle": "Token",
+    "tokensPageDescription": "Hantar token antara kunci API, kongsi kod jemputan dan sambungkan pelayan komuniti.",
+    "tokensServerUrlLabel": "URL pelayan"
   },
   "disabled": "Dilumpuhkan",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Halakan permintaan yang telah kehabisan belanjawan kepada penyedia/model sandaran percuma kecemasan.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 atau @channelname",
       "chatIdHint": "Pengecam berangka unik atau nama pengguna awam bagi sembang/saluran.",
       "tutorial": "Cara mengkonfigurasi webhook Telegram:"
-    }
+    },
+    "copy": "Salin",
+    "copied": "Disalin!",
+    "expandDetails": "Tunjukkan butiran",
+    "collapseDetails": "Sembunyikan butiran"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Panggilan (24j)",
     "mcpMetricSuccessRate": "Kadar kejayaan",
     "mcpMetricAvgDuration": "Purata tempoh",
-    "mcpMetricTopTool": "Alat Terbaik"
+    "mcpMetricTopTool": "Alat Terbaik",
+    "dismissError": "Tutup ralat"
   },
   "themesPage": {
     "title": "Tema",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Peraturan muatan lanjutan, had permintaan, dan tetapan API proksi",
     "mitmProxyDescription": "Konfigurasikan tetapan proksi MITM untuk pemeriksaan trafik dan penyahpepijatan",
     "oneProxyDescription": "Konfigurasikan tetapan 1Proxy untuk perangkaian proksi lanjutan",
-    "omniSkillsDescription": "Pasang dan urus kemahiran kotak pasir untuk pelaksanaan gesaan dan alat automatik"
+    "omniSkillsDescription": "Pasang dan urus kemahiran kotak pasir untuk pelaksanaan gesaan dan alat automatik",
+    "openMenu": "Buka menu",
+    "products": "Produk Keak"
   },
   "cloudSyncStatus": {
     "synced": "Disegerakkan",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "Sambungan pilihan",
     "preferredConnectionsDesc": "Susunan keutamaan bagi setiap kunci. Jika sambungan pilihan tidak tersedia, penghalaan beralih kepada sambungan layak yang seterusnya.",
     "preferredConnectionsNone": "Tiada keutamaan ditetapkan — strategi penghalaan lalai digunakan.",
-    "preferredConnectionsClear": "Kosongkan"
+    "preferredConnectionsClear": "Kosongkan",
+    "removeSelection": "Alih keluar {name}"
   },
   "auditLog": {
     "title": "Log Audit",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Konfigurasikan jambatan Imej→Teks dalam tetapan Jambatan Modality",
     "sttBridgeCta": "Konfigurasikan jambatan Ucapan→Teks dalam tetapan Jambatan Modality",
     "existingConnection": "Sambungan sedia ada",
-    "openrouterSttDescription": "Model suara-ke-teks OpenRouter menggunakan sambungan OpenRouter yang telah anda konfigurasi. Tiada kelayakan berasingan diperlukan."
+    "openrouterSttDescription": "Model suara-ke-teks OpenRouter menggunakan sambungan OpenRouter yang telah anda konfigurasi. Tiada kelayakan berasingan diperlukan.",
+    "modalityTabsAria": "Jenis media",
+    "serviceKindsAria": "Jenis perkhidmatan"
   },
   "search": {
     "searchQuery": "Kueri Carian",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "Tidak Dikenali",
     "cliproxyapiUpdate": "Kemas Kini",
     "cliproxyapiUpdateAvailable": "Kemas kini tersedia: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versi"
+    "cliproxyapiVersion": "Versi",
+    "removeMapping": "Alih keluar pemetaan"
   },
   "modelCatalog": {
     "title": "Model & Kombo",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Ini akan mengambil snapshot penyedia/model yang disambungkan semasa yang sepadan dengan templat ini ke dalam kombo yang boleh diedit.",
     "duplicateAutoComboFailedPrefix": "Gagal menduplikasi kombo automatik:",
     "duplicateAutoComboUnknownError": "Ralat tidak diketahui",
-    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}"
+    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}",
+    "weightPercent": "Wajaran (%)",
+    "clearSearch": "Kosongkan carian",
+    "responseValidationRemoveCheck": "Alih keluar semakan",
+    "responseValidationPath": "Laluan JSON",
+    "responseValidationCondition": "Syarat",
+    "responseValidationValue": "Nilai yang dijangkakan"
   },
   "costs": {
     "title": "Kos",
@@ -5293,7 +5316,8 @@
         "skipped": "sudah dikonfigurasi",
         "failed": "gagal"
       }
-    }
+    },
+    "stepProgress": "Kemajuan persediaan"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Penyedia ini dikecualikan daripada auto secara lalai",
@@ -8956,7 +8980,8 @@
       "statsTitle": "Pengesanan sejak dimulakan semula",
       "statsEmpty": "Belum ada pengesanan.",
       "statsRequest": "Permintaan"
-    }
+    },
+    "modelOverrideKey": "Kunci penggantian"
   },
   "contextRtk": {
     "title": "Enjin RTK",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "Lulus",
     "tomlTestFailed": "Gagal",
     "tomlImportError": "Tidak dapat memproses fail TOML RTK.",
-    "tomlFileReadError": "Tidak dapat membaca fail TOML yang dipilih."
+    "tomlFileReadError": "Tidak dapat membaca fail TOML yang dipilih.",
+    "viewMode": "Mod paparan"
   },
   "compressionEngineConfig": {
     "loading": "Memuatkan…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "Pek bahasa: {packs}",
     "dragToReorder": "Seret untuk menyusun semula langkah",
     "engine": "Enjin",
-    "intensity": "Keamatan"
+    "intensity": "Keamatan",
+    "compressionOverride": "Penggantian pemampatan"
   },
   "compressionStudio": {
     "noRun": "Tiada larian pemampatan tersedia.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "pemenang: {winner}",
     "encoder": "pengekod",
     "bytes": "bait",
-    "tokensCl100k": "token (cl100k)"
+    "tokensCl100k": "token (cl100k)",
+    "studioViews": "Paparan Studio"
   },
   "omniglyph": {
     "preview": "Pratonton",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "Mesej yang lebih pendek daripada ini tidak dimampatkan. Rendah = lebih mampatan.",
     "tooltipMinSavings": "Hanya mampatkan jika ia menjimatkan sekurang-kurangnya token sebanyak ini.",
     "ultraSettings": "Tetapan Ultra",
-    "ultraSettingsDesc": "Pemampatan semantik berkuasa SLM"
+    "ultraSettingsDesc": "Pemampatan semantik berkuasa SLM",
+    "defaultLanguage": "Bahasa lalai",
+    "viewMode": "Mod paparan"
   },
   "translator": {
     "title": "Penterjemah",
@@ -11087,7 +11117,8 @@
       "message": "Mesej",
       "error": "Ralat",
       "completion": "Pelengkapan"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Sembang Mudah",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes}m lalu",
     "hoursAgo": "{hours}j lalu",
     "daysAgo": "{days}h lalu",
-    "entries": "Entri"
+    "entries": "Entri",
+    "viewSwitcherAria": "Paparan cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11613,7 +11645,8 @@
     "notMeasured": "Belum diukur",
     "upstream4xx": "{count} kesalahan klien atas aliran",
     "upstream5xx": "{count} kesalahan pelayan atas aliran",
-    "uniformEgressLine": "{affected} daripada {exits} exit gagal serentak pada {provider} ({hours}j terakhir) — bukan masalah exit"
+    "uniformEgressLine": "{affected} daripada {exits} exit gagal serentak pada {provider} ({hours}j terakhir) — bukan masalah exit",
+    "moreActions": "Tindakan lanjut"
   },
   "playground": {
     "title": "Title",
@@ -11819,7 +11852,8 @@
       "nextButton": "Seterusnya",
       "runButton": "Jalankan",
       "promptPlaceholder": "Masukkan mesej anda… (Enter untuk hantar, Shift+Enter untuk baris baharu)"
-    }
+    },
+    "playgroundTabs": "Mod Playground"
   },
   "miniPlayground": {
     "endpoint": "Titik akhir",
@@ -11890,7 +11924,8 @@
     "assistant": "Pembantu",
     "errorLabel": "Ralat",
     "requestFailed": "Permintaan gagal",
-    "stop": "Henti"
+    "stop": "Henti",
+    "messageInputAria": "Mesej"
   },
   "requestLogger": {
     "recording": "Merakam",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} putaran akaun",
       "resilienceRetried": "Giliran kosong dicuba semula",
       "resilienceContinued": "Disambung semula di tengah strim",
-      "resilienceRecovered": "Dipulihkan oleh tindakan daya tahan"
-    }
+      "resilienceRecovered": "Dipulihkan oleh tindakan daya tahan",
+      "conversationContext": "Konteks Perbualan",
+      "goToBottom": "Pergi ke bawah",
+      "liveRefreshOn": "Muat semula langsung: hidup",
+      "liveRefreshOff": "Muat semula langsung: mati",
+      "liveRefresh": "Muat semula langsung",
+      "continuesFromParent": "bersambung daripada induk",
+      "continuesFrom": "Bersambung daripada {id}",
+      "viewConversation": "lihat perbualan",
+      "openConversation": "Buka perbualan {id}"
+    },
+    "tableLabel": "Log permintaan"
   },
   "proxyLogger": {
     "filterAll": "Semua",
@@ -12123,7 +12168,9 @@
     "colServedBy": "Dihidangkan oleh",
     "filterTraffic": "Lalu lintas",
     "filterTests": "Ujian",
-    "filterSource": "Sumber"
+    "filterSource": "Sumber",
+    "tableLabel": "Log proksi",
+    "sortLogs": "Isih log"
   },
   "endpointOptions": {
     "speech": "Pertuturan",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "HABIS",
     "statusAlerting": "MEMBERI AMARAN",
     "statusError": "RALAT",
-    "moreSuffix": "+{count} lagi"
+    "moreSuffix": "+{count} lagi",
+    "feedFilterLabel": "Tapis peristiwa"
   },
   "quotaShare": {
     "weightPercent": "Pemberat %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "Tanpa kumpulan",
     "ungroupedHint": "Kolam ini tidak diperuntukkan kepada kumpulan yang dikenali. Edit kolam untuk memindahkannya ke dalam kumpulan sebenar.",
     "removeFailed": "Tidak dapat mengalih keluar kumpulan ini.",
-    "dismiss": "Tutup"
+    "dismiss": "Tutup",
+    "allocationsHeading": "Peruntukan",
+    "wizardRemoveDimension": "Alih keluar dimensi",
+    "wizardRemoveKey": "Alih keluar kunci"
   },
   "plugins": {
     "title": "Pemalam",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "Kemas kini tetapan gagal",
       "serviceRevealApiKey": "{actor} mendedahkan kunci API untuk {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Tutup ralat"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "Pergi sekarang",
       "message": "Proksi MITM kini berada di bawah AgentBridge.",
       "title": "Halaman ini telah dipindahkan"
-    }
+    },
+    "dnsOn": "DNS dihidupkan",
+    "dnsOff": "DNS dimatikan",
+    "showServerSettings": "Tunjukkan tetapan pelayan",
+    "hideServerSettings": "Sembunyikan tetapan pelayan",
+    "upstreamCaTesting": "Menguji…",
+    "removeMapping": "Alih keluar pemetaan",
+    "mappingSourcePlaceholder": "cth., gemini-3.6-flash-medium, atau * untuk semua yang tidak dipetakan",
+    "mappingWildcardHint": "Gunakan * sebagai sumber untuk menghalakan setiap model tanpa pemetaan eksplisit melalui OmniRoute ke sasaran yang dipilih. Padanan sumber tepat sentiasa diutamakan berbanding *.",
+    "wizardDetectingModels": "Mengesan model daripada trafik yang dipintas...",
+    "wizardDetectedModels": "Menemui {count, plural, one {# model} other {# model}} dalam trafik yang dipintas. Pilih model yang ingin anda tambahkan:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# model}} dipilih. Anda akan memetakannya kepada model OmniRoute pada skrin seterusnya.",
+    "wizardAddModels": "Tambah {count, plural, one {# model} other {# model}}",
+    "wizardNoModelsDetected": "Belum ada model dikesan. Gunakan {agent} untuk membuat permintaan, kemudian jalankan semula pembantu ini untuk mengesan model secara automatik daripada trafik.",
+    "wizardNoModelsHint": "Atau tutup pembantu ini dan tambahkan pemetaan secara manual dalam kad ejen."
   },
   "providerStats": {
     "unknownError": "Ralat tidak diketahui",
@@ -12696,7 +12762,11 @@
     "avgTtft": "Purata TTFT",
     "avgTotal": "Purata Jumlah",
     "requestTelemetry": "Telemetri Permintaan",
-    "requestTelemetryDescription": "Pecahan saluran paip 7 fasa (5 minit terakhir)"
+    "requestTelemetryDescription": "Pecahan saluran paip 7 fasa (5 minit terakhir)",
+    "title": "Statistik penyedia",
+    "description": "Trafik, kependaman dan kadar kejayaan mengikut penyedia dan model",
+    "combo": "Gabungan",
+    "toggleModels": "Tunjukkan model untuk {provider}"
   },
   "relay": {
     "title": "Proksi Geganti Tanpa Pelayan",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "Tiada badan permintaan.",
     "noResponseBody": "Tiada badan respons.",
     "formatted": "Diformat",
-    "raw": "Mentah"
+    "raw": "Mentah",
+    "requestCount": "{count, plural, one {# permintaan} other {# permintaan}}",
+    "expandList": "Kembangkan senarai",
+    "collapseList": "Runtuhkan senarai",
+    "snippetLanguage": "Bahasa coretan kod",
+    "headersTable": "Pengepala",
+    "showSecrets": "Tunjukkan rahsia",
+    "maskSecrets": "Samarkan rahsia",
+    "llmNotAvailable": "Metadata LLM tidak tersedia untuk permintaan ini.",
+    "llmStreamYes": "ya (SSE)",
+    "llmStreamNo": "tidak",
+    "llmTotalTokens": "Jumlah: {count} token"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "Bahagian panggilan yang benar-benar dijawab oleh penyedia ini sepanjang 24 jam yang lalu. Tanda sengkang bermaksud trafik yang dikendalikannya terlalu sedikit untuk menyatakan kadar.",
     "reliabilitySample": "{successes} daripada {requests} panggilan berjaya dalam {hours}j yang lalu",
     "reliabilityTooFew": "Hanya {requests} panggilan dalam {hours}j yang lalu — terlalu sedikit untuk menyatakan kadar",
-    "reliabilityNoTraffic": "Tiada panggilan direkodkan dalam 24j yang lalu"
+    "reliabilityNoTraffic": "Tiada panggilan direkodkan dalam 24j yang lalu",
+    "categoryFilter": "Kategori tugas"
   },
   "discovery": {
     "title": "Penemuan Penyedia",
@@ -13341,7 +13423,11 @@
     "method": "Kaedah",
     "auth": "Pengesahan",
     "feasibility": "Kebolehlaksanaan",
-    "models": "Model"
+    "models": "Model",
+    "provider": "Penyedia",
+    "status": "Status",
+    "endpoint": "Titik akhir",
+    "actions": "Tindakan"
   },
   "noAuthProvider": {
     "title": "Tiada pengesahan diperlukan",
@@ -13390,7 +13476,8 @@
     "ownProxy": "Proksi sendiri",
     "freeTierPause": "Model {model} dijeda (429), kembali pada {time}",
     "freeTierPauseProvider": "Dijeda (429), kembali pada {time}",
-    "freeTierPauseNote": "Jeda dalam proses pada instance ini"
+    "freeTierPauseNote": "Jeda dalam proses pada instance ini",
+    "proxyType": "Jenis proksi"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "Pencapaian tersembunyi menanti...",
         "criteria": "Lengkapkan pencapaian tersembunyi untuk mendedahkan lencana ini."
       }
-    }
+    },
+    "leaderboardTitle": "Papan pendahulu",
+    "leaderboardDescription": "Kedudukan dan pencapaian merentas kunci API anda",
+    "badgeLocked": "Dikunci"
   },
   "featureFlags": {
     "title": "Bendera Ciri",
@@ -13858,7 +13948,8 @@
     "unknown": "tidak diketahui",
     "unknownProvider": "penyedia tidak diketahui",
     "unknownModel": "model tidak diketahui",
-    "resolvedTargetMetrics": "{requests} req · {success} berjaya · {latency} · kuota {quota}"
+    "resolvedTargetMetrics": "{requests} req · {success} berjaya · {latency} · kuota {quota}",
+    "timeRange": "Julat masa"
   },
   "usageLimits": {
     "usdUsageQuota": "Kuota penggunaan USD",
@@ -14005,7 +14096,11 @@
     "learnMore": "Ketahui lebih lanjut",
     "changelogLoadFailed": "Tidak dapat memuatkan log perubahan. Sila cuba lagi kemudian.",
     "retry": "Cuba semula",
-    "viewFullHistory": "Lihat sejarah penuh di GitHub"
+    "viewFullHistory": "Lihat sejarah penuh di GitHub",
+    "title": "Berita & log perubahan",
+    "description": "Pengumuman daripada pasukan OmniRoute dan nota keluaran terkini",
+    "viewLabel": "Lihat",
+    "loadingNews": "Memuatkan pengumuman..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "Keadaan Pemutus Litar Penyedia",
       "lastUpdate": "Kemaskini terakhir: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours}j {minutes}m"
+      "uptimeHoursMinutes": "{hours}j {minutes}m",
+      "breakerClosed": "Ditutup",
+      "breakerNotClosed": "Terbuka atau separa terbuka"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "Butiran Penyelenggaraan",
         "secondaryAction": "Status Sistem"
       }
+    },
+    "miniapp": {
+      "askAnything": "Tanya apa sahaja…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} dipaparkan / {total} jumlah",
+    "modeLabel": "Mod paparan",
+    "jumpToNow": "Lompat ke waktu semasa, garisan NOW ditetapkan semula ke kedudukan {position}%",
+    "laneReuse": "Penggunaan semula lorong",
+    "laneReuseLabel": "Tetingkap penggunaan semula lorong (minit)",
+    "laneReuseHint": "Permintaan yang berkongsi ID perbualan kekal pada baris garis masa yang sama selagi sela antara permintaan tersebut kurang daripada bilangan minit ini.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Muat semula automatik",
+    "autoRefreshLabel": "Selang muat semula automatik (saat)",
+    "autoRefreshHint": "Kekerapan garis masa mendapatkan semula senarai permintaan daripada pelayan.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Zum keluar",
+    "zoomIn": "Zum masuk"
   },
   "metadata": {
     "compressionTitle": "Pemampatan",

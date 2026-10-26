@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "ใช้โดย {count, plural, one {# ชุด} other {# ชุด}}",
     "batchFilePreview": "ตัวอย่าง",
     "batchFilePreviewTruncated": "แสดง {shown} บรรทัดแรก ({total} บรรทัดรวม)",
-    "batchFileDownloadFull": "ดาวน์โหลดไฟล์ทั้งหมด"
+    "batchFileDownloadFull": "ดาวน์โหลดไฟล์ทั้งหมด",
+    "dialogTitleFallback": "กล่องโต้ตอบ",
+    "pagination": "การแบ่งหน้า",
+    "clearFilters": "ล้างตัวกรอง",
+    "tokensPageTitle": "โทเค็น",
+    "tokensPageDescription": "ส่งโทเค็นระหว่างคีย์ API แชร์รหัสเชิญ และเชื่อมต่อเซิร์ฟเวอร์ชุมชน",
+    "tokensServerUrlLabel": "URL เซิร์ฟเวอร์"
   },
   "disabled": "ปิดใช้งาน",
   "featureFlagOmnirouteEmergencyFallbackDescription": "กำหนดเส้นทางคำขอที่งบประมาณหมดไปยังผู้ให้บริการ/โมเดลสำรองฟรีในกรณีฉุกเฉิน",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 หรือ @channelname",
       "chatIdHint": "ตัวระบุตัวเลขที่ไม่ซ้ำกันหรือชื่อผู้ใช้สาธารณะของแชท/ช่อง",
       "tutorial": "วิธีการกำหนดค่า Telegram webhook:"
-    }
+    },
+    "copy": "คัดลอก",
+    "copied": "คัดลอกแล้ว!",
+    "expandDetails": "แสดงรายละเอียด",
+    "collapseDetails": "ซ่อนรายละเอียด"
   },
   "compliance": {
     "auditTitle": "การตรวจสอบ",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "การโทร (24 ชม.)",
     "mcpMetricSuccessRate": "อัตราความสำเร็จ",
     "mcpMetricAvgDuration": "ระยะเวลาเฉลี่ย",
-    "mcpMetricTopTool": "เครื่องมือชั้นนำ"
+    "mcpMetricTopTool": "เครื่องมือชั้นนำ",
+    "dismissError": "ปิดข้อผิดพลาด"
   },
   "themesPage": {
     "title": "ธีมส์",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "กฎเพย์โหลดขั้นสูง ขีดจำกัดคำขอ และการตั้งค่า proxy API",
     "mitmProxyDescription": "กำหนดค่าพร็อกซี MITM สำหรับการตรวจสอบทราฟฟิกและการดีบัก",
     "oneProxyDescription": "กำหนดค่า 1Proxy สำหรับการเชื่อมต่อพร็อกซีแบบลูกโซ่ขั้นสูง",
-    "omniSkillsDescription": "ติดตั้งและจัดการทักษะแซนด์บ็อกซ์สำหรับการดำเนินการพรอมต์และเครื่องมือโดยอัตโนมัติ"
+    "omniSkillsDescription": "ติดตั้งและจัดการทักษะแซนด์บ็อกซ์สำหรับการดำเนินการพรอมต์และเครื่องมือโดยอัตโนมัติ",
+    "openMenu": "เปิดเมนู",
+    "products": "ผลิตภัณฑ์ Keak"
   },
   "cloudSyncStatus": {
     "synced": "ซิงค์แล้ว",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "การเชื่อมต่อที่ต้องการ",
     "preferredConnectionsDesc": "ลำดับความสำคัญสำหรับแต่ละคีย์ หากการเชื่อมต่อที่ต้องการใช้งานไม่ได้ การกำหนดเส้นทางจะเปลี่ยนไปใช้การเชื่อมต่อที่มีสิทธิ์ถัดไป",
     "preferredConnectionsNone": "ไม่ได้ตั้งค่าการกำหนดลำดับ — ใช้กลยุทธ์การกำหนดเส้นทางเริ่มต้น",
-    "preferredConnectionsClear": "ล้าง"
+    "preferredConnectionsClear": "ล้าง",
+    "removeSelection": "นำ {name} ออก"
   },
   "auditLog": {
     "title": "บันทึกการตรวจสอบ",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "กำหนดค่าสะพานภาพ→ข้อความในการตั้งค่าสะพานโมดัลิตี้",
     "sttBridgeCta": "กำหนดค่าสะพาน Speech→Text ในการตั้งค่า Modality Bridge",
     "existingConnection": "การเชื่อมต่อที่มีอยู่",
-    "openrouterSttDescription": "โมเดลแปลงเสียงเป็นข้อความของ OpenRouter ใช้การเชื่อมต่อ OpenRouter ที่คุณกำหนดไว้ ไม่มีการรับรองความถูกต้องแยกต่างหากที่จำเป็น."
+    "openrouterSttDescription": "โมเดลแปลงเสียงเป็นข้อความของ OpenRouter ใช้การเชื่อมต่อ OpenRouter ที่คุณกำหนดไว้ ไม่มีการรับรองความถูกต้องแยกต่างหากที่จำเป็น.",
+    "modalityTabsAria": "ประเภทสื่อ",
+    "serviceKindsAria": "ประเภทบริการ"
   },
   "search": {
     "searchQuery": "คำค้นหา",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "ไม่ทราบ",
     "cliproxyapiUpdate": "อัปเดต",
     "cliproxyapiUpdateAvailable": "มีการอัปเดต: v{current} → v{latest}",
-    "cliproxyapiVersion": "เวอร์ชัน"
+    "cliproxyapiVersion": "เวอร์ชัน",
+    "removeMapping": "นำการแมปออก"
   },
   "modelCatalog": {
     "title": "โมเดลและคอมโบ",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "สิ่งนี้จะจับภาพผู้ให้บริการ/โมเดลที่เชื่อมต่ออยู่ในปัจจุบันซึ่งตรงกับเทมเพลตนี้ลงในคอมโบที่แก้ไขได้",
     "duplicateAutoComboFailedPrefix": "ล้มเหลวในการทำสำเนาคอมโบอัตโนมัติ:",
     "duplicateAutoComboUnknownError": "ข้อผิดพลาดที่ไม่ทราบสาเหตุ",
-    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}"
+    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}",
+    "weightPercent": "น้ำหนัก (%)",
+    "clearSearch": "ล้างการค้นหา",
+    "responseValidationRemoveCheck": "นำการตรวจสอบออก",
+    "responseValidationPath": "พาธ JSON",
+    "responseValidationCondition": "เงื่อนไข",
+    "responseValidationValue": "ค่าที่คาดหวัง"
   },
   "costs": {
     "title": "ค่าใช้จ่าย",
@@ -5293,7 +5316,8 @@
         "skipped": "กำหนดค่าเรียบร้อยแล้ว",
         "failed": "ล้มเหลว"
       }
-    }
+    },
+    "stepProgress": "ความคืบหน้าของการตั้งค่า"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ผู้ให้บริการนี้ถูกยกเว้นจาก auto โดยค่าเริ่มต้น",
@@ -8956,7 +8980,8 @@
       "statsTitle": "การตรวจพบตั้งแต่รีสตาร์ต",
       "statsEmpty": "ยังไม่มีการตรวจพบ",
       "statsRequest": "คำขอ"
-    }
+    },
+    "modelOverrideKey": "คีย์แทนที่"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "ผ่าน",
     "tomlTestFailed": "ไม่ผ่าน",
     "tomlImportError": "ไม่สามารถประมวลผลไฟล์ RTK TOML ได้",
-    "tomlFileReadError": "ไม่สามารถอ่านไฟล์ TOML ที่เลือกได้"
+    "tomlFileReadError": "ไม่สามารถอ่านไฟล์ TOML ที่เลือกได้",
+    "viewMode": "โหมดมุมมอง"
   },
   "compressionEngineConfig": {
     "loading": "กำลังโหลด…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "แพ็กภาษา: {packs}",
     "dragToReorder": "ลากเพื่อจัดลำดับขั้นตอนใหม่",
     "engine": "เอนจิน",
-    "intensity": "ความเข้ม"
+    "intensity": "ความเข้ม",
+    "compressionOverride": "การแทนที่การบีบอัด"
   },
   "compressionStudio": {
     "noRun": "ไม่มีการรันการบีบอัดที่พร้อมใช้งาน",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "ผู้ชนะ: {winner}",
     "encoder": "ตัวเข้ารหัส",
     "bytes": "ไบต์",
-    "tokensCl100k": "โทเค็น (cl100k)"
+    "tokensCl100k": "โทเค็น (cl100k)",
+    "studioViews": "มุมมอง Studio"
   },
   "omniglyph": {
     "preview": "ตัวอย่าง",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "ข้อความที่สั้นกว่านี้จะไม่ถูกบีบอัด ต่ำ = บีบอัดมากขึ้น",
     "tooltipMinSavings": "บีบอัดเฉพาะในกรณีที่บันทึกโทเค็นได้อย่างน้อยเท่านี้",
     "ultraSettings": "การตั้งค่าอัลตร้า",
-    "ultraSettingsDesc": "การบีบอัดความหมายที่ขับเคลื่อนด้วย SLM"
+    "ultraSettingsDesc": "การบีบอัดความหมายที่ขับเคลื่อนด้วย SLM",
+    "defaultLanguage": "ภาษาเริ่มต้น",
+    "viewMode": "โหมดมุมมอง"
   },
   "translator": {
     "title": "นักแปล",
@@ -11087,7 +11117,8 @@
       "message": "ข้อความ",
       "error": "ข้อผิดพลาด",
       "completion": "การเสร็จสิ้น"
-    }
+    },
+    "statusFilter": "สถานะ"
   },
   "templateNames": {
     "simple-chat": "แชทง่ายๆ",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes} นาทีที่แล้ว",
     "hoursAgo": "{hours} ชั่วโมงที่แล้ว",
     "daysAgo": "{days} วันที่แล้ว",
-    "entries": "รายการ"
+    "entries": "รายการ",
+    "viewSwitcherAria": "มุมมองแคช"
   },
   "proxyConfigModal": {
     "levelGlobal": "ทั่วโลก",
@@ -11613,7 +11645,8 @@
     "notMeasured": "ยังไม่ได้วัด",
     "upstream4xx": "{count} ข้อผิดพลาดไคลเอนต์ต้นทาง",
     "upstream5xx": "{count} ข้อผิดพลาดเซิร์ฟเวอร์ต้นทาง",
-    "uniformEgressLine": "{affected} จาก {exits} ช่องทางออก ล้มเหลวพร้อมกันบน {provider} (ในช่วง {hours} ชั่วโมงที่ผ่านมา) — ไม่ใช่ปัญหาของช่องทางออก"
+    "uniformEgressLine": "{affected} จาก {exits} ช่องทางออก ล้มเหลวพร้อมกันบน {provider} (ในช่วง {hours} ชั่วโมงที่ผ่านมา) — ไม่ใช่ปัญหาของช่องทางออก",
+    "moreActions": "การดำเนินการเพิ่มเติม"
   },
   "playground": {
     "title": "Title",
@@ -11819,7 +11852,8 @@
       "nextButton": "ถัดไป",
       "runButton": "รัน",
       "promptPlaceholder": "พิมพ์ข้อความของคุณ… (กด Enter เพื่อส่ง, Shift+Enter เพื่อขึ้นบรรทัดใหม่)"
-    }
+    },
+    "playgroundTabs": "โหมด Playground"
   },
   "miniPlayground": {
     "endpoint": "เอนด์พอยต์",
@@ -11890,7 +11924,8 @@
     "assistant": "ผู้ช่วย",
     "errorLabel": "ข้อผิดพลาด",
     "requestFailed": "คำขอล้มเหลว",
-    "stop": "หยุด"
+    "stop": "หยุด",
+    "messageInputAria": "ข้อความ"
   },
   "requestLogger": {
     "recording": "กำลังบันทึก",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "สลับบัญชี {count} ครั้ง",
       "resilienceRetried": "ลองรอบว่างใหม่อีกครั้ง",
       "resilienceContinued": "ทำต่อกลางสตรีม",
-      "resilienceRecovered": "กู้คืนด้วยการดำเนินการด้านความยืดหยุ่น"
-    }
+      "resilienceRecovered": "กู้คืนด้วยการดำเนินการด้านความยืดหยุ่น",
+      "conversationContext": "บริบทการสนทนา",
+      "goToBottom": "ไปด้านล่างสุด",
+      "liveRefreshOn": "รีเฟรชสด: เปิด",
+      "liveRefreshOff": "รีเฟรชสด: ปิด",
+      "liveRefresh": "รีเฟรชสด",
+      "continuesFromParent": "ดำเนินต่อจากรายการหลัก",
+      "continuesFrom": "ดำเนินต่อจาก {id}",
+      "viewConversation": "ดูการสนทนา",
+      "openConversation": "เปิดการสนทนา {id}"
+    },
+    "tableLabel": "บันทึกคำขอ"
   },
   "proxyLogger": {
     "filterAll": "ทั้งหมด",
@@ -12123,7 +12168,9 @@
     "colServedBy": "ให้บริการโดย",
     "filterTraffic": "การจราจร",
     "filterTests": "การทดสอบ",
-    "filterSource": "แหล่งที่มา"
+    "filterSource": "แหล่งที่มา",
+    "tableLabel": "บันทึกพร็อกซี",
+    "sortLogs": "จัดเรียงบันทึก"
   },
   "endpointOptions": {
     "speech": "เสียงพูด",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "หมดแล้ว",
     "statusAlerting": "กำลังแจ้งเตือน",
     "statusError": "ข้อผิดพลาด",
-    "moreSuffix": "+{count} รายการเพิ่มเติม"
+    "moreSuffix": "+{count} รายการเพิ่มเติม",
+    "feedFilterLabel": "กรองเหตุการณ์"
   },
   "quotaShare": {
     "weightPercent": "น้ำหนัก %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "ไม่ได้จัดกลุ่ม",
     "ungroupedHint": "พูลเหล่านี้ไม่ได้ถูกมอบหมายให้กับกลุ่มที่รู้จัก แก้ไขพูลเพื่อย้ายไปยังกลุ่มจริง",
     "removeFailed": "ไม่สามารถลบพูลนี้ได้",
-    "dismiss": "ปิด"
+    "dismiss": "ปิด",
+    "allocationsHeading": "การจัดสรร",
+    "wizardRemoveDimension": "ลบมิติ",
+    "wizardRemoveKey": "ลบคีย์"
   },
   "plugins": {
     "title": "ปลั๊กอิน",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "การอัปเดตการตั้งค่าล้มเหลว",
       "serviceRevealApiKey": "{actor} แสดงคีย์ API สำหรับ {target} แล้ว",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "ปิดข้อผิดพลาด"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "ไปตอนนี้",
       "message": "ขณะนี้ MITM Proxy ย้ายไปอยู่ภายใต้ AgentBridge แล้ว",
       "title": "หน้านี้ถูกย้ายแล้ว"
-    }
+    },
+    "dnsOn": "เปิด DNS",
+    "dnsOff": "ปิด DNS",
+    "showServerSettings": "แสดงการตั้งค่าเซิร์ฟเวอร์",
+    "hideServerSettings": "ซ่อนการตั้งค่าเซิร์ฟเวอร์",
+    "upstreamCaTesting": "กำลังทดสอบ…",
+    "removeMapping": "ลบการแมป",
+    "mappingSourcePlaceholder": "เช่น gemini-3.6-flash-medium หรือ * สำหรับรายการทั้งหมดที่ยังไม่ได้แมป",
+    "mappingWildcardHint": "ใช้ * เป็นแหล่งที่มาเพื่อกำหนดเส้นทางทุกโมเดลที่ไม่มีการแมปอย่างชัดเจนผ่าน OmniRoute ไปยังเป้าหมายที่เลือก แหล่งที่มาที่ตรงกันทุกประการจะมีลำดับความสำคัญเหนือ * เสมอ",
+    "wizardDetectingModels": "กำลังตรวจหาโมเดลจากทราฟฟิกที่ดักจับ...",
+    "wizardDetectedModels": "พบ {count, plural, one {# โมเดล} other {# โมเดล}} ในทราฟฟิกที่ดักจับ เลือกโมเดลที่คุณต้องการเพิ่ม:",
+    "wizardSelectedModels": "เลือกแล้ว {count, plural, one {# โมเดล} other {# โมเดล}} คุณจะแมปโมเดลเหล่านี้กับโมเดล OmniRoute ในหน้าจอถัดไป",
+    "wizardAddModels": "เพิ่ม {count, plural, one {# โมเดล} other {# โมเดล}}",
+    "wizardNoModelsDetected": "ยังตรวจไม่พบโมเดล ใช้ {agent} เพื่อส่งคำขอ แล้วเรียกใช้วิซาร์ดนี้อีกครั้งเพื่อตรวจหาโมเดลจากทราฟฟิกโดยอัตโนมัติ",
+    "wizardNoModelsHint": "หรือปิดวิซาร์ดนี้แล้วเพิ่มการแมปด้วยตนเองในการ์ดเอเจนต์"
   },
   "providerStats": {
     "unknownError": "ข้อผิดพลาดที่ไม่รู้จัก",
@@ -12696,7 +12762,11 @@
     "avgTtft": "TTFT เฉลี่ย",
     "avgTotal": "รวมเฉลี่ย",
     "requestTelemetry": "เทเลเมทรีของคำขอ",
-    "requestTelemetryDescription": "รายละเอียดไปป์ไลน์ 7 เฟส (5 นาทีล่าสุด)"
+    "requestTelemetryDescription": "รายละเอียดไปป์ไลน์ 7 เฟส (5 นาทีล่าสุด)",
+    "title": "สถิติผู้ให้บริการ",
+    "description": "ทราฟฟิก เวลาแฝง และอัตราความสำเร็จแยกตามผู้ให้บริการและโมเดล",
+    "combo": "แบบรวม",
+    "toggleModels": "แสดงโมเดลสำหรับ {provider}"
   },
   "relay": {
     "title": "พร็อกซี Serverless Relay",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "ไม่มีเนื้อหาคำขอ.",
     "noResponseBody": "ไม่มีเนื้อหาการตอบกลับ.",
     "formatted": "จัดรูปแบบแล้ว",
-    "raw": "ข้อมูลดิบ"
+    "raw": "ข้อมูลดิบ",
+    "requestCount": "{count, plural, one {# คำขอ} other {# คำขอ}}",
+    "expandList": "ขยายรายการ",
+    "collapseList": "ยุบรายการ",
+    "snippetLanguage": "ภาษาของข้อมูลโค้ด",
+    "headersTable": "ส่วนหัว",
+    "showSecrets": "แสดงข้อมูลลับ",
+    "maskSecrets": "ซ่อนข้อมูลลับ",
+    "llmNotAvailable": "ไม่มีข้อมูลเมตา LLM สำหรับคำขอนี้",
+    "llmStreamYes": "ใช่ (SSE)",
+    "llmStreamNo": "ไม่",
+    "llmTotalTokens": "รวม: {count} โทเค็น"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "สัดส่วนการเรียกที่ผู้ให้บริการรายนี้ตอบกลับจริงในช่วง 24 ชั่วโมงที่ผ่านมา เครื่องหมายขีดหมายถึงมีปริมาณการใช้งานน้อยเกินกว่าจะระบุอัตราได้",
     "reliabilitySample": "การเรียกสำเร็จ {successes} จาก {requests} ครั้งในช่วง {hours} ชั่วโมงที่ผ่านมา",
     "reliabilityTooFew": "มีการเรียกเพียง {requests} ครั้งในช่วง {hours} ชม.ที่ผ่านมา — น้อยเกินกว่าจะระบุอัตราได้",
-    "reliabilityNoTraffic": "ไม่มีการเรียกที่บันทึกไว้ในช่วง 24 ชม.ที่ผ่านมา"
+    "reliabilityNoTraffic": "ไม่มีการเรียกที่บันทึกไว้ในช่วง 24 ชม.ที่ผ่านมา",
+    "categoryFilter": "หมวดหมู่งาน"
   },
   "discovery": {
     "title": "การค้นหาผู้ให้บริการ",
@@ -13341,7 +13423,11 @@
     "method": "วิธีการ",
     "auth": "การยืนยันตัวตน",
     "feasibility": "ความเป็นไปได้",
-    "models": "โมเดล"
+    "models": "โมเดล",
+    "provider": "ผู้ให้บริการ",
+    "status": "สถานะ",
+    "endpoint": "เอ็นด์พอยต์",
+    "actions": "การดำเนินการ"
   },
   "noAuthProvider": {
     "title": "ไม่ต้องยืนยันตัวตน",
@@ -13390,7 +13476,8 @@
     "ownProxy": "พร็อกซีของตัวเอง",
     "freeTierPause": "โมเดล {model} ถูกหยุดชั่วคราว (429) จะกลับมาที่ {time}",
     "freeTierPauseProvider": "หยุดชั่วคราว (429) จะกลับมาที่ {time}",
-    "freeTierPauseNote": "การหยุดชั่วคราวภายในโพรเซสบนอินสแตนซ์นี้"
+    "freeTierPauseNote": "การหยุดชั่วคราวภายในโพรเซสบนอินสแตนซ์นี้",
+    "proxyType": "ประเภทพร็อกซี"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "ความสำเร็จที่ซ่อนอยู่กำลังรออยู่...",
         "criteria": "ทำความสำเร็จที่ซ่อนอยู่ให้สำเร็จเพื่อเปิดเผยตราสัญลักษณ์นี้."
       }
-    }
+    },
+    "leaderboardTitle": "กระดานผู้นำ",
+    "leaderboardDescription": "อันดับและความสำเร็จจากคีย์ API ของคุณ",
+    "badgeLocked": "ล็อกอยู่"
   },
   "featureFlags": {
     "title": "ฟีเจอร์แฟล็ก",
@@ -13858,7 +13948,8 @@
     "unknown": "ไม่รู้จัก",
     "unknownProvider": "ผู้ให้บริการที่ไม่รู้จัก",
     "unknownModel": "โมเดลที่ไม่รู้จัก",
-    "resolvedTargetMetrics": "{requests} คำขอ · สำเร็จ {success} · {latency} · โควตา {quota}"
+    "resolvedTargetMetrics": "{requests} คำขอ · สำเร็จ {success} · {latency} · โควตา {quota}",
+    "timeRange": "ช่วงเวลา"
   },
   "usageLimits": {
     "usdUsageQuota": "โควตาการใช้งาน USD",
@@ -14005,7 +14096,11 @@
     "learnMore": "เรียนรู้เพิ่มเติม",
     "changelogLoadFailed": "ไม่สามารถโหลดบันทึกการเปลี่ยนแปลงได้ โปรดลองอีกครั้งในภายหลัง",
     "retry": "ลองใหม่",
-    "viewFullHistory": "ดูประวัติทั้งหมดบน GitHub"
+    "viewFullHistory": "ดูประวัติทั้งหมดบน GitHub",
+    "title": "ข่าวสารและบันทึกการเปลี่ยนแปลง",
+    "description": "ประกาศจากทีม OmniRoute และบันทึกประจำรุ่นล่าสุด",
+    "viewLabel": "ดู",
+    "loadingNews": "กำลังโหลดประกาศ..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "สถานะวงจรตัดของผู้ให้บริการ",
       "lastUpdate": "อัปเดตล่าสุด: {timestamp}",
       "uptimeMinutes": "{minutes}นาที",
-      "uptimeHoursMinutes": "{hours}ชั่วโมง {minutes}นาที"
+      "uptimeHoursMinutes": "{hours}ชั่วโมง {minutes}นาที",
+      "breakerClosed": "ปิด",
+      "breakerNotClosed": "เปิดหรือเปิดครึ่งหนึ่ง"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "รายละเอียดการบำรุงรักษา",
         "secondaryAction": "สถานะระบบ"
       }
+    },
+    "miniapp": {
+      "askAnything": "ถามอะไรก็ได้…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "เครื่องมือ MCP",
     "scope": "ขอบเขต",
-    "apiKey": "คีย์ API"
+    "apiKey": "คีย์ API",
+    "visibleCount": "แสดง {visible} รายการ / ทั้งหมด {total} รายการ",
+    "modeLabel": "โหมดการแสดงผล",
+    "jumpToNow": "ข้ามไปยังเวลาปัจจุบัน เส้น NOW จะกลับไปยังตำแหน่ง {position}%",
+    "laneReuse": "การใช้เลนซ้ำ",
+    "laneReuseLabel": "ช่วงเวลาสำหรับใช้เลนซ้ำ (นาที)",
+    "laneReuseHint": "คำขอที่ใช้ ID การสนทนาเดียวกันจะอยู่ในแถวเดียวกันบนไทม์ไลน์ ตราบใดที่ช่วงห่างระหว่างคำขอไม่เกินจำนวนนาทีนี้",
+    "laneReuseUnit": "นาที",
+    "autoRefresh": "รีเฟรชอัตโนมัติ",
+    "autoRefreshLabel": "ช่วงเวลาการรีเฟรชอัตโนมัติ (วินาที)",
+    "autoRefreshHint": "ความถี่ที่ไทม์ไลน์ดึงรายการคำขอจากเซิร์ฟเวอร์อีกครั้ง",
+    "autoRefreshUnit": "วินาที",
+    "zoomOut": "ซูมออก",
+    "zoomIn": "ซูมเข้า"
   },
   "metadata": {
     "compressionTitle": "การบีบอัด",

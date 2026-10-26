@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Käytetään {count, plural, one {# erä} other {# erää}}",
     "batchFilePreview": "Esikatselu",
     "batchFilePreviewTruncated": "Näytetään ensimmäiset {shown} riviä ({total} yhteensä riviä)",
-    "batchFileDownloadFull": "Lataa Koko Tiedosto"
+    "batchFileDownloadFull": "Lataa Koko Tiedosto",
+    "dialogTitleFallback": "Valintaikkuna",
+    "pagination": "Sivutus",
+    "clearFilters": "Tyhjennä suodattimet",
+    "tokensPageTitle": "Tokenit",
+    "tokensPageDescription": "Lähetä tokeneita API-avainten välillä, jaa kutsukoodeja ja yhdistä yhteisöpalvelimia.",
+    "tokensServerUrlLabel": "Palvelimen URL-osoite"
   },
   "disabled": "Poistettu käytöstä",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Reititä budjettinsa ylittäneet pyynnöt varalla olevalle ilmaiselle varatarjoajalle/-mallille.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 tai @kanavannimi",
       "chatIdHint": "Keskustelun/kanavan yksilöllinen numeerinen tunniste tai julkinen käyttäjänimi.",
       "tutorial": "Näin määrität Telegram-webhookin:"
-    }
+    },
+    "copy": "Kopioi",
+    "copied": "Kopioitu!",
+    "expandDetails": "Näytä tiedot",
+    "collapseDetails": "Piilota tiedot"
   },
   "compliance": {
     "auditTitle": "Auditointi",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Puhelut (24h)",
     "mcpMetricSuccessRate": "Onnistumisprosentti",
     "mcpMetricAvgDuration": "Keskimääräinen kesto",
-    "mcpMetricTopTool": "Ykköstyökalu"
+    "mcpMetricTopTool": "Ykköstyökalu",
+    "dismissError": "Sulje virheilmoitus"
   },
   "themesPage": {
     "title": "Teemat",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Edistyneet hyötykuormasäännöt, pyyntörajat ja välityspalvelimen API-asetukset",
     "mitmProxyDescription": "Määritä MITM-välityspalvelimen asetukset liikenteen tarkastusta ja virheenkorjausta varten",
     "oneProxyDescription": "Määritä 1Proxy-asetukset edistyneeseen välityspalvelinten ketjutukseen",
-    "omniSkillsDescription": "Asenna ja hallitse hiekkalaatikkotaitoja automaattista kehotteiden ja työkalujen suorittamista varten"
+    "omniSkillsDescription": "Asenna ja hallitse hiekkalaatikkotaitoja automaattista kehotteiden ja työkalujen suorittamista varten",
+    "openMenu": "Avaa valikko",
+    "products": "Keak-tuotteet"
   },
   "cloudSyncStatus": {
     "synced": "Synkronoitu",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "Ensisijaiset yhteydet",
     "preferredConnectionsDesc": "Avainkohtainen prioriteettijärjestys. Jos ensisijainen yhteys ei ole käytettävissä, reititys siirtyy seuraavaan kelpoiseen.",
     "preferredConnectionsNone": "Ensisijaisuutta ei ole asetettu — käytetään oletusreititysstrategiaa.",
-    "preferredConnectionsClear": "Tyhjennä"
+    "preferredConnectionsClear": "Tyhjennä",
+    "removeSelection": "Poista {name}"
   },
   "auditLog": {
     "title": "Tarkastusloki",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Määritä Image→Text-silta Modality Bridge -asetuksissa",
     "sttBridgeCta": "Määritä Puhe→Teksti-silta Modality Bridge -asetuksissa",
     "existingConnection": "Olemassa oleva yhteys",
-    "openrouterSttDescription": "OpenRouter puheesta tekstiksi -mallit käyttävät määrittämääsi OpenRouter-yhteyttä. Erillistä tunnistetta ei vaadita."
+    "openrouterSttDescription": "OpenRouter puheesta tekstiksi -mallit käyttävät määrittämääsi OpenRouter-yhteyttä. Erillistä tunnistetta ei vaadita.",
+    "modalityTabsAria": "Mediatyyppi",
+    "serviceKindsAria": "Palvelutyyppi"
   },
   "search": {
     "searchQuery": "Hakukysely",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "Tuntematon",
     "cliproxyapiUpdate": "Päivitä",
     "cliproxyapiUpdateAvailable": "Päivitys saatavilla: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versio"
+    "cliproxyapiVersion": "Versio",
+    "removeMapping": "Poista määritys"
   },
   "modelCatalog": {
     "title": "Mallit ja yhdistelmät",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Tämä tallentaa tämän mallin mukaiset tällä hetkellä yhdistetyt tarjoajat/mallit muokattavaan yhdistelmään.",
     "duplicateAutoComboFailedPrefix": "Automaattisen yhdistelmän kaksoiskappaleen luonti epäonnistui:",
     "duplicateAutoComboUnknownError": "Tuntematon virhe",
-    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}"
+    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}",
+    "weightPercent": "Painoarvo (%)",
+    "clearSearch": "Tyhjennä haku",
+    "responseValidationRemoveCheck": "Poista tarkistus",
+    "responseValidationPath": "JSON-polku",
+    "responseValidationCondition": "Ehto",
+    "responseValidationValue": "Odotettu arvo"
   },
   "costs": {
     "title": "Kustannukset",
@@ -5293,7 +5316,8 @@
         "skipped": "jo määritetty",
         "failed": "epäonnistui"
       }
-    }
+    },
+    "stepProgress": "Määrityksen edistyminen"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Tämä palveluntarjoaja on oletuksena suljettu pois auto-valinnasta",
@@ -8956,7 +8980,8 @@
       "statsTitle": "Havainnot uudelleenkäynnistyksen jälkeen",
       "statsEmpty": "Ei vielä havaintoja.",
       "statsRequest": "Pyynnöt"
-    }
+    },
+    "modelOverrideKey": "Ohitusavain"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "Läpäisty",
     "tomlTestFailed": "Epäonnistui",
     "tomlImportError": "RTK TOML -tiedostoa ei voitu käsitellä.",
-    "tomlFileReadError": "Valittua TOML-tiedostoa ei voitu lukea."
+    "tomlFileReadError": "Valittua TOML-tiedostoa ei voitu lukea.",
+    "viewMode": "Näkymätila"
   },
   "compressionEngineConfig": {
     "loading": "Ladataan…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "Kielipaketit: {packs}",
     "dragToReorder": "Vedä järjestääksesi vaiheen uudelleen",
     "engine": "Moottori",
-    "intensity": "Voimakkuus"
+    "intensity": "Voimakkuus",
+    "compressionOverride": "Pakkauksen ohitus"
   },
   "compressionStudio": {
     "noRun": "Pakkausajoa ei ole saatavilla.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "voittaja: {winner}",
     "encoder": "enkooderi",
     "bytes": "tavua",
-    "tokensCl100k": "tokenit (cl100k)"
+    "tokensCl100k": "tokenit (cl100k)",
+    "studioViews": "Studio-näkymät"
   },
   "omniglyph": {
     "preview": "Esikatselu",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "Tätä lyhyempiä viestejä ei pakata. Alempi = enemmän pakkausta.",
     "tooltipMinSavings": "Pakkaa vain, jos se säästää vähintään näin monta merkkiä.",
     "ultraSettings": "Ultra-asetukset",
-    "ultraSettingsDesc": "SLM-käyttöinen semanttinen pakkaus"
+    "ultraSettingsDesc": "SLM-käyttöinen semanttinen pakkaus",
+    "defaultLanguage": "Oletuskieli",
+    "viewMode": "Näkymätila"
   },
   "translator": {
     "title": "Kääntäjä",
@@ -11087,7 +11117,8 @@
       "message": "Viesti",
       "error": "Virhe",
       "completion": "Valmistuminen"
-    }
+    },
+    "statusFilter": "Tila"
   },
   "templateNames": {
     "simple-chat": "Yksinkertainen chat",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes} min sitten",
     "hoursAgo": "{hours} t sitten",
     "daysAgo": "{days} pv sitten",
-    "entries": "Merkinnät"
+    "entries": "Merkinnät",
+    "viewSwitcherAria": "Välimuistinäkymä"
   },
   "proxyConfigModal": {
     "levelGlobal": "Maailmanlaajuinen",
@@ -11613,7 +11645,8 @@
     "notMeasured": "Ei mitattu",
     "upstream4xx": "{count} ylävirta-asiakasvirheet",
     "upstream5xx": "{count} ylävirta-palvelinvirheet",
-    "uniformEgressLine": "{affected} kpl {exits} poistoa epäonnistuu yhdessä {provider} (viimeisen {hours}h) — ei ole poistoprobleema"
+    "uniformEgressLine": "{affected} kpl {exits} poistoa epäonnistuu yhdessä {provider} (viimeisen {hours}h) — ei ole poistoprobleema",
+    "moreActions": "Lisää toimintoja"
   },
   "playground": {
     "title": "Title",
@@ -11819,7 +11852,8 @@
       "nextButton": "Seuraava",
       "runButton": "Suorita",
       "promptPlaceholder": "Kirjoita viestisi… (Lähetä painamalla Enter, rivinvaihto painamalla Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground-tilat"
   },
   "miniPlayground": {
     "endpoint": "Päätepiste",
@@ -11890,7 +11924,8 @@
     "assistant": "Assistentti",
     "errorLabel": "Virhe",
     "requestFailed": "Pyyntö epäonnistui",
-    "stop": "Pysäytä"
+    "stop": "Pysäytä",
+    "messageInputAria": "Viesti"
   },
   "requestLogger": {
     "recording": "Tallennus käynnissä",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} tilin kierrätystä",
       "resilienceRetried": "Tyhjä vuoro yritettiin uudelleen",
       "resilienceContinued": "Jatkettiin kesken virran",
-      "resilienceRecovered": "Palautettu kestävyystoiminnolla"
-    }
+      "resilienceRecovered": "Palautettu kestävyystoiminnolla",
+      "conversationContext": "Keskustelukonteksti",
+      "goToBottom": "Siirry alas",
+      "liveRefreshOn": "Automaattinen päivitys: käytössä",
+      "liveRefreshOff": "Automaattinen päivitys: pois käytöstä",
+      "liveRefresh": "Automaattinen päivitys",
+      "continuesFromParent": "jatkuu ylätasolta",
+      "continuesFrom": "Jatkuu kohteesta {id}",
+      "viewConversation": "näytä keskustelu",
+      "openConversation": "Avaa keskustelu {id}"
+    },
+    "tableLabel": "Pyyntölokit"
   },
   "proxyLogger": {
     "filterAll": "Kaikki",
@@ -12123,7 +12168,9 @@
     "colServedBy": "Palvelija",
     "filterTraffic": "Liikenne",
     "filterTests": "Testit",
-    "filterSource": "Lähde"
+    "filterSource": "Lähde",
+    "tableLabel": "Välityspalvelimen lokit",
+    "sortLogs": "Lajittele lokit"
   },
   "endpointOptions": {
     "speech": "Puhe",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "LOPPUUN KÄYTETTY",
     "statusAlerting": "HÄLYTYS",
     "statusError": "VIRHE",
-    "moreSuffix": "+{count} muuta"
+    "moreSuffix": "+{count} muuta",
+    "feedFilterLabel": "Suodata tapahtumia"
   },
   "quotaShare": {
     "weightPercent": "Paino %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "Ryhmittelemättömät",
     "ungroupedHint": "Näitä pooleja ei ole määritetty tunnettuun ryhmään. Muokkaa poolia siirtääksesi sen oikeaan ryhmään.",
     "removeFailed": "Tätä poolia ei voitu poistaa.",
-    "dismiss": "Sulje"
+    "dismiss": "Sulje",
+    "allocationsHeading": "Kohdistukset",
+    "wizardRemoveDimension": "Poista ulottuvuus",
+    "wizardRemoveKey": "Poista avain"
   },
   "plugins": {
     "title": "Lisäosat",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "Asetusten päivitys epäonnistui",
       "serviceRevealApiKey": "{actor} paljasti API-avaimen kohteelle {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Ohita virhe"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "Siirry nyt",
       "message": "MITM Proxy sijaitsee nyt AgentBridgen alla.",
       "title": "Tämä sivu on siirretty"
-    }
+    },
+    "dnsOn": "DNS käytössä",
+    "dnsOff": "DNS ei käytössä",
+    "showServerSettings": "Näytä palvelinasetukset",
+    "hideServerSettings": "Piilota palvelinasetukset",
+    "upstreamCaTesting": "Testataan…",
+    "removeMapping": "Poista määritys",
+    "mappingSourcePlaceholder": "esim. gemini-3.6-flash-medium tai * kaikille määrittämättömille",
+    "mappingWildcardHint": "Käytä lähteenä merkkiä *, jos haluat reitittää kaikki mallit, joille ei ole nimenomaista määritystä, OmniRouten kautta valittuun kohteeseen. Tarkat lähdeosumat ovat aina etusijalla merkkiin * nähden.",
+    "wizardDetectingModels": "Tunnistetaan malleja siepatusta liikenteestä...",
+    "wizardDetectedModels": "Siepatusta liikenteestä löytyi {count, plural, one {# malli} other {# mallia}}. Valitse lisättävät mallit:",
+    "wizardSelectedModels": "{count, plural, one {# malli valittu} other {# mallia valittu}}. Yhdistät ne OmniRoute-malleihin seuraavassa näkymässä.",
+    "wizardAddModels": "Lisää {count, plural, one {# malli} other {# mallia}}",
+    "wizardNoModelsDetected": "Malleja ei ole vielä tunnistettu. Tee pyyntö käyttäen agenttia {agent} ja suorita sitten tämä ohjattu toiminto uudelleen, jotta mallit tunnistetaan automaattisesti liikenteestä.",
+    "wizardNoModelsHint": "Voit myös sulkea tämän ohjatun toiminnon ja lisätä määritykset manuaalisesti agenttikortissa."
   },
   "providerStats": {
     "unknownError": "Tuntematon virhe",
@@ -12696,7 +12762,11 @@
     "avgTtft": "Keskim. TTFT",
     "avgTotal": "Keskim. yhteensä",
     "requestTelemetry": "Pyyntötelemetria",
-    "requestTelemetryDescription": "7-vaiheisen putken erittely (viimeiset 5 minuuttia)"
+    "requestTelemetryDescription": "7-vaiheisen putken erittely (viimeiset 5 minuuttia)",
+    "title": "Palveluntarjoajien tilastot",
+    "description": "Palveluntarjoaja- ja mallikohtainen liikenne, viive ja onnistumisasteet",
+    "combo": "Yhdistelmä",
+    "toggleModels": "Näytä palveluntarjoajan {provider} mallit"
   },
   "relay": {
     "title": "Serverless-välityspalvelimet",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "Ei pyynnön runkoa.",
     "noResponseBody": "Ei vastauksen runkoa.",
     "formatted": "Muotoiltu",
-    "raw": "Raaka"
+    "raw": "Raaka",
+    "requestCount": "{count, plural, one {# pyyntö} other {# pyyntöä}}",
+    "expandList": "Laajenna luettelo",
+    "collapseList": "Supista luettelo",
+    "snippetLanguage": "Koodikatkelman kieli",
+    "headersTable": "Otsakkeet",
+    "showSecrets": "Näytä salaisuudet",
+    "maskSecrets": "Peitä salaisuudet",
+    "llmNotAvailable": "LLM-metatietoja ei ole saatavilla tälle pyynnölle.",
+    "llmStreamYes": "kyllä (SSE)",
+    "llmStreamNo": "ei",
+    "llmTotalTokens": "Yhteensä: {count} tokenia"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "Niiden kutsujen osuus, joihin tämä palveluntarjoaja todella vastasi viimeisten 24 tunnin aikana. Viiva tarkoittaa, että liikennettä oli liian vähän onnistumisasteen määrittämiseen.",
     "reliabilitySample": "{successes}/{requests} kutsua onnistui viimeisten {hours} tunnin aikana",
     "reliabilityTooFew": "Vain {requests} kutsua viimeisten {hours} tunnin aikana — liian vähän onnistumisasteen määrittämiseen",
-    "reliabilityNoTraffic": "Viimeisten 24 tunnin aikana ei kirjattuja kutsuja"
+    "reliabilityNoTraffic": "Viimeisten 24 tunnin aikana ei kirjattuja kutsuja",
+    "categoryFilter": "Tehtäväluokka"
   },
   "discovery": {
     "title": "Palveluntarjoajien kartoitus",
@@ -13341,7 +13423,11 @@
     "method": "Menetelmä",
     "auth": "Todennus",
     "feasibility": "Toteutettavuus",
-    "models": "Mallit"
+    "models": "Mallit",
+    "provider": "Palveluntarjoaja",
+    "status": "Tila",
+    "endpoint": "Päätepiste",
+    "actions": "Toiminnot"
   },
   "noAuthProvider": {
     "title": "Todennusta ei vaadita",
@@ -13390,7 +13476,8 @@
     "ownProxy": "Oma välityspalvelin",
     "freeTierPause": "Malli {model} keskeytetty (429), palaa {time}",
     "freeTierPauseProvider": "Keskeytetty (429), palaa {time}",
-    "freeTierPauseNote": "Prosessinsisäinen tauko tällä instanssilla"
+    "freeTierPauseNote": "Prosessinsisäinen tauko tällä instanssilla",
+    "proxyType": "Välityspalvelimen tyyppi"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "Salainen saavutus odottaa...",
         "criteria": "Suorita salainen saavutus paljastaaksesi tämän merkin."
       }
-    }
+    },
+    "leaderboardTitle": "Pistetaulukko",
+    "leaderboardDescription": "API-avaintesi sijoitukset ja saavutukset",
+    "badgeLocked": "Lukittu"
   },
   "featureFlags": {
     "title": "Ominaisuusliput",
@@ -13858,7 +13948,8 @@
     "unknown": "tuntematon",
     "unknownProvider": "tuntematon tarjoaja",
     "unknownModel": "tuntematon malli",
-    "resolvedTargetMetrics": "{requests} pyyntöä · {success} onnistunut · {latency} · kiintiö {quota}"
+    "resolvedTargetMetrics": "{requests} pyyntöä · {success} onnistunut · {latency} · kiintiö {quota}",
+    "timeRange": "Aikaväli"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-käyttökiintiö",
@@ -14005,7 +14096,11 @@
     "learnMore": "Lue lisää",
     "changelogLoadFailed": "Muutoslokia ei voitu ladata. Yritä uudelleen myöhemmin.",
     "retry": "Yritä uudelleen",
-    "viewFullHistory": "Näytä koko historia GitHubissa"
+    "viewFullHistory": "Näytä koko historia GitHubissa",
+    "title": "Uutiset ja muutosloki",
+    "description": "OmniRoute-tiimin ilmoitukset ja uusimmat julkaisutiedot",
+    "viewLabel": "Näytä",
+    "loadingNews": "Ladataan ilmoituksia..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "Palveluntarjoajan piirikatkaisijan tila",
       "lastUpdate": "Viimeisin päivitys: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} t {minutes} min"
+      "uptimeHoursMinutes": "{hours} t {minutes} min",
+      "breakerClosed": "Suljettu",
+      "breakerNotClosed": "Avoin tai puoliavoin"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "Ylläpidon tiedot",
         "secondaryAction": "Järjestelmän tila"
       }
+    },
+    "miniapp": {
+      "askAnything": "Kysy mitä tahansa…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} näkyvissä / yhteensä {total}",
+    "modeLabel": "Näkymätila",
+    "jumpToNow": "Siirry nykyhetkeen, NYT-viiva palautuu kohtaan {position} %",
+    "laneReuse": "Kaistan uudelleenkäyttö",
+    "laneReuseLabel": "Kaistan uudelleenkäyttöikkuna (minuutteina)",
+    "laneReuseHint": "Saman keskustelutunnuksen sisältävät pyynnöt pysyvät samalla aikajanan rivillä, kunhan niiden välinen aika on alle tämän minuuttimäärän.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automaattinen päivitys",
+    "autoRefreshLabel": "Automaattisen päivityksen aikaväli (sekunteina)",
+    "autoRefreshHint": "Kuinka usein aikajana noutaa pyyntöluettelon uudelleen palvelimelta.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Loitonna",
+    "zoomIn": "Lähennä"
   },
   "metadata": {
     "compressionTitle": "Pakkaus",

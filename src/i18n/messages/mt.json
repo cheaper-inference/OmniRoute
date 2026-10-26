@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Użat minn {count, plural, one {# lott} other {# lottijiet}}",
     "batchFilePreview": "Previżjoni",
     "batchFilePreviewTruncated": "Qed jintwerew l-ewwel {shown} linji ({total} linji b'kollox)",
-    "batchFileDownloadFull": "Niżżel il-Fajl Sħiħ"
+    "batchFileDownloadFull": "Niżżel il-Fajl Sħiħ",
+    "dialogTitleFallback": "Djalogu",
+    "pagination": "Paġinazzjoni",
+    "clearFilters": "Neħħi l-filtri",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Ibgħat tokens bejn iċ-ċwievet tal-API, aqsam kodiċijiet tal-istedina u qabbad servers tal-komunità.",
+    "tokensServerUrlLabel": "URL tas-server"
   },
   "disabled": "Diżattivat",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Idderieġi t-talbiet li eżawrew il-baġit lejn il-fornitur/mudell ta' riżerva bla ħlas għall-emerġenzi.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 jew @channelname",
       "chatIdHint": "L-identifikatur numeriku uniku jew l-isem tal-utent pubbliku taċ-chat/tal-kanal.",
       "tutorial": "Kif tikkonfigura webhook ta’ Telegram:"
-    }
+    },
+    "copy": "Ikkopja",
+    "copied": "Ikkupjat!",
+    "expandDetails": "Uri d-dettalji",
+    "collapseDetails": "Aħbi d-dettalji"
   },
   "compliance": {
     "auditTitle": "Awditjar",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Sejħiet (24 siegħa)",
     "mcpMetricSuccessRate": "Rata ta' suċċess",
     "mcpMetricAvgDuration": "Durata medja",
-    "mcpMetricTopTool": "L-aktar għodda użata"
+    "mcpMetricTopTool": "L-aktar għodda użata",
+    "dismissError": "Agħlaq l-iżball"
   },
   "themesPage": {
     "title": "Temi",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Regoli avvanzati għall-payload, limiti għat-talbiet u settings tal-API tal-proxy",
     "mitmProxyDescription": "Ikkonfigura s-settings tal-proxy MITM għall-ispezzjoni tat-traffiku u d-debugging",
     "oneProxyDescription": "Ikkonfigura s-settings ta' 1Proxy għal katina avvanzata ta' proxies",
-    "omniSkillsDescription": "Installa u mmaniġġja ħiliet f'ambjent iżolat għall-eżekuzzjoni awtomatizzata ta' prompts u għodod"
+    "omniSkillsDescription": "Installa u mmaniġġja ħiliet f'ambjent iżolat għall-eżekuzzjoni awtomatizzata ta' prompts u għodod",
+    "openMenu": "Iftaħ il-menu",
+    "products": "Prodotti ta’ Keak"
   },
   "cloudSyncStatus": {
     "synced": "Sinkronizzata",
@@ -2499,7 +2512,8 @@
     "preferredConnections": "Konnessjonijiet preferuti",
     "preferredConnectionsDesc": "Ordni ta' prijorità għal kull ċavetta. Jekk konnessjoni preferuta mhix disponibbli, ir-rotta tgħaddi għall-konnessjoni eliġibbli li jmiss.",
     "preferredConnectionsNone": "Ebda preferenza ma ġiet issettjata — tintuża l-istrateġija tar-rotta awtomatika.",
-    "preferredConnectionsClear": "Ħassar"
+    "preferredConnectionsClear": "Ħassar",
+    "removeSelection": "Neħħi {name}"
   },
   "auditLog": {
     "title": "Reġistru tal-Awditjar",
@@ -2611,7 +2625,9 @@
     "imageToTextBridgeCta": "Ikkonfigura l-pont Immaġni→Test fis-settings ta’ Modality Bridge",
     "sttBridgeCta": "Ikkonfigura l-pont Diskors→Test fis-settings ta’ Modality Bridge",
     "existingConnection": "Konnessjoni eżistenti",
-    "openrouterSttDescription": "Il-mudelli ta’ OpenRouter għat-trasformazzjoni tad-diskors f’test jużaw il-konnessjoni OpenRouter ikkonfigurata tiegħek. Mhi meħtieġa l-ebda kredenzjali separata."
+    "openrouterSttDescription": "Il-mudelli ta’ OpenRouter għat-trasformazzjoni tad-diskors f’test jużaw il-konnessjoni OpenRouter ikkonfigurata tiegħek. Mhi meħtieġa l-ebda kredenzjali separata.",
+    "modalityTabsAria": "Tip tal-midja",
+    "serviceKindsAria": "Tip ta’ servizz"
   },
   "search": {
     "searchQuery": "Mistoqsija tat-Tiftix",
@@ -3282,7 +3298,8 @@
     "cliproxyapiUnknown": "Mhux magħruf",
     "cliproxyapiUpdate": "Aġġorna",
     "cliproxyapiUpdateAvailable": "Aġġornament disponibbli: v{current} → v{latest}",
-    "cliproxyapiVersion": "Verżjoni"
+    "cliproxyapiVersion": "Verżjoni",
+    "removeMapping": "Neħħi l-immappjar"
   },
   "modelCatalog": {
     "title": "Mudelli u Combos",
@@ -4019,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Dan se joħloq snapshot tal-fornituri/mudelli konnessi bħalissa li jaqblu ma’ din is-sagoma, f’kombinazzjoni li tista’ tiġi editjata.",
     "duplicateAutoComboFailedPrefix": "Ma rnexxilniex nidduplikaw il-kombinazzjoni awtomatika:",
     "duplicateAutoComboUnknownError": "Żball mhux magħruf",
-    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}"
+    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}",
+    "weightPercent": "Piż (%)",
+    "clearSearch": "Ħassar it-tfittxija",
+    "responseValidationRemoveCheck": "Neħħi l-verifika",
+    "responseValidationPath": "Mogħdija JSON",
+    "responseValidationCondition": "Kundizzjoni",
+    "responseValidationValue": "Valur mistenni"
   },
   "costs": {
     "title": "Spejjeż",
@@ -5293,7 +5316,8 @@
         "skipped": "diġà kkonfigurat",
         "failed": "falla"
       }
-    }
+    },
+    "stepProgress": "Progress tal-konfigurazzjoni"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Dan il-fornitur huwa eskluż minn auto awtomatikament",
@@ -8956,7 +8980,8 @@
       "statsTitle": "Sejbiet mill-bidu mill-ġdid",
       "statsEmpty": "Għad m'hemm l-ebda sejba.",
       "statsRequest": "Talbiet"
-    }
+    },
+    "modelOverrideKey": "Ċavetta tal-override"
   },
   "contextRtk": {
     "title": "Magna RTK",
@@ -9040,7 +9065,8 @@
     "tomlTestPassed": "Għadda",
     "tomlTestFailed": "Falla",
     "tomlImportError": "Ma setax jiġi pproċessat il-fajl RTK TOML.",
-    "tomlFileReadError": "Ma setax jinqara l-fajl TOML magħżul."
+    "tomlFileReadError": "Ma setax jinqara l-fajl TOML magħżul.",
+    "viewMode": "Modalità tal-wiri"
   },
   "compressionEngineConfig": {
     "loading": "Qed jitgħabba…",
@@ -9262,7 +9288,8 @@
     "languagePacksList": "Pakketti tal-lingwa: {packs}",
     "dragToReorder": "Iddreggja biex tibdel l-ordni tal-pass",
     "engine": "Magna",
-    "intensity": "Intensità"
+    "intensity": "Intensità",
+    "compressionOverride": "Override tal-kompressjoni"
   },
   "compressionStudio": {
     "noRun": "Ebda eżekuzzjoni tal-kompressjoni mhi disponibbli.",
@@ -9322,7 +9349,8 @@
     "encoderWinner": "rebbieħ: {winner}",
     "encoder": "kodifikatur",
     "bytes": "bajts",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Dehriet ta’ Studio"
   },
   "omniglyph": {
     "preview": "Previżjoni",
@@ -9528,7 +9556,9 @@
     "tooltipMinLength": "Messaġġi iqsar minn dan ma jiġux ikkompressati. Inqas = aktar kompressjoni.",
     "tooltipMinSavings": "Ikkompressa biss jekk tiffranka mill-inqas dan l-għadd ta’ tokens.",
     "ultraSettings": "Konfigurazzjoni Ultra",
-    "ultraSettingsDesc": "Kompressjoni semantika mħaddma minn SLM"
+    "ultraSettingsDesc": "Kompressjoni semantika mħaddma minn SLM",
+    "defaultLanguage": "Lingwa predefinita",
+    "viewMode": "Modalità tal-wiri"
   },
   "translator": {
     "title": "Traduttur",
@@ -11087,7 +11117,8 @@
       "message": "Messaġġ",
       "error": "Żball",
       "completion": "Tlestija"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Chat Sempliċi",
@@ -11268,7 +11299,8 @@
     "minutesAgo": "{minutes}m ilu",
     "hoursAgo": "{hours}h ilu",
     "daysAgo": "{days}d ilu",
-    "entries": "Entrati"
+    "entries": "Entrati",
+    "viewSwitcherAria": "Dehra tal-cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globali",
@@ -11613,7 +11645,8 @@
     "notMeasured": "Mhux imkejjel",
     "upstream4xx": "{count} għajn klijent erruri",
     "upstream5xx": "{count} għajnħa server errors",
-    "uniformEgressLine": "{affected} minn {exits} ħruġijiet ifallu flimkien fuq {provider} (l-aħħar {hours}h) — mhix problema tal-ħruġ"
+    "uniformEgressLine": "{affected} minn {exits} ħruġijiet ifallu flimkien fuq {provider} (l-aħħar {hours}h) — mhix problema tal-ħruġ",
+    "moreActions": "Aktar azzjonijiet"
   },
   "playground": {
     "title": "Żona tal-Ittestjar tal-Mudelli",
@@ -11819,7 +11852,8 @@
       "nextButton": "Li jmiss",
       "runButton": "Ħaddem",
       "promptPlaceholder": "Daħħal il-messaġġ tiegħek… (Enter biex tibgħat, Shift+Enter għal linja ġdida)"
-    }
+    },
+    "playgroundTabs": "Modi tal-Playground"
   },
   "miniPlayground": {
     "endpoint": "Punt tat-tmiem",
@@ -11890,7 +11924,8 @@
     "assistant": "Assistent",
     "errorLabel": "Żball",
     "requestFailed": "It-talba falliet",
-    "stop": "Waqqaf"
+    "stop": "Waqqaf",
+    "messageInputAria": "Messaġġ"
   },
   "requestLogger": {
     "recording": "Qed jirreġistra",
@@ -12077,8 +12112,18 @@
       "resilienceRotations": "{count} rotazzjonijiet tal-kont",
       "resilienceRetried": "Dawra vojta ġiet ippruvata mill-ġdid",
       "resilienceContinued": "Kompla f'nofs il-fluss",
-      "resilienceRecovered": "Irkuprat minn azzjoni ta' reżiljenza"
-    }
+      "resilienceRecovered": "Irkuprat minn azzjoni ta' reżiljenza",
+      "conversationContext": "Kuntest tal-Konverżazzjoni",
+      "goToBottom": "Mur fil-qiegħ",
+      "liveRefreshOn": "Aġġornament dirett: mixgħul",
+      "liveRefreshOff": "Aġġornament dirett: mitfi",
+      "liveRefresh": "Aġġornament dirett",
+      "continuesFromParent": "ikompli mill-ġenitur",
+      "continuesFrom": "Ikompli minn {id}",
+      "viewConversation": "ara l-konverżazzjoni",
+      "openConversation": "Iftaħ il-konverżazzjoni {id}"
+    },
+    "tableLabel": "Reġistri tat-talbiet"
   },
   "proxyLogger": {
     "filterAll": "Kollha",
@@ -12123,7 +12168,9 @@
     "colServedBy": "Servut minn",
     "filterTraffic": "Traffiku",
     "filterTests": "Testijiet",
-    "filterSource": "Sors"
+    "filterSource": "Sors",
+    "tableLabel": "Reġistri tal-proxy",
+    "sortLogs": "Issortja r-reġistri"
   },
   "endpointOptions": {
     "speech": "Diskors",
@@ -12208,7 +12255,8 @@
     "statusExhausted": "EŻAWRITA",
     "statusAlerting": "TWISSIJA",
     "statusError": "ŻBALL",
-    "moreSuffix": "+{count} oħra"
+    "moreSuffix": "+{count} oħra",
+    "feedFilterLabel": "Iffiltra l-avvenimenti"
   },
   "quotaShare": {
     "weightPercent": "Piż %",
@@ -12375,7 +12423,10 @@
     "ungroupedTitle": "Mingħajr grupp",
     "ungroupedHint": "Dawn il-ġabriet mhumiex assenjati lil grupp magħruf. Editja ġabra biex tmexxiha għal grupp eżistenti.",
     "removeFailed": "Ma setgħetx titneħħa din il-ġabra.",
-    "dismiss": "Agħlaq"
+    "dismiss": "Agħlaq",
+    "allocationsHeading": "Allokazzjonijiet",
+    "wizardRemoveDimension": "Neħħi d-dimensjoni",
+    "wizardRemoveKey": "Neħħi ċ-ċavetta"
   },
   "plugins": {
     "title": "Plugins",
@@ -12533,7 +12584,8 @@
       "settingsUpdateFailed": "L-aġġornament tal-issettjar falla",
       "serviceRevealApiKey": "{actor} żvela ċ-ċavetta API għal {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Agħlaq l-iżball"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12666,7 +12718,21 @@
       "goNow": "Mur issa",
       "message": "Il-MITM Proxy issa jinsab taħt AgentBridge.",
       "title": "Din il-paġna ġiet imċaqalqa"
-    }
+    },
+    "dnsOn": "DNS mixgħul",
+    "dnsOff": "DNS mitfi",
+    "showServerSettings": "Uri s-settings tas-server",
+    "hideServerSettings": "Aħbi s-settings tas-server",
+    "upstreamCaTesting": "Qed jiġi ttestjat…",
+    "removeMapping": "Neħħi l-immappjar",
+    "mappingSourcePlaceholder": "eż., gemini-3.6-flash-medium, jew * għal dawk kollha mhux immappjati",
+    "mappingWildcardHint": "Uża * bħala s-sors biex tidderieġi kull mudell mingħajr immappjar espliċitu permezz ta’ OmniRoute lejn id-destinazzjoni magħżula. Taqbiliet eżatti mas-sors dejjem jieħdu preċedenza fuq *.",
+    "wizardDetectingModels": "Qed jiġu identifikati mudelli mit-traffiku interċettat...",
+    "wizardDetectedModels": "Instabu {count, plural, one {# mudell} other {# mudelli}} fit-traffiku interċettat. Agħżel dawk li trid iżżid:",
+    "wizardSelectedModels": "Intgħażlu {count, plural, one {# mudell} other {# mudelli}}. Fl-iskrin li jmiss se timmappjahom ma’ mudelli ta’ OmniRoute.",
+    "wizardAddModels": "Żid {count, plural, one {# mudell} other {# mudelli}}",
+    "wizardNoModelsDetected": "Għadu ma ġie identifikat l-ebda mudell. Uża {agent} biex tagħmel talba, imbagħad erġa’ ħaddem dan l-assistent biex tidentifika awtomatikament il-mudelli mit-traffiku.",
+    "wizardNoModelsHint": "Jew agħlaq dan l-assistent u żid l-immappjar manwalment fil-kard tal-aġent."
   },
   "providerStats": {
     "unknownError": "Żball mhux magħruf",
@@ -12696,7 +12762,11 @@
     "avgTtft": "TTFT Medju",
     "avgTotal": "Medja Totali",
     "requestTelemetry": "Telemetrija tat-Talbiet",
-    "requestTelemetryDescription": "Tqassim tal-pipeline f’7 fażijiet (l-aħħar 5 minuti)"
+    "requestTelemetryDescription": "Tqassim tal-pipeline f’7 fażijiet (l-aħħar 5 minuti)",
+    "title": "Statistika tal-fornituri",
+    "description": "Traffiku, latenza u rati ta’ suċċess għal kull fornitur u għal kull mudell",
+    "combo": "Kombinazzjoni",
+    "toggleModels": "Uri l-mudelli għal {provider}"
   },
   "relay": {
     "title": "Proxies tar-Relay mingħajr server",
@@ -12857,7 +12927,18 @@
     "noRequestBody": "Ebda korp tat-talba.",
     "noResponseBody": "Ebda korp tat-tweġiba.",
     "formatted": "Ifformattjat",
-    "raw": "Mhux ipproċessat"
+    "raw": "Mhux ipproċessat",
+    "requestCount": "{count, plural, one {# talba} other {# talbiet}}",
+    "expandList": "Espandi l-lista",
+    "collapseList": "Ikkollassa l-lista",
+    "snippetLanguage": "Lingwa tas-silta tal-kodiċi",
+    "headersTable": "Intestaturi",
+    "showSecrets": "Uri s-sigrieti",
+    "maskSecrets": "Għatti s-sigrieti",
+    "llmNotAvailable": "Il-metadata tal-LLM mhix disponibbli għal din it-talba.",
+    "llmStreamYes": "iva (SSE)",
+    "llmStreamNo": "le",
+    "llmTotalTokens": "B'kollox: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13316,7 +13397,8 @@
     "colReliabilityHelp": "Il-proporzjon ta’ sejħiet li dan il-fornitur fil-fatt wieġeb matul l-aħħar 24 siegħa. Sing ifisser li pproċessa ftit wisq traffiku biex tiġi indikata rata.",
     "reliabilitySample": "Irnexxew {successes} minn {requests} sejħiet matul l-aħħar {hours} siegħa",
     "reliabilityTooFew": "Kien hemm biss {requests} sejħiet matul l-aħħar {hours} siegħa — ftit wisq biex tiġi indikata rata",
-    "reliabilityNoTraffic": "Ma ġiet irreġistrata l-ebda sejħa matul l-aħħar 24 siegħa"
+    "reliabilityNoTraffic": "Ma ġiet irreġistrata l-ebda sejħa matul l-aħħar 24 siegħa",
+    "categoryFilter": "Kategorija tal-kompitu"
   },
   "discovery": {
     "title": "Skoperta tal-Fornituri",
@@ -13341,7 +13423,11 @@
     "method": "Metodu",
     "auth": "Awtentikazzjoni",
     "feasibility": "Fattibbiltà",
-    "models": "Mudelli"
+    "models": "Mudelli",
+    "provider": "Fornitur",
+    "status": "Status",
+    "endpoint": "Punt aħħari",
+    "actions": "Azzjonijiet"
   },
   "noAuthProvider": {
     "title": "L-ebda awtentikazzjoni meħtieġa",
@@ -13390,7 +13476,8 @@
     "ownProxy": "Proxy proprju",
     "freeTierPause": "Il-mudell {model} ippawżat (429), lura fi {time}",
     "freeTierPauseProvider": "Ippawżat (429), lura fi {time}",
-    "freeTierPauseNote": "Pawża fil-proċess fuq dan il-caż"
+    "freeTierPauseNote": "Pawża fil-proċess fuq dan il-caż",
+    "proxyType": "Tip ta' proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13563,7 +13650,10 @@
         "description": "Kisba moħbija qed tistenniek...",
         "criteria": "Imla l-kisba moħbija biex tikxef din il-badge."
       }
-    }
+    },
+    "leaderboardTitle": "Klassifika",
+    "leaderboardDescription": "Klassifiki u kisbiet għaċ-ċwievet API tiegħek",
+    "badgeLocked": "Imsakkar"
   },
   "featureFlags": {
     "title": "Flags tal-Karatteristiċi",
@@ -13858,7 +13948,8 @@
     "unknown": "mhux magħruf",
     "unknownProvider": "fornitur mhux magħruf",
     "unknownModel": "mudell mhux magħruf",
-    "resolvedTargetMetrics": "{requests} talbiet · {success} suċċessi · {latency} · kwota {quota}"
+    "resolvedTargetMetrics": "{requests} talbiet · {success} suċċessi · {latency} · kwota {quota}",
+    "timeRange": "Medda ta' żmien"
   },
   "usageLimits": {
     "usdUsageQuota": "Kwota tal-użu f'USD",
@@ -14005,7 +14096,11 @@
     "learnMore": "Sir af aktar",
     "changelogLoadFailed": "Ir-reġistru tal-bidliet ma setax jitgħabba. Jekk jogħġbok, erġa’ pprova aktar tard.",
     "retry": "Erġa’ pprova",
-    "viewFullHistory": "Ara l-istorja sħiħa fuq GitHub"
+    "viewFullHistory": "Ara l-istorja sħiħa fuq GitHub",
+    "title": "Aħbarijiet u reġistru tal-bidliet",
+    "description": "Avviżi mit-tim ta' OmniRoute u l-aħħar noti tar-rilaxx",
+    "viewLabel": "Ara",
+    "loadingNews": "Qed jitgħabbew l-avviżi..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14556,7 +14651,9 @@
       "circuitBreakerState": "Stat tas-Circuit Breaker tal-Fornitur",
       "lastUpdate": "L-aħħar aġġornament: {timestamp}",
       "uptimeMinutes": "{minutes}min",
-      "uptimeHoursMinutes": "{hours}s {minutes}min"
+      "uptimeHoursMinutes": "{hours}s {minutes}min",
+      "breakerClosed": "Magħluq",
+      "breakerNotClosed": "Miftuħ jew nofsu miftuħ"
     },
     "statusPages": {
       "400": {
@@ -14631,6 +14728,9 @@
         "primaryAction": "Dettalji tal-Manutenzjoni",
         "secondaryAction": "Status tas-Sistema"
       }
+    },
+    "miniapp": {
+      "askAnything": "Staqsi kwalunkwe ħaġa…"
     }
   },
   "kiroAuthModal": {
@@ -14821,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} viżibbli / {total} b'kollox",
+    "modeLabel": "Modalità tal-wiri",
+    "jumpToNow": "Aqbeż għall-ħin attwali; il-linja ISSA terġa' tiġi ssettjata fil-pożizzjoni {position}%",
+    "laneReuse": "Użu mill-ġdid tal-korsija",
+    "laneReuseLabel": "Perjodu għall-użu mill-ġdid tal-korsija (minuti)",
+    "laneReuseHint": "Talbiet li jaqsmu l-istess ID tal-konverżazzjoni jibqgħu fl-istess ringiela tal-kronoloġija sakemm l-intervall bejniethom ikun inqas minn dan l-għadd ta' minuti.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Aġġornament awtomatiku",
+    "autoRefreshLabel": "Intervall tal-aġġornament awtomatiku (sekondi)",
+    "autoRefreshHint": "Kemm-il darba l-kronoloġija terġa' ġġib il-lista tat-talbiet mis-server.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Naqqas iż-żum",
+    "zoomIn": "Żid iż-żum"
   },
   "metadata": {
     "compressionTitle": "Kompressjoni",
