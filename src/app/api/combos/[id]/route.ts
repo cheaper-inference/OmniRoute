@@ -51,7 +51,15 @@ export async function GET(request, { params }) {
     // #17393: the control center renders the account each target is pinned to.
     // The browser cannot read the connection table, so resolve the current
     // account display names here and ship them next to the combo row.
-    const connectionLabels = buildComboConnectionLabels(combo);
+    // The labels are cosmetic: a failed lookup must not turn the whole combo
+    // read into a 500, so fall back to no labels (the client then shows the
+    // step label or the full connection id).
+    let connectionLabels: Record<string, string> = {};
+    try {
+      connectionLabels = buildComboConnectionLabels(combo);
+    } catch (error) {
+      console.warn("Failed to resolve combo connection labels:", error);
+    }
 
     return NextResponse.json({ ...combo, connectionLabels });
   } catch (error) {
