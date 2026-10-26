@@ -1,5 +1,5 @@
 import { saveCallLog } from "@/lib/usageDb";
-import { fetchRemoteImage } from "@/shared/network/remoteImageFetch";
+import { fetchRemoteImage } from "../../../utils/remoteMediaFetch.ts";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { sleep } from "../../../utils/sleep.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";

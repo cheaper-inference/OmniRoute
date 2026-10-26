@@ -5,7 +5,7 @@
  * upstream STT provider. In particular, Telegram file URLs may embed a bot
  * token in their path; only audio bytes are sent upstream.
  */
-import { fetchRemoteMedia } from "@/shared/network/remoteImageFetch";
+import { fetchRemoteMedia } from "./remoteMediaFetch.ts";
 import { errorResponse } from "./error.ts";
 
 const MAX_AUDIO_URL_LENGTH = 4096;
