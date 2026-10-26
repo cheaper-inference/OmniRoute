@@ -171,6 +171,7 @@ export const DEFAULT_PRICING_OAUTH = {
       reasoning: 15.0,
       cache_creation: 3.75,
     },
+    "claude-sonnet-5-5": CLAUDE_SONNET_5_PRICING,
     "claude-opus-4-5-20251101": {
       input: 5.0,
       output: 25.0,

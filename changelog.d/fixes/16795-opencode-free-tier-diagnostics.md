@@ -1,0 +1,1 @@
+- **fix(sse):** distinguish explicit OpenCode free-tier restrictions from credential failures in combo error messages, without changing upstream status or routing; this diagnostic correction does not restore access to restricted free-tier models ([#16795](https://github.com/diegosouzapw/OmniRoute/pull/16795)) — thanks @KiaroSama

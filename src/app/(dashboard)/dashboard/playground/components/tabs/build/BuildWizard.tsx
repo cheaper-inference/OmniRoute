@@ -1,5 +1,10 @@
 "use client";
 
+import Textarea from "@/shared/components/Textarea";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import { cn } from "@/shared/utils/cn";
+
 // src/app/(dashboard)/dashboard/playground/components/tabs/build/BuildWizard.tsx
 
 import { useState } from "react";
@@ -49,17 +54,13 @@ function Stepper({ currentStep }: StepperProps) {
             <span
               className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-semibold transition-colors ${
                 currentStep === step.num
-                  ? "bg-primary text-white"
+                  ? "bg-primary text-accent-foreground"
                   : currentStep > step.num
                     ? "bg-primary/20 text-primary"
                     : "bg-border text-text-muted"
               }`}
             >
-              {currentStep > step.num ? (
-                <span className="material-symbols-outlined text-[12px]">check</span>
-              ) : (
-                step.num
-              )}
+              {currentStep > step.num ? <Icon name="check" size={12} /> : step.num}
             </span>
             <span
               className={`text-xs font-medium transition-colors ${
@@ -85,20 +86,21 @@ interface ModeCardProps {
 
 function ModeCard({ icon, title, description, selected, onClick }: ModeCardProps) {
   return (
-    <button
+    <Button
+      variant="outline"
+      aria-pressed={selected}
       onClick={onClick}
-      className={`flex flex-col gap-2 p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm ${
-        selected
-          ? "border-primary bg-primary/5"
-          : "border-border bg-surface hover:border-primary/40"
-      }`}
+      className={cn(
+        "h-auto flex-col items-start gap-2 whitespace-normal rounded-xl border-2 p-4 text-left font-normal",
+        selected ? "border-primary bg-primary/5" : "bg-surface"
+      )}
     >
-      <span className="text-2xl">{icon}</span>
-      <span className={`text-sm font-semibold ${selected ? "text-primary" : "text-text-main"}`}>
-        {title}
+      <span className="text-2xl" aria-hidden="true">
+        {icon}
       </span>
+      <span className="text-sm font-semibold text-text-main">{title}</span>
       <span className="text-xs text-text-muted leading-relaxed">{description}</span>
-    </button>
+    </Button>
   );
 }
 
@@ -170,13 +172,9 @@ export default function BuildWizard({
           </div>
 
           <div className="flex justify-end pt-2">
-            <button
-              onClick={goToStep2}
-              className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
-            >
+            <Button iconRight="arrow_forward" onClick={goToStep2}>
               {tb("nextButton")}
-              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -208,20 +206,12 @@ export default function BuildWizard({
           )}
 
           <div className="flex items-center justify-between pt-2">
-            <button
-              onClick={goBack}
-              className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border border-border text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            <Button variant="outline" icon="arrow_back" onClick={goBack}>
               {tb("backButton")}
-            </button>
-            <button
-              onClick={goToStep3}
-              className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
-            >
+            </Button>
+            <Button iconRight="arrow_forward" onClick={goToStep3}>
               {tb("nextButton")}
-              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -231,24 +221,20 @@ export default function BuildWizard({
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Toolbar */}
           <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-bg-alt shrink-0">
-            <button
-              onClick={goBack}
-              className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded border border-border text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[14px]">arrow_back</span>
+            <Button variant="outline" size="sm" icon="arrow_back" onClick={goBack}>
               {tb("backButton")}
-            </button>
+            </Button>
 
             <div className="w-px h-4 bg-border mx-1" />
 
-            <button
+            <Button
+              size="sm"
+              icon="play_arrow"
               onClick={onRun}
-              disabled={running || (!prompt.trim())}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={running || !prompt.trim()}
             >
-              <span className="material-symbols-outlined text-[14px]">play_arrow</span>
               {running ? t("running") : tb("runButton")}
-            </button>
+            </Button>
 
             <div className="ml-auto flex items-center gap-2 text-[11px] text-text-muted">
               {includesTools && toolsBuilder.tools.length > 0 && (
@@ -257,22 +243,18 @@ export default function BuildWizard({
                 </span>
               )}
               {includesJson && structuredOutput.enabled && (
-                <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">
-                  JSON mode
-                </span>
+                <span className="px-1.5 py-0.5 rounded bg-success/10 text-success">JSON mode</span>
               )}
             </div>
           </div>
 
           {/* Result area (conversation + tool-call UI + validation badge) */}
-          <div className="flex-1 overflow-y-auto px-4 py-3">
-            {result}
-          </div>
+          <div className="flex-1 overflow-y-auto px-4 py-3">{result}</div>
 
           {/* Prompt input */}
           <div className="px-4 py-3 border-t border-border shrink-0">
             <div className="flex items-end gap-2">
-              <textarea
+              <Textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={(e) => {
@@ -283,7 +265,8 @@ export default function BuildWizard({
                 }}
                 placeholder={tb("promptPlaceholder")}
                 rows={2}
-                className="flex-1 text-sm bg-surface border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary text-text-main resize-none"
+                aria-label={tb("promptPlaceholder")}
+                className="text-sm resize-none flex-1"
               />
             </div>
           </div>

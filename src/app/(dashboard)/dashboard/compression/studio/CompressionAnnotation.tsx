@@ -20,13 +20,13 @@ export function CompressionAnnotation({ stats }: CompressionAnnotationProps) {
 
   return (
     <div className="flex items-center gap-2 flex-wrap" data-testid="compression-annotation">
-      <span className="text-xs font-mono text-muted">
+      <span className="text-xs font-mono text-text-muted">
         {stats.originalTokens}→{stats.compressedTokens}
       </span>
       {sorted.map(([name, n]) => (
         <span
           key={name}
-          className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20"
+          className="px-1.5 py-0.5 rounded text-[10px] bg-chart-3/10 text-chart-3 border border-chart-3/20"
         >
           {name}×{n}
         </span>

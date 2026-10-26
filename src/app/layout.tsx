@@ -1,7 +1,7 @@
 import "./globals.css";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getLocale, getTranslations } from "next-intl/server";
+import { getMessages, getLocale } from "next-intl/server";
 import { RTL_LOCALES } from "@/i18n/config";
 import { normalizeComplianceEventTypes } from "@/i18n/request";
 import { pickMessages } from "@/i18n/pickMessages";
@@ -52,7 +52,6 @@ export async function generateMetadata() {
 
 export default async function RootLayout({ children }) {
   const locale = await getLocale();
-  const t = await getTranslations("sidebar");
   // Serialize ONLY the public-surface namespaces into the flight payload.
   // The full merged catalog is ~664 KB across 132 namespaces and used to be
   // embedded in every rendered page (757-865 KB HTML even for /login and
@@ -66,7 +65,7 @@ export default async function RootLayout({ children }) {
   const isRtl = RTL_LOCALES.includes(locale as (typeof RTL_LOCALES)[number]);
 
   return (
-    <html lang={locale} dir={isRtl ? "rtl" : "ltr"} suppressHydrationWarning>
+    <html lang={locale} dir={isRtl ? "rtl" : "ltr"} className="ci-theme" suppressHydrationWarning>
       <head>
         {/* #16245: seed React's $RT so Suspense reveals while the tab is hidden. */}
         <script dangerouslySetInnerHTML={{ __html: HIDDEN_TAB_REVEAL_SCRIPT }} />
@@ -102,9 +101,6 @@ export default async function RootLayout({ children }) {
             `,
           }}
         />
-        {/* Material Symbols icon font is self-hosted via globals.css
-            (@import "material-symbols/outlined.css") so icons render even when
-            the Google Fonts CDN is unreachable (#3695). */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -133,23 +129,18 @@ export default async function RootLayout({ children }) {
                 const stored = localStorage.getItem('theme');
                 const parsed = stored ? JSON.parse(stored) : null;
                 const theme = parsed?.state?.theme || 'system';
-                if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
-                }
+                const dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark', dark);
+                document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+                document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
               } catch (e) {}
             `,
           }}
         />
       </head>
+      {/* No skip link here: its #main-content target exists only in the dashboard shell, which
+          renders its own skip link as the first tab stop (F4). */}
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#6366f1] focus:text-white focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-lg"
-        >
-          {t("skipToContent")}
-        </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <BasePathNetworkProvider>
             <PwaRegister />

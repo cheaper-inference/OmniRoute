@@ -95,9 +95,9 @@ export async function createBackup() {
 // symptom. `--apply` never restarted anything and its success message ("Run
 // `omniroute --version` to verify.") implied the update was already live.
 //
-// `restart.mjs`'s `runRestartCommand()` stops then re-spawns the server in the
-// foreground (via `serve.mjs::runServe`), which can block the calling terminal
-// and is a materially bigger behavior change than this fix warrants to invoke
+// `restart.mjs`'s `runRestartCommand()` stops then re-spawns the server detached
+// (via `serve.mjs::runServe` with `daemon: true`, #17168), which is still a
+// materially bigger behavior change than this fix warrants to invoke
 // unconditionally and unattended from `--apply`. Instead, detect whether a
 // CLI-managed server is currently running (the same PID file `stop.mjs`/
 // `restart.mjs` already trust) and print an explicit, prominent instruction —
@@ -114,9 +114,13 @@ export async function printPostApplyGuidance(latest, deps = { readPidFile, isPid
     printInfo("  Run `omniroute restart` now to apply this update.");
   } else {
     printInfo(`No running OmniRoute server was detected via the CLI's PID file.`);
-    printInfo(`  Start it with \`omniroute serve\` (or restart your existing process) to run ${latest}.`);
+    printInfo(
+      `  Start it with \`omniroute serve\` (or restart your existing process) to run ${latest}.`
+    );
   }
-  printInfo("`omniroute --version` will keep reporting the old version until the process restarts.");
+  printInfo(
+    "`omniroute --version` will keep reporting the old version until the process restarts."
+  );
 }
 
 export function registerUpdate(program) {

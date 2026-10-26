@@ -1,0 +1,1 @@
+- **fix(calls):** a streamed reply that carried visible text is no longer logged as an empty reply — the call log's content-presence flag now reports it ([#17277](https://github.com/diegosouzapw/OmniRoute/pull/17277)) — thanks @maxmad64bis

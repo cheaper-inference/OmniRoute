@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { useIsElectron } from "@/shared/hooks/useElectron";
@@ -13,7 +15,9 @@ import { useIsElectron } from "@/shared/hooks/useElectron";
  */
 
 import Link from "next/link";
-import { Card } from "@/shared/components";
+// Direct module imports, not the "@/shared/components" barrel (it ships the dashboard shell).
+import Card from "@/shared/components/Card";
+import { OmniRouteLockup } from "@/shared/components/OmniRouteLogo";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("auth");
@@ -33,7 +37,10 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">{t("resetPassword")}</h1>
+          <div className="mb-6 flex justify-center">
+            <OmniRouteLockup />
+          </div>
+          <h1 className="ci-heading text-3xl mb-2">{t("resetPassword")}</h1>
           <p className="text-text-muted">{t("resetDescription")}</p>
         </div>
 
@@ -42,10 +49,8 @@ export default function ForgotPasswordPage() {
             {/* Electron: App Reset Method */}
             <Card className="mb-4">
               <div className="flex items-start gap-4 p-2">
-                <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                    folder_open
-                  </span>
+                <div className="flex items-center justify-center size-10 rounded-lg bg-bg-subtle text-text-muted shrink-0 mt-0.5">
+                  <Icon name="folder_open" size={20} />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-lg font-semibold mb-1">{t("resetViaAppData")}</h2>
@@ -55,18 +60,20 @@ export default function ForgotPasswordPage() {
                     <li>
                       {t("navigateToAppData")}:
                       {dataDir ? (
-                        <div className="bg-black/30 rounded-lg p-2 mt-1 font-mono text-xs text-green-400 border border-white/5 break-all">
+                        <div className="bg-bg-subtle rounded-lg p-2 mt-1 font-mono text-xs text-text-main border border-border break-all">
                           {dataDir}
                         </div>
                       ) : (
-                        <div className="bg-black/30 rounded-lg p-2 mt-1 font-mono text-xs text-green-400 border border-white/5">
+                        <div className="bg-bg-subtle rounded-lg p-2 mt-1 font-mono text-xs text-text-main border border-border">
                           <span className="text-text-muted/60">({t("checkAppDataFolder")})</span>
                         </div>
                       )}
                     </li>
                     <li>
                       {t("deleteSettingsJson")}{" "}
-                      <code className="bg-black/30 px-1 rounded text-text-main">settings.json</code>{" "}
+                      <code className="bg-bg-subtle px-1 rounded text-text-main">
+                        settings.json
+                      </code>{" "}
                       ({t("orRemovePasswordHashField")})
                     </li>
                     <li>{t("relaunchAppFresh")}</li>
@@ -78,10 +85,8 @@ export default function ForgotPasswordPage() {
             {/* Electron: Env File Method */}
             <Card className="mb-6">
               <div className="flex items-start gap-4 p-2">
-                <div className="flex items-center justify-center size-10 rounded-lg bg-amber-500/10 text-amber-500 shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                    settings
-                  </span>
+                <div className="flex items-center justify-center size-10 rounded-lg bg-warning-bg text-warning shrink-0 mt-0.5">
+                  <Icon name="settings" size={20} />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-lg font-semibold mb-1">{t("alternativeSetPassword")}</h2>
@@ -90,23 +95,23 @@ export default function ForgotPasswordPage() {
                     <li>{t("quitAppCompletely")}</li>
                     <li>
                       {t("openServerEnv")}{" "}
-                      <code className="bg-black/30 px-1 rounded text-text-main">server.env</code>{" "}
+                      <code className="bg-bg-subtle px-1 rounded text-text-main">server.env</code>{" "}
                       {t("inDataDirectory")}
                       {dataDir && (
-                        <div className="bg-black/30 rounded-lg p-2 mt-1 font-mono text-xs text-green-400 border border-white/5 break-all">
+                        <div className="bg-bg-subtle rounded-lg p-2 mt-1 font-mono text-xs text-text-main border border-border break-all">
                           {dataDir}/server.env
                         </div>
                       )}
                     </li>
                     <li>
                       {t("addOrUpdate")}:
-                      <div className="bg-black/30 rounded-lg p-2 mt-1 font-mono text-xs text-green-400 border border-white/5">
+                      <div className="bg-bg-subtle rounded-lg p-2 mt-1 font-mono text-xs text-text-main border border-border">
                         INITIAL_PASSWORD={t("newPasswordPlaceholder")}
                       </div>
                     </li>
                     <li>
                       {t("deleteAndRelaunch")}{" "}
-                      <code className="bg-black/30 px-1 rounded text-text-main">
+                      <code className="bg-bg-subtle px-1 rounded text-text-main">
                         {t("settingsJson")}
                       </code>{" "}
                       {t("fromDataDir")}
@@ -122,15 +127,13 @@ export default function ForgotPasswordPage() {
             {/* Method 1: CLI Reset */}
             <Card className="mb-4">
               <div className="flex items-start gap-4 p-2">
-                <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                    terminal
-                  </span>
+                <div className="flex items-center justify-center size-10 rounded-lg bg-bg-subtle text-text-muted shrink-0 mt-0.5">
+                  <Icon name="terminal" size={20} />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-lg font-semibold mb-1">{t("methodCliTitle")}</h2>
                   <p className="text-sm text-text-muted mb-3">{t("methodCliDescription")}</p>
-                  <div className="bg-black/30 rounded-lg p-3 mb-3 font-mono text-sm text-green-400 border border-white/5">
+                  <div className="bg-bg-subtle rounded-lg p-3 mb-3 font-mono text-sm text-text-main border border-border">
                     <code>npx omniroute reset-password</code>
                   </div>
                   <p className="text-xs text-text-muted">{t("methodCliHint")}</p>
@@ -141,10 +144,8 @@ export default function ForgotPasswordPage() {
             {/* Method 2: Database Reset */}
             <Card className="mb-6">
               <div className="flex items-start gap-4 p-2">
-                <div className="flex items-center justify-center size-10 rounded-lg bg-amber-500/10 text-amber-500 shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                    database
-                  </span>
+                <div className="flex items-center justify-center size-10 rounded-lg bg-warning-bg text-warning shrink-0 mt-0.5">
+                  <Icon name="database" size={20} />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-lg font-semibold mb-1">{t("methodManualTitle")}</h2>
@@ -153,15 +154,15 @@ export default function ForgotPasswordPage() {
                     <li>{t("stopServer")}</li>
                     <li>
                       {t("setPasswordInYour")}{" "}
-                      <code className="bg-black/30 px-1 rounded text-text-main">.env</code>{" "}
+                      <code className="bg-bg-subtle px-1 rounded text-text-main">.env</code>{" "}
                       {t("fileLabelSuffix")}
-                      <div className="bg-black/30 rounded-lg p-2 mt-1 font-mono text-xs text-green-400 border border-white/5">
+                      <div className="bg-bg-subtle rounded-lg p-2 mt-1 font-mono text-xs text-text-main border border-border">
                         INITIAL_PASSWORD={t("newPasswordPlaceholder")}
                       </div>
                     </li>
                     <li>
                       {t("deleteSettingsFile")}{" "}
-                      <code className="bg-black/30 px-1 rounded text-text-main">
+                      <code className="bg-bg-subtle px-1 rounded text-text-main">
                         data/settings.json
                       </code>{" "}
                       ({t("orRemovePasswordHashField")})
@@ -179,9 +180,7 @@ export default function ForgotPasswordPage() {
             href="/login"
             className="text-sm text-primary hover:underline inline-flex items-center gap-1"
           >
-            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-              arrow_back
-            </span>
+            <Icon name="arrow_back" size={16} />
             {t("backToLogin")}
           </Link>
         </div>

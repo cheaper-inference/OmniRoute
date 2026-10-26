@@ -80,7 +80,7 @@ function buildWildcardAliasMap(settings: Record<string, unknown>): Record<string
  * are folded in last: they are keyed by pattern string (containing `*`/`?`), which
  * cannot collide with a real model id, so ordering never affects exact-alias lookups.
  */
-async function getCombinedModelAliases(): Promise<Record<string, unknown>> {
+export async function getCombinedModelAliases(): Promise<Record<string, unknown>> {
   const [dbAliases, settings, autoAliases] = await Promise.all([
     getModelAliases().catch(() => ({})),
     getCachedSettings().catch(() => ({}) as Record<string, unknown>),

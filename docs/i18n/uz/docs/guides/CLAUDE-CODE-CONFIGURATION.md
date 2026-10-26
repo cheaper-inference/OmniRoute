@@ -48,16 +48,11 @@ faol kontekstdan aniqlaydi (shuning uchun `omniroute connect <vps>`, undan so‘
 
 ---
 
-## Aniqlash aliaslari — Claude bo‘lmagan modellarni `/model` tanlagichida ko‘rsating
+## Kashfiyot taxalluslari — Claude-ga tegishli bo'lmagan modellarni `/model` tanlovchisida ko'rsatish
 
-Claude Code’ning shlyuz orqali model aniqlash mexanizmi faqat `claude` yoki
-`anthropic` bilan boshlanadigan id’larni ko‘rsatadi. Shu sababli
-`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` bo‘lganda ichki `/model` tanlagichi
-odatda OmniRoute’ning **faqat** Claude/Anthropic modellarini ko‘rsatadi —
-`kimi/kimi-k2.6` yoki `glm/glm-5.2`, marshrutlash to‘g‘ri ishlasa ham, hech qachon ko‘rinmaydi.
+Claude Code ning shluz model kashfiyoti faqat `claude` yoki `anthropic` bilan boshlanadigan id-larni ro'yxatga oladi, shuning uchun `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` yoqilganda asl `/model` tanlovchisi odatda **faqat** OmniRoute ning Claude/Anthropic modellarini ko'rsatadi — `kimi/kimi-k2.6` yoki `glm/glm-5.2` hech qachon paydo bo'lmaydi, garchi u bemalol marshrutlansa ham.
 
-OmniRoute istalgan yoqilgan modelni (va kombinatsiyani) `claude/…` id ostida
-aks ettirishi mumkin, shunda u ushbu filtrdan o‘tib, tanlagichda ko‘rinadi:
+OmniRoute har qanday yoqilgan modelni (va komboni) `claude/…` id ostida aks ettirishi mumkin, shunda u bu filtrdan o'tib, tanlovchida ko'rinadi:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -65,33 +60,21 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Claude Code’da ulardan birini tanlaganingizda, OmniRoute marshrutlashdan oldin
-`claude/` o‘ramini olib tashlab, haqiqiy id’ni tiklaydi — haqiqiy
-`claude/<real-claude-model>` id’ga (haqiqiy Claude OAuth provayderi) esa hech qachon tegilmaydi.
+Claude Code da ulardan birini tanlaganingizda, OmniRoute marshrutlashdan oldin `claude/` o'rovchini olib tashlab, haqiqiy id-ga qaytaradi — chinakam `claude/<real-claude-model>` id (asl Claude OAuth provayderi) esa har doim o'z holicha qoldiriladi.
 
-**Bu standart holatda o‘chirilgan** va uch darajali boshqaruv orqali nazorat qilinadi
-(eng aniq sozlama ustunlik qiladi), shuning uchun oddiy OmniRoute Claude Code’dan
-foydalanmaydigan mijozlar uchun o‘z katalogini ikki baravar ko‘paytirmaydi:
+Odatiy holda faqat asosiy id-lar aks ettiriladi. Tanlov asosida yoqiladigan `CATALOG_MIRROR_REFINEMENTS_ENABLED` funksiya bayrog'i yoqilganda, katalogda allaqachon ro'yxatga olingan fikrlash-harakati variantlari (masalan, `codex/gpt-6-sol-high`) boshqa har qanday id kabi aks ettiriladi, shunda Claude Code aniq harakat darajasini tanlashi mumkin, so'rov yo'li shakllantira olmaydigan o'rnatilgan `auto/*` id-lar esa aks ettirilmaydi. Harakat variantlari umuman ro'yxatga olinishi yoki olinmasligi baribir `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` tomonidan boshqariladi — aks ettirish asosiy katalogda mavjud bo'lmagan variantni hech qachon qo'shmaydi.
 
-| Daraja    | Qayerda                                                                                                        |
-| --------- | -------------------------------------------------------------------------------------------------------------- |
-| Model     | Provayder tafsilotlari sahifasi → har bir model uchun "Expose in Claude Code" almashtirgichi                   |
-| Provayder | Provayder tafsilotlari sahifasi → provayder darajasidagi almashtirgich (uning barcha modellarini qamrab oladi) |
-| Global    | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (standart holatda o‘chirilgan)                        |
+**Bu odatiy holda o'chiq** va uch darajali nazorat orqali boshqariladi (eng aniq bo'lgani ustun keladi), shuning uchun oddiy OmniRoute Claude Code dan foydalanmaydigan mijozlar uchun o'z katalogini hech qachon ikki barobarga ko'paytirmaydi:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` muhit o‘zgaruvchisi global darajani majburan yoqadi
-va boshqaruv panelidagi sozlamadan ustun turadi (Feature Flags ekrani bu holatda
-"active via environment variable" qaydini ko‘rsatadi). Har bir provayder va
-har bir model uchun almashtirgichlar bu sozlamani yanada aniqlashtiradi — masalan,
-global daraja o‘chiq, ammo Kimi provayderi yoqilgan bo‘lsa, faqat Kimi modellari ko‘rsatiladi.
+| Daraja    | Qayerda                                                                                                     |
+| --------- | ----------------------------------------------------------------------------------------------------------- |
+| Model     | Provayder tafsilotlari sahifasi → har bir model uchun «Claude Code da ko'rsatish» o'tkazgichi               |
+| Provayder | Provayder tafsilotlari sahifasi → provayder darajasidagi o'tkazgich (uning barcha modellarini qamrab oladi) |
+| Global    | Sozlamalar → Funksiya bayroqlari → `EXPOSE_CC_DISCOVERY_ALIASES` (odatiy holda o'chiq)                      |
 
-> ⚠️ **Claude bo‘lmagan modellarda kontekst oynasi nomuvofiqligi.** Claude Code o‘zi
-> tanimaydigan har qanday id uchun 200K kontekst oynasini qabul qiladi (u haqiqiy
-> oynani `/v1/models`dan o‘qiy olmaydi). Kattaroq oynaga ega model uchun (masalan,
-> Kimi K2’ning 256K oynasi) avtomatik ixchamlash muddatidan oldin ishga tushmasligi
-> uchun `CLAUDE_CODE_AUTO_COMPACT_WINDOW` qiymatini modelning haqiqiy oynasidan
-> kichikroq qilib belgilang. Yuqorida yaratilgan profillar buni har bir model uchun
-> allaqachon sozlaydi.
+`EXPOSE_CC_DISCOVERY_ALIASES` muhit o'zgaruvchisi global darajani majburiy yoqadi va boshqaruv panelidagi bekor qilishdan ustun turadi (bunday bo'lganda Funksiya bayroqlari ekranida «muhit o'zgaruvchisi orqali faol» yozuvi ko'rsatiladi). Har bir provayder va har bir model o'tkazgichlari shu zahoti aniqlashtirish kiritadi — masalan, global o'chiq + Kimi provayderi yoqilganda faqat Kimi modellari ko'rinadi.
+
+> ⚠️ **Claude-ga tegishli bo'lmagan modellarda oyna nomuvofiqligi.** Claude Code tanimaydigan har qanday id uchun 200K kontekst oynasini nazarda tutadi (u `/v1/models` dan haqiqiy oynani o'qiy olmaydi). Kattaroq oynaga ega model uchun (masalan, Kimi K2 ning 256K oynasi), avtomatik siqish muddatidan oldin ishga tushib qolmasligi uchun `CLAUDE_CODE_AUTO_COMPACT_WINDOW` qiymatini modelning haqiqiy oynasidan pastroq qilib o'rnating. Yuqorida yaratilgan profillar buni har bir model uchun allaqachon bajaradi.
 
 ---
 

@@ -188,6 +188,7 @@ export async function handleVideoGeneration({
   resolvedProvider = null,
   // #16372 — route-injected media sink (owner + public origin) for auth-gated job results.
   mediaSink = undefined,
+  signal = null,
 }) {
   let { provider, model } = parseVideoModel(body.model);
   if (resolvedProvider) {
@@ -416,6 +417,7 @@ export async function handleVideoGeneration({
       body,
       credentials,
       log,
+      signal,
     });
   }
   if (resolvedProvider) {

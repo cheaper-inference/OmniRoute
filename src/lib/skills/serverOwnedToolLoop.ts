@@ -298,83 +298,43 @@ export async function runServerOwnedToolLoop(
       }
     }
 
-    // Check budget exhaustion — any truncated result terminates
+    const finishBoundary = (
+      termination: "tool_output_budget" | "max_followups" | "deadline"
+    ): ServerOwnedToolLoopResult => {
+      const formatted = formatEscapeHatchResponse(
+        response,
+        serverOwned,
+        execResults,
+        [],
+        options.sourceFormat,
+        serMap
+      );
+
+      return {
+        kind: "ok",
+        response: formatted,
+        responseForMemoryExtraction:
+          currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
+        finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
+        finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
+        cumulativeUsage: aggregateUsageOrNull(usages),
+        totalCostUsd,
+        receipts,
+        followUps,
+        termination,
+      };
+    };
+
+    // Preserve boundary precedence and avoid reading the clock for earlier limits.
     if (anyTruncated || cumulativeOutputBytes >= maxTotalResultBytes) {
-      const formatted = formatEscapeHatchResponse(
-        response,
-        serverOwned,
-        execResults,
-        [],
-        options.sourceFormat,
-        serMap
-      );
-
-      return {
-        kind: "ok",
-        response: formatted,
-        responseForMemoryExtraction:
-          currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
-        finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
-        finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateUsageOrNull(usages),
-        totalCostUsd,
-        receipts,
-        followUps,
-        termination: "tool_output_budget",
-      };
+      return finishBoundary("tool_output_budget");
     }
-
-    // Check follow-up limit
     if (followUps >= maxFollowUps) {
-      const formatted = formatEscapeHatchResponse(
-        response,
-        serverOwned,
-        execResults,
-        [],
-        options.sourceFormat,
-        serMap
-      );
-
-      return {
-        kind: "ok",
-        response: formatted,
-        responseForMemoryExtraction:
-          currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
-        finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
-        finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateUsageOrNull(usages),
-        totalCostUsd,
-        receipts,
-        followUps,
-        termination: "max_followups",
-      };
+      return finishBoundary("max_followups");
     }
-
-    // Check deadline before resume
     const remainingMs = loopDeadlineAtMs - now();
     if (remainingMs < MIN_REMAINING_FOR_FOLLOW_UP_MS) {
-      const formatted = formatEscapeHatchResponse(
-        response,
-        serverOwned,
-        execResults,
-        [],
-        options.sourceFormat,
-        serMap
-      );
-
-      return {
-        kind: "ok",
-        response: formatted,
-        responseForMemoryExtraction:
-          currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
-        finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
-        finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateUsageOrNull(usages),
-        totalCostUsd,
-        receipts,
-        followUps,
-        termination: "deadline",
-      };
+      return finishBoundary("deadline");
     }
 
     // Check abort before resume

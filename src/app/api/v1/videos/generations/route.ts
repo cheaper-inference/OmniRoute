@@ -206,6 +206,7 @@ async function postHandler(request, context) {
       // from the caller-facing origin (configured public URL / trusted proxy / Host).
       mediaSink,
       ...(isCustomModel && { resolvedProvider: provider }),
+      signal: request.signal,
     })
   );
 
@@ -221,6 +222,7 @@ async function postHandler(request, context) {
     model: body.model,
     startTime,
     duration: body.duration,
+    apiKeyId: policy.apiKeyInfo?.id,
   });
 }
 

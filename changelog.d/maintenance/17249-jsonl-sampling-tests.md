@@ -1,0 +1,1 @@
+- **test(batch):** Cover JSONL tail validation, duplicates across sampling windows and overlapping head/tail samples. ([#17249](https://github.com/diegosouzapw/OmniRoute/pull/17249)) — thanks @pacocartones

@@ -2,9 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
+import EmptyState from "@/shared/components/EmptyState";
+import Input from "@/shared/components/Input";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useDisplayBaseUrl } from "@/shared/hooks";
 
@@ -105,15 +108,19 @@ export default function RelayProxyClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold">{t("title")}</h1>
-          <p className="text-sm text-text-muted mt-1">{t("description")}</p>
-        </div>
-        <Button onClick={() => setShowCreate(!showCreate)}>
-          {showCreate ? t("cancel") : t("newToken")}
-        </Button>
-      </div>
+      <PageHeader
+        compact
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <Button
+            variant={showCreate ? "outline" : "primary"}
+            onClick={() => setShowCreate(!showCreate)}
+          >
+            {showCreate ? t("cancel") : t("newToken")}
+          </Button>
+        }
+      />
 
       {/* Create Form */}
       {showCreate && (
@@ -121,42 +128,30 @@ export default function RelayProxyClient() {
           <div className="p-4 space-y-4">
             <h2 className="text-sm font-semibold">{t("createTitle")}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">{t("nameRequired")}</label>
-                <input
-                  className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-sm"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="my-api-relay"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t("tokenDescription")}</label>
-                <input
-                  className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-sm"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder={t("descriptionPlaceholder")}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t("maxPerMinute")}</label>
-                <input
-                  type="number"
-                  className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-sm"
-                  value={form.maxRpm}
-                  onChange={(e) => setForm({ ...form, maxRpm: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t("maxPerDay")}</label>
-                <input
-                  type="number"
-                  className="w-full border border-border rounded-lg px-3 py-2 bg-surface text-sm"
-                  value={form.maxRpd}
-                  onChange={(e) => setForm({ ...form, maxRpd: e.target.value })}
-                />
-              </div>
+              <Input
+                label={t("nameRequired")}
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="my-api-relay"
+              />
+              <Input
+                label={t("tokenDescription")}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder={t("descriptionPlaceholder")}
+              />
+              <Input
+                label={t("maxPerMinute")}
+                type="number"
+                value={form.maxRpm}
+                onChange={(e) => setForm({ ...form, maxRpm: e.target.value })}
+              />
+              <Input
+                label={t("maxPerDay")}
+                type="number"
+                value={form.maxRpd}
+                onChange={(e) => setForm({ ...form, maxRpd: e.target.value })}
+              />
             </div>
             <Button onClick={createToken} disabled={!form.name.trim()}>
               {t("createButton")}
@@ -169,17 +164,15 @@ export default function RelayProxyClient() {
       {newTokenData && (
         <Card>
           <div className="p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-green-600 dark:text-green-400">
-              {t("createdTitle")}
-            </h2>
-            <div className="bg-surface/50 border border-border rounded-lg p-3">
+            <h2 className="text-sm font-semibold text-success">{t("createdTitle")}</h2>
+            <div className="bg-bg-subtle border border-border rounded-lg p-3">
               <p className="text-xs text-text-muted mb-1">
                 {t.rich("tokenFor", {
                   name: newTokenData.name,
                   strong: (chunks) => <strong>{chunks}</strong>,
                 })}
               </p>
-              <code className="text-sm font-mono break-all select-all bg-black/10 dark:bg-white/10 px-2 py-1 rounded">
+              <code className="text-sm font-mono break-all select-all bg-surface px-2 py-1 rounded">
                 {newTokenData.rawToken}
               </code>
             </div>
@@ -194,7 +187,7 @@ export default function RelayProxyClient() {
         <div className="p-4 space-y-2">
           <h2 className="text-sm font-semibold">{t("usage")}</h2>
           <p className="text-xs text-text-muted">{t("usageDescription")}</p>
-          <pre className="text-xs bg-surface/50 border border-border rounded-lg p-3 overflow-x-auto">
+          <pre className="text-xs bg-bg-subtle border border-border rounded-lg p-3 overflow-x-auto">
             {`curl ${displayBaseUrl}/v1/relay/chat/completions \\
   -H "Authorization: Bearer relay_..." \\
   -H "Content-Type: application/json" \\
@@ -212,7 +205,7 @@ export default function RelayProxyClient() {
           {loading ? (
             <p className="text-sm text-text-muted">{t("loading")}</p>
           ) : tokens.length === 0 ? (
-            <p className="text-sm text-text-muted">{t("empty")}</p>
+            <EmptyState icon="key" title={t("empty")} />
           ) : (
             <div className="space-y-2">
               {tokens.map((token) => (
@@ -222,7 +215,7 @@ export default function RelayProxyClient() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-2 h-2 rounded-full ${token.enabled ? "bg-green-500" : "bg-red-500"}`}
+                      className={`w-2 h-2 rounded-full ${token.enabled ? "bg-success" : "bg-error"}`}
                     />
                     <div>
                       <div className="font-medium text-sm">{token.name}</div>
@@ -241,18 +234,21 @@ export default function RelayProxyClient() {
                     <Badge variant="info" size="sm">
                       {token.maxRequestsPerDay}/day
                     </Badge>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => toggleToken(token.id, !token.enabled)}
-                      className="text-xs text-primary hover:underline"
                     >
                       {token.enabled ? t("disable") : t("enable")}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-error"
                       onClick={() => deleteToken(token.id)}
-                      className="text-xs text-red-500 hover:underline"
                     >
                       {t("delete")}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

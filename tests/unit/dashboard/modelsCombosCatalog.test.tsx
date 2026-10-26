@@ -2,7 +2,17 @@
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { renderToString } from "react-dom/server";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 import enMessages from "@/i18n/messages/en.json";
 
@@ -265,10 +275,13 @@ describe("Models and Combos Catalog Page UI", () => {
   }
 
   function inputByLabel(text: string): HTMLInputElement {
+    // KEA-7886: kit fields — the <label htmlFor> sits above the control, not around it.
     const label = [...container.querySelectorAll("label")].find((element) =>
       element.textContent?.trim().startsWith(text)
     );
-    const input = label?.querySelector("input") ?? null;
+    const input =
+      label?.querySelector("input") ??
+      (label?.htmlFor ? (document.getElementById(label.htmlFor) as HTMLInputElement | null) : null);
     expect(input).not.toBeNull();
     return input as HTMLInputElement;
   }
@@ -762,7 +775,11 @@ describe("Models and Combos Catalog Page UI", () => {
       const label = [...container.querySelectorAll("label")].find((element) =>
         element.textContent?.trim().startsWith(text)
       );
-      const select = label?.querySelector("select") ?? null;
+      const select =
+        label?.querySelector("select") ??
+        (label?.htmlFor
+          ? (document.getElementById(label.htmlFor) as HTMLSelectElement | null)
+          : null);
       expect(select).not.toBeNull();
       return select as HTMLSelectElement;
     }

@@ -389,6 +389,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:test-tla-order",
+      "command": "node scripts/check/check-test-tla-order.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:test-masking",
       "command": "node scripts/check/check-test-masking.mjs",
       "disposition": "separately-invoked"
@@ -702,6 +707,11 @@
       "name": "check:free-catalog-evidence",
       "command": "node scripts/check/check-free-catalog-evidence.mjs",
       "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:ui-kit-snapshot",
+      "command": "node scripts/check/check-ui-kit-snapshot.mjs",
+      "disposition": "separately-invoked"
     }
   ],
   "profiles": {
@@ -728,6 +738,7 @@
         "check:known-symbols",
         "check:route-guard-membership",
         "check:test-discovery",
+        "check:test-tla-order",
         "check:test-masking",
         "check:duplication",
         "check:cycles:ratchet",
@@ -757,6 +768,7 @@
         "check:known-symbols",
         "check:route-guard-membership",
         "check:test-discovery",
+        "check:test-tla-order",
         "check:test-masking"
       ]
     }
