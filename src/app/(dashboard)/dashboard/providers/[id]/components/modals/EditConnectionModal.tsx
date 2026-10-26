@@ -458,6 +458,7 @@ export default function EditConnectionModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           validationModelId: formData.validationModelId || undefined,
+          baseUrl: usesBaseUrl ? formData.baseUrl.trim() || undefined : undefined,
         }),
       });
       const data = await res.json();

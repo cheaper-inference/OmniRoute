@@ -56,6 +56,13 @@ import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 /** POST body is optional; when present, only known fields are validated. */
 const providerConnectionTestBodySchema = z.object({
   validationModelId: z.string().max(500).optional(),
+  baseUrl: z
+    .string()
+    .trim()
+    .max(2048)
+    .url()
+    .refine((value) => /^https?:\/\//i.test(value), "Expected an HTTP or HTTPS URL")
+    .optional(),
 });
 
 function hasQoderToken(connection: any): boolean {
@@ -74,6 +81,8 @@ function hasQoderToken(connection: any): boolean {
 // GHSA-jmq6-8j86-8xqj: getCliRuntimeStatus() spawns on the host (LOCAL_ONLY capability),
 // but these routes stay remote-reachable — only loopback/LAN callers and the scheduler probe.
 export type ConnectionTestOptions = {
+  /** Probe an unsaved API-key endpoint without updating the saved connection's health. */
+  baseUrl?: string;
   allowLocalRuntimeProbe?: boolean;
   /**
    * S-01 (#15159): whether a provider validator reached from this test may spawn a
@@ -1000,6 +1009,7 @@ export async function testSingleConnection(
   }
 
   let result;
+  let testingUnsavedUrl = false;
   const startTime = Date.now();
   const runtime = await getProviderRuntimeStatus(connection, options);
 
@@ -1022,15 +1032,19 @@ export async function testSingleConnection(
       Promise.resolve(appServerResult)
     );
   } else if (shouldUseApiKeyConnectionTest(connection.authType, provider)) {
-    const enrichedConnection = validationModelId
-      ? {
-          ...connection,
-          providerSpecificData: {
-            ...((connection.providerSpecificData as any) || {}),
-            validationModelId,
-          },
-        }
-      : connection;
+    testingUnsavedUrl =
+      options.baseUrl !== undefined && options.baseUrl !== connection.providerSpecificData?.baseUrl;
+    const enrichedConnection =
+      validationModelId || testingUnsavedUrl
+        ? {
+            ...connection,
+            providerSpecificData: {
+              ...((connection.providerSpecificData as any) || {}),
+              ...(validationModelId ? { validationModelId } : {}),
+              ...(testingUnsavedUrl ? { baseUrl: options.baseUrl } : {}),
+            },
+          }
+        : connection;
     result = await runWithProxyContext(proxyInfo?.proxy || null, () =>
       testApiKeyConnection(enrichedConnection, options.allowLocalSpawn ?? true)
     );
@@ -1047,6 +1061,17 @@ export async function testSingleConnection(
   const publicRuntime = projectProviderRuntimeForPublicResponse(runtime);
 
   const latencyMs = Date.now() - startTime;
+
+  // The probe describes the draft endpoint, not the stored connection. Do not activate,
+  // cool down, lock models, or clear breakers on the saved connection based on this result.
+  if (testingUnsavedUrl) {
+    return {
+      ...result,
+      latencyMs,
+      runtime: publicRuntime,
+      testedAt: result.skipped ? null : new Date().toISOString(),
+    };
+  }
 
   // A representative-model 402 on an openai-compatible / per-model-quota
   // gateway must lock only that model. The connection stays selectable for
@@ -1191,9 +1216,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (isValidationFailure(validation)) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-    const { validationModelId } = validation.data;
+    const { validationModelId, baseUrl } = validation.data;
 
     const data = await testSingleConnection(id, validationModelId, {
+      baseUrl,
       allowLocalRuntimeProbe: getRequestPeerLocality(request) !== "remote",
       allowLocalSpawn: getRequestPeerLocality(request) !== "remote",
     });
