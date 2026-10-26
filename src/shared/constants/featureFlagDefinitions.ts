@@ -1342,4 +1342,16 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
+  {
+    key: "CURSOR_GROK_47_DROP_MAX_EFFORT",
+    label: "Cursor Grok 4.7: Drop the max Effort Tier",
+    description:
+      "Stop offering and forwarding the max reasoning effort for Cursor Grok 4.7, which Cursor's docs do not list (low, medium, high, xhigh only): the grok-4.7-max fallback alias disappears from the catalog and a max effort request is sent without an effort parameter. Off by default: max stays offered and forwarded, as a live AgentService/Run probe accepted it.",
+    descriptionI18nKey: "featureFlagCursorGrok47DropMaxEffortDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
 ];
