@@ -59,7 +59,9 @@ export function extractCodeAssistSubscriptionTier(subscriptionInfo: unknown): st
 }
 
 /**
- * Tier ID for onboardUser tier_id (paid → current → restricted default → legacy-tier).
+ * Tier ID for onboardUser tier_id: paid → current (only when the account is not
+ * ineligible) → default allowed tier → legacy-tier. An ineligible account never
+ * onboards with its currentTier, even when no allowed tier is marked default.
  */
 export function extractCodeAssistOnboardTierId(subscriptionInfo: unknown): string {
   const subscription = toRecord(subscriptionInfo);
