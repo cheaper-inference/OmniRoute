@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import { useTranslations } from "next-intl";
+import Select from "./Select";
 
 type Model = { id: string; name?: string };
 
@@ -46,14 +47,12 @@ export default function ConnectionTestModelField({
   const available = models.some((model) => model.id === modelId);
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-text-main">
-        {t("defaultModel")}
-      </label>
-      <select
+      <Select
         id={id}
+        label={t("defaultModel")}
+        hint={t("defaultModelHint")}
         value={modelId}
         disabled={disabled || loading || failed}
-        className="w-full rounded-lg border border-border bg-bg-main p-2.5 text-sm disabled:opacity-50"
         onChange={(event) => {
           setModelId(event.target.value);
           onChange(event.target.value);
@@ -70,10 +69,9 @@ export default function ConnectionTestModelField({
             {model.name || model.id}
           </option>
         ))}
-      </select>
-      <p className="mt-1 text-xs text-text-muted">{t("defaultModelHint")}</p>
+      </Select>
       {failed && (
-        <p role="alert" className="mt-1 text-xs text-red-500">
+        <p role="alert" className="mt-1 text-xs text-error">
           {t("failed")}
         </p>
       )}

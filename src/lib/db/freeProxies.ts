@@ -105,7 +105,7 @@ export async function upsertFreeProxy(
   return { id, action: "created" };
 }
 
-export async function listFreeProxies(options?: {
+interface FreeProxyFilters {
   sources?: FreeProxySourceId[];
   protocol?: string;
   country?: string;
@@ -113,14 +113,11 @@ export async function listFreeProxies(options?: {
   onlyInPool?: boolean;
   onlyNotInPool?: boolean;
   search?: string;
-  sortBy?: "quality" | "latency" | "recent";
-  limit?: number;
-  offset?: number;
-}): Promise<FreeProxyRecord[]> {
-  const db = getDbInstance();
-  const params: unknown[] = [];
-  let sql = "SELECT * FROM free_proxies WHERE 1=1";
+}
 
+function buildFreeProxyFilter(options?: FreeProxyFilters): { sql: string; params: unknown[] } {
+  let sql = " WHERE 1=1";
+  const params: unknown[] = [];
   if (options?.sources?.length) {
     sql += ` AND source IN (${options.sources.map(() => "?").join(",")})`;
     params.push(...options.sources);
@@ -147,6 +144,21 @@ export async function listFreeProxies(options?: {
     sql += " AND host LIKE ?";
     params.push(`%${options.search}%`);
   }
+
+  return { sql, params };
+}
+
+export async function listFreeProxies(
+  options?: FreeProxyFilters & {
+    sortBy?: "quality" | "latency" | "recent";
+    limit?: number;
+    offset?: number;
+  }
+): Promise<FreeProxyRecord[]> {
+  const db = getDbInstance();
+  const filter = buildFreeProxyFilter(options);
+  const params = filter.params;
+  let sql = "SELECT * FROM free_proxies" + filter.sql;
 
   const sortClause =
     options?.sortBy === "latency"
@@ -169,45 +181,11 @@ export async function listFreeProxies(options?: {
   return rows.map(mapRow);
 }
 
-export async function countFreeProxies(options?: {
-  sources?: FreeProxySourceId[];
-  protocol?: string;
-  country?: string;
-  minQuality?: number;
-  onlyInPool?: boolean;
-  onlyNotInPool?: boolean;
-  search?: string;
-}): Promise<number> {
+export async function countFreeProxies(options?: FreeProxyFilters): Promise<number> {
   const db = getDbInstance();
-  const params: unknown[] = [];
-  let sql = "SELECT COUNT(*) AS count FROM free_proxies WHERE 1=1";
-
-  if (options?.sources?.length) {
-    sql += ` AND source IN (${options.sources.map(() => "?").join(",")})`;
-    params.push(...options.sources);
-  }
-  if (options?.protocol) {
-    sql += " AND type = ?";
-    params.push(options.protocol);
-  }
-  if (options?.country) {
-    sql += " AND country_code = ?";
-    params.push(options.country.toUpperCase());
-  }
-  if (options?.minQuality != null) {
-    sql += " AND quality_score >= ?";
-    params.push(options.minQuality);
-  }
-  if (options?.onlyInPool) {
-    sql += " AND in_pool = 1";
-  }
-  if (options?.onlyNotInPool) {
-    sql += " AND in_pool = 0";
-  }
-  if (options?.search) {
-    sql += " AND host LIKE ?";
-    params.push(`%${options.search}%`);
-  }
+  const filter = buildFreeProxyFilter(options);
+  const params = filter.params;
+  const sql = "SELECT COUNT(*) AS count FROM free_proxies" + filter.sql;
 
   const row = db.prepare(sql).get(...params) as DbRow | undefined;
   const count = row?.count;

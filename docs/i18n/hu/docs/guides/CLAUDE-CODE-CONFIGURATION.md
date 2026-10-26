@@ -48,16 +48,11 @@ egyszerűen működik), ellenőrzi a kiszolgáló állapotát, majd elindítja a
 
 ---
 
-## Felderítési álnevek — nem Claude-modellek megjelenítése a `/model` választóban
+## Discovery-aliasok – nem Claude modellek megjelenítése a `/model` választóban
 
-A Claude Code átjárómodell-felderítése csak azokat az azonosítókat sorolja fel, amelyek
-`claude` vagy `anthropic` előtaggal kezdődnek, ezért a `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
-beállítás mellett a natív `/model` választó általában **csak** az OmniRoute Claude/Anthropic
-modelljeit jeleníti meg — a `kimi/kimi-k2.6` vagy a `glm/glm-5.2` soha nem jelenik meg,
-annak ellenére, hogy az útválasztásuk megfelelően működik.
+A Claude Code gateway modellfelderítése csak azokat az azonosítókat listázza, amelyek `claude` vagy `anthropic` előtaggal kezdődnek, ezért `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` mellett a natív `/model` választó alapesetben **csak** az OmniRoute Claude/Anthropic modelljeit mutatja – egy `kimi/kimi-k2.6` vagy `glm/glm-5.2` sosem jelenik meg, pedig a routing hibátlanul működik.
 
-Az OmniRoute bármely engedélyezett modellt (és kombinációt) tükrözhet egy `claude/…`
-azonosító alatt, így az átmegy ezen a szűrőn, és megjelenik a választóban:
+Az OmniRoute bármely engedélyezett modellt (és kombót) tükrözhet egy `claude/…` azonosító alatt, így az átmegy ezen a szűrőn, és megjelenik a választóban:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -65,36 +60,21 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Amikor ezek egyikét választja ki a Claude Code-ban, az OmniRoute az útválasztás előtt
-eltávolítja a `claude/` burkoló előtagot, visszaállítva a valódi azonosítót — egy valódi
-`claude/<real-claude-model>` azonosító (a tényleges Claude OAuth-szolgáltató) mindig
-érintetlen marad.
+Amikor kiválasztja az egyiket a Claude Code-ban, az OmniRoute a routing előtt leválasztja a `claude/` burkolót, visszaállítva a valódi azonosítót – egy valódi `claude/<real-claude-model>` azonosítót (a tényleges Claude OAuth providert) mindig érintetlenül hagy.
 
-**Ez alapértelmezés szerint ki van kapcsolva**, és egy háromszintű vezérlés szabályozza
-(a legspecifikusabb beállítás élvez elsőbbséget), így egy alapértelmezett OmniRoute nem
-duplázza meg a katalógusát azoknál a klienseknél, amelyek nem használják a Claude Code-ot:
+Alapértelmezetten csak az alapazonosítók kerülnek tükrözésre. Az opt-in `CATALOG_MIRROR_REFINEMENTS_ENABLED` feature flag bekapcsolásával a katalógus által már felsorolt reasoning-effort változatok (pl. `codex/gpt-6-sol-high`) ugyanúgy tükröződnek, mint bármely más azonosító, így a Claude Code explicit effort-szintet választhat, a beépített `auto/*` azonosítók pedig, amelyeket a kérési útvonal nem tud előállítani, nem kerülnek tükrözésre. Hogy az effort-változatok egyáltalán megjelennek-e, azt továbbra is az `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` szabályozza – a tükör sosem ad hozzá olyan változatot, amely az alapkatalógusban nem szerepel.
 
-| Szint       | Hely                                                                                             |
-| ----------- | ------------------------------------------------------------------------------------------------ |
-| Modell      | Szolgáltató részleteinek oldala → modellenkénti „Megjelenítés a Claude Code-ban” kapcsoló        |
-| Szolgáltató | Szolgáltató részleteinek oldala → szolgáltatói szintű kapcsoló (az összes modelljére vonatkozik) |
-| Globális    | Beállítások → Funkciójelzők → `EXPOSE_CC_DISCOVERY_ALIASES` (alapértelmezés szerint kikapcsolva) |
+**Ez alapértelmezetten ki van kapcsolva**, és egy háromszintű kapu vezérli (a legspecifikusabb nyer), így egy alap OmniRoute sosem duplázza meg a katalógusát olyan kliensek számára, amelyek nem használnak Claude Code-ot:
 
-Az `EXPOSE_CC_DISCOVERY_ALIASES` környezeti változó bekapcsolja a globális szintet,
-és elsőbbséget élvez az irányítópult felülbírálásával szemben (a Funkciójelzők képernyőn
-egy „környezeti változóval aktiválva” megjegyzés jelenik meg, amikor ez érvényes).
-A szolgáltatónkénti és modellenkénti kapcsolók tovább finomítják ezt — például kikapcsolt
-globális beállítás és bekapcsolt Kimi-szolgáltató mellett csak a Kimi modelljei jelennek meg.
+| Szint    | Hol                                                                                 |
+| -------- | ----------------------------------------------------------------------------------- |
+| Modell   | Provider részletei oldal → modellenkénti „Expose in Claude Code” kapcsoló           |
+| Provider | Provider részletei oldal → provider-szintű kapcsoló (az összes modelljére kiterjed) |
+| Globális | Beállítások → Funkciójelzők → `EXPOSE_CC_DISCOVERY_ALIASES` (alapértelmezetten ki)  |
 
-> ⚠️ **Kontextusablak-eltérés nem Claude-modelleknél.** A Claude Code minden általa fel
-> nem ismert azonosító esetén 200K méretű kontextusablakot feltételez (a tényleges
-> ablakméretet nem tudja kiolvasni a `/v1/models` végpontról). Nagyobb ablakkal rendelkező
-> modellnél (például a Kimi K2 256K méretű ablakánál) állítsa a
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` értékét a modell tényleges ablakméreténél kisebbre,
-> hogy az automatikus tömörítés ne induljon el túl korán. A fent létrehozott profilok ezt
-> már modellenként beállítják.
+Az `EXPOSE_CC_DISCOVERY_ALIASES` környezeti változó kikényszeríti a globális szint bekapcsolását, és elsőbbséget élvez a dashboardon beállított felülbírálással szemben (a Funkciójelzők képernyő ilyenkor egy „active via environment variable” megjegyzést jelenít meg). A providerenkénti és modellenkénti kapcsolók ezt finomítják tovább – például globális ki + Kimi provider be esetén csak a Kimi modelljei jelennek meg.
 
----
+> ⚠️ **Ablakeltérés nem Claude modelleknél.** A Claude Code minden általa nem felismert azonosítóhoz 200K-s kontextusablakot feltételez (a `/v1/models` végpontról nem tudja kiolvasni a valódi ablakméretet). Nagyobb ablakú modellnél (pl. a Kimi K2 256K-jánál) állítsa a `CLAUDE_CODE_AUTO_COMPACT_WINDOW` értéket a modell valódi ablakmérete alá, hogy az automatikus tömörítés ne induljon be idő előtt. A fenti generált profilok ezt már modellenként megteszik.
 
 ## Bevezetési blokk az irányítópulton
 

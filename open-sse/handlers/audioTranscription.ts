@@ -1,5 +1,5 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
-import { upstreamErrorResponse } from "../utils/audioResponse.ts";
+import { audioErrorResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
 import { Buffer } from "node:buffer";
 /**
  * Audio Transcription Handler
@@ -29,6 +29,10 @@ import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 import { isJsonObject } from "../utils/kieTask.ts";
 import { handleOpenRouterTranscription } from "./openrouterTranscription.ts";
 import { handleSyntxTranscription } from "./syntxAudio.ts";
+import {
+  hasTranscriptionInput,
+  resolveTranscriptionFileOrResponse,
+} from "../utils/transcriptionRemoteAudio.ts";
 
 type TranscriptionCredentials = {
   apiKey?: string;
@@ -944,6 +948,14 @@ async function handleSpeechmaticsTranscription(providerConfig, file, modelId, to
   return pollSpeechmaticsJob(`${baseUrl}/${jobId}`, authHeaders);
 }
 
+function resolveTranscriptionToken(
+  providerConfig: AudioProvider,
+  credentials?: TranscriptionCredentials | null
+): string | null | undefined {
+  if (providerConfig.authType === "none") return null;
+  return credentials?.apiKey || credentials?.accessToken;
+}
+
 /**
  * Handle audio transcription request
  *
@@ -973,11 +985,10 @@ export async function handleAudioTranscription({
     return errorResponse(400, "Invalid model ID");
   }
 
-  const fileEntry = formData.get("file");
-  if (!(fileEntry instanceof Blob)) {
+  // Preserve file-only behavior; URL-only audio is resolved after credentials.
+  if (!hasTranscriptionInput(formData)) {
     return errorResponse(400, "file is required");
   }
-  const file = fileEntry as Blob & { name?: unknown };
 
   // Use pre-resolved provider/model from route handler if available (supports dynamic provider_nodes).
   let providerConfig = resolvedProvider;
@@ -996,11 +1007,16 @@ export async function handleAudioTranscription({
   }
 
   // Skip credential check for local providers (authType: "none")
-  const token =
-    providerConfig.authType === "none" ? null : credentials?.apiKey || credentials?.accessToken;
+  const token = resolveTranscriptionToken(providerConfig, credentials);
   if (providerConfig.authType !== "none" && !token) {
     return errorResponse(401, `No credentials for transcription provider: ${providerConfig.id}`);
   }
+
+  // Fetch URL input into a local file. Never forward Telegram URLs/tokens
+  // or other caller-controlled URLs to the upstream STT provider.
+  const resolvedFile = await resolveTranscriptionFileOrResponse(formData);
+  if ("response" in resolvedFile) return resolvedFile.response;
+  const file = resolvedFile.file;
 
   // Route to provider-specific handler
   if (providerConfig.format === "vertex-gemini") {
@@ -1117,6 +1133,6 @@ export async function handleAudioTranscription({
     });
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
-    return errorResponse(500, `Transcription request failed: ${error.message}`);
+    return audioErrorResponse(500, `Transcription request failed: ${error.message}`);
   }
 }

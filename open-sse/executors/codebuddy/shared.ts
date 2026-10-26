@@ -1,6 +1,7 @@
 import { DefaultExecutor } from "../default.ts";
 import type { ExecuteInput, ExecutorExecuteResult, ProviderCredentials } from "../base.ts";
 import { normalizeCodeBuddyResult } from "./sseNormalize.ts";
+import { fitTools, alignTurnOrder } from "../../utils/workbuddyGateway.ts";
 
 export const SENSITIVE_CONTENT_REJECTION =
   "抱歉，系统检测到您当前输入的信息存在敏感内容，我无法响应您的请求，请检查后重新输入";
@@ -242,6 +243,20 @@ export class CodeBuddyBaseExecutor extends DefaultExecutor {
       out.reasoning_summary = "auto";
     }
 
+    if (out.max_completion_tokens !== undefined) {
+      if (out.max_tokens === undefined) out.max_tokens = out.max_completion_tokens;
+      delete out.max_completion_tokens;
+    }
+
+    if (Array.isArray(out.messages) && out.messages.length > 0) {
+      for (const m of out.messages as Array<Record<string, unknown>>) {
+        if (m && typeof m === "object" && m.role === "developer") {
+          m.role = "system";
+        }
+      }
+      alignTurnOrder(out.messages as Array<Record<string, unknown>>);
+    }
+
     // --- Agent system prompt replacement ---
     // Identity markers always trigger; the length cap only when the operator
     // opts in via CODEBUDDY_SYSTEM_PROMPT_MAX_LEN. Dropping the caller's system
@@ -268,6 +283,9 @@ export class CodeBuddyBaseExecutor extends DefaultExecutor {
         return { ...message, content: neutralizedContent(message.content) };
       });
     }
+
+    // --- Normalize tool schemas and names (fixes 11133) ---
+    fitTools(out);
 
     // --- Strip oversized tool descriptions (>64KB) ---
     if (Array.isArray(out.tools) && out.tools.length > 0) {

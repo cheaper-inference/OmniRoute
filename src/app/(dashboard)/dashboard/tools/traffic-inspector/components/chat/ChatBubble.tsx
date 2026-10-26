@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 import type { NormalizedTurn } from "@/mitm/inspector/types";
 import { cn } from "@/shared/utils/cn";
 import { formatTime } from "@/shared/utils/formatting";
@@ -19,10 +20,10 @@ interface ChatBubbleProps {
 }
 
 const ROLE_STYLES: Record<NormalizedTurn["role"], string> = {
-  system: "border border-red-500/40 bg-red-900/20 text-red-200",
-  user: "ml-auto bg-blue-600/30 border border-blue-500/30 text-blue-100",
-  assistant: "bg-purple-900/30 border border-purple-500/30 text-purple-100",
-  tool: "bg-gray-800 border border-gray-600/30 text-gray-200",
+  system: "border border-error/40 bg-error-bg text-text-main",
+  user: "ml-auto border border-info/30 bg-info-bg text-text-main",
+  assistant: "border border-border bg-surface text-text-main",
+  tool: "border border-border bg-bg-subtle text-text-main",
 };
 
 const ROLE_LABEL_KEY: Record<NormalizedTurn["role"], string> = {
@@ -61,16 +62,18 @@ export function ChatBubble({ turn, onClick, isCurrent }: ChatBubbleProps) {
           )}
         </div>
         {isSystem && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto min-h-0 px-1.5 py-0 text-xs"
+            aria-expanded={!collapsed}
             onClick={(e) => {
               e.stopPropagation();
               setCollapsed((c) => !c);
             }}
-            className="text-xs opacity-70 hover:opacity-100 focus-ring rounded"
           >
             {collapsed ? t("expand") : t("collapse")}
-          </button>
+          </Button>
         )}
       </div>
       {!collapsed && <MessageContent blocks={turn.blocks} />}

@@ -31,7 +31,7 @@ jobs:
   detect:
     name: Detect develop
     # Upstream-only for scheduled runs (check-workflows scheduled-guard).
-    if: (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute')
+    if: (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     runs-on: ubuntu-latest
     permissions: {}
     outputs:
@@ -53,7 +53,7 @@ jobs:
   build:
     name: Build nightly
     needs: detect
-    if: (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') && needs.detect.outputs.exists == 'true'
+    if: (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && needs.detect.outputs.exists == 'true'
     # Same dynamic-runner rule as npm-publish.yml: a full `next build` outgrew the
     # 16 GB hosted runner during v3.8.49. Never runs on pull_request.
     runs-on: ${{ vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
@@ -133,7 +133,7 @@ jobs:
   publish:
     name: Publish nightly to npm
     needs: build
-    if: (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') && vars.NIGHTLY_PUBLISH == 'true'
+    if: (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && vars.NIGHTLY_PUBLISH == 'true'
     runs-on: ubuntu-latest # Trusted Publishing (OIDC) requires a GitHub-hosted runner
     permissions:
       contents: read

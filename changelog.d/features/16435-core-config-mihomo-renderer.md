@@ -1,0 +1,1 @@
+- **feat(core-config):** render owned subscriptions to Mihomo YAML in addition to sing-box JSON ([#16435](https://github.com/diegosouzapw/OmniRoute/pull/16435)) — thanks @maxmad64bis

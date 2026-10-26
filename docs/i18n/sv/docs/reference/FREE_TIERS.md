@@ -46,15 +46,15 @@ De största **dokumenterade** bidragsgivarna: `mistral` 1,00B, `nara` 210M, `llm
 
 ## Uppdatering 2026-06-17 — vad som har ändrats sedan 2026-06-05
 
-En webbresearchgenomgång med 50 agenter (officiell dokumentation + nyheter från de senaste 7 dagarna, verifierad med kontradiktoriska metoder) uppdaterade hela katalogen. Höjdpunkter:
+En webbforskningsgenomgång med 50 agenter (officiell dokumentation + nyheter från de senaste sju dagarna, kontradiktoriskt verifierad) uppdaterade hela katalogen. Höjdpunkter:
 
-- **Borttagna / ingen kostnadsfri nivå (2026):** `chutes` (den kostnadsfria nivån upphörde 2026-03), `phind` (företaget lades ned 2026-01), `kluster` (avvecklades 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (kostnadsfri MiMo-åtkomst återkallades 2026-05-24, Nemotron-kampanjen upphörde 2026-06 — verifierades på nytt 2026-06-18), `aimlapi` (den kostnadsfria nivån är pausad — verifierades på nytt 2026-06-18), `yi` (Yi-Light har tagits ur drift, betala efter användning — verifierades på nytt 2026-06-18), `featherless-ai` (ingen aktuell kostnadsfri nivå), `chipotle` (Chipotles ”Pepper AI” — den baklängeskonstruerade Amelia-chattwidgeten på `amelia.chipotle.com` som leverantören kommunicerade med returnerar nu 404 för varje sökväg, inklusive roten; serverdelen har tagits ur drift/flyttats, bekräftat 2026-09-15 — helt borttagen från katalogen, #13131/#4037). `iflytek` / `sparkdesk` finns kvar i listan men har en varning om användarvillkoren (Spark Lite är kostnadsfri; användarvillkoren begränsar proxy-/reläanvändning).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` stängdes ned 2026-06-01 och `2.5 Pro` lämnade den kostnadsfria nivån (2026-04); den kostnadsfria nivån omfattar nu **endast Flash-familjen** (2.5/3/3.1/3.5 Flash + Gemma). Katalogen **slår nu samman** Flash-familjen (siffran blåstes tidigare upp genom att varje variant räknades separat: 462M → 60M).
-- **Korrigerade siffror:** `cloudflare-ai` 122M → **30M** (i praktiken 10k Neurons/dag), `doubao` omklassificerades som en engångskredit vid registrering (inte återkommande), `llm7` 4M → **150M** (dokumenterade 5M token/dag), `together`-slutpunkter med ”-Free” har upphört → registreringskrediten på $25 har också tagits bort (kräver ett minimiköp på $5, ingen kostnadsfri provperiod), `longcat` Preview upphörde + Flash-modellerna togs ur drift → endast **LongCat-2.0**, omklassificerad som en engångskredit på **10M** token vid registrering (kräver KYC, inte återkommande).
-- **Nya kostnadsfria leverantörer som upptäckts:** ⭐ **Kilo Code** (`kilo-gateway` — roterande ”Auto Free”-utbud: NVIDIA Nemotron 3-familjen, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 roterande kostnadsfria kodningsmodeller), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash är permanent kostnadsfria + 20M i registreringsbonus) och `arcee-ai` Trinity Large Preview.
-- **Nya transparenta nivåer** (se Metodik): en kategori som är _permanent kostnadsfri men utan tak_ (verklig återkommande åtkomst, utan någon tokenbegränsning att räkna) och en _insättningsupplåst ökning_ (OpenRouter $10 → +24M/mån), båda redovisas **separat** så att de aldrig blåser upp huvudresultatet.
+- **Borttagna/ingen kostnadsfri nivå (2026):** `chutes` (den kostnadsfria nivån upphörde 2026-03), `phind` (företaget lades ned 2026-01), `kluster` (avvecklades 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (kostnadsfri MiMo-åtkomst återkallades 2026-05-24, Nemotron-kampanjen upphörde 2026-06 — verifierat på nytt 2026-06-18), `aimlapi` (den kostnadsfria nivån är pausad — verifierat på nytt 2026-06-18), `yi` (Yi-Light har tagits ur drift, betala efter användning — verifierat på nytt 2026-06-18), `featherless-ai` (ingen aktuell kostnadsfri nivå), `chipotle` (Chipotles ”Pepper AI” — den baklängeskonstruerade Amelia-chattwidgeten på `amelia.chipotle.com` som leverantören kommunicerade med ger nu 404 på varje sökväg, inklusive roten; serverdelen har avvecklats/flyttats, bekräftat 2026-09-15 — helt borttagen från katalogen, #13131/#4037). `iflytek` / `sparkdesk` finns kvar i listan men har en varning om användarvillkoren (Spark Lite är kostnadsfri; användarvillkoren begränsar användning som proxy/relä).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` stängdes ned 2026-06-01 och `2.5 Pro` lämnade den kostnadsfria nivån (2026-04); den kostnadsfria nivån omfattar nu **endast Flash-familjen** (2.5/3/3.1/3.5 Flash + Gemma). Katalogen **slår nu samman** Flash-familjen (värdet blåstes tidigare upp genom att varje variant räknades separat: 462M → 60M).
+- **Korrigerade siffror:** `cloudflare-ai` 122M → **30M** (faktiskt 10k neuroner/dag), `doubao` har omklassificerats som en engångskredit vid registrering (inte återkommande), `llm7` 4M → **150M** (dokumenterade 5M token/dag), `together`-slutpunkter av typen ”-Free” har avvecklats → registreringskrediten på $25 har också tagits bort (kräver ett minimiköp på $5, ingen kostnadsfri provperiod), förhandsversionen av `longcat` upphörde + Flash-modellerna togs ur drift → endast **LongCat-2.0**, omklassificerad som en engångskredit på **10M** token vid registrering (KYC-krav, inte återkommande).
+- **Nya kostnadsfria leverantörer som upptäckts:** ⭐ **Kilo Code** (`kilo-gateway` — roterande ”Auto Free”-uppsättning: NVIDIA Nemotron 3-familjen, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 roterande kostnadsfria kodningsmodeller, uppdaterade 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash permanent kostnadsfria + 20M i registreringsbonus) samt `arcee-ai` Trinity Large Preview.
+- **Nya transparenta nivåer** (se Metod): en kategori för _permanent kostnadsfritt men utan fast tak_ (verklig återkommande åtkomst, utan någon token-gräns att räkna) och en _insättningsupplåst ökning_ (OpenRouter $10 → +24M/mån), båda redovisade **separat** så att de aldrig blåser upp huvudvärdet.
 
-> Den detaljerade tabellen per leverantör längre ned är **ögonblicksbilden från 2026-06-05**; ändringarna ovan ersätter den. Den aktuella, kanoniska källan är katalogen per modell i `open-sse/config/freeModelCatalog.ts`.
+> Den detaljerade tabellen per leverantör längre ned är **ögonblicksbilden från 2026-06-05**; ändringarna ovan ersätter den. Den aktuella, kanoniska källan är den modellvisa katalogen `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -238,71 +238,71 @@ De flesta siffror för ”kostnadsfria token per månad” inom detta område ä
 
 ---
 
-## Kostnadsfri nivå per leverantör (Bytez/Nous kontrollerade 2026-10-15; rader granskades på nytt 2026-09-02; övriga 2026-06-17)
+## Kostnadsfri nivå per leverantör (Bytez/Nous kontrollerade 2026-10-15; rader granskade på nytt 2026-09-02; övriga 2026-06-17)
 
-> Återskapad från katalogen per modell (`open-sse/config/freeModelCatalog.ts`), deduplicerad per pool. Sorterad efter återkommande stabila token/mån. `uncapped*` = permanent kostnadsfri men utan publicerat tak för antal token (begränsad av anropsfrekvens/samtidighet) — faktisk åtkomst, **inte** inräknad i huvudvärdet. `—` = endast krediter / utan nyckel / kan inte kvantifieras i token.
+> Återskapad från katalogen per modell (`open-sse/config/freeModelCatalog.ts`), med dubbletter mellan pooler borttagna. Sorterad efter återkommande stabila token/mån. `uncapped*` = permanent kostnadsfri men utan publicerat tak för antal token (hastighets-/samtidighetsbegränsad) — faktisk åtkomst, **inte** inräknad i huvudtotalen. `—` = endast kredit / utan nyckel / kan inte kvantifieras i token.
 
 | Leverantör       | Typ av gratisnivå   | Löpande token/mån | Kredit första månaden | Villkor      | Modeller |
 | ---------------- | ------------------- | ----------------- | --------------------- | ------------ | -------- |
-| `mistral`        | återkommande        | ~1.00B            | —                     | varning      | 5        |
-| `nara`           | återkommande        | ~210M             | —                     | varning      | 8        |
-| `llm7`           | återkommande        | ~150M             | —                     | varning      | 4        |
-| `xkiro`          | återkommande        | ~150M             | —                     | varning      | 39       |
-| `longcat`        | engångs             | —                 | 10M                   | varning      | 1        |
-| `cerebras`       | engångs             | —                 | kredit på $5          | varning      | 2        |
-| `cloudflare-ai`  | återkommande        | ~30M              | —                     | varning      | 9        |
-| `groq`           | återkommande        | ~30M              | —                     | varning      | 5        |
-| `api-airforce`   | återkommande        | ~24M              | —                     | varning      | 7        |
+| `mistral`        | återkommande        | ~1.00B            | —                     | försiktighet | 5        |
+| `nara`           | återkommande        | ~210M             | —                     | försiktighet | 8        |
+| `llm7`           | återkommande        | ~150M             | —                     | försiktighet | 4        |
+| `xkiro`          | återkommande        | ~150M             | —                     | försiktighet | 39       |
+| `longcat`        | engångs             | —                 | 10M                   | försiktighet | 1        |
+| `cerebras`       | engångs             | —                 | $5 i kredit           | försiktighet | 2        |
+| `cloudflare-ai`  | återkommande        | ~30M              | —                     | försiktighet | 9        |
+| `groq`           | återkommande        | ~30M              | —                     | försiktighet | 5        |
+| `api-airforce`   | återkommande        | ~24M              | —                     | försiktighet | 7        |
 | `bluesminds`     | återkommande        | ~7M               | —                     | tvetydigt    | 22       |
-| `sambanova`      | återkommande        | ~6M               | —                     | varning      | 5        |
-| `arcee-ai`       | återkommande        | ~5M               | —                     | varning      | 1        |
-| `bazaarlink`     | återkommande        | ~4M               | —                     | varning      | 32       |
-| `openrouter`     | återkommande        | ~1M               | —                     | varning      | 1        |
-| `cohere`         | återkommande        | ~800K             | —                     | varning      | 6        |
-| `huggingchat`    | återkommande        | ~500K             | —                     | varning      | 4        |
-| `morph`          | återkommande        | ~400K             | —                     | ok           | 2        |
-| `huggingface`    | återkommande        | ~200K             | —                     | varning      | 6        |
+| `sambanova`      | återkommande        | ~6M               | —                     | försiktighet | 5        |
+| `arcee-ai`       | återkommande        | ~5M               | —                     | försiktighet | 1        |
+| `bazaarlink`     | återkommande        | ~4M               | —                     | försiktighet | 32       |
+| `openrouter`     | återkommande        | ~1M               | —                     | försiktighet | 1        |
+| `cohere`         | återkommande        | ~800K             | —                     | försiktighet | 6        |
+| `huggingchat`    | återkommande        | ~500K             | —                     | försiktighet | 4        |
+| `morph`          | återkommande        | ~400K             | —                     | okej         | 2        |
+| `huggingface`    | återkommande        | ~200K             | —                     | försiktighet | 6        |
 | `kiro`           | återkommande        | ~25K              | —                     | undvik       | 12       |
-| `glm-cn`         | utan tak            | utan tak\*        | ~20M                  | ok           | 4        |
-| `baidu`          | utan tak            | utan tak\*        | —                     | varning      | 1        |
-| `gemini`         | utan tak            | utan tak\*        | —                     | varning      | 4        |
-| `kilo-gateway`   | utan tak            | utan tak\*        | —                     | varning      | 7        |
-| `ollama-cloud`   | utan tak            | utan tak\*        | —                     | tvetydigt    | 8        |
-| `opencode-zen`   | utan tak            | utan tak\*        | —                     | varning      | 6        |
-| `tencent`        | utan tak            | utan tak\*        | —                     | varning      | 1        |
-| `vertex`         | registreringskredit | —                 | ~300M                 | varning      | 10       |
-| `agentrouter`    | registreringskredit | —                 | ~200M                 | varning      | 4        |
-| `predibase`      | registreringskredit | —                 | ~25M                  | varning      | 1        |
+| `glm-cn`         | obegränsad          | obegränsad\*      | ~20M                  | okej         | 4        |
+| `baidu`          | obegränsad          | obegränsad\*      | —                     | försiktighet | 1        |
+| `gemini`         | obegränsad          | obegränsad\*      | —                     | försiktighet | 4        |
+| `kilo-gateway`   | obegränsad          | obegränsad\*      | —                     | försiktighet | 7        |
+| `ollama-cloud`   | obegränsad          | obegränsad\*      | —                     | tvetydigt    | 8        |
+| `opencode-zen`   | obegränsad          | obegränsad\*      | —                     | försiktighet | 10       |
+| `tencent`        | obegränsad          | obegränsad\*      | —                     | försiktighet | 1        |
+| `vertex`         | registreringskredit | —                 | ~300M                 | försiktighet | 10       |
+| `agentrouter`    | registreringskredit | —                 | ~200M                 | försiktighet | 4        |
+| `predibase`      | registreringskredit | —                 | ~25M                  | försiktighet | 1        |
 | `doubao`         | registreringskredit | —                 | ~15M                  | tvetydigt    | 1        |
 | `ai21`           | registreringskredit | —                 | ~10M                  | undvik       | 2        |
-| `deepseek`       | registreringskredit | —                 | ~5M                   | ok           | 2        |
-| `hyperbolic`     | registreringskredit | —                 | ~5M                   | ok           | 8        |
-| `nscale`         | registreringskredit | —                 | ~5M                   | varning      | 6        |
+| `deepseek`       | registreringskredit | —                 | ~5M                   | okej         | 2        |
+| `hyperbolic`     | registreringskredit | —                 | ~5M                   | okej         | 8        |
+| `nscale`         | registreringskredit | —                 | ~5M                   | försiktighet | 6        |
 | `bytez`          | kredit (återk.)     | —                 | okänd                 | tvetydigt    | 1        |
-| `deepinfra`      | registreringskredit | —                 | ~1M                   | varning      | 22       |
+| `deepinfra`      | registreringskredit | —                 | ~1M                   | försiktighet | 22       |
 | `fireworks`      | registreringskredit | —                 | ~1M                   | undvik       | 10       |
-| `nebius`         | registreringskredit | —                 | ~1M                   | varning      | 1        |
-| `qoder`          | registreringskredit | —                 | ~1M                   | varning      | 14       |
-| `scaleway`       | registreringskredit | —                 | ~1M                   | ok           | 6        |
-| `novita`         | registreringskredit | —                 | ~500K                 | varning      | 1        |
-| `agy`            | utan nyckel         | —                 | —                     | undvik       | 16       |
-| `baichuan`       | utan nyckel         | —                 | —                     | tvetydigt    | 1        |
-| `blackbox`       | utan nyckel         | —                 | —                     | undvik       | 6        |
-| `coze`           | utan nyckel         | —                 | —                     | undvik       | 1        |
-| `duckduckgo-web` | utan nyckel         | —                 | —                     | undvik       | 6        |
-| `freemodel-dev`  | utan nyckel         | —                 | —                     | okänt        | 4        |
-| `friendliai`     | utan nyckel         | —                 | —                     | undvik       | 2        |
-| `iflytek`        | utan nyckel         | —                 | —                     | undvik       | 1        |
-| `inference-net`  | utan nyckel         | —                 | —                     | varning      | 3        |
-| `liquid`         | utan nyckel         | —                 | —                     | okänt        | 1        |
-| `monsterapi`     | utan nyckel         | —                 | —                     | tvetydigt    | 1        |
-| `muse-spark-web` | utan nyckel         | —                 | —                     | undvik       | 3        |
-| `nlpcloud`       | utan nyckel         | —                 | —                     | undvik       | 1        |
-| `nvidia`         | utan nyckel         | —                 | —                     | varning      | 13       |
-| `pollinations`   | utan nyckel         | —                 | —                     | varning      | 31       |
-| `publicai`       | utan nyckel         | —                 | —                     | varning      | 3        |
-| `reka`           | utan nyckel         | —                 | —                     | varning      | 2        |
-| `sensenova`      | utan nyckel         | —                 | —                     | varning      | 1        |
+| `nebius`         | registreringskredit | —                 | ~1M                   | försiktighet | 1        |
+| `qoder`          | registreringskredit | —                 | ~1M                   | försiktighet | 14       |
+| `scaleway`       | registreringskredit | —                 | ~1M                   | okej         | 6        |
+| `novita`         | registreringskredit | —                 | ~500K                 | försiktighet | 1        |
+| `agy`            | nyckelfri           | —                 | —                     | undvik       | 16       |
+| `baichuan`       | nyckelfri           | —                 | —                     | tvetydigt    | 1        |
+| `blackbox`       | nyckelfri           | —                 | —                     | undvik       | 6        |
+| `coze`           | nyckelfri           | —                 | —                     | undvik       | 1        |
+| `duckduckgo-web` | nyckelfri           | —                 | —                     | undvik       | 6        |
+| `freemodel-dev`  | nyckelfri           | —                 | —                     | okänt        | 4        |
+| `friendliai`     | nyckelfri           | —                 | —                     | undvik       | 2        |
+| `iflytek`        | nyckelfri           | —                 | —                     | undvik       | 1        |
+| `inference-net`  | nyckelfri           | —                 | —                     | försiktighet | 3        |
+| `liquid`         | nyckelfri           | —                 | —                     | okänt        | 1        |
+| `monsterapi`     | nyckelfri           | —                 | —                     | tvetydigt    | 1        |
+| `muse-spark-web` | nyckelfri           | —                 | —                     | undvik       | 3        |
+| `nlpcloud`       | nyckelfri           | —                 | —                     | undvik       | 1        |
+| `nvidia`         | nyckelfri           | —                 | —                     | försiktighet | 13       |
+| `pollinations`   | nyckelfri           | —                 | —                     | försiktighet | 31       |
+| `publicai`       | nyckelfri           | —                 | —                     | försiktighet | 3        |
+| `reka`           | nyckelfri           | —                 | —                     | försiktighet | 2        |
+| `sensenova`      | nyckelfri           | —                 | —                     | försiktighet | 1        |
 | `sparkdesk`      | nyckelfri           | —                 | —                     | försiktighet | 1        |
 | `stepfun`        | nyckelfri           | —                 | —                     | ok           | 1        |
 | `t3-web`         | nyckelfri           | —                 | —                     | undvik       | 23       |

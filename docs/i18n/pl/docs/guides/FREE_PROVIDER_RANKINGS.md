@@ -18,32 +18,34 @@ lastUpdated: 2026-06-28
 
 ---
 
-## Czym jest
+## Co to jest
 
-OmniRoute rejestruje 374 dostawców, w tym 155 wpisów katalogowych oznaczonych jako **bezpłatne/bez uwierzytelniania**
+OmniRoute rejestruje 375 dostawców, w tym 155 wpisów katalogowych oznaczonych jako **darmowe/bez uwierzytelniania**
 (bez uwierzytelniania,
-OAuth w warstwie bezpłatnej lub klucz API w warstwie bezpłatnej — zobacz
-[Przewodnik po warstwach bezpłatnych](../getting-started/FREE-TIERS-GUIDE.md) oraz pełny
-[Katalog warstw bezpłatnych](../reference/FREE_TIERS.md)). Problem polega na tym, że jakość modeli
-u bezpłatnych dostawców jest bardzo zróżnicowana. Dostawca niewymagający uwierzytelniania, który udostępnia model czołowej generacji, jest znacznie bardziej użyteczny
-niż dostawca oferujący niewielki, starszy model.
+OAuth w darmowym planie lub klucz API w darmowym planie — zobacz
+[Przewodnik po darmowych planach](../getting-started/FREE-TIERS-GUIDE.md) oraz pełny
+[katalog darmowych planów](../reference/FREE_TIERS.md)). Haczyk polega na tym, że darmowi
+dostawcy różnią się diametralnie jakością modeli. Dostawca bez uwierzytelniania
+udostępniający najnowocześniejszy model jest znacznie bardziej przydatny niż ten,
+który udostępnia mały, przestarzały model.
 
-**Ranking bezpłatnych dostawców** odpowiada na pytanie „**który bezpłatny dostawca oferuje mi najlepszy model?**” poprzez
-łączenie katalogu każdego bezpłatnego dostawcy z **wynikami jakości opartymi na ocenach społeczności** z
-**rankingu Arena AI** (ELO oparte na preferencjach ludzi — ta sama koncepcja, która stoi za areną chatbotów
-LMArena). Następnie dostawcy są klasyfikowani według możliwości ich **najlepszego bezpłatnego modelu**.
+**Rankingi darmowych dostawców** odpowiadają na pytanie „**który darmowy dostawca daje mi najlepszy model?**",
+łącząc katalog każdego darmowego dostawcy z **ocenami jakości pochodzącymi od społeczności** z rankingu
+**Arena AI** (ELO oparte na preferencjach ludzi — ta sama idea, która stoi za areną
+chatbotów LMArena). Dostawcy są następnie klasyfikowani według siły swojego
+**najlepszego darmowego modelu**.
 
-Ranking jest obliczany na podstawie trzech rzeczywistych źródeł:
+Ranking obliczany jest na podstawie trzech rzeczywistych źródeł:
 
-1. Listy bezpłatnych dostawców — `NOAUTH_PROVIDERS` oraz wpisy `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` oznaczone flagą `hasFree`
+1. List darmowych dostawców — `NOAUTH_PROVIDERS`, a także wpisów `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` oznaczonych flagą `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Katalog modeli każdego dostawcy z rejestru dostawców
+2. Katalogu modeli każdego dostawcy z rejestru dostawców
    (`open-sse/config/providerRegistry.ts`).
-3. Wyniki dopasowania do zadań wyprowadzone z ELO, przechowywane w tabeli bazy danych `model_intelligence` przez
-   mechanizm synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Wyników dopasowania do zadań wyprowadzonych z ELO, przechowywanych w tabeli bazy danych
+   `model_intelligence` przez silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logika łączenia danych znajduje się w `src/lib/freeProviderRankings.ts`.
+Logika łączenia znajduje się w `src/lib/freeProviderRankings.ts`.
 
 ---
 

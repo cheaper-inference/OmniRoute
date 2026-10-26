@@ -10,6 +10,7 @@ import {
   compareProviderGroups,
   type QuotaVisibilityScope,
 } from "./utils";
+import Icon from "@/shared/components/Icon";
 import { compareTr } from "@/shared/utils/turkishText";
 
 interface Props {
@@ -176,10 +177,8 @@ function ProviderQuotaSection({
       onToggle={(event) => setOpen((event.target as HTMLDetailsElement).open)}
       className="rounded-lg border border-border bg-surface overflow-hidden"
     >
-      <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
-        <span className="material-symbols-outlined text-[16px] text-text-muted">
-          {open ? "expand_less" : "expand_more"}
-        </span>
+      <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+        <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
             {providerLabel}

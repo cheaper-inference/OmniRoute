@@ -169,84 +169,85 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 ## ટેસ્ટ ચલાવવા
 
 ```bash
-# બધા ટેસ્ટ (યુનિટ + vitest + ઇકોસિસ્ટમ + e2e)
+# બધા ટેસ્ટ (unit + vitest + ecosystem + e2e)
 npm run test:all
 
 # એક ટેસ્ટ ફાઇલ (Node.js નેટિવ ટેસ્ટ રનર — મોટાભાગના ટેસ્ટ આનો ઉપયોગ કરે છે)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# ફક્ત તમારા ફેરફારથી પ્રભાવિત યુનિટ ટેસ્ટ (CI ગેટ જેવું જ TIA સિલેક્ટર, #8084)
-npm run test:scoped            # છેલ્લા કમિટમાં (અથવા વર્કિંગ ટ્રીમાં) થયેલા ફેરફારો
-npm run test:scoped:staged     # ફક્ત સ્ટેજ કરેલા ફેરફારો — પ્રી-કમિટ રન સાથે સારી રીતે કામ કરે છે
-npm run test:scoped:full       # પહેલાં ઇમ્પોર્ટ-ગ્રાફ મેપ ફરીથી બનાવે છે (ફાઇલો ઉમેર્યા/ખસેડ્યા પછી)
-# Exit 1 + "run the full suite" નો અર્થ એ છે કે કોઈ હબ ફાઇલ (tsconfig, package.json, …) અથવા
-# મેપ ન કરાયેલ સોર્સ બદલાયો છે — સિલેક્ટર સુરક્ષિત રીતે નિષ્ફળ જાય છે, તે ક્યારેય ચૂપચાપ છોડતું નથી.
+# ફક્ત તમારા ફેરફારથી પ્રભાવિત unit ટેસ્ટ (CI gate જેવું જ TIA selector, #8084)
+npm run test:scoped            # છેલ્લા commitમાં થયેલા ફેરફારો (અથવા working treeમાં)
+npm run test:scoped:staged     # ફક્ત staged ફેરફારો — pre-commit run સાથે સારી રીતે કામ કરે છે
+npm run test:scoped:full       # પહેલાં import-graph map ફરીથી બનાવે છે (ફાઇલો ઉમેર્યા/ખસેડ્યા પછી)
+# Exit 1 + "સંપૂર્ણ suite ચલાવો"નો અર્થ છે કે hub file (tsconfig, package.json, …) અથવા
+# unmapped source બદલાયો છે — selector સુરક્ષિત રીતે નિષ્ફળ જાય છે, તે ક્યારેય ચૂપચાપ છોડતું નથી.
 
-# Vitest (MCP સર્વર, autoCombo, કૅશ)
+# Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
 # E2E ટેસ્ટ (Playwright જરૂરી છે)
 npm run test:e2e
 
-# પ્રોટોકોલ ક્લાયન્ટ E2E (MCP ટ્રાન્સપોર્ટ્સ, A2A)
+# Protocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# ઇકોસિસ્ટમ સુસંગતતા ટેસ્ટ
+# Ecosystem compatibility ટેસ્ટ
 npm run test:ecosystem
 
-# કવરેજ ગેટ: સ્ટેટમેન્ટ્સ/લાઇન્સ/ફંક્શન્સ/બ્રાન્ચેસ માટે 60%
+# Coverage gate: statements/lines/functions/branches માટે 60%
 npm run test:coverage
 npm run coverage:report
 
-# લિન્ટ + ફોર્મેટ તપાસ
+# Lint + format તપાસ
 npm run lint
 npm run check
 
-# ગેટેડ વાસ્તવિક-અપસ્ટ્રીમ કોમ્બો સ્મોક (VPS ઍક્સેસ + વાસ્તવિક પ્રોવાઇડર ક્રેડિટ્સ જરૂરી છે)
-# વાસ્તવિક પ્રોવાઇડર્સને હિટ કરે છે — થોડો ખર્ચ થાય છે. CI માં ક્યારેય ચાલતું નથી. ગેટ વિના સ્વચ્છ રીતે સ્કિપ થાય છે.
-# જરૂરી: ssh root@192.168.0.15 ઍક્સેસ (VPS પરથી ફક્ત-વાંચવા યોગ્ય DB સ્નૅપશૉટ સોર્સ કરે છે).
+# Gate કરેલું વાસ્તવિક-upstream combo smoke (VPS access + વાસ્તવિક provider credits જરૂરી છે)
+# વાસ્તવિક providersને hit કરે છે — થોડો ખર્ચ થાય છે. CIમાં ક્યારેય ચાલતું નથી. Gate વિના સ્વચ્છ રીતે skip થાય છે.
+# જરૂરી છે: ssh root@192.168.0.15 access (VPSમાંથી read-only DB snapshot source કરે છે).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS લાઇવ સ્મોક — સાદી Node ESM સ્ક્રિપ્ટ્સ, લાઇવ .15 સર્વરને સીધું હિટ કરે છે.
-# જરૂરી: ssh root@192.168.0.15 ઍક્સેસ (કોમ્બોઝ SSH sqlite દ્વારા બનાવવામાં/દૂર કરવામાં આવે છે).
-# વાસ્તવિક પ્રોવાઇડર્સને હિટ કરે છે (નાનો ખર્ચ). ફક્ત __live_test__* કોમ્બોઝ બનાવે/કાઢી નાખે છે. CI માં ક્યારેય ચાલતું નથી.
-# .15 પર REQUIRE_API_KEY=false છે, તેથી API કીની જરૂર નથી, પરંતુ સેટ કરેલા હોય તો COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ને માન આપે છે.
-npm run test:combo:live:vps              # 7 HTTP પરિસ્થિતિઓ (પ્રાથમિકતા/રાઉન્ડ-રોબિન/વેઇટેડ/ખર્ચ/ફ્યુઝન/ઑટો + હેલ્થ)
-npm run test:combo:live:vps:failover     # વાસ્તવિક ક્રોસ-પ્રોવાઇડર ફેલઓવર પરિસ્થિતિ ઉમેરે છે (કુલ 8)
+# Phase-3 VPS live smoke — સાદી Node ESM scripts, live .15 serverને સીધું hit કરે છે.
+# જરૂરી છે: ssh root@192.168.0.15 access (combos SSH sqlite દ્વારા બનાવવામાં/દૂર કરવામાં આવે છે).
+# વાસ્તવિક providersને hit કરે છે (નાનો ખર્ચ). ફક્ત __live_test__* combos બનાવે/કાઢી નાખે છે. CIમાં ક્યારેય ચાલતું નથી.
+# .15 પર REQUIRE_API_KEY=false છે, તેથી API key જરૂરી નથી, પરંતુ જો સેટ કરેલી હોય તો COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYનું પાલન કરે છે.
+npm run test:combo:live:vps              # 7 HTTP scenarios (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # વાસ્તવિક cross-provider failover scenario ઉમેરે છે (કુલ 8)
 ```
 
-કવરેજ નોંધો:
+Coverage નોંધો:
 
-- `npm run test:coverage` મુખ્ય યુનિટ ટેસ્ટ સ્યુટ માટે સોર્સ કવરેજ માપે છે, `tests/**` ને બાકાત રાખે છે અને `open-sse/**` ને સમાવે છે
-- પુલ રિક્વેસ્ટ્સે સ્ટેટમેન્ટ્સ/લાઇન્સ/ફંક્શન્સ/બ્રાન્ચેસ માટે કવરેજ ગેટ **60%+** પર જાળવવો આવશ્યક છે
-- જો કોઈ PR `src/`, `open-sse/`, `electron/`, અથવા `bin/` માં પ્રોડક્શન કોડ બદલે, તો તેણે એ જ PR માં ઑટોમેટેડ ટેસ્ટ ઉમેરવા અથવા અપડેટ કરવા આવશ્યક છે
-- `npm run coverage:report` તાજેતરના કવરેજ રનનો વિગતવાર ફાઇલ-દર-ફાઇલ રિપોર્ટ પ્રિન્ટ કરે છે
-- `npm run test:coverage:legacy` ઐતિહાસિક સરખામણી માટે જૂના મેટ્રિકને જાળવી રાખે છે
-- તબક્કાવાર કવરેજ સુધારણા રોડમૅપ માટે `docs/ops/COVERAGE_PLAN.md` જુઓ
+- `npm run test:coverage` મુખ્ય unit test suite માટે source coverage માપે છે, `tests/**`ને બાકાત રાખે છે અને `open-sse/**`ને સમાવે છે
+- Pull requestsએ statements/lines/functions/branches માટે coverage gate **60%+** જાળવવો આવશ્યક છે
+- જો PR `src/`, `open-sse/`, `electron/` અથવા `bin/`માં production code બદલે છે, તો એ જ PRમાં automated tests ઉમેરવા અથવા અપડેટ કરવા આવશ્યક છે
+- `npm run coverage:report` તાજેતરના coverage runનો વિગતવાર file-by-file report પ્રિન્ટ કરે છે
+- `npm run test:coverage:legacy` ઐતિહાસિક સરખામણી માટે જૂનું metric જાળવી રાખે છે
+- તબક્કાવાર coverage સુધારણા roadmap માટે `docs/ops/COVERAGE_PLAN.md` જુઓ
 
-### પુલ રિક્વેસ્ટની આવશ્યકતાઓ
+### Pull Request માટેની આવશ્યકતાઓ
 
-PR ખોલતા પહેલાં, તમે જે બદલ્યું છે તેના માટે કેન્દ્રિત લૂપ ચલાવવા
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) નો ઉપયોગ કરો. સંપૂર્ણ યુનિટ સ્યુટ (4 CI શાર્ડ્સ), Vitest, **60%+** કવરેજ ગેટ અને
-પ્રોડક્શન બિલ્ડની જવાબદારી CI ની છે — તેમને સ્થાનિક રીતે ચલાવવાથી એવી કોઈ વધારાની માહિતી મળતી નથી જે PR
-તપાસ પહેલેથી નહીં આપે, અને નાના મશીનો પર તે હોસ્ટને સંતૃપ્ત કરી શકે છે (#8084):
+PR ખોલતાં પહેલાં, તમે જે બદલ્યું છે તેના માટે focused loop ચલાવવા
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)નો ઉપયોગ કરો. સંપૂર્ણ unit suite (4 CI shards), Vitest, **60%+** coverage gate અને
+production build એ CIની જવાબદારી છે — તેમને સ્થાનિક રીતે ચલાવવાથી એવી કોઈ વધારાની માહિતી મળતી નથી જે PR
+checks પહેલેથી જ નહીં આપે, અને નાનાં machines પર તે hostને સંપૂર્ણ રીતે વ્યસ્ત કરી શકે છે (#8084):
 
-- તમારા ફેરફારને આવરી લેતી ટેસ્ટ ફાઇલો ચલાવો: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- તમારા ફેરફારને આવરી લેતી test files ચલાવો: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ચલાવો
-- જ્યારે પણ પ્રોડક્શન કોડ બદલાય, ત્યારે એ જ PR માં ઑટોમેટેડ ટેસ્ટ ઉમેરો અથવા અપડેટ કરો
-- જ્યારે પ્રોડક્શન કોડ બદલાયો હોય, ત્યારે PR વર્ણનમાં બદલેલી અથવા ઉમેરેલી ટેસ્ટ ફાઇલોનો સમાવેશ કરો
-- જ્યારે પ્રોજેક્ટ સિક્રેટ્સ CI માં કન્ફિગર કરેલા હોય, ત્યારે PR પર SonarQube પરિણામ તપાસો
+- જ્યારે પણ production code બદલાય ત્યારે એ જ PRમાં automated tests ઉમેરો અથવા અપડેટ કરો
+- `node:test` filesમાં, દરેક top-level `await` (જેમ કે `await import(...)`)ને પ્રથમ `test()` / `describe()` પહેલાં મૂકો: `--test-force-exit` હેઠળ, તેના પછી નોંધાયેલા tests ક્યારેક કોઈ સૂચના વિના ચાલી જ ન શકે (#18045; `npm run check:test-tla-order` દ્વારા લાગુ કરવામાં આવે છે)
+- production code બદલાયું હોય ત્યારે PR descriptionમાં બદલેલી અથવા ઉમેરેલી test filesનો સમાવેશ કરો
+- જ્યારે project secrets CIમાં configured હોય ત્યારે PR પર SonarQube result તપાસો
 
-વર્તમાન ટેસ્ટ સ્થિતિ: **122 યુનિટ ટેસ્ટ ફાઇલો**, જે નીચેનું કવર કરે છે:
+હાલની test સ્થિતિ: **122 unit test files**, જે આને આવરી લે છે:
 
-- પ્રોવાઇડર ટ્રાન્સલેટર્સ અને ફોર્મેટ રૂપાંતરણ
-- રેટ લિમિટિંગ, સર્કિટ બ્રેકર અને સ્થિતિસ્થાપકતા
-- સિમૅન્ટિક કૅશ, આઇડેમ્પોટન્સી અને પ્રગતિ ટ્રૅકિંગ
-- ડેટાબેઝ ઑપરેશન્સ અને સ્કીમા (21 DB મોડ્યુલ્સ)
-- OAuth ફ્લોઝ અને ઑથેન્ટિકેશન
-- API એન્ડપોઇન્ટ વૅલિડેશન (Zod v4)
-- MCP સર્વર ટૂલ્સ અને સ્કોપ અમલીકરણ
-- મેમરી અને Skills સિસ્ટમ્સ
+- Provider translators અને format conversion
+- Rate limiting, circuit breaker અને resilience
+- Semantic cache, idempotency અને progress tracking
+- Database operations અને schema (21 DB modules)
+- OAuth flows અને authentication
+- API endpoint validation (Zod v4)
+- MCP server tools અને scope enforcement
+- Memory અને Skills systems
 
 ---
 

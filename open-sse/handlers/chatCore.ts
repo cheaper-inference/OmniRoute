@@ -182,6 +182,7 @@ import { stageTrace } from "./chatCore/stageTrace.ts";
 import { attachCompressionUsageReceiptAfterAnalytics as attachCompressionUsageReceiptAfterAnalyticsFor } from "./chatCore/compressionUsageReceipt.ts";
 
 import { getQuotaScopeLabelForProvider } from "../services/antigravityQuotaFamily.ts";
+import { handleClaudeQuotaFailure } from "./chatCore/claudeQuotaFailure.ts";
 import { excludeConnectionForCooldown } from "./chatCore/connectionCooldown.ts";
 import { handleProjectRouteFailure } from "./chatCore/projectRouteFailure.ts";
 import { handleRequestRejectedFailure } from "./chatCore/requestRejectedFailure.ts";
@@ -203,7 +204,7 @@ import {
 } from "@/lib/usage/pendingRequestScope";
 import { recordChatCallCost, buildCostCtx } from "@/domain/costRules";
 import { attachOmniRouteMetaToResponse as attachRouteMeta } from "@/domain/omnirouteResponseMeta";
-import { calculateCost } from "@/lib/usage/costCalculator";
+import { calculateCostDetailed } from "@/lib/usage/costCalculator";
 import {
   createDisabledCompressionConfig,
   resolveCompressionSettings,
@@ -247,6 +248,7 @@ import {
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
 import { getCachedSettings } from "@/lib/db/readCache";
+import { resolveToolDisclosureConfig } from "../utils/toolDisclosure.ts";
 import {
   applyApiKeyCodexServiceMode,
   withApiKeyCodexServiceMode,
@@ -2356,8 +2358,9 @@ async function handleChatCoreInner({
 
   // === Quota Share enforcement PRE-hook (B/F7) + G2 combo soft penalty ===
   // Extracted to chatCore/quotaSharePreHook.ts (chatCore slice 2). Fail-open per B16; a block
-  // returns the 429 response after finalizing the pending-request slot.
-  const quotaShareBlockedResponse = await runQuotaSharePreHook({
+  // returns the structured 429 error result (`errorCode: "quota_share_blocked"`, #17132) after
+  // finalizing the pending-request slot.
+  const quotaShareBlockResult = await runQuotaSharePreHook({
     apiKeyInfo,
     credentials,
     provider,
@@ -2369,7 +2372,7 @@ async function handleChatCoreInner({
       trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId),
     log,
   });
-  if (quotaShareBlockedResponse) return quotaShareBlockedResponse;
+  if (quotaShareBlockResult) return quotaShareBlockResult;
   // === /Quota Share enforcement PRE-hook ===
   if (isFeatureFlagEnabled("CAPABILITY_FILTER_ENABLED")) {
     const fit = checkRequestCapabilityFit(
@@ -2436,6 +2439,7 @@ async function handleChatCoreInner({
     ? computeRequestHash(dedupRequestBody, apiKeyInfo?.id, trustedEffortContext)
     : null;
 
+  const toolDisclosure = resolveToolDisclosureConfig(settings);
   const executeProviderRequestDeps = {
     agentGoalPolicy,
     assertManagedLeaseFence,
@@ -2476,6 +2480,7 @@ async function handleChatCoreInner({
     traceId,
     translatedBody,
     trustedEffortContext,
+    toolDisclosure,
     upstreamStream,
     userAgent,
   };
@@ -2710,6 +2715,24 @@ async function handleChatCoreInner({
     const errorConnectionId = getCurrentConnectionId() || connectionId;
     if (errorConnectionId && errorType) {
       try {
+        if (
+          await handleClaudeQuotaFailure({
+            provider,
+            connectionId: errorConnectionId,
+            model: targetModel,
+            status: statusCode,
+            errorText: message,
+            retainedMessage: persistentMessage,
+            retryAfterMs,
+            hasCallerOwner: typeof onStreamFailure === "function",
+            deps: {
+              readConnection: getProviderConnectionById,
+              persistConnection: updateProviderConnection,
+              isProbe: shouldIsolateProbeFailures,
+            },
+          })
+        )
+          return;
         if (errorType === PROVIDER_ERROR_TYPES.FORBIDDEN) {
           const probeIsolated = await shouldIsolateProbeFailures();
           await writeTerminalStatus(
@@ -3086,6 +3109,7 @@ async function handleChatCoreInner({
       targetFormat,
       triedModels,
       trustedEffortContext,
+      toolDisclosure,
       upstreamStream,
       userAgent,
       claudePromptCacheLogMeta,
@@ -3126,7 +3150,7 @@ async function handleChatCoreInner({
       buildCacheUsageLogMeta,
       buildCostCtx,
       buildErrorBody,
-      calculateCost,
+      calculateCostDetailed,
       calibrationEstimatedInputTokens,
       claudePromptCacheLogMeta,
       clientRawRequest,
@@ -3253,6 +3277,13 @@ async function handleChatCoreInner({
   }
 
   const streamingTailOutcome = await runStreamingTail({
+    registerStreamFinalizers: (
+      pipelineError: streamFailure.PipelineStreamErrorHandler,
+      clientDisconnect: (event: { reason: string; duration: number }) => boolean
+    ) => {
+      onPipelineStreamError = pipelineError;
+      onClientDisconnectFinalize = clientDisconnect;
+    },
     agentGoalPolicy,
     modelInfo,
     forcedConnectionId,

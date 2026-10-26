@@ -2,7 +2,17 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { Badge, Button, Card, EmptyState, SegmentedControl } from "@/shared/components";
 import {
   filterRankingsByAuthType,
   sortRankingsAuthTypeFirst,
@@ -32,11 +42,18 @@ function scoreLabel(score: number): string {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 0.85) return "text-green-400";
-  if (score >= 0.7) return "text-emerald-400";
-  if (score >= 0.55) return "text-yellow-400";
-  return "text-orange-400";
+  if (score >= 0.7) return "text-success";
+  if (score >= 0.55) return "text-warning";
+  return "text-error";
 }
+
+// Podium accent strip: gold / silver / bronze through theme tokens (light + dark).
+const MEDAL_COLORS = ["bg-warning", "bg-border-strong", "bg-warning/50"];
+
+const CATEGORY_BADGE: Record<string, "success" | "info" | "primary"> = {
+  noauth: "success",
+  oauth: "info",
+};
 
 const CATEGORY_OPTIONS = [
   { value: "", labelKey: "allCategories" },
@@ -56,6 +73,7 @@ const TYPE_OPTIONS: Array<{ value: ProviderAuthType | ""; labelKey: string }> = 
 
 export default function FreeProviderRankingsPage() {
   const t = useTranslations("freeProviderRankingsPage");
+  const tc = useTranslations("common");
   const [rankings, setRankings] = useState<FreeProviderRanking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -110,106 +128,80 @@ export default function FreeProviderRankingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <p className="text-sm text-text-muted mt-1">{t("subtitle")}</p>
-        </div>
-      </div>
+      <PageHeader compact title={t("title")} description={t("subtitle")} />
 
       {/* Filters */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {CATEGORY_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => setFilter(opt.value)}
-            className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-              filter === opt.value
-                ? "bg-violet-500 border-violet-500 text-white"
-                : "border-border text-text-muted hover:text-text-main hover:border-violet-500/50"
-            }`}
-          >
-            {t(opt.labelKey)}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        aria-label={t("categoryFilter")}
+        value={filter}
+        onChange={setFilter}
+        options={CATEGORY_OPTIONS.map((opt) => ({ value: opt.value, label: t(opt.labelKey) }))}
+      />
 
       {/* Availability toggles (default off → show all providers) */}
       <div className="flex items-center gap-2 flex-wrap">
-        <button
+        <Button
+          size="sm"
+          variant={configuredOnly ? "primary" : "outline"}
           onClick={() => setConfiguredOnly((v) => !v)}
           aria-pressed={configuredOnly}
-          className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-            configuredOnly
-              ? "bg-emerald-500 border-emerald-500 text-white"
-              : "border-border text-text-muted hover:text-text-main hover:border-emerald-500/50"
-          }`}
         >
           {t("filterConfiguredOnly")}
-        </button>
-        <button
+        </Button>
+        <Button
+          size="sm"
+          variant={availableOnly ? "primary" : "outline"}
           onClick={() => setAvailableOnly((v) => !v)}
           aria-pressed={availableOnly}
           title={t("filterAvailableOnlyHelp")}
-          className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-            availableOnly
-              ? "bg-emerald-500 border-emerald-500 text-white"
-              : "border-border text-text-muted hover:text-text-main hover:border-emerald-500/50"
-          }`}
         >
           {t("filterAvailableOnly")}
-        </button>
+        </Button>
       </div>
 
       {/* Type filter chips + "group by type" sort (#6915) */}
       <div className="flex items-center gap-2 flex-wrap">
-        {TYPE_OPTIONS.map((opt) => (
-          <button
-            key={opt.value || "all"}
-            onClick={() => setTypeFilter(opt.value)}
-            aria-pressed={typeFilter === opt.value}
-            className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-              typeFilter === opt.value
-                ? "bg-violet-500 border-violet-500 text-white"
-                : "border-border text-text-muted hover:text-text-main hover:border-violet-500/50"
-            }`}
-          >
-            {t(opt.labelKey)}
-          </button>
-        ))}
-        <button
+        <div role="group" aria-label={t("colType")} className="flex items-center gap-2 flex-wrap">
+          {TYPE_OPTIONS.map((opt) => (
+            <Button
+              key={opt.value || "all"}
+              size="sm"
+              variant={typeFilter === opt.value ? "primary" : "outline"}
+              onClick={() => setTypeFilter(opt.value)}
+              aria-pressed={typeFilter === opt.value}
+            >
+              {t(opt.labelKey)}
+            </Button>
+          ))}
+        </div>
+        <Button
+          size="sm"
+          variant={groupByType ? "primary" : "outline"}
           onClick={() => setGroupByType((v) => !v)}
           aria-pressed={groupByType}
           title={t("sortTypeFirstHelp")}
-          className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-            groupByType
-              ? "bg-emerald-500 border-emerald-500 text-white"
-              : "border-border text-text-muted hover:text-text-main hover:border-emerald-500/50"
-          }`}
         >
           {t("sortTypeFirst")}
-        </button>
-        <button
+        </Button>
+        <Button
+          size="sm"
+          variant={sortByReliability ? "primary" : "outline"}
           onClick={() => setSortByReliability((v) => !v)}
           aria-pressed={sortByReliability}
           title={t("sortByReliabilityHelp")}
-          className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-            sortByReliability
-              ? "bg-emerald-500 border-emerald-500 text-white"
-              : "border-border text-text-muted hover:text-text-main hover:border-emerald-500/50"
-          }`}
         >
           {t("sortByReliability")}
-        </button>
+        </Button>
       </div>
       <p className="text-xs text-text-muted">{t("typeLegend")}</p>
 
-      {error && <div className="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">{error}</div>}
+      {error && <Alert variant="critical" description={error} dismissLabel={tc("close")} />}
 
       {loading ? (
         <div className="flex items-center justify-center min-h-[200px]">
-          <div className="text-text-muted">{t("loading")}</div>
+          <div className="text-text-muted" role="status" aria-live="polite">
+            {t("loading")}
+          </div>
         </div>
       ) : (
         <>
@@ -219,16 +211,13 @@ export default function FreeProviderRankingsPage() {
               {displayedRankings.slice(0, 3).map((provider, idx) => (
                 <Card key={provider.id} className="relative overflow-hidden">
                   <div
-                    className={`absolute top-0 left-0 right-0 h-1 ${
-                      idx === 0
-                        ? "bg-gradient-to-r from-amber-400 to-yellow-600"
-                        : idx === 1
-                          ? "bg-gradient-to-r from-gray-300 to-gray-500"
-                          : "bg-gradient-to-r from-amber-600 to-orange-800"
-                    }`}
+                    aria-hidden="true"
+                    className={`absolute top-0 left-0 right-0 h-1 ${MEDAL_COLORS[idx]}`}
                   />
                   <div className="flex items-center gap-4">
-                    <div className="text-4xl">{idx === 0 ? "🥇" : idx === 1 ? "🥈" : "🥉"}</div>
+                    <div className="text-4xl" aria-hidden="true">
+                      {idx === 0 ? "🥇" : idx === 1 ? "🥈" : "🥉"}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <div
@@ -252,7 +241,9 @@ export default function FreeProviderRankingsPage() {
                         </p>
                       )}
                     </div>
-                    <div className="text-5xl font-black text-text-muted/20">{idx + 1}</div>
+                    <div className="text-5xl font-black text-text-muted/20" aria-hidden="true">
+                      {idx + 1}
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -262,105 +253,95 @@ export default function FreeProviderRankingsPage() {
           {/* Full List */}
           {displayedRankings.length > 0 && (
             <Card>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left text-sm text-text-muted border-b border-border">
-                      <th className="pb-3 font-medium w-16">{t("colRank")}</th>
-                      <th className="pb-3 font-medium">{t("colProvider")}</th>
-                      <th className="pb-3 font-medium">{t("colTopModel")}</th>
-                      <th className="pb-3 font-medium text-right">{t("colScore")}</th>
-                      <th className="pb-3 font-medium text-right">{t("colAvgScore")}</th>
-                      <th className="pb-3 font-medium text-right" title={t("colReliabilityHelp")}>
-                        {t("colReliability")}
-                      </th>
-                      <th className="pb-3 font-medium text-right">{t("colModels")}</th>
-                      <th className="pb-3 font-medium text-right" title={t("typeLegend")}>
-                        {t("colType")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {displayedRankings.map((provider, idx) => (
-                      <tr key={provider.id} className="border-b border-border/50 last:border-b-0">
-                        <td className="py-3 text-text-muted font-mono">{idx + 1}</td>
-                        <td className="py-3">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white"
-                              style={{ backgroundColor: provider.color }}
-                            >
-                              {provider.textIcon || provider.name.charAt(0)}
-                            </div>
-                            <span className="font-medium">{provider.name}</span>
+              <Table className="min-w-0" scrollbarLabel={t("title")}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-16">{t("colRank")}</TableHead>
+                    <TableHead>{t("colProvider")}</TableHead>
+                    <TableHead>{t("colTopModel")}</TableHead>
+                    <TableHead className="text-right">{t("colScore")}</TableHead>
+                    <TableHead className="text-right">{t("colAvgScore")}</TableHead>
+                    <TableHead className="text-right" title={t("colReliabilityHelp")}>
+                      {t("colReliability")}
+                    </TableHead>
+                    <TableHead className="text-right">{t("colModels")}</TableHead>
+                    <TableHead className="text-right" title={t("typeLegend")}>
+                      {t("colType")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {displayedRankings.map((provider, idx) => (
+                    <TableRow key={provider.id}>
+                      <TableCell className="text-text-muted font-mono">{idx + 1}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white"
+                            style={{ backgroundColor: provider.color }}
+                          >
+                            {provider.textIcon || provider.name.charAt(0)}
                           </div>
-                        </td>
-                        <td className="py-3 text-text-muted truncate max-w-[200px]">
-                          {provider.topModel?.modelName || "—"}
-                        </td>
-                        <td className="py-3 text-right">
-                          {provider.topModel ? (
-                            <span
-                              className={`font-mono font-medium ${scoreColor(provider.topModel.score)}`}
-                            >
-                              {scoreLabel(provider.topModel.score)}
-                            </span>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                        <td className="py-3 text-right font-mono text-text-muted">
-                          {scoreLabel(provider.averageScore)}
-                        </td>
-                        <td className="py-3 text-right">
-                          {(() => {
-                            const u = formatUsageReliability(provider.reliability?.usage);
-                            const title =
-                              u.kind === "rate"
-                                ? t("reliabilitySample", {
-                                    successes: u.successes,
+                          <span className="font-medium">{provider.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-text-muted truncate max-w-[200px]">
+                        {provider.topModel?.modelName || "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {provider.topModel ? (
+                          <span
+                            className={`font-mono font-medium ${scoreColor(provider.topModel.score)}`}
+                          >
+                            {scoreLabel(provider.topModel.score)}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-text-muted">
+                        {scoreLabel(provider.averageScore)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {(() => {
+                          const u = formatUsageReliability(provider.reliability?.usage);
+                          const title =
+                            u.kind === "rate"
+                              ? t("reliabilitySample", {
+                                  successes: u.successes,
+                                  requests: u.requests,
+                                  hours: u.windowHours,
+                                })
+                              : u.kind === "insufficient"
+                                ? t("reliabilityTooFew", {
                                     requests: u.requests,
                                     hours: u.windowHours,
                                   })
-                                : u.kind === "insufficient"
-                                  ? t("reliabilityTooFew", {
-                                      requests: u.requests,
-                                      hours: u.windowHours,
-                                    })
-                                  : t("reliabilityNoTraffic");
-                            return (
-                              <span className={`font-mono ${usageToneClass(u.tone)}`} title={title}>
-                                {u.kind === "rate" ? `${u.percent}%` : "—"}
-                              </span>
-                            );
-                          })()}
-                        </td>
-                        <td className="py-3 text-right text-text-muted">{provider.modelCount}</td>
-                        <td className="py-3 text-right">
-                          <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              provider.category === "noauth"
-                                ? "bg-green-500/10 text-green-500"
-                                : provider.category === "oauth"
-                                  ? "bg-blue-500/10 text-blue-500"
-                                  : "bg-purple-500/10 text-purple-500"
-                            }`}
-                          >
-                            {provider.category.toUpperCase()}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                                : t("reliabilityNoTraffic");
+                          return (
+                            <span className={`font-mono ${usageToneClass(u.tone)}`} title={title}>
+                              {u.kind === "rate" ? `${u.percent}%` : "—"}
+                            </span>
+                          );
+                        })()}
+                      </TableCell>
+                      <TableCell className="text-right text-text-muted">
+                        {provider.modelCount}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge size="sm" variant={CATEGORY_BADGE[provider.category] ?? "primary"}>
+                          {provider.category.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </Card>
           )}
 
           {displayedRankings.length === 0 && !error && (
-            <Card>
-              <div className="text-center py-12 text-text-muted">{t("emptyState")}</div>
-            </Card>
+            <EmptyState icon="leaderboard" title={t("emptyState")} />
           )}
         </>
       )}

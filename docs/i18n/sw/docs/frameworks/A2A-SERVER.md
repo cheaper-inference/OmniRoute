@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Kwa `smart-routing`, `metadata.combo` ni ubatilishaji bayana wa
+`metadata.model` kwa ombi la lango; hutumwa kama `model` halisi,
+si kama sehemu ya JSON ya `x-combo` inayopuuzwa. Uidhinishaji wa kawaida wa ufunguo wa API wa lango na
+uidhinishaji kwa kila lengo bado unatumika. Mchanganyiko batili au tupu hukataliwa.
+
+Matokeo huonyesha `requested_combo` (nia ya mwombaji), `dispatched_model`
+(ombi halisi la lango), `response_model` (jibu la lango) na
+`confirmed_combo`. Sehemu ya mwisho ni `null` isipokuwa lango litambue
+mchanganyiko kwa uwazi. Rekodi za maamuzi za A2A huhusisha utekelezaji na
+mchanganyiko uliothibitishwa pekee, huku zikihifadhi ombi ambalo halijathibitishwa kama `requestedCombo`.
+
 **Jibu:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Utiririshaji wa SSE
 
-Ni sawa na `message/send`, lakini hurejesha Matukio Yanayotumwa na Seva kwa ajili ya utiririshaji wa wakati halisi.
+Ni sawa na `message/send`, lakini hurejesha Matukio Yanayotumwa na Seva kwa utiririshaji wa wakati halisi.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Kuuliza Hali ya Kazi
+### `tasks/get` — Uliza Hali ya Kazi
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Kughairi Kazi
+### `tasks/cancel` — Ghairi Kazi
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Ujuzi Unaopatikana
 
-OmniRoute hutoa ujuzi 6 wa A2A uliounganishwa katika `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kila moduli ya ujuzi inapatikana katika `src/lib/a2a/skills/`.
+OmniRoute hutoa ujuzi 6 wa A2A uliounganishwa katika `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kila moduli ya ujuzi iko katika `src/lib/a2a/skills/`.
 
-| Ujuzi                    | ID                   | Maelezo                                                                                                                                                                                   | Lebo                      | Mifano                                      |
-| :----------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------ | :------------------------------------------ |
-| Uelekezaji Mahiri        | `smart-routing`      | Huelekeza kidokezo kupitia mtoa huduma/mseto unaofaa zaidi kwa kutumia injini ya michanganyiko ya OmniRoute pamoja na mfumo wa utoaji alama                                               | uelekezaji, watoa huduma  | "Elekeza kidokezo hiki kupitia modeli bora" |
-| Usimamizi wa Kiwango     | `quota-management`   | Huripoti hali ya kiwango kwa kila mtoa huduma na kuwasaidia waitaji kuamua wakati wa kupunguza kasi/kubadilisha                                                                           | kiwango, watoa huduma     | "Kagua kiwango cha anthropic"               |
-| Ugunduzi wa Watoa Huduma | `provider-discovery` | Huorodhesha watoa huduma waliosakinishwa pamoja na uwezo wao, viashiria vya kiwango kisicholipishwa na hali ya OAuth                                                                      | watoa huduma, ugunduzi    | "Ni watoa huduma gani wanaopatikana?"       |
-| Uchanganuzi wa Gharama   | `cost-analysis`      | Hukadiria gharama ya ombi/mazungumzo kwa kuzingatia katalogi pamoja na matumizi ya hivi karibuni                                                                                          | gharama, matumizi         | "Kadiria gharama ya mazungumzo haya"        |
-| Ripoti ya Afya           | `health-report`      | Hujumlisha hali ya circuit breaker, cooldown na lockout kwa kila mtoa huduma                                                                                                              | afya, ustahimilivu        | "Onyesha hali ya afya ya watoa huduma wote" |
-| Orodhesha Uwezo          | `list-capabilities`  | Hurejesha katalogi kamili ya Agent Skills yenye vipengee 45 (23 vya API + 21 vya CLI + 1 cha usanidi) kama jedwali la markdown lenye URL ghafi za SKILL.md kwa ajili ya kuingiza muktadha | katalogi, ugunduzi, ujuzi | "Orodhesha uwezo wote wa OmniRoute"         |
+| Ujuzi              | ID                   | Maelezo                                                                                                                                                                         | Lebo                       | Mifano                                      |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------------ |
+| Smart Routing      | `smart-routing`      | Huelekeza prompt kupitia mtoa huduma/mchanganyiko bora kwa kutumia injini ya combo ya OmniRoute pamoja na upimaji alama                                                         | routing, providers         | "Elekeza prompt hii kupitia mfano bora"     |
+| Quota Management   | `quota-management`   | Huripoti hali ya kwota kwa kila mtoa huduma, husaidia witoaji kuamua lini kupunguza kasi/kubadilisha                                                                            | quota, providers           | "Angalia kwota ya anthropic"                |
+| Provider Discovery | `provider-discovery` | Huorodhesha watoa huduma waliosakinishwa pamoja na uwezo, bendera za kiwango cha bure, na hali ya OAuth                                                                         | providers, discovery       | "Watoa huduma gani wanapatikana?"           |
+| Cost Analysis      | `cost-analysis`      | Hukadiria gharama ya ombi/mazungumzo kwa kutumia katalogi pamoja na matumizi ya hivi karibuni                                                                                   | cost, usage                | "Kadiria gharama ya mazungumzo haya"        |
+| Health Report      | `health-report`      | Hukusanya hali za circuit breaker, cooldown, na lockout kwa kila mtoa huduma                                                                                                    | health, resilience         | "Onyesha hali ya afya ya watoa huduma wote" |
+| List Capabilities  | `list-capabilities`  | Hurudisha katalogi kamili ya Ujuzi wa Wakala yenye viingizo 45 (API 23 + CLI 21 + config 1) kama jedwali la markdown lenye URL ghafi za SKILL.md kwa ajili ya kuingiza muktadha | catalog, discovery, skills | "Orodhesha uwezo wote wa OmniRoute"         |
 
-> Agent Card inapaswa kudumishwa ikiwa imeoanishwa na katalogi hai ya watoa huduma 374; idadi ya watoa huduma na metadata ya kutolipishwa/kutohitaji uthibitishaji hutolewa na sajili ya wakati wa utekelezaji.
+> Agent Card inapaswa kudumishwa ikilingana na katalogi hai ya watoa huduma 375; idadi za watoa huduma na metadata ya bure/bila-uthibitishaji hutokana na rejista ya wakati wa utekelezaji.
 
 ### Maelezo ya Ujuzi wa `list-capabilities`
 
-Ujuzi wa `list-capabilities` ni muhimu hasa kwa maajenti wa nje wanaohitaji kugundua kile ambacho OmniRoute hutoa kabla ya kutuma miito ya API. Hurejesha artifakti ya jedwali la markdown iliyopangwa:
+Ujuzi wa `list-capabilities` ni muhimu hasa kwa mawakala wa nje ambao wanahitaji kugundua kile OmniRoute kinachotoa kabla ya kutuma miito ya API. Hurudisha kizalisho cha jedwali la markdown lililopangiliwa:
 
 ```
-| ID | Jina | Kategoria | Eneo | Endpoints/Amri | URL Ghafi |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Uthibitishaji na Vipindi | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Kila safu inajumuisha safu wima ya `rawUrl` ili maajenti waweze kuleta SKILL.md kamili mara moja. Sehemu ya `metadata.totalSkills` inaakisi ukubwa wa katalogi (45 kwa sasa). Utekelezaji: `src/lib/a2a/skills/listCapabilities.ts`. Tazama pia [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Kila mstari unajumuisha safu ya `rawUrl` ili mawakala waweze kupata SKILL.md kamili mara moja. Sehemu ya `metadata.totalSkills` inakisi ukubwa wa katalogi (45 leo). Utekelezaji: `src/lib/a2a/skills/listCapabilities.ts`. Tazama pia [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

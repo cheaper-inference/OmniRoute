@@ -17,8 +17,8 @@
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { describe, it, expect, afterEach, beforeAll, beforeEach, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import ModelSelectField from "@/shared/components/ModelSelectField";
 
 vi.mock("next-intl", () => ({
@@ -46,6 +46,23 @@ function mockModels(models: string[]) {
   );
 }
 
+// Since KEA-7886 the picker is the kit (Radix) Select: a combobox trigger + role=option
+// items in a portal. Radix calls these on open; jsdom does not implement them.
+beforeAll(() => {
+  const proto = window.HTMLElement.prototype as unknown as Record<string, unknown>;
+  proto.hasPointerCapture ??= () => false;
+  proto.releasePointerCapture ??= () => {};
+  proto.scrollIntoView ??= () => {};
+});
+
+async function openPicker() {
+  const trigger = await screen.findByRole("combobox", { name: "webSearchRouteTitle" });
+  // the picker stays disabled while the model list loads
+  await waitFor(() => expect(trigger.hasAttribute("disabled")).toBe(false));
+  fireEvent.keyDown(trigger, { key: "Enter" });
+  return trigger;
+}
+
 describe("web-search route model is clearable", () => {
   beforeEach(() => {
     mockModels(["cx/gpt-6-astra", "claude/claude-opus-5-5"]);
@@ -68,16 +85,17 @@ describe("web-search route model is clearable", () => {
       />
     );
 
-    const select = (await screen.findByLabelText("webSearchRouteTitle")) as HTMLSelectElement;
-    const placeholderOption = Array.from(select.options).find((option) => option.value === "");
+    await openPicker();
+    const placeholderOption = screen.queryByRole("option", { name: "webSearchRoutePlaceholder" });
 
     expect(placeholderOption, "the picker must render a blank option").toBeTruthy();
     expect(
-      placeholderOption?.disabled,
+      placeholderOption?.getAttribute("aria-disabled") === "true" ||
+        placeholderOption?.hasAttribute("data-disabled"),
       "the blank option must be selectable — otherwise the override can never be disabled"
     ).toBe(false);
 
-    fireEvent.change(select, { target: { value: "" } });
+    fireEvent.click(placeholderOption!);
     expect(onChange).toHaveBeenCalledWith("");
   });
 
@@ -91,9 +109,11 @@ describe("web-search route model is clearable", () => {
       />
     );
 
-    const select = (await screen.findByLabelText("webSearchRouteTitle")) as HTMLSelectElement;
-    const placeholderOption = Array.from(select.options).find((option) => option.value === "");
-    expect(placeholderOption?.disabled).toBe(true);
+    await openPicker();
+    // The kit shows the placeholder only as the empty-value text; without allowEmpty it is
+    // never offered as a pickable item (the legacy <option value="" disabled>).
+    expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("option", { name: "webSearchRoutePlaceholder" })).toBeNull();
   });
 
   it("RoutingTab passes allowEmpty to the webSearchRouteModel picker", () => {
