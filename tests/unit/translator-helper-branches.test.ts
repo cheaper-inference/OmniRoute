@@ -642,9 +642,7 @@ test("fixMissingToolResponses inserts responses when assistant with tool_calls i
       { role: "user", content: "run tools" },
       {
         role: "assistant",
-        tool_calls: [
-          { id: "call_1", type: "function", function: { name: "f1", arguments: "{}" } },
-        ],
+        tool_calls: [{ id: "call_1", type: "function", function: { name: "f1", arguments: "{}" } }],
       },
     ],
   });
