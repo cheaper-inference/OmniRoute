@@ -10,6 +10,16 @@ const { PerplexityWebExecutor } = await import("../../open-sse/executors/perplex
 const { __setTlsFetchOverrideForTesting } =
   await import("../../open-sse/services/perplexityTlsClient.ts");
 
+test("cookie rotation retains unrelated pairs and malformed fragments in order", () => {
+  const name = "__Secure-next-auth.session-token";
+  assert.equal(
+    mergeRefreshedCookie(` other =a=b; fragment; ${name}.0=old; tail=z`, `${name}=new; Path=/`),
+    `other=a=b; fragment; tail=z; ${name}=new`
+  );
+  assert.equal(mergeRefreshedCookie("other=value", `${name}=new`), `other=value; ${name}=new`);
+  assert.equal(mergeRefreshedCookie(`${name}=same; other=value`, `${name}=same`), null);
+});
+
 function mockPplxStream(answer = "Hello, world!") {
   const encoder = new TextEncoder();
   const body =

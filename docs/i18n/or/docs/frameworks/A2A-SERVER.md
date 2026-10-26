@@ -46,7 +46,7 @@ A2A **Endpoints → A2A** ଟଗଲ୍ ଦ୍ୱାରା ନିୟନ୍ତ୍�
 
 ### `message/send` — ସମକାଳୀନ ନିଷ୍ପାଦନ
 
-ଏକ ଦକ୍ଷତାକୁ ବାର୍ତ୍ତା ପଠାଏ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରତିକ୍ରିୟା ପାଇଁ ଅପେକ୍ଷା କରେ।
+ଏକ ସ୍କିଲ୍କୁ ସନ୍ଦେଶ ପଠାଏ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରତିକ୍ରିୟା ପାଇଁ ଅପେକ୍ଷା କରେ।
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -64,6 +64,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` ପାଇଁ, `metadata.combo` ହେଉଛି ଗେଟୱେ ଅନୁରୋଧ ନିମନ୍ତେ
+`metadata.model`-ର ଏକ ସ୍ପଷ୍ଟ ଓଭରରାଇଡ୍; ଏହାକୁ ଅଣଦେଖା କରାଯାଇଥିବା `x-combo`
+JSON ଫିଲ୍ଡ ଭାବରେ ନୁହେଁ, ପ୍ରକୃତ `model` ଭାବରେ ପଠାଯାଏ। ଗେଟୱେର ସାଧାରଣ API କି ଏବଂ
+ପ୍ରତ୍ୟେକ ଟାର୍ଗେଟ୍ ପାଇଁ ପ୍ରାଧିକରଣ ତଥାପି ପ୍ରଯୁଜ୍ୟ ହୁଏ। ଏକ ଅବୈଧ କିମ୍ବା ଖାଲି କମ୍ବୋକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ।
+
+ଫଳାଫଳରେ `requested_combo` (କଲ୍କାରୀଙ୍କ ଉଦ୍ଦେଶ୍ୟ), `dispatched_model`
+(ପ୍ରକୃତ ଗେଟୱେ ଅନୁରୋଧ), `response_model` (ଗେଟୱେ ପ୍ରତିକ୍ରିୟା) ଏବଂ
+`confirmed_combo` ପ୍ରକାଶିତ ହୁଏ। ଗେଟୱେ ସ୍ପଷ୍ଟ ଭାବରେ କୌଣସି କମ୍ବୋ ଚିହ୍ନଟ ନକଲେ ଶେଷ ଫିଲ୍ଡଟି `null`
+ରହେ। A2A ନିଷ୍ପତ୍ତି ଲଗ୍ଗୁଡ଼ିକ କେବଳ ଏକ
+ନିଶ୍ଚିତ କମ୍ବୋକୁ ନିଷ୍ପାଦନର ଶ୍ରେୟ ଦିଅନ୍ତି, ଏବଂ ଏକ ଅନିଶ୍ଚିତ ଅନୁରୋଧକୁ `requestedCombo` ଭାବରେ ରଖନ୍ତି।
+
 **ପ୍ରତିକ୍ରିୟା:**
 
 ```json
@@ -75,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -98,7 +102,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE ଷ୍ଟ୍ରିମିଂ
 
-`message/send` ସହିତ ସମାନ, କିନ୍ତୁ ରିଅଲ୍-ଟାଇମ୍ ଷ୍ଟ୍ରିମିଂ ପାଇଁ Server-Sent Events ଫେରାଏ।
+`message/send` ସହ ସମାନ, କିନ୍ତୁ ରିଅଲ୍-ଟାଇମ୍ ଷ୍ଟ୍ରିମିଂ ପାଇଁ ସର୍ଭର୍-ସେଣ୍ଟ୍ ଇଭେଣ୍ଟ୍ଗୁଡ଼ିକ ଫେରାଏ।
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -115,7 +119,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE ଇଭେଣ୍ଟଗୁଡ଼ିକ:**
+**SSE ଇଭେଣ୍ଟ୍ଗୁଡ଼ିକ:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -125,7 +129,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — କାର୍ଯ୍ୟ ସ୍ଥିତି ପଚାରନ୍ତୁ
+### `tasks/get` — ଟାସ୍କ ସ୍ଥିତି ପଚାରନ୍ତୁ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -134,7 +138,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — ଏକ କାର୍ଯ୍ୟ ବାତିଲ୍ କରନ୍ତୁ
+### `tasks/cancel` — ଏକ ଟାସ୍କ ବାତିଲ୍ କରନ୍ତୁ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -261,7 +265,7 @@ JSON-RPC ଏଣ୍ଡପଏଣ୍ଟ `/a2a` ହେଉଛି ମାନକ A2A ପ
 
 ---
 
-## ଇଣ୍ଟିଗ୍ରେସନ୍ ଉଦାହରଣଗୁଡ଼ିକ
+## ଏକୀକରଣ ଉଦାହରଣଗୁଡ଼ିକ
 
 ### Python (requests)
 

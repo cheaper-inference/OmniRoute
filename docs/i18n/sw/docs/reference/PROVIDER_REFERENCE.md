@@ -4,11 +4,11 @@
 
 ---
 
-> **Imetengenezwa kiotomatiki** kutoka `src/shared/constants/providers.ts` — usihariri kwa mkono.
-> Tengeneza upya kwa: `npm run gen:provider-reference`
-> **Mara ya mwisho kutengenezwa:** 2026-10-18
+> **Imeundwa kiotomatiki** kutoka `src/shared/constants/providers.ts` — usihariri mwenyewe.
+> Unda upya kwa: `npm run gen:provider-reference`
+> **Mara ya mwisho kuundwa:** 2026-10-20
 
-Jumla ya watoa huduma: **375**. Angalia ugawanyaji wa kategoria hapa chini.
+Jumla ya watoa huduma: **375**. Tazama mgawanyo wa kategoria hapa chini.
 
 ## Kategoria
 
@@ -460,9 +460,9 @@ Tumia dashibodi kwenye `/dashboard/providers` kuwezesha, kusanidi, na kujaribu k
 ## Vyanzo vya ukweli
 
 - Katalogi: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Rejista (maelezo ya kila modeli): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Watekelezaji: [`open-sse/executors/`](../../open-sse/executors/) (utekelezaji 154)
-- Vigeuzi: [`open-sse/translator/`](../../open-sse/translator/)
+- Rejesta (maelezo ya kila modeli): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Vitekelezaji: [`open-sse/executors/`](../../open-sse/executors/) (utekelezaji 156)
+- Watafsiri: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Angalia Pia
 

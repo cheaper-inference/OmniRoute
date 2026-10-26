@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
+import Toggle from "@/shared/components/Toggle";
 import { EventChecklist } from "../shared/EventChecklist";
 import { PayloadPreview } from "../shared/PayloadPreview";
 
@@ -72,64 +76,46 @@ export function Step3EventsAndTest({
 
   return (
     <div className="space-y-5">
-      <div>
-        <label className="text-xs font-medium uppercase tracking-wider text-text-muted">
-          {t("name")}
-        </label>
-        <input
-          value={description}
-          onChange={(e) => onChangeDescription(e.target.value)}
-          placeholder={t("namePlaceholder")}
-          className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
-        />
-      </div>
+      <Input
+        label={t("name")}
+        value={description}
+        onChange={(e) => onChangeDescription(e.target.value)}
+        placeholder={t("namePlaceholder")}
+      />
 
-      <div>
-        <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
-          {t("events")}
-        </label>
-        <EventChecklist
-          selected={events}
-          onChange={onChangeEvents}
-          allEventsLabel={t("allEvents")}
-        />
-      </div>
+      <EventChecklist
+        label={t("events")}
+        selected={events}
+        onChange={onChangeEvents}
+        allEventsLabel={t("allEvents")}
+      />
 
-      <label className="flex items-center gap-3 rounded-lg border border-border p-3">
-        <input
-          type="checkbox"
-          checked={enabled}
-          onChange={(e) => onChangeEnabled(e.target.checked)}
-          className="size-4 accent-primary"
-        />
-        <span>
-          <span className="block text-sm font-medium text-text-main">{t("enabled")}</span>
-          <span className="block text-xs text-text-muted">{t("enabledDesc")}</span>
-        </span>
-      </label>
+      <Toggle
+        checked={enabled}
+        onChange={onChangeEnabled}
+        label={t("enabled")}
+        description={t("enabledDesc")}
+      />
 
       {webhookId && (
         <div className="rounded-lg border border-border p-4 space-y-3">
           <p className="text-sm font-medium text-text-main">{t("testWebhook")}</p>
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={() => void sendTest()}
             disabled={testState === "sending"}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
           >
-            <span
-              className={`material-symbols-outlined text-[18px] ${
-                testState === "sending" ? "animate-spin" : ""
-              }`}
-            >
-              {testState === "sending" ? "sync" : "send"}
-            </span>
+            <Icon
+              name={testState === "sending" ? "sync" : "send"}
+              size={18}
+              className={testState === "sending" ? "animate-spin" : undefined}
+            />
             {t("testWebhook")}
-          </button>
+          </Button>
 
           {testState === "ok" && testResult && (
             <div className="space-y-3">
-              <p className="text-xs font-medium text-emerald-500">
+              <p className="text-xs font-medium text-success">
                 ✅ {testResult.status} &middot; {testResult.latencyMs}ms &middot; {t("testSuccess")}
               </p>
               {testResult.payloadSent && (
@@ -146,7 +132,7 @@ export function Step3EventsAndTest({
 
           {testState === "fail" && testResult && (
             <div className="space-y-3">
-              <p className="text-xs text-red-500">{testResult.error ?? t("testFailed")}</p>
+              <p className="text-xs text-error">{testResult.error ?? t("testFailed")}</p>
               {testResult.payloadSent && (
                 <PayloadPreview payload={testResult.payloadSent} label={t("testPayloadSent")} />
               )}

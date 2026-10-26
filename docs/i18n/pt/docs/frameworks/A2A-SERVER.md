@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Para `smart-routing`, `metadata.combo` é uma substituição explícita de
+`metadata.model` para o pedido ao gateway; é enviado como o `model` real,
+e não como um campo JSON `x-combo` ignorado. A autenticação normal por chave de API
+e a autorização por destino do gateway continuam a aplicar-se. Um combo inválido ou vazio é rejeitado.
+
+O resultado apresenta `requested_combo` (intenção do autor da chamada), `dispatched_model`
+(o pedido efetivamente enviado ao gateway), `response_model` (resposta do gateway) e
+`confirmed_combo`. O último campo é `null`, a menos que o gateway identifique explicitamente
+um combo. Os registos de decisões A2A atribuem a execução apenas a um
+combo confirmado, mantendo um pedido não confirmado como `requestedCombo`.
+
 **Resposta:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Transmissão SSE
+### `message/stream` — Transmissão por SSE
 
-Igual a `message/send`, mas devolve Eventos Enviados pelo Servidor para transmissão em tempo real.
+Igual a `message/send`, mas devolve Server-Sent Events para transmissão em tempo real.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ submetida → em curso → concluída
 
 ---
 
-## Exemplos de Integração
+## Exemplos de integração
 
 ### Python (requests)
 

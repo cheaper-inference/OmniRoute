@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Pour `smart-routing`, `metadata.combo` remplace explicitement
+`metadata.model` dans la requête adressée à la passerelle ; il est envoyé comme véritable `model`,
+et non comme un champ JSON `x-combo` ignoré. Les règles habituelles d’autorisation par clé d’API et
+par cible de la passerelle continuent de s’appliquer. Un combo non valide ou vide est rejeté.
+
+Le résultat expose `requested_combo` (intention de l’appelant), `dispatched_model`
+(la requête réellement adressée à la passerelle), `response_model` (réponse de la passerelle) et
+`confirmed_combo`. Ce dernier champ vaut `null`, sauf si la passerelle
+identifie explicitement un combo. Les journaux de décision A2A attribuent l’exécution uniquement à un
+combo confirmé, tandis qu’une requête non confirmée est conservée sous `requestedCombo`.
+
 **Réponse :**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Diffusion SSE
 
-Identique à `message/send`, mais renvoie des événements envoyés par le serveur pour une diffusion en temps réel.
+Identique à `message/send`, mais renvoie des événements Server-Sent Events pour une diffusion en temps réel.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Consulter l’état d’une tâche
+### `tasks/get` — Interroger l’état d’une tâche
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ submitted → working → completed
 
 ---
 
-## Exemples d'intégration
+## Exemples d’intégration
 
 ### Python (requests)
 

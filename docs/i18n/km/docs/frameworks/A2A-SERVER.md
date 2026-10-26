@@ -43,11 +43,11 @@ A2A ត្រូវបានគ្រប់គ្រងដោយប៊ូតុ�
 
 ---
 
-## Methods របស់ JSON-RPC 2.0
+## វិធីសាស្ត្រ JSON-RPC 2.0
 
 ### `message/send` — ការប្រតិបត្តិបែបសមកាលកម្ម
 
-ផ្ញើសារទៅ skill មួយ ហើយរង់ចាំការឆ្លើយតបពេញលេញ។
+ផ្ញើសារទៅជំនាញមួយ ហើយរង់ចាំការឆ្លើយតបពេញលេញ។
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+សម្រាប់ `smart-routing` នោះ `metadata.combo` គឺជាការកំណត់ជាន់លើ `metadata.model` ដោយច្បាស់លាស់សម្រាប់សំណើទៅកាន់ gateway។ វាត្រូវបានផ្ញើជា `model` ពិតប្រាកដ មិនមែនជាវាល JSON `x-combo` ដែលត្រូវបានមិនអើពើនោះទេ។ ការផ្ទៀងផ្ទាត់ API key ធម្មតារបស់ gateway និងការផ្តល់សិទ្ធិតាមគោលដៅនីមួយៗនៅតែត្រូវបានអនុវត្ត។ combo ដែលមិនត្រឹមត្រូវ ឬទទេ នឹងត្រូវបានបដិសេធ។
+
+លទ្ធផលបង្ហាញ `requested_combo` (បំណងរបស់អ្នកហៅ), `dispatched_model` (សំណើជាក់ស្តែងទៅកាន់ gateway), `response_model` (ការឆ្លើយតបរបស់ gateway) និង `confirmed_combo`។ វាលចុងក្រោយនឹងមានតម្លៃ `null` លុះត្រាតែ gateway កំណត់អត្តសញ្ញាណ combo មួយយ៉ាងច្បាស់លាស់។ កំណត់ហេតុនៃការសម្រេចចិត្ត A2A កំណត់ការប្រតិបត្តិទៅឱ្យតែ combo ដែលបានបញ្ជាក់ប៉ុណ្ណោះ ដោយរក្សាទុកសំណើដែលមិនបានបញ្ជាក់ជា `requestedCombo`។
+
 **ការឆ្លើយតប៖**
 
 ```json
@@ -76,22 +80,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +96,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — ការផ្សាយបន្តផ្ទាល់តាម SSE
 
-ដូចគ្នានឹង `message/send` ប៉ុន្តែត្រឡប់ Server-Sent Events សម្រាប់ការផ្សាយបន្តផ្ទាល់ក្នុងពេលជាក់ស្តែង។
+ដូចគ្នានឹង `message/send` ដែរ ប៉ុន្តែវាត្រឡប់ព្រឹត្តិការណ៍ដែលផ្ញើពីម៉ាស៊ីនមេ សម្រាប់ការផ្សាយបន្តផ្ទាល់តាមពេលវេលាជាក់ស្តែង។
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -262,7 +259,7 @@ OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្�
 
 ---
 
-## ឧទាហរណ៍ការរួមបញ្ចូល
+## ឧទាហរណ៍នៃការរួមបញ្ចូល
 
 ### Python (requests)
 

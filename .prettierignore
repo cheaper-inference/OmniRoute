@@ -27,3 +27,6 @@ skills/*/references/*.md
 # reconciled by scripts/release/*, which are its formatter of record.
 CHANGELOG.md
 docs/i18n/*/CHANGELOG.md
+
+# packages/ui-kit/ — vendored snapshot of the CI UI Kit; synced verbatim by scripts/dev/sync-ui-kit.sh, formatted upstream.
+packages/ui-kit/src/**

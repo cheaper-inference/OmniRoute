@@ -229,14 +229,17 @@ const nextConfig = {
     // runaway that OOM'd even at a 28 GB --max-old-space-size (RSS pinned at the
     // ceiling in a GC death-spiral). Removing it keeps the build's heap bounded.
     // optimizePackageImports is designed for external libs, not workspaces.
+    // Exception: `@omniroute/ui-kit` (KEA-7886) — a flat barrel (62 exports over
+    // 73 files, no deep re-export graph); the spike and Task 2 production builds
+    // stayed at the base's 232 warnings with no heap growth. open-sse stays out.
     optimizePackageImports: [
       "lobehub/icons",
       "@lobehub/icons",
       "lucide-react",
+      "@omniroute/ui-kit",
       "date-fns",
       "lodash",
       "lodash-es",
-      "material-symbols",
       "next-intl",
     ],
   },
@@ -350,7 +353,13 @@ const nextConfig = {
     "util",
     "process",
   ],
-  transpilePackages: ["@omniroute/open-sse", "@lobehub/icons", "fumadocs-ui", "fumadocs-core"],
+  transpilePackages: [
+    "@omniroute/open-sse",
+    "@lobehub/icons",
+    "fumadocs-ui",
+    "fumadocs-core",
+    "@omniroute/ui-kit",
+  ],
   allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.0.250"],
   typescript: {
     // TODO: Re-enable after fixing all sub-component useTranslations scope issues

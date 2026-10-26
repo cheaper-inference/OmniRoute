@@ -43,11 +43,11 @@ A2A በ**Endpoints → A2A** መቀያየሪያ የሚቆጣጠር ሲሆን በ
 
 ---
 
-## የJSON-RPC 2.0 ስልቶች
+## JSON-RPC 2.0 ስልቶች
 
 ### `message/send` — የተመሳሰለ አፈጻጸም
 
-መልዕክትን ወደ ክህሎት ይልካል እና ሙሉውን ምላሽ ይጠብቃል።
+ወደ ክህሎት መልዕክት ይልካል እና ሙሉውን ምላሽ ይጠብቃል።
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+ለ`smart-routing`፣ `metadata.combo` ለጌትዌይ ጥያቄው የ`metadata.model` ግልጽ መሻሪያ ነው፤ ችላ እንደሚባል `x-combo` JSON መስክ ሳይሆን እንደ እውነተኛው `model` ይላካል። የጌትዌዩ መደበኛ የAPI ቁልፍ እና የየዒላማው ፈቃድ አሁንም ተፈጻሚ ነው። ልክ ያልሆነ ወይም ባዶ ጥምረት ውድቅ ይደረጋል።
+
+ውጤቱ `requested_combo` (የጠሪው ዓላማ)፣ `dispatched_model` (ትክክለኛው የጌትዌይ ጥያቄ)፣ `response_model` (የጌትዌይ ምላሽ) እና `confirmed_combo` ያሳያል። ጌትዌዩ ጥምረትን በግልጽ ካልለየ በስተቀር የመጨረሻው መስክ `null` ይሆናል። የA2A ውሳኔ ምዝግቦች አፈጻጸሙን የሚያያይዙት ከተረጋገጠ ጥምረት ጋር ብቻ ሲሆን፣ ያልተረጋገጠ ጥያቄን እንደ `requestedCombo` ያቆያሉ።
+
 **ምላሽ፦**
 
 ```json
@@ -76,30 +80,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — የSSE ዥረት ማስተላለፍ
+### `message/stream` — የSSE ዥረት
 
-ከ`message/send` ጋር ተመሳሳይ ነው፣ ነገር ግን ለቅጽበታዊ ዥረት ማስተላለፍ በአገልጋይ የሚላኩ ክስተቶችን ይመልሳል።
+ከ`message/send` ጋር ተመሳሳይ ነው፣ ነገር ግን ለቅጽበታዊ ዥረት በአገልጋይ የሚላኩ ክስተቶችን ይመልሳል።
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \

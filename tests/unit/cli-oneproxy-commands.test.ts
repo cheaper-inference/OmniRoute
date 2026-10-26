@@ -113,3 +113,18 @@ test("oneproxy.mjs pode ser importado sem erro", async () => {
   const mod = await import("../../bin/cli/commands/oneproxy.mjs");
   assert.equal(typeof mod.registerOneProxy, "function");
 });
+
+test("oneproxy stats works against a sessionless MCP stream", async () => {
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: { poolSize: 3 },
+    sessionMode: "stateless",
+  });
+  try {
+    const { mcpCallTool } = await import("../../bin/cli/mcpClient.mjs");
+    const result = await mcpCallTool("omniroute_oneproxy_stats", {});
+    assert.deepEqual(result, { poolSize: 3 });
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+});

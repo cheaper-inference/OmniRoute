@@ -5,10 +5,10 @@
 ---
 
 > **Samodejno ustvarjeno** iz `src/shared/constants/providers.ts` — ne urejajte ročno.
-> Ponovno ustvarite z: `npm run gen:provider-reference`
-> **Nazadnje ustvarjeno:** 2026-10-18
+> Znova ustvarite z: `npm run gen:provider-reference`
+> **Nazadnje ustvarjeno:** 2026-10-20
 
-Skupaj ponudnikov: **375**. Glejte razčlenitev po kategorijah spodaj.
+Skupno število ponudnikov: **375**. Spodaj si oglejte razčlenitev po kategorijah.
 
 ## Kategorije
 
@@ -460,8 +460,8 @@ Uporabite nadzorno ploščo na `/dashboard/providers` za omogočanje, konfigurac
 ## Viri resnice
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Register (podrobnosti po modelih): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Izvajalci: [`open-sse/executors/`](../../open-sse/executors/) (154 implementacij)
+- Register (podrobnosti za posamezne modele): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Izvajalniki: [`open-sse/executors/`](../../open-sse/executors/) (156 implementacij)
 - Prevajalniki: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Glej tudi

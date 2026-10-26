@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import Icon from "@/shared/components/Icon";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import type { ProviderModelIntelligence } from "@/app/api/provider-intelligence/route";
 import { providerText, type ProviderMessageTranslator } from "../providerCredentialText";
@@ -25,7 +26,7 @@ const OUTLINE_BUTTON_CLASS =
 function CloseButton({ label, onClose }: { label: string; onClose: () => void }) {
   return (
     <button type="button" onClick={onClose} aria-label={label} className={CLOSE_BUTTON_CLASS}>
-      <span className="material-symbols-outlined text-[20px]">close</span>
+      <Icon name="close" size={20} />
     </button>
   );
 }
@@ -95,9 +96,11 @@ function IntelligenceToolbar({
           {providerText(t, "intelligenceFreeOnly", "Free-only")}
         </label>
         <div className="relative">
-          <span className="material-symbols-outlined pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[14px] text-text-muted">
-            search
-          </span>
+          <Icon
+            name="search"
+            size={14}
+            className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-text-muted"
+          />
           <input
             type="text"
             value={search}
@@ -302,9 +305,7 @@ export default function ModelIntelligencePanel({
     return (
       <StatusFrame title={title} closeLabel={closeLabel} onClose={onClose}>
         <div className="flex flex-1 items-center justify-center">
-          <span className="material-symbols-outlined animate-spin text-2xl text-text-muted">
-            progress_activity
-          </span>
+          <Icon name="progress_activity" size={24} className="animate-spin text-text-muted" />
           <span className="ml-2 text-sm text-text-muted">
             {providerText(t, "intelligenceLoading", "Loading intelligence scores…")}
           </span>

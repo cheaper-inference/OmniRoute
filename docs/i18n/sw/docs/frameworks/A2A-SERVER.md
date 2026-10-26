@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Kwa `smart-routing`, `metadata.combo` ni ubatilishaji bayana wa
+`metadata.model` kwa ombi la lango; hutumwa kama `model` halisi,
+si kama sehemu ya JSON ya `x-combo` inayopuuzwa. Uidhinishaji wa kawaida wa ufunguo wa API wa lango na
+uidhinishaji kwa kila lengo bado unatumika. Mchanganyiko batili au tupu hukataliwa.
+
+Matokeo huonyesha `requested_combo` (nia ya mwombaji), `dispatched_model`
+(ombi halisi la lango), `response_model` (jibu la lango) na
+`confirmed_combo`. Sehemu ya mwisho ni `null` isipokuwa lango litambue
+mchanganyiko kwa uwazi. Rekodi za maamuzi za A2A huhusisha utekelezaji na
+mchanganyiko uliothibitishwa pekee, huku zikihifadhi ombi ambalo halijathibitishwa kama `requestedCombo`.
+
 **Jibu:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Utiririshaji wa SSE
 
-Ni sawa na `message/send`, lakini hurejesha Matukio Yanayotumwa na Seva kwa ajili ya utiririshaji wa wakati halisi.
+Ni sawa na `message/send`, lakini hurejesha Matukio Yanayotumwa na Seva kwa utiririshaji wa wakati halisi.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Kuuliza Hali ya Kazi
+### `tasks/get` — Uliza Hali ya Kazi
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Kughairi Kazi
+### `tasks/cancel` — Ghairi Kazi
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

@@ -45,9 +45,9 @@ JSON-RPC பிழைக் குறியீடு `-32000` உடன் HTTP 
 
 ## JSON-RPC 2.0 முறைகள்
 
-### `message/send` — ஒத்திசைவான செயலாக்கம்
+### `message/send` — ஒத்திசைவான செயல்படுத்தல்
 
-ஒரு திறனுக்குச் செய்தியை அனுப்பி, முழுமையான பதிலுக்காகக் காத்திருக்கும்.
+ஒரு skill-க்கு செய்தியை அனுப்பி, முழுமையான பதிலுக்காகக் காத்திருக்கிறது.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-க்கு, gateway கோரிக்கையில் `metadata.combo` என்பது
+`metadata.model`-ஐ வெளிப்படையாக மீறும் மதிப்பாகும்; புறக்கணிக்கப்படும் `x-combo`
+JSON புலமாக அல்லாமல், உண்மையான `model` ஆக அது அனுப்பப்படுகிறது. Gateway-இன் வழக்கமான API-key மற்றும்
+ஒவ்வொரு target-க்குமான அங்கீகாரம் தொடர்ந்து பொருந்தும். செல்லாத அல்லது காலியான combo நிராகரிக்கப்படும்.
+
+முடிவு `requested_combo` (அழைப்பவரின் நோக்கம்), `dispatched_model`
+(உண்மையான gateway கோரிக்கை), `response_model` (gateway பதில்) மற்றும்
+`confirmed_combo` ஆகியவற்றை வெளிப்படுத்துகிறது. Gateway ஒரு combo-ஐ வெளிப்படையாக
+அடையாளப்படுத்தாத வரை கடைசிப் புலம் `null` ஆக இருக்கும். A2A முடிவுப் பதிவுகள் செயல்படுத்தலை
+உறுதிப்படுத்தப்பட்ட combo-க்கு மட்டுமே ஒதுக்குகின்றன; உறுதிப்படுத்தப்படாத கோரிக்கை `requestedCombo` ஆகத் தக்கவைக்கப்படுகிறது.
+
 **பதில்:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE தொடர் பரிமாற்றம்
+### `message/stream` — SSE ஸ்ட்ரீமிங்
 
-`message/send` போன்றதே, ஆனால் நிகழ்நேர தொடர் பரிமாற்றத்திற்காக சேவையகம் அனுப்பும் நிகழ்வுகளை வழங்குகிறது.
+`message/send` போலவே செயல்படும், ஆனால் நிகழ்நேர ஸ்ட்ரீமிங்கிற்காக Server-Sent Events-ஐ வழங்கும்.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — பணி நிலையைக் கேட்டறிதல்
+### `tasks/get` — பணி நிலையை வினவுதல்
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

@@ -243,6 +243,8 @@ export async function handleRerank({
   resolvedProvider = null,
   resolvedModel = null,
   onPricedCall = null,
+  requestedModel = null,
+  comboName = null,
 }) {
   const startTime = Date.now();
   if (!model) return errorResponse(400, "model is required");
@@ -330,6 +332,8 @@ export async function handleRerank({
         error: errorMessage,
         apiKeyId: apiKeyId || undefined,
         apiKeyName: apiKeyName || undefined,
+        requestedModel: requestedModel || model,
+        comboName: comboName || undefined,
       }).catch(() => {});
       return errorResponse(res.status, errorMessage);
     }
@@ -361,6 +365,8 @@ export async function handleRerank({
       responseBody: result,
       apiKeyId: apiKeyId || undefined,
       apiKeyName: apiKeyName || undefined,
+      requestedModel: requestedModel || model,
+      comboName: comboName || undefined,
     }).catch(() => {});
 
     const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
@@ -373,6 +379,21 @@ export async function handleRerank({
     });
     return new Response(JSON.stringify(result), { status: 200, headers });
   } catch (err) {
+    saveCallLog({
+      method: "POST",
+      path: "/v1/rerank",
+      status: 500,
+      model: `${effectiveProviderId}/${modelId}`,
+      provider: effectiveProviderId,
+      connectionId: connectionId || undefined,
+      duration: Date.now() - startTime,
+      error: err instanceof Error ? err.message : String(err),
+      requestBody,
+      apiKeyId: apiKeyId || undefined,
+      apiKeyName: apiKeyName || undefined,
+      requestedModel: requestedModel || model,
+      comboName: comboName || undefined,
+    }).catch(() => {});
     return errorResponse(500, `Rerank request failed: ${err.message}`);
   }
 }

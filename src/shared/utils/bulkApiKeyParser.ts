@@ -37,6 +37,33 @@ export interface ParseBulkApiKeysOptions {
 
 const MAX_BULK_LINES = 200;
 
+type ParsedKeyLine = Omit<BulkApiKeyEntry, "lineNumber"> | { warning: string };
+
+function parseAccountKeyLine(raw: string, nextName: () => string): ParsedKeyLine {
+  const firstPipe = raw.indexOf("|");
+  if (firstPipe === -1) return { warning: "expected name|accountId|apiKey, skipped" };
+  const secondPipe = raw.indexOf("|", firstPipe + 1);
+  if (secondPipe === -1) return { warning: "missing accountId or apiKey, skipped" };
+
+  const namePart = raw.slice(0, firstPipe).trim();
+  const accountId = raw.slice(firstPipe + 1, secondPipe).trim();
+  const apiKey = raw.slice(secondPipe + 1).trim();
+  // Allocate the name before validation: invalid unnamed rows consume an index too.
+  const name = namePart || nextName();
+  if (!accountId) return { warning: "empty accountId, skipped" };
+  if (!apiKey) return { warning: "empty apiKey, skipped" };
+  return { name, accountId, apiKey };
+}
+
+function parseKeyLine(raw: string, nextName: () => string): ParsedKeyLine {
+  const pipeIdx = raw.indexOf("|");
+  const namePart = pipeIdx === -1 ? "" : raw.slice(0, pipeIdx).trim();
+  const apiKey = pipeIdx === -1 ? raw : raw.slice(pipeIdx + 1).trim();
+  const name = namePart || nextName();
+  if (!apiKey) return { warning: "empty apiKey, skipped" };
+  return { name, apiKey };
+}
+
 export function parseBulkApiKeys(
   text: string,
   options: ParseBulkApiKeysOptions = {}
@@ -45,6 +72,7 @@ export function parseBulkApiKeys(
   const entries: BulkApiKeyEntry[] = [];
   const warnings: string[] = [];
   let autoIdx = 1;
+  const nextName = () => `Key ${autoIdx++}`;
 
   if (lines.length > MAX_BULK_LINES) {
     warnings.push(
@@ -58,53 +86,14 @@ export function parseBulkApiKeys(
     if (!raw) continue;
     if (raw.startsWith("#")) continue;
 
-    if (options.withAccountId) {
-      const firstPipe = raw.indexOf("|");
-      if (firstPipe === -1) {
-        warnings.push(`Line ${i + 1}: expected name|accountId|apiKey, skipped`);
-        continue;
-      }
-      const secondPipe = raw.indexOf("|", firstPipe + 1);
-      if (secondPipe === -1) {
-        warnings.push(`Line ${i + 1}: missing accountId or apiKey, skipped`);
-        continue;
-      }
-      const namePart = raw.slice(0, firstPipe).trim();
-      const accountId = raw.slice(firstPipe + 1, secondPipe).trim();
-      const apiKey = raw.slice(secondPipe + 1).trim();
-      const name = namePart || `Key ${autoIdx++}`;
-
-      if (!accountId) {
-        warnings.push(`Line ${i + 1}: empty accountId, skipped`);
-        continue;
-      }
-      if (!apiKey) {
-        warnings.push(`Line ${i + 1}: empty apiKey, skipped`);
-        continue;
-      }
-
-      entries.push({ name, accountId, apiKey, lineNumber: i + 1 });
+    const parsed = options.withAccountId
+      ? parseAccountKeyLine(raw, nextName)
+      : parseKeyLine(raw, nextName);
+    if ("warning" in parsed) {
+      warnings.push(`Line ${i + 1}: ${parsed.warning}`);
       continue;
     }
-
-    const pipeIdx = raw.indexOf("|");
-    let name: string;
-    let apiKey: string;
-    if (pipeIdx === -1) {
-      name = `Key ${autoIdx++}`;
-      apiKey = raw;
-    } else {
-      const namePart = raw.slice(0, pipeIdx).trim();
-      apiKey = raw.slice(pipeIdx + 1).trim();
-      name = namePart || `Key ${autoIdx++}`;
-    }
-
-    if (!apiKey) {
-      warnings.push(`Line ${i + 1}: empty apiKey, skipped`);
-      continue;
-    }
-
-    entries.push({ name, apiKey, lineNumber: i + 1 });
+    entries.push({ ...parsed, lineNumber: i + 1 });
   }
 
   return { entries, warnings };

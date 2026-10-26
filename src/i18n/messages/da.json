@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Brugt af {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Forhåndsvisning",
     "batchFilePreviewTruncated": "Viser de første {shown} linjer ({total} linjer i alt)",
-    "batchFileDownloadFull": "Download Fuld Fil"
+    "batchFileDownloadFull": "Download Fuld Fil",
+    "dialogTitleFallback": "Dialog",
+    "pagination": "Sideinddeling",
+    "clearFilters": "Ryd filtre",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Send tokens mellem API-nøgler, del invitationskoder, og forbind community-servere.",
+    "tokensServerUrlLabel": "Server-URL"
   },
   "disabled": "Deaktiveret",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Diriger budgetudtømte anmodninger til den gratis nød-fallback-udbyder/-model.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 eller @kanalnavn",
       "chatIdHint": "Den unikke numeriske identifikator eller det offentlige brugernavn for chatten/kanalen.",
       "tutorial": "Sådan konfigureres Telegram-webhook:"
-    }
+    },
+    "copy": "Kopiér",
+    "copied": "Kopieret!",
+    "expandDetails": "Vis detaljer",
+    "collapseDetails": "Skjul detaljer"
   },
   "compliance": {
     "auditTitle": "Revision",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Opkald (24t)",
     "mcpMetricSuccessRate": "Succesrate",
     "mcpMetricAvgDuration": "Gns. varighed",
-    "mcpMetricTopTool": "Top værktøj"
+    "mcpMetricTopTool": "Top værktøj",
+    "dismissError": "Luk fejlmeddelelse"
   },
   "themesPage": {
     "title": "Temaer",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Avancerede payloadregler, anmodningsgrænser og proxy-API-indstillinger",
     "mitmProxyDescription": "Konfigurer MITM-proxyindstillinger til trafikinspektion og fejlfinding",
     "oneProxyDescription": "Konfigurer 1Proxy-indstillinger til avanceret proxykædning",
-    "omniSkillsDescription": "Installer og administrer sandbox-færdigheder til automatiseret prompt- og værktøjsafvikling"
+    "omniSkillsDescription": "Installer og administrer sandbox-færdigheder til automatiseret prompt- og værktøjsafvikling",
+    "openMenu": "Åbn menu",
+    "products": "Keak-produkter"
   },
   "cloudSyncStatus": {
     "synced": "Synkroniseret",
@@ -2495,7 +2508,12 @@
     "onlySelectedConnections": "Kun valgte forbindelser",
     "selectAtLeastOneConnection": "Vælg mindst én forbindelse, eller vælg Alle forbindelser.",
     "allConnectionsDesc": "Denne nøgle kan bruge enhver aktiv forbindelse.",
-    "restrictedToConnections": "Begrænset til {count, plural, one {# forbindelse} other {# forbindelser}}."
+    "restrictedToConnections": "Begrænset til {count, plural, one {# forbindelse} other {# forbindelser}}.",
+    "preferredConnections": "Foretrukne forbindelser",
+    "preferredConnectionsDesc": "Prioriteringsrækkefølge pr. nøgle. Hvis en foretrukken forbindelse ikke er tilgængelig, falder routingen tilbage til den næste kvalificerede.",
+    "preferredConnectionsNone": "Ingen præference angivet — standardstrategien for routing bruges.",
+    "preferredConnectionsClear": "Ryd",
+    "removeSelection": "Fjern {name}"
   },
   "auditLog": {
     "title": "Revisionslog",
@@ -2607,7 +2625,9 @@
     "imageToTextBridgeCta": "Konfigurer Image→Text broen i Modality Bridge indstillinger",
     "sttBridgeCta": "Konfigurer Speech→Text broen i Modality Bridge indstillinger",
     "existingConnection": "Eksisterende forbindelse",
-    "openrouterSttDescription": "OpenRouter tale-til-tekst modeller bruger din konfigurerede OpenRouter forbindelse. Ingen separate legitimationsoplysninger er nødvendige."
+    "openrouterSttDescription": "OpenRouter tale-til-tekst modeller bruger din konfigurerede OpenRouter forbindelse. Ingen separate legitimationsoplysninger er nødvendige.",
+    "modalityTabsAria": "Medietype",
+    "serviceKindsAria": "Tjenestetype"
   },
   "search": {
     "searchQuery": "Søgeforespørgsel",
@@ -3278,7 +3298,8 @@
     "cliproxyapiUnknown": "Ukendt",
     "cliproxyapiUpdate": "Opdater",
     "cliproxyapiUpdateAvailable": "Opdatering tilgængelig: v{current} → v{latest}",
-    "cliproxyapiVersion": "Version"
+    "cliproxyapiVersion": "Version",
+    "removeMapping": "Fjern tilknytning"
   },
   "modelCatalog": {
     "title": "Models & Combos",
@@ -3936,6 +3957,7 @@
     "builderComboRefStep": "Tilføj kombinationsreference",
     "builderPinnedAccount": "Fastgjort konto",
     "builderLegacyEntry": "Ældre post",
+    "builderStaleModel": "Ikke i live-kataloget",
     "reviewName": "Navn",
     "reviewStrategy": "Strategi",
     "reviewSteps": "Trin",
@@ -4014,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil tage et øjebliksbillede af de aktuelt tilsluttede udbydere/modeller, der matcher denne skabelon, i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering af auto-kombination mislykkedes:",
     "duplicateAutoComboUnknownError": "Ukendt fejl",
-    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}"
+    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}",
+    "weightPercent": "Vægt (%)",
+    "clearSearch": "Ryd søgning",
+    "responseValidationRemoveCheck": "Fjern kontrol",
+    "responseValidationPath": "JSON-sti",
+    "responseValidationCondition": "Betingelse",
+    "responseValidationValue": "Forventet værdi"
   },
   "costs": {
     "title": "Omkostninger",
@@ -5288,7 +5316,8 @@
         "skipped": "allerede konfigureret",
         "failed": "mislykkedes"
       }
-    }
+    },
+    "stepProgress": "Opsætningsstatus"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Denne udbyder er som standard udelukket fra auto",
@@ -7255,7 +7284,7 @@
       "nextSwitchNow": "Nu",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -8951,7 +8980,8 @@
       "statsTitle": "Fund siden genstart",
       "statsEmpty": "Ingen fund endnu.",
       "statsRequest": "Anmodninger"
-    }
+    },
+    "modelOverrideKey": "Tilsidesættelsesnøgle"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9035,7 +9065,8 @@
     "tomlTestPassed": "Bestået",
     "tomlTestFailed": "Fejlet",
     "tomlImportError": "Kunne ikke behandle RTK TOML-filen.",
-    "tomlFileReadError": "Kunne ikke læse den valgte TOML-fil."
+    "tomlFileReadError": "Kunne ikke læse den valgte TOML-fil.",
+    "viewMode": "Visningstilstand"
   },
   "compressionEngineConfig": {
     "loading": "Indlæser…",
@@ -9257,7 +9288,8 @@
     "languagePacksList": "Sprogpakker: {packs}",
     "dragToReorder": "Træk for at omarrangere trin",
     "engine": "Motor",
-    "intensity": "Intensitet"
+    "intensity": "Intensitet",
+    "compressionOverride": "Tilsidesættelse af komprimering"
   },
   "compressionStudio": {
     "noRun": "Ingen komprimeringskørsel tilgængelig.",
@@ -9317,7 +9349,8 @@
     "encoderWinner": "vinder: {winner}",
     "encoder": "indkoder",
     "bytes": "byte",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Studio-visninger"
   },
   "omniglyph": {
     "preview": "Forhåndsvisning",
@@ -9523,7 +9556,9 @@
     "tooltipMinLength": "Beskeder, der er kortere end dette, komprimeres ikke. Lavere = mere kompression.",
     "tooltipMinSavings": "Komprimer kun, hvis det sparer mindst så mange tokens.",
     "ultraSettings": "Ultra-indstillinger",
-    "ultraSettingsDesc": "SLM-drevet semantisk komprimering"
+    "ultraSettingsDesc": "SLM-drevet semantisk komprimering",
+    "defaultLanguage": "Standardsprog",
+    "viewMode": "Visningstilstand"
   },
   "translator": {
     "title": "Oversætter",
@@ -10291,7 +10326,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Nulstilling af Claude-grænse",
+    "confirmRedeemClaudeResetCredit": "Indløsning nulstiller øjeblikkeligt de gældende Claude-brugsgrænser og forbruger denne kredit permanent.",
+    "claudeResetCreditsModalTitle": "Claude-nulstillingskreditter",
+    "claudeResetCreditsModalExplainer": "Tilgængelige Claude-nulstillingskreditter og ugentlige sessionsnulstillinger for denne konto."
   },
   "modals": {
     "waitingAuth": "Venter på autorisation",
@@ -11078,7 +11117,8 @@
       "message": "Besked",
       "error": "Fejl",
       "completion": "Fuldførelse"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Simpel chat",
@@ -11259,7 +11299,8 @@
     "minutesAgo": "{minutes}m siden",
     "hoursAgo": "{hours}t siden",
     "daysAgo": "{days}d siden",
-    "entries": "Poster"
+    "entries": "Poster",
+    "viewSwitcherAria": "Cachevisning"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globalt",
@@ -11526,7 +11567,7 @@
     "bulkImportNoValidEntries": "Ingen gyldige poster fundet. Tjek formatet og prøv igen.",
     "bulkImportSuccess": "Import færdig: {created} oprettet, {updated} opdateret, {failed} mislykkedes",
     "bulkImportErrorLine": "Linje {line}: {reason}",
-    "bulkImportMaxExceeded": "Maksimalt 100 fuldmagter pr. import",
+    "bulkImportMaxExceeded": "Maksimalt {max} fuldmagter pr. import",
     "bulkImportPreview": "Forhåndsvisning",
     "clearAssignment": "(klar opgave)",
     "bulkProxyAssignment": "Bulk proxy tildeling",
@@ -11587,6 +11628,7 @@
     "poolSetAsideKindIpQuota429": "IP-hastighedsbegrænsning (429)",
     "poolSetAsideKindSlow": "langsomme svar",
     "poolSetAsideKindGeoBlocked": "region-blokeret (403/451)",
+    "poolSetAsideKindOperatorReported": "nedbrud rapporteret af operatør",
     "poolSetAsideUntil": "Tilbage i rotation {endsAt}",
     "poolSetAsideRepeat": "Sat til side {count, plural, one {# gang} other {# gange}}",
     "poolUnknownAddress": "Ukendt adresse",
@@ -11603,7 +11645,8 @@
     "notMeasured": "Ikke målt",
     "upstream4xx": "{count} opstrøms klientfejl",
     "upstream5xx": "{count} opstrøms serverfejl",
-    "uniformEgressLine": "{affected} af {exits} udgange fejler sammen på {provider} (seneste {hours} t) — ikke et udgangsproblem"
+    "uniformEgressLine": "{affected} af {exits} udgange fejler sammen på {provider} (seneste {hours} t) — ikke et udgangsproblem",
+    "moreActions": "Flere handlinger"
   },
   "playground": {
     "title": "Title",
@@ -11809,7 +11852,8 @@
       "nextButton": "Næste",
       "runButton": "Kør",
       "promptPlaceholder": "Indtast din besked… (Enter for at sende, Shift+Enter for ny linje)"
-    }
+    },
+    "playgroundTabs": "Playground-tilstande"
   },
   "miniPlayground": {
     "endpoint": "Slutpunkt",
@@ -11880,7 +11924,8 @@
     "assistant": "Assistent",
     "errorLabel": "Fejl",
     "requestFailed": "Anmodning mislykkedes",
-    "stop": "Stop"
+    "stop": "Stop",
+    "messageInputAria": "Besked"
   },
   "requestLogger": {
     "recording": "Registrerer",
@@ -12067,8 +12112,18 @@
       "resilienceRotations": "{count} kontorotationer",
       "resilienceRetried": "Tom tur forsøgt igen",
       "resilienceContinued": "Genoptaget midt i streamen",
-      "resilienceRecovered": "Gendannet af en robusthedshandling"
-    }
+      "resilienceRecovered": "Gendannet af en robusthedshandling",
+      "conversationContext": "Samtalekontekst",
+      "goToBottom": "Gå til bunden",
+      "liveRefreshOn": "Liveopdatering: til",
+      "liveRefreshOff": "Liveopdatering: fra",
+      "liveRefresh": "Liveopdatering",
+      "continuesFromParent": "fortsætter fra overordnet",
+      "continuesFrom": "Fortsætter fra {id}",
+      "viewConversation": "vis samtale",
+      "openConversation": "Åbn samtale {id}"
+    },
+    "tableLabel": "Anmodningslogfiler"
   },
   "proxyLogger": {
     "filterAll": "Alle",
@@ -12113,7 +12168,9 @@
     "colServedBy": "Betjent af",
     "filterTraffic": "Traffic",
     "filterTests": "Tests",
-    "filterSource": "Kilde"
+    "filterSource": "Kilde",
+    "tableLabel": "Proxylogfiler",
+    "sortLogs": "Sortér logfiler"
   },
   "endpointOptions": {
     "speech": "Tale",
@@ -12198,7 +12255,8 @@
     "statusExhausted": "OPBRUGT",
     "statusAlerting": "ADVARSEL",
     "statusError": "FEJL",
-    "moreSuffix": "+{count} flere"
+    "moreSuffix": "+{count} flere",
+    "feedFilterLabel": "Filtrér hændelser"
   },
   "quotaShare": {
     "weightPercent": "Vægt %",
@@ -12365,7 +12423,10 @@
     "ungroupedTitle": "Ikke grupperet",
     "ungroupedHint": "Disse puljer er ikke tildelt en kendt gruppe. Rediger en pulje for at flytte den til en rigtig gruppe.",
     "removeFailed": "Denne pulje kunne ikke fjernes.",
-    "dismiss": "Luk"
+    "dismiss": "Luk",
+    "allocationsHeading": "Tildelinger",
+    "wizardRemoveDimension": "Fjern dimension",
+    "wizardRemoveKey": "Fjern nøgle"
   },
   "plugins": {
     "title": "Plugins",
@@ -12523,7 +12584,8 @@
       "settingsUpdateFailed": "Opdatering af indstillinger mislykkedes",
       "serviceRevealApiKey": "{actor} afslørede API-nøgle for {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Afvis fejl"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12718,21 @@
       "goNow": "Gå nu",
       "message": "MITM-proxyen ligger nu under AgentBridge.",
       "title": "Denne side er flyttet"
-    }
+    },
+    "dnsOn": "DNS til",
+    "dnsOff": "DNS fra",
+    "showServerSettings": "Vis serverindstillinger",
+    "hideServerSettings": "Skjul serverindstillinger",
+    "upstreamCaTesting": "Tester…",
+    "removeMapping": "Fjern tilknytning",
+    "mappingSourcePlaceholder": "f.eks. gemini-3.6-flash-medium eller * for alle uden tilknytning",
+    "mappingWildcardHint": "Brug * som kilde for at dirigere alle modeller uden en eksplicit tilknytning gennem OmniRoute til det valgte mål. Eksakte kildematch har altid forrang frem for *.",
+    "wizardDetectingModels": "Registrerer modeller fra opsnappet trafik...",
+    "wizardDetectedModels": "Fandt {count, plural, one {# model} other {# modeller}} i den opsnappede trafik. Vælg dem, du vil tilføje:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# modeller}} valgt. Du knytter dem til OmniRoute-modeller på næste skærmbillede.",
+    "wizardAddModels": "Tilføj {count, plural, one {# model} other {# modeller}}",
+    "wizardNoModelsDetected": "Der er endnu ikke registreret nogen modeller. Brug {agent} til at foretage en anmodning, og kør derefter denne guide igen for automatisk at registrere modeller fra trafikken.",
+    "wizardNoModelsHint": "Du kan også lukke denne guide og tilføje tilknytninger manuelt på agentkortet."
   },
   "providerStats": {
     "unknownError": "Ukendt fejl",
@@ -12686,7 +12762,11 @@
     "avgTtft": "Gns. TTFT",
     "avgTotal": "Gns. total",
     "requestTelemetry": "Anmodningstelemetri",
-    "requestTelemetryDescription": "7-faset pipeline-fordeling (sidste 5 minutter)"
+    "requestTelemetryDescription": "7-faset pipeline-fordeling (sidste 5 minutter)",
+    "title": "Udbyderstatistik",
+    "description": "Trafik, svartid og succesrater pr. udbyder og model",
+    "combo": "Kombination",
+    "toggleModels": "Vis modeller for {provider}"
   },
   "relay": {
     "title": "Serverless relay-proxies",
@@ -12847,7 +12927,18 @@
     "noRequestBody": "Ingen anmodningsbrødtekst.",
     "noResponseBody": "Ingen svarbrødtekst.",
     "formatted": "Formateret",
-    "raw": "Rå"
+    "raw": "Rå",
+    "requestCount": "{count, plural, one {# anmodning} other {# anmodninger}}",
+    "expandList": "Udvid liste",
+    "collapseList": "Skjul liste",
+    "snippetLanguage": "Kodestykkets sprog",
+    "headersTable": "Headere",
+    "showSecrets": "Vis hemmeligheder",
+    "maskSecrets": "Maskér hemmeligheder",
+    "llmNotAvailable": "LLM-metadata er ikke tilgængelige for denne anmodning.",
+    "llmStreamYes": "ja (SSE)",
+    "llmStreamNo": "nej",
+    "llmTotalTokens": "I alt: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13397,8 @@
     "colReliabilityHelp": "Andelen af kald, som denne udbyder faktisk besvarede inden for de seneste 24 timer. En tankestreg betyder, at den håndterede for lidt trafik til, at der kan angives en andel.",
     "reliabilitySample": "{successes} ud af {requests} kald lykkedes inden for de seneste {hours} t.",
     "reliabilityTooFew": "Kun {requests} kald inden for de seneste {hours} t. — for få til at angive en andel",
-    "reliabilityNoTraffic": "Ingen kald registreret inden for de seneste 24 t."
+    "reliabilityNoTraffic": "Ingen kald registreret inden for de seneste 24 t.",
+    "categoryFilter": "Opgavekategori"
   },
   "discovery": {
     "title": "Udbyderopdagelse",
@@ -13331,7 +13423,11 @@
     "method": "Metode",
     "auth": "Godkendelse",
     "feasibility": "Gennemførlighed",
-    "models": "Modeller"
+    "models": "Modeller",
+    "provider": "Udbyder",
+    "status": "Status",
+    "endpoint": "Slutpunkt",
+    "actions": "Handlinger"
   },
   "noAuthProvider": {
     "title": "Ingen godkendelse påkrævet",
@@ -13380,7 +13476,8 @@
     "ownProxy": "Egen proxy",
     "freeTierPause": "Model {model} pauset (429), tilbage kl. {time}",
     "freeTierPauseProvider": "Pauset (429), tilbage kl. {time}",
-    "freeTierPauseNote": "Pause i processen på denne instans"
+    "freeTierPauseNote": "Pause i processen på denne instans",
+    "proxyType": "Proxytype"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13650,10 @@
         "description": "En skjult præstation venter...",
         "criteria": "Gennemfør den skjulte præstation for at afsløre dette badge."
       }
-    }
+    },
+    "leaderboardTitle": "Rangliste",
+    "leaderboardDescription": "Rangeringer og præstationer på tværs af dine API-nøgler",
+    "badgeLocked": "Låst"
   },
   "featureFlags": {
     "title": "Funktionsflag",
@@ -13848,7 +13948,8 @@
     "unknown": "ukendt",
     "unknownProvider": "ukendt udbyder",
     "unknownModel": "ukendt model",
-    "resolvedTargetMetrics": "{requests} anmodn. · {success} succes · {latency} · kvote {quota}"
+    "resolvedTargetMetrics": "{requests} anmodn. · {success} succes · {latency} · kvote {quota}",
+    "timeRange": "Tidsinterval"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-forbrugskvote",
@@ -13995,7 +14096,11 @@
     "learnMore": "Læs mere",
     "changelogLoadFailed": "Kunne ikke indlæse changeloggen. Prøv igen senere.",
     "retry": "Prøv igen",
-    "viewFullHistory": "Se fuld historik på GitHub"
+    "viewFullHistory": "Se fuld historik på GitHub",
+    "title": "Nyheder og ændringslog",
+    "description": "Meddelelser fra OmniRoute-teamet og de seneste udgivelsesnoter",
+    "viewLabel": "Vis",
+    "loadingNews": "Indlæser meddelelser..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14651,9 @@
       "circuitBreakerState": "Udbyder Circuit Breaker Tilstand",
       "lastUpdate": "Seneste opdatering: {timestamp}",
       "uptimeMinutes": "{minutes} min.",
-      "uptimeHoursMinutes": "{hours}t {minutes}m"
+      "uptimeHoursMinutes": "{hours}t {minutes}m",
+      "breakerClosed": "Lukket",
+      "breakerNotClosed": "Åben eller halvåben"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14728,9 @@
         "primaryAction": "Vedligeholdelsesdetaljer",
         "secondaryAction": "Systemstatus"
       }
+    },
+    "miniapp": {
+      "askAnything": "Spørg om hvad som helst…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} synlige / {total} i alt",
+    "modeLabel": "Visningstilstand",
+    "jumpToNow": "Gå til det aktuelle tidspunkt. NU-linjen nulstilles til positionen {position} %",
+    "laneReuse": "Genbrug af spor",
+    "laneReuseLabel": "Tidsvindue for genbrug af spor (minutter)",
+    "laneReuseHint": "Anmodninger, der deler et samtale-id, forbliver på samme række på tidslinjen, så længe intervallet mellem dem er mindre end dette antal minutter.",
+    "laneReuseUnit": "min.",
+    "autoRefresh": "Automatisk opdatering",
+    "autoRefreshLabel": "Interval for automatisk opdatering (sekunder)",
+    "autoRefreshHint": "Hvor ofte tidslinjen henter listen over anmodninger fra serveren igen.",
+    "autoRefreshUnit": "sek.",
+    "zoomOut": "Zoom ud",
+    "zoomIn": "Zoom ind"
   },
   "metadata": {
     "compressionTitle": "Komprimering",

@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 interface TabErrorListProps {
   errors?: readonly string[];
 }
@@ -14,13 +16,11 @@ export default function TabErrorList({ errors }: TabErrorListProps) {
   return (
     <div
       role="alert"
-      className="flex flex-col gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30"
+      className="flex flex-col gap-1.5 px-3 py-2 rounded-lg bg-error/10 border border-error/30"
     >
       {errors.map((message) => (
-        <p key={message} className="flex items-center gap-2 text-sm text-red-700 dark:text-red-300">
-          <span className="material-symbols-outlined text-red-500 text-sm" aria-hidden="true">
-            error
-          </span>
+        <p key={message} className="flex items-center gap-2 text-sm text-error">
+          <Icon name="error" className="text-error text-sm" />
           {message}
         </p>
       ))}

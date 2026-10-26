@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import Select from "@/shared/components/Select";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
 import Card from "@/shared/components/Card";
 import { Skeleton } from "@/shared/components/Loading";
@@ -203,9 +206,9 @@ function getStatusVariant(status: number) {
 
 function RouteMetric({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2">
+    <div className="rounded-lg border border-border bg-surface-2 p-4">
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
-        <span className="material-symbols-outlined text-[16px]">{icon}</span>
+        <Icon name={icon} size={16} />
         {label}
       </div>
       <div className="mt-2 text-xl font-semibold text-text-main">{value}</div>
@@ -228,7 +231,7 @@ function FactorCard({ factor }: { factor: ExplanationFactor }) {
   const weightPct = Math.round(factor.weight * 100);
 
   return (
-    <div className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2">
+    <div className="rounded-lg border border-border bg-surface-2 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold text-text-main">{factor.name}</div>
@@ -238,7 +241,7 @@ function FactorCard({ factor }: { factor: ExplanationFactor }) {
           {contributionPct}%
         </Badge>
       </div>
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-2">
         <div className="h-full rounded-full bg-primary" style={{ width: `${contributionPct}%` }} />
       </div>
       <div className="mt-2 text-xs text-text-muted">
@@ -264,7 +267,7 @@ function TargetTimeline({ targets }: { targets: ExplainTarget[] }) {
             "rounded-lg border p-4",
             target.outcome === "selected"
               ? "border-primary/30 bg-primary/5"
-              : "border-black/5 bg-black/2 dark:border-white/5 dark:bg-white/2"
+              : "border-border bg-surface-2"
           )}
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -351,7 +354,7 @@ function WhyThisTargetCard({ replay }: { replay: DecisionReplay | undefined }) {
         </div>
 
         {recompute ? (
-          <div className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2">
+          <div className="rounded-lg border border-border bg-surface-2 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold text-text-main">
@@ -403,7 +406,7 @@ function WhyThisTargetCard({ replay }: { replay: DecisionReplay | undefined }) {
                   "rounded-lg border p-3",
                   candidate.isRuntimeSelected
                     ? "border-primary/30 bg-primary/5"
-                    : "border-black/5 bg-bg dark:border-white/5"
+                    : "border-border bg-bg"
                 )}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -439,9 +442,7 @@ function WhyThisTargetCard({ replay }: { replay: DecisionReplay | undefined }) {
           <ul className="flex flex-col gap-2 text-xs text-text-muted">
             {replay.warnings.map((warning) => (
               <li key={warning} className="flex items-start gap-2">
-                <span className="material-symbols-outlined mt-0.5 text-[15px] text-warning">
-                  info
-                </span>
+                <Icon name="info" size={15} className="mt-0.5 text-warning" />
                 <span>{warning}</span>
               </li>
             ))}
@@ -557,7 +558,7 @@ export default function RouteExplainabilityTab({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-black/5 bg-surface p-5 shadow-sm dark:border-white/5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-text-main">
             {analyticsText(t, "routeTraceTitle", "Route Trace View")}
@@ -571,14 +572,11 @@ export default function RouteExplainabilityTab({
           </p>
         </div>
         <div className="flex min-w-0 flex-col gap-2 sm:min-w-90">
-          <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            {analyticsText(t, "routeTraceRequestLog", "Request log")}
-          </label>
-          <select
+          <Select
+            label={analyticsText(t, "routeTraceRequestLog", "Request log")}
             value={selectedId}
             onChange={(event) => setSelectedId(event.target.value)}
             disabled={logsLoading || logs.length === 0}
-            className="focus-ring rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-main disabled:cursor-not-allowed disabled:opacity-60"
           >
             {logs.map((log) => (
               <option key={log.id} value={log.id}>
@@ -587,7 +585,7 @@ export default function RouteExplainabilityTab({
                 {log.model || log.requestedModel || log.id}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
 
@@ -596,17 +594,12 @@ export default function RouteExplainabilityTab({
       {!logsLoading && !explanationLoading && error ? (
         <Card className="p-8">
           <div className="flex flex-col items-center justify-center gap-3 text-center">
-            <span className="material-symbols-outlined text-[40px] text-error">route_off</span>
+            <Icon name="route_off" size={40} className="text-error" />
             <div className="font-medium text-text-main">{t("routeUnableToLoad")}</div>
             <div className="text-sm text-text-muted">{error}</div>
-            <button
-              type="button"
-              onClick={() => fetchLogs()}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-            >
-              <span className="material-symbols-outlined text-[18px]">refresh</span>
+            <Button icon="refresh" onClick={() => fetchLogs()}>
               {t("retry")}
-            </button>
+            </Button>
           </div>
         </Card>
       ) : null}
@@ -614,7 +607,7 @@ export default function RouteExplainabilityTab({
       {!logsLoading && !explanationLoading && !error && logs.length === 0 ? (
         <Card className="p-10">
           <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <span className="material-symbols-outlined text-[40px] text-text-muted/70">route</span>
+            <Icon name="route" size={40} className="text-text-muted/70" />
             <div className="text-base font-medium text-text-main">{t("routeNoRequestLogs")}</div>
             <div className="max-w-md text-sm text-text-muted">
               {t("routeNoRequestLogsDescription")}
@@ -699,7 +692,7 @@ export default function RouteExplainabilityTab({
                 ].map(([label, value]) => (
                   <div
                     key={label}
-                    className="flex items-start justify-between gap-4 border-b border-black/5 pb-2 last:border-b-0 last:pb-0 dark:border-white/5"
+                    className="flex items-start justify-between gap-4 border-b border-border pb-2 last:border-b-0 last:pb-0"
                   >
                     <span className="text-text-muted">{label}</span>
                     <span className="max-w-[65%] truncate text-right font-medium text-text-main">
@@ -717,7 +710,7 @@ export default function RouteExplainabilityTab({
                 {explanation.evidence.map((item) => (
                   <div
                     key={item.label}
-                    className="flex items-center justify-between gap-3 rounded-lg bg-black/2 px-3 py-2 text-sm dark:bg-white/2"
+                    className="flex items-center justify-between gap-3 rounded-lg bg-surface-2 px-3 py-2 text-sm"
                   >
                     <span className="text-text-muted">{item.label}</span>
                     <Badge variant={getToneVariant(item.tone)} size="sm">
@@ -751,9 +744,7 @@ export default function RouteExplainabilityTab({
                 <ul className="flex flex-col gap-2 text-sm text-text-muted">
                   {explanation.recommendations.map((item) => (
                     <li key={item} className="flex items-start gap-2">
-                      <span className="material-symbols-outlined mt-0.5 text-[16px] text-primary">
-                        check_circle
-                      </span>
+                      <Icon name="check_circle" size={16} className="mt-0.5 text-primary" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -765,9 +756,7 @@ export default function RouteExplainabilityTab({
                   <ul className="flex flex-col gap-2 text-sm text-text-muted">
                     {explanation.limitations.map((item) => (
                       <li key={item} className="flex items-start gap-2">
-                        <span className="material-symbols-outlined mt-0.5 text-[16px] text-warning">
-                          info
-                        </span>
+                        <Icon name="info" size={16} className="mt-0.5 text-warning" />
                         <span>{item}</span>
                       </li>
                     ))}

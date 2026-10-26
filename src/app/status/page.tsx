@@ -3,7 +3,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { AlertActions, AlertDescription, AlertTitle } from "@omniroute/ui-kit/alert";
+import { Badge as KitBadge } from "@omniroute/ui-kit/badge";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import { StatusMatrix } from "@omniroute/ui-kit/metric-charts";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
+import { OmniRouteLockup } from "@/shared/components/OmniRouteLogo";
 
 interface HealthPayload {
   status?: string;
@@ -72,52 +81,71 @@ export default function StatusPage() {
     return { total: providers.length, open, halfOpen, closed };
   }, [health]);
 
+  const providerItems = useMemo(
+    () =>
+      Object.entries(health?.providerHealth || {}).map(([id, p]) => ({
+        id,
+        label: id,
+        enabled: p.state === "CLOSED",
+      })),
+    [health]
+  );
+
+  const serviceStatus = health?.status || t("status.unknown");
+
   return (
     <main className="min-h-screen text-text-main p-6 sm:p-10">
       <section className="max-w-4xl mx-auto space-y-6">
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t("status.title")}</h1>
+            <div className="mb-4">
+              <OmniRouteLockup />
+            </div>
+            <h1 className="ci-heading text-3xl">{t("status.title")}</h1>
             <p className="text-text-muted mt-1">{t("status.description")}</p>
           </div>
-          <button
-            onClick={() => void loadHealth()}
-            className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-br from-primary to-primary-hover text-white transition-all duration-200 motion-reduce:transition-none"
-          >
+          <Button icon="refresh" onClick={() => void loadHealth()}>
             {tc("refresh")}
-          </button>
+          </Button>
         </header>
 
         {loading && (
-          <div
-            className="rounded-xl border border-border bg-surface p-6 flex items-center gap-3"
-            role="status"
-            aria-live="polite"
-          >
+          <Card padding="md" className="flex items-center gap-3" role="status" aria-live="polite">
             <Spinner size="md" />
             <span className="text-text-muted">{t("status.loadingHealth")}</span>
-          </div>
+          </Card>
         )}
 
         {!loading && error && (
-          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6" role="alert">
-            <h2 className="text-lg font-semibold text-red-600 dark:text-red-400">
-              {t("status.healthCheckFailed")}
-            </h2>
-            <p className="mt-2 text-sm text-text-muted">{error}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link
-                href="/offline"
-                className="px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-bg-alt transition-colors"
-              >
-                {t("status.openConnectivityHelp")}
-              </Link>
-              <Link
-                href="/maintenance"
-                className="px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-bg-alt transition-colors"
-              >
-                {t("status.maintenanceInfo")}
-              </Link>
+          // Kit alert parts without the dismiss control (the kit Alert always renders one).
+          <div
+            role="alert"
+            data-slot="alert"
+            data-variant="critical"
+            className="ci-alert ci-alert--critical"
+          >
+            <span className="ci-alert__icon">
+              <Icon name="error" size={20} />
+            </span>
+            <div className="ci-alert__body">
+              <AlertTitle>
+                <h2>{t("status.healthCheckFailed")}</h2>
+              </AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+              <AlertActions>
+                <Link
+                  href="/offline"
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  {t("status.openConnectivityHelp")}
+                </Link>
+                <Link
+                  href="/maintenance"
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  {t("status.maintenanceInfo")}
+                </Link>
+              </AlertActions>
             </div>
           </div>
         )}
@@ -125,38 +153,57 @@ export default function StatusPage() {
         {!loading && health && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="rounded-xl border border-border bg-surface p-4">
+              <Card padding="sm">
                 <p className="text-xs uppercase tracking-wide text-text-muted">
                   {t("status.service")}
                 </p>
-                <p className="mt-2 text-xl font-semibold">{health.status || t("status.unknown")}</p>
-              </div>
-              <div className="rounded-xl border border-border bg-surface p-4">
+                <div className="mt-2">
+                  {health.status === "healthy" ? (
+                    <KitBadge variant="live" shape="pill">
+                      {serviceStatus}
+                    </KitBadge>
+                  ) : (
+                    <Badge variant={health.status === "degraded" ? "warning" : "error"} dot>
+                      {serviceStatus}
+                    </Badge>
+                  )}
+                </div>
+              </Card>
+              <Card padding="sm">
                 <p className="text-xs uppercase tracking-wide text-text-muted">{tc("version")}</p>
                 <p className="mt-2 text-xl font-semibold">
                   {health.system?.version || t("status.notAvailable")}
                 </p>
-              </div>
-              <div className="rounded-xl border border-border bg-surface p-4">
+              </Card>
+              <Card padding="sm">
                 <p className="text-xs uppercase tracking-wide text-text-muted">{tc("uptime")}</p>
                 <p className="mt-2 text-xl font-semibold">
                   {formatUptime(health.system?.uptime, t)}
                 </p>
-              </div>
-              <div className="rounded-xl border border-border bg-surface p-4">
+              </Card>
+              <Card padding="sm">
                 <p className="text-xs uppercase tracking-wide text-text-muted">
                   {t("status.providersTracked")}
                 </p>
                 <p className="mt-2 text-xl font-semibold">{providerStats.total}</p>
-              </div>
+              </Card>
             </div>
 
-            <div className="rounded-xl border border-border bg-surface p-6">
-              <h2 className="text-lg font-semibold">{t("status.circuitBreakerState")}</h2>
+            <Card padding="md">
+              <h2 className="ci-heading text-lg">{t("status.circuitBreakerState")}</h2>
               <p className="text-sm text-text-muted mt-1">
                 OPEN: {providerStats.open} · HALF_OPEN: {providerStats.halfOpen} · CLOSED:{" "}
                 {providerStats.closed}
               </p>
+              {providerItems.length > 0 && (
+                <StatusMatrix
+                  className="mt-4"
+                  label={t("status.circuitBreakerState")}
+                  items={providerItems}
+                  enabledLabel={t("status.breakerClosed")}
+                  disabledLabel={t("status.breakerNotClosed")}
+                />
+              )}
               <p className="mt-4 text-xs text-text-muted">
                 {t("status.lastUpdate", {
                   timestamp: health.timestamp
@@ -164,7 +211,7 @@ export default function StatusPage() {
                     : t("status.notAvailable"),
                 })}
               </p>
-            </div>
+            </Card>
           </>
         )}
       </section>
