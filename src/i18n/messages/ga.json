@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Úsáidte ag {count, plural, one {# bhaisc} other {# baisc}}",
     "batchFilePreview": "Réamhamharc",
     "batchFilePreviewTruncated": "Ag taispeáint na chéad {shown} líne ({total} líne san iomlán)",
-    "batchFileDownloadFull": "Íoslódáil Comhad Iomlán"
+    "batchFileDownloadFull": "Íoslódáil Comhad Iomlán",
+    "dialogTitleFallback": "Dialóg",
+    "pagination": "Uimhriú leathanach",
+    "clearFilters": "Glan na scagairí",
+    "tokensPageTitle": "Comharthaí",
+    "tokensPageDescription": "Seol comharthaí idir eochracha API, roinn cóid chuiridh agus ceangail freastalaithe pobail.",
+    "tokensServerUrlLabel": "URL an fhreastalaí"
   },
   "disabled": "Díchumasaithe",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Seol iarratais a bhfuil a mbuiséad ídithe chuig an soláthraí/samhail chúltaca éigeandála saor in aisce.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 nó @channelname",
       "chatIdHint": "Aitheantóir uimhriúil uathúil nó ainm úsáideora poiblí an chomhrá/an chainéil.",
       "tutorial": "Conas webhook Telegram a chumrú:"
-    }
+    },
+    "copy": "Cóipeáil",
+    "copied": "Cóipeáilte!",
+    "expandDetails": "Taispeáin sonraí",
+    "collapseDetails": "Folaigh sonraí"
   },
   "compliance": {
     "auditTitle": "Iniúchadh",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Glaonna (24h)",
     "mcpMetricSuccessRate": "Ráta ratha",
     "mcpMetricAvgDuration": "Meánfhad",
-    "mcpMetricTopTool": "Uirlis is fearr"
+    "mcpMetricTopTool": "Uirlis is fearr",
+    "dismissError": "Dún an earráid"
   },
   "themesPage": {
     "title": "Téamaí",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Ardrialacha pálasta, teorainneacha iarratais agus socruithe API seachfhreastalaí",
     "mitmProxyDescription": "Cumraigh socruithe seachfhreastalaí MITM le haghaidh iniúchadh agus dífhabhtú tráchta",
     "oneProxyDescription": "Cumraigh socruithe 1Proxy le haghaidh ardslabhrú seachfhreastalaithe",
-    "omniSkillsDescription": "Suiteáil agus bainistigh scileanna bosca gainimh chun leideanna agus uirlisí a rith go huathoibríoch"
+    "omniSkillsDescription": "Suiteáil agus bainistigh scileanna bosca gainimh chun leideanna agus uirlisí a rith go huathoibríoch",
+    "openMenu": "Oscail an roghchlár",
+    "products": "Táirgí Keak"
   },
   "cloudSyncStatus": {
     "synced": "Sioncronaithe",
@@ -2495,7 +2508,12 @@
     "onlySelectedConnections": "Naisc roghnaithe amháin",
     "selectAtLeastOneConnection": "Roghnaigh nasc amháin ar a laghad nó roghnaigh Gach nasc.",
     "allConnectionsDesc": "Is féidir leis an eochair seo aon nasc gníomhach a úsáid.",
-    "restrictedToConnections": "Srianta do {count, plural, one {# nasc} other {# nasc}}."
+    "restrictedToConnections": "Srianta do {count, plural, one {# nasc} other {# nasc}}.",
+    "preferredConnections": "Naisc roghnaithe",
+    "preferredConnectionsDesc": "Ord tosaíochta in aghaidh na heochrach. Mura bhfuil nasc roghnaithe ar fáil, téann an ródú ar aghaidh chuig an gcéad cheann incháilithe eile.",
+    "preferredConnectionsNone": "Níl aon rogha socraithe — úsáidtear an straitéis ródaithe réamhshocraithe.",
+    "preferredConnectionsClear": "Glan",
+    "removeSelection": "Bain {name}"
   },
   "auditLog": {
     "title": "Log Iniúchta",
@@ -2607,7 +2625,9 @@
     "imageToTextBridgeCta": "Cumraigh an droichead Íomhá→Téacs i socruithe Modality Bridge",
     "sttBridgeCta": "Cumraigh an droichead Urlabhra→Téacs i socruithe Modality Bridge",
     "existingConnection": "Nasc atá ann cheana",
-    "openrouterSttDescription": "Úsáideann samhlacha urlabhra-go-téacs OpenRouter an nasc OpenRouter atá cumraithe agat. Ní theastaíonn dintiúr ar leith."
+    "openrouterSttDescription": "Úsáideann samhlacha urlabhra-go-téacs OpenRouter an nasc OpenRouter atá cumraithe agat. Ní theastaíonn dintiúr ar leith.",
+    "modalityTabsAria": "Cineál meán",
+    "serviceKindsAria": "Cineál seirbhíse"
   },
   "search": {
     "searchQuery": "Ceist Chuardaigh",
@@ -3278,7 +3298,8 @@
     "cliproxyapiUnknown": "Anaithnid",
     "cliproxyapiUpdate": "Nuashonrú",
     "cliproxyapiUpdateAvailable": "Nuashonrú ar fáil: v{current} → v{latest}",
-    "cliproxyapiVersion": "Leagan"
+    "cliproxyapiVersion": "Leagan",
+    "removeMapping": "Bain an mhapáil"
   },
   "modelCatalog": {
     "title": "Samhlacha & Teaglamaí",
@@ -3936,6 +3957,7 @@
     "builderComboRefStep": "Cuir tagairt do theaglaim leis",
     "builderPinnedAccount": "Cuntas Pionnáilte",
     "builderLegacyEntry": "Iontráil leagáide",
+    "builderStaleModel": "Níl sé sa chatalóg beo",
     "reviewName": "Ainm",
     "reviewStrategy": "Straitéis",
     "reviewSteps": "Céimeanna",
@@ -4014,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Déanfaidh sé seo cóip de na soláthraithe/samhlacha atá nasctha faoi láthair agus a mheaitseálann an teimpléad seo, agus cuirfidh sé i gcomhcheangal ineagarthóireachta iad.",
     "duplicateAutoComboFailedPrefix": "Theip ar chóip den chomhcheangal uathoibríoch a chruthú:",
     "duplicateAutoComboUnknownError": "Earráid anaithnid",
-    "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}"
+    "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}",
+    "weightPercent": "Meáchan (%)",
+    "clearSearch": "Glan an cuardach",
+    "responseValidationRemoveCheck": "Bain an tseiceáil",
+    "responseValidationPath": "Conair JSON",
+    "responseValidationCondition": "Coinníoll",
+    "responseValidationValue": "Luach ionchais"
   },
   "costs": {
     "title": "Costais",
@@ -5288,7 +5316,8 @@
         "skipped": "cumraithe cheana",
         "failed": "teipthe"
       }
-    }
+    },
+    "stepProgress": "Dul chun cinn an tsocraithe"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Tá an soláthraí seo eisiata ó auto de réir réamhshocraithe",
@@ -7255,7 +7284,7 @@
       "nextSwitchNow": "Anois",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -8951,7 +8980,8 @@
       "statsTitle": "Brathanna ó atosú",
       "statsEmpty": "Níl aon bhrath fós.",
       "statsRequest": "Iarratais"
-    }
+    },
+    "modelOverrideKey": "Eochair sáraithe"
   },
   "contextRtk": {
     "title": "Inneall RTK",
@@ -9035,7 +9065,8 @@
     "tomlTestPassed": "D'éirigh leis",
     "tomlTestFailed": "Theip air",
     "tomlImportError": "Níorbh fhéidir an comhad RTK TOML a phróiseáil.",
-    "tomlFileReadError": "Níorbh fhéidir an comhad TOML roghnaithe a léamh."
+    "tomlFileReadError": "Níorbh fhéidir an comhad TOML roghnaithe a léamh.",
+    "viewMode": "Mód amhairc"
   },
   "compressionEngineConfig": {
     "loading": "Ag lódáil…",
@@ -9257,7 +9288,8 @@
     "languagePacksList": "Pacáistí teanga: {packs}",
     "dragToReorder": "Tarraing chun an chéim a atheagrú",
     "engine": "Inneall",
-    "intensity": "Déine"
+    "intensity": "Déine",
+    "compressionOverride": "Sárú comhbhrú"
   },
   "compressionStudio": {
     "noRun": "Níl aon rith comhbhrúcháin ar fáil.",
@@ -9317,7 +9349,8 @@
     "encoderWinner": "buaiteoir: {winner}",
     "encoder": "códóir",
     "bytes": "bearta",
-    "tokensCl100k": "comharthaí (cl100k)"
+    "tokensCl100k": "comharthaí (cl100k)",
+    "studioViews": "Amhairc Studio"
   },
   "omniglyph": {
     "preview": "Réamhamharc",
@@ -9523,7 +9556,9 @@
     "tooltipMinLength": "Ní chomhbhrúitear teachtaireachtaí atá níos giorra ná seo. Níos ísle = tuilleadh comhbhrúite.",
     "tooltipMinSavings": "Ná comhbhrú ach amháin má shábháiltear an líon seo comharthaí ar a laghad.",
     "ultraSettings": "Socruithe Ultra",
-    "ultraSettingsDesc": "Comhbhrú séimeantach faoi thiomáint ag SLM"
+    "ultraSettingsDesc": "Comhbhrú séimeantach faoi thiomáint ag SLM",
+    "defaultLanguage": "Teanga réamhshocraithe",
+    "viewMode": "Mód amhairc"
   },
   "translator": {
     "title": "Aistritheoir",
@@ -10291,7 +10326,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Athshocrú teorann Claude",
+    "confirmRedeemClaudeResetCredit": "Athshocraíonn fuascailt láithreach na teorainneacha úsáide incháilithe Claude agus ídíonn sé an creidmheas seo go buan.",
+    "claudeResetCreditsModalTitle": "Creidmheasanna athshocraithe Claude",
+    "claudeResetCreditsModalExplainer": "Creidmheasanna athshocraithe Claude agus athshocruithe seisiúin sheachtainiúla atá ar fáil don chuntas seo."
   },
   "modals": {
     "waitingAuth": "Ag fanacht le húdarú",
@@ -11078,7 +11117,8 @@
       "message": "Teachtaireacht",
       "error": "Earráid",
       "completion": "Críochnú"
-    }
+    },
+    "statusFilter": "Stádas"
   },
   "templateNames": {
     "simple-chat": "Comhrá Simplí",
@@ -11259,7 +11299,8 @@
     "minutesAgo": "{minutes}n ó shin",
     "hoursAgo": "{hours}u ó shin",
     "daysAgo": "{days}l ó shin",
-    "entries": "Iontrálacha"
+    "entries": "Iontrálacha",
+    "viewSwitcherAria": "Amharc taisce"
   },
   "proxyConfigModal": {
     "levelGlobal": "Domhanda",
@@ -11526,7 +11567,7 @@
     "bulkImportNoValidEntries": "Níor aimsíodh aon iontráil bailí. Seiceáil an fhormáid agus déan iarracht eile.",
     "bulkImportSuccess": "Iompórtáil críochnaithe: cruthaíodh {created}, nuashonraíodh {updated}, theip ar {failed}",
     "bulkImportErrorLine": "Líne {line}: {reason}",
-    "bulkImportMaxExceeded": "Uasmhéid de 100 seachfhreastalaí in aghaidh na hiompórtála",
+    "bulkImportMaxExceeded": "Uasmhéid {max} seachfhreastalai in aon iompórtáil amháin",
     "bulkImportPreview": "Réamhamharc",
     "clearAssignment": "(glan an sannadh)",
     "bulkProxyAssignment": "Sannadh Seachfhreastalaithe ar an Mórchóir",
@@ -11587,6 +11628,7 @@
     "poolSetAsideKindIpQuota429": "teorainn ráta IP (429)",
     "poolSetAsideKindSlow": "freagraí mall",
     "poolSetAsideKindGeoBlocked": "réigiún blocáilte (403/451)",
+    "poolSetAsideKindOperatorReported": "teagmháil tuairiscithe ag oibreoir",
     "poolSetAsideUntil": "Ar ais sa rothlú {endsAt}",
     "poolSetAsideRepeat": "Curtha ar leataobh {count, plural, one {# uair} other {# uair}}",
     "poolUnknownAddress": "Seoladh anaithnid",
@@ -11603,7 +11645,8 @@
     "notMeasured": "Gan tomhas",
     "upstream4xx": "{count} earráidí cliente ar an gceann chlé",
     "upstream5xx": "{count} earráidí seirbhís ar an gceann chlé",
-    "uniformEgressLine": "{affected} de {exits} éits bailiú le chéile ar {provider} (deis {hours}h) — níl ceist éit"
+    "uniformEgressLine": "{affected} de {exits} éits bailiú le chéile ar {provider} (deis {hours}h) — níl ceist éit",
+    "moreActions": "Tuilleadh gníomhartha"
   },
   "playground": {
     "title": "Clós Súgartha Múnlaí",
@@ -11809,7 +11852,8 @@
       "nextButton": "Ar aghaidh",
       "runButton": "Rith",
       "promptPlaceholder": "Cuir do theachtaireacht isteach… (Enter lena seoladh, Shift+Enter le haghaidh líne nua)"
-    }
+    },
+    "playgroundTabs": "Móid Playground"
   },
   "miniPlayground": {
     "endpoint": "Críochphointe",
@@ -11880,7 +11924,8 @@
     "assistant": "Cúntóir",
     "errorLabel": "Earráid",
     "requestFailed": "Theip ar an iarratas",
-    "stop": "Stad"
+    "stop": "Stad",
+    "messageInputAria": "Teachtaireacht"
   },
   "requestLogger": {
     "recording": "Ag taifeadadh",
@@ -12067,8 +12112,18 @@
       "resilienceRotations": "{count} uainíocht cuntas",
       "resilienceRetried": "Triaileadh an seal folamh arís",
       "resilienceContinued": "Atosaíodh i lár an tsrutha",
-      "resilienceRecovered": "Aisghafa ag gníomh athléimneachta"
-    }
+      "resilienceRecovered": "Aisghafa ag gníomh athléimneachta",
+      "conversationContext": "Comhthéacs an Chomhrá",
+      "goToBottom": "Téigh go dtí an bun",
+      "liveRefreshOn": "Athnuachan beo: ar siúl",
+      "liveRefreshOff": "Athnuachan beo: as",
+      "liveRefresh": "Athnuachan beo",
+      "continuesFromParent": "leanann ón máthair",
+      "continuesFrom": "Leanann ó {id}",
+      "viewConversation": "féach ar an gcomhrá",
+      "openConversation": "Oscail comhrá {id}"
+    },
+    "tableLabel": "Logaí iarratais"
   },
   "proxyLogger": {
     "filterAll": "Go léir",
@@ -12113,7 +12168,9 @@
     "colServedBy": "Freastalaithe ag",
     "filterTraffic": "Trácht",
     "filterTests": "Tástálacha",
-    "filterSource": "Tús"
+    "filterSource": "Tús",
+    "tableLabel": "Logaí seachfhreastalaí",
+    "sortLogs": "Sórtáil logaí"
   },
   "endpointOptions": {
     "speech": "Urlabhra",
@@ -12198,7 +12255,8 @@
     "statusExhausted": "ÍDITHE",
     "statusAlerting": "AG TABHAIRT FOLÁIRIMH",
     "statusError": "EARRÁID",
-    "moreSuffix": "+{count} eile"
+    "moreSuffix": "+{count} eile",
+    "feedFilterLabel": "Scag teagmhais"
   },
   "quotaShare": {
     "weightPercent": "Meáchan %",
@@ -12365,7 +12423,10 @@
     "ungroupedTitle": "Neamhghrúpáilte",
     "ungroupedHint": "Níl na linnte seo sannta do ghrúpa aitheanta. Cuir linn in eagar chun í a bhogadh isteach i bhfíorghrúpa.",
     "removeFailed": "Níorbh fhéidir an linn seo a bhaint.",
-    "dismiss": "Dún"
+    "dismiss": "Dún",
+    "allocationsHeading": "Leithdháiltí",
+    "wizardRemoveDimension": "Bain toise",
+    "wizardRemoveKey": "Bain eochair"
   },
   "plugins": {
     "title": "Breiseáin",
@@ -12523,7 +12584,8 @@
       "settingsUpdateFailed": "Theip ar nuashonrú na socruithe",
       "serviceRevealApiKey": "Nocht {actor} eochair API do {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Dún an earráid"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12718,21 @@
       "goNow": "Téigh anois",
       "message": "Tá an MITM Proxy anois faoi AgentBridge.",
       "title": "Bogadh an leathanach seo"
-    }
+    },
+    "dnsOn": "DNS ar siúl",
+    "dnsOff": "DNS as",
+    "showServerSettings": "Taispeáin socruithe an fhreastalaí",
+    "hideServerSettings": "Folaigh socruithe an fhreastalaí",
+    "upstreamCaTesting": "Á thástáil…",
+    "removeMapping": "Bain mapáil",
+    "mappingSourcePlaceholder": "m.sh., gemini-3.6-flash-medium, nó * do gach ceann gan mhapáil",
+    "mappingWildcardHint": "Úsáid * mar an fhoinse chun gach samhail nach bhfuil mapáil shainráite aici a ródú trí OmniRoute chuig an sprioc roghnaithe. Bíonn forlámhas i gcónaí ag meaitseálacha beachta foinse ar *.",
+    "wizardDetectingModels": "Samhlacha á mbrath ó thrácht idircheaptha...",
+    "wizardDetectedModels": "Aimsíodh {count, plural, one {# samhail} other {# samhail}} sa trácht idircheaptha. Roghnaigh na cinn is mian leat a chur leis:",
+    "wizardSelectedModels": "Tá {count, plural, one {# samhail} other {# samhail}} roghnaithe. Déanfaidh tú iad a mhapáil chuig samhlacha OmniRoute ar an gcéad scáileán eile.",
+    "wizardAddModels": "Cuir {count, plural, one {# samhail} other {# samhail}} leis",
+    "wizardNoModelsDetected": "Níor braitheadh aon samhail fós. Úsáid {agent} chun iarratas a dhéanamh, ansin rith an treoraí seo arís chun samhlacha a bhrath go huathoibríoch ón trácht.",
+    "wizardNoModelsHint": "Nó dún an treoraí seo agus cuir mapálacha leis de láimh i gcárta an ghníomhaire."
   },
   "providerStats": {
     "unknownError": "Earráid anaithnid",
@@ -12686,7 +12762,11 @@
     "avgTtft": "Meán TTFT",
     "avgTotal": "Meán Iomlán",
     "requestTelemetry": "Teilimeadracht Iarratais",
-    "requestTelemetryDescription": "Miondealú ar an bpíblíne 7 gcéim (na 5 nóiméad anuas)"
+    "requestTelemetryDescription": "Miondealú ar an bpíblíne 7 gcéim (na 5 nóiméad anuas)",
+    "title": "Staitisticí soláthraithe",
+    "description": "Trácht, aga folaigh agus rátaí ratha de réir soláthraí agus de réir samhla",
+    "combo": "Teaglaim",
+    "toggleModels": "Taispeáin samhlacha do {provider}"
   },
   "relay": {
     "title": "Seachfhreastalaithe Relé Gan Freastalaí",
@@ -12847,7 +12927,18 @@
     "noRequestBody": "Gan chorp iarratais.",
     "noResponseBody": "Gan chorp freagra.",
     "formatted": "Formáidithe",
-    "raw": "Amh"
+    "raw": "Amh",
+    "requestCount": "{count, plural, one {# iarratas} other {# iarratas}}",
+    "expandList": "Leathnaigh an liosta",
+    "collapseList": "Laghdaigh an liosta",
+    "snippetLanguage": "Teanga an bhlúire",
+    "headersTable": "Ceanntásca",
+    "showSecrets": "Taispeáin rúin",
+    "maskSecrets": "Cumhdaigh rúin",
+    "llmNotAvailable": "Níl meiteashonraí LLM ar fáil don iarratas seo.",
+    "llmStreamYes": "tá (SSE)",
+    "llmStreamNo": "níl",
+    "llmTotalTokens": "Iomlán: {count} tócan"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13397,8 @@
     "colReliabilityHelp": "Céatadán na nglaonna a d'fhreagair an soláthraí seo i ndáiríre le 24 uair an chloig anuas. Ciallaíonn fleiscín nár fhreastail sé ar dhóthain tráchta chun ráta a shonrú.",
     "reliabilitySample": "D'éirigh le {successes} as {requests} glao le {hours} uair an chloig anuas",
     "reliabilityTooFew": "Ní raibh ach {requests} glao ann le {hours} uair an chloig anuas — róbheag chun ráta a shonrú",
-    "reliabilityNoTraffic": "Níor taifeadadh aon ghlaonna le 24 uair an chloig anuas"
+    "reliabilityNoTraffic": "Níor taifeadadh aon ghlaonna le 24 uair an chloig anuas",
+    "categoryFilter": "Catagóir taisc"
   },
   "discovery": {
     "title": "Aimsiú Soláthraithe",
@@ -13331,7 +13423,11 @@
     "method": "Modh",
     "auth": "Fíordheimhniú",
     "feasibility": "Indéantacht",
-    "models": "Samhlacha"
+    "models": "Samhlacha",
+    "provider": "Soláthraí",
+    "status": "Stádas",
+    "endpoint": "Críochphointe",
+    "actions": "Gníomhartha"
   },
   "noAuthProvider": {
     "title": "Níl fíordheimhniú ag teastáil",
@@ -13380,7 +13476,8 @@
     "ownProxy": "Seachfhreastalaí féin",
     "freeTierPause": "Múnla {model} ar scoradh (429), ar ais ag {time}",
     "freeTierPauseProvider": "Ar scoradh (429), ar ais ag {time}",
-    "freeTierPauseNote": "Cúramóir i bpróiseas ar an sampla seo"
+    "freeTierPauseNote": "Cúramóir i bpróiseas ar an sampla seo",
+    "proxyType": "Cineál seachfhreastalaí"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13650,10 @@
         "description": "Tá éacht folaithe ag fanacht...",
         "criteria": "Cuir an t-éacht folaithe i gcrích chun an suaitheantas seo a nochtadh."
       }
-    }
+    },
+    "leaderboardTitle": "Clár ceannairí",
+    "leaderboardDescription": "Ranguithe agus éachtaí ar fud d'eochracha API",
+    "badgeLocked": "Faoi ghlas"
   },
   "featureFlags": {
     "title": "Bratacha Gnéithe",
@@ -13848,7 +13948,8 @@
     "unknown": "anaithnid",
     "unknownProvider": "soláthraí anaithnid",
     "unknownModel": "múnla anaithnid",
-    "resolvedTargetMetrics": "{requests} iarr. · {success} rathúil · {latency} · cuóta {quota}"
+    "resolvedTargetMetrics": "{requests} iarr. · {success} rathúil · {latency} · cuóta {quota}",
+    "timeRange": "Raon ama"
   },
   "usageLimits": {
     "usdUsageQuota": "Cuóta úsáide USD",
@@ -13995,7 +14096,11 @@
     "learnMore": "Faigh tuilleadh eolais",
     "changelogLoadFailed": "Níorbh fhéidir log na n-athruithe a lódáil. Bain triail eile as ar ball.",
     "retry": "Bain triail eile as",
-    "viewFullHistory": "Féach ar an stair iomlán ar GitHub"
+    "viewFullHistory": "Féach ar an stair iomlán ar GitHub",
+    "title": "Nuacht agus loga athruithe",
+    "description": "Fógraí ó fhoireann OmniRoute agus na nótaí eisiúna is déanaí",
+    "viewLabel": "Amharc",
+    "loadingNews": "Fógraí á lódáil..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14651,9 @@
       "circuitBreakerState": "Staid Scoradán Ciorcaid an tSoláthraí",
       "lastUpdate": "Nuashonrú deireanach: {timestamp}",
       "uptimeMinutes": "{minutes} nóim",
-      "uptimeHoursMinutes": "{hours} u {minutes} nóim"
+      "uptimeHoursMinutes": "{hours} u {minutes} nóim",
+      "breakerClosed": "Dúnta",
+      "breakerNotClosed": "Oscailte nó leathoscailte"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14728,9 @@
         "primaryAction": "Sonraí Cothabhála",
         "secondaryAction": "Stádas an Chórais"
       }
+    },
+    "miniapp": {
+      "askAnything": "Cuir ceist ar bith…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} infheicthe / {total} san iomlán",
+    "modeLabel": "Mód amhairc",
+    "jumpToNow": "Léim go dtí an t-am reatha; athshocraítear an líne ANOIS go suíomh {position}%",
+    "laneReuse": "Athúsáid lána",
+    "laneReuseLabel": "Fuinneog athúsáide lána (nóiméid)",
+    "laneReuseHint": "Fanann iarratais a roinneann aitheantas comhrá ar an tsraith chéanna den amlíne fad is atá an bhearna eatarthu níos lú ná an líon seo nóiméad.",
+    "laneReuseUnit": "nóim.",
+    "autoRefresh": "Uath-athnuachan",
+    "autoRefreshLabel": "Eatramh uath-athnuachana (soicindí)",
+    "autoRefreshHint": "Cé chomh minic a athfhaigheann an amlíne liosta na n-iarratas ón bhfreastalaí.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Súmáil amach",
+    "zoomIn": "Súmáil isteach"
   },
   "metadata": {
     "compressionTitle": "Comhbhrú",

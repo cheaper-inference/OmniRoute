@@ -1,0 +1,1 @@
+- **fix(docker):** Allow only the required Claude Code and OpenClaw lifecycle scripts under npm 12, and verify all bundled CLIs as the non-root runtime user during the build ([#18003](https://github.com/cheaper-inference/OmniRoute/pull/18003)) — thanks @jktan0504
