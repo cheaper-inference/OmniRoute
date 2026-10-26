@@ -8,16 +8,18 @@ const QUOTA_EXHAUSTED_MESSAGE =
 
 function headerValue(headers: unknown, name: string): string | null {
   if (!headers || typeof headers !== "object") return null;
-  const getter = (headers as { get?: (key: string) => string | null }).get;
-  if (typeof getter === "function") {
-    try {
-      return getter.call(headers, name);
-    } catch {
-      return null;
+  try {
+    const getter = (headers as { get?: (key: string) => unknown }).get;
+    if (typeof getter === "function") {
+      const value = getter.call(headers, name);
+      return typeof value === "string" ? value : null;
     }
+    const entry = Object.entries(headers).find(([key]) => key.toLowerCase() === name);
+    return typeof entry?.[1] === "string" ? entry[1] : null;
+  } catch {
+    // Untrusted or malformed header objects cannot crash error handling.
+    return null;
   }
-  const entry = Object.entries(headers).find(([key]) => key.toLowerCase() === name);
-  return typeof entry?.[1] === "string" ? entry[1] : null;
 }
 
 function hasExhaustedQuotaEvidence(headers: unknown): boolean {
