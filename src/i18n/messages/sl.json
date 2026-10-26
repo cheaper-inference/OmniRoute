@@ -25,10 +25,8 @@
     "confirm": "Ali ste prepričani?",
     "refresh": "Osveži",
     "close": "Zapri",
-    "dialogTitleFallback": "Pogovorno okno",
     "previousPage": "Prejšnja stran",
     "nextPage": "Naslednja stran",
-    "pagination": "Oštevilčevanje strani",
     "capsLockOn": "Tipka Caps Lock je vklopljena",
     "dismissNotification": "Zapri obvestilo",
     "toggleColumns": "Preklopi vidnost stolpcev",
@@ -184,7 +182,6 @@
     "combos": "Kombinacije",
     "noModelsFound": "Ni najdenih modelov",
     "clear": "Počisti",
-    "clearFilters": "Počisti filtre",
     "done": "Končano",
     "selectAll": "Izberi vse",
     "unselectAll": "Prekliči izbor vseh",
@@ -1002,6 +999,9 @@
     "batchFilePreview": "Predogled",
     "batchFilePreviewTruncated": "Prikazanih je prvih {shown} vrstic (skupaj {total} vrstic)",
     "batchFileDownloadFull": "Prenesi celotno datoteko",
+    "dialogTitleFallback": "Pogovorno okno",
+    "pagination": "Oštevilčevanje strani",
+    "clearFilters": "Počisti filtre",
     "tokensPageTitle": "Žetoni",
     "tokensPageDescription": "Pošiljajte žetone med ključi API, delite kode povabil in povezujte strežnike skupnosti.",
     "tokensServerUrlLabel": "URL strežnika"
@@ -1602,8 +1602,6 @@
     "quickNavigation": "Hitra navigacija",
     "quickNavigationTitle": "Hitra navigacija (⌘K / Ctrl+K)",
     "openQuickNavigation": "Odpri hitro navigacijo",
-    "openMenu": "Odpri meni",
-    "products": "Izdelki Keak",
     "switchToLightMode": "Preklopi na svetli način",
     "switchToDarkMode": "Preklopi na temni način",
     "language": "Jezik",
@@ -1702,7 +1700,9 @@
     "settingsAdvancedDescription": "Napredna pravila za koristno vsebino, omejitve zahtev in nastavitve posredniškega API-ja",
     "mitmProxyDescription": "Konfigurirajte nastavitve posredniškega strežnika MITM za pregledovanje prometa in odpravljanje napak",
     "oneProxyDescription": "Konfigurirajte nastavitve 1Proxy za napredno veriženje posredniških strežnikov",
-    "omniSkillsDescription": "Namestite in upravljajte veščine peskovnika za avtomatizirano izvajanje pozivov in orodij"
+    "omniSkillsDescription": "Namestite in upravljajte veščine peskovnika za avtomatizirano izvajanje pozivov in orodij",
+    "openMenu": "Odpri meni",
+    "products": "Izdelki Keak"
   },
   "cloudSyncStatus": {
     "synced": "Sinhronizirano",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Kombinacija → {name}"
   },
   "combos": {
+    "autoTosIncludeLabel": "Vključi ponudnike z oznako ToS: avoid v auto",
+    "autoTosDescription": "Privzeto izklopljeno. Velja za vse kombinacije auto, ne le za en račun. Povezava ponudnika te možnosti ne vklopi.",
+    "autoTosSaveError": "Pravil ToS ni bilo mogoče shraniti. Še vedno je prikazana prejšnja nastavitev. Poskusite znova.",
+    "autoTosLoadError": "Pravil ToS ni bilo mogoče naložiti. Pred spremembo poskusite znova.",
     "title": "Kombinacije",
     "description": "Ustvarite kombinacije modelov z uteženim usmerjanjem in podporo za nadomestne možnosti",
     "autoCatalogTitle": "Katalog samodejnega usmerjanja",
-    "autoTosLoadError": "Pravil ToS ni bilo mogoče naložiti. Pred spremembo poskusite znova.",
-    "autoTosSaveError": "Pravil ToS ni bilo mogoče shraniti. Še vedno je prikazana prejšnja nastavitev. Poskusite znova.",
-    "autoTosIncludeLabel": "Vključi ponudnike z oznako ToS: avoid v auto",
-    "autoTosDescription": "Privzeto izklopljeno. Velja za vse kombinacije auto, ne le za en račun. Povezava ponudnika te možnosti ne vklopi.",
     "autoCatalogTemplateCount": "Število predlog: {count}",
     "autoCatalogDescription": "Vgrajene kombinacije auto/*, ki se dinamično razrešijo na podlagi povezanih ponudnikov. Katerega koli od teh ID-jev lahko uporabite kot polje modela — nastavitev ni potrebna.",
     "autoCatalogExpand": "Razširi katalog samodejnega usmerjanja",
@@ -3556,7 +3556,6 @@
     "playgroundNoCombosYet": "Konfigurirana ni še nobena kombinacija.",
     "playgroundCreateFirst": "Najprej jo ustvarite",
     "weighted": "Uteženo",
-    "weightPercent": "Utež (%)",
     "leastUsed": "Najmanj uporabljeno",
     "costOpt": "Stroškovno optimizirano",
     "strategyGuideTitle": "Kako uporabljati to strategijo",
@@ -3718,7 +3717,6 @@
     "builderGlobalAccountCount": "{count, plural, one {# račun} two {# računa} few {# računi} other {# računov}}",
     "builderGlobalAdded": "Dodano",
     "builderGlobalAdd": "Dodaj",
-    "clearSearch": "Počisti iskanje",
     "manualModel": "Ročno določen model",
     "manualModelInvalid": "Vnesite model v obliki provider/model.",
     "manualModelUnknownProvider": "Neznana predpona ponudnika.",
@@ -3973,10 +3971,6 @@
     "responseValidationMinLength": "Najmanjša dolžina vsebine (št. znakov)",
     "responseValidationJsonPaths": "Preverjanja poti JSON",
     "responseValidationAddCheck": "+ Dodaj preverjanje",
-    "responseValidationRemoveCheck": "Odstrani preverjanje",
-    "responseValidationPath": "Pot JSON",
-    "responseValidationCondition": "Pogoj",
-    "responseValidationValue": "Pričakovana vrednost",
     "agentFeaturesSystemMessageOverride": "Preglasi sistemsko sporočilo",
     "agentFeaturesSystemMessagePlaceholder": "Ste strokovni pomočnik ...",
     "agentFeaturesSystemMessageHint": "Preglasitev sistemskega sporočila za agente",
@@ -4018,7 +4012,13 @@
     "duplicateAutoComboSnapshotMsg": "S tem boste trenutno povezane ponudnike/modele, ki se ujemajo s to predlogo, zajeli v kombinacijo, ki jo je mogoče urejati.",
     "duplicateAutoComboFailedPrefix": "Podvajanje samodejne kombinacije ni uspelo:",
     "duplicateAutoComboUnknownError": "Neznana napaka",
-    "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}"
+    "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}",
+    "weightPercent": "Utež (%)",
+    "clearSearch": "Počisti iskanje",
+    "responseValidationRemoveCheck": "Odstrani preverjanje",
+    "responseValidationPath": "Pot JSON",
+    "responseValidationCondition": "Pogoj",
+    "responseValidationValue": "Pričakovana vrednost"
   },
   "costs": {
     "title": "Stroški",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Oznaka oblike API-ja",
     "apiKeyOptionalHint": "Če vaša lokalna nastavitev ali ponudnik ne zahteva preverjanja pristnosti, pustite prazno.",
     "apiKeyOptionalLabel": "Ključ API (izbirno)",
-    "apiRegionChina": "Celinska Kitajska",
-    "apiRegionHint": "Izberite regijo končne točke, ki se uporablja za dostop do API-ja in spremljanje kvot.",
-    "apiRegionInternational": "Mednarodno",
-    "apiRegionLabel": "Regija API-ja",
+    "apiRegionChina": "__MISSING__:Mainland China",
+    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
+    "apiRegionInternational": "__MISSING__:International",
+    "apiRegionLabel": "__MISSING__:API Region",
     "apikey": "Ključ API",
     "audio": "Zvok",
     "audioProvidersHeading": "Naslov ponudnikov zvoka",
@@ -6085,13 +6085,6 @@
     "claudeLowPriorityModeDescription": "Ko ta račun doseže 5-urno omejitev uporabe in Anthropic ponudi možnost z nižjo prioriteto, jo OmniRoute sprejme in še naprej pošilja zahteve z anthropic-usage-limit: slow, dokler se časovno okno ne ponastavi, namesto da bi začasno prekinil povezavo. Tedenska omejitev še vedno velja, odgovori pa lahko čakajo na razpoložljivo zmogljivost.",
     "claudeAutoLimitResetLabel": "Samodejno ponastavi omejitev seje (enkrat tedensko)",
     "claudeAutoLimitResetDescription": "Ko ta račun doseže 5-urno omejitev uporabe in je na voljo ponastavitev omejitve seje, jo OmniRoute samodejno uveljavi in znova poskusi s polno hitrostjo. Pri tem uporabi ponastavitev računa, ki je na voljo enkrat tedensko, uporaba pa se še vedno šteje v tedensko omejitev.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Preskočite prehodno obdobje ohlajanja, da ta povezava ostane na voljo tudi po odpravljivih napakah (končna stanja, kot sta prepovedana ali potekla povezava, še vedno veljajo).",
     "disableCoolingLabel": "Onemogoči ohlajanje za to povezavo",
     "bulkPasteAdded": "{count, plural, one {Dodan 1 ključ} two {Dodana # ključa} few {Dodani # ključi} other {Dodanih # ključev}}",
@@ -6545,7 +6538,6 @@
       "monsterapi": "Pridobite ključ API na monsterapi.ai",
       "moonshot": "Povežite Kimi s ključem API.",
       "morph": "Brezplačna raven: 250.000 kreditov na mesec, 0 USD",
-      "apmix": "Povežite Apmix z API ključem iz apmix.ai/dashboard — ena naročnina, veliko modelov.",
       "nanogpt": "Povežite NanoGPT s ključem API.",
       "nebius": "Ob registraciji prejmete približno 1 USD poskusnega dobroimetja za preizkušanje API-ja",
       "nlpcloud": "NLP Cloud namesto OpenAI chat/completions uporablja lasten API za klepetalne bote. OmniRoute prilagodi sporočila OpenAI parametrom input/context/history in ponuja lokalni katalog podprtih modelov klepetalnih botov.",
@@ -6642,7 +6634,8 @@
       "kiro": "Brezplačna raven: 50 dobroimetij/mesec (~25.000–100.000 žetonov). ⚠️ Pogoji uporabe storitve Kiro prepovedujejo uporabo posrednikov ali ogrodij tretjih oseb.",
       "codex": "Povežite OpenAI Codex z obstoječim postopkom OAuth.",
       "qwen": "Povežite Qwen Code z obstoječim postopkom OAuth.",
-      "github-models": "Ustvarite GitHub PAT z obsegom »models: read« na github.com/settings/tokens"
+      "github-models": "Ustvarite GitHub PAT z obsegom »models: read« na github.com/settings/tokens",
+      "apmix": "Povežite Apmix z API ključem iz apmix.ai/dashboard — ena naročnina, veliko modelov."
     },
     "passthroughModelsDescription": "{provider} sprejema izvorne ID-je modelov ponudnika. Uvozite jih iz /models ali dodajte ID-je po meri za usmerjanje.",
     "bedrockModelsDescription": "Modeli Amazon Bedrock so omejeni na regijo AWS. Uvozite jih iz /models ali dodajte ID-je modelov Bedrock, omogočene v izbrani regiji.",
@@ -6814,7 +6807,14 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
   },
   "settings": {
     "title": "Nastavitve",
@@ -7702,7 +7702,6 @@
     "configured": "konfigurirano",
     "none": "Brez",
     "modelOverrideValuePlaceholder": "Številska vrednost",
-    "modelOverrideKey": "Ključ preglasitve",
     "modelOverrideReasoningEffortsPlaceholder": "Vrednosti v angleščini, ločene z vejicami, npr. low, medium, high",
     "addKeyValue": "Dodaj ključ in vrednost",
     "noModelOverrides": "Za ta model ni konfiguriranih preglasitev.",
@@ -8946,7 +8945,8 @@
       "statsTitle": "Zaznave od ponovnega zagona",
       "statsEmpty": "Še ni zaznav.",
       "statsRequest": "Zahteve"
-    }
+    },
+    "modelOverrideKey": "Ključ preglasitve"
   },
   "contextRtk": {
     "title": "Pogon RTK",
@@ -9835,10 +9835,6 @@
     "streamTransformFailed": "Pretvorba toka ni uspela"
   },
   "usage": {
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Poraba",
     "grokExtraUsageCredits": "Dobroimetje za dodatno uporabo",
     "grokAutoTopUp": "Samodejno dopolnjevanje",
@@ -10292,6 +10288,10 @@
     "lastRefreshed": "Nazadnje osveženo",
     "providerQuota": "Kvota ponudnika",
     "providerQuotaHomeHint": "Stanje povezanih računov v živo",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Ponastavitev omejitve Claude",
     "confirmRedeemClaudeResetCredit": "Vnovčenje takoj ponastavi veljavne omejitve uporabe Claude in trajno porabi ta kredit.",
     "claudeResetCreditsModalTitle": "Krediti za ponastavitev Claude",
@@ -11453,7 +11453,6 @@
     "tableHealth": "Delovanje (24 h)",
     "tableUsage": "Uporaba",
     "tableActions": "Dejanja",
-    "moreActions": "Več dejanj",
     "test": "Preizkusi",
     "edit": "Uredi",
     "delete": "Izbriši",
@@ -11611,7 +11610,8 @@
     "notMeasured": "Ni izmerjeno",
     "upstream4xx": "{count} napake stranke na gornjem",
     "upstream5xx": "{count} napake strežnika na gornjem",
-    "uniformEgressLine": "Sočasen izpad {affected} od {exits} izhodov pri {provider} (zadnjih {hours}h) — ni težava izhoda"
+    "uniformEgressLine": "Sočasen izpad {affected} od {exits} izhodov pri {provider} (zadnjih {hours}h) — ni težava izhoda",
+    "moreActions": "Več dejanj"
   },
   "playground": {
     "title": "Preizkusno okolje za modele",
@@ -13858,7 +13858,6 @@
     "latency": "Zakasnitev",
     "quota": "Kvota",
     "rangeWindow": "časovno obdobje: {range}",
-    "timeRange": "Časovni razpon",
     "runtimeHealthBlend": "kombinacija izvajanja in stanja",
     "averageResponseTime": "povprečni odzivni čas",
     "worstQuota": "Najslabša kvota",
@@ -13913,7 +13912,8 @@
     "unknown": "neznano",
     "unknownProvider": "neznan ponudnik",
     "unknownModel": "neznan model",
-    "resolvedTargetMetrics": "{requests} zahtev · {success} uspešnih · {latency} · kvota {quota}"
+    "resolvedTargetMetrics": "{requests} zahtev · {success} uspešnih · {latency} · kvota {quota}",
+    "timeRange": "Časovni razpon"
   },
   "usageLimits": {
     "usdUsageQuota": "Kvota porabe v USD",

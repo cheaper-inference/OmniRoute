@@ -25,10 +25,8 @@
     "confirm": "क्या आप निश्चित हैं?",
     "refresh": "ताज़ा करें",
     "close": "बंद करें",
-    "dialogTitleFallback": "संवाद",
     "previousPage": "पिछला पृष्ठ",
     "nextPage": "अगला पृष्ठ",
-    "pagination": "पृष्ठांकन",
     "capsLockOn": "Caps Lock चालू है",
     "dismissNotification": "सूचना खारिज करें",
     "toggleColumns": "कॉलम टॉगल करें",
@@ -184,7 +182,6 @@
     "combos": "कॉम्बो",
     "noModelsFound": "कोई मॉडल नहीं मिला",
     "clear": "साफ़ करें",
-    "clearFilters": "फ़िल्टर साफ़ करें",
     "done": "हो गया",
     "selectAll": "सभी चुनें",
     "unselectAll": "चयन हटाएँ",
@@ -1002,6 +999,9 @@
     "batchFilePreview": "पूर्वावलोकन",
     "batchFilePreviewTruncated": "पहले {shown} पंक्तियाँ दिखा रहे हैं ({total} कुल पंक्तियाँ)",
     "batchFileDownloadFull": "पूर्ण फ़ाइल डाउनलोड करें",
+    "dialogTitleFallback": "संवाद",
+    "pagination": "पृष्ठांकन",
+    "clearFilters": "फ़िल्टर साफ़ करें",
     "tokensPageTitle": "टोकन",
     "tokensPageDescription": "API कुंजियों के बीच टोकन भेजें, आमंत्रण कोड साझा करें और समुदाय सर्वर कनेक्ट करें।",
     "tokensServerUrlLabel": "सर्वर URL"
@@ -1602,8 +1602,6 @@
     "quickNavigation": "त्वरित नेविगेशन",
     "quickNavigationTitle": "त्वरित नेविगेशन (⌘K / Ctrl+K)",
     "openQuickNavigation": "त्वरित नेविगेशन खोलें",
-    "openMenu": "मेनू खोलें",
-    "products": "Keak उत्पाद",
     "switchToLightMode": "लाइट मोड पर स्विच करें",
     "switchToDarkMode": "डार्क मोड पर स्विच करें",
     "language": "भाषा",
@@ -1702,7 +1700,9 @@
     "settingsAdvancedDescription": "उन्नत पेलोड नियम, अनुरोध सीमाएँ और प्रॉक्सी API सेटिंग्स",
     "mitmProxyDescription": "ट्रैफ़िक निरीक्षण और डीबगिंग के लिए MITM प्रॉक्सी सेटिंग्स कॉन्फ़िगर करें",
     "oneProxyDescription": "उन्नत प्रॉक्सी चेनिंग के लिए 1Proxy सेटिंग्स कॉन्फ़िगर करें",
-    "omniSkillsDescription": "स्वचालित प्रॉम्प्ट और टूल निष्पादन के लिए सैंडबॉक्स स्किल्स इंस्टॉल और प्रबंधित करें"
+    "omniSkillsDescription": "स्वचालित प्रॉम्प्ट और टूल निष्पादन के लिए सैंडबॉक्स स्किल्स इंस्टॉल और प्रबंधित करें",
+    "openMenu": "मेनू खोलें",
+    "products": "Keak उत्पाद"
   },
   "cloudSyncStatus": {
     "synced": "सिंक किया गया",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "कॉम्बो → {name}"
   },
   "combos": {
-    "title": "संयोजन",
-    "description": "भारित रूटिंग और फ़ॉलबैक समर्थन के साथ मॉडल कॉम्बो बनाएं",
-    "autoCatalogTitle": "ऑटो-रूटिंग कैटलॉग",
     "autoTosLoadError": "सेवा की शर्तों की नीति लोड नहीं हो सकी। इसे बदलने से पहले फिर कोशिश करें।",
     "autoTosSaveError": "सेवा की शर्तों की नीति सहेजी नहीं जा सकी। पिछली सेटिंग अभी भी दिखाई जा रही है। फिर कोशिश करें।",
     "autoTosIncludeLabel": "ToS: avoid चिह्नित प्रदाताओं को auto में शामिल करें",
     "autoTosDescription": "डिफ़ॉल्ट रूप से बंद है। सभी auto कॉम्बो पर लागू होता है, केवल एक खाते पर नहीं। प्रदाता जोड़ने से यह विकल्प चालू नहीं होता।",
+    "title": "संयोजन",
+    "description": "भारित रूटिंग और फ़ॉलबैक समर्थन के साथ मॉडल कॉम्बो बनाएं",
+    "autoCatalogTitle": "ऑटो-रूटिंग कैटलॉग",
     "autoCatalogTemplateCount": "{count} टेम्प्लेट",
     "autoCatalogDescription": "अंतर्निहित ऑटो/* कॉम्बो को कनेक्टेड प्रदाताओं से गतिशील रूप से हल किया गया। इनमें से किसी भी आईडी को मॉडल फ़ील्ड के रूप में उपयोग करें - किसी सेटअप की आवश्यकता नहीं है।",
     "autoCatalogExpand": "ऑटो-रूटिंग कैटलॉग का विस्तार करें",
@@ -3556,7 +3556,6 @@
     "playgroundNoCombosYet": "अभी तक कोई कॉम्बो कॉन्फ़िगर नहीं किया गया है।",
     "playgroundCreateFirst": "पहले एक बनाएं",
     "weighted": "भारित",
-    "weightPercent": "भार (%)",
     "leastUsed": "सबसे कम इस्तेमाल किया गया",
     "costOpt": "लागत-विकल्प",
     "strategyGuideTitle": "इस रणनीति का उपयोग कैसे करें",
@@ -3718,7 +3717,6 @@
     "builderGlobalAccountCount": "{count, plural, one {# खाता} other {# खाते}}",
     "builderGlobalAdded": "जोड़ा गया",
     "builderGlobalAdd": "जोड़ें",
-    "clearSearch": "खोज साफ़ करें",
     "manualModel": "मैनुअल मॉडल",
     "manualModelInvalid": "मॉडल को provider/model के रूप में दर्ज करें।",
     "manualModelUnknownProvider": "अज्ञात प्रदाता प्रीफिक्स।",
@@ -3973,10 +3971,6 @@
     "responseValidationMinLength": "न्यूनतम सामग्री लंबाई (वर्ण)",
     "responseValidationJsonPaths": "JSON-path जांच",
     "responseValidationAddCheck": "+ जांच जोड़ें",
-    "responseValidationRemoveCheck": "जाँच हटाएँ",
-    "responseValidationPath": "JSON पथ",
-    "responseValidationCondition": "शर्त",
-    "responseValidationValue": "अपेक्षित मान",
     "agentFeaturesSystemMessageOverride": "सिस्टम संदेश को ओवरराइड करें",
     "agentFeaturesSystemMessagePlaceholder": "आप एक विशेषज्ञ सहायक हैं...",
     "agentFeaturesSystemMessageHint": "एजेंटों के लिए सिस्टम संदेश ओवरराइड",
@@ -4018,7 +4012,13 @@
     "duplicateAutoComboSnapshotMsg": "यह इस टेम्पलेट से मेल खाने वाले वर्तमान जुड़े प्रदाताओं/मॉडल को संपादन योग्य कॉम्बो में स्नैपशॉट लेगा।",
     "duplicateAutoComboFailedPrefix": "ऑटोकॉम्बो डुप्लिकेट करने में विफल:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटि",
-    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं"
+    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं",
+    "weightPercent": "भार (%)",
+    "clearSearch": "खोज साफ़ करें",
+    "responseValidationRemoveCheck": "जाँच हटाएँ",
+    "responseValidationPath": "JSON पथ",
+    "responseValidationCondition": "शर्त",
+    "responseValidationValue": "अपेक्षित मान"
   },
   "costs": {
     "title": "लागत",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API प्रारूप लेबल",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "मुख्यभूमि चीन",
-    "apiRegionHint": "API एक्सेस और कोटा ट्रैकिंग के लिए उपयोग किया जाने वाला एंडपॉइंट क्षेत्र चुनें।",
-    "apiRegionInternational": "अंतरराष्ट्रीय",
-    "apiRegionLabel": "API क्षेत्र",
+    "apiRegionChina": "__MISSING__:Mainland China",
+    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
+    "apiRegionInternational": "__MISSING__:International",
+    "apiRegionLabel": "__MISSING__:API Region",
     "apikey": "API कुंजी",
     "audio": "ऑडियो",
     "audioProvidersHeading": "ऑडियो प्रदाता शीर्षक",
@@ -6085,13 +6085,6 @@
     "claudeLowPriorityModeDescription": "जब यह खाता अपनी 5 घंटे की उपयोग सीमा तक पहुँच जाता है और Anthropic कम-प्राथमिकता वाली लेन उपलब्ध कराता है, तो OmniRoute उसे स्वीकार कर लेता है और कनेक्शन को ठंडा करने के बजाय, विंडो रीसेट होने तक anthropic-usage-limit: slow के साथ अनुरोध भेजता रहता है। साप्ताहिक सीमा फिर भी लागू रहती है और प्रतिक्रियाओं को खाली क्षमता उपलब्ध होने तक प्रतीक्षा करनी पड़ सकती है।",
     "claudeAutoLimitResetLabel": "सत्र सीमा को स्वतः रीसेट करें (सप्ताह में एक बार)",
     "claudeAutoLimitResetDescription": "जब यह खाता अपनी 5 घंटे की उपयोग सीमा तक पहुँच जाता है और सत्र-सीमा रीसेट उपलब्ध होता है, तो OmniRoute उसे स्वचालित रूप से प्राप्त करके पूरी गति से फिर से प्रयास करता है। यह खाते के सप्ताह में एक बार मिलने वाले रीसेट का उपयोग करता है और फिर भी साप्ताहिक सीमा में गिना जाता है।",
-    "codexPaidCreditsShort": "अतिरिक्त क्रेडिट",
-    "codexPaidCreditsToggleTitle": "सदस्यता कोटा समाप्त होने के बाद सशुल्क Codex क्रेडिट की अनुमति दें (अतिरिक्त शुल्क लग सकते हैं)",
-    "codexPaidCreditsEnabled": "सशुल्क Codex क्रेडिट सक्षम हैं (अतिरिक्त शुल्क लग सकते हैं)",
-    "codexPaidCreditsDisabled": "सशुल्क Codex क्रेडिट अक्षम हैं",
-    "failedUpdateCodexPaidCredits": "सशुल्क Codex क्रेडिट नीति अपडेट नहीं हो सकी",
-    "allowCodexPaidCreditsLabel": "सशुल्क Codex क्रेडिट की अनुमति दें",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "अस्थायी कूलडाउन को छोड़ें ताकि पुनर्प्राप्ति योग्य त्रुटियों के बाद भी यह कनेक्शन योग्य बना रहे (प्रतिबंधित/समाप्त जैसी अंतिम स्थितियां अभी भी लागू होती हैं)।",
     "disableCoolingLabel": "इस कनेक्शन के लिए कूलडाउन अक्षम करें",
     "bulkPasteAdded": "{count, plural, one {1 कुंजी जोड़ी गई} other {# कुंजियाँ जोड़ी गईं}}",
@@ -6545,7 +6538,6 @@
       "monsterapi": "monsterapi.ai पर API कुंजी प्राप्त करें",
       "moonshot": "Moonshot AI को एक API कुंजी से कनेक्ट करें।",
       "morph": "निःशुल्क टियर: 250K क्रेडिट/माह, $0",
-      "apmix": "apmix.ai/dashboard से API की के साथ Apmix कनेक्ट करें — एक सब्सक्रिप्शन, कई मॉडल।",
       "nanogpt": "NanoGPT को एक API कुंजी से कनेक्ट करें।",
       "nebius": "API परीक्षण के लिए साइनअप पर ~$1 ट्रायल क्रेडिट",
       "nlpcloud": "NLP Cloud, OpenAI chat/completions के बजाय एक मालिकाना चैटबॉट API का उपयोग करता है। OmniRoute OpenAI संदेशों को इनपुट/संदर्भ/इतिहास के अनुकूल बनाता है और समर्थित चैटबॉट मॉडलों का एक स्थानीय कैटलॉग प्रदर्शित करता है।",
@@ -6642,7 +6634,8 @@
       "kiro": "फ्री टियर: 50 क्रेडिट/महीना (~25K–100K टोकन)। ⚠️ Kiro ToS तृतीय-पक्ष प्रॉक्सी/हार्नेस के उपयोग को प्रतिबंधित करता है।",
       "codex": "OpenAI Codex को मौजूदा OAuth फ़्लो से कनेक्ट करें।",
       "qwen": "Qwen Code को मौजूदा OAuth फ़्लो से कनेक्ट करें।",
-      "github-models": "github.com/settings/tokens पर 'models: read' स्कोप के साथ एक GitHub PAT बनाएं"
+      "github-models": "github.com/settings/tokens पर 'models: read' स्कोप के साथ एक GitHub PAT बनाएं",
+      "apmix": "apmix.ai/dashboard से API की के साथ Apmix कनेक्ट करें — एक सब्सक्रिप्शन, कई मॉडल।"
     },
     "passthroughModelsDescription": "{provider} प्रदाता-मूल मॉडल आईडी स्वीकार करता है। /मॉडल से आयात करें या रूटिंग के लिए कस्टम आईडी जोड़ें।",
     "bedrockModelsDescription": "अमेज़ॅन बेडरॉक मॉडल का दायरा AWS क्षेत्र द्वारा तय किया गया है। /मॉडल से आयात करें या चयनित क्षेत्र में सक्षम बेडरॉक मॉडल आईडी जोड़ें।",
@@ -6814,7 +6807,14 @@
     "rateLimitOverridesModelConcurrencyLabel": "प्रति-मॉडल समवर्तीता सीमाएँ",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "वैकल्पिक: प्रति पंक्ति एक model=cap, अपस्ट्रीम मॉडल आईडी से ठीक-ठीक मिलाया जाता है। अतिरिक्त अनुरोध स्थानीय रूप से कतार में रहते हैं; खाली का अर्थ है कोई प्रति-मॉडल सीमा नहीं।",
-    "rateLimitOverridesModelConcurrencyInvalid": "अमान्य प्रति-मॉडल समवर्तीता प्रविष्टि \"{entry}\" — model=cap का उपयोग करें, जहाँ cap 1 से {max} के बीच की पूर्ण संख्या हो।"
+    "rateLimitOverridesModelConcurrencyInvalid": "अमान्य प्रति-मॉडल समवर्तीता प्रविष्टि \"{entry}\" — model=cap का उपयोग करें, जहाँ cap 1 से {max} के बीच की पूर्ण संख्या हो।",
+    "codexPaidCreditsShort": "अतिरिक्त क्रेडिट",
+    "codexPaidCreditsToggleTitle": "सदस्यता कोटा समाप्त होने के बाद सशुल्क Codex क्रेडिट की अनुमति दें (अतिरिक्त शुल्क लग सकते हैं)",
+    "codexPaidCreditsEnabled": "सशुल्क Codex क्रेडिट सक्षम हैं (अतिरिक्त शुल्क लग सकते हैं)",
+    "codexPaidCreditsDisabled": "सशुल्क Codex क्रेडिट अक्षम हैं",
+    "failedUpdateCodexPaidCredits": "सशुल्क Codex क्रेडिट नीति अपडेट नहीं हो सकी",
+    "allowCodexPaidCreditsLabel": "सशुल्क Codex क्रेडिट की अनुमति दें",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
   },
   "settings": {
     "title": "सेटिंग्स",
@@ -7702,7 +7702,6 @@
     "configured": "कॉन्फ़िगर किया गया",
     "none": "कोई नहीं",
     "modelOverrideValuePlaceholder": "संख्यात्मक मान",
-    "modelOverrideKey": "ओवरराइड कुंजी",
     "modelOverrideReasoningEffortsPlaceholder": "अंग्रेज़ी में अल्पविराम से अलग किए गए मान, जैसे low, medium, high",
     "addKeyValue": "कुंजी मान जोड़ें",
     "noModelOverrides": "इस मॉडल के लिए कोई ओवरराइड कॉन्फ़िगर नहीं किया गया है।",
@@ -8946,7 +8945,8 @@
       "statsTitle": "पुनरारंभ के बाद से पहचान",
       "statsEmpty": "अभी तक कोई पहचान नहीं।",
       "statsRequest": "अनुरोध"
-    }
+    },
+    "modelOverrideKey": "ओवरराइड कुंजी"
   },
   "contextRtk": {
     "title": "RTK इंजन",
@@ -9835,10 +9835,6 @@
     "streamTransformFailed": "स्ट्रीम को रूपांतरित करने में विफल"
   },
   "usage": {
-    "codexPaidCreditsLabel": "सशुल्क Codex क्रेडिट",
-    "codexPaidCreditsAvailable": "उपलब्ध (शेष राशि की रिपोर्ट नहीं)",
-    "codexPaidCreditsUnavailable": "अनुपलब्ध या खर्च सीमा पूरी हो गई",
-    "codexPaidCreditsUnlimited": "असीमित",
     "title": "उपयोग",
     "grokExtraUsageCredits": "अतिरिक्त उपयोग क्रेडिट्स",
     "grokAutoTopUp": "स्वचालित टॉप-अप",
@@ -10292,6 +10288,10 @@
     "lastRefreshed": "अंतिम बार रीफ़्रेश किया गया",
     "providerQuota": "प्रदाता कोटा",
     "providerQuotaHomeHint": "कनेक्टेड खातों में लाइव स्थिति",
+    "codexPaidCreditsLabel": "सशुल्क Codex क्रेडिट",
+    "codexPaidCreditsAvailable": "उपलब्ध (शेष राशि की रिपोर्ट नहीं)",
+    "codexPaidCreditsUnavailable": "अनुपलब्ध या खर्च सीमा पूरी हो गई",
+    "codexPaidCreditsUnlimited": "असीमित",
     "claudeResetCreditDefaultTitle": "Claude सीमा रीसेट",
     "confirmRedeemClaudeResetCredit": "रिडीम करने पर पात्र Claude उपयोग सीमाएं तुरंत रीसेट हो जाती हैं और यह क्रेडिट स्थायी रूप से खर्च हो जाता है।",
     "claudeResetCreditsModalTitle": "Claude रीसेट क्रेडिट",
@@ -11453,7 +11453,6 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
-    "moreActions": "और कार्रवाइयाँ",
     "test": "परीक्षण करें",
     "edit": "संपादित करें",
     "delete": "हटाएँ",
@@ -11611,7 +11610,8 @@
     "notMeasured": "मापा नहीं गया",
     "upstream4xx": "{count} उपरी क्लाइंट त्रुटियाँ",
     "upstream5xx": "{count} उपरी सर्वर त्रुटियाँ",
-    "uniformEgressLine": "{exits} में से {affected} एग्ज़िट {provider} पर एक साथ विफल हो रहे हैं (पिछले {hours} घंटों में) — यह एग्ज़िट की समस्या नहीं है"
+    "uniformEgressLine": "{exits} में से {affected} एग्ज़िट {provider} पर एक साथ विफल हो रहे हैं (पिछले {hours} घंटों में) — यह एग्ज़िट की समस्या नहीं है",
+    "moreActions": "और कार्रवाइयाँ"
   },
   "playground": {
     "title": "Title",
@@ -13858,7 +13858,6 @@
     "latency": "विलंबता",
     "quota": "कोटा",
     "rangeWindow": "{range} विंडो",
-    "timeRange": "समय-सीमा",
     "runtimeHealthBlend": "रनटाइम/स्वास्थ्य मिश्रण",
     "averageResponseTime": "औसत प्रतिक्रिया समय",
     "worstQuota": "सबसे खराब कोटा",
@@ -13913,7 +13912,8 @@
     "unknown": "अज्ञात",
     "unknownProvider": "अज्ञात प्रदाता",
     "unknownModel": "अज्ञात मॉडल",
-    "resolvedTargetMetrics": "{requests} req · {success} सफल · {latency} · कोटा {quota}"
+    "resolvedTargetMetrics": "{requests} req · {success} सफल · {latency} · कोटा {quota}",
+    "timeRange": "समय-सीमा"
   },
   "usageLimits": {
     "usdUsageQuota": "USD उपयोग कोटा",

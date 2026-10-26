@@ -25,10 +25,8 @@
     "confirm": "តើអ្នកប្រាកដទេ?",
     "refresh": "ផ្ទុកឡើងវិញ",
     "close": "បិទ",
-    "dialogTitleFallback": "ប្រអប់",
     "previousPage": "ទំព័រមុន",
     "nextPage": "ទំព័របន្ទាប់",
-    "pagination": "ការបែងចែកទំព័រ",
     "capsLockOn": "Caps Lock កំពុងបើក",
     "dismissNotification": "បិទការជូនដំណឹង",
     "toggleColumns": "បិទបើកជួរឈរ",
@@ -184,7 +182,6 @@
     "combos": "បន្សំ",
     "noModelsFound": "រកមិនឃើញម៉ូដែល",
     "clear": "សម្អាត",
-    "clearFilters": "សម្អាតតម្រង",
     "done": "រួចរាល់",
     "selectAll": "ជ្រើសរើសទាំងអស់",
     "unselectAll": "ដកការជ្រើសរើសទាំងអស់",
@@ -1002,6 +999,9 @@
     "batchFilePreview": "មើលជាមុន",
     "batchFilePreviewTruncated": "កំពុងបង្ហាញ {shown} បន្ទាត់ដំបូង (សរុប {total} បន្ទាត់)",
     "batchFileDownloadFull": "ទាញយកឯកសារពេញលេញ",
+    "dialogTitleFallback": "ប្រអប់",
+    "pagination": "ការបែងចែកទំព័រ",
+    "clearFilters": "សម្អាតតម្រង",
     "tokensPageTitle": "ថូខឹន",
     "tokensPageDescription": "ផ្ញើថូខឹនរវាងសោ API ចែករំលែកកូដអញ្ជើញ និងភ្ជាប់ម៉ាស៊ីនមេសហគមន៍។",
     "tokensServerUrlLabel": "URL ម៉ាស៊ីនមេ"
@@ -1602,8 +1602,6 @@
     "quickNavigation": "ការរុករករហ័ស",
     "quickNavigationTitle": "ការរុករករហ័ស (⌘K / Ctrl+K)",
     "openQuickNavigation": "បើកការរុករករហ័ស",
-    "openMenu": "បើកម៉ឺនុយ",
-    "products": "ផលិតផល Keak",
     "switchToLightMode": "ប្តូរទៅទម្រង់ភ្លឺ",
     "switchToDarkMode": "ប្តូរទៅទម្រង់ងងឹត",
     "language": "ភាសា",
@@ -1702,7 +1700,9 @@
     "settingsAdvancedDescription": "ច្បាប់ payload កម្រិតខ្ពស់ ដែនកំណត់សំណើ និងការកំណត់ proxy API",
     "mitmProxyDescription": "កំណត់រចនាសម្ព័ន្ធការកំណត់ MITM proxy សម្រាប់ការត្រួតពិនិត្យចរាចរណ៍ និងការបំបាត់កំហុស",
     "oneProxyDescription": "កំណត់រចនាសម្ព័ន្ធការកំណត់ 1Proxy សម្រាប់ការតភ្ជាប់ proxy ជាខ្សែសង្វាក់កម្រិតខ្ពស់",
-    "omniSkillsDescription": "ដំឡើង និងគ្រប់គ្រងជំនាញ sandbox សម្រាប់ការប្រតិបត្តិ prompt និងឧបករណ៍ដោយស្វ័យប្រវត្តិ"
+    "omniSkillsDescription": "ដំឡើង និងគ្រប់គ្រងជំនាញ sandbox សម្រាប់ការប្រតិបត្តិ prompt និងឧបករណ៍ដោយស្វ័យប្រវត្តិ",
+    "openMenu": "បើកម៉ឺនុយ",
+    "products": "ផលិតផល Keak"
   },
   "cloudSyncStatus": {
     "synced": "បានធ្វើសមកាលកម្ម",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "បន្សំ → {name}"
   },
   "combos": {
-    "title": "បន្សំ",
-    "description": "បង្កើតបន្សំម៉ូដែលដោយប្រើការបញ្ជូនតាមទម្ងន់ និងការគាំទ្រការបម្រុងទុក",
-    "autoCatalogTitle": "កាតាឡុកបញ្ជូនដោយស្វ័យប្រវត្តិ",
     "autoTosLoadError": "មិនអាចផ្ទុកគោលការណ៍លក្ខខណ្ឌសេវាកម្មបានទេ។ សូមព្យាយាមម្តងទៀតមុនពេលផ្លាស់ប្តូរវា។",
     "autoTosSaveError": "មិនអាចរក្សាទុកគោលការណ៍លក្ខខណ្ឌសេវាកម្មបានទេ។ ការកំណត់ពីមុននៅតែត្រូវបានបង្ហាញ។ សូមព្យាយាមម្តងទៀត។",
     "autoTosIncludeLabel": "រួមបញ្ចូលអ្នកផ្តល់សេវាដែលបានសម្គាល់ ToS: avoid ក្នុង auto",
     "autoTosDescription": "បិទតាមលំនាំដើម។ អនុវត្តចំពោះបន្សំ auto ទាំងអស់ មិនមែនគ្រាន់តែគណនីមួយទេ។ ការភ្ជាប់អ្នកផ្តល់សេវាមិនបើកជម្រើសនេះទេ។",
+    "title": "បន្សំ",
+    "description": "បង្កើតបន្សំម៉ូដែលដោយប្រើការបញ្ជូនតាមទម្ងន់ និងការគាំទ្រការបម្រុងទុក",
+    "autoCatalogTitle": "កាតាឡុកបញ្ជូនដោយស្វ័យប្រវត្តិ",
     "autoCatalogTemplateCount": "គំរូ {count}",
     "autoCatalogDescription": "បន្សំ auto/* ដែលមានស្រាប់ ត្រូវបានកំណត់ជាថាមវន្តពីអ្នកផ្តល់សេវាដែលបានភ្ជាប់។ ប្រើ ID ណាមួយក្នុងចំណោមនេះជាវាលម៉ូដែល — មិនចាំបាច់កំណត់រចនាសម្ព័ន្ធទេ។",
     "autoCatalogExpand": "ពង្រីកកាតាឡុកបញ្ជូនដោយស្វ័យប្រវត្តិ",
@@ -3556,7 +3556,6 @@
     "playgroundNoCombosYet": "មិនទាន់មានបន្សំដែលបានកំណត់រចនាសម្ព័ន្ធទេ។",
     "playgroundCreateFirst": "បង្កើតមួយជាមុនសិន",
     "weighted": "តាមទម្ងន់",
-    "weightPercent": "ទម្ងន់ (%)",
     "leastUsed": "ប្រើតិចបំផុត",
     "costOpt": "បង្កើនប្រសិទ្ធភាពចំណាយ",
     "strategyGuideTitle": "របៀបប្រើយុទ្ធសាស្ត្រនេះ",
@@ -3718,7 +3717,6 @@
     "builderGlobalAccountCount": "{count, plural, one {# គណនី} other {# គណនី}}",
     "builderGlobalAdded": "បានបន្ថែម",
     "builderGlobalAdd": "បន្ថែម",
-    "clearSearch": "សម្អាតការស្វែងរក",
     "manualModel": "ម៉ូដែលបញ្ចូលដោយដៃ",
     "manualModelInvalid": "បញ្ចូលម៉ូដែលក្នុងទម្រង់ provider/model។",
     "manualModelUnknownProvider": "មិនស្គាល់បុព្វបទអ្នកផ្តល់សេវា។",
@@ -3973,10 +3971,6 @@
     "responseValidationMinLength": "ប្រវែងខ្លឹមសារអប្បបរមា (តួអក្សរ)",
     "responseValidationJsonPaths": "ការត្រួតពិនិត្យ JSON-path",
     "responseValidationAddCheck": "+ បន្ថែមការត្រួតពិនិត្យ",
-    "responseValidationRemoveCheck": "លុបការត្រួតពិនិត្យ",
-    "responseValidationPath": "ផ្លូវ JSON",
-    "responseValidationCondition": "លក្ខខណ្ឌ",
-    "responseValidationValue": "តម្លៃរំពឹងទុក",
     "agentFeaturesSystemMessageOverride": "សារប្រព័ន្ធជំនួស",
     "agentFeaturesSystemMessagePlaceholder": "អ្នកគឺជាជំនួយការដែលមានជំនាញ...",
     "agentFeaturesSystemMessageHint": "ការជំនួសសារប្រព័ន្ធសម្រាប់ភ្នាក់ងារ",
@@ -4018,7 +4012,13 @@
     "duplicateAutoComboSnapshotMsg": "វានឹងថតស្ថានភាពបច្ចុប្បន្ននៃអ្នកផ្តល់សេវា/ម៉ូដែលដែលបានតភ្ជាប់ និងត្រូវគ្នានឹងគំរូនេះ ទៅជាបន្សំដែលអាចកែសម្រួលបាន។",
     "duplicateAutoComboFailedPrefix": "មិនអាចចម្លងបន្សំស្វ័យប្រវត្តិបានទេ៖",
     "duplicateAutoComboUnknownError": "កំហុសដែលមិនស្គាល់",
-    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}"
+    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}",
+    "weightPercent": "ទម្ងន់ (%)",
+    "clearSearch": "សម្អាតការស្វែងរក",
+    "responseValidationRemoveCheck": "លុបការត្រួតពិនិត្យ",
+    "responseValidationPath": "ផ្លូវ JSON",
+    "responseValidationCondition": "លក្ខខណ្ឌ",
+    "responseValidationValue": "តម្លៃរំពឹងទុក"
   },
   "costs": {
     "title": "ការចំណាយ",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "ស្លាកទម្រង់ API",
     "apiKeyOptionalHint": "ទុកឱ្យទទេ ប្រសិនបើការដំឡើងក្នុងម៉ាស៊ីនរបស់អ្នក ឬអ្នកផ្តល់សេវាមិនតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ។",
     "apiKeyOptionalLabel": "API Key (ជាជម្រើស)",
-    "apiRegionChina": "ចិនដីគោក",
-    "apiRegionHint": "ជ្រើសរើសតំបន់ endpoint ដែលប្រើសម្រាប់ការចូលប្រើ API និងការតាមដានកូតា។",
-    "apiRegionInternational": "អន្តរជាតិ",
-    "apiRegionLabel": "តំបន់ API",
+    "apiRegionChina": "__MISSING__:Mainland China",
+    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
+    "apiRegionInternational": "__MISSING__:International",
+    "apiRegionLabel": "__MISSING__:API Region",
     "apikey": "API key",
     "audio": "អូឌីយ៉ូ",
     "audioProvidersHeading": "ចំណងជើងអ្នកផ្តល់សេវាអូឌីយ៉ូ",
@@ -6545,7 +6545,6 @@
       "monsterapi": "ទទួលបាន API key នៅ monsterapi.ai",
       "moonshot": "ភ្ជាប់ Kimi ដោយប្រើ API key។",
       "morph": "កម្រិតឥតគិតថ្លៃ៖ 250K credits/ខែ, $0",
-      "apmix": "ភ្ជាប់ Apmix ជាមួយកូនសោ API ពី apmix.ai/dashboard — ជាវជាប់តែមួយ ម៉ូដែលច្រើន។",
       "nanogpt": "ភ្ជាប់ NanoGPT ដោយប្រើ API key។",
       "nebius": "ឥណទានសាកល្បងប្រហែល $1 នៅពេលចុះឈ្មោះ សម្រាប់ការធ្វើតេស្ត API",
       "nlpcloud": "NLP Cloud ប្រើ chatbot API ដែលជាកម្មសិទ្ធិផ្ទាល់ខ្លួន ជំនួសឱ្យ OpenAI chat/completions។ OmniRoute សម្របសារ OpenAI ទៅជា input/context/history និងផ្តល់កាតាឡុកក្នុងមូលដ្ឋាននៃម៉ូដែល chatbot ដែលគាំទ្រ។",
@@ -6642,7 +6641,8 @@
       "kiro": "កម្រិតឥតគិតថ្លៃ៖ 50 ក្រេឌីត/ខែ (~25K–100K tokens)។ ⚠️ លក្ខខណ្ឌប្រើប្រាស់ Kiro ហាមឃាត់ការប្រើប្រាស់ proxy/harness របស់ភាគីទីបី។",
       "codex": "ភ្ជាប់ OpenAI Codex ដោយប្រើលំហូរ OAuth ដែលមានស្រាប់។",
       "qwen": "ភ្ជាប់ Qwen Code ដោយប្រើលំហូរ OAuth ដែលមានស្រាប់។",
-      "github-models": "បង្កើត GitHub PAT ដែលមាន scope 'models: read' នៅ github.com/settings/tokens"
+      "github-models": "បង្កើត GitHub PAT ដែលមាន scope 'models: read' នៅ github.com/settings/tokens",
+      "apmix": "ភ្ជាប់ Apmix ជាមួយកូនសោ API ពី apmix.ai/dashboard — ជាវជាប់តែមួយ ម៉ូដែលច្រើន។"
     },
     "passthroughModelsDescription": "{provider} ទទួលយក ID ម៉ូដែលដើមរបស់ provider។ នាំចូលពី /models ឬបន្ថែម ID ផ្ទាល់ខ្លួនសម្រាប់ការកំណត់ផ្លូវ។",
     "bedrockModelsDescription": "ម៉ូដែល Amazon Bedrock ត្រូវបានកំណត់តាមតំបន់ AWS។ នាំចូលពី /models ឬបន្ថែម ID ម៉ូដែល Bedrock ដែលបានបើកប្រើក្នុងតំបន់ដែលបានជ្រើសរើស។",
@@ -7702,7 +7702,6 @@
     "configured": "បានកំណត់រចនាសម្ព័ន្ធ",
     "none": "គ្មាន",
     "modelOverrideValuePlaceholder": "តម្លៃជាលេខ",
-    "modelOverrideKey": "សោសម្រាប់កំណត់ជំនួស",
     "modelOverrideReasoningEffortsPlaceholder": "បំបែកដោយសញ្ញាក្បៀសអង់គ្លេស ឧ. low, medium, high",
     "addKeyValue": "បន្ថែមគូសោ-តម្លៃ",
     "noModelOverrides": "មិនមានការកំណត់ជំនួសសម្រាប់ម៉ូដែលនេះទេ។",
@@ -8946,7 +8945,8 @@
       "statsTitle": "ការរកឃើញតាំងពីចាប់ផ្ដើមឡើងវិញ",
       "statsEmpty": "មិនទាន់មានការរកឃើញទេ។",
       "statsRequest": "សំណើ"
-    }
+    },
+    "modelOverrideKey": "សោសម្រាប់កំណត់ជំនួស"
   },
   "contextRtk": {
     "title": "ម៉ាស៊ីន RTK",
@@ -11453,7 +11453,6 @@
     "tableHealth": "ស្ថានភាពដំណើរការ (24h)",
     "tableUsage": "ការប្រើប្រាស់",
     "tableActions": "សកម្មភាព",
-    "moreActions": "សកម្មភាពបន្ថែម",
     "test": "សាកល្បង",
     "edit": "កែសម្រួល",
     "delete": "លុប",
@@ -11611,7 +11610,8 @@
     "notMeasured": "មិនបានវាស់",
     "upstream4xx": "កំហុសអតិថិជន {count}",
     "upstream5xx": "កំហុសម៉ាស៊ីនមេ {count}",
-    "uniformEgressLine": "{affected} ក្នុងចំណោម {exits} ច្រកចេញបានបរាជ័យជាមួយគ្នានៅលើ {provider} (ក្នុង {hours}ម៉ោងចុងក្រោយ) — មិនមែនជាបញ្ហាច្រកចេញទេ"
+    "uniformEgressLine": "{affected} ក្នុងចំណោម {exits} ច្រកចេញបានបរាជ័យជាមួយគ្នានៅលើ {provider} (ក្នុង {hours}ម៉ោងចុងក្រោយ) — មិនមែនជាបញ្ហាច្រកចេញទេ",
+    "moreActions": "សកម្មភាពបន្ថែម"
   },
   "playground": {
     "title": "កន្លែងសាកល្បងម៉ូដែល",
@@ -13858,7 +13858,6 @@
     "latency": "រយៈពេលឆ្លើយតប",
     "quota": "កូតា",
     "rangeWindow": "ចន្លោះពេល {range}",
-    "timeRange": "ចន្លោះពេល",
     "runtimeHealthBlend": "ការរួមបញ្ចូលទិន្នន័យពេលដំណើរការ/ស្ថានភាព",
     "averageResponseTime": "រយៈពេលឆ្លើយតបជាមធ្យម",
     "worstQuota": "កូតាដែលអាក្រក់បំផុត",
@@ -13913,7 +13912,8 @@
     "unknown": "មិនស្គាល់",
     "unknownProvider": "អ្នកផ្តល់សេវាមិនស្គាល់",
     "unknownModel": "ម៉ូដែលមិនស្គាល់",
-    "resolvedTargetMetrics": "សំណើ {requests} · ជោគជ័យ {success} · {latency} · កូតា {quota}"
+    "resolvedTargetMetrics": "សំណើ {requests} · ជោគជ័យ {success} · {latency} · កូតា {quota}",
+    "timeRange": "ចន្លោះពេល"
   },
   "usageLimits": {
     "usdUsageQuota": "កូតាការប្រើប្រាស់ជា USD",

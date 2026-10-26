@@ -25,10 +25,8 @@
     "confirm": "Вы уверены?",
     "refresh": "Обновить",
     "close": "Закрыть",
-    "dialogTitleFallback": "Диалоговое окно",
     "previousPage": "Предыдущая страница",
     "nextPage": "Следующая страница",
-    "pagination": "Пагинация",
     "capsLockOn": "Caps Lock включен",
     "dismissNotification": "Скрыть уведомление",
     "toggleColumns": "Переключить колонки",
@@ -184,7 +182,6 @@
     "combos": "Комбинации",
     "noModelsFound": "Модели не найдены",
     "clear": "Очистить",
-    "clearFilters": "Очистить фильтры",
     "done": "Готово",
     "selectAll": "Выбрать все",
     "unselectAll": "Снять выделение",
@@ -1002,6 +999,9 @@
     "batchFilePreview": "Предварительный просмотр",
     "batchFilePreviewTruncated": "Показаны первые {shown} строки ({total} всего строк)",
     "batchFileDownloadFull": "Скачать полный файл",
+    "dialogTitleFallback": "Диалоговое окно",
+    "pagination": "Пагинация",
+    "clearFilters": "Очистить фильтры",
     "tokensPageTitle": "Токены",
     "tokensPageDescription": "Передавайте токены между API-ключами, делитесь кодами приглашений и подключайте серверы сообщества.",
     "tokensServerUrlLabel": "URL сервера"
@@ -1602,8 +1602,6 @@
     "quickNavigation": "Быстрая навигация",
     "quickNavigationTitle": "Быстрая навигация (⌘K / Ctrl+K)",
     "openQuickNavigation": "Открыть быструю навигацию",
-    "openMenu": "Открыть меню",
-    "products": "Продукты Keak",
     "switchToLightMode": "Переключить на светлый режим",
     "switchToDarkMode": "Переключить на темный режим",
     "language": "Язык",
@@ -1702,7 +1700,9 @@
     "settingsAdvancedDescription": "Расширенные правила обработки полезной нагрузки, ограничения запросов и настройки API прокси-сервера",
     "mitmProxyDescription": "Настройка MITM-прокси для анализа трафика и отладки",
     "oneProxyDescription": "Настройка 1Proxy для расширенного построения цепочек прокси-серверов",
-    "omniSkillsDescription": "Установите и управляйте песочными навыками для автоматизированного выполнения запросов и инструментов"
+    "omniSkillsDescription": "Установите и управляйте песочными навыками для автоматизированного выполнения запросов и инструментов",
+    "openMenu": "Открыть меню",
+    "products": "Продукты Keak"
   },
   "cloudSyncStatus": {
     "synced": "Синхронизировано",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Комбинация → {name}"
   },
   "combos": {
-    "title": "Комбо",
-    "description": "Создавайте комбинации моделей с взвешенной маршрутизацией и поддержкой резервного варианта.",
-    "autoCatalogTitle": "Каталог автомаршрутизации",
     "autoTosLoadError": "Не удалось загрузить политику ToS. Повторите попытку перед изменением.",
     "autoTosSaveError": "Не удалось сохранить политику ToS. По-прежнему отображается прежняя настройка. Повторите попытку.",
     "autoTosIncludeLabel": "Включать в auto провайдеров с отметкой ToS: avoid",
     "autoTosDescription": "По умолчанию выключено. Применяется ко всем комбинациям auto, а не только к одному аккаунту. Подключение провайдера не включает эту опцию.",
+    "title": "Комбо",
+    "description": "Создавайте комбинации моделей с взвешенной маршрутизацией и поддержкой резервного варианта.",
+    "autoCatalogTitle": "Каталог автомаршрутизации",
     "autoCatalogTemplateCount": "{count} шаблонов",
     "autoCatalogDescription": "Встроенные комбинации auto/* разрешаются динамически от подключенных провайдеров. Используйте любой из этих идентификаторов в качестве поля модели — настройка не требуется.",
     "autoCatalogExpand": "Развернуть каталог автотрассировки",
@@ -3556,7 +3556,6 @@
     "playgroundNoCombosYet": "Combo еще не настроены.",
     "playgroundCreateFirst": "Сначала создайте один",
     "weighted": "Взвешенный",
-    "weightPercent": "Вес (%)",
     "leastUsed": "Наименее используемый",
     "costOpt": "Оптимизация по стоимости",
     "strategyGuideTitle": "Как использовать эту стратегию",
@@ -3718,7 +3717,6 @@
     "builderGlobalAccountCount": "{count, plural, one {# аккаунт} other {# аккаунтов}}",
     "builderGlobalAdded": "Добавлено",
     "builderGlobalAdd": "Добавить",
-    "clearSearch": "Очистить поиск",
     "manualModel": "Ручная модель",
     "manualModelInvalid": "Введите модель в формате provider/model.",
     "manualModelUnknownProvider": "Неизвестный префикс провайдера.",
@@ -3973,10 +3971,6 @@
     "responseValidationMinLength": "Минимальная длина контента (символов)",
     "responseValidationJsonPaths": "Проверки JSON-path",
     "responseValidationAddCheck": "+ Добавить проверку",
-    "responseValidationRemoveCheck": "Удалить проверку",
-    "responseValidationPath": "Путь JSON",
-    "responseValidationCondition": "Условие",
-    "responseValidationValue": "Ожидаемое значение",
     "agentFeaturesSystemMessageOverride": "Переопределить системное сообщение",
     "agentFeaturesSystemMessagePlaceholder": "Вы профессиональный помощник...",
     "agentFeaturesSystemMessageHint": "Переопределение системных сообщений для агентов",
@@ -4018,7 +4012,13 @@
     "duplicateAutoComboSnapshotMsg": "Это создаст снимок текущих подключенных провайдеров/моделей, соответствующих этому шаблону, в редактируемом комбо.",
     "duplicateAutoComboFailedPrefix": "Не удалось дублировать автоматическое комбо:",
     "duplicateAutoComboUnknownError": "Неизвестная ошибка",
-    "duplicateAutoComboTitle": "Создать статическое комбо из {name}"
+    "duplicateAutoComboTitle": "Создать статическое комбо из {name}",
+    "weightPercent": "Вес (%)",
+    "clearSearch": "Очистить поиск",
+    "responseValidationRemoveCheck": "Удалить проверку",
+    "responseValidationPath": "Путь JSON",
+    "responseValidationCondition": "Условие",
+    "responseValidationValue": "Ожидаемое значение"
   },
   "costs": {
     "title": "Затраты",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Метка формата API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Материковый Китай",
-    "apiRegionHint": "Выберите регион конечной точки, используемый для доступа к API и отслеживания квот.",
-    "apiRegionInternational": "Международный",
-    "apiRegionLabel": "Регион API",
+    "apiRegionChina": "__MISSING__:Mainland China",
+    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
+    "apiRegionInternational": "__MISSING__:International",
+    "apiRegionLabel": "__MISSING__:API Region",
     "apikey": "API-ключ",
     "audio": "Аудио",
     "audioProvidersHeading": "Заголовок раздела аудиопровайдеров",
@@ -6085,13 +6085,6 @@
     "claudeLowPriorityModeDescription": "Когда эта учётная запись достигает 5-часового лимита использования и Anthropic предлагает режим с пониженным приоритетом, OmniRoute принимает его и продолжает отправлять запросы с anthropic-usage-limit: slow до сброса окна вместо приостановки соединения. Недельный лимит по-прежнему действует, а ответы могут ожидать освобождения ресурсов.",
     "claudeAutoLimitResetLabel": "Автоматически сбрасывать лимит сеанса (раз в неделю)",
     "claudeAutoLimitResetDescription": "Когда эта учётная запись достигает 5-часового лимита использования и доступен сброс лимита сеанса, OmniRoute автоматически активирует его и повторяет запросы на полной скорости. При этом используется доступный раз в неделю сброс для учётной записи, а использование по-прежнему учитывается в недельном лимите.",
-    "codexPaidCreditsShort": "Доп. кредиты",
-    "codexPaidCreditsToggleTitle": "Разрешить платные кредиты Codex после исчерпания квоты подписки (возможны дополнительные списания)",
-    "codexPaidCreditsEnabled": "Платные кредиты Codex включены (возможны дополнительные списания)",
-    "codexPaidCreditsDisabled": "Платные кредиты Codex отключены",
-    "failedUpdateCodexPaidCredits": "Не удалось обновить политику платных кредитов Codex",
-    "allowCodexPaidCreditsLabel": "Разрешить платные кредиты Codex",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Пропускать временный кулдаун, чтобы это подключение оставалось доступным даже после устранимых ошибок (терминальные состояния, такие как banned/expired, по-прежнему применяются).",
     "disableCoolingLabel": "Отключить кулдаун для этого подключения",
     "bulkPasteAdded": "{count, plural, one {Добавлен 1 ключ} few {Добавлено # ключа} many {Добавлено # ключей} other {Добавлено # ключа}}",
@@ -6545,7 +6538,6 @@
       "monsterapi": "Получить API-ключ на monsterapi.ai",
       "moonshot": "Подключить Moonshot AI с помощью API-ключа.",
       "morph": "Бесплатный тариф: 250 тыс. кредитов/месяц, $0",
-      "apmix": "Подключите Apmix с API-ключом от apmix.ai/dashboard — одна подписка, много моделей.",
       "nanogpt": "Подключить NanoGPT с помощью API-ключа.",
       "nebius": "~ $1 пробных кредитов при регистрации для тестирования API",
       "nlpcloud": "NLP Cloud использует собственный API чат-бота вместо OpenAI chat/completions. OmniRoute адаптирует сообщения OpenAI к входным данным/контексту/истории и предоставляет локальный каталог поддерживаемых моделей чат-ботов.",
@@ -6642,7 +6634,8 @@
       "kiro": "Бесплатный тариф: 50 кредитов/месяц (~25K–100K токенов). ⚠️ Условия использования Kiro запрещают использование сторонних прокси/оболочек.",
       "codex": "Подключите OpenAI Codex с помощью существующего процесса OAuth.",
       "qwen": "Подключите Qwen Code с помощью существующего процесса OAuth.",
-      "github-models": "Создайте GitHub PAT с областью доступа 'models: read' на github.com/settings/tokens"
+      "github-models": "Создайте GitHub PAT с областью доступа 'models: read' на github.com/settings/tokens",
+      "apmix": "Подключите Apmix с API-ключом от apmix.ai/dashboard — одна подписка, много моделей."
     },
     "passthroughModelsDescription": "{provider} принимает собственные идентификаторы моделей поставщика. Импортируйте из /models или добавляйте собственные идентификаторы для маршрутизации.",
     "bedrockModelsDescription": "Модели Amazon Bedrock охватываются регионом AWS. Импортируйте из /models или добавьте идентификаторы моделей Bedrock, включенные в выбранном регионе.",
@@ -6814,7 +6807,14 @@
     "rateLimitOverridesModelConcurrencyLabel": "Лимиты параллелизма по моделям",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Необязательно: одна запись model=cap в строке, сопоставляется с точным идентификатором upstream-модели. Лишние запросы ставятся в локальную очередь; пусто — без лимита по модели.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Недопустимая запись параллелизма по модели «{entry}» — используйте model=cap, где cap — целое число от 1 до {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Недопустимая запись параллелизма по модели «{entry}» — используйте model=cap, где cap — целое число от 1 до {max}.",
+    "codexPaidCreditsShort": "Доп. кредиты",
+    "codexPaidCreditsToggleTitle": "Разрешить платные кредиты Codex после исчерпания квоты подписки (возможны дополнительные списания)",
+    "codexPaidCreditsEnabled": "Платные кредиты Codex включены (возможны дополнительные списания)",
+    "codexPaidCreditsDisabled": "Платные кредиты Codex отключены",
+    "failedUpdateCodexPaidCredits": "Не удалось обновить политику платных кредитов Codex",
+    "allowCodexPaidCreditsLabel": "Разрешить платные кредиты Codex",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
   },
   "settings": {
     "title": "Настройки",
@@ -7702,7 +7702,6 @@
     "configured": "настроено",
     "none": "Нет",
     "modelOverrideValuePlaceholder": "Числовое значение",
-    "modelOverrideKey": "Ключ переопределения",
     "modelOverrideReasoningEffortsPlaceholder": "Через запятую на английском, например: low, medium, high",
     "addKeyValue": "Добавить ключ-значение",
     "noModelOverrides": "Для этой модели не настроено переопределений.",
@@ -8946,7 +8945,8 @@
       "statsTitle": "Обнаружения с момента перезапуска",
       "statsEmpty": "Пока нет обнаружений.",
       "statsRequest": "Запросы"
-    }
+    },
+    "modelOverrideKey": "Ключ переопределения"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9835,10 +9835,6 @@
     "streamTransformFailed": "Не удалось преобразовать поток"
   },
   "usage": {
-    "codexPaidCreditsLabel": "Платные кредиты Codex",
-    "codexPaidCreditsAvailable": "Доступно (баланс не сообщается)",
-    "codexPaidCreditsUnavailable": "Недоступно или достигнут лимит расходов",
-    "codexPaidCreditsUnlimited": "Безлимитно",
     "title": "Использование",
     "grokExtraUsageCredits": "Дополнительные кредиты на использование",
     "grokAutoTopUp": "Авто пополнение",
@@ -10292,6 +10288,10 @@
     "lastRefreshed": "Последнее обновление",
     "providerQuota": "Квота Провайдера",
     "providerQuotaHomeHint": "Живой статус по подключенным аккаунтам",
+    "codexPaidCreditsLabel": "Платные кредиты Codex",
+    "codexPaidCreditsAvailable": "Доступно (баланс не сообщается)",
+    "codexPaidCreditsUnavailable": "Недоступно или достигнут лимит расходов",
+    "codexPaidCreditsUnlimited": "Безлимитно",
     "claudeResetCreditDefaultTitle": "Сброс лимитов Claude",
     "confirmRedeemClaudeResetCredit": "Активация мгновенно сбрасывает применимые лимиты использования Claude и безвозвратно расходует этот кредит.",
     "claudeResetCreditsModalTitle": "Кредиты на сброс Claude",
@@ -11453,7 +11453,6 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
-    "moreActions": "Дополнительные действия",
     "test": "Проверить",
     "edit": "Изменить",
     "delete": "Удалить",
@@ -11611,7 +11610,8 @@
     "notMeasured": "Не измерено",
     "upstream4xx": "{count} ошибки клиента вверху",
     "upstream5xx": "{count} ошибки сервера вверху",
-    "uniformEgressLine": "{affected} из {exits} выходов одновременно дают сбой у {provider} (за последние {hours} ч) — проблема не в выходе"
+    "uniformEgressLine": "{affected} из {exits} выходов одновременно дают сбой у {provider} (за последние {hours} ч) — проблема не в выходе",
+    "moreActions": "Дополнительные действия"
   },
   "playground": {
     "title": "Title",
@@ -13858,7 +13858,6 @@
     "latency": "Задержка",
     "quota": "Квота",
     "rangeWindow": "Окно: {range}",
-    "timeRange": "Диапазон времени",
     "runtimeHealthBlend": "сочетание показателей среды выполнения и состояния",
     "averageResponseTime": "среднее время ответа",
     "worstQuota": "Наихудшая квота",
@@ -13913,7 +13912,8 @@
     "unknown": "неизвестно",
     "unknownProvider": "неизвестный провайдер",
     "unknownModel": "неизвестная модель",
-    "resolvedTargetMetrics": "{requests} запр. · {success} усп. · {latency} · квота {quota}"
+    "resolvedTargetMetrics": "{requests} запр. · {success} усп. · {latency} · квота {quota}",
+    "timeRange": "Диапазон времени"
   },
   "usageLimits": {
     "usdUsageQuota": "Квота использования в USD",
