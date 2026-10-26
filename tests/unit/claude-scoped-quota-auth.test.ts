@@ -1154,7 +1154,7 @@ test("#18058: Claude model-credit entitlement scopes a cold or stale quota snaps
   assert.deepEqual(decide({ nowMs: now + 6 * 60_000 }), modelFallback);
 });
 
-test("#18058: an unrelated scoped window cannot override an explicit model entitlement", () => {
+test("#18058: unrelated model quota cannot override entitlement, but a global blocker can", () => {
   const connectionId = "claude-model-credit-unrelated-scope";
   const now = Date.now();
   const resetAt = new Date(now + 120_000).toISOString();
