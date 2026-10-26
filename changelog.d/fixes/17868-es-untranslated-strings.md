@@ -1,0 +1,1 @@
+- **fix(i18n):** Spanish UI strings left in English or stale are now translated from the current English source ([#17868](https://github.com/diegosouzapw/OmniRoute/pull/17868)) — thanks @DeadY2J

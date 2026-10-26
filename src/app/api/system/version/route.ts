@@ -27,6 +27,7 @@ import {
 import { describeReleaseChannels } from "@/lib/system/releaseChannel";
 import { resolveGlobalOmniroutePath } from "@/lib/system/globalPackagePath";
 import { restartRunningServer } from "@/lib/system/processManagerRestart";
+import { formatUpdateInstallError } from "@/lib/system/updateInstallError";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
 // #5542 — On Windows npm is `npm.cmd`; Node ≥24 refuses to execFile a `.cmd` without
 // a shell (nodejs/node#52554 → "spawn npm ENOENT"). buildNpmExecOptions enables the
@@ -395,7 +396,9 @@ export async function POST(req: NextRequest) {
         });
         console.log(`[AutoUpdate] Successfully updated to v${latest}`);
       } catch (err: any) {
-        const errMsg = err?.stderr || err?.message || String(err);
+        // Windows keeps the running server's package files open, so npm fails with
+        // EBUSY/EPERM — explain the manual recovery instead of dumping npm's stderr.
+        const errMsg = formatUpdateInstallError(err, { platform: process.platform, latest });
         send({ step: "error", status: "failed", message: errMsg });
         console.error(`[AutoUpdate] Update failed:`, err);
       } finally {

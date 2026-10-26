@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 const {
   isUselessEmptyTurn,
+  hasUsableContentText,
   summarizeReplayedUpstreamTurn,
   readBoundedResponseText,
   readBoundedResponseOutcome,
@@ -57,6 +58,102 @@ test("shared core matches the frozen guard condition", () => {
   assert.equal(isEmptyTurnCore(false, false), true);
   assert.equal(isEmptyTurnCore(true, false), false);
   assert.equal(isEmptyTurnCore(false, true), false);
+});
+
+/**
+ * #17461: a turn whose whole output is draft/system-echo markup
+ * (`<summary>…</summary>`, `<analysis>…</analysis>`) carries no answer — the
+ * client strips the tags and is left with an empty turn. It must count as an
+ * empty turn so the recovery path can retry it on another connection.
+ */
+test("draft-only content is an empty turn (#17461)", () => {
+  assert.equal(
+    isUselessEmptyTurn({
+      ...base,
+      contentText: "<summary>draft</summary>\n<analysis>draft</analysis>",
+      forwardedValuableChunk: true,
+    }),
+    true
+  );
+  assert.equal(
+    isUselessEmptyTurn({
+      ...base,
+      contentText: "<summary>draft</summary>",
+      hasValidUsage: true,
+    }),
+    true
+  );
+});
+
+test("real content next to draft markup is not an empty turn (#17461)", () => {
+  assert.equal(
+    isUselessEmptyTurn({
+      ...base,
+      contentText: "<summary>draft</summary>\nThe actual answer.",
+    }),
+    false
+  );
+});
+
+test("hasUsableContentText ignores draft-only text and keeps real text (#17461)", () => {
+  assert.equal(hasUsableContentText(""), false);
+  assert.equal(hasUsableContentText("   \n "), false);
+  assert.equal(hasUsableContentText("<summary>draft</summary>"), false);
+  assert.equal(hasUsableContentText("<summary>draft</summary>\n<analysis>draft</analysis>"), false);
+  assert.equal(hasUsableContentText("<summary>draft</summary>answer"), true);
+  assert.equal(hasUsableContentText("hello"), true);
+  // Repeated use must stay stable (the matcher is a global regex).
+  assert.equal(hasUsableContentText("<summary>draft</summary>"), false);
+  assert.equal(hasUsableContentText("<summary>draft</summary>"), false);
+});
+
+/**
+ * A block carrying >= SYSTEM_ECHO_THRESHOLD chars of content is the model's real
+ * response (the Claude Code compaction shape), not a draft skeleton — same
+ * exemption `directivePreambleStripper` applies. It must never be retried as empty.
+ */
+test("long analysis+summary compaction reply is usable content, not an empty turn (#17461)", () => {
+  const compaction =
+    "<analysis>" + "a".repeat(3000) + "</analysis>\n<summary>" + "s".repeat(5000) + "</summary>";
+  assert.equal(hasUsableContentText(compaction), true);
+  assert.equal(
+    isUselessEmptyTurn({ ...base, contentText: compaction, forwardedValuableChunk: true }),
+    false
+  );
+  assert.equal(isUselessEmptyTurn({ ...base, contentText: compaction }), false);
+  // A single large block is enough, whatever its tag.
+  assert.equal(hasUsableContentText("<summary>" + "s".repeat(1000) + "</summary>"), true);
+  // Just under the threshold a block is still a draft skeleton.
+  assert.equal(hasUsableContentText("<summary>" + "s".repeat(999) + "</summary>"), false);
+  assert.equal(
+    hasUsableContentText(
+      "<analysis>" + "a".repeat(999) + "</analysis><summary>" + "s".repeat(999) + "</summary>"
+    ),
+    false
+  );
+});
+
+/**
+ * Behavior note (#17461): whitespace-only text used to count as content
+ * (`length > 0`). It no longer does, so such a turn falls through to the
+ * reasoning-only / zero-valuable-chunk arms instead of being waved through.
+ */
+test("whitespace-only content is not usable and falls through to the other arms (#17461)", () => {
+  assert.equal(hasUsableContentText("\n"), false);
+  assert.equal(hasUsableContentText(" \t\r\n "), false);
+  // Reasoning + stop + blank text: retryable (reasoning-only arm).
+  assert.equal(
+    isUselessEmptyTurn({ ...base, contentText: "\n", reasoningText: "some thinking trace" }),
+    true
+  );
+  // Nothing forwarded, no usage: retryable (core arm).
+  assert.equal(isUselessEmptyTurn({ ...base, contentText: "\n", finishReason: "" }), true);
+  // A blank text next to a real forwarded chunk / usage stays a normal turn.
+  assert.equal(
+    isUselessEmptyTurn({ ...base, contentText: "\n", forwardedValuableChunk: true }),
+    false
+  );
+  assert.equal(isUselessEmptyTurn({ ...base, contentText: "\n", hasValidUsage: true }), false);
 });
 
 test("memory cap is a positive bound", () => {

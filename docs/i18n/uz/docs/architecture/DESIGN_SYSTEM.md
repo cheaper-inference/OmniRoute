@@ -4,229 +4,142 @@
 
 ---
 
-> **Holat:** maʼlumotnoma — bu yerda tasvirlangan standartlashtirish **amalga oshirilgan** (1–6-bosqichlar: katakli fon, primitivlar, holat ranglarini markazlashtirish, mono token, DataTable tokenlariga migratsiya, focus-ring → accent, Checkbox/Textarea primitivlari, `cn()` → tailwind-merge, har bir mustaqil ekranda katakli fon, moslashuvchan 4K kontent qobigʻi, shaffof boʻlmagan maʼlumotlar jadvali sirtlari). Ushbu hujjat boshqaruv panelining dizayn tokenlari, komponentlari va kelishuvlarining kanonik tavsifidir; quyidagi bosqichlarga ajratish har bir qarorning asosini tushuntirish uchun saqlab qolingan.
-> **Qamrov:** OmniRoute boshqaruv paneli (`src/`) va marketing sayti (`_mono_repo/omnirouteSite/`) **yagona vizual identifikatsiya**dan foydalanadi — bir xil millimetrli qogʻoz uslubidagi katakli fon (32px), bir xil rang tokenlari va standartlashtirilgan komponentlar.
->
-> Qoʻllab-quvvatlovchilar uchun amaliy eslatmalar:
->
-> - Qolgan ayrim qattiq kodlangan hex qiymatlari **ataylab** shunday qoldirilgan (doimo qorongʻi konsol terminali, ReactFlow SVG chiziqlari) va ularni tokenlarga **KOʻCHIRMASLIK** kerak.
-> - Ishlayotgan nusxada “kattaroq” katak koʻrinishi eskirgan build natijasidir, kod emas — katak oʻlchami 32px boʻlib, saytdagi bilan bir xil.
-> - Qorongʻi mavzudagi `--table-*` qiymatlari migratsiyadan oldingi qattiq kodlangan rgba qiymatlari bilan baytma-bayt bir xil; och mavzu tuzatildi (ishlamaydigan `var()` zaxira qiymatlari sababli u xato tarzda doimo qorongʻi edi).
+> **Holat:** boshqaruv paneli **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) asosida yaratilgan va
+> `packages/ui-kit` ish maydoni sifatida vendoring qilingan (`@omniroute/ui-kit`; yuqori oqim nusxasi
+> `packages/ui-kit/UPSTREAM.md` faylida mahkamlangan va `npm run check:ui-kit-snapshot` orqali himoyalangan). Yorugʻ mavzu kanonik
+> mavzu hisoblanadi; standart afzallik — `system`. Aksent rangi — Keak laymi (`--ci-color-accent`). Inter
+> (harflar oraligʻi 0, `--ci-letter-spacing-ui`) — UI shrift oilasi, Instrument Serif esa faqat katta va siyrak
+> displey matni (`.ci-dashboard-display`) uchun, IBM Plex Mono esa kod uchun ishlatiladi — barchasi
+> `src/app/globals.css` faylining yuqori qismidagi `@fontsource/*` importlari orqali lokal joylashtirilgan. Barcha ikonalar Lucide gliflaridir.
 
----
+## 1. Komponentlar qayerda joylashgan
 
-## 1. Maqsad
+- **Toʻplam.** `packages/ui-kit/src` yuqori oqimdagi `src/` katalogining
+  `packages/ui-kit/UPSTREAM.md` faylida mahkamlangan commitdagi baytma-bayt nusxasidir (bu faylda litsenziya
+  ruxsati ham qayd etilgan); `PATCHES.md` mahalliy yamoqlarni sanab oʻtadi (hozircha yoʻq). U yigʻishsiz
+  manba sifatida ishlatiladi: `next.config.mjs` uni transpilatsiya qiladi, `tsconfig.json` esa
+  `@omniroute/ui-kit` → `packages/ui-kit/src` va `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` mosliklarini belgilaydi (`vitest.config.ts` va `vitest.mcp.config.ts` ham xuddi
+  shu taxallusni saqlaydi). Toʻplam komponentini uning quyi yoʻli orqali import qiling
+  (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), hech qachon
+  `@omniroute/ui-kit` umumiy eksporti orqali emas: umumiy eksport har bir import qiluvchiga barcha
+  komponentlarni (jumladan, sana tanlagichni) tortib kiradi. Toʻplam uslublar jadvali
+  `src/app/globals.css` orqali ulanadi (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokenlar.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` tokenlarini eʼlon qiladi;
+  `src/app/globals.css` ularni eski OmniRoute nomlari (`--color-*`, `--radius-*`,
+  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) bilan bogʻlaydi, shuning
+  uchun mavjud `var(--color-*)` murojaatlari va Tailwind yordamchi klasslari ishlashda davom etadi. Yangi
+  kod Tailwind yordamchi klasslari (`bg-surface`, `text-text-muted`, `border-border`, `text-success`,
+  `bg-success-bg`, `bg-chart-1`…) yoki toʻplam klasslaridan foydalanadi — hech qachon hex qiymatdan emas
+  (`tests/unit/design-kit-bridge.test.ts` bu bogʻlanishni nazorat qiladi). `text-primary`
+  `--text-color-primary` orqali `--color-primary-ink` qiymatiga mos keladi (yorugʻ mavzuda lime-800,
+  qorongʻi mavzuda esa laym aksenti), shu sababli asosiy matn oʻqilishi oson boʻlib qoladi,
+  `bg-primary`/`border-primary` esa laym yuzasini saqlaydi. Diagramma qatorlari
+  `--color-chart-1` … `--color-chart-5` dan foydalanadi.
+- **Mavzular.** `<html className="ci-theme">` (`src/app/layout.tsx`) hujjatni toʻplam mavzusiga ulaydi.
+  Afzal koʻriladigan mavzu `light`, `dark` yoki `system` boʻlishi mumkin
+  (`src/shared/constants/appConfig.ts` ichida `THEME_CONFIG.defaultTheme = "system"`; `system`
+  `prefers-color-scheme` ga amal qiladi). `src/store/themeStore.ts` ichidagi `applyTheme()` funksiyasi
+  (gidratatsiyadan oldin bajariladigan `src/app/layout.tsx` ichidagi ichki boshlangʻich skript ham aynan
+  shu mantiqni takrorlaydi) `data-theme="dark"|"light"` ni oʻrnatadi va `<html>` elementidagi `.dark`
+  klassini bir vaqtda almashtiradi. Toʻplamning qorongʻi tokenlar toʻplami `data-theme="dark"` asosida
+  tanlanadi (`packages/ui-kit/src/ci-tokens.css`); OmniRouteʼning oʻz qorongʻi mavzu qayta belgilashlari
+  (`globals.css` ichidagi `.dark` bloki) va eski Tailwind `dark:` yordamchi klasslari `.dark` klassiga
+  asoslanadi. Aksent rang andozalari mavjud emas: aksent har doim toʻplamdan olinadi, eski yigʻilishdan
+  saqlanib qolgan andoza esa ombor yuklanganda olib tashlanadi.
+- **Komponentlar (adapterlar).** `src/shared/components/index.tsx` OmniRoute komponent APIʼsini (bir xil
+  nomlar, standart eksportlar va proplar) saqlab qoladi, uning ortidagi primitivlar esa toʻplam ustidagi
+  adapterlardir: shakllar (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`,
+  `Card`), ustki qatlamlar va fikr-mulohaza (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
+  `NotificationToast`, `EmptyState`, `Loading`), tuzilma (`Collapsible`, `CollapsibleSection`,
+  `SegmentedControl`, `Breadcrumbs`, `Avatar`) hamda jadvallar (`DataTable`, `FilterBar`,
+  `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter toʻplam komponentini quyi yoʻl orqali import
+  qilib, eski proplarni unga moslaydi — masalan, `Button variant="primary"` toʻplamdagi `default`
+  tugmasidir (`--ci-button-primary-*`: yorugʻ mavzuda teskari yuza, qorongʻi mavzuda esa
+  `--ci-color-accent-foreground` matn rangiga ega aksent), `danger` — `destructive`, `warning` esa
+  `outline` va `.ci-button--warning` kengaytmasidan iborat. `globals.css` oxiridagi (`@layer components`)
+  `.ci-button--warning` va `.ci-badge[data-tone]` qoidalari toʻplam klasslari ustiga qoʻshilgan OmniRoute
+  kengaytmalaridir. `tests/unit/ui/adapters/*.test.tsx` har bir adapterni qatʼiy tekshiradi.
+- **Qobiq.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` ni render qiladi, u esa
+  `src/shared/components/layouts/DashboardShell.tsx` ni render qiladi: bu toʻplamdagi `SidebarProvider` /
+  `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) boʻlib, OmniRoute navigatsiya mantiqi
+  `src/shared/components/Sidebar.tsx` ichida joylashgan. `#main-content` ga olib boruvchi “kontentga
+  oʻtish” havolasi fokus olish mumkin boʻlgan birinchi elementdir. `src/shared/components/Header.tsx`
+  toʻplamdagi `SidebarTrigger` ni (qobiqdagi yon panelni almashtiruvchi yagona boshqaruv), Keak
+  `ProductSwitcher` komponentini va buyruqlar palitrasini ochuvchi boshqaruvni oʻz ichiga oladi; u yoʻnalish
+  sarlavhasini faqat `#main-content` ichida toʻplamning `PageHeader` (`.ci-page-header`) komponenti
+  oʻrnatilmagan paytda koʻrsatadi, shuning uchun oʻz `PageHeader` komponentiga ega sahifada faqat bitta
+  `h1` boʻladi. `src/shared/components/CommandPalette.tsx` — toʻplamdagi `Dialog`.
+- **Ikonkalar.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) nomni (ekranlarda
+  ishlatiladigan Material Symbols lugʻatini) `ICON_MAP` (`src/shared/constants/iconMap.ts`) orqali Lucide
+  glifiga moslaydi. Material Symbols shrifti va paketi olib tashlangan: xaritada mavjud boʻlmagan nom
+  neytral oʻrinbosar glifni (`data-icon-missing="true"`) render qiladi va production muhitidan tashqarida
+  konsolga ogohlantirish chiqaradi. `npm run gen:icon-map` xaritada mavjud boʻlmagan, ammo
+  foydalanilayotgan nomlarni chiqaradi (`tests/unit/icon-map-coverage.test.ts` Lucide ikonkasi boʻlmagan
+  har qanday nomda muvaffaqiyatsiz tugaydi; `tests/unit/icon-map-object-values.test.ts` qidiruv
+  obyektlarida saqlangan nomlarni qamrab oladi);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` literal
+  `<span className="material-symbols-outlined">` spanlarini `<Icon>` ga qayta yozadi.
+- **Brend.** `src/shared/components/OmniRouteLogo.tsx` toʻplamni oʻrab turadi: standart eksport
+  `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` ni (ichki SVG, `basePath` bilan xavfsiz)
+  render qiladi, `OmniRouteLockup` esa `ProductLockup product="omniroute"` ni (foydalanish imkoniyati uchun
+  nomi “Keak OmniRoute”) yoki oq yorliqli operatorlar uchun ularning oʻz `name`/`logoSrc` qiymatlarini
+  render qiladi. Mahsulot almashtirgich manzillari `src/shared/constants/keakProducts.ts` ichida joylashgan
+  (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Mustaqil ekranlar —
+  `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` va
+  `src/shared/components/ErrorPageScaffold.tsx` — lokapni koʻrsatadi;
+  `tests/unit/brand-pages-static.test.ts` buni nazorat qiladi.
 
-Marketing sayti (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) va mahsulot boshqaruv paneli **bitta mahsulot** kabi koʻrinishi kerak. Sayt allaqachon ranglar palitrasini boshqaruv panelidan olgan — uning `css/tokens.css` faylida hatto _“Palitra OmniRoute boshqaruv panelini aks ettiradi (src/app/globals.css)”_ deb yozilgan. Demak, ranglar darajasida ular allaqachon taxminan 80% moslashtirilgan. Boshqaruv panelida quyidagilar yetishmaydi:
+## 2. Qoidalar
 
-1. Sayt har bir sahifada ishlatadigan **millimetrli qogʻoz uslubidagi katakli fon**.
-2. Saytda mavjud, ammo boshqaruv panelida yoʻq boʻlgan bir nechta **umumiy dizayn tokenlari** (radius shkalasi, brend gradienti, `surface-2`, mono shrift).
-3. **Komponentlar darajasidagi izchillik** — boshqaruv panelining bir qator komponentlari qattiq kodlangan hex/rgba qiymatlari orqali mavzu tokenlarini chetlab oʻtadi.
+1. Literal qiymatlar emas, tokenlardan foydalaning. Ataylab saqlangan istisnolar: doimo qorongʻi konsol terminali, `STATUS_HEX` (`src/shared/constants/statusColors.ts`) orqali ReactFlow SVG chiziqlari hamda `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) va `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) kategoriyali palitralari.
+2. `packages/ui-kit/src` ichini hech qachon qoʻlda oʻzgartirmang: `scripts/dev/sync-ui-kit.sh <commit>` yordamida sinxronlang; pre-commit tekshiruvi `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) mahkamlangan upstream commitdan biror bayt farq qilsa, muvaffaqiyatsiz tugaydi (upstream kloni — `UI_KIT_CLONE` yoki `_references/cheaper-inference-ui-kit` — mavjud boʻlmasa, ogohlantirish bilan oʻtkazib yuboriladi). Kitda biror narsa yetishmasa, adapter yoki ekranda muqobil yechimdan foydalaning va uni upstreamdan soʻrang.
+3. Kit matnlarining standart qiymatlari ingliz tilida (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit komponenti matn ko‘rsatgan har bir holatda `useTranslations(...)` orqali tarjima qilingan satrlarni uzating.
+4. Tailwind utilitalari kit komponentlari klasslaridan ustun turadi (kit `@layer theme, base, components, utilities` qatlamlarini e’lon qiladi va uning qoidalari `components` ichida joylashgan) — kit komponentlari rangini oʻzgartirish uchun emas, oraliqlar va joylashuv uchun utilitalardan foydalaning.
+5. Sarlavhalar: sahifa va boʻlim sarlavhalari uchun `.ci-heading` (Inter, harflar oraligʻisiz); `.ci-dashboard-display` (Instrument Serif) faqat xatolik sahifasidagi holat kodi kabi katta va siyrak ko‘rsatma matnlari uchun.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kitning qoʻllanilishini nazorat qiladi: `src/app` yoki `src/shared/components` ostida Material ligatura spani boʻlmasligi kerak; dashboard daraxtida (`src/app/(dashboard)` va `src/shared/components`) xom `<select>`, `<textarea>` yoki `<table>` hamda roʻyxatdagi istisnolardan (`Select` adapterining mahalliy tarmogʻi, `RequestLoggerDetail`) tashqarida qoʻlda yaratilgan `role="dialog"` boʻlmasligi kerak; u yerdagi har bir xom `<button>` yoki `<input>` elementidan koʻpi bilan 3 qator yuqorida tugaydigan, sabab koʻrsatilgan `kit-exception:` izohi boʻlishi shart; palitra tuslari va `dark:` variantlariga faqat test roʻyxatida koʻrsatilgan fayllarda ruxsat beriladi.
+7. PR yuborishdan oldin ikkala mavzuni va 390 px viewportni tekshiring (skrinshotlar); `tests/e2e/a11y.spec.ts` axe’ni ishga tushiradi.
 
-Ushbu hujjat tahlil va rejani taqdim etadi.
+## 3. Ekran qoʻshish
 
----
+1. Sahifani kitdagi `PageHeader` (`@omniroute/ui-kit/page-header`, dashboard ichida `compact`) bilan boshlang — sarlavha, tavsif va `actions`. Shunda shell sarlavhasi oʻz sarlavhasini olib tashlaydi.
+2. Boshqaruv elementlarini `@/shared/components` (adapterlar) orqali yarating va adapter mavjud boʻlmagan hollarda kit komponentlarini quyi yoʻl orqali ishlating (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. Ikonkalar: `<Icon name="…" />`. Yangi nomni semantik jihatdan mos Lucide komponenti bilan `ICON_MAP` ichiga qoʻshing; `npm run gen:icon-map` hali yetishmayotgan nomlarni koʻrsatadi.
+4. Ranglar: semantik utilitalar (`text-success`, `bg-warning-bg`, `border-border`…) va diagramma qatorlari uchun `var(--color-chart-N)`; ranglarning hex qiymatlari va faqat rangni takrorlaydigan `dark:` variantlaridan foydalanmang.
+5. Matn: har bir satr, shu jumladan kit komponentlariga uzatiladigan yorliqlar ham `useTranslations` orqali olinadi. Yangi kalitlarni `src/i18n/messages/en.json`, `pt-BR.json` va `vi.json` fayllariga qoʻshing (Vetnam tili muvofiqligi testi har bir inglizcha kalitni mahkamlaydi); boshqa lokalizatsiyalar i18n sinxronlash orqali toʻldiriladi.
+6. PR yuborishdan oldin quyidagi nazoratlarni ishga tushiring: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck` (`iconMap.ts` ichidagi takrorlangan importni aniqlaydigan yagona tekshiruv), `npm run check:ui-icu` va ekranning oʻz testlari.
 
-## 2. Tamoyillar
+## 4. Adapterni qoʻshish yoki oʻzgartirish
 
-- **Yagona ishonchli manba = `src/app/globals.css`.** Sayt boshqaruv panelini aks ettiradi, aksincha emas. Yangi tokenlar avval `globals.css` fayliga qoʻshiladi.
-- **Literal qiymatlar emas, faqat tokenlar.** Komponentlar xom `#hex` qiymatlaridan emas, semantik tokenlardan (`bg-surface`, `text-primary`, `border-border`) foydalanadi.
-- **Nozik, koʻzga tashlanadigan emas.** Kataklar kontent ortida joylashadigan xira fon hisoblanadi — ular hech qachon matn kontrastini kamaytirmasligi yoki interfeys bilan vizual raqobatlashmasligi kerak.
-- **Mavzuga moslashuvchan.** Hammasi `.dark` (mahsulotning oʻziga xos koʻrinishi) va och mavzuda ishlaydi.
-- **Bosqichma-bosqich joriy etish.** Avval katakli fon va tokenlarni chiqaring (past xavf, yuqori koʻrinuvchanlik), soʻng komponentlarni bosqichma-bosqich tozalang.
+1. `src/shared/components/index.tsx` faylining ommaviy API interfeysini saqlang: eksport nomlari, standart eksportlar va
+   qabul qilinadigan props bir xil boʻlishi kerak. Eski props qiymatlarini adapter ichida toʻplamga moslang (`Button.tsx` faylidagi `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT` ga qarang).
+2. Toʻplamni quyi yoʻl orqali import qiling (`@omniroute/ui-kit/<component>`).
+3. Toʻplamdagi kamchiliklar uchun vaqtinchalik yechimlar adapterda (yoki tuzatish uslubga oid boʻlsa, `globals.css` faylidagi `@layer components` ichida)
+   joylashishi kerak, hech qachon `packages/ui-kit/src` ichida emas.
+4. `tests/unit/ui/adapters/<name>.test.tsx` faylini qoʻshing yoki yangilang. Koʻp joyda chaqiriladigan adapter uchun oʻzgarishdan
+   oldingi va keyingi render qilingan belgilashni solishtiring — ichki oraliq yoki oʻrovchi elementlardagi oʻzgarishlar har bir ekranga taʼsir qiladi.
 
----
+## 5. Toʻplamni yangilash
 
-## 3. Joriy holat — nimalar allaqachon moslashtirilgan va nimalar moslashtirilmagan
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` yuqori oqimdagi `src/` katalogini koʻrsatilgan commit holatida
+`packages/ui-kit/src` ichiga nusxalaydi va ruxsat etilgan yagona oʻzgartirishni qoʻllaydi (nisbiy importlardan `.js` suffiksini olib tashlaydi).
+Shundan soʻng: `git diff packages/ui-kit` natijasini tekshiring, har ikkala mavzuda provayderlar, sozlamalar, kombinatsiyalar,
+foydalanish va endpointni vizual tekshiruvdan oʻtkazing, `npm run check:ui-kit-snapshot` va `npm run test:vitest:ui` buyruqlarini
+ishga tushiring hamda yuqori oqimdagi oʻzgarishlar jurnali bilan PR oching.
 
-### 3.1 Ranglar — allaqachon birlashtirilgan ✅
+## 6. Maʼlumotnoma indeksi
 
-Har bir brend rangi va sirt saytdagi qiymatga allaqachon mos keladi **qiymat boʻyicha** (faqat nomlari farq qiladi — boshqaruv panelida `--color-` prefiksi ishlatiladi). Bu `src/app/globals.css:30-128` da tekshirilgan:
-
-| Tushuncha                           | Sayt tokeni (`tokens.css`)                  | Boshqaruv paneli tokeni (`globals.css`) | Moslik                   |
-| ----------------------------------- | ------------------------------------------- | --------------------------------------- | ------------------------ |
-| asosiy                              | `--primary #e54d5e`                         | `--color-primary #e54d5e`               | ✅                       |
-| asosiy-hover                        | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`         | ✅                       |
-| aksent                              | `--accent #6366f1`                          | `--color-accent #6366f1`                | ✅                       |
-| aksent-2                            | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`          | ✅ (nomi oʻzgartirilgan) |
-| aksent-3                            | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`          | ✅ (nomi oʻzgartirilgan) |
-| muvaffaqiyat / ogohlantirish / xato | `#22c55e / #f59e0b / #ef4444`               | bir xil                                 | ✅                       |
-| svetofor chiroqlari                 | `#ff5f56 / #ffbd2e / #27c93f`               | bir xil                                 | ✅                       |
-| qorongʻi fon / sirt / chegara       | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | bir xil                                 | ✅                       |
-| och fon / sirt / matn               | `#f9f9fb / #fff / #1a1a2e`                  | bir xil                                 | ✅                       |
-
-**Xulosa:** ranglarni migratsiya qilish shart emas. Identifikatsiya allaqachon umumiy; biz uni qayta qurmayapmiz, balki _yakunlayapmiz_.
-
-### 3.2 Boʻshliqlar — boshqaruv panelida nimalar yetishmaydi
-
-| Tafovut                     | Saytda mavjud                                                                         | Boshqaruv paneli                                                                | Amal                           |
-| --------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------ |
-| **Toʻrli fon rasmi**        | `body::before` millimetrli qogʻoz, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ qoʻshildi (1-bosqich)**                                                    | **A qism**                     |
-| **Radius shkalasi**         | `--radius 14px`, `--radius-sm 9px`                                                    | `--radius 14px` qoʻshildi; `-sm` + komponentlarni qayta yoʻnaltirish kutilmoqda | **B qism / 2-bosqich**         |
-| **Brend gradienti**         | `--grad-brand 135deg primary→accent-3`                                                | **✅ token qoʻshildi (1-bosqich)**; 2-bosqichda ishlatiladi                     | **B qism**                     |
-| **Ichki yuza**              | `--surface-2 #1c2230`                                                                 | **✅ qoʻshildi (1-bosqich)**                                                    | **B qism**                     |
-| **Mono shrift**             | `--font-mono` (ui-monospace steki)                                                    | kutilmoqda (4-bosqich, undan foydalanuvchilar bilan birga)                      | **B qism**                     |
-| **`text-muted` (qorongʻi)** | `#8b8b9e`                                                                             | `#a1a1aa` (zinc-400)                                                            | muvofiqlashtirish — **B qism** |
-
-### 3.3 Mavzulashtirish mexanizmlari (hech narsani buzmaslik uchun)
-
-- **Tailwind v4, avvalo CSS** (`tailwind.config.*` yoʻq). Tokenlar `:root`/`.dark` ichida aniqlanadi va `@theme inline` orqali yordamchi klasslarga taqdim etiladi (`globals.css:130-179`).
-- **Qorongʻi rejim `<html>` elementidagi `.dark` klassi orqali ishlaydi** (`globals.css:22` dagi `@custom-variant dark`) va maxsus Zustand ombori (`src/store/themeStore.ts`) orqali almashtiriladi; standart mavzu = `system` (`src/shared/constants/appConfig.ts:11`). Sayt esa buning oʻrniga `html[data-theme="light"]` dan foydalanadi — **mexanizmlar farq qiladi, ammo hech qachon kesishmaydi** (manbalari alohida), shuning uchun ziddiyat yoʻq. Boshqaruv panelining `.dark` mexanizmini saqlab qolamiz.
-- **Asosiy rangni bajarilish vaqtida almashtirish** mavjud (`themeStore.ts:85-97`, oldindan sozlamalar `COLOR_THEMES` ichida) — foydalanuvchilar `--color-primary` ni almashtira oladi. `--color-primary` ga murojaat qiladigan har qanday yangi token (gradient va hokazo) ushbu almashtirishlarni avtomatik ravishda meros qilib oladi. ✅
-- **Tailwind v4 da radius uchun zaxiralangan nomlar:** `--radius-sm/md/lg/...` `rounded-*` yordamchi klasslarining asosini tashkil qiladi. Ularni qayta aniqlash barcha mavjud `rounded-*` klasslarini orqaga qarab oʻzgartiradi (masalan, `rounded-sm` 12 ta faylda ishlatilgan). Shu sababli kichik radius qiymati va komponentlarni qayta yoʻnaltirish ataylab 2-bosqichga qoldirilgan; unda ulardan foydalanuvchilar ham birgalikda oʻzgartiriladi.
-
----
-
-## 4. A qism — Katakli qogʻoz fon panjarasi (asosiy talab) — AMALGA OSHIRILDI (1-bosqich)
-
-### 4.1 Bu nima
-
-Saytdagi aynan shu yechim (`_mono_repo/omnirouteSite/css/base.css`): barcha kontent ortida `z-index:-1` bilan joylashgan, ikkita 1px chiziqli gradientni chizuvchi **mahkamlangan, butun koʻrish oynasini qamrab oluvchi psevdoelement**.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Nega bu `body` shaffof boʻlmagan `background-color`ga ega boʻlsa ham ishlaydi:** `z-index:-1`ga ega `::before` elementning oʻz foni _ustida_, ammo uning oqim ichidagi kontenti _ostida_ chiziladi. Shunday qilib, `--color-bg` asosiy fonni toʻldiradi, panjara uning ustiga qatlamlanadi va ilova panjara ustida aks etadi.
-
-### 4.2 Kod bazasida allaqachon mavjud namuna
-
-`src/app/landing/page.tsx:16-26` **xuddi shu panjarani har bir sahifa darajasida allaqachon amalga oshirgan** — biroq **qizil** chiziqlar (`#E54D5E`, shaffoflik `0.06`) bilan, **50px** oʻlchamda va animatsiyalangan sferalar bilan. Demak, bu usul mahsulotda sinalgan; ushbu ish uni **global va mavzuga moslashuvchan** fon tasviriga aylantiradi.
-
-### 4.3 Qoʻshilgan tokenlar (`globals.css` ichida)
-
-```css
-:root {
-  /* yorugʻ mavzu — panjara shaffofligi saytdagi 0.045 qiymatidan oshirildi,
-     shunda fon zich boshqaruv panelida ham koʻrinadi (kartalar/interfeys
-     elementlari koʻrish oynasining katta qismini yopadi) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* qorongʻi mavzu — xuddi shu sababga koʻra 0.035 qiymatidan oshirildi */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Yagona toʻsiq — olib tashlandi
-
-Panjara tuzilishi boʻyicha globaldir (u panel, `auth`/`login`, xato sahifalari — barcha marshrutlarni — bir vaqtning oʻzida qamrab oladi). Panel ichida uni aynan **bitta** element yashirgan:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — tashqi oʻrovchi shaffof boʻlmagan `bg-bg` fonini chizgan. Uning ostidagi barcha elementlar allaqachon shaffof (`<main>`, aylantirish konteyneri, ichki `max-w-7xl`), shuning uchun **`bg-bg`ni olib tashlash** body panjarasining kontent hududida koʻrinishiga imkon beradi (`body`ning `--color-bg` qiymati asosiy fon sifatida qoladi).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Interfeys elementlari bilan oʻzaro taʼsir (yon panel / sarlavha)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) va `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) **shaffof boʻlmagan** holatda qoladi → panjara **faqat kontent hududida** koʻrinadi va uni bir tekis rangli interfeys elementlari oʻrab turadi. Bu sokin standart koʻrinish boʻlib, saytning interfeys qismlarini asosiy ish maydonidan ajratish usuliga mos keladi (D3 qarori = yaxlit rang).
-
-### 4.6 Kirish / autentifikatsiya / xato sahifalari
-
-Ular toʻgʻridan-toʻgʻri `<body>` ostida aks etadi (panel interfeysisiz), shu sababli global panjara avtomatik tarzda ularning ortida koʻrinishi kerak. **5-bosqich — BAJARILDI:** alohida toʻliq ekran oʻrovchilari aslida shaffof boʻlmagan (`min-h-screen … bg-bg`, bunda `bg-bg` `<body>` bilan bir xil yaxlit fon) va bu panjarani faqat kirish sahifasida emas, balki boshqaruv panelidan tashqari barcha ekranlarda yashirgan. Endi ularning barchasi shaffof va umumiy fon tasviri ular orqali koʻrinadi: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` va `ErrorPageScaffold` (`400`/`401`ni qamrab oladi). Bu **D4**ni yakunlaydi (faqat kirish sahifasidan barcha alohida ekranlargacha kengaytirildi). `tests/unit/design-grid-background.test.ts` testi bilan himoyalangan.
-
-### 4.7 Kirish sahifasi
-
-`landing/page.tsx` oʻzining boyroq animatsiyalangan fonini (sferalar + vinyetka) saqlab qoladi — bu uning oʻziga xos marketing bosh ekranidir (D5 qarori = oʻz holicha qoldirish).
-
----
-
-## 5. B qism — Tokenlarni birxillashtirish
-
-1-bosqich inert va kolliziyasiz identifikatsiya tokenlarini (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`) qoʻshadi. 2-bosqich radius shkalasini Tailwind bilan bogʻlaydi va komponentlarni unga yoʻnaltiradi; 4-bosqich `--font-mono` va undan foydalanuvchi elementlarni qoʻshadi.
-
-| Token                          | Sababi                                                              | Bosqich                                  |
-| ------------------------------ | ------------------------------------------------------------------- | ---------------------------------------- |
-| `--radius` / `--radius-sm`     | Maxsus tanlangan 6/8/12 oʻrniga yagona radius shkalasi (14/9)       | 1 (qiymat) / 2 (bogʻlash + yoʻnaltirish) |
-| `--grad-brand`                 | Saytga mos asosiy CTAlar uchun brend gradienti (qizil→binafsha)     | 1 (token) / 2 (Button)                   |
-| `--surface-2`                  | Ichki panellar / jadval sarlavhalari / ichkariga surilgan qatorlar  | 1                                        |
-| `--font-mono`                  | Kod bloklari, terminal, IDlar, endpointlar                          | 4                                        |
-| `--text-muted`ni moslashtirish | Sayt↔panel uchun bitta qiymatni tanlash (`#a1a1aa` tavsiya etiladi) | 2                                        |
-
-**D2 (text-muted):** sayt `#8b8b9e`, dashboard esa `#a1a1aa`. **Dashboarddagi `#a1a1aa`** qiymatini saqlab qolish va _saytni_ unga moslab yangilash tavsiya etiladi. Kosmetik oʻzgarish.
-
----
-
-## 6. C qism — Komponentlarni standartlashtirish (2–4-bosqichlar)
-
-Maxsus komponentlar (shadcn/Radix ishlatilmaydi), Tailwind v4, semantik tokenlar **asosan** qabul qilingan (195 ta fayl umumiy barrel orqali import qiladi). Vazifa — **aylanib oʻtishlarni** bartaraf etish. Asosiy joylashuv: `src/shared/components/`.
-
-| #   | Element                                         | Fayl(lar)                                                                                                                        | Muammo → Maqsad                                                                                                                                                       | Bosqich |
-| --- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| C1  | **Radiuslarni moslashtirish**                   | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                        | aralash 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                                    | 2       |
-| C2  | **Button gradienti + `accent` varianti**        | `Button.tsx:5-12`                                                                                                                | asosiy variant bir xil qizil→qizil; `--grad-brand`ga moslashtirish; yetishmayotgan `accent` variantini qoʻshish. ~195 ta import qiluvchi — eng yuqori koʻrinuvchanlik | 2       |
-| C3  | **Jadvallar**                                   | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                              | 100% inline tarzda qattiq kodlangan rgba + mavjud boʻlmagan oʻzgaruvchilar; tokenlarga koʻchirish, farqlanuvchi uslublarni bekor qilish                               | 3       |
-| C4  | **Holat ranglarini markazlashtirish**           | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 yordamchi modul | bir xil hex qiymatining 6+ nusxasi → `--color-success/warning/error` asosidagi yagona modul                                                                           | 3       |
-| C5  | **Card chegarasi**                              | `Card.tsx:39`                                                                                                                    | `border-white/5` → brend `/8`                                                                                                                                         | 2       |
-| C6  | **Fokus halqasini moslashtirish** ✅ BAJARILDI  | `globals.css`dagi `--focus-ring` (accent) va forma boshqaruv elementlaridagi `ring-primary/30`                                   | global halqaga mos kelishi va qizil xato halqasidan ajralib turishi uchun **accent (binafsha)** asosida birxillashtirildi; xato halqasi qizilligicha qoladi           | 4       |
-| C7  | **`Checkbox` + `Textarea` qoʻshish**            | inline `accentColor:#6366f1` bilan xom `<input>`/`<textarea>`                                                                    | tokenlar orqali boshqariladigan primitivlar                                                                                                                           | 4       |
-| C8  | **Qattiq kodlangan hex qiymatlarni tekshirish** | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, Modal nuqtalari, ~14 ta diagramma fayli                                   | literal qiymatlar → tokenlar                                                                                                                                          | 4       |
-| C9  | **`cn()` → clsx + tailwind-merge**              | `src/shared/utils/cn.ts`                                                                                                         | ziddiyatli klasslar ustma-ust qoʻshiladi; C1 override’lari uchun zarur                                                                                                | 2       |
-
-**Allaqachon brendga mos (tokenlar orqali boshqariladi, faqat radius kerak):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Joriy etish rejasi
-
-- **1-bosqich — Toʻr + identifikatsiya tokenlari (USHBU PR).** `globals.css` toʻri + `--surface-2`/`--grad-brand`/`--radius` tokenlari; `body::before` fon rasmi; `bg-bg` toʻsigʻini olib tashlash; statik himoya testi. Xavfi past, bitta commit bilan ortga qaytarish mumkin.
-- **2-bosqich — Primitivlar (C1, C2, C5) — ushbu PRda BAJARILDI.** Semantik radius utilitalari `rounded-card` (14px) / `rounded-control` (9px) `@theme` orqali qoʻshildi (maxsus nomlar, shuning uchun standart `rounded-sm/md/lg/xl` oʻzgarishsiz qoladi — 400 ta faylga ommaviy taʼsir yoʻq); Card/Modal → 14px, Button/Input/Select → 9px; Button primary → `--grad-brand` (qizil→binafsha) + yangi `accent` varianti; Card chegaralari → `border-border` tokeni (0.08). **Keyinga qoldirildi:** `cn()`→tailwind-merge (C9) yangi bogʻliqliklarni talab qiladi; maxsus yozilgan `rounded-lg` boʻyicha ommaviy yangilash (326 ta fayl) oʻz holicha qoldirildi, chunki sirtlarning asosiy qismini primitivlar qamrab oladi.
-- **3-bosqich — Holat ranglari + jadvallar (C3, C4) — ushbu PRda BAJARILDI.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` yagona manba; `flow/edgeStyles.ts` + `TokenHealthBadge` unga yoʻnaltirildi, aynan oʻsha hex saqlandi). ✅ **`--font-mono`** tokeni. ✅ **C3 (DataTable)** — barcha inline rgba qiymatlari hamda ishlamaydigan `var(--bg-table-header)` / `var(--text-secondary)` zaxira qiymatlari `--table-*` tokenlari toʻplami (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) bilan almashtirildi; ularning **qorongʻi rejimdagi qiymatlari eski hardcoded rgba qiymatlariga aynan teng** (qorongʻi rejim baytma-bayt bir xil), och rejimdagi qiymatlari esa avval doim qorongʻi boʻlib qolgan och mavzuni tuzatadi. Sarlavha chegarasi → `--color-border`, ikkilamchi matn → `--color-text-muted`. **Birlashtirishdan oldin vizual tekshiruv talab qilinadi.** (Oʻzgartirilmadi: `logTableStyles.ts` va eski Ant `.ant-table` qoidalari — alohida, ustuvorligi pastroq.)
-- **4-bosqich — Tozalash (C6, C7, C9 bajarildi; C8 kutilmoqda).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge bogʻliqlik sifatida qoʻshildi) — endi chaqiruvchining `className` qiymati primitivning ziddiyatli klassiga qoʻshilib qolish oʻrniga uni toʻgʻri _almashtiradi_. ✅ **C7** yangi `Checkbox` + `Textarea` primitivlari (tokenlar asosida ishlaydi, barrel orqali eksport qilinadi; qoʻshimcha tarzda kiritildi — 32 ta bevosita checkbox / 41 ta bevosita textarea keyinchalik bosqichma-bosqich moslashtirilishi mumkin). ✅ **C6** focus-ring muvofiqlashtirildi — forma boshqaruvlari (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) endi global `--focus-ring` bilan mos kelishi va qizil xato halqasi bilan toʻqnashmasligi uchun fokusda **accent (binafsha)** halqadan foydalanadi; qizil xato holati oʻzgartirilmadi. ⏳ **C8 hex-sweep koʻr-koʻrona qidirish/almashtirish EMAS** — _ataylab_ shunday qilingan va saqlanishi shart boʻlgan holatlar tasdiqlandi: `ConsoleLogViewer.tsx:240` (doim qorongʻi terminal), `TokenHealthBadge` popover elementi, ReactFlow SVG chiziqlari. Faqat mavzuga moslashishi kerak boʻlgan hex qiymatlarini koʻchiring.
-
-Har bir bosqichda: `npm run lint` + `npm run typecheck:core` + vizual tekshiruv.
-
----
-
-## 8. Ochiq qarorlar (tavsiyalar)
-
-- **D1 — Button primary:** qizil→qizil saqlansinmi yoki **qizil→binafsha `--grad-brand`**ga oʻtilsinmi? Tavsiya: **qizil→binafsha** (2-bosqich).
-- **D2 — Toʻr chizigʻi rangi:** **neytral** (sayt uslubi) — tanlandi — yoki brend qizili. Oʻlcham **32px** (egasining fikr-mulohazasi asosida dastlabki 46px dan ~30% kichraytirildi — dashboard maketida 46px kataklar juda katta koʻrinardi).
-- **D3 — Chrome yorqinligi:** sidebar/header **yaxlit** — tanlandi.
-- **D4 — Auth/login toʻri:** ✅ **BAJARILDI (5-bosqich)** — shaffof boʻlmagan `bg-bg` nafaqat login, balki barcha mustaqil toʻliq ekran wrapperlaridan olib tashlandi, shuning uchun toʻr barcha ekranlarda koʻrinadi. §4.6 ga qarang.
-- **D5 — Landing sahifasi:** animatsiyali splash oʻz holicha qoldirilsin. Tanlandi.
-- **D6 — Butun mahsulot boʻylab 14/9 radius:** Tavsiya: ha (2-bosqich).
-- **D7 — Avval 1-bosqich chiqariladi:** Tanlandi.
-- **D8 — Maket kengligi (5-bosqich):** dashboard kontent qobigʻi `max-w-7xl` (1280px) bilan cheklangan edi, bu katta monitorlarda uni keng boʻsh yon oraliqlar bilan markazlashtirardi. ✅ **BAJARILDI** — dinamik `max-w-[3840px]` (haqiqiy 4K) qiymatiga oshirildi: endi kontent viewport boʻylab taxminan 4K gacha kengayadi va faqat undan oshganda markazlashtiriladi (`DashboardLayout.tsx`). Ataylab tor qilingan sahifalar dizayn boʻyicha torligicha qoladi (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Shaffof boʻlmagan maʼlumotlar jadvallari (6-bosqich):** dashboard kontent sohasi endi shaffof boʻlgani uchun (toʻr fon rasmi koʻrinishi uchun, 5-bosqich), konteyneri shaffof boʻlmagan sirtga ega bo'lmagan maʼlumotlar jadvallarida toʻr ularning shaffof juft qatorlari / past alfa qiymatli zebra qatorlari orasidan koʻrinib qolardi. ✅ **BAJARILDI** — endi kartasiz har bir jadval `bg-surface` fonini chizadi (yoki `<DataTable>` primitivi uchun uning aylantirish konteynerida `background: var(--color-surface)`). Tuzatildi: `DataTable` (primitiv), `ProxyLogger`/`RequestLoggerV2` (ularning `<Card>` ichidagi `bg-black/5 dark:bg-black/20` tusi tailwind-merge orqali Card ning `bg-surface` qiymatidan ustun kelayotgan edi → ~95% shaffof), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, shuningdek cache koʻrinishlaridagi ikkita CSS-grid “jadvali” (`bg-surface/35` → `bg-surface`). `<Card>`/Modal ichida allaqachon joylashgan jadvallarning shaffof emasligi tekshirildi va ular ataylab oʻzgartirilmadi (u yerda bg-surface ortiqcha, hech qanday taʼsir koʻrsatmaydigan amal). Toʻrning oʻzi **hech qanday oʻzgartirishni talab qilmadi** — dashboard dagi `body::before` saytdagisi bilan baytma-bayt bir xil (`--grid-size: 32px`); ishlayotgan nusxada koʻrinadigan har qanday “kattaroq toʻr” kod emas, balki `#4143` dan oldingi eskirgan build natijasidir. `tests/unit/design-grid-background.test.ts` bilan himoyalangan (6-bosqich bloki).
-
----
-
-## 9. Qamrovdan tashqari / xavflar
-
-- **Rang palitrasi oʻzgarmaydi** — ranglar allaqachon mos; biz faqat yetishmayotgan tokenlarni qoʻshamiz. Mahsulot ranglarining oʻzgarish xavfi yoʻq.
-- **Mavzu mexanizmi oʻzgarmaydi** — `.dark` + Zustand store saqlanadi.
-- **Radius oʻzgarishi (2-bosqich) keng qamrovli** — har bir karta/tugma/kiritish maydoniga taʼsir qiladi; birlashtirishdan oldin elementlarga boy ekranlarni (jadvallar, modal oynalar) vizual tekshiring.
-- **Jadvallar (C3)** eng koʻp qattiq kodlangan uslublarga va eng katta regressiya yuzasiga ega — ularni alohida PRga ajrating.
-
----
-
-## 10. Havolalar indeksi
-
-| Soha                                               | Yoʻl                                                                                                                 |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Boshqaruv paneli tokenlari                         | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Mavzu store’i                                      | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Panel qobigʻi (grid shu yerda blokdan chiqariladi) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Interfeys karkasi                                  | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Grid namunasi                                      | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Asosiy komponentlar                                | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Holat ranglari manbalari                           | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` yordamchi funksiyasi                          | `src/shared/utils/cn.ts`                                                                                             |
-| 1-bosqich himoya testi                             | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Sayt uchun namuna                                  | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — token koʻprigi, `.dark` qayta belgilashlari, OmniRoute `@layer components` kengaytmalari
+- `packages/ui-kit/UPSTREAM.md` — biriktirilgan yuqori oqim commiti va litsenziya ruxsati; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` va uning yonidagi adapterlar; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
