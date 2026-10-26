@@ -25,8 +25,10 @@
     "confirm": "คุณแน่ใจเหรอ?",
     "refresh": "รีเฟรช",
     "close": "ปิด",
+    "dialogTitleFallback": "ไดอะล็อก",
     "previousPage": "หน้าก่อนหน้า",
     "nextPage": "หน้าถัดไป",
+    "pagination": "การแบ่งหน้า",
     "capsLockOn": "Caps Lock เปิดอยู่",
     "dismissNotification": "ปิดการแจ้งเตือน",
     "toggleColumns": "สลับการแสดงคอลัมน์",
@@ -182,6 +184,7 @@
     "combos": "คอมโบ",
     "noModelsFound": "ไม่พบโมเดล",
     "clear": "ล้าง",
+    "clearFilters": "ล้างตัวกรอง",
     "done": "เสร็จสิ้น",
     "selectAll": "เลือกทั้งหมด",
     "unselectAll": "ยกเลิกการเลือกทั้งหมด",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "ใช้โดย {count, plural, one {# ชุด} other {# ชุด}}",
     "batchFilePreview": "ตัวอย่าง",
     "batchFilePreviewTruncated": "แสดง {shown} บรรทัดแรก ({total} บรรทัดรวม)",
-    "batchFileDownloadFull": "ดาวน์โหลดไฟล์ทั้งหมด"
+    "batchFileDownloadFull": "ดาวน์โหลดไฟล์ทั้งหมด",
+    "tokensPageTitle": "โทเคน",
+    "tokensPageDescription": "ส่งโทเคนระหว่างคีย์ API แบ่งปันรหัสเชิญ และเชื่อมต่อเซิร์ฟเวอร์ชุมชน",
+    "tokensServerUrlLabel": "URL เซิร์ฟเวอร์"
   },
   "disabled": "ปิดใช้งาน",
   "featureFlagOmnirouteEmergencyFallbackDescription": "กำหนดเส้นทางคำขอที่งบประมาณหมดไปยังผู้ให้บริการ/โมเดลสำรองฟรีในกรณีฉุกเฉิน",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 หรือ @channelname",
       "chatIdHint": "ตัวระบุตัวเลขที่ไม่ซ้ำกันหรือชื่อผู้ใช้สาธารณะของแชท/ช่อง",
       "tutorial": "วิธีการกำหนดค่า Telegram webhook:"
-    }
+    },
+    "copy": "คัดลอก",
+    "copied": "คัดลอกแล้ว!",
+    "expandDetails": "แสดงรายละเอียด",
+    "collapseDetails": "ซ่อนรายละเอียด"
   },
   "compliance": {
     "auditTitle": "การตรวจสอบ",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "การโทร (24 ชม.)",
     "mcpMetricSuccessRate": "อัตราความสำเร็จ",
     "mcpMetricAvgDuration": "ระยะเวลาเฉลี่ย",
-    "mcpMetricTopTool": "เครื่องมือชั้นนำ"
+    "mcpMetricTopTool": "เครื่องมือชั้นนำ",
+    "dismissError": "ปิดข้อผิดพลาด"
   },
   "themesPage": {
     "title": "ธีมส์",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "นำทางด่วน",
     "quickNavigationTitle": "การนำทางด่วน (⌘K / Ctrl+K)",
     "openQuickNavigation": "เปิดการนำทางด่วน",
+    "openMenu": "เปิดเมนู",
+    "products": "ผลิตภัณฑ์ Keak",
     "switchToLightMode": "สลับเป็นโหมดสว่าง",
     "switchToDarkMode": "สลับเป็นโหมดมืด",
     "language": "ภาษา",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "เฉพาะการเชื่อมต่อที่เลือก",
     "selectAtLeastOneConnection": "เลือกการเชื่อมต่ออย่างน้อยหนึ่งรายการ หรือเลือกการเชื่อมต่อทั้งหมด",
     "allConnectionsDesc": "คีย์นี้สามารถใช้การเชื่อมต่อใดก็ได้ที่เปิดใช้งานอยู่",
-    "restrictedToConnections": "จำกัดไว้ที่ {count, plural, one {# การเชื่อมต่อ} other {# การเชื่อมต่อ}}"
+    "restrictedToConnections": "จำกัดไว้ที่ {count, plural, one {# การเชื่อมต่อ} other {# การเชื่อมต่อ}}",
+    "removeSelection": "ลบ {name}"
   },
   "auditLog": {
     "title": "บันทึกการตรวจสอบ",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "กำหนดค่าสะพานภาพ→ข้อความในการตั้งค่าสะพานโมดัลิตี้",
     "sttBridgeCta": "กำหนดค่าสะพาน Speech→Text ในการตั้งค่า Modality Bridge",
     "existingConnection": "การเชื่อมต่อที่มีอยู่",
-    "openrouterSttDescription": "โมเดลแปลงเสียงเป็นข้อความของ OpenRouter ใช้การเชื่อมต่อ OpenRouter ที่คุณกำหนดไว้ ไม่มีการรับรองความถูกต้องแยกต่างหากที่จำเป็น."
+    "openrouterSttDescription": "โมเดลแปลงเสียงเป็นข้อความของ OpenRouter ใช้การเชื่อมต่อ OpenRouter ที่คุณกำหนดไว้ ไม่มีการรับรองความถูกต้องแยกต่างหากที่จำเป็น.",
+    "modalityTabsAria": "ประเภทสื่อ",
+    "serviceKindsAria": "ประเภทบริการ"
   },
   "search": {
     "searchQuery": "คำค้นหา",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "ไม่ทราบ",
     "cliproxyapiUpdate": "อัปเดต",
     "cliproxyapiUpdateAvailable": "มีการอัปเดต: v{current} → v{latest}",
-    "cliproxyapiVersion": "เวอร์ชัน"
+    "cliproxyapiVersion": "เวอร์ชัน",
+    "removeMapping": "ลบการแมป"
   },
   "modelCatalog": {
     "title": "โมเดลและคอมโบ",
@@ -3400,13 +3417,13 @@
     "comboRefMember": "คอมโบ → {name}"
   },
   "combos": {
+    "title": "คอมโบ",
+    "description": "สร้างโมเดลคอมโบด้วยการกำหนดเส้นทางแบบถ่วงน้ำหนักและการสนับสนุนทางเลือก",
+    "autoCatalogTitle": "แค็ตตาล็อกการกำหนดเส้นทางอัตโนมัติ",
     "autoTosLoadError": "โหลดนโยบาย ToS ไม่สำเร็จ โปรดลองอีกครั้งก่อนเปลี่ยนแปลง",
     "autoTosSaveError": "บันทึกนโยบาย ToS ไม่สำเร็จ ยังคงแสดงการตั้งค่าเดิม โปรดลองอีกครั้ง",
     "autoTosIncludeLabel": "รวมผู้ให้บริการที่ระบุ ToS: avoid ใน auto",
     "autoTosDescription": "ปิดไว้โดยค่าเริ่มต้น มีผลกับคอมโบ auto ทั้งหมด ไม่ใช่แค่บัญชีเดียว การเชื่อมต่อผู้ให้บริการจะไม่เปิดตัวเลือกนี้",
-    "title": "คอมโบ",
-    "description": "สร้างโมเดลคอมโบด้วยการกำหนดเส้นทางแบบถ่วงน้ำหนักและการสนับสนุนทางเลือก",
-    "autoCatalogTitle": "แค็ตตาล็อกการกำหนดเส้นทางอัตโนมัติ",
     "autoCatalogTemplateCount": "{count} เทมเพลต",
     "autoCatalogDescription": "คอมโบอัตโนมัติ/* ในตัวได้รับการแก้ไขแบบไดนามิกจากผู้ให้บริการที่เชื่อมต่อ ใช้รหัสเหล่านี้เป็นช่องโมเดล โดยไม่จำเป็นต้องตั้งค่าใดๆ",
     "autoCatalogExpand": "ขยายแค็ตตาล็อกการกำหนดเส้นทางอัตโนมัติ",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "ยังไม่มีการกำหนดค่าคอมโบ",
     "playgroundCreateFirst": "สร้างขึ้นมาก่อน",
     "weighted": "ถ่วงน้ำหนัก",
+    "weightPercent": "น้ำหนัก (%)",
     "leastUsed": "ใช้น้อยที่สุด",
     "costOpt": "ต้นทุน-การเลือก",
     "strategyGuideTitle": "วิธีใช้กลยุทธ์นี้",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# บัญชี} other {# บัญชี}}",
     "builderGlobalAdded": "เพิ่มแล้ว",
     "builderGlobalAdd": "เพิ่ม",
+    "clearSearch": "ล้างการค้นหา",
     "manualModel": "โมเดลแบบป้อนเอง",
     "manualModelInvalid": "ป้อนโมเดลในรูปแบบ provider/model",
     "manualModelUnknownProvider": "ไม่รู้จักคำนำหน้าผู้ให้บริการ",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "ความยาวเนื้อหาขั้นต่ำ (ตัวอักษร)",
     "responseValidationJsonPaths": "การตรวจสอบ JSON-path",
     "responseValidationAddCheck": "+ เพิ่มการตรวจสอบ",
+    "responseValidationRemoveCheck": "ลบการตรวจสอบ",
+    "responseValidationPath": "เส้นทาง JSON",
+    "responseValidationCondition": "เงื่อนไข",
+    "responseValidationValue": "ค่าที่คาดหวัง",
     "agentFeaturesSystemMessageOverride": "แทนที่ข้อความของระบบ",
     "agentFeaturesSystemMessagePlaceholder": "คุณเป็นผู้ช่วยผู้เชี่ยวชาญ...",
     "agentFeaturesSystemMessageHint": "การแทนที่ข้อความของระบบสำหรับตัวแทน",
@@ -5288,7 +5311,8 @@
         "skipped": "กำหนดค่าเรียบร้อยแล้ว",
         "failed": "ล้มเหลว"
       }
-    }
+    },
+    "stepProgress": "ความคืบหน้าการตั้งค่า"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ผู้ให้บริการนี้ถูกยกเว้นจาก auto โดยค่าเริ่มต้น",
@@ -6080,6 +6104,13 @@
     "claudeLowPriorityModeDescription": "เมื่อบัญชีนี้ถึงขีดจำกัดการใช้งาน 5 ชั่วโมงและ Anthropic เปิดให้ใช้ช่องทางที่มีลำดับความสำคัญต่ำลง OmniRoute จะยอมรับและส่งคำขอต่อไปโดยใช้ anthropic-usage-limit: slow จนกว่ารอบเวลาจะรีเซ็ต แทนที่จะพักการเชื่อมต่อ ขีดจำกัดรายสัปดาห์ยังคงมีผล และการตอบกลับอาจต้องรอความจุที่ว่าง",
     "claudeAutoLimitResetLabel": "รีเซ็ตขีดจำกัดเซสชันโดยอัตโนมัติ (สัปดาห์ละครั้ง)",
     "claudeAutoLimitResetDescription": "เมื่อบัญชีนี้ถึงขีดจำกัดการใช้งาน 5 ชั่วโมงและสามารถรีเซ็ตขีดจำกัดเซสชันได้ OmniRoute จะใช้สิทธิ์รีเซ็ตโดยอัตโนมัติและลองอีกครั้งด้วยความเร็วเต็มที่ โดยใช้สิทธิ์รีเซ็ตของบัญชีที่มีให้สัปดาห์ละครั้ง และยังคงนับรวมในขีดจำกัดรายสัปดาห์",
+    "codexPaidCreditsShort": "เครดิตเพิ่มเติม",
+    "codexPaidCreditsToggleTitle": "อนุญาตเครดิต Codex แบบชำระเงินหลังโควตาการสมัครสมาชิกหมด (อาจมีค่าใช้จ่ายเพิ่มเติม)",
+    "codexPaidCreditsEnabled": "เปิดใช้เครดิต Codex แบบชำระเงินแล้ว (อาจมีค่าใช้จ่ายเพิ่มเติม)",
+    "codexPaidCreditsDisabled": "ปิดใช้เครดิต Codex แบบชำระเงินแล้ว",
+    "failedUpdateCodexPaidCredits": "อัปเดตนโยบายเครดิต Codex แบบชำระเงินไม่สำเร็จ",
+    "allowCodexPaidCreditsLabel": "อนุญาตเครดิต Codex แบบชำระเงิน",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ข้ามคูลดาวน์ชั่วคราวเพื่อให้การเชื่อมต่อนี้ยังคงมีสิทธิ์ใช้งานได้แม้หลังจากเกิดข้อผิดพลาดที่กู้คืนได้ (สถานะสิ้นสุด เช่น ถูกแบน/หมดอายุ ยังคงมีผลอยู่)",
     "disableCoolingLabel": "ปิดใช้งานคูลดาวน์สำหรับการเชื่อมต่อนี้",
     "bulkPasteAdded": "{count, plural, one {เพิ่มคีย์แล้ว 1 คีย์} other {เพิ่มคีย์แล้ว # คีย์}}",
@@ -6533,6 +6564,7 @@
       "monsterapi": "รับ API key ได้ที่ monsterapi.ai",
       "moonshot": "เชื่อมต่อ Moonshot AI ด้วย API key.",
       "morph": "ระดับฟรี: 250K เครดิต/เดือน, $0",
+      "apmix": "เชื่อมต่อ Apmix ด้วยคีย์ API จาก apmix.ai/dashboard — สมาชิกเดียว หลายโมเดล",
       "nanogpt": "เชื่อมต่อ NanoGPT ด้วย API key.",
       "nebius": "เครดิตทดลองใช้ ~$1 เมื่อลงทะเบียนสำหรับการทดสอบ API",
       "nlpcloud": "NLP Cloud ใช้ API แชทบอทที่เป็นกรรมสิทธิ์แทน OpenAI chat/completions โดย OmniRoute จะปรับข้อความ OpenAI ให้เข้ากับ input/context/history และแสดงแคตตาล็อกภายในเครื่องของโมเดลแชทบอทที่รองรับ.",
@@ -6629,8 +6661,7 @@
       "kiro": "ระดับฟรี: 50 เครดิต/เดือน (~25K–100K โทเค็น) ⚠️ ToS ของ Kiro ห้ามใช้พร็อกซี/harness ของบุคคลที่สาม",
       "codex": "เชื่อมต่อ OpenAI Codex ด้วยโฟลว์ OAuth ที่มีอยู่",
       "qwen": "เชื่อมต่อ Qwen Code ด้วยโฟลว์ OAuth ที่มีอยู่",
-      "github-models": "สร้าง GitHub PAT ที่มีขอบเขต 'models: read' ที่ github.com/settings/tokens",
-      "apmix": "เชื่อมต่อ Apmix ด้วยคีย์ API จาก apmix.ai/dashboard — สมาชิกเดียว หลายโมเดล"
+      "github-models": "สร้าง GitHub PAT ที่มีขอบเขต 'models: read' ที่ github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} ยอมรับ ID โมเดลดั้งเดิมของผู้ให้บริการ นำเข้าจาก /models หรือเพิ่ม ID ที่กำหนดเองสำหรับการกำหนดเส้นทาง",
     "bedrockModelsDescription": "โมเดล Amazon Bedrock มีการกำหนดขอบเขตตามภูมิภาค AWS นำเข้าจาก /models หรือเพิ่มรหัสรุ่น Bedrock ที่เปิดใช้งานในภูมิภาคที่เลือก",
@@ -6802,14 +6833,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "ขีดจำกัดการทำงานพร้อมกันต่อโมเดล",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "ไม่บังคับ: หนึ่ง model=cap ต่อบรรทัด จับคู่กับ ID โมเดลอัปสตรีมที่ตรงกันทุกตัวอักษร คำขอส่วนเกินจะเข้าคิวในเครื่อง ปล่อยว่างหมายถึงไม่จำกัดต่อโมเดล",
-    "rateLimitOverridesModelConcurrencyInvalid": "รายการการทำงานพร้อมกันต่อโมเดล \"{entry}\" ไม่ถูกต้อง — ใช้ model=cap โดย cap เป็นจำนวนเต็มตั้งแต่ 1 ถึง {max}",
-    "codexPaidCreditsShort": "เครดิตเพิ่มเติม",
-    "codexPaidCreditsToggleTitle": "อนุญาตเครดิต Codex แบบชำระเงินหลังโควตาการสมัครสมาชิกหมด (อาจมีค่าใช้จ่ายเพิ่มเติม)",
-    "codexPaidCreditsEnabled": "เปิดใช้เครดิต Codex แบบชำระเงินแล้ว (อาจมีค่าใช้จ่ายเพิ่มเติม)",
-    "codexPaidCreditsDisabled": "ปิดใช้เครดิต Codex แบบชำระเงินแล้ว",
-    "failedUpdateCodexPaidCredits": "อัปเดตนโยบายเครดิต Codex แบบชำระเงินไม่สำเร็จ",
-    "allowCodexPaidCreditsLabel": "อนุญาตเครดิต Codex แบบชำระเงิน",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "รายการการทำงานพร้อมกันต่อโมเดล \"{entry}\" ไม่ถูกต้อง — ใช้ model=cap โดย cap เป็นจำนวนเต็มตั้งแต่ 1 ถึง {max}"
   },
   "settings": {
     "title": "การตั้งค่า",
@@ -7707,6 +7731,7 @@
     "configured": "กำหนดค่าแล้ว",
     "none": "ไม่มี",
     "modelOverrideValuePlaceholder": "ค่าตัวเลข",
+    "modelOverrideKey": "คีย์เขียนทับ",
     "modelOverrideReasoningEffortsPlaceholder": "ค่าที่คั่นด้วยเครื่องหมายจุลภาคภาษาอังกฤษ เช่น low, medium, high",
     "addKeyValue": "เพิ่มคีย์-ค่า",
     "noModelOverrides": "ไม่มีการกำหนดค่าการเขียนทับสำหรับโมเดลนี้",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "ผ่าน",
     "tomlTestFailed": "ไม่ผ่าน",
     "tomlImportError": "ไม่สามารถประมวลผลไฟล์ RTK TOML ได้",
-    "tomlFileReadError": "ไม่สามารถอ่านไฟล์ TOML ที่เลือกได้"
+    "tomlFileReadError": "ไม่สามารถอ่านไฟล์ TOML ที่เลือกได้",
+    "viewMode": "โหมดมุมมอง"
   },
   "compressionEngineConfig": {
     "loading": "กำลังโหลด…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "แพ็กภาษา: {packs}",
     "dragToReorder": "ลากเพื่อจัดลำดับขั้นตอนใหม่",
     "engine": "เอนจิน",
-    "intensity": "ความเข้ม"
+    "intensity": "ความเข้ม",
+    "compressionOverride": "การเขียนทับการบีบอัด"
   },
   "compressionStudio": {
     "noRun": "ไม่มีการรันการบีบอัดที่พร้อมใช้งาน",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "ผู้ชนะ: {winner}",
     "encoder": "ตัวเข้ารหัส",
     "bytes": "ไบต์",
-    "tokensCl100k": "โทเค็น (cl100k)"
+    "tokensCl100k": "โทเค็น (cl100k)",
+    "studioViews": "มุมมอง Studio"
   },
   "omniglyph": {
     "preview": "ตัวอย่าง",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "ข้อความที่สั้นกว่านี้จะไม่ถูกบีบอัด ต่ำ = บีบอัดมากขึ้น",
     "tooltipMinSavings": "บีบอัดเฉพาะในกรณีที่บันทึกโทเค็นได้อย่างน้อยเท่านี้",
     "ultraSettings": "การตั้งค่าอัลตร้า",
-    "ultraSettingsDesc": "การบีบอัดความหมายที่ขับเคลื่อนด้วย SLM"
+    "ultraSettingsDesc": "การบีบอัดความหมายที่ขับเคลื่อนด้วย SLM",
+    "defaultLanguage": "ภาษาเริ่มต้น",
+    "viewMode": "โหมดมุมมอง"
   },
   "translator": {
     "title": "นักแปล",
@@ -9835,6 +9865,10 @@
     "streamTransformFailed": "แปลงสตรีมล้มเหลว"
   },
   "usage": {
+    "codexPaidCreditsLabel": "เครดิต Codex แบบชำระเงิน",
+    "codexPaidCreditsAvailable": "พร้อมใช้งาน (ไม่รายงานยอดคงเหลือ)",
+    "codexPaidCreditsUnavailable": "ไม่พร้อมใช้งานหรือถึงขีดจำกัดการใช้จ่ายแล้ว",
+    "codexPaidCreditsUnlimited": "ไม่จำกัด",
     "title": "การใช้งาน",
     "grokExtraUsageCredits": "เครดิตการใช้งานเพิ่มเติม",
     "grokAutoTopUp": "เติมเงินอัตโนมัติ",
@@ -10287,11 +10321,7 @@
     "updatedShort": "อัปเดตแล้ว",
     "lastRefreshed": "รีเฟรชล่าสุดเมื่อ",
     "providerQuota": "โควตาผู้ให้บริการ",
-    "providerQuotaHomeHint": "สถานะแบบเรียลไทม์ของบัญชีที่เชื่อมต่อทั้งหมด",
-    "codexPaidCreditsLabel": "เครดิต Codex แบบชำระเงิน",
-    "codexPaidCreditsAvailable": "พร้อมใช้งาน (ไม่รายงานยอดคงเหลือ)",
-    "codexPaidCreditsUnavailable": "ไม่พร้อมใช้งานหรือถึงขีดจำกัดการใช้จ่ายแล้ว",
-    "codexPaidCreditsUnlimited": "ไม่จำกัด"
+    "providerQuotaHomeHint": "สถานะแบบเรียลไทม์ของบัญชีที่เชื่อมต่อทั้งหมด"
   },
   "modals": {
     "waitingAuth": "รอการอนุญาต",
@@ -11078,7 +11108,8 @@
       "message": "ข้อความ",
       "error": "ข้อผิดพลาด",
       "completion": "การเสร็จสิ้น"
-    }
+    },
+    "statusFilter": "สถานะ"
   },
   "templateNames": {
     "simple-chat": "แชทง่ายๆ",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "{minutes} นาทีที่แล้ว",
     "hoursAgo": "{hours} ชั่วโมงที่แล้ว",
     "daysAgo": "{days} วันที่แล้ว",
-    "entries": "รายการ"
+    "entries": "รายการ",
+    "viewSwitcherAria": "มุมมองแคช"
   },
   "proxyConfigModal": {
     "levelGlobal": "ทั่วโลก",
@@ -11447,6 +11479,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "การดำเนินการเพิ่มเติม",
     "test": "ทดสอบ",
     "edit": "แก้ไข",
     "delete": "ลบ",
@@ -11809,7 +11842,8 @@
       "nextButton": "ถัดไป",
       "runButton": "รัน",
       "promptPlaceholder": "พิมพ์ข้อความของคุณ… (กด Enter เพื่อส่ง, Shift+Enter เพื่อขึ้นบรรทัดใหม่)"
-    }
+    },
+    "playgroundTabs": "โหมด Playground"
   },
   "miniPlayground": {
     "endpoint": "เอนด์พอยต์",
@@ -11880,7 +11914,8 @@
     "assistant": "ผู้ช่วย",
     "errorLabel": "ข้อผิดพลาด",
     "requestFailed": "คำขอล้มเหลว",
-    "stop": "หยุด"
+    "stop": "หยุด",
+    "messageInputAria": "ข้อความ"
   },
   "requestLogger": {
     "recording": "กำลังบันทึก",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "สลับบัญชี {count} ครั้ง",
       "resilienceRetried": "ลองรอบว่างใหม่อีกครั้ง",
       "resilienceContinued": "ทำต่อกลางสตรีม",
-      "resilienceRecovered": "กู้คืนด้วยการดำเนินการด้านความยืดหยุ่น"
-    }
+      "resilienceRecovered": "กู้คืนด้วยการดำเนินการด้านความยืดหยุ่น",
+      "conversationContext": "บริบทการสนทนา",
+      "goToBottom": "ไปที่ด้านล่าง",
+      "liveRefreshOn": "รีเฟรชแบบเรียลไทม์: เปิด",
+      "liveRefreshOff": "รีเฟรชแบบเรียลไทม์: ปิด",
+      "liveRefresh": "รีเฟรชแบบเรียลไทม์",
+      "continuesFromParent": "ต่อเนื่องจากรายการหลัก",
+      "continuesFrom": "ต่อเนื่องจาก {id}",
+      "viewConversation": "ดูการสนทนา",
+      "openConversation": "เปิดการสนทนา {id}"
+    },
+    "tableLabel": "ล็อกคำขอ"
   },
   "proxyLogger": {
     "filterAll": "ทั้งหมด",
@@ -12113,7 +12158,9 @@
     "colServedBy": "ให้บริการโดย",
     "filterTraffic": "การจราจร",
     "filterTests": "การทดสอบ",
-    "filterSource": "แหล่งที่มา"
+    "filterSource": "แหล่งที่มา",
+    "tableLabel": "ล็อกพร็อกซี",
+    "sortLogs": "เรียงลำดับล็อก"
   },
   "endpointOptions": {
     "speech": "เสียงพูด",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "หมดแล้ว",
     "statusAlerting": "กำลังแจ้งเตือน",
     "statusError": "ข้อผิดพลาด",
-    "moreSuffix": "+{count} รายการเพิ่มเติม"
+    "moreSuffix": "+{count} รายการเพิ่มเติม",
+    "feedFilterLabel": "กรองเหตุการณ์"
   },
   "quotaShare": {
     "weightPercent": "น้ำหนัก %",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "ไม่ได้จัดกลุ่ม",
     "ungroupedHint": "พูลเหล่านี้ไม่ได้ถูกมอบหมายให้กับกลุ่มที่รู้จัก แก้ไขพูลเพื่อย้ายไปยังกลุ่มจริง",
     "removeFailed": "ไม่สามารถลบพูลนี้ได้",
-    "dismiss": "ปิด"
+    "dismiss": "ปิด",
+    "allocationsHeading": "การจัดสรร",
+    "wizardRemoveDimension": "ลบมิติข้อมูล",
+    "wizardRemoveKey": "ลบคีย์"
   },
   "plugins": {
     "title": "ปลั๊กอิน",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "การอัปเดตการตั้งค่าล้มเหลว",
       "serviceRevealApiKey": "{actor} แสดงคีย์ API สำหรับ {target} แล้ว",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "ปิดข้อผิดพลาด"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "ไปตอนนี้",
       "message": "ขณะนี้ MITM Proxy ย้ายไปอยู่ภายใต้ AgentBridge แล้ว",
       "title": "หน้านี้ถูกย้ายแล้ว"
-    }
+    },
+    "dnsOn": "เปิด DNS",
+    "dnsOff": "ปิด DNS",
+    "showServerSettings": "แสดงการตั้งค่าเซิร์ฟเวอร์",
+    "hideServerSettings": "ซ่อนการตั้งค่าเซิร์ฟเวอร์",
+    "upstreamCaTesting": "กำลังทดสอบ…",
+    "removeMapping": "ลบการแม็ป",
+    "mappingSourcePlaceholder": "เช่น gemini-3.6-flash-medium หรือ * สำหรับทุกรายการที่ยังไม่ได้แม็ป",
+    "mappingWildcardHint": "ใช้ * เป็นต้นทางเพื่อกำหนดเส้นทางโมเดลทุกตัวที่ไม่มีการแม็ปแบบเจาะจงผ่าน OmniRoute ไปยังปลายทางที่เลือก การจับคู่ต้นทางที่ตรงตัวจะมีลำดับความสำคัญเหนือ * เสมอ",
+    "wizardDetectingModels": "กำลังตรวจจับโมเดลจากทราฟฟิกที่ดักจับ...",
+    "wizardDetectedModels": "พบ {count, plural, one {# โมเดล} other {# โมเดล}} ในทราฟฟิกที่ดักจับ เลือกโมเดลที่คุณต้องการเพิ่ม:",
+    "wizardSelectedModels": "เลือก {count, plural, one {# โมเดล} other {# โมเดล}} แล้ว คุณจะได้จับคู่โมเดลเหล่านี้กับโมเดลของ OmniRoute ในหน้าจอถัดไป",
+    "wizardAddModels": "เพิ่ม {count, plural, one {# โมเดล} other {# โมเดล}}",
+    "wizardNoModelsDetected": "ยังไม่พบโมเดล ใช้ {agent} เพื่อส่งคำขอ แล้วเรียกใช้วิซาร์ดนี้อีกครั้งเพื่อตรวจจับโมเดลจากทราฟฟิกโดยอัตโนมัติ",
+    "wizardNoModelsHint": "หรือปิดวิซาร์ดนี้แล้วเพิ่มการจับคู่ด้วยตนเองในการ์ดเอเจนต์"
   },
   "providerStats": {
     "unknownError": "ข้อผิดพลาดที่ไม่รู้จัก",
@@ -12686,7 +12752,11 @@
     "avgTtft": "TTFT เฉลี่ย",
     "avgTotal": "รวมเฉลี่ย",
     "requestTelemetry": "เทเลเมทรีของคำขอ",
-    "requestTelemetryDescription": "รายละเอียดไปป์ไลน์ 7 เฟส (5 นาทีล่าสุด)"
+    "requestTelemetryDescription": "รายละเอียดไปป์ไลน์ 7 เฟส (5 นาทีล่าสุด)",
+    "title": "สถิติผู้ให้บริการ",
+    "description": "ทราฟฟิก เวลาแฝง และอัตราความสำเร็จแยกตามผู้ให้บริการและตามโมเดล",
+    "combo": "Combo",
+    "toggleModels": "แสดงโมเดลของ {provider}"
   },
   "relay": {
     "title": "พร็อกซี Serverless Relay",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "ไม่มีเนื้อหาคำขอ.",
     "noResponseBody": "ไม่มีเนื้อหาการตอบกลับ.",
     "formatted": "จัดรูปแบบแล้ว",
-    "raw": "ข้อมูลดิบ"
+    "raw": "ข้อมูลดิบ",
+    "requestCount": "{count, plural, one {# คำขอ} other {# คำขอ}}",
+    "expandList": "ขยายรายการ",
+    "collapseList": "ยุบรายการ",
+    "snippetLanguage": "ภาษาของสนิปเป็ต",
+    "headersTable": "ส่วนหัว",
+    "showSecrets": "แสดงค่าลับ",
+    "maskSecrets": "ปิดบังค่าลับ",
+    "llmNotAvailable": "ไม่มีข้อมูลเมทาดาทาของ LLM สำหรับคำขอนี้",
+    "llmStreamYes": "ใช่ (SSE)",
+    "llmStreamNo": "ไม่",
+    "llmTotalTokens": "รวม: {count} โทเค็น"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "สัดส่วนการเรียกที่ผู้ให้บริการรายนี้ตอบกลับจริงในช่วง 24 ชั่วโมงที่ผ่านมา เครื่องหมายขีดหมายถึงมีปริมาณการใช้งานน้อยเกินกว่าจะระบุอัตราได้",
     "reliabilitySample": "การเรียกสำเร็จ {successes} จาก {requests} ครั้งในช่วง {hours} ชั่วโมงที่ผ่านมา",
     "reliabilityTooFew": "มีการเรียกเพียง {requests} ครั้งในช่วง {hours} ชม.ที่ผ่านมา — น้อยเกินกว่าจะระบุอัตราได้",
-    "reliabilityNoTraffic": "ไม่มีการเรียกที่บันทึกไว้ในช่วง 24 ชม.ที่ผ่านมา"
+    "reliabilityNoTraffic": "ไม่มีการเรียกที่บันทึกไว้ในช่วง 24 ชม.ที่ผ่านมา",
+    "categoryFilter": "หมวดหมู่งาน"
   },
   "discovery": {
     "title": "การค้นหาผู้ให้บริการ",
@@ -13331,7 +13413,11 @@
     "method": "วิธีการ",
     "auth": "การยืนยันตัวตน",
     "feasibility": "ความเป็นไปได้",
-    "models": "โมเดล"
+    "models": "โมเดล",
+    "provider": "ผู้ให้บริการ",
+    "status": "สถานะ",
+    "endpoint": "เอนด์พอยต์",
+    "actions": "การดำเนินการ"
   },
   "noAuthProvider": {
     "title": "ไม่ต้องยืนยันตัวตน",
@@ -13380,7 +13466,8 @@
     "ownProxy": "พร็อกซีของตัวเอง",
     "freeTierPause": "โมเดล {model} ถูกหยุดชั่วคราว (429) จะกลับมาที่ {time}",
     "freeTierPauseProvider": "หยุดชั่วคราว (429) จะกลับมาที่ {time}",
-    "freeTierPauseNote": "การหยุดชั่วคราวภายในโพรเซสบนอินสแตนซ์นี้"
+    "freeTierPauseNote": "การหยุดชั่วคราวภายในโพรเซสบนอินสแตนซ์นี้",
+    "proxyType": "ประเภทพร็อกซี"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "ความสำเร็จที่ซ่อนอยู่กำลังรออยู่...",
         "criteria": "ทำความสำเร็จที่ซ่อนอยู่ให้สำเร็จเพื่อเปิดเผยตราสัญลักษณ์นี้."
       }
-    }
+    },
+    "leaderboardTitle": "กระดานผู้นำ",
+    "leaderboardDescription": "การจัดอันดับและความสำเร็จของคีย์ API ทั้งหมดของคุณ",
+    "badgeLocked": "ถูกล็อก"
   },
   "featureFlags": {
     "title": "ฟีเจอร์แฟล็ก",
@@ -13794,6 +13884,7 @@
     "latency": "เวลาแฝง",
     "quota": "โควตา",
     "rangeWindow": "ช่วงเวลา {range}",
+    "timeRange": "ช่วงเวลา",
     "runtimeHealthBlend": "การผสมผสานรันไทม์/สถานะความพร้อม",
     "averageResponseTime": "เวลาตอบสนองเฉลี่ย",
     "worstQuota": "โควตาที่แย่ที่สุด",
@@ -13995,7 +14086,11 @@
     "learnMore": "เรียนรู้เพิ่มเติม",
     "changelogLoadFailed": "ไม่สามารถโหลดบันทึกการเปลี่ยนแปลงได้ โปรดลองอีกครั้งในภายหลัง",
     "retry": "ลองใหม่",
-    "viewFullHistory": "ดูประวัติทั้งหมดบน GitHub"
+    "viewFullHistory": "ดูประวัติทั้งหมดบน GitHub",
+    "title": "ข่าวสารและบันทึกการเปลี่ยนแปลง",
+    "description": "ประกาศจากทีม OmniRoute และบันทึกประจำรุ่นล่าสุด",
+    "viewLabel": "ดู",
+    "loadingNews": "กำลังโหลดประกาศ..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "สถานะวงจรตัดของผู้ให้บริการ",
       "lastUpdate": "อัปเดตล่าสุด: {timestamp}",
       "uptimeMinutes": "{minutes}นาที",
-      "uptimeHoursMinutes": "{hours}ชั่วโมง {minutes}นาที"
+      "uptimeHoursMinutes": "{hours}ชั่วโมง {minutes}นาที",
+      "breakerClosed": "ปิดแล้ว",
+      "breakerNotClosed": "เปิดหรือกึ่งเปิด"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "รายละเอียดการบำรุงรักษา",
         "secondaryAction": "สถานะระบบ"
       }
+    },
+    "miniapp": {
+      "askAnything": "ถามอะไรก็ได้…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "เครื่องมือ MCP",
     "scope": "ขอบเขต",
-    "apiKey": "คีย์ API"
+    "apiKey": "คีย์ API",
+    "visibleCount": "แสดง {visible} / ทั้งหมด {total}",
+    "modeLabel": "โหมดการแสดงผล",
+    "jumpToNow": "ข้ามไปยังเวลาปัจจุบัน เส้น NOW จะรีเซ็ตไปยังตำแหน่ง {position}%",
+    "laneReuse": "การใช้เลนซ้ำ",
+    "laneReuseLabel": "ช่วงเวลาการใช้เลนซ้ำ (นาที)",
+    "laneReuseHint": "คำขอที่ใช้รหัสการสนทนาเดียวกันจะอยู่ในแถวไทม์ไลน์เดียวกัน ตราบใดที่ช่วงห่างระหว่างกันน้อยกว่าจำนวนนาทีนี้",
+    "laneReuseUnit": "นาที",
+    "autoRefresh": "รีเฟรชอัตโนมัติ",
+    "autoRefreshLabel": "ช่วงเวลาการรีเฟรชอัตโนมัติ (วินาที)",
+    "autoRefreshHint": "ความถี่ที่ไทม์ไลน์ดึงรายการคำขอจากเซิร์ฟเวอร์ใหม่",
+    "autoRefreshUnit": "วิ",
+    "zoomOut": "ซูมออก",
+    "zoomIn": "ซูมเข้า"
   },
   "metadata": {
     "compressionTitle": "การบีบอัด",

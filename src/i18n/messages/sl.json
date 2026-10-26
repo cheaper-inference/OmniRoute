@@ -25,8 +25,10 @@
     "confirm": "Ali ste prepričani?",
     "refresh": "Osveži",
     "close": "Zapri",
+    "dialogTitleFallback": "Pogovorno okno",
     "previousPage": "Prejšnja stran",
     "nextPage": "Naslednja stran",
+    "pagination": "Oštevilčenje strani",
     "capsLockOn": "Tipka Caps Lock je vklopljena",
     "dismissNotification": "Zapri obvestilo",
     "toggleColumns": "Preklopi vidnost stolpcev",
@@ -182,6 +184,7 @@
     "combos": "Kombinacije",
     "noModelsFound": "Ni najdenih modelov",
     "clear": "Počisti",
+    "clearFilters": "Počisti filtre",
     "done": "Končano",
     "selectAll": "Izberi vse",
     "unselectAll": "Prekliči izbor vseh",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Uporabljeno v {count, plural, one {# paketu} other {# paketih}}",
     "batchFilePreview": "Predogled",
     "batchFilePreviewTruncated": "Prikazanih je prvih {shown} vrstic (skupaj {total} vrstic)",
-    "batchFileDownloadFull": "Prenesi celotno datoteko"
+    "batchFileDownloadFull": "Prenesi celotno datoteko",
+    "tokensPageTitle": "Žetoni",
+    "tokensPageDescription": "Pošiljajte žetone med ključi API, delite kode za povabila in povežite strežnike skupnosti.",
+    "tokensServerUrlLabel": "URL strežnika"
   },
   "disabled": "Onemogočeno",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Zahteve z izčrpanim proračunom usmeri k brezplačnemu ponudniku/modelu za zasilni preklop.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 ali @channelname",
       "chatIdHint": "Enolični številski identifikator ali javno uporabniško ime klepeta oziroma kanala.",
       "tutorial": "Kako konfigurirati webhook za Telegram:"
-    }
+    },
+    "copy": "Kopiraj",
+    "copied": "Kopirano!",
+    "expandDetails": "Prikaži podrobnosti",
+    "collapseDetails": "Skrij podrobnosti"
   },
   "compliance": {
     "auditTitle": "Revizija",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Klici (24 h)",
     "mcpMetricSuccessRate": "Stopnja uspešnosti",
     "mcpMetricAvgDuration": "Povprečno trajanje",
-    "mcpMetricTopTool": "Najpogosteje uporabljeno orodje"
+    "mcpMetricTopTool": "Najpogosteje uporabljeno orodje",
+    "dismissError": "Zavrni napako"
   },
   "themesPage": {
     "title": "Teme",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "Hitra navigacija",
     "quickNavigationTitle": "Hitra navigacija (⌘K / Ctrl+K)",
     "openQuickNavigation": "Odpri hitro navigacijo",
+    "openMenu": "Odpri meni",
+    "products": "Izdelki Keak",
     "switchToLightMode": "Preklopi na svetli način",
     "switchToDarkMode": "Preklopi na temni način",
     "language": "Jezik",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "Samo izbrane povezave",
     "selectAtLeastOneConnection": "Izberite vsaj eno povezavo ali možnost Vse povezave.",
     "allConnectionsDesc": "Ta ključ lahko uporablja katero koli aktivno povezavo.",
-    "restrictedToConnections": "Omejeno na {count, plural, one {# povezavo} two {# povezavi} few {# povezave} other {# povezav}}."
+    "restrictedToConnections": "Omejeno na {count, plural, one {# povezavo} two {# povezavi} few {# povezave} other {# povezav}}.",
+    "removeSelection": "Odstrani {name}"
   },
   "auditLog": {
     "title": "Dnevnik revizij",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "Konfigurirajte most slika→besedilo v nastavitvah Modality Bridge",
     "sttBridgeCta": "Konfigurirajte most govor→besedilo v nastavitvah Modality Bridge",
     "existingConnection": "Obstoječa povezava",
-    "openrouterSttDescription": "Modeli OpenRouter za pretvorbo govora v besedilo uporabljajo vašo konfigurirano povezavo OpenRouter. Ločene poverilnice niso potrebne."
+    "openrouterSttDescription": "Modeli OpenRouter za pretvorbo govora v besedilo uporabljajo vašo konfigurirano povezavo OpenRouter. Ločene poverilnice niso potrebne.",
+    "modalityTabsAria": "Vrsta medija",
+    "serviceKindsAria": "Vrsta storitve"
   },
   "search": {
     "searchQuery": "Iskalna poizvedba",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "Neznano",
     "cliproxyapiUpdate": "Posodobi",
     "cliproxyapiUpdateAvailable": "Na voljo je posodobitev: v{current} → v{latest}",
-    "cliproxyapiVersion": "Različica"
+    "cliproxyapiVersion": "Različica",
+    "removeMapping": "Odstrani preslikavo"
   },
   "modelCatalog": {
     "title": "Modeli in kombinacije",
@@ -3400,13 +3417,13 @@
     "comboRefMember": "Kombinacija → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Vključi ponudnike z oznako ToS: avoid v auto",
-    "autoTosDescription": "Privzeto izklopljeno. Velja za vse kombinacije auto, ne le za en račun. Povezava ponudnika te možnosti ne vklopi.",
-    "autoTosSaveError": "Pravil ToS ni bilo mogoče shraniti. Še vedno je prikazana prejšnja nastavitev. Poskusite znova.",
-    "autoTosLoadError": "Pravil ToS ni bilo mogoče naložiti. Pred spremembo poskusite znova.",
     "title": "Kombinacije",
     "description": "Ustvarite kombinacije modelov z uteženim usmerjanjem in podporo za nadomestne možnosti",
     "autoCatalogTitle": "Katalog samodejnega usmerjanja",
+    "autoTosLoadError": "Pravil ToS ni bilo mogoče naložiti. Pred spremembo poskusite znova.",
+    "autoTosSaveError": "Pravil ToS ni bilo mogoče shraniti. Še vedno je prikazana prejšnja nastavitev. Poskusite znova.",
+    "autoTosIncludeLabel": "Vključi ponudnike z oznako ToS: avoid v auto",
+    "autoTosDescription": "Privzeto izklopljeno. Velja za vse kombinacije auto, ne le za en račun. Povezava ponudnika te možnosti ne vklopi.",
     "autoCatalogTemplateCount": "Število predlog: {count}",
     "autoCatalogDescription": "Vgrajene kombinacije auto/*, ki se dinamično razrešijo na podlagi povezanih ponudnikov. Katerega koli od teh ID-jev lahko uporabite kot polje modela — nastavitev ni potrebna.",
     "autoCatalogExpand": "Razširi katalog samodejnega usmerjanja",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Konfigurirana ni še nobena kombinacija.",
     "playgroundCreateFirst": "Najprej jo ustvarite",
     "weighted": "Uteženo",
+    "weightPercent": "Teža (%)",
     "leastUsed": "Najmanj uporabljeno",
     "costOpt": "Stroškovno optimizirano",
     "strategyGuideTitle": "Kako uporabljati to strategijo",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# račun} two {# računa} few {# računi} other {# računov}}",
     "builderGlobalAdded": "Dodano",
     "builderGlobalAdd": "Dodaj",
+    "clearSearch": "Počisti iskanje",
     "manualModel": "Ročno določen model",
     "manualModelInvalid": "Vnesite model v obliki provider/model.",
     "manualModelUnknownProvider": "Neznana predpona ponudnika.",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "Najmanjša dolžina vsebine (št. znakov)",
     "responseValidationJsonPaths": "Preverjanja poti JSON",
     "responseValidationAddCheck": "+ Dodaj preverjanje",
+    "responseValidationRemoveCheck": "Odstrani preverjanje",
+    "responseValidationPath": "Pot JSON",
+    "responseValidationCondition": "Pogoj",
+    "responseValidationValue": "Pričakovana vrednost",
     "agentFeaturesSystemMessageOverride": "Preglasi sistemsko sporočilo",
     "agentFeaturesSystemMessagePlaceholder": "Ste strokovni pomočnik ...",
     "agentFeaturesSystemMessageHint": "Preglasitev sistemskega sporočila za agente",
@@ -5288,7 +5311,8 @@
         "skipped": "že konfigurirano",
         "failed": "neuspešno"
       }
-    }
+    },
+    "stepProgress": "Napredek nastavitve"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Ta ponudnik je privzeto izključen iz auto",
@@ -6080,6 +6104,13 @@
     "claudeLowPriorityModeDescription": "Ko ta račun doseže 5-urno omejitev uporabe in Anthropic ponudi možnost z nižjo prioriteto, jo OmniRoute sprejme in še naprej pošilja zahteve z anthropic-usage-limit: slow, dokler se časovno okno ne ponastavi, namesto da bi začasno prekinil povezavo. Tedenska omejitev še vedno velja, odgovori pa lahko čakajo na razpoložljivo zmogljivost.",
     "claudeAutoLimitResetLabel": "Samodejno ponastavi omejitev seje (enkrat tedensko)",
     "claudeAutoLimitResetDescription": "Ko ta račun doseže 5-urno omejitev uporabe in je na voljo ponastavitev omejitve seje, jo OmniRoute samodejno uveljavi in znova poskusi s polno hitrostjo. Pri tem uporabi ponastavitev računa, ki je na voljo enkrat tedensko, uporaba pa se še vedno šteje v tedensko omejitev.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Preskočite prehodno obdobje ohlajanja, da ta povezava ostane na voljo tudi po odpravljivih napakah (končna stanja, kot sta prepovedana ali potekla povezava, še vedno veljajo).",
     "disableCoolingLabel": "Onemogoči ohlajanje za to povezavo",
     "bulkPasteAdded": "{count, plural, one {Dodan 1 ključ} two {Dodana # ključa} few {Dodani # ključi} other {Dodanih # ključev}}",
@@ -6533,6 +6564,7 @@
       "monsterapi": "Pridobite ključ API na monsterapi.ai",
       "moonshot": "Povežite Kimi s ključem API.",
       "morph": "Brezplačna raven: 250.000 kreditov na mesec, 0 USD",
+      "apmix": "Povežite Apmix z API ključem iz apmix.ai/dashboard — ena naročnina, veliko modelov.",
       "nanogpt": "Povežite NanoGPT s ključem API.",
       "nebius": "Ob registraciji prejmete približno 1 USD poskusnega dobroimetja za preizkušanje API-ja",
       "nlpcloud": "NLP Cloud namesto OpenAI chat/completions uporablja lasten API za klepetalne bote. OmniRoute prilagodi sporočila OpenAI parametrom input/context/history in ponuja lokalni katalog podprtih modelov klepetalnih botov.",
@@ -6629,8 +6661,7 @@
       "kiro": "Brezplačna raven: 50 dobroimetij/mesec (~25.000–100.000 žetonov). ⚠️ Pogoji uporabe storitve Kiro prepovedujejo uporabo posrednikov ali ogrodij tretjih oseb.",
       "codex": "Povežite OpenAI Codex z obstoječim postopkom OAuth.",
       "qwen": "Povežite Qwen Code z obstoječim postopkom OAuth.",
-      "github-models": "Ustvarite GitHub PAT z obsegom »models: read« na github.com/settings/tokens",
-      "apmix": "Povežite Apmix z API ključem iz apmix.ai/dashboard — ena naročnina, veliko modelov."
+      "github-models": "Ustvarite GitHub PAT z obsegom »models: read« na github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} sprejema izvorne ID-je modelov ponudnika. Uvozite jih iz /models ali dodajte ID-je po meri za usmerjanje.",
     "bedrockModelsDescription": "Modeli Amazon Bedrock so omejeni na regijo AWS. Uvozite jih iz /models ali dodajte ID-je modelov Bedrock, omogočene v izbrani regiji.",
@@ -6802,14 +6833,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Nastavitve",
@@ -7707,6 +7731,7 @@
     "configured": "konfigurirano",
     "none": "Brez",
     "modelOverrideValuePlaceholder": "Številska vrednost",
+    "modelOverrideKey": "Ključ preglasitve",
     "modelOverrideReasoningEffortsPlaceholder": "Vrednosti v angleščini, ločene z vejicami, npr. low, medium, high",
     "addKeyValue": "Dodaj ključ in vrednost",
     "noModelOverrides": "Za ta model ni konfiguriranih preglasitev.",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "Uspešno",
     "tomlTestFailed": "Neuspešno",
     "tomlImportError": "Datoteke RTK TOML ni bilo mogoče obdelati.",
-    "tomlFileReadError": "Izbrane datoteke TOML ni bilo mogoče prebrati."
+    "tomlFileReadError": "Izbrane datoteke TOML ni bilo mogoče prebrati.",
+    "viewMode": "Način pogleda"
   },
   "compressionEngineConfig": {
     "loading": "Nalaganje…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "Jezikovni paketi: {packs}",
     "dragToReorder": "Povlecite korak, da spremenite njegov vrstni red",
     "engine": "Mehanizem",
-    "intensity": "Intenzivnost"
+    "intensity": "Intenzivnost",
+    "compressionOverride": "Preglasitev stiskanja"
   },
   "compressionStudio": {
     "noRun": "Na voljo ni nobenega zagona stiskanja.",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "zmagovalec: {winner}",
     "encoder": "kodirnik",
     "bytes": "bajti",
-    "tokensCl100k": "žetoni (cl100k)"
+    "tokensCl100k": "žetoni (cl100k)",
+    "studioViews": "Pogledi Studio"
   },
   "omniglyph": {
     "preview": "Predogled",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "Sporočila, krajša od te vrednosti, se ne stisnejo. Nižja vrednost = več stiskanja.",
     "tooltipMinSavings": "Stisni le, če se prihrani vsaj toliko žetonov.",
     "ultraSettings": "Nastavitve Ultra",
-    "ultraSettingsDesc": "Semantično stiskanje, ki ga poganja SLM"
+    "ultraSettingsDesc": "Semantično stiskanje, ki ga poganja SLM",
+    "defaultLanguage": "Privzeti jezik",
+    "viewMode": "Način pogleda"
   },
   "translator": {
     "title": "Prevajalnik",
@@ -9835,6 +9865,10 @@
     "streamTransformFailed": "Pretvorba toka ni uspela"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Poraba",
     "grokExtraUsageCredits": "Dobroimetje za dodatno uporabo",
     "grokAutoTopUp": "Samodejno dopolnjevanje",
@@ -10287,11 +10321,7 @@
     "updatedShort": "Posodobljeno",
     "lastRefreshed": "Nazadnje osveženo",
     "providerQuota": "Kvota ponudnika",
-    "providerQuotaHomeHint": "Stanje povezanih računov v živo",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "providerQuotaHomeHint": "Stanje povezanih računov v živo"
   },
   "modals": {
     "waitingAuth": "Čakanje na avtorizacijo",
@@ -11078,7 +11108,8 @@
       "message": "Sporočilo",
       "error": "Napaka",
       "completion": "Dokončanje"
-    }
+    },
+    "statusFilter": "Stanje"
   },
   "templateNames": {
     "simple-chat": "Preprosti klepet",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "pred {minutes} min",
     "hoursAgo": "pred {hours} h",
     "daysAgo": "pred {days} d",
-    "entries": "Vnosi"
+    "entries": "Vnosi",
+    "viewSwitcherAria": "Pogled predpomnilnika"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globalno",
@@ -11447,6 +11479,7 @@
     "tableHealth": "Delovanje (24 h)",
     "tableUsage": "Uporaba",
     "tableActions": "Dejanja",
+    "moreActions": "Več dejanj",
     "test": "Preizkusi",
     "edit": "Uredi",
     "delete": "Izbriši",
@@ -11809,7 +11842,8 @@
       "nextButton": "Naprej",
       "runButton": "Zaženi",
       "promptPlaceholder": "Vnesite sporočilo … (Enter za pošiljanje, Shift+Enter za novo vrstico)"
-    }
+    },
+    "playgroundTabs": "Načini igrišča"
   },
   "miniPlayground": {
     "endpoint": "Končna točka",
@@ -11880,7 +11914,8 @@
     "assistant": "Pomočnik",
     "errorLabel": "Napaka",
     "requestFailed": "Zahteva ni uspela",
-    "stop": "Ustavi"
+    "stop": "Ustavi",
+    "messageInputAria": "Sporočilo"
   },
   "requestLogger": {
     "recording": "Beleženje",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "{count} rotacij računov",
       "resilienceRetried": "Prazen krog ponovljen",
       "resilienceContinued": "Nadaljevano sredi toka",
-      "resilienceRecovered": "Obnovljeno z dejanjem odpornosti"
-    }
+      "resilienceRecovered": "Obnovljeno z dejanjem odpornosti",
+      "conversationContext": "Kontekst pogovora",
+      "goToBottom": "Pojdi na dno",
+      "liveRefreshOn": "Osveževanje v živo: vklopljeno",
+      "liveRefreshOff": "Osveževanje v živo: izklopljeno",
+      "liveRefresh": "Osveževanje v živo",
+      "continuesFromParent": "se nadaljuje iz nadrejenega",
+      "continuesFrom": "Nadaljuje iz {id}",
+      "viewConversation": "poglej pogovor",
+      "openConversation": "Odpri pogovor {id}"
+    },
+    "tableLabel": "Dnevniki zahtevkov"
   },
   "proxyLogger": {
     "filterAll": "Vse",
@@ -12113,7 +12158,9 @@
     "colServedBy": "Servira",
     "filterTraffic": "Promet",
     "filterTests": "Testi",
-    "filterSource": "Vir"
+    "filterSource": "Vir",
+    "tableLabel": "Dnevniki proxy",
+    "sortLogs": "Razvrsti dnevnike"
   },
   "endpointOptions": {
     "speech": "Govor",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "IZČRPANO",
     "statusAlerting": "OPOZORILO",
     "statusError": "NAPAKA",
-    "moreSuffix": "+{count} dodatnih"
+    "moreSuffix": "+{count} dodatnih",
+    "feedFilterLabel": "Filtriraj dogodke"
   },
   "quotaShare": {
     "weightPercent": "Utež (%)",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "Brez skupine",
     "ungroupedHint": "Ti nabori niso dodeljeni nobeni znani skupini. Uredite nabor, da ga premaknete v dejansko skupino.",
     "removeFailed": "Tega nabora ni bilo mogoče odstraniti.",
-    "dismiss": "Zapri"
+    "dismiss": "Zapri",
+    "allocationsHeading": "Dodelitve",
+    "wizardRemoveDimension": "Odstrani dimenzijo",
+    "wizardRemoveKey": "Odstrani ključ"
   },
   "plugins": {
     "title": "Vtičniki",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "Posodobitev nastavitev ni uspela",
       "serviceRevealApiKey": "{actor} je razkril ključ API za {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Zavrzi napako"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "Pojdi zdaj",
       "message": "Posredniški strežnik MITM je zdaj v razdelku AgentBridge.",
       "title": "Ta stran je bila premaknjena"
-    }
+    },
+    "dnsOn": "DNS vklopljen",
+    "dnsOff": "DNS izklopljen",
+    "showServerSettings": "Prikaži nastavitve strežnika",
+    "hideServerSettings": "Skrij nastavitve strežnika",
+    "upstreamCaTesting": "Testiranje…",
+    "removeMapping": "Odstrani preslikavo",
+    "mappingSourcePlaceholder": "npr. gemini-3.6-flash-medium ali * za vse nepreslikane",
+    "mappingWildcardHint": "Uporabite * kot vir, da usmerite vsak model brez izrecne preslikave prek OmniRoute na izbrani cilj. Točna ujemanja vira vedno prevladajo nad *.",
+    "wizardDetectingModels": "Zaznavanje modelov iz prestreženega prometa ...",
+    "wizardDetectedModels": "{count, plural, one {Najden # model} two {Najdena # modela} few {Najdeni # modeli} other {Najdenih # modelov}} v prestreženem prometu. Izberite tiste, ki jih želite dodati:",
+    "wizardSelectedModels": "{count, plural, one {Izbran # model} two {Izbrana # modela} few {Izbrani # modeli} other {Izbranih # modelov}}. Na naslednjem zaslonu jih boste preslikali v modele OmniRoute.",
+    "wizardAddModels": "Dodaj {count, plural, one {# model} two {# modela} few {# modele} other {# modelov}}",
+    "wizardNoModelsDetected": "Modeli še niso zaznani. Z orodjem {agent} pošljite zahtevo, nato znova zaženite ta čarovnik, da samodejno zazna modele iz prometa.",
+    "wizardNoModelsHint": "Ali pa zaprite ta čarovnik in preslikave dodajte ročno na kartici agenta."
   },
   "providerStats": {
     "unknownError": "Neznana napaka",
@@ -12686,7 +12752,11 @@
     "avgTtft": "Povp. TTFT",
     "avgTotal": "Povp. skupni čas",
     "requestTelemetry": "Telemetrija zahtev",
-    "requestTelemetryDescription": "Razčlenitev 7-faznega cevovoda (zadnjih 5 minut)"
+    "requestTelemetryDescription": "Razčlenitev 7-faznega cevovoda (zadnjih 5 minut)",
+    "title": "Statistika ponudnikov",
+    "description": "Promet, zakasnitev in stopnje uspešnosti po ponudnikih in modelih",
+    "combo": "Kombo",
+    "toggleModels": "Prikaži modele za {provider}"
   },
   "relay": {
     "title": "Brezstrežniški relejni posredniški strežniki",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "Ni telesa zahteve.",
     "noResponseBody": "Ni telesa odziva.",
     "formatted": "Oblikovano",
-    "raw": "Neobdelano"
+    "raw": "Neobdelano",
+    "requestCount": "{count, plural, one {# zahteva} two {# zahtevi} few {# zahteve} other {# zahtev}}",
+    "expandList": "Razširi seznam",
+    "collapseList": "Strni seznam",
+    "snippetLanguage": "Jezik izrezka",
+    "headersTable": "Glave",
+    "showSecrets": "Prikaži skrivnosti",
+    "maskSecrets": "Prikrij skrivnosti",
+    "llmNotAvailable": "Metapodatki LLM za to zahtevo niso na voljo.",
+    "llmStreamYes": "da (SSE)",
+    "llmStreamNo": "ne",
+    "llmTotalTokens": "Skupaj: {count} žetonov"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "Delež klicev, na katere je ta ponudnik dejansko odgovoril v zadnjih 24 urah. Pomišljaj pomeni, da je obdelal premalo prometa za določitev stopnje.",
     "reliabilitySample": "V zadnjih {hours} h je bilo uspešnih {successes} od {requests} klicev",
     "reliabilityTooFew": "V zadnjih {hours} h je bilo samo {requests} klicev — premalo za določitev stopnje",
-    "reliabilityNoTraffic": "V zadnjih 24 urah ni bilo zabeleženih klicev"
+    "reliabilityNoTraffic": "V zadnjih 24 urah ni bilo zabeleženih klicev",
+    "categoryFilter": "Kategorija naloge"
   },
   "discovery": {
     "title": "Odkrivanje ponudnikov",
@@ -13331,7 +13413,11 @@
     "method": "Način",
     "auth": "Preverjanje pristnosti",
     "feasibility": "Izvedljivost",
-    "models": "Modeli"
+    "models": "Modeli",
+    "provider": "Ponudnik",
+    "status": "Stanje",
+    "endpoint": "Končna točka",
+    "actions": "Dejanja"
   },
   "noAuthProvider": {
     "title": "Preverjanje pristnosti ni potrebno",
@@ -13380,7 +13466,8 @@
     "ownProxy": "Lasten posredniški strežnik",
     "freeTierPause": "Model {model} je začasno ustavljen (429), nazaj ob {time}",
     "freeTierPauseProvider": "Začasno ustavljeno (429), nazaj ob {time}",
-    "freeTierPauseNote": "Premor znotraj procesa na tem primerku"
+    "freeTierPauseNote": "Premor znotraj procesa na tem primerku",
+    "proxyType": "Vrsta proxyja"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "Čaka vas skriti dosežek ...",
         "criteria": "Dokončajte skriti dosežek, da razkrijete to značko."
       }
-    }
+    },
+    "leaderboardTitle": "Lestvica najboljših",
+    "leaderboardDescription": "Uvrstitve in dosežki vaših ključev API",
+    "badgeLocked": "Zaklenjeno"
   },
   "featureFlags": {
     "title": "Zastavice funkcij",
@@ -13794,6 +13884,7 @@
     "latency": "Zakasnitev",
     "quota": "Kvota",
     "rangeWindow": "časovno obdobje: {range}",
+    "timeRange": "Časovno obdobje",
     "runtimeHealthBlend": "kombinacija izvajanja in stanja",
     "averageResponseTime": "povprečni odzivni čas",
     "worstQuota": "Najslabša kvota",
@@ -13995,7 +14086,11 @@
     "learnMore": "Več informacij",
     "changelogLoadFailed": "Dnevnika sprememb ni bilo mogoče naložiti. Poskusite znova pozneje.",
     "retry": "Poskusi znova",
-    "viewFullHistory": "Ogled celotne zgodovine na GitHubu"
+    "viewFullHistory": "Ogled celotne zgodovine na GitHubu",
+    "title": "Novice in dnevnik sprememb",
+    "description": "Objave ekipe OmniRoute in najnovejše opombe ob izdaji",
+    "viewLabel": "Prikaži",
+    "loadingNews": "Nalaganje objav..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "Stanje odklopnika ponudnika",
       "lastUpdate": "Zadnja posodobitev: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} h {minutes} min"
+      "uptimeHoursMinutes": "{hours} h {minutes} min",
+      "breakerClosed": "Zaprto",
+      "breakerNotClosed": "Odprto ali polodprto"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "Podrobnosti o vzdrževanju",
         "secondaryAction": "Stanje sistema"
       }
+    },
+    "miniapp": {
+      "askAnything": "Vprašajte karkoli…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} vidnih / {total} skupaj",
+    "modeLabel": "Način prikaza",
+    "jumpToNow": "Skoči na trenutni čas, črta NOW se ponastavi na položaj {position}%",
+    "laneReuse": "Ponovna uporaba pasu",
+    "laneReuseLabel": "Okno ponovne uporabe pasu (minute)",
+    "laneReuseHint": "Zahteve, ki si delijo ID pogovora, ostanejo v isti vrstici časovnice, dokler je razmik med njimi manjši od tega števila minut.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Samodejno osveževanje",
+    "autoRefreshLabel": "Interval samodejnega osveževanja (sekunde)",
+    "autoRefreshHint": "Kako pogosto časovnica ponovno pridobi seznam zahtev s strežnika.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Pomanjšaj",
+    "zoomIn": "Povečaj"
   },
   "metadata": {
     "compressionTitle": "Stiskanje",

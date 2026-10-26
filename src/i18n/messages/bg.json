@@ -25,8 +25,10 @@
     "confirm": "сигурен ли си",
     "refresh": "Опресняване",
     "close": "затвори",
+    "dialogTitleFallback": "Диалогов прозорец",
     "previousPage": "Предишна страница",
     "nextPage": "Следваща страница",
+    "pagination": "Страниране",
     "capsLockOn": "Caps Lock е включен",
     "dismissNotification": "Отхвърляне на известието",
     "toggleColumns": "Превключване на колоните",
@@ -182,6 +184,7 @@
     "combos": "Комбинации",
     "noModelsFound": "Няма намерени модели",
     "clear": "Изчистване",
+    "clearFilters": "Изчистване на филтрите",
     "done": "Готово",
     "selectAll": "Избери всички",
     "unselectAll": "Отмени избора",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Използвано от {count, plural, one {# партида} other {# партиди}}",
     "batchFilePreview": "Преглед",
     "batchFilePreviewTruncated": "Показване на първите {shown} реда ({total} общо реда)",
-    "batchFileDownloadFull": "Изтеглете целия файл"
+    "batchFileDownloadFull": "Изтеглете целия файл",
+    "tokensPageTitle": "Токени",
+    "tokensPageDescription": "Изпращайте токени между API ключове, споделяйте кодове за покана и свързвайте сървъри на общността.",
+    "tokensServerUrlLabel": "URL на сървъра"
   },
   "disabled": "Деактивирано",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Маршрутизиране на заявки с изчерпан бюджет към аварийния безплатен резервен доставчик/модел.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 или @channelname",
       "chatIdHint": "Уникалният цифров идентификатор или публичното потребителско име на чата/канала.",
       "tutorial": "Как да конфигурирате Telegram уебхук:"
-    }
+    },
+    "copy": "Копиране",
+    "copied": "Копирано!",
+    "expandDetails": "Показване на подробностите",
+    "collapseDetails": "Скриване на подробностите"
   },
   "compliance": {
     "auditTitle": "Одит",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Обаждания (24ч)",
     "mcpMetricSuccessRate": "Процент на успеха",
     "mcpMetricAvgDuration": "Средна продължителност",
-    "mcpMetricTopTool": "Най-добър инструмент"
+    "mcpMetricTopTool": "Най-добър инструмент",
+    "dismissError": "Затваряне на грешката"
   },
   "themesPage": {
     "title": "Теми",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "Бърза навигация",
     "quickNavigationTitle": "Бърза навигация (⌘K / Ctrl+K)",
     "openQuickNavigation": "Отваряне на бърза навигация",
+    "openMenu": "Отваряне на менюто",
+    "products": "Продукти на Keak",
     "switchToLightMode": "Превключване към светъл режим",
     "switchToDarkMode": "Превключване към тъмен режим",
     "language": "език",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "Само избраните връзки",
     "selectAtLeastOneConnection": "Изберете поне една връзка или изберете „Всички връзки“.",
     "allConnectionsDesc": "Този ключ може да използва всяка активна връзка.",
-    "restrictedToConnections": "Ограничено до {count, plural, one {# връзка} other {# връзки}}."
+    "restrictedToConnections": "Ограничено до {count, plural, one {# връзка} other {# връзки}}.",
+    "removeSelection": "Премахване на {name}"
   },
   "auditLog": {
     "title": "Дневник за одит",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "Конфигурирайте моста Image→Text в настройките на Modality Bridge",
     "sttBridgeCta": "Конфигурирайте моста Speech→Text в настройките на Modality Bridge",
     "existingConnection": "Съществуваща връзка",
-    "openrouterSttDescription": "Моделите за преобразуване на реч в текст на OpenRouter използват вашата конфигурирана връзка с OpenRouter. Не се изискват отделни удостоверения."
+    "openrouterSttDescription": "Моделите за преобразуване на реч в текст на OpenRouter използват вашата конфигурирана връзка с OpenRouter. Не се изискват отделни удостоверения.",
+    "modalityTabsAria": "Тип медия",
+    "serviceKindsAria": "Тип услуга"
   },
   "search": {
     "searchQuery": "Заявка за търсене",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "Неизвестен",
     "cliproxyapiUpdate": "Актуализиране",
     "cliproxyapiUpdateAvailable": "Налична актуализация: v{current} → v{latest}",
-    "cliproxyapiVersion": "Версия"
+    "cliproxyapiVersion": "Версия",
+    "removeMapping": "Премахване на съпоставянето"
   },
   "modelCatalog": {
     "title": "Модели и комбота",
@@ -3400,13 +3417,13 @@
     "comboRefMember": "Комбинация → {name}"
   },
   "combos": {
+    "title": "Комбота",
+    "description": "Създавайте комбинации от модели с претеглено маршрутизиране и резервна поддръжка",
+    "autoCatalogTitle": "Каталог за автоматично маршрутизиране",
     "autoTosLoadError": "Правилата за условията на ползване не могат да се заредят. Опитайте отново, преди да ги променяте.",
     "autoTosSaveError": "Правилата за условията на ползване не могат да се запазят. Все още се показва предишната настройка. Опитайте отново.",
     "autoTosIncludeLabel": "Включване в auto на доставчици, отбелязани с ToS: avoid",
     "autoTosDescription": "Изключено по подразбиране. Важи за всички комбинации auto, а не само за един акаунт. Свързването на доставчик не включва тази опция.",
-    "title": "Комбота",
-    "description": "Създавайте комбинации от модели с претеглено маршрутизиране и резервна поддръжка",
-    "autoCatalogTitle": "Каталог за автоматично маршрутизиране",
     "autoCatalogTemplateCount": "{count} шаблони",
     "autoCatalogDescription": "Вградени автоматични/* комбинации, разрешени динамично от свързани доставчици. Използвайте който и да е от тези идентификатори като поле за модел — не е необходима настройка.",
     "autoCatalogExpand": "Разширете каталога за автоматично маршрутизиране",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Все още няма конфигурирани комбинации.",
     "playgroundCreateFirst": "Първо създайте една",
     "weighted": "Претеглени",
+    "weightPercent": "Тегло (%)",
     "leastUsed": "Най-малко използван",
     "costOpt": "Оптимизация на разходите",
     "strategyGuideTitle": "Как да използвате тази стратегия",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# акаунт} other {# акаунта}}",
     "builderGlobalAdded": "Добавено",
     "builderGlobalAdd": "Добави",
+    "clearSearch": "Изчистване на търсенето",
     "manualModel": "Ръчен модел",
     "manualModelInvalid": "Въведете модел във формат доставчик/модел.",
     "manualModelUnknownProvider": "Неизвестен префикс на доставчик.",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "Минимална дължина на съдържанието (символи)",
     "responseValidationJsonPaths": "Проверки на JSON-path",
     "responseValidationAddCheck": "+ Добавяне на проверка",
+    "responseValidationRemoveCheck": "Премахване на проверката",
+    "responseValidationPath": "JSON път",
+    "responseValidationCondition": "Условие",
+    "responseValidationValue": "Очаквана стойност",
     "agentFeaturesSystemMessageOverride": "Отмяна на системното съобщение",
     "agentFeaturesSystemMessagePlaceholder": "Вие сте експертен помощник...",
     "agentFeaturesSystemMessageHint": "Отмяна на системно съобщение за агенти",
@@ -5288,7 +5311,8 @@
         "skipped": "вече конфигурирано",
         "failed": "неуспешно"
       }
-    }
+    },
+    "stepProgress": "Прогрес на настройката"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Този доставчик е изключен от auto по подразбиране",
@@ -6080,6 +6104,13 @@
     "claudeLowPriorityModeDescription": "Когато този акаунт достигне своя 5-часов лимит на използване и Anthropic предложи лентата с по-нисък приоритет, OmniRoute я приема и продължава да изпраща заявки с anthropic-usage-limit: slow, докато прозорецът се нулира, вместо да охлади връзката. Седмичният лимит все още важи и отговорите може да изчакат за свободен капацитет.",
     "claudeAutoLimitResetLabel": "Автоматично нулиране на лимита на сесията (веднъж седмично)",
     "claudeAutoLimitResetDescription": "Когато този акаунт достигне своя 5-часов лимит на използване и е налично нулиране на лимита на сесията, OmniRoute го задейства автоматично и опитва отново с пълна скорост. Използва еднократното седмично нулиране на акаунта и все още се отчита към седмичния лимит.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Пропускане на временния период на изчакване, така че тази връзка да остане допустима дори след възстановими грешки (терминалните състояния като блокиран/изтекъл все още се прилагат).",
     "disableCoolingLabel": "Деактивиране на периода на изчакване за тази връзка",
     "bulkPasteAdded": "{count, plural, one {Добавен е 1 ключ} other {Добавени са # ключа}}",
@@ -6533,6 +6564,7 @@
       "monsterapi": "Вземете API ключ на monsterapi.ai",
       "moonshot": "Свържете Moonshot AI с API ключ.",
       "morph": "Безплатен план: 250K кредита/месец, $0",
+      "apmix": "Свържете Apmix с API ключ от apmix.ai/dashboard — един абонамент, много модели.",
       "nanogpt": "Свържете NanoGPT с API ключ.",
       "nebius": "~$1 пробни кредити при регистрация за тестване на API",
       "nlpcloud": "NLP Cloud използва собствен chatbot API вместо OpenAI chat/completions. OmniRoute адаптира съобщенията на OpenAI към input/context/history и предоставя локален каталог от поддържани модели за чатботове.",
@@ -6629,8 +6661,7 @@
       "kiro": "Безплатен план: 50 кредита/месец (~25K–100K токена). ⚠️ Условията за ползване на Kiro забраняват използването на прокси/инструменти от трети страни.",
       "codex": "Свързване на OpenAI Codex със съществуващия OAuth поток.",
       "qwen": "Свързване на Qwen Code със съществуващия OAuth поток.",
-      "github-models": "Създайте GitHub PAT с обхват 'models: read' на github.com/settings/tokens",
-      "apmix": "Свържете Apmix с API ключ от apmix.ai/dashboard — един абонамент, много модели."
+      "github-models": "Създайте GitHub PAT с обхват 'models: read' на github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} приема собствени идентификатори на модела на доставчика. Импортирайте от /models или добавете персонализирани идентификатори за маршрутизиране.",
     "bedrockModelsDescription": "Моделите на Amazon Bedrock са обхванати от регион на AWS. Импортирайте от /models или добавете идентификатори на модел Bedrock, активирани в избрания регион.",
@@ -6802,14 +6833,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Настройки",
@@ -7707,6 +7731,7 @@
     "configured": "конфигуриран",
     "none": "Няма",
     "modelOverrideValuePlaceholder": "Числова стойност",
+    "modelOverrideKey": "Ключ за заместване",
     "modelOverrideReasoningEffortsPlaceholder": "Разделени със запетаи стойности на английски, напр. low, medium, high",
     "addKeyValue": "Добавяне на ключ-стойност",
     "noModelOverrides": "Няма конфигурирани предефинирания за този модел.",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "Преминали",
     "tomlTestFailed": "Неуспешни",
     "tomlImportError": "RTK TOML файлът не можа да бъде обработен.",
-    "tomlFileReadError": "Избраният TOML файл не можа да бъде прочетен."
+    "tomlFileReadError": "Избраният TOML файл не можа да бъде прочетен.",
+    "viewMode": "Режим на изглед"
   },
   "compressionEngineConfig": {
     "loading": "Зареждане…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "Езикови пакети: {packs}",
     "dragToReorder": "Плъзнете, за да пренаредите стъпката",
     "engine": "Двигател",
-    "intensity": "Интензивност"
+    "intensity": "Интензивност",
+    "compressionOverride": "Заместване на компресията"
   },
   "compressionStudio": {
     "noRun": "Няма налично изпълнение на компресиране.",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "победител: {winner}",
     "encoder": "енкодер",
     "bytes": "байта",
-    "tokensCl100k": "токени (cl100k)"
+    "tokensCl100k": "токени (cl100k)",
+    "studioViews": "Изгледи на Studio"
   },
   "omniglyph": {
     "preview": "Преглед",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "Съобщенията, по-кратки от това, не се компресират. По-ниска = повече компресия.",
     "tooltipMinSavings": "Компресирайте само ако спестява поне толкова токени.",
     "ultraSettings": "Ултра настройки",
-    "ultraSettingsDesc": "Захранвана от SLM семантична компресия"
+    "ultraSettingsDesc": "Захранвана от SLM семантична компресия",
+    "defaultLanguage": "Език по подразбиране",
+    "viewMode": "Режим на изглед"
   },
   "translator": {
     "title": "Преводач",
@@ -9835,6 +9865,10 @@
     "streamTransformFailed": "Неуспешно преобразуване на потока"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Използване",
     "grokExtraUsageCredits": "Допълнителни кредити за използване",
     "grokAutoTopUp": "Автоматично попълване",
@@ -10287,11 +10321,7 @@
     "updatedShort": "Актуализирано",
     "lastRefreshed": "Последно опреснено",
     "providerQuota": "Квота на доставчика",
-    "providerQuotaHomeHint": "Статус в реално време за свързаните акаунти",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "providerQuotaHomeHint": "Статус в реално време за свързаните акаунти"
   },
   "modals": {
     "waitingAuth": "Изчакване на разрешение",
@@ -11078,7 +11108,8 @@
       "message": "Съобщение",
       "error": "Грешка",
       "completion": "Завършване"
-    }
+    },
+    "statusFilter": "Статус"
   },
   "templateNames": {
     "simple-chat": "Обикновен чат",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "преди {minutes} мин.",
     "hoursAgo": "преди {hours} ч.",
     "daysAgo": "преди {days} дни",
-    "entries": "Записи"
+    "entries": "Записи",
+    "viewSwitcherAria": "Изглед на кеша"
   },
   "proxyConfigModal": {
     "levelGlobal": "Глобален",
@@ -11447,6 +11479,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Още действия",
     "test": "Тестване",
     "edit": "Редактиране",
     "delete": "Изтриване",
@@ -11809,7 +11842,8 @@
       "nextButton": "Напред",
       "runButton": "Изпълнение",
       "promptPlaceholder": "Въведете вашето съобщение… (Enter за изпращане, Shift+Enter за нов ред)"
-    }
+    },
+    "playgroundTabs": "Режими на Playground"
   },
   "miniPlayground": {
     "endpoint": "Крайна точка",
@@ -11880,7 +11914,8 @@
     "assistant": "Асистент",
     "errorLabel": "Грешка",
     "requestFailed": "Неуспешна заявка",
-    "stop": "Спиране"
+    "stop": "Спиране",
+    "messageInputAria": "Съобщение"
   },
   "requestLogger": {
     "recording": "Записване",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "{count} ротации на акаунти",
       "resilienceRetried": "Празният ход е повторен",
       "resilienceContinued": "Възобновено по време на потока",
-      "resilienceRecovered": "Възстановено чрез действие за устойчивост"
-    }
+      "resilienceRecovered": "Възстановено чрез действие за устойчивост",
+      "conversationContext": "Контекст на разговора",
+      "goToBottom": "Към дъното",
+      "liveRefreshOn": "Опресняване на живо: вкл.",
+      "liveRefreshOff": "Опресняване на живо: изкл.",
+      "liveRefresh": "Опресняване на живо",
+      "continuesFromParent": "продължава от родителя",
+      "continuesFrom": "Продължава от {id}",
+      "viewConversation": "преглед на разговора",
+      "openConversation": "Отвори разговор {id}"
+    },
+    "tableLabel": "Журнали на заявките"
   },
   "proxyLogger": {
     "filterAll": "Всички",
@@ -12113,7 +12158,9 @@
     "colServedBy": "Обслужвано от",
     "filterTraffic": "Трафик",
     "filterTests": "Тестове",
-    "filterSource": "Източник"
+    "filterSource": "Източник",
+    "tableLabel": "Журнали на проксито",
+    "sortLogs": "Сортиране на журналите"
   },
   "endpointOptions": {
     "speech": "Реч",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "ИЗЧЕРПАНА",
     "statusAlerting": "ПРЕДУПРЕЖДЕНИЕ",
     "statusError": "ГРЕШКА",
-    "moreSuffix": "+още {count}"
+    "moreSuffix": "+още {count}",
+    "feedFilterLabel": "Филтриране на събитията"
   },
   "quotaShare": {
     "weightPercent": "Тегло %",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "Негрупирани",
     "ungroupedHint": "Тези пулове не са присвоени към позната група. Редактирайте пул, за да го преместите в реална група.",
     "removeFailed": "Този пул не можа да бъде премахнат.",
-    "dismiss": "Затваряне"
+    "dismiss": "Затваряне",
+    "allocationsHeading": "Разпределения",
+    "wizardRemoveDimension": "Премахни измерението",
+    "wizardRemoveKey": "Премахни ключа"
   },
   "plugins": {
     "title": "Приставки",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "Неуспешно актуализиране на настройките",
       "serviceRevealApiKey": "{actor} разкри API ключ за {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Затвори грешката"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "Отидете сега",
       "message": "MITM Proxy вече се намира в AgentBridge.",
       "title": "Тази страница е преместена"
-    }
+    },
+    "dnsOn": "DNS включено",
+    "dnsOff": "DNS изключено",
+    "showServerSettings": "Покажи настройките на сървъра",
+    "hideServerSettings": "Скрий настройките на сървъра",
+    "upstreamCaTesting": "Тестване…",
+    "removeMapping": "Премахни съответствието",
+    "mappingSourcePlaceholder": "напр., gemini-3.6-flash-medium, или * за всички без съответствие",
+    "mappingWildcardHint": "Използвайте * като източник, за да насочите всеки модел без изрично съответствие през OmniRoute към избраната цел. Точните съвпадения на източника винаги имат предимство пред *.",
+    "wizardDetectingModels": "Откриване на модели от прихванатия трафик...",
+    "wizardDetectedModels": "Намерени са {count, plural, one {# модел} other {# модела}} в прихванатия трафик. Изберете тези, които искате да добавите:",
+    "wizardSelectedModels": "Избрани са {count, plural, one {# модел} other {# модела}}. Ще ги съпоставите с модели на OmniRoute на следващия екран.",
+    "wizardAddModels": "Добави {count, plural, one {# модел} other {# модела}}",
+    "wizardNoModelsDetected": "Все още не са открити модели. Използвайте {agent}, за да направите заявка, след което стартирайте този асистент отново, за да откриете автоматично модели от трафика.",
+    "wizardNoModelsHint": "Или затворете този асистент и добавете съпоставяния ръчно в картата на агента."
   },
   "providerStats": {
     "unknownError": "Неизвестна грешка",
@@ -12686,7 +12752,11 @@
     "avgTtft": "Средно TTFT",
     "avgTotal": "Средно общо",
     "requestTelemetry": "Телеметрия на заявките",
-    "requestTelemetryDescription": "Разбивка на 7-фазния конвейер (последните 5 минути)"
+    "requestTelemetryDescription": "Разбивка на 7-фазния конвейер (последните 5 минути)",
+    "title": "Статистика на доставчиците",
+    "description": "Трафик, латентност и успеваемост по доставчик и по модел",
+    "combo": "Комбо",
+    "toggleModels": "Покажи моделите за {provider}"
   },
   "relay": {
     "title": "Serverless Relay проксита",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "Няма тяло на заявката.",
     "noResponseBody": "Няма тяло на отговора.",
     "formatted": "Форматирано",
-    "raw": "Необработено"
+    "raw": "Необработено",
+    "requestCount": "{count, plural, one {# заявка} other {# заявки}}",
+    "expandList": "Разгъни списъка",
+    "collapseList": "Свий списъка",
+    "snippetLanguage": "Език на откъса",
+    "headersTable": "Заглавки",
+    "showSecrets": "Покажи тайните",
+    "maskSecrets": "Маскирай тайните",
+    "llmNotAvailable": "Метаданните на LLM не са налични за тази заявка.",
+    "llmStreamYes": "да (SSE)",
+    "llmStreamNo": "не",
+    "llmTotalTokens": "Общо: {count} токена"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "Дял на повикванията, на които този доставчик действително е отговорил през последните 24 часа. Тире означава, че е обслужил твърде малко трафик, за да бъде посочен процент.",
     "reliabilitySample": "{successes} от {requests} повиквания бяха успешни през последните {hours} ч.",
     "reliabilityTooFew": "Само {requests} повиквания през последните {hours} ч. — твърде малко за определяне на процент",
-    "reliabilityNoTraffic": "Няма регистрирани повиквания през последните 24 ч."
+    "reliabilityNoTraffic": "Няма регистрирани повиквания през последните 24 ч.",
+    "categoryFilter": "Категория на задачата"
   },
   "discovery": {
     "title": "Откриване на доставчици",
@@ -13331,7 +13413,11 @@
     "method": "Метод",
     "auth": "Автентикация",
     "feasibility": "Осъществимост",
-    "models": "Модели"
+    "models": "Модели",
+    "provider": "Доставчик",
+    "status": "Статус",
+    "endpoint": "Крайна точка",
+    "actions": "Действия"
   },
   "noAuthProvider": {
     "title": "Не се изисква автентикация",
@@ -13380,7 +13466,8 @@
     "ownProxy": "Собствено прокси",
     "freeTierPause": "Моделът {model} е на пауза (429), връща се в {time}",
     "freeTierPauseProvider": "На пауза (429), връща се в {time}",
-    "freeTierPauseNote": "Пауза в процеса на този инстанс"
+    "freeTierPauseNote": "Пауза в процеса на този инстанс",
+    "proxyType": "Тип на проксито"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "Очаква ви скрито постижение...",
         "criteria": "Изпълнете скритото постижение, за да разкриете тази значка."
       }
-    }
+    },
+    "leaderboardTitle": "Класация",
+    "leaderboardDescription": "Класирания и постижения във вашите API ключове",
+    "badgeLocked": "Заключено"
   },
   "featureFlags": {
     "title": "Функционални флагове",
@@ -13794,6 +13884,7 @@
     "latency": "Латентност",
     "quota": "Квота",
     "rangeWindow": "Прозорец от {range}",
+    "timeRange": "Времеви диапазон",
     "runtimeHealthBlend": "комбинация от време на изпълнение/състояние",
     "averageResponseTime": "средно време за реакция",
     "worstQuota": "Най-лоша квота",
@@ -13995,7 +14086,11 @@
     "learnMore": "Научете повече",
     "changelogLoadFailed": "Дневникът на промените не можа да бъде зареден. Моля, опитайте отново по-късно.",
     "retry": "Повторен опит",
-    "viewFullHistory": "Преглед на пълната история в GitHub"
+    "viewFullHistory": "Преглед на пълната история в GitHub",
+    "title": "Новини и дневник на промените",
+    "description": "Съобщения от екипа на OmniRoute и последните бележки към изданието",
+    "viewLabel": "Преглед",
+    "loadingNews": "Зареждане на съобщенията..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "Състояние на прекъсвача на доставчика",
       "lastUpdate": "Последно обновление: {timestamp}",
       "uptimeMinutes": "{minutes}м",
-      "uptimeHoursMinutes": "{hours}ч {minutes}м"
+      "uptimeHoursMinutes": "{hours}ч {minutes}м",
+      "breakerClosed": "Затворено",
+      "breakerNotClosed": "Отворено или полуотворено"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "Детайли за поддръжка",
         "secondaryAction": "Състояние на системата"
       }
+    },
+    "miniapp": {
+      "askAnything": "Попитайте каквото и да е…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} видими / {total} общо",
+    "modeLabel": "Режим на преглед",
+    "jumpToNow": "Премини към текущото време, линията NOW се нулира на позиция {position}%",
+    "laneReuse": "Повторно използване на лента",
+    "laneReuseLabel": "Прозорец за повторно използване на лента (минути)",
+    "laneReuseHint": "Заявките, споделящи един и същ идентификатор на разговор, остават на същия ред на времевата линия, стига интервалът между тях да е под този брой минути.",
+    "laneReuseUnit": "мин",
+    "autoRefresh": "Автоматично опресняване",
+    "autoRefreshLabel": "Интервал на автоматично опресняване (секунди)",
+    "autoRefreshHint": "Колко често времевата линия извлича повторно списъка със заявки от сървъра.",
+    "autoRefreshUnit": "с",
+    "zoomOut": "Намаляване на мащаба",
+    "zoomIn": "Увеличаване на мащаба"
   },
   "metadata": {
     "compressionTitle": "Компресия",

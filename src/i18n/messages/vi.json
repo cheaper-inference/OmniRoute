@@ -3417,13 +3417,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
+    "title": "Combo",
+    "description": "Tạo các combo mô hình với hỗ trợ định tuyến có trọng số và dự phòng",
+    "autoCatalogTitle": "Danh mục định tuyến tự động",
     "autoTosLoadError": "Không thể tải chính sách ToS. Hãy thử lại trước khi thay đổi.",
     "autoTosSaveError": "Không thể lưu chính sách ToS. Thiết lập trước đó vẫn được hiển thị. Hãy thử lại.",
     "autoTosIncludeLabel": "Đưa các nhà cung cấp có nhãn ToS: avoid vào auto",
     "autoTosDescription": "Mặc định tắt. Áp dụng cho mọi tổ hợp auto, không chỉ một tài khoản. Kết nối nhà cung cấp không bật tùy chọn này.",
-    "title": "Combo",
-    "description": "Tạo các combo mô hình với hỗ trợ định tuyến có trọng số và dự phòng",
-    "autoCatalogTitle": "Danh mục định tuyến tự động",
     "autoCatalogTemplateCount": "{count} mẫu",
     "autoCatalogDescription": "Các combo auto/* tích hợp sẵn được phân giải động từ các nhà cung cấp đã kết nối. Sử dụng bất kỳ ID nào trong số này làm trường mô hình — không cần thiết lập.",
     "autoCatalogExpand": "Mở rộng danh mục định tuyến tự động",
@@ -6104,6 +6104,13 @@
     "claudeLowPriorityModeDescription": "Khi tài khoản này đạt giới hạn sử dụng 5 giờ và Anthropic cung cấp luồng có mức ưu tiên thấp hơn, OmniRoute sẽ chấp nhận và tiếp tục gửi yêu cầu với anthropic-usage-limit: slow cho đến khi khung thời gian được đặt lại, thay vì tạm ngừng kết nối. Giới hạn hằng tuần vẫn được áp dụng và phản hồi có thể phải chờ khi có dung lượng dự phòng.",
     "claudeAutoLimitResetLabel": "Tự động đặt lại giới hạn phiên (mỗi tuần một lần)",
     "claudeAutoLimitResetDescription": "Khi tài khoản này đạt giới hạn sử dụng 5 giờ và có thể đặt lại giới hạn phiên, OmniRoute sẽ tự động sử dụng lượt đặt lại đó rồi thử lại ở tốc độ tối đa. Thao tác này sử dụng lượt đặt lại mỗi tuần một lần của tài khoản và vẫn được tính vào giới hạn hằng tuần.",
+    "codexPaidCreditsShort": "Tín dụng bổ sung",
+    "codexPaidCreditsToggleTitle": "Cho phép sử dụng tín dụng trả phí của Codex sau khi hết hạn mức gói đăng ký (có thể phát sinh phí bổ sung)",
+    "codexPaidCreditsEnabled": "Đã bật tín dụng trả phí của Codex (có thể phát sinh phí bổ sung)",
+    "codexPaidCreditsDisabled": "Đã tắt tín dụng trả phí của Codex",
+    "failedUpdateCodexPaidCredits": "Không thể cập nhật chính sách tín dụng trả phí của Codex",
+    "allowCodexPaidCreditsLabel": "Cho phép tín dụng trả phí của Codex",
+    "allowCodexPaidCreditsDescription": "Cho phép tài khoản này sử dụng tín dụng trả phí sau khi hạn mức gói đăng ký đạt đến ngưỡng cắt. Yêu cầu có tín dụng khả dụng do OpenAI báo cáo; có thể phát sinh phí. Giới hạn Spark và thời gian chờ (cooldown) từ upstream vẫn được áp dụng. Tính khả dụng của tín dụng được kiểm tra ngay cả khi tính năng preflight hạn mức bị tắt.",
     "disableCoolingDescription": "Bỏ qua thời gian chờ tạm thời để kết nối này vẫn đủ điều kiện hoạt động ngay cả sau các lỗi có thể khôi phục (các trạng thái cuối cùng như bị cấm hoặc hết hạn vẫn áp dụng).",
     "disableCoolingLabel": "Vô hiệu hóa thời gian chờ cho kết nối này",
     "bulkPasteAdded": "{count, plural, one {Đã thêm 1 khóa} other {Đã thêm # khóa}}",
@@ -6557,6 +6564,7 @@
       "monsterapi": "Lấy khóa API tại monsterapi.ai",
       "moonshot": "Kết nối Kimi bằng khóa API.",
       "morph": "Gói miễn phí: 250 nghìn tín dụng/tháng, 0 USD",
+      "apmix": "Kết nối Apmix bằng khóa API từ apmix.ai/dashboard — một gói đăng ký, nhiều mô hình.",
       "nanogpt": "Kết nối NanoGPT bằng khóa API.",
       "nebius": "Khoảng 1 USD tín dụng dùng thử khi đăng ký để kiểm thử API",
       "nlpcloud": "NLP Cloud dùng API chatbot độc quyền thay cho OpenAI chat/completions. OmniRoute chuyển đổi message OpenAI thành input/context/history và cung cấp danh mục cục bộ các mô hình chatbot được hỗ trợ.",
@@ -6653,8 +6661,7 @@
       "kiro": "Gói miễn phí: 50 tín dụng/tháng (khoảng 25–100 nghìn token). ⚠️ Điều khoản Kiro cấm sử dụng proxy/harness của bên thứ ba.",
       "codex": "Kết nối OpenAI Codex bằng luồng OAuth hiện có.",
       "qwen": "Kết nối Qwen Code bằng luồng OAuth hiện có.",
-      "github-models": "Tạo GitHub PAT với phạm vi 'models: read' tại github.com/settings/tokens",
-      "apmix": "Kết nối Apmix bằng khóa API từ apmix.ai/dashboard — một gói đăng ký, nhiều mô hình."
+      "github-models": "Tạo GitHub PAT với phạm vi 'models: read' tại github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} chấp nhận ID mô hình gốc của nhà cung cấp. Nhập từ /models hoặc thêm ID tùy chỉnh để định tuyến.",
     "bedrockModelsDescription": "Các mô hình Amazon Bedrock được giới hạn theo vùng AWS. Nhập từ /models hoặc thêm ID mô hình Bedrock được bật trong vùng đã chọn.",
@@ -6826,14 +6833,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Giới hạn đồng thời theo mô hình",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Tùy chọn: mỗi dòng một model=cap, khớp chính xác với ID mô hình của upstream. Các yêu cầu vượt mức được xếp hàng cục bộ; để trống nghĩa là không giới hạn theo mô hình.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Mục đồng thời theo mô hình \"{entry}\" không hợp lệ — hãy dùng model=cap với cap là số nguyên từ 1 đến {max}.",
-    "codexPaidCreditsShort": "Tín dụng bổ sung",
-    "codexPaidCreditsToggleTitle": "Cho phép sử dụng tín dụng trả phí của Codex sau khi hết hạn mức gói đăng ký (có thể phát sinh phí bổ sung)",
-    "codexPaidCreditsEnabled": "Đã bật tín dụng trả phí của Codex (có thể phát sinh phí bổ sung)",
-    "codexPaidCreditsDisabled": "Đã tắt tín dụng trả phí của Codex",
-    "failedUpdateCodexPaidCredits": "Không thể cập nhật chính sách tín dụng trả phí của Codex",
-    "allowCodexPaidCreditsLabel": "Cho phép tín dụng trả phí của Codex",
-    "allowCodexPaidCreditsDescription": "Cho phép tài khoản này sử dụng tín dụng trả phí sau khi hạn mức gói đăng ký đạt đến ngưỡng cắt. Yêu cầu có tín dụng khả dụng do OpenAI báo cáo; có thể phát sinh phí. Giới hạn Spark và thời gian chờ (cooldown) từ upstream vẫn được áp dụng. Tính khả dụng của tín dụng được kiểm tra ngay cả khi tính năng preflight hạn mức bị tắt."
+    "rateLimitOverridesModelConcurrencyInvalid": "Mục đồng thời theo mô hình \"{entry}\" không hợp lệ — hãy dùng model=cap với cap là số nguyên từ 1 đến {max}."
   },
   "settings": {
     "title": "Cài đặt",
@@ -9865,6 +9865,10 @@
     "streamTransformFailed": "Không thể chuyển đổi luồng"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Tín dụng trả phí Codex",
+    "codexPaidCreditsAvailable": "Khả dụng (không báo cáo số dư)",
+    "codexPaidCreditsUnavailable": "Không khả dụng hoặc đã đạt giới hạn chi tiêu",
+    "codexPaidCreditsUnlimited": "Không giới hạn",
     "title": "Mức sử dụng",
     "grokExtraUsageCredits": "Tín dụng sử dụng bổ sung",
     "grokAutoTopUp": "Tự động nạp thêm",
@@ -10317,11 +10321,7 @@
     "updatedShort": "Đã cập nhật",
     "lastRefreshed": "Cập nhật lần cuối",
     "providerQuota": "Hạn ngạch nhà cung cấp",
-    "providerQuotaHomeHint": "Trạng thái theo thời gian thực của các tài khoản đã kết nối",
-    "codexPaidCreditsLabel": "Tín dụng trả phí Codex",
-    "codexPaidCreditsAvailable": "Khả dụng (không báo cáo số dư)",
-    "codexPaidCreditsUnavailable": "Không khả dụng hoặc đã đạt giới hạn chi tiêu",
-    "codexPaidCreditsUnlimited": "Không giới hạn"
+    "providerQuotaHomeHint": "Trạng thái theo thời gian thực của các tài khoản đã kết nối"
   },
   "modals": {
     "waitingAuth": "Đang chờ ủy quyền",
@@ -11977,10 +11977,10 @@
       "compressed": "Nén",
       "tps": "TPS",
       "duration": "Thời lượng",
+      "addedWait": "Thời gian chờ thêm",
       "time": "Thời gian",
       "conversation": "Cuộc trò chuyện",
-      "ttft": "TTFT",
-      "addedWait": "Thời gian chờ thêm"
+      "ttft": "TTFT"
     },
     "loadingLogs": "Đang tải nhật ký...",
     "noLogs": "Chưa có nhật ký nào. Hãy thực hiện một số cuộc gọi API để xem chúng ở đây.",

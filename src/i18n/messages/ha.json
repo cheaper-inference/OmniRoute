@@ -25,8 +25,10 @@
     "confirm": "Ka tabbata?",
     "refresh": "Sabunta",
     "close": "Rufe",
+    "dialogTitleFallback": "Akwatin Magana",
     "previousPage": "Shafin baya",
     "nextPage": "Shafi na gaba",
+    "pagination": "Raba shafuka",
     "capsLockOn": "Caps Lock yana kunne",
     "dismissNotification": "Yi watsi da sanarwar",
     "toggleColumns": "Nuna ko ɓoye ginshiƙai",
@@ -182,6 +184,7 @@
     "combos": "Haɗakoki",
     "noModelsFound": "Ba a sami samfura ba",
     "clear": "Share",
+    "clearFilters": "Share matata",
     "done": "An gama",
     "selectAll": "Zaɓi duka",
     "unselectAll": "Cire zaɓin duka",
@@ -998,14 +1001,17 @@
     "batchFileUsedByCount": "Rukuni {count, plural, one {# ne} other {# ne}} ke amfani da shi",
     "batchFilePreview": "Samfoti",
     "batchFilePreviewTruncated": "Ana nuna layuka {shown} na farko (jimillar layuka {total})",
-    "batchFileDownloadFull": "Sauke Cikakken Fayil"
+    "batchFileDownloadFull": "Sauke Cikakken Fayil",
+    "tokensPageTitle": "Alamomi",
+    "tokensPageDescription": "Aika alamomi tsakanin maɓallan API, raba lambobin gayyata kuma haɗa sabobin al'umma.",
+    "tokensServerUrlLabel": "URL na uwar garken"
   },
   "disabled": "An Kashe",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Tura buƙatun da kasafin kuɗinsu ya ƙare zuwa provider/model na gaggawa mai kyauta.",
   "featureFlagArenaEloSyncEnabledDescription": "Kunna daidaita ELO na jadawalin jagorancin Arena AI lokaci-lokaci domin martabar ƙwarewar samfura.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Ƙirƙira da shigar da taƙaitattun tattaunawa lokacin da tsarin tura haɗe-haɗe ya sauya samfura. Kashe wannan domin ɗaukar sauyin samfura daban-daban da kuma hana buƙatun miƙa aiki na bayan fage ga duk haɗe-haɗe na yanzu da na gaba.",
-  "featureFlagExposeCcDiscoveryAliasesDescription": "Bayyana ID na madubi na claude/&lt;provider&gt;/&lt;model&gt; a /v1/models domin gano samfuran gateway na Claude Code ya jera samfuran da ba na Claude ba. Gargadi: idan aka kunna wannan a ko’ina, zai ninka shigarwar kundin ga duk abokan ciniki.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
+  "featureFlagExposeCcDiscoveryAliasesDescription": "Bayyana ID na madubi na claude/&lt;provider&gt;/&lt;model&gt; a /v1/models domin gano samfuran gateway na Claude Code ya jera samfuran da ba na Claude ba. Gargadi: idan aka kunna wannan a ko’ina, zai ninka shigarwar kundin ga duk abokan ciniki.",
   "featureFlagNoThinkingAliasEnabledDescription": "Babban maɓalli na aliases na gateway na no-think/&lt;provider&gt;/&lt;model&gt;. Kunne (tsoho): /v1/models yana bayyana nau'in da ba ya yin tunani ga kowane samfurin Claude mai ikon tunani da ya cancanta, kuma ID na no-think/ da aka aika cikin buƙata yana komawa ga ainihin samfurin tare da hana yin nazari. Kashe: ba a bayyana kowane nau'i, kuma ana ɗaukar ID na no-think/ kamar kowane ID na samfurin da ba a sani ba. Zaɓin shiga/fita na ModelSpec.noThinkingAlias na kowane samfurin yana ci gaba da aiki yayin da wannan yake kunne.",
   "featureFlagChatVirtualLanesEnabledDescription": "Kunna layukan karɓa na kama-da-wane masu daidaitawa ga kowane tenant domin aika buƙatu zuwa provider (#9654): yawaitar buƙatun tenant ɗaya ba za ta sake jawo wa wani kuskuren 503 ba. Env var na OMNIROUTE_CHAT_VIRTUAL_LANES yana da fifiko kan wannan sauyin dashboard; sauye-sauye za su fara aiki bayan sake kunna server.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Shafukan masu samarwa na Dashboard: nuna alamar Kyauta kawai bisa alamomin da mai samarwar ya tabbatar — wannan yana watsi da dabarar hasashen sunan nuni, filayen kyauta marasa ƙimar boolean, da kari na :free a kan masu samarwa da aka yi wa rajista waɗanda ba su da matakin kyauta da aka rubuta. Idan an Kashe, ana ci gaba da amfani da tsohuwar ƙa’idar alamar.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 ko @channelname",
       "chatIdHint": "Keɓaɓɓen lambar ganewa ko sunan mai amfani na jama'a na hira/tashar.",
       "tutorial": "Yadda ake saita webhook na Telegram:"
-    }
+    },
+    "copy": "Kwafa",
+    "copied": "An kwafa!",
+    "expandDetails": "Nuna cikakkun bayanai",
+    "collapseDetails": "Ɓoye cikakkun bayanai"
   },
   "compliance": {
     "auditTitle": "Bincike",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Kira (sa’o’i 24)",
     "mcpMetricSuccessRate": "Ƙimar nasara",
     "mcpMetricAvgDuration": "Matsakaicin lokaci",
-    "mcpMetricTopTool": "Mafi shaharar kayan aiki"
+    "mcpMetricTopTool": "Mafi shaharar kayan aiki",
+    "dismissError": "Kore kuskure"
   },
   "themesPage": {
     "title": "Jigogi",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "Kewayawa cikin sauri",
     "quickNavigationTitle": "Kewayawa cikin sauri (⌘K / Ctrl+K)",
     "openQuickNavigation": "Buɗe kewayawa cikin sauri",
+    "openMenu": "Buɗe menu",
+    "products": "Kayayyakin Keak",
     "switchToLightMode": "Canja zuwa yanayin haske",
     "switchToDarkMode": "Canja zuwa yanayin duhu",
     "language": "Harshe",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "Haɗin da aka zaɓa kawai",
     "selectAtLeastOneConnection": "Zaɓi aƙalla haɗi ɗaya ko kuma zaɓi Duk haɗin.",
     "allConnectionsDesc": "Wannan maɓalli na iya amfani da kowane haɗi mai aiki.",
-    "restrictedToConnections": "An taƙaita zuwa {count, plural, one {haɗi #} other {haɗi #}}."
+    "restrictedToConnections": "An taƙaita zuwa {count, plural, one {haɗi #} other {haɗi #}}.",
+    "removeSelection": "Cire {name}"
   },
   "auditLog": {
     "title": "Rajistar Bincike",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "Saita gadar Hoto→Rubutu a cikin saitunan Modality Bridge",
     "sttBridgeCta": "Saita gadar Magana→Rubutu a cikin saitunan Modality Bridge",
     "existingConnection": "Haɗin da ake da shi",
-    "openrouterSttDescription": "Samfuran magana-zuwa-rubutu na OpenRouter suna amfani da haɗin OpenRouter da ka saita. Ba a buƙatar bayanan shiga na daban."
+    "openrouterSttDescription": "Samfuran magana-zuwa-rubutu na OpenRouter suna amfani da haɗin OpenRouter da ka saita. Ba a buƙatar bayanan shiga na daban.",
+    "modalityTabsAria": "Nau'in midiya",
+    "serviceKindsAria": "Nau'in sabis"
   },
   "search": {
     "searchQuery": "Tambayar Bincike",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "Ba a sani ba",
     "cliproxyapiUpdate": "Sabunta",
     "cliproxyapiUpdateAvailable": "Akwai sabuntawa: v{current} → v{latest}",
-    "cliproxyapiVersion": "Siga"
+    "cliproxyapiVersion": "Siga",
+    "removeMapping": "Cire taswira"
   },
   "modelCatalog": {
     "title": "Samfura da Haɗe-haɗe",
@@ -3400,13 +3417,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
+    "title": "Haɗe-haɗe",
+    "description": "Ƙirƙiri haɗe-haɗen samfura tare da rarrabawa bisa nauyi da goyon bayan madadin",
+    "autoCatalogTitle": "Kundin rarrabawa ta atomatik",
     "autoTosLoadError": "An kasa loda manufar sharuddan sabis. Sake gwadawa kafin ka canza ta.",
     "autoTosSaveError": "An kasa adana manufar sharuddan sabis. Ana nuna saitin da ya gabata har yanzu. Sake gwadawa.",
     "autoTosIncludeLabel": "Haɗa masu ba da sabis da aka yi wa alamar ToS: avoid a cikin auto",
     "autoTosDescription": "A kashe yake ta tsohuwa. Ya shafi duk haɗuwar auto, ba asusu ɗaya kaɗai ba. Haɗa mai ba da sabis ba ya kunna wannan zaɓi.",
-    "title": "Haɗe-haɗe",
-    "description": "Ƙirƙiri haɗe-haɗen samfura tare da rarrabawa bisa nauyi da goyon bayan madadin",
-    "autoCatalogTitle": "Kundin rarrabawa ta atomatik",
     "autoCatalogTemplateCount": "{count} samfura",
     "autoCatalogDescription": "Haɗe-haɗen auto/* da aka tanada suna warwarewa kai tsaye bisa masu samarwa da aka haɗa. Yi amfani da kowane ɗayan waɗannan IDs a matsayin filin model — ba sai an saita komai ba.",
     "autoCatalogExpand": "Faɗaɗa kundin rarrabawa ta atomatik",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Har yanzu ba a saita haɗe-haɗe ba.",
     "playgroundCreateFirst": "Fara da ƙirƙirar ɗaya",
     "weighted": "Mai Rabo Bisa Nauyi",
+    "weightPercent": "Nauyi (%)",
     "leastUsed": "Mafi Ƙarancin Amfani",
     "costOpt": "Ingantawa Bisa Kuɗi",
     "strategyGuideTitle": "Yadda ake amfani da wannan dabarar",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# asusu} other {# asusu}}",
     "builderGlobalAdded": "An ƙara",
     "builderGlobalAdd": "Ƙara",
+    "clearSearch": "Share bincike",
     "manualModel": "Samfurin da aka shigar da hannu",
     "manualModelInvalid": "Shigar da samfuri a matsayin provider/model.",
     "manualModelUnknownProvider": "Ba a san prefix ɗin provider ba.",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "Mafi ƙarancin tsawon abin ciki (haruffa)",
     "responseValidationJsonPaths": "Binciken JSON-path",
     "responseValidationAddCheck": "+ Ƙara bincike",
+    "responseValidationRemoveCheck": "Cire alama",
+    "responseValidationPath": "Hanyar JSON",
+    "responseValidationCondition": "Sharadi",
+    "responseValidationValue": "Ƙimar da ake sa ran",
     "agentFeaturesSystemMessageOverride": "Maye gurbin saƙon tsarin",
     "agentFeaturesSystemMessagePlaceholder": "Kai ƙwararren mataimaki ne...",
     "agentFeaturesSystemMessageHint": "Maye gurbin saƙon tsarin ga wakilai",
@@ -5288,7 +5311,8 @@
         "skipped": "an riga an saita",
         "failed": "ya gaza"
       }
-    }
+    },
+    "stepProgress": "Ci gaban saiti"
   },
   "providers": {
     "tosAvoidNoticeTitle": "An ware wannan mai ba da sabis daga auto ta tsohuwa",
@@ -6540,6 +6564,7 @@
       "monsterapi": "Sami maɓallin API a monsterapi.ai",
       "moonshot": "Haɗa Kimi da maɓallin API.",
       "morph": "Matakin kyauta: kiredit 250K/wata, $0",
+      "apmix": "Haɗa Apmix da maɓallin API daga apmix.ai/dashboard — biyan kuɗi ɗaya, samfura da yawa.",
       "nanogpt": "Haɗa NanoGPT da maɓallin API.",
       "nebius": "Kimanin $1 na kiredit ɗin gwaji bayan yin rajista don gwajin API",
       "nlpcloud": "NLP Cloud yana amfani da API na chatbot na mallaka maimakon OpenAI chat/completions. OmniRoute yana daidaita saƙonnin OpenAI zuwa input/context/history kuma yana samar da kundin cikin gida na samfuran chatbot da ake tallafawa.",
@@ -6636,8 +6661,7 @@
       "kiro": "Matakin kyauta: credits 50/wata (~25K–100K tokens). ⚠️ Kiro ToS ya hana amfani da proxy/harness na ɓangare na uku.",
       "codex": "Haɗa OpenAI Codex ta amfani da tsarin OAuth na yanzu.",
       "qwen": "Haɗa Qwen Code ta amfani da tsarin OAuth na yanzu.",
-      "github-models": "Ƙirƙiri GitHub PAT mai scope na 'models: read' a github.com/settings/tokens",
-      "apmix": "Haɗa Apmix da maɓallin API daga apmix.ai/dashboard — biyan kuɗi ɗaya, samfura da yawa."
+      "github-models": "Ƙirƙiri GitHub PAT mai scope na 'models: read' a github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} yana karɓar ID na samfuri na asali daga provider. Shigo da su daga /models ko ƙara ID na musamman don routing.",
     "bedrockModelsDescription": "Ana iyakance samfuran Amazon Bedrock bisa yankin AWS. Shigo da su daga /models ko ƙara ID na samfuran Bedrock da aka kunna a yankin da aka zaɓa.",
@@ -7707,6 +7731,7 @@
     "configured": "an saita",
     "none": "Babu",
     "modelOverrideValuePlaceholder": "Ƙimar lamba",
+    "modelOverrideKey": "Mabuɗin madadin",
     "modelOverrideReasoningEffortsPlaceholder": "An raba su da waƙafin Turanci, misali low, medium, high",
     "addKeyValue": "Ƙara maɓalli da ƙima",
     "noModelOverrides": "Ba a saita wani sauyi ga wannan samfurin ba.",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "Ya yi nasara",
     "tomlTestFailed": "Ya gaza",
     "tomlImportError": "An kasa sarrafa fayil ɗin RTK TOML.",
-    "tomlFileReadError": "An kasa karanta fayil ɗin TOML da aka zaɓa."
+    "tomlFileReadError": "An kasa karanta fayil ɗin TOML da aka zaɓa.",
+    "viewMode": "Yanayin duba"
   },
   "compressionEngineConfig": {
     "loading": "Ana lodawa…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "Fakitin harsuna: {packs}",
     "dragToReorder": "Ja don sake tsara matakin",
     "engine": "Injin",
-    "intensity": "Ƙarfi"
+    "intensity": "Ƙarfi",
+    "compressionOverride": "Madadin matsawa"
   },
   "compressionStudio": {
     "noRun": "Babu wani aikin compression da ake samu.",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "wanda ya yi nasara: {winner}",
     "encoder": "mai sauya tsari",
     "bytes": "baitoci",
-    "tokensCl100k": "token-token (cl100k)"
+    "tokensCl100k": "token-token (cl100k)",
+    "studioViews": "Abubuwan duba na Studio"
   },
   "omniglyph": {
     "preview": "Samfoti",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "Ba a matse saƙonnin da suka fi wannan gajarta. Ƙasa = ƙarin matsewa.",
     "tooltipMinSavings": "A matse kawai idan zai adana aƙalla wannan adadin token.",
     "ultraSettings": "Saitunan Ultra",
-    "ultraSettingsDesc": "Matsewar ma'ana mai amfani da SLM"
+    "ultraSettingsDesc": "Matsewar ma'ana mai amfani da SLM",
+    "defaultLanguage": "Harshen asali",
+    "viewMode": "Yanayin duba"
   },
   "translator": {
     "title": "Mai Fassara",
@@ -11078,7 +11108,8 @@
       "message": "Saƙo",
       "error": "Kuskure",
       "completion": "Kammalawa"
-    }
+    },
+    "statusFilter": "Matsayi"
   },
   "templateNames": {
     "simple-chat": "Tattaunawa Mai Sauƙi",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "minti {minutes} da suka wuce",
     "hoursAgo": "awa {hours} da suka wuce",
     "daysAgo": "kwanaki {days} da suka wuce",
-    "entries": "Shigarwar bayanai"
+    "entries": "Shigarwar bayanai",
+    "viewSwitcherAria": "Dubin cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Na Gabaɗaya",
@@ -11447,6 +11479,7 @@
     "tableHealth": "Lafiya (awa 24)",
     "tableUsage": "Amfani",
     "tableActions": "Ayyuka",
+    "moreActions": "Ƙarin ayyuka",
     "test": "Gwada",
     "edit": "Gyara",
     "delete": "Share",
@@ -11809,7 +11842,8 @@
       "nextButton": "Gaba",
       "runButton": "Gudanar",
       "promptPlaceholder": "Shigar da saƙonka… (Enter don aikawa, Shift+Enter don sabon layi)"
-    }
+    },
+    "playgroundTabs": "Yanayoyin Playground"
   },
   "miniPlayground": {
     "endpoint": "Wurin ƙarshe",
@@ -11880,7 +11914,8 @@
     "assistant": "Mataimaki",
     "errorLabel": "Kuskure",
     "requestFailed": "Buƙatar ta gaza",
-    "stop": "Tsaya"
+    "stop": "Tsaya",
+    "messageInputAria": "Saƙo"
   },
   "requestLogger": {
     "recording": "Ana yin rikodi",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "Juyawar asusu {count}",
       "resilienceRetried": "An sake gwada zagaye mara komai",
       "resilienceContinued": "An ci gaba a tsakiyar rafi",
-      "resilienceRecovered": "An dawo da shi ta matakin juriya"
-    }
+      "resilienceRecovered": "An dawo da shi ta matakin juriya",
+      "conversationContext": "Mahallin Tattaunawa",
+      "goToBottom": "Je ƙasa",
+      "liveRefreshOn": "Sabuntawa kai tsaye: a kunne",
+      "liveRefreshOff": "Sabuntawa kai tsaye: a kashe",
+      "liveRefresh": "Sabuntawa kai tsaye",
+      "continuesFromParent": "ci gaba daga mahaifi",
+      "continuesFrom": "Yana ci gaba daga {id}",
+      "viewConversation": "duba tattaunawa",
+      "openConversation": "Buɗe tattaunawa {id}"
+    },
+    "tableLabel": "Rajistan buƙatu"
   },
   "proxyLogger": {
     "filterAll": "Duka",
@@ -12113,7 +12158,9 @@
     "colServedBy": "An bayar da",
     "filterTraffic": "Tafiya",
     "filterTests": "Gwaje-gwaje",
-    "filterSource": "Tushen"
+    "filterSource": "Tushen",
+    "tableLabel": "Rajistan Proxy",
+    "sortLogs": "Tsara rajistan"
   },
   "endpointOptions": {
     "speech": "Magana",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "YA ƘARE",
     "statusAlerting": "ANA GARGADI",
     "statusError": "KUSKURE",
-    "moreSuffix": "+ƙarin guda {count}"
+    "moreSuffix": "+ƙarin guda {count}",
+    "feedFilterLabel": "Tace abubuwan da suka faru"
   },
   "quotaShare": {
     "weightPercent": "Nauyi %",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "Marasa rukuni",
     "ungroupedHint": "Ba a ware waɗannan rukunonin albarkatu ga wani sanannen rukuni ba. Gyara rukunin albarkatu don matsar da shi zuwa ainihin rukuni.",
     "removeFailed": "Ba a iya cire wannan rukunin albarkatu ba.",
-    "dismiss": "Yi watsi"
+    "dismiss": "Yi watsi",
+    "allocationsHeading": "Rabawa",
+    "wizardRemoveDimension": "Cire girma",
+    "wizardRemoveKey": "Cire mabuɗi"
   },
   "plugins": {
     "title": "Ƙarin shirye-shirye",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "Sabunta saituna ya gaza",
       "serviceRevealApiKey": "{actor} ya bayyana maɓallin API na {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Yi watsi da kuskure"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "Je yanzu",
       "message": "MITM Proxy yanzu yana ƙarƙashin AgentBridge.",
       "title": "An matsar da wannan shafin"
-    }
+    },
+    "dnsOn": "DNS a kunne",
+    "dnsOff": "DNS a kashe",
+    "showServerSettings": "Nuna saitunan uwar garken",
+    "hideServerSettings": "Ɓoye saitunan uwar garken",
+    "upstreamCaTesting": "Ana gwaji…",
+    "removeMapping": "Cire daidaitawa",
+    "mappingSourcePlaceholder": "misali, gemini-3.6-flash-medium, ko * don duk waɗanda ba a daidaita su ba",
+    "mappingWildcardHint": "Yi amfani da * a matsayin tushe don tura kowace ƙirar da ba ta da daidaitawa bayyane ta hanyar OmniRoute zuwa ga manufar da aka zaɓa. Daidaitattun tushe na ainihi suna rinjayar * koyaushe.",
+    "wizardDetectingModels": "Ana gano samfura daga zirga-zirgar da aka kama...",
+    "wizardDetectedModels": "An samo {count, plural, one {# samfuri} other {# samfura}} a cikin zirga-zirgar da aka kama. Zaɓi waɗanda kake son ƙarawa:",
+    "wizardSelectedModels": "An zaɓi {count, plural, one {# samfuri} other {# samfura}}. Za ka daidaita su da samfurin OmniRoute a allon na gaba.",
+    "wizardAddModels": "Ƙara {count, plural, one {# samfuri} other {# samfura}}",
+    "wizardNoModelsDetected": "Ba a gano samfura ba tukuna. Yi amfani da {agent} don yin buƙata, sannan sake gudanar da wannan mai taimako don gano samfura ta kai tsaye daga zirga-zirga.",
+    "wizardNoModelsHint": "Ko rufe wannan mai taimako kuma ƙara daidaitawa da hannu a katin agent."
   },
   "providerStats": {
     "unknownError": "Kuskuren da ba a sani ba",
@@ -12686,7 +12752,11 @@
     "avgTtft": "Matsakaicin TTFT",
     "avgTotal": "Matsakaicin Jimilla",
     "requestTelemetry": "Telemetirin Buƙata",
-    "requestTelemetryDescription": "Rarrabuwar tsarin matakai 7 (minti 5 da suka gabata)"
+    "requestTelemetryDescription": "Rarrabuwar tsarin matakai 7 (minti 5 da suka gabata)",
+    "title": "Ƙididdigar mai samarwa",
+    "description": "Zirga-zirga, jinkiri da ƙimar nasara ta kowane mai samarwa da kowane samfuri",
+    "combo": "Combo",
+    "toggleModels": "Nuna samfurin {provider}"
   },
   "relay": {
     "title": "Proxies na Relay Marasa Sabar",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "Babu jikin buƙata.",
     "noResponseBody": "Babu jikin amsa.",
     "formatted": "Tsararre",
-    "raw": "Ɗanye"
+    "raw": "Ɗanye",
+    "requestCount": "{count, plural, one {# buƙata} other {# buƙatu}}",
+    "expandList": "Faɗaɗa jerin",
+    "collapseList": "Ƙuntata jerin",
+    "snippetLanguage": "Yaren gajeren lamba",
+    "headersTable": "Headers",
+    "showSecrets": "Nuna asirai",
+    "maskSecrets": "Ɓoye asirai",
+    "llmNotAvailable": "Babu metadata na LLM don wannan buƙata.",
+    "llmStreamYes": "eh (SSE)",
+    "llmStreamNo": "a'a",
+    "llmTotalTokens": "Jimla: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "Kason kiraye-kirayen da wannan mai samarwa ya amsa a zahiri cikin awanni 24 da suka gabata. Alamar gajeren layi na nufin ya sarrafa zirga-zirga kaɗan sosai da ba za a iya ƙayyade ƙima ba.",
     "reliabilitySample": "Kiraye-kiraye {successes} cikin {requests} sun yi nasara a cikin awanni {hours} da suka gabata",
     "reliabilityTooFew": "Kiraye-kiraye {requests} kawai aka yi a cikin awanni {hours} da suka gabata — sun yi kaɗan da ba za a iya ƙayyade ƙima ba",
-    "reliabilityNoTraffic": "Ba a yi rikodin wani kira a cikin awanni 24 da suka gabata ba"
+    "reliabilityNoTraffic": "Ba a yi rikodin wani kira a cikin awanni 24 da suka gabata ba",
+    "categoryFilter": "Rukunin aiki"
   },
   "discovery": {
     "title": "Gano Masu Samarwa",
@@ -13331,7 +13413,11 @@
     "method": "Hanya",
     "auth": "Tantancewa",
     "feasibility": "Yiwuwar aiki",
-    "models": "Samfura"
+    "models": "Samfura",
+    "provider": "Mai samarwa",
+    "status": "Matsayi",
+    "endpoint": "Ƙarshen haɗi",
+    "actions": "Ayyuka"
   },
   "noAuthProvider": {
     "title": "Ba a buƙatar tantancewa",
@@ -13380,7 +13466,8 @@
     "ownProxy": "Proxy na kai",
     "freeTierPause": "An huta {model} (429), za a dawo a {time}",
     "freeTierPauseProvider": "An huta (429), za a dawo a {time}",
-    "freeTierPauseNote": "Tsaya aiki a cikin wannan lami"
+    "freeTierPauseNote": "Tsaya aiki a cikin wannan lami",
+    "proxyType": "Nau'in proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "Wata ɓoyayyiyar nasara tana jira...",
         "criteria": "Kammala ɓoyayyar nasara don bayyana wannan lamba."
       }
-    }
+    },
+    "leaderboardTitle": "Jerin manya",
+    "leaderboardDescription": "Matsayi da nasarori a duk maɓallan API ɗinka",
+    "badgeLocked": "Kulɓɓe"
   },
   "featureFlags": {
     "title": "Tutocin Fasali",
@@ -13794,6 +13884,7 @@
     "latency": "Jinkiri",
     "quota": "Ƙayyadadden amfani",
     "rangeWindow": "tazarar {range}",
+    "timeRange": "Kewayon lokaci",
     "runtimeHealthBlend": "haɗin lokacin aiki/lafiya",
     "averageResponseTime": "matsakaicin lokacin amsawa",
     "worstQuota": "Mafi ƙarancin ƙayyadadden amfani",
@@ -13995,7 +14086,11 @@
     "learnMore": "Ƙara koyo",
     "changelogLoadFailed": "Ba a iya loda rajistan canje-canje ba. Da fatan za a sake gwadawa daga baya.",
     "retry": "Sake gwadawa",
-    "viewFullHistory": "Duba cikakken tarihi a GitHub"
+    "viewFullHistory": "Duba cikakken tarihi a GitHub",
+    "title": "Labarai & canje-canje",
+    "description": "Sanarwa daga ƙungiyar OmniRoute da bayanan fitarwa mafi sabo",
+    "viewLabel": "Duba",
+    "loadingNews": "Ana lodin sanarwa..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "Matsayin Circuit Breaker na Mai Samar da Sabis",
       "lastUpdate": "Sabuntawa na ƙarshe: {timestamp}",
       "uptimeMinutes": "minti {minutes}",
-      "uptimeHoursMinutes": "awa {hours} minti {minutes}"
+      "uptimeHoursMinutes": "awa {hours} minti {minutes}",
+      "breakerClosed": "Rufaffen",
+      "breakerNotClosed": "Buɗaɗɗen ko rabin buɗe"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "Bayanan Gyare-gyare",
         "secondaryAction": "Matsayin Tsarin"
       }
+    },
+    "miniapp": {
+      "askAnything": "Tambayi komai…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} da ake gani / {total} gaba ɗaya",
+    "modeLabel": "Yanayin duba",
+    "jumpToNow": "Tsallaka zuwa lokacin yanzu, layin NOW zai sake komawa zuwa matsayi {position}%",
+    "laneReuse": "Sake amfani da layi",
+    "laneReuseLabel": "Tagar sake amfani da layi (mintuna)",
+    "laneReuseHint": "Buƙatun da ke raba lambar tattaunawa ɗaya suna kasancewa a kan jera ɗaya na jadawalin lokaci muddin gibi da ke tsakaninsu ya ƙasa da wannan adadin mintuna.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Sake sabuntawa kai tsaye",
+    "autoRefreshLabel": "Tazarar sake sabuntawa kai tsaye (daƙiƙoci)",
+    "autoRefreshHint": "Sau da sau da jadawalin lokaci yake sake ɗaukar jerin buƙatun daga uwar garken.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Nisanta",
+    "zoomIn": "Kusanta"
   },
   "metadata": {
     "compressionTitle": "Matsewa",

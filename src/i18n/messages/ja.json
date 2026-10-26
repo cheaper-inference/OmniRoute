@@ -25,8 +25,10 @@
     "confirm": "よろしいですか？",
     "refresh": "リフレッシュ",
     "close": "閉じる",
+    "dialogTitleFallback": "ダイアログ",
     "previousPage": "前のページ",
     "nextPage": "次のページ",
+    "pagination": "ページネーション",
     "capsLockOn": "Caps Lockがオンです",
     "dismissNotification": "通知を閉じる",
     "toggleColumns": "列の切り替え",
@@ -182,6 +184,7 @@
     "combos": "コンボ",
     "noModelsFound": "モデルが見つかりません",
     "clear": "クリア",
+    "clearFilters": "フィルターをクリア",
     "done": "完了",
     "selectAll": "すべて選択",
     "unselectAll": "選択をすべて解除",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# バッチ} other {# バッチ}}",
     "batchFilePreview": "プレビュー",
     "batchFilePreviewTruncated": "最初の {shown} 行を表示中 ({total} 行中)",
-    "batchFileDownloadFull": "フルファイルをダウンロード"
+    "batchFileDownloadFull": "フルファイルをダウンロード",
+    "tokensPageTitle": "トークン",
+    "tokensPageDescription": "APIキー間でトークンを送信し、招待コードを共有して、コミュニティサーバーに接続します。",
+    "tokensServerUrlLabel": "サーバーURL"
   },
   "disabled": "無効",
   "featureFlagOmnirouteEmergencyFallbackDescription": "予算を使い果たしたリクエストを、緊急用の無料フォールバックプロバイダー/モデルにルーティングします。",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 または @channelname",
       "chatIdHint": "チャット/チャンネルの一意の数値識別子または公開ユーザー名。",
       "tutorial": "Telegram Webhookの設定方法:"
-    }
+    },
+    "copy": "コピー",
+    "copied": "コピーしました！",
+    "expandDetails": "詳細を表示",
+    "collapseDetails": "詳細を非表示"
   },
   "compliance": {
     "auditTitle": "監査",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "コール (24時間)",
     "mcpMetricSuccessRate": "成功率",
     "mcpMetricAvgDuration": "平均時間",
-    "mcpMetricTopTool": "トップツール"
+    "mcpMetricTopTool": "トップツール",
+    "dismissError": "エラーを閉じる"
   },
   "themesPage": {
     "title": "テーマ",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "クイックナビ",
     "quickNavigationTitle": "クイックナビゲーション (⌘K / Ctrl+K)",
     "openQuickNavigation": "クイックナビゲーションを開く",
+    "openMenu": "メニューを開く",
+    "products": "Keak製品",
     "switchToLightMode": "ライトモードに切り替える",
     "switchToDarkMode": "ダークモードに切り替える",
     "language": "言語",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "選択した接続のみ",
     "selectAtLeastOneConnection": "少なくとも1つの接続を選択するか、すべての接続を選択してください。",
     "allConnectionsDesc": "このキーでは、アクティブな接続をすべて使用できます。",
-    "restrictedToConnections": "{count, plural, one {#件の接続に制限} other {#件の接続に制限}}。"
+    "restrictedToConnections": "{count, plural, one {#件の接続に制限} other {#件の接続に制限}}。",
+    "removeSelection": "{name}を削除"
   },
   "auditLog": {
     "title": "監査ログ",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "Modality Bridge 設定で Image→Text ブリッジを構成する",
     "sttBridgeCta": "Modality Bridge 設定で Speech→Text ブリッジを構成する",
     "existingConnection": "既存の接続",
-    "openrouterSttDescription": "OpenRouterの音声認識モデルは、設定されたOpenRouter接続を使用します。別途認証情報は必要ありません。"
+    "openrouterSttDescription": "OpenRouterの音声認識モデルは、設定されたOpenRouter接続を使用します。別途認証情報は必要ありません。",
+    "modalityTabsAria": "メディアタイプ",
+    "serviceKindsAria": "サービスタイプ"
   },
   "search": {
     "searchQuery": "検索クエリ",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "不明",
     "cliproxyapiUpdate": "更新",
     "cliproxyapiUpdateAvailable": "更新が利用可能です: v{current} → v{latest}",
-    "cliproxyapiVersion": "バージョン"
+    "cliproxyapiVersion": "バージョン",
+    "removeMapping": "マッピングを削除"
   },
   "modelCatalog": {
     "title": "モデルとコンボ",
@@ -3400,13 +3417,13 @@
     "comboRefMember": "コンボ → {name}"
   },
   "combos": {
+    "title": "コンボ",
+    "description": "重み付けルーティングとフォールバックのサポートを備えたモデルのコンボを作成する",
+    "autoCatalogTitle": "自動ルーティングカタログ",
     "autoTosLoadError": "利用規約のポリシーを読み込めませんでした。変更する前に再試行してください。",
     "autoTosSaveError": "利用規約のポリシーを保存できませんでした。以前の設定が引き続き表示されています。再試行してください。",
     "autoTosIncludeLabel": "ToS: avoid とマークされたプロバイダーを auto に含める",
     "autoTosDescription": "デフォルトではオフです。1つのアカウントだけでなく、すべての auto コンボに適用されます。プロバイダーを接続しても、このオプションは有効になりません。",
-    "title": "コンボ",
-    "description": "重み付けルーティングとフォールバックのサポートを備えたモデルのコンボを作成する",
-    "autoCatalogTitle": "自動ルーティングカタログ",
     "autoCatalogTemplateCount": "{count} テンプレート",
     "autoCatalogDescription": "接続されたプロバイダーから動的に解決される組み込みの auto/* コンボ。これらの ID のいずれかをモデル フィールドとして使用します。設定は必要ありません。",
     "autoCatalogExpand": "自動ルーティングカタログを展開する",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "コンボがまだ設定されていません。",
     "playgroundCreateFirst": "最初に作成してください",
     "weighted": "加重",
+    "weightPercent": "重み（%）",
     "leastUsed": "最も使用頻度の低いもの",
     "costOpt": "コスト最適化",
     "strategyGuideTitle": "この戦略の使用方法",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# アカウント} other {# アカウント}}",
     "builderGlobalAdded": "追加されました",
     "builderGlobalAdd": "追加",
+    "clearSearch": "検索をクリア",
     "manualModel": "手動モデル",
     "manualModelInvalid": "モデルを provider/model として入力してください。",
     "manualModelUnknownProvider": "不明なプロバイダープレフィックスです。",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "最小コンテンツ長 (文字数)",
     "responseValidationJsonPaths": "JSON-path チェック",
     "responseValidationAddCheck": "+ チェックを追加",
+    "responseValidationRemoveCheck": "チェックを削除",
+    "responseValidationPath": "JSONパス",
+    "responseValidationCondition": "条件",
+    "responseValidationValue": "期待値",
     "agentFeaturesSystemMessageOverride": "システムメッセージを上書きする",
     "agentFeaturesSystemMessagePlaceholder": "あなたはエキスパートアシスタントです...",
     "agentFeaturesSystemMessageHint": "エージェントのシステム メッセージ オーバーライド",
@@ -5288,7 +5311,8 @@
         "skipped": "すでに設定済み",
         "failed": "失敗しました"
       }
-    }
+    },
+    "stepProgress": "セットアップの進行状況"
   },
   "providers": {
     "tosAvoidNoticeTitle": "このプロバイダーはデフォルトで auto から除外されています",
@@ -6080,6 +6104,13 @@
     "claudeLowPriorityModeDescription": "このアカウントが5時間の使用上限に達し、Anthropicから低優先度レーンが提供された場合、OmniRouteはそれを受け入れ、接続をクールダウンする代わりに、ウィンドウがリセットされるまで anthropic-usage-limit: slow を指定してリクエストの送信を続けます。週間上限は引き続き適用され、空き容量が生じるまで応答が待機する場合があります。",
     "claudeAutoLimitResetLabel": "セッション上限を自動リセット（週1回）",
     "claudeAutoLimitResetDescription": "このアカウントが5時間の使用上限に達し、セッション上限のリセットが利用可能な場合、OmniRouteは自動的にそれを適用し、通常速度で再試行します。アカウントの週1回のリセットを使用し、使用量は引き続き週間上限にカウントされます。",
+    "codexPaidCreditsShort": "追加クレジット",
+    "codexPaidCreditsToggleTitle": "サブスクリプションのクォータを使い切った後に有料の Codex クレジットを許可する（追加料金が発生する場合があります）",
+    "codexPaidCreditsEnabled": "Codex の有料クレジットを有効にしました（追加料金が発生する場合があります）",
+    "codexPaidCreditsDisabled": "Codex の有料クレジットを無効にしました",
+    "failedUpdateCodexPaidCredits": "Codex の有料クレジットのポリシーを更新できませんでした",
+    "allowCodexPaidCreditsLabel": "Codex の有料クレジットを許可",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "一時的なクールダウンをスキップし、回復可能なエラーの後でもこの接続を対象として維持します (banned/expired などの終端状態は引き続き適用されます)。",
     "disableCoolingLabel": "この接続のクールダウンを無効化",
     "bulkPasteAdded": "{count, plural, one {1件のキーを追加しました} other {#件のキーを追加しました}}",
@@ -6533,6 +6564,7 @@
       "monsterapi": "monsterapi.aiでAPIキーを取得",
       "moonshot": "APIキーを使用してMoonshot AIに接続します。",
       "morph": "無料プラン：250Kクレジット/月、$0",
+      "apmix": "apmix.ai/dashboard のAPIキーでApmixに接続 — 1つのサブスクリプションで多数のモデル。",
       "nanogpt": "APIキーを使用してNanoGPTに接続します。",
       "nebius": "APIテスト用に登録時に約1ドルのトライアルクレジット",
       "nlpcloud": "NLP CloudはOpenAIのchat/completionsの代わりに独自のチャットボットAPIを使用します。OmniRouteはOpenAIメッセージをinput/context/historyに適応させ、サポートされているチャットボットモデルのローカルカタログを公開します。",
@@ -6629,8 +6661,7 @@
       "kiro": "無料枠: 50クレジット/月（約25K〜100Kトークン）。⚠️ Kiroの利用規約（ToS）は、サードパーティのプロキシやハーネスの使用を禁止しています。",
       "codex": "既存のOAuthフローを使用してOpenAI Codexに接続します。",
       "qwen": "既存のOAuthフローを使用してQwen Codeに接続します。",
-      "github-models": "github.com/settings/tokens で 'models: read' スコープを持つGitHub PATを作成",
-      "apmix": "apmix.ai/dashboard のAPIキーでApmixに接続 — 1つのサブスクリプションで多数のモデル。"
+      "github-models": "github.com/settings/tokens で 'models: read' スコープを持つGitHub PATを作成"
     },
     "passthroughModelsDescription": "{provider} は、プロバイダーネイティブのモデル ID を受け入れます。 /models からインポートするか、ルーティング用のカスタム ID を追加します。",
     "bedrockModelsDescription": "Amazon Bedrock モデルは、AWS リージョンによって範囲が定められています。 /models からインポートするか、選択したリージョンで有効になっている Bedrock モデル ID を追加します。",
@@ -6802,14 +6833,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "モデルごとの同時実行上限",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "任意: 1 行に 1 つ model=cap を指定します。アップストリームのモデル ID と完全一致で照合されます。超過したリクエストはローカルで待機します。空欄の場合、モデルごとの上限はありません。",
-    "rateLimitOverridesModelConcurrencyInvalid": "モデルごとの同時実行の指定「{entry}」が無効です — model=cap の形式で、cap は 1 から {max} までの整数にしてください。",
-    "codexPaidCreditsShort": "追加クレジット",
-    "codexPaidCreditsToggleTitle": "サブスクリプションのクォータを使い切った後に有料の Codex クレジットを許可する（追加料金が発生する場合があります）",
-    "codexPaidCreditsEnabled": "Codex の有料クレジットを有効にしました（追加料金が発生する場合があります）",
-    "codexPaidCreditsDisabled": "Codex の有料クレジットを無効にしました",
-    "failedUpdateCodexPaidCredits": "Codex の有料クレジットのポリシーを更新できませんでした",
-    "allowCodexPaidCreditsLabel": "Codex の有料クレジットを許可",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "モデルごとの同時実行の指定「{entry}」が無効です — model=cap の形式で、cap は 1 から {max} までの整数にしてください。"
   },
   "settings": {
     "title": "設定",
@@ -7707,6 +7731,7 @@
     "configured": "設定済み",
     "none": "なし",
     "modelOverrideValuePlaceholder": "数値",
+    "modelOverrideKey": "オーバーライドキー",
     "modelOverrideReasoningEffortsPlaceholder": "英語のカンマ区切り（例：low, medium, high）",
     "addKeyValue": "キーと値を追加",
     "noModelOverrides": "このモデル用に設定されたオーバーライドはありません。",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "合格",
     "tomlTestFailed": "失敗",
     "tomlImportError": "RTK TOMLファイルを処理できませんでした。",
-    "tomlFileReadError": "選択されたTOMLファイルを読み込めませんでした。"
+    "tomlFileReadError": "選択されたTOMLファイルを読み込めませんでした。",
+    "viewMode": "表示モード"
   },
   "compressionEngineConfig": {
     "loading": "読み込み中…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "言語パック: {packs}",
     "dragToReorder": "ドラッグしてステップを並べ替え",
     "engine": "エンジン",
-    "intensity": "強度"
+    "intensity": "強度",
+    "compressionOverride": "圧縮のオーバーライド"
   },
   "compressionStudio": {
     "noRun": "利用可能な圧縮実行はありません。",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "勝者: {winner}",
     "encoder": "エンコーダー",
     "bytes": "バイト",
-    "tokensCl100k": "トークン (cl100k)"
+    "tokensCl100k": "トークン (cl100k)",
+    "studioViews": "Studioビュー"
   },
   "omniglyph": {
     "preview": "プレビュー",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "これより短いメッセージは圧縮されません。低い = 圧縮が高くなります。",
     "tooltipMinSavings": "少なくともこの数のトークンを保存する場合にのみ圧縮してください。",
     "ultraSettings": "ウルトラ設定",
-    "ultraSettingsDesc": "SLM を利用したセマンティック圧縮"
+    "ultraSettingsDesc": "SLM を利用したセマンティック圧縮",
+    "defaultLanguage": "デフォルト言語",
+    "viewMode": "表示モード"
   },
   "translator": {
     "title": "翻訳者",
@@ -9835,6 +9865,10 @@
     "streamTransformFailed": "ストリームの変換に失敗しました"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Codex の有料クレジット",
+    "codexPaidCreditsAvailable": "利用可能（残高は未報告）",
+    "codexPaidCreditsUnavailable": "利用不可、または支出上限に達しました",
+    "codexPaidCreditsUnlimited": "無制限",
     "title": "使用法",
     "grokExtraUsageCredits": "追加の使用クレジット",
     "grokAutoTopUp": "自動チャージ",
@@ -10287,11 +10321,7 @@
     "updatedShort": "更新済み",
     "lastRefreshed": "最終更新",
     "providerQuota": "プロバイダークォータ",
-    "providerQuotaHomeHint": "接続されたアカウント全体のライブステータス",
-    "codexPaidCreditsLabel": "Codex の有料クレジット",
-    "codexPaidCreditsAvailable": "利用可能（残高は未報告）",
-    "codexPaidCreditsUnavailable": "利用不可、または支出上限に達しました",
-    "codexPaidCreditsUnlimited": "無制限"
+    "providerQuotaHomeHint": "接続されたアカウント全体のライブステータス"
   },
   "modals": {
     "waitingAuth": "承認を待っています",
@@ -11078,7 +11108,8 @@
       "message": "メッセージ",
       "error": "エラー",
       "completion": "完了"
-    }
+    },
+    "statusFilter": "ステータス"
   },
   "templateNames": {
     "simple-chat": "シンプルチャット",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "{minutes}分前",
     "hoursAgo": "{hours}時間前",
     "daysAgo": "{days}日前",
-    "entries": "エントリ"
+    "entries": "エントリ",
+    "viewSwitcherAria": "キャッシュビュー"
   },
   "proxyConfigModal": {
     "levelGlobal": "グローバル",
@@ -11447,6 +11479,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "その他の操作",
     "test": "テスト",
     "edit": "編集",
     "delete": "削除",
@@ -11809,7 +11842,8 @@
       "nextButton": "次へ",
       "runButton": "実行",
       "promptPlaceholder": "メッセージを入力… (Enterで送信、Shift+Enterで改行)"
-    }
+    },
+    "playgroundTabs": "プレイグラウンドモード"
   },
   "miniPlayground": {
     "endpoint": "エンドポイント",
@@ -11880,7 +11914,8 @@
     "assistant": "アシスタント",
     "errorLabel": "エラー",
     "requestFailed": "リクエストに失敗しました",
-    "stop": "停止"
+    "stop": "停止",
+    "messageInputAria": "メッセージ"
   },
   "requestLogger": {
     "recording": "記録中",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "アカウント切替{count}回",
       "resilienceRetried": "空ターンを再試行",
       "resilienceContinued": "ストリーム途中で再開",
-      "resilienceRecovered": "レジリエンス動作で回復"
-    }
+      "resilienceRecovered": "レジリエンス動作で回復",
+      "conversationContext": "会話コンテキスト",
+      "goToBottom": "一番下へ移動",
+      "liveRefreshOn": "ライブ更新: オン",
+      "liveRefreshOff": "ライブ更新: オフ",
+      "liveRefresh": "ライブ更新",
+      "continuesFromParent": "親から継続",
+      "continuesFrom": "{id} から継続",
+      "viewConversation": "会話を表示",
+      "openConversation": "会話 {id} を開く"
+    },
+    "tableLabel": "リクエストログ"
   },
   "proxyLogger": {
     "filterAll": "すべて",
@@ -12113,7 +12158,9 @@
     "colServedBy": "提供元",
     "filterTraffic": "トラフィック",
     "filterTests": "テスト",
-    "filterSource": "ソース"
+    "filterSource": "ソース",
+    "tableLabel": "プロキシログ",
+    "sortLogs": "ログを並べ替え"
   },
   "endpointOptions": {
     "speech": "音声",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "上限到達",
     "statusAlerting": "アラート発生中",
     "statusError": "エラー",
-    "moreSuffix": "ほか{count}件"
+    "moreSuffix": "ほか{count}件",
+    "feedFilterLabel": "イベントをフィルター"
   },
   "quotaShare": {
     "weightPercent": "重み %",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "未グループ化",
     "ungroupedHint": "これらのプールは既知のグループに割り当てられていません。プールを編集して実際のグループに移動してください。",
     "removeFailed": "このプールを削除できませんでした。",
-    "dismiss": "閉じる"
+    "dismiss": "閉じる",
+    "allocationsHeading": "割り当て",
+    "wizardRemoveDimension": "ディメンションを削除",
+    "wizardRemoveKey": "キーを削除"
   },
   "plugins": {
     "title": "プラグイン",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "設定の更新に失敗しました",
       "serviceRevealApiKey": "{actor} が {target} のAPIキーを表示しました",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "エラーを閉じる"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "今すぐ移動",
       "message": "MITMプロキシはAgentBridge配下に移動しました。",
       "title": "このページは移動しました"
-    }
+    },
+    "dnsOn": "DNS オン",
+    "dnsOff": "DNS オフ",
+    "showServerSettings": "サーバー設定を表示",
+    "hideServerSettings": "サーバー設定を非表示",
+    "upstreamCaTesting": "テスト中…",
+    "removeMapping": "マッピングを削除",
+    "mappingSourcePlaceholder": "例: gemini-3.6-flash-medium、または未マッピングのすべてに *",
+    "mappingWildcardHint": "ソースに * を使用すると、明示的なマッピングがないすべてのモデルが OmniRoute を経由して選択したターゲットにルーティングされます。完全一致するソースは常に * より優先されます。",
+    "wizardDetectingModels": "インターセプトしたトラフィックからモデルを検出しています...",
+    "wizardDetectedModels": "インターセプトしたトラフィックで{count, plural, one {# 件のモデル} other {# 件のモデル}}が見つかりました。追加するモデルを選択してください：",
+    "wizardSelectedModels": "{count, plural, one {# 件のモデル} other {# 件のモデル}}が選択されています。次の画面で OmniRoute のモデルにマッピングします。",
+    "wizardAddModels": "{count, plural, one {# 件のモデル} other {# 件のモデル}}を追加",
+    "wizardNoModelsDetected": "まだモデルが検出されていません。{agent} を使ってリクエストを送信してから、このウィザードを再実行すると、トラフィックからモデルが自動検出されます。",
+    "wizardNoModelsHint": "または、このウィザードを閉じて、エージェントカードでマッピングを手動で追加してください。"
   },
   "providerStats": {
     "unknownError": "不明なエラー",
@@ -12686,7 +12752,11 @@
     "avgTtft": "平均TTFT",
     "avgTotal": "平均合計",
     "requestTelemetry": "リクエストテレメトリ",
-    "requestTelemetryDescription": "7フェーズのパイプライン内訳（過去5分間）"
+    "requestTelemetryDescription": "7フェーズのパイプライン内訳（過去5分間）",
+    "title": "プロバイダー統計",
+    "description": "プロバイダー別・モデル別のトラフィック、レイテンシ、成功率",
+    "combo": "コンボ",
+    "toggleModels": "{provider} のモデルを表示"
   },
   "relay": {
     "title": "サーバーレスリレープロキシ",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "リクエストボディはありません。",
     "noResponseBody": "レスポンスボディはありません。",
     "formatted": "フォーマット済み",
-    "raw": "未加工"
+    "raw": "未加工",
+    "requestCount": "{count, plural, one {# 件のリクエスト} other {# 件のリクエスト}}",
+    "expandList": "リストを展開",
+    "collapseList": "リストを折りたたむ",
+    "snippetLanguage": "スニペットの言語",
+    "headersTable": "ヘッダー",
+    "showSecrets": "シークレットを表示",
+    "maskSecrets": "シークレットを隠す",
+    "llmNotAvailable": "このリクエストでは LLM メタデータは利用できません。",
+    "llmStreamYes": "はい（SSE）",
+    "llmStreamNo": "いいえ",
+    "llmTotalTokens": "合計: {count} トークン"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "過去24時間に、このプロバイダーが実際に応答した呼び出しの割合です。ダッシュは、処理したトラフィックが少なすぎて割合を算出できないことを示します。",
     "reliabilitySample": "過去{hours}時間に{requests}件中{successes}件の呼び出しが成功しました",
     "reliabilityTooFew": "過去{hours}時間の呼び出しは{requests}件のみです — 割合を算出するには少なすぎます",
-    "reliabilityNoTraffic": "過去24時間に記録された呼び出しはありません"
+    "reliabilityNoTraffic": "過去24時間に記録された呼び出しはありません",
+    "categoryFilter": "タスクカテゴリー"
   },
   "discovery": {
     "title": "プロバイダー検出",
@@ -13331,7 +13413,11 @@
     "method": "方法",
     "auth": "認証",
     "feasibility": "実現可能性",
-    "models": "モデル"
+    "models": "モデル",
+    "provider": "プロバイダー",
+    "status": "ステータス",
+    "endpoint": "エンドポイント",
+    "actions": "アクション"
   },
   "noAuthProvider": {
     "title": "認証不要",
@@ -13380,7 +13466,8 @@
     "ownProxy": "独自プロキシ",
     "freeTierPause": "モデル {model} は一時停止しました (429)、{time} に再開します",
     "freeTierPauseProvider": "一時停止中 (429)、{time} に再開します",
-    "freeTierPauseNote": "このインスタンスでプロセス内一時停止"
+    "freeTierPauseNote": "このインスタンスでプロセス内一時停止",
+    "proxyType": "プロキシタイプ"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "隠された実績が待っています...",
         "criteria": "このバッジを表示するには、隠された実績を達成してください。"
       }
-    }
+    },
+    "leaderboardTitle": "リーダーボード",
+    "leaderboardDescription": "APIキー全体のランキングと実績",
+    "badgeLocked": "ロック済み"
   },
   "featureFlags": {
     "title": "フィーチャーフラグ",
@@ -13794,6 +13884,7 @@
     "latency": "レイテンシ",
     "quota": "クォータ",
     "rangeWindow": "{range} ウィンドウ",
+    "timeRange": "期間",
     "runtimeHealthBlend": "ランタイム/ヘルスブレンド",
     "averageResponseTime": "平均応答時間",
     "worstQuota": "最悪のクォータ",
@@ -13995,7 +14086,11 @@
     "learnMore": "詳細を見る",
     "changelogLoadFailed": "変更履歴を読み込めませんでした。後でもう一度お試しください。",
     "retry": "再試行",
-    "viewFullHistory": "GitHubで完全な履歴を表示"
+    "viewFullHistory": "GitHubで完全な履歴を表示",
+    "title": "ニュース＆変更履歴",
+    "description": "OmniRouteチームからのお知らせと最新のリリースノート",
+    "viewLabel": "表示",
+    "loadingNews": "お知らせを読み込んでいます..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "プロバイダー サーキット ブレーカーの状態",
       "lastUpdate": "最終更新: {timestamp}",
       "uptimeMinutes": "{minutes}分",
-      "uptimeHoursMinutes": "{hours}時間 {minutes}分"
+      "uptimeHoursMinutes": "{hours}時間 {minutes}分",
+      "breakerClosed": "クローズ",
+      "breakerNotClosed": "オープンまたはハーフオープン"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "メンテナンスの詳細",
         "secondaryAction": "システムステータス"
       }
+    },
+    "miniapp": {
+      "askAnything": "何でも質問してください…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP ツール",
     "scope": "スコープ",
-    "apiKey": "API キー"
+    "apiKey": "API キー",
+    "visibleCount": "{visible} 件表示 / 全 {total} 件",
+    "modeLabel": "表示モード",
+    "jumpToNow": "現在時刻へジャンプし、NOW ラインが {position}% の位置にリセットされます",
+    "laneReuse": "レーン再利用",
+    "laneReuseLabel": "レーン再利用ウィンドウ（分）",
+    "laneReuseHint": "同じ会話 ID を共有するリクエストは、その間隔がこの分数以内であれば、同じタイムライン行に表示されます。",
+    "laneReuseUnit": "分",
+    "autoRefresh": "自動更新",
+    "autoRefreshLabel": "自動更新間隔（秒）",
+    "autoRefreshHint": "タイムラインがサーバーからリクエスト一覧を再取得する頻度。",
+    "autoRefreshUnit": "秒",
+    "zoomOut": "ズームアウト",
+    "zoomIn": "ズームイン"
   },
   "metadata": {
     "compressionTitle": "圧縮",

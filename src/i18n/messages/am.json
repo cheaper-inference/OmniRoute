@@ -25,8 +25,10 @@
     "confirm": "እርግጠኛ ነዎት?",
     "refresh": "አድስ",
     "close": "ዝጋ",
+    "dialogTitleFallback": "መገናኛ ሳጥን",
     "previousPage": "የቀድሞው ገጽ",
     "nextPage": "ቀጣዩ ገጽ",
+    "pagination": "የገጽ አሰሳ",
     "capsLockOn": "Caps Lock በርቷል",
     "dismissNotification": "ማሳወቂያውን ዝጋ",
     "toggleColumns": "ዓምዶችን አሳይ/ደብቅ",
@@ -182,6 +184,7 @@
     "combos": "ጥምረቶች",
     "noModelsFound": "ምንም ሞዴሎች አልተገኙም",
     "clear": "አጽዳ",
+    "clearFilters": "ማጣሪያዎችን አጽዳ",
     "done": "ጨርስ",
     "selectAll": "ሁሉንም ምረጥ",
     "unselectAll": "ሁሉንም አትምረጥ",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "በ{count, plural, one {# ባች} other {# ባቾች}} ጥቅም ላይ ውሏል",
     "batchFilePreview": "ቅድመ እይታ",
     "batchFilePreviewTruncated": "የመጀመሪያዎቹ {shown} መስመሮች እየታዩ ነው (በአጠቃላይ {total} መስመሮች)",
-    "batchFileDownloadFull": "ሙሉውን ፋይል አውርድ"
+    "batchFileDownloadFull": "ሙሉውን ፋይል አውርድ",
+    "tokensPageTitle": "ቶክኖች",
+    "tokensPageDescription": "ቶክኖችን በ API ቁልፎች መካከል ይላኩ፣ የግቢ ኮዶችን ያጋሩ እና የማህበረሰብ አገልጋዮችን ያገናኙ።",
+    "tokensServerUrlLabel": "የአገልጋይ URL"
   },
   "disabled": "ተሰናክሏል",
   "featureFlagOmnirouteEmergencyFallbackDescription": "በጀታቸው ያለቀባቸውን ጥያቄዎች ወደ ድንገተኛው ነፃ ተተኪ አቅራቢ/ሞዴል ያዛውሩ።",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 ወይም @channelname",
       "chatIdHint": "የውይይቱ/ቻናሉ ልዩ የቁጥር መለያ ወይም ይፋዊ የተጠቃሚ ስም።",
       "tutorial": "Telegram webhook እንዴት እንደሚዋቀር፦"
-    }
+    },
+    "copy": "ቅዳ",
+    "copied": "ተቀድቷል!",
+    "expandDetails": "ዝርዝሮችን አሳይ",
+    "collapseDetails": "ዝርዝሮችን ደብቅ"
   },
   "compliance": {
     "auditTitle": "ኦዲት",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "ጥሪዎች (24 ሰዓታት)",
     "mcpMetricSuccessRate": "የስኬት መጠን",
     "mcpMetricAvgDuration": "አማካይ ቆይታ",
-    "mcpMetricTopTool": "ቀዳሚ መሣሪያ"
+    "mcpMetricTopTool": "ቀዳሚ መሣሪያ",
+    "dismissError": "ስህተትን አስወግድ"
   },
   "themesPage": {
     "title": "ገጽታዎች",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "ፈጣን አሰሳ",
     "quickNavigationTitle": "ፈጣን አሰሳ (⌘K / Ctrl+K)",
     "openQuickNavigation": "ፈጣን አሰሳን ክፈት",
+    "openMenu": "ምናሌ ክፈት",
+    "products": "የ Keak ምርቶች",
     "switchToLightMode": "ወደ ብሩህ ሁነታ ቀይር",
     "switchToDarkMode": "ወደ ጨለማ ሁነታ ቀይር",
     "language": "ቋንቋ",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "የተመረጡ ግንኙነቶች ብቻ",
     "selectAtLeastOneConnection": "ቢያንስ አንድ ግንኙነት ይምረጡ ወይም «ሁሉም ግንኙነቶች»ን ይምረጡ።",
     "allConnectionsDesc": "ይህ ቁልፍ ማንኛውንም ንቁ ግንኙነት መጠቀም ይችላል።",
-    "restrictedToConnections": "ለ{count, plural, one {# ግንኙነት} other {# ግንኙነቶች}} ብቻ የተገደበ።"
+    "restrictedToConnections": "ለ{count, plural, one {# ግንኙነት} other {# ግንኙነቶች}} ብቻ የተገደበ።",
+    "removeSelection": "{name}ን አስወግድ"
   },
   "auditLog": {
     "title": "የኦዲት መዝገብ",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "በModality Bridge ቅንብሮች ውስጥ የምስል→ጽሑፍ ድልድዩን ያዋቅሩ",
     "sttBridgeCta": "በModality Bridge ቅንብሮች ውስጥ የንግግር→ጽሑፍ ድልድዩን ያዋቅሩ",
     "existingConnection": "ነባር ግንኙነት",
-    "openrouterSttDescription": "የOpenRouter ንግግር-ወደ-ጽሑፍ ሞዴሎች ያዋቀሩትን የOpenRouter ግንኙነት ይጠቀማሉ። የተለየ የማረጋገጫ መረጃ አያስፈልግም።"
+    "openrouterSttDescription": "የOpenRouter ንግግር-ወደ-ጽሑፍ ሞዴሎች ያዋቀሩትን የOpenRouter ግንኙነት ይጠቀማሉ። የተለየ የማረጋገጫ መረጃ አያስፈልግም።",
+    "modalityTabsAria": "የሚዲያ አይነት",
+    "serviceKindsAria": "የአገልግሎት አይነት"
   },
   "search": {
     "searchQuery": "የፍለጋ መጠይቅ",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "ያልታወቀ",
     "cliproxyapiUpdate": "አዘምን",
     "cliproxyapiUpdateAvailable": "ዝማኔ ይገኛል፦ v{current} → v{latest}",
-    "cliproxyapiVersion": "ስሪት"
+    "cliproxyapiVersion": "ስሪት",
+    "removeMapping": "ማገናኘትን አስወግድ"
   },
   "modelCatalog": {
     "title": "ሞዴሎች እና ኮምቦዎች",
@@ -3400,13 +3417,13 @@
     "comboRefMember": "ጥምረት → {name}"
   },
   "combos": {
+    "title": "ጥምረቶች",
+    "description": "ክብደት ያለው ማስተላለፊያ እና የመጠባበቂያ ድጋፍ ያላቸው የሞዴል ጥምረቶችን ይፍጠሩ",
+    "autoCatalogTitle": "የራስ-ሰር ማስተላለፊያ ካታሎግ",
     "autoTosLoadError": "የአገልግሎት ውሎች ፖሊሲ መጫን አልተቻለም። ከመቀየርዎ በፊት እንደገና ይሞክሩ።",
     "autoTosSaveError": "የአገልግሎት ውሎች ፖሊሲ ማስቀመጥ አልተቻለም። ያለፈው ቅንብር አሁንም ይታያል። እንደገና ይሞክሩ።",
     "autoTosIncludeLabel": "ToS: avoid ተብለው የተሰየሙ አቅራቢዎችን በauto ውስጥ ያካትቱ",
     "autoTosDescription": "በነባሪ ጠፍቷል። ለሁሉም የauto ጥምረቶች ይሠራል፣ ለአንድ መለያ ብቻ አይደለም። አቅራቢን ማገናኘት ይህን አማራጭ አያበራም።",
-    "title": "ጥምረቶች",
-    "description": "ክብደት ያለው ማስተላለፊያ እና የመጠባበቂያ ድጋፍ ያላቸው የሞዴል ጥምረቶችን ይፍጠሩ",
-    "autoCatalogTitle": "የራስ-ሰር ማስተላለፊያ ካታሎግ",
     "autoCatalogTemplateCount": "{count} አብነቶች",
     "autoCatalogDescription": "አብረው የተካተቱ auto/* ጥምረቶች ከተገናኙ አቅራቢዎች በተለዋዋጭ ሁኔታ ይወሰናሉ። ከእነዚህ መታወቂያዎች ማንኛውንም እንደ ሞዴል መስክ ይጠቀሙ — ምንም ማዋቀር አያስፈልግም።",
     "autoCatalogExpand": "የራስ-ሰር ማስተላለፊያ ካታሎጉን ዘርጋ",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "እስካሁን ምንም ጥምረት አልተዋቀረም።",
     "playgroundCreateFirst": "መጀመሪያ አንድ ይፍጠሩ",
     "weighted": "በክብደት የተመደበ",
+    "weightPercent": "ክብደት (%)",
     "leastUsed": "በጣም አነስተኛ ጥቅም ላይ የዋለ",
     "costOpt": "በወጪ የተመቻቸ",
     "strategyGuideTitle": "ይህን ስልት እንዴት መጠቀም እንደሚቻል",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# መለያ} other {# መለያዎች}}",
     "builderGlobalAdded": "ታክሏል",
     "builderGlobalAdd": "አክል",
+    "clearSearch": "ፍለጋን አጽዳ",
     "manualModel": "በእጅ የሚጨመር ሞዴል",
     "manualModelInvalid": "ሞዴልን በprovider/model ቅርጸት ያስገቡ።",
     "manualModelUnknownProvider": "ያልታወቀ የአቅራቢ ቅድመ ቅጥያ።",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "ዝቅተኛው የይዘት ርዝመት (ቁምፊዎች)",
     "responseValidationJsonPaths": "የJSON-path ማረጋገጫዎች",
     "responseValidationAddCheck": "+ ማረጋገጫ አክል",
+    "responseValidationRemoveCheck": "ምርመራን አስወግድ",
+    "responseValidationPath": "JSON መንገድ",
+    "responseValidationCondition": "መስፈርት",
+    "responseValidationValue": "የሚጠበቅ እሴት",
     "agentFeaturesSystemMessageOverride": "የስርዓት መልዕክትን ተካ",
     "agentFeaturesSystemMessagePlaceholder": "እርስዎ ባለሙያ ረዳት ነዎት...",
     "agentFeaturesSystemMessageHint": "ለወኪሎች የስርዓት መልዕክት መተኪያ",
@@ -5288,7 +5311,8 @@
         "skipped": "አስቀድሞ ተዋቅሯል",
         "failed": "አልተሳካም"
       }
-    }
+    },
+    "stepProgress": "የማዋቀር እድገት"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ይህ አቅራቢ በነባሪ ከauto ተገልሏል",
@@ -6540,6 +6564,7 @@
       "monsterapi": "የAPI ቁልፍን ከmonsterapi.ai ያግኙ",
       "moonshot": "Kimiን በAPI ቁልፍ ያገናኙ።",
       "morph": "ነፃ ደረጃ፦ በወር 250K ክሬዲቶች፣ $0",
+      "apmix": "Apmixን በapmix.ai/dashboard የሚገኝ የAPI ቁልፍ ያገናኙ — አንድ ደረሳ ብዙ ሞዴሎች።",
       "nanogpt": "NanoGPTን በAPI ቁልፍ ያገናኙ።",
       "nebius": "ለAPI ሙከራ ሲመዘገቡ ~$1 የሙከራ ክሬዲት",
       "nlpcloud": "NLP Cloud ከOpenAI chat/completions ይልቅ የራሱን የቻትቦት API ይጠቀማል። OmniRoute የOpenAI መልዕክቶችን ወደ input/context/history ያስማማል፣ እንዲሁም የሚደገፉ የቻትቦት ሞዴሎችን አካባቢያዊ ካታሎግ ያቀርባል።",
@@ -6636,8 +6661,7 @@
       "kiro": "ነፃ ደረጃ፦ በወር 50 ክሬዲቶች (~25K–100K ቶከኖች)። ⚠️ የKiro ToS በሦስተኛ ወገን ፕሮክሲ/ሃርነስ መጠቀምን ይከለክላል።",
       "codex": "OpenAI Codexን በነባሩ OAuth ፍሰት ያገናኙ።",
       "qwen": "Qwen Codeን በነባሩ OAuth ፍሰት ያገናኙ።",
-      "github-models": "በgithub.com/settings/tokens ላይ 'models: read' ወሰን ያለው GitHub PAT ይፍጠሩ",
-      "apmix": "Apmixን በapmix.ai/dashboard የሚገኝ የAPI ቁልፍ ያገናኙ — አንድ ደረሳ ብዙ ሞዴሎች።"
+      "github-models": "በgithub.com/settings/tokens ላይ 'models: read' ወሰን ያለው GitHub PAT ይፍጠሩ"
     },
     "passthroughModelsDescription": "{provider} የአቅራቢውን ቤተኛ የሞዴል መለያዎች ይቀበላል። ከ/models ያስመጡ ወይም ለማስተላለፍ ብጁ መለያዎችን ያክሉ።",
     "bedrockModelsDescription": "የAmazon Bedrock ሞዴሎች በAWS ክልል የተገደቡ ናቸው። ከ/models ያስመጡ ወይም በተመረጠው ክልል የነቁ የBedrock ሞዴል መለያዎችን ያክሉ።",
@@ -7707,6 +7731,7 @@
     "configured": "ተዋቅሯል",
     "none": "ምንም",
     "modelOverrideValuePlaceholder": "ቁጥራዊ እሴት",
+    "modelOverrideKey": "የመተካት ቁልፍ",
     "modelOverrideReasoningEffortsPlaceholder": "በእንግሊዝኛ ኮማ የተለዩ፣ ለምሳሌ low, medium, high",
     "addKeyValue": "ቁልፍ እና እሴት ጨምር",
     "noModelOverrides": "ለዚህ ሞዴል ምንም ማሻሻያዎች አልተዋቀሩም።",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "አልፏል",
     "tomlTestFailed": "አልተሳካም",
     "tomlImportError": "የRTK TOML ፋይልን ማስኬድ አልተቻለም።",
-    "tomlFileReadError": "የተመረጠውን TOML ፋይል ማንበብ አልተቻለም።"
+    "tomlFileReadError": "የተመረጠውን TOML ፋይል ማንበብ አልተቻለም።",
+    "viewMode": "የእይታ ሁነታ"
   },
   "compressionEngineConfig": {
     "loading": "በመጫን ላይ…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "የቋንቋ ጥቅሎች፦ {packs}",
     "dragToReorder": "የደረጃዎቹን ቅደም ተከተል ለመቀየር ይጎትቱ",
     "engine": "ኤንጂን",
-    "intensity": "ጥንካሬ"
+    "intensity": "ጥንካሬ",
+    "compressionOverride": "የመጨበጥ መተካት"
   },
   "compressionStudio": {
     "noRun": "ምንም የማጨመቂያ ሂደት አይገኝም።",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "አሸናፊ፦ {winner}",
     "encoder": "ኢንኮደር",
     "bytes": "ባይቶች",
-    "tokensCl100k": "ቶከኖች (cl100k)"
+    "tokensCl100k": "ቶከኖች (cl100k)",
+    "studioViews": "የስቱዲዮ እይታዎች"
   },
   "omniglyph": {
     "preview": "ቅድመ ዕይታ",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "ከዚህ ያጠሩ መልዕክቶች አይጨመቁም። ዝቅተኛ = የበለጠ ማመቂያ።",
     "tooltipMinSavings": "ቢያንስ ይህን ያህል ቶከኖች የሚቆጥብ ከሆነ ብቻ ይጨመቃል።",
     "ultraSettings": "እጅግ የላቁ ቅንብሮች",
-    "ultraSettingsDesc": "በSLM የሚከናወን የፍቺ ማመቅ"
+    "ultraSettingsDesc": "በSLM የሚከናወን የፍቺ ማመቅ",
+    "defaultLanguage": "ነባሪ ቋንቋ",
+    "viewMode": "የእይታ ሁነታ"
   },
   "translator": {
     "title": "ተርጓሚ",
@@ -11078,7 +11108,8 @@
       "message": "መልዕክት",
       "error": "ስህተት",
       "completion": "ማጠናቀቅ"
-    }
+    },
+    "statusFilter": "ሁኔታ"
   },
   "templateNames": {
     "simple-chat": "ቀላል ውይይት",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "ከ{minutes} ደቂቃ በፊት",
     "hoursAgo": "ከ{hours} ሰዓት በፊት",
     "daysAgo": "ከ{days} ቀን በፊት",
-    "entries": "ግቤቶች"
+    "entries": "ግቤቶች",
+    "viewSwitcherAria": "የካሽ እይታ"
   },
   "proxyConfigModal": {
     "levelGlobal": "አጠቃላይ",
@@ -11447,6 +11479,7 @@
     "tableHealth": "ጤንነት (24 ሰዓት)",
     "tableUsage": "አጠቃቀም",
     "tableActions": "ድርጊቶች",
+    "moreActions": "ተጨማሪ እርምጃዎች",
     "test": "ፈትሽ",
     "edit": "አርትዕ",
     "delete": "ሰርዝ",
@@ -11809,7 +11842,8 @@
       "nextButton": "ቀጣይ",
       "runButton": "አሂድ",
       "promptPlaceholder": "መልዕክትዎን ያስገቡ… (ለመላክ Enter፣ ወደ አዲስ መስመር ለመውረድ Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "የፕሌይግራውንድ ሁነታዎች"
   },
   "miniPlayground": {
     "endpoint": "የመዳረሻ ነጥብ",
@@ -11880,7 +11914,8 @@
     "assistant": "ረዳት",
     "errorLabel": "ስህተት",
     "requestFailed": "ጥያቄው አልተሳካም",
-    "stop": "አቁም"
+    "stop": "አቁም",
+    "messageInputAria": "መልእክት"
   },
   "requestLogger": {
     "recording": "በመቅዳት ላይ",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "{count} የመለያ ሽክርክሪቶች",
       "resilienceRetried": "ባዶ ዙር እንደገና ተሞክሯል",
       "resilienceContinued": "በዥረቱ መሃል ቀጥሏል",
-      "resilienceRecovered": "በመቋቋም እርምጃ ተመልሷል"
-    }
+      "resilienceRecovered": "በመቋቋም እርምጃ ተመልሷል",
+      "conversationContext": "የውይይት አውድ",
+      "goToBottom": "ወደ ታች ሂድ",
+      "liveRefreshOn": "ቀጥታ ዝማኔ፡ ነቅቷል",
+      "liveRefreshOff": "ቀጥታ ዝማኔ፡ ጠፍቷል",
+      "liveRefresh": "ቀጥታ ዝማኔ",
+      "continuesFromParent": "ከወላጅ ይቀጥላል",
+      "continuesFrom": "ከ{id} ይቀጥላል",
+      "viewConversation": "ውይይት ይመልከቱ",
+      "openConversation": "ውይይት {id} ክፈት"
+    },
+    "tableLabel": "የጥያቄ ምዝገባዎች"
   },
   "proxyLogger": {
     "filterAll": "ሁሉም",
@@ -12113,7 +12158,9 @@
     "colServedBy": "የተሰጠ በ",
     "filterTraffic": "ትራፊክ",
     "filterTests": "ፈተናዎች",
-    "filterSource": "ምንጭ"
+    "filterSource": "ምንጭ",
+    "tableLabel": "የፕሮክሲ ምዝገባዎች",
+    "sortLogs": "ምዝገባዎችን ደርድር"
   },
   "endpointOptions": {
     "speech": "ንግግር",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "አልቋል",
     "statusAlerting": "ማንቂያ እየተሰጠ ነው",
     "statusError": "ስህተት",
-    "moreSuffix": "+{count} ተጨማሪ"
+    "moreSuffix": "+{count} ተጨማሪ",
+    "feedFilterLabel": "ክስተቶችን አጣራ"
   },
   "quotaShare": {
     "weightPercent": "ክብደት %",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "ያልተመደቡ",
     "ungroupedHint": "እነዚህ ፑሎች ለሚታወቅ ቡድን አልተመደቡም። ወደ እውነተኛ ቡድን ለማዛወር ፑልን ያርትዑ።",
     "removeFailed": "ይህን ፑል ማስወገድ አልተቻለም።",
-    "dismiss": "ዝጋ"
+    "dismiss": "ዝጋ",
+    "allocationsHeading": "ምደባዎች",
+    "wizardRemoveDimension": "ልኬት አስወግድ",
+    "wizardRemoveKey": "ቁልፍ አስወግድ"
   },
   "plugins": {
     "title": "ተሰኪዎች",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "የቅንብሮች ማዘመን አልተሳካም",
       "serviceRevealApiKey": "{actor} የ{target} API ቁልፍን አሳይቷል",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "ስህተት አሰናብት"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "አሁን ይሂዱ",
       "message": "MITM Proxy አሁን በAgentBridge ስር ይገኛል።",
       "title": "ይህ ገጽ ተዛውሯል"
-    }
+    },
+    "dnsOn": "DNS በርቷል",
+    "dnsOff": "DNS ጠፍቷል",
+    "showServerSettings": "የአገልጋይ ቅንብሮችን አሳይ",
+    "hideServerSettings": "የአገልጋይ ቅንብሮችን ደብቅ",
+    "upstreamCaTesting": "በሙከራ ላይ…",
+    "removeMapping": "ማዛመጃ አስወግድ",
+    "mappingSourcePlaceholder": "ለምሳሌ፣ gemini-3.6-flash-medium፣ ወይም ለሁሉም ያልተዛመዱ *",
+    "mappingWildcardHint": "ግልጽ ማዛመጃ የሌለውን እያንዳንዱን ሞዴል በOmniRoute በኩል ወደ ተመረጠው ዒላማ ለማስተላለፍ * ን እንደ ምንጭ ይጠቀሙ። ትክክለኛ የምንጭ ዛመድዎች ሁልጊዜ ከ* በላይ ያሸንፋሉ።",
+    "wizardDetectingModels": "ከተያዘ ትራፊክ ሞዴሎችን በመለየት ላይ...",
+    "wizardDetectedModels": "ከተያዘ ትራፊክ ውስጥ {count, plural, one {# ሞዴል} other {# ሞዴሎች}} ተገኝቷል። ማከል የሚፈልጓቸውን ይምረጡ፡",
+    "wizardSelectedModels": "{count, plural, one {# ሞዴል} other {# ሞዴሎች}} ተመርጧል። በቀጣዩ ማያ ገጽ ከ OmniRoute ሞዴሎች ጋር ያዛምዷቸዋል።",
+    "wizardAddModels": "{count, plural, one {# ሞዴል} other {# ሞዴሎች}} ጨምር",
+    "wizardNoModelsDetected": "እስካሁን ምንም ሞዴል አልተገኘም። ጥያቄ ለማቅረብ {agent}ን ይጠቀሙ፣ ከዚያ ከትራፊክ ሞዴሎችን በራስ-ሰር ለመለየት ይህን መመሪያ እንደገና ያሂዱ።",
+    "wizardNoModelsHint": "ወይም ይህን መመሪያ ይዝጉ እና ማገናኘቶችን በወኪል ካርድ ውስጥ በእጅ ይጨምሩ።"
   },
   "providerStats": {
     "unknownError": "ያልታወቀ ስህተት",
@@ -12686,7 +12752,11 @@
     "avgTtft": "አማካይ TTFT",
     "avgTotal": "አማካይ ጠቅላላ ጊዜ",
     "requestTelemetry": "የጥያቄ ቴሌሜትሪ",
-    "requestTelemetryDescription": "የባለ 7-ደረጃ ፓይፕላይን ክፍፍል (ባለፉት 5 ደቂቃዎች)"
+    "requestTelemetryDescription": "የባለ 7-ደረጃ ፓይፕላይን ክፍፍል (ባለፉት 5 ደቂቃዎች)",
+    "title": "የአቅራቢ ስታቲስቲክስ",
+    "description": "ለእያንዳንዱ አቅራቢ እና ሞዴል ትራፊክ፣ መዘግየት እና የስኬት መጠኖች",
+    "combo": "ኮምቦ",
+    "toggleModels": "የ{provider} ሞዴሎችን አሳይ"
   },
   "relay": {
     "title": "ሰርቨር-አልባ ሪሌይ ፕሮክሲዎች",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "የጥያቄ ይዘት የለም።",
     "noResponseBody": "የምላሽ ይዘት የለም።",
     "formatted": "ቅርጸት የተሰጠው",
-    "raw": "ጥሬ"
+    "raw": "ጥሬ",
+    "requestCount": "{count, plural, one {# ጥያቄ} other {# ጥያቄዎች}}",
+    "expandList": "ዝርዝሩን አስፋ",
+    "collapseList": "ዝርዝሩን ምብ",
+    "snippetLanguage": "የኮድ ቁራጭ ቋንቋ",
+    "headersTable": "ራስጌዎች",
+    "showSecrets": "ምስጢሮችን አሳይ",
+    "maskSecrets": "ምስጢሮችን ደብቅ",
+    "llmNotAvailable": "የLLM ሜታዳታ ለዚህ ጥያቄ አይገኝም።",
+    "llmStreamYes": "አዎ (SSE)",
+    "llmStreamNo": "አይ",
+    "llmTotalTokens": "ጠቅላላ: {count} ቶከኖች"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "ይህ አቅራቢ ባለፉት 24 ሰዓታት ውስጥ በትክክል ምላሽ የሰጣቸው ጥሪዎች ድርሻ። ሰረዝ ማለት መጠን ለመግለጽ በቂ ትራፊክ አላስተናገደም ማለት ነው።",
     "reliabilitySample": "ባለፉት {hours} ሰዓታት ውስጥ ከ{requests} ጥሪዎች {successes} ተሳክተዋል",
     "reliabilityTooFew": "ባለፉት {hours} ሰዓታት ውስጥ {requests} ጥሪዎች ብቻ — መጠን ለመግለጽ በቂ አይደሉም",
-    "reliabilityNoTraffic": "ባለፉት 24 ሰዓታት ውስጥ ምንም ጥሪ አልተመዘገበም"
+    "reliabilityNoTraffic": "ባለፉት 24 ሰዓታት ውስጥ ምንም ጥሪ አልተመዘገበም",
+    "categoryFilter": "የተግባር ምድብ"
   },
   "discovery": {
     "title": "የአቅራቢ ፍለጋ",
@@ -13331,7 +13413,11 @@
     "method": "ዘዴ",
     "auth": "ማረጋገጫ",
     "feasibility": "ተግባራዊነት",
-    "models": "ሞዴሎች"
+    "models": "ሞዴሎች",
+    "provider": "አቅራቢ",
+    "status": "ሁኔታ",
+    "endpoint": "ኢንድፖይንት",
+    "actions": "እርምጃዎች"
   },
   "noAuthProvider": {
     "title": "ማረጋገጫ አያስፈልግም",
@@ -13380,7 +13466,8 @@
     "ownProxy": "የራስ ፕሮክሲ",
     "freeTierPause": "ሞዴል {model} ተቋርጧል (429), በ {time} ይመለሳል",
     "freeTierPauseProvider": "ተቋርጧል (429), በ {time} ይመለሳል",
-    "freeTierPauseNote": "በሂደት ላይ ያለ ላ ጊዜያዊ ማቁም"
+    "freeTierPauseNote": "በሂደት ላይ ያለ ላ ጊዜያዊ ማቁም",
+    "proxyType": "የፕሮክሲ አይነት"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "የተደበቀ ስኬት ይጠብቅዎታል...",
         "criteria": "ይህን ባጅ ለማሳየት የተደበቀውን ስኬት ያጠናቅቁ።"
       }
-    }
+    },
+    "leaderboardTitle": "የአሸናፊዎች ሰሌዳ",
+    "leaderboardDescription": "በእርስዎ API ቁልፎች ላይ ያሉ ደረጃዎች እና ስኬቶች",
+    "badgeLocked": "ተቆልፏል"
   },
   "featureFlags": {
     "title": "የባህሪ ጠቋሚዎች",
@@ -13794,6 +13884,7 @@
     "latency": "መዘግየት",
     "quota": "ኮታ",
     "rangeWindow": "የ{range} ጊዜ መስኮት",
+    "timeRange": "የጊዜ ክልል",
     "runtimeHealthBlend": "የአሂድ ጊዜ/ጤና ድብልቅ",
     "averageResponseTime": "አማካይ የምላሽ ጊዜ",
     "worstQuota": "ዝቅተኛው ኮታ",
@@ -13995,7 +14086,11 @@
     "learnMore": "ተጨማሪ ይወቁ",
     "changelogLoadFailed": "የለውጥ ማስታወሻውን መጫን አልተቻለም። እባክዎ ቆይተው እንደገና ይሞክሩ።",
     "retry": "እንደገና ይሞክሩ",
-    "viewFullHistory": "ሙሉ ታሪኩን በGitHub ላይ ይመልከቱ"
+    "viewFullHistory": "ሙሉ ታሪኩን በGitHub ላይ ይመልከቱ",
+    "title": "ዜና እና የለውጥ መዝገብ",
+    "description": "ከOmniRoute ቡድን ማስታወቂያዎች እና የቅርብ ጊዜ የልቀት ማስታወሻዎች",
+    "viewLabel": "ይመልከቱ",
+    "loadingNews": "ማስታወቂያዎች እየተጫኑ ነው..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "የአቅራቢ ወረዳ ቆራጭ ሁኔታ",
       "lastUpdate": "የመጨረሻ ዝማኔ፦ {timestamp}",
       "uptimeMinutes": "{minutes} ደቂቃ",
-      "uptimeHoursMinutes": "{hours} ሰዓት {minutes} ደቂቃ"
+      "uptimeHoursMinutes": "{hours} ሰዓት {minutes} ደቂቃ",
+      "breakerClosed": "ተዘግቷል",
+      "breakerNotClosed": "ክፍት ወይም ግማሽ ክፍት"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "የጥገና ዝርዝሮች",
         "secondaryAction": "የስርዓት ሁኔታ"
       }
+    },
+    "miniapp": {
+      "askAnything": "ማንኛውንም ነገር ይጠይቁ…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} የሚታዩ / {total} ጠቅላላ",
+    "modeLabel": "የእይታ ሁነታ",
+    "jumpToNow": "ወደ አሁኑ ጊዜ ዝለል፣ የ NOW መስመር ወደ {position}% ቦታ ይመለሳል",
+    "laneReuse": "የሌን ዳግም አጠቃቀም",
+    "laneReuseLabel": "የሌን ዳግም አጠቃቀም መስኮት (ደቂቃዎች)",
+    "laneReuseHint": "አንድን የውይይት መታወቂያ (conversation id) የሚጋሩ ጥያቄዎች፣ በእነርሱ መካከል ያለው ክፍተት ከዚህ የደቂቃዎች ብዛት በታች ከሆነ፣ በተመሳሳዩ የጊዜ መስመር ረድፍ ላይ ይቆያሉ።",
+    "laneReuseUnit": "ደቂ",
+    "autoRefresh": "ራስ-ሰር ማደስ",
+    "autoRefreshLabel": "የራስ-ሰር ማደስ ክፍተት (ሰከንዶች)",
+    "autoRefreshHint": "የጊዜ መስመሩ የጥያቄዎችን ዝርዝር ከአገልጋዩ ምን ያህል ብዛት እንደገና ይጠይቃል።",
+    "autoRefreshUnit": "ሰ",
+    "zoomOut": "አሳንስ",
+    "zoomIn": "አጉላ"
   },
   "metadata": {
     "compressionTitle": "ማመቅ",

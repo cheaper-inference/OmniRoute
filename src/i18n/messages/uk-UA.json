@@ -25,8 +25,10 @@
     "confirm": "Ви впевнені?",
     "refresh": "Оновити",
     "close": "Закрити",
+    "dialogTitleFallback": "Діалог",
     "previousPage": "Попередня сторінка",
     "nextPage": "Наступна сторінка",
+    "pagination": "Пагінація",
     "capsLockOn": "Caps Lock увімкнено",
     "dismissNotification": "Закрити сповіщення",
     "toggleColumns": "Перемкнути стовпці",
@@ -182,6 +184,7 @@
     "combos": "Комбінації",
     "noModelsFound": "Моделі не знайдено",
     "clear": "Очистити",
+    "clearFilters": "Очистити фільтри",
     "done": "Готово",
     "selectAll": "Вибрати все",
     "unselectAll": "Зняти вибір",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Використано {count, plural, one {# партія} other {# партій}}",
     "batchFilePreview": "Попередній перегляд",
     "batchFilePreviewTruncated": "Показано перші {shown} рядків ({total} всього рядків)",
-    "batchFileDownloadFull": "Завантажити повний файл"
+    "batchFileDownloadFull": "Завантажити повний файл",
+    "tokensPageTitle": "Токени",
+    "tokensPageDescription": "Надсилайте токени між ключами API, діліться кодами запрошень і підключайте сервери спільноти.",
+    "tokensServerUrlLabel": "URL сервера"
   },
   "disabled": "Вимкнено",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Перенаправляти запити з вичерпаним бюджетом на резервного безкоштовного провайдера/модель.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 або @channelname",
       "chatIdHint": "Унікальний числовий ідентифікатор або публічний username чату/каналу.",
       "tutorial": "Як налаштувати веб-хук Telegram:"
-    }
+    },
+    "copy": "Копіювати",
+    "copied": "Скопійовано!",
+    "expandDetails": "Показати деталі",
+    "collapseDetails": "Сховати деталі"
   },
   "compliance": {
     "auditTitle": "Аудит",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Виклики (24 год)",
     "mcpMetricSuccessRate": "Коефіцієнт успішності",
     "mcpMetricAvgDuration": "Середня тривалість",
-    "mcpMetricTopTool": "Найкращий інструмент"
+    "mcpMetricTopTool": "Найкращий інструмент",
+    "dismissError": "Сховати помилку"
   },
   "themesPage": {
     "title": "Теми",
@@ -1613,6 +1624,8 @@
     "quickNavigation": "Швидка навігація",
     "quickNavigationTitle": "Швидка навігація (⌘K / Ctrl+K)",
     "openQuickNavigation": "Відкрити швидку навігацію",
+    "openMenu": "Відкрити меню",
+    "products": "Продукти Keak",
     "switchToLightMode": "Перейти на світлий режим",
     "switchToDarkMode": "Перейти на темний режим",
     "language": "Мова",
@@ -2495,7 +2508,8 @@
     "onlySelectedConnections": "Лише вибрані з’єднання",
     "selectAtLeastOneConnection": "Виберіть принаймні одне з’єднання або варіант «Усі з’єднання».",
     "allConnectionsDesc": "Цей ключ може використовувати будь-яке активне з’єднання.",
-    "restrictedToConnections": "Обмежено до {count, plural, one {# з’єднання} other {# з’єднань}}."
+    "restrictedToConnections": "Обмежено до {count, plural, one {# з’єднання} other {# з’єднань}}.",
+    "removeSelection": "Видалити {name}"
   },
   "auditLog": {
     "title": "Журнал аудиту",
@@ -2607,7 +2621,9 @@
     "imageToTextBridgeCta": "Налаштуйте міст зображення→текст у налаштуваннях моста модальності",
     "sttBridgeCta": "Налаштуйте міст між Мовленням→Текстом у налаштуваннях Мосту Модальності",
     "existingConnection": "Існуюче з'єднання",
-    "openrouterSttDescription": "Моделі перетворення мови в текст OpenRouter використовують ваше налаштоване з'єднання OpenRouter. Окремі облікові дані не потрібні."
+    "openrouterSttDescription": "Моделі перетворення мови в текст OpenRouter використовують ваше налаштоване з'єднання OpenRouter. Окремі облікові дані не потрібні.",
+    "modalityTabsAria": "Тип медіа",
+    "serviceKindsAria": "Тип сервісу"
   },
   "search": {
     "searchQuery": "Пошуковий запит",
@@ -3278,7 +3294,8 @@
     "cliproxyapiUnknown": "Невідомо",
     "cliproxyapiUpdate": "Оновити",
     "cliproxyapiUpdateAvailable": "Доступне оновлення: v{current} → v{latest}",
-    "cliproxyapiVersion": "Версія"
+    "cliproxyapiVersion": "Версія",
+    "removeMapping": "Видалити зіставлення"
   },
   "modelCatalog": {
     "title": "Моделі та комбо",
@@ -3400,13 +3417,13 @@
     "comboRefMember": "Комбінація → {name}"
   },
   "combos": {
+    "title": "Комбо",
+    "description": "Створюйте комбінації моделей із зваженою маршрутизацією та підтримкою резервного варіанту",
+    "autoCatalogTitle": "Каталог автомаршрутизації",
     "autoTosLoadError": "Не вдалося завантажити політику ToS. Спробуйте ще раз перед зміною.",
     "autoTosSaveError": "Не вдалося зберегти політику ToS. Досі відображається попереднє налаштування. Спробуйте ще раз.",
     "autoTosIncludeLabel": "Включати до auto провайдерів із позначкою ToS: avoid",
     "autoTosDescription": "Типово вимкнено. Застосовується до всіх комбінацій auto, а не лише до одного облікового запису. Підключення провайдера не вмикає цю опцію.",
-    "title": "Комбо",
-    "description": "Створюйте комбінації моделей із зваженою маршрутизацією та підтримкою резервного варіанту",
-    "autoCatalogTitle": "Каталог автомаршрутизації",
     "autoCatalogTemplateCount": "{count} шаблони",
     "autoCatalogDescription": "Вбудовані комбінації auto/*, які динамічно вирішуються від підключених постачальників. Використовуйте будь-який із цих ідентифікаторів як поле моделі — налаштування не потрібно.",
     "autoCatalogExpand": "Розгорнути каталог автомаршрутизації",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Ще немає налаштованих комбо.",
     "playgroundCreateFirst": "Спочатку створіть одне",
     "weighted": "Зважений",
+    "weightPercent": "Вага (%)",
     "leastUsed": "Найменш використовуваний",
     "costOpt": "Оптимізація вартості",
     "strategyGuideTitle": "Як використовувати цю стратегію",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# обліковий запис} other {# облікових записів}}",
     "builderGlobalAdded": "Додано",
     "builderGlobalAdd": "Додати",
+    "clearSearch": "Очистити пошук",
     "manualModel": "Модель вручну",
     "manualModelInvalid": "Введіть модель у форматі провайдер/модель.",
     "manualModelUnknownProvider": "Невідомий префікс провайдера.",
@@ -3973,6 +3992,10 @@
     "responseValidationMinLength": "Мінімальна довжина вмісту (символів)",
     "responseValidationJsonPaths": "Перевірки JSON-path",
     "responseValidationAddCheck": "+ Додати перевірку",
+    "responseValidationRemoveCheck": "Видалити перевірку",
+    "responseValidationPath": "Шлях JSON",
+    "responseValidationCondition": "Умова",
+    "responseValidationValue": "Очікуване значення",
     "agentFeaturesSystemMessageOverride": "Перевизначити системне повідомлення",
     "agentFeaturesSystemMessagePlaceholder": "Ви експерт-помічник...",
     "agentFeaturesSystemMessageHint": "Заміна системних повідомлень для агентів",
@@ -5288,7 +5311,8 @@
         "skipped": "вже налаштовано",
         "failed": "не вдалося"
       }
-    }
+    },
+    "stepProgress": "Прогрес налаштування"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Цього провайдера типово виключено з auto",
@@ -6080,6 +6104,13 @@
     "claudeLowPriorityModeDescription": "Коли цей обліковий запис досягає 5-годинного ліміту використання й Anthropic пропонує канал із нижчим пріоритетом, OmniRoute приймає його та продовжує надсилати запити з anthropic-usage-limit: slow до скидання вікна замість переведення з’єднання в режим очікування. Тижневий ліміт усе одно діє, а відповіді можуть очікувати на вільні ресурси.",
     "claudeAutoLimitResetLabel": "Автоматично скидати ліміт сеансу (раз на тиждень)",
     "claudeAutoLimitResetDescription": "Коли цей обліковий запис досягає 5-годинного ліміту використання й доступне скидання ліміту сеансу, OmniRoute автоматично активує його та повторює спробу на повній швидкості. Використовується доступне для облікового запису скидання раз на тиждень, а використання й надалі враховується в тижневому ліміті.",
+    "codexPaidCreditsShort": "Додаткові кредити",
+    "codexPaidCreditsToggleTitle": "Дозволити платні кредити Codex після вичерпання квоти підписки (можуть стягуватися додаткові кошти)",
+    "codexPaidCreditsEnabled": "Платні кредити Codex увімкнено (можуть стягуватися додаткові кошти)",
+    "codexPaidCreditsDisabled": "Платні кредити Codex вимкнено",
+    "failedUpdateCodexPaidCredits": "Не вдалося оновити політику платних кредитів Codex",
+    "allowCodexPaidCreditsLabel": "Дозволити платні кредити Codex",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Пропускати тимчасовий період очікування, щоб це підключення залишалося доступним навіть після відновлюваних помилок (термінальні стани, як-от banned/expired, все одно застосовуються).",
     "disableCoolingLabel": "Вимкнути період очікування для цього підключення",
     "bulkPasteAdded": "{count, plural, one {Додано 1 ключ} few {Додано # ключі} many {Додано # ключів} other {Додано # ключа}}",
@@ -6533,6 +6564,7 @@
       "monsterapi": "Отримайте API-ключ на monsterapi.ai",
       "moonshot": "Підключіть Moonshot AI за допомогою API-ключа.",
       "morph": "Безкоштовний тариф: 250 тис. кредитів/місяць, $0",
+      "apmix": "Підключіть Apmix із API-ключем від apmix.ai/dashboard — одна підписка, багато моделей.",
       "nanogpt": "Підключіть NanoGPT за допомогою API-ключа.",
       "nebius": "~$1 пробних кредитів при реєстрації для тестування API",
       "nlpcloud": "NLP Cloud використовує власний API чат-бота замість OpenAI chat/completions. OmniRoute адаптує повідомлення OpenAI до вхідних даних/контексту/історії та надає локальний каталог підтримуваних моделей чат-ботів.",
@@ -6629,8 +6661,7 @@
       "kiro": "Безкоштовний рівень: 50 кредитів на місяць (~25K–100K токенів). ⚠️ Умови використання Kiro забороняють використання через сторонні проксі або оболонки.",
       "codex": "Підключіть OpenAI Codex за допомогою наявного процесу OAuth.",
       "qwen": "Підключіть Qwen Code за допомогою наявного процесу OAuth.",
-      "github-models": "Створіть GitHub PAT з областю видимості 'models: read' на github.com/settings/tokens",
-      "apmix": "Підключіть Apmix із API-ключем від apmix.ai/dashboard — одна підписка, багато моделей."
+      "github-models": "Створіть GitHub PAT з областю видимості 'models: read' на github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} приймає власні ідентифікатори моделі постачальника. Імпортуйте з /models або додайте власні ідентифікатори для маршрутизації.",
     "bedrockModelsDescription": "Моделі Amazon Bedrock залежать від регіону AWS. Імпортуйте з /models або додайте ідентифікатори моделі Bedrock, активовані у вибраному регіоні.",
@@ -6802,14 +6833,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Ліміти паралельності для окремих моделей",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Необов’язково: один запис model=cap на рядок, зіставляється з точним ідентифікатором моделі upstream. Зайві запити ставляться в локальну чергу; порожнє значення означає відсутність ліміту для моделі.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Недійсний запис паралельності для моделі «{entry}» — використовуйте model=cap, де cap — ціле число від 1 до {max}.",
-    "codexPaidCreditsShort": "Додаткові кредити",
-    "codexPaidCreditsToggleTitle": "Дозволити платні кредити Codex після вичерпання квоти підписки (можуть стягуватися додаткові кошти)",
-    "codexPaidCreditsEnabled": "Платні кредити Codex увімкнено (можуть стягуватися додаткові кошти)",
-    "codexPaidCreditsDisabled": "Платні кредити Codex вимкнено",
-    "failedUpdateCodexPaidCredits": "Не вдалося оновити політику платних кредитів Codex",
-    "allowCodexPaidCreditsLabel": "Дозволити платні кредити Codex",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Недійсний запис паралельності для моделі «{entry}» — використовуйте model=cap, де cap — ціле число від 1 до {max}."
   },
   "settings": {
     "title": "Налаштування",
@@ -7707,6 +7731,7 @@
     "configured": "налаштовано",
     "none": "Немає",
     "modelOverrideValuePlaceholder": "Числове значення",
+    "modelOverrideKey": "Ключ перевизначення",
     "modelOverrideReasoningEffortsPlaceholder": "Англійською, через кому, наприклад: low, medium, high",
     "addKeyValue": "Додати ключ-значення",
     "noModelOverrides": "Для цієї моделі не налаштовано перевизначень.",
@@ -9035,7 +9060,8 @@
     "tomlTestPassed": "Пройдено",
     "tomlTestFailed": "Не пройдено",
     "tomlImportError": "Не вдалося обробити файл RTK TOML.",
-    "tomlFileReadError": "Не вдалося прочитати вибраний файл TOML."
+    "tomlFileReadError": "Не вдалося прочитати вибраний файл TOML.",
+    "viewMode": "Режим перегляду"
   },
   "compressionEngineConfig": {
     "loading": "Завантаження…",
@@ -9257,7 +9283,8 @@
     "languagePacksList": "Мовні пакети: {packs}",
     "dragToReorder": "Перетягніть, щоб змінити порядок кроків",
     "engine": "Рушій",
-    "intensity": "Інтенсивність"
+    "intensity": "Інтенсивність",
+    "compressionOverride": "Перевизначення стиснення"
   },
   "compressionStudio": {
     "noRun": "Немає доступних запусків стиснення.",
@@ -9317,7 +9344,8 @@
     "encoderWinner": "переможець: {winner}",
     "encoder": "кодувальник",
     "bytes": "байти",
-    "tokensCl100k": "токени (cl100k)"
+    "tokensCl100k": "токени (cl100k)",
+    "studioViews": "Вигляди Studio"
   },
   "omniglyph": {
     "preview": "Попередній перегляд",
@@ -9523,7 +9551,9 @@
     "tooltipMinLength": "Коротші повідомлення не стискаються. Нижче = більше стиснення.",
     "tooltipMinSavings": "Стискайте лише якщо це зберігає принаймні таку кількість токенів.",
     "ultraSettings": "Ультра налаштування",
-    "ultraSettingsDesc": "Семантичне стиснення на основі SLM"
+    "ultraSettingsDesc": "Семантичне стиснення на основі SLM",
+    "defaultLanguage": "Мова за замовчуванням",
+    "viewMode": "Режим перегляду"
   },
   "translator": {
     "title": "Перекладач",
@@ -9835,6 +9865,10 @@
     "streamTransformFailed": "Не вдалося перетворити потік"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Платні кредити Codex",
+    "codexPaidCreditsAvailable": "Доступно (баланс не повідомляється)",
+    "codexPaidCreditsUnavailable": "Недоступно або досягнуто ліміт витрат",
+    "codexPaidCreditsUnlimited": "Без обмежень",
     "title": "Використання",
     "grokExtraUsageCredits": "Додаткові кредитні кошти",
     "grokAutoTopUp": "Автоматичне поповнення",
@@ -10287,11 +10321,7 @@
     "updatedShort": "Оновлено",
     "lastRefreshed": "Останнє оновлення",
     "providerQuota": "Квота провайдера",
-    "providerQuotaHomeHint": "Стан у реальному часі за підключеними акаунтами",
-    "codexPaidCreditsLabel": "Платні кредити Codex",
-    "codexPaidCreditsAvailable": "Доступно (баланс не повідомляється)",
-    "codexPaidCreditsUnavailable": "Недоступно або досягнуто ліміт витрат",
-    "codexPaidCreditsUnlimited": "Без обмежень"
+    "providerQuotaHomeHint": "Стан у реальному часі за підключеними акаунтами"
   },
   "modals": {
     "waitingAuth": "Очікування авторизації",
@@ -11078,7 +11108,8 @@
       "message": "Повідомлення",
       "error": "Помилка",
       "completion": "Завершення"
-    }
+    },
+    "statusFilter": "Статус"
   },
   "templateNames": {
     "simple-chat": "Простий чат",
@@ -11259,7 +11290,8 @@
     "minutesAgo": "{minutes} хв тому",
     "hoursAgo": "{hours} год тому",
     "daysAgo": "{days} дн тому",
-    "entries": "Записи"
+    "entries": "Записи",
+    "viewSwitcherAria": "Перегляд кешу"
   },
   "proxyConfigModal": {
     "levelGlobal": "Глобальний",
@@ -11447,6 +11479,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Більше дій",
     "test": "Тест",
     "edit": "Редагувати",
     "delete": "Видалити",
@@ -11809,7 +11842,8 @@
       "nextButton": "Далі",
       "runButton": "Запустити",
       "promptPlaceholder": "Введіть ваше повідомлення… (Enter для відправки, Shift+Enter для нового рядка)"
-    }
+    },
+    "playgroundTabs": "Режими Playground"
   },
   "miniPlayground": {
     "endpoint": "Ендпоінт",
@@ -11880,7 +11914,8 @@
     "assistant": "Асистент",
     "errorLabel": "Помилка",
     "requestFailed": "Помилка запиту",
-    "stop": "Зупинити"
+    "stop": "Зупинити",
+    "messageInputAria": "Повідомлення"
   },
   "requestLogger": {
     "recording": "Записування",
@@ -12067,8 +12102,18 @@
       "resilienceRotations": "{count} ротацій облікових записів",
       "resilienceRetried": "Порожній хід повторено",
       "resilienceContinued": "Відновлено посеред потоку",
-      "resilienceRecovered": "Відновлено дією стійкості"
-    }
+      "resilienceRecovered": "Відновлено дією стійкості",
+      "conversationContext": "Контекст розмови",
+      "goToBottom": "Перейти донизу",
+      "liveRefreshOn": "Живе оновлення: увімк.",
+      "liveRefreshOff": "Живе оновлення: вимк.",
+      "liveRefresh": "Живе оновлення",
+      "continuesFromParent": "продовжується від батьківського",
+      "continuesFrom": "Продовжується від {id}",
+      "viewConversation": "переглянути розмову",
+      "openConversation": "Відкрити розмову {id}"
+    },
+    "tableLabel": "Журнали запитів"
   },
   "proxyLogger": {
     "filterAll": "Усі",
@@ -12113,7 +12158,9 @@
     "colServedBy": "Обслуговується",
     "filterTraffic": "Трафік",
     "filterTests": "Тести",
-    "filterSource": "Джерело"
+    "filterSource": "Джерело",
+    "tableLabel": "Журнали проксі",
+    "sortLogs": "Сортувати журнали"
   },
   "endpointOptions": {
     "speech": "Мовлення",
@@ -12198,7 +12245,8 @@
     "statusExhausted": "ВИЧЕРПАНО",
     "statusAlerting": "ПОПЕРЕДЖЕННЯ",
     "statusError": "ПОМИЛКА",
-    "moreSuffix": "Ще {count}"
+    "moreSuffix": "Ще {count}",
+    "feedFilterLabel": "Фільтрувати події"
   },
   "quotaShare": {
     "weightPercent": "Вага %",
@@ -12365,7 +12413,10 @@
     "ungroupedTitle": "Без групи",
     "ungroupedHint": "Ці пули не призначені до жодної відомої групи. Відредагуйте пул, щоб перемістити його в реальну групу.",
     "removeFailed": "Не вдалося видалити цей пул.",
-    "dismiss": "Закрити"
+    "dismiss": "Закрити",
+    "allocationsHeading": "Розподіли",
+    "wizardRemoveDimension": "Видалити вимір",
+    "wizardRemoveKey": "Видалити ключ"
   },
   "plugins": {
     "title": "Плагіни",
@@ -12523,7 +12574,8 @@
       "settingsUpdateFailed": "Не вдалося оновити налаштування",
       "serviceRevealApiKey": "{actor} показав API-ключ для {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Закрити помилку"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12708,21 @@
       "goNow": "Перейти зараз",
       "message": "MITM Proxy тепер знаходиться в AgentBridge.",
       "title": "Цю сторінку переміщено"
-    }
+    },
+    "dnsOn": "DNS увімкнено",
+    "dnsOff": "DNS вимкнено",
+    "showServerSettings": "Показати налаштування сервера",
+    "hideServerSettings": "Приховати налаштування сервера",
+    "upstreamCaTesting": "Тестування…",
+    "removeMapping": "Видалити зіставлення",
+    "mappingSourcePlaceholder": "напр., gemini-3.6-flash-medium або * для всіх незіставлених",
+    "mappingWildcardHint": "Використовуйте * як джерело, щоб спрямовувати кожну модель без явного зіставлення через OmniRoute до вибраної цілі. Точні збіги джерел завжди мають пріоритет над *.",
+    "wizardDetectingModels": "Виявлення моделей у перехопленому трафіку...",
+    "wizardDetectedModels": "Знайдено {count, plural, one {# модель} few {# моделі} many {# моделей} other {# моделі}} у перехопленому трафіку. Виберіть ті, які хочете додати:",
+    "wizardSelectedModels": "Вибрано {count, plural, one {# модель} few {# моделі} many {# моделей} other {# моделі}}. На наступному екрані ви зіставите їх із моделями OmniRoute.",
+    "wizardAddModels": "Додати {count, plural, one {# модель} few {# моделі} many {# моделей} other {# моделі}}",
+    "wizardNoModelsDetected": "Моделей поки не виявлено. Зробіть запит за допомогою {agent}, а потім знову запустіть цей майстер, щоб автоматично виявити моделі з трафіку.",
+    "wizardNoModelsHint": "Або закрийте цей майстер і додайте зіставлення вручну в картці агента."
   },
   "providerStats": {
     "unknownError": "Невідома помилка",
@@ -12686,7 +12752,11 @@
     "avgTtft": "Сер. TTFT",
     "avgTotal": "Сер. загальний час",
     "requestTelemetry": "Телеметрія запитів",
-    "requestTelemetryDescription": "Розподіл 7-фазного конвеєра (останні 5 хвилин)"
+    "requestTelemetryDescription": "Розподіл 7-фазного конвеєра (останні 5 хвилин)",
+    "title": "Статистика провайдерів",
+    "description": "Трафік, затримка та рівень успішності за провайдерами й моделями",
+    "combo": "Combo",
+    "toggleModels": "Показати моделі для {provider}"
   },
   "relay": {
     "title": "Безсерверні Relay-проксі",
@@ -12847,7 +12917,18 @@
     "noRequestBody": "Немає тіла запиту.",
     "noResponseBody": "Немає тіла відповіді.",
     "formatted": "Відформатований",
-    "raw": "Необроблений"
+    "raw": "Необроблений",
+    "requestCount": "{count, plural, one {# запит} few {# запити} many {# запитів} other {# запити}}",
+    "expandList": "Розгорнути список",
+    "collapseList": "Згорнути список",
+    "snippetLanguage": "Мова фрагмента коду",
+    "headersTable": "Заголовки",
+    "showSecrets": "Показати секрети",
+    "maskSecrets": "Маскувати секрети",
+    "llmNotAvailable": "Метадані LLM недоступні для цього запиту.",
+    "llmStreamYes": "так (SSE)",
+    "llmStreamNo": "ні",
+    "llmTotalTokens": "Усього: {count} токенів"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13387,8 @@
     "colReliabilityHelp": "Частка викликів, на які цей провайдер фактично відповів за останні 24 години. Тире означає, що він обробив замало трафіку для визначення показника.",
     "reliabilitySample": "За останні {hours} год успішно виконано {successes} із {requests} викликів",
     "reliabilityTooFew": "За останні {hours} год було лише {requests} викликів — замало для визначення показника",
-    "reliabilityNoTraffic": "За останні 24 год викликів не зафіксовано"
+    "reliabilityNoTraffic": "За останні 24 год викликів не зафіксовано",
+    "categoryFilter": "Категорія завдання"
   },
   "discovery": {
     "title": "Виявлення провайдерів",
@@ -13331,7 +13413,11 @@
     "method": "Метод",
     "auth": "Автентифікація",
     "feasibility": "Здійсненність",
-    "models": "Моделі"
+    "models": "Моделі",
+    "provider": "Провайдер",
+    "status": "Статус",
+    "endpoint": "Кінцева точка",
+    "actions": "Дії"
   },
   "noAuthProvider": {
     "title": "Автентифікація не потрібна",
@@ -13380,7 +13466,8 @@
     "ownProxy": "Власний проксі",
     "freeTierPause": "Модель {model} призупинено (429), повернення о {time}",
     "freeTierPauseProvider": "Призупинено (429), повернення о {time}",
-    "freeTierPauseNote": "Пауза в процесі на цьому екземплярі"
+    "freeTierPauseNote": "Пауза в процесі на цьому екземплярі",
+    "proxyType": "Тип проксі"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13640,10 @@
         "description": "На вас чекає приховане досягнення...",
         "criteria": "Виконайте приховане досягнення, щоб відкрити цей значок."
       }
-    }
+    },
+    "leaderboardTitle": "Таблиця лідерів",
+    "leaderboardDescription": "Рейтинги та досягнення за вашими ключами API",
+    "badgeLocked": "Заблоковано"
   },
   "featureFlags": {
     "title": "Прапорці функцій",
@@ -13794,6 +13884,7 @@
     "latency": "Затримка",
     "quota": "Квота",
     "rangeWindow": "Вікно {range}",
+    "timeRange": "Діапазон часу",
     "runtimeHealthBlend": "поєднання виконання/стану",
     "averageResponseTime": "середній час відповіді",
     "worstQuota": "Найгірша квота",
@@ -13995,7 +14086,11 @@
     "learnMore": "Докладніше",
     "changelogLoadFailed": "Не вдалося завантажити журнал змін. Будь ласка, спробуйте пізніше.",
     "retry": "Повторити спробу",
-    "viewFullHistory": "Переглянути повну історію на GitHub"
+    "viewFullHistory": "Переглянути повну історію на GitHub",
+    "title": "Новини та журнал змін",
+    "description": "Оголошення команди OmniRoute та останні примітки до випуску",
+    "viewLabel": "Переглянути",
+    "loadingNews": "Завантаження оголошень..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14641,9 @@
       "circuitBreakerState": "Стан вимикача ланцюга постачальника",
       "lastUpdate": "Останнє оновлення: {timestamp}",
       "uptimeMinutes": "{minutes}хв",
-      "uptimeHoursMinutes": "{hours}г {minutes}х"
+      "uptimeHoursMinutes": "{hours}г {minutes}х",
+      "breakerClosed": "Закрито",
+      "breakerNotClosed": "Відкрито або напіввідкрито"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14718,9 @@
         "primaryAction": "Деталі обслуговування",
         "secondaryAction": "Стан Системи"
       }
+    },
+    "miniapp": {
+      "askAnything": "Запитайте будь-що…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14911,20 @@
     "mcp": "MCP",
     "mcpTool": "Інструмент MCP",
     "scope": "Область застосування",
-    "apiKey": "Ключ API"
+    "apiKey": "Ключ API",
+    "visibleCount": "{visible} видно / {total} усього",
+    "modeLabel": "Режим перегляду",
+    "jumpToNow": "Перейти до поточного часу, лінія NOW скидається на позицію {position}%",
+    "laneReuse": "Повторне використання смуги",
+    "laneReuseLabel": "Вікно повторного використання смуги (хвилини)",
+    "laneReuseHint": "Запити з однаковим ідентифікатором розмови залишаються в одному рядку часової шкали, доки інтервал між ними менший за цю кількість хвилин.",
+    "laneReuseUnit": "хв",
+    "autoRefresh": "Автооновлення",
+    "autoRefreshLabel": "Інтервал автооновлення (секунди)",
+    "autoRefreshHint": "Як часто часова шкала повторно отримує список запитів із сервера.",
+    "autoRefreshUnit": "с",
+    "zoomOut": "Зменшити масштаб",
+    "zoomIn": "Збільшити масштаб"
   },
   "metadata": {
     "compressionTitle": "Стиснення",
