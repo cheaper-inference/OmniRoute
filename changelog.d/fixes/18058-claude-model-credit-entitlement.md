@@ -1,0 +1,1 @@
+- **fix(claude):** Treat Claude's `Usage credits are required for this model` 429 as a long-window quota failure instead of retrying every five seconds. Lock only the affected model when no fresh quota snapshot exists, preserve sibling-model availability and honor verified account-wide quota blockers (#18058).
