@@ -44,12 +44,14 @@
 //     --hermetic    scrub OMNIROUTE_API_KEY/OMNIROUTE_URL from gate env so live
 //                   tests self-skip exactly like CI (dev machines otherwise run
 //                   them against localhost and produce false-positive reds)
+//     --suites-from <dir>  consume hosted receipts instead of local suite execution;
+//                   requires --suites-workflow-sha <sha> from the producing workflow.
 //
 // Per-gate output is saved to _artifacts/release-green/<gate>.log (gitignored) —
 // diagnose a red from the file instead of re-running the gate.
 
 import { execFileSync } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { availableParallelism } from "node:os";
 import { dirname, join } from "node:path";
@@ -532,11 +534,44 @@ export function hostedSuiteNames(unitShards, integrationShards) {
   return [...range(unitShards, "unit"), ...range(integrationShards, "integration"), "vitest"];
 }
 
+/** Exact execution identity shared by hosted writers and their consuming observer. */
+export function hostedSuiteIdentity(cwd, workflowSha) {
+  try {
+    const identity = {
+      schemaVersion: 1,
+      candidateSha: execFileSync("git", ["rev-parse", "HEAD"], { cwd, encoding: "utf8" }).trim(),
+      workflowSha,
+      runId: process.env.GITHUB_RUN_ID,
+      runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+      nodeVersion: process.version,
+      lockfileSha256: createHash("sha256")
+        .update(readFileSync(join(cwd, "package-lock.json")))
+        .digest("hex"),
+    };
+    if (
+      ![identity.candidateSha, identity.workflowSha].every((value) =>
+        /^[a-f0-9]{40}$/.test(value ?? "")
+      ) ||
+      ![identity.runId, identity.runAttempt].every((value) => /^[1-9][0-9]*$/.test(value ?? ""))
+    )
+      return null;
+    return identity;
+  } catch {
+    return null;
+  }
+}
+
 /** Parses one hosted suite result file; anything malformed counts as "no result". */
-export function parseHostedSuiteResult(text) {
+export function parseHostedSuiteResult(text, expected) {
   try {
     const r = JSON.parse(text);
-    if (typeof r?.name !== "string" || !Number.isInteger(r?.code)) return null;
+    if (typeof r?.name !== "string" || !Number.isInteger(r?.code) || r.code < 0 || r.code > 255)
+      return null;
+    if (
+      expected === null ||
+      (expected && Object.entries(expected).some(([key, value]) => r[key] !== value))
+    )
+      return null;
     return { name: r.name, code: r.code, detail: typeof r.detail === "string" ? r.detail : "" };
   } catch {
     return null;
@@ -574,6 +609,17 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
   };
   const names = hostedSuiteNames(unitShards, integrationShards);
   return [
+    ...(results.some((r) => !r || !names.includes(r.name)) || byName.size !== results.length
+      ? [
+          {
+            id: "hosted-suites",
+            label: "Hosted suite receipt integrity",
+            kind: "hard",
+            ok: false,
+            detail: "invalid, unexpected or duplicate hosted suite receipt",
+          },
+        ]
+      : []),
     lane(
       "unit",
       `Unit tests (ci.yml's ${unitShards} shards on hosted runners)`,
@@ -732,6 +778,10 @@ async function main() {
   // workflow's `suites` matrix); read their results instead of running them on this slot.
   const suitesFromIndex = process.argv.indexOf("--suites-from");
   const SUITES_FROM = suitesFromIndex >= 0 ? process.argv[suitesFromIndex + 1] : null;
+  // Explicit workflow identity accompanies hosted receipts; it is not application .env config.
+  const suitesWorkflowIndex = process.argv.indexOf("--suites-workflow-sha");
+  const SUITES_WORKFLOW_SHA =
+    suitesWorkflowIndex >= 0 ? process.argv[suitesWorkflowIndex + 1] : null;
 
   const results = [];
   const record = (r) => {
@@ -969,9 +1019,39 @@ async function main() {
         } catch {
           files = [];
         }
-        const results = files.map((f) =>
-          parseHostedSuiteResult(readFileSync(join(SUITES_FROM, f), "utf8"))
-        );
+        const expected = hostedSuiteIdentity(ROOT, SUITES_WORKFLOW_SHA);
+        const names = hostedSuiteNames(unitShards, integrationShards);
+        const results = files.map((f) => {
+          try {
+            const name = f.slice(0, -5);
+            if (!names.includes(name)) return null;
+            const log = readFileSync(join(SUITES_FROM, `${name}.log`));
+            if (log.length === 0) return null;
+            const isUnit = name.startsWith("unit-");
+            const script =
+              name === "vitest"
+                ? "test:vitest+test:vitest:ui"
+                : isUnit
+                  ? "test:unit:ci:shard"
+                  : "test:integration:ci";
+            const shard =
+              name === "vitest"
+                ? ""
+                : `${name.split("-")[1]}/${isUnit ? unitShards : integrationShards}`;
+            return parseHostedSuiteResult(
+              readFileSync(join(SUITES_FROM, f), "utf8"),
+              expected && {
+                ...expected,
+                name,
+                script,
+                shard,
+                logSha256: createHash("sha256").update(log).digest("hex"),
+              }
+            );
+          } catch {
+            return null;
+          }
+        });
         for (const r of foldHostedSuiteResults(results, { unitShards, integrationShards })) {
           announce(r.label);
           record(r);

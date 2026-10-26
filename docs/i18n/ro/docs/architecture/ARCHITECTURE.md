@@ -11,73 +11,73 @@ _Ultima actualizare: 2026-06-28_
 ## Rezumat executiv
 
 OmniRoute este un gateway local de rutare AI și un panou de control construit pe Next.js.
-Acesta oferă un singur endpoint compatibil cu OpenAI (`/v1/*`) și direcționează traficul către mai mulți furnizori din amonte, cu traducere, mecanisme de rezervă, reîmprospătarea tokenurilor și monitorizarea utilizării.
+Acesta oferă un singur endpoint compatibil cu OpenAI (`/v1/*`) și rutează traficul către mai mulți furnizori din amonte, cu traducere, mecanisme de rezervă, reîmprospătarea tokenurilor și monitorizarea utilizării.
 
 Capabilități principale:
 
-- Interfață API compatibilă cu OpenAI pentru CLI/instrumente (375 de furnizori, 156 de module de execuție)
+- Suprafață API compatibilă cu OpenAI pentru CLI/instrumente (375 de furnizori, 156 de module de execuție)
 - Traducerea cererilor/răspunsurilor între formatele furnizorilor
 - Mecanism de rezervă pentru combinații de modele (secvență cu mai multe modele)
-- Pași structurați pentru combinații (`provider + model + connection`), cu ordonare la execuție prin `compositeTiers`
+- Pași structurați pentru combinații (`provider + model + connection`), cu ordonare la rulare prin `compositeTiers`
 - Mecanism de rezervă la nivel de cont (mai multe conturi per furnizor)
-- Verificare preliminară a cotei și selectarea contului prin P2C în funcție de cotă, în fluxul principal de chat
-- Gestionarea conexiunilor la furnizori prin OAuth + chei API (27 de module pentru furnizori OAuth)
-- Generarea de încorporări prin `/v1/embeddings` (18 furnizori)
+- Verificare preliminară a cotei și selecție a contului P2C în funcție de cotă, pe fluxul principal de chat
+- Gestionarea conexiunilor la furnizori prin OAuth și chei API (27 de module de furnizori OAuth)
+- Generarea de embeddinguri prin `/v1/embeddings` (18 furnizori)
 - Generarea de imagini prin `/v1/images/generations` (peste 10 furnizori, peste 20 de modele)
 - Transcriere audio prin `/v1/audio/transcriptions` (18 furnizori)
-- Conversie text-în-vorbire prin `/v1/audio/speech` (24 de furnizori integrați)
-- Generarea de videoclipuri prin `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Generarea de muzică prin `/v1/music/generations` (ComfyUI)
-- Căutare pe web prin `/v1/search` (20 de furnizori)
+- Conversie text-vorbire prin `/v1/audio/speech` (24 de furnizori integrați)
+- Generare video prin `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generare muzicală prin `/v1/music/generations` (ComfyUI)
+- Căutare web prin `/v1/search` (20 de furnizori)
 - Moderare prin `/v1/moderations`
-- Reordonarea rezultatelor prin `/v1/rerank`
-- Parsarea etichetelor de raționament (``) pentru modelele de raționament
+- Reranking prin `/v1/rerank`
+- Parsarea etichetelor de raționament (`<think>...</think>`) pentru modelele de raționament
 - Igienizarea răspunsurilor pentru compatibilitate strictă cu SDK-ul OpenAI
 - Normalizarea rolurilor (developer→system, system→user) pentru compatibilitate între furnizori
 - Conversia ieșirilor structurate (json_schema → Gemini responseSchema)
 - Persistență locală pentru furnizori, chei, aliasuri, combinații, setări și prețuri (122 de module DB)
 - Monitorizarea utilizării/costurilor și jurnalizarea cererilor
 - Sincronizare opțională în cloud pentru sincronizarea stării între mai multe dispozitive
-- Listă de permisiuni/listă de blocare pentru controlul accesului la API pe baza adreselor IP
+- Listă de permisiuni/blocări IP pentru controlul accesului la API
 - Gestionarea bugetului de raționament (transmitere directă/automat/personalizat/adaptiv)
-- Injectarea globală a promptului de sistem
+- Injectarea unui prompt de sistem global
 - Urmărirea sesiunilor și amprentare
 - Limitare îmbunătățită a ratei per cont, cu profiluri specifice furnizorilor
-- Model de tip întrerupător de circuit pentru reziliența furnizorilor
-- Protecție împotriva efectului de avalanșă cu blocare prin mutex
-- Cache de deduplicare a cererilor bazat pe semnătură
+- Model de întrerupător de circuit pentru reziliența furnizorilor
+- Protecție împotriva efectului de turmă prin blocare cu mutex
+- Cache pentru deduplicarea cererilor pe baza semnăturilor
 - Strat de domeniu: reguli de cost, politică de rezervă, politică de blocare
-- Context Relay: rezumate pentru transferul sesiunilor, asigurând continuitatea la rotația conturilor
+- Context Relay: rezumate pentru transferul sesiunilor, menținând continuitatea la rotația conturilor
 - Persistența stării domeniului (cache SQLite cu scriere imediată pentru mecanisme de rezervă, bugete, blocări și întrerupătoare de circuit)
-- Motor de politici pentru evaluarea centralizată a cererilor (blocare → buget → rezervă)
-- Telemetria cererilor cu agregarea latențelor p50/p95/p99
-- Telemetria țintelor combinațiilor și istoricul stării acestora prin `combo_execution_key` / `combo_step_id`
-- ID de corelare (X-Request-Id) pentru trasabilitate de la un capăt la altul
-- Jurnalizare de audit pentru conformitate, cu posibilitate de dezactivare per cheie API
+- Motor de politici pentru evaluarea centralizată a cererilor (blocare → buget → mecanism de rezervă)
+- Telemetria cererilor, cu agregarea latenței p50/p95/p99
+- Telemetria țintelor combinațiilor și istoricul stării țintelor combinațiilor prin `combo_execution_key` / `combo_step_id`
+- ID de corelare (X-Request-Id) pentru urmărire de la un capăt la altul
+- Jurnalizare de audit pentru conformitate, cu posibilitatea de dezactivare per cheie API
 - Cadru de evaluare pentru asigurarea calității LLM
-- Panou de monitorizare a stării cu statutul în timp real al întrerupătoarelor de circuit ale furnizorilor
-- Server MCP (110 instrumente) cu 3 metode de transport (stdio/SSE/Streamable HTTP)
-- Server A2A (JSON-RPC 2.0 + SSE) cu abilități și ciclu de viață al sarcinilor
-- Sistem de memorie (extragere, injectare, recuperare, rezumare)
+- Panou de control al stării, cu starea în timp real a întrerupătoarelor de circuit ale furnizorilor
+- Server MCP (110 instrumente), cu 3 metode de transport (stdio/SSE/HTTP cu streaming)
+- Server A2A (JSON-RPC 2.0 + SSE), cu abilități și ciclul de viață al sarcinilor
+- Sistem de memorie (extragere, injectare, regăsire, rezumare)
 - Sistem de abilități (registru, executor, sandbox, abilități integrate)
-- Proxy MITM cu gestionarea certificatelor și a DNS-ului
+- Proxy MITM cu gestionarea certificatelor și DNS
 - Middleware de protecție împotriva injectării de prompturi
-- Flux de compresie a prompturilor cu Caveman, RTK, fluxuri suprapuse, combinații de compresie, pachete lingvistice și analize
+- Flux de comprimare a prompturilor cu Caveman, RTK, fluxuri stivuite, combinații de comprimare, pachete lingvistice și analiză
 - Registru ACP (Agent Communication Protocol)
 - Furnizori OAuth modulari (22 de module individuale în `src/lib/oauth/providers/`)
 - Scripturi de dezinstalare/dezinstalare completă
 - Acțiune de reparare a mediului OAuth
 - Punte WebSocket pentru clienți WS compatibili cu OpenAI (`/v1/ws`)
 - Gestionarea tokenurilor de sincronizare (emitere/revocare, descărcarea pachetului de configurare versionat prin ETag)
-- Presetare de furnizor de primă clasă pentru GLM Thinking (`glmt`)
+- Presetare de furnizor de prim rang pentru GLM Thinking (`glmt`)
 - Numărare hibridă a tokenurilor (`/messages/count_tokens` la nivelul furnizorului, cu estimare de rezervă)
 - Inițializarea automată a aliasurilor de modele (peste 30 de normalizări între dialectele proxy la pornire)
-- Preluare externă sigură, cu protecție SSRF, blocarea URL-urilor private și reîncercări configurabile
-- Reîncercări de chat care țin cont de perioada de așteptare, cu `requestRetry` și `maxRetryIntervalSec` configurabile
-- Validarea mediului de execuție cu Zod la pornire
-- Audit de conformitate v2 cu paginare, evenimente CRUD pentru furnizori și jurnalizarea validărilor blocate de SSRF
+- Preluare sigură de la destinații externe, cu protecție SSRF, blocarea URL-urilor private și reîncercări configurabile
+- Reîncercări pentru chat care țin cont de perioada de așteptare, cu `requestRetry` și `maxRetryIntervalSec` configurabile
+- Validarea mediului de rulare cu Zod la pornire
+- Audit de conformitate v2, cu paginare, evenimente CRUD pentru furnizori și jurnalizarea validărilor blocate de SSRF
 
-Model principal de execuție:
+Model principal de rulare:
 
 - Rutele aplicației Next.js din `src/app/api/*` implementează atât API-urile panoului de control, cât și API-urile de compatibilitate
 - Un nucleu comun SSE/de rutare din `src/sse/*` + `open-sse/*` gestionează execuția furnizorilor, traducerea, streamingul, mecanismele de rezervă și utilizarea
@@ -114,43 +114,51 @@ celelalte sunt incluse ca linkuri în ghidurile specifice domeniilor lor.
 - SLA-ul/planul de control al furnizorului din afara procesului local
 - Binarele CLI externe propriu-zise (Claude CLI, Codex CLI etc.)
 
-## Suprafețele tabloului de bord (actuale)
+## Suprafața panoului de control (actuală)
 
 Pagini principale din `src/app/(dashboard)/dashboard/`:
 
 - `/dashboard` — pornire rapidă + prezentare generală a furnizorilor
-- `/dashboard/endpoint` — proxy pentru endpointuri + file pentru MCP + A2A + endpointuri API
+- `/dashboard/endpoint` — proxy pentru endpoint-uri + file MCP + A2A + API
 - `/dashboard/providers` — conexiuni și credențiale pentru furnizori
-- `/dashboard/combos` — strategii de combinații, șabloane, constructor bazat pe pași, reguli de rutare a modelelor, ordonare manuală persistentă
-- `/dashboard/auto-combo` — Motorul Auto Combo: ponderi de evaluare, pachete de moduri, presetări pentru fabrica virtuală, telemetrie
-- `/dashboard/costs` — agregarea costurilor și vizibilitatea prețurilor
+- `/dashboard/combos` — strategii de combinare, șabloane, constructor bazat pe pași, reguli de rutare a modelelor, ordonare manuală persistentă
+- `/dashboard/auto-combo` — motorul Auto Combo: ponderi de punctare, pachete de moduri, presetări pentru fabrici virtuale, telemetrie
+- `/dashboard/costs` — agregarea costurilor și vizibilitatea tarifelor
 - `/dashboard/analytics` — analiza utilizării, evaluări, starea țintelor combinațiilor
-- `/dashboard/limits` — controale pentru cote/limite de rată
-- `/dashboard/cli-tools` — integrarea CLI, detectarea mediului de execuție, generarea configurației
+- `/dashboard/limits` — controlul cotelor și al limitelor de rată
+- `/dashboard/cli-tools` — integrare CLI, detectarea mediului de execuție, generarea configurației
 - `/dashboard/agents` — agenți ACP detectați + înregistrarea agenților personalizați
-- `/dashboard/cloud-agents` — sarcini ale agenților găzduiți în cloud (Codex Cloud, Devin, Jules) și ciclul de viață al sarcinilor
-- `/dashboard/skills` — registrul abilităților A2A, execuția în sandbox, catalogul de abilități integrate
-- `/dashboard/memory` — inspectarea și recuperarea memoriei conversaționale persistente
-- `/dashboard/webhooks` — abonamente webhook pentru ieșire, rotația secretelor, statistici privind reîncercările
-- `/dashboard/batch` — trimiterea sarcinilor în lot și progresul acestora
-- `/dashboard/cache` — statistici pentru memoria cache de tip read-through și pentru raționament, controale de evacuare
-- `/dashboard/playground` — spațiu de testare interactiv pentru conversații cu orice combinație/model configurat
-- `/dashboard/changelog` — vizualizator integrat al istoricului modificărilor (afișează `CHANGELOG.md`)
+- `/dashboard/cloud-agents` — sarcini pentru agenți găzduiți în cloud (Codex Cloud, Devin, Jules) și ciclul de viață al sarcinilor
+- `/dashboard/skills` — registru de abilități A2A, execuție în sandbox, catalog de abilități încorporate
+- `/dashboard/memory` — inspectarea și regăsirea memoriei conversaționale persistente
+- `/dashboard/webhooks` — abonamente webhook de ieșire, rotația secretelor, statistici privind reîncercările
+- `/dashboard/batch` — trimiterea lucrărilor în lot și progresul acestora
+- `/dashboard/cache` — statistici pentru cache-ul cu citire transparentă și cache-ul de raționament, controale de evacuare
+- `/dashboard/playground` — spațiu interactiv de chat pentru orice combinație/model configurat
+- `/dashboard/changelog` — vizualizator al jurnalului de modificări în aplicație (randează `CHANGELOG.md`)
 - `/dashboard/system` — diagnosticarea mediului de execuție, informații despre versiune, interfață pentru validarea mediului
 - `/dashboard/onboarding` — expert de configurare la prima rulare pentru instalările noi
-- `/dashboard/media` — spațiu de testare pentru imagini/video/muzică
+- `/dashboard/media` — spațiu de testare pentru imagini/videoclipuri/muzică
 - `/dashboard/search-tools` — testarea furnizorilor de căutare și istoricul căutărilor
-- `/dashboard/health` — disponibilitate, întrerupătoare de circuit, limite de rată, sesiuni cu cote monitorizate
-- `/dashboard/logs` — jurnale de cereri/proxy/audit/consolă
+- `/dashboard/health` — disponibilitate, întrerupătoare de circuit, limite de rată, sesiuni monitorizate în funcție de cotă
+- `/dashboard/logs` — jurnale pentru solicitări/proxy/audit/consolă
 - `/dashboard/settings` — file pentru setările sistemului (generale, rutare, valori implicite pentru combinații etc.)
 - `/dashboard/context/caveman` — reguli de compresie Caveman, pachete lingvistice, previzualizare și mod de ieșire
-- `/dashboard/context/rtk` — filtre RTK pentru rezultatele comenzilor, previzualizare și setări de siguranță pentru mediul de execuție
+- `/dashboard/context/rtk` — filtre RTK pentru ieșirea comenzilor, previzualizare și setări de siguranță pentru mediul de execuție
 - `/dashboard/context/combos` — fluxuri de compresie denumite, atribuite combinațiilor de rutare
-- `/dashboard/translator` — inspectarea translatorului și previzualizarea conversiei formatului cererilor
+- `/dashboard/translator` — inspectarea traducătorului și previzualizarea conversiei formatului solicitărilor
 - `/dashboard/audit` — browser pentru jurnalul de audit privind conformitatea, cu paginare și metadate structurate
-- `/dashboard/usage` — browser pentru utilizarea per cerere, asociat cu `usage_history`
-- `/dashboard/compression` — analiza compresiei, statistici și atribuirea fluxurilor de procesare
+- `/dashboard/usage` — browser de utilizare pentru fiecare solicitare, asociat cu `usage_history`
+- `/dashboard/compression` — analiza compresiei, statistici și atribuirea fluxurilor
 - `/dashboard/api-manager` — ciclul de viață al cheilor API și permisiunile modelelor
+
+Stratul UI: fiecare pagină este randată într-un singur shell — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset` din kit, precum și
+`Sidebar.tsx` și `Header.tsx` din OmniRoute). Paginile își importă
+componentele de bază din `@/shared/components` (adaptoare peste Keak CI UI Kit inclus în
+`packages/ui-kit`) sau din subcăile componentelor kitului (`@omniroute/ui-kit/table`, `…/page-header`), iar
+pictogramele prin `<Icon>` (`ICON_MAP` → Lucide). Tema (`system` în mod implicit, deschisă/închisă) și tokenurile provin
+din kit prin puntea din `src/app/globals.css`. Detalii: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Context de sistem la nivel înalt
 
