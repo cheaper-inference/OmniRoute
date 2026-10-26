@@ -9,7 +9,7 @@
  * OUTLIVES the restart), plus a model lockout, a provider circuit-breaker failure and
  * a provider cooldown.
  *
- * The fix (already proven for zcode.ts / minimax-code.ts): while the instance is
+ * The fix (one shared helper, open-sse/utils/drainStatus.ts): while the instance is
  * draining, a transport failure that OUR OWN shutdown caused is answered 499
  * (client_disconnected) instead of 502. 499 is in neither the model-lockout
  * error-code list nor the provider-breaker failure statuses (408/500/502/503/504).
@@ -20,7 +20,8 @@
  *   - open-sse/executors/devin-cli-agentic.ts (local Devin CLI child process)
  *
  * The drain flag is driven directly through `globalThis.__omnirouteShutdown` — the
- * state `isDraining()` reads — instead of sending real signals.
+ * state `src/lib/gracefulShutdown.ts` owns and `drainAwareFailureStatus()` reads —
+ * instead of sending real signals.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -48,7 +49,7 @@ const { DevinCliAgenticExecutor } = await import("../../open-sse/executors/devin
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 const { normalizeStreamFailurePayload } = await import("../../open-sse/utils/streamErrorFormat.ts");
 
-/** The exact shape `isDraining()` reads (src/lib/gracefulShutdown.ts). */
+/** The exact shape gracefulShutdown.ts writes and open-sse/utils/drainStatus.ts reads. */
 function setDraining(shuttingDown: boolean) {
   globalThis.__omnirouteShutdown = { init: false, shuttingDown, activeRequests: 0 };
 }

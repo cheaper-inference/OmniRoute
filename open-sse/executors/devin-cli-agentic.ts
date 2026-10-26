@@ -6,7 +6,7 @@ import { randomUUID } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { DEVIN_MODEL_CATALOG } from "../config/providers/registry/devin/catalog.ts";
 import { buildErrorBody, errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
-import { isDraining } from "../../src/lib/gracefulShutdown.ts";
+import { drainAwareFailureStatus } from "../utils/drainStatus.ts";
 import {
   buildClaudeSseFrames,
   buildClaudeTextResponse,
@@ -591,7 +591,7 @@ export class DevinCliAgenticExecutor extends BaseExecutor {
     } catch (error) {
       const bridge = error instanceof DevinAgenticBridgeError ? error : null;
       const status = bridge?.status || 500;
-      if (status >= 500 && isDraining()) {
+      if (drainAwareFailureStatus(status) === 499) {
         // The Devin CLI is a LOCAL child process: our own shutdown kills it while
         // requests are still in flight, so the spawn/ACP failure that follows is
         // evidence about OUR shutdown, not about the provider's health. The account
@@ -600,10 +600,8 @@ export class DevinCliAgenticExecutor extends BaseExecutor {
         // OUTLIVES the restart, so our own teardown must not be recorded as provider
         // ill health. While the instance is draining, answer 499
         // (client_disconnected) with the canonical body of the repo's errorResponse
-        // helper, exactly like open-sse/executors/zcode.ts does: 499 is in neither the
-        // model-lockout error-code list nor the provider-breaker failure statuses
-        // (408/500/502/503/504). A 4xx of the request keeps its own status, and a
-        // genuine upstream failure outside a drain keeps 502.
+        // helper (see open-sse/utils/drainStatus.ts). A 4xx of the request keeps its
+        // own status, and a genuine failure outside a drain keeps its 5xx.
         return {
           response: errorResponse(
             499,

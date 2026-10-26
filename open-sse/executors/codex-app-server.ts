@@ -2,7 +2,7 @@ import { bridgeToResponsesSSE, buildResponseJSON } from "../vendor/codex-chatgpt
 import { AsyncEventQueue } from "../vendor/codex-chatgpt-web/event-queue.ts";
 import type { AdapterEvent } from "../vendor/codex-chatgpt-web/types.ts";
 import { errorResponse as canonicalErrorResponse, sanitizeErrorMessage } from "../utils/error.ts";
-import { isDraining } from "../../src/lib/gracefulShutdown.ts";
+import { drainAwareFailureStatus } from "../utils/drainStatus.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { BaseExecutor, type ExecuteInput, type ExecutorExecuteResult } from "./base.ts";
 import { CodexAppServerClient, type CodexAppServerClientOptions } from "./codex/appServerClient.ts";
@@ -400,7 +400,7 @@ export class CodexAppServerExecutor extends BaseExecutor {
       } catch (err) {
         if (!terminated) {
           const message = sanitizeErrorMessage(err instanceof Error ? err.message : err);
-          const status = appServerFailureStatus(502);
+          const status = drainAwareFailureStatus(502);
           events.push({
             type: "error",
             message,
@@ -427,8 +427,8 @@ export class CodexAppServerExecutor extends BaseExecutor {
         // Our own shutdown tore the app-server down under a request that was still
         // in flight: the turn was never really served by the provider. Answer 499
         // (client_disconnected) with the canonical body of the repo's errorResponse
-        // helper, exactly like open-sse/executors/zcode.ts does, so the runtime does
-        // not read our own teardown as provider ill health.
+        // helper, so the runtime does not read our own teardown as provider ill
+        // health (see open-sse/utils/drainStatus.ts).
         return {
           response: canonicalErrorResponse(499, drainFailure.message),
           url: config.url,
@@ -460,27 +460,6 @@ export class CodexAppServerExecutor extends BaseExecutor {
       url: config.url,
     };
   }
-}
-
-/**
- * The status a failed Codex app-server turn is answered with.
- *
- * The app-server is a LOCAL child process: a graceful shutdown disposes it while
- * requests are still in flight, so the upstream model is never really asked and the
- * failure is self-inflicted. It is evidence about OUR shutdown, not about the
- * provider's health, and the account state the runtime would write from it (a
- * provider connection marked unavailable, a model lockout, a breaker failure, a
- * provider cooldown) OUTLIVES the restart. While the instance is draining, answer
- * 499 (client_disconnected) — like open-sse/executors/zcode.ts does — because 499 is
- * in neither the model-lockout error-code list nor the provider-breaker failure
- * statuses (408/500/502/503/504). A 4xx of the request keeps its own status, and a
- * genuine upstream failure outside a drain keeps 502.
- *
- * The drain flag is read live on every call (never latched): a request that fails
- * before the shutdown starts must still be answered with its own status.
- */
-function appServerFailureStatus(status: number): number {
-  return status >= 500 && isDraining() ? 499 : status;
 }
 
 function errorResponse(status: number, message: string, code: string): Response {
