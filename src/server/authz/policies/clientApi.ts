@@ -65,20 +65,26 @@ async function recordClientApiAuthTouch(
 ): Promise<void> {
   const method = ctx.request.method.toUpperCase();
   if (method !== "GET" && method !== "HEAD") return;
-  const { getApiKeyMetadata } = await import("../../../lib/db/apiKeys");
-  const metadata = await getApiKeyMetadata(credential);
-  if (!metadata || metadata.id === "env-key" || metadata.noLog === true) return;
-  recordApiKeyAuthTouch({
-    apiKeyId: metadata.id,
-    method,
-    normalizedPath: redactCredentials(ctx.classification.normalizedPath, credentials) || "/",
-    ipAddress: getAuthTouchClientIp(ctx),
-    userAgent: redactCredentials(ctx.request.headers.get("user-agent"), [
-      ...credentials,
-      metadata.keyHash,
-    ]),
-    requestId: ctx.requestId,
-  });
+  // Best effort end to end: the key already validated, so a failure in the metadata
+  // lookup, IP resolution or redaction must never change the auth outcome.
+  try {
+    const { getApiKeyMetadata } = await import("../../../lib/db/apiKeys");
+    const metadata = await getApiKeyMetadata(credential);
+    if (!metadata || metadata.id === "env-key" || metadata.noLog === true) return;
+    recordApiKeyAuthTouch({
+      apiKeyId: metadata.id,
+      method,
+      normalizedPath: redactCredentials(ctx.classification.normalizedPath, credentials) || "/",
+      ipAddress: getAuthTouchClientIp(ctx),
+      userAgent: redactCredentials(ctx.request.headers.get("user-agent"), [
+        ...credentials,
+        metadata.keyHash,
+      ]),
+      requestId: ctx.requestId,
+    });
+  } catch {
+    // Observability only; never block or reject an authenticated request.
+  }
 }
 
 export const clientApiPolicy: RoutePolicy = {

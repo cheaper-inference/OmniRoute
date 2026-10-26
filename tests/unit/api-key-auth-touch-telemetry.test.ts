@@ -234,6 +234,26 @@ test("failed auth, inference POSTs, noLog keys, and environment keys produce no 
   assert.equal(authTouchRows().length, 0);
 });
 
+test("a failure inside the touch helpers never changes the auth outcome of a valid key", async () => {
+  const created = await apiKeysDb.createApiKey("audit-failure", "machine-audit-failure");
+  // Headers whose user-agent read throws: the touch path reads it after validation,
+  // the credential extraction does not, so only the audit step can fail here.
+  class ThrowingUserAgentHeaders extends Headers {
+    get(name: string): string | null {
+      if (name.toLowerCase() === "user-agent") throw new Error("boom: user-agent read");
+      return super.get(name);
+    }
+  }
+  const policy = await loadPolicy();
+  const outcome = await policy.evaluate(
+    context({
+      headers: new ThrowingUserAgentHeaders({ authorization: `Bearer ${created.key}` }),
+    })
+  );
+  assert.equal(outcome.allow, true, "a validated key stays allowed when auditing throws");
+  assert.equal(authTouchRows().length, 0);
+});
+
 test("identical touches coalesce and the telemetry action is hard-capped", async () => {
   const created = await apiKeysDb.createApiKey("bounded", "machine-bounded");
   const base = Date.parse("2026-09-21T12:00:00.000Z");
