@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "שימוש ב{count, plural, one {# קבוצת} other {# קבוצות}}",
     "batchFilePreview": "תצוגה מקדימה",
     "batchFilePreviewTruncated": "מציג {shown} שורות ראשונות ({total} שורות סך הכל)",
-    "batchFileDownloadFull": "הורד קובץ מלא"
+    "batchFileDownloadFull": "הורד קובץ מלא",
+    "dialogTitleFallback": "תיבת דו־שיח",
+    "pagination": "עימוד",
+    "clearFilters": "ניקוי מסננים",
+    "tokensPageTitle": "אסימונים",
+    "tokensPageDescription": "שליחת אסימונים בין מפתחות API, שיתוף קודי הזמנה וחיבור שרתי קהילה.",
+    "tokensServerUrlLabel": "כתובת URL של השרת"
   },
   "disabled": "מושבת",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ניתוב בקשות שחרגו מהתקציב לספק/מודל גיבוי חינמי לשעת חירום.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 או @channelname",
       "chatIdHint": "המזהה המספרי הייחודי או שם המשתמש הציבורי של הצ'אט/ערוץ.",
       "tutorial": "כיצד להגדיר Webhook של Telegram:"
-    }
+    },
+    "copy": "העתקה",
+    "copied": "הועתק!",
+    "expandDetails": "הצגת פרטים",
+    "collapseDetails": "הסתרת פרטים"
   },
   "compliance": {
     "auditTitle": "ביקורת",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "שיחות (24ש')",
     "mcpMetricSuccessRate": "שיעור הצלחה",
     "mcpMetricAvgDuration": "משך ממוצע",
-    "mcpMetricTopTool": "כלי מוביל"
+    "mcpMetricTopTool": "כלי מוביל",
+    "dismissError": "סגירת השגיאה"
   },
   "themesPage": {
     "title": "ערכות נושא",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "כללים מתקדמים למטען הנתונים, מגבלות בקשות והגדרות API של פרוקסי",
     "mitmProxyDescription": "הגדרת פרוקסי MITM לבדיקת תעבורה ולניפוי שגיאות",
     "oneProxyDescription": "הגדרת 1Proxy לשרשור פרוקסי מתקדם",
-    "omniSkillsDescription": "התקן ונהל מיומנויות ארגז חול להרצה אוטומטית של הנחיות וכלים"
+    "omniSkillsDescription": "התקן ונהל מיומנויות ארגז חול להרצה אוטומטית של הנחיות וכלים",
+    "openMenu": "פתיחת התפריט",
+    "products": "מוצרי Keak"
   },
   "cloudSyncStatus": {
     "synced": "מסונכרן",
@@ -2495,7 +2508,12 @@
     "onlySelectedConnections": "רק חיבורים שנבחרו",
     "selectAtLeastOneConnection": "יש לבחור חיבור אחד לפחות או לבחור באפשרות כל החיבורים.",
     "allConnectionsDesc": "מפתח זה יכול להשתמש בכל חיבור פעיל.",
-    "restrictedToConnections": "מוגבל ל-{count, plural, one {חיבור אחד} other {# חיבורים}}."
+    "restrictedToConnections": "מוגבל ל-{count, plural, one {חיבור אחד} other {# חיבורים}}.",
+    "preferredConnections": "חיבורים מועדפים",
+    "preferredConnectionsDesc": "סדר עדיפויות לכל מפתח. אם חיבור מועדף אינו זמין, הניתוב עובר לחיבור הכשיר הבא.",
+    "preferredConnectionsNone": "לא הוגדרה העדפה — נעשה שימוש באסטרטגיית הניתוב המוגדרת כברירת מחדל.",
+    "preferredConnectionsClear": "נקה",
+    "removeSelection": "הסרת {name}"
   },
   "auditLog": {
     "title": "יומן ביקורת",
@@ -2607,7 +2625,9 @@
     "imageToTextBridgeCta": "הגדר את גשר התמונה→טקסט בהגדרות גשר המודאליות",
     "sttBridgeCta": "הגדר את גשר דיבור→טקסט בהגדרות גשר מודליות",
     "existingConnection": "חיבור קיים",
-    "openrouterSttDescription": "מודלים של OpenRouter להמרת דיבור לטקסט משתמשים בחיבור OpenRouter שהגדרת. אין צורך באישור נפרד."
+    "openrouterSttDescription": "מודלים של OpenRouter להמרת דיבור לטקסט משתמשים בחיבור OpenRouter שהגדרת. אין צורך באישור נפרד.",
+    "modalityTabsAria": "סוג מדיה",
+    "serviceKindsAria": "סוג שירות"
   },
   "search": {
     "searchQuery": "שאילתת חיפוש",
@@ -3278,7 +3298,8 @@
     "cliproxyapiUnknown": "לא ידוע",
     "cliproxyapiUpdate": "עדכון",
     "cliproxyapiUpdateAvailable": "עדכון זמין: v{current} → v{latest}",
-    "cliproxyapiVersion": "גרסה"
+    "cliproxyapiVersion": "גרסה",
+    "removeMapping": "הסרת מיפוי"
   },
   "modelCatalog": {
     "title": "מודלים ושילובים",
@@ -3936,6 +3957,7 @@
     "builderComboRefStep": "הוספת הפניה לשילוב",
     "builderPinnedAccount": "חשבון מוצמד",
     "builderLegacyEntry": "רשומה מדור קודם",
+    "builderStaleModel": "לא נמצא בקטלוג החי",
     "reviewName": "שם",
     "reviewStrategy": "אסטרטגיה",
     "reviewSteps": "שלבים",
@@ -4014,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "פעולה זו תצלם את הספקים/מודלים המחוברים כעת התואמים לתבנית הזו לקומבו ניתן לעריכה.",
     "duplicateAutoComboFailedPrefix": "כשל בהעתיק קומבו אוטומטי:",
     "duplicateAutoComboUnknownError": "שגיאה לא ידועה",
-    "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}"
+    "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}",
+    "weightPercent": "משקל (%)",
+    "clearSearch": "ניקוי החיפוש",
+    "responseValidationRemoveCheck": "הסרת בדיקה",
+    "responseValidationPath": "נתיב JSON",
+    "responseValidationCondition": "תנאי",
+    "responseValidationValue": "ערך צפוי"
   },
   "costs": {
     "title": "עלויות",
@@ -5288,7 +5316,8 @@
         "skipped": "כבר מוגדר",
         "failed": "נכשל"
       }
-    }
+    },
+    "stepProgress": "התקדמות ההגדרה"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ספק זה מוחרג מ-auto כברירת מחדל",
@@ -7255,7 +7284,7 @@
       "nextSwitchNow": "עכשיו",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -8951,7 +8980,8 @@
       "statsTitle": "זיהויים מאז ההפעלה מחדש",
       "statsEmpty": "אין זיהויים עדיין.",
       "statsRequest": "בקשות"
-    }
+    },
+    "modelOverrideKey": "מפתח דריסה"
   },
   "contextRtk": {
     "title": "מנוע RTK",
@@ -9035,7 +9065,8 @@
     "tomlTestPassed": "עבר",
     "tomlTestFailed": "נכשל",
     "tomlImportError": "לא ניתן היה לעבד את קובץ ה-RTK TOML.",
-    "tomlFileReadError": "לא ניתן היה לקרוא את קובץ ה-TOML שנבחר."
+    "tomlFileReadError": "לא ניתן היה לקרוא את קובץ ה-TOML שנבחר.",
+    "viewMode": "מצב תצוגה"
   },
   "compressionEngineConfig": {
     "loading": "טוען…",
@@ -9257,7 +9288,8 @@
     "languagePacksList": "חבילות שפה: {packs}",
     "dragToReorder": "גרור כדי לשנות את סדר השלבים",
     "engine": "מנוע",
-    "intensity": "עוצמה"
+    "intensity": "עוצמה",
+    "compressionOverride": "דריסת דחיסה"
   },
   "compressionStudio": {
     "noRun": "אין הרצת דחיסה זמינה.",
@@ -9317,7 +9349,8 @@
     "encoderWinner": "מנצח: {winner}",
     "encoder": "מקודד",
     "bytes": "בייטים",
-    "tokensCl100k": "טוקנים (cl100k)"
+    "tokensCl100k": "טוקנים (cl100k)",
+    "studioViews": "תצוגות Studio"
   },
   "omniglyph": {
     "preview": "תצוגה מקדימה",
@@ -9523,7 +9556,9 @@
     "tooltipMinLength": "הודעות קצרות מזה אינן דחוסות. נמוך יותר = יותר דחיסה.",
     "tooltipMinSavings": "דחוס רק אם זה חוסך לפחות כל כך הרבה אסימונים.",
     "ultraSettings": "הגדרות אולטרה",
-    "ultraSettingsDesc": "דחיסה סמנטית המופעלת על ידי SLM"
+    "ultraSettingsDesc": "דחיסה סמנטית המופעלת על ידי SLM",
+    "defaultLanguage": "שפת ברירת המחדל",
+    "viewMode": "מצב תצוגה"
   },
   "translator": {
     "title": "מתרגם",
@@ -10291,7 +10326,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "איפוס מגבלת Claude",
+    "confirmRedeemClaudeResetCredit": "מימוש מאפס מיידית את מגבלות השימוש הזכאיות של Claude ומנצל קרדיט זה לצמיתות.",
+    "claudeResetCreditsModalTitle": "קרדיטים לאיפוס Claude",
+    "claudeResetCreditsModalExplainer": "קרדיטים זמינים לאיפוס Claude ואיפוסי סשן שבועיים עבור חשבון זה."
   },
   "modals": {
     "waitingAuth": "ממתין לאישור",
@@ -11078,7 +11117,8 @@
       "message": "הודעה",
       "error": "שגיאה",
       "completion": "השלמה"
-    }
+    },
+    "statusFilter": "סטטוס"
   },
   "templateNames": {
     "simple-chat": "צ'אט פשוט",
@@ -11259,7 +11299,8 @@
     "minutesAgo": "לפני {minutes} דק'",
     "hoursAgo": "לפני {hours} שע'",
     "daysAgo": "לפני {days} ימים",
-    "entries": "רשומות"
+    "entries": "רשומות",
+    "viewSwitcherAria": "תצוגת מטמון"
   },
   "proxyConfigModal": {
     "levelGlobal": "גלובלי",
@@ -11526,7 +11567,7 @@
     "bulkImportNoValidEntries": "לא נמצאו ערכים חוקיים. בדוק את הפורמט ונסה שוב.",
     "bulkImportSuccess": "הייבוא הושלם: {created} נוצר, {updated} עודכן, {failed} נכשל",
     "bulkImportErrorLine": "שורה {line}: {reason}",
-    "bulkImportMaxExceeded": "מקסימום 100 פרוקסי לכל ייבוא",
+    "bulkImportMaxExceeded": "מקסימום {max} פרוקסי לכל ייבוא",
     "bulkImportPreview": "תצוגה מקדימה",
     "clearAssignment": "(הקצאה ברורה)",
     "bulkProxyAssignment": "הקצאת פרוקסי בכמות גדולה",
@@ -11587,6 +11628,7 @@
     "poolSetAsideKindIpQuota429": "הגבלת קצב לפי IP ‏(429)",
     "poolSetAsideKindSlow": "תגובות איטיות",
     "poolSetAsideKindGeoBlocked": "אזור חסום (403/451)",
+    "poolSetAsideKindOperatorReported": "תקלה שדווחה על ידי מפעיל",
     "poolSetAsideUntil": "חוזר לרוטציה {endsAt}",
     "poolSetAsideRepeat": "הושם בצד {count, plural, one {# פעם} other {# פעמים}}",
     "poolUnknownAddress": "כתובת לא ידועה",
@@ -11603,7 +11645,8 @@
     "notMeasured": "לא נמדד",
     "upstream4xx": "{count} שגיאות קליינט עליון",
     "upstream5xx": "{count} שגיאות שרת עליון",
-    "uniformEgressLine": "{affected} מתוך {exits} יציאות נכשלות יחד ב-{provider} (ב-({hours}h)) — אינו בעיית יציאה"
+    "uniformEgressLine": "{affected} מתוך {exits} יציאות נכשלות יחד ב-{provider} (ב-({hours}h)) — אינו בעיית יציאה",
+    "moreActions": "פעולות נוספות"
   },
   "playground": {
     "title": "Title",
@@ -11809,7 +11852,8 @@
       "nextButton": "הבא",
       "runButton": "הפעל",
       "promptPlaceholder": "הזן את ההודעה שלך… (Enter לשליחה, Shift+Enter לשורה חדשה)"
-    }
+    },
+    "playgroundTabs": "מצבי Playground"
   },
   "miniPlayground": {
     "endpoint": "נקודת קצה",
@@ -11880,7 +11924,8 @@
     "assistant": "עוזר",
     "errorLabel": "שגיאה",
     "requestFailed": "הבקשה נכשלה",
-    "stop": "עצור"
+    "stop": "עצור",
+    "messageInputAria": "הודעה"
   },
   "requestLogger": {
     "recording": "מקליט",
@@ -12067,8 +12112,18 @@
       "resilienceRotations": "{count} החלפות חשבון",
       "resilienceRetried": "תור ריק נוסה שוב",
       "resilienceContinued": "חודש באמצע הזרם",
-      "resilienceRecovered": "שוחזר באמצעות פעולת חוסן"
-    }
+      "resilienceRecovered": "שוחזר באמצעות פעולת חוסן",
+      "conversationContext": "הקשר השיחה",
+      "goToBottom": "מעבר לתחתית",
+      "liveRefreshOn": "רענון בזמן אמת: פעיל",
+      "liveRefreshOff": "רענון בזמן אמת: כבוי",
+      "liveRefresh": "רענון בזמן אמת",
+      "continuesFromParent": "ממשיך מהאב",
+      "continuesFrom": "ממשיך מ־{id}",
+      "viewConversation": "הצגת השיחה",
+      "openConversation": "פתיחת השיחה {id}"
+    },
+    "tableLabel": "יומני בקשות"
   },
   "proxyLogger": {
     "filterAll": "הכול",
@@ -12113,7 +12168,9 @@
     "colServedBy": "מוגש על ידי",
     "filterTraffic": "תנועה",
     "filterTests": "בדיקות",
-    "filterSource": "מקור"
+    "filterSource": "מקור",
+    "tableLabel": "יומני פרוקסי",
+    "sortLogs": "מיון יומנים"
   },
   "endpointOptions": {
     "speech": "דיבור",
@@ -12198,7 +12255,8 @@
     "statusExhausted": "אזלה המכסה",
     "statusAlerting": "התראה פעילה",
     "statusError": "שגיאה",
-    "moreSuffix": "+{count} נוספים"
+    "moreSuffix": "+{count} נוספים",
+    "feedFilterLabel": "סינון אירועים"
   },
   "quotaShare": {
     "weightPercent": "משקל %",
@@ -12365,7 +12423,10 @@
     "ungroupedTitle": "ללא קבוצה",
     "ungroupedHint": "בריכות אלו אינן משויכות לקבוצה מוכרת. ערוך בריכה כדי להעביר אותה לקבוצה אמיתית.",
     "removeFailed": "לא ניתן להסיר את המאגר הזה.",
-    "dismiss": "סגירה"
+    "dismiss": "סגירה",
+    "allocationsHeading": "הקצאות",
+    "wizardRemoveDimension": "הסרת ממד",
+    "wizardRemoveKey": "הסרת מפתח"
   },
   "plugins": {
     "title": "תוספים",
@@ -12523,7 +12584,8 @@
       "settingsUpdateFailed": "עדכון ההגדרות נכשל",
       "serviceRevealApiKey": "{actor} חשף/ה מפתח API עבור {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "סגירת השגיאה"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12718,21 @@
       "goNow": "עבור עכשיו",
       "message": "ה-MITM Proxy נמצא כעת תחת AgentBridge.",
       "title": "דף זה הועבר"
-    }
+    },
+    "dnsOn": "DNS מופעל",
+    "dnsOff": "DNS מושבת",
+    "showServerSettings": "הצגת הגדרות השרת",
+    "hideServerSettings": "הסתרת הגדרות השרת",
+    "upstreamCaTesting": "מתבצעת בדיקה…",
+    "removeMapping": "הסרת מיפוי",
+    "mappingSourcePlaceholder": "לדוגמה, gemini-3.6-flash-medium, או * עבור כל המודלים שאינם ממופים",
+    "mappingWildcardHint": "יש להשתמש ב־* כמקור כדי לנתב דרך OmniRoute כל מודל שאין לו מיפוי מפורש אל היעד שנבחר. התאמות מקור מדויקות תמיד מקבלות עדיפות על *.",
+    "wizardDetectingModels": "מתבצע זיהוי של מודלים מהתעבורה שיורטה...",
+    "wizardDetectedModels": "{count, plural, one {נמצא מודל אחד} other {נמצאו # מודלים}} בתעבורה שיורטה. יש לבחור את המודלים שברצונך להוסיף:",
+    "wizardSelectedModels": "{count, plural, one {נבחר מודל אחד} other {נבחרו # מודלים}}. במסך הבא יהיה אפשר למפות אותם למודלים של OmniRoute.",
+    "wizardAddModels": "{count, plural, one {הוספת מודל אחד} other {הוספת # מודלים}}",
+    "wizardNoModelsDetected": "עדיין לא זוהו מודלים. יש להשתמש ב־{agent} כדי לבצע בקשה, ולאחר מכן להפעיל שוב את האשף הזה כדי לזהות אוטומטית מודלים מהתעבורה.",
+    "wizardNoModelsHint": "לחלופין, אפשר לסגור את האשף הזה ולהוסיף מיפויים באופן ידני בכרטיס הסוכן."
   },
   "providerStats": {
     "unknownError": "שגיאה לא ידועה",
@@ -12686,7 +12762,11 @@
     "avgTtft": "TTFT ממוצע",
     "avgTotal": "סה\"כ ממוצע",
     "requestTelemetry": "טלמטריית בקשות",
-    "requestTelemetryDescription": "פילוח צינור עיבוד בן 7 שלבים (5 הדקות האחרונות)"
+    "requestTelemetryDescription": "פילוח צינור עיבוד בן 7 שלבים (5 הדקות האחרונות)",
+    "title": "סטטיסטיקות ספקים",
+    "description": "תעבורה, זמני השהיה ושיעורי הצלחה לפי ספק ולפי מודל",
+    "combo": "משולב",
+    "toggleModels": "הצגת מודלים עבור {provider}"
   },
   "relay": {
     "title": "פרוקסי Relay ללא שרת",
@@ -12847,7 +12927,18 @@
     "noRequestBody": "אין גוף בקשה.",
     "noResponseBody": "אין גוף תגובה.",
     "formatted": "מעוצב",
-    "raw": "גולמי"
+    "raw": "גולמי",
+    "requestCount": "{count, plural, one {בקשה אחת} other {# בקשות}}",
+    "expandList": "הרחבת הרשימה",
+    "collapseList": "כיווץ הרשימה",
+    "snippetLanguage": "שפת קטע הקוד",
+    "headersTable": "כותרות",
+    "showSecrets": "הצגת סודות",
+    "maskSecrets": "הסתרת סודות",
+    "llmNotAvailable": "מטא־נתוני LLM אינם זמינים עבור בקשה זו.",
+    "llmStreamYes": "כן (SSE)",
+    "llmStreamNo": "לא",
+    "llmTotalTokens": "סה״כ: {count} טוקנים"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13397,8 @@
     "colReliabilityHelp": "שיעור הקריאות שספק זה אכן השיב להן במהלך 24 השעות האחרונות. מקף מציין שהוא טיפל במעט מדי תעבורה מכדי לקבוע שיעור.",
     "reliabilitySample": "{successes} מתוך {requests} קריאות הצליחו במהלך {hours} השעות האחרונות",
     "reliabilityTooFew": "רק {requests} קריאות במהלך {hours} השעות האחרונות — מעט מדי מכדי לקבוע שיעור",
-    "reliabilityNoTraffic": "לא תועדו קריאות במהלך 24 השעות האחרונות"
+    "reliabilityNoTraffic": "לא תועדו קריאות במהלך 24 השעות האחרונות",
+    "categoryFilter": "קטגוריית משימה"
   },
   "discovery": {
     "title": "גילוי ספקים",
@@ -13331,7 +13423,11 @@
     "method": "שיטה",
     "auth": "אימות",
     "feasibility": "היתכנות",
-    "models": "מודלים"
+    "models": "מודלים",
+    "provider": "ספק",
+    "status": "סטטוס",
+    "endpoint": "נקודת קצה",
+    "actions": "פעולות"
   },
   "noAuthProvider": {
     "title": "לא נדרש אימות",
@@ -13380,7 +13476,8 @@
     "ownProxy": "פרוקסי משלך",
     "freeTierPause": "הדגם {model} הושהה (429), יחזור ב-{time}",
     "freeTierPauseProvider": "הושהה (429), יחזור ב-{time}",
-    "freeTierPauseNote": "השהיה בתוך התהליך במופע זה"
+    "freeTierPauseNote": "השהיה בתוך התהליך במופע זה",
+    "proxyType": "סוג Proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13650,10 @@
         "description": "הישג נסתר ממתין...",
         "criteria": "השלם את ההישג הנסתר כדי לחשוף תג זה."
       }
-    }
+    },
+    "leaderboardTitle": "טבלת מובילים",
+    "leaderboardDescription": "דירוגים והישגים בכל מפתחות ה-API שלך",
+    "badgeLocked": "נעול"
   },
   "featureFlags": {
     "title": "דגלי תכונות",
@@ -13848,7 +13948,8 @@
     "unknown": "לא ידוע",
     "unknownProvider": "ספק לא ידוע",
     "unknownModel": "מודל לא ידוע",
-    "resolvedTargetMetrics": "{requests} בקשות · {success} הצלחה · {latency} · מכסה {quota}"
+    "resolvedTargetMetrics": "{requests} בקשות · {success} הצלחה · {latency} · מכסה {quota}",
+    "timeRange": "טווח זמן"
   },
   "usageLimits": {
     "usdUsageQuota": "מכסת שימוש ב-USD",
@@ -13995,7 +14096,11 @@
     "learnMore": "מידע נוסף",
     "changelogLoadFailed": "לא ניתן לטעון את יומן השינויים. אנא נסה שוב מאוחר יותר.",
     "retry": "נסה שוב",
-    "viewFullHistory": "הצג היסטוריה מלאה ב-GitHub"
+    "viewFullHistory": "הצג היסטוריה מלאה ב-GitHub",
+    "title": "חדשות ויומן שינויים",
+    "description": "הכרזות מצוות OmniRoute והערות המהדורה העדכניות ביותר",
+    "viewLabel": "הצגה",
+    "loadingNews": "ההכרזות נטענות..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14651,9 @@
       "circuitBreakerState": "מצב מפסק מעגל ספק",
       "lastUpdate": "עדכון אחרון: {timestamp}",
       "uptimeMinutes": "{minutes}ד",
-      "uptimeHoursMinutes": "{hours}ש {minutes}ד"
+      "uptimeHoursMinutes": "{hours}ש {minutes}ד",
+      "breakerClosed": "סגור",
+      "breakerNotClosed": "פתוח או פתוח למחצה"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14728,9 @@
         "primaryAction": "פרטי תחזוקה",
         "secondaryAction": "סטטוס מערכת"
       }
+    },
+    "miniapp": {
+      "askAnything": "אפשר לשאול הכול…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} מוצגים / {total} בסך הכול",
+    "modeLabel": "מצב תצוגה",
+    "jumpToNow": "מעבר לזמן הנוכחי, קו NOW מתאפס למיקום {position}%",
+    "laneReuse": "שימוש חוזר בשורה",
+    "laneReuseLabel": "חלון שימוש חוזר בשורה (דקות)",
+    "laneReuseHint": "בקשות עם אותו מזהה שיחה נשארות באותה שורה בציר הזמן, כל עוד הפער ביניהן קטן ממספר הדקות הזה.",
+    "laneReuseUnit": "דק׳",
+    "autoRefresh": "רענון אוטומטי",
+    "autoRefreshLabel": "מרווח רענון אוטומטי (שניות)",
+    "autoRefreshHint": "התדירות שבה ציר הזמן מאחזר מחדש את רשימת הבקשות מהשרת.",
+    "autoRefreshUnit": "שנ׳",
+    "zoomOut": "הקטנת תצוגה",
+    "zoomIn": "הגדלת תצוגה"
   },
   "metadata": {
     "compressionTitle": "דחיסה",

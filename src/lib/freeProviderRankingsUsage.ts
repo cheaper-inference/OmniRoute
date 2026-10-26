@@ -99,15 +99,19 @@ export function formatUsageReliability(usage?: ProviderUsage): UsageDisplay {
   };
 }
 
-/** Tailwind text colour per tone, mirroring the score colours already on the page. */
+/**
+ * Kit semantic text tone per reliability tone — the same success/warning/error ramp as the score
+ * column on the page (KEA-7886, P8: no raw hue utilities). The classes are also emitted by
+ * src/app, which Tailwind scans; src/lib is not a Tailwind source.
+ */
 export function usageToneClass(tone: UsageTone): string {
   switch (tone) {
     case "good":
-      return "text-green-400";
+      return "text-success";
     case "fair":
-      return "text-yellow-400";
+      return "text-warning";
     case "poor":
-      return "text-orange-400";
+      return "text-error";
     default:
       return "text-text-muted";
   }

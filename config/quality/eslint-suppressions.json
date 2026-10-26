@@ -683,11 +683,6 @@
       "count": 2
     }
   },
-  "src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/app/(dashboard)/dashboard/costs/costExplorerUtils.ts": {
     "no-restricted-syntax": {
       "count": 1
@@ -1604,11 +1599,6 @@
       "count": 3
     }
   },
-  "src/shared/components/RequestLoggerV2.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    }
-  },
   "src/shared/components/RequestTimeline.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -1657,11 +1647,6 @@
   "src/shared/utils/apiKey.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
-    }
-  },
-  "src/shared/utils/apiKeyPolicy.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
     }
   },
   "src/shared/utils/cloud.ts": {
@@ -2672,7 +2657,7 @@
   },
   "tests/unit/cli-mcp-call-commands.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 10
+      "count": 5
     }
   },
   "tests/unit/cli-memory-commands.test.ts": {

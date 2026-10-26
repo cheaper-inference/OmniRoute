@@ -17,7 +17,9 @@ test("workbuddy default headers enforce client identity and craft purpose", () =
   assert.equal(WORKBUDDY_DEFAULT_HEADERS["X-Product"], "SaaS");
   assert.equal(WORKBUDDY_DEFAULT_HEADERS["X-IDE-Type"], "WorkBuddy");
   assert.equal(WORKBUDDY_DEFAULT_HEADERS["X-IDE-Name"], "WorkBuddy");
+  assert.equal(WORKBUDDY_DEFAULT_HEADERS["X-IDE-Version"], "5.5.6");
   assert.equal(WORKBUDDY_DEFAULT_HEADERS["X-Requested-With"], "XMLHttpRequest");
+  assert.equal(WORKBUDDY_DEFAULT_HEADERS["X-Domain"], "www.workbuddy.ai");
   assert.equal(WORKBUDDY_DEFAULT_HEADERS["X-Agent-Intent"], "craft");
   assert.equal(WORKBUDDY_DEFAULT_HEADERS["X-Agent-Purpose"], "conversation");
   assert.equal(WORKBUDDY_DEFAULT_HEADERS["X-Agent-Type"], "main");

@@ -13,47 +13,111 @@ OmniRoute yana da tsarin izini mai sanin hanya wanda ke hana kowane buƙatar API
 
 > Tushe: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## Hanyoyin Tabbatarwa Guda Biyu
+## Hanyoyin Tabbatar da Shaida Guda Biyu
 
-### 1. API Key (Bearer)
+### 1. Maɓallin API (Bearer)
 
-Ana amfani da shi don APIs na abokin ciniki masu jituwa da OpenAI/Anthropic/Gemini da wasu hanyoyin gudanarwa idan maɓallin yana da iyakar `manage`.
+Ana amfani da shi don API na abokan hulɗa masu dacewa da OpenAI/Anthropic/Gemini da kuma wasu hanyoyin gudanarwa idan maɓallin yana da izinin `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Ana tabbatar da shi ta `isValidApiKey()` / `extractApiKey()` a cikin `src/sse/services/auth.ts` kuma ana sake fitar da shi ta `src/shared/utils/apiAuth.ts`. Mai tabbatarwa kuma yana karɓar env vars na `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` a matsayin maɓallan wucewa na dindindin (issue #1350).
+Ana tabbatar da shi ta hanyar `isValidApiKey()` / `extractApiKey()` a cikin `src/sse/services/auth.ts`, sannan a sake fitar da su ta `src/shared/utils/apiAuth.ts`. Mai tabbatarwar yana kuma karɓar sauye-sauyen mahalli na `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` a matsayin maɓallan wucewa masu ɗorewa (matsala #1350).
 
-### 2. Zaman Dashboard (auth_token cookie)
+### 2. Zaman Dashboard (cookie na auth_token)
 
-Don shafukan dashboard da ayyukan admin.
+Don shafukan dashboard da ayyukan gudanarwa.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Kuki yana zama zaman ne kawai idan JWT ya tabbata **kuma** yana ɗauke da `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Duk mai amfani da kuki (dashboard route guard (`isDashboardSessionAuthenticated()`), sabunta authz pipeline, WebSocket handshake, live server, `/api/settings/require-login`, `/api/auth/status`) yana wucewa ta wannan mataimaki.
-Akwai wasu JWTs da aka sa wa hannu da `JWT_SECRET`: Cursor CLI passthrough yana ƙirƙirar tokens na `iss "omniroute" / aud "cursor-cli"` ga masu maɓalli, kuma ba su taɓa zama zaman ba (#13298).
+Cookie yana zama zaman aiki ne kawai idan an tabbatar da JWT ɗin **kuma** yana ɗauke da `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Duk
+mai amfani da cookie ɗin (mai tsaron hanyar dashboard (`isDashboardSessionAuthenticated()`), sabunta tsarin authz, musayar farko ta WebSocket, sabar kai-tsaye,
+`/api/settings/require-login`, `/api/auth/status`) yana bi ta wannan mataimakin.
+Akwai wasu JWT da aka sanya wa hannu da `JWT_SECRET` — hanyar wucewa ta Cursor CLI tana ƙirƙirar
+token na `iss "omniroute" / aud "cursor-cli"` ga masu riƙe da maɓalli — kuma ba zaman aiki ba ne
+(#13298).
 
-Ana tabbatar da shi ta `isDashboardSessionAuthenticated()` a cikin `src/shared/utils/apiAuth.ts`. Pipeline yana sabunta JWT ta atomatik idan ya rage ƙasa da kwanaki 7 cikin rayuwarsa ta kwanaki 30.
+Ana tabbatar da shi ta `isDashboardSessionAuthenticated()` a cikin `src/shared/utils/apiAuth.ts`. Tsarin yana sabunta JWT ta atomatik idan kwanakin da suka rage masa ba su kai 7 ba a cikin tsawon rayuwarsa na kwanaki 30.
 
-Zaman na iya ƙarewa kafin kwanakin 30 su cika, domin kowane mai ƙirƙira yana wucewa ta `mintDashboardSessionToken` (lokacin fitowa `iat` da mai ganowa `jti`), kuma mai tabbatarwa yana duba saituna biyu: `sessionsValidAfter`, wanda canjin kalmar sirri ke saita shi don duk zaman da aka bayar kafin shi ya daina tabbatarwa (browser ɗin da ya canza kalmar sirri yana samun sabon kuki), da `revokedDashboardSessions`, wanda `POST /api/auth/logout` ke ƙara `jti` na zaman da aka fita daga cikinsa. Zaman da wani tsohon release ya ƙirƙira ba su ɗauke da ɗayan waɗannan da'awar ba, kuma suna ci gaba da aiki har zuwa canjin kalmar sirri na farko. Idan ba a iya karanta saituna ba, ba a amince da zaman ba.
+Zaman aiki zai iya ƙarewa kafin cikar kwanakinsa 30, saboda kowane mai ƙirƙira yana bi ta `mintDashboardSessionToken` (lokacin bayarwa `iat` da ID `jti`) kuma mai tabbatarwa yana duba saituna biyu: `sessionsValidAfter`, wanda canjin kalmar sirri ke saitawa domin duk zaman da aka bayar kafin lokacin ya daina ingantuwa (burauzar da ta canza kalmar sirrin tana samun sabon cookie), da kuma `revokedDashboardSessions`, inda `POST /api/auth/logout` ke ƙara `jti` na zaman da aka fita daga cikinsa. Zaman da tsohuwar siga ta ƙirƙira ba ya ɗauke da ko ɗaya daga cikin waɗannan bayanai, kuma yana ci gaba da aiki har zuwa canjin kalmar sirri na farko. Idan ba za a iya karanta saitunan ba, ba za a amince da zaman ba.
 
-Wasu hanyoyin gudanarwa suna karɓar **ɗaya daga cikin** hanyoyi biyu: kuki KO `Bearer <key>` idan maɓallin API yana da iyakar `manage` (ko `admin`). Wannan ne ke ba da damar aikin da ake iya saitawa ta API calls, wanda aka ƙara a v3.8.
+Wasu hanyoyin gudanarwa suna karɓar **ɗaya daga cikin** hanyoyin biyu: cookie KO `Bearer <key>` idan maɓallin API yana da izinin `manage` (ko `admin`). Wannan ne ke ba da damar tsarin aiki na "daidaitawa ta hanyar kiran API" da aka ƙara a v3.8.
 
-#### Ƙofar shiga ta OIDC zaɓi (#6973)
+#### Ƙofar shiga ta OIDC mai zaɓi (#6973)
 
-Shiga ta admin ta dashboard kuma tana goyon bayan tsarin OIDC (OpenID Connect) **na zaɓi** tare da shiga ta kalmar sirri ta asali. Ba a taɓa cire shiga ta kalmar sirri ba, ana ƙara ta ne kawai:
+Shigar mai gudanarwa na dashboard yana kuma goyon bayan tsarin OIDC (OpenID Connect) na **zaɓin amfani**
+tare da tsohuwar hanyar shiga ta kalmar sirri — ba a taɓa cire hanyar shiga ta
+kalmar sirri ba, ana ƙara mata wani zaɓi ne kawai:
 
-- An kashe sai dai idan `settings.oidcEnabled === true` **kuma** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` duk an saita su (Settings → Auth). `GET /api/auth/oidc/login` yana dawo da `400` in ba haka ba.
-- `GET /api/auth/oidc/login` yana gano `authorization_endpoint` daga `/.well-known/openid-configuration` na issuer (ya koma `<issuer>/authorize`), yana gina redirect URI daga buƙatar shigowa (yana la'akari da `x-forwarded-proto`), kuma yana turawa zuwa IdP tare da `state` bazuwar da aka adana a cikin kukin `httpOnly` na `oidc_state`.
-- `GET /api/auth/oidc/callback` yana tabbatar da `state`, yana musayar authorization code, kuma yana tabbatar da sa hannun ID token ta JWKS na issuer (`createRemoteJWKSet` na `jose`, an ajiye shi ga kowane JWKS URI) tare da duba `issuer`/`audience`. Jerin `oidcAllowedSubjects` yana da mahimmanci: yana daidaita da `sub` claim na token ko `email` claim ɗinsa. Ana karɓar email claim ne kawai idan `email_verified === true`, don haka email ɗin da ba a tabbatar ba a IdP ba zai taɓa wucewa ta ƙofar ba. Idan babu shigarwa, callback yana ƙin kowace shiga (`not_configured`).
-- Idan ya yi nasara, yana ƙirƙirar **daidai** `auth_token` JWT na kwanaki 30 da shiga ta kalmar sirri ke bayarwa (`src/app/api/auth/login/route.ts`), don haka sauran pipeline ɗin zaman dashboard (sabuntawa ta atomatik, tutocin kuki) ba ya canzawa. OIDC yana maye gurbin yadda ake ƙirƙirar kuki ne kawai, ba abin da yake bayarwa ba.
-- Kowane saitin `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) yana cikin `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` yana amsawa da `400 PASSWORD_REQUIRED` sai dai idan jiki ya ɗauki kalmar sirrin gudanarwa a matsayin `currentPassword` (`401 PASSWORD_MISMATCH` idan ba daidai ba ce). `oidcDisablePasswordLogin` yana hana _shiga_ da kalmar sirri (`POST /api/auth/login`) amma yana riƙe hash ɗin kalmar sirri da aka adana, kuma re-auth har yanzu yana duba `currentPassword` akansa.
-- `corsOrigins` da `bruteForceProtection` suma suna cikin `SECURITY_IMPACTING_SETTINGS_KEYS`: sassauta ɗayansu yana raunana kariyar shiga, don haka suna buƙatar re-auth ɗaya na `currentPassword` (Security tab yana neman sa) kuma JSON import yana cire su.
-- Kowane maɓallin manufar tsaro (shigarwar `SECURITY_IMPACTING_SETTINGS_KEYS`, kowane maɓallin `oidc*`, da yanayin zaman dashboard) **na operator ne kawai** a `PATCH /api/settings`: maɓallin API mai iyakar manage ko `oma_` access token ana ƙin su da `403` ko da sun aika `currentPassword` daidai, kuma ana rubuta ƙin shi a matsayin `settings.update_failed` tare da `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` a `src/lib/api/operatorCredential.ts`). Saitunan yau da kullum (jigo, zaɓuɓɓukan nuni) suna ci gaba da kasancewa masu rubutu ga maɓallin `manage` ko `admin` access token. Kowane canji na `/api/settings` kansa (da na `/api/settings/require-login`) shi ma yana buƙatar iyakar `admin` access-token (`ADMIN_MUTATION_EXACT_PATHS` a `src/server/authz/accessScopes.ts`, daidaiton hanya cikakke). `GET` yana zama `read`, sauran ƙananan hanyoyin `/api/settings/*` (proxies, combo defaults, model aliases, compression, purges…) suna riƙe iyakar `write` da ake tantancewa daga hanyar buƙata.
-- `POST /api/settings/import-json` yana tsallake wannan re-auth, don haka yana cire kowane maɓalli a cikin `IMPORT_STRIPPED_SETTINGS_KEYS` (fayil ɗaya) kafin rubutu: kalmar sirri da `currentPassword`, kowace shigarwa ta `SECURITY_IMPACTING_SETTINGS_KEYS`, da yanayin zaman dashboard (`sessionsValidAfter`, `revokedDashboardSessions`). Don haka shigo da tsohon backup ba zai iya farfado da zaman da canjin kalmar sirri ko fita ya riga ya ƙare ba.
+- An kashe shi sai dai idan `settings.oidcEnabled === true` **kuma** an saita `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` duka (Saituna → Tantancewa).
+  In ba haka ba, `GET /api/auth/oidc/login` yana mayar da `400`.
+- `GET /api/auth/oidc/login` yana gano `authorization_endpoint` daga
+  `/.well-known/openid-configuration` na mai bayarwa (ko ya koma amfani da
+  `<issuer>/authorize`), yana gina URI na turawa daga buƙatar da ta shigo
+  (tare da la'akari da `x-forwarded-proto`), sannan ya tura zuwa IdP tare da bazuwar `state`
+  da aka adana a cikin kuki na `httpOnly` mai suna `oidc_state`.
+- `GET /api/auth/oidc/callback` yana tabbatar da `state`, yana musanya lambar izini,
+  sannan yana tabbatar da sa hannun ID token ta hanyar JWKS na mai bayarwa
+  (`createRemoteJWKSet` na `jose`, wanda ake adanawa a ma'ajiyar wucin-gadi bisa kowane JWKS URI) tare da binciken `issuer`/`audience`.
+  Izinin shiga allon gudanarwa yana buƙatar jerin `oidcAllowedSubjects` da ba fanko ba,
+  manufar `oidcAdmissionClaim`, ko duka biyun. Jerin batutuwan yana daidaita da `sub` ko
+  `email` ne kawai idan `email_verified === true`. Manufar claim ta zaɓi tana ɗaukar
+  hanyar claim ta ID-token wadda ɗigo ya raba (misali, `realm_access.roles`) da
+  jerin ƙimomin da aka amince da su; claim ɗin da aka samo dole ne ya zama jerin kirtani
+  da ke ɗauke da aƙalla ƙima ɗaya da aka amince da ita. Idan an saita manufofin biyu,
+  dole ne dukansu su yi nasara. Claim da babu ko mara inganci yana haifar da ƙin shiga,
+  kuma idan babu ko ɗaya daga cikin manufofin, callback ɗin yana ƙin shiga (`not_configured`).
+  Saitunan da ake da su waɗanda suka dogara ga subject kawai za su ci gaba ba tare da canji ba.
+- Keycloak yawanci yana taswirar matsayin realm zuwa access token, ba lallai zuwa ID
+  token ba. Don buƙatar matsayin realm na `admin`, saita protocol mapper ga
+  wannan client wanda ya haɗa da `realm_access.roles` a cikin **ID token** ɗinsa, sannan saita
+  `oidcAdmissionClaim` zuwa `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Bincika ainihin claim na ID-token na wannan client kafin kunna izinin shiga bisa
+  role kawai; manhajar ba ta karanta roles na access-token. Ƙin bayar da token
+  daga ɓangaren IdP na iya ƙara kariya amma ba ya maye gurbin wannan binciken na ɓangaren manhaja.
+- Idan an yi nasara, yana ƙirƙirar JWT na kwanaki 30 na `auth_token` wanda yake **daidai iri ɗaya**
+  da wanda shigar kalmar sirri ke bayarwa (`src/app/api/auth/login/route.ts`), don haka sauran
+  tsarin zaman allon gudanarwa (sabuntawa ta atomatik, alamomin kuki) ba ya canzawa —
+  OIDC yana maye gurbin yadda ake ƙirƙirar kukin ne kawai, ba abin da yake ba da izini ba. Canje-canje
+  ga roles/groups na IdP ba sa soke zaman OmniRoute da ke akwai; fita,
+  sauya kalmar sirri, ko ƙarewar zaman ne har yanzu ke sarrafa tsawon rayuwarsu.
+- Kowane saitin `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) yana cikin `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  yana amsawa da `400 PASSWORD_REQUIRED` sai dai idan body ɗin ya ƙunshi kalmar sirrin
+  gudanarwa a matsayin `currentPassword` (`401 PASSWORD_MISMATCH` idan ba daidai ba ne).
+  `oidcDisablePasswordLogin` yana hana _shiga_ da kalmar sirri (`POST /api/auth/login`)
+  amma yana riƙe hash ɗin kalmar sirrin da aka adana, kuma sake tantancewa har yanzu yana gwada
+  `currentPassword` da shi.
+- `corsOrigins` da `bruteForceProtection` su ma suna cikin `SECURITY_IMPACTING_SETTINGS_KEYS`:
+  sassauta ɗaya daga cikinsu yana raunana kariyar shiga, don haka suna buƙatar sake tantancewa da
+  `currentPassword` iri ɗaya (shafin Tsaro yana neman sa) kuma shigo da JSON
+  yana cire su.
+- Kowane maɓallin manufar tsaro — abubuwan cikin `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  kowane maɓallin `oidc*` da yanayin zaman allon gudanarwa — na **mai gudanar da tsari kawai** ne a
+  `PATCH /api/settings`: ana ƙin API key mai scope na manage ko access token na `oma_`
+  da `403` ko da ya aika da madaidaicin `currentPassword`, kuma ana rubuta
+  wannan ƙin a rajistar dubawa a matsayin `settings.update_failed` tare da `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` a cikin `src/lib/api/operatorCredential.ts`).
+  Saituna na yau da kullum (jigo, zaɓuɓɓukan nunawa) suna ci gaba da kasancewa masu iya rubutawa da maɓallin `manage`
+  ko access token na `admin`. Kowane canji ga `/api/settings` da kansa (da kuma
+  `/api/settings/require-login`) yana kuma buƙatar scope na access-token na `admin`
+  (`ADMIN_MUTATION_EXACT_PATHS` a cikin `src/server/authz/accessScopes.ts`, daidaitawar
+  cikakkiyar hanya); `GET` yana ci gaba da kasancewa `read`, kuma sauran ƙananan hanyoyin `/api/settings/*` (proxies,
+  tsoffin combo, laƙabin model, compression, purges…) suna riƙe scope na
+  `write` da ake tantancewa daga method.
+- `POST /api/settings/import-json` yana tsallake wannan sake tantancewar, don haka yana cire kowane maɓalli a cikin
+  `IMPORT_STRIPPED_SETTINGS_KEYS` (fayil ɗaya) kafin rubutawa: kalmar sirri da
+  `currentPassword`, kowane abu na `SECURITY_IMPACTING_SETTINGS_KEYS`, da kuma
+  yanayin zaman allon gudanarwa (`sessionsValidAfter`, `revokedDashboardSessions`).
+  Saboda haka, shigo da tsohon backup ba zai iya farfado da zaman da canjin kalmar sirri
+  ko fita ya riga ya ƙare ba.
 
 ## Nau'ikan Route
 

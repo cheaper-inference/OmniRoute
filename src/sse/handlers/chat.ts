@@ -1218,6 +1218,7 @@ async function handleChatImplementation(
           connectionRestrictionSources: restrictions.sources,
           requireToolCalling: hasQoderCallerTools(body),
           sessionKey: sessionAffinityKey,
+          preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
           ...(target?.allowRateLimitedConnection ? { allowRateLimitedConnections: true } : {}),
           ...(target?.connectionId ? { forcedConnectionId: target.connectionId } : {}),
           ...(bypassProviderQuotaPolicy ? { bypassQuotaPolicy: true } : {}),
@@ -1846,6 +1847,7 @@ async function handleSingleModelChat(
             connectionRestrictionSources: restrictions.sources,
             requireToolCalling: hasQoderCallerTools(body),
             sessionKey: occupancySessionKey,
+            preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
             reserveOAuthSession: true,
             excludeConnectionIds: Array.from(excluded),
             ...(agy.on ? { reserveAntigravityLease: true, routingRequestId: agy.requestId } : {}),
@@ -2669,6 +2671,7 @@ async function handleSingleModelChat(
         !comboName &&
         !forceLiveComboTest &&
         shouldRetrySameAccountTransport({
+          provider,
           status: result.status,
           errorText: errorStr,
           errorCode: result.errorCode,
