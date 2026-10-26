@@ -29,6 +29,32 @@ const KIMI_CONFIG = {
   apiVersion: "2023-06-01",
 };
 
+export function resolveKimiUsageUrl(providerSpecificData?: JsonRecord): string {
+  const customBaseUrl =
+    typeof providerSpecificData?.baseUrl === "string" ? providerSpecificData.baseUrl.trim() : "";
+  if (customBaseUrl) {
+    try {
+      const url = new URL(customBaseUrl);
+      if (url.protocol === "https:" || url.protocol === "http:") {
+        const host = url.hostname.toLowerCase();
+        if (host === "api.kimi.ai" || host === "api.kimi.com") {
+          const path = url.pathname.replace(/\/+$/, "");
+          if (path.endsWith("/usages")) {
+            return `${url.origin}${path}`;
+          }
+          if (path === "/coding") {
+            return `${url.origin}/coding/v1/usages`;
+          }
+          return `${url.origin}${path}/usages`;
+        }
+      }
+    } catch {
+      // fall back to default
+    }
+  }
+  return KIMI_CONFIG.usageUrl;
+}
+
 const KIMI_BOOSTER_FIXED_POINT_PER_CENT = 1_000_000;
 
 function toInteger(value: unknown): number | null {
@@ -237,7 +263,8 @@ export async function getKimiUsage(
       };
 
   try {
-    const response = await fetch(KIMI_CONFIG.usageUrl, {
+    const usageUrl = resolveKimiUsageUrl(providerSpecificData);
+    const response = await fetch(usageUrl, {
       method: "GET",
       headers: {
         ...authHeaders,

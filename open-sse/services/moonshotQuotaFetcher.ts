@@ -220,6 +220,18 @@ export async function getMoonshotOpenPlatformUsage(connection: MoonshotUsageConn
   message?: string;
   limitReached?: boolean;
 }> {
+  if (isKimiCodingConnection(connection)) {
+    return (await getKimiUsage(
+      undefined,
+      connection.apiKey,
+      toRecord(connection.providerSpecificData)
+    )) as {
+      plan?: string;
+      quotas?: Record<string, UsageQuota>;
+      message?: string;
+      limitReached?: boolean;
+    };
+  }
   const origin = resolveMoonshotOrigin(connection);
   if (!origin) {
     return { message: "Not a Moonshot Open Platform connection." };

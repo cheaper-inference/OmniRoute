@@ -8,6 +8,8 @@ import {
   getMoonshotOpenPlatformUsage,
 } from "../../open-sse/services/moonshotQuotaFetcher.ts";
 import { getUsageForProvider } from "../../open-sse/services/usage.ts";
+import { isKimiCodingBaseUrl } from "../../open-sse/services/usage/moonshotOpenPlatform.ts";
+import { getKimiUsage } from "../../open-sse/services/usage/kimi.ts";
 import { getQuotaFetcher } from "../../open-sse/services/quotaPreflight.ts";
 
 const originalFetch = globalThis.fetch;
@@ -336,4 +338,76 @@ test("registerMoonshotFetchersForNodes still wires a kimi.com/coding node", asyn
   ]);
   assert.equal(typeof getQuotaFetcher("coding-node"), "function");
   assert.equal(typeof getQuotaFetcher("kcode"), "function");
+});
+
+test("isKimiCodingBaseUrl recognizes international api.kimi.ai/coding endpoints (#18180)", () => {
+  assert.equal(isKimiCodingBaseUrl("https://api.kimi.ai/coding/v1"), true);
+  assert.equal(isKimiCodingBaseUrl("https://api.kimi.ai/coding"), true);
+  assert.equal(isKimiCodingBaseUrl("https://api.kimi.ai/coding/"), true);
+  assert.equal(isKimiCodingBaseUrl("https://api.kimi.com/coding/v1"), true);
+  assert.equal(isKimiCodingBaseUrl("https://api.moonshot.ai/v1"), false);
+  assert.equal(isKimiCodingBaseUrl("https://api.moonshot.cn/v1"), false);
+});
+
+test("moonshot connection with international Kimi Coding baseUrl reads /usages from api.kimi.ai (#18180)", async () => {
+  const calls: string[] = [];
+  globalThis.fetch = (async (url: unknown) => {
+    calls.push(String(url));
+    return jsonResponse({
+      plan: "Kimi Coding",
+      usage: {
+        limit: "100",
+        used: "20",
+        remaining: "80",
+        resetTime: "2099-09-25T02:24:04Z",
+      },
+    });
+  }) as typeof fetch;
+
+  const usage = await getMoonshotOpenPlatformUsage({
+    id: "moonshot-coding-ai",
+    provider: "moonshot",
+    apiKey: "sk-coding-key",
+    providerSpecificData: { baseUrl: "https://api.kimi.ai/coding/v1" },
+  });
+
+  assert.deepEqual(calls, ["https://api.kimi.ai/coding/v1/usages"]);
+  assert.equal((usage as { plan?: string }).plan, "Kimi Coding");
+  assert.equal(
+    (usage as { quotas?: Record<string, { remainingPercentage?: number }> }).quotas?.code_7d
+      ?.remainingPercentage,
+    80
+  );
+});
+
+test("getKimiUsage queries api.kimi.ai when baseUrl is configured with .ai host (#18180)", async () => {
+  const calls: string[] = [];
+  globalThis.fetch = (async (url: unknown) => {
+    calls.push(String(url));
+    return jsonResponse({
+      plan: "Kimi Coding",
+      usage: {
+        limit: "100",
+        used: "10",
+        remaining: "90",
+      },
+    });
+  }) as typeof fetch;
+
+  await getKimiUsage(undefined, "sk-test", { baseUrl: "https://api.kimi.ai/coding/v1" });
+  assert.deepEqual(calls, ["https://api.kimi.ai/coding/v1/usages"]);
+});
+
+test("registerMoonshotFetchersForNodes wires an api.kimi.ai/coding node (#18180)", async () => {
+  const { registerMoonshotFetchersForNodes } =
+    await import("../../open-sse/services/moonshotQuotaFetcher.ts");
+  registerMoonshotFetchersForNodes([
+    {
+      id: "coding-node-ai",
+      prefix: "kcode-ai",
+      baseUrl: "https://api.kimi.ai/coding/v1",
+    },
+  ]);
+  assert.equal(typeof getQuotaFetcher("coding-node-ai"), "function");
+  assert.equal(typeof getQuotaFetcher("kcode-ai"), "function");
 });
