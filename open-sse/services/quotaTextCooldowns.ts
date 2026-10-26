@@ -29,6 +29,11 @@ export interface QuotaTextFallback {
 // for the 5-hour subscription quota. Without a dedicated branch the request
 // falls through to the generic 429 retry path (~5s base cooldown).
 
+/** #18058: an explicit model entitlement is not depleted account-wide credits. */
+export function isClaudeModelCreditEntitlementText(errorText: string | null | undefined): boolean {
+  return errorText?.toLowerCase().includes("usage credits are required for this model") ?? false;
+}
+
 export function isSubscriptionQuotaText(lower: string, provider?: string | null): boolean {
   return (
     lower.includes("usage limit reached") ||
@@ -49,7 +54,10 @@ export function isSubscriptionQuotaText(lower: string, provider?: string | null)
     // Native Claude returns this 429 once the account's monthly extra-usage spend cap is reached.
     // It clears only when the billing month rolls over or the cap is raised, so it must park the
     // connection like any other long-window quota instead of falling into the ~5s generic backoff.
-    (provider === "claude" && lower.includes("monthly spend limit"))
+    (provider === "claude" && lower.includes("monthly spend limit")) ||
+    // #18058: model-specific Claude entitlement failures are long-window
+    // quotas, not transient 429 RPM throttles or exhausted account credits.
+    (provider === "claude" && isClaudeModelCreditEntitlementText(lower))
   );
 }
 
