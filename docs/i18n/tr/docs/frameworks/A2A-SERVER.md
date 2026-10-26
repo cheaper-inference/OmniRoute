@@ -65,6 +65,19 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` için `metadata.combo`, ağ geçidi isteğindeki
+`metadata.model` değerini açıkça geçersiz kılar; yok sayılan bir `x-combo`
+JSON alanı olarak değil, gerçek `model` olarak gönderilir. Ağ geçidinin normal
+API anahtarı ve hedef başına yetkilendirme kuralları yine geçerlidir. Geçersiz
+veya boş bir combo reddedilir.
+
+Sonuç; `requested_combo` (çağıranın amacı), `dispatched_model`
+(gerçek ağ geçidi isteği), `response_model` (ağ geçidi yanıtı) ve
+`confirmed_combo` alanlarını sunar. Ağ geçidi bir combo'yu açıkça
+tanımlamadığı sürece son alan `null` olur. A2A karar günlükleri, yürütmeyi
+yalnızca doğrulanmış bir combo ile ilişkilendirir ve doğrulanmamış bir isteği
+`requestedCombo` olarak saklar.
+
 **Yanıt:**
 
 ```json
@@ -76,22 +89,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +105,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE Akışı
 
-`message/send` ile aynıdır ancak gerçek zamanlı akış için Sunucu Tarafından Gönderilen Olaylar döndürür.
+`message/send` ile aynıdır, ancak gerçek zamanlı akış için Sunucu Tarafından Gönderilen Olaylar döndürür.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -135,7 +141,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Bir Görevi İptal Etme
+### `tasks/cancel` — Görevi İptal Etme
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

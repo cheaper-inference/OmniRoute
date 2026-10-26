@@ -47,7 +47,7 @@ A2A funkciju kontrolē iestatījuma **Endpoints → A2A** slēdzis; pēc noklus�
 
 ### `message/send` — Sinhrona izpilde
 
-Nosūta ziņojumu konkrētai prasmei un gaida pilnu atbildi.
+Nosūta ziņojumu prasmei un gaida pilnu atbildi.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Prasmei `smart-routing` lauks `metadata.combo` ir nepārprotama `metadata.model` pārrakstīšana vārtejas pieprasījumam; tas tiek nosūtīts kā faktiskais `model`, nevis kā ignorēts `x-combo` JSON lauks. Joprojām tiek piemērota vārtejas parastā API atslēgas un katra mērķa autorizācija. Nederīga vai tukša kombinācija tiek noraidīta.
+
+Rezultātā ir pieejami `requested_combo` (izsaucēja nolūks), `dispatched_model` (faktiskais vārtejas pieprasījums), `response_model` (vārtejas atbilde) un `confirmed_combo`. Pēdējā lauka vērtība ir `null`, ja vien vārteja nepārprotami neidentificē kombināciju. A2A lēmumu žurnālos izpilde tiek attiecināta tikai uz apstiprinātu kombināciju, neapstiprinātu pieprasījumu saglabājot kā `requestedCombo`.
+
 **Atbilde:**
 
 ```json
@@ -76,22 +80,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +96,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE straumēšana
 
-Darbojas tāpat kā `message/send`, bet atgriež Server-Sent Events reālā laika straumēšanai.
+Darbojas tāpat kā `message/send`, bet reāllaika straumēšanai atgriež servera sūtītus notikumus.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +123,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Uzdevuma stāvokļa vaicājums
+### `tasks/get` — Uzdevuma statusa vaicājums
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

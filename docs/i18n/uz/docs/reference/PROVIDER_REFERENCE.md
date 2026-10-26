@@ -4,11 +4,11 @@
 
 ---
 
-> **Avtomatik yaratilgan** — `src/shared/constants/providers.ts` faylidan, qo'lda tahrirlamang.
-> Qayta yaratish uchun: `npm run gen:provider-reference`
-> **Oxirgi yaratilgan:** 2026-10-18
+> `src/shared/constants/providers.ts` faylidan **avtomatik yaratilgan** — qoʻlda tahrirlamang.
+> Quyidagi buyruq bilan qayta yarating: `npm run gen:provider-reference`
+> **Oxirgi yaratilgan sana:** 2026-10-20
 
-Jami provayderlar: **375**. Toifalar bo'yicha taqsimotni quyida ko'ring.
+Provayderlar jami: **375**. Quyida toifalar boʻyicha taqsimotni koʻring.
 
 ## Toifalar
 
@@ -461,7 +461,7 @@ Har bir provayderni yoqish, sozlash va sinash uchun `/dashboard/providers` manzi
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Reyestr (har bir model tafsilotlari): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Ijrochilar: [`open-sse/executors/`](../../open-sse/executors/) (154 ta implementatsiya)
+- Ijrochilar: [`open-sse/executors/`](../../open-sse/executors/) (156 ta amalga oshirish)
 - Tarjimonlar: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Shuningdek qarang

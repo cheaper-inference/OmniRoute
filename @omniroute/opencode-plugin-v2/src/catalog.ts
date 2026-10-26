@@ -18,12 +18,15 @@ import {
   type CapabilityPresetFlags,
   passesCapabilityPresets,
 } from "./capability-presets.js";
+import { type FreeOptions, INFERRED_FREE_LABEL } from "./shared/free-signals.js";
+import { isInferredFree, warnOnEmptyFreeOverlay } from "./shared/free-signals.js";
 import {
   isHttpUrl,
   type ApiFormatV2,
   type LogLevel,
   type Logger,
   type OmniRouteCombosFetcher,
+  type OmniRouteEnrichmentEntry,
   type OmniRouteEnrichmentFetcher,
   type OmniRouteEnrichmentMap,
   type OmniRouteModelsFetcher,
@@ -90,7 +93,7 @@ export interface EndpointTimeouts {
   enrichment?: number;
 }
 
-export interface ResolvedOptions {
+export interface ResolvedOptions extends FreeOptions {
   providerId: string;
   baseURL: string;
   apiKey: string;
@@ -115,7 +118,6 @@ export interface ResolvedOptions {
    * member-level filter is on (see `usesModelsComboSource`).
    */
   combosSource?: CombosSource;
-  freeOnly?: boolean;
   toolsOnly?: boolean;
   visionOnly?: boolean;
   enrichment?: OmniRouteEnrichmentMap | boolean;
@@ -615,6 +617,8 @@ interface PublishContext {
   /** Shared with the combos pass: one collision warning per key, per run. */
   warnedCombos: Set<string>;
   cacheKey: string;
+  /** Per-entry inferred-free verdict, bound to this publish's overlay. */
+  isFreeInferred: (id: string, entry: OmniRouteEnrichmentEntry | undefined) => boolean;
 }
 
 /**
@@ -652,6 +656,7 @@ async function publishCombos(
     warnedCombos,
     cacheKey,
   } = ctx;
+  const { isFreeInferred } = ctx;
   let rawCombos: OmniRouteRawCombo[];
   try {
     rawCombos = combosFetcher
@@ -704,7 +709,8 @@ async function publishCombos(
         presetByName,
         enrichment,
         canonicalToAlias,
-        activeFlags
+        activeFlags,
+        isFreeInferred
       );
       if (deferred) {
         stillPending.push(combo);
@@ -716,6 +722,7 @@ async function publishCombos(
         isCombo: true,
       });
       const comboName = comboLookupName(combo);
+      const comboInferred = isFreeInferred(combo.id, comboEnrichment);
       const passesMembers = recordComboPresetVerdict(
         presetByName,
         combo,
@@ -728,11 +735,13 @@ async function publishCombos(
           ? !passesMembers
           : !passesCapabilityPresets(mapped, comboEnrichment, {
               freeOnly: opts.freeOnly,
+              freeInferred: comboInferred,
               toolsOnly: opts.toolsOnly,
               visionOnly: opts.visionOnly,
             } satisfies CapabilityPresetFlags)
       )
         continue;
+      if (comboInferred) mapped.name += INFERRED_FREE_LABEL;
       const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
       const key = X + "/" + mid;
       if (publishedKeys.has(key)) {
@@ -827,9 +836,7 @@ export async function collectCatalog(
   const enrichment = await resolveEnrichmentOverlay(opts, fetchers, log);
   const canonicalToAlias = buildCanonicalToAliasMap(enrichment);
   const canonicalDedup = canonicalDedupSet(rawModels, canonicalToAlias);
-  // `freeOnly` reads the overlay: an empty overlay (no management token,
-  // `enrichment: false`, or fetch failure) would otherwise empty the catalog
-  // silently. Warn once per refresh and keep filtering (fail-closed).
+  warnOnEmptyFreeOverlay(opts, enrichment, (m) => log.warn(m));
   // A sparse overlay (free-tier lines that never meet a served id) warns
   // with its match ratio instead, so a short catalog names its cause.
   const {
@@ -841,16 +848,10 @@ export async function collectCatalog(
     enrichment,
     canonicalToAlias
   );
-  if (opts.freeOnly === true) {
-    if (freeTotal === 0) {
-      log.warn(
-        `[omniroute-v2] freeOnly is on but the enrichment overlay has no free-tier entries (no management token, enrichment disabled, or free-tier fetch failed); publishing an empty catalog. Disable freeOnly or configure the management token.`
-      );
-    } else if (freeUnmatched > 0) {
-      log.warn(
-        `[omniroute-v2] freeOnly dropped ${freeUnmatched} of ${freeTotal} free-tier lines: ${freeMatched}/${freeTotal} free-tier entries match the served catalog.`
-      );
-    }
+  if (opts.freeOnly === true && freeTotal > 0 && freeUnmatched > 0) {
+    log.warn(
+      `[omniroute-v2] freeOnly dropped ${freeUnmatched} of ${freeTotal} free-tier lines: ${freeMatched}/${freeTotal} free-tier entries match the served catalog.`
+    );
   }
 
   const usable = await resolveUsableAliases(
@@ -894,9 +895,11 @@ export async function collectCatalog(
     toolsOnly: opts.toolsOnly,
     visionOnly: opts.visionOnly,
   };
+  const isFreeInferred = (id: string, entry: OmniRouteEnrichmentEntry | undefined): boolean =>
+    isInferredFree(id, entry, opts, enrichment, canonicalToAlias);
   const presetPool = catalogAll
     ? []
-    : filterRawPoolByPreset(rawModels, enrichment, canonicalToAlias, presetFlags);
+    : filterRawPoolByPreset(rawModels, enrichment, canonicalToAlias, presetFlags, isFreeInferred);
   const showcasePool = catalogAll
     ? []
     : presetPool.filter(
@@ -973,15 +976,18 @@ export async function collectCatalog(
     applyEnrichment(mapped, enrichmentEntry, {
       providerTag: opts.providerTag !== false,
     });
+    const inferred = isInferredFree(entry.id, enrichmentEntry, opts, enrichment, canonicalToAlias);
     if (
       !passesCapabilityPresets(mapped, enrichmentEntry, {
         freeOnly: opts.freeOnly,
+        freeInferred: inferred,
         toolsOnly: opts.toolsOnly,
         visionOnly: opts.visionOnly,
       } satisfies CapabilityPresetFlags)
     )
       continue;
     afterPresets += 1;
+    if (inferred) mapped.name += INFERRED_FREE_LABEL;
     const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
     const key = X + "/" + mid;
     collected.set(key, mapped);
@@ -1017,14 +1023,23 @@ export async function collectCatalog(
       applyEnrichment(mapped, restoreEnrichment, {
         providerTag: opts.providerTag !== false,
       });
+      const restoreInferred = isInferredFree(
+        entry.id,
+        restoreEnrichment,
+        opts,
+        enrichment,
+        canonicalToAlias
+      );
       if (
         !passesCapabilityPresets(mapped, restoreEnrichment, {
           freeOnly: opts.freeOnly,
+          freeInferred: restoreInferred,
           toolsOnly: opts.toolsOnly,
           visionOnly: opts.visionOnly,
         } satisfies CapabilityPresetFlags)
       )
         continue;
+      if (restoreInferred) mapped.name += INFERRED_FREE_LABEL;
       const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
       const key = X + "/" + mid;
       collected.set(key, mapped);
@@ -1057,6 +1072,7 @@ export async function collectCatalog(
         combosTimeout,
         warnedCombos,
         cacheKey,
+        isFreeInferred,
       });
   // One summary line per successful refresh: the stage counters plus the
   // free-tier lines the served catalog never reached. Audible at the

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { WebhookDeliveriesPanel } from "./WebhookDeliveriesPanel";
 
 export type WebhookKind = "slack" | "telegram" | "discord" | "custom";
@@ -28,10 +31,10 @@ const KIND_ICONS: Record<WebhookKind, string> = {
 };
 
 const KIND_COLORS: Record<WebhookKind, string> = {
-  slack: "text-emerald-500",
-  telegram: "text-blue-500",
-  discord: "text-violet-500",
-  custom: "text-amber-500",
+  slack: "text-chart-1",
+  telegram: "text-chart-2",
+  discord: "text-chart-3",
+  custom: "text-chart-4",
 };
 
 function getStatus(wh: WebhookItem): "active" | "inactive" | "errored" {
@@ -64,80 +67,77 @@ export function WebhookCard({
   const isTesting = testingId === webhook.id;
 
   return (
-    <div className="rounded-xl border border-border bg-surface transition-shadow hover:shadow-sm">
+    <div className="rounded-xl border border-border bg-surface">
       <div className="flex items-center gap-3 p-4">
-        <span
-          className={`material-symbols-outlined shrink-0 text-[22px] ${KIND_COLORS[webhook.kind]}`}
-        >
-          {KIND_ICONS[webhook.kind]}
-        </span>
+        <Icon
+          name={KIND_ICONS[webhook.kind]}
+          size={22}
+          className={`shrink-0 ${KIND_COLORS[webhook.kind]}`}
+        />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-text-main">
             {webhook.description || t("unnamedWebhook")}
           </p>
           <p className="truncate text-xs text-text-muted">{webhook.url}</p>
         </div>
-        <span
-          className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium ${
-            status === "active"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300"
-              : status === "errored"
-                ? "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-300"
-                : "border-border bg-sidebar text-text-muted"
-          }`}
+        <Badge
+          className="shrink-0"
+          variant={status === "active" ? "success" : status === "errored" ? "error" : "default"}
         >
           {t(status)}
-        </span>
+        </Badge>
         <div className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => onTest(webhook)}
             disabled={isTesting}
             title={t("testWebhook")}
-            className="rounded-lg p-2 text-text-muted transition-colors hover:bg-primary/10 hover:text-primary disabled:opacity-40"
+            aria-label={t("testWebhook")}
           >
-            <span
-              className={`material-symbols-outlined text-[18px] ${isTesting ? "animate-spin" : ""}`}
-            >
-              {isTesting ? "sync" : "send"}
-            </span>
-          </button>
-          <button
-            type="button"
+            <Icon
+              name={isTesting ? "sync" : "send"}
+              size={18}
+              className={isTesting ? "animate-spin" : undefined}
+            />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            icon={webhook.enabled ? "toggle_on" : "toggle_off"}
             onClick={() => onToggleEnabled(webhook)}
             title={webhook.enabled ? t("disable") : t("enable")}
-            className="rounded-lg p-2 text-text-muted transition-colors hover:bg-surface/60 hover:text-text-main"
-          >
-            <span className="material-symbols-outlined text-[18px]">
-              {webhook.enabled ? "toggle_on" : "toggle_off"}
-            </span>
-          </button>
-          <button
-            type="button"
+            // Stable name + pressed state ("Enabled, pressed"); a flipping action label
+            // next to aria-pressed would read "Disable, pressed".
+            aria-label={t("enabled")}
+            aria-pressed={webhook.enabled}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            icon="edit"
             onClick={() => onEdit(webhook)}
             title={t("edit")}
-            className="rounded-lg p-2 text-text-muted transition-colors hover:bg-surface/60 hover:text-text-main"
-          >
-            <span className="material-symbols-outlined text-[18px]">edit</span>
-          </button>
-          <button
-            type="button"
+            aria-label={t("edit")}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            icon="delete"
+            className="text-error"
             onClick={() => onDelete(webhook)}
             title={t("delete")}
-            className="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-500/10"
-          >
-            <span className="material-symbols-outlined text-[18px]">delete</span>
-          </button>
-          <button
-            type="button"
+            aria-label={t("delete")}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            icon={expanded ? "expand_less" : "expand_more"}
             onClick={() => setExpanded((v) => !v)}
-            title={expanded ? "Collapse" : "Expand"}
-            className="rounded-lg p-2 text-text-muted transition-colors hover:bg-surface/60 hover:text-text-main"
-          >
-            <span className="material-symbols-outlined text-[18px]">
-              {expanded ? "expand_less" : "expand_more"}
-            </span>
-          </button>
+            title={expanded ? t("collapseDetails") : t("expandDetails")}
+            aria-label={expanded ? t("collapseDetails") : t("expandDetails")}
+            aria-expanded={expanded}
+          />
         </div>
       </div>
 
@@ -145,12 +145,9 @@ export function WebhookCard({
         <div className="border-t border-border px-4 pb-4 pt-3">
           <div className="mb-3 flex flex-wrap gap-1">
             {webhook.events.map((ev) => (
-              <span
-                key={ev}
-                className="rounded-full border border-border bg-sidebar px-2 py-0.5 text-xs text-text-muted"
-              >
+              <Badge key={ev} size="sm">
                 {ev === "*" ? t("allEvents") : ev}
-              </span>
+              </Badge>
             ))}
           </div>
           <p className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">

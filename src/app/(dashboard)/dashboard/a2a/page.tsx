@@ -2,7 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { interpolateNodes, nodeArgs } from "@/shared/utils/interpolateNodes";
+import { Switch } from "@omniroute/ui-kit/switch";
 import { Card } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import EmptyState from "@/shared/components/EmptyState";
+import { cn } from "@/shared/utils/cn";
 import A2ADashboardPage from "../endpoint/components/A2ADashboard";
 
 type ServiceStatus = { online: boolean; loading: boolean };
@@ -27,60 +33,23 @@ function ServiceToggle({
 
   return (
     <div className="flex items-center gap-3">
-      <div
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
-        style={{
-          borderColor: loading
-            ? "var(--color-border)"
-            : online
-              ? "rgba(34,197,94,0.3)"
-              : "rgba(239,68,68,0.3)",
-          background: loading
-            ? "transparent"
-            : online
-              ? "rgba(34,197,94,0.1)"
-              : "rgba(239,68,68,0.1)",
-          color: loading ? "var(--color-text-muted)" : online ? "rgb(34,197,94)" : "rgb(239,68,68)",
-        }}
-      >
-        <span
-          className="inline-block w-2 h-2 rounded-full"
-          style={{
-            background: loading
-              ? "var(--color-text-muted)"
-              : online
-                ? "rgb(34,197,94)"
-                : "rgb(239,68,68)",
-            animation: online ? "pulse 2s infinite" : "none",
-          }}
-        />
+      <Badge variant={loading ? "default" : online ? "success" : "error"} dot>
         {loading ? "..." : online ? t("online") : t("offline")}
-      </div>
+      </Badge>
 
-      <button
-        onClick={onToggle}
+      <Switch
+        checked={enabled}
+        onCheckedChange={onToggle}
         disabled={toggling}
-        className="relative inline-flex items-center h-7 w-[52px] rounded-full transition-all duration-300 focus:outline-none border"
-        style={{
-          background: enabled ? "rgb(34,197,94)" : "var(--color-bg-tertiary)",
-          borderColor: enabled ? "rgba(34,197,94,0.5)" : "var(--color-border)",
-          opacity: toggling ? 0.6 : 1,
-          cursor: toggling ? "wait" : "pointer",
-        }}
+        aria-label={enabled ? t("disableLabel", { label }) : t("enableLabel", { label })}
         title={enabled ? t("disableLabel", { label }) : t("enableLabel", { label })}
-      >
-        <span
-          className="inline-block w-5 h-5 rounded-full shadow-md transition-all duration-300"
-          style={{
-            transform: enabled ? "translateX(26px)" : "translateX(3px)",
-            background: enabled ? "#fff" : "var(--color-text-muted)",
-          }}
-        />
-      </button>
+      />
 
       <span
-        className="text-xs font-medium min-w-[24px]"
-        style={{ color: enabled ? "rgb(34,197,94)" : "var(--color-text-muted)" }}
+        className={cn(
+          "text-xs font-medium min-w-[24px]",
+          enabled ? "text-success" : "text-text-muted"
+        )}
       >
         {toggling ? "..." : enabled ? tCommon("on") : tCommon("off")}
       </span>
@@ -91,38 +60,17 @@ function ServiceToggle({
 function DisabledPanel() {
   const t = useTranslations("a2aDashboard");
   return (
-    <Card className="p-6">
-      <div className="flex items-start gap-3">
-        <div
-          className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg"
-          style={{ background: "var(--color-bg-tertiary)" }}
-        >
-          <span
-            aria-hidden="true"
-            className="relative block size-5 rounded-full border-2"
-            style={{ borderColor: "var(--color-text-muted)" }}
-          >
-            <span
-              className="absolute left-1/2 top-[-3px] h-3 w-0.5 -translate-x-1/2 rounded-full"
-              style={{ background: "var(--color-text-muted)" }}
-            />
-          </span>
-        </div>
-        <div>
-          <h2 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
-            {t("a2aDisabledTitle")}
-          </h2>
-          <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
-            {t("a2aDisabledDesc")}
-          </p>
-        </div>
-      </div>
-    </Card>
+    <EmptyState
+      icon="power_settings_new"
+      title={t("a2aDisabledTitle")}
+      description={t("a2aDisabledDesc")}
+    />
   );
 }
 
 export default function A2APage() {
   const t = useTranslations("a2aDashboard");
+  const tSidebar = useTranslations("sidebar");
   const [a2aStatus, setA2aStatus] = useState<ServiceStatus>({ online: false, loading: true });
   const [a2aEnabled, setA2aEnabled] = useState(false);
   const [a2aToggling, setA2aToggling] = useState(false);
@@ -184,32 +132,29 @@ export default function A2APage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Page title (lote 7 pendência 12): the shell title hides when a PageHeader is present. */}
+      <PageHeader compact title={tSidebar("a2a")} description={tSidebar("a2aSubtitle")} />
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-              {t("a2aIntro")}
-            </p>
-            <ol
-              className="mt-2 text-sm space-y-0.5 list-decimal list-inside"
-              style={{ color: "var(--color-text-muted)" }}
-            >
+            <p className="text-sm text-text-muted">{t("a2aIntro")}</p>
+            <ol className="mt-2 text-sm space-y-0.5 list-decimal list-inside text-text-muted">
               <li>
-                {t.rich("a2aStep1", {
-                  code: (chunks) => <code className="text-xs">{t("agentCardPath")}</code>,
+                {interpolateNodes(t("a2aStep1", nodeArgs(["code"])), {
+                  code: <code className="text-xs">{t("agentCardPath")}</code>,
                 })}
               </li>
               <li>
-                {t.rich("a2aStep2", {
-                  code1: (chunks) => <code className="text-xs">{t("rpcEndpoint")}</code>,
-                  code2: (chunks) => <code className="text-xs">{t("rpcMethodSend")}</code>,
-                  code3: (chunks) => <code className="text-xs">{t("rpcMethodStream")}</code>,
+                {interpolateNodes(t("a2aStep2", nodeArgs(["code1", "code2", "code3"])), {
+                  code1: <code className="text-xs">{t("rpcEndpoint")}</code>,
+                  code2: <code className="text-xs">{t("rpcMethodSend")}</code>,
+                  code3: <code className="text-xs">{t("rpcMethodStream")}</code>,
                 })}
               </li>
               <li>
-                {t.rich("a2aStep3", {
-                  code1: (chunks) => <code className="text-xs">{t("rpcMethodGet")}</code>,
-                  code2: (chunks) => <code className="text-xs">{t("rpcMethodCancel")}</code>,
+                {interpolateNodes(t("a2aStep3", nodeArgs(["code1", "code2"])), {
+                  code1: <code className="text-xs">{t("rpcMethodGet")}</code>,
+                  code2: <code className="text-xs">{t("rpcMethodCancel")}</code>,
                 })}
               </li>
             </ol>

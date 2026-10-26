@@ -65,7 +65,18 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Պատասխան.**
+`smart-routing`-ի դեպքում `metadata.combo`-ն գեյթվեյի հարցման համար բացահայտ կերպով վերագրում է
+`metadata.model`-ը․ այն ուղարկվում է որպես իրական `model`,
+այլ ոչ թե որպես անտեսվող `x-combo` JSON դաշտ։ Գեյթվեյի API բանալու և
+ըստ թիրախի թույլտվության սովորական կանոնները շարունակում են գործել։ Անվավեր կամ դատարկ համակցությունը մերժվում է։
+
+Արդյունքում հասանելի են `requested_combo` (կանչողի մտադրությունը), `dispatched_model`
+(գեյթվեյի իրական հարցումը), `response_model` (գեյթվեյի պատասխանը) և
+`confirmed_combo` դաշտերը։ Վերջին դաշտը `null` է, եթե գեյթվեյը հստակորեն
+չի նույնականացնում համակցությունը։ A2A որոշումների մատյանները կատարումը վերագրում են միայն
+հաստատված համակցությանը՝ չհաստատված հարցումը պահպանելով որպես `requestedCombo`։
+
+**Պատասխան՝**
 
 ```json
 {
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE հոսքային փոխանցում
 
-Նույնն է, ինչ `message/send`-ը, սակայն իրական ժամանակում հոսքային փոխանցման համար վերադարձնում է սերվերից ուղարկվող իրադարձություններ։
+Նույնն է, ինչ `message/send`-ը, սակայն իրական ժամանակում հոսքային փոխանցման համար վերադարձնում է սերվերի կողմից ուղարկվող իրադարձություններ։
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE իրադարձություններ.**
+**SSE իրադարձություններ՝**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}

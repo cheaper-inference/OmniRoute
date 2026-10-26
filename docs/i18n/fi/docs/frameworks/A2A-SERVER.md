@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-taidossa `metadata.combo` ohittaa eksplisiittisesti
+`metadata.model`-arvon yhdyskäytäväpyynnössä. Se lähetetään varsinaisena `model`-arvona
+eikä ohitettavana `x-combo`-JSON-kenttänä. Yhdyskäytävän normaali API-avaimeen perustuva ja
+kohdekohtainen valtuutus on yhä voimassa. Virheellinen tai tyhjä yhdistelmä hylätään.
+
+Tulos sisältää kentät `requested_combo` (kutsujan aikomus), `dispatched_model`
+(varsinainen yhdyskäytäväpyyntö), `response_model` (yhdyskäytävän vastaus) ja
+`confirmed_combo`. Viimeisen kentän arvo on `null`, ellei yhdyskäytävä nimenomaisesti
+yksilöi yhdistelmää. A2A-päätöslokit kohdistavat suorituksen vain
+vahvistettuun yhdistelmään ja säilyttävät vahvistamattoman pyynnön `requestedCombo`-arvona.
+
 **Vastaus:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE-suoratoisto
 
-Toimii samoin kuin `message/send`, mutta palauttaa Server-Sent Events -tapahtumia reaaliaikaista suoratoistoa varten.
+Toimii kuten `message/send`, mutta palauttaa Server-Sent Events -tapahtumia reaaliaikaista suoratoistoa varten.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ lähetetty → käsittelyssä → valmis
 
 ---
 
-## Integrointiesimerkit
+## Integraatioesimerkit
 
 ### Python (requests)
 

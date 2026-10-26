@@ -43,11 +43,11 @@ A2A được kiểm soát bằng nút chuyển đổi **Endpoints → A2A** và 
 
 ---
 
-## Các phương thức JSON-RPC 2.0
+## Phương thức JSON-RPC 2.0
 
 ### `message/send` — Thực thi đồng bộ
 
-Gửi một thông điệp tới một kỹ năng và chờ phản hồi hoàn chỉnh.
+Gửi một thông điệp đến một kỹ năng và chờ phản hồi hoàn chỉnh.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Đối với `smart-routing`, `metadata.combo` là giá trị ghi đè rõ ràng lên
+`metadata.model` cho yêu cầu đến gateway; nó được gửi dưới dạng `model` thực tế,
+không phải dưới dạng trường JSON `x-combo` bị bỏ qua. Cơ chế ủy quyền thông thường
+của gateway theo khóa API và từng đích vẫn được áp dụng. Combo không hợp lệ hoặc trống sẽ bị từ chối.
+
+Kết quả cung cấp `requested_combo` (ý định của bên gọi), `dispatched_model`
+(yêu cầu thực tế đến gateway), `response_model` (phản hồi từ gateway) và
+`confirmed_combo`. Trường cuối cùng là `null` trừ khi gateway xác định rõ
+một combo. Nhật ký quyết định A2A chỉ quy kết việc thực thi cho một
+combo đã được xác nhận, đồng thời lưu giữ yêu cầu chưa được xác nhận dưới dạng `requestedCombo`.
+
 **Phản hồi:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Truyền phát SSE
 
-Tương tự như `message/send` nhưng trả về Server-Sent Events để truyền phát theo thời gian thực.
+Giống như `message/send` nhưng trả về Server-Sent Events để truyền phát theo thời gian thực.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Các sự kiện SSE:**
+**Sự kiện SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}

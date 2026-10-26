@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Bei `smart-routing` überschreibt `metadata.combo` explizit
+`metadata.model` für die Gateway-Anfrage; es wird als tatsächliches `model`
+und nicht als ignoriertes JSON-Feld `x-combo` gesendet. Die normale API-Schlüssel- und
+zielbezogene Autorisierung des Gateways gilt weiterhin. Eine ungültige oder leere Combo wird abgelehnt.
+
+Das Ergebnis stellt `requested_combo` (Absicht des Aufrufers), `dispatched_model`
+(die tatsächliche Gateway-Anfrage), `response_model` (Gateway-Antwort) und
+`confirmed_combo` bereit. Das letzte Feld ist `null`, sofern das Gateway nicht ausdrücklich
+eine Combo identifiziert. A2A-Entscheidungsprotokolle ordnen die Ausführung nur einer
+bestätigten Combo zu und behalten eine unbestätigte Anfrage als `requestedCombo` bei.
+
 **Antwort:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE-Streaming
 
-Funktioniert wie `message/send`, gibt jedoch Server-Sent Events für das Echtzeit-Streaming zurück.
+Entspricht `message/send`, gibt jedoch Server-Sent Events für das Echtzeit-Streaming zurück.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Eine Aufgabe abbrechen
+### `tasks/cancel` — Aufgabe abbrechen
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

@@ -1,22 +1,24 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+
 interface SecretMaskToggleProps {
   masked: boolean;
   onToggle: () => void;
 }
 
 export function SecretMaskToggle({ masked, onToggle }: SecretMaskToggleProps) {
+  const t = useTranslations("trafficInspector");
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="sm"
+      icon={masked ? "visibility_off" : "visibility"}
+      aria-pressed={!masked}
       onClick={onToggle}
-      className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-main focus-ring rounded px-2 py-0.5 border border-border"
-      title={masked ? "Unmask secrets" : "Mask secrets"}
     >
-      <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-        {masked ? "visibility_off" : "visibility"}
-      </span>
-      {masked ? "Show secrets" : "Mask secrets"}
-    </button>
+      {masked ? t("showSecrets") : t("maskSecrets")}
+    </Button>
   );
 }

@@ -1,4 +1,16 @@
-export function HeroStat({ label, value, accent }: { label: string; value: number; accent?: string }) {
+"use client";
+
+import Select from "@/shared/components/Select";
+
+export function HeroStat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number;
+  accent?: string;
+}) {
   return (
     <div className="text-center">
       <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold truncate">
@@ -15,7 +27,7 @@ export function HeroStat({ label, value, accent }: { label: string; value: numbe
 
 export function SyncMini({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-border/30 bg-bg-base/40 px-2 py-1.5">
+    <div className="rounded-md border border-border/30 bg-bg/40 px-2 py-1.5">
       <p className="text-[9px] uppercase tracking-wide text-text-muted font-semibold truncate">
         {label}
       </p>
@@ -38,19 +50,12 @@ export function FilterSelect({
   options: Array<{ value: string; label: string }>;
 }) {
   return (
-    <label className="flex items-center gap-1.5 text-xs text-text-muted">
-      <span className="font-semibold uppercase tracking-wide">{label}:</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="bg-bg-base border border-border rounded-md px-2 py-1.5 text-xs text-text-main cursor-pointer focus:outline-none focus:border-primary"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
+    <Select
+      compact
+      label={label}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      options={options}
+    />
   );
 }

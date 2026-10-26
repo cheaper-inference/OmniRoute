@@ -45,9 +45,9 @@ JSON-RPC ਗਲਤੀ ਕੋਡ `-32000` ਨਾਲ HTTP 503 ਵਾਪਸ ਕਰ�
 
 ## JSON-RPC 2.0 ਵਿਧੀਆਂ
 
-### `message/send` — ਸਮਕਾਲੀ ਕਾਰਜ-ਨਿਰਵਹਿਣ
+### `message/send` — ਸਮਕਾਲੀ ਐਗਜ਼ੀਕਿਊਸ਼ਨ
 
-ਇੱਕ ਸਕਿੱਲ ਨੂੰ ਸੁਨੇਹਾ ਭੇਜਦਾ ਹੈ ਅਤੇ ਪੂਰੇ ਜਵਾਬ ਦੀ ਉਡੀਕ ਕਰਦਾ ਹੈ।
+ਕਿਸੇ ਸਕਿੱਲ ਨੂੰ ਸੁਨੇਹਾ ਭੇਜਦਾ ਹੈ ਅਤੇ ਪੂਰੇ ਜਵਾਬ ਦੀ ਉਡੀਕ ਕਰਦਾ ਹੈ।
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,12 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` ਲਈ, ਗੇਟਵੇ ਬੇਨਤੀ ਵਾਸਤੇ `metadata.combo`, `metadata.model` ਨੂੰ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਓਵਰਰਾਈਡ ਕਰਦਾ ਹੈ; ਇਸਨੂੰ ਅਣਡਿੱਠੇ ਕੀਤੇ `x-combo` JSON ਫੀਲਡ ਵਜੋਂ ਨਹੀਂ, ਸਗੋਂ ਅਸਲ `model` ਵਜੋਂ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। ਗੇਟਵੇ ਦੀ ਆਮ API-ਕੁੰਜੀ ਅਤੇ ਪ੍ਰਤੀ-ਟਾਰਗੇਟ ਪ੍ਰਮਾਣੀਕਰਨ ਨੀਤੀ ਫਿਰ ਵੀ ਲਾਗੂ ਹੁੰਦੀ ਹੈ। ਅਵੈਧ ਜਾਂ ਖਾਲੀ ਕੌਂਬੋ ਰੱਦ ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।
+
+ਨਤੀਜਾ `requested_combo` (ਕਾਲਰ ਦਾ ਇਰਾਦਾ), `dispatched_model`
+(ਅਸਲ ਗੇਟਵੇ ਬੇਨਤੀ), `response_model` (ਗੇਟਵੇ ਜਵਾਬ) ਅਤੇ
+`confirmed_combo` ਪ੍ਰਦਰਸ਼ਿਤ ਕਰਦਾ ਹੈ। ਆਖਰੀ ਫੀਲਡ `null` ਰਹਿੰਦੀ ਹੈ, ਜਦੋਂ ਤੱਕ ਗੇਟਵੇ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਕਿਸੇ ਕੌਂਬੋ ਦੀ ਪਛਾਣ ਨਹੀਂ ਕਰਦਾ। A2A ਫ਼ੈਸਲਾ ਲੌਗ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਨੂੰ ਸਿਰਫ਼ ਪੁਸ਼ਟੀ ਕੀਤੇ ਕੌਂਬੋ ਨਾਲ ਜੋੜਦੇ ਹਨ, ਜਦਕਿ ਅਪੁਸ਼ਟ ਬੇਨਤੀ ਨੂੰ `requestedCombo` ਵਜੋਂ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ।
+
 **ਜਵਾਬ:**
 
 ```json
@@ -76,22 +82,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +98,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE ਸਟ੍ਰੀਮਿੰਗ
 
-`message/send` ਵਾਂਗ ਹੀ ਹੈ, ਪਰ ਰੀਅਲ-ਟਾਈਮ ਸਟ੍ਰੀਮਿੰਗ ਲਈ Server-Sent Events ਵਾਪਸ ਕਰਦਾ ਹੈ।
+ਇਹ `message/send` ਵਾਂਗ ਹੀ ਹੈ, ਪਰ ਰੀਅਲ-ਟਾਈਮ ਸਟ੍ਰੀਮਿੰਗ ਲਈ Server-Sent Events ਵਾਪਸ ਕਰਦਾ ਹੈ।
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +125,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — ਟਾਸਕ ਸਥਿਤੀ ਬਾਰੇ ਪੁੱਛਗਿੱਛ
+### `tasks/get` — ਟਾਸਕ ਦੀ ਸਥਿਤੀ ਪੁੱਛੋ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +134,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — ਇੱਕ ਟਾਸਕ ਰੱਦ ਕਰੋ
+### `tasks/cancel` — ਟਾਸਕ ਰੱਦ ਕਰੋ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +261,7 @@ JSON-RPC ਐਂਡਪੌਇੰਟ `/a2a` ਪ੍ਰਮਾਣਿਕ A2A ਪ੍ਰ�
 
 ---
 
-## ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਉਦਾਹਰਨਾਂ
+## ਏਕੀਕਰਨ ਦੀਆਂ ਉਦਾਹਰਨਾਂ
 
 ### Python (requests)
 

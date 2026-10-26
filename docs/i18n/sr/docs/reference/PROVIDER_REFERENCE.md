@@ -4,11 +4,11 @@
 
 ---
 
-> **Automatski generisano** iz `src/shared/constants/providers.ts` — ne menjajte ručno.
-> Ponovo generišite pomoću: `npm run gen:provider-reference`
-> **Poslednji put generisano:** 2026-10-18
+> **Аутоматски генерисано** из `src/shared/constants/providers.ts` — немојте ручно уређивати.
+> Поново генеришите помоћу: `npm run gen:provider-reference`
+> **Последњи пут генерисано:** 2026-10-20
 
-Ukupno provajdera: **375**. Pogledajte raspodelu po kategorijama ispod.
+Укупан број провајдера: **375**. Погледајте поделу по категоријама у наставку.
 
 ## Категорије
 
@@ -457,12 +457,12 @@ Ukupno provajdera: **375**. Pogledajte raspodelu po kategorijama ispod.
 | ------ | ------ | ------------------------------ | ------ | -------- | -------- |
 | `auto` | `auto` | Аутоматски (без конфигурације) | Систем | —        | —        |
 
-## Izvori istine
+## Извори истине
 
-- Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Registar (detalji po modelu): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Izvršioci: [`open-sse/executors/`](../../open-sse/executors/) (154 implementacije)
-- Prevodioci: [`open-sse/translator/`](../../open-sse/translator/)
+- Каталог: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- Регистар (детаљи по моделу): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Извршиоци: [`open-sse/executors/`](../../open-sse/executors/) (156 имплементација)
+- Преводиоци: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Погледајте и
 
