@@ -76,9 +76,16 @@ export function reconcileHistoricalEnrichment(
       /^(?:openai-compatible-(?:chat|responses)-|anthropic-compatible-)/.test(
         entry.providerCanonical
       );
-    // Old prefixed catalog entries cached before a rename are not evidence
-    // for any new current route; drop only unserved compatible namespaced keys.
-    if (isCompatible && alias && key.startsWith(`${alias}/`) && !served.has(key)) continue;
+    // Cached bare fallback keys are also stale if neither their unprefixed
+    // nor their current public-prefixed route is served. Preserve literal
+    // slash-bearing IDs when their prefixed route is live. For a namespaced
+    // entry, do not mistake alias/foo for alias/alias/foo.
+    if (isCompatible && alias) {
+      const namespaced = key.startsWith(`${alias}/`);
+      if (namespaced ? !served.has(key) : !served.has(key) && !served.has(`${alias}/${key}`)) {
+        continue;
+      }
+    }
     const candidates = entry.historicalPricingCandidates;
     if (!candidates?.length) {
       result.set(key, entry);
