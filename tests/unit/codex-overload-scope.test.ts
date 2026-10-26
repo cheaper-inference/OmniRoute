@@ -175,3 +175,75 @@ test("an overload never clears an existing terminal account state", async () => 
   const after = await providers.getProviderConnectionById(conn.id);
   assert.equal(after.testStatus, "expired");
 });
+
+test("Codex capacity 429 with disableCooling avoids virtual quota and exact-model lockouts", async () => {
+  const conn = await seed("codex", true);
+  const result = await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    "Codex is at capacity, please try again later",
+    "codex",
+    "gpt-5.3-codex",
+    profile
+  );
+  assert.equal(result.shouldFallback, true);
+  assert.equal(result.cooldownMs, 0);
+  const persisted = await providers.getProviderConnectionById(conn.id);
+  assert.ok(persisted);
+  assert.equal(persisted.testStatus, "active");
+  assert.ok(!persisted.rateLimitedUntil);
+  assert.ok(
+    !(persisted.providerSpecificData as Record<string, unknown>).codexScopeRateLimitedUntil,
+    "transient capacity must not be persisted as shared Codex quota"
+  );
+  assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.3-codex"), false);
+  assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.4"), false);
+});
+
+test("Codex capacity 429 briefly cools only the exact model when cooling is enabled", async () => {
+  const conn = await seed("codex", false);
+  const result = await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    "Codex is at capacity, please try again later",
+    "codex",
+    "gpt-5.3-codex",
+    profile
+  );
+  assert.equal(result.shouldFallback, true);
+  assert.ok(result.cooldownMs > 0 && result.cooldownMs <= 60_000);
+  const persisted = await providers.getProviderConnectionById(conn.id);
+  assert.ok(persisted);
+  assert.ok(!persisted.rateLimitedUntil);
+  assert.ok(!(persisted.providerSpecificData as Record<string, unknown>).codexScopeRateLimitedUntil);
+  assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.3-codex"), true);
+  assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.4"), false);
+});
+
+test("mixed capacity wording and exhausted Codex quota headers still enforce scoped quota", async () => {
+  const conn = await seed("codex", true);
+  const resetAt = new Date(Date.now() + 60_000).toISOString();
+  const result = await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    "Codex is at capacity, please try again later",
+    "codex",
+    "gpt-5.3-codex",
+    profile,
+    {
+      headers: {
+        "x-codex-5h-usage": "100",
+        "x-codex-5h-limit": "100",
+        "x-codex-5h-reset-at": resetAt,
+      },
+    }
+  );
+  assert.equal(result.shouldFallback, true);
+  const persisted = await providers.getProviderConnectionById(conn.id);
+  assert.ok(persisted);
+  assert.ok(
+    (persisted.providerSpecificData as Record<string, unknown>).codexScopeRateLimitedUntil,
+    "authoritative exhausted quota must retain virtual-scope protections"
+  );
+});
+
