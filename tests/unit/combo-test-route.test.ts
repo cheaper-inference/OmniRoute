@@ -567,7 +567,7 @@ test("combo test route aborts in-flight probes when the client disconnects", asy
   }
 });
 
-test("combo test route stops probing once the total budget is spent", async () => {
+test("combo test route still probes every target beyond 180s accumulated elapsed time", async () => {
   await createTestCombo(["provider/first", "provider/second", "provider/third"]);
 
   const probed: string[] = [];
@@ -577,7 +577,9 @@ test("combo test route stops probing once the total budget is spent", async () =
 
   globalThis.fetch = async (_url, init: RequestInit = {}) => {
     probed.push(JSON.parse(String(init.body)).model);
-    clock += route.COMBO_TEST_TOTAL_TIMEOUT_MS;
+    // Simulate three long-lived but individually completed probes. The original
+    // cumulative deadline skipped second/third targets without dispatching them.
+    clock += 180_000;
     return new Response(JSON.stringify({ error: { message: "boom" } }), {
       status: 502,
       headers: { "content-type": "application/json" },
@@ -589,10 +591,17 @@ test("combo test route stops probing once the total budget is spent", async () =
     const body = (await response.json()) as ComboTestBody;
 
     assert.equal(response.status, 200);
-    assert.deepEqual(probed, ["provider/first"]);
+    assert.deepEqual(probed, ["provider/first", "provider/second", "provider/third"]);
     assert.equal(body.results.length, 3);
-    assert.equal(body.results[1].error, "Timeout (180s total)");
-    assert.equal(body.results[2].error, "Timeout (180s total)");
+    assert.deepEqual(
+      body.results.map((result) => ({ status: result.status, statusCode: result.statusCode })),
+      [
+        { status: "error", statusCode: 502 },
+        { status: "error", statusCode: 502 },
+        { status: "error", statusCode: 502 },
+      ]
+    );
+    assert.ok(body.results.every((result) => result.error === "boom"));
   } finally {
     Date.now = realNow;
   }
