@@ -165,19 +165,6 @@ function applySessionAffinityLegacyFallback(settings: Record<string, unknown>): 
   }
 }
 
-/**
- * The dashboard persists the logs section under the `databaseSettings` namespace
- * (camelCase keys), while the request hot path reads
- * `settings.call_log_pipeline_enabled` (snake_case) from the `settings`
- * namespace. Without a bridge the panel toggle writes one row and the hot path
- * reads another, so enabling the call-log pipeline changes nothing (#16310
- * follow-up). Only an explicit saved value wins; otherwise the flat key stands.
- */
-function applyCallLogPipelineBridge(settings: Record<string, unknown>): void {
-  const saved = readSavedCallLogPipelineEnabled();
-  if (saved !== null) settings.call_log_pipeline_enabled = saved;
-}
-
 export async function getSettings() {
   const db = getDbInstance();
   const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = 'settings'").all();
@@ -357,7 +344,6 @@ export async function getSettings() {
     }
   }
   applySessionAffinityLegacyFallback(settings);
-  applyCallLogPipelineBridge(settings);
 
   // Auto-complete onboarding for pre-configured deployments (Docker/VM)
   // If INITIAL_PASSWORD is set via env, this is a headless deploy — skip the wizard
