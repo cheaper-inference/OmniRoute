@@ -4,6 +4,7 @@ import {
   selectCompressionPlan,
   shouldAutoTrigger,
 } from "@omniroute/open-sse/services/compression/strategySelector.ts";
+import { SAFE_DEFAULT_PIPELINE } from "@omniroute/open-sse/services/compression/lossyRequestPolicy.ts";
 import { getDefaultCompressionConfig } from "@omniroute/open-sse/services/compression/stats.ts";
 import type { CompressionConfig } from "@omniroute/open-sse/services/compression/types.ts";
 
@@ -29,6 +30,50 @@ test("no contextBudget → auto-trigger path is byte-identical to legacy", () =>
   assert.equal(big.mode, "aggressive");
   assert.equal(selectCompressionPlan(cfg, null, 200000).mode, "stacked");
   assert.equal(shouldAutoTrigger(cfg, 200000), true);
+});
+
+test("headerless lossy auto-trigger retains the configured safe subset", () => {
+  const cfg = {
+    ...legacyCfg(),
+    autoTriggerTokens: 1,
+    autoTriggerMode: "aggressive" as const,
+    stackedPipeline: [
+      { engine: "rtk" as const, intensity: "standard" as const },
+      { engine: "headroom" as const, config: { minRows: 20 } },
+      { engine: "lite" as const },
+    ],
+  };
+
+  assert.deepEqual(selectCompressionPlan(cfg, null, 1), {
+    mode: "stacked",
+    source: "auto-trigger",
+    stackedPipeline: [cfg.stackedPipeline[1], cfg.stackedPipeline[2]],
+  });
+});
+
+test("lossy auto-trigger controls preserve fallback, opt-in, and master-off behavior", () => {
+  const allLossy = {
+    ...legacyCfg(),
+    autoTriggerTokens: 1,
+    autoTriggerMode: "aggressive" as const,
+    stackedPipeline: [
+      { engine: "rtk" as const, intensity: "standard" as const },
+      { engine: "caveman" as const, intensity: "full" as const },
+    ],
+  };
+
+  assert.deepEqual(selectCompressionPlan(allLossy, null, 1).stackedPipeline, [
+    ...SAFE_DEFAULT_PIPELINE,
+  ]);
+  assert.equal(
+    selectCompressionPlan(allLossy, null, 1, undefined, undefined, {}, "allow-lossy").mode,
+    "aggressive"
+  );
+  assert.deepEqual(selectCompressionPlan({ ...allLossy, enabled: false }, null, 1), {
+    mode: "off",
+    stackedPipeline: [],
+    source: "off",
+  });
 });
 
 test("contextBudget.mode='off' → identical to no contextBudget", () => {
