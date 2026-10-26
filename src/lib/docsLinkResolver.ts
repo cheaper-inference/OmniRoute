@@ -1,6 +1,6 @@
 import path from "node:path";
 
-export const GITHUB_REPO_BLOB_URL = "https://github.com/diegosouzapw/OmniRoute/blob/main";
+export const GITHUB_REPO_BLOB_URL = "https://github.com/cheaper-inference/OmniRoute/blob/main";
 
 /**
  * Resolves a doc link (e.g. `../routing/AUTO-COMBO.md#14-factors`, `./RESILIENCE_GUIDE.md`,

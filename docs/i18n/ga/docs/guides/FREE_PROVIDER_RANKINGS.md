@@ -11,32 +11,32 @@
 
 ---
 
-## Cad É Seo
+## Cad atá i gceist
 
-Cláraíonn OmniRoute 374 soláthraí, lena n-áirítear 155 iontráil chatalóige marcáilte **saor in aisce/gan fíordheimhniú**
-(gan fíordheimhniú,
-OAuth sraithe saor in aisce, nó eochair API sraithe saor in aisce — féach an
-[Treoir maidir le Sraitheanna Saor in Aisce](../getting-started/FREE-TIERS-GUIDE.md) agus an
-[Eolaire iomlán de Shraitheanna Saor in Aisce](../reference/FREE_TIERS.md)). Seo é an deacracht: bíonn éagsúlacht
-mhór i gcáilíocht na samhlacha ó sholáthraithe saor in aisce. Tá soláthraí gan fíordheimhniú a fhreastalaíonn samhail cheannródaíoch i bhfad níos úsáidí
-ná soláthraí a fhreastalaíonn samhail bheag oidhreachta.
+Cláraíonn OmniRoute 375 soláthraí, lena n-áirítear 155 iontráil chatalóige atá marcáilte **saor in aisce/gan údarú**
+(gan údarú,
+OAuth le sraith saor in aisce, nó eochair API le sraith saor in aisce — féach an
+[Treoir faoi Shraitheanna Saor in Aisce](../getting-started/FREE-TIERS-GUIDE.md) agus an t-eolaire iomlán
+[Sraitheanna Saor in Aisce](../reference/FREE_TIERS.md)). Seo an fhadhb: athraíonn soláthraithe saor in aisce go
+mór maidir le cáilíocht na samhlacha. Tá soláthraí gan údarú a sholáthraíonn samhail cheannródaíoch i bhfad níos
+úsáidí ná ceann a sholáthraíonn samhail bheag oidhreachta.
 
-Freagraíonn **Ranguithe Soláthraithe Saor in Aisce** an cheist "**cén soláthraí saor in aisce a thugann an tsamhail is fearr dom?**" trí
-chatalóg gach soláthraí saor in aisce a nascadh le **scóir cháilíochta sluafhoinsithe** ó
-**chlár ceannais Arena AI** (ELO bunaithe ar roghanna daonna, an smaoineamh céanna atá taobh thiar d’airéine
-comhrábot LMArena). Ansin rangaítear soláthraithe de réir láidreacht a **samhla saor in aisce is fearr**.
+Freagraíonn **Rangú Soláthraithe Saor in Aisce** an cheist "**cé acu soláthraí saor in aisce a thugann an tsamhail
+is fearr dom?**" trí chatalóg gach soláthraí saor in aisce a nascadh le **scóir cáilíochta slua-fhoinsithe** ó
+**chlérbhord ceannais Arena AI** (ELO bunaithe ar rogha daonna, an smaoineamh céanna atá taobh thiar d'ardán
+comhráiteora LMArena). Déantar na soláthraithe a rangú ansin de réir neart a **samhail saor in aisce is fearr**.
 
-Ríomhtar an rangú ó thrí fhoinse fhíora:
+Ríomhtar an rangú ó thrí fhoinse fhíor:
 
-1. Liostaí na soláthraithe saor in aisce — `NOAUTH_PROVIDERS`, chomh maith le hiontrálacha `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` atá marcáilte `hasFree`
+1. Na liostaí soláthraithe saor in aisce — `NOAUTH_PROVIDERS`, chomh maith le hiontrálacha `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` atá marcáilte le `hasFree`
    (`src/shared/constants/providers.ts`).
 2. Catalóg samhlacha gach soláthraí ó chlárlann na soláthraithe
    (`open-sse/config/providerRegistry.ts`).
-3. Scóir oiriúnachta do thascanna a dhíorthaítear ó ELO agus a stórálann inneall sioncronaithe Arena ELO sa tábla DB `model_intelligence`
-   (`src/lib/arenaEloSync.ts`).
+3. Scóir oiriúnachta don tasc a dhiorthaítear ó ELO, atá stóráilte i dtábla `model_intelligence` sa bhunachar
+   sonraí ag inneall sioncronaithe Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Tá loighic an nasctha in `src/lib/freeProviderRankings.ts`.
+Tá an loighic cheangail lonnaithe in `src/lib/freeProviderRankings.ts`.
 
 ---
 

@@ -40,8 +40,8 @@ const ROOT = path.resolve(__dirname, "..", "..");
 // U+2010 HYPHEN separates the locale prefix in localized wiki page names.
 const LOCALE_SEP = "‐";
 export const WIKI_BANNER = "> 🌍 [View in other languages](Languages)\n\n\n";
-export const GITHUB_REPO_URL = "https://github.com/diegosouzapw/OmniRoute";
-export const GITHUB_RAW_URL = "https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main";
+export const GITHUB_REPO_URL = "https://github.com/cheaper-inference/OmniRoute";
+export const GITHUB_RAW_URL = "https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main";
 
 // Docs that must never become public wiki pages (internal reports/plans/index).
 export const NEW_PAGE_EXCLUDE = new Set([
@@ -168,31 +168,22 @@ export function rewriteWikiLinks(
   );
 
   // 2. Images: ![alt](url "title"?)
-  out = out.replace(
-    /!\[([^\]]*)\]\(([^)\s]+)(\s+["'][^"']*["'])?\)/g,
-    (m, text, href, title) => {
-      const newHref = resolveHref(href, true);
-      return `![${text}](${newHref}${title || ""})`;
-    }
-  );
+  out = out.replace(/!\[([^\]]*)\]\(([^)\s]+)(\s+["'][^"']*["'])?\)/g, (m, text, href, title) => {
+    const newHref = resolveHref(href, true);
+    return `![${text}](${newHref}${title || ""})`;
+  });
 
   // 3. Reference links: ^[label]: href "title"?
-  out = out.replace(
-    /^\[([^\]]+)\]:\s*([^\s]+)(\s+["'][^"']*["'])?$/gm,
-    (m, label, href, title) => {
-      const newHref = resolveHref(href, false);
-      return `[${label}]: ${newHref}${title || ""}`;
-    }
-  );
+  out = out.replace(/^\[([^\]]+)\]:\s*([^\s]+)(\s+["'][^"']*["'])?$/gm, (m, label, href, title) => {
+    const newHref = resolveHref(href, false);
+    return `[${label}]: ${newHref}${title || ""}`;
+  });
 
   // 4. HTML anchors: <a ... href="..." ...>
-  out = out.replace(
-    /<a\b([^>]*\bhref=["'])([^"']+)(["'][^>]*)>/gi,
-    (m, before, href, after) => {
-      const newHref = resolveHref(href, false);
-      return `<a${before}${newHref}${after}>`;
-    }
-  );
+  out = out.replace(/<a\b([^>]*\bhref=["'])([^"']+)(["'][^>]*)>/gi, (m, before, href, after) => {
+    const newHref = resolveHref(href, false);
+    return `<a${before}${newHref}${after}>`;
+  });
 
   return out;
 }

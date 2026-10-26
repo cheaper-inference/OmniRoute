@@ -3,6 +3,7 @@
  */
 import {
   SyntxMediaError,
+  decodeDataUrlBounded,
   fetchSyntxMediaBytes,
   firstMediaUrl,
   resolveSyntxToken,
@@ -20,30 +21,18 @@ import {
   type UpscaleLogger,
 } from "./shared.ts";
 
-function decodeDataUrl(dataUrl: string): { bytes: Uint8Array; mime: string; name: string } | null {
-  const match = /^data:([^;,]+);base64,(.+)$/i.exec(dataUrl.trim());
-  if (!match) return null;
-  try {
-    const mime = match[1] || "image/png";
-    const bytes = Buffer.from(match[2], "base64");
-    return { bytes, mime, name: "source.png" };
-  } catch {
-    return null;
-  }
-}
-
 async function resolveUpscaleImageUrl(
   token: string,
   source: string,
   fetchImpl: typeof fetch
 ): Promise<{ url?: string; error?: string; status?: number }> {
   if (!source.startsWith("data:")) return { url: source };
-  const decoded = decodeDataUrl(source);
+  const decoded = decodeDataUrlBounded(source);
   if (!decoded) return { error: "Could not decode source image for SYNTX upscale", status: 400 };
   const uploaded = await uploadSyntxMediaFile({
     token,
     bytes: decoded.bytes,
-    filename: decoded.name,
+    filename: "source.png",
     mimeType: decoded.mime,
     fetchImpl,
   });
@@ -67,6 +56,7 @@ async function runSyntxUpscaleJob(options: {
   startTime: number;
   log?: UpscaleLogger;
   fetchImpl: typeof fetch;
+  signal?: AbortSignal | null;
 }): Promise<UpscaleHandlerResult> {
   const resolved = await resolveUpscaleImageUrl(options.token, options.source, options.fetchImpl);
   if (!resolved.url) {
@@ -102,7 +92,13 @@ async function runSyntxUpscaleJob(options: {
   }
   const wantsBase64 = String(options.body.response_format || "").toLowerCase() === "b64_json";
   const images = wantsBase64
-    ? [{ b64_json: (await fetchSyntxMediaBytes(url, options.fetchImpl)).bytes.toString("base64") }]
+    ? [
+        {
+          b64_json: (
+            await fetchSyntxMediaBytes(url, options.fetchImpl, { signal: options.signal })
+          ).bytes.toString("base64"),
+        },
+      ]
     : [{ url }];
   options.log?.info?.("IMAGE", `SYNTX upscaled via ${options.model}`);
   return saveUpscaleSuccessResult({
@@ -121,6 +117,7 @@ export async function handleSyntxImageUpscale({
   credentials,
   log,
   fetchImpl = fetch,
+  signal = null,
 }: {
   model: string;
   provider: string;
@@ -128,6 +125,7 @@ export async function handleSyntxImageUpscale({
   credentials: UpscaleCredentials;
   log?: UpscaleLogger;
   fetchImpl?: typeof fetch;
+  signal?: AbortSignal | null;
 }): Promise<UpscaleHandlerResult> {
   const startTime = Date.now();
   const token = resolveSyntxToken({
@@ -164,6 +162,7 @@ export async function handleSyntxImageUpscale({
       startTime,
       log,
       fetchImpl,
+      signal,
     });
   } catch (error) {
     const status = error instanceof SyntxMediaError ? error.status : 502;

@@ -45,6 +45,13 @@ export const MAX_CLAUDE_THINKING_ENTRY_CHARS = 2 * 1024 * 1024;
 const MAX_CLAUDE_THINKING_TOTAL_CHARS = 64 * 1024 * 1024;
 
 const entries = new Map<string, Entry>();
+// Non-serialized provenance; weak references add no retention beyond the request.
+const restoredBlocks = new WeakSet<object>();
+
+/** True only for a block returned by the provider/model-bound restore operation. */
+export function isRestoredClaudeThinkingBlock(block: object): boolean {
+  return restoredBlocks.has(block);
+}
 let totalChars = 0;
 
 function normalizeProvider(provider: unknown): string {
@@ -215,7 +222,9 @@ export function restoreClaudeThinkingBlocks(args: {
     if (!entry) continue;
     if (entry.provider !== provider || entry.model !== model) return null;
     if (entry.connectionId !== connectionId) return null;
-    return cloneBlocks(entry.blocks);
+    const blocks = cloneBlocks(entry.blocks);
+    for (const block of blocks) restoredBlocks.add(block);
+    return blocks;
   }
   return null;
 }

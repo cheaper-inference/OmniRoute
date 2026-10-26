@@ -11,8 +11,8 @@
  * 2. They are resolved from the geminiThoughtSignatureStore (persisted from
  *    a prior upstream response)
  *
- * Reproduces: https://github.com/diegosouzapw/OmniRoute/issues/1410
- * Supersedes: https://github.com/diegosouzapw/OmniRoute/issues/725
+ * Reproduces: https://github.com/cheaper-inference/OmniRoute/issues/1410
+ * Supersedes: https://github.com/cheaper-inference/OmniRoute/issues/725
  */
 
 import test from "node:test";

@@ -1,0 +1,1 @@
+- **fix(streaming):** Register stream failure finalizers before starting the eager response pipeline so Perplexity errors after partial content retain failure callbacks and accounting ([#17226](https://github.com/diegosouzapw/OmniRoute/pull/17226)) — thanks @pacocartones

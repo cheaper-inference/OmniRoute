@@ -48,15 +48,16 @@ terus berfungsi), menjalankan pemeriksaan kesihatan pelayan, dan melaksanakan `c
 
 ---
 
-## Alias penemuan — paparkan model bukan Claude dalam pemilih `/model`
+## Alias penemuan — memaparkan model bukan Claude dalam pemilih `/model`
 
-Penemuan model get laluan Claude Code hanya menyenaraikan id yang bermula dengan `claude`
-atau `anthropic`, jadi dengan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, pemilih
-`/model` asli biasanya menunjukkan **hanya** model Claude/Anthropic OmniRoute — model
-`kimi/kimi-k2.6` atau `glm/glm-5.2` tidak akan muncul, walaupun penghalaannya berfungsi dengan baik.
+Penemuan model gateway Claude Code hanya menyenaraikan id yang bermula dengan `claude`
+atau `anthropic`, jadi dengan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` pemilih
+`/model` asli biasanya memaparkan model Claude/Anthropic OmniRoute **sahaja** —
+`kimi/kimi-k2.6` atau `glm/glm-5.2` tidak akan muncul langsung, walaupun ia boleh
+dirutkan dengan baik.
 
-OmniRoute boleh mencerminkan mana-mana model (dan gabungan) yang didayakan di bawah id `claude/…` supaya ia
-melepasi penapis tersebut dan muncul dalam pemilih:
+OmniRoute boleh mencerminkan mana-mana model (dan kombo) yang didayakan di bawah id
+`claude/…` supaya ia melepasi penapis tersebut dan muncul dalam pemilih:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,32 +65,42 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Apabila anda memilih salah satu daripadanya dalam Claude Code, OmniRoute membuang pembalut `claude/`
-dan mengembalikannya kepada id sebenar sebelum penghalaan — id `claude/<real-claude-model>` yang tulen
-(penyedia OAuth Claude sebenar) sentiasa dibiarkan tanpa perubahan.
+Apabila anda memilih salah satu daripadanya dalam Claude Code, OmniRoute membuang
+pembalut `claude/` untuk mengembalikan id sebenar sebelum perutean — id
+`claude/<real-claude-model>` tulen (pembekal OAuth Claude sebenar) sentiasa
+dibiarkan tanpa diubah.
 
-**Ciri ini dimatikan secara lalai** dan dikawal oleh get tiga peringkat (yang paling khusus
-diutamakan), jadi OmniRoute biasa tidak akan menggandakan katalognya untuk klien yang tidak menggunakan
-Claude Code:
+Secara lalai hanya id asas dicerminkan. Dengan bendera ciri opt-in
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` diaktifkan, varian usaha penaakulan yang sudah
+disenaraikan oleh katalog (cth. `codex/gpt-6-sol-high`) dicerminkan seperti mana-mana
+id lain, jadi Claude Code boleh memilih tahap usaha yang eksplisit, dan id `auto/*`
+terbina dalam yang tidak dapat diwujudkan oleh laluan permintaan tidak dicerminkan.
+Sama ada varian usaha disenaraikan langsung masih dikawal oleh
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — cerminan tidak pernah menambah varian
+yang tiada dalam katalog asas.
 
-| Peringkat | Lokasi                                                                          |
+**Ini dimatikan secara lalai** dan dikawal oleh pintu tiga peringkat (yang paling
+khusus menang), supaya OmniRoute biasa tidak pernah menggandakan katalognya bagi
+klien yang tidak menggunakan Claude Code:
+
+| Peringkat | Di mana                                                                         |
 | --------- | ------------------------------------------------------------------------------- |
-| Model     | Halaman butiran penyedia → togol "Dedahkan dalam Claude Code" bagi setiap model |
-| Penyedia  | Halaman butiran penyedia → togol peringkat penyedia (merangkumi semua modelnya) |
-| Global    | Tetapan → Bendera Ciri → `EXPOSE_CC_DISCOVERY_ALIASES` (dimatikan secara lalai) |
+| Model     | Halaman butiran pembekal → togol "Dedahkan dalam Claude Code" setiap model      |
+| Pembekal  | Halaman butiran pembekal → togol peringkat pembekal (merangkumi semua modelnya) |
+| Global    | Tetapan → Bendera Ciri → `EXPOSE_CC_DISCOVERY_ALIASES` (lalai mati)             |
 
-Pemboleh ubah persekitaran `EXPOSE_CC_DISCOVERY_ALIASES` memaksa peringkat global dihidupkan
-dan mengatasi pilihan penggantian papan pemuka (skrin Bendera Ciri menunjukkan
-nota "aktif melalui pemboleh ubah persekitaran" apabila ini berlaku). Togol bagi setiap penyedia dan
-setiap model memperincikan kawalan tersebut — cth. global dimatikan + penyedia Kimi dihidupkan akan mendedahkan
-hanya model Kimi.
+Pembolehubah persekitaran `EXPOSE_CC_DISCOVERY_ALIASES` memaksa peringkat global
+aktif dan mendapat keutamaan mengatasi penggantian papan pemuka (skrin Bendera Ciri
+memaparkan nota "aktif melalui pembolehubah persekitaran" apabila ia berlaku).
+Togol setiap pembekal dan setiap model menapis dari situ — cth. global mati +
+pembekal Kimi aktif hanya mendedahkan model Kimi.
 
-> ⚠️ **Ketidakpadanan tetingkap pada model bukan Claude.** Claude Code menganggap tetingkap konteks
-> 200K bagi mana-mana id yang tidak dikenalinya (ia tidak dapat membaca tetingkap sebenar daripada
-> `/v1/models`). Untuk model dengan tetingkap yang lebih besar (cth. 256K bagi Kimi K2), tetapkan
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` kepada nilai yang lebih rendah daripada tetingkap sebenar model supaya
-> pemadatan automatik tidak berlaku terlalu awal. Profil yang dijana di atas sudah
-> melakukan ini bagi setiap model.
+> ⚠️ **Ketidaksepadanan tetingkap pada model bukan Claude.** Claude Code menganggap
+> tetingkap konteks 200K untuk mana-mana id yang tidak dikenalinya (ia tidak dapat
+> membaca tetingkap sebenar daripada `/v1/models`). Untuk model dengan tetingkap
+> lebih besar (cth. 256K Kimi K2), tetapkan `CLAUDE_CODE_AUTO_COMPACT_WINDOW` kepada
+> nilai di bawah tetingkap sebenar model supaya pemadatan automatik tidak berlaku
+> terlalu awal. Profil yang dijana di atas sudah melakukan ini untuk setiap model.
 
 ---
 

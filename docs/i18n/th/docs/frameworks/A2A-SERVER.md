@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+สำหรับ `smart-routing` ค่า `metadata.combo` จะเขียนทับ
+`metadata.model` อย่างชัดเจนสำหรับคำขอไปยังเกตเวย์ โดยจะถูกส่งเป็น `model` จริง
+ไม่ใช่เป็นฟิลด์ JSON `x-combo` ที่ถูกละเว้น ทั้งนี้ การตรวจสอบ API key ตามปกติของเกตเวย์และ
+การอนุญาตสำหรับแต่ละเป้าหมายยังคงมีผล ระบบจะปฏิเสธคอมโบที่ไม่ถูกต้องหรือว่างเปล่า
+
+ผลลัพธ์จะแสดง `requested_combo` (เจตนาของผู้เรียก), `dispatched_model`
+(คำขอจริงที่ส่งไปยังเกตเวย์), `response_model` (การตอบกลับจากเกตเวย์) และ
+`confirmed_combo` ฟิลด์สุดท้ายจะเป็น `null` เว้นแต่เกตเวย์จะระบุคอมโบอย่างชัดเจน
+บันทึกการตัดสินใจของ A2A จะระบุว่าการดำเนินการเป็นของคอมโบที่ได้รับการยืนยันแล้วเท่านั้น
+โดยเก็บคำขอที่ยังไม่ได้รับการยืนยันไว้เป็น `requestedCombo`
+
 **การตอบกลับ:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## ทักษะที่พร้อมใช้งาน
+## สกิลที่พร้อมใช้งาน
 
-OmniRoute มีทักษะ A2A จำนวน 6 รายการที่เชื่อมต่อไว้ใน `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` โดยโมดูลของแต่ละทักษะอยู่ใน `src/lib/a2a/skills/`
+OmniRoute เปิดให้ใช้งาน 6 สกิล A2A ที่ผูกไว้ใน `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` โมดูลของสกิลแต่ละตัวอยู่ใน `src/lib/a2a/skills/`
 
-| ทักษะ                   | ID                   | คำอธิบาย                                                                                                                                                              | แท็ก                          | ตัวอย่าง                                    |
-| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :------------------------------------------ |
-| การกำหนดเส้นทางอัจฉริยะ | `smart-routing`      | กำหนดเส้นทางพรอมต์ผ่านผู้ให้บริการ/ชุดผสมที่เหมาะสมที่สุดโดยใช้กลไกชุดผสมและการให้คะแนนของ OmniRoute                                                                  | การกำหนดเส้นทาง, ผู้ให้บริการ | "กำหนดเส้นทางพรอมต์นี้ผ่านโมเดลที่ดีที่สุด" |
-| การจัดการโควตา          | `quota-management`   | รายงานสถานะโควตาของผู้ให้บริการแต่ละราย และช่วยให้ผู้เรียกตัดสินใจว่าเมื่อใดควรจำกัดอัตรา/สลับผู้ให้บริการ                                                            | โควตา, ผู้ให้บริการ           | "ตรวจสอบโควตาสำหรับ anthropic"              |
-| การค้นหาผู้ให้บริการ    | `provider-discovery` | แสดงรายชื่อผู้ให้บริการที่ติดตั้งไว้ พร้อมความสามารถ สถานะระดับใช้งานฟรี และสถานะ OAuth                                                                               | ผู้ให้บริการ, การค้นหา        | "มีผู้ให้บริการใดบ้างที่พร้อมใช้งาน?"       |
-| การวิเคราะห์ต้นทุน      | `cost-analysis`      | ประมาณการต้นทุนของคำขอ/บทสนทนาโดยอ้างอิงจากแค็ตตาล็อกและการใช้งานล่าสุด                                                                                               | ต้นทุน, การใช้งาน             | "ประมาณการต้นทุนสำหรับบทสนทนานี้"           |
-| รายงานสถานะระบบ         | `health-report`      | รวบรวมสถานะเซอร์กิตเบรกเกอร์ ช่วงพัก และการล็อกเอาต์ของผู้ให้บริการแต่ละราย                                                                                           | สถานะระบบ, ความยืดหยุ่นทนทาน  | "แสดงสถานะระบบของผู้ให้บริการทั้งหมด"       |
-| แสดงรายการความสามารถ    | `list-capabilities`  | ส่งคืนแค็ตตาล็อกทักษะเอเจนต์ทั้งหมด 45 รายการ (API 23 รายการ + CLI 21 รายการ + การกำหนดค่า 1 รายการ) เป็นตารางมาร์กดาวน์ พร้อม URL ดิบของ SKILL.md สำหรับการแทรกบริบท | แค็ตตาล็อก, การค้นหา, ทักษะ   | "แสดงความสามารถทั้งหมดของ OmniRoute"        |
+| Skill              | ID                   | คำอธิบาย                                                                                                                                        | แท็ก                       | ตัวอย่าง                              |
+| :----------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------ |
+| Smart Routing      | `smart-routing`      | ส่งต่อพรอมป์ผ่าน provider/combo ที่เหมาะสมที่สุดโดยใช้เอนจิน combo และระบบให้คะแนนของ OmniRoute                                                 | routing, providers         | "ส่งพรอมป์นี้ผ่านโมเดลที่ดีที่สุด"    |
+| Quota Management   | `quota-management`   | รายงานสถานะโควต้าของ provider แต่ละราย ช่วยให้ผู้เรียกตัดสินใจได้ว่าควรจำกัดอัตราหรือสลับเมื่อใด                                                | quota, providers           | "ตรวจสอบโควต้าของ anthropic"          |
+| Provider Discovery | `provider-discovery` | แสดงรายการ provider ที่ติดตั้งไว้ พร้อมความสามารถ แฟล็ก free-tier และสถานะ OAuth                                                                | providers, discovery       | "มี provider อะไรบ้างที่ใช้งานได้?"   |
+| Cost Analysis      | `cost-analysis`      | ประมาณค่าใช้จ่ายของคำขอ/บทสนทนา โดยอิงจากแคตตาล็อกและการใช้งานล่าสุด                                                                            | cost, usage                | "ประมาณค่าใช้จ่ายสำหรับบทสนทนานี้"    |
+| Health Report      | `health-report`      | รวบรวมสถานะ circuit breaker, cooldown และ lockout ของ provider แต่ละราย                                                                         | health, resilience         | "แสดงสถานะสุขภาพของ provider ทั้งหมด" |
+| List Capabilities  | `list-capabilities`  | คืนค่าแคตตาล็อก Agent Skills ทั้งหมด 45 รายการ (23 API + 21 CLI + 1 config) ในรูปแบบตาราง markdown พร้อม URL ดิบของ SKILL.md สำหรับการแทรกบริบท | catalog, discovery, skills | "แสดงความสามารถทั้งหมดของ OmniRoute"  |
 
-> การ์ดเอเจนต์ควรสอดคล้องกับแค็ตตาล็อกผู้ให้บริการที่ใช้งานจริงซึ่งมี 374 รายการ โดยจำนวนผู้ให้บริการและข้อมูลเมตาเกี่ยวกับการใช้งานฟรี/ไม่ต้องยืนยันตัวตนมาจากรีจิสทรีขณะรันไทม์
+> ควรปรับ Agent Card ให้สอดคล้องกับแคตตาล็อก 375 provider ที่ใช้งานจริงอยู่เสมอ โดยจำนวน provider และเมทาดาทา free/no-auth มาจากรีจิสทรีขณะรันไทม์
 
-### รายละเอียดทักษะ `list-capabilities`
+### รายละเอียดสกิล `list-capabilities`
 
-ทักษะ `list-capabilities` มีประโยชน์อย่างยิ่งสำหรับเอเจนต์ภายนอกที่ต้องค้นหาว่า OmniRoute เปิดให้ใช้งานอะไรบ้างก่อนส่งการเรียก API โดยจะส่งคืนอาร์ติแฟกต์ตารางมาร์กดาวน์ที่มีโครงสร้าง:
+สกิล `list-capabilities` มีประโยชน์อย่างยิ่งสำหรับเอเจนต์ภายนอกที่ต้องการค้นหาว่า OmniRoute เปิดเผยอะไรบ้างก่อนที่จะส่งการเรียก API โดยจะคืนค่าอาร์ติแฟกต์เป็นตาราง markdown ที่มีโครงสร้างดังนี้:
 
 ```
-| ID | ชื่อ | หมวดหมู่ | พื้นที่ | เอนด์พอยต์/คำสั่ง | URL ดิบ |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | การยืนยันตัวตนและเซสชัน | api | การยืนยันตัวตน | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-แต่ละแถวมีคอลัมน์ `rawUrl` เพื่อให้เอเจนต์สามารถดึง SKILL.md ฉบับเต็มได้ทันที ฟิลด์ `metadata.totalSkills` สะท้อนขนาดของแค็ตตาล็อก (ปัจจุบันคือ 45) การติดตั้งใช้งาน: `src/lib/a2a/skills/listCapabilities.ts` ดูเพิ่มเติมที่ [AGENT-SKILLS.md](./AGENT-SKILLS.md)
+แต่ละแถวจะมีคอลัมน์ `rawUrl` เพื่อให้เอเจนต์สามารถดึง SKILL.md ฉบับเต็มได้ทันที ฟิลด์ `metadata.totalSkills` จะสะท้อนขนาดของแคตตาล็อก (ปัจจุบัน 45 รายการ) การ implement อยู่ที่: `src/lib/a2a/skills/listCapabilities.ts` ดูเพิ่มเติมที่ [AGENT-SKILLS.md](./AGENT-SKILLS.md)
 
 ---
 
@@ -274,7 +278,7 @@ resp = requests.post("http://localhost:20128/a2a", json={
     "method": "message/send",
     "params": {
         "skill": "smart-routing",
-        "messages": [{"role": "user", "content": "สวัสดี"}]
+        "messages": [{"role": "user", "content": "Hello"}]
     }
 }, headers={"Authorization": "Bearer YOUR_KEY"})
 
@@ -298,7 +302,7 @@ const resp = await fetch("http://localhost:20128/a2a", {
     method: "message/send",
     params: {
       skill: "smart-routing",
-      messages: [{ role: "user", content: "สวัสดี" }],
+      messages: [{ role: "user", content: "Hello" }],
     },
   }),
 });

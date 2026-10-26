@@ -47,7 +47,7 @@ Ana sarrafa A2A ta maɓallin kunnawa na **Endpoints → A2A**, kuma a tsohuwa a 
 
 ### `message/send` — Aiwatarwa Mai Jira
 
-Yana aika saƙo zuwa wata ƙwarewa kuma ya jira cikakkiyar amsa.
+Yana aika saƙo zuwa wata ƙwarewa kuma yana jiran cikakkiyar amsa.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Ga `smart-routing`, `metadata.combo` takamaiman maye ne na
+`metadata.model` don buƙatar gateway; ana aika shi a matsayin ainihin `model`,
+ba a matsayin filin JSON na `x-combo` da ake yin watsi da shi ba. Har yanzu ana
+aiwatar da ƙa'idar maɓallin API ta gateway da izini ga kowane manufa. Ana ƙin combo mara inganci ko wanda babu komai a cikinsa.
+
+Sakamakon yana bayyana `requested_combo` (niyyar mai kira), `dispatched_model`
+(ainihin buƙatar gateway), `response_model` (amsar gateway) da
+`confirmed_combo`. Filin ƙarshe yana zama `null` sai idan gateway ya bayyana
+combo a sarari. Bayanai na shawarar A2A suna danganta aiwatarwa ne kawai ga
+combo da aka tabbatar, tare da riƙe buƙatar da ba a tabbatar ba a matsayin `requestedCombo`.
+
 **Amsa:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Watsawar SSE
+### `message/stream` — Yawo ta SSE
 
-Daidai yake da `message/send`, amma yana dawo da Abubuwan da Saba ke Aikawa don watsawa kai tsaye.
+Daidai yake da `message/send`, amma yana mayar da Server-Sent Events don yawo a ainihin lokaci.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Abubuwan SSE:**
+**Abubuwan da Suka Faru na SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Bincika Matsayin Aiki
+### `tasks/get` — Duba Matsayin Aiki
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Ƙwarewar da Ake da Su
+## Ƙwarewa da Ke Akwai
 
-OmniRoute yana gabatar da ƙwarewar A2A guda 6 waɗanda aka haɗa a cikin `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kowane tsarin ƙwarewa yana cikin `src/lib/a2a/skills/`.
+OmniRoute yana bayyana ƙwarewa 6 na A2A da aka haɗa a `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kowane module na ƙwarewa yana cikin `src/lib/a2a/skills/`.
 
-| Ƙwarewa                       | ID                   | Bayani                                                                                                                                                                     | Alamomi                          | Misalai                                     |
-| :---------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------ |
-| Zaɓin Hanya Mai Wayo          | `smart-routing`      | Yana tura umarni ta hanyar mafi kyawun mai samarwa/haɗin masu samarwa ta amfani da injin haɗa zaɓuɓɓuka na OmniRoute + tsarin tantancewa                                   | zaɓin hanya, masu samarwa        | "Tura wannan umarni ta mafi kyawun samfuri" |
-| Gudanar da Ƙayyadadden Amfani | `quota-management`   | Yana bayar da rahoton matsayin ƙayyadadden amfani na kowane mai samarwa, kuma yana taimaka wa masu kira yanke shawarar lokacin rage gudu/canza mai samarwa                 | ƙayyadadden amfani, masu samarwa | "Duba ƙayyadadden amfani na anthropic"      |
-| Gano Masu Samarwa             | `provider-discovery` | Yana jera masu samarwa da aka girka tare da iyawarsu, alamomin matakin kyauta, da matsayin OAuth                                                                           | masu samarwa, ganowa             | "Waɗanne masu samarwa ake da su?"           |
-| Nazarin Kuɗi                  | `cost-analysis`      | Yana ƙiyasta kuɗin buƙata/tattaunawa bisa kundin bayanai + amfani na kwanan nan                                                                                            | kuɗi, amfani                     | "Ƙiyasta kuɗin wannan tattaunawa"           |
-| Rahoton Lafiya                | `health-report`      | Yana tattara matsayin circuit breaker, lokacin jira, da kullewa na kowane mai samarwa                                                                                      | lafiya, juriya                   | "Nuna matsayin lafiyar duk masu samarwa"    |
-| Jera Iyawa                    | `list-capabilities`  | Yana dawo da cikakken kundin Agent Skills mai bayanai 45 (API 23 + CLI 21 + saiti 1) a matsayin teburin markdown tare da ɗanyen URLs na SKILL.md don saka mahallin bayanai | kundi, ganowa, ƙwarewa           | "Jera dukkan iyawar OmniRoute"              |
+| Ƙwarewa            | ID                   | Bayani                                                                                                                                                                          | Alamomi                    | Misalai                                   |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :---------------------------------------- |
+| Smart Routing      | `smart-routing`      | Yana tura prompt ta mafi kyawun provider/combo ta amfani da injin combo na OmniRoute + scoring                                                                                  | routing, providers         | "Tura wannan prompt ta mafi kyawun model" |
+| Quota Management   | `quota-management`   | Yana ba da rahoton yanayin quota na kowane provider, yana taimaka wa masu kira su yanke shawarar yaushe za su rage ko su canza                                                  | quota, providers           | "Duba quota na anthropic"                 |
+| Provider Discovery | `provider-discovery` | Yana lissafa providers da aka shigar tare da ƙwararrunsu, alamomin free-tier, da matsayin OAuth                                                                                 | providers, discovery       | "Wadanne providers ake da su?"            |
+| Cost Analysis      | `cost-analysis`      | Yana ƙididdige kudin request ko tattaunawa bisa ga catalog + amfani na kwanan nan                                                                                               | cost, usage                | "Ƙididdige kudin wannan tattaunawa"       |
+| Health Report      | `health-report`      | Yana haɗa yanayin circuit breaker, cooldown, da lockout na kowane provider                                                                                                      | health, resilience         | "Nuna matsayin lafiyar duk providers"     |
+| List Capabilities  | `list-capabilities`  | Yana mayar da cikakken catalog na Agent Skills mai ɗauke da abubuwa 45 (23 API + 21 CLI + 1 config) a matsayin teburin markdown tare da raw SKILL.md URLs don shigar da context | catalog, discovery, skills | "Lissafa duk ƙwararrun OmniRoute"         |
 
-> Ya kamata a riƙa daidaita Agent Card da kundin masu samarwa 374 mai aiki; ana samo adadin masu samarwa da bayanan kyauta/marasa buƙatar tantancewa daga rajistar lokacin aiki.
+> Ya kamata a ci gaba da daidaita Agent Card da catalog na providers 375 na rayuwa; adadin providers da metadata na free/no-auth ana samun su daga registry na runtime.
 
-### Cikakkun Bayanai Kan Ƙwarewar `list-capabilities`
+### Cikakken Bayanin Ƙwarewar `list-capabilities`
 
-Ƙwarewar `list-capabilities` tana da amfani musamman ga wakilai na waje waɗanda ke buƙatar gano abubuwan da OmniRoute ke bayarwa kafin aika kiran API. Tana dawo da kayan aikin teburin markdown mai tsari:
+Ƙwarewar `list-capabilities` tana da matuƙar amfani ga agents na waje da suke buƙatar gano abin da OmniRoute ke bayyana kafin su aika kiran API. Tana mayar da artifact na teburin markdown da aka tsara:
 
 ```
-| ID | Suna | Rukuni | Fanni | Endpoints/Umarni | Ɗanyen URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Tantancewa & Zaman Aiki | api | tantancewa | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Kowane layi yana ƙunshe da shafin `rawUrl` domin wakilai su iya ɗauko cikakken SKILL.md nan take. Shafin `metadata.totalSkills` yana nuna girman kundin (45 a yau). Aiwatarwa: `src/lib/a2a/skills/listCapabilities.ts`. Duba kuma [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Kowane jere ya haɗa da shafi na `rawUrl` domin agents su iya karɓar cikakken SKILL.md nan take. Filin `metadata.totalSkills` yana nuna girman catalog (45 a yau). Aiwatarwa: `src/lib/a2a/skills/listCapabilities.ts`. Duba kuma [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -262,7 +266,7 @@ an gabatar → ana aiki → an kammala
 
 ---
 
-## Misalan Haɗawa
+## Misalan Haɗin Kai
 
 ### Python (requests)
 

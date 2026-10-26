@@ -21,7 +21,7 @@ function CatalogBulkProgress({ running, progress }: { running: boolean; progress
   if (running) {
     return (
       <div className="flex items-center gap-3">
-        <div className="h-2 w-32 overflow-hidden rounded-full bg-black/10 dark:bg-white/10 sm:w-48">
+        <div className="h-2 w-32 overflow-hidden rounded-full bg-border sm:w-48">
           <div
             className="h-full bg-primary transition-all duration-300"
             style={{ width: `${percent}%` }}
@@ -70,7 +70,7 @@ export default function CatalogBulkActionBar({
   const t = useTranslations("modelCatalog");
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-black/[0.01] px-4 py-2.5 dark:bg-white/[0.01]">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-bg-subtle px-4 py-2.5">
       <div className="flex flex-wrap items-center gap-2">
         <Button
           variant="secondary"

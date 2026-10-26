@@ -16,16 +16,16 @@ AgentBridge 是 OmniRoute 的 MITM（中间人）代理，可拦截来自 IDE AI
 
 ### 什么是 AgentBridge？
 
-当 IDE 智能体（例如 GitHub Copilot、Cursor、Claude Code）发起 API 调用时，它会直接连接上游 AI 提供者（OpenAI、Anthropic 等）。AgentBridge 在 TLS 层透明地拦截该连接——无需更改任何智能体配置——并通过 OmniRoute 重写请求。
+当 IDE 代理（例如 GitHub Copilot、Cursor、Claude Code）发起 API 调用时，它会直接连接到上游 AI 提供者（OpenAI、Anthropic 等）。AgentBridge 在 TLS 层面透明地拦截该连接——无需对代理进行任何配置更改——并通过 OmniRoute 重写请求。
 
-这意味着您可以：
+这意味着你可以：
 
-- **将任意智能体重新路由到任意提供者**：Copilot 正在连接 OpenAI？可将其重定向至 Anthropic Claude、Gemini，或 OmniRoute 支持的 374 个提供者中的任意一个。
-- **应用模型映射**：在处理程序层透明地将 `gemini-3-flash` → `claude-sonnet-4.7`。
-- **观察所有智能体流量**：每个被拦截的请求都会发布到[流量检查器](./TRAFFIC_INSPECTOR.md)。
-- **应用 OmniRoute 弹性机制**：组合路由、断路器、故障回退和成本跟踪同样适用于 IDE 智能体流量。
+- **将任何代理重新路由到任何提供者**：Copilot 正在与 OpenAI 通信？将其重定向到 Anthropic Claude、Gemini，或 OmniRoute 375 家提供者中的任意一家。
+- **应用模型映射**：在处理器（handler）层面透明地将 `gemini-3-flash` → `claude-sonnet-4.7`。
+- **观测所有代理流量**：每个被拦截的请求都会发布到 [流量检查器](./TRAFFIC_INSPECTOR.md)。
+- **应用 OmniRoute 的弹性能力**：组合路由、熔断器、回退和成本追踪同样适用于 IDE 代理流量。
 
-### 与市场产品的定位对比
+### 与市场同类产品的定位对比
 
 | 功能           | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
 | -------------- | :-----: | :------: | :-------------: | :-----------------------: |
@@ -37,11 +37,11 @@ AgentBridge 是 OmniRoute 的 MITM（中间人）代理，可拦截来自 IDE AI
 | Zed Industries |    —    |    ✓     |        —        |             ✓             |
 | Claude Code    |    —    |    —     |        ✓        |             ✓             |
 | Open Code      |    —    |    —     |        ✓        |             ✓             |
-| Trae           |    —    |    —     |        —        |         🔍 调查中         |
-| 仪表板 UI      |    ✓    |    ✗     |        ✗        |             ✓             |
+| Trae           |    —    |    —     |        —        |         🔍 调研中         |
+| 仪表板界面     |    ✓    |    ✗     |        ✗        |             ✓             |
 | 流量检查器     |    ✗    |    ✗     |        ✓        |             ✓             |
 | OmniRoute 路由 |    ✗    |    ✗     |        ✗        |             ✓             |
-| 模型映射 UI    |    ✗    |    ✗     |        ✗        |             ✓             |
+| 模型映射界面   |    ✗    |    ✗     |        ✗        |             ✓             |
 | 绕过列表       |    ✗    |    ✗     |        ✓        |             ✓             |
 | 上游 CA 证书   |    ✗    |    ✗     |        ✓        |             ✓             |
 

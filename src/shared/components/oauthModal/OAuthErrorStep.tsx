@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
 import LinkifiedText from "@/shared/components/LinkifiedText";
 
@@ -28,11 +29,11 @@ export default function OAuthErrorStep({
 }: OAuthErrorStepProps) {
   return (
     <div className="text-center py-6">
-      <div className="size-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-        <span className="material-symbols-outlined text-3xl text-red-600">error</span>
+      <div className="size-16 mx-auto mb-4 rounded-full bg-error/10 flex items-center justify-center">
+        <Icon name="error" size={30} className="text-error" />
       </div>
       <h3 className="text-lg font-semibold mb-2">{errorTitle}</h3>
-      <p className="text-sm text-red-600 mb-4">
+      <p className="text-sm text-error mb-4">
         <LinkifiedText text={error} />
       </p>
       <div className="flex gap-2">

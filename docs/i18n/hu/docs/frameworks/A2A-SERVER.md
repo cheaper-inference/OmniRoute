@@ -47,7 +47,7 @@ HTTP 503 választ adnak a `-32000` JSON-RPC hibakóddal.
 
 ### `message/send` — Szinkron végrehajtás
 
-Üzenetet küld egy készségnek, és megvárja a teljes választ.
+Üzenetet küld egy képességnek, és megvárja a teljes választ.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+A `smart-routing` esetében a `metadata.combo` a `metadata.model` explicit felülbírálása az átjárókérésben; a rendszer a tényleges `model` értékeként küldi el, nem pedig figyelmen kívül hagyott `x-combo` JSON-mezőként. Az átjáró szokásos API-kulcsos és célpontonkénti engedélyezése továbbra is érvényes. Az érvénytelen vagy üres kombinációt a rendszer elutasítja.
+
+Az eredmény tartalmazza a `requested_combo` (a hívó szándéka), a `dispatched_model` (az átjárónak ténylegesen küldött kérés), a `response_model` (az átjáró válasza) és a `confirmed_combo` mezőket. Az utolsó mező értéke `null`, kivéve, ha az átjáró kifejezetten azonosít egy kombinációt. Az A2A döntési naplók csak megerősített kombinációhoz rendelik hozzá a végrehajtást, a meg nem erősített kérést pedig `requestedCombo` értékként őrzik meg.
+
 **Válasz:**
 
 ```json
@@ -76,22 +80,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -148,31 +145,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Elérhető készségek
 
-Az OmniRoute 6 A2A-készséget tesz elérhetővé, amelyek a `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` fájlban vannak összekötve. Minden készségmodul a `src/lib/a2a/skills/` könyvtárban található.
+Az OmniRoute 6 A2A-készséget tesz elérhetővé, amelyek a `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` helyen vannak bekötve. Minden készségmodul a `src/lib/a2a/skills/` könyvtárban található.
 
-| Készség                  | ID                   | Leírás                                                                                                                                                                            | Címkék                           | Példák                                                  |
-| :----------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------------------ |
-| Intelligens útválasztás  | `smart-routing`      | Egy promptot az optimális szolgáltatóhoz/kombinációhoz irányít az OmniRoute kombinációs motorja és pontozása segítségével                                                         | útválasztás, szolgáltatók        | „Irányítsd ezt a promptot a legjobb modellen keresztül” |
-| Kvótakezelés             | `quota-management`   | Jelenti a szolgáltatónkénti kvótaállapotot, és segít a hívóknak eldönteni, mikor kell korlátozni vagy szolgáltatót váltani                                                        | kvóta, szolgáltatók              | „Ellenőrizd az anthropic kvótáját”                      |
-| Szolgáltatók felderítése | `provider-discovery` | Felsorolja a telepített szolgáltatókat képességeikkel, ingyenes csomagjuk jelzőivel és OAuth-állapotukkal                                                                         | szolgáltatók, felderítés         | „Milyen szolgáltatók érhetők el?”                       |
-| Költségelemzés           | `cost-analysis`      | Megbecsüli egy kérés/beszélgetés költségét a katalógus és a közelmúltbeli használat alapján                                                                                       | költség, használat               | „Becsüld meg ennek a beszélgetésnek a költségét”        |
-| Állapotjelentés          | `health-report`      | Összesíti a szolgáltatónkénti áramkör-megszakító, várakozási és kizárási állapotot                                                                                                | állapot, ellenálló képesség      | „Mutasd az összes szolgáltató állapotát”                |
-| Képességek felsorolása   | `list-capabilities`  | A teljes, 45 bejegyzésből álló Agent Skills-katalógust (23 API + 21 CLI + 1 konfiguráció) adja vissza markdown-táblázatként, nyers SKILL.md URL-ekkel a kontextus beillesztéséhez | katalógus, felderítés, készségek | „Sorold fel az OmniRoute összes képességét”             |
+| Készség                 | ID                   | Leírás                                                                                                                                                                          | Címkék                           | Példák                                                  |
+| :---------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------- | :------------------------------------------------------ |
+| Intelligens útválasztás | `smart-routing`      | Az OmniRoute kombinációs motorja és pontozási rendszere segítségével az optimális szolgáltatón/kombináción keresztül irányítja a promptot                                       | útválasztás, szolgáltatók        | "Irányítsd ezt a promptot a legjobb modellen keresztül" |
+| Kvótakezelés            | `quota-management`   | Szolgáltatónként jelenti a kvótaállapotot, és segít a hívóknak eldönteni, mikor kell korlátozni vagy váltani                                                                    | kvóta, szolgáltatók              | "Ellenőrizd az anthropic kvótáját"                      |
+| Szolgáltató-felfedezés  | `provider-discovery` | Felsorolja a telepített szolgáltatókat képességeikkel, ingyenes csomag jelzőikkel és OAuth-állapotukkal                                                                         | szolgáltatók, felfedezés         | "Milyen szolgáltatók érhetők el?"                       |
+| Költségelemzés          | `cost-analysis`      | A katalógus és a közelmúltbeli használat alapján megbecsüli egy kérés/beszélgetés költségét                                                                                     | költség, használat               | "Becsüld meg ennek a beszélgetésnek a költségét"        |
+| Állapotjelentés         | `health-report`      | Szolgáltatónként összesíti a circuit breaker, a cooldown és a lockout állapotát                                                                                                 | állapot, hibatűrés               | "Mutasd az összes szolgáltató állapotát"                |
+| Képességek listázása    | `list-capabilities`  | A teljes, 45 bejegyzésből álló Agent Skills-katalógust (23 API + 21 CLI + 1 konfiguráció) markdown-táblázatként adja vissza, nyers SKILL.md URL-ekkel a kontextus-injektáláshoz | katalógus, felfedezés, készségek | "Sorold fel az összes OmniRoute-képességet"             |
 
-> Az Agent Card tartalmát összhangban kell tartani az aktuális, 374 szolgáltatót tartalmazó katalógussal; a szolgáltatók száma, valamint az ingyenességre és hitelesítés nélküliségre vonatkozó metaadatok a futásidejű nyilvántartásból származnak.
+> Az Agent Cardot naprakészen kell tartani az élő, 375 szolgáltatót tartalmazó katalógushoz igazítva; a szolgáltatók száma és az ingyenes/hitelesítés nélküli metaadatok a futásidejű regiszterből származnak.
 
 ### A `list-capabilities` készség részletei
 
-A `list-capabilities` készség különösen hasznos azoknak a külső ügynököknek, amelyeknek fel kell deríteniük, mit tesz elérhetővé az OmniRoute, mielőtt API-hívásokat küldenének. Strukturált markdown-táblázatot ad vissza műtermékként:
+A `list-capabilities` készség különösen hasznos olyan külső ágensek számára, amelyeknek API-hívások küldése előtt fel kell ismerniük, mit kínál az OmniRoute. Strukturált markdown-táblázat artefaktumot ad vissza:
 
 ```
-| ID | Név | Kategória | Terület | Végpontok/parancsok | Nyers URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Hitelesítés és munkamenetek | api | hitelesítés | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Minden sor tartalmazza a `rawUrl` oszlopot, így az ügynökök azonnal lekérhetik a teljes SKILL.md fájlt. A `metadata.totalSkills` mező a katalógus méretét tükrözi (jelenleg 45). Megvalósítás: `src/lib/a2a/skills/listCapabilities.ts`. Lásd még: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Minden sor tartalmazza a `rawUrl` oszlopot, így az ágensek azonnal lekérhetik a teljes SKILL.md-t. A `metadata.totalSkills` mező a katalógus méretét tükrözi (jelenleg 45). Implementáció: `src/lib/a2a/skills/listCapabilities.ts`. Lásd még: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

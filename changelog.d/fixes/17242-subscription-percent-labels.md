@@ -1,0 +1,1 @@
+- **fix(proxy):** Preserve proxy subscription labels containing malformed percent escapes without losing sibling nodes. ([#17242](https://github.com/diegosouzapw/OmniRoute/pull/17242)) — thanks @pacocartones

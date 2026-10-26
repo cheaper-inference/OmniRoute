@@ -45,9 +45,9 @@ A2A керується перемикачем **Endpoints → A2A** і за за
 
 ## Методи JSON-RPC 2.0
 
-### `message/send` — Синхронне виконання
+### `message/send` — синхронне виконання
 
-Надсилає повідомлення навичці та очікує на повну відповідь.
+Надсилає повідомлення навичці й очікує на повну відповідь.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Для `smart-routing` значення `metadata.combo` явно перевизначає
+`metadata.model` для запиту до шлюзу; воно надсилається як фактичне `model`,
+а не як ігнороване поле JSON `x-combo`. Стандартна авторизація шлюзу за ключем API та
+для кожної цілі все одно застосовується. Недійсна або порожня комбінація відхиляється.
+
+Результат містить `requested_combo` (намір виклику), `dispatched_model`
+(фактичний запит до шлюзу), `response_model` (відповідь шлюзу) та
+`confirmed_combo`. Останнє поле має значення `null`, якщо шлюз явно не
+ідентифікує комбінацію. Журнали рішень A2A пов’язують виконання лише з
+підтвердженою комбінацією, зберігаючи непідтверджений запит як `requestedCombo`.
+
 **Відповідь:**
 
 ```json
@@ -76,28 +87,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Потокове передавання через SSE
+### `message/stream` — потокове передавання SSE
 
 Працює так само, як `message/send`, але повертає події Server-Sent Events для потокового передавання в реальному часі.
 
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Отримання стану завдання
+### `tasks/get` — запит стану завдання
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Скасування завдання
+### `tasks/cancel` — скасування завдання
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -150,29 +154,29 @@ curl -X POST http://localhost:20128/a2a \
 
 OmniRoute надає 6 навичок A2A, підключених у `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Кожен модуль навички розташований у `src/lib/a2a/skills/`.
 
-| Навичка                      | ID                   | Опис                                                                                                                                                                      | Теги                        | Приклади                                  |
-| :--------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------- | :---------------------------------------- |
-| Інтелектуальна маршрутизація | `smart-routing`      | Спрямовує запит через оптимального провайдера або комбінацію, використовуючи механізм комбінацій OmniRoute та оцінювання                                                  | маршрутизація, провайдери   | "Спрямуй цей запит через найкращу модель" |
-| Керування квотами            | `quota-management`   | Повідомляє стан квоти для кожного провайдера та допомагає клієнтам вирішувати, коли обмежити швидкість або перемкнутися                                                   | квота, провайдери           | "Перевір квоту для anthropic"             |
-| Виявлення провайдерів        | `provider-discovery` | Перелічує встановлених провайдерів із зазначенням можливостей, ознак безкоштовного рівня та стану OAuth                                                                   | провайдери, виявлення       | "Які провайдери доступні?"                |
-| Аналіз вартості              | `cost-analysis`      | Оцінює вартість запиту або розмови на основі каталогу та нещодавнього використання                                                                                        | вартість, використання      | "Оціни вартість цієї розмови"             |
-| Звіт про стан                | `health-report`      | Агрегує стан автоматичного вимикача, періоду очікування та блокування для кожного провайдера                                                                              | стан, відмовостійкість      | "Покажи стан усіх провайдерів"            |
-| Перелік можливостей          | `list-capabilities`  | Повертає повний каталог із 45 навичок агента (23 API + 21 CLI + 1 конфігурація) у вигляді таблиці markdown із необробленими URL-адресами SKILL.md для додавання контексту | каталог, виявлення, навички | "Перелічи всі можливості OmniRoute"       |
+| Навичка            | ID                   | Опис                                                                                                                                                          | Теги                       | Приклади                                   |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :----------------------------------------- |
+| Smart Routing      | `smart-routing`      | Спрямовує промпт через оптимального провайдера/комбо, використовуючи рушій комбо OmniRoute + оцінювання                                                       | routing, providers         | "Спрямуй цей промпт через найкращу модель" |
+| Quota Management   | `quota-management`   | Звітує про стан квот за кожним провайдером, допомагає викликачам вирішувати, коли обмежувати/перемикатися                                                     | quota, providers           | "Перевір квоту для anthropic"              |
+| Provider Discovery | `provider-discovery` | Перелічує встановлених провайдерів із можливостями, прапорцями free-tier, статусом OAuth                                                                      | providers, discovery       | "Які провайдери доступні?"                 |
+| Cost Analysis      | `cost-analysis`      | Оцінює вартість запиту/розмови на основі каталогу + недавнього використання                                                                                   | cost, usage                | "Оціни вартість цієї розмови"              |
+| Health Report      | `health-report`      | Агрегує стан circuit breaker, cooldown та lockout для кожного провайдера                                                                                      | health, resilience         | "Покажи стан здоров'я всіх провайдерів"    |
+| List Capabilities  | `list-capabilities`  | Повертає повний каталог Agent Skills із 45 записів (23 API + 21 CLI + 1 config) у вигляді markdown-таблиці з raw-URL-адресами SKILL.md для ін'єкції контексту | catalog, discovery, skills | "Перелічи всі можливості OmniRoute"        |
 
-> Картку агента слід підтримувати узгодженою з актуальним каталогом із 374 провайдерів; кількість провайдерів і метадані про безкоштовний доступ або відсутність автентифікації отримуються з реєстру середовища виконання.
+> Картку агента слід підтримувати узгодженою з актуальним каталогом із 375 провайдерів; кількість провайдерів та метадані free/no-auth беруться з реєстру середовища виконання.
 
-### Докладний опис навички `list-capabilities`
+### Деталі навички `list-capabilities`
 
-Навичка `list-capabilities` особливо корисна для зовнішніх агентів, яким потрібно дізнатися, що надає OmniRoute, перш ніж надсилати виклики API. Вона повертає артефакт у вигляді структурованої таблиці markdown:
+Навичка `list-capabilities` особливо корисна для зовнішніх агентів, яким потрібно виявити, що надає OmniRoute, перед надсиланням API-викликів. Вона повертає артефакт у вигляді структурованої markdown-таблиці:
 
 ```
-| ID | Назва | Категорія | Область | Кінцеві точки/команди | Необроблена URL-адреса |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Автентифікація та сеанси | api | автентифікація | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Кожен рядок містить стовпець `rawUrl`, щоб агенти могли відразу отримати повний файл SKILL.md. Поле `metadata.totalSkills` відображає розмір каталогу (на сьогодні — 45). Реалізація: `src/lib/a2a/skills/listCapabilities.ts`. Див. також [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Кожен рядок містить стовпець `rawUrl`, тож агенти можуть одразу отримати повний SKILL.md. Поле `metadata.totalSkills` віддзеркалює розмір каталогу (45 на сьогодні). Реалізація: `src/lib/a2a/skills/listCapabilities.ts`. Див. також [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -274,7 +278,7 @@ resp = requests.post("http://localhost:20128/a2a", json={
     "method": "message/send",
     "params": {
         "skill": "smart-routing",
-        "messages": [{"role": "user", "content": "Привіт"}]
+        "messages": [{"role": "user", "content": "Hello"}]
     }
 }, headers={"Authorization": "Bearer YOUR_KEY"})
 
@@ -298,7 +302,7 @@ const resp = await fetch("http://localhost:20128/a2a", {
     method: "message/send",
     params: {
       skill: "smart-routing",
-      messages: [{ role: "user", content: "Привіт" }],
+      messages: [{ role: "user", content: "Hello" }],
     },
   }),
 });
