@@ -20,6 +20,16 @@ export interface GoogleFlowCreditsResult {
 }
 
 const XSSI_PREFIX = ")]}'";
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const flowCreditsCache = new Map<string, { data: { quotas: Record<string, UsageQuota> }; timestamp: number }>();
+
+export function invalidateFlowCreditsCache(cacheKey?: string): void {
+  if (cacheKey) {
+    flowCreditsCache.delete(cacheKey);
+  } else {
+    flowCreditsCache.clear();
+  }
+}
 
 /**
  * Normalizes user-supplied cookie input (raw header, JSON export, or bare SID)
@@ -159,9 +169,18 @@ export async function fetchFlowCredits(
  */
 export async function getGoogleFlowUsage(
   apiKeyOrCookie: string,
-  _providerSpecificData?: Record<string, unknown>,
+  providerSpecificData?: Record<string, unknown>,
   fetchImpl: typeof fetch = fetch
 ): Promise<{ quotas: Record<string, UsageQuota> }> {
+  const cacheKey = typeof apiKeyOrCookie === "string" ? apiKeyOrCookie.trim().slice(0, 80) : "default";
+  const now = Date.now();
+  const cached = flowCreditsCache.get(cacheKey);
+  const force = providerSpecificData?.forceRefresh === true || providerSpecificData?.force === true;
+
+  if (!force && cached && (now - cached.timestamp < ONE_HOUR_MS)) {
+    return cached.data;
+  }
+
   try {
     const { credits } = await fetchFlowCredits(apiKeyOrCookie, fetchImpl);
     const quota: UsageQuota = {
@@ -174,12 +193,17 @@ export async function getGoogleFlowUsage(
       displayName: "Veo Credits",
     };
 
-    return {
+    const result = {
       quotas: {
         veo_credits: quota,
       },
     };
+    flowCreditsCache.set(cacheKey, { data: result, timestamp: now });
+    return result;
   } catch (err: unknown) {
+    if (cached) {
+      return cached.data;
+    }
     const msg = sanitizeErrorMessage(err instanceof Error ? err.message : String(err));
     throw new Error(`Failed to fetch Google Flow credits: ${msg}`);
   }

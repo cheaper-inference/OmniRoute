@@ -4,7 +4,7 @@
  */
 
 import { acquireFlowBrowser, releaseFlowBrowser, type FlowBrowser } from "./browserLease.ts";
-import { normalizeFlowCookies, fetchFlowCredits } from "../../services/usage/googleflow.ts";
+import { normalizeFlowCookies, fetchFlowCredits, invalidateFlowCreditsCache } from "../../services/usage/googleflow.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 export const FLOW_USER_AGENT =
@@ -250,6 +250,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     })();
 
     videoUrl = await Promise.race([videoPromise, pollPromise]);
+    invalidateFlowCreditsCache();
 
     return {
       url: videoUrl,
@@ -397,6 +398,7 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
     })();
 
     imageUrl = await Promise.race([imagePromise, pollPromise]);
+    invalidateFlowCreditsCache();
 
     return {
       url: imageUrl,
