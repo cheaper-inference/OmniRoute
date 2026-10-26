@@ -5,10 +5,10 @@
 ---
 
 > **បង្កើតដោយស្វ័យប្រវត្តិ** ពី `src/shared/constants/providers.ts` — កុំកែសម្រួលដោយដៃ។
-> បង្កើតឡើងវិញជាមួយ៖ `npm run gen:provider-reference`
-> **បង្កើតចុងក្រោយ៖** 2026-10-18
+> បង្កើតឡើងវិញដោយប្រើ៖ `npm run gen:provider-reference`
+> **បានបង្កើតចុងក្រោយ៖** 2026-10-20
 
-អ្នកផ្តល់សេវាសរុប៖ **375**។ មើលការបែងចែកតាមប្រភេទខាងក្រោម។
+ចំនួនអ្នកផ្តល់សរុប៖ **375**។ សូមមើលការបែងចែកតាមប្រភេទខាងក្រោម។
 
 ## ប្រភេទ
 
@@ -457,12 +457,12 @@
 | ------ | --------- | --------------------------------------------- | -------- | -------- | ------------ |
 | `auto` | `auto`    | ស្វ័យប្រវត្តិ (មិនតម្រូវឱ្យកំណត់រចនាសម្ព័ន្ធ) | ប្រព័ន្ធ | —        | —            |
 
-## ប្រភពនៃការពិត
+## ប្រភពយោងផ្លូវការ
 
 - កាតាឡុក៖ [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- បញ្ជីចុះបញ្ជាក់ (Registry) (ព័ត៌មានលម្អិតតាមម៉ូដែលនីមួយៗ)៖ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (ការអនុវត្ត ១៥៤ ចំនួន)
-- Translators: [`open-sse/translator/`](../../open-sse/translator/)
+- បញ្ជីចុះឈ្មោះ (ព័ត៌មានលម្អិតតាមម៉ូដែលនីមួយៗ)៖ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- កម្មវិធីប្រតិបត្តិ៖ [`open-sse/executors/`](../../open-sse/executors/) (ការអនុវត្តចំនួន 156)
+- កម្មវិធីបកប្រែ៖ [`open-sse/translator/`](../../open-sse/translator/)
 
 ## សូមមើលផងដែរ
 

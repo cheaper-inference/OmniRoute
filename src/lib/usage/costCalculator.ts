@@ -131,21 +131,23 @@ function isCodexProvider(provider: string | null | undefined): boolean {
 }
 
 /**
- * Pricing row for (provider, model): exact id first (so a user override on an
- * annotated id wins), then the prefix-free id, then — for Codex — the id with its
- * reasoning-effort suffix removed.
+ * Model ids to look up, in order, when pricing (provider, model): exact id first (so
+ * a user override on an annotated id wins), then the prefix-free id, then — for
+ * Codex — the id with its reasoning-effort suffix removed. Exported so the
+ * `/v1/models` catalog prices entries with the same fallbacks as cost accounting.
  */
+export function getPricingLookupModels(provider: string, model: string): string[] {
+  const keys = [model];
+  const normalized = normalizeModelName(model);
+  if (normalized !== model) keys.push(normalized);
+  if (isCodexProvider(provider)) keys.push(...getCodexEffortlessPricingKeys(normalized));
+  return keys;
+}
+
+/** Pricing row for (provider, model), trying {@link getPricingLookupModels} in order. */
 async function resolvePricingRow(provider: string, model: string) {
   const { getPricingForModel } = await import("@/lib/db/settings");
-  const exact = await getPricingForModel(provider, model);
-  if (exact) return exact;
-  const normalized = normalizeModelName(model);
-  if (normalized !== model) {
-    const pricing = await getPricingForModel(provider, normalized);
-    if (pricing) return pricing;
-  }
-  if (!isCodexProvider(provider)) return null;
-  for (const key of getCodexEffortlessPricingKeys(normalized)) {
+  for (const key of getPricingLookupModels(provider, model)) {
     const pricing = await getPricingForModel(provider, key);
     if (pricing) return pricing;
   }

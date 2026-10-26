@@ -15,7 +15,11 @@ import {
   logRetryHintUnreadable,
   readProseRetryAfter,
 } from "../../utils/error.ts";
-import { buildRecoveryHint } from "./pinRecovery.ts";
+import {
+  buildRecoveryHint,
+  buildAllTargetsCoolingDownResponse,
+  type PreDispatchExclusion,
+} from "./pinRecovery.ts";
 import { buildContextBudgetResponse } from "./budgetExhaustion.ts";
 import { formatExhaustedConnectionKey } from "./comboDiagFormat.ts";
 import { collectQuotaWindowExclusions, formatQuotaSkipMessage } from "./quotaSkipDiagnostics.ts";
@@ -222,6 +226,7 @@ export async function handleRoundRobinCombo({
   // resolveComboTargetPipeline, so it wires the same stage here. Rotation
   // granularity becomes model x connection: rrStartIndex takes mod over the
   // expanded list, so each account occupies its own rotation slot.
+  const expansionExclusions: PreDispatchExclusion[] = [];
   orderedTargets = await expandTargetsForAllStrategies({
     strategy: "round-robin",
     targets: orderedTargets,
@@ -230,7 +235,14 @@ export async function handleRoundRobinCombo({
     settings: settings as Record<string, unknown> | null | undefined,
     log,
     apiKeyAllowedConnectionIds: apiKeyAllowedConnections,
+    exclusions: expansionExclusions,
   });
+  // Classify at the expansion boundary: later filters may empty a surviving
+  // pool for unrelated reasons and must retain their own error contracts.
+  if (orderedTargets.length === 0) {
+    const coolingDown = buildAllTargetsCoolingDownResponse(expansionExclusions);
+    if (coolingDown) return coolingDown;
+  }
   const tagFilteredTargets = await applyRequestTagRouting(orderedTargets, body, log);
   const evalRankedTargets = orderTargetsByEvalScores(tagFilteredTargets, config.evalRouting, log);
   // Align with the main/auto paths: combo config OR top-level settings (#8488 / #8494).

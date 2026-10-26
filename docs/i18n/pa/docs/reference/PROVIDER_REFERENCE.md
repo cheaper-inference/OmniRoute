@@ -4,11 +4,11 @@
 
 ---
 
-> **ਸਵੈ-ਸਿਰਜਿਤ** `src/shared/constants/providers.ts` ਤੋਂ — ਹੱਥੀਂ ਸੰਪਾਦਿਤ ਨਾ ਕਰੋ।
-> ਇਸ ਨਾਲ ਦੁਬਾਰਾ ਤਿਆਰ ਕਰੋ: `npm run gen:provider-reference`
-> **ਆਖਰੀ ਵਾਰ ਤਿਆਰ ਕੀਤਾ ਗਿਆ:** 2026-10-18
+> `src/shared/constants/providers.ts` ਤੋਂ **ਆਪਣੇ ਆਪ ਤਿਆਰ ਕੀਤਾ ਗਿਆ** — ਹੱਥੀਂ ਸੰਪਾਦਿਤ ਨਾ ਕਰੋ।
+> ਇਸ ਨਾਲ ਮੁੜ ਤਿਆਰ ਕਰੋ: `npm run gen:provider-reference`
+> **ਆਖਰੀ ਵਾਰ ਤਿਆਰ ਕੀਤਾ ਗਿਆ:** 2026-10-20
 
-ਕੁੱਲ ਪ੍ਰੋਵਾਈਡਰ: **375**। ਹੇਠਾਂ ਸ਼੍ਰੇਣੀ ਅਨੁਸਾਰ ਵੰਡ ਵੇਖੋ।
+ਕੁੱਲ ਪ੍ਰਦਾਤਾ: **375**। ਹੇਠਾਂ ਸ਼੍ਰੇਣੀਆਂ ਅਨੁਸਾਰ ਵੇਰਵਾ ਵੇਖੋ।
 
 ## ਸ਼੍ਰੇਣੀਆਂ
 
@@ -460,9 +460,9 @@
 ## ਸੱਚਾਈ ਦੇ ਸਰੋਤ
 
 - ਕੈਟਾਲਾਗ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- ਰਜਿਸਟਰੀ (ਪ੍ਰਤੀ-ਮਾਡਲ ਵੇਰਵੇ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ਐਗਜ਼ੀਕਿਊਟਰਜ਼: [`open-sse/executors/`](../../open-sse/executors/) (154 ਲਾਗੂਕਰਣ)
-- ਟ੍ਰਾਂਸਲੇਟਰਜ਼: [`open-sse/translator/`](../../open-sse/translator/)
+- ਰਜਿਸਟਰੀ (ਹਰੇਕ ਮਾਡਲ ਦੇ ਵੇਰਵੇ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- ਐਗਜ਼ਿਕਿਊਟਰ: [`open-sse/executors/`](../../open-sse/executors/) (156 ਇੰਪਲੀਮੈਂਟੇਸ਼ਨਾਂ)
+- ਟ੍ਰਾਂਸਲੇਟਰ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ਇਹ ਵੀ ਵੇਖੋ
 

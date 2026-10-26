@@ -4,11 +4,11 @@
 
 ---
 
-> **ಸ್ವಯಂ-ರಚಿತ** `src/shared/constants/providers.ts` ಇಂದ — ಕೈಯಾರೆ ಸಂಪಾದಿಸಬೇಡಿ.
-> ಮರು-ರಚಿಸಲು: `npm run gen:provider-reference`
-> **ಕೊನೆಯದಾಗಿ ರಚಿಸಲಾಗಿದೆ:** 2026-10-18
+> `src/shared/constants/providers.ts` ನಿಂದ **ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ** — ಕೈಯಾರೆ ಸಂಪಾದಿಸಬೇಡಿ.
+> ಇದರೊಂದಿಗೆ ಮರುರಚಿಸಿ: `npm run gen:provider-reference`
+> **ಕೊನೆಯದಾಗಿ ರಚಿಸಿದ್ದು:** 2026-10-20
 
-ಒಟ್ಟು ಪೂರೈಕೆದಾರರು: **375**. ಕೆಳಗಿನ ವರ್ಗದ ವಿಭಜನೆಯನ್ನು ನೋಡಿ.
+ಒಟ್ಟು ಪೂರೈಕೆದಾರರು: **375**. ಕೆಳಗಿನ ವರ್ಗವಾರು ವಿವರವನ್ನು ನೋಡಿ.
 
 ## ವರ್ಗಗಳು
 
@@ -460,8 +460,8 @@
 ## ಸತ್ಯದ ಮೂಲಗಳು
 
 - ಕ್ಯಾಟಲಾಗ್: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- ರಿಜಿಸ್ಟ್ರಿ (ಪ್ರತಿ-ಮಾದರಿ ವಿವರಗಳು): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು: [`open-sse/executors/`](../../open-sse/executors/) (154 ಅನುಷ್ಠಾನಗಳು)
+- ರಿಜಿಸ್ಟ್ರಿ (ಪ್ರತಿ-ಮಾದರಿಯ ವಿವರಗಳು): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು: [`open-sse/executors/`](../../open-sse/executors/) (156 ಅನುಷ್ಠಾನಗಳು)
 - ಟ್ರಾನ್ಸ್ಲೇಟರ್ಗಳು: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ಇದನ್ನೂ ನೋಡಿ
