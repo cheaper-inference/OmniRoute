@@ -465,7 +465,7 @@
     "dpdm": "^4.3.0",
     "esbuild": "0.28.2",
     "eslint": "^10.10.0",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "16.4.2",
     "eslint-plugin-react-hooks": "7.1.1",
     "eslint-plugin-sonarjs": "^4.1.0",
     "espree": "^11.2.0",
