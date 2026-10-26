@@ -40,12 +40,12 @@
   "author": "OmniRoute contributors",
   "repository": {
     "type": "git",
-    "url": "https://github.com/diegosouzapw/OmniRoute.git",
+    "url": "https://github.com/cheaper-inference/OmniRoute.git",
     "directory": "@omniroute/opencode-plugin-v2"
   },
-  "homepage": "https://github.com/diegosouzapw/OmniRoute/tree/main/%40omniroute/opencode-plugin-v2#readme",
+  "homepage": "https://github.com/cheaper-inference/OmniRoute/tree/main/%40omniroute/opencode-plugin-v2#readme",
   "bugs": {
-    "url": "https://github.com/diegosouzapw/OmniRoute/issues"
+    "url": "https://github.com/cheaper-inference/OmniRoute/issues"
   },
   "keywords": [
     "omniroute",
