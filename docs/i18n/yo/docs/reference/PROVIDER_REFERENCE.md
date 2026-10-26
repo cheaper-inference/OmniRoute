@@ -4,11 +4,11 @@
 
 ---
 
-> **A ṣe é fúnra rẹ̀** láti inú `src/shared/constants/providers.ts` — má ṣe ṣàtúnṣe rẹ̀ pẹ̀lú ọwọ́.
-> Ṣe àtúndàsílẹ̀ rẹ̀ pẹ̀lú: `npm run gen:provider-reference`
-> **A ṣe é gbẹ̀yìn:** 2026-10-18
+> **Ti a ṣẹda laifọwọyi** láti inú `src/shared/constants/providers.ts` — má ṣe ṣàtúnṣe rẹ̀ pẹ̀lú ọwọ́.
+> Ṣẹ̀dá rẹ̀ padà pẹ̀lú: `npm run gen:provider-reference`
+> **Ìgbà tí a ṣẹ̀ṣẹ̀ dá a:** 2026-10-20
 
-Àpapọ̀ àwọn olùpèsè: **375**. Wo ìtúpalẹ̀ ẹ̀ka ní ìsàlẹ̀.
+Àpapọ̀ àwọn olùpèsè: **375**. Wo ìpín gẹ́gẹ́ bí ẹ̀ka ní ìsàlẹ̀.
 
 ## Awọn ẹka
 
@@ -457,11 +457,11 @@ Lo dasibodu ni `/dashboard/providers` lati mu ṣiṣẹ, tunto, ati idanwo olup
 | ------ | ------ | ----------------------- | --- | --------------- | ------- |
 | `auto` | `auto` | Auto (Kò sí ìtòlẹ́sẹẹsẹ) | Ètò | —               | —       |
 
-## Àwọn orísun òtítọ
+## Àwọn orísun òtítọ́
 
 - Àkójọ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Ìforúkọsílẹ̀ (àlàyé awoṣe kọ̀ọ̀kan): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Àwọn olùṣe: [`open-sse/executors/`](../../open-sse/executors/) (àwọn ìmúṣe 154)
+- Ìforúkọsílẹ̀ (àwọn àlàyé fún awoṣe kọ̀ọ̀kan): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Àwọn olùmúṣẹ: [`open-sse/executors/`](../../open-sse/executors/) (àwọn ìmúṣẹ 156)
 - Àwọn olùtumọ̀: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Wo Pẹ̀lú

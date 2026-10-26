@@ -47,9 +47,9 @@ A2A je kontrolisan prekozogtača **Endpoints → A2A** i je onemogućen podrazum
 
 ## JSON-RPC 2.0 metode
 
-### `message/send` — Sinhron izvršavanje
+### `message/send` — Sinhrono izvršavanje
 
-Šalje poruku vještini i čeka kompletan odgovor.
+Šalje poruku vještini i čeka potpuni odgovor.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -67,6 +67,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Za `smart-routing`, `metadata.combo` predstavlja eksplicitno nadjačavanje vrijednosti
+`metadata.model` za zahtjev prema mrežnom prolazu; šalje se kao stvarni `model`,
+a ne kao zanemareno JSON polje `x-combo`. Uobičajena autorizacija mrežnog prolaza putem API ključa i
+autorizacija po ciljnom sistemu i dalje se primjenjuju. Nevažeća ili prazna kombinacija se odbija.
+
+Rezultat izlaže `requested_combo` (namjera pozivaoca), `dispatched_model`
+(stvarni zahtjev prema mrežnom prolazu), `response_model` (odgovor mrežnog prolaza) i
+`confirmed_combo`. Posljednje polje je `null` osim ako mrežni prolaz eksplicitno
+identificira kombinaciju. A2A zapisnici odluka pripisuju izvršavanje samo
+potvrđenoj kombinaciji, zadržavajući nepotvrđeni zahtjev kao `requestedCombo`.
+
 **Odgovor:**
 
 ```json
@@ -78,30 +89,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE streaming
+### `message/stream` — SSE prijenos
 
-Isto kao `message/send` ali vraća Server-Sent Events za real-time streaming.
+Isto kao `message/send`, ali vraća događaje koje šalje server radi prijenosa u stvarnom vremenu.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -128,7 +132,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Upit za status zadatka
+### `tasks/get` — Provjera statusa zadatka
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

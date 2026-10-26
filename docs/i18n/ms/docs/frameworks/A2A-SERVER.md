@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Untuk `smart-routing`, `metadata.combo` ialah penggantian eksplisit bagi
+`metadata.model` untuk permintaan get laluan; ia dihantar sebagai `model` sebenar,
+bukan sebagai medan JSON `x-combo` yang diabaikan. Kunci API biasa get laluan dan
+pemberian kuasa bagi setiap sasaran masih terpakai. Kombo yang tidak sah atau kosong akan ditolak.
+
+Hasilnya mendedahkan `requested_combo` (niat pemanggil), `dispatched_model`
+(permintaan get laluan sebenar), `response_model` (respons get laluan) dan
+`confirmed_combo`. Medan terakhir ialah `null` melainkan get laluan mengenal pasti
+kombo secara eksplisit. Log keputusan A2A mengaitkan pelaksanaan hanya kepada
+kombo yang disahkan, sambil mengekalkan permintaan yang belum disahkan sebagai `requestedCombo`.
+
 **Respons:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Penstriman SSE
 
-Sama seperti `message/send`, tetapi mengembalikan Peristiwa Dihantar Pelayan untuk penstriman masa nyata.
+Sama seperti `message/send` tetapi mengembalikan Peristiwa Dihantar Pelayan untuk penstriman masa nyata.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Menanyakan Status Tugasan
+### `tasks/get` — Tanya Status Tugas
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Membatalkan Tugasan
+### `tasks/cancel` — Batalkan Tugas
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

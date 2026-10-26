@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+For `smart-routing` er `metadata.combo` en eksplisitt overstyring av
+`metadata.model` for gateway-forespørselen. Den sendes som den faktiske `model`,
+ikke som et ignorert `x-combo`-JSON-felt. Gatewayens vanlige API-nøkkel og
+autorisasjon per mål gjelder fortsatt. En ugyldig eller tom kombinasjon avvises.
+
+Resultatet viser `requested_combo` (anroperens hensikt), `dispatched_model`
+(den faktiske gateway-forespørselen), `response_model` (gateway-svaret) og
+`confirmed_combo`. Det siste feltet er `null` med mindre gatewayen eksplisitt
+identifiserer en kombinasjon. A2A-beslutningslogger tilskriver bare kjøringen til en
+bekreftet kombinasjon, mens en ubekreftet forespørsel beholdes som `requestedCombo`.
+
 **Svar:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }

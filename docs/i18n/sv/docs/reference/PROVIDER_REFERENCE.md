@@ -4,9 +4,9 @@
 
 ---
 
-> **Autogenererad** från `src/shared/constants/providers.ts` — redigera inte manuellt.
+> **Automatiskt genererad** från `src/shared/constants/providers.ts` — redigera inte manuellt.
 > Generera om med: `npm run gen:provider-reference`
-> **Senast genererad:** 2026-10-18
+> **Senast genererad:** 2026-10-20
 
 Totalt antal leverantörer: **375**. Se kategorifördelningen nedan.
 
@@ -461,7 +461,7 @@ Använd kontrollpanelen på `/dashboard/providers` för att aktivera, konfigurer
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Register (detaljer per modell): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Exekverare: [`open-sse/executors/`](../../open-sse/executors/) (154 implementationer)
+- Exekverare: [`open-sse/executors/`](../../open-sse/executors/) (156 implementationer)
 - Översättare: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Se även

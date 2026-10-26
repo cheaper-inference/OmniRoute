@@ -2,8 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import { Card } from "@/shared/components";
 import { SkillsConceptCard } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import Modal from "@/shared/components/Modal";
+import Textarea from "@/shared/components/Textarea";
 import type { SkillsProvider } from "@/lib/skills/providerSettings";
 import { OmniSkillsList } from "./components/OmniSkillsList";
 import { OmniExecutionsTab } from "./components/OmniExecutionsTab";
@@ -50,6 +55,7 @@ export function OmniSkillsPageClient(): JSX.Element {
   const [skillsProvider, setSkillsProvider] = useState<SkillsProvider>("skillsmp");
 
   const t = useTranslations("skills");
+  const tSidebar = useTranslations("sidebar");
   // NOTE: commonT is intentionally unused here but retained for potential future use
   useTranslations("common");
 
@@ -195,58 +201,61 @@ export function OmniSkillsPageClient(): JSX.Element {
     { id: "marketplace", labelKey: "marketplaceTab" },
   ];
 
+  const closeInstallModal = () => {
+    setShowInstallModal(false);
+    setInstallStatus(null);
+    setInstallJson("");
+  };
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Page title (lote 7 pendência 12): the shell title hides when a PageHeader is present. */}
+      <PageHeader
+        compact
+        title={tSidebar("omniSkills")}
+        description={tSidebar("omniSkillsSubtitle")}
+      />
       {/* Concept card */}
       <SkillsConceptCard variant="omni" />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4">
+        <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalSkills")}</p>
           <p className="text-2xl font-bold text-text-main mt-1">{skillsTotal}</p>
         </Card>
-        <Card className="p-4">
+        <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("enabledSkills")}</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">{enabledCount}</p>
+          <p className="text-2xl font-bold text-success mt-1">{enabledCount}</p>
         </Card>
-        <Card className="p-4">
-          <p className="text-xs text-text-muted uppercase tracking-wide">
-            {t("totalExecutions")}
-          </p>
-          <p className="text-2xl font-bold text-violet-400 mt-1">{execTotal}</p>
+        <Card padding="sm">
+          <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalExecutions")}</p>
+          <p className="text-2xl font-bold text-primary mt-1">{execTotal}</p>
         </Card>
-        <Card className="p-4">
+        <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("successRate")}</p>
-          <p className="text-2xl font-bold text-amber-400 mt-1">{successRate}%</p>
+          <p className="text-2xl font-bold text-warning mt-1">{successRate}%</p>
         </Card>
       </div>
 
       <div className="flex justify-end">
-        <button
-          onClick={() => setShowInstallModal(true)}
-          className="px-4 py-2 text-sm font-medium rounded-lg bg-violet-500 text-white hover:bg-violet-600 transition-colors"
-        >
-          {t("installSkillButton")}
-        </button>
+        <Button onClick={() => setShowInstallModal(true)}>{t("installSkillButton")}</Button>
       </div>
 
-      {/* Tab bar */}
-      <div className="flex gap-2 border-b border-border">
-        {tabs.map(({ id, labelKey }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === id
-                ? "border-violet-500 text-violet-400"
-                : "border-transparent text-text-muted hover:text-text-main"
-            }`}
-          >
-            {t(labelKey)}
-          </button>
-        ))}
-      </div>
+      {/* Tab bar — the panels below are rendered by the page (no TabsContent). */}
+      <Tabs
+        variant="underline"
+        value={activeTab}
+        onValueChange={(next) => setActiveTab(next as typeof activeTab)}
+      >
+        <TabsList aria-label={t("installSkillButton")}>
+          {tabs.map(({ id, labelKey }) => (
+            <TabsTrigger key={id} value={id} aria-controls={undefined}>
+              {t(labelKey)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {/* Tab content */}
       {activeTab === "skills" && (
@@ -307,76 +316,52 @@ export function OmniSkillsPageClient(): JSX.Element {
       )}
 
       {/* Install modal */}
-      {showInstallModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">{t("installSkillModalTitle")}</h2>
-              <button
-                onClick={() => {
-                  setShowInstallModal(false);
-                  setInstallStatus(null);
-                  setInstallJson("");
-                }}
-                className="text-text-muted hover:text-text-main"
-              >
-                X
-              </button>
-            </div>
-            <p className="text-sm text-text-muted mb-4">{t("installSkillModalDesc")}</p>
-            <textarea
-              value={installJson}
-              onChange={(e) => setInstallJson(e.target.value)}
-              placeholder={t("installJsonPlaceholder")}
-              className="w-full h-48 p-3 rounded-lg bg-background border border-border text-sm font-mono resize-none focus:outline-none focus:ring-1 focus:ring-violet-500"
-            />
-            <div className="flex items-center gap-3 mt-3">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1.5 text-sm rounded-lg border border-border text-text-muted hover:text-text-main transition-colors"
-              >
-                {t("uploadJson")}
-              </button>
-              <div className="flex-1" />
-              <button
-                onClick={() => {
-                  setShowInstallModal(false);
-                  setInstallStatus(null);
-                  setInstallJson("");
-                }}
-                className="px-3 py-1.5 text-sm rounded-lg border border-border text-text-muted hover:text-text-main transition-colors"
-              >
-                {t("cancel")}
-              </button>
-              <button
-                onClick={handleInstall}
-                disabled={installing || !installJson.trim()}
-                className="px-4 py-1.5 text-sm font-medium rounded-lg bg-violet-500 text-white hover:bg-violet-600 disabled:opacity-50 transition-colors"
-              >
-                {installing ? t("installing") : t("installSkillButton")}
-              </button>
-            </div>
-            {installStatus && (
-              <div
-                className={`mt-3 p-3 rounded-lg text-sm ${
-                  installStatus.type === "success"
-                    ? "bg-emerald-500/10 text-emerald-400"
-                    : "bg-red-500/10 text-red-400"
-                }`}
-              >
-                {installStatus.message}
-              </div>
-            )}
-          </div>
+      <Modal
+        isOpen={showInstallModal}
+        onClose={closeInstallModal}
+        size="lg"
+        title={t("installSkillModalTitle")}
+      >
+        <p className="text-sm text-text-muted mb-4">{t("installSkillModalDesc")}</p>
+        <Textarea
+          value={installJson}
+          onChange={(e) => setInstallJson(e.target.value)}
+          placeholder={t("installJsonPlaceholder")}
+          aria-label={t("installSkillModalTitle")}
+          className="h-48 resize-none font-mono text-sm"
+        />
+        <div className="flex flex-wrap items-center gap-3 mt-3">
+          {/* kit-exception: Native file picker for the JSON upload (driven by the button; adapters have none). */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+            {t("uploadJson")}
+          </Button>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" onClick={closeInstallModal}>
+            {t("cancel")}
+          </Button>
+          <Button size="sm" onClick={handleInstall} disabled={installing || !installJson.trim()}>
+            {installing ? t("installing") : t("installSkillButton")}
+          </Button>
         </div>
-      )}
+        {installStatus && (
+          <div
+            className={`mt-3 p-3 rounded-lg text-sm ${
+              installStatus.type === "success"
+                ? "bg-success/10 text-success"
+                : "bg-error/10 text-error"
+            }`}
+          >
+            {installStatus.message}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

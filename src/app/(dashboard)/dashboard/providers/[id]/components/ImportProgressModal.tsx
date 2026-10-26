@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 /**
  * ImportProgressModal — Issue #3501 Phase 1k
  *
@@ -9,7 +11,8 @@
  * Cycle-safe: no import from ProviderDetailPageClient.
  */
 
-import { Modal } from "@/shared/components";
+import { Progress } from "@omniroute/ui-kit/progress";
+import { Button, Modal } from "@/shared/components";
 import type { ImportProgress } from "../hooks/useModelImportHandlers";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
 
@@ -43,85 +46,60 @@ export default function ImportProgressModal({
         {/* Status text */}
         <div className="flex items-center gap-3">
           {importProgress.phase === "fetching" && (
-            <span className="material-symbols-outlined text-primary animate-spin">
-              progress_activity
-            </span>
+            <Icon name="progress_activity" className="animate-spin text-text-muted" />
           )}
           {importProgress.phase === "importing" && (
-            <span className="material-symbols-outlined text-primary animate-spin">
-              progress_activity
-            </span>
+            <Icon name="progress_activity" className="animate-spin text-text-muted" />
           )}
-          {importProgress.phase === "done" && (
-            <span className="material-symbols-outlined text-green-500">check_circle</span>
-          )}
-          {importProgress.phase === "warning" && (
-            <span className="material-symbols-outlined text-orange-500">warning</span>
-          )}
-          {importProgress.phase === "error" && (
-            <span className="material-symbols-outlined text-red-500">error</span>
-          )}
+          {importProgress.phase === "done" && <Icon name="check_circle" className="text-success" />}
+          {importProgress.phase === "warning" && <Icon name="warning" className="text-warning" />}
+          {importProgress.phase === "error" && <Icon name="error" className="text-error" />}
           <span className="text-sm font-medium text-text-main">{importProgress.status}</span>
         </div>
 
         {/* Progress bar */}
         {(importProgress.phase === "importing" || importProgress.phase === "done") &&
           importProgress.total > 0 && (
-            <div className="w-full">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-text-muted">
-                  {importProgress.current} / {importProgress.total}
-                </span>
-                <span className="text-xs text-text-muted">
-                  {Math.round((importProgress.current / importProgress.total) * 100)}%
-                </span>
-              </div>
-              <div className="w-full h-2.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-300 ease-out"
-                  style={{
-                    width: `${(importProgress.current / importProgress.total) * 100}%`,
-                    background:
-                      importProgress.phase === "done"
-                        ? "linear-gradient(90deg, #22c55e, #16a34a)"
-                        : "linear-gradient(90deg, var(--color-primary), var(--color-primary-hover, var(--color-primary)))",
-                  }}
-                />
-              </div>
-            </div>
+            <Progress
+              value={importProgress.current}
+              max={importProgress.total}
+              label={`${importProgress.current} / ${importProgress.total}`}
+              showValue
+              animate={false}
+              className={
+                importProgress.phase === "done"
+                  ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-success"
+                  : undefined
+              }
+            />
           )}
 
         {/* Fetching indeterminate bar */}
         {importProgress.phase === "fetching" && (
-          <div className="w-full h-2.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full animate-pulse"
-              style={{
-                width: "60%",
-                background:
-                  "linear-gradient(90deg, var(--color-primary), var(--color-primary-hover, var(--color-primary)))",
-              }}
-            />
+          // Decorative: the fetch has no measurable progress, so keep the bar out of the a11y
+          // tree instead of announcing a fabricated value (the kit Progress has no indeterminate mode).
+          <div aria-hidden="true" data-testid="import-fetching-bar">
+            <Progress value={60} animate={false} className="animate-pulse" />
           </div>
         )}
 
         {/* Error message */}
         {importProgress.phase === "error" && importProgress.error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-            <p className="text-sm text-red-400">{importProgress.error}</p>
+          <div className="p-3 rounded-lg bg-error/10 border border-error/20">
+            <p className="text-sm text-error">{importProgress.error}</p>
           </div>
         )}
 
         {/* Log list */}
         {importProgress.logs.length > 0 && (
-          <div className="max-h-48 overflow-y-auto rounded-lg bg-black/5 dark:bg-white/5 p-3 border border-black/5 dark:border-white/5">
+          <div className="max-h-48 overflow-y-auto rounded-lg bg-bg-subtle p-3 border border-border">
             <div className="flex flex-col gap-1">
               {importProgress.logs.map((log, i) => (
                 <p
                   key={i}
                   className={`text-xs font-mono ${
                     typeof log === "string" && log.startsWith("✓")
-                      ? "text-green-500 font-semibold"
+                      ? "text-success font-semibold"
                       : "text-text-muted"
                   }`}
                 >
@@ -135,12 +113,7 @@ export default function ImportProgressModal({
         {/* Close button */}
         {(importProgress.phase === "done" || importProgress.phase === "warning") && (
           <div className="flex justify-center">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:opacity-90 transition-opacity"
-            >
-              {t("close")}
-            </button>
+            <Button onClick={onClose}>{t("close")}</Button>
           </div>
         )}
       </div>

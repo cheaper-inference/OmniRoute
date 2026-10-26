@@ -34,14 +34,9 @@ interface PoolCreate {
 export function adaptLsPoolToApiSchema(lsPool: LsPool): PoolCreate {
   const connectionId = lsPool.connectionId || "";
   const name =
-    lsPool.accountLabel ||
-    lsPool.provider ||
-    lsPool.connectionId?.slice(0, 12) ||
-    "Migrated pool";
+    lsPool.accountLabel || lsPool.provider || lsPool.connectionId?.slice(0, 12) || "Migrated pool";
   const policy: Policy =
-    lsPool.policy === "soft" || lsPool.policy === "burst"
-      ? (lsPool.policy as Policy)
-      : "hard";
+    lsPool.policy === "soft" || lsPool.policy === "burst" ? (lsPool.policy as Policy) : "hard";
 
   const allocations: PoolAllocation[] = (lsPool.allocations || [])
     .filter((a) => a.apiKeyId)

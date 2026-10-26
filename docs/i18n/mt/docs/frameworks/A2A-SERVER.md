@@ -45,9 +45,9 @@ L-A2A huwa kkontrollat mill-bidla **Endpoints → A2A** u huwa diżattivat b'mod
 
 ## Metodi JSON-RPC 2.0
 
-### `message/send` — Eżekuzzjoni Sinniċka
+### `message/send` — Eżekuzzjoni Sinkronika
 
-Jibgħat messaġġ lill-għarfien u jistenna r-risposta kompluta.
+Jibgħat messaġġ lil ħila u jistenna r-risposta sħiħa.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Għal `smart-routing`, `metadata.combo` huwa sostituzzjoni espliċita ta'
+`metadata.model` għat-talba tal-gateway; jintbagħat bħala l-`model` reali,
+mhux bħala qasam JSON `x-combo` injorat. L-awtorizzazzjoni normali tal-gateway
+permezz taċ-ċavetta tal-API u għal kull mira xorta tibqa' tapplika. Combo invalidu jew vojt jiġi miċħud.
+
+Ir-riżultat jesponi `requested_combo` (l-intenzjoni ta' min jagħmel it-talba), `dispatched_model`
+(it-talba effettiva lill-gateway), `response_model` (ir-risposta tal-gateway) u
+`confirmed_combo`. L-aħħar qasam ikun `null` sakemm il-gateway ma jidentifikax
+combo b'mod espliċitu. Ir-reġistri tad-deċiżjonijiet A2A jattribwixxu l-eżekuzzjoni biss lil
+combo kkonfermat, filwaqt li jżommu talba mhux ikkonfermata bħala `requestedCombo`.
+
 **Risposta:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE Streaming
+### `message/stream` — Streaming permezz ta' SSE
 
-Identika għal `message/send` imma jirritorna Eventi SSE għal streaming f'ħin reali.
+L-istess bħal `message/send`, iżda jirritorna Server-Sent Events għal streaming f'ħin reali.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Eventi SSE:**
+**Avvenimenti SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Staqsi l-Status tal-Kompitu
+### `tasks/get` — Ikkonsulta l-Istatus tal-Kompitu
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Kanċella Kompitu
+### `tasks/cancel` — Ikkanċella Kompitu
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

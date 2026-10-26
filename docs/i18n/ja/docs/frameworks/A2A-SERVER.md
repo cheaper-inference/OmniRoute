@@ -47,7 +47,7 @@ A2A は **Endpoints → A2A** トグルで制御され、デフォルトでは�
 
 ### `message/send` — 同期実行
 
-スキルにメッセージを送信し、完全なレスポンスが返されるまで待機します。
+スキルにメッセージを送信し、完全なレスポンスを待機します。
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,7 +65,18 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**レスポンス：**
+`smart-routing` の場合、`metadata.combo` はゲートウェイリクエストにおいて
+`metadata.model` を明示的に上書きします。無視される `x-combo` JSON フィールドとしてではなく、
+実際の `model` として送信されます。ゲートウェイの通常の API キー認証および
+ターゲットごとの認可は引き続き適用されます。無効または空のコンボは拒否されます。
+
+結果には、`requested_combo`（呼び出し元の意図）、`dispatched_model`
+（実際のゲートウェイリクエスト）、`response_model`（ゲートウェイのレスポンス）、
+および `confirmed_combo` が含まれます。最後のフィールドは、ゲートウェイがコンボを明示的に
+識別しない限り `null` です。A2A の決定ログでは、実行は確認済みのコンボにのみ帰属され、
+未確認のリクエストは `requestedCombo` として保持されます。
+
+**レスポンス:**
 
 ```json
 {
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE イベント：**
+**SSE イベント:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}

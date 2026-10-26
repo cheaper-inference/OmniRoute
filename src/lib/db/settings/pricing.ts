@@ -132,33 +132,44 @@ export async function getPricingWithSources(): Promise<{
   };
 }
 
-export async function getPricingForModel(provider: string, model: string) {
-  const pricing = (await getCachedPricing()) as PricingByProvider;
+/** Case-insensitive key lookup; returns the first matching key in insertion order. */
+type PricingKeyFinder = <T>(
+  obj: Record<string, T> | undefined | null,
+  key: string
+) => T | undefined;
 
-  const findKeyInsensitive = <T>(
-    obj: Record<string, T> | undefined | null,
-    key: string
-  ): T | undefined => {
-    if (!obj || !key) return undefined;
-    const lowerKey = key.toLowerCase();
-    for (const [k, v] of Object.entries(obj)) {
-      if (k.toLowerCase() === lowerKey) return v;
-    }
-    return undefined;
-  };
+function findKeyInsensitive<T>(obj: Record<string, T> | undefined | null, key: string) {
+  if (!obj || !key) return undefined;
+  const lowerKey = key.toLowerCase();
+  for (const [k, v] of Object.entries(obj)) {
+    if (k.toLowerCase() === lowerKey) return v;
+  }
+  return undefined;
+}
 
+/**
+ * Provider half of {@link getPricingForModel}: the provider's model table in a merged
+ * pricing table, matched by id, alias, reverse alias, then without a `-cn` suffix.
+ * Pure, so the `/v1/models` catalog can resolve prices with the same rules from one
+ * in-memory table (`find` lets it pass an indexed finder with identical semantics).
+ */
+export function findProviderPricing(
+  pricing: PricingByProvider,
+  provider: string,
+  find: PricingKeyFinder = findKeyInsensitive
+): PricingModels | null {
   const pLower = (provider || "").toLowerCase();
-  let providerPricing = findKeyInsensitive<PricingModels>(pricing, pLower);
+  let providerPricing = find<PricingModels>(pricing, pLower);
 
   if (!providerPricing) {
-    const alias = findKeyInsensitive<string>(PROVIDER_ID_TO_ALIAS, pLower);
-    if (alias) providerPricing = findKeyInsensitive(pricing, alias);
+    const alias = find<string>(PROVIDER_ID_TO_ALIAS, pLower);
+    if (alias) providerPricing = find(pricing, alias);
   }
 
   if (!providerPricing) {
     for (const [id, mappedAlias] of Object.entries(PROVIDER_ID_TO_ALIAS)) {
       if (typeof mappedAlias === "string" && mappedAlias.toLowerCase() === pLower) {
-        providerPricing = findKeyInsensitive(pricing, id);
+        providerPricing = find(pricing, id);
         if (providerPricing) break;
       }
     }
@@ -167,21 +178,31 @@ export async function getPricingForModel(provider: string, model: string) {
   if (!providerPricing) {
     const np = pLower.replace(/-cn$/, "");
     if (np && np !== pLower) {
-      providerPricing = findKeyInsensitive(pricing, np);
+      providerPricing = find(pricing, np);
     }
   }
 
-  if (!providerPricing) return null;
+  return providerPricing || null;
+}
 
+/** Model half of {@link getPricingForModel}: exact id, then dots replaced by hyphens. */
+export function findModelPricing(
+  providerPricing: PricingModels,
+  model: string,
+  find: PricingKeyFinder = findKeyInsensitive
+): JsonRecord | null {
   const mLower = (model || "").toLowerCase();
-  let modelPricing = findKeyInsensitive<JsonRecord>(providerPricing, mLower);
+  return (
+    find<JsonRecord>(providerPricing, mLower) ||
+    find<JsonRecord>(providerPricing, mLower.replace(/\./g, "-")) ||
+    null
+  );
+}
 
-  if (!modelPricing) {
-    const hyphenModel = mLower.replace(/\./g, "-");
-    modelPricing = findKeyInsensitive(providerPricing, hyphenModel);
-  }
-
-  return modelPricing || null;
+export async function getPricingForModel(provider: string, model: string) {
+  const pricing = (await getCachedPricing()) as PricingByProvider;
+  const providerPricing = findProviderPricing(pricing, provider);
+  return providerPricing ? findModelPricing(providerPricing, model) : null;
 }
 
 export async function updatePricing(pricingData: PricingByProvider) {

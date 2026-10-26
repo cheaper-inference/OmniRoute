@@ -47,7 +47,7 @@ JSON-RPC දෝෂ කේතය `-32000` සමඟ HTTP 503 ආපසු ලබ�
 
 ### `message/send` — සමමුහුර්ත ක්රියාත්මක කිරීම
 
-කුසලතාවකට පණිවිඩයක් යවා සම්පූර්ණ ප්රතිචාරය ලැබෙන තෙක් රැඳී සිටී.
+කුසලතාවකට පණිවිඩයක් යවා සම්පූර්ණ ප්රතිචාරය ලැබෙන තෙක් රැඳී සිටියි.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` සඳහා, `metadata.combo` යනු ද්වාර ඉල්ලීම සඳහා
+`metadata.model` පැහැදිලිව අතික්රමණය කිරීමකි; එය නොසලකා හරින ලද `x-combo`
+JSON ක්ෂේත්රයක් ලෙස නොව, සැබෑ `model` ලෙස යවනු ලැබේ. ද්වාරයේ සාමාන්ය API යතුරු සහ
+එක් එක් ඉලක්කයට අදාළ අවසර දීම තවමත් ක්රියාත්මක වේ. වලංගු නොවන හෝ හිස් combo එකක් ප්රතික්ෂේප කෙරේ.
+
+ප්රතිඵලය මඟින් `requested_combo` (අමතන්නාගේ අභිප්රාය), `dispatched_model`
+(සැබෑ ද්වාර ඉල්ලීම), `response_model` (ද්වාර ප්රතිචාරය) සහ
+`confirmed_combo` අනාවරණය කරයි. ද්වාරය combo එකක් පැහැදිලිව හඳුනා නොගන්නේ නම් අවසාන ක්ෂේත්රය `null` වේ.
+A2A තීරණ ලොග් මඟින් ක්රියාත්මක කිරීම ආරෝපණය කරන්නේ තහවුරු කළ combo එකකට පමණක් වන අතර,
+තහවුරු නොකළ ඉල්ලීමක් `requestedCombo` ලෙස රඳවා ගනියි.
+
 **ප්රතිචාරය:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE ප්රවාහකරණය
 
-`message/send` හා සමාන නමුත් තත්ය කාලීන ප්රවාහකරණය සඳහා සේවාදායකයෙන් යවන ලද සිදුවීම් ආපසු ලබා දෙයි.
+`message/send` හා සමාන නමුත් තත්ය කාලීන ප්රවාහකරණය සඳහා සර්වර්-යැවූ සිදුවීම් ආපසු ලබා දෙයි.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \

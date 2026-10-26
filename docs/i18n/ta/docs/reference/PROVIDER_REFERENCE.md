@@ -4,11 +4,11 @@
 
 ---
 
-> **தானாக உருவாக்கப்பட்டது** `src/shared/constants/providers.ts` இலிருந்து — கைமுறையாகத் திருத்த வேண்டாம்.
-> மீண்டும் உருவாக்க: `npm run gen:provider-reference`
-> **கடைசியாக உருவாக்கப்பட்டது:** 2026-10-18
+> `src/shared/constants/providers.ts` இலிருந்து **தானாக உருவாக்கப்பட்டது** — கைமுறையாகத் திருத்த வேண்டாம்.
+> இதைப் பயன்படுத்தி மீண்டும் உருவாக்கவும்: `npm run gen:provider-reference`
+> **கடைசியாக உருவாக்கப்பட்டது:** 2026-10-20
 
-மொத்த வழங்குநர்கள்: **375**. வகை வாரியான பிரிவைக் கீழே பார்க்கவும்.
+மொத்த வழங்குநர்கள்: **375**. கீழே வகை வாரியான விவரத்தைக் காண்க.
 
 ## வகைகள்
 
@@ -457,11 +457,11 @@
 | ------ | ------------- | ------------------------------- | ------------- | -------- | ----------- |
 | `auto` | `auto`        | தானியங்கி (உள்ளமைவு தேவையில்லை) | சிஸ்டம்       | —        | —           |
 
-## உண்மையின் மூலங்கள்
+## உண்மையின் ஆதாரங்கள்
 
 - பட்டியல்: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- பதிவேடு (மாடல் வாரியான விவரங்கள்): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- செயல்படுத்திகள்: [`open-sse/executors/`](../../open-sse/executors/) (154 செயலாக்கங்கள்)
+- பதிவகம் (ஒவ்வொரு மாடலுக்குமான விவரங்கள்): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- இயக்கிகள்: [`open-sse/executors/`](../../open-sse/executors/) (156 செயலாக்கங்கள்)
 - மொழிபெயர்ப்பிகள்: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## மேலும் காண்க

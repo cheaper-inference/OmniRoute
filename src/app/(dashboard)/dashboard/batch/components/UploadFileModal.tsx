@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
+import Button from "@/shared/components/Button";
+import Modal from "@/shared/components/Modal";
 
 const MAX_BYTES = 512 * 1024 * 1024; // 512 MB
 
@@ -23,16 +26,7 @@ export default function UploadFileModal({ onClose, onUploaded }: Props) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  // Escape key → onClose
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [onClose]);
+  // Escape, the overlay click and the focus trap come from the Modal adapter (kit Dialog).
 
   function validateAndSet(picked: File) {
     setError(null);
@@ -96,150 +90,113 @@ export default function UploadFileModal({ onClose, onUploaded }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Overlay */}
-      <div
-        ref={overlayRef}
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Panel */}
-      <div
-        className="relative w-full sm:max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-200 flex flex-col"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("uploadModalTitle")}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px] text-[var(--color-accent)]">
-              upload_file
-            </span>
-            <h2 className="text-base font-semibold text-[var(--color-text-main)]">
-              {t("uploadModalTitle")}
-            </h2>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t("close")}
-            className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors"
-          >
-            <span className="material-symbols-outlined text-[20px]">close</span>
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="px-6 py-5 flex flex-col gap-4">
-          {/* Error banner */}
-          {error && (
-            <div
-              role="alert"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/25 text-red-400 text-sm"
-            >
-              <span className="material-symbols-outlined text-[16px]">error</span>
-              {error}
-            </div>
-          )}
-
-          {/* Drop zone or file info */}
-          {!file ? (
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => inputRef.current?.click()}
-              className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 cursor-pointer transition-colors select-none ${
-                dragging
-                  ? "border-[var(--color-accent)] bg-[var(--color-accent)]/5"
-                  : "border-[var(--color-border)] hover:border-[var(--color-accent)]/60 hover:bg-[var(--color-bg-alt)]"
-              }`}
-              role="button"
-              tabIndex={0}
-              aria-label={t("uploadModalDropOrPick")}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
-              }}
-            >
-              <span
-                className={`material-symbols-outlined text-[40px] ${dragging ? "text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"}`}
-              >
-                upload_file
-              </span>
-              <span className="text-sm text-[var(--color-text-main)] text-center">
-                {t("uploadModalDropOrPick")}
-              </span>
-              <span className="text-xs text-[var(--color-text-muted)] text-center">
-                {t("uploadModalSizeLimit")}
-              </span>
-              <input
-                ref={inputRef}
-                type="file"
-                accept=".jsonl"
-                className="hidden"
-                onChange={handleInputChange}
-                aria-hidden="true"
-                tabIndex={-1}
-              />
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--color-bg-alt)] border border-[var(--color-border)]">
-              <span className="material-symbols-outlined text-[24px] text-[var(--color-accent)] shrink-0">
-                description
-              </span>
-              <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-                <span
-                  className="text-sm font-medium text-[var(--color-text-main)] truncate"
-                  title={file.name}
-                >
-                  {file.name}
-                </span>
-                <span className="text-xs text-[var(--color-text-muted)]">
-                  {formatBytes(file.size)}
-                </span>
-              </div>
-              <button
-                onClick={() => {
-                  setFile(null);
-                  setError(null);
-                }}
-                className="shrink-0 text-xs text-[var(--color-text-muted)] hover:text-red-400 transition-colors px-2 py-1 rounded border border-[var(--color-border)] hover:border-red-400/40"
-              >
-                {t("uploadFileModalRemove")}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--color-border)]">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors border border-[var(--color-border)]"
-          >
+    <Modal
+      isOpen
+      onClose={onClose}
+      size="md"
+      title={
+        <span className="flex items-center gap-2">
+          <Icon name="upload_file" size={20} className="text-accent" />
+          {t("uploadModalTitle")}
+        </span>
+      }
+      bodyClassName="px-6 py-5 flex flex-col gap-4"
+      footer={
+        <>
+          <Button variant="outline" onClick={onClose}>
             {t("uploadModalCancel")}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => void handleUpload()}
             disabled={!file || uploading}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            className="gap-2"
           >
             {uploading ? (
               <>
-                <span className="animate-spin inline-block rounded-full h-4 w-4 border-b-2 border-white" />
+                <Icon name="progress_activity" size={16} className="animate-spin" />
                 {t("uploadFileModalUploading")}
               </>
             ) : (
               <>
-                <span className="material-symbols-outlined text-[16px]">upload</span>
+                <Icon name="upload" size={16} />
                 {t("uploadModalUpload")}
               </>
             )}
-          </button>
+          </Button>
+        </>
+      }
+    >
+      {/* Error banner */}
+      {error && (
+        <div
+          role="alert"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-error/10 border border-error/25 text-error text-sm"
+        >
+          <Icon name="error" size={16} />
+          {error}
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* Drop zone or file info */}
+      {!file ? (
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+          className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 cursor-pointer transition-colors select-none ${
+            dragging
+              ? "border-accent bg-accent/10"
+              : "border-border hover:border-accent/60 hover:bg-bg-alt"
+          }`}
+          role="button"
+          tabIndex={0}
+          aria-label={t("uploadModalDropOrPick")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+          }}
+        >
+          <Icon
+            name="upload_file"
+            size={40}
+            className={dragging ? "text-accent" : "text-text-muted"}
+          />
+          <span className="text-sm text-text-main text-center">{t("uploadModalDropOrPick")}</span>
+          <span className="text-xs text-text-muted text-center">{t("uploadModalSizeLimit")}</span>
+          {/* kit-exception: Native file picker, hidden behind the drop zone: the adapters have no file
+                  input, and this one is driven by the zone's click/keyboard handlers. */}
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".jsonl"
+            className="hidden"
+            onChange={handleInputChange}
+            aria-hidden="true"
+            tabIndex={-1}
+          />
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-bg-alt border border-border">
+          <Icon name="description" size={24} className="text-accent" />
+          <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+            <span className="text-sm font-medium text-text-main truncate" title={file.name}>
+              {file.name}
+            </span>
+            <span className="text-xs text-text-muted">{formatBytes(file.size)}</span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setFile(null);
+              setError(null);
+            }}
+            className="shrink-0 text-xs text-text-muted hover:text-error hover:border-error/40"
+          >
+            {t("uploadFileModalRemove")}
+          </Button>
+        </div>
+      )}
+    </Modal>
   );
 }

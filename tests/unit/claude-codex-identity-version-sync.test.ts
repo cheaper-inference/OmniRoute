@@ -123,38 +123,42 @@ function assertGithubFallbackDoesNotPersist() {
     path.join(process.cwd(), "src/app/api/providers/[id]/models/route.ts"),
     "utf8"
   );
-  const idx = src.indexOf("Codex live catalog unavailable — using GitHub model catalog");
-  assert.ok(idx > 0);
-  const start = src.lastIndexOf("if (githubCatalogModels && githubCatalogModels.length > 0)", idx);
-  const end = src.indexOf("Codex live and GitHub catalogs unavailable", idx);
-  assert.ok(start > 0 && end > start);
-  const window = src.slice(start, end);
-  assert.match(window, /buildResponse\s*\(/);
-  assert.doesNotMatch(window, /buildApiDiscoveryResponse\s*\(/);
-  assert.doesNotMatch(window, /persistDiscoveredModels\s*\(/);
 
-  const liveIdx = src.lastIndexOf("if (liveModels && liveModels.length > 0)", start);
-  const cacheIdx = src.lastIndexOf("Codex live catalog unavailable — using cached catalog", start);
-  assert.ok(liveIdx > 0 && liveIdx < cacheIdx && cacheIdx < start);
-  const liveWindow = src.slice(liveIdx, cacheIdx);
+  const liveIdx = src.indexOf("if (liveModels && liveModels.length > 0)");
+  // Whitespace-tolerant: the anchor is the branch, not the formatting.
+  const githubMatch = /if\s*\(\s*fallbackSource\s*===\s*"github_catalog"/.exec(src);
+  const githubIdx = githubMatch ? githubMatch.index : -1;
+  const localMatch = /source:\s*"local_catalog"/.exec(src.slice(githubIdx));
+  const localIdx = localMatch ? githubIdx + localMatch.index : -1;
+  const fallbackIdx = src.indexOf("const liveFailed = liveModels === null", liveIdx);
+  const cacheMatch = /if\s*\(\s*fallbackSource\s*===\s*"cache"/.exec(src.slice(fallbackIdx));
+  const cacheIdx = cacheMatch ? fallbackIdx + cacheMatch.index : -1;
+  assert.ok(liveIdx > 0, "the live branch must exist");
+  assert.ok(fallbackIdx > liveIdx, "the fallback chain must follow the live branch");
+  assert.ok(cacheIdx > fallbackIdx, "the cached account view must be tried first");
+  assert.ok(githubIdx > cacheIdx, "the GitHub branch must follow the cache branch");
+  assert.ok(localIdx > githubIdx, "the local fallback must follow the GitHub branch");
+
+  // Only the live branch may persist the account inventory. No fallback, an
+  // empty live answer included, may rewrite it.
+  const liveWindow = src.slice(liveIdx, fallbackIdx);
   assert.match(liveWindow, /persistDiscoveredModels\s*\(/);
+  assert.doesNotMatch(src.slice(fallbackIdx, localIdx), /persistDiscoveredModels\s*\(/);
+
+  // The cached account view is a degraded answer too: it must carry the
+  // fallback warning and must not be reported as a live discovery.
+  const cacheWindow = src.slice(cacheIdx, githubIdx);
+  assert.match(cacheWindow, /fallbackWarning/);
+  assert.doesNotMatch(cacheWindow, /buildApiDiscoveryResponse\s*\(/);
+
+  // A fallback that hid itself from model-sync would let the public manifest
+  // persist as the account's synced catalog (isDegraded* keys off the warning).
+  const githubWindow = src.slice(githubIdx, localIdx);
+  assert.match(githubWindow, /buildResponse\s*\(/);
+  assert.doesNotMatch(githubWindow, /buildApiDiscoveryResponse\s*\(/);
+  assert.doesNotMatch(githubWindow, /persistDiscoveredModels\s*\(/);
+  assert.match(githubWindow, /fallbackWarning/);
 }
-
-test("test 7: live-empty GitHub catalog path does not call persist", () => {
-  assertGithubFallbackDoesNotPersist();
-});
-
-test("Codex client version locksteps Dockerfile @openai/codex and env override", () => {
-  const dockerfile = fs.readFileSync(path.join(process.cwd(), "Dockerfile"), "utf8");
-  const match = dockerfile.match(/@openai\/codex@([0-9]+\.[0-9]+\.[0-9]+)/);
-  assert.ok(match, "Dockerfile must pin @openai/codex@x.y.z");
-  const pinned = match[1];
-  assert.notEqual(pinned, "0.149.0");
-  assert.equal(codexCfg.DEFAULT_CODEX_CLIENT_VERSION, pinned);
-  assert.equal(codexCfg.getCodexClientVersion(), pinned);
-  assert.equal(codexCfg.getCodexDefaultHeaders().Version, pinned);
-  assert.equal(codexCfg.getCodexCliRsHeaders()["User-Agent"], `codex_cli_rs/${pinned}`);
-});
 
 test("test 7: live-empty GitHub catalog path does not call persist", () => {
   assertGithubFallbackDoesNotPersist();

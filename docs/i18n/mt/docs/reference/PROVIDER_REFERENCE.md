@@ -5,10 +5,10 @@
 ---
 
 > **Iġġenerat awtomatikament** minn `src/shared/constants/providers.ts` — teditjahx manwalment.
-> Erġa' ġġenerah b': `npm run gen:provider-reference`
-> **L-aħħar ġenerazzjoni:** 2026-10-18
+> Iġġenerah mill-ġdid bi: `npm run gen:provider-reference`
+> **Iġġenerat l-aħħar:** 2026-10-20
 
-Total ta' fornituri: **375**. Ara t-tqassim skont il-kategoriji hawn taħt.
+Total ta' fornituri: **375**. Ara t-tqassim skont il-kategorija hawn taħt.
 
 ## Kategoriji
 
@@ -459,9 +459,9 @@ Uża d-dashboard f’`/dashboard/providers` biex tattiva, tikkonfigura u tittest
 
 ## Sorsi tal-verità
 
-- Katalogu: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- Katalgu: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Reġistru (dettalji għal kull mudell): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Eżekuturi: [`open-sse/executors/`](../../open-sse/executors/) (154 implimentazzjoni)
+- Eżekuturi: [`open-sse/executors/`](../../open-sse/executors/) (156 implimentazzjoni)
 - Tradutturi: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Ara Wkoll

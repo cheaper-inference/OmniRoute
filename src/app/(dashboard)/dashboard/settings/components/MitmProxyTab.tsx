@@ -2,7 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { Badge, Button, Card, Input } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import { cn } from "@/shared/utils/cn";
 
 const TRANSPARENT_MITM_PORT = 443;
 
@@ -78,6 +90,7 @@ async function fetchMitmStatusResult(): Promise<MitmStatusResult> {
 
 export default function MitmProxyTab() {
   const t = useTranslations("mitm");
+  const tCommon = useTranslations("common");
   const [status, setStatus] = useState<MitmStatus>(emptyStatus);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -192,49 +205,37 @@ export default function MitmProxyTab() {
     }
   };
 
-  const statusTone = status.running
-    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-    : "border-border bg-sidebar text-text-muted";
-
   return (
     <Card className="p-6">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold text-text-main">
-            <span className="material-symbols-outlined text-[20px] text-primary">lan</span>
+            <Icon name="lan" size={20} className="text-text-muted" />
             {t("title")}
           </h2>
           <p className="mt-1 text-sm text-text-muted">{t("description")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium ${statusTone}`}
+          <Badge
+            variant={status.running ? "success" : "default"}
+            icon={status.running ? "play_circle" : "pause_circle"}
           >
-            <span className="material-symbols-outlined text-[14px]">
-              {status.running ? "play_circle" : "pause_circle"}
-            </span>
             {status.running ? t("running") : t("stopped")}
-          </span>
-          <button
-            onClick={() => void loadStatus()}
-            disabled={loading}
-            className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
-          >
+          </Badge>
+          <Button variant="outline" size="sm" onClick={() => void loadStatus()} disabled={loading}>
             {t("refresh")}
-          </button>
+          </Button>
         </div>
       </div>
 
       {feedback && (
-        <div
-          className={`mb-5 rounded-lg border px-4 py-3 text-sm ${
-            feedback.type === "success"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-              : "border-red-500/30 bg-red-500/10 text-red-600"
-          }`}
-        >
-          {feedback.message}
-        </div>
+        <Alert
+          className="mb-5"
+          variant={feedback.type === "success" ? "success" : "critical"}
+          description={feedback.message}
+          dismissLabel={tCommon("close")}
+          onDismiss={() => setFeedback(null)}
+        />
       )}
 
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
@@ -245,64 +246,42 @@ export default function MitmProxyTab() {
                 <p className="text-sm font-semibold text-text-main">{t("enable")}</p>
                 <p className="text-xs text-text-muted">{t("enableDesc")}</p>
               </div>
-              <button
+              <Button
+                variant={status.running ? "danger" : "primary"}
+                icon={status.running ? "stop_circle" : "play_circle"}
                 onClick={toggleMitm}
                 disabled={saving || loading}
-                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-40 ${
-                  status.running ? "bg-red-500 hover:bg-red-600" : "bg-primary hover:bg-primary/90"
-                }`}
               >
-                <span className="material-symbols-outlined text-[18px]">
-                  {status.running ? "stop_circle" : "play_circle"}
-                </span>
                 {status.running ? t("stop") : t("start")}
-              </button>
+              </Button>
             </div>
 
             <div className="grid gap-3 md:grid-cols-3">
-              <label className="space-y-1">
-                <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-                  {t("port")}
-                </span>
-                <input
-                  value={port}
-                  readOnly
-                  disabled={status.running}
-                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-60"
-                />
-              </label>
-              <label className="space-y-1">
-                <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-                  {t("apiKey")}
-                </span>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(event) => setApiKey(event.target.value)}
-                  placeholder={t("apiKeyPlaceholder")}
-                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
-                />
-              </label>
-              <label className="space-y-1">
-                <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-                  {t("sudoPassword")}
-                </span>
-                <input
-                  type="password"
-                  value={sudoPassword}
-                  onChange={(event) => setSudoPassword(event.target.value)}
-                  placeholder={status.hasCachedPassword ? t("cachedPassword") : t("sudoPassword")}
-                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
-                />
-              </label>
+              <Input label={t("port")} value={port} readOnly disabled={status.running} />
+              <Input
+                label={t("apiKey")}
+                type="password"
+                value={apiKey}
+                onChange={(event) => setApiKey(event.target.value)}
+                placeholder={t("apiKeyPlaceholder")}
+              />
+              <Input
+                label={t("sudoPassword")}
+                type="password"
+                value={sudoPassword}
+                onChange={(event) => setSudoPassword(event.target.value)}
+                placeholder={status.hasCachedPassword ? t("cachedPassword") : t("sudoPassword")}
+              />
             </div>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
               onClick={savePort}
               disabled={saving || status.running}
-              className="mt-3 rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
             >
               {t("saveSettings")}
-            </button>
+            </Button>
           </div>
 
           <div className="rounded-xl border border-border bg-surface/50 p-4">
@@ -313,36 +292,31 @@ export default function MitmProxyTab() {
                   {status.certExists ? t("certificateReady") : t("certificateMissing")}
                 </p>
               </div>
-              <span
-                className={`rounded-full border px-2 py-1 text-xs ${
-                  status.certExists
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                    : "border-amber-500/30 bg-amber-500/10 text-amber-600"
-                }`}
-              >
+              <Badge variant={status.certExists ? "success" : "warning"} size="sm">
                 {status.certExists ? t("available") : t("missing")}
-              </span>
+              </Badge>
             </div>
             <div className="flex flex-wrap gap-2">
               <a
                 href="/api/settings/mitm?download=cert"
-                className={`inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors ${
-                  status.certExists
-                    ? "text-text-main hover:bg-sidebar"
-                    : "pointer-events-none text-text-muted opacity-50"
-                }`}
+                aria-disabled={!status.certExists || undefined}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  !status.certExists && "pointer-events-none opacity-50"
+                )}
               >
-                <span className="material-symbols-outlined text-[18px]">download</span>
+                <Icon name="download" size={18} />
                 {t("downloadCert")}
               </a>
-              <button
+              <Button
+                variant="outline"
+                size="sm"
+                icon="autorenew"
                 onClick={regenerateCertificate}
                 disabled={saving || status.running}
-                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
               >
-                <span className="material-symbols-outlined text-[18px]">autorenew</span>
                 {t("regenerateCert")}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -378,8 +352,8 @@ export default function MitmProxyTab() {
                   </p>
                   <p className="mt-1 text-xl font-semibold text-text-main">{item.value}</p>
                 </div>
-                <span className="material-symbols-outlined rounded-lg bg-primary/10 p-2 text-[20px] text-primary">
-                  {item.icon}
+                <span className="rounded-lg bg-bg-subtle p-2 text-text-muted">
+                  <Icon name={item.icon} size={20} />
                 </span>
               </div>
             </div>
@@ -402,49 +376,42 @@ export default function MitmProxyTab() {
         {status.targets.length === 0 ? (
           <div className="p-6 text-center text-sm text-text-muted">{t("noTargets")}</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="text-xs uppercase tracking-wider text-text-muted">
-                <tr>
-                  <th className="px-4 py-3 font-medium">{t("target")}</th>
-                  <th className="px-4 py-3 font-medium">{t("host")}</th>
-                  <th className="px-4 py-3 font-medium">{t("localPort")}</th>
-                  <th className="px-4 py-3 font-medium">{t("endpoints")}</th>
-                  <th className="px-4 py-3 font-medium">{t("status")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {status.targets.map((target) => (
-                  <tr key={target.id}>
-                    <td className="px-4 py-3 font-medium text-text-main">{target.name}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-text-muted">
-                      {target.targetHost}:{target.targetPort}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-text-muted">
-                      {target.localPort}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {target.endpoints.map((endpoint) => (
-                          <span
-                            key={endpoint}
-                            className="rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted"
-                          >
-                            {endpoint}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="rounded-full border border-border bg-sidebar px-2 py-1 text-xs text-text-muted">
-                        {target.enabled ? t("enabled") : t("configured")}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table className="min-w-[760px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("target")}</TableHead>
+                <TableHead>{t("host")}</TableHead>
+                <TableHead>{t("localPort")}</TableHead>
+                <TableHead>{t("endpoints")}</TableHead>
+                <TableHead>{t("status")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {status.targets.map((target) => (
+                <TableRow key={target.id}>
+                  <TableCell className="font-medium text-text-main">{target.name}</TableCell>
+                  <TableCell className="font-mono text-xs text-text-muted">
+                    {target.targetHost}:{target.targetPort}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-text-muted">
+                    {target.localPort}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {target.endpoints.map((endpoint) => (
+                        <Badge key={endpoint} size="sm">
+                          {endpoint}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge size="sm">{target.enabled ? t("enabled") : t("configured")}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </div>
     </Card>

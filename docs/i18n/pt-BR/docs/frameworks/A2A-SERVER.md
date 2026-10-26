@@ -47,7 +47,7 @@ O A2A é controlado pela opção **Endpoints → A2A** e fica desabilitado por p
 
 ### `message/send` — Execução síncrona
 
-Envia uma mensagem para uma habilidade e aguarda a resposta completa.
+Envia uma mensagem para uma skill e aguarda a resposta completa.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Para `smart-routing`, `metadata.combo` é uma substituição explícita de
+`metadata.model` para a solicitação ao gateway; ele é enviado como o `model` real,
+e não como um campo JSON `x-combo` ignorado. A autorização normal por chave de API e
+por destino do gateway continua sendo aplicada. Um combo inválido ou vazio é rejeitado.
+
+O resultado expõe `requested_combo` (intenção do chamador), `dispatched_model`
+(a solicitação real ao gateway), `response_model` (resposta do gateway) e
+`confirmed_combo`. O último campo é `null`, a menos que o gateway identifique
+explicitamente um combo. Os logs de decisão A2A atribuem a execução apenas a um
+combo confirmado, mantendo uma solicitação não confirmada como `requestedCombo`.
+
 **Resposta:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Streaming via SSE
 
-Funciona da mesma forma que `message/send`, mas retorna Server-Sent Events para streaming em tempo real.
+Igual a `message/send`, mas retorna Server-Sent Events para streaming em tempo real.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -262,7 +266,7 @@ submitted → working → completed
 
 ---
 
-## Exemplos de Integração
+## Exemplos de integração
 
 ### Python (requests)
 

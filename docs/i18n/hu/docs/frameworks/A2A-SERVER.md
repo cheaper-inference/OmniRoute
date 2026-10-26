@@ -47,7 +47,7 @@ HTTP 503 választ adnak a `-32000` JSON-RPC hibakóddal.
 
 ### `message/send` — Szinkron végrehajtás
 
-Üzenetet küld egy készségnek, és megvárja a teljes választ.
+Üzenetet küld egy képességnek, és megvárja a teljes választ.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+A `smart-routing` esetében a `metadata.combo` a `metadata.model` explicit felülbírálása az átjárókérésben; a rendszer a tényleges `model` értékeként küldi el, nem pedig figyelmen kívül hagyott `x-combo` JSON-mezőként. Az átjáró szokásos API-kulcsos és célpontonkénti engedélyezése továbbra is érvényes. Az érvénytelen vagy üres kombinációt a rendszer elutasítja.
+
+Az eredmény tartalmazza a `requested_combo` (a hívó szándéka), a `dispatched_model` (az átjárónak ténylegesen küldött kérés), a `response_model` (az átjáró válasza) és a `confirmed_combo` mezőket. Az utolsó mező értéke `null`, kivéve, ha az átjáró kifejezetten azonosít egy kombinációt. Az A2A döntési naplók csak megerősített kombinációhoz rendelik hozzá a végrehajtást, a meg nem erősített kérést pedig `requestedCombo` értékként őrzik meg.
+
 **Válasz:**
 
 ```json
@@ -76,22 +80,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }

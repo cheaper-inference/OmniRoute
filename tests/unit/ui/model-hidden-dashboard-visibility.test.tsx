@@ -13,11 +13,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CompatibleModelsSection from "../../../src/app/(dashboard)/dashboard/providers/[id]/components/CompatibleModelsSection";
 import { useModelCompatState } from "../../../src/app/(dashboard)/dashboard/providers/[id]/hooks/useModelCompatState";
 
-vi.mock("@/shared/components", () => ({
+vi.mock("@/shared/components", async () => ({
+  // KEA-7886: form adapters (Button/Input/Checkbox/Select/FilterPills) as DOM-faithful stubs
+  ...(await import("../../helpers/sharedComponentStubs")).formStubs,
   Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
-  Button: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
-    <button onClick={onClick}>{children}</button>
-  ),
 }));
 
 vi.mock("@/store/notificationStore", () => ({

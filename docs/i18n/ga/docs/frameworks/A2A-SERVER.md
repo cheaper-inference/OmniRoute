@@ -45,7 +45,7 @@ tuairiscíonn `GET /api/a2a/status` `status: "disabled"` agus `online: false`; t
 
 ## Modhanna JSON-RPC 2.0
 
-### `message/send` — Rith Sioncrónach
+### `message/send` — Forghníomhú Sioncronach
 
 Seolann sé teachtaireacht chuig scil agus fanann sé leis an bhfreagra iomlán.
 
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+I gcás `smart-routing`, is sárú sainráite ar
+`metadata.model` é `metadata.combo` don iarratas geata; seoltar é mar an fíor-`model`,
+seachas mar réimse JSON `x-combo` a ndéantar neamhaird de. Tá gnáthúdarú na heochrach API agus
+an t-údarú de réir sprice ag an ngeata fós i bhfeidhm. Diúltaítear teaglaim neamhbhailí nó folamh.
+
+Nochtann an toradh `requested_combo` (rún an ghlaoiteora), `dispatched_model`
+(an t-iarratas geata iarbhír), `response_model` (freagra an gheata) agus
+`confirmed_combo`. Is é `null` an réimse deireanach mura sainaithníonn an geata
+teaglaim go sainráite. Ní chuireann logaí cinnteoireachta A2A an forghníomhú i leith
+teaglaim ach amháin má tá sí deimhnithe, agus coinnítear iarratas neamhdheimhnithe mar `requestedCombo`.
+
 **Freagra:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Sruthú SSE
 
-Mar an gcéanna le `message/send`, ach tugann sé Imeachtaí arna Seoladh ag an bhFreastalaí ar ais le haghaidh sruthú fíor-ama.
+Mar an gcéanna le `message/send`, ach seoltar Imeachtaí arna Seoladh ag an bhFreastalaí ar ais le haghaidh sruthú fíor-ama.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Stádas Taisc a Fhiosrú
+### `tasks/get` — Fiosraigh Stádas Taisc
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Tasc a Chealú
+### `tasks/cancel` — Cealaigh Tasc
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

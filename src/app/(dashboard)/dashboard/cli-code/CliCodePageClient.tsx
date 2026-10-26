@@ -2,8 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Link from "next/link";
+import Icon from "@/shared/components/Icon";
 import { Button, CardSkeleton, Input } from "@/shared/components";
+import Select from "@/shared/components/Select";
 import { CLI_TOOLS } from "@/shared/constants/cliTools";
 import { EXPECTED_CODE_COUNT } from "@/shared/schemas/cliCatalog";
 import { CliToolCard, CliConceptCard, CliComparisonCard } from "@/shared/components/cli";
@@ -133,6 +136,23 @@ export default function CliCodePageClient({
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader
+        compact
+        title={t("pageTitle")}
+        description={t("pageSubtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={refetch}
+            icon="refresh"
+            aria-label={tCommon("card.refreshDetection")}
+          >
+            {tCommon("card.refreshDetection")}
+          </Button>
+        }
+      />
+
       {/* Concept card */}
       <CliConceptCard currentType="code" />
 
@@ -140,26 +160,6 @@ export default function CliCodePageClient({
       <CliComparisonCard currentType="code" />
 
       <CliProfileAutoSyncToggles />
-
-      {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
-        {/* Title + subtitle */}
-        <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-semibold text-text-main leading-tight">{t("pageTitle")}</h1>
-          <p className="text-sm text-text-muted mt-0.5">{t("pageSubtitle")}</p>
-        </div>
-
-        {/* Refresh button */}
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={refetch}
-          icon="refresh"
-          aria-label={tCommon("card.refreshDetection")}
-        >
-          {tCommon("card.refreshDetection")}
-        </Button>
-      </div>
 
       <CliCompanionPanel
         targets={companionTargets}
@@ -173,6 +173,7 @@ export default function CliCodePageClient({
         <div className="flex-1 min-w-0">
           <Input
             placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
             value={search}
             onChange={handleSearchChange}
             icon="search"
@@ -180,44 +181,36 @@ export default function CliCodePageClient({
         </div>
 
         {/* Detection filter */}
-        <div className="flex flex-col gap-1 min-w-[150px]">
-          <label className="text-[11px] text-text-muted uppercase tracking-wide">
-            {t("filterDetectionLabel")}
-          </label>
-          <select
-            value={detectionFilter}
-            onChange={handleDetectionChange}
-            className="h-8 px-2 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary/30"
-          >
-            <option value="all">{t("detectionAll")}</option>
-            <option value="installed">{t("detectionInstalled")}</option>
-            <option value="not_installed">{t("detectionNotFound")}</option>
-          </select>
-        </div>
+        <Select
+          label={t("filterDetectionLabel")}
+          value={detectionFilter}
+          onChange={handleDetectionChange}
+          className="min-w-[150px]"
+        >
+          <option value="all">{t("detectionAll")}</option>
+          <option value="installed">{t("detectionInstalled")}</option>
+          <option value="not_installed">{t("detectionNotFound")}</option>
+        </Select>
 
         {/* Base URL filter */}
-        <div className="flex flex-col gap-1 min-w-[150px]">
-          <label className="text-[11px] text-text-muted uppercase tracking-wide">
-            {t("filterBaseUrlLabel")}
-          </label>
-          <select
-            value={baseUrlFilter}
-            onChange={handleBaseUrlChange}
-            className="h-8 px-2 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary/30"
-          >
-            <option value="all">{t("baseUrlAll")}</option>
-            <option value="full">{t("baseUrlFull")}</option>
-            <option value="partial">{t("baseUrlPartial")}</option>
-          </select>
-        </div>
+        <Select
+          label={t("filterBaseUrlLabel")}
+          value={baseUrlFilter}
+          onChange={handleBaseUrlChange}
+          className="min-w-[150px]"
+        >
+          <option value="all">{t("baseUrlAll")}</option>
+          <option value="full">{t("baseUrlFull")}</option>
+          <option value="partial">{t("baseUrlPartial")}</option>
+        </Select>
       </div>
 
       {/* Empty state — no active providers */}
       {!providersLoading && !hasActiveProviders && (
-        <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 flex items-start gap-3">
-          <span className="material-symbols-outlined text-amber-500 flex-shrink-0">warning</span>
+        <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 flex items-start gap-3">
+          <Icon name="warning" className="text-warning flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
+            <p className="text-sm font-medium text-warning">
               {tCommon("detail.noActiveProviders")}
             </p>
             <p className="text-xs text-text-muted mt-0.5">
