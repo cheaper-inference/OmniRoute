@@ -1,4 +1,5 @@
 import { resolveCanonicalProviderModel } from "@omniroute/open-sse/services/modelCanonicalization.ts";
+import { resolveProviderAlias } from "@omniroute/open-sse/services/providerAlias.ts";
 import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
 import {
   isProviderNodePrefixReserved,
@@ -23,11 +24,20 @@ export function createHiddenModelLookup(
   }
   const resolve = (provider: string | null | undefined, model: string) => {
     const identity = nodeByPrefix.get(provider || "") || provider;
-    const resolved = resolveCanonicalProviderModel(identity, model);
+    const canonicalProvider = resolveCanonicalProviderModel(identity, null).provider;
+    // /v1/models ids carry the provider prefix ("cmd/zai-org/GLM-5") while a provider
+    // page hides the bare id; strip this provider's own prefix BEFORE alias lookup so
+    // "github/claude-4.5-opus" still canonicalizes to "claude-opus-4-5-20251101".
+    const slash = model.indexOf("/");
+    const bareModel =
+      slash > 0 && resolveProviderAlias(model.slice(0, slash)) === canonicalProvider
+        ? model.slice(slash + 1)
+        : model;
+    const resolved = resolveCanonicalProviderModel(identity, bareModel);
     // Stored/resolved IDs are authoritative: e.g. opencode (oc) and opencode-zen
     // are distinct, even though the public opencode/ prefix redirects to the latter.
     const canonical = identity && identity in PROVIDER_ID_TO_ALIAS ? identity : resolved.provider;
-    return { provider: canonical, model: modality === "chat" ? resolved.model : model };
+    return { provider: canonical, model: modality === "chat" ? resolved.model : bareModel };
   };
   const normalized = new Map<string, Set<string>>();
   for (const [provider, models] of hiddenModels) {

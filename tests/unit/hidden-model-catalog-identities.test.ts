@@ -71,3 +71,25 @@ test("non-chat visibility retains literal IDs even when they match a chat legacy
   assert.equal(images("github", "claude-4.5-opus"), true);
   assert.equal(images("github", "claude-opus-4-5-20251101"), false);
 });
+
+test("prefixed catalog ids match their bare provider-page ids when filtering hidden models", async () => {
+  const { createHiddenModelLookup } = await import("../../src/lib/hiddenModelLookup.ts");
+  // Hidden from the unified catalog: the row id carries the provider prefix.
+  const prefixed = createHiddenModelLookup(
+    new Map([["github", new Set(["github/claude-4.5-opus"])]])
+  );
+  assert.equal(prefixed("gh", "claude-4.5-opus"), true);
+  assert.equal(prefixed("github", "gh/claude-4.5-opus"), true);
+  assert.equal(prefixed("github", "claude-opus-4-5-20251101"), true);
+  assert.equal(prefixed("github", "claude-4.5-opus-mini"), false);
+  // Hidden from the provider page: the row id is bare, the catalog queries it prefixed.
+  const bare = createHiddenModelLookup(new Map([["gh", new Set(["claude-4.5-opus"])]]));
+  assert.equal(bare("gh", "gh/claude-4.5-opus"), true);
+  assert.equal(bare("github", "github/claude-4.5-opus"), true);
+  // Another vendor's prefix is part of the model id and must not be stripped.
+  const vendor = createHiddenModelLookup(
+    new Map([["command-code", new Set(["command-code/zai-org/GLM-5"])]])
+  );
+  assert.equal(vendor("cmd", "zai-org/GLM-5"), true);
+  assert.equal(vendor("cmd", "zai-org/GLM-5.1"), false);
+});
