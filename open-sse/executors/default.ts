@@ -930,10 +930,13 @@ export class DefaultExecutor extends BaseExecutor {
           withDefaults = withoutStreamOptions;
         }
       } else if (stream && targetFormat === "openai" && requestFormat !== "openai-responses") {
-        // Do not inject stream_options when the outgoing body explicitly disables streaming.
+        // Do not inject stream_options when the outgoing body explicitly disables streaming,
+        // unless the provider enforces upstream streaming (forceStream: true), where stream: true
+        // must be sent upstream even if the client requested stream: false (#18007).
+        const isForceStream = getRegistryEntry(this.provider)?.forceStream === true;
         const defaultsRecord = withDefaults as Record<string, unknown>;
         const bodyDisablesStreamOptions =
-          defaultsRecord.stream !== undefined && defaultsRecord.stream !== true;
+          !isForceStream && defaultsRecord.stream !== undefined && defaultsRecord.stream !== true;
         if (bodyDisablesStreamOptions) {
           if (Object.prototype.hasOwnProperty.call(defaultsRecord, "stream_options")) {
             const withoutStreamOptions = { ...defaultsRecord };
@@ -949,10 +952,16 @@ export class DefaultExecutor extends BaseExecutor {
               include_usage: true,
             },
           };
-        } else if (Object.prototype.hasOwnProperty.call(withDefaults, "stream_options")) {
-          const withoutStreamOptions = { ...withDefaults } as Record<string, unknown>;
-          delete withoutStreamOptions.stream_options;
-          withDefaults = withoutStreamOptions;
+        } else {
+          withDefaults = {
+            ...withDefaults,
+            stream: true,
+          };
+          if (Object.prototype.hasOwnProperty.call(withDefaults, "stream_options")) {
+            const withoutStreamOptions = { ...withDefaults } as Record<string, unknown>;
+            delete withoutStreamOptions.stream_options;
+            withDefaults = withoutStreamOptions;
+          }
         }
       } else if (!stream && Object.prototype.hasOwnProperty.call(withDefaults, "stream_options")) {
         // #3884: stream_options is only valid on streaming requests. NVIDIA NIM

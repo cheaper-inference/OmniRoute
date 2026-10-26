@@ -1,0 +1,1 @@
+- **fix(providers):** forceStream providers rewrite explicit stream:false in the request body to stream:true so streaming-only upstreams (e.g. WorkBuddy) do not reject JSON client requests with error 11101 (#18007).

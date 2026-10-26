@@ -2021,6 +2021,12 @@ async function handleChatCoreInner({
   // it back to JSON (same mechanism already used for Claude-Code-compatible
   // providers via isClaudeCodeCompatible).
   const upstreamStream = stream || isClaudeCodeCompatible || providerRequiresStreaming;
+  if (providerRequiresStreaming && translatedBody && typeof translatedBody === "object") {
+    translatedBody = {
+      ...translatedBody,
+      stream: true,
+    };
+  }
   let ccSessionId: string | null = null;
   const stripTypes = getStripTypesForProviderModel(provider || "", model || "");
 
