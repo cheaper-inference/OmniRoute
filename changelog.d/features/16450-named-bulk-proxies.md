@@ -1,0 +1,1 @@
+- **feat(proxy):** accept explicitly named host-first bulk proxy rows while preserving existing import formats, credential fields and safe validation errors ([#16450](https://github.com/diegosouzapw/OmniRoute/pull/16450)) — thanks @KiaroSama

@@ -43,11 +43,11 @@ A2A se kontrolira preklopnikom **Endpoints → A2A** i zadano je onemogućen. Ka
 
 ---
 
-## JSON-RPC 2.0 Metode
+## Metode JSON-RPC 2.0
 
-### `message/send` — Sinkrono Izvođenje
+### `message/send` — Sinkrono izvršavanje
 
-Šalje poruku vještini i čeka na potpuni odgovor.
+Šalje poruku vještini i čeka potpuni odgovor.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Za `smart-routing`, `metadata.combo` izričito nadjačava
+`metadata.model` za zahtjev prema pristupniku; šalje se kao stvarni `model`,
+a ne kao zanemareno JSON polje `x-combo`. I dalje se primjenjuju uobičajeni API ključ
+pristupnika i autorizacija za pojedinačno odredište. Nevažeća ili prazna kombinacija odbija se.
+
+Rezultat izlaže `requested_combo` (namjera pozivatelja), `dispatched_model`
+(stvarni zahtjev prema pristupniku), `response_model` (odgovor pristupnika) i
+`confirmed_combo`. Posljednje polje ima vrijednost `null`, osim ako pristupnik izričito
+identificira kombinaciju. A2A zapisnici odluka pripisuju izvršavanje samo
+potvrđenoj kombinaciji, zadržavajući nepotvrđeni zahtjev kao `requestedCombo`.
+
 **Odgovor:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE Strujanje
+### `message/stream` — SSE strujanje
 
-Isto kao `message/send`, ali vraća Server-Sent Events za strujanje u stvarnom vremenu.
+Isto kao `message/send`, ali vraća događaje koje poslužitelj šalje za strujanje u stvarnom vremenu.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE Događaji:**
+**SSE događaji:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Upit Statusa Zadatka
+### `tasks/get` — Dohvaćanje statusa zadatka
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Otkazivanje Zadatka
+### `tasks/cancel` — Otkazivanje zadatka
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

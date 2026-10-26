@@ -1,0 +1,1 @@
+- **fix(health):** probe only local provider nodes backed by an active connection or a visible configured model, avoiding repeated health traffic to stale node definitions while preserving recovery checks for routable providers.

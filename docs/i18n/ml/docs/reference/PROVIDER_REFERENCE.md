@@ -4,11 +4,11 @@
 
 ---
 
-> **സ്വയം ജനറേറ്റ് ചെയ്തത്** `src/shared/constants/providers.ts`-ൽ നിന്ന് — കൈകൊണ്ട് എഡിറ്റ് ചെയ്യരുത്.
-> ഇത് വീണ്ടും ജനറേറ്റ് ചെയ്യാൻ: `npm run gen:provider-reference`
-> **അവസാനം ജനറേറ്റ് ചെയ്തത്:** 2026-10-18
+> `src/shared/constants/providers.ts`-ൽ നിന്ന് **സ്വയമേവ സൃഷ്ടിച്ചത്** — കൈകൊണ്ട് തിരുത്തരുത്.
+> വീണ്ടും സൃഷ്ടിക്കാൻ: `npm run gen:provider-reference`
+> **അവസാനം സൃഷ്ടിച്ചത്:** 2026-10-20
 
-ആകെ പ്രൊവൈഡർമാർ: **375**. കാറ്റഗറി വിഭജനം താഴെ കാണുക.
+ആകെ പ്രൊവൈഡർമാർ: **375**. വിഭാഗം തിരിച്ചുള്ള വിശദാംശങ്ങൾ താഴെ കാണുക.
 
 ## വിഭാഗങ്ങൾ
 
@@ -457,11 +457,11 @@
 | ------ | ------- | ------------------- | -------- | ---------- | ---------- |
 | `auto` | `auto`  | Auto (സീറോ-കോൺഫിഗ്) | സിസ്റ്റം | —          | —          |
 
-## സത്യത്തിന്റെ ഉറവിടങ്ങൾ
+## ആധികാരിക ഉറവിടങ്ങൾ
 
 - കാറ്റലോഗ്: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- റജിസ്ട്രി (ഓരോ മോഡലിന്റെയും വിവരങ്ങൾ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- എക്സിക്യൂട്ടറുകൾ: [`open-sse/executors/`](../../open-sse/executors/) (154 നടപ്പിലാക്കലുകൾ)
+- രജിസ്ട്രി (ഓരോ മോഡലിന്റെയും വിശദാംശങ്ങൾ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- എക്സിക്യൂട്ടറുകൾ: [`open-sse/executors/`](../../open-sse/executors/) (156 ഇംപ്ലിമെന്റേഷനുകൾ)
 - ട്രാൻസ്ലേറ്ററുകൾ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ഇതും കാണുക

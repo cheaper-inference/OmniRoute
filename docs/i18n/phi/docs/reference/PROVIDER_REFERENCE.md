@@ -4,11 +4,11 @@
 
 ---
 
-> **Awtomatikong nabuo** mula sa `src/shared/constants/providers.ts` — huwag i-edit nang manu-mano.
-> I-regenerate gamit ang: `npm run gen:provider-reference`
-> **Huling nabuo:** 2026-10-18
+> **Awtomatikong binuo** mula sa `src/shared/constants/providers.ts` — huwag manu-manong i-edit.
+> Muling buuin gamit ang: `npm run gen:provider-reference`
+> **Huling binuo:** 2026-10-20
 
-Kabuuang mga provider: **375**. Tingnan ang breakdown ng kategorya sa ibaba.
+Kabuuang bilang ng mga provider: **375**. Tingnan ang pagkakahati ayon sa kategorya sa ibaba.
 
 ## Mga Kategorya
 
@@ -457,11 +457,11 @@ Gamitin ang dashboard sa `/dashboard/providers` upang i-enable, i-configure, at 
 | ------ | ------ | --------------------------- | ------- | ------- | -------- |
 | `auto` | `auto` | Auto (Walang Configuration) | System  | —       | —        |
 
-## Mga pinagmulan ng katotohanan
+## Mga source of truth
 
-- Katalogo: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Rehistro (mga detalye bawat modelo): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Mga executor: [`open-sse/executors/`](../../open-sse/executors/) (154 na implementasyon)
+- Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- Registry (mga detalye ng bawat modelo): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Mga executor: [`open-sse/executors/`](../../open-sse/executors/) (156 na implementasyon)
 - Mga translator: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Tingnan Din

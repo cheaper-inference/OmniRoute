@@ -43,7 +43,7 @@ JSON-RPC കോളുകൾ JSON-RPC പിശക് കോഡ് `-32000` സ�
 
 ---
 
-## JSON-RPC 2.0 മെത്തഡുകൾ
+## JSON-RPC 2.0 രീതികൾ
 
 ### `message/send` — സമകാലിക നിർവഹണം
 
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-ന്, ഗേറ്റ്വേ അഭ്യർത്ഥനയ്ക്കായി `metadata.combo`, `metadata.model`-നെ വ്യക്തമായി മറികടക്കുന്നു; അവഗണിക്കപ്പെടുന്ന ഒരു `x-combo` JSON ഫീൽഡായല്ല, യഥാർഥ `model` ആയാണ് അത് അയയ്ക്കപ്പെടുന്നത്. ഗേറ്റ്വേയുടെ സാധാരണ API കീയും ഓരോ ലക്ഷ്യത്തിനുമുള്ള അംഗീകാരവും തുടർന്നും ബാധകമാണ്. അസാധുവായതോ ശൂന്യമായതോ ആയ കോംബോ നിരസിക്കപ്പെടും.
+
+ഫലം `requested_combo` (കോളറുടെ ഉദ്ദേശ്യം), `dispatched_model` (യഥാർഥ ഗേറ്റ്വേ അഭ്യർത്ഥന), `response_model` (ഗേറ്റ്വേ പ്രതികരണം), `confirmed_combo` എന്നിവ വെളിപ്പെടുത്തുന്നു. ഗേറ്റ്വേ ഒരു കോംബോയെ വ്യക്തമായി തിരിച്ചറിയാത്തപക്ഷം അവസാനത്തെ ഫീൽഡ് `null` ആയിരിക്കും. സ്ഥിരീകരിക്കാത്ത ഒരു അഭ്യർത്ഥനയെ `requestedCombo` ആയി നിലനിർത്തിക്കൊണ്ട്, A2A തീരുമാന ലോഗുകൾ നിർവഹണം സ്ഥിരീകരിച്ച ഒരു കോംബോയ്ക്ക് മാത്രമാണ് ആട്രിബ്യൂട്ട് ചെയ്യുന്നത്.
+
 **പ്രതികരണം:**
 
 ```json
@@ -76,22 +80,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +96,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE സ്ട്രീമിങ്
 
-`message/send`-ന് സമാനമാണ്, എന്നാൽ തത്സമയ സ്ട്രീമിങ്ങിനായി Server-Sent Events തിരികെ നൽകുന്നു.
+`message/send` പോലെത്തന്നെയാണെങ്കിലും, തത്സമയ സ്ട്രീമിങ്ങിനായി Server-Sent Events തിരികെ നൽകുന്നു.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +123,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — ടാസ്ക് സ്റ്റാറ്റസ് അന്വേഷിക്കൽ
+### `tasks/get` — ടാസ്കിന്റെ നില അന്വേഷിക്കുക
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +132,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — ഒരു ടാസ്ക് റദ്ദാക്കൽ
+### `tasks/cancel` — ഒരു ടാസ്ക് റദ്ദാക്കുക
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

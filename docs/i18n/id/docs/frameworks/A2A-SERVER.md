@@ -47,7 +47,7 @@ A2A dikendalikan oleh sakelar **Endpoints → A2A** dan dinonaktifkan secara def
 
 ### `message/send` — Eksekusi Sinkron
 
-Mengirim pesan ke sebuah skill dan menunggu respons lengkap.
+Mengirim pesan ke suatu skill dan menunggu respons lengkap.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Untuk `smart-routing`, `metadata.combo` merupakan penggantian eksplisit terhadap
+`metadata.model` untuk permintaan gateway; nilai tersebut dikirim sebagai `model` yang sebenarnya,
+bukan sebagai bidang JSON `x-combo` yang diabaikan. Otorisasi normal gateway berdasarkan kunci API dan
+per target tetap berlaku. Combo yang tidak valid atau kosong akan ditolak.
+
+Hasilnya menampilkan `requested_combo` (maksud pemanggil), `dispatched_model`
+(permintaan gateway yang sebenarnya), `response_model` (respons gateway), dan
+`confirmed_combo`. Bidang terakhir bernilai `null` kecuali gateway secara eksplisit
+mengidentifikasi suatu combo. Log keputusan A2A mengatribusikan eksekusi hanya kepada
+combo yang telah dikonfirmasi, sementara permintaan yang belum dikonfirmasi tetap disimpan sebagai `requestedCombo`.
+
 **Respons:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Streaming SSE
 
-Sama seperti `message/send`, tetapi mengembalikan Server-Sent Events untuk streaming secara real-time.
+Sama seperti `message/send`, tetapi mengembalikan Server-Sent Events untuk streaming waktu nyata.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \

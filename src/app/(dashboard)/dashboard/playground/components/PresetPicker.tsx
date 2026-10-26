@@ -1,5 +1,10 @@
 "use client";
 
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+import Modal from "@/shared/components/Modal";
+import Select from "@/shared/components/Select";
+
 // src/app/(dashboard)/dashboard/playground/components/PresetPicker.tsx
 
 import { useEffect, useState } from "react";
@@ -94,9 +99,9 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
           {t("presetsLabel")}
         </span>
 
-        {/* Load preset select */}
+        {/* Load preset select (native kit select: the value is reset after each load) */}
         <div className="flex items-center gap-2">
-          <select
+          <Select
             disabled={loading || presets.length === 0}
             onChange={(e) => {
               if (e.target.value) {
@@ -106,7 +111,8 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
               }
             }}
             defaultValue=""
-            className="flex-1 text-xs bg-surface border border-border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary text-text-main disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1"
+            selectClassName="text-xs"
             aria-label={t("loadPreset")}
           >
             <option value="" disabled>
@@ -121,15 +127,17 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
                 {preset.name}
               </option>
             ))}
-          </select>
+          </Select>
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={openSave}
-            className="text-xs px-2.5 py-1.5 rounded border border-border text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0"
+            className="shrink-0 text-xs"
             aria-label={t("savePreset")}
           >
             {t("save")}
-          </button>
+          </Button>
         </div>
 
         {/* Preset list with delete buttons (compact) */}
@@ -140,77 +148,62 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
                 key={preset.id}
                 className="flex items-center justify-between text-[11px] text-text-muted hover:text-text-main group"
               >
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleLoad(preset.id)}
-                  className="truncate text-left flex-1 hover:text-primary transition-colors"
+                  className="h-auto min-h-0 flex-1 justify-start truncate px-1 py-0.5 text-left text-[11px] font-normal"
                   aria-label={`Load preset "${preset.name}"`}
                 >
                   {preset.name}
                   <span className="ml-1.5 opacity-60">{preset.model}</span>
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => void remove(preset.id)}
-                  className="opacity-0 group-hover:opacity-100 p-0.5 text-text-muted hover:text-destructive transition-all"
+                  className="text-text-muted hover:text-error opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
                   aria-label={`Delete preset "${preset.name}"`}
-                >
-                  <span className="material-symbols-outlined text-[12px]">delete</span>
-                </button>
+                  icon="delete"
+                />
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Save preset modal */}
-      {saveModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          onClick={closeSave}
-          role="dialog"
-          aria-modal="true"
-          aria-label={t("savePreset")}
-        >
-          <div
-            className="bg-surface border border-border rounded-xl p-5 w-80 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-sm font-semibold text-text-main mb-4">{t("savePreset")}</h3>
-
-            <div className="flex flex-col gap-3">
-              <input
-                type="text"
-                value={presetName}
-                onChange={(e) => setPresetName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void handleSave();
-                  if (e.key === "Escape") closeSave();
-                }}
-                placeholder={t("presetNamePlaceholder")}
-                autoFocus
-                className="text-xs bg-bg-alt border border-border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary text-text-main"
-              />
-
-              {saveError && <p className="text-xs text-destructive">{saveError}</p>}
-
-              <div className="flex items-center justify-end gap-2">
-                <button
-                  onClick={closeSave}
-                  className="text-xs px-3 py-1.5 rounded border border-border text-text-muted hover:text-text-main transition-colors"
-                >
-                  {t("cancel")}
-                </button>
-                <button
-                  onClick={() => void handleSave()}
-                  disabled={saving}
-                  className="text-xs px-3 py-1.5 rounded bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  {saving ? t("savingPreset") : t("save")}
-                </button>
-              </div>
-            </div>
-          </div>
+      {/* Save preset modal (kit Dialog via the Modal adapter: focus trap, Escape, portal) */}
+      <Modal
+        isOpen={saveModalOpen}
+        onClose={closeSave}
+        title={t("savePreset")}
+        size="sm"
+        footer={
+          <>
+            <Button variant="outline" size="sm" onClick={closeSave}>
+              {t("cancel")}
+            </Button>
+            <Button size="sm" onClick={() => void handleSave()} disabled={saving}>
+              {saving ? t("savingPreset") : t("save")}
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <Input
+            type="text"
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void handleSave();
+            }}
+            placeholder={t("presetNamePlaceholder")}
+            aria-label={t("presetNamePlaceholder")}
+            autoFocus
+            error={saveError ?? undefined}
+          />
         </div>
-      )}
+      </Modal>
     </>
   );
 }

@@ -96,7 +96,7 @@ export default function CliProfileAutoSyncToggles() {
           description={t("claudeProfilesDescription")}
         />
       </div>
-      {error ? <p className="mt-2 text-xs text-red-500">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-error">{error}</p> : null}
     </div>
   );
 }

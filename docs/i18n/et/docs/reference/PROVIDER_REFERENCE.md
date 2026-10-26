@@ -5,10 +5,10 @@
 ---
 
 > **Automaatselt genereeritud** failist `src/shared/constants/providers.ts` — ärge muutke käsitsi.
-> Regenergeerige käsuga: `npm run gen:provider-reference`
-> **Viimati genereeritud:** 2026-10-18
+> Uuesti genereerimiseks: `npm run gen:provider-reference`
+> **Viimati genereeritud:** 2026-10-20
 
-Pakkujaid kokku: **375**. Vaadake kategooriate jaotust allpool.
+Pakkujaid kokku: **375**. Kategooriate jaotust vt allpool.
 
 ## Kategooriad
 
@@ -457,12 +457,12 @@ Kasuta töölauda aadressil `/dashboard/providers`, et lubada, seadistada ja tes
 | ------ | ------ | ----------------------------- | ------- | --------- | -------- |
 | `auto` | `auto` | Auto (nullkonfiguratsiooniga) | Süsteem | —         | —        |
 
-## Tõesuse allikad
+## Tõeallikad
 
 - Kataloog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Register (mudelipõhised detailid): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Täitjad: [`open-sse/executors/`](../../open-sse/executors/) (154 implementatsiooni)
-- Tõlkijad: [`open-sse/translator/`](../../open-sse/translator/)
+- Register (mudelipõhised üksikasjad): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Käivitajad: [`open-sse/executors/`](../../open-sse/executors/) (156 teostust)
+- Teisendajad: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Vaata ka
 

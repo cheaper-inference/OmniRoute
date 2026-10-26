@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+สำหรับ `smart-routing` ค่า `metadata.combo` จะเขียนทับ
+`metadata.model` อย่างชัดเจนสำหรับคำขอไปยังเกตเวย์ โดยจะถูกส่งเป็น `model` จริง
+ไม่ใช่เป็นฟิลด์ JSON `x-combo` ที่ถูกละเว้น ทั้งนี้ การตรวจสอบ API key ตามปกติของเกตเวย์และ
+การอนุญาตสำหรับแต่ละเป้าหมายยังคงมีผล ระบบจะปฏิเสธคอมโบที่ไม่ถูกต้องหรือว่างเปล่า
+
+ผลลัพธ์จะแสดง `requested_combo` (เจตนาของผู้เรียก), `dispatched_model`
+(คำขอจริงที่ส่งไปยังเกตเวย์), `response_model` (การตอบกลับจากเกตเวย์) และ
+`confirmed_combo` ฟิลด์สุดท้ายจะเป็น `null` เว้นแต่เกตเวย์จะระบุคอมโบอย่างชัดเจน
+บันทึกการตัดสินใจของ A2A จะระบุว่าการดำเนินการเป็นของคอมโบที่ได้รับการยืนยันแล้วเท่านั้น
+โดยเก็บคำขอที่ยังไม่ได้รับการยืนยันไว้เป็น `requestedCombo`
+
 **การตอบกลับ:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }

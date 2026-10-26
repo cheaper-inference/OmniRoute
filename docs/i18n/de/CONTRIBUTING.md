@@ -171,15 +171,15 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 # Alle Tests (Unit + Vitest + Ökosystem + E2E)
 npm run test:all
 
-# Einzelne Testdatei (nativer Test-Runner von Node.js — die meisten Tests verwenden diesen)
+# Einzelne Testdatei (nativer Node.js-Test-Runner — die meisten Tests verwenden diesen)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Nur die von deiner Änderung betroffenen Unit-Tests (derselbe TIA-Selektor wie beim CI-Gate, #8084)
+# Nur die von Ihrer Änderung betroffenen Unit-Tests (derselbe TIA-Selektor wie im CI-Gate, #8084)
 npm run test:scoped            # Änderungen im letzten Commit (oder im Arbeitsverzeichnis)
-npm run test:scoped:staged     # nur bereitgestellte Änderungen — eignet sich gut für einen Pre-Commit-Lauf
+npm run test:scoped:staged     # nur vorgemerkte Änderungen — gut für einen Pre-Commit-Lauf geeignet
 npm run test:scoped:full       # zuerst die Import-Graph-Zuordnung neu erstellen (nach dem Hinzufügen/Verschieben von Dateien)
-# Exit 1 + „run the full suite“ bedeutet, dass eine Hub-Datei (tsconfig, package.json, …) oder eine
-# nicht zugeordnete Quelldatei geändert wurde — der Selektor schlägt sicher fehl und überspringt niemals unbemerkt Tests.
+# Exit 1 + „vollständige Suite ausführen“ bedeutet, dass eine zentrale Datei (tsconfig, package.json, …) oder eine
+# nicht zugeordnete Quelldatei geändert wurde — der Selektor bricht sicher ab und überspringt niemals unbemerkt Tests.
 
 # Vitest (MCP-Server, autoCombo, Cache)
 npm run test:vitest
@@ -201,43 +201,44 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Durch Gate geschützter Combo-Smoke-Test mit echten Upstream-Diensten (erfordert VPS-Zugriff + Guthaben bei echten Anbietern)
-# Greift auf ECHTE Anbieter zu — verursacht geringe Kosten. Wird NIEMALS in CI ausgeführt. Wird ohne Gate ordnungsgemäß übersprungen.
-# Erforderlich: Zugriff per ssh root@192.168.0.15 (bezieht einen schreibgeschützten DB-Snapshot vom VPS).
+# Abgesicherter Combo-Smoke-Test mit echten Upstream-Diensten (erfordert VPS-Zugriff und echtes Provider-Guthaben)
+# Greift auf ECHTE Provider zu — verursacht geringe Kosten. Wird NIEMALS in CI ausgeführt. Wird ohne aktiviertes Gate sauber übersprungen.
+# Erfordert: Zugriff per ssh root@192.168.0.15 (bezieht einen schreibgeschützten DB-Snapshot vom VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Live-Smoke-Test für den Phase-3-VPS — reine Node-ESM-Skripte, die direkt auf den Live-Server .15 zugreifen.
-# Erfordert: Zugriff per ssh root@192.168.0.15 (Combos werden per SSH sqlite erstellt/entfernt).
-# Greift auf ECHTE Anbieter zu (geringe Kosten). Erstellt/löscht ausschließlich __live_test__*-Combos. Wird NIEMALS in CI ausgeführt.
-# REQUIRE_API_KEY=false auf .15, daher ist kein API-Schlüssel erforderlich; COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY werden jedoch berücksichtigt, falls gesetzt.
+# Phase-3-Live-Smoke-Test auf dem VPS — einfache Node-ESM-Skripte, die direkt auf den Live-Server .15 zugreifen.
+# Erfordert: Zugriff per ssh root@192.168.0.15 (Combos werden über SSH und sqlite erstellt/entfernt).
+# Greift auf ECHTE Provider zu (geringe Kosten). Erstellt/löscht nur __live_test__*-Combos. Wird NIEMALS in CI ausgeführt.
+# REQUIRE_API_KEY=false auf .15, daher ist kein API-Schlüssel erforderlich; COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY werden jedoch berücksichtigt, wenn sie gesetzt sind.
 npm run test:combo:live:vps              # 7 HTTP-Szenarien (Priorität/Round-Robin/gewichtet/Kosten/Fusion/automatisch + Zustand)
-npm run test:combo:live:vps:failover     # fügt ein echtes anbieterübergreifendes Failover-Szenario hinzu (insgesamt 8)
+npm run test:combo:live:vps:failover     # fügt ein echtes providerübergreifendes Failover-Szenario hinzu (insgesamt 8)
 ```
 
-Hinweise zur Testabdeckung:
+Hinweise zur Coverage:
 
-- `npm run test:coverage` misst die Quellcodeabdeckung für die Haupt-Unit-Test-Suite, schließt `tests/**` aus und umfasst `open-sse/**`
-- Pull Requests müssen das Coverage-Gate bei **60 %+** für Anweisungen/Zeilen/Funktionen/Verzweigungen halten
+- `npm run test:coverage` misst die Quellcode-Coverage für die primäre Unit-Test-Suite, schließt `tests/**` aus und bezieht `open-sse/**` ein
+- Pull Requests müssen das Coverage-Gate bei **60 % oder mehr** für Anweisungen/Zeilen/Funktionen/Verzweigungen halten
 - Wenn ein PR Produktionscode in `src/`, `open-sse/`, `electron/` oder `bin/` ändert, müssen im selben PR automatisierte Tests hinzugefügt oder aktualisiert werden
 - `npm run coverage:report` gibt den detaillierten Bericht für jede einzelne Datei aus dem letzten Coverage-Lauf aus
 - `npm run test:coverage:legacy` behält die ältere Metrik für historische Vergleiche bei
-- Siehe `docs/ops/COVERAGE_PLAN.md` für den phasenweisen Plan zur Verbesserung der Testabdeckung
+- Siehe `docs/ops/COVERAGE_PLAN.md` für den schrittweisen Plan zur Verbesserung der Coverage
 
 ### Anforderungen an Pull Requests
 
-Verwende vor dem Öffnen eines PR den
-[Golden Path für Beiträge](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), um die fokussierte Schleife für
-deine Änderungen auszuführen. Die vollständige Unit-Test-Suite (4 CI-Shards), Vitest, das Coverage-Gate von **60 %+** und
-der Produktions-Build liegen in der Verantwortung von CI — sie lokal auszuführen, liefert keine zusätzlichen Erkenntnisse,
-die dir die PR-Prüfungen nicht ohnehin liefern würden, und kann auf kleineren Rechnern den Host überlasten (#8084):
+Verwenden Sie vor dem Öffnen eines PR den
+[bewährten Beitragsablauf](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), um die fokussierte Schleife für
+Ihre Änderungen auszuführen. Die vollständige Unit-Test-Suite (4 CI-Shards), Vitest, das Coverage-Gate von **60 % oder mehr** und
+der Produktions-Build liegen in der Verantwortung von CI — ihre lokale Ausführung liefert keine zusätzlichen Erkenntnisse, die nicht bereits durch die PR-Prüfungen
+bereitgestellt werden, und kann auf kleineren Rechnern den Host überlasten (#8084):
 
-- Führe die Testdateien aus, die deine Änderung abdecken: `node --import tsx/esm --test tests/unit/<file>.test.ts`
-- Führe `npm run lint` aus
-- Füge im selben PR automatisierte Tests hinzu oder aktualisiere sie, wenn Produktionscode geändert wird
-- Nenne die geänderten oder hinzugefügten Testdateien in der PR-Beschreibung, wenn Produktionscode geändert wurde
-- Prüfe das SonarQube-Ergebnis im PR, wenn die Projekt-Secrets in CI konfiguriert sind
+- Führen Sie die Testdateien aus, die Ihre Änderung abdecken: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Führen Sie `npm run lint` aus
+- Fügen Sie im selben PR automatisierte Tests hinzu oder aktualisieren Sie diese, wenn Produktionscode geändert wird
+- Platzieren Sie in `node:test`-Dateien jedes `await` auf oberster Ebene (wie `await import(...)`) vor dem ersten `test()` / `describe()`: Unter `--test-force-exit` können danach registrierte Tests unbemerkt überhaupt nicht ausgeführt werden (#18045; erzwungen durch `npm run check:test-tla-order`)
+- Führen Sie die geänderten oder hinzugefügten Testdateien in der PR-Beschreibung auf, wenn Produktionscode geändert wurde
+- Prüfen Sie das SonarQube-Ergebnis für den PR, wenn die Projekt-Secrets in CI konfiguriert sind
 
-Aktueller Teststatus: **122 Unit-Test-Dateien** mit Abdeckung für:
+Aktueller Teststatus: **122 Unit-Testdateien** für:
 
 - Provider-Übersetzer und Formatkonvertierung
 - Ratenbegrenzung, Circuit Breaker und Resilienz

@@ -2,7 +2,12 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "./Icon";
 import Modal from "./Modal";
+import Button from "./Button";
+import Checkbox from "./Checkbox";
+import Input from "./Input";
+import { cn } from "@/shared/utils/cn";
 import {
   buildPassthroughAliasModels,
   buildNodeAliasModels,
@@ -34,6 +39,9 @@ import {
 } from "@/shared/constants/providers";
 import { hasEligibleConnectionForModel } from "@/domain/connectionModelRules";
 import { useNotificationStore } from "@/store/notificationStore";
+
+// Model/combo chips: compact pill on the kit outline Button (toggle via aria-pressed).
+const CHIP_CLASS = "h-auto min-h-0 rounded-xl px-2 py-1 text-xs font-medium";
 
 // Provider order: OAuth first, then no-auth, then API Key (matches dashboard/providers)
 const PROVIDER_ORDER = [
@@ -812,16 +820,15 @@ export default function ModelSelectModal({
   // `multiSelect` is on — that mode renders its own Clear + Done footer below the body.
   const doneFooter =
     keepOpenOnSelect && !multiSelect ? (
-      <button
-        type="button"
+      <Button
+        fullWidth
         onClick={() => {
           onClose();
           setSearchQuery("");
         }}
-        className="w-full px-3 py-2 text-sm font-medium rounded border border-primary bg-primary text-white hover:bg-primary/90 transition-colors"
       >
         {t("done")}
-      </button>
+      </Button>
     ) : null;
 
   return (
@@ -838,38 +845,33 @@ export default function ModelSelectModal({
     >
       {/* Search - compact */}
       <div className="mb-3">
-        <div className="relative">
-          <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted text-[16px]">
-            search
-          </span>
-          <input
-            type="text"
-            placeholder={t("search")}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 bg-surface border border-border rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
-          />
-        </div>
+        <Input
+          type="text"
+          icon="search"
+          placeholder={t("search")}
+          aria-label={t("search")}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          inputClassName="text-xs"
+        />
       </div>
 
       <div className="mt-1.5 mb-2 space-y-2">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <label className="flex items-center gap-1.5 text-xs text-text-muted cursor-pointer min-w-0">
-            <input
-              type="checkbox"
-              checked={showConfiguredOnly}
-              onChange={(e) => setShowConfiguredOnly(e.target.checked)}
-              className="rounded border-border"
-            />
-            <span className="truncate">{t("showConfiguredOnly")}</span>
-          </label>
+          <Checkbox
+            checked={showConfiguredOnly}
+            onChange={(e) => setShowConfiguredOnly(e.target.checked)}
+            label={<span className="truncate">{t("showConfiguredOnly")}</span>}
+            className="min-w-0 text-xs text-text-muted"
+          />
 
           {showSelectAllToggle && (
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleToggleSelectAllVisible}
               data-testid="model-select-toggle-all-visible"
-              className="shrink-0 px-2 py-1 text-xs font-medium rounded border border-border bg-surface text-text-main hover:border-primary/50 hover:bg-primary/5 transition-colors"
+              className="shrink-0 text-xs"
             >
               {allVisibleSelected
                 ? labelOrFallback("unselectAll", "Unselect all")
@@ -877,13 +879,13 @@ export default function ModelSelectModal({
               <span className="ml-1 text-[10px] text-text-muted font-normal">
                 ({visibleModels.length})
               </span>
-            </button>
+            </Button>
           )}
         </div>
 
         {showProviderTestControls && (
           <div
-            className="rounded-lg border border-border bg-black/[0.02] dark:bg-white/[0.02] px-2.5 py-2 space-y-2"
+            className="rounded-lg border border-border bg-bg-subtle px-2.5 py-2 space-y-2"
             data-testid="model-select-provider-test-panel"
           >
             <p className="text-[11px] text-text-muted leading-snug">
@@ -902,37 +904,37 @@ export default function ModelSelectModal({
                     { count: selectedProviderIds.size }
                   )}
                 </span>
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={
                     allProvidersChecked ? handleClearProviderSelection : handleSelectAllProviders
                   }
                   disabled={visibleProviderIds.length === 0 || testingProviders}
                   data-testid="model-select-toggle-all-providers"
-                  className="px-2 py-0.5 text-[11px] font-medium rounded border border-border bg-surface text-text-main hover:border-primary/50 hover:bg-primary/5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                  className="text-[11px]"
                 >
                   {allProvidersChecked
                     ? labelOrFallback("clearProviderSelection", "Uncheck providers")
                     : labelOrFallback("selectAllProviders", "Check all providers")}
-                </button>
+                </Button>
               </div>
 
               <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={handleTestSelectedProviders}
                   disabled={testingProviders || selectedProviderIds.size === 0}
                   data-testid="model-select-test-selected-providers"
                   title={labelOrFallback("testSelectedProviders", "Test providers")}
-                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border border-border bg-surface text-text-main hover:border-primary/50 hover:bg-primary/5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                  className="gap-1 text-xs"
                 >
-                  <span
-                    className={`material-symbols-outlined text-[14px] ${
-                      testingProviders ? "animate-spin" : ""
-                    }`}
-                  >
-                    {testingProviders ? "progress_activity" : "science"}
-                  </span>
+                  <Icon
+                    name={testingProviders ? "progress_activity" : "science"}
+                    size={14}
+                    className={testingProviders ? "animate-spin" : undefined}
+                  />
                   <span>
                     {testingProviders && testProgress
                       ? labelOrFallback(
@@ -942,19 +944,19 @@ export default function ModelSelectModal({
                         )
                       : labelOrFallback("testSelectedProviders", "Test providers")}
                   </span>
-                </button>
+                </Button>
 
                 {showSelectWorkingModels && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleToggleWorkingModels}
                     disabled={!canAddWorking && !canRemoveWorking}
                     data-testid="model-select-working-models"
-                    className={`shrink-0 px-2 py-1 text-xs font-medium rounded border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                      canRemoveWorking
-                        ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
-                        : "border-border bg-surface text-text-main hover:border-primary/50 hover:bg-primary/5"
-                    }`}
+                    className={cn(
+                      "shrink-0 text-xs",
+                      canRemoveWorking && "border-success/40 bg-success/15 text-success"
+                    )}
                   >
                     {canRemoveWorking
                       ? labelOrFallback("unselectWorkingModels", "Unselect working")
@@ -970,7 +972,7 @@ export default function ModelSelectModal({
                         : workingModelsToSelect.length}
                       )
                     </span>
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -984,7 +986,7 @@ export default function ModelSelectModal({
         {showCombos && filteredCombos.length > 0 && (
           <div>
             <div className="flex items-center gap-1.5 mb-1.5 sticky top-0 z-10 bg-surface py-1">
-              <span className="material-symbols-outlined text-primary text-[14px]">layers</span>
+              <Icon name="layers" size={14} className="text-primary" />
               <span className="text-xs font-medium text-primary">{t("combos")}</span>
               <span className="text-[10px] text-text-muted">({filteredCombos.length})</span>
             </div>
@@ -992,22 +994,23 @@ export default function ModelSelectModal({
               {filteredCombos.map((combo) => {
                 const isSelected = isValueSelected(combo.name);
                 return (
-                  <button
+                  <Button
                     key={combo.id}
+                    variant="outline"
+                    size="sm"
+                    aria-pressed={isSelected}
                     onClick={() =>
                       handleSelect({ id: combo.name, name: combo.name, value: combo.name })
                     }
-                    className={`
-                      px-2 py-1 rounded-xl text-xs font-medium transition-all border hover:cursor-pointer
-                      ${
-                        isSelected
-                          ? "bg-primary text-white border-primary"
-                          : "bg-surface border-border text-text-main hover:border-primary/50 hover:bg-primary/5"
-                      }
-                    `}
+                    className={cn(
+                      CHIP_CLASS,
+                      isSelected
+                        ? "bg-primary text-accent-foreground border-primary hover:bg-primary"
+                        : "hover:border-primary/50 hover:bg-primary/5"
+                    )}
                   >
                     {combo.name}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -1026,24 +1029,28 @@ export default function ModelSelectModal({
                 }`}
               >
                 {showProviderTestControls ? (
-                  <label className="flex items-center gap-1.5 min-w-0 cursor-pointer flex-1">
-                    <input
-                      type="checkbox"
-                      checked={providerSelected}
-                      onChange={() => handleToggleProviderForTest(providerId)}
-                      data-testid={`model-select-provider-checkbox-${providerId}`}
-                      aria-label={`Check ${group.name} for testing`}
-                      className="rounded border-border shrink-0"
-                    />
-                    <div
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: group.color }}
-                    />
-                    <span className="text-xs font-medium text-primary truncate">{group.name}</span>
-                    <span className="text-[10px] text-text-muted shrink-0">
-                      ({group.models.length})
-                    </span>
-                  </label>
+                  <Checkbox
+                    checked={providerSelected}
+                    onChange={() => handleToggleProviderForTest(providerId)}
+                    data-testid={`model-select-provider-checkbox-${providerId}`}
+                    aria-label={`Check ${group.name} for testing`}
+                    className="min-w-0 flex-1"
+                    label={
+                      <span className="flex items-center gap-1.5 min-w-0">
+                        <span
+                          aria-hidden="true"
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: group.color }}
+                        />
+                        <span className="text-xs font-medium text-primary truncate">
+                          {group.name}
+                        </span>
+                        <span className="text-[10px] text-text-muted shrink-0">
+                          ({group.models.length})
+                        </span>
+                      </span>
+                    }
+                  />
                 ) : (
                   <>
                     <div
@@ -1062,23 +1069,24 @@ export default function ModelSelectModal({
                   const isAdded = addedModelValues.includes(model.value);
                   const testStatus = modelTestStatus[model.value];
                   return (
-                    <button
+                    <Button
                       key={model.id}
+                      variant="outline"
+                      size="sm"
+                      aria-pressed={isSelected}
                       onClick={() => handleSelect(model)}
-                      className={`
-                      px-2 py-1 rounded-xl text-xs font-medium transition-all border hover:cursor-pointer
-                      ${
+                      className={cn(
+                        CHIP_CLASS,
                         isSelected
-                          ? "bg-primary text-white border-primary"
+                          ? "bg-primary text-accent-foreground border-primary hover:bg-primary"
                           : isAdded
-                            ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-400"
+                            ? "bg-success/15 border-success/30 text-success"
                             : testStatus === "ok"
-                              ? "bg-surface border-emerald-500/40 text-text-main"
+                              ? "border-success/40"
                               : testStatus === "error"
-                                ? "bg-surface border-red-500/40 text-text-main"
-                                : "bg-surface border-border text-text-main hover:border-primary/50 hover:bg-primary/5"
-                      }
-                    `}
+                                ? "border-error/40"
+                                : "hover:border-primary/50 hover:bg-primary/5"
+                      )}
                     >
                       {isAdded && <span className="mr-0.5 opacity-70">✓</span>}
                       {model.name}
@@ -1088,16 +1096,16 @@ export default function ModelSelectModal({
                         </span>
                       )}
                       {testStatus === "ok" && (
-                        <span className="ml-1 rounded px-1 py-px text-[9px] font-semibold uppercase tracking-wide bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">
+                        <span className="ml-1 rounded px-1 py-px text-[9px] font-semibold uppercase tracking-wide bg-success/20 text-success">
                           ok
                         </span>
                       )}
                       {testStatus === "error" && (
-                        <span className="ml-1 rounded px-1 py-px text-[9px] font-semibold uppercase tracking-wide bg-red-500/20 text-red-600 dark:text-red-400">
+                        <span className="ml-1 rounded px-1 py-px text-[9px] font-semibold uppercase tracking-wide bg-error/20 text-error">
                           fail
                         </span>
                       )}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -1107,7 +1115,7 @@ export default function ModelSelectModal({
 
         {Object.keys(connectionFilteredGroups).length === 0 && filteredCombos.length === 0 && (
           <div className="text-center py-4 text-text-muted">
-            <span className="material-symbols-outlined text-2xl mb-1 block">search_off</span>
+            <Icon name="search_off" size={24} className="mb-1 block" />
             <p className="text-xs">{t("noModelsFound")}</p>
           </div>
         )}
@@ -1116,23 +1124,19 @@ export default function ModelSelectModal({
         <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
           <span className="text-xs text-text-muted">{resolvedSelectedModels.length} selected</span>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onSelect(null)}
-              className="px-2 py-1 text-xs rounded border border-border bg-surface hover:bg-primary/5"
-            >
+            <Button variant="outline" size="sm" onClick={() => onSelect(null)}>
               {t("clear")}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 onClose();
                 setSearchQuery("");
               }}
-              className="px-2 py-1 text-xs rounded border border-border bg-surface hover:bg-primary/5"
             >
               {t("done")}
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -43,7 +43,7 @@ A2A נשלט באמצעות המתג **נקודות קצה → A2A** ומושב�
 
 ---
 
-## מתודות JSON-RPC 2.0
+## שיטות JSON-RPC 2.0
 
 ### `message/send` — ביצוע סינכרוני
 
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+עבור `smart-routing`, הערך `metadata.combo` הוא דריסה מפורשת של
+`metadata.model` עבור בקשת השער; הוא נשלח בתור `model` בפועל,
+ולא כשדה JSON מסוג `x-combo` שמתעלמים ממנו. אימות מפתח ה-API הרגיל של השער
+וההרשאה לכל יעד עדיין חלים. שילוב לא תקין או ריק נדחה.
+
+התוצאה חושפת את `requested_combo` (כוונת הקורא), את `dispatched_model`
+(בקשת השער בפועל), את `response_model` (תגובת השער) ואת
+`confirmed_combo`. השדה האחרון הוא `null`, אלא אם השער מזהה שילוב
+באופן מפורש. יומני ההחלטות של A2A מייחסים את הביצוע רק לשילוב
+שאושר, תוך שמירת בקשה שלא אושרה בתור `requestedCombo`.
+
 **תגובה:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — הזרמת SSE
 
-זהה ל־`message/send`, אך מחזירה אירועים שנשלחים מהשרת לצורך הזרמה בזמן אמת.
+זהה ל-`message/send`, אך מחזירה אירועים שנשלחים מהשרת לצורך הזרמה בזמן אמת.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — שאילתת סטטוס משימה
+### `tasks/get` — שאילתת מצב משימה
 
 ```bash
 curl -X POST http://localhost:20128/a2a \

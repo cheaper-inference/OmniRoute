@@ -4,11 +4,11 @@
 
 ---
 
-> **Сгенерировано автоматически** из `src/shared/constants/providers.ts` — не редактируйте вручную.
-> Для повторной генерации выполните: `npm run gen:provider-reference`
-> **Дата последней генерации:** 2026-10-18
+> **Автоматически сгенерировано** из `src/shared/constants/providers.ts` — не редактируйте вручную.
+> Повторно сгенерировать с помощью: `npm run gen:provider-reference`
+> **Дата последней генерации:** 2026-10-20
 
-Всего провайдеров: **375**. Разбивка по категориям приведена ниже.
+Всего провайдеров: **375**. Ниже приведена разбивка по категориям.
 
 ## Категории
 
@@ -460,8 +460,8 @@
 ## Источники истины
 
 - Каталог: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Реестр (детали по каждой модели): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Исполнители: [`open-sse/executors/`](../../open-sse/executors/) (154 реализации)
+- Реестр (сведения по каждой модели): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Исполнители: [`open-sse/executors/`](../../open-sse/executors/) (156 реализаций)
 - Трансляторы: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## См. также

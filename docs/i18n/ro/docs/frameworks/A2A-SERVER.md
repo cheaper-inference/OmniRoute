@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Pentru `smart-routing`, `metadata.combo` suprascrie în mod explicit
+`metadata.model` pentru cererea către gateway; acesta este trimis drept câmpul `model` real,
+nu drept un câmp JSON `x-combo` ignorat. Autorizarea obișnuită a gateway-ului, bazată pe cheia API și
+specifică fiecărei destinații, se aplică în continuare. Un combo nevalid sau gol este respins.
+
+Rezultatul expune `requested_combo` (intenția apelantului), `dispatched_model`
+(cererea efectivă către gateway), `response_model` (răspunsul gateway-ului) și
+`confirmed_combo`. Ultimul câmp este `null`, cu excepția cazului în care gateway-ul
+identifică în mod explicit un combo. Jurnalele de decizie A2A atribuie execuția numai unui
+combo confirmat, păstrând o cerere neconfirmată drept `requestedCombo`.
+
 **Răspuns:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Transmitere în flux prin SSE
+### `message/stream` — Streaming SSE
 
-La fel ca `message/send`, dar returnează evenimente trimise de server pentru transmiterea în flux în timp real.
+La fel ca `message/send`, dar returnează evenimente trimise de server pentru streaming în timp real.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \

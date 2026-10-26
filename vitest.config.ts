@@ -56,6 +56,7 @@ export default defineConfig({
       // resolves to undefined instead of failing loudly — which silently made
       // every provider look credentialed in the free-tier card tests.
       "@omniroute/open-sse": path.resolve(__dirname, "./open-sse"),
+      "@omniroute/ui-kit": path.resolve(__dirname, "./packages/ui-kit/src"),
     },
   },
 });

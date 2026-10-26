@@ -1,8 +1,11 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import {
   runCodexDeviceFlow,
@@ -104,13 +107,13 @@ export default function CodexConnectClient({ token }: { token: string }) {
   }, [token, t]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-base px-4 py-10">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-bg-subtle p-8 shadow-sm">
+    <main className="min-h-screen flex items-center justify-center bg-bg px-4 py-10">
+      <Card padding="lg" className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <span className="material-symbols-outlined text-[28px]">key</span>
+          <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-bg-subtle text-text-muted">
+            <Icon name="key" size={28} />
           </div>
-          <h1 className="text-lg font-semibold text-text-main">{t("connectOpenAiCodexTitle")}</h1>
+          <h1 className="ci-heading text-lg">{t("connectOpenAiCodexTitle")}</h1>
           <p className="mt-1 text-sm text-text-muted">{t("codexConnectDescription")}</p>
         </div>
 
@@ -135,7 +138,7 @@ export default function CodexConnectClient({ token }: { token: string }) {
           <div className="space-y-4">
             <p className="text-sm text-text-muted">{t("codexVerificationInstructions")}</p>
 
-            <div className="rounded-lg border border-border bg-bg-base p-3">
+            <div className="rounded-lg border border-border bg-bg-subtle p-3">
               <p className="mb-1 text-xs text-text-muted">{t("yourCode")}</p>
               <div className="flex items-center justify-between gap-2">
                 <code className="text-lg font-semibold tracking-widest text-text-main">
@@ -179,8 +182,8 @@ export default function CodexConnectClient({ token }: { token: string }) {
 
         {status === "success" && (
           <div className="text-center">
-            <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10 text-green-500">
-              <span className="material-symbols-outlined text-[26px]">check_circle</span>
+            <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-success-bg text-success">
+              <Icon name="check_circle" size={26} />
             </div>
             <p className="font-medium text-text-main">{t("codexConnected")}</p>
             <p className="mt-1 text-sm text-text-muted">{t("codexConnectionRegistered")}</p>
@@ -189,8 +192,8 @@ export default function CodexConnectClient({ token }: { token: string }) {
 
         {status === "error" && (
           <div className="text-center">
-            <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-500">
-              <span className="material-symbols-outlined text-[26px]">error</span>
+            <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-error-bg text-error">
+              <Icon name="error" size={26} />
             </div>
             <p className="mb-4 text-sm text-text-muted">{error}</p>
             <Button variant="secondary" icon="refresh" onClick={start} className="w-full">
@@ -198,7 +201,7 @@ export default function CodexConnectClient({ token }: { token: string }) {
             </Button>
           </div>
         )}
-      </div>
-    </div>
+      </Card>
+    </main>
   );
 }
