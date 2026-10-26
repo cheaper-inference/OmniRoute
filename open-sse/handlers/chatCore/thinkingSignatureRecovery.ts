@@ -46,7 +46,10 @@ export async function recoverAnthropicThinkingSignature(args: {
   parseError: (response: Response) => Promise<ParsedError>;
 }): Promise<ThinkingSignatureRecoveryResult> {
   const errorArgs = { provider: args.provider, status: args.statusCode, message: args.message };
-  if (!isAnthropicThinkingSignatureError(errorArgs) && !isAnthropicThinkingModifiedError(errorArgs)) {
+  if (
+    !isAnthropicThinkingSignatureError(errorArgs) &&
+    !isAnthropicThinkingModifiedError(errorArgs)
+  ) {
     return {
       attempted: false,
       succeeded: false,

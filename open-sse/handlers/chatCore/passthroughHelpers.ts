@@ -300,6 +300,11 @@ export function isAnthropicThinkingModifiedError({
   );
 }
 
+function isManualExtendedThinking(record: Record<string, unknown>): boolean {
+  const thinking = record.thinking as { type?: unknown } | null | undefined;
+  return thinking?.type === "enabled";
+}
+
 function hasNoSafeThinkingRecovery(content: unknown[]): boolean {
   if (content.every(isThinkingBlock)) return true;
   if (!hasBlock({ content }, "tool_use")) return false;
@@ -345,6 +350,11 @@ export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
   // Dropping every block would create an invalid empty assistant message.
   // Keep the original failure when there is no safe content to retry.
   if (hasNoSafeThinkingRecovery(message.content)) return body;
+  // Manual extended thinking requires the latest assistant tool_use turn to open with a
+  // thinking block: dropping it would trade this 400 for "expected thinking ... found
+  // tool_use", and the fabricated placeholder re-triggers this same 400. Keep the
+  // original failure instead of retrying (only adaptive thinking was verified live).
+  if (isManualExtendedThinking(record) && hasBlock(message, "tool_use")) return body;
 
   // The guards above exclude empty and already-normalized recovery bodies
   // before downgrading stored blocks, which also forgets their cached entries.
@@ -414,12 +424,15 @@ export function stripHistoricalThinkingForSignatureRecovery<T>(body: T): T {
   }
 
   let changed = false;
+  const manualExtendedThinking = isManualExtendedThinking(record);
   const recoveredMessages = messages.map((message, index) => {
     if (!message || message.role !== "assistant" || !Array.isArray(message.content)) {
       return message;
     }
     if (protectedAssistantIndexes.has(index)) {
-      const downgraded = downgradeRestoredClaudeThinking(message.content);
+      const downgraded = downgradeRestoredClaudeThinking(message.content, {
+        keepToolUsePlaceholder: manualExtendedThinking,
+      });
       if (!downgraded) return message;
       changed = true;
       return { ...message, content: downgraded as typeof message.content };

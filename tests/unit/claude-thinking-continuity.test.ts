@@ -450,8 +450,11 @@ test("expired entries are not restored", () => {
 
 test("signature recovery drops a server-restored block in the active cycle and forgets it", () => {
   streamClaudeToChat(claudeToolTurnEvents());
-  const body = translateChatTurn(chatHistory());
-  assert.equal(assistantTurn(body).content[0].type, "thinking");
+  const translated = translateChatTurn(chatHistory());
+  assert.equal(assistantTurn(translated).content[0].type, "thinking");
+  // Adaptive thinking (the mode verified live for #17324): a tool_use turn without a
+  // precursor is valid there. Manual "enabled" thinking is covered by the next test.
+  const body = { ...translated, thinking: { type: "adaptive" } };
 
   const recovered = stripHistoricalThinkingForSignatureRecovery(body) as {
     messages: ClaudeMessage[];
@@ -483,6 +486,35 @@ test("signature recovery drops a server-restored block in the active cycle and f
     }),
     null,
     "the rejected signature is not replayed again"
+  );
+});
+
+test("signature recovery under manual extended thinking keeps the #5312 placeholder", () => {
+  streamClaudeToChat(claudeToolTurnEvents());
+  const translated = translateChatTurn(chatHistory());
+  assert.equal(assistantTurn(translated).content[0].type, "thinking");
+  const body = { ...translated, thinking: { type: "enabled", budget_tokens: 2048 } };
+
+  const recovered = stripHistoricalThinkingForSignatureRecovery(body) as {
+    messages: ClaudeMessage[];
+  };
+  assert.notEqual(recovered, body, "recovery produces a new body");
+  const turn = assistantTurn(recovered);
+  // thinking.type "enabled" requires the tool_use turn to open with a thinking block, so the
+  // rejected restored signature is swapped for the placeholder instead of being dropped.
+  assert.deepEqual(turn.content[0], {
+    type: "redacted_thinking",
+    data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
+  });
+  assert.equal(stripCacheControl(turn.content[1]).type, "tool_use");
+  assert.equal(
+    store.restoreClaudeThinkingBlocks({
+      toolUseIds: ["toolu_01ABC"],
+      provider: "claude",
+      model: MODEL,
+    }),
+    null,
+    "the rejected signature is still forgotten"
   );
 });
 

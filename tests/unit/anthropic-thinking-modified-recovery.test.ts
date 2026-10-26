@@ -161,6 +161,38 @@ test("Anthropic thinking-modified recovery contract", async (t) => {
     clearClaudeThinkingStore();
   });
 
+  await t.test(
+    "manual extended thinking keeps the original failure for a tool_use turn (no retry)",
+    () => {
+      const body = {
+        thinking: { type: "enabled", budget_tokens: 2048 },
+        messages: [
+          { role: "user", content: [{ type: "text", text: "go" }] },
+          {
+            role: "assistant",
+            content: [
+              { type: "thinking", thinking: "cut off", signature: "STALE" },
+              { type: "tool_use", id: "toolu_1", name: "Bash", input: {} },
+            ],
+          },
+        ],
+      };
+      // thinking.type "enabled" rejects a tool_use turn without a thinking precursor, and the
+      // fabricated placeholder re-triggers this same 400, so there is no safe retry body.
+      assert.equal(stripLatestAssistantThinkingForModifiedRecovery(body), body);
+    }
+  );
+
+  await t.test("manual extended thinking still recovers a text-only latest turn", () => {
+    const body = { ...makeHistory(), thinking: { type: "enabled", budget_tokens: 2048 } };
+    const recovered = stripLatestAssistantThinkingForModifiedRecovery(body);
+    assert.notEqual(recovered, body);
+    assert.deepEqual(
+      recovered.messages[3].content.map((block: { type: string }) => block.type),
+      ["text"]
+    );
+  });
+
   await t.test("returns the original body reference when there is nothing to recover", () => {
     const body = {
       messages: [
