@@ -775,10 +775,18 @@ test("Codex capacity 429 rotates without shared scope cooldown or body limiter d
       allRateLimited: false,
     })) as PipelineConnectionContext["getProviderCredentials"],
     state: {
-      recordRateLimitHeaders: () => { headerLearns += 1; },
-      recordRateLimitBody: () => { bodyLearns += 1; },
-      onCodexScopeRateLimited: ({ failedConnectionId }) => { scoped.push(failedConnectionId); },
-      onClearSessionAffinity: ({ failedConnectionId }) => { affinityCleared.push(failedConnectionId); },
+      recordRateLimitHeaders: () => {
+        headerLearns += 1;
+      },
+      recordRateLimitBody: () => {
+        bodyLearns += 1;
+      },
+      onCodexScopeRateLimited: ({ failedConnectionId }) => {
+        scoped.push(failedConnectionId);
+      },
+      onClearSessionAffinity: ({ failedConnectionId }) => {
+        affinityCleared.push(failedConnectionId);
+      },
     },
   });
   const outcome = await runProviderExecutionPipeline(input);
@@ -815,8 +823,12 @@ test("Codex 429 with exhausted quota headers retains shared cooldown and limiter
       allRateLimited: false,
     })) as PipelineConnectionContext["getProviderCredentials"],
     state: {
-      recordRateLimitBody: () => { bodyLearns += 1; },
-      onCodexScopeRateLimited: ({ failedConnectionId }) => { scoped.push(failedConnectionId); },
+      recordRateLimitBody: () => {
+        bodyLearns += 1;
+      },
+      onCodexScopeRateLimited: ({ failedConnectionId }) => {
+        scoped.push(failedConnectionId);
+      },
     },
   });
   const outcome = await runProviderExecutionPipeline(input);
