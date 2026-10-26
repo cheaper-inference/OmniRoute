@@ -25,8 +25,10 @@
     "confirm": "Una uhakika?",
     "refresh": "Onyesha upya",
     "close": "Funga",
+    "dialogTitleFallback": "Kisanduku cha mazungumzo",
     "previousPage": "Ukurasa uliopita",
     "nextPage": "Ukurasa unaofuata",
+    "pagination": "Ugawaji wa kurasa",
     "capsLockOn": "Caps Lock imewashwa",
     "dismissNotification": "Ondoa arifa",
     "toggleColumns": "Geuza safu wima",
@@ -182,6 +184,7 @@
     "combos": "Michanganyiko",
     "noModelsFound": "Hakuna miundo iliyopatikana",
     "clear": "Futa",
+    "clearFilters": "Futa vichujio",
     "done": "Imekamilika",
     "selectAll": "Chagua zote",
     "unselectAll": "Ondoa uteuzi",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Muonekano",
     "batchFilePreviewTruncated": "Kuonyesha mistari ya kwanza {shown} ({total} jumla ya mistari)",
     "batchFileDownloadFull": "Pakua Faili Kamili",
-    "dialogTitleFallback": "Kisanduku cha mazungumzo",
-    "pagination": "Ugawaji wa kurasa",
-    "clearFilters": "Futa vichujio",
     "tokensPageTitle": "Tokeni",
     "tokensPageDescription": "Tuma tokeni kati ya funguo za API, shiriki misimbo ya mwaliko na uunganishe seva za jumuiya.",
     "tokensServerUrlLabel": "URL ya seva"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Urambazaji wa haraka",
     "quickNavigationTitle": "Urambazaji wa haraka (⌘K / Ctrl+K)",
     "openQuickNavigation": "Fungua urambazaji wa haraka",
+    "openMenu": "Fungua menyu",
+    "products": "Bidhaa za Keak",
     "switchToLightMode": "Badilisha hadi modi ya mwanga",
     "switchToDarkMode": "Badilisha hadi modi ya giza",
     "language": "Lugha",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Kanuni za kina za payload, vikomo vya maombi, na mipangilio ya API ya proksi",
     "mitmProxyDescription": "Sanidi mipangilio ya proksi ya MITM kwa ukaguzi wa trafiki na utatuzi wa hitilafu",
     "oneProxyDescription": "Sanidi mipangilio ya 1Proxy kwa uunganishaji wa kina wa proksi",
-    "omniSkillsDescription": "Sakinisha na udhibiti ujuzi wa sandbox kwa ajili ya utekelezaji wa kiotomatiki wa vidokezo na zana",
-    "openMenu": "Fungua menyu",
-    "products": "Bidhaa za Keak"
+    "omniSkillsDescription": "Sakinisha na udhibiti ujuzi wa sandbox kwa ajili ya utekelezaji wa kiotomatiki wa vidokezo na zana"
   },
   "cloudSyncStatus": {
     "synced": "Imesawazishwa",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Mchanganyiko → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Jumuisha watoa huduma wenye alama ToS: avoid katika auto",
-    "autoTosDescription": "Imezimwa kwa chaguo-msingi. Inatumika kwa michanganyiko yote ya auto, si akaunti moja tu. Kuunganisha mtoa huduma hakuwezeshi chaguo hili.",
-    "autoTosSaveError": "Imeshindikana kuhifadhi sera ya ToS. Mpangilio wa awali bado unaonyeshwa. Jaribu tena.",
-    "autoTosLoadError": "Imeshindikana kupakia sera ya ToS. Jaribu tena kabla ya kuibadilisha.",
     "title": "Mikusanyiko",
     "description": "Unda mikusanyiko ya modeli yenye uelekezaji wenye uzani na usaidizi wa kutumia mbadala",
     "autoCatalogTitle": "Katalogi ya uelekezaji kiotomatiki",
+    "autoTosLoadError": "Imeshindikana kupakia sera ya ToS. Jaribu tena kabla ya kuibadilisha.",
+    "autoTosSaveError": "Imeshindikana kuhifadhi sera ya ToS. Mpangilio wa awali bado unaonyeshwa. Jaribu tena.",
+    "autoTosIncludeLabel": "Jumuisha watoa huduma wenye alama ToS: avoid katika auto",
+    "autoTosDescription": "Imezimwa kwa chaguo-msingi. Inatumika kwa michanganyiko yote ya auto, si akaunti moja tu. Kuunganisha mtoa huduma hakuwezeshi chaguo hili.",
     "autoCatalogTemplateCount": "{count} violezo",
     "autoCatalogDescription": "Michanganyiko ya kiotomatiki/* iliyojengewa ndani imetatuliwa kutoka kwa watoa huduma waliounganishwa. Tumia kitambulisho chochote kati ya hivi kama sehemu ya kielelezo - hakuna usanidi unaohitajika.",
     "autoCatalogExpand": "Panua katalogi ya uelekezaji kiotomatiki",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Hakuna mchanganyiko uliosanidiwa bado.",
     "playgroundCreateFirst": "Unda mmoja kwanza",
     "weighted": "Yenye Uzani",
+    "weightPercent": "Uzito (%)",
     "leastUsed": "Yenye Matumizi Madogo Zaidi",
     "costOpt": "Uboreshaji wa Gharama",
     "strategyGuideTitle": "Jinsi ya kutumia mkakati huu",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# akaunti} other {# akaunti}}",
     "builderGlobalAdded": "Imeongezwa",
     "builderGlobalAdd": "Ongeza",
+    "clearSearch": "Futa utafutaji",
     "manualModel": "Modeli ya mwongozo",
     "manualModelInvalid": "Weka modeli kama provider/model.",
     "manualModelUnknownProvider": "Kiambishi awali cha mtoa huduma kisichojulikana.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Urefu wa chini wa maudhui (herufi)",
     "responseValidationJsonPaths": "Ukaguzi wa JSON-path",
     "responseValidationAddCheck": "+ Ongeza ukaguzi",
+    "responseValidationRemoveCheck": "Ondoa ukaguzi",
+    "responseValidationPath": "Njia ya JSON",
+    "responseValidationCondition": "Sharti",
+    "responseValidationValue": "Thamani inayotarajiwa",
     "agentFeaturesSystemMessageOverride": "Batilisha ujumbe wa mfumo",
     "agentFeaturesSystemMessagePlaceholder": "Wewe ni msaidizi mtaalamu...",
     "agentFeaturesSystemMessageHint": "Ubatilishaji wa ujumbe wa mfumo kwa ajenti",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Hii itachukua picha ya watoa huduma/watolei sambazwa sasa yanayolingana na kioo hiki katika combo inayoedit.",
     "duplicateAutoComboFailedPrefix": "Imeshindwa kuiga combo ya otomatiki:",
     "duplicateAutoComboUnknownError": "Hitilafai isiyojulikana",
-    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}",
-    "weightPercent": "Uzito (%)",
-    "clearSearch": "Futa utafutaji",
-    "responseValidationRemoveCheck": "Ondoa ukaguzi",
-    "responseValidationPath": "Njia ya JSON",
-    "responseValidationCondition": "Sharti",
-    "responseValidationValue": "Thamani inayotarajiwa"
+    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}"
   },
   "costs": {
     "title": "Gharama",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Lebo ya Umbizo la API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "China Bara",
+    "apiRegionHint": "Chagua eneo la endpoint linalotumika kwa ufikiaji wa API na ufuatiliaji wa mgawo.",
+    "apiRegionInternational": "Kimataifa",
+    "apiRegionLabel": "Eneo la API",
     "apikey": "Ufunguo wa API",
     "audio": "Sauti",
     "audioProvidersHeading": "Kichwa cha Watoa Huduma za Sauti",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Akaunti hii inapofikia kikomo chake cha matumizi cha saa 5 na Anthropic ikatoa njia yenye kipaumbele cha chini, OmniRoute huikubali na kuendelea kutuma maombi yenye anthropic-usage-limit: slow hadi kipindi kiwekwe upya, badala ya kusitisha muunganisho kwa muda. Kikomo cha kila wiki bado kinatumika na huenda majibu yakasubiri hadi nafasi ya ziada ipatikane.",
     "claudeAutoLimitResetLabel": "Weka upya kikomo cha kipindi kiotomatiki (mara moja kwa wiki)",
     "claudeAutoLimitResetDescription": "Akaunti hii inapofikia kikomo chake cha matumizi cha saa 5 na uwekaji upya wa kikomo cha kipindi unapatikana, OmniRoute huutumia kiotomatiki na kujaribu tena kwa kasi kamili. Hii hutumia uwekaji upya wa akaunti wa mara moja kwa wiki na bado huhesabiwa katika kikomo cha kila wiki.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ruka muda wa utulivu wa mpito ili muunganisho huu uendelee kustahiki hata baada ya hitilafu zinazoweza kurekebishwa (hali za mwisho kama vile zilizopigwa marufuku/zilizopitwa na wakati bado zinatumika).",
     "disableCoolingLabel": "Zima muda wa utulivu kwa muunganisho huu",
     "bulkPasteAdded": "{count, plural, one {Ufunguo 1 umeongezwa} other {Funguo # zimeongezwa}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Pata ufunguo wa API kwenye monsterapi.ai",
       "moonshot": "Unganisha Moonshot AI kwa kutumia ufunguo wa API.",
       "morph": "Kiwango cha bure: salio 250K/mwezi, $0",
+      "apmix": "Unganisha Apmix kwa funguo ya API kutoka apmix.ai/dashboard — usajili mmoja, modeli nyingi.",
       "nanogpt": "Unganisha NanoGPT kwa kutumia ufunguo wa API.",
       "nebius": "Salio la majaribio la ~$1 unapojisajili kwa ajili ya majaribio ya API",
       "nlpcloud": "NLP Cloud hutumia API ya chatbot ya umiliki badala ya OpenAI chat/completions. OmniRoute hurekebisha ujumbe wa OpenAI kulingana na input/context/history na kuweka wazi orodha ya ndani ya modeli za chatbot zinazotumika.",
@@ -6634,8 +6642,7 @@
       "kiro": "Kiwango cha bure: mikopo 50/mwezi (~tokeni 25K–100K). ⚠️ Kiro ToS inakataza matumizi ya proksi/harness ya wahusika wengine.",
       "codex": "Unganisha OpenAI Codex na mtiririko uliopo wa OAuth.",
       "qwen": "Unganisha Qwen Code na mtiririko uliopo wa OAuth.",
-      "github-models": "Unda PAT ya GitHub yenye upeo wa 'models: read' kwenye github.com/settings/tokens",
-      "apmix": "Unganisha Apmix kwa funguo ya API kutoka apmix.ai/dashboard — usajili mmoja, modeli nyingi."
+      "github-models": "Unda PAT ya GitHub yenye upeo wa 'models: read' kwenye github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} inakubali vitambulisho vya asili vya mtoa huduma. Ingiza kutoka /miundo au ongeza vitambulisho maalum vya kuelekeza.",
     "bedrockModelsDescription": "Mitindo ya Amazon Bedrock inatolewa na eneo la AWS. Ingiza kutoka /miundo au ongeza vitambulisho vya muundo wa Bedrock vilivyowezeshwa katika eneo lililochaguliwa.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Mipangilio",
@@ -7702,6 +7702,7 @@
     "configured": "imesanidiwa",
     "none": "Hakuna",
     "modelOverrideValuePlaceholder": "Thamani ya nambari",
+    "modelOverrideKey": "Ufunguo wa kubatilisha",
     "modelOverrideReasoningEffortsPlaceholder": "Kwa Kiingereza, zikitenganishwa kwa koma, k.m. low, medium, high",
     "addKeyValue": "Ongeza thamani ya ufunguo",
     "noModelOverrides": "Hakuna ubatilishaji uliosanidiwa kwa modeli hii.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Ugunduzi tangu kuanzishwa upya",
       "statsEmpty": "Bado hakuna ugunduzi.",
       "statsRequest": "Maombi"
-    },
-    "modelOverrideKey": "Ufunguo wa kubatilisha"
+    }
   },
   "contextRtk": {
     "title": "Injini ya RTK",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Imeshindwa kubadilisha mtiririko"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Matumizi",
     "grokExtraUsageCredits": "Mikopo Ya Ziada",
     "grokAutoTopUp": "Kuongeza Otomatikia",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Ilihuishwa mara ya mwisho",
     "providerQuota": "Kiwango cha Mtoa Huduma",
     "providerQuotaHomeHint": "Hali ya moja kwa moja kwenye akaunti zilizounganishwa",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Uwekaji upya wa kikomo cha Claude",
     "confirmRedeemClaudeResetCredit": "Kukomboa kunaweka upya mara moja vikomo vinavyostahiki vya matumizi ya Claude na kutumia salio hili kabisa.",
     "claudeResetCreditsModalTitle": "Masalio ya kuweka upya ya Claude",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Afya (saa 24)",
     "tableUsage": "Matumizi",
     "tableActions": "Vitendo",
+    "moreActions": "Vitendo zaidi",
     "test": "Jaribu",
     "edit": "Hariri",
     "delete": "Futa",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Haijapimwa",
     "upstream4xx": "{count} makosa ya mteja kaskazini",
     "upstream5xx": "{count} makosa ya server kaskazini",
-    "uniformEgressLine": "{affected} kati ya {exits} milango yanashindwa pamoja kwenye {provider} (masaa {hours} yaliyopita) — si shida la kilango",
-    "moreActions": "Vitendo zaidi"
+    "uniformEgressLine": "{affected} kati ya {exits} milango yanashindwa pamoja kwenye {provider} (masaa {hours} yaliyopita) — si shida la kilango"
   },
   "playground": {
     "title": "Mazingira ya Majaribio ya Modeli",
@@ -13858,6 +13858,7 @@
     "latency": "Ucheleweshaji",
     "quota": "Kiwango",
     "rangeWindow": "Dirisha la {range}",
+    "timeRange": "Kipindi cha muda",
     "runtimeHealthBlend": "mchanganyiko wa muda wa utekelezaji/afya",
     "averageResponseTime": "wastani wa muda wa kujibu",
     "worstQuota": "Kiwango kibaya zaidi",
@@ -13912,8 +13913,7 @@
     "unknown": "isiyojulikana",
     "unknownProvider": "mtoa huduma asiyejulikana",
     "unknownModel": "modeli isiyojulikana",
-    "resolvedTargetMetrics": "{requests} req · {success} mafanikio · {latency} · kiwango {quota}",
-    "timeRange": "Kipindi cha muda"
+    "resolvedTargetMetrics": "{requests} req · {success} mafanikio · {latency} · kiwango {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Kiwango cha matumizi cha USD",

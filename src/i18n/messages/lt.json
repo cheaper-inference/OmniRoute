@@ -25,8 +25,10 @@
     "confirm": "Ar tikrai?",
     "refresh": "Atnaujinti",
     "close": "Uždaryti",
+    "dialogTitleFallback": "Dialogas",
     "previousPage": "Ankstesnis puslapis",
     "nextPage": "Kitas puslapis",
+    "pagination": "Puslapių numeravimas",
     "capsLockOn": "Caps Lock yra įjungtas",
     "dismissNotification": "Uždaryti pranešimą",
     "toggleColumns": "Rodyti/slėpti stulpelius",
@@ -182,6 +184,7 @@
     "combos": "Kombinacijos",
     "noModelsFound": "Modelių nerasta",
     "clear": "Išvalyti",
+    "clearFilters": "Išvalyti filtrus",
     "done": "Atlikta",
     "selectAll": "Pažymėti visus",
     "unselectAll": "Atžymėti visus",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Peržiūra",
     "batchFilePreviewTruncated": "Rodomos pirmosios {shown} eilutės (iš viso {total} eilučių)",
     "batchFileDownloadFull": "Atsisiųsti visą failą",
-    "dialogTitleFallback": "Dialogas",
-    "pagination": "Puslapių numeravimas",
-    "clearFilters": "Išvalyti filtrus",
     "tokensPageTitle": "Žetonai",
     "tokensPageDescription": "Siųskite žetonus tarp API raktų, bendrinkite kvietimų kodus ir prijunkite bendruomenės serverius.",
     "tokensServerUrlLabel": "Serverio URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Spartusis naršymas",
     "quickNavigationTitle": "Spartusis naršymas (⌘K / Ctrl+K)",
     "openQuickNavigation": "Atverti spartųjį naršymą",
+    "openMenu": "Atverti meniu",
+    "products": "Keak produktai",
     "switchToLightMode": "Perjungti į šviesų režimą",
     "switchToDarkMode": "Perjungti į tamsų režimą",
     "language": "Kalba",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Išplėstinės naudingosios apkrovos taisyklės, užklausų limitai ir tarpinio serverio API nustatymai",
     "mitmProxyDescription": "Konfigūruoti MITM tarpinio serverio nustatymus srauto tikrinimui ir derinimui",
     "oneProxyDescription": "Konfigūruoti 1Proxy nustatymus išplėstiniam tarpinių serverių grandinės sudarymui",
-    "omniSkillsDescription": "Įdiegti ir tvarkyti smėlio dėžės įgūdžius automatizuotam užklausų ir įrankių vykdymui",
-    "openMenu": "Atverti meniu",
-    "products": "Keak produktai"
+    "omniSkillsDescription": "Įdiegti ir tvarkyti smėlio dėžės įgūdžius automatizuotam užklausų ir įrankių vykdymui"
   },
   "cloudSyncStatus": {
     "synced": "Sinchronizuota",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Derinys → {name}"
   },
   "combos": {
+    "title": "Kombinacijos",
+    "description": "Kurkite modelių kombinacijas su svertiniu maršrutizavimu ir perėjimo prie atsarginio modelio palaikymu",
+    "autoCatalogTitle": "Automatinio maršrutizavimo katalogas",
     "autoTosLoadError": "Nepavyko įkelti paslaugų teikimo sąlygų politikos. Prieš keisdami bandykite dar kartą.",
     "autoTosSaveError": "Nepavyko išsaugoti paslaugų teikimo sąlygų politikos. Vis dar rodoma ankstesnė nuostata. Bandykite dar kartą.",
     "autoTosIncludeLabel": "Į auto įtraukti teikėjus, pažymėtus ToS: avoid",
     "autoTosDescription": "Pagal numatytuosius nustatymus išjungta. Taikoma visiems auto deriniams, ne tik vienai paskyrai. Teikėjo prijungimas šios parinkties neįjungia.",
-    "title": "Kombinacijos",
-    "description": "Kurkite modelių kombinacijas su svertiniu maršrutizavimu ir perėjimo prie atsarginio modelio palaikymu",
-    "autoCatalogTitle": "Automatinio maršrutizavimo katalogas",
     "autoCatalogTemplateCount": "{count} šabl.",
     "autoCatalogDescription": "Integruotos auto/* kombinacijos, dinamiškai parenkamos iš prijungtų teikėjų. Naudokite bet kurį iš šių ID kaip modelio lauko reikšmę — konfigūruoti nereikia.",
     "autoCatalogExpand": "Išskleisti automatinio maršrutizavimo katalogą",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Kombinacijų kol kas nesukonfigūruota.",
     "playgroundCreateFirst": "Pirmiausia ją sukurkite",
     "weighted": "Svertinis",
+    "weightPercent": "Svoris (%)",
     "leastUsed": "Mažiausiai naudojama",
     "costOpt": "Optimizuota pagal kainą",
     "strategyGuideTitle": "Kaip naudoti šią strategiją",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# paskyra} few {# paskyros} many {# paskyros} other {# paskyrų}}",
     "builderGlobalAdded": "Pridėtas",
     "builderGlobalAdd": "Pridėti",
+    "clearSearch": "Išvalyti paiešką",
     "manualModel": "Rankiniu būdu įvestas modelis",
     "manualModelInvalid": "Įveskite modelį formatu provider/model.",
     "manualModelUnknownProvider": "Nežinomas tiekėjo priešdėlis.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Mažiausias turinio ilgis (simboliais)",
     "responseValidationJsonPaths": "JSON kelių patikros",
     "responseValidationAddCheck": "+ Pridėti patikrinimą",
+    "responseValidationRemoveCheck": "Pašalinti patikrą",
+    "responseValidationPath": "JSON kelias",
+    "responseValidationCondition": "Sąlyga",
+    "responseValidationValue": "Tikėtina reikšmė",
     "agentFeaturesSystemMessageOverride": "Pakeisti sistemos pranešimą",
     "agentFeaturesSystemMessagePlaceholder": "Jūs esate asistentas ekspertas...",
     "agentFeaturesSystemMessageHint": "Sistemos pranešimo pakeitimas agentams",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Taip šiuo metu prijungtų, šį šabloną atitinkančių teikėjų ir modelių momentinė kopija bus įrašyta į redaguojamą kombo.",
     "duplicateAutoComboFailedPrefix": "Nepavyko dubliuoti automatinio kombo:",
     "duplicateAutoComboUnknownError": "Nežinoma klaida",
-    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}",
-    "weightPercent": "Svoris (%)",
-    "clearSearch": "Išvalyti paiešką",
-    "responseValidationRemoveCheck": "Pašalinti patikrą",
-    "responseValidationPath": "JSON kelias",
-    "responseValidationCondition": "Sąlyga",
-    "responseValidationValue": "Tikėtina reikšmė"
+    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}"
   },
   "costs": {
     "title": "Išlaidos",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API formato etiketė",
     "apiKeyOptionalHint": "Palikite tuščią, jei vietinei sąrankai arba teikėjui autentifikavimas nereikalingas.",
     "apiKeyOptionalLabel": "API raktas (nebūtinas)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Žemyninė Kinija",
+    "apiRegionHint": "Pasirinkite galutinio taško regioną, naudojamą API prieigai ir kvotų stebėjimui.",
+    "apiRegionInternational": "Tarptautinis",
+    "apiRegionLabel": "API regionas",
     "apikey": "API raktas",
     "audio": "Garsas",
     "audioProvidersHeading": "Garso teikėjų antraštė",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Kai ši paskyra pasiekia 5 valandų naudojimo limitą ir Anthropic pasiūlo mažesnio prioriteto režimą, OmniRoute jį priima ir toliau siunčia užklausas su anthropic-usage-limit: slow, kol laiko intervalas nustatomas iš naujo, užuot laikinai pristabdęs ryšį. Savaitinis limitas vis tiek taikomas, o atsakymams gali tekti palaukti, kol atsiras laisvų pajėgumų.",
     "claudeAutoLimitResetLabel": "Automatiškai iš naujo nustatyti seanso limitą (kartą per savaitę)",
     "claudeAutoLimitResetDescription": "Kai ši paskyra pasiekia 5 valandų naudojimo limitą ir galima iš naujo nustatyti seanso limitą, OmniRoute automatiškai tuo pasinaudoja ir pakartoja užklausą visu greičiu. Panaudojama paskyrai kartą per savaitę suteikiama limito nustatymo iš naujo galimybė, o naudojimas vis tiek įskaičiuojamas į savaitinį limitą.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Praleisti laikiną atvėsimo laikotarpį, kad šį ryšį būtų galima naudoti net ir po klaidų, po kurių galima atkurti veikimą (galutinės būsenos, pvz., užblokavimas ar galiojimo pabaiga, vis tiek taikomos).",
     "disableCoolingLabel": "Išjungti šio ryšio atvėsimo laikotarpį",
     "bulkPasteAdded": "{count, plural, one {Pridėtas 1 raktas} other {Pridėta # raktų}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Gaukite API raktą svetainėje monsterapi.ai",
       "moonshot": "Prijunkite Kimi naudodami API raktą.",
       "morph": "Nemokamas planas: 250K kreditų per mėnesį, $0",
+      "apmix": "Prijunkite Apmix su API raktu iš apmix.ai/dashboard — vienas prenumeratos planas, daug modelių.",
       "nanogpt": "Prijunkite NanoGPT naudodami API raktą.",
       "nebius": "Užsiregistravus API testavimui suteikiama ~$1 bandomųjų kreditų",
       "nlpcloud": "NLP Cloud vietoje OpenAI chat/completions naudoja nuosavybinę pokalbių roboto API. OmniRoute pritaiko OpenAI pranešimus prie input/context/history ir pateikia vietinį palaikomų pokalbių roboto modelių katalogą.",
@@ -6634,8 +6642,7 @@
       "kiro": "Nemokamas planas: 50 kreditų per mėnesį (~25K–100K žetonų). ⚠️ Kiro ToS draudžia naudoti trečiųjų šalių tarpinius serverius ar valdymo įrankius.",
       "codex": "Prijunkite OpenAI Codex naudodami esamą OAuth procesą.",
       "qwen": "Prijunkite Qwen Code naudodami esamą OAuth procesą.",
-      "github-models": "Sukurkite GitHub PAT su „models: read“ aprėptimi adresu github.com/settings/tokens",
-      "apmix": "Prijunkite Apmix su API raktu iš apmix.ai/dashboard — vienas prenumeratos planas, daug modelių."
+      "github-models": "Sukurkite GitHub PAT su „models: read“ aprėptimi adresu github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} priima teikėjui būdingus modelių ID. Importuokite juos iš /models arba pridėkite pasirinktinius ID maršrutizavimui.",
     "bedrockModelsDescription": "Amazon Bedrock modeliai susieti su AWS regionu. Importuokite juos iš /models arba pridėkite pasirinktame regione įgalintų Bedrock modelių ID.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Nustatymai",
@@ -7702,6 +7702,7 @@
     "configured": "sukonfigūruota",
     "none": "Nėra",
     "modelOverrideValuePlaceholder": "Skaitinė reikšmė",
+    "modelOverrideKey": "Perrašymo raktas",
     "modelOverrideReasoningEffortsPlaceholder": "Angliškos reikšmės, atskirtos kableliais, pvz., low, medium, high",
     "addKeyValue": "Pridėti rakto reikšmę",
     "noModelOverrides": "Šiam modeliui nesukonfigūruota jokių perrašymų.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Aptikimai nuo paleidimo iš naujo",
       "statsEmpty": "Aptikimų dar nėra.",
       "statsRequest": "Užklausos"
-    },
-    "modelOverrideKey": "Perrašymo raktas"
+    }
   },
   "contextRtk": {
     "title": "RTK variklis",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Nepavyko transformuoti srauto"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Naudojimas",
     "grokExtraUsageCredits": "Papildomo naudojimo kreditai",
     "grokAutoTopUp": "Automatinis papildymas",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Paskutinį kartą atnaujinta",
     "providerQuota": "Teikėjo kvota",
     "providerQuotaHomeHint": "Būsena realiuoju laiku visose prijungtose paskyrose",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Claude limito atstatymas",
     "confirmRedeemClaudeResetCredit": "Panaudojus iš karto atstatomi atitinkami Claude naudojimo limitai ir visam laikui sunaudojamas šis kreditas.",
     "claudeResetCreditsModalTitle": "Claude atstatymo kreditai",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Būklė (24 val.)",
     "tableUsage": "Naudojimas",
     "tableActions": "Veiksmai",
+    "moreActions": "Daugiau veiksmų",
     "test": "Tikrinti",
     "edit": "Redaguoti",
     "delete": "Ištrinti",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Neišmatuota",
     "upstream4xx": "{count} kliento klaidos",
     "upstream5xx": "{count} serverio klaidos",
-    "uniformEgressLine": "{affected} iš {exits} išėjimų genda kartu tinkle {provider} (per paskutines {hours}h) — ne išėjimo problema",
-    "moreActions": "Daugiau veiksmų"
+    "uniformEgressLine": "{affected} iš {exits} išėjimų genda kartu tinkle {provider} (per paskutines {hours}h) — ne išėjimo problema"
   },
   "playground": {
     "title": "Modelių bandymų aplinka",
@@ -13858,6 +13858,7 @@
     "latency": "Delsa",
     "quota": "Kvota",
     "rangeWindow": "{range} intervalas",
+    "timeRange": "Laiko intervalas",
     "runtimeHealthBlend": "vykdymo ir būklės derinys",
     "averageResponseTime": "vidutinė atsako trukmė",
     "worstQuota": "Prasčiausia kvotos būklė",
@@ -13912,8 +13913,7 @@
     "unknown": "nežinoma",
     "unknownProvider": "nežinomas teikėjas",
     "unknownModel": "nežinomas modelis",
-    "resolvedTargetMetrics": "{requests} užkl. · {success} sėkmingų · {latency} · kvota {quota}",
-    "timeRange": "Laiko intervalas"
+    "resolvedTargetMetrics": "{requests} užkl. · {success} sėkmingų · {latency} · kvota {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Naudojimo kvota USD",

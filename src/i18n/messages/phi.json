@@ -25,8 +25,10 @@
     "confirm": "Sigurado ka ba?",
     "refresh": "I-refresh",
     "close": "Isara",
+    "dialogTitleFallback": "Diyalogo",
     "previousPage": "Nakaraang pahina",
     "nextPage": "Susunod na pahina",
+    "pagination": "Paginasyon",
     "capsLockOn": "Naka-on ang Caps Lock",
     "dismissNotification": "I-dismiss ang notification",
     "toggleColumns": "I-toggle ang mga column",
@@ -182,6 +184,7 @@
     "combos": "Mga Combo",
     "noModelsFound": "Walang nakitang mga model",
     "clear": "I-clear",
+    "clearFilters": "I-clear ang mga filter",
     "done": "Tapos na",
     "selectAll": "Piliin lahat",
     "unselectAll": "Alisin ang pagkakapili",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "I-preview",
     "batchFilePreviewTruncated": "Ipinapakita ang unang {shown} linya ({total} kabuuang linya)",
     "batchFileDownloadFull": "I-download ang Buong File",
-    "dialogTitleFallback": "Diyalogo",
-    "pagination": "Paginasyon",
-    "clearFilters": "I-clear ang mga filter",
     "tokensPageTitle": "Mga token",
     "tokensPageDescription": "Magpadala ng mga token sa pagitan ng mga API key, magbahagi ng mga code ng imbitasyon, at kumonekta sa mga server ng komunidad.",
     "tokensServerUrlLabel": "URL ng server"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Mabilisang nav",
     "quickNavigationTitle": "Mabilisang nabigasyon (⌘K / Ctrl+K)",
     "openQuickNavigation": "Buksan ang mabilisang nabigasyon",
+    "openMenu": "Buksan ang menu",
+    "products": "Mga produkto ng Keak",
     "switchToLightMode": "Lumipat sa light mode",
     "switchToDarkMode": "Lumipat sa dark mode",
     "language": "Wika",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Mga advanced na panuntunan sa payload, limitasyon sa request, at mga setting ng proxy API",
     "mitmProxyDescription": "I-configure ang mga setting ng MITM proxy para sa inspeksyon at pag-debug ng traffic",
     "oneProxyDescription": "I-configure ang mga setting ng 1Proxy para sa advanced na proxy chaining",
-    "omniSkillsDescription": "Mag-install at mamahala ng mga sandbox skill para sa awtomatikong prompt at pagpapagana ng tool",
-    "openMenu": "Buksan ang menu",
-    "products": "Mga produkto ng Keak"
+    "omniSkillsDescription": "Mag-install at mamahala ng mga sandbox skill para sa awtomatikong prompt at pagpapagana ng tool"
   },
   "cloudSyncStatus": {
     "synced": "Na-sync",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Isama sa auto ang mga provider na may markang ToS: avoid",
-    "autoTosDescription": "Naka-off bilang default. Para ito sa lahat ng auto combo, hindi lang sa isang account. Hindi pinapagana ang opsyong ito kapag kumonekta ka sa provider.",
-    "autoTosSaveError": "Hindi ma-save ang patakaran sa ToS. Nakikita pa rin ang dating setting. Subukan muli.",
-    "autoTosLoadError": "Hindi ma-load ang patakaran sa ToS. Subukan muli bago ito baguhin.",
     "title": "Mga combo",
     "description": "Gumawa ng mga combo ng modelo na may weighted routing at fallback support",
     "autoCatalogTitle": "Catalog ng auto-routing",
+    "autoTosLoadError": "Hindi ma-load ang patakaran sa ToS. Subukan muli bago ito baguhin.",
+    "autoTosSaveError": "Hindi ma-save ang patakaran sa ToS. Nakikita pa rin ang dating setting. Subukan muli.",
+    "autoTosIncludeLabel": "Isama sa auto ang mga provider na may markang ToS: avoid",
+    "autoTosDescription": "Naka-off bilang default. Para ito sa lahat ng auto combo, hindi lang sa isang account. Hindi pinapagana ang opsyong ito kapag kumonekta ka sa provider.",
     "autoCatalogTemplateCount": "{count} na mga template",
     "autoCatalogDescription": "Ang mga built-in na auto/* combo ay dynamic na naresolba mula sa mga konektadong provider. Gamitin ang alinman sa mga ID na ito bilang field ng modelo — hindi kailangan ng setup.",
     "autoCatalogExpand": "Palawakin ang auto-routing catalog",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Wala pang na-configure na mga combo.",
     "playgroundCreateFirst": "Gumawa muna ng isa",
     "weighted": "Natimbang",
+    "weightPercent": "Timbang (%)",
     "leastUsed": "Hindi gaanong nagamit",
     "costOpt": "Optimisado sa Gastos",
     "strategyGuideTitle": "Paano gamitin ang diskarteng ito",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# account} other {# account}}",
     "builderGlobalAdded": "Idinagdag",
     "builderGlobalAdd": "Magdagdag",
+    "clearSearch": "I-clear ang paghahanap",
     "manualModel": "Manwal na modelo",
     "manualModelInvalid": "Maglagay ng modelo bilang provider/model.",
     "manualModelUnknownProvider": "Hindi kilalang prefix ng provider.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Minimum na haba ng nilalaman (mga char)",
     "responseValidationJsonPaths": "Mga pagsusuri sa JSON-path",
     "responseValidationAddCheck": "+ Magdagdag ng pagsusuri",
+    "responseValidationRemoveCheck": "Alisin ang pagsusuri",
+    "responseValidationPath": "Path ng JSON",
+    "responseValidationCondition": "Kondisyon",
+    "responseValidationValue": "Inaasahang halaga",
     "agentFeaturesSystemMessageOverride": "I-override ang mensahe ng system",
     "agentFeaturesSystemMessagePlaceholder": "Isa kang dalubhasang katulong...",
     "agentFeaturesSystemMessageHint": "Override ng mensahe ng system para sa mga ahente",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Ito ay kukuha ng snapshot ng kasalukuyang nakakonektang mga provider/model na tugma sa template na ito sa isang editable na combo.",
     "duplicateAutoComboFailedPrefix": "Nabigo ang pag-duplicate ng auto-combo:",
     "duplicateAutoComboUnknownError": "Hindi alam na error",
-    "duplicateAutoComboTitle": "Gumawa ng static combo mula sa {name}",
-    "weightPercent": "Timbang (%)",
-    "clearSearch": "I-clear ang paghahanap",
-    "responseValidationRemoveCheck": "Alisin ang pagsusuri",
-    "responseValidationPath": "Path ng JSON",
-    "responseValidationCondition": "Kondisyon",
-    "responseValidationValue": "Inaasahang halaga"
+    "duplicateAutoComboTitle": "Gumawa ng static combo mula sa {name}"
   },
   "costs": {
     "title": "Mga gastos",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Label ng Format ng API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Pangunahing Lupain ng Tsina",
+    "apiRegionHint": "Piliin ang rehiyon ng endpoint na ginagamit para sa pag-access ng API at pagsubaybay ng quota.",
+    "apiRegionInternational": "Internasyonal",
+    "apiRegionLabel": "Rehiyon ng API",
     "apikey": "API key",
     "audio": "Audio",
     "audioProvidersHeading": "Heading ng mga Provider ng Audio",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Kapag naabot ng account na ito ang 5-oras na limitasyon sa paggamit at nag-alok ang Anthropic ng lane na may mas mababang priyoridad, tatanggapin ito ng OmniRoute at patuloy na magpapadala ng mga kahilingan gamit ang anthropic-usage-limit: slow hanggang sa mag-reset ang palugit, sa halip na pansamantalang ihinto ang koneksyon. Nalalapat pa rin ang lingguhang limitasyon at maaaring maghintay ang mga tugon hanggang magkaroon ng libreng kapasidad.",
     "claudeAutoLimitResetLabel": "Awtomatikong i-reset ang limitasyon ng session (isang beses bawat linggo)",
     "claudeAutoLimitResetDescription": "Kapag naabot ng account na ito ang 5-oras na limitasyon sa paggamit at may available na pag-reset ng limitasyon ng session, awtomatiko itong kukunin ng OmniRoute at susubukang muli nang buong bilis. Gagamitin nito ang minsan-kada-linggong pag-reset ng account at mabibilang pa rin ito sa lingguhang limitasyon.",
+    "codexPaidCreditsShort": "Mga dagdag na kredito",
+    "codexPaidCreditsToggleTitle": "Payagan ang mga bayad na kredito sa Codex kapag naubos ang quota ng subscription (maaaring may dagdag na singil)",
+    "codexPaidCreditsEnabled": "Pinagana ang mga bayad na kredito sa Codex (maaaring may dagdag na singil)",
+    "codexPaidCreditsDisabled": "Hindi pinagana ang mga bayad na kredito sa Codex",
+    "failedUpdateCodexPaidCredits": "Hindi ma-update ang patakaran sa mga bayad na kredito sa Codex",
+    "allowCodexPaidCreditsLabel": "Payagan ang mga bayad na kredito sa Codex",
+    "allowCodexPaidCreditsDescription": "Payagan ang account na ito na gumamit ng mga bayad na kredito kapag umabot na sa itinakdang cutoff ang quota ng subscription nito. Kailangan ng mga magagamit na kredito ayon sa ulat ng OpenAI; maaaring may singil. Nalalapat pa rin ang mga limitasyon ng Spark at ang mga cooldown ng upstream. Sinusuri ang pagkakaroon ng mga kredito kahit hindi pinagana ang paunang pagsusuri ng quota, maliban kung ganap na naka-off ang lokal na pag-filter ng quota (parehong hindi pinagana ang paunang pagsusuri ng quota at ang patakaran sa limitasyon).",
     "disableCoolingDescription": "Laktawan ang transient cooldown para manatiling kwalipikado ang koneksyong ito kahit pagkatapos ng mga error na maaaring ma-recover (nalalapat pa rin ang mga terminal state tulad ng banned/expired).",
     "disableCoolingLabel": "I-disable ang cooldown para sa koneksyong ito",
     "bulkPasteAdded": "{count, plural, one {1 key ang naidagdag} other {# key ang naidagdag}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Kumuha ng API key sa monsterapi.ai",
       "moonshot": "Ikonekta ang Moonshot AI gamit ang isang API key.",
       "morph": "Libreng tier: 250K credits/buwan, $0",
+      "apmix": "Ikonekta ang Apmix gamit ang API key mula sa apmix.ai/dashboard — isang subscription, maraming modelo.",
       "nanogpt": "Ikonekta ang NanoGPT gamit ang isang API key.",
       "nebius": "~$1 trial credits sa pag-signup para sa pagsubok ng API",
       "nlpcloud": "Gumagamit ang NLP Cloud ng isang proprietary chatbot API sa halip na OpenAI chat/completions. Iniaangkop ng OmniRoute ang mga mensahe ng OpenAI sa input/context/history at nagbibigay ng lokal na catalog ng mga sinusuportahang chatbot na modelo.",
@@ -6634,8 +6642,7 @@
       "kiro": "Libreng tier: 50 credits/buwan (~25K–100K tokens). ⚠️ Ipinagbabawal ng Kiro ToS ang paggamit ng third-party proxy/harness.",
       "codex": "Ikonekta ang OpenAI Codex gamit ang umiiral na OAuth flow.",
       "qwen": "Ikonekta ang Qwen Code gamit ang umiiral na OAuth flow.",
-      "github-models": "Gumawa ng GitHub PAT na may 'models: read' na scope sa github.com/settings/tokens",
-      "apmix": "Ikonekta ang Apmix gamit ang API key mula sa apmix.ai/dashboard — isang subscription, maraming modelo."
+      "github-models": "Gumawa ng GitHub PAT na may 'models: read' na scope sa github.com/settings/tokens"
     },
     "passthroughModelsDescription": "Tumatanggap ang {provider} ng mga provider-native na model ID. Mag-import mula sa /models o magdagdag ng mga custom na ID para sa pagruruta.",
     "bedrockModelsDescription": "Ang mga modelo ng Amazon Bedrock ay saklaw ng rehiyon ng AWS. Mag-import mula sa /models o magdagdag ng mga Bedrock model ID na pinagana sa napiling rehiyon.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Mga dagdag na kredito",
-    "codexPaidCreditsToggleTitle": "Payagan ang mga bayad na kredito sa Codex kapag naubos ang quota ng subscription (maaaring may dagdag na singil)",
-    "codexPaidCreditsEnabled": "Pinagana ang mga bayad na kredito sa Codex (maaaring may dagdag na singil)",
-    "codexPaidCreditsDisabled": "Hindi pinagana ang mga bayad na kredito sa Codex",
-    "failedUpdateCodexPaidCredits": "Hindi ma-update ang patakaran sa mga bayad na kredito sa Codex",
-    "allowCodexPaidCreditsLabel": "Payagan ang mga bayad na kredito sa Codex",
-    "allowCodexPaidCreditsDescription": "Payagan ang account na ito na gumamit ng mga bayad na kredito kapag umabot na sa itinakdang cutoff ang quota ng subscription nito. Kailangan ng mga magagamit na kredito ayon sa ulat ng OpenAI; maaaring may singil. Nalalapat pa rin ang mga limitasyon ng Spark at ang mga cooldown ng upstream. Sinusuri ang pagkakaroon ng mga kredito kahit hindi pinagana ang paunang pagsusuri ng quota, maliban kung ganap na naka-off ang lokal na pag-filter ng quota (parehong hindi pinagana ang paunang pagsusuri ng quota at ang patakaran sa limitasyon)."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Mga setting",
@@ -7702,6 +7702,7 @@
     "configured": "naka-configure",
     "none": "Wala",
     "modelOverrideValuePlaceholder": "Numerikong halaga",
+    "modelOverrideKey": "Key ng override",
     "modelOverrideReasoningEffortsPlaceholder": "Mga value sa English na pinaghihiwalay ng kuwit, hal. low, medium, high",
     "addKeyValue": "Magdagdag ng key value",
     "noModelOverrides": "Walang naka-configure na mga override para sa modelong ito.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Mga natukoy mula nang mag-restart",
       "statsEmpty": "Wala pang natukoy.",
       "statsRequest": "Mga request"
-    },
-    "modelOverrideKey": "Key ng override"
+    }
   },
   "contextRtk": {
     "title": "Engine ng RTK",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Nabigong i-transform ang stream"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Mga bayad na kredito sa Codex",
+    "codexPaidCreditsAvailable": "Magagamit (hindi iniulat ang balanse)",
+    "codexPaidCreditsUnavailable": "Hindi magagamit o naabot na ang limitasyon sa paggastos",
+    "codexPaidCreditsUnlimited": "Walang limitasyon",
     "title": "Paggamit",
     "grokExtraUsageCredits": "Karagdagang Paggamit ng Mga Kredito",
     "grokAutoTopUp": "Awtomatikong Pagdaragdag",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Huling na-refresh",
     "providerQuota": "Quota ng Provider",
     "providerQuotaHomeHint": "Live na status sa lahat ng nakakonektang account",
-    "codexPaidCreditsLabel": "Mga bayad na kredito sa Codex",
-    "codexPaidCreditsAvailable": "Magagamit (hindi iniulat ang balanse)",
-    "codexPaidCreditsUnavailable": "Hindi magagamit o naabot na ang limitasyon sa paggastos",
-    "codexPaidCreditsUnlimited": "Walang limitasyon",
     "claudeResetCreditDefaultTitle": "Pag-reset ng limit ng Claude",
     "confirmRedeemClaudeResetCredit": "Ang pag-redeem ay agad na nagre-reset ng mga kwalipikadong limitasyon sa paggamit ng Claude at permanenteng gagamitin ang credit na ito.",
     "claudeResetCreditsModalTitle": "Mga credit sa pag-reset ng Claude",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Higit pang mga pagkilos",
     "test": "Subukan",
     "edit": "I-edit",
     "delete": "Tanggalin",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Hindi nasukat",
     "upstream4xx": "{count} mga error ng upstream client",
     "upstream5xx": "{count} mga error ng upstream server",
-    "uniformEgressLine": "{affected} sa {exits} na mga exit ay sabay-sabay na nabigo sa {provider} (huling {hours}h) — hindi problema ng exit",
-    "moreActions": "Higit pang mga pagkilos"
+    "uniformEgressLine": "{affected} sa {exits} na mga exit ay sabay-sabay na nabigo sa {provider} (huling {hours}h) — hindi problema ng exit"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Latency",
     "quota": "Kota",
     "rangeWindow": "{range} na window",
+    "timeRange": "Saklaw ng oras",
     "runtimeHealthBlend": "blend ng runtime/health",
     "averageResponseTime": "karaniwang oras ng pagtugon",
     "worstQuota": "Pinakamalalang quota",
@@ -13912,8 +13913,7 @@
     "unknown": "hindi kilala",
     "unknownProvider": "hindi kilalang provider",
     "unknownModel": "hindi kilalang modelo",
-    "resolvedTargetMetrics": "{requests} req · {success} tagumpay · {latency} · quota {quota}",
-    "timeRange": "Saklaw ng oras"
+    "resolvedTargetMetrics": "{requests} req · {success} tagumpay · {latency} · quota {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Quota sa paggamit ng USD",

@@ -25,8 +25,10 @@
     "confirm": "آیا مطمئن هستید؟",
     "refresh": "تازهسازی",
     "close": "بستن",
+    "dialogTitleFallback": "کادر محاورهای",
     "previousPage": "صفحه قبلی",
     "nextPage": "صفحه بعدی",
+    "pagination": "صفحهبندی",
     "capsLockOn": "Caps Lock روشن است",
     "dismissNotification": "رد کردن اعلان",
     "toggleColumns": "تغییر وضعیت ستون‌ها",
@@ -182,6 +184,7 @@
     "combos": "ترکیبها",
     "noModelsFound": "هیچ مدلی یافت نشد",
     "clear": "پاک کردن",
+    "clearFilters": "پاککردن فیلترها",
     "done": "انجام شد",
     "selectAll": "انتخاب همه",
     "unselectAll": "لغو انتخاب همه",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "پیش‌نمایش",
     "batchFilePreviewTruncated": "نمایش {shown} خط اول ({total} خط کل)",
     "batchFileDownloadFull": "دانلود فایل کامل",
-    "dialogTitleFallback": "کادر محاورهای",
-    "pagination": "صفحهبندی",
-    "clearFilters": "پاککردن فیلترها",
     "tokensPageTitle": "توکنها",
     "tokensPageDescription": "توکنها را بین کلیدهای API ارسال کنید، کدهای دعوت را به اشتراک بگذارید و سرورهای جامعه را متصل کنید.",
     "tokensServerUrlLabel": "نشانی URL سرور"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "ناوبری سریع",
     "quickNavigationTitle": "ناوبری سریع (⌘K / Ctrl+K)",
     "openQuickNavigation": "باز کردن ناوبری سریع",
+    "openMenu": "بازکردن منو",
+    "products": "محصولات Keak",
     "switchToLightMode": "تغییر به حالت روشن",
     "switchToDarkMode": "تغییر به حالت تاریک",
     "language": "زبان",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "قواعد پیشرفته بار داده، محدودیتهای درخواست و تنظیمات API پروکسی",
     "mitmProxyDescription": "تنظیمات پروکسی MITM را برای بازرسی ترافیک و اشکالزدایی پیکربندی کنید",
     "oneProxyDescription": "تنظیمات 1Proxy را برای زنجیرهسازی پیشرفته پروکسی پیکربندی کنید",
-    "omniSkillsDescription": "نصب و مدیریت مهارت‌های sandbox برای اجرای خودکار پرامپت و ابزار",
-    "openMenu": "بازکردن منو",
-    "products": "محصولات Keak"
+    "omniSkillsDescription": "نصب و مدیریت مهارت‌های sandbox برای اجرای خودکار پرامپت و ابزار"
   },
   "cloudSyncStatus": {
     "synced": "همگام‌سازی شد",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "ترکیب → {name}"
   },
   "combos": {
+    "title": "ترکیبها",
+    "description": "ایجاد ترکیبهای مدل با مسیریابی وزندار و پشتیبانی از جایگزین",
+    "autoCatalogTitle": "کاتالوگ مسیریابی خودکار",
     "autoTosLoadError": "بارگذاری سیاست شرایط استفاده ممکن نشد. پیش از تغییر آن دوباره تلاش کنید.",
     "autoTosSaveError": "ذخیرهٔ سیاست شرایط استفاده ممکن نشد. همچنان تنظیم قبلی نمایش داده می‌شود. دوباره تلاش کنید.",
     "autoTosIncludeLabel": "ارائه‌دهندگان با برچسب ToS: avoid را در auto بگنجان",
     "autoTosDescription": "به‌طور پیش‌فرض خاموش است. برای همهٔ ترکیب‌های auto اعمال می‌شود، نه فقط یک حساب. اتصال یک ارائه‌دهنده این گزینه را فعال نمی‌کند.",
-    "title": "ترکیبها",
-    "description": "ایجاد ترکیبهای مدل با مسیریابی وزندار و پشتیبانی از جایگزین",
-    "autoCatalogTitle": "کاتالوگ مسیریابی خودکار",
     "autoCatalogTemplateCount": "الگوهای {count}",
     "autoCatalogDescription": "ترکیب های خودکار/* داخلی به صورت پویا از ارائه دهندگان متصل حل می شوند. از هر یک از این شناسه ها به عنوان فیلد مدل استفاده کنید — نیازی به تنظیم نیست.",
     "autoCatalogExpand": "کاتالوگ مسیریابی خودکار را گسترش دهید",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "هنوز هیچ ترکیبی پیکربندی نشده است.",
     "playgroundCreateFirst": "ابتدا یکی ایجاد کنید",
     "weighted": "وزندار",
+    "weightPercent": "وزن (٪)",
     "leastUsed": "کماستفادهترین",
     "costOpt": "بهینهسازی هزینه",
     "strategyGuideTitle": "نحوه استفاده از این راهبرد",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# حساب} other {# حساب‌ها}}",
     "builderGlobalAdded": "اضافه شد",
     "builderGlobalAdd": "اضافه کردن",
+    "clearSearch": "پاککردن جستجو",
     "manualModel": "مدل دستی",
     "manualModelInvalid": "یک مدل را به صورت provider/model وارد کنید.",
     "manualModelUnknownProvider": "پیشوند ارائه‌دهنده ناشناخته است.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "حداقل طول محتوا (کاراکتر)",
     "responseValidationJsonPaths": "بررسی‌های JSON-path",
     "responseValidationAddCheck": "+ افزودن بررسی",
+    "responseValidationRemoveCheck": "حذف بررسی",
+    "responseValidationPath": "مسیر JSON",
+    "responseValidationCondition": "شرط",
+    "responseValidationValue": "مقدار مورد انتظار",
     "agentFeaturesSystemMessageOverride": "جایگزینی پیام سیستم",
     "agentFeaturesSystemMessagePlaceholder": "شما یک دستیار متخصص هستید...",
     "agentFeaturesSystemMessageHint": "جایگزینی پیام سیستم برای عاملها",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "این ارائه‌دهندگان/مدل‌های متصل فعلی که با این قالب مطابقت دارند را در یک ترکیب قابل ویرایش ذخیره می‌کند.",
     "duplicateAutoComboFailedPrefix": "تکرار ترکیب خودکار ناموفق بود:",
     "duplicateAutoComboUnknownError": "خطای ناشناخته",
-    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}",
-    "weightPercent": "وزن (٪)",
-    "clearSearch": "پاککردن جستجو",
-    "responseValidationRemoveCheck": "حذف بررسی",
-    "responseValidationPath": "مسیر JSON",
-    "responseValidationCondition": "شرط",
-    "responseValidationValue": "مقدار مورد انتظار"
+    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}"
   },
   "costs": {
     "title": "هزینهها",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "برچسب قالب API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "سرزمین اصلی چین",
+    "apiRegionHint": "منطقهی اندپوینت مورد استفاده برای دسترسی به API و رهگیری سهمیه را انتخاب کنید.",
+    "apiRegionInternational": "بینالمللی",
+    "apiRegionLabel": "منطقهی API",
     "apikey": "کلید API",
     "audio": "صوت",
     "audioProvidersHeading": "عنوان ارائهدهندگان صوت",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "هنگامی که این حساب به محدودیت استفاده ۵ ساعته خود میرسد و Anthropic مسیر با اولویت پایینتر را پیشنهاد میدهد، OmniRoute آن را میپذیرد و به ارسال درخواستها با anthropic-usage-limit: slow ادامه میدهد تا زمانی که بازه زمانی بازنشانی شود، به جای اینکه اتصال را متوقف کند. محدودیت هفتگی همچنان اعمال میشود و پاسخها ممکن است منتظر ظرفیت مازاد بمانند.",
     "claudeAutoLimitResetLabel": "بازنشانی خودکار محدودیت نشست (یک بار در هفته)",
     "claudeAutoLimitResetDescription": "هنگامی که این حساب به محدودیت استفاده ۵ ساعته خود میرسد و بازنشانی محدودیت نشست در دسترس است، OmniRoute آن را به طور خودکار اعمال کرده و با سرعت کامل دوباره تلاش میکند. این کار از بازنشانی یک بار در هفته حساب استفاده میکند و همچنان جزو محدودیت هفتگی محسوب میشود.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "نادیده گرفتن دوره خنک‌سازی گذرا تا این اتصال حتی پس از خطاهای قابل بازیابی واجد شرایط باقی بماند (حالت‌های نهایی مانند مسدود شده/منقضی شده همچنان اعمال می‌شوند).",
     "disableCoolingLabel": "غیرفعال کردن دوره خنک‌سازی برای این اتصال",
     "bulkPasteAdded": "{count, plural, one {۱ کلید اضافه شد} other {# کلید اضافه شد}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "دریافت کلید API در monsterapi.ai",
       "moonshot": "اتصال Moonshot AI با یک کلید API.",
       "morph": "سطح رایگان: ۲۵۰ هزار اعتبار در ماه، ۰ دلار",
+      "apmix": "Apmix را با یک کلید API از apmix.ai/dashboard متصل کنید — یک اشتراک، مدل‌های زیاد.",
       "nanogpt": "اتصال NanoGPT با یک کلید API.",
       "nebius": "حدود ۱ دلار اعتبار آزمایشی در زمان ثبت‌نام برای تست API",
       "nlpcloud": "سرویس NLP Cloud به جای OpenAI chat/completions از یک API چت‌بات اختصاصی استفاده می‌کند. OmniRoute پیام‌های OpenAI را با ورودی/زمینه/تاریخچه تطبیق می‌دهد و کاتالوگ محلی از مدل‌های چت‌بات پشتیبانی‌شده را ارائه می‌کند.",
@@ -6634,8 +6642,7 @@
       "kiro": "طرح رایگان: ۵۰ اعتبار/ماه (~۲۵ هزار–۱۰۰ هزار توکن). ⚠️ شرایط خدمات Kiro استفاده از پروکسی/هارنس شخص ثالث را ممنوع می‌کند.",
       "codex": "اتصال OpenAI Codex با جریان OAuth موجود.",
       "qwen": "اتصال Qwen Code با جریان OAuth موجود.",
-      "github-models": "یک GitHub PAT با محدوده (scope) 'models: read' در github.com/settings/tokens ایجاد کنید",
-      "apmix": "Apmix را با یک کلید API از apmix.ai/dashboard متصل کنید — یک اشتراک، مدل‌های زیاد."
+      "github-models": "یک GitHub PAT با محدوده (scope) 'models: read' در github.com/settings/tokens ایجاد کنید"
     },
     "passthroughModelsDescription": "{provider} شناسه های مدل بومی ارائه دهنده را می پذیرد. از /models وارد کنید یا شناسه های سفارشی را برای مسیریابی اضافه کنید.",
     "bedrockModelsDescription": "مدل‌های بستر آمازون بر اساس منطقه AWS تعیین می‌شوند. از /models وارد کنید یا شناسه‌های مدل Bedrock را که در منطقه انتخابی فعال شده است اضافه کنید.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "تنظیمات",
@@ -7702,6 +7702,7 @@
     "configured": "پیکربندی‌شده",
     "none": "هیچ‌کدام",
     "modelOverrideValuePlaceholder": "مقدار عددی",
+    "modelOverrideKey": "کلید بازنویسی",
     "modelOverrideReasoningEffortsPlaceholder": "با ویرگول انگلیسی جدا کنید، مانند low, medium, high",
     "addKeyValue": "افزودن کلید-مقدار",
     "noModelOverrides": "هیچ بازنویسی‌ای برای این مدل پیکربندی نشده است.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "شناسایی‌ها از زمان راه‌اندازی مجدد",
       "statsEmpty": "هنوز موردی شناسایی نشده است.",
       "statsRequest": "درخواست‌ها"
-    },
-    "modelOverrideKey": "کلید بازنویسی"
+    }
   },
   "contextRtk": {
     "title": "موتور RTK",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "تبدیل استریم ناموفق بود"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "میزان استفاده",
     "grokExtraUsageCredits": "اعتبارات اضافی مصرف",
     "grokAutoTopUp": "شارژ خودکار",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "آخرین به‌روزرسانی",
     "providerQuota": "سهمیه ارائه‌دهنده",
     "providerQuotaHomeHint": "وضعیت لحظه‌ای در حساب‌های متصل",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "بازنشانی محدودیت Claude",
     "confirmRedeemClaudeResetCredit": "استفاده از این اعتبار، بلافاصله محدودیت‌های واجد شرایط استفاده از Claude را بازنشانی کرده و این اعتبار را به‌طور دائم مصرف می‌کند.",
     "claudeResetCreditsModalTitle": "اعتبارهای بازنشانی Claude",
@@ -11453,6 +11453,7 @@
     "tableHealth": "سلامت (۲۴ ساعت)",
     "tableUsage": "میزان استفاده",
     "tableActions": "عملیات",
+    "moreActions": "اقدامات بیشتر",
     "test": "آزمایش",
     "edit": "ویرایش",
     "delete": "حذف",
@@ -11610,8 +11611,7 @@
     "notMeasured": "اندازه‌گیری نشده",
     "upstream4xx": "{count} خطای سرویس گیرنده بالادست",
     "upstream5xx": "{count} خطای سرویس دهنده بالادست",
-    "uniformEgressLine": "{affected} از {exits} خروجی به‌طور همزمان در {provider} دچار خطا می‌شوند (در {hours} ساعت گذشته) — مشکل از خروجی نیست",
-    "moreActions": "اقدامات بیشتر"
+    "uniformEgressLine": "{affected} از {exits} خروجی به‌طور همزمان در {provider} دچار خطا می‌شوند (در {hours} ساعت گذشته) — مشکل از خروجی نیست"
   },
   "playground": {
     "title": "محیط آزمایش مدل",
@@ -13858,6 +13858,7 @@
     "latency": "تأخیر",
     "quota": "سهمیه",
     "rangeWindow": "پنجره {range}",
+    "timeRange": "بازه زمانی",
     "runtimeHealthBlend": "ترکیب زمان اجرا/سلامت",
     "averageResponseTime": "میانگین زمان پاسخ",
     "worstQuota": "بدترین سهمیه",
@@ -13912,8 +13913,7 @@
     "unknown": "ناشناخته",
     "unknownProvider": "ارائه‌دهنده ناشناخته",
     "unknownModel": "مدل ناشناخته",
-    "resolvedTargetMetrics": "{requests} درخواست · {success} موفق · {latency} · سهمیه {quota}",
-    "timeRange": "بازه زمانی"
+    "resolvedTargetMetrics": "{requests} درخواست · {success} موفق · {latency} · سهمیه {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "سهمیه مصرف USD",

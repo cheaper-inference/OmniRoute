@@ -25,8 +25,10 @@
     "confirm": "Jsi si jistý/á?",
     "refresh": "Obnovit",
     "close": "Zavřít",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Předchozí stránka",
     "nextPage": "Další stránka",
+    "pagination": "Stránkování",
     "capsLockOn": "Caps Lock je zapnutý",
     "dismissNotification": "Zavřít oznámení",
     "toggleColumns": "Přepnout sloupce",
@@ -182,6 +184,7 @@
     "combos": "Kombinace",
     "noModelsFound": "Nebyly nalezeny žádné modely",
     "clear": "Vymazat",
+    "clearFilters": "Vymazat filtry",
     "done": "Hotovo",
     "selectAll": "Vybrat vše",
     "unselectAll": "Zrušit výběr",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Náhled",
     "batchFilePreviewTruncated": "Zobrazuji prvních {shown} řádků ({total} celkem řádků)",
     "batchFileDownloadFull": "Stáhnout celý soubor",
-    "dialogTitleFallback": "Dialog",
-    "pagination": "Stránkování",
-    "clearFilters": "Vymazat filtry",
     "tokensPageTitle": "Tokeny",
     "tokensPageDescription": "Posílejte tokeny mezi API klíči, sdílejte pozvánkové kódy a připojujte komunitní servery.",
     "tokensServerUrlLabel": "URL serveru"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Rychlá navigace",
     "quickNavigationTitle": "Rychlá navigace (⌘K / Ctrl+K)",
     "openQuickNavigation": "Otevřít rychlou navigaci",
+    "openMenu": "Otevřít nabídku",
+    "products": "Produkty Keak",
     "switchToLightMode": "Přepnout do světlého režimu",
     "switchToDarkMode": "Přepnout do tmavého režimu",
     "language": "Jazyk",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Pokročilá pravidla datové části, limity požadavků a nastavení proxy API",
     "mitmProxyDescription": "Konfigurace nastavení MITM proxy pro kontrolu provozu a ladění",
     "oneProxyDescription": "Konfigurace nastavení 1Proxy pro pokročilé řetězení proxy serverů",
-    "omniSkillsDescription": "Instalujte a spravujte dovednosti sandboxu pro automatizované spouštění promptů a nástrojů",
-    "openMenu": "Otevřít nabídku",
-    "products": "Produkty Keak"
+    "omniSkillsDescription": "Instalujte a spravujte dovednosti sandboxu pro automatizované spouštění promptů a nástrojů"
   },
   "cloudSyncStatus": {
     "synced": "Synchronizováno",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Kombinace → {name}"
   },
   "combos": {
+    "title": "Komba",
+    "description": "Vytvářejte kombinace modelů s váženým směrováním a podporou záloh",
+    "autoCatalogTitle": "Katalog automatického směrování",
     "autoTosLoadError": "Zásady podmínek služby se nepodařilo načíst. Před změnou to zkuste znovu.",
     "autoTosSaveError": "Zásady podmínek služby se nepodařilo uložit. Stále se zobrazuje předchozí nastavení. Zkuste to znovu.",
     "autoTosIncludeLabel": "Zahrnout do auto poskytovatele označené ToS: avoid",
     "autoTosDescription": "Ve výchozím nastavení vypnuto. Platí pro všechny kombinace auto, nejen pro jeden účet. Připojení poskytovatele tuto možnost nezapne.",
-    "title": "Komba",
-    "description": "Vytvářejte kombinace modelů s váženým směrováním a podporou záloh",
-    "autoCatalogTitle": "Katalog automatického směrování",
     "autoCatalogTemplateCount": "{count} šablon",
     "autoCatalogDescription": "Vestavěná automatická/* komba řešená dynamicky od připojených poskytovatelů. Použijte kterékoli z těchto ID jako pole modelu – není potřeba žádné nastavení.",
     "autoCatalogExpand": "Rozbalte katalog automatického směrování",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Zatím nejsou nakonfigurovány žádné kombinace.",
     "playgroundCreateFirst": "Nejprve nějakou vytvořte",
     "weighted": "Váženo",
+    "weightPercent": "Váha (%)",
     "leastUsed": "Nejméně používané",
     "costOpt": "Optimalizace nákladů",
     "strategyGuideTitle": "Jak tuto strategii používat",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# účet} other {# účtů}}",
     "builderGlobalAdded": "Přidáno",
     "builderGlobalAdd": "Přidat",
+    "clearSearch": "Vymazat hledání",
     "manualModel": "Ruční model",
     "manualModelInvalid": "Zadejte model ve formátu poskytovatel/model.",
     "manualModelUnknownProvider": "Neznámý prefix poskytovatele.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Minimální délka obsahu (znaky)",
     "responseValidationJsonPaths": "Kontroly JSON-path",
     "responseValidationAddCheck": "+ Přidat kontrolu",
+    "responseValidationRemoveCheck": "Odebrat kontrolu",
+    "responseValidationPath": "Cesta JSON",
+    "responseValidationCondition": "Podmínka",
+    "responseValidationValue": "Očekávaná hodnota",
     "agentFeaturesSystemMessageOverride": "Přepsat systémovou zprávu",
     "agentFeaturesSystemMessagePlaceholder": "Jste odborný asistent...",
     "agentFeaturesSystemMessageHint": "Přepsání systémové zprávy pro agenty",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Tím se zachytí aktuálně připojení poskytovatelé/modely, které odpovídají této šabloně, do upravitelné kombinace.",
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
-    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
-    "weightPercent": "Váha (%)",
-    "clearSearch": "Vymazat hledání",
-    "responseValidationRemoveCheck": "Odebrat kontrolu",
-    "responseValidationPath": "Cesta JSON",
-    "responseValidationCondition": "Podmínka",
-    "responseValidationValue": "Očekávaná hodnota"
+    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}"
   },
   "costs": {
     "title": "Náklady",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Popisek formátu API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Kontinentální Čína",
+    "apiRegionHint": "Vyberte oblast koncového bodu používanou pro přístup k API a sledování kvót.",
+    "apiRegionInternational": "Mezinárodní",
+    "apiRegionLabel": "Oblast API",
     "apikey": "Klíč API",
     "audio": "Zvuk",
     "audioProvidersHeading": "Nadpis poskytovatelů zvuku",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Když tento účet dosáhne svého 5hodinového limitu využití a Anthropic nabídne dráhu s nižší prioritou, OmniRoute ji přijme a bude i nadále odesílat požadavky s anthropic-usage-limit: slow, dokud se okno neobnoví, místo aby spojení ochlazoval. Týdenní limit stále platí a odpovědi mohou čekat na volnou kapacitu.",
     "claudeAutoLimitResetLabel": "Automaticky resetovat limit relace (jednou týdně)",
     "claudeAutoLimitResetDescription": "Když tento účet dosáhne svého 5hodinového limitu využití a je k dispozici reset limitu relace, OmniRoute ho automaticky uplatní a opakuje pokusy plnou rychlostí. Využívá reset účtu dostupný jednou týdně a stále se započítává do týdenního limitu.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Přeskočit přechodný cooldown, aby toto připojení zůstalo způsobilé i po obnovitelných chybách (konečné stavy jako zablokováno/vypršelo stále platí).",
     "disableCoolingLabel": "Zakázat cooldown pro toto připojení",
     "bulkPasteAdded": "{count, plural, one {Přidán 1 klíč} few {Přidány # klíče} other {Přidáno # klíčů}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Získejte API klíč na monsterapi.ai",
       "moonshot": "Připojte Moonshot AI pomocí API klíče.",
       "morph": "Bezplatná úroveň: 250 tisíc kreditů/měsíc, 0 $",
+      "apmix": "Připojte Apmix pomocí API klíče z apmix.ai/dashboard — jedno předplatné, mnoho modelů.",
       "nanogpt": "Připojte NanoGPT pomocí API klíče.",
       "nebius": "~1 $ zkušební kredit při registraci pro testování API",
       "nlpcloud": "NLP Cloud používá proprietární API pro chatboty namísto OpenAI chat/completions. OmniRoute přizpůsobuje zprávy OpenAI vstupu/kontextu/historii a zpřístupňuje lokální katalog podporovaných modelů chatbotů.",
@@ -6634,8 +6642,7 @@
       "kiro": "Bezplatná úroveň: 50 kreditů/měsíc (~25–100 tis. tokenů). ⚠️ Podmínky používání Kiro zakazují používání proxy serverů či testovacích rozhraní třetích stran.",
       "codex": "Připojit OpenAI Codex pomocí stávajícího toku OAuth.",
       "qwen": "Připojit Qwen Code pomocí stávajícího toku OAuth.",
-      "github-models": "Vytvořte GitHub PAT s rozsahem 'models: read' na github.com/settings/tokens",
-      "apmix": "Připojte Apmix pomocí API klíče z apmix.ai/dashboard — jedno předplatné, mnoho modelů."
+      "github-models": "Vytvořte GitHub PAT s rozsahem 'models: read' na github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} přijímá ID modelu nativního poskytovatele. Importujte z /models nebo přidejte vlastní ID pro směrování.",
     "bedrockModelsDescription": "Modely Amazon Bedrock jsou vymezeny podle regionu AWS. Importujte z /models nebo přidejte ID modelu Bedrock povolené ve vybrané oblasti.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Nastavení",
@@ -7702,6 +7702,7 @@
     "configured": "nakonfigurováno",
     "none": "Žádné",
     "modelOverrideValuePlaceholder": "Číselná hodnota",
+    "modelOverrideKey": "Klíč přepsání",
     "modelOverrideReasoningEffortsPlaceholder": "Anglické hodnoty oddělené čárkami, např. low, medium, high",
     "addKeyValue": "Přidat klíč-hodnotu",
     "noModelOverrides": "Pro tento model nejsou nakonfigurována žádná přepsání.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Detekce od restartu",
       "statsEmpty": "Zatím žádné detekce.",
       "statsRequest": "Požadavky"
-    },
-    "modelOverrideKey": "Klíč přepsání"
+    }
   },
   "contextRtk": {
     "title": "Modul RTK",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Transformace streamu se nezdařila"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Použití",
     "grokExtraUsageCredits": "Další kredit na použití",
     "grokAutoTopUp": "Automatické dobíjení",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Naposledy aktualizováno",
     "providerQuota": "Kvóta poskytovatele",
     "providerQuotaHomeHint": "Aktuální stav napříč připojenými účty",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Reset limitu Claude",
     "confirmRedeemClaudeResetCredit": "Uplatnění okamžitě resetuje příslušné limity využití Claude a trvale spotřebuje tento kredit.",
     "claudeResetCreditsModalTitle": "Kredity na reset Claude",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Další akce",
     "test": "Otestovat",
     "edit": "Upravit",
     "delete": "Odstranit",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Neměřeno",
     "upstream4xx": "{count} chyby klienta ve výstupním směru",
     "upstream5xx": "{count} chyby serveru ve výstupním směru",
-    "uniformEgressLine": "{affected} z {exits} výstupů selhávají společně na {provider} (posledních {hours}h) — nejedná se o problém výstupu",
-    "moreActions": "Další akce"
+    "uniformEgressLine": "{affected} z {exits} výstupů selhávají společně na {provider} (posledních {hours}h) — nejedná se o problém výstupu"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Latence",
     "quota": "Kvóta",
     "rangeWindow": "Okno {range}",
+    "timeRange": "Časové období",
     "runtimeHealthBlend": "kombinace runtime/stavu",
     "averageResponseTime": "průměrná doba odezvy",
     "worstQuota": "Nejhorší kvóta",
@@ -13912,8 +13913,7 @@
     "unknown": "neznámý",
     "unknownProvider": "neznámý poskytovatel",
     "unknownModel": "neznámý model",
-    "resolvedTargetMetrics": "{requests} pož. · {success} úspěchů · {latency} · kvóta {quota}",
-    "timeRange": "Časové období"
+    "resolvedTargetMetrics": "{requests} pož. · {success} úspěchů · {latency} · kvóta {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Kvóta využití v USD",

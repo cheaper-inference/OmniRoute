@@ -25,8 +25,10 @@
     "confirm": "Adakah anda pasti?",
     "refresh": "Segarkan semula",
     "close": "tutup",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Halaman sebelumnya",
     "nextPage": "Halaman seterusnya",
+    "pagination": "Penomboran halaman",
     "capsLockOn": "Caps Lock dihidupkan",
     "dismissNotification": "Ketepikan pemberitahuan",
     "toggleColumns": "Togol lajur",
@@ -182,6 +184,7 @@
     "combos": "Gabungan",
     "noModelsFound": "Tiada model ditemui",
     "clear": "Kosongkan",
+    "clearFilters": "Kosongkan penapis",
     "done": "Selesai",
     "selectAll": "Pilih semua",
     "unselectAll": "Batal pilih semua",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Pratonton",
     "batchFilePreviewTruncated": "Menunjukkan {shown} baris pertama ({total} jumlah baris)",
     "batchFileDownloadFull": "Muat Turun Fail Penuh",
-    "dialogTitleFallback": "Dialog",
-    "pagination": "Penomboran halaman",
-    "clearFilters": "Kosongkan penapis",
     "tokensPageTitle": "Token",
     "tokensPageDescription": "Hantar token antara kunci API, kongsi kod jemputan dan sambungkan pelayan komuniti.",
     "tokensServerUrlLabel": "URL pelayan"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Navigasi pantas",
     "quickNavigationTitle": "Navigasi pantas (⌘K / Ctrl+K)",
     "openQuickNavigation": "Buka navigasi pantas",
+    "openMenu": "Buka menu",
+    "products": "Produk Keak",
     "switchToLightMode": "Tukar ke mod cerah",
     "switchToDarkMode": "Tukar ke mod gelap",
     "language": "Bahasa",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Peraturan muatan lanjutan, had permintaan, dan tetapan API proksi",
     "mitmProxyDescription": "Konfigurasikan tetapan proksi MITM untuk pemeriksaan trafik dan penyahpepijatan",
     "oneProxyDescription": "Konfigurasikan tetapan 1Proxy untuk perangkaian proksi lanjutan",
-    "omniSkillsDescription": "Pasang dan urus kemahiran kotak pasir untuk pelaksanaan gesaan dan alat automatik",
-    "openMenu": "Buka menu",
-    "products": "Produk Keak"
+    "omniSkillsDescription": "Pasang dan urus kemahiran kotak pasir untuk pelaksanaan gesaan dan alat automatik"
   },
   "cloudSyncStatus": {
     "synced": "Disegerakkan",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Kombo → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Sertakan penyedia bertanda ToS: avoid dalam auto",
-    "autoTosDescription": "Dimatikan secara lalai. Terpakai kepada semua kombo auto, bukan hanya satu akaun. Menyambungkan penyedia tidak menghidupkan pilihan ini.",
-    "autoTosSaveError": "Dasar ToS tidak dapat disimpan. Tetapan sebelumnya masih dipaparkan. Cuba lagi.",
-    "autoTosLoadError": "Dasar ToS tidak dapat dimuatkan. Cuba lagi sebelum mengubahnya.",
     "title": "Kombo",
     "description": "Cipta gabungan model dengan penghalaan berwajaran dan sokongan sandaran",
     "autoCatalogTitle": "Katalog penghalaan automatik",
+    "autoTosLoadError": "Dasar ToS tidak dapat dimuatkan. Cuba lagi sebelum mengubahnya.",
+    "autoTosSaveError": "Dasar ToS tidak dapat disimpan. Tetapan sebelumnya masih dipaparkan. Cuba lagi.",
+    "autoTosIncludeLabel": "Sertakan penyedia bertanda ToS: avoid dalam auto",
+    "autoTosDescription": "Dimatikan secara lalai. Terpakai kepada semua kombo auto, bukan hanya satu akaun. Menyambungkan penyedia tidak menghidupkan pilihan ini.",
     "autoCatalogTemplateCount": "{count} templat",
     "autoCatalogDescription": "Gabungan auto/* terbina dalam diselesaikan secara dinamik daripada pembekal yang disambungkan. Gunakan mana-mana ID ini sebagai medan model — tiada persediaan diperlukan.",
     "autoCatalogExpand": "Kembangkan katalog penghalaan automatik",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Tiada kombo dikonfigurasikan lagi.",
     "playgroundCreateFirst": "Cipta satu terlebih dahulu",
     "weighted": "Ditimbang",
+    "weightPercent": "Wajaran (%)",
     "leastUsed": "Paling Kurang Digunakan",
     "costOpt": "Kos-Opt",
     "strategyGuideTitle": "Cara menggunakan strategi ini",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# akaun} other {# akaun}}",
     "builderGlobalAdded": "Ditambah",
     "builderGlobalAdd": "Tambah",
+    "clearSearch": "Kosongkan carian",
     "manualModel": "Model manual",
     "manualModelInvalid": "Masukkan model sebagai penyedia/model.",
     "manualModelUnknownProvider": "Awalan penyedia tidak diketahui.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Panjang kandungan minimum (aksara)",
     "responseValidationJsonPaths": "Pemeriksaan JSON-path",
     "responseValidationAddCheck": "+ Tambah pemeriksaan",
+    "responseValidationRemoveCheck": "Alih keluar semakan",
+    "responseValidationPath": "Laluan JSON",
+    "responseValidationCondition": "Syarat",
+    "responseValidationValue": "Nilai yang dijangkakan",
     "agentFeaturesSystemMessageOverride": "Gantikan mesej sistem",
     "agentFeaturesSystemMessagePlaceholder": "Anda seorang pembantu pakar...",
     "agentFeaturesSystemMessageHint": "Pembatalan mesej sistem untuk ejen",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Ini akan mengambil snapshot penyedia/model yang disambungkan semasa yang sepadan dengan templat ini ke dalam kombo yang boleh diedit.",
     "duplicateAutoComboFailedPrefix": "Gagal menduplikasi kombo automatik:",
     "duplicateAutoComboUnknownError": "Ralat tidak diketahui",
-    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}",
-    "weightPercent": "Wajaran (%)",
-    "clearSearch": "Kosongkan carian",
-    "responseValidationRemoveCheck": "Alih keluar semakan",
-    "responseValidationPath": "Laluan JSON",
-    "responseValidationCondition": "Syarat",
-    "responseValidationValue": "Nilai yang dijangkakan"
+    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}"
   },
   "costs": {
     "title": "Kos",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Label Format API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Tanah Besar China",
+    "apiRegionHint": "Pilih wilayah titik akhir yang digunakan untuk akses API dan penjejakan kuota.",
+    "apiRegionInternational": "Antarabangsa",
+    "apiRegionLabel": "Wilayah API",
     "apikey": "Kunci API",
     "audio": "Audio",
     "audioProvidersHeading": "Tajuk Penyedia Audio",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Apabila akaun ini mencapai had penggunaan 5 jam dan Anthropic menawarkan laluan keutamaan lebih rendah, OmniRoute menerimanya dan terus menghantar permintaan dengan anthropic-usage-limit: slow sehingga tetingkap ditetapkan semula, dan bukannya menyejukkan sambungan. Had mingguan masih terpakai dan respons mungkin perlu menunggu kapasiti yang tersedia.",
     "claudeAutoLimitResetLabel": "Tetapkan semula had sesi secara automatik (sekali seminggu)",
     "claudeAutoLimitResetDescription": "Apabila akaun ini mencapai had penggunaan 5 jam dan penetapan semula had sesi tersedia, OmniRoute menggunakannya secara automatik dan mencuba semula pada kelajuan penuh. Ini menggunakan penetapan semula sekali seminggu bagi akaun tersebut dan masih dikira dalam had mingguan.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Langkau tempoh bertenang sementara supaya sambungan ini kekal layak walaupun selepas ralat yang boleh dipulihkan (keadaan terminal seperti disekat/tamat tempoh masih terpakai).",
     "disableCoolingLabel": "Nyahdayakan tempoh bertenang untuk sambungan ini",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambah} other {# kunci ditambah}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Dapatkan kunci API di monsterapi.ai",
       "moonshot": "Sambungkan Moonshot AI dengan kunci API.",
       "morph": "Peringkat percuma: 250K kredit/bulan, $0",
+      "apmix": "Sambungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model.",
       "nanogpt": "Sambungkan NanoGPT dengan kunci API.",
       "nebius": "Kredit percubaan ~$1 semasa pendaftaran untuk ujian API",
       "nlpcloud": "NLP Cloud menggunakan API bot sembang proprietari dan bukannya OpenAI chat/completions. OmniRoute menyesuaikan mesej OpenAI kepada input/context/history dan mendedahkan katalog tempatan bagi model bot sembang yang disokong.",
@@ -6634,8 +6642,7 @@
       "kiro": "Peringkat percuma: 50 kredit/bulan (~25K–100K token). ⚠️ ToS Kiro melarang penggunaan proksi/harness pihak ketiga.",
       "codex": "Sambungkan OpenAI Codex dengan aliran OAuth sedia ada.",
       "qwen": "Sambungkan Qwen Code dengan aliran OAuth sedia ada.",
-      "github-models": "Cipta PAT GitHub dengan skop 'models: read' di github.com/settings/tokens",
-      "apmix": "Sambungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model."
+      "github-models": "Cipta PAT GitHub dengan skop 'models: read' di github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} menerima ID model asli pembekal. Import daripada /models atau tambahkan ID tersuai untuk penghalaan.",
     "bedrockModelsDescription": "Model Amazon Bedrock diliputi oleh rantau AWS. Import daripada /models atau tambah ID model Bedrock yang didayakan di rantau yang dipilih.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "tetapan",
@@ -7702,6 +7702,7 @@
     "configured": "dikonfigurasikan",
     "none": "Tiada",
     "modelOverrideValuePlaceholder": "Nilai angka",
+    "modelOverrideKey": "Kunci penggantian",
     "modelOverrideReasoningEffortsPlaceholder": "Dipisahkan dengan koma Inggeris, cth. low, medium, high",
     "addKeyValue": "Tambah nilai kunci",
     "noModelOverrides": "Tiada pintasan dikonfigurasikan untuk model ini.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Pengesanan sejak dimulakan semula",
       "statsEmpty": "Belum ada pengesanan.",
       "statsRequest": "Permintaan"
-    },
-    "modelOverrideKey": "Kunci penggantian"
+    }
   },
   "contextRtk": {
     "title": "Enjin RTK",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Gagal mengubah strim"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Penggunaan",
     "grokExtraUsageCredits": "Kredit Penggunaan Tambahan",
     "grokAutoTopUp": "Pengisian Automatik",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Terakhir disegarkan",
     "providerQuota": "Kuota Penyedia",
     "providerQuotaHomeHint": "Status langsung merentas akaun yang disambungkan",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Tetapan semula had Claude",
     "confirmRedeemClaudeResetCredit": "Penebusan akan menetapkan semula had penggunaan Claude yang layak dengan serta-merta dan menggunakan kredit ini secara kekal.",
     "claudeResetCreditsModalTitle": "Kredit tetapan semula Claude",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Tindakan lanjut",
     "test": "Uji",
     "edit": "Sunting",
     "delete": "Padam",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Belum diukur",
     "upstream4xx": "{count} kesalahan klien atas aliran",
     "upstream5xx": "{count} kesalahan pelayan atas aliran",
-    "uniformEgressLine": "{affected} daripada {exits} exit gagal serentak pada {provider} ({hours}j terakhir) — bukan masalah exit",
-    "moreActions": "Tindakan lanjut"
+    "uniformEgressLine": "{affected} daripada {exits} exit gagal serentak pada {provider} ({hours}j terakhir) — bukan masalah exit"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Kependaman",
     "quota": "Kuota",
     "rangeWindow": "Tetingkap {range}",
+    "timeRange": "Julat masa",
     "runtimeHealthBlend": "campuran masa jalan/kesihatan",
     "averageResponseTime": "masa tindak balas purata",
     "worstQuota": "Kuota terburuk",
@@ -13912,8 +13913,7 @@
     "unknown": "tidak diketahui",
     "unknownProvider": "penyedia tidak diketahui",
     "unknownModel": "model tidak diketahui",
-    "resolvedTargetMetrics": "{requests} req · {success} berjaya · {latency} · kuota {quota}",
-    "timeRange": "Julat masa"
+    "resolvedTargetMetrics": "{requests} req · {success} berjaya · {latency} · kuota {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Kuota penggunaan USD",

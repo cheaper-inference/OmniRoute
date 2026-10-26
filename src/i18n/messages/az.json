@@ -25,8 +25,10 @@
     "confirm": "Əminsiniz?",
     "refresh": "Yenilə",
     "close": "Bağla",
+    "dialogTitleFallback": "Dialoq",
     "previousPage": "Əvvəlki səhifə",
     "nextPage": "Növbəti səhifə",
+    "pagination": "Səhifələmə",
     "capsLockOn": "Caps Lock aktivdir",
     "dismissNotification": "Bildirişi rədd et",
     "toggleColumns": "Sütunları dəyişdir",
@@ -182,6 +184,7 @@
     "combos": "Kombinasiyalar",
     "noModelsFound": "Heç bir model tapılmadı",
     "clear": "Təmizlə",
+    "clearFilters": "Filtrləri təmizlə",
     "done": "Hazır",
     "selectAll": "Hamısını seç",
     "unselectAll": "Seçimi ləğv et",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Önizləmə",
     "batchFilePreviewTruncated": "İlk {shown} sətir göstərilir ({total} cəmi sətir)",
     "batchFileDownloadFull": "Tam Faylı Yüklə",
-    "dialogTitleFallback": "Dialoq",
-    "pagination": "Səhifələmə",
-    "clearFilters": "Filtrləri təmizlə",
     "tokensPageTitle": "Tokenlər",
     "tokensPageDescription": "API açarları arasında tokenlər göndərin, dəvət kodlarını paylaşın və icma serverlərini qoşun.",
     "tokensServerUrlLabel": "Server URL-i"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Sürətli naviqasiya",
     "quickNavigationTitle": "Sürətli naviqasiya (⌘K / Ctrl+K)",
     "openQuickNavigation": "Sürətli naviqasiyanı açın",
+    "openMenu": "Menyunu aç",
+    "products": "Keak məhsulları",
     "switchToLightMode": "Açıq rejimə keçin",
     "switchToDarkMode": "Tünd rejimə keçin",
     "language": "Dil",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Qabaqcıl yük qaydaları, sorğu limitləri və proxy API parametrləri",
     "mitmProxyDescription": "Trafikin yoxlanılması və sazlanması üçün MITM proksi parametrlərini konfiqurasiya edin",
     "oneProxyDescription": "Təkmil proxy zəncirləmə üçün 1Proxy parametrlərini konfiqurasiya edin",
-    "omniSkillsDescription": "Avtomatlaşdırılmış sorğu və alət icrası üçün sandbox bacarıqlarını quraşdırın və idarə edin",
-    "openMenu": "Menyunu aç",
-    "products": "Keak məhsulları"
+    "omniSkillsDescription": "Avtomatlaşdırılmış sorğu və alət icrası üçün sandbox bacarıqlarını quraşdırın və idarə edin"
   },
   "cloudSyncStatus": {
     "synced": "Sinxronlaşdırıldı",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Kombo → {name}"
   },
   "combos": {
+    "title": "Kombinasiyalar",
+    "description": "Çəkili yönləndirmə və ehtiyat keçid dəstəyi ilə model kombinasiyaları yaradın",
+    "autoCatalogTitle": "Avtomatik marşrutlaşdırma kataloqu",
     "autoTosLoadError": "Xidmət şərtləri siyasətini yükləmək mümkün olmadı. Dəyişməzdən əvvəl yenidən cəhd edin.",
     "autoTosSaveError": "Xidmət şərtləri siyasətini saxlamaq mümkün olmadı. Əvvəlki parametr hələ də göstərilir. Yenidən cəhd edin.",
     "autoTosIncludeLabel": "ToS: avoid kimi işarələnmiş provayderləri auto-ya daxil et",
     "autoTosDescription": "Standart olaraq söndürülüb. Tək hesaba deyil, bütün auto kombinasiyalarına aiddir. Provayderi qoşmaq bu seçimi aktivləşdirmir.",
-    "title": "Kombinasiyalar",
-    "description": "Çəkili yönləndirmə və ehtiyat keçid dəstəyi ilə model kombinasiyaları yaradın",
-    "autoCatalogTitle": "Avtomatik marşrutlaşdırma kataloqu",
     "autoCatalogTemplateCount": "{count} şablonları",
     "autoCatalogDescription": "Daxili avtomatik/* kombinasiyaları əlaqəli provayderlərdən dinamik şəkildə həll edilir. Model sahəsi kimi bu identifikatorlardan hər hansı birini istifadə edin – quraşdırmaya ehtiyac yoxdur.",
     "autoCatalogExpand": "Avtomatik marşrutlaşdırma kataloqunu genişləndirin",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Hələ heç bir kombo konfiqurasiya edilməyib.",
     "playgroundCreateFirst": "Əvvəlcə birini yaradın",
     "weighted": "Çəkili",
+    "weightPercent": "Çəki (%)",
     "leastUsed": "Ən az istifadə olunan",
     "costOpt": "Xərc optimallaşdırması",
     "strategyGuideTitle": "Bu strategiyadan necə istifadə etməli",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# hesab} other {# hesablar}}",
     "builderGlobalAdded": "Əlavə edildi",
     "builderGlobalAdd": "Əlavə et",
+    "clearSearch": "Axtarışı təmizlə",
     "manualModel": "Mexniki model",
     "manualModelInvalid": "Modeli provayder/model kimi daxil edin.",
     "manualModelUnknownProvider": "Naməlum provayder prefiksi.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Minimum məzmun uzunluğu (simvol)",
     "responseValidationJsonPaths": "JSON-path yoxlamaları",
     "responseValidationAddCheck": "+ Yoxlama əlavə et",
+    "responseValidationRemoveCheck": "Yoxlamanı sil",
+    "responseValidationPath": "JSON yolu",
+    "responseValidationCondition": "Şərt",
+    "responseValidationValue": "Gözlənilən dəyər",
     "agentFeaturesSystemMessageOverride": "Sistem mesajını əvəz et",
     "agentFeaturesSystemMessagePlaceholder": "Siz ekspert köməkçisiniz...",
     "agentFeaturesSystemMessageHint": "Agentlər üçün sistem mesajının əvəzlənməsi",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uyğun olan hazırkı qoşulmuş provayderləri/modeləri redaktə oluna bilən kombo kimi saxlayacaq.",
     "duplicateAutoComboFailedPrefix": "Avtokombo kopyalanması uğursuz oldu:",
     "duplicateAutoComboUnknownError": "Naməlum xəta",
-    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat",
-    "weightPercent": "Çəki (%)",
-    "clearSearch": "Axtarışı təmizlə",
-    "responseValidationRemoveCheck": "Yoxlamanı sil",
-    "responseValidationPath": "JSON yolu",
-    "responseValidationCondition": "Şərt",
-    "responseValidationValue": "Gözlənilən dəyər"
+    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat"
   },
   "costs": {
     "title": "Xərclər",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API formatı etiketi",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Materik Çin",
+    "apiRegionHint": "API girişi və kvota izlənməsi üçün istifadə olunan endpoint regionunu seçin.",
+    "apiRegionInternational": "Beynəlxalq",
+    "apiRegionLabel": "API regionu",
     "apikey": "API açarı",
     "audio": "Audio",
     "audioProvidersHeading": "Audio provayderləri başlığı",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Bu hesab 5 saatlıq istifadə limitinə çatdıqda və Anthropic aşağı prioritetli zolağı təklif etdikdə, OmniRoute bunu qəbul edir və bağlantını soyutmaq əvəzinə, pəncərə sıfırlanana qədər sorğuları anthropic-usage-limit: slow ilə göndərməyə davam edir. Həftəlik limit yenə də tətbiq olunur və cavablar ehtiyat tutum gözləyə bilər.",
     "claudeAutoLimitResetLabel": "Sessiya limitini avtomatik sıfırla (həftədə bir dəfə)",
     "claudeAutoLimitResetDescription": "Bu hesab 5 saatlıq istifadə limitinə çatdıqda və sessiya limitinin sıfırlanması mövcud olduqda, OmniRoute ondan avtomatik istifadə edir və tam sürətlə yenidən cəhd edir. Hesabın həftədə bir dəfəlik sıfırlamasından istifadə edir və yenə də həftəlik limitə daxil olur.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Müvəqqəti soyuma müddətini atlayın ki, bu bağlantı bərpa edilə bilən xətalardan sonra belə uyğun qalsın (bloklanmış/vaxtı keçmiş kimi terminal vəziyyətlər hələ də tətbiq olunur).",
     "disableCoolingLabel": "Bu bağlantı üçün soyuma müddətini söndürün",
     "bulkPasteAdded": "{count, plural, one {1 açar əlavə edildi} other {# açar əlavə edildi}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "API açarını monsterapi.ai ünvanından əldə edin",
       "moonshot": "Moonshot AI-ı API açarı ilə qoşun.",
       "morph": "Pulsuz səviyyə: 250K kredit/ay, $0",
+      "apmix": "Apmix-i apmix.ai/dashboard-da olan API açarı ilə qoş — bir abunəlik, çox model.",
       "nanogpt": "NanoGPT-ni API açarı ilə qoşun.",
       "nebius": "API testi üçün qeydiyyatdan keçdikdə ~$1 sınaq krediti",
       "nlpcloud": "NLP Cloud, OpenAI chat/completions əvəzinə xüsusi chatbot API-sindən istifadə edir. OmniRoute OpenAI mesajlarını giriş/kontekst/tarixçəyə uyğunlaşdırır və dəstəklənən chatbot modellərinin yerli kataloqunu təqdim edir.",
@@ -6634,8 +6642,7 @@
       "kiro": "Pulsuz səviyyə: ayda 50 kredit (~25K–100K token). ⚠️ Kiro istifadə şərtləri üçüncü tərəf proksi və ya harness istifadəsini qadağan edir.",
       "codex": "OpenAI Codex-i mövcud OAuth axını ilə qoşun.",
       "qwen": "Qwen Code-u mövcud OAuth axını ilə qoşun.",
-      "github-models": "github.com/settings/tokens ünvanında 'models: read' əhatə dairəsi ilə GitHub PAT yaradın",
-      "apmix": "Apmix-i apmix.ai/dashboard-da olan API açarı ilə qoş — bir abunəlik, çox model."
+      "github-models": "github.com/settings/tokens ünvanında 'models: read' əhatə dairəsi ilə GitHub PAT yaradın"
     },
     "passthroughModelsDescription": "{provider} provayderin yerli model identifikatorlarını qəbul edir. /modellərdən idxal edin və ya marşrutlaşdırma üçün fərdi identifikatorlar əlavə edin.",
     "bedrockModelsDescription": "Amazon Bedrock modelləri AWS bölgəsi tərəfindən əhatə olunur. /modellərdən idxal edin və ya seçilmiş regionda aktivləşdirilmiş Bedrock model ID-lərini əlavə edin.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Parametrlər",
@@ -7702,6 +7702,7 @@
     "configured": "konfiqurasiya edilib",
     "none": "Heç biri",
     "modelOverrideValuePlaceholder": "Ədədi dəyər",
+    "modelOverrideKey": "Əvəzləmə açarı",
     "modelOverrideReasoningEffortsPlaceholder": "İngilis dilində vergüllə ayrılmış, məsələn, low, medium, high",
     "addKeyValue": "Açar-dəyər əlavə et",
     "noModelOverrides": "Bu model üçün heç bir yenidən təyinetmə konfiqurasiya edilməyib.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Yenidən başladılandan bəri aşkarlamalar",
       "statsEmpty": "Hələ aşkarlama yoxdur.",
       "statsRequest": "Sorğular"
-    },
-    "modelOverrideKey": "Əvəzləmə açarı"
+    }
   },
   "contextRtk": {
     "title": "RTK Mühərriki",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Axını çevirmək mümkün olmadı"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "İstifadə",
     "grokExtraUsageCredits": "Əlavə İstifadə Krediti",
     "grokAutoTopUp": "Avtomatik Yükləmə",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Sonuncu dəfə yenilənib",
     "providerQuota": "Provayder kvotası",
     "providerQuotaHomeHint": "Qoşulmuş hesablar üzrə canlı status",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Claude limitinin sıfırlanması",
     "confirmRedeemClaudeResetCredit": "İstifadə edilməsi uyğun Claude istifadə limitlərini dərhal sıfırlayır və bu krediti həmişəlik sərf edir.",
     "claudeResetCreditsModalTitle": "Claude sıfırlama kreditləri",
@@ -11453,6 +11453,7 @@
     "tableHealth": "İşlək vəziyyət (24 saat)",
     "tableUsage": "İstifadə",
     "tableActions": "Əməliyyatlar",
+    "moreActions": "Əlavə əməliyyatlar",
     "test": "Sınaqdan keçir",
     "edit": "Redaktə et",
     "delete": "Sil",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Ölçülməyib",
     "upstream4xx": "{count} yuxarı axın müştəri səhvləri",
     "upstream5xx": "{count} yuxarı axın server səhvləri",
-    "uniformEgressLine": "{affected} of {exits} çıxışları {provider} üzərində eyni anda uğursuz oldu (son {hours} saat) — çıxış problemi deyil",
-    "moreActions": "Əlavə əməliyyatlar"
+    "uniformEgressLine": "{affected} of {exits} çıxışları {provider} üzərində eyni anda uğursuz oldu (son {hours} saat) — çıxış problemi deyil"
   },
   "playground": {
     "title": "Model sınaq meydanı",
@@ -13858,6 +13858,7 @@
     "latency": "Gecikmə",
     "quota": "Kvota",
     "rangeWindow": "{range} pəncərəsi",
+    "timeRange": "Vaxt aralığı",
     "runtimeHealthBlend": "icra vaxtı/sağlamlıq qarışığı",
     "averageResponseTime": "orta cavab vaxtı",
     "worstQuota": "Ən pis kvota",
@@ -13912,8 +13913,7 @@
     "unknown": "naməlum",
     "unknownProvider": "naməlum provayder",
     "unknownModel": "naməlum model",
-    "resolvedTargetMetrics": "{requests} sorğu · {success} uğurlu · {latency} · kvota {quota}",
-    "timeRange": "Vaxt aralığı"
+    "resolvedTargetMetrics": "{requests} sorğu · {success} uğurlu · {latency} · kvota {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD istifadə kvotası",

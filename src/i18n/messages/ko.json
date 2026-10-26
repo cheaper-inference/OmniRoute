@@ -25,8 +25,10 @@
     "confirm": "확실합니까?",
     "refresh": "새로고침",
     "close": "닫기",
+    "dialogTitleFallback": "대화 상자",
     "previousPage": "이전 페이지",
     "nextPage": "다음 페이지",
+    "pagination": "페이지네이션",
     "capsLockOn": "Caps Lock이 켜져 있습니다",
     "dismissNotification": "알림 닫기",
     "toggleColumns": "열 토글",
@@ -182,6 +184,7 @@
     "combos": "콤보",
     "noModelsFound": "모델을 찾을 수 없습니다",
     "clear": "지우기",
+    "clearFilters": "필터 지우기",
     "done": "완료",
     "selectAll": "모두 선택",
     "unselectAll": "선택 해제",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "미리보기",
     "batchFilePreviewTruncated": "첫 번째 {shown} 줄 표시 ({total} 총 줄)",
     "batchFileDownloadFull": "전체 파일 다운로드",
-    "dialogTitleFallback": "대화 상자",
-    "pagination": "페이지네이션",
-    "clearFilters": "필터 지우기",
     "tokensPageTitle": "토큰",
     "tokensPageDescription": "API 키 간에 토큰을 전송하고, 초대 코드를 공유하고, 커뮤니티 서버를 연결하세요.",
     "tokensServerUrlLabel": "서버 URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "빠른 탐색",
     "quickNavigationTitle": "빠른 탐색 (⌘K / Ctrl+K)",
     "openQuickNavigation": "빠른 탐색 열기",
+    "openMenu": "메뉴 열기",
+    "products": "Keak 제품",
     "switchToLightMode": "라이트 모드로 전환",
     "switchToDarkMode": "다크 모드로 전환",
     "language": "언어",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "고급 페이로드 규칙, 요청 제한 및 프록시 API 설정",
     "mitmProxyDescription": "트래픽 검사 및 디버깅을 위한 MITM 프록시 설정을 구성합니다",
     "oneProxyDescription": "고급 프록시 체이닝을 위한 1Proxy 설정을 구성합니다",
-    "omniSkillsDescription": "자동화된 프롬프트 및 도구 실행을 위한 샌드박스 스킬 설치 및 관리",
-    "openMenu": "메뉴 열기",
-    "products": "Keak 제품"
+    "omniSkillsDescription": "자동화된 프롬프트 및 도구 실행을 위한 샌드박스 스킬 설치 및 관리"
   },
   "cloudSyncStatus": {
     "synced": "동기화됨",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "조합 → {name}"
   },
   "combos": {
+    "title": "콤보",
+    "description": "가중치 기반 라우팅 및 폴백 지원을 통해 모델 콤보 생성",
+    "autoCatalogTitle": "자동 라우팅 카탈로그",
     "autoTosLoadError": "서비스 약관 정책을 불러오지 못했습니다. 변경하기 전에 다시 시도하세요.",
     "autoTosSaveError": "서비스 약관 정책을 저장하지 못했습니다. 이전 설정이 계속 표시됩니다. 다시 시도하세요.",
     "autoTosIncludeLabel": "ToS: avoid로 표시된 제공자를 auto에 포함",
     "autoTosDescription": "기본적으로 꺼져 있습니다. 한 계정뿐 아니라 모든 auto 콤보에 적용됩니다. 제공자를 연결해도 이 옵션은 활성화되지 않습니다.",
-    "title": "콤보",
-    "description": "가중치 기반 라우팅 및 폴백 지원을 통해 모델 콤보 생성",
-    "autoCatalogTitle": "자동 라우팅 카탈로그",
     "autoCatalogTemplateCount": "{count} 템플릿",
     "autoCatalogDescription": "내장된 auto/* 콤보는 연결된 공급자로부터 동적으로 확인됩니다. 이러한 ID 중 하나를 모델 필드로 사용하세요 — 설정이 필요하지 않습니다.",
     "autoCatalogExpand": "자동 라우팅 카탈로그 확장",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "아직 구성된 콤보가 없습니다.",
     "playgroundCreateFirst": "먼저 하나를 생성하세요",
     "weighted": "가중",
+    "weightPercent": "가중치(%)",
     "leastUsed": "가장 적게 사용됨",
     "costOpt": "비용 최적화",
     "strategyGuideTitle": "이 전략을 사용하는 방법",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# 계정} other {# 계정}}",
     "builderGlobalAdded": "추가됨",
     "builderGlobalAdd": "추가",
+    "clearSearch": "검색어 지우기",
     "manualModel": "수동 모델",
     "manualModelInvalid": "모델을 provider/model 형식으로 입력하세요.",
     "manualModelUnknownProvider": "알 수 없는 제공업체 접두사입니다.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "최소 콘텐츠 길이 (자수)",
     "responseValidationJsonPaths": "JSON-path 검사",
     "responseValidationAddCheck": "+ 검사 추가",
+    "responseValidationRemoveCheck": "검사 제거",
+    "responseValidationPath": "JSON 경로",
+    "responseValidationCondition": "조건",
+    "responseValidationValue": "예상 값",
     "agentFeaturesSystemMessageOverride": "시스템 메시지 재정의",
     "agentFeaturesSystemMessagePlaceholder": "당신은 전문 조수입니다 ...",
     "agentFeaturesSystemMessageHint": "에이전트에 대한 시스템 메시지 재정의",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "이 템플릿과 일치하는 현재 연결된 제공자/모델을 편집 가능한 콤보로 스냅샷합니다.",
     "duplicateAutoComboFailedPrefix": "자동 콤보 복제 실패:",
     "duplicateAutoComboUnknownError": "알 수 없는 오류",
-    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기",
-    "weightPercent": "가중치(%)",
-    "clearSearch": "검색어 지우기",
-    "responseValidationRemoveCheck": "검사 제거",
-    "responseValidationPath": "JSON 경로",
-    "responseValidationCondition": "조건",
-    "responseValidationValue": "예상 값"
+    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기"
   },
   "costs": {
     "title": "비용",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API 형식 레이블",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "중국 본토",
+    "apiRegionHint": "API 액세스 및 할당량 추적에 사용할 엔드포인트 리전을 선택하세요.",
+    "apiRegionInternational": "해외",
+    "apiRegionLabel": "API 리전",
     "apikey": "API 키",
     "audio": "오디오",
     "audioProvidersHeading": "오디오 제공업체 제목",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "이 계정이 5시간 사용 한도에 도달하고 Anthropic에서 낮은 우선순위 처리 경로를 제공하면, OmniRoute는 이를 수락하고 연결을 일시 중지하는 대신 사용량 기간이 초기화될 때까지 anthropic-usage-limit: slow을 사용하여 요청을 계속 전송합니다. 주간 한도는 계속 적용되며, 여유 처리 용량이 생길 때까지 응답이 대기할 수 있습니다.",
     "claudeAutoLimitResetLabel": "세션 한도 자동 초기화(주 1회)",
     "claudeAutoLimitResetDescription": "이 계정이 5시간 사용 한도에 도달하고 세션 한도 초기화를 사용할 수 있으면, OmniRoute가 이를 자동으로 적용하고 최대 속도로 다시 시도합니다. 계정의 주 1회 초기화 기회를 사용하며, 사용량은 계속 주간 한도에 포함됩니다.",
+    "codexPaidCreditsShort": "추가 크레딧",
+    "codexPaidCreditsToggleTitle": "구독 할당량을 모두 사용한 후 유료 Codex 크레딧 허용(추가 요금이 부과될 수 있음)",
+    "codexPaidCreditsEnabled": "Codex 유료 크레딧 사용 설정됨(추가 요금이 부과될 수 있음)",
+    "codexPaidCreditsDisabled": "Codex 유료 크레딧 사용 안 함",
+    "failedUpdateCodexPaidCredits": "Codex 유료 크레딧 정책을 업데이트하지 못했습니다",
+    "allowCodexPaidCreditsLabel": "유료 Codex 크레딧 허용",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "일시적인 쿨다운을 건너뛰어 복구 가능한 오류가 발생한 후에도 이 연결이 사용 가능한 상태로 유지되도록 합니다(차단됨/만료됨과 같은 최종 상태는 여전히 적용됨).",
     "disableCoolingLabel": "이 연결에 대한 쿨다운 비활성화",
     "bulkPasteAdded": "{count, plural, one {키 1개 추가됨} other {키 #개 추가됨}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "monsterapi.ai에서 API 키 받기",
       "moonshot": "API 키로 Moonshot AI를 연결합니다.",
       "morph": "무료 티어: 월 250K 크레딧, $0",
+      "apmix": "apmix.ai/dashboard에서 API 키로 Apmix를 연결하세요 — 하나의 구독으로 다양한 모델.",
       "nanogpt": "API 키로 NanoGPT를 연결합니다.",
       "nebius": "API 테스트를 위한 가입 시 약 $1 체험 크레딧 제공",
       "nlpcloud": "NLP Cloud는 OpenAI chat/completions 대신 자체 챗봇 API를 사용합니다. OmniRoute는 OpenAI 메시지를 input/context/history에 맞게 변환하고 지원되는 챗봇 모델의 로컬 카탈로그를 제공합니다.",
@@ -6634,8 +6642,7 @@
       "kiro": "무료 티어: 월 50 크레딧(~25K–100K 토큰). ⚠️ Kiro ToS는 서드파티 프록시/하네스 사용을 금지합니다.",
       "codex": "기존 OAuth 흐름으로 OpenAI Codex를 연결합니다.",
       "qwen": "기존 OAuth 흐름으로 Qwen Code를 연결합니다.",
-      "github-models": "github.com/settings/tokens 에서 'models: read' 범위(scope)를 가진 GitHub PAT를 생성하세요.",
-      "apmix": "apmix.ai/dashboard에서 API 키로 Apmix를 연결하세요 — 하나의 구독으로 다양한 모델."
+      "github-models": "github.com/settings/tokens 에서 'models: read' 범위(scope)를 가진 GitHub PAT를 생성하세요."
     },
     "passthroughModelsDescription": "{provider}은 공급자 기본 모델 ID를 허용합니다. /models에서 가져오거나 라우팅을 위한 사용자 정의 ID를 추가하세요.",
     "bedrockModelsDescription": "Amazon Bedrock 모델은 AWS 지역별로 범위가 지정됩니다. /models에서 가져오거나 선택한 지역에서 활성화된 Bedrock 모델 ID를 추가하세요.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "모델별 동시 실행 상한",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "선택 사항: 한 줄에 model=cap 하나를 입력합니다. 업스트림 모델 ID와 정확히 일치해야 합니다. 초과 요청은 로컬에서 대기하며, 비워 두면 모델별 상한이 없습니다.",
-    "rateLimitOverridesModelConcurrencyInvalid": "모델별 동시 실행 항목 \"{entry}\"이(가) 올바르지 않습니다 — model=cap 형식을 사용하고 cap은 1에서 {max} 사이의 정수여야 합니다.",
-    "codexPaidCreditsShort": "추가 크레딧",
-    "codexPaidCreditsToggleTitle": "구독 할당량을 모두 사용한 후 유료 Codex 크레딧 허용(추가 요금이 부과될 수 있음)",
-    "codexPaidCreditsEnabled": "Codex 유료 크레딧 사용 설정됨(추가 요금이 부과될 수 있음)",
-    "codexPaidCreditsDisabled": "Codex 유료 크레딧 사용 안 함",
-    "failedUpdateCodexPaidCredits": "Codex 유료 크레딧 정책을 업데이트하지 못했습니다",
-    "allowCodexPaidCreditsLabel": "유료 Codex 크레딧 허용",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "모델별 동시 실행 항목 \"{entry}\"이(가) 올바르지 않습니다 — model=cap 형식을 사용하고 cap은 1에서 {max} 사이의 정수여야 합니다."
   },
   "settings": {
     "title": "설정",
@@ -7702,6 +7702,7 @@
     "configured": "구성됨",
     "none": "없음",
     "modelOverrideValuePlaceholder": "숫자 값",
+    "modelOverrideKey": "키 재정의",
     "modelOverrideReasoningEffortsPlaceholder": "영문 쉼표로 구분(예: low, medium, high)",
     "addKeyValue": "키-값 추가",
     "noModelOverrides": "이 모델에 구성된 재정의가 없습니다.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "재시작 이후 감지",
       "statsEmpty": "아직 감지된 항목이 없습니다.",
       "statsRequest": "요청"
-    },
-    "modelOverrideKey": "키 재정의"
+    }
   },
   "contextRtk": {
     "title": "RTK 엔진",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "스트림 변환 실패"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Codex 유료 크레딧",
+    "codexPaidCreditsAvailable": "사용 가능(잔액 미보고)",
+    "codexPaidCreditsUnavailable": "사용 불가 또는 지출 한도 도달",
+    "codexPaidCreditsUnlimited": "무제한",
     "title": "사용량",
     "grokExtraUsageCredits": "추가 사용 크레딧",
     "grokAutoTopUp": "자동 충전",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "마지막 새로고침",
     "providerQuota": "제공자 할당량",
     "providerQuotaHomeHint": "연결된 계정의 실시간 상태",
-    "codexPaidCreditsLabel": "Codex 유료 크레딧",
-    "codexPaidCreditsAvailable": "사용 가능(잔액 미보고)",
-    "codexPaidCreditsUnavailable": "사용 불가 또는 지출 한도 도달",
-    "codexPaidCreditsUnlimited": "무제한",
     "claudeResetCreditDefaultTitle": "Claude 한도 초기화",
     "confirmRedeemClaudeResetCredit": "사용 시 대상 Claude 사용 한도가 즉시 초기화되며 이 크레딧은 영구적으로 소진됩니다.",
     "claudeResetCreditsModalTitle": "Claude 초기화 크레딧",
@@ -11453,6 +11453,7 @@
     "tableHealth": "상태 (24h)",
     "tableUsage": "사용량",
     "tableActions": "작업",
+    "moreActions": "추가 작업",
     "test": "테스트",
     "edit": "편집",
     "delete": "삭제",
@@ -11610,8 +11611,7 @@
     "notMeasured": "측정되지 않음",
     "upstream4xx": "{count} 상류 클라이언트 오류",
     "upstream5xx": "{count}개의 업스트림 서버 오류",
-    "uniformEgressLine": "{provider}에서 {exits}개 exit 중 {affected}개가 함께 실패함 (최근 {hours}시간) — exit 문제가 아님",
-    "moreActions": "추가 작업"
+    "uniformEgressLine": "{provider}에서 {exits}개 exit 중 {affected}개가 함께 실패함 (최근 {hours}시간) — exit 문제가 아님"
   },
   "playground": {
     "title": "모델 플레이그라운드",
@@ -13858,6 +13858,7 @@
     "latency": "지연 시간",
     "quota": "할당량",
     "rangeWindow": "{range} 기간",
+    "timeRange": "기간",
     "runtimeHealthBlend": "런타임/상태 혼합",
     "averageResponseTime": "평균 응답 시간",
     "worstQuota": "가장 부족한 할당량",
@@ -13912,8 +13913,7 @@
     "unknown": "알 수 없음",
     "unknownProvider": "알 수 없는 제공업체",
     "unknownModel": "알 수 없는 모델",
-    "resolvedTargetMetrics": "{requests} 요청 · {success} 성공 · {latency} · 할당량 {quota}",
-    "timeRange": "기간"
+    "resolvedTargetMetrics": "{requests} 요청 · {success} 성공 · {latency} · 할당량 {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD 사용량 할당량",

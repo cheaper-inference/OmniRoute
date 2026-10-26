@@ -25,8 +25,10 @@
     "confirm": "ඔබට විශ්වාසද?",
     "refresh": "යළි පූරණය කරන්න",
     "close": "වසන්න",
+    "dialogTitleFallback": "සංවාද කොටුව",
     "previousPage": "පෙර පිටුව",
     "nextPage": "ඊළඟ පිටුව",
+    "pagination": "පිටුකරණය",
     "capsLockOn": "Caps Lock සක්රියයි",
     "dismissNotification": "දැනුම්දීම ඉවතලන්න",
     "toggleColumns": "තීරු පෙන්වීම මාරු කරන්න",
@@ -182,6 +184,7 @@
     "combos": "සංයෝජන",
     "noModelsFound": "මාදිලි හමු නොවීය",
     "clear": "හිස් කරන්න",
+    "clearFilters": "පෙරහන් ඉවත් කරන්න",
     "done": "අවසන්",
     "selectAll": "සියල්ල තෝරන්න",
     "unselectAll": "සියල්ල තේරීම ඉවත් කරන්න",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "පෙරදසුන",
     "batchFilePreviewTruncated": "පළමු පේළි {shown} පෙන්වමින් පවතී (මුළු පේළි {total})",
     "batchFileDownloadFull": "සම්පූර්ණ ගොනුව බාගන්න",
-    "dialogTitleFallback": "සංවාද කොටුව",
-    "pagination": "පිටුකරණය",
-    "clearFilters": "පෙරහන් ඉවත් කරන්න",
     "tokensPageTitle": "ටෝකන",
     "tokensPageDescription": "API යතුරු අතර ටෝකන යවන්න, ආරාධනා කේත බෙදාගන්න සහ ප්රජා සේවාදායක සම්බන්ධ කරන්න.",
     "tokensServerUrlLabel": "සේවාදායක URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "ඉක්මන් සංචාලනය",
     "quickNavigationTitle": "ඉක්මන් සංචාලනය (⌘K / Ctrl+K)",
     "openQuickNavigation": "ඉක්මන් සංචාලනය විවෘත කරන්න",
+    "openMenu": "මෙනුව විවෘත කරන්න",
+    "products": "Keak නිෂ්පාදන",
     "switchToLightMode": "ආලෝක ප්රකාරයට මාරු වන්න",
     "switchToDarkMode": "අඳුරු ප්රකාරයට මාරු වන්න",
     "language": "භාෂාව",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "උසස් පේලෝඩ් නීති, ඉල්ලීම් සීමා සහ ප්රොක්සි API සැකසුම්",
     "mitmProxyDescription": "ගමනාගමන පරීක්ෂාව සහ දෝෂහරණය සඳහා MITM ප්රොක්සි සැකසුම් වින්යාස කරන්න",
     "oneProxyDescription": "උසස් ප්රොක්සි දාමකරණය සඳහා 1Proxy සැකසුම් වින්යාස කරන්න",
-    "omniSkillsDescription": "ස්වයංක්රීය ප්රොම්ප්ට් සහ මෙවලම් ක්රියාත්මක කිරීම සඳහා සෑන්ඩ්බොක්ස් කුසලතා ස්ථාපනය කර කළමනාකරණය කරන්න",
-    "openMenu": "මෙනුව විවෘත කරන්න",
-    "products": "Keak නිෂ්පාදන"
+    "omniSkillsDescription": "ස්වයංක්රීය ප්රොම්ප්ට් සහ මෙවලම් ක්රියාත්මක කිරීම සඳහා සෑන්ඩ්බොක්ස් කුසලතා ස්ථාපනය කර කළමනාකරණය කරන්න"
   },
   "cloudSyncStatus": {
     "synced": "සමමුහුර්තයි",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "සංයෝජනය → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid ලෙස සලකුණු කළ සපයන්නන් auto වෙත ඇතුළත් කරන්න",
-    "autoTosDescription": "පෙරනිමියෙන් අක්‍රියයි. එක් ගිණුමකට පමණක් නොව සියලු auto සංයෝජනවලට අදාළ වේ. සපයන්නෙකු සම්බන්ධ කිරීමෙන් මෙම විකල්පය සක්‍රිය නොවේ.",
-    "autoTosSaveError": "ToS ප්‍රතිපත්තිය සුරැකිය නොහැකි විය. පෙර සැකසුම තවමත් පෙන්වයි. නැවත උත්සාහ කරන්න.",
-    "autoTosLoadError": "ToS ප්‍රතිපත්තිය පූරණය කළ නොහැකි විය. වෙනස් කිරීමට පෙර නැවත උත්සාහ කරන්න.",
     "title": "සංයෝජන",
     "description": "බරිත මාර්ගගත කිරීම සහ විකල්ප සහාය සහිත ආකෘති සංයෝජන සාදන්න",
     "autoCatalogTitle": "ස්වයංක්රීය මාර්ගගත කිරීමේ නාමාවලිය",
+    "autoTosLoadError": "ToS ප්‍රතිපත්තිය පූරණය කළ නොහැකි විය. වෙනස් කිරීමට පෙර නැවත උත්සාහ කරන්න.",
+    "autoTosSaveError": "ToS ප්‍රතිපත්තිය සුරැකිය නොහැකි විය. පෙර සැකසුම තවමත් පෙන්වයි. නැවත උත්සාහ කරන්න.",
+    "autoTosIncludeLabel": "ToS: avoid ලෙස සලකුණු කළ සපයන්නන් auto වෙත ඇතුළත් කරන්න",
+    "autoTosDescription": "පෙරනිමියෙන් අක්‍රියයි. එක් ගිණුමකට පමණක් නොව සියලු auto සංයෝජනවලට අදාළ වේ. සපයන්නෙකු සම්බන්ධ කිරීමෙන් මෙම විකල්පය සක්‍රිය නොවේ.",
     "autoCatalogTemplateCount": "සැකිලි {count}ක්",
     "autoCatalogDescription": "සම්බන්ධිත සැපයුම්කරුවන් මත පදනම්ව ගතිකව විසඳනු ලබන, පද්ධතිය තුළම අන්තර්ගත auto/* සංයෝජන. මෙම ඕනෑම ID එකක් model ක්ෂේත්රය ලෙස භාවිත කරන්න — සැකසීමක් අවශ්ය නොවේ.",
     "autoCatalogExpand": "ස්වයංක්රීය මාර්ගගත කිරීමේ නාමාවලිය දිගහරින්න",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "තවමත් කිසිදු කොම්බෝවක් වින්යාස කර නැත.",
     "playgroundCreateFirst": "පළමුව එකක් සාදන්න",
     "weighted": "බරිත",
+    "weightPercent": "බර (%)",
     "leastUsed": "අවම වශයෙන් භාවිත වූ",
     "costOpt": "පිරිවැය-ප්රශස්ත",
     "strategyGuideTitle": "මෙම උපායමාර්ගය භාවිත කරන ආකාරය",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# ගිණුම} other {# ගිණුම්}}",
     "builderGlobalAdded": "එක් කරන ලදී",
     "builderGlobalAdd": "එක් කරන්න",
+    "clearSearch": "සෙවීම හිස් කරන්න",
     "manualModel": "අතින් ඇතුළත් කරන මොඩලය",
     "manualModelInvalid": "මොඩලයක් provider/model ලෙස ඇතුළත් කරන්න.",
     "manualModelUnknownProvider": "හඳුනා නොගත් සපයන්නාගේ උපසර්ගයකි.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "අවම අන්තර්ගත දිග (අක්ෂර)",
     "responseValidationJsonPaths": "JSON-path පරීක්ෂණ",
     "responseValidationAddCheck": "+ පරීක්ෂණයක් එක් කරන්න",
+    "responseValidationRemoveCheck": "පරීක්ෂාව ඉවත් කරන්න",
+    "responseValidationPath": "JSON මාර්ගය",
+    "responseValidationCondition": "කොන්දේසිය",
+    "responseValidationValue": "අපේක්ෂිත අගය",
     "agentFeaturesSystemMessageOverride": "පද්ධති පණිවිඩය අභිබවා යන්න",
     "agentFeaturesSystemMessagePlaceholder": "ඔබ විශේෂඥ සහායකයෙකි...",
     "agentFeaturesSystemMessageHint": "නියෝජිතයන් සඳහා පද්ධති පණිවිඩ අභිබවා යාම",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "මෙමඟින් මෙම අච්චුවට ගැළපෙන, දැනට සම්බන්ධිත සැපයුම්කරුවන්/ආකෘතිවල වත්මන් තත්ත්වය සංස්කරණය කළ හැකි සංයෝජනයක් ලෙස සුරකිනු ඇත.",
     "duplicateAutoComboFailedPrefix": "ස්වයංක්රීය සංයෝජනය අනුපිටපත් කිරීමට අසමත් විය:",
     "duplicateAutoComboUnknownError": "නොදන්නා දෝෂයකි",
-    "duplicateAutoComboTitle": "{name} වෙතින් ස්ථිතික සංයෝජනයක් සාදන්න",
-    "weightPercent": "බර (%)",
-    "clearSearch": "සෙවීම හිස් කරන්න",
-    "responseValidationRemoveCheck": "පරීක්ෂාව ඉවත් කරන්න",
-    "responseValidationPath": "JSON මාර්ගය",
-    "responseValidationCondition": "කොන්දේසිය",
-    "responseValidationValue": "අපේක්ෂිත අගය"
+    "duplicateAutoComboTitle": "{name} වෙතින් ස්ථිතික සංයෝජනයක් සාදන්න"
   },
   "costs": {
     "title": "පිරිවැය",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API ආකෘති ලේබලය",
     "apiKeyOptionalHint": "ඔබේ දේශීය සැකසුමට හෝ සැපයුම්කරුට සත්යාපනය අවශ්ය නොවේ නම් හිස්ව තබන්න.",
     "apiKeyOptionalLabel": "API යතුර (විකල්පීය)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "චීන මහාද්වීපය",
+    "apiRegionHint": "API ප්රවේශය සහ කෝටා නිරීක්ෂණය සඳහා යොදාගන්නා endpoint කලාපය තෝරන්න.",
+    "apiRegionInternational": "ජාත්යන්තර",
+    "apiRegionLabel": "API කලාපය",
     "apikey": "API යතුර",
     "audio": "ශ්රව්ය",
     "audioProvidersHeading": "ශ්රව්ය සැපයුම්කරුවන්ගේ ශීර්ෂය",
@@ -6545,6 +6545,7 @@
       "monsterapi": "API යතුර monsterapi.ai වෙතින් ලබා ගන්න",
       "moonshot": "API යතුරක් භාවිතයෙන් Kimi සම්බන්ධ කරන්න.",
       "morph": "නොමිලේ මට්ටම: මසකට ණය 250K, $0",
+      "apmix": "apmix.ai/dashboard වෙතින් API යතුරක් සමඟ Apmix සම්බන්ධ කරන්න — එක් දායකත්වයක්, බොහෝ ආකෘති.",
       "nanogpt": "API යතුරක් භාවිතයෙන් NanoGPT සම්බන්ධ කරන්න.",
       "nebius": "API පරීක්ෂා කිරීම සඳහා ලියාපදිංචි වීමේදී ~$1 අත්හදා බැලීමේ ණය",
       "nlpcloud": "NLP Cloud විසින් OpenAI chat/completions වෙනුවට හිමිකාර චැට්බොට් API එකක් භාවිත කරයි. OmniRoute විසින් OpenAI පණිවිඩ input/context/history බවට අනුවර්තනය කර, සහාය දක්වන චැට්බොට් මාදිලිවල දේශීය නාමාවලියක් නිරාවරණය කරයි.",
@@ -6641,8 +6642,7 @@
       "kiro": "නොමිලේ ස්තරය: මසකට credits 50ක් (~25K–100K tokens). ⚠️ Kiro ToS මඟින් තෙවන පාර්ශ්ව proxy/harness භාවිතය තහනම් කරයි.",
       "codex": "පවතින OAuth ප්රවාහය සමඟ OpenAI Codex සම්බන්ධ කරන්න.",
       "qwen": "පවතින OAuth ප්රවාහය සමඟ Qwen Code සම්බන්ධ කරන්න.",
-      "github-models": "github.com/settings/tokens හි 'models: read' scope එක සහිත GitHub PAT එකක් සාදන්න",
-      "apmix": "apmix.ai/dashboard වෙතින් API යතුරක් සමඟ Apmix සම්බන්ධ කරන්න — එක් දායකත්වයක්, බොහෝ ආකෘති."
+      "github-models": "github.com/settings/tokens හි 'models: read' scope එක සහිත GitHub PAT එකක් සාදන්න"
     },
     "passthroughModelsDescription": "{provider} සපයන්නා provider-native model IDs පිළිගනී. /models වෙතින් ආයාත කරන්න හෝ මාර්ගගත කිරීම සඳහා අභිරුචි IDs එක් කරන්න.",
     "bedrockModelsDescription": "Amazon Bedrock models AWS කලාපය අනුව සීමා වේ. /models වෙතින් ආයාත කරන්න හෝ තෝරාගත් කලාපයේ සක්රීය කර ඇති Bedrock model IDs එක් කරන්න.",
@@ -7702,6 +7702,7 @@
     "configured": "වින්යාස කර ඇත",
     "none": "කිසිවක් නැත",
     "modelOverrideValuePlaceholder": "සංඛ්යාත්මක අගය",
+    "modelOverrideKey": "අතික්රමණ යතුර",
     "modelOverrideReasoningEffortsPlaceholder": "ඉංග්රීසි කොමාවෙන් වෙන් කළ, උදා. low, medium, high",
     "addKeyValue": "යතුර සහ අගය එක් කරන්න",
     "noModelOverrides": "මෙම ආකෘතිය සඳහා අභිබවා සැකසීම් කිසිවක් වින්යාස කර නැත.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "නැවත ආරම්භයෙන් පසු අනාවරණ",
       "statsEmpty": "තවම අනාවරණ නැත.",
       "statsRequest": "ඉල්ලීම්"
-    },
-    "modelOverrideKey": "අතික්රමණ යතුර"
+    }
   },
   "contextRtk": {
     "title": "RTK එන්ජිම",
@@ -11453,6 +11453,7 @@
     "tableHealth": "සෞඛ්යය (පැය 24)",
     "tableUsage": "භාවිතය",
     "tableActions": "ක්රියා",
+    "moreActions": "තවත් ක්රියා",
     "test": "පරීක්ෂා කරන්න",
     "edit": "සංස්කරණය කරන්න",
     "delete": "මකන්න",
@@ -11610,8 +11611,7 @@
     "notMeasured": "මනින ලද්දේ නැත",
     "upstream4xx": "{count} උපරිම ක්‍රීඩා ප්‍රදේශය තුළ දෝෂ",
     "upstream5xx": "{count} උපරිම සර්වර දෝෂ",
-    "uniformEgressLine": "{affected} {exits} ඕත්තු සමග අසාධුවෙයි හි {provider} (පැමිණීම {hours} පැය) — ඕත්තු ගැටළුවක් නොවේ",
-    "moreActions": "තවත් ක්රියා"
+    "uniformEgressLine": "{affected} {exits} ඕත්තු සමග අසාධුවෙයි හි {provider} (පැමිණීම {hours} පැය) — ඕත්තු ගැටළුවක් නොවේ"
   },
   "playground": {
     "title": "ආකෘති අත්හදා බැලීමේ පරිසරය",
@@ -12037,8 +12037,8 @@
       "compressed": "සම්පීඩිතයි: {from} → {to} ({percent}% ඉතිරි විය)",
       "output": "ප්රතිදානය",
       "totalOut": "මුළු ප්රතිදානය: {value}",
-      "reasoningObserved": "{value} · අක්ෂර {chars}ක් නිරීක්ෂණය විය",
       "reasoning": "තාර්කිකකරණය: {value}",
+      "reasoningObserved": "{value} · අක්ෂර {chars}ක් නිරීක්ෂණය විය",
       "requestedModel": "ඉල්ලා ඇති මාදිලිය",
       "requestProtocol": "ඉල්ලීම් ප්රොටෝකෝලය",
       "cacheSource": "කෑෂ් මූලාශ්රය",
@@ -13858,6 +13858,7 @@
     "latency": "ප්රමාදය",
     "quota": "කෝටාව",
     "rangeWindow": "{range} කාල පරාසය",
+    "timeRange": "කාල පරාසය",
     "runtimeHealthBlend": "ධාවන කාල/සෞඛ්ය මිශ්රණය",
     "averageResponseTime": "සාමාන්ය ප්රතිචාර කාලය",
     "worstQuota": "අවම කෝටාව",
@@ -13912,8 +13913,7 @@
     "unknown": "නොදන්නා",
     "unknownProvider": "නොදන්නා සැපයුම්කරු",
     "unknownModel": "නොදන්නා මාදිලිය",
-    "resolvedTargetMetrics": "ඉල්ලීම් {requests} · සාර්ථක {success} · {latency} · කෝටාව {quota}",
-    "timeRange": "කාල පරාසය"
+    "resolvedTargetMetrics": "ඉල්ලීම් {requests} · සාර්ථක {success} · {latency} · කෝටාව {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD භාවිත කෝටාව",

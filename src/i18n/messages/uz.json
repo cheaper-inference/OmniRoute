@@ -25,8 +25,10 @@
     "confirm": "Ishonchingiz komilmi?",
     "refresh": "Yangilash",
     "close": "Yopish",
+    "dialogTitleFallback": "Muloqot oynasi",
     "previousPage": "Oldingi sahifa",
     "nextPage": "Keyingi sahifa",
+    "pagination": "Sahifalash",
     "capsLockOn": "Caps Lock yoqilgan",
     "dismissNotification": "Bildirishnomani yopish",
     "toggleColumns": "Ustunlarni koʻrsatish/yashirish",
@@ -182,6 +184,7 @@
     "combos": "Kombinatsiyalar",
     "noModelsFound": "Modellar topilmadi",
     "clear": "Tozalash",
+    "clearFilters": "Filtrlarni tozalash",
     "done": "Tayyor",
     "selectAll": "Barchasini tanlash",
     "unselectAll": "Barchasini tanlashni bekor qilish",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Koʻrib chiqish",
     "batchFilePreviewTruncated": "Dastlabki {shown} qator koʻrsatilmoqda (jami {total} qator)",
     "batchFileDownloadFull": "Toʻliq faylni yuklab olish",
-    "dialogTitleFallback": "Muloqot oynasi",
-    "pagination": "Sahifalash",
-    "clearFilters": "Filtrlarni tozalash",
     "tokensPageTitle": "Tokenlar",
     "tokensPageDescription": "Tokenlarni API kalitlari oʻrtasida yuboring, taklif kodlarini ulashing va hamjamiyat serverlarini ulang.",
     "tokensServerUrlLabel": "Server URL manzili"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Tezkor navigatsiya",
     "quickNavigationTitle": "Tezkor navigatsiya (⌘K / Ctrl+K)",
     "openQuickNavigation": "Tezkor navigatsiyani ochish",
+    "openMenu": "Menyuni ochish",
+    "products": "Keak mahsulotlari",
     "switchToLightMode": "Yorugʻ rejimga oʻtish",
     "switchToDarkMode": "Qorongʻi rejimga oʻtish",
     "language": "Til",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Kengaytirilgan foydali yuk qoidalari, so‘rov cheklovlari va proksi API sozlamalari",
     "mitmProxyDescription": "Trafikni tekshirish va nosozliklarni tuzatish uchun MITM proksi sozlamalarini belgilang",
     "oneProxyDescription": "Kengaytirilgan proksi zanjirlash uchun 1Proxy sozlamalarini belgilang",
-    "omniSkillsDescription": "Promptlar va vositalarni avtomatik bajarish uchun sandbox ko‘nikmalarini o‘rnating va boshqaring",
-    "openMenu": "Menyuni ochish",
-    "products": "Keak mahsulotlari"
+    "omniSkillsDescription": "Promptlar va vositalarni avtomatik bajarish uchun sandbox ko‘nikmalarini o‘rnating va boshqaring"
   },
   "cloudSyncStatus": {
     "synced": "Sinxronlandi",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Kombinatsiya → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid deb belgilangan provayderlarni auto tarkibiga kiriting",
-    "autoTosDescription": "Sukut bo‘yicha o‘chirilgan. Faqat bitta hisobga emas, barcha auto kombinatsiyalariga tatbiq etiladi. Provayderni ulash bu parametrni yoqmaydi.",
-    "autoTosSaveError": "ToS siyosatini saqlab bo‘lmadi. Oldingi sozlama hali ham ko‘rsatilmoqda. Qayta urinib ko‘ring.",
-    "autoTosLoadError": "ToS siyosatini yuklab bo‘lmadi. O‘zgartirishdan oldin qayta urinib ko‘ring.",
     "title": "Kombinatsiyalar",
     "description": "Vaznli yoʻnaltirish va zaxira variantlarini qoʻllab-quvvatlaydigan model kombinatsiyalarini yarating",
     "autoCatalogTitle": "Avtomatik yoʻnaltirish katalogi",
+    "autoTosLoadError": "ToS siyosatini yuklab bo‘lmadi. O‘zgartirishdan oldin qayta urinib ko‘ring.",
+    "autoTosSaveError": "ToS siyosatini saqlab bo‘lmadi. Oldingi sozlama hali ham ko‘rsatilmoqda. Qayta urinib ko‘ring.",
+    "autoTosIncludeLabel": "ToS: avoid deb belgilangan provayderlarni auto tarkibiga kiriting",
+    "autoTosDescription": "Sukut bo‘yicha o‘chirilgan. Faqat bitta hisobga emas, barcha auto kombinatsiyalariga tatbiq etiladi. Provayderni ulash bu parametrni yoqmaydi.",
     "autoCatalogTemplateCount": "{count} ta shablon",
     "autoCatalogDescription": "Ulangan provayderlar asosida dinamik ravishda aniqlanadigan ichki auto/* kombinatsiyalari. Ushbu IDlardan istalganini model maydoni sifatida ishlating — sozlash talab qilinmaydi.",
     "autoCatalogExpand": "Avtomatik yoʻnaltirish katalogini kengaytirish",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Hali hech qanday kombo sozlanmagan.",
     "playgroundCreateFirst": "Avval bittasini yarating",
     "weighted": "Vaznli",
+    "weightPercent": "Vazn (%)",
     "leastUsed": "Eng kam ishlatilgan",
     "costOpt": "Xarajat bo‘yicha optimal",
     "strategyGuideTitle": "Bu strategiyadan qanday foydalanish kerak",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# ta hisob} other {# ta hisob}}",
     "builderGlobalAdded": "Qoʻshildi",
     "builderGlobalAdd": "Qoʻshish",
+    "clearSearch": "Qidiruvni tozalash",
     "manualModel": "Qoʻlda kiritiladigan model",
     "manualModelInvalid": "Modelni provider/model shaklida kiriting.",
     "manualModelUnknownProvider": "Nomaʼlum provayder prefiksi.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Minimal kontent uzunligi (belgilar)",
     "responseValidationJsonPaths": "JSON-path tekshiruvlari",
     "responseValidationAddCheck": "+ Tekshiruv qo‘shish",
+    "responseValidationRemoveCheck": "Tekshiruvni olib tashlash",
+    "responseValidationPath": "JSON yoʻli",
+    "responseValidationCondition": "Shart",
+    "responseValidationValue": "Kutilgan qiymat",
     "agentFeaturesSystemMessageOverride": "Tizim xabarini almashtirish",
     "agentFeaturesSystemMessagePlaceholder": "Siz ekspert yordamchisiz...",
     "agentFeaturesSystemMessageHint": "Agentlar uchun tizim xabarini almashtirish",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Bu shablonga mos keladigan, hozir ulangan provayderlar/modellarning joriy holatini tahrirlanadigan kombinatsiya sifatida saqlaydi.",
     "duplicateAutoComboFailedPrefix": "Avtomatik kombinatsiyani nusxalab bo‘lmadi:",
     "duplicateAutoComboUnknownError": "Noma’lum xato",
-    "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish",
-    "weightPercent": "Vazn (%)",
-    "clearSearch": "Qidiruvni tozalash",
-    "responseValidationRemoveCheck": "Tekshiruvni olib tashlash",
-    "responseValidationPath": "JSON yoʻli",
-    "responseValidationCondition": "Shart",
-    "responseValidationValue": "Kutilgan qiymat"
+    "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish"
   },
   "costs": {
     "title": "Xarajatlar",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API formati yorlig‘i",
     "apiKeyOptionalHint": "Mahalliy sozlamangiz yoki provayderingiz autentifikatsiyani talab qilmasa, bo‘sh qoldiring.",
     "apiKeyOptionalLabel": "API kaliti (ixtiyoriy)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Materik Xitoy",
+    "apiRegionHint": "API kirish va kvotani kuzatish uchun ishlatiladigan endpoint mintaqasini tanlang.",
+    "apiRegionInternational": "Xalqaro",
+    "apiRegionLabel": "API mintaqasi",
     "apikey": "API kaliti",
     "audio": "Audio",
     "audioProvidersHeading": "Audio provayderlari sarlavhasi",
@@ -6545,6 +6545,7 @@
       "monsterapi": "API kalitini monsterapi.ai manzilidan oling",
       "moonshot": "Kimi’ni API kaliti bilan ulang.",
       "morph": "Bepul tarif: oyiga 250K kredit, $0",
+      "apmix": "Apmix'ni apmix.ai/dashboard dagi API kaliti bilan ulang — bitta obuna, ko'plab modellar.",
       "nanogpt": "NanoGPT’ni API kaliti bilan ulang.",
       "nebius": "Roʻyxatdan oʻtganda API sinovi uchun ~$1 sinov krediti",
       "nlpcloud": "NLP Cloud OpenAI chat/completions oʻrniga xususiy chatbot API’sidan foydalanadi. OmniRoute OpenAI xabarlarini input/context/history formatiga moslashtiradi va qoʻllab-quvvatlanadigan chatbot modellarining mahalliy katalogini taqdim etadi.",
@@ -6641,8 +6642,7 @@
       "kiro": "Bepul tarif: oyiga 50 kredit (~25K–100K token). ⚠️ Kiro ToS uchinchi tomon proksi yoki harness vositalaridan foydalanishni taqiqlaydi.",
       "codex": "OpenAI Codexʼni mavjud OAuth jarayoni orqali ulang.",
       "qwen": "Qwen Codeʼni mavjud OAuth jarayoni orqali ulang.",
-      "github-models": "github.com/settings/tokens manzilida 'models: read' vakolat doirasiga ega GitHub PAT yarating",
-      "apmix": "Apmix'ni apmix.ai/dashboard dagi API kaliti bilan ulang — bitta obuna, ko'plab modellar."
+      "github-models": "github.com/settings/tokens manzilida 'models: read' vakolat doirasiga ega GitHub PAT yarating"
     },
     "passthroughModelsDescription": "{provider} provayderga xos model IDʼlarini qabul qiladi. /models orqali import qiling yoki marshrutlash uchun maxsus IDʼlarni qoʻshing.",
     "bedrockModelsDescription": "Amazon Bedrock modellari AWS mintaqasi boʻyicha cheklangan. /models orqali import qiling yoki tanlangan mintaqada yoqilgan Bedrock model IDʼlarini qoʻshing.",
@@ -7702,6 +7702,7 @@
     "configured": "sozlangan",
     "none": "Yo‘q",
     "modelOverrideValuePlaceholder": "Raqamli qiymat",
+    "modelOverrideKey": "Qayta belgilash kaliti",
     "modelOverrideReasoningEffortsPlaceholder": "Inglizcha vergul bilan ajratilgan, masalan: low, medium, high",
     "addKeyValue": "Kalit qiymatini qo‘shish",
     "noModelOverrides": "Bu model uchun istisno sozlamalari mavjud emas.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Qayta ishga tushirilgandan beri aniqlashlar",
       "statsEmpty": "Hali aniqlashlar yo'q.",
       "statsRequest": "So'rovlar"
-    },
-    "modelOverrideKey": "Qayta belgilash kaliti"
+    }
   },
   "contextRtk": {
     "title": "RTK mexanizmi",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Ishlash holati (24 soat)",
     "tableUsage": "Foydalanish",
     "tableActions": "Amallar",
+    "moreActions": "Boshqa amallar",
     "test": "Sinash",
     "edit": "Tahrirlash",
     "delete": "O‘chirish",
@@ -11610,8 +11611,7 @@
     "notMeasured": "O‘lchanmagan",
     "upstream4xx": "{count} murojaat tashqarisidagi xatolar",
     "upstream5xx": "{count} server tashqarisidagi xatolar",
-    "uniformEgressLine": "{provider} da {exits} ta chiqishdan {affected} tasi birga ishlamayapti (soʻnggi {hours} soat) — chiqish muammosi emas",
-    "moreActions": "Boshqa amallar"
+    "uniformEgressLine": "{provider} da {exits} ta chiqishdan {affected} tasi birga ishlamayapti (soʻnggi {hours} soat) — chiqish muammosi emas"
   },
   "playground": {
     "title": "Model sinov maydoni",
@@ -13858,6 +13858,7 @@
     "latency": "Kechikish",
     "quota": "Kvota",
     "rangeWindow": "{range} oraligʻi",
+    "timeRange": "Vaqt oralig‘i",
     "runtimeHealthBlend": "ishlash/holat uygʻunligi",
     "averageResponseTime": "oʻrtacha javob vaqti",
     "worstQuota": "Eng past kvota",
@@ -13912,8 +13913,7 @@
     "unknown": "nomaʼlum",
     "unknownProvider": "nomaʼlum provayder",
     "unknownModel": "nomaʼlum model",
-    "resolvedTargetMetrics": "{requests} soʻrov · {success} muvaffaqiyatli · {latency} · kvota {quota}",
-    "timeRange": "Vaqt oralig‘i"
+    "resolvedTargetMetrics": "{requests} soʻrov · {success} muvaffaqiyatli · {latency} · kvota {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD sarf-xarajat kvotasi",

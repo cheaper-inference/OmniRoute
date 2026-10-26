@@ -25,8 +25,10 @@
     "confirm": "Weet je het zeker?",
     "refresh": "Vernieuwen",
     "close": "Sluiten",
+    "dialogTitleFallback": "Dialoogvenster",
     "previousPage": "Vorige pagina",
     "nextPage": "Volgende pagina",
+    "pagination": "Paginering",
     "capsLockOn": "Caps Lock staat aan",
     "dismissNotification": "Melding negeren",
     "toggleColumns": "Kolommen in-/uitschakelen",
@@ -182,6 +184,7 @@
     "combos": "Combinaties",
     "noModelsFound": "Geen modellen gevonden",
     "clear": "Wissen",
+    "clearFilters": "Filters wissen",
     "done": "Gereed",
     "selectAll": "Alles selecteren",
     "unselectAll": "Selectie opheffen",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Voorbeeld",
     "batchFilePreviewTruncated": "Eerste {shown} regels weergeven ({total} totaal regels)",
     "batchFileDownloadFull": "Download Volledig Bestand",
-    "dialogTitleFallback": "Dialoogvenster",
-    "pagination": "Paginering",
-    "clearFilters": "Filters wissen",
     "tokensPageTitle": "Tokens",
     "tokensPageDescription": "Stuur tokens tussen API-sleutels, deel uitnodigingscodes en verbind communityservers.",
     "tokensServerUrlLabel": "Server-URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Snelle navigatie",
     "quickNavigationTitle": "Snelle navigatie (⌘K / Ctrl+K)",
     "openQuickNavigation": "Snelle navigatie openen",
+    "openMenu": "Menu openen",
+    "products": "Keak-producten",
     "switchToLightMode": "Overschakelen naar lichte modus",
     "switchToDarkMode": "Overschakelen naar donkere modus",
     "language": "Taal",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Geavanceerde payloadregels, aanvraaglimieten en proxy-API-instellingen",
     "mitmProxyDescription": "Configureer MITM-proxy-instellingen voor verkeersinspectie en foutopsporing",
     "oneProxyDescription": "Configureer 1Proxy-instellingen voor geavanceerde proxyketens",
-    "omniSkillsDescription": "Installeer en beheer sandbox-skills voor geautomatiseerde prompt- en tooluitvoering",
-    "openMenu": "Menu openen",
-    "products": "Keak-producten"
+    "omniSkillsDescription": "Installeer en beheer sandbox-skills voor geautomatiseerde prompt- en tooluitvoering"
   },
   "cloudSyncStatus": {
     "synced": "Gesynchroniseerd",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
+    "title": "Combo's",
+    "description": "Creëer modelcombinaties met gewogen routing en fallback-ondersteuning",
+    "autoCatalogTitle": "Catalogus voor automatische routering",
     "autoTosLoadError": "Het ToS-beleid kon niet worden geladen. Probeer het opnieuw voordat je het wijzigt.",
     "autoTosSaveError": "Het ToS-beleid kon niet worden opgeslagen. De vorige instelling wordt nog getoond. Probeer het opnieuw.",
     "autoTosIncludeLabel": "Providers met ToS: avoid opnemen in auto",
     "autoTosDescription": "Standaard uitgeschakeld. Geldt voor alle auto-combo’s, niet alleen voor één account. Het verbinden van een provider schakelt deze optie niet in.",
-    "title": "Combo's",
-    "description": "Creëer modelcombinaties met gewogen routing en fallback-ondersteuning",
-    "autoCatalogTitle": "Catalogus voor automatische routering",
     "autoCatalogTemplateCount": "{count} sjablonen",
     "autoCatalogDescription": "Ingebouwde auto/*-combinaties die dynamisch worden opgelost door aangesloten providers. Gebruik een van deze ID's als modelveld; er is geen configuratie nodig.",
     "autoCatalogExpand": "Vouw de autoroutingcatalogus uit",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Nog geen combo's geconfigureerd.",
     "playgroundCreateFirst": "Maak er eerst een aan",
     "weighted": "Gewogen",
+    "weightPercent": "Gewicht (%)",
     "leastUsed": "Minst gebruikt",
     "costOpt": "Kosten-opt",
     "strategyGuideTitle": "Hoe deze strategie te gebruiken",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# account} other {# accounts}}",
     "builderGlobalAdded": "Toegevoegd",
     "builderGlobalAdd": "Toevoegen",
+    "clearSearch": "Zoekopdracht wissen",
     "manualModel": "Handmatig model",
     "manualModelInvalid": "Voer een model in als provider/model.",
     "manualModelUnknownProvider": "Onbekend provider-voorvoegsel.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Minimale inhoudslengte (tekens)",
     "responseValidationJsonPaths": "JSON-path-controles",
     "responseValidationAddCheck": "+ Controle toevoegen",
+    "responseValidationRemoveCheck": "Controle verwijderen",
+    "responseValidationPath": "JSON-pad",
+    "responseValidationCondition": "Voorwaarde",
+    "responseValidationValue": "Verwachte waarde",
     "agentFeaturesSystemMessageOverride": "Systeembericht negeren",
     "agentFeaturesSystemMessagePlaceholder": "Jij bent een deskundige assistent...",
     "agentFeaturesSystemMessageHint": "Systeembericht negeren voor agenten",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Dit maakt een momentopname van de momenteel verbonden providers/modellen die overeenkomen met dit sjabloon in een bewerkbare combinatie.",
     "duplicateAutoComboFailedPrefix": "Automatische combinatie dupliceren mislukt:",
     "duplicateAutoComboUnknownError": "Onbekende fout",
-    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}",
-    "weightPercent": "Gewicht (%)",
-    "clearSearch": "Zoekopdracht wissen",
-    "responseValidationRemoveCheck": "Controle verwijderen",
-    "responseValidationPath": "JSON-pad",
-    "responseValidationCondition": "Voorwaarde",
-    "responseValidationValue": "Verwachte waarde"
+    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}"
   },
   "costs": {
     "title": "Kosten",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Label voor API-indeling",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Vasteland van China",
+    "apiRegionHint": "Selecteer de endpointregio die wordt gebruikt voor API-toegang en het bijhouden van quota's.",
+    "apiRegionInternational": "Internationaal",
+    "apiRegionLabel": "API-regio",
     "apikey": "API-sleutel",
     "audio": "Audio",
     "audioProvidersHeading": "Koptekst voor audioproviders",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Wanneer dit account de gebruikslimiet van 5 uur bereikt en Anthropic verwerking met lagere prioriteit aanbiedt, accepteert OmniRoute deze en blijft het verzoeken verzenden met anthropic-usage-limit: slow totdat het tijdvenster wordt gereset, in plaats van de verbinding tijdelijk te vertragen. De wekelijkse limiet blijft van toepassing en reacties moeten mogelijk wachten op beschikbare capaciteit.",
     "claudeAutoLimitResetLabel": "De sessielimiet automatisch resetten (eenmaal per week)",
     "claudeAutoLimitResetDescription": "Wanneer dit account de gebruikslimiet van 5 uur bereikt en er een reset van de sessielimiet beschikbaar is, past OmniRoute deze automatisch toe en probeert het opnieuw op volle snelheid. Dit gebruikt de wekelijkse reset van het account en telt nog steeds mee voor de wekelijkse limiet.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Betaalde Codex-credits toestaan nadat het abonnementsquotum op is (extra kosten kunnen van toepassing zijn)",
+    "codexPaidCreditsEnabled": "Betaalde Codex-credits ingeschakeld (extra kosten kunnen van toepassing zijn)",
+    "codexPaidCreditsDisabled": "Betaalde Codex-credits uitgeschakeld",
+    "failedUpdateCodexPaidCredits": "Het beleid voor betaalde Codex-credits bijwerken is mislukt",
+    "allowCodexPaidCreditsLabel": "Betaalde Codex-credits toestaan",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Sla de tijdelijke afkoelperiode over, zodat deze verbinding in aanmerking blijft komen, zelfs na herstelbare fouten (definitieve statussen zoals verbannen/verlopen zijn nog steeds van toepassing).",
     "disableCoolingLabel": "Afkoelperiode uitschakelen voor deze verbinding",
     "bulkPasteAdded": "{count, plural, one {1 sleutel toegevoegd} other {# sleutels toegevoegd}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Verkrijg een API-sleutel op monsterapi.ai",
       "moonshot": "Verbind Moonshot AI met een API-sleutel.",
       "morph": "Gratis niveau: 250K credits/maand, $0",
+      "apmix": "Verbind Apmix met een API-sleutel van apmix.ai/dashboard — één abonnement, veel modellen.",
       "nanogpt": "Verbind NanoGPT met een API-sleutel.",
       "nebius": "~$1 proeftegoed bij registratie voor API-testen",
       "nlpcloud": "NLP Cloud gebruikt een eigen chatbot-API in plaats van OpenAI chat/completions. OmniRoute past OpenAI-berichten aan naar invoer/context/geschiedenis en stelt een lokale catalogus van ondersteunde chatbotmodellen beschikbaar.",
@@ -6634,8 +6642,7 @@
       "kiro": "Gratis tier: 50 credits/maand (~25K–100K tokens). ⚠️ Kiro ToS verbiedt het gebruik van externe proxy/harness.",
       "codex": "Verbind OpenAI Codex met de bestaande OAuth-flow.",
       "qwen": "Verbind Qwen Code met de bestaande OAuth-flow.",
-      "github-models": "Maak een GitHub PAT aan met de scope 'models: read' op github.com/settings/tokens",
-      "apmix": "Verbind Apmix met een API-sleutel van apmix.ai/dashboard — één abonnement, veel modellen."
+      "github-models": "Maak een GitHub PAT aan met de scope 'models: read' op github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} accepteert provider-native model-ID's. Importeer uit /models of voeg aangepaste ID's toe voor routering.",
     "bedrockModelsDescription": "Amazon Bedrock-modellen zijn afgestemd op de AWS-regio. Importeer uit /models of voeg Bedrock-model-ID's toe die zijn ingeschakeld in de geselecteerde regio.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Gelijktijdigheidslimieten per model",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optioneel: één model=cap per regel, vergeleken met de exacte upstream-model-id. Extra verzoeken wachten lokaal in de wachtrij; leeg betekent geen limiet per model.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Ongeldige gelijktijdigheidsinvoer per model \"{entry}\" — gebruik model=cap met een geheel getal van 1 tot {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Betaalde Codex-credits toestaan nadat het abonnementsquotum op is (extra kosten kunnen van toepassing zijn)",
-    "codexPaidCreditsEnabled": "Betaalde Codex-credits ingeschakeld (extra kosten kunnen van toepassing zijn)",
-    "codexPaidCreditsDisabled": "Betaalde Codex-credits uitgeschakeld",
-    "failedUpdateCodexPaidCredits": "Het beleid voor betaalde Codex-credits bijwerken is mislukt",
-    "allowCodexPaidCreditsLabel": "Betaalde Codex-credits toestaan",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Ongeldige gelijktijdigheidsinvoer per model \"{entry}\" — gebruik model=cap met een geheel getal van 1 tot {max}."
   },
   "settings": {
     "title": "Instellingen",
@@ -7702,6 +7702,7 @@
     "configured": "geconfigureerd",
     "none": "Geen",
     "modelOverrideValuePlaceholder": "Numerieke waarde",
+    "modelOverrideKey": "Overschrijvingssleutel",
     "modelOverrideReasoningEffortsPlaceholder": "Engelse kommagescheiden waarden, bijv. low, medium, high",
     "addKeyValue": "Sleutelwaarde toevoegen",
     "noModelOverrides": "Geen overschrijvingen geconfigureerd voor dit model.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Detecties sinds herstart",
       "statsEmpty": "Nog geen detecties.",
       "statsRequest": "Verzoeken"
-    },
-    "modelOverrideKey": "Overschrijvingssleutel"
+    }
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Transformeren van stream mislukt"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Betaalde Codex-credits",
+    "codexPaidCreditsAvailable": "Beschikbaar (saldo niet gemeld)",
+    "codexPaidCreditsUnavailable": "Niet beschikbaar of bestedingslimiet bereikt",
+    "codexPaidCreditsUnlimited": "Onbeperkt",
     "title": "Gebruik",
     "grokExtraUsageCredits": "Extra Gebruikskredieten",
     "grokAutoTopUp": "Automatische Opwaardering",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Laatst vernieuwd",
     "providerQuota": "Providerquota",
     "providerQuotaHomeHint": "Live status over verbonden accounts",
-    "codexPaidCreditsLabel": "Betaalde Codex-credits",
-    "codexPaidCreditsAvailable": "Beschikbaar (saldo niet gemeld)",
-    "codexPaidCreditsUnavailable": "Niet beschikbaar of bestedingslimiet bereikt",
-    "codexPaidCreditsUnlimited": "Onbeperkt",
     "claudeResetCreditDefaultTitle": "Claude-limietreset",
     "confirmRedeemClaudeResetCredit": "Inwisselen reset direct de in aanmerking komende Claude-gebruikslimieten en verbruikt dit tegoed definitief.",
     "claudeResetCreditsModalTitle": "Claude-resetcredits",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Meer acties",
     "test": "Testen",
     "edit": "Bewerken",
     "delete": "Verwijderen",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Niet gemeten",
     "upstream4xx": "{count} upstream clientfouten",
     "upstream5xx": "{count} upstream serverfouten",
-    "uniformEgressLine": "{affected} van {exits} exits falen tegelijk op {provider} (laatste {hours}u) — geen exit-probleem",
-    "moreActions": "Meer acties"
+    "uniformEgressLine": "{affected} van {exits} exits falen tegelijk op {provider} (laatste {hours}u) — geen exit-probleem"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Latentie",
     "quota": "Quotum",
     "rangeWindow": "{range}-venster",
+    "timeRange": "Tijdsbereik",
     "runtimeHealthBlend": "runtime/health-mix",
     "averageResponseTime": "gemiddelde responstijd",
     "worstQuota": "Slechtste quota",
@@ -13912,8 +13913,7 @@
     "unknown": "onbekend",
     "unknownProvider": "onbekende provider",
     "unknownModel": "onbekend model",
-    "resolvedTargetMetrics": "{requests} req · {success} geslaagd · {latency} · quotum {quota}",
-    "timeRange": "Tijdsbereik"
+    "resolvedTargetMetrics": "{requests} req · {success} geslaagd · {latency} · quotum {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-gebruiksquotum",

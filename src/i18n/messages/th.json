@@ -25,8 +25,10 @@
     "confirm": "คุณแน่ใจเหรอ?",
     "refresh": "รีเฟรช",
     "close": "ปิด",
+    "dialogTitleFallback": "กล่องโต้ตอบ",
     "previousPage": "หน้าก่อนหน้า",
     "nextPage": "หน้าถัดไป",
+    "pagination": "การแบ่งหน้า",
     "capsLockOn": "Caps Lock เปิดอยู่",
     "dismissNotification": "ปิดการแจ้งเตือน",
     "toggleColumns": "สลับการแสดงคอลัมน์",
@@ -182,6 +184,7 @@
     "combos": "คอมโบ",
     "noModelsFound": "ไม่พบโมเดล",
     "clear": "ล้าง",
+    "clearFilters": "ล้างตัวกรอง",
     "done": "เสร็จสิ้น",
     "selectAll": "เลือกทั้งหมด",
     "unselectAll": "ยกเลิกการเลือกทั้งหมด",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "ตัวอย่าง",
     "batchFilePreviewTruncated": "แสดง {shown} บรรทัดแรก ({total} บรรทัดรวม)",
     "batchFileDownloadFull": "ดาวน์โหลดไฟล์ทั้งหมด",
-    "dialogTitleFallback": "กล่องโต้ตอบ",
-    "pagination": "การแบ่งหน้า",
-    "clearFilters": "ล้างตัวกรอง",
     "tokensPageTitle": "โทเค็น",
     "tokensPageDescription": "ส่งโทเค็นระหว่างคีย์ API แชร์รหัสเชิญ และเชื่อมต่อเซิร์ฟเวอร์ชุมชน",
     "tokensServerUrlLabel": "URL เซิร์ฟเวอร์"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "นำทางด่วน",
     "quickNavigationTitle": "การนำทางด่วน (⌘K / Ctrl+K)",
     "openQuickNavigation": "เปิดการนำทางด่วน",
+    "openMenu": "เปิดเมนู",
+    "products": "ผลิตภัณฑ์ Keak",
     "switchToLightMode": "สลับเป็นโหมดสว่าง",
     "switchToDarkMode": "สลับเป็นโหมดมืด",
     "language": "ภาษา",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "กฎเพย์โหลดขั้นสูง ขีดจำกัดคำขอ และการตั้งค่า proxy API",
     "mitmProxyDescription": "กำหนดค่าพร็อกซี MITM สำหรับการตรวจสอบทราฟฟิกและการดีบัก",
     "oneProxyDescription": "กำหนดค่า 1Proxy สำหรับการเชื่อมต่อพร็อกซีแบบลูกโซ่ขั้นสูง",
-    "omniSkillsDescription": "ติดตั้งและจัดการทักษะแซนด์บ็อกซ์สำหรับการดำเนินการพรอมต์และเครื่องมือโดยอัตโนมัติ",
-    "openMenu": "เปิดเมนู",
-    "products": "ผลิตภัณฑ์ Keak"
+    "omniSkillsDescription": "ติดตั้งและจัดการทักษะแซนด์บ็อกซ์สำหรับการดำเนินการพรอมต์และเครื่องมือโดยอัตโนมัติ"
   },
   "cloudSyncStatus": {
     "synced": "ซิงค์แล้ว",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "คอมโบ → {name}"
   },
   "combos": {
+    "title": "คอมโบ",
+    "description": "สร้างโมเดลคอมโบด้วยการกำหนดเส้นทางแบบถ่วงน้ำหนักและการสนับสนุนทางเลือก",
+    "autoCatalogTitle": "แค็ตตาล็อกการกำหนดเส้นทางอัตโนมัติ",
     "autoTosLoadError": "โหลดนโยบาย ToS ไม่สำเร็จ โปรดลองอีกครั้งก่อนเปลี่ยนแปลง",
     "autoTosSaveError": "บันทึกนโยบาย ToS ไม่สำเร็จ ยังคงแสดงการตั้งค่าเดิม โปรดลองอีกครั้ง",
     "autoTosIncludeLabel": "รวมผู้ให้บริการที่ระบุ ToS: avoid ใน auto",
     "autoTosDescription": "ปิดไว้โดยค่าเริ่มต้น มีผลกับคอมโบ auto ทั้งหมด ไม่ใช่แค่บัญชีเดียว การเชื่อมต่อผู้ให้บริการจะไม่เปิดตัวเลือกนี้",
-    "title": "คอมโบ",
-    "description": "สร้างโมเดลคอมโบด้วยการกำหนดเส้นทางแบบถ่วงน้ำหนักและการสนับสนุนทางเลือก",
-    "autoCatalogTitle": "แค็ตตาล็อกการกำหนดเส้นทางอัตโนมัติ",
     "autoCatalogTemplateCount": "{count} เทมเพลต",
     "autoCatalogDescription": "คอมโบอัตโนมัติ/* ในตัวได้รับการแก้ไขแบบไดนามิกจากผู้ให้บริการที่เชื่อมต่อ ใช้รหัสเหล่านี้เป็นช่องโมเดล โดยไม่จำเป็นต้องตั้งค่าใดๆ",
     "autoCatalogExpand": "ขยายแค็ตตาล็อกการกำหนดเส้นทางอัตโนมัติ",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "ยังไม่มีการกำหนดค่าคอมโบ",
     "playgroundCreateFirst": "สร้างขึ้นมาก่อน",
     "weighted": "ถ่วงน้ำหนัก",
+    "weightPercent": "น้ำหนัก (%)",
     "leastUsed": "ใช้น้อยที่สุด",
     "costOpt": "ต้นทุน-การเลือก",
     "strategyGuideTitle": "วิธีใช้กลยุทธ์นี้",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# บัญชี} other {# บัญชี}}",
     "builderGlobalAdded": "เพิ่มแล้ว",
     "builderGlobalAdd": "เพิ่ม",
+    "clearSearch": "ล้างการค้นหา",
     "manualModel": "โมเดลแบบป้อนเอง",
     "manualModelInvalid": "ป้อนโมเดลในรูปแบบ provider/model",
     "manualModelUnknownProvider": "ไม่รู้จักคำนำหน้าผู้ให้บริการ",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "ความยาวเนื้อหาขั้นต่ำ (ตัวอักษร)",
     "responseValidationJsonPaths": "การตรวจสอบ JSON-path",
     "responseValidationAddCheck": "+ เพิ่มการตรวจสอบ",
+    "responseValidationRemoveCheck": "นำการตรวจสอบออก",
+    "responseValidationPath": "พาธ JSON",
+    "responseValidationCondition": "เงื่อนไข",
+    "responseValidationValue": "ค่าที่คาดหวัง",
     "agentFeaturesSystemMessageOverride": "แทนที่ข้อความของระบบ",
     "agentFeaturesSystemMessagePlaceholder": "คุณเป็นผู้ช่วยผู้เชี่ยวชาญ...",
     "agentFeaturesSystemMessageHint": "การแทนที่ข้อความของระบบสำหรับตัวแทน",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "สิ่งนี้จะจับภาพผู้ให้บริการ/โมเดลที่เชื่อมต่ออยู่ในปัจจุบันซึ่งตรงกับเทมเพลตนี้ลงในคอมโบที่แก้ไขได้",
     "duplicateAutoComboFailedPrefix": "ล้มเหลวในการทำสำเนาคอมโบอัตโนมัติ:",
     "duplicateAutoComboUnknownError": "ข้อผิดพลาดที่ไม่ทราบสาเหตุ",
-    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}",
-    "weightPercent": "น้ำหนัก (%)",
-    "clearSearch": "ล้างการค้นหา",
-    "responseValidationRemoveCheck": "นำการตรวจสอบออก",
-    "responseValidationPath": "พาธ JSON",
-    "responseValidationCondition": "เงื่อนไข",
-    "responseValidationValue": "ค่าที่คาดหวัง"
+    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}"
   },
   "costs": {
     "title": "ค่าใช้จ่าย",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "ป้ายกำกับรูปแบบ API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "จีนแผ่นดินใหญ่",
+    "apiRegionHint": "เลือกภูมิภาคของเอนด์พอยต์ที่ใช้สำหรับการเข้าถึง API และการติดตามโควตา",
+    "apiRegionInternational": "นานาชาติ",
+    "apiRegionLabel": "ภูมิภาค API",
     "apikey": "คีย์ API",
     "audio": "เสียง",
     "audioProvidersHeading": "หัวข้อผู้ให้บริการเสียง",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "เมื่อบัญชีนี้ถึงขีดจำกัดการใช้งาน 5 ชั่วโมงและ Anthropic เปิดให้ใช้ช่องทางที่มีลำดับความสำคัญต่ำลง OmniRoute จะยอมรับและส่งคำขอต่อไปโดยใช้ anthropic-usage-limit: slow จนกว่ารอบเวลาจะรีเซ็ต แทนที่จะพักการเชื่อมต่อ ขีดจำกัดรายสัปดาห์ยังคงมีผล และการตอบกลับอาจต้องรอความจุที่ว่าง",
     "claudeAutoLimitResetLabel": "รีเซ็ตขีดจำกัดเซสชันโดยอัตโนมัติ (สัปดาห์ละครั้ง)",
     "claudeAutoLimitResetDescription": "เมื่อบัญชีนี้ถึงขีดจำกัดการใช้งาน 5 ชั่วโมงและสามารถรีเซ็ตขีดจำกัดเซสชันได้ OmniRoute จะใช้สิทธิ์รีเซ็ตโดยอัตโนมัติและลองอีกครั้งด้วยความเร็วเต็มที่ โดยใช้สิทธิ์รีเซ็ตของบัญชีที่มีให้สัปดาห์ละครั้ง และยังคงนับรวมในขีดจำกัดรายสัปดาห์",
+    "codexPaidCreditsShort": "เครดิตเพิ่มเติม",
+    "codexPaidCreditsToggleTitle": "อนุญาตเครดิต Codex แบบชำระเงินหลังโควตาการสมัครสมาชิกหมด (อาจมีค่าใช้จ่ายเพิ่มเติม)",
+    "codexPaidCreditsEnabled": "เปิดใช้เครดิต Codex แบบชำระเงินแล้ว (อาจมีค่าใช้จ่ายเพิ่มเติม)",
+    "codexPaidCreditsDisabled": "ปิดใช้เครดิต Codex แบบชำระเงินแล้ว",
+    "failedUpdateCodexPaidCredits": "อัปเดตนโยบายเครดิต Codex แบบชำระเงินไม่สำเร็จ",
+    "allowCodexPaidCreditsLabel": "อนุญาตเครดิต Codex แบบชำระเงิน",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ข้ามคูลดาวน์ชั่วคราวเพื่อให้การเชื่อมต่อนี้ยังคงมีสิทธิ์ใช้งานได้แม้หลังจากเกิดข้อผิดพลาดที่กู้คืนได้ (สถานะสิ้นสุด เช่น ถูกแบน/หมดอายุ ยังคงมีผลอยู่)",
     "disableCoolingLabel": "ปิดใช้งานคูลดาวน์สำหรับการเชื่อมต่อนี้",
     "bulkPasteAdded": "{count, plural, one {เพิ่มคีย์แล้ว 1 คีย์} other {เพิ่มคีย์แล้ว # คีย์}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "รับ API key ได้ที่ monsterapi.ai",
       "moonshot": "เชื่อมต่อ Moonshot AI ด้วย API key.",
       "morph": "ระดับฟรี: 250K เครดิต/เดือน, $0",
+      "apmix": "เชื่อมต่อ Apmix ด้วยคีย์ API จาก apmix.ai/dashboard — สมาชิกเดียว หลายโมเดล",
       "nanogpt": "เชื่อมต่อ NanoGPT ด้วย API key.",
       "nebius": "เครดิตทดลองใช้ ~$1 เมื่อลงทะเบียนสำหรับการทดสอบ API",
       "nlpcloud": "NLP Cloud ใช้ API แชทบอทที่เป็นกรรมสิทธิ์แทน OpenAI chat/completions โดย OmniRoute จะปรับข้อความ OpenAI ให้เข้ากับ input/context/history และแสดงแคตตาล็อกภายในเครื่องของโมเดลแชทบอทที่รองรับ.",
@@ -6634,8 +6642,7 @@
       "kiro": "ระดับฟรี: 50 เครดิต/เดือน (~25K–100K โทเค็น) ⚠️ ToS ของ Kiro ห้ามใช้พร็อกซี/harness ของบุคคลที่สาม",
       "codex": "เชื่อมต่อ OpenAI Codex ด้วยโฟลว์ OAuth ที่มีอยู่",
       "qwen": "เชื่อมต่อ Qwen Code ด้วยโฟลว์ OAuth ที่มีอยู่",
-      "github-models": "สร้าง GitHub PAT ที่มีขอบเขต 'models: read' ที่ github.com/settings/tokens",
-      "apmix": "เชื่อมต่อ Apmix ด้วยคีย์ API จาก apmix.ai/dashboard — สมาชิกเดียว หลายโมเดล"
+      "github-models": "สร้าง GitHub PAT ที่มีขอบเขต 'models: read' ที่ github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} ยอมรับ ID โมเดลดั้งเดิมของผู้ให้บริการ นำเข้าจาก /models หรือเพิ่ม ID ที่กำหนดเองสำหรับการกำหนดเส้นทาง",
     "bedrockModelsDescription": "โมเดล Amazon Bedrock มีการกำหนดขอบเขตตามภูมิภาค AWS นำเข้าจาก /models หรือเพิ่มรหัสรุ่น Bedrock ที่เปิดใช้งานในภูมิภาคที่เลือก",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "ขีดจำกัดการทำงานพร้อมกันต่อโมเดล",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "ไม่บังคับ: หนึ่ง model=cap ต่อบรรทัด จับคู่กับ ID โมเดลอัปสตรีมที่ตรงกันทุกตัวอักษร คำขอส่วนเกินจะเข้าคิวในเครื่อง ปล่อยว่างหมายถึงไม่จำกัดต่อโมเดล",
-    "rateLimitOverridesModelConcurrencyInvalid": "รายการการทำงานพร้อมกันต่อโมเดล \"{entry}\" ไม่ถูกต้อง — ใช้ model=cap โดย cap เป็นจำนวนเต็มตั้งแต่ 1 ถึง {max}",
-    "codexPaidCreditsShort": "เครดิตเพิ่มเติม",
-    "codexPaidCreditsToggleTitle": "อนุญาตเครดิต Codex แบบชำระเงินหลังโควตาการสมัครสมาชิกหมด (อาจมีค่าใช้จ่ายเพิ่มเติม)",
-    "codexPaidCreditsEnabled": "เปิดใช้เครดิต Codex แบบชำระเงินแล้ว (อาจมีค่าใช้จ่ายเพิ่มเติม)",
-    "codexPaidCreditsDisabled": "ปิดใช้เครดิต Codex แบบชำระเงินแล้ว",
-    "failedUpdateCodexPaidCredits": "อัปเดตนโยบายเครดิต Codex แบบชำระเงินไม่สำเร็จ",
-    "allowCodexPaidCreditsLabel": "อนุญาตเครดิต Codex แบบชำระเงิน",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "รายการการทำงานพร้อมกันต่อโมเดล \"{entry}\" ไม่ถูกต้อง — ใช้ model=cap โดย cap เป็นจำนวนเต็มตั้งแต่ 1 ถึง {max}"
   },
   "settings": {
     "title": "การตั้งค่า",
@@ -7702,6 +7702,7 @@
     "configured": "กำหนดค่าแล้ว",
     "none": "ไม่มี",
     "modelOverrideValuePlaceholder": "ค่าตัวเลข",
+    "modelOverrideKey": "คีย์แทนที่",
     "modelOverrideReasoningEffortsPlaceholder": "ค่าที่คั่นด้วยเครื่องหมายจุลภาคภาษาอังกฤษ เช่น low, medium, high",
     "addKeyValue": "เพิ่มคีย์-ค่า",
     "noModelOverrides": "ไม่มีการกำหนดค่าการเขียนทับสำหรับโมเดลนี้",
@@ -8945,8 +8946,7 @@
       "statsTitle": "การตรวจพบตั้งแต่รีสตาร์ต",
       "statsEmpty": "ยังไม่มีการตรวจพบ",
       "statsRequest": "คำขอ"
-    },
-    "modelOverrideKey": "คีย์แทนที่"
+    }
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "แปลงสตรีมล้มเหลว"
   },
   "usage": {
+    "codexPaidCreditsLabel": "เครดิต Codex แบบชำระเงิน",
+    "codexPaidCreditsAvailable": "พร้อมใช้งาน (ไม่รายงานยอดคงเหลือ)",
+    "codexPaidCreditsUnavailable": "ไม่พร้อมใช้งานหรือถึงขีดจำกัดการใช้จ่ายแล้ว",
+    "codexPaidCreditsUnlimited": "ไม่จำกัด",
     "title": "การใช้งาน",
     "grokExtraUsageCredits": "เครดิตการใช้งานเพิ่มเติม",
     "grokAutoTopUp": "เติมเงินอัตโนมัติ",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "รีเฟรชล่าสุดเมื่อ",
     "providerQuota": "โควตาผู้ให้บริการ",
     "providerQuotaHomeHint": "สถานะแบบเรียลไทม์ของบัญชีที่เชื่อมต่อทั้งหมด",
-    "codexPaidCreditsLabel": "เครดิต Codex แบบชำระเงิน",
-    "codexPaidCreditsAvailable": "พร้อมใช้งาน (ไม่รายงานยอดคงเหลือ)",
-    "codexPaidCreditsUnavailable": "ไม่พร้อมใช้งานหรือถึงขีดจำกัดการใช้จ่ายแล้ว",
-    "codexPaidCreditsUnlimited": "ไม่จำกัด",
     "claudeResetCreditDefaultTitle": "รีเซ็ตขีดจำกัด Claude",
     "confirmRedeemClaudeResetCredit": "การแลกรับจะรีเซ็ตขีดจำกัดการใช้งาน Claude ที่เข้าเกณฑ์ทันที และจะใช้เครดิตนี้ไปอย่างถาวร",
     "claudeResetCreditsModalTitle": "เครดิตรีเซ็ต Claude",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "การดำเนินการเพิ่มเติม",
     "test": "ทดสอบ",
     "edit": "แก้ไข",
     "delete": "ลบ",
@@ -11610,8 +11611,7 @@
     "notMeasured": "ยังไม่ได้วัด",
     "upstream4xx": "{count} ข้อผิดพลาดไคลเอนต์ต้นทาง",
     "upstream5xx": "{count} ข้อผิดพลาดเซิร์ฟเวอร์ต้นทาง",
-    "uniformEgressLine": "{affected} จาก {exits} ช่องทางออก ล้มเหลวพร้อมกันบน {provider} (ในช่วง {hours} ชั่วโมงที่ผ่านมา) — ไม่ใช่ปัญหาของช่องทางออก",
-    "moreActions": "การดำเนินการเพิ่มเติม"
+    "uniformEgressLine": "{affected} จาก {exits} ช่องทางออก ล้มเหลวพร้อมกันบน {provider} (ในช่วง {hours} ชั่วโมงที่ผ่านมา) — ไม่ใช่ปัญหาของช่องทางออก"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "เวลาแฝง",
     "quota": "โควตา",
     "rangeWindow": "ช่วงเวลา {range}",
+    "timeRange": "ช่วงเวลา",
     "runtimeHealthBlend": "การผสมผสานรันไทม์/สถานะความพร้อม",
     "averageResponseTime": "เวลาตอบสนองเฉลี่ย",
     "worstQuota": "โควตาที่แย่ที่สุด",
@@ -13912,8 +13913,7 @@
     "unknown": "ไม่รู้จัก",
     "unknownProvider": "ผู้ให้บริการที่ไม่รู้จัก",
     "unknownModel": "โมเดลที่ไม่รู้จัก",
-    "resolvedTargetMetrics": "{requests} คำขอ · สำเร็จ {success} · {latency} · โควตา {quota}",
-    "timeRange": "ช่วงเวลา"
+    "resolvedTargetMetrics": "{requests} คำขอ · สำเร็จ {success} · {latency} · โควตา {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "โควตาการใช้งาน USD",

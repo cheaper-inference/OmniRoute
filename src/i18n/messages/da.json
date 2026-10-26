@@ -25,8 +25,10 @@
     "confirm": "Er du sikker?",
     "refresh": "Opdater",
     "close": "Luk",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Forrige side",
     "nextPage": "Næste side",
+    "pagination": "Sideinddeling",
     "capsLockOn": "Caps Lock er slået til",
     "dismissNotification": "Afvis notifikation",
     "toggleColumns": "Slå kolonner til/fra",
@@ -182,6 +184,7 @@
     "combos": "Kombinationer",
     "noModelsFound": "Ingen modeller fundet",
     "clear": "Ryd",
+    "clearFilters": "Ryd filtre",
     "done": "Færdig",
     "selectAll": "Vælg alle",
     "unselectAll": "Fravælg alle",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Forhåndsvisning",
     "batchFilePreviewTruncated": "Viser de første {shown} linjer ({total} linjer i alt)",
     "batchFileDownloadFull": "Download Fuld Fil",
-    "dialogTitleFallback": "Dialog",
-    "pagination": "Sideinddeling",
-    "clearFilters": "Ryd filtre",
     "tokensPageTitle": "Tokens",
     "tokensPageDescription": "Send tokens mellem API-nøgler, del invitationskoder, og forbind community-servere.",
     "tokensServerUrlLabel": "Server-URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Hurtig navigation",
     "quickNavigationTitle": "Hurtig navigation (⌘K / Ctrl+K)",
     "openQuickNavigation": "Åbn hurtig navigation",
+    "openMenu": "Åbn menu",
+    "products": "Keak-produkter",
     "switchToLightMode": "Skift til lys tilstand",
     "switchToDarkMode": "Skift til mørk tilstand",
     "language": "Sprog",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Avancerede payloadregler, anmodningsgrænser og proxy-API-indstillinger",
     "mitmProxyDescription": "Konfigurer MITM-proxyindstillinger til trafikinspektion og fejlfinding",
     "oneProxyDescription": "Konfigurer 1Proxy-indstillinger til avanceret proxykædning",
-    "omniSkillsDescription": "Installer og administrer sandbox-færdigheder til automatiseret prompt- og værktøjsafvikling",
-    "openMenu": "Åbn menu",
-    "products": "Keak-produkter"
+    "omniSkillsDescription": "Installer og administrer sandbox-færdigheder til automatiseret prompt- og værktøjsafvikling"
   },
   "cloudSyncStatus": {
     "synced": "Synkroniseret",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Kombination → {name}"
   },
   "combos": {
+    "title": "Kombinationer",
+    "description": "Skab modelkombinationer med vægtet routing og fallback-understøttelse",
+    "autoCatalogTitle": "Auto-routing katalog",
     "autoTosLoadError": "Politikken for tjenestevilkår kunne ikke indlæses. Prøv igen, før du ændrer den.",
     "autoTosSaveError": "Politikken for tjenestevilkår kunne ikke gemmes. Den tidligere indstilling vises stadig. Prøv igen.",
     "autoTosIncludeLabel": "Medtag udbydere markeret ToS: avoid i auto",
     "autoTosDescription": "Slået fra som standard. Gælder alle auto-kombinationer, ikke kun én konto. Tilslutning af en udbyder aktiverer ikke denne mulighed.",
-    "title": "Kombinationer",
-    "description": "Skab modelkombinationer med vægtet routing og fallback-understøttelse",
-    "autoCatalogTitle": "Auto-routing katalog",
     "autoCatalogTemplateCount": "{count} skabeloner",
     "autoCatalogDescription": "Indbyggede auto/*-kombinationer løst dynamisk fra tilsluttede udbydere. Brug et af disse id'er som modelfelt - ingen opsætning nødvendig.",
     "autoCatalogExpand": "Udvid auto-routing-kataloget",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Ingen kombinationer konfigureret endnu.",
     "playgroundCreateFirst": "Opret en først",
     "weighted": "Vægtet",
+    "weightPercent": "Vægt (%)",
     "leastUsed": "Mindst brugt",
     "costOpt": "Omkostningsoptimeret",
     "strategyGuideTitle": "Sådan bruger du denne strategi",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# konto} other {# konti}}",
     "builderGlobalAdded": "Tilføjet",
     "builderGlobalAdd": "Tilføj",
+    "clearSearch": "Ryd søgning",
     "manualModel": "Manuel model",
     "manualModelInvalid": "Indtast en model som udbyder/model.",
     "manualModelUnknownProvider": "Ukendt udbyderpræfiks.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Minimum indholdslængde (tegn)",
     "responseValidationJsonPaths": "JSON-path-kontroller",
     "responseValidationAddCheck": "+ Tilføj kontrol",
+    "responseValidationRemoveCheck": "Fjern kontrol",
+    "responseValidationPath": "JSON-sti",
+    "responseValidationCondition": "Betingelse",
+    "responseValidationValue": "Forventet værdi",
     "agentFeaturesSystemMessageOverride": "Tilsidesæt systemmeddelelse",
     "agentFeaturesSystemMessagePlaceholder": "Du er en ekspert assistent...",
     "agentFeaturesSystemMessageHint": "Systemmeddelelse tilsidesættelse for agenter",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil tage et øjebliksbillede af de aktuelt tilsluttede udbydere/modeller, der matcher denne skabelon, i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering af auto-kombination mislykkedes:",
     "duplicateAutoComboUnknownError": "Ukendt fejl",
-    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}",
-    "weightPercent": "Vægt (%)",
-    "clearSearch": "Ryd søgning",
-    "responseValidationRemoveCheck": "Fjern kontrol",
-    "responseValidationPath": "JSON-sti",
-    "responseValidationCondition": "Betingelse",
-    "responseValidationValue": "Forventet værdi"
+    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}"
   },
   "costs": {
     "title": "Omkostninger",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Etiket for API-format",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Fastlands-Kina",
+    "apiRegionHint": "Vælg den slutpunktsregion, der bruges til API-adgang og kvotesporing.",
+    "apiRegionInternational": "International",
+    "apiRegionLabel": "API-region",
     "apikey": "API-nøgle",
     "audio": "Lyd",
     "audioProvidersHeading": "Overskrift for lydudbydere",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Når denne konto når sin forbrugsgrænse på 5 timer, og Anthropic tilbyder banen med lavere prioritet, accepterer OmniRoute den og fortsætter med at sende anmodninger med anthropic-usage-limit: slow, indtil vinduet nulstilles, i stedet for at lade forbindelsen køle ned. Den ugentlige grænse gælder stadig, og svar kan komme til at vente på ledig kapacitet.",
     "claudeAutoLimitResetLabel": "Nulstil automatisk sessionsgrænsen (én gang om ugen)",
     "claudeAutoLimitResetDescription": "Når denne konto når sin forbrugsgrænse på 5 timer, og en nulstilling af sessionsgrænsen er tilgængelig, indløser OmniRoute den automatisk og prøver igen med fuld hastighed. Bruger kontoens ugentlige nulstilling og tæller stadig med i den ugentlige grænse.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Spring den midlertidige nedkølingsperiode over, så denne forbindelse fortsat kan bruges, selv efter fejl, der kan afhjælpes (sluttilstande som blokeret/udløbet gælder stadig).",
     "disableCoolingLabel": "Deaktiver afkøling for denne forbindelse",
     "bulkPasteAdded": "{count, plural, one {1 nøgle tilføjet} other {# nøgler tilføjet}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Få API-nøgle på monsterapi.ai",
       "moonshot": "Forbind Moonshot AI med en API-nøgle.",
       "morph": "Gratis niveau: 250K kreditter/måned, $0",
+      "apmix": "Forbind Apmix med en API-nøgle fra apmix.ai/dashboard — ét abonnement, mange modeller.",
       "nanogpt": "Forbind NanoGPT med en API-nøgle.",
       "nebius": "~$1 prøvekredit ved tilmelding til API-test",
       "nlpcloud": "NLP Cloud bruger en proprietær chatbot-API i stedet for OpenAI chat/completions. OmniRoute tilpasser OpenAI-meddelelser til input/kontekst/historik og eksponerer et lokalt katalog over understøttede chatbot-modeller.",
@@ -6634,8 +6642,7 @@
       "kiro": "Gratis niveau: 50 kreditter/måned (~25K–100K tokens). ⚠️ Kiro ToS forbyder brug af tredjeparts proxy/harness.",
       "codex": "Forbind OpenAI Codex med det eksisterende OAuth-flow.",
       "qwen": "Forbind Qwen Code med det eksisterende OAuth-flow.",
-      "github-models": "Opret et GitHub PAT med 'models: read'-scope på github.com/settings/tokens",
-      "apmix": "Forbind Apmix med en API-nøgle fra apmix.ai/dashboard — ét abonnement, mange modeller."
+      "github-models": "Opret et GitHub PAT med 'models: read'-scope på github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} accepterer udbyder-native model-id'er. Importer fra /models eller tilføj brugerdefinerede id'er til routing.",
     "bedrockModelsDescription": "Amazon Bedrock-modeller er omfattet af AWS-regionen. Importer fra /models eller tilføj Bedrock-model-id'er aktiveret i det valgte område.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Indstillinger",
@@ -7702,6 +7702,7 @@
     "configured": "konfigureret",
     "none": "Ingen",
     "modelOverrideValuePlaceholder": "Numerisk værdi",
+    "modelOverrideKey": "Tilsidesættelsesnøgle",
     "modelOverrideReasoningEffortsPlaceholder": "Kommasepareret på engelsk, f.eks. low, medium, high",
     "addKeyValue": "Tilføj nøgleværdi",
     "noModelOverrides": "Ingen tilsidesættelser konfigureret for denne model.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Fund siden genstart",
       "statsEmpty": "Ingen fund endnu.",
       "statsRequest": "Anmodninger"
-    },
-    "modelOverrideKey": "Tilsidesættelsesnøgle"
+    }
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Kunne ikke transformere stream"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Brug",
     "grokExtraUsageCredits": "Ekstra Brugs Kreditter",
     "grokAutoTopUp": "Auto Opladning",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Sidst opdateret",
     "providerQuota": "Udbyderkvote",
     "providerQuotaHomeHint": "Livestatus på tværs af tilknyttede konti",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Nulstilling af Claude-grænse",
     "confirmRedeemClaudeResetCredit": "Indløsning nulstiller øjeblikkeligt de gældende Claude-brugsgrænser og forbruger denne kredit permanent.",
     "claudeResetCreditsModalTitle": "Claude-nulstillingskreditter",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Flere handlinger",
     "test": "Test",
     "edit": "Rediger",
     "delete": "Slet",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Ikke målt",
     "upstream4xx": "{count} opstrøms klientfejl",
     "upstream5xx": "{count} opstrøms serverfejl",
-    "uniformEgressLine": "{affected} af {exits} udgange fejler sammen på {provider} (seneste {hours} t) — ikke et udgangsproblem",
-    "moreActions": "Flere handlinger"
+    "uniformEgressLine": "{affected} af {exits} udgange fejler sammen på {provider} (seneste {hours} t) — ikke et udgangsproblem"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Latens",
     "quota": "Kvote",
     "rangeWindow": "{range}-vindue",
+    "timeRange": "Tidsinterval",
     "runtimeHealthBlend": "runtime-/sundhedsblanding",
     "averageResponseTime": "gennemsnitlig svartid",
     "worstQuota": "Dårligste kvote",
@@ -13912,8 +13913,7 @@
     "unknown": "ukendt",
     "unknownProvider": "ukendt udbyder",
     "unknownModel": "ukendt model",
-    "resolvedTargetMetrics": "{requests} anmodn. · {success} succes · {latency} · kvote {quota}",
-    "timeRange": "Tidsinterval"
+    "resolvedTargetMetrics": "{requests} anmodn. · {success} succes · {latency} · kvote {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-forbrugskvote",

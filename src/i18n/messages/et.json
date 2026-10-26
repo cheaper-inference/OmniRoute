@@ -25,8 +25,10 @@
     "confirm": "Kas olete kindel?",
     "refresh": "Värskenda",
     "close": "Sulge",
+    "dialogTitleFallback": "Dialoog",
     "previousPage": "Eelmine leht",
     "nextPage": "Järgmine leht",
+    "pagination": "Lehekülgjaotus",
     "capsLockOn": "Suurtähelukk on sisse lülitatud",
     "dismissNotification": "Sulge teavitus",
     "toggleColumns": "Kuva või peida veerud",
@@ -182,6 +184,7 @@
     "combos": "Kombinatsioonid",
     "noModelsFound": "Mudeleid ei leitud",
     "clear": "Tühjenda",
+    "clearFilters": "Tühjenda filtrid",
     "done": "Valmis",
     "selectAll": "Vali kõik",
     "unselectAll": "Tühista kõik valikud",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Eelvaade",
     "batchFilePreviewTruncated": "Kuvatakse esimesed {shown} rida (kokku {total} rida)",
     "batchFileDownloadFull": "Laadi alla kogu fail",
-    "dialogTitleFallback": "Dialoog",
-    "pagination": "Lehekülgjaotus",
-    "clearFilters": "Tühjenda filtrid",
     "tokensPageTitle": "Tokenid",
     "tokensPageDescription": "Saada tokeneid API-võtmete vahel, jaga kutsekoode ja ühenda kogukonnaservereid.",
     "tokensServerUrlLabel": "Serveri URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Kiirnavigeerimine",
     "quickNavigationTitle": "Kiirnavigeerimine (⌘K / Ctrl+K)",
     "openQuickNavigation": "Ava kiirnavigeerimine",
+    "openMenu": "Ava menüü",
+    "products": "Keaki tooted",
     "switchToLightMode": "Lülitu heledale režiimile",
     "switchToDarkMode": "Lülitu tumedale režiimile",
     "language": "Keel",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Täpsemad andmekoormuse reeglid, päringupiirangud ja puhverserveri API sätted",
     "mitmProxyDescription": "Seadista MITM-puhverserveri sätted liikluse kontrollimiseks ja silumiseks",
     "oneProxyDescription": "Seadista 1Proxy sätted täpsema puhverserveriahela jaoks",
-    "omniSkillsDescription": "Installi ja halda liivakastioskusi viipade ning tööriistade automaatseks käivitamiseks",
-    "openMenu": "Ava menüü",
-    "products": "Keaki tooted"
+    "omniSkillsDescription": "Installi ja halda liivakastioskusi viipade ning tööriistade automaatseks käivitamiseks"
   },
   "cloudSyncStatus": {
     "synced": "Sünkroonitud",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Kombinatsioon → {name}"
   },
   "combos": {
+    "title": "Kombinatsioonid",
+    "description": "Loo kaalutud marsruutimise ja varuvalikute toega mudelikombinatsioone",
+    "autoCatalogTitle": "Automaatse marsruutimise kataloog",
     "autoTosLoadError": "Teenustingimuste reegleid ei saanud laadida. Enne nende muutmist proovige uuesti.",
     "autoTosSaveError": "Teenustingimuste reegleid ei saanud salvestada. Kuvatakse endiselt eelmine säte. Proovige uuesti.",
     "autoTosIncludeLabel": "Kaasa auto-valikusse pakkujad märkega ToS: avoid",
     "autoTosDescription": "Vaikimisi välja lülitatud. Kehtib kõigile auto-kombinatsioonidele, mitte ainult ühele kontole. Pakkuja ühendamine seda valikut ei lülita sisse.",
-    "title": "Kombinatsioonid",
-    "description": "Loo kaalutud marsruutimise ja varuvalikute toega mudelikombinatsioone",
-    "autoCatalogTitle": "Automaatse marsruutimise kataloog",
     "autoCatalogTemplateCount": "{count} malli",
     "autoCatalogDescription": "Sisseehitatud auto/* kombinatsioonid, mis määratakse dünaamiliselt ühendatud teenusepakkujate põhjal. Kasuta mudeli väljal ükskõik millist neist ID-dest — seadistamine pole vajalik.",
     "autoCatalogExpand": "Laienda automaatse marsruutimise kataloogi",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Ühtegi kombot pole veel seadistatud.",
     "playgroundCreateFirst": "Looge esmalt kombo",
     "weighted": "Kaalutud",
+    "weightPercent": "Kaal (%)",
     "leastUsed": "Vähim kasutatud",
     "costOpt": "Kuluoptimeeritud",
     "strategyGuideTitle": "Kuidas seda strateegiat kasutada",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# konto} other {# kontot}}",
     "builderGlobalAdded": "Lisatud",
     "builderGlobalAdd": "Lisa",
+    "clearSearch": "Tühjenda otsing",
     "manualModel": "Käsitsi lisatav mudel",
     "manualModelInvalid": "Sisestage mudel kujul provider/model.",
     "manualModelUnknownProvider": "Tundmatu teenusepakkuja prefiks.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Sisu minimaalne pikkus (tähemärkides)",
     "responseValidationJsonPaths": "JSONPathi kontrollid",
     "responseValidationAddCheck": "+ Lisa kontroll",
+    "responseValidationRemoveCheck": "Eemalda kontroll",
+    "responseValidationPath": "JSON-i tee",
+    "responseValidationCondition": "Tingimus",
+    "responseValidationValue": "Eeldatav väärtus",
     "agentFeaturesSystemMessageOverride": "Alista süsteemisõnum",
     "agentFeaturesSystemMessagePlaceholder": "Oled asjatundlik assistent...",
     "agentFeaturesSystemMessageHint": "Agentide süsteemisõnumi alistus",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "See salvestab hetkel ühendatud ja sellele mallile vastavad teenusepakkujad/mudelid redigeeritavasse kombinatsiooni.",
     "duplicateAutoComboFailedPrefix": "Automaatse kombinatsiooni dubleerimine ebaõnnestus:",
     "duplicateAutoComboUnknownError": "Tundmatu viga",
-    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon",
-    "weightPercent": "Kaal (%)",
-    "clearSearch": "Tühjenda otsing",
-    "responseValidationRemoveCheck": "Eemalda kontroll",
-    "responseValidationPath": "JSON-i tee",
-    "responseValidationCondition": "Tingimus",
-    "responseValidationValue": "Eeldatav väärtus"
+    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon"
   },
   "costs": {
     "title": "Kulud",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API-vormingu silt",
     "apiKeyOptionalHint": "Jätke tühjaks, kui teie kohalik seadistus või teenusepakkuja ei nõua autentimist.",
     "apiKeyOptionalLabel": "API-võti (valikuline)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Mandri-Hiina",
+    "apiRegionHint": "Valige lõpp-punkti piirkond, mida kasutatakse API juurdepääsuks ja kvoodi jälgimiseks.",
+    "apiRegionInternational": "Rahvusvaheline",
+    "apiRegionLabel": "API piirkond",
     "apikey": "API-võti",
     "audio": "Heli",
     "audioProvidersHeading": "Heliteenuste pakkujate pealkiri",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Kui see konto jõuab oma 5-tunnise kasutuslimiidini ja Anthropic pakub madalama prioriteediga riba, aktsepteerib OmniRoute seda ja saadab jätkuvalt päringuid päisega anthropic-usage-limit: slow kuni aken lähtestub, selle asemel et ühendust jahutada. Nädalane limiit kehtib endiselt ja vastused võivad oodata vaba mahtuvuse järele.",
     "claudeAutoLimitResetLabel": "Lähtesta sessioonilimiit automaatselt (üks kord nädalas)",
     "claudeAutoLimitResetDescription": "Kui see konto jõuab oma 5-tunnise kasutuslimiidini ja sessioonilimiidi lähtestamine on saadaval, kasutab OmniRoute selle automaatselt ära ning proovib täiskiirusel uuesti. Kasutab konto ühekordset nädalast lähtestamist ja see arvestatakse endiselt nädalasesse limiiti.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Jäta ajutine ooteaeg vahele, et see ühendus jääks kasutatavaks ka pärast taastatavaid vigu (lõppolekud, nagu blokeeritud või aegunud, kehtivad endiselt).",
     "disableCoolingLabel": "Keela selle ühenduse ooteaeg",
     "bulkPasteAdded": "{count, plural, one {Lisati 1 võti} other {Lisati # võtit}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Hangi API-võti aadressilt monsterapi.ai",
       "moonshot": "Ühenda Kimi API-võtmega.",
       "morph": "Tasuta pakett: 250K krediiti kuus, $0",
+      "apmix": "Ühenda Apmix API võtmega saidilt apmix.ai/dashboard — üks tellimus, palju mudeleid.",
       "nanogpt": "Ühenda NanoGPT API-võtmega.",
       "nebius": "Registreerumisel API testimiseks ~$1 proovikrediiti",
       "nlpcloud": "NLP Cloud kasutab OpenAI chat/completionsi asemel omanduslikku vestlusroboti API-t. OmniRoute kohandab OpenAI sõnumid sisendiks, kontekstiks ja ajalooks ning pakub toetatud vestlusrobotimudelite kohalikku kataloogi.",
@@ -6634,8 +6642,7 @@
       "kiro": "Tasuta pakett: 50 krediiti kuus (~25K–100K tokenit). ⚠️ Kiro kasutustingimused keelavad kolmanda osapoole puhverserveri või rakenduskesta kasutamise.",
       "codex": "Ühenda OpenAI Codex olemasoleva OAuth-vooga.",
       "qwen": "Ühenda Qwen Code olemasoleva OAuth-vooga.",
-      "github-models": "Loo aadressil github.com/settings/tokens GitHub PAT õigusega „models: read”",
-      "apmix": "Ühenda Apmix API võtmega saidilt apmix.ai/dashboard — üks tellimus, palju mudeleid."
+      "github-models": "Loo aadressil github.com/settings/tokens GitHub PAT õigusega „models: read”"
     },
     "passthroughModelsDescription": "{provider} aktsepteerib teenusepakkuja omavormingus mudeli-ID-sid. Impordi need lehelt /models või lisa marsruutimiseks kohandatud ID-d.",
     "bedrockModelsDescription": "Amazon Bedrocki mudelid on seotud AWS-i piirkonnaga. Impordi need lehelt /models või lisa valitud piirkonnas lubatud Bedrocki mudelite ID-d.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Seaded",
@@ -7702,6 +7702,7 @@
     "configured": "seadistatud",
     "none": "Puudub",
     "modelOverrideValuePlaceholder": "Arvväärtus",
+    "modelOverrideKey": "Alistusvõti",
     "modelOverrideReasoningEffortsPlaceholder": "Komadega eraldatud ingliskeelsed väärtused, nt low, medium, high",
     "addKeyValue": "Lisa võtme-väärtuse paar",
     "noModelOverrides": "Selle mudeli jaoks pole alistusi seadistatud.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Tuvastused alates taaskäivitusest",
       "statsEmpty": "Tuvastusi veel pole.",
       "statsRequest": "Päringud"
-    },
-    "modelOverrideKey": "Alistusvõti"
+    }
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Voo teisendamine nurjus"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Kasutus",
     "grokExtraUsageCredits": "Täiendavad kasutuskrediidid",
     "grokAutoTopUp": "Automaatne saldo täiendamine",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Viimati värskendatud",
     "providerQuota": "Teenusepakkuja kvoot",
     "providerQuotaHomeHint": "Ühendatud kontode reaalajas olek",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Claude'i limiidi lähtestamine",
     "confirmRedeemClaudeResetCredit": "Lunastamine lähtestab kohe kohaldatavad Claude'i kasutuslimiidid ja kulutab selle krediidi jäädavalt.",
     "claudeResetCreditsModalTitle": "Claude'i lähtestuskrediidid",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Seisund (24 h)",
     "tableUsage": "Kasutus",
     "tableActions": "Toimingud",
+    "moreActions": "Rohkem toiminguid",
     "test": "Testi",
     "edit": "Muuda",
     "delete": "Kustuta",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Mõõtmata",
     "upstream4xx": "{count} ülespoole kliendivigad",
     "upstream5xx": "{count} ülespoole serverivigad",
-    "uniformEgressLine": "{affected} {exits} väljumistest ebaõnnestuvad koos {provider} (viimased {hours}h) — mitte väljumisprobleem",
-    "moreActions": "Rohkem toiminguid"
+    "uniformEgressLine": "{affected} {exits} väljumistest ebaõnnestuvad koos {provider} (viimased {hours}h) — mitte väljumisprobleem"
   },
   "playground": {
     "title": "Mudelite testkeskkond",
@@ -13858,6 +13858,7 @@
     "latency": "Latentsus",
     "quota": "Kvoot",
     "rangeWindow": "Ajavahemik: {range}",
+    "timeRange": "Ajavahemik",
     "runtimeHealthBlend": "käitusaja ja seisundi koondnäitaja",
     "averageResponseTime": "keskmine reageerimisaeg",
     "worstQuota": "Halvim kvoodiseis",
@@ -13912,8 +13913,7 @@
     "unknown": "tundmatu",
     "unknownProvider": "tundmatu teenusepakkuja",
     "unknownModel": "tundmatu mudel",
-    "resolvedTargetMetrics": "{requests} päringut · {success} õnnestunud · {latency} · kvoot {quota}",
-    "timeRange": "Ajavahemik"
+    "resolvedTargetMetrics": "{requests} päringut · {success} õnnestunud · {latency} · kvoot {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-kasutuskvoot",

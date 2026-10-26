@@ -25,8 +25,10 @@
     "confirm": "Oletko varma?",
     "refresh": "Päivitä",
     "close": "Sulje",
+    "dialogTitleFallback": "Valintaikkuna",
     "previousPage": "Edellinen sivu",
     "nextPage": "Seuraava sivu",
+    "pagination": "Sivutus",
     "capsLockOn": "Caps Lock on päällä",
     "dismissNotification": "Hylkää ilmoitus",
     "toggleColumns": "Vaihda sarakkeita",
@@ -182,6 +184,7 @@
     "combos": "Yhdistelmät",
     "noModelsFound": "Malleja ei löytynyt",
     "clear": "Tyhjennä",
+    "clearFilters": "Tyhjennä suodattimet",
     "done": "Valmis",
     "selectAll": "Valitse kaikki",
     "unselectAll": "Poista valinnat",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Esikatselu",
     "batchFilePreviewTruncated": "Näytetään ensimmäiset {shown} riviä ({total} yhteensä riviä)",
     "batchFileDownloadFull": "Lataa Koko Tiedosto",
-    "dialogTitleFallback": "Valintaikkuna",
-    "pagination": "Sivutus",
-    "clearFilters": "Tyhjennä suodattimet",
     "tokensPageTitle": "Tokenit",
     "tokensPageDescription": "Lähetä tokeneita API-avainten välillä, jaa kutsukoodeja ja yhdistä yhteisöpalvelimia.",
     "tokensServerUrlLabel": "Palvelimen URL-osoite"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Pikasiirtyminen",
     "quickNavigationTitle": "Pikasiirtyminen (⌘K / Ctrl+K)",
     "openQuickNavigation": "Avaa pikasiirtyminen",
+    "openMenu": "Avaa valikko",
+    "products": "Keak-tuotteet",
     "switchToLightMode": "Vaihda vaaleaan tilaan",
     "switchToDarkMode": "Vaihda tummaan tilaan",
     "language": "Kieli",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Edistyneet hyötykuormasäännöt, pyyntörajat ja välityspalvelimen API-asetukset",
     "mitmProxyDescription": "Määritä MITM-välityspalvelimen asetukset liikenteen tarkastusta ja virheenkorjausta varten",
     "oneProxyDescription": "Määritä 1Proxy-asetukset edistyneeseen välityspalvelinten ketjutukseen",
-    "omniSkillsDescription": "Asenna ja hallitse hiekkalaatikkotaitoja automaattista kehotteiden ja työkalujen suorittamista varten",
-    "openMenu": "Avaa valikko",
-    "products": "Keak-tuotteet"
+    "omniSkillsDescription": "Asenna ja hallitse hiekkalaatikkotaitoja automaattista kehotteiden ja työkalujen suorittamista varten"
   },
   "cloudSyncStatus": {
     "synced": "Synkronoitu",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Yhdistelmä → {name}"
   },
   "combos": {
+    "title": "Yhdistelmät",
+    "description": "Luo mallikomboja painotetulla reitityksellä ja varatuella",
+    "autoCatalogTitle": "Automaattinen reititysluettelo",
     "autoTosLoadError": "Käyttöehtokäytäntöä ei voitu ladata. Yritä uudelleen ennen sen muuttamista.",
     "autoTosSaveError": "Käyttöehtokäytäntöä ei voitu tallentaa. Aiempi asetus näkyy edelleen. Yritä uudelleen.",
     "autoTosIncludeLabel": "Sisällytä ToS: avoid -merkityt palveluntarjoajat auto-valintaan",
     "autoTosDescription": "Oletuksena pois käytöstä. Koskee kaikkia auto-yhdistelmiä, ei vain yhtä tiliä. Palveluntarjoajan yhdistäminen ei ota tätä asetusta käyttöön.",
-    "title": "Yhdistelmät",
-    "description": "Luo mallikomboja painotetulla reitityksellä ja varatuella",
-    "autoCatalogTitle": "Automaattinen reititysluettelo",
     "autoCatalogTemplateCount": "{count} malleja",
     "autoCatalogDescription": "Sisäänrakennetut auto/*-yhdistelmät, jotka on ratkaistu dynaamisesti yhdistettyjen palveluntarjoajien kautta. Käytä mitä tahansa näistä tunnuksista mallikenttänä – asetusta ei tarvita.",
     "autoCatalogExpand": "Laajenna automaattisen reitityksen luettelo",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Yhdistelmiä ei ole vielä määritetty.",
     "playgroundCreateFirst": "Luo ensin yksi",
     "weighted": "Painotettu",
+    "weightPercent": "Painoarvo (%)",
     "leastUsed": "Vähiten käytetty",
     "costOpt": "Kustannus-opt",
     "strategyGuideTitle": "Kuinka käyttää tätä strategiaa",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# tili} other {# tiliä}}",
     "builderGlobalAdded": "Lisätty",
     "builderGlobalAdd": "Lisää",
+    "clearSearch": "Tyhjennä haku",
     "manualModel": "Manuaalinen malli",
     "manualModelInvalid": "Syötä malli muodossa tarjoaja/malli.",
     "manualModelUnknownProvider": "Tuntematon tarjoajan etuliite.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Sisällön vähimmäispituus (merkkiä)",
     "responseValidationJsonPaths": "JSON-polun tarkistukset",
     "responseValidationAddCheck": "+ Lisää tarkistus",
+    "responseValidationRemoveCheck": "Poista tarkistus",
+    "responseValidationPath": "JSON-polku",
+    "responseValidationCondition": "Ehto",
+    "responseValidationValue": "Odotettu arvo",
     "agentFeaturesSystemMessageOverride": "Ohita järjestelmäviesti",
     "agentFeaturesSystemMessagePlaceholder": "Olet asiantuntija-assistentti...",
     "agentFeaturesSystemMessageHint": "Järjestelmäviestien ohitus agenteille",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Tämä tallentaa tämän mallin mukaiset tällä hetkellä yhdistetyt tarjoajat/mallit muokattavaan yhdistelmään.",
     "duplicateAutoComboFailedPrefix": "Automaattisen yhdistelmän kaksoiskappaleen luonti epäonnistui:",
     "duplicateAutoComboUnknownError": "Tuntematon virhe",
-    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}",
-    "weightPercent": "Painoarvo (%)",
-    "clearSearch": "Tyhjennä haku",
-    "responseValidationRemoveCheck": "Poista tarkistus",
-    "responseValidationPath": "JSON-polku",
-    "responseValidationCondition": "Ehto",
-    "responseValidationValue": "Odotettu arvo"
+    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}"
   },
   "costs": {
     "title": "Kustannukset",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API-muodon tunniste",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Manner-Kiina",
+    "apiRegionHint": "Valitse päätepisteen alue, jota käytetään API-käyttöön ja kiintiön seurantaan.",
+    "apiRegionInternational": "Kansainvälinen",
+    "apiRegionLabel": "API-alue",
     "apikey": "API-avain",
     "audio": "Ääni",
     "audioProvidersHeading": "Äänipalveluntarjoajat",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Kun tämä tili saavuttaa 5 tunnin käyttörajan ja Anthropic tarjoaa matalamman prioriteetin kaistaa, OmniRoute hyväksyy sen ja jatkaa pyyntöjen lähettämistä anthropic-usage-limit: slow -tilassa, kunnes ikkuna nollautuu, sen sijaan että jäähdyttäisi yhteyden. Viikoittainen raja on edelleen voimassa ja vastaukset saattavat odottaa vapaata kapasiteettia.",
     "claudeAutoLimitResetLabel": "Nollaa istuntoraja automaattisesti (kerran viikossa)",
     "claudeAutoLimitResetDescription": "Kun tämä tili saavuttaa 5 tunnin käyttörajan ja istuntorajan nollaus on saatavilla, OmniRoute käyttää sen automaattisesti ja yrittää uudelleen täydellä nopeudella. Käyttää tilin kerran viikossa tapahtuvaa nollausta ja lasketaan edelleen viikoittaiseen rajaan.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ohita tilapäinen jäädytysaika, jotta tämä yhteys pysyy käytettävissä myös palautettavien virheiden jälkeen (lopulliset tilat, kuten estetty/vanhentunut, ovat edelleen voimassa).",
     "disableCoolingLabel": "Poista jäädytysaika käytöstä tälle yhteydelle",
     "bulkPasteAdded": "{count, plural, one {1 avain lisätty} other {# avainta lisätty}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Hanki API-avain osoitteesta monsterapi.ai",
       "moonshot": "Yhdistä Moonshot AI API-avaimella.",
       "morph": "Ilmainen taso: 250K krediittiä/kk, $0",
+      "apmix": "Yhdistä Apmix API-avaimella osoitteesta apmix.ai/dashboard — yksi tilaus, monta mallia.",
       "nanogpt": "Yhdistä NanoGPT API-avaimella.",
       "nebius": "~$1 kokeilusaldoa rekisteröitymisen yhteydessä API-testaukseen",
       "nlpcloud": "NLP Cloud käyttää omaa chatbot-API:aan OpenAI:n chat/completions-rajapinnan sijaan. OmniRoute mukauttaa OpenAI-viestit muotoon input/context/history ja tarjoaa paikallisen luettelon tuetuista chatbot-malleista.",
@@ -6634,8 +6642,7 @@
       "kiro": "Maksuton taso: 50 krediittiä kuukaudessa (~25K–100K tokenia). ⚠️ Kiro ToS kieltää kolmannen osapuolen välityspalvelujen ja harness-työkalujen käytön.",
       "codex": "Yhdistä OpenAI Codex olemassa olevalla OAuth-työnkululla.",
       "qwen": "Yhdistä Qwen Code olemassa olevalla OAuth-työnkululla.",
-      "github-models": "Luo GitHub PAT -tunniste 'models: read' -käyttöoikeudella osoitteessa github.com/settings/tokens",
-      "apmix": "Yhdistä Apmix API-avaimella osoitteesta apmix.ai/dashboard — yksi tilaus, monta mallia."
+      "github-models": "Luo GitHub PAT -tunniste 'models: read' -käyttöoikeudella osoitteessa github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} hyväksyy palveluntarjoajan alkuperäiset mallitunnukset. Tuo /modelsista tai lisää mukautettuja tunnuksia reititystä varten.",
     "bedrockModelsDescription": "Amazon Bedrock -mallit on luokiteltu AWS-alueen mukaan. Tuo osoitteesta /models tai lisää valitulla alueella käytössä olevat kallioperän mallitunnukset.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Asetukset",
@@ -7702,6 +7702,7 @@
     "configured": "määritetty",
     "none": "Ei mitään",
     "modelOverrideValuePlaceholder": "Numeerinen arvo",
+    "modelOverrideKey": "Ohitusavain",
     "modelOverrideReasoningEffortsPlaceholder": "Englanniksi pilkuilla eroteltuna, esim. low, medium, high",
     "addKeyValue": "Lisää avain-arvo",
     "noModelOverrides": "Tälle mallille ei ole määritetty ohituksia.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Havainnot uudelleenkäynnistyksen jälkeen",
       "statsEmpty": "Ei vielä havaintoja.",
       "statsRequest": "Pyynnöt"
-    },
-    "modelOverrideKey": "Ohitusavain"
+    }
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Virran muuntaminen epäonnistui"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Käyttö",
     "grokExtraUsageCredits": "Lisäkäyttöluottoja",
     "grokAutoTopUp": "Automaattinen Lataus",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Viimeksi päivitetty",
     "providerQuota": "Tarjoajan kiintiö",
     "providerQuotaHomeHint": "Reaaliaikainen tila yhdistetyissä tileissä",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Claude-rajojen nollaus",
     "confirmRedeemClaudeResetCredit": "Lunastaminen nollaa soveltuvat Claude-käyttörajat välittömästi ja kuluttaa tämän krediitin pysyvästi.",
     "claudeResetCreditsModalTitle": "Claude-nollauskrediitit",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Lisää toimintoja",
     "test": "Testaa",
     "edit": "Muokkaa",
     "delete": "Poista",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Ei mitattu",
     "upstream4xx": "{count} ylävirta-asiakasvirheet",
     "upstream5xx": "{count} ylävirta-palvelinvirheet",
-    "uniformEgressLine": "{affected} kpl {exits} poistoa epäonnistuu yhdessä {provider} (viimeisen {hours}h) — ei ole poistoprobleema",
-    "moreActions": "Lisää toimintoja"
+    "uniformEgressLine": "{affected} kpl {exits} poistoa epäonnistuu yhdessä {provider} (viimeisen {hours}h) — ei ole poistoprobleema"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Viive",
     "quota": "Kiintiö",
     "rangeWindow": "{range} -ikkuna",
+    "timeRange": "Aikaväli",
     "runtimeHealthBlend": "ajonaikainen/terveydentila-yhdistelmä",
     "averageResponseTime": "keskimääräinen vastausaika",
     "worstQuota": "Huonoin kiintiö",
@@ -13912,8 +13913,7 @@
     "unknown": "tuntematon",
     "unknownProvider": "tuntematon tarjoaja",
     "unknownModel": "tuntematon malli",
-    "resolvedTargetMetrics": "{requests} pyyntöä · {success} onnistunut · {latency} · kiintiö {quota}",
-    "timeRange": "Aikaväli"
+    "resolvedTargetMetrics": "{requests} pyyntöä · {success} onnistunut · {latency} · kiintiö {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-käyttökiintiö",

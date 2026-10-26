@@ -25,8 +25,10 @@
     "confirm": "நிச்சயமாகத் தொடர விரும்புகிறீர்களா?",
     "refresh": "புதுப்பி",
     "close": "மூடு",
+    "dialogTitleFallback": "உரையாடல் பெட்டி",
     "previousPage": "முந்தைய பக்கம்",
     "nextPage": "அடுத்த பக்கம்",
+    "pagination": "பக்கப் பிரிப்பு",
     "capsLockOn": "Caps Lock இயக்கத்தில் உள்ளது",
     "dismissNotification": "அறிவிப்பை நிராகரிக்கவும்",
     "toggleColumns": "நெடுவரிசைகளை நிலைமாற்றவும்",
@@ -182,6 +184,7 @@
     "combos": "சேர்க்கைகள்",
     "noModelsFound": "மாதிரிகள் எதுவும் கிடைக்கவில்லை",
     "clear": "அழிக்கவும்",
+    "clearFilters": "வடிப்பான்களை அழி",
     "done": "முடிந்தது",
     "selectAll": "அனைத்தையும் தேர்ந்தெடு",
     "unselectAll": "தேர்வை நீக்கு",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "முன்காட்சி",
     "batchFilePreviewTruncated": "முதல் {shown} வரிகளை காட்டு ({total} மொத்த வரிகள்)",
     "batchFileDownloadFull": "முழு கோப்பை பதிவிறக்கம் செய்க",
-    "dialogTitleFallback": "உரையாடல் பெட்டி",
-    "pagination": "பக்கப் பிரிப்பு",
-    "clearFilters": "வடிப்பான்களை அழி",
     "tokensPageTitle": "டோக்கன்கள்",
     "tokensPageDescription": "API விசைகளுக்கு இடையே டோக்கன்களை அனுப்பவும், அழைப்புக் குறியீடுகளைப் பகிரவும், சமூக சேவையகங்களை இணைக்கவும்.",
     "tokensServerUrlLabel": "சேவையக URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "விரைவு வழிசெலுத்தல்",
     "quickNavigationTitle": "விரைவு வழிசெலுத்தல் (⌘K / Ctrl+K)",
     "openQuickNavigation": "விரைவு வழிசெலுத்தலைத் திறக்கவும்",
+    "openMenu": "பட்டியைத் திற",
+    "products": "Keak தயாரிப்புகள்",
     "switchToLightMode": "வெளிச்சப் பயன்முறைக்கு மாறவும்",
     "switchToDarkMode": "இருண்ட பயன்முறைக்கு மாறவும்",
     "language": "மொழி",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "மேம்பட்ட பேலோடு விதிகள், கோரிக்கை வரம்புகள் மற்றும் ப்ராக்ஸி API அமைப்புகள்",
     "mitmProxyDescription": "போக்குவரத்து ஆய்வு மற்றும் பிழைத்திருத்தத்திற்கான MITM ப்ராக்ஸி அமைப்புகளை உள்ளமைக்கவும்",
     "oneProxyDescription": "மேம்பட்ட ப்ராக்ஸி சங்கிலியிடலுக்கான 1Proxy அமைப்புகளை உள்ளமைக்கவும்",
-    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்",
-    "openMenu": "பட்டியைத் திற",
-    "products": "Keak தயாரிப்புகள்"
+    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்"
   },
   "cloudSyncStatus": {
     "synced": "ஒத்திசைக்கப்பட்டது",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "காம்போ → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid எனக் குறிக்கப்பட்ட வழங்குநர்களை auto-வில் சேர்க்கவும்",
-    "autoTosDescription": "இயல்பாக முடக்கப்பட்டுள்ளது. ஒரு கணக்குக்கு மட்டுமல்ல, அனைத்து auto கூட்டுகளுக்கும் பொருந்தும். வழங்குநரை இணைப்பதால் இந்தத் தேர்வு இயக்கப்படாது.",
-    "autoTosSaveError": "ToS கொள்கையைச் சேமிக்க முடியவில்லை. முந்தைய அமைப்பே இன்னும் காட்டப்படுகிறது. மீண்டும் முயலவும்.",
-    "autoTosLoadError": "ToS கொள்கையை ஏற்ற முடியவில்லை. மாற்றுவதற்கு முன் மீண்டும் முயலவும்.",
     "title": "காம்போக்கள்",
     "description": "எடையிட்ட வழிப்படுத்தல் மற்றும் மாற்று ஆதரவுடன் மாதிரி காம்போக்களை உருவாக்கவும்",
     "autoCatalogTitle": "தானாக ரூட்டிங் பட்டியல்",
+    "autoTosLoadError": "ToS கொள்கையை ஏற்ற முடியவில்லை. மாற்றுவதற்கு முன் மீண்டும் முயலவும்.",
+    "autoTosSaveError": "ToS கொள்கையைச் சேமிக்க முடியவில்லை. முந்தைய அமைப்பே இன்னும் காட்டப்படுகிறது. மீண்டும் முயலவும்.",
+    "autoTosIncludeLabel": "ToS: avoid எனக் குறிக்கப்பட்ட வழங்குநர்களை auto-வில் சேர்க்கவும்",
+    "autoTosDescription": "இயல்பாக முடக்கப்பட்டுள்ளது. ஒரு கணக்குக்கு மட்டுமல்ல, அனைத்து auto கூட்டுகளுக்கும் பொருந்தும். வழங்குநரை இணைப்பதால் இந்தத் தேர்வு இயக்கப்படாது.",
     "autoCatalogTemplateCount": "{count} டெம்ப்ளேட்கள்",
     "autoCatalogDescription": "இணைக்கப்பட்ட வழங்குநர்களிடமிருந்து உள்ளமைந்த தானியங்கு/* சேர்க்கைகள் மாறும் வகையில் தீர்க்கப்படுகின்றன. இந்த ஐடிகளில் ஏதேனும் ஒன்றை மாதிரி புலமாகப் பயன்படுத்தவும் - அமைப்பு தேவையில்லை.",
     "autoCatalogExpand": "தானாக ரூட்டிங் பட்டியலை விரிவாக்குங்கள்",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "இன்னும் எந்த காம்போக்களும் கட்டமைக்கப்படவில்லை.",
     "playgroundCreateFirst": "முதலில் ஒன்றை உருவாக்கவும்",
     "weighted": "எடையிடப்பட்டது",
+    "weightPercent": "எடை (%)",
     "leastUsed": "மிகக் குறைவாகப் பயன்படுத்தப்பட்டது",
     "costOpt": "செலவு-உகப்பாக்கம்",
     "strategyGuideTitle": "இந்த உத்தியைப் பயன்படுத்துவது எப்படி",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# கணக்கு} other {# கணக்குகள்}}",
     "builderGlobalAdded": "சேர்க்கப்பட்டது",
     "builderGlobalAdd": "சேர்க்கவும்",
+    "clearSearch": "தேடலை அழி",
     "manualModel": "கைமுறை மாதிரி",
     "manualModelInvalid": "வழங்குநர்/மாதிரி என ஒரு மாதிரியை உள்ளிடவும்.",
     "manualModelUnknownProvider": "அறியப்படாத வழங்குநர் முன்னொட்டு.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "குறைந்தபட்ச உள்ளடக்க நீளம் (எழுத்துக்கள்)",
     "responseValidationJsonPaths": "JSON-பாதை சோதனைகள்",
     "responseValidationAddCheck": "+ சோதனையைச் சேர்",
+    "responseValidationRemoveCheck": "சரிபார்ப்பை அகற்று",
+    "responseValidationPath": "JSON பாதை",
+    "responseValidationCondition": "நிபந்தனை",
+    "responseValidationValue": "எதிர்பார்க்கப்படும் மதிப்பு",
     "agentFeaturesSystemMessageOverride": "அமைப்புச் செய்தியை மேலெழுது",
     "agentFeaturesSystemMessagePlaceholder": "நீங்கள் ஒரு நிபுணத்துவ உதவியாளர்...",
     "agentFeaturesSystemMessageHint": "முகவர்களுக்கான அமைப்புச் செய்தி மேலெழுதுதல்",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "இந்த டெம்ப்ளேட்டுடன் பொருந்தும் தற்போதைய இணைக்கப்பட்ட வழங்குநர்கள்/மாதிரிகளை திருத்தக்கூடிய கம்போவில் எடுக்கும்.",
     "duplicateAutoComboFailedPrefix": "ஆட்டோகம்போ நகலெடுத்தல் தோல்வியடைந்தது:",
     "duplicateAutoComboUnknownError": "அறியப்படாத பிழை",
-    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்",
-    "weightPercent": "எடை (%)",
-    "clearSearch": "தேடலை அழி",
-    "responseValidationRemoveCheck": "சரிபார்ப்பை அகற்று",
-    "responseValidationPath": "JSON பாதை",
-    "responseValidationCondition": "நிபந்தனை",
-    "responseValidationValue": "எதிர்பார்க்கப்படும் மதிப்பு"
+    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்"
   },
   "costs": {
     "title": "செலவுகள்",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API வடிவ லேபிள்",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "மெயின்லாந்து சீனா",
+    "apiRegionHint": "API அணுகல் மற்றும் ஒதுக்கீடு கண்காணிப்பிற்குப் பயன்படுத்தப்படும் எண்ட்பாயிண்ட் பிராந்தியத்தைத் தேர்ந்தெடுக்கவும்.",
+    "apiRegionInternational": "சர்வதேசம்",
+    "apiRegionLabel": "API பிராந்தியம்",
     "apikey": "API விசை",
     "audio": "ஆடியோ",
     "audioProvidersHeading": "ஆடியோ வழங்குநர்களுக்கான தலைப்பு",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "இந்தக் கணக்கு அதன் 5 மணிநேரப் பயன்பாட்டு வரம்பை அடைந்து, Anthropic குறைந்த முன்னுரிமை வழித்தடத்தை வழங்கும்போது, OmniRoute அதை ஏற்றுக்கொண்டு, இணைப்பைத் தற்காலிகமாக நிறுத்துவதற்குப் பதிலாக, காலச் சாளரம் மீட்டமைக்கப்படும் வரை anthropic-usage-limit: slow என்பதுடன் கோரிக்கைகளைத் தொடர்ந்து அனுப்பும். வாராந்திர வரம்பு தொடர்ந்து பொருந்தும், மேலும் உபரித் திறன் கிடைக்கும் வரை பதில்கள் காத்திருக்கக்கூடும்.",
     "claudeAutoLimitResetLabel": "அமர்வு வரம்பைத் தானாக மீட்டமை (வாரத்திற்கு ஒருமுறை)",
     "claudeAutoLimitResetDescription": "இந்தக் கணக்கு அதன் 5 மணிநேரப் பயன்பாட்டு வரம்பை அடைந்து, அமர்வு வரம்பை மீட்டமைக்கும் வாய்ப்பு கிடைக்கும்போது, OmniRoute அதைத் தானாகப் பயன்படுத்தி முழு வேகத்தில் மீண்டும் முயற்சிக்கும். இது கணக்கின் வாரத்திற்கு ஒருமுறை கிடைக்கும் மீட்டமைப்பைப் பயன்படுத்தும்; மேலும், பயன்பாடு வாராந்திர வரம்பில் தொடர்ந்து கணக்கிடப்படும்.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "தற்காலிக கூல்டவுனைத் தவிர்க்கவும், இதனால் மீட்டெடுக்கக்கூடிய பிழைகளுக்குப் பிறகும் இந்த இணைப்பு தகுதியுடையதாக இருக்கும் (தடைசெய்யப்பட்ட/காலாவதியான போன்ற இறுதி நிலைகள் இன்னும் பொருந்தும்).",
     "disableCoolingLabel": "இந்த இணைப்பிற்கான கூல்டவுனை முடக்கவும்",
     "bulkPasteAdded": "{count, plural, one {1 விசை சேர்க்கப்பட்டது} other {# விசைகள் சேர்க்கப்பட்டன}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "monsterapi.ai இல் API விசையைப் பெறுக",
       "moonshot": "Moonshot AI ஐ ஒரு API விசையுடன் இணைக்கவும்.",
       "morph": "இலவச அடுக்கு: 250K கிரெடிட்கள்/மாதம், $0",
+      "apmix": "apmix.ai/dashboard இலிருந்து API விசையுடன் Apmix ஐ இணைக்கவும் — ஒரு சந்தா, பல மாடல்கள்.",
       "nanogpt": "NanoGPT ஐ ஒரு API விசையுடன் இணைக்கவும்.",
       "nebius": "API சோதனைக்காக பதிவு செய்யும் போது ~$1 சோதனை கிரெடிட்கள்",
       "nlpcloud": "NLP Cloud ஆனது OpenAI chat/completions க்கு பதிலாக ஒரு தனியுரிம சாட்பாட் API ஐப் பயன்படுத்துகிறது. OmniRoute ஆனது OpenAI செய்திகளை உள்ளீடு/சூழல்/வரலாறுக்கு ஏற்ப மாற்றி, ஆதரிக்கப்படும் சாட்பாட் மாடல்களின் உள்ளூர் பட்டியலை வழங்குகிறது.",
@@ -6634,8 +6642,7 @@
       "kiro": "இலவச அடுக்கு: 50 கிரெடிட்கள்/மாதம் (~25K–100K டோக்கன்கள்). ⚠️ Kiro ToS மூன்றாம் தரப்பு proxy/harness பயன்பாட்டைத் தடைசெய்கிறது.",
       "codex": "தற்போதுள்ள OAuth செயல்முறையுடன் OpenAI Codex-ஐ இணைக்கவும்.",
       "qwen": "தற்போதுள்ள OAuth செயல்முறையுடன் Qwen Code-ஐ இணைக்கவும்.",
-      "github-models": "github.com/settings/tokens இல் 'models: read' வரம்புடன் ஒரு GitHub PAT ஐ உருவாக்கவும்",
-      "apmix": "apmix.ai/dashboard இலிருந்து API விசையுடன் Apmix ஐ இணைக்கவும் — ஒரு சந்தா, பல மாடல்கள்."
+      "github-models": "github.com/settings/tokens இல் 'models: read' வரம்புடன் ஒரு GitHub PAT ஐ உருவாக்கவும்"
     },
     "passthroughModelsDescription": "{provider} வழங்குநரின் சொந்த மாதிரி ஐடிகளை ஏற்றுக்கொள்கிறது. /மாடல்களில் இருந்து இறக்குமதி செய்யவும் அல்லது ரூட்டிங் செய்ய தனிப்பயன் ஐடிகளைச் சேர்க்கவும்.",
     "bedrockModelsDescription": "அமேசான் பெட்ராக் மாதிரிகள் AWS பிராந்தியத்தால் ஸ்கோப் செய்யப்படுகின்றன. /மாடல்களில் இருந்து இறக்குமதி செய்யவும் அல்லது தேர்ந்தெடுக்கப்பட்ட பகுதியில் செயல்படுத்தப்பட்ட பெட்ராக் மாடல் ஐடிகளைச் சேர்க்கவும்.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "அமைப்புகள்",
@@ -7702,6 +7702,7 @@
     "configured": "கட்டமைக்கப்பட்டது",
     "none": "ஏதுமில்லை",
     "modelOverrideValuePlaceholder": "எண் மதிப்பு",
+    "modelOverrideKey": "மேலெழுதும் விசை",
     "modelOverrideReasoningEffortsPlaceholder": "ஆங்கிலக் காற்புள்ளியால் பிரிக்கப்பட்டவை, எ.கா. low, medium, high",
     "addKeyValue": "விசை மதிப்பைச் சேர்",
     "noModelOverrides": "இந்த மாதிரிக்கு மேலெழுதல்கள் எதுவும் கட்டமைக்கப்படவில்லை.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "மறுதொடக்கத்திற்குப் பின் கண்டறிதல்கள்",
       "statsEmpty": "இதுவரை கண்டறிதல்கள் இல்லை.",
       "statsRequest": "கோரிக்கைகள்"
-    },
-    "modelOverrideKey": "மேலெழுதும் விசை"
+    }
   },
   "contextRtk": {
     "title": "RTK எஞ்சின்",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "ஸ்ட்ரீமை மாற்ற முடியவில்லை"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "பயன்பாடு",
     "grokExtraUsageCredits": "கூடுதல் பயன்பாட்டு கிரெடிட்கள்",
     "grokAutoTopUp": "தானியங்கி மேலேற்றம்",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "கடைசியாகப் புதுப்பிக்கப்பட்டது",
     "providerQuota": "வழங்குநர் ஒதுக்கீடு",
     "providerQuotaHomeHint": "இணைக்கப்பட்ட கணக்குகளின் நேரலை நிலை",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Claude வரம்பு மீட்டமைப்பு",
     "confirmRedeemClaudeResetCredit": "மீட்பதன் மூலம் தகுதியுள்ள Claude பயன்பாட்டு வரம்புகள் உடனடியாக மீட்டமைக்கப்படும் மற்றும் இந்தக் கிரெடிட் நிரந்தரமாகப் பயன்படுத்தப்படும்.",
     "claudeResetCreditsModalTitle": "Claude மீட்டமைப்பு கிரெடிட்கள்",
@@ -11453,6 +11453,7 @@
     "tableHealth": "செயல்நலம் (24 மணி)",
     "tableUsage": "பயன்பாடு",
     "tableActions": "செயல்கள்",
+    "moreActions": "மேலும் செயல்கள்",
     "test": "சோதனை",
     "edit": "திருத்து",
     "delete": "நீக்கு",
@@ -11610,8 +11611,7 @@
     "notMeasured": "அளவிடப்படவில்லை",
     "upstream4xx": "{count} மேல்நிலை கிளையண்ட் பிழைகள்",
     "upstream5xx": "{count} மேல்நிலை சர்வர் பிழைகள்",
-    "uniformEgressLine": "{provider} இல் {exits} வெளியேற்றங்களில் {affected} ஒன்றாகத் தோல்வியடைகின்றன (கடந்த {hours} மணிநேரம்) — வெளியேற்றப் பிரச்சினை அல்ல",
-    "moreActions": "மேலும் செயல்கள்"
+    "uniformEgressLine": "{provider} இல் {exits} வெளியேற்றங்களில் {affected} ஒன்றாகத் தோல்வியடைகின்றன (கடந்த {hours} மணிநேரம்) — வெளியேற்றப் பிரச்சினை அல்ல"
   },
   "playground": {
     "title": "மாதிரி சோதனைக்களம்",
@@ -13858,6 +13858,7 @@
     "latency": "தாமதம்",
     "quota": "ஒதுக்கீடு",
     "rangeWindow": "{range} சாளரம்",
+    "timeRange": "கால வரம்பு",
     "runtimeHealthBlend": "இயக்கநேரம்/ஆரோக்கிய கலவை",
     "averageResponseTime": "சராசரி பதில் நேரம்",
     "worstQuota": "மிக மோசமான ஒதுக்கீடு",
@@ -13912,8 +13913,7 @@
     "unknown": "தெரியாதது",
     "unknownProvider": "தெரியாத வழங்குநர்",
     "unknownModel": "தெரியாத மாதிரி",
-    "resolvedTargetMetrics": "{requests} req · {success} வெற்றி · {latency} · ஒதுக்கீடு {quota}",
-    "timeRange": "கால வரம்பு"
+    "resolvedTargetMetrics": "{requests} req · {success} வெற்றி · {latency} · ஒதுக்கீடு {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD பயன்பாட்டு ஒதுக்கீடு",

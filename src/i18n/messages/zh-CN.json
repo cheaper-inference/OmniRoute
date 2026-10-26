@@ -25,8 +25,10 @@
     "confirm": "你确定吗？",
     "refresh": "刷新",
     "close": "关闭",
+    "dialogTitleFallback": "对话框",
     "previousPage": "上一页",
     "nextPage": "下一页",
+    "pagination": "分页",
     "capsLockOn": "大写锁定已开启",
     "dismissNotification": "忽略通知",
     "toggleColumns": "切换列",
@@ -182,6 +184,7 @@
     "combos": "组合",
     "noModelsFound": "未找到 Model",
     "clear": "清除",
+    "clearFilters": "清除筛选条件",
     "done": "完成",
     "selectAll": "全选",
     "unselectAll": "取消全选",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "预览",
     "batchFilePreviewTruncated": "显示前 {shown} 行（共 {total} 行）",
     "batchFileDownloadFull": "下载完整文件",
-    "dialogTitleFallback": "对话框",
-    "pagination": "分页",
-    "clearFilters": "清除筛选条件",
     "tokensPageTitle": "令牌",
     "tokensPageDescription": "在 API 密钥之间发送令牌、共享邀请码并连接社区服务器。",
     "tokensServerUrlLabel": "服务器 URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "快速导航",
     "quickNavigationTitle": "快速导航 (⌘K / Ctrl+K)",
     "openQuickNavigation": "打开快速导航",
+    "openMenu": "打开菜单",
+    "products": "Keak 产品",
     "switchToLightMode": "切换到浅色模式",
     "switchToDarkMode": "切换到深色模式",
     "language": "语言",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "高级负载规则、请求限制和代理 API 设置",
     "mitmProxyDescription": "配置 MITM 代理设置以进行流量检查和调试",
     "oneProxyDescription": "配置 1Proxy 设置以实现高级代理链",
-    "omniSkillsDescription": "安装和管理用于自动提示和工具执行的沙箱技能",
-    "openMenu": "打开菜单",
-    "products": "Keak 产品"
+    "omniSkillsDescription": "安装和管理用于自动提示和工具执行的沙箱技能"
   },
   "cloudSyncStatus": {
     "synced": "已同步",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "组合 → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "在 auto 中包含标记为 ToS: avoid 的提供者",
-    "autoTosDescription": "默认关闭。适用于所有 auto 组合，而非单个账户。连接提供者不会启用此选项。",
-    "autoTosSaveError": "无法保存 ToS 策略。仍显示之前的设置，请重试。",
-    "autoTosLoadError": "无法加载 ToS 策略。请重试后再进行更改。",
     "title": "组合",
     "description": "创建支持权重路由与故障回退的模型组合",
     "autoCatalogTitle": "自动路由目录",
+    "autoTosLoadError": "无法加载 ToS 策略。请重试后再进行更改。",
+    "autoTosSaveError": "无法保存 ToS 策略。仍显示之前的设置，请重试。",
+    "autoTosIncludeLabel": "在 auto 中包含标记为 ToS: avoid 的提供者",
+    "autoTosDescription": "默认关闭。适用于所有 auto 组合，而非单个账户。连接提供者不会启用此选项。",
     "autoCatalogTemplateCount": "{count} 个模板",
     "autoCatalogDescription": "内置 auto/* 组合，从已连接的提供者动态解析。直接将这些 ID 作为 model 字段使用——无需设置。",
     "autoCatalogExpand": "展开自动路由目录",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "尚未配置任何组合。",
     "playgroundCreateFirst": "先创建一个",
     "weighted": "加权",
+    "weightPercent": "权重（%）",
     "leastUsed": "最少使用",
     "costOpt": "成本优化",
     "strategyGuideTitle": "如何使用这种策略",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# 个账户} other {# 个账户}}",
     "builderGlobalAdded": "已添加",
     "builderGlobalAdd": "添加",
+    "clearSearch": "清除搜索",
     "manualModel": "手动模型",
     "manualModelInvalid": "请按 provider/model 格式填写。",
     "manualModelUnknownProvider": "未知的提供者前缀。",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "最小内容长度（字符数）",
     "responseValidationJsonPaths": "JSON-path 检查",
     "responseValidationAddCheck": "+ 添加检查",
+    "responseValidationRemoveCheck": "移除检查",
+    "responseValidationPath": "JSON 路径",
+    "responseValidationCondition": "条件",
+    "responseValidationValue": "预期值",
     "agentFeaturesSystemMessageOverride": "系统消息覆盖",
     "agentFeaturesSystemMessagePlaceholder": "覆盖通过此组合路由的所有请求的系统提示…",
     "agentFeaturesSystemMessageHint": "替换客户端发送的任何系统消息。留空则透传客户端系统消息。",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "这将把与此模板匹配的当前连接提供者/模型快照到可编辑的组合中。",
     "duplicateAutoComboFailedPrefix": "复制自动组合失败：",
     "duplicateAutoComboUnknownError": "未知错误",
-    "duplicateAutoComboTitle": "从{name}创建静态组合",
-    "weightPercent": "权重（%）",
-    "clearSearch": "清除搜索",
-    "responseValidationRemoveCheck": "移除检查",
-    "responseValidationPath": "JSON 路径",
-    "responseValidationCondition": "条件",
-    "responseValidationValue": "预期值"
+    "duplicateAutoComboTitle": "从{name}创建静态组合"
   },
   "costs": {
     "title": "成本",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API 格式",
     "apiKeyOptionalHint": "如果上游不需要认证，可以留空 API key。",
     "apiKeyOptionalLabel": "API key（可选）",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "中国大陆",
+    "apiRegionHint": "选择用于 API 访问和配额跟踪的端点区域。",
+    "apiRegionInternational": "国际",
+    "apiRegionLabel": "API 区域",
     "apikey": "API 密钥",
     "audio": "音频",
     "audioProvidersHeading": "音频 Provider",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "当此账户达到 5 小时使用限额且 Anthropic 提供较低优先级通道时，OmniRoute 会接受该通道，并继续发送带有 anthropic-usage-limit: slow 的请求，直到时间窗口重置，而不是让连接进入冷却状态。每周限额仍然适用，响应可能需要等待空闲容量。",
     "claudeAutoLimitResetLabel": "自动重置会话限额（每周一次）",
     "claudeAutoLimitResetDescription": "当此账户达到 5 小时使用限额且有可用的会话限额重置机会时，OmniRoute 会自动使用该机会，并以全速重试。这会使用账户每周一次的重置机会，且仍会计入每周限额。",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "跳过瞬态冷却，以便此连接在发生可恢复错误后仍符合条件（被禁/过期等终态仍适用）。",
     "disableCoolingLabel": "禁用此连接的冷却",
     "bulkPasteAdded": "{count, plural, one {已添加 1 个 key} other {已添加 # 个 key}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "在 monsterapi.ai 获取 API 密钥",
       "moonshot": "使用 API 密钥连接 Moonshot AI。",
       "morph": "免费层级：每月 250K 额度，$0",
+      "apmix": "使用来自 apmix.ai/dashboard 的 API 密钥连接 Apmix — 一份订阅，多个模型。",
       "nanogpt": "使用 API 密钥连接 NanoGPT。",
       "nebius": "注册即送约 $1 试用额度用于 API 测试",
       "nlpcloud": "NLP Cloud 使用专有的聊天机器人 API，而非 OpenAI chat/completions。OmniRoute 将 OpenAI 消息适配为 input/context/history，并公开受支持聊天机器人模型的本地目录。",
@@ -6634,8 +6642,7 @@
       "kiro": "免费层：50 积分/月（约 25K–100K 令牌）。⚠️ Kiro 服务条款禁止使用第三方代理/测试框架。",
       "codex": "使用现有的 OAuth 流程连接 OpenAI Codex。",
       "qwen": "使用现有的 OAuth 流程连接 Qwen Code。",
-      "github-models": "在 github.com/settings/tokens 创建具有 'models: read' 作用域的 GitHub PAT",
-      "apmix": "使用来自 apmix.ai/dashboard 的 API 密钥连接 Apmix — 一份订阅，多个模型。"
+      "github-models": "在 github.com/settings/tokens 创建具有 'models: read' 作用域的 GitHub PAT"
     },
     "passthroughModelsDescription": "{provider} 接受供应商本机模型 ID。从 /models 导入或添加用于路由的自定义 ID。",
     "bedrockModelsDescription": "Amazon Bedrock 模型的范围按 AWS 区域划分。从 /models 导入或添加在所选区域中启用的基岩模型 ID。",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "设置",
@@ -7702,6 +7702,7 @@
     "configured": "已配置",
     "none": "无",
     "modelOverrideValuePlaceholder": "数字值",
+    "modelOverrideKey": "覆盖键",
     "modelOverrideReasoningEffortsPlaceholder": "使用英文逗号分隔，例如 low, medium, high",
     "addKeyValue": "添加键值",
     "noModelOverrides": "该模型尚未配置覆盖。",
@@ -8945,8 +8946,7 @@
       "statsTitle": "自重启以来的检测",
       "statsEmpty": "暂无检测。",
       "statsRequest": "请求"
-    },
-    "modelOverrideKey": "覆盖键"
+    }
   },
   "contextRtk": {
     "title": "命令输出过滤引擎",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "转换流失败"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "用量",
     "grokExtraUsageCredits": "额外使用积分",
     "grokAutoTopUp": "自动充值",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "上次刷新",
     "providerQuota": "提供者配额",
     "providerQuotaHomeHint": "已连接账户的实时状态",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Claude 限额重置",
     "confirmRedeemClaudeResetCredit": "兑换将立即重置符合条件的 Claude 使用限额，并永久消耗此点数。",
     "claudeResetCreditsModalTitle": "Claude 重置点数",
@@ -11453,6 +11453,7 @@
     "tableHealth": "健康状态（24小时）",
     "tableUsage": "使用情况",
     "tableActions": "操作",
+    "moreActions": "更多操作",
     "test": "测试",
     "edit": "编辑",
     "delete": "删除",
@@ -11610,8 +11611,7 @@
     "notMeasured": "未测量",
     "upstream4xx": "{count} 上游客户端错误",
     "upstream5xx": "{count} 上游服务器错误",
-    "uniformEgressLine": "{affected}/{exits} 个出口在 {provider} 上同时失败（最近 {hours} 小时）—— 不是出口问题",
-    "moreActions": "更多操作"
+    "uniformEgressLine": "{affected}/{exits} 个出口在 {provider} 上同时失败（最近 {hours} 小时）—— 不是出口问题"
   },
   "playground": {
     "title": "模型演练场",
@@ -13858,6 +13858,7 @@
     "latency": "延迟",
     "quota": "配额",
     "rangeWindow": "{range} 窗口",
+    "timeRange": "时间范围",
     "runtimeHealthBlend": "运行时/健康度融合",
     "averageResponseTime": "平均响应时间",
     "worstQuota": "最差配额",
@@ -13912,8 +13913,7 @@
     "unknown": "未知",
     "unknownProvider": "未知提供者",
     "unknownModel": "未知模型",
-    "resolvedTargetMetrics": "{requests} 请求 · {success} 成功 · {latency} · 配额 {quota}",
-    "timeRange": "时间范围"
+    "resolvedTargetMetrics": "{requests} 请求 · {success} 成功 · {latency} · 配额 {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "美元使用配额",

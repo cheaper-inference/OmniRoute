@@ -25,8 +25,10 @@
     "confirm": "esti sigur?",
     "refresh": "Reîmprospătați",
     "close": "Închide",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Pagina anterioară",
     "nextPage": "Pagina următoare",
+    "pagination": "Paginare",
     "capsLockOn": "Caps Lock este activat",
     "dismissNotification": "Închide notificarea",
     "toggleColumns": "Comută coloanele",
@@ -182,6 +184,7 @@
     "combos": "Combinații",
     "noModelsFound": "Nu s-au găsit modele",
     "clear": "Șterge",
+    "clearFilters": "Șterge filtrele",
     "done": "Gata",
     "selectAll": "Selectează tot",
     "unselectAll": "Deselectează tot",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Previzualizare",
     "batchFilePreviewTruncated": "Afișare primele {shown} linii ({total} linii totale)",
     "batchFileDownloadFull": "Descarcă Fișierul Complet",
-    "dialogTitleFallback": "Dialog",
-    "pagination": "Paginare",
-    "clearFilters": "Șterge filtrele",
     "tokensPageTitle": "Tokenuri",
     "tokensPageDescription": "Trimite tokenuri între cheile API, distribuie coduri de invitație și conectează serverele comunității.",
     "tokensServerUrlLabel": "URL-ul serverului"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Navigare rapidă",
     "quickNavigationTitle": "Navigare rapidă (⌘K / Ctrl+K)",
     "openQuickNavigation": "Deschide navigarea rapidă",
+    "openMenu": "Deschide meniul",
+    "products": "Produse Keak",
     "switchToLightMode": "Comută la modul luminos",
     "switchToDarkMode": "Comută la modul întunecat",
     "language": "Limba",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Reguli avansate pentru sarcina utilă, limite pentru cereri și setări API pentru proxy",
     "mitmProxyDescription": "Configurați setările proxy-ului MITM pentru inspectarea traficului și depanare",
     "oneProxyDescription": "Configurați setările 1Proxy pentru înlănțuirea avansată a proxy-urilor",
-    "omniSkillsDescription": "Instalează și gestionează abilități sandbox pentru executarea automată a prompturilor și instrumentelor",
-    "openMenu": "Deschide meniul",
-    "products": "Produse Keak"
+    "omniSkillsDescription": "Instalează și gestionează abilități sandbox pentru executarea automată a prompturilor și instrumentelor"
   },
   "cloudSyncStatus": {
     "synced": "Sincronizat",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Include în auto furnizorii marcați ToS: avoid",
-    "autoTosDescription": "Dezactivat implicit. Se aplică tuturor combinațiilor auto, nu doar unui cont. Conectarea unui furnizor nu activează această opțiune.",
-    "autoTosSaveError": "Politica ToS nu a putut fi salvată. Setarea anterioară este încă afișată. Încearcă din nou.",
-    "autoTosLoadError": "Politica ToS nu a putut fi încărcată. Încearcă din nou înainte de a o modifica.",
     "title": "Combo-uri",
     "description": "Creați combinații de modele cu rutare ponderată și suport alternativ",
     "autoCatalogTitle": "Catalog de rutare automată",
+    "autoTosLoadError": "Politica ToS nu a putut fi încărcată. Încearcă din nou înainte de a o modifica.",
+    "autoTosSaveError": "Politica ToS nu a putut fi salvată. Setarea anterioară este încă afișată. Încearcă din nou.",
+    "autoTosIncludeLabel": "Include în auto furnizorii marcați ToS: avoid",
+    "autoTosDescription": "Dezactivat implicit. Se aplică tuturor combinațiilor auto, nu doar unui cont. Conectarea unui furnizor nu activează această opțiune.",
     "autoCatalogTemplateCount": "{count} șabloane",
     "autoCatalogDescription": "Combo auto/* încorporate rezolvate dinamic de la furnizorii conectați. Utilizați oricare dintre aceste ID-uri ca câmp de model - nu este necesară configurarea.",
     "autoCatalogExpand": "Extindeți catalogul de rutare automată",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Nu există combinații configurate încă.",
     "playgroundCreateFirst": "Creați una mai întâi",
     "weighted": "ponderat",
+    "weightPercent": "Pondere (%)",
     "leastUsed": "Cel mai puțin folosit",
     "costOpt": "Optimizat pentru cost",
     "strategyGuideTitle": "Cum se utilizează această strategie",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# cont} other {# conturi}}",
     "builderGlobalAdded": "Adăugat",
     "builderGlobalAdd": "Adaugă",
+    "clearSearch": "Șterge căutarea",
     "manualModel": "Model manual",
     "manualModelInvalid": "Introduceți un model sub forma furnizor/model.",
     "manualModelUnknownProvider": "Prefix de furnizor necunoscut.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Lungime minimă conținut (caractere)",
     "responseValidationJsonPaths": "Verificări JSON-path",
     "responseValidationAddCheck": "+ Adăugare verificare",
+    "responseValidationRemoveCheck": "Elimină verificarea",
+    "responseValidationPath": "Cale JSON",
+    "responseValidationCondition": "Condiție",
+    "responseValidationValue": "Valoare așteptată",
     "agentFeaturesSystemMessageOverride": "Ignorați mesajul de sistem",
     "agentFeaturesSystemMessagePlaceholder": "Esti un asistent expert...",
     "agentFeaturesSystemMessageHint": "Suprascrierea mesajului de sistem pentru agenți",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Acesta va captura furnizorii/modelurile conectate în prezent care se potrivesc cu acest șablon într-o combinație editabilă.",
     "duplicateAutoComboFailedPrefix": "Duplicarea combinației automate a eșuat:",
     "duplicateAutoComboUnknownError": "Eroare necunoscută",
-    "duplicateAutoComboTitle": "Creați o combinație statică din {name}",
-    "weightPercent": "Pondere (%)",
-    "clearSearch": "Șterge căutarea",
-    "responseValidationRemoveCheck": "Elimină verificarea",
-    "responseValidationPath": "Cale JSON",
-    "responseValidationCondition": "Condiție",
-    "responseValidationValue": "Valoare așteptată"
+    "duplicateAutoComboTitle": "Creați o combinație statică din {name}"
   },
   "costs": {
     "title": "Costuri",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Etichetă pentru formatul API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "China continentală",
+    "apiRegionHint": "Selectați regiunea endpoint-ului utilizată pentru accesul API și urmărirea cotelor.",
+    "apiRegionInternational": "Internațional",
+    "apiRegionLabel": "Regiune API",
     "apikey": "Cheie API",
     "audio": "Audio",
     "audioProvidersHeading": "Titlu pentru furnizorii audio",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Când acest cont atinge limita de utilizare de 5 ore, iar Anthropic oferă accesul cu prioritate redusă, OmniRoute îl acceptă și continuă să trimită solicitări cu anthropic-usage-limit: slow până la resetarea intervalului, în loc să lase conexiunea să se răcească. Limita săptămânală se aplică în continuare, iar răspunsurile pot aștepta până când există capacitate disponibilă.",
     "claudeAutoLimitResetLabel": "Resetează automat limita sesiunii (o dată pe săptămână)",
     "claudeAutoLimitResetDescription": "Când acest cont atinge limita de utilizare de 5 ore și este disponibilă o resetare a limitei sesiunii, OmniRoute o revendică automat și reîncearcă la viteză maximă. Folosește resetarea disponibilă o dată pe săptămână pentru cont și continuă să fie luată în calcul pentru limita săptămânală.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Omite perioada de răcire tranzitorie, astfel încât această conexiune să rămână eligibilă chiar și după erori recuperabile (stările terminale precum blocat/expirat se aplică în continuare).",
     "disableCoolingLabel": "Dezactivează perioada de răcire pentru această conexiune",
     "bulkPasteAdded": "{count, plural, one {1 cheie adăugată} other {# chei adăugate}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Obține cheia API la monsterapi.ai",
       "moonshot": "Conectează Moonshot AI cu o cheie API.",
       "morph": "Nivel gratuit: 250K credite/lună, $0",
+      "apmix": "Conectează Apmix cu o cheie API de pe apmix.ai/dashboard — un abonament, multe modele.",
       "nanogpt": "Conectează NanoGPT cu o cheie API.",
       "nebius": "~$1 credite de încercare la înregistrare pentru testarea API-ului",
       "nlpcloud": "NLP Cloud folosește un API proprietar de chatbot în loc de OpenAI chat/completions. OmniRoute adaptează mesajele OpenAI la input/context/history și expune un catalog local de modele de chatbot acceptate.",
@@ -6634,8 +6642,7 @@
       "kiro": "Nivel gratuit: 50 de credite/lună (~25K–100K tokenuri). ⚠️ Kiro ToS interzice utilizarea de proxy/harness terțe.",
       "codex": "Conectați OpenAI Codex cu fluxul OAuth existent.",
       "qwen": "Conectați Qwen Code cu fluxul OAuth existent.",
-      "github-models": "Creați un GitHub PAT cu scope-ul 'models: read' la github.com/settings/tokens",
-      "apmix": "Conectează Apmix cu o cheie API de pe apmix.ai/dashboard — un abonament, multe modele."
+      "github-models": "Creați un GitHub PAT cu scope-ul 'models: read' la github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} acceptă ID-uri de model native ale furnizorului. Importați din /modele sau adăugați ID-uri personalizate pentru rutare.",
     "bedrockModelsDescription": "Modelele Amazon Bedrock sunt acoperite de regiunea AWS. Importați din /modele sau adăugați ID-uri de model Bedrock activate în regiunea selectată.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Setări",
@@ -7702,6 +7702,7 @@
     "configured": "configurat",
     "none": "Niciunul",
     "modelOverrideValuePlaceholder": "Valoare numerică",
+    "modelOverrideKey": "Cheie de suprascriere",
     "modelOverrideReasoningEffortsPlaceholder": "Valori în limba engleză, separate prin virgule, de ex. low, medium, high",
     "addKeyValue": "Adaugă cheie-valoare",
     "noModelOverrides": "Nu sunt configurate suprascrieri pentru acest model.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Detecții de la repornire",
       "statsEmpty": "Nicio detecție încă.",
       "statsRequest": "Cereri"
-    },
-    "modelOverrideKey": "Cheie de suprascriere"
+    }
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Eșec la transformarea fluxului"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Utilizare",
     "grokExtraUsageCredits": "Credite Suplimentare de Utilizare",
     "grokAutoTopUp": "Reîncărcare Automată",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Ultima reîmprospătare",
     "providerQuota": "Cotă furnizor",
     "providerQuotaHomeHint": "Stare în timp real pentru conturile conectate",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Resetare limită Claude",
     "confirmRedeemClaudeResetCredit": "Revendicarea resetează imediat limitele de utilizare Claude eligibile și consumă definitiv acest credit.",
     "claudeResetCreditsModalTitle": "Credite de resetare Claude",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Mai multe acțiuni",
     "test": "Testează",
     "edit": "Editează",
     "delete": "Șterge",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Nemăsurat",
     "upstream4xx": "{count} erori de client upstream",
     "upstream5xx": "{count} erori de server upstream",
-    "uniformEgressLine": "{affected} din {exits} exit-uri eșuează împreună pe {provider} (ultimele {hours}h) — nu este o problemă de exit",
-    "moreActions": "Mai multe acțiuni"
+    "uniformEgressLine": "{affected} din {exits} exit-uri eșuează împreună pe {provider} (ultimele {hours}h) — nu este o problemă de exit"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Latență",
     "quota": "Cotă",
     "rangeWindow": "Fereastră {range}",
+    "timeRange": "Interval de timp",
     "runtimeHealthBlend": "mix runtime/stare de funcționare",
     "averageResponseTime": "timp mediu de răspuns",
     "worstQuota": "Cea mai critică cotă",
@@ -13912,8 +13913,7 @@
     "unknown": "necunoscut",
     "unknownProvider": "furnizor necunoscut",
     "unknownModel": "model necunoscut",
-    "resolvedTargetMetrics": "{requests} req · {success} succes · {latency} · cotă {quota}",
-    "timeRange": "Interval de timp"
+    "resolvedTargetMetrics": "{requests} req · {success} succes · {latency} · cotă {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Cotă de utilizare USD",

@@ -25,8 +25,10 @@
     "confirm": "Ви впевнені?",
     "refresh": "Оновити",
     "close": "Закрити",
+    "dialogTitleFallback": "Діалогове вікно",
     "previousPage": "Попередня сторінка",
     "nextPage": "Наступна сторінка",
+    "pagination": "Пагінація",
     "capsLockOn": "Caps Lock увімкнено",
     "dismissNotification": "Закрити сповіщення",
     "toggleColumns": "Перемкнути стовпці",
@@ -182,6 +184,7 @@
     "combos": "Комбінації",
     "noModelsFound": "Моделі не знайдено",
     "clear": "Очистити",
+    "clearFilters": "Очистити фільтри",
     "done": "Готово",
     "selectAll": "Вибрати все",
     "unselectAll": "Зняти вибір",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Попередній перегляд",
     "batchFilePreviewTruncated": "Показано перші {shown} рядків ({total} всього рядків)",
     "batchFileDownloadFull": "Завантажити повний файл",
-    "dialogTitleFallback": "Діалогове вікно",
-    "pagination": "Пагінація",
-    "clearFilters": "Очистити фільтри",
     "tokensPageTitle": "Токени",
     "tokensPageDescription": "Надсилайте токени між ключами API, діліться кодами запрошень і підключайте сервери спільноти.",
     "tokensServerUrlLabel": "URL сервера"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Швидка навігація",
     "quickNavigationTitle": "Швидка навігація (⌘K / Ctrl+K)",
     "openQuickNavigation": "Відкрити швидку навігацію",
+    "openMenu": "Відкрити меню",
+    "products": "Продукти Keak",
     "switchToLightMode": "Перейти на світлий режим",
     "switchToDarkMode": "Перейти на темний режим",
     "language": "Мова",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Розширені правила запитів, ліміти та налаштування API проксі",
     "mitmProxyDescription": "Налаштування MITM-проксі для інспекції трафіку та налагодження",
     "oneProxyDescription": "Налаштування 1Proxy для розширеного ланцюгування проксі",
-    "omniSkillsDescription": "Встановлюйте та керуйте навичками пісочниці для автоматичного виконання промптів та інструментів",
-    "openMenu": "Відкрити меню",
-    "products": "Продукти Keak"
+    "omniSkillsDescription": "Встановлюйте та керуйте навичками пісочниці для автоматичного виконання промптів та інструментів"
   },
   "cloudSyncStatus": {
     "synced": "Синхронізовано",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Комбінація → {name}"
   },
   "combos": {
+    "title": "Комбо",
+    "description": "Створюйте комбінації моделей із зваженою маршрутизацією та підтримкою резервного варіанту",
+    "autoCatalogTitle": "Каталог автомаршрутизації",
     "autoTosLoadError": "Не вдалося завантажити політику ToS. Спробуйте ще раз перед зміною.",
     "autoTosSaveError": "Не вдалося зберегти політику ToS. Досі відображається попереднє налаштування. Спробуйте ще раз.",
     "autoTosIncludeLabel": "Включати до auto провайдерів із позначкою ToS: avoid",
     "autoTosDescription": "Типово вимкнено. Застосовується до всіх комбінацій auto, а не лише до одного облікового запису. Підключення провайдера не вмикає цю опцію.",
-    "title": "Комбо",
-    "description": "Створюйте комбінації моделей із зваженою маршрутизацією та підтримкою резервного варіанту",
-    "autoCatalogTitle": "Каталог автомаршрутизації",
     "autoCatalogTemplateCount": "{count} шаблони",
     "autoCatalogDescription": "Вбудовані комбінації auto/*, які динамічно вирішуються від підключених постачальників. Використовуйте будь-який із цих ідентифікаторів як поле моделі — налаштування не потрібно.",
     "autoCatalogExpand": "Розгорнути каталог автомаршрутизації",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Ще немає налаштованих комбо.",
     "playgroundCreateFirst": "Спочатку створіть одне",
     "weighted": "Зважений",
+    "weightPercent": "Вага (%)",
     "leastUsed": "Найменш використовуваний",
     "costOpt": "Оптимізація вартості",
     "strategyGuideTitle": "Як використовувати цю стратегію",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# обліковий запис} other {# облікових записів}}",
     "builderGlobalAdded": "Додано",
     "builderGlobalAdd": "Додати",
+    "clearSearch": "Очистити пошук",
     "manualModel": "Модель вручну",
     "manualModelInvalid": "Введіть модель у форматі провайдер/модель.",
     "manualModelUnknownProvider": "Невідомий префікс провайдера.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Мінімальна довжина вмісту (символів)",
     "responseValidationJsonPaths": "Перевірки JSON-path",
     "responseValidationAddCheck": "+ Додати перевірку",
+    "responseValidationRemoveCheck": "Видалити перевірку",
+    "responseValidationPath": "Шлях JSON",
+    "responseValidationCondition": "Умова",
+    "responseValidationValue": "Очікуване значення",
     "agentFeaturesSystemMessageOverride": "Перевизначити системне повідомлення",
     "agentFeaturesSystemMessagePlaceholder": "Ви експерт-помічник...",
     "agentFeaturesSystemMessageHint": "Заміна системних повідомлень для агентів",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Це зробить знімок поточно підключених постачальників/моделей, які відповідають цьому шаблону, у редаговане комбо.",
     "duplicateAutoComboFailedPrefix": "Не вдалося дублювати автоматичне комбо:",
     "duplicateAutoComboUnknownError": "Невідома помилка",
-    "duplicateAutoComboTitle": "Створити статичне комбо з {name}",
-    "weightPercent": "Вага (%)",
-    "clearSearch": "Очистити пошук",
-    "responseValidationRemoveCheck": "Видалити перевірку",
-    "responseValidationPath": "Шлях JSON",
-    "responseValidationCondition": "Умова",
-    "responseValidationValue": "Очікуване значення"
+    "duplicateAutoComboTitle": "Створити статичне комбо з {name}"
   },
   "costs": {
     "title": "Витрати",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Мітка формату API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Материковий Китай",
+    "apiRegionHint": "Виберіть регіон кінцевої точки, який використовується для доступу до API та відстеження квот.",
+    "apiRegionInternational": "Міжнародний",
+    "apiRegionLabel": "Регіон API",
     "apikey": "Ключ API",
     "audio": "Аудіо",
     "audioProvidersHeading": "Заголовок провайдерів аудіо",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Коли цей обліковий запис досягає 5-годинного ліміту використання й Anthropic пропонує канал із нижчим пріоритетом, OmniRoute приймає його та продовжує надсилати запити з anthropic-usage-limit: slow до скидання вікна замість переведення з’єднання в режим очікування. Тижневий ліміт усе одно діє, а відповіді можуть очікувати на вільні ресурси.",
     "claudeAutoLimitResetLabel": "Автоматично скидати ліміт сеансу (раз на тиждень)",
     "claudeAutoLimitResetDescription": "Коли цей обліковий запис досягає 5-годинного ліміту використання й доступне скидання ліміту сеансу, OmniRoute автоматично активує його та повторює спробу на повній швидкості. Використовується доступне для облікового запису скидання раз на тиждень, а використання й надалі враховується в тижневому ліміті.",
+    "codexPaidCreditsShort": "Додаткові кредити",
+    "codexPaidCreditsToggleTitle": "Дозволити платні кредити Codex після вичерпання квоти підписки (можуть стягуватися додаткові кошти)",
+    "codexPaidCreditsEnabled": "Платні кредити Codex увімкнено (можуть стягуватися додаткові кошти)",
+    "codexPaidCreditsDisabled": "Платні кредити Codex вимкнено",
+    "failedUpdateCodexPaidCredits": "Не вдалося оновити політику платних кредитів Codex",
+    "allowCodexPaidCreditsLabel": "Дозволити платні кредити Codex",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Пропускати тимчасовий період очікування, щоб це підключення залишалося доступним навіть після відновлюваних помилок (термінальні стани, як-от banned/expired, все одно застосовуються).",
     "disableCoolingLabel": "Вимкнути період очікування для цього підключення",
     "bulkPasteAdded": "{count, plural, one {Додано 1 ключ} few {Додано # ключі} many {Додано # ключів} other {Додано # ключа}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Отримайте API-ключ на monsterapi.ai",
       "moonshot": "Підключіть Moonshot AI за допомогою API-ключа.",
       "morph": "Безкоштовний тариф: 250 тис. кредитів/місяць, $0",
+      "apmix": "Підключіть Apmix із API-ключем від apmix.ai/dashboard — одна підписка, багато моделей.",
       "nanogpt": "Підключіть NanoGPT за допомогою API-ключа.",
       "nebius": "~$1 пробних кредитів при реєстрації для тестування API",
       "nlpcloud": "NLP Cloud використовує власний API чат-бота замість OpenAI chat/completions. OmniRoute адаптує повідомлення OpenAI до вхідних даних/контексту/історії та надає локальний каталог підтримуваних моделей чат-ботів.",
@@ -6634,8 +6642,7 @@
       "kiro": "Безкоштовний рівень: 50 кредитів на місяць (~25K–100K токенів). ⚠️ Умови використання Kiro забороняють використання через сторонні проксі або оболонки.",
       "codex": "Підключіть OpenAI Codex за допомогою наявного процесу OAuth.",
       "qwen": "Підключіть Qwen Code за допомогою наявного процесу OAuth.",
-      "github-models": "Створіть GitHub PAT з областю видимості 'models: read' на github.com/settings/tokens",
-      "apmix": "Підключіть Apmix із API-ключем від apmix.ai/dashboard — одна підписка, багато моделей."
+      "github-models": "Створіть GitHub PAT з областю видимості 'models: read' на github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} приймає власні ідентифікатори моделі постачальника. Імпортуйте з /models або додайте власні ідентифікатори для маршрутизації.",
     "bedrockModelsDescription": "Моделі Amazon Bedrock залежать від регіону AWS. Імпортуйте з /models або додайте ідентифікатори моделі Bedrock, активовані у вибраному регіоні.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Ліміти паралельності для окремих моделей",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Необов’язково: один запис model=cap на рядок, зіставляється з точним ідентифікатором моделі upstream. Зайві запити ставляться в локальну чергу; порожнє значення означає відсутність ліміту для моделі.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Недійсний запис паралельності для моделі «{entry}» — використовуйте model=cap, де cap — ціле число від 1 до {max}.",
-    "codexPaidCreditsShort": "Додаткові кредити",
-    "codexPaidCreditsToggleTitle": "Дозволити платні кредити Codex після вичерпання квоти підписки (можуть стягуватися додаткові кошти)",
-    "codexPaidCreditsEnabled": "Платні кредити Codex увімкнено (можуть стягуватися додаткові кошти)",
-    "codexPaidCreditsDisabled": "Платні кредити Codex вимкнено",
-    "failedUpdateCodexPaidCredits": "Не вдалося оновити політику платних кредитів Codex",
-    "allowCodexPaidCreditsLabel": "Дозволити платні кредити Codex",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Недійсний запис паралельності для моделі «{entry}» — використовуйте model=cap, де cap — ціле число від 1 до {max}."
   },
   "settings": {
     "title": "Налаштування",
@@ -7702,6 +7702,7 @@
     "configured": "налаштовано",
     "none": "Немає",
     "modelOverrideValuePlaceholder": "Числове значення",
+    "modelOverrideKey": "Ключ перевизначення",
     "modelOverrideReasoningEffortsPlaceholder": "Англійською, через кому, наприклад: low, medium, high",
     "addKeyValue": "Додати ключ-значення",
     "noModelOverrides": "Для цієї моделі не налаштовано перевизначень.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Виявлення від перезапуску",
       "statsEmpty": "Виявлень поки немає.",
       "statsRequest": "Запити"
-    },
-    "modelOverrideKey": "Ключ перевизначення"
+    }
   },
   "contextRtk": {
     "title": "Двигун RTK",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Не вдалося перетворити потік"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Платні кредити Codex",
+    "codexPaidCreditsAvailable": "Доступно (баланс не повідомляється)",
+    "codexPaidCreditsUnavailable": "Недоступно або досягнуто ліміт витрат",
+    "codexPaidCreditsUnlimited": "Без обмежень",
     "title": "Використання",
     "grokExtraUsageCredits": "Додаткові кредитні кошти",
     "grokAutoTopUp": "Автоматичне поповнення",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Останнє оновлення",
     "providerQuota": "Квота провайдера",
     "providerQuotaHomeHint": "Стан у реальному часі за підключеними акаунтами",
-    "codexPaidCreditsLabel": "Платні кредити Codex",
-    "codexPaidCreditsAvailable": "Доступно (баланс не повідомляється)",
-    "codexPaidCreditsUnavailable": "Недоступно або досягнуто ліміт витрат",
-    "codexPaidCreditsUnlimited": "Без обмежень",
     "claudeResetCreditDefaultTitle": "Скидання лімітів Claude",
     "confirmRedeemClaudeResetCredit": "Активація негайно скидає відповідні ліміти використання Claude та безповоротно витрачає цей кредит.",
     "claudeResetCreditsModalTitle": "Кредити для скидання Claude",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Додаткові дії",
     "test": "Тест",
     "edit": "Редагувати",
     "delete": "Видалити",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Не виміряно",
     "upstream4xx": "{count} верхніх помилок клієнта",
     "upstream5xx": "{count} помилки верхнього сервера",
-    "uniformEgressLine": "{affected} з {exits} виходів одночасно виходять з ладу на {provider} (останні {hours} год.) — це не проблема виходу",
-    "moreActions": "Додаткові дії"
+    "uniformEgressLine": "{affected} з {exits} виходів одночасно виходять з ладу на {provider} (останні {hours} год.) — це не проблема виходу"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Затримка",
     "quota": "Квота",
     "rangeWindow": "Вікно {range}",
+    "timeRange": "Часовий діапазон",
     "runtimeHealthBlend": "поєднання виконання/стану",
     "averageResponseTime": "середній час відповіді",
     "worstQuota": "Найгірша квота",
@@ -13912,8 +13913,7 @@
     "unknown": "невідомо",
     "unknownProvider": "невідомий провайдер",
     "unknownModel": "невідома модель",
-    "resolvedTargetMetrics": "{requests} зап. · {success} успішно · {latency} · квота {quota}",
-    "timeRange": "Часовий діапазон"
+    "resolvedTargetMetrics": "{requests} зап. · {success} успішно · {latency} · квота {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Квота використання в USD",

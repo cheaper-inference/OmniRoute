@@ -25,8 +25,10 @@
     "confirm": "你確定嗎？",
     "refresh": "重新整理",
     "close": "關閉",
+    "dialogTitleFallback": "對話方塊",
     "previousPage": "上一頁",
     "nextPage": "下一頁",
+    "pagination": "分頁",
     "capsLockOn": "Caps Lock 已開啟",
     "dismissNotification": "關閉通知",
     "toggleColumns": "切換欄位",
@@ -182,6 +184,7 @@
     "combos": "組合",
     "noModelsFound": "未找到 Model",
     "clear": "清除",
+    "clearFilters": "清除篩選條件",
     "done": "完成",
     "selectAll": "全選",
     "unselectAll": "取消全選",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "預覽",
     "batchFilePreviewTruncated": "顯示前 {shown} 行（共 {total} 行）",
     "batchFileDownloadFull": "下載完整檔案",
-    "dialogTitleFallback": "對話方塊",
-    "pagination": "分頁",
-    "clearFilters": "清除篩選條件",
     "tokensPageTitle": "權杖",
     "tokensPageDescription": "在 API 金鑰之間傳送權杖、分享邀請碼並連線至社群伺服器。",
     "tokensServerUrlLabel": "伺服器 URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "快速導覽",
     "quickNavigationTitle": "快速導覽（⌘K / Ctrl+K）",
     "openQuickNavigation": "開啟快速導覽",
+    "openMenu": "開啟選單",
+    "products": "Keak 產品",
     "switchToLightMode": "切換至淺色模式",
     "switchToDarkMode": "切換至深色模式",
     "language": "語言",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "高階負載規則、請求限制和代理 API 設定",
     "mitmProxyDescription": "設定 MITM 代理設定以進行流量檢查和除錯",
     "oneProxyDescription": "設定 1Proxy 設定以實現高階代理鏈",
-    "omniSkillsDescription": "安裝和管理用於自動提示和工具執行的沙箱技能",
-    "openMenu": "開啟選單",
-    "products": "Keak 產品"
+    "omniSkillsDescription": "安裝和管理用於自動提示和工具執行的沙箱技能"
   },
   "cloudSyncStatus": {
     "synced": "已同步",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "組合 → {name}"
   },
   "combos": {
+    "title": "組合",
+    "description": "建立支援權重路由與故障回退的模型組合",
+    "autoCatalogTitle": "自動路由目錄",
     "autoTosLoadError": "無法載入 ToS 政策。請重試後再進行變更。",
     "autoTosSaveError": "無法儲存 ToS 政策。仍顯示先前的設定，請重試。",
     "autoTosIncludeLabel": "在 auto 中納入標記為 ToS: avoid 的提供者",
     "autoTosDescription": "預設關閉。適用於所有 auto 組合，而非單一帳戶。連線至提供者不會啟用此選項。",
-    "title": "組合",
-    "description": "建立支援權重路由與故障回退的模型組合",
-    "autoCatalogTitle": "自動路由目錄",
     "autoCatalogTemplateCount": "{count} 個模板",
     "autoCatalogDescription": "內建 auto/* 組合，從已連線的提供者動態解析。直接將這些 ID 作為 model 欄位使用——無需設定。",
     "autoCatalogExpand": "展開自動路由目錄",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "尚未設定任何 combos。",
     "playgroundCreateFirst": "請先建立一個",
     "weighted": "加權",
+    "weightPercent": "權重（%）",
     "leastUsed": "最少使用",
     "costOpt": "成本最佳化",
     "strategyGuideTitle": "如何使用這種策略",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# 個帳戶} other {# 個帳戶}}",
     "builderGlobalAdded": "已添加",
     "builderGlobalAdd": "新增",
+    "clearSearch": "清除搜尋",
     "manualModel": "手動模型",
     "manualModelInvalid": "請按 provider/model 格式填寫。",
     "manualModelUnknownProvider": "未知的提供者字首。",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "最小內容長度（字元）",
     "responseValidationJsonPaths": "JSON 路徑檢查",
     "responseValidationAddCheck": "+ 新增檢查",
+    "responseValidationRemoveCheck": "移除檢查",
+    "responseValidationPath": "JSON 路徑",
+    "responseValidationCondition": "條件",
+    "responseValidationValue": "預期值",
     "agentFeaturesSystemMessageOverride": "系統訊息覆蓋",
     "agentFeaturesSystemMessagePlaceholder": "覆蓋通過此組合路由的所有請求的系統提示…",
     "agentFeaturesSystemMessageHint": "替換客戶端傳送的任何系統訊息。留空則透傳客戶端系統訊息。",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "這將把與此模板匹配的目前連線提供者/模型快照到可編輯的組合中。",
     "duplicateAutoComboFailedPrefix": "複製自動組合失敗：",
     "duplicateAutoComboUnknownError": "未知錯誤",
-    "duplicateAutoComboTitle": "從{name}建立靜態組合",
-    "weightPercent": "權重（%）",
-    "clearSearch": "清除搜尋",
-    "responseValidationRemoveCheck": "移除檢查",
-    "responseValidationPath": "JSON 路徑",
-    "responseValidationCondition": "條件",
-    "responseValidationValue": "預期值"
+    "duplicateAutoComboTitle": "從{name}建立靜態組合"
   },
   "costs": {
     "title": "成本",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API 格式",
     "apiKeyOptionalHint": "如果上游不需要認證，可以留空 API key。",
     "apiKeyOptionalLabel": "API key（可選）",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "中國大陸",
+    "apiRegionHint": "選取用於 API 存取與配額追蹤的端點區域。",
+    "apiRegionInternational": "國際",
+    "apiRegionLabel": "API 區域",
     "apikey": "API key",
     "audio": "音訊",
     "audioProvidersHeading": "音訊 Provider",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "當此帳戶達到 5 小時用量上限，且 Anthropic 提供較低優先順序的通道時，OmniRoute 會接受該通道，並持續使用 anthropic-usage-limit: slow 傳送請求，直到時間區間重設為止，而非讓連線進入冷卻。每週上限仍然適用，且回應可能需要等待閒置容量。",
     "claudeAutoLimitResetLabel": "自動重設工作階段上限（每週一次）",
     "claudeAutoLimitResetDescription": "當此帳戶達到 5 小時用量上限，且可重設工作階段上限時，OmniRoute 會自動使用該次重設並以完整速度重試。這會使用帳戶每週一次的重設機會，且用量仍會計入每週上限。",
+    "codexPaidCreditsShort": "額外額度",
+    "codexPaidCreditsToggleTitle": "訂閱配額用盡後允許使用付費 Codex 額度（可能產生額外費用）",
+    "codexPaidCreditsEnabled": "已啟用 Codex 付費額度（可能產生額外費用）",
+    "codexPaidCreditsDisabled": "已停用 Codex 付費額度",
+    "failedUpdateCodexPaidCredits": "更新 Codex 付費額度政策失敗",
+    "allowCodexPaidCreditsLabel": "允許使用付費 Codex 額度",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "跳過暫時冷卻，使此連線在可恢復錯誤後仍保持資格（已停用/已過期等終止狀態仍適用）。",
     "disableCoolingLabel": "對此連線停用冷卻",
     "bulkPasteAdded": "{count, plural, one {已新增 1 個 key} other {已新增 # 個 key}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "在 monsterapi.ai 取得 API 金鑰",
       "moonshot": "使用 API 金鑰連線 Moonshot AI。",
       "morph": "免費方案：每月 25 萬額度，$0 美元",
+      "apmix": "使用來自 apmix.ai/dashboard 的 API 金鑰連接 Apmix — 一份訂閱，多個模型。",
       "nanogpt": "使用 API 金鑰連線 NanoGPT。",
       "nebius": "註冊即贈約 $1 美元試用額度，供 API 測試使用",
       "nlpcloud": "NLP Cloud 使用專有的聊天機器人 API，而非 OpenAI chat/completions。OmniRoute 將 OpenAI 訊息轉換為 input/context/history，並提供支援的聊天機器人模型本地目錄。",
@@ -6634,8 +6642,7 @@
       "kiro": "免費方案：每月 50 額度（約 2.5 萬至 10 萬 tokens）。⚠️ Kiro 服務條款禁止第三方代理/轉接使用。",
       "codex": "使用現有的 OAuth 流程連線 OpenAI Codex。",
       "qwen": "使用現有的 OAuth 流程連線 Qwen Code。",
-      "github-models": "在 github.com/settings/tokens 建立具有 'models: read' 範圍的 GitHub PAT",
-      "apmix": "使用來自 apmix.ai/dashboard 的 API 金鑰連接 Apmix — 一份訂閱，多個模型。"
+      "github-models": "在 github.com/settings/tokens 建立具有 'models: read' 範圍的 GitHub PAT"
     },
     "passthroughModelsDescription": "{provider} 接受提供者本機模型 ID。從 /models 匯入或新增用於路由的自定義 ID。",
     "bedrockModelsDescription": "Amazon Bedrock 模型的範圍按 AWS 區域劃分。從 /models 匯入或新增在所選區域中啟用的基岩模型 ID。",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "各模型並行上限",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "選填：每行一個 model=cap，與上游模型 ID 完全比對。超出的請求會在本機排隊；留空表示不設各模型上限。",
-    "rateLimitOverridesModelConcurrencyInvalid": "無效的各模型並行項目「{entry}」——請使用 model=cap，其中 cap 為 1 到 {max} 的整數。",
-    "codexPaidCreditsShort": "額外額度",
-    "codexPaidCreditsToggleTitle": "訂閱配額用盡後允許使用付費 Codex 額度（可能產生額外費用）",
-    "codexPaidCreditsEnabled": "已啟用 Codex 付費額度（可能產生額外費用）",
-    "codexPaidCreditsDisabled": "已停用 Codex 付費額度",
-    "failedUpdateCodexPaidCredits": "更新 Codex 付費額度政策失敗",
-    "allowCodexPaidCreditsLabel": "允許使用付費 Codex 額度",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "無效的各模型並行項目「{entry}」——請使用 model=cap，其中 cap 為 1 到 {max} 的整數。"
   },
   "settings": {
     "title": "設定",
@@ -7702,6 +7702,7 @@
     "configured": "已設定",
     "none": "無",
     "modelOverrideValuePlaceholder": "數值",
+    "modelOverrideKey": "覆寫金鑰",
     "modelOverrideReasoningEffortsPlaceholder": "以英文逗號分隔，例如 low, medium, high",
     "addKeyValue": "新增鍵值",
     "noModelOverrides": "此模型未設定任何覆寫。",
@@ -8945,8 +8946,7 @@
       "statsTitle": "自重新啟動以來的偵測",
       "statsEmpty": "尚無偵測。",
       "statsRequest": "請求"
-    },
-    "modelOverrideKey": "覆寫金鑰"
+    }
   },
   "contextRtk": {
     "title": "RTK 引擎",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "轉換串流失敗"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Codex 付費額度",
+    "codexPaidCreditsAvailable": "可用（未回報餘額）",
+    "codexPaidCreditsUnavailable": "無法使用或已達支出上限",
+    "codexPaidCreditsUnlimited": "無限",
     "title": "用量",
     "grokExtraUsageCredits": "額外使用積分",
     "grokAutoTopUp": "自動加值",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "上次重新整理",
     "providerQuota": "提供者配額",
     "providerQuotaHomeHint": "已連線帳戶的即時狀態",
-    "codexPaidCreditsLabel": "Codex 付費額度",
-    "codexPaidCreditsAvailable": "可用（未回報餘額）",
-    "codexPaidCreditsUnavailable": "無法使用或已達支出上限",
-    "codexPaidCreditsUnlimited": "無限",
     "claudeResetCreditDefaultTitle": "Claude 限額重設",
     "confirmRedeemClaudeResetCredit": "兌換將立即重設符合條件的 Claude 使用限額，並永久消耗此點數。",
     "claudeResetCreditsModalTitle": "Claude 重設點數",
@@ -11453,6 +11453,7 @@
     "tableHealth": "健康狀態（24小時）",
     "tableUsage": "使用情況",
     "tableActions": "操作",
+    "moreActions": "更多動作",
     "test": "測試",
     "edit": "編輯",
     "delete": "刪除",
@@ -11610,8 +11611,7 @@
     "notMeasured": "未測量",
     "upstream4xx": "{count} 上游客戶端錯誤",
     "upstream5xx": "{count} 上游伺服器錯誤",
-    "uniformEgressLine": "{affected} 中的 {exits} 個出口在 {provider} 上同時失敗 (最後 {hours} 小時) — 不是出口問題",
-    "moreActions": "更多動作"
+    "uniformEgressLine": "{affected} 中的 {exits} 個出口在 {provider} 上同時失敗 (最後 {hours} 小時) — 不是出口問題"
   },
   "playground": {
     "title": "模型演練場",
@@ -13858,6 +13858,7 @@
     "latency": "延遲",
     "quota": "配額",
     "rangeWindow": "{range} 視窗",
+    "timeRange": "時間範圍",
     "runtimeHealthBlend": "執行時期/健康混合",
     "averageResponseTime": "平均回應時間",
     "worstQuota": "最差配額",
@@ -13912,8 +13913,7 @@
     "unknown": "未知",
     "unknownProvider": "未知提供者",
     "unknownModel": "未知模型",
-    "resolvedTargetMetrics": "{requests} 請求 · {success} 成功 · {latency} · 配額 {quota}",
-    "timeRange": "時間範圍"
+    "resolvedTargetMetrics": "{requests} 請求 · {success} 成功 · {latency} · 配額 {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD 用量配額",

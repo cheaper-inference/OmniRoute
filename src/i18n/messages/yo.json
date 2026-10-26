@@ -25,8 +25,10 @@
     "confirm": "Ṣé ó dá ọ lójú?",
     "refresh": "Tún un ṣe",
     "close": "Pa á",
+    "dialogTitleFallback": "Àpótí ìbánisọ̀rọ̀",
     "previousPage": "Ojú-ewé ìṣáájú",
     "nextPage": "Ojú-ewé tó kàn",
+    "pagination": "Pípín sí ojúewé",
     "capsLockOn": "Caps Lock ti tàn",
     "dismissNotification": "Pa ìfitónilétí náà",
     "toggleColumns": "Ṣí tàbí pa àwọn ọwọ̀n",
@@ -182,6 +184,7 @@
     "combos": "Àwọn àkójọpọ̀",
     "noModelsFound": "A kò rí awoṣe kankan",
     "clear": "Nu rẹ́",
+    "clearFilters": "Pa àwọn àsẹ̀ rẹ́",
     "done": "Ti parí",
     "selectAll": "Yan gbogbo rẹ̀",
     "unselectAll": "Yọ gbogbo yíyan kúrò",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Àwòtẹ́lẹ̀",
     "batchFilePreviewTruncated": "Ń ṣàfihàn àwọn ìlà {shown} àkọ́kọ́ (àpapọ̀ ìlà {total})",
     "batchFileDownloadFull": "Gba Fáìlì Kíkún Sílẹ̀",
-    "dialogTitleFallback": "Àpótí ìbánisọ̀rọ̀",
-    "pagination": "Pípín sí ojúewé",
-    "clearFilters": "Pa àwọn àsẹ̀ rẹ́",
     "tokensPageTitle": "Àwọn tọ́kẹ́ẹ̀nì",
     "tokensPageDescription": "Fi àwọn tọ́kẹ́ẹ̀nì ránṣẹ́ láàárín àwọn kọ́kọ́rọ́ API, pín àwọn kóòdù ìpè, kí o sì so àwọn olupin àwùjọ pọ̀.",
     "tokensServerUrlLabel": "URL olupin"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Ìlọ kiri kíákíá",
     "quickNavigationTitle": "Ìlọ kiri kíákíá (⌘K / Ctrl+K)",
     "openQuickNavigation": "Ṣí ìlọ kiri kíákíá",
+    "openMenu": "Ṣí àkojọ aṣàyàn",
+    "products": "Àwọn ọjà Keak",
     "switchToLightMode": "Yí padà sí ìpo ìmọ́lẹ̀",
     "switchToDarkMode": "Yí padà sí ìpo òkùnkùn",
     "language": "Èdè",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Àwọn òfin payload onípele-gíga, àwọn ààlà ìbéèrè, àti àwọn ètò API aṣojú",
     "mitmProxyDescription": "Ṣètò àwọn ètò aṣojú MITM fún ṣíṣe àyẹ̀wò ìrìn-àjò dátà àti ìṣàwárí àṣìṣe",
     "oneProxyDescription": "Ṣètò àwọn ètò 1Proxy fún ṣíṣe àsopọ̀ ọ̀pọ̀ aṣojú onípele-gíga",
-    "omniSkillsDescription": "Fi àwọn ọgbọ́n sandbox sori ẹrọ kí o sì ṣàkóso wọn fún ìmúṣẹ́ prompt àti irinṣẹ́ láìfọwọ́ṣe",
-    "openMenu": "Ṣí àkojọ aṣàyàn",
-    "products": "Àwọn ọjà Keak"
+    "omniSkillsDescription": "Fi àwọn ọgbọ́n sandbox sori ẹrọ kí o sì ṣàkóso wọn fún ìmúṣẹ́ prompt àti irinṣẹ́ láìfọwọ́ṣe"
   },
   "cloudSyncStatus": {
     "synced": "Ti múṣiṣẹ́pọ̀",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Àkópọ̀ → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Fi àwọn olùpèsè tí a samisi ToS: avoid sí auto",
-    "autoTosDescription": "Ó wà ní pípa ní ìbẹ̀rẹ̀. Ó kan gbogbo àkójọpọ̀ auto, kì í ṣe àkọọlẹ̀ kan ṣoṣo. Síso olùpèsè pọ̀ kò tan àṣàyàn yìí.",
-    "autoTosSaveError": "A kò lè fi ìlànà ToS pamọ́. Ètò ìṣáájú ṣì hàn. Gbìyànjú lẹ́ẹ̀kan sí i.",
-    "autoTosLoadError": "A kò lè ṣí ìlànà ToS. Gbìyànjú lẹ́ẹ̀kan sí i kí o tó yí i padà.",
     "title": "Àwọn àkójọpọ̀",
     "description": "Ṣẹ̀dá àwọn àkójọpọ̀ awoṣe pẹ̀lú ìtọ́sọ́nà oníwọ̀n àti àtìlẹ́yìn ìpadàsẹ́yìn",
     "autoCatalogTitle": "Àkójọ ìtọ́sọ́nà aládàáṣe",
+    "autoTosLoadError": "A kò lè ṣí ìlànà ToS. Gbìyànjú lẹ́ẹ̀kan sí i kí o tó yí i padà.",
+    "autoTosSaveError": "A kò lè fi ìlànà ToS pamọ́. Ètò ìṣáájú ṣì hàn. Gbìyànjú lẹ́ẹ̀kan sí i.",
+    "autoTosIncludeLabel": "Fi àwọn olùpèsè tí a samisi ToS: avoid sí auto",
+    "autoTosDescription": "Ó wà ní pípa ní ìbẹ̀rẹ̀. Ó kan gbogbo àkójọpọ̀ auto, kì í ṣe àkọọlẹ̀ kan ṣoṣo. Síso olùpèsè pọ̀ kò tan àṣàyàn yìí.",
     "autoCatalogTemplateCount": "Àwọn àdàkọ {count}",
     "autoCatalogDescription": "Àwọn àkójọpọ̀ auto/* tí a fi sínú rẹ̀ ni a ń yanjú ní ìmúdàgba láti ọ̀dọ̀ àwọn olùpèsè tí a ti sopọ̀. Lo èyíkéyìí nínú àwọn ID wọ̀nyí gẹ́gẹ́ bí ààyè awoṣe — kò nílò ìṣètò.",
     "autoCatalogExpand": "Fẹ̀ àkójọ ìtọ́sọ́nà aládàáṣe sí i",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Kò tíì sí combo tí a ṣètò.",
     "playgroundCreateFirst": "Kọ́kọ́ ṣẹ̀dá ọ̀kan",
     "weighted": "Tí a Fún ní Ìwọ̀n",
+    "weightPercent": "Ìwọ̀n (%)",
     "leastUsed": "Èyí tí a Lò Kéré Jù",
     "costOpt": "Ìmúdára-Iye Owó",
     "strategyGuideTitle": "Bí a ṣe ń lo ọgbọ́n yìí",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# àkọọ́lẹ̀} other {# àwọn àkọọ́lẹ̀}}",
     "builderGlobalAdded": "A ti ṣàfikún",
     "builderGlobalAdd": "Ṣàfikún",
+    "clearSearch": "Pa ìṣàwárí rẹ́",
     "manualModel": "Módẹ́lì àfọwọ́ṣe",
     "manualModelInvalid": "Tẹ módẹ́lì kan sí i gẹ́gẹ́ bí provider/model.",
     "manualModelUnknownProvider": "Ìṣáájú orúkọ olùpèsè tí a kò mọ̀.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Ìwọ̀n gígùn àkóónú tó kéré jù (àwọn àmì-ọ̀rọ̀)",
     "responseValidationJsonPaths": "Àwọn àyẹ̀wò JSON-path",
     "responseValidationAddCheck": "+ Ṣàfikún àyẹ̀wò",
+    "responseValidationRemoveCheck": "Yọ àyẹ̀wò náà kúrò",
+    "responseValidationPath": "Ipa ọ̀nà JSON",
+    "responseValidationCondition": "Àdéhùn",
+    "responseValidationValue": "Iye tí a ń retí",
     "agentFeaturesSystemMessageOverride": "Rọ́pò ìfiránṣẹ́ ètò",
     "agentFeaturesSystemMessagePlaceholder": "O jẹ́ olùrànlọ́wọ́ amòye...",
     "agentFeaturesSystemMessageHint": "Ìfiránṣẹ́ ètò tí yóò rọ́pò èyí tó wà fún àwọn aṣojú",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Èyí yóò ṣe ẹ̀dà àwọn olùpèsè/àwọn awoṣe tó sopọ̀ lọ́wọ́lọ́wọ́ tí ó bá àdàkọ yìí mu, yóò sì fi wọ́n sínú àkójọpọ̀ tí a lè ṣàtúnṣe.",
     "duplicateAutoComboFailedPrefix": "Kò ṣeé ṣe láti ṣe ẹ̀dà àkójọpọ̀ aládàáṣiṣẹ́:",
     "duplicateAutoComboUnknownError": "Àṣìṣe àìmọ̀",
-    "duplicateAutoComboTitle": "Ṣẹ̀dá àkójọpọ̀ àìyípadà láti inú {name}",
-    "weightPercent": "Ìwọ̀n (%)",
-    "clearSearch": "Pa ìṣàwárí rẹ́",
-    "responseValidationRemoveCheck": "Yọ àyẹ̀wò náà kúrò",
-    "responseValidationPath": "Ipa ọ̀nà JSON",
-    "responseValidationCondition": "Àdéhùn",
-    "responseValidationValue": "Iye tí a ń retí"
+    "duplicateAutoComboTitle": "Ṣẹ̀dá àkójọpọ̀ àìyípadà láti inú {name}"
   },
   "costs": {
     "title": "Àwọn ìnáwó",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Àkọlé Fọ́mátì API",
     "apiKeyOptionalHint": "Fi sílẹ̀ ní òfo bí ètò agbègbè rẹ tàbí olùpèsè rẹ kò bá nílò ìfàṣẹsí.",
     "apiKeyOptionalLabel": "API Key (kì í ṣe dandan)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Ilẹ̀ China ńlá",
+    "apiRegionHint": "Yan agbègbè endpoint tí a ń lò fún ìwọlé API àti títọpa iye àṣẹ.",
+    "apiRegionInternational": "Káríayé",
+    "apiRegionLabel": "Agbègbè API",
     "apikey": "API Key",
     "audio": "Ohùn",
     "audioProvidersHeading": "Àkọlé Àwọn Olùpèsè Ohùn",
@@ -6545,6 +6545,7 @@
       "monsterapi": "Gba kọ́kọ́rọ́ API ní monsterapi.ai",
       "moonshot": "So Kimi pọ̀ pẹ̀lú kọ́kọ́rọ́ API kan.",
       "morph": "Ìpele ọ̀fẹ́: kirẹditi 250K/oṣù, $0",
+      "apmix": "So Apmix pọ mọ API key kan láti apmix.ai/dashboard — ìfọwọ́sí kan, ọ̀pọ̀ àwọn módéèlù.",
       "nanogpt": "So NanoGPT pọ̀ mọ́ kọ́kọ́rọ́ API kan.",
       "nebius": "Kirẹditi ìdánwò tó tó ~$1 nígbà ìforúkọsílẹ̀ fún ṣíṣàyẹ̀wò API",
       "nlpcloud": "NLP Cloud ń lo API chatbot aládàáni dípò OpenAI chat/completions. OmniRoute ń ṣàtúnṣe àwọn ìfiránṣẹ́ OpenAI sí input/context/history, ó sì ń pèsè àkójọ abẹ́lé ti àwọn àwòṣe chatbot tí a ṣètìlẹ́yìn fún.",
@@ -6641,8 +6642,7 @@
       "kiro": "Ìpele ọ̀fẹ́: kírẹ́díìtì 50/oṣù (~25K–100K tokens). ⚠️ Àwọn ToS Kiro kọ lílo proxy/harness ẹni-kẹta.",
       "codex": "So OpenAI Codex pọ̀ pẹ̀lú ìṣàn OAuth tó wà tẹ́lẹ̀.",
       "qwen": "So Qwen Code pọ̀ pẹ̀lú ìṣàn OAuth tó wà tẹ́lẹ̀.",
-      "github-models": "Ṣẹ̀dá GitHub PAT kan pẹ̀lú àyè 'models: read' ní github.com/settings/tokens",
-      "apmix": "So Apmix pọ mọ API key kan láti apmix.ai/dashboard — ìfọwọ́sí kan, ọ̀pọ̀ àwọn módéèlù."
+      "github-models": "Ṣẹ̀dá GitHub PAT kan pẹ̀lú àyè 'models: read' ní github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} ń gba àwọn ID model abinibi-provider. Gbé wọlé láti /models tàbí fi àwọn ID àdáni kún un fún ìdarí ipa-ọ̀nà.",
     "bedrockModelsDescription": "Àwọn model Amazon Bedrock jẹ́ dídín mọ́ agbègbè AWS. Gbé wọlé láti /models tàbí fi àwọn ID model Bedrock tí a ti mú ṣiṣẹ́ ní agbègbè tí a yàn kún un.",
@@ -7702,6 +7702,7 @@
     "configured": "tí a ṣètò",
     "none": "Kò sí",
     "modelOverrideValuePlaceholder": "Iye nọ́ńbà",
+    "modelOverrideKey": "Kọ́kọ́rọ́ àtúnkọjá",
     "modelOverrideReasoningEffortsPlaceholder": "Àwọn ọ̀rọ̀ Gẹ̀ẹ́sì tí a fi àmì kọ́má yà, àpẹẹrẹ low, medium, high",
     "addKeyValue": "Fi kọ́kọ́rọ́ àti iye kún un",
     "noModelOverrides": "Kò sí ìṣàtúnṣe kankan tí a ṣètò fún awoṣe yìí.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Àwọn àwárí láti ìgbà àtúnbẹ̀rẹ̀",
       "statsEmpty": "Kò sí àwárí kankan síbẹ̀.",
       "statsRequest": "Àwọn ìbéèrè"
-    },
-    "modelOverrideKey": "Kọ́kọ́rọ́ àtúnkọjá"
+    }
   },
   "contextRtk": {
     "title": "Ẹ́ńjìnnì RTK",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Ìlera (wákàtí 24)",
     "tableUsage": "Ìlò",
     "tableActions": "Àwọn ìgbésẹ̀",
+    "moreActions": "Àwọn ìgbésẹ̀ míì",
     "test": "Dán wò",
     "edit": "Ṣàtúnṣe",
     "delete": "Paarẹ́",
@@ -11610,8 +11611,7 @@
     "notMeasured": "A ko wọn",
     "upstream4xx": "{count} ìwà àwọn àkàntà ní àwọn àkàntà",
     "upstream5xx": "{count} ìwà àwọn àkàntà ní àwọn àkàntà",
-    "uniformEgressLine": "{affected} ya ka {exits} ẹjọ kò rí nipa {provider} (lẹhin {hours}h) — kò si ẹjọ",
-    "moreActions": "Àwọn ìgbésẹ̀ míì"
+    "uniformEgressLine": "{affected} ya ka {exits} ẹjọ kò rí nipa {provider} (lẹhin {hours}h) — kò si ẹjọ"
   },
   "playground": {
     "title": "Pápá Ìdánwò Àwòṣe",
@@ -13858,6 +13858,7 @@
     "latency": "Àkókò ìdádúró",
     "quota": "Ìpín",
     "rangeWindow": "fèrèsé {range}",
+    "timeRange": "Àkókò",
     "runtimeHealthBlend": "àkópọ̀ àkókò ìṣiṣẹ́/ìlera",
     "averageResponseTime": "ìpíndọ́gba àkókò ìdáhùn",
     "worstQuota": "Ìpín tó burú jù",
@@ -13912,8 +13913,7 @@
     "unknown": "àìmọ̀",
     "unknownProvider": "olùpèsè àìmọ̀",
     "unknownModel": "àwòṣe àìmọ̀",
-    "resolvedTargetMetrics": "Ìbéèrè {requests} · àṣeyọrí {success} · {latency} · ìwọ̀n {quota}",
-    "timeRange": "Àkókò"
+    "resolvedTargetMetrics": "Ìbéèrè {requests} · àṣeyọrí {success} · {latency} · ìwọ̀n {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Ìwọ̀n lílo USD",

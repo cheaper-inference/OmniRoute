@@ -25,8 +25,10 @@
     "confirm": "Żgur?",
     "refresh": "Aġġorna",
     "close": "Agħlaq",
+    "dialogTitleFallback": "Djalogu",
     "previousPage": "Il-paġna ta' qabel",
     "nextPage": "Il-paġna li jmiss",
+    "pagination": "Paġinazzjoni",
     "capsLockOn": "Caps Lock huwa mixgħul",
     "dismissNotification": "Agħlaq in-notifika",
     "toggleColumns": "Ibdel il-viżibbiltà tal-kolonni",
@@ -182,6 +184,7 @@
     "combos": "Kombinazzjonijiet",
     "noModelsFound": "Ma nstab l-ebda mudell",
     "clear": "Ħassar",
+    "clearFilters": "Neħħi l-filtri",
     "done": "Lest",
     "selectAll": "Agħżel kollox",
     "unselectAll": "Neħħi l-għażla minn kollox",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Previżjoni",
     "batchFilePreviewTruncated": "Qed jintwerew l-ewwel {shown} linji ({total} linji b'kollox)",
     "batchFileDownloadFull": "Niżżel il-Fajl Sħiħ",
-    "dialogTitleFallback": "Djalogu",
-    "pagination": "Paġinazzjoni",
-    "clearFilters": "Neħħi l-filtri",
     "tokensPageTitle": "Tokens",
     "tokensPageDescription": "Ibgħat tokens bejn iċ-ċwievet tal-API, aqsam kodiċijiet tal-istedina u qabbad servers tal-komunità.",
     "tokensServerUrlLabel": "URL tas-server"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Navigazzjoni rapida",
     "quickNavigationTitle": "Navigazzjoni rapida (⌘K / Ctrl+K)",
     "openQuickNavigation": "Iftaħ in-navigazzjoni rapida",
+    "openMenu": "Iftaħ il-menu",
+    "products": "Prodotti ta’ Keak",
     "switchToLightMode": "Aqleb għall-modalità ċara",
     "switchToDarkMode": "Aqleb għall-modalità skura",
     "language": "Lingwa",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Regoli avvanzati għall-payload, limiti għat-talbiet u settings tal-API tal-proxy",
     "mitmProxyDescription": "Ikkonfigura s-settings tal-proxy MITM għall-ispezzjoni tat-traffiku u d-debugging",
     "oneProxyDescription": "Ikkonfigura s-settings ta' 1Proxy għal katina avvanzata ta' proxies",
-    "omniSkillsDescription": "Installa u mmaniġġja ħiliet f'ambjent iżolat għall-eżekuzzjoni awtomatizzata ta' prompts u għodod",
-    "openMenu": "Iftaħ il-menu",
-    "products": "Prodotti ta’ Keak"
+    "omniSkillsDescription": "Installa u mmaniġġja ħiliet f'ambjent iżolat għall-eżekuzzjoni awtomatizzata ta' prompts u għodod"
   },
   "cloudSyncStatus": {
     "synced": "Sinkronizzata",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Inkludi fornituri mmarkati ToS: avoid f’auto",
-    "autoTosDescription": "Mitfi awtomatikament. Japplika għall-combos auto kollha, mhux għal kont wieħed biss. Il-konnessjoni ta’ fornitur ma tattivax din l-għażla.",
-    "autoTosSaveError": "Il-politika ToS ma setgħetx tiġi ssejvjata. Għadu jidher l-issettjar ta’ qabel. Erġa’ pprova.",
-    "autoTosLoadError": "Il-politika ToS ma setgħetx titgħabba. Erġa’ pprova qabel tibdilha.",
     "title": "Kombinazzjonijiet",
     "description": "Oħloq kombinazzjonijiet ta’ mudelli b’instradar ponderat u appoġġ għal alternattivi ta’ riżerva",
     "autoCatalogTitle": "Katalgu tal-instradar awtomatiku",
+    "autoTosLoadError": "Il-politika ToS ma setgħetx titgħabba. Erġa’ pprova qabel tibdilha.",
+    "autoTosSaveError": "Il-politika ToS ma setgħetx tiġi ssejvjata. Għadu jidher l-issettjar ta’ qabel. Erġa’ pprova.",
+    "autoTosIncludeLabel": "Inkludi fornituri mmarkati ToS: avoid f’auto",
+    "autoTosDescription": "Mitfi awtomatikament. Japplika għall-combos auto kollha, mhux għal kont wieħed biss. Il-konnessjoni ta’ fornitur ma tattivax din l-għażla.",
     "autoCatalogTemplateCount": "{count} mudelli",
     "autoCatalogDescription": "Kombinazzjonijiet auto/* integrati li jiġu riżolti b’mod dinamiku mill-fornituri konnessi. Uża kwalunkwe wieħed minn dawn l-IDs bħala l-qasam tal-mudell — ebda konfigurazzjoni meħtieġa.",
     "autoCatalogExpand": "Espandi l-katalgu tal-instradar awtomatiku",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Għadu ma ġie kkonfigurat ebda combo.",
     "playgroundCreateFirst": "L-ewwel oħloq waħda",
     "weighted": "Ibbilanċjata skont il-Piż",
+    "weightPercent": "Piż (%)",
     "leastUsed": "L-Inqas Użata",
     "costOpt": "Ottimizzata għall-Ispejjeż",
     "strategyGuideTitle": "Kif tuża din l-istrateġija",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# kont} other {# kontijiet}}",
     "builderGlobalAdded": "Miżjud",
     "builderGlobalAdd": "Żid",
+    "clearSearch": "Ħassar it-tfittxija",
     "manualModel": "Mudell manwali",
     "manualModelInvalid": "Daħħal mudell bħala provider/model.",
     "manualModelUnknownProvider": "Prefiss tal-fornitur mhux magħruf.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Tul minimu tal-kontenut (karattri)",
     "responseValidationJsonPaths": "Verifiki tal-JSON-path",
     "responseValidationAddCheck": "+ Żid verifika",
+    "responseValidationRemoveCheck": "Neħħi l-verifika",
+    "responseValidationPath": "Mogħdija JSON",
+    "responseValidationCondition": "Kundizzjoni",
+    "responseValidationValue": "Valur mistenni",
     "agentFeaturesSystemMessageOverride": "Issostitwixxi l-messaġġ tas-sistema",
     "agentFeaturesSystemMessagePlaceholder": "Inti assistent espert...",
     "agentFeaturesSystemMessageHint": "Sostituzzjoni tal-messaġġ tas-sistema għall-aġenti",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Dan se joħloq snapshot tal-fornituri/mudelli konnessi bħalissa li jaqblu ma’ din is-sagoma, f’kombinazzjoni li tista’ tiġi editjata.",
     "duplicateAutoComboFailedPrefix": "Ma rnexxilniex nidduplikaw il-kombinazzjoni awtomatika:",
     "duplicateAutoComboUnknownError": "Żball mhux magħruf",
-    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}",
-    "weightPercent": "Piż (%)",
-    "clearSearch": "Ħassar it-tfittxija",
-    "responseValidationRemoveCheck": "Neħħi l-verifika",
-    "responseValidationPath": "Mogħdija JSON",
-    "responseValidationCondition": "Kundizzjoni",
-    "responseValidationValue": "Valur mistenni"
+    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}"
   },
   "costs": {
     "title": "Spejjeż",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Tikketta tal-format tal-API",
     "apiKeyOptionalHint": "Ħalli vojt jekk il-konfigurazzjoni lokali jew il-fornitur tiegħek ma jeħtiġux awtentikazzjoni.",
     "apiKeyOptionalLabel": "Ċavetta tal-API (mhux obbligatorja)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Iċ-Ċina Kontinentali",
+    "apiRegionHint": "Agħżel ir-reġjun tal-endpoint użat għall-aċċess tal-API u t-traċċar tal-kwota.",
+    "apiRegionInternational": "Internazzjonali",
+    "apiRegionLabel": "Reġjun tal-API",
     "apikey": "Ċavetta tal-API",
     "audio": "Awdjo",
     "audioProvidersHeading": "Intestatura tal-fornituri tal-awdjo",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Meta dan il-kont jilħaq il-limitu ta' użu tiegħu ta' 5 sigħat u Anthropic toffri l-kanal bi prijorità aktar baxxa, OmniRoute taċċettah u tkompli tibgħat it-talbiet b'anthropic-usage-limit: slow sakemm tiġi rrisettjata t-tieqa, minflok ma tħalli l-konnessjoni tistenna. Il-limitu ta' kull ġimgħa xorta japplika u t-tweġibiet jistgħu jistennew sakemm ikun hemm kapaċità disponibbli.",
     "claudeAutoLimitResetLabel": "Irrisettja awtomatikament il-limitu tas-sessjoni (darba fil-ġimgħa)",
     "claudeAutoLimitResetDescription": "Meta dan il-kont jilħaq il-limitu ta' użu tiegħu ta' 5 sigħat u jkun disponibbli reset tal-limitu tas-sessjoni, OmniRoute tużah awtomatikament u terġa' tipprova bil-veloċità sħiħa. Dan juża r-reset tal-kont ta' darba fil-ġimgħa u xorta jgħodd mal-limitu ta' kull ġimgħa.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Aqbeż il-perjodu ta’ stennija temporanju sabiex din il-konnessjoni tibqa’ eliġibbli anke wara żbalji li jistgħu jiġu rkuprati (l-istati terminali bħal ipprojbiti jew skaduti xorta jibqgħu japplikaw).",
     "disableCoolingLabel": "Iddiżattiva l-perjodu ta’ stennija għal din il-konnessjoni",
     "bulkPasteAdded": "{count, plural, one {Żdiedet ċavetta waħda} other {Żdiedu # ċwievet}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Ikseb ċavetta API fuq monsterapi.ai",
       "moonshot": "Qabbad Kimi b'ċavetta API.",
       "morph": "Livell b'xejn: 250K krediti fix-xahar, $0",
+      "apmix": "Qabbad Apmix bi ċavetta API minn apmix.ai/dashboard — abbonament wieħed, bosta mudelli.",
       "nanogpt": "Qabbad NanoGPT b'ċavetta API.",
       "nebius": "Madwar $1 fi krediti ta' prova mar-reġistrazzjoni għall-ittestjar tal-API",
       "nlpcloud": "NLP Cloud juża API proprjetarja ta' chatbot minflok chat/completions ta' OpenAI. OmniRoute jadatta l-messaġġi ta' OpenAI għal input/context/history u jipprovdi katalgu lokali ta' mudelli ta' chatbot appoġġjati.",
@@ -6634,8 +6642,7 @@
       "kiro": "Livell bla ħlas: 50 kreditu/xahar (~25K–100K token). ⚠️ It-Termini tas-Servizz ta’ Kiro jipprojbixxu l-użu ta’ proxy/harness ta’ parti terza.",
       "codex": "Qabbad OpenAI Codex mal-fluss OAuth eżistenti.",
       "qwen": "Qabbad Qwen Code mal-fluss OAuth eżistenti.",
-      "github-models": "Oħloq GitHub PAT bl-ambitu 'models: read' fuq github.com/settings/tokens",
-      "apmix": "Qabbad Apmix bi ċavetta API minn apmix.ai/dashboard — abbonament wieħed, bosta mudelli."
+      "github-models": "Oħloq GitHub PAT bl-ambitu 'models: read' fuq github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} jaċċetta IDs tal-mudelli nattivi għall-fornitur. Importa minn /models jew żid IDs personalizzati għar-routing.",
     "bedrockModelsDescription": "Il-mudelli ta’ Amazon Bedrock huma limitati skont ir-reġjun AWS. Importa minn /models jew żid IDs tal-mudelli Bedrock attivati fir-reġjun magħżul.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Issettjar",
@@ -7702,6 +7702,7 @@
     "configured": "ikkonfigurat",
     "none": "Xejn",
     "modelOverrideValuePlaceholder": "Valur numeriku",
+    "modelOverrideKey": "Ċavetta tal-override",
     "modelOverrideReasoningEffortsPlaceholder": "Bl-Ingliż, separati b'virgoli, eż. low, medium, high",
     "addKeyValue": "Żid ċavetta u valur",
     "noModelOverrides": "Ma ġiet ikkonfigurata ebda sostituzzjoni għal dan il-mudell.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Sejbiet mill-bidu mill-ġdid",
       "statsEmpty": "Għad m'hemm l-ebda sejba.",
       "statsRequest": "Talbiet"
-    },
-    "modelOverrideKey": "Ċavetta tal-override"
+    }
   },
   "contextRtk": {
     "title": "Magna RTK",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "It-trasformazzjoni tal-fluss falliet"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Użu",
     "grokExtraUsageCredits": "Krediti Addizzjonali għall-Użu",
     "grokAutoTopUp": "Rikarga Awtomatika",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Aġġornat l-aħħar darba",
     "providerQuota": "Kwota tal-Fornitur",
     "providerQuotaHomeHint": "Status f’ħin reali fil-kontijiet konnessi",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Irrisettjar tal-limitu ta' Claude",
     "confirmRedeemClaudeResetCredit": "It-tifdija tirrisettja immedjatament il-limiti eliġibbli tal-użu ta' Claude u tikkonsma dan il-kreditu b'mod permanenti.",
     "claudeResetCreditsModalTitle": "Krediti għall-irrisettjar ta' Claude",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Kundizzjoni (24 siegħa)",
     "tableUsage": "Użu",
     "tableActions": "Azzjonijiet",
+    "moreActions": "Aktar azzjonijiet",
     "test": "Ittestja",
     "edit": "Editja",
     "delete": "Ħassar",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Mhux imkejjel",
     "upstream4xx": "{count} għajn klijent erruri",
     "upstream5xx": "{count} għajnħa server errors",
-    "uniformEgressLine": "{affected} minn {exits} ħruġijiet ifallu flimkien fuq {provider} (l-aħħar {hours}h) — mhix problema tal-ħruġ",
-    "moreActions": "Aktar azzjonijiet"
+    "uniformEgressLine": "{affected} minn {exits} ħruġijiet ifallu flimkien fuq {provider} (l-aħħar {hours}h) — mhix problema tal-ħruġ"
   },
   "playground": {
     "title": "Żona tal-Ittestjar tal-Mudelli",
@@ -13858,6 +13858,7 @@
     "latency": "Latenza",
     "quota": "Kwota",
     "rangeWindow": "perjodu ta' {range}",
+    "timeRange": "Medda ta' żmien",
     "runtimeHealthBlend": "taħlita tat-tħaddim u s-saħħa",
     "averageResponseTime": "ħin medju tar-rispons",
     "worstQuota": "L-agħar kwota",
@@ -13912,8 +13913,7 @@
     "unknown": "mhux magħruf",
     "unknownProvider": "fornitur mhux magħruf",
     "unknownModel": "mudell mhux magħruf",
-    "resolvedTargetMetrics": "{requests} talbiet · {success} suċċessi · {latency} · kwota {quota}",
-    "timeRange": "Medda ta' żmien"
+    "resolvedTargetMetrics": "{requests} talbiet · {success} suċċessi · {latency} · kwota {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "Kwota tal-użu f'USD",

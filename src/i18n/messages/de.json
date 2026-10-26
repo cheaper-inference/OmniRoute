@@ -25,8 +25,10 @@
     "confirm": "Bist du sicher?",
     "refresh": "Aktualisieren",
     "close": "Schließen",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Vorherige Seite",
     "nextPage": "Nächste Seite",
+    "pagination": "Seitennummerierung",
     "capsLockOn": "Feststelltaste ist aktiviert",
     "dismissNotification": "Benachrichtigung verwerfen",
     "toggleColumns": "Spalten umschalten",
@@ -182,6 +184,7 @@
     "combos": "Kombinationen",
     "noModelsFound": "Keine Modelle gefunden",
     "clear": "Löschen",
+    "clearFilters": "Filter zurücksetzen",
     "done": "Fertig",
     "selectAll": "Alle auswählen",
     "unselectAll": "Auswahl aufheben",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Vorschau",
     "batchFilePreviewTruncated": "Zeige die ersten {shown} Zeilen ({total} insgesamt)",
     "batchFileDownloadFull": "Vollständige Datei herunterladen",
-    "dialogTitleFallback": "Dialog",
-    "pagination": "Seitennummerierung",
-    "clearFilters": "Filter zurücksetzen",
     "tokensPageTitle": "Token",
     "tokensPageDescription": "Übertrage Token zwischen API-Schlüsseln, teile Einladungscodes und verbinde Community-Server.",
     "tokensServerUrlLabel": "Server-URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Schnellnavigation",
     "quickNavigationTitle": "Schnellnavigation (⌘K / Strg+K)",
     "openQuickNavigation": "Schnellnavigation öffnen",
+    "openMenu": "Menü öffnen",
+    "products": "Keak-Produkte",
     "switchToLightMode": "Zum hellen Modus wechseln",
     "switchToDarkMode": "Zum dunklen Modus wechseln",
     "language": "Sprache",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Erweiterte Payload-Regeln, Anfragelimits und Proxy-API-Einstellungen",
     "mitmProxyDescription": "MITM-Proxy-Einstellungen für Datenverkehrsinspektion und Debugging konfigurieren",
     "oneProxyDescription": "1Proxy-Einstellungen für erweiterte Proxy-Verkettung konfigurieren",
-    "omniSkillsDescription": "Sandbox-Skills für die automatisierte Prompt- und Tool-Ausführung installieren und verwalten",
-    "openMenu": "Menü öffnen",
-    "products": "Keak-Produkte"
+    "omniSkillsDescription": "Sandbox-Skills für die automatisierte Prompt- und Tool-Ausführung installieren und verwalten"
   },
   "cloudSyncStatus": {
     "synced": "Synchronisiert",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
+    "title": "Kombinationen",
+    "description": "Erstellen Sie Modellkombinationen mit gewichtetem Routing und Fallback-Unterstützung",
+    "autoCatalogTitle": "Katalog für automatisches Routing",
     "autoTosLoadError": "Die Richtlinie zu den Nutzungsbedingungen konnte nicht geladen werden. Versuchen Sie es vor einer Änderung erneut.",
     "autoTosSaveError": "Die Richtlinie zu den Nutzungsbedingungen konnte nicht gespeichert werden. Die vorherige Einstellung wird weiterhin angezeigt. Versuchen Sie es erneut.",
     "autoTosIncludeLabel": "Mit ToS: avoid markierte Anbieter in auto einbeziehen",
     "autoTosDescription": "Standardmäßig deaktiviert. Gilt für alle auto-Kombinationen, nicht nur für ein Konto. Das Verbinden eines Anbieters aktiviert diese Option nicht.",
-    "title": "Kombinationen",
-    "description": "Erstellen Sie Modellkombinationen mit gewichtetem Routing und Fallback-Unterstützung",
-    "autoCatalogTitle": "Katalog für automatisches Routing",
     "autoCatalogTemplateCount": "{count} Vorlagen",
     "autoCatalogDescription": "Integrierte Auto/*-Kombinationen werden dynamisch von verbundenen Anbietern aufgelöst. Verwenden Sie eine dieser IDs als Modellfeld – keine Einrichtung erforderlich.",
     "autoCatalogExpand": "Erweitern Sie den Katalog für automatisches Routing",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Noch keine Combos konfiguriert.",
     "playgroundCreateFirst": "Zuerst eine erstellen",
     "weighted": "Gewichtet",
+    "weightPercent": "Gewichtung (%)",
     "leastUsed": "Am wenigsten genutzt",
     "costOpt": "Kosten-Opt",
     "strategyGuideTitle": "So nutzen Sie diese Strategie",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# Konto} other {# Konten}}",
     "builderGlobalAdded": "Hinzugefügt",
     "builderGlobalAdd": "Hinzufügen",
+    "clearSearch": "Suche löschen",
     "manualModel": "Manuelles Modell",
     "manualModelInvalid": "Geben Sie ein Modell als provider/model ein.",
     "manualModelUnknownProvider": "Unbekanntes Provider-Präfix.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Mindestinhaltslänge (Zeichen)",
     "responseValidationJsonPaths": "JSON-Path-Prüfungen",
     "responseValidationAddCheck": "+ Prüfung hinzufügen",
+    "responseValidationRemoveCheck": "Prüfung entfernen",
+    "responseValidationPath": "JSON-Pfad",
+    "responseValidationCondition": "Bedingung",
+    "responseValidationValue": "Erwarteter Wert",
     "agentFeaturesSystemMessageOverride": "Systemmeldung überschreiben",
     "agentFeaturesSystemMessagePlaceholder": "Sie sind ein erfahrener Assistent...",
     "agentFeaturesSystemMessageHint": "Überschreibung von Systemnachrichten für Agenten",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Dadurch werden die aktuell verbundenen Anbieter/Modelle, die dieser Vorlage entsprechen, in einer bearbeitbaren Kombination gespeichert.",
     "duplicateAutoComboFailedPrefix": "Automatische Kombination konnte nicht dupliziert werden:",
     "duplicateAutoComboUnknownError": "Unbekannter Fehler",
-    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}",
-    "weightPercent": "Gewichtung (%)",
-    "clearSearch": "Suche löschen",
-    "responseValidationRemoveCheck": "Prüfung entfernen",
-    "responseValidationPath": "JSON-Pfad",
-    "responseValidationCondition": "Bedingung",
-    "responseValidationValue": "Erwarteter Wert"
+    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}"
   },
   "costs": {
     "title": "Kosten",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Bezeichnung des API-Formats",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Festlandchina",
+    "apiRegionHint": "Wählen Sie die Endpunktregion aus, die für den API-Zugriff und die Kontingentverfolgung verwendet wird.",
+    "apiRegionInternational": "International",
+    "apiRegionLabel": "API-Region",
     "apikey": "API-Schlüssel",
     "audio": "Audio",
     "audioProvidersHeading": "Überschrift für Audioanbieter",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Wenn dieses Konto sein 5-Stunden-Nutzungslimit erreicht und Anthropic die Lane mit niedrigerer Priorität anbietet, akzeptiert OmniRoute diese und sendet weiterhin Anfragen mit anthropic-usage-limit: slow, bis das Zeitfenster zurückgesetzt wird, anstatt die Verbindung abkühlen zu lassen. Das Wochenlimit gilt weiterhin und Antworten warten möglicherweise auf freie Kapazität.",
     "claudeAutoLimitResetLabel": "Sitzungslimit automatisch zurücksetzen (einmal pro Woche)",
     "claudeAutoLimitResetDescription": "Wenn dieses Konto sein 5-Stunden-Nutzungslimit erreicht und ein Zurücksetzen des Sitzungslimits verfügbar ist, beansprucht OmniRoute dieses automatisch und versucht es erneut mit voller Geschwindigkeit. Nutzt das einmal pro Woche verfügbare Zurücksetzen des Kontos und wird weiterhin auf das Wochenlimit angerechnet.",
+    "codexPaidCreditsShort": "Zusatz-Credits",
+    "codexPaidCreditsToggleTitle": "Kostenpflichtige Codex-Credits zulassen, nachdem das Abo-Kontingent aufgebraucht ist (es können zusätzliche Kosten anfallen)",
+    "codexPaidCreditsEnabled": "Kostenpflichtige Codex-Credits aktiviert (es können zusätzliche Kosten anfallen)",
+    "codexPaidCreditsDisabled": "Kostenpflichtige Codex-Credits deaktiviert",
+    "failedUpdateCodexPaidCredits": "Codex-Richtlinie für kostenpflichtige Credits konnte nicht aktualisiert werden",
+    "allowCodexPaidCreditsLabel": "Kostenpflichtige Codex-Credits zulassen",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Vorübergehende Abklingzeit überspringen, damit diese Verbindung auch nach behebbaren Fehlern verfügbar bleibt (endgültige Zustände wie gesperrt/abgelaufen gelten weiterhin).",
     "disableCoolingLabel": "Abklingzeit für diese Verbindung deaktivieren",
     "bulkPasteAdded": "{count, plural, one {1 Schlüssel hinzugefügt} other {# Schlüssel hinzugefügt}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "API-Schlüssel unter monsterapi.ai abrufen",
       "moonshot": "Moonshot AI mit einem API-Schlüssel verbinden.",
       "morph": "Kostenlose Stufe: 250K Credits/Monat, 0 $",
+      "apmix": "Verbinde Apmix mit einem API-Schlüssel von apmix.ai/dashboard — ein Abo, viele Modelle.",
       "nanogpt": "NanoGPT mit einem API-Schlüssel verbinden.",
       "nebius": "Ca. 1 $ Testguthaben bei Registrierung für API-Tests",
       "nlpcloud": "NLP Cloud verwendet eine proprietäre Chatbot-API anstelle von OpenAI chat/completions. OmniRoute passt OpenAI-Nachrichten an Eingabe/Kontext/Verlauf an und stellt einen lokalen Katalog unterstützter Chatbot-Modelle bereit.",
@@ -6634,8 +6642,7 @@
       "kiro": "Kostenlose Stufe: 50 Credits/Monat (~25K–100K Token). ⚠️ Die Nutzungsbedingungen von Kiro verbieten die Nutzung von Drittanbieter-Proxys/Harnesses.",
       "codex": "OpenAI Codex mit dem bestehenden OAuth-Flow verbinden.",
       "qwen": "Qwen Code mit dem bestehenden OAuth-Flow verbinden.",
-      "github-models": "Erstellen Sie einen GitHub-PAT mit dem Scope 'models: read' unter github.com/settings/tokens",
-      "apmix": "Verbinde Apmix mit einem API-Schlüssel von apmix.ai/dashboard — ein Abo, viele Modelle."
+      "github-models": "Erstellen Sie einen GitHub-PAT mit dem Scope 'models: read' unter github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} akzeptiert provider-native Modell-IDs. Importiere sie über /models oder füge eigene IDs fürs Routing hinzu.",
     "bedrockModelsDescription": "Amazon-Bedrock-Modelle hängen von der AWS-Region ab. Importiere sie über /models oder füge Bedrock-Modell-IDs hinzu, die in der gewählten Region aktiviert sind.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Parallelitätslimits pro Modell",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: ein Modell=Limit pro Zeile, abgeglichen mit der exakten Modell-ID beim Anbieter. Überzählige Anfragen werden lokal in eine Warteschlange gestellt; leer bedeutet kein Limit pro Modell.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Ungültiger Parallelitätseintrag pro Modell „{entry}“ – verwenden Sie Modell=Limit mit einer ganzen Zahl von 1 bis {max}.",
-    "codexPaidCreditsShort": "Zusatz-Credits",
-    "codexPaidCreditsToggleTitle": "Kostenpflichtige Codex-Credits zulassen, nachdem das Abo-Kontingent aufgebraucht ist (es können zusätzliche Kosten anfallen)",
-    "codexPaidCreditsEnabled": "Kostenpflichtige Codex-Credits aktiviert (es können zusätzliche Kosten anfallen)",
-    "codexPaidCreditsDisabled": "Kostenpflichtige Codex-Credits deaktiviert",
-    "failedUpdateCodexPaidCredits": "Codex-Richtlinie für kostenpflichtige Credits konnte nicht aktualisiert werden",
-    "allowCodexPaidCreditsLabel": "Kostenpflichtige Codex-Credits zulassen",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Ungültiger Parallelitätseintrag pro Modell „{entry}“ – verwenden Sie Modell=Limit mit einer ganzen Zahl von 1 bis {max}."
   },
   "settings": {
     "title": "Einstellungen",
@@ -7702,6 +7702,7 @@
     "configured": "konfiguriert",
     "none": "Keine",
     "modelOverrideValuePlaceholder": "Numerischer Wert",
+    "modelOverrideKey": "Überschreibungsschlüssel",
     "modelOverrideReasoningEffortsPlaceholder": "Englisch, kommagetrennt, z. B. low, medium, high",
     "addKeyValue": "Schlüssel-Wert hinzufügen",
     "noModelOverrides": "Keine Overrides für dieses Modell konfiguriert.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Erkennungen seit dem Neustart",
       "statsEmpty": "Noch keine Erkennungen.",
       "statsRequest": "Anfragen"
-    },
-    "modelOverrideKey": "Überschreibungsschlüssel"
+    }
   },
   "contextRtk": {
     "title": "RTK-Engine",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Stream konnte nicht transformiert werden"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Kostenpflichtige Codex-Credits",
+    "codexPaidCreditsAvailable": "Verfügbar (Guthaben nicht gemeldet)",
+    "codexPaidCreditsUnavailable": "Nicht verfügbar oder Ausgabenlimit erreicht",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Nutzung",
     "grokExtraUsageCredits": "Zusätzliche Nutzungsguthaben",
     "grokAutoTopUp": "Automatische Aufladung",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Zuletzt aktualisiert",
     "providerQuota": "Anbieter-Kontingent",
     "providerQuotaHomeHint": "Live-Status über verbundene Konten hinweg",
-    "codexPaidCreditsLabel": "Kostenpflichtige Codex-Credits",
-    "codexPaidCreditsAvailable": "Verfügbar (Guthaben nicht gemeldet)",
-    "codexPaidCreditsUnavailable": "Nicht verfügbar oder Ausgabenlimit erreicht",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Claude-Limit-Reset",
     "confirmRedeemClaudeResetCredit": "Das Einlösen setzt die berechtigten Claude-Nutzungslimits sofort zurück und verbraucht dieses Guthaben dauerhaft.",
     "claudeResetCreditsModalTitle": "Claude-Reset-Guthaben",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Weitere Aktionen",
     "test": "Testen",
     "edit": "Bearbeiten",
     "delete": "Löschen",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Nicht gemessen",
     "upstream4xx": "{count} Upstream-Client-Fehler",
     "upstream5xx": "{count} Upstream-Server-Fehler",
-    "uniformEgressLine": "{affected} von {exits} Ausgängen fallen gemeinsam auf {provider} aus (letzte {hours}h) — kein Ausgangsproblem",
-    "moreActions": "Weitere Aktionen"
+    "uniformEgressLine": "{affected} von {exits} Ausgängen fallen gemeinsam auf {provider} aus (letzte {hours}h) — kein Ausgangsproblem"
   },
   "playground": {
     "title": "Title",
@@ -13858,6 +13858,7 @@
     "latency": "Latenz",
     "quota": "Kontingent",
     "rangeWindow": "{range}-Fenster",
+    "timeRange": "Zeitraum",
     "runtimeHealthBlend": "Laufzeit/Zustand-Mischung",
     "averageResponseTime": "durchschnittliche Antwortzeit",
     "worstQuota": "Schlechtestes Kontingent",
@@ -13912,8 +13913,7 @@
     "unknown": "unbekannt",
     "unknownProvider": "unbekannter Anbieter",
     "unknownModel": "unbekanntes Modell",
-    "resolvedTargetMetrics": "{requests} Anfr. · {success} erfolgreich · {latency} · Kontingent {quota}",
-    "timeRange": "Zeitraum"
+    "resolvedTargetMetrics": "{requests} Anfr. · {success} erfolgreich · {latency} · Kontingent {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD-Nutzungskontingent",

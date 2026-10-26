@@ -25,8 +25,10 @@
     "confirm": "کیا آپ کو یقین ہے؟",
     "refresh": "تازہ کریں",
     "close": "بند کریں",
+    "dialogTitleFallback": "ڈائیلاگ",
     "previousPage": "پچھلا صفحہ",
     "nextPage": "اگلا صفحہ",
+    "pagination": "صفحہ بندی",
     "capsLockOn": "Caps Lock آن ہے",
     "dismissNotification": "نوٹیفکیشن خارج کریں",
     "toggleColumns": "کالمز کو ٹوگل کریں",
@@ -182,6 +184,7 @@
     "combos": "کمبوز",
     "noModelsFound": "کوئی ماڈل نہیں ملا",
     "clear": "صاف کریں",
+    "clearFilters": "فلٹرز صاف کریں",
     "done": "ہو گیا",
     "selectAll": "سب منتخب کریں",
     "unselectAll": "انتخاب ہٹائیں",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "پیش نظارہ",
     "batchFilePreviewTruncated": "پہلی {shown} لائنیں دکھا رہے ہیں ({total} کل لائنیں)",
     "batchFileDownloadFull": "مکمل فائل ڈاؤن لوڈ کریں",
-    "dialogTitleFallback": "ڈائیلاگ",
-    "pagination": "صفحہ بندی",
-    "clearFilters": "فلٹرز صاف کریں",
     "tokensPageTitle": "ٹوکنز",
     "tokensPageDescription": "API کلیدوں کے درمیان ٹوکنز بھیجیں، دعوتی کوڈز شیئر کریں اور کمیونٹی سرورز منسلک کریں۔",
     "tokensServerUrlLabel": "سرور URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "فوری نیویگیشن",
     "quickNavigationTitle": "فوری نیویگیشن (⌘K / Ctrl+K)",
     "openQuickNavigation": "فوری نیویگیشن کھولیں",
+    "openMenu": "مینو کھولیں",
+    "products": "Keak مصنوعات",
     "switchToLightMode": "لائٹ موڈ پر سوئچ کریں",
     "switchToDarkMode": "ڈارک موڈ پر سوئچ کریں",
     "language": "زبان",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "اعلیٰ درجے کے پے لوڈ قواعد، درخواست کی حدود، اور پراکسی API کی ترتیبات",
     "mitmProxyDescription": "ٹریفک کے معائنے اور ڈیبگنگ کے لیے MITM پراکسی کی ترتیبات کنفیگر کریں",
     "oneProxyDescription": "اعلیٰ درجے کی پراکسی چیننگ کے لیے 1Proxy کی ترتیبات کنفیگر کریں",
-    "omniSkillsDescription": "خودکار پرامپٹ اور ٹول کے نفاذ کے لیے سینڈ باکس اسکلز انسٹال اور منظم کریں",
-    "openMenu": "مینو کھولیں",
-    "products": "Keak مصنوعات"
+    "omniSkillsDescription": "خودکار پرامپٹ اور ٹول کے نفاذ کے لیے سینڈ باکس اسکلز انسٹال اور منظم کریں"
   },
   "cloudSyncStatus": {
     "synced": "مطابقت پذیر",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "کمبو → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid کے نشان والے فراہم کنندگان کو auto میں شامل کریں",
-    "autoTosDescription": "بطور ڈیفالٹ بند ہے۔ صرف ایک اکاؤنٹ نہیں بلکہ تمام auto کومبوز پر لاگو ہوتا ہے۔ فراہم کنندہ کو جوڑنے سے یہ اختیار فعال نہیں ہوتا۔",
-    "autoTosSaveError": "ToS پالیسی محفوظ نہیں ہو سکی۔ پچھلی ترتیب اب بھی دکھائی جا رہی ہے۔ دوبارہ کوشش کریں۔",
-    "autoTosLoadError": "ToS پالیسی لوڈ نہیں ہو سکی۔ اسے بدلنے سے پہلے دوبارہ کوشش کریں۔",
     "title": "کمبوز",
     "description": "وزنی روٹنگ اور فال بیک سپورٹ کے ساتھ ماڈل کمبوز بنائیں",
     "autoCatalogTitle": "آٹو روٹنگ کیٹلاگ",
+    "autoTosLoadError": "ToS پالیسی لوڈ نہیں ہو سکی۔ اسے بدلنے سے پہلے دوبارہ کوشش کریں۔",
+    "autoTosSaveError": "ToS پالیسی محفوظ نہیں ہو سکی۔ پچھلی ترتیب اب بھی دکھائی جا رہی ہے۔ دوبارہ کوشش کریں۔",
+    "autoTosIncludeLabel": "ToS: avoid کے نشان والے فراہم کنندگان کو auto میں شامل کریں",
+    "autoTosDescription": "بطور ڈیفالٹ بند ہے۔ صرف ایک اکاؤنٹ نہیں بلکہ تمام auto کومبوز پر لاگو ہوتا ہے۔ فراہم کنندہ کو جوڑنے سے یہ اختیار فعال نہیں ہوتا۔",
     "autoCatalogTemplateCount": "{count} ٹیمپلیٹس",
     "autoCatalogDescription": "بلٹ ان آٹو/* کومبوز مربوط فراہم کنندگان سے متحرک طور پر حل ہوئے۔ ان میں سے کسی بھی ID کو بطور ماڈل فیلڈ استعمال کریں — کسی سیٹ اپ کی ضرورت نہیں۔",
     "autoCatalogExpand": "آٹو روٹنگ کیٹلاگ کو پھیلائیں۔",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "ابھی تک کوئی کومبوز کنفیگر نہیں کیے گئے۔",
     "playgroundCreateFirst": "پہلے ایک بنائیں",
     "weighted": "وزن شدہ",
+    "weightPercent": "وزن (%)",
     "leastUsed": "سب سے کم استعمال شدہ",
     "costOpt": "لاگت کے لحاظ سے بہتر",
     "strategyGuideTitle": "اس حکمتِ عملی کو کیسے استعمال کریں",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# اکاؤنٹ} other {# اکاؤنٹس}}",
     "builderGlobalAdded": "شامل کیا گیا",
     "builderGlobalAdd": "شامل کریں",
+    "clearSearch": "تلاش صاف کریں",
     "manualModel": "مینول ماڈل",
     "manualModelInvalid": "ماڈل کو provider/model کے طور پر درج کریں۔",
     "manualModelUnknownProvider": "نامعلوم فراہم کنندہ کا پریفکس۔",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "مواد کی کم از کم لمبائی (حروف)",
     "responseValidationJsonPaths": "JSON-path کی جانچیں",
     "responseValidationAddCheck": "+ جانچ شامل کریں",
+    "responseValidationRemoveCheck": "چیک ہٹائیں",
+    "responseValidationPath": "JSON پاتھ",
+    "responseValidationCondition": "شرط",
+    "responseValidationValue": "متوقع قدر",
     "agentFeaturesSystemMessageOverride": "سسٹم پیغام کو اوور رائیڈ کریں",
     "agentFeaturesSystemMessagePlaceholder": "آپ ایک ماہر معاون ہیں...",
     "agentFeaturesSystemMessageHint": "ایجنٹس کے لیے سسٹم پیغام کا اوور رائیڈ",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "یہ اس ٹیمپلیٹ سے ملنے والے موجودہ منسلک فراہم کنندگان/ماڈلز کو ایڈیٹ ایبل کمبو میں اسنیپ شاট لے گا۔",
     "duplicateAutoComboFailedPrefix": "آٹو کمبو ڈپلیکیٹ کرنے میں ناکام:",
     "duplicateAutoComboUnknownError": "نامعلوم خرابی",
-    "duplicateAutoComboTitle": "{name} سے ایک جامد کمبو بنائیں",
-    "weightPercent": "وزن (%)",
-    "clearSearch": "تلاش صاف کریں",
-    "responseValidationRemoveCheck": "چیک ہٹائیں",
-    "responseValidationPath": "JSON پاتھ",
-    "responseValidationCondition": "شرط",
-    "responseValidationValue": "متوقع قدر"
+    "duplicateAutoComboTitle": "{name} سے ایک جامد کمبو بنائیں"
   },
   "costs": {
     "title": "اخراجات",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API فارمیٹ کا لیبل",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "برّی چین",
+    "apiRegionHint": "API تک رسائی اور کوٹہ ٹریکنگ کے لیے استعمال ہونے والا اینڈ پوائنٹ خطہ منتخب کریں۔",
+    "apiRegionInternational": "بین الاقوامی",
+    "apiRegionLabel": "API خطہ",
     "apikey": "API کلید",
     "audio": "آڈیو",
     "audioProvidersHeading": "آڈیو فراہم کنندگان کی سرخی",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "جب یہ اکاؤنٹ اپنی 5 گھنٹے کی استعمال کی حد تک پہنچ جاتا ہے اور Anthropic کم ترجیحی لین پیش کرتا ہے، تو OmniRoute اسے قبول کرتا ہے اور ونڈو ری سیٹ ہونے تک anthropic-usage-limit: slow کے ساتھ درخواستیں بھیجتا رہتا ہے، بجائے اس کے کہ کنکشن کو عارضی طور پر روک دے۔ ہفتہ وار حد بدستور لاگو رہتی ہے اور جوابات کو اضافی گنجائش دستیاب ہونے تک انتظار کرنا پڑ سکتا ہے۔",
     "claudeAutoLimitResetLabel": "سیشن کی حد خودکار طور پر ری سیٹ کریں (ہفتے میں ایک بار)",
     "claudeAutoLimitResetDescription": "جب یہ اکاؤنٹ اپنی 5 گھنٹے کی استعمال کی حد تک پہنچ جاتا ہے اور سیشن کی حد ری سیٹ کرنے کا اختیار دستیاب ہوتا ہے، تو OmniRoute اسے خودکار طور پر استعمال کرتا ہے اور پوری رفتار سے دوبارہ کوشش کرتا ہے۔ یہ اکاؤنٹ کا ہفتے میں ایک بار دستیاب ری سیٹ استعمال کرتا ہے اور پھر بھی ہفتہ وار حد میں شمار ہوتا ہے۔",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "عارضی کول ڈاؤن کو چھوڑیں تاکہ یہ کنکشن قابلِ بحالی غلطیوں کے بعد بھی اہل رہے (حتمی حالتیں جیسے banned/expired اب بھی لاگو ہوں گی)۔",
     "disableCoolingLabel": "اس کنکشن کے لیے کول ڈاؤن غیر فعال کریں",
     "bulkPasteAdded": "{count, plural, one {1 کلید شامل کی گئی} other {# کلیدیں شامل کی گئیں}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "monsterapi.ai پر API کی حاصل کریں",
       "moonshot": "Moonshot AI کو ایک API کی کے ساتھ منسلک کریں۔",
       "morph": "مفت درجہ: 250K کریڈٹس/ماہ، $0",
+      "apmix": "apmix.ai/dashboard سے API کی کے ساتھ Apmix جوڑیں — ایک سبسکرپشن، کئی ماڈلز۔",
       "nanogpt": "NanoGPT کو ایک API کی کے ساتھ منسلک کریں۔",
       "nebius": "API ٹیسٹنگ کے لیے سائن اپ پر تقریباً $1 آزمائشی کریڈٹس",
       "nlpcloud": "NLP Cloud، OpenAI chat/completions کے بجائے ایک ملکیتی چیٹ بوٹ API استعمال کرتا ہے۔ OmniRoute، OpenAI پیغامات کو ان پٹ/سیاق و سباق/ہسٹری کے مطابق ڈھالتا ہے اور تعاون یافتہ چیٹ بوٹ ماڈلز کا مقامی کیٹلاگ ظاہر کرتا ہے۔",
@@ -6634,8 +6642,7 @@
       "kiro": "مفت پلان: 50 کریڈٹس/مہینہ (~25K–100K ٹوکنز)۔ ⚠️ Kiro ToS فریقِ ثالث کے پراکسی/ہارنس کے استعمال سے منع کرتا ہے۔",
       "codex": "OpenAI Codex کو موجودہ OAuth فلو سے منسلک کریں۔",
       "qwen": "Qwen Code کو موجودہ OAuth فلو سے منسلک کریں۔",
-      "github-models": "github.com/settings/tokens پر 'models: read' اسکوپ کے ساتھ ایک GitHub PAT بنائیں",
-      "apmix": "apmix.ai/dashboard سے API کی کے ساتھ Apmix جوڑیں — ایک سبسکرپشن، کئی ماڈلز۔"
+      "github-models": "github.com/settings/tokens پر 'models: read' اسکوپ کے ساتھ ایک GitHub PAT بنائیں"
     },
     "passthroughModelsDescription": "{provider} فراہم کنندہ کے مقامی ماڈل IDs کو قبول کرتا ہے۔ /ماڈلز سے درآمد کریں یا روٹنگ کے لیے حسب ضرورت IDs شامل کریں۔",
     "bedrockModelsDescription": "ایمیزون بیڈرک ماڈلز کا دائرہ AWS ریجن کے ذریعہ کیا گیا ہے۔ /ماڈلز سے درآمد کریں یا منتخب علاقے میں فعال کردہ Bedrock ماڈل IDs شامل کریں۔",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "ترتیبات",
@@ -7702,6 +7702,7 @@
     "configured": "کنفیگر شدہ",
     "none": "کوئی نہیں",
     "modelOverrideValuePlaceholder": "عددی قدر",
+    "modelOverrideKey": "اوور رائیڈ کلید",
     "modelOverrideReasoningEffortsPlaceholder": "انگریزی میں کوما سے علیحدہ، مثلاً low, medium, high",
     "addKeyValue": "کی ویلیو شامل کریں",
     "noModelOverrides": "اس ماڈل کے لیے کوئی اوور رائیڈز کنفیگر نہیں کیے گئے۔",
@@ -8945,8 +8946,7 @@
       "statsTitle": "دوبارہ شروع ہونے کے بعد سے نشاندہیاں",
       "statsEmpty": "ابھی تک کوئی نشاندہی نہیں۔",
       "statsRequest": "درخواستیں"
-    },
-    "modelOverrideKey": "اوور رائیڈ کلید"
+    }
   },
   "contextRtk": {
     "title": "RTK انجن",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "اسٹریم کو تبدیل کرنے میں ناکامی"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "استعمال",
     "grokExtraUsageCredits": "اضافی استعمال کے کریڈٹس",
     "grokAutoTopUp": "خودکار ٹاپ اپ",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "آخری بار ریفریش کیا گیا",
     "providerQuota": "فراہم کنندہ کا کوٹہ",
     "providerQuotaHomeHint": "منسلک اکاؤنٹس میں لائیو اسٹیٹس",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Claude لمٹ ری سیٹ",
     "confirmRedeemClaudeResetCredit": "ریڈیم کرنے سے فوری طور پر اہل Claude کے استعمال کی حدود ری سیٹ ہو جاتی ہیں اور یہ کریڈٹ مستقل طور پر خرچ ہو جاتا ہے۔",
     "claudeResetCreditsModalTitle": "Claude ری سیٹ کریڈٹس",
@@ -11453,6 +11453,7 @@
     "tableHealth": "صحت (24 گھنٹے)",
     "tableUsage": "استعمال",
     "tableActions": "اقدامات",
+    "moreActions": "مزید کارروائیاں",
     "test": "جانچ کریں",
     "edit": "ترمیم کریں",
     "delete": "حذف کریں",
@@ -11610,8 +11611,7 @@
     "notMeasured": "پیمائش نہیں ہوئی",
     "upstream4xx": "{count} اپسٹریم کلائنٹ کی خرابیاں",
     "upstream5xx": "{count} اپسٹریم سرور کی خرابیاں",
-    "uniformEgressLine": "{affected} آؤٹ میں سے {exits} آؤٹ {provider} پر ایک ساتھ ناکام ہو جاتے ہیں (آخری {hours} گھنٹے) — ایک آؤٹ مسئلہ نہیں ہے",
-    "moreActions": "مزید کارروائیاں"
+    "uniformEgressLine": "{affected} آؤٹ میں سے {exits} آؤٹ {provider} پر ایک ساتھ ناکام ہو جاتے ہیں (آخری {hours} گھنٹے) — ایک آؤٹ مسئلہ نہیں ہے"
   },
   "playground": {
     "title": "ماڈل پلے گراؤنڈ",
@@ -13858,6 +13858,7 @@
     "latency": "تاخیر",
     "quota": "کوٹہ",
     "rangeWindow": "{range} ونڈو",
+    "timeRange": "وقت کی حد",
     "runtimeHealthBlend": "رن ٹائم/صحت کا امتزاج",
     "averageResponseTime": "اوسط ردعمل کا وقت",
     "worstQuota": "بدترین کوٹہ",
@@ -13912,8 +13913,7 @@
     "unknown": "نامعلوم",
     "unknownProvider": "نامعلوم فراہم کنندہ",
     "unknownModel": "نامعلوم ماڈل",
-    "resolvedTargetMetrics": "{requests} req · {success} کامیابی · {latency} · کوٹہ {quota}",
-    "timeRange": "وقت کی حد"
+    "resolvedTargetMetrics": "{requests} req · {success} کامیابی · {latency} · کوٹہ {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD استعمال کا کوٹہ",

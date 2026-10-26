@@ -25,8 +25,10 @@
     "confirm": "Да ли сте сигурни?",
     "refresh": "Освежи",
     "close": "Затвори",
+    "dialogTitleFallback": "Дијалог",
     "previousPage": "Претходна страница",
     "nextPage": "Следећа страница",
+    "pagination": "Пагинација",
     "capsLockOn": "Caps Lock је укључен",
     "dismissNotification": "Одбаци обавештење",
     "toggleColumns": "Прикажи/сакриј колоне",
@@ -182,6 +184,7 @@
     "combos": "Комбинације",
     "noModelsFound": "Модели нису пронађени",
     "clear": "Обриши",
+    "clearFilters": "Обриши филтере",
     "done": "Готово",
     "selectAll": "Означи све",
     "unselectAll": "Поништи све",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "Преглед",
     "batchFilePreviewTruncated": "Приказано првих {shown} линија (укупно {total} линија)",
     "batchFileDownloadFull": "Преузми цео фајл",
-    "dialogTitleFallback": "Дијалог",
-    "pagination": "Пагинација",
-    "clearFilters": "Обриши филтере",
     "tokensPageTitle": "Токени",
     "tokensPageDescription": "Шаљите токене између API кључева, делите позивне кодове и повезујте сервере заједнице.",
     "tokensServerUrlLabel": "URL сервера"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "Брза навигација",
     "quickNavigationTitle": "Брза навигација (⌘K / Ctrl+K)",
     "openQuickNavigation": "Отвори брзу навигацију",
+    "openMenu": "Отвори мени",
+    "products": "Keak производи",
     "switchToLightMode": "Пређи на светли режим",
     "switchToDarkMode": "Пређи на тамни режим",
     "language": "Језик",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "Napredna pravila za payload, ograničenja zahteva i podešavanja proxy API-ja",
     "mitmProxyDescription": "Konfigurišite podešavanja MITM proxy-ja za inspekciju saobraćaja i debagovanje",
     "oneProxyDescription": "Konfigurišite podešavanja 1Proxy za napredno povezivanje proxy servera u lanac",
-    "omniSkillsDescription": "Instalirajte sandbox veštine i upravljajte njima radi automatizovanog izvršavanja promptova i alata",
-    "openMenu": "Отвори мени",
-    "products": "Keak производи"
+    "omniSkillsDescription": "Instalirajte sandbox veštine i upravljajte njima radi automatizovanog izvršavanja promptova i alata"
   },
   "cloudSyncStatus": {
     "synced": "Sinhronizovano",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "Комбинација → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Укључи у auto добављаче означене као ToS: avoid",
-    "autoTosDescription": "Подразумевано искључено. Важи за све auto комбинације, не само за један налог. Повезивање добављача не укључује ову опцију.",
-    "autoTosSaveError": "Није могуће сачувати ToS правила. И даље се приказује претходно подешавање. Покушајте поново.",
-    "autoTosLoadError": "Није могуће учитати ToS правила. Покушајте поново пре измене.",
     "title": "Комбинације",
     "description": "Креирајте комбинације модела са пондерисаним рутирањем и подршком за резервне опције",
     "autoCatalogTitle": "Каталог аутоматског рутирања",
+    "autoTosLoadError": "Није могуће учитати ToS правила. Покушајте поново пре измене.",
+    "autoTosSaveError": "Није могуће сачувати ToS правила. И даље се приказује претходно подешавање. Покушајте поново.",
+    "autoTosIncludeLabel": "Укључи у auto добављаче означене као ToS: avoid",
+    "autoTosDescription": "Подразумевано искључено. Важи за све auto комбинације, не само за један налог. Повезивање добављача не укључује ову опцију.",
     "autoCatalogTemplateCount": "{count} шаблона",
     "autoCatalogDescription": "Уграђене комбинације auto/* динамички се одређују на основу повезаних провајдера. Користите било који од ових ID-ова као поље модела — подешавање није потребно.",
     "autoCatalogExpand": "Прошири каталог аутоматског рутирања",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "Још нема конфигурисаних комбо група.",
     "playgroundCreateFirst": "Прво направите комбо групу",
     "weighted": "Пондерисано",
+    "weightPercent": "Тежина (%)",
     "leastUsed": "Најмање коришћено",
     "costOpt": "Оптимизација трошкова",
     "strategyGuideTitle": "Како користити ову стратегију",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# налог} other {# налога}}",
     "builderGlobalAdded": "Додато",
     "builderGlobalAdd": "Додај",
+    "clearSearch": "Обриши претрагу",
     "manualModel": "Ручно унет модел",
     "manualModelInvalid": "Унесите модел у формату провајдер/модел.",
     "manualModelUnknownProvider": "Непознат префикс провајдера.",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "Минимална дужина садржаја (знакови)",
     "responseValidationJsonPaths": "JSON-path провере",
     "responseValidationAddCheck": "+ Додај проверу",
+    "responseValidationRemoveCheck": "Уклони проверу",
+    "responseValidationPath": "JSON путања",
+    "responseValidationCondition": "Услов",
+    "responseValidationValue": "Очекивана вредност",
     "agentFeaturesSystemMessageOverride": "Замени системску поруку",
     "agentFeaturesSystemMessagePlaceholder": "Ви сте стручни асистент...",
     "agentFeaturesSystemMessageHint": "Замена системске поруке за агенте",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "Овим ће тренутно повезани провајдери/модели који одговарају овом шаблону бити снимљени у комбинацију која се може уређивати.",
     "duplicateAutoComboFailedPrefix": "Neuspešno dupliranje auto-kombinacije:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}",
-    "weightPercent": "Тежина (%)",
-    "clearSearch": "Обриши претрагу",
-    "responseValidationRemoveCheck": "Уклони проверу",
-    "responseValidationPath": "JSON путања",
-    "responseValidationCondition": "Услов",
-    "responseValidationValue": "Очекивана вредност"
+    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}"
   },
   "costs": {
     "title": "Troškovi",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "Ознака API формата",
     "apiKeyOptionalHint": "Оставите празно ако ваше локално подешавање или провајдер не захтевају аутентикацију.",
     "apiKeyOptionalLabel": "API кључ (опционо)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "Континентална Кина",
+    "apiRegionHint": "Изаберите регион крајње тачке који се користи за API приступ и праћење квота.",
+    "apiRegionInternational": "Међународни",
+    "apiRegionLabel": "API регион",
     "apikey": "API кључ",
     "audio": "Аудио",
     "audioProvidersHeading": "Наслов одељка провајдера за аудио",
@@ -6085,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Када овај налог достигне ограничење коришћења од 5 сати и Anthropic понуди канал нижег приоритета, OmniRoute га прихвата и наставља да шаље захтеве са anthropic-usage-limit: slow док се временски период не ресетује, уместо да привремено обустави везу. Недељно ограничење и даље важи, а одговори могу да чекају на слободан капацитет.",
     "claudeAutoLimitResetLabel": "Аутоматски ресетуј ограничење сесије (једном недељно)",
     "claudeAutoLimitResetDescription": "Када овај налог достигне ограничење коришћења од 5 сати и ресетовање ограничења сесије је доступно, OmniRoute га аутоматски активира и покушава поново пуном брзином. Користи ресетовање налога доступно једном недељно и употреба се и даље рачуна у недељно ограничење.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Прескочите привремени период чекања како би ова веза остала доступна чак и након грешака од којих је могућ опоравак (терминална стања попут забране или истека и даље се примењују).",
     "disableCoolingLabel": "Онемогући период чекања за ову везу",
     "bulkPasteAdded": "{count, plural, one {Додат је 1 кључ} other {Додато је # кључева}}",
@@ -6538,6 +6545,7 @@
       "monsterapi": "Преузмите API кључ на monsterapi.ai",
       "moonshot": "Повежите Kimi помоћу API кључа.",
       "morph": "Бесплатан ниво: 250K кредита/месечно, 0$",
+      "apmix": "Повежите Apmix са API кључем са apmix.ai/dashboard — једна претплата, много модела.",
       "nanogpt": "Повежите NanoGPT помоћу API кључа.",
       "nebius": "~1$ пробних кредита приликом пријаве за тестирање API-ја",
       "nlpcloud": "NLP Cloud користи власнички chatbot API уместо OpenAI chat/completions. OmniRoute прилагођава OpenAI поруке у input/context/history и излаже локални каталог подржаних chatbot модела.",
@@ -6634,8 +6642,7 @@
       "kiro": "Бесплатни ниво: 50 кредита месечно (~25К–100К токена). ⚠️ Услови коришћења за Kiro забрањују употребу проксија или алата за оркестрацију трећих страна.",
       "codex": "Повежите OpenAI Codex помоћу постојећег OAuth тока.",
       "qwen": "Повежите Qwen Code помоћу постојећег OAuth тока.",
-      "github-models": "Направите GitHub PAT са обимом 'models: read' на github.com/settings/tokens",
-      "apmix": "Повежите Apmix са API кључем са apmix.ai/dashboard — једна претплата, много модела."
+      "github-models": "Направите GitHub PAT са обимом 'models: read' на github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} прихвата ID-ове модела нативне за добавача. Увезите из /models или додајте прилагођене ID-ове за рутирање.",
     "bedrockModelsDescription": "Amazon Bedrock модели су ограничени по AWS региону. Увезите из /models или додајте ID-ове Bedrock модела омогућене у изабраном региону.",
@@ -6807,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Подешавања",
@@ -7702,6 +7702,7 @@
     "configured": "конфигурисано",
     "none": "Ништа",
     "modelOverrideValuePlaceholder": "Нумеричка вредност",
+    "modelOverrideKey": "Кључ за замену",
     "modelOverrideReasoningEffortsPlaceholder": "Раздвојено запетама на енглеском, нпр. low, medium, high",
     "addKeyValue": "Додај пар кључ-вредност",
     "noModelOverrides": "За овај модел нема конфигурисаних прилагођавања.",
@@ -8945,8 +8946,7 @@
       "statsTitle": "Откривања од поновног покретања",
       "statsEmpty": "Још нема откривања.",
       "statsRequest": "Захтеви"
-    },
-    "modelOverrideKey": "Кључ за замену"
+    }
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Трансформација стрима није успела"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Коришћење",
     "grokExtraUsageCredits": "Кредити за додатно коришћење",
     "grokAutoTopUp": "Аутоматско допуњавање",
@@ -10288,10 +10292,6 @@
     "lastRefreshed": "Последње ажурирање",
     "providerQuota": "Квота провајдера",
     "providerQuotaHomeHint": "Статус повезаних налога у реалном времену",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "claudeResetCreditDefaultTitle": "Ресетовање Claude ограничења",
     "confirmRedeemClaudeResetCredit": "Искоришћавање одмах ресетује одговарајућа Claude ограничења коришћења и трајно троши овај кредит.",
     "claudeResetCreditsModalTitle": "Claude кредити за ресетовање",
@@ -11453,6 +11453,7 @@
     "tableHealth": "Стање (24ч)",
     "tableUsage": "Употреба",
     "tableActions": "Радње",
+    "moreActions": "Још радњи",
     "test": "Тестирај",
     "edit": "Уреди",
     "delete": "Обриши",
@@ -11610,8 +11611,7 @@
     "notMeasured": "Није мерено",
     "upstream4xx": "{count} grešaka klijenta na upstream-u",
     "upstream5xx": "{count} grešaka servera na upstream-u",
-    "uniformEgressLine": "{affected} od {exits} izlaza padaju zajedno na {provider} (poslednjih {hours} сати) — nije problem izlaza",
-    "moreActions": "Још радњи"
+    "uniformEgressLine": "{affected} od {exits} izlaza padaju zajedno na {provider} (poslednjih {hours} сати) — nije problem izlaza"
   },
   "playground": {
     "title": "Окружење за тестирање модела",
@@ -13858,6 +13858,7 @@
     "latency": "Латенција",
     "quota": "Квота",
     "rangeWindow": "Прозор од {range}",
+    "timeRange": "Временски опсег",
     "runtimeHealthBlend": "комбинација података о извршавању и здрављу",
     "averageResponseTime": "просечно време одговора",
     "worstQuota": "Најгора квота",
@@ -13912,8 +13913,7 @@
     "unknown": "непознато",
     "unknownProvider": "непознат провајдер",
     "unknownModel": "непознат модел",
-    "resolvedTargetMetrics": "{requests} захт. · {success} успешно · {latency} · квота {quota}",
-    "timeRange": "Временски опсег"
+    "resolvedTargetMetrics": "{requests} захт. · {success} успешно · {latency} · квота {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD квота коришћења",

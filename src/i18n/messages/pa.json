@@ -25,8 +25,10 @@
     "confirm": "ਕੀ ਤੁਹਾਨੂੰ ਯਕੀਨ ਹੈ?",
     "refresh": "ਤਾਜ਼ਾ ਕਰੋ",
     "close": "ਬੰਦ ਕਰੋ",
+    "dialogTitleFallback": "ਡਾਇਲਾਗ",
     "previousPage": "ਪਿਛਲਾ ਪੰਨਾ",
     "nextPage": "ਅਗਲਾ ਪੰਨਾ",
+    "pagination": "ਪੰਨਾ-ਵੰਡ",
     "capsLockOn": "Caps Lock ਚਾਲੂ ਹੈ",
     "dismissNotification": "ਸੂਚਨਾ ਹਟਾਓ",
     "toggleColumns": "ਕਾਲਮ ਦਿਖਾਓ ਜਾਂ ਲੁਕਾਓ",
@@ -182,6 +184,7 @@
     "combos": "ਕੌਂਬੋ",
     "noModelsFound": "ਕੋਈ ਮਾਡਲ ਨਹੀਂ ਮਿਲਿਆ",
     "clear": "ਸਾਫ਼ ਕਰੋ",
+    "clearFilters": "ਫ਼ਿਲਟਰ ਸਾਫ਼ ਕਰੋ",
     "done": "ਮੁਕੰਮਲ",
     "selectAll": "ਸਾਰੇ ਚੁਣੋ",
     "unselectAll": "ਸਾਰਿਆਂ ਦੀ ਚੋਣ ਹਟਾਓ",
@@ -999,9 +1002,6 @@
     "batchFilePreview": "ਪੂਰਵ-ਝਲਕ",
     "batchFilePreviewTruncated": "ਪਹਿਲੀਆਂ {shown} ਲਾਈਨਾਂ ਦਿਖਾਈਆਂ ਜਾ ਰਹੀਆਂ ਹਨ (ਕੁੱਲ {total} ਲਾਈਨਾਂ)",
     "batchFileDownloadFull": "ਪੂਰੀ ਫ਼ਾਈਲ ਡਾਊਨਲੋਡ ਕਰੋ",
-    "dialogTitleFallback": "ਡਾਇਲਾਗ",
-    "pagination": "ਪੰਨਾ-ਵੰਡ",
-    "clearFilters": "ਫ਼ਿਲਟਰ ਸਾਫ਼ ਕਰੋ",
     "tokensPageTitle": "ਟੋਕਨ",
     "tokensPageDescription": "API ਕੁੰਜੀਆਂ ਵਿਚਕਾਰ ਟੋਕਨ ਭੇਜੋ, ਸੱਦਾ ਕੋਡ ਸਾਂਝੇ ਕਰੋ ਅਤੇ ਕਮਿਊਨਿਟੀ ਸਰਵਰਾਂ ਨੂੰ ਕਨੈਕਟ ਕਰੋ।",
     "tokensServerUrlLabel": "ਸਰਵਰ URL"
@@ -1602,6 +1602,8 @@
     "quickNavigation": "ਤੁਰੰਤ ਨੈਵੀਗੇਸ਼ਨ",
     "quickNavigationTitle": "ਤੁਰੰਤ ਨੈਵੀਗੇਸ਼ਨ (⌘K / Ctrl+K)",
     "openQuickNavigation": "ਤੁਰੰਤ ਨੈਵੀਗੇਸ਼ਨ ਖੋਲ੍ਹੋ",
+    "openMenu": "ਮੀਨੂ ਖੋਲ੍ਹੋ",
+    "products": "Keak ਉਤਪਾਦ",
     "switchToLightMode": "ਲਾਈਟ ਮੋਡ 'ਤੇ ਬਦਲੋ",
     "switchToDarkMode": "ਡਾਰਕ ਮੋਡ 'ਤੇ ਬਦਲੋ",
     "language": "ਭਾਸ਼ਾ",
@@ -1700,9 +1702,7 @@
     "settingsAdvancedDescription": "ਉੱਨਤ ਪੇਲੋਡ ਨਿਯਮ, ਬੇਨਤੀ ਸੀਮਾਵਾਂ ਅਤੇ ਪ੍ਰੌਕਸੀ API ਸੈਟਿੰਗਾਂ",
     "mitmProxyDescription": "ਟਰੈਫਿਕ ਜਾਂਚ ਅਤੇ ਡੀਬੱਗਿੰਗ ਲਈ MITM ਪ੍ਰੌਕਸੀ ਸੈਟਿੰਗਾਂ ਸੰਰਚਿਤ ਕਰੋ",
     "oneProxyDescription": "ਉੱਨਤ ਪ੍ਰੌਕਸੀ ਚੇਨਿੰਗ ਲਈ 1Proxy ਸੈਟਿੰਗਾਂ ਸੰਰਚਿਤ ਕਰੋ",
-    "omniSkillsDescription": "ਸਵੈਚਾਲਿਤ ਪ੍ਰੌਮਪਟ ਅਤੇ ਟੂਲ ਚਲਾਉਣ ਲਈ ਸੈਂਡਬਾਕਸ ਹੁਨਰ ਸਥਾਪਤ ਅਤੇ ਪ੍ਰਬੰਧਿਤ ਕਰੋ",
-    "openMenu": "ਮੀਨੂ ਖੋਲ੍ਹੋ",
-    "products": "Keak ਉਤਪਾਦ"
+    "omniSkillsDescription": "ਸਵੈਚਾਲਿਤ ਪ੍ਰੌਮਪਟ ਅਤੇ ਟੂਲ ਚਲਾਉਣ ਲਈ ਸੈਂਡਬਾਕਸ ਹੁਨਰ ਸਥਾਪਤ ਅਤੇ ਪ੍ਰਬੰਧਿਤ ਕਰੋ"
   },
   "cloudSyncStatus": {
     "synced": "ਸਿੰਕ ਕੀਤਾ ਗਿਆ",
@@ -3397,13 +3397,13 @@
     "comboRefMember": "ਕੰਬੋ → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid ਵਜੋਂ ਨਿਸ਼ਾਨਬੱਧ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ auto ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ",
-    "autoTosDescription": "ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ ਹੈ। ਸਿਰਫ਼ ਇੱਕ ਖਾਤੇ ਲਈ ਨਹੀਂ, ਸਾਰੇ auto ਕੰਬੋ ਲਈ ਲਾਗੂ ਹੁੰਦਾ ਹੈ। ਪ੍ਰਦਾਤਾ ਜੋੜਨ ਨਾਲ ਇਹ ਵਿਕਲਪ ਚਾਲੂ ਨਹੀਂ ਹੁੰਦਾ।",
-    "autoTosSaveError": "ToS ਨੀਤੀ ਸੰਭਾਲੀ ਨਹੀਂ ਜਾ ਸਕੀ। ਪਿਛਲੀ ਸੈਟਿੰਗ ਅਜੇ ਵੀ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹੈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
-    "autoTosLoadError": "ToS ਨੀਤੀ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ। ਬਦਲਣ ਤੋਂ ਪਹਿਲਾਂ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     "title": "ਕੌਂਬੋ",
     "description": "ਭਾਰਿਤ ਰਾਊਟਿੰਗ ਅਤੇ ਫਾਲਬੈਕ ਸਹਾਇਤਾ ਨਾਲ ਮਾਡਲ ਕੌਂਬੋ ਬਣਾਓ",
     "autoCatalogTitle": "ਆਟੋ-ਰਾਊਟਿੰਗ ਕੈਟਾਲਾਗ",
+    "autoTosLoadError": "ToS ਨੀਤੀ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ। ਬਦਲਣ ਤੋਂ ਪਹਿਲਾਂ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "autoTosSaveError": "ToS ਨੀਤੀ ਸੰਭਾਲੀ ਨਹੀਂ ਜਾ ਸਕੀ। ਪਿਛਲੀ ਸੈਟਿੰਗ ਅਜੇ ਵੀ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹੈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "autoTosIncludeLabel": "ToS: avoid ਵਜੋਂ ਨਿਸ਼ਾਨਬੱਧ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ auto ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ",
+    "autoTosDescription": "ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ ਹੈ। ਸਿਰਫ਼ ਇੱਕ ਖਾਤੇ ਲਈ ਨਹੀਂ, ਸਾਰੇ auto ਕੰਬੋ ਲਈ ਲਾਗੂ ਹੁੰਦਾ ਹੈ। ਪ੍ਰਦਾਤਾ ਜੋੜਨ ਨਾਲ ਇਹ ਵਿਕਲਪ ਚਾਲੂ ਨਹੀਂ ਹੁੰਦਾ।",
     "autoCatalogTemplateCount": "{count} ਟੈਂਪਲੇਟ",
     "autoCatalogDescription": "ਬਿਲਟ-ਇਨ auto/* ਕੌਂਬੋ, ਜੋ ਕਨੈਕਟ ਕੀਤੇ ਪ੍ਰਦਾਤਾਵਾਂ ਤੋਂ ਗਤੀਸ਼ੀਲ ਢੰਗ ਨਾਲ ਹੱਲ ਕੀਤੇ ਜਾਂਦੇ ਹਨ। ਇਨ੍ਹਾਂ ਵਿੱਚੋਂ ਕਿਸੇ ਵੀ ID ਨੂੰ ਮਾਡਲ ਫੀਲਡ ਵਜੋਂ ਵਰਤੋ — ਕਿਸੇ ਸੈੱਟਅੱਪ ਦੀ ਲੋੜ ਨਹੀਂ।",
     "autoCatalogExpand": "ਆਟੋ-ਰਾਊਟਿੰਗ ਕੈਟਾਲਾਗ ਫੈਲਾਓ",
@@ -3556,6 +3556,7 @@
     "playgroundNoCombosYet": "ਹਾਲੇ ਤੱਕ ਕੋਈ ਕੌਂਬੋ ਸੰਰਚਿਤ ਨਹੀਂ ਹੈ।",
     "playgroundCreateFirst": "ਪਹਿਲਾਂ ਇੱਕ ਬਣਾਓ",
     "weighted": "ਭਾਰਿਤ",
+    "weightPercent": "ਭਾਰ (%)",
     "leastUsed": "ਸਭ ਤੋਂ ਘੱਟ ਵਰਤਿਆ",
     "costOpt": "ਲਾਗਤ-ਅਨੁਕੂਲਿਤ",
     "strategyGuideTitle": "ਇਸ ਰਣਨੀਤੀ ਦੀ ਵਰਤੋਂ ਕਿਵੇਂ ਕਰਨੀ ਹੈ",
@@ -3717,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# ਖਾਤਾ} other {# ਖਾਤੇ}}",
     "builderGlobalAdded": "ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ",
     "builderGlobalAdd": "ਸ਼ਾਮਲ ਕਰੋ",
+    "clearSearch": "ਖੋਜ ਸਾਫ਼ ਕਰੋ",
     "manualModel": "ਮੈਨੂਅਲ ਮਾਡਲ",
     "manualModelInvalid": "ਮਾਡਲ ਨੂੰ provider/model ਫਾਰਮੈਟ ਵਿੱਚ ਦਰਜ ਕਰੋ।",
     "manualModelUnknownProvider": "ਅਣਜਾਣ ਪ੍ਰਦਾਤਾ ਪ੍ਰੀਫਿਕਸ।",
@@ -3971,6 +3973,10 @@
     "responseValidationMinLength": "ਸਮੱਗਰੀ ਦੀ ਘੱਟੋ-ਘੱਟ ਲੰਬਾਈ (ਅੱਖਰਾਂ ਵਿੱਚ)",
     "responseValidationJsonPaths": "JSON-path ਜਾਂਚਾਂ",
     "responseValidationAddCheck": "+ ਜਾਂਚ ਸ਼ਾਮਲ ਕਰੋ",
+    "responseValidationRemoveCheck": "ਜਾਂਚ ਹਟਾਓ",
+    "responseValidationPath": "JSON ਪਾਥ",
+    "responseValidationCondition": "ਸ਼ਰਤ",
+    "responseValidationValue": "ਉਮੀਦ ਕੀਤਾ ਮੁੱਲ",
     "agentFeaturesSystemMessageOverride": "ਸਿਸਟਮ ਸੁਨੇਹੇ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰੋ",
     "agentFeaturesSystemMessagePlaceholder": "ਤੁਸੀਂ ਇੱਕ ਮਾਹਰ ਸਹਾਇਕ ਹੋ...",
     "agentFeaturesSystemMessageHint": "ਏਜੰਟਾਂ ਲਈ ਸਿਸਟਮ ਸੁਨੇਹਾ ਓਵਰਰਾਈਡ",
@@ -4012,13 +4018,7 @@
     "duplicateAutoComboSnapshotMsg": "ਇਹ ਇਸ ਟੈਂਪਲੇਟ ਨਾਲ ਮੇਲ ਖਾਂਦੇ ਮੌਜੂਦਾ ਕਨੈਕਟ ਕੀਤੇ ਪ੍ਰਦਾਤਾਵਾਂ/ਮਾਡਲਾਂ ਦਾ ਸਨੈਪਸ਼ਾਟ ਲੈ ਕੇ ਇੱਕ ਸੰਪਾਦਨਯੋਗ ਕੌਂਬੋ ਬਣਾਏਗਾ।",
     "duplicateAutoComboFailedPrefix": "ਆਟੋ-ਕੌਂਬੋ ਦੀ ਨਕਲ ਬਣਾਉਣ ਵਿੱਚ ਅਸਫਲ:",
     "duplicateAutoComboUnknownError": "ਅਣਜਾਣ ਗਲਤੀ",
-    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ",
-    "weightPercent": "ਭਾਰ (%)",
-    "clearSearch": "ਖੋਜ ਸਾਫ਼ ਕਰੋ",
-    "responseValidationRemoveCheck": "ਜਾਂਚ ਹਟਾਓ",
-    "responseValidationPath": "JSON ਪਾਥ",
-    "responseValidationCondition": "ਸ਼ਰਤ",
-    "responseValidationValue": "ਉਮੀਦ ਕੀਤਾ ਮੁੱਲ"
+    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ"
   },
   "costs": {
     "title": "ਲਾਗਤਾਂ",
@@ -6061,10 +6061,10 @@
     "apiFormatLabel": "API ਫਾਰਮੈਟ ਲੇਬਲ",
     "apiKeyOptionalHint": "ਜੇ ਤੁਹਾਡੇ ਲੋਕਲ ਸੈਟਅੱਪ ਜਾਂ ਪ੍ਰਦਾਤਾ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ ਤਾਂ ਖਾਲੀ ਛੱਡੋ।",
     "apiKeyOptionalLabel": "API ਕੁੰਜੀ (ਵਿਕਲਪਿਕ)",
-    "apiRegionChina": "__MISSING__:Mainland China",
-    "apiRegionHint": "__MISSING__:Select the endpoint region used for API access and quota tracking.",
-    "apiRegionInternational": "__MISSING__:International",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionChina": "ਮੈਨਲੈਂਡ ਚੀਨ",
+    "apiRegionHint": "API ਐਕਸੈਸ ਅਤੇ ਕੋਟਾ ਟ੍ਰੈਕਿੰਗ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਐਂਡਪੁਆਇੰਟ ਖੇਤਰ ਚੁਣੋ।",
+    "apiRegionInternational": "ਅੰਤਰਰਾਸ਼ਟਰੀ",
+    "apiRegionLabel": "API ਖੇਤਰ",
     "apikey": "API ਕੁੰਜੀ",
     "audio": "ਆਡੀਓ",
     "audioProvidersHeading": "ਆਡੀਓ ਪ੍ਰਦਾਤਾ ਸਿਰਲੇਖ",
@@ -6545,6 +6545,7 @@
       "monsterapi": "API ਕੁੰਜੀ monsterapi.ai ਤੋਂ ਪ੍ਰਾਪਤ ਕਰੋ",
       "moonshot": "Kimi ਨੂੰ API ਕੁੰਜੀ ਨਾਲ ਕਨੈਕਟ ਕਰੋ।",
       "morph": "ਮੁਫ਼ਤ ਟੀਅਰ: 250K ਕ੍ਰੈਡਿਟ/ਮਹੀਨਾ, $0",
+      "apmix": "apmix.ai/dashboard ਤੋਂ API ਕੁੰਜੀ ਨਾਲ Apmix ਕਨੈਕਟ ਕਰੋ — ਇੱਕ ਮੈਂਬਰਸ਼ਿਪ, ਕਈ ਮਾਡਲ।",
       "nanogpt": "NanoGPT ਨੂੰ API ਕੁੰਜੀ ਨਾਲ ਕਨੈਕਟ ਕਰੋ।",
       "nebius": "API ਟੈਸਟਿੰਗ ਲਈ ਸਾਈਨ ਅੱਪ ਕਰਨ 'ਤੇ ~$1 ਦੇ ਟ੍ਰਾਇਲ ਕ੍ਰੈਡਿਟ",
       "nlpcloud": "NLP Cloud OpenAI chat/completions ਦੀ ਬਜਾਏ ਇੱਕ ਮਲਕੀਅਤ ਵਾਲਾ ਚੈਟਬੋਟ API ਵਰਤਦਾ ਹੈ। OmniRoute OpenAI ਸੁਨੇਹਿਆਂ ਨੂੰ ਇਨਪੁੱਟ/ਸੰਦਰਭ/ਇਤਿਹਾਸ ਅਨੁਸਾਰ ਢਾਲਦਾ ਹੈ ਅਤੇ ਸਮਰਥਿਤ ਚੈਟਬੋਟ ਮਾਡਲਾਂ ਦਾ ਇੱਕ ਸਥਾਨਕ ਕੈਟਾਲਾਗ ਉਪਲਬਧ ਕਰਾਉਂਦਾ ਹੈ।",
@@ -6641,8 +6642,7 @@
       "kiro": "ਮੁਫ਼ਤ ਟੀਅਰ: 50 ਕ੍ਰੈਡਿਟ/ਮਹੀਨਾ (~25K–100K ਟੋਕਨ)। ⚠️ Kiro ToS ਵਿੱਚ ਤੀਜੀ-ਧਿਰ ਪ੍ਰਾਕਸੀ/ਹਾਰਨੈੱਸ ਦੀ ਵਰਤੋਂ ਦੀ ਮਨਾਹੀ ਹੈ।",
       "codex": "ਮੌਜੂਦਾ OAuth ਫ਼ਲੋ ਨਾਲ OpenAI Codex ਨੂੰ ਕਨੈਕਟ ਕਰੋ।",
       "qwen": "ਮੌਜੂਦਾ OAuth ਫ਼ਲੋ ਨਾਲ Qwen Code ਨੂੰ ਕਨੈਕਟ ਕਰੋ।",
-      "github-models": "github.com/settings/tokens ਉੱਤੇ 'models: read' ਸਕੋਪ ਵਾਲਾ GitHub PAT ਬਣਾਓ",
-      "apmix": "apmix.ai/dashboard ਤੋਂ API ਕੁੰਜੀ ਨਾਲ Apmix ਕਨੈਕਟ ਕਰੋ — ਇੱਕ ਮੈਂਬਰਸ਼ਿਪ, ਕਈ ਮਾਡਲ।"
+      "github-models": "github.com/settings/tokens ਉੱਤੇ 'models: read' ਸਕੋਪ ਵਾਲਾ GitHub PAT ਬਣਾਓ"
     },
     "passthroughModelsDescription": "{provider} ਪ੍ਰਦਾਤਾ-ਮੂਲ ਮਾਡਲ IDs ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ। /models ਤੋਂ ਇੰਪੋਰਟ ਕਰੋ ਜਾਂ ਰੂਟਿੰਗ ਲਈ ਕਸਟਮ IDs ਸ਼ਾਮਲ ਕਰੋ।",
     "bedrockModelsDescription": "Amazon Bedrock ਮਾਡਲਾਂ ਦਾ ਦਾਇਰਾ AWS ਖੇਤਰ ਅਨੁਸਾਰ ਹੁੰਦਾ ਹੈ। /models ਤੋਂ ਇੰਪੋਰਟ ਕਰੋ ਜਾਂ ਚੁਣੇ ਹੋਏ ਖੇਤਰ ਵਿੱਚ ਸਮਰੱਥ ਕੀਤੀਆਂ Bedrock ਮਾਡਲ IDs ਸ਼ਾਮਲ ਕਰੋ।",
@@ -7702,6 +7702,7 @@
     "configured": "ਸੰਰਚਿਤ",
     "none": "ਕੋਈ ਨਹੀਂ",
     "modelOverrideValuePlaceholder": "ਸੰਖਿਆਤਮਕ ਮੁੱਲ",
+    "modelOverrideKey": "ਓਵਰਰਾਈਡ ਕੁੰਜੀ",
     "modelOverrideReasoningEffortsPlaceholder": "ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਕਾਮਿਆਂ ਨਾਲ ਵੱਖ ਕੀਤੇ ਹੋਏ, ਜਿਵੇਂ low, medium, high",
     "addKeyValue": "ਕੁੰਜੀ-ਮੁੱਲ ਜੋੜੋ",
     "noModelOverrides": "ਇਸ ਮਾਡਲ ਲਈ ਕੋਈ ਓਵਰਰਾਈਡ ਸੰਰਚਿਤ ਨਹੀਂ ਹੈ।",
@@ -8945,8 +8946,7 @@
       "statsTitle": "ਮੁੜ-ਚਾਲੂ ਹੋਣ ਤੋਂ ਬਾਅਦ ਦੀਆਂ ਪਛਾਣਾਂ",
       "statsEmpty": "ਅਜੇ ਕੋਈ ਪਛਾਣ ਨਹੀਂ।",
       "statsRequest": "ਬੇਨਤੀਆਂ"
-    },
-    "modelOverrideKey": "ਓਵਰਰਾਈਡ ਕੁੰਜੀ"
+    }
   },
   "contextRtk": {
     "title": "RTK ਇੰਜਣ",
@@ -11453,6 +11453,7 @@
     "tableHealth": "ਸਿਹਤ (24 ਘੰਟੇ)",
     "tableUsage": "ਵਰਤੋਂ",
     "tableActions": "ਕਾਰਵਾਈਆਂ",
+    "moreActions": "ਹੋਰ ਕਾਰਵਾਈਆਂ",
     "test": "ਟੈਸਟ",
     "edit": "ਸੋਧੋ",
     "delete": "ਮਿਟਾਓ",
@@ -11610,8 +11611,7 @@
     "notMeasured": "ਮਾਪਿਆ ਨਹੀਂ ਗਿਆ",
     "upstream4xx": "{count} ਅੱਗੇ ਕਲਾਈਂਟ ਗਲਤੀਆਂ",
     "upstream5xx": "{count} ਅੱਗੇ ਸਰਵਰ ਗਲਤੀਆਂ",
-    "uniformEgressLine": "{exits} ਐਗਜ਼ਿਟਾਂ ਵਿੱਚੋਂ {affected} {provider} ਉੱਤੇ ਇਕੱਠੇ ਫੇਲ ਹੋ ਰਹੇ ਹਨ (ਪਿਛਲੇ {hours} ਘੰਟਿਆਂ ਵਿੱਚ) — ਇਹ ਐਗਜ਼ਿਟ ਦੀ ਸਮੱਸਿਆ ਨਹੀਂ ਹੈ",
-    "moreActions": "ਹੋਰ ਕਾਰਵਾਈਆਂ"
+    "uniformEgressLine": "{exits} ਐਗਜ਼ਿਟਾਂ ਵਿੱਚੋਂ {affected} {provider} ਉੱਤੇ ਇਕੱਠੇ ਫੇਲ ਹੋ ਰਹੇ ਹਨ (ਪਿਛਲੇ {hours} ਘੰਟਿਆਂ ਵਿੱਚ) — ਇਹ ਐਗਜ਼ਿਟ ਦੀ ਸਮੱਸਿਆ ਨਹੀਂ ਹੈ"
   },
   "playground": {
     "title": "ਮਾਡਲ ਪਲੇਗ੍ਰਾਊਂਡ",
@@ -13858,6 +13858,7 @@
     "latency": "ਲੇਟੈਂਸੀ",
     "quota": "ਕੋਟਾ",
     "rangeWindow": "{range} ਵਿੰਡੋ",
+    "timeRange": "ਸਮਾਂ-ਸੀਮਾ",
     "runtimeHealthBlend": "ਰਨਟਾਈਮ/ਸਥਿਤੀ ਮਿਸ਼ਰਣ",
     "averageResponseTime": "ਔਸਤ ਜਵਾਬ ਸਮਾਂ",
     "worstQuota": "ਸਭ ਤੋਂ ਮਾੜਾ ਕੋਟਾ",
@@ -13912,8 +13913,7 @@
     "unknown": "ਅਣਜਾਣ",
     "unknownProvider": "ਅਣਜਾਣ ਪ੍ਰਦਾਤਾ",
     "unknownModel": "ਅਣਜਾਣ ਮਾਡਲ",
-    "resolvedTargetMetrics": "{requests} ਬੇਨਤੀਆਂ · {success} ਸਫਲਤਾਵਾਂ · {latency} · ਕੋਟਾ {quota}",
-    "timeRange": "ਸਮਾਂ-ਸੀਮਾ"
+    "resolvedTargetMetrics": "{requests} ਬੇਨਤੀਆਂ · {success} ਸਫਲਤਾਵਾਂ · {latency} · ਕੋਟਾ {quota}"
   },
   "usageLimits": {
     "usdUsageQuota": "USD ਵਰਤੋਂ ਕੋਟਾ",
