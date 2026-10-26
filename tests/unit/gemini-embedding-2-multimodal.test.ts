@@ -327,7 +327,7 @@ test("#18244: Gemini native embedContent usage reaches the API response", async 
     });
     assert.equal(result.success, true, result.error);
     const data = result.data as {
-      data: Array<{ embedding: number[]; index: number }>;
+      data: Array<{ object: string; embedding: number[]; index: number }>;
       usage: { prompt_tokens: number; total_tokens: number };
     };
     assert.deepEqual(data.usage, { prompt_tokens: 8, total_tokens: 8 });
@@ -357,7 +357,7 @@ test("#18244: Gemini native batch token usage is accounted once, not once per em
     });
     assert.equal(result.success, true, result.error);
     const data = result.data as {
-      data: Array<{ embedding: number[]; index: number }>;
+      data: Array<{ object: string; embedding: number[]; index: number }>;
       usage: { prompt_tokens: number; total_tokens: number };
     };
     assert.deepEqual(data.usage, { prompt_tokens: 19, total_tokens: 19 });
